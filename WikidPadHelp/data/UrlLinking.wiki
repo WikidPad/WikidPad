@@ -1,0 +1,13 @@
+++ Url Linking
+
+You may enter URLs to websites or local files into your document.  To
+open the link double click on it or press the Ctrl-L. If you drag a
+file from Windows explorer onto wikidPad a link will be created for
+you.
+
+Example:
+
+http://www.google.com/ 
+https://somewheresecure.com
+file:///C|/Documents%20and%20Settings/joeshmoe/readme.txt
+ftp://ftp.whereever.com/

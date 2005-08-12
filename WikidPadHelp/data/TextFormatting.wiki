@@ -1,0 +1,34 @@
+++ Text Formatting
+
+As you type you can enter formatting commands in plain text.
+
+*bold*
+_italic_
++ Heading1
+++ Heading2
++++ Heading3
+
+When you type in a really really really really really really really really really really really really
+long line you can tell wikidPad to rewrap it for you by pressing Ctrl-W. Try it on this line.
+
+You can even change the wrap position by adding a wrap attribute to your document.
+[wrap: 20]
+Changes the wrapping on this page to 20.
+
+[global.wrap: 70]
+changes the global wrap position to 70.
+
+*Escaping Formatting*
+
+To create a section of text with no formatting, wrap that section 
+in a "<< >>" block. Example:
+
+escape formatting
+
+<<
+*This should be bold* ThisShouldBeALink
+>> 
+
+with formatting
+
+*This should be bold* ThisShouldBeALink

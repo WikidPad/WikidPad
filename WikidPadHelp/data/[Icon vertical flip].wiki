@@ -1,0 +1,2 @@
+++ Icon vertical flip
+[icon: vertical flip ]

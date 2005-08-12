@@ -1,0 +1,45 @@
+++ Key Bindings
+
+The key bindings defined below may be changed, ChangingKeyBindings.
+
+*Formatting*
+CTRL-B          bold
+CTRL-I          italic
+CTRL-ALT-H      heading
+
+*Commands*
+CTRL-L          activate link
+CTRL-W          rewrap text at position
+CTRL-E          eval scripts
+CTRL-F          start incremental search, perform next search
+F3              start incremental search, perform next search
+CTRL-ALT-F      search for words within the wiki
+
+*History*
+CTRL-H          view history
+CTRL-ALT-UP     view history, select -1
+CTRL-ALT-DOWN   view history, select +1
+CTRL-ALT-LEFT   go back in history
+CTRL-ALT-RIGHT  go forward in history
+
+*Wiki Words*
+CTRL-O          open wiki word
+CTRL-S          save current word
+CTRL-R          replace
+CTRL-Alt-R      rename the current wiki word
+CTRL-D          delete the current word, and content for that word
+CTRL-UP         view parents of current word
+CTRL-DOWN       view children of current word
+CTRL-SHIFT-UP   view parentless nodes
+Ctrl-Alt-B      add a bookmark
+
+*Zooming*
+CTRL-+          zoom in
+CTRL--          zoom out
+
+*Misc*
+
+Ctrl-T          hide/show the tree control
+Ctrl-N          new Wiki
+Ctrl-Alt-O      open wiki
+Ctrl-Shift-B    view bookmarks

@@ -1,0 +1,72 @@
+++ Wiki Document Attributes
+
+Wiki pages support "attributes". Attributes serve 2 purposes.  They
+allow you to index your data by attribute, in addition to by wikiword,
+and they are used to specify certain special wiki formatting commands.
+
+You can attach attributes to a page like this:
+
+[importance: high]
+
+Setting an attribute like this makes this document available under the
+*Views* node in the tree on the left, under importance/high.  Example
+attributes you might want to add to your wiki words might be:
+
+[contact: work]
+[contact: personal] for wiki contacts, ie JohnDoe
+[work-related: true] to mark something as work related
+[personal: kids] to mark something as personal and about the kids
+
+Open the "Views" node in the tree on the left to see how these attributes
+become available for reference.
+
+*Attribute Based Tree Formatting*
+
+You can also use attributes to change the way a document appears in
+the tree.  This is done by setting global attribute properties in the
+wiki.  Example:
+
+[global.importance.high.bold=true]
+
+This means any document in the wiki with a "importance" attribute
+that has a value of high will be bold.
+[importance: high]
+So setting the above attribute is what made this document bold
+in the tree.
+
+[global.importance.low.color=grey]
+
+When creating a new wiki some default global attributes are
+automatically attached to the root wiki document.
+
+*Special Attributes*
+
+There are 4 special attributes you can attach to a doc that will
+override the global defaults. 
+
+icon: name (see TreeIcons)
+color: (white, blue, etc.)
+priority: 1-5
+
+Example:
+[icon: lens] changes the icon for this page to a lens.
+
+The priority setting will set the node text in the tree to
+"WikiDocumentAttributes (3)" for example.  It also will affect the importance
+setting of the node if "importance" is not already set.
+
+[priority: 3]
+
+*Autocompletion*
+
+Attributes also support auto completion. Try it:
+
+Place cursor after the m and press CTRL-SPACE
+[im
+
+*Fonts* 
+
+Attributes can also be used to change WikiFonts.
+
+[alias: WikiDocumentAttribute]
+[tree_position: 6]

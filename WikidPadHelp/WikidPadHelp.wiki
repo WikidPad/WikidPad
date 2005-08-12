@@ -1,0 +1,7 @@
+[wiki_db]
+data_dir = data
+
+[main]
+last_wiki_word = TodoItems
+wiki_name = WikidPadHelp
+

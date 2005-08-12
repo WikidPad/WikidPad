@@ -1,0 +1,17 @@
+++ Incremental Search
+
+When in a document type CTRL-F or F3 to start an incremental search.
+When in incremental search mode anything you type becomes a search
+string, and as you type you are brought to matches in the current
+text. Typing CTRL-F, or F3 again will "Search Next".
+
+To exit incremental search mode type ESC.
+
+Incremental search supports regex. For example. To match the
+word "incremental" or the word "search" in this document type.
+
+CTRL-F
+incremental|search
+The type CTRL-F again to cycle through the matches
+
+[icon: lens]

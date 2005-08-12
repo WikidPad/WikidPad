@@ -1,0 +1,110 @@
+kj stuff
+========
+
+kjbuckets0.py
+ kjbuckets in pure python
+
+kjParseBuild.py
+ python code for building a parser from a grammar
+
+kjParser.py
+ python for parser interpretation
+
+kjSet.py
+ sets implemented using mappings
+
+
+Gadfly
+======
+
+database.py
+ Main entry point for gadfly sql.
+
+store.py
+ storage objects
+
+introspection.py
+ View based introspection and extension views
+
+bindings.py
+ rule bindings for sql grammar.
+
+sql.py
+ grammar generation stuff for sql. This module does not bind any rule
+ semantics, it just generates the parser data structures.
+
+grammar.py
+ sql grammar, partial, based on ODBC 2.0 programmer's ref
+
+operations.py
+ Database DDL/DML statement semantics
+
+semantics.py
+ sql semantics - provides kjbuckets
+
+
+Installation
+------------
+
+setup.py
+ Gadfly installation script. Build the sql grammar.
+
+sqlwhere.py
+ this module indicates where the sql datastructures are marshalled. Auto
+ generated on install: better not touch!
+
+
+Scripts
+-------
+
+scripts/gfclient.py
+ client access to gadfly server
+ uses gfsocket
+
+scripts/gfserve.py
+ gadfly server
+ uses gadfly, gfsocket
+
+
+Tests
+-----
+
+test/gfstest.py
+ Test script for gadfly client and server
+
+test/gftest.py
+ test script for gadfly
+
+test/remotetest.py
+ Demonstration of the Remote View protocol for adding specially implemented
+ Views in an application.
+
+test/SQLTESTG.py
+ this was used for debugging null productions
+
+test/sqlgtest.py
+ sql grammar tests
+
+
+
+Demos
+=====
+
+demo/idl.py
+  IDL parser
+ 
+demo/relalg.py
+ Simple relational algebra interpreter.
+
+demo/pygram.py
+ Rules for python based on grammar given in Programming Python by Mark Lutz
+
+demo/pylint.py
+ python lint using kwParsing
+
+demo/DLispShort.py
+ Grammar generation for lisp lists with strings, ints, vars, print, and setq
+
+demo/DumbLispGen.py
+ Test for kjParseBuild module automatic parser generation. Lisp lists with
+ strings, ints, vars, and setq.

@@ -1,0 +1,28 @@
+++ Wiki Export
+
+You can export your wiki as a single html page, a set of html
+pages, one wiki word page at a time, or as XML.
+
+Select from the "Wiki" menu:
+
+Export / Export Wiki As Single Html Page
+Export / Export Wiki As Set of Html Pages
+Export / Export Current Wiki Word As Html Page
+Export / Export Wiki As XML
+
+When exporting into XML each wiki word will include its created and modified time.
+The time format will look something like this:
+
+(2003, 10, 14, 19, 51, 56, 1, 287, 1)
+
+These numbers correspond to these fields.
+
+0 tm_year (for example, 1993) 
+1 tm_mon range [1,12] 
+2 tm_mday range [1,31] 
+3 tm_hour range [0,23] 
+4 tm_min range [0,59] 
+5 tm_sec range [0,61]; see (1) in strftime() description 
+6 tm_wday range [0,6], Monday is 0 
+7 tm_yday range [1,366] 
+8 tm_isdst Is daylight savings. 0, 1 or -1;

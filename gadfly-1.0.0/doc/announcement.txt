@@ -1,0 +1,38 @@
+================================================
+Gadfly 1.0.0 - SQL Relational Database in Python
+================================================
+
+Gadfly is a relational database system implemented in Python based on the
+SQL Structured Query Language. This is the GadflyB5 release - like a NG
+release only better :)
+
+Note: Aaron Watters is not the contact for this project. The contact for
+this project is richard@users.sourceforge.net.
+
+Gadfly requires python 2.1 or later for correct operation.
+
+GadflyB5 is mostly the same old Gadfly, but:
+
+- updated to use new regular expression engine (regex -> re migration)
+  performed by the fine folk at the Zope Corporation (http://www.zope.com/).
+- kjbuckets C extension module maintenance and updates (see the kjbuckets
+  documentation for details)
+- documentation cleanup
+- cleanup and reorganisation of the gadfly modules, including:
+
+  - migration to distutils-based installation
+  - cleanup of SQL grammar marshalling
+  - more strict (in places) unit/regression testing
+  - general cleanup of the code itself
+  - cleanup of networking code (note: gfclient argument list has changed!)
+
+Please read CHANGES.txt for a complete list of changes since the last
+release. There is no ongoing support available for usage, unless someone
+volunteers. If you have found a bug, please submit an issue to the bug
+tracker at:
+
+    https://sourceforge.net/tracker/?atid=100662&group_id=662
+
+If you've got a great idea for gadfly, and have the time to work on it,
+please contact the gadfly project admins.
+

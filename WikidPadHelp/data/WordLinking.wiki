@@ -1,0 +1,8 @@
+++ Word Linking
+
+As you type wiki words into the editor they become underlined.  Words
+that already have content, like AutoCompletion turn blue, words that
+do not, like JavaTemplates, stay black but are underlined.
+
+To activate or follow a Wiki Word link, *double click on it*, or
+type CTRL-L when the cursor is in the word.

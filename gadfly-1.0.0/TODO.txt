@@ -1,0 +1,8 @@
+Stuff to do some time:
+. extend gfserver to handle commands - stop, start
+. introduce a rowid concept for default ordering
+. have only cached rows in-memory, rest stay on disk
+. many more unit tests to torture the SQL and semantics code
+. conform to Python Database API Specification 2.0
+  http://www.python.org/topics/database/DatabaseAPI-2.0.html
+
