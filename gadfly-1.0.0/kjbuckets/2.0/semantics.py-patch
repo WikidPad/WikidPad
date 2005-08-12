@@ -1,0 +1,110 @@
+*** sqlsem.py-orig	Tue Oct  6 22:35:53 1998
+--- sqlsem.py	Thu Jun 14 16:31:03 2001
+***************
+*** 17,28 ****
+  ###
+  
+  # use kjbuckets builtin if available
+  try:
+      import kjbuckets
+  except ImportError:
+      import kjbuckets0
+      kjbuckets = kjbuckets0
+!     
+  Tuple = kjbuckets.kjDict
+  Graph = kjbuckets.kjGraph
+  Set = kjbuckets.kjSet
+--- 17,31 ----
+  ###
+  
+  # use kjbuckets builtin if available
++ pyd=0
+  try:
+      import kjbuckets
++     pyd=1
+  except ImportError:
+      import kjbuckets0
+      kjbuckets = kjbuckets0
+! 
+!    
+  Tuple = kjbuckets.kjDict
+  Graph = kjbuckets.kjGraph
+  Set = kjbuckets.kjSet
+***************
+*** 1279,1284 ****
+--- 1282,1288 ----
+     def map(self, assnlist):
+         """remap btlist by self. return (tuplelist, attorder)"""
+         # DON'T eliminate nulls
++        #kjbuckets.debug()
+         from types import IntType
+         tt = type
+         values = []
+***************
+*** 1296,1302 ****
+                valtups[i] = 0 # null/false
+             else:
+                tup = valtups[i]
+!               valtups[i] = kjUndump(undumper, tup)
+         return (valtups, self.attorder)
+         
+     def relbind(self, dict, db):
+--- 1300,1311 ----
+                valtups[i] = 0 # null/false
+             else:
+                tup = valtups[i]
+!               if pyd:
+!                  valtups[i] = kjUndump((undumper, tup))
+!               else:
+!                  valtups[i] = kjUndump(undumper, tup)                 
+!                  
+!        #kjbuckets.debug(0)                 
+         return (valtups, self.attorder)
+         
+     def relbind(self, dict, db):
+***************
+*** 2505,2519 ****
+      undumper = map(None, [0]*ndynamic, range(ndynamic))
+      undumper = tuple(undumper)
+      result = list(dynamic)
+!     kjUndump = kjbuckets.kjUndump
+      for i in xrange(len(dynamic)):
+          dyn = dynamic[i]
+          ldyn = len(dyn)
+!         #print undumper, dyn
+          if ldyn==1:
+!            dynresult = kjUndump(undumper, dyn[0])
+          else:
+!            dynresult = kjUndump(undumper, dyn)
+          result[i] = dynresult
+      return result
+  
+--- 2514,2541 ----
+      undumper = map(None, [0]*ndynamic, range(ndynamic))
+      undumper = tuple(undumper)
+      result = list(dynamic)
+!     
+!     #Ad Modified
+!     #kjUndump = kjbuckets.kjUndump
+!     kjUndump = kjbuckets.kjUndump    
+!     
+      for i in xrange(len(dynamic)):
+          dyn = dynamic[i]
+          ldyn = len(dyn)
+!         
+!        
+          if ldyn==1:
+!            if pyd:        
+!               dynresult = kjUndump((undumper, dyn[0]))
+!            else:                      
+!               dynresult = kjUndump(undumper, dyn[0])           
+          else:
+!            if pyd:
+!               #Ad convert before calling C module if not error non-unary tuple
+!               dyntuple=tuple(dyn)	
+!               dynresult = kjUndump(undumper, dyntuple)
+!            else:
+!               dynresult = kjUndump(undumper, dyn)
+          result[i] = dynresult
+      return result
+  

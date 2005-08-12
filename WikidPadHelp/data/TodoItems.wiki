@@ -1,0 +1,28 @@
++ Todo Items
+
+In Wikid Pad "todo", "action", "track", "issue" and "question" are
+special keywords that enable you to track important items under the
+"View" menu in the tree.
+
+todo: I have to do this.
+action: I have action items
+track: I am tracking this
+issue: I am tracking this
+question: This is a question
+project: This is my project
+
+Now open the views node in the tree on the left to see how these todo
+items have been added.  For example, open "Views/question" and you will
+see a node named "This is a question."
+
+These items support a nested sub-category also, for example:
+
+todo.bugs-to-fix: There is a bug in the system
+
+Will create a "bugs-to-fix" node in the tree under "Views/todo".
+
+[icon: pin]
+[alias: TodoItem]
+
+
+

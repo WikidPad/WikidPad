@@ -1,0 +1,15 @@
+++ Wiki Fonts
+
+You can change the font of a single wiki page by adding a font
+attribute to that page. Example:
+
+[font: Verdana]
+
+This font attribute is what changes the font of this page to Verdana.
+You can change the default font for the entire wiki by creating a
+global attribute. Example:
+
+[global.font: Courier New]
+
+would set the default font for the wiki to "Courier New".  See
+WikiDocumentAttributes for more information about attributes.

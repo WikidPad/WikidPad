@@ -1,0 +1,30 @@
+This file contains the changes to Gadfly over time. The entries are given with
+the most recent entry first.
+
+1.0.0
+- fixed compilation bug in kjbucketsmodule.c (PyObject_HEAD_INIT)
+- fixed commit-after-open bug (no working_db)
+- added more functionality to gfplus:
+  / or !!         repeat last command
+  (s|c)/pat/repl  repeat last but RE sub pat for repl
+- corrected gfplus exit code
+- close db before removal in tests
+
+
+1.0.0pr1
+- updated to use new regular expression engine (regex -> re migration)
+  performed by the fine folk at the Zope Corporation (http://www.zope.com/).
+- kjbuckets C extension module maintenance and updates (see the kjbuckets
+  documentation for details)
+- cleanup and reorganisation of the gadfly modules, including:
+  - migration to distutils-based installation
+  - cleanup of SQL grammar marshalling
+  - more strict (in places) unit/regression testing
+  - general cleanup of the code itself
+  - cleanup of networking code (gfclient argument list change)
+  - fixed bug in Average
+  - started to clean up code that might break under future python releases
+    (float division)
+  - removed as many circular imports as possible
+- documentation cleanup
+

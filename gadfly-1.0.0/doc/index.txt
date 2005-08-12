@@ -1,0 +1,102 @@
+===========================================
+GadflyB5: SQL Relational Database in Python
+===========================================
+
+Gadfly is a simple relational database system implemented in Python
+based on the SQL Structured Query Language. The  package  requires
+installation  before  use,  please  see the section on installation_.
+In  addition  to  this general documentation, please see the Gadfly
+`frequently asked questions`_.
+
+Contents
+========
+
+- Installation_
+- Overview_
+- gfplus_, the command-line SQL tool
+- SQL_ details
+- `Frequently Asked Questions`_
+- kwParsing_ (core parsing engine)
+- kjBuckets_ (core storage types)
+- `Database Recovery`_
+- `Network Setup`_
+- `About the New Gadfly Relase, GadflyB5`_
+- Contact_
+- Acknowledgements_
+- License_
+- `Gadfly project page`_, including downloads and bug tracker.
+
+.. _installation: installation.html
+.. _overview: gadfly.html
+.. _gfplus: gfplus.html
+.. _sql: sql.html
+.. _`frequently asked questions`: faq.html
+.. _kjbuckets: kjbuckets.html
+.. _kwparsing: kwParsing.html
+.. _`database recovery`: recover.html
+.. _`network setup`: network.html
+.. _`gadfly project page`: http://sourceforge.net/projects/gadfly/
+
+
+About the New Gadfly Relase, GadflyB5
+=====================================
+
+Codename: GadflyB5 (a much better series than TNG ;)
+
+See the announcement_ text for more info.
+
+.. _announcement: announcement.html
+
+
+Contact
+=======
+
+The primary contact for this project is Richard Jones <richard@users.sf.net>.
+There is no ongoing support available for usage, unless someone volunteers.
+If you have found a bug, please submit an issue to the bug tracker at:
+
+    https://sourceforge.net/tracker/?atid=100662&group_id=662
+
+Please include information about your system, your python version and the
+traceback of the error you encountered.
+
+If you've got a great idea for gadfly, and have the time to work on it, please
+contact the gadfly project admins.
+
+
+Acknowledgements
+================
+
+Aaron Watters, for writing the whole thing in the first place. You rock!
+
+For contributions over time: the `Zope Corporation`_ team, Berthold
+Hoellmann, Oleg Broytmann, Adnan Merican, spex66, jfarr, Anthony Baxter, Lars
+M. Garshol, Marc Risney, Jeff Berliner.
+
+.. _`Zope Corporation`: http://www.zope.com/
+
+
+License
+=======
+
+The gadfly and kjbuckets source is copyrighted, but you can freely use and
+copy it as long as you don't change or remove the copyright:
+
+Copyright Aaron Robert Watters, 1994
+
+                        All Rights Reserved
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
+provided that the above copyright notice appears in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation.
+
+AARON ROBERT WATTERS DISCLAIMS ALL WARRANTIES WITH REGARD TO
+THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS, IN NO EVENT SHALL AARON ROBERT WATTERS BE LIABLE
+FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+

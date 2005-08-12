@@ -1,0 +1,2 @@
+++ Icon beer
+[icon: beer]

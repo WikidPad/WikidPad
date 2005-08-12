@@ -1,0 +1,9 @@
+++ Rebuild The Wiki
+
+This will completely rebuild the internal database for the wiki.  
+
+This feature can also be used to add large numbers of pages to the
+wiki.  Copy ".wiki" wikiword files into the data directory and then
+create a wiki page that points to each of the wiki words for the files
+that you just dragged in. Then "Rebuild Wiki" to rebuild the database
+to include these files.
