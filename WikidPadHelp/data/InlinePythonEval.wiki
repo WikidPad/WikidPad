@@ -1,0 +1,57 @@
+++ Inline Python Eval
+
+You can evaluate python expressions directly in the editor by
+highlighting the expression and pressing CTRL-E. Example:
+
+Highlight the calculation below, and type CTRL-E.
+
+1+2+3
+ 
+You can also execute blocks of code within a document.  Blocks of code
+are defined within <% %> blocks. For example:
+
+<%
+editor.GotoPos(editor.GetLength())
+editor.AddText('\nhello ')
+%>
+
+To execute the code above, type Ctrl-E. Ctrl-E actually will execute all
+of the scripts on a page, including script imports.
+
+You can assign up to 4 functions on a page to a Ctrl-# key. For example:
+
+function 1: <% 1: editor.AddText(lib.now()) %>
+function 2: <% 2: lib.addDate(editor) %>
+
+Type Ctrl-1 to execute function 1. Enter Ctrl-2 to execute function 2.
+
+You can define your own functions for evaluation by copying
+evalLibrary.py into a directory in the wikidPad install directory
+called "user_extensions". This file will not be touched when upgrading
+wikidPad.
+
+file:///C|/Program%20Files/WikidPad/extensions/EvalLibrary.py
+file:///C|/Program%20Files/WikidPad/user_extensions/EvalLibrary.py
+
+*Script Imports*
+
+You can import scripts from another page using the following attribute.
+
+[import_scripts: GlobalScriptLibrary]
+
+Type "Ctrl-4" to see the output from script 4 on the page
+GlobalScriptLibrary.
+
+*Editor Control Functions*
+
+See http://www.yellowbrain.com/stc/index.html for a list of the functions
+available to the "editor" control.
+
+*Another Example*
+
+Highlight the line below and press CTRL-3
+
+c:\this path\will be encoded.txt
+
+<% 3: lib.encodeSelection(editor) %>
+

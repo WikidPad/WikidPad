@@ -1,0 +1,11 @@
+++ Bulleted Lists
+
+To start a bulleted list type a asterik at the beginning of the line.
+For example:
+
+    * Put your cursor at the end of this line and press enter.
+
+The start a numbered bulleted list type a number followed by a period
+at the beginning of the line. For example:
+
+    1. Put your cursor at the end of this line and press enter.

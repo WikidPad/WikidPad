@@ -1,0 +1,58 @@
+Sorry, these instructions are very Windows specific.
+
+--- Setup for dev ---
+
+Install each of the items in the tobuild directory.
+
+python
+We know what this is, I hope.
+
+nsis20b31.exe
+Nullsoft Scriptable Install System
+http://nsis.sourceforge.net/
+
+py2exe
+Generates a windows ".exe" for Python code.
+http://starship.python.net/crew/theller/py2exe/
+
+wxPython
+GUI framework
+http://www.wxpython.org/
+
+Now install gadfly
+
+cd gadfly-1.0.0
+python setup.py install
+
+--- To run WikidPad from source ---
+
+set PYTHONPATH=lib
+python WikidPad.py
+
+--- To build and generate executable ---
+
+set PYTHONPATH=lib
+build.bat
+
+This will generate a "build" directory and a "dist" directory.
+
+--- To create a WikidPad.exe distribution ---
+
+Modify the version number of wikidPad in:
+
+setup.py
+installer/WikidPad.nsi
+and the html in lib/pwiki/PersonalWikiFrame.py in the AboutDialog.
+yes this could be better.
+
+Run wikidPad using: python WikidPad.py
+
+Open the help wiki. Make sure it is the help wiki under the source tree. Now
+click on the root node. This makes sure that the distributed version will open
+up on the root node.
+
+Go into the installer directory.
+Right click on WikidPad.nsi and select Compile NSI.
+
+
+

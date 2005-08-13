@@ -1,0 +1,24 @@
+BODY {
+	font-family: Verdana; font-size: 90%;
+}
+
+.wiki-name-ref {
+	color: #888888; font-size: 75%;
+}
+
+.parent-nodes {
+	color: #888888; font-size: 75%;
+}
+
+.property {
+	color: #888888; font-size: 75%;
+}
+
+.script {
+	color: #888888; font-size: 75%;
+}
+
+.todo {
+	font-weight: bold;
+}
+

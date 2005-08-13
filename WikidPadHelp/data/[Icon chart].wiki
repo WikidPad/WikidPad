@@ -1,0 +1,2 @@
+++ Icon chart
+[icon: chart]

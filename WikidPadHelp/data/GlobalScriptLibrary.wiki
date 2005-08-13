@@ -1,0 +1,10 @@
+++ Global Script Library
+
+A page can import the scripts from another page. When this page
+is imported CTRL-4 will cause the text
+
+"--- from global library ---"
+
+to be added the page at the current position.
+
+<% 4: editor.AddText("--- from global library ---") %>

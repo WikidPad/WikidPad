@@ -1,0 +1,6 @@
+++ Not Camel Case
+
+java and wiki
+
+[icon=chart]
+[priority: 3]
