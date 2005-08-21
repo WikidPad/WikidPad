@@ -1,9 +1,16 @@
 #!/bin/python
 
+import sys, os, traceback, os.path
+
+os.stat_float_times(True)
+
+import pwiki.urllib_red as urllib
+
 from wxPython.wx import *
+import wxPython.xrc as xrc
+
 from pwiki.PersonalWikiFrame import PersonalWikiFrame
-import urllib
-import sys, os
+
 
 openThisWiki = None
 openThisWikiWord = None
@@ -18,6 +25,15 @@ if len(sys.argv) > 1:
 
 class App(wxApp):   
     def OnInit(self):
+        appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
+        rf = open(os.path.join(appdir, "WikidPad.xrc"), "r")
+        rd = rf.read()
+        rf.close()
+        
+        res = xrc.wxXmlResource.Get()
+        res.SetFlags(0)
+        res.LoadFromString(rd)
+
         self.wikiFrame = PersonalWikiFrame(None, -1, "WikidPad", openThisWiki, openThisWikiWord)
         self.SetTopWindow(self.wikiFrame)
 
@@ -51,6 +67,7 @@ try:
    app = App(0)
    app.MainLoop()
 except Exception, e:
+   traceback.print_exc()
    exception = e
    error = Error(0)
    error.MainLoop()

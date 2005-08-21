@@ -1,5 +1,5 @@
 from time import strftime
-import urllib
+import pwiki.urllib_red as urllib
 
 def now():
     return strftime("%x %I:%M %p")

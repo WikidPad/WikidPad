@@ -30,8 +30,7 @@ WikiFormatting.py: Container for regex's, and styles.
 Exporters.py: html/xml export code.
 TextWrapper.py: I snagged this from somewhere. This runs when you press Ctrl-W.
 Enum.py: Also snagged from somewhere, python enums.
-Config.py: Default fonts. I think I meant to do more with this file. 
-           Actually, I think it did do some registration stuff before.
+Configuration.py: Configuration manager.
 
 --- API ---
 

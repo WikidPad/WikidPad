@@ -1,9 +1,22 @@
+import sys    ## , hotshot
+
+## _prof = hotshot.Profile("hotshot.prf")
+
 from wxPython.wx import *
 from wxPython.stc import *
 
 from WikiData import WikiWordNotFoundException
 import WikiFormatting
-import sys
+
+from StringOps import mbcsEnc, guiToUni, uniToGui
+
+
+class NodeStyle:
+    def __init__(self):
+        self.bold = "False"
+        self.icon = "page"
+        self.color = "null"
+        
 
 class WikiTreeCtrl(wxTreeCtrl):
     def __init__(self, pWiki, parent, ID):        
@@ -19,38 +32,69 @@ class WikiTreeCtrl(wxTreeCtrl):
         EVT_TREE_SEL_CHANGED(self, ID, self.OnTreeItemActivated)
         EVT_TREE_ITEM_EXPANDING(self, ID, self.OnTreeItemExpand)
         EVT_TREE_ITEM_COLLAPSED(self, ID, self.OnTreeItemCollapse)
+        EVT_RIGHT_DOWN(self, self.OnRightButtonDown)
 
-        rightClickMenu=wxMenu()                                
+        self.rightClickMenu=wxMenu()
 
         menuID=wxNewId()
-        rightClickMenu.Append(menuID, 'Rename', 'Rename')
+        self.rightClickMenu.Append(menuID, 'Rename', 'Rename')
         EVT_MENU(self, menuID, lambda evt: self.pWiki.showWikiWordRenameDialog())
 
         menuID=wxNewId()
-        rightClickMenu.Append(menuID, 'Delete', 'Delete')
+        self.rightClickMenu.Append(menuID, 'Delete', 'Delete')
         EVT_MENU(self, menuID, lambda evt: self.pWiki.showWikiWordDeleteDialog())
 
         menuID=wxNewId()
-        rightClickMenu.Append(menuID, 'Bookmark', 'Bookmark')
+        self.rightClickMenu.Append(menuID, 'Bookmark', 'Bookmark')
         EVT_MENU(self, menuID, lambda evt: self.pWiki.insertAttribute("bookmarked", "true"))
 
-        def popup(evt):
-            if not self.isViewNode(self.GetSelection()):
-                self.PopupMenuXY(rightClickMenu, evt.GetX(), evt.GetY())
-
-        EVT_RIGHT_DOWN(self, popup)
+        menuID=wxNewId()
+        self.rightClickMenu.Append(menuID, 'Set As Root', 'Set As Root')
+        EVT_MENU(self, menuID, lambda evt: self.pWiki.setCurrentWordAsRoot())
 
 
     def collapse(self):        
         rootNode = self.GetRootItem()
         self.CollapseAndReset(rootNode)
+        
+    def getHideUndefined(self):
+        return self.pWiki.configuration.getboolean("main", "hideundefined")
 
-    def buildTreeForWord(self, wikiWord, selectNode=False):
+
+    # TODO Update label (priority number)
+    def updateTreeNode(self, wikiPage, treeNode, hasChildren=None):
+        """
+        Update visual presentation of tree node (label, style, color, itemhaschildren).
+        But does not update its children.
+        
+        wikiPage -- WikiPage of the item at least with ['props'] data
+        treeNode -- node of the item
+        """
+        ## haschildren = True
+        if treeNode == self.GetRootItem():
+            hasChildren = True # Has at least ScratchPad and Views
+        elif hasChildren is None:
+            hasChildren = len(wikiPage.getChildRelationships(      
+                    existingonly=self.getHideUndefined(), selfreference=False)) > 0
+        
+        if not hasChildren:
+            self.CollapseAndReset(treeNode)
+            
+        self.SetItemHasChildren(treeNode, hasChildren)
+
+        # apply custom properties to nodes
+        self.applyPropsToTreeNode(wikiPage, treeNode)
+
+
+    def buildTreeForWord(self, wikiWord, selectNode=False, doexpand=False):
         """
         First tries to find a path from wikiWord to the currently selected node.
         If nothing is found, searches for a path from wikiWord to the root.
         Expands the tree out if a path is found.
         """
+
+        if selectNode:
+            doexpand = True
 
         wikiData = self.pWiki.wikiData
         currentNode = self.GetRootItem()
@@ -61,7 +105,8 @@ class WikiTreeCtrl(wxTreeCtrl):
 
         # if a path is not found try to get a path to the root node
         if not crumbs:
-            crumbs = wikiData.findBestPathFromWordToWord(wikiWord, self.pWiki.wikiName)
+            crumbs = wikiData.findBestPathFromWordToWord(wikiWord,
+                    self.getNodeValue(self.GetRootItem()))   # self.pWiki.wikiName)
             if crumbs:
                 currentNode = self.GetRootItem()
 
@@ -74,7 +119,8 @@ class WikiTreeCtrl(wxTreeCtrl):
                 # replace currentNode under special conditions, which would invalidate
                 # the currentNode pointer
                 try:
-                    self.Expand(currentNode)
+                    if doexpand:
+                        self.Expand(currentNode)
 
                     # fetch the next crumb node
                     if (i+1) < numCrumbs:
@@ -91,17 +137,13 @@ class WikiTreeCtrl(wxTreeCtrl):
                 # invalidated the root pointer
                 if len(currentWikiWord) > 0:
                     try:
-                        currentNodePage = wikiData.getPage(currentWikiWord, ['children', 'props'])
-                        if len(currentNodePage.childRelations) > 0:
-                            self.SetItemHasChildren(currentNode, 1)
-                        else:
-                            self.SetItemHasChildren(currentNode, 0)
-                        # apply custom properties to nodes
-                        self.applyPropsToTreeNode(currentNodePage, currentNode)
+                        currentNodePage = wikiData.getPage(currentWikiWord, ['props'])   # 'children', 
+                        self.updateTreeNode(currentNodePage, currentNode)
                     except Exception, e:
-                        sys.stderr.write(e)
+                        sys.stderr.write(str(e))
 
-                self.EnsureVisible(currentNode)                            
+                if doexpand:
+                    self.EnsureVisible(currentNode)                            
                 if selectNode:
                     self.SelectItem(currentNode)
 
@@ -111,84 +153,112 @@ class WikiTreeCtrl(wxTreeCtrl):
         Fills in the treeNodes children with the relations to wikiWord. If the
         treeNode passed in is replaced, the replacement is returned.
         """
-
         wikiData = self.pWiki.wikiData
 
         if not wikiWord:
             wikiWord = self.getNodeValue(treeNode)
 
-        treeChanged = False
-        wikiPage = wikiData.getPage(wikiWord, ['children', 'props'])
-        relations = wikiPage.childRelations
-
-        if self.IsExpanded(treeNode):
-            treeChildren = self.getChildTreeNodes(treeNode)
-
-            # get the nodes not in the relations
-            deleteThese = [childNode for (childNode, childText) in treeChildren
-                            if not self.isViewNode(childNode) and childText not in relations]
-
-            # delete them from the tree
-            if len(deleteThese) > 0:
-                for toDelete in deleteThese:
-                    self.Delete(toDelete)
-                # reset the tree children list
-                treeChildren = self.getChildTreeNodes(treeNode)
-                treeChanged = True
-
-            # get the relations not in the tree
-            childWordsInTree = [childText for (childNode, childText) in treeChildren]
-            relations = [relation for relation in relations if relation not in childWordsInTree]
-
+        wikiPage = wikiData.getPage(wikiWord, ['props'])
+#         relations = wikiPage.getChildRelationships(
+#                 existingonly=self.getHideUndefined(), selfreference=False)
+        relations = wikiPage.getChildRelationshipsAndHasChildren(
+                existingonly=self.getHideUndefined(), selfreference=False)
+                
         # get the sort order for the children
         childSortOrder = "ascending"
         if (wikiPage.props.has_key('child_sort_order')):
             childSortOrder = wikiPage.props['child_sort_order'][0]
+            
+        # TODO Automatically add ScratchPad
+#         if treeNode == self.GetRootItem() and not "ScratchPad" in relations:
+#             relations.append(("ScratchPad", None))
 
-        # sorter for relations, removes brackets and sorts lower case
-        def removeBracketsAndSort(a, b):
-            a = getTextForNode(a)
-            b = getTextForNode(b)
-            if childSortOrder.startswith("desc"):
-                return cmp(b.lower(), a.lower())
-            else:
-                return cmp(a.lower(), b.lower())
-
-        # add the missing relationships
+        # Apply sort order
         if childSortOrder != "unsorted":
-            relations.sort(removeBracketsAndSort) # sort alphabetically
-
+            if childSortOrder.startswith("desc"):
+                relations.sort(removeBracketsAndSortDesc) # sort alphabetically
+            else:
+                relations.sort(removeBracketsAndSortAsc)
+            
         relationData = []
         position = 1
-        for relation in relations:
-            relationPage = wikiData.getPage(relation, ['children', 'props'])
-            relationData.append((relation, relationPage, position))
+        for relation, hasChildren in relations:
+            relationPage = wikiData.getPageNoError(relation, ['props'])
+            relationData.append((relation, relationPage, position, hasChildren))
             position = position+1
             
+        # Sort again, using tree position and priority properties
         relationData.sort(relationSort)
-        for (relation, relationData, position) in relationData:
-            childTreeNode = self.addTreeNode(treeNode, relation)
-            try:
-                if len(relationData.childRelations) > 0:
-                    self.SetItemHasChildren(childTreeNode, 1)
-                # apply custom properties to nodes
-                self.applyPropsToTreeNode(relationData, childTreeNode)                
-                treeChanged = True
-            except WikiWordNotFoundException, e:
-                pass
+        
+        
+        # Refresh subtree
+        
+        ## self.Freeze() # Stop visual updates
+        if self.IsExpanded(treeNode):
+            treeChildren = self.getChildTreeNodes(treeNode)
+        else:
+            # Simply remove all, no sophisticated replacement
+            self.DeleteChildren(treeNode)
+            treeChildren = []
+        
+        tci = 0    # Index into treeChildren
+        
+        # Delete/create/update tree nodes
+        for (relation, relationPage, position, hasChildren) in relationData:
+            if (tci < len(treeChildren)) and \
+                    (treeChildren[tci][1] == relation):
+                        
+                # This relation is already in the tree, so use existing node
+                childTreeNode = treeChildren[tci][0]
+                tci += 1
+            else:
+                # No match, so create new node                
+                childTreeNode = self.addTreeNode(treeNode, relation)
+                
+                # Update childTreeNode   # TODO: Also for existing children?
+                try:
+                    self.updateTreeNode(relationPage, childTreeNode, hasChildren)
+                except WikiWordNotFoundException, e:
+                    pass
+                
+                
+        # Remove old children
+        while (tci < len(treeChildren)):
+            self.Delete(treeChildren[tci][0])
+            tci += 1
 
         # add a "View" node to the root if it isn't already there
-        if wikiWord == self.pWiki.wikiName:            
+        if treeNode == self.GetRootItem(): #wikiWord == self.pWiki.wikiName:
             if not self.findChildTreeNodeWithText(treeNode, "Views"):
                 viewNode = self.addViewNode(treeNode, "Views", icon="orgchart")
-
+                
+        ## self.Thaw() # Allow visual updates again
+        
         return treeNode
+        
+
+    def setRootByPage(self, rootpage):
+        """
+        Clear the tree and use page described by rootpage as
+        root of the tree
+        """
+        self.DeleteAllItems()
+        # add the root node to the tree
+        root = self.AddRoot(rootpage.wikiWord)
+        self.SetPyData(root, (rootpage.wikiWord,None,None))
+        self.SetItemBold(root, True)  # TODO: This doesn't work
+        self.SelectItem(root)
+
+#       root has at least ScratchPad and Views as children
+        self.SetItemHasChildren(root, 1)
+        self.Expand(root)
+
 
     def addTreeNode(self, parentNode, nodeText, nodeValue=None, viewData=None, searchData=None, applyProps=False):
         if not nodeValue:
             nodeValue = nodeText
         nodeText = getTextForNode(nodeText)
-        newNode = self.AppendItem(parentNode, nodeText)
+        newNode = self.AppendItem(parentNode, mbcsEnc(nodeText, "replace")[0])
         self.SetPyData(newNode, (nodeValue, viewData, searchData))
 
         # if applyProps true format the node according to its properties
@@ -198,7 +268,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
         return newNode
 
-    def addViewNode(self, toNode, named, data="view", icon='page'):
+    def addViewNode(self, toNode, named, data=u"view", icon='page'):
         "adds a view node setting its data to 'view~something'"
         try:
             newNode = self.addTreeNode(toNode, named, named, data)
@@ -220,7 +290,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         
     def getChildTreeNodes(self, fromNode):
         childNodes = []
-        (child, cookie) = self.GetFirstChild(fromNode, 0)
+        (child, cookie) = self.GetFirstChild(fromNode)    # , 0
         while child:
             childText = self.getNodeValue(child)
             childNodes.append((child, childText))
@@ -265,6 +335,12 @@ class WikiTreeCtrl(wxTreeCtrl):
                 elif (priorNum < 3):
                     props['importance'] = 'low'
 
+##        self.setNodeColor(treeNode, "black")
+##        self.setNodeImage(treeNode, "page")
+##        self.SetItemBold(treeNode, False)
+
+        style = NodeStyle()
+
         # apply the global props based on the props of this node
         for (key, values) in props.items():
             for val in values:
@@ -273,32 +349,52 @@ class WikiTreeCtrl(wxTreeCtrl):
                     if not gPropVal:
                         gPropVal = globalProps.get("global.%s.%s" % (key, type))
                     if gPropVal:
-                        func(treeNode, gPropVal)
+                        setattr(style, type, gPropVal)
+                        # func(treeNode, gPropVal)
                             
         # color. let user override global color
         if props.has_key("color"):
-            self.SetItemTextColour(treeNode, wxNamedColour(props["color"][0]))
+            style.color = props["color"][0]
+            # self.setNodeColor(treeNode, props["color"][0])
 
         # icon. let user override global icon
         if props.has_key("icon"):
-            self.setNodeImage(treeNode, props["icon"][0])
-                
+            style.icon = props["icon"][0]
+            # self.setNodeImage(treeNode, props["icon"][0])
+        if props.has_key("bold"):
+            style.bold = props["bold"][0]
+
+        self.setNodeStyle(treeNode, style)
+
+
     def setNodeImage(self, node, image):
         try:
             (index, icon) = self.pWiki.iconLookup[image]
-            if icon:
-                self.SetItemImage(node, index, wxTreeItemIcon_Normal)
-                self.SetItemImage(node, index, wxTreeItemIcon_Selected)
-                self.SetItemImage(node, index, wxTreeItemIcon_Expanded)
-                self.SetItemImage(node, index, wxTreeItemIcon_SelectedExpanded)
+            ## if icon:
+                ## self.SetItemImage(node, index, wxTreeItemIcon_Selected)
+                ## self.SetItemImage(node, index, wxTreeItemIcon_Expanded)
+                ## self.SetItemImage(node, index, wxTreeItemIcon_SelectedExpanded)
+            self.SetItemImage(node, index, wxTreeItemIcon_Normal)
         except:
-            pass        
+            try:
+                self.SetItemImage(node, 0, wxTreeItemIcon_Normal)
+            except:
+                pass        
 
     def setNodeBold(self, node, notUsed):
         self.SetItemBold(node, True)        
 
     def setNodeColor(self, node, color):
-        self.SetItemTextColour(node, wxNamedColour(color))
+        if color == "null":
+            self.SetItemTextColour(node, wxNullColour)
+        else:
+            self.SetItemTextColour(node, wxNamedColour(color))
+
+    def setNodeStyle(self, node, style):
+        self.setNodeImage(node, style.icon)
+        bold = not (style.bold in ("false", "0", "False", "FALSE"))
+        self.SetItemBold(node, bold)
+        self.setNodeColor(node, style.color)
         
     def expandView(self, viewNode):
         "called from OnTreeItemExpand when a view is expanded"
@@ -330,7 +426,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
             # add property names            
             propNames = wikiData.getPropertyNames()
-            propNames.sort()
+            ## propNames.sort()
             for name in propNames:
                 propertyIcon = globalProps.get("global.%s.icon" % (name))
                 if propertyIcon:
@@ -350,7 +446,7 @@ class WikiTreeCtrl(wxTreeCtrl):
                 self.addViewNode(viewNode, "parentless-nodes", icon="link") 
 
         elif name == "searches":
-            for search in wikiData.getSavedSearches():
+            for search in wikiData.getSavedSearches():     # ???
                 self.addViewNode(viewNode, search, "%s~searchFor" % name, icon="lens")
 
         elif name == "modified-within":
@@ -415,8 +511,9 @@ class WikiTreeCtrl(wxTreeCtrl):
             self.expandViewPropValues(viewNode)
             
         elif data.endswith('searchFor'):
-            for word in wikiData.search(name):
-                resultNode = self.addTreeNode(viewNode, word, searchData=name, applyProps=True)
+            for word in wikiData.search(guiToUni(name)):
+                resultNode = self.addTreeNode(viewNode, word,
+                        searchData=guiToUni(name), applyProps=True)
 
         elif data.endswith("modifiedWithin"):
             days = int(data[0:data.find('~')])
@@ -452,31 +549,46 @@ class WikiTreeCtrl(wxTreeCtrl):
     def getSearchInfo(self, item):
         (value, data, search) = self.GetPyData(item)
         return search
-
+        
     def OnTreeItemActivated(self, event):
         item = event.GetItem()        
         # view nodes can't be activated
-        if self.GetPyData(item) and not self.isViewNode(item):
+        if item.IsOk() and self.GetPyData(item) and not self.isViewNode(item):
             wikiWord = self.getNodeValue(item)
             self.pWiki.openWikiPage(wikiWord)
             searchInfo = self.getSearchInfo(item)
             if searchInfo:
                 self.pWiki.editor.executeSearch(searchInfo, 0)
+        
+        event.Skip()
                     
     def OnTreeItemExpand(self, event):
+        ## print "OnTreeItemExpand start"
+        ## _prof.start()
         item = event.GetItem()
         if not self.isViewNode(item):
+            
+            if self.IsExpanded(item):   # TODO Check if a good idea
+                return
             self.expandTreeNode(item)
         else:
             self.expandView(item)
+        ## _prof.stop()
+        ## print "OnTreeItemExpand stop"
 
     def OnTreeItemCollapse(self, event):
         self.DeleteChildren(event.GetItem())
+
+    def OnRightButtonDown(self, evt):
+        if not self.isViewNode(self.GetSelection()):
+            self.PopupMenuXY(self.rightClickMenu, evt.GetX(), evt.GetY())
+
 
 def getTextForNode(text):
     if text.startswith("["):
         return text[1:len(text)-1]
     return text
+    
 
 def relationSort(a, b):
     propsA = a[1].props
@@ -506,3 +618,16 @@ def relationSort(a, b):
         bSort = b[2]
 
     return cmp(aSort, bSort)
+
+
+# sorter for relations, removes brackets and sorts lower case
+def removeBracketsAndSortDesc(a, b):
+    a = getTextForNode(a[0])
+    b = getTextForNode(b[0])
+    return cmp(b.lower(), a.lower())
+
+def removeBracketsAndSortAsc(a, b):
+    a = getTextForNode(a[0])
+    b = getTextForNode(b[0])
+    return cmp(a.lower(), b.lower())
+

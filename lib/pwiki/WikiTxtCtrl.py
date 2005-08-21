@@ -1,47 +1,100 @@
-import os
-import urllib
+import os, traceback, codecs, array
+from cStringIO import StringIO
+import urllib_red as urllib
 import string
 import re
+import threading
 
 from time import time, strftime
 
 from wxPython.wx import *
 from wxPython.stc import *
+import wxPython.xrc as xrc
+
+from wxHelper import GUI_ID, XrcControls, XRCID
 
 import WikiFormatting
 from WikiData import WikiWordNotFoundException, WikiFileNotFoundException
-from TextWrapper import fill
-from Config import faces
+# from TextWrapper import fill
+from textwrap import fill
+
+from StringOps import utf8Enc, utf8Dec, mbcsEnc, mbcsDec, uniToGui, guiToUni
+from Configuration import isUnicode
+
+
+def bytelenSct_utf8(us):
+    """
+    us -- unicode string
+    returns: Number of bytes us requires in Scintilla (with UTF-8 encoding=Unicode)
+    """
+    return len(utf8Enc(us)[0])
+
+
+def bytelenSct_mbcs(us):
+    """
+    us -- unicode string
+    returns: Number of bytes us requires in Scintilla (with mbcs encoding=Ansi)
+    """
+    return len(mbcsEnc(us)[0])
+
+
 
 class WikiTxtCtrl(wxStyledTextCtrl):
-    def __init__(self, pWiki, parent, ID):        
+    def __init__(self, pWiki, parent, ID):
         wxStyledTextCtrl.__init__(self, parent, ID)
         self.pWiki = pWiki
         self.evalScope = None
-        
+        self.stylebytes = None
+        self.stylethread = None
+
         # editor settings
         self.SetIndent(4)
         self.SetTabIndents(1)
         self.SetBackSpaceUnIndents(1)
         self.SetTabWidth(4)
-        self.SetUseTabs(0)
+        self.SetUseTabs(0)  # TODO Configurable
         self.SetEOLMode(wxSTC_EOL_LF)
+        
+        # Self-modify to ansi/unicode version
+        if isUnicode():
+            self.bytelenSct = bytelenSct_utf8
+        else:
+            self.bytelenSct = bytelenSct_mbcs
+            
+            self.GetText = self.GetText_unicode
+            self.GetTextRange = self.GetTextRange_unicode
+            self.GetSelectedText = self.GetSelectedText_unicode
+            self.GetLine = self.GetLine_unicode
+            self.ReplaceSelection = self.ReplaceSelection_unicode
+            self.AddText = self.AddText_unicode
 
-        self.StyleSetSpec(wxSTC_STYLE_DEFAULT, "face:%(mono)s,size:%(size)d" % faces)
+
+        # Popup menu must be created by Python code to replace clipboard functions
+        # for unicode built
+        self.UsePopUp(0)
+
+        self.StyleSetSpec(wxSTC_STYLE_DEFAULT, "face:%(mono)s,size:%(size)d" % self.pWiki.presentationExt.faces)
 
         # i plan on lexing myself
         self.SetLexer(wxSTC_LEX_CONTAINER)
 
-        # make the text control a drop target for files
+        # make the text control a drop target for files and text
         self.SetDropTarget(WikiTxtCtrlDropTarget(self))
 
         # register some keyboard commands
         self.CmdKeyAssign(ord('+'), wxSTC_SCMOD_CTRL, wxSTC_CMD_ZOOMIN)
         self.CmdKeyAssign(ord('-'), wxSTC_SCMOD_CTRL, wxSTC_CMD_ZOOMOUT)
 
-        self.CmdKeyAssign(wxSTC_KEY_INSERT, wxSTC_SCMOD_CTRL, wxSTC_CMD_COPY)
-        self.CmdKeyAssign(wxSTC_KEY_INSERT, wxSTC_SCMOD_SHIFT, wxSTC_CMD_PASTE)
-        self.CmdKeyAssign(wxSTC_KEY_DELETE, wxSTC_SCMOD_SHIFT, wxSTC_CMD_CUT)
+        # Clear all key mappings for clipboard operations
+        # PersonalWikiFrame handles them and calls the special clipboard functions
+        # instead of the normal ones
+        self.CmdKeyClear(wxSTC_KEY_INSERT, wxSTC_SCMOD_CTRL)
+        self.CmdKeyClear(wxSTC_KEY_INSERT, wxSTC_SCMOD_SHIFT)
+        self.CmdKeyClear(wxSTC_KEY_DELETE, wxSTC_SCMOD_SHIFT)
+
+        self.CmdKeyClear(ord('X'), wxSTC_SCMOD_CTRL)
+        self.CmdKeyClear(ord('C'), wxSTC_SCMOD_CTRL)
+        self.CmdKeyClear(ord('V'), wxSTC_SCMOD_CTRL)
 
         # set the autocomplete separator
         self.AutoCompSetSeparator(ord('~'))
@@ -55,12 +108,15 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         EVT_MOTION(self, self.OnMouseMove)
         #EVT_STC_DOUBLECLICK(self, ID, self.OnDoubleClick)
         EVT_KEY_DOWN(self, self.OnKeyDown)
+        EVT_CHAR(self, self.OnChar)
         EVT_IDLE(self, self.OnIdle)
+        EVT_CONTEXT_MENU(self, self.OnContextMenu)
 
-        # search related vars        
+        # search related vars
         self.inIncrementalSearch = False
-        self.anchorPosition = -1
-        self.searchStartPos = 0
+        self.anchorBytePosition = -1
+        self.anchorCharPosition = -1
+        self.searchCharStartPos = 0
 
         # are WikiWords enabled
         self.wikiWordsEnabled = True
@@ -69,91 +125,267 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.lastKeyPressed = time()
         self.eolMode = self.GetEOLMode()
 
+        # Stock cursors. Created here because the App object must be created first
+        WikiTxtCtrl.CURSOR_IBEAM = wxStockCursor(wxCURSOR_IBEAM)
+        WikiTxtCtrl.CURSOR_HAND = wxStockCursor(wxCURSOR_HAND)
+
+        res = xrc.wxXmlResource.Get()
+        self.contextMenu = res.LoadMenu("MenuTextctrlPopup")
+
+        # Connect context menu events to functions
+        EVT_MENU(self, XRCID("txtUndo"), lambda evt: self.Undo())
+        EVT_MENU(self, XRCID("txtRedo"), lambda evt: self.Redo())
+
+        EVT_MENU(self, XRCID("txtCut"), lambda evt: self.Cut())
+        EVT_MENU(self, XRCID("txtCopy"), lambda evt: self.Copy())
+        EVT_MENU(self, XRCID("txtPaste"), lambda evt: self.Paste())
+        EVT_MENU(self, XRCID("txtDelete"), lambda evt: self.ReplaceSelection(""))
+
+        EVT_MENU(self, XRCID("txtSelectAll"), lambda evt: self.SelectAll())
+
+
+    def Cut(self):
+        self.Copy()
+        self.ReplaceSelection("")
+
+
+    def Copy(self):
+        cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
+        udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
+        realuni = self.GetSelectedText()
+        arruni = array.array("u")
+        arruni.fromunicode(realuni+u"\x00")
+        rawuni = arruni.tostring()
+        # print "Copy", repr(realuni), repr(rawuni), repr(mbcsenc(realuni)[0])
+        udataob.SetData(rawuni)
+        cdataob.SetData(mbcsEnc(realuni)[0]+"\x00")
+
+        dataob = wxDataObjectComposite()
+        dataob.Add(udataob)
+        dataob.Add(cdataob)
+
+        cb = wxTheClipboard
+        cb.Open()
+        try:
+            cb.SetData(dataob)
+        finally:
+            cb.Close()
+
+
+    def Paste(self):
+        cb = wxTheClipboard
+        cb.Open()
+        try:
+            # datob = wxTextDataObject()
+            # datob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
+            dataob = wxDataObjectComposite()
+            cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
+            udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
+            cdataob.SetData("")
+            udataob.SetData("")
+            dataob.Add(udataob)
+            dataob.Add(cdataob)
+
+            if cb.GetData(dataob):
+                if udataob.GetDataSize() > 0 and (udataob.GetDataSize() % 2) == 0:
+                    # We have unicode data
+                    # This might not work for all platforms:   # TODO Better impl.
+                    rawuni = udataob.GetData()
+                    arruni = array.array("u")
+                    arruni.fromstring(rawuni)
+                    realuni = arruni.tounicode()
+                    self.ReplaceSelection(realuni)
+                elif cdataob.GetDataSize() > 0:
+                    realuni = mbcsDec(cdataob.GetData(), "replace")[0]
+                    self.ReplaceSelection(realuni)
+                # print "Test getData", cdataob.GetDataSize(), udataob.GetDataSize()
+
+            # print "Test text", repr(datob.GetData())       # GetDataHere())
+        finally:
+            cb.Close()
+
+
     def setWrap(self, onOrOff):
         if onOrOff:
             self.SetWrapMode(wxSTC_WRAP_WORD)
         else:
             self.SetWrapMode(wxSTC_WRAP_NONE)
-        
-    def SetStyles(self, styleFaces=faces):
+
+    def SetStyles(self, styleFaces = None):
         # create the styles
+        if styleFaces is None:
+            styleFaces = self.pWiki.presentationExt.faces
+
         for type, style in WikiFormatting.getStyles(styleFaces):
             self.StyleSetSpec(type, style)
 
     def SetText(self, text):
+        """
+        Overrides the wxStyledTextCtrl method.
+        text -- Unicode text content to set
+        """
         self.inIncrementalSearch = False
-        self.anchorPosition = -1
-        self.searchStartPos = 0
+        self.anchorBytePosition = -1
+        self.anchorCharPosition = -1
+        self.searchCharStartPos = 0
 
         self.SetSelection(-1, -1)
         self.ignoreOnChange = True
-        wxStyledTextCtrl.SetText(self, text)
+        if isUnicode():
+            wxStyledTextCtrl.SetText(self, text)
+        else:
+            # TODO Configure if "replace" or "strict"
+            wxStyledTextCtrl.SetText(self, mbcsEnc(text, "replace")[0])
         self.ignoreOnChange = False
         self.EmptyUndoBuffer()
+
+        
+    def GetText_unicode(self):
+        """
+        Overrides the wxStyledTextCtrl.GetText method in ansi mode
+        to return unicode.
+        """
+        return mbcsDec(wxStyledTextCtrl.GetText(self), "replace")[0]
+
+    
+    def GetTextRange_unicode(self, startPos, endPos):
+        """
+        Overrides the wxStyledTextCtrl.GetTextRange method in ansi mode
+        to return unicode.
+        startPos and endPos are byte(!) positions into the editor buffer
+        """
+        return mbcsDec(wxStyledTextCtrl.GetTextRange(self, startPos, endPos),
+                "replace")[0]
+
+
+    def GetSelectedText_unicode(self):
+        """
+        Overrides the wxStyledTextCtrl.GetSelectedText method in ansi mode
+        to return unicode.
+        """
+        return mbcsDec(wxStyledTextCtrl.GetSelectedText(self), "replace")[0]
+
+
+    def GetLine_unicode(self, line):
+        return mbcsDec(wxStyledTextCtrl.GetLine(self, line), "replace")[0]
+
+
+    def ReplaceSelection_unicode(self, txt):
+        return wxStyledTextCtrl.ReplaceSelection(self, mbcsEnc(txt, "replace")[0])
+
+
+    def AddText_unicode(self, txt):
+        return wxStyledTextCtrl.AddText(self, mbcsEnc(txt, "replace")[0])
+
 
     def OnStyleNeeded(self, evt):
         "Styles the text of the editor"
 
-        wikiData = self.pWiki.wikiData
-        
-        # get the text to regex against        
+        # get the text to regex against
         text = self.GetText()
+        textlen = len(text)
 
-        # keeps track of the positions that have been styled        
-        styledPositions = []
+        if textlen < 10240:    # Arbitrary value
+            # Synchronous styling
+            self.stylethread = None
+            self.buildStyling(text, True, sync=True)
+            self.applyStyling(self.stylebytes)
+            self.stylebytes = None
+        else:
+            # Asynchronous styling
+            # This avoids further request from STC:
+            self.StartStyling(self.GetLength(), 0xff)  # len(text) may be != self.GetLength()
+            self.SetStyling(0, 0)
 
-        for re, style in WikiFormatting.FormatExpressions:
-            styleToApply = style
+            self.stylebytes = None
 
-            # if WikiWords are not enabled skip ahead
-            if not self.wikiWordsEnabled and style == WikiFormatting.FormatTypes.WikiWord:
-                continue
-            
-            match = re.search(text)
-            while match:
-                # make sure these positions don't intersect with positions that
-                # have already been styled. this guarantees that URL's can have wiki words.
-                if not self.checkForStyleIntersection(styledPositions, match.start(), match.end()):
-                    if style == WikiFormatting.FormatTypes.WikiWord or style == WikiFormatting.FormatTypes.WikiWord2:
-                        if wikiData.isWikiWord(match.group(0)):
-                            styleToApply = WikiFormatting.FormatTypes.AvailWikiWord
+            t = threading.Thread(target = self.buildStyling, args = (text, True))
+            self.stylethread = t
+            t.start()
+
+        # self.buildStyling(text, True)
+
+
+    def OnContextMenu(self, evt):
+        # Enable/Disable appropriate menu items
+        self.contextMenu.FindItemById(XRCID("txtUndo")).Enable(self.CanUndo())
+        self.contextMenu.FindItemById(XRCID("txtRedo")).Enable(self.CanRedo())
+
+        cancopy = self.GetSelectionStart() != self.GetSelectionEnd()
+        self.contextMenu.FindItemById(XRCID("txtDelete")).\
+                Enable(cancopy and self.CanPaste())
+        self.contextMenu.FindItemById(XRCID("txtCut")).\
+                Enable(cancopy and self.CanPaste())
+        self.contextMenu.FindItemById(XRCID("txtCopy")).Enable(cancopy)
+        self.contextMenu.FindItemById(XRCID("txtPaste")).Enable(self.CanPaste())
+
+        # Show menu
+        self.PopupMenu(self.contextMenu)
+
+
+    def buildStyling(self, text, withCamelCase, sync = False):
+        """
+        Unicode text
+        """
+        # print "buildStyling start", self.wikiWordsEnabled
+        if self.wikiWordsEnabled:
+            combre = WikiFormatting.CombinedWithCamelCaseRE
+        else:
+            combre = WikiFormatting.CombinedWithoutCamelCaseRE
+
+        charstylepos = 0  # styling position in characters in text
+        styleresult = []
+        textlen = len(text) # Text length (in characters)
+        wikiData = self.pWiki.wikiData
+
+        while true:
+            mat = combre.search(text, charstylepos)
+            if mat is None:
+                if charstylepos < textlen:
+                    bytestylelen = self.bytelenSct(text[charstylepos:])
+                    # print "styledefault1", charstylepos, bytestylelen
+                    styleresult.append(chr(WikiFormatting.FormatTypes.Default) * bytestylelen)
+                break
+
+            groupdict = mat.groupdict()
+            for m in groupdict.keys():
+                if not groupdict[m] is None:
+                    start, end = mat.span()
+                    styleno = int(m[5:])  # m is of the form:   style<style number>
+                    if charstylepos < start:
+                        bytestylelen = self.bytelenSct(text[charstylepos:start])
+                        # print "styledefault2", charstylepos, start, bytestylelen
+
+                        styleresult.append(chr(WikiFormatting.FormatTypes.Default) * bytestylelen)
+                        charstylepos = start
+
+                    if styleno == WikiFormatting.FormatTypes.WikiWord or \
+                            styleno == WikiFormatting.FormatTypes.WikiWord2:
+
+                        if wikiData.isDefinedWikiWord(mat.group(0)):
+                            styleno = WikiFormatting.FormatTypes.AvailWikiWord
                         else:
-                            styleToApply = WikiFormatting.FormatTypes.WikiWord
+                            styleno = WikiFormatting.FormatTypes.WikiWord
 
-                    self.StartStyling(match.start(), 0xff)
-                    self.SetStyling(match.end() - match.start(), styleToApply)
-                    styledPositions.append((match.start(), match.end()))
+                    bytestylelen = self.bytelenSct(text[charstylepos:end])
+                    # print "style3", charstylepos, start, end, bytestylelen, styleno
+                    styleresult.append(chr(styleno) * bytestylelen)
+                    charstylepos = end
+                    break
 
-                match = re.search(text, match.end())
+            if (not threading.currentThread() is self.stylethread) and not sync:
+                break
 
-        # sort the styled positions by start pos
-        styledPositions.sort(lambda (aStart, aEnd), (bStart, bEnd): cmp(aStart, bStart))
+        if (threading.currentThread() is self.stylethread) or sync:
+            self.stylebytes = "".join(styleresult)
 
-        # now restyle the sections not styled by the above code to
-        # the default style
-        start = 0
-        styledEnd = 0
-        for (styledStart, styledEnd) in styledPositions:
-            if styledStart > start:
-                self.StartStyling(start, 0xff)
-                self.SetStyling(styledStart - start, WikiFormatting.FormatTypes.Default)
-            start = styledEnd+1
+        # print "buildStyling end", type(self.stylebytes)
 
-        # style the rest of the doc
-        if styledEnd <= self.GetLength():            
-           self.StartStyling(styledEnd, 0xff)
-           self.SetStyling(self.GetLength() - styledEnd, WikiFormatting.FormatTypes.Default)
-    
-    def checkForStyleIntersection(self, styleList, start, end):
-        "true if start to end intersects with an existing applied style"
-        for (styleStart, styleEnd) in styleList:
-            if start >= styleStart and start <= styleEnd:
-                return True
-            if end <= styleEnd and end >= styleStart:
-                return True
-            if start < styleStart and end > styleEnd:
-                return True
-        return False
+
+    def applyStyling(self, stylebytes):
+        self.StartStyling(0, 0xff)
+        self.SetStyleBytes(len(stylebytes), stylebytes)
+
 
     def snip(self):
         # get the selected text
@@ -163,45 +395,44 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.Copy()
 
         # load the ScratchPad
-        try:        
+        try:
             wikiPage = self.pWiki.wikiData.getPage("ScratchPad", ["info"])
         except WikiWordNotFoundException, e:
             wikiPage = self.pWiki.wikiData.createPage("ScratchPad")
 
-        content = ""        
+        content = ""
 
         # get the text from the scratch pad
-        try:            
+        try:
             content = wikiPage.getContent()
         except WikiFileNotFoundException, e:
-            content = "++ Scratch Pad\n"
+            content = u"++ Scratch Pad\n"
 
-        content = "%s\n%s\n---------------------------\n\n%s\n" % (content, strftime("%x %I:%M %p"), text)
+        # TODO strftime
+        content = u"%s\n%s\n---------------------------\n\n%s\n" % \
+                (content, mbcsDec(strftime("%x %I:%M %p"))[0], text)
         wikiPage.save(content, False)
-        self.pWiki.statusBar.SetStatusText("Copied snippet to ScratchPad", 0)
+        self.pWiki.statusBar.SetStatusText(uniToGui("Copied snippet to ScratchPad"), 0)
 
     def styleSelection(self, styleChars):
-        (startPos, endPos) = self.GetSelection()
-        if startPos == endPos:
-            (startPos, endPos) = self.getNearestWordPositions()
+        """
+        Currently len(styleChars) must be 1.
+        """
+        (startBytePos, endBytePos) = self.GetSelection()
+        if startBytePos == endBytePos:
+            (startBytePos, endBytePos) = self.getNearestWordPositions()
+            
+        endBytePos = self.PositionAfter(endBytePos)
 
-        pos = self.GetCurrentPos()
-        self.GotoPos(startPos)
+        bytePos = self.PositionAfter(self.GetCurrentPos())
+        self.GotoPos(startBytePos)
         self.AddText(styleChars)
-        self.GotoPos(endPos+len(styleChars))
+        self.GotoPos(endBytePos)   # +len(styleChars)
         self.AddText(styleChars)
-        self.GotoPos(pos)        
+        self.GotoPos(bytePos)        
 
-    def wikiStyleSelection(self, styleChars, startPos=0, endPos=0):
-        if startPos == endPos:
-            (startPos, endPos) = self.getNearestWordPositions()
 
-        pos = self.GetCurrentPos()
-        self.GotoPos(startPos)
-        self.AddText(styleChars)
-        self.GotoPos(endPos+1)
-        self.AddText(styleChars)
-        self.GotoPos(pos)        
+
 
     def activateLink(self, mousePosition=None):
         "returns true if the link was activated"
@@ -210,7 +441,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if mousePosition:
             linkPos = self.PositionFromPoint(mousePosition)
 
-        inWikiWord = False        
+        inWikiWord = False
         if self.isPositionInWikiWord(linkPos):
             inWikiWord = True
         if not inWikiWord:
@@ -223,7 +454,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             searchStr = None
             (start, end) = self.getWikiWordBeginEnd(linkPos)
             if end+2 < self.GetLength():
-                if chr(self.GetCharAt(end+1)) == "#":
+                if chr(self.GetCharAt(end+1)) == "#":    # This may be a problem under rare circumstances
                     searchStr = self.GetTextRange(end+2, self.WordEndPosition(end+2, 1))
 
             # open the wiki page
@@ -232,7 +463,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             # if a search str was found execute the search
             if searchStr:
                 self.pWiki.editor.executeSearch(searchStr, 0)
-                
+
             return True
         elif self.isPositionInLink(linkPos):
             self.launchUrl(self.getTextInStyle(linkPos, WikiFormatting.FormatTypes.Url))
@@ -240,12 +471,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         return False
 
     def launchUrl(self, link):
-        match = WikiFormatting.UrlRE.match(link) 
+        match = WikiFormatting.UrlRE.match(link)
         try:
             os.startfile(match.group(1))
             return True
         except:
-            pass        
+            pass
         return False
 
     def evalScriptBlocks(self, index=-1):
@@ -262,109 +493,122 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             if self.pWiki.currentWikiPage.props.has_key("import_scripts"):
                 scripts = self.pWiki.currentWikiPage.props["import_scripts"]
                 for script in scripts:
-                    try:            
+                    try:
                         importPage = self.pWiki.wikiData.getPage(script, [])
                         content = importPage.getContent()
                         text = text + "\n" + content
                     except:
                         pass
-            
+
             match = WikiFormatting.ScriptRE.search(text)
             while(match):
-                script = re.sub("^[\r\n\s]+", "", match.group(1))
-                script = re.sub("[\r\n\s]+$", "", script)
-                try:                    
+                script = re.sub(u"^[\r\n\s]+", "", match.group(1))
+                script = re.sub(u"[\r\n\s]+$", "", script)
+                try:
                     if index == -1:
-                        script = re.sub("^\d:?\s?", "", script)
+                        script = re.sub(u"^\d:?\s?", "", script)
                         exec(script) in self.evalScope
                     elif index > 0 and script.startswith(str(index)):
-                        script = re.sub("^\d:?\s?", "", script)
+                        script = re.sub(u"^\d:?\s?", "", script)
                         exec(script) in self.evalScope
-                        
+
                 except Exception, e:
-                    self.AddText("\nException: %s" % str(e))                
-                    
+                    self.AddText(u"\nException: %s" % unicode(e))
+
                 match = WikiFormatting.ScriptRE.search(text, match.end())
         else:
             text = self.GetSelectedText()
             try:
-                result = eval(re.sub("[\n\r]", "", text))
+                result = eval(re.sub(u"[\n\r]", u"", text), self.evalScope)
             except Exception, e:
-                result = e
-                
+                s = StringIO()
+                traceback.print_exc(file=s)
+                result = s.getvalue()
+
             pos = self.GetCurrentPos()
             self.GotoPos(endPos)
-            self.AddText(" = %s" % str(result))
+            self.AddText(u" = %s" % unicode(result))
             self.GotoPos(pos)
 
-    def startIncrementalSearch(self, searchStr=''):
+    def startIncrementalSearch(self, searchStr=u''):
         self.SetFocus()
         self.searchStr = searchStr
-        self.pWiki.statusBar.SetStatusText("Search (ESC to stop): ", 0)    
-        self.searchStartPos = self.GetCurrentPos()
-        self.inIncrementalSearch = True
-        self.anchorPosition = -1
+        self.pWiki.statusBar.SetStatusText(uniToGui(u"Search (ESC to stop): "), 0)
+        self.searchCharStartPos = len(self.GetTextRange(0, self.GetCurrentPos()))
 
-    def executeSearch(self, searchStr=None, searchStartPos=-1, next=False, replacement=None, caseSensitive=False, cycleToStart=True):
+        self.inIncrementalSearch = True
+        self.anchorBytePosition = -1
+        self.anchorCharPosition = -1
+
+
+    # TODO char to byte mapping
+    def executeSearch(self, searchStr=None, searchCharStartPos=-1, next=False, replacement=None, caseSensitive=False, cycleToStart=True):
         if not searchStr:
             searchStr = self.searchStr
-        if searchStartPos < 0:
-            searchStartPos = self.searchStartPos
-            
-        self.pWiki.statusBar.SetStatusText("Search (ESC to stop): %s" % searchStr, 0)
-        if len(searchStr) > 0 and not searchStr.endswith("\\"):
-            text = self.GetText()
-            startPos = searchStartPos
-            if next and (self.anchorPosition != -1):
-                startPos = self.anchorPosition
+        if searchCharStartPos < 0:
+            searchCharStartPos = self.searchCharStartPos
+
+        self.pWiki.statusBar.SetStatusText(uniToGui(u"Search (ESC to stop): %s" % searchStr), 0)
+        text = self.GetText()
+        if len(searchStr) > 0:   # and not searchStr.endswith("\\"):
+            charStartPos = searchCharStartPos
+            if next and (self.anchorCharPosition != -1):
+                charStartPos = self.anchorCharPosition
 
             regex = None
-            if caseSensitive:
-                regex = re.compile(searchStr)
-            else:
-                regex = re.compile(searchStr, re.IGNORECASE)
-                
-            match = regex.search(text, startPos, self.GetLength())
-            if match:
-                self.anchorPosition = match.end()
-                self.SetSelection(match.start(), self.anchorPosition)
-                if replacement != None:
-                    self.ReplaceSelection(replacement)
-                    selEnd = match.start() + len(replacement)
-                    self.SetSelection(match.start(), selEnd)
-                    self.anchorPosition = selEnd
-                    return selEnd
+            try:
+                if caseSensitive:
+                    regex = re.compile(searchStr, re.MULTILINE | re.LOCALE)
                 else:
-                    return self.anchorPosition
-                    
-            elif startPos > 0 and cycleToStart:
-                match = regex.search(text, 0, startPos)
-                if match:
-                    self.anchorPosition = match.end()
-                    self.SetSelection(match.start(), self.anchorPosition)
-                    if replacement:
-                        self.ReplaceSelection(replacement)
-                        selEnd = match.start() + len(replacement)
-                        self.SetSelection(match.start(), selEnd)
-                        self.anchorPosition = selEnd
-                        return selEnd
-                    else:
-                        return self.anchorPosition
-        else:
-            self.SetSelection(-1, -1)
-            self.anchorPosition = -1
-            self.GotoPos(searchStartPos)
+                    regex = re.compile(searchStr, re.IGNORECASE | \
+                        re.MULTILINE | re.LOCALE)
+            except:
+                # Regex error
+                return self.anchorCharPosition
 
-        return -1            
+            match = regex.search(text, charStartPos, len(text))
+            if not match and charStartPos > 0 and cycleToStart:
+                match = regex.search(text, 0, charStartPos)
+
+            if match:
+                matchbytestart = self.bytelenSct(text[:match.start()])
+                self.anchorBytePosition = matchbytestart + \
+                        self.bytelenSct(text[match.start():match.end()])
+                self.anchorCharPosition = match.end()
+
+                self.SetSelection(matchbytestart, self.anchorBytePosition)
+
+                if replacement is not None:
+                    self.ReplaceSelection(replacement)
+                    selByteEnd = matchbytestart + self.bytelenSct(replacement)
+                    selCharEnd = match.start() + len(replacement)
+                    self.SetSelection(matchbytestart, selByteEnd)
+                    self.anchorBytePosition = selByteEnd
+                    self.anchorCharPosition = selCharEnd
+
+                    return selCharEnd
+                else:
+                    return self.anchorCharPosition
+
+        self.SetSelection(-1, -1)
+        self.anchorBytePosition = -1
+        self.anchorCharPosition = -1
+        self.GotoPos(self.bytelenSct(text[:searchCharStartPos]))
+
+        return -1
 
     def endIncrementalSearch(self):
-        self.pWiki.statusBar.SetStatusText("", 0)    
+        self.pWiki.statusBar.SetStatusText("", 0)
         self.inIncrementalSearch = False
-        self.anchorPosition = -1
+        self.anchorBytePosition = -1
+        self.anchorCharPosition = -1
 
+
+    # TODO UNICODE
+        
     def rewrapText(self):
         curPos = self.GetCurrentPos()
-        
+
         # search back for start of the para
         curLineNum = self.GetCurrentLine()
         curLine = self.GetLine(curLineNum)
@@ -390,7 +634,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 if (WikiFormatting.BulletRE.match(curLine) or WikiFormatting.NumericBulletRE.match(curLine)):
                     curLineNum = curLineNum - 1
                     break
-            
+
             if WikiFormatting.EmptyLineRE.match(curLine):
                 curLineNum = curLineNum - 1
                 break
@@ -408,8 +652,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             indent = self.GetLineIndentation(startLine)
             subIndent = indent
 
-            # if the start of the para is a bullet the subIndent has to change            
-            if WikiFormatting.BulletRE.match(self.GetLine(startLine)):                
+            # if the start of the para is a bullet the subIndent has to change
+            if WikiFormatting.BulletRE.match(self.GetLine(startLine)):
                 subIndent = indent + 2
             else:
                 match = WikiFormatting.NumericBulletRE.match(self.GetLine(startLine))
@@ -436,14 +680,16 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             # make the min wrapPosition 5
             if wrapPosition < 5:
                 wrapPosition = 5
-                
-            filledText = fill(text, wrapPosition, " " * indent, " " * subIndent)
+
+            filledText = fill(text, width=wrapPosition,
+                    initial_indent=u" " * indent, 
+                    subsequent_indent=u" " * subIndent)
             # replace the text based on targetting
             self.SetTargetStart(startPos)
             self.SetTargetEnd(endPos)
             self.ReplaceTarget(filledText)
             self.GotoPos(curPos)
-        
+
     def getWikiWordText(self, position):
         word = self.getTextInStyle(position, WikiFormatting.FormatTypes.WikiWord)
         if not word:
@@ -508,11 +754,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             return (startPos, endPos)
         else:
             return (-1, -1)
-            
-    def getNearestWordPositions(self, pos=None):
-        if not pos:
-            pos = self.GetCurrentPos()
-        return (self.WordStartPosition(pos, 1), self.WordEndPosition(pos, 1))
+
+    def getNearestWordPositions(self, bytepos=None):
+        if not bytepos:
+            bytepos = self.GetCurrentPos()
+        return (self.WordStartPosition(bytepos, 1), self.WordEndPosition(bytepos, 1))
 
     def OnChange(self, evt):
         if not self.ignoreOnChange:
@@ -521,12 +767,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def OnCharAdded(self, evt):
         "When the user presses enter reindent to the previous level"
         key = evt.GetKey()
-        
+
         if key == 10:
             currentLine = self.GetCurrentLine()
             if currentLine > 0:
                 previousLine = self.GetLine(currentLine-1)
-                
+
                 # check if the prev level was a bullet level
                 if (WikiFormatting.BulletRE.search(previousLine)):
                     self.AddText("%s* " % (" " * self.GetLineIndentation(currentLine-1)))
@@ -537,10 +783,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         prevNum = int(prevNumStr)
                         nextNum = prevNum+1
                         adjustment = len(str(nextNum)) - len(prevNumStr)
-                        
-                        self.AddText("%s%d. " % (" " * (self.GetLineIndentation(currentLine-1) - adjustment), int(prevNum)+1))
+
+                        self.AddText(u"%s%d. " % (u" " * (self.GetLineIndentation(currentLine-1) - adjustment), int(prevNum)+1))
                     else:
-                        self.AddText(" " * self.GetLineIndentation(currentLine-1))
+                        self.AddText(u" " * self.GetLineIndentation(currentLine-1))
+
 
     def OnKeyDown(self, evt):
         key = evt.GetKeyCode()
@@ -552,49 +799,32 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         else:
 
             # handle key presses while in incremental search here
-            if self.inIncrementalSearch:            
-                # support some shift chars for regex search
-                if evt.ShiftDown():
-                    if key == ord('/'):
-                        key = ord('?')
-                    elif key == ord('8'):
-                        key = ord('*')
-                    elif key == ord('\\'):
-                        key = ord('|')                            
-                    elif key == ord('9'):
-                        key = ord('(')                            
-                    elif key == ord('0'):
-                        key = ord(')')                            
-                    elif key == ord('='):
-                        key = ord('+')                            
-                    elif key == ord('-'):
-                        key = ord('_')                            
-                    elif key == ord('6'):
-                        key = ord('^')                            
-                    elif key == ord('\''):
-                        key = ord('"')                            
-                
+            if self.inIncrementalSearch:
                 if key < 256:
                     # escape ends the search
                     if key == WXK_ESCAPE:
                         self.endIncrementalSearch()
                     # do the next search on another ctrl-s, or f
                     elif evt.ControlDown() and (key == ord('S') or key == ord('F')):
-                        self.executeSearch(next=True)                
+                        self.executeSearch(next=True)
                     # handle the delete key
                     elif key == WXK_BACK or key == WXK_DELETE:
                         self.searchStr = self.searchStr[:len(self.searchStr)-1]
-                        self.executeSearch();                            
+                        self.executeSearch();
                     # handle the other keys
                     else:
-                        self.searchStr = self.searchStr + chr(key).lower()
-                        self.executeSearch();
+                        evt.Skip() # OnChar is responsible for that
+
                 elif key == WXK_F3:
-                    self.executeSearch(next=True)                
+                    self.executeSearch(next=True)
                 else:
-                    self.anchorPosition = self.GetCurrentPos()
+                    # TODO Should also work for mouse!
+                    self.anchorBytePosition = self.GetCurrentPos()
+                    self.anchorCharPosition = \
+                            len(self.GetTextRange(0, self.GetCurrentPos()))
+
                     evt.Skip()
-                    
+
             elif evt.ControlDown():
                 (selectStart, selectEnd) = self.GetSelection()
 
@@ -604,16 +834,16 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
                 elif key == WXK_SPACE:
                     pos = self.GetCurrentPos()
-                    (startPos, endPos) = self.getNearestWordPositions()                                            
+                    (startPos, endPos) = self.getNearestWordPositions()
                     nearestWord = self.GetTextRange(startPos, endPos)
 
                     if (startPos-1) > 0 and self.GetCharAt(startPos-1) == ord('['):
-                        nearestWord = "[" + nearestWord
+                        nearestWord = u"[" + nearestWord
                         startPos = startPos-1
 
                     if len(nearestWord) > 0:
                         wikiWords = self.pWiki.wikiData.getWikiWordsStartingWith(nearestWord, True)
-                        
+
                         if len(wikiWords) > 0:
                             wordListAsStr = string.join(wikiWords, "~")
                             self.AutoCompShow(pos-startPos, wordListAsStr)
@@ -629,14 +859,31 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         if curLine.find("[") != -1:
                             props = self.pWiki.wikiData.getPropertyNames()
                             self.AutoCompShow(pos-startPos, string.join(props, "~"))
-                            
+
                 elif key == WXK_RETURN:
                     self.activateLink()
                 else:
                     evt.Skip()
-                    
+
             else:
                 evt.Skip()
+
+
+    def OnChar(self, evt):
+        key = evt.GetKeyCode()
+        # handle key presses while in incremental search here
+        if self.inIncrementalSearch and key < WXK_START and key > 31 and \
+                not evt.ControlDown():
+
+            if isUnicode():
+                self.searchStr += unichr(evt.GetUnicodeKey())
+            else:
+                self.searchStr += mbcsDec(chr(key))[0]
+
+            self.executeSearch();
+        else:
+            evt.Skip()
+
 
     def OnClick(self, evt):
         if evt.ControlDown():
@@ -646,7 +893,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 evt.Skip()
         else:
             evt.Skip()
-        
+
     def OnDoubleClick(self, evt):
         x = evt.GetX()
         y = evt.GetY()
@@ -654,11 +901,22 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             evt.Skip()
 
     def OnMouseMove(self, evt):
-        linkPos = self.PositionFromPoint(wxPoint(evt.GetX(), evt.GetY()))
-        if evt.ControlDown() and (self.isPositionInWikiWord(linkPos) or self.isPositionInLink(linkPos)):
-            self.pWiki.SetCursor(wxStockCursor(wxCURSOR_HAND))
-        else:
+        if (not evt.ControlDown()) or evt.Dragging():
+            # self.SetCursor(WikiTxtCtrl.CURSOR_IBEAM)
             evt.Skip()
+            return
+        else:
+            textPos = self.PositionFromPoint(evt.GetPosition())
+
+            if (self.isPositionInWikiWord(textPos) or
+                        self.isPositionInLink(textPos)):
+                self.SetCursor(WikiTxtCtrl.CURSOR_HAND)
+                return
+            else:
+                # self.SetCursor(WikiTxtCtrl.CURSOR_IBEAM)
+                evt.Skip()
+                return
+
 
     def OnIdle(self, evt):
         if (self.IsEnabled):
@@ -666,9 +924,15 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             currentLine = self.GetCurrentLine()+1
             currentPos = self.GetCurrentPos()
             currentCol = self.GetColumn(currentPos)
-            self.pWiki.statusBar.SetStatusText("Line: %d Col: %d Pos: %d" %
-                                            (currentLine, currentCol, currentPos), 1)        
-        
+            self.pWiki.statusBar.SetStatusText(uniToGui(u"Line: %d Col: %d Pos: %d" %
+                                            (currentLine, currentCol, currentPos)), 1)
+            stylebytes = self.stylebytes
+            self.stylebytes = None
+
+            if stylebytes:
+                self.applyStyling(stylebytes)
+
+
     def OnDestroy(self, evt):
         # This is how the clipboard contents can be preserved after
         # the app has exited.
@@ -676,15 +940,109 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         evt.Skip()
 
 
-class WikiTxtCtrlDropTarget(wxFileDropTarget):
+    # TODO !!!!!!!!!!!!!
+#     def setMouseCursor(self):
+#         """
+#         Set the right mouse cursor depending on some circumstances.
+#         Returns True iff a special cursor was choosen.
+#         """
+#         mousePos = wxGetMousePosition()
+#         mouseBtnPressed = wxGetKeyState(WXK_LBUTTON) or \
+#                 wxGetKeyState(WXK_MBUTTON) or \
+#                 wxGetKeyState(WXK_RBUTTON)
+# 
+#         ctrlPressed = wxGetKeyState(WXK_CONTROL)
+# 
+#         if (not ctrlPressed) or mouseBtnPressed:
+#             self.SetCursor(WikiTxtCtrl.CURSOR_IBEAM)
+#             return False
+#         else:
+#             linkPos = self.PositionFromPoint(wxPoint(*self.ScreenToClientXY(*mousePos)))
+# 
+#             if (self.isPositionInWikiWord(linkPos) or
+#                         self.isPositionInLink(linkPos)):
+#                 self.SetCursor(WikiTxtCtrl.CURSOR_HAND)
+#                 return True
+#             else:
+#                 self.SetCursor(WikiTxtCtrl.CURSOR_IBEAM)
+#                 return False
+
+
+
+# Already defined in WikiTreeCtrl
+def _getTextForNode(text):
+    if text.startswith("["):
+        return text[1:len(text)-1]
+    return text
+
+
+# sorter for relations, removes brackets and sorts lower case
+# Already defined in WikiTreeCtrl
+def _removeBracketsAndSort(a, b):
+    a = _getTextForNode(a)
+    b = _getTextForNode(b)
+    return cmp(a.lower(), b.lower())
+
+
+class WikiTxtCtrlDropTarget(wxPyDropTarget):
     def __init__(self, editor):
-        wxFileDropTarget.__init__(self)
+        wxPyDropTarget.__init__(self)
+
         self.editor = editor
+        self.resetDObject()
+
+    def resetDObject(self):
+        """
+        (Re)sets the dataobject at init and after each drop
+        """
+        dataob = wxDataObjectComposite()
+        self.tobj = wxTextDataObject()  # Char. type depends on wxPython build
+        dataob.Add(self.tobj)
+        self.fobj = wxFileDataObject()
+        dataob.Add(self.fobj)
+
+        self.dataob = dataob
+        self.SetDataObject(dataob)
+
+##    def OnDrop(self, x, y):
+##        return 1
+
+
+    def OnDragOver(self, x, y, defresult):
+        return self.editor.DoDragOver(x, y, defresult)
+
+
+    def OnData(self, x, y, defresult):
+        try:
+            if self.GetData():
+                data = self.dataob
+                formats = data.GetAllFormats()
+
+                fnames = self.fobj.GetFilenames()
+                text = self.tobj.GetText()
+
+                if fnames:
+                    self.OnDropFiles(x, y, fnames)
+                elif text:
+                    self.OnDropText(x, y, text)
+
+            return defresult
+
+        finally:
+            self.resetDObject()
+
+
+
+    def OnDropText(self, x, y, text):
+        self.editor.DoDropText(x, y, text)
 
     def OnDropFiles(self, x, y, filenames):
+        urls = []
         for file in filenames:
             url = urllib.pathname2url(file)
             if file.endswith(".wiki"):
-                self.editor.AddText("wiki:%s" % url)
+                urls.append("wiki:%s" % url)
             else:
-                self.editor.AddText("file:%s" % url)
+                urls.append("file:%s" % url)
+
+        self.editor.DoDropText(x, y, " ".join(urls))

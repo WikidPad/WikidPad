@@ -20,6 +20,7 @@ UpHistory="Ctrl-Alt-Up"
 DownHistory="Ctrl-Alt-Down"
 GoBack="Ctrl-Alt-Left"
 GoForward="Ctrl-Alt-Right"
+GoHome="Ctrl-Q"
 Bold="Ctrl-B"
 Italic="Ctrl-I"
 Heading="Ctrl-Alt-H"
@@ -32,18 +33,19 @@ Redo="Ctrl-Y"
 ZoomIn=""
 ZoomOut=""
 FindAndReplace="Ctrl-R"
+ReplaceTextByWikiword="Ctrl-Shift-R"
 RewrapText="Ctrl-W"
 Eval="Ctrl-E"
 InsertDate="Ctrl-Alt-D"
 
 def makeBold(editor):
-    editor.styleSelection('*')
+    editor.styleSelection(u'*')
 
 def makeItalic(editor):
-    editor.styleSelection('_')
+    editor.styleSelection(u'_')
 
 def addHeading(editor):
-    pos = editor.GetCurrentPos()
+    bytePos = editor.PositionAfter(editor.GetCurrentPos())
     editor.CmdKeyExecute(wxSTC_CMD_HOME)
-    editor.AddText('+')
-    editor.GotoPos(pos)
+    editor.AddText(u'+')
+    editor.GotoPos(bytePos)

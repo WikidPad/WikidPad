@@ -1,18 +1,95 @@
-import ConfigParser
-import os
+from Configuration import createConfiguration
+import os, gc, traceback
 from os.path import *
-from time import localtime, time
+from time import localtime, time, strftime
 
 from wxPython.wx import *
 from wxPython.stc import *
 from wxPython.html import *
+from wxHelper import GUI_ID
 
 from WikiData import *
 from WikiTxtCtrl import *
 from WikiTreeCtrl import *
+from AdditionalDialogs import *
 from Exporters import *
+from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc
 import WikiFormatting
-from Config import *
+
+
+_COLORS = [
+    "AQUAMARINE",
+    "BLACK",
+    "BLUE VIOLET",
+    "BLUE",
+    "BROWN",
+    "CADET BLUE",
+    "CORAL",
+    "CORNFLOWER BLUE",
+    "CYAN",
+    "DARK GREEN",
+    "DARK GREY",
+    "DARK OLIVE GREEN",
+    "DARK ORCHID",
+    "DARK SLATE BLUE",
+    "DARK SLATE GREY",
+    "DARK TURQUOISE",
+    "DIM GREY",
+    "FIREBRICK",
+    "FOREST GREEN",
+    "GOLD",
+    "GOLDENROD",
+    "GREEN YELLOW",
+    "GREEN",
+    "GREY",
+    "INDIAN RED",
+    "KHAKI",
+    "LIGHT BLUE",
+    "LIGHT GREY",
+    "LIGHT STEEL BLUE",
+    "LIME GREEN",
+    "MAGENTA",
+    "MAROON",
+    "MEDIUM AQUAMARINE",
+    "MEDIUM BLUE",
+    "MEDIUM FOREST GREEN",
+    "MEDIUM GOLDENROD",
+    "MEDIUM ORCHID",
+    "MEDIUM SEA GREEN",
+    "MEDIUM SLATE BLUE",
+    "MEDIUM SPRING GREEN",
+    "MEDIUM TURQUOISE",
+    "MEDIUM VIOLET RED",
+    "MIDNIGHT BLUE",
+    "NAVY",
+    "ORANGE RED",
+    "ORANGE",
+    "ORCHID",
+    "PALE GREEN",
+    "PINK",
+    "PLUM",
+    "PURPLE",
+    "RED",
+    "SALMON",
+    "SEA GREEN",
+    "SIENNA",
+    "SKY BLUE",
+    "SLATE BLUE",
+    "SPRING GREEN",
+    "STEEL BLUE",
+    "TAN",
+    "THISTLE",
+    "TURQUOISE",
+    "VIOLET RED",
+    "VIOLET",
+    "WHEAT",
+    "WHITE",
+    "YELLOW GREEN",
+    "YELLOW"
+]
+
+
+
 
 class PersonalWikiFrame(wxFrame):
     def __init__(self, parent, id, title, wikiToOpen, wikiWordToOpen):
@@ -22,12 +99,13 @@ class PersonalWikiFrame(wxFrame):
         # where is the WikidPad.config file
         globalConfigDir = None
         self.wikiAppDir = None
-        
+        self.sleepMode = False  # Is program in low resource sleep mode?
+
         try:
             self.wikiAppDir = dirname(abspath(sys.argv[0]))
             if not self.wikiAppDir:
                 self.wikiAppDir = "C:\Program Files\WikidPad"
-            
+
             homeDir = os.environ.get("HOME")
             if homeDir and exists(homeDir):
                 globalConfigDir = homeDir
@@ -36,7 +114,7 @@ class PersonalWikiFrame(wxFrame):
                 if user:
                     homeDir = "c:\Documents And Settings\%s" % user
                     if homeDir and exists(homeDir):
-                        globalConfigDir = homeDir                
+                        globalConfigDir = homeDir
         except Exception, e:
             self.displayErrorMessage("Error initializing environment", e)
 
@@ -49,17 +127,18 @@ class PersonalWikiFrame(wxFrame):
         if not globalConfigDir or not exists(globalConfigDir):
             self.displayErrorMessage("Error initializing environment, couldn't locate global config directory", "Shutting Down")
             self.Close()
-            
+
+
         # initialize some variables
         self.globalConfigDir = globalConfigDir
         self.globalConfigLoc = join(globalConfigDir, "WikidPad.config")
-        self.globalConfig = ConfigParser.ConfigParser()
+        self.configuration = createConfiguration()
+
         self.wikiPadHelp = join(self.wikiAppDir, 'WikidPadHelp', 'WikidPadHelp.wiki')
 
         # defaults
-        self.config = None
         self.wikiData = None
-        self.wikiConfigFile = None
+        self.wikiConfigFilename = None
         self.currentWikiWord = None
         self.currentWikiPage = None
         self.historyPosition = 0
@@ -74,25 +153,26 @@ class PersonalWikiFrame(wxFrame):
         # initialize the wiki syntax
         WikiFormatting.initialize(self.wikiSyntax)
 
-        # trigger hook            
+        # trigger hook
         self.wikidPadHooks.startup(self)
 
         # if it already exists read it in
-        if (exists(self.globalConfigLoc)):            
-            self.globalConfig.read(self.globalConfigLoc)
+        if (exists(self.globalConfigLoc)):
+            self.configuration.loadGlobalConfig(self.globalConfigLoc)
         else:
             self.createDefaultGlobalConfig()
 
         # wiki history
-        if (self.globalConfig.has_option("main", "wiki_history")):
-            self.wikiHistory = self.globalConfig.get("main", "wiki_history").split(";")
+        history = self.configuration.get("main", "wiki_history")
+        if history:
+            self.wikiHistory = history.split(";")
 
         # resize the window to the last position/size
         screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
         screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
 
-        sizeX = int(self.globalConfig.get("main", "size_x"))
-        sizeY = int(self.globalConfig.get("main", "size_y"))
+        sizeX = self.configuration.getint("main", "size_x")
+        sizeY = self.configuration.getint("main", "size_y")
 
         # don't let the window be > than the size of the screen
         if sizeX > screenX:
@@ -103,8 +183,8 @@ class PersonalWikiFrame(wxFrame):
         # set the size
         self.SetSize(wxSize(sizeX, sizeY))
 
-        currentX = int(self.globalConfig.get("main", "pos_x"))
-        currentY = int(self.globalConfig.get("main", "pos_y"))
+        currentX = self.configuration.getint("main", "pos_x")
+        currentY = self.configuration.getint("main", "pos_y")
 
         # fix any crazy screen positions
         if currentX < 0:
@@ -115,40 +195,35 @@ class PersonalWikiFrame(wxFrame):
             currentX = screenX-100
         if currentY > screenY:
             currentY = screenY-100
-        
+
         self.SetPosition(wxPoint(currentX, currentY))
 
+        # Should reduce resources usage (less icons)
+        # Do not set self.lowResources after initialization here!
+        self.lowResources = self.configuration.getboolean("main", "lowresources")
+
         # get the wrap mode setting
-        self.wrapMode = True
-        if (self.globalConfig.has_option("main", "wrap_mode")):
-            self.wrapMode = self.globalConfig.getboolean("main", "wrap_mode")
+        self.wrapMode = self.configuration.getboolean("main", "wrap_mode")
 
         # get the position of the splitter
-        self.lastSplitterPos = 170
-        if (self.globalConfig.has_option("main", "splitter_pos")):
-            self.lastSplitterPos = int(self.globalConfig.get("main", "splitter_pos"))
+        self.lastSplitterPos = self.configuration.getint("main", "splitter_pos")
 
         # is autosave on
-        self.autoSave = True
-        if (self.globalConfig.has_option("main", "auto_save")):
-            self.autoSave = self.globalConfig.getboolean("main", "auto_save")
+#         self.autoSave = True
+#         if (self.globalConfig.has_option("main", "auto_save")):
+#             self.autoSave = self.globalConfig.getboolean("main", "auto_save")
 
         # are indentationGuides enabled
-        self.indentationGuides = True
-        if (self.globalConfig.has_option("main", "indentation_guides")):
-            self.indentationGuides = self.globalConfig.getboolean("main", "indentation_guides")
-        
-        # set the locale
+        self.indentationGuides = self.configuration.getboolean("main", "indentation_guides")
+
+        # set the locale  # TODO Why?
         locale = wxLocale()
         self.locale = locale.GetCanonicalName()
 
-        # initialize the GUI
-        self.initializeGui()
 
         # get the default font for the editor
-        self.defaultEditorFont = faces["mono"]
-        if (self.globalConfig.has_option("main", "font")):
-            self.defaultEditorFont = self.globalConfig.get("main", "font")
+        self.defaultEditorFont = self.configuration.get("main", "font",
+                self.presentationExt.faces["mono"])
 
         # this will keep track of the last font used in the editor
         self.lastEditorFont = None
@@ -156,82 +231,125 @@ class PersonalWikiFrame(wxFrame):
         # should WikiWords be enabled or not for the current wiki
         self.wikiWordsEnabled = True
 
-        # if a wiki to open wasn't passed in used the last_wiki from the global config
+        # if a wiki to open wasn't passed in use the last_wiki from the global config
         if not wikiToOpen:
-            if self.globalConfig.has_option("main", "last_wiki"):
-                wikiToOpen = self.globalConfig.get("main", "last_wiki")
+            wikiToOpen = self.configuration.get("main", "last_wiki")
 
-        # if a wiki to open is set open it
+        # initialize the GUI
+        self.initializeGui()
+
+        # Minimize on tray?
+        ## self.showOnTray = self.globalConfig.getboolean("main", "showontray")
+
+        self.tbIcon = None
+        self.setShowOnTray()
+
+        # windowmode:  0=normal, 1=maximized, 2=iconized, 3=maximized iconized(doesn't work)
+        windowmode = self.configuration.getint("main", "windowmode")
+
+        if windowmode & 1:
+            self.Maximize(True)
+        if windowmode & 2:
+            self.Iconize(True)
+
+        # if a wiki to open is set, open it
         if wikiToOpen:
             if exists(wikiToOpen):
                 self.openWiki(wikiToOpen, wikiWordToOpen)
             else:
-                self.statusBar.SetStatusText("Couldn't open last wiki: %s" % wikiToOpen, 0)
+                self.statusBar.SetStatusText(
+                        uniToGui(u"Couldn't open last wiki: %s" % wikiToOpen), 0)
 
         # set the focus to the editor
         if self.vertSplitter.GetSashPosition() < 2:
             self.editor.SetFocus()
-        
+
+        # display the window
+        ## if not (self.showOnTray and self.IsIconized()):
+        self.Show(True)
+
+        if self.lowResources and self.IsIconized():
+            self.resourceSleep()
+
+
     def loadExtensions(self):
         self.wikidPadHooks = self.getExtension('WikidPadHooks', 'WikidPadHooks.py')
         self.keyBindings = self.getExtension('KeyBindings', 'KeyBindings.py')
         self.evalLib = self.getExtension('EvalLibrary', 'EvalLibrary.py')
         self.wikiSyntax = self.getExtension('SyntaxLibrary', 'WikiSyntax.py')
+        self.presentationExt = self.getExtension('Presentation', 'Presentation.py')
 
     def getExtension(self, extensionName, fileName):
         extensionFileName = join(self.wikiAppDir, 'user_extensions', fileName)
         if not exists(extensionFileName):
             extensionFileName = join(self.wikiAppDir, 'extensions', fileName)
         extensionFile = open(extensionFileName)
-        return importCode(extensionFile, extensionName)        
+        return importCode(extensionFile, extensionName)
 
     def createDefaultGlobalConfig(self):
-        self.globalConfig.add_section("main")
-        self.globalConfig.set("main", "wiki_history", self.wikiPadHelp)
-        self.globalConfig.set("main", "last_wiki", self.wikiPadHelp)
+        self.configuration.createEmptyGlobalConfig(self.globalConfigLoc)
+        self.configuration.fillGlobalWithDefaults()
+
+        self.configuration.set("main", "wiki_history", self.wikiPadHelp)
+        self.configuration.set("main", "last_wiki", self.wikiPadHelp)
         curSize = self.GetSize()
-        self.globalConfig.set("main", "size_x", str(curSize.x))
-        self.globalConfig.set("main", "size_y", str(curSize.y))
+        self.configuration.set("main", "size_x", str(curSize.x))
+        self.configuration.set("main", "size_y", str(curSize.y))
         curPos = self.GetPosition()
-        self.globalConfig.set("main", "pos_x", str(curPos.x))
-        self.globalConfig.set("main", "pos_y", str(curPos.y))
-        self.globalConfig.set("main", "splitter_pos", '170')
-        self.globalConfig.set("main", "zoom", '0')
-        self.globalConfig.set("main", "last_active_dir", os.getcwd())
-        self.globalConfig.set("main", "font", "Courier New")
-        self.globalConfig.set("main", "wrap_mode", "0")
-        self.globalConfig.set("main", "auto_save", "1")
-        self.globalConfig.set("main", "indentation_guides", "1")
+        self.configuration.set("main", "pos_x", str(curPos.x))
+        self.configuration.set("main", "pos_y", str(curPos.y))
+        self.configuration.set("main", "last_active_dir", os.getcwd())
 
-    def initializeGui(self):
-        "initializes the gui environment"
 
-        # ------------------------------------------------------------------------------------
-        # load the icons the program will use
-        # ------------------------------------------------------------------------------------
+    def fillIconLookup(self, createIconImageList=False):
+        """
+        Fills or refills the self.iconLookup (if createIconImageList is
+        false, it must exist already)
+        If createIconImageList is true, self.iconImageList is also
+        built
+        """
 
-        # add the gif handler for gif icon support
-        wxImage_AddHandler(wxGIFHandler())
-        # create the image icon list
-        iconList = wxImageList(16, 16)
-        # default icon is page.gif
-        icons = ['page.gif']
-        # add the rest of the icons
-        icons.extend([file for file in os.listdir(join(self.wikiAppDir, "icons"))
-                      if file.endswith('.gif') and file != 'page.gif'])
+        if createIconImageList:
+            # create the image icon list
+            self.iconImageList = wxImageList(16, 16)
+            self.iconLookup = {}
 
-        for icon in icons:
+        for icon in self.iconFileList:
             iconFile = join(self.wikiAppDir, "icons", icon)
             bitmap = wxBitmap(iconFile, wxBITMAP_TYPE_GIF)
             try:
-                id = iconList.Add(bitmap, wxNullBitmap)
-                if id >= 0:
-                    self.iconLookup[icon.replace('.gif', '')] = (id, bitmap)
-                else:
-                    sys.stderr.write("couldn't load icon %s\n" % iconFile)
+                id = -1
+                if createIconImageList:
+                    id = self.iconImageList.Add(bitmap, wxNullBitmap)
+
+                if self.lowResources and not icon.startswith("tb_"):
+                    bitmap = None
+
+                iconname = icon.replace('.gif', '')
+                if id == -1:
+                    id = self.iconLookup[iconname][0]
+
+                self.iconLookup[iconname] = (id, bitmap)
             except Exception, e:
+                traceback.print_exc()
                 sys.stderr.write("couldn't load icon %s\n" % iconFile)
 
+
+    def addMenuItem(self, menu, label, text, evtfct, iconname=None, menuID=None):
+        if menuID is None:
+            menuID = wxNewId()
+
+        menuitem = wxMenuItem(menu, menuID, label, text)
+        if iconname:  # (not self.lowResources) and
+            (id, bitmap) = self.iconLookup[iconname]
+            menuitem.SetBitmap(bitmap)
+
+        menu.AppendItem(menuitem)
+        EVT_MENU(self, menuID, evtfct)
+        return menuitem
+
+
+    def buildMainMenu(self):
         # ------------------------------------------------------------------------------------
         # Set up menu bar for the program.
         # ------------------------------------------------------------------------------------
@@ -239,13 +357,11 @@ class PersonalWikiFrame(wxFrame):
 
         wikiMenu=wxMenu()
 
-        menuID=wxNewId()
-        wikiMenu.Append(menuID, '&New\t' + self.keyBindings.NewWiki, 'New Wiki')
-        EVT_MENU(self, menuID, self.OnWikiNew)
+        self.addMenuItem(wikiMenu, '&New\t' + self.keyBindings.NewWiki,
+                'New Wiki', self.OnWikiNew)
 
-        menuID=wxNewId()
-        wikiMenu.Append(menuID, '&Open\t' + self.keyBindings.OpenWiki, 'Open Wiki')
-        EVT_MENU(self, menuID, self.OnWikiOpen)
+        self.addMenuItem(wikiMenu, '&Open\t' + self.keyBindings.OpenWiki,
+                'Open Wiki', self.OnWikiOpen)
 
         self.recentWikisMenu = wxMenu()
         wikiMenu.AppendMenu(wxNewId(), '&Recent', self.recentWikisMenu)
@@ -258,12 +374,10 @@ class PersonalWikiFrame(wxFrame):
 
         wikiMenu.AppendSeparator()
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(wikiMenu, menuID, '&Search Wiki\t' + self.keyBindings.SearchWiki, 'Search Wiki')
-        (id, bitmap) = self.iconLookup["tb_lens"]
-        menuItem.SetBitmap(bitmap)
-        wikiMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.showSearchDialog())
+        self.addMenuItem(wikiMenu, '&Search Wiki\t' + self.keyBindings.SearchWiki,
+                'Search Wiki', lambda evt: self.showSearchDialog(),
+                "tb_lens")
+
 
         menuID=wxNewId()
         wikiMenu.Append(menuID, '&View Saved Searches', 'View Saved Searches')
@@ -276,16 +390,20 @@ class PersonalWikiFrame(wxFrame):
         wikiMenu.AppendSeparator()
 
         menuID=wxNewId()
-        showTreeCtrlMenuItem = wxMenuItem(wikiMenu, menuID, "&Show Tree Control\t" + self.keyBindings.ShowTreeControl, "Show Tree Control", wxITEM_CHECK)
-        wikiMenu.AppendItem(showTreeCtrlMenuItem)
-        EVT_MENU(self, menuID, lambda evt: self.setShowTreeControl(showTreeCtrlMenuItem.IsChecked()))
+        self.showTreeCtrlMenuItem = wxMenuItem(wikiMenu, menuID, "&Show Tree Control\t" + self.keyBindings.ShowTreeControl, "Show Tree Control", wxITEM_CHECK)
+        wikiMenu.AppendItem(self.showTreeCtrlMenuItem)
+        EVT_MENU(self, menuID, lambda evt: self.setShowTreeControl(self.showTreeCtrlMenuItem.IsChecked()))
 
-        menuID=wxNewId()
-        autoSaveMenuItem = wxMenuItem(wikiMenu, menuID, "Auto Save Enabled", "Auto Save Enabled", wxITEM_CHECK)
-        wikiMenu.AppendItem(autoSaveMenuItem)
-        EVT_MENU(self, menuID, lambda evt: self.setAutoSave(autoSaveMenuItem.IsChecked()))
+
+        self.addMenuItem(wikiMenu, 'O&ptions',
+                'Set Options', lambda evt: self.showOptionsDialog())
 
         wikiMenu.AppendSeparator()
+
+#         menuID=wxNewId()
+#         wikiMenu.Append(menuID, 'Export Dialog', 'Export  Dialog')
+#         EVT_MENU(self, menuID, lambda evt: self.showExportDialog())
+
 
         exportWikisMenu = wxMenu()
         wikiMenu.AppendMenu(wxNewId(), 'Export', exportWikisMenu)
@@ -326,40 +444,25 @@ class PersonalWikiFrame(wxFrame):
 
         wikiWordMenu=wxMenu()
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(wikiWordMenu, menuID, '&Open\t' + self.keyBindings.OpenWikiWord, 'Open Wiki Word')
-        (id, bitmap) = self.iconLookup["tb_doc"]
-        menuItem.SetBitmap(bitmap)
-        wikiWordMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.showWikiWordOpenDialog())
+        self.addMenuItem(wikiWordMenu, '&Open\t' + self.keyBindings.OpenWikiWord,
+                'Open Wiki Word', lambda evt: self.showWikiWordOpenDialog(),
+                "tb_doc")
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(wikiWordMenu, menuID, '&Save\t' + self.keyBindings.Save, 'Save Current Wiki Word')
-        (id, bitmap) = self.iconLookup["tb_save"]
-        menuItem.SetBitmap(bitmap)
-        wikiWordMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.saveCurrentWikiPage())
+        self.addMenuItem(wikiWordMenu, '&Save\t' + self.keyBindings.Save,
+                'Save Current Wiki Word', lambda evt: (self.saveCurrentWikiPage(), self.wikiData.commit()),
+                "tb_save")
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(wikiWordMenu, menuID, '&Rename\t' + self.keyBindings.Rename, 'Rename Current Wiki Word')
-        (id, bitmap) = self.iconLookup["tb_rename"]
-        menuItem.SetBitmap(bitmap)
-        wikiWordMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.showWikiWordRenameDialog())
+        self.addMenuItem(wikiWordMenu, '&Rename\t' + self.keyBindings.Rename,
+                'Rename Current Wiki Word', lambda evt: self.showWikiWordRenameDialog(),
+                "tb_rename")
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(wikiWordMenu, menuID, '&Delete\t' + self.keyBindings.Delete, 'Delete Wiki Word')
-        (id, bitmap) = self.iconLookup["tb_delete"]
-        menuItem.SetBitmap(bitmap)
-        wikiWordMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.showWikiWordDeleteDialog())
+        self.addMenuItem(wikiWordMenu, '&Delete\t' + self.keyBindings.Delete,
+                'Delete Wiki Word', lambda evt: self.showWikiWordDeleteDialog(),
+                "tb_delete")
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(wikiWordMenu, menuID, 'Add Bookmark\t' + self.keyBindings.AddBookmark, 'Add Bookmark to Page')
-        (id, bitmap) = self.iconLookup["pin"]
-        menuItem.SetBitmap(bitmap)
-        wikiWordMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.insertAttribute("bookmarked", "true"))
+        self.addMenuItem(wikiWordMenu, 'Add Bookmark\t' + self.keyBindings.AddBookmark,
+                'Add Bookmark to Page', lambda evt: self.insertAttribute("bookmarked", "true"),
+                "tb_pin")
 
         wikiWordMenu.AppendSeparator()
 
@@ -372,19 +475,22 @@ class PersonalWikiFrame(wxFrame):
         EVT_MENU(self, menuID, lambda evt: self.viewParents(self.currentWikiWord))
 
         menuID=wxNewId()
-        wikiWordMenu.Append(menuID, '&View Parentless Nodes\t' + self.keyBindings.ViewParentless, 'View nodes with no parent relations')
+        wikiWordMenu.Append(menuID, 'View &Parentless Nodes\t' + self.keyBindings.ViewParentless, 'View nodes with no parent relations')
         EVT_MENU(self, menuID, lambda evt: self.viewParentLess())
 
         menuID=wxNewId()
-        wikiWordMenu.Append(menuID, '&View Children\t' + self.keyBindings.ViewChildren, 'View Children Of Current Wiki Word')
+        wikiWordMenu.Append(menuID, 'View &Children\t' + self.keyBindings.ViewChildren, 'View Children Of Current Wiki Word')
         EVT_MENU(self, menuID, lambda evt: self.viewChildren(self.currentWikiWord))
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(wikiWordMenu, menuID, 'Synchronize with tree', 'Find the current wiki word in the tree')
-        (id, bitmap) = self.iconLookup["tb_cycle"]
-        menuItem.SetBitmap(bitmap)
-        wikiWordMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.findCurrentWordInTree())
+# TODO
+#         self.addMenuItem(wikiWordMenu, 'Set As &Root\t' + self.keyBindings.SetAsRoot,
+#                 'Set current wiki word as tree root',
+#                 lambda evt: self.setCurrentWordAsRoot())
+
+        self.addMenuItem(wikiWordMenu, 'S&ynchronize with tree',
+                'Find the current wiki word in the tree', lambda evt: self.findCurrentWordInTree(),
+                "tb_cycle")
+
 
         historyMenu=wxMenu()
 
@@ -400,91 +506,69 @@ class PersonalWikiFrame(wxFrame):
         historyMenu.Append(menuID, '&Down History\t' + self.keyBindings.DownHistory, 'Down History')
         EVT_MENU(self, menuID, lambda evt: self.viewHistory(1))
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(historyMenu, menuID, '&Back\t' + self.keyBindings.GoBack, 'Go Back')
-        (id, bitmap) = self.iconLookup["tb_back"]
-        menuItem.SetBitmap(bitmap)
-        historyMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.goInHistory(-1))
+        self.addMenuItem(historyMenu, '&Back\t' + self.keyBindings.GoBack,
+                'Go Back', lambda evt: self.goInHistory(-1),
+                "tb_back")
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(historyMenu, menuID, '&Forward\t' + self.keyBindings.GoForward, 'Go Forward')
-        (id, bitmap) = self.iconLookup["tb_forward"]
-        menuItem.SetBitmap(bitmap)
-        historyMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.goInHistory(1))
+        self.addMenuItem(historyMenu, '&Forward\t' + self.keyBindings.GoForward,
+                'Go Forward', lambda evt: self.goInHistory(1),
+                "tb_forward")
+
+        self.addMenuItem(historyMenu, '&Wiki Home\t' + self.keyBindings.GoHome,
+                'Go to Wiki Home Page',
+                lambda evt: self.openWikiPage(self.wikiName, forceTreeSyncFromRoot=True),
+                "tb_home")
+
 
         formattingMenu=wxMenu()
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(formattingMenu, menuID, '&Bold\t' + self.keyBindings.Bold, 'Bold')
-        (id, bitmap) = self.iconLookup["tb_bold"]
-        menuItem.SetBitmap(bitmap)
-        formattingMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.keyBindings.makeBold(self.editor))
+        self.addMenuItem(formattingMenu, '&Bold\t' + self.keyBindings.Bold,
+                'Bold', lambda evt: self.keyBindings.makeBold(self.editor),
+                "tb_bold")
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(formattingMenu, menuID, '&Italic\t' + self.keyBindings.Italic, 'Italic')
-        (id, bitmap) = self.iconLookup["tb_italic"]
-        menuItem.SetBitmap(bitmap)
-        formattingMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.keyBindings.makeItalic(self.editor))
+        self.addMenuItem(formattingMenu, '&Italic\t' + self.keyBindings.Italic,
+                'Italic', lambda evt: self.keyBindings.makeItalic(self.editor),
+                "tb_italic")
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(formattingMenu, menuID, '&Heading\t' + self.keyBindings.Heading, 'Add Heading')
-        (id, bitmap) = self.iconLookup["tb_heading"]
-        menuItem.SetBitmap(bitmap)
-        formattingMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.keyBindings.addHeading(self.editor))
+        self.addMenuItem(formattingMenu, '&Heading\t' + self.keyBindings.Heading,
+                'Add Heading', lambda evt: self.keyBindings.addHeading(self.editor),
+                "tb_heading")
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(formattingMenu, menuID, 'Insert Date\t' + self.keyBindings.InsertDate, 'Insert Date')
-        (id, bitmap) = self.iconLookup["date"]
-        menuItem.SetBitmap(bitmap)
-        formattingMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.editor.AddText(self.evalLib.now()))
+        self.addMenuItem(formattingMenu, 'Insert Date\t' + self.keyBindings.InsertDate,
+                'Insert Date', lambda evt: self.insertDate(),
+                "tb_date")
+
+        self.addMenuItem(formattingMenu, 'Set Date Format',
+                'Set Date Format', lambda evt: self.showDateformatDialog())
+
 
         formattingMenu.AppendSeparator()
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(formattingMenu, menuID, 'Cu&t\t' + self.keyBindings.Cut, 'Cut')
-        (id, bitmap) = self.iconLookup["tb_cut"]
-        menuItem.SetBitmap(bitmap)
-        formattingMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_CUT))
+        self.addMenuItem(formattingMenu, 'Cu&t\t' + self.keyBindings.Cut,
+                'Cut', lambda evt: self.editor.Cut(),
+                "tb_cut", menuID=GUI_ID.CLIPBOARD_CUT)
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(formattingMenu, menuID, '&Copy\t' + self.keyBindings.Copy, 'Copy')
-        (id, bitmap) = self.iconLookup["tb_copy"]
-        menuItem.SetBitmap(bitmap)
-        formattingMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_COPY))
+        self.addMenuItem(formattingMenu, '&Copy\t' + self.keyBindings.Copy,
+                'Copy', lambda evt: self.editor.Copy(),
+                "tb_copy", menuID=GUI_ID.CLIPBOARD_COPY)
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(formattingMenu, menuID, 'Copy to &ScratchPad\t' + self.keyBindings.CopyToScratchPad, 'Copy Text to ScratchPad')
-        (id, bitmap) = self.iconLookup["tb_copy"]
-        menuItem.SetBitmap(bitmap)
-        formattingMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.editor.snip())
+        self.addMenuItem(formattingMenu, 'Copy to &ScratchPad\t' + self.keyBindings.CopyToScratchPad,
+                'Copy Text to ScratchPad', lambda evt: self.editor.snip(),
+                "tb_copy")
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(formattingMenu, menuID, '&Paste\t' + self.keyBindings.Paste, 'Paste')
-        (id, bitmap) = self.iconLookup["tb_paste"]
-        menuItem.SetBitmap(bitmap)
-        formattingMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_PASTE))
+        self.addMenuItem(formattingMenu, '&Paste\t' + self.keyBindings.Paste,
+                'Paste', lambda evt: self.editor.Paste(),
+                "tb_paste", menuID=GUI_ID.CLIPBOARD_PASTE)
+
 
         formattingMenu.AppendSeparator()
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(formattingMenu, menuID, '&Undo\t' + self.keyBindings.Undo, 'Undo')
-        formattingMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_UNDO))
+        self.addMenuItem(formattingMenu, '&Undo\t' + self.keyBindings.Undo,
+                'Undo', lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_UNDO))
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(formattingMenu, menuID, '&Redo\t' + self.keyBindings.Redo, 'Redo')
-        formattingMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_REDO))
+        self.addMenuItem(formattingMenu, '&Redo\t' + self.keyBindings.Redo,
+                'Redo', lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_REDO))
+
 
         formattingMenu.AppendSeparator()
 
@@ -511,71 +595,117 @@ class PersonalWikiFrame(wxFrame):
         attributesMenu.AppendItem(menuItem)
         EVT_MENU(self, menuID, lambda evt: self.insertAttribute('wrap', '80'))
 
-        iconsMenu = wxMenu()
-        attributesMenu.AppendMenu(wxNewId(), 'icons', iconsMenu)
+        self.addMenuItem(attributesMenu, 'camelCaseWordsEnabled: false', '',
+                lambda evt: self.insertAttribute('camelCaseWordsEnabled', 'false'))
 
-        iconsMenu1 = wxMenu()
-        iconsMenu.AppendMenu(wxNewId(), 'A-C', iconsMenu1)
-        iconsMenu2 = wxMenu()
-        iconsMenu.AppendMenu(wxNewId(), 'D-F', iconsMenu2)
-        iconsMenu3 = wxMenu()
-        iconsMenu.AppendMenu(wxNewId(), 'H-L', iconsMenu3)
-        iconsMenu4 = wxMenu()
-        iconsMenu.AppendMenu(wxNewId(), 'M-P', iconsMenu4)
-        iconsMenu5 = wxMenu()
-        iconsMenu.AppendMenu(wxNewId(), 'Q-S', iconsMenu5)
-        iconsMenu6 = wxMenu()
-        iconsMenu.AppendMenu(wxNewId(), 'T-Z', iconsMenu6)
 
-        icons = self.iconLookup.keys();
-        icons.sort(lambda a, b: cmp(a, b))
-        for id in icons:
-            if id.startswith("tb_"):
-                continue
-            iconsSubMenu = None
-            if id[0] <= 'c':
-                iconsSubMenu = iconsMenu1
-            elif id[0] <= 'f':
-                iconsSubMenu = iconsMenu2
-            elif id[0] <= 'l':
-                iconsSubMenu = iconsMenu3
-            elif id[0] <= 'p':
-                iconsSubMenu = iconsMenu4
-            elif id[0] <= 's':
-                iconsSubMenu = iconsMenu5
-            elif id[0] <= 'z':
-                iconsSubMenu = iconsMenu6
+        # Build icon menu
+
+        if self.lowResources:
+            # Add only menu item for icon select dialog
+            self.addMenuItem(attributesMenu, 'icons',
+                    'Open icon select dialog', lambda evt: self.showIconSelectDialog())
+        else:
+            # Build full submenu for icons
+            iconsMenu = wxMenu()
+            attributesMenu.AppendMenu(wxNewId(), 'icons', iconsMenu)
+
+            iconsMenu1 = wxMenu()
+            iconsMenu.AppendMenu(wxNewId(), 'A-C', iconsMenu1)
+            iconsMenu2 = wxMenu()
+            iconsMenu.AppendMenu(wxNewId(), 'D-F', iconsMenu2)
+            iconsMenu3 = wxMenu()
+            iconsMenu.AppendMenu(wxNewId(), 'H-L', iconsMenu3)
+            iconsMenu4 = wxMenu()
+            iconsMenu.AppendMenu(wxNewId(), 'M-P', iconsMenu4)
+            iconsMenu5 = wxMenu()
+            iconsMenu.AppendMenu(wxNewId(), 'Q-S', iconsMenu5)
+            iconsMenu6 = wxMenu()
+            iconsMenu.AppendMenu(wxNewId(), 'T-Z', iconsMenu6)
+
+            icons = self.iconLookup.keys();
+            icons.sort()
+
+            for id in icons:
+                if id.startswith("tb_"):
+                    continue
+                iconsSubMenu = None
+                if id[0] <= 'c':
+                    iconsSubMenu = iconsMenu1
+                elif id[0] <= 'f':
+                    iconsSubMenu = iconsMenu2
+                elif id[0] <= 'l':
+                    iconsSubMenu = iconsMenu3
+                elif id[0] <= 'p':
+                    iconsSubMenu = iconsMenu4
+                elif id[0] <= 's':
+                    iconsSubMenu = iconsMenu5
+                elif id[0] <= 'z':
+                    iconsSubMenu = iconsMenu6
+
+                menuID=wxNewId()
+                menuItem = wxMenuItem(iconsSubMenu, menuID, id, id)
+                (id2, bitmap) = self.iconLookup[id]
+                menuItem.SetBitmap(bitmap)
+                iconsSubMenu.AppendItem(menuItem)
+                def insertIconAttribute(evt, iconId=id):
+                    self.insertAttribute("icon", iconId)
+                EVT_MENU(self, menuID, insertIconAttribute)
+
+        colorsMenu = wxMenu()
+        attributesMenu.AppendMenu(wxNewId(), 'colors', colorsMenu)
+
+        colorsMenu1 = wxMenu()
+        colorsMenu.AppendMenu(wxNewId(), 'A-L', colorsMenu1)
+        colorsMenu2 = wxMenu()
+        colorsMenu.AppendMenu(wxNewId(), 'M-Z', colorsMenu2)
+
+        for cn in _COLORS:
+            colorsSubMenu = None
+            if cn[0] <= 'L':
+                colorsSubMenu = colorsMenu1
+            ## elif cn[0] <= 'Z':
+            else:
+                colorsSubMenu = colorsMenu2
 
             menuID=wxNewId()
-            menuItem = wxMenuItem(iconsSubMenu, menuID, id, id)
-            (id2, bitmap) = self.iconLookup[id]
-            menuItem.SetBitmap(bitmap)
-            iconsSubMenu.AppendItem(menuItem)
-            def insertIconAttribute(evt, iconId=id):
-                self.insertAttribute("icon", iconId)
-            EVT_MENU(self, menuID, insertIconAttribute)
+            menuItem = wxMenuItem(colorsSubMenu, menuID, cn, cn)
+            cl = wxNamedColour(cn)
+
+            menuItem.SetBackgroundColour(cl)
+
+            # if color is dark, text should be white (checking green component seems to be enough)
+            ## light = (cl.Green() + cl.Red() + cl.Blue())/3
+            if cl.Green() < 128:
+                menuItem.SetTextColour(wxWHITE)
+
+            colorsSubMenu.AppendItem(menuItem)
+            def insertColorAttribute(evt, colorId=cn):
+                self.insertAttribute("color", colorId)
+            EVT_MENU(self, menuID, insertColorAttribute)
+
+
 
         formattingMenu.AppendSeparator()
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(formattingMenu, menuID, '&Zoom In\t' + self.keyBindings.ZoomIn, 'Zoom In')
-        (id, bitmap) = self.iconLookup["tb_zoomin"]
-        menuItem.SetBitmap(bitmap)
-        formattingMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_ZOOMIN))
+        self.addMenuItem(formattingMenu, '&Zoom In\t' + self.keyBindings.ZoomIn,
+                'Zoom In', lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_ZOOMIN),
+                "tb_zoomin")
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(formattingMenu, menuID, 'Zoo&m Out\t' + self.keyBindings.ZoomOut, 'Zoom Out')
-        (id, bitmap) = self.iconLookup["tb_zoomout"]
-        menuItem.SetBitmap(bitmap)
-        formattingMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
+        self.addMenuItem(formattingMenu, 'Zoo&m Out\t' + self.keyBindings.ZoomOut,
+                'Zoom Out', lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_ZOOMOUT),
+                "tb_zoomout")
+
 
         formattingMenu.AppendSeparator()
 
         menuID=wxNewId()
         formattingMenu.Append(menuID, '&Find and Replace\t' + self.keyBindings.FindAndReplace, 'Find and Replace')
         EVT_MENU(self, menuID, lambda evt: self.showFindReplaceDialog())
+
+        menuID=wxNewId()
+        formattingMenu.Append(menuID, 'Rep&lace Text by WikiWord\t' + self.keyBindings.ReplaceTextByWikiword, 'Replace selected text by WikiWord')
+        EVT_MENU(self, menuID, lambda evt: self.showReplaceTextByWikiwordDialog())
 
         formattingMenu.AppendSeparator()
 
@@ -600,33 +730,34 @@ class PersonalWikiFrame(wxFrame):
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks())
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, '&Eval Function 1\tCtrl-1', 'Eval Script Function 1')
+        formattingMenu.Append(menuID, 'Eval Function &1\tCtrl-1', 'Eval Script Function 1')
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks(1))
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, '&Eval Function 2\tCtrl-2', 'Eval Script Function 2')
+        formattingMenu.Append(menuID, 'Eval Function &2\tCtrl-2', 'Eval Script Function 2')
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks(2))
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, '&Eval Function 3\tCtrl-3', 'Eval Script Function 3')
+        formattingMenu.Append(menuID, 'Eval Function &3\tCtrl-3', 'Eval Script Function 3')
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks(3))
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, '&Eval Function 4\tCtrl-4', 'Eval Script Function 4')
+        formattingMenu.Append(menuID, 'Eval Function &4\tCtrl-4', 'Eval Script Function 4')
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks(4))
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, '&Eval Function 5\tCtrl-5', 'Eval Script Function 5')
+        formattingMenu.Append(menuID, 'Eval Function &5\tCtrl-5', 'Eval Script Function 5')
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks(5))
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, '&Eval Function 6\tCtrl-6', 'Eval Script Function 6')
+        formattingMenu.Append(menuID, 'Eval Function &6\tCtrl-6', 'Eval Script Function 6')
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks(6))
 
         helpMenu=wxMenu()
 
+
         def openHelp(evt):
-            os.startfile(self.wikiPadHelp)
+            os.startfile(self.wikiPadHelp)   # TODO!
 
         menuID=wxNewId()
         helpMenu.Append(menuID, '&Open WikidPadHelp', 'Open WikidPadHelp')
@@ -657,9 +788,15 @@ class PersonalWikiFrame(wxFrame):
         self.mainmenu.Append(helpMenu, 'He&lp')
 
         self.SetMenuBar(self.mainmenu)
-        self.mainmenu.EnableTop(1, 0)
-        self.mainmenu.EnableTop(2, 0)
-        self.mainmenu.EnableTop(3, 0)
+
+        if self.wikiConfigFilename:  # If a wiki is open
+            self.mainmenu.EnableTop(1, 1)
+            self.mainmenu.EnableTop(2, 1)
+            self.mainmenu.EnableTop(3, 1)
+        else:
+            self.mainmenu.EnableTop(1, 0)
+            self.mainmenu.EnableTop(2, 0)
+            self.mainmenu.EnableTop(3, 0)
 
         # turn on or off the wrap mode menu item. this must be done here,
         # after the menus are added to the menu bar
@@ -667,13 +804,15 @@ class PersonalWikiFrame(wxFrame):
             wrapModeMenuItem.Check(1)
 
         # turn on or off auto-save
-        if self.autoSave:
-            autoSaveMenuItem.Check(1)
+#         if self.autoSave:
+#             autoSaveMenuItem.Check(1)
 
-        # turn on or off auto-save
+        # turn on or off indentation guides
         if self.indentationGuides:
             indentGuidesMenuItem.Check(1)
 
+
+    def buildToolbar(self):
         # ------------------------------------------------------------------------------------
         # Create the toolbar
         # ------------------------------------------------------------------------------------
@@ -693,7 +832,7 @@ class PersonalWikiFrame(wxFrame):
 
         (index, icon) = self.iconLookup["tb_home"]
         tbID = wxNewId()
-        tb.AddSimpleTool(tbID, icon, "Wiki Root", "Wiki Root")
+        tb.AddSimpleTool(tbID, icon, "Wiki Home", "Wiki Home")
         EVT_TOOL(self, tbID, lambda evt: self.openWikiPage(self.wikiName, forceTreeSyncFromRoot=True))
 
         (index, icon) = self.iconLookup["tb_doc"]
@@ -716,7 +855,7 @@ class PersonalWikiFrame(wxFrame):
         (index, icon) = self.iconLookup["tb_save"]
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Save Wiki Word (Ctrl-S)", "Save Wiki Word")
-        EVT_TOOL(self, tbID, lambda evt: self.saveCurrentWikiPage())
+        EVT_TOOL(self, tbID, lambda evt: (self.saveCurrentWikiPage(), self.wikiData.commit()))
 
         (index, icon) = self.iconLookup["tb_rename"]
         tbID = wxNewId()
@@ -758,6 +897,43 @@ class PersonalWikiFrame(wxFrame):
         EVT_TOOL(self, tbID, lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
 
         tb.Realize()
+        self.toolBar = tb
+
+
+    def initializeGui(self):
+        "initializes the gui environment"
+
+        # ------------------------------------------------------------------------------------
+        # load the icons the program will use
+        # ------------------------------------------------------------------------------------
+
+        # add the gif handler for gif icon support
+        wxImage_AddHandler(wxGIFHandler())
+        ## create the image icon list
+        # iconList = wxImageList(16, 16)
+        # default icon is page.gif
+        icons = ['page.gif']
+        # add the rest of the icons
+        icons.extend([file for file in os.listdir(join(self.wikiAppDir, "icons"))
+                      if file.endswith('.gif') and file != 'page.gif'])
+
+        self.iconFileList = icons
+
+        # Create iconImageList
+        self.fillIconLookup(True)
+
+        self.buildMainMenu()
+        self.buildToolbar()
+
+        # Add alternative accelerators for clipboard operations
+        ACCS = [
+            (wxACCEL_CTRL, WXK_INSERT, GUI_ID.CLIPBOARD_COPY),
+            (wxACCEL_SHIFT, WXK_INSERT, GUI_ID.CLIPBOARD_PASTE),
+            (wxACCEL_SHIFT, WXK_DELETE, GUI_ID.CLIPBOARD_CUT)
+            ]
+
+        self.SetAcceleratorTable(wxAcceleratorTable(ACCS))
+
 
         # ------------------------------------------------------------------------------------
         # Create the left-right splitter window.
@@ -772,7 +948,7 @@ class PersonalWikiFrame(wxFrame):
 
         # assign the image list
         try:
-            self.tree.AssignImageList(iconList)
+            self.tree.AssignImageList(self.iconImageList)
         except Exception, e:
             self.displayErrorMessage('There was an error loading the icons for the tree control.', e)
 
@@ -809,24 +985,99 @@ class PersonalWikiFrame(wxFrame):
         # Register the App close handler
         EVT_CLOSE(self, self.OnWikiExit)
 
-        # display the window
-        self.Show(True)
+        EVT_ICONIZE(self, self.OnIconize)
+        EVT_MAXIMIZE(self, self.OnMaximize)
 
-        # turn on the tree control check box
+        # turn on the tree control check box   # TODO: Doesn't work after restore from sleep mode
         if self.vertSplitter.GetSashPosition() > 1:
-            showTreeCtrlMenuItem.Check(1)
+            self.showTreeCtrlMenuItem.Check(1)
         else:
             self.tree.Hide()
 
 
+    def resourceSleep(self):
+        """
+        Free unnecessary resources if program is iconized
+        """
+        if self.sleepMode:
+            return  # Already in sleep mode
+        self.sleepMode = True
+
+        self.toolBar.Destroy()
+
+        self.SetMenuBar(None)
+        self.showTreeCtrlMenuItem = None
+        self.mainmenu.Destroy()
+
+        # Set menu/menu items to None
+        self.mainmenu = None
+        self.recentWikisMenu = None
+        self.showTreeCtrlMenuItem = None
+        # self.showOnTrayMenuItem = None
+
+
+        for k in self.iconLookup.keys():
+            self.iconLookup[k] = (self.iconLookup[k][0], None)
+
+        gc.collect()
+
+
+    def resourceWakeup(self):
+        """
+        Aquire resources after program is restored
+        """
+        if not self.sleepMode:
+            return  # Already in wake mode
+        self.sleepMode = False
+
+        self.fillIconLookup(False)
+        self.buildMainMenu()
+        self.buildToolbar()
+        self.setShowOnTray()
+
+
+    def testIt(self):
+        cb = wxTheClipboard
+        cb.Open()
+        # datob = wxTextDataObject()
+        # datob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
+        datob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
+
+
+        print "Test getData", repr(cb.GetData(datob))
+        print "Test text", repr(datob.GetData())       # GetDataHere())
+        cb.Close()
+
+
+
+    def OnIconize(self, evt):
+        if self.lowResources:
+            if self.IsIconized():
+                self.resourceSleep()
+            else:
+                self.resourceWakeup()
+
+        if self.configuration.getboolean("main", "showontray"):
+            self.Show(not self.IsIconized())
+
+        evt.Skip()
+
+
+    def OnMaximize(self, evt):
+        if self.lowResources:
+            self.resourceWakeup()
+
+        evt.Skip()
+
+
     def createEditor(self):
         self.editor = WikiTxtCtrl(self, self.vertSplitter, -1)
-        self.editor.evalScope = { 'editor' : self.editor, 'pwiki' : self, 'lib': self.evalLib}
+        self.editor.evalScope = { 'editor' : self.editor, 'pwiki' : self,
+            'lib': self.evalLib}
 
         # enable and zoom the editor
         self.editor.Enable(0)
-        if (self.globalConfig.has_option("main", "zoom")):
-            self.editor.SetZoom(int(self.globalConfig.get("main", "zoom")))
+        self.editor.SetZoom(self.configuration.getint("main", "zoom"))
 
         # set the wrap mode of the editor
         self.setWrapMode(self.wrapMode)
@@ -844,6 +1095,8 @@ class PersonalWikiFrame(wxFrame):
         self.editor.EmptyUndoBuffer()
         self.editor.Disable()
 
+        # reset tray
+        self.setShowOnTray()
 
     def newWiki(self, wikiName, wikiDir):
         "creates a new wiki"
@@ -854,7 +1107,7 @@ class PersonalWikiFrame(wxFrame):
         wikiDir = join(wikiDir, wikiName)
         configFileLoc = join(wikiDir, "%s.wiki" % wikiName)
 
-        self.statusBar.SetStatusText("Creating Wiki: %s" % wikiName, 0)
+        self.statusBar.SetStatusText(uniToGui(u"Creating Wiki: %s" % wikiName), 0)
 
         createIt = True;
         if (exists(wikiDir)):
@@ -872,27 +1125,20 @@ class PersonalWikiFrame(wxFrame):
             # create the new dir for the wiki
             os.mkdir(wikiDir)
 
-            # create a new config file for the new wiki
-            config = ConfigParser.ConfigParser()
-            config.add_section("main")
-            config.add_section("wiki_db")
-            config.set("main", "wiki_name", wikiName)
-            config.set("main", "last_wiki_word", wikiName)
-            config.set("wiki_db", "data_dir", "data")
             allIsWell = True
 
             dataDir = join(wikiDir, "data")
 
             # create the data directory for the data files
             try:
-                createWikiDB(wikiName, dataDir, false)
+                createWikiDB(wikiName, dataDir, False)
             except WikiDBExistsException:
                 # The DB exists, should it be overwritten
                 dlg=wxMessageDialog(self, 'A wiki database already exists in this location, overwrite?',
                                     'Wiki DB Exists', wxYES_NO)
                 result = dlg.ShowModal()
                 if result == wxID_YES:
-                    createWikiDB(wikiName, dataDir, true)
+                    createWikiDB(wikiName, dataDir, True)
                 else:
                     allIsWell = False
 
@@ -903,11 +1149,21 @@ class PersonalWikiFrame(wxFrame):
 
             if (allIsWell):
                 # everything is ok, write out the config file
-                configFile = open(configFileLoc, 'w')
-                config.write(configFile)
-                configFile.close()
+                # create a new config file for the new wiki
+                self.configuration.createEmptyWikiConfig(configFileLoc)
+                self.configuration.fillWikiWithDefaults()
+                
+                self.configuration.set("main", "wiki_name", wikiName)
+                self.configuration.set("main", "last_wiki_word", wikiName)
+                self.configuration.set("wiki_db", "data_dir", "data")
+                self.configuration.save()
 
-                self.statusBar.SetStatusText("Created Wiki: %s" % wikiName, 0)
+#                 configFile = open(configFileLoc, 'w')
+#                 config.write(configFile)
+#                 configFile.close()
+
+                self.statusBar.SetStatusText(
+                        uniToGui(u"Created Wiki: %s" % wikiName), 0)
 
                 # open the new wiki
                 self.openWiki(configFileLoc)
@@ -933,42 +1189,44 @@ class PersonalWikiFrame(wxFrame):
                 self.openWikiPage(self.wikiName, False, False)
 
 
-    def openWiki(self, wikiConfigFile, wikiWordToOpen=None):
+    def openWiki(self, wikiConfigFilename, wikiWordToOpen=None):
         "opens up a wiki"
 
-        self.wikidPadHooks.openWiki(self, wikiConfigFile)
+        self.wikidPadHooks.openWiki(self, wikiConfigFilename)
 
         # Save the state of the currently open wiki, if there was one open
         # if the new config is the same as the old, don't resave state since
         # this could be a wiki overwrite from newWiki. We don't want to overwrite
         # the new config with the old one.
-        if self.wikiConfigFile != wikiConfigFile:
+        if self.wikiConfigFilename != wikiConfigFilename:
             self.closeWiki()
 
         # status
-        self.statusBar.SetStatusText("Opening Wiki: %s" % wikiConfigFile, 0)
+        self.statusBar.SetStatusText(
+                uniToGui(u"Opening Wiki: %s" % wikiConfigFilename), 0)
 
         # make sure the config exists
-        if (not exists(wikiConfigFile)):
-            self.displayErrorMessage("Wiki configuration file '%s' not found" % wikiConfigFile)
-            if wikiConfigFile in self.wikiHistory:
-                self.wikiHistory.remove(wikiConfigFile)
+        if (not exists(wikiConfigFilename)):
+            self.displayErrorMessage("Wiki configuration file '%s' not found" % wikiConfigFilename)
+            if wikiConfigFilename in self.wikiHistory:
+                self.wikiHistory.remove(wikiConfigFilename)
             return False
 
         # read in the config file
-        config = ConfigParser.ConfigParser()
+        # config = ConfigParser.ConfigParser()
         try:
-            config.read(wikiConfigFile)
+            # config.read(wikiConfigFile)
+            self.configuration.loadWikiConfig(wikiConfigFilename)
         except Exception, e:
             # try to recover by checking if the parent dir contains the real wiki file
             # if it does the current wiki file must be a wiki word file, so open the
             # real wiki to the wiki word.
             try:
-                parentDir = dirname(dirname(wikiConfigFile))
+                parentDir = dirname(dirname(wikiConfigFilename))
                 if parentDir:
                     wikiFiles = [file for file in os.listdir(parentDir) if file.endswith(".wiki")]
                     if len(wikiFiles) > 0:
-                        wikiWord = basename(wikiConfigFile)
+                        wikiWord = basename(wikiConfigFilename)
                         wikiWord = wikiWord[0:len(wikiWord)-5]
 
                         # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
@@ -981,21 +1239,23 @@ class PersonalWikiFrame(wxFrame):
                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
                         return
             except Exception, ne:
-                self.displayErrorMessage("Error reading config file '%s'" % wikiConfigFile, e)
-                print ne
+                self.displayErrorMessage("Error reading config file '%s'" % wikiConfigFilename, e)
+                traceback.print_exc()
                 return False
 
         # config variables
-        try:
-            wikiName = config.get("main", "wiki_name")
-            dataDir = config.get("wiki_db", "data_dir")
-        except Exception, e:
+        wikiName = self.configuration.get("main", "wiki_name")
+        dataDir = self.configuration.get("wiki_db", "data_dir")
+
+        # except Exception, e:
+        if wikiName is None or dataDir is None:
             self.displayErrorMessage("Wiki configuration file is corrupt", e)
+            # traceback.print_exc()
             return False
 
         # absolutize the path to data dir if it's not already
         if not isabs(dataDir):
-            dataDir = join(dirname(wikiConfigFile), dataDir)
+            dataDir = join(dirname(wikiConfigFilename), dataDir)
 
         # create the db interface to the wiki data
         wikiData = None
@@ -1003,12 +1263,13 @@ class PersonalWikiFrame(wxFrame):
             wikiData = WikiData(self, dataDir)
         except Exception, e:
             self.displayErrorMessage("Error connecting to database in '%s'" % dataDir, e)
+            traceback.print_exc()
             return False
 
         # what was the last wiki word opened
         lastWikiWord = wikiWordToOpen
-        if not lastWikiWord and config.has_option("main", "last_wiki_word"):
-            lastWikiWord = config.get("main", "last_wiki_word")
+        if not lastWikiWord:
+            lastWikiWord = self.configuration.get("main", "last_wiki_word")
 
         # OK, things look good
 
@@ -1019,8 +1280,8 @@ class PersonalWikiFrame(wxFrame):
         self.wikiWordHistory = []
 
         # set the member variables.
-        self.wikiConfigFile = wikiConfigFile
-        self.config = config
+        self.wikiConfigFilename = wikiConfigFilename
+        ## self.wikiConfig = config
         self.wikiName = wikiName
         self.dataDir = dataDir
         self.wikiData = wikiData
@@ -1029,66 +1290,86 @@ class PersonalWikiFrame(wxFrame):
         self.resetGui()
 
         # enable the top level menus
-        self.mainmenu.EnableTop(1, 1)
-        self.mainmenu.EnableTop(2, 1)
-        self.mainmenu.EnableTop(3, 1)
-
-        # add the root node to the tree
-        self.treeRoot = self.tree.AddRoot(self.wikiName)
-        self.tree.SetPyData(self.treeRoot, (self.wikiName,None,None))
-        self.tree.SetItemBold(self.treeRoot, True)
-        self.tree.SelectItem(self.treeRoot)
+        if self.mainmenu:
+            self.mainmenu.EnableTop(1, 1)
+            self.mainmenu.EnableTop(2, 1)
+            self.mainmenu.EnableTop(3, 1)
 
         # open the root
         self.openWikiPage(self.wikiName)
 
-        # make sure the root has a relationship to the ScratchPad
-        self.currentWikiPage.addChildRelationship("ScratchPad")
+        self.setCurrentWordAsRoot()
 
-        # set the root tree node as having children if it does
-        if len(self.currentWikiPage.childRelations) > 0:
-            self.tree.SetItemHasChildren(self.treeRoot, 1)
-            self.tree.Expand(self.treeRoot)
+
+#         # add the root node to the tree
+#         self.treeRoot = self.tree.AddRoot(self.wikiName)
+#         self.tree.SetPyData(self.treeRoot, (self.wikiName,None,None))
+#         self.tree.SetItemBold(self.treeRoot, True)  # TODO: This doesn't work
+#         self.tree.SelectItem(self.treeRoot)
+#
+#         # open the root
+#         self.openWikiPage(self.wikiName)
+#
+#         # make sure the root has a relationship to the ScratchPad
+#         self.currentWikiPage.addChildRelationship("ScratchPad")
+#
+#         # set the root tree node as having children if it does
+#         if len(self.currentWikiPage.childRelations) > 0:
+#             self.tree.SetItemHasChildren(self.treeRoot, 1)
+#             self.tree.Expand(self.treeRoot)
 
         # set status
-        self.statusBar.SetStatusText("Opened wiki '%s'" % self.wikiName, 0)
+        self.statusBar.SetStatusText(
+                uniToGui(u"Opened wiki '%s'" % self.wikiName), 0)
 
         # now try and open the last wiki page
         if lastWikiWord and lastWikiWord != self.wikiName:
             # if the word is not a wiki word see if a word that starts with the word can be found
-            if not self.wikiData.isWikiWord(lastWikiWord):
+            if not self.wikiData.isDefinedWikiWord(lastWikiWord):
                 wordsStartingWith = self.wikiData.getWikiWordsStartingWith(lastWikiWord, True)
                 if wordsStartingWith:
                     lastWikiWord = wordsStartingWith[0]
             self.openWikiPage(lastWikiWord)
             self.findCurrentWordInTree()
 
+        self.tree.SetScrollPos(wxHORIZONTAL, 0)
+
         # enable the editor control whether or not the wiki root was found
         self.editor.Enable(1)
 
         # update the last accessed wiki config var
-        self.lastAccessedWiki(self.wikiConfigFile)
+        self.lastAccessedWiki(self.wikiConfigFilename)
 
         # trigger hook
-        self.wikidPadHooks.openedWiki(self, self.wikiName, wikiConfigFile)
+        self.wikidPadHooks.openedWiki(self, self.wikiName, wikiConfigFilename)
 
         # return that the wiki was opened successfully
         return True
 
 
+    def setCurrentWordAsRoot(self):
+        """
+        Set current wiki word as root of the tree
+        """
+        # make sure the root has a relationship to the ScratchPad
+        # self.currentWikiPage.addChildRelationship("ScratchPad")
+        self.tree.setRootByPage(self.currentWikiPage)
+
+
     def closeWiki(self, saveState=True):
-        if self.wikiConfigFile:
+        if self.wikiConfigFilename:
             if saveState:
                 self.saveCurrentWikiState()
             if self.wikiData:
                 self.wikiData.close()
-            self.wikiConfigFile = None
+                self.wikiData = None
+            self.wikiConfigFilename = None
 
+            self.setShowOnTray()
 
     def saveCurrentWikiState(self):
         # write out the current config
-        if self.config:
-            self.writeCurrentConfig()
+        self.writeCurrentConfig()
 
         # save the current wiki page if it is dirty
         if self.currentWikiPage:
@@ -1101,18 +1382,21 @@ class PersonalWikiFrame(wxFrame):
             self.wikiData.commit()
 
 
-    def openWikiPage(self, wikiWord, addToHistory=True, forceTreeSyncFromRoot=False):
+    def openWikiPage(self, wikiWord, addToHistory=True,
+            forceTreeSyncFromRoot=False, forceReopen=False):
 
-        self.statusBar.SetStatusText("Opening wiki word '%s'" % wikiWord, 0)
+        self.statusBar.SetStatusText(uniToGui("Opening wiki word '%s'" %
+                wikiWord), 0)
 
         # make sure this is a valid wiki word
         if not WikiFormatting.isWikiWord(wikiWord):
             self.displayErrorMessage("'%s' is an invalid wiki word." % wikiWord)
 
         # don't reopen the currently open page
-        if (wikiWord == self.currentWikiWord):
-            self.tree.buildTreeForWord(self.currentWikiWord)
-            self.statusBar.SetStatusText("Wiki word '%s' already open" % wikiWord, 0)
+        if (wikiWord == self.currentWikiWord) and not forceReopen:
+            # self.tree.buildTreeForWord(self.currentWikiWord)  # TODO Needed?
+            self.statusBar.SetStatusText(uniToGui("Wiki word '%s' already open" %
+                    wikiWord), 0)
             return
 
         # save the current page if it is dirty
@@ -1145,15 +1429,18 @@ class PersonalWikiFrame(wxFrame):
             self.wikidPadHooks.newWikiWord(self, wikiWord)
 
         # set the editor text
-        content = ""
+        content = u""
 
         try:
             content = self.currentWikiPage.getContent()
-            self.statusBar.SetStatusText("Opened wiki word '%s'" % self.currentWikiWord, 0)
+            self.statusBar.SetStatusText(uniToGui("Opened wiki word '%s'" %
+                    self.currentWikiWord), 0)
         except WikiFileNotFoundException, e:
-            self.statusBar.SetStatusText("Wiki page not found, a new page will be created", 0)
+            self.statusBar.SetStatusText(uniToGui("Wiki page not found, a new "+
+            "page will be created"), 0)
             title = self.getWikiPageTitle(self.currentWikiWord)
-            content = "++ %s\n\n" % title
+            content = u"++ %s\n\n" % title
+            self.lastCursorPositionInPage[self.currentWikiWord] = len(content)
 
         # get the properties that need to be checked for options
         pageProps = self.currentWikiPage.props
@@ -1168,21 +1455,19 @@ class PersonalWikiFrame(wxFrame):
 
         # set the styles in the editor to the font
         if self.lastEditorFont != font:
-            faces["mono"] = font
-            self.editor.SetStyles(faces)
+            self.presentationExt.faces["mono"] = font
+            self.editor.SetStyles(self.presentationExt.faces)
             self.lastEditorFont = font
 
         # now fill the text into the editor
         self.editor.SetText(content)
 
         # see if there is a saved position for this page
-        lastPos = self.lastCursorPositionInPage.get(wikiWord)
-        if lastPos:
-            self.editor.GotoPos(lastPos)
-        else:
-            self.editor.GotoPos(0)
+        lastPos = self.lastCursorPositionInPage.get(wikiWord, 0)
+        self.editor.GotoPos(lastPos)
 
-        # get the font that should be used in the editor
+        # check if CamelCase should be used
+        # print "openWikiPage props", repr(pageProps), repr(globalProps)
         wikiWordsEnabled = True
         if pageProps.has_key("camelCaseWordsEnabled"):
             if pageProps["camelCaseWordsEnabled"][0] == "false":
@@ -1195,9 +1480,10 @@ class PersonalWikiFrame(wxFrame):
         self.editor.wikiWordsEnabled = wikiWordsEnabled
 
         # set the title and add the word to the history
-        self.SetTitle("Wiki: %s - %s" % (self.wikiName, self.currentWikiWord))
+        self.SetTitle(uniToGui("Wiki: %s - %s" %
+                (self.wikiName,self.currentWikiWord)))
         if addToHistory: self.addToHistory(wikiWord)
-        self.config.set("main", "last_wiki_word", wikiWord)
+        self.configuration.set("main", "last_wiki_word", wikiWord)
 
         # sync the tree
         if forceTreeSyncFromRoot:
@@ -1224,9 +1510,10 @@ class PersonalWikiFrame(wxFrame):
                                     wxOK|wxCANCEL)
 
         if dlg.ShowModal() == wxID_OK:
-            wikiWord = dlg.GetStringSelection()
+            wikiWord = guiToUni(dlg.GetStringSelection())
             if len(wikiWord) > 0:
                 self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
+                self.editor.SetFocus()
         dlg.Destroy()
 
 
@@ -1239,9 +1526,10 @@ class PersonalWikiFrame(wxFrame):
                                    wxOK|wxCANCEL)
 
         if dlg.ShowModal() == wxID_OK:
-            wikiWord = dlg.GetStringSelection()
+            wikiWord = guiToUni(dlg.GetStringSelection())
             if len(wikiWord) > 0:
                 self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
+                self.editor.SetFocus()
         dlg.Destroy()
 
 
@@ -1254,9 +1542,10 @@ class PersonalWikiFrame(wxFrame):
                                    wxOK|wxCANCEL)
 
         if dlg.ShowModal() == wxID_OK:
-            wikiWord = dlg.GetStringSelection()
+            wikiWord = guiToUni(dlg.GetStringSelection())
             if len(wikiWord) > 0:
                 self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
+                self.editor.SetFocus()
         dlg.Destroy()
 
 
@@ -1285,7 +1574,7 @@ class PersonalWikiFrame(wxFrame):
             self.historyPosition = self.historyPosition + posDelta
         wikiWord = self.wikiWordHistory[self.historyPosition]
         self.openWikiPage(wikiWord, False)
-
+        self.editor.SetFocus()
 
     def goBackInHistory(self, howMany=1):
         if self.historyPosition > 0:
@@ -1331,59 +1620,64 @@ class PersonalWikiFrame(wxFrame):
 
     def viewBookmarks(self):
         dlg = wxSingleChoiceDialog(self,
-                                   "Bookmarks",
-                                   "Bookmarks",
+                                   u"Bookmarks",
+                                   u"Bookmarks",
                                    self.wikiData.getWordsWithPropertyValue("bookmarked", "true"),
                                    wxOK|wxCANCEL)
 
         if dlg.ShowModal() == wxID_OK:
-            wikiWord = dlg.GetStringSelection()
+            wikiWord = guiToUni(dlg.GetStringSelection())
             if len(wikiWord) > 0:
                 self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
+                self.editor.SetFocus()
         dlg.Destroy()
 
 
     def saveCurrentWikiPage(self):
+        return self.saveWikiPage(self.currentWikiWord, self.currentWikiPage,
+                self.editor.GetText())
+
+    def saveWikiPage(self, word, page, text):
         self.statusBar.SetStatusText("Saving WikiPage", 0)
-        self.wikidPadHooks.savingWikiWord(self, self.currentWikiWord)
+        self.wikidPadHooks.savingWikiWord(self, word)
 
         error = False
         while 1:
             try:
-                self.currentWikiPage.save(self.editor.GetText())
+                page.save(text)
+                page.update(text)
                 error = False
                 break
             except Exception, e:
                 error = True
-                dlg=wxMessageDialog(self, 'There was an error saving the contents of wiki page "%s".\n%s\n\nWould you like to try and save this document again?' % (self.currentWikiWord, e),
-                                    'Error Saving!', wxYES_NO)
+                dlg=wxMessageDialog(self,
+                        uniToGui(u'There was an error saving the contents of wiki page "%s".\n%s\n\nWould you like to try and save this document again?' % (word, e)),
+                                    u'Error Saving!', wxYES_NO)
                 result = dlg.ShowModal()
                 dlg.Destroy()
+                traceback.print_exc()
                 if result == wxID_NO:
                     break
 
         if not error:
             self.statusBar.SetStatusText("", 0)
             self.editor.SetSavePoint()
-            self.wikidPadHooks.savedWikiWord(self, self.currentWikiWord)
+            self.wikidPadHooks.savedWikiWord(self, word)
 
-            # if saving the root open it in the tree
-            if (self.currentWikiWord == self.wikiName):
-                self.findCurrentWordInTree()
 
 
     def updateRelationships(self):
-        self.statusBar.SetStatusText("Updating relationships", 0)
+        self.statusBar.SetStatusText(u"Updating relationships", 0)
         self.currentWikiPage.update(self.editor.GetText())
-        self.statusBar.SetStatusText("", 0)
+        self.statusBar.SetStatusText(u"", 0)
 
 
-    def lastAccessedWiki(self, wikiConfigFile):
+    def lastAccessedWiki(self, wikiConfigFilename):
         "writes to the global config the location of the last accessed wiki"
         # create a new config file for the new wiki
-        self.globalConfig.set("main", "last_wiki", wikiConfigFile)
-        if wikiConfigFile not in self.wikiHistory:
-            self.wikiHistory.append(wikiConfigFile)
+        self.configuration.set("main", "last_wiki", wikiConfigFilename)
+        if wikiConfigFilename not in self.wikiHistory:
+            self.wikiHistory.append(wikiConfigFilename)
 
             # only keep 5 items
             if len(self.wikiWordHistory) > 5:
@@ -1391,24 +1685,25 @@ class PersonalWikiFrame(wxFrame):
 
             # add the item to the menu
             menuID=wxNewId()
-            self.recentWikisMenu.Append(menuID, wikiConfigFile)
+            self.recentWikisMenu.Append(menuID, wikiConfigFilename)
             EVT_MENU(self, menuID, self.OnSelectRecentWiki)
 
-        self.globalConfig.set("main", "last_active_dir", dirname(wikiConfigFile))
+        self.configuration.set("main", "last_active_dir", dirname(wikiConfigFilename))
         self.writeGlobalConfig()
 
     def setWrapMode(self, onOrOff):
         self.wrapMode = onOrOff
-        self.globalConfig.set("main", "wrap_mode", self.wrapMode)
+        self.configuration.set("main", "wrap_mode", self.wrapMode)
         self.editor.setWrap(self.wrapMode)
 
+    # Only needed for scripts
     def setAutoSave(self, onOrOff):
         self.autoSave = onOrOff
-        self.globalConfig.set("main", "auto_save", self.autoSave)
+        self.configuration.set("main", "auto_save", self.autoSave)
 
     def setIndentationGuides(self, onOrOff):
         self.indentationGuides = onOrOff
-        self.globalConfig.set("main", "indentation_guides", self.indentationGuides)
+        self.configuration.set("main", "indentation_guides", self.indentationGuides)
         if onOrOff:
             self.editor.SetIndentationGuides(1)
         else:
@@ -1426,25 +1721,67 @@ class PersonalWikiFrame(wxFrame):
             self.tree.Hide()
 
 
+    def setShowOnTray(self, onOrOff=None):
+        """
+        Update UI and config according to the settings of onOrOff.
+        If onOrOff is omitted, UI is updated according to current
+        setting of the global config
+        """
+        if not onOrOff is None:
+            self.configuration.set("main", "showontray", onOrOff)
+        else:
+            onOrOff = self.configuration.getboolean("main", "showontray")
+
+#         if self.showOnTrayMenuItem:
+#             self.showOnTrayMenuItem.Check(self.showOnTray)   # TODO infinite loop?
+
+        if onOrOff:
+            if self.tbIcon is None:
+                self.tbIcon = TaskBarIcon(self)
+
+            tooltip = None
+            if self.wikiConfigFilename:  # If a wiki is open
+                tooltip = "Wiki: %s" % self.wikiName
+            else:
+                tooltip = "Wikidpad"
+
+            self.tbIcon.SetIcon(wxIcon(os.path.join(self.wikiAppDir, 'icons', 'pwiki.ico'),
+                    wxBITMAP_TYPE_ICO), tooltip)
+        else:
+            if self.tbIcon is not None:
+                if self.tbIcon.IsIconInstalled():
+                    self.tbIcon.RemoveIcon()
+
+                self.tbIcon.Destroy()
+                self.tbIcon = None
+
+
+    # TODO: Rebuild tree
+    def setHideUndefined(self, onOrOff=None):
+        """
+        Set if undefined WikiWords should be hidden in the tree
+        """
+
+        if not onOrOff is None:
+            self.configuration.set("main", "hideundefined", onOrOff)
+        else:
+            onOrOff = self.configuration.getboolean("main", "hideundefined")
+
+
     def writeGlobalConfig(self):
         "writes out the global config file"
         try:
-            configFile = open(self.globalConfigLoc, 'w')
-            self.globalConfig.write(configFile)
-            configFile.close()
+            self.configuration.save()
         except Exception, e:
             self.displayErrorMessage("Error saving global configuration", e)
 
 
     def writeCurrentConfig(self):
         "writes out the current config file"
-        if (self.config):
-            try:
-                configFile = open(self.wikiConfigFile, 'w')
-                self.config.write(configFile)
-                configFile.close()
-            except Exception, e:
-                self.displayErrorMessage("Error saving current configuration", e)
+        try:
+            self.configuration.save()
+        except Exception, e:
+            self.displayErrorMessage("Error saving current configuration", e)
 
 
     def showWikiWordOpenDialog(self):
@@ -1455,23 +1792,38 @@ class PersonalWikiFrame(wxFrame):
             if wikiWord:
                 dlg.Destroy()
                 self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
+                self.editor.SetFocus()
         dlg.Destroy()
 
 
     def showWikiWordRenameDialog(self, wikiWord=None, toWikiWord=None):
         dlg = wxTextEntryDialog (self, "Rename '%s' to:" % self.currentWikiWord,
-                                 "Rename Wiki Word", "", wxOK | wxCANCEL)
-        if dlg.ShowModal() == wxID_OK:
-            wikiWord = dlg.GetValue()
-            self.showWikiWordRenameConfirmDialog(self.currentWikiWord, wikiWord)
-        dlg.Destroy()
+                                 "Rename Wiki Word", self.currentWikiWord,
+                                 wxOK | wxCANCEL)
+
+        try:
+            while dlg.ShowModal() == wxID_OK and \
+                    not self.showWikiWordRenameConfirmDialog(self.currentWikiWord,
+                            guiToUni(dlg.GetValue())):
+                pass
+
+        finally:
+            dlg.Destroy()
 
 
+
+    # TODO Check if new name already exists (?)
     def showWikiWordRenameConfirmDialog(self, wikiWord, toWikiWord):
+        """
+        Checks if renaming operation is valid, presents either an error
+        message or a confirmation dialog.
+        Returns -- True iff renaming was done successfully
+        """
         if not toWikiWord or len(toWikiWord) == 0:
             return False
 
         if wikiWord == toWikiWord:
+            self.displayErrorMessage("Can't rename wiki home")
             return False
 
         if wikiWord == "ScratchPad":
@@ -1484,9 +1836,12 @@ class PersonalWikiFrame(wxFrame):
             self.displayErrorMessage("'%s' is an invalid WikiWord" % toWikiWord)
             return False
 
+        if self.wikiData.isDefinedWikiWord(toWikiWord):
+            self.displayErrorMessage("Cannot rename to '%s', word already exists" % toWikiWord)
+            return False
+
         dlg=wxMessageDialog(self, "Are you sure you want to rename wiki word '%s' to '%s'?" % (wikiWord, toWikiWord),
                             'Rename Wiki Word', wxYES_NO)
-
         renamed = False
         result = dlg.ShowModal()
         if result == wxID_YES:
@@ -1496,13 +1851,13 @@ class PersonalWikiFrame(wxFrame):
 
                 # if the root was renamed we have a little more to do
                 if wikiWord == self.wikiName:
-                    self.config.set("main", "wiki_name", toWikiWord)
-                    self.config.set("main", "last_wiki_word", toWikiWord)
+                    self.configuration.set("main", "wiki_name", toWikiWord)
+                    self.configuration.set("main", "last_wiki_word", toWikiWord)
                     self.saveCurrentWikiState()
-                    self.wikiHistory.remove(self.wikiConfigFile)
-                    renamedConfigFile = join(dirname(self.wikiConfigFile), "%s.wiki" % toWikiWord)
-                    os.rename(self.wikiConfigFile, renamedConfigFile)
-                    self.wikiConfigFile = None
+                    self.wikiHistory.remove(self.wikiConfigFilename)
+                    renamedConfigFile = join(dirname(self.wikiConfigFilename), "%s.wiki" % toWikiWord)
+                    os.rename(self.wikiConfigFilename, renamedConfigFile)
+                    self.wikiConfigFilename = None
                     self.openWiki(renamedConfigFile)
 
                 self.wikidPadHooks.renamedWikiWord(self, wikiWord, toWikiWord)
@@ -1511,6 +1866,7 @@ class PersonalWikiFrame(wxFrame):
                 self.findCurrentWordInTree()
                 renamed = True
             except WikiDataException, e:
+                traceback.print_exc()                
                 self.displayErrorMessage(str(e))
 
         dlg.Destroy()
@@ -1526,6 +1882,7 @@ class PersonalWikiFrame(wxFrame):
                 dlg.Destroy()
                 self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
                 self.editor.executeSearch(searchedFor, 0)
+                self.editor.SetFocus()
         dlg.Destroy()
 
 
@@ -1534,7 +1891,7 @@ class PersonalWikiFrame(wxFrame):
         dlg.CenterOnParent(wxBOTH)
         if dlg.ShowModal() == wxID_OK:
             wikiWord = dlg.GetValue()
-            if wikiWord:
+            if wikiWord:     # TODO ???
                 dlg.Destroy()
                 self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
         dlg.Destroy()
@@ -1576,6 +1933,78 @@ class PersonalWikiFrame(wxFrame):
         dlg.data = data
         dlg.Show(True)
 
+    def showReplaceTextByWikiwordDialog(self):
+        wikiWord = guiToUni(wxGetTextFromUser("Replace text by WikiWord:",
+                "Replace by Wiki Word", self.currentWikiWord, self))
+
+        if wikiWord:
+            if not WikiFormatting.isWikiWord(wikiWord):
+                wikiWord = "[%s]" % wikiWord
+            if not WikiFormatting.isWikiWord(wikiWord):
+                self.displayErrorMessage(u"'%s' is an invalid WikiWord" % wikiWord)
+                return False
+
+            if self.wikiData.isDefinedWikiWord(wikiWord):
+                self.displayErrorMessage(u"'%s' exists already" % wikiWord)  # TODO Allow retry or append/replace
+                return False
+
+            text = self.editor.GetSelectedText()
+            page = self.wikiData.createPage(wikiWord)
+            self.editor.ReplaceSelection(wikiWord)
+            title = self.getWikiPageTitle(wikiWord)
+            self.saveWikiPage(page.wikiWord, page, u"++ %s\n\n%s" % (title, text))
+
+
+    def showIconSelectDialog(self):
+        dlg = IconSelectDialog(self, -1)
+        dlg.CenterOnParent(wxBOTH)
+        iconname = None
+        if dlg.ShowModal() == wxID_OK:
+            iconname = dlg.GetValue()
+
+        dlg.Destroy()
+
+        if iconname:
+            self.insertAttribute("icon", iconname)
+
+    def showDateformatDialog(self):
+        fmt = self.configuration.get("main", "strftime")
+
+        dlg = DateformatDialog(self, -1, deffmt = fmt)
+        dlg.CenterOnParent(wxBOTH)
+        dateformat = None
+
+        if dlg.ShowModal() == wxID_OK:
+            dateformat = dlg.GetValue()
+        dlg.Destroy()
+
+        if not dateformat is None:
+            self.configuration.set("main", "strftime", dateformat)
+
+
+    def showOptionsDialog(self):
+        dlg = OptionsDialog(self, -1)
+        dlg.CenterOnParent(wxBOTH)
+
+        result = dlg.ShowModal()
+        dlg.Destroy()
+
+        if result == wxID_OK:
+            # Perform operations to reset GUI parts after option changes
+            self.setShowOnTray()
+            self.setHideUndefined()
+
+
+    def showExportDialog(self):
+        dlg = ExportDialog(self, -1)
+        dlg.CenterOnParent(wxBOTH) #?
+
+        result = dlg.ShowModal()
+        dlg.Destroy()
+
+        if result == wxID_OK:
+            pass
+
 
     def exportWiki(self, type):
         dlg = wxDirDialog(self, "Select Export Directory", self.getLastActiveDir(), style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
@@ -1583,21 +2012,22 @@ class PersonalWikiFrame(wxFrame):
             exporter = HtmlExporter(self)
             dir = dlg.GetPath()
             exporter.export(type, dir)
-            self.globalConfig.set("main", "last_active_dir", dir)
+            self.configuration.set("main", "last_active_dir", dir)
 
+    # TODO: Should be more general to support other databases
+    def rebuildWiki(self, skipConfirm = False):
+        if not skipConfirm:
+            result = wxMessageBox("Are you sure you want to rebuild this wiki? You may want to backup your data first!",
+                    'Rebuild wiki', wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
 
-    def rebuildWiki(self):
-        dlg=wxMessageDialog(self, "Are you sure you want to rebuild this wiki? You may want to backup your data first!",
-                            'Rebuild wiki', wxYES_NO)
-        result = dlg.ShowModal()
-        if result == wxID_YES:
+        if skipConfirm or result == wxYES :
             # get all of the wikiWords
-            wikiWords = self.wikiData.getAllWikiWordsFromDisk()
+            wikiWords = self.wikiData.getAllPageNamesFromDisk()   # Replace this call
             # get the saved searches
             searches = self.wikiData.getSavedSearches()
 
-            # close nulls the wikiConfigFile var, so save it
-            wikiConfigFile = self.wikiConfigFile
+            # close nulls the wikiConfigFilename var, so save it
+            wikiConfigFilename = self.wikiConfigFilename
             # first close the existing wiki
             self.closeWiki()
 
@@ -1615,12 +2045,13 @@ class PersonalWikiFrame(wxFrame):
                 for wikiWord in wikiWords:
                     progress.Update(step, "Rebuilding %s" % wikiWord)
                     wikiPage = wikiData.createPage(wikiWord)
+                    wikiData.updatePageEntry(wikiWord)
                     wikiPage.update(wikiPage.getContent(), False)
                     step = step + 1
 
                 # resave searches
                 for search in searches:
-                    progress.Update(step, "Readding search %s" % search)
+                    progress.Update(step, "Reading search %s" % search)
                     wikiData.saveSearch(search)
 
                 wikiData.close()
@@ -1628,24 +2059,24 @@ class PersonalWikiFrame(wxFrame):
 
             except Exception, e:
                 self.displayErrorMessage("Error rebuilding wiki", e)
-
-            self.openWiki(wikiConfigFile)
+                traceback.print_exc()
+            self.openWiki(wikiConfigFilename)
 
 
     def insertAttribute(self, name, value):
         pos = self.editor.GetCurrentPos()
         self.editor.GotoPos(self.editor.GetLength())
-        self.editor.AddText("\n\n[%s=%s]" % (name, value))
+        self.editor.AddText(u"\n\n[%s=%s]" % (name, value))
         self.editor.GotoPos(pos)
         self.saveCurrentWikiPage()
 
+    def insertDate(self):
+        # strftime can't handle unicode correctly, so conversion is needed
+        mstr = mbcsEnc(self.configuration.get("main", "strftime"), "replace")[0]
+        self.editor.AddText(mbcsDec(strftime(mstr), "replace")[0])
 
     def getLastActiveDir(self):
-        if self.globalConfig.has_option("main", "last_active_dir"):
-            return self.globalConfig.get("main", "last_active_dir")
-        else:
-            return os.getcwd()
-
+        return self.configuration.get("main", "last_active_dir", os.getcwd())
 
     def displayMessage(self, title, str):
         "pops up a dialog box"
@@ -1656,7 +2087,7 @@ class PersonalWikiFrame(wxFrame):
 
     def displayErrorMessage(self, errorStr, e=""):
         "pops up a error dialog box"
-        dlg_m = wxMessageDialog(self, "%s. %s." % (errorStr, e), 'Error!', wxOK)
+        dlg_m = wxMessageDialog(self, uniToGui("%s. %s." % (errorStr, e)), 'Error!', wxOK)
         dlg_m.ShowModal()
         dlg_m.Destroy()
         try:
@@ -1698,16 +2129,16 @@ class PersonalWikiFrame(wxFrame):
                                  "Create New Wiki", "MyWiki", wxOK | wxCANCEL)
 
         if dlg.ShowModal() == wxID_OK:
-            wikiName = dlg.GetValue()
+            wikiName = guiToUni(dlg.GetValue())
 
             # make sure this is a valid wiki word
-            if wikiName.find(' ') == -1 and WikiFormatting.isWikiWord(wikiName):
+            if wikiName.find(u' ') == -1 and WikiFormatting.isWikiWord(wikiName):
                 dlg = wxDirDialog(self, "Directory to store new wiki", self.getLastActiveDir(), style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
                 if dlg.ShowModal() == wxID_OK:
                     try:
                         self.newWiki(wikiName, dlg.GetPath())
                     except IOError, e:
-                        self.displayErrorMessage('There was an creating your new Wiki.', e)
+                        self.displayErrorMessage('There was an error while creating your new Wiki.', e)
             else:
                 self.displayErrorMessage("'%s' is an invalid WikiWord. There must be no spaces and mixed caps" % wikiName)
 
@@ -1721,7 +2152,7 @@ class PersonalWikiFrame(wxFrame):
 
 
     def OnWikiPageUpdate(self, wikiPage):
-        self.tree.buildTreeForWord(self.currentWikiWord)
+        self.tree.buildTreeForWord(wikiPage.wikiWord)    # self.currentWikiWord)
 
 
     def OnFind(self, evt, next=False, replace=False, replaceAll=False):
@@ -1736,16 +2167,20 @@ class PersonalWikiFrame(wxFrame):
         if flags == 5 or flags == 7:
             matchCase = True
 
-        findString = evt.GetFindString()
+        findString = guiToUni(evt.GetFindString())
         if matchWholeWord:
-            findString = "\\b%s\\b" % findString
+            findString = u"\\b%s\\b" % findString
 
         if et == wxEVT_COMMAND_FIND:
             self.editor.executeSearch(findString, caseSensitive=matchCase)
         elif et == wxEVT_COMMAND_FIND_NEXT:
             self.editor.executeSearch(findString, next=True, caseSensitive=matchCase)
         elif et == wxEVT_COMMAND_FIND_REPLACE:
-            self.lastFindPos = self.editor.executeSearch(findString, self.lastFindPos, self.lastFindPos > -1, replacement=evt.GetReplaceString(), caseSensitive=matchCase)
+            self.lastFindPos = self.editor.executeSearch(findString,
+                    self.lastFindPos, self.lastFindPos > -1,
+                    replacement=guiToUni(evt.GetReplaceString()),
+                    caseSensitive=matchCase)
+                    
         elif et == wxEVT_COMMAND_FIND_REPLACE_ALL:
             lastReplacePos = -1
             while(1):
@@ -1762,7 +2197,7 @@ class PersonalWikiFrame(wxFrame):
 
 
     def OnIdle(self, evt):
-        if not self.autoSave:
+        if not self.configuration.getboolean("main", "auto_save"):  # self.autoSave:
             return
         # check if the current wiki page needs to be saved
         if self.currentWikiPage:
@@ -1774,6 +2209,7 @@ class PersonalWikiFrame(wxFrame):
                     if saveDirty:
                         if (currentTime - self.currentWikiPage.lastSave) > 15:
                             self.saveCurrentWikiPage()
+                            self.wikiData.commit()  # Only necessary for WPCompact
                     elif updateDirty:
                         if (currentTime - self.currentWikiPage.lastUpdate) > 5:
                             self.updateRelationships()
@@ -1784,18 +2220,28 @@ class PersonalWikiFrame(wxFrame):
         # update the size/pos of the global config
         if not self.IsIconized():
             curSize = self.GetSize()
-            self.globalConfig.set("main", "size_x", str(curSize.x))
-            self.globalConfig.set("main", "size_y", str(curSize.y))
+            self.configuration.set("main", "size_x", curSize.x)
+            self.configuration.set("main", "size_y", curSize.y)
             curPos = self.GetPosition()
-            self.globalConfig.set("main", "pos_x", str(curPos.x))
-            self.globalConfig.set("main", "pos_y", str(curPos.y))
+            self.configuration.set("main", "pos_x", curPos.x)
+            self.configuration.set("main", "pos_y", curPos.y)
+
+        # windowmode:  0=normal, 1=maximized, 2=iconized, 3=maximized iconized
+
+        windowmode = 0
+        if self.IsMaximized():
+            windowmode |= 1
+        if self.IsIconized():
+            windowmode |= 2
+
+        self.configuration.set("main", "windowmode", windowmode)
 
         splitterPos = self.vertSplitter.GetSashPosition()
         if splitterPos == 0:
             splitterPos = self.lastSplitterPos
-        self.globalConfig.set("main", "splitter_pos", str(splitterPos))
-        self.globalConfig.set("main", "zoom", str(self.editor.GetZoom()))
-        self.globalConfig.set("main", "wiki_history", ";".join(self.wikiHistory))
+        self.configuration.set("main", "splitter_pos", splitterPos)
+        self.configuration.set("main", "zoom", self.editor.GetZoom())
+        self.configuration.set("main", "wiki_history", ";".join(self.wikiHistory))
         self.writeGlobalConfig()
 
         # save the current wiki state
@@ -1805,77 +2251,17 @@ class PersonalWikiFrame(wxFrame):
         self.wikidPadHooks.exit(self)
 
         wxTheClipboard.Flush()
+        if self.wikiData:
+            self.wikiData.close()
+
+        if self.tbIcon is not None:
+            if self.tbIcon.IsIconInstalled():
+                self.tbIcon.RemoveIcon()
+                
+            self.tbIcon.Destroy()
+            self.tbIcon = None
+
         self.Destroy()
-
-
-class OpenWikiWordDialog(wxDialog):
-    def __init__(self, pWiki, ID, title="Open Wiki Word",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D):
-        wxDialog.__init__(self, pWiki, ID, title, pos, size, style)
-        self.pWiki = pWiki
-
-        # Now continue with the normal construction of the dialog
-        # contents
-        sizer = wxBoxSizer(wxVERTICAL)
-
-        label = wxStaticText(self, -1, "Open Wiki Word")
-        sizer.Add(label, 0, wxALIGN_CENTRE|wxALL, 5)
-
-        box = wxBoxSizer(wxVERTICAL)
-
-        self.text = wxTextCtrl(self, -1, "", size=wxSize(145, -1))
-        box.Add(self.text, 0, wxALIGN_CENTRE|wxALL, 5)
-
-        self.lb = wxListBox(self, -1, wxDefaultPosition, wxSize(145, 200), [], wxLB_SINGLE)
-        box.Add(self.lb, 1, wxALIGN_CENTRE|wxALL, 5)
-
-        sizer.Add(box, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5)
-
-        line = wxStaticLine(self, -1, size=(20,-1), style=wxLI_HORIZONTAL)
-        sizer.Add(line, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxRIGHT|wxTOP, 5)
-
-        box = wxBoxSizer(wxHORIZONTAL)
-
-        btn = wxButton(self, wxID_OK, " OK ")
-        btn.SetDefault()
-        box.Add(btn, 0, wxALIGN_CENTRE|wxALL, 5)
-
-        btn = wxButton(self, wxID_CANCEL, " Cancel ")
-        box.Add(btn, 0, wxALIGN_CENTRE|wxALL, 5)
-
-        sizer.Add(box, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5)
-
-        self.SetSizer(sizer)
-        self.SetAutoLayout(True)
-        sizer.Fit(self)
-
-        self.value = None
-
-        EVT_TEXT(self, ID, self.OnText)
-        EVT_LISTBOX(self, ID, self.OnListBox)
-
-    def GetValue(self):
-        if self.pWiki.wikiData.isWikiWord(self.value):
-            return self.value
-        else:
-            words = self.pWiki.wikiData.getWikiWordsWith(self.value.lower())
-            if len(words) > 0:
-                return words[0]
-            else:
-                self.pWiki.displayErrorMessage("'%s' is not an existing wikiword" % self.value)
-                return None
-
-    def OnText(self, evt):
-        self.value = evt.GetString()
-        self.lb.Clear()
-        if len(self.value) > 0:
-            words = self.pWiki.wikiData.getWikiWordsWith(self.value.lower())
-            for word in words:
-                self.lb.Append(word)
-
-    def OnListBox(self, evt):
-        self.value = evt.GetString()
 
 
 class SearchDialog(wxDialog):
@@ -1894,11 +2280,11 @@ class SearchDialog(wxDialog):
 
         box = wxBoxSizer(wxVERTICAL)
 
-        self.text = wxTextCtrl(self, -1, "", size=wxSize(165, -1))
+        self.text = wxTextCtrl(self, -1, "", size=wxSize(165, -1), style=wxTE_PROCESS_ENTER)
         box.Add(self.text, 0, wxALIGN_CENTRE|wxALL, 5)
 
         btn = wxButton(self, wxID_FIND, " Search ")
-        btn.SetDefault()
+        ## btn.SetDefault()  # Otherwise return wouldn't be processed in listbox correctly
         box.Add(btn, 0, wxALIGN_CENTRE|wxALL, 5)
 
         self.lb = wxListBox(self, -1, wxDefaultPosition, wxSize(165, 200), [], wxLB_SINGLE)
@@ -1930,24 +2316,26 @@ class SearchDialog(wxDialog):
 
         EVT_BUTTON(self, wxID_FIND, self.OnSearch)
         EVT_BUTTON(self, wxID_SAVE, self.OnSave)
+        EVT_CHAR(self.text, self.OnCharText)
+        EVT_CHAR(self.lb, self.OnCharListBox)
         EVT_LISTBOX(self, ID, self.OnListBox)
         EVT_LISTBOX_DCLICK(self, ID, self.OnListBoxDClick)
 
     def GetValue(self):
         if self.value:
-            return (self.value, self.text.GetValue())
+            return (self.value, guiToUni(self.text.GetValue()))
         elif self.lb.GetCount() > 0:
-            return (self.lb.GetString(0), self.text.GetValue())
+            return (guiToUni(self.lb.GetString(0)), guiToUni(self.text.GetValue()))
 
     def OnSearch(self, evt):
-        forStr = self.text.GetValue()
+        forStr = guiToUni(self.text.GetValue())
         self.lb.Clear()
         if len(forStr) > 0:
             for word in self.pWiki.wikiData.search(forStr):
                 self.lb.Append(word)
 
     def OnSave(self, evt):
-        forStr = self.text.GetValue()
+        forStr = guiToUni(self.text.GetValue())
         if len(forStr) > 0:
             self.pWiki.wikiData.saveSearch(forStr)
             self.EndModal(wxID_CANCEL)
@@ -1955,10 +2343,34 @@ class SearchDialog(wxDialog):
             self.pWiki.displayErrorMessage("Invalid search string, can't save as view")
 
     def OnListBox(self, evt):
-        self.value = evt.GetString()
+        self.value = guiToUni(evt.GetString())
 
     def OnListBoxDClick(self, evt):
         self.EndModal(wxID_OK)
+
+    def OnCharText(self, evt):
+        if (evt.GetKeyCode() == WXK_DOWN):
+            if not self.lb.IsEmpty():
+                self.lb.SetFocus()
+                self.lb.SetSelection(0)
+        elif (evt.GetKeyCode() == WXK_UP):
+            pass
+        elif (evt.GetKeyCode() in (WXK_RETURN, WXK_NUMPAD_ENTER)):
+            self.OnSearch(evt)
+            if not self.lb.IsEmpty():
+                self.lb.SetFocus()
+                self.lb.SetSelection(0)
+        else:
+            evt.Skip()
+
+    def OnCharListBox(self, evt):
+        if (evt.GetKeyCode() == WXK_UP) and (self.lb.GetSelection() == 0):
+            self.text.SetFocus()
+            self.lb.Deselect(0)
+        elif (evt.GetKeyCode() in (WXK_RETURN, WXK_NUMPAD_ENTER)):
+            self.OnListBoxDClick(evt)
+        else:
+            evt.Skip()
 
 
 class SavedSearchesDialog(wxDialog):
@@ -2021,7 +2433,8 @@ class SavedSearchesDialog(wxDialog):
             self.EndModal(wxID_CANCEL)
 
     def OnListBox(self, evt):
-        self.value = evt.GetString()
+        self.value = guiToUni(evt.GetString())
+
 
 
 class AboutDialog(wxDialog):
@@ -2042,10 +2455,14 @@ wikidPad is a Wiki-like notebook for storing your thoughts, ideas, todo lists, c
 What makes wikidPad different from other notepad applications is the ease with which you can cross-link your information.        </p>        
         <br><br>
 
-        <table border=0 cellpadding=1 cellspacing=0>            
+        <table border=0 cellpadding=1 cellspacing=0>
             <tr><td width="30%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Jason Horman</font></td></tr>
             <tr><td width="30%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">wikidpad@jhorman.org</font></td></tr>
             <tr><td width="30%" align="right"><font size="3"><b>URL:</b></font></td><td nowrap><font size="3">http://www.jhorman.org/wikidPad/</font></td></tr>
+            <tr><td width="30%" align="right">&nbsp;</td></tr>
+            <tr><td width="30%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Michael Butscher</font></td></tr>
+            <tr><td width="30%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">mbutscher@gmx.de</font></td></tr>
+            <tr><td width="30%" align="right"><font size="3"><b>URL:</b></font></td><td nowrap><font size="3">http://www.mbutscher.nextdesigns.net/software.html</font></td></tr>
         </table>
     </center>
 </body>
@@ -2079,7 +2496,36 @@ What makes wikidPad different from other notepad applications is the ease with w
         self.SetAutoLayout(True)
         self.Layout()
         self.CentreOnParent(wxBOTH)
-        
+
+
+class TaskBarIcon(wxTaskBarIcon):
+    def __init__(self, pwiki):
+        wxTaskBarIcon.__init__(self)
+        self.pwiki = pwiki
+
+        # Register menu events
+        EVT_MENU(self, GUI_ID.TBMENU_RESTORE, self.OnLeftUp)
+        EVT_MENU(self, GUI_ID.TBMENU_SAVE, lambda evt: (self.pwiki.saveCurrentWikiPage(),
+                self.pwiki.wikiData.commit()))
+        EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pwiki.Close())
+
+        EVT_TASKBAR_LEFT_UP(self, self.OnLeftUp)
+
+    def OnLeftUp(self, evt):
+        if self.pwiki.IsIconized():
+            self.pwiki.Iconize(False)
+            self.pwiki.Show(True)
+            self.pwiki.Raise()
+
+    def CreatePopupMenu(self):
+        # Build menu
+        tbMenu = wxMenu()
+        tbMenu.Append(GUI_ID.TBMENU_RESTORE, '&Restore')
+        tbMenu.Append(GUI_ID.TBMENU_SAVE, '&Save\t')
+        tbMenu.Append(GUI_ID.TBMENU_EXIT, 'E&xit')
+
+        return tbMenu
+
 
 def importCode(code,name,add_to_sys_modules=0):
     """
@@ -2110,3 +2556,6 @@ def importCode(code,name,add_to_sys_modules=0):
         sys.modules[name] = module
 
     return module
+
+
+

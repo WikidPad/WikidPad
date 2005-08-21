@@ -1,5 +1,6 @@
 * text=auto !eol
 /WikidPad.py -text
+/WikidPad.xrc -text
 WikidPadHelp/WikidPadHelp.wiki -text
 WikidPadHelp/data/ApiDocs.wiki -text
 WikidPadHelp/data/AutoCompletion.wiki -text
@@ -292,6 +293,7 @@ docs/dev.txt -text
 export/wikistyle.css -text
 extensions/EvalLibrary.py -text
 extensions/KeyBindings.py -text
+extensions/Presentation.py -text
 extensions/WikiSyntax.py -text
 extensions/WikidPadHooks.py -text
 gadfly-1.0.0/CHANGES.txt -text
@@ -539,6 +541,7 @@ icons/tb_bold.gif -text
 icons/tb_copy.gif -text
 icons/tb_cut.gif -text
 icons/tb_cycle.gif -text
+icons/tb_date.gif -text
 icons/tb_delete.gif -text
 icons/tb_doc.gif -text
 icons/tb_forward.gif -text
@@ -547,6 +550,7 @@ icons/tb_home.gif -text
 icons/tb_italic.gif -text
 icons/tb_lens.gif -text
 icons/tb_paste.gif -text
+icons/tb_pin.gif -text
 icons/tb_rename.gif -text
 icons/tb_save.gif -text
 icons/tb_seperator.gif -text
@@ -618,20 +622,24 @@ lib/gadfly/sql.pyo -text
 lib/gadfly/store.py -text
 lib/gadfly/store.pyc -text
 lib/gadfly/store.pyo -text
-lib/pwiki/Config.py -text
+lib/pwiki/AdditionalDialogs.py -text
+lib/pwiki/Configuration.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
 lib/pwiki/PersonalWikiFrame.py -text
-lib/pwiki/TextWrapper.py -text
+lib/pwiki/StringOps.py -text
 lib/pwiki/WikiData.py -text
+lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiFormatting.py -text
 lib/pwiki/WikiTreeCtrl.py -text
 lib/pwiki/WikiTxtCtrl.py -text
 lib/pwiki/__init__.py -text
+lib/pwiki/macurl2path_red.py -text
+lib/pwiki/nturl2path_red.py -text
+lib/pwiki/urllib_red.py -text
+lib/pwiki/wxHelper.py -text
 lib/readme.txt -text
 /license.txt -text
 /pwiki.ico -text
 /setup.py -text
 /sql_mar.py -text
-/sql_mar.pyc -text
-/sql_mar.pyo -text

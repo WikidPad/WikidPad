@@ -116,7 +116,7 @@ getChildRelationships(wikiWord)
 getParentRelationships(wikiWord)
     Returns array of the words that are parents of the word passed in.
 
-getAllWords()
+getAllDefinedWords()
     Get all of the wiki words in the wiki.
 
 getAllAliases()

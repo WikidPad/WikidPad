@@ -1,5 +1,7 @@
 from Enum import Enumeration
-from Config import faces
+# from Config import faces
+
+import re
 
 FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord2", "WikiWord", "AvailWikiWord",                                          
                                           "Bold", "Italic", "Heading4", "Heading3", "Heading2", "Heading1",
@@ -28,6 +30,8 @@ def initialize(wikiSyntax):
     global SuppressHighlightingRE
     global ToDoREWithCapturing
     global FormatExpressions
+    global CombinedWithCamelCaseRE
+    global CombinedWithoutCamelCaseRE
     
     BoldRE = wikiSyntax.BoldRE
     ItalicRE = wikiSyntax.ItalicRE
@@ -52,13 +56,45 @@ def initialize(wikiSyntax):
     # used in the tree control to parse saved todos
     ToDoREWithCapturing = wikiSyntax.ToDoREWithCapturing
     
-    FormatExpressions = [(SuppressHighlightingRE, FormatTypes.Default), (ScriptRE, FormatTypes.Script), (PropertyRE, FormatTypes.Property),
-                         (UrlRE, FormatTypes.Url), (ToDoRE, FormatTypes.ToDo),
-                         (WikiWordRE2, FormatTypes.WikiWord2), (WikiWordRE, FormatTypes.WikiWord), (BoldRE, FormatTypes.Bold),
-                         (ItalicRE, FormatTypes.Italic), (Heading3RE, FormatTypes.Heading3), (Heading4RE, FormatTypes.Heading4),
-                         (Heading2RE, FormatTypes.Heading2), (Heading1RE, FormatTypes.Heading1)]
+##    FormatExpressions = [(SuppressHighlightingRE, FormatTypes.Default), (ScriptRE, FormatTypes.Script), (PropertyRE, FormatTypes.Property),
+##                         (UrlRE, FormatTypes.Url), (ToDoRE, FormatTypes.ToDo),
+##                         (WikiWordRE2, FormatTypes.WikiWord2), (WikiWordRE, FormatTypes.WikiWord), (BoldRE, FormatTypes.Bold),
+##                         (ItalicRE, FormatTypes.Italic), (Heading3RE, FormatTypes.Heading3), (Heading4RE, FormatTypes.Heading4),
+##                         (Heading2RE, FormatTypes.Heading2), (Heading1RE, FormatTypes.Heading1)]
 
-def getStyles(styleFaces=faces):
+# Reordered version, most specific first
+
+    FormatExpressions = [
+            (SuppressHighlightingRE, FormatTypes.Default),
+            (ScriptRE, FormatTypes.Script),
+            (UrlRE, FormatTypes.Url),
+            (ToDoRE, FormatTypes.ToDo),
+            (PropertyRE, FormatTypes.Property),
+            (WikiWordRE2, FormatTypes.WikiWord2),
+            (WikiWordRE, FormatTypes.WikiWord),
+            (BoldRE, FormatTypes.Bold),
+            (ItalicRE, FormatTypes.Italic),
+            (Heading4RE, FormatTypes.Heading4),
+            (Heading3RE, FormatTypes.Heading3),
+            (Heading2RE, FormatTypes.Heading2),
+            (Heading1RE, FormatTypes.Heading1)
+            ]
+
+    # Build combined regexps
+    WithCamelCase = []
+    WithoutCamelCase = []
+    for r, s in FormatExpressions:
+        WithCamelCase.append((u"(?P<style%i>" % s) + r.pattern + u")")
+        if not s is FormatTypes.WikiWord:
+            WithoutCamelCase.append((u"(?P<style%i>" % s) + r.pattern + u")")
+
+
+    CombinedWithCamelCaseRE = re.compile(u"|".join(WithCamelCase), re.DOTALL | re.LOCALE | re.MULTILINE | re.UNICODE)
+    CombinedWithoutCamelCaseRE = re.compile(u"|".join(WithoutCamelCase), re.DOTALL | re.LOCALE | re.MULTILINE | re.UNICODE)
+    
+
+
+def getStyles(styleFaces):
     return [(FormatTypes.Default, "face:%(mono)s,size:%(size)d" % styleFaces),
             (FormatTypes.WikiWord, "fore:#000000,underline,face:%(mono)s,size:%(size)d" % styleFaces),      
             (FormatTypes.AvailWikiWord, "fore:#0000BB,underline,face:%(mono)s,size:%(size)d" % styleFaces),      
