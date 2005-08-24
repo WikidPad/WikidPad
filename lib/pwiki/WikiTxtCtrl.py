@@ -329,9 +329,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         # print "buildStyling start", self.wikiWordsEnabled
         if self.wikiWordsEnabled:
-            combre = WikiFormatting.CombinedWithCamelCaseRE
+            combre = WikiFormatting.CombinedSyntaxHighlightWithCamelCaseRE
         else:
-            combre = WikiFormatting.CombinedWithoutCamelCaseRE
+            combre = WikiFormatting.CombinedSyntaxHighlightWithoutCamelCaseRE
 
         charstylepos = 0  # styling position in characters in text
         styleresult = []
@@ -604,8 +604,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.anchorCharPosition = -1
 
 
-    # TODO UNICODE
-        
     def rewrapText(self):
         curPos = self.GetCurrentPos()
 
@@ -779,12 +777,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 else:
                     match = WikiFormatting.NumericBulletRE.search(previousLine)
                     if match:
-                        prevNumStr = match.group(2)
+                        prevNumStr = match.group(3)
                         prevNum = int(prevNumStr)
                         nextNum = prevNum+1
                         adjustment = len(str(nextNum)) - len(prevNumStr)
 
-                        self.AddText(u"%s%d. " % (u" " * (self.GetLineIndentation(currentLine-1) - adjustment), int(prevNum)+1))
+                        self.AddText(u"%s%s%d. " % (u" " * (self.GetLineIndentation(currentLine-1) - adjustment), match.group(2), int(prevNum)+1))
                     else:
                         self.AddText(u" " * self.GetLineIndentation(currentLine-1))
 

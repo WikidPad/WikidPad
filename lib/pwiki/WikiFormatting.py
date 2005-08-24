@@ -30,8 +30,8 @@ def initialize(wikiSyntax):
     global SuppressHighlightingRE
     global ToDoREWithCapturing
     global FormatExpressions
-    global CombinedWithCamelCaseRE
-    global CombinedWithoutCamelCaseRE
+    global CombinedSyntaxHighlightWithCamelCaseRE
+    global CombinedSyntaxHighlightWithoutCamelCaseRE
     
     BoldRE = wikiSyntax.BoldRE
     ItalicRE = wikiSyntax.ItalicRE
@@ -89,8 +89,12 @@ def initialize(wikiSyntax):
             WithoutCamelCase.append((u"(?P<style%i>" % s) + r.pattern + u")")
 
 
-    CombinedWithCamelCaseRE = re.compile(u"|".join(WithCamelCase), re.DOTALL | re.LOCALE | re.MULTILINE | re.UNICODE)
-    CombinedWithoutCamelCaseRE = re.compile(u"|".join(WithoutCamelCase), re.DOTALL | re.LOCALE | re.MULTILINE | re.UNICODE)
+    CombinedSyntaxHighlightWithCamelCaseRE = \
+            re.compile(u"|".join(WithCamelCase),
+                    re.DOTALL | re.LOCALE | re.MULTILINE | re.UNICODE)
+    CombinedSyntaxHighlightWithoutCamelCaseRE = \
+            re.compile(u"|".join(WithoutCamelCase),
+                    re.DOTALL | re.LOCALE | re.MULTILINE | re.UNICODE)
     
 
 

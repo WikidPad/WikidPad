@@ -24,9 +24,12 @@ UrlRE           = re.compile(u"((?:wiki|file|https?|ftp|mailto)://[^\s<]*)",
 
 
 # The following 3 are not in WikiFormatting.FormatExpressions
-BulletRE        = re.compile(u"^(\s*)(\*)\s([^\\n]*)")
-NumericBulletRE = re.compile(u"^(\s*)(\d+)\.\s([^\\n]*)")
-IndentedContentRE = re.compile(u"^((?:\s{4})+)()([^\\n]*)")
+BulletRE        = re.compile(ur"^(\s*)(\*)\s([^\n]*)",
+        re.DOTALL | re.LOCALE | re.MULTILINE)
+NumericBulletRE = re.compile(ur"^(\s*)((?:\d+\.)*)(\d+)\.\s([^\n]*)",
+        re.DOTALL | re.LOCALE | re.MULTILINE)
+IndentedContentRE = re.compile(ur"^((?:\s{4})+)()([^\n]*)",
+        re.DOTALL | re.LOCALE | re.MULTILINE)
 
 # WikiWords
 #WikiWordRE      = re.compile(r"\b(?<!~)(?:[A-Z\xc0-\xde\x8a-\x8f]+[a-z\xdf-\xff\x9a-\x9f]+[A-Z\xc0-\xde\x8a-\x8f]+[a-zA-Z0-9\xc0-\xde\x8a-\x8f\xdf-\xff\x9a-\x9f]*|[A-Z\xc0-\xde\x8a-\x8f]{2,}[a-z\xdf-\xff\x9a-\x9f]+)\b")

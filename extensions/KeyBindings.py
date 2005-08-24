@@ -37,6 +37,7 @@ ReplaceTextByWikiword="Ctrl-Shift-R"
 RewrapText="Ctrl-W"
 Eval="Ctrl-E"
 InsertDate="Ctrl-Alt-D"
+MakeWikiWord="Ctrl-J"
 
 def makeBold(editor):
     editor.styleSelection(u'*')
@@ -49,3 +50,11 @@ def addHeading(editor):
     editor.CmdKeyExecute(wxSTC_CMD_HOME)
     editor.AddText(u'+')
     editor.GotoPos(bytePos)
+
+def makeWikiWord(editor):
+    text = editor.GetSelectedText()
+    text = text.replace(u"'", u"")
+    text = text[0:1].upper() + text[1:]
+    text = u"[" + text + u"]"
+    editor.ReplaceSelection(text)
+

@@ -193,7 +193,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         
         # Refresh subtree
         
-        ## self.Freeze() # Stop visual updates
+        self.Freeze() # Stop visual updates
         if self.IsExpanded(treeNode):
             treeChildren = self.getChildTreeNodes(treeNode)
         else:
@@ -232,7 +232,7 @@ class WikiTreeCtrl(wxTreeCtrl):
             if not self.findChildTreeNodeWithText(treeNode, "Views"):
                 viewNode = self.addViewNode(treeNode, "Views", icon="orgchart")
                 
-        ## self.Thaw() # Allow visual updates again
+        self.Thaw() # Allow visual updates again
         
         return treeNode
         
@@ -258,7 +258,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         if not nodeValue:
             nodeValue = nodeText
         nodeText = getTextForNode(nodeText)
-        newNode = self.AppendItem(parentNode, mbcsEnc(nodeText, "replace")[0])
+        newNode = self.AppendItem(parentNode, uniToGui(nodeText))
         self.SetPyData(newNode, (nodeValue, viewData, searchData))
 
         # if applyProps true format the node according to its properties
@@ -447,7 +447,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
         elif name == "searches":
             for search in wikiData.getSavedSearches():     # ???
-                self.addViewNode(viewNode, search, "%s~searchFor" % name, icon="lens")
+                self.addViewNode(viewNode, search, u"%s~searchFor" % name, icon="lens")
 
         elif name == "modified-within":
             self.addViewNode(viewNode, "1 day", "1~modifiedWithin", icon="date")
@@ -563,8 +563,6 @@ class WikiTreeCtrl(wxTreeCtrl):
         event.Skip()
                     
     def OnTreeItemExpand(self, event):
-        ## print "OnTreeItemExpand start"
-        ## _prof.start()
         item = event.GetItem()
         if not self.isViewNode(item):
             
@@ -573,8 +571,6 @@ class WikiTreeCtrl(wxTreeCtrl):
             self.expandTreeNode(item)
         else:
             self.expandView(item)
-        ## _prof.stop()
-        ## print "OnTreeItemExpand stop"
 
     def OnTreeItemCollapse(self, event):
         self.DeleteChildren(event.GetItem())

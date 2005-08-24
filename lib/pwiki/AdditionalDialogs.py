@@ -490,7 +490,6 @@ class ExportDialog(wxDialog):
 #             ]
 
 
-        # ['Single HTML page', 'Set of HTML pages', 'XML file', 'Set of *.wiki files']
         for e in self.exporterList:
             e[3].Show(False)
             e[3].Enable(False)
@@ -540,10 +539,10 @@ class ExportDialog(wxDialog):
         # Run exporter
         ob, t, desc, panel = \
                 self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
-                
+
         ob.export(self.pWiki, self.pWiki.wikiData, wordList, t, 
-                self.ctrls.tfDirectory.GetValue(), panel)
- 
+                self.ctrls.tfDirectory.GetValue(), ob.getAddOpt(panel))
+
         self.EndModal(wxID_OK)
 
         

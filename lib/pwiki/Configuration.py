@@ -16,7 +16,7 @@ def isUnicode():
 
 from StringOps import utf8Enc, utf8Dec, mbcsDec, strToBool
 
-
+Error = ConfigParser.Error
 
 def _setValue(section, option, value, config):
     """

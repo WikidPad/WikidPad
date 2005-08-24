@@ -1,4 +1,4 @@
-from Configuration import createConfiguration
+
 import os, gc, traceback
 from os.path import *
 from time import localtime, time, strftime
@@ -8,11 +8,13 @@ from wxPython.stc import *
 from wxPython.html import *
 from wxHelper import GUI_ID
 
+import Configuration
+from Configuration import createConfiguration
 from WikiData import *
 from WikiTxtCtrl import *
 from WikiTreeCtrl import *
 from AdditionalDialogs import *
-from Exporters import *
+import Exporters
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc
 import WikiFormatting
 
@@ -90,6 +92,47 @@ _COLORS = [
 
 
 
+class wxGuiProgressHandler:
+    """
+    Implementation of a GuiProgressListener to
+    show a wxProgressDialog
+    """
+    def __init__(self, title, msg, addsteps, parent, flags=wxPD_APP_MODAL):
+        self.title = title
+        self.msg = msg
+        self.addsteps = addsteps
+        self.parent = parent
+        self.flags = flags
+
+    def open(self, sum):
+        """
+        Start progress handler, set the number of steps, the operation will
+        take in sum. Will be called once before update()
+        is called several times
+        """
+        self.progDlg = wxProgressDialog(self.title, self.msg,
+                sum + self.addsteps, self.parent, self.flags)
+        
+    def update(self, step, msg):
+        """
+        Called after a step is finished to trigger update
+        of GUI.
+        step -- Number of done steps
+        msg -- Human readable descripion what is currently done
+        returns: True to continue, False to stop operation
+        """
+        self.progDlg.Update(step, uniToGui(msg))
+        return True
+
+    def close(self):
+        """
+        Called after finishing operation or after abort to 
+        do clean-up if necessary
+        """
+        self.progDlg.Destroy()
+        self.progDlg = None
+
+
 
 class PersonalWikiFrame(wxFrame):
     def __init__(self, parent, id, title, wikiToOpen, wikiWordToOpen):
@@ -157,8 +200,11 @@ class PersonalWikiFrame(wxFrame):
         self.wikidPadHooks.startup(self)
 
         # if it already exists read it in
-        if (exists(self.globalConfigLoc)):
-            self.configuration.loadGlobalConfig(self.globalConfigLoc)
+        if exists(self.globalConfigLoc):
+            try:
+                self.configuration.loadGlobalConfig(self.globalConfigLoc)
+            except Configuration.Error:
+                self.createDefaultGlobalConfig()
         else:
             self.createDefaultGlobalConfig()
 
@@ -400,37 +446,40 @@ class PersonalWikiFrame(wxFrame):
 
         wikiMenu.AppendSeparator()
 
-#         menuID=wxNewId()
-#         wikiMenu.Append(menuID, 'Export Dialog', 'Export  Dialog')
-#         EVT_MENU(self, menuID, lambda evt: self.showExportDialog())
-
-
         exportWikisMenu = wxMenu()
         wikiMenu.AppendMenu(wxNewId(), 'Export', exportWikisMenu)
 
-        menuID=wxNewId()
-        exportWikisMenu.Append(menuID, 'Export Wiki as Single HTML Page', 'Export As Single HTML Page')
-        EVT_MENU(self, menuID, lambda evt: self.exportWiki(ExportTypes.WikiToSingleHtmlPage))
+        self.addMenuItem(exportWikisMenu, 'Export Wiki as Single HTML Page',
+                'Export Wiki as Single HTML Page', self.OnExportWiki,
+                menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_PAGE)
 
-        menuID=wxNewId()
-        exportWikisMenu.Append(menuID, 'Export Wiki as Set of HTML Pages', 'Export Wiki As Set of HTML Pages')
-        EVT_MENU(self, menuID, lambda evt: self.exportWiki(ExportTypes.WikiToSetOfHtmlPages))
+        self.addMenuItem(exportWikisMenu, 'Export Wiki as Set of HTML Pages',
+                'Export Wiki as Set of HTML Pages', self.OnExportWiki,
+                menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES)
 
-        menuID=wxNewId()
-        exportWikisMenu.Append(menuID, 'Export Current Wiki Word as HTML Page', 'Export Current Wiki Word as HTML Page')
-        EVT_MENU(self, menuID, lambda evt: self.exportWiki(ExportTypes.WikiWordToHtmlPage))
+        self.addMenuItem(exportWikisMenu, 'Export Current Wiki Word as HTML Page',
+                'Export Current Wiki Word as HTML Page', self.OnExportWiki,
+                menuID=GUI_ID.MENU_EXPORT_WORD_AS_PAGE)
 
-        menuID=wxNewId()
-        exportWikisMenu.Append(menuID, 'Export Sub-Tree as Single HTML Page', 'Export Sub-Tree as Single HTML Page')
-        EVT_MENU(self, menuID, lambda evt: self.exportWiki(ExportTypes.WikiSubTreeToSingleHtmlPage))
+        self.addMenuItem(exportWikisMenu, 'Export Sub-Tree as Single HTML Page',
+                'Export Sub-Tree as Single HTML Page', self.OnExportWiki,
+                menuID=GUI_ID.MENU_EXPORT_SUB_AS_PAGE)
 
-        menuID=wxNewId()
-        exportWikisMenu.Append(menuID, 'Export Sub-Tree as Set of HTML Pages', 'Export Sub-Tree as Set of HTML Pages')
-        EVT_MENU(self, menuID, lambda evt: self.exportWiki(ExportTypes.WikiSubTreeToSetOfHtmlPages))
+        self.addMenuItem(exportWikisMenu, 'Export Sub-Tree as Set of HTML Pages',
+                'Export Sub-Tree as Set of HTML Pages', self.OnExportWiki,
+                menuID=GUI_ID.MENU_EXPORT_SUB_AS_PAGES)
 
-        menuID=wxNewId()
-        exportWikisMenu.Append(menuID, 'Export Wiki as XML', 'Export Wiki as XML')
-        EVT_MENU(self, menuID, lambda evt: self.exportWiki(ExportTypes.WikiToXml))
+        self.addMenuItem(exportWikisMenu, 'Export Wiki as XML',
+                'Export Wiki as XML in UTF-8', self.OnExportWiki,
+                menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_XML)
+
+        self.addMenuItem(exportWikisMenu, 'Export Wiki to .wiki files',
+                'Export Wiki to .wiki files in UTF-8', self.OnExportWiki,
+                menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_RAW)
+
+        self.addMenuItem(exportWikisMenu, 'Other Export...',
+                'Open export dialog',
+                lambda evt: self.showExportDialog())
 
         menuID=wxNewId()
         wikiMenu.Append(menuID, '&Rebuild Wiki', 'Rebuild this wiki')
@@ -540,6 +589,12 @@ class PersonalWikiFrame(wxFrame):
 
         self.addMenuItem(formattingMenu, 'Set Date Format',
                 'Set Date Format', lambda evt: self.showDateformatDialog())
+
+        self.addMenuItem(formattingMenu,
+                'Wikize Selected Word\t' + self.keyBindings.MakeWikiWord,
+                'Wikize Selected Word',
+                lambda evt: self.keyBindings.makeWikiWord(self.editor),
+                "tb_pin")
 
 
         formattingMenu.AppendSeparator()
@@ -896,6 +951,11 @@ class PersonalWikiFrame(wxFrame):
         tb.AddSimpleTool(tbID, icon, "Zoom Out", "Zoom Out")
         EVT_TOOL(self, tbID, lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
 
+        (index, icon) = self.iconLookup["tb_pin"]
+        tbID = wxNewId()
+        tb.AddSimpleTool(tbID, icon, "Wikize Selected Word", "Wikize Selected Word")
+        EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.editor))
+
         tb.Realize()
         self.toolBar = tb
 
@@ -989,7 +1049,8 @@ class PersonalWikiFrame(wxFrame):
         EVT_MAXIMIZE(self, self.OnMaximize)
 
         # turn on the tree control check box   # TODO: Doesn't work after restore from sleep mode
-        if self.vertSplitter.GetSashPosition() > 1:
+        ## if self.vertSplitter.GetSashPosition() > 1:
+        if self.lastSplitterPos > 1:
             self.showTreeCtrlMenuItem.Check(1)
         else:
             self.tree.Hide()
@@ -2006,61 +2067,127 @@ class PersonalWikiFrame(wxFrame):
             pass
 
 
-    def exportWiki(self, type):
-        dlg = wxDirDialog(self, "Select Export Directory", self.getLastActiveDir(), style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
-        if dlg.ShowModal() == wxID_OK:
-            exporter = HtmlExporter(self)
-            dir = dlg.GetPath()
-            exporter.export(type, dir)
-            self.configuration.set("main", "last_active_dir", dir)
+    EXPORT_PARAMS = {
+            GUI_ID.MENU_EXPORT_WHOLE_AS_PAGE:
+                    (Exporters.HtmlXmlExporter, u"html_single", ()),
+            GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES:
+                    (Exporters.HtmlXmlExporter, u"html_multi", ()),
+            GUI_ID.MENU_EXPORT_WORD_AS_PAGE:
+                    (Exporters.HtmlXmlExporter, u"html_single", ()),
+            GUI_ID.MENU_EXPORT_SUB_AS_PAGE:
+                    (Exporters.HtmlXmlExporter, u"html_single", ()),
+            GUI_ID.MENU_EXPORT_SUB_AS_PAGES:
+                    (Exporters.HtmlXmlExporter, u"html_multi", ()),
+            GUI_ID.MENU_EXPORT_WHOLE_AS_XML:
+                    (Exporters.HtmlXmlExporter, u"xml", ()),
+            GUI_ID.MENU_EXPORT_WHOLE_AS_RAW:
+                    (Exporters.TextExporter, u"raw_files", (1,))
+            }
+
+
+    def OnExportWiki(self, evt):
+        dest = wxDirSelector("Select Export Directory", self.getLastActiveDir(),
+        wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON, parent=self)
+#         dlg = wxDirDialog(self, "Select Export Directory",
+#                 self.getLastActiveDir(),
+#                 style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
+
+        if dest:
+            typ = evt.GetId()
+            
+            if typ in (GUI_ID.MENU_EXPORT_WHOLE_AS_PAGE,
+                    GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES,
+                    GUI_ID.MENU_EXPORT_WHOLE_AS_XML,
+                    GUI_ID.MENU_EXPORT_WHOLE_AS_RAW):
+                wordList = self.wikiData.getAllDefinedPageNames()
+                
+            elif typ in (GUI_ID.MENU_EXPORT_SUB_AS_PAGE,
+                    GUI_ID.MENU_EXPORT_SUB_AS_PAGES):
+                wordList = self.wikiData.getAllSubWords(
+                        self.currentWikiWord, True)
+            else:
+                wordList = (self.currentWikiWord,)
+                
+            expclass, exptype, addopt = self.EXPORT_PARAMS[typ]
+            
+            expclass().export(self, self.wikiData, wordList, exptype, dest,
+                    addopt)
+
+
+            self.configuration.set("main", "last_active_dir", dest)
+
+# 
+#             exporter = HtmlExporter(self)
+#             exporter.export(type, dir)
+
+#     def exportWiki(self, type):
+#         dlg = wxDirDialog(self, "Select Export Directory", self.getLastActiveDir(), style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
+#         if dlg.ShowModal() == wxID_OK:
+#             exporter = HtmlExporter(self)
+#             dir = dlg.GetPath()
+#             exporter.export(type, dir)
+#             self.configuration.set("main", "last_active_dir", dir)
 
     # TODO: Should be more general to support other databases
     def rebuildWiki(self, skipConfirm = False):
         if not skipConfirm:
-            result = wxMessageBox("Are you sure you want to rebuild this wiki? You may want to backup your data first!",
+            result = wxMessageBox("Are you sure you want to rebuild this wiki? "+
+                    "You may want to backup your data first!",
                     'Rebuild wiki', wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
 
         if skipConfirm or result == wxYES :
-            # get all of the wikiWords
-            wikiWords = self.wikiData.getAllPageNamesFromDisk()   # Replace this call
-            # get the saved searches
-            searches = self.wikiData.getSavedSearches()
-
-            # close nulls the wikiConfigFilename var, so save it
-            wikiConfigFilename = self.wikiConfigFilename
-            # first close the existing wiki
-            self.closeWiki()
-
-            progress = wxProgressDialog("Rebuilding wiki", "Rebuilding wiki",
-                                        len(wikiWords) + len(searches) + 1, self, wxPD_APP_MODAL)
-
             try:
-                step = 1
-                # recreate the db
-                progress.Update(step, "Recreating database")
-                createWikiDB(self.wikiName, self.dataDir, True)
-                # reopen the wiki
-                wikiData = WikiData(self, self.dataDir)
-                # re-save all of the pages
-                for wikiWord in wikiWords:
-                    progress.Update(step, "Rebuilding %s" % wikiWord)
-                    wikiPage = wikiData.createPage(wikiWord)
-                    wikiData.updatePageEntry(wikiWord)
-                    wikiPage.update(wikiPage.getContent(), False)
-                    step = step + 1
+                self.wikiData.rebuildWiki(
+                        wxGuiProgressHandler("Rebuilding wiki", "Rebuilding wiki",
+                        0, self))
 
-                # resave searches
-                for search in searches:
-                    progress.Update(step, "Reading search %s" % search)
-                    wikiData.saveSearch(search)
-
-                wikiData.close()
-                progress.Destroy()
-
+                self.tree.collapse()
+                self.openWikiPage(self.currentWikiWord, forceTreeSyncFromRoot=True)
             except Exception, e:
                 self.displayErrorMessage("Error rebuilding wiki", e)
                 traceback.print_exc()
-            self.openWiki(wikiConfigFilename)
+
+            
+#             # get all of the wikiWords
+#             wikiWords = self.wikiData.getAllPageNamesFromDisk()   # Replace this call
+#             # get the saved searches
+#             searches = self.wikiData.getSavedSearches()
+# 
+#             # close nulls the wikiConfigFilename var, so save it
+#             wikiConfigFilename = self.wikiConfigFilename
+#             # first close the existing wiki
+#             self.closeWiki()
+# 
+#             progress = wxProgressDialog("Rebuilding wiki", "Rebuilding wiki",
+#                                         len(wikiWords) + len(searches) + 1, self, wxPD_APP_MODAL)
+# 
+#             try:
+#                 step = 1
+#                 # recreate the db
+#                 progress.Update(step, "Recreating database")
+#                 createWikiDB(self.wikiName, self.dataDir, True)
+#                 # reopen the wiki
+#                 wikiData = WikiData(self, self.dataDir)
+#                 # re-save all of the pages
+#                 for wikiWord in wikiWords:
+#                     progress.Update(step, u"Rebuilding %s" % wikiWord)
+#                     wikiPage = wikiData.createPage(wikiWord)
+#                     wikiData.updatePageEntry(wikiWord)
+#                     wikiPage.update(wikiPage.getContent(), False)
+#                     step = step + 1
+# 
+#                 # resave searches
+#                 for search in searches:
+#                     progress.Update(step, u"Reading search %s" % search)
+#                     wikiData.saveSearch(search)
+# 
+#                 wikiData.close()
+#                 progress.Destroy()
+# 
+#             except Exception, e:
+#                 self.displayErrorMessage("Error rebuilding wiki", e)
+#                 traceback.print_exc()
+#             self.openWiki(wikiConfigFilename)
 
 
     def insertAttribute(self, name, value):
@@ -2463,6 +2590,9 @@ What makes wikidPad different from other notepad applications is the ease with w
             <tr><td width="30%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Michael Butscher</font></td></tr>
             <tr><td width="30%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">mbutscher@gmx.de</font></td></tr>
             <tr><td width="30%" align="right"><font size="3"><b>URL:</b></font></td><td nowrap><font size="3">http://www.mbutscher.nextdesigns.net/software.html</font></td></tr>
+            <tr><td width="30%" align="right">&nbsp;</td></tr>
+            <tr><td width="30%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Gerhard Reitmayr</font></td></tr>
+            <tr><td width="30%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">gerhard.reitmayr@gmail.com</font></td></tr>
         </table>
     </center>
 </body>

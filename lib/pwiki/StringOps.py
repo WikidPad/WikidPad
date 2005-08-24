@@ -199,12 +199,17 @@ def applyCompact(a, cops):
 
 
 def applyBinCompact(a, bops):
+    """
+    Apply binary diff operations bops to a to create b
+    """
     return applyCompact(a, binCompactToCompact(bops))
 
 
 def getBinCompactForDiff(a, b):
     """
-    Return the binary compact codes to change string a to b
+    Return the binary compact codes to change string a to b.
+    For strings a and b (NOT unicode) it is true that
+        applyBinCompact(a, getBinCompactForDiff(a, b)) == b
     """
 
     sm = difflib.SequenceMatcher(None, a, b)

@@ -21,7 +21,7 @@ import re, string, glob
 
 import gadfly
 import WikiFormatting
-from WikiExceptions import *   # TODO make normal import
+from WikiExceptions import *   # TODO make normal import?
 
 from StringOps import mbcsEnc, mbcsDec, utf8Enc, utf8Dec, BOM_UTF8, \
         fileContentToUnicode
@@ -39,7 +39,6 @@ def _utf8ToUni(ob):
         return utf8Dec(ob, "replace")[0]
     else:
         return ob
-        
 
 
 
@@ -50,7 +49,17 @@ class WikiData:
     def __init__(self, pWiki, dataDir):
         self.pWiki = pWiki
         self.dataDir = dataDir
-        self.dbConn = gadfly.gadfly("wikidb", dataDir)
+        self.dbConn = None
+        self.cachedWikiWords = None
+        
+        self._reinit()
+        
+
+    def _reinit(self):
+        """
+        Actual initialization or reinitialization after rebuildWiki()
+        """
+        self.dbConn = gadfly.gadfly("wikidb", self.dataDir)
 
         # create word caches
         self.cachedWikiWords = {}
@@ -114,7 +123,7 @@ class WikiData:
 
         return fileContentToUnicode(content)
 
-        # TODO Remove method, create rebuildWiki method
+        # TODO Remove method
     def updatePageEntry(self, word, moddate = None, creadate = None):
         """
         Update/Create entry with additional information for a page
@@ -186,6 +195,49 @@ class WikiData:
         del self.cachedWikiWords[word]
         
 
+    # ---------- Rebuilding the wiki ----------
+    def rebuildWiki(self, progresshandler):
+        """
+        progresshandler -- Object, fulfilling the GuiProgressHandler
+            protocol
+        """
+        # get all of the wikiWords
+        wikiWords = self.getAllPageNamesFromDisk()   # Replace this call
+        # get the saved searches
+        searches = self.getSavedSearches()
+
+        self.close()
+                
+        progresshandler.open(len(wikiWords) + len(searches) + 1)
+
+        try:
+            step = 1
+            # recreate the db
+            progresshandler.update(step, "Recreating database")
+            createWikiDB("", self.dataDir, True)
+            # reopen the wiki
+            self._reinit()
+            # re-save all of the pages
+            for wikiWord in wikiWords:
+                progresshandler.update(step, u"Rebuilding %s" % wikiWord)
+                wikiPage = self.createPage(wikiWord)
+                self.updatePageEntry(wikiWord)
+                wikiPage.update(wikiPage.getContent(), False)
+                step += 1
+
+            # resave searches
+            for search in searches:
+                progresshandler.update(step, u"Reading search %s" % search)
+                self.saveSearch(search)
+
+##             self.close()
+##             self._reinit()
+            
+        finally:            
+            progresshandler.close()
+    
+    
+    
     # ---------- The rest ----------
 
     def getPage(self, wikiWord, toload=None):

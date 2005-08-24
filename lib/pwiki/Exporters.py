@@ -1,20 +1,21 @@
+from Enum import Enumeration
+import WikiFormatting
 import re
 import os
 from os.path import join, exists
-import sys, traceback
+import sys
 import shutil
-# from xml.sax.saxutils import escape
+## from xml.sax.saxutils import escape
 from time import localtime
 
-from Enum import Enumeration
-from StringOps import mbcsWriter, utf8Writer, mbcsEnc, strToBool, BOM_UTF8
-import WikiFormatting
-from WikiExceptions import *
+import WikiData
+import StringOps
+from StringOps import mbcsWriter, utf8Writer, utf8Enc, mbcsEnc, strToBool
 
+import wxPython.xrc as xrc
 
-ExportTypes = Enumeration("ExportTypes", ["WikiToSingleHtmlPage", "WikiToSetOfHtmlPages", "WikiWordToHtmlPage",
-                                          "WikiSubTreeToSingleHtmlPage", "WikiSubTreeToSetOfHtmlPages",
-                                          "WikiToXml"], 1)
+from wxHelper import XrcControls
+
 
 
 ## Copied from xml.sax.saxutils and modified to reduce dependencies
@@ -30,27 +31,90 @@ def escape(data):
 
 
 
-class HtmlExporter:
-    def __init__(self, pWiki):
+# ExportTypes = Enumeration("ExportTypes", ["WikiToSingleHtmlPage", "WikiToSetOfHtmlPages", "WikiWordToHtmlPage",
+#                                           "WikiSubTreeToSingleHtmlPage", "WikiSubTreeToSetOfHtmlPages",
+#                                           "WikiToXml"], 1)
+
+class HtmlXmlExporter:
+    def __init__(self):
+        self.pWiki = None
+        self.wikiData = None
+        self.wordList = None
+        self.exportDest = None
+
+
+    def getExportTypes(self, guiparent):
+        """
+        Return sequence of tuples with the description of export types provided
+        by this object. A tuple has the form (<exp. type>,
+            <human readbale desctiption>, <panel for add. options or None>)
+        If panels for additional options must be created, they should use
+        guiparent as parent
+        """
+        return (
+            (u"html_single", u'Single HTML page', None),
+            (u"html_multi", u'Set of HTML pages', None),
+            (u"xml", u'XML file', None)
+            )
+
+
+    def getAddOptVersion(self):
+        """
+        Returns the version of the additional options information returned
+        by getAddOpt(). If the return value is -1, the version info can't
+        be stored between application sessions.
+        
+        Otherwise, the addopt information can be stored between sessions
+        and can later handled back to the export method of the object
+        without previously showing the export dialog.
+        """
+        return 0
+
+
+    def getAddOpt(self, addoptpanel):
+        """
+        Reads additional options from panel addoptpanel.
+        If getAddOptVersion() > -1, the return value must be a sequence
+        of simple string and/or numeric objects. Otherwise, any object
+        can be returned (normally the addoptpanel itself)
+        """
+        return ()
+
+            
+    def export(self, pWiki, wikiData, wordList, exportType, exportDest,
+            addopt):
+        """
+        Run export operation.
+        
+        pWiki -- PersonalWikiFrame object
+        wikiData -- WikiData object
+        wordList -- Sequence of wiki words to export
+        exportType -- string tag to identify how to export
+        exportDest -- Path to destination directory or file to export to
+        addopt -- additional options returned by getAddOpt()
+        """
+        
         self.pWiki = pWiki
-        self.wikiData = self.pWiki.wikiData
+        self.wikiData = wikiData # self.pWiki.wikiData
+        self.wordList = wordList
+        self.exportDest = exportDest
+        if exportType == u"html_single":
+            startfile = self.exportHtmlSingleFile()
+        elif exportType == u"html_multi":
+            startfile = self.exportHtmlMultipleFiles()
+        elif exportType == u"xml":
+            startfile = self.exportXml()
+            
+        if self.pWiki.configuration.getboolean(
+                "main", "start_browser_after_export") and startfile:
+            os.startfile(startfile)
 
-    def export(self, type, dir):
-        if type == ExportTypes.WikiToSingleHtmlPage:
-            self.exportWikiToSingleHtmlPage(dir)
-        elif type == ExportTypes.WikiToSetOfHtmlPages:
-            self.exportWikiToSetOfHtmlPages(dir)
-        elif type == ExportTypes.WikiWordToHtmlPage:
-            self.exportWordToHtmlPage(dir)
-        elif type == ExportTypes.WikiSubTreeToSingleHtmlPage:
-            self.exportSubTreeToSingleHtmlPage(dir)
-        elif type == ExportTypes.WikiSubTreeToSetOfHtmlPages:
-            self.exportSubTreeToSetOfHtmlPages(dir)
-        elif type == ExportTypes.WikiToXml:
-            self.exportWikiToXml(dir)
 
-    def exportWikiToSingleHtmlPage(self, dir):
-        outputFile = mbcsEnc(join(dir, u"%s.html" % self.pWiki.wikiName))[0]
+    def exportHtmlSingleFile(self):
+        if len(self.wordList) == 1:
+            return self.exportHtmlMultipleFiles()
+
+        outputFile = mbcsEnc(join(self.exportDest, u"%s.html" % self.pWiki.wikiName))[0]
         if exists(outputFile):
             os.unlink(outputFile)
 
@@ -58,8 +122,7 @@ class HtmlExporter:
         fp = mbcsWriter(realfp, "replace")
         fp.write(self.getFileHeader(self.pWiki.wikiName))
         
-        words = self.wikiData.getAllDefinedPageNames()
-        for word in words:
+        for word in self.wordList:
             wikiPage = self.wikiData.getPage(word, toload=["parents", "children", "props"])
             if not self.shouldExport(word, wikiPage):
                 continue
@@ -78,122 +141,11 @@ class HtmlExporter:
                         links[relation] = u"#%s" % relation
                     
                 formattedContent = self.formatContent(word, content, links)
-                fp.write((u'<span class="wiki-name-ref">[<a name="%s">%s</a>]'+
-                        u'</span><br><br><span class="parent-nodes">'+
-                        u'parent nodes: %s</span><br>%s%s<hr size="1"/>') %
-                        (word, word, self.getParentLinks(wikiPage, False), formattedContent, '<br />\n'*10))
-            except Exception, e:
-                traceback.print_exc()
-                pass
-
-        fp.write(self.getFileFooter())
-        fp.reset()        
-        realfp.close()        
-        self.copyCssFile(dir)
-        if self.pWiki.configuration.getboolean("main", "start_browser_after_export"):
-            os.startfile(outputFile)
-
-        
-    def exportWikiToSetOfHtmlPages(self, dir):
-        words = self.wikiData.getAllDefinedPageNames()
-        for word in words:
-            wikiPage = self.wikiData.getPage(word, toload=["parents", "children", "props"])
-            if not self.shouldExport(word, wikiPage):
-                continue
-
-            links = {}
-            for relation in wikiPage.childRelations:
-                if not self.shouldExport(relation):
-                    continue
-                # get aliases too
-                wordForAlias = self.wikiData.getAliasesWikiWord(relation)
-                if wordForAlias:
-                    links[relation] = u"%s.html" % wordForAlias
-                else:
-                    links[relation] = u"%s.html" % relation
-                                
-            self.exportWordToHtmlPage(dir, word, links, False)
-        self.copyCssFile(dir)
-        rootFile = mbcsEnc(join(dir, u"%s.html" % self.pWiki.wikiName))[0]
-        if self.pWiki.configuration.getboolean("main", "start_browser_after_export"):
-            os.startfile(rootFile)
-
-
-    def exportWordToHtmlPage(self, dir, word=None, links=None, startFile=True, onlyInclude=None):
-        if not word:
-            word = self.pWiki.currentWikiWord
-
-        outputFile = mbcsEnc(join(dir, u"%s.html" % word))[0]
-        try:
-            wikiPage = self.wikiData.getPage(word, toload=["parents"])
-            content = wikiPage.getContent()
-            formattedContent = self.formatContent(word, content, links)
-
-            if exists(outputFile):
-                os.unlink(outputFile)
-
-            realfp = open(outputFile, "w")
-            fp = mbcsWriter(realfp, "replace")
-            fp.write(self.getFileHeader(word))
-
-            # if startFile is set then this is the only page being exported so
-            # do not include the parent header.
-            if not startFile:
-                fp.write(u'<span class="parent-nodes">parent nodes: %s</span>' %
-                        self.getParentLinks(wikiPage, True, onlyInclude))
-                
-            fp.write(formattedContent)
-            fp.write(self.getFileFooter())
-            fp.reset()        
-            realfp.close()        
-        except Exception, e:
-            traceback.print_exc()
-            pass
-        
-        self.copyCssFile(dir)
-        if startFile and self.pWiki.configuration.getboolean(
-                "main", "start_browser_after_export"):
-            os.startfile(outputFile)
-
-
-    def exportSubTreeToSingleHtmlPage(self, dir, rootWord=None):
-        if not rootWord:
-            rootWord = self.pWiki.currentWikiWord
-
-        outputFile = mbcsEnc(join(dir, u"%s.html" % rootWord))[0]
-
-        if exists(outputFile):
-            os.unlink(outputFile)
-
-        realfp = open(outputFile, "w")
-        fp = mbcsWriter(realfp, "replace")
-        fp.write(self.getFileHeader(rootWord))
-
-        words = self.wikiData.getAllSubWords(rootWord, True)
-        for word in words:
-            wikiPage = self.wikiData.getPage(word, toload=["parents", "children", "props"])
-            if not self.shouldExport(word, wikiPage):
-                continue
-
-            try:
-                content = wikiPage.getContent()
-                links = {}
-                for relation in wikiPage.childRelations:
-                    if not self.shouldExport(relation):
-                        continue
-
-                    # get aliases too
-                    wordForAlias = self.wikiData.getAliasesWikiWord(relation)
-                    if wordForAlias:
-                        links[relation] = u"#%s" % wordForAlias
-                    else:
-                        links[relation] = u"#%s" % relation
-                    
-                formattedContent = self.formatContent(word, content, links)
-                fp.write((u'<span class="wiki-name-ref">[<a name="%s">%s</a>]'+
-                        u'</span><br><br><span class="parent-nodes">'+
-                        u'parent nodes: %s</span><br>%s%s<hr size="1"/>') %
-                        (word, word, self.getParentLinks(wikiPage, False, words),
+                fp.write((u'<span class="wiki-name-ref">'+
+                        u'[<a name="%s">%s</a>]</span><br><br>'+
+                        u'<span class="parent-nodes">parent nodes: %s</span>'+
+                        u'<br>%s%s<hr size="1"/>') %
+                        (word, word, self.getParentLinks(wikiPage, False),
                         formattedContent, u'<br />\n'*10))
             except Exception, e:
                 pass
@@ -201,17 +153,12 @@ class HtmlExporter:
         fp.write(self.getFileFooter())
         fp.reset()        
         realfp.close()        
-        self.copyCssFile(dir)
-        if self.pWiki.configuration.getboolean("main", "start_browser_after_export"):
-            os.startfile(outputFile)
+        self.copyCssFile(self.exportDest)
+        return outputFile
 
 
-    def exportSubTreeToSetOfHtmlPages(self, dir, rootWord=None):
-        if not rootWord:
-            rootWord = self.pWiki.currentWikiWord
-
-        words = self.wikiData.getAllSubWords(rootWord, True)
-        for word in words:
+    def exportHtmlMultipleFiles(self):
+        for word in self.wordList:
             wikiPage = self.wikiData.getPage(word, toload=["parents", "children", "props"])
             if not self.shouldExport(word, wikiPage):
                 continue
@@ -220,7 +167,6 @@ class HtmlExporter:
             for relation in wikiPage.childRelations:
                 if not self.shouldExport(relation):
                     continue
-
                 # get aliases too
                 wordForAlias = self.wikiData.getAliasesWikiWord(relation)
                 if wordForAlias:
@@ -228,33 +174,30 @@ class HtmlExporter:
                 else:
                     links[relation] = u"%s.html" % relation
                                 
-            self.exportWordToHtmlPage(dir, word, links, False, words)
-        self.copyCssFile(dir)
-        rootFile = mbcsEnc(join(dir, u"%s.html" % rootWord))[0]
-        if self.pWiki.configuration.getboolean("main", "start_browser_after_export"):
-            os.startfile(rootFile)
-
-
-    def exportWikiToXml(self, dir):
-        outputFile = mbcsEnc(join(dir, u"%s.xml" % self.pWiki.wikiName))[0]
+            self.exportWordToHtmlPage(self.exportDest, word, links, False)
+        self.copyCssFile(self.exportDest)
+        rootFile = mbcsEnc(join(self.exportDest, u"%s.html" % self.wordList[0]))[0]     #self.pWiki.wikiName))[0]
+        return rootFile
+            
+            
+    def exportXml(self):
+        outputFile = mbcsEnc(join(self.exportDest, u"%s.xml" % self.pWiki.wikiName))[0]
 
         if exists(outputFile):
             os.unlink(outputFile)
 
         realfp = open(outputFile, "w")
-        realfp.write(BOM_UTF8)
         fp = utf8Writer(realfp, "replace")
-        fp.write(u'<?xml version="1.0" encoding="utf-8" ?>')
 
-
+        fp.write(u'<?xml version="1.0" encoding="utf-8" ?>')  # TODO Encoding
         fp.write(u'<wiki name="%s">' % self.pWiki.wikiName)
         
-        words = self.wikiData.getAllDefinedPageNames()
-        for word in words:
+        for word in self.wordList:
             wikiPage = self.wikiData.getPage(word, toload=["info", "parents", "children", "props"])
             if not self.shouldExport(word, wikiPage):
                 continue
-
+                
+            # Why localtime?
             created = localtime(float(wikiPage.created))
             modified = localtime(float(wikiPage.modified))
             
@@ -285,11 +228,12 @@ class HtmlExporter:
 
         fp.write(u"</wiki>")
         fp.reset()        
-        realfp.close()        
-        if self.pWiki.configuration.getboolean("main", "start_browser_after_export"):
-            os.startfile(outputFile)
+        realfp.close()
 
-
+        return outputFile
+        
+            
+            
     def getFileHeader(self, title):
         return u"""<html>
     <head>
@@ -304,109 +248,15 @@ class HtmlExporter:
         return u"""    </body>
 </html>
 """
-
-    def getParentLinks(self, wikiPage, asHref=True, wordsToInclude=None):
-        parents = u""
-        wikiPage.parentRelations.sort()
-        for relation in wikiPage.parentRelations:
-            if wordsToInclude and relation not in wordsToInclude:
-                continue
             
-            if parents != u"":
-                parents = parents + u" | "
+    # TODO Handle this correctly:
+    """
+    * Bullet
+    * Bullet
 
-            if asHref:
-                parents = parents + u'<span class="parent-node"><a href="%s.html">%s</a></span>' % (relation, relation)
-            else:
-                parents = parents + u'<span class="parent-node"><a href="#%s">%s</a></span>' % (relation, relation)
-
-        return parents
-    
-    
-    def formatContent(self, word, content, links=None, asXml=False):
-        # change the <<>> blocks into [[]] blocks so they aren't escaped
-        content = WikiFormatting.SuppressHighlightingRE.sub('[[\\1]]', content)
-        content = escape(content)
-        contentBeforeProcessing = content
-
-        content = WikiFormatting.ItalicRE.sub(u'<i>\\1</i>', content)
-        content = WikiFormatting.Heading3RE.sub(u'<h3>\\1</h3>', content)
-        content = WikiFormatting.Heading2RE.sub(u'<h2>\\1</h2>', content)
-        content = WikiFormatting.Heading1RE.sub(u'<h1>\\1</h1>', content)
-
-        if asXml:
-            content = WikiFormatting.ToDoREWithContent.sub(u'<todo>\\1</todo>', content)
-        else:
-            content = WikiFormatting.ToDoREWithContent.sub(
-                    u'<span class="todo">\\1</span><br />', content)
-            
-        content = WikiFormatting.ScriptRE.sub('', content)
-
-        if asXml:        
-            content = WikiFormatting.PropertyRE.sub(
-                    u'<property name="\\1" value="\\2"/>', content)
-        else:
-            content = WikiFormatting.PropertyRE.sub(
-                    u'<span class="property">[\\1: \\2]</span>', content)
-
-        if not asXml:    
-            content = WikiFormatting.HorizLineRE.sub(u'<hr size="1"/>', content)
-
-        # add the ul/ol/li tags for bullets
-        content = self.createBullets(content, asXml)
-
-        # add the blockquote tags for indents
-        content = self.createIndents(content, asXml)
-
-        # do bold last to make sure it doesn't mess with bullets
-        content = WikiFormatting.BoldRE.sub(u'<b>\\1</b>', content)
-
-        # link the wiki words
-        if links:
-            content = self.linkWikiWords(content, links, asXml)
-
-        # replace URL's last
-        if asXml:
-            content = WikiFormatting.UrlRE.sub(u'<link type="href">\\1</link>', content)
-        else:
-            def replaceLink(match):
-                lowerLink = match.group(1).lower()
-                if lowerLink.endswith(u".jpg") or lowerLink.endswith(u".gif") or\
-                        lowerLink.endswith(u".png"):
-                    return u'<img src="%s" border="0">' % match.group(1)
-                else:
-                    return u'<a href="%s">%s</a>' % (match.group(1), match.group(1))
-            content = WikiFormatting.UrlRE.sub(replaceLink, content)
-
-        # add <pre> tags for suppressed regions
-        SuppressHighlightingRE = re.compile(u"\[\[(.*?)\]\]", re.DOTALL)
-
-        # tracks which [] block we are on
-        matchIndex = MatchIndex()
-        def suppress(match):
-            # now search the pre-processed text for the same match
-            bpMatchNumber = 0
-            bpMatch = SuppressHighlightingRE.search(contentBeforeProcessing)
-            while bpMatch:
-                if bpMatchNumber == matchIndex.get():
-                    break
-                bpMatch = SuppressHighlightingRE.search(contentBeforeProcessing, bpMatch.end())
-                bpMatchNumber = bpMatchNumber + 1
-
-            if (bpMatch):
-                matchContent = bpMatch.group(1)
-                htmlRe = re.compile(u"<.+?>")
-                matchContent = htmlRe.sub('', matchContent)
-                matchIndex.increment()
-                return u'<pre>%s</pre>' % matchContent
-            else:
-                return match.group(1)
-        
-        content = SuppressHighlightingRE.sub(suppress, content)
-        
-        return content
-    
-
+    1. Number
+    2. Number
+    """
     def createBullets(self, content, asXml=False):
         lastBulletDepth = 0
         lastUolTag = None
@@ -419,7 +269,7 @@ class HtmlExporter:
                 match = WikiFormatting.NumericBulletRE.search(line)
                 
             if match:
-                if match.group(2) == '*':
+                if match.group(2) == u'*':
                     lastUolTag = u"ul"
                 else:
                     lastUolTag = u"ol"
@@ -465,7 +315,7 @@ class HtmlExporter:
                 if not asXml:
                     if len(line.strip()) == 0:
                         newContent.append(u"<p />\n")
-                    elif len(line) < 50 and line.find("<h") == -1:
+                    elif len(line) < 50 and line.find(u"<h") == -1:
                         newContent.append(u"%s<br />\n" % line)
                     else:
                         newContent.append(u"%s\n" % line)
@@ -529,8 +379,8 @@ class HtmlExporter:
                 if not asXml:
                     if len(line.strip()) == 0:
                         newContent.append(u"<p />\n")
-                    elif len(line) < 50 and line.find("<h") == -1:
-                        newContent.append(u"%s<br />\n" % line)
+                    ## elif len(line) < 50 and line.find("<h") == -1:   # TODO: ???
+                    ##    newContent.append("%s<br />\n" % line)
                     else:
                         newContent.append(u"%s\n" % line)
                 else:
@@ -554,6 +404,22 @@ class HtmlExporter:
         replaceRe = re.compile(u" {%s}" % tabSize)        
         return len(replaceRe.sub(u" ", str));
 
+    def getParentLinks(self, wikiPage, asHref=True, wordsToInclude=None):
+        parents = u""
+        wikiPage.parentRelations.sort()
+        for relation in wikiPage.parentRelations:
+            if wordsToInclude and relation not in wordsToInclude:
+                continue
+            
+            if parents != u"":
+                parents = parents + u" | "
+
+            if asHref:
+                parents = parents + u'<span class="parent-node"><a href="%s.html">%s</a></span>' % (relation, relation)
+            else:
+                parents = parents + u'<span class="parent-node"><a href="#%s">%s</a></span>' % (relation, relation)
+
+        return parents
 
     def linkWikiWords(self, content, links, asXml=False):
         def replaceWithLink(match):
@@ -581,8 +447,8 @@ class HtmlExporter:
         return u"\n".join(newContent)
 
     def copyCssFile(self, dir):
-        if not exists(join(dir, 'wikistyle.css')):
-            cssFile = join(self.pWiki.wikiAppDir, 'export', 'wikistyle.css')
+        if not exists(mbcsEnc(join(dir, 'wikistyle.css'))[0]):
+            cssFile = mbcsEnc(join(self.pWiki.wikiAppDir, 'export', 'wikistyle.css'))[0]
             if exists(cssFile):
                 shutil.copy(cssFile, dir)
 
@@ -590,14 +456,130 @@ class HtmlExporter:
         if not wikiPage:
             try:
                 wikiPage = self.wikiData.getPage(wikiWord, toload=["props"])
-            except WikiWordNotFoundException:
+            except WikiData.WikiWordNotFoundException:
                 return False
             
         #print "shouldExport", mbcsEnc(wikiWord)[0], repr(wikiPage.props.get("export", ("True",))), \
          #       type(wikiPage.props.get("export", ("True",)))
             
         return strToBool(wikiPage.props.get("export", ("True",))[0])
+
+    
+    def formatContent(self, word, content, links=None, asXml=False):
+        # change the <<>> blocks into [[]] blocks so they aren't escaped
+        content = WikiFormatting.SuppressHighlightingRE.sub(u'[[\\1]]', content)
+        content = escape(content)
+        contentBeforeProcessing = content
+
+        content = WikiFormatting.ItalicRE.sub(u'<i>\\1</i>', content)
+        content = WikiFormatting.Heading4RE.sub(u'<h4>\\1</h4>', content)
+        content = WikiFormatting.Heading3RE.sub(u'<h3>\\1</h3>', content)
+        content = WikiFormatting.Heading2RE.sub(u'<h2>\\1</h2>', content)
+        content = WikiFormatting.Heading1RE.sub(u'<h1>\\1</h1>', content)
+
+        if asXml:
+            content = WikiFormatting.ToDoREWithContent.sub(u'<todo>\\1</todo>', content)
+        else:
+            content = WikiFormatting.ToDoREWithContent.sub(u'<span class="todo">\\1</span><br />', content)
             
+        content = WikiFormatting.ScriptRE.sub(u'', content)
+
+        if asXml:        
+            content = WikiFormatting.PropertyRE.sub(u'<property name="\\1" value="\\2"/>', content)
+        else:
+            content = WikiFormatting.PropertyRE.sub(u'<span class="property">[\\1: \\2]</span>', content)
+
+        if not asXml:    
+            content = WikiFormatting.HorizLineRE.sub(u'<hr size="1"/>', content)
+
+        # add the ul/ol/li tags for bullets
+        content = self.createBullets(content, asXml)
+
+        # add the blockquote tags for indents
+        content = self.createIndents(content, asXml)
+
+        # do bold last to make sure it doesn't mess with bullets
+        content = WikiFormatting.BoldRE.sub(u'<b>\\1</b>', content)
+
+        # link the wiki words
+        if links:
+            content = self.linkWikiWords(content, links, asXml)
+
+        # replace URL's last
+        if asXml:
+            content = WikiFormatting.UrlRE.sub(u'<link type="href">\\1</link>', content)
+        else:
+            def replaceLink(match):
+                lowerLink = match.group(1).lower()
+                if lowerLink.endswith(".jpg") or lowerLink.endswith(".gif") or lowerLink.endswith(".png"):
+                    return u'<img src="%s" border="0">' % match.group(1)
+                else:
+                    return u'<a href="%s">%s</a>' % (match.group(1), match.group(1))
+            content = WikiFormatting.UrlRE.sub(replaceLink, content)
+
+        # add <pre> tags for suppressed regions
+        SuppressHighlightingRE = re.compile(u"\[\[(.*?)\]\]", re.DOTALL)
+
+        # tracks which [] block we are on
+        matchIndex = MatchIndex()
+        def suppress(match):
+            # now search the pre-processed text for the same match
+            bpMatchNumber = 0
+            bpMatch = SuppressHighlightingRE.search(contentBeforeProcessing)
+            while bpMatch:
+                if bpMatchNumber == matchIndex.get():
+                    break
+                bpMatch = SuppressHighlightingRE.search(contentBeforeProcessing, bpMatch.end())
+                bpMatchNumber = bpMatchNumber + 1
+
+            if (bpMatch):
+                matchContent = bpMatch.group(1)
+                htmlRe = re.compile(u"<.+?>")
+                matchContent = htmlRe.sub('', matchContent)
+                matchIndex.increment()
+                return u'<pre>%s</pre>' % matchContent
+            else:
+                return match.group(1)
+        
+        content = SuppressHighlightingRE.sub(suppress, content)
+        
+        return content
+
+    
+    def exportWordToHtmlPage(self, dir, word, links=None, startFile=True, onlyInclude=None):
+        outputFile = mbcsEnc(join(dir, u"%s.html" % word))[0]
+        try:
+            wikiPage = self.wikiData.getPage(word, toload=["parents"])
+            content = wikiPage.getContent()
+            formattedContent = self.formatContent(word, content, links)
+
+            if exists(outputFile):
+                os.unlink(outputFile)
+
+            realfp = open(outputFile, "w")
+            fp = mbcsWriter(realfp, "replace")
+            fp.write(self.getFileHeader(word))
+
+            # if startFile is set then this is the only page being exported so
+            # do not include the parent header.
+            if not startFile:
+                fp.write(u'<span class="parent-nodes">parent nodes: %s</span>'
+                        % self.getParentLinks(wikiPage, True, onlyInclude))
+
+            fp.write(formattedContent)
+            fp.write(self.getFileFooter())
+            fp.reset()        
+            realfp.close()        
+        except Exception, e:
+            pass
+        
+        self.copyCssFile(dir)
+        return outputFile
+#         if startFile:
+#             os.startfile(outputFile)
+
+        
+        
 class MatchIndex:
     def __init__(self):
         self.matchIndex = 0
@@ -605,4 +587,124 @@ class MatchIndex:
         self.matchIndex = self.matchIndex + 1
     def get(self):
         return self.matchIndex
+
+
+
+class TextExporter:
+    """
+    Exports raw text
+    """
+    def __init__(self):
+        self.pWiki = None
+        self.wikiData = None
+        self.wordList = None
+        self.exportDest = None
+
+
+    def getExportTypes(self, guiparent):
+        """
+        Return sequence of tuples with the description of export types provided
+        by this object. A tuple has the form (<exp. type>,
+            <human readable desctiption>, <panel for add. options or None>)
+        If panels for additional options must be created, they should use
+        guiparent as parent
+        """
         
+        res = xrc.wxXmlResource.Get()
+        
+#         self.additOptions = wxPanel(self)
+#         res.AttachUnknownControl("additOptions", self.additOptions, self)
+
+        textPanel = res.LoadPanel(guiparent, "ExportSubText") # .ctrls.additOptions
+        
+        return (
+            ("raw_files", 'Set of *.wiki files', textPanel),
+            )
+
+
+    def getAddOptVersion(self):
+        """
+        Returns the version of the additional options information returned
+        by getAddOpt(). If the return value is -1, the version info can't
+        be stored between application sessions.
+        
+        Otherwise, the addopt information can be stored between sessions
+        and can later handled back to the export method of the object
+        without previously showing the export dialog.
+        """
+        return 0
+
+
+    def getAddOpt(self, addoptpanel):
+        """
+        Reads additional options from panel addoptpanel.
+        If getAddOptVersion() > -1, the return value must be a sequence
+        of simple string and/or numeric objects. Otherwise, any object
+        can be returned (normally the addoptpanel itself)
+        """
+        ctrls = XrcControls(addoptpanel)
+        
+        # Which encoding:
+        # 0:System standard, 1:utf-8 with BOM, 2: utf-8 without BOM
+
+        return (ctrls.chTextEncoding.GetSelection(),)
+
+            
+
+    def export(self, pWiki, wikiData, wordList, exportType, exportDest,
+            addopt):
+        """
+        Run export operation.
+        
+        pWiki -- PersonalWikiFrame object
+        wikiData -- WikiData object
+        wordList -- Sequence of wiki words to export
+        exportType -- string tag to identify how to export
+        exportDest -- Path to destination directory or file to export to
+        addopt -- additional options returned by getAddOpt()
+        """
+        self.pWiki = pWiki
+        self.wikiData = wikiData # self.pWiki.wikiData
+        self.wordList = wordList
+        self.exportDest = exportDest
+        
+        # 0:System standard, 1:utf-8 with BOM, 2: utf-8 without BOM
+        encoding = addopt[0]
+                
+        if encoding == 0:
+            enc = mbcsEnc
+        else:
+            enc = utf8Enc
+            
+        if encoding == 1:
+            filehead = StringOps.BOM_UTF8
+        else:
+            filehead = ""
+
+        for word in self.wordList:
+            try:
+                content, modified = self.wikiData.getContentAndInfo(word)[:2]
+            except:
+                continue
+                
+            outputFile = mbcsEnc(join(self.exportDest, u"%s.wiki" % word))[0]
+            try:
+#                 if exists(outputFile):
+#                     os.unlink(outputFile)
+    
+                fp = open(outputFile, "wb")
+                fp.write(filehead)
+                fp.write(enc(content, "replace")[0])
+                fp.close()
+                
+                try:
+                    os.utime(outputFile, (long(modified), long(modified)))
+                except:
+                    pass
+            except:
+                continue
+
+
+def getExporterObjects():
+    return (HtmlXmlExporter(), TextExporter())
+    
