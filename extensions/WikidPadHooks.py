@@ -1,5 +1,7 @@
 from os.path import join
 
+WIKIDPAD_PLUGIN = (("hooks", 1),)
+
 def startup(wikidPad):
     """
     Called when application starts

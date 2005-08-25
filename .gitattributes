@@ -599,6 +599,7 @@ lib/pwiki/Configuration.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
 lib/pwiki/PersonalWikiFrame.py -text
+lib/pwiki/PluginManager.py -text
 lib/pwiki/StringOps.py -text
 lib/pwiki/WikiData.py -text
 lib/pwiki/WikiExceptions.py -text

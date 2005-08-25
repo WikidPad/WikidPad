@@ -9,7 +9,7 @@ import wxPython.xrc as xrc
 
 from wxHelper import *
 
-from StringOps import uniToGui, guiToUni
+from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec
 import WikiFormatting
 import Exporters
 
@@ -110,14 +110,14 @@ class OpenWikiWordDialog(wxDialog):
         """
         wikiWord = self.value
         if not WikiFormatting.isWikiWord(wikiWord):
-            wikiWord = "[%s]" % wikiWord
+            wikiWord = u"[%s]" % wikiWord
         if not WikiFormatting.isWikiWord(wikiWord):
-            self.pWiki.displayErrorMessage("'%s' is an invalid WikiWord" % wikiWord)
+            self.pWiki.displayErrorMessage(u"'%s' is an invalid WikiWord" % wikiWord)
             self.ctrls.text.SetFocus()
             return
         
         if self.pWiki.wikiData.isDefinedWikiWord(wikiWord):
-            self.pWiki.displayErrorMessage("'%s' exists already" % wikiWord)
+            self.pWiki.displayErrorMessage(u"'%s' exists already" % wikiWord)
             self.ctrls.text.SetFocus()
             return
             
@@ -336,7 +336,7 @@ class DateformatDialog(wxDialog):
     
     def __init__(self, pWiki, ID, title="Select Date Format",
                  pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D, deffmt=""):
+                 style=wxNO_3D, deffmt=u""):
         """
         deffmt -- Initial value for format string
         """
@@ -366,9 +366,11 @@ class DateformatDialog(wxDialog):
         
     def OnText(self, evt):
         preview = "<invalid>"
-        text = self.ctrls.fieldFormat.GetValue()
+        text = guiToUni(self.ctrls.fieldFormat.GetValue())
         try:
-            preview = strftime(text)
+            # strftime can't handle unicode correctly, so conversion is needed
+            mstr = mbcsEnc(text, "replace")[0]
+            preview = mbcsDec(strftime(mstr), "replace")[0]
             self.value = text
         except:
             pass
@@ -420,6 +422,7 @@ class OptionsDialog(wxDialog):
     def OnOk(self, evt):
         # Transfer options from dialog to config file
         for o, c, t in self.OPTION_TO_CONTROL:
+            #TODO Handle unicode text controls
             self.pWiki.configuration.set("main", o, repr(self.ctrls[c].GetValue()))
             
         # Options with special treatment
@@ -518,7 +521,7 @@ class ExportDialog(wxDialog):
 
 
     def OnOk(self, evt):
-        if not exists(self.ctrls.tfDirectory.GetValue()):
+        if not exists(guiToUni(self.ctrls.tfDirectory.GetValue())):
             self.pWiki.displayErrorMessage(u"Destination directory does not exist")
             return
             
@@ -541,12 +544,13 @@ class ExportDialog(wxDialog):
                 self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
 
         ob.export(self.pWiki, self.pWiki.wikiData, wordList, t, 
-                self.ctrls.tfDirectory.GetValue(), ob.getAddOpt(panel))
+                guiToUni(self.ctrls.tfDirectory.GetValue()), ob.getAddOpt(panel))
 
         self.EndModal(wxID_OK)
 
         
     def OnSelectDir(self, evt):
+        # Only transfer between GUI elements, so no unicode conversion
         seldir = wxDirSelector(u"Select Export Directory",
                 self.ctrls.tfDirectory.GetValue(),
                 style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON, parent=self)
