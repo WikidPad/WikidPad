@@ -458,7 +458,7 @@ class ExportDialog(wxDialog):
         exporterList = [] # List of tuples (<exporter object>, <export tag>,
                           # <readable description>, <additional options panel>)
         
-        for ob in Exporters.getExporterObjects():   # TODO search plugins
+        for ob in Exporters.describeExporters():   # TODO search plugins
             for tp in ob.getExportTypes(self.ctrls.additOptions):
                 panel = tp[2]
                 if panel is None:

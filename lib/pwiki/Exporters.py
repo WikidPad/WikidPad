@@ -705,6 +705,6 @@ class TextExporter:
                 continue
 
 
-def getExporterObjects():
+def describeExporters():
     return (HtmlXmlExporter(), TextExporter())
     

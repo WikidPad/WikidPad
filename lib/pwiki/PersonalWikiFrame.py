@@ -199,6 +199,13 @@ class PersonalWikiFrame(wxFrame):
             ["startup", "newWiki", "createdWiki", "openWiki", "openedWiki", 
              "openWikiWord", "newWikiWord", "openedWikiWord", "savingWikiWord",
              "savedWikiWord", "renamedWikiWord", "deletedWikiWord", "exit"] )
+        # interfaces for menu and toolbar plugins
+#         self.editorFunctions = self.pluginManager.registerPluginAPI(("EditorFunctions",1), 
+#                                 ["describeMenuItem", "describeToolbarItem"])
+        self.menuFunctions = self.pluginManager.registerPluginAPI(("MenuFunctions",1), 
+                                ["describeMenuItems"])
+        self.toolbarFunctions = self.pluginManager.registerPluginAPI(("ToolbarFunctions",1), 
+                                ["describeToolbarItems"])
 
         # load extensions
         self.loadExtensions()
@@ -361,6 +368,7 @@ class PersonalWikiFrame(wxFrame):
         self.configuration.set("main", "last_active_dir", os.getcwd())
 
 
+    # TODO!
     def fillIconLookup(self, createIconImageList=False):
         """
         Fills or refills the self.iconLookup (if createIconImageList is
@@ -394,14 +402,54 @@ class PersonalWikiFrame(wxFrame):
                 traceback.print_exc()
                 sys.stderr.write("couldn't load icon %s\n" % iconFile)
 
+    # TODO!
+    def lookupIcon(self, iconname):
+        try:
+            return self.iconLookup[iconname]
+        except KeyError:
+            return (None, None)
 
-    def addMenuItem(self, menu, label, text, evtfct, iconname=None, menuID=None):
+
+    def resolveIconDescriptor(self, desc, default=None):
+        """
+        Used for plugins of type "MenuFunctions" or "ToolbarFunctions".
+        Tries to find and return an appropriate wxBitmap object.
+        
+        An icon descriptor can be one of the following:
+            - None
+            - a wxBitmap object
+            - the filename of a bitmap
+            - a tuple of filenames, first existing file is used
+        
+        If no bitmap can be found, default is returned instead.
+        """
+        if desc is None:
+            return default            
+        elif isinstance(desc, wxBitmap):
+            return desc
+        elif isinstance(desc, basestring):
+            result = self.lookupIcon(desc)[1]
+            if result is not None:
+                return result
+            
+            return default
+        else:    # A sequence of possible names
+            for n in desc:
+                result = self.lookupIcon(n)[1]
+                if result is not None:
+                    return result
+
+            return default
+
+
+    def addMenuItem(self, menu, label, text, evtfct, icondesc=None, menuID=None):
         if menuID is None:
             menuID = wxNewId()
 
         menuitem = wxMenuItem(menu, menuID, label, text)
-        if iconname:  # (not self.lowResources) and
-            (id, bitmap) = self.iconLookup[iconname]
+        # if icondesc:  # (not self.lowResources) and
+        bitmap = self.resolveIconDescriptor(icondesc)
+        if bitmap:
             menuitem.SetBitmap(bitmap)
 
         menu.AppendItem(menuitem)
@@ -850,10 +898,28 @@ class PersonalWikiFrame(wxFrame):
         helpMenu.Append(menuID, '&About', 'About WikidPad')
         EVT_MENU(self, menuID, lambda evt: self.showAboutDialog())
 
+        # get info for any plugin menu items and create them as necessary
+        pluginMenu = None
+        menuItems = reduce(lambda a, b: a+list(b),
+                self.menuFunctions.describeMenuItems(self), [])
+        if len(menuItems) > 0:
+            pluginMenu = wxMenu()
+                
+            def addPluginMenuItem(function, label, statustext, icondesc=None,
+                    menuID=None):
+                self.addMenuItem(pluginMenu, label, statustext,
+                        lambda evt: function(self, evt), icondesc, menuID)
+            
+            for item in menuItems:
+                addPluginMenuItem(*item)
+
+
         self.mainmenu.Append(wikiMenu, 'W&iki')
         self.mainmenu.Append(wikiWordMenu, '&Wiki Words')
         self.mainmenu.Append(historyMenu, '&History')
         self.mainmenu.Append(formattingMenu, '&Editor')
+        if pluginMenu:
+            self.mainmenu.Append(pluginMenu, "Pl&ugins")
         self.mainmenu.Append(helpMenu, 'He&lp')
 
         self.SetMenuBar(self.mainmenu)
@@ -969,6 +1035,28 @@ class PersonalWikiFrame(wxFrame):
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Wikize Selected Word", "Wikize Selected Word")
         EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.editor))
+
+        # get info for any plugin toolbar items and create them as necessary
+        toolbarItems = reduce(lambda a, b: a+list(b),
+                self.toolbarFunctions.describeToolbarItems(self), [])
+        
+        def addPluginTool(function, label, tooltip, icondesc, tbID=None):
+            if tbID is None:
+                tbID = wxNewId()
+                
+            icon = self.resolveIconDescriptor(icondesc, self.lookupIcon(u"tb_doc")[1])
+            tb.AddLabelTool(tbID, label, icon, wxNullBitmap, 0, tooltip)
+            EVT_TOOL(self, tbID, lambda evt: function(self, evt))
+            
+        for item in toolbarItems:
+            addPluginTool(*item)
+
+
+            
+#         for function, label, tooltip, icon in toolbarItems:
+#             tbID = wxNewId()
+#             tb.AddLabelTool( tbID, label, icon, wxNullBitmap, 0, tooltip)
+#             EVT_TOOL(self, tbID, lambda evt: function(self))
 
         tb.Realize()
         self.toolBar = tb

@@ -296,6 +296,7 @@ extensions/KeyBindings.py -text
 extensions/Presentation.py -text
 extensions/WikiSyntax.py -text
 extensions/WikidPadHooks.py -text
+extensions/referrals.py -text
 gadfly-1.0.0/CHANGES.txt -text
 gadfly-1.0.0/COPYRIGHT.txt -text
 gadfly-1.0.0/PKG-INFO -text
