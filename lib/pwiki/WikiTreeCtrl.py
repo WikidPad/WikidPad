@@ -369,7 +369,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
     def setNodeImage(self, node, image):
         try:
-            (index, icon) = self.pWiki.iconLookup[image]
+            index = self.pWiki.lookupIconIndex(image)
             ## if icon:
                 ## self.SetItemImage(node, index, wxTreeItemIcon_Selected)
                 ## self.SetItemImage(node, index, wxTreeItemIcon_Expanded)

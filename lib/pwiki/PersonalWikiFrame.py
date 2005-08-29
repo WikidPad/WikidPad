@@ -190,7 +190,7 @@ class PersonalWikiFrame(wxFrame):
         self.historyPosition = 0
         self.wikiWordHistory = []
         self.lastCursorPositionInPage = {}
-        self.iconLookup = {}
+        self.iconLookupCache = {}
         self.wikiHistory = []
 
         # setup plugin manager and hooks API
@@ -369,9 +369,9 @@ class PersonalWikiFrame(wxFrame):
 
 
     # TODO!
-    def fillIconLookup(self, createIconImageList=False):
+    def fillIconLookupCache(self, createIconImageList=False):
         """
-        Fills or refills the self.iconLookup (if createIconImageList is
+        Fills or refills the self.iconLookupCache (if createIconImageList is
         false, it must exist already)
         If createIconImageList is true, self.iconImageList is also
         built
@@ -380,7 +380,7 @@ class PersonalWikiFrame(wxFrame):
         if createIconImageList:
             # create the image icon list
             self.iconImageList = wxImageList(16, 16)
-            self.iconLookup = {}
+            self.iconLookupCache = {}
 
         for icon in self.iconFileList:
             iconFile = join(self.wikiAppDir, "icons", icon)
@@ -390,24 +390,50 @@ class PersonalWikiFrame(wxFrame):
                 if createIconImageList:
                     id = self.iconImageList.Add(bitmap, wxNullBitmap)
 
-                if self.lowResources and not icon.startswith("tb_"):
+                if self.lowResources:   # and not icon.startswith("tb_"):
                     bitmap = None
 
                 iconname = icon.replace('.gif', '')
                 if id == -1:
-                    id = self.iconLookup[iconname][0]
+                    id = self.iconLookupCache[iconname][0]
 
-                self.iconLookup[iconname] = (id, bitmap)
+                self.iconLookupCache[iconname] = (id, bitmap)
             except Exception, e:
                 traceback.print_exc()
                 sys.stderr.write("couldn't load icon %s\n" % iconFile)
 
-    # TODO!
     def lookupIcon(self, iconname):
+        """
+        Returns the bitmap object for the given iconname.
+        If the bitmap wasn't cached already, it is loaded and created.
+        If icon is unknown, None is returned.
+        """
         try:
-            return self.iconLookup[iconname]
+            bitmap = self.iconLookupCache[iconname][1]
+            if bitmap is not None:
+                return bitmap
+                
+            # Bitmap not yet available -> create it and store in the cache
+            iconFile = join(self.wikiAppDir, "icons", iconname+".gif")
+            bitmap = wxBitmap(iconFile, wxBITMAP_TYPE_GIF)
+            
+            self.iconLookupCache[iconname] = (self.iconLookupCache[iconname][0],
+                    bitmap)
+            return bitmap
+
         except KeyError:
-            return (None, None)
+            return None
+
+
+    def lookupIconIndex(self, iconname):
+        """
+        Returns the id number into self.iconImageList of the requested icon.
+        If icon is unknown, -1 is returned.
+        """
+        try:
+            return self.iconLookupCache[iconname][0]
+        except KeyError:
+            return -1
 
 
     def resolveIconDescriptor(self, desc, default=None):
@@ -428,14 +454,14 @@ class PersonalWikiFrame(wxFrame):
         elif isinstance(desc, wxBitmap):
             return desc
         elif isinstance(desc, basestring):
-            result = self.lookupIcon(desc)[1]
+            result = self.lookupIcon(desc)
             if result is not None:
                 return result
             
             return default
         else:    # A sequence of possible names
             for n in desc:
-                result = self.lookupIcon(n)[1]
+                result = self.lookupIcon(n)
                 if result is not None:
                     return result
 
@@ -740,7 +766,7 @@ class PersonalWikiFrame(wxFrame):
             iconsMenu6 = wxMenu()
             iconsMenu.AppendMenu(wxNewId(), 'T-Z', iconsMenu6)
 
-            icons = self.iconLookup.keys();
+            icons = self.iconLookupCache.keys();  # TODO: Create function?
             icons.sort()
 
             for id in icons:
@@ -762,7 +788,7 @@ class PersonalWikiFrame(wxFrame):
 
                 menuID=wxNewId()
                 menuItem = wxMenuItem(iconsSubMenu, menuID, id, id)
-                (id2, bitmap) = self.iconLookup[id]
+                bitmap = self.lookupIcon(id)
                 menuItem.SetBitmap(bitmap)
                 iconsSubMenu.AppendItem(menuItem)
                 def insertIconAttribute(evt, iconId=id):
@@ -953,85 +979,85 @@ class PersonalWikiFrame(wxFrame):
         # ------------------------------------------------------------------------------------
 
         tb = self.CreateToolBar(wxTB_HORIZONTAL | wxNO_BORDER | wxTB_FLAT | wxTB_TEXT)
-        (index, seperator) = self.iconLookup["tb_seperator"]
+        seperator = self.lookupIcon("tb_seperator")
 
-        (index, icon) = self.iconLookup["tb_back"]
+        icon = self.lookupIcon("tb_back")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Back (Ctrl-Alt-Back)", "Back")
         EVT_TOOL(self, tbID, lambda evt: self.goInHistory(-1))
 
-        (index, icon) = self.iconLookup["tb_forward"]
+        icon = self.lookupIcon("tb_forward")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Forward (Ctrl-Alt-Forward)", "Forward")
         EVT_TOOL(self, tbID, lambda evt: self.goInHistory(1))
 
-        (index, icon) = self.iconLookup["tb_home"]
+        icon = self.lookupIcon("tb_home")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Wiki Home", "Wiki Home")
         EVT_TOOL(self, tbID, lambda evt: self.openWikiPage(self.wikiName, forceTreeSyncFromRoot=True))
 
-        (index, icon) = self.iconLookup["tb_doc"]
+        icon = self.lookupIcon("tb_doc")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Open Wiki Word  (Ctrl-O)", "Open Wiki Word")
         EVT_TOOL(self, tbID, lambda evt: self.showWikiWordOpenDialog())
 
-        (index, icon) = self.iconLookup["tb_lens"]
+        icon = self.lookupIcon("tb_lens")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Search  (Ctrl-Alt-F)", "Search")
         EVT_TOOL(self, tbID, lambda evt: self.showSearchDialog())
 
-        (index, icon) = self.iconLookup["tb_cycle"]
+        icon = self.lookupIcon("tb_cycle")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Find current word in tree", "Find current word in tree")
         EVT_TOOL(self, tbID, lambda evt: self.findCurrentWordInTree())
 
         tb.AddSimpleTool(wxNewId(), seperator, "Separator", "Separator")
 
-        (index, icon) = self.iconLookup["tb_save"]
+        icon = self.lookupIcon("tb_save")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Save Wiki Word (Ctrl-S)", "Save Wiki Word")
         EVT_TOOL(self, tbID, lambda evt: (self.saveCurrentWikiPage(), self.wikiData.commit()))
 
-        (index, icon) = self.iconLookup["tb_rename"]
+        icon = self.lookupIcon("tb_rename")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Rename Wiki Word (Ctrl-Alt-R)", "Rename Wiki Word")
         EVT_TOOL(self, tbID, lambda evt: self.showWikiWordRenameDialog())
 
-        (index, icon) = self.iconLookup["tb_delete"]
+        icon = self.lookupIcon("tb_delete")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Delete (Ctrl-D)", "Delete Wiki Word")
         EVT_TOOL(self, tbID, lambda evt: self.showWikiWordDeleteDialog())
 
         tb.AddSimpleTool(wxNewId(), seperator, "Separator", "Separator")
 
-        (index, icon) = self.iconLookup["tb_heading"]
+        icon = self.lookupIcon("tb_heading")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Heading (Ctrl-Alt-H)", "Heading")
         EVT_TOOL(self, tbID, lambda evt: self.keyBindings.addHeading(self.editor))
 
-        (index, icon) = self.iconLookup["tb_bold"]
+        icon = self.lookupIcon("tb_bold")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Bold (Ctrl-B)", "Bold")
         EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeBold(self.editor))
 
-        (index, icon) = self.iconLookup["tb_italic"]
+        icon = self.lookupIcon("tb_italic")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Italic (Ctrl-I)", "Italic")
         EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeItalic(self.editor))
 
         tb.AddSimpleTool(wxNewId(), seperator, "Separator", "Separator")
 
-        (index, icon) = self.iconLookup["tb_zoomin"]
+        icon = self.lookupIcon("tb_zoomin")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Zoom In", "Zoom In")
         EVT_TOOL(self, tbID, lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_ZOOMIN))
 
-        (index, icon) = self.iconLookup["tb_zoomout"]
+        icon = self.lookupIcon("tb_zoomout")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Zoom Out", "Zoom Out")
         EVT_TOOL(self, tbID, lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
 
-        (index, icon) = self.iconLookup["tb_pin"]
+        icon = self.lookupIcon("tb_pin")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Wikize Selected Word", "Wikize Selected Word")
         EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.editor))
@@ -1044,19 +1070,13 @@ class PersonalWikiFrame(wxFrame):
             if tbID is None:
                 tbID = wxNewId()
                 
-            icon = self.resolveIconDescriptor(icondesc, self.lookupIcon(u"tb_doc")[1])
+            icon = self.resolveIconDescriptor(icondesc, self.lookupIcon(u"tb_doc"))
             tb.AddLabelTool(tbID, label, icon, wxNullBitmap, 0, tooltip)
             EVT_TOOL(self, tbID, lambda evt: function(self, evt))
             
         for item in toolbarItems:
             addPluginTool(*item)
 
-
-            
-#         for function, label, tooltip, icon in toolbarItems:
-#             tbID = wxNewId()
-#             tb.AddLabelTool( tbID, label, icon, wxNullBitmap, 0, tooltip)
-#             EVT_TOOL(self, tbID, lambda evt: function(self))
 
         tb.Realize()
         self.toolBar = tb
@@ -1082,7 +1102,7 @@ class PersonalWikiFrame(wxFrame):
         self.iconFileList = icons
 
         # Create iconImageList
-        self.fillIconLookup(True)
+        self.fillIconLookupCache(True)
 
         self.buildMainMenu()
         self.buildToolbar()
@@ -1180,8 +1200,8 @@ class PersonalWikiFrame(wxFrame):
         # self.showOnTrayMenuItem = None
 
 
-        for k in self.iconLookup.keys():
-            self.iconLookup[k] = (self.iconLookup[k][0], None)
+        for k in self.iconLookupCache.keys():
+            self.iconLookupCache[k] = (self.iconLookupCache[k][0], None)
 
         gc.collect()
 
@@ -1194,7 +1214,6 @@ class PersonalWikiFrame(wxFrame):
             return  # Already in wake mode
         self.sleepMode = False
 
-        self.fillIconLookup(False)
         self.buildMainMenu()
         self.buildToolbar()
         self.setShowOnTray()
@@ -1299,9 +1318,9 @@ class PersonalWikiFrame(wxFrame):
                 createWikiDB(wikiName, dataDir, False)
             except WikiDBExistsException:
                 # The DB exists, should it be overwritten
-                dlg=wxMessageDialog(self, 'A wiki database already exists '+
-                        'in this location, overwrite?',
-                        'Wiki DB Exists', wxYES_NO)
+                dlg=wxMessageDialog(self, u'A wiki database already exists '+
+                        u'in this location, overwrite?',
+                        u'Wiki DB Exists', wxYES_NO)
                 result = dlg.ShowModal()
                 if result == wxID_YES:
                     createWikiDB(wikiName, dataDir, True)

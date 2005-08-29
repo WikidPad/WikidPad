@@ -133,10 +133,10 @@ class IconSelectDialog(wxDialog):
         wxDialog.__init__(self, pWiki, ID, title, pos, size, style)
         self.pWiki = pWiki
         self.iconImageList = self.pWiki.iconImageList
-        self.iconLookup = self.pWiki.iconLookup
+        self.lookupIconIndex = self.pWiki.lookupIconIndex
         
         self.iconNames = filter(lambda n: not n.startswith("tb_"),
-                self.pWiki.iconLookup.keys())
+                self.pWiki.iconLookupCache.keys())
         self.iconNames.sort()
         
         # Now continue with the normal construction of the dialog
@@ -155,7 +155,8 @@ class IconSelectDialog(wxDialog):
         self.lc.InsertColumn(0, "Icon")
 
         for icn in self.iconNames:
-            self.lc.InsertImageStringItem(sys.maxint, icn, self.iconLookup[icn][0])
+            self.lc.InsertImageStringItem(sys.maxint, icn,
+                    self.lookupIconIndex(icn))
         self.lc.SetColumnWidth(0, wxLIST_AUTOSIZE)
         
         
