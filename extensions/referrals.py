@@ -50,8 +50,8 @@ def describeToolbarItems(wiki):
     Returns a sequence of tuples to describe the menu items, where each must
     contain (in this order):
         - callback function
-        - tool label string
         - tooltip string
+        - tool item description (string to show in status bar)
         - icon descriptor (see below, if no icon found, a default icon
             will be used)
     It can contain the following additional items (in this order), each of

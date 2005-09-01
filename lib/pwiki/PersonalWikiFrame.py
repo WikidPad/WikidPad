@@ -1066,12 +1066,13 @@ class PersonalWikiFrame(wxFrame):
         toolbarItems = reduce(lambda a, b: a+list(b),
                 self.toolbarFunctions.describeToolbarItems(self), [])
         
-        def addPluginTool(function, label, tooltip, icondesc, tbID=None):
+        def addPluginTool(function, tooltip, statustext, icondesc, tbID=None):
             if tbID is None:
                 tbID = wxNewId()
                 
             icon = self.resolveIconDescriptor(icondesc, self.lookupIcon(u"tb_doc"))
-            tb.AddLabelTool(tbID, label, icon, wxNullBitmap, 0, tooltip)
+#             tb.AddLabelTool(tbID, label, icon, wxNullBitmap, 0, tooltip)
+            tb.AddSimpleTool(tbID, icon, tooltip, statustext)
             EVT_TOOL(self, tbID, lambda evt: function(self, evt))
             
         for item in toolbarItems:
