@@ -2,6 +2,6 @@
 data_dir = data
 
 [main]
-last_wiki_word = TodoItems
+last_wiki_word = AutoSave
 wiki_name = WikidPadHelp
 

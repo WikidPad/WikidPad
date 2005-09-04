@@ -599,7 +599,7 @@ class PersonalWikiFrame(wxFrame):
 
         self.addMenuItem(wikiWordMenu, 'Add Bookmark\t' + self.keyBindings.AddBookmark,
                 'Add Bookmark to Page', lambda evt: self.insertAttribute("bookmarked", "true"),
-                "tb_pin")
+                "pin")
 
         wikiWordMenu.AppendSeparator()
 
@@ -673,7 +673,7 @@ class PersonalWikiFrame(wxFrame):
 
         self.addMenuItem(formattingMenu, 'Insert Date\t' + self.keyBindings.InsertDate,
                 'Insert Date', lambda evt: self.insertDate(),
-                "tb_date")
+                "date")
 
         self.addMenuItem(formattingMenu, 'Set Date Format',
                 'Set Date Format', lambda evt: self.showDateformatDialog())
@@ -682,7 +682,7 @@ class PersonalWikiFrame(wxFrame):
                 'Wikize Selected Word\t' + self.keyBindings.MakeWikiWord,
                 'Wikize Selected Word',
                 lambda evt: self.keyBindings.makeWikiWord(self.editor),
-                "tb_pin")
+                "pin")
 
 
         formattingMenu.AppendSeparator()
@@ -1057,7 +1057,7 @@ class PersonalWikiFrame(wxFrame):
         tb.AddSimpleTool(tbID, icon, "Zoom Out", "Zoom Out")
         EVT_TOOL(self, tbID, lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
 
-        icon = self.lookupIcon("tb_pin")
+        icon = self.lookupIcon("pin")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Wikize Selected Word", "Wikize Selected Word")
         EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.editor))
@@ -2692,7 +2692,7 @@ class AboutDialog(wxDialog):
     <center>
         <table bgcolor="#CCCCCC" width="100%" cellspacing="0" cellpadding="0" border="1">
             <tr>
-                <td align="center"><h2>wikidPad 1.16</h2></td>
+                <td align="center"><h2>wikidPad 1.20beta</h2></td>
             </tr>
         </table>
 

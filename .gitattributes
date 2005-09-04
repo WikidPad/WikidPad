@@ -542,7 +542,6 @@ icons/tb_bold.gif -text
 icons/tb_copy.gif -text
 icons/tb_cut.gif -text
 icons/tb_cycle.gif -text
-icons/tb_date.gif -text
 icons/tb_delete.gif -text
 icons/tb_doc.gif -text
 icons/tb_forward.gif -text
@@ -551,7 +550,6 @@ icons/tb_home.gif -text
 icons/tb_italic.gif -text
 icons/tb_lens.gif -text
 icons/tb_paste.gif -text
-icons/tb_pin.gif -text
 icons/tb_rename.gif -text
 icons/tb_save.gif -text
 icons/tb_seperator.gif -text
