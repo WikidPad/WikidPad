@@ -13,6 +13,11 @@ def isUnicode():
     """
     return wxPlatformInfo[2] == "unicode"
 
+def isOSX():
+    """
+    Return if working on Mac OSX
+    """
+    return '__WXMAC__' in wxPlatformInfo
 
 from StringOps import utf8Enc, utf8Dec, mbcsDec, strToBool
 

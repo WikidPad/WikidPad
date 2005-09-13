@@ -23,7 +23,7 @@ wikidpad = Target(
     icon_resources = [(0, 'icons/pwiki.ico')])
 
 
-setup(name='WikidPadCompact',
+setup(name='WikidPad',
       version='1.20',
       author='Jason Horman',
       author_email='jason@jhorman.org',

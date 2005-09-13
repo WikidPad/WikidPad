@@ -13,11 +13,11 @@ from struct import pack, unpack
 
 from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE
 
-from Configuration import isUnicode
+from Configuration import isUnicode, isOSX
 
 
 # To generate dependencies for py2exe
-import encodings.utf_8, encodings.latin_1, encodings.mbcs
+import encodings.utf_8, encodings.latin_1
 
 
 
@@ -26,12 +26,23 @@ import encodings.utf_8, encodings.latin_1, encodings.mbcs
 
 utf8Enc = codecs.getencoder("utf-8")
 utf8Dec = codecs.getdecoder("utf-8")
-mbcsEnc = codecs.getencoder("mbcs")
-mbcsDec = codecs.getdecoder("mbcs")
 utf8Reader = codecs.getreader("utf-8")
 utf8Writer = codecs.getwriter("utf-8")
-mbcsReader = codecs.getreader("mbcs")
-mbcsWriter = codecs.getwriter("mbcs")
+
+if isOSX():
+    # generate dependencies for py2app
+    import encodings.mac_roman
+    mbcsEnc = codecs.getencoder("mac_roman")
+    mbcsDec = codecs.getdecoder("mac_roman")
+    mbcsReader = codecs.getreader("mac_roman")
+    mbcsWriter = codecs.getwriter("mac_roman")
+else:
+    # generate dependencies for py2exe
+    import encodings.mbcs
+    mbcsEnc = codecs.getencoder("mbcs")
+    mbcsDec = codecs.getdecoder("mbcs")
+    mbcsReader = codecs.getreader("mbcs")
+    mbcsWriter = codecs.getwriter("mbcs")
 
 if isUnicode():
     def uniToGui(text):
