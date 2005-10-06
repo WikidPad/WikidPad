@@ -21,10 +21,12 @@ import re, string, glob
 
 import gadfly
 import WikiFormatting
+# from WikiFormatting import FormatTypes
+
 from WikiExceptions import *   # TODO make normal import?
 
 from StringOps import mbcsEnc, mbcsDec, utf8Enc, utf8Dec, BOM_UTF8, \
-        fileContentToUnicode
+        fileContentToUnicode, Tokenizer
 
 
 def _uniToUtf8(ob):
@@ -39,7 +41,6 @@ def _utf8ToUni(ob):
         return utf8Dec(ob, "replace")[0]
     else:
         return ob
-
 
 
 CleanTextRE = re.compile("[^A-Za-z0-9]")  # ?
@@ -59,6 +60,11 @@ class WikiData:
         """
         Actual initialization or reinitialization after rebuildWiki()
         """
+        self._updateTokenizerWithoutCamelCase = \
+                Tokenizer(WikiFormatting.CombinedUpdateWithoutCamelCaseRE, -1)
+        self._updateTokenizerWithCamelCase = \
+                Tokenizer(WikiFormatting.CombinedUpdateWithCamelCaseRE, -1)
+
         self.dbConn = gadfly.gadfly("wikidb", self.dataDir)
 
         # create word caches
@@ -107,7 +113,8 @@ class WikiData:
 
     # TODO More general Wikiword to filename mapping
     def getWikiWordFileName(self, wikiWord):
-        return mbcsEnc(join(self.dataDir, "%s.wiki" % wikiWord))[0]
+        # return mbcsEnc(join(self.dataDir, "%s.wiki" % wikiWord))[0]
+        return join(self.dataDir, u"%s.wiki" % wikiWord)
 
     def isDefinedWikiWord(self, word):
         "check if a word is a valid wikiword (page name or alias)"
@@ -267,7 +274,7 @@ class WikiData:
 #                 "insert into wikiwords(word, created, modified) values (?, ?, ?)",
 #                 (wikiWord, ti, ti))
 #         self.cachedWikiWords[wikiWord] = 1
-        return self.getPageNoError(wikiWord)
+        return self.getPageNoError(wikiWord, toload=[""])
 
     def getChildRelationships(self, wikiWord, existingonly=False,
             selfreference=True):
@@ -512,6 +519,10 @@ class WikiData:
         return words
 
     def getAliasesWikiWord(self, alias):
+        """
+        If alias is an alias for another word, return that,
+        otherwise return None
+        """
         aliases = self.getWordsWithPropertyValue("alias", alias)
         if len(aliases) > 0:
             return aliases[0]
@@ -651,30 +662,31 @@ class WikiPage:
         self.wikiData = wikiData
         self.wikiWord = wikiWord
         self.wikiFile = self.wikiData.getWikiWordFileName(self.wikiWord)
-        self.parentRelations = []
-        self.childRelations = []
-        self.todos = []
-        self.props = {}
+        self.parentRelations = None
+        # self.childRelations = None
+        self.todos = None
+        self.props = None
+        self.modified, self.created = None, None
 
         # load the wiki word info from the db
         if not toload or 'info' in toload:
-            self.fetchWikiWordInfo()
+            self.getWikiWordInfo()
 
         # load the wiki word parents
         if not toload or 'parents' in toload:
-            self.fetchParentRelationships()
+            self.getParentRelationships()
 
         # load the wiki word children
-        if not toload or 'children' in toload:
-            self.fetchChildRelationships()
+#         if not toload or 'children' in toload:
+#             self.getChildRelationships()
 
         # fetch the props of the wiki word
         if not toload or 'props' in toload:
-            self.fetchProperties()
+            self.getProperties()
 
         # fetch the todo list
         if not toload or 'todos' in toload:
-            self.fetchTodos()
+            self.getTodos()
 
         # does this page need to be saved
         self.saveDirty = False
@@ -686,27 +698,57 @@ class WikiPage:
         # save when this page was last saved
         self.lastUpdate = time()
 
-    def fetchWikiWordInfo(self):
-        ti = time()
 
-        dates = self.wikiData.execSqlQuery("select modified, created "+
-                "from wikiwords where word = ?", (self.wikiWord,))
-        if len(dates) > 0:
-            self.modified, self.created = dates[0]
-        else:
-            self.modified, self.created = ti, ti  # ?
+    def getWikiWord(self):
+        return self.wikiWord
 
-    def fetchParentRelationships(self):
-        self.parentRelations = self.wikiData.getParentRelationships(self.wikiWord)
 
-    def fetchChildRelationships(self):
-        self.childRelations = self.wikiData.getChildRelationships(self.wikiWord)
+    def getWikiWordInfo(self):
+        if self.modified is None:
+            dates = self.wikiData.execSqlQuery("select modified, created "+
+                    "from wikiwords where word = ?", (self.wikiWord,))
+            if len(dates) > 0:
+                self.modified, self.created = dates[0]
+            else:
+                ti = time()
+                self.modified, self.created = ti, ti  # ?
 
-    def fetchProperties(self):
-        data = self.wikiData.execSqlQuery("select key, value "+
-                "from wikiwordprops where word = ?", (self.wikiWord,))
-        for (key, val) in data:
-            self.addProperty(key, val)
+        return self.modified, self.created
+
+    def getParentRelationships(self):
+        if self.parentRelations is None:
+            self.parentRelations = \
+                    self.wikiData.getParentRelationships(self.wikiWord)
+        
+        return self.parentRelations
+
+        
+    def getChildRelationships(self, existingonly=False, selfreference=True):
+        """
+        Does not support caching
+        """
+        return self.wikiData.getChildRelationships(self.wikiWord,
+                existingonly, selfreference)
+
+
+    def getChildRelationshipsAndHasChildren(self, existingonly=False,
+            selfreference=True):
+        """
+        Does not support caching
+        """
+        return self.wikiData.getChildRelationshipsAndHasChildren(self.wikiWord,
+                existingonly, selfreference)
+
+    def getProperties(self):
+        if self.props is None:
+            data = self.wikiData.execSqlQuery("select key, value "+
+                    "from wikiwordprops where word = ?", (self.wikiWord,))
+            self.props = {}
+            for (key, val) in data:
+                self.addProperty(key, val)
+                
+        return self.props
+        
 
     def addProperty(self, key, val):
         values = self.props.get(key)
@@ -714,26 +756,29 @@ class WikiPage:
             values = []
             self.props[key] = values
         values.append(val)
+        
 
-    def fetchTodos(self):
-        data = self.wikiData.execSqlQuery("select todo from todos "+
-                "where word = ?", (self.wikiWord,))
-        for row in data:
-            self.todos.append(row[0])
+    def getTodos(self):
+        if self.todos is None:
+            self.todos = self.wikiData.execSqlQuerySingleColumn("select todo from todos "+
+                    "where word = ?", (self.wikiWord,))
+                    
+        return self.todos
+        
+    def getNonAliasPage(self):
+        """
+        If this page belongs to an alias of a wiki word, return a page for
+        the real one, otherwise return self
+        """
+        if not self.wikiData.isAlias(self.wikiWord):
+            return self
+        
+        word = self.wikiData.getAliasesWikiWord(self.wikiWord)
+        return WikiPage(self.wikiData, word, toload=[""])
+
 
     def getContent(self):
         return self.wikiData.getContent(self.wikiWord)
-
-
-    def getChildRelationships(self, existingonly=False, selfreference=True):
-        return self.wikiData.getChildRelationships(self.wikiWord,
-                existingonly, selfreference)
-
-
-    def getChildRelationshipsAndHasChildren(self, existingonly=False,
-            selfreference=True):
-        return self.wikiData.getChildRelationshipsAndHasChildren(self.wikiWord,
-                existingonly, selfreference)
 
 
     def save(self, text, alertPWiki=True):
@@ -741,15 +786,7 @@ class WikiPage:
         Saves the content of current wiki page.
         """
         self.lastSave = time()
-
         self.wikiData.setContent(self.wikiWord, text)
-        # output = open(self.wikiFile, 'w')
-        # output.write(text)
-        # output.close()
-
-        # self.update(text, alertPWiki)
-        # self.wikiData.commit()
-
         self.saveDirty = False
 
     def update(self, text, alertPWiki=True):
@@ -759,75 +796,45 @@ class WikiPage:
         self.deleteChildRelationships()
         self.deleteProperties()
         self.deleteTodos()
-
-        textLen = len(text)
-
-        # 1st collect the toIgnore blocks.
-        ignoreBlocks = []
-        match = WikiFormatting.SuppressHighlightingRE.search(text)
-        while match:
-            ignoreBlocks.append((match.start(), match.end()))
-            match = WikiFormatting.SuppressHighlightingRE.search(text, match.end())
-
-        # urls are also to be ignored
-        match = WikiFormatting.UrlRE.search(text)
-        while match:
-            ignoreBlocks.append((match.start(), match.end()))
-            match = WikiFormatting.UrlRE.search(text, match.end())
-
-        # script blocks are also to be ignored
-        match = WikiFormatting.ScriptRE.search(text)
-        while match:
-            ignoreBlocks.append((match.start(), match.end()))
-            match = WikiFormatting.ScriptRE.search(text, match.end())
-
-        # read todo's from the text
-        match = WikiFormatting.ToDoREWithContent.search(text)
-        while match:
-            if not self.inIgnoreBlock(ignoreBlocks, match.start(), match.end()):
-                # i couldn't get the re to ignore todos with a leading [
-                if not match.group(1).startswith('['):
-                    self.addTodo(match.group(1))
-            match = WikiFormatting.ToDoREWithContent.search(text, match.end())
-
-        # read relations from the text
-        match = WikiFormatting.WikiWordRE2.search(text)
-        while match:
-            if not self.inIgnoreBlock(ignoreBlocks, match.start(), match.end()):
-                self.addChildRelationship(match.group(0))
-                ignoreBlocks.append((match.start(), match.end()))
-            match = WikiFormatting.WikiWordRE2.search(text, match.end())
-
-        # read WikiWord relations from the text if they are not disabled
+        
         if self.wikiData.pWiki.wikiWordsEnabled:
-            match = WikiFormatting.WikiWordRE.search(text)
-            while match:
-                if not self.inIgnoreBlock(ignoreBlocks, match.start(), match.end()):
-                    relation = match.group(0)
-                    # to avoid saving wiki looking words in properties
-                    if match.end() < textLen:
-                        if text[match.end()] != ']':
-                            self.addChildRelationship(relation)
-                    else:
-                        # this else is neccessary for wiki words at the very end of a page
-                        self.addChildRelationship(relation)
-                match = WikiFormatting.WikiWordRE.search(text, match.end())
+            tokenizer = self.wikiData._updateTokenizerWithCamelCase
+        else:
+            tokenizer = self.wikiData._updateTokenizerWithoutCamelCase
+        
 
-        # read properties from the text
-        match = WikiFormatting.PropertyRE.search(text)
-        while match:
-            if not self.inIgnoreBlock(ignoreBlocks, match.start(), match.end()):
-                # update alias cache for alias properties
-                if match.group(1) == "alias":
-                    word = match.group(2)
-                    if not WikiFormatting.WikiWordRE.match(word):
-                        word = u"[%s]" % word
-                    self.wikiData.cachedWikiWords[word] = 2
-                    self.setProperty("alias", word)
+        tokens = tokenizer.tokenize(text, sync=True)
+
+        if len(tokens) >= 2:
+            tok = tokens[0]
+            
+            for nexttok in tokens[1:]:
+                stindex = tok[1]
+                if stindex == -1:
+                    styleno = WikiFormatting.FormatTypes.Default
                 else:
-                    self.setProperty(match.group(1), match.group(2))
+                    styleno = WikiFormatting.UpdateExpressions[stindex][1]
 
-            match = WikiFormatting.PropertyRE.search(text, match.end())
+                if styleno == WikiFormatting.FormatTypes.ToDo:
+                    self.addTodo(tok[2]["todoContent"])
+                elif styleno == WikiFormatting.FormatTypes.WikiWord2:
+                    self.addChildRelationship(text[tok[0]:nexttok[0]])
+                elif styleno == WikiFormatting.FormatTypes.WikiWord:
+                    self.addChildRelationship(text[tok[0]:nexttok[0]])
+                elif styleno == WikiFormatting.FormatTypes.Property:
+                    propName = tok[2]["propertyName"]
+                    propValue = tok[2]["propertyValue"]
+
+                    if propName == "alias":
+                        word = propValue
+                        if not WikiFormatting.WikiWordRE.match(word):
+                            word = u"[%s]" % word
+                        self.wikiData.cachedWikiWords[word] = 2
+                        self.setProperty("alias", word)
+                    else:
+                        self.setProperty(propName, propValue)
+                        
+                tok = nexttok
 
         # update the modified time
 #         self.modified = time()
@@ -860,18 +867,25 @@ class WikiPage:
         return False
 
     def addChildRelationship(self, toWord):
-        if toWord not in self.childRelations:
-            if self.wikiData.addRelationship(self.wikiWord, toWord):
-                self.childRelations.append(toWord)
+        self.wikiData.addRelationship(self.wikiWord, toWord)
+        
+#         if toWord not in self.childRelations:
+#             if self.wikiData.addRelationship(self.wikiWord, toWord):
+#                 self.childRelations.append(toWord)
 
     def setProperty(self, key, value):
-        if self.wikiData.setProperty(self.wikiWord, key, value):
-            self.addProperty(key, value)
+        self.wikiData.setProperty(self.wikiWord, key, value)
+        self.props = None        
+        
+#         if self.wikiData.setProperty(self.wikiWord, key, value):
+#             self.addProperty(key, value)
 
     def addTodo(self, todo):
-        if todo not in self.todos:
-            if self.wikiData.addTodo(self.wikiWord, todo):
-                self.todos.append(todo)
+        if todo not in self.getTodos():
+            self.wikiData.addTodo(self.wikiWord, todo)
+            self.todos.append(todo)            
+            # if self.wikiData.addTodo(self.wikiWord, todo):
+
 
     def deleteChildRelationships(self):
         self.wikiData.deleteChildRelationships(self.wikiWord)

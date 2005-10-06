@@ -1,4 +1,4 @@
-from Enum import Enumeration
+# from Enum import Enumeration
 import WikiFormatting
 import re
 import os
@@ -9,8 +9,9 @@ import shutil
 from time import localtime
 
 import WikiData
-import StringOps
-from StringOps import mbcsWriter, utf8Writer, utf8Enc, mbcsEnc, strToBool
+import WikiFormatting
+from StringOps import mbcsWriter, utf8Writer, utf8Enc, mbcsEnc, strToBool, \
+        Tokenizer, BOM_UTF8
 
 import wxPython.xrc as xrc
 
@@ -20,20 +21,29 @@ from wxHelper import XrcControls
 
 ## Copied from xml.sax.saxutils and modified to reduce dependencies
 def escape(data):
-    """Escape &, <, and > in a string of data.
+    """
+    Escape &, <, and > in a unicode string of data.
     """
 
     # must do ampersand first
     data = data.replace(u"&", u"&amp;")
     data = data.replace(u">", u"&gt;")
     data = data.replace(u"<", u"&lt;")
+    data = data.replace(u"\n", u"<br />")   # ?
     return data
 
 
+def splitIndent(text):
+    pl = len(text)
+    text = text.lstrip()
+    return (text, pl-len(text))
+        
 
-# ExportTypes = Enumeration("ExportTypes", ["WikiToSingleHtmlPage", "WikiToSetOfHtmlPages", "WikiWordToHtmlPage",
-#                                           "WikiSubTreeToSingleHtmlPage", "WikiSubTreeToSetOfHtmlPages",
-#                                           "WikiToXml"], 1)
+# HtmlStates = Enumeration("FormatTypes", ["Default", "WikiWord2", "WikiWord", "AvailWikiWord",                                          
+#                                           "Bold", "Italic", "Heading4", "Heading3", "Heading2", "Heading1",
+#                                           "Url", "Script", "Property", "ToDo"], 1)
+
+# TODO UTF-8 support for HTML? Other encodings?
 
 class HtmlXmlExporter:
     def __init__(self):
@@ -41,13 +51,21 @@ class HtmlXmlExporter:
         self.wikiData = None
         self.wordList = None
         self.exportDest = None
+        self.tokenizer = Tokenizer(
+                WikiFormatting.CombinedHtmlExportWithCamelCaseRE, -1)
+                
+        self.result = None
+        self.statestack = None
+        # deepness of numeric bullets
+        self.numericdeepness = None
 
+        
 
     def getExportTypes(self, guiparent):
         """
         Return sequence of tuples with the description of export types provided
         by this object. A tuple has the form (<exp. type>,
-            <human readbale desctiption>, <panel for add. options or None>)
+            <human readbale description>, <panel for add. options or None>)
         If panels for additional options must be created, they should use
         guiparent as parent
         """
@@ -119,7 +137,7 @@ class HtmlXmlExporter:
             os.unlink(outputFile)
 
         realfp = open(outputFile, "w")
-        fp = mbcsWriter(realfp, "replace")
+        fp = utf8Writer(realfp, "replace")
         fp.write(self.getFileHeader(self.pWiki.wikiName))
         
         for word in self.wordList:
@@ -130,7 +148,8 @@ class HtmlXmlExporter:
             try:
                 content = wikiPage.getContent()
                 links = {}
-                for relation in wikiPage.childRelations:
+                for relation in wikiPage.getChildRelationships(
+                        existingonly=True, selfreference=False):
                     if not self.shouldExport(relation):
                         continue
                     # get aliases too
@@ -164,7 +183,8 @@ class HtmlXmlExporter:
                 continue
 
             links = {}
-            for relation in wikiPage.childRelations:
+            for relation in wikiPage.getChildRelationships(
+                    existingonly=True, selfreference=False):
                 if not self.shouldExport(relation):
                     continue
                 # get aliases too
@@ -207,7 +227,8 @@ class HtmlXmlExporter:
             try:
                 content = wikiPage.getContent()
                 links = {}
-                for relation in wikiPage.childRelations:
+                for relation in wikiPage.getChildRelationships(
+                        existingonly=True, selfreference=False):
                     if not self.shouldExport(relation):
                         continue
 
@@ -232,11 +253,41 @@ class HtmlXmlExporter:
 
         return outputFile
         
-            
+    def exportWordToHtmlPage(self, dir, word, links=None, startFile=True, onlyInclude=None):
+        outputFile = mbcsEnc(join(dir, u"%s.html" % word))[0]
+        try:
+            wikiPage = self.wikiData.getPage(word, toload=["parents"])
+            content = wikiPage.getContent()
+            formattedContent = self.formatContent(word, content, links)
+
+            if exists(outputFile):
+                os.unlink(outputFile)
+
+            realfp = open(outputFile, "w")
+            fp = utf8Writer(realfp, "replace")
+            fp.write(self.getFileHeader(word))
+
+            # if startFile is set then this is the only page being exported so
+            # do not include the parent header.
+            if not startFile:
+                fp.write(u'<span class="parent-nodes">parent nodes: %s</span>'
+                        % self.getParentLinks(wikiPage, True, onlyInclude))
+
+            fp.write(formattedContent)
+            fp.write(self.getFileFooter())
+            fp.reset()        
+            realfp.close()        
+        except NotImplementedError: # Exception, e:
+            pass
+        
+        self.copyCssFile(dir)
+        return outputFile
+
             
     def getFileHeader(self, title):
         return u"""<html>
     <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <title>%s</title>
          <link type="text/css" rel="stylesheet" href="wikistyle.css">
     </head>
@@ -248,161 +299,6 @@ class HtmlXmlExporter:
         return u"""    </body>
 </html>
 """
-            
-    # TODO Handle this correctly:
-    """
-    * Bullet
-    * Bullet
-
-    1. Number
-    2. Number
-    """
-    def createBullets(self, content, asXml=False):
-        lastBulletDepth = 0
-        lastUolTag = None
-        tabSize = 4
-        newContent = []
-        
-        for line in content.splitlines():
-            match = WikiFormatting.BulletRE.search(line)
-            if not match:
-                match = WikiFormatting.NumericBulletRE.search(line)
-                
-            if match:
-                if match.group(2) == u'*':
-                    lastUolTag = u"ul"
-                else:
-                    lastUolTag = u"ol"
-
-                depth = self.getIndentDepth(match.group(1), tabSize)
-
-                if depth > lastBulletDepth:
-                    while lastBulletDepth < depth:
-                        newContent.append(u"<%s>\n" % lastUolTag)
-                        lastBulletDepth = lastBulletDepth + 1
-                else:
-                    while lastBulletDepth > depth:
-                        newContent.append(u"</%s>\n" % lastUolTag)
-                        lastBulletDepth = lastBulletDepth - 1
-
-                newContent.append(u"\t<li>%s</li>\n" % match.group(3))
-                lastBulletDepth = depth
-
-            else:
-                
-                # bullet can span multiple lines so check and see if we are
-                # still inside of a bullet tag.
-                stillInBullet = False
-                if lastBulletDepth > 0:
-                    # if the trimed line is 0 we are probably still in the bullet since
-                    # it probably is just a newline between bullets.
-                    if len(line.strip()) > 0:
-                        indentedMatch = WikiFormatting.IndentedRE.search(line)
-                        if indentedMatch:
-                            depth = self.getIndentDepth(indentedMatch.group(1), tabSize)
-                            if depth >= lastBulletDepth:
-                                line = indentedMatch.group(2)
-                                stillInBullet = True
-                    else:
-                        stillInBullet = True;
-
-                if not stillInBullet:
-                    # close each opened ul/ol
-                    while lastBulletDepth > 0:
-                        newContent.append(u"</%s>\n" % lastUolTag)
-                        lastBulletDepth = lastBulletDepth - 1
-
-                if not asXml:
-                    if len(line.strip()) == 0:
-                        newContent.append(u"<p />\n")
-                    elif len(line) < 50 and line.find(u"<h") == -1:
-                        newContent.append(u"%s<br />\n" % line)
-                    else:
-                        newContent.append(u"%s\n" % line)
-                else:
-                    newContent.append(u"%s\n" % line)
-
-        # i may need to write out the last set of ol/ul
-        while lastBulletDepth > 0:
-            newContent.append(u"</%s>\n" % lastUolTag)
-            lastBulletDepth = lastBulletDepth - 1
-
-        return u"".join(newContent)
-
-    def createIndents(self, content, asXml=False):
-        lastBulletDepth = 0
-        lastUolTag = None
-        tabSize = 4
-        newContent = []
-        
-        for line in content.splitlines():
-            match = WikiFormatting.IndentedContentRE.search(line)
-            if match:
-                lastUolTag = u"blockquote"
-                depth = self.getIndentDepth(match.group(1), tabSize)
-                if depth > lastBulletDepth:
-                    while lastBulletDepth < depth:
-                        newContent.append(u"<%s>\n" % lastUolTag)
-                        lastBulletDepth = lastBulletDepth + 1
-                else:
-                    while lastBulletDepth > depth:
-                        newContent.append(u"</%s>\n" % lastUolTag)
-                        lastBulletDepth = lastBulletDepth - 1
-
-                newContent.append(u"\t%s\n" % match.group(3))
-                lastBulletDepth = depth
-
-            else:
-                
-                # bullet can span multiple lines so check and see if we are
-                # still inside of a bullet tag.
-                stillInBullet = False
-                if lastBulletDepth > 0:
-                    # if the trimed line is 0 we are probably still in the bullet since
-                    # it probably is just a newline between bullets.
-                    if len(line.strip()) > 0:
-                        indentedMatch = WikiFormatting.IndentedRE.search(line)
-                        if indentedMatch:
-                            depth = self.getIndentDepth(indentedMatch.group(1), tabSize)
-                            if depth >= lastBulletDepth:
-                                line = indentedMatch.group(2)
-                                stillInBullet = True
-                    else:
-                        stillInBullet = True;
-
-                if not stillInBullet:
-                    # close each opened blockquote
-                    while lastBulletDepth > 0:
-                        newContent.append(u"</%s>\n" % lastUolTag)
-                        lastBulletDepth = lastBulletDepth - 1
-
-                if not asXml:
-                    if len(line.strip()) == 0:
-                        newContent.append(u"<p />\n")
-                    ## elif len(line) < 50 and line.find("<h") == -1:   # TODO: ???
-                    ##    newContent.append("%s<br />\n" % line)
-                    else:
-                        newContent.append(u"%s\n" % line)
-                else:
-                    newContent.append(u"%s\n" % line)
-
-        # i may need to write out the last set of ol/ul
-        while lastBulletDepth > 0:
-            newContent.append(u"</%s>\n" % lastUolTag)
-            lastBulletDepth = lastBulletDepth - 1
-
-        return u"".join(newContent)
-
-
-    def getIndentDepth(self, str, tabSize):
-        """
-        Gets the indent depth from the leading spaces in the bulleted list
-        pattern and number list pattern. Bullets should be nested in increments
-        of 3 spaces or with tabs. If using spaces the length of the spaces
-        string is divided by 3 for the depth.
-        """
-        replaceRe = re.compile(u" {%s}" % tabSize)        
-        return len(replaceRe.sub(u" ", str));
 
     def getParentLinks(self, wikiPage, asHref=True, wordsToInclude=None):
         parents = u""
@@ -421,30 +317,6 @@ class HtmlXmlExporter:
 
         return parents
 
-    def linkWikiWords(self, content, links, asXml=False):
-        def replaceWithLink(match):
-            word = match.group(0)
-            link = links.get(word)
-            if link:
-                if asXml:
-                    return u'<link type="wikiword">%s</link>' % word
-                else:
-                    if word.startswith("["):
-                        word = word[1:len(word)-1]
-                    return u'<a href="%s">%s</a>' % (link, word)
-            else:
-                return word
-
-        newContent = []
-        for line in content.splitlines():
-            # don't match links on the same line as properties
-            # sorry, links and WikiWords can't be on the same line for exporting
-            if not WikiFormatting.UrlRE.search(line) and not line.find("<property") != -1:
-                line = WikiFormatting.WikiWordRE.sub(replaceWithLink, line)
-                line = WikiFormatting.WikiWordRE2.sub(replaceWithLink, line)
-            newContent.append(line)
-
-        return u"\n".join(newContent)
 
     def copyCssFile(self, dir):
         if not exists(mbcsEnc(join(dir, 'wikistyle.css'))[0]):
@@ -464,130 +336,205 @@ class HtmlXmlExporter:
             
         return strToBool(wikiPage.props.get("export", ("True",))[0])
 
-    
-    def formatContent(self, word, content, links=None, asXml=False):
-        # change the <<>> blocks into [[]] blocks so they aren't escaped
-        content = WikiFormatting.SuppressHighlightingRE.sub(u'[[\\1]]', content)
-        content = escape(content)
-        contentBeforeProcessing = content
 
-        content = WikiFormatting.ItalicRE.sub(u'<i>\\1</i>', content)
-        content = WikiFormatting.Heading4RE.sub(u'<h4>\\1</h4>', content)
-        content = WikiFormatting.Heading3RE.sub(u'<h3>\\1</h3>', content)
-        content = WikiFormatting.Heading2RE.sub(u'<h2>\\1</h2>', content)
-        content = WikiFormatting.Heading1RE.sub(u'<h1>\\1</h1>', content)
-
-        if asXml:
-            content = WikiFormatting.ToDoREWithContent.sub(u'<todo>\\1</todo>', content)
-        else:
-            content = WikiFormatting.ToDoREWithContent.sub(u'<span class="todo">\\1</span><br />', content)
+    def popState(self):
+        if self.statestack[-1][0] == "normalindent":
+            self.result.append(u"</ul>\n")
+        elif self.statestack[-1][0] == "ol":
+            self.result.append(u"</ol>\n")
+            self.numericdeepness -= 1
+        elif self.statestack[-1][0] == "ul":
+            self.result.append(u"</ul>\n")
             
-        content = WikiFormatting.ScriptRE.sub(u'', content)
-
-        if asXml:        
-            content = WikiFormatting.PropertyRE.sub(u'<property name="\\1" value="\\2"/>', content)
-        else:
-            content = WikiFormatting.PropertyRE.sub(u'<span class="property">[\\1: \\2]</span>', content)
-
-        if not asXml:    
-            content = WikiFormatting.HorizLineRE.sub(u'<hr size="1"/>', content)
-
-        # add the ul/ol/li tags for bullets
-        content = self.createBullets(content, asXml)
-
-        # add the blockquote tags for indents
-        content = self.createIndents(content, asXml)
-
-        # do bold last to make sure it doesn't mess with bullets
-        content = WikiFormatting.BoldRE.sub(u'<b>\\1</b>', content)
-
-        # link the wiki words
-        if links:
-            content = self.linkWikiWords(content, links, asXml)
-
-        # replace URL's last
-        if asXml:
-            content = WikiFormatting.UrlRE.sub(u'<link type="href">\\1</link>', content)
-        else:
-            def replaceLink(match):
-                lowerLink = match.group(1).lower()
-                if lowerLink.endswith(".jpg") or lowerLink.endswith(".gif") or lowerLink.endswith(".png"):
-                    return u'<img src="%s" border="0">' % match.group(1)
-                else:
-                    return u'<a href="%s">%s</a>' % (match.group(1), match.group(1))
-            content = WikiFormatting.UrlRE.sub(replaceLink, content)
-
-        # add <pre> tags for suppressed regions
-        SuppressHighlightingRE = re.compile(u"\[\[(.*?)\]\]", re.DOTALL)
-
-        # tracks which [] block we are on
-        matchIndex = MatchIndex()
-        def suppress(match):
-            # now search the pre-processed text for the same match
-            bpMatchNumber = 0
-            bpMatch = SuppressHighlightingRE.search(contentBeforeProcessing)
-            while bpMatch:
-                if bpMatchNumber == matchIndex.get():
-                    break
-                bpMatch = SuppressHighlightingRE.search(contentBeforeProcessing, bpMatch.end())
-                bpMatchNumber = bpMatchNumber + 1
-
-            if (bpMatch):
-                matchContent = bpMatch.group(1)
-                htmlRe = re.compile(u"<.+?>")
-                matchContent = htmlRe.sub('', matchContent)
-                matchIndex.increment()
-                return u'<pre>%s</pre>' % matchContent
-            else:
-                return match.group(1)
+        self.statestack.pop()
         
-        content = SuppressHighlightingRE.sub(suppress, content)
+    def hasStates(self):
+        """
+        Return true iff more than the basic state is on the state stack yet.
+        """
+        return len(self.statestack) > 1
         
-        return content
 
-    
-    def exportWordToHtmlPage(self, dir, word, links=None, startFile=True, onlyInclude=None):
-        outputFile = mbcsEnc(join(dir, u"%s.html" % word))[0]
-        try:
-            wikiPage = self.wikiData.getPage(word, toload=["parents"])
-            content = wikiPage.getContent()
-            formattedContent = self.formatContent(word, content, links)
-
-            if exists(outputFile):
-                os.unlink(outputFile)
-
-            realfp = open(outputFile, "w")
-            fp = mbcsWriter(realfp, "replace")
-            fp.write(self.getFileHeader(word))
-
-            # if startFile is set then this is the only page being exported so
-            # do not include the parent header.
-            if not startFile:
-                fp.write(u'<span class="parent-nodes">parent nodes: %s</span>'
-                        % self.getParentLinks(wikiPage, True, onlyInclude))
-
-            fp.write(formattedContent)
-            fp.write(self.getFileFooter())
-            fp.reset()        
-            realfp.close()        
-        except Exception, e:
-            pass
+    def formatContent(self, word, content, links=None, asXml=False):
+        if links is None:
+            links = {}
+        # Replace tabs with spaces
+        content = content.replace(u"\t", u" " * 4)  # TODO Configurable
+#         # Replace &, <, > with entities
+#         content = escape(content)
+        self.result = []
+        self.statestack = [("normalindent", 0)]
+        # deepness of numeric bullets
+        self.numericdeepness = 0
         
-        self.copyCssFile(dir)
-        return outputFile
-#         if startFile:
-#             os.startfile(outputFile)
-
+        # TODO Without camel case
+        tokens = self.tokenizer.tokenize(content, sync=True)
         
-        
-class MatchIndex:
-    def __init__(self):
-        self.matchIndex = 0
-    def increment(self):
-        self.matchIndex = self.matchIndex + 1
-    def get(self):
-        return self.matchIndex
+        if len(tokens) >= 2:
+            tok = tokens[0]
+            
+            for nexttok in tokens[1:]:
+                stindex = tok[1]
+                if stindex == -1:
+                    # Normal text, maybe with newlines and indentation to process
+                    lines = content[tok[0]:nexttok[0]].split(u"\n")
+                    
+                    # Test if beginning of lines at beginning of a line in editor
+                    if tok[0] > 0 and content[tok[0] - 1] != "\n":
+                        # if not -> output
+                        self.result.append(escape(lines[0]))
+                        del lines[0]
+                        
+                    # All 'lines' now begin at a new line in the editor
+                    for line in lines:
+                        if line.strip() == u"":
+                            # Handle empty line
+                            self.result.append(u"<br />\n")
+                            continue
 
+                        line, ind = splitIndent(line)
+                        
+                        while ind < self.statestack[-1][1]:
+                            self.popState()
+                                
+                        if self.statestack[-1][0] == "normalindent" and \
+                                ind > self.statestack[-1][1]:
+                            # More indentation
+                            self.result.append(u"<ul>")
+                            self.statestack.append(("normalindent", ind))
+                            self.result.append(u"<br />\n"+escape(line))
+                        elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
+                            self.result.append(u"<br />\n" + escape(line))
+                            
+                    # self.result.append(u"<br />\n")   # TODO <br />  ?
+
+                    tok = nexttok
+                    continue    # Next token
+                
+                styleno = WikiFormatting.HtmlExportExpressions[stindex][1]
+                if styleno == WikiFormatting.FormatTypes.Bold:
+                    self.result.append(u"<b>" + escape(tok[2]["boldContent"]) + u"</b>")
+                elif styleno == WikiFormatting.FormatTypes.Italic:
+                    self.result.append(u"<i>"+escape(tok[2]["italicContent"]) + u"</i>")
+                elif styleno == WikiFormatting.FormatTypes.Heading4:
+                    self.result.append(u"<h4>%s</h4>" % escape(tok[2]["h4Content"]))
+                elif styleno == WikiFormatting.FormatTypes.Heading3:
+                    self.result.append(u"<h3>%s</h3>" % escape(tok[2]["h3Content"]))
+                elif styleno == WikiFormatting.FormatTypes.Heading2:
+                    self.result.append(u"<h2>%s</h2>" % escape(tok[2]["h2Content"]))
+                elif styleno == WikiFormatting.FormatTypes.Heading1:
+                    self.result.append(u"<h1>%s</h1>" % escape(tok[2]["h1Content"]))
+                elif styleno == WikiFormatting.FormatTypes.HorizLine:
+                    self.result.append(u'<hr size="1" />\n')
+                elif styleno == WikiFormatting.FormatTypes.Script:
+                    pass  # Hide scripts                
+                elif styleno == WikiFormatting.FormatTypes.ToDo:
+                    if asXml:
+                        self.result.append(u'<todo>%s</todo>' % 
+                                escape(tok[2]["todoContent"]))
+                    else:
+                        self.result.append(u'<span class="todo">%s</span><br />' % 
+                                escape(tok[2]["todoContent"]))
+                elif styleno == WikiFormatting.FormatTypes.Property:
+                    if asXml:
+                        self.result.append( u'<property name="%s" value="%s"/>' % 
+                                (escape(tok[2]["propertyName"]),
+                                escape(tok[2]["propertyValue"])) )
+                    else:
+                        self.result.append( u'<span class="property">[%s: %s]</span>' % 
+                                (escape(tok[2]["propertyName"]),
+                                escape(tok[2]["propertyValue"])) )
+                elif styleno == WikiFormatting.FormatTypes.Url:
+                    link = content[tok[0]:nexttok[0]]
+                    if asXml:
+                        self.result.append(u'<link type="href">%s</link>' % 
+                                escape(link))
+                    else:
+                        lowerLink = link.lower()
+                        if lowerLink.endswith(".jpg") or \
+                                lowerLink.endswith(".gif") or \
+                                lowerLink.endswith(".png"):
+                            self.result.append(u'<img src="%s" border="0" />' % 
+                                    escape(link))
+                        else:
+                            self.result.append(u'<a href="%s">%s</a>' %
+                                    (escape(link), escape(link)))
+                elif styleno == WikiFormatting.FormatTypes.WikiWord or \
+                        styleno == WikiFormatting.FormatTypes.WikiWord2:
+                    word = content[tok[0]:nexttok[0]]
+                    link = links.get(word)
+                    
+                    if link:
+                        if asXml:
+                            self.result.append(u'<link type="wikiword">%s</link>' % 
+                                    escape(word))
+                        else:
+                            if word.startswith("["):
+                                word = word[1:len(word)-1]
+                            self.result.append(u'<a href="%s">%s</a>' %
+                                    (link, word))
+                    else:
+                        self.result.append(word)
+                elif styleno == WikiFormatting.FormatTypes.Numeric:
+                    # Numeric bullet
+                    numbers = len(tok[2]["preLastNumeric"].split(u"."))
+                    ind = splitIndent(tok[2]["indentNumeric"])[1]
+                    
+                    while ind < self.statestack[-1][1] and \
+                            (self.statestack[-1][0] != "ol" or \
+                            numbers < self.numericdeepness):
+                        self.popState()
+                        
+                    while ind == self.statestack[-1][1] and \
+                            self.statestack[-1][0] != "ol" and \
+                            self.hasStates():
+                        self.popState()
+
+                    if ind > self.statestack[-1][1] or \
+                            self.statestack[-1][0] != "ol":
+                        self.result.append(u"<ol>")
+                        self.statestack.append(("ol", ind))
+                        self.numericdeepness += 1
+
+                    while numbers > self.numericdeepness:
+                        self.result.append(u"<ol>")
+                        self.statestack.append(("ol", ind))
+                        self.numericdeepness += 1
+                        
+                    self.result.append(u"<li />")
+                elif styleno == WikiFormatting.FormatTypes.Bullet:
+                    # Numeric bullet
+                    ind = splitIndent(tok[2]["indentBullet"])[1]
+                    
+                    while ind < self.statestack[-1][1]:
+                        self.popState()
+                        
+                    while ind == self.statestack[-1][1] and \
+                            self.statestack[-1][0] != "ul" and \
+                            self.hasStates():
+                        self.popState()
+
+                    if ind > self.statestack[-1][1] or \
+                            self.statestack[-1][0] != "ul":
+                        self.result.append(u"<ul>")
+                        self.statestack.append(("ul", ind))
+
+                    self.result.append(u"<li />")
+                elif styleno == WikiFormatting.FormatTypes.Suppress:
+                    while self.statestack[-1][0] != "normalindent":
+                        self.popState()
+                    self.result.append(escape(tok[2]["suppressContent"]))
+                elif styleno == WikiFormatting.FormatTypes.Default:
+                    while self.statestack[-1][0] != "normalindent":
+                        self.popState()
+                    self.result.append(escape(content[tok[0]:nexttok[0]]))
+
+                tok = nexttok
+                
+            while len(self.statestack) > 1:
+                self.popState()
+
+        return u"".join(self.result)
 
 
 class TextExporter:
@@ -677,7 +624,7 @@ class TextExporter:
             enc = utf8Enc
             
         if encoding == 1:
-            filehead = StringOps.BOM_UTF8
+            filehead = BOM_UTF8
         else:
             filehead = ""
 

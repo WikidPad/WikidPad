@@ -1,9 +1,10 @@
 import os, traceback, codecs, array
 from cStringIO import StringIO
 import urllib_red as urllib
-import string
-import re
+import string, re
 import threading
+
+from os.path import exists
 
 from time import time, strftime
 
@@ -14,11 +15,12 @@ import wxPython.xrc as xrc
 from wxHelper import GUI_ID, XrcControls, XRCID
 
 import WikiFormatting
-from WikiData import WikiWordNotFoundException, WikiFileNotFoundException
+from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException
 # from TextWrapper import fill
 from textwrap import fill
 
-from StringOps import utf8Enc, utf8Dec, mbcsEnc, mbcsDec, uniToGui, guiToUni
+from StringOps import utf8Enc, utf8Dec, mbcsEnc, mbcsDec, uniToGui, guiToUni, \
+        Tokenizer, revStr
 from Configuration import isUnicode
 
 
@@ -45,7 +47,18 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.pWiki = pWiki
         self.evalScope = None
         self.stylebytes = None
-        self.stylethread = None
+        ## self.stylethread = None
+        
+        self.tokenizerWithCamelCase = Tokenizer(
+                WikiFormatting.CombinedSyntaxHighlightWithCamelCaseRE, -1)
+        self.tokenizerWithoutCamelCase = Tokenizer(
+                WikiFormatting.CombinedSyntaxHighlightWithoutCamelCaseRE, -1)
+                
+        self.activeTokenizer = None
+        
+        self.autoCompBackBytesWithoutBracket = 0
+        self.autoCompBackBytesWithBracket = 0
+
 
         # editor settings
         self.SetIndent(4)
@@ -54,6 +67,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.SetTabWidth(4)
         self.SetUseTabs(0)  # TODO Configurable
         self.SetEOLMode(wxSTC_EOL_LF)
+        self.AutoCompSetFillUps(u":=")  # TODO Add '.'?
         
         # Self-modify to ansi/unicode version
         if isUnicode():
@@ -70,7 +84,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
         # Popup menu must be created by Python code to replace clipboard functions
-        # for unicode built
+        # for unicode build
         self.UsePopUp(0)
 
         self.StyleSetSpec(wxSTC_STYLE_DEFAULT, "face:%(mono)s,size:%(size)d" % self.pWiki.presentationExt.faces)
@@ -103,6 +117,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         EVT_STC_STYLENEEDED(self, ID, self.OnStyleNeeded)
         EVT_STC_CHARADDED(self, ID, self.OnCharAdded)
         EVT_STC_CHANGE(self, ID, self.OnChange)
+        EVT_STC_USERLISTSELECTION(self, ID, self.OnUserListSelection)
+        
         EVT_LEFT_DOWN(self, self.OnClick)
         EVT_LEFT_DCLICK(self, self.OnDoubleClick)
         EVT_MOTION(self, self.OnMouseMove)
@@ -284,11 +300,20 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         # get the text to regex against
         text = self.GetText()
         textlen = len(text)
-
+        
+        oldtok = self.activeTokenizer
+        if oldtok:
+            oldtok.setTokenThread(None)
+        
+        if self.wikiWordsEnabled:
+            self.activeTokenizer = self.tokenizerWithCamelCase
+        else:
+            self.activeTokenizer = self.tokenizerWithoutCamelCase
+            
         if textlen < 10240:    # Arbitrary value
             # Synchronous styling
-            self.stylethread = None
-            self.buildStyling(text, True, sync=True)
+            self.activeTokenizer.setTokenThread(None)
+            self.buildStyling(text, sync=True)
             self.applyStyling(self.stylebytes)
             self.stylebytes = None
         else:
@@ -299,8 +324,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
             self.stylebytes = None
 
-            t = threading.Thread(target = self.buildStyling, args = (text, True))
-            self.stylethread = t
+            t = threading.Thread(target = self.buildStyling, args = (text,))
+            self.activeTokenizer.setTokenThread(t)
             t.start()
 
         # self.buildStyling(text, True)
@@ -323,64 +348,61 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.PopupMenu(self.contextMenu)
 
 
-    def buildStyling(self, text, withCamelCase, sync = False):
+    def buildStyling(self, text, sync = False):
         """
         Unicode text
         """
         # print "buildStyling start", self.wikiWordsEnabled
-        if self.wikiWordsEnabled:
-            combre = WikiFormatting.CombinedSyntaxHighlightWithCamelCaseRE
-        else:
-            combre = WikiFormatting.CombinedSyntaxHighlightWithoutCamelCaseRE
-
-        charstylepos = 0  # styling position in characters in text
-        styleresult = []
-        textlen = len(text) # Text length (in characters)
+        
+        tokens = self.activeTokenizer.tokenize(text, sync=sync)
         wikiData = self.pWiki.wikiData
+        
+        if not sync and (not threading.currentThread() is 
+                self.activeTokenizer.getTokenThread()):
+            return
 
-        while true:
-            mat = combre.search(text, charstylepos)
-            if mat is None:
-                if charstylepos < textlen:
-                    bytestylelen = self.bytelenSct(text[charstylepos:])
-                    # print "styledefault1", charstylepos, bytestylelen
-                    styleresult.append(chr(WikiFormatting.FormatTypes.Default) * bytestylelen)
-                break
+        if len(tokens) < 2:
+            return
+            
+        stylebytes = []
+        tok = tokens[0]
+        
+        for nexttok in tokens[1:]:
+            bytestylelen = self.bytelenSct(text[tok[0]:nexttok[0]])
+            stindex = tok[1]
+            if stindex == -1:
+                styleno = WikiFormatting.FormatTypes.Default
+            else:
+                styleno = WikiFormatting.FormatExpressions[stindex][1]
+                
+            if styleno == WikiFormatting.FormatTypes.WikiWord or \
+                    styleno == WikiFormatting.FormatTypes.WikiWord2:
+                        
+                # Remove possible '#' attachment
+                ww = text[tok[0]:nexttok[0]].split(u"#", 1)[0]
 
-            groupdict = mat.groupdict()
-            for m in groupdict.keys():
-                if not groupdict[m] is None:
-                    start, end = mat.span()
-                    styleno = int(m[5:])  # m is of the form:   style<style number>
-                    if charstylepos < start:
-                        bytestylelen = self.bytelenSct(text[charstylepos:start])
-                        # print "styledefault2", charstylepos, start, bytestylelen
+                if wikiData.isDefinedWikiWord(ww):
+                    styleno = WikiFormatting.FormatTypes.AvailWikiWord
+                else:
+                    styleno = WikiFormatting.FormatTypes.WikiWord
+            
+            
+            stylebytes.append(chr(styleno) * bytestylelen)
+            tok = nexttok
+            
+            if not sync and (not threading.currentThread() is 
+                    self.activeTokenizer.getTokenThread()):
+                return
 
-                        styleresult.append(chr(WikiFormatting.FormatTypes.Default) * bytestylelen)
-                        charstylepos = start
-
-                    if styleno == WikiFormatting.FormatTypes.WikiWord or \
-                            styleno == WikiFormatting.FormatTypes.WikiWord2:
-
-                        if wikiData.isDefinedWikiWord(mat.group(0)):
-                            styleno = WikiFormatting.FormatTypes.AvailWikiWord
-                        else:
-                            styleno = WikiFormatting.FormatTypes.WikiWord
-
-                    bytestylelen = self.bytelenSct(text[charstylepos:end])
-                    # print "style3", charstylepos, start, end, bytestylelen, styleno
-                    styleresult.append(chr(styleno) * bytestylelen)
-                    charstylepos = end
-                    break
-
-            if (not threading.currentThread() is self.stylethread) and not sync:
-                break
-
-        if (threading.currentThread() is self.stylethread) or sync:
-            self.stylebytes = "".join(styleresult)
+            
+        if not sync and (not threading.currentThread() is 
+                self.activeTokenizer.getTokenThread()):
+            return
+            
+        self.stylebytes = "".join(stylebytes)
 
         # print "buildStyling end", type(self.stylebytes)
-
+        
 
     def applyStyling(self, stylebytes):
         self.StartStyling(0, 0xff)
@@ -432,8 +454,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.GotoPos(bytePos)        
 
 
-
-
     def activateLink(self, mousePosition=None):
         "returns true if the link was activated"
         linkPos = self.GetCurrentPos()
@@ -451,18 +471,28 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 inWikiWord = True
 
         if inWikiWord:
-            searchStr = None
+            ## searchStr = None
             (start, end) = self.getWikiWordBeginEnd(linkPos)
-            if end+2 < self.GetLength():
-                if chr(self.GetCharAt(end+1)) == "#":    # This may be a problem under rare circumstances
-                    searchStr = self.GetTextRange(end+2, self.WordEndPosition(end+2, 1))
-
+            # Word may contain a '#' with attached search string
+            combword = self.getWikiWordText(linkPos).split(u"#", 1)
             # open the wiki page
-            self.pWiki.openWikiPage(self.getWikiWordText(linkPos))
+            self.pWiki.openWikiPage(combword[0])
+            self.pWiki.tree.Unselect()  # TODO move to other place?
+            
+            if len(combword) == 2:
+                self.pWiki.editor.executeSearch(
+                        WikiFormatting.SearchUnescapeRE.sub(ur"\1",
+                        combword[1]), 0)
 
-            # if a search str was found execute the search
-            if searchStr:
-                self.pWiki.editor.executeSearch(searchStr, 0)
+
+#             if end+2 < self.GetLength():
+#                 if chr(self.GetCharAt(end+1)) == "#":    # This may be a problem under rare circumstances
+#                     searchStr = self.GetTextRange(end+2, self.WordEndPosition(end+2, 1))
+# 
+# 
+#             # if a search str was found execute the search
+#             if searchStr:
+#                 self.pWiki.editor.executeSearch(searchStr, 0)
 
             return True
         elif self.isPositionInLink(linkPos):
@@ -473,8 +503,25 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def launchUrl(self, link):
         match = WikiFormatting.UrlRE.match(link)
         try:
-            os.startfile(match.group(1))
-            return True
+            link2 = match.group(1)
+            
+            if self.pWiki.configuration.getint(
+                    "main", "new_window_on_follow_wiki_url") == 1 or \
+                    not link2.startswith("wiki:"):
+                os.startfile(link2)
+                return True
+            elif self.pWiki.configuration.getint(
+                    "main", "new_window_on_follow_wiki_url") == 0:
+                        
+                link2 = urllib.url2pathname(link2)
+                link2 = link2.replace(u"wiki:", u"")
+                if exists(link2):
+                    self.pWiki.openWiki(link2, u"")  # ?
+                    return True
+                else:
+                    self.pWiki.statusBar.SetStatusText(
+                            uniToGui(u"Couldn't open wiki: %s" % link2), 0)
+                    return False
         except:
             pass
         return False
@@ -831,32 +878,86 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     self.startIncrementalSearch()
 
                 elif key == WXK_SPACE:
-                    pos = self.GetCurrentPos()
-                    (startPos, endPos) = self.getNearestWordPositions()
-                    nearestWord = self.GetTextRange(startPos, endPos)
+                    # Handle autocompletion
+                    endBytePos = self.GetCurrentPos()
+                    startBytePos = self.PositionFromLine(
+                            self.LineFromPosition(endBytePos))
+                    line = self.GetTextRange(startBytePos, endBytePos)
+                    rline = revStr(line)
+                    mat1 = WikiFormatting.RevWikiWordRE.match(rline)
+                    mat2 = WikiFormatting.RevWikiWordRE2.match(rline)
+                    mat3 = WikiFormatting.RevPropertyValue.match(rline)
+                    acresult = []
+                    self.autoCompBackBytesWithoutBracket = 0
+                    self.autoCompBackBytesWithBracket = 0
 
-                    if (startPos-1) > 0 and self.GetCharAt(startPos-1) == ord('['):
-                        nearestWord = u"[" + nearestWord
-                        startPos = startPos-1
+                    if mat1:
+                        # may be CamelCase word
+                        tofind = line[-mat1.end():]
+                        # print "mat1", repr(tofind)
+                        self.autoCompBackBytesWithoutBracket = self.bytelenSct(tofind)
+                        acresult += self.pWiki.wikiData.\
+                                getWikiWordsStartingWith(tofind, True)
+                                
+                    if mat2:
+                        # may be not-CamelCase word or in a property name
+                        tofind = line[-mat2.end():]
+                        # print "mat2", repr(tofind)
+                        self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
+                        acresult += self.pWiki.wikiData.\
+                                getWikiWordsStartingWith(tofind, True)
+                        acresult += map(lambda s: u"[" + s, self.pWiki.wikiData.\
+                                getPropertyNamesStartingWith(tofind[1:]))
 
-                    if len(nearestWord) > 0:
-                        wikiWords = self.pWiki.wikiData.getWikiWordsStartingWith(nearestWord, True)
+                    elif mat3:
+                        # In a property value
+                        tofind = line[-mat3.end():]
+                        propkey = revStr(mat3.group(3))
+                        propfill = revStr(mat3.group(2))
+                        propvalpart = revStr(mat3.group(1))
+                        # print "mat3", repr(tofind)
+                        self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
+                        values = filter(lambda pv: pv.startswith(propvalpart),
+                                self.pWiki.wikiData.getDistinctPropertyValues(propkey))
+                        acresult += map(lambda v: u"[" + propkey + propfill + 
+                                v +  u"]", values)
 
-                        if len(wikiWords) > 0:
-                            wordListAsStr = string.join(wikiWords, "~")
-                            self.AutoCompShow(pos-startPos, wordListAsStr)
-                        else:
-                            # see if we should complete a property name
-                            curLine = self.GetLine(self.GetCurrentLine())
-                            if nearestWord.startswith("["):
-                                props = self.pWiki.wikiData.getPropertyNamesStartingWith(nearestWord[1:])
-                                self.AutoCompShow(pos-(startPos+1), string.join(props, "~"))
-                    else:
-                        # see if we should autocomplete the complete property name list
-                        curLine = self.GetLine(self.GetCurrentLine())
-                        if curLine.find("[") != -1:
-                            props = self.pWiki.wikiData.getPropertyNames()
-                            self.AutoCompShow(pos-startPos, string.join(props, "~"))
+                    # print "line", repr(line)
+                    
+                    if len(acresult) > 0:
+                        # print "acresult", repr(acresult), repr(endBytePos-startBytePos)
+                        self.UserListShow(1, u"~".join(acresult))
+#                         self.AutoCompShow(0,        # endBytePos-startBytePos
+#                                 u"~".join(acresult))
+                    
+                    
+                    
+#                     pos = self.GetCurrentPos()
+#                     (startPos, endPos) = self.getNearestWordPositions()
+#                     nearestWord = self.GetTextRange(startPos, endPos)
+# 
+#                     if (startPos-1) > 0 and self.GetCharAt(startPos-1) == ord('['):
+#                         nearestWord = u"[" + nearestWord
+#                         startPos = startPos-1
+# 
+#                     if len(nearestWord) > 0:
+#                         wikiWords = self.pWiki.wikiData.getWikiWordsStartingWith(nearestWord, True)
+# 
+#                         if len(wikiWords) > 0:
+#                             wordListAsStr = string.join(wikiWords, "~")
+#                             self.AutoCompShow(pos-startPos, wordListAsStr)
+#                         else:
+#                             # see if we should complete a property name
+#                             curLine = self.GetLine(self.GetCurrentLine())
+#                             if nearestWord.startswith("["):
+#                                 props = self.pWiki.wikiData.getPropertyNamesStartingWith(nearestWord[1:])
+#                                 self.AutoCompShow(pos-(startPos+1), string.join(props, "~"))
+#                     else:
+#                         # see if we should autocomplete the complete property name list
+#                         curLine = self.GetLine(self.GetCurrentLine())
+#                         if curLine.find("[") != -1:
+#                             props = self.pWiki.wikiData.getPropertyNames()
+#                             self.AutoCompShow(pos-startPos, string.join(props, "~"))
 
                 elif key == WXK_RETURN:
                     self.activateLink()
@@ -866,6 +967,23 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             else:
                 evt.Skip()
 
+
+    def OnUserListSelection(self, evt):
+        text = evt.GetText()
+        # print "OnUserListSelection", repr(evt.GetText())   # TODO: Non unicode version
+        if text[0] == "[":
+            toerase = self.autoCompBackBytesWithBracket
+        else:
+            toerase = self.autoCompBackBytesWithoutBracket
+            
+        self.SetSelection(self.GetCurrentPos()-toerase, self.GetCurrentPos())
+        
+#         for i in xrange(toerase):
+#             self.DeleteBack()
+        
+        self.ReplaceSelection(text)
+            
+        
 
     def OnChar(self, evt):
         key = evt.GetKeyCode()

@@ -5,62 +5,27 @@ import re
 
 FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord2", "WikiWord", "AvailWikiWord",                                          
                                           "Bold", "Italic", "Heading4", "Heading3", "Heading2", "Heading1",
-                                          "Url", "Script", "Property", "ToDo"], 1)
+                                          "Url", "Script", "Property", "ToDo",
+                                          "HorizLine", "Bullet", "Numeric",
+                                          "Suppress"], 1)
 
 def initialize(wikiSyntax):
-    global BoldRE
-    global ItalicRE
-    global Heading4RE
-    global Heading3RE
-    global Heading2RE
-    global Heading1RE
-    global WikiWordRE
-    global WikiWordRE2
-    global UrlRE
-    global ScriptRE
-    global PropertyRE
-    global BulletRE
-    global NumericBulletRE
-    global IndentedContentRE
-    global ToDoRE
-    global ToDoREWithContent
-    global EmptyLineRE
-    global HorizLineRE
-    global IndentedRE
-    global SuppressHighlightingRE
-    global ToDoREWithCapturing
+    import WikiFormatting as ownmodule
+    for item in dir(wikiSyntax):
+        if item.startswith("_"):   # TODO check if necessary
+            continue
+        setattr(ownmodule, item, getattr(wikiSyntax, item))
+
+    
     global FormatExpressions
     global CombinedSyntaxHighlightWithCamelCaseRE
     global CombinedSyntaxHighlightWithoutCamelCaseRE
-    
-    BoldRE = wikiSyntax.BoldRE
-    ItalicRE = wikiSyntax.ItalicRE
-    Heading4RE = wikiSyntax.Heading4RE
-    Heading3RE = wikiSyntax.Heading3RE
-    Heading2RE = wikiSyntax.Heading2RE
-    Heading1RE = wikiSyntax.Heading1RE
-    WikiWordRE = wikiSyntax.WikiWordRE
-    WikiWordRE2 = wikiSyntax.WikiWordRE2
-    UrlRE = wikiSyntax.UrlRE
-    ScriptRE = wikiSyntax.ScriptRE
-    PropertyRE = wikiSyntax.PropertyRE
-    BulletRE = wikiSyntax.BulletRE
-    NumericBulletRE = wikiSyntax.NumericBulletRE
-    IndentedContentRE = wikiSyntax.IndentedContentRE
-    ToDoRE = wikiSyntax.ToDoRE
-    ToDoREWithContent = wikiSyntax.ToDoREWithContent
-    EmptyLineRE = wikiSyntax.EmptyLineRE
-    HorizLineRE = wikiSyntax.HorizLineRE
-    IndentedRE = wikiSyntax.IndentedRE
-    SuppressHighlightingRE = wikiSyntax.SuppressHighlightingRE
-    # used in the tree control to parse saved todos
-    ToDoREWithCapturing = wikiSyntax.ToDoREWithCapturing
-    
-##    FormatExpressions = [(SuppressHighlightingRE, FormatTypes.Default), (ScriptRE, FormatTypes.Script), (PropertyRE, FormatTypes.Property),
-##                         (UrlRE, FormatTypes.Url), (ToDoRE, FormatTypes.ToDo),
-##                         (WikiWordRE2, FormatTypes.WikiWord2), (WikiWordRE, FormatTypes.WikiWord), (BoldRE, FormatTypes.Bold),
-##                         (ItalicRE, FormatTypes.Italic), (Heading3RE, FormatTypes.Heading3), (Heading4RE, FormatTypes.Heading4),
-##                         (Heading2RE, FormatTypes.Heading2), (Heading1RE, FormatTypes.Heading1)]
+    global UpdateExpressions
+    global CombinedUpdateWithCamelCaseRE
+    global CombinedUpdateWithoutCamelCaseRE
+    global HtmlExportExpressions
+    global CombinedHtmlExportWithCamelCaseRE
+    global CombinedHtmlExportWithoutCamelCaseRE
 
 # Reordered version, most specific first
 
@@ -70,8 +35,10 @@ def initialize(wikiSyntax):
             (UrlRE, FormatTypes.Url),
             (ToDoRE, FormatTypes.ToDo),
             (PropertyRE, FormatTypes.Property),
-            (WikiWordRE2, FormatTypes.WikiWord2),
-            (WikiWordRE, FormatTypes.WikiWord),
+            (FootnoteRE, FormatTypes.Default),
+            (WikiWordEditorRE2, FormatTypes.WikiWord2),
+            (WikiWordEditorRE, FormatTypes.WikiWord),
+            # (WikiWordRE, FormatTypes.WikiWord),
             (BoldRE, FormatTypes.Bold),
             (ItalicRE, FormatTypes.Italic),
             (Heading4RE, FormatTypes.Heading4),
@@ -83,19 +50,89 @@ def initialize(wikiSyntax):
     # Build combined regexps
     WithCamelCase = []
     WithoutCamelCase = []
-    for r, s in FormatExpressions:
-        WithCamelCase.append((u"(?P<style%i>" % s) + r.pattern + u")")
+    for i in range(len(FormatExpressions)):
+        r, s = FormatExpressions[i]
+#     for r, s in FormatExpressions:
+        WithCamelCase.append((u"(?P<style%i>" % i) + r.pattern + u")")
         if not s is FormatTypes.WikiWord:
-            WithoutCamelCase.append((u"(?P<style%i>" % s) + r.pattern + u")")
+            WithoutCamelCase.append((u"(?P<style%i>" % i) + r.pattern + u")")
 
 
     CombinedSyntaxHighlightWithCamelCaseRE = \
             re.compile(u"|".join(WithCamelCase),
-                    re.DOTALL | re.LOCALE | re.MULTILINE | re.UNICODE)
+                    re.DOTALL | re.UNICODE | re.MULTILINE)
     CombinedSyntaxHighlightWithoutCamelCaseRE = \
             re.compile(u"|".join(WithoutCamelCase),
-                    re.DOTALL | re.LOCALE | re.MULTILINE | re.UNICODE)
+                    re.DOTALL | re.UNICODE | re.MULTILINE)
     
+
+    UpdateExpressions = [
+            (SuppressHighlightingRE, FormatTypes.Default),
+            (ScriptRE, FormatTypes.Script),
+            (UrlRE, FormatTypes.Url),
+            (ToDoREWithContent, FormatTypes.ToDo),
+            (PropertyRE, FormatTypes.Property),
+            (FootnoteRE, FormatTypes.Default),
+            (WikiWordRE2, FormatTypes.WikiWord2),
+            (WikiWordRE, FormatTypes.WikiWord),
+            ]
+
+    # Build combined regexps
+    WithCamelCase = []
+    WithoutCamelCase = []
+    for i in range(len(UpdateExpressions)):
+        r, s = UpdateExpressions[i]
+#     for r, s in FormatExpressions:
+        WithCamelCase.append((u"(?P<style%i>" % i) + r.pattern + u")")
+        if not s is FormatTypes.WikiWord:
+            WithoutCamelCase.append((u"(?P<style%i>" % i) + r.pattern + u")")
+
+    CombinedUpdateWithCamelCaseRE = \
+            re.compile(u"|".join(WithCamelCase),
+                    re.DOTALL | re.UNICODE | re.MULTILINE)
+    CombinedUpdateWithoutCamelCaseRE = \
+            re.compile(u"|".join(WithoutCamelCase),
+                    re.DOTALL | re.UNICODE | re.MULTILINE)
+
+
+    HtmlExportExpressions = [
+            (BoldRE, FormatTypes.Bold),
+            (ItalicRE, FormatTypes.Italic),
+            (Heading4RE, FormatTypes.Heading4),
+            (Heading3RE, FormatTypes.Heading3),
+            (Heading2RE, FormatTypes.Heading2),
+            (Heading1RE, FormatTypes.Heading1),
+            (ToDoREWithContent, FormatTypes.ToDo),
+            (PropertyRE, FormatTypes.Property),
+            (HorizLineRE, FormatTypes.HorizLine),
+            (UrlRE, FormatTypes.Url),
+            (SuppressHighlightingRE, FormatTypes.Suppress),
+            (BulletRE, FormatTypes.Bullet),
+            (NumericBulletRE, FormatTypes.Numeric),
+            (FootnoteRE, FormatTypes.Default),
+            (WikiWordRE2, FormatTypes.WikiWord2),
+            (WikiWordRE, FormatTypes.WikiWord),
+            (ScriptRE, FormatTypes.Script)
+            ]
+            
+    # Build combined regexps
+    WithCamelCase = []
+    WithoutCamelCase = []
+    for i in range(len(HtmlExportExpressions)):
+        r, s = HtmlExportExpressions[i]
+#     for r, s in FormatExpressions:
+        WithCamelCase.append((u"(?P<style%i>" % i) + r.pattern + u")")
+        if not s is FormatTypes.WikiWord:
+            WithoutCamelCase.append((u"(?P<style%i>" % i) + r.pattern + u")")
+
+    CombinedHtmlExportWithCamelCaseRE = \
+            re.compile(u"|".join(WithCamelCase),
+                    re.DOTALL | re.UNICODE | re.MULTILINE)
+    CombinedHtmlExportWithoutCamelCaseRE = \
+            re.compile(u"|".join(WithoutCamelCase),
+                    re.DOTALL | re.UNICODE | re.MULTILINE)
+
+
 
 
 def getStyles(styleFaces):

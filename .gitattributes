@@ -296,6 +296,7 @@ extensions/KeyBindings.py -text
 extensions/Presentation.py -text
 extensions/WikiSyntax.py -text
 extensions/WikidPadHooks.py -text
+extensions/autoNew.py -text
 extensions/referrals.py -text
 gadfly-1.0.0/CHANGES.txt -text
 gadfly-1.0.0/COPYRIGHT.txt -text
@@ -615,3 +616,4 @@ lib/readme.txt -text
 /pwiki.ico -text
 /setup.py -text
 /sql_mar.py -text
+/wikidpad_unicode.iss -text

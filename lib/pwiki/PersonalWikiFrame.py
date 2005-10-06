@@ -1,5 +1,7 @@
+import os, gc, traceback, hotshot
 
-import os, gc, traceback
+## _prof = hotshot.Profile("hotshot.prf")
+
 from os.path import *
 from time import localtime, time, strftime
 
@@ -10,13 +12,14 @@ from wxHelper import GUI_ID
 
 import Configuration
 from Configuration import createConfiguration
-from WikiData import *
 from WikiTxtCtrl import *
 from WikiTreeCtrl import *
+import WikiFormatting
+from WikiData import *
 from AdditionalDialogs import *
 import Exporters
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc
-import WikiFormatting
+
 
 from PluginManager import *
 _COLORS = [
@@ -619,10 +622,9 @@ class PersonalWikiFrame(wxFrame):
         wikiWordMenu.Append(menuID, 'View &Children\t' + self.keyBindings.ViewChildren, 'View Children Of Current Wiki Word')
         EVT_MENU(self, menuID, lambda evt: self.viewChildren(self.currentWikiWord))
 
-# TODO
-#         self.addMenuItem(wikiWordMenu, 'Set As &Root\t' + self.keyBindings.SetAsRoot,
-#                 'Set current wiki word as tree root',
-#                 lambda evt: self.setCurrentWordAsRoot())
+        self.addMenuItem(wikiWordMenu, 'Set As &Root\t' + self.keyBindings.SetAsRoot,
+                'Set current wiki word as tree root',
+                lambda evt: self.setCurrentWordAsRoot())
 
         self.addMenuItem(wikiWordMenu, 'S&ynchronize with tree',
                 'Find the current wiki word in the tree', lambda evt: self.findCurrentWordInTree(),
@@ -1117,7 +1119,6 @@ class PersonalWikiFrame(wxFrame):
 
         self.SetAcceleratorTable(wxAcceleratorTable(ACCS))
 
-
         # ------------------------------------------------------------------------------------
         # Create the left-right splitter window.
         # ------------------------------------------------------------------------------------
@@ -1135,7 +1136,6 @@ class PersonalWikiFrame(wxFrame):
         except Exception, e:
             self.displayErrorMessage('There was an error loading the icons '+
                     'for the tree control.', e)
-
 
         # ------------------------------------------------------------------------------------
         # Create the editor
@@ -1572,6 +1572,7 @@ These are your default global settings.
         self.tree.setRootByPage(self.currentWikiPage)
 
 
+
     def closeWiki(self, saveState=True):
         if self.wikiConfigFilename:
             if saveState:
@@ -1660,7 +1661,7 @@ These are your default global settings.
             self.lastCursorPositionInPage[self.currentWikiWord] = len(content)
 
         # get the properties that need to be checked for options
-        pageProps = self.currentWikiPage.props
+        pageProps = self.currentWikiPage.getProperties()
         globalProps = self.wikiData.getGlobalProperties()
 
         # get the font that should be used in the editor
@@ -2292,9 +2293,11 @@ These are your default global settings.
 
         if skipConfirm or result == wxYES :
             try:
+                ## _prof.start()
                 self.wikiData.rebuildWiki(
                         wxGuiProgressHandler(u"Rebuilding wiki", u"Rebuilding wiki",
                         0, self))
+                ## _prof.stop()
 
                 self.tree.collapse()
                 self.openWikiPage(self.currentWikiWord, forceTreeSyncFromRoot=True)
@@ -2415,7 +2418,7 @@ These are your default global settings.
 
         findString = guiToUni(evt.GetFindString())
         if matchWholeWord:
-            findString = u"\\b%s\\b" % findString
+            findString = ur"\b%s\b" % findString
 
         if et == wxEVT_COMMAND_FIND:
             self.editor.executeSearch(findString, caseSensitive=matchCase)

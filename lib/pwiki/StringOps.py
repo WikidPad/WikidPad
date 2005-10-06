@@ -9,6 +9,8 @@ creating diff information for plain byte sequences
 
 import difflib, codecs
 
+import threading
+
 from struct import pack, unpack
 
 from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE
@@ -104,8 +106,109 @@ def fileContentToUnicode(content):
         return mbcsDec(content, "replace")[0]
         
         
+        
+def wikiWordToLabel(word):
+    """
+    Strip '[' and ']' if non camelcase word and return it
+    """
+    if word.startswith("["):
+        return word[1:-1]
+    return word
 
-# ---------- Handling  diff information ----------
+        
+def revStr(s):
+    """
+    Return reversed string
+    """
+    s = list(s)
+    s.reverse()
+    return u"".join(s)
+
+
+# ---------- Breaking text into tokens ----------
+
+class Tokenizer:
+    def __init__(self, tokenre, defaultType):
+        self.tokenre = tokenre
+        self.defaultType = defaultType
+        self.tokenThread = None
+
+    def setTokenThread(self, tt):
+        self.tokenThread = tt
+
+    def getTokenThread(self):
+        return self.tokenThread
+
+    def tokenize(self, text, sync=True):
+        textlen = len(text)
+        result = []
+        charpos = 0    
+        
+        while True:
+            mat = self.tokenre.search(text, charpos)
+            if mat is None:
+                if charpos < textlen:
+                    result.append((charpos, self.defaultType, None))
+                
+                result.append((textlen, self.defaultType, None))
+                break
+    
+            groupdict = mat.groupdict()
+            for m in groupdict.keys():
+                if not groupdict[m] is None and m.startswith(u"style"):
+                    start, end = mat.span()
+                    
+                    # m is of the form:   style<index>
+                    index = int(m[5:])
+                    if charpos < start:
+                        result.append((charpos, self.defaultType, None))                    
+                        charpos = start
+    
+                    result.append((charpos, index, groupdict))
+                    charpos = end
+                    break
+    
+            if not sync and (not threading.currentThread() is self.tokenThread):
+                break
+                
+        return result
+
+
+
+# def processPageUpdate(text, tokenizer):
+#         tokens = tokenizer.tokenize(text, sync=True)
+#         
+#         newTodos = []
+#         newWords = []
+#         newProps = []
+# 
+#         if len(tokens) >= 2:
+#             lasttok = tokens[0]
+#             
+#             for tok in tokens[1:]:
+#                 stindex = lasttok[1]
+#                 if stindex == -1:
+#                     styleno = WikiFormatting.FormatTypes.Default
+#                 else:
+#                     styleno = WikiFormatting.UpdateExpressions[stindex][1]
+# 
+#                 if styleno == WikiFormatting.FormatTypes.ToDo:
+#                     newTodos.append(lasttok[2]("todoContent"))
+#                 elif styleno == WikiFormatting.FormatTypes.WikiWord2:
+#                     newWords.append(text[lasttok[0]:tok[0]])
+#                 elif styleno == WikiFormatting.FormatTypes.WikiWord:
+#                     newWords.append(text[lasttok[0]:tok[0]])
+#                 elif styleno == WikiFormatting.FormatTypes.Property:
+#                     propName = lasttok[2]("propertyName")
+#                     propValue = lasttok[2]("propertyValue")
+#                     newProps.append(propName, propValue)
+# 
+# 
+#         return (newTodos, newWords, newProps)
+
+
+
+# ---------- Handling diff information ----------
 
 
 def difflibToCompact(ops, b):

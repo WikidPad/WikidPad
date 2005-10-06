@@ -417,6 +417,11 @@ class OptionsDialog(wxDialog):
         self.ctrls.cbLowResources.SetValue(
                 self.pWiki.configuration.getint("main", "lowresources") != 0)
 
+        self.ctrls.cbNewWindowWikiUrl.SetValue(
+                self.pWiki.configuration.getint("main",
+                "new_window_on_follow_wiki_url") != 0)
+
+
         EVT_BUTTON(self, wxID_OK, self.OnOk)
         
 
@@ -431,6 +436,11 @@ class OptionsDialog(wxDialog):
             self.pWiki.configuration.set("main", "lowresources", "1")
         else:
             self.pWiki.configuration.set("main", "lowresources", "0")
+
+        if self.ctrls.cbNewWindowWikiUrl.GetValue():
+            self.pWiki.configuration.set("main", "new_window_on_follow_wiki_url", "1")
+        else:
+            self.pWiki.configuration.set("main", "new_window_on_follow_wiki_url", "0")
 
         evt.Skip()
         
@@ -447,9 +457,6 @@ class ExportDialog(wxDialog):
         res = xrc.wxXmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "ExportDialog")
         
-#         self.additOptions = wxPanel(self)
-#         res.AttachUnknownControl("additOptions", self.additOptions, self)
-
         self.ctrls = XrcControls(self)
         
         # Necessary to avoid a crash        
@@ -469,10 +476,6 @@ class ExportDialog(wxDialog):
 
                 exporterList.append((ob, tp[0], tp[1], panel))
         
-
-#         self.textPanel = res.LoadPanel(self.ctrls.additOptions, "ExportSubText") # .ctrls.additOptions
-#         self.textPanel.Fit()
-        
         self.ctrls.additOptions.Fit()
         mins = self.ctrls.additOptions.GetMinSize()
         
@@ -486,14 +489,6 @@ class ExportDialog(wxDialog):
         
         self.ctrls.tfDirectory.SetValue(self.pWiki.getLastActiveDir())
         
-#         self.exporterList = [
-#             (Exporters.HtmlXmlExporter, "html_single"),
-#             (Exporters.HtmlXmlExporter, "html_multi"),
-#             (Exporters.HtmlXmlExporter, "xml"),
-#             (Exporters.TextExporter, "plaintext")
-#             ]
-
-
         for e in self.exporterList:
             e[3].Show(False)
             e[3].Enable(False)
