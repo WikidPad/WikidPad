@@ -1,4 +1,4 @@
-++ Wiki Document Attributes
+﻿++ Wiki Document Attributes
 
 Wiki pages support "attributes". Attributes serve 2 purposes.  They
 allow you to index your data by attribute, in addition to by wikiword,
@@ -13,9 +13,10 @@ Setting an attribute like this makes this document available under the
 attributes you might want to add to your wiki words might be:
 
 [contact: work]
-[contact: personal] for wiki contacts, ie JohnDoe
+[contact: private] for wiki contacts, ie JohnDoe
 [work-related: true] to mark something as work related
-[personal: kids] to mark something as personal and about the kids
+[contact.personal.kids: school] to mark something as personal contact
+about school of the kids.
 
 Open the "Views" node in the tree on the left to see how these attributes
 become available for reference.

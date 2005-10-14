@@ -1,4 +1,4 @@
-++ Change Log
+ï»¿++ Change Log
 
 Jan. 08, 2004
 
@@ -174,8 +174,84 @@ Nov. 14, 2003
     1. Added ScratchPad feature. Ctrl-Alt-C copies to the scratch pad.
     2. Added ability for end users to customize wikidPad by hooking into
        some of the core events. See WikiPadHooks.
-    3. WikiWords may now contain InternatiönalChàracters.
+    3. WikiWords may now contain InternatiÃ¶nalChÃ racters.
     4. Bug fixes. Issues with renaming wikiwords have been resolved.
+
+Okt. 13, 2005
+
+    1. *Unicode support*. This means:
+    1.1. Characters from any language in the text (if font and 
+         operating system support them).
+    1.2. Arbitrary alphanumeric characters (as defined by Unicode 
+         consortium) for non-camelCase wiki words (if operating and 
+         file system supports it), except numeric only words, like e.g. 
+         [42].
+    1.3. Support for all characters in incremental search.
+
+    2. Changes in *wiki syntax*:
+    2.1. Before and after the tags to escape formatting (<< and >>) 
+         only whitespaces are allowed on the same line. See 
+         TextFormatting.
+    2.2. Escaping spaces when executing a search as part of a link. 
+         Example: This link
+         WikiDocumentAttributes#creating# a# new# wiki .
+         A # is escaped as ##.
+    2.3. Arbitrary alphanumeric characters (see 1.2.)
+
+    3. The *editor*:
+    3.1. Drag and drop of text.
+    3.2. Faster syntax highlighting. For pages bigger than 10 KBytes, 
+         it is done in the background, so you might notice a delay 
+         before the highlighting is updated.
+    3.3. New menu item "Replace Text by WikiWord". Select some text you 
+         want to move to a new wiki page, choose the item and enter the 
+         name of the new page. On the old page, the text will be 
+         replaced by a link to the new one.
+    3.4. Possibility to change the date format for "Insert Date"
+    3.5. New menu item "Wikize selected word" to convert selected words 
+         to a valid wiki word.
+    3.6. Menu and toolbar plugin to add a list of the children and 
+         parents of a wiki word to a page.
+    3.7. Menu plugin to create new wiki words with auto-generated 
+         names. (Name looks like  [New124536] with a unique number).
+    3.8. Right handling of numbered lists with multiple levels of 
+         numbering (like this one). See also BulletedLists. Written by 
+         Gerhard Reitmayr.
+
+    4. The *user interface*:
+    4.1. Submenu to choose colors similar to icons.
+    4.2. In the dialogs "Open word" and "Search wiki" you can use
+         cursor up/down to move between text field and the list below
+         the field.
+    4.3. "Set as root" menu item to choose an arbitrary wiki word as 
+         root of the tree on the left.
+    4.4. Add menu and toolbar items as Python plugins (no documentation
+         yet, but example in extensions/referrals.py). Written by 
+         Gerhard Reitmayr.
+    4.5. Arbitrary nested todo and property entries in the View tree. 
+         See WikiDocumentAttributes and TodoItems.
+
+    5. *Options* dialog in the "Wiki" menu:
+    5.1. "Minimize to Tray".
+    5.2. "Hide undefined wiki words in tree". Undefined children words 
+         of a word are not shown in the tree if this is checked.
+    5.3. "Start browser after export". If this is checked, after 
+         exporting HTML or XML, the standard web browser is started to 
+         show the result.
+    5.4. "New window on wiki URL". If checked, activating a "wiki:" URL 
+         opens a new WikidPad window (only if   'Handle URLs with 
+         "wiki:" by WikidPad'   was checked when WikidPad was 
+         installed). If not checked, the same window is reused to open 
+         the selected wiki.
+    5.5. "Low resource usage". Uses less GDI and user resources on 
+         Windows 95/98/ME, especially if minimized. Changing this 
+         setting takes effect only after restarting WikidPad.
+
+    6. *Internals*:
+    6.1. Plugin manager by Gerhard Reitmayr.
+    6.2. Slower but more reliable HTML/XML export.
+
+
 
 [bookmarked: true]
 [tree_position: 0]

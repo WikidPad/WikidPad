@@ -2,6 +2,6 @@
 data_dir = data
 
 [main]
-last_wiki_word = AutoSave
+last_wiki_word = WikidPadHelp
 wiki_name = WikidPadHelp
 

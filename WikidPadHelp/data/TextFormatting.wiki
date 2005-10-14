@@ -1,4 +1,4 @@
-++ Text Formatting
+﻿++ Text Formatting
 
 As you type you can enter formatting commands in plain text.
 
@@ -32,3 +32,6 @@ escape formatting
 with formatting
 
 *This should be bold* ThisShouldBeALink
+
+Before and after the begin and end tags only whitespaces are allowed on the same line, so a << in the text does not prevent ALink from being highlighted.
+
