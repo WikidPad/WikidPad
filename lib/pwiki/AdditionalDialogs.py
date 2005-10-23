@@ -50,14 +50,15 @@ class OpenWikiWordDialog(wxDialog):
                 self.value = words[0]
             else:
                 wikiWord = self.value
-                if not WikiFormatting.isWikiWord(wikiWord):
-                    wikiWord = u"[%s]" % wikiWord
-                if not WikiFormatting.isWikiWord(wikiWord):
+                wikiWordN = WikiFormatting.normalizeWikiWord(wikiWord)
+
+                if wikiWordN is None:
                     # Entered text is not a valid wiki word
                     self.ctrls.text.SetFocus()
                     return
                     
                 # wikiWord is valid but nonexisting, so maybe create it?
+                # TODO Special case [WikiWord]
                 result = wxMessageBox(
                         uniToGui(u"'%s' is not an existing wikiword. Create?" %
                         wikiWord), uniToGui(u"Create"),
@@ -108,11 +109,9 @@ class OpenWikiWordDialog(wxDialog):
         """
         Create new WikiWord
         """
-        wikiWord = self.value
-        if not WikiFormatting.isWikiWord(wikiWord):
-            wikiWord = u"[%s]" % wikiWord
-        if not WikiFormatting.isWikiWord(wikiWord):
-            self.pWiki.displayErrorMessage(u"'%s' is an invalid WikiWord" % wikiWord)
+        wikiWord = WikiFormatting.normalizeWikiWord(self.value)
+        if wikiWord is None:
+            self.pWiki.displayErrorMessage(u"'%s' is an invalid WikiWord" % self.value)
             self.ctrls.text.SetFocus()
             return
         

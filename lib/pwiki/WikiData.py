@@ -124,7 +124,7 @@ class WikiData:
         if (not exists(self.getWikiWordFileName(word))):
             raise WikiFileNotFoundException, u"wiki page not found for word: %s" % word
 
-        fp = open(self.getWikiWordFileName(word), "r")
+        fp = open(self.getWikiWordFileName(word), "rU")
         content = fp.read()
         fp.close()
 
@@ -818,19 +818,22 @@ class WikiPage:
                 if styleno == WikiFormatting.FormatTypes.ToDo:
                     self.addTodo(tok[2]["todoContent"])
                 elif styleno == WikiFormatting.FormatTypes.WikiWord2:
-                    self.addChildRelationship(text[tok[0]:nexttok[0]])
+                    self.addChildRelationship(
+                            WikiFormatting.normalizeWikiWord(
+                            text[tok[0]:nexttok[0]]))
                 elif styleno == WikiFormatting.FormatTypes.WikiWord:
-                    self.addChildRelationship(text[tok[0]:nexttok[0]])
+                    self.addChildRelationship(
+                            WikiFormatting.normalizeWikiWord(
+                            text[tok[0]:nexttok[0]]))
                 elif styleno == WikiFormatting.FormatTypes.Property:
                     propName = tok[2]["propertyName"]
                     propValue = tok[2]["propertyValue"]
 
                     if propName == "alias":
-                        word = propValue
-                        if not WikiFormatting.WikiWordRE.match(word):
-                            word = u"[%s]" % word
-                        self.wikiData.cachedWikiWords[word] = 2
-                        self.setProperty("alias", word)
+                        word = WikiFormatting.normalizeWikiWord(propValue)
+                        if word is not None:
+                            self.wikiData.cachedWikiWords[word] = 2
+                            self.setProperty("alias", word)
                     else:
                         self.setProperty(propName, propValue)
                         

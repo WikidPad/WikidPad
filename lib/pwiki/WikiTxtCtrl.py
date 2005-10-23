@@ -16,7 +16,6 @@ from wxHelper import GUI_ID, XrcControls, XRCID
 
 import WikiFormatting
 from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException
-# from TextWrapper import fill
 from textwrap import fill
 
 from StringOps import utf8Enc, utf8Dec, mbcsEnc, mbcsDec, uniToGui, guiToUni, \
@@ -379,7 +378,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     styleno == WikiFormatting.FormatTypes.WikiWord2:
                         
                 # Remove possible '#' attachment
-                ww = text[tok[0]:nexttok[0]].split(u"#", 1)[0]
+                ww = WikiFormatting.normalizeWikiWord(
+                        text[tok[0]:nexttok[0]].split(u"#", 1)[0])
 
                 if wikiData.isDefinedWikiWord(ww):
                     styleno = WikiFormatting.FormatTypes.AvailWikiWord
@@ -499,6 +499,53 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.launchUrl(self.getTextInStyle(linkPos, WikiFormatting.FormatTypes.Url))
             return True
         return False
+
+
+#     def launchUrl(self, link):   # TODO Works only for Windows
+#         match = WikiFormatting.UrlRE.match(link)
+#         try:
+#             link2 = match.group(1)
+#             
+#             if link2.startswith("wiki:"):
+#                 if self.pWiki.configuration.getint(
+#                         "main", "new_window_on_follow_wiki_url") == 1:
+#                     os.startfile(link2)
+#                     return True
+#                 else:
+#                     link2 = urllib.url2pathname(link2)
+#                     link2 = link2.replace(u"wiki:", u"")
+#                     if exists(link2):
+#                         self.openWiki(link2, u"")
+#                         return True
+#                     else:
+#                         self.SetStatusText(
+#                                 uniToGui(u"Couldn't find wiki: %s" % link2))
+#                         return False
+#             elif link2.startswith("file:"):
+#                 link2 = link2.replace(u"file:", u"")
+#                 if "|" in link2:
+#                     # Link is absolute
+#                     filepath = urllib.url2pathname(link2)
+#                 else:
+#                     # Link is relative, cut off leading '/'
+#                     while link2.startswith("/"):
+#                         link2 = link2[1:]
+#                     filepath = urllib.url2pathname(link2)
+#                     filepath = join(self.dataDir, filepath)
+#                     
+#                 if exists(filepath):
+#                     os.startfile(filepath)
+#                     return True
+#                 else:
+#                     self.SetStatusText(
+#                             uniToGui(u"Couldn't find file: %s" % filepath))
+#                     return False
+#             else:
+#                 os.startfile(link2)
+#         except:
+#             pass
+#         return False
+
 
     def launchUrl(self, link):
         match = WikiFormatting.UrlRE.match(link)
@@ -927,37 +974,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     if len(acresult) > 0:
                         # print "acresult", repr(acresult), repr(endBytePos-startBytePos)
                         self.UserListShow(1, u"~".join(acresult))
-#                         self.AutoCompShow(0,        # endBytePos-startBytePos
-#                                 u"~".join(acresult))
-                    
-                    
-                    
-#                     pos = self.GetCurrentPos()
-#                     (startPos, endPos) = self.getNearestWordPositions()
-#                     nearestWord = self.GetTextRange(startPos, endPos)
-# 
-#                     if (startPos-1) > 0 and self.GetCharAt(startPos-1) == ord('['):
-#                         nearestWord = u"[" + nearestWord
-#                         startPos = startPos-1
-# 
-#                     if len(nearestWord) > 0:
-#                         wikiWords = self.pWiki.wikiData.getWikiWordsStartingWith(nearestWord, True)
-# 
-#                         if len(wikiWords) > 0:
-#                             wordListAsStr = string.join(wikiWords, "~")
-#                             self.AutoCompShow(pos-startPos, wordListAsStr)
-#                         else:
-#                             # see if we should complete a property name
-#                             curLine = self.GetLine(self.GetCurrentLine())
-#                             if nearestWord.startswith("["):
-#                                 props = self.pWiki.wikiData.getPropertyNamesStartingWith(nearestWord[1:])
-#                                 self.AutoCompShow(pos-(startPos+1), string.join(props, "~"))
-#                     else:
-#                         # see if we should autocomplete the complete property name list
-#                         curLine = self.GetLine(self.GetCurrentLine())
-#                         if curLine.find("[") != -1:
-#                             props = self.pWiki.wikiData.getPropertyNames()
-#                             self.AutoCompShow(pos-startPos, string.join(props, "~"))
 
                 elif key == WXK_RETURN:
                     self.activateLink()
@@ -977,9 +993,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             toerase = self.autoCompBackBytesWithoutBracket
             
         self.SetSelection(self.GetCurrentPos()-toerase, self.GetCurrentPos())
-        
-#         for i in xrange(toerase):
-#             self.DeleteBack()
         
         self.ReplaceSelection(text)
             
@@ -1112,7 +1125,7 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
         (Re)sets the dataobject at init and after each drop
         """
         dataob = wxDataObjectComposite()
-        self.tobj = wxTextDataObject()  # Char. type depends on wxPython build
+        self.tobj = wxTextDataObject()  # Char. size depends on wxPython build!
         dataob.Add(self.tobj)
         self.fobj = wxFileDataObject()
         dataob.Add(self.fobj)
@@ -1131,8 +1144,8 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
     def OnData(self, x, y, defresult):
         try:
             if self.GetData():
-                data = self.dataob
-                formats = data.GetAllFormats()
+                # data = self.dataob
+                # formats = data.GetAllFormats()
 
                 fnames = self.fobj.GetFilenames()
                 text = self.tobj.GetText()
@@ -1152,13 +1165,27 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
     def OnDropText(self, x, y, text):
         self.editor.DoDropText(x, y, text)
 
+        # TODO works for Windows only
     def OnDropFiles(self, x, y, filenames):
         urls = []
-        for file in filenames:
-            url = urllib.pathname2url(file)
-            if file.endswith(".wiki"):
+        for f in filenames:
+            url = urllib.pathname2url(f)
+            if f.endswith(".wiki"):
                 urls.append("wiki:%s" % url)
             else:
                 urls.append("file:%s" % url)
+
+                
+#             if f.endswith(".wiki"):
+#                 url = urllib.pathname2url(f)
+#                 urls.append("wiki:%s" % url)
+#             else:
+#                 if f.startswith(self.controller.dataDir + sep):
+#                     f = "//" + f[len(self.controller.dataDir + sep):]
+#                 
+#                 url = urllib.pathname2url(f)
+# 
+#                 urls.append("file:%s" % url)
+
 
         self.editor.DoDropText(x, y, " ".join(urls))

@@ -38,7 +38,6 @@ def initialize(wikiSyntax):
             (FootnoteRE, FormatTypes.Default),
             (WikiWordEditorRE2, FormatTypes.WikiWord2),
             (WikiWordEditorRE, FormatTypes.WikiWord),
-            # (WikiWordRE, FormatTypes.WikiWord),
             (BoldRE, FormatTypes.Bold),
             (ItalicRE, FormatTypes.Italic),
             (Heading4RE, FormatTypes.Heading4),
@@ -151,5 +150,39 @@ def getStyles(styleFaces):
             (FormatTypes.ToDo, "bold,face:%(mono)s,size:%(size)d" % styleFaces)]
 
 def isWikiWord(word):
-    return WikiWordRE.match(word) or WikiWordRE2.match(word)
+    """
+    Test if word is syntactically a wiki word
+    """
+    return WikiWordRE.match(word) or (WikiWordRE2.match(word) and not \
+            FootnoteRE.match(word))
+ 
+
+def normalizeWikiWord(word):
+    """
+    Try to normalize text to a valid wiki word and return it or None
+    if it can't be normalized.
+    """
+    if WikiWordRE.match(word):
+        return word
+        
+    if FootnoteRE.match(word):
+        return None
+        
+    if WikiWordRE2.match(word):
+        if WikiWordRE.match(word[1:-1]):
+            # If word is '[WikiWord]', return 'WikiWord' instead
+            return word[1:-1]
+        else:
+            return word
+    
+    # No valid wiki word -> try to add brackets
+    if WikiWordRE2.match(u"[%s]" % word):
+        return u"[%s]" % word
+            
+    return None
+
+
+
+
+
  

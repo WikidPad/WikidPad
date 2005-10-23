@@ -70,23 +70,22 @@ WikiWordRE      = re.compile(ur"\b(?<!~)" + singleWikiWord +
                              ur"\b", re.DOTALL | re.UNICODE | re.MULTILINE)
                              
                              
+# Special version for syntax highlighting to allow appending search expression with '#'
 WikiWordEditorRE      = re.compile(WikiWordRE.pattern +
                               ur"(?:#(?:(?:#.)|[^ \t\n#])+)?",
                               re.DOTALL | re.UNICODE | re.MULTILINE)
 
-# WikiWordRE2     = re.compile(u"\[[" + LETTERS + string.digits + u"\-\_\s]+?\]",
-#         re.DOTALL | re.LOCALE | re.MULTILINE)
+                             
 
 # Only to exclude them from WikiWordRE2
 FootnoteRE     = re.compile(ur"\[[0-9]+?\]",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
-# WikiWordRE2     = re.compile(u"\[[" + LETTERS + string.digits + u"\-\_\s]+?\]",
-#         re.DOTALL | re.UNICODE | re.MULTILINE)
 WikiWordRE2     = re.compile(ur"\[[\w\-\_ \t]+?\]",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
+# Special version for syntax highlighting to allow appending search expression with '#'
 WikiWordEditorRE2      = re.compile(WikiWordRE2.pattern +
                               ur"(?:#(?:(?:#.)|[^ \t\n#])+)?",
                               re.DOTALL | re.UNICODE | re.MULTILINE)
@@ -112,7 +111,7 @@ revSingleWikiWord    =       (ur"(?:[" +
                              ur"])")
 
 RevWikiWordRE      = re.compile(ur"^" + revSingleWikiWord + 
-                             ur"(?![\[~])\b", re.DOTALL | re.UNICODE | re.MULTILINE)
+                             ur"(?![\~])\b", re.DOTALL | re.UNICODE | re.MULTILINE)
 
 RevWikiWordRE2     = re.compile(ur"^[\w\-\_ \t.]+?\[",
         re.DOTALL | re.UNICODE | re.MULTILINE)

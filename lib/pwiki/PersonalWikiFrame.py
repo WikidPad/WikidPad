@@ -1599,15 +1599,17 @@ These are your default global settings.
             self.wikiData.commit()
 
 
-    def openWikiPage(self, wikiWord, addToHistory=True,
+    def openWikiPage(self, wikiPageWord, addToHistory=True,
             forceTreeSyncFromRoot=False, forceReopen=False):
 
         self.statusBar.SetStatusText(uniToGui(u"Opening wiki word '%s'" %
-                wikiWord), 0)
+                wikiPageWord), 0)
 
         # make sure this is a valid wiki word
-        if not WikiFormatting.isWikiWord(wikiWord):
-            self.displayErrorMessage(u"'%s' is an invalid wiki word." % wikiWord)
+        wikiWord = WikiFormatting.normalizeWikiWord(wikiPageWord)
+        if wikiWord is None:  # not WikiFormatting.isWikiWord(wikiWord):
+            self.displayErrorMessage(u"'%s' is an invalid wiki word." % wikiPageWord)
+            return
 
         # don't reopen the currently open page
         if (wikiWord == self.currentWikiWord) and not forceReopen:
@@ -2036,13 +2038,18 @@ These are your default global settings.
 
 
     # TODO Check if new name already exists (?)
-    def showWikiWordRenameConfirmDialog(self, wikiWord, toWikiWord):
+    def showWikiWordRenameConfirmDialog(self, wikiWord, newWikiWord):
         """
         Checks if renaming operation is valid, presents either an error
         message or a confirmation dialog.
         Returns -- True iff renaming was done successfully
         """
-        if not toWikiWord or len(toWikiWord) == 0:
+        if not newWikiWord or len(newWikiWord) == 0:
+            return False
+            
+        toWikiWord = WikiFormatting.normalizeWikiWord(newWikiWord)
+        if toWikiWord is None:
+            self.displayErrorMessage(u"'%s' is an invalid WikiWord" % newWikiWord)
             return False
 
         if wikiWord == toWikiWord:
@@ -2051,12 +2058,6 @@ These are your default global settings.
 
         if wikiWord == "ScratchPad":
             self.displayErrorMessage(u"The scratch pad cannot be renamed.")
-            return False
-
-        if not WikiFormatting.isWikiWord(toWikiWord):
-            toWikiWord = u"[%s]" % toWikiWord
-        if not WikiFormatting.isWikiWord(toWikiWord):
-            self.displayErrorMessage(u"'%s' is an invalid WikiWord" % toWikiWord)
             return False
 
         if self.wikiData.isDefinedWikiWord(toWikiWord):

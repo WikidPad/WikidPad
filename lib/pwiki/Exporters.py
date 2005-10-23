@@ -39,9 +39,6 @@ def splitIndent(text):
     return (text, pl-len(text))
         
 
-# HtmlStates = Enumeration("FormatTypes", ["Default", "WikiWord2", "WikiWord", "AvailWikiWord",                                          
-#                                           "Bold", "Italic", "Heading4", "Heading3", "Heading2", "Heading1",
-#                                           "Url", "Script", "Property", "ToDo"], 1)
 
 # TODO UTF-8 support for HTML? Other encodings?
 
@@ -58,7 +55,7 @@ class HtmlXmlExporter:
         self.statestack = None
         # deepness of numeric bullets
         self.numericdeepness = None
-
+        self.convertFilename = lambda s: s   # lambda s: mbcsEnc(s, "replace")[0]
         
 
     def getExportTypes(self, guiparent):
@@ -116,12 +113,22 @@ class HtmlXmlExporter:
         self.wikiData = wikiData # self.pWiki.wikiData
         self.wordList = wordList
         self.exportDest = exportDest
+        
+#         if compatFilenames:
+#             self.convertFilename = unicodeToCompFilename
+#         else:
+ #            self.convertFilename = lambda s: s    # lambda s: mbcsEnc(s, "replace")[0]
+        
         if exportType == u"html_single":
             startfile = self.exportHtmlSingleFile()
         elif exportType == u"html_multi":
             startfile = self.exportHtmlMultipleFiles()
         elif exportType == u"xml":
             startfile = self.exportXml()
+            
+            
+#         if not compatFilenames:
+#             startfile = mbcsEnc(startfile)[0]
             
         if self.pWiki.configuration.getboolean(
                 "main", "start_browser_after_export") and startfile:
@@ -132,7 +139,9 @@ class HtmlXmlExporter:
         if len(self.wordList) == 1:
             return self.exportHtmlMultipleFiles()
 
-        outputFile = mbcsEnc(join(self.exportDest, u"%s.html" % self.pWiki.wikiName))[0]
+        outputFile = join(self.exportDest,
+                self.convertFilename(u"%s.html" % self.pWiki.wikiName))
+
         if exists(outputFile):
             os.unlink(outputFile)
 
@@ -155,6 +164,7 @@ class HtmlXmlExporter:
                     # get aliases too
                     wordForAlias = self.wikiData.getAliasesWikiWord(relation)
                     if wordForAlias:
+                        # TODO Use self.convertFilename here?
                         links[relation] = u"#%s" % wordForAlias
                     else:
                         links[relation] = u"#%s" % relation
@@ -190,18 +200,22 @@ class HtmlXmlExporter:
                 # get aliases too
                 wordForAlias = self.wikiData.getAliasesWikiWord(relation)
                 if wordForAlias:
-                    links[relation] = u"%s.html" % wordForAlias
+                    links[relation] = self.convertFilename(
+                            u"%s.html" % wordForAlias)
                 else:
-                    links[relation] = u"%s.html" % relation
+                    links[relation] = self.convertFilename(
+                            u"%s.html" % relation)
                                 
             self.exportWordToHtmlPage(self.exportDest, word, links, False)
         self.copyCssFile(self.exportDest)
-        rootFile = mbcsEnc(join(self.exportDest, u"%s.html" % self.wordList[0]))[0]     #self.pWiki.wikiName))[0]
+        rootFile = join(self.exportDest, 
+                self.convertFilename(u"%s.html" % self.wordList[0]))    #self.pWiki.wikiName))[0]
         return rootFile
             
             
     def exportXml(self):
-        outputFile = mbcsEnc(join(self.exportDest, u"%s.xml" % self.pWiki.wikiName))[0]
+        outputFile = join(self.exportDest,
+                self.convertFilename(u"%s.xml" % self.pWiki.wikiName))
 
         if exists(outputFile):
             os.unlink(outputFile)
@@ -209,7 +223,7 @@ class HtmlXmlExporter:
         realfp = open(outputFile, "w")
         fp = utf8Writer(realfp, "replace")
 
-        fp.write(u'<?xml version="1.0" encoding="utf-8" ?>')  # TODO Encoding
+        fp.write(u'<?xml version="1.0" encoding="utf-8" ?>')
         fp.write(u'<wiki name="%s">' % self.pWiki.wikiName)
         
         for word in self.wordList:
@@ -254,7 +268,7 @@ class HtmlXmlExporter:
         return outputFile
         
     def exportWordToHtmlPage(self, dir, word, links=None, startFile=True, onlyInclude=None):
-        outputFile = mbcsEnc(join(dir, u"%s.html" % word))[0]
+        outputFile = join(dir, self.convertFilename(u"%s.html" % word))   # mbcsEnc()[0]
         try:
             wikiPage = self.wikiData.getPage(word, toload=["parents"])
             content = wikiPage.getContent()
@@ -311,9 +325,13 @@ class HtmlXmlExporter:
                 parents = parents + u" | "
 
             if asHref:
-                parents = parents + u'<span class="parent-node"><a href="%s.html">%s</a></span>' % (relation, relation)
+                parents = parents +\
+                        u'<span class="parent-node"><a href="%s.html">%s</a></span>' %\
+                        (self.convertFilename(relation), relation)
             else:
-                parents = parents + u'<span class="parent-node"><a href="#%s">%s</a></span>' % (relation, relation)
+                parents = parents +\
+                u'<span class="parent-node"><a href="#%s">%s</a></span>' %\
+                (relation, relation)
 
         return parents
 
@@ -461,7 +479,8 @@ class HtmlXmlExporter:
                                     (escape(link), escape(link)))
                 elif styleno == WikiFormatting.FormatTypes.WikiWord or \
                         styleno == WikiFormatting.FormatTypes.WikiWord2:
-                    word = content[tok[0]:nexttok[0]]
+                    word = WikiFormatting.normalizeWikiWord(
+                            content[tok[0]:nexttok[0]])
                     link = links.get(word)
                     
                     if link:
@@ -546,6 +565,7 @@ class TextExporter:
         self.wikiData = None
         self.wordList = None
         self.exportDest = None
+        self.convertFilename = lambda s: s   # lambda s: mbcsEnc(s, "replace")[0]
 
 
     def getExportTypes(self, guiparent):
@@ -615,6 +635,11 @@ class TextExporter:
         self.wordList = wordList
         self.exportDest = exportDest
         
+#         if compatFilenames:
+#             self.convertFilename = unicodeToCompFilename
+#         else:
+#             self.convertFilename = lambda s: s    # lambda s: mbcsEnc(s, "replace")[0]
+         
         # 0:System standard, 1:utf-8 with BOM, 2: utf-8 without BOM
         encoding = addopt[0]
                 
@@ -634,7 +659,9 @@ class TextExporter:
             except:
                 continue
                 
-            outputFile = mbcsEnc(join(self.exportDest, u"%s.wiki" % word))[0]
+            # TODO Use self.convertFilename here???
+            outputFile = join(self.exportDest,
+                    self.convertFilename(u"%s.wiki" % word))
             try:
 #                 if exists(outputFile):
 #                     os.unlink(outputFile)
