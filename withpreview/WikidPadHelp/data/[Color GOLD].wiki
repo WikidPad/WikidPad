@@ -1,0 +1,2 @@
+++ Color GOLD
+[color: GOLD ]

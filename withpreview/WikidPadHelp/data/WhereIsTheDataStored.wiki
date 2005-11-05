@@ -1,0 +1,8 @@
+++ Where Is The Data Stored
+
+The data for your wiki is stored in plain text under the data
+directory of the directory your Wiki config is stored in.  There is
+one file per wiki word.  The .grl and .gdf files are the database
+files used to index your wiki words efficiently.
+
+[icon: question]

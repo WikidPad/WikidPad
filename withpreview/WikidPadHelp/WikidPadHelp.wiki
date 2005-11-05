@@ -1,0 +1,7 @@
+[wiki_db]
+data_dir = data
+
+[main]
+last_wiki_word = WikidPadHooks
+wiki_name = WikidPadHelp
+

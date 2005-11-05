@@ -1,0 +1,7 @@
+++ Dynamic Views
+
+The "Views" item in the tree to the left performs attribute based
+searches and shows nodes that match those searches.  See
+WikiDocumentAttributes for more info.
+ 
+[icon: find]

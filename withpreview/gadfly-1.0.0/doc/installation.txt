@@ -1,0 +1,82 @@
+Gadfly: SQL Relational Database in Python
+=========================================
+
+:Version: $Revision: 1.5 $
+
+
+Installation
+------------
+
+To guarantee correct installation, please follow the steps in this 
+document. Of course you must have Python in order to use this package!
+Python can be obtained from the `Python project page`_
+
+.. _`Python project page`: http://www.python.org/
+
+Note: this package requires Python 2.1 or later. If your python2.1 executable 
+is called something other than "python" then substitute it below (for example, 
+on RedHat 6.x/7.x systems, python version 2+ is called "python2").
+
+On Windows, make sure that the Python directory is in your path. The easiest 
+way to check this is to start a command prompt (or DOS) window and type 
+"python".  If you then see some output like;::
+
+    Python 2.2 (#28, Dec 21 2001, 12:21:22) [MSC 32 bit (Intel)] on win32
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>>
+
+You have Python on your path and may continue. If you get a message saying 
+"not found" or "'python' is not recognized as an internal or external command"
+then you may not have the right directory in your path.
+
+If you are reading these instructions we presume that you have already found 
+the gadfly module and downloaded it to your machine. If you haven't go and get
+the appropriate file from the web site (http://sourceforge.net/project/showfiles.php?group_id=662)
+before proceeding.
+
+0) If you've got a previous version of gadfly installed on your system, you may 
+   need to remove it since the packaging of gadfly has changed. Look in the
+   site-packages directory of your python installation's "lib" directory.
+   If there are any directories under there called "Gadfly" or "gadfly" then
+   you have an existing version of the module and should rename or delete
+   that directory.
+
+1) Unpack the package.
+
+2) Test: In the package directory, run the command::
+
+     % python run_tests
+
+   and all tests should pass.
+
+3) Install: In the package directory, run the command::
+
+     % python setup.py install
+
+   This  installs the gadfly module, and after this command, you're ready
+   to go. Have a look at the overview_ for details of how to use gadfly.
+
+4) If you wish to speed up gadfly you can use the kjbuckets_ parser, go 
+   to the kjbuckets directory and
+
+   a) if you have a C compiler
+
+      - run the command "python setup.py install"
+      - the kjbuckets extenstion could compile and install
+
+   b) if you're on Windows,
+
+      - cd to kjbuckets/<your python version>
+      - copy the .pyd file to your the library directory appropriate to 
+        your python version. This should be something like 
+        /usr/lib/python<version>/site-packages on \*nix, 
+        c:\\python<version> on Windows (prior to Python2.2) or 
+        c:\\python<version>\\Lib\\site-packages if you are on Python2.2 
+        or later
+
+.. _overview: gadfly.html
+.. _kjbuckets: kjbuckets.html
+
+If for some reason you are stuck with using Python 2.0, you will need to patch 
+the gadly/semantics.py file with the patch in kjbuckets/2.0. This is risky and 
+we recommend upgrading to Python 2.1 or 2.2 instead.

@@ -1,0 +1,36 @@
+++ Searching The Wiki
+
+CTRL-R brings up the "Find and Replace" dialog.
+CTRL-F or F3 turns on wiki page IncrementalSearch.
+CTRL-ALT-F brings up the search dialog for the entire wiki.
+
+When searching the entire wiki you can use regex searches, along with
+"and" predicates. For example, to search this wiki for pages with "search"
+and "wiki" in them type:
+
+CTRL-ALT-F
+search and wiki
+Press Search Button
+
+To search for "(search or java)" and "wiki" type
+
+CTRL-ALT-F
+(search|java) and wiki
+Press Search Button
+
+To search for special characters like "[" or "(" you must escape them
+with a back slash. "\[". This is b/c these characters are special to the
+regex engine.
+
+*Saving Searches*
+
+In the "Search Wiki" dialog there is an option to "Save Search". This
+option will save your search as a view.  You can then find and execute
+that search by expanding the "Views/searches" node of the tree.  This
+is a powerful way to create dynamic search based views of your data. 
+
+You can delete saved searches by selecting "View Saved Searches" from
+the Wiki menu, selecting the search phrase you would like to delete,
+and clicking the Delete button.
+
+[icon: lens]

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="Windows-1252" ?>
+<XML_DIZ_INFO>
+<MASTER_PAD_VERSION_INFO>
+    <MASTER_PAD_VERSION>1.15</MASTER_PAD_VERSION>
+    <MASTER_PAD_INFO>Portable Application Description, or PAD for short, is a data set that is used by shareware authors to disseminate information to anyone interested in their software products. To find out more go to http://www.asp-shareware.org/pad</MASTER_PAD_INFO>
+</MASTER_PAD_VERSION_INFO>
+<Company_Info>
+        <Company_Name>jhorman.org</Company_Name>
+        <Address_1>48 Powderhouse Blvd.</Address_1>
+        <Address_2>Apt. 2</Address_2>
+        <City_Town>Somerville</City_Town>
+        <State_Province>MA</State_Province>
+        <Zip_Postal_Code>02144</Zip_Postal_Code>
+        <Country>USA</Country>
+        <Company_WebSite_URL>http://www.jhorman.org/wikidPad/</Company_WebSite_URL>
+<Contact_Info>
+        <Author_First_Name>Jason</Author_First_Name>
+        <Author_Last_Name>Horman</Author_Last_Name>
+        <Author_Email>jason@jhorman.org</Author_Email>
+        <Contact_First_Name>Jason</Contact_First_Name>
+        <Contact_Last_Name>Horman</Contact_Last_Name>
+        <Contact_Email>jason@jhorman.org</Contact_Email>
+    </Contact_Info>
+<Support_Info>
+        <Sales_Email>jason@jhorman.org</Sales_Email>
+        <Support_Email>jason@jhorman.org</Support_Email>
+        <General_Email>jason@jhorman.org</General_Email>
+        <Sales_Phone />
+        <Support_Phone />
+        <General_Phone />
+        <Fax_Phone />
+    </Support_Info>
+</Company_Info>
+<Program_Info>
+        <Program_Name>wikidPad</Program_Name>
+        <Program_Version>1.0</Program_Version>
+        <Program_Release_Month>10</Program_Release_Month>
+        <Program_Release_Day>19</Program_Release_Day>
+        <Program_Release_Year>2003</Program_Release_Year>
+        <Program_Cost_Dollars>12</Program_Cost_Dollars>
+        <Program_Cost_Other_Code />
+        <Program_Cost_Other />
+        <Program_Type>Shareware</Program_Type>
+        <Program_Release_Status>New Release</Program_Release_Status>
+        <Program_Install_Support>Install and Uninstall</Program_Install_Support>
+        <Program_OS_Support>Win95,Win98,WinME,WinXP,Windows2000</Program_OS_Support>
+        <Program_Language>English</Program_Language>
+<File_Info>
+        <Filename_Versioned />
+        <Filename_Previous />
+        <Filename_Generic>WikidPad.exe</Filename_Generic>
+        <Filename_Long>WikidPad.exe</Filename_Long>
+        <File_Size_Bytes>3632175</File_Size_Bytes>
+        <File_Size_K>3547</File_Size_K>
+        <File_Size_MB>3.55</File_Size_MB>
+    </File_Info>
+<Expire_Info>
+        <Has_Expire_Info>Y</Has_Expire_Info>
+        <Expire_Count>30</Expire_Count>
+        <Expire_Based_On>Days</Expire_Based_On>
+        <Expire_Other_Info />
+        <Expire_Month />
+        <Expire_Day />
+        <Expire_Year />
+    </Expire_Info>
+        <Program_Change_Info />
+        <Program_Specific_Category>Utilities</Program_Specific_Category>
+        <Program_Categories>PIM, Outliner, Notepad</Program_Categories>
+        <Program_System_Requirements />
+        <Includes_JAVA_VM>N</Includes_JAVA_VM>
+        <Includes_VB_Runtime>N</Includes_VB_Runtime>
+        <Includes_DirectX>N</Includes_DirectX>
+</Program_Info>
+<Program_Descriptions>
+<English>
+        <Keywords>PIM, wiki, notepad, notebook, information manager</Keywords>
+        <Char_Desc_45>wikidPad is a wiki-like notebook</Char_Desc_45>
+        <Char_Desc_80>wikidPad is a wiki-like notebook for storing your thoughts, ideas, todos, etc</Char_Desc_80>
+        <Char_Desc_250>wikidPad is a wiki-like notebook for storing your thoughts, ideas, todo lists, contacts, or anything else you can think of to write down.</Char_Desc_250>
+        <Char_Desc_450>wikidPad is a Wiki-like notebook for storing your thoughts, ideas, todo lists, contacts, or anything else you can think of to write down. What makes wikidPad different from other notepad/outliner applications is the ease with which you can cross-link your information.</Char_Desc_450>
+        <Char_Desc_2000>wikidPad is a Wiki-like notebook for storing your thoughts, ideas, todo lists, contacts, or anything else you can think of to write down. What makes wikidPad different from other notepad/outliner applications is the ease with which you can cross-link your information. Links in a wiki are created by typing in WikiWords. A WikiWord is any mixed case word typed into the editor. The term wiki means &quot;quick&quot; in Hawaiian, and wikidPad is all about quickly linking your information together.</Char_Desc_2000>
+</English>
+</Program_Descriptions>
+<Web_Info>
+<Application_URLs>
+        <Application_Info_URL>http://www.jhorman.org/wikidPad/</Application_Info_URL>
+        <Application_Order_URL />
+        <Application_Screenshot_URL>http://www.jhorman.org/wikidPad/screens/screen1.gif</Application_Screenshot_URL>
+        <Application_Icon_URL />
+        <Application_XML_File_URL>http://www.jhorman.org/wikidPad/pad.xml</Application_XML_File_URL>
+    </Application_URLs>
+<Download_URLs>
+        <Primary_Download_URL>http://www.jhorman.org/wikidPad/WikidPad.exe</Primary_Download_URL>
+        <Secondary_Download_URL />
+        <Additional_Download_URL_1 />
+        <Additional_Download_URL_2 />
+    </Download_URLs>
+</Web_Info>
+<Permissions>
+        <Distribution_Permissions />
+        <EULA>End User License Agreement
+
+CAREFULLY READ THE FOLLOWING LICENSE AGREEMENT. BY OPENING THE PACKAGE OR CLICKING ON THE &quot;ACCEPT&quot; OR &quot;AGREE&quot; BUTTON, YOU ARE CONSENTING TO BE BOUND BY AND ARE BECOMING A PARTY TO THIS AGREEMENT. 
+
+1. LICENSE GRANT. The package (or download) contains software (&quot;Software&quot;) and related explanatory written materials (&quot;Documentation&quot;). &quot;Software&quot; includes any upgrades, modified versions, updates, additions and copies of the Software. &quot;You&quot; means the person or company who is being licensed to use the Software or Documentation. &quot;We&quot; and &quot;us&quot; means Jason Horman.
+
+We hereby grant you a nonexclusive, non-transferable, limited license to use the Software on your personal computers or the computers used by you in your place of business.
+
+2. THINGS YOU MAY NOT DO. United States copyright laws and international treaties protect the Software and Documentation. You must treat the Software and Documentation like any other copyrighted material. You may not: 
+
+-- copy the Documentation, 
+
+-- copy the Software except to make archival or backup copies as provided above, 
+
+-- modify or adapt the Software or merge it into another program, 
+
+-- reverse engineer, disassemble, decompile or make any attempt to discover the source code of this Software, 
+
+-- sublicense, rent, lease or lend any portion of the Software or Documentation. 
+
+3. THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+
+IN NO EVENT WILL WE BE LIABLE TO YOU FOR ANY DAMAGES, INCLUDING ANY LOST PROFITS, LOST SAVINGS, OR OTHER INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING FROM THE USE OR THE INABILITY TO USE THE SOFTWARE, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF THESE DAMAGES, and regardless of whether we know or had reason to know of your particular needs. No employee, agent, dealer or distributor of ours is authorized to modify this limited warranty, or to make any additional warranties. 
+
+SOME STATES DO NOT ALLOW THE LIMITATION OR EXCLUSION OF LIABILITY FOR INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THE ABOVE LIMITATION MAY NOT APPLY TO YOU. IF OUR LIMITED WARRANTY AND/OR LIMITED REMEDY SHALL BE HELD INEFFECTIVE OR TO HAVE FAILED THEIR ESSENTIAL PURPOSES, OUR TOTAL LIABILITY FOR DAMAGES, WHETHER IN CONTRACT, TORT OR OTHERWISE, SHALL NOT EXCEED THE LICENSE FEES PAID BY YOU FOR THE SOFTWARE LICENSED HEREUNDER. 
+
+4. TERM AND TERMINATION. This license agreement takes effect upon your use of the Software and remains effective until terminated. You may terminate it at any time by destroying all copies of the Software and Documentation in your possession. It will also automatically terminate if you fail to comply with any term or condition of this license agreement. You agree on termination of this license to either return to us or destroy all copies of the Software and Documentation in your possession. 
+
+5. GENERAL PROVISIONS. 
+
+(a) This written license agreement is the exclusive agreement between you and us concerning the Software and Documentation and supersedes any and all prior oral or written agreements, negotiations or other dealings between us concerning the Software. 
+
+(b) This license agreement may be modified only by a writing signed by you and us. 
+
+(c) In the event of litigation or alternative dispute resolution process between us concerning the Software or Documentation or this Agreement, the prevailing party in the litigation or process will be entitled to recover attorney fees and expenses from the other party. 
+
+(d) This license agreement is governed by the laws of the state of Massachusetts. 
+
+(e) You agree that the Software will not be shipped, transferred or exported into any country or used in any manner prohibited by the United States Export Administration Act or any other export laws, restrictions or regulations.</EULA>
+</Permissions>
+</XML_DIZ_INFO>

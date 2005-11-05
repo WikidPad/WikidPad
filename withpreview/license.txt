@@ -1,0 +1,41 @@
+End User License Agreement
+
+CAREFULLY READ THE FOLLOWING LICENSE AGREEMENT. BY OPENING THE PACKAGE OR CLICKING ON THE "ACCEPT" OR "AGREE" BUTTON, YOU ARE CONSENTING TO BE BOUND BY AND ARE BECOMING A PARTY TO THIS AGREEMENT. 
+
+1. LICENSE GRANT. The package (or download) contains software ("Software") and related explanatory written materials ("Documentation"). "Software" includes any upgrades, modified versions, updates, additions and copies of the Software. "You" means the person or company who is being licensed to use the Software or Documentation. "We" and "us" means Jason Horman.
+
+We hereby grant you a nonexclusive, non-transferable, limited license to use the Software on your personal computers or the computers used by you in your place of business.
+
+2. THINGS YOU MAY NOT DO. United States copyright laws and international treaties protect the Software and Documentation. You must treat the Software and Documentation like any other copyrighted material. You may not: 
+
+-- copy the Documentation, 
+
+-- copy the Software except to make archival or backup copies as provided above, 
+
+-- modify or adapt the Software or merge it into another program, 
+
+-- reverse engineer, disassemble, decompile or make any attempt to discover the source code of this Software, 
+
+-- sublicense, rent, lease or lend any portion of the Software or Documentation. 
+
+3. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+
+IN NO EVENT WILL WE BE LIABLE TO YOU FOR ANY DAMAGES, INCLUDING ANY LOST PROFITS, LOST SAVINGS, OR OTHER INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING FROM THE USE OR THE INABILITY TO USE THE SOFTWARE, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF THESE DAMAGES, and regardless of whether we know or had reason to know of your particular needs. No employee, agent, dealer or distributor of ours is authorized to modify this limited warranty, or to make any additional warranties. 
+
+SOME STATES DO NOT ALLOW THE LIMITATION OR EXCLUSION OF LIABILITY FOR INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THE ABOVE LIMITATION MAY NOT APPLY TO YOU. IF OUR LIMITED WARRANTY AND/OR LIMITED REMEDY SHALL BE HELD INEFFECTIVE OR TO HAVE FAILED THEIR ESSENTIAL PURPOSES, OUR TOTAL LIABILITY FOR DAMAGES, WHETHER IN CONTRACT, TORT OR OTHERWISE, SHALL NOT EXCEED THE LICENSE FEES PAID BY YOU FOR THE SOFTWARE LICENSED HEREUNDER. 
+
+4. TERM AND TERMINATION. This license agreement takes effect upon your use of the Software and remains effective until terminated. You may terminate it at any time by destroying all copies of the Software and Documentation in your possession. It will also automatically terminate if you fail to comply with any term or condition of this license agreement. You agree on termination of this license to either return to us or destroy all copies of the Software and Documentation in your possession. 
+
+5. GENERAL PROVISIONS. 
+
+(a) This written license agreement is the exclusive agreement between you and us concerning the Software and Documentation and supersedes any and all prior oral or written agreements, negotiations or other dealings between us concerning the Software. 
+
+(b) This license agreement may be modified only by a writing signed by you and us. 
+
+(c) In the event of litigation or alternative dispute resolution process between us concerning the Software or Documentation or this Agreement, the prevailing party in the litigation or process will be entitled to recover attorney fees and expenses from the other party. 
+
+(d) This license agreement is governed by the laws of the state of Massachusetts. 
+
+(e) You agree that the Software will not be shipped, transferred or exported into any country or used in any manner prohibited by the United States Export Administration Act or any other export laws, restrictions or regulations.
+
+6. PRODUCT END OF LIFE. In the event that the author decides to no longer support or develop the software any further it will be released to the public using some form of open source license.

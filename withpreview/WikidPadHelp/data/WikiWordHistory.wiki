@@ -1,0 +1,13 @@
+++ Wiki Word History
+
+Wiki Pad maintains a history of the words you have visited.
+You can view this history by typing CTRL-H.
+
+To go back in the history type CTRL-ALT-LEFT ARROW
+To go forward in the history type CTRL-ALT-RIGHT ARROW
+
+To view the history window with the previous word automatically
+selected type CTRL-ALT-UP
+
+To view the history window with the next word automatically
+selected type CTRL-ALT-DOWN

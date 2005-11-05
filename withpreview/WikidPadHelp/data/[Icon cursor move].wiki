@@ -1,0 +1,2 @@
+++ Icon cursor move
+[icon: cursor move]

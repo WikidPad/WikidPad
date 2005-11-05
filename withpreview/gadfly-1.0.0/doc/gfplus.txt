@@ -1,0 +1,117 @@
+===================================================
+gfplus -- An interactive shell for the Gadfly RDBMS
+===================================================
+
+Introduction
+------------
+
+gfplus was designed to allow interactive sessions to Gadfly databases.
+It  is  molded  in  the fashion of SQL*Plus, a similar tool for Oracle
+databases.  gfplus  allows  you to type SQL directly to your database,
+and  interactively modify your data or database structure. gfplus 
+requires gadfly to be installed.
+
+Features
+--------
+
+- Interactively query your database with SQL
+
+  - Supports both local and Client/Server databases
+  - When  avaialble,  uses full command line editing, and command recall
+  - Can be used in a "pipeline" or take its input from a script
+
+- Full commit/rollback capability
+- Create new Gadfly databases with ease
+- Easily access column listings for all relations
+- Switch between Gadfly databases in one session
+- Interactive help menu, by typing "help;"
+
+Instructions
+------------
+
+gfplus  runs  on  any  platform where Python can run and Gadfly is
+installed.  To  execute  it on a standalone database, you can just
+run::
+
+    > python gfplus.py [db] [location]
+
+gfplus  takes two optional arguments. The first is the name of the
+database  to  open. The second is the location of the database, on
+disk.  If  you do not provide these parameters, gfplus will prompt
+you  for them. If you give a name and location which gfplus cannot
+find,   it  will  allow  you  to  create  a  database  with  those
+parameters::
+
+    > python gfplus.py bar /u/jeff/gf/
+
+    gfplus 1.0 -- Interactive gadfly shell
+
+    Using:
+    DB: bar
+    Loc: /u/jeff/gf/
+
+    Unable to locate database "bar" at location "/u/jeff/gf/".
+    Create? (Yy/Nn)
+
+All  gfplus  statements  are  terminated  with  a  semicolon  (;).
+Statements can span multiple lines.
+
+A  sample  session,  where  I edit the foo database, stored in the
+directory /u/jeff/gf/::
+
+    gfplus 1.0 -- Interactive gadfly shell
+
+    Using:
+    DB: foo
+    Loc: /u/jeff/gf/
+
+    GF> select * from rush where tracks < 6;
+
+    TRACKS | ALBUM
+    ====================
+    4      | Hemispheres
+
+    GF> select * from rush;
+
+    TRACKS | ALBUM
+    ============================
+    8      | Fly By Night
+    6      | Caress of Steel
+    4      | Hemispheres
+    6      | A Farewell To Kings
+    6      | Permanent Waves
+
+    GF> update rush set tracks = 5
+    _GF>   where album = '2112';
+    GF> select * from rush where tracks < 6;
+
+    TRACKS | ALBUM
+    ====================
+    5      | 2112
+    4      | Hemispheres
+
+    GF> commit;
+    GF> desc rush;
+
+    COLUMN_NAME
+    ===========
+    ALBUM
+    TRACKS
+
+    GF> exit;
+
+To use gfplus with a Client/Server instance, start gfplus with the
+same arguments you would pass to gfclient::
+
+    > python gfplus.py admin admin localhost 2222
+
+    gfplus 1.1 -- Interactive gadfly shell  [readline]
+
+    Tuesday January 19, 1999 09:22 AM
+
+    Using:
+    Policy: admin
+    Loc: localhost:2222
+
+    GF>
+

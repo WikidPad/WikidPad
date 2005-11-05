@@ -1,0 +1,13 @@
+++ Wiki Maintenance
+
+As you add and remove links from the various pages in your wiki
+database you may end up with unlinked, or parentless, nodes.  To view
+parentless nodes select:
+
+Wiki Word/View Parentless Nodes
+or press Ctrl-Shift-Up
+
+You can then decide if you need to relink these nodes, or if you want
+to delete them via the CTRL-D delete command.
+
+[icon: cog]
