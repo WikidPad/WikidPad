@@ -58,4 +58,3 @@ def makeWikiWord(editor):
     text = text[0:1].upper() + text[1:]
     text = u"[" + text + u"]"
     editor.ReplaceSelection(text)
-

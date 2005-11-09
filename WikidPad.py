@@ -1,10 +1,20 @@
 #!/bin/python
 
 import sys, os, traceback, os.path
-
 os.stat_float_times(True)
 
+# from pwiki import srePersistent
+# srePersistent.loadCodeCache()
+
+
 import pwiki.urllib_red as urllib
+
+
+# To ensure unicode selection, works only for me (Michael)
+
+if not hasattr(sys, 'frozen'):
+    sys.path =  \
+            [r"C:\Programme\Python23\Lib\site-packages\wx-2.6-msw-unicode"] + sys.path
 
 from wxPython.wx import *
 import wxPython.xrc as xrc
@@ -25,23 +35,26 @@ if len(sys.argv) > 1:
 
 class App(wxApp):   
     def OnInit(self):
+        ## _prof.start()
         appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
         rf = open(os.path.join(appdir, "WikidPad.xrc"), "r")
         rd = rf.read()
         rf.close()
-        
+
         res = xrc.wxXmlResource.Get()
         res.SetFlags(0)
         res.LoadFromString(rd)
-
+        
         self.wikiFrame = PersonalWikiFrame(None, -1, "WikidPad", openThisWiki, openThisWikiWord)
         self.SetTopWindow(self.wikiFrame)
+        ## _prof.stop()
 
         # set the icon of the app
         try:
             self.wikiFrame.SetIcon(wxIcon(os.path.join('icons', 'pwiki.ico'), wxBITMAP_TYPE_ICO))
         except:
             pass
+
 
         return True
 
@@ -63,9 +76,13 @@ class Error(wxApp):
 app = None
 exception = None
 
+
 try:
-   app = App(0)
-   app.MainLoop()
+    app = App(0)
+    app.MainLoop()
+#     srePersistent.saveCodeCache()
+
+    
 except Exception, e:
    traceback.print_exc()
    exception = e

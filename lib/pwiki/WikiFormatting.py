@@ -1,7 +1,8 @@
 from Enum import Enumeration
 # from Config import faces
 
-import re
+import srePersistent as re
+
 
 FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord2", "WikiWord", "AvailWikiWord",                                          
                                           "Bold", "Italic", "Heading4", "Heading3", "Heading2", "Heading1",
@@ -95,23 +96,23 @@ def initialize(wikiSyntax):
 
 
     HtmlExportExpressions = [
+            (SuppressHighlightingRE, FormatTypes.Suppress),
+            (ScriptRE, FormatTypes.Script),
+            (UrlRE, FormatTypes.Url),
+            (ToDoREWithContent, FormatTypes.ToDo),
+            (PropertyRE, FormatTypes.Property),
+            (FootnoteRE, FormatTypes.Default),
+            (WikiWordRE2, FormatTypes.WikiWord2),
+            (WikiWordRE, FormatTypes.WikiWord),
             (BoldRE, FormatTypes.Bold),
             (ItalicRE, FormatTypes.Italic),
             (Heading4RE, FormatTypes.Heading4),
             (Heading3RE, FormatTypes.Heading3),
             (Heading2RE, FormatTypes.Heading2),
             (Heading1RE, FormatTypes.Heading1),
-            (ToDoREWithContent, FormatTypes.ToDo),
-            (PropertyRE, FormatTypes.Property),
             (HorizLineRE, FormatTypes.HorizLine),
-            (UrlRE, FormatTypes.Url),
-            (SuppressHighlightingRE, FormatTypes.Suppress),
             (BulletRE, FormatTypes.Bullet),
-            (NumericBulletRE, FormatTypes.Numeric),
-            (FootnoteRE, FormatTypes.Default),
-            (WikiWordRE2, FormatTypes.WikiWord2),
-            (WikiWordRE, FormatTypes.WikiWord),
-            (ScriptRE, FormatTypes.Script)
+            (NumericBulletRE, FormatTypes.Numeric)
             ]
             
     # Build combined regexps
@@ -185,4 +186,4 @@ def normalizeWikiWord(word):
 
 
 
- 
+    

@@ -526,7 +526,7 @@ class WikiData:
         aliases = self.getWordsWithPropertyValue("alias", alias)
         if len(aliases) > 0:
             return aliases[0]
-        return None
+        return alias # None
 
     def isAlias(self, word):
         "check if a word is an alias for another"
@@ -748,7 +748,22 @@ class WikiPage:
                 self.addProperty(key, val)
                 
         return self.props
-        
+
+
+    def getPropertyOrGlobal(self, propkey, default=None):
+        """
+        Tries to find a property on this page and returns the first value.
+        If it can't be found for page, it is searched for a global
+        property with this name. If this also can't be found,
+        default (normally None) is returned.
+        """
+        props = self.getProperties()
+        if props.has_key(propkey):
+            return props[propkey][0]
+        else:
+            globalProps = self.wikiData.getGlobalProperties()     
+            return globalProps.get(u"global."+propkey, default)
+
 
     def addProperty(self, key, val):
         values = self.props.get(key)
@@ -858,16 +873,16 @@ class WikiPage:
         if alertPWiki:
             self.wikiData.pWiki.OnWikiPageUpdate(self)
 
-    def inIgnoreBlock(self, ignoreBlocks, start, end):
-        "true if start to end intersects with an existing applied style"
-        for (ignoreStart, ignoreEnd) in ignoreBlocks:
-            if start >= ignoreStart and start <= ignoreEnd:
-                return True
-            if end <= ignoreEnd and end >= ignoreStart:
-                return True
-            if start < ignoreStart and end > ignoreEnd:
-                return True
-        return False
+#     def inIgnoreBlock(self, ignoreBlocks, start, end):
+#         "true if start to end intersects with an existing applied style"
+#         for (ignoreStart, ignoreEnd) in ignoreBlocks:
+#             if start >= ignoreStart and start <= ignoreEnd:
+#                 return True
+#             if end <= ignoreEnd and end >= ignoreStart:
+#                 return True
+#             if start < ignoreStart and end > ignoreEnd:
+#                 return True
+#         return False
 
     def addChildRelationship(self, toWord):
         self.wikiData.addRelationship(self.wikiWord, toWord)

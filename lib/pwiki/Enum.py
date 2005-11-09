@@ -32,6 +32,8 @@ class Enumeration:
     def __getattr__(self, attr):
         if not self.lookup.has_key(attr):
             raise AttributeError
+            
+        setattr(self, attr, self.lookup[attr])
         return self.lookup[attr]
     def whatis(self, value):
         return self.reverseLookup[value]

@@ -79,6 +79,9 @@ def strToBool(s, default=False):
     interpreted
     """
     
+    if s is None:
+        return default
+    
     # Try to interpret as integer
     try:
         return int(s) != 0

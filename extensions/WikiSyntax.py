@@ -2,6 +2,7 @@ import re
 import locale
 import string
 
+import pwiki.srePersistent as re
 from pwiki.StringOps import mbcsDec
 
 locale.setlocale(locale.LC_ALL, '')

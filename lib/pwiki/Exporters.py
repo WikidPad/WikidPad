@@ -1,18 +1,21 @@
 # from Enum import Enumeration
 import WikiFormatting
-import re
+# import re
 import os
 from os.path import join, exists
 import sys
 import shutil
 ## from xml.sax.saxutils import escape
 from time import localtime
+import urllib_red as urllib
+
 
 import WikiData
 import WikiFormatting
 from StringOps import mbcsWriter, utf8Writer, utf8Enc, mbcsEnc, strToBool, \
         Tokenizer, BOM_UTF8
 
+from wxPython.wx import *
 import wxPython.xrc as xrc
 
 from wxHelper import XrcControls
@@ -26,11 +29,14 @@ def escape(data):
     """
 
     # must do ampersand first
-    data = data.replace(u"&", u"&amp;")
-    data = data.replace(u">", u"&gt;")
-    data = data.replace(u"<", u"&lt;")
-    data = data.replace(u"\n", u"<br />")   # ?
-    return data
+
+#     data = data.replace(u"&", u"&amp;")
+#     data = data.replace(u">", u"&gt;")
+#     data = data.replace(u"<", u"&lt;")
+#     data = data.replace(u"\n", u"<br />")   # ?
+#     return data
+    return data.replace(u"&", u"&amp;").replace(u">", u"&gt;").\
+            replace(u"<", u"&lt;").replace(u"\n", u"<br />")
 
 
 def splitIndent(text):
@@ -56,7 +62,7 @@ class HtmlXmlExporter:
         # deepness of numeric bullets
         self.numericdeepness = None
         self.convertFilename = lambda s: s   # lambda s: mbcsEnc(s, "replace")[0]
-        
+
 
     def getExportTypes(self, guiparent):
         """
@@ -135,6 +141,7 @@ class HtmlXmlExporter:
             os.startfile(startfile)
 
 
+
     def exportHtmlSingleFile(self):
         if len(self.wordList) == 1:
             return self.exportHtmlMultipleFiles()
@@ -150,7 +157,7 @@ class HtmlXmlExporter:
         fp.write(self.getFileHeader(self.pWiki.wikiName))
         
         for word in self.wordList:
-            wikiPage = self.wikiData.getPage(word, toload=["parents", "children", "props"])
+            wikiPage = self.wikiData.getPage(word, toload=[""])
             if not self.shouldExport(word, wikiPage):
                 continue
             
@@ -162,12 +169,9 @@ class HtmlXmlExporter:
                     if not self.shouldExport(relation):
                         continue
                     # get aliases too
-                    wordForAlias = self.wikiData.getAliasesWikiWord(relation)
-                    if wordForAlias:
+                    relation = self.wikiData.getAliasesWikiWord(relation)
                         # TODO Use self.convertFilename here?
-                        links[relation] = u"#%s" % wordForAlias
-                    else:
-                        links[relation] = u"#%s" % relation
+                    links[relation] = u"#%s" % relation
                     
                 formattedContent = self.formatContent(word, content, links)
                 fp.write((u'<span class="wiki-name-ref">'+
@@ -188,7 +192,7 @@ class HtmlXmlExporter:
 
     def exportHtmlMultipleFiles(self):
         for word in self.wordList:
-            wikiPage = self.wikiData.getPage(word, toload=["parents", "children", "props"])
+            wikiPage = self.wikiData.getPage(word, toload=[""])
             if not self.shouldExport(word, wikiPage):
                 continue
 
@@ -198,21 +202,23 @@ class HtmlXmlExporter:
                 if not self.shouldExport(relation):
                     continue
                 # get aliases too
-                wordForAlias = self.wikiData.getAliasesWikiWord(relation)
-                if wordForAlias:
-                    links[relation] = self.convertFilename(
-                            u"%s.html" % wordForAlias)
-                else:
-                    links[relation] = self.convertFilename(
-                            u"%s.html" % relation)
+                relation = self.wikiData.getAliasesWikiWord(relation)
+                links[relation] = self.convertFilename(u"#%s" % relation)
+#                 wordForAlias = self.wikiData.getAliasesWikiWord(relation)
+#                 if wordForAlias:
+#                     links[relation] = self.convertFilename(
+#                             u"%s.html" % wordForAlias)
+#                 else:
+#                     links[relation] = self.convertFilename(
+#                             u"%s.html" % relation)
                                 
             self.exportWordToHtmlPage(self.exportDest, word, links, False)
         self.copyCssFile(self.exportDest)
         rootFile = join(self.exportDest, 
                 self.convertFilename(u"%s.html" % self.wordList[0]))    #self.pWiki.wikiName))[0]
         return rootFile
-            
-            
+
+
     def exportXml(self):
         outputFile = join(self.exportDest,
                 self.convertFilename(u"%s.xml" % self.pWiki.wikiName))
@@ -227,13 +233,14 @@ class HtmlXmlExporter:
         fp.write(u'<wiki name="%s">' % self.pWiki.wikiName)
         
         for word in self.wordList:
-            wikiPage = self.wikiData.getPage(word, toload=["info", "parents", "children", "props"])
+            wikiPage = self.wikiData.getPage(word, toload=[""])
             if not self.shouldExport(word, wikiPage):
                 continue
                 
             # Why localtime?
-            created = localtime(float(wikiPage.created))
-            modified = localtime(float(wikiPage.modified))
+            modified, created = wikiPage.getWikiWordInfo()
+            created = localtime(float(created))
+            modified = localtime(float(modified))
             
             fp.write(u'<wikiword name="%s" created="%s" modified="%s">' %
                     (word, created, modified))
@@ -247,11 +254,13 @@ class HtmlXmlExporter:
                         continue
 
                     # get aliases too
-                    wordForAlias = self.wikiData.getAliasesWikiWord(relation)
-                    if wordForAlias:
-                        links[relation] = u"#%s" % wordForAlias
-                    else:
-                        links[relation] = u"#%s" % relation
+                    relation = self.wikiData.getAliasesWikiWord(relation)
+                    links[relation] = u"#%s" % relation
+#                     wordForAlias = self.wikiData.getAliasesWikiWord(relation)
+#                     if wordForAlias:
+#                         links[relation] = u"#%s" % wordForAlias
+#                     else:
+#                         links[relation] = u"#%s" % relation
                     
                 formattedContent = self.formatContent(word, content, links, asXml=True)
                 fp.write(formattedContent)
@@ -267,35 +276,49 @@ class HtmlXmlExporter:
 
         return outputFile
         
-    def exportWordToHtmlPage(self, dir, word, links=None, startFile=True, onlyInclude=None):
-        outputFile = join(dir, self.convertFilename(u"%s.html" % word))   # mbcsEnc()[0]
+    def exportWordToHtmlPage(self, dir, word, links=None, startFile=True,
+            onlyInclude=None):
+        outputFile = join(dir, self.convertFilename(u"%s.html" % word))
         try:
-            wikiPage = self.wikiData.getPage(word, toload=["parents"])
-            content = wikiPage.getContent()
-            formattedContent = self.formatContent(word, content, links)
-
             if exists(outputFile):
                 os.unlink(outputFile)
 
             realfp = open(outputFile, "w")
             fp = utf8Writer(realfp, "replace")
-            fp.write(self.getFileHeader(word))
-
-            # if startFile is set then this is the only page being exported so
-            # do not include the parent header.
-            if not startFile:
-                fp.write(u'<span class="parent-nodes">parent nodes: %s</span>'
-                        % self.getParentLinks(wikiPage, True, onlyInclude))
-
-            fp.write(formattedContent)
-            fp.write(self.getFileFooter())
+            
+            wikiPage = self.wikiData.getPage(word, toload=[""])
+            content = wikiPage.getContent()            
+            fp.write(self.exportContentToHtmlString(word, content, links, startFile,
+                    onlyInclude))
             fp.reset()        
-            realfp.close()        
-        except NotImplementedError: # Exception, e:
+            realfp.close()
+        except NotImplementedError: # Exception, e:    !!!!!!!!!!
             pass
         
-        self.copyCssFile(dir)
         return outputFile
+
+
+    def exportContentToHtmlString(self, word, content, links=None, startFile=True,
+            onlyInclude=None, asHtmlPreview=False):
+        """
+        Read content of wiki word word, create an HTML page and return it
+        """
+        result = []
+        
+        formattedContent = self.formatContent(word, content, links,
+                asHtmlPreview=asHtmlPreview)
+        result.append(self.getFileHeader(word))
+        # if startFile is set then this is the only page being exported so
+        # do not include the parent header.
+        if not startFile:
+            wikiPage = self.wikiData.getPage(word, toload=[""])
+            result.append(u'<span class="parent-nodes">parent nodes: %s</span>'
+                    % self.getParentLinks(wikiPage, True, onlyInclude))
+
+        result.append(formattedContent)
+        result.append(self.getFileFooter())
+        
+        return u"".join(result)
 
             
     def getFileHeader(self, title):
@@ -316,8 +339,10 @@ class HtmlXmlExporter:
 
     def getParentLinks(self, wikiPage, asHref=True, wordsToInclude=None):
         parents = u""
-        wikiPage.parentRelations.sort()
-        for relation in wikiPage.parentRelations:
+        parentRelations = wikiPage.getParentRelationships()[:]
+        parentRelations.sort()
+        
+        for relation in parentRelations:
             if wordsToInclude and relation not in wordsToInclude:
                 continue
             
@@ -332,7 +357,7 @@ class HtmlXmlExporter:
                 parents = parents +\
                 u'<span class="parent-node"><a href="#%s">%s</a></span>' %\
                 (relation, relation)
-
+                
         return parents
 
 
@@ -345,14 +370,14 @@ class HtmlXmlExporter:
     def shouldExport(self, wikiWord, wikiPage=None):
         if not wikiPage:
             try:
-                wikiPage = self.wikiData.getPage(wikiWord, toload=["props"])
+                wikiPage = self.wikiData.getPage(wikiWord, toload=[""])
             except WikiData.WikiWordNotFoundException:
                 return False
             
         #print "shouldExport", mbcsEnc(wikiWord)[0], repr(wikiPage.props.get("export", ("True",))), \
          #       type(wikiPage.props.get("export", ("True",)))
             
-        return strToBool(wikiPage.props.get("export", ("True",))[0])
+        return strToBool(wikiPage.getProperties().get("export", ("True",))[0])
 
 
     def popState(self):
@@ -373,7 +398,8 @@ class HtmlXmlExporter:
         return len(self.statestack) > 1
         
 
-    def formatContent(self, word, content, links=None, asXml=False):
+    def formatContent(self, word, content, links=None, asXml=False,
+            asHtmlPreview=False):
         if links is None:
             links = {}
         # Replace tabs with spaces
@@ -390,16 +416,22 @@ class HtmlXmlExporter:
         
         if len(tokens) >= 2:
             tok = tokens[0]
+
+            if asHtmlPreview:
+                facename = self.pWiki.configuration.get(
+                        "main", "facename_html_preview", u"")
+                if facename:
+                    self.result.append('<font face="%s">' % facename)
             
             for nexttok in tokens[1:]:
                 stindex = tok[1]
-                if stindex == -1:
+                if stindex == -1:  # == no token RE matches
                     # Normal text, maybe with newlines and indentation to process
                     lines = content[tok[0]:nexttok[0]].split(u"\n")
                     
                     # Test if beginning of lines at beginning of a line in editor
-                    if tok[0] > 0 and content[tok[0] - 1] != "\n":
-                        # if not -> output
+                    if tok[0] > 0 and content[tok[0] - 1] != u"\n":
+                        # if not -> output of the first, incomplete, line
                         self.result.append(escape(lines[0]))
                         del lines[0]
                         
@@ -413,11 +445,13 @@ class HtmlXmlExporter:
                         line, ind = splitIndent(line)
                         
                         while ind < self.statestack[-1][1]:
+                            # Current indentation is less than previous (stored
+                            # on stack) so close open <ul> and <ol>
                             self.popState()
                                 
                         if self.statestack[-1][0] == "normalindent" and \
                                 ind > self.statestack[-1][1]:
-                            # More indentation
+                            # More indentation than before -> open new <ul> level
                             self.result.append(u"<ul>")
                             self.statestack.append(("normalindent", ind))
                             self.result.append(u"<br />\n"+escape(line))
@@ -428,6 +462,9 @@ class HtmlXmlExporter:
 
                     tok = nexttok
                     continue    # Next token
+                
+                
+                # if a known token RE matches:
                 
                 styleno = WikiFormatting.HtmlExportExpressions[stindex][1]
                 if styleno == WikiFormatting.FormatTypes.Bold:
@@ -472,6 +509,12 @@ class HtmlXmlExporter:
                         if lowerLink.endswith(".jpg") or \
                                 lowerLink.endswith(".gif") or \
                                 lowerLink.endswith(".png"):
+                            if asHtmlPreview and lowerLink.startswith("file:"):
+                                # At least under Windows, wxWidgets has another
+                                # opinion how a local file URL should look like
+                                # than Python
+                                p = urllib.url2pathname(link)  # TODO Relative URLs
+                                link = wxFileSystem.FileNameToURL(p)
                             self.result.append(u'<img src="%s" border="0" />' % 
                                     escape(link))
                         else:
@@ -544,14 +587,18 @@ class HtmlXmlExporter:
                         self.popState()
                     self.result.append(escape(tok[2]["suppressContent"]))
                 elif styleno == WikiFormatting.FormatTypes.Default:
-                    while self.statestack[-1][0] != "normalindent":
-                        self.popState()
+#                     while self.statestack[-1][0] != "normalindent":
+#                         self.popState()
                     self.result.append(escape(content[tok[0]:nexttok[0]]))
 
                 tok = nexttok
                 
             while len(self.statestack) > 1:
                 self.popState()
+                
+            if asHtmlPreview and facename:
+                self.result.append('</font>')
+
 
         return u"".join(self.result)
 

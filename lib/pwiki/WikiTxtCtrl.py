@@ -1,7 +1,8 @@
 import os, traceback, codecs, array
 from cStringIO import StringIO
 import urllib_red as urllib
-import string, re
+import string
+import srePersistent as re
 import threading
 
 from os.path import exists
@@ -12,7 +13,7 @@ from wxPython.wx import *
 from wxPython.stc import *
 import wxPython.xrc as xrc
 
-from wxHelper import GUI_ID, XrcControls, XRCID
+from wxHelper import GUI_ID
 
 import WikiFormatting
 from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException
@@ -55,8 +56,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 
         self.activeTokenizer = None
         
-        self.autoCompBackBytesWithoutBracket = 0
-        self.autoCompBackBytesWithBracket = 0
+        # If autocompletion word was choosen, how many bytes to delete backward
+        # before inserting word, if word ...
+        self.autoCompBackBytesWithoutBracket = 0  # doesn't start with '['
+        self.autoCompBackBytesWithBracket = 0     # starts with '['
 
 
         # editor settings
@@ -148,15 +151,15 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.contextMenu = res.LoadMenu("MenuTextctrlPopup")
 
         # Connect context menu events to functions
-        EVT_MENU(self, XRCID("txtUndo"), lambda evt: self.Undo())
-        EVT_MENU(self, XRCID("txtRedo"), lambda evt: self.Redo())
+        EVT_MENU(self, GUI_ID.CMD_UNDO, lambda evt: self.Undo())
+        EVT_MENU(self, GUI_ID.CMD_REDO, lambda evt: self.Redo())
 
-        EVT_MENU(self, XRCID("txtCut"), lambda evt: self.Cut())
-        EVT_MENU(self, XRCID("txtCopy"), lambda evt: self.Copy())
-        EVT_MENU(self, XRCID("txtPaste"), lambda evt: self.Paste())
-        EVT_MENU(self, XRCID("txtDelete"), lambda evt: self.ReplaceSelection(""))
+        EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CUT, lambda evt: self.Cut())
+        EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, lambda evt: self.Copy())
+        EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_PASTE, lambda evt: self.Paste())
+        EVT_MENU(self, GUI_ID.CMD_TEXT_DELETE, lambda evt: self.ReplaceSelection(""))
 
-        EVT_MENU(self, XRCID("txtSelectAll"), lambda evt: self.SelectAll())
+        EVT_MENU(self, GUI_ID.CMD_TEXT_SELECT_ALL, lambda evt: self.SelectAll())
 
 
     def Cut(self):
@@ -299,7 +302,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         # get the text to regex against
         text = self.GetText()
         textlen = len(text)
-        
+
         oldtok = self.activeTokenizer
         if oldtok:
             oldtok.setTokenThread(None)
@@ -332,16 +335,18 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def OnContextMenu(self, evt):
         # Enable/Disable appropriate menu items
-        self.contextMenu.FindItemById(XRCID("txtUndo")).Enable(self.CanUndo())
-        self.contextMenu.FindItemById(XRCID("txtRedo")).Enable(self.CanRedo())
+        self.contextMenu.FindItemById(GUI_ID.CMD_UNDO).Enable(self.CanUndo())
+        self.contextMenu.FindItemById(GUI_ID.CMD_REDO).Enable(self.CanRedo())
 
         cancopy = self.GetSelectionStart() != self.GetSelectionEnd()
-        self.contextMenu.FindItemById(XRCID("txtDelete")).\
+        self.contextMenu.FindItemById(GUI_ID.CMD_TEXT_DELETE).\
                 Enable(cancopy and self.CanPaste())
-        self.contextMenu.FindItemById(XRCID("txtCut")).\
+        self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_CUT).\
                 Enable(cancopy and self.CanPaste())
-        self.contextMenu.FindItemById(XRCID("txtCopy")).Enable(cancopy)
-        self.contextMenu.FindItemById(XRCID("txtPaste")).Enable(self.CanPaste())
+        self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_COPY).\
+                Enable(cancopy)
+        self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_PASTE).\
+                Enable(self.CanPaste())
 
         # Show menu
         self.PopupMenu(self.contextMenu)
@@ -351,18 +356,16 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         Unicode text
         """
-        # print "buildStyling start", self.wikiWordsEnabled
-        
         tokens = self.activeTokenizer.tokenize(text, sync=sync)
         wikiData = self.pWiki.wikiData
-        
+
         if not sync and (not threading.currentThread() is 
                 self.activeTokenizer.getTokenThread()):
             return
 
         if len(tokens) < 2:
             return
-            
+
         stylebytes = []
         tok = tokens[0]
         
@@ -398,10 +401,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if not sync and (not threading.currentThread() is 
                 self.activeTokenizer.getTokenThread()):
             return
-            
-        self.stylebytes = "".join(stylebytes)
 
-        # print "buildStyling end", type(self.stylebytes)
+        self.stylebytes = "".join(stylebytes)
         
 
     def applyStyling(self, stylebytes):
@@ -471,32 +472,28 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 inWikiWord = True
 
         if inWikiWord:
-            ## searchStr = None
+            searchStr = None
             (start, end) = self.getWikiWordBeginEnd(linkPos)
-            # Word may contain a '#' with attached search string
-            combword = self.getWikiWordText(linkPos).split(u"#", 1)
-            # open the wiki page
-            self.pWiki.openWikiPage(combword[0])
-            self.pWiki.tree.Unselect()  # TODO move to other place?
+            wordText = self.getWikiWordText(linkPos)
+            if end+2 < self.GetLength():
+                if chr(self.GetCharAt(end+1)) == "#":    # This may be a problem under rare circumstances
+                    searchStr = self.GetTextRange(end+2, self.WordEndPosition(end+2, 1))
             
+            
+            # Word may contain a '#' with attached search string
+            combword = wordText.split(u"#", 1)
+            # open the wiki page
+            self.pWiki.openWikiPage(combword[0], motionType="child")
+##            self.pWiki.tree.Unselect()  # TODO move to other place?
+
             if len(combword) == 2:
                 self.pWiki.editor.executeSearch(
                         WikiFormatting.SearchUnescapeRE.sub(ur"\1",
                         combword[1]), 0)
 
-
-#             if end+2 < self.GetLength():
-#                 if chr(self.GetCharAt(end+1)) == "#":    # This may be a problem under rare circumstances
-#                     searchStr = self.GetTextRange(end+2, self.WordEndPosition(end+2, 1))
-# 
-# 
-#             # if a search str was found execute the search
-#             if searchStr:
-#                 self.pWiki.editor.executeSearch(searchStr, 0)
-
             return True
         elif self.isPositionInLink(linkPos):
-            self.launchUrl(self.getTextInStyle(linkPos, WikiFormatting.FormatTypes.Url))
+            self.pWiki.launchUrl(self.getTextInStyle(linkPos, WikiFormatting.FormatTypes.Url))
             return True
         return False
 
@@ -547,31 +544,31 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #         return False
 
 
-    def launchUrl(self, link):
-        match = WikiFormatting.UrlRE.match(link)
-        try:
-            link2 = match.group(1)
-            
-            if self.pWiki.configuration.getint(
-                    "main", "new_window_on_follow_wiki_url") == 1 or \
-                    not link2.startswith("wiki:"):
-                os.startfile(link2)
-                return True
-            elif self.pWiki.configuration.getint(
-                    "main", "new_window_on_follow_wiki_url") == 0:
-                        
-                link2 = urllib.url2pathname(link2)
-                link2 = link2.replace(u"wiki:", u"")
-                if exists(link2):
-                    self.pWiki.openWiki(link2, u"")  # ?
-                    return True
-                else:
-                    self.pWiki.statusBar.SetStatusText(
-                            uniToGui(u"Couldn't open wiki: %s" % link2), 0)
-                    return False
-        except:
-            pass
-        return False
+#     def launchUrl(self, link):
+#         match = WikiFormatting.UrlRE.match(link)
+#         try:
+#             link2 = match.group(1)
+#             
+#             if self.pWiki.configuration.getint(
+#                     "main", "new_window_on_follow_wiki_url") == 1 or \
+#                     not link2.startswith("wiki:"):
+#                 os.startfile(link2)
+#                 return True
+#             elif self.pWiki.configuration.getint(
+#                     "main", "new_window_on_follow_wiki_url") == 0:
+#                         
+#                 link2 = urllib.url2pathname(link2)
+#                 link2 = link2.replace(u"wiki:", u"")
+#                 if exists(link2):
+#                     self.pWiki.openWiki(link2, u"")  # ?
+#                     return True
+#                 else:
+#                     self.pWiki.statusBar.SetStatusText(
+#                             uniToGui(u"Couldn't open wiki: %s" % link2), 0)
+#                     return False
+#         except:
+#             pass
+#         return False
 
     def evalScriptBlocks(self, index=-1):
         # it is important to python to have consistent eol's
@@ -974,7 +971,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     if len(acresult) > 0:
                         # print "acresult", repr(acresult), repr(endBytePos-startBytePos)
                         self.UserListShow(1, u"~".join(acresult))
-
+                    
                 elif key == WXK_RETURN:
                     self.activateLink()
                 else:
@@ -1128,6 +1125,7 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
         self.tobj = wxTextDataObject()  # Char. size depends on wxPython build!
         dataob.Add(self.tobj)
         self.fobj = wxFileDataObject()
+        
         dataob.Add(self.fobj)
 
         self.dataob = dataob
@@ -1161,7 +1159,6 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
             self.resetDObject()
 
 
-
     def OnDropText(self, x, y, text):
         self.editor.DoDropText(x, y, text)
 
@@ -1174,7 +1171,7 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
                 urls.append("wiki:%s" % url)
             else:
                 urls.append("file:%s" % url)
-
+                
                 
 #             if f.endswith(".wiki"):
 #                 url = urllib.pathname2url(f)

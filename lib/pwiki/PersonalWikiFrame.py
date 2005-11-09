@@ -1,7 +1,5 @@
-import os, gc, traceback, hotshot
 
-## _prof = hotshot.Profile("hotshot.prf")
-
+import os, gc, traceback
 from os.path import *
 from time import localtime, time, strftime
 
@@ -10,16 +8,19 @@ from wxPython.stc import *
 from wxPython.html import *
 from wxHelper import GUI_ID
 
+from MiscEvent import MiscEventSourceMixin
 import Configuration
 from Configuration import createConfiguration
+from WikiData import *
 from WikiTxtCtrl import *
 from WikiTreeCtrl import *
-import WikiFormatting
-from WikiData import *
+from WikiHtmlView import WikiHtmlView
+from PageHistory import PageHistory
+
 from AdditionalDialogs import *
 import Exporters
-from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc
-
+from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool
+import WikiFormatting
 
 from PluginManager import *
 _COLORS = [
@@ -137,10 +138,11 @@ class wxGuiProgressHandler:
 
 
 
-class PersonalWikiFrame(wxFrame):
+class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
     def __init__(self, parent, id, title, wikiToOpen, wikiWordToOpen):
         wxFrame.__init__(self, parent, -1, title, size = (700, 550),
                          style=wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
+        MiscEventSourceMixin.__init__(self)
 
         # where is the WikidPad.config file
         globalConfigDir = None
@@ -190,8 +192,8 @@ class PersonalWikiFrame(wxFrame):
         self.wikiConfigFilename = None
         self.currentWikiWord = None
         self.currentWikiPage = None
-        self.historyPosition = 0
-        self.wikiWordHistory = []
+#         self.historyPosition = 0
+#         self.wikiWordHistory = []
         self.lastCursorPositionInPage = {}
         self.iconLookupCache = {}
         self.wikiHistory = []
@@ -215,6 +217,9 @@ class PersonalWikiFrame(wxFrame):
 
         # initialize the wiki syntax
         WikiFormatting.initialize(self.wikiSyntax)
+        
+        # Connect page history
+        self.pageHistory = PageHistory(self)
 
         # trigger hook
         self.hooks.startup(self)
@@ -370,6 +375,9 @@ class PersonalWikiFrame(wxFrame):
         self.configuration.set("main", "pos_y", str(curPos.y))
         self.configuration.set("main", "last_active_dir", os.getcwd())
 
+
+    def getCurrentWikiWord(self):
+        return self.currentWikiWord
 
     # TODO!
     def fillIconLookupCache(self, createIconImageList=False):
@@ -646,11 +654,11 @@ class PersonalWikiFrame(wxFrame):
         EVT_MENU(self, menuID, lambda evt: self.viewHistory(1))
 
         self.addMenuItem(historyMenu, '&Back\t' + self.keyBindings.GoBack,
-                'Go Back', lambda evt: self.goInHistory(-1),
+                'Go Back', lambda evt: self.pageHistory.goInHistory(-1),
                 "tb_back")
 
         self.addMenuItem(historyMenu, '&Forward\t' + self.keyBindings.GoForward,
-                'Go Forward', lambda evt: self.goInHistory(1),
+                'Go Forward', lambda evt: self.pageHistory.goInHistory(1),
                 "tb_forward")
 
         self.addMenuItem(historyMenu, '&Wiki Home\t' + self.keyBindings.GoHome,
@@ -691,11 +699,11 @@ class PersonalWikiFrame(wxFrame):
 
         self.addMenuItem(formattingMenu, 'Cu&t\t' + self.keyBindings.Cut,
                 'Cut', lambda evt: self.editor.Cut(),
-                "tb_cut", menuID=GUI_ID.CLIPBOARD_CUT)
+                "tb_cut", menuID=GUI_ID.CMD_CLIPBOARD_CUT)
 
         self.addMenuItem(formattingMenu, '&Copy\t' + self.keyBindings.Copy,
                 'Copy', lambda evt: self.editor.Copy(),
-                "tb_copy", menuID=GUI_ID.CLIPBOARD_COPY)
+                "tb_copy", menuID=GUI_ID.CMD_CLIPBOARD_COPY)
 
         self.addMenuItem(formattingMenu, 'Copy to &ScratchPad\t' + self.keyBindings.CopyToScratchPad,
                 'Copy Text to ScratchPad', lambda evt: self.editor.snip(),
@@ -703,7 +711,7 @@ class PersonalWikiFrame(wxFrame):
 
         self.addMenuItem(formattingMenu, '&Paste\t' + self.keyBindings.Paste,
                 'Paste', lambda evt: self.editor.Paste(),
-                "tb_paste", menuID=GUI_ID.CLIPBOARD_PASTE)
+                "tb_paste", menuID=GUI_ID.CMD_CLIPBOARD_PASTE)
 
 
         formattingMenu.AppendSeparator()
@@ -986,12 +994,12 @@ class PersonalWikiFrame(wxFrame):
         icon = self.lookupIcon("tb_back")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Back (Ctrl-Alt-Back)", "Back")
-        EVT_TOOL(self, tbID, lambda evt: self.goInHistory(-1))
+        EVT_TOOL(self, tbID, lambda evt: self.pageHistory.goInHistory(-1))
 
         icon = self.lookupIcon("tb_forward")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Forward (Ctrl-Alt-Forward)", "Forward")
-        EVT_TOOL(self, tbID, lambda evt: self.goInHistory(1))
+        EVT_TOOL(self, tbID, lambda evt: self.pageHistory.goInHistory(1))
 
         icon = self.lookupIcon("tb_home")
         tbID = wxNewId()
@@ -1073,7 +1081,7 @@ class PersonalWikiFrame(wxFrame):
                 tbID = wxNewId()
                 
             icon = self.resolveIconDescriptor(icondesc, self.lookupIcon(u"tb_doc"))
-#             tb.AddLabelTool(tbID, label, icon, wxNullBitmap, 0, tooltip)
+            # tb.AddLabelTool(tbID, label, icon, wxNullBitmap, 0, tooltip)
             tb.AddSimpleTool(tbID, icon, tooltip, statustext)
             EVT_TOOL(self, tbID, lambda evt: function(self, evt))
             
@@ -1112,12 +1120,13 @@ class PersonalWikiFrame(wxFrame):
 
         # Add alternative accelerators for clipboard operations
         ACCS = [
-            (wxACCEL_CTRL, WXK_INSERT, GUI_ID.CLIPBOARD_COPY),
-            (wxACCEL_SHIFT, WXK_INSERT, GUI_ID.CLIPBOARD_PASTE),
-            (wxACCEL_SHIFT, WXK_DELETE, GUI_ID.CLIPBOARD_CUT)
+            (wxACCEL_CTRL, WXK_INSERT, GUI_ID.CMD_CLIPBOARD_COPY),
+            (wxACCEL_SHIFT, WXK_INSERT, GUI_ID.CMD_CLIPBOARD_PASTE),
+            (wxACCEL_SHIFT, WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT)
             ]
 
         self.SetAcceleratorTable(wxAcceleratorTable(ACCS))
+
 
         # ------------------------------------------------------------------------------------
         # Create the left-right splitter window.
@@ -1136,16 +1145,30 @@ class PersonalWikiFrame(wxFrame):
         except Exception, e:
             self.displayErrorMessage('There was an error loading the icons '+
                     'for the tree control.', e)
+                    
+                    
+        self.mainAreaPanel = wxNotebook(self.vertSplitter, -1)# wxPanel(self.vertSplitter)
+        # self.mainAreaPanelSizer = wxBoxSizer(wxVERTICAL)
 
         # ------------------------------------------------------------------------------------
         # Create the editor
         # ------------------------------------------------------------------------------------
         self.createEditor()
+        
+        self.htmlView = WikiHtmlView(self, self.mainAreaPanel, -1)
+        
+        self.mainAreaPanel.AddPage(self.htmlView, u"Preview")
+        
+        # self.mainAreaPanel.SetSizer(self.mainAreaPanelSizer)
 
         # ------------------------------------------------------------------------------------
         # Split the tree and the editor
         # ------------------------------------------------------------------------------------
-        self.vertSplitter.SplitVertically(self.tree, self.editor, self.lastSplitterPos)
+        
+        # self.vertSplitter.SplitVertically(self.tree, self.editor, self.lastSplitterPos)
+        self.vertSplitter.SplitVertically(self.tree, self.mainAreaPanel, self.lastSplitterPos)
+
+        EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(), self.OnNotebookPageChanged)
 
         # ------------------------------------------------------------------------------------
         # Find and replace events
@@ -1233,6 +1256,14 @@ class PersonalWikiFrame(wxFrame):
         cb.Close()
 
 
+    def OnNotebookPageChanged(self, evt):
+        if evt.GetSelection() == 0:
+            self.editor.SetFocus()
+        elif evt.GetSelection() == 1:
+            self.htmlView.SetFocus()
+
+        self.htmlView.setVisible(evt.GetSelection() == 1)  # TODO
+
 
     def OnIconize(self, evt):
         if self.lowResources:
@@ -1255,7 +1286,10 @@ class PersonalWikiFrame(wxFrame):
 
 
     def createEditor(self):
-        self.editor = WikiTxtCtrl(self, self.vertSplitter, -1)
+#         self.editor = WikiTxtCtrl(self, self.vertSplitter, -1)
+        self.editor = WikiTxtCtrl(self, self.mainAreaPanel, -1)
+#         self.mainAreaPanelSizer.Add(self.editor, 1, wxEXPAND)
+        self.mainAreaPanel.AddPage(self.editor, u"Edit")
         self.editor.evalScope = { 'editor' : self.editor, 'pwiki' : self,
             'lib': self.evalLib}
 
@@ -1281,6 +1315,21 @@ class PersonalWikiFrame(wxFrame):
 
         # reset tray
         self.setShowOnTray()
+        
+#         # reset menu and toolbar (capabilities of WikiData may have changed)
+#         self.toolBar.Destroy()
+#         
+#         self.SetMenuBar(None)
+# 
+#         self.buildMainMenu()
+#         self.buildToolbar()
+
+    def getCurrentText(self):
+        """
+        Return the raw input text of current wiki word
+        """
+        return self.editor.GetText()
+
 
     def newWiki(self, wikiName, wikiDir):
         "creates a new wiki"
@@ -1492,8 +1541,8 @@ These are your default global settings.
         # Reset some of the members
         self.currentWikiWord = None
         self.currentWikiPage = None
-        self.historyPosition = 0
-        self.wikiWordHistory = []
+#         self.historyPosition = 0
+#         self.wikiWordHistory = []
 
         # set the member variables.
         self.wikiConfigFilename = wikiConfigFilename
@@ -1510,29 +1559,12 @@ These are your default global settings.
             self.mainmenu.EnableTop(1, 1)
             self.mainmenu.EnableTop(2, 1)
             self.mainmenu.EnableTop(3, 1)
+            
+        self.fireMiscEventKeys(("opened wiki",))
 
         # open the root
         self.openWikiPage(self.wikiName)
-
         self.setCurrentWordAsRoot()
-
-
-#         # add the root node to the tree
-#         self.treeRoot = self.tree.AddRoot(self.wikiName)
-#         self.tree.SetPyData(self.treeRoot, (self.wikiName,None,None))
-#         self.tree.SetItemBold(self.treeRoot, True)  # TODO: This doesn't work
-#         self.tree.SelectItem(self.treeRoot)
-#
-#         # open the root
-#         self.openWikiPage(self.wikiName)
-#
-#         # make sure the root has a relationship to the ScratchPad
-#         self.currentWikiPage.addChildRelationship("ScratchPad")
-#
-#         # set the root tree node as having children if it does
-#         if len(self.currentWikiPage.childRelations) > 0:
-#             self.tree.SetItemHasChildren(self.treeRoot, 1)
-#             self.tree.Expand(self.treeRoot)
 
         # set status
         self.statusBar.SetStatusText(
@@ -1572,7 +1604,6 @@ These are your default global settings.
         self.tree.setRootByPage(self.currentWikiPage)
 
 
-
     def closeWiki(self, saveState=True):
         if self.wikiConfigFilename:
             if saveState:
@@ -1600,14 +1631,17 @@ These are your default global settings.
 
 
     def openWikiPage(self, wikiPageWord, addToHistory=True,
-            forceTreeSyncFromRoot=False, forceReopen=False):
+            forceTreeSyncFromRoot=False, forceReopen=False, **evtprops):
+                
+        evtprops["addToHistory"] = addToHistory
+        evtprops["forceTreeSyncFromRoot"] = forceTreeSyncFromRoot
 
         self.statusBar.SetStatusText(uniToGui(u"Opening wiki word '%s'" %
                 wikiPageWord), 0)
 
         # make sure this is a valid wiki word
         wikiWord = WikiFormatting.normalizeWikiWord(wikiPageWord)
-        if wikiWord is None:  # not WikiFormatting.isWikiWord(wikiWord):
+        if wikiWord is None:
             self.displayErrorMessage(u"'%s' is an invalid wiki word." % wikiPageWord)
             return
 
@@ -1633,9 +1667,7 @@ These are your default global settings.
 
         # check if this is an alias
         if (self.wikiData.isAlias(wikiWord)):
-            aliasesWikiWord = self.wikiData.getAliasesWikiWord(wikiWord)
-            if aliasesWikiWord:
-                wikiWord = aliasesWikiWord
+            wikiWord = self.wikiData.getAliasesWikiWord(wikiWord)
 
         # set the current wikiword
         self.currentWikiWord = wikiWord
@@ -1667,17 +1699,18 @@ These are your default global settings.
         globalProps = self.wikiData.getGlobalProperties()
 
         # get the font that should be used in the editor
-        font = self.defaultEditorFont
-        if pageProps.has_key("font"):
-            font = pageProps["font"][0]
-        elif globalProps.has_key("global.font"):
-            font = globalProps["global.font"]
+        font = self.currentWikiPage.getPropertyOrGlobal("font",
+                self.defaultEditorFont)
 
         # set the styles in the editor to the font
         if self.lastEditorFont != font:
             self.presentationExt.faces["mono"] = font
             self.editor.SetStyles(self.presentationExt.faces)
             self.lastEditorFont = font
+            
+        p2 = evtprops.copy()
+        p2.update({"loading current page": True})
+        self.fireMiscEventProps(p2)
 
         # now fill the text into the editor
         self.editor.SetText(content)
@@ -1688,21 +1721,20 @@ These are your default global settings.
 
         # check if CamelCase should be used
         # print "openWikiPage props", repr(pageProps), repr(globalProps)
-        wikiWordsEnabled = True
-        if pageProps.has_key("camelCaseWordsEnabled"):
-            if pageProps["camelCaseWordsEnabled"][0] == "false":
-                wikiWordsEnabled = False
-        elif globalProps.has_key("global.camelCaseWordsEnabled"):
-            if globalProps["global.camelCaseWordsEnabled"] == "false":
-                wikiWordsEnabled = False
+        wikiWordsEnabled = strToBool(self.currentWikiPage.getPropertyOrGlobal(
+                "camelCaseWordsEnabled"), True)
 
         self.wikiWordsEnabled = wikiWordsEnabled
         self.editor.wikiWordsEnabled = wikiWordsEnabled
 
+        p2 = evtprops.copy()
+        p2.update({"loaded current page": True})
+        self.fireMiscEventProps(p2)        
+
         # set the title and add the word to the history
         self.SetTitle(uniToGui(u"Wiki: %s - %s" %
                 (self.wikiName,self.currentWikiWord)))
-        if addToHistory: self.addToHistory(wikiWord)
+#         if addToHistory: self.addToHistory(wikiWord)
         self.configuration.set("main", "last_wiki_word", wikiWord)
 
         # sync the tree
@@ -1711,147 +1743,6 @@ These are your default global settings.
 
         # trigger hook
         self.hooks.openedWikiWord(self, wikiWord)
-
-
-    def findCurrentWordInTree(self):
-        try:
-            self.tree.buildTreeForWord(self.currentWikiWord, selectNode=True)
-        except Exception, e:
-            sys.stderr.write("%s\n" % e)
-
-
-    def viewParents(self, ofWord):
-        parents = self.wikiData.getParentRelationships(ofWord)
-
-        dlg = wxSingleChoiceDialog(self,
-                                    uniToGui(u"Parent nodes of '%s'" % ofWord),
-                                    uniToGui(u"Parent nodes of '%s'" % ofWord),
-                                    parents,
-                                    wxOK|wxCANCEL)
-
-        if dlg.ShowModal() == wxID_OK:
-            wikiWord = guiToUni(dlg.GetStringSelection())
-            if len(wikiWord) > 0:
-                self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
-                self.editor.SetFocus()
-        dlg.Destroy()
-
-
-    def viewParentLess(self):
-        parentLess = self.wikiData.getParentLessWords()
-        dlg = wxSingleChoiceDialog(self,
-                                   "Parentless nodes",
-                                   "Parentless nodes",
-                                   parentLess,
-                                   wxOK|wxCANCEL)
-
-        if dlg.ShowModal() == wxID_OK:
-            wikiWord = guiToUni(dlg.GetStringSelection())
-            if len(wikiWord) > 0:
-                self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
-                self.editor.SetFocus()
-        dlg.Destroy()
-
-
-    def viewChildren(self, ofWord):
-        children = self.wikiData.getChildRelationships(ofWord)
-        dlg = wxSingleChoiceDialog(self,
-                                   uniToGui(u"Child nodes of '%s'" % ofWord),
-                                   uniToGui(u"Child nodes of '%s'" % ofWord),
-                                   children,
-                                   wxOK|wxCANCEL)
-
-        if dlg.ShowModal() == wxID_OK:
-            wikiWord = guiToUni(dlg.GetStringSelection())
-            if len(wikiWord) > 0:
-                self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
-                self.editor.SetFocus()
-        dlg.Destroy()
-
-
-    def addToHistory(self, wikiWord):
-        if wikiWord == self.getCurrentWikiWordFromHistory():
-            return
-
-        # if the pointer is on the middle of the array right now
-        # slice the array at the pointer and then add
-        if self.historyPosition < len(self.wikiWordHistory)-1:
-            self.wikiWordHistory = self.wikiWordHistory[0:self.historyPosition+1]
-
-        # add the item to history
-        self.wikiWordHistory.append(wikiWord)
-
-        # only keep 25 items
-        if len(self.wikiWordHistory) > 25:
-            self.wikiWordHistory.pop(0)
-
-        # set the position of the history pointer
-        self.historyPosition = len(self.wikiWordHistory)-1
-
-
-    def goInHistory(self, posDelta=0):
-        if (posDelta < 0 and self.historyPosition > 0) or \
-                (posDelta > 0 and self.historyPosition < (len(self.wikiWordHistory)-1)):
-            self.historyPosition = self.historyPosition + posDelta
-        wikiWord = self.wikiWordHistory[self.historyPosition]
-        self.openWikiPage(wikiWord, False)
-        self.editor.SetFocus()
-
-    def goBackInHistory(self, howMany=1):
-        if self.historyPosition > 0:
-            self.historyPosition = self.historyPosition - howMany
-            wikiWord = self.wikiWordHistory[self.historyPosition]
-            self.openWikiPage(wikiWord, False)
-
-
-    def goForwardInHistory(self):
-        if self.historyPosition < len(self.wikiWordHistory)-1:
-            self.historyPosition = self.historyPosition + 1
-            wikiWord = self.wikiWordHistory[self.historyPosition]
-            self.openWikiPage(wikiWord, False)
-
-
-    def getCurrentWikiWordFromHistory(self):
-        if len(self.wikiWordHistory) > 0:
-            return self.wikiWordHistory[self.historyPosition]
-        else:
-            return None
-
-
-    def viewHistory(self, posDelta=0):
-        dlg = wxSingleChoiceDialog(self,
-                                   u"History",
-                                   u"History",
-                                   self.wikiWordHistory,
-                                   wxOK|wxCANCEL)
-
-        historyLen = len(self.wikiWordHistory)
-        position = self.historyPosition+posDelta
-        if (position < 0):
-            position = 0
-        elif (position >= historyLen):
-            position = historyLen-1
-
-        dlg.SetSelection(position)
-        if dlg.ShowModal() == wxID_OK:
-            self.goInHistory(dlg.GetSelection() - self.historyPosition)
-            self.findCurrentWordInTree()
-        dlg.Destroy()
-
-
-    def viewBookmarks(self):
-        dlg = wxSingleChoiceDialog(self,
-                                   u"Bookmarks",
-                                   u"Bookmarks",
-                                   self.wikiData.getWordsWithPropertyValue("bookmarked", u"true"),
-                                   wxOK|wxCANCEL)
-
-        if dlg.ShowModal() == wxID_OK:
-            wikiWord = guiToUni(dlg.GetStringSelection())
-            if len(wikiWord) > 0:
-                self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
-                self.editor.SetFocus()
-        dlg.Destroy()
 
 
     def saveCurrentWikiPage(self):
@@ -1867,7 +1758,7 @@ These are your default global settings.
         while 1:
             try:
                 page.save(text)
-                page.update(text)
+                page.update(text)   # ?
                 error = False
                 break
             except Exception, e:
@@ -1890,6 +1781,239 @@ These are your default global settings.
             self.hooks.savedWikiWord(self, word)
 
 
+    def deleteCurrentWikiPage(self, **evtprops):
+        if self.currentWikiWord:
+            self.wikiData.deleteWord(self.currentWikiWord)
+
+            # trigger hooks
+            self.hooks.deletedWikiWord(self, self.currentWikiWord)
+            
+            p2 = evtprops.copy()
+            p2["deleted current page"] = True
+            self.fireMiscEventProps(p2)
+            
+            self.pageHistory.goAfterDeletion()
+            
+            
+    def renameCurrentWikiPage(self, toWikiWord, **evtprops):
+        """
+        Renames current wiki word to toWikiWord.
+        Returns True if renaming was done successful.
+        """
+        wikiWord = self.getCurrentWikiWord()
+        try:
+            self.saveCurrentWikiPage()
+            self.wikiData.renameWord(wikiWord, toWikiWord)
+
+            # if the root was renamed we have a little more to do
+            if wikiWord == self.wikiName:
+                self.configuration.set("main", "wiki_name", toWikiWord)
+                self.configuration.set("main", "last_wiki_word", toWikiWord)
+                self.saveCurrentWikiState()
+                self.configuration.loadWikiConfig(None)
+                
+                self.wikiHistory.remove(self.wikiConfigFilename)
+                renamedConfigFile = join(dirname(self.wikiConfigFilename),
+                        u"%s.wiki" % toWikiWord)
+                os.rename(self.wikiConfigFilename, renamedConfigFile)
+                self.openWiki(renamedConfigFile)
+                
+            self.currentWikiWord = toWikiWord
+            self.currentWikiPage = None
+
+            # trigger hooks
+            self.hooks.renamedWikiWord(self, wikiWord, toWikiWord)                
+            # self.tree.collapse()
+            p2 = evtprops.copy()
+            p2["renamed page"] = True
+            p2["oldWord"] = wikiWord
+            p2["newWord"] = toWikiWord
+            self.fireMiscEventProps(p2)
+
+            self.openWikiPage(toWikiWord, forceTreeSyncFromRoot=True)
+            # self.findCurrentWordInTree()
+            return True
+        except WikiDataException, e:
+            traceback.print_exc()                
+            self.displayErrorMessage(str(e))
+            return False
+
+
+
+    def findCurrentWordInTree(self):
+        try:
+            self.tree.buildTreeForWord(self.currentWikiWord, selectNode=True)
+        except Exception, e:
+            sys.stderr.write("%s\n" % e)
+
+
+    def launchUrl(self, link):
+        match = WikiFormatting.UrlRE.match(link)
+        try:
+            link2 = match.group(1)
+            
+            if self.configuration.getint(
+                    "main", "new_window_on_follow_wiki_url") == 1 or \
+                    not link2.startswith("wiki:"):
+                os.startfile(link2)
+                return True
+            elif self.configuration.getint(
+                    "main", "new_window_on_follow_wiki_url") == 0:
+                        
+                link2 = urllib.url2pathname(link2)
+                link2 = link2.replace(u"wiki:", u"")
+                if exists(link2):
+                    self.openWiki(link2, u"")  # ?
+                    return True
+                else:
+                    self.statusBar.SetStatusText(
+                            uniToGui(u"Couldn't open wiki: %s" % link2), 0)
+                    return False
+        except:
+            pass
+        return False
+
+
+    def viewWordSelection(self, title, words, motionType):
+        """
+        View a single choice to select a word to go to
+        title -- Title of the dialog
+        words -- Sequence of the words to choose from
+        motionType -- motion type to set in openWikiPage if word was choosen
+        """
+        wordsgui = map(uniToGui, words)
+        result = wxGetSingleChoiceIndex(uniToGui(title), uniToGui(title),
+                wordsgui, self)
+                
+        if result == -1:
+            return
+            
+        wikiWord = words[result]
+        if len(wikiWord) > 0:
+            self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True,
+                    motionType=motionType)
+            # self.editor.SetFocus()
+
+
+    def viewParents(self, ofWord):
+        parents = self.wikiData.getParentRelationships(ofWord)
+        self.viewWordSelection(u"Parent nodes of '%s'" % ofWord, parents,
+                "parent")
+
+
+    def viewParentLess(self):
+        parentLess = self.wikiData.getParentLessWords()
+        self.viewWordSelection(u"Parentless nodes", parentLess,
+                "random")
+
+
+    def viewChildren(self, ofWord):
+        children = self.wikiData.getChildRelationships(ofWord)
+        self.viewWordSelection(u"Child nodes of '%s'" % ofWord, children,
+                "child")
+
+    def viewBookmarks(self):
+        bookmarked = self.wikiData.getWordsWithPropertyValue(
+                "bookmarked", u"true")
+        self.viewWordSelection(u"Bookmarks", bookmarked,
+                "random")
+
+    def viewHistory(self, posDelta=0):
+        hist = self.pageHistory.getHistory()
+        histpos = self.pageHistory.getPosition()
+
+        dlg = wxSingleChoiceDialog(self,
+                                   u"History",
+                                   u"History",
+                                   hist,
+                                   wxOK|wxCANCEL)
+        
+        historyLen = len(hist)
+        position = histpos + posDelta - 1
+        if (position < 0):
+            position = 0
+        elif (position >= historyLen):
+            position = historyLen-1
+
+        dlg.SetSelection(position)
+        if dlg.ShowModal() == wxID_OK:
+            # print "viewHistory1"
+            self.pageHistory.goInHistory(dlg.GetSelection() - (histpos - 1))
+            # self.findCurrentWordInTree()
+        # print "viewHistory2"
+        dlg.Destroy()
+
+
+#     def addToHistory(self, wikiWord):
+#         if wikiWord == self.getCurrentWikiWordFromHistory():
+#             return
+# 
+#         # if the pointer is on the middle of the array right now
+#         # slice the array at the pointer and then add
+#         if self.historyPosition < len(self.wikiWordHistory)-1:
+#             self.wikiWordHistory = self.wikiWordHistory[0:self.historyPosition+1]
+# 
+#         # add the item to history
+#         self.wikiWordHistory.append(wikiWord)
+# 
+#         # only keep 25 items
+#         if len(self.wikiWordHistory) > 25:
+#             self.wikiWordHistory.pop(0)
+# 
+#         # set the position of the history pointer
+#         self.historyPosition = len(self.wikiWordHistory)-1
+# 
+# 
+#     def goInHistory(self, posDelta=0):
+#         if (posDelta < 0 and self.historyPosition > 0) or \
+#                 (posDelta > 0 and self.historyPosition < (len(self.wikiWordHistory)-1)):
+#             self.historyPosition = self.historyPosition + posDelta
+#         wikiWord = self.wikiWordHistory[self.historyPosition]
+#         self.openWikiPage(wikiWord, False)
+#         self.editor.SetFocus()
+# 
+#     def goBackInHistory(self, howMany=1):
+#         if self.historyPosition > 0:
+#             self.historyPosition = self.historyPosition - howMany
+#             wikiWord = self.wikiWordHistory[self.historyPosition]
+#             self.openWikiPage(wikiWord, False)
+# 
+# 
+#     def goForwardInHistory(self):
+#         if self.historyPosition < len(self.wikiWordHistory)-1:
+#             self.historyPosition = self.historyPosition + 1
+#             wikiWord = self.wikiWordHistory[self.historyPosition]
+#             self.openWikiPage(wikiWord, False)
+# 
+# 
+# 
+#     def getCurrentWikiWordFromHistory(self):
+#         if len(self.wikiWordHistory) > 0:
+#             return self.wikiWordHistory[self.historyPosition]
+#         else:
+#             return None
+
+
+#     def viewHistory(self, posDelta=0):
+#         dlg = wxSingleChoiceDialog(self,
+#                                    u"History",
+#                                    u"History",
+#                                    self.wikiWordHistory,
+#                                    wxOK|wxCANCEL)
+# 
+#         historyLen = len(self.wikiWordHistory)
+#         position = self.historyPosition+posDelta
+#         if (position < 0):
+#             position = 0
+#         elif (position >= historyLen):
+#             position = historyLen-1
+# 
+#         dlg.SetSelection(position)
+#         if dlg.ShowModal() == wxID_OK:
+#             self.pageHistory.goInHistory(dlg.GetSelection() - self.historyPosition)
+#             self.findCurrentWordInTree()
+#         dlg.Destroy()
+
 
     def updateRelationships(self):
         self.statusBar.SetStatusText(u"Updating relationships", 0)
@@ -1905,8 +2029,8 @@ These are your default global settings.
             self.wikiHistory.append(wikiConfigFilename)
 
             # only keep 5 items
-            if len(self.wikiWordHistory) > 5:
-                self.wikiWordHistory.pop(0)
+            if len(self.wikiHistory) > 5:
+                self.wikiHistory.pop(0)
 
             # add the item to the menu
             menuID=wxNewId()
@@ -2028,7 +2152,7 @@ These are your default global settings.
 
         try:
             while dlg.ShowModal() == wxID_OK and \
-                    not self.showWikiWordRenameConfirmDialog(self.currentWikiWord,
+                    not self.showWikiWordRenameConfirmDialog(
                             guiToUni(dlg.GetValue())):
                 pass
 
@@ -2038,12 +2162,14 @@ These are your default global settings.
 
 
     # TODO Check if new name already exists (?)
-    def showWikiWordRenameConfirmDialog(self, wikiWord, newWikiWord):
+    def showWikiWordRenameConfirmDialog(self, newWikiWord):
         """
         Checks if renaming operation is valid, presents either an error
         message or a confirmation dialog.
         Returns -- True iff renaming was done successfully
         """
+        wikiWord = self.getCurrentWikiWord()
+
         if not newWikiWord or len(newWikiWord) == 0:
             return False
             
@@ -2073,26 +2199,27 @@ These are your default global settings.
         if result == wxID_YES:
             try:
                 self.saveCurrentWikiPage()
-                self.wikiData.renameWord(wikiWord, toWikiWord)
-
-                # if the root was renamed we have a little more to do
-                if wikiWord == self.wikiName:
-                    self.configuration.set("main", "wiki_name", toWikiWord)
-                    self.configuration.set("main", "last_wiki_word", toWikiWord)
-                    self.saveCurrentWikiState()
-                    self.wikiHistory.remove(self.wikiConfigFilename)
-                    renamedConfigFile = join(dirname(self.wikiConfigFilename),
-                            u"%s.wiki" % toWikiWord)
-                    os.rename(self.wikiConfigFilename, renamedConfigFile)
-                    self.wikiConfigFilename = None
-                    self.openWiki(renamedConfigFile)
-
-                # trigger hooks
-                self.hooks.renamedWikiWord(self, wikiWord, toWikiWord)                
-                self.tree.collapse()
-                self.openWikiPage(toWikiWord, forceTreeSyncFromRoot=True)
-                self.findCurrentWordInTree()
-                renamed = True
+                renamed = self.renameCurrentWikiPage(toWikiWord)
+#                 self.wikiData.renameWord(wikiWord, toWikiWord)
+# 
+#                 # if the root was renamed we have a little more to do
+#                 if wikiWord == self.wikiName:
+#                     self.configuration.set("main", "wiki_name", toWikiWord)
+#                     self.configuration.set("main", "last_wiki_word", toWikiWord)
+#                     self.saveCurrentWikiState()
+#                     self.wikiHistory.remove(self.wikiConfigFilename)
+#                     renamedConfigFile = join(dirname(self.wikiConfigFilename),
+#                             u"%s.wiki" % toWikiWord)
+#                     os.rename(self.wikiConfigFilename, renamedConfigFile)
+#                     self.wikiConfigFilename = None
+#                     self.openWiki(renamedConfigFile)
+# 
+#                 # trigger hooks
+#                 self.hooks.renamedWikiWord(self, wikiWord, toWikiWord)                
+#                 self.tree.collapse()
+#                 self.openWikiPage(toWikiWord, forceTreeSyncFromRoot=True)
+#                 self.findCurrentWordInTree()
+#                 renamed = True
             except WikiDataException, e:
                 traceback.print_exc()                
                 self.displayErrorMessage(str(e))
@@ -2140,16 +2267,17 @@ These are your default global settings.
         if result == wxID_YES:
             self.saveCurrentWikiPage()
             try:
-                self.wikiData.deleteWord(wikiWord)
-                # trigger hooks
-                self.hooks.deletedWikiWord(self, wikiWord)
-                if wikiWord == self.currentWikiWord:
-                    self.tree.collapse()
-                    if self.wikiWordHistory[self.historyPosition-1] != self.currentWikiWord:
-                        self.goInHistory(-1)
-                    else:
-                        self.openWikiPage(self.wikiName)
-                    self.findCurrentWordInTree()
+                self.deleteCurrentWikiPage()
+#                 self.wikiData.deleteWord(wikiWord)
+#                 # trigger hooks
+#                 self.hooks.deletedWikiWord(self, wikiWord)
+#                 if wikiWord == self.currentWikiWord:
+#                     self.tree.collapse()
+#                     if self.wikiWordHistory[self.historyPosition-1] != self.currentWikiWord:
+#                         self.goInHistory(-1)
+#                     else:
+#                         self.openWikiPage(self.wikiName)
+#                     self.findCurrentWordInTree()
             except WikiDataException, e:
                 self.displayErrorMessage(str(e))
 
@@ -2223,6 +2351,7 @@ These are your default global settings.
             # Perform operations to reset GUI parts after option changes
             self.setShowOnTray()
             self.setHideUndefined()
+            self.fireMiscEventKeys(("options changed",))
 
 
     def showExportDialog(self):
@@ -2294,11 +2423,9 @@ These are your default global settings.
 
         if skipConfirm or result == wxYES :
             try:
-                ## _prof.start()
                 self.wikiData.rebuildWiki(
                         wxGuiProgressHandler(u"Rebuilding wiki", u"Rebuilding wiki",
                         0, self))
-                ## _prof.stop()
 
                 self.tree.collapse()
                 self.openWikiPage(self.currentWikiWord, forceTreeSyncFromRoot=True)

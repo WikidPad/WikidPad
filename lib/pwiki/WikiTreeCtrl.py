@@ -7,6 +7,7 @@ from wxPython.stc import *
 import wxPython.xrc as xrc
 
 from wxHelper import GUI_ID
+from MiscEvent import KeyFunctionSink
 
 from WikiExceptions import WikiWordNotFoundException
 import WikiFormatting
@@ -14,7 +15,7 @@ import WikiFormatting
 from StringOps import mbcsEnc, guiToUni, uniToGui, wikiWordToLabel, strToBool
 
 
-class NodeStyle:
+class NodeStyle(object):
     """
     A simple structure to hold all necessary information to present a tree node.
     """
@@ -30,7 +31,7 @@ class NodeStyle:
         self.hasChildren = False
         
 
-_SETABLE_PROPS = (u"bold", u"icon", u"color")
+_SETTABLE_PROPS = (u"bold", u"icon", u"color")
 
 
 # New style class to allow __slots__ for efficiency
@@ -51,13 +52,20 @@ class AbstractNode(object):
         Sets if this node is a logical root of the tree or not
         (currently the physical root is the one and only logical root)
         """
-        if flag: raise Error   # TOD Better exception
+        if flag: raise Error   # TODO Better exception
 
     def getNodePresentation(self):
         """
         return a NodeStyle object for the node
         """
         return NodeStyle()
+        
+    def representsFamilyWikiWord(self):
+        """
+        True iff the node type represents a wiki word and is bound into its
+        family of parent and children
+        """
+        return False
         
     def representsWikiWord(self):
         """
@@ -159,7 +167,7 @@ class WikiWordNode(AbstractNode):
         # apply the global props based on the props of this node
         for (key, values) in props.items():
             for val in values:
-                for p in _SETABLE_PROPS:
+                for p in _SETTABLE_PROPS:
                     gPropVal = globalProps.get(u"global.%s.%s.%s" % (key, val, p))
                     if not gPropVal:
                         gPropVal = globalProps.get(u"global.%s.%s" % (key, p))
@@ -182,9 +190,15 @@ class WikiWordNode(AbstractNode):
         return style
 
 
+    def representsFamilyWikiWord(self):
+        """
+        True iff the node type is bound into its family of parent and children
+        """
+        return True
+
     def representsWikiWord(self):
         return True
-        
+       
         
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.wikiData
@@ -305,6 +319,12 @@ class WikiWordSearchNode(WikiWordNode):
         if self.searchInfo:
             self.treeCtrl.pWiki.editor.executeSearch(self.searchInfo, 0)
 
+    def representsFamilyWikiWord(self):
+        """
+        A search node is alone as child of a view subnode without
+        its children or real parent
+        """
+        return False
 
 
 class MainViewNode(AbstractNode):
@@ -649,6 +669,13 @@ class WikiTreeCtrl(wxTreeCtrl):
         EVT_MENU(self, GUI_ID.CMD_SETASROOT_WIKIWORD,
                 lambda evt: self.pWiki.setCurrentWordAsRoot())
 
+        # Register for pWiki events
+        self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
+                ("loading current page", self.onLoadingCurrentWikiPage),
+                ("updated current page cache", self.onUpdatedCurrentPageCache), # TODO is event fired somewhere?
+                ("renamed page", self.onRenamedWikiPage)
+        )))
+
 
     def collapse(self):
         rootNode = self.GetRootItem()
@@ -656,6 +683,47 @@ class WikiTreeCtrl(wxTreeCtrl):
         
     def getHideUndefined(self):
         return self.pWiki.configuration.getboolean("main", "hideundefined")
+
+    def onLoadingCurrentWikiPage(self, miscevt):
+        if miscevt.get("forceTreeSyncFromRoot", False):
+            self.buildTreeForWord(self.pWiki.getCurrentWikiWord(),
+                    selectNode=True)
+        else:
+            currentNode = self.GetSelection()
+            if currentNode.IsOk():
+                node = self.GetPyData(currentNode)
+                if node.representsWikiWord():                    
+#                     if node.getWikiWord() == self.pWiki.getCurrentWikiWord():
+#                         return # Is already on word -> nothing to do
+                    if self.pWiki.wikiData.getAliasesWikiWord(node.getWikiWord()) ==\
+                            self.pWiki.getCurrentWikiWord():
+                        return
+                if node.representsFamilyWikiWord():            
+                    # If we know the motionType, tree selection can be moved smart
+                    motionType = miscevt.get("motionType", "random")
+                    if motionType == "parent":
+                        self.SelectItem(self.GetItemParent(currentNode))
+                        return
+                    elif motionType == "child":
+                        if self.IsExpanded(currentNode):
+                            child = self.findChildTreeNodeByWikiWord(currentNode,
+                                    self.pWiki.getCurrentWikiWord())
+                            if child:
+                                self.SelectItem(child)
+                                return
+                    
+                # Can't find word -> remove selection
+                self.Unselect()
+
+
+    def onUpdatedCurrentPageCache(self, miscevt):
+        self.buildTreeForWord(self.pWiki.getCurrentWikiWord())
+
+
+    def onRenamedWikiPage(self, miscevt):
+        self.collapse()   # TODO?
+
+
 
 
     def buildTreeForWord(self, wikiWord, selectNode=False, doexpand=False):
@@ -683,6 +751,7 @@ class WikiTreeCtrl(wxTreeCtrl):
             currentWikiWord = self.GetPyData(currentNode).getWikiWord()
             crumbs = wikiData.findBestPathFromWordToWord(wikiWord,
                     currentWikiWord)
+                    
 
         if crumbs:
             numCrumbs = len(crumbs)
@@ -698,7 +767,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
                     # fetch the next crumb node
                     if (i+1) < numCrumbs:
-                        currentNode = self.findChildTreeNodeWithText(currentNode,
+                        currentNode = self.findChildTreeNodeByWikiWord(currentNode,
                                 crumbs[i+1])
                 except Exception, e:
                     sys.stderr.write("error expanding tree node: %s\n" % e)
@@ -726,17 +795,19 @@ class WikiTreeCtrl(wxTreeCtrl):
                 if selectNode:
                     self.SelectItem(currentNode)
 
-
-    def findChildTreeNodeWithText(self, fromNode, findWord):
+    def findChildTreeNodeByWikiWord(self, fromNode, findWord):
         (child, cookie) = self.GetFirstChild(fromNode)    # , 0
         while child:
             nodeobj = self.GetPyData(child)
-            if nodeobj.representsWikiWord() and nodeobj.getWikiWord() == findWord:
+#             if nodeobj.representsFamilyWikiWord() and nodeobj.getWikiWord() == findWord:
+            if nodeobj.representsFamilyWikiWord() and \
+                    self.pWiki.wikiData.getAliasesWikiWord(nodeobj.getWikiWord())\
+                    == findWord:
                 return child
             
             (child, cookie) = self.GetNextChild(fromNode, cookie)
         return None
-        
+
 
     def setRootByPage(self, rootpage):
         """
