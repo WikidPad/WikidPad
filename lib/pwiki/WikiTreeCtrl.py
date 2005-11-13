@@ -388,8 +388,8 @@ class TodoNode(AbstractNode):
         This is called before expanding the node
         """
         wikiData = self.treeCtrl.pWiki.wikiData
-        result = []
         addedTodoSubCategories = []
+        addedWords = []
         for (wikiWord, todo) in wikiData.getTodos():
             # parse the todo for name and value
             match = WikiFormatting.ToDoREWithCapturing.match(todo)
@@ -401,10 +401,7 @@ class TodoNode(AbstractNode):
             elif (len(entryCats) == len(self.categories)) and \
                     (entryCats == self.categories):
                 # Same category sequence -> wiki word node
-                result.append(WikiWordSearchNode(self.treeCtrl,
-                        wikiData.getPage(wikiWord, toload=[""]),
-                               # flagChildren = False, newLabel=match.group(3)
-                        searchInfo=todo))
+                addedWords.append((wikiWord, todo))
             elif entryCats[:len(self.categories)] == \
                     self.categories:
                 # Subcategories -> category node
@@ -412,11 +409,22 @@ class TodoNode(AbstractNode):
                 nextSubCategory = entryCats[len(self.categories)]
                 
                 if nextSubCategory not in addedTodoSubCategories:
-                    result.append(TodoNode(self.treeCtrl,
-                            self.categories + (nextSubCategory,)))
                     addedTodoSubCategories.append(nextSubCategory)
+                    
+        addedTodoSubCategories.sort()
+        addedWords.sort()
         
+        result = []
+        # First list categories, then words
+        result += map(lambda c: TodoNode(self.treeCtrl,
+                self.categories + (c,)), addedTodoSubCategories)
+
+        result += map(lambda wt: WikiWordSearchNode(self.treeCtrl,
+                wikiData.getPage(wt[0], toload=[""]), searchInfo=wt[1]),
+                addedWords)
+
         return result
+
 
 
 class PropCategoryNode(AbstractNode):
