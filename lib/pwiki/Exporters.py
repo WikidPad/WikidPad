@@ -2,7 +2,7 @@
 import WikiFormatting
 # import re
 import os
-from os.path import join, exists
+from os.path import join, exists, splitext
 import sys
 import shutil
 ## from xml.sax.saxutils import escape
@@ -13,7 +13,7 @@ import urllib_red as urllib
 import WikiData
 import WikiFormatting
 from StringOps import mbcsWriter, utf8Writer, utf8Enc, mbcsEnc, strToBool, \
-        Tokenizer, BOM_UTF8
+        Tokenizer, BOM_UTF8, unicodeToCompFilename, wikiWordToLabel
 
 from wxPython.wx import *
 import wxPython.xrc as xrc
@@ -43,7 +43,18 @@ def splitIndent(text):
     pl = len(text)
     text = text.lstrip()
     return (text, pl-len(text))
-        
+
+
+def removeBracketsFilename(fn):
+    n, ext = splitext(fn)
+    return wikiWordToLabel(n) + ext
+
+def removeBracketsToCompFilename(fn):
+    """
+    Combine unicodeToCompFilename() and removeBracketsFilename() from StringOps
+    """
+    return unicodeToCompFilename(removeBracketsFilename(fn))
+
 
 
 # TODO UTF-8 support for HTML? Other encodings?
@@ -61,9 +72,14 @@ class HtmlXmlExporter:
         self.statestack = None
         # deepness of numeric bullets
         self.numericdeepness = None
-        self.convertFilename = lambda s: s   # lambda s: mbcsEnc(s, "replace")[0]
+        self.convertFilename = removeBracketsFilename   # lambda s: mbcsEnc(s, "replace")[0]
+        
+        self.result = None
+        
+        # Flag to control how to push output into self.result
+        self.outFlagEatPostBreak = False
 
-
+        
     def getExportTypes(self, guiparent):
         """
         Return sequence of tuples with the description of export types provided
@@ -103,7 +119,7 @@ class HtmlXmlExporter:
 
             
     def export(self, pWiki, wikiData, wordList, exportType, exportDest,
-            addopt):
+            compatFilenames, addopt):
         """
         Run export operation.
         
@@ -112,6 +128,8 @@ class HtmlXmlExporter:
         wordList -- Sequence of wiki words to export
         exportType -- string tag to identify how to export
         exportDest -- Path to destination directory or file to export to
+        compatFilenames -- Should the filenames be encoded to be lowest
+                           level compatible
         addopt -- additional options returned by getAddOpt()
         """
         
@@ -120,10 +138,10 @@ class HtmlXmlExporter:
         self.wordList = wordList
         self.exportDest = exportDest
         
-#         if compatFilenames:
-#             self.convertFilename = unicodeToCompFilename
-#         else:
- #            self.convertFilename = lambda s: s    # lambda s: mbcsEnc(s, "replace")[0]
+        if compatFilenames:
+            self.convertFilename = removeBracketsToCompFilename
+        else:
+            self.convertFilename = removeBracketsFilename    # lambda s: mbcsEnc(s, "replace")[0]
         
         if exportType == u"html_single":
             startfile = self.exportHtmlSingleFile()
@@ -133,8 +151,8 @@ class HtmlXmlExporter:
             startfile = self.exportXml()
             
             
-#         if not compatFilenames:
-#             startfile = mbcsEnc(startfile)[0]
+        if not compatFilenames:
+            startfile = mbcsEnc(startfile)[0]
             
         if self.pWiki.configuration.getboolean(
                 "main", "start_browser_after_export") and startfile:
@@ -170,7 +188,7 @@ class HtmlXmlExporter:
                         continue
                     # get aliases too
                     relation = self.wikiData.getAliasesWikiWord(relation)
-                        # TODO Use self.convertFilename here?
+                    # TODO Use self.convertFilename here?
                     links[relation] = u"#%s" % relation
                     
                 formattedContent = self.formatContent(word, content, links)
@@ -203,7 +221,7 @@ class HtmlXmlExporter:
                     continue
                 # get aliases too
                 relation = self.wikiData.getAliasesWikiWord(relation)
-                links[relation] = self.convertFilename(u"#%s" % relation)
+                links[relation] = self.convertFilename(u"%s.html" % relation)  #   "#%s" ???
 #                 wordForAlias = self.wikiData.getAliasesWikiWord(relation)
 #                 if wordForAlias:
 #                     links[relation] = self.convertFilename(
@@ -382,12 +400,12 @@ class HtmlXmlExporter:
 
     def popState(self):
         if self.statestack[-1][0] == "normalindent":
-            self.result.append(u"</ul>\n")
+            self.outEatBreaks(u"</ul>\n")
         elif self.statestack[-1][0] == "ol":
-            self.result.append(u"</ol>\n")
+            self.outEatBreaks(u"</ol>\n")
             self.numericdeepness -= 1
         elif self.statestack[-1][0] == "ul":
-            self.result.append(u"</ul>\n")
+            self.outEatBreaks(u"</ul>\n")
             
         self.statestack.pop()
         
@@ -397,6 +415,50 @@ class HtmlXmlExporter:
         """
         return len(self.statestack) > 1
         
+
+    def outAppend(self, toAppend, eatPreBreak=False, eatPostBreak=False):
+        """
+        Append toAppend to self.result, maybe remove or modify it according to
+        flags
+        """
+        if self.outFlagEatPostBreak and toAppend.strip() == "<br />":
+            self.outFlagEatPostBreak = eatPostBreak
+            return
+        
+        if eatPreBreak and len(self.result) > 0 and \
+                self.result[-1].strip() == "<br />":
+            self.result[-1] = toAppend
+            return
+            
+        self.result.append(toAppend)
+        
+
+    # TODO Remove
+    def eatPreBreak(self, toAppend):
+        """
+        If last element in self.result is a <br />, delete it.
+        Then append toAppend to self.result
+        """
+        if len(self.result) > 0 and self.result[-1].strip() == "<br />":
+            self.result[-1] = toAppend
+        else:
+            self.result.append(toAppend)
+
+
+    def outEatBreaks(self, toAppend, **kpars):
+        """
+        Sets flags so that a <br /> before and/or after the item toAppend
+        are eaten (removed) and appends toAppend to self.result
+        """
+        kpars["eatPreBreak"] = True
+        kpars["eatPostBreak"] = True
+
+        self.outAppend(toAppend, **kpars)
+
+
+    def getOutput(self):
+        return u"".join(self.result)
+
 
     def formatContent(self, word, content, links=None, asXml=False,
             asHtmlPreview=False):
@@ -421,42 +483,90 @@ class HtmlXmlExporter:
                 facename = self.pWiki.configuration.get(
                         "main", "facename_html_preview", u"")
                 if facename:
-                    self.result.append('<font face="%s">' % facename)
+                    self.outAppend('<font face="%s">' % facename)
             
             for nexttok in tokens[1:]:
-                stindex = tok[1]
-                if stindex == -1:  # == no token RE matches
+                styleno = tok[1]
+                if styleno != -1:                
+                    styleno = WikiFormatting.HtmlExportExpressions[styleno][1]
+
+                nextstyleno = nexttok[1]
+                if nextstyleno != -1:
+                    nextstyleno = \
+                            WikiFormatting.HtmlExportExpressions[nextstyleno][1]
+
+                # print "formatContent", styleno, nextstyleno, repr(content[tok[0]:nexttok[0]])
+
+                if styleno == -1:  # == no token RE matches
                     # Normal text, maybe with newlines and indentation to process
                     lines = content[tok[0]:nexttok[0]].split(u"\n")
                     
                     # Test if beginning of lines at beginning of a line in editor
                     if tok[0] > 0 and content[tok[0] - 1] != u"\n":
                         # if not -> output of the first, incomplete, line
-                        self.result.append(escape(lines[0]))
+                        self.outAppend(u"%s" % escape(lines[0]))
                         del lines[0]
                         
-                    # All 'lines' now begin at a new line in the editor
-                    for line in lines:
-                        if line.strip() == u"":
-                            # Handle empty line
-                            self.result.append(u"<br />\n")
-                            continue
+                        if len(lines) >= 1:
+                            # If further lines follow, break line
+                            self.outAppend(u"<br />\n")
+                            
+                            
+                    if len(lines) >= 1:
+                        # All 'lines' now begin at a new line in the editor
+                        # and all but the last end at one
+                        for line in lines[:-1]:
+                            if line.strip() == u"":
+                                # Handle empty line
+                                self.outAppend(u"<br />\n")
+                                continue
+    
+                            line, ind = splitIndent(line)
+                            
+                            while ind < self.statestack[-1][1]:
+                                # Current indentation is less than previous (stored
+                                # on stack) so close open <ul> and <ol>
+                                self.popState()
+                                    
+                            if self.statestack[-1][0] == "normalindent" and \
+                                    ind > self.statestack[-1][1]:
+                                # More indentation than before -> open new <ul> level
+                                self.outEatBreaks(u"<ul>")
+                                self.statestack.append(("normalindent", ind))
+                                self.outAppend(escape(line))
+                                self.outAppend(u"<br />\n")
 
-                        line, ind = splitIndent(line)
-                        
-                        while ind < self.statestack[-1][1]:
-                            # Current indentation is less than previous (stored
-                            # on stack) so close open <ul> and <ol>
-                            self.popState()
+                            elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
+                                self.outAppend(escape(line))
+                                self.outAppend(u"<br />\n")
                                 
-                        if self.statestack[-1][0] == "normalindent" and \
-                                ind > self.statestack[-1][1]:
-                            # More indentation than before -> open new <ul> level
-                            self.result.append(u"<ul>")
-                            self.statestack.append(("normalindent", ind))
-                            self.result.append(u"<br />\n"+escape(line))
-                        elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
-                            self.result.append(u"<br />\n" + escape(line))
+                                
+                        # Handle last line
+                        # Some tokens have own indentation handling
+                        # and last line is empty string in this case,
+                        # do not handle last line if such token follows
+                        if not nextstyleno in \
+                                (WikiFormatting.FormatTypes.Numeric,
+                                WikiFormatting.FormatTypes.Bullet,
+                                WikiFormatting.FormatTypes.Suppress):
+
+                            line = lines[-1]
+                            line, ind = splitIndent(line)
+                            
+                            while ind < self.statestack[-1][1]:
+                                # Current indentation is less than previous (stored
+                                # on stack) so close open <ul> and <ol>
+                                self.popState()
+                                    
+                            if self.statestack[-1][0] == "normalindent" and \
+                                    ind > self.statestack[-1][1]:
+                                # More indentation than before -> open new <ul> level
+                                self.outEatBreaks(u"<ul>")
+                                self.statestack.append(("normalindent", ind))
+                                self.outAppend(escape(line))
+                            elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
+                                self.outAppend(escape(line))
+                        
                             
                     # self.result.append(u"<br />\n")   # TODO <br />  ?
 
@@ -466,43 +576,42 @@ class HtmlXmlExporter:
                 
                 # if a known token RE matches:
                 
-                styleno = WikiFormatting.HtmlExportExpressions[stindex][1]
                 if styleno == WikiFormatting.FormatTypes.Bold:
-                    self.result.append(u"<b>" + escape(tok[2]["boldContent"]) + u"</b>")
+                    self.outAppend(u"<b>" + escape(tok[2]["boldContent"]) + u"</b>")
                 elif styleno == WikiFormatting.FormatTypes.Italic:
-                    self.result.append(u"<i>"+escape(tok[2]["italicContent"]) + u"</i>")
+                    self.outAppend(u"<i>"+escape(tok[2]["italicContent"]) + u"</i>")
                 elif styleno == WikiFormatting.FormatTypes.Heading4:
-                    self.result.append(u"<h4>%s</h4>" % escape(tok[2]["h4Content"]))
+                    self.outEatBreaks(u"<h4>%s</h4>\n" % escape(tok[2]["h4Content"]))
                 elif styleno == WikiFormatting.FormatTypes.Heading3:
-                    self.result.append(u"<h3>%s</h3>" % escape(tok[2]["h3Content"]))
+                    self.outEatBreaks(u"<h3>%s</h3>\n" % escape(tok[2]["h3Content"]))
                 elif styleno == WikiFormatting.FormatTypes.Heading2:
-                    self.result.append(u"<h2>%s</h2>" % escape(tok[2]["h2Content"]))
+                    self.outEatBreaks(u"<h2>%s</h2>\n" % escape(tok[2]["h2Content"]))
                 elif styleno == WikiFormatting.FormatTypes.Heading1:
-                    self.result.append(u"<h1>%s</h1>" % escape(tok[2]["h1Content"]))
+                    self.outEatBreaks(u"<h1>%s</h1>\n" % escape(tok[2]["h1Content"]))
                 elif styleno == WikiFormatting.FormatTypes.HorizLine:
-                    self.result.append(u'<hr size="1" />\n')
+                    self.outEatBreaks(u'<hr size="1" />\n')
                 elif styleno == WikiFormatting.FormatTypes.Script:
                     pass  # Hide scripts                
                 elif styleno == WikiFormatting.FormatTypes.ToDo:
                     if asXml:
-                        self.result.append(u'<todo>%s</todo>' % 
+                        self.outAppend(u'<todo>%s</todo>' % 
                                 escape(tok[2]["todoContent"]))
                     else:
-                        self.result.append(u'<span class="todo">%s</span><br />' % 
+                        self.outAppend(u'<span class="todo">%s</span><br />' % 
                                 escape(tok[2]["todoContent"]))
                 elif styleno == WikiFormatting.FormatTypes.Property:
                     if asXml:
-                        self.result.append( u'<property name="%s" value="%s"/>' % 
+                        self.outAppend( u'<property name="%s" value="%s"/>' % 
                                 (escape(tok[2]["propertyName"]),
                                 escape(tok[2]["propertyValue"])) )
                     else:
-                        self.result.append( u'<span class="property">[%s: %s]</span>' % 
+                        self.outAppend( u'<span class="property">[%s: %s]</span>' % 
                                 (escape(tok[2]["propertyName"]),
                                 escape(tok[2]["propertyValue"])) )
                 elif styleno == WikiFormatting.FormatTypes.Url:
                     link = content[tok[0]:nexttok[0]]
                     if asXml:
-                        self.result.append(u'<link type="href">%s</link>' % 
+                        self.outAppend(u'<link type="href">%s</link>' % 
                                 escape(link))
                     else:
                         lowerLink = link.lower()
@@ -515,10 +624,10 @@ class HtmlXmlExporter:
                                 # than Python
                                 p = urllib.url2pathname(link)  # TODO Relative URLs
                                 link = wxFileSystem.FileNameToURL(p)
-                            self.result.append(u'<img src="%s" border="0" />' % 
+                            self.outAppend(u'<img src="%s" border="0" />' % 
                                     escape(link))
                         else:
-                            self.result.append(u'<a href="%s">%s</a>' %
+                            self.outAppend(u'<a href="%s">%s</a>' %
                                     (escape(link), escape(link)))
                 elif styleno == WikiFormatting.FormatTypes.WikiWord or \
                         styleno == WikiFormatting.FormatTypes.WikiWord2:
@@ -528,15 +637,15 @@ class HtmlXmlExporter:
                     
                     if link:
                         if asXml:
-                            self.result.append(u'<link type="wikiword">%s</link>' % 
+                            self.outAppend(u'<link type="wikiword">%s</link>' % 
                                     escape(word))
                         else:
-                            if word.startswith("["):
+                            if word.startswith(u"["):
                                 word = word[1:len(word)-1]
-                            self.result.append(u'<a href="%s">%s</a>' %
+                            self.outAppend(u'<a href="%s">%s</a>' %
                                     (link, word))
                     else:
-                        self.result.append(word)
+                        self.outAppend(word)
                 elif styleno == WikiFormatting.FormatTypes.Numeric:
                     # Numeric bullet
                     numbers = len(tok[2]["preLastNumeric"].split(u"."))
@@ -554,16 +663,17 @@ class HtmlXmlExporter:
 
                     if ind > self.statestack[-1][1] or \
                             self.statestack[-1][0] != "ol":
-                        self.result.append(u"<ol>")
+                        self.outEatBreaks(u"<ol>")
                         self.statestack.append(("ol", ind))
                         self.numericdeepness += 1
 
                     while numbers > self.numericdeepness:
-                        self.result.append(u"<ol>")
+                        self.outEatBreaks(u"<ol>")
                         self.statestack.append(("ol", ind))
                         self.numericdeepness += 1
                         
-                    self.result.append(u"<li />")
+                    self.eatPreBreak(u"<li />")
+
                 elif styleno == WikiFormatting.FormatTypes.Bullet:
                     # Numeric bullet
                     ind = splitIndent(tok[2]["indentBullet"])[1]
@@ -578,18 +688,18 @@ class HtmlXmlExporter:
 
                     if ind > self.statestack[-1][1] or \
                             self.statestack[-1][0] != "ul":
-                        self.result.append(u"<ul>")
+                        self.outEatBreaks(u"<ul>")
                         self.statestack.append(("ul", ind))
 
-                    self.result.append(u"<li />")
+                    self.eatPreBreak(u"<li />")
                 elif styleno == WikiFormatting.FormatTypes.Suppress:
                     while self.statestack[-1][0] != "normalindent":
                         self.popState()
-                    self.result.append(escape(tok[2]["suppressContent"]))
+                    self.outAppend(escape(tok[2]["suppressContent"]))
                 elif styleno == WikiFormatting.FormatTypes.Default:
 #                     while self.statestack[-1][0] != "normalindent":
 #                         self.popState()
-                    self.result.append(escape(content[tok[0]:nexttok[0]]))
+                    self.outAppend(escape(content[tok[0]:nexttok[0]]))
 
                 tok = nexttok
                 
@@ -597,10 +707,9 @@ class HtmlXmlExporter:
                 self.popState()
                 
             if asHtmlPreview and facename:
-                self.result.append('</font>')
+                self.outAppend('</font>')
 
-
-        return u"".join(self.result)
+        return self.getOutput()
 
 
 class TextExporter:
@@ -666,7 +775,7 @@ class TextExporter:
             
 
     def export(self, pWiki, wikiData, wordList, exportType, exportDest,
-            addopt):
+            compatFilenames, addopt):
         """
         Run export operation.
         
@@ -675,17 +784,19 @@ class TextExporter:
         wordList -- Sequence of wiki words to export
         exportType -- string tag to identify how to export
         exportDest -- Path to destination directory or file to export to
+        compatFilenames -- Should the filenames be encoded to be lowest
+                           level compatible
         addopt -- additional options returned by getAddOpt()
         """
         self.pWiki = pWiki
         self.wikiData = wikiData # self.pWiki.wikiData
         self.wordList = wordList
         self.exportDest = exportDest
-        
-#         if compatFilenames:
-#             self.convertFilename = unicodeToCompFilename
-#         else:
-#             self.convertFilename = lambda s: s    # lambda s: mbcsEnc(s, "replace")[0]
+       
+        if compatFilenames:
+            self.convertFilename = unicodeToCompFilename
+        else:
+            self.convertFilename = lambda s: s    # lambda s: mbcsEnc(s, "replace")[0]
          
         # 0:System standard, 1:utf-8 with BOM, 2: utf-8 without BOM
         encoding = addopt[0]

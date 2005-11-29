@@ -3,8 +3,8 @@
 import sys, os, traceback, os.path
 os.stat_float_times(True)
 
-# from pwiki import srePersistent
-# srePersistent.loadCodeCache()
+from pwiki import srePersistent
+srePersistent.loadCodeCache()
 
 
 import pwiki.urllib_red as urllib
@@ -80,7 +80,7 @@ exception = None
 try:
     app = App(0)
     app.MainLoop()
-#     srePersistent.saveCodeCache()
+    srePersistent.saveCodeCache()
 
     
 except Exception, e:

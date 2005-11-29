@@ -21,10 +21,12 @@
 from sre_compile import *
 from sre_compile import _code
 
-import sre
+import sys, sre
 sub = sre.sub
 
 import _sre
+
+from os.path import join, dirname, abspath, exists
 
 import cPickle as pickle
 
@@ -38,74 +40,48 @@ X = VERBOSE = SRE_FLAG_VERBOSE # ignore whitespace and comments
 
 
 _code_cache = {}
-_code_cache_dirty = False
-
-
-# try:
-#     import srePersistentCache
-#     _code_cache = srePersistentCache.data
-# except:
-#     print "sre except1"
-#     pass
+# _code_cache_dirty = False
 
 
 # TODO Check date
 def loadCodeCache():
     global _code_cache
     try:
-#        print "loadCodeCache1"
-        fp = open("regexpr.cache", "rb")
+        fp = open(join(dirname(abspath(sys.argv[0])), "regexpr.cache"), "rb")
         cache = pickle.load(fp)
         fp.close()
         _code_cache = cache
-#        print "loadCodeCache2", len(_code_cache), repr(_code_cache.keys())
-
     except:
         pass
 
 def saveCodeCache():
-    global _code_cache, _code_cache_dirty
+    global _code_cache  # , _code_cache_dirty
     
-    if not _code_cache_dirty:
-        return
+#     if not _code_cache_dirty:
+#         return
 
     try:
-        fp = open("regexpr.cache", "wb")
+        filename = join(dirname(abspath(sys.argv[0])), "regexpr.cache")
+        if exists(filename):
+            # After initial creation cache is never updated to avoid
+            # collecting all search strings entered by the user
+            return
+
+        fp = open(filename, "wb")
         pickle.dump(_code_cache, fp, pickle.HIGHEST_PROTOCOL)
         fp.close()
     except:
         pass
 
 
-# def saveCodeCache():
-#     global _code_cache, _code_cache_dirty
-#     print "saveCodeCache1"
-#     if not _code_cache_dirty:
-#         return
-#         
-#     try:
-#         print "saveCodeCache2"
-#         fp = open("srePersistentCache.py", "w")
-#         fp.write("data = ")
-#         fp.write(repr(_code_cache))
-#         fp.close()
-#         print "saveCodeCache5"
-#     except:
-#         pass
-    
-
-
 def compile(p, flags=0):
-    global _code_cache, _code_cache_dirty
+    global _code_cache  # , _code_cache_dirty
     # internal: convert pattern list to internal format
     
     cachekey = (p, flags)   # type(p),
-#    print "compile1", _code_cache.has_key(cachekey)
     pp, code = _code_cache.get(cachekey, (None, None))
-#    print "compile3", repr(cachekey), repr((pp, code))
 
     if code is None:
-#         print "compile2", repr(p)[:70]
 
         if isstring(p):
             import sre_parse
@@ -118,13 +94,11 @@ def compile(p, flags=0):
  
         code = _code(pp, flags)
     
-        # print code
-    
         assert pp.pattern.groups <= 100,\
                "sorry, but this version only supports 100 named groups"
 
         _code_cache[cachekey] = (pp, code)
-        _code_cache_dirty = True
+        # _code_cache_dirty = True
 
     # map in either direction
     groupindex = pp.pattern.groupdict

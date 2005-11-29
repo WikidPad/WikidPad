@@ -1,4 +1,3 @@
-import re
 import locale
 import string
 
@@ -125,6 +124,8 @@ RevPropertyValue     = re.compile(ur"^([\w\-\_ \t]*?)([ \t]*[=:][ \t]*)([a-zA-Z0
 # script blocks
 ScriptRE        = re.compile(u"\<%(.*?)%\>", re.DOTALL)
 
+# Auto generated area
+AutoGenAreaRE = re.compile(ur"^([ \t]*\<\<[ \t]+)([^\n]+\n)(.*?)^([ \t]*\>\>[ \t]*\n)", re.DOTALL | re.LOCALE | re.MULTILINE)
 # todos, non-capturing
 ## ToDoRE          = re.compile(u"^\s*(?:todo|action|track|issue|question|project)\\.?[^\\:\\s]*:", re.DOTALL | re.LOCALE | re.MULTILINE)
 ToDoRE          = re.compile(ur"^\s*(?:todo|action|track|issue|question|project)(?:\.[^:\s]+)?:",

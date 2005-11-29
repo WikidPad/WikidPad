@@ -6,7 +6,7 @@ from time import localtime, time, strftime
 from wxPython.wx import *
 from wxPython.stc import *
 from wxPython.html import *
-from wxHelper import GUI_ID
+from wxHelper import GUI_ID, setWindowPos, setWindowSize
 
 from MiscEvent import MiscEventSourceMixin
 import Configuration
@@ -239,35 +239,40 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
             self.wikiHistory = history.split(u";")
 
         # resize the window to the last position/size
-        screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
-        screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
+        setWindowSize(self, (self.configuration.getint("main", "size_x"),
+                self.configuration.getint("main", "size_y")))
+        setWindowPos(self, (self.configuration.getint("main", "pos_x"),
+                self.configuration.getint("main", "pos_y")))
 
-        sizeX = self.configuration.getint("main", "size_x")
-        sizeY = self.configuration.getint("main", "size_y")
-
-        # don't let the window be > than the size of the screen
-        if sizeX > screenX:
-            sizeX = screenX-20
-        if sizeY > screenY:
-            currentY = screenY-20
-
-        # set the size
-        self.SetSize(wxSize(sizeX, sizeY))
-
-        currentX = self.configuration.getint("main", "pos_x")
-        currentY = self.configuration.getint("main", "pos_y")
-
-        # fix any crazy screen positions
-        if currentX < 0:
-            currentX = 10
-        if currentY < 0:
-            currentY = 10
-        if currentX > screenX:
-            currentX = screenX-100
-        if currentY > screenY:
-            currentY = screenY-100
-
-        self.SetPosition(wxPoint(currentX, currentY))
+#         screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
+#         screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
+# 
+#         sizeX = self.configuration.getint("main", "size_x")
+#         sizeY = self.configuration.getint("main", "size_y")
+# 
+#         # don't let the window be > than the size of the screen
+#         if sizeX > screenX:
+#             sizeX = screenX-20
+#         if sizeY > screenY:
+#             currentY = screenY-20
+# 
+#         # set the size
+#         self.SetSize(wxSize(sizeX, sizeY))
+# 
+#         currentX = self.configuration.getint("main", "pos_x")
+#         currentY = self.configuration.getint("main", "pos_y")
+# 
+#         # fix any crazy screen positions
+#         if currentX < 0:
+#             currentX = 10
+#         if currentY < 0:
+#             currentY = 10
+#         if currentX > screenX:
+#             currentX = screenX-100
+#         if currentY > screenY:
+#             currentY = screenY-100
+# 
+#         self.SetPosition(wxPoint(currentX, currentY))
 
         # Should reduce resources usage (less icons)
         # Do not set self.lowResources after initialization here!
@@ -287,10 +292,9 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         # are indentationGuides enabled
         self.indentationGuides = self.configuration.getboolean("main", "indentation_guides")
 
-        # set the locale  # TODO Why?
-        locale = wxLocale()
-        self.locale = locale.GetCanonicalName()
-
+#         # set the locale  # TODO Why?
+#         locale = wxLocale()
+#         self.locale = locale.GetCanonicalName()
 
         # get the default font for the editor
         self.defaultEditorFont = self.configuration.get("main", "font",
@@ -1601,7 +1605,7 @@ These are your default global settings.
         """
         # make sure the root has a relationship to the ScratchPad
         # self.currentWikiPage.addChildRelationship("ScratchPad")
-        self.tree.setRootByPage(self.currentWikiPage)
+        self.tree.setRootByWord(self.currentWikiWord)
 
 
     def closeWiki(self, saveState=True):
@@ -1713,7 +1717,7 @@ These are your default global settings.
         self.fireMiscEventProps(p2)
 
         # now fill the text into the editor
-        self.editor.SetText(content)
+        self.editor.setTextAgaUpdated(content)
 
         # see if there is a saved position for this page
         lastPos = self.lastCursorPositionInPage.get(wikiWord, 0)
@@ -1757,8 +1761,8 @@ These are your default global settings.
         error = False
         while 1:
             try:
-                page.save(text)
-                page.update(text)   # ?
+                page.save(self.editor.cleanAutoGenAreas(text))
+                page.update(self.editor.updateAutoGenAreas(text))   # ?
                 error = False
                 break
             except Exception, e:
@@ -1789,7 +1793,8 @@ These are your default global settings.
             self.hooks.deletedWikiWord(self, self.currentWikiWord)
             
             p2 = evtprops.copy()
-            p2["deleted current page"] = True
+            p2["deleted page"] = True
+            p2["wikiWord"] = self.currentWikiWord
             self.fireMiscEventProps(p2)
             
             self.pageHistory.goAfterDeletion()
@@ -1881,18 +1886,10 @@ These are your default global settings.
         words -- Sequence of the words to choose from
         motionType -- motion type to set in openWikiPage if word was choosen
         """
-        wordsgui = map(uniToGui, words)
-        result = wxGetSingleChoiceIndex(uniToGui(title), uniToGui(title),
-                wordsgui, self)
-                
-        if result == -1:
-            return
-            
-        wikiWord = words[result]
-        if len(wikiWord) > 0:
-            self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True,
-                    motionType=motionType)
-            # self.editor.SetFocus()
+        dlg = ChooseWikiWordDialog(self, -1, words, motionType, title)
+        dlg.CenterOnParent(wxBOTH)
+        dlg.ShowModal()
+        dlg.Destroy()
 
 
     def viewParents(self, ofWord):
@@ -1926,7 +1923,7 @@ These are your default global settings.
                                    u"History",
                                    u"History",
                                    hist,
-                                   wxOK|wxCANCEL)
+                                   wxCHOICEDLG_STYLE|wxOK|wxCANCEL)
         
         historyLen = len(hist)
         position = histpos + posDelta - 1
@@ -1937,82 +1934,9 @@ These are your default global settings.
 
         dlg.SetSelection(position)
         if dlg.ShowModal() == wxID_OK:
-            # print "viewHistory1"
             self.pageHistory.goInHistory(dlg.GetSelection() - (histpos - 1))
-            # self.findCurrentWordInTree()
-        # print "viewHistory2"
+
         dlg.Destroy()
-
-
-#     def addToHistory(self, wikiWord):
-#         if wikiWord == self.getCurrentWikiWordFromHistory():
-#             return
-# 
-#         # if the pointer is on the middle of the array right now
-#         # slice the array at the pointer and then add
-#         if self.historyPosition < len(self.wikiWordHistory)-1:
-#             self.wikiWordHistory = self.wikiWordHistory[0:self.historyPosition+1]
-# 
-#         # add the item to history
-#         self.wikiWordHistory.append(wikiWord)
-# 
-#         # only keep 25 items
-#         if len(self.wikiWordHistory) > 25:
-#             self.wikiWordHistory.pop(0)
-# 
-#         # set the position of the history pointer
-#         self.historyPosition = len(self.wikiWordHistory)-1
-# 
-# 
-#     def goInHistory(self, posDelta=0):
-#         if (posDelta < 0 and self.historyPosition > 0) or \
-#                 (posDelta > 0 and self.historyPosition < (len(self.wikiWordHistory)-1)):
-#             self.historyPosition = self.historyPosition + posDelta
-#         wikiWord = self.wikiWordHistory[self.historyPosition]
-#         self.openWikiPage(wikiWord, False)
-#         self.editor.SetFocus()
-# 
-#     def goBackInHistory(self, howMany=1):
-#         if self.historyPosition > 0:
-#             self.historyPosition = self.historyPosition - howMany
-#             wikiWord = self.wikiWordHistory[self.historyPosition]
-#             self.openWikiPage(wikiWord, False)
-# 
-# 
-#     def goForwardInHistory(self):
-#         if self.historyPosition < len(self.wikiWordHistory)-1:
-#             self.historyPosition = self.historyPosition + 1
-#             wikiWord = self.wikiWordHistory[self.historyPosition]
-#             self.openWikiPage(wikiWord, False)
-# 
-# 
-# 
-#     def getCurrentWikiWordFromHistory(self):
-#         if len(self.wikiWordHistory) > 0:
-#             return self.wikiWordHistory[self.historyPosition]
-#         else:
-#             return None
-
-
-#     def viewHistory(self, posDelta=0):
-#         dlg = wxSingleChoiceDialog(self,
-#                                    u"History",
-#                                    u"History",
-#                                    self.wikiWordHistory,
-#                                    wxOK|wxCANCEL)
-# 
-#         historyLen = len(self.wikiWordHistory)
-#         position = self.historyPosition+posDelta
-#         if (position < 0):
-#             position = 0
-#         elif (position >= historyLen):
-#             position = historyLen-1
-# 
-#         dlg.SetSelection(position)
-#         if dlg.ShowModal() == wxID_OK:
-#             self.pageHistory.goInHistory(dlg.GetSelection() - self.historyPosition)
-#             self.findCurrentWordInTree()
-#         dlg.Destroy()
 
 
     def updateRelationships(self):
@@ -2256,7 +2180,7 @@ These are your default global settings.
         if not wikiWord:
             wikiWord = self.currentWikiWord
 
-        if wikiWord == "ScratchPad":
+        if wikiWord == u"ScratchPad":
             self.displayErrorMessage(u"The scratch pad cannot be deleted")
             return
 
@@ -2409,7 +2333,7 @@ These are your default global settings.
             expclass, exptype, addopt = self.EXPORT_PARAMS[typ]
             
             expclass().export(self, self.wikiData, wordList, exptype, dest,
-                    addopt)
+                    False, addopt)
 
 
             self.configuration.set("main", "last_active_dir", dest)
@@ -2481,8 +2405,8 @@ These are your default global settings.
         return title
 
 
-    def isLocaleEnglish(self):
-        return self.locale.startswith('en_')
+#     def isLocaleEnglish(self):
+#         return self.locale.startswith('en_')
 
     # ----------------------------------------------------------------------------------------
     # Event handlers from here on out.
@@ -2528,8 +2452,10 @@ These are your default global settings.
             self.recentWikisMenu.Remove(event.GetId())
 
 
-    def OnWikiPageUpdate(self, wikiPage):
-        self.tree.buildTreeForWord(wikiPage.wikiWord)    # self.currentWikiWord)
+    def informWikiPageUpdate(self, wikiPage):
+        # self.tree.buildTreeForWord(wikiPage.wikiWord)    # self.currentWikiWord)
+        self.fireMiscEventProps({"updated current page props": None,
+                "wikiPage": wikiPage})
 
 
     def OnFind(self, evt, next=False, replace=False, replaceAll=False):
@@ -2539,10 +2465,8 @@ These are your default global settings.
         et = evt.GetEventType()
         flags = evt.GetFlags()
 
-        if flags == 3 or flags == 7:
-            matchWholeWord = True
-        if flags == 5 or flags == 7:
-            matchCase = True
+        matchWholeWord = not not (flags & wxFR_WHOLEWORD)
+        matchCase = not not (flags & wxFR_MATCHCASE)
 
         findString = guiToUni(evt.GetFindString())
         if matchWholeWord:
@@ -2573,6 +2497,7 @@ These are your default global settings.
         evt.GetDialog().Destroy()
 
 
+    # TODO decouple save and update
     def OnIdle(self, evt):
         if not self.configuration.getboolean("main", "auto_save"):  # self.autoSave:
             return
@@ -2644,7 +2569,7 @@ These are your default global settings.
 class SearchDialog(wxDialog):
     def __init__(self, pWiki, ID, title="Search Wiki",
                  pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D):
+                 style=wxNO_3D|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER):
         wxDialog.__init__(self, pWiki, ID, title, pos, size, style)
         self.pWiki = pWiki
 

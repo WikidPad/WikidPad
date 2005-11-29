@@ -6,7 +6,6 @@ creating diff information for plain byte sequences
 """
 
 
-
 import difflib, codecs
 
 import threading
@@ -31,7 +30,7 @@ utf8Dec = codecs.getdecoder("utf-8")
 utf8Reader = codecs.getreader("utf-8")
 utf8Writer = codecs.getwriter("utf-8")
 
-if isOSX():
+if isOSX():      # TODO Linux
     # generate dependencies for py2app
     import encodings.mac_roman
     mbcsEnc = codecs.getencoder("mac_roman")
@@ -72,6 +71,27 @@ else:
         return mbcsDec(text, "replace")[0]
 
 
+def unicodeToCompFilename(us):
+    """
+    Encode a unicode filename to a filename compatible to (hopefully)
+    any filesystem encoding by converting unicode to '=xx' for
+    characters up to 255 and '$xxxx' above. Each 'x represents a hex
+    character
+    """
+    result = []
+    for c in us:
+        if ord(c) > 255:
+            result.append("$%04x" % ord(c))
+            continue
+        if c in u"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"+\
+                u"{}[]()+-*_,.%":   # Allowed characters
+            result.append(str(c))
+            continue
+        
+        result.append("=%02x" % ord(c))
+        
+    return "".join(result)
+        
 def strToBool(s, default=False):
     """
     Try to interpret string (or unicode) s as
@@ -114,7 +134,7 @@ def wikiWordToLabel(word):
     """
     Strip '[' and ']' if non camelcase word and return it
     """
-    if word.startswith("["):
+    if word.startswith(u"[") and word.endswith(u"]"):
         return word[1:-1]
     return word
 
@@ -126,6 +146,37 @@ def revStr(s):
     s = list(s)
     s.reverse()
     return u"".join(s)
+
+
+# ---------- Support for serializing values into binary data (and back) ----------
+# Especially used in SearchAndReplace.py, class SearchReplaceOperation
+
+def boolToChar(b):
+    if b:
+        return "1"
+    else:
+        return "\0"
+        
+def charToBool(c):
+    return c != "\0"
+
+
+def strToBin(s):
+    """
+    s -- String to convert to binary (NOT unicode!)
+    """
+    return pack(">I", len(s)) + s   # Why big-endian? Why not?
+    
+def binToStr(b):
+    """
+    Returns tuple (s, br) with string s and rest of the binary data br
+    """
+    l = unpack(">I", b[:4])[0]
+    s = b[4 : 4+l]
+    br = b[4+l : ]
+    return (s, br)
+
+
 
 
 # ---------- Breaking text into tokens ----------

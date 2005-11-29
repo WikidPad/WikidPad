@@ -521,8 +521,11 @@ class WikiData:
     def getAliasesWikiWord(self, alias):
         """
         If alias is an alias for another word, return that,
-        otherwise return None
+        otherwise return alias itself
         """
+        if not self.isAlias(alias):
+            return alias
+
         aliases = self.getWordsWithPropertyValue("alias", alias)
         if len(aliases) > 0:
             return aliases[0]
@@ -871,38 +874,19 @@ class WikiPage:
         self.updateDirty = False
 
         if alertPWiki:
-            self.wikiData.pWiki.OnWikiPageUpdate(self)
-
-#     def inIgnoreBlock(self, ignoreBlocks, start, end):
-#         "true if start to end intersects with an existing applied style"
-#         for (ignoreStart, ignoreEnd) in ignoreBlocks:
-#             if start >= ignoreStart and start <= ignoreEnd:
-#                 return True
-#             if end <= ignoreEnd and end >= ignoreStart:
-#                 return True
-#             if start < ignoreStart and end > ignoreEnd:
-#                 return True
-#         return False
+            self.wikiData.pWiki.informWikiPageUpdate(self)
 
     def addChildRelationship(self, toWord):
         self.wikiData.addRelationship(self.wikiWord, toWord)
         
-#         if toWord not in self.childRelations:
-#             if self.wikiData.addRelationship(self.wikiWord, toWord):
-#                 self.childRelations.append(toWord)
-
     def setProperty(self, key, value):
         self.wikiData.setProperty(self.wikiWord, key, value)
         self.props = None        
         
-#         if self.wikiData.setProperty(self.wikiWord, key, value):
-#             self.addProperty(key, value)
-
     def addTodo(self, todo):
         if todo not in self.getTodos():
             self.wikiData.addTodo(self.wikiWord, todo)
             self.todos.append(todo)            
-            # if self.wikiData.addTodo(self.wikiWord, todo):
 
 
     def deleteChildRelationships(self):
