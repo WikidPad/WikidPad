@@ -23,6 +23,7 @@ WikidPadHelp/data/REGISTRATION.grl -text
 WikidPadHelp/data/RebuildTheWiki.wiki -text
 WikidPadHelp/data/RenamingWikiWords.wiki -text
 WikidPadHelp/data/SEARCH_VIEWS.grl -text
+WikidPadHelp/data/SETTINGS.grl -text
 WikidPadHelp/data/ScratchPad.wiki -text
 WikidPadHelp/data/SearchingTheWiki.wiki -text
 WikidPadHelp/data/TODOS.grl -text
@@ -595,12 +596,15 @@ lib/gadfly/sql.py -text
 lib/gadfly/store.py -text
 lib/pwiki/AdditionalDialogs.py -text
 lib/pwiki/Configuration.py -text
+lib/pwiki/DbStructure.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
 lib/pwiki/MiscEvent.py -text
 lib/pwiki/PageHistory.py -text
 lib/pwiki/PersonalWikiFrame.py -text
 lib/pwiki/PluginManager.py -text
+lib/pwiki/SearchAndReplace.py -text
+lib/pwiki/SearchAndReplaceDialogs.py -text
 lib/pwiki/StringOps.py -text
 lib/pwiki/WikiData.py -text
 lib/pwiki/WikiExceptions.py -text

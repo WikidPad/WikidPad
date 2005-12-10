@@ -8,7 +8,53 @@ FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord2", "WikiWord", "A
                                           "Bold", "Italic", "Heading4", "Heading3", "Heading2", "Heading1",
                                           "Url", "Script", "Property", "ToDo",
                                           "HorizLine", "Bullet", "Numeric",
-                                          "Suppress"], 1)
+                                          "Suppress", "Footnote"], 1)
+
+
+def compileCombinedRegex(expressions):
+    """
+    expressions -- List of tuples (r, s) where r is single compiled RE,
+            s is a number from FormatTypes
+    returns: compiled combined RE to feed into StringOps.Tokenizer
+    """ 
+    result = []
+    for i in range(len(expressions)):
+        r, s = expressions[i]
+        result.append((u"(?P<style%i>" % i) + r.pattern + u")")
+        
+    return re.compile(u"|".join(result),
+            re.DOTALL | re.UNICODE | re.MULTILINE)
+    
+    
+def _buildExpressionsUnindex(expressions, modifier):
+    """
+    Create from an expressions list (see compileCombinedRegex) a tuple
+    of format types so that result[i] is the "right" number from
+    FormatTypes when i is the index returned as second element of a tuple
+    in the tuples list returned by the Tokenizer.
+
+    In fact it is mainly the second tuple item from each expressions
+    list element.
+    modifier -- Dict. If a format type in expressions matches a key
+            in modifier, it is replaced by its value in the result
+    """
+    
+    return [modifier.get(t, t) for re, t in expressions]
+    
+
+def getExpressionsFormatList(expressions, withNonCamelCase, footnotesAsWws):
+    modifier = {FormatTypes.WikiWord2: FormatTypes.WikiWord}
+    
+    if not withNonCamelCase:
+        modifier[FormatTypes.WikiWord] = FormatTypes.Default
+    
+    if footnotesAsWws:  # Footnotes (e.g. [42]) as wiki words
+        modifier[FormatTypes.Footnote] = FormatTypes.WikiWord
+    else:
+        modifier[FormatTypes.Footnote] = FormatTypes.Default
+        
+    return _buildExpressionsUnindex(expressions, modifier)
+
 
 def initialize(wikiSyntax):
     import WikiFormatting as ownmodule
@@ -19,16 +65,13 @@ def initialize(wikiSyntax):
 
     
     global FormatExpressions
-    global CombinedSyntaxHighlightWithCamelCaseRE
-    global CombinedSyntaxHighlightWithoutCamelCaseRE
+    global CombinedSyntaxHighlightRE
     global UpdateExpressions
-    global CombinedUpdateWithCamelCaseRE
-    global CombinedUpdateWithoutCamelCaseRE
+    global CombinedUpdateRE
     global HtmlExportExpressions
-    global CombinedHtmlExportWithCamelCaseRE
-    global CombinedHtmlExportWithoutCamelCaseRE
+    global CombinedHtmlExportRE
 
-# Reordered version, most specific first
+# Most specific first
 
     FormatExpressions = [
             (SuppressHighlightingRE, FormatTypes.Default),
@@ -36,7 +79,7 @@ def initialize(wikiSyntax):
             (UrlRE, FormatTypes.Url),
             (ToDoRE, FormatTypes.ToDo),
             (PropertyRE, FormatTypes.Property),
-            (FootnoteRE, FormatTypes.Default),
+            (FootnoteRE, FormatTypes.Footnote),
             (WikiWordEditorRE2, FormatTypes.WikiWord2),
             (WikiWordEditorRE, FormatTypes.WikiWord),
             (BoldRE, FormatTypes.Bold),
@@ -46,54 +89,17 @@ def initialize(wikiSyntax):
             (Heading2RE, FormatTypes.Heading2),
             (Heading1RE, FormatTypes.Heading1)
             ]
-
-    # Build combined regexps
-    WithCamelCase = []
-    WithoutCamelCase = []
-    for i in range(len(FormatExpressions)):
-        r, s = FormatExpressions[i]
-#     for r, s in FormatExpressions:
-        WithCamelCase.append((u"(?P<style%i>" % i) + r.pattern + u")")
-        if not s is FormatTypes.WikiWord:
-            WithoutCamelCase.append((u"(?P<style%i>" % i) + r.pattern + u")")
-
-
-    CombinedSyntaxHighlightWithCamelCaseRE = \
-            re.compile(u"|".join(WithCamelCase),
-                    re.DOTALL | re.UNICODE | re.MULTILINE)
-    CombinedSyntaxHighlightWithoutCamelCaseRE = \
-            re.compile(u"|".join(WithoutCamelCase),
-                    re.DOTALL | re.UNICODE | re.MULTILINE)
-    
-
+            
     UpdateExpressions = [
             (SuppressHighlightingRE, FormatTypes.Default),
             (ScriptRE, FormatTypes.Script),
             (UrlRE, FormatTypes.Url),
             (ToDoREWithContent, FormatTypes.ToDo),
             (PropertyRE, FormatTypes.Property),
-            (FootnoteRE, FormatTypes.Default),
+            (FootnoteRE, FormatTypes.Footnote),
             (WikiWordRE2, FormatTypes.WikiWord2),
             (WikiWordRE, FormatTypes.WikiWord),
             ]
-
-    # Build combined regexps
-    WithCamelCase = []
-    WithoutCamelCase = []
-    for i in range(len(UpdateExpressions)):
-        r, s = UpdateExpressions[i]
-#     for r, s in FormatExpressions:
-        WithCamelCase.append((u"(?P<style%i>" % i) + r.pattern + u")")
-        if not s is FormatTypes.WikiWord:
-            WithoutCamelCase.append((u"(?P<style%i>" % i) + r.pattern + u")")
-
-    CombinedUpdateWithCamelCaseRE = \
-            re.compile(u"|".join(WithCamelCase),
-                    re.DOTALL | re.UNICODE | re.MULTILINE)
-    CombinedUpdateWithoutCamelCaseRE = \
-            re.compile(u"|".join(WithoutCamelCase),
-                    re.DOTALL | re.UNICODE | re.MULTILINE)
-
 
     HtmlExportExpressions = [
             (SuppressHighlightingRE, FormatTypes.Suppress),
@@ -101,7 +107,7 @@ def initialize(wikiSyntax):
             (UrlRE, FormatTypes.Url),
             (ToDoREWithContent, FormatTypes.ToDo),
             (PropertyRE, FormatTypes.Property),
-            (FootnoteRE, FormatTypes.Default),
+            (FootnoteRE, FormatTypes.Footnote),
             (WikiWordRE2, FormatTypes.WikiWord2),
             (WikiWordRE, FormatTypes.WikiWord),
             (BoldRE, FormatTypes.Bold),
@@ -115,23 +121,9 @@ def initialize(wikiSyntax):
             (NumericBulletRE, FormatTypes.Numeric)
             ]
             
-    # Build combined regexps
-    WithCamelCase = []
-    WithoutCamelCase = []
-    for i in range(len(HtmlExportExpressions)):
-        r, s = HtmlExportExpressions[i]
-#     for r, s in FormatExpressions:
-        WithCamelCase.append((u"(?P<style%i>" % i) + r.pattern + u")")
-        if not s is FormatTypes.WikiWord:
-            WithoutCamelCase.append((u"(?P<style%i>" % i) + r.pattern + u")")
-
-    CombinedHtmlExportWithCamelCaseRE = \
-            re.compile(u"|".join(WithCamelCase),
-                    re.DOTALL | re.UNICODE | re.MULTILINE)
-    CombinedHtmlExportWithoutCamelCaseRE = \
-            re.compile(u"|".join(WithoutCamelCase),
-                    re.DOTALL | re.UNICODE | re.MULTILINE)
-
+    CombinedSyntaxHighlightRE = compileCombinedRegex(FormatExpressions)
+    CombinedUpdateRE = compileCombinedRegex(UpdateExpressions)
+    CombinedHtmlExportRE = compileCombinedRegex(HtmlExportExpressions)
 
 
 
@@ -158,7 +150,7 @@ def isWikiWord(word):
             FootnoteRE.match(word))
  
 
-def normalizeWikiWord(word):
+def normalizeWikiWord(word, footnotesAsWws):
     """
     Try to normalize text to a valid wiki word and return it or None
     if it can't be normalized.
@@ -166,9 +158,9 @@ def normalizeWikiWord(word):
     if WikiWordRE.match(word):
         return word
         
-    if FootnoteRE.match(word):
+    if not footnotesAsWws and FootnoteRE.match(word):
         return None
-        
+
     if WikiWordRE2.match(word):
         if WikiWordRE.match(word[1:-1]):
             # If word is '[WikiWord]', return 'WikiWord' instead

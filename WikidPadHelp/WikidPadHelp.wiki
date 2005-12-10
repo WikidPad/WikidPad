@@ -3,5 +3,6 @@ data_dir = data
 
 [main]
 last_wiki_word = WikidPadHelp
+footnotes_as_wikiwords = False
 wiki_name = WikidPadHelp
 

@@ -148,6 +148,23 @@ def revStr(s):
     return u"".join(s)
 
 
+## Copied from xml.sax.saxutils and modified to reduce dependencies
+def escapeHtml(data):
+    """
+    Escape &, <, and > in a unicode string of data.
+    """
+
+    # must do ampersand first
+
+#     data = data.replace(u"&", u"&amp;")
+#     data = data.replace(u">", u"&gt;")
+#     data = data.replace(u"<", u"&lt;")
+#     data = data.replace(u"\n", u"<br />")   # ?
+#     return data
+    return data.replace(u"&", u"&amp;").replace(u">", u"&gt;").\
+            replace(u"<", u"&lt;").replace(u"\n", u"<br />")
+
+
 # ---------- Support for serializing values into binary data (and back) ----------
 # Especially used in SearchAndReplace.py, class SearchReplaceOperation
 
@@ -226,39 +243,6 @@ class Tokenizer:
                 break
                 
         return result
-
-
-
-# def processPageUpdate(text, tokenizer):
-#         tokens = tokenizer.tokenize(text, sync=True)
-#         
-#         newTodos = []
-#         newWords = []
-#         newProps = []
-# 
-#         if len(tokens) >= 2:
-#             lasttok = tokens[0]
-#             
-#             for tok in tokens[1:]:
-#                 stindex = lasttok[1]
-#                 if stindex == -1:
-#                     styleno = WikiFormatting.FormatTypes.Default
-#                 else:
-#                     styleno = WikiFormatting.UpdateExpressions[stindex][1]
-# 
-#                 if styleno == WikiFormatting.FormatTypes.ToDo:
-#                     newTodos.append(lasttok[2]("todoContent"))
-#                 elif styleno == WikiFormatting.FormatTypes.WikiWord2:
-#                     newWords.append(text[lasttok[0]:tok[0]])
-#                 elif styleno == WikiFormatting.FormatTypes.WikiWord:
-#                     newWords.append(text[lasttok[0]:tok[0]])
-#                 elif styleno == WikiFormatting.FormatTypes.Property:
-#                     propName = lasttok[2]("propertyName")
-#                     propValue = lasttok[2]("propertyValue")
-#                     newProps.append(propName, propValue)
-# 
-# 
-#         return (newTodos, newWords, newProps)
 
 
 

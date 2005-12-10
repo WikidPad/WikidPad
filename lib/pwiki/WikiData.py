@@ -20,27 +20,18 @@ import datetime
 import re, string, glob
 
 import gadfly
-import WikiFormatting
+import DbStructure
+from DbStructure import createWikiDB, WikiDBExistsException
+
 # from WikiFormatting import FormatTypes
 
 from WikiExceptions import *   # TODO make normal import?
+import SearchAndReplace
 
 from StringOps import mbcsEnc, mbcsDec, utf8Enc, utf8Dec, BOM_UTF8, \
         fileContentToUnicode, Tokenizer
 
-
-def _uniToUtf8(ob):
-    if type(ob) is unicode:
-        return utf8Enc(ob)[0]
-    else:
-        return utf8Enc(unicode(ob))[0]
-        
-        
-def _utf8ToUni(ob):
-    if type(ob) is str:
-        return utf8Dec(ob, "replace")[0]
-    else:
-        return ob
+import WikiFormatting
 
 
 CleanTextRE = re.compile("[^A-Za-z0-9]")  # ?
@@ -50,9 +41,12 @@ class WikiData:
     def __init__(self, pWiki, dataDir):
         self.pWiki = pWiki
         self.dataDir = dataDir
-        self.dbConn = None
+        self.connWrap = None
         self.cachedWikiWords = None
         
+        self._updateTokenizer = \
+                Tokenizer(WikiFormatting.CombinedUpdateRE, -1)
+
         self._reinit()
         
 
@@ -60,12 +54,23 @@ class WikiData:
         """
         Actual initialization or reinitialization after rebuildWiki()
         """
-        self._updateTokenizerWithoutCamelCase = \
-                Tokenizer(WikiFormatting.CombinedUpdateWithoutCamelCaseRE, -1)
-        self._updateTokenizerWithCamelCase = \
-                Tokenizer(WikiFormatting.CombinedUpdateWithCamelCaseRE, -1)
+        conn = gadfly.gadfly("wikidb", self.dataDir)
+        self.connWrap = DbStructure.ConnectWrap(conn)
+        
+        formatcheck, formatmsg = DbStructure.checkDatabaseFormat(self.connWrap)
 
-        self.dbConn = gadfly.gadfly("wikidb", self.dataDir)
+        if formatcheck == 2:
+            # Unknown format
+            raise WikiDataException, formatmsg
+
+        # Update database from previous versions if necessary
+        if formatcheck == 1:
+            try:
+                DbStructure.updateDatabase(self.connWrap)
+            except:
+                self.connWrap.rollback()
+                raise
+
 
         # create word caches
         self.cachedWikiWords = {}
@@ -80,25 +85,25 @@ class WikiData:
         self.cachedGlobalProps = None
         self.getGlobalProperties()
 
-        # maintenance
-        #self.execSql("delete from wikiwords where word = ''")
-        #self.execSql("delete from wikirelations where word = 'MyContacts'")
-
-        # database versioning...
-        indices = self.execSqlQuerySingleColumn("select INDEX_NAME from __indices__")
-        tables = self.execSqlQuerySingleColumn("select TABLE_NAME from __table_names__")
-
-        if "WIKIWORDPROPS_PKEY" in indices:
-            print "dropping index wikiwordprops_pkey"
-            self.execSql("drop index wikiwordprops_pkey")
-        if "WIKIWORDPROPS_WORD" not in indices:
-            print "creating index wikiwordprops_word"
-            self.execSql("create index wikiwordprops_word on wikiwordprops(word)")
-        if "WIKIRELATIONS_WORD" not in indices:
-            print "creating index wikirelations_word"
-            self.execSql("create index wikirelations_word on wikirelations(word)")
-        if "REGISTRATION" in tables:
-            self.execSql("drop table registration")
+#         # maintenance
+#         #self.execSql("delete from wikiwords where word = ''")
+#         #self.execSql("delete from wikirelations where word = 'MyContacts'")
+# 
+#         # database versioning...
+#         indices = self.execSqlQuerySingleColumn("select INDEX_NAME from __indices__")
+#         tables = self.execSqlQuerySingleColumn("select TABLE_NAME from __table_names__")
+# 
+#         if "WIKIWORDPROPS_PKEY" in indices:
+#             print "dropping index wikiwordprops_pkey"
+#             self.execSql("drop index wikiwordprops_pkey")
+#         if "WIKIWORDPROPS_WORD" not in indices:
+#             print "creating index wikiwordprops_word"
+#             self.execSql("create index wikiwordprops_word on wikiwordprops(word)")
+#         if "WIKIRELATIONS_WORD" not in indices:
+#             print "creating index wikirelations_word"
+#             self.execSql("create index wikirelations_word on wikirelations(word)")
+#         if "REGISTRATION" in tables:
+#             self.execSql("drop table registration")
 
     # ---------- Direct handling of page data ----------
     
@@ -210,39 +215,60 @@ class WikiData:
         """
         # get all of the wikiWords
         wikiWords = self.getAllPageNamesFromDisk()   # Replace this call
-        # get the saved searches
-        searches = self.getSavedSearches()
-
-        self.close()
                 
-        progresshandler.open(len(wikiWords) + len(searches) + 1)
-
+        progresshandler.open(len(wikiWords) + 1)
         try:
             step = 1
-            # recreate the db
-            progresshandler.update(step, "Recreating database")
-            createWikiDB("", self.dataDir, True)
-            # reopen the wiki
-            self._reinit()
+    
             # re-save all of the pages
+            self.clearCacheTables()
             for wikiWord in wikiWords:
                 progresshandler.update(step, u"Rebuilding %s" % wikiWord)
-                wikiPage = self.createPage(wikiWord)
                 self.updatePageEntry(wikiWord)
-                wikiPage.update(wikiPage.getContent(), False)
-                step += 1
-
-            # resave searches
-            for search in searches:
-                progresshandler.update(step, u"Reading search %s" % search)
-                self.saveSearch(search)
-
-##             self.close()
-##             self._reinit()
-            
+                wikiPage = self.createPage(wikiWord)
+                wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
+                step = step + 1
+    
         finally:            
             progresshandler.close()
-    
+
+#         # get all of the wikiWords
+#         wikiWords = self.getAllPageNamesFromDisk()   # Replace this call
+#         # get the saved searches
+#         titles = self.getSavedSearchTitles()
+#         searches = [(title, self.getSearchDatablock(title)) for title in titles]
+# #         searches = self.getSavedSearches()
+# 
+#         self.close()
+#                 
+#         progresshandler.open(len(wikiWords) + len(searches) + 1)
+# 
+#         try:
+#             step = 1
+#             # recreate the db
+#             progresshandler.update(step, "Recreating database")
+#             createWikiDB("", self.dataDir, True)
+#             # reopen the wiki
+#             self._reinit()
+#             # re-save all of the pages
+#             for wikiWord in wikiWords:
+#                 progresshandler.update(step, u"Rebuilding %s" % wikiWord)
+#                 wikiPage = self.createPage(wikiWord)
+#                 self.updatePageEntry(wikiWord)
+#                 wikiPage.update(wikiPage.getContent(), False)
+#                 step += 1
+# 
+#             # resave searches
+#             for title, datablock in searches:
+#                 progresshandler.update(step, u"Reading search %s" % title)
+#                 self.saveSearch(title, datablock)
+# 
+# ##             self.close()
+# ##             self._reinit()
+#             
+#         finally:            
+#             progresshandler.close()
+#     
     
     
     # ---------- The rest ----------
@@ -411,11 +437,17 @@ class WikiData:
 #                 del self.cachedWikiWords[word]
 #                 self.cachedWikiWords[toWord] = 1
             except:
-                self.dbConn.rollback()
+                self.connWrap.rollback()
                 raise
 
             # now i have to search the wiki files and replace the old word with the new
-            results = self.search(word, False)
+            searchOp = SearchAndReplace.SearchReplaceOperation()
+            searchOp.wikiWide = True
+            searchOp.wildCard = 'no'
+            searchOp.caseSensitive = True
+            searchOp.searchStr = word
+            
+            results = self.search(searchOp)
             for resultWord in results:
                 content = self.getContent(resultWord)
                 content = content.replace(word, toWord)
@@ -463,11 +495,12 @@ class WikiData:
                 self.commit()
 
                 # due to some bug we have to close and reopen the db sometimes
-                self.dbConn.close()
-                self.dbConn = gadfly.gadfly("wikidb", self.dataDir)
+                self.connWrap.close()
+                conn = gadfly.gadfly("wikidb", self.dataDir)
+                self.connWrap = DbStructure.ConnectWrap(conn)
 
             except:
-                self.dbConn.rollback()
+                self.connWrap.rollback()
                 raise
         else:
             raise WikiDataException, "You cannot delete the root wiki node"
@@ -583,75 +616,164 @@ class WikiData:
                 subWords.append(allWordsItem)
         return subWords
 
-    def search(self, forPattern, processAnds=True):
-        if processAnds:
-            andPatterns = [re.compile(pattern, re.IGNORECASE)
-                           for pattern in forPattern.lower().split(' and ')]
-        else:
-            andPatterns = [re.compile(forPattern.lower(), re.IGNORECASE)]
+#     def search(self, forPattern, processAnds=True):
+#         if processAnds:
+#             andPatterns = [re.compile(pattern, re.IGNORECASE)
+#                            for pattern in forPattern.lower().split(' and ')]
+#         else:
+#             andPatterns = [re.compile(forPattern.lower(), re.IGNORECASE)]
+# 
+#         results = []
+#         for word in self.getAllDefinedPageNames():  #glob.glob(join(self.dataDir, '*.wiki')):
+#             # print "search1", repr(word), repr(self.getWikiWordFileName(word))
+#             fileContents = self.getContent(word)
+# 
+#             patternsMatched = 0
+#             for pattern in andPatterns:
+#                 if pattern.search(fileContents):
+#                     patternsMatched = patternsMatched + 1
+# 
+#             if patternsMatched == len(andPatterns):
+#                 results.append(word)
+# 
+#         return results
 
+
+    def search(self, sarOp):
         results = []
         for word in self.getAllDefinedPageNames():  #glob.glob(join(self.dataDir, '*.wiki')):
             # print "search1", repr(word), repr(self.getWikiWordFileName(word))
             fileContents = self.getContent(word)
-
-            patternsMatched = 0
-            for pattern in andPatterns:
-                if pattern.search(fileContents):
-                    patternsMatched = patternsMatched + 1
-
-            if patternsMatched == len(andPatterns):
+            
+            if sarOp.testText(fileContents) == True:
                 results.append(word)
-
+                
         return results
 
-    def saveSearch(self, search):
-        "save a search into the search_views table"
-        data = self.execSqlQuery('select search from search_views where '+
-                'search = ?', (search,))
-        if len(data) < 1:
-            self.execSql('insert into search_views(search) values (?)', (search,))
 
-    def getSavedSearches(self):
-        return self.execSqlQuerySingleColumn('select search from search_views order by search')
+# ----- Begin of save search API -----
 
-    def deleteSavedSearch(self, search):
-        self.execSql('delete from search_views where search = ?', (search,))
+    def saveSearch(self, title, datablock):
+        test = self.connWrap.execSqlQuerySingleItem(
+                "select title from search_views where title = ?",
+                (title,))
+                
+        if test is not None:
+            self.connWrap.execSql(
+                    "update search_views set datablock = ? where "+\
+                    "title = ?", (datablock, title))
+        else:
+            self.connWrap.execSql(
+                    "insert into search_views(title, datablock) "+\
+                    "values (?, ?)", (title, datablock))
+
+    def getSavedSearchTitles(self):
+        return self.connWrap.execSqlQuerySingleColumn(
+                "select title from search_views order by title")
+
+    def getSearchDatablock(self, title):
+        return self.connWrap.execSqlQuerySingleItem(
+                "select datablock from search_views where title = ?", (title,),
+                strConv=False)
+
+    def deleteSavedSearch(self, title):
+        self.connWrap.execSql(
+                "delete from search_views where title = ?", (title,))
+
+#     def saveSearch(self, title, datablock):
+#         "save a search into the search_views table"
+#         searchOp = SearchAndReplace.SearchReplaceOperation()
+#         searchOp.setPackedSettings(datablock)
+#         search = searchOp.searchStr
+# 
+#         data = self.execSqlQuery('select search from search_views where '+
+#                 'search = ?', (search,))
+#         if len(data) < 1:
+#             self.execSql('insert into search_views(search) values (?)', (search,))
+# 
+#     def getSavedSearchTitles(self):
+#         return self.execSqlQuerySingleColumn('select search from search_views order by search')
+# 
+#     def getSearchDatablock(self, title):
+#         searchOp = SearchAndReplace.SearchReplaceOperation()
+#         searchOp.searchStr = title
+#         searchOp.wikiWide = True
+#         searchOp.booleanOp = True
+#         searchOp.setTitle(title)
+#         return searchOp.getPackedSettings()
+# 
+#     def deleteSavedSearch(self, title):
+#         self.execSql('delete from search_views where search = ?', (title,))
+
+# ----- End of faked save search API from WikidPadCompact -----
+
+
+
+#     def saveSearch(self, search):
+#         "save a search into the search_views table"
+#         data = self.execSqlQuery('select search from search_views where '+
+#                 'search = ?', (search,))
+#         if len(data) < 1:
+#             self.execSql('insert into search_views(search) values (?)', (search,))
+# 
+#     def getSavedSearches(self):
+#         return self.execSqlQuerySingleColumn('select search from search_views order by search')
+# 
+#     def deleteSavedSearch(self, search):
+#         self.execSql('delete from search_views where search = ?', (search,))
+
+
+    def clearCacheTables(self):
+        """
+        Clear all tables in the database which contain non-essential
+        (cache) information as well as other cache information.
+        Needed before updating the whole wiki
+        """
+        DbStructure.recreateCacheTables(self.connWrap)
+        self.connWrap.commit()
+
+        self.cachedWikiWords = {}
+        self.cachedGlobalProps = None
+
+
 
     def execSql(self, sql, params=None):
         "utility method, executes the sql, no return"
-        cursor = self.dbConn.cursor()
-        if params:
-            params = tuple(map(_uniToUtf8, params))
-            cursor.execute(sql, params)
-        else:
-            cursor.execute(sql)
-        cursor.close()
+        return self.connWrap.execSql(sql, params)
+#         cursor = self.dbConn.cursor()
+#         if params:
+#             params = tuple(map(_uniToUtf8, params))
+#             cursor.execute(sql, params)
+#         else:
+#             cursor.execute(sql)
+#         cursor.close()
 
     def execSqlQuery(self, sql, params=None):
         "utility method, executes the sql, returns query result"
-        cursor = self.dbConn.cursor()
-        if params:
-            params = tuple(map(_uniToUtf8, params))
-            cursor.execute(sql, params)
-        else:
-            cursor.execute(sql)
-        data = cursor.fetchall()
-        cursor.close()
-        data = map(lambda row: map(_utf8ToUni, row), data)
-        return data
+        return self.connWrap.execSqlQuery(sql, params)
+#         cursor = self.dbConn.cursor()
+#         if params:
+#             params = tuple(map(_uniToUtf8, params))
+#             cursor.execute(sql, params)
+#         else:
+#             cursor.execute(sql)
+#         data = cursor.fetchall()
+#         cursor.close()
+#         data = map(lambda row: map(_utf8ToUni, row), data)
+#         return data
 
     def execSqlQuerySingleColumn(self, sql, params=None):
         "utility method, executes the sql, returns query result"
-        data = self.execSqlQuery(sql, params)
-        return [row[0] for row in data]
+        return self.connWrap.execSqlQuerySingleColumn(sql, params)
+#         data = self.execSqlQuery(sql, params)
+#         return [row[0] for row in data]
 
     def commit(self):
-        self.dbConn.commit()
+        self.connWrap.commit()
 
     def close(self):
         self.commit()
-        self.dbConn.close()
+        self.connWrap.close()
 
 
 class WikiPage:
@@ -807,6 +929,7 @@ class WikiPage:
         self.wikiData.setContent(self.wikiWord, text)
         self.saveDirty = False
 
+
     def update(self, text, alertPWiki=True):
         """
         Update additional cached informations (properties, todos, relations)
@@ -814,44 +937,51 @@ class WikiPage:
         self.deleteChildRelationships()
         self.deleteProperties()
         self.deleteTodos()
-        
-        if self.wikiData.pWiki.wikiWordsEnabled:
-            tokenizer = self.wikiData._updateTokenizerWithCamelCase
-        else:
-            tokenizer = self.wikiData._updateTokenizerWithoutCamelCase
-        
 
-        tokens = tokenizer.tokenize(text, sync=True)
+        footnotesAsWikiwords = self.wikiData.pWiki.configuration.getboolean(
+                "main", "footnotes_as_wikiwords")
+        
+        formatMap = WikiFormatting.getExpressionsFormatList(
+                WikiFormatting.UpdateExpressions,
+                self.wikiData.pWiki.wikiWordsEnabled,
+                footnotesAsWikiwords)
+
+        tokens = self.wikiData._updateTokenizer.tokenize(text, sync=True)
 
         if len(tokens) >= 2:
             tok = tokens[0]
-            
+
             for nexttok in tokens[1:]:
                 stindex = tok[1]
                 if stindex == -1:
                     styleno = WikiFormatting.FormatTypes.Default
                 else:
-                    styleno = WikiFormatting.UpdateExpressions[stindex][1]
+                    styleno = formatMap[stindex]
 
                 if styleno == WikiFormatting.FormatTypes.ToDo:
                     self.addTodo(tok[2]["todoContent"])
-                elif styleno == WikiFormatting.FormatTypes.WikiWord2:
-                    self.addChildRelationship(
-                            WikiFormatting.normalizeWikiWord(
-                            text[tok[0]:nexttok[0]]))
+#                 elif styleno == WikiFormatting.FormatTypes.WikiWord2:
+#                     self.addChildRelationship(
+#                             WikiFormatting.normalizeWikiWord(
+#                             text[tok[0]:nexttok[0]]))
                 elif styleno == WikiFormatting.FormatTypes.WikiWord:
                     self.addChildRelationship(
                             WikiFormatting.normalizeWikiWord(
-                            text[tok[0]:nexttok[0]]))
+                            text[tok[0]:nexttok[0]], footnotesAsWikiwords))
                 elif styleno == WikiFormatting.FormatTypes.Property:
                     propName = tok[2]["propertyName"]
                     propValue = tok[2]["propertyValue"]
 
                     if propName == "alias":
-                        word = WikiFormatting.normalizeWikiWord(propValue)
+                        word = WikiFormatting.normalizeWikiWord(propValue,
+                                footnotesAsWikiwords)
                         if word is not None:
                             self.wikiData.cachedWikiWords[word] = 2
                             self.setProperty("alias", word)
+#                         if not WikiFormatting.WikiWordRE.match(word):
+#                             word = u"[%s]" % word
+#                         self.wikiData.cachedWikiWords[word] = 2
+#                         self.setProperty("alias", word)
                     else:
                         self.setProperty(propName, propValue)
                         
@@ -913,36 +1043,38 @@ class WikiPage:
 # module level functions
 ####################################################
 
-def createWikiDB(wikiName, dataDir, overwrite=False):
-    "creates the initial db"
-    if (not exists(dataDir) or overwrite):
-        if (not exists(dataDir)):
-            mkdir(dataDir)
+# def createWikiDB(wikiName, dataDir, overwrite=False):
+#     "creates the initial db"
+#     if (not exists(dataDir) or overwrite):
+#         if (not exists(dataDir)):
+#             mkdir(dataDir)
+# 
+#         # create the new gadfly database
+#         connection = gadfly.gadfly()
+#         connection.startup("wikidb", dataDir)
+# 
+#         # create the tables, etc
+#         cursor = connection.cursor()
+#         cursor.execute("create table wikiwords (word varchar, created varchar, modified varchar)")
+#         cursor.execute("create table wikirelations (word varchar, relation varchar, created varchar)")
+#         cursor.execute("create table wikiwordprops (word varchar, key varchar, value varchar)")
+#         cursor.execute("create table todos (word varchar, todo varchar)")
+#         cursor.execute("create table search_views (search varchar)")
+# 
+#         cursor.execute("create unique index wikiwords_pkey on wikiwords(word)")
+#         cursor.execute("create unique index wikirelations_pkey on wikirelations(word, relation)")
+#         cursor.execute("create index wikirelations_word on wikirelations(word)")
+#         cursor.execute("create index wikiwordprops_word on wikiwordprops(word)")
+# 
+#         connection.commit()
+# 
+#         # close the connection
+#         connection.close()
+# 
+#     else:
+#         raise WikiDBExistsException, u"database already exists at location: %s" % dataDir
 
-        # create the new gadfly database
-        connection = gadfly.gadfly()
-        connection.startup("wikidb", dataDir)
 
-        # create the tables, etc
-        cursor = connection.cursor()
-        cursor.execute("create table wikiwords (word varchar, created varchar, modified varchar)")
-        cursor.execute("create table wikirelations (word varchar, relation varchar, created varchar)")
-        cursor.execute("create table wikiwordprops (word varchar, key varchar, value varchar)")
-        cursor.execute("create table todos (word varchar, todo varchar)")
-        cursor.execute("create table search_views (search varchar)")
-
-        cursor.execute("create unique index wikiwords_pkey on wikiwords(word)")
-        cursor.execute("create unique index wikirelations_pkey on wikirelations(word, relation)")
-        cursor.execute("create index wikirelations_word on wikirelations(word)")
-        cursor.execute("create index wikiwordprops_word on wikiwordprops(word)")
-
-        connection.commit()
-
-        # close the connection
-        connection.close()
-
-    else:
-        raise WikiDBExistsException, u"database already exists at location: %s" % dataDir
 
 def findShortestPath(graph, start, end, path):   # path=[]
     "finds the shortest path in the graph from start to end"

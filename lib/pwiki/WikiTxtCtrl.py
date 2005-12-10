@@ -8,6 +8,7 @@ import threading
 from os.path import exists
 
 from time import time, strftime
+from textwrap import fill
 
 from wxPython.wx import *
 from wxPython.stc import *
@@ -18,6 +19,7 @@ from wxHelper import GUI_ID
 import WikiFormatting
 from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException
 
+from SearchAndReplace import SearchReplaceOperation
 from StringOps import utf8Enc, utf8Dec, mbcsEnc, mbcsDec, uniToGui, guiToUni, \
         Tokenizer, revStr
 from Configuration import isUnicode
@@ -48,12 +50,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.stylebytes = None
         ## self.stylethread = None
         
-        self.tokenizerWithCamelCase = Tokenizer(
-                WikiFormatting.CombinedSyntaxHighlightWithCamelCaseRE, -1)
-        self.tokenizerWithoutCamelCase = Tokenizer(
-                WikiFormatting.CombinedSyntaxHighlightWithoutCamelCaseRE, -1)
-                
-        self.activeTokenizer = None
+        self.tokenizer = Tokenizer(
+                WikiFormatting.CombinedSyntaxHighlightRE, -1)
         
         # If autocompletion word was choosen, how many bytes to delete backward
         # before inserting word, if word ...
@@ -309,18 +307,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         text = self.GetText()
         textlen = len(text)
 
-        oldtok = self.activeTokenizer
-        if oldtok:
-            oldtok.setTokenThread(None)
-        
-        if self.wikiWordsEnabled:
-            self.activeTokenizer = self.tokenizerWithCamelCase
-        else:
-            self.activeTokenizer = self.tokenizerWithoutCamelCase
-            
+        self.tokenizer.setTokenThread(None)
+
         if textlen < 10240:    # Arbitrary value
             # Synchronous styling
-            self.activeTokenizer.setTokenThread(None)
+            self.tokenizer.setTokenThread(None)
             self.buildStyling(text, sync=True)
             self.applyStyling(self.stylebytes)
             self.stylebytes = None
@@ -333,7 +324,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.stylebytes = None
 
             t = threading.Thread(target = self.buildStyling, args = (text,))
-            self.activeTokenizer.setTokenThread(t)
+            self.tokenizer.setTokenThread(t)
             t.start()
 
         # self.buildStyling(text, True)
@@ -362,11 +353,17 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         Unicode text
         """
-        tokens = self.activeTokenizer.tokenize(text, sync=sync)
+        tokens = self.tokenizer.tokenize(text, sync=sync)
         wikiData = self.pWiki.wikiData
+        footnotesAsWikiwords = self.pWiki.configuration.getboolean(
+                "main", "footnotes_as_wikiwords")
+        # TODO Cache if necessary
+        formatMap = WikiFormatting.getExpressionsFormatList(
+                WikiFormatting.FormatExpressions, self.wikiWordsEnabled,
+                footnotesAsWikiwords)
 
         if not sync and (not threading.currentThread() is 
-                self.activeTokenizer.getTokenThread()):
+                self.tokenizer.getTokenThread()):
             return
 
         if len(tokens) < 2:
@@ -381,14 +378,15 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             if stindex == -1:
                 styleno = WikiFormatting.FormatTypes.Default
             else:
-                styleno = WikiFormatting.FormatExpressions[stindex][1]
+                styleno = formatMap[stindex]
                 
-            if styleno == WikiFormatting.FormatTypes.WikiWord or \
-                    styleno == WikiFormatting.FormatTypes.WikiWord2:
+            if styleno == WikiFormatting.FormatTypes.WikiWord:  # or \
+                    # styleno == WikiFormatting.FormatTypes.WikiWord2:
                         
                 # Remove possible '#' attachment
                 ww = WikiFormatting.normalizeWikiWord(
-                        text[tok[0]:nexttok[0]].split(u"#", 1)[0])
+                        text[tok[0]:nexttok[0]].split(u"#", 1)[0],
+                        footnotesAsWikiwords)
 
                 if wikiData.isDefinedWikiWord(ww):
                     styleno = WikiFormatting.FormatTypes.AvailWikiWord
@@ -400,12 +398,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             tok = nexttok
             
             if not sync and (not threading.currentThread() is 
-                    self.activeTokenizer.getTokenThread()):
+                    self.tokenizer.getTokenThread()):
                 return
 
             
         if not sync and (not threading.currentThread() is 
-                self.activeTokenizer.getTokenThread()):
+                self.tokenizer.getTokenThread()):
             return
 
         self.stylebytes = "".join(stylebytes)
@@ -493,9 +491,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 ##            self.pWiki.tree.Unselect()  # TODO move to other place?
 
             if len(combword) == 2:
-                self.pWiki.editor.executeSearch(
-                        WikiFormatting.SearchUnescapeRE.sub(ur"\1",
-                        combword[1]), 0)
+                searchOp = SearchReplaceOperation()
+                searchOp.wildCard = "no"
+                searchOp.searchStr = WikiFormatting.SearchUnescapeRE.sub(ur"\1",
+                        combword[1])
+
+                self.pWiki.editor.executeSearch(searchOp, 0)
 
             return True
         elif self.isPositionInLink(linkPos):
@@ -738,33 +739,28 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.anchorCharPosition = -1
 
 
-    # TODO char to byte mapping
-    def executeSearch(self, searchStr=None, searchCharStartPos=-1, next=False, replacement=None, caseSensitive=False, cycleToStart=True):
-        if not searchStr:
-            searchStr = self.searchStr
-        if searchCharStartPos < 0:
-            searchCharStartPos = self.searchCharStartPos
-
-        self.pWiki.statusBar.SetStatusText(uniToGui(u"Search (ESC to stop): %s" % searchStr), 0)
+    def executeIncrementalSearch(self, next=False):
+        """
+        Run incremental search
+        """
+        self.pWiki.statusBar.SetStatusText(
+                uniToGui(u"Search (ESC to stop): %s" % self.searchStr), 0)
         text = self.GetText()
-        if len(searchStr) > 0:   # and not searchStr.endswith("\\"):
-            charStartPos = searchCharStartPos
+        if len(self.searchStr) > 0:   # and not searchStr.endswith("\\"):
+            charStartPos = self.searchCharStartPos
             if next and (self.anchorCharPosition != -1):
                 charStartPos = self.anchorCharPosition
 
             regex = None
             try:
-                if caseSensitive:
-                    regex = re.compile(searchStr, re.MULTILINE | re.LOCALE)
-                else:
-                    regex = re.compile(searchStr, re.IGNORECASE | \
-                        re.MULTILINE | re.LOCALE)
+                regex = re.compile(self.searchStr, re.IGNORECASE | \
+                        re.MULTILINE | re.UNICODE)
             except:
                 # Regex error
                 return self.anchorCharPosition
 
             match = regex.search(text, charStartPos, len(text))
-            if not match and charStartPos > 0 and cycleToStart:
+            if not match and charStartPos > 0:
                 match = regex.search(text, 0, charStartPos)
 
             if match:
@@ -775,22 +771,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
                 self.SetSelection(matchbytestart, self.anchorBytePosition)
 
-                if replacement is not None:
-                    self.ReplaceSelection(replacement)
-                    selByteEnd = matchbytestart + self.bytelenSct(replacement)
-                    selCharEnd = match.start() + len(replacement)
-                    self.SetSelection(matchbytestart, selByteEnd)
-                    self.anchorBytePosition = selByteEnd
-                    self.anchorCharPosition = selCharEnd
-
-                    return selCharEnd
-                else:
-                    return self.anchorCharPosition
+                return self.anchorCharPosition
 
         self.SetSelection(-1, -1)
         self.anchorBytePosition = -1
         self.anchorCharPosition = -1
-        self.GotoPos(self.bytelenSct(text[:searchCharStartPos]))
+        self.GotoPos(self.bytelenSct(text[:self.searchCharStartPos]))
 
         return -1
 
@@ -800,6 +786,134 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.inIncrementalSearch = False
         self.anchorBytePosition = -1
         self.anchorCharPosition = -1
+
+
+    def executeSearch(self, sarOp, searchCharStartPos=-1, next=False):
+        if sarOp.booleanOp:
+            return (None, None)  # Not possible
+
+        if searchCharStartPos < 0:
+            searchCharStartPos = self.searchCharStartPos
+
+#         self.pWiki.statusBar.SetStatusText(
+#                 uniToGui(u"Search (ESC to stop): %s" % searchStr), 0)
+        text = self.GetText()
+        if len(sarOp.searchStr) > 0:
+            charStartPos = searchCharStartPos
+#             if next and (self.anchorCharPosition != -1):
+#                 charStartPos = self.anchorCharPosition
+            if next:
+                charStartPos = len(self.GetTextRange(0, self.GetSelectionEnd()))
+            try:
+                found = sarOp.searchText(text, charStartPos)
+                start, end = found[:2]
+            except:
+                # Regex error
+                return (self.anchorCharPosition, self.anchorCharPosition)
+                
+            if start is not None:
+                matchbytestart = self.bytelenSct(text[:start])
+                self.anchorBytePosition = matchbytestart + \
+                        self.bytelenSct(text[start:end])
+                self.anchorCharPosition = end
+
+                self.SetSelection(matchbytestart, self.anchorBytePosition)
+
+#                 if sarOp.replaceOp:
+#                     replacement = sarOp.replace(text, found)                    
+#                     self.ReplaceSelection(replacement)
+#                     selByteEnd = matchbytestart + self.bytelenSct(replacement)
+#                     selCharEnd = start + len(replacement)
+#                     self.SetSelection(matchbytestart, selByteEnd)
+#                     self.anchorBytePosition = selByteEnd
+#                     self.anchorCharPosition = selCharEnd
+# 
+#                     return selCharEnd
+#                 else:
+#                     return self.anchorCharPosition
+                return found    # self.anchorCharPosition
+
+        self.SetSelection(-1, -1)
+        self.anchorBytePosition = -1
+        self.anchorCharPosition = -1
+        self.GotoPos(self.bytelenSct(text[:searchCharStartPos]))
+
+        return (None, None)
+        
+        
+    def executeReplace(self, sarOp):
+        seltext = self.GetSelectedText()
+        found = sarOp.matchesPart(seltext)
+        
+        if found is None:
+            return -1
+
+        replacement = sarOp.replace(seltext, found)                    
+        bytestart = self.GetSelectionStart()
+        self.ReplaceSelection(replacement)
+        selByteEnd = bytestart + self.bytelenSct(replacement)
+        selCharEnd = len(self.GetTextRange(0, selByteEnd))
+#         self.SetSelection(matchbytestart, selByteEnd)
+        self.anchorBytePosition = selByteEnd
+        self.anchorCharPosition = selCharEnd
+
+        return selCharEnd
+
+
+#     def executeSearch(self, searchStr, searchCharStartPos=-1, next=False,
+#             replacement=None, caseSensitive=False, cycleToStart=True):
+#         if searchCharStartPos < 0:
+#             searchCharStartPos = self.searchCharStartPos
+# 
+#         self.pWiki.statusBar.SetStatusText(
+#                 uniToGui(u"Search (ESC to stop): %s" % searchStr), 0)
+#         text = self.GetText()
+#         if len(searchStr) > 0:   # and not searchStr.endswith("\\"):
+#             charStartPos = searchCharStartPos
+#             if next and (self.anchorCharPosition != -1):
+#                 charStartPos = self.anchorCharPosition
+# 
+#             regex = None
+#             try:
+#                 if caseSensitive:
+#                     regex = re.compile(searchStr, re.MULTILINE | re.UNICODE)
+#                 else:
+#                     regex = re.compile(searchStr, re.IGNORECASE | \
+#                         re.MULTILINE | re.UNICODE)
+#             except:
+#                 # Regex error
+#                 return self.anchorCharPosition
+# 
+#             match = regex.search(text, charStartPos, len(text))
+#             if not match and charStartPos > 0 and cycleToStart:
+#                 match = regex.search(text, 0, charStartPos)
+# 
+#             if match:
+#                 matchbytestart = self.bytelenSct(text[:match.start()])
+#                 self.anchorBytePosition = matchbytestart + \
+#                         self.bytelenSct(text[match.start():match.end()])
+#                 self.anchorCharPosition = match.end()
+# 
+#                 self.SetSelection(matchbytestart, self.anchorBytePosition)
+# 
+#                 if replacement is not None:
+#                     self.ReplaceSelection(replacement)
+#                     selByteEnd = matchbytestart + self.bytelenSct(replacement)
+#                     selCharEnd = match.start() + len(replacement)
+#                     self.SetSelection(matchbytestart, selByteEnd)
+#                     self.anchorBytePosition = selByteEnd
+#                     self.anchorCharPosition = selCharEnd
+# 
+#                     return selCharEnd
+#                 else:
+#                     return self.anchorCharPosition
+# 
+#         self.SetSelection(-1, -1)
+#         self.anchorBytePosition = -1
+#         self.anchorCharPosition = -1
+#         self.GotoPos(self.bytelenSct(text[:searchCharStartPos]))
+# 
+#         return -1
 
 
     def rewrapText(self):
@@ -1002,17 +1116,17 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         self.endIncrementalSearch()
                     # do the next search on another ctrl-s, or f
                     elif evt.ControlDown() and (key == ord('S') or key == ord('F')):
-                        self.executeSearch(next=True)
+                        self.executeIncrementalSearch(next=True)
                     # handle the delete key
                     elif key == WXK_BACK or key == WXK_DELETE:
                         self.searchStr = self.searchStr[:len(self.searchStr)-1]
-                        self.executeSearch();
+                        self.executeIncrementalSearch();
                     # handle the other keys
                     else:
                         evt.Skip() # OnChar is responsible for that
 
                 elif key == WXK_F3:
-                    self.executeSearch(next=True)
+                    self.executeIncrementalSearch(next=True)
                 else:
                     # TODO Should also work for mouse!
                     self.anchorBytePosition = self.GetCurrentPos()
@@ -1113,7 +1227,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             else:
                 self.searchStr += mbcsDec(chr(key))[0]
 
-            self.executeSearch();
+            self.executeIncrementalSearch();
         else:
             evt.Skip()
 

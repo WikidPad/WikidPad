@@ -16,8 +16,11 @@ from WikiTxtCtrl import *
 from WikiTreeCtrl import *
 from WikiHtmlView import WikiHtmlView
 from PageHistory import PageHistory
+from SearchAndReplace import SearchReplaceOperation
 
 from AdditionalDialogs import *
+from SearchAndReplaceDialogs import *
+
 import Exporters
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool
 import WikiFormatting
@@ -197,6 +200,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         self.lastCursorPositionInPage = {}
         self.iconLookupCache = {}
         self.wikiHistory = []
+        self.findDlg = None  # Stores find and find&replace dialog, if present
 
         # setup plugin manager and hooks API
         self.pluginManager = PluginManager()
@@ -528,9 +532,9 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
                 "tb_lens")
 
 
-        menuID=wxNewId()
-        wikiMenu.Append(menuID, '&View Saved Searches', 'View Saved Searches')
-        EVT_MENU(self, menuID, lambda evt: self.showSavedSearchesDialog())
+#         menuID=wxNewId()
+#         wikiMenu.Append(menuID, '&View Saved Searches', 'View Saved Searches')
+#         EVT_MENU(self, menuID, lambda evt: self.showSavedSearchesDialog())
 
         menuID=wxNewId()
         wikiMenu.Append(menuID, '&View Bookmarks\t' + self.keyBindings.ViewBookmarks, 'View Bookmarks')
@@ -601,7 +605,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
                 "tb_doc")
 
         self.addMenuItem(wikiWordMenu, '&Save\t' + self.keyBindings.Save,
-                'Save Current Wiki Word', lambda evt: (self.saveCurrentWikiPage(), self.wikiData.commit()),
+                'Save Current Wiki Word', lambda evt: (self.saveCurrentWikiPage(force=True), self.wikiData.commit()),
                 "tb_save")
 
         self.addMenuItem(wikiWordMenu, '&Rename\t' + self.keyBindings.Rename,
@@ -857,7 +861,11 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         formattingMenu.AppendSeparator()
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, '&Find and Replace\t' + self.keyBindings.FindAndReplace, 'Find and Replace')
+        formattingMenu.Append(menuID, '&Find\t', 'Find')
+        EVT_MENU(self, menuID, lambda evt: self.showFindDialog())
+
+        menuID=wxNewId()
+        formattingMenu.Append(menuID, 'Find and &Replace\t' + self.keyBindings.FindAndReplace, 'Find and Replace')
         EVT_MENU(self, menuID, lambda evt: self.showFindReplaceDialog())
 
         menuID=wxNewId()
@@ -1030,7 +1038,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         icon = self.lookupIcon("tb_save")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Save Wiki Word (Ctrl-S)", "Save Wiki Word")
-        EVT_TOOL(self, tbID, lambda evt: (self.saveCurrentWikiPage(), self.wikiData.commit()))
+        EVT_TOOL(self, tbID, lambda evt: (self.saveCurrentWikiPage(force=True), self.wikiData.commit()))
 
         icon = self.lookupIcon("tb_rename")
         tbID = wxNewId()
@@ -1384,6 +1392,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
                 dlg.Destroy()
             except Exception, e:
                 self.displayErrorMessage('There was an error creating the wiki database.', e)
+                traceback.print_exc()                
                 allIsWell = False
 
             if (allIsWell):
@@ -1431,7 +1440,7 @@ These are your default global settings.
                 
                 self.editor.GotoPos(self.editor.GetLength())
                 self.editor.AddText(u"\n\n\t* WikiSettings\n")
-                self.saveCurrentWikiPage()
+                self.saveCurrentWikiPage(force=True)
                 
 
 #                 # create the WikiSettings page
@@ -1625,9 +1634,7 @@ These are your default global settings.
 
         # save the current wiki page if it is dirty
         if self.currentWikiPage:
-            (saveDirty, updateDirty) = self.currentWikiPage.getDirty()
-            if saveDirty:
-                self.saveCurrentWikiPage()
+            self.saveCurrentWikiPage()
 
         # database commits
         if self.wikiData:
@@ -1644,7 +1651,8 @@ These are your default global settings.
                 wikiPageWord), 0)
 
         # make sure this is a valid wiki word
-        wikiWord = WikiFormatting.normalizeWikiWord(wikiPageWord)
+        wikiWord = WikiFormatting.normalizeWikiWord(wikiPageWord,
+                self.configuration.getboolean("main", "footnotes_as_wikiwords"))
         if wikiWord is None:
             self.displayErrorMessage(u"'%s' is an invalid wiki word." % wikiPageWord)
             return
@@ -1658,9 +1666,7 @@ These are your default global settings.
 
         # save the current page if it is dirty
         if self.currentWikiPage:
-            (saveDirty, updateDirty) = self.currentWikiPage.getDirty()
-            if saveDirty:
-                self.saveCurrentWikiPage()
+            self.saveCurrentWikiPage()
 
             # save the cursor position of the current page so that if
             # the user comes back we can put the cursor in the right spot.
@@ -1749,9 +1755,12 @@ These are your default global settings.
         self.hooks.openedWikiWord(self, wikiWord)
 
 
-    def saveCurrentWikiPage(self):
-        return self.saveWikiPage(self.currentWikiWord, self.currentWikiPage,
-                self.editor.GetText())
+    def saveCurrentWikiPage(self, force = False):
+        if force or self.currentWikiPage.getDirty()[0]:
+            return self.saveWikiPage(self.currentWikiWord, self.currentWikiPage,
+                    self.editor.GetText())
+        else:
+            return None
 
     def saveWikiPage(self, word, page, text):
         self.statusBar.SetStatusText(u"Saving WikiPage", 0)
@@ -2097,7 +2106,9 @@ These are your default global settings.
         if not newWikiWord or len(newWikiWord) == 0:
             return False
             
-        toWikiWord = WikiFormatting.normalizeWikiWord(newWikiWord)
+        toWikiWord = WikiFormatting.normalizeWikiWord(newWikiWord,
+                self.pWiki.configuration.getboolean("main",
+                "footnotes_as_wikiwords"))
         if toWikiWord is None:
             self.displayErrorMessage(u"'%s' is an invalid WikiWord" % newWikiWord)
             return False
@@ -2151,29 +2162,28 @@ These are your default global settings.
         dlg.Destroy()
         return renamed
 
-
     def showSearchDialog(self):
-        dlg = SearchDialog(self, -1)
-        dlg.CenterOnParent(wxBOTH)
-        if dlg.ShowModal() == wxID_OK:
-            (wikiWord, searchedFor) = dlg.GetValue()
-            if wikiWord:
-                dlg.Destroy()
-                self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
-                self.editor.executeSearch(searchedFor, 0)
-                self.editor.SetFocus()
-        dlg.Destroy()
+        if self.findDlg != None:
+            return
+
+        self.findDlg = SearchWikiDialog(self, -1)
+        self.findDlg.CenterOnParent(wxBOTH)
+        self.findDlg.Show()
+        # dlg.Destroy()
+#         if dlg.ShowModal() == wxID_OK:
+#             (wikiWord, searchedFor) = dlg.GetValue()
+#             if wikiWord:
+#                 dlg.Destroy()
+#                 self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
+#                 self.editor.executeSearch(searchedFor, 0)
+#                 self.editor.SetFocus()
 
 
-    def showSavedSearchesDialog(self):
-        dlg = SavedSearchesDialog(self, -1)
-        dlg.CenterOnParent(wxBOTH)
-        if dlg.ShowModal() == wxID_OK:
-            wikiWord = dlg.GetValue()
-            if wikiWord:     # TODO ???
-                dlg.Destroy()
-                self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
-        dlg.Destroy()
+#     def showSavedSearchesDialog(self):
+#         dlg = SavedSearchesDialog(self, -1)
+#         dlg.CenterOnParent(wxBOTH)
+#         dlg.ShowModal()
+#         dlg.Destroy()
 
 
     def showWikiWordDeleteDialog(self, wikiWord=None):
@@ -2208,11 +2218,37 @@ These are your default global settings.
         dlg.Destroy()
 
 
-    def showFindReplaceDialog(self):
+    def showFindDialog(self):
+        if self.findDlg is None:
+            data = wxFindReplaceData()
+        else:
+            return
+#             data = wxFindReplaceData() #self.findDlg.GetData()
+#             self.findDlg.Show(False)
+#             self.findDlg.Destroy()
+#             self.findDlg = None
+
         self.lastFindPos = -1
-        data = wxFindReplaceData()
+        dlg = wxFindReplaceDialog(self, data, u"Find", wxFR_NOUPDOWN)
+        dlg.data = data
+        self.findDlg = dlg
+        dlg.Show(True)
+
+
+    def showFindReplaceDialog(self):
+        if self.findDlg is None:
+            data = wxFindReplaceData()
+        else:
+            return
+#             data = wxFindReplaceData() #self.findDlg.GetData()
+#             self.findDlg.Show(False)
+#             self.findDlg.Destroy()
+#             self.findDlg = None
+
+        self.lastFindPos = -1
         dlg = wxFindReplaceDialog(self, data, u"Find and Replace", wxFR_REPLACEDIALOG)
         dlg.data = data
+        self.findDlg = dlg
         dlg.Show(True)
 
     def showReplaceTextByWikiwordDialog(self):
@@ -2472,29 +2508,39 @@ These are your default global settings.
         if matchWholeWord:
             findString = ur"\b%s\b" % findString
 
+        sarOp = SearchReplaceOperation()
+        sarOp.searchStr = guiToUni(evt.GetFindString())
+        sarOp.replaceOp = False
+        sarOp.booleanOp = False
+        sarOp.caseSensitive = not not (flags & wxFR_MATCHCASE)
+        sarOp.wholeWord = not not (flags & wxFR_WHOLEWORD)
+        sarOp.cycleToStart = True
+        sarOp.wildCard = 'no'  # TODO
+        sarOp.wikiWide = False
+
         if et == wxEVT_COMMAND_FIND:
-            self.editor.executeSearch(findString, caseSensitive=matchCase)
+            self.editor.executeSearch(sarOp)
         elif et == wxEVT_COMMAND_FIND_NEXT:
-            self.editor.executeSearch(findString, next=True, caseSensitive=matchCase)
+            self.editor.executeSearch(sarOp, next=True)
         elif et == wxEVT_COMMAND_FIND_REPLACE:
-            self.lastFindPos = self.editor.executeSearch(findString,
-                    self.lastFindPos, self.lastFindPos > -1,
-                    replacement=guiToUni(evt.GetReplaceString()),
-                    caseSensitive=matchCase)
+            sarOp.replaceStr = guiToUni(evt.GetReplaceString())
+            sarOp.replaceOp = True
+            self.lastFindPos = self.editor.executeSearch(sarOp,
+                    self.lastFindPos, self.lastFindPos > -1)
                     
         elif et == wxEVT_COMMAND_FIND_REPLACE_ALL:
+            sarOp.replaceStr = guiToUni(evt.GetReplaceString())
+            sarOp.replaceOp = True
             lastReplacePos = -1
             while(1):
-                lastReplacePos = self.editor.executeSearch(findString, lastReplacePos,
-                                                           replacement=evt.GetReplaceString(),
-                                                           caseSensitive=matchCase,
-                                                           cycleToStart=False)
+                lastReplacePos = self.editor.executeSearch(sarOp, lastReplacePos)
                 if lastReplacePos == -1:
                     break
 
 
     def OnFindClose(self, evt, next=False, replace=False, replaceAll=False):
         evt.GetDialog().Destroy()
+        self.findDlg = None
 
 
     # TODO decouple save and update
@@ -2564,179 +2610,6 @@ These are your default global settings.
             self.tbIcon = None
 
         self.Destroy()
-
-
-class SearchDialog(wxDialog):
-    def __init__(self, pWiki, ID, title="Search Wiki",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER):
-        wxDialog.__init__(self, pWiki, ID, title, pos, size, style)
-        self.pWiki = pWiki
-
-        # Now continue with the normal construction of the dialog
-        # contents
-        sizer = wxBoxSizer(wxVERTICAL)
-
-        label = wxStaticText(self, -1, "Wiki Search (regex supported)")
-        sizer.Add(label, 0, wxALIGN_CENTRE|wxALL, 5)
-
-        box = wxBoxSizer(wxVERTICAL)
-
-        self.text = wxTextCtrl(self, -1, "", size=wxSize(165, -1), style=wxTE_PROCESS_ENTER)
-        box.Add(self.text, 0, wxALIGN_CENTRE|wxALL, 5)
-
-        btn = wxButton(self, wxID_FIND, " Search ")
-        ## btn.SetDefault()  # Otherwise return wouldn't be processed in listbox correctly
-        box.Add(btn, 0, wxALIGN_CENTRE|wxALL, 5)
-
-        self.lb = wxListBox(self, -1, wxDefaultPosition, wxSize(165, 200), [], wxLB_SINGLE)
-        box.Add(self.lb, 1, wxALIGN_CENTRE|wxALL, 5)
-
-        sizer.AddSizer(box, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5)
-
-        line = wxStaticLine(self, -1, size=(20,-1), style=wxLI_HORIZONTAL)
-        sizer.Add(line, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxRIGHT|wxTOP, 5)
-
-        box = wxBoxSizer(wxHORIZONTAL)
-
-        btn = wxButton(self, wxID_OK, " OK ")
-        box.Add(btn, 0, wxALIGN_CENTRE|wxALL, 5)
-
-        btn = wxButton(self, wxID_SAVE, " Save Search ")
-        box.Add(btn, 0, wxALIGN_CENTRE|wxALL, 5)
-
-        btn = wxButton(self, wxID_CANCEL, " Cancel ")
-        box.Add(btn, 0, wxALIGN_CENTRE|wxALL, 5)
-
-        sizer.AddSizer(box, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5)
-
-        self.SetSizer(sizer)
-        self.SetAutoLayout(True)
-        sizer.Fit(self)
-
-        self.value = None
-
-        EVT_BUTTON(self, wxID_FIND, self.OnSearch)
-        EVT_BUTTON(self, wxID_SAVE, self.OnSave)
-        EVT_CHAR(self.text, self.OnCharText)
-        EVT_CHAR(self.lb, self.OnCharListBox)
-        EVT_LISTBOX(self, ID, self.OnListBox)
-        EVT_LISTBOX_DCLICK(self, ID, self.OnListBoxDClick)
-
-    def GetValue(self):
-        if self.value:
-            return (self.value, guiToUni(self.text.GetValue()))
-        elif self.lb.GetCount() > 0:
-            return (guiToUni(self.lb.GetString(0)), guiToUni(self.text.GetValue()))
-
-    def OnSearch(self, evt):
-        forStr = guiToUni(self.text.GetValue())
-        self.lb.Clear()
-        if len(forStr) > 0:
-            for word in self.pWiki.wikiData.search(forStr):
-                self.lb.Append(word)
-
-    def OnSave(self, evt):
-        forStr = guiToUni(self.text.GetValue())
-        if len(forStr) > 0:
-            self.pWiki.wikiData.saveSearch(forStr)
-            self.EndModal(wxID_CANCEL)
-        else:
-            self.pWiki.displayErrorMessage(u"Invalid search string, can't save as view")
-
-    def OnListBox(self, evt):
-        self.value = guiToUni(evt.GetString())
-
-    def OnListBoxDClick(self, evt):
-        self.EndModal(wxID_OK)
-
-    def OnCharText(self, evt):
-        if (evt.GetKeyCode() == WXK_DOWN):
-            if not self.lb.IsEmpty():
-                self.lb.SetFocus()
-                self.lb.SetSelection(0)
-        elif (evt.GetKeyCode() == WXK_UP):
-            pass
-        elif (evt.GetKeyCode() in (WXK_RETURN, WXK_NUMPAD_ENTER)):
-            self.OnSearch(evt)
-            if not self.lb.IsEmpty():
-                self.lb.SetFocus()
-                self.lb.SetSelection(0)
-        else:
-            evt.Skip()
-
-    def OnCharListBox(self, evt):
-        if (evt.GetKeyCode() == WXK_UP) and (self.lb.GetSelection() == 0):
-            self.text.SetFocus()
-            self.lb.Deselect(0)
-        elif (evt.GetKeyCode() in (WXK_RETURN, WXK_NUMPAD_ENTER)):
-            self.OnListBoxDClick(evt)
-        else:
-            evt.Skip()
-
-
-class SavedSearchesDialog(wxDialog):
-    def __init__(self, pWiki, ID, title="Saved Searches",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D):
-        wxDialog.__init__(self, pWiki, ID, title, pos, size, style)
-        self.pWiki = pWiki
-
-        # Now continue with the normal construction of the dialog
-        # contents
-        sizer = wxBoxSizer(wxVERTICAL)
-
-        label = wxStaticText(self, -1, "Saved Searches")
-        sizer.Add(label, 0, wxALIGN_CENTRE|wxALL, 5)
-
-        label = wxStaticText(self, -1, "(to execute a saved search select")
-        sizer.Add(label, 0, wxALIGN_CENTRE, 5)
-
-        label = wxStaticText(self, -1, "searches under 'Views' in the tree)")
-        sizer.Add(label, 0, wxALIGN_CENTRE, 5)
-
-        box = wxBoxSizer(wxVERTICAL)
-
-        self.lb = wxListBox(self, -1, wxDefaultPosition, wxSize(165, 200), [], wxLB_SINGLE)
-
-        # fill in the listbox
-        for search in self.pWiki.wikiData.getSavedSearches():
-            self.lb.Append(search)
-
-        box.Add(self.lb, 1, wxALIGN_CENTRE|wxALL, 5)
-
-        sizer.AddSizer(box, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5)
-
-        line = wxStaticLine(self, -1, size=(20,-1), style=wxLI_HORIZONTAL)
-        sizer.Add(line, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxRIGHT|wxTOP, 5)
-
-        box = wxBoxSizer(wxHORIZONTAL)
-
-        btn = wxButton(self, wxID_CLEAR, " Delete ")
-        box.Add(btn, 0, wxALIGN_CENTRE|wxALL, 5)
-
-        btn = wxButton(self, wxID_CANCEL, " Cancel ")
-        box.Add(btn, 0, wxALIGN_CENTRE|wxALL, 5)
-
-        sizer.AddSizer(box, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5)
-
-        self.SetSizer(sizer)
-        self.SetAutoLayout(True)
-        sizer.Fit(self)
-
-        self.value = None
-
-        EVT_BUTTON(self, wxID_CLEAR, self.OnDelete)
-        EVT_LISTBOX(self, ID, self.OnListBox)
-
-    def OnDelete(self, evt):
-        if self.value:
-            self.pWiki.wikiData.deleteSavedSearch(self.value)
-            self.EndModal(wxID_CANCEL)
-
-    def OnListBox(self, evt):
-        self.value = guiToUni(evt.GetString())
-
 
 
 class AboutDialog(wxDialog):
@@ -2810,7 +2683,7 @@ class TaskBarIcon(wxTaskBarIcon):
 
         # Register menu events
         EVT_MENU(self, GUI_ID.TBMENU_RESTORE, self.OnLeftUp)
-        EVT_MENU(self, GUI_ID.TBMENU_SAVE, lambda evt: (self.pwiki.saveCurrentWikiPage(),
+        EVT_MENU(self, GUI_ID.TBMENU_SAVE, lambda evt: (self.pwiki.saveCurrentWikiPage(force=True),
                 self.pwiki.wikiData.commit()))
         EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pwiki.Close())
 

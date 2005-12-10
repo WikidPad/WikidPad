@@ -1,4 +1,4 @@
-++ Wikid Pad Help
+ï»¿++ Wikid Pad Help
 
 *Description*
 
@@ -43,14 +43,13 @@ Then just start typing text with WikiWords to create your wiki.
     * TreeIcons
     * TreeNodeColors
     * UrlLinking
-    * InternatiönalChàracters
+    * InternatiÃ¶nalChÃ racters
 
 *Other/Questions*
 
     * WikiMaintenance
     * WhereIsTheDataStored
     * PlannedFeatures
-    * HowToPurchase
     * WikidPadSupport
     * ChangeLog
     * GlobalScriptLibrary

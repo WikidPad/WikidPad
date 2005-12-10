@@ -24,10 +24,6 @@ UrlRE           = re.compile(u"((?:wiki|file|https?|ftp|mailto)://[^\s<]*)",
 
 
 # The following 3 are not in WikiFormatting.FormatExpressions
-# BulletRE        = re.compile(ur"^(?P<indentBullet> *)(\*)\s([^\n]*)",
-#         re.DOTALL | re.UNICODE | re.MULTILINE)
-# NumericBulletRE = re.compile(ur"^(?P<indentNumeric> *)(?P<preLastNumeric>(?:\d+\.)*)(\d+)\.\s([^\n]*)",
-#         re.DOTALL | re.UNICODE | re.MULTILINE)
 BulletRE        = re.compile(ur"^(?P<indentBullet> *)(\*)[ \t]",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 NumericBulletRE = re.compile(ur"^(?P<indentNumeric> *)(?P<preLastNumeric>(?:\d+\.)*)(\d+)\.[ \t]",

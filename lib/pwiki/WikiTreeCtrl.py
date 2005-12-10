@@ -11,6 +11,7 @@ from MiscEvent import KeyFunctionSink
 
 from WikiExceptions import WikiWordNotFoundException
 import WikiFormatting
+from SearchAndReplace import SearchReplaceOperation
 
 from StringOps import mbcsEnc, guiToUni, uniToGui, wikiWordToLabel, strToBool
 
@@ -80,24 +81,6 @@ class AbstractNode(object):
         This is called before expanding the node
         """
         return ()
-
-#     def openChildren(self):
-#         """
-#         Calls listChildren to return a sequence of Nodes for
-#         the children of this node.
-#         This list is also cached.
-#         This is called before expanding the node and
-#         This function shouldn't be overwritten, overwrite listChildren
-#         instead.
-#         """
-#         
-#     def closeChildren(self):
-#         """
-#         Drop cached list of children. This function only needs to be
-#         called once, even if openChildren() was called multiple times
-#         before
-#         """
-
 
     def onActivate(self):
         """
@@ -269,41 +252,6 @@ class WikiWordNode(AbstractNode):
             result.append(MainViewNode(self.treeCtrl))
                 
         return result
-        
-        
-#         else:
-#             tci = 0    # Index into prev
-#             
-#             result = []
-#             # Delete/create/update tree nodes
-#             for (relation, relationPage, position, hasChildren) in relationData:
-#                 if (tci < len(prev)) and prev[tci].representsWikiWord() and \
-#                         (prev[tci].wikiPage.getWikiWord() == relation):
-#                             
-#                     # This relation is already in the tree, so use existing node
-#                     childTreeNode = prev[tci][0]
-#                     tci += 1
-#                 else:
-#                     # No match, so create new node                
-#                     childTreeNode = self.addTreeNode(treeNode, relation)
-#                     
-#                     # Update childTreeNode   # TODO: Also for existing children?
-#                     try:
-#                         self.updateTreeNode(relationPage, childTreeNode, hasChildren)
-#                     except WikiWordNotFoundException, e:
-#                         pass
-#                     
-#                     
-#             # Remove old children
-#             while (tci < len(prev)):
-#                 self.Delete(prev[tci][0])
-#                 tci += 1
-#     
-#             # add a "View" node to the root if it isn't already there
-#             if treeNode == self.GetRootItem(): #wikiWord == self.pWiki.wikiName:
-#                 if not self.findChildTreeNodeWithText(treeNode, "Views"):
-#                     viewNode = self.addViewNode(treeNode, "Views", icon="orgchart")
-#         return treeNode
 
 
     def onActivate(self):
@@ -332,14 +280,14 @@ class WikiWordSearchNode(WikiWordNode):
     Derived from WikiWordNode with ability to set label different from
     wikiWord and to set search information
     """
-    __slots__ = ("newLabel", "searchInfo")    
+    __slots__ = ("newLabel", "searchOp")    
     
     def __init__(self, tree, wikiWord, flagChildren = False, newLabel = None,
-            searchInfo = None):
+            searchOp = None):
         WikiWordNode.__init__(self, tree, wikiWord, flagChildren)
 
         self.newLabel = newLabel
-        self.searchInfo = searchInfo
+        self.searchOp = searchOp
 
 
     def getNodePresentation(self):
@@ -350,8 +298,8 @@ class WikiWordSearchNode(WikiWordNode):
 
     def onActivate(self):
         WikiWordNode.onActivate(self)
-        if self.searchInfo:
-            self.treeCtrl.pWiki.editor.executeSearch(self.searchInfo, 0)
+        if self.searchOp:
+            self.treeCtrl.pWiki.editor.executeSearch(self.searchOp, 0)   # TODO
 
     def representsFamilyWikiWord(self):
         """
@@ -458,16 +406,14 @@ class TodoNode(AbstractNode):
         # First list categories, then words
         result += [TodoNode(self.treeCtrl, self.categories + (c,))
                 for c in addedTodoSubCategories]
+                
+        def createSearchNode(wt):
+            searchOp = SearchReplaceOperation()
+            searchOp.wildCard = "no"
+            searchOp.searchStr = wt[1]
+            return WikiWordSearchNode(self.treeCtrl, wt[0], searchOp=searchOp)
 
-#         map(lambda c: TodoNode(self.treeCtrl,
-#                 self.categories + (c,)), addedTodoSubCategories)
-
-        result += [WikiWordSearchNode(self.treeCtrl, wt[0], searchInfo=wt[1])
-                for wt in addedWords]
-        
-#         map(lambda wt: WikiWordSearchNode(self.treeCtrl,
-#                 wt[0], searchInfo=wt[1]),
-#                 addedWords)
+        result += [createSearchNode(wt) for wt in addedWords]
 
         return result
 
@@ -601,14 +547,13 @@ class MainSearchesNode(AbstractNode):
         return style
         
     def isVisible(self):
-        return self.treeCtrl.pWiki.wikiData.getSavedSearches()
+        return not not self.treeCtrl.pWiki.wikiData.getSavedSearchTitles()
         
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.wikiData
         
-        searches = wikiData.getSavedSearches()
-        searches.sort()
-        return map(lambda s: SearchNode(self.treeCtrl, s), searches)
+        searchTitles = wikiData.getSavedSearchTitles()
+        return map(lambda s: SearchNode(self.treeCtrl, s), searchTitles)
 
 
     
@@ -617,29 +562,34 @@ class SearchNode(AbstractNode):
     Represents a search below the "searches" node
     """
     
-    __slots__ = ("search",)
+    __slots__ = ("searchTitle",)
             
-    def __init__(self, tree, search):
+    def __init__(self, tree, searchTitle):
         AbstractNode.__init__(self, tree)
-        self.search = search
+        self.searchTitle = searchTitle
 
     def getNodePresentation(self):
         style = NodeStyle()
         style.icon = u"lens"
-        style.label = unicode(self.search)
+        style.label = unicode(self.searchTitle)
         style.hasChildren = True
         return style
 
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.wikiData
-        words = wikiData.search(self.search)
+        datablock = wikiData.getSearchDatablock(self.searchTitle)
+        searchOp = SearchReplaceOperation()
+        searchOp.setPackedSettings(datablock)
+        searchOp.setTitle(self.searchTitle)
+        searchOp.replaceOp = False
+        words = wikiData.search(searchOp)
         words.sort()
-        
-        return [WikiWordSearchNode(self.treeCtrl, w, searchInfo=self.search)
+
+        return [WikiWordSearchNode(self.treeCtrl, w, searchOp=searchOp)
                 for w in words]
 
 #         return map(lambda w: WikiWordSearchNode(self.treeCtrl,
-#                 wikiData.getPage(w, toload=[""]), searchInfo=self.search),
+#                 wikiData.getPage(w, toload=[""]), searchOp=searchOp),   # TODO
 #                 words)
 
     def nodeEquality(self, other):
@@ -647,7 +597,7 @@ class SearchNode(AbstractNode):
         Test for node equality
         """
         return AbstractNode.nodeEquality(self, other) and \
-                self.search.getTitle() == other.search.getTitle()
+                self.searchTitle.getTitle() == other.searchTitle.getTitle()
 
 
 
@@ -839,7 +789,7 @@ class WikiTreeCtrl(wxTreeCtrl):
                                 return
                     
         # No cheap way to find current word in tree    
-        if self.pWiki.configuration.getboolean("main", "tree_auto_follow") or\
+        if self.pWiki.configuration.getboolean("main", "tree_auto_follow") or \
                 miscevt.get("forceTreeSyncFromRoot", False):
             # Configuration or event says to use expensive way
             self.buildTreeForWord(self.pWiki.getCurrentWikiWord(),
@@ -849,7 +799,9 @@ class WikiTreeCtrl(wxTreeCtrl):
             self.Unselect()
 
     def onUpdatedCurrentPageProps(self, miscevt):
-        # print "onUpdatedCurrentPageProps1"
+        if not self.pWiki.configuration.getboolean("main", "tree_update_after_save"):
+            return
+
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
                 self.GetRootItem())
                 
@@ -874,11 +826,9 @@ class WikiTreeCtrl(wxTreeCtrl):
         if nodeObj.representsWikiWord():
             wikiWord = wikiData.getAliasesWikiWord(nodeObj.getWikiWord())
 
-        if not nodeObj.representsFamilyWikiWord() or \
-                wikiWord in self.refreshCheckChildren:
-##         if nodeObj.representsFamilyWikiWord() and \
+##         if not nodeObj.representsFamilyWikiWord() or \
 ##                 wikiWord in self.refreshCheckChildren:
-##         if True:
+        if True:
             # We have to recreate the children of this node
             
             # This is time consuming
