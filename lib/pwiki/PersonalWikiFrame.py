@@ -1472,8 +1472,6 @@ These are your default global settings.
         # if the new config is the same as the old, don't resave state since
         # this could be a wiki overwrite from newWiki. We don't want to overwrite
         # the new config with the old one.
-        if self.wikiConfigFilename != wikiConfigFilename:
-            self.closeWiki()
 
         # status
         self.statusBar.SetStatusText(
@@ -1486,6 +1484,9 @@ These are your default global settings.
             if wikiConfigFilename in self.wikiHistory:
                 self.wikiHistory.remove(wikiConfigFilename)
             return False
+
+#        if self.wikiConfigFilename != wikiConfigFilename:
+        self.closeWiki()
 
         # read in the config file
         # config = ConfigParser.ConfigParser()
@@ -2107,7 +2108,7 @@ These are your default global settings.
             return False
             
         toWikiWord = WikiFormatting.normalizeWikiWord(newWikiWord,
-                self.pWiki.configuration.getboolean("main",
+                self.configuration.getboolean("main",
                 "footnotes_as_wikiwords"))
         if toWikiWord is None:
             self.displayErrorMessage(u"'%s' is an invalid WikiWord" % newWikiWord)
