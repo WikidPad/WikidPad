@@ -1,5 +1,6 @@
 import sys, traceback
 from time import strftime
+import re
 
 from os.path import exists
 
@@ -396,7 +397,14 @@ class OptionsDialog(wxDialog):
             ("tree_auto_follow", "cbTreeAutoFollow", "b"),
             ("tree_update_after_save", "cbTreeUpdateAfterSave", "b"),
             ("facename_html_preview", "tfFacenameHtmlPreview", "t"),
-            ("footnotes_as_wikiwords", "cbFootnotesAsWws", "b")
+            ("footnotes_as_wikiwords", "cbFootnotesAsWws", "b"),
+
+            ("html_preview_proppattern_is_excluding",
+                    "cbHtmlPreviewProppatternIsExcluding", "b"),
+            ("html_preview_proppattern", "tfHtmlPreviewProppattern", "tre"),
+            ("html_export_proppattern_is_excluding",
+                    "cbHtmlExportProppatternIsExcluding", "b"),
+            ("html_export_proppattern", "tfHtmlExportProppattern", "tre")
     ]
     
     def __init__(self, pWiki, ID, title="Options",
@@ -416,12 +424,13 @@ class OptionsDialog(wxDialog):
         
         # Transfer options to dialog
         for o, c, t in self.OPTION_TO_CONTROL:
-            if t == "b":
+            if t == "b":   # boolean field = checkbox
                 self.ctrls[c].SetValue(
                         self.pWiki.configuration.getboolean("main", o))
-            elif t == "t":
+            elif t == "t" or t == "tre":  # text field or regular expression field
                 self.ctrls[c].SetValue(
                         uniToGui(self.pWiki.configuration.get("main", o)) )
+            
                 
             
         # Options with special treatment
@@ -437,14 +446,36 @@ class OptionsDialog(wxDialog):
         
 
     def OnOk(self, evt):
+        fieldsValid = True
+        # First check validity of field contents
+        for o, c, t in self.OPTION_TO_CONTROL:
+            if t == "tre":
+                # Regular expression field, test if re is valid
+                try:
+                    rexp = guiToUni(self.ctrls[c].GetValue())
+                    re.compile(rexp, re.DOTALL | re.UNICODE | re.MULTILINE)
+                    self.ctrls[c].SetBackgroundColour(wxWHITE)
+                except:   # TODO Specific exception
+                    fieldsValid = False
+                    self.ctrls[c].SetBackgroundColour(wxRED)
+
+        if not fieldsValid:
+            self.Refresh()
+            return
+
         # Transfer options from dialog to config file
         for o, c, t in self.OPTION_TO_CONTROL:
-            #TODO Handle unicode text controls
+            # TODO Handle unicode text controls
             if t == "b":
                 self.pWiki.configuration.set("main", o, repr(self.ctrls[c].GetValue()))
             elif t == "t":
                 self.pWiki.configuration.set(
                         "main", o, guiToUni(self.ctrls[c].GetValue()) )
+            elif t == "tre":
+                # Regular expression field
+                rexp = guiToUni(self.ctrls[c].GetValue())
+                self.pWiki.configuration.set("main", o, rexp)
+                    
             
         # Options with special treatment
         if self.ctrls.cbLowResources.GetValue():

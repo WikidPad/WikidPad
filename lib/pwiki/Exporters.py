@@ -1,7 +1,7 @@
 # from Enum import Enumeration
 import WikiFormatting
-# import re
-import os
+import srePersistent as re
+import os, string
 from os.path import join, exists, splitext
 import sys
 import shutil
@@ -175,7 +175,7 @@ class HtmlXmlExporter:
         fp.write(self.getFileHeader(self.pWiki.wikiName))
         
         for word in self.wordList:
-            wikiPage = self.wikiData.getPage(word, toload=[""])
+            wikiPage = self.wikiData.getPage(word)
             if not self.shouldExport(word, wikiPage):
                 continue
             
@@ -210,7 +210,7 @@ class HtmlXmlExporter:
 
     def exportHtmlMultipleFiles(self):
         for word in self.wordList:
-            wikiPage = self.wikiData.getPage(word, toload=[""])
+            wikiPage = self.wikiData.getPage(word)
             if not self.shouldExport(word, wikiPage):
                 continue
 
@@ -251,7 +251,7 @@ class HtmlXmlExporter:
         fp.write(u'<wiki name="%s">' % self.pWiki.wikiName)
         
         for word in self.wordList:
-            wikiPage = self.wikiData.getPage(word, toload=[""])
+            wikiPage = self.wikiData.getPage(word)
             if not self.shouldExport(word, wikiPage):
                 continue
                 
@@ -304,7 +304,7 @@ class HtmlXmlExporter:
             realfp = open(outputFile, "w")
             fp = utf8Writer(realfp, "replace")
             
-            wikiPage = self.wikiData.getPage(word, toload=[""])
+            wikiPage = self.wikiData.getPage(word)
             content = wikiPage.getContent()            
             fp.write(self.exportContentToHtmlString(word, content, links, startFile,
                     onlyInclude))
@@ -329,7 +329,7 @@ class HtmlXmlExporter:
         # if startFile is set then this is the only page being exported so
         # do not include the parent header.
         if not startFile:
-            wikiPage = self.wikiData.getPage(word, toload=[""])
+            wikiPage = self.wikiData.getPage(word)
             result.append(u'<span class="parent-nodes">parent nodes: %s</span>'
                     % self.getParentLinks(wikiPage, True, onlyInclude))
 
@@ -388,7 +388,7 @@ class HtmlXmlExporter:
     def shouldExport(self, wikiWord, wikiPage=None):
         if not wikiPage:
             try:
-                wikiPage = self.wikiData.getPage(wikiWord, toload=[""])
+                wikiPage = self.wikiData.getPage(wikiWord)
             except WikiData.WikiWordNotFoundException:
                 return False
             
@@ -421,6 +421,9 @@ class HtmlXmlExporter:
         Append toAppend to self.result, maybe remove or modify it according to
         flags
         """
+        if toAppend.strip() == u"":
+            return
+
         if self.outFlagEatPostBreak and toAppend.strip() == "<br />":
             self.outFlagEatPostBreak = eatPostBreak
             return
@@ -428,8 +431,10 @@ class HtmlXmlExporter:
         if eatPreBreak and len(self.result) > 0 and \
                 self.result[-1].strip() == "<br />":
             self.result[-1] = toAppend
+            self.outFlagEatPostBreak = eatPostBreak
             return
             
+        self.outFlagEatPostBreak = eatPostBreak
         self.result.append(toAppend)
         
 
@@ -458,6 +463,23 @@ class HtmlXmlExporter:
 
     def getOutput(self):
         return u"".join(self.result)
+        
+    def outTable(self, content):
+        """
+        Write out content of a table as HTML code
+        """
+        # TODO XML
+        self.outAppend(u'<table border="2">\n')  # , eatPreBreak=True
+        for line in content.split(u"\n"):
+            if line.strip() == "":
+                continue
+            cells = line.split(u"|")  # TODO strip whitespaces?
+            resline = [u"<tr>"]
+            resline += [u"<td>%s</td>" % escapeHtml(cell) for cell in cells]
+            resline.append(u"</tr>\n")
+            self.outAppend(u"".join(resline))
+        
+        self.outAppend(u'</table>\n', eatPostBreak=True)
 
 
     def formatContent(self, word, content, links=None, asXml=False,
@@ -481,6 +503,25 @@ class HtmlXmlExporter:
         # TODO Without camel case
         tokens = self.tokenizer.tokenize(content, sync=True)
         
+        # Get property pattern
+        if asHtmlPreview:
+            proppattern = self.pWiki.configuration.get(
+                        "main", "html_preview_proppattern", u"")
+        else:
+            proppattern = self.pWiki.configuration.get(
+                        "main", "html_export_proppattern", u"")
+                        
+        proppattern = re.compile(proppattern,
+                re.DOTALL | re.UNICODE | re.MULTILINE)
+
+        if asHtmlPreview:
+            proppatternExcluding = self.pWiki.configuration.getboolean(
+                        "main", "html_preview_proppattern_is_excluding", u"True")
+        else:
+            proppatternExcluding = self.pWiki.configuration.getboolean(
+                        "main", "html_export_proppattern_is_excluding", u"True")
+        
+
         if len(tokens) >= 2:
             tok = tokens[0]
 
@@ -564,7 +605,8 @@ class HtmlXmlExporter:
                         if not nextstyleno in \
                                 (WikiFormatting.FormatTypes.Numeric,
                                 WikiFormatting.FormatTypes.Bullet,
-                                WikiFormatting.FormatTypes.Suppress):
+                                WikiFormatting.FormatTypes.Suppress,
+                                WikiFormatting.FormatTypes.Table):
 
                             line = lines[-1]
                             line, ind = splitIndent(line)
@@ -621,9 +663,16 @@ class HtmlXmlExporter:
                                 (escapeHtml(tok[2]["propertyName"]),
                                 escapeHtml(tok[2]["propertyValue"])) )
                     else:
-                        self.outAppend( u'<span class="property">[%s: %s]</span>' % 
-                                (escapeHtml(tok[2]["propertyName"]),
-                                escapeHtml(tok[2]["propertyValue"])) )
+                        standardProperty = u"%s: %s" % (tok[2]["propertyName"],
+                                tok[2]["propertyValue"])
+                        standardPropertyMatching = \
+                                not not proppattern.match(standardProperty)
+                        # Output only for different truth values
+                        if standardPropertyMatching != proppatternExcluding:
+                            self.outAppend( u'<span class="property">[%s: %s]</span>' % 
+                                    (escapeHtml(tok[2]["propertyName"]),
+                                    escapeHtml(tok[2]["propertyValue"])) )
+
                 elif styleno == WikiFormatting.FormatTypes.Url:
                     link = content[tok[0]:nexttok[0]]
                     if asXml:
@@ -714,6 +763,10 @@ class HtmlXmlExporter:
                     while self.statestack[-1][0] != "normalindent":
                         self.popState()
                     self.outAppend(escapeHtml(tok[2]["suppressContent"]))
+                elif styleno == WikiFormatting.FormatTypes.Table:
+                    while self.statestack[-1][0] != "normalindent":  # TODO ?
+                        self.popState()
+                    self.outTable(tok[2]["tableContent"])
                 elif styleno == WikiFormatting.FormatTypes.Default:
 #                     while self.statestack[-1][0] != "normalindent":
 #                         self.popState()

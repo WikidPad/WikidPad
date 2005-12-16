@@ -207,7 +207,7 @@ class MiscEvent(object):
         for k in addkeys:
             event.properties[k] = None
         return event
-
+        
 
 class KeyFunctionSink(object):
     """
@@ -225,6 +225,20 @@ class KeyFunctionSink(object):
         for k, f in self.activationTable:
             if evt.has_key(k):
                 f(evt)
-                
+
+
+class DebugSimple(object):
+    """
+    A MiscEvent sink which dispatches events further to other functions
+    """
+    __slots__ = ("__weakref__", "text")
+    
+    def __init__(self, text):
+        """
+        """
+        self.text = text
+    
+    def miscEventHappened(self, evt):
+        print self.text, repr(evt.properties)
         
     

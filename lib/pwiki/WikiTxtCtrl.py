@@ -423,7 +423,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # load the ScratchPad
         try:
-            wikiPage = self.pWiki.wikiData.getPage("ScratchPad", ["info"])
+            wikiPage = self.pWiki.wikiData.getPage("ScratchPad")
         except WikiWordNotFoundException, e:
             wikiPage = self.pWiki.wikiData.createPage("ScratchPad")
 
@@ -492,7 +492,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
             if len(combword) == 2:
                 searchOp = SearchReplaceOperation()
-                searchOp.wildCard = "no"
+                searchOp.wildCard = "no"   # TODO Why not regex?
                 searchOp.searchStr = WikiFormatting.SearchUnescapeRE.sub(ur"\1",
                         combword[1])
 
@@ -588,11 +588,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             text = self.GetText()
 
             # process script imports
-            if self.pWiki.currentWikiPage.props.has_key("import_scripts"):
-                scripts = self.pWiki.currentWikiPage.props["import_scripts"]
+            if self.pWiki.currentWikiPage.getProperties().has_key("import_scripts"):
+                scripts = self.pWiki.currentWikiPage.getProperties()["import_scripts"]
                 for script in scripts:
                     try:
-                        importPage = self.pWiki.wikiData.getPage(script, [])
+                        importPage = self.pWiki.wikiData.getPage(script)
                         content = importPage.getContent()
                         text = text + "\n" + content
                     except:
@@ -720,7 +720,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         Can be called by an aga to present all parents of the current page.
         """
-        relations = self.pWiki.currentWikiPage.parentRelations
+        relations = self.pWiki.currentWikiPage.getParentRelationships()[:]
 
         # Apply sort order
         relations.sort(_removeBracketsAndSort) # sort alphabetically
@@ -978,14 +978,21 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             # wrap the text
             wrapPosition = 70
             try:
-                if self.pWiki.currentWikiPage.props.has_key("wrap"):
-                    wrapPosition = int(self.pWiki.currentWikiPage.props["wrap"][0])
-                else:
-                    styleProps = self.pWiki.wikiData.getGlobalProperties()
-                    if styleProps.has_key("global.wrap"):
-                        wrapPosition = int(styleProps["global.wrap"])
+                wrapPosition = int(
+                        self.pWiki.currentWikiPage.getPropertyOrGlobal(
+                        "wrap", "70"))
             except:
                 pass
+#             try:
+#                 if self.pWiki.currentWikiPage.getProperties().has_key("wrap"):
+#                     wrapPosition = int(
+#                             self.pWiki.currentWikiPage.getProperties()["wrap"][0])
+#                 else:
+#                     styleProps = self.pWiki.wikiData.getGlobalProperties()
+#                     if styleProps.has_key("global.wrap"):
+#                         wrapPosition = int(styleProps["global.wrap"])
+#             except:
+#                 pass
 
             # make the min wrapPosition 5
             if wrapPosition < 5:

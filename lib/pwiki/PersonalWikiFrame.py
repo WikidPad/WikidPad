@@ -15,6 +15,8 @@ from WikiData import *
 from WikiTxtCtrl import *
 from WikiTreeCtrl import *
 from WikiHtmlView import WikiHtmlView
+from AboutDialog import AboutDialog
+
 from PageHistory import PageHistory
 from SearchAndReplace import SearchReplaceOperation
 
@@ -201,6 +203,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         self.iconLookupCache = {}
         self.wikiHistory = []
         self.findDlg = None  # Stores find and find&replace dialog, if present
+        self.mainmenu = None
 
         # setup plugin manager and hooks API
         self.pluginManager = PluginManager()
@@ -502,12 +505,11 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         return menuitem
 
 
-    def buildMainMenu(self):
-        # ------------------------------------------------------------------------------------
-        # Set up menu bar for the program.
-        # ------------------------------------------------------------------------------------
-        self.mainmenu = wxMenuBar()   # Create menu bar.
-
+    def buildWikiMenu(self):
+        """
+        Builds the first, the "Wiki" menu and returns it
+        """
+        wikiData = self.wikiData
         wikiMenu=wxMenu()
 
         self.addMenuItem(wikiMenu, '&New\t' + self.keyBindings.NewWiki,
@@ -525,20 +527,21 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
             self.recentWikisMenu.Append(menuID, wiki)
             EVT_MENU(self, menuID, self.OnSelectRecentWiki)
 
-        wikiMenu.AppendSeparator()
+        if wikiData is not None:
+            wikiMenu.AppendSeparator()
+    
+            self.addMenuItem(wikiMenu, '&Search Wiki\t' +
+                    self.keyBindings.SearchWiki, 'Search Wiki',
+                    lambda evt: self.showSearchDialog(), "tb_lens")
 
-        self.addMenuItem(wikiMenu, '&Search Wiki\t' + self.keyBindings.SearchWiki,
-                'Search Wiki', lambda evt: self.showSearchDialog(),
-                "tb_lens")
-
-
-#         menuID=wxNewId()
-#         wikiMenu.Append(menuID, '&View Saved Searches', 'View Saved Searches')
-#         EVT_MENU(self, menuID, lambda evt: self.showSavedSearchesDialog())
-
-        menuID=wxNewId()
-        wikiMenu.Append(menuID, '&View Bookmarks\t' + self.keyBindings.ViewBookmarks, 'View Bookmarks')
-        EVT_MENU(self, menuID, lambda evt: self.viewBookmarks())
+            self.addMenuItem(wikiMenu, '&View Bookmarks\t' +
+                    self.keyBindings.ViewBookmarks, 'View Bookmarks',
+                    lambda evt: self.viewBookmarks())
+    
+#             menuID=wxNewId()
+#             wikiMenu.Append(menuID, '&View Bookmarks\t' +
+#                     self.keyBindings.ViewBookmarks, 'View Bookmarks')
+#             EVT_MENU(self, menuID, lambda evt: self.viewBookmarks())
 
         wikiMenu.AppendSeparator()
 
@@ -552,51 +555,100 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
                 'Set Options', lambda evt: self.showOptionsDialog())
 
         wikiMenu.AppendSeparator()
+        
+        if wikiData is not None:
+            exportWikisMenu = wxMenu()
+            wikiMenu.AppendMenu(wxNewId(), 'Export', exportWikisMenu)
+    
+            self.addMenuItem(exportWikisMenu, 'Export Wiki as Single HTML Page',
+                    'Export Wiki as Single HTML Page', self.OnExportWiki,
+                    menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_PAGE)
+    
+            self.addMenuItem(exportWikisMenu, 'Export Wiki as Set of HTML Pages',
+                    'Export Wiki as Set of HTML Pages', self.OnExportWiki,
+                    menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES)
+    
+            self.addMenuItem(exportWikisMenu, 'Export Current Wiki Word as HTML Page',
+                    'Export Current Wiki Word as HTML Page', self.OnExportWiki,
+                    menuID=GUI_ID.MENU_EXPORT_WORD_AS_PAGE)
+    
+            self.addMenuItem(exportWikisMenu, 'Export Sub-Tree as Single HTML Page',
+                    'Export Sub-Tree as Single HTML Page', self.OnExportWiki,
+                    menuID=GUI_ID.MENU_EXPORT_SUB_AS_PAGE)
+    
+            self.addMenuItem(exportWikisMenu, 'Export Sub-Tree as Set of HTML Pages',
+                    'Export Sub-Tree as Set of HTML Pages', self.OnExportWiki,
+                    menuID=GUI_ID.MENU_EXPORT_SUB_AS_PAGES)
+    
+            self.addMenuItem(exportWikisMenu, 'Export Wiki as XML',
+                    'Export Wiki as XML in UTF-8', self.OnExportWiki,
+                    menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_XML)
+    
+            self.addMenuItem(exportWikisMenu, 'Export Wiki to .wiki files',
+                    'Export Wiki to .wiki files in UTF-8', self.OnExportWiki,
+                    menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_RAW)
+    
+            self.addMenuItem(exportWikisMenu, 'Other Export...',
+                    'Open export dialog',
+                    lambda evt: self.showExportDialog())
 
-        exportWikisMenu = wxMenu()
-        wikiMenu.AppendMenu(wxNewId(), 'Export', exportWikisMenu)
+        if wikiData is not None and wikiData.checkCapability("rebuild") == 1:
+            menuID=wxNewId()
+            wikiMenu.Append(menuID, '&Rebuild Wiki', 'Rebuild this wiki')
+            EVT_MENU(self, menuID, lambda evt: self.rebuildWiki())
 
-        self.addMenuItem(exportWikisMenu, 'Export Wiki as Single HTML Page',
-                'Export Wiki as Single HTML Page', self.OnExportWiki,
-                menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_PAGE)
+        if wikiData is not None and wikiData.checkCapability("compactify") == 1:
+            menuID=wxNewId()
+            wikiMenu.Append(menuID, '&Vacuum Wiki', 'Free unused space in database')
+            EVT_MENU(self, menuID, lambda evt: self.vacuumWiki())
 
-        self.addMenuItem(exportWikisMenu, 'Export Wiki as Set of HTML Pages',
-                'Export Wiki as Set of HTML Pages', self.OnExportWiki,
-                menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES)
+        if wikiData is not None and \
+                wikiData.checkCapability("plain text import") == 1:
+            menuID=wxNewId()
+            wikiMenu.Append(menuID, '&Copy .wiki files to database', 'Copy .wiki files to database')
+            EVT_MENU(self, menuID, self.OnImportFromPagefiles)
 
-        self.addMenuItem(exportWikisMenu, 'Export Current Wiki Word as HTML Page',
-                'Export Current Wiki Word as HTML Page', self.OnExportWiki,
-                menuID=GUI_ID.MENU_EXPORT_WORD_AS_PAGE)
+        if wikiData is not None and wikiData.checkCapability("versioning") == 1:
+            wikiMenu.AppendSeparator()
+    
+            menuID=wxNewId()
+            wikiMenu.Append(menuID, '&Store version', 'Store new version')
+            EVT_MENU(self, menuID, lambda evt: self.showStoreVersionDialog())
+    
+            menuID=wxNewId()
+            wikiMenu.Append(menuID, '&Retrieve version', 'Retrieve previous version')
+            EVT_MENU(self, menuID, lambda evt: self.showSavedVersionsDialog())
+    
+            menuID=wxNewId()
+            wikiMenu.Append(menuID, 'Delete &All Versions', 'Delete all stored versions')
+            EVT_MENU(self, menuID, lambda evt: self.showDeleteAllVersionsDialog())
 
-        self.addMenuItem(exportWikisMenu, 'Export Sub-Tree as Single HTML Page',
-                'Export Sub-Tree as Single HTML Page', self.OnExportWiki,
-                menuID=GUI_ID.MENU_EXPORT_SUB_AS_PAGE)
+        wikiMenu.AppendSeparator()  # TODO May have two separators without anything between
 
-        self.addMenuItem(exportWikisMenu, 'Export Sub-Tree as Set of HTML Pages',
-                'Export Sub-Tree as Set of HTML Pages', self.OnExportWiki,
-                menuID=GUI_ID.MENU_EXPORT_SUB_AS_PAGES)
-
-        self.addMenuItem(exportWikisMenu, 'Export Wiki as XML',
-                'Export Wiki as XML in UTF-8', self.OnExportWiki,
-                menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_XML)
-
-        self.addMenuItem(exportWikisMenu, 'Export Wiki to .wiki files',
-                'Export Wiki to .wiki files in UTF-8', self.OnExportWiki,
-                menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_RAW)
-
-        self.addMenuItem(exportWikisMenu, 'Other Export...',
-                'Open export dialog',
-                lambda evt: self.showExportDialog())
-
-        menuID=wxNewId()
-        wikiMenu.Append(menuID, '&Rebuild Wiki', 'Rebuild this wiki')
-        EVT_MENU(self, menuID, lambda evt: self.rebuildWiki())
-
-        wikiMenu.AppendSeparator()
+        # self.addMenuItem(wikiMenu, '&Test',
+        #         'Test', lambda evt: self.testIt())
 
         menuID=wxNewId()
         wikiMenu.Append(menuID, 'E&xit', 'Exit')
         EVT_MENU(self, menuID, lambda evt: self.Close())
+        
+        return wikiMenu
+
+
+
+    def buildMainMenu(self):
+        # ------------------------------------------------------------------------------------
+        # Set up menu bar for the program.
+        # ------------------------------------------------------------------------------------
+        if self.mainmenu is not None:
+            # This is a rebuild of an existing menu (after loading a new wikiData)
+            self.mainmenu.Replace(0, self.buildWikiMenu(), 'W&iki')
+            return
+
+
+        self.mainmenu = wxMenuBar()   # Create menu bar.
+
+        wikiMenu = self.buildWikiMenu()
 
         wikiWordMenu=wxMenu()
 
@@ -1487,6 +1539,7 @@ These are your default global settings.
 
 #        if self.wikiConfigFilename != wikiConfigFilename:
         self.closeWiki()
+        self.buildMainMenu()
 
         # read in the config file
         # config = ConfigParser.ConfigParser()
@@ -1567,6 +1620,7 @@ These are your default global settings.
 
         # reset the gui
         self.resetGui()
+        self.buildMainMenu()
 
         # enable the top level menus
         if self.mainmenu:
@@ -1628,6 +1682,7 @@ These are your default global settings.
             self.wikiConfigFilename = None
 
             self.setShowOnTray()
+            self.fireMiscEventKeys(("closed current wiki",))
 
     def saveCurrentWikiState(self):
         # write out the current config
@@ -1833,8 +1888,8 @@ These are your default global settings.
                 os.rename(self.wikiConfigFilename, renamedConfigFile)
                 self.openWiki(renamedConfigFile)
                 
-            self.currentWikiWord = toWikiWord
-            self.currentWikiPage = None
+#             self.currentWikiWord = toWikiWord
+#             self.currentWikiPage = None
 
             # trigger hooks
             self.hooks.renamedWikiWord(self, wikiWord, toWikiWord)                
@@ -1845,7 +1900,7 @@ These are your default global settings.
             p2["newWord"] = toWikiWord
             self.fireMiscEventProps(p2)
 
-            self.openWikiPage(toWikiWord, forceTreeSyncFromRoot=True)
+            self.openWikiPage(toWikiWord, forceTreeSyncFromRoot=False)
             # self.findCurrentWordInTree()
             return True
         except WikiDataException, e:
@@ -2093,6 +2148,60 @@ These are your default global settings.
         finally:
             dlg.Destroy()
 
+    # TODO Unicode
+    def showStoreVersionDialog(self):
+        dlg = wxTextEntryDialog (self, u"Description:",
+                                 u"Store new version", u"",
+                                 wxOK | wxCANCEL)
+
+        description = None
+        if dlg.ShowModal() == wxID_OK:
+            description = dlg.GetValue()
+        dlg.Destroy()
+
+        if not description is None:
+            self.saveCurrentWikiPage()
+            self.wikiData.storeVersion(description)
+
+
+    def showDeleteAllVersionsDialog(self):
+        result = wxMessageBox(u"Do you want to delete all stored versions?",
+                u"Delete All Versions", wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION, self)
+
+        if result == wxYES:
+            self.wikiData.deleteVersioningData()
+
+
+    def showSavedVersionsDialog(self):
+        if not self.wikiData.hasVersioningData():
+            dlg=wxMessageDialog(self, u"This wiki does not contain any version information",
+                    u'Retrieve version', wxOK)
+            dlg.ShowModal()
+            dlg.Destroy()
+            return
+
+        dlg = SavedVersionsDialog(self, -1)
+        dlg.CenterOnParent(wxBOTH)
+
+        version = None
+        if dlg.ShowModal() == wxID_OK:
+            version = dlg.GetValue()
+        dlg.Destroy()
+
+        if version:
+            dlg=wxMessageDialog(self, u"This will overwrite current content if not stored as version. Continue?",
+                    u'Retrieve version', wxYES_NO)
+            if dlg.ShowModal() == wxID_YES:
+                dlg.Destroy()
+                self.saveCurrentWikiPage()
+                word = self.currentWikiPage.getWikiWord()
+                self.wikiData.applyStoredVersion(version[0])
+                self.rebuildWiki(skipConfirm=True)
+                ## self.tree.collapse()
+                self.openWikiPage(self.currentWikiWord, forceTreeSyncFromRoot=True, forceReopen=True)
+                ## self.findCurrentWordInTree()
+            else:
+                dlg.Destroy()
 
 
     # TODO Check if new name already exists (?)
@@ -2134,7 +2243,7 @@ These are your default global settings.
         result = dlg.ShowModal()
         if result == wxID_YES:
             try:
-                self.saveCurrentWikiPage()
+                # self.saveCurrentWikiPage()
                 renamed = self.renameCurrentWikiPage(toWikiWord)
 #                 self.wikiData.renameWord(wikiWord, toWikiWord)
 # 
@@ -2395,6 +2504,19 @@ These are your default global settings.
                 traceback.print_exc()
 
 
+    def vacuumWiki(self):
+        self.wikiData.vacuum()
+
+
+    def OnImportFromPagefiles(self, evt):
+        dlg=wxMessageDialog(self, "This could overwrite pages in the database. Continue?",
+                            'Import pagefiles', wxYES_NO)
+
+        result = dlg.ShowModal()
+        if result == wxID_YES:
+            self.wikiData.copyWikiFilesToDatabase()
+
+
     def insertAttribute(self, name, value):
         pos = self.editor.GetCurrentPos()
         self.editor.GotoPos(self.editor.GetLength())
@@ -2594,7 +2716,8 @@ These are your default global settings.
         self.writeGlobalConfig()
 
         # save the current wiki state
-        self.saveCurrentWikiState()
+        self.closeWiki()
+#         self.saveCurrentWikiState()
 
         # trigger hook
         self.hooks.exit(self)
@@ -2611,70 +2734,6 @@ These are your default global settings.
             self.tbIcon = None
 
         self.Destroy()
-
-
-class AboutDialog(wxDialog):
-    """ An about box that uses an HTML window """
-
-    text = '''
-<html>
-<body bgcolor="#FFFFFF">
-    <center>
-        <table bgcolor="#CCCCCC" width="100%" cellspacing="0" cellpadding="0" border="1">
-            <tr>
-                <td align="center"><h2>wikidPad 1.20beta</h2></td>
-            </tr>
-        </table>
-
-        <p>
-wikidPad is a Wiki-like notebook for storing your thoughts, ideas, todo lists, contacts, or anything else you can think of to write down.
-What makes wikidPad different from other notepad applications is the ease with which you can cross-link your information.        </p>        
-        <br><br>
-
-        <table border=0 cellpadding=1 cellspacing=0>
-            <tr><td width="30%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Jason Horman</font></td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">wikidpad@jhorman.org</font></td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>URL:</b></font></td><td nowrap><font size="3">http://www.jhorman.org/wikidPad/</font></td></tr>
-            <tr><td width="30%" align="right">&nbsp;</td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Michael Butscher</font></td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">mbutscher@gmx.de</font></td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>URL:</b></font></td><td nowrap><font size="3">http://www.mbutscher.nextdesigns.net/software.html</font></td></tr>
-            <tr><td width="30%" align="right">&nbsp;</td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Gerhard Reitmayr</font></td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">gerhard.reitmayr@gmail.com</font></td></tr>
-        </table>
-    </center>
-</body>
-</html>
-'''
-
-    def __init__(self, parent):
-        wxDialog.__init__(self, parent, -1, 'About WikidPad',
-                          size=(470, 330) )
-
-        html = wxHtmlWindow(self, -1)
-        html.SetPage(self.text)
-        button = wxButton(self, wxID_OK, "Okay")
-
-        # constraints for the html window
-        lc = wxLayoutConstraints()
-        lc.top.SameAs(self, wxTop, 5)
-        lc.left.SameAs(self, wxLeft, 5)
-        lc.bottom.SameAs(button, wxTop, 5)
-        lc.right.SameAs(self, wxRight, 5)
-        html.SetConstraints(lc)
-
-        # constraints for the button
-        lc = wxLayoutConstraints()
-        lc.bottom.SameAs(self, wxBottom, 5)
-        lc.centreX.SameAs(self, wxCentreX)
-        lc.width.AsIs()
-        lc.height.AsIs()
-        button.SetConstraints(lc)
-
-        self.SetAutoLayout(True)
-        self.Layout()
-        self.CentreOnParent(wxBOTH)
 
 
 class TaskBarIcon(wxTaskBarIcon):

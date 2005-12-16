@@ -136,10 +136,11 @@ class WikiData:
         return fileContentToUnicode(content)
 
         # TODO Remove method
-    def updatePageEntry(self, word, moddate = None, creadate = None):
+    def _updatePageEntry(self, word, moddate = None, creadate = None):
         """
         Update/Create entry with additional information for a page
-            (modif./creation date)
+            (modif./creation date).
+        Not part of public API!
         """
         ti = time()
         if moddate is None:
@@ -175,7 +176,7 @@ class WikiData:
         output.write(utf8Enc(text)[0])
         output.close()
         
-        self.updatePageEntry(word, moddate, creadate)
+        self._updatePageEntry(word, moddate, creadate)
 
 
 #     def getContentAndInfo(self, word):
@@ -224,7 +225,7 @@ class WikiData:
             self.clearCacheTables()
             for wikiWord in wikiWords:
                 progresshandler.update(step, u"Rebuilding %s" % wikiWord)
-                self.updatePageEntry(wikiWord)
+                self._updatePageEntry(wikiWord)
                 wikiPage = self.createPage(wikiWord)
                 wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
                 step = step + 1
@@ -254,7 +255,7 @@ class WikiData:
 #             for wikiWord in wikiWords:
 #                 progresshandler.update(step, u"Rebuilding %s" % wikiWord)
 #                 wikiPage = self.createPage(wikiWord)
-#                 self.updatePageEntry(wikiWord)
+#                 self._updatePageEntry(wikiWord)
 #                 wikiPage.update(wikiPage.getContent(), False)
 #                 step += 1
 # 
@@ -273,7 +274,20 @@ class WikiData:
     
     # ---------- The rest ----------
 
-    def getPage(self, wikiWord, toload=None):
+    _CAPABILITIES = {
+        "rebuild": 1
+        }
+
+    def checkCapability(self, capkey):
+        """
+        Check the capabilities of this WikiData implementation.
+        The capkey names the capability, the function returns normally
+        a version number or None if not supported
+        """
+        return WikiData._CAPABILITIES.get(capkey, None)
+
+
+    def getPage(self, wikiWord):
         """
         Fetch a WikiPage for the wikiWord, throws WikiWordNotFoundException
         if word doesn't exist
@@ -281,14 +295,14 @@ class WikiData:
         if not self.isDefinedWikiWord(wikiWord):
             raise WikiWordNotFoundException, u"Word '%s' not in wiki" % wikiWord
 
-        return WikiPage(self, wikiWord, toload)
+        return WikiPage(self, wikiWord)
 
-    def getPageNoError(self, wikiWord, toload=None):
+    def getPageNoError(self, wikiWord):
         """
         fetch a WikiPage for the wikiWord. If it doesn't exist, return
         one without throwing an error and without updating the cache
         """
-        return WikiPage(self, wikiWord, toload)
+        return WikiPage(self, wikiWord)
 
     def createPage(self, wikiWord):
         """
@@ -300,7 +314,7 @@ class WikiData:
 #                 "insert into wikiwords(word, created, modified) values (?, ?, ?)",
 #                 (wikiWord, ti, ti))
 #         self.cachedWikiWords[wikiWord] = 1
-        return self.getPageNoError(wikiWord, toload=[""])
+        return self.getPageNoError(wikiWord)
 
     def getChildRelationships(self, wikiWord, existingonly=False,
             selfreference=True):
@@ -386,7 +400,8 @@ class WikiData:
 
     def getWikiWordsWith(self, thisStr):
         "get the list of words with thisStr in them."
-        return [word for word in self.getAllDefinedPageNames() if word.lower().find(thisStr) != -1]
+        return [word for word in self.getAllDefinedPageNames()
+                if word.lower().find(thisStr) != -1]
 
     def getWikiWordsModifiedWithin(self, days):
         timeDiff = time()-(86400*days)
@@ -588,17 +603,22 @@ class WikiData:
 
     def findBestPathFromWordToWord(self, word, toWord):
         "finds the shortest path from word to toWord"
-        bestPath = findShortestPath(self.assembleWordGraph(word), word, toWord, [])
+        bestPath = findShortestPath(self._assembleWordGraph(word, {}), word,
+                toWord, [])
         if bestPath: bestPath.reverse()
         return bestPath
 
-    def assembleWordGraph(self, word, graph={}):
-        "recursively builds a graph of each of words parent relations"
+    def _assembleWordGraph(self, word, graph):
+        """
+        recursively builds a graph of each of words parent relations
+
+        Not part of public API!
+        """
         if not graph.has_key(word):
             parents = self.getParentRelationships(word)
             graph[word] = parents;
             for parent in parents:
-                self.assembleWordGraph(parent, graph)
+                self._assembleWordGraph(parent, graph)
         return graph
 
     def getAllSubWords(self, word, includeRoot=False):
@@ -779,11 +799,8 @@ class WikiData:
 class WikiPage:
     """
     holds the data for a wikipage. fetched via the WikiData.getPage method.
-    you can optionally pass the toload parameter into the constructor. this
-    tells the object which pieces of data to load from the db. valid values
-    are: info, parents, children, props, and todos
     """
-    def __init__(self, wikiData, wikiWord, toload=None):
+    def __init__(self, wikiData, wikiWord):
         self.wikiData = wikiData
         self.wikiWord = wikiWord
         self.wikiFile = self.wikiData.getWikiWordFileName(self.wikiWord)
@@ -793,25 +810,21 @@ class WikiPage:
         self.props = None
         self.modified, self.created = None, None
 
-        # load the wiki word info from the db
-        if not toload or 'info' in toload:
-            self.getWikiWordInfo()
-
-        # load the wiki word parents
-        if not toload or 'parents' in toload:
-            self.getParentRelationships()
-
-        # load the wiki word children
-#         if not toload or 'children' in toload:
-#             self.getChildRelationships()
-
-        # fetch the props of the wiki word
-        if not toload or 'props' in toload:
-            self.getProperties()
-
-        # fetch the todo list
-        if not toload or 'todos' in toload:
-            self.getTodos()
+#         # load the wiki word info from the db
+#         if not toload or 'info' in toload:
+#             self.getWikiWordInfo()
+# 
+#         # load the wiki word parents
+#         if not toload or 'parents' in toload:
+#             self.getParentRelationships()
+# 
+#         # fetch the props of the wiki word
+#         if not toload or 'props' in toload:
+#             self.getProperties()
+# 
+#         # fetch the todo list
+#         if not toload or 'todos' in toload:
+#             self.getTodos()
 
         # does this page need to be saved
         self.saveDirty = False
@@ -914,7 +927,7 @@ class WikiPage:
             return self
         
         word = self.wikiData.getAliasesWikiWord(self.wikiWord)
-        return WikiPage(self.wikiData, word, toload=[""])
+        return WikiPage(self.wikiData, word)
 
 
     def getContent(self):

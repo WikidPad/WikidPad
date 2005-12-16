@@ -7,7 +7,7 @@ from wxPython.stc import *
 import wxPython.xrc as xrc
 
 from wxHelper import GUI_ID
-from MiscEvent import KeyFunctionSink
+from MiscEvent import KeyFunctionSink, DebugSimple
 
 from WikiExceptions import WikiWordNotFoundException
 import WikiFormatting
@@ -235,7 +235,7 @@ class WikiWordNode(AbstractNode):
         relationData = []
         position = 1
         for relation, hasChildren in relations:
-            relationPage = wikiData.getPageNoError(relation, toload=[""])
+            relationPage = wikiData.getPageNoError(relation)
             relationData.append((relation, relationPage, position, hasChildren))
             position += 1
             
@@ -259,10 +259,10 @@ class WikiWordNode(AbstractNode):
         
 #     def getWikiPage(self):
 #         return self.wikiPage
-        
+
     def getWikiWord(self):
         return self.wikiWord
-        
+
     def getContextMenu(self):
         # Take context menu from tree   # TODO Better solution esp. for event handling
         return self.treeCtrl.contextMenuWikiWords
@@ -701,7 +701,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         self.pWiki = pWiki
 
         self.refreshGenerator = None  # Generator called in OnIdle
-        self.refreshCheckChildren = [] # List of nodes to check for new/deleted children
+#         self.refreshCheckChildren = [] # List of nodes to check for new/deleted children
 
         EVT_TREE_ITEM_ACTIVATED(self, ID, self.OnTreeItemActivated)
         EVT_TREE_SEL_CHANGED(self, ID, self.OnTreeItemActivated)
@@ -723,11 +723,15 @@ class WikiTreeCtrl(wxTreeCtrl):
         EVT_MENU(self, GUI_ID.CMD_SETASROOT_WIKIWORD,
                 lambda evt: self.pWiki.setCurrentWordAsRoot())
 
+
+##        self.pWiki.getMiscEvent().addListener(DebugSimple("tree event:"))
         # Register for pWiki events
         self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
                 ("loading current page", self.onLoadingCurrentWikiPage),
+                ("closed current wiki", self.onClosedCurrentWiki),
                 ("updated current page props", self.onUpdatedCurrentPageProps), # TODO is event fired somewhere?
-                ("renamed page", self.onRenamedWikiPage)
+                ("renamed page", self.onRenamedWikiPage),
+                ("deleted page", self.onDeletedWikiPage)
         )))
 
 
@@ -775,18 +779,19 @@ class WikiTreeCtrl(wxTreeCtrl):
                         if child:
                             self.SelectItem(child)
                             return
-                        else:
-                            # Move to child but child not found ->
-                            # subtree below currentNode might need
-                            # a refresh
-                            self.CollapseAndReset(currentNode)  # AndReset?
-                            self.Expand(currentNode)
-
-                            child = self.findChildTreeNodeByWikiWord(currentNode,
-                                    self.pWiki.getCurrentWikiWord())
-                            if child:
-                                self.SelectItem(child)
-                                return
+#                         else:
+#                             # TODO !!!!!! Better method if child doesn't even exist!
+#                             # Move to child but child not found ->
+#                             # subtree below currentNode might need
+#                             # a refresh
+#                             self.CollapseAndReset(currentNode)  # AndReset?
+#                             self.Expand(currentNode)
+# 
+#                             child = self.findChildTreeNodeByWikiWord(currentNode,
+#                                     self.pWiki.getCurrentWikiWord())
+#                             if child:
+#                                 self.SelectItem(child)
+#                                 return
                     
         # No cheap way to find current word in tree    
         if self.pWiki.configuration.getboolean("main", "tree_auto_follow") or \
@@ -798,6 +803,7 @@ class WikiTreeCtrl(wxTreeCtrl):
             # Can't find word -> remove selection
             self.Unselect()
 
+
     def onUpdatedCurrentPageProps(self, miscevt):
         if not self.pWiki.configuration.getboolean("main", "tree_update_after_save"):
             return
@@ -805,14 +811,24 @@ class WikiTreeCtrl(wxTreeCtrl):
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
                 self.GetRootItem())
                 
-        wikiData = self.pWiki.wikiData
-        wikiWord = wikiData.getAliasesWikiWord(self.pWiki.getCurrentWikiWord())
-        if not wikiWord in self.refreshCheckChildren:
-            self.refreshCheckChildren.append(wikiWord)
+#         wikiData = self.pWiki.wikiData
+#         wikiWord = wikiData.getAliasesWikiWord(self.pWiki.getCurrentWikiWord())
+#         if not wikiWord in self.refreshCheckChildren:
+#             self.refreshCheckChildren.append(wikiWord)
 
 
         # self._refreshNodeAndChildren(self.GetRootItem())        
         # print "onUpdatedCurrentPageProps2"
+
+
+    def onDeletedWikiPage(self, miscevt):  # TODO May be called multiple times if
+                                           # multiple pages are deleted at once
+        if not self.pWiki.configuration.getboolean("main", "tree_update_after_save"):
+            return
+
+        self.refreshGenerator = self._generatorRefreshNodeAndChildren(
+                self.GetRootItem())
+        
         
 
     def _generatorRefreshNodeAndChildren(self, parentnodeid):
@@ -880,10 +896,15 @@ class WikiTreeCtrl(wxTreeCtrl):
             # End of loop, no more new children, remove possible remaining
             # children in tree
             
+            selnodeid = self.GetSelection()
+            
             while nodeid.IsOk():
                 # Trying to prevent failure of GetNextChild() after deletion
                 delnodeid = nodeid                
                 nodeid, cookie = self.GetNextChild(nodeid, cookie)
+                
+                if selnodeid.IsOk() and selnodeid == delnodeid:
+                    self.Unselect()
                 self.Delete(delnodeid)
         else:
             # Recreation of children not necessary -> simple refresh<
@@ -909,9 +930,16 @@ class WikiTreeCtrl(wxTreeCtrl):
 
 
     def onRenamedWikiPage(self, miscevt):
-        self.collapse()   # TODO?
+        if not self.pWiki.configuration.getboolean("main", "tree_update_after_save"):
+            return
+
+        self.refreshGenerator = self._generatorRefreshNodeAndChildren(
+                self.GetRootItem())
+#         self.collapse()   # TODO?
 
 
+    def onClosedCurrentWiki(self, miscevt):
+        self.refreshGenerator = None
 
 
     def buildTreeForWord(self, wikiWord, selectNode=False, doexpand=False):
@@ -1094,7 +1122,7 @@ class WikiTreeCtrl(wxTreeCtrl):
             except StopIteration:
                 if self.refreshGenerator == gen:
                     self.refreshGenerator = None
-                    self.refreshCheckChildren = []
+#                     self.refreshCheckChildren = []
 
 def relationSort(a, b):
     propsA = a[1].getProperties()

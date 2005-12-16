@@ -121,7 +121,7 @@ RevPropertyValue     = re.compile(ur"^([\w\-\_ \t]*?)([ \t]*[=:][ \t]*)([a-zA-Z0
 ScriptRE        = re.compile(u"\<%(.*?)%\>", re.DOTALL)
 
 # Auto generated area
-AutoGenAreaRE = re.compile(ur"^([ \t]*\<\<[ \t]+)([^\n]+\n)(.*?)^([ \t]*\>\>[ \t]*\n)", re.DOTALL | re.LOCALE | re.MULTILINE)
+AutoGenAreaRE = re.compile(ur"^([ \t]*<<[ \t]+)([^\n]+\n)(.*?)^([ \t]*>>[ \t]*\n)", re.DOTALL | re.LOCALE | re.MULTILINE)
 # todos, non-capturing
 ## ToDoRE          = re.compile(u"^\s*(?:todo|action|track|issue|question|project)\\.?[^\\:\\s]*:", re.DOTALL | re.LOCALE | re.MULTILINE)
 ToDoRE          = re.compile(ur"^\s*(?:todo|action|track|issue|question|project)(?:\.[^:\s]+)?:",
@@ -151,5 +151,9 @@ HorizLineRE     = re.compile(u"----+", re.DOTALL | re.UNICODE | re.MULTILINE)
 # Orig: SuppressHighlightingRE = re.compile("\<\<(.*?)\>\>", re.DOTALL)
 SuppressHighlightingRE = re.compile(ur"^(?P<suppressIndent>[ \t]*)<<[ \t]*$"+
         ur"(?P<suppressContent>.*?)^[ \t]*>>[ \t]*$",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+
+TableRE = re.compile(ur"^[ \t]*<<\|[ \t]*$"+
+        ur"(?P<tableContent>.*?)^[ \t]*>>[ \t]*$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 

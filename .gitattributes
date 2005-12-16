@@ -594,6 +594,7 @@ lib/gadfly/serialize.py -text
 lib/gadfly/server.py -text
 lib/gadfly/sql.py -text
 lib/gadfly/store.py -text
+lib/pwiki/AboutDialog.py -text
 lib/pwiki/AdditionalDialogs.py -text
 lib/pwiki/Configuration.py -text
 lib/pwiki/DbStructure.py -text

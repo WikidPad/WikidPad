@@ -8,7 +8,7 @@ FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord2", "WikiWord", "A
                                           "Bold", "Italic", "Heading4", "Heading3", "Heading2", "Heading1",
                                           "Url", "Script", "Property", "ToDo",
                                           "HorizLine", "Bullet", "Numeric",
-                                          "Suppress", "Footnote"], 1)
+                                          "Suppress", "Footnote", "Table"], 1)
 
 
 def compileCombinedRegex(expressions):
@@ -28,6 +28,7 @@ def compileCombinedRegex(expressions):
     
 def _buildExpressionsUnindex(expressions, modifier):
     """
+    Helper for getExpressionsFormatList().
     Create from an expressions list (see compileCombinedRegex) a tuple
     of format types so that result[i] is the "right" number from
     FormatTypes when i is the index returned as second element of a tuple
@@ -42,10 +43,23 @@ def _buildExpressionsUnindex(expressions, modifier):
     return [modifier.get(t, t) for re, t in expressions]
     
 
-def getExpressionsFormatList(expressions, withNonCamelCase, footnotesAsWws):
+def getExpressionsFormatList(expressions, withCamelCase, footnotesAsWws):
+    """
+    Create from an expressions list (see compileCombinedRegex) a tuple
+    of format types so that result[i] is the "right" number from
+    FormatTypes when i is the index returned as second element of a tuple
+    in the tuples list returned by the Tokenizer.
+
+    In fact it is mainly the second tuple item from each expressions
+    list element with some modifications according to the parameters
+    withCamelCase -- Recognize camel-case words as wiki words instead
+            of normal text
+    footnotesAsWws -- Recognize footnotes (e.g. "[42]") as wiki-words
+            instead of normal text
+    """
     modifier = {FormatTypes.WikiWord2: FormatTypes.WikiWord}
     
-    if not withNonCamelCase:
+    if not withCamelCase:
         modifier[FormatTypes.WikiWord] = FormatTypes.Default
     
     if footnotesAsWws:  # Footnotes (e.g. [42]) as wiki words
@@ -74,6 +88,7 @@ def initialize(wikiSyntax):
 # Most specific first
 
     FormatExpressions = [
+            (TableRE, FormatTypes.Default),
             (SuppressHighlightingRE, FormatTypes.Default),
             (ScriptRE, FormatTypes.Script),
             (UrlRE, FormatTypes.Url),
@@ -91,6 +106,7 @@ def initialize(wikiSyntax):
             ]
             
     UpdateExpressions = [
+            (TableRE, FormatTypes.Default),
             (SuppressHighlightingRE, FormatTypes.Default),
             (ScriptRE, FormatTypes.Script),
             (UrlRE, FormatTypes.Url),
@@ -102,6 +118,7 @@ def initialize(wikiSyntax):
             ]
 
     HtmlExportExpressions = [
+            (TableRE, FormatTypes.Table),
             (SuppressHighlightingRE, FormatTypes.Suppress),
             (ScriptRE, FormatTypes.Script),
             (UrlRE, FormatTypes.Url),
