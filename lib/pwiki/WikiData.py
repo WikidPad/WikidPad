@@ -29,7 +29,7 @@ from WikiExceptions import *   # TODO make normal import?
 import SearchAndReplace
 
 from StringOps import mbcsEnc, mbcsDec, utf8Enc, utf8Dec, BOM_UTF8, \
-        fileContentToUnicode, Tokenizer
+        fileContentToUnicode, Tokenizer, wikiWordToLabel
 
 import WikiFormatting
 
@@ -66,7 +66,7 @@ class WikiData:
         # Update database from previous versions if necessary
         if formatcheck == 1:
             try:
-                DbStructure.updateDatabase(self.connWrap)
+                DbStructure.updateDatabase(self.connWrap, self.dataDir)
             except:
                 self.connWrap.rollback()
                 raise
@@ -114,12 +114,14 @@ class WikiData:
     # TODO More general Wikiword to filename mapping
     def getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
         files = glob.glob(join(mbcsEnc(self.dataDir)[0], '*.wiki'))
-        return [mbcsDec(basename(file).replace('.wiki', ''), "replace")[0] for file in files]
+        return [normalizeWikiWord(
+                mbcsDec(basename(file).replace('.wiki', ''), "replace")[0])
+                for file in files]
 
     # TODO More general Wikiword to filename mapping
     def getWikiWordFileName(self, wikiWord):
         # return mbcsEnc(join(self.dataDir, "%s.wiki" % wikiWord))[0]
-        return join(self.dataDir, u"%s.wiki" % wikiWord)
+        return join(self.dataDir, u"%s.wiki" % wikiWordToLabel(wikiWord))
 
     def isDefinedWikiWord(self, word):
         "check if a word is a valid wikiword (page name or alias)"

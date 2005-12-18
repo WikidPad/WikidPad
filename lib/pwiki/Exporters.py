@@ -13,7 +13,8 @@ import urllib_red as urllib
 import WikiData
 import WikiFormatting
 from StringOps import mbcsWriter, utf8Writer, utf8Enc, mbcsEnc, strToBool, \
-        Tokenizer, BOM_UTF8, unicodeToCompFilename, wikiWordToLabel, escapeHtml
+        Tokenizer, BOM_UTF8, unicodeToCompFilename, wikiWordToLabel, escapeHtml, \
+        removeBracketsFilename
 
 from wxPython.wx import *
 import wxPython.xrc as xrc
@@ -44,10 +45,6 @@ def splitIndent(text):
     text = text.lstrip()
     return (text, pl-len(text))
 
-
-def removeBracketsFilename(fn):
-    n, ext = splitext(fn)
-    return wikiWordToLabel(n) + ext
 
 def removeBracketsToCompFilename(fn):
     """

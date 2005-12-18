@@ -7,10 +7,11 @@ DB formats to the current one
 
 import string, codecs, types
 
-from os import mkdir, unlink
-from os.path import exists, join
+from os import mkdir, unlink, rename
+from os.path import exists, join, split, basename
+import glob
 
-from StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec
+from StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, removeBracketsFilename
 from SearchAndReplace import SearchReplaceOperation
 
 import gadfly
@@ -541,26 +542,26 @@ def checkDatabaseFormat(connwrap):
     formatver = getSettingsInt(connwrap, "formatver")
     writecompatver = getSettingsInt(connwrap, "writecompatver")
 
-    if writecompatver > 0:
+    if writecompatver > 1:
         # TODO: Check compatibility
         
         return 2, "Database has unknown format version='%i'" \
                 % formatver
                 
-    if formatver < 0:   # ???
+    if formatver < 1:   # ???
         return 1, "Update needed, current format version='%i'" \
                 % formatver
         
     return 0, "Database format is up to date"
 
 
-def updateDatabase(connwrap):
+def updateDatabase(connwrap, dataDir):
     """
     Update a database from an older version to current (checkDatabaseFormat()
     should have returned 1 before calling this function)
     """
     connwrap.commit()
-    
+
     indices = connwrap.execSqlQuerySingleColumn("select INDEX_NAME from __indices__")
     tables = connwrap.execSqlQuerySingleColumn("select TABLE_NAME from __table_names__")
 
@@ -572,7 +573,6 @@ def updateDatabase(connwrap):
     if not "SETTINGS" in tables:
         # We are prior WikidPad 1.2beta2 (which writes format version 0)
         
-        # From WikidPad
         if "WIKIWORDPROPS_PKEY" in indices:
             print "dropping index wikiwordprops_pkey"
             connwrap.execSql("drop index wikiwordprops_pkey")
@@ -618,9 +618,48 @@ def updateDatabase(connwrap):
             setSettingsValue(connwrap, key, value)
 
 
-        # --- WikiPadCompact 1.2beta2 reached (formatver=0, writecompatver=0,
+        # --- WikiPad 1.20beta2 reached (formatver=0, writecompatver=0,
         #         readcompatver=0) ---
 
+
+    formatver = getSettingsInt(connwrap, "formatver")
+    
+    if formatver == 0:
+        # From formatver 0 to 1, all filenames with brackets are renamed
+        # to have no brackets
+        filenames = glob.glob(join(mbcsEnc(dataDir)[0], '*.wiki'))
+        for fn in filenames:
+            fn = mbcsDec(fn, "replace")[0]
+            bn = basename(fn)
+            newbname = removeBracketsFilename(bn)
+            if bn == newbname:
+                continue
+                    
+            newname = mbcsEnc(join(dataDir, newbname))[0]
+            if exists(newname):
+                # A file with the designated new name of fn already exists
+                # -> do nothing
+                continue
+            
+            try:
+                rename(fn, newname)
+            except (IOError, OSError):
+                pass
+        
+        formatver = 1
+ 
+        # --- WikiPad 1.20beta3 reached (formatver=1, writecompatver=1,
+        #         readcompatver=1) ---
+
+        
+    # Write format information
+    for key, value in (
+            ("formatver", "1"),  # Version of database format the data was written
+            ("writecompatver", "1"),  # Lowest format version which is write compatible
+            ("readcompatver", "1"),  # Lowest format version which is read compatible
+            ("branchtag", "WikidPad")  # Tag of the WikidPad branch
+            ):
+        setSettingsValue(connwrap, key, value)
 
     rebuildIndices(connwrap)
     
@@ -636,7 +675,7 @@ class WikiDBExistsException(Exception): pass
 """
 Schema changes in WikidPad:
 
-+++ Initial 1.2beta1:
++++ Initial 1.20beta1:
 
 
 TABLE_DEFINITIONS = {
@@ -680,7 +719,7 @@ TABLE_DEFINITIONS = {
     }
 
 
-+++ 1.2beta1 to 1.2beta2 (formatver=0):
++++ 1.20beta1 to 1.20beta2 (formatver=0):
     Table "settings" created:
     
         "settings": (
@@ -695,5 +734,8 @@ TABLE_DEFINITIONS = {
             ("datablock", t.t)
             ),
  
+++ 1.20beta2 to 1.20beta3 (formatver=1):
+    All filenames of wiki files with brackets like e.g. "[Not Camelcase].wiki"
+    are renamed to ones without brackets like "Not Camelcase.wiki"
 
 """

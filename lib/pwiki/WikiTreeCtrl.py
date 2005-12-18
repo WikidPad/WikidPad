@@ -43,10 +43,11 @@ class AbstractNode(object):
     """
     
     __slots__ = ("__weakref__",   # just in case...
-            "treeCtrl")
+            "treeCtrl", "parentNode")
             
-    def __init__(self, tree):
+    def __init__(self, tree, parentNode):
         self.treeCtrl = tree
+        self.parentNode = parentNode
     
     def setRoot(self, flag = True):
         """
@@ -54,6 +55,9 @@ class AbstractNode(object):
         (currently the physical root is the one and only logical root)
         """
         if flag: raise Error   # TODO Better exception
+        
+    def getParentNode(self):
+        return self.parentNode
 
     def getNodePresentation(self):
         """
@@ -108,8 +112,8 @@ class WikiWordNode(AbstractNode):
     """
     __slots__ = ("wikiWord", "flagChildren", "flagRoot")
     
-    def __init__(self, tree, wikiWord, flagChildren = None):
-        AbstractNode.__init__(self, tree)
+    def __init__(self, tree, parentNode, wikiWord, flagChildren = None):
+        AbstractNode.__init__(self, tree, parentNode)
         self.wikiWord = wikiWord
         self.flagChildren = flagChildren
         self.flagRoot = False        
@@ -245,11 +249,11 @@ class WikiWordNode(AbstractNode):
         # if prev is None:
         ## Create everything new
         
-        result = [WikiWordNode(self.treeCtrl, rd[0], rd[3])
+        result = [WikiWordNode(self.treeCtrl, self, rd[0], rd[3])
                 for rd in relationData]
                 
         if self.flagRoot:
-            result.append(MainViewNode(self.treeCtrl))
+            result.append(MainViewNode(self.treeCtrl, self))
                 
         return result
 
@@ -282,9 +286,9 @@ class WikiWordSearchNode(WikiWordNode):
     """
     __slots__ = ("newLabel", "searchOp")    
     
-    def __init__(self, tree, wikiWord, flagChildren = False, newLabel = None,
-            searchOp = None):
-        WikiWordNode.__init__(self, tree, wikiWord, flagChildren)
+    def __init__(self, tree, parentNode, wikiWord, flagChildren = False,
+            newLabel = None, searchOp = None):
+        WikiWordNode.__init__(self, tree, parentNode, wikiWord, flagChildren)
 
         self.newLabel = newLabel
         self.searchOp = searchOp
@@ -334,17 +338,17 @@ class MainViewNode(AbstractNode):
         result = []
 
         # add to do list nodes
-        result += TodoNode(self.treeCtrl, ()).listChildren()
+        result += TodoNode(self.treeCtrl, self, ()).listChildren()
         # add property names   
-        result += PropCategoryNode(self.treeCtrl, ()).listChildren()
+        result += PropCategoryNode(self.treeCtrl, self, ()).listChildren()
         # add searches view
-        node = MainSearchesNode(self.treeCtrl)
+        node = MainSearchesNode(self.treeCtrl, self)
         if node.isVisible():
             result.append(node)
         # add last modified view
-        result.append(MainModifiedWithinNode(self.treeCtrl))
+        result.append(MainModifiedWithinNode(self.treeCtrl, self))
         # add parentless view
-        node = MainParentlessNode(self.treeCtrl)
+        node = MainParentlessNode(self.treeCtrl, self)
         if node.isVisible():
             result.append(node)
 
@@ -359,8 +363,8 @@ class TodoNode(AbstractNode):
     
     __slots__ = ("categories",)
             
-    def __init__(self, tree, cats):
-        AbstractNode.__init__(self, tree)
+    def __init__(self, tree, parentNode, cats):
+        AbstractNode.__init__(self, tree, parentNode)
         self.categories = cats
 
     def getNodePresentation(self):
@@ -404,14 +408,14 @@ class TodoNode(AbstractNode):
         
         result = []
         # First list categories, then words
-        result += [TodoNode(self.treeCtrl, self.categories + (c,))
+        result += [TodoNode(self.treeCtrl, self, self.categories + (c,))
                 for c in addedTodoSubCategories]
                 
         def createSearchNode(wt):
             searchOp = SearchReplaceOperation()
             searchOp.wildCard = "no"
             searchOp.searchStr = wt[1]
-            return WikiWordSearchNode(self.treeCtrl, wt[0], searchOp=searchOp)
+            return WikiWordSearchNode(self.treeCtrl, self, wt[0], searchOp=searchOp)
 
         result += [createSearchNode(wt) for wt in addedWords]
 
@@ -432,8 +436,8 @@ class PropCategoryNode(AbstractNode):
     
     __slots__ = ("categories", "propIcon")
             
-    def __init__(self, tree, cats, propertyIcon=u"page"):
-        AbstractNode.__init__(self, tree)
+    def __init__(self, tree, parentNode, cats, propertyIcon=u"page"):
+        AbstractNode.__init__(self, tree, parentNode)
         self.categories = cats
         self.propIcon = propertyIcon
 
@@ -464,13 +468,13 @@ class PropCategoryNode(AbstractNode):
             
         subCats = addedSubCategories.keys()
         subCats.sort()
-        result += map(lambda c: PropCategoryNode(self.treeCtrl,
+        result += map(lambda c: PropCategoryNode(self.treeCtrl, self,
                 self.categories + (c,)), subCats)
                 
         # Now the values:
         vals = wikiData.getDistinctPropertyValues(u".".join(self.categories))
         vals.sort()
-        result += map(lambda v: PropValueNode(self.treeCtrl,
+        result += map(lambda v: PropValueNode(self.treeCtrl, self,
                 self.categories, v), vals)
                 
         # Replace a single "true" value node by its children
@@ -496,8 +500,8 @@ class PropValueNode(AbstractNode):
     
     __slots__ = ("categories", "value", "propIcon")
             
-    def __init__(self, tree, cats, value, propertyIcon=u"page"):
-        AbstractNode.__init__(self, tree)
+    def __init__(self, tree, parentNode, cats, value, propertyIcon=u"page"):
+        AbstractNode.__init__(self, tree, parentNode)
         self.categories = cats
         self.value = value
         self.propIcon = propertyIcon
@@ -518,7 +522,7 @@ class PropValueNode(AbstractNode):
         key = u".".join(self.categories)
         words = wikiData.getWordsWithPropertyValue(key, self.value)
         words.sort()                
-        return [WikiWordSearchNode(self.treeCtrl, w) for w in words]
+        return [WikiWordSearchNode(self.treeCtrl, self, w) for w in words]
 
 #         return map(lambda w: WikiWordSearchNode(self.treeCtrl,
 #                 wikiData.getPage(w, toload=[""])), words)
@@ -553,7 +557,7 @@ class MainSearchesNode(AbstractNode):
         wikiData = self.treeCtrl.pWiki.wikiData
         
         searchTitles = wikiData.getSavedSearchTitles()
-        return map(lambda s: SearchNode(self.treeCtrl, s), searchTitles)
+        return map(lambda s: SearchNode(self.treeCtrl, self, s), searchTitles)
 
 
     
@@ -564,8 +568,8 @@ class SearchNode(AbstractNode):
     
     __slots__ = ("searchTitle",)
             
-    def __init__(self, tree, searchTitle):
-        AbstractNode.__init__(self, tree)
+    def __init__(self, tree, parentNode, searchTitle):
+        AbstractNode.__init__(self, tree, parentNode)
         self.searchTitle = searchTitle
 
     def getNodePresentation(self):
@@ -585,7 +589,7 @@ class SearchNode(AbstractNode):
         words = wikiData.search(searchOp)
         words.sort()
 
-        return [WikiWordSearchNode(self.treeCtrl, w, searchOp=searchOp)
+        return [WikiWordSearchNode(self.treeCtrl, self, w, searchOp=searchOp)
                 for w in words]
 
 #         return map(lambda w: WikiWordSearchNode(self.treeCtrl,
@@ -615,7 +619,7 @@ class MainModifiedWithinNode(AbstractNode):
         return style
         
     def listChildren(self):
-        return map(lambda d: ModifiedWithinNode(self.treeCtrl, d),
+        return map(lambda d: ModifiedWithinNode(self.treeCtrl, self, d),
                 [1, 3, 7, 30])
 
     
@@ -626,8 +630,8 @@ class ModifiedWithinNode(AbstractNode):
     
     __slots__ = ("daySpan",)
             
-    def __init__(self, tree, daySpan):
-        AbstractNode.__init__(self, tree)
+    def __init__(self, tree, parentNode, daySpan):
+        AbstractNode.__init__(self, tree, parentNode)
         self.daySpan = daySpan
 
     def getNodePresentation(self):
@@ -645,7 +649,7 @@ class ModifiedWithinNode(AbstractNode):
         words = wikiData.getWikiWordsModifiedWithin(self.daySpan)
         words.sort()
                 
-        return [WikiWordSearchNode(self.treeCtrl, w) for w in words]
+        return [WikiWordSearchNode(self.treeCtrl, self, w) for w in words]
 
 #         return map(lambda w: WikiWordSearchNode(self.treeCtrl,
 #                 wikiData.getPage(w, toload=[""])),
@@ -683,7 +687,7 @@ class MainParentlessNode(AbstractNode):
         
 #         words = filter(lambda w: w != self.treeCtrl.pWiki.wikiName, words)
                 
-        return [WikiWordSearchNode(self.treeCtrl, w) for w in words
+        return [WikiWordSearchNode(self.treeCtrl, self, w) for w in words
                 if w != self.treeCtrl.pWiki.wikiName]
                 
 #         return map(lambda w: WikiWordSearchNode(self.treeCtrl,
@@ -1034,7 +1038,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         """
         self.DeleteAllItems()
         # add the root node to the tree
-        nodeobj = WikiWordNode(self, rootword)
+        nodeobj = WikiWordNode(self, None, rootword)
         nodeobj.setRoot(True)
         root = self.AddRoot(u"")
         self.SetPyData(root, nodeobj)

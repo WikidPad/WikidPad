@@ -21,7 +21,7 @@ from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException
 
 from SearchAndReplace import SearchReplaceOperation
 from StringOps import utf8Enc, utf8Dec, mbcsEnc, mbcsDec, uniToGui, guiToUni, \
-        Tokenizer, revStr
+        Tokenizer, wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 from Configuration import isUnicode
 
 
@@ -174,7 +174,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def Copy(self):
         cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
         udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
-        realuni = self.GetSelectedText()
+        realuni = lineendToOs(self.GetSelectedText())
         arruni = array.array("u")
         arruni.fromunicode(realuni+u"\x00")
         rawuni = arruni.tostring()
@@ -215,10 +215,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     rawuni = udataob.GetData()
                     arruni = array.array("u")
                     arruni.fromstring(rawuni)
-                    realuni = arruni.tounicode()
+                    realuni = lineendToInternal(arruni.tounicode())
                     self.ReplaceSelection(realuni)
                 elif cdataob.GetDataSize() > 0:
-                    realuni = mbcsDec(cdataob.GetData(), "replace")[0]
+                    realuni = lineendToInternal(
+                            mbcsDec(cdataob.GetData(), "replace")[0])
                     self.ReplaceSelection(realuni)
                 # print "Test getData", cdataob.GetDataSize(), udataob.GetDataSize()
 
@@ -1322,19 +1323,18 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #                 return False
 
 
-
-# Already defined in WikiTreeCtrl
-def _getTextForNode(text):
-    if text.startswith("["):
-        return text[1:len(text)-1]
-    return text
+# # Already defined in WikiTreeCtrl
+# def _getTextForNode(text):
+#     if text.startswith("["):
+#         return text[1:len(text)-1]
+#     return text
 
 
 # sorter for relations, removes brackets and sorts lower case
 # Already defined in WikiTreeCtrl
 def _removeBracketsAndSort(a, b):
-    a = _getTextForNode(a)
-    b = _getTextForNode(b)
+    a = wikiWordToLabel(a)
+    b = wikiWordToLabel(b)
     return cmp(a.lower(), b.lower())
 
 
@@ -1379,6 +1379,7 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
                 if fnames:
                     self.OnDropFiles(x, y, fnames)
                 elif text:
+                    text = lineendToInternal(text)
                     self.OnDropText(x, y, text)
 
             return defresult

@@ -6,13 +6,19 @@ creating diff information for plain byte sequences
 """
 
 
-import difflib, codecs
 
 import threading
 
 from struct import pack, unpack
 
+import difflib, codecs
 from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE
+from os.path import splitext
+
+import srePersistent as re
+
+LINEEND_SPLIT_RE = re.compile(r"\r\n?|\n")
+
 
 from Configuration import isUnicode, isOSX
 
@@ -30,6 +36,19 @@ utf8Dec = codecs.getdecoder("utf-8")
 utf8Reader = codecs.getreader("utf-8")
 utf8Writer = codecs.getwriter("utf-8")
 
+def convertLineEndings(text, newLe):
+    """
+    Convert line endings of text to string newLe which should be
+    "\n", "\r" or "\r\n". If newLe or text is unicode, the result
+    will be unicode, too.
+    """
+    return newLe.join(LINEEND_SPLIT_RE.split(text))
+
+def lineendToInternal(text):
+    return convertLineEndings(text, "\n")
+    
+
+
 if isOSX():      # TODO Linux
     # generate dependencies for py2app
     import encodings.mac_roman
@@ -37,6 +56,10 @@ if isOSX():      # TODO Linux
     mbcsDec = codecs.getdecoder("mac_roman")
     mbcsReader = codecs.getreader("mac_roman")
     mbcsWriter = codecs.getwriter("mac_roman")
+    
+    def lineendToOs(text):
+        return convertLineEndings(text, "\r")
+   
 else:
     # generate dependencies for py2exe
     import encodings.mbcs
@@ -44,6 +67,11 @@ else:
     mbcsDec = codecs.getdecoder("mbcs")
     mbcsReader = codecs.getreader("mbcs")
     mbcsWriter = codecs.getwriter("mbcs")
+
+    # TODO This is suitable for Windows only
+    def lineendToOs(text):
+        return convertLineEndings(text, "\r\n")
+
 
 if isUnicode():
     def uniToGui(text):
@@ -138,7 +166,12 @@ def wikiWordToLabel(word):
         return word[1:-1]
     return word
 
-        
+
+def removeBracketsFilename(fn):
+    n, ext = splitext(fn)
+    return wikiWordToLabel(n) + ext
+
+
 def revStr(s):
     """
     Return reversed string
