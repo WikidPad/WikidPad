@@ -71,6 +71,9 @@ class WikiData:
                 self.connWrap.rollback()
                 raise
 
+        # Set marker for database type
+        self.pWiki.configuration.set("main", "wiki_database_type",
+                "original_gadfly")
 
         # create word caches
         self.cachedWikiWords = {}
@@ -106,27 +109,7 @@ class WikiData:
 #             self.execSql("drop table registration")
 
     # ---------- Direct handling of page data ----------
-    
-    def getAllDefinedPageNames(self):
-        "get the names of all the pages in the db, no aliases"
-        return self.execSqlQuerySingleColumn("select word from wikiwords")
 
-    # TODO More general Wikiword to filename mapping
-    def getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
-        files = glob.glob(join(mbcsEnc(self.dataDir)[0], '*.wiki'))
-        return [normalizeWikiWord(
-                mbcsDec(basename(file).replace('.wiki', ''), "replace")[0])
-                for file in files]
-
-    # TODO More general Wikiword to filename mapping
-    def getWikiWordFileName(self, wikiWord):
-        # return mbcsEnc(join(self.dataDir, "%s.wiki" % wikiWord))[0]
-        return join(self.dataDir, u"%s.wiki" % wikiWordToLabel(wikiWord))
-
-    def isDefinedWikiWord(self, word):
-        "check if a word is a valid wikiword (page name or alias)"
-        return self.cachedWikiWords.has_key(word)
-    
     def getContent(self, word):
         if (not exists(self.getWikiWordFileName(word))):
             raise WikiFileNotFoundException, u"wiki page not found for word: %s" % word
@@ -208,228 +191,9 @@ class WikiData:
         if exists(self.getWikiWordFileName(word)):
             unlink(self.getWikiWordFileName(word))
         del self.cachedWikiWords[word]
-        
-
-    # ---------- Rebuilding the wiki ----------
-    def rebuildWiki(self, progresshandler):
-        """
-        progresshandler -- Object, fulfilling the GuiProgressHandler
-            protocol
-        """
-        # get all of the wikiWords
-        wikiWords = self.getAllPageNamesFromDisk()   # Replace this call
-                
-        progresshandler.open(len(wikiWords) + 1)
-        try:
-            step = 1
-    
-            # re-save all of the pages
-            self.clearCacheTables()
-            for wikiWord in wikiWords:
-                progresshandler.update(step, u"Rebuilding %s" % wikiWord)
-                self._updatePageEntry(wikiWord)
-                wikiPage = self.createPage(wikiWord)
-                wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
-                step = step + 1
-    
-        finally:            
-            progresshandler.close()
-
-#         # get all of the wikiWords
-#         wikiWords = self.getAllPageNamesFromDisk()   # Replace this call
-#         # get the saved searches
-#         titles = self.getSavedSearchTitles()
-#         searches = [(title, self.getSearchDatablock(title)) for title in titles]
-# #         searches = self.getSavedSearches()
-# 
-#         self.close()
-#                 
-#         progresshandler.open(len(wikiWords) + len(searches) + 1)
-# 
-#         try:
-#             step = 1
-#             # recreate the db
-#             progresshandler.update(step, "Recreating database")
-#             createWikiDB("", self.dataDir, True)
-#             # reopen the wiki
-#             self._reinit()
-#             # re-save all of the pages
-#             for wikiWord in wikiWords:
-#                 progresshandler.update(step, u"Rebuilding %s" % wikiWord)
-#                 wikiPage = self.createPage(wikiWord)
-#                 self._updatePageEntry(wikiWord)
-#                 wikiPage.update(wikiPage.getContent(), False)
-#                 step += 1
-# 
-#             # resave searches
-#             for title, datablock in searches:
-#                 progresshandler.update(step, u"Reading search %s" % title)
-#                 self.saveSearch(title, datablock)
-# 
-# ##             self.close()
-# ##             self._reinit()
-#             
-#         finally:            
-#             progresshandler.close()
-#     
-    
-    
-    # ---------- The rest ----------
-
-    _CAPABILITIES = {
-        "rebuild": 1
-        }
-
-    def checkCapability(self, capkey):
-        """
-        Check the capabilities of this WikiData implementation.
-        The capkey names the capability, the function returns normally
-        a version number or None if not supported
-        """
-        return WikiData._CAPABILITIES.get(capkey, None)
 
 
-    def getPage(self, wikiWord):
-        """
-        Fetch a WikiPage for the wikiWord, throws WikiWordNotFoundException
-        if word doesn't exist
-        """
-        if not self.isDefinedWikiWord(wikiWord):
-            raise WikiWordNotFoundException, u"Word '%s' not in wiki" % wikiWord
-
-        return WikiPage(self, wikiWord)
-
-    def getPageNoError(self, wikiWord):
-        """
-        fetch a WikiPage for the wikiWord. If it doesn't exist, return
-        one without throwing an error and without updating the cache
-        """
-        return WikiPage(self, wikiWord)
-
-    def createPage(self, wikiWord):
-        """
-        create a new wikiPage for the wikiWord. Cache is not updated until
-        page is saved
-        """
-#         ti = time()
-#         self.execSql(
-#                 "insert into wikiwords(word, created, modified) values (?, ?, ?)",
-#                 (wikiWord, ti, ti))
-#         self.cachedWikiWords[wikiWord] = 1
-        return self.getPageNoError(wikiWord)
-
-    def getChildRelationships(self, wikiWord, existingonly=False,
-            selfreference=True):
-        """
-        get the child relations to this word
-        existingonly -- List only existing wiki words
-        selfreference -- List also wikiWord if it references itself
-        """
-        sql = "select relation from wikirelations where word = ?"
-        children = self.execSqlQuerySingleColumn(sql, (wikiWord,))
-        if not selfreference:
-            try:
-                children.remove(wikiWord)
-            except ValueError:
-                pass
-        
-        if existingonly:
-            return filter(lambda w: self.cachedWikiWords.has_key(w), children)
-        else:
-            return children
-
-    # TODO More efficient
-    def _hasChildren(self, wikiWord, existingonly=False,
-            selfreference=True):
-        return len(self.getChildRelationships(wikiWord, existingonly,
-                selfreference)) > 0
-                
-    # TODO More efficient                
-    def getChildRelationshipsAndHasChildren(self, wikiWord, existingonly=False,
-            selfreference=True):
-        """
-        get the child relations to this word as sequence of tuples
-            (<child word>, <has child children?>). Used when expanding
-            a node in the tree control.
-        existingonly -- List only existing wiki words
-        selfreference -- List also wikiWord if it references itself
-        """
-        children = self.getChildRelationships(wikiWord, existingonly,
-                selfreference)
-                
-        return map(lambda c: (c, self._hasChildren(c, existingonly,
-                selfreference)), children)
-
-
-    def getParentRelationships(self, toWord):
-        "get the parent relations to this word"
-        return self.execSqlQuerySingleColumn(
-                "select word from wikirelations where relation = ?", (toWord,))
-
-    def addRelationship(self, word, toWord):
-        """
-        Add a relationship from word toWord. Returns True if relation added.
-        A relation from one word to another is unique and can't be added twice.
-        """
-        data = self.execSqlQuery("select relation from wikirelations where "+
-                "word = ? and relation = ?", (word, toWord))
-        returnValue = False
-        if len(data) < 1:
-            self.execSql("insert into wikirelations(word, relation, created) "+
-                    "values (?, ?, ?)", (word, toWord, time()))
-            returnValue = True
-        return returnValue
-
-    def getAllAliases(self):
-        # get all of the aliases
-        return self.execSqlQuerySingleColumn("select value from wikiwordprops where key = 'alias'")
-
-    def getAllRelations(self):
-        "get all of the relations in the db"
-        relations = []
-        data = self.execSqlQuery("select word, relation from wikirelations")
-        for row in data:
-            relations.append((row[0], row[1]))
-        return relations
-
-    def getWikiWordsStartingWith(self, thisStr, includeAliases=False):
-        "get the list of words starting with thisStr. used for autocompletion."
-        words = self.getAllDefinedPageNames()
-        if includeAliases:
-            words.extend(self.getAllAliases())
-        startingWith = [word for word in words if word.startswith(thisStr)]
-        return startingWith
-
-    def getWikiWordsWith(self, thisStr):
-        "get the list of words with thisStr in them."
-        return [word for word in self.getAllDefinedPageNames()
-                if word.lower().find(thisStr) != -1]
-
-    def getWikiWordsModifiedWithin(self, days):
-        timeDiff = time()-(86400*days)
-        rows = self.execSqlQuery("select word, modified from wikiwords")
-        return [row[0] for row in rows if float(row[1]) >= timeDiff]
-
-
-    def getParentLessWords(self):
-        """
-        get the words that have no parents. also returns nodes that have files but
-        no entries in the wikiwords table.
-        """
-        words = self.getAllDefinedPageNames()
-        relations = self.getAllRelations()
-        rightSide = [relation for (word, relation) in relations]
-
-        # get the list of wiki files
-#         wikiFiles = [file.replace(".wiki", "") for file in listdir(self.dataDir)
-#                      if file.endswith(".wiki")]
-        wikiFiles = self.getAllPageNamesFromDisk()
-
-        # append the words that don't exist in the words db
-        words.extend([file for file in wikiFiles if file not in words])
-
-        # find those that have no parent relations
-        return [word for word in words if word not in rightSide]
+    # ---------- Renaming/deleting pages with cache update ----------
 
     def renameWord(self, word, toWord):
         if WikiFormatting.isWikiWord(toWord):
@@ -522,20 +286,215 @@ class WikiData:
         else:
             raise WikiDataException, "You cannot delete the root wiki node"
 
+
+    # ---------- WikiPage creation ----------
+
+    def getPage(self, wikiWord):
+        """
+        Fetch a WikiPage for the wikiWord, throws WikiWordNotFoundException
+        if word doesn't exist
+        """
+        if not self.isDefinedWikiWord(wikiWord):
+            raise WikiWordNotFoundException, u"Word '%s' not in wiki" % wikiWord
+
+        return WikiPage(self, wikiWord)
+
+    def getPageNoError(self, wikiWord):
+        """
+        fetch a WikiPage for the wikiWord. If it doesn't exist, return
+        one without throwing an error and without updating the cache
+        """
+        return WikiPage(self, wikiWord)
+
+    def createPage(self, wikiWord):
+        """
+        create a new wikiPage for the wikiWord. Cache is not updated until
+        page is saved
+        """
+#         ti = time()
+#         self.execSql(
+#                 "insert into wikiwords(word, created, modified) values (?, ?, ?)",
+#                 (wikiWord, ti, ti))
+#         self.cachedWikiWords[wikiWord] = 1
+        return self.getPageNoError(wikiWord)
+
+
+    # ---------- Handling of relationships cache ----------
+
+    def getAllRelations(self):
+        "get all of the relations in the db"
+        relations = []
+        data = self.execSqlQuery("select word, relation from wikirelations")
+        for row in data:
+            relations.append((row[0], row[1]))
+        return relations
+
+    def getChildRelationships(self, wikiWord, existingonly=False,
+            selfreference=True):
+        """
+        get the child relations to this word
+        existingonly -- List only existing wiki words
+        selfreference -- List also wikiWord if it references itself
+        """
+        sql = "select relation from wikirelations where word = ?"
+        children = self.execSqlQuerySingleColumn(sql, (wikiWord,))
+        if not selfreference:
+            try:
+                children.remove(wikiWord)
+            except ValueError:
+                pass
+        
+        if existingonly:
+            return filter(lambda w: self.cachedWikiWords.has_key(w), children)
+        else:
+            return children
+
+    # TODO More efficient
+    def _hasChildren(self, wikiWord, existingonly=False,
+            selfreference=True):
+        return len(self.getChildRelationships(wikiWord, existingonly,
+                selfreference)) > 0
+                
+    # TODO More efficient                
+    def getChildRelationshipsAndHasChildren(self, wikiWord, existingonly=False,
+            selfreference=True):
+        """
+        get the child relations to this word as sequence of tuples
+            (<child word>, <has child children?>). Used when expanding
+            a node in the tree control.
+        existingonly -- List only existing wiki words
+        selfreference -- List also wikiWord if it references itself
+        """
+        children = self.getChildRelationships(wikiWord, existingonly,
+                selfreference)
+                
+        return map(lambda c: (c, self._hasChildren(c, existingonly,
+                selfreference)), children)
+
+    def getParentRelationships(self, toWord):
+        "get the parent relations to this word"
+        return self.execSqlQuerySingleColumn(
+                "select word from wikirelations where relation = ?", (toWord,))
+
+    def getParentLessWords(self):
+        """
+        get the words that have no parents. also returns nodes that have files but
+        no entries in the wikiwords table.
+        """
+        words = self.getAllDefinedPageNames()
+        relations = self.getAllRelations()
+        rightSide = [relation for (word, relation) in relations]
+
+        # get the list of wiki files
+#         wikiFiles = [file.replace(".wiki", "") for file in listdir(self.dataDir)
+#                      if file.endswith(".wiki")]
+        wikiFiles = self.getAllPageNamesFromDisk()
+
+        # append the words that don't exist in the words db
+        words.extend([file for file in wikiFiles if file not in words])
+
+        # find those that have no parent relations
+        return [word for word in words if word not in rightSide]
+
+    def addRelationship(self, word, toWord):
+        """
+        Add a relationship from word toWord. Returns True if relation added.
+        A relation from one word to another is unique and can't be added twice.
+        """
+        data = self.execSqlQuery("select relation from wikirelations where "+
+                "word = ? and relation = ?", (word, toWord))
+        returnValue = False
+        if len(data) < 1:
+            self.execSql("insert into wikirelations(word, relation, created) "+
+                    "values (?, ?, ?)", (word, toWord, time()))
+            returnValue = True
+        return returnValue
+
     def deleteChildRelationships(self, fromWord):
         self.execSql("delete from wikirelations where word = ?", (fromWord,))
 
-    def setProperty(self, word, key, value):
-        # make sure the value doesn't already exist for this property
-        data = self.execSqlQuery("select word from wikiwordprops where "+
-                "word = ? and key = ? and value = ?", (word, key, value))
-        # if it doesn't insert it
-        returnValue = False
-        if len(data) < 1:
-            self.execSql("insert into wikiwordprops(word, key, value) "+
-                    "values (?, ?, ?)", (word, key, value))
-            returnValue = True
-        return returnValue
+    def getAllSubWords(self, word, includeRoot=False):
+        """
+        Return all words which are children, grandchildren, etc.
+        of word. Used by the "export Sub-Tree" functions
+        """
+
+        subWords = []
+        if (includeRoot):
+            subWords.append(word)
+        allWords = self.getAllDefinedPageNames()
+        for allWordsItem in allWords:
+            if allWordsItem != word and self.findBestPathFromWordToWord(allWordsItem, word):
+                subWords.append(allWordsItem)
+        return subWords
+
+    def _assembleWordGraph(self, word, graph):
+        """
+        recursively builds a graph of each of words parent relations
+
+        Not part of public API!
+        """
+        if not graph.has_key(word):
+            parents = self.getParentRelationships(word)
+            graph[word] = parents;
+            for parent in parents:
+                self._assembleWordGraph(parent, graph)
+        return graph
+
+    def findBestPathFromWordToWord(self, word, toWord):
+        "finds the shortest path from word to toWord"
+        bestPath = findShortestPath(self._assembleWordGraph(word, {}), word,
+                toWord, [])
+        if bestPath: bestPath.reverse()
+        return bestPath
+
+
+    # ---------- Listing/Searching wiki words (see also "alias handling", "searching pages")----------
+
+    def getAllDefinedPageNames(self):
+        "get the names of all the pages in the db, no aliases"
+        return self.execSqlQuerySingleColumn("select word from wikiwords")
+
+    # TODO More general Wikiword to filename mapping
+    def getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
+        files = glob.glob(join(mbcsEnc(self.dataDir)[0], '*.wiki'))
+        return [WikiFormatting.normalizeWikiWord(
+                mbcsDec(basename(file).replace('.wiki', ''), "replace")[0], True)
+                for file in files]
+
+    # TODO More general Wikiword to filename mapping
+    def getWikiWordFileName(self, wikiWord):
+        """
+        Not part of public API!
+        """
+
+        # return mbcsEnc(join(self.dataDir, "%s.wiki" % wikiWord))[0]
+        return join(self.dataDir, u"%s.wiki" % wikiWordToLabel(wikiWord))
+
+    def isDefinedWikiWord(self, word):
+        "check if a word is a valid wikiword (page name or alias)"
+        return self.cachedWikiWords.has_key(word)
+
+    def getWikiWordsStartingWith(self, thisStr, includeAliases=False):
+        "get the list of words starting with thisStr. used for autocompletion."
+        words = self.getAllDefinedPageNames()
+        if includeAliases:
+            words.extend(self.getAllAliases())
+        startingWith = [word for word in words if word.startswith(thisStr)]
+        return startingWith
+
+    def getWikiWordsWith(self, thisStr):
+        "get the list of words with thisStr in them."
+        return [word for word in self.getAllDefinedPageNames()
+                if word.lower().find(thisStr) != -1]
+
+    def getWikiWordsModifiedWithin(self, days):
+        timeDiff = time()-(86400*days)
+        rows = self.execSqlQuery("select word, modified from wikiwords")
+        return [row[0] for row in rows if float(row[1]) >= timeDiff]
+
+
+    # ---------- Property cache handling ----------
 
     def getPropertyNames(self):
         names = self.execSqlQuerySingleColumn("select distinct(key) from wikiwordprops order by key")
@@ -568,6 +527,24 @@ class WikiData:
             words.append(row[0])
         return words
 
+    def setProperty(self, word, key, value):
+        # make sure the value doesn't already exist for this property
+        data = self.execSqlQuery("select word from wikiwordprops where "+
+                "word = ? and key = ? and value = ?", (word, key, value))
+        # if it doesn't insert it
+        returnValue = False
+        if len(data) < 1:
+            self.execSql("insert into wikiwordprops(word, key, value) "+
+                    "values (?, ?, ?)", (word, key, value))
+            returnValue = True
+        return returnValue
+
+    def deleteProperties(self, word):
+        self.execSql("delete from wikiwordprops where word = ?", (word,))
+
+
+    # ---------- Alias handling ----------
+
     def getAliasesWikiWord(self, alias):
         """
         If alias is an alias for another word, return that,
@@ -587,8 +564,12 @@ class WikiData:
             return self.cachedWikiWords.get(word) == 2
         return False
 
-    def addTodo(self, word, todo):
-        self.execSql("insert into todos(word, todo) values (?, ?)", (word, todo))
+    def getAllAliases(self):
+        # get all of the aliases
+        return self.execSqlQuerySingleColumn("select value from wikiwordprops where key = 'alias'")
+
+
+    # ---------- Todo cache handling ----------
 
     def getTodos(self):
         todos = []
@@ -597,69 +578,14 @@ class WikiData:
             todos.append((row[0], row[1]))
         return todos
 
-    def deleteProperties(self, word):
-        self.execSql("delete from wikiwordprops where word = ?", (word,))
+    def addTodo(self, word, todo):
+        self.execSql("insert into todos(word, todo) values (?, ?)", (word, todo))
 
     def deleteTodos(self, word):
         self.execSql("delete from todos where word = ?", (word,))
 
-    def findBestPathFromWordToWord(self, word, toWord):
-        "finds the shortest path from word to toWord"
-        bestPath = findShortestPath(self._assembleWordGraph(word, {}), word,
-                toWord, [])
-        if bestPath: bestPath.reverse()
-        return bestPath
 
-    def _assembleWordGraph(self, word, graph):
-        """
-        recursively builds a graph of each of words parent relations
-
-        Not part of public API!
-        """
-        if not graph.has_key(word):
-            parents = self.getParentRelationships(word)
-            graph[word] = parents;
-            for parent in parents:
-                self._assembleWordGraph(parent, graph)
-        return graph
-
-    def getAllSubWords(self, word, includeRoot=False):
-        """
-        Return all words which are children, grandchildren, etc.
-        of word. Used by the "export Sub-Tree" functions
-        """
-
-        subWords = []
-        if (includeRoot):
-            subWords.append(word)
-        allWords = self.getAllDefinedPageNames()
-        for allWordsItem in allWords:
-            if allWordsItem != word and self.findBestPathFromWordToWord(allWordsItem, word):
-                subWords.append(allWordsItem)
-        return subWords
-
-#     def search(self, forPattern, processAnds=True):
-#         if processAnds:
-#             andPatterns = [re.compile(pattern, re.IGNORECASE)
-#                            for pattern in forPattern.lower().split(' and ')]
-#         else:
-#             andPatterns = [re.compile(forPattern.lower(), re.IGNORECASE)]
-# 
-#         results = []
-#         for word in self.getAllDefinedPageNames():  #glob.glob(join(self.dataDir, '*.wiki')):
-#             # print "search1", repr(word), repr(self.getWikiWordFileName(word))
-#             fileContents = self.getContent(word)
-# 
-#             patternsMatched = 0
-#             for pattern in andPatterns:
-#                 if pattern.search(fileContents):
-#                     patternsMatched = patternsMatched + 1
-# 
-#             if patternsMatched == len(andPatterns):
-#                 results.append(word)
-# 
-#         return results
-
+    # ---------- Searching pages ----------
 
     def search(self, sarOp):
         results = []
@@ -671,9 +597,6 @@ class WikiData:
                 results.append(word)
                 
         return results
-
-
-# ----- Begin of save search API -----
 
     def saveSearch(self, title, datablock):
         test = self.connWrap.execSqlQuerySingleItem(
@@ -702,48 +625,21 @@ class WikiData:
         self.connWrap.execSql(
                 "delete from search_views where title = ?", (title,))
 
-#     def saveSearch(self, title, datablock):
-#         "save a search into the search_views table"
-#         searchOp = SearchAndReplace.SearchReplaceOperation()
-#         searchOp.setPackedSettings(datablock)
-#         search = searchOp.searchStr
-# 
-#         data = self.execSqlQuery('select search from search_views where '+
-#                 'search = ?', (search,))
-#         if len(data) < 1:
-#             self.execSql('insert into search_views(search) values (?)', (search,))
-# 
-#     def getSavedSearchTitles(self):
-#         return self.execSqlQuerySingleColumn('select search from search_views order by search')
-# 
-#     def getSearchDatablock(self, title):
-#         searchOp = SearchAndReplace.SearchReplaceOperation()
-#         searchOp.searchStr = title
-#         searchOp.wikiWide = True
-#         searchOp.booleanOp = True
-#         searchOp.setTitle(title)
-#         return searchOp.getPackedSettings()
-# 
-#     def deleteSavedSearch(self, title):
-#         self.execSql('delete from search_views where search = ?', (title,))
-
-# ----- End of faked save search API from WikidPadCompact -----
 
 
+    # ---------- Miscellaneous ----------
 
-#     def saveSearch(self, search):
-#         "save a search into the search_views table"
-#         data = self.execSqlQuery('select search from search_views where '+
-#                 'search = ?', (search,))
-#         if len(data) < 1:
-#             self.execSql('insert into search_views(search) values (?)', (search,))
-# 
-#     def getSavedSearches(self):
-#         return self.execSqlQuerySingleColumn('select search from search_views order by search')
-# 
-#     def deleteSavedSearch(self, search):
-#         self.execSql('delete from search_views where search = ?', (search,))
+    _CAPABILITIES = {
+        "rebuild": 1
+        }
 
+    def checkCapability(self, capkey):
+        """
+        Check the capabilities of this WikiData implementation.
+        The capkey names the capability, the function returns normally
+        a version number or None if not supported
+        """
+        return WikiData._CAPABILITIES.get(capkey, None)
 
     def clearCacheTables(self):
         """
@@ -757,7 +653,11 @@ class WikiData:
         self.cachedWikiWords = {}
         self.cachedGlobalProps = None
 
+    def close(self):
+        self.commit()
+        self.connWrap.close()
 
+    # Not part of public API:
 
     def execSql(self, sql, params=None):
         "utility method, executes the sql, no return"
@@ -793,9 +693,38 @@ class WikiData:
     def commit(self):
         self.connWrap.commit()
 
-    def close(self):
-        self.commit()
-        self.connWrap.close()
+    # ---------- Other optional functionality ----------
+
+    def rebuildWiki(self, progresshandler):
+        """
+        Rebuild cached structures, try to repair database inconsistencies.
+
+        Must be implemented if checkCapability returns a version number
+        for "rebuild".
+        
+        progresshandler -- Object, fulfilling the GuiProgressHandler
+            protocol
+        """
+        # get all of the wikiWords
+        wikiWords = self.getAllPageNamesFromDisk()   # Replace this call
+                
+        progresshandler.open(len(wikiWords) + 1)
+        try:
+            step = 1
+    
+            # re-save all of the pages
+            self.clearCacheTables()
+            for wikiWord in wikiWords:
+                progresshandler.update(step, u"Rebuilding %s" % wikiWord)
+                self._updatePageEntry(wikiWord)
+                wikiPage = self.createPage(wikiWord)
+                wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
+                step = step + 1
+    
+        finally:            
+            progresshandler.close()
+
+
 
 
 class WikiPage:
@@ -811,22 +740,6 @@ class WikiPage:
         self.todos = None
         self.props = None
         self.modified, self.created = None, None
-
-#         # load the wiki word info from the db
-#         if not toload or 'info' in toload:
-#             self.getWikiWordInfo()
-# 
-#         # load the wiki word parents
-#         if not toload or 'parents' in toload:
-#             self.getParentRelationships()
-# 
-#         # fetch the props of the wiki word
-#         if not toload or 'props' in toload:
-#             self.getProperties()
-# 
-#         # fetch the todo list
-#         if not toload or 'todos' in toload:
-#             self.getTodos()
 
         # does this page need to be saved
         self.saveDirty = False

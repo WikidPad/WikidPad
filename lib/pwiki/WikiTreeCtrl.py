@@ -110,13 +110,21 @@ class WikiWordNode(AbstractNode):
     """
     Represents a wiki word
     """
-    __slots__ = ("wikiWord", "flagChildren", "flagRoot")
+    __slots__ = ("wikiWord", "flagChildren", "flagRoot", "ancestors")
     
     def __init__(self, tree, parentNode, wikiWord, flagChildren = None):
         AbstractNode.__init__(self, tree, parentNode)
         self.wikiWord = wikiWord
-        self.flagChildren = flagChildren
-        self.flagRoot = False        
+        if flagChildren is False:
+            self.flagChildren = False
+        elif self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
+            # All children of these node could be part of a cycle, so we
+            # don't know here if the node really has children
+            self.flagChildren = None
+        else:
+            self.flagChildren = flagChildren
+        self.flagRoot = False
+        self.ancestors = None
 
     def getNodePresentation(self):
         return self._createNodePresentation(
@@ -124,6 +132,68 @@ class WikiWordNode(AbstractNode):
 
     def setRoot(self, flag = True):
         self.flagRoot = flag
+
+    def getAncestors(self):  # TODO Check for cache clearing conditions
+        """
+        Returns a dictionary with the ancestor words (parent, grandparent, ...)
+        as keys (instead of a list for speed reasons).
+        """
+        if self.ancestors is None:
+            parent = self.getParentNode()
+            if parent is not None:
+                result = parent.getAncestors().copy()
+                result[parent.getWikiWord()] = None
+            else:
+                result = {}
+#             result = {}
+#             anc = self.getParentNode()
+#             while anc is not None:
+#                 result[anc.getWikiWord()] = None
+#                 anc = anc.getParentNode()
+
+            self.ancestors = result
+
+        return self.ancestors            
+       
+
+    def _getValidChildren(self, wikiPage):
+        """
+        Get all valid children, filter out undefined and/or cycles
+        if options are set accordingly
+        """
+        relations = wikiPage.getChildRelationshipsAndHasChildren(
+                existingonly=self.treeCtrl.getHideUndefined(),
+                selfreference=False)
+
+        if self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
+#             # Avoid the checking for grandchildren
+#             relations = wikiPage.getChildRelationships(
+#                     existingonly=self.treeCtrl.getHideUndefined(),
+#                     selfreference=False)
+            # Filter out cycles
+            ancestors = self.getAncestors()
+            relations = [r for r in relations if not ancestors.has_key(r[0])]
+#             relations = [(r, None) for r in relations]
+#         else:
+        
+        return relations
+
+
+    def _hasValidChildren(self, wikiPage):
+        """
+        Check if represented word has valid children, filter out undefined
+        and/or cycles if options are set accordingly
+        """
+        relations = wikiPage.getChildRelationships(
+                existingonly=self.treeCtrl.getHideUndefined(),
+                selfreference=False)
+        if self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
+            # Filter out cycles
+            ancestors = self.getAncestors()
+            relations = [r for r in relations if not ancestors.has_key(r)]
+        
+        return len(relations) > 0
+
 
     def _createNodePresentation(self, baselabel):
         """
@@ -141,9 +211,8 @@ class WikiWordNode(AbstractNode):
             self.flagChildren = True # Has at least ScratchPad and Views
         elif self.flagChildren is None:
             # Inefficient, therefore self.flagChildren should be set
-            self.flagChildren = len(wikiPage.getChildRelationships(      
-                    existingonly=self.treeCtrl.getHideUndefined(), selfreference=False)) > 0
-        
+            self.flagChildren = self._hasValidChildren(wikiPage)  # len(self._getValidChildren(wikiPage)) > 0
+
         style.hasChildren = self.flagChildren
         
         # apply custom properties to nodes
@@ -154,7 +223,7 @@ class WikiWordNode(AbstractNode):
         # if this is the scratch pad set the icon and return
         if (self.wikiWord == "ScratchPad"):
             style.icon = "note"
-            return style # ?????????
+            return style # ?
             
             
         # fetch the global properties
@@ -212,15 +281,12 @@ class WikiWordNode(AbstractNode):
 
     def representsWikiWord(self):
         return True
-       
         
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.wikiData
         wikiPage = wikiData.getPageNoError(self.wikiWord)
-        relations = wikiPage.getChildRelationshipsAndHasChildren(
-                existingonly=self.treeCtrl.getHideUndefined(),
-                selfreference=False)
-                
+        relations = self._getValidChildren(wikiPage)
+
         # get the sort order for the children
         childSortOrder = wikiPage.getProperties().get(u'child_sort_order',
                 (u"ascending",))[0]
@@ -293,6 +359,12 @@ class WikiWordSearchNode(WikiWordNode):
         self.newLabel = newLabel
         self.searchOp = searchOp
 
+    def getAncestors(self):
+        """
+        Returns a dictionary with the ancestor words (parent, grandparent, ...)
+        as keys (instead of a list for speed reasons).
+        """
+        return {}
 
     def getNodePresentation(self):
         if self.newLabel:
@@ -958,12 +1030,23 @@ class WikiTreeCtrl(wxTreeCtrl):
 
         wikiData = self.pWiki.wikiData
         currentNode = self.GetSelection()    # self.GetRootItem()
+        
         crumbs = None
         
-        if currentNode.IsOk() and self.GetPyData(currentNode).representsWikiWord():
+        if currentNode.IsOk() and self.GetPyData(currentNode).representsFamilyWikiWord():
             # check for path from wikiWord to currently selected tree node            
             currentWikiWord = self.GetPyData(currentNode).getWikiWord() #self.getNodeValue(currentNode)
             crumbs = wikiData.findBestPathFromWordToWord(wikiWord, currentWikiWord)
+            
+            if crumbs and self.pWiki.configuration.getboolean("main",
+                    "tree_no_cycles"):
+                ancestors = self.GetPyData(currentNode).getAncestors()
+                # If an ancestor of the current node is in the crumbs, the
+                # crumbs path is invalid because it contains a cycle
+                for c in crumbs:
+                    if ancestors.has_key(c):
+                        crumbs = None
+                        break
         
         # if a path is not found try to get a path to the root node
         if not crumbs:

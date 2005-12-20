@@ -44,6 +44,7 @@ Then just start typing text with WikiWords to create your wiki.
     * TreeNodeColors
     * UrlLinking
     * InternatiönalChàracters
+    * OptionsDialog
 
 *Other/Questions*
 

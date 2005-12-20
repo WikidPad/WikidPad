@@ -396,6 +396,7 @@ class OptionsDialog(wxDialog):
             ("start_browser_after_export", "cbStartBrowserAfterExport", "b"),
             ("tree_auto_follow", "cbTreeAutoFollow", "b"),
             ("tree_update_after_save", "cbTreeUpdateAfterSave", "b"),
+            ("tree_no_cycles", "cbTreeNoCycles", "b"),
             ("facename_html_preview", "tfFacenameHtmlPreview", "t"),
             ("footnotes_as_wikiwords", "cbFootnotesAsWws", "b"),
 

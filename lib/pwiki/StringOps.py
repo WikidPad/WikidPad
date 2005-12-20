@@ -119,7 +119,8 @@ def unicodeToCompFilename(us):
         result.append("=%02x" % ord(c))
         
     return "".join(result)
-        
+
+
 def strToBool(s, default=False):
     """
     Try to interpret string (or unicode) s as
@@ -144,7 +145,6 @@ def strToBool(s, default=False):
         return default
 
 
-
 # TODO More formats
 def fileContentToUnicode(content):
     """
@@ -155,7 +155,6 @@ def fileContentToUnicode(content):
         return utf8Dec(content[len(BOM_UTF8):], "replace")[0]
     else:
         return mbcsDec(content, "replace")[0]
-        
         
         
 def wikiWordToLabel(word):

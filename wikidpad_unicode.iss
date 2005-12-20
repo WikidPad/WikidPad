@@ -31,19 +31,19 @@ Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 1.20beta2
+AppVerName=WikidPad 1.20beta3
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
 VersionInfoVersion=1.20
-VersionInfoTextVersion=WikidPad 1.20beta2
+VersionInfoTextVersion=WikidPad 1.20beta3
 LicenseFile=license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-1.20beta2
+OutputBaseFilename=WikidPad-1.20beta3
 InternalCompressLevel=ultra
-AppCopyright= 2005 Jason Horman, Michael Butscher, Gerhard Reitmayr
+AppCopyright=© 2005 Jason Horman, Michael Butscher, Gerhard Reitmayr
 [Components]
 Name: Program_files; Description: Main program files; Flags: fixed; Types: custom compact full
 Name: Help; Description: Help wiki; Types: custom compact full
@@ -64,6 +64,7 @@ Root: HKCR; Subkey: wiki\shell\open\command; ValueType: string; ValueData: """{a
 Name: assocWiki; Description: Associate WikidPad with .wiki files
 Name: assocWikiUrl; Description: "Handle URLs with ""wiki:"" by WikidPad"
 [InstallDelete]
-Name: regexpr.cache; Type: files; Components: ; Tasks: 
+Name: {app}\regexpr.cache; Type: files
+Name: {app}\WikidPadHelp\data\[*].wiki; Type: files; Components: Help; Tasks: 
 [UninstallDelete]
-Name: regexpr.cache; Type: files
+Name: {app}\regexpr.cache; Type: files

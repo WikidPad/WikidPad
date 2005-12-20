@@ -19,7 +19,7 @@ Heading2RE      = re.compile(u"^\\+\\+(?!\\+\\+) ?(?P<h2Content>[^\\+\\n]+)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 Heading1RE      = re.compile(u"^\\+(?!\\+\\+\\+) ?(?P<h1Content>[^\\+\\n]+)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-UrlRE           = re.compile(u"((?:wiki|file|https?|ftp|mailto)://[^\s<]*)",
+UrlRE           = re.compile(ur"((?:(?:wiki|file|https?|ftp)://|mailto:)[^\s<]*)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 

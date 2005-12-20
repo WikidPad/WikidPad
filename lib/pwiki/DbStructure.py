@@ -464,9 +464,9 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
                 changeTableSchema(connwrap, tn, TABLE_DEFINITIONS[tn])
                 
             for key, value in (
-                    ("formatver", "0"),  # Version of database format the data was written
-                    ("writecompatver", "0"),  # Lowest format version which is write compatible
-                    ("readcompatver", "0"),  # Lowest format version which is read compatible
+                    ("formatver", "1"),  # Version of database format the data was written
+                    ("writecompatver", "1"),  # Lowest format version which is write compatible
+                    ("readcompatver", "1"),  # Lowest format version which is read compatible
                     ("branchtag", "WikidPad")  # Tag of the WikidPad branch
                     ):
                 setSettingsValue(connwrap, key, value)
@@ -627,7 +627,7 @@ def updateDatabase(connwrap, dataDir):
     if formatver == 0:
         # From formatver 0 to 1, all filenames with brackets are renamed
         # to have no brackets
-        filenames = glob.glob(join(mbcsEnc(dataDir)[0], '*.wiki'))
+        filenames = glob.glob(join(mbcsEnc(dataDir, "replace")[0], '*.wiki'))
         for fn in filenames:
             fn = mbcsDec(fn, "replace")[0]
             bn = basename(fn)
@@ -635,7 +635,7 @@ def updateDatabase(connwrap, dataDir):
             if bn == newbname:
                 continue
                     
-            newname = mbcsEnc(join(dataDir, newbname))[0]
+            newname = mbcsEnc(join(dataDir, newbname), "replace")[0]
             if exists(newname):
                 # A file with the designated new name of fn already exists
                 # -> do nothing

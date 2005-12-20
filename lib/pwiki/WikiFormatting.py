@@ -11,6 +11,12 @@ FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord2", "WikiWord", "A
                                           "Suppress", "Footnote", "Table"], 1)
 
 
+
+
+
+
+
+
 def compileCombinedRegex(expressions):
     """
     expressions -- List of tuples (r, s) where r is single compiled RE,
@@ -143,29 +149,13 @@ def initialize(wikiSyntax):
     CombinedHtmlExportRE = compileCombinedRegex(HtmlExportExpressions)
 
 
-
-def getStyles(styleFaces):
-    return [(FormatTypes.Default, "face:%(mono)s,size:%(size)d" % styleFaces),
-            (FormatTypes.WikiWord, "fore:#000000,underline,face:%(mono)s,size:%(size)d" % styleFaces),      
-            (FormatTypes.AvailWikiWord, "fore:#0000BB,underline,face:%(mono)s,size:%(size)d" % styleFaces),      
-            (FormatTypes.Bold, "bold,face:%(mono)s,size:%(size)d" % styleFaces),   
-            (FormatTypes.Italic, "italic,face:%(mono)s,size:%(size)d" % styleFaces), 
-            (FormatTypes.Heading4, "bold,face:%(mono)s,size:%(heading4)d" % styleFaces),       
-            (FormatTypes.Heading3, "bold,face:%(mono)s,size:%(heading3)d" % styleFaces),       
-            (FormatTypes.Heading2, "bold,face:%(mono)s,size:%(heading2)d" % styleFaces),       
-            (FormatTypes.Heading1, "bold,face:%(mono)s,size:%(heading1)d" % styleFaces), 
-            (FormatTypes.Url, "fore:#0000BB,underline,face:%(mono)s,size:%(size)d" % styleFaces), 
-            (FormatTypes.Script, "fore:#555555,face:%(mono)s,size:%(size)d" % styleFaces),
-            (FormatTypes.Property, "bold,fore:#555555,face:%(mono)s,size:%(size)d" % styleFaces),
-            (FormatTypes.ToDo, "bold,face:%(mono)s,size:%(size)d" % styleFaces)]
-
 def isWikiWord(word):
     """
     Test if word is syntactically a wiki word
     """
     return WikiWordRE.match(word) or (WikiWordRE2.match(word) and not \
-            FootnoteRE.match(word))
- 
+            FootnoteRE.match(word))  # TODO !!!!!
+
 
 def normalizeWikiWord(word, footnotesAsWws):
     """
@@ -193,6 +183,142 @@ def normalizeWikiWord(word, footnotesAsWws):
 
 
 
+def getStyles(styleFaces):
+    return [(FormatTypes.Default, "face:%(mono)s,size:%(size)d" % styleFaces),
+            (FormatTypes.WikiWord, "fore:#000000,underline,face:%(mono)s,size:%(size)d" % styleFaces),      
+            (FormatTypes.AvailWikiWord, "fore:#0000BB,underline,face:%(mono)s,size:%(size)d" % styleFaces),      
+            (FormatTypes.Bold, "bold,face:%(mono)s,size:%(size)d" % styleFaces),   
+            (FormatTypes.Italic, "italic,face:%(mono)s,size:%(size)d" % styleFaces), 
+            (FormatTypes.Heading4, "bold,face:%(mono)s,size:%(heading4)d" % styleFaces),       
+            (FormatTypes.Heading3, "bold,face:%(mono)s,size:%(heading3)d" % styleFaces),       
+            (FormatTypes.Heading2, "bold,face:%(mono)s,size:%(heading2)d" % styleFaces),       
+            (FormatTypes.Heading1, "bold,face:%(mono)s,size:%(heading1)d" % styleFaces), 
+            (FormatTypes.Url, "fore:#0000BB,underline,face:%(mono)s,size:%(size)d" % styleFaces), 
+            (FormatTypes.Script, "fore:#555555,face:%(mono)s,size:%(size)d" % styleFaces),
+            (FormatTypes.Property, "bold,fore:#555555,face:%(mono)s,size:%(size)d" % styleFaces),
+            (FormatTypes.ToDo, "bold,face:%(mono)s,size:%(size)d" % styleFaces)]
 
 
+
+
+# --------------- Class unused yet -----------------
+
+
+class Formatting:
+    def __init__(self, wikiSyntax, footnotesAsWws):
+        self.footnotesAsWws = footnotesAsWws
+
+        for item in dir(wikiSyntax):
+            if item.startswith("_"):   # TODO check if necessary
+                continue
+            setattr(self, item, getattr(wikiSyntax, item))
+
+    # Most specific first
     
+        self.FormatExpressions = [
+                (self.TableRE, FormatTypes.Default),
+                (self.SuppressHighlightingRE, FormatTypes.Default),
+                (self.ScriptRE, FormatTypes.Script),
+                (self.UrlRE, FormatTypes.Url),
+                (self.ToDoRE, FormatTypes.ToDo),
+                (self.PropertyRE, FormatTypes.Property),
+                (self.FootnoteRE, FormatTypes.Footnote),
+                (self.WikiWordEditorRE2, FormatTypes.WikiWord2),
+                (self.WikiWordEditorRE, FormatTypes.WikiWord),
+                (self.BoldRE, FormatTypes.Bold),
+                (self.ItalicRE, FormatTypes.Italic),
+                (self.Heading4RE, FormatTypes.Heading4),
+                (self.Heading3RE, FormatTypes.Heading3),
+                (self.Heading2RE, FormatTypes.Heading2),
+                (self.Heading1RE, FormatTypes.Heading1)
+                ]
+                
+        self.UpdateExpressions = [
+                (self.TableRE, FormatTypes.Default),
+                (self.SuppressHighlightingRE, FormatTypes.Default),
+                (self.ScriptRE, FormatTypes.Script),
+                (self.UrlRE, FormatTypes.Url),
+                (self.ToDoREWithContent, FormatTypes.ToDo),
+                (self.PropertyRE, FormatTypes.Property),
+                (self.FootnoteRE, FormatTypes.Footnote),
+                (self.WikiWordRE2, FormatTypes.WikiWord2),
+                (self.WikiWordRE, FormatTypes.WikiWord),
+                ]
+    
+        self.HtmlExportExpressions = [
+                (self.TableRE, FormatTypes.Table),
+                (self.SuppressHighlightingRE, FormatTypes.Suppress),
+                (self.ScriptRE, FormatTypes.Script),
+                (self.UrlRE, FormatTypes.Url),
+                (self.ToDoREWithContent, FormatTypes.ToDo),
+                (self.PropertyRE, FormatTypes.Property),
+                (self.FootnoteRE, FormatTypes.Footnote),
+                (self.WikiWordRE2, FormatTypes.WikiWord2),
+                (self.WikiWordRE, FormatTypes.WikiWord),
+                (self.BoldRE, FormatTypes.Bold),
+                (self.ItalicRE, FormatTypes.Italic),
+                (self.Heading4RE, FormatTypes.Heading4),
+                (self.Heading3RE, FormatTypes.Heading3),
+                (self.Heading2RE, FormatTypes.Heading2),
+                (self.Heading1RE, FormatTypes.Heading1),
+                (self.HorizLineRE, FormatTypes.HorizLine),
+                (self.BulletRE, FormatTypes.Bullet),
+                (self.NumericBulletRE, FormatTypes.Numeric)
+                ]
+                
+        self.CombinedSyntaxHighlightRE = compileCombinedRegex(self.FormatExpressions)
+        self.CombinedUpdateRE = compileCombinedRegex(self.UpdateExpressions)
+        self.CombinedHtmlExportRE = compileCombinedRegex(self.HtmlExportExpressions)
+
+        # For convenience
+        self.compileCombinedRegex = compileCombinedRegex
+        self.getExpressionsFormatList = getExpressionsFormatList
+    
+    def isWikiWord(self, word):
+        """
+        Test if word is syntactically a wiki word
+        """
+        if self.WikiWordRE.match(word):
+            return True
+        if self.WikiWordRE2.match(word):
+            if self.footnotesAsWws:
+                return True
+            else:
+                return not self.FootnoteRE.match(word)
+        
+        return False
+    
+    
+    def normalizeWikiWord(self, word):
+        """
+        Try to normalize text to a valid wiki word and return it or None
+        if it can't be normalized.
+        """
+        if self.WikiWordRE.match(word):
+            return word
+            
+        if not self.footnotesAsWws and self.FootnoteRE.match(word):
+            return None
+    
+        if self.WikiWordRE2.match(word):
+            if self.WikiWordRE.match(word[1:-1]):
+                # If word is '[WikiWord]', return 'WikiWord' instead
+                return word[1:-1]
+            else:
+                return word
+        
+        # No valid wiki word -> try to add brackets
+        if self.WikiWordRE2.match(u"[%s]" % word):
+            return u"[%s]" % word
+                
+        return None
+
+    def wikiWordToLabel(self, word):
+        """
+        Strip '[' and ']' if non camelcase word and return it
+        """
+        if word.startswith(u"[") and word.endswith(u"]"):
+            return word[1:-1]
+        return word
+
+

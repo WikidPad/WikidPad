@@ -22,24 +22,6 @@ import wxPython.xrc as xrc
 from wxHelper import XrcControls
 
 
-
-# ## Copied from xml.sax.saxutils and modified to reduce dependencies
-# def escape(data):
-#     """
-#     Escape &, <, and > in a unicode string of data.
-#     """
-# 
-#     # must do ampersand first
-# 
-# #     data = data.replace(u"&", u"&amp;")
-# #     data = data.replace(u">", u"&gt;")
-# #     data = data.replace(u"<", u"&lt;")
-# #     data = data.replace(u"\n", u"<br />")   # ?
-# #     return data
-#     return data.replace(u"&", u"&amp;").replace(u">", u"&gt;").\
-#             replace(u"<", u"&lt;").replace(u"\n", u"<br />")
-
-
 def splitIndent(text):
     pl = len(text)
     text = text.lstrip()
@@ -789,7 +771,7 @@ class TextExporter:
         self.wikiData = None
         self.wordList = None
         self.exportDest = None
-        self.convertFilename = lambda s: s   # lambda s: mbcsEnc(s, "replace")[0]
+        self.convertFilename = removeBracketsFilename # lambda s: s   
 
 
     def getExportTypes(self, guiparent):
@@ -862,9 +844,9 @@ class TextExporter:
         self.exportDest = exportDest
        
         if compatFilenames:
-            self.convertFilename = unicodeToCompFilename
+            self.convertFilename = removeBracketsToCompFilename
         else:
-            self.convertFilename = lambda s: s    # lambda s: mbcsEnc(s, "replace")[0]
+            self.convertFilename = removeBracketsFilename # lambda s: s
          
         # 0:System standard, 1:utf-8 with BOM, 2: utf-8 without BOM
         encoding = addopt[0]

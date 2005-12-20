@@ -1,0 +1,75 @@
+﻿++ Options Dialog
+
+The options dialog controls the behaviour of the application and the currently open wiki. To open it, choose "Options" in the wiki menu.
+
++++ Application wide
+
+The following options apply to the whole application and therefore to each wiki opened in it.
+
+
+++++ Tree options
+
+These apply to the tree on the left of the main window.
+
+*Tree auto-follow*
+The tree tries to always select the wiki word currently shown in the editor or HTML-view.
+
+*Tree update after save*
+After each (automatic or manual) save, the tree icons and shown children are updated. This may need some time and may create some flicker going from top to bottom through the tree.
+
+*Hide Undefined WikiWords in Tree*
+If a page contains wiki word links to non-existing pages, these are not shown as children in the tree.
+
+*No cycles in tree*
+If two or more pages reference each other (e.g. NodeA -> NodeB -> NodeA) these cycles are not shown. Precisely: if a child of a word is already an ancestor (parent, grandparent, ...) of this word, it is not shown.
+
+
+++++ HTML preview/export
+
+*Start browser after export*
+Starts the current web browser after exporting one or more HTML pages or an XML document.
+
+*Font name for HTML preview*
+Enter the desired font name for the HTML preview. Clicking on the "..." button shows a list of available fonts.
+
+*Props to (not) include in preview*
+Enter here a regular expression of the properties you want to allow to be shown in the HTML preview. The RE is tested against a "normalized" property where the brackets are removed and key and value are separated by ": ". So even if the property is in the page written as 
+"[camelCaseWordsEnabled=false]", the RE is tested against "camelCaseWordsEnabled: false".
+
+If you e.g. want to show the "alias" properties only, enter "alias: .* ". Other properties will then be hidden in the preview. The empty text field matches everything.
+
+If you want to show all properties *except* those matching the RE, tick the checkbox to the eft of the "not".
+
+If you press the "Ok" button of the options dialog, but the dialog doesn't vanish, instead this text field is red, then the RE contains an error and must be corrected first.
+
+*Props to (not) include in export*
+Same as above, but for the HTML export.
+
+
+++++ Other
+
+*Auto Save*
+Save current page content to disk (if modified) after a few seconds of inactivity.
+
+*Minimize to Tray*
+Minmized to system tray instead of the normal taskbar.
+
+*New window on wiki URL*
+When double clicking on a wiki: URL, a new instance of the application is started, otherwise, the current instance loads the new wiki.
+
+*Process auto-generated areas* (WikidPadCompact only)
+Experimental feature.
+
+*Low resource usage*
+Try to reduce usage of Windows resources. Only interesting for Windows 9x/ME.
+
+
+
++++ Current wiki
+These option applies to the active wiki only
+
+*Footnotes as wiki words*
+Interpret footnotes (e.g. "[42]") as wiki words instead of normal text.
+
+
+
