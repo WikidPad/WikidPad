@@ -51,9 +51,7 @@ class OpenWikiWordDialog(wxDialog):
                 self.value = words[0]
             else:
                 wikiWord = self.value
-                wikiWordN = WikiFormatting.normalizeWikiWord(wikiWord,
-                        self.pWiki.configuration.getboolean("main",
-                        "footnotes_as_wikiwords"))
+                wikiWordN = self.pWiki.getFormatting().normalizeWikiWord(wikiWord)
 
                 if wikiWordN is None:
                     # Entered text is not a valid wiki word
@@ -112,9 +110,7 @@ class OpenWikiWordDialog(wxDialog):
         """
         Create new WikiWord
         """
-        wikiWord = WikiFormatting.normalizeWikiWord(self.value,
-                self.pWiki.configuration.getboolean("main",
-                "footnotes_as_wikiwords"))
+        wikiWord = self.pWiki.getFormatting().normalizeWikiWord(self.value)
         if wikiWord is None:
             self.pWiki.displayErrorMessage(u"'%s' is an invalid WikiWord" % self.value)
             self.ctrls.text.SetFocus()

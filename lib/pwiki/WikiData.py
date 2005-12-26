@@ -29,9 +29,11 @@ from WikiExceptions import *   # TODO make normal import?
 import SearchAndReplace
 
 from StringOps import mbcsEnc, mbcsDec, utf8Enc, utf8Dec, BOM_UTF8, \
-        fileContentToUnicode, Tokenizer, wikiWordToLabel
+        fileContentToUnicode, wikiWordToLabel
 
 import WikiFormatting
+
+import PageAst
 
 
 CleanTextRE = re.compile("[^A-Za-z0-9]")  # ?
@@ -44,8 +46,8 @@ class WikiData:
         self.connWrap = None
         self.cachedWikiWords = None
         
-        self._updateTokenizer = \
-                Tokenizer(WikiFormatting.CombinedUpdateRE, -1)
+#         self._updateTokenizer = \
+#                 Tokenizer(WikiFormatting.CombinedUpdateRE, -1)
 
         self._reinit()
         
@@ -865,55 +867,83 @@ class WikiPage:
         self.deleteChildRelationships()
         self.deleteProperties()
         self.deleteTodos()
-
-        footnotesAsWikiwords = self.wikiData.pWiki.configuration.getboolean(
-                "main", "footnotes_as_wikiwords")
         
-        formatMap = WikiFormatting.getExpressionsFormatList(
-                WikiFormatting.UpdateExpressions,
-                self.wikiData.pWiki.wikiWordsEnabled,
-                footnotesAsWikiwords)
+        formatting = self.wikiData.pWiki.getFormatting()
+        
+        page = PageAst.Page()
+        page.buildAst(formatting, text)
+        
+        todoTokens = page.findType(WikiFormatting.FormatTypes.ToDo)
+        for t in todoTokens:
+            self.addTodo(t.grpdict["todoName"] + t.grpdict["todoDelimiter"] +
+                t.grpdict["todoValue"])
+        
+        propTokens = page.findType(WikiFormatting.FormatTypes.Property)
+        for t in propTokens:
+            propName = t.grpdict["propertyName"]
+            propValue = t.grpdict["propertyValue"]
+            if propName == u"alias":
+                word = formatting.normalizeWikiWord(propValue)
+                if word is not None:
+                    self.wikiData.cachedWikiWords[word] = 2
+                    self.setProperty(u"alias", word)
+            else:
+                self.setProperty(propName, propValue)
 
-        tokens = self.wikiData._updateTokenizer.tokenize(text, sync=True)
+        wwTokens = page.findType(WikiFormatting.FormatTypes.WikiWord)
+        for t in wwTokens:
+            self.addChildRelationship(
+                    formatting.normalizeWikiWord(t.text))
 
-        if len(tokens) >= 2:
-            tok = tokens[0]
-
-            for nexttok in tokens[1:]:
-                stindex = tok[1]
-                if stindex == -1:
-                    styleno = WikiFormatting.FormatTypes.Default
-                else:
-                    styleno = formatMap[stindex]
-
-                if styleno == WikiFormatting.FormatTypes.ToDo:
-                    self.addTodo(tok[2]["todoContent"])
-#                 elif styleno == WikiFormatting.FormatTypes.WikiWord2:
+#         footnotesAsWikiwords = self.wikiData.pWiki.configuration.getboolean(
+#                 "main", "footnotes_as_wikiwords")
+#         
+#         formatMap = WikiFormatting.getExpressionsFormatList(
+#                 WikiFormatting.UpdateExpressions,
+#                 self.wikiData.pWiki.wikiWordsEnabled,
+#                 footnotesAsWikiwords)
+# 
+#         tokens = self.wikiData._updateTokenizer.tokenize(text, sync=True)
+# 
+#         if len(tokens) >= 2:
+#             print "Updating", repr(self.wikiWord), repr([t[:2] for t in tokens])
+#             tok = tokens[0]
+# 
+#             for nexttok in tokens[1:]:
+#                 stindex = tok[1]
+#                 if stindex == -1:
+#                     styleno = WikiFormatting.FormatTypes.Default
+#                 else:
+#                     styleno = formatMap[stindex]
+# 
+#                 if styleno == WikiFormatting.FormatTypes.ToDo:
+#                     self.addTodo(tok[2]["todoContent"])
+# #                 elif styleno == WikiFormatting.FormatTypes.WikiWord2:
+# #                     self.addChildRelationship(
+# #                             WikiFormatting.normalizeWikiWord(
+# #                             text[tok[0]:nexttok[0]]))
+#                 elif styleno == WikiFormatting.FormatTypes.WikiWord:
 #                     self.addChildRelationship(
 #                             WikiFormatting.normalizeWikiWord(
-#                             text[tok[0]:nexttok[0]]))
-                elif styleno == WikiFormatting.FormatTypes.WikiWord:
-                    self.addChildRelationship(
-                            WikiFormatting.normalizeWikiWord(
-                            text[tok[0]:nexttok[0]], footnotesAsWikiwords))
-                elif styleno == WikiFormatting.FormatTypes.Property:
-                    propName = tok[2]["propertyName"]
-                    propValue = tok[2]["propertyValue"]
-
-                    if propName == "alias":
-                        word = WikiFormatting.normalizeWikiWord(propValue,
-                                footnotesAsWikiwords)
-                        if word is not None:
-                            self.wikiData.cachedWikiWords[word] = 2
-                            self.setProperty("alias", word)
-#                         if not WikiFormatting.WikiWordRE.match(word):
-#                             word = u"[%s]" % word
-#                         self.wikiData.cachedWikiWords[word] = 2
-#                         self.setProperty("alias", word)
-                    else:
-                        self.setProperty(propName, propValue)
-                        
-                tok = nexttok
+#                             text[tok[0]:nexttok[0]], footnotesAsWikiwords))
+#                 elif styleno == WikiFormatting.FormatTypes.Property:
+#                     propName = tok[2]["propertyName"]
+#                     propValue = tok[2]["propertyValue"]
+# 
+#                     if propName == "alias":
+#                         word = WikiFormatting.normalizeWikiWord(propValue,
+#                                 footnotesAsWikiwords)
+#                         if word is not None:
+#                             self.wikiData.cachedWikiWords[word] = 2
+#                             self.setProperty("alias", word)
+# #                         if not WikiFormatting.WikiWordRE.match(word):
+# #                             word = u"[%s]" % word
+# #                         self.wikiData.cachedWikiWords[word] = 2
+# #                         self.setProperty("alias", word)
+#                     else:
+#                         self.setProperty(propName, propValue)
+#                         
+#                 tok = nexttok
 
         # update the modified time
 #         self.modified = time()

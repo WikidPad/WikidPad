@@ -2,7 +2,8 @@ from MiscEvent import KeyFunctionSink
 
 class PageHistory:
     """
-    Represents the history of visited wikiwords
+    Represents the history of visited wikiwords. Active component which reacts
+    on MiscEvents.
     """
     def __init__(self, pWiki):
         self.pos = 0   # Pos is index into history but points one element *behind* current word

@@ -604,12 +604,14 @@ lib/pwiki/DbStructure.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
 lib/pwiki/MiscEvent.py -text
+lib/pwiki/PageAst.py -text
 lib/pwiki/PageHistory.py -text
 lib/pwiki/PersonalWikiFrame.py -text
 lib/pwiki/PluginManager.py -text
 lib/pwiki/SearchAndReplace.py -text
 lib/pwiki/SearchAndReplaceDialogs.py -text
 lib/pwiki/StringOps.py -text
+lib/pwiki/Utilities.py -text
 lib/pwiki/WikiData.py -text
 lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiFormatting.py -text

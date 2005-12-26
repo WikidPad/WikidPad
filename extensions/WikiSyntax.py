@@ -67,8 +67,8 @@ WikiWordRE      = re.compile(ur"\b(?<!~)" + singleWikiWord +
                              
                              
 # Special version for syntax highlighting to allow appending search expression with '#'
-WikiWordEditorRE      = re.compile(WikiWordRE.pattern +
-                              ur"(?:#(?:(?:#.)|[^ \t\n#])+)?",
+WikiWordEditorRE      = re.compile(ur"(?P<wikiword>" + WikiWordRE.pattern +
+                              ur")(?:#(?P<wikiwordSearchfrag>(?:(?:#.)|[^ \t\n#])+))?",
                               re.DOTALL | re.UNICODE | re.MULTILINE)
 
                              
@@ -82,8 +82,8 @@ WikiWordRE2     = re.compile(ur"\[[\w\-\_ \t]+?\]",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 # Special version for syntax highlighting to allow appending search expression with '#'
-WikiWordEditorRE2      = re.compile(WikiWordRE2.pattern +
-                              ur"(?:#(?:(?:#.)|[^ \t\n#])+)?",
+WikiWordEditorRE2      = re.compile(ur"\[(?P<wikiwordncc>[\w\-\_ \t]+?)\]"
+                              ur"(?:#(?P<wikiwordnccSearchfrag>(?:(?:#.)|[^ \t\n#])+))?",
                               re.DOTALL | re.UNICODE | re.MULTILINE)
 
 SearchUnescapeRE   = re.compile(ur"#(.)",
@@ -129,7 +129,10 @@ ToDoRE          = re.compile(ur"^\s*(?:todo|action|track|issue|question|project)
         
 # todos, captures the todo item text
 ## ToDoREWithContent = re.compile(u"^\s*((?:todo|action|track|issue|question|project)\\.?[^\\:\\s]*:[^\\r\\n]+)", re.MULTILINE)
-ToDoREWithContent = re.compile(ur"^\s*(?P<todoContent>(?:todo|action|track|issue|question|project)(?:\.[^:\s]+)?:[^\r\n]+)",
+
+ToDoREWithContent = re.compile(ur"(?P<todoIndent>^\s*)"
+        ur"(?P<todoName>(?:todo|action|track|issue|question|project)(?:\.[^:\s]+)?)"
+        ur"(?P<todoDelimiter>:)(?P<todoValue>[^\r\n]+)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
         
 # todos, used in the tree control to parse saved todos. Because they were
@@ -153,7 +156,7 @@ SuppressHighlightingRE = re.compile(ur"^(?P<suppressIndent>[ \t]*)<<[ \t]*$"+
         ur"(?P<suppressContent>.*?)^[ \t]*>>[ \t]*$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
-TableRE = re.compile(ur"^[ \t]*<<\|[ \t]*$"+
-        ur"(?P<tableContent>.*?)^[ \t]*>>[ \t]*$",
+TableRE = re.compile(ur"(?P<tableBegin>^[ \t]*<<\|[ \t]*$)"
+        ur"(?P<tableContent>.*?)(?P<tableEnd>^[ \t]*>>[ \t]*$)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 

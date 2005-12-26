@@ -225,8 +225,12 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         # initialize the wiki syntax
         WikiFormatting.initialize(self.wikiSyntax)
         
+        # Initialize new component
+        self.formatting = WikiFormatting.WikiFormatting(self, self.wikiSyntax)
+        
         # Connect page history
         self.pageHistory = PageHistory(self)
+        
 
         # trigger hook
         self.hooks.startup(self)
@@ -389,6 +393,16 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
     def getCurrentWikiWord(self):
         return self.currentWikiWord
+        
+    def getWikiData(self):
+        return self.wikiData
+        
+    def getConfig(self):
+        return self.configuration
+        
+    def getFormatting(self):
+        return self.formatting
+
 
     # TODO!
     def fillIconLookupCache(self, createIconImageList=False):
@@ -1237,11 +1251,11 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         # ------------------------------------------------------------------------------------
         # Find and replace events
         # ------------------------------------------------------------------------------------
-        EVT_COMMAND_FIND(self, -1, self.OnFind)
-        EVT_COMMAND_FIND_NEXT(self, -1, lambda evt: self.OnFind(evt, next=True))
-        EVT_COMMAND_FIND_REPLACE(self, -1, lambda evt: self.OnFind(evt, replace=True))
-        EVT_COMMAND_FIND_REPLACE_ALL(self, -1, lambda evt: self.OnFind(evt, replaceAll=True))
-        EVT_COMMAND_FIND_CLOSE(self, -1, self.OnFindClose)
+#         EVT_COMMAND_FIND(self, -1, self.OnFind)
+#         EVT_COMMAND_FIND_NEXT(self, -1, lambda evt: self.OnFind(evt, next=True))
+#         EVT_COMMAND_FIND_REPLACE(self, -1, lambda evt: self.OnFind(evt, replace=True))
+#         EVT_COMMAND_FIND_REPLACE_ALL(self, -1, lambda evt: self.OnFind(evt, replaceAll=True))
+#         EVT_COMMAND_FIND_CLOSE(self, -1, self.OnFindClose)
 
         # ------------------------------------------------------------------------------------
         # Create the status bar
@@ -1707,8 +1721,7 @@ These are your default global settings.
                 wikiPageWord), 0)
 
         # make sure this is a valid wiki word
-        wikiWord = WikiFormatting.normalizeWikiWord(wikiPageWord,
-                self.configuration.getboolean("main", "footnotes_as_wikiwords"))
+        wikiWord = self.getFormatting().normalizeWikiWord(wikiPageWord)
         if wikiWord is None:
             self.displayErrorMessage(u"'%s' is an invalid wiki word." % wikiPageWord)
             return
@@ -1918,7 +1931,7 @@ These are your default global settings.
 
 
     def launchUrl(self, link):
-        match = WikiFormatting.UrlRE.match(link)
+        match = self.getFormatting().UrlRE.match(link)
         try:
             link2 = match.group(1)
             
@@ -2216,9 +2229,7 @@ These are your default global settings.
         if not newWikiWord or len(newWikiWord) == 0:
             return False
             
-        toWikiWord = WikiFormatting.normalizeWikiWord(newWikiWord,
-                self.configuration.getboolean("main",
-                "footnotes_as_wikiwords"))
+        toWikiWord = self.getFormatting().normalizeWikiWord(newWikiWord)
         if toWikiWord is None:
             self.displayErrorMessage(u"'%s' is an invalid WikiWord" % newWikiWord)
             return False
@@ -2346,29 +2357,36 @@ These are your default global settings.
 
 
     def showFindReplaceDialog(self):
-        if self.findDlg is None:
-            data = wxFindReplaceData()
-        else:
+        if self.findDlg != None:
             return
-#             data = wxFindReplaceData() #self.findDlg.GetData()
-#             self.findDlg.Show(False)
-#             self.findDlg.Destroy()
-#             self.findDlg = None
 
-        self.lastFindPos = -1
-        dlg = wxFindReplaceDialog(self, data, u"Find and Replace", wxFR_REPLACEDIALOG)
-        dlg.data = data
-        self.findDlg = dlg
-        dlg.Show(True)
+        self.findDlg = SearchPageDialog(self, -1)
+        self.findDlg.CenterOnParent(wxBOTH)
+        self.findDlg.Show()
+        
+#         if self.findDlg is None:
+#             data = wxFindReplaceData()
+#         else:
+#             return
+# #             data = wxFindReplaceData() #self.findDlg.GetData()
+# #             self.findDlg.Show(False)
+# #             self.findDlg.Destroy()
+# #             self.findDlg = None
+# 
+#         self.lastFindPos = -1
+#         dlg = wxFindReplaceDialog(self, data, u"Find and Replace", wxFR_REPLACEDIALOG)
+#         dlg.data = data
+#         self.findDlg = dlg
+#         dlg.Show(True)
 
     def showReplaceTextByWikiwordDialog(self):
         wikiWord = guiToUni(wxGetTextFromUser(u"Replace text by WikiWord:",
                 u"Replace by Wiki Word", self.currentWikiWord, self))
 
         if wikiWord:
-            if not WikiFormatting.isWikiWord(wikiWord):
+            if not self.getFormatting().isWikiWord(wikiWord):
                 wikiWord = u"[%s]" % wikiWord
-            if not WikiFormatting.isWikiWord(wikiWord):
+            if not self.getFormatting().isWikiWord(wikiWord):
                 self.displayErrorMessage(u"'%s' is an invalid WikiWord" % wikiWord)
                 return False
 
@@ -2588,7 +2606,8 @@ These are your default global settings.
             wikiName = guiToUni(dlg.GetValue())
 
             # make sure this is a valid wiki word
-            if wikiName.find(u' ') == -1 and WikiFormatting.isWikiWord(wikiName):
+            if wikiName.find(u' ') == -1 and \
+                    self.getFormatting().isWikiWord(wikiName):
                 dlg = wxDirDialog(self, u"Directory to store new wiki",
                         self.getLastActiveDir(),
                         style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
@@ -2617,53 +2636,63 @@ These are your default global settings.
                 "wikiPage": wikiPage})
 
 
-    def OnFind(self, evt, next=False, replace=False, replaceAll=False):
-        matchWholeWord = False
-        matchCase = False
-
-        et = evt.GetEventType()
-        flags = evt.GetFlags()
-
-        matchWholeWord = not not (flags & wxFR_WHOLEWORD)
-        matchCase = not not (flags & wxFR_MATCHCASE)
-
-        findString = guiToUni(evt.GetFindString())
-        if matchWholeWord:
-            findString = ur"\b%s\b" % findString
-
-        sarOp = SearchReplaceOperation()
-        sarOp.searchStr = guiToUni(evt.GetFindString())
-        sarOp.replaceOp = False
-        sarOp.booleanOp = False
-        sarOp.caseSensitive = not not (flags & wxFR_MATCHCASE)
-        sarOp.wholeWord = not not (flags & wxFR_WHOLEWORD)
-        sarOp.cycleToStart = True
-        sarOp.wildCard = 'no'  # TODO
-        sarOp.wikiWide = False
-
-        if et == wxEVT_COMMAND_FIND:
-            self.editor.executeSearch(sarOp)
-        elif et == wxEVT_COMMAND_FIND_NEXT:
-            self.editor.executeSearch(sarOp, next=True)
-        elif et == wxEVT_COMMAND_FIND_REPLACE:
-            sarOp.replaceStr = guiToUni(evt.GetReplaceString())
-            sarOp.replaceOp = True
-            self.lastFindPos = self.editor.executeSearch(sarOp,
-                    self.lastFindPos, self.lastFindPos > -1)
-                    
-        elif et == wxEVT_COMMAND_FIND_REPLACE_ALL:
-            sarOp.replaceStr = guiToUni(evt.GetReplaceString())
-            sarOp.replaceOp = True
-            lastReplacePos = -1
-            while(1):
-                lastReplacePos = self.editor.executeSearch(sarOp, lastReplacePos)
-                if lastReplacePos == -1:
-                    break
-
-
-    def OnFindClose(self, evt, next=False, replace=False, replaceAll=False):
-        evt.GetDialog().Destroy()
-        self.findDlg = None
+#     def OnFind(self, evt, next=False, replace=False, replaceAll=False):
+#         matchWholeWord = False
+#         matchCase = False
+# 
+#         et = evt.GetEventType()
+#         flags = evt.GetFlags()
+# 
+#         matchWholeWord = not not (flags & wxFR_WHOLEWORD)
+#         matchCase = not not (flags & wxFR_MATCHCASE)
+# 
+#         findString = guiToUni(evt.GetFindString())
+#         if matchWholeWord:
+#             findString = ur"\b%s\b" % findString
+# 
+#         sarOp = SearchReplaceOperation()
+#         sarOp.searchStr = guiToUni(evt.GetFindString())
+#         sarOp.replaceOp = False
+#         sarOp.booleanOp = False
+#         sarOp.caseSensitive = not not (flags & wxFR_MATCHCASE)
+#         sarOp.wholeWord = not not (flags & wxFR_WHOLEWORD)
+#         sarOp.cycleToStart = True #???
+#         sarOp.wildCard = 'no'  # TODO
+#         sarOp.wikiWide = False
+#         
+#         print "OnFind", et, replaceAll, wxEVT_COMMAND_FIND, wxEVT_COMMAND_FIND_NEXT, wxEVT_COMMAND_FIND_REPLACE, wxEVT_COMMAND_FIND_REPLACE_ALL
+# 
+#         if et == wxEVT_COMMAND_FIND:
+#             self.editor.executeSearch(sarOp)
+#         elif et == wxEVT_COMMAND_FIND_NEXT:
+#             self.editor.executeSearch(sarOp, next=True)
+#         elif et == wxEVT_COMMAND_FIND_REPLACE:
+#             sarOp.replaceStr = guiToUni(evt.GetReplaceString())
+#             sarOp.replaceOp = True
+#             self.editor.executeReplace(sarOp)
+# 
+#             self.lastFindPos = self.editor.executeSearch(sarOp,
+#                     next=True)
+# #             self.lastFindPos = self.editor.executeSearch(sarOp,
+# #                     self.lastFindPos, self.lastFindPos > -1)
+#                     
+#         elif et == wxEVT_COMMAND_FIND_REPLACE_ALL:
+#             sarOp.replaceStr = guiToUni(evt.GetReplaceString())
+#             sarOp.replaceOp = True
+#             lastReplacePos = 0
+#             while(1):
+#                 print "wxEVT_COMMAND_FIND_REPLACE_ALL1", lastReplacePos
+#                 lastReplacePos = self.editor.executeSearch(sarOp, lastReplacePos)
+#                 print "wxEVT_COMMAND_FIND_REPLACE_ALL2", lastReplacePos
+#                 self.editor.executeReplace(sarOp)
+#                 print "wxEVT_COMMAND_FIND_REPLACE_ALL3", lastReplacePos
+#                 if lastReplacePos == -1:
+#                     break
+# 
+# 
+#     def OnFindClose(self, evt, next=False, replace=False, replaceAll=False):
+#         evt.GetDialog().Destroy()
+#         self.findDlg = None
 
 
     # TODO decouple save and update

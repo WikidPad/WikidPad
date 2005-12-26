@@ -14,6 +14,7 @@ from struct import pack, unpack
 import difflib, codecs
 from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE
 from os.path import splitext
+from Utilities import DUMBTHREADHOLDER
 
 import srePersistent as re
 
@@ -178,7 +179,18 @@ def revStr(s):
     s = list(s)
     s.reverse()
     return u"".join(s)
-
+    
+def splitkeep(s, delim):
+    """
+    Similar to split, but keeps the delimiter as separate element, e.g.
+    splitkeep("aaabaaabaa", "b") -> ["aaa", "b", "aaa", "b", "aa"]
+    """
+    result = []
+    for e in s.split(delim):
+        result.append(e)
+        result.append(delim)
+        
+    return result[:-1]
 
 ## Copied from xml.sax.saxutils and modified to reduce dependencies
 def escapeHtml(data):
@@ -230,6 +242,20 @@ def binToStr(b):
 
 # ---------- Breaking text into tokens ----------
 
+class Token(object):
+    __slots__ = ("__weakref__", "ttype", "start", "grpdict", "text", "node")
+    
+    def __init__(self, ttype, start, grpdict, text, node=None):
+        self.ttype = ttype
+        self.start = start
+        self.grpdict = grpdict
+        self.text = text
+        self.node = node
+        
+    def __repr__(self):
+        return u"Token(%s, %s, %s, <dict>, %s)" % (repr(self.ttype), repr(self.start), repr(self.text), repr(self.node))
+
+
 class Tokenizer:
     def __init__(self, tokenre, defaultType):
         self.tokenre = tokenre
@@ -242,7 +268,42 @@ class Tokenizer:
     def getTokenThread(self):
         return self.tokenThread
 
-    def tokenize(self, text, sync=True):
+#     def tokenize(self, text, sync=True):
+#         textlen = len(text)
+#         result = []
+#         charpos = 0    
+#         
+#         while True:
+#             mat = self.tokenre.search(text, charpos)
+#             if mat is None:
+#                 if charpos < textlen:
+#                     result.append((charpos, self.defaultType, None))
+#                 
+#                 result.append((textlen, self.defaultType, None))
+#                 break
+#     
+#             groupdict = mat.groupdict()
+#             for m in groupdict.keys():
+#                 if not groupdict[m] is None and m.startswith(u"style"):
+#                     start, end = mat.span()
+#                     
+#                     # m is of the form:   style<index>
+#                     index = int(m[5:])
+#                     if charpos < start:
+#                         result.append((charpos, self.defaultType, None))                    
+#                         charpos = start
+#     
+#                     result.append((charpos, index, groupdict))
+#                     charpos = end
+#                     break
+#     
+#             if not sync and (not threading.currentThread() is self.tokenThread):
+#                 break
+#                 
+#         return result
+
+
+    def tokenize(self, text, formatMap, defaultType, threadholder=DUMBTHREADHOLDER):
         textlen = len(text)
         result = []
         charpos = 0    
@@ -251,9 +312,10 @@ class Tokenizer:
             mat = self.tokenre.search(text, charpos)
             if mat is None:
                 if charpos < textlen:
-                    result.append((charpos, self.defaultType, None))
+                    result.append(Token(defaultType, charpos, None,
+                            text[charpos:textlen]))
                 
-                result.append((textlen, self.defaultType, None))
+                result.append(Token(defaultType, textlen, None, u""))
                 break
     
             groupdict = mat.groupdict()
@@ -264,16 +326,18 @@ class Tokenizer:
                     # m is of the form:   style<index>
                     index = int(m[5:])
                     if charpos < start:
-                        result.append((charpos, self.defaultType, None))                    
+                        result.append(Token(defaultType, charpos, None,
+                                text[charpos:start]))                    
                         charpos = start
     
-                    result.append((charpos, index, groupdict))
+                    result.append(Token(formatMap[index], charpos, groupdict,
+                            text[start:end]))
                     charpos = end
                     break
     
-            if not sync and (not threading.currentThread() is self.tokenThread):
+            if not threadholder.isCurrent():
                 break
-                
+
         return result
 
 

@@ -271,7 +271,7 @@ class SearchWikiDialog(wxDialog):   # TODO
             pagePosNext = self.pWiki.editor.executeSearch(searchOp,
                     0, next=nextOnPage)[1]
                     
-            if pagePosNext is not None:
+            if pagePosNext != -1:
                 return  # Found
                 
             if self.ctrls.htmllbPages.GetSelection() == \
@@ -491,5 +491,70 @@ class SearchWikiDialog(wxDialog):   # TODO
             evt.Skip()
 
 
+class SearchPageDialog(wxDialog):   # TODO
+    def __init__(self, pWiki, ID, title="Search Wiki",
+                 pos=wxDefaultPosition, size=wxDefaultSize,
+                 style=wxNO_3D|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER):
+        d = wxPreDialog()
+        self.PostCreate(d)
+        
+        self.pWiki = pWiki
+
+        res = xrc.wxXmlResource.Get()
+        res.LoadOnDialog(self, self.pWiki, "SearchPageDialog")
+        
+        self.ctrls = XrcControls(self)
+        
+        self.ctrls.btnClose.SetId(wxID_CANCEL)
+        
+        self.firstFind = True
+
+        EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)        
+        EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
+        EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
+        EVT_BUTTON(self, wxID_CANCEL, self.OnClose)        
+        EVT_CLOSE(self, self.OnClose)
 
 
+    def OnClose(self, evt):
+        self.pWiki.findDlg = None
+        self.Destroy()
+
+
+    def _buildSearchOperation(self):
+        sarOp = SearchReplaceOperation()
+        sarOp.searchStr = guiToUni(self.ctrls.txtSearch.GetValue())
+        sarOp.replaceOp = False
+        sarOp.booleanOp = False
+        sarOp.caseSensitive = self.ctrls.cbCaseSensitive.GetValue()
+        sarOp.wholeWord = self.ctrls.cbWholeWord.GetValue()
+        sarOp.cycleToStart = True #???
+        sarOp.wildCard = 'no'  # TODO
+        sarOp.wikiWide = False
+
+        return sarOp
+
+
+    def OnFindNext(self, evt):
+        sarOp = self._buildSearchOperation()
+        sarOp.replaceOp = False        
+        self.pWiki.editor.executeSearch(sarOp, next=not self.firstFind)
+        self.firstFind = False
+
+    def OnReplace(self, evt):
+        sarOp = self._buildSearchOperation()
+        sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
+        sarOp.replaceOp = True
+        self.pWiki.editor.executeReplace(sarOp)
+        self.pWiki.editor.executeSearch(sarOp, next=True)
+
+    def OnReplaceAll(self, evt):
+        sarOp = self._buildSearchOperation()
+        sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
+        sarOp.replaceOp = True
+        lastReplacePos = 0
+        while(1):
+            lastReplacePos = self.pWiki.editor.executeSearch(sarOp, lastReplacePos)[1]
+            self.pWiki.editor.executeReplace(sarOp)
+            if lastReplacePos == -1:
+                break
