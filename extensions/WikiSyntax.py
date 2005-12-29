@@ -71,7 +71,7 @@ WikiWordEditorRE      = re.compile(ur"(?P<wikiword>" + WikiWordRE.pattern +
                               ur")(?:#(?P<wikiwordSearchfrag>(?:(?:#.)|[^ \t\n#])+))?",
                               re.DOTALL | re.UNICODE | re.MULTILINE)
 
-                             
+
 
 # Only to exclude them from WikiWordRE2
 FootnoteRE     = re.compile(ur"\[[0-9]+?\]",
@@ -91,9 +91,6 @@ SearchUnescapeRE   = re.compile(ur"#(.)",
 
 
 # parses the dynamic properties
-# PropertyRE      = re.compile(ur"\[\s*(?P<propertyName>[a-zA-Z0-9\-\_\s\.]+?)\s*" +
-#                   ur"[=:]\s*(?P<propertyValue>[\w\-\_\s]+?)\s*\]",
-#                   re.DOTALL | re.UNICODE | re.MULTILINE)
 PropertyRE      = re.compile(ur"\[\s*(?P<propertyName>[a-zA-Z0-9\-\_\.]+?)\s*" +
                   ur"[=:]\s*(?P<propertyValue>[\w\-\_ \t]+?)\]",
                   re.DOTALL | re.UNICODE | re.MULTILINE)

@@ -40,6 +40,10 @@ class Page(Ast):
         self.tokens = formatting.tokenizePage(text, threadholder)
         
         for tok in self.tokens:
+            if not threadholder.isCurrent():
+                self.tokens = None
+                return
+
             if tok.ttype == WikiFormatting.FormatTypes.ToDo:
                 node = Todo()
                 node.buildSubAst(formatting, tok, threadholder=threadholder)
@@ -48,6 +52,7 @@ class Page(Ast):
                 node = Table()
                 node.buildSubAst(formatting, tok, threadholder=threadholder)
                 tok.node = node
+                
 
     def _findType(self, typeToFind, result):
         for tok in self.tokens:
@@ -112,6 +117,9 @@ class Table(Ast):
         contenttokens = []
         relpos = token.start + len(self.begin)
         for c in cells:
+            if not threadholder.isCurrent():
+                return
+
             tokensIn = formatting.tokenizeCell(c, threadholder=threadholder)
             tokensOut = []
             # Filter out empty tokens

@@ -238,7 +238,7 @@ class HtmlXmlExporter:
                 continue
                 
             # Why localtime?
-            modified, created = wikiPage.getWikiWordInfo()
+            modified, created = wikiPage.getTimestamps()
             created = localtime(float(created))
             modified = localtime(float(modified))
             
@@ -561,16 +561,19 @@ class HtmlXmlExporter:
                             continue
 
                         line, ind = splitIndent(line)
-                        
+
                         while stacklen < len(self.statestack) and \
                                 ind < self.statestack[-1][1]:
                             # Current indentation is less than previous (stored
                             # on stack) so close open <ul> and <ol>
                             self.popState()
-                                
+
+#                         print "normal1", repr(line), repr(self.statestack[-1][0]), ind, repr(self.statestack[-1][1])
+
                         if self.statestack[-1][0] == "normalindent" and \
                                 ind > self.statestack[-1][1]:
                             # More indentation than before -> open new <ul> level
+#                             print "normal2"
                             self.outEatBreaks(u"<ul>")
                             self.statestack.append(("normalindent", ind))
                             self.outAppend(escapeHtml(line))
@@ -762,21 +765,17 @@ class HtmlXmlExporter:
                         ind < self.statestack[-1][1]:
                     self.popState()
                     
-                while ind == self.statestack[-1][1] and \
-                        self.statestack[-1][0] != "ul" and \
-                        stacklen < len(self.statestack):
-                    self.popState()
+#                 while ind == self.statestack[-1][1] and \
+#                         self.statestack[-1][0] != "ul" and \
+#                         stacklen < len(self.statestack):
+#                     self.popState()
 
-                if ind > self.statestack[-1][1] or \
-                        self.statestack[-1][0] != "ul":
+                if ind > self.statestack[-1][1]: # or \
+#                        self.statestack[-1][0] != "ul":
                     self.outEatBreaks(u"<ul>")
                     self.statestack.append(("normalindent", ind))
 
                 self.outTable(content, tok.node)
-#             elif styleno == WikiFormatting.FormatTypes.Default:
-# #                     while self.statestack[-1][0] != "normalindent":
-# #                         self.popState()
-#                 self.outAppend(escapeHtml(tok.text))
 
         while len(self.statestack) > stacklen:
             self.popState()

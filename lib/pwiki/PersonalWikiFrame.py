@@ -255,36 +255,6 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         setWindowPos(self, (self.configuration.getint("main", "pos_x"),
                 self.configuration.getint("main", "pos_y")))
 
-#         screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
-#         screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
-# 
-#         sizeX = self.configuration.getint("main", "size_x")
-#         sizeY = self.configuration.getint("main", "size_y")
-# 
-#         # don't let the window be > than the size of the screen
-#         if sizeX > screenX:
-#             sizeX = screenX-20
-#         if sizeY > screenY:
-#             currentY = screenY-20
-# 
-#         # set the size
-#         self.SetSize(wxSize(sizeX, sizeY))
-# 
-#         currentX = self.configuration.getint("main", "pos_x")
-#         currentY = self.configuration.getint("main", "pos_y")
-# 
-#         # fix any crazy screen positions
-#         if currentX < 0:
-#             currentX = 10
-#         if currentY < 0:
-#             currentY = 10
-#         if currentX > screenX:
-#             currentX = screenX-100
-#         if currentY > screenY:
-#             currentY = screenY-100
-# 
-#         self.SetPosition(wxPoint(currentX, currentY))
-
         # Should reduce resources usage (less icons)
         # Do not set self.lowResources after initialization here!
         self.lowResources = self.configuration.getboolean("main", "lowresources")
@@ -552,11 +522,6 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
                     self.keyBindings.ViewBookmarks, 'View Bookmarks',
                     lambda evt: self.viewBookmarks())
     
-#             menuID=wxNewId()
-#             wikiMenu.Append(menuID, '&View Bookmarks\t' +
-#                     self.keyBindings.ViewBookmarks, 'View Bookmarks')
-#             EVT_MENU(self, menuID, lambda evt: self.viewBookmarks())
-
         wikiMenu.AppendSeparator()
 
         menuID=wxNewId()
@@ -926,9 +891,9 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
         formattingMenu.AppendSeparator()
 
-        menuID=wxNewId()
-        formattingMenu.Append(menuID, '&Find\t', 'Find')
-        EVT_MENU(self, menuID, lambda evt: self.showFindDialog())
+#         menuID=wxNewId()
+#         formattingMenu.Append(menuID, '&Find\t', 'Find')
+#         EVT_MENU(self, menuID, lambda evt: self.showFindDialog())
 
         menuID=wxNewId()
         formattingMenu.Append(menuID, 'Find and &Replace\t' + self.keyBindings.FindAndReplace, 'Find and Replace')
@@ -1195,12 +1160,15 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
         self.buildMainMenu()
         self.buildToolbar()
+        
+        EVT_MENU(self, GUI_ID.CMD_SWITCH_FOCUS, self.OnSwitchFocus)
 
         # Add alternative accelerators for clipboard operations
         ACCS = [
             (wxACCEL_CTRL, WXK_INSERT, GUI_ID.CMD_CLIPBOARD_COPY),
             (wxACCEL_SHIFT, WXK_INSERT, GUI_ID.CMD_CLIPBOARD_PASTE),
-            (wxACCEL_SHIFT, WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT)
+            (wxACCEL_SHIFT, WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT),
+            (wxACCEL_NORMAL, WXK_F6, GUI_ID.CMD_SWITCH_FOCUS)
             ]
 
         self.SetAcceleratorTable(wxAcceleratorTable(ACCS))
@@ -1247,15 +1215,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         self.vertSplitter.SplitVertically(self.tree, self.mainAreaPanel, self.lastSplitterPos)
 
         EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(), self.OnNotebookPageChanged)
-
-        # ------------------------------------------------------------------------------------
-        # Find and replace events
-        # ------------------------------------------------------------------------------------
-#         EVT_COMMAND_FIND(self, -1, self.OnFind)
-#         EVT_COMMAND_FIND_NEXT(self, -1, lambda evt: self.OnFind(evt, next=True))
-#         EVT_COMMAND_FIND_REPLACE(self, -1, lambda evt: self.OnFind(evt, replace=True))
-#         EVT_COMMAND_FIND_REPLACE_ALL(self, -1, lambda evt: self.OnFind(evt, replaceAll=True))
-#         EVT_COMMAND_FIND_CLOSE(self, -1, self.OnFindClose)
+        EVT_SET_FOCUS(self.mainAreaPanel, self.OnNotebookFocused)
 
         # ------------------------------------------------------------------------------------
         # Create the status bar
@@ -1279,6 +1239,18 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
             self.showTreeCtrlMenuItem.Check(1)
         else:
             self.tree.Hide()
+
+    def OnSwitchFocus(self, evt):
+        foc = wxWindow.FindFocus()
+        mainAreaPanel = self.mainAreaPanel
+        while foc != None:
+            if foc == mainAreaPanel:
+                self.tree.SetFocus()
+                return
+            
+            foc = foc.GetParent()
+            
+        mainAreaPanel.SetFocus()
 
 
     def resourceSleep(self):
@@ -1342,6 +1314,8 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
         self.htmlView.setVisible(evt.GetSelection() == 1)  # TODO
 
+    def OnNotebookFocused(self, evt):
+        self.mainAreaPanel.GetCurrentPage().SetFocus()
 
     def OnIconize(self, evt):
         if self.lowResources:
@@ -1364,9 +1338,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
 
     def createEditor(self):
-#         self.editor = WikiTxtCtrl(self, self.vertSplitter, -1)
         self.editor = WikiTxtCtrl(self, self.mainAreaPanel, -1)
-#         self.mainAreaPanelSizer.Add(self.editor, 1, wxEXPAND)
         self.mainAreaPanel.AddPage(self.editor, u"Edit")
         self.editor.evalScope = { 'editor' : self.editor, 'pwiki' : self,
             'lib': self.evalLib}
@@ -1508,19 +1480,6 @@ These are your default global settings.
                 self.editor.AddText(u"\n\n\t* WikiSettings\n")
                 self.saveCurrentWikiPage(force=True)
                 
-
-#                 # create the WikiSettings page
-#                 self.openWikiPage("WikiSettings", False, False)
-#                 self.editor.GotoPos(self.editor.GetLength())
-#                 self.editor.AddText(u"\n\nThese are your default global settings.\n\n")
-#                 self.editor.AddText(u"[global.importance.low.color: grey]\n")
-#                 self.editor.AddText(u"[global.importance.high.bold: true]\n")
-#                 self.editor.AddText(u"[global.contact.icon: contact]\n")
-#                 self.editor.AddText(u"[global.todo.bold: true]\n")
-#                 self.editor.AddText(u"[global.todo.icon: pin]\n")
-#                 self.editor.AddText(u"[global.wrap: 70]\n")
-#                 self.editor.AddText(u"\n[icon: cog]\n")
-
                 # trigger hook
                 self.hooks.createdWiki(self, wikiName, wikiDir)
 
@@ -1615,7 +1574,11 @@ These are your default global settings.
         # what was the last wiki word opened
         lastWikiWord = wikiWordToOpen
         if not lastWikiWord:
-            lastWikiWord = self.configuration.get("main", "last_wiki_word")
+            lastWikiWord = self.configuration.get("main", "first_wiki_word")
+            if lastWikiWord != u"":
+                lastWikiWord = self.getFormatting().normalizeWikiWord(lastWikiWord)
+            else:
+                lastWikiWord = self.configuration.get("main", "last_wiki_word")
 
         # OK, things look good
 
@@ -1891,7 +1854,7 @@ These are your default global settings.
             # if the root was renamed we have a little more to do
             if wikiWord == self.wikiName:
                 self.configuration.set("main", "wiki_name", toWikiWord)
-                self.configuration.set("main", "last_wiki_word", toWikiWord)
+                self.configuration.set("main", "last_wiki_word", toWikiWord) # ?
                 self.saveCurrentWikiState()
                 self.configuration.loadWikiConfig(None)
                 
@@ -2228,14 +2191,14 @@ These are your default global settings.
 
         if not newWikiWord or len(newWikiWord) == 0:
             return False
-            
+
         toWikiWord = self.getFormatting().normalizeWikiWord(newWikiWord)
         if toWikiWord is None:
             self.displayErrorMessage(u"'%s' is an invalid WikiWord" % newWikiWord)
             return False
 
         if wikiWord == toWikiWord:
-            self.displayErrorMessage(u"Can't rename wiki home")
+            self.displayErrorMessage(u"Can't rename to itself")
             return False
 
         if wikiWord == "ScratchPad":
@@ -2290,21 +2253,6 @@ These are your default global settings.
         self.findDlg = SearchWikiDialog(self, -1)
         self.findDlg.CenterOnParent(wxBOTH)
         self.findDlg.Show()
-        # dlg.Destroy()
-#         if dlg.ShowModal() == wxID_OK:
-#             (wikiWord, searchedFor) = dlg.GetValue()
-#             if wikiWord:
-#                 dlg.Destroy()
-#                 self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
-#                 self.editor.executeSearch(searchedFor, 0)
-#                 self.editor.SetFocus()
-
-
-#     def showSavedSearchesDialog(self):
-#         dlg = SavedSearchesDialog(self, -1)
-#         dlg.CenterOnParent(wxBOTH)
-#         dlg.ShowModal()
-#         dlg.Destroy()
 
 
     def showWikiWordDeleteDialog(self, wikiWord=None):
@@ -2339,21 +2287,17 @@ These are your default global settings.
         dlg.Destroy()
 
 
-    def showFindDialog(self):
-        if self.findDlg is None:
-            data = wxFindReplaceData()
-        else:
-            return
-#             data = wxFindReplaceData() #self.findDlg.GetData()
-#             self.findDlg.Show(False)
-#             self.findDlg.Destroy()
-#             self.findDlg = None
-
-        self.lastFindPos = -1
-        dlg = wxFindReplaceDialog(self, data, u"Find", wxFR_NOUPDOWN)
-        dlg.data = data
-        self.findDlg = dlg
-        dlg.Show(True)
+#     def showFindDialog(self):
+#         if self.findDlg is None:
+#             data = wxFindReplaceData()
+#         else:
+#             return
+# 
+#         self.lastFindPos = -1
+#         dlg = wxFindReplaceDialog(self, data, u"Find", wxFR_NOUPDOWN)
+#         dlg.data = data
+#         self.findDlg = dlg
+#         dlg.Show(True)
 
 
     def showFindReplaceDialog(self):
@@ -2364,21 +2308,6 @@ These are your default global settings.
         self.findDlg.CenterOnParent(wxBOTH)
         self.findDlg.Show()
         
-#         if self.findDlg is None:
-#             data = wxFindReplaceData()
-#         else:
-#             return
-# #             data = wxFindReplaceData() #self.findDlg.GetData()
-# #             self.findDlg.Show(False)
-# #             self.findDlg.Destroy()
-# #             self.findDlg = None
-# 
-#         self.lastFindPos = -1
-#         dlg = wxFindReplaceDialog(self, data, u"Find and Replace", wxFR_REPLACEDIALOG)
-#         dlg.data = data
-#         self.findDlg = dlg
-#         dlg.Show(True)
-
     def showReplaceTextByWikiwordDialog(self):
         wikiWord = guiToUni(wxGetTextFromUser(u"Replace text by WikiWord:",
                 u"Replace by Wiki Word", self.currentWikiWord, self))
@@ -2474,9 +2403,6 @@ These are your default global settings.
     def OnExportWiki(self, evt):
         dest = wxDirSelector(u"Select Export Directory", self.getLastActiveDir(),
         wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON, parent=self)
-#         dlg = wxDirDialog(self, "Select Export Directory",
-#                 self.getLastActiveDir(),
-#                 style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
 
         if dest:
             typ = evt.GetId()
@@ -2582,9 +2508,6 @@ These are your default global settings.
         return title
 
 
-#     def isLocaleEnglish(self):
-#         return self.locale.startswith('en_')
-
     # ----------------------------------------------------------------------------------------
     # Event handlers from here on out.
     # ----------------------------------------------------------------------------------------
@@ -2634,65 +2557,6 @@ These are your default global settings.
         # self.tree.buildTreeForWord(wikiPage.wikiWord)    # self.currentWikiWord)
         self.fireMiscEventProps({"updated current page props": None,
                 "wikiPage": wikiPage})
-
-
-#     def OnFind(self, evt, next=False, replace=False, replaceAll=False):
-#         matchWholeWord = False
-#         matchCase = False
-# 
-#         et = evt.GetEventType()
-#         flags = evt.GetFlags()
-# 
-#         matchWholeWord = not not (flags & wxFR_WHOLEWORD)
-#         matchCase = not not (flags & wxFR_MATCHCASE)
-# 
-#         findString = guiToUni(evt.GetFindString())
-#         if matchWholeWord:
-#             findString = ur"\b%s\b" % findString
-# 
-#         sarOp = SearchReplaceOperation()
-#         sarOp.searchStr = guiToUni(evt.GetFindString())
-#         sarOp.replaceOp = False
-#         sarOp.booleanOp = False
-#         sarOp.caseSensitive = not not (flags & wxFR_MATCHCASE)
-#         sarOp.wholeWord = not not (flags & wxFR_WHOLEWORD)
-#         sarOp.cycleToStart = True #???
-#         sarOp.wildCard = 'no'  # TODO
-#         sarOp.wikiWide = False
-#         
-#         print "OnFind", et, replaceAll, wxEVT_COMMAND_FIND, wxEVT_COMMAND_FIND_NEXT, wxEVT_COMMAND_FIND_REPLACE, wxEVT_COMMAND_FIND_REPLACE_ALL
-# 
-#         if et == wxEVT_COMMAND_FIND:
-#             self.editor.executeSearch(sarOp)
-#         elif et == wxEVT_COMMAND_FIND_NEXT:
-#             self.editor.executeSearch(sarOp, next=True)
-#         elif et == wxEVT_COMMAND_FIND_REPLACE:
-#             sarOp.replaceStr = guiToUni(evt.GetReplaceString())
-#             sarOp.replaceOp = True
-#             self.editor.executeReplace(sarOp)
-# 
-#             self.lastFindPos = self.editor.executeSearch(sarOp,
-#                     next=True)
-# #             self.lastFindPos = self.editor.executeSearch(sarOp,
-# #                     self.lastFindPos, self.lastFindPos > -1)
-#                     
-#         elif et == wxEVT_COMMAND_FIND_REPLACE_ALL:
-#             sarOp.replaceStr = guiToUni(evt.GetReplaceString())
-#             sarOp.replaceOp = True
-#             lastReplacePos = 0
-#             while(1):
-#                 print "wxEVT_COMMAND_FIND_REPLACE_ALL1", lastReplacePos
-#                 lastReplacePos = self.editor.executeSearch(sarOp, lastReplacePos)
-#                 print "wxEVT_COMMAND_FIND_REPLACE_ALL2", lastReplacePos
-#                 self.editor.executeReplace(sarOp)
-#                 print "wxEVT_COMMAND_FIND_REPLACE_ALL3", lastReplacePos
-#                 if lastReplacePos == -1:
-#                     break
-# 
-# 
-#     def OnFindClose(self, evt, next=False, replace=False, replaceAll=False):
-#         evt.GetDialog().Destroy()
-#         self.findDlg = None
 
 
     # TODO decouple save and update

@@ -1,6 +1,25 @@
 ﻿++ Change Log
 
 
+
+Dec. 29, 2005 (1.20beta4 / WikidPadCompact 1.5.5beta3)
+
+Changes:
+    * Extended table support: wiki words, bold and italic
+      text can now be used in table cells and the ...
+    * same support in todo items now works correctly
+
+    * Per-wiki-option to define a fixed wiki word to show when
+      wiki is opened
+    * Regular expression support for page search (menu
+      "Editor"->"Find and Replace")
+    * For wiki-wide search, the number of occurring matches on
+      a page can be displayed.
+    * Function key F6 to switch between tree and editor
+
+    * Some bugs fixed
+
+
 Dec. 20, 2005 (1.20beta3)
 
 *Warning*: This version has a new database format. It is converted
@@ -10,10 +29,10 @@ moments, please be patient.
 
     * Basic table support. Example:
 
-<<|
-here| nowhere| somewhere
-else| where?| elsewhere
->>
+    <<|
+    here| nowhere| somewhere
+    else| where?| elsewhere
+    >>
 
     * The .wiki filenames have no more brackets
     * Option to forbid cycles in trees (see [OptionsDialog])
@@ -65,7 +84,6 @@ beforehand is therefore recommended!
         3. In export dialog: option to use *compatible filenames* which
            contain ASCII-only characters, so sets of HTML files are
            more compatible to other filesystems.
-    
     
     4. Fixed bug
         1. *WikiWord and [WikiWord]* were different words

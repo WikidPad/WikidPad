@@ -1,8 +1,16 @@
-++ Where Is The Data Stored
+﻿++ Where Is The Data Stored
 
++++ Original version
 The data for your wiki is stored in plain text under the data
 directory of the directory your Wiki config is stored in.  There is
 one file per wiki word.  The .grl and .gdf files are the database
 files used to index your wiki words efficiently.
+
++++ WikidPadCompact
+The data is stored in a single file named "wiki.sli" under the data
+directory of the directory your Wiki config is stored in. This
+database file is created by the Sqlite database engine and contains
+the content of all wiki pages as well as the cache information for
+fast handling of your wiki.
 
 [icon: question]

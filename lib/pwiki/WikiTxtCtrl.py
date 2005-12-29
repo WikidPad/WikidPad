@@ -8,7 +8,7 @@ from Utilities import *
 
 from os.path import exists
 
-from time import time, strftime
+from time import time, strftime, sleep
 from textwrap import fill
 
 from wxPython.wx import *
@@ -316,26 +316,28 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 #         self.tokenizer.setTokenThread(None)
 
-        if textlen < 10240:    # Arbitrary value
+        t = self.stylingThreadHolder.getThread()
+        if t is not None:
+#             t.cancel()
+            self.stylingThreadHolder.setThread(None)
+            self.stylebytes = None
+
+        if textlen < 5120:    # Arbitrary value
             # Synchronous styling
 #             self.tokenizer.setTokenThread(None)
             self.stylingThreadHolder.setThread(None)
-            self.stylebytes = None
             self.buildStyling(text, threadholder=DUMBTHREADHOLDER)
             self.applyStyling(self.stylebytes)
-            self.stylebytes = None
         else:
             # Asynchronous styling
             # This avoids further request from STC:
             self.StartStyling(self.GetLength(), 0xff)  # len(text) may be != self.GetLength()
             self.SetStyling(0, 0)
 
-            self.stylebytes = None
-            
             sth = self.stylingThreadHolder
 
-            t = threading.Thread(target = self.buildStyling, args = (text, sth))
-#             self.tokenizer.setTokenThread(t)
+            t = threading.Thread(None, self.buildStyling, args = (text, sth))
+#             t = threading.Timer(1, self.buildStyling, args = (text, sth))
             sth.setThread(t)
             t.start()
 
@@ -362,6 +364,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def buildStyling(self, text, threadholder=DUMBTHREADHOLDER):
+        if not threadholder is DUMBTHREADHOLDER:
+            sleep(0.5)
+            if not threadholder.isCurrent():
+                return
+
         page = PageAst.Page()
         page.buildAst(self.pWiki.getFormatting(), text)
         
@@ -376,13 +383,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def processTokens(self, tokens, threadholder):
         wikiData = self.pWiki.wikiData
         stylebytes = []
-#         print "procToken1", repr(tokens)
         
         for tok in tokens:
             if not threadholder.isCurrent():
                 return ""
 
-#             print "procToken2", repr(tok.ttype)
             styleno = tok.ttype
             bytestylelen = self.bytelenSct(tok.text)
             if styleno == WikiFormatting.FormatTypes.WikiWord:
@@ -395,10 +400,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 else:
                     styleno = WikiFormatting.FormatTypes.WikiWord
         
-#             elif styleno == WikiFormatting.FormatTypes.Table:
-#                 styleno = WikiFormatting.FormatTypes.Default
-# #                 stylebytes.append(self.buildTableStyling(tok[2]))
-            
             elif styleno == WikiFormatting.FormatTypes.ToDo:
                 styleno = -1
                 node = tok.node
@@ -417,8 +418,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 stylebytes.append(chr(WikiFormatting.FormatTypes.Default) *
                         self.bytelenSct(node.begin))
                         
-#                 print "processTable", repr(node.contenttokens)
-                
                 stylebytes.append(self.processTokens(node.contenttokens, threadholder))
 
                 stylebytes.append(chr(WikiFormatting.FormatTypes.Default) *
@@ -430,109 +429,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         return "".join(stylebytes)
 
-
-
-#     def buildTableStyling(self, matchdict, sync=False):
-#         tokenizer = Tokenizer(
-#                 self.pWiki.getFormatting().formatInTCellExpressions, -1)
-#                 
-#         # Beginning of table is normal text
-#         result = [chr(WikiFormatting.FormatTypes.Default) * 
-#                 self.bytelenSct(matchdict["tableBegin"])]
-#             
-#         for line in splitkeep(matchdict["tableContent"], u"\n"):
-#             if line.strip() == "":
-#                 result.append(chr(WikiFormatting.FormatTypes.Default) * 
-#                         self.bytelenSct(line))
-#                 continue
-#             cells = splitkeep(line, u"|")
-#             for cell in cells:
-#                 tokens = self.tokenizer.tokenize2(cell, self.tableFormatMap,
-#                         WikiFormatting.FormatTypes.Default, sync=sync)
-# 
-#                 result.append(self.processTokens(cell, None, tokens, sync=False))                
-#         
-#         result = [chr(WikiFormatting.FormatTypes.Default) * 
-#                 self.bytelenSct(matchdict["tableEnd"])]
-# 
-# 
-#     def buildStyling(self, text, sync = False):
-#         """
-#         Unicode text
-#         """
-#         footnotesAsWikiwords = self.pWiki.configuration.getboolean(
-#                 "main", "footnotes_as_wikiwords")
-# 
-#         # TODO Cache if necessary
-#         formatMap = self.pWiki.getFormatting().getExpressionsFormatList(
-#                 self.pWiki.getFormatting().formatExpressions, self.wikiWordsEnabled)
-# 
-#         tokens = self.tokenizer.tokenize2(text, formatMap,
-#                 WikiFormatting.FormatTypes.Default, sync=sync)
-#                 
-#         self.tableFormatMap = self.pWiki.getFormatting().getExpressionsFormatList(
-#                 self.pWiki.getFormatting().formatExpressions, self.wikiWordsEnabled)
-# 
-#         if not sync and (not threading.currentThread() is 
-#                 self.tokenizer.getTokenThread()):
-#             return
-# 
-#         if len(tokens) < 2:
-#             return
-#             
-#         stylebytes = self.processTokens(text, self.tokenizer, tokens, sync=sync)
-# 
-#         if not sync and (not threading.currentThread() is 
-#                 self.tokenizer.getTokenThread()):
-#             return
-#             
-#         self.stylebytes = stylebytes
-# 
-# 
-#     def processTokens(self, text, tokenizer, tokens, sync=False):
-#         """
-#         tokenizer -- Needed only to ask for token thread
-#         """
-#         
-#         stylebytes = []
-#         tok = tokens[0]
-#         wikiData = self.pWiki.wikiData
-#         
-#         for nexttok in tokens[1:]:
-#             bytestylelen = self.bytelenSct(text[tok[1]:nexttok[1]])
-#             styleno = tok[0]
-#                 
-#             if styleno == WikiFormatting.FormatTypes.WikiWord:  # or \
-#                     # styleno == WikiFormatting.FormatTypes.WikiWord2:
-#                         
-#                 # Remove possible '#' attachment
-#                 ww = self.pWiki.getFormatting().normalizeWikiWord(
-#                         text[tok[1]:nexttok[1]].split(u"#", 1)[0])
-# 
-#                 if wikiData.isDefinedWikiWord(ww):
-#                     styleno = WikiFormatting.FormatTypes.AvailWikiWord
-#                 else:
-#                     styleno = WikiFormatting.FormatTypes.WikiWord
-#             elif styleno == WikiFormatting.FormatTypes.Table:
-#                 styleno = WikiFormatting.FormatTypes.
-#                 stylebytes.append(self.buildTableStyling(tok[2]))
-# 
-#             if styleno != -1:
-#                 stylebytes.append(chr(styleno) * bytestylelen)
-# 
-#             if not sync and (not threading.currentThread() is 
-#                     tokenizer.getTokenThread()):
-#                 return ""
-# 
-#             tok = nexttok
-# 
-#         if not sync and (not threading.currentThread() is 
-#                 tokenizer.getTokenThread()):
-#             return ""
-# 
-#         return "".join(stylebytes)
-        
-        
 
     def applyStyling(self, stylebytes):
         self.StartStyling(0, 0xff)
@@ -629,7 +525,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             return True
         return False
 
-
+#  DO NOT DELETE!
 #     def launchUrl(self, link):   # TODO Works only for Windows
 #         match = WikiFormatting.UrlRE.match(link)
 #         try:
@@ -675,32 +571,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #             pass
 #         return False
 
-
-#     def launchUrl(self, link):
-#         match = WikiFormatting.UrlRE.match(link)
-#         try:
-#             link2 = match.group(1)
-#             
-#             if self.pWiki.configuration.getint(
-#                     "main", "new_window_on_follow_wiki_url") == 1 or \
-#                     not link2.startswith("wiki:"):
-#                 os.startfile(link2)
-#                 return True
-#             elif self.pWiki.configuration.getint(
-#                     "main", "new_window_on_follow_wiki_url") == 0:
-#                         
-#                 link2 = urllib.url2pathname(link2)
-#                 link2 = link2.replace(u"wiki:", u"")
-#                 if exists(link2):
-#                     self.pWiki.openWiki(link2, u"")  # ?
-#                     return True
-#                 else:
-#                     self.pWiki.statusBar.SetStatusText(
-#                             uniToGui(u"Couldn't open wiki: %s" % link2), 0)
-#                     return False
-#         except:
-#             pass
-#         return False
 
     def evalScriptBlocks(self, index=-1):
         # it is important to python to have consistent eol's

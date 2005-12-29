@@ -31,6 +31,9 @@ class SearchWikiOptionsDialog(wxDialog):
                 
         self.ctrls.tfContextBefore.SetValue(uniToGui(before))
         self.ctrls.tfContextAfter.SetValue(uniToGui(after))
+        self.ctrls.cbCountOccurrences.SetValue(
+                self.pWiki.configuration.getboolean("main",
+                "search_wiki_count_occurrences"))
 
         self.ctrls.btnOk.SetId(wxID_OK)
         self.ctrls.btnCancel.SetId(wxID_CANCEL)
@@ -55,6 +58,9 @@ class SearchWikiOptionsDialog(wxDialog):
                 "search_wiki_context_before", before)
             self.pWiki.configuration.set("main",
                 "search_wiki_context_after", after)
+            self.pWiki.configuration.set("main",
+                "search_wiki_count_occurrences",
+                self.ctrls.cbCountOccurrences.GetValue())
         except:
             self.Refresh()
             return
@@ -71,6 +77,7 @@ class SearchResultListBox(wxHtmlListBox):
         self.searchWikiDialog = parent
         self.found = []
         self.htmlfound = []
+        self.foundpos = []
         self.SetItemCount(0)
 
     def OnGetItem(self, i):
@@ -83,41 +90,94 @@ class SearchResultListBox(wxHtmlListBox):
         if found is None:
             self.found = []
             self.htmlfound = []
+            self.foundpos = []
             self.SetItemCount(0)
         else:
             self.found = found
             self.htmlfound = []
-            
+            self.foundpos = [0] * len(found)
             # Load context settings
             before = self.pWiki.configuration.getint("main",
                     "search_wiki_context_before")
             after = self.pWiki.configuration.getint("main",
                     "search_wiki_context_after")
                     
-            if before + after == 0:
-                # No context
-                self.htmlfound = [
-                        '<font color="BLUE"><b>%s</b></font>' % \
-                        escapeHtml(w) for w in found]
-            elif sarOp.booleanOp:
+            countOccurrences = self.pWiki.configuration.getboolean("main",
+                    "search_wiki_count_occurrences")
+                    
+            if sarOp.booleanOp:
                 # No specific position to show, so show beginning of page
                 context = before + after
-                for w in found:
-                    bluew = '<font color="BLUE"><b>%s</b></font><br>' % \
-                            escapeHtml(w)
-                    part = wikiData.getContent(w)[0:context]
-                    self.htmlfound.append(bluew + escapeHtml(part))
+                if context == 0:
+                    self.htmlfound = [
+                            '<font color="BLUE"><b>%s</b></font>' % \
+                            escapeHtml(w) for w in found]
+                else:                    
+                    for w in found:
+                        bluew = '<font color="BLUE"><b>%s</b></font><br>' % \
+                                escapeHtml(w)
+                        part = wikiData.getContent(w)[0:context]
+                        self.htmlfound.append(bluew + escapeHtml(part))
             else:
-                for w in found:
-                    bluew = '<font color="BLUE"><b>%s</b></font><br>' % \
-                            escapeHtml(w)
-                    text = wikiData.getContent(w)
-                    pos = sarOp.searchText(text)
-                    s = max(0, pos[0] - before)
-                    e = min(len(text), pos[1] + after)
-                    self.htmlfound.append(bluew + escapeHtml(text[s:pos[0]]) +
-                            "<b>" + escapeHtml(text[pos[0]:pos[1]]) + "</b>" +
-                            escapeHtml(text[pos[1]:e]))
+                if before + after == 0 and not countOccurrences:
+                    # No context, no occurrence counting
+                    self.htmlfound = [
+                            '<font color="BLUE"><b>%s</b></font>' % \
+                            escapeHtml(w) for w in found]
+                else:
+                    for i, w in enumerate(found):
+                        bluew = ['<font color="BLUE"><b>%s</b></font>' % \
+                                escapeHtml(w)]
+                        text = wikiData.getContent(w)
+                        pos = sarOp.searchText(text)
+                        self.foundpos[i] = pos + (1,) # Add info that this marks the first occurrence
+                        if countOccurrences:
+                            occ = 1
+                            while True:
+                                pos = sarOp.searchText(text, pos[1])
+                                if pos[0] is None:
+                                    break
+                                occ += 1
+
+                            self.foundpos[i] += (occ,)
+
+                            bluew.append(' <b>(%i)</b>' % occ)
+
+                        if before + after > 0:
+                            pos = self.foundpos[i][:2]
+                            s = max(0, pos[0] - before)
+                            e = min(len(text), pos[1] + after)
+                            bluew += ['<br>', escapeHtml(text[s:pos[0]]), 
+                                "<b>", escapeHtml(text[pos[0]:pos[1]]), "</b>",
+                                escapeHtml(text[pos[1]:e])]
+                            
+                        self.htmlfound.append(u"".join(bluew))
+
+
+#             if before + after == 0 and not calcOccurrences:
+#                 # No context, no occurrences
+#                 self.htmlfound = [
+#                         '<font color="BLUE"><b>%s</b></font>' % \
+#                         escapeHtml(w) for w in found]
+#             elif sarOp.booleanOp:
+#                 # No specific position to show, so show beginning of page
+#                 context = before + after
+#                 for w in found:
+#                     bluew = '<font color="BLUE"><b>%s</b></font><br>' % \
+#                             escapeHtml(w)
+#                     part = wikiData.getContent(w)[0:context]
+#                     self.htmlfound.append(bluew + escapeHtml(part))
+#             else:
+#                 for w in found:
+#                     bluew = '<font color="BLUE"><b>%s</b></font><br>' % \
+#                             escapeHtml(w)
+#                     text = wikiData.getContent(w)
+#                     pos = sarOp.searchText(text)
+#                     s = max(0, pos[0] - before)
+#                     e = min(len(text), pos[1] + after)
+#                     self.htmlfound.append(bluew + escapeHtml(text[s:pos[0]]) +
+#                             "<b>" + escapeHtml(text[pos[0]:pos[1]]) + "</b>" +
+#                             escapeHtml(text[pos[1]:e]))
 
         self.SetItemCount(len(self.htmlfound))
         self.Refresh()
@@ -529,7 +589,12 @@ class SearchPageDialog(wxDialog):   # TODO
         sarOp.caseSensitive = self.ctrls.cbCaseSensitive.GetValue()
         sarOp.wholeWord = self.ctrls.cbWholeWord.GetValue()
         sarOp.cycleToStart = True #???
-        sarOp.wildCard = 'no'  # TODO
+        
+        if self.ctrls.cbRegEx.GetValue():
+            sarOp.wildCard = 'regex'
+        else:
+            sarOp.wildCard = 'no'
+
         sarOp.wikiWide = False
 
         return sarOp
@@ -553,7 +618,7 @@ class SearchPageDialog(wxDialog):   # TODO
         sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
         sarOp.replaceOp = True
         lastReplacePos = 0
-        while(1):
+        while True:
             lastReplacePos = self.pWiki.editor.executeSearch(sarOp, lastReplacePos)[1]
             self.pWiki.editor.executeReplace(sarOp)
             if lastReplacePos == -1:

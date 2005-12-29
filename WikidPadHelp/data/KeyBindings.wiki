@@ -1,6 +1,6 @@
-++ Key Bindings
+﻿++ Key Bindings
 
-The key bindings defined below may be changed, ChangingKeyBindings.
+Many of the key bindings defined below may be changed, ChangingKeyBindings.
 
 *Formatting*
 CTRL-B          bold
@@ -38,8 +38,9 @@ CTRL-+          zoom in
 CTRL--          zoom out
 
 *Misc*
-
 Ctrl-T          hide/show the tree control
 Ctrl-N          new Wiki
 Ctrl-Alt-O      open wiki
 Ctrl-Shift-B    view bookmarks
+F6              switch between tree and editor
+

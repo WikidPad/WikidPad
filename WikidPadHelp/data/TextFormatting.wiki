@@ -7,6 +7,7 @@ _italic_
 + Heading1
 ++ Heading2
 +++ Heading3
+++++ Heading4
 
 When you type in a really really really really really really really really really really really really
 long line you can tell wikidPad to rewrap it for you by pressing Ctrl-W. Try it on this line.
@@ -18,7 +19,10 @@ Changes the wrapping on this page to 20.
 [global.wrap: 70]
 changes the global wrap position to 70.
 
-*Escaping Formatting*
+For creating bulleted or numbered lists, see BulletedLists.
+
+
++++ Escaping Formatting
 
 To create a section of text with no formatting, wrap that section 
 in a "<< >>" block. Example:
@@ -34,4 +38,18 @@ with formatting
 *This should be bold* ThisShouldBeALink
 
 Before and after the begin and end tags only whitespaces are allowed on the same line, so a << in the text does not prevent ALink from being highlighted.
+
+
++++ Tables
+
+A table is enclosed in <<| and >> tags which must be alone on a line as for format escaping tags.
+Each line with text is a table row, cells are separated by |. A table cell can contain wiki word links, bold and italic text. Tables show up properly only in preview mode.
+
+Example:
+
+<<|
+ScratchPad| This is| *a table*
+with two| rows and| three columns
+>>
+
 

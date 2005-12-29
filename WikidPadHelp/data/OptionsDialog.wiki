@@ -2,7 +2,7 @@
 
 The options dialog controls the behaviour of the application and the currently open wiki. To open it, choose "Options" in the wiki menu.
 
-+++ Application wide
++++ Application-wide
 
 The following options apply to the whole application and therefore to each wiki opened in it.
 
@@ -66,10 +66,12 @@ Try to reduce usage of Windows resources. Only interesting for Windows 9x/ME.
 
 
 +++ Current wiki
-These option applies to the active wiki only
+These options apply to the active wiki only
 
 *Footnotes as wiki words*
 Interpret footnotes (e.g. "[42]") as wiki words instead of normal text.
 
+*First word at startup*
+Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last word when the wiki was closed is shown on opening.
 
 

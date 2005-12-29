@@ -205,7 +205,7 @@ class SimpleStrNode(AbstractCriteriumNode):
 
 class SearchReplaceOperation:
     """
-    Dumb container to hold data of a search or replace operation.
+    Container to hold data of a search or replace operation.
     
     Be aware that if self.booleanOp is True, some settings have no effect:
     - replaceOp is assumed to be False

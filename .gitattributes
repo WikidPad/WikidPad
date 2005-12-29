@@ -616,6 +616,7 @@ lib/pwiki/WikiData.py -text
 lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiFormatting.py -text
 lib/pwiki/WikiHtmlView.py -text
+lib/pwiki/WikiPage.py -text
 lib/pwiki/WikiTreeCtrl.py -text
 lib/pwiki/WikiTxtCtrl.py -text
 lib/pwiki/__init__.py -text

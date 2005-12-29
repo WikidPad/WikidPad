@@ -200,11 +200,6 @@ def escapeHtml(data):
 
     # must do ampersand first
 
-#     data = data.replace(u"&", u"&amp;")
-#     data = data.replace(u">", u"&gt;")
-#     data = data.replace(u"<", u"&lt;")
-#     data = data.replace(u"\n", u"<br />")   # ?
-#     return data
     return data.replace(u"&", u"&amp;").replace(u">", u"&gt;").\
             replace(u"<", u"&lt;").replace(u"\n", u"<br />")
 
@@ -267,41 +262,6 @@ class Tokenizer:
 
     def getTokenThread(self):
         return self.tokenThread
-
-#     def tokenize(self, text, sync=True):
-#         textlen = len(text)
-#         result = []
-#         charpos = 0    
-#         
-#         while True:
-#             mat = self.tokenre.search(text, charpos)
-#             if mat is None:
-#                 if charpos < textlen:
-#                     result.append((charpos, self.defaultType, None))
-#                 
-#                 result.append((textlen, self.defaultType, None))
-#                 break
-#     
-#             groupdict = mat.groupdict()
-#             for m in groupdict.keys():
-#                 if not groupdict[m] is None and m.startswith(u"style"):
-#                     start, end = mat.span()
-#                     
-#                     # m is of the form:   style<index>
-#                     index = int(m[5:])
-#                     if charpos < start:
-#                         result.append((charpos, self.defaultType, None))                    
-#                         charpos = start
-#     
-#                     result.append((charpos, index, groupdict))
-#                     charpos = end
-#                     break
-#     
-#             if not sync and (not threading.currentThread() is self.tokenThread):
-#                 break
-#                 
-#         return result
-
 
     def tokenize(self, text, formatMap, defaultType, threadholder=DUMBTHREADHOLDER):
         textlen = len(text)

@@ -3,8 +3,8 @@
 
 +++ To search inside a page
 
-CTRL-R brings up the "Find and Replace" dialog.
 CTRL-F or F3 turns on wiki page IncrementalSearch.
+CTRL-R brings up the "Find and Replace" dialog.
 
 
 +++ To search all pages
@@ -37,7 +37,7 @@ Some operations are not available in "Anded" regex mode.
 Choose here if case matters for the search pattern and/or if only whole words should be searched for
 
 *Button "Find"*
-Starts search process. If finished, a list of matching pages is listed on the right, optional with a few characters of context if set in the options.
+Starts search process. If finished, a list of matching pages is listed on the right, optional with the number of occurring matches in parenthese and/or a few characters of context if set in the options.
 
 
 ++++ Replacing
@@ -78,7 +78,20 @@ Same as hitting "Load Search" and "Find" button subsequently. Double clicking in
 ++++ Other
 
 *Button "Options"*
-Choose the number of characters to show before and after a found match as context. For an "anded" regex, the beginning of the page is shown with so many characters as the sum of the "before" and "after" values.
+Starts a dialog to set options for the searching:
+
+    Context *before* and *after*
+    Chooses the number of characters to show before and after
+    a found match as context. For an "anded" regex, the beginning
+    of the page is shown with so many characters as the sum of the
+    "before" and "after" values. Using context may slow down the
+    searching a bit.
+
+    *Count Occurrences*
+    Counts how many matches a page contains and shows this number
+    in parentheses after each page name. This option slows down
+    searching.
+
 
 *Button "Close"*
 Close the dialog, same as hitting ESC key.

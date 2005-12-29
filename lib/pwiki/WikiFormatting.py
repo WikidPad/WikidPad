@@ -52,33 +52,6 @@ def _buildExpressionsUnindex(expressions, modifier):
     return [modifier.get(t, t) for re, t in expressions]
     
 
-# def getExpressionsFormatList(expressions, withCamelCase, footnotesAsWws):
-#     """
-#     Create from an expressions list (see compileCombinedRegex) a tuple
-#     of format types so that result[i] is the "right" number from
-#     FormatTypes when i is the index returned as second element of a tuple
-#     in the tuples list returned by the Tokenizer.
-# 
-#     In fact it is mainly the second tuple item from each expressions
-#     list element with some modifications according to the parameters
-#     withCamelCase -- Recognize camel-case words as wiki words instead
-#             of normal text
-#     footnotesAsWws -- Recognize footnotes (e.g. "[42]") as wiki-words
-#             instead of normal text
-#     """
-#     modifier = {FormatTypes.WikiWord2: FormatTypes.WikiWord}
-#     
-#     if not withCamelCase:
-#         modifier[FormatTypes.WikiWord] = FormatTypes.Default
-#     
-#     if footnotesAsWws:  # Footnotes (e.g. [42]) as wiki words
-#         modifier[FormatTypes.Footnote] = FormatTypes.WikiWord
-#     else:
-#         modifier[FormatTypes.Footnote] = FormatTypes.Default
-#         
-#     return _buildExpressionsUnindex(expressions, modifier)
-
-
 # TODO Remove ?
 # Currently needed only to get ToDoREWithCapturing in WikiTreeCtrl.py and
 # for some regexes in WikiTxtCtrl.py
@@ -90,105 +63,6 @@ def initialize(wikiSyntax):
         setattr(ownmodule, item, getattr(wikiSyntax, item))
 
     
-#     global FormatExpressions
-#     global CombinedSyntaxHighlightRE
-#     global UpdateExpressions
-#     global CombinedUpdateRE
-#     global HtmlExportExpressions
-#     global CombinedHtmlExportRE
-
-# Most specific first
-
-#     FormatExpressions = [
-#             (TableRE, FormatTypes.Default),
-#             (SuppressHighlightingRE, FormatTypes.Default),
-#             (ScriptRE, FormatTypes.Script),
-#             (UrlRE, FormatTypes.Url),
-#             (ToDoREWithContent, FormatTypes.ToDo),
-#             (PropertyRE, FormatTypes.Property),
-#             (FootnoteRE, FormatTypes.Footnote),
-#             (WikiWordEditorRE2, FormatTypes.WikiWord2),
-#             (WikiWordEditorRE, FormatTypes.WikiWord),
-#             (BoldRE, FormatTypes.Bold),
-#             (ItalicRE, FormatTypes.Italic),
-#             (Heading4RE, FormatTypes.Heading4),
-#             (Heading3RE, FormatTypes.Heading3),
-#             (Heading2RE, FormatTypes.Heading2),
-#             (Heading1RE, FormatTypes.Heading1)
-#             ]
-            
-#     UpdateExpressions = [
-#             (TableRE, FormatTypes.Default),
-#             (SuppressHighlightingRE, FormatTypes.Default),
-#             (ScriptRE, FormatTypes.Script),
-#             (UrlRE, FormatTypes.Url),
-#             (ToDoREWithContent, FormatTypes.ToDo),
-#             (PropertyRE, FormatTypes.Property),
-#             (FootnoteRE, FormatTypes.Footnote),
-#             (WikiWordRE2, FormatTypes.WikiWord2),
-#             (WikiWordRE, FormatTypes.WikiWord),
-#             ]
-
-#     HtmlExportExpressions = [
-#             (TableRE, FormatTypes.Table),
-#             (SuppressHighlightingRE, FormatTypes.Suppress),
-#             (ScriptRE, FormatTypes.Script),
-#             (UrlRE, FormatTypes.Url),
-#             (ToDoREWithContent, FormatTypes.ToDo),
-#             (PropertyRE, FormatTypes.Property),
-#             (FootnoteRE, FormatTypes.Footnote),
-#             (WikiWordRE2, FormatTypes.WikiWord2),
-#             (WikiWordRE, FormatTypes.WikiWord),
-#             (BoldRE, FormatTypes.Bold),
-#             (ItalicRE, FormatTypes.Italic),
-#             (Heading4RE, FormatTypes.Heading4),
-#             (Heading3RE, FormatTypes.Heading3),
-#             (Heading2RE, FormatTypes.Heading2),
-#             (Heading1RE, FormatTypes.Heading1),
-#             (HorizLineRE, FormatTypes.HorizLine),
-#             (BulletRE, FormatTypes.Bullet),
-#             (NumericBulletRE, FormatTypes.Numeric)
-#             ]
-#             
-#     CombinedSyntaxHighlightRE = compileCombinedRegex(FormatExpressions)
-#     CombinedUpdateRE = compileCombinedRegex(UpdateExpressions)
-#     CombinedHtmlExportRE = compileCombinedRegex(HtmlExportExpressions)
-
-
-# def isWikiWord(word):
-#     """
-#     Test if word is syntactically a wiki word
-#     """
-#     return WikiWordRE.match(word) or (WikiWordRE2.match(word) and not \
-#             FootnoteRE.match(word))  # TODO !!!!!
-
-
-# def normalizeWikiWord(word, footnotesAsWws):
-#     """
-#     Try to normalize text to a valid wiki word and return it or None
-#     if it can't be normalized.
-#     """
-#     if WikiWordRE.match(word):
-#         return word
-#         
-#     if not footnotesAsWws and FootnoteRE.match(word):
-#         return None
-# 
-#     if WikiWordRE2.match(word):
-#         if WikiWordRE.match(word[1:-1]):
-#             # If word is '[WikiWord]', return 'WikiWord' instead
-#             return word[1:-1]
-#         else:
-#             return word
-#     
-#     # No valid wiki word -> try to add brackets
-#     if WikiWordRE2.match(u"[%s]" % word):
-#         return u"[%s]" % word
-#             
-#     return None
-
-
-
 def getStyles(styleFaces):
     return [(FormatTypes.Default, "face:%(mono)s,size:%(size)d" % styleFaces),
             (FormatTypes.WikiWord, "fore:#000000,underline,face:%(mono)s,size:%(size)d" % styleFaces),      
@@ -237,13 +111,9 @@ class WikiFormatting:
 
         self.formatExpressions = None
         self.formatCellExpressions = None            
-#         self.updateExpressions = None    
-#         self.htmlExportExpressions = None
                 
         self.combinedPageRE = None
         self.combinedCellRE = None
-#         self.combinedUpdateRE = None
-#         self.combinedHtmlExportRE = None
         
         self.wikiWordStart = None  # String describing the beginning of a wiki
                 # word or property, normally u"["
@@ -281,41 +151,10 @@ class WikiFormatting:
                 (self.Heading2RE, FormatTypes.Heading2),
                 (self.Heading1RE, FormatTypes.Heading1),
                 (self.BulletRE, FormatTypes.Bullet),
-                (self.NumericBulletRE, FormatTypes.Numeric)
+                (self.NumericBulletRE, FormatTypes.Numeric),
+                (self.HorizLineRE, FormatTypes.HorizLine)
                 ]
                 
-#         self.updateExpressions = [
-#                 (self.TableRE, FormatTypes.Default),
-#                 (self.SuppressHighlightingRE, FormatTypes.Default),
-#                 (self.ScriptRE, FormatTypes.Script),
-#                 (self.UrlRE, FormatTypes.Url),
-#                 (self.ToDoREWithContent, FormatTypes.ToDo),
-#                 (self.PropertyRE, FormatTypes.Property),
-#                 (self.FootnoteRE, FormatTypes.Footnote),
-#                 (self.WikiWordRE2, FormatTypes.WikiWord2),
-#                 (self.WikiWordRE, FormatTypes.WikiWord),
-#                 ]
-    
-#         self.htmlExportExpressions = [
-#                 (self.TableRE, FormatTypes.Table),
-#                 (self.SuppressHighlightingRE, FormatTypes.Suppress),
-#                 (self.ScriptRE, FormatTypes.Script),
-#                 (self.UrlRE, FormatTypes.Url),
-#                 (self.ToDoREWithContent, FormatTypes.ToDo),
-#                 (self.PropertyRE, FormatTypes.Property),
-#                 (self.FootnoteRE, FormatTypes.Footnote),
-#                 (self.WikiWordRE2, FormatTypes.WikiWord2),
-#                 (self.WikiWordRE, FormatTypes.WikiWord),
-#                 (self.BoldRE, FormatTypes.Bold),
-#                 (self.ItalicRE, FormatTypes.Italic),
-#                 (self.Heading4RE, FormatTypes.Heading4),
-#                 (self.Heading3RE, FormatTypes.Heading3),
-#                 (self.Heading2RE, FormatTypes.Heading2),
-#                 (self.Heading1RE, FormatTypes.Heading1),
-#                 (self.HorizLineRE, FormatTypes.HorizLine),
-#                 (self.BulletRE, FormatTypes.Bullet),
-#                 (self.NumericBulletRE, FormatTypes.Numeric)
-#                 ]
                 
         self.formatCellExpressions = [
                 (self.UrlRE, FormatTypes.Url),
@@ -327,24 +166,8 @@ class WikiFormatting:
                 (self.ItalicRE, FormatTypes.Italic),
                 ]
                 
-#         self.updateAndHtmlInTCellExpressions = [
-#                 (self.UrlRE, FormatTypes.Url),
-#                 (self.FootnoteRE, FormatTypes.Footnote),
-#                 (self.WikiWordRE2, FormatTypes.WikiWord2),
-#                 (self.WikiWordRE, FormatTypes.WikiWord),
-#                 (self.BoldRE, FormatTypes.Bold),
-#                 (self.ItalicRE, FormatTypes.Italic)
-# #                 (self.BulletRE, FormatTypes.Bullet),     # ?
-# #                 (self.NumericBulletRE, FormatTypes.Numeric)    # ?
-#                 ]
-
-                
         self.combinedPageRE = compileCombinedRegex(self.formatExpressions)
-#         self.combinedUpdateRE = compileCombinedRegex(self.updateExpressions)
-#         self.combinedHtmlExportRE = compileCombinedRegex(self.htmlExportExpressions)
-        
         self.combinedCellRE = compileCombinedRegex(self.formatCellExpressions)
-
 
         self.wikiWordStart = u"["
         self.wikiWordEnd = u"]"
@@ -405,11 +228,11 @@ class WikiFormatting:
         if mat:
             return mat.group("wikiword")
             
-        if not self.footnotesAsWws and self.FootnoteRE.match(word):
-            return None
-    
         mat = self.WikiWordEditorRE2.match(word)
         if mat:
+            if not self.footnotesAsWws and self.FootnoteRE.match(word):
+                return None
+
             if self.WikiWordEditorRE.match(mat.group("wikiwordncc")):
                 # If word is '[WikiWord]', return 'WikiWord' instead
                 return mat.group("wikiwordncc")
@@ -417,44 +240,16 @@ class WikiFormatting:
                 return self.wikiWordStart + mat.group("wikiwordncc") + self.wikiWordEnd
         
         # No valid wiki word -> try to add brackets
-        mat = self.WikiWordEditorRE2.match(self.wikiWordStart + word + self.wikiWordEnd)
+        parword = self.wikiWordStart + word + self.wikiWordEnd
+        mat = self.WikiWordEditorRE2.match(parword)
         if mat:
+            if not self.footnotesAsWws and self.FootnoteRE.match(parword):
+                return None
+
             return self.wikiWordStart + mat.group("wikiwordncc") + self.wikiWordEnd
 
         return None
 
-
-#     def normalizeWikiWord(self, word):
-#         """
-#         Try to normalize text to a valid wiki word and return it or None
-#         if it can't be normalized.
-#         """
-#         print "normalizeWikiWord1", repr(word)
-#         if self.WikiWordRE.match(word):
-#             return word
-#         print "normalizeWikiWord2"
-#             
-#         if not self.footnotesAsWws and self.FootnoteRE.match(word):
-#             return None
-#         print "normalizeWikiWord3"
-#     
-#         if self.WikiWordRE2.match(word):
-#             if self.WikiWordRE.match(
-#                     word[len(self.wikiWordStart):-len(self.wikiWordEnd)]):
-#                 # If word is '[WikiWord]', return 'WikiWord' instead
-#                 print "normalizeWikiWord4"
-#                 return word[len(self.wikiWordStart):-len(self.wikiWordEnd)]
-#             else:
-#                 print "normalizeWikiWord5"
-#                 return word
-#         
-#         # No valid wiki word -> try to add brackets
-#         if self.WikiWordRE2.match(self.wikiWordStart + word + self.wikiWordEnd):
-#             return self.wikiWordStart + word + self.wikiWordEnd
-#         
-#         print "normalizeWikiWord6"
-# 
-#         return None
 
     def wikiWordToLabel(self, word):
         """
@@ -502,8 +297,6 @@ class WikiFormatting:
                 self.formatExpressions)
                 
         tokenizer = Tokenizer(self.combinedPageRE, -1)
-#         if not thread is None:         !!!!!!!!!!!!!
-#             tokenizer.setTokenThread(thread)
         
         return tokenizer.tokenize(text, formatMap, FormatTypes.Default,
                 threadholder=threadholder)
@@ -518,12 +311,6 @@ class WikiFormatting:
                 self.formatCellExpressions)  # TODO non camelcase !!!!
                 
         tokenizer = Tokenizer(self.combinedCellRE, -1)
-#         if not thread is None:
-#             tokenizer.setTokenThread(thread)
         
         return tokenizer.tokenize(text, formatMap, FormatTypes.Default,
                 threadholder=threadholder)
-
-
-        
-

@@ -263,7 +263,8 @@ GLOBALDEFAULTS = {
     ("main", "html_export_proppattern_is_excluding"): "False",  # Same for HTML exporting
 
     ("main", "search_wiki_context_before"): "0", # No. of context characters before
-    ("main", "search_wiki_context_after"): "0"   # and after a found pattern
+    ("main", "search_wiki_context_after"): "0",  # and after a found pattern
+    ("main", "search_wiki_count_occurrences"): "False" # Show for each page the number of found matches
     }
 
 
@@ -271,7 +272,8 @@ WIKIDEFAULTS = {
     ("wiki_db", "data_dir"): u"data",
     ("main", "wiki_name"): None,
     ("main", "last_wiki_word"): None,
-    ("main", "wiki_database_type"): "",  # Type of database "original_gadfly" for WikidPad,
+    ("main", "first_wiki_word"): "", # Start with a special wiki word (If empty, use last word)
+    ("main", "wiki_database_type"): u"",  # Type of database "original_gadfly" for WikidPad,
                                          # "compact_sqlite" for WikidPadCompact
     ("main", "footnotes_as_wikiwords"): "False"  # Interpret footnotes (e.g. [42]) as wiki words
     }
