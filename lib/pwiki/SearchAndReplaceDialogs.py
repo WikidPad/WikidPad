@@ -69,33 +69,162 @@ class SearchWikiOptionsDialog(wxDialog):
 
 
 
+class _SearchResultItemInfo(object):
+    __slots__ = ("__weakref__", "wikiWord", "occCount", "occNumber", "occHtml",
+            "occPos", "html")
+    
+    def __init__(self, wikiWord, occPos = (-1, -1), occCount = -1):
+        self.wikiWord = wikiWord
+        if occPos[0] != -1:
+            self.occNumber = 1
+        else:
+            self.occNumber = -1  # -1: No specific occurrence
+
+        self.occHtml = u""  # HTML presentation of the occurrence
+        self.occPos = occPos  # Tuple (start, end) with position of occurrence in characters
+        self.occCount = occCount # -1: Undefined
+        self.html = None
+        
+        
+    def buildOccurrence(self, text, before, after, pos, occNumber):
+        self.html = None
+        basum = before + after
+        self.occNumber = -1
+        self.occPos = pos
+        if basum == 0:
+            # No context
+            self.occHtml = u""
+            return self
+            
+        if pos[0] == -1:
+            # No position -> use beginning of text
+            info.occHtml = escapeHtml(text[0:basum])
+            return self
+        
+        s = max(0, pos[0] - before)
+        e = min(len(text), pos[1] + after)
+        self.occHtml = u"".join([escapeHtml(text[s:pos[0]]), 
+            "<b>", escapeHtml(text[pos[0]:pos[1]]), "</b>",
+            escapeHtml(text[pos[1]:e])])
+            
+        self.occNumber = occNumber
+        return self
+
+
+    def getHtml(self):
+        if self.html is None:
+            result = [u'<table><tr><td bgcolor="#0000ff" width="6"></td>'
+                    u'<td><font color="BLUE"><b>%s</b></font>' % \
+                    escapeHtml(self.wikiWord)]
+            
+            if self.occNumber != -1:
+                stroc = [unicode(self.occNumber), u"/"]
+            else:
+                stroc = []
+                
+            if self.occCount != -1:
+                stroc.append(unicode(self.occCount))
+            elif len(stroc) > 0:
+                stroc.append(u"?")
+                
+            stroc = u"".join(stroc)
+            
+            if stroc != u"":
+                result.append(u' <b>(%s)</b>' % stroc)
+                
+#             if self.occCount != -1:
+#                 result.append(u' <b>(%i/%i)</b>' % (self.occNumber, self.occCount))
+#             elif self.occNumber != -1:
+#                 # We have no count of occurrences but at least a occNumber
+#                 # (this means it isn't a boolean search op.)
+#                 result.append(u' <b>(%i/?)</b>' % self.occNumber)                
+                
+            if self.occHtml != u"":
+                result.append(u'<br>\n')
+                result.append(self.occHtml)
+                
+            result.append('</td></tr></table>')
+            self.html = u"".join(result)
+            
+        return self.html
+
+#                         self.htmlfound.append('<table><tr><td bgcolor="#0000ff" width="6"></td><td>' + u"".join(bluew) + "</td></tr></table>")
+
+
+
 class SearchResultListBox(wxHtmlListBox):
+# class SearchResultListBox(wxVListBox):
     def __init__(self, parent, pWiki, ID):
         wxHtmlListBox.__init__(self, parent, ID, style = wxSUNKEN_BORDER)
+#         wxVListBox.__init__(self, parent, ID, style = wxSUNKEN_BORDER)
         
         self.pWiki = pWiki
         self.searchWikiDialog = parent
         self.found = []
-        self.htmlfound = []
-        self.foundpos = []
+        self.foundinfo = []
         self.SetItemCount(0)
+
+        EVT_LEFT_DOWN(self, self.OnLeftDown)
+        EVT_LEFT_DCLICK(self, self.OnLeftDown)
+        EVT_KEY_DOWN(self, self.OnKeyDown)
+        EVT_LISTBOX_DCLICK(self, ID, self.OnDClick)
+
+    
+#     def _buildContainerCell(self, i):
+#         parser = wxHtmlWinParser()
+#         
+#         dc = wxClientDC(self)
+#         font = dc.GetFont()
+#         
+#         # parser.SetDC(None)
+#         parser.SetDC(dc)
+# 
+#         # set FS
+#         # parser.SetStandardFonts()
+#         
+#         cell = parser.Parse("")  # self.OnGetItem(i))
+#         f2 = dc.GetFont()
+#         dc.SetFont(font)
+#         
+#         return None
+#         cell.Layout(self.GetClientSize().x - 2*self.GetMargins().x)
+#         parser.SetDC(None)
+#         
+#         print "_buildContainerCell2", repr(dc.thisown)
+#         
+#         return cell
+#     
+#     
+#     def OnDrawItem(self, dc, rect, i):
+#         # if selected
+#         return
+#         
+#         cell = self._buildContainerCell(i)
+#         
+#         rendinfo = wxHtmlRenderingInfo()
+#         cell.Draw(dc, rect.x+2, rect.y+2, 0, 2000000000, rendinfo)
+# 
+# 
+#     def OnMeasureItem(self, i):
+#         cell = self._buildContainerCell(i)
+#         return 30
+#         
+#         return cell.GetHeight() + cell.GetDescent() + 4
 
     def OnGetItem(self, i):
         try:
-            return self.htmlfound[i]
+            return self.foundinfo[i].getHtml()
         except IndexError:
             return u""
 
     def showFound(self, sarOp, found, wikiData):
         if found is None:
             self.found = []
-            self.htmlfound = []
-            self.foundpos = []
+            self.foundinfo = []
             self.SetItemCount(0)
         else:
             self.found = found
-            self.htmlfound = []
-            self.foundpos = [0] * len(found)
+            self.foundinfo = []
             # Load context settings
             before = self.pWiki.configuration.getint("main",
                     "search_wiki_context_before")
@@ -109,28 +238,25 @@ class SearchResultListBox(wxHtmlListBox):
                 # No specific position to show, so show beginning of page
                 context = before + after
                 if context == 0:
-                    self.htmlfound = [
-                            '<font color="BLUE"><b>%s</b></font>' % \
-                            escapeHtml(w) for w in found]
+                    self.foundinfo = [_SearchResultItemInfo(w) for w in found]
                 else:                    
                     for w in found:
-                        bluew = '<font color="BLUE"><b>%s</b></font><br>' % \
-                                escapeHtml(w)
-                        part = wikiData.getContent(w)[0:context]
-                        self.htmlfound.append(bluew + escapeHtml(part))
+                        text = wikiData.getContent(w)
+                        self.foundinfo.append(
+                                _SearchResultItemInfo(w).buildOccurrence(
+                                text, before, after, (-1, -1), -1))
             else:
                 if before + after == 0 and not countOccurrences:
                     # No context, no occurrence counting
-                    self.htmlfound = [
-                            '<font color="BLUE"><b>%s</b></font>' % \
-                            escapeHtml(w) for w in found]
+                    self.foundinfo = [_SearchResultItemInfo(w) for w in found]
                 else:
-                    for i, w in enumerate(found):
-                        bluew = ['<font color="BLUE"><b>%s</b></font>' % \
-                                escapeHtml(w)]
+                    for w in found:
                         text = wikiData.getContent(w)
                         pos = sarOp.searchText(text)
-                        self.foundpos[i] = pos + (1,) # Add info that this marks the first occurrence
+                        firstpos = pos
+                        
+                        info = _SearchResultItemInfo(w, occPos=pos)
+                        
                         if countOccurrences:
                             occ = 1
                             while True:
@@ -139,57 +265,33 @@ class SearchResultListBox(wxHtmlListBox):
                                     break
                                 occ += 1
 
-                            self.foundpos[i] += (occ,)
+                            info.occCount = occ
 
-                            bluew.append(' <b>(%i)</b>' % occ)
+#                         if before + after > 0:
+#                             s = max(0, firstpos[0] - before)
+#                             e = min(len(text), firstpos[1] + after)
+#                             info.occHtml = u"".join([escapeHtml(text[s:firstpos[0]]), 
+#                                 "<b>", escapeHtml(text[firstpos[0]:firstpos[1]]), "</b>",
+#                                 escapeHtml(text[firstpos[1]:e])])
 
-                        if before + after > 0:
-                            pos = self.foundpos[i][:2]
-                            s = max(0, pos[0] - before)
-                            e = min(len(text), pos[1] + after)
-                            bluew += ['<br>', escapeHtml(text[s:pos[0]]), 
-                                "<b>", escapeHtml(text[pos[0]:pos[1]]), "</b>",
-                                escapeHtml(text[pos[1]:e])]
+                        self.foundinfo.append(info.buildOccurrence(
+                                text, before, after, firstpos, 1))
                             
-                        self.htmlfound.append(u"".join(bluew))
+#                         self.htmlfound.append("<table><tr><td>&nbsp;&nbsp;&nbsp;</td><td>" + u"".join(bluew) + "</td></tr></table>")
+#                         self.htmlfound.append(u"".join(bluew))
 
-
-#             if before + after == 0 and not calcOccurrences:
-#                 # No context, no occurrences
-#                 self.htmlfound = [
-#                         '<font color="BLUE"><b>%s</b></font>' % \
-#                         escapeHtml(w) for w in found]
-#             elif sarOp.booleanOp:
-#                 # No specific position to show, so show beginning of page
-#                 context = before + after
-#                 for w in found:
-#                     bluew = '<font color="BLUE"><b>%s</b></font><br>' % \
-#                             escapeHtml(w)
-#                     part = wikiData.getContent(w)[0:context]
-#                     self.htmlfound.append(bluew + escapeHtml(part))
-#             else:
-#                 for w in found:
-#                     bluew = '<font color="BLUE"><b>%s</b></font><br>' % \
-#                             escapeHtml(w)
-#                     text = wikiData.getContent(w)
-#                     pos = sarOp.searchText(text)
-#                     s = max(0, pos[0] - before)
-#                     e = min(len(text), pos[1] + after)
-#                     self.htmlfound.append(bluew + escapeHtml(text[s:pos[0]]) +
-#                             "<b>" + escapeHtml(text[pos[0]:pos[1]]) + "</b>" +
-#                             escapeHtml(text[pos[1]:e]))
-
-        self.SetItemCount(len(self.htmlfound))
+        self.SetItemCount(len(self.foundinfo))
         self.Refresh()
         
         # self.SetSelection(0)  #?
         
+
     def GetSelectedWord(self):
         sel = self.GetSelection()
         if sel == -1:
             return None
         else:
-            return self.found[sel]
+            return self.foundinfo[sel].wikiWord
             
     def GetCount(self):
         return len(self.found)
@@ -197,6 +299,109 @@ class SearchResultListBox(wxHtmlListBox):
     def IsEmpty(self):
         return self.GetCount() == 0
 
+
+    def _pageListFindNext(self):
+        sel = self.GetSelection()
+        if sel == -1:
+            return
+        
+        info = self.foundinfo[sel]
+        if info.occPos[0] == -1:
+            return
+        if info.occNumber == -1:
+            return
+            
+        before = self.pWiki.configuration.getint("main",
+                "search_wiki_context_before")
+        after = self.pWiki.configuration.getint("main",
+                "search_wiki_context_after")
+        
+        wikiData = self.pWiki.wikiData
+        text = wikiData.getContent(info.wikiWord)
+        searchOp = self.searchWikiDialog.buildSearchReplaceOperation()
+        searchOp.replaceOp = False
+        searchOp.cycleToStart = True
+
+        pos = searchOp.searchText(text, info.occPos[1])
+        if pos[0] == -1:
+            # Page was changed after last search and contains no more any occurrence 
+            info.occCount = 0
+            info.buildOccurrence(text, 0, 0, pos, -1)
+        elif pos[0] < info.occPos[1]:
+            # Search went back to beginning, number of last occ. ist also occ.count
+            info.occCount = info.occNumber
+            info.buildOccurrence(text, before, after, pos, 1)
+        else:
+            info.buildOccurrence(text, before, after, pos, info.occNumber + 1)
+
+        # TODO nicer refresh
+        self.SetSelection(-1)
+        self.SetSelection(sel)
+        self.Refresh()
+        
+
+    def OnDClick(self, evt):
+        sel = self.GetSelection()
+        if sel == -1:
+            return
+
+        info = self.foundinfo[sel]
+
+#         if self.pWiki.getCurrentWikiWord() == info.wikiWord:
+#             # Search next
+#             searchOp = self.searchWikiDialog.buildSearchReplaceOperation()
+#             searchOp.replaceOp = False
+#             searchOp.cycleToStart = True
+#             self.pWiki.editor.executeSearch(searchOp,
+#                     -1, next=True)[1]
+#         else:
+        self.pWiki.openWikiPage(info.wikiWord)
+        # self.pagePosNext = 0
+        if info.occPos[0] != -1:
+            self.pWiki.editor.SetSelectionByChar(info.occPos[0], info.occPos[1])
+
+#                 executeSearch(searchOp, 0)
+        self.pWiki.editor.SetFocus()
+
+
+    def OnLeftDown(self, evt):
+        pos = evt.GetPosition()
+        hitsel = self.HitTest(pos)
+        
+        if hitsel == wxNOT_FOUND:
+            evt.Skip()
+            return
+        
+        if pos.x < (5 + 6):
+            # Click inside the blue bar
+#             sel = self.GetSelection()
+            self.SetSelection(hitsel)
+            self._pageListFindNext()
+#             self.SetSelection(sel)
+            return
+        
+        evt.Skip()
+        
+    def OnKeyDown(self, evt):
+        if evt.GetKeyCode() == WXK_F3 and not evt.ShiftDown() and \
+                not evt.MetaDown() and not evt.ControlDown() and \
+                not evt.CmdDown():
+            self._pageListFindNext()
+        elif evt.GetKeyCode() in (WXK_RETURN, WXK_NUMPAD_ENTER) and \
+                not evt.ShiftDown() and not evt.MetaDown() and \
+                not evt.ControlDown() and not evt.CmdDown():
+            self.OnDClick(evt)
+        else:
+            evt.Skip()
+
+#     def OnCharPagesListBox(self, evt):
+# #         if (evt.GetKeyCode() == WXK_UP) and (self.ctrls.lb.GetSelection() == 0):
+# #             self.ctrls.text.SetFocus()
+# #             self.ctrls.lb.Deselect(0)
+#         if (evt.GetKeyCode() in (WXK_RETURN, WXK_NUMPAD_ENTER)):
+#             self.OnPageListDClick(evt)
+#         else:
+#             evt.Skip()
 
 
 class SearchWikiDialog(wxDialog):   # TODO
@@ -210,10 +415,17 @@ class SearchWikiDialog(wxDialog):   # TODO
 
         res = xrc.wxXmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "SearchWikiDialog")
-        lbox = SearchResultListBox(self, self.pWiki, -1)
+        lbox = SearchResultListBox(self, self.pWiki, GUI_ID.htmllbPages)
         res.AttachUnknownControl("htmllbPages", lbox, self)
         
         self.ctrls = XrcControls(self)
+        
+#         searchContentPage = res.LoadPanel(self.ctrls.nbFilters,
+#                 "SearchWikiContentPage")
+#         
+#         self.ctrls.nbFilters.AddPage(searchContentPage, u"Content", True)
+#         
+#         self.Fit()
         
         self.ctrls.btnClose.SetId(wxID_CANCEL)
         
@@ -238,8 +450,6 @@ class SearchWikiDialog(wxDialog):   # TODO
 #         EVT_CHAR(self.ctrls.cbCaseSensitive, self.OnCharToFind)
 #         EVT_CHAR(self.ctrls.cbWholeWord, self.OnCharToFind)
 
-        EVT_CHAR(self.ctrls.htmllbPages, self.OnCharPagesListBox)
-        EVT_LISTBOX_DCLICK(self, GUI_ID.htmllbPages, self.OnPageListDClick)
         EVT_LISTBOX_DCLICK(self, GUI_ID.lbSavedSearches, self.OnLoadAndRunSearch)
         EVT_RADIOBOX(self, GUI_ID.rboxSearchType, self.OnRadioBox)
         EVT_BUTTON(self, wxID_CANCEL, self.OnClose)        
@@ -250,7 +460,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         EVT_CHECKBOX(self, GUI_ID.cbWholeWord, self.OnListRefreshNeeded)
 
 
-    def _buildSearchReplaceOperation(self):
+    def buildSearchReplaceOperation(self):
         sarOp = SearchReplaceOperation()
         sarOp.searchStr = guiToUni(self.ctrls.txtSearch.GetValue())
         sarOp.booleanOp = self.ctrls.rboxSearchType.GetSelection() == 1
@@ -267,7 +477,7 @@ class SearchWikiDialog(wxDialog):   # TODO
 
 
     def _refreshPageList(self):
-        sarOp = self._buildSearchReplaceOperation()
+        sarOp = self.buildSearchReplaceOperation()
         self.pWiki.saveCurrentWikiPage()
 
         if len(sarOp.searchStr) > 0:
@@ -326,7 +536,7 @@ class SearchWikiDialog(wxDialog):   # TODO
             else:
                 nextOnPage = True
 
-            searchOp = self._buildSearchReplaceOperation()
+            searchOp = self.buildSearchReplaceOperation()
             searchOp.replaceOp = False
             pagePosNext = self.pWiki.editor.executeSearch(searchOp,
                     0, next=nextOnPage)[1]
@@ -347,7 +557,7 @@ class SearchWikiDialog(wxDialog):   # TODO
 
 
     def OnReplace(self, evt):
-        sarOp = self._buildSearchReplaceOperation()
+        sarOp = self.buildSearchReplaceOperation()
         sarOp.replaceOp = True
         self.pWiki.editor.executeReplace(sarOp)
         
@@ -368,7 +578,7 @@ class SearchWikiDialog(wxDialog):   # TODO
                 
             self.pWiki.saveCurrentWikiPage()
             
-            sarOp = self._buildSearchReplaceOperation()
+            sarOp = self.buildSearchReplaceOperation()
             sarOp.replaceOp = True
             
             wikiData = self.pWiki.wikiData
@@ -406,7 +616,7 @@ class SearchWikiDialog(wxDialog):   # TODO
 
     # TODO Store search mode
     def OnSaveSearch(self, evt):
-        sarOp = self._buildSearchReplaceOperation()
+        sarOp = self.buildSearchReplaceOperation()
         
         if len(sarOp.searchStr) > 0:
             title = sarOp.getTitle()
@@ -430,18 +640,6 @@ class SearchWikiDialog(wxDialog):   # TODO
                 break
         else:
             self.pWiki.displayErrorMessage(u"Invalid search string, can't save as view")
-
-
-    def OnPageListDClick(self, evt):
-        wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
-        if wikiWord:
-            self.pWiki.openWikiPage(wikiWord)
-            self.pagePosNext = 0
-            searchOp = self._buildSearchReplaceOperation()
-            searchOp.replaceOp = False
-            self.pWiki.editor.executeSearch(searchOp, 0)
-
-            self.pWiki.editor.SetFocus()
 
 
     def OnRadioBox(self, evt):
@@ -541,14 +739,6 @@ class SearchWikiDialog(wxDialog):   # TODO
         else:
             evt.Skip()
 
-    def OnCharPagesListBox(self, evt):
-#         if (evt.GetKeyCode() == WXK_UP) and (self.ctrls.lb.GetSelection() == 0):
-#             self.ctrls.text.SetFocus()
-#             self.ctrls.lb.Deselect(0)
-        if (evt.GetKeyCode() in (WXK_RETURN, WXK_NUMPAD_ENTER)):
-            self.OnPageListDClick(evt)
-        else:
-            evt.Skip()
 
 
 class SearchPageDialog(wxDialog):   # TODO

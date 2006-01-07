@@ -1,4 +1,4 @@
-import os, traceback, codecs, array
+import os, traceback, codecs, array, string
 from StringOps import *
 from Utilities import DUMBTHREADHOLDER
 
@@ -22,6 +22,66 @@ class Ast(object):
     def _findType(self, typeToFind, result):
         pass
 
+    def getTokensForPos(self, pos):
+        return []
+
+
+
+
+def _enrichTokens(formatting, tokens, threadholder=DUMBTHREADHOLDER):
+    for tok in tokens:
+        if not threadholder.isCurrent():
+            return
+
+        if tok.ttype == WikiFormatting.FormatTypes.ToDo:
+            node = Todo()
+            node.buildSubAst(formatting, tok, threadholder=threadholder)
+            tok.node = node
+        elif tok.ttype == WikiFormatting.FormatTypes.Table:
+            node = Table()
+            node.buildSubAst(formatting, tok, threadholder=threadholder)
+            tok.node = node
+        elif tok.ttype == WikiFormatting.FormatTypes.WikiWord:
+            node = WikiWord()
+            node.buildSubAst(formatting, tok, threadholder=threadholder)
+            tok.node = node
+        elif tok.ttype == WikiFormatting.FormatTypes.Url:
+            node = Url()
+            node.buildSubAst(formatting, tok, threadholder=threadholder)
+            tok.node = node
+            
+
+def _findTokensForPos(tokens, pos):
+    # Algorithm taken from standard lib bisect module
+    if tokens is None:
+        return []
+
+    lo = 0
+    hi = len(tokens)
+    while lo < hi:
+        mid = (lo+hi)//2
+        if pos < tokens[mid].start: hi = mid
+        else: lo = mid+1
+        
+    index = lo - 1
+
+    if index == -1:
+        # Before first token
+        return []
+
+    tok = tokens[index]
+
+    if lo == len(tokens) and pos >= (len(tok.text) + tok.start):
+        # After last token
+        return []
+
+    if tok.node is not None:
+        result = tok.node.getTokensForPos(pos)
+        result.append(tok)
+        return result
+    else:
+        return [tok]
+
 
 class Page(Ast):
     __slots__ = ("tokens",)
@@ -36,23 +96,14 @@ class Page(Ast):
         """
         return self.tokens
         
+    def getTokensForPos(self, pos):
+        return _findTokensForPos(self.tokens, pos)
+        
     def buildAst(self, formatting, text, threadholder=DUMBTHREADHOLDER):
         self.tokens = formatting.tokenizePage(text, threadholder)
         
-        for tok in self.tokens:
-            if not threadholder.isCurrent():
-                self.tokens = None
-                return
+        _enrichTokens(formatting, self.tokens, threadholder=threadholder)
 
-            if tok.ttype == WikiFormatting.FormatTypes.ToDo:
-                node = Todo()
-                node.buildSubAst(formatting, tok, threadholder=threadholder)
-                tok.node = node
-            elif tok.ttype == WikiFormatting.FormatTypes.Table:
-                node = Table()
-                node.buildSubAst(formatting, tok, threadholder=threadholder)
-                tok.node = node
-                
 
     def _findType(self, typeToFind, result):
         for tok in self.tokens:
@@ -69,6 +120,9 @@ class Todo(Ast):
     def __init__(self):
         Ast.__init__(self)
         
+    def getTokensForPos(self, pos):
+        return _findTokensForPos(self.valuetokens, pos)
+
     def buildSubAst(self, formatting, token, threadholder=DUMBTHREADHOLDER):
         # First three parts are simple
         groupdict = token.grpdict
@@ -87,6 +141,8 @@ class Todo(Ast):
         
         for t in self.valuetokens:
             t.start += relpos
+            
+        _enrichTokens(formatting, self.valuetokens, threadholder=threadholder)
 
 
     def _findType(self, typeToFind, result):
@@ -102,6 +158,9 @@ class Table(Ast):
 
     def __init__(self):
         Ast.__init__(self)
+
+    def getTokensForPos(self, pos):
+        return _findTokensForPos(self.contenttokens, pos)
 
     def buildSubAst(self, formatting, token, threadholder=DUMBTHREADHOLDER):
         groupdict = token.grpdict
@@ -133,6 +192,9 @@ class Table(Ast):
             contenttokens += tokensOut
 
         self.contenttokens = contenttokens
+
+        _enrichTokens(formatting, self.contenttokens, threadholder=threadholder)
+
 
     def _findType(self, typeToFind, result):
         for tok in self.contenttokens:
@@ -173,42 +235,106 @@ class Table(Ast):
         return grid
 
 
-#     def outTable(self, content):
-#         """
-#         Write out content of a table as HTML code
-#         """
-#         # TODO XML
-#         self.outAppend(u'<table border="2">\n')  # , eatPreBreak=True
-#         for line in content.split(u"\n"):
-#             if line.strip() == "":
-#                 continue
-#             cells = line.split(u"|")  # TODO strip whitespaces?
-#             resline = [u"<tr>"]
-#             resline += [u"<td>%s</td>" % escapeHtml(cell) for cell in cells]
-#             resline.append(u"</tr>\n")
-#             self.outAppend(u"".join(resline))
-#         
-#         self.outAppend(u'</table>\n', eatPostBreak=True)
+class WikiWord(Ast):
+    __slots__ = ("nakedWord", "searchFragment", "titleTokens")
+
+    def __init__(self):
+        Ast.__init__(self)
+
+    def getTokensForPos(self, pos):
+        return _findTokensForPos(self.titleTokens, pos)
+
+    def buildSubAst(self, formatting, token, threadholder=DUMBTHREADHOLDER):
+        groupdict = token.grpdict
+        frag = groupdict.get("wikiwordnccSearchfrag")
+        if frag is None:
+            frag = groupdict.get("wikiwordSearchfrag")
+        self.searchFragment = frag
         
-#     def buildTableStyling(self, matchdict, sync=False):
-#         tokenizer = Tokenizer(
-#                 self.pWiki.getFormatting().formatInTCellExpressions, -1)
-#                 
-#         # Beginning of table is normal text
-#         result = [chr(WikiFormatting.FormatTypes.Default) * 
-#                 self.bytelenSct(matchdict["tableBegin"])]
-#             
-#         for line in splitkeep(matchdict["tableContent"], u"\n"):
-#             if line.strip() == "":
-#                 result.append(chr(WikiFormatting.FormatTypes.Default) * 
-#                         self.bytelenSct(line))
-#                 continue
-#             cells = splitkeep(line, u"|")
-#             for cell in cells:
-#                 tokens = self.tokenizer.tokenize2(cell, self.tableFormatMap,
-#                         WikiFormatting.FormatTypes.Default, sync=sync)
-# 
-#                 result.append(self.processTokens(cell, None, tokens, sync=False))                
-#         
-#         result = [chr(WikiFormatting.FormatTypes.Default) * 
-#                 self.bytelenSct(matchdict["tableEnd"])]
+        nw = groupdict.get("wikiwordncc")
+        if nw is None:
+            nw = groupdict.get("wikiword")
+            
+        self.nakedWord = nw.strip()
+        
+        title = groupdict.get("wikiwordnccTitle")
+        if title is None:
+            self.titleTokens = None
+            return
+            
+        relpos = token.start + 1 + len(nw) + len(groupdict.get("wikiwordnccDelim"))
+#         if title is not None:
+#             relpos += len(title)
+
+#         delimPos = title.rindex(formatting.TitleWikiWordDelimiter)
+#         title = title[:delimPos]
+
+        self.titleTokens = formatting.tokenizeTitle(title,
+                threadholder=threadholder)
+                
+        for t in self.titleTokens:
+            t.start += relpos
+
+        _enrichTokens(formatting, self.titleTokens, threadholder=threadholder)
+
+
+    def _findType(self, typeToFind, result):
+        if self.titleTokens is None:
+            return
+
+        for tok in self.titleTokens:
+            if tok.ttype == typeToFind:
+                result.append(tok)
+            if tok.node is not None:
+                tok.node._findType(typeToFind, result)
+
+
+
+class Url(Ast):
+    __slots__ = ("url", "titleTokens")
+
+    def __init__(self):
+        Ast.__init__(self)
+
+    def getTokensForPos(self, pos):
+        return _findTokensForPos(self.titleTokens, pos)
+
+    def buildSubAst(self, formatting, token, threadholder=DUMBTHREADHOLDER):
+        groupdict = token.grpdict
+        
+        url = groupdict.get("titledurlUrl")
+        if url is None:
+            self.url = token.text
+            self.titleTokens = None
+            return
+        
+        self.url = url.strip()
+        
+        title = groupdict.get("titledurlTitle")
+        if title is None:
+            self.titleTokens = None
+            return
+            
+        relpos = token.start + 1 + len(url) + len(groupdict.get("titledurlDelim"))
+
+#         delimPos = title.rindex(formatting.TitleWikiWordDelimiter)
+#         title = title[:delimPos]
+
+        self.titleTokens = formatting.tokenizeTitle(title,
+                threadholder=threadholder)
+                
+        for t in self.titleTokens:
+            t.start += relpos
+
+        _enrichTokens(formatting, self.titleTokens, threadholder=threadholder)
+
+
+    def _findType(self, typeToFind, result):
+        if self.titleTokens is None:
+            return
+
+        for tok in self.titleTokens:
+            if tok.ttype == typeToFind:
+                result.append(tok)
+            if tok.node is not None:
+                tok.node._findType(typeToFind, result)

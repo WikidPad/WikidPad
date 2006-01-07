@@ -307,6 +307,16 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         return wxStyledTextCtrl.AddText(self, mbcsEnc(txt, "replace")[0])
 
 
+    def SetSelectionByChar(self, start, end):
+        """
+        Same as SetSelection(), but start and end are character positions
+        not byte positions
+        """
+        text = self.GetText()
+        bs = self.bytelenSct(text[:start])
+        be = bs + self.bytelenSct(text[start:end])
+        self.SetSelection(bs, be)
+
     def OnStyleNeeded(self, evt):
         "Styles the text of the editor"
 
@@ -321,6 +331,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #             t.cancel()
             self.stylingThreadHolder.setThread(None)
             self.stylebytes = None
+            self.pageAst = None
 
         if textlen < 5120:    # Arbitrary value
             # Synchronous styling
@@ -363,6 +374,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.PopupMenu(self.contextMenu)
 
 
+    def storeStylingAndAst(self, stylebytes, page):
+        self.stylebytes = stylebytes
+        self.pageAst = page
+        self.AddPendingEvent(wxIdleEvent())
+
+
     def buildStyling(self, text, threadholder=DUMBTHREADHOLDER):
         if not threadholder is DUMBTHREADHOLDER:
             sleep(0.5)
@@ -370,14 +387,15 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 return
 
         page = PageAst.Page()
-        page.buildAst(self.pWiki.getFormatting(), text)
+        page.buildAst(self.pWiki.getFormatting(), text,
+                threadholder=threadholder)
         
 #         print "buildStyling", repr(page.getTokens())
         
         stylebytes = self.processTokens(page.getTokens(), threadholder)
         
         if threadholder.isCurrent():
-            self.stylebytes = stylebytes
+            self.storeStylingAndAst(stylebytes, page)
 
 
     def processTokens(self, tokens, threadholder):
@@ -480,6 +498,57 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.GotoPos(bytePos)        
 
 
+    def getPageAst(self):
+        page = self.pageAst
+        if page is None:
+            t = self.stylingThreadHolder.getThread()
+            if t is not None:
+                t.join()
+                page = self.pageAst
+        
+        if page is None:
+            page = PageAst.Page()
+            self.pageAst = page
+            page.buildAst(self.pWiki.getFormatting(), self.GetText())
+        
+        return page
+
+
+    def _activateTokens(self, tokens):
+        """
+        Helper for activateLink()
+        """
+        if len(tokens) == 0:
+            return False
+
+        for tok in tokens:
+            if tok.ttype not in (WikiFormatting.FormatTypes.Url,
+                    WikiFormatting.FormatTypes.WikiWord):
+                continue
+        
+            if tok.ttype == WikiFormatting.FormatTypes.WikiWord:
+                searchStr = None
+    
+                # open the wiki page
+                self.pWiki.openWikiPage(tok.node.nakedWord, motionType="child")
+    
+                searchfrag = tok.node.searchFragment
+                if searchfrag is not None:
+                    searchOp = SearchReplaceOperation()
+                    searchOp.wildCard = "no"   # TODO Why not regex?
+                    searchOp.searchStr = searchfrag
+    
+                    self.pWiki.editor.executeSearch(searchOp, 0)
+    
+                return True
+    
+            elif tok.ttype == WikiFormatting.FormatTypes.Url:
+                self.pWiki.launchUrl(tok.node.url)
+                return True
+                
+        return False
+
+
     def activateLink(self, mousePosition=None):
         "returns true if the link was activated"
         linkPos = self.GetCurrentPos()
@@ -487,43 +556,79 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if mousePosition:
             linkPos = self.PositionFromPoint(mousePosition)
 
-        inWikiWord = False
-        if self.isPositionInWikiWord(linkPos):
-            inWikiWord = True
-        if not inWikiWord:
-            # search back one char b/c the position could be "WikiWord|"
-            if linkPos > 0 and self.isPositionInWikiWord(linkPos-1):
-                linkPos = linkPos - 1
-                inWikiWord = True
+        pageAst = self.getPageAst()
+        linkCharPos = len(self.GetTextRange(0, linkPos))
+        tokens = pageAst.getTokensForPos(linkCharPos)
+        
+        if not self._activateTokens(tokens):
+            if tokens[-1].start == linkCharPos and linkCharPos > 0:
+                # Link position lies exactly on token start, so maybe
+                # the previous token(s) was/were meant
+                tokens = pageAst.getTokensForPos(linkCharPos - 1)
 
-        if inWikiWord:
-            searchStr = None
-            (start, end) = self.getWikiWordBeginEnd(linkPos)
-            wordText = self.getWikiWordText(linkPos)
-            if end+2 < self.GetLength():
-                if chr(self.GetCharAt(end+1)) == "#":    # This may be a problem under rare circumstances
-                    searchStr = self.GetTextRange(end+2, self.WordEndPosition(end+2, 1))
-            
-            
-            # Word may contain a '#' with attached search string
-            combword = wordText.split(u"#", 1)
-            # open the wiki page
-            self.pWiki.openWikiPage(combword[0], motionType="child")
-##            self.pWiki.tree.Unselect()  # TODO move to other place?
-
-            if len(combword) == 2:
-                searchOp = SearchReplaceOperation()
-                searchOp.wildCard = "no"   # TODO Why not regex?
-                searchOp.searchStr = WikiFormatting.SearchUnescapeRE.sub(ur"\1",
-                        combword[1])
-
-                self.pWiki.editor.executeSearch(searchOp, 0)
-
+                return self._activateTokens(tokens)
+        else:
             return True
-        elif self.isPositionInLink(linkPos):
-            self.pWiki.launchUrl(self.getTextInStyle(linkPos, WikiFormatting.FormatTypes.Url))
-            return True
+                
         return False
+
+
+
+#     def activateLink(self, mousePosition=None):
+#         "returns true if the link was activated"
+#         linkPos = self.GetCurrentPos()
+#         # mouse position overrides current pos
+#         if mousePosition:
+#             linkPos = self.PositionFromPoint(mousePosition)
+# 
+#         inWikiWord = False
+#         if self.isPositionInWikiWord(linkPos):
+#             inWikiWord = True
+#         if not inWikiWord:
+#             # search back one char b/c the position could be "WikiWord|"
+#             if linkPos > 0 and self.isPositionInWikiWord(linkPos-1):
+#                 linkPos = linkPos - 1
+#                 inWikiWord = True
+# 
+#         if inWikiWord:
+#             searchStr = None
+#             (start, end) = self.getWikiWordBeginEnd(linkPos)
+#             wordText = self.getWikiWordText(linkPos)
+#             nword, title, searchfrag = \
+#                     self.pWiki.getFormatting().splitWikiWord(wordText)
+# 
+# #             if end+2 < self.GetLength():
+# #                 if chr(self.GetCharAt(end+1)) == "#":    # This may be a problem under rare circumstances
+# #                     searchStr = self.GetTextRange(end+2, self.WordEndPosition(end+2, 1))
+#             
+#             # open the wiki page
+#             self.pWiki.openWikiPage(nword, motionType="child")
+# ##            self.pWiki.tree.Unselect()  # TODO move to other place?
+# 
+#             if searchfrag is not None:
+#                 searchOp = SearchReplaceOperation()
+#                 searchOp.wildCard = "no"   # TODO Why not regex?
+#                 searchOp.searchStr = searchfrag
+# 
+#                 self.pWiki.editor.executeSearch(searchOp, 0)
+# 
+#             return True
+#         elif self.isPositionInLink(linkPos):
+#             pageAst = self.getAst()
+#             linkCharPos = len(self.GetTextRange(0, linkPos))
+#             tok, prevtok = pageAst.getTokenForPos(linkCharPos)
+#             if tok is None or tok.ttype != WikiFormatting.FormatTypes.Url:
+#                 return
+#                 
+#             self.pWiki.launchUrl(tok.node.url)
+#             return True
+#         return False
+
+
+
+
+
+
 
 #  DO NOT DELETE!
 #     def launchUrl(self, link):   # TODO Works only for Windows

@@ -670,8 +670,8 @@ class HtmlXmlExporter:
                                 escapeHtml(tok.grpdict["propertyValue"])) )
 
             elif styleno == WikiFormatting.FormatTypes.Url:
-                link = tok.text
-                if self.asXml:
+                link = tok.node.url
+                if self.asXml:   # TODO XML
                     self.outAppend(u'<link type="href">%s</link>' % 
                             escapeHtml(link))
                 else:
@@ -679,6 +679,7 @@ class HtmlXmlExporter:
                     if lowerLink.endswith(".jpg") or \
                             lowerLink.endswith(".gif") or \
                             lowerLink.endswith(".png"):
+                        # Ignore title, use image
                         if self.asHtmlPreview and lowerLink.startswith("file:"):
                             # At least under Windows, wxWidgets has another
                             # opinion how a local file URL should look like
@@ -688,24 +689,39 @@ class HtmlXmlExporter:
                         self.outAppend(u'<img src="%s" border="0" />' % 
                                 escapeHtml(link))
                     else:
-                        self.outAppend(u'<a href="%s">%s</a>' %
-                                (escapeHtml(link), escapeHtml(link)))
+#                         self.outAppend(u'<a href="%s">%s</a>' %
+#                                 (escapeHtml(link), escapeHtml(link)))
+                        self.outAppend(u'<a href="%s">' % link)
+                        if tok.node.titleTokens is not None:
+                            self.processTokens(content, tok.node.titleTokens)
+                        else:
+                            self.outAppend(escapeHtml(link))                        
+                        self.outAppend(u'</a>')
+
             elif styleno == WikiFormatting.FormatTypes.WikiWord:  # or \
                     # styleno == WikiFormatting.FormatTypes.WikiWord2:
                 word = self.pWiki.getFormatting().normalizeWikiWord(tok.text)
                 link = self.links.get(word)
                 
                 if link:
-                    if self.asXml:
+                    if self.asXml:   # TODO XML
                         self.outAppend(u'<link type="wikiword">%s</link>' % 
                                 escapeHtml(tok.text))
                     else:
-                        if word.startswith(u"["):
-                            word = word[1:len(word)-1]
-                        self.outAppend(u'<a href="%s">%s</a>' %
-                                (link, tok.text))
+#                         if word.startswith(u"["):
+#                             word = word[1:len(word)-1]
+                        self.outAppend(u'<a href="%s">' % escapeHtml(link))
+                        if tok.node.titleTokens is not None:
+                            self.processTokens(content, tok.node.titleTokens)
+                        else:
+                            self.outAppend(escapeHtml(tok.text))                        
+                        self.outAppend(u'</a>')
                 else:
-                    self.outAppend(tok.text)
+                    if tok.node.titleTokens is not None:
+                        self.processTokens(content, tok.node.titleTokens)
+                    else:
+                        self.outAppend(escapeHtml(tok.text))                        
+
             elif styleno == WikiFormatting.FormatTypes.Numeric:
                 # Numeric bullet
                 numbers = len(tok.grpdict["preLastNumeric"].split(u"."))

@@ -1894,29 +1894,30 @@ These are your default global settings.
 
 
     def launchUrl(self, link):
-        match = self.getFormatting().UrlRE.match(link)
-        try:
-            link2 = match.group(1)
+#         match = self.getFormatting().UrlRE.match(link)
+#         try:
+#             link2 = match.group(1)
             
-            if self.configuration.getint(
-                    "main", "new_window_on_follow_wiki_url") == 1 or \
-                    not link2.startswith("wiki:"):
-                os.startfile(link2)
+        link2 = link
+        if self.configuration.getint(
+                "main", "new_window_on_follow_wiki_url") == 1 or \
+                not link2.startswith("wiki:"):
+            os.startfile(link2)
+            return True
+        elif self.configuration.getint(
+                "main", "new_window_on_follow_wiki_url") == 0:
+                    
+            link2 = urllib.url2pathname(link2)
+            link2 = link2.replace(u"wiki:", u"")
+            if exists(link2):
+                self.openWiki(link2, u"")  # ?
                 return True
-            elif self.configuration.getint(
-                    "main", "new_window_on_follow_wiki_url") == 0:
-                        
-                link2 = urllib.url2pathname(link2)
-                link2 = link2.replace(u"wiki:", u"")
-                if exists(link2):
-                    self.openWiki(link2, u"")  # ?
-                    return True
-                else:
-                    self.statusBar.SetStatusText(
-                            uniToGui(u"Couldn't open wiki: %s" % link2), 0)
-                    return False
-        except:
-            pass
+            else:
+                self.statusBar.SetStatusText(
+                        uniToGui(u"Couldn't open wiki: %s" % link2), 0)
+                return False
+#         except:
+#             pass
         return False
 
 

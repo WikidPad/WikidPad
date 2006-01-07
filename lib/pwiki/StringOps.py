@@ -192,6 +192,25 @@ def splitkeep(s, delim):
         
     return result[:-1]
 
+
+def matchWhole(reObj, s):
+    """
+    reObj -- Compiled regular expression
+    s -- String to match
+    
+    Similar to reObj.match(s), but returns MatchObject only if the 
+    whole string s is covered by the match, returns None otherwise
+    """
+    mat = reObj.match(s)
+    if not mat:
+        return None
+    if mat.end(0) < len(s):
+        return None
+        
+    return mat
+    
+
+
 ## Copied from xml.sax.saxutils and modified to reduce dependencies
 def escapeHtml(data):
     """

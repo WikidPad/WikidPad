@@ -5,7 +5,7 @@ from Utilities import DUMBTHREADHOLDER
 
 import srePersistent as re
 
-from StringOps import Tokenizer
+from StringOps import Tokenizer, matchWhole
 
 
 FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord2", "WikiWord", "AvailWikiWord",                                          
@@ -138,6 +138,7 @@ class WikiFormatting:
                 (self.TableRE, FormatTypes.Table),
                 (self.SuppressHighlightingRE, FormatTypes.Default),
                 (self.ScriptRE, FormatTypes.Script),
+                (self.TitledUrlRE, FormatTypes.Url),
                 (self.UrlRE, FormatTypes.Url),
                 (self.ToDoREWithContent, FormatTypes.ToDo),
                 (self.PropertyRE, FormatTypes.Property),
@@ -157,6 +158,7 @@ class WikiFormatting:
                 
                 
         self.formatCellExpressions = [
+                (self.TitledUrlRE, FormatTypes.Url),
                 (self.UrlRE, FormatTypes.Url),
 #                 (self.ToDoREWithContent, FormatTypes.ToDo),  # TODO Doesn't work
                 (self.FootnoteRE, FormatTypes.Footnote),
@@ -166,8 +168,15 @@ class WikiFormatting:
                 (self.ItalicRE, FormatTypes.Italic),
                 ]
                 
+        self.formatWwTitleExpressions = [
+                (self.BoldRE, FormatTypes.Bold),
+                (self.ItalicRE, FormatTypes.Italic),
+                ]
+       
+                
         self.combinedPageRE = compileCombinedRegex(self.formatExpressions)
         self.combinedCellRE = compileCombinedRegex(self.formatCellExpressions)
+        self.combinedWwTitleRE = compileCombinedRegex(self.formatWwTitleExpressions)
 
         self.wikiWordStart = u"["
         self.wikiWordEnd = u"]"
@@ -224,24 +233,25 @@ class WikiFormatting:
         Try to normalize text to a valid wiki word and return it or None
         if it can't be normalized.
         """
-        mat = self.WikiWordEditorRE.match(word)
+        mat = matchWhole(self.WikiWordEditorRE, word)
         if mat:
             return mat.group("wikiword")
             
-        mat = self.WikiWordEditorRE2.match(word)
+        mat = matchWhole(self.WikiWordEditorRE2, word)
         if mat:
-            if not self.footnotesAsWws and self.FootnoteRE.match(word):
+            if not self.footnotesAsWws and matchWhole(self.FootnoteRE, word):
                 return None
 
-            if self.WikiWordEditorRE.match(mat.group("wikiwordncc")):
+            if matchWhole(self.WikiWordEditorRE, mat.group("wikiwordncc")):
                 # If word is '[WikiWord]', return 'WikiWord' instead
                 return mat.group("wikiwordncc")
             else:
-                return self.wikiWordStart + mat.group("wikiwordncc") + self.wikiWordEnd
+                return self.wikiWordStart + mat.group("wikiwordncc") + \
+                        self.wikiWordEnd
         
         # No valid wiki word -> try to add brackets
         parword = self.wikiWordStart + word + self.wikiWordEnd
-        mat = self.WikiWordEditorRE2.match(parword)
+        mat = matchWhole(self.WikiWordEditorRE2, parword)
         if mat:
             if not self.footnotesAsWws and self.FootnoteRE.match(parword):
                 return None
@@ -249,6 +259,45 @@ class WikiFormatting:
             return self.wikiWordStart + mat.group("wikiwordncc") + self.wikiWordEnd
 
         return None
+
+
+    def splitWikiWord(self, word):
+        """
+        Splits a wiki word with (optional) title and/or search fragment
+        into its parts.
+        It is only recognized if it is valid in the editor, this means
+        a non camelcase word must be in brackets.
+        Returns tuple (<naked word>, <title>, <search fragment>) where
+        "naked" means it doesn't have brackets, "title" and/or "search fragment"
+        may be None if they are not present. The search fragment is unescaped
+        
+        If word isn't a wiki word, (None, None, None) is returned.
+        """
+        mat = matchWhole(self.WikiWordEditorRE, word)
+        if mat:
+            # Camelcase word without brackets (has never a title)
+            gd = mat.groupdict()
+            nword = gd.get("wikiword")
+            sfrag = gd.get("wikiwordSearchfrag")
+            if sfrag is not None:
+                sfrag = self.SearchUnescapeRE.sub(ur"\1", sfrag)
+            
+            return (nword, None, sfrag)
+            
+        mat = matchWhole(self.WikiWordEditorRE2, word)
+        if mat:
+            # Sort out footnotes if appropriate
+            if not self.footnotesAsWws and matchWhole(self.FootnoteRE, word):
+                return (None, None, None)
+                
+            gd = mat.groupdict()
+            nword = gd.get("wikiwordncc")
+            title = gd.get("wikiwordnccTitle")
+            sfrag = gd.get("wikiwordnccSearchfrag")
+            if sfrag is not None:
+                sfrag = self.SearchUnescapeRE.sub(ur"\1", sfrag)
+            
+            return (nword, title, sfrag)
 
 
     def wikiWordToLabel(self, word):
@@ -314,3 +363,18 @@ class WikiFormatting:
         
         return tokenizer.tokenize(text, formatMap, FormatTypes.Default,
                 threadholder=threadholder)
+
+
+    def tokenizeTitle(self, text, threadholder=DUMBTHREADHOLDER):
+        """
+        Function used by PageAst module
+        """
+        # TODO Cache if necessary
+        formatMap = self.getExpressionsFormatList(
+                self.formatWwTitleExpressions)  # TODO non camelcase !!!!
+                
+        tokenizer = Tokenizer(self.combinedWwTitleRE, -1)
+
+        return tokenizer.tokenize(text, formatMap, FormatTypes.Default,
+                threadholder=threadholder)
+
