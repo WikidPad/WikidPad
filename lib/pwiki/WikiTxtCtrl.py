@@ -257,6 +257,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.anchorBytePosition = -1
         self.anchorCharPosition = -1
         self.searchCharStartPos = 0
+        self.stylebytes = None
+        self.pageAst = None
 
         self.SetSelection(-1, -1)
         self.ignoreOnChange = True
@@ -333,11 +335,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.stylebytes = None
             self.pageAst = None
 
-        if textlen < 5120:    # Arbitrary value
+        if textlen < self.pWiki.configuration.getint(
+                "main", "sync_highlight_byte_limit"):
             # Synchronous styling
-#             self.tokenizer.setTokenThread(None)
             self.stylingThreadHolder.setThread(None)
-            self.buildStyling(text, threadholder=DUMBTHREADHOLDER)
+            self.buildStyling(text, 0, threadholder=DUMBTHREADHOLDER)
             self.applyStyling(self.stylebytes)
         else:
             # Asynchronous styling
@@ -346,8 +348,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.SetStyling(0, 0)
 
             sth = self.stylingThreadHolder
-
-            t = threading.Thread(None, self.buildStyling, args = (text, sth))
+            
+            delay = self.pWiki.configuration.getfloat(
+                    "main", "async_highlight_delay")
+            t = threading.Thread(None, self.buildStyling, args = (text, delay, sth))
 #             t = threading.Timer(1, self.buildStyling, args = (text, sth))
             sth.setThread(t)
             t.start()
@@ -380,9 +384,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.AddPendingEvent(wxIdleEvent())
 
 
-    def buildStyling(self, text, threadholder=DUMBTHREADHOLDER):
-        if not threadholder is DUMBTHREADHOLDER:
-            sleep(0.5)
+    def buildStyling(self, text, delay, threadholder=DUMBTHREADHOLDER):
+        if delay != 0:  # not threadholder is DUMBTHREADHOLDER:
+            sleep(delay)
             if not threadholder.isCurrent():
                 return
 

@@ -14,7 +14,7 @@ from StringOps import mbcsWriter, utf8Writer, utf8Enc, mbcsEnc, strToBool, \
         Token, BOM_UTF8, unicodeToCompFilename, wikiWordToLabel, escapeHtml, \
         removeBracketsFilename
 
-import WikiData
+from WikiExceptions import WikiWordNotFoundException
 import WikiFormatting
 import PageAst
 
@@ -371,7 +371,7 @@ class HtmlXmlExporter:
         if not wikiPage:
             try:
                 wikiPage = self.wikiData.getPage(wikiWord)
-            except WikiData.WikiWordNotFoundException:
+            except WikiWordNotFoundException:
                 return False
             
         #print "shouldExport", mbcsEnc(wikiWord)[0], repr(wikiPage.props.get("export", ("True",))), \

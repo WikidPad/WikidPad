@@ -19,20 +19,27 @@ from time import time, localtime
 import datetime
 import re, string, glob
 
-import gadfly
-import DbStructure
-from DbStructure import createWikiDB, WikiDBExistsException
+try:
+    import gadfly
+    import DbStructure
+    from DbStructure import createWikiDB, WikiDBExistsException
+except:
+    gadfly = None
+# finally:
+#     pass
 
-from WikiExceptions import *   # TODO make normal import?
-import SearchAndReplace
 
-from StringOps import mbcsEnc, mbcsDec, utf8Enc, utf8Dec, BOM_UTF8, \
+
+from pwiki.WikiExceptions import *   # TODO make normal import?
+from pwiki import SearchAndReplace
+
+from pwiki.StringOps import mbcsEnc, mbcsDec, utf8Enc, utf8Dec, BOM_UTF8, \
         fileContentToUnicode, wikiWordToLabel
 
-import WikiFormatting
-import PageAst
+from pwiki import WikiFormatting
+from pwiki import PageAst
 
-from WikiPage import WikiPage
+from pwiki.WikiPage import WikiPage
 
 
 CleanTextRE = re.compile("[^A-Za-z0-9]")  # ?
@@ -433,20 +440,38 @@ class WikiData:
     def deleteChildRelationships(self, fromWord):
         self.execSql("delete from wikirelations where word = ?", (fromWord,))
 
-    def getAllSubWords(self, word, includeRoot=False):
+    def getAllSubWords(self, word):
         """
         Return all words which are children, grandchildren, etc.
-        of word. Used by the "export Sub-Tree" functions
+        of word and the word itself. Used by the "export/print Sub-Tree"
+        functions. All returned words are real existing words, no aliases.
         """
+        word = self.getAliasesWikiWord(word)
+        result = {word: None}
+        checkList = [word]
 
-        subWords = []
-        if (includeRoot):
-            subWords.append(word)
-        allWords = self.getAllDefinedPageNames()
-        for allWordsItem in allWords:
-            if allWordsItem != word and self.findBestPathFromWordToWord(allWordsItem, word):
-                subWords.append(allWordsItem)
-        return subWords
+        while len(checkList) > 0:
+            toCheck = checkList.pop()
+            
+            for c in self.getChildRelationships(toCheck, existingonly=True,
+                    selfreference=False):
+                c = self.getAliasesWikiWord(c)
+                if not result.has_key(c):
+                    result[c] = None
+                    checkList.append(c)
+                    
+        keys = result.keys()
+        keys.sort()
+        
+        return keys
+
+#         subWords = [word]
+#         allWords = self.getAllDefinedPageNames()
+#         for allWordsItem in allWords:
+#             if allWordsItem != word and self.findBestPathFromWordToWord(allWordsItem, word):
+#                 subWords.append(allWordsItem)
+#         return subWords
+
 
     def _assembleWordGraph(self, word, graph):
         """
@@ -796,3 +821,27 @@ def findShortestPath(graph, start, end, path):   # path=[]
                     shortest = newpath
 
     return shortest
+
+
+
+def listAvailableWikiDataHandlers(pWiki):
+    """
+    Returns a list with the names of available handlers from this module.
+    Each item is a tuple (<internal name>, <descriptive name>)
+    """
+    if gadfly is not None:
+        return [("original_gadfly", "Original Gadfly")]
+    else:
+        return []
+
+
+def getWikiDataHandler(pWiki, name):
+    """
+    Returns a creation function (or class) for an appropriate
+    WikiData object and a createWikiDB function or (None, None)
+    if name is unknown
+    """
+    if name == "original_gadfly":
+        return WikiData, createWikiDB
+    
+    return (None, None)

@@ -11,8 +11,8 @@ from os import mkdir, unlink, rename
 from os.path import exists, join, split, basename
 import glob
 
-from StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, removeBracketsFilename
-from SearchAndReplace import SearchReplaceOperation
+from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, removeBracketsFilename
+from pwiki.SearchAndReplace import SearchReplaceOperation
 
 import gadfly
 

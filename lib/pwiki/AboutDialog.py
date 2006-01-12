@@ -11,7 +11,7 @@ class AboutDialog(wxDialog):
     <center>
         <table bgcolor="#CCCCCC" width="100%" cellspacing="0" cellpadding="0" border="1">
             <tr>
-                <td align="center"><h2>wikidPad 1.20beta</h2></td>
+                <td align="center"><h2>wikidPad 1.6beta</h2></td>
             </tr>
         </table>
 

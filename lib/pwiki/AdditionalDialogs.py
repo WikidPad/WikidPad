@@ -403,6 +403,9 @@ class OptionsDialog(wxDialog):
                     "cbHtmlExportProppatternIsExcluding", "b"),
             ("html_export_proppattern", "tfHtmlExportProppattern", "tre"),
             
+            ("sync_highlight_byte_limit", "tfSyncHighlightingByteLimit", "i0+"),
+            ("async_highlight_delay", "tfAsyncHighlightingDelay", "f0+"),
+            
             ("footnotes_as_wikiwords", "cbFootnotesAsWws", "b"),
             ("first_wiki_word", "tfFirstWikiWord", "t"),
             
@@ -429,12 +432,10 @@ class OptionsDialog(wxDialog):
             if t == "b":   # boolean field = checkbox
                 self.ctrls[c].SetValue(
                         self.pWiki.configuration.getboolean("main", o))
-            elif t == "t" or t == "tre":  # text field or regular expression field
+            elif t in ("t", "tre", "i0+", "f0+"):  # text field or regular expression field
                 self.ctrls[c].SetValue(
                         uniToGui(self.pWiki.configuration.get("main", o)) )
-            
-                
-            
+
         # Options with special treatment
         self.ctrls.cbLowResources.SetValue(
                 self.pWiki.configuration.getint("main", "lowresources") != 0)
@@ -460,24 +461,39 @@ class OptionsDialog(wxDialog):
                 except:   # TODO Specific exception
                     fieldsValid = False
                     self.ctrls[c].SetBackgroundColour(wxRED)
+            elif t == "i0+":
+                # Nonnegative integer field
+                try:
+                    val = int(guiToUni(self.ctrls[c].GetValue()))
+                    if val < 0:
+                        raise ValueError
+                    self.ctrls[c].SetBackgroundColour(wxWHITE)
+                except ValueError:
+                    fieldsValid = False
+                    self.ctrls[c].SetBackgroundColour(wxRED)
+            elif t == "f0+":
+                # Nonnegative float field
+                try:
+                    val = float(guiToUni(self.ctrls[c].GetValue()))
+                    if val < 0:
+                        raise ValueError
+                    self.ctrls[c].SetBackgroundColour(wxWHITE)
+                except ValueError:
+                    fieldsValid = False
+                    self.ctrls[c].SetBackgroundColour(wxRED)
 
         if not fieldsValid:
             self.Refresh()
             return
 
-        # Transfer options from dialog to config file
+        # Then transfer options from dialog to config file
         for o, c, t in self.OPTION_TO_CONTROL:
             # TODO Handle unicode text controls
             if t == "b":
                 self.pWiki.configuration.set("main", o, repr(self.ctrls[c].GetValue()))
-            elif t == "t":
+            elif t in ("t", "tre", "i0+", "f0+"):
                 self.pWiki.configuration.set(
                         "main", o, guiToUni(self.ctrls[c].GetValue()) )
-            elif t == "tre":
-                # Regular expression field
-                rexp = guiToUni(self.ctrls[c].GetValue())
-                self.pWiki.configuration.set("main", o, rexp)
-                    
             
         # Options with special treatment
         if self.ctrls.cbLowResources.GetValue():
@@ -650,7 +666,7 @@ class ExportDialog(wxDialog):
             wordList = [root]
         elif selset == 1:
             # subtree
-            wordList = self.pWiki.wikiData.getAllSubWords(root, True)
+            wordList = self.pWiki.wikiData.getAllSubWords(root)
         else:
             # whole wiki
             wordList = self.pWiki.wikiData.getAllDefinedPageNames()

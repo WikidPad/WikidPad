@@ -1,11 +1,14 @@
 #!/bin/python
 
 import sys, os, traceback, os.path
+sys.path.append("lib")
 os.stat_float_times(True)
 
 from pwiki import srePersistent
 srePersistent.loadCodeCache()
 
+## import hotshot
+## _prof = hotshot.Profile("hotshot.prf")
 
 import pwiki.urllib_red as urllib
 
@@ -15,6 +18,12 @@ import pwiki.urllib_red as urllib
 if not hasattr(sys, 'frozen'):
     sys.path =  \
             [r"C:\Programme\Python23\Lib\site-packages\wx-2.6-msw-unicode"] + sys.path
+
+
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "gadfly.zip"))
+# print "sys.path + ", os.path.join(os.path.abspath(sys.argv[0]), "gadfly.zip")
+sys.path.append("gadfly.zip")
+
 
 from wxPython.wx import *
 import wxPython.xrc as xrc
@@ -81,7 +90,6 @@ try:
     app = App(0)
     app.MainLoop()
     srePersistent.saveCodeCache()
-
     
 except Exception, e:
    traceback.print_exc()

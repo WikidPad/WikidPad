@@ -11,7 +11,9 @@ from wxHelper import GUI_ID, setWindowPos, setWindowSize
 from MiscEvent import MiscEventSourceMixin
 import Configuration
 from Configuration import createConfiguration
-from WikiData import *
+# from WikiData import *
+from wikidata import DataManager
+
 from WikiTxtCtrl import *
 from WikiTreeCtrl import *
 from WikiHtmlView import WikiHtmlView
@@ -19,6 +21,7 @@ from AboutDialog import AboutDialog
 
 from PageHistory import PageHistory
 from SearchAndReplace import SearchReplaceOperation
+from Printing import Printer, PrintMainDialog
 
 from AdditionalDialogs import *
 from SearchAndReplaceDialogs import *
@@ -231,7 +234,6 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         # Connect page history
         self.pageHistory = PageHistory(self)
         
-
         # trigger hook
         self.hooks.startup(self)
 
@@ -243,6 +245,9 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
                 self.createDefaultGlobalConfig()
         else:
             self.createDefaultGlobalConfig()
+
+        # Initialize printing
+        self.printer = Printer(self)
 
         # wiki history
         history = self.configuration.get("main", "wiki_history")
@@ -502,6 +507,10 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         self.addMenuItem(wikiMenu, '&Open\t' + self.keyBindings.OpenWiki,
                 'Open Wiki', self.OnWikiOpen)
 
+        self.addMenuItem(wikiMenu, 'Open as &Type',
+                'Open Wiki with a specified wiki database type',
+                self.OnWikiOpenAsType)
+
         self.recentWikisMenu = wxMenu()
         wikiMenu.AppendMenu(wxNewId(), '&Recent', self.recentWikisMenu)
 
@@ -570,6 +579,12 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
             self.addMenuItem(exportWikisMenu, 'Other Export...',
                     'Open export dialog',
                     lambda evt: self.showExportDialog())
+
+
+        if wikiData is not None:
+            self.addMenuItem(wikiMenu, 'Print...\t' + self.keyBindings.Print,
+                    'Show the print dialog',
+                    lambda evt: self.printer.showPrintMainDialog())
 
         if wikiData is not None and wikiData.checkCapability("rebuild") == 1:
             menuID=wxNewId()
@@ -1383,6 +1398,11 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
     def newWiki(self, wikiName, wikiDir):
         "creates a new wiki"
+        wdhandlers = DataManager.listHandlers(self)
+        if len(wdhandlers) == 0:
+            self.displayErrorMessage(
+                    'No data handler available to create database.')
+            return
 
         self.hooks.newWiki(self, wikiName, wikiDir)
 
@@ -1404,8 +1424,27 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
             elif result == wxID_NO:
                 createIt = False
             dlg.Destroy()
+            
+        
+        if createIt:
+            # Ask for the data handler to use
+            index = wxGetSingleChoiceIndex(u"Choose database type",
+                    u"Choose database type", [wdh[1] for wdh in wdhandlers],
+                    self)
+            if index == -1:
+                return
 
-        if (createIt):
+            wdhName = wdhandlers[index][0]
+                
+            wikiDataFactory, createWikiDbFunc = DataManager.getHandler(self, 
+                    wdhName)
+                    
+            if wikiDataFactory is None:
+                self.displayErrorMessage(
+                        'Data handler %s not available' % wdh[0])
+                return
+            
+
             # create the new dir for the wiki
             os.mkdir(wikiDir)
 
@@ -1415,7 +1454,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
             # create the data directory for the data files
             try:
-                createWikiDB(wikiName, dataDir, False)
+                createWikiDbFunc(wikiName, dataDir, False)
             except WikiDBExistsException:
                 # The DB exists, should it be overwritten
                 dlg=wxMessageDialog(self, u'A wiki database already exists '+
@@ -1423,7 +1462,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
                         u'Wiki DB Exists', wxYES_NO)
                 result = dlg.ShowModal()
                 if result == wxID_YES:
-                    createWikiDB(wikiName, dataDir, True)
+                    createWikiDbFunc(wikiName, dataDir, True)
                 else:
                     allIsWell = False
 
@@ -1441,6 +1480,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
                 
                 self.configuration.set("main", "wiki_name", wikiName)
                 self.configuration.set("main", "last_wiki_word", wikiName)
+                self.configuration.set("main", "wiki_database_type", wdhName)
                 self.configuration.set("wiki_db", "data_dir", "data")
                 self.configuration.save()
 
@@ -1487,8 +1527,13 @@ These are your default global settings.
                 self.openWikiPage(self.wikiName, False, False)
 
 
-    def openWiki(self, wikiConfigFilename, wikiWordToOpen=None):
-        "opens up a wiki"
+    def openWiki(self, wikiConfigFilename, wikiWordToOpen=None,
+            ignoreWdhName=False):
+        """
+        opens up a wiki
+        ignoreWdhName -- Should the name of the wiki data handler in the
+                wiki config file (if any) be ignored?
+        """
 
         # trigger hooks
         self.hooks.openWiki(self, wikiConfigFilename)
@@ -1554,7 +1599,7 @@ These are your default global settings.
 
         # except Exception, e:
         if wikiName is None or dataDir is None:
-            self.displayErrorMessage("Wiki configuration file is corrupt", e)
+            self.displayErrorMessage("Wiki configuration file is corrupted", e)
             # traceback.print_exc()
             return False
 
@@ -1565,7 +1610,42 @@ These are your default global settings.
         # create the db interface to the wiki data
         wikiData = None
         try:
-            wikiData = WikiData(self, dataDir)
+            if not ignoreWdhName:
+                wikidhName = self.configuration.get("main",
+                        "wiki_database_type", "")
+            else:
+                wikidhName = None
+            if wikidhName:
+                wikiDataFactory, createWikiDbFunc = DataManager.getHandler(self, 
+                        wikidhName)
+                if wikiDataFactory is None:
+                    self.displayErrorMessage(
+                            'Required data handler %s not available' % wikidhName)
+                    wikidhName = None
+            
+            if not wikidhName:
+                wdhandlers = DataManager.listHandlers(self)
+                if len(wdhandlers) == 0:
+                    self.displayErrorMessage(
+                            'No data handler available to open database.')
+                    return
+
+                # Ask for the data handler to use
+                index = wxGetSingleChoiceIndex(u"Choose database type",
+                        u"Choose database type", [wdh[1] for wdh in wdhandlers],
+                        self)
+                if index == -1:
+                    return
+                    
+                wikiDataFactory, createWikiDbFunc = DataManager.getHandler(self, 
+                        wdhandlers[index][0])
+                        
+                if wikiDataFactory is None:
+                    self.displayErrorMessage(
+                            'Data handler %s not available' % wdh[0])
+                    return
+
+            wikiData = wikiDataFactory(self, dataDir)
         except Exception, e:
             self.displayErrorMessage("Error connecting to database in '%s'" % dataDir, e)
             traceback.print_exc()
@@ -1854,7 +1934,7 @@ These are your default global settings.
             # if the root was renamed we have a little more to do
             if wikiWord == self.wikiName:
                 self.configuration.set("main", "wiki_name", toWikiWord)
-                self.configuration.set("main", "last_wiki_word", toWikiWord) # ?
+                self.configuration.set("main", "last_wiki_word", toWikiWord)
                 self.saveCurrentWikiState()
                 self.configuration.loadWikiConfig(None)
                 
@@ -1883,7 +1963,6 @@ These are your default global settings.
             traceback.print_exc()                
             self.displayErrorMessage(str(e))
             return False
-
 
 
     def findCurrentWordInTree(self):
@@ -2373,8 +2452,11 @@ These are your default global settings.
 
 
     def showExportDialog(self):
+        self.saveCurrentWikiPage(force=True)
+        self.wikiData.commit()
+
         dlg = ExportDialog(self, -1)
-        dlg.CenterOnParent(wxBOTH) #?
+        dlg.CenterOnParent(wxBOTH)
 
         result = dlg.ShowModal()
         dlg.Destroy()
@@ -2416,12 +2498,14 @@ These are your default global settings.
                 
             elif typ in (GUI_ID.MENU_EXPORT_SUB_AS_PAGE,
                     GUI_ID.MENU_EXPORT_SUB_AS_PAGES):
-                wordList = self.wikiData.getAllSubWords(
-                        self.currentWikiWord, True)
+                wordList = self.wikiData.getAllSubWords(self.currentWikiWord)
             else:
                 wordList = (self.currentWikiWord,)
                 
             expclass, exptype, addopt = self.EXPORT_PARAMS[typ]
+            
+            self.saveCurrentWikiPage(force=True)
+            self.wikiData.commit()
             
             expclass().export(self, self.wikiData, wordList, exptype, dest,
                     False, addopt)
@@ -2519,8 +2603,14 @@ These are your default global settings.
         if dlg.ShowModal() == wxID_OK:
             self.openWiki(abspath(dlg.GetPath()))
         dlg.Destroy()
-
-
+        
+    def OnWikiOpenAsType(self, event):
+        dlg = wxFileDialog(self, u"Choose a Wiki to open",
+                self.getLastActiveDir(), "", "*.wiki", wxOPEN)
+        if dlg.ShowModal() == wxID_OK:
+            self.openWiki(abspath(dlg.GetPath()), ignoreWdhName=True)
+        dlg.Destroy()
+        
     def OnWikiNew(self, event):
         dlg = wxTextEntryDialog (self,
                 u"Name for new wiki (must be in the form of a WikiWord):",

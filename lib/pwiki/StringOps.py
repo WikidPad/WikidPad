@@ -220,7 +220,14 @@ def escapeHtml(data):
     # must do ampersand first
 
     return data.replace(u"&", u"&amp;").replace(u">", u"&gt;").\
-            replace(u"<", u"&lt;").replace(u"\n", u"<br />")
+            replace(u"<", u"&lt;").replace(u"\n", u"<br />\n")
+
+
+def unescapeRe(text):
+    """
+    Unescape things like \n\f. Throws exception if unescaping fails
+    """
+    return re.sub(u"", text, u"", 1)
 
 
 # ---------- Support for serializing values into binary data (and back) ----------

@@ -128,6 +128,18 @@ class Configuration:
             return default
 
 
+    def getfloat(self, section, option, default=None):
+        result = self.get(section, option)
+        if result is None:
+            return default
+        
+        try:
+            return float(result)
+        except ValueError:
+            # Can't convert result string to float
+            return default
+
+
     def getboolean(self, section, option, default=None):
         result = self.get(section, option)
         if result is None:
@@ -262,9 +274,16 @@ GLOBALDEFAULTS = {
     ("main", "html_export_proppattern"): "",  # Same for HTML exporting
     ("main", "html_export_proppattern_is_excluding"): "False",  # Same for HTML exporting
 
+    ("main", "sync_highlight_byte_limit"): "5120",  # Size limit where to start asyn. highlighting in editor
+    ("main", "async_highlight_delay"): "0.5",  # Delay after keypress before starting async. highlighting
+
     ("main", "search_wiki_context_before"): "0", # No. of context characters before
     ("main", "search_wiki_context_after"): "0",  # and after a found pattern
-    ("main", "search_wiki_count_occurrences"): "False" # Show for each page the number of found matches
+    ("main", "search_wiki_count_occurrences"): "False", # Show for each page the number of found matches
+
+    ("main", "print_margins"): "0,0,0,0", # Left, upper, right, lower page margins on printing
+    ("main", "print_plaintext_font"): "", # Font description for printing in plain text mode
+    ("main", "print_plaintext_wpseparator"): "\\n\\n\\n\\n" # How to separate wikiword pages (uses re escaping)
     }
 
 

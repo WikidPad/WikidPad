@@ -5,16 +5,12 @@ from glob import glob
 import py2exe
 from py2exe.build_exe import Target
 
-# notice that i create a lib dir with the sql_mar
-# gadfly grammar files. the build.bat forces the import
-# of these files
-
 
 wikidpad = Target(
     # used for the versioninfo resource
-    version = '1.20',
+    version = '1.6',
     name = "WikidPad",
-    copyright = "(C) 2005 Jason Horman, Michael Butscher, Gerhard Reitmayr",
+    copyright = "(C) 2005-2006 Jason Horman, Michael Butscher, Gerhard Reitmayr",
     description = "Single user wiki notepad",
     comments="",
 
@@ -23,22 +19,23 @@ wikidpad = Target(
     icon_resources = [(0, 'icons/pwiki.ico')])
 
 
-setup(name='WikidPad',
-      version='1.20',
-      author='Jason Horman',
-      author_email='jason@jhorman.org',
-      url='http://www.jhorman.org/WikidPad/',
-      scripts=['WikidPad.py'],
+setup(name='WikidPadCompact',
+      version='1.6beta',
+      author='Michael Butscher',
+      author_email='mbutscher@gmx.de',
+      url='http://www.mbutscher.nextdesigns.net/software.html',
+      ## scripts=['WikidPad.py'],
       windows=[wikidpad],
       package_dir = {'': 'lib'},
-      packages=['pwiki'],
+      packages=['pwiki', 'pwiki.wikidata', 'pwiki.wikidata.compact_sqlite',
+                'pwiki.wikidata.original_gadfly'],
+      # py_modules=['encodings.utf_8', 'encodings.latin_1'],
       data_files=[('icons', glob(os.path.join('icons', '*.*'))),
-                  ('lib', glob('sql_mar.*')),
+#                   ('lib', glob('sql_mar.*')),
                   ('extensions', glob('extensions/*.*')),
-                  ('', ['WikidPad.xrc']),
-                  ('WikidPadHelp', glob(os.path.join('WikidPadHelp', "*.wiki"))),
+                  ('', ['sqlite3.dll', 'WikidPad.xrc', 'readme_Wic.txt', "gadfly.zip"]),
+                  ('WikidPadHelp', glob(os.path.join('WikidPadHelpOG-static', "*.wiki"))),
                   (os.path.join('WikidPadHelp', 'data'),
-                   glob(os.path.join('WikidPadHelp', 'data', "*.*"))),
+                   glob(os.path.join('WikidPadHelpOG-static', 'data', "*.*"))),
                   ('export', [os.path.join('export', 'wikistyle.css')])]
 )
-

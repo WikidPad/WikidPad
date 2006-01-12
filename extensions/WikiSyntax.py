@@ -60,6 +60,13 @@ LOWERCASE = mbcsDec(string.lowercase)[0]
 LETTERS = UPPERCASE + LOWERCASE
 
 
+# # Pattern string for delimiter for search fragment after wiki word
+# WikiWordSearchFragDelimPAT = ur"#"
+# 
+# # Pattern string for search fragment itself
+# WikiWordSearchFragPAT = ur"(?:#.|[^ \t\n#])+"
+
+
 singleWikiWord    =          (ur"(?:[" +
                              UPPERCASE +
                              # "A-Z\xc0-\xde\x8a-\x8f"
@@ -80,9 +87,9 @@ singleWikiWord    =          (ur"(?:[" +
                              # "a-z\xdf-\xff\x9a-\x9f"
                              ur"]+)")
 
-WikiWordRE      = re.compile(ur"\b(?<!~)" + singleWikiWord + 
-                             ur"\b", re.DOTALL | re.UNICODE | re.MULTILINE)
-                             
+WikiWordRE      = re.compile(ur"\b(?<!~)" + singleWikiWord + ur"\b", # ur"(?:/" + singleWikiWord +
+                             # ur")*\b",
+                             re.DOTALL | re.UNICODE | re.MULTILINE)
                              
 # Special version for syntax highlighting to allow appending search expression with '#'
 WikiWordEditorRE = re.compile(ur"(?P<wikiword>" + WikiWordRE.pattern +
@@ -134,8 +141,9 @@ revSingleWikiWord    =       (ur"(?:[" +
                              UPPERCASE+
                              ur"])")
 
-RevWikiWordRE      = re.compile(ur"^" + revSingleWikiWord + 
-                             ur"(?![\~])\b", re.DOTALL | re.UNICODE | re.MULTILINE)
+RevWikiWordRE      = re.compile(ur"^" + revSingleWikiWord + ur"(?:/" +
+                             revSingleWikiWord + ur")*(?![\~])\b",
+                             re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 RevWikiWordRE2     = re.compile(ur"^[\w\-\_ \t.]+?\[",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN

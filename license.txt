@@ -1,4 +1,4 @@
-Copyright (c) 2005, Jason Horman, Michael Butscher, Gerhard Reitmayr
+Copyright (c) 2005-2006 Jason Horman, Michael Butscher, Gerhard Reitmayr
 All rights reserved.
 
 
@@ -26,3 +26,32 @@ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
+
+----------
+
+Components used by this software:
+
+
+* Python
+Copyright (c) 2001-2005 Python Software Foundation.
+All Rights Reserved.
+
+Copyright (c) 2000 BeOpen.com.
+All Rights Reserved.
+
+Copyright (c) 1995-2001 Corporation for National Research Initiatives.
+All Rights Reserved.
+
+Copyright (c) 1991-1995 Stichting Mathematisch Centrum, Amsterdam.
+All Rights Reserved.
+
+
+* wxWidgets/wxPython
+Copyright (c) 1998 Julian Smart, Robert Roebling et al
+
+
+* ctypes
+Copyright (c) 2000, 2001, 2002, 2003, 2004 Thomas Heller
+
+
+* sqlite
