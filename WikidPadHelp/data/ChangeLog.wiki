@@ -1,6 +1,28 @@
 ﻿++ Change Log
 
 
+Jan. 13, 2006 (1.6beta1)
+
+Changes:
+    * WikidPad and WikidPadCompact merged into one application
+      (therefore the new version number) (see [DatabaseTypes])
+    * In wiki-wide search cycling through found matching occurrences
+      on a page with F3 or clicking on the little blue bar
+    * Basic printing support (see [Printing])
+    * Support for titled wiki words and URLs (e.g
+      [http://www.somewhere.com/aaa/bbb |Somewhere]
+      [ScratchPad |This text is shown in preview and HTML export] )
+      The title of the link is not stored in the XML export!
+
+    * Options to control timing behaviour of syntax highlighter (see
+      [OptionsDialog])
+    * Option to set background color of text editor (works only
+      partially)
+
+    * Bug fixed: non camel-case words starting with camel-case word
+      (e.g. [WikiWord with something]) incorrectly recognized in tree
+
+
 
 Dec. 29, 2005 (1.20beta4 / WikidPadCompact 1.5.5beta3)
 

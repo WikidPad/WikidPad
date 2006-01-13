@@ -230,6 +230,29 @@ def unescapeRe(text):
     return re.sub(u"", text, u"", 1)
 
 
+def htmlColorToRgbTuple(html):
+    """
+    Calculate RGB integer tuple from html '#hhhhhh' format string.
+    Returns None in case of an error
+    """
+    if len(html) != 7 or html[0] != "#":
+        return None
+    try:
+        r = int(html[1:3], 16)
+        g = int(html[3:5], 16)
+        b = int(html[5:7], 16)
+        return (r, g, b)
+    except:
+        return None
+        
+def rgbToHtmlColor(r, g, b):
+    """
+    Return HTML color '#hhhhhh' format string.
+    """
+    return "#%02X%02X%02X" % (r, g, b)
+    
+
+
 # ---------- Support for serializing values into binary data (and back) ----------
 # Especially used in SearchAndReplace.py, class SearchReplaceOperation
 

@@ -45,6 +45,8 @@ Then just start typing text with WikiWords to create your wiki.
     * UrlLinking
     * InternatiönalChàracters
     * OptionsDialog
+    * Different DatabaseTypes
+    * [Printing]
 
 *Other/Questions*
 

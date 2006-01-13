@@ -13,6 +13,8 @@ CTRL-ALT-F brings up the search dialog for the entire wiki.
 
 The dialog is non-modal, this means you can edit your wiki while the dialog is open.
 
+*Be aware* that the search operates on the data in the database. If you have changed a page in the editor and not yet saved, this changes can't be seen by the search dialog.
+
 The whole right side of the dialog shows the search results, the left side allows to control how to search.
 
 From top to bottom:
@@ -96,5 +98,13 @@ Starts a dialog to set options for the searching:
 *Button "Close"*
 Close the dialog, same as hitting ESC key.
 
+
+++++ The result list on the right
+
+Each item in the result list consist of the page name, one or two optional numbers in parentheses behind the name (one number: Number of occurrences, two numbers: currently shown occurrences, then "/", then number of occurrences or a question mark if unknown)
+
+In the result list, double clicking on an item (not on its blue bar!) brings you to the page and (if existing) to the matching occurrence shown for the list item. If the page was already loaded, a double click brings you to the next occurrence on this page.
+
+If a particular occurrence is shown in the list, you can select this item and press F3 or click on the little blue bar on the left to show the next occurrence on this page.
 
 [icon: lens]

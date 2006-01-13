@@ -16,6 +16,7 @@ from wxPython.stc import *
 import wxPython.xrc as xrc
 
 from wxHelper import GUI_ID
+from MiscEvent import KeyFunctionSink
 
 import WikiFormatting
 import PageAst
@@ -94,9 +95,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         self.StyleSetSpec(wxSTC_STYLE_DEFAULT, "face:%(mono)s,size:%(size)d" % self.pWiki.presentationExt.faces)
 
+        for i in xrange(32):
+            self.StyleSetEOLFilled(i, True)
+
         # i plan on lexing myself
         self.SetLexer(wxSTC_LEX_CONTAINER)
-
+        
         # make the text control a drop target for files and text
         self.SetDropTarget(WikiTxtCtrlDropTarget(self))
 
@@ -126,6 +130,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.AutoCompSetSeparator(ord('~'))
 
         # register some event handlers
+        self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
+                ("options changed", self.onOptionsChanged),
+        )))
+        
         EVT_STC_STYLENEEDED(self, ID, self.OnStyleNeeded)
         EVT_STC_CHARADDED(self, ID, self.OnCharAdded)
         EVT_STC_CHANGE(self, ID, self.OnChange)
@@ -148,6 +156,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # are WikiWords enabled
         self.wikiWordsEnabled = True
+        
+        self.onOptionsChanged(None)
 
         # when was a key pressed last. used to check idle time.
         self.lastKeyPressed = time()
@@ -318,6 +328,19 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         bs = self.bytelenSct(text[:start])
         be = bs + self.bytelenSct(text[start:end])
         self.SetSelection(bs, be)
+
+    def onOptionsChanged(self, miscevt):
+        coltuple = htmlColorToRgbTuple(self.pWiki.configuration.get(
+                "main", "editor_bg_color"))
+
+        if coltuple is None:
+            coltuple = (255, 255, 255)
+            
+        color = wxColour(*coltuple)
+        
+        for i in xrange(32):
+            self.StyleSetBackground(i, color)
+#             self.StyleSetEOLFilled(i, True)
 
     def OnStyleNeeded(self, evt):
         "Styles the text of the editor"
@@ -537,6 +560,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 self.pWiki.openWikiPage(tok.node.nakedWord, motionType="child")
     
                 searchfrag = tok.node.searchFragment
+                # Unescape search fragment
+                searchfrag = self.pWiki.getFormatting().SearchUnescapeRE.sub(
+                        ur"\1", searchfrag)
                 if searchfrag is not None:
                     searchOp = SearchReplaceOperation()
                     searchOp.wildCard = "no"   # TODO Why not regex?

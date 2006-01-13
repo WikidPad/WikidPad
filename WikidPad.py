@@ -22,7 +22,6 @@ if not hasattr(sys, 'frozen'):
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "gadfly.zip"))
 # print "sys.path + ", os.path.join(os.path.abspath(sys.argv[0]), "gadfly.zip")
-sys.path.append("gadfly.zip")
 
 
 from wxPython.wx import *

@@ -46,6 +46,18 @@ If you press the "Ok" button of the options dialog, but the dialog doesn't vanis
 Same as above, but for the HTML export.
 
 
+++++ Editor
+
+*Sync. highlighting limit*
+Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 3000 to 5000 bytes
+
+*Highlight start delay*
+For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds
+
+*Background color*
+(Works only partially). Specify the background color of the editor by pressing the little "..." button to start the color dialog.
+
+
 ++++ Other
 
 *Auto Save*

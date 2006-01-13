@@ -10,7 +10,8 @@ import wxPython.xrc as xrc
 
 from wxHelper import *
 
-from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec
+from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, htmlColorToRgbTuple,\
+        rgbToHtmlColor
 import WikiFormatting
 import Exporters
 
@@ -405,6 +406,7 @@ class OptionsDialog(wxDialog):
             
             ("sync_highlight_byte_limit", "tfSyncHighlightingByteLimit", "i0+"),
             ("async_highlight_delay", "tfAsyncHighlightingDelay", "f0+"),
+            ("editor_bg_color", "tfEditorBgColor", "t"),
             
             ("footnotes_as_wikiwords", "cbFootnotesAsWws", "b"),
             ("first_wiki_word", "tfFirstWikiWord", "t"),
@@ -446,6 +448,7 @@ class OptionsDialog(wxDialog):
 
         EVT_BUTTON(self, wxID_OK, self.OnOk)
         EVT_BUTTON(self, GUI_ID.btnSelectFaceHtmlPrev, self.OnSelectFaceHtmlPrev)
+        EVT_BUTTON(self, GUI_ID.btnSelectEditorBgColor, self.OnSelectEditorBgColor)
         
 
     def OnOk(self, evt):
@@ -515,6 +518,21 @@ class OptionsDialog(wxDialog):
             self.ctrls.tfFacenameHtmlPreview.SetValue(dlg.GetValue())
         dlg.Destroy()
         
+    def OnSelectEditorBgColor(self, evt):
+        rgb = htmlColorToRgbTuple(self.ctrls.tfEditorBgColor.GetValue())
+        color = wxColour(*rgb)
+        colordata = wxColourData()
+        colordata.SetColour(color)
+
+        dlg = wxColourDialog(self, colordata)
+        if dlg.ShowModal() == wxID_OK:
+            color = dlg.GetColourData().GetColour()
+            if color.Ok():
+                self.ctrls.tfEditorBgColor.SetValue(
+                        rgbToHtmlColor(color.Red(), color.Green(), color.Blue()))
+
+        dlg.Destroy()
+
 
 class FontFaceDialog(wxDialog):
     """
