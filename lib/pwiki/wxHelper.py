@@ -96,6 +96,43 @@ def setWindowSize(win, size):
     win.SetSize((sizeX, sizeY))
 
 
-    
+def getTextFromClipboard():
+    """
+    Retrieve text or unicode text from clipboard
+    """
+    from wxPython.wx import wxTheClipboard, wxDataObjectComposite, wxDataFormat, \
+            wxCustomDataObject, wxDF_TEXT, wxDF_UNICODETEXT
+    from StringOps import lineendToInternal, mbcsDec
+    import array
+
+    cb = wxTheClipboard
+    cb.Open()
+    try:
+        dataob = wxDataObjectComposite()
+        cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
+        udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
+        cdataob.SetData("")
+        udataob.SetData("")
+        dataob.Add(udataob)
+        dataob.Add(cdataob)
+
+        if cb.GetData(dataob):
+            if udataob.GetDataSize() > 0 and (udataob.GetDataSize() % 2) == 0:
+                # We have unicode data
+                # This might not work for all platforms:   # TODO Better impl.
+                rawuni = udataob.GetData()
+                arruni = array.array("u")
+                arruni.fromstring(rawuni)
+                realuni = lineendToInternal(arruni.tounicode())
+                return realuni
+            elif cdataob.GetDataSize() > 0:
+                realuni = lineendToInternal(
+                        mbcsDec(cdataob.GetData(), "replace")[0])
+                return realuni
+            else:
+                return ""
+    finally:
+        cb.Close()
+
 
         

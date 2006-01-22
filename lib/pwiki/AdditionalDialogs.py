@@ -11,7 +11,7 @@ import wxPython.xrc as xrc
 from wxHelper import *
 
 from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, htmlColorToRgbTuple,\
-        rgbToHtmlColor
+        rgbToHtmlColor, wikiWordToLabel
 import WikiFormatting
 import Exporters
 
@@ -52,15 +52,14 @@ class OpenWikiWordDialog(wxDialog):
                 self.value = words[0]
             else:
                 wikiWord = self.value
-                wikiWordN = self.pWiki.getFormatting().normalizeWikiWord(wikiWord)
+                nakedWord = wikiWordToLabel(wikiWord)
 
-                if wikiWordN is None:
+                if not self.pWiki.getFormatting().isNakedWikiWord(nakedWord):
                     # Entered text is not a valid wiki word
                     self.ctrls.text.SetFocus()
                     return
                     
                 # wikiWord is valid but nonexisting, so maybe create it?
-                # TODO Special case [WikiWord]
                 result = wxMessageBox(
                         uniToGui(u"'%s' is not an existing wikiword. Create?" %
                         wikiWord), uniToGui(u"Create"),
@@ -111,18 +110,18 @@ class OpenWikiWordDialog(wxDialog):
         """
         Create new WikiWord
         """
-        wikiWord = self.pWiki.getFormatting().normalizeWikiWord(self.value)
-        if wikiWord is None:
-            self.pWiki.displayErrorMessage(u"'%s' is an invalid WikiWord" % self.value)
+        nakedWord = wikiWordToLabel(self.value)
+        if not self.pWiki.getFormatting().isNakedWikiWord(nakedWord):
+            self.pWiki.displayErrorMessage(u"'%s' is an invalid WikiWord" % nakedWord)
             self.ctrls.text.SetFocus()
             return
         
-        if self.pWiki.wikiData.isDefinedWikiWord(wikiWord):
-            self.pWiki.displayErrorMessage(u"'%s' exists already" % wikiWord)
+        if self.pWiki.wikiData.isDefinedWikiWord(nakedWord):
+            self.pWiki.displayErrorMessage(u"'%s' exists already" % nakedWord)
             self.ctrls.text.SetFocus()
             return
             
-        self.value = wikiWord
+        self.value = nakedWord
         self.EndModal(wxID_OK)
  
  

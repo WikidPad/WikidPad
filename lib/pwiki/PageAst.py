@@ -1,4 +1,4 @@
-import os, traceback, codecs, array, string
+import os, traceback, codecs, array, string, re
 from StringOps import *
 from Utilities import DUMBTHREADHOLDER
 
@@ -49,7 +49,12 @@ def _enrichTokens(formatting, tokens, threadholder=DUMBTHREADHOLDER):
             node = Url()
             node.buildSubAst(formatting, tok, threadholder=threadholder)
             tok.node = node
-            
+        elif tok.ttype == WikiFormatting.FormatTypes.EscapedChar:
+            node = EscapeCharacter()
+            node.buildSubAst(formatting, tok, threadholder=threadholder)
+            tok.node = node
+
+           
 
 def _findTokensForPos(tokens, pos):
     # Algorithm taken from standard lib bisect module
@@ -152,6 +157,9 @@ class Todo(Ast):
             if tok.node is not None:
                 tok.node._findType(typeToFind, result)
         
+        
+
+
             
 class Table(Ast):
     __slots__ = ("begin", "end", "contenttokens")
@@ -163,15 +171,22 @@ class Table(Ast):
         return _findTokensForPos(self.contenttokens, pos)
 
     def buildSubAst(self, formatting, token, threadholder=DUMBTHREADHOLDER):
+        cutRe = re.compile(ur"\n|" + formatting.TitleWikiWordDelimiterPAT +
+                ur"|" + formatting.PlainCharacterPAT + ur"+?(?=\n|" +
+                formatting.TitleWikiWordDelimiterPAT + ur"|(?!.))", 
+                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO Explain (if it works)
+
         groupdict = token.grpdict
         self.begin = groupdict["tableBegin"]
         self.end = groupdict["tableEnd"]
         content = groupdict["tableContent"]
         
-        lines = splitkeep(content, u"\n")
-        cells = []
-        for l in lines:
-            cells += splitkeep(l, u"|")
+        cells = cutRe.findall(content)
+
+#         lines = splitkeep(content, u"\n")
+#         cells = []
+#         for l in lines:
+#             cells += splitkeep(l, u"|")
             
         contenttokens = []
         relpos = token.start + len(self.begin)
@@ -338,3 +353,16 @@ class Url(Ast):
                 result.append(tok)
             if tok.node is not None:
                 tok.node._findType(typeToFind, result)
+
+
+class EscapeCharacter(Ast):
+    __slots__ = ("unescaped")
+
+    def __init__(self):
+        Ast.__init__(self)
+
+    def buildSubAst(self, formatting, token, threadholder=DUMBTHREADHOLDER):
+#        if token.text[1] in u"\n\r\f|*_[]\\":
+            self.unescaped = token.text[1]
+#         else:
+#             self.unescaped = token.text

@@ -15,18 +15,29 @@ TitleWikiWordDelimiter = ur"|"
 TitleWikiWordDelimiterPAT = ur"\|"
 
 
+PlainCharacterPAT = ur"(?:[^\\]|\\.)"
+
+PlainEscapedCharacterRE = re.compile(ur"\\(.)")
+
+
 # basic formatting
-BoldRE          = re.compile(u"\*(?=[^\s])(?P<boldContent>.+?)\*",
+BoldRE          = re.compile(ur"\*(?=[^\s])(?P<boldContent>" + PlainCharacterPAT +
+        ur"+?)\*",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-ItalicRE        = re.compile(ur"\b\_(?P<italicContent>.+?)\_\b",
+ItalicRE        = re.compile(ur"\b_(?P<italicContent>" + PlainCharacterPAT +
+        ur"+?)_\b",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-Heading4RE      = re.compile(u"^\\+\\+\\+\\+(?!\\+) ?(?P<h4Content>[^\\+\\n]+)",
+Heading4RE      = re.compile(u"^\\+\\+\\+\\+(?!\\+) ?(?P<h4Content>" +
+        PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-Heading3RE      = re.compile(u"^\\+\\+\\+(?!\\+) ?(?P<h3Content>[^\\+\\n]+)",
+Heading3RE      = re.compile(u"^\\+\\+\\+(?!\\+) ?(?P<h3Content>" +
+        PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-Heading2RE      = re.compile(u"^\\+\\+(?!\\+\\+) ?(?P<h2Content>[^\\+\\n]+)",
+Heading2RE      = re.compile(u"^\\+\\+(?!\\+) ?(?P<h2Content>" +
+        PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-Heading1RE      = re.compile(u"^\\+(?!\\+\\+\\+) ?(?P<h1Content>[^\\+\\n]+)",
+Heading1RE      = re.compile(u"^\\+(?!\\+) ?(?P<h1Content>" +
+        PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp)://|mailto:)[^"\s<]*',
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
@@ -38,7 +49,7 @@ UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp)://|mailto:)[^"\s<]*'
 TitledUrlRE =  re.compile(
         ur"\[(?P<titledurlUrl>" + UrlRE.pattern + ur")"
         ur"(?:(?P<titledurlDelim>\s*" + TitleWikiWordDelimiterPAT + ur")"
-        ur"(?P<titledurlTitle>[^\]]+))?\]",
+        ur"(?P<titledurlTitle>" + PlainCharacterPAT + ur"+?))?\]",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 # The following 3 are not in WikiFormatting.FormatExpressions
@@ -119,11 +130,11 @@ WikiWordRE2     = re.compile(ur"\[(?:" + WikiWordNccPAT + ur")\]",
 WikiWordEditorRE2      = re.compile(
         ur"\[(?P<wikiwordncc>" + WikiWordNccPAT + ur")"
         ur"(?:(?P<wikiwordnccDelim>\s*" + TitleWikiWordDelimiterPAT + ur")"
-        ur"(?P<wikiwordnccTitle>[^\]]+))?\]"
+        ur"(?P<wikiwordnccTitle>" + PlainCharacterPAT + ur"+?))?\]"
         ur"(?:#(?P<wikiwordnccSearchfrag>(?:(?:#.)|[^ \t\n#])+))?",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
-SearchUnescapeRE   = re.compile(ur"#(.)",
+SearchFragmentUnescapeRE   = re.compile(ur"#(.)",
                               re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -141,8 +152,8 @@ revSingleWikiWord    =       (ur"(?:[" +
                              UPPERCASE+
                              ur"])")
 
-RevWikiWordRE      = re.compile(ur"^" + revSingleWikiWord + ur"(?:/" +
-                             revSingleWikiWord + ur")*(?![\~])\b",
+RevWikiWordRE      = re.compile(ur"^" + # revSingleWikiWord + ur"(?:/" +
+                             revSingleWikiWord + ur"(?![\~])\b",
                              re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 RevWikiWordRE2     = re.compile(ur"^[\w\-\_ \t.]+?\[",
@@ -158,23 +169,21 @@ ScriptRE        = re.compile(u"\<%(.*?)%\>", re.DOTALL)
 
 # Auto generated area
 AutoGenAreaRE = re.compile(ur"^([ \t]*<<[ \t]+)([^\n]+\n)(.*?)^([ \t]*>>[ \t]*\n)", re.DOTALL | re.LOCALE | re.MULTILINE)
-# todos, non-capturing
-## ToDoRE          = re.compile(u"^\s*(?:todo|action|track|issue|question|project)\\.?[^\\:\\s]*:", re.DOTALL | re.LOCALE | re.MULTILINE)
-ToDoRE          = re.compile(ur"^\s*(?:todo|action|track|issue|question|project)(?:\.[^:\s]+)?:",
-        re.DOTALL | re.UNICODE | re.MULTILINE)
         
 # todos, captures the todo item text
 ## ToDoREWithContent = re.compile(u"^\s*((?:todo|action|track|issue|question|project)\\.?[^\\:\\s]*:[^\\r\\n]+)", re.MULTILINE)
 
 ToDoREWithContent = re.compile(ur"(?P<todoIndent>^\s*)"
-        ur"(?P<todoName>(?:todo|action|track|issue|question|project)(?:\.[^:\s]+)?)"
-        ur"(?P<todoDelimiter>:)(?P<todoValue>[^\r\n]+)",
+        ur"(?P<todoName>(?:todo|done|wait|action|track|issue|question|project)(?:\.[^:\s]+)?)"
+#         ur"(?P<todoDelimiter>:)(?P<todoValue>[^\r\n]+)",
+        ur"(?P<todoDelimiter>:)(?P<todoValue>" + PlainCharacterPAT + ur"+?)(?=\n)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 # todos, used in the tree control to parse saved todos. Because they were
 #   already identified as todos, the regexp can be quite simple
 ## ToDoREWithCapturing = re.compile(u"(todo|action|track|issue|question|project)\\.?([^\\:\\s]*):([^\\r\\n]+)")
-ToDoREWithCapturing = re.compile(ur"([^:\s]+):\s*([^\r\n]+)",
+# ToDoREWithCapturing = re.compile(ur"([^:\s]+):\s*([^\r\n]+)",
+ToDoREWithCapturing = re.compile(ur"^([^:\s]+):\s*(.+?)$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -193,6 +202,8 @@ SuppressHighlightingRE = re.compile(ur"^(?P<suppressIndent>[ \t]*)<<[ \t]*$"+
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 TableRE = re.compile(ur"(?P<tableBegin>^[ \t]*<<\|[ \t]*$)"
-        ur"(?P<tableContent>.*?)(?P<tableEnd>^[ \t]*>>[ \t]*$)",
+        ur"(?P<tableContent>" + PlainCharacterPAT +
+        ur"*?)(?P<tableEnd>^[ \t]*>>[ \t]*$)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
+
 

@@ -7,6 +7,10 @@ import wxPython.xrc as xrc
 from wxHelper import *
 
 from StringOps import uniToGui, guiToUni, escapeHtml
+
+import WikiFormatting
+import PageAst
+
 from SearchAndReplace import SearchReplaceOperation
 
 
@@ -437,6 +441,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         self._refreshSavedSearchesList()
 
         EVT_BUTTON(self, GUI_ID.btnFindPages, self.OnSearchWiki)
+        EVT_BUTTON(self, GUI_ID.btnSetPageList, self.OnSetPageList)
         EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)        
         EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
         EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
@@ -505,6 +510,17 @@ class SearchWikiDialog(wxDialog):   # TODO
         if not self.ctrls.htmllbPages.IsEmpty():
             self.ctrls.htmllbPages.SetFocus()
             self.ctrls.htmllbPages.SetSelection(0)
+            
+    def OnSetPageList(self, evt):
+        """
+        Show the Page List dialog
+        """
+        dlg = PageListConstructionDialog(self, self.pWiki, -1)
+        result = dlg.ShowModal()
+        dlg.Destroy()
+        if result == wxID_OK:
+            pass
+
 
     def OnListRefreshNeeded(self, evt):
         self.listNeedsRefresh = True
@@ -813,3 +829,123 @@ class SearchPageDialog(wxDialog):   # TODO
             self.pWiki.editor.executeReplace(sarOp)
             if lastReplacePos == -1:
                 break
+
+
+
+class PageListConstructionDialog(wxDialog):   # TODO
+    def __init__(self, parent, pWiki, ID, title="Page List",
+                 pos=wxDefaultPosition, size=wxDefaultSize,
+                 style=wxNO_3D|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER):
+        d = wxPreDialog()
+        self.PostCreate(d)
+        
+        self.pWiki = pWiki
+
+        res = xrc.wxXmlResource.Get()
+        res.LoadOnDialog(self, parent, "PageListConstructionDialog")
+        
+        self.ctrls = XrcControls(self)
+        
+        self.ctrls.btnOk.SetId(wxID_OK)
+        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        
+        self.ctrls.tfSubtreeRoot.SetValue(uniToGui(
+                self.pWiki.getCurrentWikiWord()))
+        
+        EVT_TEXT(self, GUI_ID.tfSubtreeRoot,
+                lambda evt: self.ctrls.rbPagesSubtree.SetValue(True))
+        EVT_TEXT(self, GUI_ID.tfSubtreeLevels,
+                lambda evt: self.ctrls.rbPagesSubtree.SetValue(True))
+        
+        EVT_BUTTON(self, GUI_ID.btnPageListOverwriteFromClipboard,
+                self.OnPageListOverwriteFromClipboard) 
+        EVT_BUTTON(self, GUI_ID.btnResultListPreview, self.OnResultListPreview) 
+               
+#         EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
+#         EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
+#         EVT_BUTTON(self, wxID_CANCEL, self.OnClose)        
+#         EVT_CLOSE(self, self.OnClose)
+
+    _ORDERCHOICE_TO_NAME = {
+            0: "natural",
+            1: "ascending",
+            2: "no"
+    }
+
+    def _buildListPagesOperation(self):
+        """
+        Construct a ListPagesOperation according to current content of the
+        dialog
+        """
+        import SearchAndReplace as Sar
+        
+        lpOp = Sar.ListPagesOperation()
+        
+        if self.ctrls.rbPagesAll.GetValue():
+            item = Sar.AllPagesNode(lpOp)
+        elif self.ctrls.rbPagesSubtree.GetValue():
+            try:
+                level = int(self.ctrls.tfSubtreeLevels.GetValue())
+            except ValueError:
+                level = -1
+            rootWord = guiToUni(self.ctrls.tfSubtreeRoot.GetValue())
+            formatting = self.pWiki.getFormatting()
+            rootWord = formatting.wikiWordToLabel(rootWord)
+            if not formatting.isNakedWikiWord(rootWord):
+                return None
+            
+            item = Sar.SubTreePagesNode(lpOp, rootWord, level)
+        else:
+            return None
+            
+        lpOp.setSearchOpTree(item)
+        lpOp.ordering = self._ORDERCHOICE_TO_NAME[
+                self.ctrls.chOrdering.GetSelection()]
+
+        return lpOp
+
+
+    def OnPageListOverwriteFromClipboard(self, evt):
+        """
+        Take wiki words from clipboard and enter them into the page
+        """
+        page = PageAst.Page()
+        
+        text = getTextFromClipboard()
+        if text:
+            page.buildAst(self.pWiki.getFormatting(), text)
+            wwTokens = page.findType(WikiFormatting.FormatTypes.WikiWord)
+
+            found = {}
+            words = []
+            for t in wwTokens:
+                w = t.node.nakedWord
+                if not found.has_key(w):
+                    words.append(w)
+                    found[w] = None
+
+            self.ctrls.lbPageList.Clear()
+            for w in words:
+                self.ctrls.lbPageList.Append(uniToGui(w))
+
+
+    def OnResultListPreview(self, evt):
+        lpOp = self._buildListPagesOperation()
+        
+        if lpOp is None:
+            return
+
+        self.SetCursor(wxHOURGLASS_CURSOR)
+        try:
+            self.Freeze()
+            words = self.pWiki.getWikiData().search(lpOp)
+            
+            self.ctrls.lbResultPreview.Clear()
+            for w in words:
+                self.ctrls.lbResultPreview.Append(uniToGui(w))
+
+        finally:
+            self.Thaw()
+            self.SetCursor(wxNullCursor)
+
+

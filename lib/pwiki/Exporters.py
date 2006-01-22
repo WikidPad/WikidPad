@@ -522,6 +522,9 @@ class HtmlXmlExporter:
 
     def processTokens(self, content, tokens):
         stacklen = len(self.statestack)
+        unescapeNormalText = self.pWiki.getFormatting().unescapeNormalText
+        
+
         for i in xrange(len(tokens)):
             tok = tokens[i]
             try:
@@ -535,10 +538,13 @@ class HtmlXmlExporter:
 
             # print "formatContent", styleno, nextstyleno, repr(content[tok[0]:nexttok[0]])
 
-            if styleno == WikiFormatting.FormatTypes.Default:  # == no token RE matches
+            if styleno == WikiFormatting.FormatTypes.Default or \
+                styleno == WikiFormatting.FormatTypes.EscapedChar:  # == no token RE matches
                 # Normal text, maybe with newlines and indentation to process
                 lines = tok.text.split(u"\n")
-                
+                if styleno == WikiFormatting.FormatTypes.EscapedChar:
+                    lines = [tok.node.unescaped]
+
                 # Test if beginning of lines at beginning of a line in editor
                 if tok.start > 0 and content[tok.start - 1] != u"\n":
 #                     print "icline", repr(lines[0]), repr(escapeHtml(lines[0]))
@@ -621,17 +627,23 @@ class HtmlXmlExporter:
             # if a known token RE matches:
             
             if styleno == WikiFormatting.FormatTypes.Bold:
-                self.outAppend(u"<b>" + escapeHtml(tok.grpdict["boldContent"]) + u"</b>")
+                self.outAppend(u"<b>" + escapeHtml(
+                        unescapeNormalText(tok.grpdict["boldContent"])) + u"</b>")
             elif styleno == WikiFormatting.FormatTypes.Italic:
-                self.outAppend(u"<i>"+escapeHtml(tok.grpdict["italicContent"]) + u"</i>")
+                self.outAppend(u"<i>"+escapeHtml(
+                        unescapeNormalText(tok.grpdict["italicContent"])) + u"</i>")
             elif styleno == WikiFormatting.FormatTypes.Heading4:
-                self.outEatBreaks(u"<h4>%s</h4>\n" % escapeHtml(tok.grpdict["h4Content"]))
+                self.outEatBreaks(u"<h4>%s</h4>\n" % escapeHtml(
+                        unescapeNormalText(tok.grpdict["h4Content"])))
             elif styleno == WikiFormatting.FormatTypes.Heading3:
-                self.outEatBreaks(u"<h3>%s</h3>\n" % escapeHtml(tok.grpdict["h3Content"]))
+                self.outEatBreaks(u"<h3>%s</h3>\n" % escapeHtml(
+                        unescapeNormalText(tok.grpdict["h3Content"])))
             elif styleno == WikiFormatting.FormatTypes.Heading2:
-                self.outEatBreaks(u"<h2>%s</h2>\n" % escapeHtml(tok.grpdict["h2Content"]))
+                self.outEatBreaks(u"<h2>%s</h2>\n" % escapeHtml(
+                        unescapeNormalText(tok.grpdict["h2Content"])))
             elif styleno == WikiFormatting.FormatTypes.Heading1:
-                self.outEatBreaks(u"<h1>%s</h1>\n" % escapeHtml(tok.grpdict["h1Content"]))
+                self.outEatBreaks(u"<h1>%s</h1>\n" % escapeHtml(
+                        unescapeNormalText(tok.grpdict["h1Content"])))
             elif styleno == WikiFormatting.FormatTypes.HorizLine:
                 self.outEatBreaks(u'<hr size="1" />\n')
             elif styleno == WikiFormatting.FormatTypes.Script:

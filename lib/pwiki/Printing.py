@@ -13,14 +13,6 @@ from wxHelper import *
 from StringOps import escapeHtml, unescapeRe
 
 
-# MULTISPACE_RE = re.compile(u"  +",
-#         re.DOTALL | re.UNICODE | re.MULTILINE)
-
-# _CUT_RE = re.compile(ur"(?P<newline>\n)|(?P<formfeed>\f)|"
-#         ur"(?P<spaces> +)|(?P<word>[^ \n\f]+)",
-#         re.DOTALL | re.UNICODE | re.MULTILINE)
-
-
 _CUT_RE = re.compile(ur"\n|\f| +|[^ \n\f]+",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 

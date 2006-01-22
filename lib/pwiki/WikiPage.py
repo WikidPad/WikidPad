@@ -155,17 +155,15 @@ class WikiPage:
             propName = t.grpdict["propertyName"]
             propValue = t.grpdict["propertyValue"]
             if propName == u"alias":
-                word = formatting.normalizeWikiWord(propValue)
-                if word is not None:
-                    self.wikiData.cachedWikiWords[word] = 2
-                    self.setProperty(u"alias", word)
+                if formatting.isNakedWikiWord(propValue):
+                    self.wikiData.cachedWikiWords[propValue] = 2
+                    self.setProperty(u"alias", propValue)
             else:
                 self.setProperty(propName, propValue)
 
         wwTokens = page.findType(WikiFormatting.FormatTypes.WikiWord)
         for t in wwTokens:
-            self.addChildRelationship(
-                    formatting.normalizeWikiWord(t.text))
+            self.addChildRelationship(t.node.nakedWord)
 
         self.lastUpdate = time()   # self.modified
 
@@ -218,26 +216,3 @@ class WikiPage:
 
     def getDirty(self):
         return (self.saveDirty, self.updateDirty)
-
-
-####################################################
-# module level functions
-####################################################
-
-
-def findShortestPath(graph, start, end, path):   # path=[]
-    "finds the shortest path in the graph from start to end"
-    path = path + [start]
-    if start == end:
-        return path
-    if not graph.has_key(start):
-        return None
-    shortest = None
-    for node in graph[start]:
-        if node not in path:
-            newpath = findShortestPath(graph, node, end, path)
-            if newpath:
-                if not shortest or len(newpath) < len(shortest):
-                    shortest = newpath
-
-    return shortest

@@ -15,7 +15,7 @@ from wxPython.wx import *
 from wxPython.stc import *
 import wxPython.xrc as xrc
 
-from wxHelper import GUI_ID
+from wxHelper import GUI_ID, getTextFromClipboard
 from MiscEvent import KeyFunctionSink
 
 import WikiFormatting
@@ -211,37 +211,38 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def Paste(self):
-        cb = wxTheClipboard
-        cb.Open()
-        try:
-            # datob = wxTextDataObject()
-            # datob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
-            dataob = wxDataObjectComposite()
-            cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
-            udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
-            cdataob.SetData("")
-            udataob.SetData("")
-            dataob.Add(udataob)
-            dataob.Add(cdataob)
-
-            if cb.GetData(dataob):
-                if udataob.GetDataSize() > 0 and (udataob.GetDataSize() % 2) == 0:
-                    # We have unicode data
-                    # This might not work for all platforms:   # TODO Better impl.
-                    rawuni = udataob.GetData()
-                    arruni = array.array("u")
-                    arruni.fromstring(rawuni)
-                    realuni = lineendToInternal(arruni.tounicode())
-                    self.ReplaceSelection(realuni)
-                elif cdataob.GetDataSize() > 0:
-                    realuni = lineendToInternal(
-                            mbcsDec(cdataob.GetData(), "replace")[0])
-                    self.ReplaceSelection(realuni)
-                # print "Test getData", cdataob.GetDataSize(), udataob.GetDataSize()
-
-            # print "Test text", repr(datob.GetData())       # GetDataHere())
-        finally:
-            cb.Close()
+        self.ReplaceSelection(getTextFromClipboard())
+#         cb = wxTheClipboard
+#         cb.Open()
+#         try:
+#             # datob = wxTextDataObject()
+#             # datob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
+#             dataob = wxDataObjectComposite()
+#             cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
+#             udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
+#             cdataob.SetData("")
+#             udataob.SetData("")
+#             dataob.Add(udataob)
+#             dataob.Add(cdataob)
+# 
+#             if cb.GetData(dataob):
+#                 if udataob.GetDataSize() > 0 and (udataob.GetDataSize() % 2) == 0:
+#                     # We have unicode data
+#                     # This might not work for all platforms:   # TODO Better impl.
+#                     rawuni = udataob.GetData()
+#                     arruni = array.array("u")
+#                     arruni.fromstring(rawuni)
+#                     realuni = lineendToInternal(arruni.tounicode())
+#                     self.ReplaceSelection(realuni)
+#                 elif cdataob.GetDataSize() > 0:
+#                     realuni = lineendToInternal(
+#                             mbcsDec(cdataob.GetData(), "replace")[0])
+#                     self.ReplaceSelection(realuni)
+#                 # print "Test getData", cdataob.GetDataSize(), udataob.GetDataSize()
+# 
+#             # print "Test text", repr(datob.GetData())       # GetDataHere())
+#         finally:
+#             cb.Close()
 
 
     def setWrap(self, onOrOff):
@@ -436,11 +437,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             styleno = tok.ttype
             bytestylelen = self.bytelenSct(tok.text)
             if styleno == WikiFormatting.FormatTypes.WikiWord:
-                # Remove possible '#' attachment
-                ww = self.pWiki.getFormatting().normalizeWikiWord(
-                        tok.text.split(u"#", 1)[0])
-
-                if wikiData.isDefinedWikiWord(ww):
+                if wikiData.isDefinedWikiWord(tok.node.nakedWord):
                     styleno = WikiFormatting.FormatTypes.AvailWikiWord
                 else:
                     styleno = WikiFormatting.FormatTypes.WikiWord
@@ -561,9 +558,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     
                 searchfrag = tok.node.searchFragment
                 # Unescape search fragment
-                searchfrag = self.pWiki.getFormatting().SearchUnescapeRE.sub(
-                        ur"\1", searchfrag)
                 if searchfrag is not None:
+                    searchfrag = self.pWiki.getFormatting().\
+                            SearchFragmentUnescapeRE.sub(ur"\1", searchfrag)
                     searchOp = SearchReplaceOperation()
                     searchOp.wildCard = "no"   # TODO Why not regex?
                     searchOp.searchStr = searchfrag
@@ -601,63 +598,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             return True
                 
         return False
-
-
-
-#     def activateLink(self, mousePosition=None):
-#         "returns true if the link was activated"
-#         linkPos = self.GetCurrentPos()
-#         # mouse position overrides current pos
-#         if mousePosition:
-#             linkPos = self.PositionFromPoint(mousePosition)
-# 
-#         inWikiWord = False
-#         if self.isPositionInWikiWord(linkPos):
-#             inWikiWord = True
-#         if not inWikiWord:
-#             # search back one char b/c the position could be "WikiWord|"
-#             if linkPos > 0 and self.isPositionInWikiWord(linkPos-1):
-#                 linkPos = linkPos - 1
-#                 inWikiWord = True
-# 
-#         if inWikiWord:
-#             searchStr = None
-#             (start, end) = self.getWikiWordBeginEnd(linkPos)
-#             wordText = self.getWikiWordText(linkPos)
-#             nword, title, searchfrag = \
-#                     self.pWiki.getFormatting().splitWikiWord(wordText)
-# 
-# #             if end+2 < self.GetLength():
-# #                 if chr(self.GetCharAt(end+1)) == "#":    # This may be a problem under rare circumstances
-# #                     searchStr = self.GetTextRange(end+2, self.WordEndPosition(end+2, 1))
-#             
-#             # open the wiki page
-#             self.pWiki.openWikiPage(nword, motionType="child")
-# ##            self.pWiki.tree.Unselect()  # TODO move to other place?
-# 
-#             if searchfrag is not None:
-#                 searchOp = SearchReplaceOperation()
-#                 searchOp.wildCard = "no"   # TODO Why not regex?
-#                 searchOp.searchStr = searchfrag
-# 
-#                 self.pWiki.editor.executeSearch(searchOp, 0)
-# 
-#             return True
-#         elif self.isPositionInLink(linkPos):
-#             pageAst = self.getAst()
-#             linkCharPos = len(self.GetTextRange(0, linkPos))
-#             tok, prevtok = pageAst.getTokenForPos(linkCharPos)
-#             if tok is None or tok.ttype != WikiFormatting.FormatTypes.Url:
-#                 return
-#                 
-#             self.pWiki.launchUrl(tok.node.url)
-#             return True
-#         return False
-
-
-
-
-
 
 
 #  DO NOT DELETE!
@@ -990,62 +930,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         return selCharEnd
 
 
-#     def executeSearch(self, searchStr, searchCharStartPos=-1, next=False,
-#             replacement=None, caseSensitive=False, cycleToStart=True):
-#         if searchCharStartPos < 0:
-#             searchCharStartPos = self.searchCharStartPos
-# 
-#         self.pWiki.statusBar.SetStatusText(
-#                 uniToGui(u"Search (ESC to stop): %s" % searchStr), 0)
-#         text = self.GetText()
-#         if len(searchStr) > 0:   # and not searchStr.endswith("\\"):
-#             charStartPos = searchCharStartPos
-#             if next and (self.anchorCharPosition != -1):
-#                 charStartPos = self.anchorCharPosition
-# 
-#             regex = None
-#             try:
-#                 if caseSensitive:
-#                     regex = re.compile(searchStr, re.MULTILINE | re.UNICODE)
-#                 else:
-#                     regex = re.compile(searchStr, re.IGNORECASE | \
-#                         re.MULTILINE | re.UNICODE)
-#             except:
-#                 # Regex error
-#                 return self.anchorCharPosition
-# 
-#             match = regex.search(text, charStartPos, len(text))
-#             if not match and charStartPos > 0 and cycleToStart:
-#                 match = regex.search(text, 0, charStartPos)
-# 
-#             if match:
-#                 matchbytestart = self.bytelenSct(text[:match.start()])
-#                 self.anchorBytePosition = matchbytestart + \
-#                         self.bytelenSct(text[match.start():match.end()])
-#                 self.anchorCharPosition = match.end()
-# 
-#                 self.SetSelection(matchbytestart, self.anchorBytePosition)
-# 
-#                 if replacement is not None:
-#                     self.ReplaceSelection(replacement)
-#                     selByteEnd = matchbytestart + self.bytelenSct(replacement)
-#                     selCharEnd = match.start() + len(replacement)
-#                     self.SetSelection(matchbytestart, selByteEnd)
-#                     self.anchorBytePosition = selByteEnd
-#                     self.anchorCharPosition = selCharEnd
-# 
-#                     return selCharEnd
-#                 else:
-#                     return self.anchorCharPosition
-# 
-#         self.SetSelection(-1, -1)
-#         self.anchorBytePosition = -1
-#         self.anchorCharPosition = -1
-#         self.GotoPos(self.bytelenSct(text[:searchCharStartPos]))
-# 
-#         return -1
-
-
     def rewrapText(self):
         curPos = self.GetCurrentPos()
 
@@ -1298,16 +1182,18 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         tofind = line[-mat1.end():]
                         # print "mat1", repr(tofind)
                         self.autoCompBackBytesWithoutBracket = self.bytelenSct(tofind)
-                        acresult += self.pWiki.wikiData.\
-                                getWikiWordsStartingWith(tofind, True)
-                                
+                        formatting = self.pWiki.getFormatting()
+                        acresult += filter(formatting.isCcWikiWord, 
+                                self.pWiki.wikiData.getWikiWordsStartingWith(
+                                tofind, True))
+
                     if mat2:
                         # may be not-CamelCase word or in a property name
                         tofind = line[-mat2.end():]
                         # print "mat2", repr(tofind)
                         self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
-                        acresult += self.pWiki.wikiData.\
-                                getWikiWordsStartingWith(tofind, True)
+                        acresult += map(lambda s: u"[" + s, self.pWiki.wikiData.\
+                                getWikiWordsStartingWith(tofind[1:], True))
                         acresult += map(lambda s: u"[" + s, self.pWiki.wikiData.\
                                 getPropertyNamesStartingWith(tofind[1:]))
 
@@ -1462,8 +1348,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 # sorter for relations, removes brackets and sorts lower case
 # Already defined in WikiTreeCtrl
 def _removeBracketsAndSort(a, b):
-    a = wikiWordToLabel(a)
-    b = wikiWordToLabel(b)
+#     a = wikiWordToLabel(a)
+#     b = wikiWordToLabel(b)
     return cmp(a.lower(), b.lower())
 
 

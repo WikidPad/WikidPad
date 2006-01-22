@@ -127,8 +127,7 @@ class WikiWordNode(AbstractNode):
         self.ancestors = None
 
     def getNodePresentation(self):
-        return self._createNodePresentation(
-                wikiWordToLabel(self.wikiWord))
+        return self._createNodePresentation(self.wikiWord)
 
     def setRoot(self, flag = True):
         self.flagRoot = flag
@@ -1243,12 +1242,12 @@ def relationSort(a, b):
 
 # sorter for relations, removes brackets and sorts lower case
 def removeBracketsAndSortDesc(a, b):
-    a = wikiWordToLabel(a[0])
-    b = wikiWordToLabel(b[0])
-    return cmp(b.lower(), a.lower())
+#     a = wikiWordToLabel(a[0])
+#     b = wikiWordToLabel(b[0])
+    return cmp(b[0].lower(), a[0].lower())
 
 def removeBracketsAndSortAsc(a, b):
-    a = wikiWordToLabel(a[0])
-    b = wikiWordToLabel(b[0])
-    return cmp(a.lower(), b.lower())
+#     a = wikiWordToLabel(a[0])
+#     b = wikiWordToLabel(b[0])
+    return cmp(a[0].lower(), b[0].lower())
 

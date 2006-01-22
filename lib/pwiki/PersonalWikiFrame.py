@@ -26,8 +26,11 @@ from Printing import Printer, PrintMainDialog
 from AdditionalDialogs import *
 from SearchAndReplaceDialogs import *
 
+from WikiExceptions import *
+
 import Exporters
-from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool
+from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
+        wikiWordToLabel
 import WikiFormatting
 
 from PluginManager import *
@@ -1655,9 +1658,7 @@ These are your default global settings.
         lastWikiWord = wikiWordToOpen
         if not lastWikiWord:
             lastWikiWord = self.configuration.get("main", "first_wiki_word")
-            if lastWikiWord != u"":
-                lastWikiWord = self.getFormatting().normalizeWikiWord(lastWikiWord)
-            else:
+            if lastWikiWord == u"":
                 lastWikiWord = self.configuration.get("main", "last_wiki_word")
 
         # OK, things look good
@@ -1754,19 +1755,18 @@ These are your default global settings.
             self.wikiData.commit()
 
 
-    def openWikiPage(self, wikiPageWord, addToHistory=True,
+    def openWikiPage(self, wikiWord, addToHistory=True,
             forceTreeSyncFromRoot=False, forceReopen=False, **evtprops):
                 
         evtprops["addToHistory"] = addToHistory
         evtprops["forceTreeSyncFromRoot"] = forceTreeSyncFromRoot
 
         self.statusBar.SetStatusText(uniToGui(u"Opening wiki word '%s'" %
-                wikiPageWord), 0)
+                wikiWord), 0)
 
         # make sure this is a valid wiki word
-        wikiWord = self.getFormatting().normalizeWikiWord(wikiPageWord)
-        if wikiWord is None:
-            self.displayErrorMessage(u"'%s' is an invalid wiki word." % wikiPageWord)
+        if not self.getFormatting().isNakedWikiWord(wikiWord):
+            self.displayErrorMessage(u"'%s' is an invalid wiki word." % wikiWord)
             return
 
         # don't reopen the currently open page
@@ -2261,7 +2261,7 @@ These are your default global settings.
 
 
     # TODO Check if new name already exists (?)
-    def showWikiWordRenameConfirmDialog(self, newWikiWord):
+    def showWikiWordRenameConfirmDialog(self, toWikiWord):
         """
         Checks if renaming operation is valid, presents either an error
         message or a confirmation dialog.
@@ -2269,12 +2269,11 @@ These are your default global settings.
         """
         wikiWord = self.getCurrentWikiWord()
 
-        if not newWikiWord or len(newWikiWord) == 0:
+        if not toWikiWord or len(toWikiWord) == 0:
             return False
 
-        toWikiWord = self.getFormatting().normalizeWikiWord(newWikiWord)
-        if toWikiWord is None:
-            self.displayErrorMessage(u"'%s' is an invalid WikiWord" % newWikiWord)
+        if not self.getFormatting().isNakedWikiWord(toWikiWord):
+            self.displayErrorMessage(u"'%s' is an invalid WikiWord" % toWikiWord)
             return False
 
         if wikiWord == toWikiWord:
@@ -2393,9 +2392,10 @@ These are your default global settings.
                 u"Replace by Wiki Word", self.currentWikiWord, self))
 
         if wikiWord:
-            if not self.getFormatting().isWikiWord(wikiWord):
-                wikiWord = u"[%s]" % wikiWord
-            if not self.getFormatting().isWikiWord(wikiWord):
+            wikiWord = wikiWordToLabel(wikiWord)
+#             if not self.getFormatting().isWikiWord(wikiWord):
+#                 wikiWord = u"[%s]" % wikiWord
+            if not self.getFormatting().isNakedWikiWord(wikiWord):
                 self.displayErrorMessage(u"'%s' is an invalid WikiWord" % wikiWord)
                 return False
 
@@ -2618,10 +2618,11 @@ These are your default global settings.
 
         if dlg.ShowModal() == wxID_OK:
             wikiName = guiToUni(dlg.GetValue())
+            wikiName = wikiWordToLabel(wikiName)
 
             # make sure this is a valid wiki word
             if wikiName.find(u' ') == -1 and \
-                    self.getFormatting().isWikiWord(wikiName):
+                    self.getFormatting().isNakedWikiWord(wikiName):
                 dlg = wxDirDialog(self, u"Directory to store new wiki",
                         self.getLastActiveDir(),
                         style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
