@@ -33,8 +33,7 @@ Starts the current web browser after exporting one or more HTML pages or an XML 
 Enter the desired font name for the HTML preview. Clicking on the "..." button shows a list of available fonts.
 
 *Props to (not) include in preview*
-Enter here a regular expression of the properties you want to allow to be shown in the HTML preview. The RE is tested against a "normalized" property where the brackets are removed and key and value are separated by ": ". So even if the property is in the page written as 
-"[camelCaseWordsEnabled=false]", the RE is tested against "camelCaseWordsEnabled: false".
+Enter here a regular expression of the properties you want to allow to be shown in the HTML preview. The RE is tested against a "normalized" property where the brackets are removed and key and value are separated by ": ". So even if the property is in the page written as "\[camelCaseWordsEnabled=false]", the RE is tested against "camelCaseWordsEnabled: false".
 
 If you e.g. want to show the "alias" properties only, enter "alias: .* ". Other properties will then be hidden in the preview. The empty text field matches everything.
 
@@ -44,6 +43,20 @@ If you press the "Ok" button of the options dialog, but the dialog doesn't vanis
 
 *Props to (not) include in export*
 Same as above, but for the HTML export.
+
+
+++++ Autosave
+
+*Autosave active*
+Save current page content to disk (if modified) after a few seconds of inactivity.
+
+There are two delays which *both* must be exceeded before a save operation is triggered (if Autosave is active).
+
+*Delay after key pressed*
+How long to wait after the last keypress in the editor (default: 3 seconds). Recommended value: 1 to 5 seconds.
+
+*Delay after page dirty*
+How long to wait after the page was initially modified (dirty) after last save (default: 15 seconds). Recommended value: 15 to 180 seconds.
 
 
 ++++ Editor
@@ -60,17 +73,14 @@ For async. highlighting how long to wait after key press (in seconds) before sta
 
 ++++ Other
 
-*Auto Save*
-Save current page content to disk (if modified) after a few seconds of inactivity.
-
 *Minimize to Tray*
 Minmized to system tray instead of the normal taskbar.
 
 *New window on wiki URL*
 When double clicking on a wiki: URL, a new instance of the application is started, otherwise, the current instance loads the new wiki.
 
-*Process auto-generated areas* (WikidPadCompact only)
-Experimental feature.
+*Process auto-generated areas*
+Experimental feature, use not recommended!
 
 *Low resource usage*
 Try to reduce usage of Windows resources. Only interesting for Windows 9x/ME.

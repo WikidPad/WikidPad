@@ -21,13 +21,14 @@ import re, string, glob
 
 try:
     import gadfly
-    import DbStructure
-    from DbStructure import createWikiDB, WikiDBExistsException
 except:
     gadfly = None
 # finally:
 #     pass
 
+if gadfly is not None:
+    import DbStructure
+    from DbStructure import createWikiDB
 
 
 from pwiki.WikiExceptions import *   # TODO make normal import?
@@ -218,7 +219,7 @@ class WikiData:
     # ---------- Renaming/deleting pages with cache update ----------
 
     def renameWord(self, word, toWord):
-        if self.pWiki.getFormatting().isWikiWord(toWord):
+        if self.pWiki.getFormatting().isNakedWikiWord(toWord):
             try:
                 self.getPage(toWord)
                 raise WikiDataException, u"Cannot rename '%s' to '%s', '%s' already exists" % (word, toWord, toWord)
@@ -440,37 +441,38 @@ class WikiData:
     def deleteChildRelationships(self, fromWord):
         self.execSql("delete from wikirelations where word = ?", (fromWord,))
 
-    def getAllSubWords(self, word):
+    def getAllSubWords(self, words, level=-1):
         """
         Return all words which are children, grandchildren, etc.
-        of word and the word itself. Used by the "export/print Sub-Tree"
+        of words and the words itself. Used by the "export/print Sub-Tree"
         functions. All returned words are real existing words, no aliases.
         """
-        word = self.getAliasesWikiWord(word)
-        result = {word: None}
-        checkList = [word]
+        checkList = [(self.getAliasesWikiWord(w), 0) for w in words]
+        checkList.reverse()
+        
+        resultSet = {}
+        result = []
 
         while len(checkList) > 0:
-            toCheck = checkList.pop()
-            
-            for c in self.getChildRelationships(toCheck, existingonly=True,
-                    selfreference=False):
-                c = self.getAliasesWikiWord(c)
-                if not result.has_key(c):
-                    result[c] = None
-                    checkList.append(c)
-                    
-        keys = result.keys()
-        keys.sort()
-        
-        return keys
+            toCheck, chLevel = checkList.pop()
+            if resultSet.has_key(toCheck):
+                continue
 
-#         subWords = [word]
-#         allWords = self.getAllDefinedPageNames()
-#         for allWordsItem in allWords:
-#             if allWordsItem != word and self.findBestPathFromWordToWord(allWordsItem, word):
-#                 subWords.append(allWordsItem)
-#         return subWords
+            result.append(toCheck)
+            resultSet[toCheck] = None
+            
+            if level > -1 and chLevel >= level:
+                continue  # Don't go deeper
+            
+            children = self.getChildRelationships(toCheck, existingonly=True,
+                    selfreference=False)
+                    
+            children = [(self.getAliasesWikiWord(c), chLevel + 1)
+                    for c in children]
+            children.reverse()
+            checkList += children
+
+        return result
 
 
     def _assembleWordGraph(self, word, graph):
@@ -503,8 +505,7 @@ class WikiData:
     # TODO More general Wikiword to filename mapping
     def getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
         files = glob.glob(join(mbcsEnc(self.dataDir)[0], '*.wiki'))
-        return [self.pWiki.getFormatting().normalizeWikiWordImport(
-                mbcsDec(basename(file).replace('.wiki', ''), "replace")[0])
+        return [mbcsDec(basename(file).replace('.wiki', ''), "replace")[0]
                 for file in files]
 
     # TODO More general Wikiword to filename mapping
@@ -514,7 +515,7 @@ class WikiData:
         """
 
         # return mbcsEnc(join(self.dataDir, "%s.wiki" % wikiWord))[0]
-        return join(self.dataDir, u"%s.wiki" % wikiWordToLabel(wikiWord))
+        return join(self.dataDir, u"%s.wiki" % wikiWord)
 
     def isDefinedWikiWord(self, word):
         "check if a word is a valid wikiword (page name or alias)"
@@ -662,15 +663,22 @@ class WikiData:
 
     # ---------- Searching pages ----------
 
-    def search(self, sarOp):
+    def search(self, sarOp, applOrdering=True):
         results = []
-        for word in self.getAllDefinedPageNames():  #glob.glob(join(self.dataDir, '*.wiki')):
-            # print "search1", repr(word), repr(self.getWikiWordFileName(word))
-            fileContents = self.getContent(word)
-            
-            if sarOp.testText(fileContents) == True:
-                results.append(word)
+        sarOp.beginWikiSearch(self)
+        try:
+            for word in self.getAllDefinedPageNames():  #glob.glob(join(self.dataDir, '*.wiki')):
+                # print "search1", repr(word), repr(self.getWikiWordFileName(word))
+                fileContents = self.getContent(word)
                 
+                if sarOp.testPage(word, fileContents) == True:
+                    results.append(word)
+            if applOrdering:
+                results = sarOp.applyOrdering(results)
+
+        finally:
+            sarOp.endWikiSearch()
+
         return results
 
     def saveSearch(self, title, datablock):

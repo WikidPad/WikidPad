@@ -325,6 +325,19 @@ class SerializeStream:
             return val
 
 
+    def serInt32(self, val):
+        """
+        Serialize 32bit signed integer val. This means: if stream is in read
+        mode, val is ignored and the int read from stream is returned,
+        if in write mode, val is written and returned
+        """
+        if self.isReadMode():
+            return unpack(">i", self.readBytes(4))[0]   # Why big-endian? Why not? 
+        else:
+            self.writeBytes(pack(">I", val))
+            return val
+
+
     def serString(self, s):
         """
         Serialize string s, including length. This means: if stream is in read

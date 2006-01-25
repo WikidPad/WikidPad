@@ -39,7 +39,10 @@ Some operations are not available in "Anded" regex mode.
 Choose here if case matters for the search pattern and/or if only whole words should be searched for
 
 *Button "Find"*
-Starts search process. If finished, a list of matching pages is listed on the right, optional with the number of occurring matches in parenthese and/or a few characters of context if set in the options.
+Starts search process. If finished, a list of matching pages is listed on the right, optional with the number of occurring matches in parentheses and/or a few characters of context if set in the options.
+
+*Button "Set Page list"*
+Opens the [PageListDialog], the Wiki Search Dialog vanishes until you close the other dialog. You can use it to limit the pages which should be searched by the "Find" operation. If you save the search, the settings in the [PageListDialog] are also stored.
 
 
 ++++ Replacing

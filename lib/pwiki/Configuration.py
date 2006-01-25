@@ -252,7 +252,11 @@ GLOBALDEFAULTS = {
     ## ("main", "font"): "Courier New",
     ("main", "font"): None,
     ("main", "wrap_mode"): "True",
-    ("main", "auto_save"): "1",
+
+    ("main", "auto_save"): "True",  # Boolean field, if auto save should be active
+    ("main", "auto_save_delay_key_pressed"): "3",  # Seconds to wait after last key pressed and ...
+    ("main", "auto_save_delay_dirty"): "15",  # secs. to wait after page became dirty before auto save
+     
     ("main", "indentation_guides"): "True",
     ("main", "windowmode"): "0",   # The value must be a number, not a truth value!
     ("main", "lowresources"): "0",

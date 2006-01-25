@@ -4,12 +4,13 @@ from struct import pack, unpack
 from wxPython.wx import *
 from wxHelper import GUI_ID  #, setWindowPos, setWindowSize
 
+from WikiExceptions import *
+
 from StringOps import utf8Enc, utf8Dec, boolToChar, charToBool, strToBin, \
         binToStr, SerializeStream
 
 
 Unknown = object()  # Abstract third truth value constant
-
 
 
 class AbstractSearchNode:
@@ -158,8 +159,52 @@ class AndSearchNode(AbstractSearchNode):
         rightret = self.right.orderNatural(wordSet)
         
         return leftret + rightret
+        
+        
+class NotSearchNode(AbstractSearchNode):
+    """
+    Inverts the meaning of the subnode
+    """
+    
+    CLASS_PERSID = "Not"  # Class id for persistence storage
+
+    def __init__(self, sarOp, sub=None):
+        AbstractSearchNode.__init__(self, sarOp)
+        self.sub = sub
+        
+    def beginWikiSearch(self, wikiData):
+        self.sub.beginWikiSearch(wikiData)
+        
+    def endWikiSearch(self):
+        """
+        Called after a wiki-wide search operation ended
+        """
+        self.sub.endWikiSearch()
+
+        
+    def testPage(self, word, text):
+        subret = self.left.testPage(word, text)
+        
+        if subret == Unknown:
+            return Unknown
+            
+        return not subret
 
 
+    # orderNatural() from the subnode is not delegated
+
+    def serializeBin(self, stream):  # TODO !!!
+        """
+        Read or write content of this object to or from a serialize stream
+
+        stream -- StringOps.SerializeStream object
+        """
+        version = stream.serUint32(0)
+        
+        if version != 0:
+            raise SerializationException
+            
+        self.sub = _serNode(stream, self.sarOp, self.sub)
 
 
 # ----- Page list construction nodes -----
@@ -183,41 +228,106 @@ class AllPagesNode(AbstractSearchNode):
         version = stream.serUint32(0)
         
         if version != 0:
-            return   # TODO Error handling
+            raise SerializationException
 
 
+class RegexPageNode(AbstractSearchNode):
+    """
+    Returns True if regex matches page name
+    """
+    
+    CLASS_PERSID = "RegexPage"  # Class id for persistence storage
+    
+    def __init__(self, sarOp, pattern=u""):
+        AbstractSearchNode.__init__(self, sarOp)
+        self.compPat = re.compile(pattern,
+                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+    
+    def testPage(self, word, text):
+        return not not self.compPat.match(word)
 
-class SubTreePagesNode(AbstractSearchNode):
+    def serializeBin(self, stream):
+        """
+        Read or write content of this object to or from a serialize stream
+
+        stream -- StringOps.SerializeStream object
+        """
+        version = stream.serUint32(0)
+        
+        if version != 0:
+            raise SerializationException
+            
+        pattern = stream.serUniUtf8(self.compPat.pattern)
+        
+        if pattern != self.compPat.pattern:
+            self.compPat = re.compile(pattern,
+                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+                
+    def getPattern(self):
+        """
+        Return the pattern string
+        """
+        return self.compPat.pattern
+
+
+class ListItemWithSubtreePagesNode(AbstractSearchNode):
     """
     Returns True for a specified root page and all pages below to a specified
     level. (level == -1: any depth, level == 0: root only)
     """
 
-    CLASS_PERSID = "SubTreePages"  # Class id for persistence storage
+    CLASS_PERSID = "ListItemWithSubtreePages"  # Class id for persistence storage
     
-    def __init__(self, sarOp, rootWord=None, level=None):
+    def __init__(self, sarOp, rootWords=None, level=-1):
         AbstractSearchNode.__init__(self, sarOp)
-        self.rootWord = rootWord
+        self.rootWords = rootWords
         self.level = level
-        self.wordList = None
+        
+        # wordSet and wordList always contain the same words
+        self.wordSet = None    # used for testPage()
+        self.wordList = None   # used for orderNatural()
+
 
     def beginWikiSearch(self, wikiData):
         """
         Always called before a new wiki-wide search operation begins.
-        Fills wordList
+        Fills wordList and wordSet
         """
-        self.wordList = wikiData.getAllSubWords(self.rootWord)
+        wordSet = {}
+        
+        if self.level == 0:
+            for rw in self.rootWords:
+                wordSet[rw] = None
 
-    
+            self.wordList = self.rootWords
+            self.wordSet = wordSet
+            return
+
+        wordList = []
+        for rw in self.rootWords:
+            subWords = wikiData.getAllSubWords(self.rootWords, self.level)
+            for sw in subWords:
+#                 if wordSet.has_key(sw):
+#                     continue
+                wordSet[sw] = None
+#                 wordList.append(sw)
+
+        self.wordList = subWords  # wordList
+        self.wordSet = wordSet
+
+
     def endWikiSearch(self):
         """
         Called after a wiki-wide search operation ended.
         Clears wordList
         """
+        self.wordSet = None
         self.wordList = None
-        
+
+
     def testPage(self, word, text):
-        return word in self.wordList
+        return self.wordSet.has_key(word)
+
 
     def orderNatural(self, wordSet):
         result = []
@@ -229,25 +339,61 @@ class SubTreePagesNode(AbstractSearchNode):
         return result
 
 
-    def serializeBin(self, stream):  # TODO !!!
+    def serializeBin(self, stream):
         """
         Read or write content of this object to or from a serialize stream
 
         stream -- StringOps.SerializeStream object
         """
         version = stream.serUint32(0)
-        
+
         if version != 0:
-            return   # TODO Error handling
+            raise SerializationException
+            
+        # Read/write all root words
+        if stream.isReadMode():
+            rwl = stream.serUint32(0)
+            lst = []
+            for i in xrange(rwl):
+                lst.append(stream.serUniUtf8(u""))
+                
+            self.rootWords = lst
+        else:
+            stream.serUint32(len(self.rootWords))
+            for item in self.rootWords:
+                stream.serUniUtf8(item)
+
+        # Serialize the level
+        self.level = stream.serInt32(self.level)
 
 
 
-_CLASSES_WITH_PERSID = (AllPagesNode, SubTreePagesNode)
+_CLASSES_WITH_PERSID = (NotSearchNode, AllPagesNode,
+        ListItemWithSubtreePagesNode, RegexPageNode)
 
 _PERSID_TO_CLASS_MAP = {}
 for cl in _CLASSES_WITH_PERSID:
     _PERSID_TO_CLASS_MAP[cl.CLASS_PERSID] = cl
 
+
+def _serNode(stream, sarOp, obj):
+    """
+    (De-)Serializes an object with a CLASS_PERSID. If object is read from
+    stream, a newly created object is returned, if it is written, obj is
+    returned
+    """
+    global _PERSID_TO_CLASS_MAP
+
+    if stream.isReadMode():
+        persId = stream.serString("")
+        cl = _PERSID_TO_CLASS_MAP[persId]
+        obj = cl(sarOp)
+        obj.serializeBin(stream)
+        return obj
+    else:
+        stream.serString(obj.CLASS_PERSID)
+        obj.serializeBin(stream)
+        return obj
 
 
 
@@ -389,10 +535,6 @@ class SimpleStrNode(AbstractContentSearchNode):
         return pattern
 
 
-
-
-
-
 # ----------------------------------------------------------------------
 
 
@@ -413,13 +555,14 @@ class ListPagesOperation:
     def getSearchOpTree(self):
         return self.searchOpTree
 
-
     def serializeBin(self, stream):
         """
         Read or write content of this object to or from a serialize stream
 
         stream -- StringOps.SerializeStream object
         """
+        self.ordering = stream.serString(self.ordering)
+        self.searchOpTree = _serNode(stream, self, self.searchOpTree)
 
 
     def getPackedSettings(self):
@@ -430,7 +573,7 @@ class ListPagesOperation:
         setPackedSettings()
         """
         return ""  # TODO !!!
-        
+
 
     def setPackedSettings(self, data):
         """
@@ -587,10 +730,10 @@ class SearchReplaceOperation:
 
         stream -- StringOps.SerializeStream object
         """
-        version = stream.serUint32(0)
+        version = stream.serUint32(1)
         
-        if version != 0:
-            return   # TODO Error handling
+        if version < 0 or version > 1:
+            raise SerializationException
 
         self.searchStr = stream.serUniUtf8(self.searchStr)
         self.replaceStr = stream.serUniUtf8(self.replaceStr)
@@ -603,7 +746,14 @@ class SearchReplaceOperation:
 
         self.wildCard = stream.serString(self.wildCard)
                 
-        
+        if version > 0:
+            self.listPagesOp.serializeBin(stream)
+        else:
+            # Can only happen in stream read mode
+            # Reset listPagesOp to default
+            self.listPagesOp = ListPagesOperation()
+
+
     def getPackedSettings(self):
         """
         Returns a byte sequence (string) containing the current settings
@@ -790,6 +940,8 @@ class SearchReplaceOperation:
         if self.searchOpTree is None:
             self.rebuildSearchOpTree()
             
+        self.listPagesOp.beginWikiSearch(wikiData)
+            
         return self.searchOpTree.beginWikiSearch(wikiData)
         
 
@@ -801,6 +953,7 @@ class SearchReplaceOperation:
             self.rebuildSearchOpTree()   # TODO: Error ?
             
         result = self.searchOpTree.endWikiSearch()
+        self.listPagesOp.endWikiSearch()
         self.wikiData = None
 
         return result
@@ -808,7 +961,8 @@ class SearchReplaceOperation:
 
     def testPage(self, word, text):
         """
-        Test, if page fulfills the search criteria and return
+        Test, if page fulfills the search criteria and is listed
+        from contained listPagesOp and return
         truth value. This is useful for wiki-wide searching for pages.
         
         word -- Naked wiki word of the page
@@ -817,7 +971,8 @@ class SearchReplaceOperation:
         if self.searchOpTree is None:
             self.rebuildSearchOpTree()
             
-        return self.searchOpTree.testPage(word, text)
+        return self.listPagesOp.testPage(word, text) and \
+                self.searchOpTree.testPage(word, text)
 
 
     def applyOrdering(self, words):

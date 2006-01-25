@@ -12,6 +12,9 @@ from wxHelper import *
 
 from StringOps import escapeHtml, unescapeRe
 
+from SearchAndReplaceDialogs import PageListConstructionDialog
+from SearchAndReplace import ListPagesOperation
+
 
 _CUT_RE = re.compile(ur"\n|\f| +|[^ \n\f]+",
         re.DOTALL | re.UNICODE | re.MULTILINE)
@@ -81,6 +84,8 @@ class PrintMainDialog(wxDialog):
 #         self.ctrls.chExportTo.SetSelection(0)       
         
 #         EVT_CHOICE(self, XRCID("chExportTo"), self.OnExportTo)
+        EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
+
         EVT_BUTTON(self, GUI_ID.btnPreview, self.OnPreview)
         EVT_BUTTON(self, GUI_ID.btnPageSetup, self.OnPageSetup)
         EVT_BUTTON(self, GUI_ID.btnChoosePlainTextFont,
@@ -129,6 +134,16 @@ class PrintMainDialog(wxDialog):
             self.EndModal(wxID_OK)
 
 
+    def OnChSelectedSet(self, evt):
+        selset = self.ctrls.chSelectedSet.GetSelection()
+        if selset == 3:  # Custom
+            dlg = PageListConstructionDialog(self, self.pWiki, -1, 
+                    value=self.printer.listPagesOperation)
+            if dlg.ShowModal() == wxID_OK:
+                self.printer.listPagesOperation = dlg.getValue()
+            dlg.Destroy()
+
+
     def OnChoosePlainTextFont(self, evt):
         fontdata = wxFontData()
         if self.plainTextFontDesc:
@@ -162,6 +177,8 @@ class Printer:
         self.printData = wxPrintData()
         self.psddata = wxPageSetupDialogData(self.printData)
         self.selectionSet = 0
+        self.listPagesOperation = ListPagesOperation()
+
         self.plainTextFontDesc = self.pWiki.configuration.get(
                 "main", "print_plaintext_font")
         try:
@@ -173,7 +190,7 @@ class Printer:
             
         self.psddata.SetMarginTopLeft(wxPoint(margins[0], margins[1]))
         self.psddata.SetMarginBottomRight(wxPoint(margins[2], margins[3]))
-
+        
 
     def setStdOptions(self, selectionSet, plainTextFontDesc, wpSeparator):
         self.selectionSet = selectionSet
@@ -182,7 +199,6 @@ class Printer:
                 plainTextFontDesc)
         self.pWiki.configuration.set("main", "print_plaintext_wpseparator",
                 wpSeparator)
-
 
 
     def buildWordList(self):
@@ -194,10 +210,13 @@ class Printer:
             wordList = [root]
         elif selset == 1:
             # subtree
-            wordList = self.pWiki.wikiData.getAllSubWords(root)
-        else:
+            wordList = self.pWiki.wikiData.getAllSubWords([root])
+        elif selset == 2:
             # whole wiki
             wordList = self.pWiki.wikiData.getAllDefinedPageNames()
+        else:
+            # custom list
+            wordList = self.pWiki.wikiData.search(self.listPagesOperation, True)
             
         return wordList
 

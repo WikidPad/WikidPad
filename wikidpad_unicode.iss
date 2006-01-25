@@ -41,17 +41,17 @@ Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 1.6beta1
+AppVerName=WikidPad 1.6beta2
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
 VersionInfoVersion=1.6
-VersionInfoTextVersion=WikidPad 1.6beta1
+VersionInfoTextVersion=WikidPad 1.6beta2
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-1.6beta1
+OutputBaseFilename=WikidPad-1.6beta2
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2006 Jason Horman, Michael Butscher, Gerhard Reitmayr
 [Components]
@@ -60,8 +60,8 @@ Name: Gadfly; Description: Gadfly database; Types: custom compact full
 Name: Gadfly\Help; Description: Help wiki; Types: custom compact full
 Name: Sqlite; Description: Sqlite database; Types: full
 [Icons]
-Name: {group}\WikidPadCompact; Filename: {app}\WikidPad.exe; IconFilename: {app}\icons\pwiki.ico; IconIndex: 0; Components: Program_files Gadfly\Help
-Name: {group}\{cm:UninstallProgram, WikidPadCompact}; Filename: {uninstallexe}
+Name: {group}\WikidPad; Filename: {app}\WikidPad.exe; IconFilename: {app}\icons\pwiki.ico; IconIndex: 0; Components: Program_files Gadfly\Help
+Name: {group}\{cm:UninstallProgram, WikidPad}; Filename: {uninstallexe}
 [Registry]
 Root: HKCR; SubKey: .wiki; ValueType: string; ValueData: wikidPadFile; Flags: uninsdeletekey; Tasks: assocWiki
 Root: HKCR; SubKey: wikidPadFile; ValueType: string; ValueData: WikidPad File; Flags: uninsdeletekey; Tasks: assocWiki
@@ -73,8 +73,8 @@ Root: HKCR; Subkey: wiki\shell; ValueType: string; ValueData: open; Flags: unins
 Root: HKCR; Subkey: wiki\DefaultIcon; ValueType: string; ValueData: {app}\icons\pwiki.ico,0; Flags: uninsdeletevalue; Tasks: assocWikiUrl
 Root: HKCR; Subkey: wiki\shell\open\command; ValueType: string; ValueData: """{app}\WikidPad.exe"" ""%1"""; Flags: uninsdeletevalue; Tasks: assocWikiUrl
 [Tasks]
-Name: assocWiki; Description: Associate WikidPadCompact with .wiki files
-Name: assocWikiUrl; Description: "Handle URLs with ""wiki:"" by WikidPadCompact"
+Name: assocWiki; Description: Associate WikidPad with .wiki files
+Name: assocWikiUrl; Description: "Handle URLs with ""wiki:"" by WikidPad"
 [InstallDelete]
 Name: {app}\regexpr.cache; Type: files
 [UninstallDelete]

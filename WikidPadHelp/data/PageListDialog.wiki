@@ -1,0 +1,52 @@
+﻿++ Page List Dialog
+
+The page list dialog is available from different places to construct a list of pages you want to
+
+    * search for a text pattern
+    * export
+    * print
+
+Similar to the wiki search dialog it has some option fields in the left half and mainly a large list on the right, called the "preview".
+
+At first you should choose the criterion the pages have to fulfill:
+
+
++++ All Pages
+All pages will be in the page list
+
++++ Page names matching regular expression
+All pages their names match a regular expression pattern are in the list
+
++++ Pages in list
+All pages mentioned in the list on the left of the dialog are in the resulting page list. You can also define if children of these pages should be in the result. If the level is 0, no children are taken, for 1 direct children are taken, 2 means to take also grandchildren and so on. If the field is -1 or empty, the level is seen as indefinite.
+
+
++++ The left list
+There are a lot of possibilities to give you precise control of the content and order of this list.
+
+To the right of the actual list box there are the buttons "Up" and "Down" with which you can move the currently selected item in the list. With "Sort" the whole list is sorted alphabetically (the sorting algorithm orders upper case before lower case and does not work correctly for non-English characters).
+
+Below the list box is a text field in which you can add new list items. To add them, hit enter in the field or click on the "Add" button to the right of the field (there is another "Add" button below).
+
+Below the text field there are the following buttons:
+
+    * "Clear List" to remove all entries from the list
+    * "Del" to delete the currently selected entry
+    * "Copy" to copy all list entries to clipboard. They are copied as text, one wiki word per line, each in brackets. So you can insert them as link list into any wiki page.
+
+You have also possibilities to *paste entries from clipboard*. Simply copy text which contains some wiki words to the clipboard. When pasting, at first the wiki words are extracted from the text in the order of appearance (be aware that the recognition of camel-case words and footnotes depends on the settings of the currently open page and the wiki). With the extracted words the following can be done:
+
+    * "Add": Add words to the current entries 
+    * "Overwrite": Remove previous list entries and replace them by the new ones
+    * "Intersect": Remove entries from current list which are not in the extracted words
+
+You can also *control the order* of the pages in the final list. *"Alphabetically"* has the same restrictions as described for the "Sort" button above. *"Natural"* tries to order in the way the user would expect the pages to be ordered (well, more or less). If you have created your own list of wikiwords, the "natural" order keeps them as they are sorted by you. "Natural" is the slowest order mode. *"Unordered"* uses the internal order of the database and is the fastest possible way.
+
+If you are using the page list dialog inside wiki-wide searching, the order option is not available.
+
+
++++ The right result list
+When you hit the button "Preview", this list shows which pages *currently* match the criteria chosen on the left side. When defining a page list e.g. for a saved search, the pages matching the criteria may change over time when the wiki database changes.
+
+The "Copy" button above the preview copies the content of the preview to the clipboard in the same way as it is done for the left page list.
+

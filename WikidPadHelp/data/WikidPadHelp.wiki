@@ -34,6 +34,7 @@ Then just start typing text with WikiWords to create your wiki.
     * TodoItems (track todos, questions, issues)
     * WikiBookmarks
     * SearchingTheWiki
+    * PageListDialog
     * WikiExport
     * RenamingWikiWords
     * InlinePythonEval

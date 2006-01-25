@@ -11,7 +11,9 @@ from os import mkdir, unlink, rename
 from os.path import exists, join, split, basename
 import glob
 
-from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, removeBracketsFilename
+from pwiki.WikiExceptions import *
+from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, \
+        removeBracketsFilename, wikiWordToLabel
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
 import gadfly
@@ -464,9 +466,9 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
                 changeTableSchema(connwrap, tn, TABLE_DEFINITIONS[tn])
                 
             for key, value in (
-                    ("formatver", "1"),  # Version of database format the data was written
-                    ("writecompatver", "1"),  # Lowest format version which is write compatible
-                    ("readcompatver", "1"),  # Lowest format version which is read compatible
+                    ("formatver", "2"),  # Version of database format the data was written
+                    ("writecompatver", "2"),  # Lowest format version which is write compatible
+                    ("readcompatver", "2"),  # Lowest format version which is read compatible
                     ("branchtag", "WikidPad")  # Tag of the WikidPad branch
                     ):
                 setSettingsValue(connwrap, key, value)
@@ -542,13 +544,13 @@ def checkDatabaseFormat(connwrap):
     formatver = getSettingsInt(connwrap, "formatver")
     writecompatver = getSettingsInt(connwrap, "writecompatver")
 
-    if writecompatver > 1:
+    if writecompatver > 2:
         # TODO: Check compatibility
         
         return 2, "Database has unknown format version='%i'" \
                 % formatver
                 
-    if formatver < 1:   # ???
+    if formatver < 2:
         return 1, "Update needed, current format version='%i'" \
                 % formatver
         
@@ -647,16 +649,84 @@ def updateDatabase(connwrap, dataDir):
                 pass
         
         formatver = 1
- 
+        
         # --- WikiPad 1.20beta3 reached (formatver=1, writecompatver=1,
         #         readcompatver=1) ---
+
+    if formatver == 1:
+        # remove brackets from all wikiwords in database
+        
+        # table wikiwords
+        dataIn = connwrap.execSqlQuery(
+                "select word, created, modified from wikiwords")
+        connwrap.execSql("drop table wikiwords")
+        connwrap.commit()
+        changeTableSchema(connwrap, "wikiwords", 
+                TABLE_DEFINITIONS["wikiwords"])
+        rebuildIndices(connwrap)
+        
+        uniqueCtl = {}
+        for w, c, m in dataIn:
+            w = wikiWordToLabel(w)
+            if not uniqueCtl.has_key(w):
+                connwrap.execSql("insert into wikiwords(word, created, modified) "
+                        "values (?, ?, ?)", (w, c, m))
+                uniqueCtl[w] = None
+
+        # table wikirelations
+        dataIn = connwrap.execSqlQuery(
+                "select word, relation, created from wikirelations")
+        connwrap.execSql("drop table wikirelations")
+        connwrap.commit()
+        changeTableSchema(connwrap, "wikirelations", 
+                TABLE_DEFINITIONS["wikirelations"])
+        rebuildIndices(connwrap)
+
+        uniqueCtl = {}
+        for w, r, c in dataIn:
+            w, r = wikiWordToLabel(w), wikiWordToLabel(r)
+            if not uniqueCtl.has_key((w, r)):
+                connwrap.execSql("insert into wikirelations(word, relation, created) "
+                        "values (?, ?, ?)", (w, r, c))
+                uniqueCtl[(w, r)] = None
+
+        # table wikiwordprops
+        dataIn = connwrap.execSqlQuery(
+                "select word, key, value from wikiwordprops")
+        connwrap.execSql("drop table wikiwordprops")
+        connwrap.commit()
+        changeTableSchema(connwrap, "wikiwordprops", 
+                TABLE_DEFINITIONS["wikiwordprops"])
+        rebuildIndices(connwrap)
+
+        for w, k, v in dataIn:
+            connwrap.execSql("insert into wikiwordprops(word, key, value) "
+                    "values (?, ?, ?)", (wikiWordToLabel(w), k, v))
+
+        # table todos
+        dataIn = connwrap.execSqlQuery(
+                "select word, todo from todos")
+        connwrap.execSql("drop table todos")
+        connwrap.commit()
+        changeTableSchema(connwrap, "todos", 
+                TABLE_DEFINITIONS["todos"])
+        rebuildIndices(connwrap)
+
+        for w, t in dataIn:
+            connwrap.execSql("insert into todos(word, todo) "
+                    "values (?, ?)", (wikiWordToLabel(w), t))
+
+        formatver = 2
+
+        # --- WikiPad 1.6beta2 reached (formatver=2, writecompatver=2,
+        #         readcompatver=2) ---
 
         
     # Write format information
     for key, value in (
-            ("formatver", "1"),  # Version of database format the data was written
-            ("writecompatver", "1"),  # Lowest format version which is write compatible
-            ("readcompatver", "1"),  # Lowest format version which is read compatible
+            ("formatver", "2"),  # Version of database format the data was written
+            ("writecompatver", "2"),  # Lowest format version which is write compatible
+            ("readcompatver", "2"),  # Lowest format version which is read compatible
             ("branchtag", "WikidPad")  # Tag of the WikidPad branch
             ):
         setSettingsValue(connwrap, key, value)
@@ -669,7 +739,7 @@ def updateDatabase(connwrap, dataDir):
         
     
 # class WikiDBExistsException(WikiDataException): pass
-class WikiDBExistsException(Exception): pass
+# class WikiDBExistsException(Exception): pass
 
 
 """

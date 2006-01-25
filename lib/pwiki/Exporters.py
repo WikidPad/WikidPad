@@ -163,7 +163,7 @@ class HtmlXmlExporter:
             
             try:
                 content = wikiPage.getContent()
-                links = {}
+                links = {}  # TODO Why links to all (even not exported) children?
                 for relation in wikiPage.getChildRelationships(
                         existingonly=True, selfreference=False):
                     if not self.shouldExport(relation):
@@ -292,7 +292,7 @@ class HtmlXmlExporter:
                     onlyInclude))
             fp.reset()        
             realfp.close()
-        except NotImplementedError: # Exception, e:    !!!!!!!!!!
+        except Exception, e:
             pass
         
         return outputFile
@@ -712,7 +712,7 @@ class HtmlXmlExporter:
 
             elif styleno == WikiFormatting.FormatTypes.WikiWord:  # or \
                     # styleno == WikiFormatting.FormatTypes.WikiWord2:
-                word = self.pWiki.getFormatting().normalizeWikiWord(tok.text)
+                word = tok.node.nakedWord # self.pWiki.getFormatting().normalizeWikiWord(tok.text)
                 link = self.links.get(word)
                 
                 if link:

@@ -19,14 +19,14 @@ class WikiPage:
         self.modified, self.created = None, None
 
         # does this page need to be saved?
-        self.saveDirty = False
-        self.updateDirty = False
+        self.saveDirtySince = None  # None, if not dirty or timestamp when it became dirty
+        self.updateDirtySince = None
 
-        # save when this page was last saved
-        self.lastSave = time()
-
-        # save when this page was last saved
-        self.lastUpdate = time()
+#         # save when this page was last saved
+#         self.lastSave = time()
+# 
+#         # save when this page was last saved
+#         self.lastUpdate = time()
 
 
     def getWikiWord(self):
@@ -127,9 +127,9 @@ class WikiPage:
         """
         Saves the content of current wiki page.
         """
-        self.lastSave = time()
+#         self.lastSave = time()
         self.wikiData.setContent(self.wikiWord, text)
-        self.saveDirty = False
+        self.saveDirtySince = None
 
 
     def update(self, text, alertPWiki=True):
@@ -165,8 +165,6 @@ class WikiPage:
         for t in wwTokens:
             self.addChildRelationship(t.node.nakedWord)
 
-        self.lastUpdate = time()   # self.modified
-
         # kill the global prop cache in case any props were added
         self.wikiData.cachedGlobalProps = None
 
@@ -175,11 +173,13 @@ class WikiPage:
             self.addChildRelationship(u"ScratchPad")
 
         # clear the dirty flag
-        self.updateDirty = False
+        self.updateDirtySince = None
 
         self.wikiData.updateTodos(self.wikiWord, self.todos)
         self.wikiData.updateChildRelations(self.wikiWord, self.childRelations)
         self.wikiData.updateProperties(self.wikiWord, self.props)
+
+#         self.lastUpdate = time()   # self.modified
 
         if alertPWiki:
             self.wikiData.pWiki.informWikiPageUpdate(self)
@@ -211,8 +211,19 @@ class WikiPage:
         self.todos = []
 
     def setDirty(self, dirt):
-        self.saveDirty = dirt
-        self.updateDirty = dirt
+        if dirt:
+            if self.saveDirtySince is None:
+                ti = time()
+                self.saveDirtySince = ti
+                self.updateDirtySince = ti
+        else:
+            self.saveDirtySince = None
+            self.updateDirtySince = None
 
     def getDirty(self):
-        return (self.saveDirty, self.updateDirty)
+        return (self.saveDirtySince is not None,
+                self.updateDirtySince is not None)
+
+    def getDirtySince(self):
+        return (self.saveDirtySince, self.updateDirtySince)
+

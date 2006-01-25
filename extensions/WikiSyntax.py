@@ -17,7 +17,8 @@ TitleWikiWordDelimiterPAT = ur"\|"
 
 PlainCharacterPAT = ur"(?:[^\\]|\\.)"
 
-PlainEscapedCharacterRE = re.compile(ur"\\(.)")
+PlainEscapedCharacterRE = re.compile(ur"\\(.)",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
 # basic formatting

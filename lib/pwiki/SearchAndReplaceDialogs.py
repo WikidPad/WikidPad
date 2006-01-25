@@ -1,9 +1,10 @@
-import sys, traceback
+import sys, traceback, re
 
 from wxPython.wx import *
 from wxPython.html import *
 import wxPython.xrc as xrc
 
+from MiscEvent import MiscEventSourceMixin, KeyFunctionSink
 from wxHelper import *
 
 from StringOps import uniToGui, guiToUni, escapeHtml
@@ -11,7 +12,7 @@ from StringOps import uniToGui, guiToUni, escapeHtml
 import WikiFormatting
 import PageAst
 
-from SearchAndReplace import SearchReplaceOperation
+from SearchAndReplace import SearchReplaceOperation, ListPagesOperation
 
 
 class SearchWikiOptionsDialog(wxDialog):
@@ -102,7 +103,7 @@ class _SearchResultItemInfo(object):
             
         if pos[0] == -1:
             # No position -> use beginning of text
-            info.occHtml = escapeHtml(text[0:basum])
+            self.occHtml = escapeHtml(text[0:basum])
             return self
         
         s = max(0, pos[0] - before)
@@ -157,10 +158,8 @@ class _SearchResultItemInfo(object):
 
 
 class SearchResultListBox(wxHtmlListBox):
-# class SearchResultListBox(wxVListBox):
     def __init__(self, parent, pWiki, ID):
         wxHtmlListBox.__init__(self, parent, ID, style = wxSUNKEN_BORDER)
-#         wxVListBox.__init__(self, parent, ID, style = wxSUNKEN_BORDER)
         
         self.pWiki = pWiki
         self.searchWikiDialog = parent
@@ -271,23 +270,11 @@ class SearchResultListBox(wxHtmlListBox):
 
                             info.occCount = occ
 
-#                         if before + after > 0:
-#                             s = max(0, firstpos[0] - before)
-#                             e = min(len(text), firstpos[1] + after)
-#                             info.occHtml = u"".join([escapeHtml(text[s:firstpos[0]]), 
-#                                 "<b>", escapeHtml(text[firstpos[0]:firstpos[1]]), "</b>",
-#                                 escapeHtml(text[firstpos[1]:e])])
-
                         self.foundinfo.append(info.buildOccurrence(
                                 text, before, after, firstpos, 1))
                             
-#                         self.htmlfound.append("<table><tr><td>&nbsp;&nbsp;&nbsp;</td><td>" + u"".join(bluew) + "</td></tr></table>")
-#                         self.htmlfound.append(u"".join(bluew))
-
         self.SetItemCount(len(self.foundinfo))
         self.Refresh()
-        
-        # self.SetSelection(0)  #?
         
 
     def GetSelectedWord(self):
@@ -398,15 +385,6 @@ class SearchResultListBox(wxHtmlListBox):
         else:
             evt.Skip()
 
-#     def OnCharPagesListBox(self, evt):
-# #         if (evt.GetKeyCode() == WXK_UP) and (self.ctrls.lb.GetSelection() == 0):
-# #             self.ctrls.text.SetFocus()
-# #             self.ctrls.lb.Deselect(0)
-#         if (evt.GetKeyCode() in (WXK_RETURN, WXK_NUMPAD_ENTER)):
-#             self.OnPageListDClick(evt)
-#         else:
-#             evt.Skip()
-
 
 class SearchWikiDialog(wxDialog):   # TODO
     def __init__(self, pWiki, ID, title="Search Wiki",
@@ -438,6 +416,8 @@ class SearchWikiDialog(wxDialog):   # TODO
                                       
         self.savedSearches = None
         self.foundPages = []
+        
+        self.listPagesOperation = ListPagesOperation()
         self._refreshSavedSearchesList()
 
         EVT_BUTTON(self, GUI_ID.btnFindPages, self.OnSearchWiki)
@@ -450,6 +430,9 @@ class SearchWikiDialog(wxDialog):   # TODO
         EVT_BUTTON(self, GUI_ID.btnLoadSearch, self.OnLoadSearch)
         EVT_BUTTON(self, GUI_ID.btnLoadAndRunSearch, self.OnLoadAndRunSearch)
         EVT_BUTTON(self, GUI_ID.btnOptions, self.OnOptions)
+        EVT_BUTTON(self, GUI_ID.btnCopyPageNamesToClipboard,
+                self.OnCopyPageNamesToClipboard)
+        
         EVT_CHAR(self.ctrls.txtSearch, self.OnCharToFind)
 #         EVT_CHAR(self.ctrls.rboxSearchType, self.OnCharToFind)
 #         EVT_CHAR(self.ctrls.cbCaseSensitive, self.OnCharToFind)
@@ -474,6 +457,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         sarOp.cycleToStart = False
         sarOp.wildCard = 'regex'
         sarOp.wikiWide = True
+        sarOp.listPagesOp = self.listPagesOperation
 
         if not sarOp.booleanOp:
             sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
@@ -482,28 +466,27 @@ class SearchWikiDialog(wxDialog):   # TODO
 
 
     def _refreshPageList(self):
-        sarOp = self.buildSearchReplaceOperation()
-        self.pWiki.saveCurrentWikiPage()
-
-        if len(sarOp.searchStr) > 0:
-            self.foundPages = self.pWiki.wikiData.search(sarOp)
-            self.foundPages.sort()
-            self.ctrls.htmllbPages.showFound(sarOp, self.foundPages,
-                    self.pWiki.wikiData)
-        else:
-            self.foundPages = []
-            self.ctrls.htmllbPages.showFound(None, None, None)
-
-#         self.ctrls.lb.Clear()
-# 
-#         if len(sarOp.searchStr) > 0:
-#             found = self.pWiki.wikiData.search(sarOp)
-#             found.sort()
-#             for word in found:
-#                 self.ctrls.lb.Append(word)
-
-        self.listNeedsRefresh = False
+        self.SetCursor(wxHOURGLASS_CURSOR)
+        self.Freeze()
+        try:
+            sarOp = self.buildSearchReplaceOperation()
+            self.pWiki.saveCurrentWikiPage()
+    
+            if len(sarOp.searchStr) > 0:
+                self.foundPages = self.pWiki.wikiData.search(sarOp)
+                self.foundPages.sort()
+                self.ctrls.htmllbPages.showFound(sarOp, self.foundPages,
+                        self.pWiki.wikiData)
+            else:
+                self.foundPages = []
+                self.ctrls.htmllbPages.showFound(None, None, None)
+    
+            self.listNeedsRefresh = False
         
+        finally:
+            self.Thaw()
+            self.SetCursor(wxNullCursor)
+
 
     def OnSearchWiki(self, evt):
         self._refreshPageList()
@@ -515,11 +498,28 @@ class SearchWikiDialog(wxDialog):   # TODO
         """
         Show the Page List dialog
         """
-        dlg = PageListConstructionDialog(self, self.pWiki, -1)
-        result = dlg.ShowModal()
-        dlg.Destroy()
-        if result == wxID_OK:
-            pass
+        dlg = PageListConstructionDialog(self, self.pWiki, -1,
+                value=self.listPagesOperation, allowOrdering=False)
+
+#         result = dlg.ShowModal()
+#         dlg.Destroy()
+#         if result == wxID_OK:
+#             self.listPagesOperation = dlg.getValue()
+#             pass
+
+        dlg.getMiscEvent().addListener(KeyFunctionSink((
+                ("nonmodal closed", self.onNonmodalClosedPageList),
+        )))
+
+        self.Show(False)
+        dlg.Show(True)
+
+    def onNonmodalClosedPageList(self, miscevt):
+        plop = miscevt.get("listPagesOp")
+        if plop is not None:
+            self.listPagesOperation = plop
+
+        self.Show(True)
 
 
     def OnListRefreshNeeded(self, evt):
@@ -738,9 +738,19 @@ class SearchWikiDialog(wxDialog):   # TODO
         if not sarOp.booleanOp and sarOp.replaceOp:
             self.ctrls.txtReplace.SetValue(uniToGui(sarOp.replaceStr))
             
+        self.listPagesOperation = sarOp.listPagesOp
+            
         self.OnRadioBox(None)  # Refresh settings
         
         return True
+
+
+    def OnCopyPageNamesToClipboard(self, evt):
+        formatting = self.pWiki.getFormatting()
+        wordsText = u"".join([u"%s%s%s\n" % (formatting.wikiWordStart, w,
+                formatting.wikiWordEnd) for w in self.foundPages])
+
+        copyTextToClipboard(wordsText)
 
 
     def OnCharToFind(self, evt):
@@ -832,14 +842,19 @@ class SearchPageDialog(wxDialog):   # TODO
 
 
 
-class PageListConstructionDialog(wxDialog):   # TODO
-    def __init__(self, parent, pWiki, ID, title="Page List",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER):
+class PageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
+    def __init__(self, parent, pWiki, ID, value=None, allowOrdering=True,
+            title="Page List", pos=wxDefaultPosition, size=wxDefaultSize,
+            style=wxNO_3D|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER):
         d = wxPreDialog()
         self.PostCreate(d)
-        
+        MiscEventSourceMixin.__init__(self)
+
         self.pWiki = pWiki
+        self.value = value
+        
+        self.pageListData = []  # Wiki words in the left pagelist
+        self.resultListData = []
 
         res = xrc.wxXmlResource.Get()
         res.LoadOnDialog(self, parent, "PageListConstructionDialog")
@@ -849,18 +864,66 @@ class PageListConstructionDialog(wxDialog):   # TODO
         self.ctrls.btnOk.SetId(wxID_OK)
         self.ctrls.btnCancel.SetId(wxID_CANCEL)
         
-        self.ctrls.tfSubtreeRoot.SetValue(uniToGui(
+        self.ctrls.tfPageListToAdd.SetValue(uniToGui(
                 self.pWiki.getCurrentWikiWord()))
-        
-        EVT_TEXT(self, GUI_ID.tfSubtreeRoot,
-                lambda evt: self.ctrls.rbPagesSubtree.SetValue(True))
+
+        if self.value is not None:
+            item = self.value.searchOpTree
+            
+            if item.CLASS_PERSID == "AllPages":
+                self.ctrls.rbPagesAll.SetValue(True)
+            elif item.CLASS_PERSID == "RegexPage":
+                self.ctrls.rbPagesMatchRe.SetValue(True)
+                self.ctrls.tfMatchRe.SetValue(item.getPattern)
+            elif item.CLASS_PERSID == "ListItemWithSubtreePages":
+                self.ctrls.rbPagesInList.SetValue(True)
+                self.pageListData = item.rootWords[:]
+                self.ctrls.lbPageList.AppendItems(self.pageListData)
+                if item.level == -1:
+                    self.ctrls.tfSubtreeLevels.SetValue(u"")
+                else:
+                    self.ctrls.tfSubtreeLevels.SetValue(u"%i" % item.level)
+                    
+            self.ctrls.chOrdering.SetSelection(
+                    self._ORDERNAME_TO_CHOICE[self.value.ordering])
+
+        if not allowOrdering:
+            self.ctrls.chOrdering.SetSelection(self._ORDERNAME_TO_CHOICE["no"])
+            self.ctrls.chOrdering.Enable(False)
+
         EVT_TEXT(self, GUI_ID.tfSubtreeLevels,
-                lambda evt: self.ctrls.rbPagesSubtree.SetValue(True))
+                lambda evt: self.ctrls.rbPagesInList.SetValue(True))
+        EVT_TEXT(self, GUI_ID.tfMatchRe,
+                lambda evt: self.ctrls.rbPagesMatchRe.SetValue(True))
         
+        EVT_BUTTON(self, wxID_CANCEL, self.OnClose)        
+        EVT_CLOSE(self, self.OnClose)
+        EVT_BUTTON(self, wxID_OK, self.OnOk)
+
+        EVT_TEXT_ENTER(self, GUI_ID.tfPageListToAdd, self.OnPageListAdd)
+        EVT_BUTTON(self, GUI_ID.btnPageListUp, self.OnPageListUp) 
+        EVT_BUTTON(self, GUI_ID.btnPageListDown, self.OnPageListDown) 
+        EVT_BUTTON(self, GUI_ID.btnPageListSort, self.OnPageListSort) 
+
+        EVT_BUTTON(self, GUI_ID.btnPageListAdd, self.OnPageListAdd) 
+        EVT_BUTTON(self, GUI_ID.btnPageListDelete, self.OnPageListDelete) 
+        EVT_BUTTON(self, GUI_ID.btnPageListClearList, self.OnPageListClearList) 
+
+        EVT_BUTTON(self, GUI_ID.btnPageListCopyToClipboard,
+                self.OnPageListCopyToClipboard) 
+
+        EVT_BUTTON(self, GUI_ID.btnPageListAddFromClipboard,
+                self.OnPageListAddFromClipboard) 
         EVT_BUTTON(self, GUI_ID.btnPageListOverwriteFromClipboard,
                 self.OnPageListOverwriteFromClipboard) 
+        EVT_BUTTON(self, GUI_ID.btnPageListIntersectWithClipboard,
+                self.OnPageListIntersectWithClipboard) 
+
         EVT_BUTTON(self, GUI_ID.btnResultListPreview, self.OnResultListPreview) 
-               
+        EVT_BUTTON(self, GUI_ID.btnResultCopyToClipboard,
+                self.OnResultCopyToClipboard) 
+
+
 #         EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
 #         EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
 #         EVT_BUTTON(self, wxID_CANCEL, self.OnClose)        
@@ -871,6 +934,20 @@ class PageListConstructionDialog(wxDialog):   # TODO
             1: "ascending",
             2: "no"
     }
+
+    _ORDERNAME_TO_CHOICE = {
+            "natural": 0,
+            "ascending": 1,
+            "no": 2
+    }
+
+
+    def setValue(self, value):
+        self.value = value
+        
+    def getValue(self):
+        return self.value
+
 
     def _buildListPagesOperation(self):
         """
@@ -883,18 +960,26 @@ class PageListConstructionDialog(wxDialog):   # TODO
         
         if self.ctrls.rbPagesAll.GetValue():
             item = Sar.AllPagesNode(lpOp)
-        elif self.ctrls.rbPagesSubtree.GetValue():
+        elif self.ctrls.rbPagesMatchRe.GetValue():
+            pattern = self.ctrls.tfMatchRe.GetValue()
+            try:
+                re.compile(pattern, re.DOTALL | re.UNICODE | re.MULTILINE)
+            except re.error, e:
+                wxMessageBox("Bad regular expression '%s':\n%s" %
+                        (pattern, unicode(e)), u"Regular expression error",
+                        wxOK, self)
+                return None
+            item = Sar.RegexPageNode(lpOp, pattern)
+        elif self.ctrls.rbPagesInList.GetValue():
             try:
                 level = int(self.ctrls.tfSubtreeLevels.GetValue())
+                if level < 0:
+                    raise ValueError
             except ValueError:
                 level = -1
-            rootWord = guiToUni(self.ctrls.tfSubtreeRoot.GetValue())
-            formatting = self.pWiki.getFormatting()
-            rootWord = formatting.wikiWordToLabel(rootWord)
-            if not formatting.isNakedWikiWord(rootWord):
-                return None
-            
-            item = Sar.SubTreePagesNode(lpOp, rootWord, level)
+
+            item = Sar.ListItemWithSubtreePagesNode(lpOp, self.pageListData[:],
+                    level)
         else:
             return None
             
@@ -905,10 +990,126 @@ class PageListConstructionDialog(wxDialog):   # TODO
         return lpOp
 
 
-    def OnPageListOverwriteFromClipboard(self, evt):
+    def OnOk(self, evt):
+        val = self._buildListPagesOperation()
+        if val is None:
+            return
+            
+        self.value = val 
+        if self.IsModal():
+            self.EndModal(wxID_OK)
+        else:
+            self.Destroy()
+            self.fireMiscEventProps({"nonmodal closed": wxID_OK,
+                    "listPagesOp": self.value})
+
+    def OnClose(self, evt):
+        self.value = None
+        if self.IsModal():
+            self.EndModal(wxID_CANCEL)
+        else:
+            self.Destroy()
+            self.fireMiscEventProps({"nonmodal closed": wxID_CANCEL,
+                    "listPagesOp": None})
+
+
+    def OnPageListUp(self, evt):
+        sel = self.ctrls.lbPageList.GetSelection()
+        if sel == wxNOT_FOUND or sel == 0:
+            return
+            
+        dispWord = self.ctrls.lbPageList.GetString(sel)
+        word = self.pageListData[sel]
+        
+        self.ctrls.lbPageList.Delete(sel)
+        del self.pageListData[sel]
+        
+        self.ctrls.lbPageList.Insert(dispWord, sel - 1)
+        self.pageListData.insert(sel - 1, word)
+        self.ctrls.lbPageList.SetSelection(sel - 1)
+        
+        
+    def OnPageListDown(self, evt):
+        sel = self.ctrls.lbPageList.GetSelection()
+        if sel == wxNOT_FOUND or sel == len(self.pageListData) - 1:
+            return
+
+        dispWord = self.ctrls.lbPageList.GetString(sel)
+        word = self.pageListData[sel]
+        
+        self.ctrls.lbPageList.Delete(sel)
+        del self.pageListData[sel]
+        
+        self.ctrls.lbPageList.Insert(dispWord, sel + 1)
+        self.pageListData.insert(sel + 1, word)
+        self.ctrls.lbPageList.SetSelection(sel + 1)
+
+
+    def OnPageListSort(self, evt):
+        self.ctrls.rbPagesInList.SetValue(True)
+
+        self.pageListData.sort()
+        
+        self.ctrls.lbPageList.Clear()
+        self.ctrls.lbPageList.AppendItems(self.pageListData)
+
+
+    def OnPageListAdd(self, evt):
+        self.ctrls.rbPagesInList.SetValue(True)
+
+        word = guiToUni(self.ctrls.tfPageListToAdd.GetValue())
+        formatting = self.pWiki.getFormatting()
+        word = formatting.wikiWordToLabel(word)
+        if not formatting.isNakedWikiWord(word):
+            return
+        if word in self.pageListData:
+            return  # Already in list
+
+        sel = self.ctrls.lbPageList.GetSelection()
+        if sel == wxNOT_FOUND:
+            self.ctrls.lbPageList.Append(uniToGui(word))
+            self.pageListData.append(word)
+            self.ctrls.lbPageList.SetSelection(len(self.pageListData) - 1)
+        else:
+            self.ctrls.lbPageList.Insert(uniToGui(word), sel + 1)
+            self.pageListData.insert(sel + 1, word)
+            self.ctrls.lbPageList.SetSelection(sel + 1)
+            
+        self.ctrls.tfPageListToAdd.SetValue(u"")
+
+
+    def OnPageListDelete(self, evt):
+        self.ctrls.rbPagesInList.SetValue(True)
+
+        sel = self.ctrls.lbPageList.GetSelection()
+        if sel == wxNOT_FOUND:
+            return
+
+        self.ctrls.lbPageList.Delete(sel)
+        del self.pageListData[sel]
+        
+        count = len(self.pageListData)
+        if count == 0:
+            return
+        
+        if sel >= count:
+            sel = count - 1
+        self.ctrls.lbPageList.SetSelection(sel)
+
+
+    def OnPageListClearList(self, evt):
+        self.ctrls.rbPagesInList.SetValue(True)
+
+        self.ctrls.lbPageList.Clear()
+        self.pageListData = []
+        
+
+    def OnPageListAddFromClipboard(self, evt):
         """
-        Take wiki words from clipboard and enter them into the page
+        Take wiki words from clipboard and enter them into the list
         """
+        self.ctrls.rbPagesInList.SetValue(True)
+
         page = PageAst.Page()
         
         text = getTextFromClipboard()
@@ -917,16 +1118,71 @@ class PageListConstructionDialog(wxDialog):   # TODO
             wwTokens = page.findType(WikiFormatting.FormatTypes.WikiWord)
 
             found = {}
-            words = []
+            # First fill found with already existing entries
+            for w in self.pageListData:
+                found[w] = None
+            
+            # Now fill all with new tokens
             for t in wwTokens:
                 w = t.node.nakedWord
                 if not found.has_key(w):
-                    words.append(w)
+                    self.ctrls.lbPageList.Append(uniToGui(w))
+                    self.pageListData.append(w)
                     found[w] = None
 
+
+    def OnPageListOverwriteFromClipboard(self, evt):
+        self.ctrls.lbPageList.Clear()
+        self.pageListData = []
+        
+        self.OnPageListAddFromClipboard(evt)
+
+
+    def OnPageListIntersectWithClipboard(self, evt):
+        """
+        Take wiki words from clipboard and intersect with the list
+        """
+        self.ctrls.rbPagesInList.SetValue(True)
+
+        page = PageAst.Page()
+        
+        text = getTextFromClipboard()
+        if text:
+            page.buildAst(self.pWiki.getFormatting(), text)
+            wwTokens = page.findType(WikiFormatting.FormatTypes.WikiWord)
+
+            found = {}
+            # First fill found with new tokens
+            for t in wwTokens:
+                w = t.node.nakedWord
+                found[w] = None
+
+            pageList = self.pageListData
+            self.pageListData = []
             self.ctrls.lbPageList.Clear()
-            for w in words:
-                self.ctrls.lbPageList.Append(uniToGui(w))
+
+            # Now fill all with already existing entries
+            for w in pageList:
+                if found.has_key(w):
+                    self.ctrls.lbPageList.Append(uniToGui(w))
+                    self.pageListData.append(w)
+                    del found[w]
+
+
+    def OnPageListCopyToClipboard(self, evt):
+        formatting = self.pWiki.getFormatting()
+        wordsText = u"".join([u"%s%s%s\n" % (formatting.wikiWordStart, w,
+                formatting.wikiWordEnd) for w in self.pageListData])
+
+        copyTextToClipboard(wordsText)
+
+
+    def OnResultCopyToClipboard(self, evt):
+        formatting = self.pWiki.getFormatting()
+        wordsText = u"".join([u"%s%s%s\n" % (formatting.wikiWordStart, w,
+                formatting.wikiWordEnd) for w in self.resultListData])
+
+        copyTextToClipboard(wordsText)
 
 
     def OnResultListPreview(self, evt):
@@ -936,14 +1192,16 @@ class PageListConstructionDialog(wxDialog):   # TODO
             return
 
         self.SetCursor(wxHOURGLASS_CURSOR)
+        self.Freeze()
         try:
-            self.Freeze()
             words = self.pWiki.getWikiData().search(lpOp)
             
             self.ctrls.lbResultPreview.Clear()
-            for w in words:
-                self.ctrls.lbResultPreview.Append(uniToGui(w))
-
+            self.ctrls.lbResultPreview.AppendItems(words)
+#             for w in words:
+#                 self.ctrls.lbResultPreview.Append(uniToGui(w))
+                
+            self.resultListData = words
         finally:
             self.Thaw()
             self.SetCursor(wxNullCursor)

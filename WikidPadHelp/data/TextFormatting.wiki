@@ -24,6 +24,7 @@ For creating bulleted or numbered lists, see BulletedLists.
 
 +++ Escaping Formatting
 
+++++ Escaping blocks
 To create a section of text with no formatting, wrap that section 
 in a "<< >>" block. Example:
 
@@ -39,6 +40,11 @@ with formatting
 
 Before and after the begin and end tags only whitespaces are allowed on the same line, so a << in the text does not prevent ALink from being highlighted.
 
+++++ Escaping characters
+To escape single characters, prepend them with a backslash. These characters are then interpreted as normal text, the backslash is suppressed in HTML preview and export. If you want to really write a backslash, write two of them: \\.
+
+With this, you can write \[brackets] or \*asterisks\* which are not seen as formatting commands by \WikidPad.
+
 
 +++ Tables
 
@@ -49,7 +55,8 @@ Example:
 
 <<|
 ScratchPad| This is| *a table*
-with two| rows and| three columns
+with two| rows and| three columns delimited by \| and \
+                                                    with two lines in a cell
 >>
 
 

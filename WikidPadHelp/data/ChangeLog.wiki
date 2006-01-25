@@ -1,6 +1,27 @@
 ﻿++ Change Log
 
 
+Jan. 25, 2006 (1.6beta2)
+
+*Warning*: This version has a new database format. It is converted
+automatically when opening a wiki the first time. Making a backup
+beforehand is therefore recommended!
+
+Changes:
+    * No more brackets around wiki words in the "Open Wiki Word"
+      and all other dialogs
+    * Characters can be escaped with backslash and are then
+      interpreted as normal text (see [TextFormatting])
+    * New dialog to choose which pages to search for, to export
+      or to print (see [PageListDialog], [Printing], [WikiExport],
+      [SearchingTheWiki])
+    * New options to control the auto save timing
+      (see [OptionsDialog])
+
+    * Some bugs fixed
+
+
+
 Jan. 13, 2006 (1.6beta1)
 
 Changes:

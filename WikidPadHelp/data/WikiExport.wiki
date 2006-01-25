@@ -14,7 +14,7 @@ Export / Export Wiki As XML
 Or you can use Export / Other Export to show a dialog to choose other settings:
 
 *What to export*
-Choose if you want to export current page only, the current page and all sub-pages (children, grandchildren...) or the whole wiki.
+Choose if you want to export current page only, the current page and all sub-pages (children, grandchildren...), the whole wiki or use "Custom..." to open the [PageListDialog].
 
 *Compatible filenames*
 Uses ASCII-only filenames for exported files so that they can be transferred to other filesystems without compatibility issues. On Windows XP and Server 2003 the AppLocale utility (see http://www.microsoft.com/globaldev/tools/apploc.mspx ) might also help on export problems.

@@ -10,8 +10,9 @@ import string, codecs, types
 from os import mkdir, unlink
 from os.path import exists, join
 
+from pwiki.WikiExceptions import *
 from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, applyBinCompact, \
-        getBinCompactForDiff
+        getBinCompactForDiff, wikiWordToLabel
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
 import pwiki.sqlite3api as sqlite
@@ -429,9 +430,9 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
     
             connwrap.executemany("insert or replace into settings(key, value) "+
                         "values (?, ?)", (
-                    ("formatver", "4"),  # Version of database format the data was written
-                    ("writecompatver", "4"),  # Lowest format version which is write compatible
-                    ("readcompatver", "4"),  # Lowest format version which is read compatible
+                    ("formatver", "5"),  # Version of database format the data was written
+                    ("writecompatver", "5"),  # Lowest format version which is write compatible
+                    ("readcompatver", "5"),  # Lowest format version which is read compatible
                     ("branchtag", "WikidPadCompact")  # Tag of the WikidPad branch
                     )  )
 
@@ -506,21 +507,22 @@ def sqlite_testMatch(context, values):
     Sqlite user-defined function "testMatch" for WikiData.search()
     method
     """
-    fileContents = utf8Dec(values[0].value_blob(), "replace")[0]
-    sarOp = sqlite.getTransObject(values[1].value_int())
-    if sarOp.testText(fileContents) == True:
+    nakedword = utf8Dec(values[0].value_blob(), "replace")[0]
+    fileContents = utf8Dec(values[1].value_blob(), "replace")[0]
+    sarOp = sqlite.getTransObject(values[2].value_int())
+    if sarOp.testPage(nakedword, fileContents) == True:
         context.result_int(1)
     else:
         context.result_null()
 
-#     patterns = sqlite.getTransObject(values[1].value_int())       
-# 
-#     for pattern in patterns:   # self.patterns:
-#         if not pattern.search(fileContents):
-#             context.result_null()
-#             return
-# 
-#     context.result_int(1)
+
+def sqlite_nakedWord(context, values):
+    """
+    Sqlite user-defined function "nakedWord" to remove brackets around
+    wiki words. Needed for version update from 4 to 5.
+    """
+    nakedword = wikiWordToLabel(utf8Dec(values[0].value_text(), "replace")[0])
+    context.result_text(utf8Enc(nakedword)[0])
 
 
 
@@ -573,11 +575,12 @@ def registerSqliteFunctions(connwrap):
     Register necessary user-defined functions for a connection
     """
     connwrap.getConnection().createFunction("textToBlob", 1, sqlite_textToBlob)
-    connwrap.getConnection().createFunction("testMatch", 2, sqlite_testMatch)
+    connwrap.getConnection().createFunction("testMatch", 3, sqlite_testMatch)
     connwrap.getConnection().createFunction("latin1ToUtf8", 1, sqlite_latin1ToUtf8)
     connwrap.getConnection().createFunction("utf8ToLatin1", 1, sqlite_utf8ToLatin1)
     connwrap.getConnection().createFunction("mbcsToUtf8", 1, sqlite_mbcsToUtf8)
     connwrap.getConnection().createFunction("utf8ToMbcs", 1, sqlite_utf8ToMbcs)
+    connwrap.getConnection().createFunction("nakedWord", 1, sqlite_nakedWord)
 
 
 def registerUtf8Support(connwrap):
@@ -627,13 +630,13 @@ def checkDatabaseFormat(connwrap):
     formatver = getSettingsInt(connwrap, "formatver")
     writecompatver = getSettingsInt(connwrap, "writecompatver")
 
-    if writecompatver > 4:
+    if writecompatver > 5:
         # TODO: Check compatibility
         
         return 2, "Database has unknown format version='%i'" \
                 % formatver
                 
-    if formatver < 4:
+    if formatver < 5:
         return 1, "Update needed, current format version='%i'" \
                 % formatver
         
@@ -856,13 +859,29 @@ def updateDatabase(connwrap):
 
     # --- WikiPadCompact 1.5u reached (formatver=4, writecompatver=4,
     #         readcompatver=4) ---
+    
+    if formatver == 4:
+        # Remove brackets from all wikiword references in database
+        connwrap.execSql("update or ignore wikiwordcontent set "
+                "word=nakedWord(word)")
+        connwrap.execSql("update or ignore wikiwordprops set "
+                "word=nakedWord(word)")
+        connwrap.execSql("update or ignore todos set "
+                "word=nakedWord(word)")
+        connwrap.execSql("update or ignore wikirelations set "
+                "word=nakedWord(word), "
+                "relation=nakedWord(relation)")
+
+    # --- WikiPad(Compact) 1.6beta2 reached (formatver=5, writecompatver=5,
+    #         readcompatver=5) ---
+
 
     # Write format information
     connwrap.executemany("insert or replace into settings(key, value) "+
             "values (?, ?)", (
-        ("formatver", "4"),  # Version of database format the data was written
-        ("writecompatver", "4"),  # Lowest format version which is write compatible
-        ("readcompatver", "4"),  # Lowest format version which is read compatible
+        ("formatver", "5"),  # Version of database format the data was written
+        ("writecompatver", "5"),  # Lowest format version which is write compatible
+        ("readcompatver", "5"),  # Lowest format version which is read compatible
         ("branchtag", "WikidPadCompact")  # Tag of the WikidPad branch
         )   )
 
@@ -873,7 +892,7 @@ def updateDatabase(connwrap):
         
     
 # class WikiDBExistsException(WikiDataException): pass
-class WikiDBExistsException(Exception): pass
+# class WikiDBExistsException(Exception): pass
 
 
 """

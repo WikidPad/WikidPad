@@ -15,7 +15,7 @@ from wxPython.wx import *
 from wxPython.stc import *
 import wxPython.xrc as xrc
 
-from wxHelper import GUI_ID, getTextFromClipboard
+from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard
 from MiscEvent import KeyFunctionSink
 
 import WikiFormatting
@@ -188,26 +188,28 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def Copy(self):
-        cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
-        udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
-        realuni = lineendToOs(self.GetSelectedText())
-        arruni = array.array("u")
-        arruni.fromunicode(realuni+u"\x00")
-        rawuni = arruni.tostring()
-        # print "Copy", repr(realuni), repr(rawuni), repr(mbcsenc(realuni)[0])
-        udataob.SetData(rawuni)
-        cdataob.SetData(mbcsEnc(realuni)[0]+"\x00")
+        copyTextToClipboard(self.GetSelectedText())
 
-        dataob = wxDataObjectComposite()
-        dataob.Add(udataob)
-        dataob.Add(cdataob)
-
-        cb = wxTheClipboard
-        cb.Open()
-        try:
-            cb.SetData(dataob)
-        finally:
-            cb.Close()
+#         cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
+#         udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
+#         realuni = lineendToOs(self.GetSelectedText())
+#         arruni = array.array("u")
+#         arruni.fromunicode(realuni+u"\x00")
+#         rawuni = arruni.tostring()
+#         # print "Copy", repr(realuni), repr(rawuni), repr(mbcsenc(realuni)[0])
+#         udataob.SetData(rawuni)
+#         cdataob.SetData(mbcsEnc(realuni)[0]+"\x00")
+# 
+#         dataob = wxDataObjectComposite()
+#         dataob.Add(udataob)
+#         dataob.Add(cdataob)
+# 
+#         cb = wxTheClipboard
+#         cb.Open()
+#         try:
+#             cb.SetData(dataob)
+#         finally:
+#             cb.Close()
 
 
     def Paste(self):

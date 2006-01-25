@@ -272,7 +272,7 @@ class WikiData:
     # ---------- Renaming/deleting pages with cache update ----------
 
     def renameWord(self, word, toWord):
-        if not self.pWiki.getFormatting().isWikiWord(toWord):
+        if not self.pWiki.getFormatting().isNakedWikiWord(toWord):
             raise WikiDataException, u"'%s' is an invalid wiki word" % toWord
 
         if self.isDefinedWikiWord(toWord):
@@ -475,40 +475,40 @@ class WikiData:
         self.connWrap.execSql(
                 "delete from wikirelations where word = ?", (fromWord,))
 
+
     # TODO Maybe optimize
-    def getAllSubWords(self, word):
+    def getAllSubWords(self, words, level=-1):
         """
         Return all words which are children, grandchildren, etc.
-        of word and the word itself. Used by the "export/print Sub-Tree"
+        of words and the words itself. Used by the "export/print Sub-Tree"
         functions. All returned words are real existing words, no aliases.
         """
-        word = self.getAliasesWikiWord(word)
-        result = {word: None}
-        checkList = [word]
+        checkList = [(self.getAliasesWikiWord(w), 0) for w in words]
+        checkList.reverse()
+        
+        resultSet = {}
+        result = []
 
         while len(checkList) > 0:
-            toCheck = checkList.pop()
-            
-            for c in self.getChildRelationships(toCheck, existingonly=True,
-                    selfreference=False):
-                c = self.getAliasesWikiWord(c)
-                if not result.has_key(c):
-                    result[c] = None
-                    checkList.append(c)
-                    
-        keys = result.keys()
-        keys.sort()
-        
-        return keys
+            toCheck, chLevel = checkList.pop()
+            if resultSet.has_key(toCheck):
+                continue
 
-#         subWords = []
-#         if (includeRoot):
-#             subWords.append(word)
-#         allWords = self.getAllDefinedPageNames()
-#         for allWordsItem in allWords:
-#             if allWordsItem != word and self.findBestPathFromWordToWord(allWordsItem, word):
-#                 subWords.append(allWordsItem)
-#         return subWords
+            result.append(toCheck)
+            resultSet[toCheck] = None
+            
+            if level > -1 and chLevel >= level:
+                continue  # Don't go deeper
+            
+            children = self.getChildRelationships(toCheck, existingonly=True,
+                    selfreference=False)
+                    
+            children = [(self.getAliasesWikiWord(c), chLevel + 1)
+                    for c in children]
+            children.reverse()
+            checkList += children
+
+        return result
 
 
     def findBestPathFromWordToWord(self, word, toWord):
@@ -802,18 +802,25 @@ class WikiData:
 #         return result
 
 
-    def search(self, sarOp):
+    def search(self, sarOp, applOrdering=True):
         """
         Search all content using the SearchAndReplaceOperation sarOp and
         return list of all page names match the search criteria.
         This version uses sqlite user-defined functions.
         TODO: Use search_fallback for other databases (currently not working!)
         """
-        result = self.connWrap.execSqlQuerySingleColumn(
-                "select word from wikiwordcontent where "+\
-                "testMatch(content, ?)", (sqlite.addTransObject(sarOp),))
-
-        sqlite.delTransObject(sarOp)
+        sarOp.beginWikiSearch(self)
+        try:
+            result = self.connWrap.execSqlQuerySingleColumn(
+                    "select word from wikiwordcontent where "+\
+                    "testMatch(word, content, ?)", (sqlite.addTransObject(sarOp),))
+    
+            sqlite.delTransObject(sarOp)
+            
+            if applOrdering:
+                result = sarOp.applyOrdering(result)
+        finally:
+            sarOp.endWikiSearch()
 
         return result
 
@@ -1147,8 +1154,8 @@ class WikiData:
             content = fp.read()
             fp.close()
             content = fileContentToUnicode(content)
-            word = self.pWiki.getFormatting().normalizeWikiWordImport(word)
-            if word:
+#             word = self.pWiki.getFormatting().normalizeWikiWordImport(word)
+            if self.pWiki.getFormatting().isNakedWikiWord(word):
                 self.setContent(word, content, moddate=stat(fn).st_mtime)
 #             self.connWrap.execSql("insert or replace into wikiwordcontent(word, "+\
 #                     "content, modified) values (?,?,?)", (word, sqlite.Binary(content), \

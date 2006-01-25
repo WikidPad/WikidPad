@@ -263,6 +263,12 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         setWindowPos(self, (self.configuration.getint("main", "pos_x"),
                 self.configuration.getint("main", "pos_y")))
 
+        # Set the auto save timing
+        self.autoSaveDelayAfterKeyPressed = self.configuration.getint(
+                "main", "auto_save_delay_key_pressed")
+        self.autoSaveDelayAfterDirty = self.configuration.getint(
+                "main", "auto_save_delay_dirty")
+
         # Should reduce resources usage (less icons)
         # Do not set self.lowResources after initialization here!
         self.lowResources = self.configuration.getboolean("main", "lowresources")
@@ -2446,6 +2452,10 @@ These are your default global settings.
 
         if result == wxID_OK:
             # Perform operations to reset GUI parts after option changes
+            self.autoSaveDelayAfterKeyPressed = self.configuration.getint(
+                    "main", "auto_save_delay_key_pressed")
+            self.autoSaveDelayAfterDirty = self.configuration.getint(
+                    "main", "auto_save_delay_dirty")
             self.setShowOnTray()
             self.setHideUndefined()
             self.fireMiscEventKeys(("options changed",))
@@ -2498,7 +2508,7 @@ These are your default global settings.
                 
             elif typ in (GUI_ID.MENU_EXPORT_SUB_AS_PAGE,
                     GUI_ID.MENU_EXPORT_SUB_AS_PAGES):
-                wordList = self.wikiData.getAllSubWords(self.currentWikiWord)
+                wordList = self.wikiData.getAllSubWords([self.currentWikiWord])
             else:
                 wordList = (self.currentWikiWord,)
                 
@@ -2509,7 +2519,6 @@ These are your default global settings.
             
             expclass().export(self, self.wikiData, wordList, exptype, dest,
                     False, addopt)
-
 
             self.configuration.set("main", "last_active_dir", dest)
 
@@ -2657,18 +2666,21 @@ These are your default global settings.
             return
         # check if the current wiki page needs to be saved
         if self.currentWikiPage:
-            (saveDirty, updateDirty) = self.currentWikiPage.getDirty()
-            if saveDirty or updateDirty:
+            (saveDirtySince, updateDirtySince) = \
+                    self.currentWikiPage.getDirtySince()
+            if saveDirtySince is not None:
                 currentTime = time()
                 # only try and save if the user stops typing
-                if (currentTime - self.editor.lastKeyPressed) > 3:
-                    if saveDirty:
-                        if (currentTime - self.currentWikiPage.lastSave) > 15:
-                            self.saveCurrentWikiPage()
-                            self.wikiData.commit()  # Only necessary for WPCompact
-                    elif updateDirty:
-                        if (currentTime - self.currentWikiPage.lastUpdate) > 5:
-                            self.updateRelationships()
+                if (currentTime - self.editor.lastKeyPressed) > \
+                        self.autoSaveDelayAfterKeyPressed:
+#                     if saveDirty:
+                    if (currentTime - saveDirtySince) > \
+                            self.autoSaveDelayAfterDirty:
+                        self.saveCurrentWikiPage()
+                        self.wikiData.commit()
+#                     elif updateDirty:
+#                         if (currentTime - self.currentWikiPage.lastUpdate) > 5:
+#                             self.updateRelationships()
 
 
     def OnWikiExit(self, evt):
