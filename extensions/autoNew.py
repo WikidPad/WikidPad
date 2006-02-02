@@ -48,20 +48,21 @@ def describeMenuItems(wiki):
     return ((autoNew, "Create new page\tShift-Ctrl-N", "Create new page"),)
 
 
-_testRE = re.compile(ur"^\[New[0-9]{6}\]$")
+_testRE = re.compile(ur"^New[0-9]{6}$")
 
 
 def autoNew(wiki, evt):
     wiki.saveCurrentWikiPage()
-    candidates = wiki.wikiData.getWikiWordsStartingWith(u"[New",
+    candidates = wiki.wikiData.getWikiWordsStartingWith(u"New",
             includeAliases=False)
-    
+            
     candidates = filter(lambda w: _testRE.match(w), candidates)
-    numbers = map(lambda w: int(w[4:-1]), candidates)
+    numbers = map(lambda w: int(w[3:]), candidates)
+
     if len(numbers) == 0:
         nextNumber = 1
     else:
         nextNumber = max(numbers) + 1
-    wiki.openWikiPage(u"[New%06i]" % nextNumber)
+    wiki.openWikiPage(u"New%06i" % nextNumber)
     wiki.editor.SetFocus()
 

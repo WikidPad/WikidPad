@@ -207,7 +207,7 @@ class WikiFormatting:
 
     def isCcWikiWord(self, word):
         """
-        Test if word is syntactically a camel-case wiki word
+        Test if word is syntactically a naked camel-case wiki word
         """
         if matchWhole(self.WikiWordEditorRE, word):
             return True
@@ -338,7 +338,7 @@ class WikiFormatting:
 
     def wikiWordToLabel(self, word):
         """
-        Strip '[' and ']' if non camelcase word and return it
+        Strip '[' and ']' if present and return naked word
         """
         if word.startswith(self.wikiWordStart) and \
                 word.endswith(self.wikiWordEnd):

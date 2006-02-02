@@ -247,27 +247,40 @@ class WikiWordNode(AbstractNode):
 
 
         # apply the global props based on the props of this node
-        for (key, values) in props.items():
-            for val in values:
-                for p in _SETTABLE_PROPS:
+        for p in _SETTABLE_PROPS:
+            # Check per page props first
+            if props.has_key(p):
+                setattr(style, p, props[p][0])
+                continue
+                
+            for (key, values) in props.items():
+                for val in values:
                     gPropVal = globalProps.get(u"global.%s.%s.%s" % (key, val, p))
-                    if not gPropVal:
+                    while not gPropVal:
                         gPropVal = globalProps.get(u"global.%s.%s" % (key, p))
+                        dotpos = key.rfind(u".")
+                        if dotpos == -1:
+                            break
+                        key = key[:dotpos]
+
+#                     if not gPropVal:
+#                         gPropVal = globalProps.get(u"global.%s.%s" % (key, p))
                     if gPropVal:
                         setattr(style, p, gPropVal)
                    
-        # Overwrite with per page props, if available         
-        # color. let user override global color
-        if props.has_key("color"):
-            style.color = props["color"][0]
-            # self.setNodeColor(treeNode, props["color"][0])
 
-        # icon. let user override global icon
-        if props.has_key("icon"):
-            style.icon = props["icon"][0]
-            # self.setNodeImage(treeNode, props["icon"][0])
-        if props.has_key("bold"):
-            style.bold = props["bold"][0]
+#         # Overwrite with per page props, if available         
+#         # color. let user override global color
+#         if props.has_key("color"):
+#             style.color = props["color"][0]
+#             # self.setNodeColor(treeNode, props["color"][0])
+# 
+#         # icon. let user override global icon
+#         if props.has_key("icon"):
+#             style.icon = props["icon"][0]
+#             # self.setNodeImage(treeNode, props["icon"][0])
+#         if props.has_key("bold"):
+#             style.bold = props["bold"][0]
 
         return style
 

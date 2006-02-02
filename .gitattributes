@@ -292,6 +292,7 @@ WikidPadHelp/data/index/TEXT_INDEX.grl -text
 WikidPadHelp/data/index/WORDS.grl -text
 WikidPadHelp/data/index/wiki_idx.gfd -text
 WikidPadHelp/data/wikidb.gfd -text
+/WikidPadStarter.py -text
 /build.bat -text
 docs/api.txt -text
 docs/dev-setup.txt -text

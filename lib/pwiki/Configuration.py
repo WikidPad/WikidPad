@@ -257,12 +257,6 @@ GLOBALDEFAULTS = {
     ("main", "auto_save_delay_key_pressed"): "3",  # Seconds to wait after last key pressed and ...
     ("main", "auto_save_delay_dirty"): "15",  # secs. to wait after page became dirty before auto save
      
-    ("main", "indentation_guides"): "True",
-    ("main", "windowmode"): "0",   # The value must be a number, not a truth value!
-    ("main", "lowresources"): "0",
-    ("main", "showontray"): "0",
-    ("main", "strftime"): u"%x %I:%M %p",  # time format
-    
     ("main", "hideundefined"): "False", # hide undefined wikiwords in tree
     ("main", "tree_auto_follow"): "True", # The tree selection follows when opening a wiki word
     ("main", "tree_update_after_save"): "True", # The tree is updated after a save
@@ -288,7 +282,14 @@ GLOBALDEFAULTS = {
 
     ("main", "print_margins"): "0,0,0,0", # Left, upper, right, lower page margins on printing
     ("main", "print_plaintext_font"): "", # Font description for printing in plain text mode
-    ("main", "print_plaintext_wpseparator"): "\\n\\n\\n\\n" # How to separate wikiword pages (uses re escaping)
+    ("main", "print_plaintext_wpseparator"): "\\n\\n\\n\\n", # How to separate wikiword pages (uses re escaping)
+
+    ("main", "indentation_guides"): "True",
+    ("main", "windowmode"): "0",   # The value must be a number, not a truth value!
+    ("main", "lowresources"): "0",
+    ("main", "showontray"): "0",
+    ("main", "strftime"): u"%x %I:%M %p",  # time format
+    ("main", "allow_importScripts"): "0"  # Allow the use of import_scripts property? 0: None; 1: allow local import_scripts; 2: allow also global.import_scripts
     }
 
 

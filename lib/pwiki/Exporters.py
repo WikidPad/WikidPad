@@ -10,9 +10,7 @@ from time import localtime
 import urllib_red as urllib
 
 
-from StringOps import mbcsWriter, utf8Writer, utf8Enc, mbcsEnc, strToBool, \
-        Token, BOM_UTF8, unicodeToCompFilename, wikiWordToLabel, escapeHtml, \
-        removeBracketsFilename
+from StringOps import *
 
 from WikiExceptions import WikiWordNotFoundException
 import WikiFormatting
@@ -22,12 +20,6 @@ from wxPython.wx import *
 import wxPython.xrc as xrc
 
 from wxHelper import XrcControls
-
-
-def splitIndent(text):
-    pl = len(text)
-    text = text.lstrip()
-    return (text, pl-len(text))
 
 
 def removeBracketsToCompFilename(fn):

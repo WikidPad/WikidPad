@@ -196,6 +196,16 @@ def splitkeep(s, delim):
     return result[:-1]
 
 
+def splitIndent(text):
+    """
+    Return tuple (t, d) where d is deepness of indentation and t is text
+    without the indentation
+    """
+    pl = len(text)
+    text = text.lstrip()
+    return (text, pl-len(text))
+
+
 def matchWhole(reObj, s):
     """
     reObj -- Compiled regular expression
@@ -226,9 +236,44 @@ def escapeHtml(data):
             replace(u"<", u"&lt;").replace(u"\n", u"<br />\n")
 
 
-def unescapeRe(text):
+def escapeForIni(text, toEscape=u""):
     """
-    Unescape things like \n\f. Throws exception if unescaping fails
+    Return an escaped version of string. Always escaped will be backslash and
+    all characters with ASCII value < 32. Additional characters can be given in
+    the toEscape parameter (as unicode string, only characters < 128).
+    
+    Returns: unicode string
+    """
+    # Escape '\' and for readability escape \r \n \f and \t separately
+    text = text.replace(u"\\", u"\\x%02x" % ord("\\"))
+    
+    # Escape everything with ord < 32
+    for i in xrange(32):
+        text = text.replace(unichr(i), u"\\x%02x" % i)
+        
+    for c in toEscape:
+        text = text.replace(c, u"\\x%02x" % ord(c))
+    
+    return text
+
+
+def _unescapeForIniHelper(match):
+    return unichr(int(match.group(1), 16))
+
+def unescapeForIni(text):
+    """
+    Inverse of escapeForIni()
+    """
+    return re.sub(ur"\\x([0-9a-f]{2})", _unescapeForIniHelper, text)    
+
+
+def escapeWithRe(text):
+    return text.replace(u"\\", u"\\\\").replace("\n", "\\n").\
+            replace("\r", "\\r")
+
+def unescapeWithRe(text):
+    """
+    Unescape things like \n or \f. Throws exception if unescaping fails
     """
     return re.sub(u"", text, u"", 1)
 

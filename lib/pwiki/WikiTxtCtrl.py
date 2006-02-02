@@ -658,13 +658,31 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if startPos == endPos or index > 0:
             # get the text of the current page
             text = self.GetText()
+            
+            importSecurity = self.pWiki.configuration.getint(
+                    "main", "allow_importScripts")
 
             # process script imports
-            if self.pWiki.currentWikiPage.getProperties().has_key("import_scripts"):
-                scripts = self.pWiki.currentWikiPage.getProperties()["import_scripts"]
-                for script in scripts:
+            if importSecurity > 0: # Local import_scripts properties allowed
+                if self.pWiki.currentWikiPage.getProperties().has_key(
+                        "import_scripts"):
+                    scripts = self.pWiki.currentWikiPage.getProperties()[
+                            "import_scripts"]
+                    for script in scripts:
+                        try:
+                            importPage = self.pWiki.wikiData.getPage(script)
+                            content = importPage.getContent()
+                            text = text + "\n" + content
+                        except:
+                            pass
+
+            if importSecurity > 1: # global.import_scripts property allowed
+                globscript = self.pWiki.getWikiData().getGlobalProperties().get(
+                        "global.import_scripts")
+    
+                if globscript is not None:
                     try:
-                        importPage = self.pWiki.wikiData.getPage(script)
+                        importPage = self.pWiki.wikiData.getPage(globscript)
                         content = importPage.getContent()
                         text = text + "\n" + content
                     except:

@@ -1,5 +1,5 @@
 [Files]
-Source: dist\WikidPad.exe; DestDir: {app}; Components: Program_files
+Source: dist\WikidPad.exe; DestDir: {app}; Components: Program_files; Flags: replacesameversion
 Source: dist\export\wikistyle.css; DestDir: {app}\export\; Components: Program_files; Flags: confirmoverwrite
 Source: dist\extensions\EvalLibrary.py; DestDir: {app}\extensions\; Components: Program_files
 Source: dist\extensions\KeyBindings.py; DestDir: {app}\extensions\; Components: Program_files

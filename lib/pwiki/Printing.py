@@ -10,7 +10,7 @@ import wxPython.xrc as xrc
 
 from wxHelper import *
 
-from StringOps import escapeHtml, unescapeRe
+from StringOps import escapeHtml, unescapeWithRe
 
 from SearchAndReplaceDialogs import PageListConstructionDialog
 from SearchAndReplace import ListPagesOperation
@@ -292,7 +292,7 @@ class PlainTextPrint:
                 contents[i] += "\n"
                 
         try:
-            separator = unescapeRe(self.pWiki.configuration.get(
+            separator = unescapeWithRe(self.pWiki.configuration.get(
                     "main", "print_plaintext_wpseparator"))
         except:
             separator = u"\n\n\n\n"   # TODO Error message

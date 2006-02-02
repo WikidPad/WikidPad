@@ -30,7 +30,8 @@ from WikiExceptions import *
 
 import Exporters
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
-        wikiWordToLabel
+        wikiWordToLabel, BOM_UTF8, fileContentToUnicode, splitIndent, \
+        unescapeWithRe
 import WikiFormatting
 
 from PluginManager import *
@@ -155,10 +156,11 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
                          style=wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
         MiscEventSourceMixin.__init__(self)
 
-        # where is the WikidPad.config file
+        self.sleepMode = False  # Is program in low resource sleep mode?
+
+        # Locate the global configuration directory containing the WikidPad.config file
         globalConfigDir = None
         self.wikiAppDir = None
-        self.sleepMode = False  # Is program in low resource sleep mode?
 
         try:
             self.wikiAppDir = dirname(abspath(sys.argv[0]))
@@ -192,6 +194,24 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
         # initialize some variables
         self.globalConfigDir = globalConfigDir
+        
+        self.globalConfigSubDir = join(self.globalConfigDir, u".WikidPadGlobals")
+        if not exists(self.globalConfigSubDir):
+            os.mkdir(self.globalConfigSubDir)
+        # Create the "[TextBlocks].wiki" file in the global config subdirectory
+        # if the file doesn't exist yet.
+        tbLoc = join(self.globalConfigSubDir, u"[TextBlocks].wiki")
+        if not exists(tbLoc):
+            tbFile = open(tbLoc, "wa")
+            tbFile.write(BOM_UTF8)
+            tbFile.write(
+"""importance: high;a=[importance: high]\\n
+importance: low;a=[importance: low]\\n
+tree_position: 0;a=[tree_position: 0]\\n
+wrap: 80;a=[wrap: 80]\\n
+camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
+""")
+            tbFile.close()
         self.globalConfigLoc = join(globalConfigDir, u"WikidPad.config")
         self.configuration = createConfiguration()
 
@@ -201,10 +221,8 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         # defaults
         self.wikiData = None
         self.wikiConfigFilename = None
-        self.currentWikiWord = None
+#         self.currentWikiWord = None
         self.currentWikiPage = None
-#         self.historyPosition = 0
-#         self.wikiWordHistory = []
         self.lastCursorPositionInPage = {}
         self.iconLookupCache = {}
         self.wikiHistory = []
@@ -218,8 +236,6 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
              "openWikiWord", "newWikiWord", "openedWikiWord", "savingWikiWord",
              "savedWikiWord", "renamedWikiWord", "deletedWikiWord", "exit"] )
         # interfaces for menu and toolbar plugins
-#         self.editorFunctions = self.pluginManager.registerPluginAPI(("EditorFunctions",1), 
-#                                 ["describeMenuItem", "describeToolbarItem"])
         self.menuFunctions = self.pluginManager.registerPluginAPI(("MenuFunctions",1), 
                                 ["describeMenuItems"])
         self.toolbarFunctions = self.pluginManager.registerPluginAPI(("ToolbarFunctions",1), 
@@ -355,10 +371,19 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
     def getExtension(self, extensionName, fileName):
         extensionFileName = join(self.wikiAppDir, 'user_extensions', fileName)
-        if not exists(extensionFileName):
-            extensionFileName = join(self.wikiAppDir, 'extensions', fileName)
-        extensionFile = open(extensionFileName)
-        return importCode(extensionFile, extensionName)
+        if exists(extensionFileName):
+            extFile = open(extensionFileName, "ra")
+            userExtension = extFile.read()
+            extFile.close()
+        else:
+            userExtension = None
+            
+        extensionFileName = join(self.wikiAppDir, 'extensions', fileName)
+        extFile = open(extensionFileName, "ra")
+        systemExtension = extFile.read()
+        extFile.close()
+        
+        return importCode(systemExtension, userExtension, extensionName)
 
     def createDefaultGlobalConfig(self):
         self.configuration.createEmptyGlobalConfig(self.globalConfigLoc)
@@ -376,7 +401,9 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
 
     def getCurrentWikiWord(self):
-        return self.currentWikiWord
+        if self.currentWikiPage is None:
+            return None
+        return self.currentWikiPage.getWikiWord()
         
     def getWikiData(self):
         return self.wikiData
@@ -392,7 +419,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
     def fillIconLookupCache(self, createIconImageList=False):
         """
         Fills or refills the self.iconLookupCache (if createIconImageList is
-        false, it must exist already)
+        false, self.iconImageList must exist already)
         If createIconImageList is true, self.iconImageList is also
         built
         """
@@ -638,6 +665,87 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         return wikiMenu
 
 
+    def buildTextBlocksMenu(self):
+        tbLoc = join(self.globalConfigSubDir, u"[TextBlocks].wiki")
+        try:
+            tbFile = open(tbLoc, "ra")
+            tbContent = tbFile.read()
+            tbFile.close()
+            tbContent = fileContentToUnicode(tbContent)
+        except:
+            tbContent = u""
+        
+        stack = [[0, u"Text blocks", wxMenu()]]
+
+        for line in tbContent.split(u"\n"):
+            if line.strip() == u"":
+                continue
+
+            # Parse line                
+            text, deep = splitIndent(line)
+            try:
+                entryPrefix, entryContent = text.split(u"=", 1)
+            except:
+                continue
+                
+            entryPrefixes = entryPrefix.split(u";")
+            entryTitle = entryPrefixes[0]
+            if len(entryPrefixes) > 1:
+                entryFlags = entryPrefixes[1]
+            else:
+                entryFlags = u""
+
+            if entryTitle == u"":
+                entryTitle = entryContent[:60]
+                entryTitle = entryTitle.split("\\n", 1)[0]
+
+            try:
+                entryContent = unescapeWithRe(entryContent)
+                entryTitle = unescapeWithRe(entryTitle)
+            except:
+                continue
+
+            # Adjust the stack
+            if deep > stack[-1][0]:
+                stack.append([deep, None, wxMenu()])
+            else:
+                while stack[-1][0] > deep:
+                    title, menu = stack.pop()[1:3]
+                    if title is None:
+                        title = u"<No title>"
+                    
+                    stack[-1][2].AppendMenu(wxNewId(), title, menu)
+            
+            # Create new entry if necessary
+            title, menu = stack[-1][1:3]
+            if title is None:
+                # Entry defines title
+                stack[-1][1] = entryTitle
+                
+            if entryContent == u"":
+                continue
+
+            menuID=wxNewId()
+            menuItem = wxMenuItem(menu, menuID, entryTitle)
+            menu.AppendItem(menuItem)
+
+            if u"a" in entryFlags:
+                EVT_MENU(self, menuID, lambda evt, content=entryContent:
+                        self.appendText(content))
+            else:
+                EVT_MENU(self, menuID, lambda evt, content=entryContent:
+                        self.addText(content))
+
+        # Finally empty stack
+        while len(stack) > 1:
+            title, menu = stack.pop()[1:3]
+            if title is None:
+                title = u"<No title>"
+            
+            stack[-1][2].AppendMenu(wxNewId(), title, menu)
+
+        return stack[-1][2]
+
 
     def buildMainMenu(self):
         # ------------------------------------------------------------------------------------
@@ -683,7 +791,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
         menuID=wxNewId()
         wikiWordMenu.Append(menuID, '&View Parents\t' + self.keyBindings.ViewParents, 'View Parents Of Current Wiki Word')
-        EVT_MENU(self, menuID, lambda evt: self.viewParents(self.currentWikiWord))
+        EVT_MENU(self, menuID, lambda evt: self.viewParents(self.getCurrentWikiWord()))
 
         menuID=wxNewId()
         wikiWordMenu.Append(menuID, 'View &Parentless Nodes\t' + self.keyBindings.ViewParentless, 'View nodes with no parent relations')
@@ -691,7 +799,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
         menuID=wxNewId()
         wikiWordMenu.Append(menuID, 'View &Children\t' + self.keyBindings.ViewChildren, 'View Children Of Current Wiki Word')
-        EVT_MENU(self, menuID, lambda evt: self.viewChildren(self.currentWikiWord))
+        EVT_MENU(self, menuID, lambda evt: self.viewChildren(self.getCurrentWikiWord()))
 
         self.addMenuItem(wikiWordMenu, 'Set As &Root\t' + self.keyBindings.SetAsRoot,
                 'Set current wiki word as tree root',
@@ -788,43 +896,46 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
         formattingMenu.AppendSeparator()
 
-        attributesMenu = wxMenu()
-        formattingMenu.AppendMenu(wxNewId(), 'Attributes', attributesMenu)
+        formattingMenu.AppendMenu(wxNewId(), '&Text blocks',
+                self.buildTextBlocksMenu())
 
-        menuID=wxNewId()
-        menuItem = wxMenuItem(attributesMenu, menuID, 'importance: high')
-        attributesMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.insertAttribute('importance', 'high'))
-
-        menuID=wxNewId()
-        menuItem = wxMenuItem(attributesMenu, menuID, 'importance: low')
-        attributesMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.insertAttribute('importance', 'low'))
-
-        menuID=wxNewId()
-        menuItem = wxMenuItem(attributesMenu, menuID, 'tree_position: 0')
-        attributesMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.insertAttribute('tree_position', '0'))
-
-        menuID=wxNewId()
-        menuItem = wxMenuItem(attributesMenu, menuID, 'wrap: 80')
-        attributesMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.insertAttribute('wrap', '80'))
-
-        self.addMenuItem(attributesMenu, 'camelCaseWordsEnabled: false', '',
-                lambda evt: self.insertAttribute('camelCaseWordsEnabled', 'false'))
+#         attributesMenu = wxMenu()
+#         formattingMenu.AppendMenu(wxNewId(), 'Attributes', attributesMenu)
+# 
+#         menuID=wxNewId()
+#         menuItem = wxMenuItem(attributesMenu, menuID, 'importance: high')
+#         attributesMenu.AppendItem(menuItem)
+#         EVT_MENU(self, menuID, lambda evt: self.insertAttribute('importance', 'high'))
+# 
+#         menuID=wxNewId()
+#         menuItem = wxMenuItem(attributesMenu, menuID, 'importance: low')
+#         attributesMenu.AppendItem(menuItem)
+#         EVT_MENU(self, menuID, lambda evt: self.insertAttribute('importance', 'low'))
+# 
+#         menuID=wxNewId()
+#         menuItem = wxMenuItem(attributesMenu, menuID, 'tree_position: 0')
+#         attributesMenu.AppendItem(menuItem)
+#         EVT_MENU(self, menuID, lambda evt: self.insertAttribute('tree_position', '0'))
+# 
+#         menuID=wxNewId()
+#         menuItem = wxMenuItem(attributesMenu, menuID, 'wrap: 80')
+#         attributesMenu.AppendItem(menuItem)
+#         EVT_MENU(self, menuID, lambda evt: self.insertAttribute('wrap', '80'))
+# 
+#         self.addMenuItem(attributesMenu, 'camelCaseWordsEnabled: false', '',
+#                 lambda evt: self.insertAttribute('camelCaseWordsEnabled', 'false'))
 
 
         # Build icon menu
 
         if self.lowResources:
             # Add only menu item for icon select dialog
-            self.addMenuItem(attributesMenu, 'icons',
+            self.addMenuItem(formattingMenu, 'Add icon property',
                     'Open icon select dialog', lambda evt: self.showIconSelectDialog())
         else:
             # Build full submenu for icons
             iconsMenu = wxMenu()
-            attributesMenu.AppendMenu(wxNewId(), 'icons', iconsMenu)
+            formattingMenu.AppendMenu(wxNewId(), 'Add icon property', iconsMenu)
 
             iconsMenu1 = wxMenu()
             iconsMenu.AppendMenu(wxNewId(), 'A-C', iconsMenu1)
@@ -869,14 +980,13 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
                 EVT_MENU(self, menuID, insertIconAttribute)
 
         colorsMenu = wxMenu()
-        attributesMenu.AppendMenu(wxNewId(), 'colors', colorsMenu)
 
         colorsMenu1 = wxMenu()
         colorsMenu.AppendMenu(wxNewId(), 'A-L', colorsMenu1)
         colorsMenu2 = wxMenu()
         colorsMenu.AppendMenu(wxNewId(), 'M-Z', colorsMenu2)
 
-        for cn in _COLORS:
+        for cn in _COLORS:    # ["BLACK"]:
             colorsSubMenu = None
             if cn[0] <= 'L':
                 colorsSubMenu = colorsMenu1
@@ -899,6 +1009,8 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
             def insertColorAttribute(evt, colorId=cn):
                 self.insertAttribute("color", colorId)
             EVT_MENU(self, menuID, insertColorAttribute)
+
+        formattingMenu.AppendMenu(wxNewId(), 'Add color property', colorsMenu)
 
 
 
@@ -1670,10 +1782,8 @@ These are your default global settings.
         # OK, things look good
 
         # Reset some of the members
-        self.currentWikiWord = None
+#         self.currentWikiWord = None
         self.currentWikiPage = None
-#         self.historyPosition = 0
-#         self.wikiWordHistory = []
 
         # set the member variables.
         self.wikiConfigFilename = wikiConfigFilename
@@ -1733,7 +1843,8 @@ These are your default global settings.
         """
         # make sure the root has a relationship to the ScratchPad
         # self.currentWikiPage.addChildRelationship("ScratchPad")
-        self.tree.setRootByWord(self.currentWikiWord)
+        if self.getCurrentWikiWord() is not None:
+            self.tree.setRootByWord(self.getCurrentWikiWord())
 
 
     def closeWiki(self, saveState=True):
@@ -1776,7 +1887,7 @@ These are your default global settings.
             return
 
         # don't reopen the currently open page
-        if (wikiWord == self.currentWikiWord) and not forceReopen:
+        if (wikiWord == self.getCurrentWikiWord()) and not forceReopen:
             # self.tree.buildTreeForWord(self.currentWikiWord)  # TODO Needed?
             self.statusBar.SetStatusText(uniToGui(u"Wiki word '%s' already open" %
                     wikiWord), 0)
@@ -1788,7 +1899,8 @@ These are your default global settings.
 
             # save the cursor position of the current page so that if
             # the user comes back we can put the cursor in the right spot.
-            self.lastCursorPositionInPage[self.currentWikiWord] = self.editor.GetCurrentPos();
+            self.lastCursorPositionInPage[self.getCurrentWikiWord()] = \
+                    self.editor.GetCurrentPos();
 
         # trigger hook
         self.hooks.openWikiWord(self, wikiWord)
@@ -1797,8 +1909,8 @@ These are your default global settings.
         if (self.wikiData.isAlias(wikiWord)):
             wikiWord = self.wikiData.getAliasesWikiWord(wikiWord)
 
-        # set the current wikiword
-        self.currentWikiWord = wikiWord
+#         # set the current wikiword
+#         self.currentWikiWord = wikiWord
 
         # fetch the page info from the database
         try:
@@ -1809,18 +1921,33 @@ These are your default global settings.
             self.hooks.newWikiWord(self, wikiWord)
 
         # set the editor text
-        content = u""
+        content = None
 
         try:
             content = self.currentWikiPage.getContent()
             self.statusBar.SetStatusText(uniToGui(u"Opened wiki word '%s'" %
-                    self.currentWikiWord), 0)
+                    self.getCurrentWikiWord()), 0)
         except WikiFileNotFoundException, e:
-            self.statusBar.SetStatusText(uniToGui("Wiki page not found, a new "+
-            "page will be created"), 0)
-            title = self.getWikiPageTitle(self.currentWikiWord)
-            content = u"++ %s\n\n" % title
-            self.lastCursorPositionInPage[self.currentWikiWord] = len(content)
+            self.statusBar.SetStatusText(uniToGui(u"Wiki page not found, a new "
+                    u"page will be created"), 0)
+
+            # Check if there is exactly one parent
+            parents = self.currentWikiPage.getParentRelationships()
+            if len(parents) == 1:
+                # Check if there is a template page
+                try:
+                    parentPage = self.wikiData.getPage(parents[0])
+                    templateWord = parentPage.getPropertyOrGlobal("template")
+                    templatePage = self.wikiData.getPage(templateWord)
+                    content = templatePage.getContent()
+                except (WikiWordNotFoundException, WikiFileNotFoundException):
+                    pass
+
+            if content is None:
+                title = self.getWikiPageTitle(self.getCurrentWikiWord())
+                content = u"++ %s\n\n" % title
+
+            self.lastCursorPositionInPage[self.getCurrentWikiWord()] = len(content)
 
         # get the properties that need to be checked for options
         pageProps = self.currentWikiPage.getProperties()
@@ -1861,7 +1988,7 @@ These are your default global settings.
 
         # set the title and add the word to the history
         self.SetTitle(uniToGui(u"Wiki: %s - %s" %
-                (self.wikiName,self.currentWikiWord)))
+                (self.wikiName, self.getCurrentWikiWord())))
 #         if addToHistory: self.addToHistory(wikiWord)
         self.configuration.set("main", "last_wiki_word", wikiWord)
 
@@ -1875,7 +2002,7 @@ These are your default global settings.
 
     def saveCurrentWikiPage(self, force = False):
         if force or self.currentWikiPage.getDirty()[0]:
-            return self.saveWikiPage(self.currentWikiWord, self.currentWikiPage,
+            return self.saveWikiPage(self.getCurrentWikiWord(), self.currentWikiPage,
                     self.editor.GetText())
         else:
             return None
@@ -1913,15 +2040,15 @@ These are your default global settings.
 
 
     def deleteCurrentWikiPage(self, **evtprops):
-        if self.currentWikiWord:
-            self.wikiData.deleteWord(self.currentWikiWord)
+        if self.getCurrentWikiWord():
+            self.wikiData.deleteWord(self.getCurrentWikiWord())
 
             # trigger hooks
-            self.hooks.deletedWikiWord(self, self.currentWikiWord)
+            self.hooks.deletedWikiWord(self, self.getCurrentWikiWord())
             
             p2 = evtprops.copy()
             p2["deleted page"] = True
-            p2["wikiWord"] = self.currentWikiWord
+            p2["wikiWord"] = self.getCurrentWikiWord()
             self.fireMiscEventProps(p2)
             
             self.pageHistory.goAfterDeletion()
@@ -1933,6 +2060,9 @@ These are your default global settings.
         Returns True if renaming was done successful.
         """
         wikiWord = self.getCurrentWikiWord()
+        if wikiWord is None:
+            return False
+
         try:
             self.saveCurrentWikiPage()
             self.wikiData.renameWord(wikiWord, toWikiWord)
@@ -1943,13 +2073,13 @@ These are your default global settings.
                 self.configuration.set("main", "last_wiki_word", toWikiWord)
                 self.saveCurrentWikiState()
                 self.configuration.loadWikiConfig(None)
-                
+
                 self.wikiHistory.remove(self.wikiConfigFilename)
                 renamedConfigFile = join(dirname(self.wikiConfigFilename),
                         u"%s.wiki" % toWikiWord)
                 os.rename(self.wikiConfigFilename, renamedConfigFile)
                 self.openWiki(renamedConfigFile)
-                
+
 #             self.currentWikiWord = toWikiWord
 #             self.currentWikiPage = None
 
@@ -1973,7 +2103,7 @@ These are your default global settings.
 
     def findCurrentWordInTree(self):
         try:
-            self.tree.buildTreeForWord(self.currentWikiWord, selectNode=True)
+            self.tree.buildTreeForWord(self.getCurrentWikiWord(), selectNode=True)
         except Exception, e:
             sys.stderr.write("%s\n" % e)
 
@@ -2197,9 +2327,13 @@ These are your default global settings.
 
 
     def showWikiWordRenameDialog(self, wikiWord=None, toWikiWord=None):
-        dlg = wxTextEntryDialog (self, uniToGui(u"Rename '%s' to:" %
-                self.currentWikiWord), u"Rename Wiki Word", self.currentWikiWord,
-                wxOK | wxCANCEL)
+        if self.getCurrentWikiWord() is None:
+            self.pWiki.displayErrorMessage(u"No real wiki word selected to rename")
+            return
+
+        dlg = wxTextEntryDialog(self, uniToGui(u"Rename '%s' to:" %
+                self.getCurrentWikiWord()), u"Rename Wiki Word",
+                self.getCurrentWikiWord(), wxOK | wxCANCEL)
 
         try:
             while dlg.ShowModal() == wxID_OK and \
@@ -2260,7 +2394,7 @@ These are your default global settings.
                 self.wikiData.applyStoredVersion(version[0])
                 self.rebuildWiki(skipConfirm=True)
                 ## self.tree.collapse()
-                self.openWikiPage(self.currentWikiWord, forceTreeSyncFromRoot=True, forceReopen=True)
+                self.openWikiPage(self.getCurrentWikiWord(), forceTreeSyncFromRoot=True, forceReopen=True)
                 ## self.findCurrentWordInTree()
             else:
                 dlg.Destroy()
@@ -2342,10 +2476,14 @@ These are your default global settings.
 
     def showWikiWordDeleteDialog(self, wikiWord=None):
         if not wikiWord:
-            wikiWord = self.currentWikiWord
+            wikiWord = self.getCurrentWikiWord()
 
         if wikiWord == u"ScratchPad":
             self.displayErrorMessage(u"The scratch pad cannot be deleted")
+            return
+            
+        if wikiWord is None:
+            self.displayErrorMessage(u"No real wiki word to delete")
             return
 
         dlg=wxMessageDialog(self,
@@ -2394,8 +2532,12 @@ These are your default global settings.
         self.findDlg.Show()
         
     def showReplaceTextByWikiwordDialog(self):
+        if self.getCurrentWikiWord() is None:
+            self.pWiki.displayErrorMessage(u"No real wiki word to modify")
+            return
+
         wikiWord = guiToUni(wxGetTextFromUser(u"Replace text by WikiWord:",
-                u"Replace by Wiki Word", self.currentWikiWord, self))
+                u"Replace by Wiki Word", self.getCurrentWikiWord(), self))
 
         if wikiWord:
             wikiWord = wikiWordToLabel(wikiWord)
@@ -2412,7 +2554,7 @@ These are your default global settings.
             text = self.editor.GetSelectedText()
             page = self.wikiData.createPage(wikiWord)
             self.editor.ReplaceSelection(wikiWord)
-            title = self.getWikiPageTitle(wikiWord)
+            title = self.getWikiPageTitle(wikiWord)   # TODO Respect template property?
             self.saveWikiPage(page.wikiWord, page, u"++ %s\n\n%s" % (title, text))
 
 
@@ -2508,10 +2650,19 @@ These are your default global settings.
                 
             elif typ in (GUI_ID.MENU_EXPORT_SUB_AS_PAGE,
                     GUI_ID.MENU_EXPORT_SUB_AS_PAGES):
-                wordList = self.wikiData.getAllSubWords([self.currentWikiWord])
+                if self.getCurrentWikiWord() is None:
+                    self.pWiki.displayErrorMessage(
+                            u"No real wiki word selected as root")
+                    return
+                wordList = self.wikiData.getAllSubWords([self.getCurrentWikiWord()])
             else:
-                wordList = (self.currentWikiWord,)
-                
+                if self.getCurrentWikiWord() is None:
+                    self.pWiki.displayErrorMessage(
+                            u"No real wiki word selected as root")
+                    return
+
+                wordList = (self.getCurrentWikiWord(),)
+
             expclass, exptype, addopt = self.EXPORT_PARAMS[typ]
             
             self.saveCurrentWikiPage(force=True)
@@ -2536,7 +2687,11 @@ These are your default global settings.
                         0, self))
 
                 self.tree.collapse()
-                self.openWikiPage(self.currentWikiWord, forceTreeSyncFromRoot=True)
+
+                # TODO Adapt for functional pages
+                if self.getCurrentWikiWord() is not None:
+                    self.openWikiPage(self.getCurrentWikiWord(),
+                            forceTreeSyncFromRoot=True)
             except Exception, e:
                 self.displayErrorMessage(u"Error rebuilding wiki", e)
                 traceback.print_exc()
@@ -2556,11 +2711,25 @@ These are your default global settings.
 
 
     def insertAttribute(self, name, value):
-        pos = self.editor.GetCurrentPos()
-        self.editor.GotoPos(self.editor.GetLength())
-        self.editor.AddText(u"\n\n[%s=%s]" % (name, value))
-        self.editor.GotoPos(pos)
+#         pos = self.editor.GetCurrentPos()
+#         self.editor.GotoPos(self.editor.GetLength())
+#         self.editor.AddText(u"\n\n[%s=%s]" % (name, value))
+#         self.editor.GotoPos(pos)
+        self.editor.AppendText(u"\n\n[%s=%s]" % (name, value))
         self.saveCurrentWikiPage()
+
+    def addText(self, text):
+        """
+        Add text to current active editor view
+        """
+        self.editor.AddText(text)
+
+
+    def appendText(self, text):
+        """
+        Append text to current active editor view
+        """
+        self.editor.AppendText(text)
 
     def insertDate(self):
         # strftime can't handle unicode correctly, so conversion is needed
@@ -2597,8 +2766,8 @@ These are your default global settings.
     def getWikiPageTitle(self, wikiWord):
         title = re.sub(ur'([A-Z\xc0-\xde]{2,})([a-z\xdf-\xff])', r'\1 \2', wikiWord)
         title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2', title)
-        if title.startswith("["):
-            title = title[1:len(title)-1]
+#         if title.startswith("["):
+#             title = title[1:len(title)-1]
         return title
 
 
@@ -2762,12 +2931,14 @@ class TaskBarIcon(wxTaskBarIcon):
         return tbMenu
 
 
-def importCode(code,name,add_to_sys_modules=0):
+def importCode(code, usercode, name, add_to_sys_modules=False):
     """
-    Import dynamically generated code as a module. code is the
-    object containing the code (a string, a file handle or an
-    actual compiled code object, same types as accepted by an
-    exec statement). The name is the name to give to the module,
+    Import dynamically generated code as a module. 
+    usercode and code are the objects containing the code
+    (a string, a file handle or an actual compiled code object,
+    same types as accepted by an exec statement), usercode
+    may be None. code is executed first, usercode thereafter
+    and can overwrite settings in code. The name is the name to give to the module,
     and the final argument says wheter to add it to sys.modules
     or not. If it is added, a subsequent import statement using
     name will return this module. If it is not added to sys.modules
@@ -2787,6 +2958,8 @@ def importCode(code,name,add_to_sys_modules=0):
     module = imp.new_module(name)
 
     exec code in module.__dict__
+    if usercode is not None:
+        exec usercode in module.__dict__
     if add_to_sys_modules:
         sys.modules[name] = module
 
