@@ -43,4 +43,5 @@ Ctrl-N          new Wiki
 Ctrl-Alt-O      open wiki
 Ctrl-Shift-B    view bookmarks
 F6              switch between tree and editor
+Ctrl-Tab        Switch between "Edit" and "Preview" tabs
 

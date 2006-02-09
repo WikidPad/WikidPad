@@ -1,0 +1,63 @@
+﻿++ Text Blocks
+
+In the "Editor" menu you have a submenu "Text blocks" which you can modify (currently only application-wide and only with a text editor) to contain arbitrary blocks of text you use often and which you can insert or append everywhere by chosing the appropriate menu item.
+
++++ Where is the file?
+
+The file is below your configuration directory which is either your home directory or the directory where you installed WikidPad. Your configuration directory can also be found by opening the "About" dialog (menu "Help") and scrolling down to bottom.
+
+The file named "[TextBlocks].wiki" you want to modify is in a directory ".WikidPadGlobals" which is in your configuration directory (the dot prefix is a Linux/Unix convention). If it does not exist when starting WikidPad, a default version is created automatically.
+
+You need an external text editor to modify the file, currently WikidPad itself can't open it.
+
+After you have modified and saved it, you can see the changes when selecting "Reread text blocks" at the bottom of the "Text blocks" menu. This reads "[TextBlocks].wiki" again and rebuilds the menu.
+
+
++++ File format
+
+Each line represents an own entry of the menu. The indentation controls if it is in the "Text blocks" menu itself or in a submenu.
+Each entry consists of a combination of title, flags and/or content. The title is shown in the menu, the content is inserted or appended when choosing the menu item, the flags control further details. 
+
+
+Examples:
+
+=This will be inserted
+
+The equal sign is always necessary! After the equal sign begins the content which can contain escape sequences with backslash, so you can write \n to insert a newline. The title is deduced from the beginning of the content. When selecting the menu item, content is inserted at cursor position.
+
+
+
+insert=This will be inserted
+
+Same as before but the title in the menu is now "insert".
+
+
+
+append;a=This will be appended
+
+Similar as before but the entry has the "a" flag (currently the only existing one) which means the content is appended to the end of the current wiki page.
+
+
+
+;a=This will be appended
+
+Same as before but title is ommitted here and therefore deduced from content.
+
+
+Submenu title=
+
+Title without content, only meaningful as first entry of a submenu to define the submenu title.
+
+
+
+A more complex example with one submenu (add these lines to "[TextBlocks].wiki" to see the effect of it):
+
+
+;a=Something interesting at the end
+    Submenu title=
+    item title=Something to insert
+    escaping=Escaping new lines as \\n...\n\n\nworks
+    all together;a=Show flag to append and item title \nand escape to new line
+
+
+

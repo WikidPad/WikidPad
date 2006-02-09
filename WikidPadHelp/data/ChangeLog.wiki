@@ -1,5 +1,42 @@
 ﻿++ Change Log
 
+Feb. 09, 2006 (1.6beta3)
+
+
+Changes:
+    * 'global.import_scripts' property introduced (see
+      [InlinePythonEval]) 
+    * Security option to control if scripts should be executed
+      and (global.)import_scripts property should be respected
+      (see [InlinePythonEval]) 
+
+    * 'template' property introduced to use content of one page
+      as template for children of another page. (see
+      [WikiDocumentAttributes]).
+
+    * Hierarchical global presentation deduction: e.g. a property
+      'global.work.color' will be applied to pages containing
+      'work', "work.somewhere", "work.somewhere.else" ...
+      properties, except there is e.g. a
+      'global.work.somwhere.else.color' property. This works for
+      'color', 'icon' and 'bold' properties which control the
+      presentation of the tree nodes (see [WikiDocumentAttributes]).
+
+    * Differential user_extensions: A file in "user_extensions"
+      now only needs to contain the  definitions which are
+      different compared to the file in "extensions"
+
+    * In configuration directory, a directory ".WikidPadGlobals"
+      will be created if not existing
+    * In ".WikidPadGlobals" a file "[TextBlocks].wiki" will be
+      created if not existing. This file describes content of
+      the "Editor"->"Text blocks" submenu and can be customized
+      (see [TextBlocks]).
+    
+    * Bug in autoNew.py script fixed
+    * Bug with renaming in "compact_sqlite" database fixed
+
+
 
 Jan. 25, 2006 (1.6beta2)
 

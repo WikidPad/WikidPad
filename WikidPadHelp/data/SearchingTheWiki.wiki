@@ -82,6 +82,10 @@ Same as hitting "Load Search" and "Find" button subsequently. Double clicking in
 
 ++++ Other
 
+*Copy to clipboard: Button "Page names"*
+This copies the content of the result to the clipboard in the same way as it is done in the [PageListDialog]## # # # *# "Copy" .
+
+
 *Button "Options"*
 Starts a dialog to set options for the searching:
 
@@ -104,10 +108,11 @@ Close the dialog, same as hitting ESC key.
 
 ++++ The result list on the right
 
-Each item in the result list consist of the page name, one or two optional numbers in parentheses behind the name (one number: Number of occurrences, two numbers: currently shown occurrences, then "/", then number of occurrences or a question mark if unknown)
+Each item in the result list consist of the page name, one or two optional numbers in parentheses behind the name (one number: Number of occurrences, two numbers: currently shown occurrence, then "/", then number of occurrences or a question mark if unknown)
 
 In the result list, double clicking on an item (not on its blue bar!) brings you to the page and (if existing) to the matching occurrence shown for the list item. If the page was already loaded, a double click brings you to the next occurrence on this page.
 
 If a particular occurrence is shown in the list, you can select this item and press F3 or click on the little blue bar on the left to show the next occurrence on this page.
+
 
 [icon: lens]

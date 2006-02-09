@@ -1,12 +1,39 @@
-++ Inline Python Eval
+﻿++ Inline Python Eval
 
-You can evaluate python expressions directly in the editor by
+
++++ Security concerns
+WikidPad allows to evaluate and execute arbitrary Python scripts.
+Because this is a potential security risk, script execution is
+disabled by default.
+
+To enable it, open the "Options" dialog, chapter "Other", item
+"Script security". In the drop-down field you can enter the level
+of security you want:
+
+    * No scripts: Script execution is completely disabled. This is
+      the default.
+    * No import_scripts: Scripts on the currently open page can be
+      executed and expressions evaluated. Importing scripts from
+      other pages with the import_scripts property doesn't work (see
+      below how to do this).
+    * No global.import_scripts: Property "import_scripts" works,
+      but "global.import_scripts" does not
+    * Allow everything
+
+
+The following examples work therefore only with an appropriately relaxed security setting.
+
+
++++ Evaluating expressions
+You can evaluate Python expressions directly in the editor by
 highlighting the expression and pressing CTRL-E. Example:
 
 Highlight the calculation below, and type CTRL-E.
 
 1+2+3
  
+ 
++++ Executing scripts on the same page
 You can also execute blocks of code within a document.  Blocks of code
 are defined within <% %> blocks. For example:
 
@@ -18,7 +45,7 @@ editor.AddText('\nhello ')
 To execute the code above, type Ctrl-E. Ctrl-E actually will execute all
 of the scripts on a page, including script imports.
 
-You can assign up to 4 functions on a page to a Ctrl-# key. For example:
+You can assign up to 6 functions on a page to a Ctrl-# key. For example:
 
 function 1: <% 1: editor.AddText(lib.now()) %>
 function 2: <% 2: lib.addDate(editor) %>
@@ -33,7 +60,8 @@ wikidPad.
 file:///C|/Program%20Files/WikidPad/extensions/EvalLibrary.py
 file:///C|/Program%20Files/WikidPad/user_extensions/EvalLibrary.py
 
-*Script Imports*
+
++++ Script Imports
 
 You can import scripts from another page using the following attribute.
 
@@ -42,12 +70,16 @@ You can import scripts from another page using the following attribute.
 Type "Ctrl-4" to see the output from script 4 on the page
 GlobalScriptLibrary.
 
-*Editor Control Functions*
+You can also use \[global.import_script: ...] property to define a single page which will be seen as if it was imported by every page of the wiki.
+
+
++++ Editor Control Functions
 
 See http://www.yellowbrain.com/stc/index.html for a list of the functions
 available to the "editor" control.
 
-*Another Example*
+
++++ Another Example
 
 Highlight the line below and press CTRL-3
 

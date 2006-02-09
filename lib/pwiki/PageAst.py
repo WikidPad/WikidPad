@@ -171,17 +171,12 @@ class Table(Ast):
         return _findTokensForPos(self.contenttokens, pos)
 
     def buildSubAst(self, formatting, token, threadholder=DUMBTHREADHOLDER):
-        cutRe = re.compile(ur"\n|" + formatting.TitleWikiWordDelimiterPAT +
-                ur"|" + formatting.PlainCharacterPAT + ur"+?(?=\n|" +
-                formatting.TitleWikiWordDelimiterPAT + ur"|(?!.))", 
-                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO Explain (if it works)
-
         groupdict = token.grpdict
         self.begin = groupdict["tableBegin"]
         self.end = groupdict["tableEnd"]
         content = groupdict["tableContent"]
         
-        cells = cutRe.findall(content)
+        cells = formatting.tableCutRe.findall(content)
 
 #         lines = splitkeep(content, u"\n")
 #         cells = []

@@ -190,6 +190,13 @@ class WikiFormatting:
             self.footnotesAsWws = self.pWiki.getConfig().getboolean(
                     "main", "footnotes_as_wikiwords", False)
 
+        # Needed in PageAst.Table.buildSubAst (placed here because of threading
+        #   problem with re.compile            
+        self.tableCutRe = re.compile(ur"\n|" + self.TitleWikiWordDelimiterPAT +
+                ur"|" + self.PlainCharacterPAT + ur"+?(?=\n|" +
+                self.TitleWikiWordDelimiterPAT + ur"|(?!.))", 
+                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO Explain (if it works)
+
     
     def isWikiWord(self, word):
         """

@@ -1,5 +1,5 @@
 
-import os, gc, traceback
+import os, gc, traceback, sets
 from os.path import *
 from time import localtime, time, strftime
 
@@ -228,6 +228,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.wikiHistory = []
         self.findDlg = None  # Stores find and find&replace dialog, if present
         self.mainmenu = None
+        self.editorMenu = None  # "Editor" menu
+        self.textBlocksActivation = {} # See self.buildTextBlocksMenu()
+        # Position of the root menu of the text blocks within "Editor" menu
+        self.textBlocksMenuPosition = None  
 
         # setup plugin manager and hooks API
         self.pluginManager = PluginManager()
@@ -274,10 +278,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.wikiHistory = history.split(u";")
 
         # resize the window to the last position/size
-        setWindowSize(self, (self.configuration.getint("main", "size_x"),
-                self.configuration.getint("main", "size_y")))
-        setWindowPos(self, (self.configuration.getint("main", "pos_x"),
-                self.configuration.getint("main", "pos_y")))
+        setWindowSize(self, (self.configuration.getint("main", "size_x", 10),
+                self.configuration.getint("main", "size_y", 10)))
+        setWindowPos(self, (self.configuration.getint("main", "pos_x", 10),
+                self.configuration.getint("main", "pos_y", 10)))
 
         # Set the auto save timing
         self.autoSaveDelayAfterKeyPressed = self.configuration.getint(
@@ -666,9 +670,25 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def buildTextBlocksMenu(self):
+        """
+        Constructs the text blocks menu submenu and necessary subsubmenus.
+        If this is called more than once, previously used menu ids are reused
+        for the new menu.
+        """
+        reusableIds = sets.Set(self.textBlocksActivation.keys())
+        
+        # Dictionary with menu id of the text block item as key and tuple
+        # (entryFlags, entryContent) as value, where entryFlags is a string
+        # of flag characters for the text block (currently only "a" for append
+        # instead of insert at cursor position), entryContent is the unescaped
+        # content of the text block.
+        # Tuple may be (None, None) if the id isn't used but stored for later
+        # reuse
+        self.textBlocksActivation = {}
+
         tbLoc = join(self.globalConfigSubDir, u"[TextBlocks].wiki")
         try:
-            tbFile = open(tbLoc, "ra")
+            tbFile = open(tbLoc, "rU")
             tbContent = tbFile.read()
             tbFile.close()
             tbContent = fileContentToUnicode(tbContent)
@@ -725,16 +745,33 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if entryContent == u"":
                 continue
 
-            menuID=wxNewId()
+            if len(reusableIds) > 0:
+                menuID = reusableIds.pop()
+                # No event binding must have happened before because id is reused
+            else:
+                menuID = wxNewId()
+                EVT_MENU(self, menuID, self.OnTextBlockUsed)
+#                 self.Bind(wx.EVT_MENU, lambda evt, content=entryContent:
+#                         self.appendText(content), id=menuID)
+
+
             menuItem = wxMenuItem(menu, menuID, entryTitle)
             menu.AppendItem(menuItem)
+            
+            self.textBlocksActivation[menuID] = (entryFlags, entryContent)
 
-            if u"a" in entryFlags:
-                EVT_MENU(self, menuID, lambda evt, content=entryContent:
-                        self.appendText(content))
-            else:
-                EVT_MENU(self, menuID, lambda evt, content=entryContent:
-                        self.addText(content))
+#             if u"a" in entryFlags:
+#                 self.Bind(wx.EVT_MENU, lambda evt, content=entryContent:
+#                         self.appendText(content), id=menuID)
+#             else:
+#                 self.Bind(wx.EVT_MENU, lambda evt, content=entryContent:
+#                         self.addText(content), id=menuID)
+#                 EVT_MENU(self, menuID, lambda evt, content=entryContent:
+#                         self.addText(content))
+
+            # Add the remaining ids so nothing gets lost
+            for i in reusableIds:
+                self.textBlocksActivation[menuID] = (None, None)
 
         # Finally empty stack
         while len(stack) > 1:
@@ -743,8 +780,44 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 title = u"<No title>"
             
             stack[-1][2].AppendMenu(wxNewId(), title, menu)
+            
+        stack[-1][2].AppendSeparator()
+        stack[-1][2].Append(GUI_ID.CMD_REREAD_TEXT_BLOCKS, 'Reread text blocks',
+                'Reread the text block file(s) and recreate menu')
+        EVT_MENU(self, GUI_ID.CMD_REREAD_TEXT_BLOCKS, self.OnRereadTextBlocks)
 
         return stack[-1][2]
+
+
+    def OnTextBlockUsed(self, evt):
+        try:
+            entryFlags, entryContent = self.textBlocksActivation[evt.GetId()]
+            if entryFlags is None:
+                return
+
+            if u"a" in entryFlags:
+                self.appendText(entryContent)
+            else:
+                self.addText(entryContent)
+            
+        except KeyError:
+            pass
+
+    
+    def OnRereadTextBlocks(self, evt):
+        """
+        Starts rereading and rebuilding of the text blocks submenu
+        """
+        oldItem = self.editorMenu.FindItemByPosition(
+                self.textBlocksMenuPosition)
+        oldItemId = oldItem.GetId()
+        
+        self.editorMenu.DeleteItem(oldItem)
+
+        tbmenu = self.buildTextBlocksMenu()
+                
+        self.editorMenu.InsertMenu(self.textBlocksMenuPosition, oldItemId,
+                '&Text blocks', tbmenu)
 
 
     def buildMainMenu(self):
@@ -838,65 +911,67 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "tb_home")
 
 
-        formattingMenu=wxMenu()
+        self.editorMenu=wxMenu()
 
-        self.addMenuItem(formattingMenu, '&Bold\t' + self.keyBindings.Bold,
+        self.addMenuItem(self.editorMenu, '&Bold\t' + self.keyBindings.Bold,
                 'Bold', lambda evt: self.keyBindings.makeBold(self.editor),
                 "tb_bold")
 
-        self.addMenuItem(formattingMenu, '&Italic\t' + self.keyBindings.Italic,
+        self.addMenuItem(self.editorMenu, '&Italic\t' + self.keyBindings.Italic,
                 'Italic', lambda evt: self.keyBindings.makeItalic(self.editor),
                 "tb_italic")
 
-        self.addMenuItem(formattingMenu, '&Heading\t' + self.keyBindings.Heading,
+        self.addMenuItem(self.editorMenu, '&Heading\t' + self.keyBindings.Heading,
                 'Add Heading', lambda evt: self.keyBindings.addHeading(self.editor),
                 "tb_heading")
 
-        self.addMenuItem(formattingMenu, 'Insert Date\t' + self.keyBindings.InsertDate,
+        self.addMenuItem(self.editorMenu, 'Insert Date\t' + self.keyBindings.InsertDate,
                 'Insert Date', lambda evt: self.insertDate(),
                 "date")
 
-        self.addMenuItem(formattingMenu, 'Set Date Format',
+        self.addMenuItem(self.editorMenu, 'Set Date Format',
                 'Set Date Format', lambda evt: self.showDateformatDialog())
 
-        self.addMenuItem(formattingMenu,
+        self.addMenuItem(self.editorMenu,
                 'Wikize Selected Word\t' + self.keyBindings.MakeWikiWord,
                 'Wikize Selected Word',
                 lambda evt: self.keyBindings.makeWikiWord(self.editor),
                 "pin")
 
 
-        formattingMenu.AppendSeparator()
+        self.editorMenu.AppendSeparator()
 
-        self.addMenuItem(formattingMenu, 'Cu&t\t' + self.keyBindings.Cut,
+        self.addMenuItem(self.editorMenu, 'Cu&t\t' + self.keyBindings.Cut,
                 'Cut', lambda evt: self.editor.Cut(),
                 "tb_cut", menuID=GUI_ID.CMD_CLIPBOARD_CUT)
 
-        self.addMenuItem(formattingMenu, '&Copy\t' + self.keyBindings.Copy,
+        self.addMenuItem(self.editorMenu, '&Copy\t' + self.keyBindings.Copy,
                 'Copy', lambda evt: self.editor.Copy(),
                 "tb_copy", menuID=GUI_ID.CMD_CLIPBOARD_COPY)
 
-        self.addMenuItem(formattingMenu, 'Copy to &ScratchPad\t' + self.keyBindings.CopyToScratchPad,
+        self.addMenuItem(self.editorMenu, 'Copy to &ScratchPad\t' + self.keyBindings.CopyToScratchPad,
                 'Copy Text to ScratchPad', lambda evt: self.editor.snip(),
                 "tb_copy")
 
-        self.addMenuItem(formattingMenu, '&Paste\t' + self.keyBindings.Paste,
+        self.addMenuItem(self.editorMenu, '&Paste\t' + self.keyBindings.Paste,
                 'Paste', lambda evt: self.editor.Paste(),
                 "tb_paste", menuID=GUI_ID.CMD_CLIPBOARD_PASTE)
 
 
-        formattingMenu.AppendSeparator()
+        self.editorMenu.AppendSeparator()
 
-        self.addMenuItem(formattingMenu, '&Undo\t' + self.keyBindings.Undo,
+        self.addMenuItem(self.editorMenu, '&Undo\t' + self.keyBindings.Undo,
                 'Undo', lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_UNDO))
 
-        self.addMenuItem(formattingMenu, '&Redo\t' + self.keyBindings.Redo,
+        self.addMenuItem(self.editorMenu, '&Redo\t' + self.keyBindings.Redo,
                 'Redo', lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_REDO))
 
 
-        formattingMenu.AppendSeparator()
+        self.editorMenu.AppendSeparator()
+        
+        self.textBlocksMenuPosition = self.editorMenu.GetMenuItemCount()
 
-        formattingMenu.AppendMenu(wxNewId(), '&Text blocks',
+        self.editorMenu.AppendMenu(wxNewId(), '&Text blocks',
                 self.buildTextBlocksMenu())
 
 #         attributesMenu = wxMenu()
@@ -930,12 +1005,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         if self.lowResources:
             # Add only menu item for icon select dialog
-            self.addMenuItem(formattingMenu, 'Add icon property',
+            self.addMenuItem(self.editorMenu, 'Add icon property',
                     'Open icon select dialog', lambda evt: self.showIconSelectDialog())
         else:
             # Build full submenu for icons
             iconsMenu = wxMenu()
-            formattingMenu.AppendMenu(wxNewId(), 'Add icon property', iconsMenu)
+            self.editorMenu.AppendMenu(wxNewId(), 'Add icon property', iconsMenu)
 
             iconsMenu1 = wxMenu()
             iconsMenu.AppendMenu(wxNewId(), 'A-C', iconsMenu1)
@@ -1010,79 +1085,79 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.insertAttribute("color", colorId)
             EVT_MENU(self, menuID, insertColorAttribute)
 
-        formattingMenu.AppendMenu(wxNewId(), 'Add color property', colorsMenu)
+        self.editorMenu.AppendMenu(wxNewId(), 'Add color property', colorsMenu)
 
 
 
-        formattingMenu.AppendSeparator()
+        self.editorMenu.AppendSeparator()
 
-        self.addMenuItem(formattingMenu, '&Zoom In\t' + self.keyBindings.ZoomIn,
+        self.addMenuItem(self.editorMenu, '&Zoom In\t' + self.keyBindings.ZoomIn,
                 'Zoom In', lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_ZOOMIN),
                 "tb_zoomin")
 
-        self.addMenuItem(formattingMenu, 'Zoo&m Out\t' + self.keyBindings.ZoomOut,
+        self.addMenuItem(self.editorMenu, 'Zoo&m Out\t' + self.keyBindings.ZoomOut,
                 'Zoom Out', lambda evt: self.editor.CmdKeyExecute(wxSTC_CMD_ZOOMOUT),
                 "tb_zoomout")
 
 
-        formattingMenu.AppendSeparator()
+        self.editorMenu.AppendSeparator()
 
 #         menuID=wxNewId()
 #         formattingMenu.Append(menuID, '&Find\t', 'Find')
 #         EVT_MENU(self, menuID, lambda evt: self.showFindDialog())
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, 'Find and &Replace\t' + self.keyBindings.FindAndReplace, 'Find and Replace')
+        self.editorMenu.Append(menuID, 'Find and &Replace\t' + self.keyBindings.FindAndReplace, 'Find and Replace')
         EVT_MENU(self, menuID, lambda evt: self.showFindReplaceDialog())
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, 'Rep&lace Text by WikiWord\t' + self.keyBindings.ReplaceTextByWikiword, 'Replace selected text by WikiWord')
+        self.editorMenu.Append(menuID, 'Rep&lace Text by WikiWord\t' + self.keyBindings.ReplaceTextByWikiword, 'Replace selected text by WikiWord')
         EVT_MENU(self, menuID, lambda evt: self.showReplaceTextByWikiwordDialog())
 
-        formattingMenu.AppendSeparator()
+        self.editorMenu.AppendSeparator()
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, '&Rewrap Text\t' + self.keyBindings.RewrapText, 'Rewrap Text')
+        self.editorMenu.Append(menuID, '&Rewrap Text\t' + self.keyBindings.RewrapText, 'Rewrap Text')
         EVT_MENU(self, menuID, lambda evt: self.editor.rewrapText())
 
         menuID=wxNewId()
-        wrapModeMenuItem = wxMenuItem(formattingMenu, menuID, "&Wrap Mode", "Set wrap mode", wxITEM_CHECK)
-        formattingMenu.AppendItem(wrapModeMenuItem)
+        wrapModeMenuItem = wxMenuItem(self.editorMenu, menuID, "&Wrap Mode", "Set wrap mode", wxITEM_CHECK)
+        self.editorMenu.AppendItem(wrapModeMenuItem)
         EVT_MENU(self, menuID, lambda evt: self.setWrapMode(wrapModeMenuItem.IsChecked()))
 
         menuID=wxNewId()
-        indentGuidesMenuItem = wxMenuItem(formattingMenu, menuID, "&View Indentation Guides", "View Indentation Guides", wxITEM_CHECK)
-        formattingMenu.AppendItem(indentGuidesMenuItem)
+        indentGuidesMenuItem = wxMenuItem(self.editorMenu, menuID, "&View Indentation Guides", "View Indentation Guides", wxITEM_CHECK)
+        self.editorMenu.AppendItem(indentGuidesMenuItem)
         EVT_MENU(self, menuID, lambda evt: self.setIndentationGuides(indentGuidesMenuItem.IsChecked()))
 
-        formattingMenu.AppendSeparator()
+        self.editorMenu.AppendSeparator()
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, '&Eval\t' + self.keyBindings.Eval, 'Eval Script Blocks')
+        self.editorMenu.Append(menuID, '&Eval\t' + self.keyBindings.Eval, 'Eval Script Blocks')
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks())
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, 'Eval Function &1\tCtrl-1', 'Eval Script Function 1')
+        self.editorMenu.Append(menuID, 'Eval Function &1\tCtrl-1', 'Eval Script Function 1')
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks(1))
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, 'Eval Function &2\tCtrl-2', 'Eval Script Function 2')
+        self.editorMenu.Append(menuID, 'Eval Function &2\tCtrl-2', 'Eval Script Function 2')
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks(2))
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, 'Eval Function &3\tCtrl-3', 'Eval Script Function 3')
+        self.editorMenu.Append(menuID, 'Eval Function &3\tCtrl-3', 'Eval Script Function 3')
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks(3))
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, 'Eval Function &4\tCtrl-4', 'Eval Script Function 4')
+        self.editorMenu.Append(menuID, 'Eval Function &4\tCtrl-4', 'Eval Script Function 4')
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks(4))
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, 'Eval Function &5\tCtrl-5', 'Eval Script Function 5')
+        self.editorMenu.Append(menuID, 'Eval Function &5\tCtrl-5', 'Eval Script Function 5')
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks(5))
 
         menuID=wxNewId()
-        formattingMenu.Append(menuID, 'Eval Function &6\tCtrl-6', 'Eval Script Function 6')
+        self.editorMenu.Append(menuID, 'Eval Function &6\tCtrl-6', 'Eval Script Function 6')
         EVT_MENU(self, menuID, lambda evt: self.editor.evalScriptBlocks(6))
 
         helpMenu=wxMenu()
@@ -1132,7 +1207,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.mainmenu.Append(wikiMenu, 'W&iki')
         self.mainmenu.Append(wikiWordMenu, '&Wiki Words')
         self.mainmenu.Append(historyMenu, '&History')
-        self.mainmenu.Append(formattingMenu, '&Editor')
+        self.mainmenu.Append(self.editorMenu, '&Editor')
         if pluginMenu:
             self.mainmenu.Append(pluginMenu, "Pl&ugins")
         self.mainmenu.Append(helpMenu, 'He&lp')

@@ -1,0 +1,25 @@
+﻿++ Templates
+
+If a non-existing page has only one parent which has a "template" property, the initial content of the new page will be taken from the page pointed to by the property.
+
+The new page will (as always) only be created effectively after it is modified in some way.
+
+
+Example:
+
+Let's assume you want to record things you have bought,
+each article on it's own page.
+
+
+So at first create a template page: BoughtTemplate.
+
+Then define this as a root page which uses the template:
+[template: BoughtTemplate].
+
+
+Now you can create subpages:
+
+    * BoughtFoobaromatic (this is already created)
+    * BoughtStopAndGoer (go to this to see the template)
+    * NotBoughtAlsoTemplate (or to this page)
+

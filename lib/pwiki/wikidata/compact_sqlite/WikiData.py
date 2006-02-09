@@ -21,7 +21,7 @@ import string, glob, types
 import pwiki.srePersistent as re
 
 from pwiki.WikiExceptions import *   # TODO make normal import
-import pwiki.SearchAndReplace
+from pwiki import SearchAndReplace
 # from SqliteThin3 import *
 
 try:

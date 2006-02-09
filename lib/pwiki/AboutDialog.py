@@ -1,15 +1,17 @@
 from wxPython.wx import *
 from wxPython.html import *
 
+from StringOps import escapeHtml
+
 
 class AboutDialog(wxDialog):
     """ An about box that uses an HTML window """
 
-    text = '''
+    textTemplate = '''
 <html>
 <body bgcolor="#FFFFFF">
     <center>
-        <table bgcolor="#CCCCCC" width="100%" cellspacing="0" cellpadding="0" border="1">
+        <table bgcolor="#CCCCCC" width="100%%" cellspacing="0" cellpadding="0" border="1">
             <tr>
                 <td align="center"><h2>wikidPad 1.6beta</h2></td>
             </tr>
@@ -21,28 +23,33 @@ What makes wikidPad different from other notepad applications is the ease with w
         <br><br>
 
         <table border=0 cellpadding=1 cellspacing=0>
-            <tr><td width="30%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Jason Horman</font></td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">wikidpad@jhorman.org</font></td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>URL:</b></font></td><td nowrap><font size="3">http://www.jhorman.org/wikidPad/</font></td></tr>
-            <tr><td width="30%" align="right">&nbsp;</td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Michael Butscher</font></td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">mbutscher@gmx.de</font></td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>URL:</b></font></td><td nowrap><font size="3">http://www.mbutscher.nextdesigns.net/software.html</font></td></tr>
-            <tr><td width="30%" align="right">&nbsp;</td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Gerhard Reitmayr</font></td></tr>
-            <tr><td width="30%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">gerhard.reitmayr@gmail.com</font></td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Jason Horman</font></td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">wikidpad@jhorman.org</font></td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>URL:</b></font></td><td nowrap><font size="3">http://www.jhorman.org/wikidPad/</font></td></tr>
+            <tr><td width="30%%" align="right">&nbsp;</td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Michael Butscher</font></td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">mbutscher@gmx.de</font></td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>URL:</b></font></td><td nowrap><font size="3">http://www.mbutscher.nextdesigns.net/software.html</font></td></tr>
+            <tr><td width="30%%" align="right">&nbsp;</td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Gerhard Reitmayr</font></td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">gerhard.reitmayr@gmail.com</font></td></tr>
         </table>
     </center>
+    
+    <hr />
+    
+    <p />Your configuration directory is: %s
 </body>
 </html>
 '''
 
-    def __init__(self, parent):
-        wxDialog.__init__(self, parent, -1, 'About WikidPad',
+    def __init__(self, pWiki):
+        wxDialog.__init__(self, pWiki, -1, 'About WikidPad',
                           size=(470, 330) )
+        text = self.textTemplate % (escapeHtml(pWiki.globalConfigDir),)
 
         html = wxHtmlWindow(self, -1)
-        html.SetPage(self.text)
+        html.SetPage(text)
         button = wxButton(self, wxID_OK, "Okay")
 
         # constraints for the html window

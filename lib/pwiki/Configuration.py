@@ -289,7 +289,9 @@ GLOBALDEFAULTS = {
     ("main", "lowresources"): "0",
     ("main", "showontray"): "0",
     ("main", "strftime"): u"%x %I:%M %p",  # time format
-    ("main", "allow_importScripts"): "0"  # Allow the use of import_scripts property? 0: None; 1: allow local import_scripts; 2: allow also global.import_scripts
+    ("main", "script_security_level"): "0"  # Allow the use of scripts and
+            # import_scripts property? 0: No scripts at all; 1: No import_scripts;
+            # 2: allow local import_scripts; 3: allow also global.import_scripts
     }
 
 

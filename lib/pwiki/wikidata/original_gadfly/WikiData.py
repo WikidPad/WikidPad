@@ -21,7 +21,7 @@ import re, string, glob
 
 try:
     import gadfly
-except:
+except ImportError:
     gadfly = None
 # finally:
 #     pass
@@ -57,7 +57,7 @@ class WikiData:
 #                 Tokenizer(WikiFormatting.CombinedUpdateRE, -1)
 
         self._reinit()
-        
+
 
     def _reinit(self):
         """

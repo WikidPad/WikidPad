@@ -21,53 +21,86 @@ about school of the kids.
 Open the "Views" node in the tree on the left to see how these attributes
 become available for reference.
 
-*Attribute Based Tree Formatting*
++++ Attribute Based Tree Formatting
 
-You can also use attributes to change the way a document appears in
-the tree.  This is done by setting global attribute properties in the
-wiki.  Example:
+There are 3 special attributes you can attach to a page that control
+the appearance of the page's node in the tree. These attributes override any global settings (see below): 
+
+icon: name (see TreeIcons)
+color: (white, blue, etc., see TreeNodeColors)
+bold: (true or false)
+
+Example:
+[icon: lens] changes the icon for this page to a lens.
+
+You can also use global attribute properties to change the appearance based on the existence of other properties.
+
+Examples:
 
 [global.importance.high.bold=true]
 
-This means any document in the wiki with a "importance" attribute
+This means any document in the wiki with an "importance" attribute
 that has a value of high will be bold.
 [importance: high]
 So setting the above attribute is what made this document bold
 in the tree.
 
-[global.importance.low.color=grey]
 
-When creating a new wiki some default global attributes are
-automatically attached to the root wiki document.
-
-*Special Attributes*
-
-There are 4 special attributes you can attach to a doc that will
-override the global defaults. 
-
-icon: name (see TreeIcons)
-color: (white, blue, etc.)
-priority: 1-5
+If the global definition contains the first part(s) of an attribute the appearance is also changed.
 
 Example:
-[icon: lens] changes the icon for this page to a lens.
 
-The priority setting will set the node text in the tree to
-"WikiDocumentAttributes (3)" for example.  It also will affect the importance
-setting of the node if "importance" is not already set.
+Above we had already defined:
+\[contact.personal.kids: school]
 
-[priority: 3]
+The following defines that pages containing attributes beginning with "contact" part have color indian red:
+[global.contact.color: indian red]
 
-*Autocompletion*
+But the node isn't colored so because of this more specific definition to use dark orchid for attributes beginning with "contact.personal":
+[global.contact.personal.color: dark orchid]
+
+
+When creating a new wiki some default global attributes are
+automatically attached to the root wiki document on the WikiSettings page.
+
+
++++ Autocompletion
 
 Attributes also support auto completion. Try it:
 
 Place cursor after the m and press CTRL-SPACE
 [im
 
-*Fonts* 
 
-Attributes can also be used to change WikiFonts.
++++ Special Attributes
 
+*priority: 1-5*
+The priority setting will set the node text in the tree to
+"WikiDocumentAttributes (3)" for example.  It also will affect the
+importance setting of the node if "importance" is not already set.
+
+[priority: 3]
+
+
+*font: font face name*
+Change the editor font of a page or the whole wiki.
+See WikiFonts for example and details.
+
+
+*alias: other page name*
+Set another name under which a page can be linked to.
+
+Example:
+To this page can also be linked as WikiDocumentAttribute.
 [alias: WikiDocumentAttribute]
+
+
+*import_scripts: page to import scripts from*
+See InlinePythonEval.
+
+
+*template: page which content should be used as template*
+See [Templates].
+
+
 [tree_position: 6]

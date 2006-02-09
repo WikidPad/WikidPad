@@ -190,61 +190,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def Copy(self):
         copyTextToClipboard(self.GetSelectedText())
 
-#         cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
-#         udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
-#         realuni = lineendToOs(self.GetSelectedText())
-#         arruni = array.array("u")
-#         arruni.fromunicode(realuni+u"\x00")
-#         rawuni = arruni.tostring()
-#         # print "Copy", repr(realuni), repr(rawuni), repr(mbcsenc(realuni)[0])
-#         udataob.SetData(rawuni)
-#         cdataob.SetData(mbcsEnc(realuni)[0]+"\x00")
-# 
-#         dataob = wxDataObjectComposite()
-#         dataob.Add(udataob)
-#         dataob.Add(cdataob)
-# 
-#         cb = wxTheClipboard
-#         cb.Open()
-#         try:
-#             cb.SetData(dataob)
-#         finally:
-#             cb.Close()
-
-
     def Paste(self):
         self.ReplaceSelection(getTextFromClipboard())
-#         cb = wxTheClipboard
-#         cb.Open()
-#         try:
-#             # datob = wxTextDataObject()
-#             # datob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
-#             dataob = wxDataObjectComposite()
-#             cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
-#             udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
-#             cdataob.SetData("")
-#             udataob.SetData("")
-#             dataob.Add(udataob)
-#             dataob.Add(cdataob)
-# 
-#             if cb.GetData(dataob):
-#                 if udataob.GetDataSize() > 0 and (udataob.GetDataSize() % 2) == 0:
-#                     # We have unicode data
-#                     # This might not work for all platforms:   # TODO Better impl.
-#                     rawuni = udataob.GetData()
-#                     arruni = array.array("u")
-#                     arruni.fromstring(rawuni)
-#                     realuni = lineendToInternal(arruni.tounicode())
-#                     self.ReplaceSelection(realuni)
-#                 elif cdataob.GetDataSize() > 0:
-#                     realuni = lineendToInternal(
-#                             mbcsDec(cdataob.GetData(), "replace")[0])
-#                     self.ReplaceSelection(realuni)
-#                 # print "Test getData", cdataob.GetDataSize(), udataob.GetDataSize()
-# 
-#             # print "Test text", repr(datob.GetData())       # GetDataHere())
-#         finally:
-#             cb.Close()
 
 
     def setWrap(self, onOrOff):
@@ -650,6 +597,15 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def evalScriptBlocks(self, index=-1):
+        """
+        Evaluates scripts. Respects "script_security_level" option
+        """
+        securityLevel = self.pWiki.configuration.getint(
+                "main", "script_security_level")
+        if securityLevel == 0:
+            # No scripts allowed
+            return
+
         # it is important to python to have consistent eol's
         self.ConvertEOLs(self.eolMode)
         (startPos, endPos) = self.GetSelection()
@@ -659,11 +615,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             # get the text of the current page
             text = self.GetText()
             
-            importSecurity = self.pWiki.configuration.getint(
-                    "main", "allow_importScripts")
-
             # process script imports
-            if importSecurity > 0: # Local import_scripts properties allowed
+            if securityLevel > 1: # Local import_scripts properties allowed
                 if self.pWiki.currentWikiPage.getProperties().has_key(
                         "import_scripts"):
                     scripts = self.pWiki.currentWikiPage.getProperties()[
@@ -676,7 +629,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         except:
                             pass
 
-            if importSecurity > 1: # global.import_scripts property allowed
+            if securityLevel > 2: # global.import_scripts property also allowed
                 globscript = self.pWiki.getWikiData().getGlobalProperties().get(
                         "global.import_scripts")
     

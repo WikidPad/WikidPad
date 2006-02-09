@@ -5,6 +5,8 @@ WikidPadHelp/WikidPadHelp.wiki -text
 WikidPadHelp/data/ApiDocs.wiki -text
 WikidPadHelp/data/AutoCompletion.wiki -text
 WikidPadHelp/data/AutoSave.wiki -text
+WikidPadHelp/data/BoughtFoobaromatic.wiki -text
+WikidPadHelp/data/BoughtTemplate.wiki -text
 WikidPadHelp/data/BulletedLists.wiki -text
 WikidPadHelp/data/CamelCase.wiki -text
 WikidPadHelp/data/ChangeLog.wiki -text
@@ -264,6 +266,8 @@ WikidPadHelp/data/SETTINGS.grl -text
 WikidPadHelp/data/ScratchPad.wiki -text
 WikidPadHelp/data/SearchingTheWiki.wiki -text
 WikidPadHelp/data/TODOS.grl -text
+WikidPadHelp/data/Templates.wiki -text
+WikidPadHelp/data/TextBlocks.wiki -text
 WikidPadHelp/data/TextFormatting.wiki -text
 WikidPadHelp/data/That[!!-~]Arent[!!-~]Wiki[!!-~]Words.wiki -text
 WikidPadHelp/data/ThirdPartyLibraries.wiki -text

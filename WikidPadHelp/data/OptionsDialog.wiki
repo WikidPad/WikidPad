@@ -82,6 +82,9 @@ When double clicking on a wiki: URL, a new instance of the application is starte
 *Process auto-generated areas*
 Experimental feature, use not recommended!
 
+*Script security*
+Set the security level for script execution, see InlinePythonEval#+++# Security# concerns .
+
 *Low resource usage*
 Try to reduce usage of Windows resources. Only interesting for Windows 9x/ME.
 
