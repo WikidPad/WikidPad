@@ -1,4 +1,4 @@
-Copyright (c) 2005-2006 Jason Horman, Michael Butscher, Gerhard Reitmayr
+Copyright (c) 2005-2006 Michael Butscher, Jason Horman, Gerhard Reitmayr
 All rights reserved.
 
 

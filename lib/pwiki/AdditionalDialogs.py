@@ -724,7 +724,7 @@ class ExportDialog(wxDialog):
         ob, t, desc, panel = \
                 self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
 
-        ob.export(self.pWiki, self.pWiki.wikiData, wordList, t, 
+        ob.export(self.pWiki, self.pWiki.getWikiDataManager(), wordList, t, 
                 guiToUni(self.ctrls.tfDirectory.GetValue()), 
                 self.ctrls.compatFilenames.GetValue(), ob.getAddOpt(panel))
 

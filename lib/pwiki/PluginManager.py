@@ -1,5 +1,7 @@
 import os, sys
 
+from StringOps import mbcsEnc
+
 """The PluginManager and PluginAPI classes implement a generic plugin framework.
    Plugin apis are created by the PluginManager and can be used to call all
    installed plugins for that api at once. The PluginManager loads plugins from
@@ -132,7 +134,7 @@ class PluginManager(object):
            appearing in earlier directories are not loaded from later ones."""
         exclusions = excludeFiles[:]
         for directory in directories:
-            if not os.access(directory, os.F_OK):
+            if not os.access(mbcsEnc(directory, "replace")[0], os.F_OK):
                 continue
             files = os.listdir(directory)
             for name in files:
@@ -149,7 +151,8 @@ class PluginManager(object):
                     if self.registerPlugin(module):
                         exclusions.append(name)
           
-    def importDirectory(self, name, add_to_sys_modules = False):    
+    def importDirectory(self, name, add_to_sys_modules = False): 
+        name = mbcsEnc(name, "replace")[0]
         try:
             module = __import__(name)
         except ImportError:

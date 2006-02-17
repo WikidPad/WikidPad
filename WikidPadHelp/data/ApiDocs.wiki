@@ -1,4 +1,4 @@
-++ wikiPad Hooks
+﻿++ wikiPad Hooks
 
 Under the wikidPad install directory:
 
@@ -14,6 +14,8 @@ file:///C|/Program%20Files/WikidPad/extensions/WikidPadHooks.py
 file:///C|/Program%20Files/WikidPad/user_extensions/WikidPadHooks.py
 
 ++ API Documentation
+
+*The following documentation is outdated!*
 
 The first argument to each hook function is wikidPad itself.  Here are
 the available methods on the wikidPad object.

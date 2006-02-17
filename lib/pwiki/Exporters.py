@@ -92,7 +92,7 @@ class HtmlXmlExporter:
         return ()
 
             
-    def export(self, pWiki, wikiData, wordList, exportType, exportDest,
+    def export(self, pWiki, wikiDataManager, wordList, exportType, exportDest,
             compatFilenames, addopt):
         """
         Run export operation.
@@ -108,7 +108,9 @@ class HtmlXmlExporter:
         """
         
         self.pWiki = pWiki
-        self.wikiData = wikiData # self.pWiki.wikiData
+        self.wikiDataManager = wikiDataManager
+        self.wikiData = self.wikiDataManager.getWikiData()
+
         self.wordList = wordList
         self.exportDest = exportDest
         
@@ -149,12 +151,13 @@ class HtmlXmlExporter:
         fp.write(self.getFileHeader(self.pWiki.wikiName))
         
         for word in self.wordList:
-            wikiPage = self.wikiData.getPage(word)
+            wikiPage = self.wikiDataManager.getPage(word)
             if not self.shouldExport(word, wikiPage):
                 continue
-            
+
             try:
                 content = wikiPage.getContent()
+                formatDetails = wikiPage.getFormatDetails()
                 links = {}  # TODO Why links to all (even not exported) children?
                 for relation in wikiPage.getChildRelationships(
                         existingonly=True, selfreference=False):
@@ -165,7 +168,8 @@ class HtmlXmlExporter:
                     # TODO Use self.convertFilename here?
                     links[relation] = u"#%s" % relation
                     
-                formattedContent = self.formatContent(word, content, links)
+                formattedContent = self.formatContent(word, content,
+                        formatDetails, links)
                 fp.write((u'<span class="wiki-name-ref">'+
                         u'[<a name="%s">%s</a>]</span><br><br>'+
                         u'<span class="parent-nodes">parent nodes: %s</span>'+
@@ -184,7 +188,7 @@ class HtmlXmlExporter:
 
     def exportHtmlMultipleFiles(self):
         for word in self.wordList:
-            wikiPage = self.wikiData.getPage(word)
+            wikiPage = self.wikiDataManager.getPage(word)
             if not self.shouldExport(word, wikiPage):
                 continue
 
@@ -194,7 +198,7 @@ class HtmlXmlExporter:
                 if not self.shouldExport(relation):
                     continue
                 # get aliases too
-                relation = self.wikiData.getAliasesWikiWord(relation)
+                relation = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
                 links[relation] = self.convertFilename(u"%s.html" % relation)  #   "#%s" ???
 #                 wordForAlias = self.wikiData.getAliasesWikiWord(relation)
 #                 if wordForAlias:
@@ -225,7 +229,7 @@ class HtmlXmlExporter:
         fp.write(u'<wiki name="%s">' % self.pWiki.wikiName)
         
         for word in self.wordList:
-            wikiPage = self.wikiData.getPage(word)
+            wikiPage = self.wikiDataManager.getPage(word)
             if not self.shouldExport(word, wikiPage):
                 continue
                 
@@ -239,6 +243,7 @@ class HtmlXmlExporter:
 
             try:
                 content = wikiPage.getContent()
+                formatDetails = wikiPage.getFormatDetails()
                 links = {}
                 for relation in wikiPage.getChildRelationships(
                         existingonly=True, selfreference=False):
@@ -246,7 +251,7 @@ class HtmlXmlExporter:
                         continue
 
                     # get aliases too
-                    relation = self.wikiData.getAliasesWikiWord(relation)
+                    relation = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
                     links[relation] = u"#%s" % relation
 #                     wordForAlias = self.wikiData.getAliasesWikiWord(relation)
 #                     if wordForAlias:
@@ -254,7 +259,8 @@ class HtmlXmlExporter:
 #                     else:
 #                         links[relation] = u"#%s" % relation
                     
-                formattedContent = self.formatContent(word, content, links, asXml=True)
+                formattedContent = self.formatContent(word, content,
+                        formatDetails, links, asXml=True)
                 fp.write(formattedContent)
 
             except Exception, e:
@@ -278,10 +284,11 @@ class HtmlXmlExporter:
             realfp = open(outputFile, "w")
             fp = utf8Writer(realfp, "replace")
             
-            wikiPage = self.wikiData.getPage(word)
-            content = wikiPage.getContent()            
-            fp.write(self.exportContentToHtmlString(word, content, links, startFile,
-                    onlyInclude))
+            wikiPage = self.wikiDataManager.getPage(word)
+            content = wikiPage.getContent()
+            formatDetails = wikiPage.getFormatDetails()       
+            fp.write(self.exportContentToHtmlString(word, content,
+                    formatDetails, links, startFile, onlyInclude))
             fp.reset()        
             realfp.close()
         except Exception, e:
@@ -290,20 +297,20 @@ class HtmlXmlExporter:
         return outputFile
 
 
-    def exportContentToHtmlString(self, word, content, links=None, startFile=True,
-            onlyInclude=None, asHtmlPreview=False):
+    def exportContentToHtmlString(self, word, content, formatDetails=None,
+            links=None, startFile=True, onlyInclude=None, asHtmlPreview=False):
         """
         Read content of wiki word word, create an HTML page and return it
         """
         result = []
         
-        formattedContent = self.formatContent(word, content, links,
-                asHtmlPreview=asHtmlPreview)
+        formattedContent = self.formatContent(word, content, formatDetails,
+                links, asHtmlPreview=asHtmlPreview)
         result.append(self.getFileHeader(word))
         # if startFile is set then this is the only page being exported so
         # do not include the parent header.
         if not startFile:
-            wikiPage = self.wikiData.getPage(word)
+            wikiPage = self.wikiDataManager.getPage(word)
             result.append(u'<span class="parent-nodes">parent nodes: %s</span>'
                     % self.getParentLinks(wikiPage, True, onlyInclude))
 
@@ -362,7 +369,7 @@ class HtmlXmlExporter:
     def shouldExport(self, wikiWord, wikiPage=None):
         if not wikiPage:
             try:
-                wikiPage = self.wikiData.getPage(wikiWord)
+                wikiPage = self.wikiDataManager.getPage(wikiWord)
             except WikiWordNotFoundException:
                 return False
             
@@ -458,8 +465,8 @@ class HtmlXmlExporter:
         self.outAppend(u'</table>\n', eatPostBreak=True)
 
 
-    def formatContent(self, word, content, links=None, asXml=False,
-            asHtmlPreview=False):
+    def formatContent(self, word, content, formatDetails=None, links=None,
+            asXml=False, asHtmlPreview=False):
         if links is None:
             self.links = {}
         else:
@@ -476,7 +483,7 @@ class HtmlXmlExporter:
 
         # TODO Without camel case
         page = PageAst.Page()
-        page.buildAst(self.pWiki.getFormatting(), content)
+        page.buildAst(self.pWiki.getFormatting(), content, formatDetails)
 
         # Get property pattern
         if asHtmlPreview:
@@ -809,7 +816,7 @@ class TextExporter:
     """
     def __init__(self):
         self.pWiki = None
-        self.wikiData = None
+        self.wikiDataManager = None
         self.wordList = None
         self.exportDest = None
         self.convertFilename = removeBracketsFilename # lambda s: s   
@@ -865,7 +872,7 @@ class TextExporter:
 
             
 
-    def export(self, pWiki, wikiData, wordList, exportType, exportDest,
+    def export(self, pWiki, wikiDataManager, wordList, exportType, exportDest,
             compatFilenames, addopt):
         """
         Run export operation.
@@ -880,7 +887,7 @@ class TextExporter:
         addopt -- additional options returned by getAddOpt()
         """
         self.pWiki = pWiki
-        self.wikiData = wikiData # self.pWiki.wikiData
+        self.wikiDataManager = wikiDataManager
         self.wordList = wordList
         self.exportDest = exportDest
        
@@ -904,10 +911,10 @@ class TextExporter:
 
         for word in self.wordList:
             try:
-                content, modified = self.wikiData.getContentAndInfo(word)[:2]
+                content, modified = self.wikiDataManager.getWikiData().getContentAndInfo(word)[:2]
             except:
                 continue
-                
+
             # TODO Use self.convertFilename here???
             outputFile = join(self.exportDest,
                     self.convertFilename(u"%s.wiki" % word))

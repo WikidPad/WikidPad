@@ -70,7 +70,7 @@ You can import scripts from another page using the following attribute.
 Type "Ctrl-4" to see the output from script 4 on the page
 GlobalScriptLibrary.
 
-You can also use \[global.import_script: ...] property to define a single page which will be seen as if it was imported by every page of the wiki.
+You can also use \[global.import_scripts: ...] property to define a single page which will be seen as if it was imported by every page of the wiki.
 
 
 +++ Editor Control Functions

@@ -244,7 +244,7 @@ TABLE_DEFINITIONS = {
 #         ),
     
     
-    "wikiwords": (     # Cache TODO Make essential because of crea. and mod. date
+    "wikiwords": (     # Essential
         ("word", t.t),
         ("created", t.t),
         ("modified", t.t)
@@ -325,7 +325,7 @@ def recreateCacheTables(connwrap):
     Delete and create again all tables with cache information and
     associated indices
     """
-    CACHE_TABLES = ("wikiwords", "wikirelations", "wikiwordprops", "todos")
+    CACHE_TABLES = ("wikirelations", "wikiwordprops", "todos")
     
     for tn in CACHE_TABLES:
         connwrap.execSqlNoError("drop table %s" % tn)

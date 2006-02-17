@@ -1,17 +1,16 @@
 #!/bin/python
 
-import sys, os, traceback, os.path
-sys.path.append("lib")
+import sys, os, traceback, os.path, glob
 os.stat_float_times(True)
+
+if not hasattr(sys, 'frozen'):
+    sys.path.append("lib")
 
 from pwiki import srePersistent
 srePersistent.loadCodeCache()
 
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
-
-import pwiki.urllib_red as urllib
-
 
 # To ensure unicode selection, works only for me (Michael)
 
@@ -28,18 +27,87 @@ from wxPython.wx import *
 import wxPython.xrc as xrc
 
 from pwiki.PersonalWikiFrame import PersonalWikiFrame
+from pwiki.StringOps import mbcsDec
+from pwiki.CmdLineAction import CmdLineAction
+
+# openThisWiki = None
+# openThisWikiWord = None
+# if len(sys.argv) > 1:
+#    openThisWiki = sys.argv[1]
+#    if openThisWiki.startswith("wiki:"):
+#       openThisWiki = urllib.url2pathname(openThisWiki)
+#       openThisWiki = openThisWiki.replace("wiki:", "")
+# 
+#    if len(sys.argv) > 2:
+#       openThisWikiWord = sys.argv[2]
+
+def findDirs():
+    """
+    Returns tuple (wikiAppDir, globalConfigDir)
+    """
+    wikiAppDir = None
+
+    try:
+        wikiAppDir = os.path.dirname(os.path.abspath(sys.argv[0]))
+        if not wikiAppDir:
+            wikiAppDir = r"C:\Program Files\WikidPad"
+
+        globalConfigDir = os.environ.get("HOME")
+        if not (globalConfigDir and os.path.exists(globalConfigDir)):
+            user = os.environ.get("USERNAME")
+            if user:
+                globalConfigDir = r"c:\Documents And Settings\%s" % user
+    finally:
+        pass
+#     except Exception, e:
+#         return None, None
+
+    if not globalConfigDir:
+        globalConfigDir = wikiAppDir
+
+    if not globalConfigDir or not os.path.exists(globalConfigDir):
+        globalConfigDir = "C:\Windows"
+        
+    # mcbs decoding
+    if wikiAppDir is not None:
+        wikiAppDir = mbcsDec(wikiAppDir, "replace")[0]
+
+    if globalConfigDir is not None:
+        globalConfigDir = mbcsDec(globalConfigDir, "replace")[0]
+
+    return (wikiAppDir, globalConfigDir)
 
 
-openThisWiki = None
-openThisWikiWord = None
-if len(sys.argv) > 1:
-   openThisWiki = sys.argv[1]
-   if openThisWiki.startswith("wiki:"):
-      openThisWiki = urllib.url2pathname(openThisWiki)
-      openThisWiki = openThisWiki.replace("wiki:", "")
 
-   if len(sys.argv) > 2:
-      openThisWikiWord = sys.argv[2]
+if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
+    # Special option, called by deinstaller on request to delete personal
+    # configuration files
+    wikiAppDir, globalConfigDir = findDirs()
+    if globalConfigDir is None:
+        sys.exit(1)
+        
+    try:
+        globalConfigSubDir = os.path.join(globalConfigDir, ".WikidPadGlobals")
+        subfiles = glob.glob(os.path.join(globalConfigSubDir, "*"))
+        for f in subfiles:
+            try:
+                os.remove(f)
+            except:
+                pass
+        try:
+            os.rmdir(globalConfigSubDir)
+        except:
+            pass
+
+        try:
+            os.remove(os.path.join(globalConfigDir, "WikidPad.config"))
+        except:
+            pass
+
+        sys.exit(0)
+    
+    except:
+        sys.exit(1)
 
 
 class App(wxApp):   
@@ -54,13 +122,17 @@ class App(wxApp):
         res.SetFlags(0)
         res.LoadFromString(rd)
         
-        self.wikiFrame = PersonalWikiFrame(None, -1, "WikidPad", openThisWiki, openThisWikiWord)
+        wikiAppDir, globalConfigDir = findDirs()
+        self.wikiFrame = PersonalWikiFrame(None, -1, "WikidPad", wikiAppDir,
+                globalConfigDir, CmdLineAction(sys.argv[1:]))
+
         self.SetTopWindow(self.wikiFrame)
         ## _prof.stop()
 
         # set the icon of the app
         try:
-            self.wikiFrame.SetIcon(wxIcon(os.path.join('icons', 'pwiki.ico'), wxBITMAP_TYPE_ICO))
+            self.wikiFrame.SetIcon(wxIcon(os.path.join('icons', 'pwiki.ico'),
+                    wxBITMAP_TYPE_ICO))
         except:
             pass
 

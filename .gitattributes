@@ -608,6 +608,7 @@ lib/gadfly/sql.py -text
 lib/gadfly/store.py -text
 lib/pwiki/AboutDialog.py -text
 lib/pwiki/AdditionalDialogs.py -text
+lib/pwiki/CmdLineAction.py -text
 lib/pwiki/Configuration.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
@@ -634,7 +635,8 @@ lib/pwiki/nturl2path_red.py -text
 lib/pwiki/sqlite3api.py -text
 lib/pwiki/srePersistent.py -text
 lib/pwiki/urllib_red.py -text
-lib/pwiki/wikidata/DataManager.py -text
+lib/pwiki/wikidata/DbBackendUtils.py -text
+lib/pwiki/wikidata/WikiDataManager.py -text
 lib/pwiki/wikidata/WikiData_compact_sqlite.py -text
 lib/pwiki/wikidata/WikiData_original_gadfly.py -text
 lib/pwiki/wikidata/__init__.py -text

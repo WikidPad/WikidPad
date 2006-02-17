@@ -49,11 +49,6 @@ class WikiData:
     def __init__(self, pWiki, dataDir):
         self.pWiki = pWiki
         self.dataDir = dataDir
-        
-#         self._updateTokenizerWithoutCamelCase = \
-#                 Tokenizer(WikiFormatting.CombinedUpdateWithoutCamelCaseRE, -1)
-#         self._updateTokenizer = \
-#                 Tokenizer(self.pWiki.getFormatting().combinedUpdateRE, -1)
 
         dbfile = join(dataDir, "wiki.sli")
 
@@ -90,10 +85,6 @@ class WikiData:
         self.pWiki.configuration.set("main", "wiki_database_type",
                 "compact_sqlite")
 
-#         # Function to convert byte strings from input to content in database
-#         # used by setContent
-#         self.contentByteInputToDb = None
-
         # Function to convert unicode strings from input to content in database
         # used by setContent
 
@@ -125,8 +116,6 @@ class WikiData:
 
         self.cachedGlobalProps = None
         self.getGlobalProperties()
-
-        ## self.contentCache = {}
 
 
     def _reinit(self):
@@ -161,21 +150,9 @@ class WikiData:
         if len(result) == 0:
             raise WikiFileNotFoundException, "wiki page not found: %s" % word
 
-        # if self.contentDbToOutput:
         content = self.contentDbToOutput(result[0][0])
         return (content, result[0][1])
-        # else:
-        #     return result[0]
 
-
-#         # TODO Remove method, create rebuildWiki method
-#     def updatePageEntry(self, word, moddate = None, creadate = None):
-#         """
-#         Update/Create entry with additional information for a page
-#             (modif./creation date)
-#         (Needed only for PersonalWikiFrame.rebuildWiki). Dummy for compact
-#         """
-#         pass        
 
     def setContent(self, word, content, moddate = None, creadate = None):
         """
@@ -187,11 +164,6 @@ class WikiData:
         assert type(content) is unicode
 
         content = self.contentUniInputToDb(content)
-#         elif self.contentByteInputToDb is not None:
-#             content = self.contentByteInputToDb(content)
-
-        # print "setContent", repr(content)
-        
         self.setContentRaw(word, content, moddate, creadate)
 
         self.cachedWikiWords[word] = 1
@@ -279,30 +251,27 @@ class WikiData:
             raise WikiDataException, u"Cannot rename '%s' to '%s', '%s' already exists" % (word, toWord, toWord)
 
         # commit anything pending so we can rollback on error
-
         self.connWrap.commit()
+
         try:
             self.connWrap.execSql("update wikirelations set word = ? where word = ?", (toWord, word))
-            self.connWrap.execSql("update wikirelations set relation = ? where relation = ?", (toWord, word))
+#             self.connWrap.execSql("update wikirelations set relation = ? where relation = ?", (toWord, word))
             self.connWrap.execSql("update wikiwordprops set word = ? where word = ?", (toWord, word))
             self.connWrap.execSql("update todos set word = ? where word = ?", (toWord, word))
-            # self.connWrap.execSql("update wikiwordcontent set word = ? where word = ?", (toWord, word))
-            # del self.cachedWikiWords[word]
-            # self.cachedWikiWords[toWord] = 1
             self.renameContent(word, toWord)
 
-            # now we have to search the wiki files and replace the old word with the new
-            searchOp = SearchAndReplace.SearchReplaceOperation()
-            searchOp.wikiWide = True
-            searchOp.wildCard = 'no'
-            searchOp.caseSensitive = True
-            searchOp.searchStr = word
-            
-            results = self.search(searchOp)
-            for resultWord in results:
-                content = self.getContent(resultWord)
-                content = content.replace(word, toWord)
-                self.setContent(resultWord, content)
+#             # now we have to search the wiki files and replace the old word with the new
+#             searchOp = SearchAndReplace.SearchReplaceOperation()
+#             searchOp.wikiWide = True
+#             searchOp.wildCard = 'no'
+#             searchOp.caseSensitive = True
+#             searchOp.searchStr = word
+#             
+#             results = self.search(searchOp)
+#             for resultWord in results:
+#                 content = self.getContent(resultWord)
+#                 content = content.replace(word, toWord)
+#                 self.setContent(resultWord, content)
 
             self.connWrap.commit()
         except:
@@ -342,33 +311,33 @@ class WikiData:
             raise WikiDataException, "You cannot delete the root wiki node"
 
 
-    # ---------- WikiPage creation ----------
-
-    def getPage(self, wikiWord):
-        """
-        Fetches a WikiPage for the wikiWord, throws WikiWordNotFoundException
-        if word doesn't exist
-        """
-        if not self.isDefinedWikiWord(wikiWord):
-            raise WikiWordNotFoundException, u"Word '%s' not in wiki" % wikiWord
-
-        return WikiPage(self, wikiWord)
-
-    def getPageNoError(self, wikiWord):
-        """
-        fetch a WikiPage for the wikiWord. If it doesn't exist, return
-        one without throwing an error and without updating the cache
-        """
-        return WikiPage(self, wikiWord)
-
-
-    def createPage(self, wikiWord):
-        """
-        create a new wikiPage for the wikiWord. Cache is not updated until
-        page is saved
-        """
-        ## self.cachedWikiWords[wikiWord] = 1   # TODO Remove???
-        return self.getPageNoError(wikiWord)
+#     # ---------- WikiPage creation ----------
+# 
+#     def getPage(self, wikiWord):
+#         """
+#         Fetches a WikiPage for the wikiWord, throws WikiWordNotFoundException
+#         if word doesn't exist
+#         """
+#         if not self.isDefinedWikiWord(wikiWord):
+#             raise WikiWordNotFoundException, u"Word '%s' not in wiki" % wikiWord
+# 
+#         return WikiPage(self, wikiWord)
+# 
+#     def getPageNoError(self, wikiWord):
+#         """
+#         fetch a WikiPage for the wikiWord. If it doesn't exist, return
+#         one without throwing an error and without updating the cache
+#         """
+#         return WikiPage(self, wikiWord)
+# 
+# 
+#     def createPage(self, wikiWord):
+#         """
+#         create a new wikiPage for the wikiWord. Cache is not updated until
+#         page is saved
+#         """
+#         ## self.cachedWikiWords[wikiWord] = 1   # TODO Remove???
+#         return self.getPageNoError(wikiWord)
 
 
     # ---------- Handling of relationships cache ----------
@@ -402,46 +371,46 @@ class WikiData:
         return self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
 
 
-    def getChildRelationshipsAndHasChildren(self, wikiWord, existingonly=False,
-            selfreference=True):
-        """
-        get the child relations to this word as sequence of tuples
-            (<child word>, <has child children?>). Used when expanding
-            a node in the tree control. If cycles are forbidden in the
-            tree, a True in the "children" flag must be checked
-            for cycles, a False is always correct.
-
-        existingonly -- List only existing wiki words
-        selfreference -- List also wikiWord if it references itself
-        """
-        innersql = "select relation from wikirelations as innerrel where "+\
-                "word = wikirelations.relation"
-        if existingonly:
-            # filter to only words in wikiwordcontent or aliases
-            innersql += " and (exists (select word from wikiwordcontent "+\
-                    "where word = relation) or exists "+\
-                    "(select value from wikiwordprops "+\
-                    "where value = relation and key = 'alias'))"
-
-        if not selfreference:
-            innersql += " and relation != word"
-
-
-        outersql = "select relation, exists(%s) from wikirelations where word = ?"
-        if existingonly:
-            # filter to only words in wikiwordcontent or aliases
-            outersql += " and (exists (select word from wikiwordcontent "+\
-                    "where word = relation) or exists "+\
-                    "(select value from wikiwordprops "+\
-                    "where value = relation and key = 'alias'))"
-
-        if not selfreference:
-            outersql += " and relation != word"
-
-        outersql = outersql % innersql
-
-
-        return self.connWrap.execSqlQuery(outersql, (wikiWord,))
+#     def getChildRelationshipsAndHasChildren(self, wikiWord, existingonly=False,
+#             selfreference=True):
+#         """
+#         get the child relations to this word as sequence of tuples
+#             (<child word>, <has child children?>). Used when expanding
+#             a node in the tree control. If cycles are forbidden in the
+#             tree, a True in the "children" flag must be checked
+#             for cycles, a False is always correct.
+# 
+#         existingonly -- List only existing wiki words
+#         selfreference -- List also wikiWord if it references itself
+#         """
+#         innersql = "select relation from wikirelations as innerrel where "+\
+#                 "word = wikirelations.relation"
+#         if existingonly:
+#             # filter to only words in wikiwordcontent or aliases
+#             innersql += " and (exists (select word from wikiwordcontent "+\
+#                     "where word = relation) or exists "+\
+#                     "(select value from wikiwordprops "+\
+#                     "where value = relation and key = 'alias'))"
+# 
+#         if not selfreference:
+#             innersql += " and relation != word"
+# 
+# 
+#         outersql = "select relation, exists(%s) from wikirelations where word = ?"
+#         if existingonly:
+#             # filter to only words in wikiwordcontent or aliases
+#             outersql += " and (exists (select word from wikiwordcontent "+\
+#                     "where word = relation) or exists "+\
+#                     "(select value from wikiwordprops "+\
+#                     "where value = relation and key = 'alias'))"
+# 
+#         if not selfreference:
+#             outersql += " and relation != word"
+# 
+#         outersql = outersql % innersql
+# 
+# 
+#         return self.connWrap.execSqlQuery(outersql, (wikiWord,))
 
 
     def getParentRelationships(self, wikiWord):
@@ -573,9 +542,27 @@ class WikiData:
         "get the names of all the pages in the db, no aliases"
         return self.connWrap.execSqlQuerySingleColumn("select word from wikiwordcontent")
 
-    # TODO More general Wikiword to filename mapping
-    def getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
-        return self.connWrap.execSqlQuerySingleColumn("select word from wikiwordcontent")
+    def refreshDefinedPageNames(self):
+        """
+        Refreshes the internal list of defined pages which
+        may be different from the list of pages for which
+        content is available (not possible for compact database).
+        The function tries to conserve additional informations
+        (creation/modif. date) if possible.
+        
+        It is mainly called during rebuilding of the wiki 
+        so it may not rely on the presence of other cache
+        information (e.g. relations).
+        
+        The self.cachedWikiWords member may also need an update
+        after this funtion was called.
+        """
+        pass
+
+
+#     # TODO More general Wikiword to filename mapping
+#     def getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
+#         return self.connWrap.execSqlQuerySingleColumn("select word from wikiwordcontent")
 
 #     # TODO More general Wikiword to filename mapping
 #     def getWikiWordFileName(self, wikiWord):
@@ -868,7 +855,7 @@ class WikiData:
         """
         Clear all tables in the database which contain non-essential
         (cache) information as well as other cache information.
-        Needed before updating the whole wiki
+        Needed before rebuilding the whole wiki
         """
         DbStructure.recreateCacheTables(self.connWrap)
         self.connWrap.commit()
@@ -1066,7 +1053,7 @@ class WikiData:
 
     # ---------- Other optional functionality ----------
 
-    def rebuildWiki(self, progresshandler):
+    def cleanupAfterRebuild(self, progresshandler):
         """
         Rebuild cached structures, try to repair database inconsistencies.
 
@@ -1076,52 +1063,63 @@ class WikiData:
         progresshandler -- Object, fulfilling the GuiProgressHandler
             protocol
         """
-        # get all of the wikiWords
-        wikiWords = self.getAllPageNamesFromDisk()   # Replace this call
+#         # get all of the wikiWords
+#         wikiWords = self.getAllPageNamesFromDisk()   # Replace this call
+#                 
+#         progresshandler.open(len(wikiWords) + 1)
+#         try:
+#             step = 1
+#     
+#             # re-save all of the pages
+#             self.clearCacheTables()
+#             for wikiWord in wikiWords:
+#                 progresshandler.update(step, u"")   # , "Rebuilding %s" % wikiWord)
+#                 wikiPage = self.createPage(wikiWord)
+#                 wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
+#                 step = step + 1
                 
-        progresshandler.open(len(wikiWords) + 1)
-        try:
-            step = 1
-    
-            # re-save all of the pages
-            self.clearCacheTables()
-            for wikiWord in wikiWords:
-                progresshandler.update(step, u"")   # , "Rebuilding %s" % wikiWord)
-                wikiPage = self.createPage(wikiWord)
-                wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
-                step = step + 1
-                
+        DbStructure.rebuildIndices(self.connWrap)
+
+        # TODO
+        # Check the presence of important indexes
+
+        indexes = self.connWrap.execSqlQuerySingleColumn(
+                "select name from sqlite_master where type='index'")
+        indexes = map(string.upper, indexes)
+        
+        if not "WIKIWORDCONTENT_PKEY" in indexes:
+            # Maybe we have multiple pages with the same name in the database
+            
+            # Copy valid creation date to all pages
+            self.connWrap.execSql("update wikiwordcontent set "
+                    "created=(select max(created) from wikiwordcontent as "
+                    "inner where inner.word=wikiwordcontent.word)")
+            
+            # Delete all but the newest page
+            self.connWrap.execSql("delete from wikiwordcontent where "
+                    "ROWID not in (select max(ROWID) from wikiwordcontent as "
+                    "outer where modified=(select max(modified) from "
+                    "wikiwordcontent as inner where inner.word=outer.word) "
+                    "group by outer.word)")
+                    
             DbStructure.rebuildIndices(self.connWrap)
-            
-            
-              # TODO
-            # Check the presence of important indexes
 
-            indexes = self.connWrap.execSqlQuerySingleColumn(
-                    "select name from sqlite_master where type='index'")
-            indexes = map(string.upper, indexes)
-            
-            if not "WIKIWORDCONTENT_PKEY" in indexes:
-                # Maybe we have multiple pages with the same name in the database
-                
-                # Copy valid creation date to all pages
-                self.connWrap.execSql("update wikiwordcontent set "
-                        "created=(select max(created) from wikiwordcontent as "
-                        "inner where inner.word=wikiwordcontent.word)")
-                
-                # Delete all but the newest page
-                self.connWrap.execSql("delete from wikiwordcontent where "
-                        "ROWID not in (select max(ROWID) from wikiwordcontent as "
-                        "outer where modified=(select max(modified) from "
-                        "wikiwordcontent as inner where inner.word=outer.word) "
-                        "group by outer.word)")
-                        
-                DbStructure.rebuildIndices(self.connWrap)
+       # TODO: More repair operations
 
-           # TODO: More repair operations
 
-        finally:            
-            progresshandler.close()
+        # recreate word caches
+        self.cachedWikiWords = {}
+        for word in self.getAllDefinedPageNames():
+            self.cachedWikiWords[word] = 1
+
+        # cache aliases
+        aliases = self.getAllAliases()
+        for alias in aliases:
+            self.cachedWikiWords[alias] = 2
+
+
+#         finally:            
+#             progresshandler.close()
 
 
     def vacuum(self):

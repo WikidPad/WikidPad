@@ -64,5 +64,5 @@ def autoNew(wiki, evt):
     else:
         nextNumber = max(numbers) + 1
     wiki.openWikiPage(u"New%06i" % nextNumber)
-    wiki.editor.SetFocus()
+    wiki.getActiveEditor().SetFocus()
 

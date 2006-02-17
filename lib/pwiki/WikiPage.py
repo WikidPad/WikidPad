@@ -1,18 +1,22 @@
 from time import time
 
 from WikiExceptions import *   # TODO make normal import?
+
+from StringOps import strToBool
+
 import WikiFormatting
 import PageAst
 
 
 class WikiPage:
     """
-    holds the data for a wikipage. fetched via the WikiData.getPage method.
+    holds the data for a wikipage. fetched via the WikiDataManager.getPage method.
     """
-    def __init__(self, wikiData, wikiWord):
-        self.wikiData = wikiData
+    def __init__(self, wikiDataManager, wikiWord):
+        self.wikiDataManager = wikiDataManager
+        self.wikiData = self.wikiDataManager.getWikiData()
+
         self.wikiWord = wikiWord
-#         self.wikiFile = self.wikiData.getWikiWordFileName(self.wikiWord)
         self.parentRelations = None
         self.todos = None
         self.props = None
@@ -21,13 +25,6 @@ class WikiPage:
         # does this page need to be saved?
         self.saveDirtySince = None  # None, if not dirty or timestamp when it became dirty
         self.updateDirtySince = None
-
-#         # save when this page was last saved
-#         self.lastSave = time()
-# 
-#         # save when this page was last saved
-#         self.lastUpdate = time()
-
 
     def getWikiWord(self):
         return self.wikiWord
@@ -60,13 +57,13 @@ class WikiPage:
                 existingonly, selfreference)
 
 
-    def getChildRelationshipsAndHasChildren(self, existingonly=False,
-            selfreference=True):
-        """
-        Does not support caching
-        """
-        return self.wikiData.getChildRelationshipsAndHasChildren(self.wikiWord,
-                existingonly, selfreference)
+#     def getChildRelationshipsAndHasChildren(self, existingonly=False,
+#             selfreference=True):
+#         """
+#         Does not support caching
+#         """
+#         return self.wikiData.getChildRelationshipsAndHasChildren(self.wikiWord,
+#                 existingonly, selfreference)
 
     def getProperties(self):
         if self.props is None:
@@ -116,11 +113,22 @@ class WikiPage:
             return self
         
         word = self.wikiData.getAliasesWikiWord(self.wikiWord)
-        return WikiPage(self.wikiData, word)
+        return self.wikiDataManager.getPageNoError(word)
 
 
     def getContent(self):
         return self.wikiData.getContent(self.wikiWord)
+        
+    def getFormatDetails(self):
+        """
+        According to currently stored settings, return a
+        WikiFormatting.WikiPageFormatDetails object to describe
+        formatting
+        """
+        withCamelCase = strToBool(self.getPropertyOrGlobal(
+                "camelCaseWordsEnabled"), True)
+        
+        return WikiFormatting.WikiPageFormatDetails(withCamelCase)
 
 
     def save(self, text, alertPWiki=True):
@@ -136,14 +144,15 @@ class WikiPage:
         """
         Update additional cached informations (properties, todos, relations)
         """
-        self.deleteChildRelationships()
-        self.deleteProperties()
-        self.deleteTodos()
-        
         formatting = self.wikiData.pWiki.getFormatting()
         
         page = PageAst.Page()
-        page.buildAst(formatting, text)
+        page.buildAst(formatting, text, self.getFormatDetails())
+
+
+        self.deleteChildRelationships()
+        self.deleteProperties()
+        self.deleteTodos()
         
         todoTokens = page.findType(WikiFormatting.FormatTypes.ToDo)
         for t in todoTokens:

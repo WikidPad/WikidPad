@@ -92,11 +92,17 @@ class WikiHtmlView(wxHtmlWindow):
         
         self.exporterInstance.wikiData = self.pWiki.wikiData
         
-        word = self.pWiki.getCurrentWikiWord()
+        wikiPage = self.pWiki.getCurrentWikiPage()
+        if wikiPage is None:
+            return  # TODO Do anything else here?
+
+        word = wikiPage.getWikiWord()
         self.currentLoadedWikiWord = word
         content = self.pWiki.getCurrentText()
         
         html = self.exporterInstance.exportContentToHtmlString(word, content,
+                wikiPage.getFormatDetails(),
+#                 wikiPage.getLinkCreator(self.pWiki.wikiData), asHtmlPreview=True)
                 LinkCreator(self.pWiki.wikiData), asHtmlPreview=True)
         
         # TODO Reset after open wiki

@@ -1,7 +1,7 @@
 ﻿++ Change Log
 
-Feb. 09, 2006 (1.6beta3)
 
+Feb. 09, 2006 (1.6beta3)
 
 Changes:
     * 'global.import_scripts' property introduced (see

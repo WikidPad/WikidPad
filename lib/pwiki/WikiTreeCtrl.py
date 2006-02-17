@@ -112,17 +112,19 @@ class WikiWordNode(AbstractNode):
     """
     __slots__ = ("wikiWord", "flagChildren", "flagRoot", "ancestors")
     
-    def __init__(self, tree, parentNode, wikiWord, flagChildren = None):
+    def __init__(self, tree, parentNode, wikiWord):
         AbstractNode.__init__(self, tree, parentNode)
         self.wikiWord = wikiWord
-        if flagChildren is False:
-            self.flagChildren = False
-        elif self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
-            # All children of these node could be part of a cycle, so we
-            # don't know here if the node really has children
-            self.flagChildren = None
-        else:
-            self.flagChildren = flagChildren
+        self.flagChildren = None
+
+#         if flagChildren is False:
+#             self.flagChildren = False
+#         elif self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
+#             # All children of these node could be part of a cycle, so we
+#             # don't know here if the node really has valid children
+#             self.flagChildren = None
+#         else:
+#             self.flagChildren = flagChildren
         self.flagRoot = False
         self.ancestors = None
 
@@ -160,25 +162,19 @@ class WikiWordNode(AbstractNode):
         Get all valid children, filter out undefined and/or cycles
         if options are set accordingly
         """
-        relations = wikiPage.getChildRelationshipsAndHasChildren(
+        relations = wikiPage.getChildRelationships(
                 existingonly=self.treeCtrl.getHideUndefined(),
                 selfreference=False)
 
         if self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
-#             # Avoid the checking for grandchildren
-#             relations = wikiPage.getChildRelationships(
-#                     existingonly=self.treeCtrl.getHideUndefined(),
-#                     selfreference=False)
             # Filter out cycles
             ancestors = self.getAncestors()
-            relations = [r for r in relations if not ancestors.has_key(r[0])]
-#             relations = [(r, None) for r in relations]
-#         else:
+            relations = [r for r in relations if not ancestors.has_key(r)]
         
         return relations
 
 
-    def _hasValidChildren(self, wikiPage):
+    def _hasValidChildren(self, wikiPage):  # TODO More efficient
         """
         Check if represented word has valid children, filter out undefined
         and/or cycles if options are set accordingly
@@ -191,15 +187,16 @@ class WikiWordNode(AbstractNode):
             ancestors = self.getAncestors()
             relations = [r for r in relations if not ancestors.has_key(r)]
         
-        return len(relations) > 0
+        return len(self._getValidChildren(wikiPage)) > 0
 
 
     def _createNodePresentation(self, baselabel):
         """
         Splitted to support derived class WikiWordSearchNode
         """
-        wikiData = self.treeCtrl.pWiki.wikiData
-        wikiPage = wikiData.getPageNoError(self.wikiWord)
+        wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
+        wikiData = wikiDataManager.getWikiData()
+        wikiPage = wikiDataManager.getPageNoError(self.wikiWord)
 
         style = NodeStyle()
         
@@ -208,16 +205,17 @@ class WikiWordNode(AbstractNode):
         # Has children?
         if self.flagRoot:
             self.flagChildren = True # Has at least ScratchPad and Views
-        elif self.flagChildren is None:
-            # Inefficient, therefore self.flagChildren should be set
-            self.flagChildren = self._hasValidChildren(wikiPage)  # len(self._getValidChildren(wikiPage)) > 0
+#         elif self.flagChildren is None:
+#             # Inefficient, therefore self.flagChildren should be set
+#             self.flagChildren = self._hasValidChildren(wikiPage)  # len(self._getValidChildren(wikiPage)) > 0
+        else:
+            self.flagChildren = self._hasValidChildren(wikiPage)
+            
 
         style.hasChildren = self.flagChildren
         
         # apply custom properties to nodes
         wikiPage = wikiPage.getNonAliasPage() # Ensure we don't have an alias
-
-#         wikiWord = wikiPage.getWikiWord()
 
         # if this is the scratch pad set the icon and return
         if (self.wikiWord == "ScratchPad"):
@@ -263,24 +261,8 @@ class WikiWordNode(AbstractNode):
                             break
                         key = key[:dotpos]
 
-#                     if not gPropVal:
-#                         gPropVal = globalProps.get(u"global.%s.%s" % (key, p))
                     if gPropVal:
                         setattr(style, p, gPropVal)
-                   
-
-#         # Overwrite with per page props, if available         
-#         # color. let user override global color
-#         if props.has_key("color"):
-#             style.color = props["color"][0]
-#             # self.setNodeColor(treeNode, props["color"][0])
-# 
-#         # icon. let user override global icon
-#         if props.has_key("icon"):
-#             style.icon = props["icon"][0]
-#             # self.setNodeImage(treeNode, props["icon"][0])
-#         if props.has_key("bold"):
-#             style.bold = props["bold"][0]
 
         return style
 
@@ -295,8 +277,8 @@ class WikiWordNode(AbstractNode):
         return True
         
     def listChildren(self):
-        wikiData = self.treeCtrl.pWiki.wikiData
-        wikiPage = wikiData.getPageNoError(self.wikiWord)
+        wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
+        wikiPage = wikiDataManager.getPageNoError(self.wikiWord)
         relations = self._getValidChildren(wikiPage)
 
         # get the sort order for the children
@@ -310,15 +292,15 @@ class WikiWordNode(AbstractNode):
         # Apply sort order
         if childSortOrder != u"unsorted":
             if childSortOrder.startswith(u"desc"):
-                relations.sort(removeBracketsAndSortDesc) # sort alphabetically
+                relations.sort(cmpLowerDesc) # sort alphabetically
             else:
-                relations.sort(removeBracketsAndSortAsc)
+                relations.sort(cmpLowerAsc)
             
         relationData = []
         position = 1
-        for relation, hasChildren in relations:
-            relationPage = wikiData.getPageNoError(relation)
-            relationData.append((relation, relationPage, position, hasChildren))
+        for relation in relations:
+            relationPage = wikiDataManager.getPageNoError(relation)
+            relationData.append((relation, relationPage, position))
             position += 1
             
         # Sort again, using tree position and priority properties
@@ -327,7 +309,7 @@ class WikiWordNode(AbstractNode):
         # if prev is None:
         ## Create everything new
         
-        result = [WikiWordNode(self.treeCtrl, self, rd[0], rd[3])
+        result = [WikiWordNode(self.treeCtrl, self, rd[0])
                 for rd in relationData]
                 
         if self.flagRoot:
@@ -364,9 +346,9 @@ class WikiWordSearchNode(WikiWordNode):
     """
     __slots__ = ("newLabel", "searchOp")    
     
-    def __init__(self, tree, parentNode, wikiWord, flagChildren = False,
-            newLabel = None, searchOp = None):
-        WikiWordNode.__init__(self, tree, parentNode, wikiWord, flagChildren)
+    def __init__(self, tree, parentNode, wikiWord, newLabel = None,
+            searchOp = None):
+        WikiWordNode.__init__(self, tree, parentNode, wikiWord)
 
         self.newLabel = newLabel
         self.searchOp = searchOp
@@ -387,7 +369,22 @@ class WikiWordSearchNode(WikiWordNode):
     def onActivate(self):
         WikiWordNode.onActivate(self)
         if self.searchOp:
-            self.treeCtrl.pWiki.editor.executeSearch(self.searchOp, 0)   # TODO
+            self.treeCtrl.pWiki.getActiveEditor().executeSearch(self.searchOp, 0)   # TODO
+
+    def _getValidChildren(self, wikiPage):
+        """
+        Get all valid children, filter out undefined and/or cycles
+        if options are set accordingly. A WikiWordSearchNode has no children.
+        """        
+        return []
+
+    def _hasValidChildren(self, wikiPage):  # TODO More efficient
+        """
+        Check if represented word has valid children, filter out undefined
+        and/or cycles if options are set accordingly. A WikiWordSearchNode
+        has no children.
+        """
+        return False
 
     def representsFamilyWikiWord(self):
         """
@@ -1254,13 +1251,9 @@ def relationSort(a, b):
 
 
 # sorter for relations, removes brackets and sorts lower case
-def removeBracketsAndSortDesc(a, b):
-#     a = wikiWordToLabel(a[0])
-#     b = wikiWordToLabel(b[0])
-    return cmp(b[0].lower(), a[0].lower())
+def cmpLowerDesc(a, b):
+    return cmp(b.lower(), a.lower())
 
-def removeBracketsAndSortAsc(a, b):
-#     a = wikiWordToLabel(a[0])
-#     b = wikiWordToLabel(b[0])
-    return cmp(a[0].lower(), b[0].lower())
+def cmpLowerAsc(a, b):
+    return cmp(a.lower(), b.lower())
 

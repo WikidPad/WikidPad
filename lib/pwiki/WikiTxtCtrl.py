@@ -53,18 +53,15 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.pWiki = pWiki
         self.evalScope = None
         self.stylebytes = None
-        ## self.stylethread = None
-        
-#         self.tokenizer = Tokenizer(
-#                 WikiFormatting.CombinedSyntaxHighlightRE, -1)
-
         self.stylingThreadHolder = ThreadHolder()
+        self.loadedWikiPage = None
+        self.lastCursorPositionInPage = {}
+        self.lastFont = None
         
         # If autocompletion word was choosen, how many bytes to delete backward
         # before inserting word, if word ...
         self.autoCompBackBytesWithoutBracket = 0  # doesn't start with '['
         self.autoCompBackBytesWithBracket = 0     # starts with '['
-
 
         # editor settings
         self.SetIndent(4)
@@ -181,6 +178,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         EVT_MENU(self, GUI_ID.CMD_TEXT_SELECT_ALL, lambda evt: self.SelectAll())
 
+    def getLoadedWikiPage(self):
+        return self.loadedWikiPage
 
     def Cut(self):
         self.Copy()
@@ -278,6 +277,109 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         bs = self.bytelenSct(text[:start])
         be = bs + self.bytelenSct(text[start:end])
         self.SetSelection(bs, be)
+        
+    def _getWikiPageTitle(self, wikiWord):
+        title = re.sub(ur'([A-Z\xc0-\xde]{2,})([a-z\xdf-\xff])', r'\1 \2', wikiWord)
+        title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2', title)
+        return title
+
+        
+    def saveLoadedWikiPage(self):
+        """
+        Save loaded wiki page into database. Does not check if dirty
+        """
+        if self.loadedWikiPage is None:
+            return
+
+        page = self.loadedWikiPage
+        wikiWord = page.getWikiWord()
+        if wikiWord is not None:
+            self.lastCursorPositionInPage[wikiWord] = self.GetCurrentPos()
+
+#         if not self.loadedWikiPage.getDirty()[0]:
+#             return
+
+        text = self.GetText()
+        if self.pWiki.saveWikiPage(page, text):
+            self.SetSavePoint()
+
+        
+    def loadWikiPage(self, wikiPage, evtprops):
+        """
+        Save loaded page, if necessary, then load wikiPage into editor
+        """
+        if self.loadedWikiPage is not None and self.loadedWikiPage.getDirty()[0]:
+            self.saveLoadedWikiPage()
+        
+        # set the editor text
+        content = None
+        wikiDataManager = self.pWiki.getWikiDataManager()
+        
+        self.loadedWikiPage = wikiPage
+        if self.loadedWikiPage is None:
+            self.SetText("")
+            return  # TODO How to handle?
+
+        try:
+            content = self.loadedWikiPage.getContent()
+        except WikiFileNotFoundException, e:
+            # Create initial content of new page
+            
+            # Check if there is exactly one parent
+            parents = self.loadedWikiPage.getParentRelationships()
+            if len(parents) == 1:
+                # Check if there is a template page
+                try:
+                    parentPage = wikiDataManager.getPage(parents[0])
+                    templateWord = parentPage.getPropertyOrGlobal("template")
+                    templatePage = wikiDataManager.getPage(templateWord)
+                    content = templatePage.getContent()
+                except (WikiWordNotFoundException, WikiFileNotFoundException):
+                    pass
+
+            if content is None:
+                title = self._getWikiPageTitle(self.loadedWikiPage.getWikiWord())
+                content = u"++ %s\n\n" % title
+
+            self.lastCursorPositionInPage[self.loadedWikiPage.getWikiWord()] = \
+                    len(content)
+
+        # get the properties that need to be checked for options
+        pageProps = self.loadedWikiPage.getProperties()
+        globalProps = wikiDataManager.getWikiData().getGlobalProperties()
+
+        # get the font that should be used in the editor
+        font = self.loadedWikiPage.getPropertyOrGlobal("font",
+                self.pWiki.defaultEditorFont)
+
+        # set the styles in the editor to the font
+        if self.lastFont != font:
+            faces = self.pWiki.presentationExt.faces.copy()
+            faces["mono"] = font
+            self.SetStyles(faces)
+            self.lastEditorFont = font
+            
+        p2 = evtprops.copy()
+        p2.update({"loading current page": True})
+        self.pWiki.fireMiscEventProps(p2)  # TODO Remove this hack
+
+        # now fill the text into the editor
+        self.setTextAgaUpdated(content)
+
+        # see if there is a saved position for this page
+        lastPos = self.lastCursorPositionInPage.get(
+                self.loadedWikiPage.getWikiWord(), 0)
+        self.GotoPos(lastPos)
+
+#         # check if CamelCase should be used
+#         # print "openWikiPage props", repr(pageProps), repr(globalProps)
+#         wikiWordsEnabled = strToBool(self.loadedWikiPage.getPropertyOrGlobal(
+#                 "camelCaseWordsEnabled"), True)
+
+#         self.wikiWordsEnabled = wikiWordsEnabled
+#         self.editor.wikiWordsEnabled = wikiWordsEnabled
+        
+
 
     def onOptionsChanged(self, miscevt):
         coltuple = htmlColorToRgbTuple(self.pWiki.configuration.get(
@@ -422,8 +524,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def applyStyling(self, stylebytes):
-        self.StartStyling(0, 0xff)
-        self.SetStyleBytes(len(stylebytes), stylebytes)
+        if len(stylebytes) == self.GetLength():
+            self.StartStyling(0, 0xff)
+            self.SetStyleBytes(len(stylebytes), stylebytes)
 
 
     def snip(self):
@@ -435,9 +538,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # load the ScratchPad
         try:
-            wikiPage = self.pWiki.wikiData.getPage("ScratchPad")
+            wikiPage = self.pWiki.getWikiDataManager().getPage("ScratchPad")
         except WikiWordNotFoundException, e:
-            wikiPage = self.pWiki.wikiData.createPage("ScratchPad")
+            wikiPage = self.pWiki.getWikiDataManager().createPage("ScratchPad")
 
         content = ""
 
@@ -514,7 +617,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     searchOp.wildCard = "no"   # TODO Why not regex?
                     searchOp.searchStr = searchfrag
     
-                    self.pWiki.editor.executeSearch(searchOp, 0)
+                    self.executeSearch(searchOp, 0)
     
                 return True
     
@@ -617,13 +720,13 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             
             # process script imports
             if securityLevel > 1: # Local import_scripts properties allowed
-                if self.pWiki.currentWikiPage.getProperties().has_key(
+                if self.loadedWikiPage.getProperties().has_key(
                         "import_scripts"):
-                    scripts = self.pWiki.currentWikiPage.getProperties()[
+                    scripts = self.loadedWikiPage.getProperties()[
                             "import_scripts"]
                     for script in scripts:
                         try:
-                            importPage = self.pWiki.wikiData.getPage(script)
+                            importPage = self.pWiki.getWikiDataManager().getPage(script)
                             content = importPage.getContent()
                             text = text + "\n" + content
                         except:
@@ -635,7 +738,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     
                 if globscript is not None:
                     try:
-                        importPage = self.pWiki.wikiData.getPage(globscript)
+                        importPage = self.pWiki.getWikiDataManager().getPage(globscript)
                         content = importPage.getContent()
                         text = text + "\n" + content
                     except:
@@ -763,7 +866,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         Can be called by an aga to present all parents of the current page.
         """
-        relations = self.pWiki.currentWikiPage.getParentRelationships()[:]
+        relations = self.loadedWikiPage.getParentRelationships()[:]
 
         # Apply sort order
         relations.sort(_removeBracketsAndSort) # sort alphabetically
@@ -966,7 +1069,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             wrapPosition = 70
             try:
                 wrapPosition = int(
-                        self.pWiki.currentWikiPage.getPropertyOrGlobal(
+                        self.loadedWikiPage.getPropertyOrGlobal(
                         "wrap", "70"))
             except:
                 pass
@@ -1066,7 +1169,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def OnChange(self, evt):
         if not self.ignoreOnChange:
-            self.pWiki.currentWikiPage.setDirty(True)
+            self.loadedWikiPage.setDirty(True)
 
     def OnCharAdded(self, evt):
         "When the user presses enter reindent to the previous level"

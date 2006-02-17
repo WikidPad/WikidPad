@@ -79,3 +79,21 @@ Name: assocWikiUrl; Description: "Handle URLs with ""wiki:"" by WikidPad"
 Name: {app}\regexpr.cache; Type: files
 [UninstallDelete]
 Name: {app}\regexpr.cache; Type: files
+[Code]
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+  resultCode: Integer;
+begin
+  // Call our function just before the actual uninstall process begins
+  if CurUninstallStep = usUninstall then
+  begin
+    if MsgBox('Do you also want to remove your personal settings?',
+        mbConfirmation, MB_YESNO) = idYes then
+    begin
+      Exec(ExpandConstant('{app}/WikidPad.exe'), '--deleteconfig',
+          ExpandConstant('{app}'), SW_HIDE, ewWaitUntilTerminated, resultCode);
+    end;
+  end;
+end;
+
+

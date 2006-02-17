@@ -28,30 +28,30 @@ class Ast(object):
 
 
 
-def _enrichTokens(formatting, tokens, threadholder=DUMBTHREADHOLDER):
+def _enrichTokens(formatting, tokens, formatDetails, threadholder):
     for tok in tokens:
         if not threadholder.isCurrent():
             return
 
         if tok.ttype == WikiFormatting.FormatTypes.ToDo:
             node = Todo()
-            node.buildSubAst(formatting, tok, threadholder=threadholder)
+            node.buildSubAst(formatting, tok, formatDetails, threadholder)
             tok.node = node
         elif tok.ttype == WikiFormatting.FormatTypes.Table:
             node = Table()
-            node.buildSubAst(formatting, tok, threadholder=threadholder)
+            node.buildSubAst(formatting, tok, formatDetails, threadholder)
             tok.node = node
         elif tok.ttype == WikiFormatting.FormatTypes.WikiWord:
             node = WikiWord()
-            node.buildSubAst(formatting, tok, threadholder=threadholder)
+            node.buildSubAst(formatting, tok, formatDetails, threadholder)
             tok.node = node
         elif tok.ttype == WikiFormatting.FormatTypes.Url:
             node = Url()
-            node.buildSubAst(formatting, tok, threadholder=threadholder)
+            node.buildSubAst(formatting, tok, formatDetails, threadholder)
             tok.node = node
         elif tok.ttype == WikiFormatting.FormatTypes.EscapedChar:
             node = EscapeCharacter()
-            node.buildSubAst(formatting, tok, threadholder=threadholder)
+            node.buildSubAst(formatting, tok, formatDetails, threadholder)
             tok.node = node
 
            
@@ -104,10 +104,12 @@ class Page(Ast):
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.tokens, pos)
         
-    def buildAst(self, formatting, text, threadholder=DUMBTHREADHOLDER):
-        self.tokens = formatting.tokenizePage(text, threadholder)
+    def buildAst(self, formatting, text, formatDetails=None,    # !!!References to buildAst !!!!!!
+            threadholder=DUMBTHREADHOLDER):
+        self.tokens = formatting.tokenizePage(text, formatDetails=formatDetails,
+                threadholder=threadholder)
         
-        _enrichTokens(formatting, self.tokens, threadholder=threadholder)
+        _enrichTokens(formatting, self.tokens, formatDetails, threadholder)
 
 
     def _findType(self, typeToFind, result):
@@ -128,7 +130,8 @@ class Todo(Ast):
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.valuetokens, pos)
 
-    def buildSubAst(self, formatting, token, threadholder=DUMBTHREADHOLDER):
+    def buildSubAst(self, formatting, token, formatDetails=None,
+            threadholder=DUMBTHREADHOLDER):
         # First three parts are simple
         groupdict = token.grpdict
         self.indent = groupdict["todoIndent"]
@@ -139,7 +142,8 @@ class Todo(Ast):
                 len(self.delimiter)
         
         value = groupdict["todoValue"]
-        self.valuetokens = formatting.tokenizeCell(value, threadholder=threadholder)
+        self.valuetokens = formatting.tokenizeCell(value,
+                formatDetails=formatDetails, threadholder=threadholder)
         
         # The valuetokens contain start position relative to beginning of
         # value. This must be corrected to position rel. to whole page
@@ -147,7 +151,7 @@ class Todo(Ast):
         for t in self.valuetokens:
             t.start += relpos
             
-        _enrichTokens(formatting, self.valuetokens, threadholder=threadholder)
+        _enrichTokens(formatting, self.valuetokens, formatDetails, threadholder)
 
 
     def _findType(self, typeToFind, result):
@@ -170,7 +174,8 @@ class Table(Ast):
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.contenttokens, pos)
 
-    def buildSubAst(self, formatting, token, threadholder=DUMBTHREADHOLDER):
+    def buildSubAst(self, formatting, token, formatDetails=None,
+            threadholder=DUMBTHREADHOLDER):
         groupdict = token.grpdict
         self.begin = groupdict["tableBegin"]
         self.end = groupdict["tableEnd"]
@@ -189,7 +194,8 @@ class Table(Ast):
             if not threadholder.isCurrent():
                 return
 
-            tokensIn = formatting.tokenizeCell(c, threadholder=threadholder)
+            tokensIn = formatting.tokenizeCell(c, formatDetails=formatDetails,
+                    threadholder=threadholder)
             tokensOut = []
             # Filter out empty tokens
             for t in tokensIn:
@@ -203,7 +209,8 @@ class Table(Ast):
 
         self.contenttokens = contenttokens
 
-        _enrichTokens(formatting, self.contenttokens, threadholder=threadholder)
+        _enrichTokens(formatting, self.contenttokens, formatDetails,
+                threadholder)
 
 
     def _findType(self, typeToFind, result):
@@ -254,7 +261,8 @@ class WikiWord(Ast):
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.titleTokens, pos)
 
-    def buildSubAst(self, formatting, token, threadholder=DUMBTHREADHOLDER):
+    def buildSubAst(self, formatting, token, formatDetails=None,
+            threadholder=DUMBTHREADHOLDER):
         groupdict = token.grpdict
         frag = groupdict.get("wikiwordnccSearchfrag")
         if frag is None:
@@ -280,12 +288,12 @@ class WikiWord(Ast):
 #         title = title[:delimPos]
 
         self.titleTokens = formatting.tokenizeTitle(title,
-                threadholder=threadholder)
+                formatDetails=formatDetails, threadholder=threadholder)
                 
         for t in self.titleTokens:
             t.start += relpos
 
-        _enrichTokens(formatting, self.titleTokens, threadholder=threadholder)
+        _enrichTokens(formatting, self.titleTokens, formatDetails, threadholder)
 
 
     def _findType(self, typeToFind, result):
@@ -309,7 +317,8 @@ class Url(Ast):
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.titleTokens, pos)
 
-    def buildSubAst(self, formatting, token, threadholder=DUMBTHREADHOLDER):
+    def buildSubAst(self, formatting, token, formatDetails=None,
+            threadholder=DUMBTHREADHOLDER):
         groupdict = token.grpdict
         
         url = groupdict.get("titledurlUrl")
@@ -331,12 +340,12 @@ class Url(Ast):
 #         title = title[:delimPos]
 
         self.titleTokens = formatting.tokenizeTitle(title,
-                threadholder=threadholder)
+                formatDetails=formatDetails, threadholder=threadholder)
                 
         for t in self.titleTokens:
             t.start += relpos
 
-        _enrichTokens(formatting, self.titleTokens, threadholder=threadholder)
+        _enrichTokens(formatting, self.titleTokens, formatDetails, threadholder)
 
 
     def _findType(self, typeToFind, result):
@@ -356,7 +365,8 @@ class EscapeCharacter(Ast):
     def __init__(self):
         Ast.__init__(self)
 
-    def buildSubAst(self, formatting, token, threadholder=DUMBTHREADHOLDER):
+    def buildSubAst(self, formatting, token, formatDetails=None,
+            threadholder=DUMBTHREADHOLDER):
 #        if token.text[1] in u"\n\r\f|*_[]\\":
             self.unescaped = token.text[1]
 #         else:

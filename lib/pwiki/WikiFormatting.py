@@ -81,6 +81,21 @@ def getStyles(styleFaces):
 
 # --------------------------------
 
+class WikiPageFormatDetails(object):
+    """
+    Store some details of the formatting of a specific page
+    """
+    __slots__ = ("__weakref__", "withCamelCase")
+    
+    def __init__(self, withCamelCase=True):
+        self.withCamelCase = withCamelCase
+    
+
+
+
+
+# --------------------------------
+
 
 class WikiFormatting:
     """
@@ -353,7 +368,7 @@ class WikiFormatting:
         return word
 
 
-    def getExpressionsFormatList(self, expressions, withCamelCase=None):
+    def getExpressionsFormatList(self, expressions, formatDetails=None):
         """
         Create from an expressions list (see compileCombinedRegex) a tuple
         of format types so that result[i] is the "right" number from
@@ -366,13 +381,17 @@ class WikiFormatting:
                 of normal text
         """
         modifier = {FormatTypes.WikiWord2: FormatTypes.WikiWord}
-        if withCamelCase is None:
-            withCamelCase = self.pWiki.wikiWordsEnabled
+        if formatDetails is None:
+            page = self.pWiki.getCurrentWikiPage()
+            if page is None:
+                formatDetails = WikiPageFormatDetails() # Default
+            else:
+                formatDetails = page.getFormatDetails()
         
-        if not withCamelCase:
+        if not formatDetails.withCamelCase:
             modifier[FormatTypes.WikiWord] = FormatTypes.Default
         
-        if self.footnotesAsWws:  # Footnotes (e.g. [42]) as wiki words
+        if self.footnotesAsWws:  # Footnotes (e.g. [42]) as wiki words?
             modifier[FormatTypes.Footnote] = FormatTypes.WikiWord
         else:
             modifier[FormatTypes.Footnote] = FormatTypes.Default
@@ -380,13 +399,14 @@ class WikiFormatting:
         return _buildExpressionsUnindex(expressions, modifier)
 
 
-    def tokenizePage(self, text, threadholder=DUMBTHREADHOLDER):
+    def tokenizePage(self, text, formatDetails=None,
+            threadholder=DUMBTHREADHOLDER):
         """
         Function used by PageAst module
         """
         # TODO Cache if necessary
         formatMap = self.getExpressionsFormatList(
-                self.formatExpressions)
+                self.formatExpressions, formatDetails=formatDetails)
                 
         tokenizer = Tokenizer(self.combinedPageRE, -1)
         
@@ -394,13 +414,14 @@ class WikiFormatting:
                 threadholder=threadholder)
 
 
-    def tokenizeCell(self, text, threadholder=DUMBTHREADHOLDER):
+    def tokenizeCell(self, text, formatDetails=None,
+            threadholder=DUMBTHREADHOLDER):
         """
         Function used by PageAst module
         """
         # TODO Cache if necessary
         formatMap = self.getExpressionsFormatList(
-                self.formatCellExpressions)  # TODO non camelcase !!!!
+                self.formatCellExpressions, formatDetails=formatDetails)
                 
         tokenizer = Tokenizer(self.combinedCellRE, -1)
         
@@ -408,13 +429,14 @@ class WikiFormatting:
                 threadholder=threadholder)
 
 
-    def tokenizeTitle(self, text, threadholder=DUMBTHREADHOLDER):
+    def tokenizeTitle(self, text, formatDetails=None,
+            threadholder=DUMBTHREADHOLDER):
         """
         Function used by PageAst module
         """
         # TODO Cache if necessary
         formatMap = self.getExpressionsFormatList(
-                self.formatWwTitleExpressions)  # TODO non camelcase !!!!
+                self.formatWwTitleExpressions, formatDetails=formatDetails)
                 
         tokenizer = Tokenizer(self.combinedWwTitleRE, -1)
 
