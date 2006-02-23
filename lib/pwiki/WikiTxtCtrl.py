@@ -19,7 +19,7 @@ from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard
 from MiscEvent import KeyFunctionSink
 
 import WikiFormatting
-import PageAst
+import PageAst, WikiPage
 from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException
 
 from SearchAndReplace import SearchReplaceOperation
@@ -128,9 +128,14 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # register some event handlers
         self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
-                ("options changed", self.onOptionsChanged),
+                ("options changed", self.onOptionsChanged),  # fired by PersonalWikiFrame
         )))
-        
+
+        self.wikiPageListener = KeyFunctionSink((
+                ("wiki page updated", self.onWikiPageUpdated),   # fired by a WikiPage
+        ))
+
+
         EVT_STC_STYLENEEDED(self, ID, self.OnStyleNeeded)
         EVT_STC_CHARADDED(self, ID, self.OnCharAdded)
         EVT_STC_CHANGE(self, ID, self.OnChange)
@@ -151,8 +156,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.anchorCharPosition = -1
         self.searchCharStartPos = 0
 
-        # are WikiWords enabled
-        self.wikiWordsEnabled = True
+#         # are WikiWords enabled
+#         self.wikiWordsEnabled = True
         
         self.onOptionsChanged(None)
 
@@ -278,12 +283,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         be = bs + self.bytelenSct(text[start:end])
         self.SetSelection(bs, be)
         
-    def _getWikiPageTitle(self, wikiWord):
-        title = re.sub(ur'([A-Z\xc0-\xde]{2,})([a-z\xdf-\xff])', r'\1 \2', wikiWord)
-        title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2', title)
-        return title
-
-        
     def saveLoadedWikiPage(self):
         """
         Save loaded wiki page into database. Does not check if dirty
@@ -304,49 +303,108 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.SetSavePoint()
 
         
-    def loadWikiPage(self, wikiPage, evtprops):
-        """
-        Save loaded page, if necessary, then load wikiPage into editor
-        """
-        if self.loadedWikiPage is not None and self.loadedWikiPage.getDirty()[0]:
-            self.saveLoadedWikiPage()
-        
+    def loadFuncPage(self, funcPage, evtprops):
+        # Unload current page
+        if self.loadedWikiPage is not None:
+            if self.loadedWikiPage.getDirty()[0]:
+                self.saveLoadedWikiPage()
+            
+            miscevt = self.loadedWikiPage.getMiscEvent()
+            miscevt.removeListener(self.wikiPageListener)
+            
+            self.loadedWikiPage = None
+
         # set the editor text
         content = None
         wikiDataManager = self.pWiki.getWikiDataManager()
         
-        self.loadedWikiPage = wikiPage
+        self.loadedWikiPage = funcPage
         if self.loadedWikiPage is None:
-            self.SetText("")
+            self.SetText(u"")
             return  # TODO How to handle?
+        else:
+            miscevt = self.loadedWikiPage.getMiscEvent()
+            miscevt.addListener(self.wikiPageListener)
+            
 
         try:
             content = self.loadedWikiPage.getContent()
         except WikiFileNotFoundException, e:
-            # Create initial content of new page
+            assert 0   # TODO
+
+        globalProps = wikiDataManager.getWikiData().getGlobalProperties()
+        # get the font that should be used in the editor
+        font = globalProps.get("global.font", self.pWiki.defaultEditorFont)
+
+        # set the styles in the editor to the font
+        if self.lastFont != font:
+            faces = self.pWiki.presentationExt.faces.copy()
+            faces["mono"] = font
+            self.SetStyles(faces)
+            self.lastEditorFont = font
+
+#         p2 = evtprops.copy()
+#         p2.update({"loading current page": True})
+#         self.pWiki.fireMiscEventProps(p2)  # TODO Remove this hack
+
+        # now fill the text into the editor
+        self.SetText(content)
+
+
+    def loadWikiPage(self, wikiPage, evtprops):
+        """
+        Save loaded page, if necessary, then load wikiPage into editor
+        """
+        # Unload current page
+        if self.loadedWikiPage is not None:
+            if self.loadedWikiPage.getDirty()[0]:
+                self.saveLoadedWikiPage()
             
-            # Check if there is exactly one parent
-            parents = self.loadedWikiPage.getParentRelationships()
-            if len(parents) == 1:
-                # Check if there is a template page
-                try:
-                    parentPage = wikiDataManager.getPage(parents[0])
-                    templateWord = parentPage.getPropertyOrGlobal("template")
-                    templatePage = wikiDataManager.getPage(templateWord)
-                    content = templatePage.getContent()
-                except (WikiWordNotFoundException, WikiFileNotFoundException):
-                    pass
+            miscevt = self.loadedWikiPage.getMiscEvent()
+            miscevt.removeListener(self.wikiPageListener)
+            
+            self.loadedWikiPage = None
+        
+        # set the editor text
+        wikiDataManager = self.pWiki.getWikiDataManager()
+        
+        self.loadedWikiPage = wikiPage
+        if self.loadedWikiPage is None:
+            self.SetText(u"")
+            return  # TODO How to handle?
+        else:
+            miscevt = self.loadedWikiPage.getMiscEvent()
+            miscevt.addListener(self.wikiPageListener)
+            
+        content = self.loadedWikiPage.getContent()
 
-            if content is None:
-                title = self._getWikiPageTitle(self.loadedWikiPage.getWikiWord())
-                content = u"++ %s\n\n" % title
-
-            self.lastCursorPositionInPage[self.loadedWikiPage.getWikiWord()] = \
-                    len(content)
+#         try:
+#             
+#         except WikiFileNotFoundException, e:
+#             # Create initial content of new page
+#             
+#             # Check if there is exactly one parent
+#             parents = self.loadedWikiPage.getParentRelationships()
+#             if len(parents) == 1:
+#                 # Check if there is a template page
+#                 try:
+#                     parentPage = wikiDataManager.getPage(parents[0])
+#                     templateWord = parentPage.getPropertyOrGlobal("template")
+#                     templatePage = wikiDataManager.getPage(templateWord)
+#                     content = templatePage.getContent()
+#                 except (WikiWordNotFoundException, WikiFileNotFoundException):
+#                     pass
+# 
+#             if content is None:
+#                 title = self._getWikiPageTitle(self.loadedWikiPage.getWikiWord())
+#                 content = u"++ %s\n\n" % title
+# 
+#             self.lastCursorPositionInPage[self.loadedWikiPage.getWikiWord()] = \
+#                     len(content)
 
         # get the properties that need to be checked for options
         pageProps = self.loadedWikiPage.getProperties()
-        globalProps = wikiDataManager.getWikiData().getGlobalProperties()
+#         globalProps = wikiDataManager.getWikiData().getGlobalProperties()
 
         # get the font that should be used in the editor
         font = self.loadedWikiPage.getPropertyOrGlobal("font",
@@ -393,6 +451,24 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         for i in xrange(32):
             self.StyleSetBackground(i, color)
 #             self.StyleSetEOLFilled(i, True)
+
+    def onWikiPageUpdated(self, miscevt):
+        if self.loadedWikiPage is None or \
+                not isinstance(self.loadedWikiPage, WikiPage.WikiPage):
+            return
+
+        # get the font that should be used in the editor
+        font = self.loadedWikiPage.getPropertyOrGlobal("font",
+                self.pWiki.defaultEditorFont)
+
+        # set the styles in the editor to the font
+        if self.lastFont != font:
+            faces = self.pWiki.presentationExt.faces.copy()
+            faces["mono"] = font
+            self.SetStyles(faces)
+            self.lastEditorFont = font
+
+
 
     def OnStyleNeeded(self, evt):
         "Styles the text of the editor"
@@ -640,7 +716,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         tokens = pageAst.getTokensForPos(linkCharPos)
         
         if not self._activateTokens(tokens):
-            if tokens[-1].start == linkCharPos and linkCharPos > 0:
+            if linkCharPos > 0:   # tokens[-1].start == linkCharPos and 
                 # Link position lies exactly on token start, so maybe
                 # the previous token(s) was/were meant
                 tokens = pageAst.getTokensForPos(linkCharPos - 1)
@@ -714,7 +790,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         (startPos, endPos) = self.GetSelection()
 
         # if no selection eval all scripts
-        if startPos == endPos or index > 0:
+        if startPos == endPos or index > -1:
             # get the text of the current page
             text = self.GetText()
             
@@ -728,7 +804,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         try:
                             importPage = self.pWiki.getWikiDataManager().getPage(script)
                             content = importPage.getContent()
-                            text = text + "\n" + content
+                            text += "\n" + content
                         except:
                             pass
 
@@ -740,7 +816,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     try:
                         importPage = self.pWiki.getWikiDataManager().getPage(globscript)
                         content = importPage.getContent()
-                        text = text + "\n" + content
+                        text += "\n" + content
                     except:
                         pass
 
@@ -750,11 +826,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 script = re.sub(u"[\r\n\s]+$", "", script)
                 try:
                     if index == -1:
-                        script = re.sub(u"^\d:?\s?", "", script)
+                        script = re.sub(u"^\d:?\s?", u"", script)
                         exec(script) in self.evalScope
-                    elif index > 0 and script.startswith(str(index)):
-                        script = re.sub(u"^\d:?\s?", "", script)
+                    elif index > -1 and script.startswith(str(index)):
+                        script = re.sub(u"^\d:?\s?", u"", script)
                         exec(script) in self.evalScope
+                        break # Execute only the first found script
 
                 except Exception, e:
                     self.AddText(u"\nException: %s" % unicode(e))

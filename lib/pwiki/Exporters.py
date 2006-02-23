@@ -107,6 +107,9 @@ class HtmlXmlExporter:
         addopt -- additional options returned by getAddOpt()
         """
         
+#         print "export1", repr((pWiki, wikiDataManager, wordList, exportType, exportDest,
+#             compatFilenames, addopt))
+        
         self.pWiki = pWiki
         self.wikiDataManager = wikiDataManager
         self.wikiData = self.wikiDataManager.getWikiData()
@@ -631,6 +634,9 @@ class HtmlXmlExporter:
             elif styleno == WikiFormatting.FormatTypes.Italic:
                 self.outAppend(u"<i>"+escapeHtml(
                         unescapeNormalText(tok.grpdict["italicContent"])) + u"</i>")
+            elif styleno == WikiFormatting.FormatTypes.HtmlTag:
+                # HTML tag -> export as is 
+                self.outAppend(tok.text)
             elif styleno == WikiFormatting.FormatTypes.Heading4:
                 self.outEatBreaks(u"<h4>%s</h4>\n" % escapeHtml(
                         unescapeNormalText(tok.grpdict["h4Content"])))
@@ -830,13 +836,11 @@ class TextExporter:
         If panels for additional options must be created, they should use
         guiparent as parent
         """
-        
-        res = xrc.wxXmlResource.Get()
-        
-#         self.additOptions = wxPanel(self)
-#         res.AttachUnknownControl("additOptions", self.additOptions, self)
-
-        textPanel = res.LoadPanel(guiparent, "ExportSubText") # .ctrls.additOptions
+        if guiparent:
+            res = xrc.wxXmlResource.Get()
+            textPanel = res.LoadPanel(guiparent, "ExportSubText") # .ctrls.additOptions
+        else:
+            textPanel = None
         
         return (
             ("raw_files", 'Set of *.wiki files', textPanel),
@@ -863,12 +867,15 @@ class TextExporter:
         of simple string and/or numeric objects. Otherwise, any object
         can be returned (normally the addoptpanel itself)
         """
-        ctrls = XrcControls(addoptpanel)
-        
-        # Which encoding:
-        # 0:System standard, 1:utf-8 with BOM, 2: utf-8 without BOM
-
-        return (ctrls.chTextEncoding.GetSelection(),)
+        if addoptpanel is None:
+            return (1,)
+        else:
+            ctrls = XrcControls(addoptpanel)
+            
+            # Which encoding:
+            # 0:System standard, 1:utf-8 with BOM, 2: utf-8 without BOM
+    
+            return (ctrls.chTextEncoding.GetSelection(),)
 
             
 

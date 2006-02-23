@@ -432,7 +432,9 @@ class MainViewNode(AbstractNode):
         node = MainParentlessNode(self.treeCtrl, self)
         if node.isVisible():
             result.append(node)
-
+            
+        result.append(MainFuncPagesNode(self.treeCtrl, self))
+            
         return result
 
 
@@ -776,8 +778,79 @@ class MainParentlessNode(AbstractNode):
 #                 words)
 
 
-# ----------------------------------------------------------------------
 
+
+class MainFuncPagesNode(AbstractNode):
+    """
+    Represents the "Func pages" node
+    """
+    __slots__ = ()
+    
+    def getNodePresentation(self):
+        style = NodeStyle()
+        style.label = u"Func. pages"
+        style.icon = u"cog"
+        style.hasChildren = True
+        return style
+        
+    def listChildren(self):
+        return [
+                FuncPageNode(self.treeCtrl, self, "global/[TextBlocks]"),
+                FuncPageNode(self.treeCtrl, self, "wiki/[TextBlocks]")
+                ]
+
+
+class FuncPageNode(AbstractNode):
+    """
+    Node representing a functional page
+    """
+    
+    __slots__ = ("funcTag", "label")
+    
+    TAG_TO_LABEL_MAP = {    # Maps the func tag to the node's label
+            "global/[TextBlocks]": u"Global text blocks",
+            "wiki/[TextBlocks]": u"Wiki text blocks"
+        }
+
+    def __init__(self, tree, parentNode, funcTag):
+        AbstractNode.__init__(self, tree, parentNode)
+        self.funcTag = funcTag
+        self.label = self.TAG_TO_LABEL_MAP.get(self.funcTag, self.funcTag)
+
+    def getNodePresentation(self):
+        """
+        return a NodeStyle object for the node
+        """
+        style = NodeStyle()
+        style.label = self.label
+        style.icon = u"cog"
+        style.hasChildren = False
+
+        return style
+
+    def onActivate(self):
+        """
+        React on activation
+        """
+        self.treeCtrl.pWiki.openFuncPage(self.funcTag)
+
+#     def getContextMenu(self):
+#         """
+#         Return a context menu for this item or None
+#         """
+#         return None
+        
+    def nodeEquality(self, other):
+        """
+        Test for node equality
+        """
+        return AbstractNode.nodeEquality(self, other) and \
+                self.funcTag == other.funcTag
+
+
+
+
+# ----------------------------------------------------------------------
 
 
 class WikiTreeCtrl(wxTreeCtrl):

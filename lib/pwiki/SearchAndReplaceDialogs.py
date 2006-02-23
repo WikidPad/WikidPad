@@ -349,10 +349,11 @@ class SearchResultListBox(wxHtmlListBox):
         self.pWiki.openWikiPage(info.wikiWord)
         # self.pagePosNext = 0
         if info.occPos[0] != -1:
-            self.pWiki.editor.SetSelectionByChar(info.occPos[0], info.occPos[1])
+            self.pWiki.getActiveEditor().SetSelectionByChar(info.occPos[0],
+                    info.occPos[1])
 
 #                 executeSearch(searchOp, 0)
-        self.pWiki.editor.SetFocus()
+        self.pWiki.getActiveEditor().SetFocus()
 
 
     def OnLeftDown(self, evt):
@@ -554,7 +555,7 @@ class SearchWikiDialog(wxDialog):   # TODO
 
             searchOp = self.buildSearchReplaceOperation()
             searchOp.replaceOp = False
-            pagePosNext = self.pWiki.editor.executeSearch(searchOp,
+            pagePosNext = self.pWiki.getActiveEditor().executeSearch(searchOp,
                     0, next=nextOnPage)[1]
                     
             if pagePosNext != -1:
@@ -575,7 +576,7 @@ class SearchWikiDialog(wxDialog):   # TODO
     def OnReplace(self, evt):
         sarOp = self.buildSearchReplaceOperation()
         sarOp.replaceOp = True
-        self.pWiki.editor.executeReplace(sarOp)
+        self.pWiki.getActiveEditor().executeReplace(sarOp)
         
         self._findNext()
 
@@ -655,7 +656,8 @@ class SearchWikiDialog(wxDialog):   # TODO
                 self._refreshSavedSearchesList()
                 break
         else:
-            self.pWiki.displayErrorMessage(u"Invalid search string, can't save as view")
+            self.pWiki.displayErrorMessage(
+                    u"Invalid search string, can't save as view")
 
 
     def OnRadioBox(self, evt):
@@ -819,15 +821,16 @@ class SearchPageDialog(wxDialog):   # TODO
     def OnFindNext(self, evt):
         sarOp = self._buildSearchOperation()
         sarOp.replaceOp = False        
-        self.pWiki.editor.executeSearch(sarOp, next=not self.firstFind)
+        self.pWiki.getActiveEditor().executeSearch(sarOp,
+                next=not self.firstFind)
         self.firstFind = False
 
     def OnReplace(self, evt):
         sarOp = self._buildSearchOperation()
         sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
         sarOp.replaceOp = True
-        self.pWiki.editor.executeReplace(sarOp)
-        self.pWiki.editor.executeSearch(sarOp, next=True)
+        self.pWiki.getActiveEditor().executeReplace(sarOp)
+        self.pWiki.getActiveEditor().executeSearch(sarOp, next=True)
 
     def OnReplaceAll(self, evt):
         sarOp = self._buildSearchOperation()
@@ -835,8 +838,9 @@ class SearchPageDialog(wxDialog):   # TODO
         sarOp.replaceOp = True
         lastReplacePos = 0
         while True:
-            lastReplacePos = self.pWiki.editor.executeSearch(sarOp, lastReplacePos)[1]
-            self.pWiki.editor.executeReplace(sarOp)
+            lastReplacePos = self.pWiki.getActiveEditor().executeSearch(sarOp,
+                    lastReplacePos)[1]
+            self.pWiki.getActiveEditor().executeReplace(sarOp)
             if lastReplacePos == -1:
                 break
 

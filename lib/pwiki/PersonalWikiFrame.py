@@ -157,6 +157,13 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         wxFrame.__init__(self, parent, -1, title, size = (700, 550),
                          style=wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
         MiscEventSourceMixin.__init__(self)
+        
+        if cmdLineAction.cmdLineError:
+            cmdLineAction.showCmdLineUsage(self,
+                    u"Bad formatted command line.\n\n")
+            self.Close()
+            self.Destroy()
+            return
 
         self.sleepMode = False  # Is program in low resource sleep mode?
 
@@ -363,6 +370,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # display the window
         ## if not (self.showOnTray and self.IsIconized()):
+            
+        cmdLineAction.actionBeforeShow(self)
+        
+        if cmdLineAction.exitFinally:
+            self.Close()
+            self.Destroy()
+            return
+
         self.Show(True)
 
         if self.lowResources and self.IsIconized():
@@ -688,34 +703,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         return wikiMenu
 
 
-    def buildTextBlocksMenu(self):
+    def _addToTextBlocksMenu(self, tbContent, stack, reusableIds):
         """
-        Constructs the text blocks menu submenu and necessary subsubmenus.
-        If this is called more than once, previously used menu ids are reused
-        for the new menu.
+        Helper for buildTextBlocksMenu() to build up menu
         """
-        reusableIds = sets.Set(self.textBlocksActivation.keys())
-        
-        # Dictionary with menu id of the text block item as key and tuple
-        # (entryFlags, entryContent) as value, where entryFlags is a string
-        # of flag characters for the text block (currently only "a" for append
-        # instead of insert at cursor position), entryContent is the unescaped
-        # content of the text block.
-        # Tuple may be (None, None) if the id isn't used but stored for later
-        # reuse
-        self.textBlocksActivation = {}
-
-        tbLoc = join(self.globalConfigSubDir, "[TextBlocks].wiki")
-        try:
-            tbFile = open(tbLoc, "rU")
-            tbContent = tbFile.read()
-            tbFile.close()
-            tbContent = fileContentToUnicode(tbContent)
-        except:
-            tbContent = u""
-        
-        stack = [[0, u"Text blocks", wxMenu()]]
-
         for line in tbContent.split(u"\n"):
             if line.strip() == u"":
                 continue
@@ -770,22 +761,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             else:
                 menuID = wxNewId()
                 EVT_MENU(self, menuID, self.OnTextBlockUsed)
-#                 self.Bind(wx.EVT_MENU, lambda evt, content=entryContent:
-#                         self.appendText(content), id=menuID)
 
             menuItem = wxMenuItem(menu, menuID, entryTitle)
             menu.AppendItem(menuItem)
 
             self.textBlocksActivation[menuID] = (entryFlags, entryContent)
-
-#             if u"a" in entryFlags:
-#                 self.Bind(wx.EVT_MENU, lambda evt, content=entryContent:
-#                         self.appendText(content), id=menuID)
-#             else:
-#                 self.Bind(wx.EVT_MENU, lambda evt, content=entryContent:
-#                         self.addText(content), id=menuID)
-#                 EVT_MENU(self, menuID, lambda evt, content=entryContent:
-#                         self.addText(content))
 
         # Add the remaining ids so nothing gets lost
         for i in reusableIds:
@@ -798,7 +778,49 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 title = u"<No title>"
             
             stack[-1][2].AppendMenu(wxNewId(), title, menu)
-            
+
+
+    def buildTextBlocksMenu(self):
+        """
+        Constructs the text blocks menu submenu and necessary subsubmenus.
+        If this is called more than once, previously used menu ids are reused
+        for the new menu.
+        """
+        reusableIds = sets.Set(self.textBlocksActivation.keys())
+        
+        # Dictionary with menu id of the text block item as key and tuple
+        # (entryFlags, entryContent) as value, where entryFlags is a string
+        # of flag characters for the text block (currently only "a" for append
+        # instead of insert at cursor position), entryContent is the unescaped
+        # content of the text block.
+        # Tuple may be (None, None) if the id isn't used but stored for later
+        # reuse
+        self.textBlocksActivation = {}
+        
+        stack = [[0, u"Text blocks", wxMenu()]]
+                
+        wikiData = self.getWikiData()
+        if wikiData is not None:
+            if wikiData.isDefinedWikiWord("[TextBlocks]"):
+                # We have current wiki with appropriate functional page,
+                # so fill menu first with wiki specific text blocks
+                tbContent = wikiData.getContent("[TextBlocks]")
+                self._addToTextBlocksMenu(tbContent, stack, reusableIds)
+
+                stack[-1][2].AppendSeparator()
+
+        # Fill menu with global text blocks
+        tbLoc = join(self.globalConfigSubDir, "[TextBlocks].wiki")
+        try:
+            tbFile = open(tbLoc, "rU")
+            tbContent = tbFile.read()
+            tbFile.close()
+            tbContent = fileContentToUnicode(tbContent)
+        except:
+            tbContent = u""
+
+        self._addToTextBlocksMenu(tbContent, stack, reusableIds)
+
         stack[-1][2].AppendSeparator()
         stack[-1][2].Append(GUI_ID.CMD_REREAD_TEXT_BLOCKS, 'Reread text blocks',
                 'Reread the text block file(s) and recreate menu')
@@ -823,6 +845,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     
     def OnRereadTextBlocks(self, evt):
+        self.rereadTextBlocks()
+        
+        
+    def rereadTextBlocks(self):
         """
         Starts rereading and rebuilding of the text blocks submenu
         """
@@ -1924,6 +1950,9 @@ These are your default global settings.
         # update the last accessed wiki config var
         self.lastAccessedWiki(self.wikiConfigFilename)
 
+        # Rebuild text blocks menu
+        self.rereadTextBlocks()
+
         # trigger hook
         self.hooks.openedWiki(self, self.wikiName, wikiConfigFilename)
 
@@ -1965,6 +1994,23 @@ These are your default global settings.
         # database commits
         if self.getWikiData():
             self.getWikiData().commit()
+
+
+    def openFuncPage(self, funcTag, **evtprops):
+#         try:
+        page = self.wikiDataManager.getFuncPage(funcTag)
+#         except (WikiWordNotFoundException, WikiFileNotFoundException), e:
+#             page = self.wikiDataManager.createPage(wikiWord)
+#             # trigger hooks
+#             self.hooks.newWikiWord(self, wikiWord)
+
+        self.activeEditor.loadFuncPage(page, evtprops)
+
+        p2 = evtprops.copy()
+        p2.update({"loaded current functional page": True})
+        # p2.update({"loaded current page": True})
+        self.fireMiscEventProps(p2)        
+
 
     def openWikiPage(self, wikiWord, addToHistory=True,
             forceTreeSyncFromRoot=False, forceReopen=False, **evtprops):
@@ -2086,6 +2132,7 @@ These are your default global settings.
 
         p2 = evtprops.copy()
         p2.update({"loaded current page": True})
+        p2.update({"loaded current wiki page": True})
         self.fireMiscEventProps(p2)        
 
         # set the title and add the word to the history
@@ -2106,27 +2153,33 @@ These are your default global settings.
     def saveCurrentWikiPage(self, force = False):
         if force or self.getCurrentWikiPage().getDirty()[0]:
             self.activeEditor.saveLoadedWikiPage()
-#             return self.saveWikiPage(self.getCurrentWikiWord(), self.currentWikiPage,
-#                     self.activeEditor.GetText())
-#         else:
-#             return None
+
 
     def saveWikiPage(self, page, text):
         if page is None:
             return False
         self.statusBar.PushStatusText(u"Saving WikiPage", 0)
         word = page.getWikiWord()
-        # trigger hooks
-        self.hooks.savingWikiWord(self, word)
+        if word is not None:
+            # trigger hooks
+            self.hooks.savingWikiWord(self, word)
         try:
             while True:
                 try:
-                    page.save(self.activeEditor.cleanAutoGenAreas(text))
-                    page.update(self.activeEditor.updateAutoGenAreas(text))   # ?
-                    # trigger hooks
-                    self.hooks.savedWikiWord(self, word)
+                    if word is not None:
+                        # only for real wiki pages
+                        page.save(self.activeEditor.cleanAutoGenAreas(text))
+                        page.update(self.activeEditor.updateAutoGenAreas(text))   # ?
+                        # trigger hooks
+                        self.hooks.savedWikiWord(self, word)
+                    else:
+                        page.save(text)
+                        page.update(text)
+                        
                     return True
                 except Exception, e:
+                    if word is None:    # TODO !!!
+                        word = u"---"
                     dlg = wxMessageDialog(self,
                             uniToGui((u'There was an error saving the contents of '
                             u'wiki page "%s".\n%s\n\nWould you like to try and '
@@ -2447,7 +2500,7 @@ These are your default global settings.
 
     def showWikiWordRenameDialog(self, wikiWord=None, toWikiWord=None):
         if self.getCurrentWikiWord() is None:
-            self.pWiki.displayErrorMessage(u"No real wiki word selected to rename")
+            self.displayErrorMessage(u"No real wiki word selected to rename")
             return
 
         dlg = wxTextEntryDialog(self, uniToGui(u"Rename '%s' to:" %
@@ -2951,7 +3004,8 @@ These are your default global settings.
             if wikiName.find(u' ') == -1 and \
                     self.getFormatting().isNakedWikiWord(wikiName):
                 dlg = wxDirDialog(self, u"Directory to store new wiki",
-                        self.getLastActiveDir(),
+#                         self.getLastActiveDir(),
+                        dirname(dirname(self.wikiConfigFilename)),
                         style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
                 if dlg.ShowModal() == wxID_OK:
                     try:

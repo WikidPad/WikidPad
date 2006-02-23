@@ -5,13 +5,13 @@ from Utilities import DUMBTHREADHOLDER
 
 import srePersistent as re
 
-from StringOps import Tokenizer, matchWhole
+from StringOps import Tokenizer, matchWhole, Token
 
 
 FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord2", "WikiWord",
         "AvailWikiWord", "Bold", "Italic", "Heading4", "Heading3", "Heading2",
         "Heading1", "Url", "Script", "Property", "ToDo", "HorizLine", "Bullet",
-        "Numeric", "Suppress", "Footnote", "Table", "EscapedChar"], 1)
+        "Numeric", "Suppress", "Footnote", "Table", "EscapedChar", "HtmlTag"], 1)
 
 EMPTY_RE = re.compile(ur"", re.DOTALL | re.UNICODE | re.MULTILINE)
 
@@ -85,10 +85,11 @@ class WikiPageFormatDetails(object):
     """
     Store some details of the formatting of a specific page
     """
-    __slots__ = ("__weakref__", "withCamelCase")
+    __slots__ = ("__weakref__", "withCamelCase", "noFormat")
     
-    def __init__(self, withCamelCase=True):
-        self.withCamelCase = withCamelCase
+    def __init__(self, withCamelCase=True, noFormat=False):
+        self.withCamelCase = withCamelCase   # Interpret CamelCase as wiki word
+        self.noFormat = noFormat   # No formatting at all, overrides other settings
     
 
 
@@ -162,6 +163,7 @@ class WikiFormatting:
                 (self.WikiWordEditorRE, FormatTypes.WikiWord),
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
+                (self.HtmlTagRE, FormatTypes.HtmlTag),
                 (self.Heading4RE, FormatTypes.Heading4),
                 (self.Heading3RE, FormatTypes.Heading3),
                 (self.Heading2RE, FormatTypes.Heading2),
@@ -181,13 +183,15 @@ class WikiFormatting:
                 (self.WikiWordEditorRE2, FormatTypes.WikiWord2),
                 (self.WikiWordEditorRE, FormatTypes.WikiWord),
                 (self.BoldRE, FormatTypes.Bold),
-                (self.ItalicRE, FormatTypes.Italic)
+                (self.ItalicRE, FormatTypes.Italic),
+                (self.HtmlTagRE, FormatTypes.HtmlTag)
                 ]
                 
         self.formatWwTitleExpressions = [
                 (self.PlainEscapedCharacterRE, FormatTypes.EscapedChar),
                 (self.BoldRE, FormatTypes.Bold),
-                (self.ItalicRE, FormatTypes.Italic)
+                (self.ItalicRE, FormatTypes.Italic),
+                (self.HtmlTagRE, FormatTypes.HtmlTag)
                 ]
        
                 
@@ -404,6 +408,17 @@ class WikiFormatting:
         """
         Function used by PageAst module
         """
+        if formatDetails is None:
+            page = self.pWiki.getCurrentWikiPage()
+            if page is None:
+                formatDetails = WikiPageFormatDetails() # Default
+            else:
+                formatDetails = page.getFormatDetails()
+
+        if formatDetails.noFormat:
+            # No formatting at all (used e.g. by some functional pages)
+            return [Token(FormatTypes.Default, 0, {}, text)]
+            
         # TODO Cache if necessary
         formatMap = self.getExpressionsFormatList(
                 self.formatExpressions, formatDetails=formatDetails)

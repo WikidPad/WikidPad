@@ -28,6 +28,9 @@ BoldRE          = re.compile(ur"\*(?=[^\s])(?P<boldContent>" + PlainCharacterPAT
 ItalicRE        = re.compile(ur"\b_(?P<italicContent>" + PlainCharacterPAT +
         ur"+?)_\b",
         re.DOTALL | re.UNICODE | re.MULTILINE)
+HtmlTagRE = re.compile(
+        ur"</?[A-Za-z][A-Za-z0-9]*(?:/| [^\n]*)?>",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
 Heading4RE      = re.compile(u"^\\+\\+\\+\\+(?!\\+) ?(?P<h4Content>" +
         PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
@@ -53,7 +56,8 @@ TitledUrlRE =  re.compile(
         ur"(?P<titledurlTitle>" + PlainCharacterPAT + ur"+?))?\]",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
-# The following 3 are not in WikiFormatting.FormatExpressions
+
+# The following 2 are not in WikiFormatting.FormatExpressions
 BulletRE        = re.compile(ur"^(?P<indentBullet> *)(\*)[ \t]",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 NumericBulletRE = re.compile(ur"^(?P<indentNumeric> *)(?P<preLastNumeric>(?:\d+\.)*)(\d+)\.[ \t]",
@@ -142,7 +146,7 @@ SearchFragmentUnescapeRE   = re.compile(ur"#(.)",
 
 # parses the dynamic properties
 PropertyRE      = re.compile(ur"\[\s*(?P<propertyName>[a-zA-Z0-9\-\_\.]+?)\s*" +
-                  ur"[=:]\s*(?P<propertyValue>[\w\-\_ \t]+?)\]",
+                  ur"[=:]\s*(?P<propertyValue>[\w\-\_ \t;:,.]+?)\]",
                   re.DOTALL | re.UNICODE | re.MULTILINE)
 
 

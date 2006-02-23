@@ -2,7 +2,7 @@ from weakref import WeakValueDictionary
 
 
 from pwiki.WikiExceptions import *
-from pwiki.WikiPage import WikiPage
+from pwiki.WikiPage import WikiPage, FunctionalPage
 
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
@@ -29,7 +29,7 @@ class WikiDataManager:
         return self.wikiData
 
 
-    def getPage(self, wikiWord):
+    def getWikiPage(self, wikiWord):
         """
         Fetch a WikiPage for the wikiWord, throws WikiWordNotFoundException
         if word doesn't exist
@@ -38,8 +38,8 @@ class WikiDataManager:
             raise WikiWordNotFoundException, u"Word '%s' not in wiki" % wikiWord
 
         return self.getPageNoError(wikiWord)
-
-    def getPageNoError(self, wikiWord):
+        
+    def getWikiPageNoError(self, wikiWord):
         """
         fetch a WikiPage for the wikiWord. If it doesn't exist, return
         one without throwing an error and without updating the cache.
@@ -56,12 +56,25 @@ class WikiDataManager:
         return value
 
 
-    def createPage(self, wikiWord):
+    def createWikiPage(self, wikiWord):
         """
         create a new wikiPage for the wikiWord. Cache is not updated until
         page is saved
         """
         return self.getPageNoError(wikiWord)
+
+    # TODO Remove these:
+    getPage = getWikiPage
+    getPageNoError = getWikiPageNoError
+    createPage = createWikiPage
+        
+        
+    def getFuncPage(self, funcTag):
+        """
+        Retrieve a functional page
+        """
+        # TODO Ensure uniqueness as for wiki pages
+        return FunctionalPage(self.pWiki, self, funcTag)
 
 
     def rebuildWiki(self, progresshandler):

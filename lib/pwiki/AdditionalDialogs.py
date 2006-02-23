@@ -712,13 +712,13 @@ class ExportDialog(wxDialog):
             wordList = [root]
         elif selset == 1:
             # subtree
-            wordList = self.pWiki.wikiData.getAllSubWords([root])
+            wordList = self.pWiki.getWikiData().getAllSubWords([root])
         elif selset == 2:
             # whole wiki
-            wordList = self.pWiki.wikiData.getAllDefinedPageNames()
+            wordList = self.pWiki.getWikiData().getAllDefinedPageNames()
         else:
             # custom list
-            wordList = self.pWiki.wikiData.search(self.listPagesOperation, True)
+            wordList = self.pWiki.getWikiData().search(self.listPagesOperation, True)
 
         # Run exporter
         ob, t, desc, panel = \

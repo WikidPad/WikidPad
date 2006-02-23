@@ -1,18 +1,23 @@
 from time import time
+import os.path, re
+
+from MiscEvent import MiscEventSourceMixin
 
 from WikiExceptions import *   # TODO make normal import?
 
-from StringOps import strToBool
+from StringOps import strToBool, fileContentToUnicode, BOM_UTF8, utf8Enc
 
 import WikiFormatting
 import PageAst
 
 
-class WikiPage:
+class WikiPage(MiscEventSourceMixin):
     """
     holds the data for a wikipage. fetched via the WikiDataManager.getPage method.
     """
     def __init__(self, wikiDataManager, wikiWord):
+        MiscEventSourceMixin.__init__(self)
+
         self.wikiDataManager = wikiDataManager
         self.wikiData = self.wikiDataManager.getWikiData()
 
@@ -114,11 +119,41 @@ class WikiPage:
         
         word = self.wikiData.getAliasesWikiWord(self.wikiWord)
         return self.wikiDataManager.getPageNoError(word)
+        
+
+    def _getWikiPageTitle(self, wikiWord):
+        title = re.sub(ur'([A-Z\xc0-\xde]{2,})([a-z\xdf-\xff])', r'\1 \2', wikiWord)
+        title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2', title)
+        return title
 
 
     def getContent(self):
-        return self.wikiData.getContent(self.wikiWord)
-        
+        content = None
+
+        try:
+            content = self.wikiData.getContent(self.wikiWord)
+        except WikiFileNotFoundException, e:
+            # Create initial content of new page
+            
+            # Check if there is exactly one parent
+            parents = self.getParentRelationships()
+            if len(parents) == 1:
+                # Check if there is a template page
+                try:
+                    parentPage = self.wikiDataManager.getPage(parents[0])
+                    templateWord = parentPage.getPropertyOrGlobal("template")
+                    templatePage = self.wikiDataManager.getPage(templateWord)
+                    content = templatePage.getContent()
+                except (WikiWordNotFoundException, WikiFileNotFoundException):
+                    pass
+
+            if content is None:
+                title = self._getWikiPageTitle(self.getWikiWord())
+                content = u"++ %s\n\n" % title
+
+        return content
+
+
     def getFormatDetails(self):
         """
         According to currently stored settings, return a
@@ -140,7 +175,7 @@ class WikiPage:
         self.saveDirtySince = None
 
 
-    def update(self, text, alertPWiki=True):
+    def update(self, text, fireEvent=True):
         """
         Update additional cached informations (properties, todos, relations)
         """
@@ -148,7 +183,6 @@ class WikiPage:
         
         page = PageAst.Page()
         page.buildAst(formatting, text, self.getFormatDetails())
-
 
         self.deleteChildRelationships()
         self.deleteProperties()
@@ -190,8 +224,10 @@ class WikiPage:
 
 #         self.lastUpdate = time()   # self.modified
 
-        if alertPWiki:
-            self.wikiData.pWiki.informWikiPageUpdate(self)
+        if fireEvent:
+            self.wikiData.pWiki.informWikiPageUpdate(self)  # TODO Remove
+            self.fireMiscEventKeys(("wiki page updated", "page updated"))
+
 
     def addChildRelationship(self, toWord):
         if toWord not in self.childRelations:
@@ -218,6 +254,128 @@ class WikiPage:
     def deleteTodos(self):
         # self.wikiData.deleteTodos(self.wikiWord)
         self.todos = []
+
+    def setDirty(self, dirt):
+        if dirt:
+            if self.saveDirtySince is None:
+                ti = time()
+                self.saveDirtySince = ti
+                self.updateDirtySince = ti
+        else:
+            self.saveDirtySince = None
+            self.updateDirtySince = None
+
+    def getDirty(self):
+        return (self.saveDirtySince is not None,
+                self.updateDirtySince is not None)
+
+    def getDirtySince(self):
+        return (self.saveDirtySince, self.updateDirtySince)
+
+
+
+
+
+
+
+
+class FunctionalPage(MiscEventSourceMixin):
+    """
+    holds the data for a functional page. Such a page controls the behavior
+    of the application or a special wiki
+    """
+    def __init__(self, pWiki, wikiDataManager, funcTag):
+        MiscEventSourceMixin.__init__(self)
+
+        self.pWiki = pWiki
+        self.wikiDataManager = wikiDataManager
+        self.funcTag = funcTag
+
+        # does this page need to be saved?
+        self.saveDirtySince = None  # None if not dirty or timestamp when it became dirty
+        self.updateDirtySince = None
+
+
+    def getWikiWord(self):
+        return None
+        
+    def getFuncTag(self):
+        """
+        Return the functional tag of the page (a kind of filepath
+        for the page)
+        """
+        return self.funcTag
+
+
+    def getContent(self):
+        if self.funcTag == "global/[TextBlocks]":
+            tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[TextBlocks].wiki")
+            try:
+                tbFile = open(tbLoc, "rU")
+                tbContent = tbFile.read()
+                tbFile.close()
+                tbContent = fileContentToUnicode(tbContent)
+            except:
+                tbContent = u""
+        elif self.funcTag == "wiki/[TextBlocks]":
+            wikiData = self.wikiDataManager.getWikiData()
+            if wikiData.isDefinedWikiWord("[TextBlocks]"):
+                tbContent = wikiData.getContent("[TextBlocks]")
+            else:
+                tbContent = u""
+
+        return tbContent
+
+
+    def getFormatDetails(self):
+        """
+        According to currently stored settings, return a
+        WikiFormatting.WikiPageFormatDetails object to describe
+        formatting.
+        
+        For functional pages this is normally no formatting
+        """
+        return WikiFormatting.WikiPageFormatDetails(noFormat=True)
+
+
+    def save(self, text, alertPWiki=True):
+        """
+        Saves the content of current wiki page.
+        """
+#         self.wikiData.setContent(self.wikiWord, text)
+
+        if self.funcTag == "global/[TextBlocks]":
+            tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[TextBlocks].wiki")
+            tbFile = open(tbLoc, "w")
+
+            try:
+                tbFile.write(BOM_UTF8)
+                tbFile.write(utf8Enc(text)[0])
+            finally:
+                tbFile.close()
+        elif self.funcTag == "wiki/[TextBlocks]":
+            wikiData = self.wikiDataManager.getWikiData()
+            if wikiData.isDefinedWikiWord("[TextBlocks]") and text == u"":
+                # Delete content
+                wikiData.deleteContent("[TextBlocks]")
+            else:
+                if text != u"":
+                    wikiData.setContent("[TextBlocks]", text)
+
+        self.saveDirtySince = None
+
+
+    def update(self, text, alertPWiki=True):
+        """
+        Update additional cached informations (properties, todos, relations)
+        """
+        # clear the dirty flag
+        self.updateDirtySince = None
+
+        if self.funcTag in ("global/[TextBlocks]", "wiki/[TextBlocks]"):
+            if alertPWiki:
+                self.pWiki.rereadTextBlocks()
+
 
     def setDirty(self, dirt):
         if dirt:

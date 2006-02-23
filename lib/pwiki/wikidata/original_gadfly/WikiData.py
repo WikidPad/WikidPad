@@ -674,6 +674,9 @@ class WikiData:
                     "values (?, ?)", (title, datablock))
 
     def getSavedSearchTitles(self):
+        """
+        Return the titles of all stored searches in alphabetical order
+        """
         return self.connWrap.execSqlQuerySingleColumn(
                 "select title from search_views order by title")
 
