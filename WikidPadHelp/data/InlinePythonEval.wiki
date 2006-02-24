@@ -51,6 +51,11 @@ function 1: <% 1: editor.AddText(lib.now()) %>
 function 2: <% 2: lib.addDate(editor) %>
 
 Type Ctrl-1 to execute function 1. Enter Ctrl-2 to execute function 2.
+This will execute at most one script. If a script with this number is
+found on the page, it is executed, if not, the local script imports
+with import_scripts are searched. If no appropriate script is found
+there either, the page mentioned in global.import_scripts is searched.
+As already said, this happens only with the right security settings.
 
 You can define your own functions for evaluation by copying
 evalLibrary.py into a directory in the wikidPad install directory

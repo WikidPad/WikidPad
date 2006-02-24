@@ -3,7 +3,7 @@
 Used terms:
     
     wikiword -- a string matching one of the wiki word regexes
-    page -- real existing content stored and associated with a wikiword
+    wiki page -- real existing content stored and associated with a wikiword
             (which is the page name). Sometimes page is synonymous for page name
     alias -- wikiword without content but associated to a page name.
             For the user it looks as if the content of the alias is the content
@@ -105,14 +105,14 @@ class WikiData:
                 "on temppathfindparents(steps)")
 
         # create word caches
-        self.cachedWikiWords = {}
-        for word in self.getAllDefinedPageNames():
-            self.cachedWikiWords[word] = 1
+        self.cachedContentNames = {}
+        for word in self.getAllDefinedContentNames():
+            self.cachedContentNames[word] = 1
 
         # cache aliases
         aliases = self.getAllAliases()
         for alias in aliases:
-            self.cachedWikiWords[alias] = 2
+            self.cachedContentNames[alias] = 2
 
         self.cachedGlobalProps = None
         self.getGlobalProperties()
@@ -157,7 +157,7 @@ class WikiData:
     def setContent(self, word, content, moddate = None, creadate = None):
         """
         Sets the content, does not modify the cache information
-        except self.cachedWikiWords
+        except self.cachedContentNames
         """
         if not content: content = u""  # ?
         
@@ -166,7 +166,7 @@ class WikiData:
         content = self.contentUniInputToDb(content)
         self.setContentRaw(word, content, moddate, creadate)
 
-        self.cachedWikiWords[word] = 1
+        self.cachedContentNames[word] = 1
 
 
     def setContentRaw(self, word, content, moddate = None, creadate = None):
@@ -206,14 +206,14 @@ class WikiData:
     def renameContent(self, oldWord, newWord):
         """
         The content which was stored under oldWord is stored
-        after the call under newWord. The self.cachedWikiWords
+        after the call under newWord. The self.cachedContentNames
         dictionary is updated, other caches won't be updated.
         """
         self.connWrap.execSql("update wikiwordcontent set word = ? where word = ?",
                 (newWord, oldWord))
 
-        del self.cachedWikiWords[oldWord]
-        self.cachedWikiWords[newWord] = 1
+        del self.cachedContentNames[oldWord]
+        self.cachedContentNames[newWord] = 1
 
 
     def deleteContent(self, word):
@@ -222,7 +222,7 @@ class WikiData:
         """
         try:
             self.connWrap.execSql("delete from wikiwordcontent where word = ?", (word,))
-            del self.cachedWikiWords[word]
+            del self.cachedContentNames[word]
         except sqlite.Error:
             raise WikiFileNotFoundException, "wiki page for deletion not found: %s" % word
 
@@ -296,7 +296,7 @@ class WikiData:
                 self.connWrap.execSql("delete from todos where word = ?", (word,))
                 self.deleteContent(word)
                 # self.connWrap.execSql("delete from wikiwordcontent where word = ?", (word,))
-                # del self.cachedWikiWords[word]
+                # del self.cachedContentNames[word]
 
                 self.connWrap.commit()
 
@@ -336,7 +336,7 @@ class WikiData:
 #         create a new wikiPage for the wikiWord. Cache is not updated until
 #         page is saved
 #         """
-#         ## self.cachedWikiWords[wikiWord] = 1   # TODO Remove???
+#         ## self.cachedContentNames[wikiWord] = 1   # TODO Remove???
 #         return self.getPageNoError(wikiWord)
 
 
@@ -418,13 +418,14 @@ class WikiData:
         return self.connWrap.execSqlQuerySingleColumn(
                 "select word from wikirelations where relation = ?", (wikiWord,))
 
-    def getParentLessWords(self):
+    def getParentlessWikiWords(self):
         """
         get the words that have no parents.
         """
 
-        return self.connWrap.execSqlQuerySingleColumn("select word from wikiwordcontent except "+\
-                "select relation from wikirelations")
+        return self.connWrap.execSqlQuerySingleColumn(
+                "select word from wikiwordcontent where not word glob '[[]*' "
+                "except select relation from wikirelations")
 
     def addRelationship(self, word, toWord):
         """
@@ -538,11 +539,18 @@ class WikiData:
 
     # ---------- Listing/Searching wiki words (see also "alias handling", "searching pages")----------
 
-    def getAllDefinedPageNames(self):
-        "get the names of all the pages in the db, no aliases"
-        return self.connWrap.execSqlQuerySingleColumn("select word from wikiwordcontent")
+    def getAllDefinedWikiPageNames(self):
+        "get the names of all wiki pages in the db, no aliases"
+        return self.connWrap.execSqlQuerySingleColumn(
+                "select word from wikiwordcontent where not word glob '[[]*'")
 
-    def refreshDefinedPageNames(self):
+    def getAllDefinedContentNames(self):
+        "get the names of all the content elements in the db, no aliases"
+        return self.connWrap.execSqlQuerySingleColumn(
+                "select word from wikiwordcontent")
+
+
+    def refreshDefinedContentNames(self):
         """
         Refreshes the internal list of defined pages which
         may be different from the list of pages for which
@@ -554,7 +562,7 @@ class WikiData:
         so it may not rely on the presence of other cache
         information (e.g. relations).
         
-        The self.cachedWikiWords member may also need an update
+        The self.cachedContentNames member may also need an update
         after this funtion was called.
         """
         pass
@@ -570,7 +578,7 @@ class WikiData:
 
     def isDefinedWikiWord(self, word):
         "check if a word is a valid wikiword (page name or alias)"
-        return self.cachedWikiWords.has_key(word)
+        return self.cachedContentNames.has_key(word)
 
     def getWikiWordsStartingWith(self, thisStr, includeAliases=False):
         "get the list of words starting with thisStr. used for autocompletion."
@@ -594,12 +602,14 @@ class WikiData:
                 (thisStr,))
         return r1 + self.connWrap.execSqlQuerySingleColumn(
                 "select word from wikiwordcontent "
-                "where word like ('%' || ? || '%') and word not like (? || '%')",
-                (thisStr, thisStr))
+                "where word like ('%' || ? || '%') and word not like (? || '%')"
+                "and word not glob '[[]*'", (thisStr, thisStr))
 
     def getWikiWordsModifiedWithin(self, days):
         timeDiff = float(time()-(86400*days))
-        return self.connWrap.execSqlQuerySingleColumn("select word from wikiwordcontent where modified >= ?", (timeDiff,))
+        return self.connWrap.execSqlQuerySingleColumn(
+                "select word from wikiwordcontent where modified >= ?",
+                (timeDiff,))
 
 
 
@@ -654,7 +664,7 @@ class WikiData:
             for v in values:
                 self.setProperty(word, k, v)
                 if k == "alias":
-                    self.cachedWikiWords[v] = 2
+                    self.cachedContentNames[v] = 2
 
     def updateCachedGlobalProps(self):
         """
@@ -688,9 +698,15 @@ class WikiData:
 
     def isAlias(self, word):
         "check if a word is an alias for another"
-        if self.cachedWikiWords.has_key(word):
-            return self.cachedWikiWords.get(word) == 2
+        if self.cachedContentNames.has_key(word):
+            return self.cachedContentNames.get(word) == 2
         return False
+        
+    def setAsAlias(self, word):
+        """
+        Sets this word in internal cache to be an alias
+        """
+        self.cachedContentNames[word] = 2
         
     def getAllAliases(self):
         # get all of the aliases
@@ -800,7 +816,8 @@ class WikiData:
         try:
             result = self.connWrap.execSqlQuerySingleColumn(
                     "select word from wikiwordcontent where "+\
-                    "testMatch(word, content, ?)", (sqlite.addTransObject(sarOp),))
+                    "word not glob '[[]*' and testMatch(word, content, ?)",
+                    (sqlite.addTransObject(sarOp),))
     
             sqlite.delTransObject(sarOp)
             
@@ -863,7 +880,7 @@ class WikiData:
         DbStructure.recreateCacheTables(self.connWrap)
         self.connWrap.commit()
 
-        self.cachedWikiWords = {}
+        self.cachedContentNames = {}
         self.cachedGlobalProps = None
 
     def close(self):
@@ -1111,14 +1128,14 @@ class WikiData:
 
 
         # recreate word caches
-        self.cachedWikiWords = {}
-        for word in self.getAllDefinedPageNames():
-            self.cachedWikiWords[word] = 1
+        self.cachedContentNames = {}
+        for word in self.getAllDefinedContentNames():
+            self.cachedContentNames[word] = 1
 
         # cache aliases
         aliases = self.getAllAliases()
         for alias in aliases:
-            self.cachedWikiWords[alias] = 2
+            self.cachedContentNames[alias] = 2
 
 
 #         finally:            

@@ -510,7 +510,7 @@ def sqlite_testMatch(context, values):
     nakedword = utf8Dec(values[0].value_blob(), "replace")[0]
     fileContents = utf8Dec(values[1].value_blob(), "replace")[0]
     sarOp = sqlite.getTransObject(values[2].value_int())
-    if sarOp.testPage(nakedword, fileContents) == True:
+    if sarOp.testWikiPage(nakedword, fileContents) == True:
         context.result_int(1)
     else:
         context.result_null()

@@ -14,6 +14,7 @@ from Configuration import createConfiguration
 # from WikiData import *
 from wikidata import DbBackendUtils
 from wikidata.WikiDataManager import WikiDataManager
+import WikiPage
 
 from WikiTxtCtrl import *
 from WikiTreeCtrl import *
@@ -427,15 +428,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def getCurrentWikiWord(self):
-        wikiPage = self.getCurrentWikiPage()
-        if wikiPage is None:
+        docPage = self.getCurrentDocPage()
+        if docPage is None or not isinstance(docPage, WikiPage.WikiPage):
             return None
-        return wikiPage.getWikiWord()
+        return docPage.getWikiWord()
 
-    def getCurrentWikiPage(self):
+    def getCurrentDocPage(self):
         if self.activeEditor is None:
             return None
-        return self.activeEditor.getLoadedWikiPage()
+        return self.activeEditor.getLoadedDocPage()
         
     def getActiveEditor(self):
         return self.activeEditor
@@ -885,7 +886,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "tb_doc")
 
         self.addMenuItem(wikiWordMenu, '&Save\t' + self.keyBindings.Save,
-                'Save Current Wiki Word', lambda evt: (self.saveCurrentWikiPage(force=True), self.wikiData.commit()),
+                'Save Current Wiki Word', lambda evt: (self.saveCurrentDocPage(force=True), self.wikiData.commit()),
                 "tb_save")
 
         self.addMenuItem(wikiWordMenu, '&Rename\t' + self.keyBindings.Rename,
@@ -1324,7 +1325,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         icon = self.lookupIcon("tb_save")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Save Wiki Word (Ctrl-S)", "Save Wiki Word")
-        EVT_TOOL(self, tbID, lambda evt: (self.saveCurrentWikiPage(force=True), self.wikiData.commit()))
+        EVT_TOOL(self, tbID, lambda evt: (self.saveCurrentDocPage(force=True), self.wikiData.commit()))
 
         icon = self.lookupIcon("tb_rename")
         tbID = wxNewId()
@@ -1613,7 +1614,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.tree.DeleteAllItems()
 
         # reset the editor
-        self.activeEditor.loadWikiPage(None, None)
+        self.activeEditor.loadWikiPage(None)
         self.activeEditor.SetSelection(-1, -1)
         self.activeEditor.EmptyUndoBuffer()
         self.activeEditor.Disable()
@@ -1733,7 +1734,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
                 # open the new wiki
                 self.openWiki(configFileLoc)
-                p = self.wikiDataManager.createPage(u"WikiSettings")
+                p = self.wikiDataManager.createWikiPage(u"WikiSettings")
                 text = u"""++ Wiki Settings
 
 
@@ -1751,14 +1752,14 @@ These are your default global settings.
                 p.save(text, False)
                 p.update(text, False)
 
-                p = self.wikiDataManager.createPage(u"ScratchPad")
+                p = self.wikiDataManager.createWikiPage(u"ScratchPad")
                 text = u"++ Scratch Pad\n\n"
                 p.save(text, False)
                 p.update(text, False)
                 
                 self.activeEditor.GotoPos(self.activeEditor.GetLength())
                 self.activeEditor.AddText(u"\n\n\t* WikiSettings\n")
-                self.saveCurrentWikiPage(force=True)
+                self.saveCurrentDocPage(force=True)
                 
                 # trigger hook
                 self.hooks.createdWiki(self, wikiName, wikiDir)
@@ -1988,8 +1989,8 @@ These are your default global settings.
         self.writeCurrentConfig()
 
         # save the current wiki page if it is dirty
-        if self.getCurrentWikiPage():
-            self.saveCurrentWikiPage()
+        if self.getCurrentDocPage():
+            self.saveCurrentDocPage()
 
         # database commits
         if self.getWikiData():
@@ -2000,7 +2001,7 @@ These are your default global settings.
 #         try:
         page = self.wikiDataManager.getFuncPage(funcTag)
 #         except (WikiWordNotFoundException, WikiFileNotFoundException), e:
-#             page = self.wikiDataManager.createPage(wikiWord)
+#             page = self.wikiDataManager.createWikiPage(wikiWord)
 #             # trigger hooks
 #             self.hooks.newWikiWord(self, wikiWord)
 
@@ -2034,8 +2035,8 @@ These are your default global settings.
             return
 
         # save the current page if it is dirty
-#         if self.getCurrentWikiPage():
-#             self.saveCurrentWikiPage()
+#         if self.getCurrentDocPage():
+#             self.saveCurrentDocPage()
 # 
 #             # save the cursor position of the current page so that if
 #             # the user comes back we can put the cursor in the right spot.
@@ -2054,11 +2055,11 @@ These are your default global settings.
 
         # fetch the page info from the database
         try:
-            page = self.wikiDataManager.getPage(wikiWord)
+            page = self.wikiDataManager.getWikiPage(wikiWord)
             self.statusBar.SetStatusText(uniToGui(u"Opened wiki word '%s'" %
                     self.getCurrentWikiWord()), 0)
         except (WikiWordNotFoundException, WikiFileNotFoundException), e:
-            page = self.wikiDataManager.createPage(wikiWord)
+            page = self.wikiDataManager.createWikiPage(wikiWord)
             # trigger hooks
             self.hooks.newWikiWord(self, wikiWord)
             self.statusBar.SetStatusText(uniToGui(u"Wiki page not found, a new "
@@ -2084,9 +2085,9 @@ These are your default global settings.
 #             if len(parents) == 1:
 #                 # Check if there is a template page
 #                 try:
-#                     parentPage = self.wikiDataManager.getPage(parents[0])
+#                     parentPage = self.wikiDataManager.getWikiPage(parents[0])
 #                     templateWord = parentPage.getPropertyOrGlobal("template")
-#                     templatePage = self.wikiDataManager.getPage(templateWord)
+#                     templatePage = self.wikiDataManager.getWikiPage(templateWord)
 #                     content = templatePage.getContent()
 #                 except (WikiWordNotFoundException, WikiFileNotFoundException):
 #                     pass
@@ -2150,12 +2151,12 @@ These are your default global settings.
         self.hooks.openedWikiWord(self, wikiWord)
 
 
-    def saveCurrentWikiPage(self, force = False):
-        if force or self.getCurrentWikiPage().getDirty()[0]:
+    def saveCurrentDocPage(self, force = False):
+        if force or self.getCurrentDocPage().getDirty()[0]:
             self.activeEditor.saveLoadedWikiPage()
 
 
-    def saveWikiPage(self, page, text):
+    def saveDocPage(self, page, text):
         if page is None:
             return False
         self.statusBar.PushStatusText(u"Saving WikiPage", 0)
@@ -2196,7 +2197,7 @@ These are your default global settings.
 
     def deleteCurrentWikiPage(self, **evtprops):
         if self.getCurrentWikiWord():
-            # self.saveCurrentWikiPage()
+            # self.saveCurrentDocPage()
             self.wikiData.deleteWord(self.getCurrentWikiWord())
 
             # trigger hooks
@@ -2220,7 +2221,7 @@ These are your default global settings.
             return False
 
         try:
-            self.saveCurrentWikiPage()
+            self.saveCurrentDocPage()
             self.getWikiDataManager().renameWikiWord(wikiWord, toWikiWord)
 #             self.getWikiData().renameWord(wikiWord, toWikiWord)
 # 
@@ -2232,7 +2233,7 @@ These are your default global settings.
 #             searchOp.searchStr = wikiWord
 #             
 #             for resultWord in self.getWikiData().search(searchOp):
-#                 page = self.getWikiDataManager().getPage(resultWord)
+#                 page = self.getWikiDataManager().getWikiPage(resultWord)
 #                 content = page.getContent()
 #                 content = content.replace(wikiWord, toWikiWord)
 #                 page.save(content)
@@ -2252,8 +2253,7 @@ These are your default global settings.
                 os.rename(self.wikiConfigFilename, renamedConfigFile)
                 self.openWiki(renamedConfigFile)
 
-            self.currentWikiWord = toWikiWord
-            self.currentWikiPage = None
+            self.getActiveEditor().loadWikiPage(None)
 
             # trigger hooks
             self.hooks.renamedWikiWord(self, wikiWord, toWikiWord)                
@@ -2328,7 +2328,7 @@ These are your default global settings.
 
 
     def viewParentLess(self):
-        parentLess = self.wikiData.getParentLessWords()
+        parentLess = self.wikiData.getParentlessWikiWords()
         self.viewWordSelection(u"Parentless nodes", parentLess,
                 "random")
 
@@ -2528,7 +2528,7 @@ These are your default global settings.
         dlg.Destroy()
 
         if not description is None:
-            self.saveCurrentWikiPage()
+            self.saveCurrentDocPage()
             self.wikiData.storeVersion(description)
 
 
@@ -2561,7 +2561,7 @@ These are your default global settings.
                     u'Retrieve version', wxYES_NO)
             if dlg.ShowModal() == wxID_YES:
                 dlg.Destroy()
-                self.saveCurrentWikiPage()
+                self.saveCurrentDocPage()
                 word = self.getCurrentWikiWord()
                 self.wikiData.applyStoredVersion(version[0])
                 self.rebuildWiki(skipConfirm=True)
@@ -2608,7 +2608,7 @@ These are your default global settings.
         result = dlg.ShowModal()
         if result == wxID_YES:
             try:
-                # self.saveCurrentWikiPage()
+                # self.saveCurrentDocPage()
                 renamed = self.renameCurrentWikiPage(toWikiWord)
 #                 self.wikiData.renameWord(wikiWord, toWikiWord)
 # 
@@ -2663,7 +2663,7 @@ These are your default global settings.
                 'Delete Wiki Word', wxYES_NO)
         result = dlg.ShowModal()
         if result == wxID_YES:
-            self.saveCurrentWikiPage()
+            self.saveCurrentDocPage()
             try:
                 self.deleteCurrentWikiPage()
 #                 self.wikiData.deleteWord(wikiWord)
@@ -2724,10 +2724,10 @@ These are your default global settings.
                 return False
 
             text = self.activeEditor.GetSelectedText()
-            page = self.wikiDataManager.createPage(wikiWord)
+            page = self.wikiDataManager.createWikiPage(wikiWord)
             self.activeEditor.ReplaceSelection(wikiWord)
             title = self.getWikiPageTitle(wikiWord)   # TODO Respect template property?
-            self.saveWikiPage(page, u"++ %s\n\n%s" % (title, text))
+            self.saveDocPage(page, u"++ %s\n\n%s" % (title, text))
 
 
     def showIconSelectDialog(self):
@@ -2776,7 +2776,7 @@ These are your default global settings.
 
 
     def showExportDialog(self):
-        self.saveCurrentWikiPage(force=True)
+        self.saveCurrentDocPage(force=True)
         self.wikiData.commit()
 
         dlg = ExportDialog(self, -1)
@@ -2818,7 +2818,7 @@ These are your default global settings.
                     GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES,
                     GUI_ID.MENU_EXPORT_WHOLE_AS_XML,
                     GUI_ID.MENU_EXPORT_WHOLE_AS_RAW):
-                wordList = self.wikiData.getAllDefinedPageNames()
+                wordList = self.wikiData.getAllDefinedWikiPageNames()
                 
             elif typ in (GUI_ID.MENU_EXPORT_SUB_AS_PAGE,
                     GUI_ID.MENU_EXPORT_SUB_AS_PAGES):
@@ -2837,7 +2837,7 @@ These are your default global settings.
 
             expclass, exptype, addopt = self.EXPORT_PARAMS[typ]
             
-            self.saveCurrentWikiPage(force=True)
+            self.saveCurrentDocPage(force=True)
             self.wikiData.commit()
             
             expclass().export(self, self.getWikiDataManager(), wordList, exptype, dest,
@@ -2871,7 +2871,7 @@ These are your default global settings.
 #                     self.getWikiData().clearCacheTables()
 #                     for wikiWord in wikiWords:
 #                         progresshandler.update(step, u"")   # , "Rebuilding %s" % wikiWord)
-#                         wikiPage = self.getWikiDataManager().createPage(wikiWord)
+#                         wikiPage = self.getWikiDataManager().createWikiPage(wikiWord)
 #                         wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
 #                         step = step + 1
 #     
@@ -2917,7 +2917,7 @@ These are your default global settings.
 #         self.editor.AddText(u"\n\n[%s=%s]" % (name, value))
 #         self.editor.GotoPos(pos)
         self.activeEditor.AppendText(u"\n\n[%s=%s]" % (name, value))
-        self.saveCurrentWikiPage()
+        self.saveCurrentDocPage()
 
     def addText(self, text):
         """
@@ -3037,9 +3037,9 @@ These are your default global settings.
         if not self.configuration.getboolean("main", "auto_save"):  # self.autoSave:
             return
         # check if the current wiki page needs to be saved
-        if self.getCurrentWikiPage():
+        if self.getCurrentDocPage():
             (saveDirtySince, updateDirtySince) = \
-                    self.getCurrentWikiPage().getDirtySince()
+                    self.getCurrentDocPage().getDirtySince()
             if saveDirtySince is not None:
                 currentTime = time()
                 # only try and save if the user stops typing
@@ -3048,7 +3048,7 @@ These are your default global settings.
 #                     if saveDirty:
                     if (currentTime - saveDirtySince) > \
                             self.autoSaveDelayAfterDirty:
-                        self.saveCurrentWikiPage()
+                        self.saveCurrentDocPage()
                         self.wikiData.commit()
 #                     elif updateDirty:
 #                         if (currentTime - self.currentWikiPage.lastUpdate) > 5:
@@ -3112,7 +3112,7 @@ class TaskBarIcon(wxTaskBarIcon):
 
         # Register menu events
         EVT_MENU(self, GUI_ID.TBMENU_RESTORE, self.OnLeftUp)
-        EVT_MENU(self, GUI_ID.TBMENU_SAVE, lambda evt: (self.pwiki.saveCurrentWikiPage(force=True),
+        EVT_MENU(self, GUI_ID.TBMENU_SAVE, lambda evt: (self.pwiki.saveCurrentDocPage(force=True),
                 self.pwiki.wikiData.commit()))
         EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pwiki.Close())
 

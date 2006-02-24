@@ -105,7 +105,7 @@ class CmdLineAction:
             wordList = pWiki.getWikiData().getAllSubWords([self.wikiWordToOpen])
         elif self.exportWhat == u"wiki":
             # whole wiki
-            wordList = pWiki.getWikiData().getAllDefinedPageNames()
+            wordList = pWiki.getWikiData().getAllDefinedWikiPageNames()
         else:
             self.showCmdLineUsage(pWiki,
                     u"Value for --export-what can be page, subtree or wiki.\n\n")

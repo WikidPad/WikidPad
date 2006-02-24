@@ -386,7 +386,7 @@ class WikiFormatting:
         """
         modifier = {FormatTypes.WikiWord2: FormatTypes.WikiWord}
         if formatDetails is None:
-            page = self.pWiki.getCurrentWikiPage()
+            page = self.pWiki.getCurrentDocPage()
             if page is None:
                 formatDetails = WikiPageFormatDetails() # Default
             else:
@@ -409,7 +409,7 @@ class WikiFormatting:
         Function used by PageAst module
         """
         if formatDetails is None:
-            page = self.pWiki.getCurrentWikiPage()
+            page = self.pWiki.getCurrentDocPage()
             if page is None:
                 formatDetails = WikiPageFormatDetails() # Default
             else:

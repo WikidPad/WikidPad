@@ -23,44 +23,46 @@ Then just start typing text with WikiWords to create your wiki.
 
     * On the fly wiki WordLinking
     * Wiki words can be CamelCase or [Not Camel Case].
-    * WikiDocumentAttributes (cross-index your information)
-    * Wiki word AutoCompletion
-    * WikiWordNavigation (KeyBindings)
-    * WikiWordHistory viewer/navigation
-    * Wiki TextFormatting
-    * BulletedLists
-    * WikiFonts
-    * DynamicViews
-    * TodoItems (track todos, questions, issues)
-    * WikiBookmarks
-    * SearchingTheWiki
-    * PageListDialog
-    * WikiExport
-    * RenamingWikiWords
-    * InlinePythonEval
-    * AutoSave
-    * IncrementalSearch
-    * KeyBindings
     * TreeIcons
     * TreeNodeColors
+    * WikiWordNavigation (KeyBindings)
+    * WikiWordHistory viewer/navigation
+    * AutoSave
+
+    * Wiki TextFormatting
+    * BulletedLists
+    * WikiDocumentAttributes (cross-index your information)
+    * TodoItems (track todos, questions, issues)
+    * WikiBookmarks
     * UrlLinking
+
+    * RenamingWikiWords
+    * WikiFonts
+    * Wiki word AutoCompletion
+    * DynamicViews
+    * SearchingTheWiki
+    * IncrementalSearch
+    * PageListDialog
+    * WikiExport
+    * [Printing]
+    * InlinePythonEval
+    * KeyBindings
     * InternatiönalChàracters
     * OptionsDialog
+    * CommandLineSupport
     * Different DatabaseTypes
     * Defining TextBlocks
-    * [Printing]
 
 *Other/Questions*
 
     * WikiMaintenance
     * WhereIsTheDataStored
-    * PlannedFeatures
     * WikidPadSupport
     * ChangeLog
     * GlobalScriptLibrary
     * ApiDocs / WikidPadHooks
     * ThirdPartyLibraries
 
-Email wikidpad@jhorman.org if you have additional questions.
+Email mbutscher@gmx.de or wikidpad@jhorman.org if you have additional questions.
 
 [alias: HelpDocument]

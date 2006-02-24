@@ -13,7 +13,7 @@ import PageAst
 
 class WikiPage(MiscEventSourceMixin):
     """
-    holds the data for a wikipage. fetched via the WikiDataManager.getPage method.
+    holds the data for a wikipage. fetched via the WikiDataManager.getWikiPage method.
     """
     def __init__(self, wikiDataManager, wikiWord):
         MiscEventSourceMixin.__init__(self)
@@ -118,7 +118,7 @@ class WikiPage(MiscEventSourceMixin):
             return self
         
         word = self.wikiData.getAliasesWikiWord(self.wikiWord)
-        return self.wikiDataManager.getPageNoError(word)
+        return self.wikiDataManager.getWikiPageNoError(word)
         
 
     def _getWikiPageTitle(self, wikiWord):
@@ -140,9 +140,9 @@ class WikiPage(MiscEventSourceMixin):
             if len(parents) == 1:
                 # Check if there is a template page
                 try:
-                    parentPage = self.wikiDataManager.getPage(parents[0])
+                    parentPage = self.wikiDataManager.getWikiPage(parents[0])
                     templateWord = parentPage.getPropertyOrGlobal("template")
-                    templatePage = self.wikiDataManager.getPage(templateWord)
+                    templatePage = self.wikiDataManager.getWikiPage(templateWord)
                     content = templatePage.getContent()
                 except (WikiWordNotFoundException, WikiFileNotFoundException):
                     pass
@@ -199,7 +199,7 @@ class WikiPage(MiscEventSourceMixin):
             propValue = t.grpdict["propertyValue"]
             if propName == u"alias":
                 if formatting.isNakedWikiWord(propValue):
-                    self.wikiData.cachedWikiWords[propValue] = 2
+                    self.wikiData.setAsAlias(propValue)
                     self.setProperty(u"alias", propValue)
             else:
                 self.setProperty(propName, propValue)

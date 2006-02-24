@@ -15,8 +15,8 @@ from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, htmlColorToRgbTuple,
 import WikiFormatting
 import Exporters
 
-from SearchAndReplaceDialogs import PageListConstructionDialog
-from SearchAndReplace import ListPagesOperation
+from SearchAndReplaceDialogs import WikiPageListConstructionDialog
+from SearchAndReplace import ListWikiPagesOperation
 
 
 class OpenWikiWordDialog(wxDialog):
@@ -620,7 +620,7 @@ class ExportDialog(wxDialog):
         
         self.pWiki = pWiki
         
-        self.listPagesOperation = ListPagesOperation()
+        self.listPagesOperation = ListWikiPagesOperation()
         res = xrc.wxXmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "ExportDialog")
         
@@ -688,7 +688,7 @@ class ExportDialog(wxDialog):
     def OnChSelectedSet(self, evt):
         selset = self.ctrls.chSelectedSet.GetSelection()
         if selset == 3:  # Custom
-            dlg = PageListConstructionDialog(self, self.pWiki, -1, 
+            dlg = WikiPageListConstructionDialog(self, self.pWiki, -1, 
                     value=self.listPagesOperation)
             if dlg.ShowModal() == wxID_OK:
                 self.listPagesOperation = dlg.getValue()
@@ -715,7 +715,7 @@ class ExportDialog(wxDialog):
             wordList = self.pWiki.getWikiData().getAllSubWords([root])
         elif selset == 2:
             # whole wiki
-            wordList = self.pWiki.getWikiData().getAllDefinedPageNames()
+            wordList = self.pWiki.getWikiData().getAllDefinedWikiPageNames()
         else:
             # custom list
             wordList = self.pWiki.getWikiData().search(self.listPagesOperation, True)
@@ -792,7 +792,7 @@ class ChooseWikiWordDialog(wxDialog):
             if answer != wxYES:
                 return
 
-            self.pWiki.saveCurrentWikiPage()
+            self.pWiki.saveCurrentDocPage()
             for s in self.ctrls.lb.GetSelections():
                 delword = self.words[s]
                 # Un-alias word
@@ -806,6 +806,7 @@ class ChooseWikiWordDialog(wxDialog):
                     
                     p2 = {}
                     p2["deleted page"] = True
+                    p2["deleted wiki page"] = True
                     p2["wikiWord"] = delword
                     self.pWiki.fireMiscEventProps(p2)
             

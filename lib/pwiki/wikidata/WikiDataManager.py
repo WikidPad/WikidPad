@@ -37,7 +37,7 @@ class WikiDataManager:
         if not self.wikiData.isDefinedWikiWord(wikiWord):
             raise WikiWordNotFoundException, u"Word '%s' not in wiki" % wikiWord
 
-        return self.getPageNoError(wikiWord)
+        return self.getWikiPageNoError(wikiWord)
         
     def getWikiPageNoError(self, wikiWord):
         """
@@ -61,13 +61,8 @@ class WikiDataManager:
         create a new wikiPage for the wikiWord. Cache is not updated until
         page is saved
         """
-        return self.getPageNoError(wikiWord)
+        return self.getWikiPageNoError(wikiWord)
 
-    # TODO Remove these:
-    getPage = getWikiPage
-    getPageNoError = getWikiPageNoError
-    createPage = createWikiPage
-        
         
     def getFuncPage(self, funcTag):
         """
@@ -85,10 +80,10 @@ class WikiDataManager:
             PersonalWikiFrame.GuiProgressHandler protocol
         """
                 
-        self.getWikiData().refreshDefinedPageNames()
+        self.getWikiData().refreshDefinedContentNames()
 
         # get all of the wikiWords
-        wikiWords = self.getWikiData().getAllDefinedPageNames()
+        wikiWords = self.getWikiData().getAllDefinedWikiPageNames()
         
         progresshandler.open(len(wikiWords) + 1)
         try:
@@ -98,7 +93,7 @@ class WikiDataManager:
             self.getWikiData().clearCacheTables()
             for wikiWord in wikiWords:
                 progresshandler.update(step, u"")   # , "Rebuilding %s" % wikiWord)
-                wikiPage = self.createPage(wikiWord)
+                wikiPage = self.createWikiPage(wikiWord)
                 wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
                 step = step + 1
 
@@ -121,7 +116,7 @@ class WikiDataManager:
         searchOp.searchStr = wikiWord
         
         for resultWord in self.getWikiData().search(searchOp):
-            page = self.getPage(resultWord)
+            page = self.getWikiPage(resultWord)
             content = page.getContent()
             content = content.replace(wikiWord, toWikiWord)
             page.save(content)

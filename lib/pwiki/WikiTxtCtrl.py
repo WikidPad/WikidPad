@@ -54,7 +54,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.evalScope = None
         self.stylebytes = None
         self.stylingThreadHolder = ThreadHolder()
-        self.loadedWikiPage = None
+        self.loadedDocPage = None
         self.lastCursorPositionInPage = {}
         self.lastFont = None
         
@@ -183,8 +183,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         EVT_MENU(self, GUI_ID.CMD_TEXT_SELECT_ALL, lambda evt: self.SelectAll())
 
-    def getLoadedWikiPage(self):
-        return self.loadedWikiPage
+    def getLoadedDocPage(self):
+        return self.loadedDocPage
 
     def Cut(self):
         self.Copy()
@@ -287,48 +287,48 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         Save loaded wiki page into database. Does not check if dirty
         """
-        if self.loadedWikiPage is None:
+        if self.loadedDocPage is None:
             return
 
-        page = self.loadedWikiPage
+        page = self.loadedDocPage
         wikiWord = page.getWikiWord()
         if wikiWord is not None:
             self.lastCursorPositionInPage[wikiWord] = self.GetCurrentPos()
 
-#         if not self.loadedWikiPage.getDirty()[0]:
+#         if not self.loadedDocPage.getDirty()[0]:
 #             return
 
         text = self.GetText()
-        if self.pWiki.saveWikiPage(page, text):
+        if self.pWiki.saveDocPage(page, text):
             self.SetSavePoint()
 
         
-    def loadFuncPage(self, funcPage, evtprops):
+    def loadFuncPage(self, funcPage, evtprops=None):
         # Unload current page
-        if self.loadedWikiPage is not None:
-            if self.loadedWikiPage.getDirty()[0]:
+        if self.loadedDocPage is not None:
+            if self.loadedDocPage.getDirty()[0]:
                 self.saveLoadedWikiPage()
             
-            miscevt = self.loadedWikiPage.getMiscEvent()
+            miscevt = self.loadedDocPage.getMiscEvent()
             miscevt.removeListener(self.wikiPageListener)
             
-            self.loadedWikiPage = None
+            self.loadedDocPage = None
 
         # set the editor text
         content = None
         wikiDataManager = self.pWiki.getWikiDataManager()
         
-        self.loadedWikiPage = funcPage
-        if self.loadedWikiPage is None:
+        self.loadedDocPage = funcPage
+        if self.loadedDocPage is None:
             self.SetText(u"")
             return  # TODO How to handle?
         else:
-            miscevt = self.loadedWikiPage.getMiscEvent()
+            miscevt = self.loadedDocPage.getMiscEvent()
             miscevt.addListener(self.wikiPageListener)
             
 
         try:
-            content = self.loadedWikiPage.getContent()
+            content = self.loadedDocPage.getContent()
         except WikiFileNotFoundException, e:
             assert 0   # TODO
 
@@ -351,32 +351,32 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.SetText(content)
 
 
-    def loadWikiPage(self, wikiPage, evtprops):
+    def loadWikiPage(self, wikiPage, evtprops=None):
         """
         Save loaded page, if necessary, then load wikiPage into editor
         """
         # Unload current page
-        if self.loadedWikiPage is not None:
-            if self.loadedWikiPage.getDirty()[0]:
+        if self.loadedDocPage is not None:
+            if self.loadedDocPage.getDirty()[0]:
                 self.saveLoadedWikiPage()
             
-            miscevt = self.loadedWikiPage.getMiscEvent()
+            miscevt = self.loadedDocPage.getMiscEvent()
             miscevt.removeListener(self.wikiPageListener)
             
-            self.loadedWikiPage = None
+            self.loadedDocPage = None
         
         # set the editor text
         wikiDataManager = self.pWiki.getWikiDataManager()
         
-        self.loadedWikiPage = wikiPage
-        if self.loadedWikiPage is None:
+        self.loadedDocPage = wikiPage
+        if self.loadedDocPage is None:
             self.SetText(u"")
             return  # TODO How to handle?
         else:
-            miscevt = self.loadedWikiPage.getMiscEvent()
+            miscevt = self.loadedDocPage.getMiscEvent()
             miscevt.addListener(self.wikiPageListener)
             
-        content = self.loadedWikiPage.getContent()
+        content = self.loadedDocPage.getContent()
 
 #         try:
 #             
@@ -384,7 +384,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #             # Create initial content of new page
 #             
 #             # Check if there is exactly one parent
-#             parents = self.loadedWikiPage.getParentRelationships()
+#             parents = self.loadedDocPage.getParentRelationships()
 #             if len(parents) == 1:
 #                 # Check if there is a template page
 #                 try:
@@ -396,18 +396,18 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #                     pass
 # 
 #             if content is None:
-#                 title = self._getWikiPageTitle(self.loadedWikiPage.getWikiWord())
+#                 title = self._getWikiPageTitle(self.loadedDocPage.getWikiWord())
 #                 content = u"++ %s\n\n" % title
 # 
-#             self.lastCursorPositionInPage[self.loadedWikiPage.getWikiWord()] = \
+#             self.lastCursorPositionInPage[self.loadedDocPage.getWikiWord()] = \
 #                     len(content)
 
         # get the properties that need to be checked for options
-        pageProps = self.loadedWikiPage.getProperties()
+        pageProps = self.loadedDocPage.getProperties()
 #         globalProps = wikiDataManager.getWikiData().getGlobalProperties()
 
         # get the font that should be used in the editor
-        font = self.loadedWikiPage.getPropertyOrGlobal("font",
+        font = self.loadedDocPage.getPropertyOrGlobal("font",
                 self.pWiki.defaultEditorFont)
 
         # set the styles in the editor to the font
@@ -417,6 +417,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.SetStyles(faces)
             self.lastEditorFont = font
             
+        if evtprops is None:
+            evtprops = {}
         p2 = evtprops.copy()
         p2.update({"loading current page": True})
         self.pWiki.fireMiscEventProps(p2)  # TODO Remove this hack
@@ -426,12 +428,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # see if there is a saved position for this page
         lastPos = self.lastCursorPositionInPage.get(
-                self.loadedWikiPage.getWikiWord(), 0)
+                self.loadedDocPage.getWikiWord(), 0)
         self.GotoPos(lastPos)
 
 #         # check if CamelCase should be used
 #         # print "openWikiPage props", repr(pageProps), repr(globalProps)
-#         wikiWordsEnabled = strToBool(self.loadedWikiPage.getPropertyOrGlobal(
+#         wikiWordsEnabled = strToBool(self.loadedDocPage.getPropertyOrGlobal(
 #                 "camelCaseWordsEnabled"), True)
 
 #         self.wikiWordsEnabled = wikiWordsEnabled
@@ -453,12 +455,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #             self.StyleSetEOLFilled(i, True)
 
     def onWikiPageUpdated(self, miscevt):
-        if self.loadedWikiPage is None or \
-                not isinstance(self.loadedWikiPage, WikiPage.WikiPage):
+        if self.loadedDocPage is None or \
+                not isinstance(self.loadedDocPage, WikiPage.WikiPage):
             return
 
         # get the font that should be used in the editor
-        font = self.loadedWikiPage.getPropertyOrGlobal("font",
+        font = self.loadedDocPage.getPropertyOrGlobal("font",
                 self.pWiki.defaultEditorFont)
 
         # set the styles in the editor to the font
@@ -614,9 +616,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # load the ScratchPad
         try:
-            wikiPage = self.pWiki.getWikiDataManager().getPage("ScratchPad")
+            wikiPage = self.pWiki.getWikiDataManager().getWikiPage("ScratchPad")
         except WikiWordNotFoundException, e:
-            wikiPage = self.pWiki.getWikiDataManager().createPage("ScratchPad")
+            wikiPage = self.pWiki.getWikiDataManager().createWikiPage("ScratchPad")
 
         content = ""
 
@@ -796,13 +798,14 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             
             # process script imports
             if securityLevel > 1: # Local import_scripts properties allowed
-                if self.loadedWikiPage.getProperties().has_key(
+                if self.loadedDocPage.getProperties().has_key(
                         "import_scripts"):
-                    scripts = self.loadedWikiPage.getProperties()[
+                    scripts = self.loadedDocPage.getProperties()[
                             "import_scripts"]
                     for script in scripts:
                         try:
-                            importPage = self.pWiki.getWikiDataManager().getPage(script)
+                            importPage = self.pWiki.getWikiDataManager().\
+                                    getWikiPage(script)
                             content = importPage.getContent()
                             text += "\n" + content
                         except:
@@ -814,7 +817,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     
                 if globscript is not None:
                     try:
-                        importPage = self.pWiki.getWikiDataManager().getPage(globscript)
+                        importPage = self.pWiki.getWikiDataManager().\
+                                getWikiPage(globscript)
                         content = importPage.getContent()
                         text += "\n" + content
                     except:
@@ -943,7 +947,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         Can be called by an aga to present all parents of the current page.
         """
-        relations = self.loadedWikiPage.getParentRelationships()[:]
+        relations = self.loadedDocPage.getParentRelationships()[:]
 
         # Apply sort order
         relations.sort(_removeBracketsAndSort) # sort alphabetically
@@ -1146,7 +1150,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             wrapPosition = 70
             try:
                 wrapPosition = int(
-                        self.loadedWikiPage.getPropertyOrGlobal(
+                        self.loadedDocPage.getPropertyOrGlobal(
                         "wrap", "70"))
             except:
                 pass
@@ -1246,7 +1250,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def OnChange(self, evt):
         if not self.ignoreOnChange:
-            self.loadedWikiPage.setDirty(True)
+            self.loadedDocPage.setDirty(True)
 
     def OnCharAdded(self, evt):
         "When the user presses enter reindent to the previous level"

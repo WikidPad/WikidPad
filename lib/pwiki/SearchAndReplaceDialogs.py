@@ -12,7 +12,7 @@ from StringOps import uniToGui, guiToUni, escapeHtml
 import WikiFormatting
 import PageAst
 
-from SearchAndReplace import SearchReplaceOperation, ListPagesOperation
+from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation
 
 
 class SearchWikiOptionsDialog(wxDialog):
@@ -418,7 +418,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         self.savedSearches = None
         self.foundPages = []
         
-        self.listPagesOperation = ListPagesOperation()
+        self.listPagesOperation = ListWikiPagesOperation()
         self._refreshSavedSearchesList()
 
         EVT_BUTTON(self, GUI_ID.btnFindPages, self.OnSearchWiki)
@@ -458,7 +458,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         sarOp.cycleToStart = False
         sarOp.wildCard = 'regex'
         sarOp.wikiWide = True
-        sarOp.listPagesOp = self.listPagesOperation
+        sarOp.listWikiPagesOp = self.listPagesOperation
 
         if not sarOp.booleanOp:
             sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
@@ -471,7 +471,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         self.Freeze()
         try:
             sarOp = self.buildSearchReplaceOperation()
-            self.pWiki.saveCurrentWikiPage()
+            self.pWiki.saveCurrentDocPage()
     
             if len(sarOp.searchStr) > 0:
                 self.foundPages = self.pWiki.wikiData.search(sarOp)
@@ -499,7 +499,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         """
         Show the Page List dialog
         """
-        dlg = PageListConstructionDialog(self, self.pWiki, -1,
+        dlg = WikiPageListConstructionDialog(self, self.pWiki, -1,
                 value=self.listPagesOperation, allowOrdering=False)
 
 #         result = dlg.ShowModal()
@@ -516,7 +516,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         dlg.Show(True)
 
     def onNonmodalClosedPageList(self, miscevt):
-        plop = miscevt.get("listPagesOp")
+        plop = miscevt.get("listWikiPagesOp")
         if plop is not None:
             self.listPagesOperation = plop
 
@@ -593,7 +593,7 @@ class SearchWikiDialog(wxDialog):   # TODO
             if self.ctrls.htmllbPages.GetCount() == 0:
                 return
                 
-            self.pWiki.saveCurrentWikiPage()
+            self.pWiki.saveCurrentDocPage()
             
             sarOp = self.buildSearchReplaceOperation()
             sarOp.replaceOp = True
@@ -740,7 +740,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         if not sarOp.booleanOp and sarOp.replaceOp:
             self.ctrls.txtReplace.SetValue(uniToGui(sarOp.replaceStr))
             
-        self.listPagesOperation = sarOp.listPagesOp
+        self.listPagesOperation = sarOp.listWikiPagesOp
             
         self.OnRadioBox(None)  # Refresh settings
         
@@ -846,7 +846,7 @@ class SearchPageDialog(wxDialog):   # TODO
 
 
 
-class PageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
+class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
     def __init__(self, parent, pWiki, ID, value=None, allowOrdering=True,
             title="Page List", pos=wxDefaultPosition, size=wxDefaultSize,
             style=wxNO_3D|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER):
@@ -861,7 +861,7 @@ class PageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
         self.resultListData = []
 
         res = xrc.wxXmlResource.Get()
-        res.LoadOnDialog(self, parent, "PageListConstructionDialog")
+        res.LoadOnDialog(self, parent, "WikiPageListConstructionDialog")
         
         self.ctrls = XrcControls(self)
         
@@ -955,15 +955,15 @@ class PageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
 
     def _buildListPagesOperation(self):
         """
-        Construct a ListPagesOperation according to current content of the
+        Construct a ListWikiPagesOperation according to current content of the
         dialog
         """
         import SearchAndReplace as Sar
         
-        lpOp = Sar.ListPagesOperation()
+        lpOp = Sar.ListWikiPagesOperation()
         
         if self.ctrls.rbPagesAll.GetValue():
-            item = Sar.AllPagesNode(lpOp)
+            item = Sar.AllWikiPagesNode(lpOp)
         elif self.ctrls.rbPagesMatchRe.GetValue():
             pattern = self.ctrls.tfMatchRe.GetValue()
             try:
@@ -973,7 +973,7 @@ class PageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
                         (pattern, unicode(e)), u"Regular expression error",
                         wxOK, self)
                 return None
-            item = Sar.RegexPageNode(lpOp, pattern)
+            item = Sar.RegexWikiPageNode(lpOp, pattern)
         elif self.ctrls.rbPagesInList.GetValue():
             try:
                 level = int(self.ctrls.tfSubtreeLevels.GetValue())
@@ -982,8 +982,8 @@ class PageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
             except ValueError:
                 level = -1
 
-            item = Sar.ListItemWithSubtreePagesNode(lpOp, self.pageListData[:],
-                    level)
+            item = Sar.ListItemWithSubtreeWikiPagesNode(lpOp,
+                    self.pageListData[:], level)
         else:
             return None
             
@@ -1005,7 +1005,7 @@ class PageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
         else:
             self.Destroy()
             self.fireMiscEventProps({"nonmodal closed": wxID_OK,
-                    "listPagesOp": self.value})
+                    "listWikiPagesOp": self.value})
 
     def OnClose(self, evt):
         self.value = None
@@ -1014,7 +1014,7 @@ class PageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
         else:
             self.Destroy()
             self.fireMiscEventProps({"nonmodal closed": wxID_CANCEL,
-                    "listPagesOp": None})
+                    "listWikiPagesOp": None})
 
 
     def OnPageListUp(self, evt):

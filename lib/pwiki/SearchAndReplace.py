@@ -38,9 +38,9 @@ class AbstractSearchNode:
         """
         pass
 
-    def testPage(self, word, text):
+    def testWikiPage(self, word, text):
         """
-        Test, if page fulfills the search criteria and return
+        Test, if wiki page fulfills the search criteria and return
         truth value. This is useful for wiki-wide searching for pages.
         
         word -- Naked wiki word of the page
@@ -113,13 +113,13 @@ class AndSearchNode(AbstractSearchNode):
         self.right.endWikiSearch()
 
         
-    def testPage(self, word, text):
-        leftret = self.left.testPage(word, text)
+    def testWikiPage(self, word, text):
+        leftret = self.left.testWikiPage(word, text)
         
         if leftret == False:
             return False
             
-        rightret = self.left.testPage(word, text)
+        rightret = self.left.testWikiPage(word, text)
         
         if rightret == False:
             return False
@@ -182,8 +182,8 @@ class NotSearchNode(AbstractSearchNode):
         self.sub.endWikiSearch()
 
         
-    def testPage(self, word, text):
-        subret = self.left.testPage(word, text)
+    def testWikiPage(self, word, text):
+        subret = self.left.testWikiPage(word, text)
         
         if subret == Unknown:
             return Unknown
@@ -209,14 +209,14 @@ class NotSearchNode(AbstractSearchNode):
 
 # ----- Page list construction nodes -----
 
-class AllPagesNode(AbstractSearchNode):
+class AllWikiPagesNode(AbstractSearchNode):
     """
     Returns True for any page
     """
     
     CLASS_PERSID = "AllPages"  # Class id for persistence storage
     
-    def testPage(self, word, text):
+    def testWikiPage(self, word, text):
         return True
 
     def serializeBin(self, stream):
@@ -231,7 +231,7 @@ class AllPagesNode(AbstractSearchNode):
             raise SerializationException
 
 
-class RegexPageNode(AbstractSearchNode):
+class RegexWikiPageNode(AbstractSearchNode):
     """
     Returns True if regex matches page name
     """
@@ -243,7 +243,7 @@ class RegexPageNode(AbstractSearchNode):
         self.compPat = re.compile(pattern,
                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
     
-    def testPage(self, word, text):
+    def testWikiPage(self, word, text):
         return not not self.compPat.match(word)
 
     def serializeBin(self, stream):
@@ -270,7 +270,7 @@ class RegexPageNode(AbstractSearchNode):
         return self.compPat.pattern
 
 
-class ListItemWithSubtreePagesNode(AbstractSearchNode):
+class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
     """
     Returns True for a specified root page and all pages below to a specified
     level. (level == -1: any depth, level == 0: root only)
@@ -284,7 +284,7 @@ class ListItemWithSubtreePagesNode(AbstractSearchNode):
         self.level = level
         
         # wordSet and wordList always contain the same words
-        self.wordSet = None    # used for testPage()
+        self.wordSet = None    # used for testWikiPage()
         self.wordList = None   # used for orderNatural()
 
 
@@ -325,7 +325,7 @@ class ListItemWithSubtreePagesNode(AbstractSearchNode):
         self.wordList = None
 
 
-    def testPage(self, word, text):
+    def testWikiPage(self, word, text):
         return self.wordSet.has_key(word)
 
 
@@ -368,8 +368,8 @@ class ListItemWithSubtreePagesNode(AbstractSearchNode):
 
 
 
-_CLASSES_WITH_PERSID = (NotSearchNode, AllPagesNode,
-        ListItemWithSubtreePagesNode, RegexPageNode)
+_CLASSES_WITH_PERSID = (NotSearchNode, AllWikiPagesNode,
+        ListItemWithSubtreeWikiPagesNode, RegexWikiPageNode)
 
 _PERSID_TO_CLASS_MAP = {}
 for cl in _CLASSES_WITH_PERSID:
@@ -542,9 +542,9 @@ class SimpleStrNode(AbstractContentSearchNode):
 # TODO Abstract base for following two classes
 
 
-class ListPagesOperation:
+class ListWikiPagesOperation:
     def __init__(self):
-        self.searchOpTree = AllPagesNode(self)
+        self.searchOpTree = AllWikiPagesNode(self)
         self.ordering = "no"  # How to order the pages ("natural",
                               # "ascending"=Alphabetically ascending or "no")
         self.wikiData = None
@@ -607,7 +607,7 @@ class ListPagesOperation:
         return self.searchOpTree.endWikiSearch()
         
 
-    def testPage(self, word, text):
+    def testWikiPage(self, word, text):
         """
         Test, if page fulfills the search criteria and return
         truth value. This is useful for wiki-wide searching for pages.
@@ -618,7 +618,7 @@ class ListPagesOperation:
         if self.searchOpTree is None:
             return False
             
-        return self.searchOpTree.testPage(word, text)
+        return self.searchOpTree.testWikiPage(word, text)
 
     
     def applyOrdering(self, words):
@@ -692,7 +692,7 @@ class SearchReplaceOperation:
 
         self.searchOpTree = None # Cache information
         self.wikiData = None
-        self.listPagesOp = ListPagesOperation()
+        self.listWikiPagesOp = ListWikiPagesOperation()
 
     def clone(self):
         """
@@ -747,11 +747,11 @@ class SearchReplaceOperation:
         self.wildCard = stream.serString(self.wildCard)
                 
         if version > 0:
-            self.listPagesOp.serializeBin(stream)
+            self.listWikiPagesOp.serializeBin(stream)
         else:
             # Can only happen in stream read mode
-            # Reset listPagesOp to default
-            self.listPagesOp = ListPagesOperation()
+            # Reset listWikiPagesOp to default
+            self.listWikiPagesOp = ListWikiPagesOperation()
 
 
     def getPackedSettings(self):
@@ -940,7 +940,7 @@ class SearchReplaceOperation:
         if self.searchOpTree is None:
             self.rebuildSearchOpTree()
             
-        self.listPagesOp.beginWikiSearch(wikiData)
+        self.listWikiPagesOp.beginWikiSearch(wikiData)
             
         return self.searchOpTree.beginWikiSearch(wikiData)
         
@@ -953,16 +953,16 @@ class SearchReplaceOperation:
             self.rebuildSearchOpTree()   # TODO: Error ?
             
         result = self.searchOpTree.endWikiSearch()
-        self.listPagesOp.endWikiSearch()
+        self.listWikiPagesOp.endWikiSearch()
         self.wikiData = None
 
         return result
         
 
-    def testPage(self, word, text):
+    def testWikiPage(self, word, text):
         """
         Test, if page fulfills the search criteria and is listed
-        from contained listPagesOp and return
+        from contained listWikiPagesOp and return
         truth value. This is useful for wiki-wide searching for pages.
         
         word -- Naked wiki word of the page
@@ -971,8 +971,8 @@ class SearchReplaceOperation:
         if self.searchOpTree is None:
             self.rebuildSearchOpTree()
             
-        return self.listPagesOp.testPage(word, text) and \
-                self.searchOpTree.testPage(word, text)
+        return self.listWikiPagesOp.testWikiPage(word, text) and \
+                self.searchOpTree.testWikiPage(word, text)
 
 
     def applyOrdering(self, words):

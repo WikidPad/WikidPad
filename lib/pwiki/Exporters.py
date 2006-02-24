@@ -154,7 +154,7 @@ class HtmlXmlExporter:
         fp.write(self.getFileHeader(self.pWiki.wikiName))
         
         for word in self.wordList:
-            wikiPage = self.wikiDataManager.getPage(word)
+            wikiPage = self.wikiDataManager.getWikiPage(word)
             if not self.shouldExport(word, wikiPage):
                 continue
 
@@ -191,7 +191,7 @@ class HtmlXmlExporter:
 
     def exportHtmlMultipleFiles(self):
         for word in self.wordList:
-            wikiPage = self.wikiDataManager.getPage(word)
+            wikiPage = self.wikiDataManager.getWikiPage(word)
             if not self.shouldExport(word, wikiPage):
                 continue
 
@@ -232,7 +232,7 @@ class HtmlXmlExporter:
         fp.write(u'<wiki name="%s">' % self.pWiki.wikiName)
         
         for word in self.wordList:
-            wikiPage = self.wikiDataManager.getPage(word)
+            wikiPage = self.wikiDataManager.getWikiPage(word)
             if not self.shouldExport(word, wikiPage):
                 continue
                 
@@ -287,7 +287,7 @@ class HtmlXmlExporter:
             realfp = open(outputFile, "w")
             fp = utf8Writer(realfp, "replace")
             
-            wikiPage = self.wikiDataManager.getPage(word)
+            wikiPage = self.wikiDataManager.getWikiPage(word)
             content = wikiPage.getContent()
             formatDetails = wikiPage.getFormatDetails()       
             fp.write(self.exportContentToHtmlString(word, content,
@@ -313,7 +313,7 @@ class HtmlXmlExporter:
         # if startFile is set then this is the only page being exported so
         # do not include the parent header.
         if not startFile:
-            wikiPage = self.wikiDataManager.getPage(word)
+            wikiPage = self.wikiDataManager.getWikiPage(word)
             result.append(u'<span class="parent-nodes">parent nodes: %s</span>'
                     % self.getParentLinks(wikiPage, True, onlyInclude))
 
@@ -372,7 +372,7 @@ class HtmlXmlExporter:
     def shouldExport(self, wikiWord, wikiPage=None):
         if not wikiPage:
             try:
-                wikiPage = self.wikiDataManager.getPage(wikiWord)
+                wikiPage = self.wikiDataManager.getWikiPage(wikiWord)
             except WikiWordNotFoundException:
                 return False
             

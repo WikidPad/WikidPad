@@ -196,7 +196,7 @@ class WikiWordNode(AbstractNode):
         """
         wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
         wikiData = wikiDataManager.getWikiData()
-        wikiPage = wikiDataManager.getPageNoError(self.wikiWord)
+        wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
 
         style = NodeStyle()
         
@@ -278,7 +278,7 @@ class WikiWordNode(AbstractNode):
         
     def listChildren(self):
         wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
-        wikiPage = wikiDataManager.getPageNoError(self.wikiWord)
+        wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
         relations = self._getValidChildren(wikiPage)
 
         # get the sort order for the children
@@ -299,7 +299,7 @@ class WikiWordNode(AbstractNode):
         relationData = []
         position = 1
         for relation in relations:
-            relationPage = wikiDataManager.getPageNoError(relation)
+            relationPage = wikiDataManager.getWikiPageNoError(relation)
             relationData.append((relation, relationPage, position))
             position += 1
             
@@ -761,11 +761,11 @@ class MainParentlessNode(AbstractNode):
         
     def isVisible(self):
         wikiData = self.treeCtrl.pWiki.wikiData
-        return len(wikiData.getParentLessWords()) > 1  # TODO Test if root is single element
+        return len(wikiData.getParentlessWikiWords()) > 1  # TODO Test if root is single element
         
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.wikiData
-        words = wikiData.getParentLessWords()
+        words = wikiData.getParentlessWikiWords()
         words.sort()
         
 #         words = filter(lambda w: w != self.treeCtrl.pWiki.wikiName, words)

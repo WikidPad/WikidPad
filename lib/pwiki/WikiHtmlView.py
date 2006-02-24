@@ -92,7 +92,7 @@ class WikiHtmlView(wxHtmlWindow):
         
         self.exporterInstance.wikiData = self.pWiki.wikiData
         
-        wikiPage = self.pWiki.getCurrentWikiPage()
+        wikiPage = self.pWiki.getCurrentDocPage()
         if wikiPage is None:
             return  # TODO Do anything else here?
 

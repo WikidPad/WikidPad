@@ -12,8 +12,8 @@ from wxHelper import *
 
 from StringOps import escapeHtml, unescapeWithRe
 
-from SearchAndReplaceDialogs import PageListConstructionDialog
-from SearchAndReplace import ListPagesOperation
+from SearchAndReplaceDialogs import WikiPageListConstructionDialog
+from SearchAndReplace import ListWikiPagesOperation
 
 
 _CUT_RE = re.compile(ur"\n|\f| +|[^ \n\f]+",
@@ -70,7 +70,7 @@ class PrintMainDialog(wxDialog):
         self.ctrls.btnPrint.SetId(wxID_OK)
         self.ctrls.btnCancel.SetId(wxID_CANCEL)
         
-        self.pWiki.saveCurrentWikiPage(force=True)
+        self.pWiki.saveCurrentDocPage(force=True)
         self.pWiki.wikiData.commit()
         
 #         for e in self.exporterList:
@@ -137,7 +137,7 @@ class PrintMainDialog(wxDialog):
     def OnChSelectedSet(self, evt):
         selset = self.ctrls.chSelectedSet.GetSelection()
         if selset == 3:  # Custom
-            dlg = PageListConstructionDialog(self, self.pWiki, -1, 
+            dlg = WikiPageListConstructionDialog(self, self.pWiki, -1, 
                     value=self.printer.listPagesOperation)
             if dlg.ShowModal() == wxID_OK:
                 self.printer.listPagesOperation = dlg.getValue()
@@ -177,7 +177,7 @@ class Printer:
         self.printData = wxPrintData()
         self.psddata = wxPageSetupDialogData(self.printData)
         self.selectionSet = 0
-        self.listPagesOperation = ListPagesOperation()
+        self.listPagesOperation = ListWikiPagesOperation()
 
         self.plainTextFontDesc = self.pWiki.configuration.get(
                 "main", "print_plaintext_font")
@@ -213,7 +213,7 @@ class Printer:
             wordList = self.pWiki.wikiData.getAllSubWords([root])
         elif selset == 2:
             # whole wiki
-            wordList = self.pWiki.wikiData.getAllDefinedPageNames()
+            wordList = self.pWiki.wikiData.getAllDefinedWikiPageNames()
         else:
             # custom list
             wordList = self.pWiki.wikiData.search(self.listPagesOperation, True)

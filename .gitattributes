@@ -82,6 +82,7 @@ WikidPadHelp/data/Color[!!-~]WHITE.wiki -text
 WikidPadHelp/data/Color[!!-~]YELLOW[!!-~]GREEN.wiki -text
 WikidPadHelp/data/Color[!!-~]YELLOW.wiki -text
 WikidPadHelp/data/ColorTestPage.wiki -text
+WikidPadHelp/data/CommandLineSupport.wiki -text
 WikidPadHelp/data/DatabaseTypes.wiki -text
 WikidPadHelp/data/DisableCamelCaseWords.wiki -text
 WikidPadHelp/data/DynamicViews.wiki -text
@@ -256,7 +257,6 @@ WikidPadHelp/data/KeyBindings.wiki -text
 WikidPadHelp/data/Not[!!-~]Camel[!!-~]Case.wiki -text
 WikidPadHelp/data/OptionsDialog.wiki -text
 WikidPadHelp/data/PageListDialog.wiki -text
-WikidPadHelp/data/PlannedFeatures.wiki -text
 WikidPadHelp/data/Printing.wiki -text
 WikidPadHelp/data/REGISTRATION.grl -text
 WikidPadHelp/data/RebuildTheWiki.wiki -text

@@ -1,19 +1,31 @@
 ﻿++ Text Blocks
 
-In the "Editor" menu you have a submenu "Text blocks" which you can modify (currently only application-wide and only with a text editor) to contain arbitrary blocks of text you use often and which you can insert or append everywhere by chosing the appropriate menu item.
+In the "Editor" menu you have a submenu "Text blocks" which you can modify to contain arbitrary blocks of text you use often and which you can insert or append everywhere by chosing the appropriate menu item.
 
-+++ Where is the file?
+To modify the menu you have to edit one of two special wiki pages, so-called "functional pages" which are located below the "Func. pages" node which is a child of the "Views" node in the tree on the right.
 
-The file is below your configuration directory which is either your home directory or the directory where you installed WikidPad. Your configuration directory can also be found by opening the "About" dialog (menu "Help") and scrolling down to bottom.
+Functional pages behave similar to normal wiki pages but can't be renamed or deleted. They control some behaviour of a wiki or the whole application.
 
-The file named "[TextBlocks].wiki" you want to modify is in a directory ".WikidPadGlobals" which is in your configuration directory (the dot prefix is a Linux/Unix convention). If it does not exist when starting WikidPad, a default version is created automatically.
+The "Global text blocks" page applies application-wide to all wikis, while "Wiki text blocks" can be set individually for each wiki.
 
-You need an external text editor to modify the file, currently WikidPad itself can't open it.
+The menu is updated after saving (manually or automatically) one of the pages.
 
-After you have modified and saved it, you can see the changes when selecting "Reread text blocks" at the bottom of the "Text blocks" menu. This reads "[TextBlocks].wiki" again and rebuilds the menu.
+
++++ Where are the files?
+
+If you want to edit them with a text editor, you can find the global text blocks file below your configuration directory which is either your home directory or the directory where you installed WikidPad. Your configuration directory can also be found by opening the "About" dialog (menu "Help") and scrolling down to bottom.
+
+The file is named "[TextBlocks].wiki" and is located in a directory ".WikidPadGlobals" which is in your configuration directory (the dot prefix is a Linux/Unix convention). If it does not exist when starting WikidPad, a default version is created automatically.
+
+The wiki-specific file is (for "Original" database types only) in the "data" directory of your wiki and has the same name "[TextBlocks].wiki". For the "Compact" database type there exists no separate file.
+
+After you have modified and saved one of the files, you can see the changes when selecting "Reread text blocks" at the bottom of the "Text blocks" menu. This reads "[TextBlocks].wiki" again and rebuilds the menu.
+
 
 
 +++ File format
+
+(If you read this in HTML preview, you should switch back to edit mode to see it correctly.)
 
 Each line represents an own entry of the menu. The indentation controls if it is in the "Text blocks" menu itself or in a submenu.
 Each entry consists of a combination of title, flags and/or content. The title is shown in the menu, the content is inserted or appended when choosing the menu item, the flags control further details. 
@@ -50,7 +62,7 @@ Title without content, only meaningful as first entry of a submenu to define the
 
 
 
-A more complex example with one submenu (add these lines to "[TextBlocks].wiki" to see the effect of it):
+A complete example with one submenu (add these lines to one of the pages or one of the "[TextBlocks].wiki" files to see the effect of it):
 
 
 ;a=Something interesting at the end
@@ -58,6 +70,4 @@ A more complex example with one submenu (add these lines to "[TextBlocks].wiki" 
     item title=Something to insert
     escaping=Escaping new lines as \\n...\n\n\nworks
     all together;a=Show flag to append and item title \nand escape to new line
-
-
 

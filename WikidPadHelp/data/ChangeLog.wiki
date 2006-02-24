@@ -1,6 +1,40 @@
 ﻿++ Change Log
 
 
+Feb. 24, 2006 (1.6beta4)
+
+Changes:
+    * Commandline support for exporting (parts of) a wiki and
+      deletion of personal configuration (see [CommandLineSupport])
+    * Windows binary installer: Support for deleting config.
+      files on uninstall
+    * Support HTML tags in WikidPad
+
+    * Support for wiki specific text blocks (see [TextBlocks])
+    * Editing of text blocks files from within WikidPad as
+      "functional pages", located under Views in tree
+    * Editor font now changes instantly after saving page
+    * Now at most one script is executed when pressing
+      Ctrl-Number (search order: local page, imported scripts,
+      global imported scripts page)
+
+    * Better handling of property "camelCaseWordsEnabled" during
+      database update/rebuild.
+    * Gadfly database backend: Rebuild does no more loose
+      creation and modification date of a page.
+
+
+Fixed bugs:
+    * Crash on non-ascii characters in path to wiki database
+    * Refresh of text blocks menu didn't work
+    * When word in tree node had no children but got one after
+      update, no '+' icon appeared after refresh.
+    * Problems with wiki-wide search and page search
+    * Jumping to wiki word didn't work if cursor and word were
+      at end of page.
+
+
+
 Feb. 09, 2006 (1.6beta3)
 
 Changes:
