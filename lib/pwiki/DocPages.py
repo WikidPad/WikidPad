@@ -11,14 +11,44 @@ import WikiFormatting
 import PageAst
 
 
-class WikiPage(MiscEventSourceMixin):
+class DocPage(MiscEventSourceMixin):
+    """
+    Abstract common base class for WikiPage and FunctionalPage
+    """
+    def __init__(self, wikiDataManager):
+        MiscEventSourceMixin.__init__(self)
+        
+        self.wikiDataManager = wikiDataManager
+        self.txtEditors = []  # List of all editors (views) showing this page
+
+
+    def addTxtEditor(self, txted):
+        """
+        Add txted to the list of editors (views) showing this page.
+        """
+        if not txted in self.txtEditors:
+            self.txtEditors.append(txted)
+
+
+    def removeTxtEditor(self, txted):
+        """
+        Remove txted from the list of editors (views) showing this page.
+        """
+        try:
+            idx = self.txtEditors.index(txted)
+            del self.txtEditors[idx]
+        except ValueError:
+            # txted not in list
+            pass
+
+
+class WikiPage(DocPage):
     """
     holds the data for a wikipage. fetched via the WikiDataManager.getWikiPage method.
     """
     def __init__(self, wikiDataManager, wikiWord):
-        MiscEventSourceMixin.__init__(self)
+        DocPage.__init__(self, wikiDataManager)
 
-        self.wikiDataManager = wikiDataManager
         self.wikiData = self.wikiDataManager.getWikiData()
 
         self.wikiWord = wikiWord
@@ -128,6 +158,11 @@ class WikiPage(MiscEventSourceMixin):
 
 
     def getContent(self):
+        """
+        Returns page content. If page doesn't exist already the template
+        craeation is done here. After calling this function, properties
+        are also accessible for a non-existing page
+        """
         content = None
 
         try:
@@ -144,6 +179,8 @@ class WikiPage(MiscEventSourceMixin):
                     templateWord = parentPage.getPropertyOrGlobal("template")
                     templatePage = self.wikiDataManager.getWikiPage(templateWord)
                     content = templatePage.getContent()
+                    # Load also properties from template page (especially pagetype prop.)
+                    self.props = templatePage.getProperties()
                 except (WikiWordNotFoundException, WikiFileNotFoundException):
                     pass
 
@@ -275,20 +312,15 @@ class WikiPage(MiscEventSourceMixin):
 
 
 
-
-
-
-
-class FunctionalPage(MiscEventSourceMixin):
+class FunctionalPage(DocPage):
     """
     holds the data for a functional page. Such a page controls the behavior
     of the application or a special wiki
     """
     def __init__(self, pWiki, wikiDataManager, funcTag):
-        MiscEventSourceMixin.__init__(self)
+        DocPage.__init__(self, wikiDataManager)
 
         self.pWiki = pWiki
-        self.wikiDataManager = wikiDataManager
         self.funcTag = funcTag
 
         # does this page need to be saved?

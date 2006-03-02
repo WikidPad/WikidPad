@@ -1,2 +1,2 @@
-++ Icon notepad
-[icon: notepad ]
+﻿++ Icon notepad
+[icon: notepad]

@@ -14,9 +14,9 @@ srePersistent.loadCodeCache()
 
 # To ensure unicode selection, works only for me (Michael)
 
-if not hasattr(sys, 'frozen'):
-    sys.path =  \
-            [r"C:\Programme\Python23\Lib\site-packages\wx-2.6-msw-unicode"] + sys.path
+# if not hasattr(sys, 'frozen'):
+#     sys.path =  \
+#             [r"C:\Programme\Python23\Lib\site-packages\wx-2.6-msw-unicode"] + sys.path
 
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "gadfly.zip"))
@@ -131,8 +131,8 @@ class App(wxApp):
 
         # set the icon of the app
         try:
-            self.wikiFrame.SetIcon(wxIcon(os.path.join('icons', 'pwiki.ico'),
-                    wxBITMAP_TYPE_ICO))
+            self.wikiFrame.SetIcon(wxIcon(os.path.join(wikiAppDir, 'icons',
+                    'pwiki.ico'), wxBITMAP_TYPE_ICO))
         except:
             pass
 

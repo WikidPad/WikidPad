@@ -179,13 +179,13 @@ class WikiWordNode(AbstractNode):
         Check if represented word has valid children, filter out undefined
         and/or cycles if options are set accordingly
         """
-        relations = wikiPage.getChildRelationships(
-                existingonly=self.treeCtrl.getHideUndefined(),
-                selfreference=False)
-        if self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
-            # Filter out cycles
-            ancestors = self.getAncestors()
-            relations = [r for r in relations if not ancestors.has_key(r)]
+#         relations = wikiPage.getChildRelationships(
+#                 existingonly=self.treeCtrl.getHideUndefined(),
+#                 selfreference=False)
+#         if self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
+#             # Filter out cycles
+#             ancestors = self.getAncestors()
+#             relations = [r for r in relations if not ancestors.has_key(r)]
         
         return len(self._getValidChildren(wikiPage)) > 0
 

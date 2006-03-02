@@ -254,6 +254,7 @@ WikidPadHelp/data/IncrementalSearch.wiki -text
 WikidPadHelp/data/InlinePythonEval.wiki -text
 WikidPadHelp/data/InternatiönalChàracters.wiki -text
 WikidPadHelp/data/KeyBindings.wiki -text
+WikidPadHelp/data/MigrationBetweenDbTypes.wiki -text
 WikidPadHelp/data/Not[!!-~]Camel[!!-~]Case.wiki -text
 WikidPadHelp/data/OptionsDialog.wiki -text
 WikidPadHelp/data/PageListDialog.wiki -text
@@ -610,6 +611,7 @@ lib/pwiki/AboutDialog.py -text
 lib/pwiki/AdditionalDialogs.py -text
 lib/pwiki/CmdLineAction.py -text
 lib/pwiki/Configuration.py -text
+lib/pwiki/DocPages.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
 lib/pwiki/MiscEvent.py -text
@@ -626,7 +628,6 @@ lib/pwiki/Utilities.py -text
 lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiFormatting.py -text
 lib/pwiki/WikiHtmlView.py -text
-lib/pwiki/WikiPage.py -text
 lib/pwiki/WikiTreeCtrl.py -text
 lib/pwiki/WikiTxtCtrl.py -text
 lib/pwiki/__init__.py -text
@@ -639,6 +640,7 @@ lib/pwiki/wikidata/DbBackendUtils.py -text
 lib/pwiki/wikidata/WikiDataManager.py -text
 lib/pwiki/wikidata/WikiData_compact_sqlite.py -text
 lib/pwiki/wikidata/WikiData_original_gadfly.py -text
+lib/pwiki/wikidata/WikiData_original_sqlite.py -text
 lib/pwiki/wikidata/__init__.py -text
 lib/pwiki/wikidata/compact_sqlite/DbStructure.py -text
 lib/pwiki/wikidata/compact_sqlite/WikiData.py -text
@@ -646,6 +648,9 @@ lib/pwiki/wikidata/compact_sqlite/__init__.py -text
 lib/pwiki/wikidata/original_gadfly/DbStructure.py -text
 lib/pwiki/wikidata/original_gadfly/WikiData.py -text
 lib/pwiki/wikidata/original_gadfly/__init__.py -text
+lib/pwiki/wikidata/original_sqlite/DbStructure.py -text
+lib/pwiki/wikidata/original_sqlite/WikiData.py -text
+lib/pwiki/wikidata/original_sqlite/__init__.py -text
 lib/pwiki/wxHelper.py -text
 lib/readme.txt -text
 /license.txt -text

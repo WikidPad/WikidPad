@@ -1,2 +1,2 @@
-++ Icon smudge
-[icon: smudge ]
+﻿++ Icon smudge
+[icon: smudge]

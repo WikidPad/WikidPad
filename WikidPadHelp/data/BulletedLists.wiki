@@ -1,6 +1,6 @@
 ﻿++ Bulleted Lists
 
-To start a bulleted list type a asterik at the beginning of the line.
+To start a bulleted list type an asterik at the beginning of the line.
 For example:
 
     * Put your cursor at the end of this line and press enter.
@@ -13,3 +13,14 @@ at the beginning of the line. For example:
 
     15.4.3. Put your cursor at the end of this line and press enter.
 
+
+Be sure to indent your list otherwise the following text is interpreted as part of the list and therefore indented in the HTML view.
+
+Example:
+
+
+* Part
+* of list
+
+
+After the list.

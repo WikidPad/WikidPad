@@ -1,2 +1,2 @@
-++ Icon dice
-[icon: dice ]
+﻿++ Icon dice
+[icon: dice]

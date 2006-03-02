@@ -1,2 +1,2 @@
-++ Icon horizontal flip
-[icon: horizontal flip ]
+﻿++ Icon horizontal flip
+[icon: horizontal flip]

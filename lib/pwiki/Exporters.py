@@ -1,7 +1,5 @@
 # from Enum import Enumeration
-import WikiFormatting
-import srePersistent as re
-import os, string
+import os, string, re, traceback
 from os.path import join, exists, splitext
 import sys
 import shutil
@@ -10,6 +8,7 @@ from time import localtime
 import urllib_red as urllib
 
 
+import WikiFormatting
 from StringOps import *
 
 from WikiExceptions import WikiWordNotFoundException
@@ -33,8 +32,12 @@ def removeBracketsToCompFilename(fn):
 # TODO UTF-8 support for HTML? Other encodings?
 
 class HtmlXmlExporter:
-    def __init__(self):
-        self.pWiki = None
+    def __init__(self, mainControl):
+        """
+        mainControl -- Currently PersonalWikiFrame object
+        """
+
+        self.mainControl = mainControl
         self.wikiData = None
         self.wordList = None
         self.exportDest = None
@@ -62,9 +65,19 @@ class HtmlXmlExporter:
         If panels for additional options must be created, they should use
         guiparent as parent
         """
+        if guiparent:
+            res = xrc.wxXmlResource.Get()
+            htmlPanel = res.LoadPanel(guiparent, "ExportSubHtml")
+            ctrls = XrcControls(htmlPanel)
+            ctrls.cbPicsAsLinks.SetValue(
+                    self.mainControl.getConfig().getboolean("main",
+                    "html_export_pics_as_links"))
+        else:
+            htmlPanel = None
+        
         return (
-            (u"html_single", u'Single HTML page', None),
-            (u"html_multi", u'Set of HTML pages', None),
+            (u"html_single", u'Single HTML page', htmlPanel),
+            (u"html_multi", u'Set of HTML pages', htmlPanel),
             (u"xml", u'XML file', None)
             )
 
@@ -79,43 +92,50 @@ class HtmlXmlExporter:
         and can later handled back to the export method of the object
         without previously showing the export dialog.
         """
-        return 0
+        return 1
 
 
     def getAddOpt(self, addoptpanel):
         """
         Reads additional options from panel addoptpanel.
         If getAddOptVersion() > -1, the return value must be a sequence
-        of simple string and/or numeric objects. Otherwise, any object
+        of simple string, unicode and/or numeric objects. Otherwise, any object
         can be returned (normally the addoptpanel itself)
         """
-        return ()
+        if addoptpanel is None:
+            # Return default set in options
+            return (boolToInt(self.mainControl.getConfig().getboolean("main",
+                    "html_export_pics_as_links")),)
+        else:
+            ctrls = XrcControls(addoptpanel)
+            picsAsLinks = boolToInt(ctrls.cbPicsAsLinks.GetValue())
+                
+            return (picsAsLinks,)
 
-            
-    def export(self, pWiki, wikiDataManager, wordList, exportType, exportDest,
-            compatFilenames, addopt):
+
+    def export(self, wikiDataManager, wordList, exportType, exportDest,
+            compatFilenames, addOpt):
         """
         Run export operation.
         
-        pWiki -- PersonalWikiFrame object
         wikiData -- WikiData object
         wordList -- Sequence of wiki words to export
         exportType -- string tag to identify how to export
         exportDest -- Path to destination directory or file to export to
         compatFilenames -- Should the filenames be encoded to be lowest
                            level compatible
-        addopt -- additional options returned by getAddOpt()
+        addOpt -- additional options returned by getAddOpt()
         """
         
 #         print "export1", repr((pWiki, wikiDataManager, wordList, exportType, exportDest,
 #             compatFilenames, addopt))
         
-        self.pWiki = pWiki
         self.wikiDataManager = wikiDataManager
         self.wikiData = self.wikiDataManager.getWikiData()
 
         self.wordList = wordList
         self.exportDest = exportDest
+        self.addOpt = addOpt
         
         if compatFilenames:
             self.convertFilename = removeBracketsToCompFilename
@@ -133,7 +153,7 @@ class HtmlXmlExporter:
         if not compatFilenames:
             startfile = mbcsEnc(startfile)[0]
             
-        if self.pWiki.configuration.getboolean(
+        if self.mainControl.configuration.getboolean(
                 "main", "start_browser_after_export") and startfile:
             os.startfile(startfile)
 
@@ -144,16 +164,17 @@ class HtmlXmlExporter:
             return self.exportHtmlMultipleFiles()
 
         outputFile = join(self.exportDest,
-                self.convertFilename(u"%s.html" % self.pWiki.wikiName))
+                self.convertFilename(u"%s.html" % self.mainControl.wikiName))
 
         if exists(outputFile):
             os.unlink(outputFile)
 
         realfp = open(outputFile, "w")
         fp = utf8Writer(realfp, "replace")
-        fp.write(self.getFileHeader(self.pWiki.wikiName))
+        fp.write(self.getFileHeader(self.mainControl.wikiName))
         
         for word in self.wordList:
+
             wikiPage = self.wikiDataManager.getWikiPage(word)
             if not self.shouldExport(word, wikiPage):
                 continue
@@ -180,16 +201,17 @@ class HtmlXmlExporter:
                         (word, word, self.getParentLinks(wikiPage, False),
                         formattedContent, u'<br />\n'*10))
             except Exception, e:
-                pass
+                traceback.print_exc()
 
         fp.write(self.getFileFooter())
         fp.reset()        
-        realfp.close()        
+        realfp.close() 
         self.copyCssFile(self.exportDest)
         return outputFile
 
 
     def exportHtmlMultipleFiles(self):
+
         for word in self.wordList:
             wikiPage = self.wikiDataManager.getWikiPage(word)
             if not self.shouldExport(word, wikiPage):
@@ -214,13 +236,13 @@ class HtmlXmlExporter:
             self.exportWordToHtmlPage(self.exportDest, word, links, False)
         self.copyCssFile(self.exportDest)
         rootFile = join(self.exportDest, 
-                self.convertFilename(u"%s.html" % self.wordList[0]))    #self.pWiki.wikiName))[0]
+                self.convertFilename(u"%s.html" % self.wordList[0]))    #self.mainControl.wikiName))[0]
         return rootFile
 
 
     def exportXml(self):
         outputFile = join(self.exportDest,
-                self.convertFilename(u"%s.xml" % self.pWiki.wikiName))
+                self.convertFilename(u"%s.xml" % self.mainControl.wikiName))
 
         if exists(outputFile):
             os.unlink(outputFile)
@@ -229,7 +251,7 @@ class HtmlXmlExporter:
         fp = utf8Writer(realfp, "replace")
 
         fp.write(u'<?xml version="1.0" encoding="utf-8" ?>')
-        fp.write(u'<wiki name="%s">' % self.pWiki.wikiName)
+        fp.write(u'<wiki name="%s">' % self.mainControl.wikiName)
         
         for word in self.wordList:
             wikiPage = self.wikiDataManager.getWikiPage(word)
@@ -267,7 +289,7 @@ class HtmlXmlExporter:
                 fp.write(formattedContent)
 
             except Exception, e:
-                pass
+                traceback.print_exc()
 
             fp.write(u'</wikiword>')
 
@@ -295,7 +317,7 @@ class HtmlXmlExporter:
             fp.reset()        
             realfp.close()
         except Exception, e:
-            pass
+            traceback.print_exc()
         
         return outputFile
 
@@ -365,7 +387,7 @@ class HtmlXmlExporter:
 
     def copyCssFile(self, dir):
         if not exists(mbcsEnc(join(dir, 'wikistyle.css'))[0]):
-            cssFile = mbcsEnc(join(self.pWiki.wikiAppDir, 'export', 'wikistyle.css'))[0]
+            cssFile = mbcsEnc(join(self.mainControl.wikiAppDir, 'export', 'wikistyle.css'))[0]
             if exists(cssFile):
                 shutil.copy(cssFile, dir)
 
@@ -486,30 +508,30 @@ class HtmlXmlExporter:
 
         # TODO Without camel case
         page = PageAst.Page()
-        page.buildAst(self.pWiki.getFormatting(), content, formatDetails)
+        page.buildAst(self.mainControl.getFormatting(), content, formatDetails)
 
         # Get property pattern
         if asHtmlPreview:
-            proppattern = self.pWiki.configuration.get(
+            proppattern = self.mainControl.getConfig().get(
                         "main", "html_preview_proppattern", u"")
         else:
-            proppattern = self.pWiki.configuration.get(
+            proppattern = self.mainControl.getConfig().get(
                         "main", "html_export_proppattern", u"")
                         
         self.proppattern = re.compile(proppattern,
                 re.DOTALL | re.UNICODE | re.MULTILINE)
 
         if asHtmlPreview:
-            self.proppatternExcluding = self.pWiki.configuration.getboolean(
+            self.proppatternExcluding = self.mainControl.getConfig().getboolean(
                         "main", "html_preview_proppattern_is_excluding", u"True")
         else:
-            self.proppatternExcluding = self.pWiki.configuration.getboolean(
+            self.proppatternExcluding = self.mainControl.getConfig().getboolean(
                         "main", "html_export_proppattern_is_excluding", u"True")
         
 
         if len(page.getTokens()) >= 2:
             if asHtmlPreview:
-                facename = self.pWiki.configuration.get(
+                facename = self.mainControl.getConfig().get(
                         "main", "facename_html_preview", u"")
                 if facename:
                     self.outAppend('<font face="%s">' % facename)
@@ -524,14 +546,14 @@ class HtmlXmlExporter:
 
     def processTokens(self, content, tokens):
         stacklen = len(self.statestack)
-        unescapeNormalText = self.pWiki.getFormatting().unescapeNormalText
+        unescapeNormalText = self.mainControl.getFormatting().unescapeNormalText
         
 
         for i in xrange(len(tokens)):
             tok = tokens[i]
             try:
                 nexttok = tokens[i+1]
-            except:
+            except IndexError:
                 nexttok = Token(WikiFormatting.FormatTypes.Default,
                     tok.start+len(tok.text), {}, u"")
 
@@ -693,9 +715,15 @@ class HtmlXmlExporter:
                             escapeHtml(link))
                 else:
                     lowerLink = link.lower()
-                    if lowerLink.endswith(".jpg") or \
+                    if self.asHtmlPreview:
+                        picsAsLinks = self.mainControl.getConfig().getboolean(
+                                "main", "html_preview_pics_as_links")
+                    else:
+                        picsAsLinks = not not self.addOpt[0]
+                        
+                    if (lowerLink.endswith(".jpg") or \
                             lowerLink.endswith(".gif") or \
-                            lowerLink.endswith(".png"):
+                            lowerLink.endswith(".png")) and not picsAsLinks:
                         # Ignore title, use image
                         if self.asHtmlPreview and lowerLink.startswith("file:"):
                             # At least under Windows, wxWidgets has another
@@ -717,7 +745,7 @@ class HtmlXmlExporter:
 
             elif styleno == WikiFormatting.FormatTypes.WikiWord:  # or \
                     # styleno == WikiFormatting.FormatTypes.WikiWord2:
-                word = tok.node.nakedWord # self.pWiki.getFormatting().normalizeWikiWord(tok.text)
+                word = tok.node.nakedWord # self.mainControl.getFormatting().normalizeWikiWord(tok.text)
                 link = self.links.get(word)
                 
                 if link:
@@ -820,8 +848,8 @@ class TextExporter:
     """
     Exports raw text
     """
-    def __init__(self):
-        self.pWiki = None
+    def __init__(self, mainControl):
+        self.mainControl = mainControl
         self.wikiDataManager = None
         self.wordList = None
         self.exportDest = None
@@ -879,12 +907,11 @@ class TextExporter:
 
             
 
-    def export(self, pWiki, wikiDataManager, wordList, exportType, exportDest,
+    def export(self, wikiDataManager, wordList, exportType, exportDest,
             compatFilenames, addopt):
         """
         Run export operation.
         
-        pWiki -- PersonalWikiFrame object
         wikiData -- WikiData object
         wordList -- Sequence of wiki words to export
         exportType -- string tag to identify how to export
@@ -893,7 +920,6 @@ class TextExporter:
                            level compatible
         addopt -- additional options returned by getAddOpt()
         """
-        self.pWiki = pWiki
         self.wikiDataManager = wikiDataManager
         self.wordList = wordList
         self.exportDest = exportDest
@@ -920,11 +946,13 @@ class TextExporter:
             try:
                 content, modified = self.wikiDataManager.getWikiData().getContentAndInfo(word)[:2]
             except:
+                traceback.print_exc()
                 continue
 
             # TODO Use self.convertFilename here???
             outputFile = join(self.exportDest,
                     self.convertFilename(u"%s.wiki" % word))
+
             try:
 #                 if exists(outputFile):
 #                     os.unlink(outputFile)
@@ -939,9 +967,11 @@ class TextExporter:
                 except:
                     pass
             except:
+                traceback.print_exc()
                 continue
+                
 
 
-def describeExporters():
-    return (HtmlXmlExporter(), TextExporter())
+def describeExporters(mainControl):
+    return (HtmlXmlExporter(mainControl), TextExporter(mainControl))
     

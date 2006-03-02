@@ -271,6 +271,8 @@ GLOBALDEFAULTS = {
     ("main", "html_preview_proppattern_is_excluding"): "False", # Should these pattern be excluded instead of included?
     ("main", "html_export_proppattern"): "",  # Same for HTML exporting
     ("main", "html_export_proppattern_is_excluding"): "False",  # Same for HTML exporting
+    ("main", "html_preview_pics_as_links"): "False",  # Show only links to pictures in HTML preview
+    ("main", "html_export_pics_as_links"): "False",  # Same for HTML exporting
 
     ("main", "sync_highlight_byte_limit"): "5120",  # Size limit when to start asyn. highlighting in editor
     ("main", "async_highlight_delay"): "0.5",  # Delay after keypress before starting async. highlighting
@@ -289,6 +291,8 @@ GLOBALDEFAULTS = {
     ("main", "lowresources"): "0",
     ("main", "showontray"): "0",
     ("main", "strftime"): u"%x %I:%M %p",  # time format
+    ("main", "recent_time_formats"): u"%x %I:%M %p;%m/%d/%y;%d.%m.%y;%d.%m.%Y;%a %Y-%m-%d",
+             # semicolon separated list of recently used time formats
     ("main", "script_security_level"): "0"  # Allow the use of scripts and
             # import_scripts property? 0: No scripts at all; 1: No import_scripts;
             # 2: allow local import_scripts; 3: allow also global.import_scripts

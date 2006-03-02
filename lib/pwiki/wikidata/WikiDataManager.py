@@ -2,7 +2,7 @@ from weakref import WeakValueDictionary
 
 
 from pwiki.WikiExceptions import *
-from pwiki.WikiPage import WikiPage, FunctionalPage
+from pwiki.DocPages import WikiPage, FunctionalPage
 
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
@@ -23,7 +23,7 @@ class WikiDataManager:
         self.pWiki = pWiki
         self.wikiData = wikiData
         
-        self.pageDict = WeakValueDictionary()
+        self.wikiPageDict = WeakValueDictionary()
         
     def getWikiData(self):
         return self.wikiData
@@ -47,11 +47,11 @@ class WikiDataManager:
         Asking for the same wikiWord twice returns the same object if
         it wasn't garbage collected yet.
         """
-        value = self.pageDict.get(wikiWord)
+        value = self.wikiPageDict.get(wikiWord)
         if value is None:
             # No active page available
             value = WikiPage(self, wikiWord)
-            self.pageDict[wikiWord] = value
+            self.wikiPageDict[wikiWord] = value
 
         return value
 
@@ -63,7 +63,7 @@ class WikiDataManager:
         """
         return self.getWikiPageNoError(wikiWord)
 
-        
+
     def getFuncPage(self, funcTag):
         """
         Retrieve a functional page

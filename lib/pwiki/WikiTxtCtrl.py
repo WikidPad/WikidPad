@@ -19,7 +19,7 @@ from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard
 from MiscEvent import KeyFunctionSink
 
 import WikiFormatting
-import PageAst, WikiPage
+import PageAst, DocPages
 from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException
 
 from SearchAndReplace import SearchReplaceOperation
@@ -57,6 +57,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.loadedDocPage = None
         self.lastCursorPositionInPage = {}
         self.lastFont = None
+        self.pageType = "normal"   # The pagetype controls some special editor behaviour
         
         # If autocompletion word was choosen, how many bytes to delete backward
         # before inserting word, if word ...
@@ -223,6 +224,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.searchCharStartPos = 0
         self.stylebytes = None
         self.pageAst = None
+        self.pageType = "normal"
 
         self.SetSelection(-1, -1)
         self.ignoreOnChange = True
@@ -283,7 +285,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         be = bs + self.bytelenSct(text[start:end])
         self.SetSelection(bs, be)
         
-    def saveLoadedWikiPage(self):
+    def saveLoadedDocPage(self):
         """
         Save loaded wiki page into database. Does not check if dirty
         """
@@ -303,17 +305,23 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.SetSavePoint()
 
         
-    def loadFuncPage(self, funcPage, evtprops=None):
+        
+    def _unloadCurrentDocPage(self, evtprops):
         # Unload current page
         if self.loadedDocPage is not None:
             if self.loadedDocPage.getDirty()[0]:
-                self.saveLoadedWikiPage()
+                self.saveLoadedDocPage()
             
             miscevt = self.loadedDocPage.getMiscEvent()
             miscevt.removeListener(self.wikiPageListener)
             
+            self.loadedDocPage.removeTxtEditor(self)
             self.loadedDocPage = None
+            self.pageType = "normal"
 
+
+    def loadFuncPage(self, funcPage, evtprops=None):
+        self._unloadCurrentDocPage(evtprops)
         # set the editor text
         content = None
         wikiDataManager = self.pWiki.getWikiDataManager()
@@ -322,10 +330,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if self.loadedDocPage is None:
             self.SetText(u"")
             return  # TODO How to handle?
-        else:
-            miscevt = self.loadedDocPage.getMiscEvent()
-            miscevt.addListener(self.wikiPageListener)
-            
+
+        miscevt = self.loadedDocPage.getMiscEvent()
+        miscevt.addListener(self.wikiPageListener)
+        self.loadedDocPage.addTxtEditor(self)
 
         try:
             content = self.loadedDocPage.getContent()
@@ -351,20 +359,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.SetText(content)
 
 
+
     def loadWikiPage(self, wikiPage, evtprops=None):
         """
         Save loaded page, if necessary, then load wikiPage into editor
         """
-        # Unload current page
-        if self.loadedDocPage is not None:
-            if self.loadedDocPage.getDirty()[0]:
-                self.saveLoadedWikiPage()
-            
-            miscevt = self.loadedDocPage.getMiscEvent()
-            miscevt.removeListener(self.wikiPageListener)
-            
-            self.loadedDocPage = None
-        
+        self._unloadCurrentDocPage(evtprops)        
         # set the editor text
         wikiDataManager = self.pWiki.getWikiDataManager()
         
@@ -372,39 +372,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if self.loadedDocPage is None:
             self.SetText(u"")
             return  # TODO How to handle?
-        else:
-            miscevt = self.loadedDocPage.getMiscEvent()
-            miscevt.addListener(self.wikiPageListener)
-            
+
+        miscevt = self.loadedDocPage.getMiscEvent()
+        miscevt.addListener(self.wikiPageListener)
+        self.loadedDocPage.addTxtEditor(self)
+
         content = self.loadedDocPage.getContent()
-
-#         try:
-#             
-#         except WikiFileNotFoundException, e:
-#             # Create initial content of new page
-#             
-#             # Check if there is exactly one parent
-#             parents = self.loadedDocPage.getParentRelationships()
-#             if len(parents) == 1:
-#                 # Check if there is a template page
-#                 try:
-#                     parentPage = wikiDataManager.getPage(parents[0])
-#                     templateWord = parentPage.getPropertyOrGlobal("template")
-#                     templatePage = wikiDataManager.getPage(templateWord)
-#                     content = templatePage.getContent()
-#                 except (WikiWordNotFoundException, WikiFileNotFoundException):
-#                     pass
-# 
-#             if content is None:
-#                 title = self._getWikiPageTitle(self.loadedDocPage.getWikiWord())
-#                 content = u"++ %s\n\n" % title
-# 
-#             self.lastCursorPositionInPage[self.loadedDocPage.getWikiWord()] = \
-#                     len(content)
-
-        # get the properties that need to be checked for options
-        pageProps = self.loadedDocPage.getProperties()
-#         globalProps = wikiDataManager.getWikiData().getGlobalProperties()
 
         # get the font that should be used in the editor
         font = self.loadedDocPage.getPropertyOrGlobal("font",
@@ -425,20 +398,20 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # now fill the text into the editor
         self.setTextAgaUpdated(content)
-
-        # see if there is a saved position for this page
-        lastPos = self.lastCursorPositionInPage.get(
-                self.loadedDocPage.getWikiWord(), 0)
-        self.GotoPos(lastPos)
-
-#         # check if CamelCase should be used
-#         # print "openWikiPage props", repr(pageProps), repr(globalProps)
-#         wikiWordsEnabled = strToBool(self.loadedDocPage.getPropertyOrGlobal(
-#                 "camelCaseWordsEnabled"), True)
-
-#         self.wikiWordsEnabled = wikiWordsEnabled
-#         self.editor.wikiWordsEnabled = wikiWordsEnabled
         
+        self.pageType = self.loadedDocPage.getProperties().get(u"pagetype",
+                [u"normal"])[0]
+                
+        if self.pageType == u"normal":
+            # see if there is a saved position for this page
+            lastPos = self.lastCursorPositionInPage.get(
+                    self.loadedDocPage.getWikiWord(), 0)
+            self.GotoPos(lastPos)
+        elif self.pageType == u"form":
+            self.GotoPos(0)
+            self._goToNextFormField()
+        else:
+            pass   # TODO Error message?
 
 
     def onOptionsChanged(self, miscevt):
@@ -454,9 +427,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.StyleSetBackground(i, color)
 #             self.StyleSetEOLFilled(i, True)
 
+
     def onWikiPageUpdated(self, miscevt):
         if self.loadedDocPage is None or \
-                not isinstance(self.loadedDocPage, WikiPage.WikiPage):
+                not isinstance(self.loadedDocPage, DocPages.WikiPage):
             return
 
         # get the font that should be used in the editor
@@ -470,6 +444,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.SetStyles(faces)
             self.lastEditorFont = font
 
+        self.pageType = self.loadedDocPage.getProperties().get(u"pagetype",
+                [u"normal"])[0]
 
 
     def OnStyleNeeded(self, evt):
@@ -529,6 +505,38 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # Show menu
         self.PopupMenu(self.contextMenu)
+
+
+    def _goToNextFormField(self):
+        """
+        If pagetype is "form" this is called when user presses TAB in
+        text editor and after loading a form page
+        """
+        searchOp = SearchReplaceOperation()
+        searchOp.wikiWide = False
+        searchOp.wildCard = 'regex'
+        searchOp.caseSensitive = True
+        searchOp.searchStr = "&&[a-z]"
+        
+        text = self.GetText()
+        charStartPos = len(self.GetTextRange(0, self.GetSelectionEnd()))
+        while True:
+            start, end = searchOp.searchText(text, charStartPos)[:2]
+            if start is None: break
+            
+            fieldcode = text[start + 2]
+            if fieldcode == "i":
+                matchbytestart = self.bytelenSct(text[:start])
+                matchbyteend = matchbytestart + \
+                        self.bytelenSct(text[start:end])
+
+                self.SetSelection(matchbytestart, matchbyteend)
+                break
+                
+            charStartPos = end
+            
+                
+
 
 
     def storeStylingAndAst(self, stylebytes, page):
@@ -1017,7 +1025,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def executeSearch(self, sarOp, searchCharStartPos=-1, next=False):
         if sarOp.booleanOp:
-            return (None, None)  # Not possible
+            return (-1, -1)  # Not possible
 
         if searchCharStartPos < 0:
             searchCharStartPos = self.searchCharStartPos
@@ -1378,8 +1386,18 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 else:
                     evt.Skip()
 
+            elif not evt.ControlDown() and not evt.ShiftDown():  # TODO Check all modifiers
+                if key == WXK_TAB:
+                    if self.pageType == u"form":
+                        self._goToNextFormField()
+                        return
+                evt.Skip()
+
             else:
                 evt.Skip()
+                
+                
+        
 
 
     def OnUserListSelection(self, evt):

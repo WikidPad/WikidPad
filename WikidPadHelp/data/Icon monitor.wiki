@@ -1,2 +1,2 @@
-++ Icon monitor
-[icon: monitor ]
+﻿++ Icon monitor
+[icon: monitor]

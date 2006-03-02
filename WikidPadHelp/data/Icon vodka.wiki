@@ -1,2 +1,2 @@
-++ Icon vodka
-[icon: vodka ]
+﻿++ Icon vodka
+[icon: vodka]

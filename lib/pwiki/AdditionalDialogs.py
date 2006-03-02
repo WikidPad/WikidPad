@@ -11,7 +11,7 @@ import wxPython.xrc as xrc
 from wxHelper import *
 
 from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, htmlColorToRgbTuple,\
-        rgbToHtmlColor, wikiWordToLabel
+        rgbToHtmlColor, wikiWordToLabel, escapeForIni, unescapeForIni
 import WikiFormatting
 import Exporters
 
@@ -337,7 +337,9 @@ class DateformatDialog(wxDialog):
 </body>
 </html>
 """
-    
+
+
+
     def __init__(self, pWiki, ID, title="Select Date Format",
                  pos=wxDefaultPosition, size=wxDefaultSize,
                  style=wxNO_3D, deffmt=u""):
@@ -352,6 +354,7 @@ class DateformatDialog(wxDialog):
         res = xrc.wxXmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "DateformatDialog")
         
+        # Create HTML explanation
         html = wxHtmlWindow(self, -1)
         html.SetPage(self.FORMATHELP)
         res.AttachUnknownControl("htmlExplain", html, self)
@@ -361,10 +364,16 @@ class DateformatDialog(wxDialog):
         self.ctrls.btnOk.SetId(wxID_OK)
         self.ctrls.btnCancel.SetId(wxID_CANCEL)
         
+        # Set dropdown list of recent time formats
+        tfs = self.pWiki.getConfig().get("main", "recent_time_formats")
+        self.recentFormats = [unescapeForIni(s) for s in tfs.split(u";")]
+        for f in self.recentFormats:
+            self.ctrls.fieldFormat.Append(f)
+
         self.ctrls.fieldFormat.SetValue(deffmt)
         self.OnText(None)
         
-        ## EVT_BUTTON(self, wxID_OK, self.OnOk)
+        EVT_BUTTON(self, wxID_OK, self.OnOk)
         EVT_TEXT(self, XRCID("fieldFormat"), self.OnText) 
 
         
@@ -385,6 +394,26 @@ class DateformatDialog(wxDialog):
     def GetValue(self):
         return self.value
         
+    
+    def OnOk(self, evt):
+        if self.value != u"":
+            # Update recent time formats list
+            
+            try:
+                self.recentFormats.remove(self.value)
+            except ValueError:
+                pass
+                
+            self.recentFormats.insert(0, self.value)
+            if len(self.recentFormats) > 10:
+                self.recentFormats = self.recentFormats[:10]
+
+            # Escape to store it in configuration
+            tfs = u";".join([escapeForIni(f, u";") for f in self.recentFormats])
+            self.pWiki.getConfig().set("main", "recent_time_formats", tfs)
+
+        self.EndModal(wxID_OK)
+
 
 class OptionsDialog(wxDialog):
     OPTION_TO_CONTROL = [
@@ -409,6 +438,8 @@ class OptionsDialog(wxDialog):
             ("html_export_proppattern_is_excluding",
                     "cbHtmlExportProppatternIsExcluding", "b"),
             ("html_export_proppattern", "tfHtmlExportProppattern", "tre"),
+            ("html_preview_pics_as_links", "cbHtmlPreviewPicsAsLinks", "b"),
+            ("html_export_pics_as_links", "cbHtmlExportPicsAsLinks", "b"),
             
             ("sync_highlight_byte_limit", "tfSyncHighlightingByteLimit", "i0+"),
             ("async_highlight_delay", "tfAsyncHighlightingDelay", "f0+"),
@@ -438,13 +469,13 @@ class OptionsDialog(wxDialog):
         for o, c, t in self.OPTION_TO_CONTROL:
             if t == "b":   # boolean field = checkbox
                 self.ctrls[c].SetValue(
-                        self.pWiki.configuration.getboolean("main", o))
+                        self.pWiki.getConfig().getboolean("main", o))
             elif t in ("t", "tre", "i0+", "f0+"):  # text field or regular expression field
                 self.ctrls[c].SetValue(
-                        uniToGui(self.pWiki.configuration.get("main", o)) )
+                        uniToGui(self.pWiki.getConfig().get("main", o)) )
             elif t == "seli":   # Selection -> transfer index
                 self.ctrls[c].SetSelection(
-                        self.pWiki.configuration.getint("main", o))
+                        self.pWiki.getConfig().getint("main", o))
 
         # Options with special treatment
         self.ctrls.cbLowResources.SetValue(
@@ -633,7 +664,7 @@ class ExportDialog(wxDialog):
         exporterList = [] # List of tuples (<exporter object>, <export tag>,
                           # <readable description>, <additional options panel>)
         
-        for ob in Exporters.describeExporters():   # TODO search plugins
+        for ob in Exporters.describeExporters(self.pWiki):   # TODO search plugins
             for tp in ob.getExportTypes(self.ctrls.additOptions):
                 panel = tp[2]
                 if panel is None:
@@ -664,8 +695,12 @@ class ExportDialog(wxDialog):
         # Enable first addit. options panel
         self.exporterList[0][3].Enable(True)
         self.exporterList[0][3].Show(True)
-        self.ctrls.chExportTo.SetSelection(0)       
+        self.ctrls.chExportTo.SetSelection(0)  
         
+#         self.ctrls.cbHtmlExportPicsAsLinks.SetValue(
+#                 self.pWiki.getConfig().getboolean("main",
+#                 "html_export_pics_as_links"))
+
         EVT_CHOICE(self, GUI_ID.chExportTo, self.OnExportTo)
         EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
 
@@ -720,11 +755,14 @@ class ExportDialog(wxDialog):
             # custom list
             wordList = self.pWiki.getWikiData().search(self.listPagesOperation, True)
 
+#         self.pWiki.getConfig().set("main", "html_export_pics_as_links",
+#                 self.ctrls.cbHtmlExportPicsAsLinks.GetValue())
+
         # Run exporter
         ob, t, desc, panel = \
                 self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
 
-        ob.export(self.pWiki, self.pWiki.getWikiDataManager(), wordList, t, 
+        ob.export(self.pWiki.getWikiDataManager(), wordList, t, 
                 guiToUni(self.ctrls.tfDirectory.GetValue()), 
                 self.ctrls.compatFilenames.GetValue(), ob.getAddOpt(panel))
 

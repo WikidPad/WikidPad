@@ -116,7 +116,7 @@ class CmdLineAction:
 
         # Handle self.exportType
         exporterList = []
-        for ob in Exporters.describeExporters():   # TODO search plugins
+        for ob in Exporters.describeExporters(pWiki):   # TODO search plugins
             for tp in ob.getExportTypes(None):
                 exporterList.append((ob, tp[0]))
 
@@ -133,7 +133,7 @@ class CmdLineAction:
                     u"Value for --export-type can be one of:\n%s\n\n" % exList)
             return
             
-        exporter.export(pWiki, pWiki.getWikiDataManager(), wordList,
+        exporter.export(pWiki.getWikiDataManager(), wordList,
                 self.exportType, self.exportDest, 
                 self.exportCompFn, ob.getAddOpt(None))
 

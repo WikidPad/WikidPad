@@ -1,2 +1,2 @@
-++ Icon zoomout
-[icon:  zoomout]
+﻿++ Icon zoomout
+[icon: zoomout]

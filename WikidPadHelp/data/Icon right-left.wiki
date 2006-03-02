@@ -1,2 +1,2 @@
-++ Icon right-left
-[icon: right-left ]
+﻿++ Icon right-left
+[icon: right-left]

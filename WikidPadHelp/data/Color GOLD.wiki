@@ -1,2 +1,2 @@
-++ Color GOLD
-[color: GOLD ]
+﻿++ Color GOLD
+[color: GOLD]

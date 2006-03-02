@@ -1,2 +1,2 @@
-++ Color MAROON
-[color: MAROON ]
+﻿++ Color MAROON
+[color: MAROON]

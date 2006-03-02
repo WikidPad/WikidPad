@@ -1,6 +1,6 @@
 import WikiData_compact_sqlite
 import WikiData_original_gadfly
-
+import WikiData_original_sqlite
 
 _handlers = None
 
@@ -18,7 +18,12 @@ def _collectHandlers(pWiki):
     for h in hdls:
         _handlers.append((h[0], h[1],
                 WikiData_original_gadfly.getWikiDataHandler))
-        
+
+    hdls = WikiData_original_sqlite.listAvailableWikiDataHandlers(pWiki)
+    for h in hdls:
+        _handlers.append((h[0], h[1],
+                WikiData_original_sqlite.getWikiDataHandler))
+
 
 def listHandlers(pWiki):
     global _handlers

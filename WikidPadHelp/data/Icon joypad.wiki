@@ -1,2 +1,2 @@
-++ Icon joypad
-[icon: joypad ]
+﻿++ Icon joypad
+[icon: joypad]

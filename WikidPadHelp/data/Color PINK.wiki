@@ -1,2 +1,2 @@
-++ Color PINK
-[color: PINK ]
+﻿++ Color PINK
+[color: PINK]

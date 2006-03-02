@@ -1,2 +1,2 @@
-++ Icon vertical flip
-[icon: vertical flip ]
+﻿++ Icon vertical flip
+[icon: vertical flip]

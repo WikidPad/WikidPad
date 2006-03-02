@@ -67,7 +67,7 @@ class WikiHtmlView(wxHtmlWindow):
         self.currentLoadedWikiWord = None
         self.scrollPosCache = {}
         
-        self.exporterInstance = Exporters.HtmlXmlExporter()
+        self.exporterInstance = Exporters.HtmlXmlExporter(self.pWiki)
         
         # TODO More elegant
         self.exporterInstance.pWiki = self.pWiki

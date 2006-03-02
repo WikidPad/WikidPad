@@ -1,2 +1,2 @@
-++ Icon find
-[icon:find  ]
+﻿++ Icon find
+[icon:find]

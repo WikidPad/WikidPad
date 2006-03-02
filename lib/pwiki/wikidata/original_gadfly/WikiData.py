@@ -40,10 +40,8 @@ from pwiki.StringOps import mbcsEnc, mbcsDec, utf8Enc, utf8Dec, BOM_UTF8, \
 from pwiki import WikiFormatting
 from pwiki import PageAst
 
-from pwiki.WikiPage import WikiPage
+from pwiki.DocPages import WikiPage
 
-
-CleanTextRE = re.compile("[^A-Za-z0-9]")  # ?
 
 class WikiData:
     "Interface to wiki data."
@@ -132,7 +130,7 @@ class WikiData:
         self.cachedContentNames[word] = 1
 
 
-    def setContent(self, word, text, moddate = None, creadate = None):
+    def setContent(self, word, content, moddate = None, creadate = None):
         """
         Store unicode text for wikiword word, regardless if previous
         content exists or not. creadate will be used for new content
@@ -144,7 +142,7 @@ class WikiData:
         
         output = open(self.getWikiWordFileName(word), 'w')
         output.write(BOM_UTF8)
-        output.write(utf8Enc(text)[0])
+        output.write(utf8Enc(content)[0])
         output.close()
         
         self._updatePageEntry(word, moddate, creadate)
@@ -258,37 +256,6 @@ class WikiData:
             raise WikiDataException, "You cannot delete the root wiki node"
 
 
-#     # ---------- WikiPage creation ----------
-# 
-#     def getPage(self, wikiWord):
-#         """
-#         Fetch a WikiPage for the wikiWord, throws WikiWordNotFoundException
-#         if word doesn't exist
-#         """
-#         if not self.isDefinedWikiWord(wikiWord):
-#             raise WikiWordNotFoundException, u"Word '%s' not in wiki" % wikiWord
-# 
-#         return WikiPage(self, wikiWord)
-# 
-#     def getPageNoError(self, wikiWord):
-#         """
-#         fetch a WikiPage for the wikiWord. If it doesn't exist, return
-#         one without throwing an error and without updating the cache
-#         """
-#         return WikiPage(self, wikiWord)
-# 
-#     def createPage(self, wikiWord):
-#         """
-#         create a new wikiPage for the wikiWord. Cache is not updated until
-#         page is saved
-#         """
-# #         ti = time()
-# #         self.execSql(
-# #                 "insert into wikiwords(word, created, modified) values (?, ?, ?)",
-# #                 (wikiWord, ti, ti))
-# #         self.cachedContentNames[wikiWord] = 1
-#         return self.getPageNoError(wikiWord)
-
 
     # ---------- Handling of relationships cache ----------
 
@@ -349,25 +316,22 @@ class WikiData:
 
     def getParentlessWikiWords(self):
         """
-        get the words that have no parents. also returns nodes that have files but
-        no entries in the wikiwords table.
+        get the words that have no parents.
+        
+        NO LONGER VALID: (((also returns nodes that have files but
+        no entries in the wikiwords table.)))
         """
-#         words = self.getAllDefinedWikiPageNames()
+#         words = self._getAllPageNamesFromDisk()
+# 
+#         # Filter out non-wiki words
+#         wordSet = sets.Set([word for word in words if not word.startswith("[")])
+# 
+#         # Remove all which have parents
 #         relations = self.getAllRelations()
-#         rightSide = [relation for (word, relation) in relations]
-# 
-#         wikiFiles = self._getAllPageNamesFromDisk()
-# 
-#         # append the words that don't exist in the words db
-#         words.extend([file for file in wikiFiles if file not in words])
-# 
-#         # find those that have no parent relations
-#         return [word for word in words
-#                 if word not in rightSide and not word.startswith("[")]
-        words = self._getAllPageNamesFromDisk()
+#         for word, relation in relations:
+#             wordSet.discard(relation)
 
-        # Filter out non-wiki words
-        wordSet = sets.Set([word for word in words if not word.startswith("[")])
+        wordSet = sets.Set(self.getAllDefinedWikiPageNames())
 
         # Remove all which have parents
         relations = self.getAllRelations()
@@ -667,7 +631,7 @@ class WikiData:
 
     # ---------- Searching pages ----------
 
-    def search(self, sarOp, applOrdering=True):
+    def search(self, sarOp, applyOrdering=True):
         results = []
         sarOp.beginWikiSearch(self)
         try:
@@ -677,7 +641,7 @@ class WikiData:
                 
                 if sarOp.testWikiPage(word, fileContents) == True:
                     results.append(word)
-            if applOrdering:
+            if applyOrdering:
                 results = sarOp.applyOrdering(results)
 
         finally:

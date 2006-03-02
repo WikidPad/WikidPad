@@ -14,7 +14,7 @@ from Configuration import createConfiguration
 # from WikiData import *
 from wikidata import DbBackendUtils
 from wikidata.WikiDataManager import WikiDataManager
-import WikiPage
+import DocPages
 
 from WikiTxtCtrl import *
 from WikiTreeCtrl import *
@@ -429,7 +429,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def getCurrentWikiWord(self):
         docPage = self.getCurrentDocPage()
-        if docPage is None or not isinstance(docPage, WikiPage.WikiPage):
+        if docPage is None or not isinstance(docPage, DocPages.WikiPage):
             return None
         return docPage.getWikiWord()
 
@@ -1323,9 +1323,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         tb.AddSimpleTool(wxNewId(), seperator, "Separator", "Separator")
 
         icon = self.lookupIcon("tb_save")
-        tbID = wxNewId()
-        tb.AddSimpleTool(tbID, icon, "Save Wiki Word (Ctrl-S)", "Save Wiki Word")
-        EVT_TOOL(self, tbID, lambda evt: (self.saveCurrentDocPage(force=True), self.wikiData.commit()))
+        tb.AddSimpleTool(GUI_ID.CMD_SAVE_WIKI, icon, "Save Wiki Word (Ctrl-S)",
+                "Save Wiki Word")
+        EVT_TOOL(self, GUI_ID.CMD_SAVE_WIKI,
+                lambda evt: (self.saveCurrentDocPage(force=True),
+                self.wikiData.commit()))
 
         icon = self.lookupIcon("tb_rename")
         tbID = wxNewId()
@@ -2153,13 +2155,38 @@ These are your default global settings.
 
     def saveCurrentDocPage(self, force = False):
         if force or self.getCurrentDocPage().getDirty()[0]:
-            self.activeEditor.saveLoadedWikiPage()
+            self.activeEditor.saveLoadedDocPage() # this calls in turn saveDocPage() below
+#             tb = self.GetToolBar()
+#             tool = tb.FindById(GUI_ID.CMD_SAVE_WIKI)
+#             # tool.SetNormalBitmap(self.lookupIcon("boy"))
+#             tool.Enable(False)
+#             
+#             # tb.Realize()
+#             self.Freeze()
+#             tb.SetBackgroundColour(wxRED)
+#             self.Thaw()
+#             self.Refresh()
+# 
+#             # tb.OnPaint(wxPaintEvent(tb.GetId()))
+#             # 
+#             
+#             try:
+#                 self.activeEditor.saveLoadedDocPage()
+#             finally:
+#                 tool.Enable(True)
+#                 # tool.SetNormalBitmap(self.lookupIcon("tb_save"))
+#                 # tb.Realize()
+#                 # tb.SetBackgroundColour(wxNullColour)
+#                 # tb.Refresh()
 
 
     def saveDocPage(self, page, text):
+        """
+        Save page unconditionally
+        """
         if page is None:
             return False
-        self.statusBar.PushStatusText(u"Saving WikiPage", 0)
+        self.statusBar.PushStatusText(u"Saving page", 0)
         word = page.getWikiWord()
         if word is not None:
             # trigger hooks
@@ -2585,7 +2612,7 @@ These are your default global settings.
             return False
 
         if not self.getFormatting().isNakedWikiWord(toWikiWord):
-            self.displayErrorMessage(u"'%s' is an invalid WikiWord" % toWikiWord)
+            self.displayErrorMessage(u"'%s' is an invalid wiki word" % toWikiWord)
             return False
 
         if wikiWord == toWikiWord:
@@ -2716,7 +2743,7 @@ These are your default global settings.
 #             if not self.getFormatting().isWikiWord(wikiWord):
 #                 wikiWord = u"[%s]" % wikiWord
             if not self.getFormatting().isNakedWikiWord(wikiWord):
-                self.displayErrorMessage(u"'%s' is an invalid WikiWord" % wikiWord)
+                self.displayErrorMessage(u"'%s' is an invalid wiki word" % wikiWord)
                 return False
 
             if self.wikiData.isDefinedWikiWord(wikiWord):
@@ -2776,7 +2803,7 @@ These are your default global settings.
 
 
     def showExportDialog(self):
-        self.saveCurrentDocPage(force=True)
+        self.saveCurrentDocPage()
         self.wikiData.commit()
 
         dlg = ExportDialog(self, -1)
@@ -2791,17 +2818,17 @@ These are your default global settings.
 
     EXPORT_PARAMS = {
             GUI_ID.MENU_EXPORT_WHOLE_AS_PAGE:
-                    (Exporters.HtmlXmlExporter, u"html_single", ()),
+                    (Exporters.HtmlXmlExporter, u"html_single", None),
             GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES:
-                    (Exporters.HtmlXmlExporter, u"html_multi", ()),
+                    (Exporters.HtmlXmlExporter, u"html_multi", None),
             GUI_ID.MENU_EXPORT_WORD_AS_PAGE:
-                    (Exporters.HtmlXmlExporter, u"html_single", ()),
+                    (Exporters.HtmlXmlExporter, u"html_single", None),
             GUI_ID.MENU_EXPORT_SUB_AS_PAGE:
-                    (Exporters.HtmlXmlExporter, u"html_single", ()),
+                    (Exporters.HtmlXmlExporter, u"html_single", None),
             GUI_ID.MENU_EXPORT_SUB_AS_PAGES:
-                    (Exporters.HtmlXmlExporter, u"html_multi", ()),
+                    (Exporters.HtmlXmlExporter, u"html_multi", None),
             GUI_ID.MENU_EXPORT_WHOLE_AS_XML:
-                    (Exporters.HtmlXmlExporter, u"xml", ()),
+                    (Exporters.HtmlXmlExporter, u"xml", None),
             GUI_ID.MENU_EXPORT_WHOLE_AS_RAW:
                     (Exporters.TextExporter, u"raw_files", (1,))
             }
@@ -2837,10 +2864,16 @@ These are your default global settings.
 
             expclass, exptype, addopt = self.EXPORT_PARAMS[typ]
             
+            
             self.saveCurrentDocPage(force=True)
             self.wikiData.commit()
             
-            expclass().export(self, self.getWikiDataManager(), wordList, exptype, dest,
+            ob = expclass(self)
+            if addopt is None:
+                # Additional options not given -> take default provided by exporter
+                addopt = ob.getAddOpt(None)
+
+            ob.export(self.getWikiDataManager(), wordList, exptype, dest,
                     False, addopt)
 
             self.configuration.set("main", "last_active_dir", dest)
@@ -3003,9 +3036,15 @@ These are your default global settings.
             # make sure this is a valid wiki word
             if wikiName.find(u' ') == -1 and \
                     self.getFormatting().isNakedWikiWord(wikiName):
+                startDir = self.wikiConfigFilename
+                if startDir is None:
+                    startDir = self.getLastActiveDir()
+                else:
+                    startDir = dirname(dirname(startDir))
+
                 dlg = wxDirDialog(self, u"Directory to store new wiki",
 #                         self.getLastActiveDir(),
-                        dirname(dirname(self.wikiConfigFilename)),
+                        startDir,
                         style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
                 if dlg.ShowModal() == wxID_OK:
                     try:
@@ -3014,7 +3053,7 @@ These are your default global settings.
                         self.displayErrorMessage(u'There was an error while '+
                                 'creating your new Wiki.', e)
             else:
-                self.displayErrorMessage((u"'%s' is an invalid WikiWord. "+
+                self.displayErrorMessage((u"'%s' is an invalid wiki word. "+
                 u"There must be no spaces and mixed caps") % wikiName)
 
         dlg.Destroy()

@@ -1,2 +1,2 @@
-++ Color BLUE
-[color: BLUE ]
+﻿++ Color BLUE
+[color: BLUE]

@@ -1,2 +1,2 @@
-++ Icon folder open
-[icon: folder open ]
+﻿++ Icon folder open
+[icon: folder open]

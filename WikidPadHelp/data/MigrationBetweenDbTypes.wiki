@@ -1,0 +1,50 @@
+﻿++ Migration Between Db Types
+
+*This topic is incomplete!*
+
+It is recommended to make a backup before applying the following procedures.
+
+When migrating you will loose stored searches and the modification and
+creation dates of the wiki pages!
+
+
+
+From "Original Gadfly" to "Compact Sqlite":
+
+1. Start WikidPad
+2. Use "Open as Type" to open your wiki (this also works if the wiki is
+already open)
+3. Choose "Compact Sqlite" as database type
+4. From "Wiki" menu run "Copy .wiki files to database"
+5. From the same menu, run "Rebuild Wiki"
+6. Close and reopen WikidPad
+
+Now you can go into the "data" directory inside the wiki directory and
+delete all \*.wiki files to ensure that no old files remain if you later
+want to migrate back. Do not delete the one \*.wiki file in the directory
+above "data"!
+
+
+The \*.gfd and \*.grl files as well as the "index" directory are also
+unnecessary for Sqlite but needed when migrating back.
+
+If you have deleted them and want to go back to Gadfly you have to copy
+them from another Gadfly wiki (e.g. WikidPadHelp) before applying the
+following.
+
+
+
+
+From "Compact Sqlite" to "Original Gadfly":
+
+1. Start WikidPad
+2. Open your wiki
+3. Choose "Wiki" -> "Export" -> "Export wiki to .wiki files"
+4. Select the "data" directory of your wiki as target
+5. Use "Wiki" -> "Open as Type" to open the already opened wiki, but
+choose "Original Gadfly" as db type.
+6. Run "Wiki" -> "Rebuild Wiki"
+7. Close and reopen WikidPad
+
+Now you can delete the "wiki.sli" file in the "data" directory which is
+only needed by Sqlite.

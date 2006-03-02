@@ -1,2 +1,2 @@
-++ Icon spiky hair
-[icon: spiky hair ]
+﻿++ Icon spiky hair
+[icon: spiky hair]

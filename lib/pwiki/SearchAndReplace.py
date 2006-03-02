@@ -766,23 +766,6 @@ class SearchReplaceOperation:
         
         return stream.getBytes()
         
-#         result = []
-#         
-#         result.append(pack(">I", 0))  # Version number of binary data
-#         
-#         result.append(strToBin(utf8Enc(self.searchStr)[0]))
-#         result.append(strToBin(utf8Enc(self.replaceStr)[0]))
-#         
-#         result.append(boolToChar(self.replaceOp) + boolToChar(self.wholeWord) +
-#                 boolToChar(self.caseSensitive) + boolToChar(self.cycleToStart) + \
-#                 boolToChar(self.booleanOp))
-# 
-#         result.append(strToBin(self.wildCard))
-#         
-# #         result.append(boolToChar(self.wikiWide))
-#         
-#         return "".join(result)
-        
     
     def setPackedSettings(self, data):
         """
@@ -791,28 +774,6 @@ class SearchReplaceOperation:
         """
         stream = SerializeStream(stringBuf=data, readMode=True)
         self.serializeBin(stream)
-
-        
-#         version = unpack(">I", data[:4])[0]
-#         data = data[4:]
-#         
-#         if version != 0:
-#             return   # TODO Error handling
-#         
-#         self.searchStr, data = binToStr(data)
-#         self.replaceStr, data = binToStr(data)
-# 
-#         self.replaceOp = charToBool(data[0])
-#         self.wholeWord = charToBool(data[1])
-#         self.caseSensitive = charToBool(data[2])
-#         self.cycleToStart = charToBool(data[3])
-#         self.booleanOp = charToBool(data[4])
-#         data = data[5:]
-#        
-#         self.wildCard, data = binToStr(data)
-#         
-# #         self.wikiWide = charToBool(data[0])
-# #         data = data[1:]
         
         self.clearCache()
 
@@ -880,9 +841,10 @@ class SearchReplaceOperation:
 
     def searchText(self, text, searchCharStartPos=0):
         """
-        Applies the search operation on text and returns either
-        tuple (<first char>, <after last char>) with position of
-        found data or (None, None) if search was unsuccessful.
+        Applies the search operation on text and returns a
+        tuple with at least two elements <first char>, <after last char>
+        with position of found data or (None, None) if search
+        was unsuccessful.
         
         Remarks:
         - The function does not work if self.booleanOp is True

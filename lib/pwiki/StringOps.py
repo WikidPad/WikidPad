@@ -441,6 +441,12 @@ def boolToChar(b):
 def charToBool(c):
     return c != "\0"
 
+def boolToInt(b):
+    if b:
+        return 1
+    else:
+        return 0
+    
 
 def strToBin(s):
     """
@@ -497,9 +503,13 @@ class Tokenizer:
             mat = self.tokenre.search(text, charpos)
             if mat is None:
                 if charpos < textlen:
+#                     print "tokenize3", repr((defaultType, charpos, None,
+#                             text[charpos:textlen]))
                     result.append(Token(defaultType, charpos, None,
                             text[charpos:textlen]))
                 
+#                 print "tokenize4", repr((defaultType, textlen, None,
+#                         u""))
                 result.append(Token(defaultType, textlen, None, u""))
                 break
     
@@ -511,10 +521,14 @@ class Tokenizer:
                     # m is of the form:   style<index>
                     index = int(m[5:])
                     if charpos < start:
+#                         print "tokenize7", repr((defaultType, charpos, None,
+#                                 text[charpos:start]))
                         result.append(Token(defaultType, charpos, None,
                                 text[charpos:start]))                    
                         charpos = start
     
+#                     print "tokenize8", repr((formatMap[index], charpos, groupdict,
+#                             text[start:end]))
                     result.append(Token(formatMap[index], charpos, groupdict,
                             text[start:end]))
                     charpos = end

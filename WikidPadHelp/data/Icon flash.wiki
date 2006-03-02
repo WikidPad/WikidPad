@@ -1,2 +1,2 @@
-++ Icon flash
-[icon: flash ]
+﻿++ Icon flash
+[icon: flash]

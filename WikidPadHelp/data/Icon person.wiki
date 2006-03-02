@@ -1,2 +1,2 @@
-++ Icon person
-[icon: person ]
+﻿++ Icon person
+[icon: person]

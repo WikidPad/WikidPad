@@ -1,2 +1,2 @@
-++ Color WHEAT
-[color: WHEAT ]
+﻿++ Color WHEAT
+[color: WHEAT]

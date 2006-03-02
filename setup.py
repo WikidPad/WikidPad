@@ -8,7 +8,7 @@ from py2exe.build_exe import Target
 
 wikidpad = Target(
     # used for the versioninfo resource
-    version = '1.6',
+    version = '1.7',
     name = "WikidPad",
     copyright = "(C) 2005-2006 Jason Horman, Michael Butscher, Gerhard Reitmayr",
     description = "Single user wiki notepad",
@@ -20,7 +20,7 @@ wikidpad = Target(
 
 
 setup(name='WikidPadCompact',
-      version='1.6beta',
+      version='1.7beta',
       author='Michael Butscher',
       author_email='mbutscher@gmx.de',
       url='http://www.mbutscher.nextdesigns.net/software.html',

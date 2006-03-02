@@ -39,10 +39,8 @@ from pwiki.StringOps import getBinCompactForDiff, applyBinCompact, mbcsEnc, mbcs
 from pwiki import WikiFormatting
 from pwiki import PageAst
 
-from pwiki.WikiPage import WikiPage
+from pwiki.DocPages import WikiPage
 
-
-CleanTextRE = re.compile("[^A-Za-z0-9]")  # ?
 
 class WikiData:
     "Interface to wiki data."
@@ -309,35 +307,6 @@ class WikiData:
                 raise
         else:
             raise WikiDataException, "You cannot delete the root wiki node"
-
-
-#     # ---------- WikiPage creation ----------
-# 
-#     def getPage(self, wikiWord):
-#         """
-#         Fetches a WikiPage for the wikiWord, throws WikiWordNotFoundException
-#         if word doesn't exist
-#         """
-#         if not self.isDefinedWikiWord(wikiWord):
-#             raise WikiWordNotFoundException, u"Word '%s' not in wiki" % wikiWord
-# 
-#         return WikiPage(self, wikiWord)
-# 
-#     def getPageNoError(self, wikiWord):
-#         """
-#         fetch a WikiPage for the wikiWord. If it doesn't exist, return
-#         one without throwing an error and without updating the cache
-#         """
-#         return WikiPage(self, wikiWord)
-# 
-# 
-#     def createPage(self, wikiWord):
-#         """
-#         create a new wikiPage for the wikiWord. Cache is not updated until
-#         page is saved
-#         """
-#         ## self.cachedContentNames[wikiWord] = 1   # TODO Remove???
-#         return self.getPageNoError(wikiWord)
 
 
     # ---------- Handling of relationships cache ----------
@@ -805,7 +774,7 @@ class WikiData:
 #         return result
 
 
-    def search(self, sarOp, applOrdering=True):
+    def search(self, sarOp, applyOrdering=True):
         """
         Search all content using the SearchAndReplaceOperation sarOp and
         return list of all page names match the search criteria.
@@ -821,7 +790,7 @@ class WikiData:
     
             sqlite.delTransObject(sarOp)
             
-            if applOrdering:
+            if applyOrdering:
                 result = sarOp.applyOrdering(result)
         finally:
             sarOp.endWikiSearch()
