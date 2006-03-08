@@ -319,16 +319,23 @@ class WikiData:
             relations.append((row[0], row[1]))
         return relations
 
+
     def getChildRelationships(self, wikiWord, existingonly=False,
-            selfreference=True):
+            selfreference=True, withPosition=False):
         """
-        get the child relations to this word
+        get the child relations of this word
         existingonly -- List only existing wiki words
         selfreference -- List also wikiWord if it references itself
+        withPositions -- Return tuples (relation, firstcharpos) with char.
+            position of link in page (may be -1 to represent unknown)
         """
-        sql = "select relation from wikirelations where word = ?"
+        if withPosition:
+            sql = "select relation, firstcharpos from wikirelations where word = ?"
+        else:
+            sql = "select relation from wikirelations where word = ?"
+
         if existingonly:
-            # filter to only words in wikiwordcontent or aliases
+            # filter to only words in wikiwords or aliases
             sql += " and (exists (select word from wikiwordcontent "+\
                     "where word = relation) or exists "+\
                     "(select value from wikiwordprops "+\
@@ -336,8 +343,12 @@ class WikiData:
 
         if not selfreference:
             sql += " and relation != word"
+            
+        if withPosition:
+            return self.connWrap.execSqlQuery(sql, (wikiWord,))
+        else:
+            return self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
 
-        return self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
 
 
 #     def getChildRelationshipsAndHasChildren(self, wikiWord, existingonly=False,

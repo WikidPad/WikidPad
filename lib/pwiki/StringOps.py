@@ -479,7 +479,8 @@ class Token(object):
         self.node = node
         
     def __repr__(self):
-        return u"Token(%s, %s, %s, <dict>, %s)" % (repr(self.ttype), repr(self.start), repr(self.text), repr(self.node))
+        return u"Token(%s, %s, %s, <dict>, %s)" % (repr(self.ttype),
+                repr(self.start), repr(self.text), repr(self.node))
 
 
 class Tokenizer:

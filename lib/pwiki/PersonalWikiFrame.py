@@ -1,4 +1,3 @@
-
 import os, gc, traceback, sets
 from os.path import *
 from time import localtime, time, strftime
@@ -442,7 +441,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         return self.activeEditor
 
     def getWikiData(self):
-        return self.wikiData
+        if self.wikiDataManager is None:
+            return None
+        
+        return self.wikiDataManager.getWikiData()
 
     def getWikiDataManager(self):
         return self.wikiDataManager
@@ -573,7 +575,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """
         Builds the first, the "Wiki" menu and returns it
         """
-        wikiData = self.wikiData
+        wikiData = self.getWikiData()
         wikiMenu=wxMenu()
 
         self.addMenuItem(wikiMenu, '&New\t' + self.keyBindings.NewWiki,
@@ -886,8 +888,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "tb_doc")
 
         self.addMenuItem(wikiWordMenu, '&Save\t' + self.keyBindings.Save,
-                'Save Current Wiki Word', lambda evt: (self.saveCurrentDocPage(force=True), self.wikiData.commit()),
-                "tb_save")
+                'Save Current Wiki Word',
+                lambda evt: (self.saveCurrentDocPage(force=True),
+                self.getWikiData().commit()), "tb_save")
 
         self.addMenuItem(wikiWordMenu, '&Rename\t' + self.keyBindings.Rename,
                 'Rename Current Wiki Word', lambda evt: self.showWikiWordRenameDialog(),
@@ -976,6 +979,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(self.editorMenu, 'Set Date Format',
                 'Set Date Format', lambda evt: self.showDateformatDialog())
+
+        if isSpellCheckSupported():
+            self.addMenuItem(self.editorMenu, 'Spell check',
+                    'Spell check current page',
+                    lambda evt: self.spellCheckActiveEditor())
+
 
         self.addMenuItem(self.editorMenu,
                 'Wikize Selected Word\t' + self.keyBindings.MakeWikiWord,
@@ -1327,7 +1336,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "Save Wiki Word")
         EVT_TOOL(self, GUI_ID.CMD_SAVE_WIKI,
                 lambda evt: (self.saveCurrentDocPage(force=True),
-                self.wikiData.commit()))
+                self.getWikiData().commit()))
 
         icon = self.lookupIcon("tb_rename")
         tbID = wxNewId()
@@ -1938,8 +1947,9 @@ These are your default global settings.
         # now try and open the last wiki page
         if lastWikiWord and lastWikiWord != self.wikiName:
             # if the word is not a wiki word see if a word that starts with the word can be found
-            if not self.wikiData.isDefinedWikiWord(lastWikiWord):
-                wordsStartingWith = self.wikiData.getWikiWordsStartingWith(lastWikiWord, True)
+            if not self.getWikiData().isDefinedWikiWord(lastWikiWord):
+                wordsStartingWith = self.getWikiData().getWikiWordsStartingWith(
+                        lastWikiWord, True)
                 if wordsStartingWith:
                     lastWikiWord = wordsStartingWith[0]
             self.openWikiPage(lastWikiWord)
@@ -1977,8 +1987,8 @@ These are your default global settings.
         if self.wikiConfigFilename:
             if saveState:
                 self.saveCurrentWikiState()
-            if self.wikiData:
-                self.wikiData.close()
+            if self.getWikiData():
+                self.getWikiData().close()
                 self.wikiData = None
                 self.wikiDataManager = None
             self.wikiConfigFilename = None
@@ -2049,8 +2059,8 @@ These are your default global settings.
         self.hooks.openWikiWord(self, wikiWord)
 
         # check if this is an alias
-        if (self.wikiData.isAlias(wikiWord)):
-            wikiWord = self.wikiData.getAliasesWikiWord(wikiWord)
+        if (self.getWikiData().isAlias(wikiWord)):
+            wikiWord = self.getWikiData().getAliasesWikiWord(wikiWord)
 
 #         # set the current wikiword
 #         self.currentWikiWord = wikiWord
@@ -2225,7 +2235,7 @@ These are your default global settings.
     def deleteCurrentWikiPage(self, **evtprops):
         if self.getCurrentWikiWord():
             # self.saveCurrentDocPage()
-            self.wikiData.deleteWord(self.getCurrentWikiWord())
+            self.getWikiData().deleteWord(self.getCurrentWikiWord())
 
             # trigger hooks
             self.hooks.deletedWikiWord(self, self.getCurrentWikiWord())
@@ -2349,24 +2359,24 @@ These are your default global settings.
 
 
     def viewParents(self, ofWord):
-        parents = self.wikiData.getParentRelationships(ofWord)
+        parents = self.getWikiData().getParentRelationships(ofWord)
         self.viewWordSelection(u"Parent nodes of '%s'" % ofWord, parents,
                 "parent")
 
 
     def viewParentLess(self):
-        parentLess = self.wikiData.getParentlessWikiWords()
+        parentLess = self.getWikiData().getParentlessWikiWords()
         self.viewWordSelection(u"Parentless nodes", parentLess,
                 "random")
 
 
     def viewChildren(self, ofWord):
-        children = self.wikiData.getChildRelationships(ofWord)
+        children = self.getWikiData().getChildRelationships(ofWord)
         self.viewWordSelection(u"Child nodes of '%s'" % ofWord, children,
                 "child")
 
     def viewBookmarks(self):
-        bookmarked = self.wikiData.getWordsWithPropertyValue(
+        bookmarked = self.getWikiData().getWordsWithPropertyValue(
                 "bookmarked", u"true")
         self.viewWordSelection(u"Bookmarks", bookmarked,
                 "random")
@@ -2556,7 +2566,7 @@ These are your default global settings.
 
         if not description is None:
             self.saveCurrentDocPage()
-            self.wikiData.storeVersion(description)
+            self.getWikiData().storeVersion(description)
 
 
     def showDeleteAllVersionsDialog(self):
@@ -2564,11 +2574,11 @@ These are your default global settings.
                 u"Delete All Versions", wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION, self)
 
         if result == wxYES:
-            self.wikiData.deleteVersioningData()
+            self.getWikiData().deleteVersioningData()
 
 
     def showSavedVersionsDialog(self):
-        if not self.wikiData.hasVersioningData():
+        if not self.getWikiData().hasVersioningData():
             dlg=wxMessageDialog(self, u"This wiki does not contain any version information",
                     u'Retrieve version', wxOK)
             dlg.ShowModal()
@@ -2590,7 +2600,7 @@ These are your default global settings.
                 dlg.Destroy()
                 self.saveCurrentDocPage()
                 word = self.getCurrentWikiWord()
-                self.wikiData.applyStoredVersion(version[0])
+                self.getWikiData().applyStoredVersion(version[0])
                 self.rebuildWiki(skipConfirm=True)
                 ## self.tree.collapse()
                 self.openWikiPage(self.getCurrentWikiWord(), forceTreeSyncFromRoot=True, forceReopen=True)
@@ -2623,7 +2633,7 @@ These are your default global settings.
             self.displayErrorMessage(u"The scratch pad cannot be renamed.")
             return False
 
-        if self.wikiData.isDefinedWikiWord(toWikiWord):
+        if self.getWikiData().isDefinedWikiWord(toWikiWord):
             self.displayErrorMessage(u"Cannot rename to '%s', word already exists" %
                     toWikiWord)
             return False
@@ -2637,7 +2647,7 @@ These are your default global settings.
             try:
                 # self.saveCurrentDocPage()
                 renamed = self.renameCurrentWikiPage(toWikiWord)
-#                 self.wikiData.renameWord(wikiWord, toWikiWord)
+#                 self.getWikiData().renameWord(wikiWord, toWikiWord)
 # 
 #                 # if the root was renamed we have a little more to do
 #                 if wikiWord == self.wikiName:
@@ -2746,7 +2756,7 @@ These are your default global settings.
                 self.displayErrorMessage(u"'%s' is an invalid wiki word" % wikiWord)
                 return False
 
-            if self.wikiData.isDefinedWikiWord(wikiWord):
+            if self.getWikiData().isDefinedWikiWord(wikiWord):
                 self.displayErrorMessage(u"'%s' exists already" % wikiWord)  # TODO Allow retry or append/replace
                 return False
 
@@ -2804,7 +2814,7 @@ These are your default global settings.
 
     def showExportDialog(self):
         self.saveCurrentDocPage()
-        self.wikiData.commit()
+        self.getWikiData().commit()
 
         dlg = ExportDialog(self, -1)
         dlg.CenterOnParent(wxBOTH)
@@ -2834,6 +2844,14 @@ These are your default global settings.
             }
 
 
+    def spellCheckActiveEditor(self):
+        self.statusBar.PushStatusText(u"Checking spelling on wiki page", 0)
+        try:
+            self.getActiveEditor().spellCheckContent()
+        finally:
+            self.statusBar.PopStatusText(0)
+
+
     def OnExportWiki(self, evt):
         dest = wxDirSelector(u"Select Export Directory", self.getLastActiveDir(),
         wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON, parent=self)
@@ -2845,7 +2863,7 @@ These are your default global settings.
                     GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES,
                     GUI_ID.MENU_EXPORT_WHOLE_AS_XML,
                     GUI_ID.MENU_EXPORT_WHOLE_AS_RAW):
-                wordList = self.wikiData.getAllDefinedWikiPageNames()
+                wordList = self.getWikiData().getAllDefinedWikiPageNames()
                 
             elif typ in (GUI_ID.MENU_EXPORT_SUB_AS_PAGE,
                     GUI_ID.MENU_EXPORT_SUB_AS_PAGES):
@@ -2853,7 +2871,8 @@ These are your default global settings.
                     self.pWiki.displayErrorMessage(
                             u"No real wiki word selected as root")
                     return
-                wordList = self.wikiData.getAllSubWords([self.getCurrentWikiWord()])
+                wordList = self.getWikiData().getAllSubWords(
+                        [self.getCurrentWikiWord()])
             else:
                 if self.getCurrentWikiWord() is None:
                     self.pWiki.displayErrorMessage(
@@ -2866,7 +2885,7 @@ These are your default global settings.
             
             
             self.saveCurrentDocPage(force=True)
-            self.wikiData.commit()
+            self.getWikiData().commit()
             
             ob = expclass(self)
             if addopt is None:
@@ -2932,7 +2951,7 @@ These are your default global settings.
 
 
     def vacuumWiki(self):
-        self.wikiData.vacuum()
+        self.getWikiData().vacuum()
 
 
     def OnImportFromPagefiles(self, evt):
@@ -2941,7 +2960,7 @@ These are your default global settings.
 
         result = dlg.ShowModal()
         if result == wxID_YES:
-            self.wikiData.copyWikiFilesToDatabase()
+            self.getWikiData().copyWikiFilesToDatabase()
 
 
     def insertAttribute(self, name, value):
@@ -3088,7 +3107,7 @@ These are your default global settings.
                     if (currentTime - saveDirtySince) > \
                             self.autoSaveDelayAfterDirty:
                         self.saveCurrentDocPage()
-                        self.wikiData.commit()
+                        self.getWikiData().commit()
 #                     elif updateDirty:
 #                         if (currentTime - self.currentWikiPage.lastUpdate) > 5:
 #                             self.updateRelationships()
@@ -3131,8 +3150,10 @@ These are your default global settings.
         self.hooks.exit(self)
 
         wxTheClipboard.Flush()
-        if self.wikiData:
-            self.wikiData.close()
+        if self.getWikiData():
+            self.getWikiData().close()
+            self.wikiData = None
+            self.wikiDataManager = None
 
         if self.tbIcon is not None:
             if self.tbIcon.IsIconInstalled():

@@ -104,12 +104,18 @@ class Page(Ast):
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.tokens, pos)
         
-    def buildAst(self, formatting, text, formatDetails=None,    # !!!References to buildAst !!!!!!
+    def buildAst(self, formatting, text, formatDetails=None,
             threadholder=DUMBTHREADHOLDER):
         self.tokens = formatting.tokenizePage(text, formatDetails=formatDetails,
                 threadholder=threadholder)
         
         _enrichTokens(formatting, self.tokens, formatDetails, threadholder)
+        
+    def findTypeFlat(self, typeToFind):
+        """
+        Non-recursive search for tokens of the specified type
+        """
+        return [tok for tok in self.tokens if tok.ttype == typeToFind]
 
 
     def _findType(self, typeToFind, result):
@@ -142,12 +148,12 @@ class Todo(Ast):
                 len(self.delimiter)
         
         value = groupdict["todoValue"]
-        self.valuetokens = formatting.tokenizeCell(value,
+        self.valuetokens = formatting.tokenizeTodo(value,
                 formatDetails=formatDetails, threadholder=threadholder)
-        
+
         # The valuetokens contain start position relative to beginning of
         # value. This must be corrected to position rel. to whole page
-        
+
         for t in self.valuetokens:
             t.start += relpos
             
@@ -161,6 +167,20 @@ class Todo(Ast):
             if tok.node is not None:
                 tok.node._findType(typeToFind, result)
         
+
+def tokenizeTodoValue(formatting, value):
+    """
+    Tokenize the value (the right side) of a todo and return enriched
+    tokens. Used by WikiTreeCtrl to handle properties in todo items
+    """
+    formatDetails = WikiFormatting.WikiPageFormatDetails()
+    tokens = formatting.tokenizeTodo(value,
+            formatDetails)
+    
+    _enrichTokens(formatting, tokens, formatDetails, DUMBTHREADHOLDER)
+    
+    return tokens
+
         
 
 
@@ -170,6 +190,8 @@ class Table(Ast):
 
     def __init__(self):
         Ast.__init__(self)
+        
+        self.contenttokens = None
 
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.contenttokens, pos)
@@ -180,34 +202,45 @@ class Table(Ast):
         self.begin = groupdict["tableBegin"]
         self.end = groupdict["tableEnd"]
         content = groupdict["tableContent"]
-        
-        cells = formatting.tableCutRe.findall(content)
-
-#         lines = splitkeep(content, u"\n")
-#         cells = []
-#         for l in lines:
-#             cells += splitkeep(l, u"|")
-            
-        contenttokens = []
+      
+        tokensIn = formatting.tokenizeTableContent(content,
+                formatDetails=formatDetails, threadholder=threadholder)
         relpos = token.start + len(self.begin)
-        for c in cells:
-            if not threadholder.isCurrent():
-                return
+        
+        contenttokens = []
 
-            tokensIn = formatting.tokenizeCell(c, formatDetails=formatDetails,
-                    threadholder=threadholder)
-            tokensOut = []
-            # Filter out empty tokens
-            for t in tokensIn:
-                if t.text == u"":
-                    continue
-                t.start += relpos
-                tokensOut.append(t)
+        # Filter out empty tokens and relocate them
+        for t in tokensIn:
+            if t.text == u"":
+                continue
+            t.start += relpos
+            contenttokens.append(t)
             
-            relpos += len(c)
-            contenttokens += tokensOut
-
         self.contenttokens = contenttokens
+
+
+#         cells = formatting.tableCutRe.findall(content)
+# 
+#         contenttokens = []
+#         relpos = token.start + len(self.begin)
+#         for c in cells:
+#             if not threadholder.isCurrent():
+#                 return
+# 
+#             tokensIn = formatting.tokenizeCell(c, formatDetails=formatDetails,
+#                     threadholder=threadholder)
+#             tokensOut = []
+#             # Filter out empty tokens
+#             for t in tokensIn:
+#                 if t.text == u"":
+#                     continue
+#                 t.start += relpos
+#                 tokensOut.append(t)
+#             
+#             relpos += len(c)
+#             contenttokens += tokensOut
+# 
+#         self.contenttokens = contenttokens
 
         _enrichTokens(formatting, self.contenttokens, formatDetails,
                 threadholder)
@@ -226,20 +259,32 @@ class Table(Ast):
         cell = []
 #         print "calcGrid1", repr(self.contenttokens)
         for t in self.contenttokens:
-            if t.ttype == WikiFormatting.FormatTypes.Default:
-                if t.text == u"\n":
-                    if len(cell) > 0:
-                        row.append(cell)
-                        cell = []
-                    if len(row) > 0:
-                        grid.append(row)
-                        row = []
-                    continue
-                elif t.text == u"|":
+#             if t.ttype == WikiFormatting.FormatTypes.Default:
+#                 if t.text == u"\n":
+#                     if len(cell) > 0:
+#                         row.append(cell)
+#                         cell = []
+#                     if len(row) > 0:
+#                         grid.append(row)
+#                         row = []
+#                     continue
+#                 elif t.text == u"|":
+#                     row.append(cell)
+#                     cell = []
+#                     continue
+            if t.ttype == WikiFormatting.FormatTypes.TableRowSplit:
+                if len(cell) > 0:
                     row.append(cell)
                     cell = []
-                    continue
-            
+                if len(row) > 0:
+                    grid.append(row)
+                    row = []
+                continue
+            elif t.ttype == WikiFormatting.FormatTypes.TableCellSplit:
+                row.append(cell)
+                cell = []
+                continue
+
             cell.append(t)
             
         if len(cell) > 0:

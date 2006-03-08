@@ -2,6 +2,9 @@
 
 WikidPad supports different database backends to store the wiki pages (see [WhereIsTheDataStored] for the differences).
 
+See [MigrationBetweenDbTypes] if you want to change the type of an existing wiki.
+
+
 In some places you are asked which backend to use:
 
 

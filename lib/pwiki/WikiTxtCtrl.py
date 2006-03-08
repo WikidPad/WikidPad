@@ -4,7 +4,6 @@ import urllib_red as urllib
 import string
 import srePersistent as re
 import threading
-from Utilities import *
 
 from os.path import exists
 
@@ -14,6 +13,15 @@ from textwrap import fill
 from wxPython.wx import *
 from wxPython.stc import *
 import wxPython.xrc as xrc
+
+try:
+    from XXXenchant.checker import SpellChecker
+    from XXXenchant.checker.wxSpellCheckerDialog import wxSpellCheckerDialog
+except ImportError:
+    wxSpellCheckerDialog = None
+    SpellChecker = None
+
+from Utilities import *
 
 from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard
 from MiscEvent import KeyFunctionSink
@@ -91,7 +99,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         # for unicode build
         self.UsePopUp(0)
 
-        self.StyleSetSpec(wxSTC_STYLE_DEFAULT, "face:%(mono)s,size:%(size)d" % self.pWiki.presentationExt.faces)
+        self.StyleSetSpec(wxSTC_STYLE_DEFAULT, "face:%(mono)s,size:%(size)d" %
+                self.pWiki.presentationExt.faces)
 
         for i in xrange(32):
             self.StyleSetEOLFilled(i, True)
@@ -172,7 +181,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         res = xrc.wxXmlResource.Get()
         self.contextMenu = res.LoadMenu("MenuTextctrlPopup")
-
+        
         # Connect context menu events to functions
         EVT_MENU(self, GUI_ID.CMD_UNDO, lambda evt: self.Undo())
         EVT_MENU(self, GUI_ID.CMD_REDO, lambda evt: self.Redo())
@@ -231,12 +240,18 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if isUnicode():
             wxStyledTextCtrl.SetText(self, text)
         else:
-            # TODO Configure if "replace" or "strict"
             wxStyledTextCtrl.SetText(self, mbcsEnc(text, "replace")[0])
         self.ignoreOnChange = False
         self.EmptyUndoBuffer()
 
-        
+
+    def replaceText(self, text):
+        if isUnicode():
+            wxStyledTextCtrl.SetText(self, text)
+        else:
+            wxStyledTextCtrl.SetText(self, mbcsEnc(text, "replace")[0])
+
+
     def GetText_unicode(self):
         """
         Overrides the wxStyledTextCtrl.GetText method in ansi mode
@@ -403,15 +418,37 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 [u"normal"])[0]
                 
         if self.pageType == u"normal":
-            # see if there is a saved position for this page
-            lastPos = self.lastCursorPositionInPage.get(
-                    self.loadedDocPage.getWikiWord(), 0)
-            self.GotoPos(lastPos)
+            if not self.loadedDocPage.isDefined():
+                # This is a new, not yet defined page, so go to the end of page
+                self.GotoPos(self.GetLength())
+            else:
+                # see if there is a saved position for this page
+                lastPos = self.lastCursorPositionInPage.get(
+                        self.loadedDocPage.getWikiWord(), 0)
+                self.GotoPos(lastPos)
+
         elif self.pageType == u"form":
             self.GotoPos(0)
             self._goToNextFormField()
         else:
             pass   # TODO Error message?
+
+
+    def spellCheckContent(self):
+        #sknysh - spell checker
+        text = self.GetText()
+        dlg = wxSpellCheckerDialog(self.pWiki, -1, u"")
+
+        chkr = SpellChecker("en_US", text)  # TODO Option
+        dlg.SetSpellChecker(chkr)
+
+        result = dlg.ShowModal()
+        dlg.Destroy()
+
+        if result == wx.ID_OK: # this line requires the new wxSpellCheckerDialog mentioned above
+            self.replaceText(chkr.get_text())
+#             self.saveCurrentDocPage(force=True)
+
 
 
     def onOptionsChanged(self, miscevt):
@@ -534,9 +571,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 break
                 
             charStartPos = end
-            
-                
-
 
 
     def storeStylingAndAst(self, stylebytes, page):
@@ -564,7 +598,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def processTokens(self, tokens, threadholder):
-        wikiData = self.pWiki.wikiData
+        wikiData = self.pWiki.getWikiData()
         stylebytes = []
         
         for tok in tokens:
@@ -600,7 +634,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 stylebytes.append(self.processTokens(node.contenttokens, threadholder))
 
                 stylebytes.append(chr(WikiFormatting.FormatTypes.Default) *
-                        self.bytelenSct(node.end))                
+                        self.bytelenSct(node.end)) 
+
+            elif styleno not in WikiFormatting.VALID_SCINTILLA_STYLES:
+                # Style is not known to Scintilla, so use default instead
+                styleno = WikiFormatting.FormatTypes.Default
 
             if styleno != -1:
                 stylebytes.append(chr(styleno) * bytestylelen)
@@ -793,6 +831,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 "main", "script_security_level")
         if securityLevel == 0:
             # No scripts allowed
+            # Print warning message
+            wxMessageBox(u"Set in options, chapter \"Other\", \n"
+                    "item \"Script security\" an appropriate value \n"
+                    "to execute a script", u"Script execution disabled",
+                    wxOK, self.pWiki)
             return
 
         # it is important to python to have consistent eol's
@@ -1605,3 +1648,9 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
 
 
         self.editor.DoDropText(x, y, " ".join(urls))
+
+
+
+def isSpellCheckSupported():
+    return SpellChecker is not None
+

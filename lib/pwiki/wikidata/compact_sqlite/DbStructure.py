@@ -153,6 +153,7 @@ class t:
 t.r = "real not null default 0.0"
 t.i = "integer not null default 0"
 t.pi = "integer primary key not null"
+t.imo = "integer not null default -1"
 t.t = "text not null default ''"
 t.pt = "text primary key not null"
 t.b = "blob not null default x''"
@@ -204,20 +205,23 @@ TABLE_DEFINITIONS = {
     
     "wikirelations": (     # Cache
         ("word", t.t),
-        ("relation", t.t)
+        ("relation", t.t),
+        ("firstcharpos", t.imo)  # Position of the link from word to relation in chars
         ),
     
     
     "wikiwordprops": (     # Cache
         ("word", t.t),
         ("key", t.t),
-        ("value", t.t)
+        ("value", t.t),
+        ("firstcharpos", t.imo)  # Position of the property in page in chars
         ),
     
     
     "todos": (     # Cache
         ("word", t.t),
-        ("todo", t.t)
+        ("todo", t.t),
+        ("firstcharpos", t.imo)  # Position of the todo in page in chars
         ),
         
     
@@ -430,7 +434,7 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
     
             connwrap.executemany("insert or replace into settings(key, value) "+
                         "values (?, ?)", (
-                    ("formatver", "5"),  # Version of database format the data was written
+                    ("formatver", "6"),  # Version of database format the data was written
                     ("writecompatver", "5"),  # Lowest format version which is write compatible
                     ("readcompatver", "5"),  # Lowest format version which is read compatible
                     ("branchtag", "WikidPadCompact")  # Tag of the WikidPad branch
@@ -630,13 +634,13 @@ def checkDatabaseFormat(connwrap):
     formatver = getSettingsInt(connwrap, "formatver")
     writecompatver = getSettingsInt(connwrap, "writecompatver")
 
-    if writecompatver > 5:
+    if writecompatver > 6:
         # TODO: Check compatibility
         
         return 2, "Database has unknown format version='%i'" \
                 % formatver
                 
-    if formatver < 5:
+    if formatver < 6:
         return 1, "Update needed, current format version='%i'" \
                 % formatver
         
@@ -871,15 +875,30 @@ def updateDatabase(connwrap):
         connwrap.execSql("update or ignore wikirelations set "
                 "word=nakedWord(word), "
                 "relation=nakedWord(relation)")
-
+                
+        formatver = 5
     # --- WikiPad(Compact) 1.6beta2 reached (formatver=5, writecompatver=5,
     #         readcompatver=5) ---
 
+    if formatver == 5:
+        # Add column "firstcharpos" to some tables
+
+        changeTableSchema(connwrap, "wikirelations",
+                TABLE_DEFINITIONS["wikirelations"])
+        changeTableSchema(connwrap, "wikiwordprops", 
+                TABLE_DEFINITIONS["wikiwordprops"])
+        changeTableSchema(connwrap, "todos", 
+                TABLE_DEFINITIONS["todos"])
+        
+        formatver = 6
+
+        # --- WikiPad 1.7beta1 reached (formatver=6, writecompatver=5,
+        #         readcompatver=5) ---
 
     # Write format information
     connwrap.executemany("insert or replace into settings(key, value) "+
             "values (?, ?)", (
-        ("formatver", "5"),  # Version of database format the data was written
+        ("formatver", "6"),  # Version of database format the data was written
         ("writecompatver", "5"),  # Lowest format version which is write compatible
         ("readcompatver", "5"),  # Lowest format version which is read compatible
         ("branchtag", "WikidPadCompact")  # Tag of the WikidPad branch
@@ -1013,5 +1032,16 @@ TABLE_DEFINITIONS = {
 
     Completely new search_views table (previous data deleted)
     to store complex wiki-wide searches
+    
+    
++++ TODO Add missing entry
+    
+    
++++ 1.6beta4 (formatver=5) to 1.7beta1 (formatver=6)
+
+    Added column "firstcharpos" to tables "wikirelations",
+    "wikiwordprops", "todos". This column contains the position of the
+    link, property or todo respectively in the wiki page in characters.
+    
 """
 

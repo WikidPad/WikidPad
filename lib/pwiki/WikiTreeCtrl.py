@@ -11,6 +11,7 @@ from MiscEvent import KeyFunctionSink, DebugSimple
 
 from WikiExceptions import WikiWordNotFoundException
 import WikiFormatting
+from PageAst import tokenizeTodoValue
 from SearchAndReplace import SearchReplaceOperation
 
 from StringOps import mbcsEnc, guiToUni, uniToGui, wikiWordToLabel, strToBool
@@ -157,20 +158,23 @@ class WikiWordNode(AbstractNode):
         return self.ancestors            
        
 
-    def _getValidChildren(self, wikiPage):
+    def _getValidChildren(self, wikiPage, withPosition=False):
         """
         Get all valid children, filter out undefined and/or cycles
         if options are set accordingly
         """
         relations = wikiPage.getChildRelationships(
                 existingonly=self.treeCtrl.getHideUndefined(),
-                selfreference=False)
+                selfreference=False, withPosition=withPosition)
 
         if self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
             # Filter out cycles
             ancestors = self.getAncestors()
-            relations = [r for r in relations if not ancestors.has_key(r)]
-        
+            if withPosition:
+                relations = [r for r in relations if not ancestors.has_key(r[0])]
+            else:
+                relations = [r for r in relations if not ancestors.has_key(r)]
+
         return relations
 
 
@@ -187,7 +191,7 @@ class WikiWordNode(AbstractNode):
 #             ancestors = self.getAncestors()
 #             relations = [r for r in relations if not ancestors.has_key(r)]
         
-        return len(self._getValidChildren(wikiPage)) > 0
+        return len(self._getValidChildren(wikiPage, withPosition=False)) > 0
 
 
     def _createNodePresentation(self, baselabel):
@@ -279,36 +283,46 @@ class WikiWordNode(AbstractNode):
     def listChildren(self):
         wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
         wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
-        relations = self._getValidChildren(wikiPage)
 
         # get the sort order for the children
         childSortOrder = wikiPage.getProperties().get(u'child_sort_order',
                 (u"ascending",))[0]
             
-        # TODO Automatically add ScratchPad
-#         if treeNode == self.GetRootItem() and not "ScratchPad" in relations:
-#             relations.append(("ScratchPad", None))
-
         # Apply sort order
-        if childSortOrder != u"unsorted":
+        if childSortOrder == u"natural":
+            # Retrieve relations as list of tuples (child, firstcharpos)
+            relations = self._getValidChildren(wikiPage, withPosition=True)
+            print "listChildren", repr(relations)
+            relations.sort(_cmpCharPosition)
+            # Remove firstcharpos
+            relations = [r[0] for r in relations]
+        else:
+            # Retrieve relations as list of children words
+            relations = self._getValidChildren(wikiPage, withPosition=False)
             if childSortOrder.startswith(u"desc"):
-                relations.sort(cmpLowerDesc) # sort alphabetically
-            else:
-                relations.sort(cmpLowerAsc)
-            
+                relations.sort(_cmpLowerDesc) # sort alphabetically
+            elif childSortOrder.startswith(u"asc"):
+                relations.sort(_cmpLowerAsc)
+
+#         if childSortOrder != u"unsorted":
+#             if childSortOrder.startswith(u"desc"):
+#                 relations.sort(_cmpLowerDesc) # sort alphabetically
+#             else:
+#                 relations.sort(_cmpLowerAsc)
+
         relationData = []
         position = 1
         for relation in relations:
             relationPage = wikiDataManager.getWikiPageNoError(relation)
             relationData.append((relation, relationPage, position))
             position += 1
-            
+
         # Sort again, using tree position and priority properties
-        relationData.sort(relationSort)
-        
+        relationData.sort(_relationSort)
+
         # if prev is None:
         ## Create everything new
-        
+
         result = [WikiWordNode(self.treeCtrl, self, rd[0])
                 for rd in relationData]
                 
@@ -371,7 +385,7 @@ class WikiWordSearchNode(WikiWordNode):
         if self.searchOp:
             self.treeCtrl.pWiki.getActiveEditor().executeSearch(self.searchOp, 0)   # TODO
 
-    def _getValidChildren(self, wikiPage):
+    def _getValidChildren(self, wikiPage, withPosition=False):
         """
         Get all valid children, filter out undefined and/or cycles
         if options are set accordingly. A WikiWordSearchNode has no children.
@@ -444,17 +458,38 @@ class TodoNode(AbstractNode):
     Represents a todo node or subnode
     """
     
-    __slots__ = ("categories",)
+    __slots__ = ("categories", "isRightSide")
             
-    def __init__(self, tree, parentNode, cats):
+    def __init__(self, tree, parentNode, cats, isRightSide=False):
+        """
+        cats -- Sequence of category (todo, action, done, ...) and
+                subcategories, may also include the todo-value (=right side)
+        isRightSide -- If true, the last element of cats is the
+                "right side" of todo (e.g.: todo.work: This is the right side)
+        """
         AbstractNode.__init__(self, tree, parentNode)
         self.categories = cats
+        self.isRightSide = isRightSide
+
 
     def getNodePresentation(self):
         style = NodeStyle()
-        style.icon = "pin"
-        style.label = self.categories[-1]
         style.hasChildren = True
+        style.label = self.categories[-1]
+        style.icon = "pin"
+        
+        if self.isRightSide:
+            # Last item in self.categories is the right side, so tokenize it
+            # to find properties which modify the style
+            formatting = self.treeCtrl.pWiki.getFormatting()
+            tokens = tokenizeTodoValue(formatting, self.categories[-1])
+            for tok in tokens:
+                if tok.ttype == WikiFormatting.FormatTypes.Property and \
+                        tok.grpdict["propertyName"] in _SETTABLE_PROPS:
+                    # Use the found property to set the style of this node
+                    setattr(style, tok.grpdict["propertyName"],
+                            tok.grpdict["propertyValue"])
+
         return style
         
     def listChildren(self):
@@ -464,6 +499,7 @@ class TodoNode(AbstractNode):
         """
         wikiData = self.treeCtrl.pWiki.wikiData
         addedTodoSubCategories = []
+        addedRightSides = []
         addedWords = []
         for (wikiWord, todo) in wikiData.getTodos():
             # parse the todo for name and value
@@ -483,17 +519,27 @@ class TodoNode(AbstractNode):
 
                 nextSubCategory = entryCats[len(self.categories)]
                 
-                if nextSubCategory not in addedTodoSubCategories:
-                    addedTodoSubCategories.append(nextSubCategory)
-                    
+                if len(entryCats) - len(self.categories) == 1:
+                    # nextSubCategory is the last category (the "right side")
+                    # of the todo, so handle it differently
+                    if nextSubCategory not in addedRightSides:
+                        addedRightSides.append(nextSubCategory)
+                else:
+                    if nextSubCategory not in addedTodoSubCategories:
+                        addedTodoSubCategories.append(nextSubCategory)
+
         addedTodoSubCategories.sort()
+        addedRightSides.sort()
         addedWords.sort()
-        
+
         result = []
-        # First list categories, then words
-        result += [TodoNode(self.treeCtrl, self, self.categories + (c,))
-                for c in addedTodoSubCategories]
-                
+        # First list real categories, then right sides, then words
+        result += [TodoNode(self.treeCtrl, self, self.categories + (c,),
+                isRightSide=False) for c in addedTodoSubCategories]
+
+        result += [TodoNode(self.treeCtrl, self, self.categories + (c,),
+                isRightSide=True) for c in addedRightSides]
+
         def createSearchNode(wt):
             searchOp = SearchReplaceOperation()
             searchOp.wildCard = "no"
@@ -1293,7 +1339,7 @@ class WikiTreeCtrl(wxTreeCtrl):
                     self.refreshGenerator = None
 #                     self.refreshCheckChildren = []
 
-def relationSort(a, b):
+def _relationSort(a, b):
     propsA = a[1].getProperties()
     propsB = b[1].getProperties()
 
@@ -1323,10 +1369,16 @@ def relationSort(a, b):
     return cmp(aSort, bSort)
 
 
+def _cmpCharPosition(a, b):
+    """
+    Compare "natural", means using the char. positions of the links in page
+    """
+    return int(a[1] - b[1])
+
 # sorter for relations, removes brackets and sorts lower case
-def cmpLowerDesc(a, b):
+def _cmpLowerDesc(a, b):
     return cmp(b.lower(), a.lower())
 
-def cmpLowerAsc(a, b):
+def _cmpLowerAsc(a, b):
     return cmp(a.lower(), b.lower())
 

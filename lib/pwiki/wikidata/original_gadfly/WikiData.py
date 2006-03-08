@@ -96,7 +96,8 @@ class WikiData:
 
     def getContent(self, word):
         if (not exists(self.getWikiWordFileName(word))):
-            raise WikiFileNotFoundException, u"wiki page not found for word: %s" % word
+            raise WikiFileNotFoundException, \
+                    u"wiki page not found for word: %s" % word
 
         fp = open(self.getWikiWordFileName(word), "rU")
         content = fp.read()
@@ -268,11 +269,14 @@ class WikiData:
         return relations
 
     def getChildRelationships(self, wikiWord, existingonly=False,
-            selfreference=True):
+            selfreference=True, withPosition=False):
         """
-        get the child relations to this word
+        get the child relations of this word
         existingonly -- List only existing wiki words
         selfreference -- List also wikiWord if it references itself
+        withPositions -- Return tuples (relation, firstcharpos) with char.
+            position of link in page (may be -1 to represent unknown).
+            The Gadfly implementation always returns -1
         """
         sql = "select relation from wikirelations where word = ?"
         children = self.execSqlQuerySingleColumn(sql, (wikiWord,))
@@ -283,9 +287,12 @@ class WikiData:
                 pass
         
         if existingonly:
-            return filter(lambda w: self.cachedContentNames.has_key(w), children)
-        else:
-            return children
+            children = filter(lambda w: self.cachedContentNames.has_key(w), children)
+
+        if withPosition:
+            children = [(c, -1) for c in children]
+
+        return children
 
 #     # TODO More efficient
 #     def _hasChildren(self, wikiWord, existingonly=False,
@@ -462,7 +469,17 @@ class WikiData:
         for word in (diskPages - definedPages):
             self.execSql("insert into wikiwords(word, created, modified) "
                     "values (?, ?, ?)", (word, ti, ti))
-        
+
+        # recreate word caches
+        self.cachedContentNames = {}
+        for word in self.getAllDefinedContentNames():
+            self.cachedContentNames[word] = 1
+
+        # cache aliases
+        aliases = self.getAllAliases()
+        for alias in aliases:
+            self.cachedContentNames[alias] = 2
+
 
     # TODO More general Wikiword to filename mapping
     def _getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
@@ -636,9 +653,12 @@ class WikiData:
         sarOp.beginWikiSearch(self)
         try:
             for word in self.getAllDefinedWikiPageNames():  #glob.glob(join(self.dataDir, '*.wiki')):
-                # print "search1", repr(word), repr(self.getWikiWordFileName(word))
-                fileContents = self.getContent(word)
-                
+                try:
+                    fileContents = self.getContent(word)
+                except WikiFileNotFoundException:
+                    # some error in cache (should not happen)
+                    continue
+
                 if sarOp.testWikiPage(word, fileContents) == True:
                     results.append(word)
             if applyOrdering:

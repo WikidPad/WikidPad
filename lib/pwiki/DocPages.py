@@ -84,12 +84,13 @@ class WikiPage(DocPage):
         return self.parentRelations
 
         
-    def getChildRelationships(self, existingonly=False, selfreference=True):
+    def getChildRelationships(self, existingonly=False, selfreference=True,
+            withPosition=False):
         """
         Does not support caching
         """
         return self.wikiData.getChildRelationships(self.wikiWord,
-                existingonly, selfreference)
+                existingonly, selfreference, withPosition=withPosition)
 
 
 #     def getChildRelationshipsAndHasChildren(self, existingonly=False,
@@ -156,6 +157,9 @@ class WikiPage(DocPage):
         title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2', title)
         return title
 
+
+    def isDefined(self):
+        return self.wikiData.isDefinedWikiWord(self.getWikiWord())
 
     def getContent(self):
         """
@@ -229,8 +233,9 @@ class WikiPage(DocPage):
         for t in todoTokens:
             self.addTodo(t.grpdict["todoName"] + t.grpdict["todoDelimiter"] +
                 t.grpdict["todoValue"])
-        
-        propTokens = page.findType(WikiFormatting.FormatTypes.Property)
+
+        # Do not search for properties in subtoken
+        propTokens = page.findTypeFlat(WikiFormatting.FormatTypes.Property)
         for t in propTokens:
             propName = t.grpdict["propertyName"]
             propValue = t.grpdict["propertyValue"]

@@ -17,7 +17,7 @@ from os import mkdir, unlink, listdir, rename, stat, utime
 from os.path import exists, join, basename
 from time import time, localtime
 import datetime
-import re, string, glob, sets
+import re, string, glob, sets, traceback
 # import pwiki.srePersistent as re
 
 from pwiki.WikiExceptions import *   # TODO make normal import
@@ -127,7 +127,8 @@ class WikiData:
     
     def getContent(self, word):
         if (not exists(self.getWikiWordFileName(word))):
-            raise WikiFileNotFoundException, u"wiki page not found for word: %s" % word
+            raise WikiFileNotFoundException, \
+                    u"wiki page not found for word: %s" % word
 
         fp = open(self.getWikiWordFileName(word), "rU")
         content = fp.read()
@@ -348,14 +349,21 @@ class WikiData:
             relations.append((row[0], row[1]))
         return relations
 
+
     def getChildRelationships(self, wikiWord, existingonly=False,
-            selfreference=True):
+            selfreference=True, withPosition=False):
         """
-        get the child relations to this word
+        get the child relations of this word
         existingonly -- List only existing wiki words
         selfreference -- List also wikiWord if it references itself
+        withPositions -- Return tuples (relation, firstcharpos) with char.
+            position of link in page (may be -1 to represent unknown)
         """
-        sql = "select relation from wikirelations where word = ?"
+        if withPosition:
+            sql = "select relation, firstcharpos from wikirelations where word = ?"
+        else:
+            sql = "select relation from wikirelations where word = ?"
+
         if existingonly:
             # filter to only words in wikiwords or aliases
             sql += " and (exists (select word from wikiwords "+\
@@ -365,8 +373,12 @@ class WikiData:
 
         if not selfreference:
             sql += " and relation != word"
+            
+        if withPosition:
+            return self.connWrap.execSqlQuery(sql, (wikiWord,))
+        else:
+            return self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
 
-        return self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
 
     def getParentRelationships(self, wikiWord):
         "get the parent relations to this word"
@@ -551,6 +563,16 @@ class WikiData:
         for word in (diskPages - definedPages):
             self.connWrap.execSql("insert into wikiwords(word, created, modified) "
                     "values (?, ?, ?)", (word, ti, ti))
+
+        # recreate word caches
+        self.cachedContentNames = {}
+        for word in self.getAllDefinedContentNames():
+            self.cachedContentNames[word] = 1
+
+        # cache aliases
+        aliases = self.getAllAliases()
+        for alias in aliases:
+            self.cachedContentNames[alias] = 2
 
 
     # TODO More general Wikiword to filename mapping
@@ -742,7 +764,11 @@ class WikiData:
         sarOp.beginWikiSearch(self)
         try:
             for word in self.getAllDefinedWikiPageNames():  #glob.glob(join(self.dataDir, '*.wiki')):
-                fileContents = self.getContent(word)
+                try:
+                    fileContents = self.getContent(word)
+                except WikiFileNotFoundException:
+                    # some error in cache (should not happen)
+                    continue
 
                 if sarOp.testWikiPage(word, fileContents) == True:
                     results.append(word)

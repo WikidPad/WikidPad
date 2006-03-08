@@ -206,6 +206,9 @@ SuppressHighlightingRE = re.compile(ur"^(?P<suppressIndent>[ \t]*)<<[ \t]*$"+
         ur"(?P<suppressContent>.*?)^[ \t]*>>[ \t]*$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
+
+TableRowDelimiterPAT = ur"\n"
+
 TableRE = re.compile(ur"(?P<tableBegin>^[ \t]*<<\|[ \t]*$)"
         ur"(?P<tableContent>" + PlainCharacterPAT +
         ur"*?)(?P<tableEnd>^[ \t]*>>[ \t]*$)",

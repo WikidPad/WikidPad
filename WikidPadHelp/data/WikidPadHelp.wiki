@@ -50,13 +50,12 @@ Then just start typing text with WikiWords to create your wiki.
     * InternatiönalChàracters
     * OptionsDialog
     * CommandLineSupport
-    * Different DatabaseTypes
+    * Different DatabaseTypes (WhereIsTheDataStored ?, MigrationBetweenDbTypes)
     * Defining TextBlocks
 
 *Other/Questions*
 
     * WikiMaintenance
-    * WhereIsTheDataStored
     * WikidPadSupport
     * ChangeLog
     * GlobalScriptLibrary

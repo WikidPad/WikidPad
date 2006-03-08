@@ -1,3 +1,4 @@
+import sets
 from Enum import Enumeration
 from MiscEvent import KeyFunctionSink
 from Utilities import DUMBTHREADHOLDER
@@ -8,10 +9,11 @@ import srePersistent as re
 from StringOps import Tokenizer, matchWhole, Token
 
 
-FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord2", "WikiWord",
+FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
         "AvailWikiWord", "Bold", "Italic", "Heading4", "Heading3", "Heading2",
-        "Heading1", "Url", "Script", "Property", "ToDo", "HorizLine", "Bullet",
-        "Numeric", "Suppress", "Footnote", "Table", "EscapedChar", "HtmlTag"], 1)
+        "Heading1", "Url", "Script", "Property", "ToDo", "WikiWord2",
+        "HorizLine", "Bullet", "Numeric", "Suppress", "Footnote", "Table",
+        "EscapedChar", "HtmlTag", "TableCellSplit", "TableRowSplit"], 1)
 
 EMPTY_RE = re.compile(ur"", re.DOTALL | re.UNICODE | re.MULTILINE)
 
@@ -76,6 +78,22 @@ def getStyles(styleFaces):
             (FormatTypes.Script, "fore:#555555,face:%(mono)s,size:%(size)d" % styleFaces),
             (FormatTypes.Property, "bold,fore:#555555,face:%(mono)s,size:%(size)d" % styleFaces),
             (FormatTypes.ToDo, "bold,face:%(mono)s,size:%(size)d" % styleFaces)]
+
+# List of all styles mentioned in getStyles which can be used as scintilla registered style
+VALID_SCINTILLA_STYLES = sets.ImmutableSet((
+        FormatTypes.Default,
+        FormatTypes.WikiWord,
+        FormatTypes.AvailWikiWord,      
+        FormatTypes.Bold,
+        FormatTypes.Italic,
+        FormatTypes.Heading4,
+        FormatTypes.Heading3,
+        FormatTypes.Heading2,
+        FormatTypes.Heading1,
+        FormatTypes.Url,
+        FormatTypes.Script,
+        FormatTypes.Property,
+        FormatTypes.ToDo))
 
 
 
@@ -174,8 +192,24 @@ class WikiFormatting:
                 ]
                 
                 
-        self.formatCellExpressions = [
+        self.formatTodoExpressions = [
                 (self.PlainEscapedCharacterRE, FormatTypes.EscapedChar),
+                (self.TitledUrlRE, FormatTypes.Url),
+                (self.UrlRE, FormatTypes.Url),
+                (self.PropertyRE, FormatTypes.Property),
+                (self.FootnoteRE, FormatTypes.Footnote),
+                (self.WikiWordEditorRE2, FormatTypes.WikiWord2),
+                (self.WikiWordEditorRE, FormatTypes.WikiWord),
+                (self.BoldRE, FormatTypes.Bold),
+                (self.ItalicRE, FormatTypes.Italic),
+                (self.HtmlTagRE, FormatTypes.HtmlTag)
+                ]
+                
+
+        self.formatTableContentExpressions = [
+                (self.PlainEscapedCharacterRE, FormatTypes.EscapedChar),
+                (self.TitleWikiWordDelimiterPAT, FormatTypes.TableCellSplit),
+                (self.TableRowDelimiterPAT, FormatTypes.TableRowSplit),
                 (self.TitledUrlRE, FormatTypes.Url),
                 (self.UrlRE, FormatTypes.Url),
 #                 (self.ToDoREWithContent, FormatTypes.ToDo),  # TODO Doesn't work
@@ -186,7 +220,8 @@ class WikiFormatting:
                 (self.ItalicRE, FormatTypes.Italic),
                 (self.HtmlTagRE, FormatTypes.HtmlTag)
                 ]
-                
+
+
         self.formatWwTitleExpressions = [
                 (self.PlainEscapedCharacterRE, FormatTypes.EscapedChar),
                 (self.BoldRE, FormatTypes.Bold),
@@ -196,7 +231,8 @@ class WikiFormatting:
        
                 
         self.combinedPageRE = compileCombinedRegex(self.formatExpressions)
-        self.combinedCellRE = compileCombinedRegex(self.formatCellExpressions)
+        self.combinedTodoRE = compileCombinedRegex(self.formatTodoExpressions)
+        self.combinedTableContentRE = compileCombinedRegex(self.formatTableContentExpressions)
         self.combinedWwTitleRE = compileCombinedRegex(self.formatWwTitleExpressions)
 
         self.wikiWordStart = u"["
@@ -429,16 +465,31 @@ class WikiFormatting:
                 threadholder=threadholder)
 
 
-    def tokenizeCell(self, text, formatDetails=None,
+    def tokenizeTodo(self, text, formatDetails=None,
             threadholder=DUMBTHREADHOLDER):
         """
         Function used by PageAst module
         """
         # TODO Cache if necessary
         formatMap = self.getExpressionsFormatList(
-                self.formatCellExpressions, formatDetails=formatDetails)
+                self.formatTodoExpressions, formatDetails=formatDetails)
                 
-        tokenizer = Tokenizer(self.combinedCellRE, -1)
+        tokenizer = Tokenizer(self.combinedTodoRE, -1)
+        
+        return tokenizer.tokenize(text, formatMap, FormatTypes.Default,
+                threadholder=threadholder)
+
+
+    def tokenizeTableContent(self, text, formatDetails=None,
+            threadholder=DUMBTHREADHOLDER):
+        """
+        Function used by PageAst module
+        """
+        # TODO Cache if necessary
+        formatMap = self.getExpressionsFormatList(
+                self.formatTableContentExpressions, formatDetails=formatDetails)
+                
+        tokenizer = Tokenizer(self.combinedTableContentRE, -1)
         
         return tokenizer.tokenize(text, formatMap, FormatTypes.Default,
                 threadholder=threadholder)

@@ -1,6 +1,27 @@
 ﻿++ Change Log
 
 
+
+* Beginning of 1.7 series
+* Introduced new db backend "Original Sqlite"
+* Parentless nodes do no longer list unknown wiki words (which aren't in the database table for "Original" versions)
+* For "Set Date Format" dialog last 10 entries are stored in global configuration
+
+* Option to interpret image URLs for HTML preview and export either as images or as normal links
+* HTML export has option in export dialog to finally control this image URL handling
+
+* Property [pagetype: form] introduced to support special behaviour of Tab key in editor.
+* Internal: Load properties for non-existing page from template page, if any (needed for "pagetype" property)
+
+* Internal: Traceback prints for silently caught exceptions in Exporters.py
+* Internal: API of Exporter classes changed
+* Internal: Renamed WikiPage.py to DocPages.py
+
+
+
+
+
+
 Feb. 24, 2006 (1.6beta4)
 
 Changes:

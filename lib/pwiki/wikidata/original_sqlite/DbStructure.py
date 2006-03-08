@@ -153,6 +153,7 @@ class t:
 t.r = "real not null default 0.0"
 t.i = "integer not null default 0"
 t.pi = "integer primary key not null"
+t.imo = "integer not null default -1"
 t.t = "text not null default ''"
 t.pt = "text primary key not null"
 t.b = "blob not null default x''"
@@ -201,20 +202,23 @@ TABLE_DEFINITIONS = {
     
     "wikirelations": (     # Cache
         ("word", t.t),
-        ("relation", t.t)
+        ("relation", t.t),
+        ("firstcharpos", t.imo)  # Position of the link from word to relation in chars
         ),
     
     
     "wikiwordprops": (     # Cache
         ("word", t.t),
         ("key", t.t),
-        ("value", t.t)
+        ("value", t.t),
+        ("firstcharpos", t.imo)  # Position of the property in page in chars
         ),
     
     
     "todos": (     # Cache
         ("word", t.t),
-        ("todo", t.t)
+        ("todo", t.t),
+        ("firstcharpos", t.imo)  # Position of the todo in page in chars
         ),
         
     
@@ -667,7 +671,7 @@ def updateDatabase(connwrap):
 """
 Schema changes in WikidPad:
 
-+++ Initial 1.0 (formatver=0):
++++ Initial 1.7beta1 (formatver=0):
 
     "wikiwords": (     # Essential
         ("word", t.t),
@@ -678,24 +682,28 @@ Schema changes in WikidPad:
     
     "wikirelations": (     # Cache
         ("word", t.t),
-        ("relation", t.t)
+        ("relation", t.t),
+        ("firstcharpos", t.imo)  # Position of the link from word to relation in chars
         ),
     
     
     "wikiwordprops": (     # Cache
         ("word", t.t),
         ("key", t.t),
-        ("value", t.t)
+        ("value", t.t),
+        ("firstcharpos", t.imo)  # Position of the property in page in chars
         ),
     
     
     "todos": (     # Cache
         ("word", t.t),
-        ("todo", t.t)
+        ("todo", t.t),
+        ("firstcharpos", t.imo)  # Position of the todo in page in chars
         ),
         
     
     "search_views": (     # Essential
+##        ("id", t.pi),   # ??????
         ("title", t.pt),
         ("datablock", t.b)
         ),
@@ -705,5 +713,7 @@ Schema changes in WikidPad:
         ("key", t.pt),    # !!! primary key?
         ("value", t.t)
         )
+
+
 
 """
