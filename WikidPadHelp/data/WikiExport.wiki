@@ -22,7 +22,9 @@ Uses ASCII-only filenames for exported files so that they can be transferred to 
 *Export to*
 You can export a single HTML page, one HTML page for each wiki page, an XML document or a set of .wiki files (only interesting for Compact version to migrate to original).
 
-For the .wiki export you can also choose if the files should have system encoding or UTF-8 with or without BOM (byte-order mark). The import function of Compact can't recognize UTF-8 without BOM correctly.
+For the HTML exports you can choose if you want to export URLs to images as \<img> tags or as normal links. The default for this possibility can be set in the options dialog.
+
+For the .wiki export you can choose if the files should have system encoding or UTF-8 with or without BOM (byte-order mark). The import function of Compact can't recognize UTF-8 without BOM correctly.
 
 ------------------------------------------------------------
 

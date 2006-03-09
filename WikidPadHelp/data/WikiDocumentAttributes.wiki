@@ -33,6 +33,13 @@ bold: (true or false)
 Example:
 [icon: lens] changes the icon for this page to a lens.
 
+These attributes can also be written in a todo item. If used there, they control the presentation of the todo entry (below the special "Views" node) instead of the wiki page.
+
+Example:
+todo: Show another color [color: orange]
+
+
+
 You can also use global attribute properties to change the appearance based on the existence of other properties.
 
 Examples:
@@ -99,8 +106,25 @@ To this page can also be linked as WikiDocumentAttribute.
 See InlinePythonEval.
 
 
+*child_sort_order: order how to sort child nodes in the tree*
+Possible values are:
+    * ascending: Sort alphabetically ascending
+    * descending: Sort alphabetically descending
+    * unsorted: Make no attempt to sort (fastest)
+    * natural: Sort in order of appearance of the words on the page (may not always work)
+
+You can also use the attribute global.child_sort_order to control the default for the wiki (without this attribute "ascending" is used)
+
+
 *template: page which content should be used as template*
 See [Templates].
+
+
+*pagetype: type of the page*
+Controls some behaviour of the editor.
+
+Currently only type "form" is supported (see [FormPages] for details).
+
 
 
 [tree_position: 6]

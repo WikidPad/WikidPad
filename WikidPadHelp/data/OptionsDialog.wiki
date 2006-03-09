@@ -44,6 +44,14 @@ If you press the "Ok" button of the options dialog, but the dialog doesn't vanis
 *Props to (not) include in export*
 Same as above, but for the HTML export.
 
+*Shows pics as links in preview*
+If this option is checked, links to image URLs (those ending with .png, .gif or .jpg) are shown like other links in the preview. If it is unchecked, the images (if available) are shown.
+
+*Shows pics as links in export*
+Same for HTML export.
+
+In the export dialog, you can temporarily override this setting for one export.
+
 
 ++++ Autosave
 

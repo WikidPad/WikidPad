@@ -86,6 +86,7 @@ WikidPadHelp/data/CommandLineSupport.wiki -text
 WikidPadHelp/data/DatabaseTypes.wiki -text
 WikidPadHelp/data/DisableCamelCaseWords.wiki -text
 WikidPadHelp/data/DynamicViews.wiki -text
+WikidPadHelp/data/FormPages.wiki -text
 WikidPadHelp/data/GlobalScriptLibrary.wiki -text
 WikidPadHelp/data/Icon[!!-~]airbrush.wiki -text
 WikidPadHelp/data/Icon[!!-~]align.wiki -text
@@ -266,6 +267,7 @@ WikidPadHelp/data/SEARCH_VIEWS.grl -text
 WikidPadHelp/data/SETTINGS.grl -text
 WikidPadHelp/data/ScratchPad.wiki -text
 WikidPadHelp/data/SearchingTheWiki.wiki -text
+WikidPadHelp/data/SystemInfoTemplate.wiki -text
 WikidPadHelp/data/TODOS.grl -text
 WikidPadHelp/data/Templates.wiki -text
 WikidPadHelp/data/TextBlocks.wiki -text

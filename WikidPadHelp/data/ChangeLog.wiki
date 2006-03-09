@@ -1,24 +1,41 @@
 ﻿++ Change Log
 
 
+Mar. 09, 2006 (1.7beta1)
 
-* Beginning of 1.7 series
-* Introduced new db backend "Original Sqlite"
-* Parentless nodes do no longer list unknown wiki words (which aren't in the database table for "Original" versions)
-* For "Set Date Format" dialog last 10 entries are stored in global configuration
+*Warning*: This version has a new database format for
+"Compact Sqlite" databases. It is converted automatically
+when opening a wiki the first time. Making a backup beforehand
+is therefore recommended!
 
-* Option to interpret image URLs for HTML preview and export either as images or as normal links
-* HTML export has option in export dialog to finally control this image URL handling
+Changes:
+    * Introduced new db backend "Original Sqlite".
+      See [WhereIsTheDataStored] and [MigrationBetweenDbTypes].
+    * For "Set Date Format" dialog last 10 entries are remembered
+    * Option to interpret image URLs for HTML preview and export
+      either as images or as normal links (see [OptionsDialog])
+    * Export dialog has checkbox to temporarily override this option
+      setting.
 
-* Property [pagetype: form] introduced to support special behaviour of Tab key in editor.
-* Internal: Load properties for non-existing page from template page, if any (needed for "pagetype" property)
+    * Attribute \[pagetype: form] introduced to support special
+      behaviour of the editor for form-like pages. (see [FormPages])
 
-* Internal: Traceback prints for silently caught exceptions in Exporters.py
-* Internal: API of Exporter classes changed
-* Internal: Renamed WikiPage.py to DocPages.py
+    * Support for global.child_sort_order attribute.
+    * Support for \[child_sort_order: natural] (but not really
+      stable). See [WikiDocumentAttributes].
+    * Presentation attributes (bold, color, icon) in todo entries
+      used to format the entry in tree instead of the page.
+    * See [WikiDocumentAttributes].
+
+    * When trying to run a script, but script security doesn't
+      allow to run scripts, a message box appears to explain.
 
 
-
+Fixed bugs:
+    * No titled URLs/wiki words in tables
+    * Invalid HTML anchors created
+    * Exporting of raw .wiki files didn't work for
+      "Original Gadfly" databases
 
 
 

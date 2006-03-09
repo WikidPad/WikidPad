@@ -1,7 +1,5 @@
 ﻿++ Migration Between Db Types
 
-*This topic is incomplete!*
-
 It is recommended to make a backup before applying the following procedures.
 
 When migrating you will loose stored searches and the modification and
@@ -32,9 +30,8 @@ If no Gadfly database files in the data-directory are present (file "wikidb.gfd"
 
 
 +++ For each migration:
-
     1. Start WikidPad (if not done already)
-    2. Use "Wiki" -> "Open as Type" to open the already opened wiki, but choose the new desired db type.
+    2. Use "Wiki" -> "Open as Type" to open the wiki to migrate, but choose the new desired db type.
     3. Run "Wiki" -> "Rebuild Wiki"
     4. Close and possibly reopen WikidPad
 

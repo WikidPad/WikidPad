@@ -138,10 +138,13 @@ class WikiData:
         return self.contentDbToOutput(result)
         # else:
         #     return result
-        
-    def getContentAndInfo(self, word):
+
+
+    def _getContentAndInfo(self, word):
         """
         Get content and further information about a word
+        
+        Not part of public API!
         """
         result = self.connWrap.execSqlQuery("select content, modified from "+\
             "wikiwordcontent where word = ?", (word,))
@@ -887,7 +890,7 @@ class WikiData:
         3 delete page: content is undefined
         """
 
-        content, moddate = self.getContentAndInfo(word)[:2]
+        content, moddate = self._getContentAndInfo(word)[:2]
 
         headcontent, headmoddate = self.connWrap.execSqlQuery("select content, modified from headversion "+\
                 "where word=?", (word,))[0]

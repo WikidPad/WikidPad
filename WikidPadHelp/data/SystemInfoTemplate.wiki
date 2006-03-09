@@ -1,0 +1,26 @@
+﻿++ System Info Template
+
+
+Which operating system do you use?
+    &&i
+
+What is it's native language?
+    &&i
+
+Which version of WikidPad do you use?
+    &&i
+
+Do you use a binary version of WikidPad or the source?
+    &&i
+
+Have you created your own version of some files in the "extensions" directory and put in "user_extensions"? If yes, which?
+    &&i
+
+Which filesystem is used to store the wiki files on (FAT, NTFS, network drive)?
+    &&i
+
+Which database backend do you use ("Original Gadfly", from original WikidPad, "Compact Sqlite", formerly known as WikidPadCompact or the new "Original Sqlite")?
+    &&i
+
+
+[pagetype: form]

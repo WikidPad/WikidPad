@@ -285,14 +285,13 @@ class WikiWordNode(AbstractNode):
         wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
 
         # get the sort order for the children
-        childSortOrder = wikiPage.getProperties().get(u'child_sort_order',
-                (u"ascending",))[0]
+        childSortOrder = wikiPage.getPropertyOrGlobal(u'child_sort_order',
+                u"ascending")
             
         # Apply sort order
         if childSortOrder == u"natural":
             # Retrieve relations as list of tuples (child, firstcharpos)
             relations = self._getValidChildren(wikiPage, withPosition=True)
-            print "listChildren", repr(relations)
             relations.sort(_cmpCharPosition)
             # Remove firstcharpos
             relations = [r[0] for r in relations]

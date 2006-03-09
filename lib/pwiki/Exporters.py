@@ -27,6 +27,23 @@ def removeBracketsToCompFilename(fn):
     """
     return unicodeToCompFilename(removeBracketsFilename(fn))
 
+def _escapeAnchor(name):
+    """
+    Escape name to be usable as HTML anchor (URL fragment)
+    """
+    result = []
+    for c in name:
+        oc = ord(c)
+        if oc < 65 or oc > 122 or (90 < oc < 97):
+            if oc > 255:
+                result.append("$%04x" % oc)
+            else:
+                result.append("=%02x" % oc)
+
+#             result.append(u"%%%02x" % oc)
+        else:
+            result.append(c)
+    return u"".join(result)
 
 
 # TODO UTF-8 support for HTML? Other encodings?
@@ -190,7 +207,7 @@ class HtmlXmlExporter:
                     # get aliases too
                     relation = self.wikiData.getAliasesWikiWord(relation)
                     # TODO Use self.convertFilename here?
-                    links[relation] = u"#%s" % relation
+                    links[relation] = u"#%s" % _escapeAnchor(relation)
                     
                 formattedContent = self.formatContent(word, content,
                         formatDetails, links)
@@ -198,8 +215,9 @@ class HtmlXmlExporter:
                         u'[<a name="%s">%s</a>]</span><br><br>'+
                         u'<span class="parent-nodes">parent nodes: %s</span>'+
                         u'<br>%s%s<hr size="1"/>') %
-                        (word, word, self.getParentLinks(wikiPage, False),
-                        formattedContent, u'<br />\n'*10))
+                        (_escapeAnchor(word), word,
+                        self.getParentLinks(wikiPage, False), formattedContent,
+                        u'<br />\n'*10))
             except Exception, e:
                 traceback.print_exc()
 
@@ -277,7 +295,7 @@ class HtmlXmlExporter:
 
                     # get aliases too
                     relation = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
-                    links[relation] = u"#%s" % relation
+                    links[relation] = u"#%s" % _escapeAnchor(relation)
 #                     wordForAlias = self.wikiData.getAliasesWikiWord(relation)
 #                     if wordForAlias:
 #                         links[relation] = u"#%s" % wordForAlias
@@ -380,7 +398,7 @@ class HtmlXmlExporter:
             else:
                 parents = parents +\
                 u'<span class="parent-node"><a href="#%s">%s</a></span>' %\
-                (relation, relation)
+                (_escapeAnchor(relation), relation)
                 
         return parents
 
@@ -944,7 +962,8 @@ class TextExporter:
 
         for word in self.wordList:
             try:
-                content, modified = self.wikiDataManager.getWikiData().getContentAndInfo(word)[:2]
+                content = self.wikiDataManager.getWikiData().getContent(word)
+                modified = self.wikiDataManager.getWikiData().getTimestamps(word)[0]
             except:
                 traceback.print_exc()
                 continue

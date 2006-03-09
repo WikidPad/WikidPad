@@ -23,3 +23,7 @@ Now you can create subpages:
     * BoughtStopAndGoer (go to this to see the template)
     * NotBoughtAlsoTemplate (or to this page)
 
+
+
+You can enhance this example using [FormPages].
+

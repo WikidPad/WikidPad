@@ -42,6 +42,13 @@ class DocPage(MiscEventSourceMixin):
             pass
 
 
+#     def replaceLiveText(self, text):
+#         
+#     def appendLiveText(self, text):
+# 
+#     def getLiveText(self):
+
+
 class WikiPage(DocPage):
     """
     holds the data for a wikipage. fetched via the WikiDataManager.getWikiPage method.
