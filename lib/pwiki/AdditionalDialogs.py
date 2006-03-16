@@ -2,7 +2,7 @@ import sys, traceback
 from time import strftime
 import re
 
-from os.path import exists
+from os.path import exists, isdir, isfile
 
 from wxPython.wx import *
 from wxPython.html import *
@@ -13,7 +13,7 @@ from wxHelper import *
 from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, htmlColorToRgbTuple,\
         rgbToHtmlColor, wikiWordToLabel, escapeForIni, unescapeForIni
 import WikiFormatting
-import Exporters
+import Exporters, Importers
 
 from SearchAndReplaceDialogs import WikiPageListConstructionDialog
 from SearchAndReplace import ListWikiPagesOperation
@@ -658,8 +658,8 @@ class ExportDialog(wxDialog):
         self.ctrls = XrcControls(self)
         
         # Necessary to avoid a crash        
-        emptyPanel = wxPanel(self.ctrls.additOptions)
-        emptyPanel.Fit()
+        self.emptyPanel = wxPanel(self.ctrls.additOptions)
+        self.emptyPanel.Fit()
         
         exporterList = [] # List of tuples (<exporter object>, <export tag>,
                           # <readable description>, <additional options panel>)
@@ -668,12 +668,14 @@ class ExportDialog(wxDialog):
             for tp in ob.getExportTypes(self.ctrls.additOptions):
                 panel = tp[2]
                 if panel is None:
-                    panel = emptyPanel
+                    panel = self.emptyPanel
                 else:
                     panel.Fit()
 
-                exporterList.append((ob, tp[0], tp[1], panel))
-        
+                # Add Tuple (Exporter object, export type tag,
+                #     export type description, additional options panel)
+                exporterList.append((ob, tp[0], tp[1], panel)) 
+
         self.ctrls.additOptions.Fit()
         mins = self.ctrls.additOptions.GetMinSize()
         
@@ -685,38 +687,51 @@ class ExportDialog(wxDialog):
         self.ctrls.btnOk.SetId(wxID_OK)
         self.ctrls.btnCancel.SetId(wxID_CANCEL)
         
-        self.ctrls.tfDirectory.SetValue(self.pWiki.getLastActiveDir())
+        self.ctrls.tfDestination.SetValue(self.pWiki.getLastActiveDir())
         
         for e in self.exporterList:
             e[3].Show(False)
             e[3].Enable(False)
             self.ctrls.chExportTo.Append(e[2])
             
-        # Enable first addit. options panel
-        self.exporterList[0][3].Enable(True)
-        self.exporterList[0][3].Show(True)
-        self.ctrls.chExportTo.SetSelection(0)  
-        
-#         self.ctrls.cbHtmlExportPicsAsLinks.SetValue(
-#                 self.pWiki.getConfig().getboolean("main",
-#                 "html_export_pics_as_links"))
+#         # Enable first addit. options panel
+#         self.exporterList[0][3].Enable(True)
+#         self.exporterList[0][3].Show(True)
 
+        self.ctrls.chExportTo.SetSelection(0)  
+        self._refreshForEtype()
+        
         EVT_CHOICE(self, GUI_ID.chExportTo, self.OnExportTo)
         EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
 
         EVT_BUTTON(self, wxID_OK, self.OnOk)
-        EVT_BUTTON(self, GUI_ID.btnSelectDirectory, self.OnSelectDir)
+        EVT_BUTTON(self, GUI_ID.btnSelectDestination, self.OnSelectDest)
 
 
-    def OnExportTo(self, evt):
+    def _refreshForEtype(self):
         for e in self.exporterList:
             e[3].Show(False)
             e[3].Enable(False)
             
-        # Enable appropriate addit. options panel
-        self.exporterList[evt.GetSelection()][3].Enable(True)
-        self.exporterList[evt.GetSelection()][3].Show(True)
+        ob, etype, desc, panel = \
+                self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
 
+        # Enable appropriate addit. options panel
+        panel.Enable(True)
+        panel.Show(True)
+
+        expDestWildcards = ob.getExportDestinationWildcards(etype)
+
+        if expDestWildcards is None:
+            # Directory destination
+            self.ctrls.stDestination.SetLabel(u"Destination directory:")
+        else:
+            # File destination
+            self.ctrls.stDestination.SetLabel(u"Destination file:")
+
+
+    def OnExportTo(self, evt):
+        self._refreshForEtype()
         evt.Skip()
 
 
@@ -730,10 +745,32 @@ class ExportDialog(wxDialog):
             dlg.Destroy()
 
     def OnOk(self, evt):
-        if not exists(guiToUni(self.ctrls.tfDirectory.GetValue())):
-            self.pWiki.displayErrorMessage(u"Destination directory does not exist")
-            return
+        # Run exporter
+        ob, etype, desc, panel = \
+                self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
+                
+        # If this returns None, export goes to a directory
+        expDestWildcards = ob.getExportDestinationWildcards(etype)
+        if expDestWildcards is None:
+            # Export to a directory
+            if not exists(guiToUni(self.ctrls.tfDestination.GetValue())):
+                self.pWiki.displayErrorMessage(
+                        u"Destination directory does not exist")
+                return
             
+            if not isdir(guiToUni(self.ctrls.tfDestination.GetValue())):
+                self.pWiki.displayErrorMessage(
+                        u"Destination must be a directory")
+                return
+        else:
+            if exists(guiToUni(self.ctrls.tfDestination.GetValue())) and \
+                    not isfile(guiToUni(self.ctrls.tfDestination.GetValue())):
+                self.pWiki.displayErrorMessage(
+                        u"Destination must be a file")
+                return
+
+
+
         # Create wordList (what to export)
         selset = self.ctrls.chSelectedSet.GetSelection()
         root = self.pWiki.getCurrentWikiWord()
@@ -758,25 +795,220 @@ class ExportDialog(wxDialog):
 #         self.pWiki.getConfig().set("main", "html_export_pics_as_links",
 #                 self.ctrls.cbHtmlExportPicsAsLinks.GetValue())
 
-        # Run exporter
-        ob, t, desc, panel = \
-                self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
 
-        ob.export(self.pWiki.getWikiDataManager(), wordList, t, 
-                guiToUni(self.ctrls.tfDirectory.GetValue()), 
+        if panel is self.emptyPanel:
+            panel = None
+
+        ob.export(self.pWiki.getWikiDataManager(), wordList, etype, 
+                guiToUni(self.ctrls.tfDestination.GetValue()), 
                 self.ctrls.compatFilenames.GetValue(), ob.getAddOpt(panel))
 
         self.EndModal(wxID_OK)
 
         
-    def OnSelectDir(self, evt):
-        # Only transfer between GUI elements, so no unicode conversion
-        seldir = wxDirSelector(u"Select Export Directory",
-                self.ctrls.tfDirectory.GetValue(),
-                style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON, parent=self)
+    def OnSelectDest(self, evt):
+        ob, etype, desc, panel = \
+                self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
+
+        expDestWildcards = ob.getExportDestinationWildcards(etype)
+
+        if expDestWildcards is None:
+            # Only transfer between GUI elements, so no unicode conversion
+            seldir = wxDirSelector(u"Select Export Directory",
+                    self.ctrls.tfDestination.GetValue(),
+                    style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON, parent=self)
                 
-        if seldir:
-            self.ctrls.tfDirectory.SetValue(seldir)
+            if seldir:
+                self.ctrls.tfDestination.SetValue(seldir)
+
+        else:
+            # Build wildcard string
+            wcs = []
+            for wd, wp in expDestWildcards:
+                wcs.append(wd)
+                wcs.append(wp)
+                
+            wcs.append(u"All files (*.*)")
+            wcs.append(u"*")
+            
+            wcs = u"|".join(wcs)
+            
+            selfile = wxFileSelector(u"Select Export File",
+                    self.ctrls.tfDestination.GetValue(),
+                    default_filename = "", default_extension = "",
+                    wildcard = wcs, flags=wxSAVE | wxOVERWRITE_PROMPT,
+                    parent=self)
+
+            if selfile:
+                self.ctrls.tfDestination.SetValue(selfile)
+
+
+class ImportDialog(wxDialog):
+    def __init__(self, parent, ID, mainControl, title="Import",
+                 pos=wxDefaultPosition, size=wxDefaultSize):
+        d = wxPreDialog()
+        self.PostCreate(d)
+        
+        self.parent = parent
+        self.mainControl = mainControl
+        
+        self.listPagesOperation = ListWikiPagesOperation()
+        res = xrc.wxXmlResource.Get()
+        res.LoadOnDialog(self, self.parent, "ImportDialog")
+
+        self.ctrls = XrcControls(self)
+
+        # Necessary to avoid a crash        
+        self.emptyPanel = wxPanel(self.ctrls.additOptions)
+        self.emptyPanel.Fit()
+        
+        importerList = [] # List of tuples (<importer object>, <import tag=type>,
+                          # <readable description>, <additional options panel>)
+        
+        for ob in Importers.describeImporters(self.mainControl):   # TODO search plugins
+            for tp in ob.getImportTypes(self.ctrls.additOptions):
+                panel = tp[2]
+                if panel is None:
+                    panel = self.emptyPanel
+                else:
+                    panel.Fit()
+
+                # Add Tuple (Importer object, import type tag,
+                #     import type description, additional options panel)
+                importerList.append((ob, tp[0], tp[1], panel)) 
+
+        self.ctrls.additOptions.Fit()
+        mins = self.ctrls.additOptions.GetMinSize()
+        
+        self.ctrls.additOptions.SetMinSize(wxSize(mins.width+10, mins.height+10))
+        self.Fit()
+        
+        self.importerList = importerList
+
+        self.ctrls.btnOk.SetId(wxID_OK)
+        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        
+        self.ctrls.tfSource.SetValue(self.mainControl.getLastActiveDir())
+        
+        for e in self.importerList:
+            e[3].Show(False)
+            e[3].Enable(False)
+            self.ctrls.chImportFormat.Append(e[2])
+            
+#         # Enable first addit. options panel
+#         self.importerList[0][3].Enable(True)
+#         self.importerList[0][3].Show(True)
+        self.ctrls.chImportFormat.SetSelection(0)
+        self._refreshForItype()
+
+        EVT_CHOICE(self, GUI_ID.chImportFormat, self.OnImportFormat)
+
+        EVT_BUTTON(self, wxID_OK, self.OnOk)
+        EVT_BUTTON(self, GUI_ID.btnSelectSource, self.OnSelectSrc)
+
+
+    def _refreshForItype(self):
+        """
+        Refresh GUI depending on chosen import type
+        """
+        for e in self.importerList:
+            e[3].Show(False)
+            e[3].Enable(False)
+
+        ob, itype, desc, panel = \
+                self.importerList[self.ctrls.chImportFormat.GetSelection()][:4]
+
+        # Enable appropriate addit. options panel
+        panel.Enable(True)
+        panel.Show(True)
+
+        impSrcWildcards = ob.getImportSourceWildcards(itype)
+
+        if impSrcWildcards is None:
+            # Directory source
+            self.ctrls.stSource.SetLabel(u"Source directory:")
+        else:
+            # File source
+            self.ctrls.stSource.SetLabel(u"Source file:")
+
+
+    def OnImportFormat(self, evt):
+        self._refreshForItype()
+        evt.Skip()
+
+
+
+    def OnOk(self, evt):
+        # Run importer
+        ob, itype, desc, panel = \
+                self.importerList[self.ctrls.chImportFormat.GetSelection()][:4]
+                
+        if not exists(guiToUni(self.ctrls.tfSource.GetValue())):
+            self.mainControl.displayErrorMessage(
+                    u"Source does not exist")
+            return
+
+        # If this returns None, import goes to a directory
+        impSrcWildcards = ob.getImportSourceWildcards(itype)
+        if impSrcWildcards is None:
+            # Import from a directory
+            
+            if not isdir(guiToUni(self.ctrls.tfSource.GetValue())):
+                self.mainControl.displayErrorMessage(
+                        u"Source must be a directory")
+                return
+        else:
+            if not isfile(guiToUni(self.ctrls.tfSource.GetValue())):
+                self.mainControl.displayErrorMessage(
+                        u"Source must be a file")
+                return
+
+        if panel is self.emptyPanel:
+            panel = None
+
+        ob.doImport(self.mainControl.getWikiDataManager(), itype, 
+                guiToUni(self.ctrls.tfSource.GetValue()), 
+                False, ob.getAddOpt(panel))
+
+        self.EndModal(wxID_OK)
+
+        
+    def OnSelectSrc(self, evt):
+        ob, itype, desc, panel = \
+                self.importerList[self.ctrls.chImportFormat.GetSelection()][:4]
+
+        impSrcWildcards = ob.getImportSourceWildcards(itype)
+
+        if impSrcWildcards is None:
+            # Only transfer between GUI elements, so no unicode conversion
+            seldir = wxDirSelector(u"Select Import Directory",
+                    self.ctrls.tfSource.GetValue(),
+                    style=wxDD_DEFAULT_STYLE, parent=self)
+
+            if seldir:
+                self.ctrls.tfSource.SetValue(seldir)
+
+        else:
+            # Build wildcard string
+            wcs = []
+            for wd, wp in impSrcWildcards:
+                wcs.append(wd)
+                wcs.append(wp)
+                
+            wcs.append(u"All files (*.*)")
+            wcs.append(u"*")
+            
+            wcs = u"|".join(wcs)
+            
+            selfile = wxFileSelector(u"Select Import File",
+                    self.ctrls.tfSource.GetValue(),
+                    default_filename = "", default_extension = "",
+                    wildcard = wcs, flags=wxOPEN | wxFILE_MUST_EXIST,
+                    parent=self)
+
+            if selfile:
+                self.ctrls.tfSource.SetValue(selfile)
+
 
 
 class ChooseWikiWordDialog(wxDialog):

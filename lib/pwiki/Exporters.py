@@ -1,5 +1,5 @@
 # from Enum import Enumeration
-import os, string, re, traceback
+import os, string, re, traceback, random
 from os.path import join, exists, splitext
 import sys
 import shutil
@@ -7,18 +7,23 @@ import shutil
 from time import localtime
 import urllib_red as urllib
 
-
-import WikiFormatting
-from StringOps import *
-
-from WikiExceptions import WikiWordNotFoundException
-import WikiFormatting
-import PageAst
-
 from wxPython.wx import *
 import wxPython.xrc as xrc
 
 from wxHelper import XrcControls
+
+
+import WikiFormatting
+from StringOps import *
+
+from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
+        ListItemWithSubtreeWikiPagesNode
+
+
+from WikiExceptions import WikiWordNotFoundException, ExportException
+import WikiFormatting
+import PageAst
+
 
 
 def removeBracketsToCompFilename(fn):
@@ -44,6 +49,11 @@ def _escapeAnchor(name):
         else:
             result.append(c)
     return u"".join(result)
+
+# # Types of export destinations
+# EXPORT_DEST_TYPE_DIR = 1
+# EXPORT_DEST_TYPE_FILE = 2
+
 
 
 # TODO UTF-8 support for HTML? Other encodings?
@@ -78,7 +88,7 @@ class HtmlXmlExporter:
         """
         Return sequence of tuples with the description of export types provided
         by this object. A tuple has the form (<exp. type>,
-            <human readbale description>, <panel for add. options or None>)
+            <human readable description>, <panel for add. options or None>)
         If panels for additional options must be created, they should use
         guiparent as parent
         """
@@ -97,6 +107,34 @@ class HtmlXmlExporter:
             (u"html_multi", u'Set of HTML pages', htmlPanel),
             (u"xml", u'XML file', None)
             )
+
+
+#     def getExportDestinationType(self, exportType):
+#         """
+#         Return one of the EXPORT_DEST_TYPE_* constants describing
+#         if exportType exorts to a file or directory
+#         """
+#         TYPEMAP = {
+#                 u"html_single": EXPORT_DEST_TYPE_DIR,
+#                 u"html_multi": EXPORT_DEST_TYPE_DIR,
+#                 u"xml": EXPORT_DEST_TYPE_FILE
+#                 }
+#                 
+#         return TYPEMAP[exportType]
+
+
+    def getExportDestinationWildcards(self, exportType):
+        """
+        If an export type is intended to go to a file, this function
+        returns a (possibly empty) sequence of tuples
+        (wildcard description, wildcard filepattern).
+        
+        If an export type goes to a directory, None is returned
+        """
+        if exportType == u"xml":
+            return (("XML files (*.xml)", "*.xml"),) 
+        
+        return None
 
 
     def getAddOptVersion(self):
@@ -259,8 +297,10 @@ class HtmlXmlExporter:
 
 
     def exportXml(self):
-        outputFile = join(self.exportDest,
-                self.convertFilename(u"%s.xml" % self.mainControl.wikiName))
+#         outputFile = join(self.exportDest,
+#                 self.convertFilename(u"%s.xml" % self.mainControl.wikiName))
+
+        outputFile = self.exportDest
 
         if exists(outputFile):
             os.unlink(outputFile)
@@ -878,7 +918,7 @@ class TextExporter:
         """
         Return sequence of tuples with the description of export types provided
         by this object. A tuple has the form (<exp. type>,
-            <human readable desctiption>, <panel for add. options or None>)
+            <human readable description>, <panel for add. options or None>)
         If panels for additional options must be created, they should use
         guiparent as parent
         """
@@ -891,6 +931,29 @@ class TextExporter:
         return (
             ("raw_files", 'Set of *.wiki files', textPanel),
             )
+
+
+#     def getExportDestinationType(self, exportType):
+#         """
+#         Return one of the EXPORT_DEST_TYPE_* constants describing
+#         if exportType exorts to a file or directory
+#         """
+#         TYPEMAP = {
+#                 u"raw_files": EXPORT_DEST_TYPE_DIR
+#                 }
+#                 
+#         return TYPEMAP[exportType]
+
+
+    def getExportDestinationWildcards(self, exportType):
+        """
+        If an export type is intended to go to a file, this function
+        returns a (possibly empty) sequence of tuples
+        (wildcard description, wildcard filepattern).
+        
+        If an export type goes to a directory, None is returned
+        """
+        return None
 
 
     def getAddOptVersion(self):
@@ -991,6 +1054,190 @@ class TextExporter:
                 
 
 
+
+class MultiPageTextExporter:
+    """
+    Exports in multipage text format
+    """
+    def __init__(self, mainControl):
+        self.mainControl = mainControl
+        self.wikiDataManager = None
+        self.wordList = None
+        self.exportDest = None
+        self.addOpt = None
+
+
+    def getExportTypes(self, guiparent):
+        """
+        Return sequence of tuples with the description of export types provided
+        by this object. A tuple has the form (<exp. type>,
+            <human readable description>, <panel for add. options or None>)
+        If panels for additional options must be created, they should use
+        guiparent as parent
+        """
+        return (
+                (u"multipage_text", "Multipage text", None),
+                )
+
+
+    def getExportDestinationWildcards(self, exportType):
+        """
+        If an export type is intended to go to a file, this function
+        returns a (possibly empty) sequence of tuples
+        (wildcard description, wildcard filepattern).
+        
+        If an export type goes to a directory, None is returned
+        """
+        if exportType == u"multipage_text":
+            return (("Multipage files (*.mpt)", "*.mpt"),
+                    ("Text file (*.txt)", "*.txt")) 
+
+        return None
+
+
+    def getAddOptVersion(self):
+        """
+        Returns the version of the additional options information returned
+        by getAddOpt(). If the return value is -1, the version info can't
+        be stored between application sessions.
+        
+        Otherwise, the addopt information can be stored between sessions
+        and can later handled back to the export method of the object
+        without previously showing the export dialog.
+        """
+        return 0
+
+
+    def getAddOpt(self, addoptpanel):
+        """
+        Reads additional options from panel addoptpanel.
+        If getAddOptVersion() > -1, the return value must be a sequence
+        of simple string and/or numeric objects. Otherwise, any object
+        can be returned (normally the addoptpanel itself)
+        """
+        return ()
+
+
+    def _checkPossibleSeparator(self, sep):
+        """
+        Run search operation to test if separator string sep
+        (without trailing newline) is already in use.
+        Returns True if sep doesn't appear as line in any page from
+        self.wordList
+        """
+        searchOp = SearchReplaceOperation()
+        searchOp.searchStr = u"^" + re.escape(sep) + u"$"
+        searchOp.booleanOp = False
+        searchOp.caseSensitive = True
+        searchOp.wholeWord = False
+        searchOp.cycleToStart = False
+        searchOp.wildCard = 'regex'
+        searchOp.wikiWide = True
+        
+        wpo = ListWikiPagesOperation()
+        wpo.setSearchOpTree(ListItemWithSubtreeWikiPagesNode(wpo, self.wordList,
+                level=0))
+        
+        searchOp.listWikiPagesOp = wpo
+        
+        foundPages = self.mainControl.getWikiData().search(searchOp)
+        
+        return len(foundPages) == 0
+
+
+
+    _RNDBASESEQ = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+    def _createRandomSequence(self):
+        return u"".join([random.choice(self._RNDBASESEQ) for i in xrange(20)])
+   
+        
+
+        # TODO Make it better somehow
+    def _findSeparator(self):
+        """
+        Find a separator (=something not used as line in a page to export)
+        """
+        # Try dashes
+        sep = u"------"
+        
+        while len(sep) < 11:
+            if self._checkPossibleSeparator(sep):
+                return sep
+            sep += u"-"
+
+        # Try dots
+        sep = u"...."
+        while len(sep) < 11:
+            if self._checkPossibleSeparator(sep):
+                return sep
+            sep += u"."
+            
+        # Try random strings (5 tries)
+        for i in xrange(5):
+            sep = u"-----%s-----" % self._createRandomSequence()
+            if self._checkPossibleSeparator(sep):
+                return sep
+
+        # Give up
+        return None            
+        
+
+    def export(self, wikiDataManager, wordList, exportType, exportDest,
+            compatFilenames, addOpt):
+        """
+        Run export operation.
+        
+        wikiData -- WikiData object
+        wordList -- Sequence of wiki words to export
+        exportType -- string tag to identify how to export
+        exportDest -- Path to destination directory or file to export to
+        compatFilenames -- Should the filenames be encoded to be lowest
+                           level compatible
+        addOpt -- additional options returned by getAddOpt()
+        """
+        self.wikiDataManager = wikiDataManager
+        self.wordList = wordList
+        self.exportDest = exportDest
+        self.addOpt = addOpt
+        self.exportFile = None
+        
+        # The hairy thing first: find a separator that doesn't appear
+        # as a line in one of the pages to export
+        self.separator = self._findSeparator()
+        if self.separator is None:
+            # _findSeparator gave up
+            raise ExportException("No usable separator found")
+            
+        self.rawExportFile = open(self.exportDest, "w")
+        try:
+            # Only UTF-8 mode currently
+            self.rawExportFile.write(BOM_UTF8)
+            self.exportFile = utf8Writer(self.rawExportFile, "replace")
+            
+            # Identifier line with file format
+            self.exportFile.write("Multipage text format 0\n")
+            # Separator line
+            self.exportFile.write("Separator: %s\n" % self.separator)
+
+            sepCount = len(self.wordList) - 1  # Number of separators yet to write
+            for word in self.wordList:
+                self.exportFile.write("%s\n" % word)
+                page = self.wikiDataManager.getWikiPage(word)
+                self.exportFile.write(page.getContent())
+                
+                if sepCount > 0:
+                    self.exportFile.write("\n%s\n" % self.separator)
+                    sepCount -= 1
+        finally:
+            if self.exportFile is not None:
+                self.exportFile.flush()
+                
+            self.rawExportFile.close()
+        
+
+
 def describeExporters(mainControl):
-    return (HtmlXmlExporter(mainControl), TextExporter(mainControl))
+    return (HtmlXmlExporter(mainControl), TextExporter(mainControl),
+            MultiPageTextExporter(mainControl))
     

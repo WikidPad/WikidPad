@@ -303,13 +303,13 @@ class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
             self.wordSet = wordSet
             return
 
-        wordList = []
-        for rw in self.rootWords:
-            subWords = wikiData.getAllSubWords(self.rootWords, self.level)
-            for sw in subWords:
+#         wordList = []
+        # for rw in self.rootWords:
+        subWords = wikiData.getAllSubWords(self.rootWords, self.level)
+        for sw in subWords:
 #                 if wordSet.has_key(sw):
 #                     continue
-                wordSet[sw] = None
+            wordSet[sw] = None
 #                 wordList.append(sw)
 
         self.wordList = subWords  # wordList

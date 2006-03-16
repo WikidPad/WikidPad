@@ -58,6 +58,9 @@ class WikiData:
 
         DbStructure.registerSqliteFunctions(self.connWrap)
 
+        self.pagefileSuffix = self.pWiki.configuration.get("main",
+                "db_pagefile_suffix", u".wiki")
+
         formatcheck, formatmsg = DbStructure.checkDatabaseFormat(self.connWrap)
 
         if formatcheck == 2:
@@ -577,13 +580,15 @@ class WikiData:
 
     # TODO More general Wikiword to filename mapping
     def _getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
-        files = glob.glob(join(mbcsEnc(self.dataDir)[0], '*.wiki'))
-        return [mbcsDec(basename(file).replace('.wiki', ''), "replace")[0]
-                for file in files]
+        files = glob.glob(mbcsEnc(join(self.dataDir,
+                u'*' + self.pagefileSuffix), "replace")[0])
+        return [mbcsDec(basename(file), "replace")[0].replace(self.pagefileSuffix, '')
+                for file in files]   # TODO: Unsafe. Suffix like e.g. '.wiki' may appear
+                                    #  in the word. E.g. "The.great.wiki.for.all.wiki"
 
     # TODO More general Wikiword to filename mapping
     def getWikiWordFileName(self, wikiWord):
-        return join(self.dataDir, u"%s.wiki" % wikiWord)
+        return join(self.dataDir, (u"%s" + self.pagefileSuffix) % wikiWord)
 
     def isDefinedWikiWord(self, word):
         "check if a word is a valid wikiword (page name or alias)"

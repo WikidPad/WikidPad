@@ -54,9 +54,11 @@ def findDirs():
 
         globalConfigDir = os.environ.get("HOME")
         if not (globalConfigDir and os.path.exists(globalConfigDir)):
-            user = os.environ.get("USERNAME")
-            if user:
-                globalConfigDir = r"c:\Documents And Settings\%s" % user
+            globalConfigDir = os.environ.get("USERPROFILE")
+            if not (globalConfigDir and os.path.exists(globalConfigDir)):
+                user = os.environ.get("USERNAME")
+                if user:
+                    globalConfigDir = r"c:\Documents And Settings\%s" % user
     finally:
         pass
 #     except Exception, e:

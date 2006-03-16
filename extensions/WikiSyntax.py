@@ -22,7 +22,7 @@ PlainEscapedCharacterRE = re.compile(ur"\\(.)",
 
 
 # basic formatting
-BoldRE          = re.compile(ur"\*(?=[^\s])(?P<boldContent>" + PlainCharacterPAT +
+BoldRE          = re.compile(ur"\*(?=\S)(?P<boldContent>" + PlainCharacterPAT +
         ur"+?)\*",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 ItalicRE        = re.compile(ur"\b_(?P<italicContent>" + PlainCharacterPAT +
@@ -52,7 +52,7 @@ UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp)://|mailto:)[^"\s<]*'
 #         re.DOTALL | re.UNICODE | re.MULTILINE)
 TitledUrlRE =  re.compile(
         ur"\[(?P<titledurlUrl>" + UrlRE.pattern + ur")"
-        ur"(?:(?P<titledurlDelim>\s*" + TitleWikiWordDelimiterPAT + ur")"
+        ur"(?:(?P<titledurlDelim>[ \t]*" + TitleWikiWordDelimiterPAT + ur")"
         ur"(?P<titledurlTitle>" + PlainCharacterPAT + ur"+?))?\]",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
@@ -134,7 +134,7 @@ WikiWordRE2     = re.compile(ur"\[(?:" + WikiWordNccPAT + ur")\]",
 #         re.DOTALL | re.UNICODE | re.MULTILINE)
 WikiWordEditorRE2      = re.compile(
         ur"\[(?P<wikiwordncc>" + WikiWordNccPAT + ur")"
-        ur"(?:(?P<wikiwordnccDelim>\s*" + TitleWikiWordDelimiterPAT + ur")"
+        ur"(?:(?P<wikiwordnccDelim>[ \t]*" + TitleWikiWordDelimiterPAT + ur")"
         ur"(?P<wikiwordnccTitle>" + PlainCharacterPAT + ur"+?))?\]"
         ur"(?:#(?P<wikiwordnccSearchfrag>(?:(?:#.)|[^ \t\n#])+))?",
         re.DOTALL | re.UNICODE | re.MULTILINE)
@@ -145,8 +145,8 @@ SearchFragmentUnescapeRE   = re.compile(ur"#(.)",
 
 
 # parses the dynamic properties
-PropertyRE      = re.compile(ur"\[\s*(?P<propertyName>[a-zA-Z0-9\-\_\.]+?)\s*" +
-                  ur"[=:]\s*(?P<propertyValue>[\w\-\_ \t;:,.]+?)\]",
+PropertyRE      = re.compile(ur"\[[ \t]*(?P<propertyName>[a-zA-Z0-9\-\_\.]+?)[ \t]*" +
+                  ur"[=:][ \t]*(?P<propertyValue>[\w\-\_ \t;:,.]+?)\]",
                   re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -178,7 +178,7 @@ AutoGenAreaRE = re.compile(ur"^([ \t]*<<[ \t]+)([^\n]+\n)(.*?)^([ \t]*>>[ \t]*\n
 # todos, captures the todo item text
 ## ToDoREWithContent = re.compile(u"^\s*((?:todo|action|track|issue|question|project)\\.?[^\\:\\s]*:[^\\r\\n]+)", re.MULTILINE)
 
-ToDoREWithContent = re.compile(ur"(?P<todoIndent>^\s*)"
+ToDoREWithContent = re.compile(ur"(?P<todoIndent>^[ \t]*)"
         ur"(?P<todoName>(?:todo|done|wait|action|track|issue|question|project)(?:\.[^:\s]+)?)"
 #         ur"(?P<todoDelimiter>:)(?P<todoValue>[^\r\n]+)",
         ur"(?P<todoDelimiter>:)(?P<todoValue>" + PlainCharacterPAT + ur"+?)(?=\n)",
@@ -188,14 +188,14 @@ ToDoREWithContent = re.compile(ur"(?P<todoIndent>^\s*)"
 #   already identified as todos, the regexp can be quite simple
 ## ToDoREWithCapturing = re.compile(u"(todo|action|track|issue|question|project)\\.?([^\\:\\s]*):([^\\r\\n]+)")
 # ToDoREWithCapturing = re.compile(ur"([^:\s]+):\s*([^\r\n]+)",
-ToDoREWithCapturing = re.compile(ur"^([^:\s]+):\s*(.+?)$",
+ToDoREWithCapturing = re.compile(ur"^([^:\s]+):[ \t]*(.+?)$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
 # used to detect indent levels
 
 # The following 2 are not in WikiFormatting.FormatExpressions
-EmptyLineRE     = re.compile(ur"^[\s\r\n]*$",
+EmptyLineRE     = re.compile(ur"^[ \t\r\n]*$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 HorizLineRE     = re.compile(u"----+", re.DOTALL | re.UNICODE | re.MULTILINE)

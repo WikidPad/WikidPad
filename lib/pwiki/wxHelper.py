@@ -163,6 +163,29 @@ def copyTextToClipboard(text):
         cb.Close()
 
 
+def keyDownToAccel(evt):
+    from wxPython.wx import wxACCEL_ALT, wxACCEL_SHIFT, wxACCEL_CTRL, \
+            wxACCEL_NORMAL
+    """
+    evt -- wx event received from a key down event
+    return: tuple (modifier, keycode) suitable e.g. as AcceleratorEntry
+            (without event handling function)
+    """
+    keyCode = evt.GetKeyCode()
+    
+    modif = wxACCEL_NORMAL
+
+    if evt.ShiftDown():
+        modif |= wxACCEL_SHIFT
+    if evt.ControlDown():
+        modif |= wxACCEL_CTRL
+    if evt.AltDown():
+        modif |= wxACCEL_ALT
+    
+    return (modif, keyCode)
+
+
+
 """
 Clipboard formats Windows
 

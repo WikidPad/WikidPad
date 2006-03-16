@@ -243,6 +243,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.textBlocksActivation = {} # See self.buildTextBlocksMenu()
         # Position of the root menu of the text blocks within "Editor" menu
         self.textBlocksMenuPosition = None  
+        self.cmdIdToIconName = None # Maps command id (=menu id) to icon name
+                                    # needed for "Editor"->"Add icon property"
+        self.cmdIdToColorName = None # Same for color names
 
         # setup plugin manager and hooks API
         self.pluginManager = PluginManager()
@@ -654,8 +657,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_RAW)
     
             self.addMenuItem(exportWikisMenu, 'Other Export...',
-                    'Open export dialog',
-                    lambda evt: self.showExportDialog())
+                    'Open export dialog', self.OnCmdExportDialog)
+
+        if wikiData is not None:
+            self.addMenuItem(wikiMenu, 'Import...',
+                    'Import dialog', self.OnCmdImportDialog)
 
 
         if wikiData is not None:
@@ -867,6 +873,102 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 '&Text blocks', tbmenu)
 
 
+    def buildIconsSubmenu(self):
+        """
+        Returns tuple (icon sub menu, dict from menu id to icon name)
+        """
+        iconMap = {}
+        iconsMenu = wxMenu()
+
+        iconsMenu1 = wxMenu()
+        iconsMenu.AppendMenu(wxNewId(), 'A-C', iconsMenu1)
+        iconsMenu2 = wxMenu()
+        iconsMenu.AppendMenu(wxNewId(), 'D-F', iconsMenu2)
+        iconsMenu3 = wxMenu()
+        iconsMenu.AppendMenu(wxNewId(), 'H-L', iconsMenu3)
+        iconsMenu4 = wxMenu()
+        iconsMenu.AppendMenu(wxNewId(), 'M-P', iconsMenu4)
+        iconsMenu5 = wxMenu()
+        iconsMenu.AppendMenu(wxNewId(), 'Q-S', iconsMenu5)
+        iconsMenu6 = wxMenu()
+        iconsMenu.AppendMenu(wxNewId(), 'T-Z', iconsMenu6)
+
+        icons = self.iconLookupCache.keys();  # TODO: Create function?
+        icons.sort()
+
+        for icname in icons:
+            if icname.startswith("tb_"):
+                continue
+            iconsSubMenu = None
+            if icname[0] <= 'c':
+                iconsSubMenu = iconsMenu1
+            elif icname[0] <= 'f':
+                iconsSubMenu = iconsMenu2
+            elif icname[0] <= 'l':
+                iconsSubMenu = iconsMenu3
+            elif icname[0] <= 'p':
+                iconsSubMenu = iconsMenu4
+            elif icname[0] <= 's':
+                iconsSubMenu = iconsMenu5
+            elif icname[0] <= 'z':
+                iconsSubMenu = iconsMenu6
+
+            menuID = wxNewId()
+            iconMap[menuID] = icname
+
+            menuItem = wxMenuItem(iconsSubMenu, menuID, icname, icname)
+            bitmap = self.lookupIcon(icname)
+            menuItem.SetBitmap(bitmap)
+            iconsSubMenu.AppendItem(menuItem)
+
+        return (iconsMenu, iconMap)
+
+
+    def OnInsertIconAttribute(self, evt):
+        self.insertAttribute("icon", self.cmdIdToIconName[evt.GetId()])
+
+
+    def buildColorsSubmenu(self):
+        """
+        Returns tuple (color sub menu, dict from menu id to color name)
+        """
+        colorMap = {}
+        colorsMenu = wxMenu()
+
+        colorsMenu1 = wxMenu()
+        colorsMenu.AppendMenu(wxNewId(), 'A-L', colorsMenu1)
+        colorsMenu2 = wxMenu()
+        colorsMenu.AppendMenu(wxNewId(), 'M-Z', colorsMenu2)
+
+        for cn in _COLORS:    # ["BLACK"]:
+            colorsSubMenu = None
+            if cn[0] <= 'L':
+                colorsSubMenu = colorsMenu1
+            ## elif cn[0] <= 'Z':
+            else:
+                colorsSubMenu = colorsMenu2
+
+            menuID = wxNewId()
+            colorMap[menuID] = cn
+            menuItem = wxMenuItem(colorsSubMenu, menuID, cn, cn)
+            cl = wxNamedColour(cn)
+
+            menuItem.SetBackgroundColour(cl)
+
+            # if color is dark, text should be white (checking green component seems to be enough)
+            if cl.Green() < 128:
+                menuItem.SetTextColour(wxWHITE)
+
+            colorsSubMenu.AppendItem(menuItem)
+
+        return (colorsMenu, colorMap)
+
+
+    def OnInsertColorAttribute(self, evt):
+        self.insertAttribute("color", self.cmdIdToColorName[evt.GetId()])
+
+
+
     def buildMainMenu(self):
         # ------------------------------------------------------------------------------------
         # Set up menu bar for the program.
@@ -1028,120 +1130,25 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.editorMenu.AppendMenu(wxNewId(), '&Text blocks',
                 self.buildTextBlocksMenu())
 
-#         attributesMenu = wxMenu()
-#         formattingMenu.AppendMenu(wxNewId(), 'Attributes', attributesMenu)
-# 
-#         menuID=wxNewId()
-#         menuItem = wxMenuItem(attributesMenu, menuID, 'importance: high')
-#         attributesMenu.AppendItem(menuItem)
-#         EVT_MENU(self, menuID, lambda evt: self.insertAttribute('importance', 'high'))
-# 
-#         menuID=wxNewId()
-#         menuItem = wxMenuItem(attributesMenu, menuID, 'importance: low')
-#         attributesMenu.AppendItem(menuItem)
-#         EVT_MENU(self, menuID, lambda evt: self.insertAttribute('importance', 'low'))
-# 
-#         menuID=wxNewId()
-#         menuItem = wxMenuItem(attributesMenu, menuID, 'tree_position: 0')
-#         attributesMenu.AppendItem(menuItem)
-#         EVT_MENU(self, menuID, lambda evt: self.insertAttribute('tree_position', '0'))
-# 
-#         menuID=wxNewId()
-#         menuItem = wxMenuItem(attributesMenu, menuID, 'wrap: 80')
-#         attributesMenu.AppendItem(menuItem)
-#         EVT_MENU(self, menuID, lambda evt: self.insertAttribute('wrap', '80'))
-# 
-#         self.addMenuItem(attributesMenu, 'camelCaseWordsEnabled: false', '',
-#                 lambda evt: self.insertAttribute('camelCaseWordsEnabled', 'false'))
-
-
         # Build icon menu
-
         if self.lowResources:
             # Add only menu item for icon select dialog
             self.addMenuItem(self.editorMenu, 'Add icon property',
                     'Open icon select dialog', lambda evt: self.showIconSelectDialog())
         else:
             # Build full submenu for icons
-            iconsMenu = wxMenu()
+            iconsMenu, self.cmdIdToIconName = self.buildIconsSubmenu()
+            for cmi in self.cmdIdToIconName.keys():
+                EVT_MENU(self, cmi, self.OnInsertIconAttribute)
+
             self.editorMenu.AppendMenu(wxNewId(), 'Add icon property', iconsMenu)
 
-            iconsMenu1 = wxMenu()
-            iconsMenu.AppendMenu(wxNewId(), 'A-C', iconsMenu1)
-            iconsMenu2 = wxMenu()
-            iconsMenu.AppendMenu(wxNewId(), 'D-F', iconsMenu2)
-            iconsMenu3 = wxMenu()
-            iconsMenu.AppendMenu(wxNewId(), 'H-L', iconsMenu3)
-            iconsMenu4 = wxMenu()
-            iconsMenu.AppendMenu(wxNewId(), 'M-P', iconsMenu4)
-            iconsMenu5 = wxMenu()
-            iconsMenu.AppendMenu(wxNewId(), 'Q-S', iconsMenu5)
-            iconsMenu6 = wxMenu()
-            iconsMenu.AppendMenu(wxNewId(), 'T-Z', iconsMenu6)
-
-            icons = self.iconLookupCache.keys();  # TODO: Create function?
-            icons.sort()
-
-            for id in icons:
-                if id.startswith("tb_"):
-                    continue
-                iconsSubMenu = None
-                if id[0] <= 'c':
-                    iconsSubMenu = iconsMenu1
-                elif id[0] <= 'f':
-                    iconsSubMenu = iconsMenu2
-                elif id[0] <= 'l':
-                    iconsSubMenu = iconsMenu3
-                elif id[0] <= 'p':
-                    iconsSubMenu = iconsMenu4
-                elif id[0] <= 's':
-                    iconsSubMenu = iconsMenu5
-                elif id[0] <= 'z':
-                    iconsSubMenu = iconsMenu6
-
-                menuID=wxNewId()
-                menuItem = wxMenuItem(iconsSubMenu, menuID, id, id)
-                bitmap = self.lookupIcon(id)
-                menuItem.SetBitmap(bitmap)
-                iconsSubMenu.AppendItem(menuItem)
-                def insertIconAttribute(evt, iconId=id):
-                    self.insertAttribute("icon", iconId)
-                EVT_MENU(self, menuID, insertIconAttribute)
-
-        colorsMenu = wxMenu()
-
-        colorsMenu1 = wxMenu()
-        colorsMenu.AppendMenu(wxNewId(), 'A-L', colorsMenu1)
-        colorsMenu2 = wxMenu()
-        colorsMenu.AppendMenu(wxNewId(), 'M-Z', colorsMenu2)
-
-        for cn in _COLORS:    # ["BLACK"]:
-            colorsSubMenu = None
-            if cn[0] <= 'L':
-                colorsSubMenu = colorsMenu1
-            ## elif cn[0] <= 'Z':
-            else:
-                colorsSubMenu = colorsMenu2
-
-            menuID=wxNewId()
-            menuItem = wxMenuItem(colorsSubMenu, menuID, cn, cn)
-            cl = wxNamedColour(cn)
-
-            menuItem.SetBackgroundColour(cl)
-
-            # if color is dark, text should be white (checking green component seems to be enough)
-            ## light = (cl.Green() + cl.Red() + cl.Blue())/3
-            if cl.Green() < 128:
-                menuItem.SetTextColour(wxWHITE)
-
-            colorsSubMenu.AppendItem(menuItem)
-            def insertColorAttribute(evt, colorId=cn):
-                self.insertAttribute("color", colorId)
-            EVT_MENU(self, menuID, insertColorAttribute)
+        # Build submenu for colors
+        colorsMenu, self.cmdIdToColorName = self.buildColorsSubmenu()
+        for cmi in self.cmdIdToColorName.keys():
+            EVT_MENU(self, cmi, self.OnInsertColorAttribute)
 
         self.editorMenu.AppendMenu(wxNewId(), 'Add color property', colorsMenu)
-
-
 
         self.editorMenu.AppendSeparator()
 
@@ -1996,6 +2003,7 @@ These are your default global settings.
             self.setShowOnTray()
             self.fireMiscEventKeys(("closed current wiki",))
 
+
     def saveCurrentWikiState(self):
         # write out the current config
         self.writeCurrentConfig()
@@ -2010,12 +2018,7 @@ These are your default global settings.
 
 
     def openFuncPage(self, funcTag, **evtprops):
-#         try:
         page = self.wikiDataManager.getFuncPage(funcTag)
-#         except (WikiWordNotFoundException, WikiFileNotFoundException), e:
-#             page = self.wikiDataManager.createWikiPage(wikiWord)
-#             # trigger hooks
-#             self.hooks.newWikiWord(self, wikiWord)
 
         self.activeEditor.loadFuncPage(page, evtprops)
 
@@ -2046,24 +2049,12 @@ These are your default global settings.
                     wikiWord), 0)
             return
 
-        # save the current page if it is dirty
-#         if self.getCurrentDocPage():
-#             self.saveCurrentDocPage()
-# 
-#             # save the cursor position of the current page so that if
-#             # the user comes back we can put the cursor in the right spot.
-#             self.lastCursorPositionInPage[self.getCurrentWikiWord()] = \
-#                     self.editor.GetCurrentPos()
-
         # trigger hook
         self.hooks.openWikiWord(self, wikiWord)
 
         # check if this is an alias
         if (self.getWikiData().isAlias(wikiWord)):
             wikiWord = self.getWikiData().getAliasesWikiWord(wikiWord)
-
-#         # set the current wikiword
-#         self.currentWikiWord = wikiWord
 
         # fetch the page info from the database
         try:
@@ -2077,71 +2068,7 @@ These are your default global settings.
             self.statusBar.SetStatusText(uniToGui(u"Wiki page not found, a new "
                     u"page will be created"), 0)
 
-
         self.activeEditor.loadWikiPage(page, evtprops)
-
-
-#         # set the editor text
-#         content = None
-# 
-#         try:
-#             content = self.currentWikiPage.getContent()
-#             self.statusBar.SetStatusText(uniToGui(u"Opened wiki word '%s'" %
-#                     self.getCurrentWikiWord()), 0)
-#         except WikiFileNotFoundException, e:
-#             self.statusBar.SetStatusText(uniToGui(u"Wiki page not found, a new "
-#                     u"page will be created"), 0)
-# 
-#             # Check if there is exactly one parent
-#             parents = self.currentWikiPage.getParentRelationships()
-#             if len(parents) == 1:
-#                 # Check if there is a template page
-#                 try:
-#                     parentPage = self.wikiDataManager.getWikiPage(parents[0])
-#                     templateWord = parentPage.getPropertyOrGlobal("template")
-#                     templatePage = self.wikiDataManager.getWikiPage(templateWord)
-#                     content = templatePage.getContent()
-#                 except (WikiWordNotFoundException, WikiFileNotFoundException):
-#                     pass
-# 
-#             if content is None:
-#                 title = self.getWikiPageTitle(self.getCurrentWikiWord())
-#                 content = u"++ %s\n\n" % title
-# 
-#             self.lastCursorPositionInPage[self.getCurrentWikiWord()] = len(content)
-# 
-#         # get the properties that need to be checked for options
-#         pageProps = self.currentWikiPage.getProperties()
-#         globalProps = self.wikiData.getGlobalProperties()
-# 
-#         # get the font that should be used in the editor
-#         font = self.currentWikiPage.getPropertyOrGlobal("font",
-#                 self.defaultEditorFont)
-# 
-#         # set the styles in the editor to the font
-#         if self.lastEditorFont != font:         # TODO ??????
-#             self.presentationExt.faces["mono"] = font
-#             self.editor.SetStyles(self.presentationExt.faces)
-#             self.lastEditorFont = font
-#             
-#         p2 = evtprops.copy()
-#         p2.update({"loading current page": True})
-#         self.fireMiscEventProps(p2)
-# 
-#         # now fill the text into the editor
-#         self.editor.setTextAgaUpdated(content)
-# 
-#         # see if there is a saved position for this page
-#         lastPos = self.lastCursorPositionInPage.get(wikiWord, 0)
-#         self.editor.GotoPos(lastPos)
-# 
-#         # check if CamelCase should be used
-#         # print "openWikiPage props", repr(pageProps), repr(globalProps)
-#         wikiWordsEnabled = strToBool(self.currentWikiPage.getPropertyOrGlobal(
-#                 "camelCaseWordsEnabled"), True)
-# 
-#         self.wikiWordsEnabled = wikiWordsEnabled
-#         self.editor.wikiWordsEnabled = wikiWordsEnabled
 
         p2 = evtprops.copy()
         p2.update({"loaded current page": True})
@@ -2166,28 +2093,28 @@ These are your default global settings.
     def saveCurrentDocPage(self, force = False):
         if force or self.getCurrentDocPage().getDirty()[0]:
             self.activeEditor.saveLoadedDocPage() # this calls in turn saveDocPage() below
-#             tb = self.GetToolBar()
-#             tool = tb.FindById(GUI_ID.CMD_SAVE_WIKI)
-#             # tool.SetNormalBitmap(self.lookupIcon("boy"))
-#             tool.Enable(False)
-#             
-#             # tb.Realize()
-#             self.Freeze()
-#             tb.SetBackgroundColour(wxRED)
-#             self.Thaw()
-#             self.Refresh()
+
+
+#             rect = self.statusBar.GetFieldRect(0)
 # 
-#             # tb.OnPaint(wxPaintEvent(tb.GetId()))
-#             # 
-#             
+#             dc = wxWindowDC(self.statusBar)
 #             try:
+#                 dc.SetBrush(wxRED_BRUSH)
+#                 dc.SetPen(wxRED_PEN)
+#                 dc.DrawRectangle(rect.x, rect.y, rect.width, rect.height)
+#                 dc.SetPen(wxWHITE_PEN)
+#                 dc.SetFont(self.statusBar.GetFont())
+#                 dc.DrawText(u"Saving page", rect.x + 2, rect.y + 2)
 #                 self.activeEditor.saveLoadedDocPage()
+#                 dc.SetFont(wxNullFont)
+#                 dc.SetBrush(wxNullBrush)
+#                 dc.SetPen(wxNullPen)
 #             finally:
-#                 tool.Enable(True)
-#                 # tool.SetNormalBitmap(self.lookupIcon("tb_save"))
-#                 # tb.Realize()
-#                 # tb.SetBackgroundColour(wxNullColour)
-#                 # tb.Refresh()
+#                 del dc
+# 
+#             
+#             self.statusBar.Refresh()
+
 
 
     def saveDocPage(self, page, text):
@@ -2229,6 +2156,7 @@ These are your default global settings.
                     if result == wxID_NO:
                         return False
         finally:
+            pass
             self.statusBar.PopStatusText(0)
 
 
@@ -2326,7 +2254,7 @@ These are your default global settings.
         if self.configuration.getint(
                 "main", "new_window_on_follow_wiki_url") == 1 or \
                 not link2.startswith("wiki:"):
-            os.startfile(link2)
+            os.startfile(mbcsEnc(link2, "replace")[0])
             return True
         elif self.configuration.getint(
                 "main", "new_window_on_follow_wiki_url") == 0:
@@ -2739,7 +2667,8 @@ These are your default global settings.
         self.findDlg = SearchPageDialog(self, -1)
         self.findDlg.CenterOnParent(wxBOTH)
         self.findDlg.Show()
-        
+
+
     def showReplaceTextByWikiwordDialog(self):
         if self.getCurrentWikiWord() is None:
             self.pWiki.displayErrorMessage(u"No real wiki word to modify")
@@ -2812,7 +2741,7 @@ These are your default global settings.
             self.fireMiscEventKeys(("options changed",))
 
 
-    def showExportDialog(self):
+    def OnCmdExportDialog(self, evt):
         self.saveCurrentDocPage()
         self.getWikiData().commit()
 
@@ -2821,9 +2750,6 @@ These are your default global settings.
 
         result = dlg.ShowModal()
         dlg.Destroy()
-
-#         if result == wxID_OK:
-#             pass
 
 
     EXPORT_PARAMS = {
@@ -2844,21 +2770,22 @@ These are your default global settings.
             }
 
 
-    def spellCheckActiveEditor(self):
-        self.statusBar.PushStatusText(u"Checking spelling on wiki page", 0)
-        try:
-            self.getActiveEditor().spellCheckContent()
-        finally:
-            self.statusBar.PopStatusText(0)
-
-
     def OnExportWiki(self, evt):
-        dest = wxDirSelector(u"Select Export Directory", self.getLastActiveDir(),
-        wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON, parent=self)
+        typ = evt.GetId()
+        
+        if typ != GUI_ID.MENU_EXPORT_WHOLE_AS_XML:
+            # Export to dir
+            dest = wxDirSelector(u"Select Export Directory", self.getLastActiveDir(),
+            wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON, parent=self)
+        else:
+            # Export to file
+            dest = wxFileSelector(u"Select Export File",
+                    self.getLastActiveDir(),
+                    default_filename = "", default_extension = "",
+                    wildcard = u"XML files (*.xml)|*.xml|All files (*.*)|*",
+                    flags=wxSAVE | wxOVERWRITE_PROMPT, parent=self)
 
         if dest:
-            typ = evt.GetId()
-            
             if typ in (GUI_ID.MENU_EXPORT_WHOLE_AS_PAGE,
                     GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES,
                     GUI_ID.MENU_EXPORT_WHOLE_AS_XML,
@@ -2898,6 +2825,25 @@ These are your default global settings.
             self.configuration.set("main", "last_active_dir", dest)
 
 
+    def OnCmdImportDialog(self, evt):
+        self.saveCurrentDocPage()
+        self.getWikiData().commit()
+
+        dlg = ImportDialog(self, -1, self)
+        dlg.CenterOnParent(wxBOTH)
+
+        result = dlg.ShowModal()
+        dlg.Destroy()
+
+
+    def spellCheckActiveEditor(self):
+        self.statusBar.PushStatusText(u"Checking spelling on wiki page", 0)
+        try:
+            self.getActiveEditor().spellCheckContent()
+        finally:
+            self.statusBar.PopStatusText(0)
+
+
     def rebuildWiki(self, skipConfirm = False):
         if not skipConfirm:
             result = wxMessageBox(u"Are you sure you want to rebuild this wiki? "+
@@ -2909,35 +2855,6 @@ These are your default global settings.
                 progresshandler = wxGuiProgressHandler(u"Rebuilding wiki",
                         u"Rebuilding wiki", 0, self)
                 self.getWikiDataManager().rebuildWiki(progresshandler)
-
-#                 self.getWikiData().refreshDefinedPages()
-# 
-#                 # get all of the wikiWords
-#                 wikiWords = self.getWikiData().getAllDefinedPageNames()
-#                 
-#                 progresshandler.open(len(wikiWords) + 1)
-#                 try:
-#                     step = 1
-# 
-#                     # re-save all of the pages
-#                     self.getWikiData().clearCacheTables()
-#                     for wikiWord in wikiWords:
-#                         progresshandler.update(step, u"")   # , "Rebuilding %s" % wikiWord)
-#                         wikiPage = self.getWikiDataManager().createWikiPage(wikiWord)
-#                         wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
-#                         step = step + 1
-#     
-#                 finally:            
-#                     progresshandler.close()
-#                     
-# 
-#                 # Give possibility to do further reorganisation
-#                 # specific to database backend
-#                 self.getWikiData().rebuildWiki(progresshandler)
-                
-#                 self.wikiData.rebuildWiki(
-#                         wxGuiProgressHandler(u"Rebuilding wiki", u"Rebuilding wiki",
-#                         0, self))
 
                 self.tree.collapse()
 
@@ -2964,12 +2881,8 @@ These are your default global settings.
 
 
     def insertAttribute(self, name, value):
-#         pos = self.editor.GetCurrentPos()
-#         self.editor.GotoPos(self.editor.GetLength())
-#         self.editor.AddText(u"\n\n[%s=%s]" % (name, value))
-#         self.editor.GotoPos(pos)
         self.activeEditor.AppendText(u"\n\n[%s=%s]" % (name, value))
-        self.saveCurrentDocPage()
+#         self.saveCurrentDocPage()   # TODO Remove or activate this line?
 
     def addText(self, text):
         """
@@ -3090,7 +3003,6 @@ These are your default global settings.
                 "wikiPage": wikiPage})
 
 
-    # TODO decouple save and update
     def OnIdle(self, evt):
         if not self.configuration.getboolean("main", "auto_save"):  # self.autoSave:
             return

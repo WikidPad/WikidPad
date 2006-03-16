@@ -474,7 +474,7 @@ class SearchWikiDialog(wxDialog):   # TODO
             self.pWiki.saveCurrentDocPage()
     
             if len(sarOp.searchStr) > 0:
-                self.foundPages = self.pWiki.wikiData.search(sarOp)
+                self.foundPages = self.pWiki.getWikiData().search(sarOp)
                 self.foundPages.sort()
                 self.ctrls.htmllbPages.showFound(sarOp, self.foundPages,
                         self.pWiki.wikiData)

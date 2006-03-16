@@ -19,9 +19,9 @@ import cStringIO as StringIO
 
 from Utilities import DUMBTHREADHOLDER
 
-import srePersistent as re
+import srePersistent as _re
 
-LINEEND_SPLIT_RE = re.compile(r"\r\n?|\n")
+LINEEND_SPLIT_RE = _re.compile(r"\r\n?|\n")
 
 
 from Configuration import isUnicode, isOSX
@@ -264,7 +264,7 @@ def unescapeForIni(text):
     """
     Inverse of escapeForIni()
     """
-    return re.sub(ur"\\x([0-9a-f]{2})", _unescapeForIniHelper, text)    
+    return _re.sub(ur"\\x([0-9a-f]{2})", _unescapeForIniHelper, text)    
 
 
 def escapeWithRe(text):
@@ -275,7 +275,7 @@ def unescapeWithRe(text):
     """
     Unescape things like \n or \f. Throws exception if unescaping fails
     """
-    return re.sub(u"", text, u"", 1)
+    return _re.sub(u"", text, u"", 1)
 
 
 def htmlColorToRgbTuple(html):

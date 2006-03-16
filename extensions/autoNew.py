@@ -2,7 +2,6 @@ import re
 
 
 # Example plugin for EditorFunctions type plugins
-# The functionality was originally implemented by endura29 <endura29@gmail.com>
 #
 # The plugin allows to install new menu items and toolbar items and register a
 # a function with each that is called. The function must accept one argument which

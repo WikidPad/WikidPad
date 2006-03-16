@@ -306,7 +306,11 @@ WIKIDEFAULTS = {
     ("main", "first_wiki_word"): "", # Start with a special wiki word (If empty, use last word)
     ("main", "wiki_database_type"): u"",  # Type of database "original_gadfly" for WikidPad,
                                          # "compact_sqlite" for WikidPadCompact
-    ("main", "footnotes_as_wikiwords"): "False"  # Interpret footnotes (e.g. [42]) as wiki words
+                                         # or "original_sqlite"
+    ("main", "footnotes_as_wikiwords"): "False",  # Interpret footnotes (e.g. [42]) as wiki words?
+    ("main", "db_pagefile_suffix"): ".wiki"  # Suffix of the page files for "Original ..."
+                                             # db types
+
     }
 
 

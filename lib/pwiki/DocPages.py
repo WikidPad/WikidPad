@@ -42,11 +42,66 @@ class DocPage(MiscEventSourceMixin):
             pass
 
 
-#     def replaceLiveText(self, text):
-#         
-#     def appendLiveText(self, text):
-# 
-#     def getLiveText(self):
+    def appendLiveText(self, text, fireEvent=True):
+        """
+        Append some text to page which is either loaded in one or more
+        editor(s) or only stored in the database (with automatic update).
+
+        fireEvent -- Send event if database was directly modified
+        """
+        if len(self.txtEditors) > 0:
+            # page is in text editor(s), so call AppendText on one of it
+            self.txtEditors[0].AppendText(text)
+        else:
+            # Modify database
+            wikiData = self.wikiDataManager()
+            self.save(text, fireEvent=fireEvent)
+            self.update(text, fireEvent=fireEvent)
+
+
+    def getLiveText(self):
+        """
+        Return current tex of page, either from a text editor or
+        from the database
+        """
+        if len(self.txtEditors) > 0:
+            # page is in text editor(s), so call AppendText on one of it
+            return self.txtEditors[0].GetText()
+        else:
+            return self.getContent()
+
+
+    def replaceLiveText(self, text):
+        if len(self.txtEditors) > 0:
+            # page is in text editor(s), so call replace on one of it
+            self.txtEditors[0].replaceText(text)
+        else:
+            self.save(text)
+            self.update(text, False)   # TODO: Really update? Handle auto-generated areas
+
+
+    def getContent(self):
+        """
+        Returns page content. If page doesn't exist already some content
+        is created automatically (may be empty string).
+        """
+        assert 0 #abstract
+
+
+    def save(self, text, fireEvent=True):
+        """
+        Saves the content of current doc page.
+        """
+        assert 0 #abstract
+
+
+    def update(self, text, fireEvent=True):
+        """
+        Update additional cached informations of doc page
+        """
+        assert 0 #abstract
+
+
 
 
 class WikiPage(DocPage):
@@ -171,7 +226,7 @@ class WikiPage(DocPage):
     def getContent(self):
         """
         Returns page content. If page doesn't exist already the template
-        craeation is done here. After calling this function, properties
+        creation is done here. After calling this function, properties
         are also accessible for a non-existing page
         """
         content = None
@@ -214,7 +269,7 @@ class WikiPage(DocPage):
         return WikiFormatting.WikiPageFormatDetails(withCamelCase)
 
 
-    def save(self, text, alertPWiki=True):
+    def save(self, text, fireEvent=True):
         """
         Saves the content of current wiki page.
         """
@@ -382,7 +437,7 @@ class FunctionalPage(DocPage):
         return WikiFormatting.WikiPageFormatDetails(noFormat=True)
 
 
-    def save(self, text, alertPWiki=True):
+    def save(self, text, fireEvent=True):
         """
         Saves the content of current wiki page.
         """
@@ -409,7 +464,7 @@ class FunctionalPage(DocPage):
         self.saveDirtySince = None
 
 
-    def update(self, text, alertPWiki=True):
+    def update(self, text, fireEvent=True):
         """
         Update additional cached informations (properties, todos, relations)
         """
@@ -417,7 +472,7 @@ class FunctionalPage(DocPage):
         self.updateDirtySince = None
 
         if self.funcTag in ("global/[TextBlocks]", "wiki/[TextBlocks]"):
-            if alertPWiki:
+            if fireEvent:
                 self.pWiki.rereadTextBlocks()
 
 

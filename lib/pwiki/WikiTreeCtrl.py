@@ -916,6 +916,31 @@ class WikiTreeCtrl(wxTreeCtrl):
         res = xrc.wxXmlResource.Get()
         self.contextMenuWikiWords = res.LoadMenu("MenuTreectrlWikiWords")
 
+        # Build icon menu
+        if self.pWiki.lowResources:
+            # Add only menu item for icon select dialog
+            menuID = wxNewId()
+            self.contextMenuWikiWords.Append(menuID, 'Add icon property',
+                    'Open icon select dialog')
+            EVT_MENU(self, menuID, lambda evt: self.pWiki.showIconSelectDialog())
+        else:
+            # Build full submenu for icons
+            iconsMenu, self.cmdIdToIconName = self.pWiki.buildIconsSubmenu()
+            for cmi in self.cmdIdToIconName.keys():
+                EVT_MENU(self, cmi, self.OnInsertIconAttribute)
+
+            self.contextMenuWikiWords.AppendMenu(wxNewId(),
+                    'Add icon property', iconsMenu)
+
+        # Build submenu for colors
+        colorsMenu, self.cmdIdToColorName = self.pWiki.buildColorsSubmenu()
+        for cmi in self.cmdIdToColorName.keys():
+            EVT_MENU(self, cmi, self.OnInsertColorAttribute)
+
+        self.contextMenuWikiWords.AppendMenu(wxNewId(), 'Add color property',
+                colorsMenu)
+
+
         # TODO Let PersonalWikiFrame handle this 
         EVT_MENU(self, GUI_ID.CMD_RENAME_WIKIWORD,
                 lambda evt: self.pWiki.showWikiWordRenameDialog())
@@ -1143,6 +1168,14 @@ class WikiTreeCtrl(wxTreeCtrl):
 
     def onClosedCurrentWiki(self, miscevt):
         self.refreshGenerator = None
+
+    def OnInsertIconAttribute(self, evt):
+        self.pWiki.insertAttribute("icon", self.cmdIdToIconName[evt.GetId()])
+
+    def OnInsertColorAttribute(self, evt):
+        self.pWiki.insertAttribute("color", self.cmdIdToColorName[evt.GetId()])
+
+#         self.activeEditor.AppendText(u"\n\n[%s=%s]" % (name, value))
 
 
     def buildTreeForWord(self, wikiWord, selectNode=False, doexpand=False):
