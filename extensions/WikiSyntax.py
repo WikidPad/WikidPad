@@ -58,7 +58,7 @@ TitledUrlRE =  re.compile(
 
 
 # The following 2 are not in WikiFormatting.FormatExpressions
-BulletRE        = re.compile(ur"^(?P<indentBullet> *)(\*)[ \t]",
+BulletRE        = re.compile(ur"^(?P<indentBullet> *)(?P<actualBullet>\*[ \t])",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 NumericBulletRE = re.compile(ur"^(?P<indentNumeric> *)(?P<preLastNumeric>(?:\d+\.)*)(\d+)\.[ \t]",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
@@ -214,4 +214,9 @@ TableRE = re.compile(ur"(?P<tableBegin>^[ \t]*<<\|[ \t]*$)"
         ur"*?)(?P<tableEnd>^[ \t]*>>[ \t]*$)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
+
+PreBlockRE = re.compile(ur"(?P<preBegin>^[ \t]*<<pre[ \t]*\n)"
+        ur"(?P<preContent>."         #  + PlainCharacterPAT +
+        ur"*?)(?P<preEnd>\n[ \t]*>>[ \t]*$(\n)?)",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
 

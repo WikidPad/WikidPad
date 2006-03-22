@@ -680,7 +680,8 @@ class HtmlXmlExporter:
                             (WikiFormatting.FormatTypes.Numeric,
                             WikiFormatting.FormatTypes.Bullet,
                             WikiFormatting.FormatTypes.Suppress,
-                            WikiFormatting.FormatTypes.Table):
+                            WikiFormatting.FormatTypes.Table,
+                            WikiFormatting.FormatTypes.PreBlock):
 
                         line = lines[-1]
                         line, ind = splitIndent(line)
@@ -732,7 +733,10 @@ class HtmlXmlExporter:
             elif styleno == WikiFormatting.FormatTypes.HorizLine:
                 self.outEatBreaks(u'<hr size="1" />\n')
             elif styleno == WikiFormatting.FormatTypes.Script:
-                pass  # Hide scripts                
+                pass  # Hide scripts 
+            elif styleno == WikiFormatting.FormatTypes.PreBlock:
+                self.outEatBreaks(u"<pre>%s</pre>" %
+                        escapeHtmlNoBreaks(tok.grpdict["preContent"]))
             elif styleno == WikiFormatting.FormatTypes.ToDo:
                 node = tok.node
                 namedelim = (node.name, node.delimiter)
@@ -1208,9 +1212,11 @@ class MultiPageTextExporter:
         if self.separator is None:
             # _findSeparator gave up
             raise ExportException("No usable separator found")
-            
-        self.rawExportFile = open(self.exportDest, "w")
+
+        self.rawExportFile = None
         try:
+            self.rawExportFile = open(self.exportDest, "w")
+
             # Only UTF-8 mode currently
             self.rawExportFile.write(BOM_UTF8)
             self.exportFile = utf8Writer(self.rawExportFile, "replace")
@@ -1229,12 +1235,16 @@ class MultiPageTextExporter:
                 if sepCount > 0:
                     self.exportFile.write("\n%s\n" % self.separator)
                     sepCount -= 1
-        finally:
+        except Exception, e:
             if self.exportFile is not None:
                 self.exportFile.flush()
+
+            if self.rawExportFile is not None:
+                self.rawExportFile.close()
                 
-            self.rawExportFile.close()
-        
+            traceback.print_exc()
+            raise ExportException(unicode(e))
+
 
 
 def describeExporters(mainControl):

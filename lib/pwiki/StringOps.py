@@ -227,13 +227,24 @@ def matchWhole(reObj, s):
 ## Copied from xml.sax.saxutils and modified to reduce dependencies
 def escapeHtml(data):
     """
-    Escape &, <, and > in a unicode string of data.
+    Escape &, <, > and line breaks in a unicode string of data.
     """
 
     # must do ampersand first
 
     return data.replace(u"&", u"&amp;").replace(u">", u"&gt;").\
             replace(u"<", u"&lt;").replace(u"\n", u"<br />\n")
+
+
+def escapeHtmlNoBreaks(data):
+    """
+    Escape &, <, and > (no line breaks) in a unicode string of data.
+    """
+
+    # must do ampersand first
+
+    return data.replace(u"&", u"&amp;").replace(u">", u"&gt;").\
+            replace(u"<", u"&lt;")
 
 
 def escapeForIni(text, toEscape=u""):

@@ -19,6 +19,7 @@ from WikiTxtCtrl import *
 from WikiTreeCtrl import *
 from WikiHtmlView import WikiHtmlView
 from AboutDialog import AboutDialog
+import PropertyGui
 
 from PageHistory import PageHistory
 from SearchAndReplace import SearchReplaceOperation
@@ -36,76 +37,76 @@ from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
 import WikiFormatting
 
 from PluginManager import *
-_COLORS = [
-    "AQUAMARINE",
-    "BLACK",
-    "BLUE VIOLET",
-    "BLUE",
-    "BROWN",
-    "CADET BLUE",
-    "CORAL",
-    "CORNFLOWER BLUE",
-    "CYAN",
-    "DARK GREEN",
-    "DARK GREY",
-    "DARK OLIVE GREEN",
-    "DARK ORCHID",
-    "DARK SLATE BLUE",
-    "DARK SLATE GREY",
-    "DARK TURQUOISE",
-    "DIM GREY",
-    "FIREBRICK",
-    "FOREST GREEN",
-    "GOLD",
-    "GOLDENROD",
-    "GREEN YELLOW",
-    "GREEN",
-    "GREY",
-    "INDIAN RED",
-    "KHAKI",
-    "LIGHT BLUE",
-    "LIGHT GREY",
-    "LIGHT STEEL BLUE",
-    "LIME GREEN",
-    "MAGENTA",
-    "MAROON",
-    "MEDIUM AQUAMARINE",
-    "MEDIUM BLUE",
-    "MEDIUM FOREST GREEN",
-    "MEDIUM GOLDENROD",
-    "MEDIUM ORCHID",
-    "MEDIUM SEA GREEN",
-    "MEDIUM SLATE BLUE",
-    "MEDIUM SPRING GREEN",
-    "MEDIUM TURQUOISE",
-    "MEDIUM VIOLET RED",
-    "MIDNIGHT BLUE",
-    "NAVY",
-    "ORANGE RED",
-    "ORANGE",
-    "ORCHID",
-    "PALE GREEN",
-    "PINK",
-    "PLUM",
-    "PURPLE",
-    "RED",
-    "SALMON",
-    "SEA GREEN",
-    "SIENNA",
-    "SKY BLUE",
-    "SLATE BLUE",
-    "SPRING GREEN",
-    "STEEL BLUE",
-    "TAN",
-    "THISTLE",
-    "TURQUOISE",
-    "VIOLET RED",
-    "VIOLET",
-    "WHEAT",
-    "WHITE",
-    "YELLOW GREEN",
-    "YELLOW"
-]
+# _COLORS = [
+#     "AQUAMARINE",
+#     "BLACK",
+#     "BLUE VIOLET",
+#     "BLUE",
+#     "BROWN",
+#     "CADET BLUE",
+#     "CORAL",
+#     "CORNFLOWER BLUE",
+#     "CYAN",
+#     "DARK GREEN",
+#     "DARK GREY",
+#     "DARK OLIVE GREEN",
+#     "DARK ORCHID",
+#     "DARK SLATE BLUE",
+#     "DARK SLATE GREY",
+#     "DARK TURQUOISE",
+#     "DIM GREY",
+#     "FIREBRICK",
+#     "FOREST GREEN",
+#     "GOLD",
+#     "GOLDENROD",
+#     "GREEN YELLOW",
+#     "GREEN",
+#     "GREY",
+#     "INDIAN RED",
+#     "KHAKI",
+#     "LIGHT BLUE",
+#     "LIGHT GREY",
+#     "LIGHT STEEL BLUE",
+#     "LIME GREEN",
+#     "MAGENTA",
+#     "MAROON",
+#     "MEDIUM AQUAMARINE",
+#     "MEDIUM BLUE",
+#     "MEDIUM FOREST GREEN",
+#     "MEDIUM GOLDENROD",
+#     "MEDIUM ORCHID",
+#     "MEDIUM SEA GREEN",
+#     "MEDIUM SLATE BLUE",
+#     "MEDIUM SPRING GREEN",
+#     "MEDIUM TURQUOISE",
+#     "MEDIUM VIOLET RED",
+#     "MIDNIGHT BLUE",
+#     "NAVY",
+#     "ORANGE RED",
+#     "ORANGE",
+#     "ORCHID",
+#     "PALE GREEN",
+#     "PINK",
+#     "PLUM",
+#     "PURPLE",
+#     "RED",
+#     "SALMON",
+#     "SEA GREEN",
+#     "SIENNA",
+#     "SKY BLUE",
+#     "SLATE BLUE",
+#     "SPRING GREEN",
+#     "STEEL BLUE",
+#     "TAN",
+#     "THISTLE",
+#     "TURQUOISE",
+#     "VIOLET RED",
+#     "VIOLET",
+#     "WHEAT",
+#     "WHITE",
+#     "YELLOW GREEN",
+#     "YELLOW"
+# ]
 
 
 
@@ -157,7 +158,7 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
         wxFrame.__init__(self, parent, -1, title, size = (700, 550),
                          style=wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
         MiscEventSourceMixin.__init__(self)
-        
+
         if cmdLineAction.cmdLineError:
             cmdLineAction.showCmdLineUsage(self,
                     u"Bad formatted command line.\n\n")
@@ -166,33 +167,6 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
             return
 
         self.sleepMode = False  # Is program in low resource sleep mode?
-
-        # Locate the global configuration directory containing the WikidPad.config file
-#         self.wikiAppDir = None
-# 
-#         try:
-#             self.wikiAppDir = dirname(abspath(sys.argv[0]))
-#             if not self.wikiAppDir:
-#                 self.wikiAppDir = r"C:\Program Files\WikidPad"
-# 
-#             homeDir = os.environ.get("HOME")
-#             if homeDir and exists(homeDir):
-#                 globalConfigDir = homeDir
-#             else:
-#                 user = os.environ.get("USERNAME")
-#                 if user:
-#                     homeDir = r"c:\Documents And Settings\%s" % user
-#                     if homeDir and exists(homeDir):
-#                         globalConfigDir = homeDir
-#         except Exception, e:
-#             self.displayErrorMessage(u"Error initializing environment", e)
-# 
-#         if not globalConfigDir:
-#             globalConfigDir = self.wikiAppDir
-# 
-#         if not globalConfigDir or not exists(globalConfigDir):
-#             globalConfigDir = "C:\Windows"
-
 
         if not globalConfigDir or not exists(globalConfigDir):
             self.displayErrorMessage(
@@ -319,7 +293,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #             self.autoSave = self.globalConfig.getboolean("main", "auto_save")
 
         # are indentationGuides enabled
-        self.indentationGuides = self.configuration.getboolean("main", "indentation_guides")
+        self.indentationGuides = self.configuration.getboolean("main",
+                "indentation_guides")
 
 #         # set the locale  # TODO Why?
 #         locale = wxLocale()
@@ -873,95 +848,95 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 '&Text blocks', tbmenu)
 
 
-    def buildIconsSubmenu(self):
-        """
-        Returns tuple (icon sub menu, dict from menu id to icon name)
-        """
-        iconMap = {}
-        iconsMenu = wxMenu()
-
-        iconsMenu1 = wxMenu()
-        iconsMenu.AppendMenu(wxNewId(), 'A-C', iconsMenu1)
-        iconsMenu2 = wxMenu()
-        iconsMenu.AppendMenu(wxNewId(), 'D-F', iconsMenu2)
-        iconsMenu3 = wxMenu()
-        iconsMenu.AppendMenu(wxNewId(), 'H-L', iconsMenu3)
-        iconsMenu4 = wxMenu()
-        iconsMenu.AppendMenu(wxNewId(), 'M-P', iconsMenu4)
-        iconsMenu5 = wxMenu()
-        iconsMenu.AppendMenu(wxNewId(), 'Q-S', iconsMenu5)
-        iconsMenu6 = wxMenu()
-        iconsMenu.AppendMenu(wxNewId(), 'T-Z', iconsMenu6)
-
-        icons = self.iconLookupCache.keys();  # TODO: Create function?
-        icons.sort()
-
-        for icname in icons:
-            if icname.startswith("tb_"):
-                continue
-            iconsSubMenu = None
-            if icname[0] <= 'c':
-                iconsSubMenu = iconsMenu1
-            elif icname[0] <= 'f':
-                iconsSubMenu = iconsMenu2
-            elif icname[0] <= 'l':
-                iconsSubMenu = iconsMenu3
-            elif icname[0] <= 'p':
-                iconsSubMenu = iconsMenu4
-            elif icname[0] <= 's':
-                iconsSubMenu = iconsMenu5
-            elif icname[0] <= 'z':
-                iconsSubMenu = iconsMenu6
-
-            menuID = wxNewId()
-            iconMap[menuID] = icname
-
-            menuItem = wxMenuItem(iconsSubMenu, menuID, icname, icname)
-            bitmap = self.lookupIcon(icname)
-            menuItem.SetBitmap(bitmap)
-            iconsSubMenu.AppendItem(menuItem)
-
-        return (iconsMenu, iconMap)
+#     def buildIconsSubmenu(self):
+#         """
+#         Returns tuple (icon sub menu, dict from menu id to icon name)
+#         """
+#         iconMap = {}
+#         iconsMenu = wxMenu()
+# 
+#         iconsMenu1 = wxMenu()
+#         iconsMenu.AppendMenu(wxNewId(), 'A-C', iconsMenu1)
+#         iconsMenu2 = wxMenu()
+#         iconsMenu.AppendMenu(wxNewId(), 'D-F', iconsMenu2)
+#         iconsMenu3 = wxMenu()
+#         iconsMenu.AppendMenu(wxNewId(), 'H-L', iconsMenu3)
+#         iconsMenu4 = wxMenu()
+#         iconsMenu.AppendMenu(wxNewId(), 'M-P', iconsMenu4)
+#         iconsMenu5 = wxMenu()
+#         iconsMenu.AppendMenu(wxNewId(), 'Q-S', iconsMenu5)
+#         iconsMenu6 = wxMenu()
+#         iconsMenu.AppendMenu(wxNewId(), 'T-Z', iconsMenu6)
+# 
+#         icons = self.iconLookupCache.keys();  # TODO: Create function?
+#         icons.sort()
+# 
+#         for icname in icons:
+#             if icname.startswith("tb_"):
+#                 continue
+#             iconsSubMenu = None
+#             if icname[0] <= 'c':
+#                 iconsSubMenu = iconsMenu1
+#             elif icname[0] <= 'f':
+#                 iconsSubMenu = iconsMenu2
+#             elif icname[0] <= 'l':
+#                 iconsSubMenu = iconsMenu3
+#             elif icname[0] <= 'p':
+#                 iconsSubMenu = iconsMenu4
+#             elif icname[0] <= 's':
+#                 iconsSubMenu = iconsMenu5
+#             elif icname[0] <= 'z':
+#                 iconsSubMenu = iconsMenu6
+# 
+#             menuID = wxNewId()
+#             iconMap[menuID] = icname
+# 
+#             menuItem = wxMenuItem(iconsSubMenu, menuID, icname, icname)
+#             bitmap = self.lookupIcon(icname)
+#             menuItem.SetBitmap(bitmap)
+#             iconsSubMenu.AppendItem(menuItem)
+# 
+#         return (iconsMenu, iconMap)
 
 
     def OnInsertIconAttribute(self, evt):
         self.insertAttribute("icon", self.cmdIdToIconName[evt.GetId()])
 
 
-    def buildColorsSubmenu(self):
-        """
-        Returns tuple (color sub menu, dict from menu id to color name)
-        """
-        colorMap = {}
-        colorsMenu = wxMenu()
-
-        colorsMenu1 = wxMenu()
-        colorsMenu.AppendMenu(wxNewId(), 'A-L', colorsMenu1)
-        colorsMenu2 = wxMenu()
-        colorsMenu.AppendMenu(wxNewId(), 'M-Z', colorsMenu2)
-
-        for cn in _COLORS:    # ["BLACK"]:
-            colorsSubMenu = None
-            if cn[0] <= 'L':
-                colorsSubMenu = colorsMenu1
-            ## elif cn[0] <= 'Z':
-            else:
-                colorsSubMenu = colorsMenu2
-
-            menuID = wxNewId()
-            colorMap[menuID] = cn
-            menuItem = wxMenuItem(colorsSubMenu, menuID, cn, cn)
-            cl = wxNamedColour(cn)
-
-            menuItem.SetBackgroundColour(cl)
-
-            # if color is dark, text should be white (checking green component seems to be enough)
-            if cl.Green() < 128:
-                menuItem.SetTextColour(wxWHITE)
-
-            colorsSubMenu.AppendItem(menuItem)
-
-        return (colorsMenu, colorMap)
+#     def buildColorsSubmenu(self):
+#         """
+#         Returns tuple (color sub menu, dict from menu id to color name)
+#         """
+#         colorMap = {}
+#         colorsMenu = wxMenu()
+# 
+#         colorsMenu1 = wxMenu()
+#         colorsMenu.AppendMenu(wxNewId(), 'A-L', colorsMenu1)
+#         colorsMenu2 = wxMenu()
+#         colorsMenu.AppendMenu(wxNewId(), 'M-Z', colorsMenu2)
+# 
+#         for cn in _COLORS:    # ["BLACK"]:
+#             colorsSubMenu = None
+#             if cn[0] <= 'L':
+#                 colorsSubMenu = colorsMenu1
+#             ## elif cn[0] <= 'Z':
+#             else:
+#                 colorsSubMenu = colorsMenu2
+# 
+#             menuID = wxNewId()
+#             colorMap[menuID] = cn
+#             menuItem = wxMenuItem(colorsSubMenu, menuID, cn, cn)
+#             cl = wxNamedColour(cn)
+# 
+#             menuItem.SetBackgroundColour(cl)
+# 
+#             # if color is dark, text should be white (checking green component seems to be enough)
+#             if cl.Green() < 128:
+#                 menuItem.SetTextColour(wxWHITE)
+# 
+#             colorsSubMenu.AppendItem(menuItem)
+# 
+#         return (colorsMenu, colorMap)
 
 
     def OnInsertColorAttribute(self, evt):
@@ -1137,14 +1112,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     'Open icon select dialog', lambda evt: self.showIconSelectDialog())
         else:
             # Build full submenu for icons
-            iconsMenu, self.cmdIdToIconName = self.buildIconsSubmenu()
+            iconsMenu, self.cmdIdToIconName = PropertyGui.buildIconsSubmenu(self)
             for cmi in self.cmdIdToIconName.keys():
                 EVT_MENU(self, cmi, self.OnInsertIconAttribute)
 
             self.editorMenu.AppendMenu(wxNewId(), 'Add icon property', iconsMenu)
 
         # Build submenu for colors
-        colorsMenu, self.cmdIdToColorName = self.buildColorsSubmenu()
+        colorsMenu, self.cmdIdToColorName = PropertyGui.buildColorsSubmenu()
         for cmi in self.cmdIdToColorName.keys():
             EVT_MENU(self, cmi, self.OnInsertColorAttribute)
 
@@ -1184,12 +1159,38 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         menuID=wxNewId()
         wrapModeMenuItem = wxMenuItem(self.editorMenu, menuID, "&Wrap Mode", "Set wrap mode", wxITEM_CHECK)
         self.editorMenu.AppendItem(wrapModeMenuItem)
-        EVT_MENU(self, menuID, lambda evt: self.setWrapMode(wrapModeMenuItem.IsChecked()))
+        EVT_MENU(self, menuID, self.OnCmdCheckWrapMode)
+
+        wrapModeMenuItem.Check(self.getActiveEditor().getWrapMode())
+
 
         menuID=wxNewId()
-        indentGuidesMenuItem = wxMenuItem(self.editorMenu, menuID, "&View Indentation Guides", "View Indentation Guides", wxITEM_CHECK)
+        indentGuidesMenuItem = wxMenuItem(self.editorMenu, menuID,
+                "&View Indentation Guides", "View Indentation Guides", wxITEM_CHECK)
         self.editorMenu.AppendItem(indentGuidesMenuItem)
-        EVT_MENU(self, menuID, lambda evt: self.setIndentationGuides(indentGuidesMenuItem.IsChecked()))
+        EVT_MENU(self, menuID, self.OnCmdCheckIndentationGuides)
+
+        indentGuidesMenuItem.Check(self.getActiveEditor().GetIndentationGuides())
+
+
+        menuID=wxNewId()
+        autoIndentMenuItem = wxMenuItem(self.editorMenu, menuID,
+                "Auto-indent", "Auto indentation", wxITEM_CHECK)
+        self.editorMenu.AppendItem(autoIndentMenuItem)
+        EVT_MENU(self, menuID, self.OnCmdCheckAutoIndent)
+
+        autoIndentMenuItem.Check(self.getActiveEditor().getAutoIndent())
+
+
+        menuID=wxNewId()
+        autoBulletsMenuItem = wxMenuItem(self.editorMenu, menuID,
+                "Auto-bullets", "Show bullet on next line if current has one",
+                wxITEM_CHECK)
+        self.editorMenu.AppendItem(autoBulletsMenuItem)
+        EVT_MENU(self, menuID, self.OnCmdCheckAutoBullets)
+
+        autoBulletsMenuItem.Check(self.getActiveEditor().getAutoBullets())
+
 
         self.editorMenu.AppendSeparator()
 
@@ -1286,16 +1287,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # turn on or off the wrap mode menu item. this must be done here,
         # after the menus are added to the menu bar
-        if self.wrapMode:
-            wrapModeMenuItem.Check(1)
+#         if self.wrapMode:
+#             wrapModeMenuItem.Check(1)
 
         # turn on or off auto-save
 #         if self.autoSave:
 #             autoSaveMenuItem.Check(1)
 
         # turn on or off indentation guides
-        if self.indentationGuides:
-            indentGuidesMenuItem.Check(1)
+#         if self.indentationGuides:
+#             indentGuidesMenuItem.Check(1)
 
 
     def buildToolbar(self):
@@ -1432,22 +1433,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # Create iconImageList
         self.fillIconLookupCache(True)
 
-        self.buildMainMenu()
-        self.buildToolbar()
-        
-        EVT_MENU(self, GUI_ID.CMD_SWITCH_FOCUS, self.OnSwitchFocus)
-
-        # Add alternative accelerators for clipboard operations
-        ACCS = [
-            (wxACCEL_CTRL, WXK_INSERT, GUI_ID.CMD_CLIPBOARD_COPY),
-            (wxACCEL_SHIFT, WXK_INSERT, GUI_ID.CMD_CLIPBOARD_PASTE),
-            (wxACCEL_SHIFT, WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT),
-            (wxACCEL_NORMAL, WXK_F6, GUI_ID.CMD_SWITCH_FOCUS)
-            ]
-
-        self.SetAcceleratorTable(wxAcceleratorTable(ACCS))
-
-
         # ------------------------------------------------------------------------------------
         # Create the left-right splitter window.
         # ------------------------------------------------------------------------------------
@@ -1491,11 +1476,43 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(), self.OnNotebookPageChanged)
         EVT_SET_FOCUS(self.mainAreaPanel, self.OnNotebookFocused)
 
+
+        # ------------------------------------------------------------------------------------
+        # Create menu and toolbar
+        # ------------------------------------------------------------------------------------
+        
+        self.buildMainMenu()
+        self.buildToolbar()
+        
+        EVT_MENU(self, GUI_ID.CMD_SWITCH_FOCUS, self.OnSwitchFocus)
+
+        # Add alternative accelerators for clipboard operations
+        ACCS = [
+            (wxACCEL_CTRL, WXK_INSERT, GUI_ID.CMD_CLIPBOARD_COPY),
+            (wxACCEL_SHIFT, WXK_INSERT, GUI_ID.CMD_CLIPBOARD_PASTE),
+            (wxACCEL_SHIFT, WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT),
+            (wxACCEL_NORMAL, WXK_F6, GUI_ID.CMD_SWITCH_FOCUS)
+            ]
+
+        self.SetAcceleratorTable(wxAcceleratorTable(ACCS))
+
         # ------------------------------------------------------------------------------------
         # Create the status bar
         # ------------------------------------------------------------------------------------
         self.statusBar = wxStatusBar(self, -1)
-        self.statusBar.SetFieldsCount(2)
+        self.statusBar.SetFieldsCount(3)
+
+        # Measure necessary widths of status fields
+        dc = wxClientDC(self.statusBar)
+        try:
+            dc.SetFont(self.statusBar.GetFont())
+            posWidth = dc.GetTextExtent(
+                    u"Line: 9999 Col: 9999 Pos: 9999999988888")[0]
+            dc.SetFont(wxNullFont)
+        finally:
+            del dc
+
+        self.statusBar.SetStatusWidths([-1, -1, posWidth])
         self.SetStatusBar(self.statusBar)
 
         # Register the App IDLE handler
@@ -1570,8 +1587,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def testIt(self):
         cb = wxTheClipboard
         cb.Open()
-        # datob = wxTextDataObject()
-        # datob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
         datob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
 
 
@@ -1621,10 +1636,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.activeEditor.Enable(0)
         self.activeEditor.SetZoom(self.configuration.getint("main", "zoom"))
 
-        # set the wrap mode of the editor
-        self.setWrapMode(self.wrapMode)
-        if self.indentationGuides:
-            self.activeEditor.SetIndentationGuides(1)
+#         # set the wrap mode of the editor
+#         self.setWrapMode(self.wrapMode)
+#         if self.indentationGuides:
+#             self.activeEditor.SetIndentationGuides(1)
 
 
     def resetGui(self):
@@ -1639,14 +1654,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # reset tray
         self.setShowOnTray()
-        
-#         # reset menu and toolbar (capabilities of WikiData may have changed)
-#         self.toolBar.Destroy()
-#         
-#         self.SetMenuBar(None)
-# 
-#         self.buildMainMenu()
-#         self.buildToolbar()
 
     def getCurrentText(self):
         """
@@ -1669,7 +1676,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         wikiDir = join(wikiDir, wikiName)
         configFileLoc = join(wikiDir, u"%s.wiki" % wikiName)
 
-        self.statusBar.SetStatusText(uniToGui(u"Creating Wiki: %s" % wikiName), 0)
+#         self.statusBar.SetStatusText(uniToGui(u"Creating Wiki: %s" % wikiName), 0)
 
         createIt = True;
         if (exists(wikiDir)):
@@ -1679,7 +1686,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     wikiDir), u'Warning', wxYES_NO)
             result = dlg.ShowModal()
             if result == wxID_YES:
-                os.rmdir(wikiDir)  # BUG!!!!!!!!!!!!!
+                os.rmdir(wikiDir)  # TODO BUG!!!
                 createIt = True
             elif result == wxID_NO:
                 createIt = False
@@ -1747,8 +1754,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #                 config.write(configFile)
 #                 configFile.close()
 
-                self.statusBar.SetStatusText(
-                        uniToGui(u"Created Wiki: %s" % wikiName), 0)
+#                 self.statusBar.SetStatusText(
+#                         uniToGui(u"Created Wiki: %s" % wikiName), 0)
 
                 # open the new wiki
                 self.openWiki(configFileLoc)
@@ -1803,8 +1810,8 @@ These are your default global settings.
         # the new config with the old one.
 
         # status
-        self.statusBar.SetStatusText(
-                uniToGui(u"Opening Wiki: %s" % wikiConfigFilename), 0)
+#         self.statusBar.SetStatusText(
+#                 uniToGui(u"Opening Wiki: %s" % wikiConfigFilename), 0)
 
         # make sure the config exists
         if (not exists(wikiConfigFilename)):
@@ -1845,7 +1852,7 @@ These are your default global settings.
                             if matchingFiles:
                                 wikiWord = matchingFiles[0]
                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
-                        return
+                return
             except Exception, ne:
                 self.displayErrorMessage(u"Error reading config file '%s'" %
                         wikiConfigFilename, e)
@@ -1948,8 +1955,8 @@ These are your default global settings.
         self.setCurrentWordAsRoot()
 
         # set status
-        self.statusBar.SetStatusText(
-                uniToGui(u"Opened wiki '%s'" % self.wikiName), 0)
+#         self.statusBar.SetStatusText(
+#                 uniToGui(u"Opened wiki '%s'" % self.wikiName), 0)
 
         # now try and open the last wiki page
         if lastWikiWord and lastWikiWord != self.wikiName:
@@ -2034,8 +2041,8 @@ These are your default global settings.
         evtprops["addToHistory"] = addToHistory
         evtprops["forceTreeSyncFromRoot"] = forceTreeSyncFromRoot
 
-        self.statusBar.SetStatusText(uniToGui(u"Opening wiki word '%s'" %
-                wikiWord), 0)
+#         self.statusBar.SetStatusText(uniToGui(u"Opening wiki word '%s'" %
+#                 wikiWord), 0)
 
         # make sure this is a valid wiki word
         if not self.getFormatting().isNakedWikiWord(wikiWord):
@@ -2060,13 +2067,17 @@ These are your default global settings.
         try:
             page = self.wikiDataManager.getWikiPage(wikiWord)
             self.statusBar.SetStatusText(uniToGui(u"Opened wiki word '%s'" %
-                    self.getCurrentWikiWord()), 0)
+                    wikiWord), 0)
+                    
+            self.refreshPageStatus(page)
+
         except (WikiWordNotFoundException, WikiFileNotFoundException), e:
             page = self.wikiDataManager.createWikiPage(wikiWord)
             # trigger hooks
             self.hooks.newWikiWord(self, wikiWord)
             self.statusBar.SetStatusText(uniToGui(u"Wiki page not found, a new "
                     u"page will be created"), 0)
+            self.statusBar.SetStatusText(uniToGui(u""), 1)
 
         self.activeEditor.loadWikiPage(page, evtprops)
 
@@ -2094,6 +2105,7 @@ These are your default global settings.
         if force or self.getCurrentDocPage().getDirty()[0]:
             self.activeEditor.saveLoadedDocPage() # this calls in turn saveDocPage() below
 
+        self.refreshPageStatus()
 
 #             rect = self.statusBar.GetFieldRect(0)
 # 
@@ -2188,23 +2200,7 @@ These are your default global settings.
         try:
             self.saveCurrentDocPage()
             self.getWikiDataManager().renameWikiWord(wikiWord, toWikiWord)
-#             self.getWikiData().renameWord(wikiWord, toWikiWord)
-# 
-#             # now we have to search the wiki files and replace the old word with the new
-#             searchOp = SearchReplaceOperation()
-#             searchOp.wikiWide = True
-#             searchOp.wildCard = 'no'
-#             searchOp.caseSensitive = True
-#             searchOp.searchStr = wikiWord
-#             
-#             for resultWord in self.getWikiData().search(searchOp):
-#                 page = self.getWikiDataManager().getWikiPage(resultWord)
-#                 content = page.getContent()
-#                 content = content.replace(wikiWord, toWikiWord)
-#                 page.save(content)
-#                 page.update(content, False)  # TODO AGA processing
-# 
-# 
+
             # if the root was renamed we have a little more to do
             if wikiWord == self.wikiName:
                 self.configuration.set("main", "wiki_name", toWikiWord)
@@ -2271,6 +2267,33 @@ These are your default global settings.
 #         except:
 #             pass
         return False
+
+
+    def refreshPageStatus(self, page = None):
+        """
+        Read information from page and present it in the field 1 of the
+        status bar.
+        """
+        fmt = mbcsEnc(self.getConfig().get("main", "pagestatus_timeformat"),
+                "replace")[0]
+
+        if page is None:
+            page = self.getCurrentDocPage()
+
+        if page is None or not isinstance(page, DocPages.WikiPage):
+            self.statusBar.SetStatusText(uniToGui(u""), 1)
+            return
+            
+        pageStatus = u""   # wikiWord
+
+        modTime, creaTime = page.getTimestamps()
+        if modTime is not None:
+            pageStatus += u"Mod.: %s" % \
+                    unicode(strftime(fmt, localtime(modTime)))
+            pageStatus += u"; Crea.: %s" % \
+                    unicode(strftime(fmt, localtime(creaTime)))
+
+        self.statusBar.SetStatusText(uniToGui(pageStatus), 1)
 
 
     def viewWordSelection(self, title, words, motionType):
@@ -2358,23 +2381,24 @@ These are your default global settings.
         self.configuration.set("main", "last_active_dir", dirname(wikiConfigFilename))
         self.writeGlobalConfig()
 
-    def setWrapMode(self, onOrOff):
-        self.wrapMode = onOrOff
-        self.configuration.set("main", "wrap_mode", self.wrapMode)
-        self.activeEditor.setWrap(self.wrapMode)
+#     def setWrapMode(self, onOrOff):
+#         self.wrapMode = onOrOff
+#         self.configuration.set("main", "wrap_mode", self.wrapMode)
+#         self.getActiveEditor().setWrapMode(self.wrapMode)
 
     # Only needed for scripts
     def setAutoSave(self, onOrOff):
         self.autoSave = onOrOff
         self.configuration.set("main", "auto_save", self.autoSave)
 
-    def setIndentationGuides(self, onOrOff):
-        self.indentationGuides = onOrOff
-        self.configuration.set("main", "indentation_guides", self.indentationGuides)
-        if onOrOff:
-            self.activeEditor.SetIndentationGuides(1)
-        else:
-            self.activeEditor.SetIndentationGuides(0)
+#     def setIndentationGuides(self, onOrOff):
+#         self.indentationGuides = onOrOff
+#         self.configuration.set("main", "indentation_guides", self.indentationGuides)
+# #         if onOrOff:
+#         self.getActiveEditor().SetIndentationGuides(onOrOff)
+# #         else:
+# #             self.getActiveEditor().SetIndentationGuides(0)
+
 
     def setShowTreeControl(self, onOrOff):
         if onOrOff:
@@ -2573,28 +2597,7 @@ These are your default global settings.
         result = dlg.ShowModal()
         if result == wxID_YES:
             try:
-                # self.saveCurrentDocPage()
                 renamed = self.renameCurrentWikiPage(toWikiWord)
-#                 self.getWikiData().renameWord(wikiWord, toWikiWord)
-# 
-#                 # if the root was renamed we have a little more to do
-#                 if wikiWord == self.wikiName:
-#                     self.configuration.set("main", "wiki_name", toWikiWord)
-#                     self.configuration.set("main", "last_wiki_word", toWikiWord)
-#                     self.saveCurrentWikiState()
-#                     self.wikiHistory.remove(self.wikiConfigFilename)
-#                     renamedConfigFile = join(dirname(self.wikiConfigFilename),
-#                             u"%s.wiki" % toWikiWord)
-#                     os.rename(self.wikiConfigFilename, renamedConfigFile)
-#                     self.wikiConfigFilename = None
-#                     self.openWiki(renamedConfigFile)
-# 
-#                 # trigger hooks
-#                 self.hooks.renamedWikiWord(self, wikiWord, toWikiWord)                
-#                 self.tree.collapse()
-#                 self.openWikiPage(toWikiWord, forceTreeSyncFromRoot=True)
-#                 self.findCurrentWordInTree()
-#                 renamed = True
             except WikiDataException, e:
                 traceback.print_exc()                
                 self.displayErrorMessage(str(e))
@@ -2631,33 +2634,10 @@ These are your default global settings.
             self.saveCurrentDocPage()
             try:
                 self.deleteCurrentWikiPage()
-#                 self.wikiData.deleteWord(wikiWord)
-#                 # trigger hooks
-#                 self.hooks.deletedWikiWord(self, wikiWord)
-#                 if wikiWord == self.currentWikiWord:
-#                     self.tree.collapse()
-#                     if self.wikiWordHistory[self.historyPosition-1] != self.currentWikiWord:
-#                         self.goInHistory(-1)
-#                     else:
-#                         self.openWikiPage(self.wikiName)
-#                     self.findCurrentWordInTree()
             except WikiDataException, e:
                 self.displayErrorMessage(str(e))
 
         dlg.Destroy()
-
-
-#     def showFindDialog(self):
-#         if self.findDlg is None:
-#             data = wxFindReplaceData()
-#         else:
-#             return
-# 
-#         self.lastFindPos = -1
-#         dlg = wxFindReplaceDialog(self, data, u"Find", wxFR_NOUPDOWN)
-#         dlg.data = data
-#         self.findDlg = dlg
-#         dlg.Show(True)
 
 
     def showFindReplaceDialog(self):
@@ -2711,7 +2691,7 @@ These are your default global settings.
     def showDateformatDialog(self):
         fmt = self.configuration.get("main", "strftime")
 
-        dlg = DateformatDialog(self, -1, deffmt = fmt)
+        dlg = DateformatDialog(self, -1, self, deffmt = fmt)
         dlg.CenterOnParent(wxBOTH)
         dateformat = None
 
@@ -2738,6 +2718,7 @@ These are your default global settings.
                     "main", "auto_save_delay_dirty")
             self.setShowOnTray()
             self.setHideUndefined()
+            self.refreshPageStatus()
             self.fireMiscEventKeys(("options changed",))
 
 
@@ -3023,6 +3004,24 @@ These are your default global settings.
 #                     elif updateDirty:
 #                         if (currentTime - self.currentWikiPage.lastUpdate) > 5:
 #                             self.updateRelationships()
+
+
+    def OnCmdCheckWrapMode(self, evt):        
+        self.getActiveEditor().setWrapMode(evt.IsChecked())
+        self.configuration.set("main", "wrap_mode", evt.IsChecked())
+
+
+    def OnCmdCheckIndentationGuides(self, evt):        
+        self.getActiveEditor().SetIndentationGuides(evt.IsChecked())
+        self.configuration.set("main", "indentation_guides", evt.IsChecked())
+
+    def OnCmdCheckAutoIndent(self, evt):        
+        self.getActiveEditor().setAutoIndent(evt.IsChecked())
+        self.configuration.set("main", "auto_indent", evt.IsChecked())
+
+    def OnCmdCheckAutoBullets(self, evt):        
+        self.getActiveEditor().setAutoBullets(evt.IsChecked())
+        self.configuration.set("main", "auto_bullets", evt.IsChecked())
 
 
     def OnWikiExit(self, evt):

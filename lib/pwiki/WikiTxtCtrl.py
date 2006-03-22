@@ -74,13 +74,21 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # editor settings
         self.SetIndent(4)
-        self.SetTabIndents(1)
-        self.SetBackSpaceUnIndents(1)
+        self.SetTabIndents(True)
+        self.SetBackSpaceUnIndents(True)
         self.SetTabWidth(4)
         self.SetUseTabs(0)  # TODO Configurable
         self.SetEOLMode(wxSTC_EOL_LF)
         self.AutoCompSetFillUps(u":=")  # TODO Add '.'?
         
+        # configurable editor settings
+        config = self.pWiki.getConfig()
+        self.setWrapMode(config.getboolean("main", "wrap_mode"))
+        self.SetIndentationGuides(config.getboolean("main", "indentation_guides"))
+        self.autoIndent = config.getboolean("main", "auto_indent")
+        self.autoBullets = config.getboolean("main", "auto_bullets")
+
+
         # Self-modify to ansi/unicode version
         if isUnicode():
             self.bytelenSct = bytelenSct_utf8
@@ -208,11 +216,27 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.ReplaceSelection(getTextFromClipboard())
 
 
-    def setWrap(self, onOrOff):
+    def setWrapMode(self, onOrOff):
         if onOrOff:
             self.SetWrapMode(wxSTC_WRAP_WORD)
         else:
             self.SetWrapMode(wxSTC_WRAP_NONE)
+
+    def getWrapMode(self):
+        return self.GetWrapMode() == wxSTC_WRAP_WORD
+
+    def setAutoIndent(self, onOff):
+        self.autoIndent = onOff
+        
+    def getAutoIndent(self):
+        return self.autoIndent
+
+    def setAutoBullets(self, onOff):
+        self.autoBullets = onOff
+        
+    def getAutoBullets(self):
+        return self.autoBullets
+
 
     def SetStyles(self, styleFaces = None):
         # create the styles
@@ -452,7 +476,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def onOptionsChanged(self, miscevt):
-        coltuple = htmlColorToRgbTuple(self.pWiki.configuration.get(
+        coltuple = htmlColorToRgbTuple(self.pWiki.getConfig().get(
                 "main", "editor_bg_color"))
 
         if coltuple is None:
@@ -678,7 +702,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         content = u"%s\n%s\n---------------------------\n\n%s\n" % \
                 (content, mbcsDec(strftime("%x %I:%M %p"))[0], text)
         wikiPage.save(content, False)
-        self.pWiki.statusBar.SetStatusText(uniToGui("Copied snippet to ScratchPad"), 0)
+#         self.pWiki.statusBar.SetStatusText(uniToGui("Copied snippet to ScratchPad"), 0)
 
     def styleSelection(self, styleChars):
         """
@@ -1313,9 +1337,14 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 previousLine = self.GetLine(currentLine-1)
 
                 # check if the prev level was a bullet level
-                if (WikiFormatting.BulletRE.search(previousLine)):
-                    self.AddText("%s* " % (" " * self.GetLineIndentation(currentLine-1)))
-                else:
+                if self.autoBullets:
+                    match = WikiFormatting.BulletRE.match(previousLine)
+                    if match:
+                        self.AddText(
+                                (" " * self.GetLineIndentation(currentLine-1)) +
+                                match.group("actualBullet"))
+                        return
+
                     match = WikiFormatting.NumericBulletRE.search(previousLine)
                     if match:
                         prevNumStr = match.group(3)
@@ -1324,8 +1353,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         adjustment = len(str(nextNum)) - len(prevNumStr)
 
                         self.AddText(u"%s%s%d. " % (u" " * (self.GetLineIndentation(currentLine-1) - adjustment), match.group(2), int(prevNum)+1))
-                    else:
-                        self.AddText(u" " * self.GetLineIndentation(currentLine-1))
+                        return
+
+                if self.autoIndent:
+                    self.AddText(u" " * self.GetLineIndentation(currentLine-1))
 
 
     def OnKeyDown(self, evt):
@@ -1513,7 +1544,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             currentPos = self.GetCurrentPos()
             currentCol = self.GetColumn(currentPos)
             self.pWiki.statusBar.SetStatusText(uniToGui(u"Line: %d Col: %d Pos: %d" %
-                                            (currentLine, currentCol, currentPos)), 1)
+                                            (currentLine, currentCol, currentPos)), 2)
+#             self.pWiki.statusBar.SetStatusText(uniToGui(u"Line: 9999 Col: 9999 Pos: 99999999"), 1)
+
             stylebytes = self.stylebytes
             self.stylebytes = None
 

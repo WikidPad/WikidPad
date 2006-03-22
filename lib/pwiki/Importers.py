@@ -176,9 +176,8 @@ class MultiPageTextImporter:
                 raise
             except Exception, e:
                 traceback.print_exc()
-                raise ImportException("Import error: " + str(e))
-            
-            
+                raise ImportException(unicode(e))
+
         finally:
             self.rawImportFile.close()
 

@@ -277,6 +277,9 @@ class WikiPage(DocPage):
         self.wikiData.setContent(self.wikiWord, text)
         self.saveDirtySince = None
 
+        # Clear timestamp cache
+        self.modified = None
+
 
     def update(self, text, fireEvent=True):
         """

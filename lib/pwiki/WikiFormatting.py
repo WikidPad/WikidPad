@@ -13,19 +13,30 @@ FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
         "AvailWikiWord", "Bold", "Italic", "Heading4", "Heading3", "Heading2",
         "Heading1", "Url", "Script", "Property", "ToDo", "WikiWord2",
         "HorizLine", "Bullet", "Numeric", "Suppress", "Footnote", "Table",
-        "EscapedChar", "HtmlTag", "TableCellSplit", "TableRowSplit"], 1)
+        "EscapedChar", "HtmlTag", "TableCellSplit", "TableRowSplit", "PreBlock"
+        ], 1)
 
 EMPTY_RE = re.compile(ur"", re.DOTALL | re.UNICODE | re.MULTILINE)
 
-def compileCombinedRegex(expressions):
+
+def compileCombinedRegex(expressions, ignoreList=None):
     """
     expressions -- List of tuples (r, s) where r is single compiled RE,
             s is a number from FormatTypes
+    ignoreList -- List of FormatTypes for which the related
+            expression shouldn't be taken into the compiled expression
     returns: compiled combined RE to feed into StringOps.Tokenizer
     """ 
     result = []
+    if ignoreList == None:
+        ignoreList = []
+
     for i in range(len(expressions)):
         r, s = expressions[i]
+
+        if s in ignoreList:
+            continue
+
         if type(r) is type(EMPTY_RE):
             r = r.pattern
         else:
@@ -34,23 +45,24 @@ def compileCombinedRegex(expressions):
 
     return re.compile(u"|".join(result),
             re.DOTALL | re.UNICODE | re.MULTILINE)
-    
-    
-def _buildExpressionsUnindex(expressions, modifier):
-    """
-    Helper for getExpressionsFormatList().
-    Create from an expressions list (see compileCombinedRegex) a tuple
-    of format types so that result[i] is the "right" number from
-    FormatTypes when i is the index returned as second element of a tuple
-    in the tuples list returned by the Tokenizer.
 
-    In fact it is mainly the second tuple item from each expressions
-    list element.
-    modifier -- Dict. If a format type in expressions matches a key
-            in modifier, it is replaced by its value in the result
-    """
-    
-    return [modifier.get(t, t) for re, t in expressions]
+
+
+# def _buildExpressionsUnindex(expressions, modifier):
+#     """
+#     Helper for getExpressionsFormatList().
+#     Create from an expressions list (see compileCombinedRegex) a tuple
+#     of format types so that result[i] is the "right" number from
+#     FormatTypes when i is the index returned as second element of a tuple
+#     in the tuples list returned by the Tokenizer.
+# 
+#     In fact it is mainly the second tuple item from each expressions
+#     list element.
+#     modifier -- Dict. If a format type in expressions matches a key
+#             in modifier, it is replaced by its value in the result
+#     """
+#     
+#     return [modifier.get(t, t) for re, t in expressions]
     
 
 # TODO Remove ?
@@ -157,7 +169,7 @@ class WikiFormatting:
         self.wikiWordStartEsc = None
         self.wikiWordEndEsc = None
 
-        self.rebuildFormatting(None)
+        # self.rebuildFormatting(None)
 
 
     def rebuildFormatting(self, miscevt):
@@ -166,10 +178,15 @@ class WikiFormatting:
         It rebuilds regexes and sets other variables according to
         the new settings
         """
-        # Most specific first
+        # In each list most specific single expressions first
+        
+        # These are the full lists with all possible expressions
+        # they might be reduced afterwards
+
         self.formatExpressions = [
                 (self.PlainEscapedCharacterRE, FormatTypes.EscapedChar),
                 (self.TableRE, FormatTypes.Table),
+                (self.PreBlockRE, FormatTypes.PreBlock),
                 (self.SuppressHighlightingRE, FormatTypes.Default),
                 (self.ScriptRE, FormatTypes.Script),
                 (self.TitledUrlRE, FormatTypes.Url),
@@ -228,12 +245,26 @@ class WikiFormatting:
                 (self.ItalicRE, FormatTypes.Italic),
                 (self.HtmlTagRE, FormatTypes.HtmlTag)
                 ]
-       
-                
-        self.combinedPageRE = compileCombinedRegex(self.formatExpressions)
-        self.combinedTodoRE = compileCombinedRegex(self.formatTodoExpressions)
-        self.combinedTableContentRE = compileCombinedRegex(self.formatTableContentExpressions)
-        self.combinedWwTitleRE = compileCombinedRegex(self.formatWwTitleExpressions)
+
+
+        ignoreList = []  # List of FormatTypes not to compile into the comb. regex
+
+        if self.pWiki.getConfig().getboolean(
+                    "main", "footnotes_as_wikiwords", False):
+            ignoreList.append(FormatTypes.Footnote)
+            self.footnotesAsWws = self.pWiki.getConfig().getboolean(
+                    "main", "footnotes_as_wikiwords", False)
+
+
+        self.combinedPageRE = compileCombinedRegex(self.formatExpressions,
+                ignoreList)
+        self.combinedTodoRE = compileCombinedRegex(self.formatTodoExpressions,
+                ignoreList)
+        self.combinedTableContentRE = compileCombinedRegex(
+                self.formatTableContentExpressions, ignoreList)
+        self.combinedWwTitleRE = compileCombinedRegex(
+                self.formatWwTitleExpressions, ignoreList)
+
 
         self.wikiWordStart = u"["
         self.wikiWordEnd = u"]"
@@ -241,9 +272,9 @@ class WikiFormatting:
         self.wikiWordStartEsc = ur"\["
         self.wikiWordEndEsc = ur"\]"
         
-        if self.pWiki.wikiConfigFilename:
-            self.footnotesAsWws = self.pWiki.getConfig().getboolean(
-                    "main", "footnotes_as_wikiwords", False)
+#         if self.pWiki.wikiConfigFilename:
+#             self.footnotesAsWws = self.pWiki.getConfig().getboolean(
+#                     "main", "footnotes_as_wikiwords", False)
 
         # Needed in PageAst.Table.buildSubAst (placed here because of threading
         #   problem with re.compile            
@@ -431,12 +462,13 @@ class WikiFormatting:
         if not formatDetails.withCamelCase:
             modifier[FormatTypes.WikiWord] = FormatTypes.Default
         
-        if self.footnotesAsWws:  # Footnotes (e.g. [42]) as wiki words?
-            modifier[FormatTypes.Footnote] = FormatTypes.WikiWord
-        else:
-            modifier[FormatTypes.Footnote] = FormatTypes.Default
+#         if self.footnotesAsWws:  # Footnotes (e.g. [42]) as wiki words?
+#             modifier[FormatTypes.Footnote] = FormatTypes.WikiWord
+#         else:
+#             modifier[FormatTypes.Footnote] = FormatTypes.Default
             
-        return _buildExpressionsUnindex(expressions, modifier)
+        return [modifier.get(t, t) for re, t in expressions]
+
 
 
     def tokenizePage(self, text, formatDetails=None,

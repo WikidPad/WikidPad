@@ -85,8 +85,9 @@ class Configuration:
             option = utf8Enc(option)[0]
             
         result = None
-        
-        if self.wikiConfig and self.wikiDefaults.has_key((section, option)):
+
+        if self.wikiConfig is not None and \
+                self.wikiDefaults.has_key((section, option)):
             if self.wikiConfig.has_option(section, option):
                 result = self.wikiConfig.get(section, option)
             else:
@@ -252,6 +253,9 @@ GLOBALDEFAULTS = {
     ## ("main", "font"): "Courier New",
     ("main", "font"): None,
     ("main", "wrap_mode"): "True",
+    ("main", "indentation_guides"): "True",
+    ("main", "auto_bullets"): "True",  # Show bullet/number in newline if current line has bullet
+    ("main", "auto_indent"): "True",
 
     ("main", "auto_save"): "True",  # Boolean field, if auto save should be active
     ("main", "auto_save_delay_key_pressed"): "3",  # Seconds to wait after last key pressed and ...
@@ -286,11 +290,11 @@ GLOBALDEFAULTS = {
     ("main", "print_plaintext_font"): "", # Font description for printing in plain text mode
     ("main", "print_plaintext_wpseparator"): "\\n\\n\\n\\n", # How to separate wikiword pages (uses re escaping)
 
-    ("main", "indentation_guides"): "True",
     ("main", "windowmode"): "0",   # The value must be a number, not a truth value!
     ("main", "lowresources"): "0",
     ("main", "showontray"): "0",
-    ("main", "strftime"): u"%x %I:%M %p",  # time format
+    ("main", "strftime"): u"%x %I:%M %p",  # time format when inserting time in a page
+    ("main", "pagestatus_timeformat"): u"%x %I:%M %p",  # time format for the page status field in status bar
     ("main", "recent_time_formats"): u"%x %I:%M %p;%m/%d/%y;%d.%m.%y;%d.%m.%Y;%a %Y-%m-%d",
              # semicolon separated list of recently used time formats
     ("main", "script_security_level"): "0"  # Allow the use of scripts and

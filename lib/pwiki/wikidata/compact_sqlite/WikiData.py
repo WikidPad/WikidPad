@@ -237,7 +237,7 @@ class WikiData:
                 (word,))
 
         if len(dates) > 0:
-            return dates[0]
+            return (float(dates[0][0]), float(dates[0][1]))
         else:
             return (None, None)  # ?
 

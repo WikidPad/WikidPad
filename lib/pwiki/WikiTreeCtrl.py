@@ -11,10 +11,13 @@ from MiscEvent import KeyFunctionSink, DebugSimple
 
 from WikiExceptions import WikiWordNotFoundException
 import WikiFormatting
+import PropertyGui
 from PageAst import tokenizeTodoValue
 from SearchAndReplace import SearchReplaceOperation
 
 from StringOps import mbcsEnc, guiToUni, uniToGui, wikiWordToLabel, strToBool
+
+from AdditionalDialogs import OpenWikiWordDialog
 
 
 class NodeStyle(object):
@@ -915,6 +918,8 @@ class WikiTreeCtrl(wxTreeCtrl):
         
         res = xrc.wxXmlResource.Get()
         self.contextMenuWikiWords = res.LoadMenu("MenuTreectrlWikiWords")
+        
+        self.contextMenuWikiWords.AppendSeparator()
 
         # Build icon menu
         if self.pWiki.lowResources:
@@ -925,7 +930,8 @@ class WikiTreeCtrl(wxTreeCtrl):
             EVT_MENU(self, menuID, lambda evt: self.pWiki.showIconSelectDialog())
         else:
             # Build full submenu for icons
-            iconsMenu, self.cmdIdToIconName = self.pWiki.buildIconsSubmenu()
+            iconsMenu, self.cmdIdToIconName = \
+                    PropertyGui.buildIconsSubmenu(self.pWiki)
             for cmi in self.cmdIdToIconName.keys():
                 EVT_MENU(self, cmi, self.OnInsertIconAttribute)
 
@@ -933,12 +939,14 @@ class WikiTreeCtrl(wxTreeCtrl):
                     'Add icon property', iconsMenu)
 
         # Build submenu for colors
-        colorsMenu, self.cmdIdToColorName = self.pWiki.buildColorsSubmenu()
+        colorsMenu, self.cmdIdToColorName = PropertyGui.buildColorsSubmenu()
         for cmi in self.cmdIdToColorName.keys():
             EVT_MENU(self, cmi, self.OnInsertColorAttribute)
 
         self.contextMenuWikiWords.AppendMenu(wxNewId(), 'Add color property',
                 colorsMenu)
+                
+        self.contextMenuNode = None  # Tree node for which a context menu was shown
 
 
         # TODO Let PersonalWikiFrame handle this 
@@ -950,6 +958,10 @@ class WikiTreeCtrl(wxTreeCtrl):
                 lambda evt: self.pWiki.insertAttribute("bookmarked", "true"))
         EVT_MENU(self, GUI_ID.CMD_SETASROOT_WIKIWORD,
                 lambda evt: self.pWiki.setCurrentWordAsRoot())
+        EVT_MENU(self, GUI_ID.CMD_APPEND_WIKIWORD,
+                self.OnAppendWikiWord)
+        EVT_MENU(self, GUI_ID.CMD_PREPEND_WIKIWORD,
+                self.OnPrependWikiWord)
 
 
 ##        self.pWiki.getMiscEvent().addListener(DebugSimple("tree event:"))
@@ -1177,6 +1189,26 @@ class WikiTreeCtrl(wxTreeCtrl):
 
 #         self.activeEditor.AppendText(u"\n\n[%s=%s]" % (name, value))
 
+    def OnAppendWikiWord(self, evt):
+        dlg = OpenWikiWordDialog(self.pWiki, -1, title="Append Wiki Word")
+        if dlg.ShowModal() == wxID_OK:
+            parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
+            page = self.pWiki.getWikiDataManager().getWikiPage(parentWord)
+            page.appendLiveText("\n[%s]" % dlg.GetValue())
+            
+        dlg.Destroy()
+
+    def OnPrependWikiWord(self, evt):
+        dlg = OpenWikiWordDialog(self.pWiki, -1, title="Prepend Wiki Word")
+        if dlg.ShowModal() == wxID_OK:
+            parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
+            page = self.pWiki.getWikiDataManager().getWikiPage(parentWord)
+            text = page.getLiveText()
+            page.replaceLiveText("[%s]\n%s" % (dlg.GetValue(), text))
+
+        dlg.Destroy()
+
+
 
     def buildTreeForWord(self, wikiWord, selectNode=False, doexpand=False):
         """
@@ -1356,10 +1388,14 @@ class WikiTreeCtrl(wxTreeCtrl):
         self.DeleteChildren(event.GetItem())
 
     def OnRightButtonDown(self, event):
-        menu = self.GetPyData(self.GetSelection()).getContextMenu()
+        self.contextMenuNode = self.GetSelection()
+        menu = self.GetPyData(self.contextMenuNode).getContextMenu()
 
         if menu is not None:
             self.PopupMenuXY(menu, event.GetX(), event.GetY())
+        else:
+            self.contextMenuNode = None
+
 
     def OnIdle(self, event):
         gen = self.refreshGenerator
