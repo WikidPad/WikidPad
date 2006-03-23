@@ -1,7 +1,5 @@
 # from Enum import Enumeration
-import WikiFormatting
-import srePersistent as re
-import os, string
+import os, string, re, traceback
 from os.path import join, exists, splitext
 import sys
 import shutil
@@ -10,6 +8,7 @@ from time import localtime
 import urllib_red as urllib
 
 
+import WikiFormatting
 from StringOps import *
 
 from WikiExceptions import WikiWordNotFoundException
@@ -28,6 +27,23 @@ def removeBracketsToCompFilename(fn):
     """
     return unicodeToCompFilename(removeBracketsFilename(fn))
 
+def _escapeAnchor(name):
+    """
+    Escape name to be usable as HTML anchor (URL fragment)
+    """
+    result = []
+    for c in name:
+        oc = ord(c)
+        if oc < 65 or oc > 122 or (90 < oc < 97):
+            if oc > 255:
+                result.append("$%04x" % oc)
+            else:
+                result.append("=%02x" % oc)
+
+#             result.append(u"%%%02x" % oc)
+        else:
+            result.append(c)
+    return u"".join(result)
 
 
 # TODO UTF-8 support for HTML? Other encodings?
@@ -154,6 +170,7 @@ class HtmlXmlExporter:
         fp.write(self.getFileHeader(self.pWiki.wikiName))
         
         for word in self.wordList:
+
             wikiPage = self.wikiDataManager.getWikiPage(word)
             if not self.shouldExport(word, wikiPage):
                 continue
@@ -169,7 +186,7 @@ class HtmlXmlExporter:
                     # get aliases too
                     relation = self.wikiData.getAliasesWikiWord(relation)
                     # TODO Use self.convertFilename here?
-                    links[relation] = u"#%s" % relation
+                    links[relation] = u"#%s" % _escapeAnchor(relation)
                     
                 formattedContent = self.formatContent(word, content,
                         formatDetails, links)
@@ -177,19 +194,21 @@ class HtmlXmlExporter:
                         u'[<a name="%s">%s</a>]</span><br><br>'+
                         u'<span class="parent-nodes">parent nodes: %s</span>'+
                         u'<br>%s%s<hr size="1"/>') %
-                        (word, word, self.getParentLinks(wikiPage, False),
-                        formattedContent, u'<br />\n'*10))
+                        (_escapeAnchor(word), word,
+                        self.getParentLinks(wikiPage, False), formattedContent,
+                        u'<br />\n'*10))
             except Exception, e:
                 pass
 
         fp.write(self.getFileFooter())
         fp.reset()        
-        realfp.close()        
+        realfp.close() 
         self.copyCssFile(self.exportDest)
         return outputFile
 
 
     def exportHtmlMultipleFiles(self):
+
         for word in self.wordList:
             wikiPage = self.wikiDataManager.getWikiPage(word)
             if not self.shouldExport(word, wikiPage):
@@ -255,7 +274,7 @@ class HtmlXmlExporter:
 
                     # get aliases too
                     relation = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
-                    links[relation] = u"#%s" % relation
+                    links[relation] = u"#%s" % _escapeAnchor(relation)
 #                     wordForAlias = self.wikiData.getAliasesWikiWord(relation)
 #                     if wordForAlias:
 #                         links[relation] = u"#%s" % wordForAlias
@@ -358,7 +377,7 @@ class HtmlXmlExporter:
             else:
                 parents = parents +\
                 u'<span class="parent-node"><a href="#%s">%s</a></span>' %\
-                (relation, relation)
+                (_escapeAnchor(relation), relation)
                 
         return parents
 
@@ -531,7 +550,7 @@ class HtmlXmlExporter:
             tok = tokens[i]
             try:
                 nexttok = tokens[i+1]
-            except:
+            except IndexError:
                 nexttok = Token(WikiFormatting.FormatTypes.Default,
                     tok.start+len(tok.text), {}, u"")
 
@@ -918,13 +937,15 @@ class TextExporter:
 
         for word in self.wordList:
             try:
-                content, modified = self.wikiDataManager.getWikiData().getContentAndInfo(word)[:2]
+                content = self.wikiDataManager.getWikiData().getContent(word)
+                modified = self.wikiDataManager.getWikiData().getTimestamps(word)[0]
             except:
                 continue
 
             # TODO Use self.convertFilename here???
             outputFile = join(self.exportDest,
                     self.convertFilename(u"%s.wiki" % word))
+
             try:
 #                 if exists(outputFile):
 #                     os.unlink(outputFile)
@@ -940,7 +961,7 @@ class TextExporter:
                     pass
             except:
                 continue
-
+                
 
 def describeExporters():
     return (HtmlXmlExporter(), TextExporter())

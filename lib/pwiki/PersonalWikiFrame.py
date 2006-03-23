@@ -1827,7 +1827,7 @@ These are your default global settings.
                             if matchingFiles:
                                 wikiWord = matchingFiles[0]
                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
-                        return
+                return
             except Exception, ne:
                 self.displayErrorMessage(u"Error reading config file '%s'" %
                         wikiConfigFilename, e)
@@ -2289,7 +2289,7 @@ These are your default global settings.
         if self.configuration.getint(
                 "main", "new_window_on_follow_wiki_url") == 1 or \
                 not link2.startswith("wiki:"):
-            os.startfile(link2)
+            os.startfile(mbcsEnc(link2, "replace")[0])
             return True
         elif self.configuration.getint(
                 "main", "new_window_on_follow_wiki_url") == 0:
@@ -3003,9 +3003,14 @@ These are your default global settings.
             # make sure this is a valid wiki word
             if wikiName.find(u' ') == -1 and \
                     self.getFormatting().isNakedWikiWord(wikiName):
+                startDir = self.wikiConfigFilename
+                if startDir is None:
+                    startDir = self.getLastActiveDir()
+                else:
+                    startDir = dirname(dirname(startDir))
+
                 dlg = wxDirDialog(self, u"Directory to store new wiki",
-#                         self.getLastActiveDir(),
-                        dirname(dirname(self.wikiConfigFilename)),
+                        startDir,
                         style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
                 if dlg.ShowModal() == wxID_OK:
                     try:

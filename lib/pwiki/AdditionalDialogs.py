@@ -627,8 +627,8 @@ class ExportDialog(wxDialog):
         self.ctrls = XrcControls(self)
         
         # Necessary to avoid a crash        
-        emptyPanel = wxPanel(self.ctrls.additOptions)
-        emptyPanel.Fit()
+        self.emptyPanel = wxPanel(self.ctrls.additOptions)
+        self.emptyPanel.Fit()
         
         exporterList = [] # List of tuples (<exporter object>, <export tag>,
                           # <readable description>, <additional options panel>)
@@ -637,12 +637,14 @@ class ExportDialog(wxDialog):
             for tp in ob.getExportTypes(self.ctrls.additOptions):
                 panel = tp[2]
                 if panel is None:
-                    panel = emptyPanel
+                    panel = self.emptyPanel
                 else:
                     panel.Fit()
 
-                exporterList.append((ob, tp[0], tp[1], panel))
-        
+                # Add Tuple (Exporter object, export type tag,
+                #     export type description, additional options panel)
+                exporterList.append((ob, tp[0], tp[1], panel)) 
+
         self.ctrls.additOptions.Fit()
         mins = self.ctrls.additOptions.GetMinSize()
         
@@ -723,6 +725,9 @@ class ExportDialog(wxDialog):
         # Run exporter
         ob, t, desc, panel = \
                 self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
+
+        if panel is self.emptyPanel:
+            panel = None
 
         ob.export(self.pWiki, self.pWiki.getWikiDataManager(), wordList, t, 
                 guiToUni(self.ctrls.tfDirectory.GetValue()), 

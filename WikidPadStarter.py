@@ -13,10 +13,10 @@ srePersistent.loadCodeCache()
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # To ensure unicode selection, works only for me (Michael)
-
-if not hasattr(sys, 'frozen'):
-    sys.path =  \
-            [r"C:\Programme\Python23\Lib\site-packages\wx-2.6-msw-unicode"] + sys.path
+# 
+# if not hasattr(sys, 'frozen'):
+#     sys.path =  \
+#             [r"C:\Programme\Python23\Lib\site-packages\wx-2.6-msw-unicode"] + sys.path
 
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "gadfly.zip"))
