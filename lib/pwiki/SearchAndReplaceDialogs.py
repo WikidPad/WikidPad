@@ -474,7 +474,7 @@ class SearchWikiDialog(wxDialog):   # TODO
             self.pWiki.saveCurrentDocPage()
     
             if len(sarOp.searchStr) > 0:
-                self.foundPages = self.pWiki.wikiData.search(sarOp)
+                self.foundPages = self.pWiki.getWikiData().search(sarOp)
                 self.foundPages.sort()
                 self.ctrls.htmllbPages.showFound(sarOp, self.foundPages,
                         self.pWiki.wikiData)
@@ -836,13 +836,14 @@ class SearchPageDialog(wxDialog):   # TODO
         sarOp = self._buildSearchOperation()
         sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
         sarOp.replaceOp = True
+        sarOp.cycleToStart = False
         lastReplacePos = 0
         while True:
             lastReplacePos = self.pWiki.getActiveEditor().executeSearch(sarOp,
                     lastReplacePos)[1]
-            self.pWiki.getActiveEditor().executeReplace(sarOp)
             if lastReplacePos == -1:
                 break
+            lastReplacePos = self.pWiki.getActiveEditor().executeReplace(sarOp)
 
 
 
