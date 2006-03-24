@@ -43,7 +43,7 @@ Then just start typing text with WikiWords to create your wiki.
     * SearchingTheWiki
     * IncrementalSearch
     * PageListDialog
-    * WikiExport
+    * WikiExport / WikiImport
     * [Printing]
     * InlinePythonEval
     * KeyBindings

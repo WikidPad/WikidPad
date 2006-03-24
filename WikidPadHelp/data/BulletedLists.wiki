@@ -14,7 +14,16 @@ at the beginning of the line. For example:
     15.4.3. Put your cursor at the end of this line and press enter.
 
 
-Be sure to indent your list otherwise the following text is interpreted as part of the list and therefore indented in the HTML view.
+
+You can switch off the automatic generation of bullets/numbers with the "auto-bullets" option in the "Editor" menu.
+
+You can also switch off the automatic indentation with "auto-indent" option:
+
+    If this line is indented and you press return, next will be as well.
+
+
+
+Be sure to indent your list, otherwise the following text is interpreted as part of the list and therefore indented in the HTML view.
 
 Example:
 

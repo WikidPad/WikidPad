@@ -1091,6 +1091,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def executeSearch(self, sarOp, searchCharStartPos=-1, next=False):
+        """
+        Returns a tuple with a least two elements (<start>, <after end>)
+        containing start and after end char positions of the found occurrence
+        or (-1, -1) if not found.
+        """
         if sarOp.booleanOp:
             return (-1, -1)  # Not possible
 
@@ -1144,6 +1149,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         
         
     def executeReplace(self, sarOp):
+        """
+        Returns char position after replacement or -1 if replacement wasn't
+        possible
+        """
         seltext = self.GetSelectedText()
         found = sarOp.matchesPart(seltext)
         

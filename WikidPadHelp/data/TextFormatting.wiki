@@ -40,6 +40,27 @@ with formatting
 
 Before and after the begin and end tags only whitespaces are allowed on the same line, so a << in the text does not prevent ALink from being highlighted.
 
+++++ Preformatted blocks
+
+You can use <<\pre and >> to enclose blocks which have no special formatting (wiki words, italics) as the default escaping blocks but are shown in HTML as monospaced blocks and have exactly the same formatting as written in the source text.
+
+This is helpful especially for programming source code.
+
+Example:
+<<pre
+                      ^
+                     / \
+                    /   \
+                   /_____\
+                  (       )
+                  |       |
+                  |       |
+                  |       |
+                  |       |
+                  L_______j
+>>
+
+
 ++++ Escaping characters
 To escape single characters, prepend them with a backslash. These characters are then interpreted as normal text, the backslash is suppressed in HTML preview and export. If you want to really write a backslash, write two of them: \\.
 

@@ -9,6 +9,7 @@ WikidPadHelp/data/BoughtFoobaromatic.wiki -text
 WikidPadHelp/data/BoughtTemplate.wiki -text
 WikidPadHelp/data/BulletedLists.wiki -text
 WikidPadHelp/data/CamelCase.wiki -text
+WikidPadHelp/data/ChangeFileSuffix.wiki -text
 WikidPadHelp/data/ChangeLog.wiki -text
 WikidPadHelp/data/ChangeLog2003.wiki -text
 WikidPadHelp/data/ChangeLog2004.wiki -text
@@ -286,6 +287,7 @@ WikidPadHelp/data/WikiBookmarks.wiki -text
 WikidPadHelp/data/WikiDocumentAttributes.wiki -text
 WikidPadHelp/data/WikiExport.wiki -text
 WikidPadHelp/data/WikiFonts.wiki -text
+WikidPadHelp/data/WikiImport.wiki -text
 WikidPadHelp/data/WikiMaintenance.wiki -text
 WikidPadHelp/data/WikiPadHooks.wiki -text
 WikidPadHelp/data/WikiSyntax.wiki -text
@@ -298,6 +300,7 @@ WikidPadHelp/data/index/DOCUMENTS.grl -text
 WikidPadHelp/data/index/TEXT_INDEX.grl -text
 WikidPadHelp/data/index/WORDS.grl -text
 WikidPadHelp/data/index/wiki_idx.gfd -text
+WikidPadHelp/data/multipage[!!-~]text[!!-~]format.wiki -text
 WikidPadHelp/data/wikidb.gfd -text
 /WikidPadStarter.py -text
 /build.bat -text

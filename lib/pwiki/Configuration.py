@@ -279,7 +279,7 @@ GLOBALDEFAULTS = {
     ("main", "html_export_pics_as_links"): "False",  # Same for HTML exporting
 
     ("main", "sync_highlight_byte_limit"): "5120",  # Size limit when to start asyn. highlighting in editor
-    ("main", "async_highlight_delay"): "0.5",  # Delay after keypress before starting async. highlighting
+    ("main", "async_highlight_delay"): "0.2",  # Delay after keypress before starting async. highlighting
     ("main", "editor_bg_color"): "#FFFFFF",  # Background color of the editor
 
     ("main", "search_wiki_context_before"): "0", # No. of context characters before

@@ -90,12 +90,14 @@ When double clicking on a wiki: URL, a new instance of the application is starte
 *Process auto-generated areas*
 Experimental feature, use not recommended!
 
-*Script security*
-Set the security level for script execution, see InlinePythonEval#+++# Security# concerns .
-
 *Low resource usage*
 Try to reduce usage of Windows resources. Only interesting for Windows 9x/ME.
 
+*Script security*
+Set the security level for script execution, see InlinePythonEval#+++# Security# concerns .
+
+*Statusbar time format*
+Set the time format the statusbar should use to show modification and creation date of the current wiki page. The format can only be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
 
 
 +++ Current wiki

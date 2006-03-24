@@ -121,14 +121,6 @@ class WikiWordNode(AbstractNode):
         self.wikiWord = wikiWord
         self.flagChildren = None
 
-#         if flagChildren is False:
-#             self.flagChildren = False
-#         elif self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
-#             # All children of these node could be part of a cycle, so we
-#             # don't know here if the node really has valid children
-#             self.flagChildren = None
-#         else:
-#             self.flagChildren = flagChildren
         self.flagRoot = False
         self.ancestors = None
 
@@ -186,14 +178,6 @@ class WikiWordNode(AbstractNode):
         Check if represented word has valid children, filter out undefined
         and/or cycles if options are set accordingly
         """
-#         relations = wikiPage.getChildRelationships(
-#                 existingonly=self.treeCtrl.getHideUndefined(),
-#                 selfreference=False)
-#         if self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
-#             # Filter out cycles
-#             ancestors = self.getAncestors()
-#             relations = [r for r in relations if not ancestors.has_key(r)]
-        
         return len(self._getValidChildren(wikiPage, withPosition=False)) > 0
 
 
@@ -212,9 +196,6 @@ class WikiWordNode(AbstractNode):
         # Has children?
         if self.flagRoot:
             self.flagChildren = True # Has at least ScratchPad and Views
-#         elif self.flagChildren is None:
-#             # Inefficient, therefore self.flagChildren should be set
-#             self.flagChildren = self._hasValidChildren(wikiPage)  # len(self._getValidChildren(wikiPage)) > 0
         else:
             self.flagChildren = self._hasValidChildren(wikiPage)
             
@@ -306,12 +287,6 @@ class WikiWordNode(AbstractNode):
             elif childSortOrder.startswith(u"asc"):
                 relations.sort(_cmpLowerAsc)
 
-#         if childSortOrder != u"unsorted":
-#             if childSortOrder.startswith(u"desc"):
-#                 relations.sort(_cmpLowerDesc) # sort alphabetically
-#             else:
-#                 relations.sort(_cmpLowerAsc)
-
         relationData = []
         position = 1
         for relation in relations:
@@ -337,9 +312,6 @@ class WikiWordNode(AbstractNode):
     def onActivate(self):
         self.treeCtrl.pWiki.openWikiPage(self.wikiWord)
         
-#     def getWikiPage(self):
-#         return self.wikiPage
-
     def getWikiWord(self):
         return self.wikiWord
 
@@ -438,13 +410,13 @@ class MainViewNode(AbstractNode):
         result += TodoNode(self.treeCtrl, self, ()).listChildren()
         # add property names   
         result += PropCategoryNode(self.treeCtrl, self, ()).listChildren()
-        # add searches view
+        # add "searches" view
         node = MainSearchesNode(self.treeCtrl, self)
         if node.isVisible():
             result.append(node)
-        # add last modified view
+        # add "last modified" view
         result.append(MainModifiedWithinNode(self.treeCtrl, self))
-        # add parentless view
+        # add "parentless" view
         node = MainParentlessNode(self.treeCtrl, self)
         if node.isVisible():
             result.append(node)

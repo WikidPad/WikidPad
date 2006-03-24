@@ -168,7 +168,6 @@ RevPropertyValue     = re.compile(ur"^([\w\-\_ \t]*?)([ \t]*[=:][ \t]*)([a-zA-Z0
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 
-
 # script blocks
 ScriptRE        = re.compile(u"\<%(.*?)%\>", re.DOTALL)
 
@@ -178,10 +177,9 @@ AutoGenAreaRE = re.compile(ur"^([ \t]*<<[ \t]+)([^\n]+\n)(.*?)^([ \t]*>>[ \t]*\n
 # todos, captures the todo item text
 ## ToDoREWithContent = re.compile(u"^\s*((?:todo|action|track|issue|question|project)\\.?[^\\:\\s]*:[^\\r\\n]+)", re.MULTILINE)
 
-ToDoREWithContent = re.compile(ur"(?P<todoIndent>^[ \t]*)"
+ToDoREWithContent = re.compile(ur"\b(?P<todoIndent>)"    # ur"(?P<todoIndent>^[ \t]*)"
         ur"(?P<todoName>(?:todo|done|wait|action|track|issue|question|project)(?:\.[^:\s]+)?)"
-#         ur"(?P<todoDelimiter>:)(?P<todoValue>[^\r\n]+)",
-        ur"(?P<todoDelimiter>:)(?P<todoValue>" + PlainCharacterPAT + ur"+?)(?=\n)",
+        ur"(?P<todoDelimiter>:)(?P<todoValue>" + PlainCharacterPAT + ur"+?)$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 # todos, used in the tree control to parse saved todos. Because they were

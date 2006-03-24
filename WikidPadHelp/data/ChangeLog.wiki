@@ -1,7 +1,38 @@
 ﻿++ Change Log
 
 
-Mar. 09, 2006 (1.7beta1)
+Mar. 24, 2006 (1.7beta2)
+
+Changes:
+    * Importer/Exporter for new multipage text format (mpt).
+      See ([WikiExport], [WikiImport], [multipage text format])    
+
+    * Tree node context menu allows now also choice of color and
+      icon of a node as well as appending or prepending of 
+      wiki words to a page.
+    * Options to switch off automatic bullet/numbering creation
+      and auto-indent (see [BulletedLists])
+
+    * Introduced <\<pre >>  block to create preformatted,
+      monospaced text
+    * Todo items (e.g. "\todo:", "\track:") can start after
+      arbitrary text now, not only at the beginning of a line.
+      This is currently experimental! It might be changed back
+      if user have problems with this (see [TodoItems]).
+
+    * Display of modification and creation date of page in status
+      line (customizable date format, see [OptionsDialog])
+    * Support for changing of file suffix of page files in the
+      config file (not part of options GUI) (see [ChangeFileSuffix])
+    * Uses now also environment variable "USERPROFILE" to find
+      configuration directory
+
+    * Bug fixed: page-wide "Replace All" could run in an endless
+      loop (e.g. when replacing "e" by "ee").
+
+
+
+Mar. 09, 2006 (1.7beta1, repository revision in "mbutscher" branch: 63)
 
 *Warning*: This version has a new database format for
 "Compact Sqlite" databases. It is converted automatically
@@ -39,7 +70,7 @@ Fixed bugs:
 
 
 
-Feb. 24, 2006 (1.6beta4)
+Feb. 24, 2006 (1.6beta4, repository revision in "mbutscher" branch: 60)
 
 Changes:
     * Commandline support for exporting (parts of) a wiki and
@@ -73,7 +104,7 @@ Fixed bugs:
 
 
 
-Feb. 09, 2006 (1.6beta3)
+Feb. 09, 2006 (1.6beta3, repository revision in "mbutscher" branch: 57)
 
 Changes:
     * 'global.import_scripts' property introduced (see
@@ -110,7 +141,7 @@ Changes:
 
 
 
-Jan. 25, 2006 (1.6beta2)
+Jan. 25, 2006 (1.6beta2, repository revision in "mbutscher" branch: 55)
 
 *Warning*: This version has a new database format. It is converted
 automatically when opening a wiki the first time. Making a backup
@@ -131,7 +162,7 @@ Changes:
 
 
 
-Jan. 13, 2006 (1.6beta1)
+Jan. 13, 2006 (1.6beta1, repository revision in "mbutscher" branch: 53)
 
 Changes:
     * WikidPad and WikidPadCompact merged into one application
@@ -154,7 +185,7 @@ Changes:
 
 
 
-Dec. 29, 2005 (1.20beta4 / WikidPadCompact 1.5.5beta3)
+Dec. 29, 2005 (1.20beta4 / WikidPadCompact 1.5.5beta3, repository revision in "mbutscher" branch: 50)
 
 Changes:
     * Extended table support: wiki words, bold and italic
@@ -172,7 +203,7 @@ Changes:
     * Some bugs fixed
 
 
-Dec. 20, 2005 (1.20beta3)
+Dec. 20, 2005 (1.20beta3, repository revision in "mbutscher" branch: 48)
 
 *Warning*: This version has a new database format. It is converted
 automatically when opening a wiki the first time. Making a backup
@@ -195,7 +226,7 @@ moments, please be patient.
         * WPCompact: Creation of new wikis and importing doesn't work (wrong formatver)
 
 
-Dec. 10, 2005 (1.20beta2)
+Dec. 10, 2005 (1.20beta2, repository revision in "mbutscher" branch: 44)
 
 *Warning*: This version has a new database format. It is converted
 automatically when opening a wiki the first time. Making a backup

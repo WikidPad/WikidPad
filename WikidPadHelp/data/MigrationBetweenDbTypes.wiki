@@ -32,6 +32,15 @@ If no Gadfly database files in the data-directory are present (file "wikidb.gfd"
 +++ For each migration:
     1. Start WikidPad (if not done already)
     2. Use "Wiki" -> "Open as Type" to open the wiki to migrate, but choose the new desired db type.
+
+
+
++++ If you migrate to "Compact Sqlite":
+Run "Copy .wiki files to database" from "Wiki" menu. This copies the files from the data-directory into the database which contains the real pages for "Compact Sqlite" datatype.
+
+
+
++++ For each migration:
     3. Run "Wiki" -> "Rebuild Wiki"
     4. Close and possibly reopen WikidPad
 

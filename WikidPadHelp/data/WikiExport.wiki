@@ -20,11 +20,16 @@ Choose if you want to export current page only, the current page and all sub-pag
 Uses ASCII-only filenames for exported files so that they can be transferred to other filesystems without compatibility issues. On Windows XP and Server 2003 the AppLocale utility (see http://www.microsoft.com/globaldev/tools/apploc.mspx ) might also help on export problems.
 
 *Export to*
-You can export a single HTML page, one HTML page for each wiki page, an XML document or a set of .wiki files (only interesting for Compact version to migrate to original).
+You can export a single HTML page, one HTML page for each wiki page, an XML document, a [multipage text format] file or a set of .wiki files (mainly interesting for Compact version to migrate to original).
 
 For the HTML exports you can choose if you want to export URLs to images as \<img> tags or as normal links. The default for this possibility can be set in the options dialog.
 
 For the .wiki export you can choose if the files should have system encoding or UTF-8 with or without BOM (byte-order mark). The import function of Compact can't recognize UTF-8 without BOM correctly.
+
+
+*Destination file/directory*
+Here you can set where the exported file(s) should be stored. If file or directory is needed depends on the type given in "Export to". For XML and multipage text it is a single file, for other types it is a directory (because multiple files must be written).
+
 
 ------------------------------------------------------------
 

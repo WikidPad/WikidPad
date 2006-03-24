@@ -836,13 +836,14 @@ class SearchPageDialog(wxDialog):   # TODO
         sarOp = self._buildSearchOperation()
         sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
         sarOp.replaceOp = True
+        sarOp.cycleToStart = False
         lastReplacePos = 0
         while True:
             lastReplacePos = self.pWiki.getActiveEditor().executeSearch(sarOp,
                     lastReplacePos)[1]
-            self.pWiki.getActiveEditor().executeReplace(sarOp)
             if lastReplacePos == -1:
                 break
+            lastReplacePos = self.pWiki.getActiveEditor().executeReplace(sarOp)
 
 
 

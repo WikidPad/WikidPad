@@ -17,7 +17,7 @@ After choosing name and position of the new wiki you are asked to choose the dat
 
 
 +++ Opening an older wiki
-If you open the first time wiki created by an older version of WikidPad(Compact) you are asked to choose the database type it has.
+If you open the first time a wiki created by an older version of WikidPad(Compact) you are asked to choose the database type it has.
 
 If it was created by original WikidPad the right choice is "Original Gadfly", for WikidPadCompact it is "Compact Sqlite". Your choice will be stored in the wiki configuration file so the application will choose the right type automatically next time.
 
