@@ -559,4 +559,5 @@ lib/readme.txt -text
 /pwiki.ico -text
 /setup.py -text
 /sql_mar.py -text
+/wikidpad_ansi.iss -text
 /wikidpad_unicode.iss -text

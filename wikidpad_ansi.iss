@@ -17,8 +17,8 @@ Source: dist\readme_Wic.txt; DestDir: {app}; Components: Program_files
 Source: dist\python24.dll; DestDir: {app}; Components: Program_files
 Source: dist\MSVCR71.dll; DestDir: {app}; Components: Program_files
 Source: dist\sqlite3.dll; DestDir: {app}; Components: Sqlite
-Source: dist\wxmsw26uh_stc_vc.dll; DestDir: {app}; Components: Program_files
-Source: dist\wxmsw26uh_vc.dll; DestDir: {app}; Components: Program_files
+Source: dist\wxmsw26h_stc_vc.dll; DestDir: {app}; Components: Program_files
+Source: dist\wxmsw26h_vc.dll; DestDir: {app}; Components: Program_files
 Source: dist\_controls_.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_core_.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_ctypes.pyd; DestDir: {app}; Components: Sqlite
@@ -41,17 +41,17 @@ Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 1.6urc1
+AppVerName=WikidPad 1.6arc1
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
 VersionInfoVersion=1.6
-VersionInfoTextVersion=WikidPad 1.6urc1
+VersionInfoTextVersion=WikidPad 1.6arc1
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-1.6urc1
+OutputBaseFilename=WikidPad-1.6arc1
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2006 Jason Horman, Michael Butscher, Gerhard Reitmayr
 [Components]

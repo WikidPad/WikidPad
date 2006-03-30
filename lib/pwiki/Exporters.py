@@ -7,18 +7,21 @@ import shutil
 from time import localtime
 import urllib_red as urllib
 
-
-import WikiFormatting
-from StringOps import *
-
-from WikiExceptions import WikiWordNotFoundException
-import WikiFormatting
-import PageAst
-
 from wxPython.wx import *
 import wxPython.xrc as xrc
 
 from wxHelper import XrcControls
+
+
+from WikiExceptions import WikiWordNotFoundException
+import WikiFormatting
+from StringOps import *
+
+from Configuration import isUnicode
+
+import WikiFormatting
+import PageAst
+
 
 
 def removeBracketsToCompFilename(fn):
@@ -74,7 +77,7 @@ class HtmlXmlExporter:
         """
         Return sequence of tuples with the description of export types provided
         by this object. A tuple has the form (<exp. type>,
-            <human readbale description>, <panel for add. options or None>)
+            <human readable description>, <panel for add. options or None>)
         If panels for additional options must be created, they should use
         guiparent as parent
         """
@@ -328,7 +331,13 @@ class HtmlXmlExporter:
         
         formattedContent = self.formatContent(word, content, formatDetails,
                 links, asHtmlPreview=asHtmlPreview)
-        result.append(self.getFileHeader(word))
+        
+        if isUnicode():
+            result.append(self.getFileHeader(word))
+        else:
+            # Retrieve file header without encoding mentioned
+            result.append(self.getFileHeaderNoCharset(word))
+
         # if startFile is set then this is the only page being exported so
         # do not include the parent header.
         if not startFile:
@@ -342,6 +351,16 @@ class HtmlXmlExporter:
         return u"".join(result)
 
             
+    def getFileHeaderNoCharset(self, title):
+        return u"""<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html">
+        <title>%s</title>
+         <link type="text/css" rel="stylesheet" href="wikistyle.css">
+    </head>
+    <body>
+""" % title
+
     def getFileHeader(self, title):
         return u"""<html>
     <head>
@@ -851,7 +870,7 @@ class TextExporter:
         """
         Return sequence of tuples with the description of export types provided
         by this object. A tuple has the form (<exp. type>,
-            <human readable desctiption>, <panel for add. options or None>)
+            <human readable description>, <panel for add. options or None>)
         If panels for additional options must be created, they should use
         guiparent as parent
         """

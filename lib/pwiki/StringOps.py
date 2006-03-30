@@ -53,6 +53,7 @@ def lineendToInternal(text):
     
 
 
+
 if isOSX():      # TODO Linux
     # generate dependencies for py2app
     import encodings.mac_roman
@@ -66,6 +67,7 @@ if isOSX():      # TODO Linux
    
 else:
     # generate dependencies for py2exe
+    import encodings.ascii
     import encodings.mbcs
     mbcsEnc = codecs.getencoder("mbcs")
     mbcsDec = codecs.getdecoder("mbcs")
