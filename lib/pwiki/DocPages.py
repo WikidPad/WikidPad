@@ -102,11 +102,61 @@ class DocPage(MiscEventSourceMixin):
         assert 0 #abstract
 
 
+class AliasWikiPage(DocPage):
+    """
+    Fake page for an alias name of a wiki page. Most functions are delegated
+    to underlying real page
+    Fetched via the WikiDataManager.getWikiPage method.
+    """
+    def __init__(self, wikiDataManager, aliasWikiWord, realWikiPage):
+        self.wikiDataManager = wikiDataManager
+        self.aliasWikiWord = aliasWikiWord
+        self.realWikiPage = realWikiPage
+
+    def getWikiWord(self):
+        return self.aliasWikiWord
+
+    def getNonAliasPage(self):
+        """
+        If this page belongs to an alias of a wiki word, return a page for
+        the real one, otherwise return self
+        """
+#         if not self.wikiData.isAlias(self.wikiWord):
+#             return self
+        
+        word = self.wikiData.getAliasesWikiWord(self.wikiWord)
+        return self.wikiDataManager.getWikiPageNoError(word)
+
+    def getContent(self):
+        """
+        Returns page content. If page doesn't exist already some content
+        is created automatically (may be empty string).
+        """
+        return self.realWikiPage.getContent()
+
+
+    def save(self, text, fireEvent=True):
+        """
+        Saves the content of current doc page.
+        """
+        return self.realWikiPage.save(text, fireEvent)
+
+
+    def update(self, text, fireEvent=True):
+        return self.realWikiPage.update(text, fireEvent)
+
+
+    # TODO A bit hackish, maybe remove
+    def __getattr__(self, attr):
+        return getattr(self.realWikiPage, attr)
+
 
 
 class WikiPage(DocPage):
     """
-    holds the data for a wikipage. fetched via the WikiDataManager.getWikiPage method.
+    holds the data for a real wikipage (no alias).
+    
+    Fetched via the WikiDataManager.getWikiPage method.
     """
     def __init__(self, wikiDataManager, wikiWord):
         DocPage.__init__(self, wikiDataManager)
@@ -114,6 +164,7 @@ class WikiPage(DocPage):
         self.wikiData = self.wikiDataManager.getWikiData()
 
         self.wikiWord = wikiWord
+#         self.realWikiWord = None  # Real wiki word (may be different if wikiWord is an alias)
         self.parentRelations = None
         self.todos = None
         self.props = None
@@ -125,6 +176,9 @@ class WikiPage(DocPage):
 
     def getWikiWord(self):
         return self.wikiWord
+        
+#     def getRealWikiWord(self):
+        
 
 
     def getTimestamps(self):
@@ -155,14 +209,6 @@ class WikiPage(DocPage):
                 existingonly, selfreference, withPosition=withPosition)
 
 
-#     def getChildRelationshipsAndHasChildren(self, existingonly=False,
-#             selfreference=True):
-#         """
-#         Does not support caching
-#         """
-#         return self.wikiData.getChildRelationshipsAndHasChildren(self.wikiWord,
-#                 existingonly, selfreference)
-
     def getProperties(self):
         if self.props is None:
             data = self.wikiData.getPropertiesForWord(self.wikiWord)
@@ -182,7 +228,7 @@ class WikiPage(DocPage):
         """
         props = self.getProperties()
         if props.has_key(propkey):
-            return props[propkey][0]
+            return props[propkey][-1]
         else:
             globalProps = self.wikiData.getGlobalProperties()     
             return globalProps.get(u"global."+propkey, default)
@@ -202,16 +248,24 @@ class WikiPage(DocPage):
                     
         return self.todos
         
+#     def getNonAliasPage(self):
+#         """
+#         If this page belongs to an alias of a wiki word, return a page for
+#         the real one, otherwise return self
+#         """
+#         if not self.wikiData.isAlias(self.wikiWord):
+#             return self
+#         
+#         word = self.wikiData.getAliasesWikiWord(self.wikiWord)
+#         return self.wikiDataManager.getWikiPageNoError(word)
+
     def getNonAliasPage(self):
         """
         If this page belongs to an alias of a wiki word, return a page for
-        the real one, otherwise return self
+        the real one, otherwise return self.
+        This class always returns self
         """
-        if not self.wikiData.isAlias(self.wikiWord):
-            return self
-        
-        word = self.wikiData.getAliasesWikiWord(self.wikiWord)
-        return self.wikiDataManager.getWikiPageNoError(word)
+        return self
         
 
     def _getWikiPageTitle(self, wikiWord):
@@ -269,6 +323,13 @@ class WikiPage(DocPage):
         return WikiFormatting.WikiPageFormatDetails(withCamelCase)
 
 
+    def extractPropertyTokensFromPageAst(self, pageAst):
+        """
+        Return a list of property tokens
+        """
+        return pageAst.findTypeFlat(WikiFormatting.FormatTypes.Property)
+
+
     def save(self, text, fireEvent=True):
         """
         Saves the content of current wiki page.
@@ -299,8 +360,7 @@ class WikiPage(DocPage):
             self.addTodo(t.grpdict["todoName"] + t.grpdict["todoDelimiter"] +
                 t.grpdict["todoValue"])
 
-        # Do not search for properties in subtoken
-        propTokens = page.findTypeFlat(WikiFormatting.FormatTypes.Property)
+        propTokens = self.extractPropertyTokensFromPageAst(page)
         for t in propTokens:
             propName = t.grpdict["propertyName"]
             propValue = t.grpdict["propertyValue"]

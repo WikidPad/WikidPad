@@ -1,5 +1,5 @@
 from   wxPython.wx import wxNewId, wxSystemSettings_GetMetric, wxSYS_SCREEN_X, \
-        wxSYS_SCREEN_Y
+        wxSYS_SCREEN_Y, wxSplitterWindow, wxSashLayoutWindow
 
 from wx.xrc import XRCCTRL, XRCID
 
@@ -186,34 +186,97 @@ def keyDownToAccel(evt):
 
 
 
-"""
-Clipboard formats Windows
+class SmartSashLayoutWindow(wxSashLayoutWindow):
+    def __init__(self, *args, **kwargs):
+        from wxPython.wx import EVT_SASH_DRAGGED
 
-#define CF_TEXT	1
-#define CF_BITMAP	2
-#define CF_METAFILEPICT	3
-#define CF_SYLK	4
-#define CF_DIF	5
-#define CF_TIFF	6
-#define CF_OEMTEXT	7
-#define CF_DIB	8
-#define CF_PALETTE	9
-#define CF_PENDATA	10
-#define CF_RIFF	11
-#define CF_WAVE	12
-#define CF_UNICODETEXT	13
-#define CF_ENHMETAFILE	14
-#define CF_HDROP	15
-#define CF_LOCALE	16
-#define CF_MAX	17
-#define CF_OWNERDISPLAY	128
-#define CF_DSPTEXT	129
-#define CF_DSPBITMAP	130
-#define CF_DSPMETAFILEPICT	131
-#define CF_DSPENHMETAFILE	142
-#define CF_PRIVATEFIRST	512
-#define CF_PRIVATELAST	767
-#define CF_GDIOBJFIRST	768
-#define CF_GDIOBJLAST	1023
-"""
+        wxSashLayoutWindow.__init__(self, *args, **kwargs)
+        
+        self.effectiveSashPos = 0
+        self.minimalEffectiveSashPos = 0
+        self.sashPos = 0
+        
+        self.SetMinimumSizeX(1)
+        self.SetMinimumSizeY(1)
+
+        EVT_SASH_DRAGGED(self, self.GetId(), self.OnSashDragged)
+
+    def align(self, al):
+        from wxPython.wx import wxLAYOUT_TOP, wxLAYOUT_BOTTOM, wxLAYOUT_LEFT, \
+                wxLAYOUT_RIGHT, wxLAYOUT_HORIZONTAL, wxLAYOUT_VERTICAL, \
+                wxSASH_TOP, wxSASH_BOTTOM, wxSASH_LEFT, wxSASH_RIGHT
+        
+        if al == wxLAYOUT_TOP:
+            self.SetOrientation(wxLAYOUT_HORIZONTAL)
+            self.SetAlignment(wxLAYOUT_TOP)
+            self.SetSashVisible(wxSASH_BOTTOM, True)
+        elif al == wxLAYOUT_BOTTOM:
+            self.SetOrientation(wxLAYOUT_HORIZONTAL)
+            self.SetAlignment(wxLAYOUT_BOTTOM)
+            self.SetSashVisible(wxSASH_TOP, True)
+        elif al == wxLAYOUT_LEFT:
+            self.SetOrientation(wxLAYOUT_VERTICAL)
+            self.SetAlignment(wxLAYOUT_LEFT)
+            self.SetSashVisible(wxSASH_RIGHT, True)
+        elif al == wxLAYOUT_RIGHT:
+            self.SetOrientation(wxLAYOUT_VERTICAL)
+            self.SetAlignment(wxLAYOUT_RIGHT)
+            self.SetSashVisible(wxSASH_LEFT, True)
+
+
+    def setSashPosition(self, pos):
+        from wxPython.wx import wxSizeEvent, wxLAYOUT_VERTICAL
+
+        if self.GetOrientation() == wxLAYOUT_VERTICAL:
+            self.SetDefaultSize((pos, 1000))
+        else:
+            self.SetDefaultSize((1000, pos))
+            
+        self.sashPos = pos
+        if pos >= self.minimalEffectiveSashPos:
+            self.effectiveSashPos = pos
+            
+        parent = self.GetParent()
+        sevent = wxSizeEvent(parent.GetSize())
+        parent.ProcessEvent(sevent)
+
+    def getSashPosition(self):
+        return self.sashPos
+
+
+    def setMinimalEffectiveSashPosition(self, minPos):
+        self.minimalEffectiveSashPos = minPos
+
+    def setEffectiveSashPosition(self, ePos):
+        # TODO Check bounds
+        self.effectiveSashPos = ePos
+
+    def getEffectiveSashPosition(self):
+        return self.effectiveSashPos
+
+
+    def isCollapsed(self):
+        return self.getSashPosition() < self.minimalEffectiveSashPos
+
+    def collapseWindow(self):
+        if not self.isCollapsed():
+            self.setSashPosition(1)
+
+    def uncollapseWindow(self):
+        if self.isCollapsed():
+            self.setSashPosition(self.effectiveSashPos)
+
+
+    def OnSashDragged(self, evt):
+        from wxPython.wx import wxLAYOUT_VERTICAL
+
+        # print "OnSashDragged", repr((evt.GetDragRect().width, evt.GetDragRect().height))
+
+        if self.GetOrientation() == wxLAYOUT_VERTICAL:
+            self.setSashPosition(evt.GetDragRect().width)
+        else:
+            self.setSashPosition(evt.GetDragRect().height)
+
+        evt.Skip()
+
 

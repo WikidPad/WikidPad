@@ -5,7 +5,7 @@ import string
 import srePersistent as re
 import threading
 
-from os.path import exists
+from os.path import exists, dirname
 
 from time import time, strftime, sleep
 from textwrap import fill
@@ -14,12 +14,12 @@ from wxPython.wx import *
 from wxPython.stc import *
 import wxPython.xrc as xrc
 
-try:
-    from XXXenchant.checker import SpellChecker
-    from XXXenchant.checker.wxSpellCheckerDialog import wxSpellCheckerDialog
-except ImportError:
-    wxSpellCheckerDialog = None
-    SpellChecker = None
+# try:
+#     from XXXenchant.checker import SpellChecker
+#     from XXXenchant.checker.wxSpellCheckerDialog import wxSpellCheckerDialog
+# except ImportError:
+#     wxSpellCheckerDialog = None
+#     SpellChecker = None
 
 from Utilities import *
 
@@ -36,6 +36,8 @@ from StringOps import *
 #        Tokenizer, wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
 from Configuration import isUnicode
+
+
 
 
 def bytelenSct_utf8(us):
@@ -63,7 +65,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.stylebytes = None
         self.stylingThreadHolder = ThreadHolder()
         self.loadedDocPage = None
-        self.lastCursorPositionInPage = {}
+        self.lastCursorPositionInPage = {}   # TODO Clear caches when loading new wiki
+        self.scrollPosCache = {}
         self.lastFont = None
         self.pageType = "normal"   # The pagetype controls some special editor behaviour
         
@@ -80,6 +83,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.SetUseTabs(0)  # TODO Configurable
         self.SetEOLMode(wxSTC_EOL_LF)
         self.AutoCompSetFillUps(u":=")  # TODO Add '.'?
+#         self.SetYCaretPolicy(wxSTC_CARET_SLOP, 2)  
+#         self.SetYCaretPolicy(wxSTC_CARET_JUMPS | wxSTC_CARET_EVEN, 4)  
+        self.SetYCaretPolicy(wxSTC_CARET_SLOP | wxSTC_CARET_EVEN, 4)  
+
         
         # configurable editor settings
         config = self.pWiki.getConfig()
@@ -165,6 +172,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         #EVT_STC_DOUBLECLICK(self, ID, self.OnDoubleClick)
         EVT_KEY_DOWN(self, self.OnKeyDown)
         EVT_CHAR(self, self.OnChar)
+        EVT_SET_FOCUS(self, self.OnSetFocus)
+        
         EVT_IDLE(self, self.OnIdle)
         EVT_CONTEXT_MENU(self, self.OnContextMenu)
 
@@ -314,7 +323,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         return wxStyledTextCtrl.AddText(self, mbcsEnc(txt, "replace")[0])
 
 
-    def SetSelectionByChar(self, start, end):
+    def SetSelectionByCharPos(self, start, end):
         """
         Same as SetSelection(), but start and end are character positions
         not byte positions
@@ -323,7 +332,19 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         bs = self.bytelenSct(text[:start])
         be = bs + self.bytelenSct(text[start:end])
         self.SetSelection(bs, be)
-        
+
+
+    def GetSelectionCharPos(self):
+        """
+        Same as GetSelection(), but returned (start, end) are character positions
+        not byte positions
+        """
+        start, end = self.GetSelection()
+        cs = len(self.GetTextRange(0, start))
+        ce = cs + len(self.GetTextRange(start, end))
+        return (cs, ce)
+
+
     def saveLoadedDocPage(self):
         """
         Save loaded wiki page into database. Does not check if dirty
@@ -332,9 +353,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             return
 
         page = self.loadedDocPage
-        wikiWord = page.getWikiWord()
-        if wikiWord is not None:
-            self.lastCursorPositionInPage[wikiWord] = self.GetCurrentPos()
+#         wikiWord = page.getWikiWord()
+#         if wikiWord is not None:
+#             self.lastCursorPositionInPage[wikiWord] = self.GetCurrentPos()
 
 #         if not self.loadedDocPage.getDirty()[0]:
 #             return
@@ -350,7 +371,14 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if self.loadedDocPage is not None:
             if self.loadedDocPage.getDirty()[0]:
                 self.saveLoadedDocPage()
-            
+
+            wikiWord = self.loadedDocPage.getWikiWord()
+            if wikiWord is not None:
+                self.lastCursorPositionInPage[wikiWord] = self.GetCurrentPos()
+                self.scrollPosCache[wikiWord] = (self.GetScrollPos(wxHORIZONTAL),
+                        self.GetScrollPos(wxVERTICAL))
+
+
             miscevt = self.loadedDocPage.getMiscEvent()
             miscevt.removeListener(self.wikiPageListener)
             
@@ -398,7 +426,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.SetText(content)
 
 
-
     def loadWikiPage(self, wikiPage, evtprops=None):
         """
         Save loaded page, if necessary, then load wikiPage into editor
@@ -439,7 +466,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.setTextAgaUpdated(content)
         
         self.pageType = self.loadedDocPage.getProperties().get(u"pagetype",
-                [u"normal"])[0]
+                [u"normal"])[-1]
                 
         if self.pageType == u"normal":
             if not self.loadedDocPage.isDefined():
@@ -451,6 +478,22 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         self.loadedDocPage.getWikiWord(), 0)
                 self.GotoPos(lastPos)
 
+                scrollPos = self.scrollPosCache.get(
+                        self.loadedDocPage.getWikiWord())
+                if scrollPos is not None:
+                    self.SetScrollPos(wxHORIZONTAL, scrollPos[0], False)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK, scrollPos[0], wxHORIZONTAL)
+                    self.ProcessEvent(screvt)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE, scrollPos[0], wxHORIZONTAL)
+                    self.ProcessEvent(screvt)
+                    
+                    self.SetScrollPos(wxVERTICAL, scrollPos[1], True)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK, scrollPos[1], wxVERTICAL)
+                    self.ProcessEvent(screvt)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE, scrollPos[1], wxVERTICAL)
+                    self.ProcessEvent(screvt)
+
+
         elif self.pageType == u"form":
             self.GotoPos(0)
             self._goToNextFormField()
@@ -458,20 +501,20 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             pass   # TODO Error message?
 
 
-    def spellCheckContent(self):
-        #sknysh - spell checker
-        text = self.GetText()
-        dlg = wxSpellCheckerDialog(self.pWiki, -1, u"")
-
-        chkr = SpellChecker("en_US", text)  # TODO Option
-        dlg.SetSpellChecker(chkr)
-
-        result = dlg.ShowModal()
-        dlg.Destroy()
-
-        if result == wx.ID_OK: # this line requires the new wxSpellCheckerDialog mentioned above
-            self.replaceText(chkr.get_text())
-#             self.saveCurrentDocPage(force=True)
+#     def spellCheckContent(self):
+#         #sknysh - spell checker
+#         text = self.GetText()
+#         dlg = wxSpellCheckerDialog(self.pWiki, -1, u"")
+# 
+#         chkr = SpellChecker("en_US", text)  # TODO Option
+#         dlg.SetSpellChecker(chkr)
+# 
+#         result = dlg.ShowModal()
+#         dlg.Destroy()
+# 
+#         if result == wx.ID_OK: # this line requires the new wxSpellCheckerDialog mentioned above
+#             self.replaceText(chkr.get_text())
+# #             self.saveCurrentDocPage(force=True)
 
 
 
@@ -491,7 +534,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def onWikiPageUpdated(self, miscevt):
         if self.loadedDocPage is None or \
-                not isinstance(self.loadedDocPage, DocPages.WikiPage):
+                not isinstance(self.loadedDocPage,
+                (DocPages.WikiPage, DocPages.AliasWikiPage)):
             return
 
         # get the font that should be used in the editor
@@ -506,7 +550,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.lastEditorFont = font
 
         self.pageType = self.loadedDocPage.getProperties().get(u"pagetype",
-                [u"normal"])[0]
+                [u"normal"])[-1]
 
 
     def OnStyleNeeded(self, evt):
@@ -786,17 +830,17 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         pageAst = self.getPageAst()
         linkCharPos = len(self.GetTextRange(0, linkPos))
         tokens = pageAst.getTokensForPos(linkCharPos)
-        
+
         if not self._activateTokens(tokens):
-            if linkCharPos > 0:   # tokens[-1].start == linkCharPos and 
-                # Link position lies exactly on token start, so maybe
-                # the previous token(s) was/were meant
+            if linkCharPos > 0:
+                # Maybe a token left to the cursor was meant, so check
+                # one char to the left
                 tokens = pageAst.getTokensForPos(linkCharPos - 1)
 
                 return self._activateTokens(tokens)
         else:
             return True
-                
+
         return False
 
 
@@ -1338,6 +1382,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def OnCharAdded(self, evt):
         "When the user presses enter reindent to the previous level"
+
+#         currPos = self.GetScrollPos(wxVERTICAL)
+        
         key = evt.GetKey()
 
         if key == 10:
@@ -1478,9 +1525,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
             else:
                 evt.Skip()
-                
-                
-        
+
+
+    def OnSetFocus(self, evt):
+        self.pWiki.setActiveEditor(self)
+        evt.Skip()
 
 
     def OnUserListSelection(self, evt):
@@ -1491,7 +1540,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         else:
             toerase = self.autoCompBackBytesWithoutBracket
             
-        self.SetSelection(self.GetCurrentPos()-toerase, self.GetCurrentPos())
+        self.SetSelection(self.GetCurrentPos() - toerase, self.GetCurrentPos())
         
         self.ReplaceSelection(text)
             
@@ -1554,13 +1603,13 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             currentCol = self.GetColumn(currentPos)
             self.pWiki.statusBar.SetStatusText(uniToGui(u"Line: %d Col: %d Pos: %d" %
                                             (currentLine, currentCol, currentPos)), 2)
-#             self.pWiki.statusBar.SetStatusText(uniToGui(u"Line: 9999 Col: 9999 Pos: 99999999"), 1)
 
             stylebytes = self.stylebytes
             self.stylebytes = None
 
             if stylebytes:
                 self.applyStyling(stylebytes)
+
 
 
     def OnDestroy(self, evt):
@@ -1669,13 +1718,25 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
         # TODO works for Windows only
     def OnDropFiles(self, x, y, filenames):
         urls = []
-        for f in filenames:
-            url = urllib.pathname2url(f)
-            if f.endswith(".wiki"):
+        for fn in filenames:
+            url = urllib.pathname2url(fn)
+            if fn.endswith(".wiki"):
                 urls.append("wiki:%s" % url)
             else:
-                urls.append("file:%s" % url)
-                
+                if not wxGetKeyState(WXK_SHIFT):
+                    # Absolute file: URL
+                    urls.append("file:%s" % url)
+                else:
+                    # Relative rel: URL
+                    locPath = self.editor.pWiki.getWikiConfigPath()
+                    if locPath is not None:
+                        locPath = dirname(locPath)
+                        relPath = relativeFilePath(locPath, fn)
+                        if relPath is None:
+                            # Absolute path needed
+                            urls.append("file:%s" % url)
+                        else:
+                            urls.append("rel://%s" % urllib.pathname2url(relPath))
                 
 #             if f.endswith(".wiki"):
 #                 url = urllib.pathname2url(f)
@@ -1690,9 +1751,4 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
 
 
         self.editor.DoDropText(x, y, " ".join(urls))
-
-
-
-def isSpellCheckSupported():
-    return SpellChecker is not None
 

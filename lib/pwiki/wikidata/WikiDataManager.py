@@ -2,7 +2,7 @@ from weakref import WeakValueDictionary
 
 
 from pwiki.WikiExceptions import *
-from pwiki.DocPages import WikiPage, FunctionalPage
+from pwiki.DocPages import WikiPage, FunctionalPage, AliasWikiPage
 
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
@@ -50,7 +50,14 @@ class WikiDataManager:
         value = self.wikiPageDict.get(wikiWord)
         if value is None:
             # No active page available
-            value = WikiPage(self, wikiWord)
+            realWikiWord = self.wikiData.getAliasesWikiWord(wikiWord)
+            if wikiWord == realWikiWord:
+                # no alias
+                value = WikiPage(self, wikiWord)
+            else:
+                realpage = WikiPage(self, realWikiWord)
+                value = AliasWikiPage(self, wikiWord, realpage)
+
             self.wikiPageDict[wikiWord] = value
 
         return value

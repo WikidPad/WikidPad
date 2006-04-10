@@ -39,7 +39,7 @@ from pwiki.StringOps import getBinCompactForDiff, applyBinCompact, mbcsEnc, \
 from pwiki import WikiFormatting
 from pwiki import PageAst
 
-from pwiki.DocPages import WikiPage
+# from pwiki.DocPages import WikiPage
 
 
 class WikiData:
@@ -107,13 +107,15 @@ class WikiData:
 
         # create word caches
         self.cachedContentNames = {}
-        for word in self.getAllDefinedContentNames():
-            self.cachedContentNames[word] = 1
 
         # cache aliases
         aliases = self.getAllAliases()
         for alias in aliases:
             self.cachedContentNames[alias] = 2
+
+        # Cache real words
+        for word in self.getAllDefinedContentNames():
+            self.cachedContentNames[word] = 1
 
         self.cachedGlobalProps = None
         self.getGlobalProperties()
@@ -385,8 +387,25 @@ class WikiData:
 
     def getParentRelationships(self, wikiWord):
         "get the parent relations to this word"
-        return self.connWrap.execSqlQuerySingleColumn(
-                "select word from wikirelations where relation = ?", (wikiWord,))
+#         return self.connWrap.execSqlQuerySingleColumn(
+#                 "select word from wikirelations where relation = ?", (wikiWord,))
+
+        # Parents of the real word
+        wikiWord = self.getAliasesWikiWord(wikiWord)
+        parents = sets.Set(self.connWrap.execSqlQuerySingleColumn(
+                "select word from wikirelations where relation = ?", (wikiWord,)))
+
+        # Plus parents of aliases
+        aliases = [v for k, v in self.getPropertiesForWord(wikiWord)
+                if k == u"alias"]
+
+        for al in aliases:
+            parents.union_update(self.connWrap.execSqlQuerySingleColumn(
+                "select word from wikirelations where relation = ?", (al,)))
+
+        return list(parents)
+
+
 
     # TODO Optimize!
     def getParentlessWikiWords(self):
@@ -551,8 +570,7 @@ class WikiData:
         so it may not rely on the presence of other cache
         information (e.g. relations).
         
-        The self.cachedContentNames member may also need an update
-        after this funtion was called.
+        The self.cachedContentNames is also updated.
         """
         diskPages = sets.ImmutableSet(self._getAllPageNamesFromDisk())
         definedPages = sets.ImmutableSet(self.getAllDefinedContentNames())
@@ -567,15 +585,17 @@ class WikiData:
             self.connWrap.execSql("insert into wikiwords(word, created, modified) "
                     "values (?, ?, ?)", (word, ti, ti))
 
-        # recreate word caches
         self.cachedContentNames = {}
-        for word in self.getAllDefinedContentNames():
-            self.cachedContentNames[word] = 1
 
         # cache aliases
         aliases = self.getAllAliases()
         for alias in aliases:
             self.cachedContentNames[alias] = 2
+
+        # recreate word caches
+        for word in self.getAllDefinedContentNames():
+            self.cachedContentNames[word] = 1
+
 
 
     # TODO More general Wikiword to filename mapping
@@ -607,18 +627,34 @@ class WikiData:
         else:
             return self.connWrap.execSqlQuerySingleColumn("select word from wikiwordcontent where word glob (? || '*')", (thisStr,))
 
-    def getWikiWordsWith(self, thisStr):
+    def getWikiWordsWith(self, thisStr, includeAliases=False):
         """
         get the list of words with thisStr in them,
         if possible first these which start with thisStr.
         """
-        r1 = self.connWrap.execSqlQuerySingleColumn(
+        result = self.connWrap.execSqlQuerySingleColumn(
                 "select word from wikiwords where word like (? || '%')",
                 (thisStr,))
-        return r1 + self.connWrap.execSqlQuerySingleColumn(
+
+        if includeAliases:
+            result += self.connWrap.execSqlQuerySingleColumn(
+                    "select value from wikiwordprops where key = 'alias' and "
+                    "value like (? || '%')", (thisStr,))
+
+
+        result += self.connWrap.execSqlQuerySingleColumn(
                 "select word from wikiwords "
                 "where word like ('%' || ? || '%') and word not like (? || '%')"
                 "and word not glob '[[]*'", (thisStr, thisStr))
+                
+        if includeAliases:
+            result += self.connWrap.execSqlQuerySingleColumn(
+                    "select value from wikiwordprops where key = 'alias' and "
+                    "value like ('%' || ? || '%') and value not like (? || '%')",
+                    (thisStr, thisStr))
+
+        return result
+
 
     def getWikiWordsModifiedWithin(self, days):
         timeDiff = float(time()-(86400*days))
@@ -655,6 +691,11 @@ class WikiData:
         return self.connWrap.execSqlQuerySingleColumn(
                 "select distinct(value) from wikiwordprops where key = ? "
                 "order by value", (key,))
+                
+    def getWordsForPropertyName(self, key):
+        return self.connWrap.execSqlQuerySingleColumn(
+                "select distinct(word) from wikiwordprops where key = ? ",
+                (key,))
 
     def getWordsWithPropertyValue(self, key, value):
         return self.connWrap.execSqlQuerySingleColumn(
@@ -681,7 +722,7 @@ class WikiData:
             for v in values:
                 self.setProperty(word, k, v)
                 if k == "alias":
-                    self.cachedContentNames[v] = 2
+                    self.setAsAlias(v)  # TODO
 
     def updateCachedGlobalProps(self):
         """
@@ -703,11 +744,15 @@ class WikiData:
 
     # ---------- Alias handling ----------
 
+    # TODO Should return None if word isn't defined
     def getAliasesWikiWord(self, alias):
         """
         If alias is an alias wiki word, return the original word,
         otherwise return alias
         """
+        if not self.isAlias(alias):
+            return alias
+
         aliases = self.getWordsWithPropertyValue("alias", alias)
         if len(aliases) > 0:
             return aliases[0]
@@ -715,15 +760,14 @@ class WikiData:
 
     def isAlias(self, word):
         "check if a word is an alias for another"
-        if self.cachedContentNames.has_key(word):
-            return self.cachedContentNames.get(word) == 2
-        return False
+        return self.cachedContentNames.get(word) == 2
         
     def setAsAlias(self, word):
         """
         Sets this word in internal cache to be an alias
         """
-        self.cachedContentNames[word] = 2
+        if self.cachedContentNames.get(word, 2) == 2:
+            self.cachedContentNames[word] = 2
         
     def getAllAliases(self):
         # get all of the aliases
@@ -1084,15 +1128,17 @@ class WikiData:
        # TODO: More repair operations
 
 
-        # recreate word caches
-        self.cachedContentNames = {}
-        for word in self.getAllDefinedContentNames():
-            self.cachedContentNames[word] = 1
+#         self.cachedContentNames = {}
+# 
+#         # cache aliases
+#         aliases = self.getAllAliases()
+#         for alias in aliases:
+#             self.cachedContentNames[alias] = 2
+# 
+#         # recreate word caches
+#         for word in self.getAllDefinedContentNames():
+#             self.cachedContentNames[word] = 1
 
-        # cache aliases
-        aliases = self.getAllAliases()
-        for alias in aliases:
-            self.cachedContentNames[alias] = 2
 
 
 #         finally:            

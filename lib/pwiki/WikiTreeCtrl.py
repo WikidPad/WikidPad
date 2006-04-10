@@ -11,7 +11,7 @@ from MiscEvent import KeyFunctionSink, DebugSimple
 
 from WikiExceptions import WikiWordNotFoundException
 import WikiFormatting
-import PropertyGui
+import PropertyHandling
 from PageAst import tokenizeTodoValue
 from SearchAndReplace import SearchReplaceOperation
 
@@ -217,7 +217,7 @@ class WikiWordNode(AbstractNode):
         props = wikiPage.getProperties()
 
         # priority
-        priority = props.get("priority", (None,))[0]
+        priority = props.get("priority", (None,))[-1]
 
         # priority is special. it can create an "importance" and it changes
         # the text of the node            
@@ -236,21 +236,23 @@ class WikiWordNode(AbstractNode):
         for p in _SETTABLE_PROPS:
             # Check per page props first
             if props.has_key(p):
-                setattr(style, p, props[p][0])
+                setattr(style, p, props[p][-1])
                 continue
                 
             for (key, values) in props.items():
                 for val in values:
                     gPropVal = globalProps.get(u"global.%s.%s.%s" % (key, val, p))
-                    while not gPropVal:
-                        gPropVal = globalProps.get(u"global.%s.%s" % (key, p))
-                        dotpos = key.rfind(u".")
-                        if dotpos == -1:
-                            break
-                        key = key[:dotpos]
+                    if gPropVal: break
 
-                    if gPropVal:
-                        setattr(style, p, gPropVal)
+                while not gPropVal:
+                    gPropVal = globalProps.get(u"global.%s.%s" % (key, p))
+                    dotpos = key.rfind(u".")
+                    if dotpos == -1:
+                        break
+                    key = key[:dotpos]
+
+                if gPropVal:
+                    setattr(style, p, gPropVal)
 
         return style
 
@@ -903,7 +905,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         else:
             # Build full submenu for icons
             iconsMenu, self.cmdIdToIconName = \
-                    PropertyGui.buildIconsSubmenu(self.pWiki)
+                    PropertyHandling.buildIconsSubmenu(self.pWiki)
             for cmi in self.cmdIdToIconName.keys():
                 EVT_MENU(self, cmi, self.OnInsertIconAttribute)
 
@@ -911,7 +913,7 @@ class WikiTreeCtrl(wxTreeCtrl):
                     'Add icon property', iconsMenu)
 
         # Build submenu for colors
-        colorsMenu, self.cmdIdToColorName = PropertyGui.buildColorsSubmenu()
+        colorsMenu, self.cmdIdToColorName = PropertyHandling.buildColorsSubmenu()
         for cmi in self.cmdIdToColorName.keys():
             EVT_MENU(self, cmi, self.OnInsertColorAttribute)
 
@@ -1165,7 +1167,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         dlg = OpenWikiWordDialog(self.pWiki, -1, title="Append Wiki Word")
         if dlg.ShowModal() == wxID_OK:
             parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
-            page = self.pWiki.getWikiDataManager().getWikiPage(parentWord)
+            page = self.pWiki.getWikiDataManager().getWikiPageNoError(parentWord)
             page.appendLiveText("\n[%s]" % dlg.GetValue())
             
         dlg.Destroy()
@@ -1174,7 +1176,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         dlg = OpenWikiWordDialog(self.pWiki, -1, title="Prepend Wiki Word")
         if dlg.ShowModal() == wxID_OK:
             parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
-            page = self.pWiki.getWikiDataManager().getWikiPage(parentWord)
+            page = self.pWiki.getWikiDataManager().getWikiPageNoError(parentWord)
             text = page.getLiveText()
             page.replaceLiveText("[%s]\n%s" % (dlg.GetValue(), text))
 
@@ -1388,9 +1390,9 @@ def _relationSort(a, b):
 
     try:
         if (propsA.has_key(u'tree_position')):
-            aSort = int(propsA[u'tree_position'][0])
+            aSort = int(propsA[u'tree_position'][-1])
         elif (propsA.has_key(u'priority')):
-            aSort = int(propsA[u'priority'][0])
+            aSort = int(propsA[u'priority'][-1])
         else:
             aSort = a[2]
     except:
@@ -1398,9 +1400,9 @@ def _relationSort(a, b):
 
     try:            
         if (propsB.has_key(u'tree_position')):
-            bSort = int(propsB[u'tree_position'][0])
+            bSort = int(propsB[u'tree_position'][-1])
         elif (propsB.has_key(u'priority')):
-            bSort = int(propsB[u'priority'][0])
+            bSort = int(propsB[u'priority'][-1])
         else:
             bSort = b[2]
     except:

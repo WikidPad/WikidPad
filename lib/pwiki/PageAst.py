@@ -24,8 +24,19 @@ class Ast(object):
 
     def getTokensForPos(self, pos):
         return []
-
-
+        
+    def getText(self):
+        """
+        Return the plain text the ast or ast part consists of
+        """
+        assert 0  # Abstract
+        
+    def getLength(self):
+        """
+        Return the length of the plain text the ast or ast part consists of
+        """
+        # Default implementation
+        return len(self.getText())
 
 
 def _enrichTokens(formatting, tokens, formatDetails, threadholder):
@@ -54,7 +65,13 @@ def _enrichTokens(formatting, tokens, formatDetails, threadholder):
             node.buildSubAst(formatting, tok, formatDetails, threadholder)
             tok.node = node
 
-           
+
+def _getRealTextForTokens(tokens):
+    """
+    Returns the concatenated real text of a sequence of tokens
+    """
+    return u"".join([t.getRealText() for t in tokens])
+
 
 def _findTokensForPos(tokens, pos):
     # Algorithm taken from standard lib bisect module
@@ -88,12 +105,27 @@ def _findTokensForPos(tokens, pos):
         return [tok]
 
 
+def iterWords(pageast):
+    """
+    Generator to find all words in page, generates a sequence of
+    (start, end, word) tuples.
+    """
+    for texttoken in pageast.getTextualTokens():
+        for mat in WikiFormatting.TextWordRE.finditer(texttoken.text):
+            yield (mat.start() + texttoken.start, mat.end() + texttoken.start,
+                    mat.group(0))
+
+
+
 class Page(Ast):
     __slots__ = ("tokens",)
 
     def __init__(self):
         Ast.__init__(self)
         self.tokens = None
+        
+    def getText(self):
+        return _getRealTextForTokens(self.tokens)
         
     def getTokens(self):
         """
@@ -126,6 +158,47 @@ class Page(Ast):
             if tok.node is not None:
                 tok.node._findType(typeToFind, result)
 
+    def getTextualTokens(self):
+        """
+        Returns a sequence of tokens containing real text only which are then
+        processed and cut into words for word counting or spell checking.
+        Returned token types can only be FormatTypes.SuppressHighlight for
+        plain text and FormatTypes.Default for escaped text.
+        """
+        result = []
+        for t in self.tokens:
+            if t.ttype in (WikiFormatting.FormatTypes.WikiWord, 
+                    WikiFormatting.FormatTypes.WikiWord2):
+                # Ignore these
+                continue
+
+            t = t.shallowCopy()
+            
+            if t.ttype in (WikiFormatting.FormatTypes.EscapedChar, 
+                    WikiFormatting.FormatTypes.Bold,
+                    WikiFormatting.FormatTypes.Italic,
+                    WikiFormatting.FormatTypes.Heading4,
+                    WikiFormatting.FormatTypes.Heading3,
+                    WikiFormatting.FormatTypes.Heading2,
+                    WikiFormatting.FormatTypes.Heading1):
+                # Convert to default
+                t.ttype = WikiFormatting.FormatTypes.Default
+                t.grpdict = None
+                t.node = None
+
+
+            if t.ttype == WikiFormatting.FormatTypes.Default or \
+                    t.ttype == WikiFormatting.FormatTypes.SuppressHighlight:
+                # check for coalescing possibility
+                if len(result) > 0 and result[-1].ttype == t.ttype and \
+                        result[-1].start + len(result[-1].text) == t.start:
+                    result[-1].text += t.text
+                else:
+                    result.append(t)
+
+        return result
+
+
 
 class Todo(Ast):
     __slots__ = ("indent", "name", "delimiter", "valuetokens")
@@ -135,6 +208,10 @@ class Todo(Ast):
         
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.valuetokens, pos)
+        
+    def getText(self):
+        return self.indent + self.name + self.delimiter + \
+                _getRealTextForTokens(self.valuetokens)
 
     def buildSubAst(self, formatting, token, formatDetails=None,
             threadholder=DUMBTHREADHOLDER):
@@ -192,6 +269,9 @@ class Table(Ast):
         Ast.__init__(self)
         
         self.contenttokens = None
+
+    def getText(self):
+        return self.begin + self.end + _getRealTextForTokens(self.contenttokens)
 
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.contenttokens, pos)
@@ -303,6 +383,14 @@ class WikiWord(Ast):
     def __init__(self):
         Ast.__init__(self)
 
+    def getText(self):
+        # Full text not available
+        return None
+        
+    def getLength(self):
+        # Length not available
+        return -1
+
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.titleTokens, pos)
 
@@ -358,6 +446,14 @@ class Url(Ast):
 
     def __init__(self):
         Ast.__init__(self)
+
+    def getText(self):
+        # Full text not available
+        return None
+        
+    def getLength(self):
+        # Length not available
+        return -1
 
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.titleTokens, pos)

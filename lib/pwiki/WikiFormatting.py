@@ -13,8 +13,8 @@ FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
         "AvailWikiWord", "Bold", "Italic", "Heading4", "Heading3", "Heading2",
         "Heading1", "Url", "Script", "Property", "ToDo", "WikiWord2",
         "HorizLine", "Bullet", "Numeric", "Suppress", "Footnote", "Table",
-        "EscapedChar", "HtmlTag", "TableCellSplit", "TableRowSplit", "PreBlock"
-        ], 1)
+        "EscapedChar", "HtmlTag", "TableCellSplit", "TableRowSplit", "PreBlock",
+        "SuppressHighlight"], 1)
 
 EMPTY_RE = re.compile(ur"", re.DOTALL | re.UNICODE | re.MULTILINE)
 
@@ -187,7 +187,7 @@ class WikiFormatting:
                 (self.PlainEscapedCharacterRE, FormatTypes.EscapedChar),
                 (self.TableRE, FormatTypes.Table),
                 (self.PreBlockRE, FormatTypes.PreBlock),
-                (self.SuppressHighlightingRE, FormatTypes.Default),
+                (self.SuppressHighlightingRE, FormatTypes.SuppressHighlight),
                 (self.ScriptRE, FormatTypes.Script),
                 (self.TitledUrlRE, FormatTypes.Url),
                 (self.UrlRE, FormatTypes.Url),
@@ -206,6 +206,7 @@ class WikiFormatting:
                 (self.BulletRE, FormatTypes.Bullet),
                 (self.NumericBulletRE, FormatTypes.Numeric),
                 (self.HorizLineRE, FormatTypes.HorizLine)
+#                 (self.PlainCharactersRE, FormatTypes.Default)
                 ]
                 
                 
@@ -220,6 +221,7 @@ class WikiFormatting:
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
                 (self.HtmlTagRE, FormatTypes.HtmlTag)
+#                 (self.PlainCharactersRE, FormatTypes.Default)
                 ]
                 
 
@@ -236,6 +238,7 @@ class WikiFormatting:
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
                 (self.HtmlTagRE, FormatTypes.HtmlTag)
+#                 (self.PlainCharactersRE, FormatTypes.Default)
                 ]
 
 
@@ -244,6 +247,7 @@ class WikiFormatting:
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
                 (self.HtmlTagRE, FormatTypes.HtmlTag)
+#                 (self.PlainCharactersRE, FormatTypes.Default)
                 ]
 
 

@@ -132,12 +132,12 @@ class CmdLineAction:
             self.showCmdLineUsage(pWiki,
                     u"Value for --export-type can be one of:\n%s\n\n" % exList)
             return
-            
+
         exporter.export(pWiki.getWikiDataManager(), wordList,
                 self.exportType, self.exportDest, 
-                self.exportCompFn, ob.getAddOpt(None))
+                self.exportCompFn, exporter.getAddOpt(None))
 
-            
+
 
     USAGE = \
 """Options:

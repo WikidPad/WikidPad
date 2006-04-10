@@ -349,7 +349,7 @@ class SearchResultListBox(wxHtmlListBox):
         self.pWiki.openWikiPage(info.wikiWord)
         # self.pagePosNext = 0
         if info.occPos[0] != -1:
-            self.pWiki.getActiveEditor().SetSelectionByChar(info.occPos[0],
+            self.pWiki.getActiveEditor().SetSelectionByCharPos(info.occPos[0],
                     info.occPos[1])
 
 #                 executeSearch(searchOp, 0)

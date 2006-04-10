@@ -13,14 +13,15 @@ import wxPython.xrc as xrc
 from wxHelper import XrcControls
 
 
+from WikiExceptions import WikiWordNotFoundException, ExportException
 import WikiFormatting
 from StringOps import *
 
 from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
         ListItemWithSubtreeWikiPagesNode
 
+from Configuration import isUnicode
 
-from WikiExceptions import WikiWordNotFoundException, ExportException
 import WikiFormatting
 import PageAst
 
@@ -227,7 +228,7 @@ class HtmlXmlExporter:
         realfp = open(outputFile, "w")
         fp = utf8Writer(realfp, "replace")
         fp.write(self.getFileHeader(self.mainControl.wikiName))
-        
+
         for word in self.wordList:
 
             wikiPage = self.wikiDataManager.getWikiPage(word)
@@ -267,7 +268,6 @@ class HtmlXmlExporter:
 
 
     def exportHtmlMultipleFiles(self):
-
         for word in self.wordList:
             wikiPage = self.wikiDataManager.getWikiPage(word)
             if not self.shouldExport(word, wikiPage):
@@ -389,7 +389,13 @@ class HtmlXmlExporter:
         
         formattedContent = self.formatContent(word, content, formatDetails,
                 links, asHtmlPreview=asHtmlPreview)
-        result.append(self.getFileHeader(word))
+        
+        if isUnicode():
+            result.append(self.getFileHeader(word))
+        else:
+            # Retrieve file header without encoding mentioned
+            result.append(self.getFileHeaderNoCharset(word))
+
         # if startFile is set then this is the only page being exported so
         # do not include the parent header.
         if not startFile:
@@ -403,6 +409,19 @@ class HtmlXmlExporter:
         return u"".join(result)
 
             
+    def getFileHeaderNoCharset(self, title):
+        """
+        Used for ansi version
+        """
+        return u"""<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html">
+        <title>%s</title>
+         <link type="text/css" rel="stylesheet" href="wikistyle.css">
+    </head>
+    <body>
+""" % title
+
     def getFileHeader(self, title):
         return u"""<html>
     <head>
@@ -459,7 +478,7 @@ class HtmlXmlExporter:
         #print "shouldExport", mbcsEnc(wikiWord)[0], repr(wikiPage.props.get("export", ("True",))), \
          #       type(wikiPage.props.get("export", ("True",)))
             
-        return strToBool(wikiPage.getProperties().get("export", ("True",))[0])
+        return strToBool(wikiPage.getProperties().get("export", ("True",))[-1])
 
 
     def popState(self):
@@ -620,8 +639,9 @@ class HtmlXmlExporter:
 
             # print "formatContent", styleno, nextstyleno, repr(content[tok[0]:nexttok[0]])
 
-            if styleno == WikiFormatting.FormatTypes.Default or \
-                styleno == WikiFormatting.FormatTypes.EscapedChar:  # == no token RE matches
+            if styleno in (WikiFormatting.FormatTypes.Default,
+                WikiFormatting.FormatTypes.EscapedChar,
+                WikiFormatting.FormatTypes.SuppressHighlight):
                 # Normal text, maybe with newlines and indentation to process
                 lines = tok.text.split(u"\n")
                 if styleno == WikiFormatting.FormatTypes.EscapedChar:
@@ -679,7 +699,7 @@ class HtmlXmlExporter:
                     if not nextstyleno in \
                             (WikiFormatting.FormatTypes.Numeric,
                             WikiFormatting.FormatTypes.Bullet,
-                            WikiFormatting.FormatTypes.Suppress,
+                            WikiFormatting.FormatTypes.Suppress,   # TODO Suppress?
                             WikiFormatting.FormatTypes.Table,
                             WikiFormatting.FormatTypes.PreBlock):
 
@@ -772,6 +792,16 @@ class HtmlXmlExporter:
 
             elif styleno == WikiFormatting.FormatTypes.Url:
                 link = tok.node.url
+                if link.startswith(u"rel://"):
+                    # Relative URL
+                    if self.asHtmlPreview:
+                        # If preview, make absolute
+                        link = u"file:" + urllib.pathname2url(
+                                self.mainControl.makeRelUrlAbsolute(link))
+                    else:
+                        # If export, reformat a bit
+                        link = link[6:]
+
                 if self.asXml:   # TODO XML
                     self.outAppend(u'<link type="href">%s</link>' % 
                             escapeHtml(link))

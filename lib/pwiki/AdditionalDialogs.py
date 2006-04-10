@@ -53,7 +53,8 @@ class OpenWikiWordDialog(wxDialog):
         
     def OnOk(self, evt):
         if not self.pWiki.getWikiData().isDefinedWikiWord(self.value):
-            words = self.pWiki.getWikiData().getWikiWordsWith(self.value.lower())
+            words = self.pWiki.getWikiData().getWikiWordsWith(self.value.lower(),
+                    True)
             if len(words) > 0:
                 self.value = words[0]
             else:
@@ -64,13 +65,13 @@ class OpenWikiWordDialog(wxDialog):
                     # Entered text is not a valid wiki word
                     self.ctrls.text.SetFocus()
                     return
-                    
+
                 # wikiWord is valid but nonexisting, so maybe create it?
                 result = wxMessageBox(
                         uniToGui(u"'%s' is not an existing wikiword. Create?" %
                         wikiWord), uniToGui(u"Create"),
                         wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
-                
+
                 if result == wxNO:
                     self.ctrls.text.SetFocus()
                     return
@@ -87,7 +88,8 @@ class OpenWikiWordDialog(wxDialog):
         self.value = guiToUni(evt.GetString())
         self.ctrls.lb.Clear()
         if len(self.value) > 0:
-            words = self.pWiki.wikiData.getWikiWordsWith(self.value.lower())
+            words = self.pWiki.wikiData.getWikiWordsWith(self.value.lower(),
+                    True)
             for word in words:
                 self.ctrls.lb.Append(word)
 

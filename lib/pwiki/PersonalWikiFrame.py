@@ -15,11 +15,13 @@ from wikidata import DbBackendUtils
 from wikidata.WikiDataManager import WikiDataManager
 import DocPages
 
-from WikiTxtCtrl import *
-from WikiTreeCtrl import *
+from WikiTxtCtrl import WikiTxtCtrl
+from WikiTreeCtrl import WikiTreeCtrl
 from WikiHtmlView import WikiHtmlView
 from AboutDialog import AboutDialog
-import PropertyGui
+from LogWindow import LogWindow
+
+import PropertyHandling, SpellChecker
 
 from PageHistory import PageHistory
 from SearchAndReplace import SearchReplaceOperation
@@ -35,6 +37,11 @@ from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
         wikiWordToLabel, BOM_UTF8, fileContentToUnicode, splitIndent, \
         unescapeWithRe
 import WikiFormatting
+
+
+import PageAst   # For experiments only
+
+
 
 from PluginManager import *
 # _COLORS = [
@@ -220,6 +227,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.cmdIdToIconName = None # Maps command id (=menu id) to icon name
                                     # needed for "Editor"->"Add icon property"
         self.cmdIdToColorName = None # Same for color names
+        
+        self.spellChkIgnore = sets.Set()  # set of words to ignore during spell checking
 
         # setup plugin manager and hooks API
         self.pluginManager = PluginManager()
@@ -244,7 +253,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         # Connect page history
         self.pageHistory = PageHistory(self)
-        
+
+        self.propertyChecker = PropertyHandling.PropertyChecker(self)
+
         # trigger hook
         self.hooks.startup(self)
 
@@ -343,8 +354,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         uniToGui(u"Couldn't open last wiki: %s" % wikiToOpen), 0)
 
         # set the focus to the editor
-        if self.vertSplitter.GetSashPosition() < 2:
-            self.activeEditor.SetFocus()
+#         if self.vertSplitter.GetSashPosition() < 2:
+#             self.activeEditor.SetFocus()
 
         # display the window
         ## if not (self.showOnTray and self.IsIconized()):
@@ -406,7 +417,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def getCurrentWikiWord(self):
         docPage = self.getCurrentDocPage()
-        if docPage is None or not isinstance(docPage, DocPages.WikiPage):
+        if docPage is None or not isinstance(docPage,
+                (DocPages.WikiPage, DocPages.AliasWikiPage)):
             return None
         return docPage.getWikiWord()
 
@@ -417,6 +429,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
     def getActiveEditor(self):
         return self.activeEditor
+        
+    def setActiveEditor(self, activeEditor):
+        self.activeEditor = activeEditor
 
     def getWikiData(self):
         if self.wikiDataManager is None:
@@ -426,12 +441,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def getWikiDataManager(self):
         return self.wikiDataManager
+        
+    def getWikiConfigPath(self):
+        return self.wikiConfigFilename
 
     def getConfig(self):
         return self.configuration
         
     def getFormatting(self):
         return self.formatting
+        
+    def getLogWindow(self):
+        return self.logWindow
 
 
     # TODO!
@@ -591,7 +612,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         menuID=wxNewId()
         self.showTreeCtrlMenuItem = wxMenuItem(wikiMenu, menuID, "&Show Tree Control\t" + self.keyBindings.ShowTreeControl, "Show Tree Control", wxITEM_CHECK)
         wikiMenu.AppendItem(self.showTreeCtrlMenuItem)
-        EVT_MENU(self, menuID, lambda evt: self.setShowTreeControl(self.showTreeCtrlMenuItem.IsChecked()))
+        EVT_MENU(self, menuID, lambda evt: self.setShowTreeControl(
+                self.showTreeCtrlMenuItem.IsChecked()))
 
 
         self.addMenuItem(wikiMenu, 'O&ptions',
@@ -677,8 +699,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         wikiMenu.AppendSeparator()  # TODO May have two separators without anything between
 
-        # self.addMenuItem(wikiMenu, '&Test',
-        #         'Test', lambda evt: self.testIt())
+        self.addMenuItem(wikiMenu, '&Test', 'Test', lambda evt: self.testIt())
 
         menuID=wxNewId()
         wikiMenu.Append(menuID, 'E&xit', 'Exit')
@@ -1057,10 +1078,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.addMenuItem(self.editorMenu, 'Set Date Format',
                 'Set Date Format', lambda evt: self.showDateformatDialog())
 
-        if isSpellCheckSupported():
+        if SpellChecker.isSpellCheckSupported():
             self.addMenuItem(self.editorMenu, 'Spell check',
                     'Spell check current page',
-                    lambda evt: self.spellCheckActiveEditor())
+                    lambda evt: self.showSpellCheckerDialog())
 
 
         self.addMenuItem(self.editorMenu,
@@ -1112,14 +1133,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     'Open icon select dialog', lambda evt: self.showIconSelectDialog())
         else:
             # Build full submenu for icons
-            iconsMenu, self.cmdIdToIconName = PropertyGui.buildIconsSubmenu(self)
+            iconsMenu, self.cmdIdToIconName = PropertyHandling.buildIconsSubmenu(self)
             for cmi in self.cmdIdToIconName.keys():
                 EVT_MENU(self, cmi, self.OnInsertIconAttribute)
 
             self.editorMenu.AppendMenu(wxNewId(), 'Add icon property', iconsMenu)
 
         # Build submenu for colors
-        colorsMenu, self.cmdIdToColorName = PropertyGui.buildColorsSubmenu()
+        colorsMenu, self.cmdIdToColorName = PropertyHandling.buildColorsSubmenu()
         for cmi in self.cmdIdToColorName.keys():
             EVT_MENU(self, cmi, self.OnInsertColorAttribute)
 
@@ -1436,45 +1457,103 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # ------------------------------------------------------------------------------------
         # Create the left-right splitter window.
         # ------------------------------------------------------------------------------------
-        self.vertSplitter = wxSplitterWindow(self, -1, style=wxSP_NOBORDER)
-        self.vertSplitter.SetMinimumPaneSize(1)
+        self.treeSashWindow = SmartSashLayoutWindow(self, GUI_ID.SASH_WINDOW_TREE,
+                wxDefaultPosition, (200, 30), wxSW_3DSASH)
+        self.treeSashWindow.align(wxLAYOUT_LEFT)
+        self.treeSashWindow.setMinimalEffectiveSashPosition(10)
+        
+        pos = self.getConfig().getint("main", "splitter_pos", 170)
+
+        self.treeSashWindow.setSashPosition(pos)
+        if pos < 50: pos = 170
+        self.treeSashWindow.setEffectiveSashPosition(pos)
+
+
+#         self.vertSplitter = self.createWindow({"name":
+#                 "split(tree)(split(txteditor1)(log))"}, self)
+#         self.vertSplitter.SetMinimumPaneSize(1)
 
         # ------------------------------------------------------------------------------------
         # Create the tree on the left.
         # ------------------------------------------------------------------------------------
-        self.tree = WikiTreeCtrl(self, self.vertSplitter, -1)
+        self.tree = self.createWindow({"name": "tree"}, self.treeSashWindow)
 
-        # assign the image list
-        try:
-            self.tree.AssignImageList(self.iconImageList)
-        except Exception, e:
-            self.displayErrorMessage('There was an error loading the icons '+
-                    'for the tree control.', e)
-                    
-                    
-        self.mainAreaPanel = wxNotebook(self.vertSplitter, -1)# wxPanel(self.vertSplitter)
+#         # assign the image list
+#         try:
+#             self.tree.AssignImageList(self.iconImageList)
+#         except Exception, e:
+#             self.displayErrorMessage('There was an error loading the icons '+
+#                     'for the tree control.', e)
+
+#         self.logSplitter = self.createWindow({"name":
+#                 "split(txteditor1)(log)"}, self.vertSplitter)
+#         self.logSplitter.SetMinimumPaneSize(1)
+#         self.logSplitter.setEffectiveSettings(2, 5)
+        
+
+
+#         self.mainAreaPanel = wxNotebook(self.vertSplitter, -1)# wxPanel(self.vertSplitter)
         # self.mainAreaPanelSizer = wxBoxSizer(wxVERTICAL)
+
+        self.logSashWindow = SmartSashLayoutWindow(self, GUI_ID.SASH_WINDOW_LOG,
+                wxDefaultPosition, (200, 30), wxSW_3DSASH)  # wxNO_BORDER|wxSW_3D
+        self.logSashWindow.align(wxLAYOUT_BOTTOM)
+        self.logSashWindow.setMinimalEffectiveSashPosition(10)
+        
+        self.logSashWindow.setEffectiveSashPosition(self.configuration.getint(
+                "main", "log_window_effectiveSashPos", 120))
+        self.logSashWindow.setSashPosition(self.configuration.getint(
+                "main", "log_window_sashPos", 1))
+#         self.logSashWindow.SetDefaultSize((1000, 120))
+#         self.logSashWindow.SetOrientation(wxLAYOUT_HORIZONTAL)
+#         self.logSashWindow.SetAlignment(wxLAYOUT_BOTTOM)
+#         self.logSashWindow.SetSashVisible(wxSASH_TOP, True)
+
+        self.logWindow = self.createWindow({"name": "log"},
+                self.logSashWindow)
+
 
         # ------------------------------------------------------------------------------------
         # Create the editor
         # ------------------------------------------------------------------------------------
-        self.createEditor()
+        ## self.createEditor()
+
+        self.mainAreaPanel = wxNotebook(self, -1)
+                
+        self.activeEditor = self.createWindow({"name": "txteditor1"},
+                self.mainAreaPanel)
+        self.mainAreaPanel.AddPage(self.activeEditor, u"Edit")
         
         self.htmlView = WikiHtmlView(self, self.mainAreaPanel, -1)
-        
         self.mainAreaPanel.AddPage(self.htmlView, u"Preview")
         
         # self.mainAreaPanel.SetSizer(self.mainAreaPanelSizer)
+
 
         # ------------------------------------------------------------------------------------
         # Split the tree and the editor
         # ------------------------------------------------------------------------------------
         
-        # self.vertSplitter.SplitVertically(self.tree, self.editor, self.lastSplitterPos)
-        self.vertSplitter.SplitVertically(self.tree, self.mainAreaPanel, self.lastSplitterPos)
+#         self.vertSplitter.SplitVertically(self.tree, self.mainAreaPanel,
+#                 self.lastSplitterPos)
+#         self.vertSplitter.SplitVertically(self.tree, self.logSplitter,
+#                 self.lastSplitterPos)
+#         self.logSplitter.SplitHorizontally(self.mainAreaPanel, self.logWindow)
+        # self.logSplitter.SetSashPosition(-1)
+
+#         self.logSplitter.setEffectiveSashPos(self.configuration.getint(
+#                 "main", "log_splitter_effectiveSplitPos", -120))
+#         self.logSplitter.SetSashPosition(self.configuration.getint(
+#                 "main", "log_splitter_splitPos", -1))
+#         self.logSplitter.SetSashGravity(1.0)
+
 
         EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(), self.OnNotebookPageChanged)
         EVT_SET_FOCUS(self.mainAreaPanel, self.OnNotebookFocused)
+        
+#         EVT_SASH_DRAGGED(self, GUI_ID.SASH_WINDOW_TREE, self.OnSashDrag)
+#         EVT_SASH_DRAGGED(self, GUI_ID.SASH_WINDOW_LOG, self.OnSashDrag)
+
 
 
         # ------------------------------------------------------------------------------------
@@ -1521,12 +1600,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # Register the App close handler
         EVT_CLOSE(self, self.OnWikiExit)
 
+        # Check resizing to layout sash windows
+        EVT_SIZE(self, self.OnSize)
+
         EVT_ICONIZE(self, self.OnIconize)
         EVT_MAXIMIZE(self, self.OnMaximize)
 
         # turn on the tree control check box   # TODO: Doesn't work after restore from sleep mode
-        ## if self.vertSplitter.GetSashPosition() > 1:
-        if self.lastSplitterPos > 1:
+#         if self.lastSplitterPos > 1:
+        if not self.treeSashWindow.isCollapsed():
             self.showTreeCtrlMenuItem.Check(1)
         else:
             self.tree.Hide()
@@ -1542,6 +1624,48 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             foc = foc.GetParent()
             
         mainAreaPanel.SetFocus()
+
+
+    def createWindow(self, winProps, parent):
+        """
+        Creates tree, editor, splitter, ... according to the given window name
+        in winProps
+        """
+        winName = winProps["name"]
+#         if winName.startswith("split("):
+#             return SmartSplitterWindow(parent, -1, style=wxSP_NOBORDER)
+        if winName == "tree":
+            tree = WikiTreeCtrl(self, parent, -1)
+            # assign the image list
+            try:
+                tree.AssignImageList(self.iconImageList)
+            except Exception, e:
+                displayErrorMessage('There was an error loading the icons '+
+                        'for the tree control.', e)
+            return tree
+        elif winName.startswith("txteditor"):
+            editor = WikiTxtCtrl(self, parent, -1)
+            editor.evalScope = { 'editor' : editor,
+                    'pwiki' : self, 'lib': self.evalLib}
+    
+            # enable and zoom the editor
+            editor.Enable(0)
+            editor.SetZoom(self.configuration.getint("main", "zoom"))
+            return editor
+        elif winName == "log":
+            return LogWindow(parent, -1, self)
+
+
+    def appendLogMessage(self, msg):   # TODO make log window visible if necessary
+        """
+        Add message to log window, make log window visible if necessary
+        """
+        if self.configuration.getboolean("main", "log_window_autoshow"):
+            self.logSashWindow.uncollapseWindow()
+        self.logWindow.appendMessage(msg)
+
+    def hideLogWindow(self):
+        self.logSashWindow.collapseWindow()
 
 
     def resourceSleep(self):
@@ -1585,14 +1709,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def testIt(self):
-        cb = wxTheClipboard
-        cb.Open()
-        datob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
-
-
-        print "Test getData", repr(cb.GetData(datob))
-        print "Test text", repr(datob.GetData())       # GetDataHere())
-        cb.Close()
+        pageast = self.getActiveEditor().getPageAst()
+        print "testIt", repr(tuple(PageAst.iterWords(pageast)))
 
 
     def OnNotebookPageChanged(self, evt):
@@ -1626,20 +1744,17 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         evt.Skip()
 
 
-    def createEditor(self):
-        self.activeEditor = WikiTxtCtrl(self, self.mainAreaPanel, -1)
-        self.mainAreaPanel.AddPage(self.activeEditor, u"Edit")
-        self.activeEditor.evalScope = { 'editor' : self.activeEditor,
-                'pwiki' : self, 'lib': self.evalLib}
+#     def createEditor(self):
+#         self.activeEditor = WikiTxtCtrl(self, self.mainAreaPanel, -1)
+#         self.mainAreaPanel.AddPage(self.activeEditor, u"Edit")
+#         self.activeEditor.evalScope = { 'editor' : self.activeEditor,
+#                 'pwiki' : self, 'lib': self.evalLib}
+# 
+#         # enable and zoom the editor
+#         self.activeEditor.Enable(0)
+#         self.activeEditor.SetZoom(self.configuration.getint("main", "zoom"))
 
-        # enable and zoom the editor
-        self.activeEditor.Enable(0)
-        self.activeEditor.SetZoom(self.configuration.getint("main", "zoom"))
 
-#         # set the wrap mode of the editor
-#         self.setWrapMode(self.wrapMode)
-#         if self.indentationGuides:
-#             self.activeEditor.SetIndentationGuides(1)
 
 
     def resetGui(self):
@@ -2037,6 +2152,9 @@ These are your default global settings.
 
     def openWikiPage(self, wikiWord, addToHistory=True,
             forceTreeSyncFromRoot=False, forceReopen=False, **evtprops):
+        """
+        Opens a wiki page in the active editor.
+        """
                 
         evtprops["addToHistory"] = addToHistory
         evtprops["forceTreeSyncFromRoot"] = forceTreeSyncFromRoot
@@ -2088,7 +2206,6 @@ These are your default global settings.
 
         # set the title and add the word to the history
         self.SetTitle(uniToGui(u"Wiki: %s - %s" %
-#                 (self.wikiName, self.getCurrentWikiWord())))
                 (self.wikiConfigFilename, self.getCurrentWikiWord())))
 
         self.configuration.set("main", "last_wiki_word", wikiWord)
@@ -2106,6 +2223,9 @@ These are your default global settings.
             self.activeEditor.saveLoadedDocPage() # this calls in turn saveDocPage() below
 
         self.refreshPageStatus()
+
+
+#             self.GetToolBar().FindById(GUI_ID.CMD_SAVE_WIKI).Enable(False)
 
 #             rect = self.statusBar.GetFieldRect(0)
 # 
@@ -2147,6 +2267,9 @@ These are your default global settings.
                         # only for real wiki pages
                         page.save(self.activeEditor.cleanAutoGenAreas(text))
                         page.update(self.activeEditor.updateAutoGenAreas(text))   # ?
+                        self.propertyChecker.checkPage(page,
+                                self.activeEditor.getPageAst())
+
                         # trigger hooks
                         self.hooks.savedWikiWord(self, word)
                     else:
@@ -2241,6 +2364,12 @@ These are your default global settings.
             sys.stderr.write("%s\n" % e)
 
 
+    def makeRelUrlAbsolute(self, relurl):
+        """
+        Return the absolute path for a rel: URL
+        """
+        return abspath(join(dirname(self.wikiConfigFilename), relurl[6:]))
+
     def launchUrl(self, link):
 #         match = self.getFormatting().UrlRE.match(link)
 #         try:
@@ -2249,7 +2378,11 @@ These are your default global settings.
         link2 = link
         if self.configuration.getint(
                 "main", "new_window_on_follow_wiki_url") == 1 or \
-                not link2.startswith("wiki:"):
+                not link2.startswith(u"wiki:"):
+            if link2.startswith(u"rel://"):
+                # This is a relative link
+                link2 = makeRelUrlAbsolute(link2)
+
             os.startfile(mbcsEnc(link2, "replace")[0])
             return True
         elif self.configuration.getint(
@@ -2280,7 +2413,8 @@ These are your default global settings.
         if page is None:
             page = self.getCurrentDocPage()
 
-        if page is None or not isinstance(page, DocPages.WikiPage):
+        if page is None or not isinstance(page,
+                (DocPages.WikiPage, DocPages.AliasWikiPage)):
             self.statusBar.SetStatusText(uniToGui(u""), 1)
             return
             
@@ -2290,8 +2424,10 @@ These are your default global settings.
         if modTime is not None:
             pageStatus += u"Mod.: %s" % \
                     unicode(strftime(fmt, localtime(modTime)))
+#                     mbcsDec(strftime(fmt, localtime(modTime)), "replace")[0]
             pageStatus += u"; Crea.: %s" % \
                     unicode(strftime(fmt, localtime(creaTime)))
+#                     mbcsDec(strftime(fmt, localtime(creaTime)), "replace")[0]
 
         self.statusBar.SetStatusText(uniToGui(pageStatus), 1)
 
@@ -2356,12 +2492,6 @@ These are your default global settings.
         dlg.Destroy()
 
 
-#     def updateRelationships(self):
-#         self.statusBar.SetStatusText(u"Updating relationships", 0)
-#         self.currentWikiPage.update(self.activeEditor.GetText())
-#         self.statusBar.SetStatusText(u"", 0)
-
-
     def lastAccessedWiki(self, wikiConfigFilename):
         "writes to the global config the location of the last accessed wiki"
         # create a new config file for the new wiki
@@ -2381,35 +2511,28 @@ These are your default global settings.
         self.configuration.set("main", "last_active_dir", dirname(wikiConfigFilename))
         self.writeGlobalConfig()
 
-#     def setWrapMode(self, onOrOff):
-#         self.wrapMode = onOrOff
-#         self.configuration.set("main", "wrap_mode", self.wrapMode)
-#         self.getActiveEditor().setWrapMode(self.wrapMode)
 
     # Only needed for scripts
     def setAutoSave(self, onOrOff):
         self.autoSave = onOrOff
         self.configuration.set("main", "auto_save", self.autoSave)
 
-#     def setIndentationGuides(self, onOrOff):
-#         self.indentationGuides = onOrOff
-#         self.configuration.set("main", "indentation_guides", self.indentationGuides)
-# #         if onOrOff:
-#         self.getActiveEditor().SetIndentationGuides(onOrOff)
-# #         else:
-# #             self.getActiveEditor().SetIndentationGuides(0)
-
 
     def setShowTreeControl(self, onOrOff):
         if onOrOff:
-            if self.lastSplitterPos < 50:
-                self.lastSplitterPos = 185
-            self.vertSplitter.SetSashPosition(self.lastSplitterPos)
-            self.tree.Show()
+            self.treeSashWindow.uncollapseWindow()
         else:
-            self.lastSplitterPos = self.vertSplitter.GetSashPosition()
-            self.vertSplitter.SetSashPosition(1)
-            self.tree.Hide()
+            self.treeSashWindow.collapseWindow()
+            
+#         if onOrOff:
+#             if self.lastSplitterPos < 50:
+#                 self.lastSplitterPos = 185
+# #             self.vertSplitter.SetSashPosition(self.lastSplitterPos)
+#             self.tree.Show()
+#         else:
+# #             self.lastSplitterPos = self.vertSplitter.GetSashPosition()
+# #             self.vertSplitter.SetSashPosition(1)
+#             self.tree.Hide()
 
 
     def setShowOnTray(self, onOrOff=None):
@@ -2447,7 +2570,6 @@ These are your default global settings.
                 self.tbIcon = None
 
 
-    # TODO: Rebuild tree
     def setHideUndefined(self, onOrOff=None):
         """
         Set if undefined WikiWords should be hidden in the tree
@@ -2817,14 +2939,20 @@ These are your default global settings.
         dlg.Destroy()
 
 
-    def spellCheckActiveEditor(self):
-        self.statusBar.PushStatusText(u"Checking spelling on wiki page", 0)
-        try:
-            self.getActiveEditor().spellCheckContent()
-        finally:
-            self.statusBar.PopStatusText(0)
+    def showSpellCheckerDialog(self):
+        dlg = SpellChecker.SpellCheckerDialog(self, -1, self)
+        dlg.CenterOnParent(wxBOTH)
+        dlg.Show()
+        dlg.checkNext(startPos=0)
 
-
+#         if self.findDlg != None:
+#             return
+# 
+#         self.findDlg = SearchWikiDialog(self, -1)
+#         self.findDlg.CenterOnParent(wxBOTH)
+#         self.findDlg.Show()
+        
+        
     def rebuildWiki(self, skipConfirm = False):
         if not skipConfirm:
             result = wxMessageBox(u"Are you sure you want to rebuild this wiki? "+
@@ -3005,6 +3133,16 @@ These are your default global settings.
 #                         if (currentTime - self.currentWikiPage.lastUpdate) > 5:
 #                             self.updateRelationships()
 
+    def OnSize(self, evt):
+        wxLayoutAlgorithm().LayoutWindow(self, self.mainAreaPanel)
+
+    def OnSashDrag(self, evt):
+        if evt.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE:
+            return
+            
+        wxLayoutAlgorithm().LayoutWindow(self, self.mainAreaPanel)
+        # self.mainAreaPanel.Refresh()
+
 
     def OnCmdCheckWrapMode(self, evt):        
         self.getActiveEditor().setWrapMode(evt.IsChecked())
@@ -3045,10 +3183,17 @@ These are your default global settings.
 
         self.configuration.set("main", "windowmode", windowmode)
 
-        splitterPos = self.vertSplitter.GetSashPosition()
-        if splitterPos == 0:
-            splitterPos = self.lastSplitterPos
+        splitterPos = self.treeSashWindow.getSashPosition()
+        if splitterPos < 3:
+            splitterPos = self.treeSashWindow.getEffectiveSashPosition()
+
         self.configuration.set("main", "splitter_pos", splitterPos)
+        self.configuration.set("main", "log_window_effectiveSashPos",
+                self.logSashWindow.getEffectiveSashPosition())
+        self.configuration.set("main", "log_window_sashPos",
+                self.logSashWindow.getSashPosition())
+
+
         self.configuration.set("main", "zoom", self.activeEditor.GetZoom())
         self.configuration.set("main", "wiki_history", ";".join(self.wikiHistory))
         self.writeGlobalConfig()

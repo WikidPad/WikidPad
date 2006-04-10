@@ -11,11 +11,8 @@ import threading
 
 from struct import pack, unpack
 
-import difflib, codecs
+import difflib, codecs, os.path
 from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE
-from os.path import splitext
-
-import cStringIO as StringIO
 
 from Utilities import DUMBTHREADHOLDER
 
@@ -66,6 +63,7 @@ if isOSX():      # TODO Linux
    
 else:
     # generate dependencies for py2exe
+    import encodings.ascii
     import encodings.mbcs
     mbcsEnc = codecs.getencoder("mbcs")
     mbcsDec = codecs.getdecoder("mbcs")
@@ -171,7 +169,7 @@ def wikiWordToLabel(word):
 
 
 def removeBracketsFilename(fn):
-    n, ext = splitext(fn)
+    n, ext = os.path.splitext(fn)
     return wikiWordToLabel(n) + ext
 
 
@@ -310,137 +308,69 @@ def rgbToHtmlColor(r, g, b):
     """
     return "#%02X%02X%02X" % (r, g, b)
     
-
-
-# ---------- Support for serializing values into binary data (and back) ----------
-# Especially used in SearchAndReplace.py, class SearchReplaceOperation
-
-class SerializeStream:
-    def __init__(self, fileObj=None, stringBuf=None, readMode=True):
-        """
-        fileobj -- file-like object to wrap.
-        readmode -- True; read from fileobj, False: write to fileobj
-        """
-        self.fileObj = fileObj 
-        self.readMode = readMode
-
-        if stringBuf is not None:
-            if self.readMode:
-                self.fileObj = StringIO.StringIO(stringBuf)
-            else:
-                self.fileObj = StringIO.StringIO()
-
-    def isReadMode(self):
-        """
-        Returns True iff reading from fileObj, False iff writing to fileObj
-        """
-        return self.readMode
-        
-    def setBytesToRead(self, b):
-        """
-        Sets a string to read from via StringIO
-        """
-        self.fileObj = StringIO.StringIO(b)
-        self.readMode = True
-
-        
-    def useBytesToWrite(self):
-        """
-        Sets the stream to write mode writing to a byte buffer (=string)
-        via StringIO
-        """
-        self.fileObj = StringIO.StringIO()
-        self.readMode = False
-
-        
-    def getBytes(self):
-        """
-        If fileObj is a StringIO object, call this to retrieve the stored
-        string after write operations are finished, but before close() is
-        called
-        """
-        return self.fileObj.getvalue()
-        
     
-    def writeBytes(self, b):
-        self.fileObj.write(b)
-        
-    def readBytes(self, l):
-        return self.fileObj.read(l)
-        
-    def serUint32(self, val):
-        """
-        Serialize 32bit unsigned integer val. This means: if stream is in read
-        mode, val is ignored and the int read from stream is returned,
-        if in write mode, val is written and returned
-        """
-        if self.isReadMode():
-            return unpack(">I", self.readBytes(4))[0]   # Why big-endian? Why not? 
-        else:
-            self.writeBytes(pack(">I", val))
-            return val
+def splitpath(path):
+    """
+    Cut a path into all of its pieces, starting with drive name, through
+    all path components up to the name of the file (if any).
+    Returns a list of the elements, first and/or last element may be
+    empty strings.
+    Maybe use os.path.abspath before calling it
+    """
+    dr, path = os.path.splitdrive(path)
+    result = []
+    while True:
+        head, last = os.path.split(path)
+        if head == path: break
+        result.append(last)
+        path = head
+    result.append(dr)
+    result.reverse()
+    return result
 
 
-    def serInt32(self, val):
-        """
-        Serialize 32bit signed integer val. This means: if stream is in read
-        mode, val is ignored and the int read from stream is returned,
-        if in write mode, val is written and returned
-        """
-        if self.isReadMode():
-            return unpack(">i", self.readBytes(4))[0]   # Why big-endian? Why not? 
-        else:
-            self.writeBytes(pack(">I", val))
-            return val
+def relativeFilePath(location, toFilePath):
+    """
+    Returns a relative (if possible) path to address the file
+    toFilePath if you are in directory location.
+    Both parameters should be normalized with os.path.abspath
+    
+    Function returns None if an absolute path is needed!
 
+    location -- Directory where you are
+    toFilePath -- absolute path to file you want to reach
+    """
+    locParts = splitpath(location)
+    if locParts[-1] == "":
+        del locParts[-1]
+    
+    locLen = len(locParts)
+    fileParts = splitpath(toFilePath)
+    
+    for i in xrange(len(locParts)):
+        if len(fileParts) == 0:
+            break  # TODO Error ???
 
-    def serString(self, s):
-        """
-        Serialize string s, including length. This means: if stream is in read
-        mode, s is ignored and the string read from stream is returned,
-        if in write mode, s is written and returned
-        """
-        l = self.serUint32(len(s))
+        if locParts[0] != fileParts[0]:
+            break
 
-        if self.isReadMode():
-            return self.readBytes(l)
-        else:
-            self.writeBytes(s)
-            return s
+        del locParts[0]
+        del fileParts[0]
 
+    result = []
+    
+    if len(locParts) == locLen:
+        # Nothing matches at all, absolute path needed
+        return None
 
-    def serUniUtf8(self, us):
-        """
-        Serialize unicode string, encoded as UTF-8
-        """
-        if self.isReadMode():
-            return utf8Dec(self.serString(""), "replace")[0]
-        else:
-            self.serString(utf8Enc(us)[0])
-            return us
+    if len(locParts) > 0:
+        # go back some steps
+        result += [".."] * len(locParts)
+    
+    result += fileParts
+    
+    return os.path.join(*result)
 
-
-    def serBool(self, tv):
-        """
-        Serialize boolean truth value
-        """
-        if self.isReadMode():
-            b = self.readBytes(1)
-            return b != "\0"
-        else:
-            if tv:
-                self.writeBytes("1")
-            else:
-                self.writeBytes("\0")
-            
-            return tv
-
-
-    def close(self):
-        """
-        Close stream and underlying file object
-        """
-        self.fileObj.close()
 
 
 def boolToChar(b):
@@ -494,62 +424,191 @@ class Token(object):
                 repr(self.start), repr(self.text), repr(self.node))
 
 
+    def getRealLength(self):
+        """
+        If node object exist, it is asked for length. If it returns -1 or
+        doesn't exist at all, length of self.text is returned.
+        """
+        result = -1
+        
+        if self.node is not None:
+            result = self.node.getLength()
+        
+        if result == -1:
+            result = len(self.text)
+            
+        return result
+
+
+    def getRealText(self):
+        """
+        If node object exist, it is asked for text. If it returns None or
+        doesn't exist at all, self.text is returned.
+        """
+        result = None
+        if self.node is not None:
+            result = self.node.getText()
+
+        if result == None:
+            result = self.text
+
+
+    def shallowCopy(self):
+        return Token(self.ttype, self.start, self.grpdict, self.text, self.node)
+
+    
+
+class TokenIterator:
+    """
+    Tokenizer with iterator mechanism
+    """
+    def __init__(self, tokenre, formatMap, defaultType, text, charPos=0,
+            tokenStartOffset=0):
+        """
+        charPos -- start position in text where to start
+        tokenStartOffset -- offset to add to token.start value before returning token
+        """
+        self.tokenre = tokenre
+        self.formatMap = formatMap
+        self.defaultType = defaultType
+        self.text = text
+        self.charPos = charPos
+        self.tokenStartOffset = tokenStartOffset
+        self.nextMatch = None  # Stores an already found match to speed up things
+
+    def __iter__(self):
+        return self
+        
+    def setCharPos(charPos):
+        self.charPos = charPos
+        
+    def getCharPos(self):
+        return self.charPos
+
+
+    def next(self):
+        textlen = len(self.text)
+        if self.charPos >= textlen:
+            raise StopIteration()
+
+        # Try to get cached nextMatch
+        if self.nextMatch:
+            mat = self.nextMatch
+            self.nextMatch = None
+        else:
+            mat = self.tokenre.search(self.text, self.charPos)
+
+        if mat is None:
+#                     print "tokenize3", repr((defaultType, charpos, None,
+#                             text[charpos:textlen]))
+
+            cp = self.charPos
+            self.charPos = textlen
+            return Token(self.defaultType, cp + self.tokenStartOffset, None,
+                    self.text[cp:textlen])
+            
+#                 print "tokenize4", repr((defaultType, textlen, None,
+#                         u""))
+#             result.append(Token(self.defaultType, textlen, None, u""))
+#             break
+
+        start, end = mat.span()
+        if self.charPos < start:
+#                         print "tokenize7", repr((defaultType, charpos, None,
+#                                 text[charpos:start]))
+            self.nextMatch = mat
+            cp = self.charPos
+            self.charPos = start
+            return Token(self.defaultType, cp + self.tokenStartOffset, None,
+                    self.text[cp:start])                   
+
+
+        groupdict = mat.groupdict()
+        for m in groupdict.keys():
+            if not groupdict[m] is None and m.startswith(u"style"):
+                # m is of the form:   style<index>
+                index = int(m[5:])
+
+#                     print "tokenize8", repr((formatMap[index], charpos, groupdict,
+#                             text[start:end]))
+                cp = self.charPos
+                self.charPos = end
+                return Token(self.formatMap[index], cp + self.tokenStartOffset,
+                        groupdict, self.text[start:end])
+
+
 class Tokenizer:
     def __init__(self, tokenre, defaultType):
         self.tokenre = tokenre
         self.defaultType = defaultType
-        self.tokenThread = None
 
-    def setTokenThread(self, tt):
-        self.tokenThread = tt
-
-    def getTokenThread(self):
-        return self.tokenThread
+#         self.tokenThread = None
+# 
+#     def setTokenThread(self, tt):
+#         self.tokenThread = tt
+# 
+#     def getTokenThread(self):
+#         return self.tokenThread
 
     def tokenize(self, text, formatMap, defaultType, threadholder=DUMBTHREADHOLDER):
-        textlen = len(text)
         result = []
-        charpos = 0    
+        if not threadholder.isCurrent():
+            return result
+
+        it = TokenIterator(self.tokenre, formatMap, defaultType, text)
         
-        while True:
-            mat = self.tokenre.search(text, charpos)
-            if mat is None:
-                if charpos < textlen:
-#                     print "tokenize3", repr((defaultType, charpos, None,
-#                             text[charpos:textlen]))
-                    result.append(Token(defaultType, charpos, None,
-                            text[charpos:textlen]))
-                
-#                 print "tokenize4", repr((defaultType, textlen, None,
-#                         u""))
-                result.append(Token(defaultType, textlen, None, u""))
-                break
-    
-            groupdict = mat.groupdict()
-            for m in groupdict.keys():
-                if not groupdict[m] is None and m.startswith(u"style"):
-                    start, end = mat.span()
-                    
-                    # m is of the form:   style<index>
-                    index = int(m[5:])
-                    if charpos < start:
-#                         print "tokenize7", repr((defaultType, charpos, None,
-#                                 text[charpos:start]))
-                        result.append(Token(defaultType, charpos, None,
-                                text[charpos:start]))                    
-                        charpos = start
-    
-#                     print "tokenize8", repr((formatMap[index], charpos, groupdict,
-#                             text[start:end]))
-                    result.append(Token(formatMap[index], charpos, groupdict,
-                            text[start:end]))
-                    charpos = end
-                    break
-    
+        for t in it:
+            result.append(t)
             if not threadholder.isCurrent():
                 break
-
+                
         return result
+
+
+
+#         textlen = len(text)
+#         result = []
+#         charpos = 0    
+#         
+#         while True:
+#             mat = self.tokenre.search(text, charpos)
+#             if mat is None:
+#                 if charpos < textlen:
+# #                     print "tokenize3", repr((defaultType, charpos, None,
+# #                             text[charpos:textlen]))
+#                     result.append(Token(defaultType, charpos, None,
+#                             text[charpos:textlen]))
+#                 
+# #                 print "tokenize4", repr((defaultType, textlen, None,
+# #                         u""))
+#                 result.append(Token(defaultType, textlen, None, u""))
+#                 break
+#     
+#             groupdict = mat.groupdict()
+#             for m in groupdict.keys():
+#                 if not groupdict[m] is None and m.startswith(u"style"):
+#                     start, end = mat.span()
+#                     
+#                     # m is of the form:   style<index>
+#                     index = int(m[5:])
+#                     if charpos < start:
+# #                         print "tokenize7", repr((defaultType, charpos, None,
+# #                                 text[charpos:start]))
+#                         result.append(Token(defaultType, charpos, None,
+#                                 text[charpos:start]))                    
+#                         charpos = start
+#     
+# #                     print "tokenize8", repr((formatMap[index], charpos, groupdict,
+# #                             text[start:end]))
+#                     result.append(Token(formatMap[index], charpos, groupdict,
+#                             text[start:end]))
+#                     charpos = end
+#                     break
+#     
+#             if not threadholder.isCurrent():
+#                 break
+# 
+#         return result
 
 
 

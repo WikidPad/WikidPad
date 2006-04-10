@@ -20,6 +20,9 @@ PlainCharacterPAT = ur"(?:[^\\]|\\.)"
 PlainEscapedCharacterRE = re.compile(ur"\\(.)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
+# PlainCharactersRE = re.compile(PlainCharacterPAT + "+",
+#         re.DOTALL | re.UNICODE | re.MULTILINE)
+
 
 # basic formatting
 BoldRE          = re.compile(ur"\*(?=\S)(?P<boldContent>" + PlainCharacterPAT +
@@ -43,7 +46,7 @@ Heading2RE      = re.compile(u"^\\+\\+(?!\\+) ?(?P<h2Content>" +
 Heading1RE      = re.compile(u"^\\+(?!\\+) ?(?P<h1Content>" +
         PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp)://|mailto:)[^"\s<]*',
+UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp|rel)://|mailto:)[^"\s<>]*',
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 # TitledUrlRE =  re.compile(
@@ -143,6 +146,12 @@ SearchFragmentUnescapeRE   = re.compile(ur"#(.)",
                               re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
+# For spell checking
+TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlRE.pattern + u"|" +
+        WikiWordRE.pattern + ur")|\b\w.*?\b",
+        re.DOTALL | re.UNICODE | re.MULTILINE)  # SP only
+
+
 
 # parses the dynamic properties
 PropertyRE      = re.compile(ur"\[[ \t]*(?P<propertyName>[a-zA-Z0-9\-\_\.]+?)[ \t]*" +
@@ -179,13 +188,11 @@ AutoGenAreaRE = re.compile(ur"^([ \t]*<<[ \t]+)([^\n]+\n)(.*?)^([ \t]*>>[ \t]*\n
 
 ToDoREWithContent = re.compile(ur"\b(?P<todoIndent>)"    # ur"(?P<todoIndent>^[ \t]*)"
         ur"(?P<todoName>(?:todo|done|wait|action|track|issue|question|project)(?:\.[^:\s]+)?)"
-        ur"(?P<todoDelimiter>:)(?P<todoValue>" + PlainCharacterPAT + ur"+?)$",
+        ur"(?P<todoDelimiter>:)(?P<todoValue>" + PlainCharacterPAT + ur"+?)(?:$|(?=\|))",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 # todos, used in the tree control to parse saved todos. Because they were
 #   already identified as todos, the regexp can be quite simple
-## ToDoREWithCapturing = re.compile(u"(todo|action|track|issue|question|project)\\.?([^\\:\\s]*):([^\\r\\n]+)")
-# ToDoREWithCapturing = re.compile(ur"([^:\s]+):\s*([^\r\n]+)",
 ToDoREWithCapturing = re.compile(ur"^([^:\s]+):[ \t]*(.+?)$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 

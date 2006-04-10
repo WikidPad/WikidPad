@@ -6,8 +6,12 @@ from wxHelper import GUI_ID  #, setWindowPos, setWindowSize
 
 from WikiExceptions import *
 
+from Serialization import SerializeStream
+
 from StringOps import utf8Enc, utf8Dec, boolToChar, charToBool, strToBin, \
-        binToStr, SerializeStream
+        binToStr
+        
+
 
 
 Unknown = object()  # Abstract third truth value constant
