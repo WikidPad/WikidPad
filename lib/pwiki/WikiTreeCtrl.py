@@ -818,7 +818,9 @@ class MainFuncPagesNode(AbstractNode):
     def listChildren(self):
         return [
                 FuncPageNode(self.treeCtrl, self, "global/[TextBlocks]"),
-                FuncPageNode(self.treeCtrl, self, "wiki/[TextBlocks]")
+                FuncPageNode(self.treeCtrl, self, "wiki/[TextBlocks]"),
+                FuncPageNode(self.treeCtrl, self, "global/[PWL]"),
+                FuncPageNode(self.treeCtrl, self, "wiki/[PWL]")
                 ]
 
 
@@ -831,7 +833,9 @@ class FuncPageNode(AbstractNode):
     
     TAG_TO_LABEL_MAP = {    # Maps the func tag to the node's label
             "global/[TextBlocks]": u"Global text blocks",
-            "wiki/[TextBlocks]": u"Wiki text blocks"
+            "wiki/[TextBlocks]": u"Wiki text blocks",
+            "global/[PWL]": "Global spell list",
+            "wiki/[PWL]": "Wiki spell list"
         }
 
     def __init__(self, tree, parentNode, funcTag):

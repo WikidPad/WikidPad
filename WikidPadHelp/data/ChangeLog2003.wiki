@@ -10,5 +10,5 @@ Nov. 14, 2003
     1. Added ScratchPad feature. Ctrl-Alt-C copies to the scratch pad.
     2. Added ability for end users to customize wikidPad by hooking into
        some of the core events. See WikiPadHooks.
-    3. WikiWords may now contain InternatiÃ¶nalChÃ racters.
+    3. WikiWords may now contain InternatiönalChàracters.
     4. Bug fixes. Issues with renaming wikiwords have been resolved.

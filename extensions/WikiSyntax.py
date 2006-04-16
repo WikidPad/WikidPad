@@ -148,7 +148,7 @@ SearchFragmentUnescapeRE   = re.compile(ur"#(.)",
 
 # For spell checking
 TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlRE.pattern + u"|" +
-        WikiWordRE.pattern + ur")|\b\w.*?\b",
+        WikiWordRE.pattern + ur")|\b[\w']+",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SP only
 
 

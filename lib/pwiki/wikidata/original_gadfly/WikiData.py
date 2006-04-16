@@ -550,6 +550,45 @@ class WikiData:
         return [row[0] for row in rows if float(row[1]) >= timeDiff]
 
 
+    def getFirstWikiWord(self):
+        """
+        Returns the name of the "first" wiki word. See getNextWikiWord()
+        for details. Returns either an existing wiki word or None if no
+        wiki words in database.
+        """
+        words = self.getAllDefinedWikiPageNames()
+        words.sort()
+        if len(words) == 0:
+            return None
+        return words[0]
+
+
+    def getNextWikiWord(self, currWord):
+        """
+        Returns the "next" wiki word after currWord or None if no
+        next word exists. If you begin with the first word returned
+        by getFirstWikiWord() and then use getNextWikiWord() to
+        go to the next word until no more words are available
+        and if the list of existing wiki words is not modified during
+        iteration, it is guaranteed that you have visited all real
+        wiki words (no aliases) then.
+        """
+        words = self.getAllDefinedWikiPageNames()
+        words.sort()
+        if len(words) == 0:
+            return None
+            
+        try:
+            i = words.index(currWord)
+            i += 1
+            if i == len(words):
+                return None
+            
+            return words[i]
+        except ValueError:
+            None
+
+
     # ---------- Property cache handling ----------
 
     def getPropertyNames(self):

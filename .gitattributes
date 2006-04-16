@@ -268,6 +268,7 @@ WikidPadHelp/data/SEARCH_VIEWS.grl -text
 WikidPadHelp/data/SETTINGS.grl -text
 WikidPadHelp/data/ScratchPad.wiki -text
 WikidPadHelp/data/SearchingTheWiki.wiki -text
+WikidPadHelp/data/SpellChecking.wiki -text
 WikidPadHelp/data/SystemInfoTemplate.wiki -text
 WikidPadHelp/data/TODOS.grl -text
 WikidPadHelp/data/Templates.wiki -text
@@ -524,6 +525,7 @@ lib/pwiki/AdditionalDialogs.py -text
 lib/pwiki/CmdLineAction.py -text
 lib/pwiki/Configuration.py -text
 lib/pwiki/DocPages.py -text
+lib/pwiki/EnchantDriver.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
 lib/pwiki/Importers.py -text
@@ -570,8 +572,10 @@ lib/pwiki/wikidata/original_sqlite/WikiData.py -text
 lib/pwiki/wikidata/original_sqlite/__init__.py -text
 lib/pwiki/wxHelper.py -text
 lib/readme.txt -text
+/license-spelladdon.txt -text
 /license.txt -text
 /pwiki.ico -text
 /setup.py -text
 /sql_mar.py -text
+/wikidpad_spelladdon.iss -text
 /wikidpad_unicode.iss -text

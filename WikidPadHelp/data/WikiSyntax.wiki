@@ -1,4 +1,4 @@
-++ Wiki Syntax
+﻿++ Wiki Syntax
 
 The syntax of this wiki is customizable. Use:
 

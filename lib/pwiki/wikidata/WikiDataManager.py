@@ -112,8 +112,15 @@ class WikiDataManager:
         # specific to database backend
         self.getWikiData().cleanupAfterRebuild(progresshandler)
         
-    def renameWikiWord(self, wikiWord, toWikiWord):
+    def renameWikiWord(self, wikiWord, toWikiWord, modifyText):
+        """
+        modifyText -- Should the text of links to the renamed page be
+                modified? This text replacement works unreliably
+        """
         self.getWikiData().renameWord(wikiWord, toWikiWord)
+        
+        if not modifyText:
+            return
 
         # now we have to search the wiki files and replace the old word with the new
         searchOp = SearchReplaceOperation()

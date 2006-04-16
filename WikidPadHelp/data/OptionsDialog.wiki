@@ -1,6 +1,6 @@
 ﻿++ Options Dialog
 
-The options dialog controls the behaviour of the application and the currently open wiki. To open it, choose "Options" in the wiki menu.
+The options dialog controls the behavior of the application and the currently open wiki. To open it, choose "Options" in the wiki menu.
 
 +++ Application-wide
 
@@ -37,7 +37,7 @@ Enter here a regular expression of the properties you want to allow to be shown 
 
 If you e.g. want to show the "alias" properties only, enter "alias: .* ". Other properties will then be hidden in the preview. The empty text field matches everything.
 
-If you want to show all properties *except* those matching the RE, tick the checkbox to the eft of the "not".
+If you want to show all properties *except* those matching the RE, tick the checkbox to the left of the "not".
 
 If you press the "Ok" button of the options dialog, but the dialog doesn't vanish, instead this text field is red, then the RE contains an error and must be corrected first.
 
@@ -82,7 +82,7 @@ For async. highlighting how long to wait after key press (in seconds) before sta
 ++++ Other
 
 *Minimize to Tray*
-Minmized to system tray instead of the normal taskbar.
+Minimized to system tray instead of the normal taskbar.
 
 *New window on wiki URL*
 When double clicking on a wiki: URL, a new instance of the application is started, otherwise, the current instance loads the new wiki.
@@ -98,6 +98,13 @@ Set the security level for script execution, see InlinePythonEval#+++# Security#
 
 *Statusbar time format*
 Set the time format the statusbar should use to show modification and creation date of the current wiki page. The format can only be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
+
+*Auto-show log window*
+Automatically show log window if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
+
+*Auto-hide log window*
+Automatically hide log window if no more error messages are present.
+
 
 
 +++ Current wiki

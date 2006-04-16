@@ -5,7 +5,8 @@ from MiscEvent import MiscEventSourceMixin
 
 from WikiExceptions import *   # TODO make normal import?
 
-from StringOps import strToBool, fileContentToUnicode, BOM_UTF8, utf8Enc
+from StringOps import strToBool, fileContentToUnicode, BOM_UTF8, utf8Enc, \
+        utf8Dec
 
 import WikiFormatting
 import PageAst
@@ -177,9 +178,6 @@ class WikiPage(DocPage):
     def getWikiWord(self):
         return self.wikiWord
         
-#     def getRealWikiWord(self):
-        
-
 
     def getTimestamps(self):
         if self.modified is None:
@@ -441,6 +439,7 @@ class WikiPage(DocPage):
 
 
 
+# TODO Maybe split into single classes for each tag
 
 class FunctionalPage(DocPage):
     """
@@ -479,10 +478,25 @@ class FunctionalPage(DocPage):
                 tbContent = fileContentToUnicode(tbContent)
             except:
                 tbContent = u""
+        elif self.funcTag == "global/[PWL]":
+            tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[PWL].wiki")
+            try:
+                tbFile = open(tbLoc, "rU")
+                tbContent = tbFile.read()
+                tbFile.close()
+                tbContent = fileContentToUnicode(tbContent)
+            except:
+                tbContent = u""
         elif self.funcTag == "wiki/[TextBlocks]":
             wikiData = self.wikiDataManager.getWikiData()
             if wikiData.isDefinedWikiWord("[TextBlocks]"):
                 tbContent = wikiData.getContent("[TextBlocks]")
+            else:
+                tbContent = u""
+        elif self.funcTag == "wiki/[PWL]":
+            wikiData = self.wikiDataManager.getWikiData()
+            if wikiData.isDefinedWikiWord("[PWL]"):
+                tbContent = wikiData.getContent("[PWL]")
             else:
                 tbContent = u""
 
@@ -509,7 +523,14 @@ class FunctionalPage(DocPage):
         if self.funcTag == "global/[TextBlocks]":
             tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[TextBlocks].wiki")
             tbFile = open(tbLoc, "w")
-
+            try:
+                tbFile.write(BOM_UTF8)
+                tbFile.write(utf8Enc(text)[0])
+            finally:
+                tbFile.close()
+        elif self.funcTag == "global/[PWL]":
+            tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[PWL].wiki")
+            tbFile = open(tbLoc, "w")
             try:
                 tbFile.write(BOM_UTF8)
                 tbFile.write(utf8Enc(text)[0])
@@ -523,6 +544,14 @@ class FunctionalPage(DocPage):
             else:
                 if text != u"":
                     wikiData.setContent("[TextBlocks]", text)
+        elif self.funcTag == "wiki/[PWL]":
+            wikiData = self.wikiDataManager.getWikiData()
+            if wikiData.isDefinedWikiWord("[PWL]") and text == u"":
+                # Delete content
+                wikiData.deleteContent("[PWL]")
+            else:
+                if text != u"":
+                    wikiData.setContent("[PWL]", text)
 
         self.saveDirtySince = None
 
@@ -537,6 +566,9 @@ class FunctionalPage(DocPage):
         if self.funcTag in ("global/[TextBlocks]", "wiki/[TextBlocks]"):
             if fireEvent:
                 self.pWiki.rereadTextBlocks()
+        elif self.funcTag in ("global/[PWL]", "wiki/[PWL]"):
+            if fireEvent and self.pWiki.spellChkDlg is not None:
+                self.pWiki.spellChkDlg.rereadPersonalWordLists()
 
 
     def setDirty(self, dirt):

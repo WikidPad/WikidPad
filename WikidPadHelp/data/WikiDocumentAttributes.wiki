@@ -6,7 +6,7 @@ and they are used to specify certain special wiki formatting commands.
 
 You can attach attributes to a page like this:
 
-[importance: high]
+[attribute: value]
 
 Setting an attribute like this makes this document available under the
 *Views* node in the tree on the left, under importance/high.  Example
@@ -60,7 +60,7 @@ Example:
 Above we had already defined:
 \[contact.personal.kids: school]
 
-The following defines that pages containing attributes beginning with "contact" part have color indian red:
+The following defines that pages containing attributes beginning with "contact" part have color Indian red:
 [global.contact.color: indian red]
 
 But the node isn't colored so because of this more specific definition to use dark orchid for attributes beginning with "contact.personal":
@@ -121,10 +121,28 @@ See [Templates].
 
 
 *pagetype: type of the page*
-Controls some behaviour of the editor.
+Controls some behavior of the editor.
 
 Currently only type "form" is supported (see [FormPages] for details).
 
+
+*language: language code*
+Controls language of a page or the wiki (with "global." prepended) for [SpellChecking].
+
+
++++ Error checking
+
+The content of a page is checked on saving for logical errors in some of the special attributes. There is a log window below the editor (normally hidden) which shows error messages if something is wrong.
+
+Currently it checks the attributes alias, color, icon and bold. The presentation attributes inside todo items are not checked.
+
+The log window normally automatically pops up if new messages arrive and automatically hides when there are no more messages (both can be switched off in configuration dialog.
+
+To test the error checking, remove the backslash on the following line and save the page:
+
+\[icon: doesntexist]
+
+Double clicking a message brings the editor to the offending attribute. Position may be a bit off if page was modified after saving.
 
 
 [tree_position: 6]

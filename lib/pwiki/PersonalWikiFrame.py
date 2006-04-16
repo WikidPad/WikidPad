@@ -218,7 +218,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.lastCursorPositionInPage = {}
         self.iconLookupCache = {}
         self.wikiHistory = []
-        self.findDlg = None  # Stores find and find&replace dialog, if present
+        self.findDlg = None  # Stores find&replace or wiki search dialog, if present
+        self.spellChkDlg = None  # Stores spell check dialog, if present
         self.mainmenu = None
         self.editorMenu = None  # "Editor" menu
         self.textBlocksActivation = {} # See self.buildTextBlocksMenu()
@@ -228,8 +229,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                                     # needed for "Editor"->"Add icon property"
         self.cmdIdToColorName = None # Same for color names
         
-        self.spellChkIgnore = sets.Set()  # set of words to ignore during spell checking
-
         # setup plugin manager and hooks API
         self.pluginManager = PluginManager()
         self.hooks = self.pluginManager.registerPluginAPI(("hooks",1),
@@ -699,7 +698,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         wikiMenu.AppendSeparator()  # TODO May have two separators without anything between
 
-        self.addMenuItem(wikiMenu, '&Test', 'Test', lambda evt: self.testIt())
+#         self.addMenuItem(wikiMenu, '&Test', 'Test', lambda evt: self.testIt())
 
         menuID=wxNewId()
         wikiMenu.Append(menuID, 'E&xit', 'Exit')
@@ -1079,7 +1078,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 'Set Date Format', lambda evt: self.showDateformatDialog())
 
         if SpellChecker.isSpellCheckSupported():
-            self.addMenuItem(self.editorMenu, 'Spell check',
+            self.addMenuItem(self.editorMenu, 'Spell check\t' + self.keyBindings.SpellCheck,
                     'Spell check current page',
                     lambda evt: self.showSpellCheckerDialog())
 
@@ -2311,10 +2310,13 @@ These are your default global settings.
             self.pageHistory.goAfterDeletion()
             
             
-    def renameCurrentWikiPage(self, toWikiWord, **evtprops):
+    def renameCurrentWikiPage(self, toWikiWord, modifyText, **evtprops):
         """
         Renames current wiki word to toWikiWord.
         Returns True if renaming was done successful.
+        
+        modifyText -- Should the text of links to the renamed page be
+                modified? This text replacement works unreliably
         """
         wikiWord = self.getCurrentWikiWord()
         if wikiWord is None:
@@ -2322,7 +2324,8 @@ These are your default global settings.
 
         try:
             self.saveCurrentDocPage()
-            self.getWikiDataManager().renameWikiWord(wikiWord, toWikiWord)
+            self.getWikiDataManager().renameWikiWord(wikiWord, toWikiWord,
+                    modifyText)
 
             # if the root was renamed we have a little more to do
             if wikiWord == self.wikiName:
@@ -2381,7 +2384,7 @@ These are your default global settings.
                 not link2.startswith(u"wiki:"):
             if link2.startswith(u"rel://"):
                 # This is a relative link
-                link2 = makeRelUrlAbsolute(link2)
+                link2 = self.makeRelUrlAbsolute(link2)
 
             os.startfile(mbcsEnc(link2, "replace")[0])
             return True
@@ -2711,21 +2714,25 @@ These are your default global settings.
             self.displayErrorMessage(u"Cannot rename to '%s', word already exists" %
                     toWikiWord)
             return False
+            
+        result = wxMessageBox(u"Do you want to modify all links to the wiki word "
+                u"'%s' renamed to '%s'?" % (wikiWord, toWikiWord),
+                u'Rename Wiki Word', wxYES_NO | wxCANCEL, self)
 
-        dlg=wxMessageDialog(self, uniToGui((u"Are you sure you want to rename "+
-                u"wiki word '%s' to '%s'?") % (wikiWord, toWikiWord)),
-                u'Rename Wiki Word', wxYES_NO)
-        renamed = False
-        result = dlg.ShowModal()
-        if result == wxID_YES:
+#         dlg=wxMessageDialog(self, uniToGui((u"Are you sure you want to rename "+
+#                 u"wiki word '%s' to '%s'?") % (wikiWord, toWikiWord)),
+#                 u'Rename Wiki Word', wxYES_NO)
+#         result = dlg.ShowModal()
+        if result == wxYES or result == wxNO:
             try:
-                renamed = self.renameCurrentWikiPage(toWikiWord)
+                self.renameCurrentWikiPage(toWikiWord, result == wxYES)
+                return True
             except WikiDataException, e:
                 traceback.print_exc()                
                 self.displayErrorMessage(str(e))
 
-        dlg.Destroy()
-        return renamed
+#         dlg.Destroy()
+        return False
 
     def showSearchDialog(self):
         if self.findDlg != None:
@@ -2940,19 +2947,15 @@ These are your default global settings.
 
 
     def showSpellCheckerDialog(self):
-        dlg = SpellChecker.SpellCheckerDialog(self, -1, self)
-        dlg.CenterOnParent(wxBOTH)
-        dlg.Show()
-        dlg.checkNext(startPos=0)
+        if self.spellChkDlg != None:
+            return
+            
+        self.spellChkDlg = SpellChecker.SpellCheckerDialog(self, -1, self)
+        self.spellChkDlg.CenterOnParent(wxBOTH)
+        self.spellChkDlg.Show()
+        self.spellChkDlg.checkNext(startPos=0)
 
-#         if self.findDlg != None:
-#             return
-# 
-#         self.findDlg = SearchWikiDialog(self, -1)
-#         self.findDlg.CenterOnParent(wxBOTH)
-#         self.findDlg.Show()
-        
-        
+
     def rebuildWiki(self, skipConfirm = False):
         if not skipConfirm:
             result = wxMessageBox(u"Are you sure you want to rebuild this wiki? "+

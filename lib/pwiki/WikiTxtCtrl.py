@@ -14,13 +14,6 @@ from wxPython.wx import *
 from wxPython.stc import *
 import wxPython.xrc as xrc
 
-# try:
-#     from XXXenchant.checker import SpellChecker
-#     from XXXenchant.checker.wxSpellCheckerDialog import wxSpellCheckerDialog
-# except ImportError:
-#     wxSpellCheckerDialog = None
-#     SpellChecker = None
-
 from Utilities import *
 
 from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard
@@ -435,6 +428,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         wikiDataManager = self.pWiki.getWikiDataManager()
         
         self.loadedDocPage = wikiPage
+
         if self.loadedDocPage is None:
             self.SetText(u"")
             return  # TODO How to handle?
@@ -464,7 +458,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # now fill the text into the editor
         self.setTextAgaUpdated(content)
-        
+
         self.pageType = self.loadedDocPage.getProperties().get(u"pagetype",
                 [u"normal"])[-1]
                 
@@ -499,23 +493,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self._goToNextFormField()
         else:
             pass   # TODO Error message?
-
-
-#     def spellCheckContent(self):
-#         #sknysh - spell checker
-#         text = self.GetText()
-#         dlg = wxSpellCheckerDialog(self.pWiki, -1, u"")
-# 
-#         chkr = SpellChecker("en_US", text)  # TODO Option
-#         dlg.SetSpellChecker(chkr)
-# 
-#         result = dlg.ShowModal()
-#         dlg.Destroy()
-# 
-#         if result == wx.ID_OK: # this line requires the new wxSpellCheckerDialog mentioned above
-#             self.replaceText(chkr.get_text())
-# #             self.saveCurrentDocPage(force=True)
-
 
 
     def onOptionsChanged(self, miscevt):
@@ -1282,16 +1259,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         "wrap", "70"))
             except:
                 pass
-#             try:
-#                 if self.pWiki.currentWikiPage.getProperties().has_key("wrap"):
-#                     wrapPosition = int(
-#                             self.pWiki.currentWikiPage.getProperties()["wrap"][0])
-#                 else:
-#                     styleProps = self.pWiki.wikiData.getGlobalProperties()
-#                     if styleProps.has_key("global.wrap"):
-#                         wrapPosition = int(styleProps["global.wrap"])
-#             except:
-#                 pass
 
             # make the min wrapPosition 5
             if wrapPosition < 5:
@@ -1431,7 +1398,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     if key == WXK_ESCAPE:
                         self.endIncrementalSearch()
                     # do the next search on another ctrl-s, or f
-                    elif evt.ControlDown() and (key == ord('S') or key == ord('F')):
+                    elif evt.ControlDown() and (key == ord('S') or \
+                            key == ord(self.pWiki.keyBindings.IncrementalSearchCtrl)):
                         self.executeIncrementalSearch(next=True)
                     # handle the delete key
                     elif key == WXK_BACK or key == WXK_DELETE:
@@ -1455,7 +1423,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 (selectStart, selectEnd) = self.GetSelection()
 
                 # activate link
-                if key == ord('F'):
+                if key == ord(self.pWiki.keyBindings.IncrementalSearchCtrl) and \
+                        not evt.ShiftDown() and not evt.AltDown():
                     self.startIncrementalSearch()
 
                 elif key == WXK_SPACE:

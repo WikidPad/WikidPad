@@ -26,6 +26,7 @@ GoHome="Ctrl-Q"
 Bold="Ctrl-B"
 Italic="Ctrl-I"
 Heading="Ctrl-Alt-H"
+SpellCheck=""
 Cut="Ctrl-X"
 Copy="Ctrl-C"
 Paste="Ctrl-V"
@@ -40,6 +41,7 @@ RewrapText="Ctrl-W"
 Eval="Ctrl-E"
 InsertDate="Ctrl-Alt-D"
 MakeWikiWord="Ctrl-J"
+IncrementalSearchCtrl="F"   # Hack, changing not recommended
 
 def makeBold(editor):
     editor.styleSelection(u'*')

@@ -41,6 +41,7 @@ Then just start typing text with WikiWords to create your wiki.
     * Wiki word AutoCompletion
     * DynamicViews
     * SearchingTheWiki
+    * SpellChecking
     * IncrementalSearch
     * PageListDialog
     * WikiExport / WikiImport

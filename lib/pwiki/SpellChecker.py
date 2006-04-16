@@ -1,4 +1,4 @@
-import sets
+import sets, os.path
 
 from wxPython.wx import *
 from wxPython.html import *
@@ -9,12 +9,14 @@ from wxHelper import *
 
 
 try:
-    from enchant import Dict
+    from EnchantDriver import Dict
+    import EnchantDriver
 except ImportError:
     Dict = None
 
+from DocPages import AliasWikiPage, WikiPage
 
-from StringOps import uniToGui, guiToUni
+from StringOps import uniToGui, guiToUni, mbcsEnc
 
 import WikiFormatting
 
@@ -42,18 +44,34 @@ class SpellCheckerDialog(wxDialog):
         self.wordRe = self.mainControl.getFormatting().TextWordRE
         
         self.enchantDict = None
+        self.dictLanguage = None
         
         self.currentCheckedWord = None
         self.currentStart = -1
         self.currentEnd = -1
 
+        # For current session
         self.autoReplaceWords = {}
-        
-        self._createChecker()
+        self.spellChkIgnore = sets.Set()  # set of words to ignore during spell checking
+
+        # For currently open dict file (if any)
+        self.spellChkAddedGlobal = None
+        self.globalPwlPage = None
+        self.spellChkAddedLocal = None
+        self.localPwlPage = None
+
+        self._refreshDictionary()
 
         EVT_BUTTON(self, GUI_ID.btnIgnore, self.OnIgnore)
+        EVT_BUTTON(self, GUI_ID.btnIgnoreAll, self.OnIgnoreAll)
         EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
-        
+        EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
+        EVT_BUTTON(self, GUI_ID.btnAddWordGlobal, self.OnAddWordGlobal)
+        EVT_BUTTON(self, GUI_ID.btnAddWordLocal, self.OnAddWordLocal)
+        EVT_BUTTON(self, wxID_CANCEL, self.OnClose)        
+        EVT_CLOSE(self, self.OnClose)
+
+                
         EVT_LISTBOX(self, GUI_ID.lbReplaceSuggestions,
                 self.OnLbReplaceSuggestions)
 
@@ -61,33 +79,115 @@ class SpellCheckerDialog(wxDialog):
         EVT_CHAR(self.ctrls.lbReplaceSuggestions, self.OnCharReplaceSuggestions)
 
 
-    def _createChecker(self):
+    def _refreshDictionary(self):
         """
         Creates the enchant spell checker object
         """
-        self.enchantDict = Dict("en_US")
+        localDictPath = os.path.join(self.mainControl.globalConfigSubDir,
+                "[PWL].wiki")
+
+        docPage = self.mainControl.getActiveEditor().getLoadedDocPage()
+        if not isinstance(docPage, (AliasWikiPage, WikiPage)):
+            return  # No support for functional pages
+
+        lang = docPage.getPropertyOrGlobal(u"language", self.dictLanguage)
+        try:
+            if lang != self.dictLanguage:
+                self.enchantDict = Dict(str(lang))
+                self.dictLanguage = lang
+                self.rereadPersonalWordLists()
+        except (UnicodeEncodeError, EnchantDriver.DictNotFoundError):
+            self.enchantDict = None
+            self.dictLanguage = None
+            self.globalPwlPage = None
+            self.spellChkAddedGlobal = None
+            self.spellChkAddedLocal = None
+            self.localPwlPage = None
+            
+            
+    def _showInfo(self, msg):
+        """
+        Set dialog controls to show an info/error message
+        """
+        
+        self.ctrls.tfToCheck.SetValue("")
+        # Show misspelled word in context
+        self.ctrls.tfToCheck.SetDefaultStyle(wxTextAttr(wxBLUE))
+        self.ctrls.tfToCheck.AppendText(uniToGui(msg))
+        self.ctrls.tfToCheck.SetDefaultStyle(wxTextAttr(wxBLACK))
+        self.ctrls.tfReplaceWith.SetValue(u"")
+        self.ctrls.lbReplaceSuggestions.Set([])
+        
+        self.ctrls.tfReplaceWith.SetFocus()
+
+
+    def rereadPersonalWordLists(self):
+        wdm = self.mainControl.getWikiDataManager()
+        self.globalPwlPage = wdm.getFuncPage("global/[PWL]")
+        self.spellChkAddedGlobal = \
+                sets.Set(self.globalPwlPage.getContent().split("\n"))
+
+        self.localPwlPage = wdm.getFuncPage("wiki/[PWL]")
+        self.spellChkAddedLocal = \
+                sets.Set(self.localPwlPage.getContent().split("\n"))
 
 
     def checkNext(self, startPos=0):
-        self.ctrls.tfToCheck.SetValue("")
+        self._refreshDictionary()   # TODO Make faster?
+        
+        if self.enchantDict is None:
+            self._showInfo(u"No dictionary found for this page")
+            return False  # No dictionary  # TODO: Next page
 
         text = self.mainControl.getActiveEditor().GetText()
-        spellChkIgnore = self.mainControl.spellChkIgnore
         activeEditor = self.mainControl.getActiveEditor()
+        startWikiWord = self.mainControl.getCurrentWikiWord()
+
+        if startWikiWord is None:
+            # No wiki loaded or no wiki word in editor
+            self._showInfo(u"No wiki open or current page is a functional page")
+            return False
+
+        startWikiWord = self.mainControl.getWikiData().getAliasesWikiWord(
+                startWikiWord)
+        checkedWikiWord = startWikiWord
+
+        self.ctrls.tfToCheck.SetValue("")
 
         while True:
             mat = self.wordRe.search(text, startPos)
             if mat is None:
-                return False
+                # End of page reached
+                if self.ctrls.cbGoToNextPage.GetValue():
+                    #Automatically go to next page
+                    nw = self.mainControl.getWikiData().getNextWikiWord(
+                            checkedWikiWord)
+                    if nw is None:
+                        nw = self.mainControl.getWikiData().getFirstWikiWord()
+                    
+                    if nw is None or nw == startWikiWord:
+                        # Something went wrong or we are where we started
+                        self._showInfo(u"No (more) misspelled words found")
+                        return False
+                        
+                    text = self.mainControl.getWikiDataManager().getWikiPage(nw).getLiveText()
+                    checkedWikiWord = nw
+                    startPos = 0
+                    continue
+                else:
+                    self._showInfo(u"No (more) misspelled words found")
+                    return False
 
             start, end = mat.span()
             word = mat.group()
 
             if mat.group("negative") is not None or \
-                    word in spellChkIgnore or \
+                    word in self.spellChkIgnore or \
+                    word in self.spellChkAddedGlobal or \
+                    word in self.spellChkAddedLocal or \
                     self.enchantDict.check(word):
                 # Ignore if word is in the negative regex pattern (like numbers,
-                # URLs, ...) or in the ignore list or is seen as correct
+                # URLs, ...) or in the ignore lists or is seen as correct
                 # by the spell checker
 
                 startPos = end
@@ -96,9 +196,15 @@ class SpellCheckerDialog(wxDialog):
             if self.autoReplaceWords.has_key(word):
                 activeEditor.SetSelectionByCharPos(start, end)
                 activeEditor.ReplaceSelection(self.autoReplaceWords[word])
+                startPos = activeEditor.GetSelectionCharPos()[1]
                 continue  # ?
 
             break
+            
+            
+        if startWikiWord != checkedWikiWord:
+            # The search went on to another word, so load it into editor
+            self.mainControl.openWikiPage(checkedWikiWord)
 
         self.currentCheckedWord = word
         self.currentStart = start
@@ -132,10 +238,18 @@ class SpellCheckerDialog(wxDialog):
 
         return True
 
+    def OnClose(self, evt):
+        self.mainControl.spellChkDlg = None
+        self.Destroy()
 
     def OnIgnore(self, evt):
         s, e = self.mainControl.getActiveEditor().GetSelectionCharPos()
         self.checkNext(e)
+
+
+    def OnIgnoreAll(self, evt):
+        self.spellChkIgnore.add(self.currentCheckedWord)
+        self.OnIgnore(None)
 
 
     def OnReplace(self, evt):
@@ -147,12 +261,42 @@ class SpellCheckerDialog(wxDialog):
 
         s, e = self.mainControl.getActiveEditor().GetSelectionCharPos()
         self.checkNext(e)
-        
-        
+
+
+    def OnReplaceAll(self, evt):
+        self.autoReplaceWords[self.currentCheckedWord] = \
+                guiToUni(self.ctrls.tfReplaceWith.GetValue())
+        self.OnReplace(None)
+
+
     def OnLbReplaceSuggestions(self, evt):
         sel = guiToUni(self.ctrls.lbReplaceSuggestions.GetStringSelection())
         if sel != u"":
             self.ctrls.tfReplaceWith.SetValue(uniToGui(sel))
+
+
+    def OnAddWordGlobal(self, evt):
+        """
+        Add word globally (application-wide)
+        """  
+        self.spellChkAddedGlobal.add(self.currentCheckedWord)
+        words = list(self.spellChkAddedGlobal)
+        words.sort()
+        self.globalPwlPage.save(u"\n".join(words))
+
+        self.OnIgnore(None)
+
+
+    def OnAddWordLocal(self, evt):
+        """
+        Add word locally (wiki-wide)
+        """
+        self.spellChkAddedLocal.add(self.currentCheckedWord)
+        words = list(self.spellChkAddedLocal)
+        words.sort()
+        self.localPwlPage.save(u"\n".join(words))
+
+        self.OnIgnore(None)
 
 
     def OnCharReplaceWith(self, evt):

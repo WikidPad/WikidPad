@@ -1,6 +1,6 @@
 ﻿++ Bulleted Lists
 
-To start a bulleted list type an asterik at the beginning of the line.
+To start a bulleted list type an asterisk at the beginning of the line.
 For example:
 
     * Put your cursor at the end of this line and press enter.

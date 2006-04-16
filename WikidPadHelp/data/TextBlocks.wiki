@@ -1,10 +1,10 @@
 ﻿++ Text Blocks
 
-In the "Editor" menu you have a submenu "Text blocks" which you can modify to contain arbitrary blocks of text you use often and which you can insert or append everywhere by chosing the appropriate menu item.
+In the "Editor" menu you have a submenu "Text blocks" which you can modify to contain arbitrary blocks of text you use often and which you can insert or append everywhere by choosing the appropriate menu item.
 
-To modify the menu you have to edit one of two special wiki pages, so-called "functional pages" which are located below the "Func. pages" node which is a child of the "Views" node in the tree on the right.
+To modify the menu you have to edit one of two special wiki pages, so-called "functional pages" which are located below the "Func. pages" node which is a child of the "Views" node in the tree on the left.
 
-Functional pages behave similar to normal wiki pages but can't be renamed or deleted. They control some behaviour of a wiki or the whole application.
+Functional pages behave similar to normal wiki pages but can't be renamed or deleted. They control some behavior of a wiki or the whole application.
 
 The "Global text blocks" page applies application-wide to all wikis, while "Wiki text blocks" can be set individually for each wiki.
 
@@ -53,7 +53,7 @@ Similar as before but the entry has the "a" flag (currently the only existing on
 
 ;a=This will be appended
 
-Same as before but title is ommitted here and therefore deduced from content.
+Same as before but title is omitted here and therefore deduced from content.
 
 
 Submenu title=

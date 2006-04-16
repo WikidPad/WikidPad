@@ -36,7 +36,7 @@ If no Gadfly database files in the data-directory are present (file "wikidb.gfd"
 
 
 +++ If you migrate to "Compact Sqlite":
-Run "Copy .wiki files to database" from "Wiki" menu. This copies the files from the data-directory into the database which contains the real pages for "Compact Sqlite" datatype.
+Run "Copy .wiki files to database" from "Wiki" menu. This copies the files from the data-directory into the database which contains the real pages for "Compact Sqlite" data type.
 
 
 

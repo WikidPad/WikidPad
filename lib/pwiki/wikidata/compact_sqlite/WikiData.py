@@ -643,6 +643,31 @@ class WikiData:
                 (timeDiff,))
 
 
+    def getFirstWikiWord(self):
+        """
+        Returns the name of the "first" wiki word. See getNextWikiWord()
+        for details. Returns either an existing wiki word or None if no
+        wiki words in database.
+        """
+        return self.connWrap.execSqlQuerySingleItem(
+                "select word from wikiwordcontent where not word glob '[[]*' "
+                "order by word limit 1")
+
+
+    def getNextWikiWord(self, currWord):
+        """
+        Returns the "next" wiki word after currWord or None if no
+        next word exists. If you begin with the first word returned
+        by getFirstWikiWord() and then use getNextWikiWord() to
+        go to the next word until no more words are available
+        and if the list of existing wiki words is not modified during
+        iteration, it is guaranteed that you have visited all real
+        wiki words (no aliases) then.
+        """
+        return self.connWrap.execSqlQuerySingleItem(
+                "select word from wikiwordcontent where not word glob '[[]*' and "
+                "word > ? order by word limit 1", (currWord,))
+
 
     # ---------- Property cache handling ----------
 

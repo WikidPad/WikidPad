@@ -1,4 +1,4 @@
-﻿++ wikiPad Hooks
+﻿++ wikidPad Hooks
 
 Under the wikidPad install directory:
 

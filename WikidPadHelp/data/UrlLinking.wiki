@@ -1,4 +1,4 @@
-++ Url Linking
+﻿++ Url Linking
 
 You may enter URLs to websites or local files into your document.  To
 open the link double click on it or press the Ctrl-L. If you drag a
@@ -11,3 +11,14 @@ http://www.google.com/
 https://somewheresecure.com
 file:///C|/Documents%20and%20Settings/joeshmoe/readme.txt
 ftp://ftp.whereever.com/
+
+
+++ Relative URLs
+You can create URLs which are relative to the wiki directory. These start with rel:// followed by the relative position. For HTML export the rel:// is removed to create a relative HTML link (without protocol). For HTML preview they are converted to "file:" URLs.
+
+You can drag a file from Explorer while holding shift key to create a relative URL. This does not work with files ending with ".wiki", these are always absolute and have the "wiki:" protocol.
+
+Example:
+
+rel://../above/andBelow.txt
+

@@ -1,6 +1,39 @@
 ﻿++ Change Log
 
 
+Apr. 16, 2006 (1.7beta3)
+
+Changes:
+
+    * Better alias support. E.g. pages linking to an alias of
+      WikiWord are now listed as parents of this word.
+    * Support for relative URLS with rel: protocol, see [UrlLinking]
+    
+    * Initial support for checking special attributes for validity
+      (currently only "alias", "icon", "color", "bold") with an
+      own "Log Window" for error messages, see [WikiDocumentAttributes].
+    
+    * Support for spell checking, see [SpellChecking].
+    * Todo items can now be terminated with newline or |
+    * On multiple attributes of same name on one page (e.g.
+      multiple "icon" attributes) the last one is now preferred
+      instead of the first one.
+    
+    * Bug fixed: Cursor position on a page is now stored for
+      each page even if page is not modified and saved
+    * Scroll position of editor is now stored (during session) as
+      cursor position already is.
+    * Scroll policy of editor modified to better handling
+    
+    * Bug fixed: Command line export didn't work because of wrong
+      default additional options
+    * Bug fixed: Gaps between paragraphs in editor when using some
+      fonts (e.g. Verdana) and asynchronous highlighting.
+    * Bug fixed: Tree not shown if set invisible and then made
+      visible by dragging splitter sash.
+
+
+
 Mar. 24, 2006 (1.7beta2)
 
 Changes:
@@ -49,7 +82,7 @@ Changes:
       setting.
 
     * Attribute \[pagetype: form] introduced to support special
-      behaviour of the editor for form-like pages. (see [FormPages])
+      behavior of the editor for form-like pages. (see [FormPages])
 
     * Support for global.child_sort_order attribute.
     * Support for \[child_sort_order: natural] (but not really
@@ -121,7 +154,7 @@ Changes:
       'global.work.color' will be applied to pages containing
       'work', "work.somewhere", "work.somewhere.else" ...
       properties, except there is e.g. a
-      'global.work.somwhere.else.color' property. This works for
+      'global.work.somewhere.else.color' property. This works for
       'color', 'icon' and 'bold' properties which control the
       presentation of the tree nodes (see [WikiDocumentAttributes]).
 
@@ -175,7 +208,7 @@ Changes:
       [ScratchPad |This text is shown in preview and HTML export] )
       The title of the link is not stored in the XML export!
 
-    * Options to control timing behaviour of syntax highlighter (see
+    * Options to control timing behavior of syntax highlighter (see
       [OptionsDialog])
     * Option to set background color of text editor (works only
       partially)
@@ -221,7 +254,7 @@ moments, please be patient.
     * Option to forbid cycles in trees (see [OptionsDialog])
     * Option to filter properties to show in HTML preview and export (see [OptionsDialog])
     * A few bugs fixed. Among others:
-        * Wrong lineendings in clipboard
+        * Wrong line endings in clipboard
         * WPCompact: Missing RE prevents wrap text from work
         * WPCompact: Creation of new wikis and importing doesn't work (wrong formatver)
 

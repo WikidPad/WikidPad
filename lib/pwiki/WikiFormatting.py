@@ -14,7 +14,7 @@ FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
         "Heading1", "Url", "Script", "Property", "ToDo", "WikiWord2",
         "HorizLine", "Bullet", "Numeric", "Suppress", "Footnote", "Table",
         "EscapedChar", "HtmlTag", "TableCellSplit", "TableRowSplit", "PreBlock",
-        "SuppressHighlight"], 1)
+        "SuppressHighlight"], 0)
 
 EMPTY_RE = re.compile(ur"", re.DOTALL | re.UNICODE | re.MULTILINE)
 
