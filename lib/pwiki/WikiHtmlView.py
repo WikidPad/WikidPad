@@ -15,6 +15,8 @@
 from wxPython.wx import *
 from wxPython.html import *
 
+from wxHelper import keyDownToAccel
+
 from MiscEvent import KeyFunctionSink
 
 import Exporters
@@ -71,6 +73,9 @@ class WikiHtmlView(wxHtmlWindow):
         
         # TODO More elegant
         self.exporterInstance.pWiki = self.pWiki
+        
+        EVT_KEY_DOWN(self, self.OnKeyDown)
+        EVT_MOUSEWHEEL(self, self.OnMouseWheel) 
 
 
     def setVisible(self, vis):
@@ -83,7 +88,11 @@ class WikiHtmlView(wxHtmlWindow):
         self.visible = vis
 
 
-        # TODO More elegant
+    _DEFAULT_FONT_SIZES = (wxHTML_FONT_SIZE_1, wxHTML_FONT_SIZE_2, 
+            wxHTML_FONT_SIZE_3, wxHTML_FONT_SIZE_4, wxHTML_FONT_SIZE_5, 
+            wxHTML_FONT_SIZE_6, wxHTML_FONT_SIZE_7)
+
+
     def refresh(self):
         ## _prof.start()
         # Store position of previous word, if any
@@ -107,6 +116,9 @@ class WikiHtmlView(wxHtmlWindow):
         
         # TODO Reset after open wiki
 #         lx, ly = self.GetViewStart()
+        zoom = self.pWiki.getConfig().getint("main", "preview_zoom", 0)
+        self.SetFonts("", "", [max(s + 2 * zoom, 1)
+                for s in self._DEFAULT_FONT_SIZES])
         self.SetPage(html)
         
         lx, ly = self.scrollPosCache.get(self.currentLoadedWikiWord, (0, 0))
@@ -134,4 +146,31 @@ class WikiHtmlView(wxHtmlWindow):
             self.pWiki.openWikiPage(href[13:], motionType="child")
         else:
             self.pWiki.launchUrl(href)
+
+
+    def OnKeyDown(self, evt):
+        acc = keyDownToAccel(evt)
+        if acc == (wxACCEL_CTRL, ord('+')) or \
+                acc == (wxACCEL_CTRL, WXK_NUMPAD_ADD):
+            zoom = self.pWiki.getConfig().getint("main", "preview_zoom", 0)
+            self.pWiki.getConfig().set("main", "preview_zoom", str(zoom + 1))
+            self.refresh()
+        elif acc == (wxACCEL_CTRL, ord('-')) or \
+                acc == (wxACCEL_CTRL, WXK_NUMPAD_SUBTRACT):
+            zoom = self.pWiki.getConfig().getint("main", "preview_zoom", 0)
+            self.pWiki.getConfig().set("main", "preview_zoom", str(zoom - 1))
+            self.refresh()
+        else:
+            evt.Skip()
+
+    def OnMouseWheel(self, evt):
+        if evt.ControlDown():
+            zoom = self.pWiki.getConfig().getint("main", "preview_zoom", 0)
+            zoom -= evt.GetWheelRotation() // evt.GetWheelDelta()
+            self.pWiki.getConfig().set("main", "preview_zoom", str(zoom))
+            self.refresh()
+        else:
+            evt.Skip()
+
+
 

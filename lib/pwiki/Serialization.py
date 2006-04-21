@@ -1,6 +1,9 @@
 from struct import pack, unpack
 import cStringIO as StringIO
 
+from StringOps import utf8Dec, utf8Enc
+
+
 
 # ---------- Support for serializing values into binary data (and back) ----------
 # Especially used in SearchAndReplace.py, class SearchReplaceOperation

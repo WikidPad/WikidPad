@@ -1,4 +1,4 @@
-import os, gc, traceback, sets
+import os, gc, traceback, sets, string
 from os.path import *
 from time import localtime, time, strftime
 
@@ -609,10 +609,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         wikiMenu.AppendSeparator()
 
         menuID=wxNewId()
-        self.showTreeCtrlMenuItem = wxMenuItem(wikiMenu, menuID, "&Show Tree Control\t" + self.keyBindings.ShowTreeControl, "Show Tree Control", wxITEM_CHECK)
+        self.showTreeCtrlMenuItem = wxMenuItem(wikiMenu, menuID,
+                "&Show Tree Control\t" + self.keyBindings.ShowTreeControl,
+                "Show Tree Control", wxITEM_CHECK)
         wikiMenu.AppendItem(self.showTreeCtrlMenuItem)
         EVT_MENU(self, menuID, lambda evt: self.setShowTreeControl(
                 self.showTreeCtrlMenuItem.IsChecked()))
+        EVT_UPDATE_UI(self, menuID, self.OnUpdateTreeCtrlMenuItem)
 
 
         self.addMenuItem(wikiMenu, 'O&ptions',
@@ -1609,8 +1612,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         if self.lastSplitterPos > 1:
         if not self.treeSashWindow.isCollapsed():
             self.showTreeCtrlMenuItem.Check(1)
-        else:
-            self.tree.Hide()
+#         else:
+#             self.tree.Hide()
+
+    def OnUpdateTreeCtrlMenuItem(self, evt):
+        evt.Check(not self.treeSashWindow.isCollapsed())
+        
+
 
     def OnSwitchFocus(self, evt):
         foc = wxWindow.FindFocus()
@@ -3187,8 +3195,8 @@ These are your default global settings.
         self.configuration.set("main", "windowmode", windowmode)
 
         splitterPos = self.treeSashWindow.getSashPosition()
-        if splitterPos < 3:
-            splitterPos = self.treeSashWindow.getEffectiveSashPosition()
+#         if splitterPos < 3:
+#             splitterPos = self.treeSashWindow.getEffectiveSashPosition()
 
         self.configuration.set("main", "splitter_pos", splitterPos)
         self.configuration.set("main", "log_window_effectiveSashPos",

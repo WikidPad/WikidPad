@@ -266,10 +266,12 @@ class WikiPage(DocPage):
         return self
         
 
-    def _getWikiPageTitle(self, wikiWord):
-        title = re.sub(ur'([A-Z\xc0-\xde]{2,})([a-z\xdf-\xff])', r'\1 \2', wikiWord)
+    def _getWikiPageTitle(wikiWord):   # static
+        title = re.sub(ur'([A-Z\xc0-\xde]+)([A-Z\xc0-\xde][a-z\xdf-\xff])', r'\1 \2', wikiWord)
         title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2', title)
         return title
+        
+    _getWikiPageTitle = staticmethod(_getWikiPageTitle)
 
 
     def isDefined(self):

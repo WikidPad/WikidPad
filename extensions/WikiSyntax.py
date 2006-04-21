@@ -46,13 +46,14 @@ Heading2RE      = re.compile(u"^\\+\\+(?!\\+) ?(?P<h2Content>" +
 Heading1RE      = re.compile(u"^\\+(?!\\+) ?(?P<h1Content>" +
         PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp|rel)://|mailto:)[^"\s<>]*',
+# UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp|rel)://|mailto:)[^"\s<>]*',
+#         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
+UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp|rel)://|mailto:)'
+        ur'(?:(?![.,;:!?]+["\s])[^"\s<>])*',
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
-# TitledUrlRE =  re.compile(
-#         ur"\[(?P<titledurlTitle>.+?" + TitleWikiWordDelimiterPAT + ur"\s*)?"
-#         ur"(?P<titledurlUrl>" + UrlRE.pattern + ur")\]",
-#         re.DOTALL | re.UNICODE | re.MULTILINE)
+
+
 TitledUrlRE =  re.compile(
         ur"\[(?P<titledurlUrl>" + UrlRE.pattern + ur")"
         ur"(?:(?P<titledurlDelim>[ \t]*" + TitleWikiWordDelimiterPAT + ur")"
@@ -154,7 +155,7 @@ TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlRE.pattern + u"|" +
 
 
 # parses the dynamic properties
-PropertyRE      = re.compile(ur"\[[ \t]*(?P<propertyName>[a-zA-Z0-9\-\_\.]+?)[ \t]*" +
+PropertyRE      = re.compile(ur"\[[ \t]*(?P<propertyName>[\w\-\_\.]+?)[ \t]*" +
                   ur"[=:][ \t]*(?P<propertyValue>[\w\-\_ \t;:,.]+?)\]",
                   re.DOTALL | re.UNICODE | re.MULTILINE)
 
@@ -173,7 +174,7 @@ RevWikiWordRE      = re.compile(ur"^" + # revSingleWikiWord + ur"(?:/" +
 RevWikiWordRE2     = re.compile(ur"^[\w\-\_ \t.]+?\[",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
-RevPropertyValue     = re.compile(ur"^([\w\-\_ \t]*?)([ \t]*[=:][ \t]*)([a-zA-Z0-9\-\_ \t\.]+?)\[",
+RevPropertyValue     = re.compile(ur"^([\w\-\_ \t]*?)([ \t]*[=:][ \t]*)([\w\-\_ \t\.]+?)\[",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 

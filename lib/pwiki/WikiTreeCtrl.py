@@ -556,7 +556,7 @@ class PropCategoryNode(AbstractNode):
         style.label = self.categories[-1]
         style.hasChildren = True
         return style
-        
+
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.wikiData
         result = []

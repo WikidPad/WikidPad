@@ -252,7 +252,8 @@ GLOBALDEFAULTS = {
     ("main", "log_window_autohide"): "True", # Automatically hide log window if empty
     ("main", "log_window_sashPos"): "1",  # Real splitter pos
     ("main", "log_window_effectiveSashPos"): "120",  # Splitter pos when calling showEffWindow
-    ("main", "zoom"): '0',
+    ("main", "zoom"): '0',  # Zoom factor for editor
+    ("main", "preview_zoom"): '0',  # Zoom factor for preview
     ("main", "last_active_dir"): None,   # Should be overwritten with concrete value
     ## ("main", "font"): "Courier New",
     ("main", "font"): None,

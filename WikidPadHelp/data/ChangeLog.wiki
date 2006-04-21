@@ -1,7 +1,34 @@
 ﻿++ Change Log
 
 
-Apr. 16, 2006 (1.7beta3)
+Apr. 21, 2006 (1.7beta4)
+
+Changes:
+
+    * One or more of the characters .,;:!? can directly follow
+      an URL and aren't counted as part of it. If you need such
+      a character as last one in an URL, enclose the URL in brackets.
+    * Attribute names can consist of all alphanumeric
+      (unicode definition) characters.
+    * Support for zoom in preview (with Ctrl-+, Ctrl-- and
+      Ctrl-Mousewheel).
+    * Better formatting of titles of newly created wiki pages
+      (e.g. wikiword "URLViewer" now leads to title "++ URL Viewer"
+      instead of "++ URLV iewer"
+
+    * Bug fixed: Tree always visible on WikidPad start, even if
+      made invisible before previous termination.
+    * Bug fixed: Creation of new wikis didn't work
+    * Bug fixed: Searches not saveable, saved searches not usable
+    * Bug "reduced": Scroll position of page in editor not remembered
+      properly. The fix may lead to some visible jumps: sometimes
+      you will see the beginning of page for a short time before
+      it jumps to the stored position. Moreover, even with the
+      fix the stored position may be imprecise sometimes.
+
+
+
+Apr. 16, 2006 (1.7beta3, repository revision in "mbutscher" branch: 73)
 
 Changes:
 
@@ -34,7 +61,7 @@ Changes:
 
 
 
-Mar. 24, 2006 (1.7beta2)
+Mar. 24, 2006 (1.7beta2, repository revision in "mbutscher" branch: 70)
 
 Changes:
     * Importer/Exporter for new multipage text format (mpt).

@@ -475,6 +475,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 scrollPos = self.scrollPosCache.get(
                         self.loadedDocPage.getWikiWord())
                 if scrollPos is not None:
+                    # Bad hack: First scroll to position to avoid a visible jump
+                    #   if scrolling works, then update display,
+                    #   then scroll again because it may have failed the first time
+
                     self.SetScrollPos(wxHORIZONTAL, scrollPos[0], False)
                     screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK, scrollPos[0], wxHORIZONTAL)
                     self.ProcessEvent(screvt)
@@ -487,6 +491,19 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE, scrollPos[1], wxVERTICAL)
                     self.ProcessEvent(screvt)
 
+                    self.Update()
+
+                    self.SetScrollPos(wxHORIZONTAL, scrollPos[0], False)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK, scrollPos[0], wxHORIZONTAL)
+                    self.ProcessEvent(screvt)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE, scrollPos[0], wxHORIZONTAL)
+                    self.ProcessEvent(screvt)
+                    
+                    self.SetScrollPos(wxVERTICAL, scrollPos[1], True)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK, scrollPos[1], wxVERTICAL)
+                    self.ProcessEvent(screvt)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE, scrollPos[1], wxVERTICAL)
+                    self.ProcessEvent(screvt)
 
         elif self.pageType == u"form":
             self.GotoPos(0)
