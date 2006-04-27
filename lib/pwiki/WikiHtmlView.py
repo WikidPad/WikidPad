@@ -32,6 +32,8 @@ import Exporters
 #         Tokenizer, revStr
 # from Configuration import isUnicode
 
+from StringOps import uniToGui
+
 
 
 class LinkCreator:
@@ -107,8 +109,8 @@ class WikiHtmlView(wxHtmlWindow):
         
         # TODO Reset after open wiki
 #         lx, ly = self.GetViewStart()
-        self.SetPage(html)
-        
+        self.SetPage(uniToGui(html))
+
         lx, ly = self.scrollPosCache.get(self.currentLoadedWikiWord, (0, 0))
         self.Scroll(lx, ly)
         ## _prof.stop()

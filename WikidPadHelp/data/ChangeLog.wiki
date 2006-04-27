@@ -1,6 +1,23 @@
 ﻿++ Change Log
 
 
+Apr. 27, 2006 (1.6rc2)
+
+Changes:
+    * Bug fixed: commandline export takes wrong default
+      additional options and may fail
+    * Bug fixed: Hidden tree not shown if moving tree splitter
+    * Bug fixed: Gaps between paragraphs in editor for some
+      fonts (e.g. Verdana)
+    * Bug fixed: No preview in ANSI mode when umlauts
+      in page
+
+
+
+Mar. 30, 2006 (1.6rc1)
+
+
+
 Feb. 24, 2006 (1.6beta4)
 
 Changes:

@@ -12,7 +12,7 @@ from StringOps import Tokenizer, matchWhole, Token
 FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord2", "WikiWord",
         "AvailWikiWord", "Bold", "Italic", "Heading4", "Heading3", "Heading2",
         "Heading1", "Url", "Script", "Property", "ToDo", "HorizLine", "Bullet",
-        "Numeric", "Suppress", "Footnote", "Table", "EscapedChar", "HtmlTag"], 1)
+        "Numeric", "Suppress", "Footnote", "Table", "EscapedChar", "HtmlTag"], 0)
 
 EMPTY_RE = re.compile(ur"", re.DOTALL | re.UNICODE | re.MULTILINE)
 

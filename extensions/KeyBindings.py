@@ -40,6 +40,7 @@ RewrapText="Ctrl-W"
 Eval="Ctrl-E"
 InsertDate="Ctrl-Alt-D"
 MakeWikiWord="Ctrl-J"
+IncrementalSearchCtrl="F"   # Hack, changing not recommended
 
 def makeBold(editor):
     editor.styleSelection(u'*')

@@ -135,7 +135,7 @@ class CmdLineAction:
             
         exporter.export(pWiki, pWiki.getWikiDataManager(), wordList,
                 self.exportType, self.exportDest, 
-                self.exportCompFn, ob.getAddOpt(None))
+                self.exportCompFn, exporter.getAddOpt(None))
 
             
 

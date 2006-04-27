@@ -19,7 +19,7 @@ wikidpad = Target(
     icon_resources = [(0, 'icons/pwiki.ico')])
 
 
-setup(name='WikidPadCompact',
+setup(name='WikidPad',
       version='1.6rc',
       author='Michael Butscher',
       author_email='mbutscher@gmx.de',
@@ -34,7 +34,7 @@ setup(name='WikidPadCompact',
 #                   ('lib', glob('sql_mar.*')),
                   ('extensions', glob('extensions/*.*')),
                   ('', ['sqlite3.dll', 'WikidPad.xrc', 'readme_Wic.txt', "gadfly.zip"]),
-                  ('WikidPadHelp', glob(os.path.join('WikidPadHelpOG-static', "*.wiki"))),
+                  ('WikidPadHelp', glob(os.path.join('WikidPadHelpOG-static16', "*.wiki"))),
                   (os.path.join('WikidPadHelp', 'data'),
                    glob(os.path.join('WikidPadHelpOG-static16', 'data', "*.*"))),
                   ('export', [os.path.join('export', 'wikistyle.css')])]

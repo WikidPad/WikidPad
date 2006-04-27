@@ -1293,7 +1293,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     if key == WXK_ESCAPE:
                         self.endIncrementalSearch()
                     # do the next search on another ctrl-s, or f
-                    elif evt.ControlDown() and (key == ord('S') or key == ord('F')):
+                    elif evt.ControlDown() and (key == ord('S') or \
+                            key == ord(self.pWiki.keyBindings.IncrementalSearchCtrl)):
                         self.executeIncrementalSearch(next=True)
                     # handle the delete key
                     elif key == WXK_BACK or key == WXK_DELETE:
@@ -1317,7 +1318,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 (selectStart, selectEnd) = self.GetSelection()
 
                 # activate link
-                if key == ord('F'):
+                if key == ord(self.pWiki.keyBindings.IncrementalSearchCtrl) and \
+                        not evt.ShiftDown() and not evt.AltDown():
                     self.startIncrementalSearch()
 
                 elif key == WXK_SPACE:

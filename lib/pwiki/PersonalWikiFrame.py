@@ -1,5 +1,5 @@
 
-import os, gc, traceback, sets
+import os, gc, traceback, sets, string
 from os.path import *
 from time import localtime, time, strftime
 
@@ -1493,8 +1493,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         ## if self.vertSplitter.GetSashPosition() > 1:
         if self.lastSplitterPos > 1:
             self.showTreeCtrlMenuItem.Check(1)
-        else:
-            self.tree.Hide()
+#         else:
+#             self.tree.Hide()
 
     def OnSwitchFocus(self, evt):
         foc = wxWindow.FindFocus()
@@ -2416,11 +2416,11 @@ These are your default global settings.
             if self.lastSplitterPos < 50:
                 self.lastSplitterPos = 185
             self.vertSplitter.SetSashPosition(self.lastSplitterPos)
-            self.tree.Show()
+#             self.tree.Show()
         else:
             self.lastSplitterPos = self.vertSplitter.GetSashPosition()
             self.vertSplitter.SetSashPosition(1)
-            self.tree.Hide()
+#             self.tree.Hide()
 
 
     def setShowOnTray(self, onOrOff=None):
