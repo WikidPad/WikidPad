@@ -62,6 +62,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.scrollPosCache = {}
         self.lastFont = None
         self.pageType = "normal"   # The pagetype controls some special editor behaviour
+#         self.idleCounter = 0       # Used to reduce idle load
         
         # If autocompletion word was choosen, how many bytes to delete backward
         # before inserting word, if word ...
@@ -147,6 +148,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         # register some event handlers
         self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
                 ("options changed", self.onOptionsChanged),  # fired by PersonalWikiFrame
+                ("command copy", self.onCmdCopy)
         )))
 
         self.wikiPageListener = KeyFunctionSink((
@@ -162,7 +164,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         EVT_LEFT_DOWN(self, self.OnClick)
         EVT_LEFT_DCLICK(self, self.OnDoubleClick)
         EVT_MOTION(self, self.OnMouseMove)
-        #EVT_STC_DOUBLECLICK(self, ID, self.OnDoubleClick)
+        # EVT_STC_DOUBLECLICK(self, ID, self.OnDoubleClick)
         EVT_KEY_DOWN(self, self.OnKeyDown)
         EVT_CHAR(self, self.OnChar)
         EVT_SET_FOCUS(self, self.OnSetFocus)
@@ -210,12 +212,16 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.Copy()
         self.ReplaceSelection("")
 
-
     def Copy(self):
         copyTextToClipboard(self.GetSelectedText())
 
     def Paste(self):
         self.ReplaceSelection(getTextFromClipboard())
+
+    def onCmdCopy(self, miscevt):
+        if wxWindow.FindFocus() != self:
+            return
+        self.Copy()
 
 
     def setWrapMode(self, onOrOff):
@@ -244,8 +250,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         # create the styles
         if styleFaces is None:
             styleFaces = self.pWiki.presentationExt.faces
-
-        for type, style in WikiFormatting.getStyles(styleFaces):
+            
+        config = self.pWiki.getConfig()
+        for type, style in WikiFormatting.getStyles(styleFaces, config):
             self.StyleSetSpec(type, style)
 
     def SetText(self, text):
@@ -513,6 +520,18 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def onOptionsChanged(self, miscevt):
+        faces = self.pWiki.presentationExt.faces.copy()
+
+        if isinstance(self.loadedDocPage, 
+                (DocPages.WikiPage, DocPages.AliasWikiPage)):
+
+            font = self.loadedDocPage.getPropertyOrGlobal("font",
+                    self.pWiki.defaultEditorFont)
+            faces["mono"] = font
+            self.lastEditorFont = font    # ???
+
+        self.SetStyles(faces)
+
         coltuple = htmlColorToRgbTuple(self.pWiki.getConfig().get(
                 "main", "editor_bg_color"))
 
@@ -523,7 +542,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         
         for i in xrange(32):
             self.StyleSetBackground(i, color)
-#             self.StyleSetEOLFilled(i, True)
 
 
     def onWikiPageUpdated(self, miscevt):
@@ -749,10 +767,15 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         (startBytePos, endBytePos) = self.GetSelection()
         if startBytePos == endBytePos:
             (startBytePos, endBytePos) = self.getNearestWordPositions()
-            
-        endBytePos = self.PositionAfter(endBytePos)
 
-        bytePos = self.PositionAfter(self.GetCurrentPos())
+        for i in xrange(len(styleChars)):
+            endBytePos = self.PositionAfter(endBytePos)
+
+#         bytePos = self.PositionAfter(self.GetCurrentPos())
+
+        bytePos = endBytePos
+        for i in xrange(len(styleChars)):
+            bytePos = self.PositionAfter(bytePos)
         self.GotoPos(startBytePos)
         self.AddText(styleChars)
         self.GotoPos(endBytePos)   # +len(styleChars)
@@ -1400,6 +1423,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def OnKeyDown(self, evt):
+#         self.idleCounter = 0
         key = evt.GetKeyCode()
         self.lastKeyPressed = time()
 
@@ -1508,7 +1532,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         self._goToNextFormField()
                         return
                 evt.Skip()
-
             else:
                 evt.Skip()
 
@@ -1529,7 +1552,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.SetSelection(self.GetCurrentPos() - toerase, self.GetCurrentPos())
         
         self.ReplaceSelection(text)
-            
         
 
     def OnChar(self, evt):
@@ -1582,7 +1604,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def OnIdle(self, evt):
-        if (self.IsEnabled):
+#         self.idleCounter -= 1
+#         if self.idleCounter < 0:
+#             self.idleCounter = 0
+        if (self.IsEnabled()):
             # fix the line, pos and col numbers
             currentLine = self.GetCurrentLine()+1
             currentPos = self.GetCurrentPos()
@@ -1592,10 +1617,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
             stylebytes = self.stylebytes
             self.stylebytes = None
-
+    
             if stylebytes:
                 self.applyStyling(stylebytes)
-
 
 
     def OnDestroy(self, evt):

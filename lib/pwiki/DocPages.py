@@ -55,7 +55,8 @@ class DocPage(MiscEventSourceMixin):
             self.txtEditors[0].AppendText(text)
         else:
             # Modify database
-            wikiData = self.wikiDataManager()
+#             wikiData = self.wikiDataManager.getWikiData()
+            text = self.getLiveText() + text
             self.save(text, fireEvent=fireEvent)
             self.update(text, fireEvent=fireEvent)
 

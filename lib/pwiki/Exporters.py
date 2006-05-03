@@ -214,6 +214,10 @@ class HtmlXmlExporter:
             os.startfile(startfile)
 
 
+    def setWikiDataManager(self, wikiDataManager):
+        self.wikiDataManager = wikiDataManager
+        self.wikiData = self.wikiDataManager.getWikiData()
+
 
     def exportHtmlSingleFile(self):
         if len(self.wordList) == 1:
@@ -227,7 +231,7 @@ class HtmlXmlExporter:
 
         realfp = open(outputFile, "w")
         fp = utf8Writer(realfp, "replace")
-        fp.write(self.getFileHeader(self.mainControl.wikiName))
+        fp.write(self.getFileHeaderMultiPage(self.mainControl.wikiName))
 
         for word in self.wordList:
 
@@ -387,19 +391,20 @@ class HtmlXmlExporter:
         """
         result = []
         
+        wikiPage = self.wikiDataManager.getWikiPage(word)
+
         formattedContent = self.formatContent(word, content, formatDetails,
                 links, asHtmlPreview=asHtmlPreview)
-        
+
         if isUnicode():
-            result.append(self.getFileHeader(word))
+            result.append(self.getFileHeader(wikiPage))
         else:
             # Retrieve file header without encoding mentioned
-            result.append(self.getFileHeaderNoCharset(word))
+            result.append(self.getFileHeaderNoCharset(wikiPage))
 
         # if startFile is set then this is the only page being exported so
         # do not include the parent header.
         if not startFile:
-            wikiPage = self.wikiDataManager.getWikiPage(word)
             result.append(u'<span class="parent-nodes">parent nodes: %s</span>'
                     % self.getParentLinks(wikiPage, True, onlyInclude))
 
@@ -408,10 +413,9 @@ class HtmlXmlExporter:
         
         return u"".join(result)
 
-            
-    def getFileHeaderNoCharset(self, title):
+    def getFileHeaderMultiPage(self, title):
         """
-        Used for ansi version
+        Return file header for an HTML file containing multiple pages
         """
         return u"""<html>
     <head>
@@ -422,15 +426,83 @@ class HtmlXmlExporter:
     <body>
 """ % title
 
-    def getFileHeader(self, title):
+            
+    def _getBodyTag(self, wikiPage):
+        # Get application defaults from config
+        config = self.mainControl.getConfig()
+        linkcol = config.get("main", "html_body_link")
+        alinkcol = config.get("main", "html_body_alink")
+        vlinkcol = config.get("main", "html_body_vlink")
+        textcol = config.get("main", "html_body_text")
+        bgcol = config.get("main", "html_body_bgcolor")
+        bgimg = config.get("main", "html_body_background")
+
+        # Get property settings
+        linkcol = wikiPage.getPropertyOrGlobal(u"html.linkcolor", linkcol)
+        alinkcol = wikiPage.getPropertyOrGlobal(u"html.alinkcolor", alinkcol)
+        vlinkcol = wikiPage.getPropertyOrGlobal(u"html.vlinkcolor", vlinkcol)
+        textcol = wikiPage.getPropertyOrGlobal(u"html.textcolor", textcol)
+        bgcol = wikiPage.getPropertyOrGlobal(u"html.bgcolor", bgcol)
+        bgimg = wikiPage.getPropertyOrGlobal(u"html.bgimage", bgimg)
+        
+        # Filter
+        def filterCol(col, prop):
+            # Filter color
+            if htmlColorToRgbTuple(col) is not None:
+                return u'%s="%s"' % (prop, col)
+            else:
+                return u''
+        
+        linkcol = filterCol(linkcol, u"link")
+        alinkcol = filterCol(alinkcol, u"alink")
+        vlinkcol = filterCol(vlinkcol, u"vlink")
+        textcol = filterCol(textcol, u"text")
+        bgcol = filterCol(bgcol, u"bgcolor")
+        
+        if bgimg:
+            bgimg = u'background="%s"' % bgimg
+        else:
+            bgimg = u''
+            
+        # Build tagstring
+        bodytag = u" ".join((linkcol, alinkcol, vlinkcol, textcol, bgcol, bgimg))
+        if len(bodytag) > 0:
+            bodytag = "<body %s>" % bodytag
+        else:
+            bodytag = "<body>"
+            
+        return bodytag
+
+
+    def getFileHeader(self, wikiPage):
+        """
+        Return the header part of an HTML file for wikiPage.
+        wikiPage -- WikiPage object
+        """
+
         return u"""<html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <title>%s</title>
-         <link type="text/css" rel="stylesheet" href="wikistyle.css">
+        <link type="text/css" rel="stylesheet" href="wikistyle.css">
     </head>
-    <body>
-""" % title
+    %s
+""" % (wikiPage.getWikiWord(), self._getBodyTag(wikiPage))
+
+
+    def getFileHeaderNoCharset(self, wikiPage):
+        """
+        Ansi version of getFileHeader
+        wikiPage -- WikiPage object
+        """
+        return u"""<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html">
+        <title>%s</title>
+        <link type="text/css" rel="stylesheet" href="wikistyle.css">
+    </head>
+    %s
+""" % (wikiPage.getWikiWord(), self._getBodyTag(wikiPage))
 
 
     def getFileFooter(self):

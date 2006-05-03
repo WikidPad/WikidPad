@@ -252,6 +252,7 @@ GLOBALDEFAULTS = {
     ("main", "log_window_autohide"): "True", # Automatically hide log window if empty
     ("main", "log_window_sashPos"): "1",  # Real splitter pos
     ("main", "log_window_effectiveSashPos"): "120",  # Splitter pos when calling showEffWindow
+    ("main", "toolbar_show"): "True",  # Show the toolbar?
     ("main", "zoom"): '0',  # Zoom factor for editor
     ("main", "preview_zoom"): '0',  # Zoom factor for preview
     ("main", "last_active_dir"): None,   # Should be overwritten with concrete value
@@ -261,7 +262,8 @@ GLOBALDEFAULTS = {
     ("main", "indentation_guides"): "True",
     ("main", "auto_bullets"): "True",  # Show bullet/number in newline if current line has bullet
     ("main", "auto_indent"): "True",
-
+    ("main", "clipboardCatcher_suffix"): ur"\n",  # Suffix to append after each caught clipboard snippet
+    
     ("main", "auto_save"): "True",  # Boolean field, if auto save should be active
     ("main", "auto_save_delay_key_pressed"): "3",  # Seconds to wait after last key pressed and ...
     ("main", "auto_save_delay_dirty"): "15",  # secs. to wait after page became dirty before auto save
@@ -283,9 +285,20 @@ GLOBALDEFAULTS = {
     ("main", "html_preview_pics_as_links"): "False",  # Show only links to pictures in HTML preview
     ("main", "html_export_pics_as_links"): "False",  # Same for HTML exporting
 
+    ("main", "html_body_link"): "",  # for HTML preview/export, color for link or "" for default
+    ("main", "html_body_alink"): "",  # for HTML preview/export, color for active link or "" for default
+    ("main", "html_body_vlink"): "",  # for HTML preview/export, color for visited link or "" for default
+    ("main", "html_body_text"): "",  # for HTML preview/export, color for text or "" for default
+    ("main", "html_body_bgcolor"): "",  # for HTML preview/export, color for background or "" for default
+    ("main", "html_body_background"): "",  # for HTML preview/export, URL for background image or "" for none
+
+
     ("main", "sync_highlight_byte_limit"): "5120",  # Size limit when to start asyn. highlighting in editor
     ("main", "async_highlight_delay"): "0.2",  # Delay after keypress before starting async. highlighting
-    ("main", "editor_bg_color"): "#FFFFFF",  # Background color of the editor
+    ("main", "editor_plaintext_color"): "", # Color of plain text (and non-exist. wikiwords) in editor
+    ("main", "editor_link_color"): "", # Color of links (URL and wikiwords)
+    ("main", "editor_attribute_color"): "", # Color of attributes (=properties) and scripts
+    ("main", "editor_bg_color"): "",  # Background color of the editor
 
     ("main", "search_wiki_context_before"): "0", # No. of context characters before
     ("main", "search_wiki_context_after"): "0",  # and after a found pattern
@@ -295,8 +308,9 @@ GLOBALDEFAULTS = {
     ("main", "print_plaintext_font"): "", # Font description for printing in plain text mode
     ("main", "print_plaintext_wpseparator"): "\\n\\n\\n\\n", # How to separate wikiword pages (uses re escaping)
 
-    ("main", "windowmode"): "0",   # The value must be a number, not a truth value!
-    ("main", "lowresources"): "0",
+    ("main", "windowmode"): "0",
+    ("main", "frame_stayOnTop"): "False",  # Should frame stay on top of all other windows?
+    ("main", "lowresources"): "0",   # The value must be a number, not a truth value!
     ("main", "showontray"): "0",
     ("main", "strftime"): u"%x %I:%M %p",  # time format when inserting time in a page
     ("main", "pagestatus_timeformat"): u"%x %I:%M %p",  # time format for the page status field in status bar

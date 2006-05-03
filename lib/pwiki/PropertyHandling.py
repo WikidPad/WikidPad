@@ -303,7 +303,7 @@ class PropertyCheckPresentation(AbstractPropertyCheck):
         Return a compiled regular expression of the property name(s) (keys)
         this object is responsible for
         """
-        return _re.compile(ur"^(?:global\..*?)?(icon|color|bold)$",
+        return _re.compile(ur"^(?:global\..*?\.)?(icon|color|bold)$",
                 _re.DOTALL | _re.UNICODE | _re.MULTILINE)
 
 

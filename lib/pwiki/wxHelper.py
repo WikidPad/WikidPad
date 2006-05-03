@@ -167,7 +167,7 @@ def keyDownToAccel(evt):
     from wxPython.wx import wxACCEL_ALT, wxACCEL_SHIFT, wxACCEL_CTRL, \
             wxACCEL_NORMAL
     """
-    evt -- wx event received from a key down event
+    evt -- wx KeyEvent received from a key down event
     return: tuple (modifier, keycode) suitable e.g. as AcceleratorEntry
             (without event handling function)
     """
@@ -183,6 +183,9 @@ def keyDownToAccel(evt):
         modif |= wxACCEL_ALT
     
     return (modif, keyCode)
+
+# see also GetAccelFromString in wxPython's _core.py
+
 
 
 

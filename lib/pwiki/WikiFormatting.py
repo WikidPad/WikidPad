@@ -6,7 +6,7 @@ from Utilities import DUMBTHREADHOLDER
 
 import srePersistent as re
 
-from StringOps import Tokenizer, matchWhole, Token
+from StringOps import Tokenizer, matchWhole, Token, htmlColorToRgbTuple
 
 
 FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
@@ -76,19 +76,43 @@ def initialize(wikiSyntax):
         setattr(ownmodule, item, getattr(wikiSyntax, item))
 
     
-def getStyles(styleFaces):
-    return [(FormatTypes.Default, "face:%(mono)s,size:%(size)d" % styleFaces),
-            (FormatTypes.WikiWord, "fore:#000000,underline,face:%(mono)s,size:%(size)d" % styleFaces),      
-            (FormatTypes.AvailWikiWord, "fore:#0000BB,underline,face:%(mono)s,size:%(size)d" % styleFaces),      
+def getStyles(styleFaces, config):
+    # Read colors from config
+    colPlaintext = config.get("main", "editor_plaintext_color", "#000000")
+    colLink = config.get("main", "editor_link_color", "#0000BB")
+    colAttribute = config.get("main", "editor_attribute_color", "#555555")
+
+    # Check validity
+    if htmlColorToRgbTuple(colPlaintext) is None:
+        colPlaintext = "#000000"
+    if htmlColorToRgbTuple(colLink) is None:
+        colLink = "#0000BB"
+    if htmlColorToRgbTuple(colAttribute) is None:
+        colAttribute = "#555555"
+
+    # Add colors to dictionary:
+    styleFaces = styleFaces.copy()
+    styleFaces.update({"colPlaintext": colPlaintext,
+            "colLink": colLink, "colAttribute": colAttribute})
+
+    return [(FormatTypes.Default,
+                    "fore:%(colPlaintext)s,face:%(mono)s,size:%(size)d" % styleFaces),
+            (FormatTypes.WikiWord,
+                    "fore:%(colPlaintext)s,underline,face:%(mono)s,size:%(size)d" % styleFaces),      
+            (FormatTypes.AvailWikiWord,
+                    "fore:%(colLink)s,underline,face:%(mono)s,size:%(size)d" % styleFaces),      
             (FormatTypes.Bold, "bold,face:%(mono)s,size:%(size)d" % styleFaces),   
             (FormatTypes.Italic, "italic,face:%(mono)s,size:%(size)d" % styleFaces), 
             (FormatTypes.Heading4, "bold,face:%(mono)s,size:%(heading4)d" % styleFaces),       
             (FormatTypes.Heading3, "bold,face:%(mono)s,size:%(heading3)d" % styleFaces),       
             (FormatTypes.Heading2, "bold,face:%(mono)s,size:%(heading2)d" % styleFaces),       
             (FormatTypes.Heading1, "bold,face:%(mono)s,size:%(heading1)d" % styleFaces), 
-            (FormatTypes.Url, "fore:#0000BB,underline,face:%(mono)s,size:%(size)d" % styleFaces), 
-            (FormatTypes.Script, "fore:#555555,face:%(mono)s,size:%(size)d" % styleFaces),
-            (FormatTypes.Property, "bold,fore:#555555,face:%(mono)s,size:%(size)d" % styleFaces),
+            (FormatTypes.Url,
+                    "fore:%(colLink)s,underline,face:%(mono)s,size:%(size)d" % styleFaces), 
+            (FormatTypes.Script,
+                    "fore:%(colAttribute)s,face:%(mono)s,size:%(size)d" % styleFaces),
+            (FormatTypes.Property,
+                    "bold,fore:%(colAttribute)s,face:%(mono)s,size:%(size)d" % styleFaces),
             (FormatTypes.ToDo, "bold,face:%(mono)s,size:%(size)d" % styleFaces)]
 
 # List of all styles mentioned in getStyles which can be used as scintilla registered style
@@ -455,7 +479,8 @@ class WikiFormatting:
         withCamelCase -- Recognize camel-case words as wiki words instead
                 of normal text
         """
-        modifier = {FormatTypes.WikiWord2: FormatTypes.WikiWord}
+        modifier = {FormatTypes.WikiWord2: FormatTypes.WikiWord,
+                FormatTypes.Footnote: FormatTypes.Default}
         if formatDetails is None:
             page = self.pWiki.getCurrentDocPage()
             if page is None:

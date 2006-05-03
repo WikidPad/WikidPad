@@ -96,7 +96,7 @@ else:
         
     def guiToUni(text):
         """
-        Convert unicode text to a format usable for wx GUI
+        Convert wx GUI string format to unicode
         """
         return mbcsDec(text, "replace")[0]
 

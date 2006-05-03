@@ -329,19 +329,17 @@ class WikiWordNode(AbstractNode):
                 self.wikiWord == other.wikiWord
 
 
-class WikiWordSearchNode(WikiWordNode):
+class WikiWordRelabelNode(WikiWordNode):
     """
     Derived from WikiWordNode with ability to set label different from
-    wikiWord and to set search information
+    wikiWord
     """
-    __slots__ = ("newLabel", "searchOp")    
+    __slots__ = ("newLabel",)    
     
-    def __init__(self, tree, parentNode, wikiWord, newLabel = None,
-            searchOp = None):
+    def __init__(self, tree, parentNode, wikiWord, newLabel = None):
         WikiWordNode.__init__(self, tree, parentNode, wikiWord)
 
         self.newLabel = newLabel
-        self.searchOp = searchOp
 
     def getAncestors(self):
         """
@@ -355,11 +353,6 @@ class WikiWordSearchNode(WikiWordNode):
             return WikiWordNode._createNodePresentation(self, self.newLabel)
         else:
             return WikiWordNode.getNodePresentation(self)
-
-    def onActivate(self):
-        WikiWordNode.onActivate(self)
-        if self.searchOp:
-            self.treeCtrl.pWiki.getActiveEditor().executeSearch(self.searchOp, 0)   # TODO
 
     def _getValidChildren(self, wikiPage, withPosition=False):
         """
@@ -389,6 +382,28 @@ class WikiWordSearchNode(WikiWordNode):
         """
         return WikiWordNode.nodeEquality(self, other) and \
                 self.newLabel == other.newLabel
+
+
+
+class WikiWordSearchNode(WikiWordRelabelNode):
+    """
+    Derived from WikiWordRelabelNode with ability to set label different from
+    wikiWord and to set search information
+    """
+    __slots__ = ("searchOp",)    
+    
+    def __init__(self, tree, parentNode, wikiWord, newLabel = None,
+            searchOp = None):
+        WikiWordRelabelNode.__init__(self, tree, parentNode, wikiWord, newLabel)
+
+        self.searchOp = searchOp
+
+    def onActivate(self):
+        # WikiWordNode.onActivate(self)
+        WikiWordRelabelNode.onActivate(self)
+        if self.searchOp:
+            self.treeCtrl.pWiki.getActiveEditor().executeSearch(self.searchOp, 0)   # TODO
+
 
 
 class MainViewNode(AbstractNode):
@@ -485,14 +500,14 @@ class TodoNode(AbstractNode):
             if len(entryCats) < len(self.categories):
                 # Can't match
                 continue
-            elif (len(entryCats) == len(self.categories)) and \
+            elif self.isRightSide and (len(entryCats) == len(self.categories)) and \
                     (entryCats == self.categories):
                 # Same category sequence -> wiki word node
                 addedWords.append((wikiWord, todo))
-            elif entryCats[:len(self.categories)] == \
-                    self.categories:
+            elif not self.isRightSide and len(entryCats) > len(self.categories) and \
+                    entryCats[:len(self.categories)] == self.categories:
                 # Subcategories -> category node
-
+                
                 nextSubCategory = entryCats[len(self.categories)]
                 
                 if len(entryCats) - len(self.categories) == 1:
@@ -892,8 +907,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         EVT_TREE_ITEM_EXPANDING(self, ID, self.OnTreeItemExpand)
         EVT_TREE_ITEM_COLLAPSED(self, ID, self.OnTreeItemCollapse)
         EVT_RIGHT_DOWN(self, self.OnRightButtonDown)   # TODO Context menu
-        EVT_IDLE(self, self.OnIdle)
-        
+
         res = xrc.wxXmlResource.Get()
         self.contextMenuWikiWords = res.LoadMenu("MenuTreectrlWikiWords")
         
@@ -1028,6 +1042,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
                 self.GetRootItem())
+        self.Bind(EVT_IDLE, self.OnIdle)
                 
 #         wikiData = self.pWiki.wikiData
 #         wikiWord = wikiData.getAliasesWikiWord(self.pWiki.getCurrentWikiWord())
@@ -1046,6 +1061,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
                 self.GetRootItem())
+        self.Bind(EVT_IDLE, self.OnIdle)
         
         
 
@@ -1153,11 +1169,13 @@ class WikiTreeCtrl(wxTreeCtrl):
 
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
                 self.GetRootItem())
+        self.Bind(EVT_IDLE, self.OnIdle)
 #         self.collapse()   # TODO?
 
 
     def onClosedCurrentWiki(self, miscevt):
         self.refreshGenerator = None
+        self.Unbind(EVT_IDLE)
 
     def OnInsertIconAttribute(self, evt):
         self.pWiki.insertAttribute("icon", self.cmdIdToIconName[evt.GetId()])
@@ -1383,6 +1401,7 @@ class WikiTreeCtrl(wxTreeCtrl):
             except StopIteration:
                 if self.refreshGenerator == gen:
                     self.refreshGenerator = None
+                    self.Unbind(EVT_IDLE)
 #                     self.refreshCheckChildren = []
 
 def _relationSort(a, b):

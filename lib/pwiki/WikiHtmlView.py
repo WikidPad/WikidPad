@@ -15,7 +15,7 @@
 from wxPython.wx import *
 from wxPython.html import *
 
-from wxHelper import keyDownToAccel
+from wxHelper import keyDownToAccel, copyTextToClipboard, GUI_ID
 
 from MiscEvent import KeyFunctionSink
 
@@ -58,8 +58,9 @@ class WikiHtmlView(wxHtmlWindow):
         self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
                 ("loaded current page", self.onLoadedCurrentWikiPage),
                 ("opened wiki", self.onOpenedWiki),
-                ("options changed", self.onOptionsChanged)
-                
+                ("options changed", self.onOptionsChanged),
+                ("command copy", self.onCmdCopy)
+
 #                 ("updated current page cache", self.updatedCurrentPageCache),
 #                 ("renamed page", self.renamedWikiPage)
         )))
@@ -75,6 +76,8 @@ class WikiHtmlView(wxHtmlWindow):
         self.exporterInstance.pWiki = self.pWiki
         
         EVT_KEY_DOWN(self, self.OnKeyDown)
+        EVT_KEY_UP(self, self.OnKeyUp)
+
         EVT_MOUSEWHEEL(self, self.OnMouseWheel) 
 
 
@@ -134,9 +137,17 @@ class WikiHtmlView(wxHtmlWindow):
         self.currentLoadedWikiWord = None
         self.scrollPosCache = {}
 
+        self.exporterInstance.setWikiDataManager(self.pWiki.getWikiDataManager())
+
     def onOptionsChanged(self, miscevt):
         if self.visible:
             self.refresh()
+
+
+    def onCmdCopy(self, miscevt):
+        if wxWindow.FindFocus() != self:
+            return
+        copyTextToClipboard(self.SelectionToText())
 
 
     def OnLinkClicked(self, linkinfo):
@@ -146,6 +157,15 @@ class WikiHtmlView(wxHtmlWindow):
             self.pWiki.openWikiPage(href[13:], motionType="child")
         else:
             self.pWiki.launchUrl(href)
+
+
+    def OnKeyUp(self, evt):
+        acc = keyDownToAccel(evt)
+        if acc == (wxACCEL_CTRL, ord('C')):
+            # Consume original clipboard copy function
+            pass
+        else:
+            evt.Skip()
 
 
     def OnKeyDown(self, evt):

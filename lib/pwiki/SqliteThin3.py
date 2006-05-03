@@ -103,7 +103,7 @@ def stdErrHandler(err):
 
 # This dictionary holds python objects which can't be handled
 # as sqlite functions or function parameters directly
-_sqliteTransObjects = {}  # Dictionary of type {<id of object>, <object>}
+_sqliteTransObjects = {}  # Dictionary of type {<id of object>: <object>}
 
 
 def addTransObject(o):

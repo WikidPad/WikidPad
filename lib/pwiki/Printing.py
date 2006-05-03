@@ -292,7 +292,7 @@ class PlainTextPrint:
                 contents[i] += "\n"
                 
         try:
-            separator = unescapeWithRe(self.pWiki.configuration.get(
+            separator = unescapeWithRe(self.pWiki.getConfig().get(
                     "main", "print_plaintext_wpseparator"))
         except:
             separator = u"\n\n\n\n"   # TODO Error message

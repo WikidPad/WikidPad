@@ -2,6 +2,8 @@ import os, gc, traceback, sets, string
 from os.path import *
 from time import localtime, time, strftime
 
+import urllib_red as urllib
+
 from wxPython.wx import *
 from wxPython.stc import *
 from wxPython.html import *
@@ -41,79 +43,13 @@ import WikiFormatting
 
 import PageAst   # For experiments only
 
-
-
 from PluginManager import *
-# _COLORS = [
-#     "AQUAMARINE",
-#     "BLACK",
-#     "BLUE VIOLET",
-#     "BLUE",
-#     "BROWN",
-#     "CADET BLUE",
-#     "CORAL",
-#     "CORNFLOWER BLUE",
-#     "CYAN",
-#     "DARK GREEN",
-#     "DARK GREY",
-#     "DARK OLIVE GREEN",
-#     "DARK ORCHID",
-#     "DARK SLATE BLUE",
-#     "DARK SLATE GREY",
-#     "DARK TURQUOISE",
-#     "DIM GREY",
-#     "FIREBRICK",
-#     "FOREST GREEN",
-#     "GOLD",
-#     "GOLDENROD",
-#     "GREEN YELLOW",
-#     "GREEN",
-#     "GREY",
-#     "INDIAN RED",
-#     "KHAKI",
-#     "LIGHT BLUE",
-#     "LIGHT GREY",
-#     "LIGHT STEEL BLUE",
-#     "LIME GREEN",
-#     "MAGENTA",
-#     "MAROON",
-#     "MEDIUM AQUAMARINE",
-#     "MEDIUM BLUE",
-#     "MEDIUM FOREST GREEN",
-#     "MEDIUM GOLDENROD",
-#     "MEDIUM ORCHID",
-#     "MEDIUM SEA GREEN",
-#     "MEDIUM SLATE BLUE",
-#     "MEDIUM SPRING GREEN",
-#     "MEDIUM TURQUOISE",
-#     "MEDIUM VIOLET RED",
-#     "MIDNIGHT BLUE",
-#     "NAVY",
-#     "ORANGE RED",
-#     "ORANGE",
-#     "ORCHID",
-#     "PALE GREEN",
-#     "PINK",
-#     "PLUM",
-#     "PURPLE",
-#     "RED",
-#     "SALMON",
-#     "SEA GREEN",
-#     "SIENNA",
-#     "SKY BLUE",
-#     "SLATE BLUE",
-#     "SPRING GREEN",
-#     "STEEL BLUE",
-#     "TAN",
-#     "THISTLE",
-#     "TURQUOISE",
-#     "VIOLET RED",
-#     "VIOLET",
-#     "WHEAT",
-#     "WHITE",
-#     "YELLOW GREEN",
-#     "YELLOW"
-# ]
+
+# TODO More abstract/platform independent
+try:
+    import WindowsHacks
+except:
+    WindowsHacks = None
 
 
 
@@ -274,6 +210,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         history = self.configuration.get("main", "wiki_history")
         if history:
             self.wikiHistory = history.split(u";")
+          
+        # clipboard catcher  
+        if WindowsHacks is None:
+            self.clipboardCatcher = None
+        else:
+            self.clipboardCatcher = WindowsHacks.ClipboardCatcher(self)
+            
 
         # resize the window to the last position/size
         setWindowSize(self, (self.configuration.getint("main", "size_x", 10),
@@ -367,7 +310,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
         self.Show(True)
-
+        
         if self.lowResources and self.IsIconized():
             self.resourceSleep()
 
@@ -435,7 +378,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def getWikiData(self):
         if self.wikiDataManager is None:
             return None
-        
+
         return self.wikiDataManager.getWikiData()
 
     def getWikiDataManager(self):
@@ -554,7 +497,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return default
 
 
-    def addMenuItem(self, menu, label, text, evtfct, icondesc=None, menuID=None):
+    def addMenuItem(self, menu, label, text, evtfct=None, icondesc=None, menuID=None):
         if menuID is None:
             menuID = wxNewId()
 
@@ -565,7 +508,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             menuitem.SetBitmap(bitmap)
 
         menu.AppendItem(menuitem)
-        EVT_MENU(self, menuID, evtfct)
+        if evtfct is not None:
+            EVT_MENU(self, menuID, evtfct)
         return menuitem
 
 
@@ -608,15 +552,32 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     
         wikiMenu.AppendSeparator()
 
-        menuID=wxNewId()
-        self.showTreeCtrlMenuItem = wxMenuItem(wikiMenu, menuID,
+        menuID = wxNewId()
+        menuItem = wxMenuItem(wikiMenu, menuID,
                 "&Show Tree Control\t" + self.keyBindings.ShowTreeControl,
                 "Show Tree Control", wxITEM_CHECK)
-        wikiMenu.AppendItem(self.showTreeCtrlMenuItem)
+        wikiMenu.AppendItem(menuItem)
         EVT_MENU(self, menuID, lambda evt: self.setShowTreeControl(
-                self.showTreeCtrlMenuItem.IsChecked()))
+                self.treeSashWindow.isCollapsed()))
         EVT_UPDATE_UI(self, menuID, self.OnUpdateTreeCtrlMenuItem)
 
+        menuItem = wxMenuItem(wikiMenu, GUI_ID.CMD_SHOW_TOOLBAR,
+                "Show Toolbar\t" + self.keyBindings.ShowToolbar, 
+                "Show Toolbar", wxITEM_CHECK)
+        wikiMenu.AppendItem(menuItem)
+        EVT_MENU(self, GUI_ID.CMD_SHOW_TOOLBAR, lambda evt: self.setShowToolbar(
+                self.GetToolBar() is None))
+        EVT_UPDATE_UI(self, GUI_ID.CMD_SHOW_TOOLBAR,
+                self.OnUpdateToolbarMenuItem)
+
+        menuItem = wxMenuItem(wikiMenu, GUI_ID.CMD_STAY_ON_TOP,
+                "Stay on Top\t" + self.keyBindings.StayOnTop, 
+                "Stay on Top", wxITEM_CHECK)
+        wikiMenu.AppendItem(menuItem)
+        EVT_MENU(self, GUI_ID.CMD_STAY_ON_TOP, lambda evt: self.setStayOnTop(
+                not self.getStayOnTop()))
+        EVT_UPDATE_UI(self, GUI_ID.CMD_STAY_ON_TOP,
+                self.OnUpdateStayOnTopMenuItem)
 
         self.addMenuItem(wikiMenu, 'O&ptions',
                 'Set Options', lambda evt: self.showOptionsDialog())
@@ -871,100 +832,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 '&Text blocks', tbmenu)
 
 
-#     def buildIconsSubmenu(self):
-#         """
-#         Returns tuple (icon sub menu, dict from menu id to icon name)
-#         """
-#         iconMap = {}
-#         iconsMenu = wxMenu()
-# 
-#         iconsMenu1 = wxMenu()
-#         iconsMenu.AppendMenu(wxNewId(), 'A-C', iconsMenu1)
-#         iconsMenu2 = wxMenu()
-#         iconsMenu.AppendMenu(wxNewId(), 'D-F', iconsMenu2)
-#         iconsMenu3 = wxMenu()
-#         iconsMenu.AppendMenu(wxNewId(), 'H-L', iconsMenu3)
-#         iconsMenu4 = wxMenu()
-#         iconsMenu.AppendMenu(wxNewId(), 'M-P', iconsMenu4)
-#         iconsMenu5 = wxMenu()
-#         iconsMenu.AppendMenu(wxNewId(), 'Q-S', iconsMenu5)
-#         iconsMenu6 = wxMenu()
-#         iconsMenu.AppendMenu(wxNewId(), 'T-Z', iconsMenu6)
-# 
-#         icons = self.iconLookupCache.keys();  # TODO: Create function?
-#         icons.sort()
-# 
-#         for icname in icons:
-#             if icname.startswith("tb_"):
-#                 continue
-#             iconsSubMenu = None
-#             if icname[0] <= 'c':
-#                 iconsSubMenu = iconsMenu1
-#             elif icname[0] <= 'f':
-#                 iconsSubMenu = iconsMenu2
-#             elif icname[0] <= 'l':
-#                 iconsSubMenu = iconsMenu3
-#             elif icname[0] <= 'p':
-#                 iconsSubMenu = iconsMenu4
-#             elif icname[0] <= 's':
-#                 iconsSubMenu = iconsMenu5
-#             elif icname[0] <= 'z':
-#                 iconsSubMenu = iconsMenu6
-# 
-#             menuID = wxNewId()
-#             iconMap[menuID] = icname
-# 
-#             menuItem = wxMenuItem(iconsSubMenu, menuID, icname, icname)
-#             bitmap = self.lookupIcon(icname)
-#             menuItem.SetBitmap(bitmap)
-#             iconsSubMenu.AppendItem(menuItem)
-# 
-#         return (iconsMenu, iconMap)
-
-
     def OnInsertIconAttribute(self, evt):
         self.insertAttribute("icon", self.cmdIdToIconName[evt.GetId()])
 
 
-#     def buildColorsSubmenu(self):
-#         """
-#         Returns tuple (color sub menu, dict from menu id to color name)
-#         """
-#         colorMap = {}
-#         colorsMenu = wxMenu()
-# 
-#         colorsMenu1 = wxMenu()
-#         colorsMenu.AppendMenu(wxNewId(), 'A-L', colorsMenu1)
-#         colorsMenu2 = wxMenu()
-#         colorsMenu.AppendMenu(wxNewId(), 'M-Z', colorsMenu2)
-# 
-#         for cn in _COLORS:    # ["BLACK"]:
-#             colorsSubMenu = None
-#             if cn[0] <= 'L':
-#                 colorsSubMenu = colorsMenu1
-#             ## elif cn[0] <= 'Z':
-#             else:
-#                 colorsSubMenu = colorsMenu2
-# 
-#             menuID = wxNewId()
-#             colorMap[menuID] = cn
-#             menuItem = wxMenuItem(colorsSubMenu, menuID, cn, cn)
-#             cl = wxNamedColour(cn)
-# 
-#             menuItem.SetBackgroundColour(cl)
-# 
-#             # if color is dark, text should be white (checking green component seems to be enough)
-#             if cl.Green() < 128:
-#                 menuItem.SetTextColour(wxWHITE)
-# 
-#             colorsSubMenu.AppendItem(menuItem)
-# 
-#         return (colorsMenu, colorMap)
-
-
     def OnInsertColorAttribute(self, evt):
         self.insertAttribute("color", self.cmdIdToColorName[evt.GetId()])
-
 
 
     def buildMainMenu(self):
@@ -1003,6 +876,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.addMenuItem(wikiWordMenu, 'Add Bookmark\t' + self.keyBindings.AddBookmark,
                 'Add Bookmark to Page', lambda evt: self.insertAttribute("bookmarked", "true"),
                 "pin")
+                
+        if self.clipboardCatcher is not None:
+            menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER,
+                    "Clipboard Catcher\t" + self.keyBindings.CatchClipboard, 
+                    u"Text copied to clipboard is also pasted to this page",
+                    wxITEM_CHECK)
+            wikiWordMenu.AppendItem(menuItem)
+            EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER, self.OnClipboardCatcher)
+            EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER,
+                    self.OnUpdateClipboardCatcher)
 
         wikiWordMenu.AppendSeparator()
 
@@ -1100,7 +983,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "tb_cut", menuID=GUI_ID.CMD_CLIPBOARD_CUT)
 
         self.addMenuItem(self.editorMenu, '&Copy\t' + self.keyBindings.Copy,
-                'Copy', lambda evt: self.activeEditor.Copy(),
+                'Copy', lambda evt: self.fireMiscEventKeys(("command copy",)), # lambda evt: self.activeEditor.Copy()  # lambda evt: wxWindow.FindFocus().ProcessEvent(evt),
                 "tb_copy", menuID=GUI_ID.CMD_CLIPBOARD_COPY)
 
         self.addMenuItem(self.editorMenu, 'Copy to &ScratchPad\t' + self.keyBindings.CopyToScratchPad,
@@ -1431,7 +1314,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
         tb.Realize()
-        self.toolBar = tb
 
 
     def initializeGui(self):
@@ -1550,7 +1432,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         self.logSplitter.SetSashGravity(1.0)
 
 
-        EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(), self.OnNotebookPageChanged)
+        EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(),
+                self.OnNotebookPageChanged)
         EVT_SET_FOCUS(self.mainAreaPanel, self.OnNotebookFocused)
         
 #         EVT_SASH_DRAGGED(self, GUI_ID.SASH_WINDOW_TREE, self.OnSashDrag)
@@ -1563,8 +1446,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # ------------------------------------------------------------------------------------
         
         self.buildMainMenu()
-        self.buildToolbar()
-        
+        if self.getConfig().getboolean("main", "toolbar_show", True):
+            self.setShowToolbar(True)
+
         EVT_MENU(self, GUI_ID.CMD_SWITCH_FOCUS, self.OnSwitchFocus)
 
         # Add alternative accelerators for clipboard operations
@@ -1592,6 +1476,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             dc.SetFont(wxNullFont)
         finally:
             del dc
+            
+        
+        # Check if window should stay on top
+        self.setStayOnTop(self.getConfig().getboolean("main", "frame_stayOnTop",
+                False))
 
         self.statusBar.SetStatusWidths([-1, -1, posWidth])
         self.SetStatusBar(self.statusBar)
@@ -1610,14 +1499,19 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # turn on the tree control check box   # TODO: Doesn't work after restore from sleep mode
 #         if self.lastSplitterPos > 1:
-        if not self.treeSashWindow.isCollapsed():
-            self.showTreeCtrlMenuItem.Check(1)
-#         else:
-#             self.tree.Hide()
+#         if not self.treeSashWindow.isCollapsed():
+#             self.showTreeCtrlMenuItem.Check(1)
+# #         else:
+# #             self.tree.Hide()
 
     def OnUpdateTreeCtrlMenuItem(self, evt):
         evt.Check(not self.treeSashWindow.isCollapsed())
         
+    def OnUpdateToolbarMenuItem(self, evt):
+        evt.Check(not self.GetToolBar() is None)
+
+    def OnUpdateStayOnTopMenuItem(self, evt):
+        evt.Check(self.getStayOnTop())
 
 
     def OnSwitchFocus(self, evt):
@@ -1682,17 +1576,17 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if self.sleepMode:
             return  # Already in sleep mode
         self.sleepMode = True
-
-        self.toolBar.Destroy()
+        
+        self.setShowToolbar(False)
+#         self.toolBar.Destroy()
+#         self.toolBar = None
 
         self.SetMenuBar(None)
-        self.showTreeCtrlMenuItem = None
         self.mainmenu.Destroy()
 
         # Set menu/menu items to None
         self.mainmenu = None
         self.recentWikisMenu = None
-        self.showTreeCtrlMenuItem = None
         # self.showOnTrayMenuItem = None
 
 
@@ -1711,7 +1605,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.sleepMode = False
 
         self.buildMainMenu()
-        self.buildToolbar()
+        self.setShowToolbar(True)
         self.setShowOnTray()
 
 
@@ -1945,7 +1839,7 @@ These are your default global settings.
 
 #        if self.wikiConfigFilename != wikiConfigFilename:
         self.closeWiki()
-        self.buildMainMenu()
+#         self.buildMainMenu()   # ???
 
         # read in the config file
         # config = ConfigParser.ConfigParser()
@@ -2128,6 +2022,9 @@ These are your default global settings.
                 self.wikiData = None
                 self.wikiDataManager = None
             self.wikiConfigFilename = None
+            if self.clipboardCatcher is not None and \
+                    self.clipboardCatcher.isActive():
+                self.clipboardCatcher.stop()
 
             self.setShowOnTray()
             self.fireMiscEventKeys(("closed current wiki",))
@@ -2545,6 +2442,36 @@ These are your default global settings.
 # #             self.vertSplitter.SetSashPosition(1)
 #             self.tree.Hide()
 
+    def setShowToolbar(self, onOrOff):
+        """
+        Control, if toolbar should be shown or not
+        """
+        if onOrOff == (not self.GetToolBar() is None):
+            # Desired state already reached
+            return
+
+        if onOrOff:
+            self.buildToolbar()
+        else:
+            self.GetToolBar().Destroy()
+            self.SetToolBar(None)
+
+    def getStayOnTop(self):
+        """
+        Returns if this window is set to stay on top of all others
+        """
+        return not not self.GetWindowStyleFlag() & wxSTAY_ON_TOP 
+
+    def setStayOnTop(self, onOrOff):
+        style = self.GetWindowStyleFlag()
+        
+        if onOrOff:
+            style |= wxSTAY_ON_TOP
+        else:
+            style &= ~wxSTAY_ON_TOP
+            
+        self.SetWindowStyleFlag(style)
+
 
     def setShowOnTray(self, onOrOff=None):
         """
@@ -2590,6 +2517,31 @@ These are your default global settings.
             self.configuration.set("main", "hideundefined", onOrOff)
         else:
             onOrOff = self.configuration.getboolean("main", "hideundefined")
+
+
+    def getClipboardCatcher(self):
+        return self.clipboardCatcher is not None and \
+                self.clipboardCatcher.isActive()
+
+
+    def OnClipboardCatcher(self, evt):
+        if self.clipboardCatcher.isActive():
+            self.clipboardCatcher.stop()
+        else:
+            self.clipboardCatcher.start(self.GetHandle(),
+                    self.getCurrentDocPage())
+
+
+    def OnUpdateClipboardCatcher(self, evt):
+        if self.getClipboardCatcher():
+            evt.Check(True)
+            evt.SetText("Clipboard Catcher: %s\t%s" % 
+                    (self.clipboardCatcher.getWikiWord(),
+                    self.keyBindings.CatchClipboard))
+        else:
+            evt.Check(False)
+            evt.SetText("Clipboard Catcher\t" +
+                    self.keyBindings.CatchClipboard)
 
 
     def writeGlobalConfig(self):
@@ -2952,7 +2904,7 @@ These are your default global settings.
 
         result = dlg.ShowModal()
         dlg.Destroy()
-
+        
 
     def showSpellCheckerDialog(self):
         if self.spellChkDlg != None:
@@ -3025,8 +2977,55 @@ These are your default global settings.
     def getLastActiveDir(self):
         return self.configuration.get("main", "last_active_dir", os.getcwd())
 
+    
+    def stdDialog(self, dlgtype, title, message, additional=None):
+        """
+        Used to show a dialog, especially in scripts.
+        Possible values for dlgtype:
+        "text": input text to dialog, additional is the default text
+            when showing dlg returns entered text on OK or empty string
+        "o": As displayMessage, shows only OK button
+        "oc": Shows OK and Cancel buttons, returns either "ok" or "cancel"
+        "yn": Yes and No buttons, returns either "yes" or "no"
+        "ync": like "yn" but with additional cancel button, can also return
+            "cancel"
+        """
+        if dlgtype == "text":
+            if additional is None:
+                additional = u""
+            return guiToUni(wxGetTextFromUser(uniToGui(message),
+                    uniToGui(title), uniToGui(additional), self))
+        else:
+            style = None
+            if dlgtype == "o":
+                style = wxOK
+            elif dlgtype == "oc":
+                style = wxOK | wxCANCEL
+            elif dlgtype == "yn":
+                style = wxYES_NO
+            elif dlgtype == "ync":
+                style = wxYES_NO | wxCANCEL
+            
+            if style is None:
+                raise RuntimeError, "Unknown dialog type"
+
+            result = wxMessageBox(uniToGui(message), uniToGui(title), style, self)
+            
+            if result == wxOK:
+                return "ok"
+            elif result == wxCANCEL:
+                return "cancel"
+            elif result == wxYES:
+                return "yes"
+            elif result == wxNO:
+                return "no"
+                
+            raise RuntimeError, "Internal Error"
+
     def displayMessage(self, title, str):
-        "pops up a dialog box"
+        """pops up a dialog box,
+        used by scripts only
+        """
         dlg_m = wxMessageDialog(self, uniToGui(u"%s" % str), title, wxOK)
         dlg_m.ShowModal()
         dlg_m.Destroy()
@@ -3174,6 +3173,10 @@ These are your default global settings.
 
 
     def OnWikiExit(self, evt):
+        # Stop clipboard catcher if running
+        if self.clipboardCatcher is not None and self.clipboardCatcher.isActive():
+            self.clipboardCatcher.stop()
+
         # if the frame is not minimized
         # update the size/pos of the global config
         if not self.IsIconized():
@@ -3198,13 +3201,17 @@ These are your default global settings.
 #         if splitterPos < 3:
 #             splitterPos = self.treeSashWindow.getEffectiveSashPosition()
 
+
         self.configuration.set("main", "splitter_pos", splitterPos)
+
         self.configuration.set("main", "log_window_effectiveSashPos",
                 self.logSashWindow.getEffectiveSashPosition())
         self.configuration.set("main", "log_window_sashPos",
                 self.logSashWindow.getSashPosition())
+                
+        self.configuration.set("main", "toolbar_show", not self.GetToolBar() is None)
 
-
+        self.configuration.set("main", "frame_stayOnTop", self.getStayOnTop())
         self.configuration.set("main", "zoom", self.activeEditor.GetZoom())
         self.configuration.set("main", "wiki_history", ";".join(self.wikiHistory))
         self.writeGlobalConfig()

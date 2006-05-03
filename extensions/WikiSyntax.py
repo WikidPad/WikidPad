@@ -156,7 +156,7 @@ TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlRE.pattern + u"|" +
 
 # parses the dynamic properties
 PropertyRE      = re.compile(ur"\[[ \t]*(?P<propertyName>[\w\-\_\.]+?)[ \t]*" +
-                  ur"[=:][ \t]*(?P<propertyValue>[\w\-\_ \t;:,.]+?)\]",
+                  ur"[=:][ \t]*(?P<propertyValue>[\w\-\_ \t:;,.!?#/|]+?)\]",
                   re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -174,7 +174,7 @@ RevWikiWordRE      = re.compile(ur"^" + # revSingleWikiWord + ur"(?:/" +
 RevWikiWordRE2     = re.compile(ur"^[\w\-\_ \t.]+?\[",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
-RevPropertyValue     = re.compile(ur"^([\w\-\_ \t]*?)([ \t]*[=:][ \t]*)([\w\-\_ \t\.]+?)\[",
+RevPropertyValue     = re.compile(ur"^([\w\-\_ \t:;,.!?#/|]*?)([ \t]*[=:][ \t]*)([\w\-\_ \t\.]+?)\[",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 

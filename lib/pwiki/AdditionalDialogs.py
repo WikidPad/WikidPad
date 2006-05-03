@@ -424,7 +424,7 @@ class OptionsDialog(wxDialog):
     # Supported types: b: boolean checkbox, i0+: nonnegative integer, t: text
     #    tre: regular expression,  f0+: nonegative float
 
-    OPTION_TO_CONTROL = [
+    OPTION_TO_CONTROL = (
             ("auto_save", "cbAutoSave", "b"),
             ("auto_save_delay_key_pressed", "tfAutoSaveDelayKeyPressed", "i0+"),
             ("auto_save_delay_dirty", "tfAutoSaveDelayDirty", "i0+"),
@@ -436,6 +436,7 @@ class OptionsDialog(wxDialog):
             ("pagestatus_timeformat", "tfPageStatusTimeFormat", "t"),
             ("log_window_autoshow", "cbLogWindowAutoShow", "b"),
             ("log_window_autohide", "cbLogWindowAutoHide", "b"),
+            ("clipboardCatcher_suffix", "tfClipboardCatcherSuffix", "t"),
 
             ("tree_auto_follow", "cbTreeAutoFollow", "b"),
             ("tree_update_after_save", "cbTreeUpdateAfterSave", "b"),
@@ -452,13 +453,32 @@ class OptionsDialog(wxDialog):
             ("html_preview_pics_as_links", "cbHtmlPreviewPicsAsLinks", "b"),
             ("html_export_pics_as_links", "cbHtmlExportPicsAsLinks", "b"),
             
+            ("html_body_link", "tfHtmlLinkColor", "color0"),
+            ("html_body_alink", "tfHtmlALinkColor", "color0"),
+            ("html_body_vlink", "tfHtmlVLinkColor", "color0"),
+            ("html_body_text", "tfHtmlTextColor", "color0"),
+            ("html_body_bgcolor", "tfHtmlBgColor", "color0"),
+            ("html_body_background", "tfHtmlBgImage", "t"),
+
             ("sync_highlight_byte_limit", "tfSyncHighlightingByteLimit", "i0+"),
             ("async_highlight_delay", "tfAsyncHighlightingDelay", "f0+"),
-            ("editor_bg_color", "tfEditorBgColor", "t"),
-            
+            ("editor_plaintext_color", "tfEditorPlaintextColor", "color0"),
+            ("editor_link_color", "tfEditorLinkColor", "color0"),
+            ("editor_attribute_color", "tfEditorAttributeColor", "color0"),
+            ("editor_bg_color", "tfEditorBgColor", "color0"),
+
             ("footnotes_as_wikiwords", "cbFootnotesAsWws", "b"),
             ("first_wiki_word", "tfFirstWikiWord", "t")
-    ]
+    )
+    
+    _PANEL_LIST = (
+            ("OptionsPageApplication", u"Application"),    
+            ("OptionsPageTree", u"  Tree"),
+            ("OptionsPageHtml", u"  HTML preview/export"),
+            ("OptionsPageAutosave", u"  Autosave"),
+            ("OptionsPageEditor", u"  Editor"),
+            ("OptionsPageCurrentWiki", u"Current Wiki")
+    )
     
     def __init__(self, pWiki, ID, title="Options",
                  pos=wxDefaultPosition, size=wxDefaultSize,
@@ -469,18 +489,42 @@ class OptionsDialog(wxDialog):
         self.pWiki = pWiki
         res = xrc.wxXmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "OptionsDialog")
-        
+
         self.ctrls = XrcControls(self)
+
+        # Necessary to avoid a crash        
+        self.emptyPanel = wxPanel(self.ctrls.panelPages)
+        self.emptyPanel.Fit()
         
+        self.panelList = []
+        self.ctrls.lbPages.Clear()
+        
+        minw = 0
+        minh = 0        
+        for pn, pt in self._PANEL_LIST:
+            if pn:
+                panel = res.LoadPanel(self.ctrls.panelPages, pn)
+            else:
+                panel = self.emptyPanel
+                
+            self.panelList.append(panel)
+            self.ctrls.lbPages.Append(pt)
+            mins = panel.GetSize()
+            minw = max(minw, mins.width)
+            minh = max(minh, mins.height)
+
+        self.ctrls.panelPages.SetMinSize(wxSize(minw + 10, minh + 10))
+        self.Fit()
+
         self.ctrls.btnOk.SetId(wxID_OK)
         self.ctrls.btnCancel.SetId(wxID_CANCEL)
-        
+
         # Transfer options to dialog
         for o, c, t in self.OPTION_TO_CONTROL:
             if t == "b":   # boolean field = checkbox
                 self.ctrls[c].SetValue(
                         self.pWiki.getConfig().getboolean("main", o))
-            elif t in ("t", "tre", "i0+", "f0+"):  # text field or regular expression field
+            elif t in ("t", "tre", "i0+", "f0+", "color0"):  # text field or regular expression field
                 self.ctrls[c].SetValue(
                         uniToGui(self.pWiki.getConfig().get("main", o)) )
             elif t == "seli":   # Selection -> transfer index
@@ -495,12 +539,54 @@ class OptionsDialog(wxDialog):
                 self.pWiki.getConfig().getint("main",
                 "new_window_on_follow_wiki_url") != 0)
 
+        self.ctrls.lbPages.SetSelection(0)  
+        self._refreshForPage()
+
+        EVT_LISTBOX(self, GUI_ID.lbPages, self.OnLbPages)
+
         EVT_BUTTON(self, wxID_OK, self.OnOk)
         EVT_BUTTON(self, GUI_ID.btnSelectFaceHtmlPrev, self.OnSelectFaceHtmlPrev)
-        EVT_BUTTON(self, GUI_ID.btnSelectEditorBgColor, self.OnSelectEditorBgColor)
+
+        EVT_BUTTON(self, GUI_ID.btnSelectHtmlLinkColor,
+                lambda evt: self.selectColor(self.ctrls.tfHtmlLinkColor))
+        EVT_BUTTON(self, GUI_ID.btnSelectHtmlALinkColor,
+                lambda evt: self.selectColor(self.ctrls.tfHtmlALinkColor))
+        EVT_BUTTON(self, GUI_ID.btnSelectHtmlVLinkColor,
+                lambda evt: self.selectColor(self.ctrls.tfHtmlVLinkColor))
+        EVT_BUTTON(self, GUI_ID.btnSelectHtmlTextColor,
+                lambda evt: self.selectColor(self.ctrls.tfHtmlTextColor))
+        EVT_BUTTON(self, GUI_ID.btnSelectHtmlBgColor,
+                lambda evt: self.selectColor(self.ctrls.tfHtmlBgColor))
+
+        EVT_BUTTON(self, GUI_ID.btnSelectEditorPlaintextColor,
+                lambda evt: self.selectColor(self.ctrls.tfEditorPlaintextColor))
+        EVT_BUTTON(self, GUI_ID.btnSelectEditorLinkColor,
+                lambda evt: self.selectColor(self.ctrls.tfEditorLinkColor))
+        EVT_BUTTON(self, GUI_ID.btnSelectEditorAttributeColor,
+                lambda evt: self.selectColor(self.ctrls.tfEditorAttributeColor))
+        EVT_BUTTON(self, GUI_ID.btnSelectEditorBgColor,
+                lambda evt: self.selectColor(self.ctrls.tfEditorBgColor))
+
         EVT_BUTTON(self, GUI_ID.btnSelectPageStatusTimeFormat,
                 self.OnSelectPageStatusTimeFormat)
-        
+
+
+    def _refreshForPage(self):
+        for p in self.panelList:
+            p.Show(False)
+            p.Enable(False)
+            
+        panel = self.panelList[self.ctrls.lbPages.GetSelection()]
+
+        # Enable appropriate addit. options panel
+        panel.Enable(True)
+        panel.Show(True)
+
+
+    def OnLbPages(self, evt):
+        self._refreshForPage()
+        evt.Skip()
+
 
     def OnOk(self, evt):
         fieldsValid = True
@@ -535,6 +621,16 @@ class OptionsDialog(wxDialog):
                 except ValueError:
                     fieldsValid = False
                     self.ctrls[c].SetBackgroundColour(wxRED)
+            elif t == "color0":
+                # HTML Color field or empty field
+                val = guiToUni(self.ctrls[c].GetValue())
+                rgb = htmlColorToRgbTuple(val)
+                
+                if val != "" and rgb is None:
+                    self.ctrls[c].SetBackgroundColour(wxRED)
+                    fieldsValid = False
+                else:
+                    self.ctrls[c].SetBackgroundColour(wxWHITE)
 
         if not fieldsValid:
             self.Refresh()
@@ -545,7 +641,7 @@ class OptionsDialog(wxDialog):
             # TODO Handle unicode text controls
             if t == "b":
                 self.pWiki.getConfig().set("main", o, repr(self.ctrls[c].GetValue()))
-            elif t in ("t", "tre", "i0+", "f0+"):
+            elif t in ("t", "tre", "i0+", "f0+", "color0"):
                 self.pWiki.getConfig().set(
                         "main", o, guiToUni(self.ctrls[c].GetValue()) )
             elif t == "seli":   # Selection -> transfer index
@@ -572,8 +668,18 @@ class OptionsDialog(wxDialog):
             self.ctrls.tfFacenameHtmlPreview.SetValue(dlg.GetValue())
         dlg.Destroy()
         
-    def OnSelectEditorBgColor(self, evt):
-        rgb = htmlColorToRgbTuple(self.ctrls.tfEditorBgColor.GetValue())
+    def OnSelectPageStatusTimeFormat(self, evt):
+        dlg = DateformatDialog(self, -1, self.pWiki, 
+                deffmt=self.ctrls.tfPageStatusTimeFormat.GetValue())
+        if dlg.ShowModal() == wxID_OK:
+            self.ctrls.tfPageStatusTimeFormat.SetValue(dlg.GetValue())
+        dlg.Destroy()
+
+    def selectColor(self, tfield):
+        rgb = htmlColorToRgbTuple(tfield.GetValue())
+        if rgb is None:
+            rgb = 0, 0, 0
+
         color = wxColour(*rgb)
         colordata = wxColourData()
         colordata.SetColour(color)
@@ -582,18 +688,11 @@ class OptionsDialog(wxDialog):
         if dlg.ShowModal() == wxID_OK:
             color = dlg.GetColourData().GetColour()
             if color.Ok():
-                self.ctrls.tfEditorBgColor.SetValue(
+                tfield.SetValue(
                         rgbToHtmlColor(color.Red(), color.Green(), color.Blue()))
 
         dlg.Destroy()
-
-    def OnSelectPageStatusTimeFormat(self, evt):
-        dlg = DateformatDialog(self, -1, self.pWiki, 
-                deffmt=self.ctrls.tfPageStatusTimeFormat.GetValue())
-        if dlg.ShowModal() == wxID_OK:
-            self.ctrls.tfPageStatusTimeFormat.SetValue(dlg.GetValue())
-        dlg.Destroy()
-
+        
 
 
 
@@ -1111,3 +1210,8 @@ class ChooseWikiWordDialog(wxDialog):
 
             self.EndModal(wxID_OK)
 
+
+def _children(win, indent=0):
+    print " " * indent + repr(win), win.GetId()
+    for c in win.GetChildren():
+        _children(c, indent=indent+2)

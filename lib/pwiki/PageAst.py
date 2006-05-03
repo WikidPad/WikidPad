@@ -116,7 +116,6 @@ def iterWords(pageast):
                     mat.group(0))
 
 
-
 class Page(Ast):
     __slots__ = ("tokens",)
 

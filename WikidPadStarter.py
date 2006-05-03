@@ -51,14 +51,21 @@ def findDirs():
         wikiAppDir = os.path.dirname(os.path.abspath(sys.argv[0]))
         if not wikiAppDir:
             wikiAppDir = r"C:\Program Files\WikidPad"
-
-        globalConfigDir = os.environ.get("HOME")
-        if not (globalConfigDir and os.path.exists(globalConfigDir)):
-            globalConfigDir = os.environ.get("USERPROFILE")
+            
+        # This allows to keep the program with config on an USB stick
+        if os.path.exists(os.path.join(wikiAppDir, "WikidPad.config")):
+            globalConfigDir = wikiAppDir
+        else:
+            globalConfigDir = os.environ.get("HOME")
             if not (globalConfigDir and os.path.exists(globalConfigDir)):
-                user = os.environ.get("USERNAME")
-                if user:
-                    globalConfigDir = r"c:\Documents And Settings\%s" % user
+                globalConfigDir = os.environ.get("USERPROFILE")
+                if not (globalConfigDir and os.path.exists(globalConfigDir)):
+                    # Instead of checking USERNAME, the system config dir. is
+                    # now used
+                    globalConfigDir = wxStandardPaths.Get().GetUserConfigDir()
+#                     user = os.environ.get("USERNAME")
+#                     if user:
+#                         globalConfigDir = r"c:\Documents And Settings\%s" % user
     finally:
         pass
 #     except Exception, e:
@@ -112,7 +119,11 @@ if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
         sys.exit(1)
 
 
-class App(wxApp):   
+class App(wxApp): 
+    def __init__(self, *args, **kwargs):
+        wxApp.__init__(self, *args, **kwargs)
+        self.SetAppName("WikidPad")
+
     def OnInit(self):
         ## _prof.start()
         appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
