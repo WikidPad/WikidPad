@@ -684,7 +684,7 @@ class SearchNode(AbstractNode):
         Test for node equality
         """
         return AbstractNode.nodeEquality(self, other) and \
-                self.searchTitle.getTitle() == other.searchTitle.getTitle()
+                self.searchTitle == other.searchTitle
 
 
 

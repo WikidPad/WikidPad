@@ -37,6 +37,12 @@ from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
 import WikiFormatting
 
 from PluginManager import *
+
+
+
+
+wxWIN95 = 20   # For wxGetOsVersion(), this includes also Win 98 and ME
+
 _COLORS = [
     "AQUAMARINE",
     "BLACK",
@@ -1105,25 +1111,31 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         colorsMenu.AppendMenu(wxNewId(), 'A-L', colorsMenu1)
         colorsMenu2 = wxMenu()
         colorsMenu.AppendMenu(wxNewId(), 'M-Z', colorsMenu2)
+        
+        # Set showColored to False if we are on Win 95/98/ME and use an unicode
+        #   build of wxPython
+        showColored = not (wxGetOsVersion()[0] == wxWIN95 and
+                Configuration.isUnicode())
 
         for cn in _COLORS:    # ["BLACK"]:
             colorsSubMenu = None
             if cn[0] <= 'L':
                 colorsSubMenu = colorsMenu1
-            ## elif cn[0] <= 'Z':
             else:
                 colorsSubMenu = colorsMenu2
 
             menuID=wxNewId()
             menuItem = wxMenuItem(colorsSubMenu, menuID, cn, cn)
-            cl = wxNamedColour(cn)
-
-            menuItem.SetBackgroundColour(cl)
-
-            # if color is dark, text should be white (checking green component seems to be enough)
-            ## light = (cl.Green() + cl.Red() + cl.Blue())/3
-            if cl.Green() < 128:
-                menuItem.SetTextColour(wxWHITE)
+            
+            if showColored:
+                cl = wxNamedColour(cn)
+    
+                menuItem.SetBackgroundColour(cl)
+    
+                # if color is dark, text should be white
+                #   (checking green component seems to be enough)
+                if cl.Green() < 128:
+                    menuItem.SetTextColour(wxWHITE)
 
             colorsSubMenu.AppendItem(menuItem)
             def insertColorAttribute(evt, colorId=cn):

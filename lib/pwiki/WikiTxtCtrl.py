@@ -195,7 +195,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         copyTextToClipboard(self.GetSelectedText())
 
     def Paste(self):
-        self.ReplaceSelection(getTextFromClipboard())
+        text = getTextFromClipboard()
+        if text is None:
+            return
+
+        self.ReplaceSelection(text)
 
 
     def setWrap(self, onOrOff):
