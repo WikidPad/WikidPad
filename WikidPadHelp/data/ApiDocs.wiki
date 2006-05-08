@@ -15,18 +15,24 @@ file:///C|/Program%20Files/WikidPad/user_extensions/WikidPadHooks.py
 
 ++ API Documentation
 
-*The following documentation is outdated!*
+The first argument to each hook function is the instance of the
+PersonalWikiFrame object which is the main window of the application.
+In scripts, this instance is automatically assigned to the variable
+"pwiki".
 
-The first argument to each hook function is wikidPad itself.  Here are
-the available methods on the wikidPad object.
+If you are reading the source code of WikidPad, this instance is often
+stored in member variable "pWiki", for some newer objects it has the
+name "mainControl".
 
-*wikidPad functions*
+*Selected functions of PersonalWikiFrame instance*
 
 newWiki(wikiName, wikiDir)
-    create a new wiki
+    Create a new wiki
 
-openWiki(wikiConfigFile, wikiWordToOpen)
-    open a wiki, and optionally a page in that wiki.
+openWiki(wikiConfigFilename, wikiWordToOpen=None, ignoreWdhName=False)
+    Open a wiki, and optionally a page in that wiki. if ignoreWdhName
+    is True, the program asks for the database type (same as
+    "Open as Type" in menu)
 
 saveCurrentWikiState()
     Write any changes to the wiki to disk.
@@ -43,6 +49,69 @@ viewParents(word)
 viewChildren()
     Pop up the dialog that shows the children of the node passed in.
 
+viewParentLess()
+    Pop up the dialog that shows the parentless nodes.
+
+viewBookmarks()
+    Pop up the dialog that shows the bookmarked nodes.
+
+viewHistory()
+    Pop up the dialog that shows the history of visited pages.
+
+saveCurrentWikiPage()
+    Save the current wiki page to disk.
+
+stdDialog(dlgtype, title, message, additional=None)
+    Show one of the standard dialogs. dlgtype is a string giving the type
+    of the desired dialog. title and message are strings to show in the
+    dialog, the meaning of additional and the return value depends on
+    the dialog type.
+    
+    Possible types:
+
+    "text": input text to dialog, additional is the default text.
+        The function returns the entered text on OK or an empty string on Cancel
+    "o": Shows only OK button
+    "oc": Shows OK and Cancel buttons, returns either "ok" or "cancel"
+    "yn": Yes and No buttons, returns either "yes" or "no"
+    "ync": like "yn" but with additional cancel button, can also return
+        "cancel"
+
+
+displayErrorMessage(errorStr, exception)
+    Popup an exception dialog.
+
+
+getWikiData()
+    Get currently active WikiData object.
+    
+getActiveEditor()
+    Returns currently active editor control (currently there only can be one).
+
+getCurrentWikiWord()
+    The currently open wiki word.
+    
+getCurrentDocPage()
+    Get the current DocPage object. (TODO)
+
+
+
+
+
+
+
+
+
+
+
+*The following documentation is outdated!*
+
+The first argument to each hook function is wikidPad itself.  Here are
+the available methods on the wikidPad object.
+
+*wikidPad functions*
+
+
 addToHistory(word)
     Add the word passed in to the history.
     
@@ -55,15 +124,7 @@ goBackInHistory()
 goForwardInHistory()
     Go forward in history one position.
     
-viewHistory()
-    Show the history dialog.
-    
-viewBookmarks()
-    Show the bookmarks dialog.
-    
-saveCurrentWikiPage()
-    Save the current wiki page to disk.
-    
+       
 showWikiWordOpenDialog()
 showWikiWordRenameDialog()
 showWikiWordRenameConfirmDialog()
@@ -75,8 +136,6 @@ showFindReplaceDialog()
 displayMessage(title, msg)
     Popup a dialog with the message passed in.
     
-displayErrorMessage(errorStr, exception)
-    Popup an exception dialog.
     
 *wikidPad.variables*
 
@@ -110,11 +169,6 @@ wikiData
 tree
     The tree control on the left. The is a wxTreeCtrl. More on this below.
 
-currentWikiWord
-    The currently open wiki word.
-    
-currentWikiPage
-    The data for the currently open wiki word. More on this below.
     
 editor
     The text editor for wikidPad. This is a wxStyledTextCtrl. More on this below.

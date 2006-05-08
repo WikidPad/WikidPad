@@ -267,12 +267,12 @@ class WikiPage(DocPage):
         return self
         
 
-    def _getWikiPageTitle(wikiWord):   # static
+    def getWikiPageTitle(wikiWord):   # static
         title = re.sub(ur'([A-Z\xc0-\xde]+)([A-Z\xc0-\xde][a-z\xdf-\xff])', r'\1 \2', wikiWord)
         title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2', title)
         return title
         
-    _getWikiPageTitle = staticmethod(_getWikiPageTitle)
+    getWikiPageTitle = staticmethod(getWikiPageTitle)
 
 
     def isDefined(self):
@@ -306,7 +306,7 @@ class WikiPage(DocPage):
                     pass
 
             if content is None:
-                title = self._getWikiPageTitle(self.getWikiWord())
+                title = self.getWikiPageTitle(self.getWikiWord())
                 content = u"++ %s\n\n" % title
 
         return content
@@ -355,7 +355,7 @@ class WikiPage(DocPage):
         self.deleteChildRelationships()
         self.deleteProperties()
         self.deleteTodos()
-        
+
         todoTokens = page.findType(WikiFormatting.FormatTypes.ToDo)
         for t in todoTokens:
             self.addTodo(t.grpdict["todoName"] + t.grpdict["todoDelimiter"] +

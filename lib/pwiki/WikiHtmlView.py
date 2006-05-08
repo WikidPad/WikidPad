@@ -19,6 +19,8 @@ from wxHelper import keyDownToAccel, copyTextToClipboard, GUI_ID
 
 from MiscEvent import KeyFunctionSink
 
+from StringOps import uniToGui
+
 import Exporters
 
 # from wxPython.stc import *
@@ -122,7 +124,7 @@ class WikiHtmlView(wxHtmlWindow):
         zoom = self.pWiki.getConfig().getint("main", "preview_zoom", 0)
         self.SetFonts("", "", [max(s + 2 * zoom, 1)
                 for s in self._DEFAULT_FONT_SIZES])
-        self.SetPage(html)
+        self.SetPage(uniToGui(html))
         
         lx, ly = self.scrollPosCache.get(self.currentLoadedWikiWord, (0, 0))
         self.Scroll(lx, ly)

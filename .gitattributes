@@ -3,6 +3,7 @@
 /WikidPad.xrc -text
 WikidPadHelp/WikidPadHelp.wiki -text
 WikidPadHelp/data/ApiDocs.wiki -text
+WikidPadHelp/data/ApplicationConfigurationFiles.wiki -text
 WikidPadHelp/data/AutoCompletion.wiki -text
 WikidPadHelp/data/AutoSave.wiki -text
 WikidPadHelp/data/BoughtFoobaromatic.wiki -text
@@ -14,6 +15,7 @@ WikidPadHelp/data/ChangeLog.wiki -text
 WikidPadHelp/data/ChangeLog2003.wiki -text
 WikidPadHelp/data/ChangeLog2004.wiki -text
 WikidPadHelp/data/ChangingKeyBindings.wiki -text
+WikidPadHelp/data/ClipboardCatcher.wiki -text
 WikidPadHelp/data/Color[!!-~]AQUAMARINE.wiki -text
 WikidPadHelp/data/Color[!!-~]BLACK.wiki -text
 WikidPadHelp/data/Color[!!-~]BLUE[!!-~]VIOLET.wiki -text
@@ -87,6 +89,7 @@ WikidPadHelp/data/CommandLineSupport.wiki -text
 WikidPadHelp/data/DatabaseTypes.wiki -text
 WikidPadHelp/data/DisableCamelCaseWords.wiki -text
 WikidPadHelp/data/DynamicViews.wiki -text
+WikidPadHelp/data/FileStorage.wiki -text
 WikidPadHelp/data/FormPages.wiki -text
 WikidPadHelp/data/GlobalScriptLibrary.wiki -text
 WikidPadHelp/data/Icon[!!-~]airbrush.wiki -text
@@ -258,6 +261,7 @@ WikidPadHelp/data/InternatiönalChàracters.wiki -text
 WikidPadHelp/data/KeyBindings.wiki -text
 WikidPadHelp/data/MigrationBetweenDbTypes.wiki -text
 WikidPadHelp/data/Not[!!-~]Camel[!!-~]Case.wiki -text
+WikidPadHelp/data/Options[!!-~]HTML[!!-~]preview_export.wiki -text
 WikidPadHelp/data/OptionsDialog.wiki -text
 WikidPadHelp/data/PageListDialog.wiki -text
 WikidPadHelp/data/Printing.wiki -text
@@ -295,6 +299,7 @@ WikidPadHelp/data/WikiSyntax.wiki -text
 WikidPadHelp/data/WikiWordHistory.wiki -text
 WikidPadHelp/data/WikiWordNavigation.wiki -text
 WikidPadHelp/data/WikidPadHelp.wiki -text
+WikidPadHelp/data/WikidPadOnUSB.wiki -text
 WikidPadHelp/data/WikidPadSupport.wiki -text
 WikidPadHelp/data/WordLinking.wiki -text
 WikidPadHelp/data/index/DOCUMENTS.grl -text
@@ -557,6 +562,7 @@ lib/pwiki/sqlite3api.py -text
 lib/pwiki/srePersistent.py -text
 lib/pwiki/urllib_red.py -text
 lib/pwiki/wikidata/DbBackendUtils.py -text
+lib/pwiki/wikidata/FileStorage.py -text
 lib/pwiki/wikidata/WikiDataManager.py -text
 lib/pwiki/wikidata/WikiData_compact_sqlite.py -text
 lib/pwiki/wikidata/WikiData_original_gadfly.py -text

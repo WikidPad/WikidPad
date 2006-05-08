@@ -7,79 +7,7 @@ The options dialog controls the behavior of the application and the currently op
 The following options apply to the whole application and therefore to each wiki opened in it.
 
 
-++++ Tree options
-
-These apply to the tree on the left of the main window.
-
-*Tree auto-follow*
-The tree tries to always select the wiki word currently shown in the editor or HTML-view.
-
-*Tree update after save*
-After each (automatic or manual) save, the tree icons and shown children are updated. This may need some time and may create some flicker going from top to bottom through the tree.
-
-*Hide Undefined WikiWords in Tree*
-If a page contains wiki word links to non-existing pages, these are not shown as children in the tree.
-
-*No cycles in tree*
-If two or more pages reference each other (e.g. NodeA -> NodeB -> NodeA) these cycles are not shown. Precisely: if a child of a word is already an ancestor (parent, grandparent, ...) of this word, it is not shown.
-
-
-++++ HTML preview/export
-
-*Start browser after export*
-Starts the current web browser after exporting one or more HTML pages or an XML document.
-
-*Font name for HTML preview*
-Enter the desired font name for the HTML preview. Clicking on the "..." button shows a list of available fonts.
-
-*Props to (not) include in preview*
-Enter here a regular expression of the properties you want to allow to be shown in the HTML preview. The RE is tested against a "normalized" property where the brackets are removed and key and value are separated by ": ". So even if the property is in the page written as "\[camelCaseWordsEnabled=false]", the RE is tested against "camelCaseWordsEnabled: false".
-
-If you e.g. want to show the "alias" properties only, enter "alias: .* ". Other properties will then be hidden in the preview. The empty text field matches everything.
-
-If you want to show all properties *except* those matching the RE, tick the checkbox to the left of the "not".
-
-If you press the "Ok" button of the options dialog, but the dialog doesn't vanish, instead this text field is red, then the RE contains an error and must be corrected first.
-
-*Props to (not) include in export*
-Same as above, but for the HTML export.
-
-*Shows pics as links in preview*
-If this option is checked, links to image URLs (those ending with .png, .gif or .jpg) are shown like other links in the preview. If it is unchecked, the images (if available) are shown.
-
-*Shows pics as links in export*
-Same for HTML export.
-
-In the export dialog, you can temporarily override this setting for one export.
-
-
-++++ Autosave
-
-*Autosave active*
-Save current page content to disk (if modified) after a few seconds of inactivity.
-
-There are two delays which *both* must be exceeded before a save operation is triggered (if Autosave is active).
-
-*Delay after key pressed*
-How long to wait after the last keypress in the editor (default: 3 seconds). Recommended value: 1 to 5 seconds.
-
-*Delay after page dirty*
-How long to wait after the page was initially modified (dirty) after last save (default: 15 seconds). Recommended value: 15 to 180 seconds.
-
-
-++++ Editor
-
-*Sync. highlighting limit*
-Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 3000 to 5000 bytes
-
-*Highlight start delay*
-For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds
-
-*Background color*
-(Works only partially). Specify the background color of the editor by pressing the little "..." button to start the color dialog.
-
-
-++++ Other
+++++ General options
 
 *Minimize to Tray*
 Minimized to system tray instead of the normal taskbar.
@@ -105,6 +33,65 @@ Automatically show log window if new error messages arrive (see [WikiDocumentAtt
 *Auto-hide log window*
 Automatically hide log window if no more error messages are present.
 
+*Append after clipboard snippet*
+Control what the ClipboardCatcher should append after each caught snippet.
+
+
+++++ Tree options
+
+These apply to the tree on the left of the main window.
+
+*Tree auto-follow*
+The tree tries to always select the wiki word currently shown in the editor or HTML-view.
+
+*Tree update after save*
+After each (automatic or manual) save, the tree icons and shown children are updated. This may need some time and may create some flicker going from top to bottom through the tree.
+
+*Hide Undefined WikiWords in Tree*
+If a page contains wiki word links to non-existing pages, these are not shown as children in the tree.
+
+*No cycles in tree*
+If two or more pages reference each other (e.g. NodeA -> NodeB -> NodeA) these cycles are not shown. Precisely: if a child of a word is already an ancestor (parent, grandparent, ...) of this word, it is not shown.
+
+
+++++ HTML preview/export
+
+See [Options HTML preview_export].
+
+
+++++ Autosave
+
+*Autosave active*
+Save current page content to disk (if modified) after a few seconds of inactivity.
+
+There are two delays which *both* must be exceeded before a save operation is triggered (if Autosave is active).
+
+*Delay after key pressed*
+How long to wait after the last keypress in the editor (default: 3 seconds). Recommended value: 1 to 5 seconds.
+
+*Delay after page dirty*
+How long to wait after the page was initially modified (dirty) after last save (default: 15 seconds). Recommended value: 15 to 180 seconds.
+
+
+++++ Editor
+
+*Sync. highlighting limit*
+Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 3000 to 5000 bytes
+
+*Highlight start delay*
+For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds
+
+*Plain text color*
+Specify the color of plain text (like this one) in the editor by pressing the little "..." button to start the color dialog or by entering a numeric HTML color (e.g. "#000000" for black) in the text field. Leaving the field empty chooses the default color.
+
+*Link color*
+Set the color of links (URLs and existing wiki words, e.g. http://nowhere) in the editor. See "Plain text color" above for details.
+
+*Attribute/script color*
+Set the color of attributes and scripts (e.g. <%"this one"%>) in the editor. See "Plain text color" above for details.
+
+*Background color*
+(Works only partially). Specify the background color of the editor. See "Plain text color" above for details.
 
 
 +++ Current wiki
@@ -115,5 +102,10 @@ Interpret footnotes (e.g. "[42]") as wiki words instead of normal text.
 
 *First word at startup*
 Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last word when the wiki was closed is shown on opening.
+
+*Modif. date must match*
+*Filename must match*
+*Modif. date is enough*
+See [FileStorage].
 
 

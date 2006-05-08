@@ -468,7 +468,11 @@ class OptionsDialog(wxDialog):
             ("editor_bg_color", "tfEditorBgColor", "color0"),
 
             ("footnotes_as_wikiwords", "cbFootnotesAsWws", "b"),
-            ("first_wiki_word", "tfFirstWikiWord", "t")
+            ("first_wiki_word", "tfFirstWikiWord", "t"),
+            
+            ("fileStorage_identity_modDateMustMatch", "cbFsModDateMustMatch", "b"),
+            ("fileStorage_identity_filenameMustMatch", "cbFsFilenameMustMatch", "b"),
+            ("fileStorage_identity_modDateIsEnough", "cbFsModDateIsEnough", "b")
     )
     
     _PANEL_LIST = (

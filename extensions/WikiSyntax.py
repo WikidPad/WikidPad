@@ -49,7 +49,7 @@ Heading1RE      = re.compile(u"^\\+(?!\\+) ?(?P<h1Content>" +
 # UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp|rel)://|mailto:)[^"\s<>]*',
 #         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp|rel)://|mailto:)'
-        ur'(?:(?![.,;:!?]+["\s])[^"\s<>])*',
+        ur'(?:(?![.,;:!?)]+["\s])[^"\s<>])*',
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 

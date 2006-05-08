@@ -75,14 +75,20 @@ def describeToolbarItems(wiki):
 def referrals(wiki, evt):
     if wiki.getCurrentWikiWord() is None:
         return
-    wiki.editor.AddText(u"\n------------------------\n")
+    wiki.getActiveEditor().AddText(u"\n------------------------\n")
+
     parents = wiki.wikiData.getParentRelationships(wiki.getCurrentWikiWord())
-    wiki.editor.AddText(u"*%s Wikis referring to*   %s\n" % (len(parents), wiki.getCurrentWikiWord()))
+    wiki.getActiveEditor().AddText(u"*%s Wikis referring to*   %s\n" %
+            (len(parents), wiki.getCurrentWikiWord()))
+
     for word in parents:
-        wiki.editor.AddText(u"%s\n" % word)
-    wiki.editor.AddText(u"------------------------\n")
+        wiki.getActiveEditor().AddText(u"%s\n" % word)
+    wiki.getActiveEditor().AddText(u"------------------------\n")
+
     children = wiki.wikiData.getChildRelationships(wiki.getCurrentWikiWord())
-    wiki.editor.AddText(u"*%s Wikis referred to by* %s\n" % (len(children), wiki.getCurrentWikiWord()))
+    wiki.getActiveEditor().AddText(u"*%s Wikis referred to by* %s\n" %
+            (len(children), wiki.getCurrentWikiWord()))
+
     for word in children:
-        wiki.editor.AddText(u"%s\n" % word)
-    wiki.editor.AddText(u"------------------------\n")
+        wiki.getActiveEditor().AddText(u"%s\n" % word)
+    wiki.getActiveEditor().AddText(u"------------------------\n")

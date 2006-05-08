@@ -16,9 +16,13 @@ ftp://ftp.whereever.com/
 ++ Relative URLs
 You can create URLs which are relative to the wiki directory. These start with rel:// followed by the relative position. For HTML export the rel:// is removed to create a relative HTML link (without protocol). For HTML preview they are converted to "file:" URLs.
 
-You can drag a file from Explorer while holding shift key to create a relative URL. This does not work with files ending with ".wiki", these are always absolute and have the "wiki:" protocol.
+You can drag a file from Windows Explorer while holding shift key to create a relative URL. This does not work with files ending with ".wiki", these are always absolute and have the "wiki:" protocol.
 
 Example:
 
 rel://../above/andBelow.txt
+
+
+++ File storage
+You can also copy files into a subdirectory of the wiki directory from within WikidPad. See [FileStorage] for details.
 

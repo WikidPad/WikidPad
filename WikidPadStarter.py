@@ -60,7 +60,7 @@ def findDirs():
             if not (globalConfigDir and os.path.exists(globalConfigDir)):
                 globalConfigDir = os.environ.get("USERPROFILE")
                 if not (globalConfigDir and os.path.exists(globalConfigDir)):
-                    # Instead of checking USERNAME, the system config dir. is
+                    # Instead of checking USERNAME, the user config dir. is
                     # now used
                     globalConfigDir = wxStandardPaths.Get().GetUserConfigDir()
 #                     user = os.environ.get("USERNAME")
@@ -91,6 +91,9 @@ def findDirs():
 if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
     # Special option, called by deinstaller on request to delete personal
     # configuration files
+    dummyApp = wxApp(0)
+    dummyApp.SetAppName("WikidPad")
+
     wikiAppDir, globalConfigDir = findDirs()
     if globalConfigDir is None:
         sys.exit(1)

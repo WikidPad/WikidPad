@@ -38,6 +38,8 @@ import Exporters
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
         wikiWordToLabel, BOM_UTF8, fileContentToUnicode, splitIndent, \
         unescapeWithRe
+
+import DocPages
 import WikiFormatting
 
 
@@ -497,7 +499,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return default
 
 
-    def addMenuItem(self, menu, label, text, evtfct=None, icondesc=None, menuID=None):
+    def addMenuItem(self, menu, label, text, evtfct=None, icondesc=None,
+            menuID=None):
         if menuID is None:
             menuID = wxNewId()
 
@@ -541,7 +544,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         if wikiData is not None:
             wikiMenu.AppendSeparator()
-    
+
             self.addMenuItem(wikiMenu, '&Search Wiki\t' +
                     self.keyBindings.SearchWiki, 'Search Wiki',
                     lambda evt: self.showSearchDialog(), "tb_lens")
@@ -549,7 +552,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.addMenuItem(wikiMenu, '&View Bookmarks\t' +
                     self.keyBindings.ViewBookmarks, 'View Bookmarks',
                     lambda evt: self.viewBookmarks())
-    
+
         wikiMenu.AppendSeparator()
 
         menuID = wxNewId()
@@ -566,7 +569,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "Show Toolbar", wxITEM_CHECK)
         wikiMenu.AppendItem(menuItem)
         EVT_MENU(self, GUI_ID.CMD_SHOW_TOOLBAR, lambda evt: self.setShowToolbar(
-                self.GetToolBar() is None))
+                not self.getConfig().getboolean("main", "toolbar_show", True)))
         EVT_UPDATE_UI(self, GUI_ID.CMD_SHOW_TOOLBAR,
                 self.OnUpdateToolbarMenuItem)
 
@@ -579,7 +582,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         EVT_UPDATE_UI(self, GUI_ID.CMD_STAY_ON_TOP,
                 self.OnUpdateStayOnTopMenuItem)
 
-        self.addMenuItem(wikiMenu, 'O&ptions',
+        self.addMenuItem(wikiMenu, 'O&ptions...',
                 'Set Options', lambda evt: self.showOptionsDialog())
 
         wikiMenu.AppendSeparator()
@@ -1577,9 +1580,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return  # Already in sleep mode
         self.sleepMode = True
         
-        self.setShowToolbar(False)
-#         self.toolBar.Destroy()
-#         self.toolBar = None
+        toolBar = self.GetToolBar()
+        if toolBar is not None:
+            toolBar.Destroy()
 
         self.SetMenuBar(None)
         self.mainmenu.Destroy()
@@ -1605,7 +1608,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.sleepMode = False
 
         self.buildMainMenu()
-        self.setShowToolbar(True)
+        self.setShowToolbar(self.getConfig().getboolean("main", "toolbar_show",
+                True))
         self.setShowOnTray()
 
 
@@ -1953,6 +1957,16 @@ These are your default global settings.
         self.dataDir = dataDir
         self.wikiData = wikiData
         self.wikiDataManager = WikiDataManager(self, wikiData)
+
+        # Set file storage according to configuration
+        fs = self.getWikiDataManager().getFileStorage()
+        
+        fs.setModDateMustMatch(self.configuration.getboolean("main",
+                "fileStorage_identity_modDateMustMatch", False))
+        fs.setFilenameMustMatch(self.configuration.getboolean("main",
+                "fileStorage_identity_filenameMustMatch", False))
+        fs.setModDateIsEnough(self.configuration.getboolean("main",
+                "fileStorage_identity_modDateIsEnough", False))
 
         # reset the gui
         self.resetGui()
@@ -2446,6 +2460,8 @@ These are your default global settings.
         """
         Control, if toolbar should be shown or not
         """
+        self.getConfig().set("main", "toolbar_show", onOrOff)
+
         if onOrOff == (not self.GetToolBar() is None):
             # Desired state already reached
             return
@@ -2740,7 +2756,7 @@ These are your default global settings.
 
     def showReplaceTextByWikiwordDialog(self):
         if self.getCurrentWikiWord() is None:
-            self.pWiki.displayErrorMessage(u"No real wiki word to modify")
+            self.displayErrorMessage(u"No real wiki word to modify")
             return
 
         wikiWord = guiToUni(wxGetTextFromUser(u"Replace text by WikiWord:",
@@ -2755,13 +2771,16 @@ These are your default global settings.
                 return False
 
             if self.getWikiData().isDefinedWikiWord(wikiWord):
-                self.displayErrorMessage(u"'%s' exists already" % wikiWord)  # TODO Allow retry or append/replace
+                self.displayErrorMessage(u"'%s' exists already" % wikiWord)
+                        # TODO Allow retry or append/replace
                 return False
 
             text = self.activeEditor.GetSelectedText()
             page = self.wikiDataManager.createWikiPage(wikiWord)
-            self.activeEditor.ReplaceSelection(wikiWord)
-            title = self.getWikiPageTitle(wikiWord)   # TODO Respect template property?
+            self.activeEditor.ReplaceSelection(
+                    self.getFormatting().normalizeWikiWord(wikiWord))
+            # TODO Respect template property?
+            title = DocPages.WikiPage.getWikiPageTitle(wikiWord)
             self.saveDocPage(page, u"++ %s\n\n%s" % (title, text))
 
 
@@ -2809,6 +2828,16 @@ These are your default global settings.
             self.setHideUndefined()
             self.refreshPageStatus()
             self.fireMiscEventKeys(("options changed",))
+            
+            # Set file storage according to configuration
+            fs = self.getWikiDataManager().getFileStorage()
+            
+            fs.setModDateMustMatch(self.configuration.getboolean("main",
+                    "fileStorage_identity_modDateMustMatch", False))
+            fs.setFilenameMustMatch(self.configuration.getboolean("main",
+                    "fileStorage_identity_filenameMustMatch", False))
+            fs.setModDateIsEnough(self.configuration.getboolean("main",
+                    "fileStorage_identity_modDateIsEnough", False))
 
 
     def OnCmdExportDialog(self, evt):
@@ -3048,12 +3077,12 @@ These are your default global settings.
         dlg.Destroy()
 
 
-    def getWikiPageTitle(self, wikiWord):
-        title = re.sub(ur'([A-Z\xc0-\xde]{2,})([a-z\xdf-\xff])', r'\1 \2', wikiWord)
-        title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2', title)
-#         if title.startswith("["):
-#             title = title[1:len(title)-1]
-        return title
+#     def getWikiPageTitle(self, wikiWord):
+#         title = re.sub(ur'([A-Z\xc0-\xde]{2,})([a-z\xdf-\xff])', r'\1 \2', wikiWord)
+#         title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2', title)
+# #         if title.startswith("["):
+# #             title = title[1:len(title)-1]
+#         return title
 
 
     # ----------------------------------------------------------------------------------------
@@ -3146,12 +3175,12 @@ These are your default global settings.
     def OnSize(self, evt):
         wxLayoutAlgorithm().LayoutWindow(self, self.mainAreaPanel)
 
-    def OnSashDrag(self, evt):
-        if evt.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE:
-            return
-            
-        wxLayoutAlgorithm().LayoutWindow(self, self.mainAreaPanel)
-        # self.mainAreaPanel.Refresh()
+#     def OnSashDrag(self, evt):
+#         if evt.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE:
+#             return
+#             
+#         wxLayoutAlgorithm().LayoutWindow(self, self.mainAreaPanel)
+#         # self.mainAreaPanel.Refresh()
 
 
     def OnCmdCheckWrapMode(self, evt):        
@@ -3209,8 +3238,6 @@ These are your default global settings.
         self.configuration.set("main", "log_window_sashPos",
                 self.logSashWindow.getSashPosition())
                 
-        self.configuration.set("main", "toolbar_show", not self.GetToolBar() is None)
-
         self.configuration.set("main", "frame_stayOnTop", self.getStayOnTop())
         self.configuration.set("main", "zoom", self.activeEditor.GetZoom())
         self.configuration.set("main", "wiki_history", ";".join(self.wikiHistory))

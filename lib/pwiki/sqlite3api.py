@@ -84,6 +84,9 @@ class Connection:
         It will be removed from the cache if it was in to avoid that two cursors
         use the same statement.
         
+        The function returns a list (a mutable sequence) with the statement
+        as first item and a hint for the column types or None as second item.
+        
         sql -- SQL-string to prepare
         """
         try:

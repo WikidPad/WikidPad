@@ -32,10 +32,11 @@ Enter here with what the wiki pages (not the print pages) should be separated. Y
 
 Of special interest might be:
 
-\n New line
-\f New print page
+\n  New line
+\f  New print page
+\\  A single backslash
 
-The default are four new lines only between the wiki pages.
+The default are four newlines between the wiki pages.
 
 
 ++++ Preview

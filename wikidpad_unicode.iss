@@ -1,5 +1,5 @@
 [Files]
-Source: dist\WikidPad.exe; DestDir: {app}; Components: Program_files; Flags: replacesameversion
+Source: dist\WikidPad.exe; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\export\wikistyle.css; DestDir: {app}\export\; Components: Program_files; Flags: confirmoverwrite
 Source: dist\extensions\EvalLibrary.py; DestDir: {app}\extensions\; Components: Program_files
 Source: dist\extensions\KeyBindings.py; DestDir: {app}\extensions\; Components: Program_files
@@ -21,7 +21,7 @@ Source: dist\wxmsw26uh_stc_vc.dll; DestDir: {app}; Components: Program_files
 Source: dist\wxmsw26uh_vc.dll; DestDir: {app}; Components: Program_files
 Source: dist\_controls_.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_core_.pyd; DestDir: {app}; Components: Program_files
-Source: dist\_ctypes.pyd; DestDir: {app}; Components: Sqlite
+Source: dist\_ctypes.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_gdi_.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_html.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_misc_.pyd; DestDir: {app}; Components: Program_files
@@ -41,17 +41,17 @@ Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 1.7beta4
+AppVerName=WikidPad 1.7beta5
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
 VersionInfoVersion=1.7
-VersionInfoTextVersion=WikidPad 1.7beta4
+VersionInfoTextVersion=WikidPad 1.7beta5
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-1.7beta4
+OutputBaseFilename=WikidPad-1.7beta5
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2006 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true

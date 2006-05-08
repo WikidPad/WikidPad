@@ -1,7 +1,58 @@
 ﻿++ Change Log
 
 
-Apr. 21, 2006 (1.7beta4)
+May 08, 2006 (1.7beta5)
+
+Changes:
+
+    * Clipboard catcher (Windows only): Every piece of text added to
+      the clipboard is also appended to a wiki page if the clipboard
+      catcher is active. There is also an option to set some suffix
+      after each caught piece of text from clipboard (by default, a
+      newline is added). See ClipboardCatcher.
+    * File storage introduced: Copy files into a subdirectory of the
+      wiki within WikidPad. See FileStorage.
+
+    * Options to choose text colors for editor. See
+      OptionsDialog#*Plain# text# color* and following.
+    * Control background and text color of HTML export (and partially
+      for preview) by attributes (for wiki or page) or by options for
+      the whole application.
+      See [Options HTML preview_export]#+++# HTML# page# settings
+
+    * If a wiki word node is clicked which is subnode of an attribute
+      node, the particular attribute is selected as it worked already
+      for todo items.
+
+    * New menu item to hide/show toolbar.
+    * New menu item to keep window always on top.
+    * New options dialog consisting of multiple pages.
+    
+    * Simpler function for some standard dialogs for scripts.
+      See [ApiDocs]#stdDialog
+
+    * Changed method to find configuration directory, more suitable
+      for WikidPad on USB-stick and more reliable. See WikidPadOnUSB
+      and ApplicationConfigurationFiles.
+
+
+Bugs fixed:
+
+    * Todo item part shows up twice in tree with same content if part
+      is also right side of a todo entry. Now shows up only once.
+    * Wrong cursor position after using bold or italic from
+      menu/toolbar
+    * "Show referring Wikis" in the "Plugins" menu didn't work
+    * Exception when refreshing tree while "saved searches" node is
+      expanded
+    * Exception when trying to paste something non-textual from
+      clipboard
+    * Workaround for wxPython bug: Crash when showing colored menu
+      items on Win 98/Me
+
+
+
+Apr. 21, 2006 (1.7beta4, repository revision in "mbutscher" branch: 74)
 
 Changes:
 

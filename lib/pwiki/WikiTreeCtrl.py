@@ -451,7 +451,7 @@ class TodoNode(AbstractNode):
     
     __slots__ = ("categories", "isRightSide")
             
-    def __init__(self, tree, parentNode, cats, isRightSide=False):
+    def __init__(self, tree, parentNode, cats):  # , isRightSide=False):
         """
         cats -- Sequence of category (todo, action, done, ...) and
                 subcategories, may also include the todo-value (=right side)
@@ -460,7 +460,7 @@ class TodoNode(AbstractNode):
         """
         AbstractNode.__init__(self, tree, parentNode)
         self.categories = cats
-        self.isRightSide = isRightSide
+#         self.isRightSide = isRightSide
 
 
     def getNodePresentation(self):
@@ -469,20 +469,22 @@ class TodoNode(AbstractNode):
         style.label = self.categories[-1]
         style.icon = "pin"
         
-        if self.isRightSide:
-            # Last item in self.categories is the right side, so tokenize it
-            # to find properties which modify the style
-            formatting = self.treeCtrl.pWiki.getFormatting()
-            tokens = tokenizeTodoValue(formatting, self.categories[-1])
-            for tok in tokens:
-                if tok.ttype == WikiFormatting.FormatTypes.Property and \
-                        tok.grpdict["propertyName"] in _SETTABLE_PROPS:
-                    # Use the found property to set the style of this node
-                    setattr(style, tok.grpdict["propertyName"],
-                            tok.grpdict["propertyValue"])
+#         if self.isRightSide:
+#         # Last item in self.categories is the right side, so tokenize it
+#         # to find properties which modify the style
+
+        formatting = self.treeCtrl.pWiki.getFormatting()
+        tokens = tokenizeTodoValue(formatting, self.categories[-1])
+        for tok in tokens:
+            if tok.ttype == WikiFormatting.FormatTypes.Property and \
+                    tok.grpdict["propertyName"] in _SETTABLE_PROPS:
+                # Use the found property to set the style of this node
+                setattr(style, tok.grpdict["propertyName"],
+                        tok.grpdict["propertyValue"])
 
         return style
-        
+
+
     def listChildren(self):
         """
         Returns a sequence of Nodes for the children of this node.
@@ -490,46 +492,46 @@ class TodoNode(AbstractNode):
         """
         wikiData = self.treeCtrl.pWiki.wikiData
         addedTodoSubCategories = []
-        addedRightSides = []
+#         addedRightSides = []
         addedWords = []
         for (wikiWord, todo) in wikiData.getTodos():
             # parse the todo for name and value
             match = WikiFormatting.ToDoREWithCapturing.match(todo)
             entryCats = tuple(match.group(1).split(u".") + [match.group(2)])
-        
+
             if len(entryCats) < len(self.categories):
                 # Can't match
                 continue
-            elif self.isRightSide and (len(entryCats) == len(self.categories)) and \
+            elif (len(entryCats) == len(self.categories)) and \
                     (entryCats == self.categories):
                 # Same category sequence -> wiki word node
                 addedWords.append((wikiWord, todo))
-            elif not self.isRightSide and len(entryCats) > len(self.categories) and \
+            elif len(entryCats) > len(self.categories) and \
                     entryCats[:len(self.categories)] == self.categories:
                 # Subcategories -> category node
-                
+
                 nextSubCategory = entryCats[len(self.categories)]
-                
-                if len(entryCats) - len(self.categories) == 1:
-                    # nextSubCategory is the last category (the "right side")
-                    # of the todo, so handle it differently
-                    if nextSubCategory not in addedRightSides:
-                        addedRightSides.append(nextSubCategory)
-                else:
-                    if nextSubCategory not in addedTodoSubCategories:
-                        addedTodoSubCategories.append(nextSubCategory)
+
+#                 if len(entryCats) - len(self.categories) == 1:
+#                     # nextSubCategory is the last category (the "right side")
+#                     # of the todo, so handle it differently
+#                     if nextSubCategory not in addedRightSides:
+#                         addedRightSides.append(nextSubCategory)
+#                 else:
+                if nextSubCategory not in addedTodoSubCategories:
+                    addedTodoSubCategories.append(nextSubCategory)
 
         addedTodoSubCategories.sort()
-        addedRightSides.sort()
+#         addedRightSides.sort()
         addedWords.sort()
 
         result = []
         # First list real categories, then right sides, then words
-        result += [TodoNode(self.treeCtrl, self, self.categories + (c,),
-                isRightSide=False) for c in addedTodoSubCategories]
+        result += [TodoNode(self.treeCtrl, self, self.categories + (c,))
+                for c in addedTodoSubCategories]
 
-        result += [TodoNode(self.treeCtrl, self, self.categories + (c,),
-                isRightSide=True) for c in addedRightSides]
+#         result += [TodoNode(self.treeCtrl, self, self.categories + (c,),
+#                 isRightSide=True) for c in addedRightSides]
 
         def createSearchNode(wt):
             searchOp = SearchReplaceOperation()
@@ -642,7 +644,9 @@ class PropValueNode(AbstractNode):
         key = u".".join(self.categories)
         words = wikiData.getWordsWithPropertyValue(key, self.value)
         words.sort()                
-        return [WikiWordSearchNode(self.treeCtrl, self, w) for w in words]
+#         return [WikiWordSearchNode(self.treeCtrl, self, w) for w in words]
+        return [WikiWordPropertySearchNode(self.treeCtrl, self, w,
+                key, self.value) for w in words]
 
 #         return map(lambda w: WikiWordSearchNode(self.treeCtrl,
 #                 wikiData.getPage(w, toload=[""])), words)
@@ -654,6 +658,41 @@ class PropValueNode(AbstractNode):
         return AbstractNode.nodeEquality(self, other) and \
                 self.categories == other.categories and \
                 self.value == other.value
+
+
+class WikiWordPropertySearchNode(WikiWordRelabelNode):
+    """
+    Derived from WikiWordRelabelNode, specialized to locate and select
+    in the active editor a particular property with given propName and
+    propValue.
+    """
+    __slots__ = ("propName", "propValue")    
+    
+    def __init__(self, tree, parentNode, wikiWord, propName, propValue):
+        WikiWordRelabelNode.__init__(self, tree, parentNode, wikiWord)
+
+        self.propName = propName
+        self.propValue = propValue
+
+    def onActivate(self):
+        # WikiWordNode.onActivate(self)
+        WikiWordRelabelNode.onActivate(self)
+
+        editor = self.treeCtrl.pWiki.getActiveEditor()
+        pageAst = editor.getPageAst()
+        if pageAst is None:
+            return
+            
+        wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
+#         wikiData = wikiDataManager.getWikiData()
+        wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
+            
+        propTokens = wikiPage.extractPropertyTokensFromPageAst(pageAst)
+        for t in propTokens:
+            if t.grpdict["propertyName"] == self.propName and \
+                    t.grpdict["propertyValue"] == self.propValue:
+                editor.SetSelectionByCharPos(t.start, t.start + t.getRealLength())
+                break
 
 
 
@@ -721,7 +760,7 @@ class SearchNode(AbstractNode):
         Test for node equality
         """
         return AbstractNode.nodeEquality(self, other) and \
-                self.searchTitle.getTitle() == other.searchTitle.getTitle()
+                self.searchTitle == other.searchTitle
 
 
 

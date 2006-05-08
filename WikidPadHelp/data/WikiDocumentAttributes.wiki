@@ -130,6 +130,26 @@ Currently only type "form" is supported (see [FormPages] for details).
 Controls language of a page or the wiki (with "global." prepended) for [SpellChecking].
 
 
+*html.linkcolor*
+Specify the color of a link in preview/HTML export with a numeric HTML color (e.g. "#000000" for black).
+
+*html.alinkcolor*
+Color of a link while hovering over it with the mouse or while mouse is pressed (depends on browser). Doesn't work for preview.
+
+*html.vlinkcolor*
+Color of an already visited link. Doesn't work for preview.
+
+*html.textcolor*
+Color of normal text.
+
+*html.bgcolor*
+Color of background.
+
+*html.bgimage*
+Link (URL) to a background image. Doesn't work for preview.
+
+
+
 +++ Error checking
 
 The content of a page is checked on saving for logical errors in some of the special attributes. There is a log window below the editor (normally hidden) which shows error messages if something is wrong.

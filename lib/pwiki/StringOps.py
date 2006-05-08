@@ -11,7 +11,7 @@ import threading
 
 from struct import pack, unpack
 
-import difflib, codecs, os.path
+import difflib, codecs, os.path, random
 from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE
 
 from Utilities import DUMBTHREADHOLDER
@@ -370,6 +370,15 @@ def relativeFilePath(location, toFilePath):
     result += fileParts
     
     return os.path.join(*result)
+
+
+_RNDBASESEQ = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+def createRandomString(length):
+    """
+    Create a unicode string of random characters and digits
+    """
+    return u"".join([random.choice(_RNDBASESEQ) for i in xrange(length)])
 
 
 

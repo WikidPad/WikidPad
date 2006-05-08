@@ -216,7 +216,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         copyTextToClipboard(self.GetSelectedText())
 
     def Paste(self):
-        self.ReplaceSelection(getTextFromClipboard())
+        text = getTextFromClipboard()
+        if text is None:
+            return
+
+        self.ReplaceSelection(text)
 
     def onCmdCopy(self, miscevt):
         if wxWindow.FindFocus() != self:
@@ -1733,10 +1737,21 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
             if fn.endswith(".wiki"):
                 urls.append("wiki:%s" % url)
             else:
-                if not wxGetKeyState(WXK_SHIFT):
-                    # Absolute file: URL
-                    urls.append("file:%s" % url)
-                else:
+                doCopy = False  # Necessary because key state may change between
+                                # the two ifs
+                if wxGetKeyState(WXK_CONTROL):
+                    # Copy file into file storage
+                    fs = self.editor.pWiki.getWikiDataManager().getFileStorage()
+                    try:
+                        fn = fs.createDestPath(fn)
+                        doCopy = True
+                    except Exception, e:
+                        traceback.print_exc()
+                        self.editor.pWiki.displayErrorMessage(
+                                u"Couldn't copy file", e)
+                        return
+
+                if wxGetKeyState(WXK_SHIFT) or doCopy:
                     # Relative rel: URL
                     locPath = self.editor.pWiki.getWikiConfigPath()
                     if locPath is not None:
@@ -1747,6 +1762,9 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
                             urls.append("file:%s" % url)
                         else:
                             urls.append("rel://%s" % urllib.pathname2url(relPath))
+                else:
+                    # Absolute file: URL
+                    urls.append("file:%s" % url)
                 
 #             if f.endswith(".wiki"):
 #                 url = urllib.pathname2url(f)

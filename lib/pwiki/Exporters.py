@@ -1,5 +1,5 @@
 # from Enum import Enumeration
-import os, string, re, traceback, random
+import os, string, re, traceback
 from os.path import join, exists, splitext
 import sys
 import shutil
@@ -460,6 +460,16 @@ class HtmlXmlExporter:
         bgcol = filterCol(bgcol, u"bgcolor")
         
         if bgimg:
+            if bgimg.startswith(u"rel://"):
+                # Relative URL
+                if self.asHtmlPreview:
+                    # If preview, make absolute
+                    bgimg = u"file:" + urllib.pathname2url(
+                            self.mainControl.makeRelUrlAbsolute(bgimg))
+                else:
+                    # If export, reformat a bit
+                    bgimg = bgimg[6:]
+
             bgimg = u'background="%s"' % bgimg
         else:
             bgimg = u''
@@ -1252,10 +1262,10 @@ class MultiPageTextExporter:
 
 
 
-    _RNDBASESEQ = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-    def _createRandomSequence(self):
-        return u"".join([random.choice(self._RNDBASESEQ) for i in xrange(20)])
+#     _RNDBASESEQ = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+# 
+#     def _createRandomSequence(self):
+#         return u"".join([random.choice(self._RNDBASESEQ) for i in xrange(20)])
    
         
 
@@ -1281,7 +1291,7 @@ class MultiPageTextExporter:
             
         # Try random strings (5 tries)
         for i in xrange(5):
-            sep = u"-----%s-----" % self._createRandomSequence()
+            sep = u"-----%s-----" % createRandomString(20)
             if self._checkPossibleSeparator(sep):
                 return sep
 

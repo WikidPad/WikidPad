@@ -1,11 +1,36 @@
 ﻿++ Third Party Libraries
 
-wikidPad uses:
+Components used by this software:
 
-wxWindows
 
-Scintilla
-License for Scintilla and SciTE
+    * Python
+    Copyright (c) 2001-2005 Python Software Foundation.
+    All Rights Reserved.
+    
+    Copyright (c) 2000 BeOpen.com.
+    All Rights Reserved.
+    
+    Copyright (c) 1995-2001 Corporation for National Research Initiatives.
+    All Rights Reserved.
+    
+    Copyright (c) 1991-1995 Stichting Mathematisch Centrum, Amsterdam.
+    All Rights Reserved.
+    
+    
+    * wxWidgets/wxPython
+    Copyright (c) 1998 Julian Smart, Robert Roebling et al
+    
+    
+    * ctypes
+    Copyright (c) 2000, 2001, 2002, 2003, 2004 Thomas Heller
+    
+    
+    * sqlite
 
-Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
 
+    * enchant
+    Copyright (C) 2003, 2004 Dom Lachowicz
+    
+    
+    * pyEnchant
+    Copyright (C) 2004-2005, Ryan Kelly

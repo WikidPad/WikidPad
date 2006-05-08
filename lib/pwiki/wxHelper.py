@@ -131,6 +131,7 @@ def getTextFromClipboard():
                 return realuni
             else:
                 return ""
+        return None
     finally:
         cb.Close()
 

@@ -300,6 +300,7 @@ GLOBALDEFAULTS = {
     ("main", "editor_attribute_color"): "", # Color of attributes (=properties) and scripts
     ("main", "editor_bg_color"): "",  # Background color of the editor
 
+    # For wiki-wide search
     ("main", "search_wiki_context_before"): "0", # No. of context characters before
     ("main", "search_wiki_context_after"): "0",  # and after a found pattern
     ("main", "search_wiki_count_occurrences"): "False", # Show for each page the number of found matches
@@ -331,8 +332,14 @@ WIKIDEFAULTS = {
                                          # "compact_sqlite" for WikidPadCompact
                                          # or "original_sqlite"
     ("main", "footnotes_as_wikiwords"): "False",  # Interpret footnotes (e.g. [42]) as wiki words?
-    ("main", "db_pagefile_suffix"): ".wiki"  # Suffix of the page files for "Original ..."
+    ("main", "db_pagefile_suffix"): ".wiki",  # Suffix of the page files for "Original ..."
                                              # db types
+
+    # For file storage (esp. identity check)
+    ("main", "fileStorage_identity_modDateMustMatch"): "False",  # Modification date must match for file to be identical
+    ("main", "fileStorage_identity_filenameMustMatch"): "False",  # Filename must match for file 
+    ("main", "fileStorage_identity_modDateIsEnough"): "False"
+            # Same modification date is enough to claim files identical (no content compare)
 
     }
 

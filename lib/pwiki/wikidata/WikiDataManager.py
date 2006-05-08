@@ -1,11 +1,12 @@
 from weakref import WeakValueDictionary
-
+import os.path
 
 from pwiki.WikiExceptions import *
 from pwiki.DocPages import WikiPage, FunctionalPage, AliasWikiPage
 
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
+import FileStorage
 
 
 class WikiDataManager:
@@ -19,14 +20,20 @@ class WikiDataManager:
     exists yet, no new object is created, but the same returned
     """
 
-    def __init__(self, pWiki, wikiData):
-        self.pWiki = pWiki
+    def __init__(self, mainControl, wikiData):
+        self.mainControl = mainControl
         self.wikiData = wikiData
         
         self.wikiPageDict = WeakValueDictionary()
-        
+        self.fileStorage = FileStorage.FileStorage(self.mainControl, self,
+                os.path.join(os.path.dirname(
+                self.mainControl.getWikiConfigPath()), "files"))
+
     def getWikiData(self):
         return self.wikiData
+        
+    def getFileStorage(self):
+        return self.fileStorage
 
 
     def getWikiPage(self, wikiWord):
@@ -76,7 +83,7 @@ class WikiDataManager:
         Retrieve a functional page
         """
         # TODO Ensure uniqueness as for wiki pages
-        return FunctionalPage(self.pWiki, self, funcTag)
+        return FunctionalPage(self.mainControl, self, funcTag)
 
 
     def rebuildWiki(self, progresshandler):

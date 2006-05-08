@@ -8,14 +8,15 @@ import pwiki.srePersistent as _re
 
 from wxPython.wx import *
 # import wxPython.xrc as xrc
-
 from wxHelper import *
 
 from WikiExceptions import *
+from Configuration import isUnicode
 
 from LogWindow import LogMessage
 
 
+wxWIN95 = 20   # For wxGetOsVersion(), this includes also Win 98 and ME
 
 _COLORS = [
     "AQUAMARINE",
@@ -153,6 +154,10 @@ def buildColorsSubmenu():
     colorsMenu.AppendMenu(wxNewId(), 'A-L', colorsMenu1)
     colorsMenu2 = wxMenu()
     colorsMenu.AppendMenu(wxNewId(), 'M-Z', colorsMenu2)
+    
+    # Set showColored to False if we are on Win 95/98/ME and use an unicode build
+    #   of wxPython
+    showColored = not (wxGetOsVersion()[0] == wxWIN95 and isUnicode())
 
     for cn in _COLORS:    # ["BLACK"]:
         colorsSubMenu = None
@@ -165,13 +170,16 @@ def buildColorsSubmenu():
         menuID = wxNewId()
         colorMap[menuID] = cn
         menuItem = wxMenuItem(colorsSubMenu, menuID, cn, cn)
-        cl = wxNamedColour(cn)
-
-        menuItem.SetBackgroundColour(cl)
-
-        # if color is dark, text should be white (checking green component seems to be enough)
-        if cl.Green() < 128:
-            menuItem.SetTextColour(wxWHITE)
+        
+        if showColored:
+            cl = wxNamedColour(cn)
+    
+            menuItem.SetBackgroundColour(cl)
+    
+            # if color is dark, text should be white
+            #   (checking green component seems to be enough)
+            if cl.Green() < 128:
+                menuItem.SetTextColour(wxWHITE)
 
         colorsSubMenu.AppendItem(menuItem)
 
