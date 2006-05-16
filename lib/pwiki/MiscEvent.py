@@ -1,6 +1,5 @@
 # TODO Weak references!
 
-
 class MiscEventSourceMixin:
     """
     Mixin class to handle misc events

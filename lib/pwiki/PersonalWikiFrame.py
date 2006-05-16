@@ -7,11 +7,13 @@ import urllib_red as urllib
 from wxPython.wx import *
 from wxPython.stc import *
 from wxPython.html import *
-from wxHelper import GUI_ID, setWindowPos, setWindowSize
+from wxHelper import GUI_ID, cloneImageList
 
 from MiscEvent import MiscEventSourceMixin
+
 import Configuration
 from Configuration import createConfiguration
+from WindowLayout import WindowLayouter, setWindowPos, setWindowSize
 # from WikiData import *
 from wikidata import DbBackendUtils
 from wikidata.WikiDataManager import WikiDataManager
@@ -146,6 +148,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.wikiPadHelp = join(self.wikiAppDir, 'WikidPadHelp',
                 'WikidPadHelp.wiki')
+        self.windowLayouter = None  # will be set by initializeGui()
 
         # defaults
         self.wikiData = None
@@ -258,6 +261,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # get the default font for the editor
         self.defaultEditorFont = self.configuration.get("main", "font",
                 self.presentationExt.faces["mono"])
+                
+        self.layoutViewsTreeShow = self.configuration.getint("main",
+                "viewsTree_show", "no")
 
         # this will keep track of the last font used in the editor
         self.lastEditorFont = None
@@ -561,7 +567,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "Show Tree Control", wxITEM_CHECK)
         wikiMenu.AppendItem(menuItem)
         EVT_MENU(self, menuID, lambda evt: self.setShowTreeControl(
-                self.treeSashWindow.isCollapsed()))
+                self.windowLayouter.isWindowCollapsed("maintree")))
         EVT_UPDATE_UI(self, menuID, self.OnUpdateTreeCtrlMenuItem)
 
         menuItem = wxMenuItem(wikiMenu, GUI_ID.CMD_SHOW_TOOLBAR,
@@ -881,14 +887,39 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "pin")
                 
         if self.clipboardCatcher is not None:
-            menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER,
-                    "Clipboard Catcher\t" + self.keyBindings.CatchClipboard, 
+            wikiWordMenu.AppendSeparator()
+
+            menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
+                    "Clipboard Catcher at Page\t" + self.keyBindings.CatchClipboard, 
                     u"Text copied to clipboard is also pasted to this page",
-                    wxITEM_CHECK)
+                    wxITEM_RADIO)
             wikiWordMenu.AppendItem(menuItem)
-            EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER, self.OnClipboardCatcher)
-            EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER,
+            EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
+                    self.OnClipboardCatcherAtPage)
+            EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
                     self.OnUpdateClipboardCatcher)
+
+
+            menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
+                    "Clipboard Catcher at Cursor\t" + self.keyBindings.CatchClipboard, 
+                    u"Text copied to clipboard is also added to cursor position",
+                    wxITEM_RADIO)
+            wikiWordMenu.AppendItem(menuItem)
+            EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
+                    self.OnClipboardCatcherAtCursor)
+            EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
+                    self.OnUpdateClipboardCatcher)
+
+
+            menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
+                    "Clipboard Catcher off\t" + self.keyBindings.CatchClipboard, 
+                    u"Switch off clipboard catcher",wxITEM_RADIO)
+            wikiWordMenu.AppendItem(menuItem)
+            EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
+                    self.OnClipboardCatcherOff)
+            EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
+                    self.OnUpdateClipboardCatcher)
+
 
         wikiWordMenu.AppendSeparator()
 
@@ -1319,6 +1350,29 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         tb.Realize()
 
 
+
+#     _LAYOUT_DEFINITION = (
+#         {
+#             "name": "main area panel"
+#         },
+#         {
+#             "name": "maintree",
+#             "layout relative to": "main area panel",
+#             "layout relation": "left"
+#         },
+#         {
+#             "name": "viewstree",
+#             "layout relative to": "maintree",
+#             "layout relation": "below"
+#         },
+#         {
+#             "name": "log",
+#             "layout relative to": "main area panel",
+#             "layout relation": "below"
+#         }
+#     )
+
+
     def initializeGui(self):
         "initializes the gui environment"
 
@@ -1341,63 +1395,82 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # Create iconImageList
         self.fillIconLookupCache(True)
 
-        # ------------------------------------------------------------------------------------
-        # Create the left-right splitter window.
-        # ------------------------------------------------------------------------------------
-        self.treeSashWindow = SmartSashLayoutWindow(self, GUI_ID.SASH_WINDOW_TREE,
-                wxDefaultPosition, (200, 30), wxSW_3DSASH)
-        self.treeSashWindow.align(wxLAYOUT_LEFT)
-        self.treeSashWindow.setMinimalEffectiveSashPosition(10)
+
+        # Build layout:
+
+        self.windowLayouter = WindowLayouter(self, self.createWindow)
         
-        pos = self.getConfig().getint("main", "splitter_pos", 170)
+#         for pr in self._LAYOUT_DEFINITION:
+#             self.windowLayouter.addWindowProps(pr)
 
-        self.treeSashWindow.setSashPosition(pos)
-        if pos < 50: pos = 170
-        self.treeSashWindow.setEffectiveSashPosition(pos)
+        cfstr = self.getConfig().get("main", "windowLayout")
+        self.windowLayouter.setWinPropsByConfig(cfstr)
+       
 
+#         print "initializeGui layout", repr(self.windowLayouter.getWinPropsForConfig())
 
-#         self.vertSplitter = self.createWindow({"name":
-#                 "split(tree)(split(txteditor1)(log))"}, self)
-#         self.vertSplitter.SetMinimumPaneSize(1)
+        self.windowLayouter.realize()
 
-        # ------------------------------------------------------------------------------------
-        # Create the tree on the left.
-        # ------------------------------------------------------------------------------------
-        self.tree = self.createWindow({"name": "tree"}, self.treeSashWindow)
-
-#         # assign the image list
-#         try:
-#             self.tree.AssignImageList(self.iconImageList)
-#         except Exception, e:
-#             self.displayErrorMessage('There was an error loading the icons '+
-#                     'for the tree control.', e)
-
-#         self.logSplitter = self.createWindow({"name":
-#                 "split(txteditor1)(log)"}, self.vertSplitter)
-#         self.logSplitter.SetMinimumPaneSize(1)
-#         self.logSplitter.setEffectiveSettings(2, 5)
-        
+#         self.viewsTree = self.windowLayouter.getWindowForName("viewstree")
+        self.tree = self.windowLayouter.getWindowForName("maintree")
+        self.logWindow = self.windowLayouter.getWindowForName("log")
 
 
-#         self.mainAreaPanel = wxNotebook(self.vertSplitter, -1)# wxPanel(self.vertSplitter)
-        # self.mainAreaPanelSizer = wxBoxSizer(wxVERTICAL)
 
-        self.logSashWindow = SmartSashLayoutWindow(self, GUI_ID.SASH_WINDOW_LOG,
-                wxDefaultPosition, (200, 30), wxSW_3DSASH)  # wxNO_BORDER|wxSW_3D
-        self.logSashWindow.align(wxLAYOUT_BOTTOM)
-        self.logSashWindow.setMinimalEffectiveSashPosition(10)
-        
-        self.logSashWindow.setEffectiveSashPosition(self.configuration.getint(
-                "main", "log_window_effectiveSashPos", 120))
-        self.logSashWindow.setSashPosition(self.configuration.getint(
-                "main", "log_window_sashPos", 1))
-#         self.logSashWindow.SetDefaultSize((1000, 120))
-#         self.logSashWindow.SetOrientation(wxLAYOUT_HORIZONTAL)
-#         self.logSashWindow.SetAlignment(wxLAYOUT_BOTTOM)
-#         self.logSashWindow.SetSashVisible(wxSASH_TOP, True)
-
-        self.logWindow = self.createWindow({"name": "log"},
-                self.logSashWindow)
+#         # ------------------------------------------------------------------------------------
+#         # Create the left-right splitter window.
+#         # ------------------------------------------------------------------------------------
+#         self.treeSashWindow = SmartSashLayoutWindow(self, GUI_ID.SASH_WINDOW_TREE,
+#                 wxDefaultPosition, (200, 30), wxSW_3DSASH)
+#         self.treeSashWindow.align(wxLAYOUT_LEFT)
+#         self.treeSashWindow.setMinimalEffectiveSashPosition(10)
+#         
+#         pos = self.getConfig().getint("main", "splitter_pos", 170)
+# 
+#         self.treeSashWindow.setSashPosition(pos)
+#         if pos < 50: pos = 170
+#         self.treeSashWindow.setEffectiveSashPosition(pos)
+# 
+# 
+#         self.viewsTreeSashWindow = SmartSashLayoutWindow(self.treeSashWindow, -1,
+#                 wxDefaultPosition, (200, 30), wxSW_3DSASH)
+#         self.viewsTreeSashWindow.align(wxLAYOUT_BOTTOM)
+#         self.viewsTreeSashWindow.setMinimalEffectiveSashPosition(10)
+#         self.viewsTreeSashWindow.setSashPosition(60)
+#         
+#         self.viewsTree = self.createWindow({"name": "viewstree"},
+#                 self.viewsTreeSashWindow)
+# 
+# 
+# #         self.vertSplitter = self.createWindow({"name":
+# #                 "split(tree)(split(txteditor1)(log))"}, self)
+# #         self.vertSplitter.SetMinimumPaneSize(1)
+# 
+#         # ------------------------------------------------------------------------------------
+#         # Create the tree on the left.
+#         # ------------------------------------------------------------------------------------
+#         self.tree = self.createWindow({"name": "maintree"}, self.treeSashWindow)
+# 
+#         EVT_SIZE(self.treeSashWindow, lambda evt: wxLayoutAlgorithm().LayoutWindow(
+#                 self.treeSashWindow, self.tree))
+# 
+# 
+#         self.logSashWindow = SmartSashLayoutWindow(self, GUI_ID.SASH_WINDOW_LOG,
+#                 wxDefaultPosition, (200, 30), wxSW_3DSASH)  # wxNO_BORDER|wxSW_3D
+#         self.logSashWindow.align(wxLAYOUT_BOTTOM)
+#         self.logSashWindow.setMinimalEffectiveSashPosition(10)
+#         
+#         self.logSashWindow.setEffectiveSashPosition(self.configuration.getint(
+#                 "main", "log_window_effectiveSashPos", 120))
+#         self.logSashWindow.setSashPosition(self.configuration.getint(
+#                 "main", "log_window_sashPos", 1))
+# #         self.logSashWindow.SetDefaultSize((1000, 120))
+# #         self.logSashWindow.SetOrientation(wxLAYOUT_HORIZONTAL)
+# #         self.logSashWindow.SetAlignment(wxLAYOUT_BOTTOM)
+# #         self.logSashWindow.SetSashVisible(wxSASH_TOP, True)
+# 
+#         self.logWindow = self.createWindow({"name": "log"},
+#                 self.logSashWindow)
 
 
         # ------------------------------------------------------------------------------------
@@ -1405,42 +1478,19 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # ------------------------------------------------------------------------------------
         ## self.createEditor()
 
-        self.mainAreaPanel = wxNotebook(self, -1)
-                
-        self.activeEditor = self.createWindow({"name": "txteditor1"},
-                self.mainAreaPanel)
-        self.mainAreaPanel.AddPage(self.activeEditor, u"Edit")
+#         self.mainAreaPanel = wxNotebook(self, -1)
+#                 
+#         self.activeEditor = self.createWindow({"name": "txteditor1"},
+#                 self.mainAreaPanel)
+#         self.mainAreaPanel.AddPage(self.activeEditor, u"Edit")
+#         
+#         self.htmlView = WikiHtmlView(self, self.mainAreaPanel, -1)
+#         self.mainAreaPanel.AddPage(self.htmlView, u"Preview")
         
-        self.htmlView = WikiHtmlView(self, self.mainAreaPanel, -1)
-        self.mainAreaPanel.AddPage(self.htmlView, u"Preview")
-        
-        # self.mainAreaPanel.SetSizer(self.mainAreaPanelSizer)
-
-
-        # ------------------------------------------------------------------------------------
-        # Split the tree and the editor
-        # ------------------------------------------------------------------------------------
-        
-#         self.vertSplitter.SplitVertically(self.tree, self.mainAreaPanel,
-#                 self.lastSplitterPos)
-#         self.vertSplitter.SplitVertically(self.tree, self.logSplitter,
-#                 self.lastSplitterPos)
-#         self.logSplitter.SplitHorizontally(self.mainAreaPanel, self.logWindow)
-        # self.logSplitter.SetSashPosition(-1)
-
-#         self.logSplitter.setEffectiveSashPos(self.configuration.getint(
-#                 "main", "log_splitter_effectiveSplitPos", -120))
-#         self.logSplitter.SetSashPosition(self.configuration.getint(
-#                 "main", "log_splitter_splitPos", -1))
-#         self.logSplitter.SetSashGravity(1.0)
-
 
         EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(),
                 self.OnNotebookPageChanged)
         EVT_SET_FOCUS(self.mainAreaPanel, self.OnNotebookFocused)
-        
-#         EVT_SASH_DRAGGED(self, GUI_ID.SASH_WINDOW_TREE, self.OnSashDrag)
-#         EVT_SASH_DRAGGED(self, GUI_ID.SASH_WINDOW_LOG, self.OnSashDrag)
 
 
 
@@ -1500,15 +1550,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         EVT_ICONIZE(self, self.OnIconize)
         EVT_MAXIMIZE(self, self.OnMaximize)
 
-        # turn on the tree control check box   # TODO: Doesn't work after restore from sleep mode
-#         if self.lastSplitterPos > 1:
-#         if not self.treeSashWindow.isCollapsed():
-#             self.showTreeCtrlMenuItem.Check(1)
-# #         else:
-# #             self.tree.Hide()
 
     def OnUpdateTreeCtrlMenuItem(self, evt):
-        evt.Check(not self.treeSashWindow.isCollapsed())
+#         evt.Check(not self.treeSashWindow.isCollapsed())
+        evt.Check(not self.windowLayouter.isWindowCollapsed("maintree"))
         
     def OnUpdateToolbarMenuItem(self, evt):
         evt.Check(not self.GetToolBar() is None)
@@ -1530,22 +1575,43 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         mainAreaPanel.SetFocus()
 
 
+#     def createWindow(self, winProps, parent):
+#         """
+#         Wrapper around _actualCreateWindow to maintain a cache
+#         of already existing windows
+#         """
+#         winName = winProps["name"]
+# 
+#         # Try in cache:
+#         window = self.createdWindowCache.get(winName)
+#         if window is not None:
+#             window.Reparent(parent)    # TODO Reparent not available for all OS'
+#             return window
+#             
+#         window = self._actualCreateWindow(winProps, parent)
+#         if window is not None:
+#             self.createdWindowCache[winName] = window
+#             
+#         return window
+
+
     def createWindow(self, winProps, parent):
         """
         Creates tree, editor, splitter, ... according to the given window name
         in winProps
         """
         winName = winProps["name"]
-#         if winName.startswith("split("):
-#             return SmartSplitterWindow(parent, -1, style=wxSP_NOBORDER)
-        if winName == "tree":
+        if winName == "maintree" or winName == "viewstree":
             tree = WikiTreeCtrl(self, parent, -1)
             # assign the image list
             try:
-                tree.AssignImageList(self.iconImageList)
+                tree.AssignImageList(cloneImageList(self.iconImageList))
             except Exception, e:
-                displayErrorMessage('There was an error loading the icons '+
+                traceback.print_exc()
+                self.displayErrorMessage('There was an error loading the icons '
                         'for the tree control.', e)
+            if self.wikiConfigFilename is not None and winName == "viewstree":
+                tree.setViewsAsRoot()
             return tree
         elif winName.startswith("txteditor"):
             editor = WikiTxtCtrl(self, parent, -1)
@@ -1558,6 +1624,17 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return editor
         elif winName == "log":
             return LogWindow(parent, -1, self)
+        elif winName == "main area panel":  # TODO remove this hack
+            self.mainAreaPanel = wxNotebook(parent, -1)
+                    
+            self.activeEditor = self.createWindow({"name": "txteditor1"},
+                    self.mainAreaPanel)
+            self.mainAreaPanel.AddPage(self.activeEditor, u"Edit")
+            
+            self.htmlView = WikiHtmlView(self, self.mainAreaPanel, -1)
+            self.mainAreaPanel.AddPage(self.htmlView, u"Preview")
+            
+            return self.mainAreaPanel
 
 
     def appendLogMessage(self, msg):   # TODO make log window visible if necessary
@@ -1565,11 +1642,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         Add message to log window, make log window visible if necessary
         """
         if self.configuration.getboolean("main", "log_window_autoshow"):
-            self.logSashWindow.uncollapseWindow()
+#             self.logSashWindow.uncollapseWindow()
+            self.windowLayouter.uncollapseWindow("log")
         self.logWindow.appendMessage(msg)
 
     def hideLogWindow(self):
-        self.logSashWindow.collapseWindow()
+#         self.logSashWindow.collapseWindow()
+        self.windowLayouter.collapseWindow("log")
 
 
     def resourceSleep(self):
@@ -1613,10 +1692,28 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.setShowOnTray()
 
 
-    def testIt(self):
-        pageast = self.getActiveEditor().getPageAst()
-        print "testIt", repr(tuple(PageAst.iterWords(pageast)))
+#     _TEST_LAYOUT_DEFINITION = (
+#         {
+#             "name": "main area panel"
+#         },
+#         {
+#             "name": "maintree",
+#             "layout relative to": "main area panel",
+#             "layout relation": "left"
+#         },
+#         {
+#             "name": "viewstree",
+#             "layout relative to": "maintree",
+#             "layout relation": "above"
+#         },
+#         {
+#             "name": "log",
+#             "layout relative to": "main area panel",
+#             "layout relation": "below"
+#         }
+#     )
 
+#     def testIt(self):
 
     def OnNotebookPageChanged(self, evt):
         if evt.GetSelection() == 0:
@@ -1983,6 +2080,11 @@ These are your default global settings.
         # open the root
         self.openWikiPage(self.wikiName)
         self.setCurrentWordAsRoot()
+        
+        viewsTree = self.windowLayouter.getWindowForName("viewstree")
+        if viewsTree is not None:
+            viewsTree.setViewsAsRoot()
+
 
         # set status
 #         self.statusBar.SetStatusText(
@@ -2290,7 +2392,10 @@ These are your default global settings.
         """
         Return the absolute path for a rel: URL
         """
-        return abspath(join(dirname(self.wikiConfigFilename), relurl[6:]))
+        relpath = urllib.url2pathname(relurl[6:])
+
+        return u"file:" + urllib.pathname2url(
+                abspath(join(dirname(self.wikiConfigFilename), relpath)))
 
     def launchUrl(self, link):
 #         match = self.getFormatting().UrlRE.match(link)
@@ -2304,8 +2409,13 @@ These are your default global settings.
             if link2.startswith(u"rel://"):
                 # This is a relative link
                 link2 = self.makeRelUrlAbsolute(link2)
+            try:
+                os.startfile(mbcsEnc(link2, "replace")[0])
+            except Exception, e:
+                traceback.print_exc()
+                self.displayErrorMessage(u"Couldn't start file", e)
+                return False
 
-            os.startfile(mbcsEnc(link2, "replace")[0])
             return True
         elif self.configuration.getint(
                 "main", "new_window_on_follow_wiki_url") == 0:
@@ -2441,20 +2551,15 @@ These are your default global settings.
 
 
     def setShowTreeControl(self, onOrOff):
-        if onOrOff:
-            self.treeSashWindow.uncollapseWindow()
-        else:
-            self.treeSashWindow.collapseWindow()
-            
 #         if onOrOff:
-#             if self.lastSplitterPos < 50:
-#                 self.lastSplitterPos = 185
-# #             self.vertSplitter.SetSashPosition(self.lastSplitterPos)
-#             self.tree.Show()
+#             self.treeSashWindow.uncollapseWindow()
 #         else:
-# #             self.lastSplitterPos = self.vertSplitter.GetSashPosition()
-# #             self.vertSplitter.SetSashPosition(1)
-#             self.tree.Hide()
+#             self.treeSashWindow.collapseWindow()
+        if onOrOff:
+            self.windowLayouter.uncollapseWindow("maintree")
+        else:
+            self.windowLayouter.collapseWindow("maintree")
+
 
     def setShowToolbar(self, onOrOff):
         """
@@ -2535,29 +2640,116 @@ These are your default global settings.
             onOrOff = self.configuration.getboolean("main", "hideundefined")
 
 
-    def getClipboardCatcher(self):
-        return self.clipboardCatcher is not None and \
-                self.clipboardCatcher.isActive()
+    _LAYOUT_WITHOUT_VIEWSTREE = "name:main area panel;"\
+        "layout relation:left&layout relative to:main area panel&name:maintree&"\
+            "layout sash position:170&layout sash effective position:170;"\
+        "layout relation:below&layout relative to:main area panel&name:log&"\
+            "layout sash position:1&layout sash effective position:120"
+
+    _LAYOUT_WITH_VIEWSTREE = "name:main area panel;"\
+            "layout relation:left&layout relative to:main area panel&name:maintree&"\
+                "layout sash position:170&layout sash effective position:170;"\
+            "layout relation:%s&layout relative to:maintree&name:viewstree;"\
+            "layout relation:below&layout relative to:main area panel&name:log&"\
+                "layout sash position:1&layout sash effective position:120"
+
+    def changeLayoutByCf(self, layoutCfStr):
+        """
+        Create a new window layouter according to the
+        layout configuration string layoutCfStr. Try to reuse and reparent
+        existing windows.
+        BUG: Reparenting seems to disturb event handling for tree events and
+            isn't available for all OS'
+        """
+        # Reparent reusable windows so they aren't destroyed when
+        #   cleaning main window
+        # TODO Reparent not available for all OS'
+        cachedWindows = {}
+        for n, w in self.windowLayouter.winNameToObject.iteritems():
+            cachedWindows[n] = w
+            w.Reparent(None)
+
+        self.windowLayouter.cleanMainWindow()
+        
+        # make own creator function which provides already existing windows
+        def cachedCreateWindow(winProps, parent):
+            """
+            Wrapper around _actualCreateWindow to maintain a cache
+            of already existing windows
+            """
+            winName = winProps["name"]
+    
+            # Try in cache:
+            window = cachedWindows.get(winName)
+            if window is not None:
+                window.Reparent(parent)    # TODO Reparent not available for all OS'
+                return window
+                
+            window = self.createWindow(winProps, parent)
+            if window is not None:
+                cachedWindows[winName] = window
+
+            return window
+        
+        self.windowLayouter = WindowLayouter(self, cachedCreateWindow)
+
+#         for pr in self._TEST_LAYOUT_DEFINITION:
+#             self.windowLayouter.addWindowProps(pr)
+
+        self.windowLayouter.setWinPropsByConfig(layoutCfStr)
+        # Handle no size events while realizing layout
+        self.Unbind(EVT_SIZE)
+        
+        self.windowLayouter.realize()
+
+        # Destroy windows which weren't reused (have parent None)
+        for n, w in cachedWindows.iteritems():
+            if w.GetParent() is None:
+                w.Destroy()
+        
+        self.windowLayouter.layout()
+
+        EVT_SIZE(self, self.OnSize)
+
+        self.tree = self.windowLayouter.getWindowForName("maintree")
+        self.logWindow = self.windowLayouter.getWindowForName("log")
 
 
-    def OnClipboardCatcher(self, evt):
+#     def getClipboardCatcher(self):
+#         return self.clipboardCatcher is not None and \
+#                 self.clipboardCatcher.isActive()
+
+    def OnClipboardCatcherOff(self, evt):
         if self.clipboardCatcher.isActive():
             self.clipboardCatcher.stop()
-        else:
-            self.clipboardCatcher.start(self.GetHandle(),
-                    self.getCurrentDocPage())
+
+    def OnClipboardCatcherAtPage(self, evt):
+        self.clipboardCatcher.startAtPage(self.GetHandle(),
+                self.getCurrentDocPage())
+
+    def OnClipboardCatcherAtCursor(self, evt):
+        self.clipboardCatcher.startAtCursor(self.GetHandle())
 
 
     def OnUpdateClipboardCatcher(self, evt):
-        if self.getClipboardCatcher():
-            evt.Check(True)
-            evt.SetText("Clipboard Catcher: %s\t%s" % 
-                    (self.clipboardCatcher.getWikiWord(),
-                    self.keyBindings.CatchClipboard))
-        else:
-            evt.Check(False)
-            evt.SetText("Clipboard Catcher\t" +
-                    self.keyBindings.CatchClipboard)
+        cc = self.clipboardCatcher
+        if cc is None:
+            return  # Shouldn't be called anyway
+
+        if evt.GetId() == GUI_ID.CMD_CLIPBOARD_CATCHER_OFF:
+            evt.Check(cc.getMode() == cc.MODE_OFF)
+        elif evt.GetId() == GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR:
+            evt.Check(cc.getMode() == cc.MODE_AT_CURSOR)
+        elif evt.GetId() == GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE:
+            if cc.getMode() == cc.MODE_AT_PAGE:
+                evt.Check(True)
+                evt.SetText("Clipboard Catcher at: %s\t%s" % 
+                        (self.clipboardCatcher.getWikiWord(),
+                        self.keyBindings.CatchClipboard))
+            else:
+                evt.Check(False)
+                evt.SetText("Clipboard Catcher at Page\t" +
+                        self.keyBindings.CatchClipboard)
 
 
     def writeGlobalConfig(self):
@@ -2695,10 +2887,6 @@ These are your default global settings.
                 u"'%s' renamed to '%s'?" % (wikiWord, toWikiWord),
                 u'Rename Wiki Word', wxYES_NO | wxCANCEL, self)
 
-#         dlg=wxMessageDialog(self, uniToGui((u"Are you sure you want to rename "+
-#                 u"wiki word '%s' to '%s'?") % (wikiWord, toWikiWord)),
-#                 u'Rename Wiki Word', wxYES_NO)
-#         result = dlg.ShowModal()
         if result == wxYES or result == wxNO:
             try:
                 self.renameCurrentWikiPage(toWikiWord, result == wxYES)
@@ -2764,8 +2952,6 @@ These are your default global settings.
 
         if wikiWord:
             wikiWord = wikiWordToLabel(wikiWord)
-#             if not self.getFormatting().isWikiWord(wikiWord):
-#                 wikiWord = u"[%s]" % wikiWord
             if not self.getFormatting().isNakedWikiWord(wikiWord):
                 self.displayErrorMessage(u"'%s' is an invalid wiki word" % wikiWord)
                 return False
@@ -2827,7 +3013,6 @@ These are your default global settings.
             self.setShowOnTray()
             self.setHideUndefined()
             self.refreshPageStatus()
-            self.fireMiscEventKeys(("options changed",))
             
             # Set file storage according to configuration
             fs = self.getWikiDataManager().getFileStorage()
@@ -2838,6 +3023,26 @@ These are your default global settings.
                     "fileStorage_identity_filenameMustMatch", False))
             fs.setModDateIsEnough(self.configuration.getboolean("main",
                     "fileStorage_identity_modDateIsEnough", False))
+
+            newLayoutViewsTreeShow = self.configuration.getint("main",
+                "viewsTree_show", 0)
+            if self.layoutViewsTreeShow != newLayoutViewsTreeShow:
+                self.layoutViewsTreeShow = newLayoutViewsTreeShow
+
+                if newLayoutViewsTreeShow == 0:
+                    # Don't show "Views" tree
+                    layoutCfStr = self._LAYOUT_WITHOUT_VIEWSTREE
+                elif newLayoutViewsTreeShow == 1:
+                    # Show "Views" tree above main tree
+                    layoutCfStr = self._LAYOUT_WITH_VIEWSTREE % "above"
+                elif newLayoutViewsTreeShow == 2:
+                    # Show "Views" tree above main tree
+                    layoutCfStr = self._LAYOUT_WITH_VIEWSTREE % "below"
+    
+                self.configuration.set("main", "windowLayout", layoutCfStr)
+                self.changeLayoutByCf(layoutCfStr)
+
+            self.fireMiscEventKeys(("options changed",))
 
 
     def OnCmdExportDialog(self, evt):
@@ -3077,14 +3282,6 @@ These are your default global settings.
         dlg.Destroy()
 
 
-#     def getWikiPageTitle(self, wikiWord):
-#         title = re.sub(ur'([A-Z\xc0-\xde]{2,})([a-z\xdf-\xff])', r'\1 \2', wikiWord)
-#         title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2', title)
-# #         if title.startswith("["):
-# #             title = title[1:len(title)-1]
-#         return title
-
-
     # ----------------------------------------------------------------------------------------
     # Event handlers from here on out.
     # ----------------------------------------------------------------------------------------
@@ -3173,14 +3370,8 @@ These are your default global settings.
 #                             self.updateRelationships()
 
     def OnSize(self, evt):
-        wxLayoutAlgorithm().LayoutWindow(self, self.mainAreaPanel)
-
-#     def OnSashDrag(self, evt):
-#         if evt.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE:
-#             return
-#             
-#         wxLayoutAlgorithm().LayoutWindow(self, self.mainAreaPanel)
-#         # self.mainAreaPanel.Refresh()
+        if self.windowLayouter is not None:
+            self.windowLayouter.layout()
 
 
     def OnCmdCheckWrapMode(self, evt):        
@@ -3226,18 +3417,18 @@ These are your default global settings.
 
         self.configuration.set("main", "windowmode", windowmode)
 
-        splitterPos = self.treeSashWindow.getSashPosition()
-#         if splitterPos < 3:
-#             splitterPos = self.treeSashWindow.getEffectiveSashPosition()
+#         splitterPos = self.treeSashWindow.getSashPosition()
+# 
+#         self.configuration.set("main", "splitter_pos", splitterPos)
+# 
+#         self.configuration.set("main", "log_window_effectiveSashPos",
+#                 self.logSashWindow.getEffectiveSashPosition())
+#         self.configuration.set("main", "log_window_sashPos",
+#                 self.logSashWindow.getSashPosition())
 
+        layoutCfStr = self.windowLayouter.getWinPropsForConfig()
+        self.configuration.set("main", "windowLayout", layoutCfStr)
 
-        self.configuration.set("main", "splitter_pos", splitterPos)
-
-        self.configuration.set("main", "log_window_effectiveSashPos",
-                self.logSashWindow.getEffectiveSashPosition())
-        self.configuration.set("main", "log_window_sashPos",
-                self.logSashWindow.getSashPosition())
-                
         self.configuration.set("main", "frame_stayOnTop", self.getStayOnTop())
         self.configuration.set("main", "zoom", self.activeEditor.GetZoom())
         self.configuration.set("main", "wiki_history", ";".join(self.wikiHistory))

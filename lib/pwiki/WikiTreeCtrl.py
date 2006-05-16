@@ -6,8 +6,8 @@ from wxPython.wx import *
 from wxPython.stc import *
 import wxPython.xrc as xrc
 
-from wxHelper import GUI_ID
-from MiscEvent import KeyFunctionSink, DebugSimple
+from wxHelper import GUI_ID, wxKeyFunctionSink
+from MiscEvent import DebugSimple   # , KeyFunctionSink
 
 from WikiExceptions import WikiWordNotFoundException
 import WikiFormatting
@@ -58,7 +58,7 @@ class AbstractNode(object):
         Sets if this node is a logical root of the tree or not
         (currently the physical root is the one and only logical root)
         """
-        if flag: raise Error   # TODO Better exception
+        pass
         
     def getParentNode(self):
         return self.parentNode
@@ -617,7 +617,7 @@ class PropCategoryNode(AbstractNode):
 
 class PropValueNode(AbstractNode):
     """
-    Node representing a property value. Children are WikiWordSearchNode s
+    Node representing a property value. Children are WikiWordSearchNode's
     """
     
     __slots__ = ("categories", "value", "propIcon")
@@ -997,16 +997,37 @@ class WikiTreeCtrl(wxTreeCtrl):
 
 ##        self.pWiki.getMiscEvent().addListener(DebugSimple("tree event:"))
         # Register for pWiki events
-        self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
+        wxKeyFunctionSink(self.pWiki.getMiscEvent(), self, (
                 ("loading current page", self.onLoadingCurrentWikiPage),
                 ("closed current wiki", self.onClosedCurrentWiki),
                 ("updated current page props", self.onUpdatedCurrentPageProps), # TODO is event fired somewhere?
                 ("renamed page", self.onRenamedWikiPage),
                 ("deleted page", self.onDeletedWikiPage)
-        )))
+        ))
+#         
+#         self.pWiki.getMiscEvent().addListener(self.meListener)
+
+
+
+
+#     def Reparent(self, parent):
+#         """
+#         Tree events seem to get lost on reparent, so bind them again
+#         """
+#         print "Reparent"
+#         wxTreeCtrl.Reparent(self, parent)
+#         ID = self.GetId()
+#         EVT_TREE_ITEM_ACTIVATED(self, ID, self.OnTreeItemActivated)
+#         EVT_TREE_SEL_CHANGED(self, ID, self.OnTreeItemActivated)
+#         EVT_TREE_ITEM_EXPANDING(self, ID, self.OnTreeItemExpand)
+#         EVT_TREE_ITEM_COLLAPSED(self, ID, self.OnTreeItemCollapse)
+
 
 
     def collapse(self):
+        """
+        Called before rebuilding tree
+        """
         rootNode = self.GetRootItem()
         self.CollapseAndReset(rootNode)
         
@@ -1068,8 +1089,9 @@ class WikiTreeCtrl(wxTreeCtrl):
         if self.pWiki.configuration.getboolean("main", "tree_auto_follow") or \
                 miscevt.get("forceTreeSyncFromRoot", False):
             # Configuration or event says to use expensive way
-            self.buildTreeForWord(self.pWiki.getCurrentWikiWord(),
-                    selectNode=True)
+            if not self.buildTreeForWord(self.pWiki.getCurrentWikiWord(),
+                    selectNode=True):
+                self.Unselect()
         else:    
             # Can't find word -> remove selection
             self.Unselect()
@@ -1249,7 +1271,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         """
         First tries to find a path from wikiWord to the currently selected node.
         If nothing is found, searches for a path from wikiWord to the root.
-        Expands the tree out if a path is found.
+        Expands the tree out and returns True if a path is found 
         """
         
 #         if selectNode:
@@ -1259,7 +1281,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         currentNode = self.GetSelection()    # self.GetRootItem()
         
         crumbs = None
-        
+
         if currentNode.IsOk() and self.GetPyData(currentNode).representsFamilyWikiWord():
             # check for path from wikiWord to currently selected tree node            
             currentWikiWord = self.GetPyData(currentNode).getWikiWord() #self.getNodeValue(currentNode)
@@ -1278,7 +1300,8 @@ class WikiTreeCtrl(wxTreeCtrl):
         # if a path is not found try to get a path to the root node
         if not crumbs:
             currentNode = self.GetRootItem()
-            if currentNode.IsOk():
+            if currentNode.IsOk() and \
+                    self.GetPyData(currentNode).representsFamilyWikiWord():
                 currentWikiWord = self.GetPyData(currentNode).getWikiWord()
                 crumbs = wikiData.findBestPathFromWordToWord(wikiWord,
                         currentWikiWord)
@@ -1326,6 +1349,10 @@ class WikiTreeCtrl(wxTreeCtrl):
                     self.EnsureVisible(currentNode)                            
                 if selectNode:
                     self.SelectItem(currentNode)
+                
+                return True
+        
+        return False    
 
     def findChildTreeNodeByWikiWord(self, fromNode, findWord):
         (child, cookie) = self.GetFirstChild(fromNode)    # , 0
@@ -1343,7 +1370,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
     def setRootByWord(self, rootword):
         """
-        Clear the tree and use page described by rootpage as
+        Clear the tree and use wiki word rootword as
         root of the tree
         """
         self.DeleteAllItems()
@@ -1355,6 +1382,22 @@ class WikiTreeCtrl(wxTreeCtrl):
         self.setNodePresentation(root, nodeobj.getNodePresentation())
         self.SelectItem(root)
         self.Expand(root)        
+
+
+    def setViewsAsRoot(self):
+        """
+        Clear the tree and use the "Views" subnode as root of the tree.
+        Used for a second "Views"-spcific tree
+        """      
+        self.DeleteAllItems()
+        # add the root node to the tree
+        nodeobj = MainViewNode(self, None)
+        nodeobj.setRoot(True)
+        root = self.AddRoot(u"")
+        self.SetPyData(root, nodeobj)
+        self.setNodePresentation(root, nodeobj.getNodePresentation())
+        self.SelectItem(root)
+        self.Expand(root)
 
 
     def setNodeImage(self, node, image):
@@ -1485,4 +1528,32 @@ def _cmpLowerDesc(a, b):
 
 def _cmpLowerAsc(a, b):
     return cmp(a.lower(), b.lower())
+
+
+
+
+
+# class ViewOnlyTreeCtrl(WikiTreeCtrl):
+#     """
+#     Special tree, used to show only the "Views" nodes and subnodes
+#     """
+#     def __init__(self, pWiki, parent, ID):
+#         WikiTreeCtrl.__init__(self, pWiki, parent, ID)
+#         
+#     def onLoadingCurrentWikiPage(self, miscevt):
+#         currentNode = self.GetSelection()
+#         if currentNode.IsOk():
+#             node = self.GetPyData(currentNode)
+#             if node.representsWikiWord():                    
+#                 if self.pWiki.wikiData.getAliasesWikiWord(node.getWikiWord()) ==\
+#                         self.pWiki.getCurrentWikiWord():
+#                     return  # Is already on word -> nothing to do
+#                     
+#         self.Unselect()
+#         
+#     def buildTreeForWord(self, wikiWord, selectNode=False, doexpand=False):
+#         """
+#         No family wiki words in the "Views" tree
+#         return False
+
 

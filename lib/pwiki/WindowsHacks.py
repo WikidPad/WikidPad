@@ -202,13 +202,19 @@ class ClipboardCatcher(BaseClipboardCatcher):
     """
     Specialized WikidPad clipboard catcher
     """
+    
+    MODE_OFF = 0
+    MODE_AT_PAGE = 1
+    MODE_AT_CURSOR = 2
+    
     def __init__(self, mainControl):
         BaseClipboardCatcher.__init__(self)
         
         self.mainControl = mainControl
         self.wikiPage = None
+        self.mode = ClipboardCatcher.MODE_OFF
         
-    def start(self, hWnd, wikiPage):
+    def startAtPage(self, hWnd, wikiPage):
         """
         wikiPage -- page to write clipboard content to
         """
@@ -217,23 +223,39 @@ class ClipboardCatcher(BaseClipboardCatcher):
             self.mainControl.displayErrorMessage(
                     u"Only a real wiki page can be a clipboard catcher")
             return
+            
+        if self.mode != ClipboardCatcher.MODE_OFF:
+            self.stop()
 
         BaseClipboardCatcher.start(self, hWnd)
         self.wikiPage = wikiPage
+        self.mode = ClipboardCatcher.MODE_AT_PAGE
+
+    def startAtCursor(self, hWnd):
+        """
+        Write clipboard content to cursor position
+        """
+        if self.mode != ClipboardCatcher.MODE_OFF:
+            self.stop()
+
+        BaseClipboardCatcher.start(self, hWnd)
+        self.mode = ClipboardCatcher.MODE_AT_CURSOR
+
 
     def stop(self):
         BaseClipboardCatcher.stop(self)
         self.wikiPage = None
+        self.mode = ClipboardCatcher.MODE_OFF
+
+    def getMode(self):
+        return self.mode
 
 
     def handleClipboardChange(self):
-        if self.wikiPage is None:
-            return
-            
         text = getTextFromClipboard()
         if len(text) == 0:
             return
-            
+
         try:
             suffix = unescapeWithRe(self.mainControl.getConfig().get(
                     "main", "clipboardCatcher_suffix", r"\n"))
@@ -241,7 +263,16 @@ class ClipboardCatcher(BaseClipboardCatcher):
             traceback.print_exc()
             suffix = u"\n"   # TODO Error message?
 
-        self.wikiPage.appendLiveText(text + suffix)
+        if self.mode == ClipboardCatcher.MODE_OFF:
+            return
+        elif self.mode == ClipboardCatcher.MODE_AT_PAGE:
+            if self.wikiPage is None:
+                return
+            self.wikiPage.appendLiveText(text + suffix)
+            
+        elif self.mode == ClipboardCatcher.MODE_AT_CURSOR:
+            self.mainControl.getActiveEditor().ReplaceSelection(text + suffix)
+
 
     def getWikiWord(self):
         if self.wikiPage is None:

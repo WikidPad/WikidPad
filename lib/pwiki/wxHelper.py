@@ -1,7 +1,11 @@
 from   wxPython.wx import wxNewId, wxSystemSettings_GetMetric, wxSYS_SCREEN_X, \
-        wxSYS_SCREEN_Y, wxSplitterWindow, wxSashLayoutWindow
+        wxSYS_SCREEN_Y, wxSplitterWindow, wxSashLayoutWindow, \
+        EVT_WINDOW_DESTROY, wxEvtHandler
 
 from wx.xrc import XRCCTRL, XRCID
+
+from MiscEvent import KeyFunctionSink
+
 
 class wxIdPool:
     def __init__(self):
@@ -188,99 +192,151 @@ def keyDownToAccel(evt):
 # see also GetAccelFromString in wxPython's _core.py
 
 
+def cloneImageList(imgList):
+    """
+    Create a copy of an wxImageList
+    """
+    from wxPython.wx import wxImageList
+
+    sz = imgList.GetSize(0)
+    lng = imgList.GetImageCount()
+    result = wxImageList(sz[0], sz[1], True, lng)
+
+    for i in xrange(lng):
+        result.AddIcon(imgList.GetIcon(i))
+
+    return result
 
 
-class SmartSashLayoutWindow(wxSashLayoutWindow):
-    def __init__(self, *args, **kwargs):
-        from wxPython.wx import EVT_SASH_DRAGGED
+class wxKeyFunctionSink(wxEvtHandler, KeyFunctionSink):
+    """
+    A MiscEvent sink which dispatches events further to other functions.
+    """
+    __slots__ = ("evtSource", "ifdestroyed")
 
-        wxSashLayoutWindow.__init__(self, *args, **kwargs)
+
+    def __init__(self, evtSource, ifdestroyed, activationTable):
+        wxEvtHandler.__init__(self)
+        KeyFunctionSink.__init__(self, activationTable)
+
+        self.evtSource = evtSource
+        self.ifdestroyed = ifdestroyed
         
-        self.effectiveSashPos = 0
-        self.minimalEffectiveSashPos = 0
-        self.sashPos = 0
+        if self.evtSource is not None:
+            self.evtSource.addListener(self)
         
-        self.SetMinimumSizeX(1)
-        self.SetMinimumSizeY(1)
-
-        EVT_SASH_DRAGGED(self, self.GetId(), self.OnSashDragged)
-
-    def align(self, al):
-        from wxPython.wx import wxLAYOUT_TOP, wxLAYOUT_BOTTOM, wxLAYOUT_LEFT, \
-                wxLAYOUT_RIGHT, wxLAYOUT_HORIZONTAL, wxLAYOUT_VERTICAL, \
-                wxSASH_TOP, wxSASH_BOTTOM, wxSASH_LEFT, wxSASH_RIGHT
-        
-        if al == wxLAYOUT_TOP:
-            self.SetOrientation(wxLAYOUT_HORIZONTAL)
-            self.SetAlignment(wxLAYOUT_TOP)
-            self.SetSashVisible(wxSASH_BOTTOM, True)
-        elif al == wxLAYOUT_BOTTOM:
-            self.SetOrientation(wxLAYOUT_HORIZONTAL)
-            self.SetAlignment(wxLAYOUT_BOTTOM)
-            self.SetSashVisible(wxSASH_TOP, True)
-        elif al == wxLAYOUT_LEFT:
-            self.SetOrientation(wxLAYOUT_VERTICAL)
-            self.SetAlignment(wxLAYOUT_LEFT)
-            self.SetSashVisible(wxSASH_RIGHT, True)
-        elif al == wxLAYOUT_RIGHT:
-            self.SetOrientation(wxLAYOUT_VERTICAL)
-            self.SetAlignment(wxLAYOUT_RIGHT)
-            self.SetSashVisible(wxSASH_LEFT, True)
+        if self.ifdestroyed is not None:
+            EVT_WINDOW_DESTROY(self.ifdestroyed, self.OnDestroy)
 
 
-    def setSashPosition(self, pos):
-        from wxPython.wx import wxSizeEvent, wxLAYOUT_VERTICAL
-
-        if self.GetOrientation() == wxLAYOUT_VERTICAL:
-            self.SetDefaultSize((pos, 1000))
-        else:
-            self.SetDefaultSize((1000, pos))
-            
-        self.sashPos = pos
-        if pos >= self.minimalEffectiveSashPos:
-            self.effectiveSashPos = pos
-            
-        parent = self.GetParent()
-        sevent = wxSizeEvent(parent.GetSize())
-        parent.ProcessEvent(sevent)
-
-    def getSashPosition(self):
-        return self.sashPos
-
-
-    def setMinimalEffectiveSashPosition(self, minPos):
-        self.minimalEffectiveSashPos = minPos
-
-    def setEffectiveSashPosition(self, ePos):
-        # TODO Check bounds
-        self.effectiveSashPos = ePos
-
-    def getEffectiveSashPosition(self):
-        return self.effectiveSashPos
-
-
-    def isCollapsed(self):
-        return self.getSashPosition() < self.minimalEffectiveSashPos
-
-    def collapseWindow(self):
-        if not self.isCollapsed():
-            self.setSashPosition(1)
-
-    def uncollapseWindow(self):
-        if self.isCollapsed():
-            self.setSashPosition(self.effectiveSashPos)
-
-
-    def OnSashDragged(self, evt):
-        from wxPython.wx import wxLAYOUT_VERTICAL
-
-        # print "OnSashDragged", repr((evt.GetDragRect().width, evt.GetDragRect().height))
-
-        if self.GetOrientation() == wxLAYOUT_VERTICAL:
-            self.setSashPosition(evt.GetDragRect().width)
-        else:
-            self.setSashPosition(evt.GetDragRect().height)
-
+    def OnDestroy(self, evt):
+        self.evtSource.removeListener(self)
         evt.Skip()
+
+
+    def addAsListenerTo(self, evtSource):
+        self.evtSource = evtSource
+        self.evtSource.addListener(self)
+
+
+#         """
+#         Set an wxWindow object window. If this window is destroyed,
+#         the sink automatically disconnects
+#         """
+
+
+
+# class SmartSashLayoutWindow(wxSashLayoutWindow):
+#     def __init__(self, *args, **kwargs):
+#         from wxPython.wx import EVT_SASH_DRAGGED
+# 
+#         wxSashLayoutWindow.__init__(self, *args, **kwargs)
+#         
+#         self.effectiveSashPos = 0
+#         self.minimalEffectiveSashPos = 0
+#         self.sashPos = 0
+#         
+#         self.SetMinimumSizeX(1)
+#         self.SetMinimumSizeY(1)
+# 
+#         EVT_SASH_DRAGGED(self, self.GetId(), self.OnSashDragged)
+# 
+#     def align(self, al):
+#         from wxPython.wx import wxLAYOUT_TOP, wxLAYOUT_BOTTOM, wxLAYOUT_LEFT, \
+#                 wxLAYOUT_RIGHT, wxLAYOUT_HORIZONTAL, wxLAYOUT_VERTICAL, \
+#                 wxSASH_TOP, wxSASH_BOTTOM, wxSASH_LEFT, wxSASH_RIGHT
+#         
+#         if al == wxLAYOUT_TOP:
+#             self.SetOrientation(wxLAYOUT_HORIZONTAL)
+#             self.SetAlignment(wxLAYOUT_TOP)
+#             self.SetSashVisible(wxSASH_BOTTOM, True)
+#         elif al == wxLAYOUT_BOTTOM:
+#             self.SetOrientation(wxLAYOUT_HORIZONTAL)
+#             self.SetAlignment(wxLAYOUT_BOTTOM)
+#             self.SetSashVisible(wxSASH_TOP, True)
+#         elif al == wxLAYOUT_LEFT:
+#             self.SetOrientation(wxLAYOUT_VERTICAL)
+#             self.SetAlignment(wxLAYOUT_LEFT)
+#             self.SetSashVisible(wxSASH_RIGHT, True)
+#         elif al == wxLAYOUT_RIGHT:
+#             self.SetOrientation(wxLAYOUT_VERTICAL)
+#             self.SetAlignment(wxLAYOUT_RIGHT)
+#             self.SetSashVisible(wxSASH_LEFT, True)
+# 
+# 
+#     def setSashPosition(self, pos):
+#         from wxPython.wx import wxSizeEvent, wxLAYOUT_VERTICAL
+# 
+#         if self.GetOrientation() == wxLAYOUT_VERTICAL:
+#             self.SetDefaultSize((pos, 1000))
+#         else:
+#             self.SetDefaultSize((1000, pos))
+#             
+#         self.sashPos = pos
+#         if pos >= self.minimalEffectiveSashPos:
+#             self.effectiveSashPos = pos
+#             
+#         parent = self.GetParent()
+#         sevent = wxSizeEvent(parent.GetSize())
+#         parent.ProcessEvent(sevent)
+# 
+#     def getSashPosition(self):
+#         return self.sashPos
+# 
+# 
+#     def setMinimalEffectiveSashPosition(self, minPos):
+#         self.minimalEffectiveSashPos = minPos
+# 
+#     def setEffectiveSashPosition(self, ePos):
+#         # TODO Check bounds
+#         self.effectiveSashPos = ePos
+# 
+#     def getEffectiveSashPosition(self):
+#         return self.effectiveSashPos
+# 
+# 
+#     def isCollapsed(self):
+#         return self.getSashPosition() < self.minimalEffectiveSashPos
+# 
+#     def collapseWindow(self):
+#         if not self.isCollapsed():
+#             self.setSashPosition(1)
+# 
+#     def uncollapseWindow(self):
+#         if self.isCollapsed():
+#             self.setSashPosition(self.effectiveSashPos)
+# 
+# 
+#     def OnSashDragged(self, evt):
+#         from wxPython.wx import wxLAYOUT_VERTICAL
+# 
+#         # print "OnSashDragged", repr((evt.GetDragRect().width, evt.GetDragRect().height))
+# 
+#         if self.GetOrientation() == wxLAYOUT_VERTICAL:
+#             self.setSashPosition(evt.GetDragRect().width)
+#         else:
+#             self.setSashPosition(evt.GetDragRect().height)
+# 
+#         evt.Skip()
 
 

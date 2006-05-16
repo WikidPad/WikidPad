@@ -16,7 +16,8 @@ import wxPython.xrc as xrc
 
 from Utilities import *
 
-from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard
+from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
+        wxKeyFunctionSink
 from MiscEvent import KeyFunctionSink
 
 import WikiFormatting
@@ -146,10 +147,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.AutoCompSetSeparator(ord('~'))
 
         # register some event handlers
-        self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
+        wxKeyFunctionSink(self.pWiki.getMiscEvent(), self, (
                 ("options changed", self.onOptionsChanged),  # fired by PersonalWikiFrame
                 ("command copy", self.onCmdCopy)
-        )))
+        ))
 
         self.wikiPageListener = KeyFunctionSink((
                 ("wiki page updated", self.onWikiPageUpdated),   # fired by a WikiPage

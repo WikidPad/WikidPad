@@ -464,8 +464,7 @@ class HtmlXmlExporter:
                 # Relative URL
                 if self.asHtmlPreview:
                     # If preview, make absolute
-                    bgimg = u"file:" + urllib.pathname2url(
-                            self.mainControl.makeRelUrlAbsolute(bgimg))
+                    bgimg = self.mainControl.makeRelUrlAbsolute(bgimg)
                 else:
                     # If export, reformat a bit
                     bgimg = bgimg[6:]
@@ -878,8 +877,7 @@ class HtmlXmlExporter:
                     # Relative URL
                     if self.asHtmlPreview:
                         # If preview, make absolute
-                        link = u"file:" + urllib.pathname2url(
-                                self.mainControl.makeRelUrlAbsolute(link))
+                        link = self.mainControl.makeRelUrlAbsolute(link)
                     else:
                         # If export, reformat a bit
                         link = link[6:]
@@ -927,13 +925,12 @@ class HtmlXmlExporter:
                         self.outAppend(u'<link type="wikiword">%s</link>' % 
                                 escapeHtml(tok.text))
                     else:
-#                         if word.startswith(u"["):
-#                             word = word[1:len(word)-1]
                         self.outAppend(u'<a href="%s">' % escapeHtml(link))
                         if tok.node.titleTokens is not None:
                             self.processTokens(content, tok.node.titleTokens)
                         else:
-                            self.outAppend(escapeHtml(tok.text))                        
+#                             self.outAppend(escapeHtml(tok.text))                        
+                            self.outAppend(escapeHtml(word))                        
                         self.outAppend(u'</a>')
                 else:
                     if tok.node.titleTokens is not None:

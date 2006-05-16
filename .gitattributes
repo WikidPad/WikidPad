@@ -554,6 +554,7 @@ lib/pwiki/WikiFormatting.py -text
 lib/pwiki/WikiHtmlView.py -text
 lib/pwiki/WikiTreeCtrl.py -text
 lib/pwiki/WikiTxtCtrl.py -text
+lib/pwiki/WindowLayout.py -text
 lib/pwiki/WindowsHacks.py -text
 lib/pwiki/__init__.py -text
 lib/pwiki/macurl2path_red.py -text

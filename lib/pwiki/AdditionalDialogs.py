@@ -437,6 +437,7 @@ class OptionsDialog(wxDialog):
             ("log_window_autoshow", "cbLogWindowAutoShow", "b"),
             ("log_window_autohide", "cbLogWindowAutoHide", "b"),
             ("clipboardCatcher_suffix", "tfClipboardCatcherSuffix", "t"),
+            ("viewsTree_show", "chViewsTreeShow", "seli"),
 
             ("tree_auto_follow", "cbTreeAutoFollow", "b"),
             ("tree_update_after_save", "cbTreeUpdateAfterSave", "b"),

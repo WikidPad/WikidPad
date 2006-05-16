@@ -263,7 +263,22 @@ GLOBALDEFAULTS = {
     ("main", "auto_bullets"): "True",  # Show bullet/number in newline if current line has bullet
     ("main", "auto_indent"): "True",
     ("main", "clipboardCatcher_suffix"): ur"\n",  # Suffix to append after each caught clipboard snippet
-    
+    ("main", "viewsTree_show"): "0",  # Mode how to show the "Views" tree,
+            # 0: Not at all, 1:Above main tree, 2: Below main tree
+    ("main", "windowLayout"): "name:main area panel;"\
+            "layout relation:left&layout relative to:main area panel&name:maintree&"\
+                "layout sash position:170&layout sash effective position:170;"\
+            "layout relation:below&layout relative to:main area panel&name:log&"\
+                "layout sash position:1&layout sash effective position:120",
+            # !!!
+#     ("main", "windowLayout"): "name:main area panel;"\
+#             "layout relation:left&layout relative to:main area panel&name:maintree&"\
+#                 "layout sash position:170&layout sash effective position:170;"\
+#             "layout relation:below&layout relative to:maintree&name:viewstree;"\
+#             "layout relation:below&layout relative to:main area panel&name:log&"\
+#                 "layout sash position:1&layout sash effective position:120",
+#             # !!!
+
     ("main", "auto_save"): "True",  # Boolean field, if auto save should be active
     ("main", "auto_save_delay_key_pressed"): "3",  # Seconds to wait after last key pressed and ...
     ("main", "auto_save_delay_dirty"): "15",  # secs. to wait after page became dirty before auto save
