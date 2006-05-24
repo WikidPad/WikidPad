@@ -1,0 +1,31 @@
+﻿++ Application Configuration Files
+
+Application configuration files mean here the application-wide configuration files "WikidPad.config" and the directory ".WikidPadGlobals" with all contained files.
+
+This page describes where WikidPad searches for these files on startup:
+
+If the installation directory (where the "WikidPad.exe" file is on Windows binary installations) contains already a file "WikidPad.config", the installation directory becomes the configuration directory.
+
+This is helpful for WikidPad on an USB stick, so you can move it between multiple computers without any need to store a file on the host computer.
+
+
+If WikidPad could not found a "WikidPad.config" file, it uses so-called environment variables to locate the config. directory
+
+    1. If there is a "HOME" variable, its value (normally a
+       directory) is used.
+    2. If not, but there is a "USERPROFILE" variable, its value
+       (normally a directory) is used.
+    3. If not, it asks the operating system for the appropriate user
+       configuration directory (this is done through the wxPython
+       library)
+
+
+If WikidPad is running, you can find out where the files are stored by opening the "About" dialog (menu "Help") and scrolling the shown text down to the end. The configuration directory is mentioned there.
+
+
+On Windows, you can open a console (=Dos-Box) and type the command "set" which shows all environment variables.
+
+
+
+
+[camelCaseWordsEnabled: false]

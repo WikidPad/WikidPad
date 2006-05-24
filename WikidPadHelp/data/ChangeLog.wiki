@@ -1,6 +1,17 @@
 ﻿++ Change Log
 
 
+May. 24, 2006 (1.6rc3)
+
+Changes:
+
+    * Changed rules to find configuration directory as in
+      1.7beta.
+    * For Win 95/98/ME: Color names in "Add color property"
+      submenu are uncolored to workaround a bug in wxPython
+
+
+
 Apr. 27, 2006 (1.6rc2)
 
 Changes:

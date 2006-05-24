@@ -3,6 +3,7 @@
 /WikidPad.xrc -text
 WikidPadHelp/WikidPadHelp.wiki -text
 WikidPadHelp/data/ApiDocs.wiki -text
+WikidPadHelp/data/ApplicationConfigurationFiles.wiki -text
 WikidPadHelp/data/AutoCompletion.wiki -text
 WikidPadHelp/data/AutoSave.wiki -text
 WikidPadHelp/data/BoughtFoobaromatic.wiki -text
@@ -289,6 +290,7 @@ WikidPadHelp/data/WikiSyntax.wiki -text
 WikidPadHelp/data/WikiWordHistory.wiki -text
 WikidPadHelp/data/WikiWordNavigation.wiki -text
 WikidPadHelp/data/WikidPadHelp.wiki -text
+WikidPadHelp/data/WikidPadOnUSB.wiki -text
 WikidPadHelp/data/WikidPadSupport.wiki -text
 WikidPadHelp/data/WordLinking.wiki -text
 WikidPadHelp/data/index/DOCUMENTS.grl -text
