@@ -746,23 +746,29 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.Copy()
 
         # load the ScratchPad
-        try:
-            wikiPage = self.pWiki.getWikiDataManager().getWikiPage("ScratchPad")
-        except WikiWordNotFoundException, e:
-            wikiPage = self.pWiki.getWikiDataManager().createWikiPage("ScratchPad")
+#         try:
+#             wikiPage = self.pWiki.getWikiDataManager().getWikiPage("ScratchPad")
+#         except WikiWordNotFoundException, e:
+#             wikiPage = self.pWiki.getWikiDataManager().createWikiPage("ScratchPad")
+# 
+#         content = ""
+# 
+#         # get the text from the scratch pad
+#         try:
+#             content = wikiPage.getContent()
+#         except WikiFileNotFoundException, e:
+#             content = u"++ Scratch Pad\n"
 
-        content = ""
+        wikiPage = self.pWiki.getWikiDataManager().getWikiPageNoError("ScratchPad")
+        
+        wikiPage.appendLiveText("\n%s\n---------------------------\n\n%s\n" %
+                (mbcsDec(strftime("%x %I:%M %p"), "replace")[0], text))
 
-        # get the text from the scratch pad
-        try:
-            content = wikiPage.getContent()
-        except WikiFileNotFoundException, e:
-            content = u"++ Scratch Pad\n"
 
         # TODO strftime
-        content = u"%s\n%s\n---------------------------\n\n%s\n" % \
-                (content, mbcsDec(strftime("%x %I:%M %p"))[0], text)
-        wikiPage.save(content, False)
+#         content = u"%s\n%s\n---------------------------\n\n%s\n" % \
+#                 (content, mbcsDec(strftime("%x %I:%M %p"))[0], text)
+#         wikiPage.save(content, False)
 #         self.pWiki.statusBar.SetStatusText(uniToGui("Copied snippet to ScratchPad"), 0)
 
     def styleSelection(self, styleChars):

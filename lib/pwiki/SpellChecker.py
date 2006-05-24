@@ -34,12 +34,15 @@ class SpellCheckerDialog(wxDialog):
         res.LoadOnDialog(self, parent, "SpellCheckDialog")
         self.SetTitle(title)
         
-        # Create HTML explanation
+        # Create styled explanation
         tfToCheck = wxTextCtrl(self, GUI_ID.tfToCheck, style=wxTE_MULTILINE|wxTE_RICH)
         res.AttachUnknownControl("tfToCheck", tfToCheck, self)
+        tfReplaceWith = wxTextCtrl(self, GUI_ID.tfReplaceWith, style=wxTE_RICH)
+        res.AttachUnknownControl("tfReplaceWith", tfReplaceWith, self)
 
         self.ctrls = XrcControls(self)
         self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        self.ctrls.lbReplaceSuggestions.InsertColumn(0, "Suggestion")
         
         self.wordRe = self.mainControl.getFormatting().TextWordRE
         
@@ -72,7 +75,9 @@ class SpellCheckerDialog(wxDialog):
         EVT_CLOSE(self, self.OnClose)
 
                 
-        EVT_LISTBOX(self, GUI_ID.lbReplaceSuggestions,
+#         EVT_LISTBOX(self, GUI_ID.lbReplaceSuggestions,
+#                 self.OnLbReplaceSuggestions)
+        EVT_LIST_ITEM_SELECTED(self, GUI_ID.lbReplaceSuggestions,
                 self.OnLbReplaceSuggestions)
 
         EVT_CHAR(self.ctrls.tfReplaceWith, self.OnCharReplaceWith)
@@ -116,7 +121,7 @@ class SpellCheckerDialog(wxDialog):
         self.ctrls.tfToCheck.AppendText(uniToGui(msg))
         self.ctrls.tfToCheck.SetDefaultStyle(wxTextAttr(wxBLACK))
         self.ctrls.tfReplaceWith.SetValue(u"")
-        self.ctrls.lbReplaceSuggestions.Set([])
+        self.ctrls.lbReplaceSuggestions.DeleteAllItems()
         
         self.ctrls.tfReplaceWith.SetFocus()
 
@@ -232,8 +237,13 @@ class SpellCheckerDialog(wxDialog):
         
         # List suggestions
         sugglist = self.enchantDict.suggest(mat.group(0))
-        self.ctrls.lbReplaceSuggestions.Set(sugglist)
         
+        self.ctrls.lbReplaceSuggestions.DeleteAllItems()
+        for s in sugglist:
+            self.ctrls.lbReplaceSuggestions.InsertStringItem(
+                    self.ctrls.lbReplaceSuggestions.GetItemCount(), s)
+        self.ctrls.lbReplaceSuggestions.SetColumnWidth(0, wxLIST_AUTOSIZE)
+
         self.ctrls.tfReplaceWith.SetFocus()
 
         return True
@@ -269,10 +279,16 @@ class SpellCheckerDialog(wxDialog):
         self.OnReplace(None)
 
 
+    def getReplSuggSelect(self):
+        return self.ctrls.lbReplaceSuggestions.GetNextItem(-1,
+                state=wxLIST_STATE_SELECTED)
+
     def OnLbReplaceSuggestions(self, evt):
-        sel = guiToUni(self.ctrls.lbReplaceSuggestions.GetStringSelection())
-        if sel != u"":
-            self.ctrls.tfReplaceWith.SetValue(uniToGui(sel))
+        sel = self.getReplSuggSelect()
+        if sel == -1:
+            return
+        sel = self.ctrls.lbReplaceSuggestions.GetItemText(sel)
+        self.ctrls.tfReplaceWith.SetValue(sel)
 
 
     def OnAddWordGlobal(self, evt):
@@ -301,9 +317,11 @@ class SpellCheckerDialog(wxDialog):
 
     def OnCharReplaceWith(self, evt):
         if (evt.GetKeyCode() == WXK_DOWN) and \
-                not self.ctrls.lbReplaceSuggestions.IsEmpty():
+                not self.ctrls.lbReplaceSuggestions.GetItemCount() == 0:
             self.ctrls.lbReplaceSuggestions.SetFocus()
-            self.ctrls.lbReplaceSuggestions.SetSelection(0)
+            self.ctrls.lbReplaceSuggestions.SetItemState(0,
+                    wxLIST_STATE_SELECTED|wxLIST_STATE_FOCUSED,
+                    wxLIST_STATE_SELECTED|wxLIST_STATE_FOCUSED)
             self.OnLbReplaceSuggestions(None)
         elif (evt.GetKeyCode() == WXK_UP):
             pass
@@ -312,9 +330,10 @@ class SpellCheckerDialog(wxDialog):
 
     def OnCharReplaceSuggestions(self, evt):
         if (evt.GetKeyCode() == WXK_UP) and \
-                (self.ctrls.lbReplaceSuggestions.GetSelection() == 0):
+                (self.getReplSuggSelect() == 0):
             self.ctrls.tfReplaceWith.SetFocus()
-            self.ctrls.lbReplaceSuggestions.Deselect(0)
+            self.ctrls.lbReplaceSuggestions.SetItemState(0, 0,
+                    wxLIST_STATE_SELECTED)
         else:
             evt.Skip()
 

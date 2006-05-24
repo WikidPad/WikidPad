@@ -74,10 +74,10 @@ def findDirs():
     if not globalConfigDir:
         globalConfigDir = wikiAppDir
 
-    if not globalConfigDir or not os.path.exists(globalConfigDir):
-        globalConfigDir = "C:\Windows"
+#     if not globalConfigDir or not os.path.exists(globalConfigDir):
+#         globalConfigDir = "C:\Windows"
         
-    # mcbs decoding
+    # mbcs decoding
     if wikiAppDir is not None:
         wikiAppDir = mbcsDec(wikiAppDir, "replace")[0]
 

@@ -118,7 +118,8 @@ class WikiDataManager:
         # Give possibility to do further reorganisation
         # specific to database backend
         self.getWikiData().cleanupAfterRebuild(progresshandler)
-        
+
+
     def renameWikiWord(self, wikiWord, toWikiWord, modifyText):
         """
         modifyText -- Should the text of links to the renamed page be
@@ -126,6 +127,16 @@ class WikiDataManager:
         """
         self.getWikiData().renameWord(wikiWord, toWikiWord)
         
+        # TODO: Replace always?
+        prevTitle = "++ " + WikiPage.getWikiPageTitle(wikiWord) + u"\n"
+        page = self.getWikiPage(toWikiWord)
+        content = page.getLiveText()
+        if content.startswith(prevTitle):
+            # Replace previous title with new one
+            content = "++ " + WikiPage.getWikiPageTitle(toWikiWord) + u"\n" + \
+                    content[len(prevTitle):]
+            page.replaceLiveText(content)
+
         if not modifyText:
             return
 

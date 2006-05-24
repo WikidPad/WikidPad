@@ -76,6 +76,7 @@ class HtmlXmlExporter:
         self.statestack = None
         # deepness of numeric bullets
         self.numericdeepness = None
+        self.preMode = None  # Count how many <pre> tags are open
         self.links = None
         self.convertFilename = removeBracketsFilename   # lambda s: mbcsEnc(s, "replace")[0]
         
@@ -391,7 +392,7 @@ class HtmlXmlExporter:
         """
         result = []
         
-        wikiPage = self.wikiDataManager.getWikiPage(word)
+        wikiPage = self.wikiDataManager.getWikiPageNoError(word)
 
         formattedContent = self.formatContent(word, content, formatDetails,
                 links, asHtmlPreview=asHtmlPreview)
@@ -663,6 +664,7 @@ class HtmlXmlExporter:
         self.statestack = [("normalindent", 0)]
         # deepness of numeric bullets
         self.numericdeepness = 0
+        self.preMode = 0  # Count how many <pre> tags are open
 
         # TODO Without camel case
         page = PageAst.Page()
@@ -730,48 +732,55 @@ class HtmlXmlExporter:
 
                 # Test if beginning of lines at beginning of a line in editor
                 if tok.start > 0 and content[tok.start - 1] != u"\n":
-#                     print "icline", repr(lines[0]), repr(escapeHtml(lines[0]))
                     # if not -> output of the first, incomplete, line
                     self.outAppend(escapeHtml(lines[0]))
+#                     print "processTokens12", repr(lines[0])
                     del lines[0]
                     
                     if len(lines) >= 1:
                         # If further lines follow, break line
-                        self.outAppend(u"<br />\n")
-
+                        if not self.preMode:
+                            self.outAppend(u"<br />")
+                        self.outAppend(u"\n")
 
                 if len(lines) >= 1:
                     # All 'lines' now begin at a new line in the editor
                     # and all but the last end at one
                     for line in lines[:-1]:
+#                         print "processTokens15", repr(line)
                         if line.strip() == u"":
                             # Handle empty line
-                            self.outAppend(u"<br />\n")
+                            if not self.preMode:
+                                self.outAppend(u"<br />")
+                            self.outAppend(u"\n")
                             continue
-
-                        line, ind = splitIndent(line)
-
-                        while stacklen < len(self.statestack) and \
-                                ind < self.statestack[-1][1]:
-                            # Current indentation is less than previous (stored
-                            # on stack) so close open <ul> and <ol>
-                            self.popState()
-
-#                         print "normal1", repr(line), repr(self.statestack[-1][0]), ind, repr(self.statestack[-1][1])
-
-                        if self.statestack[-1][0] == "normalindent" and \
-                                ind > self.statestack[-1][1]:
-                            # More indentation than before -> open new <ul> level
-#                             print "normal2"
-                            self.outEatBreaks(u"<ul>")
-                            self.statestack.append(("normalindent", ind))
-                            self.outAppend(escapeHtml(line))
-                            self.outAppend(u"<br />\n")
-
-                        elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
-                            self.outAppend(escapeHtml(line))
-                            self.outAppend(u"<br />\n")
                             
+                        if not self.preMode:
+                            line, ind = splitIndent(line)
+    
+                            while stacklen < len(self.statestack) and \
+                                    ind < self.statestack[-1][1]:
+                                # Current indentation is less than previous (stored
+                                # on stack) so close open <ul> and <ol>
+                                self.popState()
+    
+    #                         print "normal1", repr(line), repr(self.statestack[-1][0]), ind, repr(self.statestack[-1][1])
+    
+                            if self.statestack[-1][0] == "normalindent" and \
+                                    ind > self.statestack[-1][1]:
+                                # More indentation than before -> open new <ul> level
+    #                             print "normal2"
+                                self.outEatBreaks(u"<ul>")
+                                self.statestack.append(("normalindent", ind))
+                                self.outAppend(escapeHtml(line))
+                                self.outAppend(u"<br />\n")
+    
+                            elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
+                                self.outAppend(escapeHtml(line))
+                                self.outAppend(u"<br />\n")
+                        else:
+                            self.outAppend(escapeHtml(line))
+                            self.outAppend(u"\n")
                             
                     # Handle last line
                     # Some tokens have own indentation handling
@@ -785,21 +794,24 @@ class HtmlXmlExporter:
                             WikiFormatting.FormatTypes.PreBlock):
 
                         line = lines[-1]
-                        line, ind = splitIndent(line)
-                        
-                        while stacklen < len(self.statestack) and \
-                                ind < self.statestack[-1][1]:
-                            # Current indentation is less than previous (stored
-                            # on stack) so close open <ul> and <ol>
-                            self.popState()
-                                
-                        if self.statestack[-1][0] == "normalindent" and \
-                                ind > self.statestack[-1][1]:
-                            # More indentation than before -> open new <ul> level
-                            self.outEatBreaks(u"<ul>")
-                            self.statestack.append(("normalindent", ind))
-                            self.outAppend(escapeHtml(line))
-                        elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
+                        if not self.preMode:
+                            line, ind = splitIndent(line)
+                            
+                            while stacklen < len(self.statestack) and \
+                                    ind < self.statestack[-1][1]:
+                                # Current indentation is less than previous (stored
+                                # on stack) so close open <ul> and <ol>
+                                self.popState()
+                                    
+                            if self.statestack[-1][0] == "normalindent" and \
+                                    ind > self.statestack[-1][1]:
+                                # More indentation than before -> open new <ul> level
+                                self.outEatBreaks(u"<ul>")
+                                self.statestack.append(("normalindent", ind))
+                                self.outAppend(escapeHtml(line))
+                            elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
+                                self.outAppend(escapeHtml(line))
+                        else:
                             self.outAppend(escapeHtml(line))
                     
                         
@@ -817,6 +829,10 @@ class HtmlXmlExporter:
                 self.outAppend(u"<i>"+escapeHtml(
                         unescapeNormalText(tok.grpdict["italicContent"])) + u"</i>")
             elif styleno == WikiFormatting.FormatTypes.HtmlTag:
+                if re.match(u"^<pre[ >]", tok.text.lower()):
+                    self.preMode += 1
+                elif re.match(u"^</pre[ >]", tok.text.lower()):
+                    self.preMode = max(0, self.preMode - 1)
                 # HTML tag -> export as is 
                 self.outAppend(tok.text)
             elif styleno == WikiFormatting.FormatTypes.Heading4:

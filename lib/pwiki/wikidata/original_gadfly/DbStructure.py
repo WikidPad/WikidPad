@@ -365,9 +365,13 @@ def changeTableSchema(connwrap, tablename, schema, forcechange=False):
 #     print "changeTableSchema1", repr(tablename), repr(schema)
     
     # Build the sql command to create the table with new schema (needed later)
-    sqlcreate = "create table %s (" % tablename
-    sqlcreate += ", ".join(map(lambda sc: "%s %s" % sc, schema))
-    sqlcreate += ")"
+    
+    newtabletyped = ", ".join(map(lambda sc: "%s %s" % sc[:2], schema))
+    newtableselect = ", ".join(map(lambda sc: sc[0], schema))
+
+    newtablecreate = "create table %s (" % tablename
+    newtablecreate += newtabletyped
+    newtablecreate += ")"
     
 
     # Test if table already exists
@@ -379,11 +383,9 @@ def changeTableSchema(connwrap, tablename, schema, forcechange=False):
     if tn is None:
         # Does not exist, so simply create
         connwrap.commit()        
-        connwrap.execSql(sqlcreate)
+        connwrap.execSql(newtablecreate)
         connwrap.commit()        
         return True
-
-#     print "changeTableSchema2", repr(sqlcreate)
 
     # Table exists, so retrieve list of columns
     oldcolumns = connwrap.execSqlQuerySingleColumn(
@@ -394,7 +396,8 @@ def changeTableSchema(connwrap, tablename, schema, forcechange=False):
     
     # Which columns have old and new schema in common?    
     intersect = []
-    for n, d in schema:
+    for sc in schema:
+        n, d = sc[:2]
         n = n.upper()
         if n in oldcolumns:
             intersect.append(n)
@@ -409,37 +412,73 @@ def changeTableSchema(connwrap, tablename, schema, forcechange=False):
     if not recreate:
         return False  # Nothing to do, same column set as before
 
-#     print "changeTableSchema4"
-
     if len(intersect) > 0:
-#         print "changeTableSchema5"
-        typemap = {}
-        for n, t in schema:
+        newinsertcols = intersect[:]
+        newinsertvalues = ["?" for i in intersect]
+
+        for sc in schema:
+            n, t = sc[:2]
             n = n.upper()
-            typemap[n] = t
+
+            if n in intersect:
+                continue
+
+            if len(sc) > 2:
+                df = sc[2]
+            else:
+                df = None
             
-        intersecttyped = ["%s %s" % (n, typemap[n]) for n in intersect]
-        intersecttyped = ", ".join(intersecttyped)
+            if df is None:
+                if t.lower() == "varchar":
+                    df = "''"
+                    
+            newinsertcols.append(n)
+            newinsertvalues.append(df)
+
+        newinsertcols = ", ".join(newinsertcols)
+        newinsertvalues = ", ".join(newinsertvalues)
+
+            
+#             n = n.upper()
+#             typemap[n] = t
+            
+#         intersecttyped = ["%s %s" % (n, typemap[n]) for n in intersect]
+#         intersecttyped = ", ".join(intersecttyped)
         
-        intersect = ", ".join(intersect)
+        intersectselect = ", ".join(intersect)
         
         connwrap.commit()        
-        connwrap.execSql("create table tmptable(%s)" % intersecttyped)
-        connwrap.execSql("insert into tmptable(%s) select %s from %s" % 
-                (intersect, intersect, tablename))
+        connwrap.execSql("create table tmptable(%s)" % newtabletyped)
+        data = connwrap.execSqlQuery("select %s from %s" %
+                (intersectselect, tablename))
+                
+        for row in data:
+            connwrap.execSql("insert into tmptable (%s) values (%s)" %
+                    (newinsertcols, newinsertvalues), row)
+        
         connwrap.execSql("drop table %s" % tablename)
-        connwrap.execSql(sqlcreate)
+        connwrap.execSql(newtablecreate)
+        connwrap.commit()        
         connwrap.execSql("insert into %s(%s) select %s from tmptable" %
-                (tablename, intersect, intersect))
+                (tablename, newtableselect, newtableselect))
         connwrap.execSql("drop table tmptable")
         connwrap.commit()        
     else:
         # Nothing in common -> delete old, create new
-#         print "changeTableSchema7"
         connwrap.commit()        
         connwrap.execSql("drop table %s" % tablename)
-        connwrap.execSql(sqlcreate)
+        connwrap.commit()        
+        connwrap.execSql(newtablecreate)
         connwrap.commit()
+
+
+    # Table exists, so retrieve list of columns
+    oldcolumns = connwrap.execSqlQuerySingleColumn(
+            "select COLUMN_NAME from __columns__ where TABLE_NAME = '%s'" %
+            tablename.upper())
+    
+    oldcolumns = map(string.upper, oldcolumns)
+    
     return True
 
 
@@ -721,7 +760,18 @@ def updateDatabase(connwrap, dataDir):
         # --- WikiPad 1.6beta2 reached (formatver=2, writecompatver=2,
         #         readcompatver=2) ---
 
-        
+
+# Will be used later
+#     if formatver == 2:
+#         print "format update"
+#         changeTableSchema(connwrap, "wikiwords", 
+#             TABLE_DEFINITIONS["wikiwords"])
+#             
+#         connwrap.execSql("update wikiwords set word_sk = word")
+# 
+#         formatver = 3
+
+
     # Write format information
     for key, value in (
             ("formatver", "2"),  # Version of database format the data was written

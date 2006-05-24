@@ -142,19 +142,6 @@ class WikiData:
         return fileContentToUnicode(content)
 
         
-#     def getContentAndInfo(self, word):
-#         """
-#         Get content and further information about a word
-#         """
-#         result = self.connWrap.execSqlQuery("select content, modified from "+\
-#             "wikiwordcontent where word = ?", (word,))
-#         if len(result) == 0:
-#             raise WikiFileNotFoundException, "wiki page not found: %s" % word
-# 
-#         content = self.contentDbToOutput(result[0][0])
-#         return (content, result[0][1])
-
-
         # TODO Remove method
     def _updatePageEntry(self, word, moddate = None, creadate = None):
         """
@@ -652,7 +639,7 @@ class WikiData:
                     "select value from wikiwordprops where key = 'alias' and "
                     "value like ('%' || ? || '%') and value not like (? || '%')",
                     (thisStr, thisStr))
-
+                    
         return result
 
 

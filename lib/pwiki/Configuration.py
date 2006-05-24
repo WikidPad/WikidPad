@@ -263,8 +263,10 @@ GLOBALDEFAULTS = {
     ("main", "auto_bullets"): "True",  # Show bullet/number in newline if current line has bullet
     ("main", "auto_indent"): "True",
     ("main", "clipboardCatcher_suffix"): ur"\n",  # Suffix to append after each caught clipboard snippet
-    ("main", "viewsTree_show"): "0",  # Mode how to show the "Views" tree,
-            # 0: Not at all, 1:Above main tree, 2: Below main tree
+    ("main", "mainTree_position"): "0",  # Mode where to place the main tree,
+            # 0:Left, 1:Right, 2:Above, 3:Below
+    ("main", "viewsTree_position"): "0",  # Mode how to show the "Views" tree relative to main tree,
+            # 0: Not at all, 1:Above, 2:Below, 3:Left, 4:Right
     ("main", "windowLayout"): "name:main area panel;"\
             "layout relation:left&layout relative to:main area panel&name:maintree&"\
                 "layout sash position:170&layout sash effective position:170;"\

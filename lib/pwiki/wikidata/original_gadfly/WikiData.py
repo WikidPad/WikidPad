@@ -533,14 +533,15 @@ class WikiData:
 
     def getWikiWordsWith(self, thisStr, includeAliases=False):
         "get the list of words with thisStr in them."
-        
+        thisStr = thisStr.lower()
+
         result = [word for word in self.getAllDefinedWikiPageNames()
                 if word.lower().find(thisStr) != -1]
-        
+
         if includeAliases:
             result += [word for word in self.getAllAliases()
                     if word.lower().find(thisStr) != -1]
-                    
+
         return result
 
 

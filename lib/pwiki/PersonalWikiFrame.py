@@ -262,8 +262,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.defaultEditorFont = self.configuration.get("main", "font",
                 self.presentationExt.faces["mono"])
                 
-        self.layoutViewsTreeShow = self.configuration.getint("main",
-                "viewsTree_show", "no")
+        self.layoutMainTreePosition = self.configuration.getint("main",
+                "mainTree_position", 0)
+        self.layoutViewsTreePosition = self.configuration.getint("main",
+                "viewsTree_position", 0)
 
         # this will keep track of the last font used in the editor
         self.lastEditorFont = None
@@ -890,7 +892,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             wikiWordMenu.AppendSeparator()
 
             menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
-                    "Clipboard Catcher at Page\t" + self.keyBindings.CatchClipboard, 
+                    "Clipboard Catcher at Page\t" + self.keyBindings.CatchClipboardAtPage, 
                     u"Text copied to clipboard is also pasted to this page",
                     wxITEM_RADIO)
             wikiWordMenu.AppendItem(menuItem)
@@ -901,7 +903,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
             menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
-                    "Clipboard Catcher at Cursor\t" + self.keyBindings.CatchClipboard, 
+                    "Clipboard Catcher at Cursor\t" + self.keyBindings.CatchClipboardAtCursor, 
                     u"Text copied to clipboard is also added to cursor position",
                     wxITEM_RADIO)
             wikiWordMenu.AppendItem(menuItem)
@@ -912,7 +914,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
             menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
-                    "Clipboard Catcher off\t" + self.keyBindings.CatchClipboard, 
+                    "Clipboard Catcher off\t" + self.keyBindings.CatchClipboardOff, 
                     u"Switch off clipboard catcher",wxITEM_RADIO)
             wikiWordMenu.AppendItem(menuItem)
             EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
@@ -1020,7 +1022,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 'Copy', lambda evt: self.fireMiscEventKeys(("command copy",)), # lambda evt: self.activeEditor.Copy()  # lambda evt: wxWindow.FindFocus().ProcessEvent(evt),
                 "tb_copy", menuID=GUI_ID.CMD_CLIPBOARD_COPY)
 
-        self.addMenuItem(self.editorMenu, 'Copy to &ScratchPad\t' + self.keyBindings.CopyToScratchPad,
+        self.addMenuItem(self.editorMenu, 'Copy to &ScratchPad\t' + \
+                self.keyBindings.CopyToScratchPad,
                 'Copy Text to ScratchPad', lambda evt: self.activeEditor.snip(),
                 "tb_copy")
 
@@ -2311,23 +2314,23 @@ These are your default global settings.
                     if result == wxID_NO:
                         return False
         finally:
-            pass
             self.statusBar.PopStatusText(0)
 
 
     def deleteCurrentWikiPage(self, **evtprops):
         if self.getCurrentWikiWord():
             # self.saveCurrentDocPage()
-            self.getWikiData().deleteWord(self.getCurrentWikiWord())
+            if self.getWikiData().isDefinedWikiWord(self.getCurrentWikiWord()):
+                self.getWikiData().deleteWord(self.getCurrentWikiWord())
 
-            # trigger hooks
-            self.hooks.deletedWikiWord(self, self.getCurrentWikiWord())
-            
-            p2 = evtprops.copy()
-            p2["deleted page"] = True
-            p2["wikiWord"] = self.getCurrentWikiWord()
-            self.fireMiscEventProps(p2)
-            
+                # trigger hooks
+                self.hooks.deletedWikiWord(self, self.getCurrentWikiWord())
+                
+                p2 = evtprops.copy()
+                p2["deleted page"] = True
+                p2["wikiWord"] = self.getCurrentWikiWord()
+                self.fireMiscEventProps(p2)
+
             self.pageHistory.goAfterDeletion()
             
             
@@ -2455,11 +2458,9 @@ These are your default global settings.
         modTime, creaTime = page.getTimestamps()
         if modTime is not None:
             pageStatus += u"Mod.: %s" % \
-                    unicode(strftime(fmt, localtime(modTime)))
-#                     mbcsDec(strftime(fmt, localtime(modTime)), "replace")[0]
+                    mbcsDec(strftime(fmt, localtime(modTime)), "replace")[0]
             pageStatus += u"; Crea.: %s" % \
-                    unicode(strftime(fmt, localtime(creaTime)))
-#                     mbcsDec(strftime(fmt, localtime(creaTime)), "replace")[0]
+                    mbcsDec(strftime(fmt, localtime(creaTime)), "replace")[0]
 
         self.statusBar.SetStatusText(uniToGui(pageStatus), 1)
 
@@ -2641,13 +2642,13 @@ These are your default global settings.
 
 
     _LAYOUT_WITHOUT_VIEWSTREE = "name:main area panel;"\
-        "layout relation:left&layout relative to:main area panel&name:maintree&"\
+        "layout relation:%s&layout relative to:main area panel&name:maintree&"\
             "layout sash position:170&layout sash effective position:170;"\
         "layout relation:below&layout relative to:main area panel&name:log&"\
             "layout sash position:1&layout sash effective position:120"
 
     _LAYOUT_WITH_VIEWSTREE = "name:main area panel;"\
-            "layout relation:left&layout relative to:main area panel&name:maintree&"\
+            "layout relation:%s&layout relative to:main area panel&name:maintree&"\
                 "layout sash position:170&layout sash effective position:170;"\
             "layout relation:%s&layout relative to:maintree&name:viewstree;"\
             "layout relation:below&layout relative to:main area panel&name:log&"\
@@ -2706,7 +2707,7 @@ These are your default global settings.
         for n, w in cachedWindows.iteritems():
             if w.GetParent() is None:
                 w.Destroy()
-        
+
         self.windowLayouter.layout()
 
         EVT_SIZE(self, self.OnSize)
@@ -2745,12 +2746,11 @@ These are your default global settings.
                 evt.Check(True)
                 evt.SetText("Clipboard Catcher at: %s\t%s" % 
                         (self.clipboardCatcher.getWikiWord(),
-                        self.keyBindings.CatchClipboard))
+                        self.keyBindings.CatchClipboardAtPage))
             else:
                 evt.Check(False)
                 evt.SetText("Clipboard Catcher at Page\t" +
-                        self.keyBindings.CatchClipboard)
-
+                        self.keyBindings.CatchClipboardAtPage)
 
     def writeGlobalConfig(self):
         "writes out the global config file"
@@ -3024,20 +3024,26 @@ These are your default global settings.
             fs.setModDateIsEnough(self.configuration.getboolean("main",
                     "fileStorage_identity_modDateIsEnough", False))
 
-            newLayoutViewsTreeShow = self.configuration.getint("main",
-                "viewsTree_show", 0)
-            if self.layoutViewsTreeShow != newLayoutViewsTreeShow:
-                self.layoutViewsTreeShow = newLayoutViewsTreeShow
+            newLayoutMainTreePosition = self.configuration.getint("main",
+                "mainTree_position", 0)
+            newLayoutViewsTreePosition = self.configuration.getint("main",
+                "viewsTree_position", 0)
+            if self.layoutViewsTreePosition != newLayoutViewsTreePosition or \
+                self.layoutMainTreePosition != newLayoutMainTreePosition:
+                self.layoutViewsTreePosition = newLayoutViewsTreePosition
+                self.layoutMainTreePosition = newLayoutMainTreePosition
+                
+                mainPos = {0:"left", 1:"right", 2:"above", 3:"below"}\
+                        [newLayoutMainTreePosition]
 
-                if newLayoutViewsTreeShow == 0:
+                if newLayoutViewsTreePosition == 0:
                     # Don't show "Views" tree
-                    layoutCfStr = self._LAYOUT_WITHOUT_VIEWSTREE
-                elif newLayoutViewsTreeShow == 1:
-                    # Show "Views" tree above main tree
-                    layoutCfStr = self._LAYOUT_WITH_VIEWSTREE % "above"
-                elif newLayoutViewsTreeShow == 2:
-                    # Show "Views" tree above main tree
-                    layoutCfStr = self._LAYOUT_WITH_VIEWSTREE % "below"
+                    layoutCfStr = self._LAYOUT_WITHOUT_VIEWSTREE % mainPos
+                else:
+                    viewsPos = {1:"above", 2:"below", 3:"left", 4:"right"}\
+                            [newLayoutViewsTreePosition]
+                    layoutCfStr = self._LAYOUT_WITH_VIEWSTREE % \
+                            (mainPos, viewsPos)
     
                 self.configuration.set("main", "windowLayout", layoutCfStr)
                 self.changeLayoutByCf(layoutCfStr)

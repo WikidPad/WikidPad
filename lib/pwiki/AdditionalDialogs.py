@@ -53,7 +53,9 @@ class OpenWikiWordDialog(wxDialog):
         
     def OnOk(self, evt):
         if not self.pWiki.getWikiData().isDefinedWikiWord(self.value):
-            words = self.pWiki.getWikiData().getWikiWordsWith(self.value.lower(),
+#             words = self.pWiki.getWikiData().getWikiWordsWith(self.value.lower(),
+#                     True)
+            words = self.pWiki.getWikiData().getWikiWordsWith(self.value,
                     True)
             if len(words) > 0:
                 self.value = words[0]
@@ -88,7 +90,9 @@ class OpenWikiWordDialog(wxDialog):
         self.value = guiToUni(evt.GetString())
         self.ctrls.lb.Clear()
         if len(self.value) > 0:
-            words = self.pWiki.wikiData.getWikiWordsWith(self.value.lower(),
+#             words = self.pWiki.wikiData.getWikiWordsWith(self.value.lower(),
+#                     True)
+            words = self.pWiki.wikiData.getWikiWordsWith(self.value,
                     True)
             for word in words:
                 self.ctrls.lb.Append(word)
@@ -437,7 +441,8 @@ class OptionsDialog(wxDialog):
             ("log_window_autoshow", "cbLogWindowAutoShow", "b"),
             ("log_window_autohide", "cbLogWindowAutoHide", "b"),
             ("clipboardCatcher_suffix", "tfClipboardCatcherSuffix", "t"),
-            ("viewsTree_show", "chViewsTreeShow", "seli"),
+            ("mainTree_position", "chMainTreePosition", "seli"),
+            ("viewsTree_position", "chViewsTreePosition", "seli"),
 
             ("tree_auto_follow", "cbTreeAutoFollow", "b"),
             ("tree_update_after_save", "cbTreeUpdateAfterSave", "b"),
