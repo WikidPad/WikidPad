@@ -1,14 +1,17 @@
-++ Renaming Wiki Words
+﻿++ Renaming Wiki Words
 
 You can rename the current wiki word from the menu, or via the 
 CTRL-ALT-R command.
 
 *What Happens*
 
-The Wiki Pad database is updated with the renamed word.  All of the
-relationships, attributes, and todos are re-linked.  Then, all of the
-.wiki files in the data directory that have links to the renamed word
-have their references updated.  For a large wiki this could be a
-relatively slow operation.
+You will be asked first for a new name of the page. Then you have to decide if WikidPad should update all of the wiki pages in the database that have links to the renamed word. 
+
+For a large wiki this could be a relatively slow operation. Furthermore does the updating not always work reliably, sometimes it modifies things which aren't intended as links. Therefore it is often better to make this update later by hand (maybe by using wiki-wide search and replace).
+
+*Title auto-rename*
+
+If the title of page which was generated at page creation (the text at the top beginning with "++ ") wasn't modified since creation, then the title will be modified accordingly when the page is renamed.
+
 
 [icon: rename]

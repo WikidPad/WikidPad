@@ -333,13 +333,13 @@ class WikiData:
 
     # ---------- Handling of relationships cache ----------
 
-    def getAllRelations(self):
-        "get all of the relations in the db"
-        relations = []
-        data = self.connWrap.execSqlQuery("select word, relation from wikirelations")
-        for row in data:
-            relations.append((row[0], row[1]))
-        return relations
+#     def getAllRelations(self):
+#         "get all of the relations in the db"
+#         relations = []
+#         data = self.connWrap.execSqlQuery("select word, relation from wikirelations")
+#         for row in data:
+#             relations.append((row[0], row[1]))
+#         return relations
 
 
     def getChildRelationships(self, wikiWord, existingonly=False,
@@ -554,7 +554,7 @@ class WikiData:
         (creation/modif. date) if possible.
         
         It is mainly called during rebuilding of the wiki 
-        so it may not rely on the presence of other cache
+        so it must not rely on the presence of other cache
         information (e.g. relations).
         
         The self.cachedContentNames is also updated.
@@ -680,17 +680,16 @@ class WikiData:
 
     def getPropertyNames(self):
         """
-        Return all property names (not beginning with "global.")
-        in ascending order (C sort)
+        Return all property names not beginning with "global."
         """
         return self.connWrap.execSqlQuerySingleColumn(
                 "select distinct(key) from wikiwordprops "
-                "where key not glob 'global.*' order by key")
+                "where key not glob 'global.*'")
 
     # TODO More efficient? (used by autocompletion)
     def getPropertyNamesStartingWith(self, startingWith):
         names = self.connWrap.execSqlQuerySingleColumn(
-                "select distinct(key) from wikiwordprops order by key")
+                "select distinct(key) from wikiwordprops")   #  order by key")
         return [name for name in names if name.startswith(startingWith)]
 
     def getGlobalProperties(self):
@@ -702,7 +701,8 @@ class WikiData:
     def getDistinctPropertyValues(self, key):
         return self.connWrap.execSqlQuerySingleColumn(
                 "select distinct(value) from wikiwordprops where key = ? "
-                "order by value", (key,))
+#                 "order by value", (key,))
+                , (key,))
                 
     def getWordsForPropertyName(self, key):
         return self.connWrap.execSqlQuerySingleColumn(

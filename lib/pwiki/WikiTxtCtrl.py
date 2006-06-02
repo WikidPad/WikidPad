@@ -89,7 +89,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.SetIndentationGuides(config.getboolean("main", "indentation_guides"))
         self.autoIndent = config.getboolean("main", "auto_indent")
         self.autoBullets = config.getboolean("main", "auto_bullets")
-
+        self.setShowLineNumbers(config.getboolean("main", "show_lineNumbers"))
 
         # Self-modify to ansi/unicode version
         if isUnicode():
@@ -249,6 +249,17 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         
     def getAutoBullets(self):
         return self.autoBullets
+
+    def setShowLineNumbers(self, onOrOff):
+        if onOrOff:
+            self.SetMarginWidth(0, self.TextWidth(wxSTC_STYLE_LINENUMBER, "_99999"))
+            self.SetMarginWidth(1, 0)
+        else:
+            self.SetMarginWidth(0, 0)
+            self.SetMarginWidth(1, 16)
+
+    def getShowLineNumbers(self):
+        return self.GetMarginWidth(0) != 0
 
 
     def SetStyles(self, styleFaces = None):
@@ -778,6 +789,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         (startBytePos, endBytePos) = self.GetSelection()
         if startBytePos == endBytePos:
             (startBytePos, endBytePos) = self.getNearestWordPositions()
+            
+        emptySelection = startBytePos == endBytePos  # is selection empty
 
         for i in xrange(len(styleChars)):
             endBytePos = self.PositionAfter(endBytePos)
@@ -785,8 +798,13 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #         bytePos = self.PositionAfter(self.GetCurrentPos())
 
         bytePos = endBytePos
-        for i in xrange(len(styleChars)):
-            bytePos = self.PositionAfter(bytePos)
+        
+        if not emptySelection:
+            # Cursor will in the end stand after styled word
+            # if selection is empty, it will stand between the style characters
+            for i in xrange(len(styleChars)):
+                bytePos = self.PositionAfter(bytePos)
+
         self.GotoPos(startBytePos)
         self.AddText(styleChars)
         self.GotoPos(endBytePos)   # +len(styleChars)
@@ -1492,6 +1510,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     acresult = []
                     self.autoCompBackBytesWithoutBracket = 0
                     self.autoCompBackBytesWithBracket = 0
+
+                    # TODO Sort entries appropriate 
 
                     if mat1:
                         # may be CamelCase word

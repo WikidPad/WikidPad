@@ -265,7 +265,7 @@ class WikiData:
 
     # ---------- Handling of relationships cache ----------
 
-    def getAllRelations(self):
+    def _getAllRelations(self):
         "get all of the relations in the db"
         relations = []
         data = self.execSqlQuery("select word, relation from wikirelations")
@@ -360,7 +360,7 @@ class WikiData:
         wordSet = sets.Set(self.getAllDefinedWikiPageNames())
 
         # Remove all which have parents
-        relations = self.getAllRelations()
+        relations = self._getAllRelations()
         for word, relation in relations:
             wordSet.discard(relation)
         
@@ -470,7 +470,7 @@ class WikiData:
         (creation/modif. date) if possible.
         
         It is mainly called during rebuilding of the wiki 
-        so it may not rely on the presence of other cache
+        so it must not rely on the presence of other cache
         information (e.g. relations)
         
         The self.cachedContentNames is also updated.
@@ -593,13 +593,16 @@ class WikiData:
     # ---------- Property cache handling ----------
 
     def getPropertyNames(self):
+        """
+        Return all property names not beginning with "global."
+        """
         names = self.execSqlQuerySingleColumn(
-                "select distinct(key) from wikiwordprops order by key")
+                "select distinct(key) from wikiwordprops")
         return [name for name in names if not name.startswith('global.')]
 
     def getPropertyNamesStartingWith(self, startingWith):
         names = self.execSqlQuerySingleColumn(
-                "select distinct(key) from wikiwordprops order by key")
+                "select distinct(key) from wikiwordprops")   #  order by key")
         return [name for name in names if name.startswith(startingWith)]
 
     def getGlobalProperties(self):
@@ -616,7 +619,7 @@ class WikiData:
 
     def getDistinctPropertyValues(self, key):
         return self.execSqlQuerySingleColumn("select distinct(value) "
-                "from wikiwordprops where key = ? order by value", (key,))
+                "from wikiwordprops where key = ?", (key,))  #  order by value
 
     def getWordsForPropertyName(self, key):
         return self.connWrap.execSqlQuerySingleColumn(

@@ -250,9 +250,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         if (self.globalConfig.has_option("main", "auto_save")):
 #             self.autoSave = self.globalConfig.getboolean("main", "auto_save")
 
-        # are indentationGuides enabled
-        self.indentationGuides = self.configuration.getboolean("main",
-                "indentation_guides")
+#         # are indentationGuides enabled
+#         self.indentationGuides = self.configuration.getboolean("main",
+#                 "indentation_guides")
 
 #         # set the locale  # TODO Why?
 #         locale = wxLocale()
@@ -1135,38 +1135,65 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         autoBulletsMenuItem.Check(self.getActiveEditor().getAutoBullets())
 
 
+        menuID=wxNewId()
+        showLineNumbersMenuItem = wxMenuItem(self.editorMenu, menuID,
+                "Show line numbers", "Show line numbers",
+                wxITEM_CHECK)
+        self.editorMenu.AppendItem(showLineNumbersMenuItem)
+        EVT_MENU(self, menuID, self.OnCmdCheckShowLineNumbers)
+
+        showLineNumbersMenuItem.Check(self.getActiveEditor().getShowLineNumbers())
+
         self.editorMenu.AppendSeparator()
 
-        menuID=wxNewId()
-        self.editorMenu.Append(menuID, '&Eval\t' + self.keyBindings.Eval, 'Eval Script Blocks')
-        EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks())
 
-        menuID=wxNewId()
-        self.editorMenu.Append(menuID, 'Eval Function &1\tCtrl-1', 'Eval Script Function 1')
-        EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(1))
+        evaluationMenu=wxMenu()
 
-        menuID=wxNewId()
-        self.editorMenu.Append(menuID, 'Eval Function &2\tCtrl-2', 'Eval Script Function 2')
-        EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(2))
+        self.addMenuItem(evaluationMenu, '&Eval\t' + self.keyBindings.Eval,
+                'Eval Script Blocks',
+                lambda evt: self.activeEditor.evalScriptBlocks())
 
-        menuID=wxNewId()
-        self.editorMenu.Append(menuID, 'Eval Function &3\tCtrl-3', 'Eval Script Function 3')
-        EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(3))
+        for i in xrange(1,7):
+            self.addMenuItem(evaluationMenu, 'Eval Function &%i\tCtrl-%i' % (i, i),
+                    'Eval Script Function %i' % i,
+                    lambda evt, i=i: self.activeEditor.evalScriptBlocks(i))
+                    
+        self.editorMenu.AppendMenu(wxNewId(), "Evaluation", evaluationMenu,
+                "Evaluate scripts/expressions")
 
-        menuID=wxNewId()
-        self.editorMenu.Append(menuID, 'Eval Function &4\tCtrl-4', 'Eval Script Function 4')
-        EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(4))
 
-        menuID=wxNewId()
-        self.editorMenu.Append(menuID, 'Eval Function &5\tCtrl-5', 'Eval Script Function 5')
-        EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(5))
 
-        menuID=wxNewId()
-        self.editorMenu.Append(menuID, 'Eval Function &6\tCtrl-6', 'Eval Script Function 6')
-        EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(6))
+#         menuID=wxNewId()
+#         self.editorMenu.Append(menuID, '&Eval\t' + self.keyBindings.Eval, 'Eval Script Blocks')
+#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks())
+# 
+#         menuID=wxNewId()
+#         self.editorMenu.Append(menuID, 'Eval Function &1\tCtrl-1', 'Eval Script Function 1')
+#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(1))
+# 
+#         menuID=wxNewId()
+#         self.editorMenu.Append(menuID, 'Eval Function &2\tCtrl-2', 'Eval Script Function 2')
+#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(2))
+# 
+#         menuID=wxNewId()
+#         self.editorMenu.Append(menuID, 'Eval Function &3\tCtrl-3', 'Eval Script Function 3')
+#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(3))
+# 
+#         menuID=wxNewId()
+#         self.editorMenu.Append(menuID, 'Eval Function &4\tCtrl-4', 'Eval Script Function 4')
+#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(4))
+# 
+#         menuID=wxNewId()
+#         self.editorMenu.Append(menuID, 'Eval Function &5\tCtrl-5', 'Eval Script Function 5')
+#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(5))
+# 
+#         menuID=wxNewId()
+#         self.editorMenu.Append(menuID, 'Eval Function &6\tCtrl-6', 'Eval Script Function 6')
+#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(6))
+
+
 
         helpMenu=wxMenu()
-
 
         def openHelp(evt):
             os.startfile(self.wikiPadHelp)   # TODO!
@@ -2332,8 +2359,8 @@ These are your default global settings.
                 self.fireMiscEventProps(p2)
 
             self.pageHistory.goAfterDeletion()
-            
-            
+
+
     def renameCurrentWikiPage(self, toWikiWord, modifyText, **evtprops):
         """
         Renames current wiki word to toWikiWord.
@@ -3396,6 +3423,10 @@ These are your default global settings.
     def OnCmdCheckAutoBullets(self, evt):        
         self.getActiveEditor().setAutoBullets(evt.IsChecked())
         self.configuration.set("main", "auto_bullets", evt.IsChecked())
+
+    def OnCmdCheckShowLineNumbers(self, evt):        
+        self.getActiveEditor().setShowLineNumbers(evt.IsChecked())
+        self.configuration.set("main", "show_lineNumbers", evt.IsChecked())
 
 
     def OnWikiExit(self, evt):

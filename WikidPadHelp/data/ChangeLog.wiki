@@ -1,7 +1,41 @@
 ﻿++ Change Log
 
 
-May 08, 2006 (1.7beta5)
+Jun. 02, 2006 (1.7beta6)
+
+Changes:
+    * Support for an additional "Views" tree which can be put at any
+      side of main tree, also option to put main tree at any side of
+      editor (layout change during session has bugs).
+      See OptionsDialog#*Position# main# tree* .
+    * Clipboard catcher: New option to insert at cursor.
+      See ClipboardCatcher.
+    * Option for showing line numbers in editor
+    * If ++ title of page was unmodified since page creation, it is
+      changed on page rename accordingly.
+      See RenamingWikiWords#*Title# auto-rename*
+    * Fixed bug: Upper case non-ascii letters were not found when
+      opening a wiki word (e.g. "É" didn't find Éve).
+    * HTML-tag <pre> is now handled much better.
+    * Changed controls in spell check dialog to circumvent problems
+      with some languages on Win 98/ME
+    
+    * Fixed bug: No preview if newly created page wasn't saved first.
+    * Fixed bug: No preview if page contains plain text only.
+    * Fixed bug: WikidPad didn't work if date pattern for
+      creation/modification date in status line created/contained
+      non-ascii characters.
+    * Fixed bug: double-escaped relative URLs (could be seen e.g. if
+      path has spaces)
+    * Fixed bug: Copying text to ScratchPad didn't work if copying
+      from ScratchPad
+    
+    * Internal: "C:\Windows" is no longer used as configuration
+      directory if all other possibilities fail.
+
+
+
+May 08, 2006 (1.7beta5, repository revision in "mbutscher" branch: 77)
 
 Changes:
 

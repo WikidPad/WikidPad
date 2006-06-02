@@ -476,7 +476,7 @@ class HtmlXmlExporter:
             
         # Build tagstring
         bodytag = u" ".join((linkcol, alinkcol, vlinkcol, textcol, bgcol, bgimg))
-        if len(bodytag) > 0:
+        if len(bodytag) > 5:  # the 5 spaces
             bodytag = "<body %s>" % bodytag
         else:
             bodytag = "<body>"
@@ -689,7 +689,7 @@ class HtmlXmlExporter:
                         "main", "html_export_proppattern_is_excluding", u"True")
         
 
-        if len(page.getTokens()) >= 2:
+        if len(page.getTokens()) >= 1:
             if asHtmlPreview:
                 facename = self.mainControl.getConfig().get(
                         "main", "facename_html_preview", u"")
@@ -705,10 +705,12 @@ class HtmlXmlExporter:
 
 
     def processTokens(self, content, tokens):
+        """
+        Actual token to HTML converter. May be called recursively
+        """
         stacklen = len(self.statestack)
         unescapeNormalText = self.mainControl.getFormatting().unescapeNormalText
         
-
         for i in xrange(len(tokens)):
             tok = tokens[i]
             try:
@@ -765,7 +767,6 @@ class HtmlXmlExporter:
                                 self.popState()
     
     #                         print "normal1", repr(line), repr(self.statestack[-1][0]), ind, repr(self.statestack[-1][1])
-    
                             if self.statestack[-1][0] == "normalindent" and \
                                     ind > self.statestack[-1][1]:
                                 # More indentation than before -> open new <ul> level

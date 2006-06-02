@@ -260,8 +260,9 @@ GLOBALDEFAULTS = {
     ("main", "font"): None,
     ("main", "wrap_mode"): "True",
     ("main", "indentation_guides"): "True",
-    ("main", "auto_bullets"): "True",  # Show bullet/number in newline if current line has bullet
+    ("main", "auto_bullets"): "True",  # Show bullet/number after newline if current line has bullet
     ("main", "auto_indent"): "True",
+    ("main", "show_lineNumbers"): "False", 
     ("main", "clipboardCatcher_suffix"): ur"\n",  # Suffix to append after each caught clipboard snippet
     ("main", "mainTree_position"): "0",  # Mode where to place the main tree,
             # 0:Left, 1:Right, 2:Above, 3:Below

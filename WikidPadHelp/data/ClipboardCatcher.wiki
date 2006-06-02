@@ -2,15 +2,25 @@
 
 The clipboard catcher is similar to the ScratchPad. While the ScratchPad catches text chunks which are especially copied to it inside WikidPad, the clipboard catcher collects every piece of text copied (or cutted) to clipboard from every application and appends it to a wiki page of your choice.
 
-+++ Usage
++++ Clipboard catcher at page
 
-Go to the wiki page where the clipboard snippets should be appended to. Activate "Clipboard Catcher" in menu "Wiki Words". If you open the menu again, you can see that "Clipboard Catcher" is checked now and the page name is appended to the menu item.
+In this mode, the clipboard catcher appends copied text to the page for which it was activated, even if you go to another page while it is active.
 
-The clipboard catcher appends now everything to this page, even if you go to another page of the wiki.
+Go to the wiki page where the clipboard snippets should be appended to. Activate "Clipboard Catcher at Page" in menu "Wiki Words". If you open the menu again, you can see that "Clipboard Catcher at:" is checked now and the page name is appended to the menu item.
+
+
++++ Clipboard catcher at cursor
+
+In this mode, the snippets are inserted at current cursor position as if they were typed in manually. Cursor position and page won't be remembered. If you change the cursor position, snippets will be inserted at the new one.
+
+Activate "Clipboard Catcher at Cursor" in menu "Wiki Words".
+
+
++++ Disabling clipboard catcher
 
 The clipboard catcher is disabled when:
 
-    * the menu item "Clipboard Catcher" is selected again
+    * the menu item "Clipboard Catcher off" is selected
     * another wiki is opened
     * WikidPad is closed
 
