@@ -2,7 +2,7 @@ import ConfigParser
 # import os
 # from os.path import *
 
-import codecs
+import codecs, os
 
 from wxPython.wx import wxPlatformInfo
 
@@ -18,6 +18,16 @@ def isOSX():
     Return if working on Mac OSX
     """
     return '__WXMAC__' in wxPlatformInfo
+
+def isLinux():
+    """
+    Return if working on Linux system
+    """
+    try:
+        return os.uname[0] == "Linux"
+    except AttributeError:
+        return False
+
 
 from StringOps import utf8Enc, utf8Dec, mbcsDec, strToBool
 

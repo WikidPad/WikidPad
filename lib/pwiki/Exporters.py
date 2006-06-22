@@ -342,8 +342,8 @@ class HtmlXmlExporter:
         # do not include the parent header.
         if not startFile:
             wikiPage = self.wikiDataManager.getWikiPage(word)
-            result.append(u'<span class="parent-nodes">parent nodes: %s</span>'
-                    % self.getParentLinks(wikiPage, True, onlyInclude))
+            result.append((u'<span class="parent-nodes">parent nodes: %s</span>'
+                    '<br /><br />\n') % self.getParentLinks(wikiPage, True, onlyInclude))
 
         result.append(formattedContent)
         result.append(self.getFileFooter())

@@ -405,14 +405,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def getExtension(self, extensionName, fileName):
         extensionFileName = join(self.wikiAppDir, 'user_extensions', fileName)
         if exists(extensionFileName):
-            extFile = open(extensionFileName, "ra")
+            extFile = open(extensionFileName, "rU")
             userExtension = extFile.read()
             extFile.close()
         else:
             userExtension = None
             
         extensionFileName = join(self.wikiAppDir, 'extensions', fileName)
-        extFile = open(extensionFileName, "ra")
+        extFile = open(extensionFileName, "rU")
         systemExtension = extFile.read()
         extFile.close()
         
@@ -1068,7 +1068,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             iconsMenu2 = wxMenu()
             iconsMenu.AppendMenu(wxNewId(), 'D-F', iconsMenu2)
             iconsMenu3 = wxMenu()
-            iconsMenu.AppendMenu(wxNewId(), 'H-L', iconsMenu3)
+            iconsMenu.AppendMenu(wxNewId(), 'G-L', iconsMenu3)
             iconsMenu4 = wxMenu()
             iconsMenu.AppendMenu(wxNewId(), 'M-P', iconsMenu4)
             iconsMenu5 = wxMenu()

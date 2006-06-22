@@ -191,9 +191,12 @@ class WikiData:
                 "wikiwordcontent where word=?", (word,), None) is not None:
 
             # Word exists already
-            self.connWrap.execSql("insert or replace into wikiwordcontent"+\
-                "(word, content, modified) values (?,?,?)",
-                (word, sqlite.Binary(content), moddate))
+#             self.connWrap.execSql("insert or replace into wikiwordcontent"+\
+#                 "(word, content, modified) values (?,?,?)",
+#                 (word, sqlite.Binary(content), moddate))
+            self.connWrap.execSql("update wikiwordcontent set "
+                "content=?, modified=? where word=?",
+                (sqlite.Binary(content), moddate, word))
         else:
             if creadate is None:
                 creadate = ti

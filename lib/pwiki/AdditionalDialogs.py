@@ -50,7 +50,7 @@ class OpenWikiWordDialog(wxDialog):
         
     def OnOk(self, evt):
         if not self.pWiki.wikiData.isDefinedWikiWord(self.value):
-            words = self.pWiki.wikiData.getWikiWordsWith(self.value.lower())
+            words = self.pWiki.wikiData.getWikiWordsWith(self.value)
             if len(words) > 0:
                 self.value = words[0]
             else:
@@ -84,7 +84,7 @@ class OpenWikiWordDialog(wxDialog):
         self.value = guiToUni(evt.GetString())
         self.ctrls.lb.Clear()
         if len(self.value) > 0:
-            words = self.pWiki.wikiData.getWikiWordsWith(self.value.lower())
+            words = self.pWiki.wikiData.getWikiWordsWith(self.value)
             for word in words:
                 self.ctrls.lb.Append(word)
 
@@ -626,9 +626,7 @@ class ExportDialog(wxDialog):
         
         self.ctrls = XrcControls(self)
         
-        # Necessary to avoid a crash        
-        self.emptyPanel = wxPanel(self.ctrls.additOptions)
-        self.emptyPanel.Fit()
+        self.emptyPanel = None
         
         exporterList = [] # List of tuples (<exporter object>, <export tag>,
                           # <readable description>, <additional options panel>)
@@ -637,6 +635,10 @@ class ExportDialog(wxDialog):
             for tp in ob.getExportTypes(self.ctrls.additOptions):
                 panel = tp[2]
                 if panel is None:
+                    if self.emptyPanel is None:
+                        # Necessary to avoid a crash        
+                        self.emptyPanel = wxPanel(self.ctrls.additOptions)
+                        self.emptyPanel.Fit()
                     panel = self.emptyPanel
                 else:
                     panel.Fit()

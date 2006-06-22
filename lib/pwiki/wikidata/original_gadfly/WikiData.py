@@ -529,6 +529,7 @@ class WikiData:
 
     def getWikiWordsWith(self, thisStr):
         "get the list of words with thisStr in them."
+        thisStr = thisStr.lower()
         return [word for word in self.getAllDefinedWikiPageNames()
                 if word.lower().find(thisStr) != -1]
 

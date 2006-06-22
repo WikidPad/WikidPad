@@ -1,5 +1,6 @@
 # Example plugin for EditorFunctions type plugins
 # The functionality was originally implemented by endura29 <endura29@gmail.com>
+# Cosmetic changes by schnullibullihulli (2006-06-01)
 #
 # The plugin allows to install new menu items and toolbar items and register a
 # a function with each that is called. The function must accept one argument which
@@ -41,7 +42,7 @@ def describeMenuItems(wiki):
         - the filename of a bitmap (if file not found, no icon is used)
         - a tuple of filenames, first existing file is used
     """
-    return ((referrals, "Show Referring Wikis\tctrl-r", "Show Referring Wikis"),)
+    return ((referrals, "Show referring pages\tCtrl-Shift-P", "Show referring pages"),)
 
 
 def describeToolbarItems(wiki):
@@ -67,27 +68,34 @@ def describeToolbarItems(wiki):
         - the filename of a bitmap (if file not found, a default icon is used)
         - a tuple of filenames, first existing file is used
     """
-    return ((referrals, "Referers", "Show Referring Wikis", ("rename", "tb_rename")),)
+    return ((referrals, "Referers", "Show referring pages", ("rename", "tb_rename")),)
     #icon = wiki.lookupIcon("tb_rename")
-    # return ((referrals, "Referers", "Show Referring Wikis", icon),)
+    # return ((referrals, "Referers", "Show referring pages", icon),)
 
 
 def referrals(wiki, evt):
     if wiki.getCurrentWikiWord() is None:
         return
+
+    formatting = wiki.getFormatting()
+    def bracketWord(word):
+        return formatting.wikiWordStart + word + formatting.wikiWordEnd
+
     wiki.getActiveEditor().AddText(u"\n------------------------\n")
 
     parents = wiki.wikiData.getParentRelationships(wiki.getCurrentWikiWord())
-    wiki.getActiveEditor().AddText(u"*%s Wikis referring to*   %s\n" %
-            (len(parents), wiki.getCurrentWikiWord()))
+    parents = [bracketWord(word) for word in parents]
+    wiki.getActiveEditor().AddText(u"*%s page(s) referring to* %s\n" %
+            (len(parents), bracketWord(wiki.getCurrentWikiWord())))
 
     for word in parents:
         wiki.getActiveEditor().AddText(u"%s\n" % word)
     wiki.getActiveEditor().AddText(u"------------------------\n")
 
     children = wiki.wikiData.getChildRelationships(wiki.getCurrentWikiWord())
-    wiki.getActiveEditor().AddText(u"*%s Wikis referred to by* %s\n" %
-            (len(children), wiki.getCurrentWikiWord()))
+    children = [bracketWord(word) for word in children]
+    wiki.getActiveEditor().AddText(u"*%s page(s) referred to by* %s\n" %
+            (len(children), bracketWord(wiki.getCurrentWikiWord())))
 
     for word in children:
         wiki.getActiveEditor().AddText(u"%s\n" % word)
