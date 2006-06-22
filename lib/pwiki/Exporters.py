@@ -256,9 +256,9 @@ class HtmlXmlExporter:
                 formattedContent = self.formatContent(word, content,
                         formatDetails, links)
                 fp.write((u'<span class="wiki-name-ref">'+
-                        u'[<a name="%s">%s</a>]</span><br><br>'+
+                        u'[<a name="%s">%s</a>]</span><br /><br />'+
                         u'<span class="parent-nodes">parent nodes: %s</span>'+
-                        u'<br>%s%s<hr size="1"/>') %
+                        u'<br />%s%s<hr size="1"/>') %
                         (_escapeAnchor(word), word,
                         self.getParentLinks(wikiPage, False), formattedContent,
                         u'<br />\n'*10))
@@ -406,7 +406,8 @@ class HtmlXmlExporter:
         # if startFile is set then this is the only page being exported so
         # do not include the parent header.
         if not startFile:
-            result.append(u'<span class="parent-nodes">parent nodes: %s</span>'
+            result.append((u'<span class="parent-nodes">parent nodes: %s</span>'
+                    '<br /><br />\n')
                     % self.getParentLinks(wikiPage, True, onlyInclude))
 
         result.append(formattedContent)
@@ -742,8 +743,9 @@ class HtmlXmlExporter:
                     if len(lines) >= 1:
                         # If further lines follow, break line
                         if not self.preMode:
-                            self.outAppend(u"<br />")
-                        self.outAppend(u"\n")
+                            self.outAppend(u"<br />\n")
+                        else:
+                            self.outAppend(u"\n")
 
                 if len(lines) >= 1:
                     # All 'lines' now begin at a new line in the editor
@@ -753,8 +755,9 @@ class HtmlXmlExporter:
                         if line.strip() == u"":
                             # Handle empty line
                             if not self.preMode:
-                                self.outAppend(u"<br />")
-                            self.outAppend(u"\n")
+                                self.outAppend(u"<br />\n")
+                            else:
+                                self.outAppend(u"\n")
                             continue
                             
                         if not self.preMode:

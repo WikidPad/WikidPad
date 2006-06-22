@@ -47,6 +47,7 @@ class XrcControls:
         return XRCCTRL(self.__basepanel, name)
     
 
+# DEPRECATED: Use same function in WindowLayout.py
 def setWindowPos(win, pos=None, fullVisible=False):
     """
     Set position of a wxWindow, but ensure that the position is valid.
@@ -82,6 +83,7 @@ def setWindowPos(win, pos=None, fullVisible=False):
     win.SetPosition((currentX, currentY))
 
 
+# DEPRECATED: Use same function in WindowLayout.py
 def setWindowSize(win, size):
     """
     Set size of a wxWindow, but ensure that the size is valid
@@ -237,106 +239,5 @@ class wxKeyFunctionSink(wxEvtHandler, KeyFunctionSink):
     def addAsListenerTo(self, evtSource):
         self.evtSource = evtSource
         self.evtSource.addListener(self)
-
-
-#         """
-#         Set an wxWindow object window. If this window is destroyed,
-#         the sink automatically disconnects
-#         """
-
-
-
-# class SmartSashLayoutWindow(wxSashLayoutWindow):
-#     def __init__(self, *args, **kwargs):
-#         from wxPython.wx import EVT_SASH_DRAGGED
-# 
-#         wxSashLayoutWindow.__init__(self, *args, **kwargs)
-#         
-#         self.effectiveSashPos = 0
-#         self.minimalEffectiveSashPos = 0
-#         self.sashPos = 0
-#         
-#         self.SetMinimumSizeX(1)
-#         self.SetMinimumSizeY(1)
-# 
-#         EVT_SASH_DRAGGED(self, self.GetId(), self.OnSashDragged)
-# 
-#     def align(self, al):
-#         from wxPython.wx import wxLAYOUT_TOP, wxLAYOUT_BOTTOM, wxLAYOUT_LEFT, \
-#                 wxLAYOUT_RIGHT, wxLAYOUT_HORIZONTAL, wxLAYOUT_VERTICAL, \
-#                 wxSASH_TOP, wxSASH_BOTTOM, wxSASH_LEFT, wxSASH_RIGHT
-#         
-#         if al == wxLAYOUT_TOP:
-#             self.SetOrientation(wxLAYOUT_HORIZONTAL)
-#             self.SetAlignment(wxLAYOUT_TOP)
-#             self.SetSashVisible(wxSASH_BOTTOM, True)
-#         elif al == wxLAYOUT_BOTTOM:
-#             self.SetOrientation(wxLAYOUT_HORIZONTAL)
-#             self.SetAlignment(wxLAYOUT_BOTTOM)
-#             self.SetSashVisible(wxSASH_TOP, True)
-#         elif al == wxLAYOUT_LEFT:
-#             self.SetOrientation(wxLAYOUT_VERTICAL)
-#             self.SetAlignment(wxLAYOUT_LEFT)
-#             self.SetSashVisible(wxSASH_RIGHT, True)
-#         elif al == wxLAYOUT_RIGHT:
-#             self.SetOrientation(wxLAYOUT_VERTICAL)
-#             self.SetAlignment(wxLAYOUT_RIGHT)
-#             self.SetSashVisible(wxSASH_LEFT, True)
-# 
-# 
-#     def setSashPosition(self, pos):
-#         from wxPython.wx import wxSizeEvent, wxLAYOUT_VERTICAL
-# 
-#         if self.GetOrientation() == wxLAYOUT_VERTICAL:
-#             self.SetDefaultSize((pos, 1000))
-#         else:
-#             self.SetDefaultSize((1000, pos))
-#             
-#         self.sashPos = pos
-#         if pos >= self.minimalEffectiveSashPos:
-#             self.effectiveSashPos = pos
-#             
-#         parent = self.GetParent()
-#         sevent = wxSizeEvent(parent.GetSize())
-#         parent.ProcessEvent(sevent)
-# 
-#     def getSashPosition(self):
-#         return self.sashPos
-# 
-# 
-#     def setMinimalEffectiveSashPosition(self, minPos):
-#         self.minimalEffectiveSashPos = minPos
-# 
-#     def setEffectiveSashPosition(self, ePos):
-#         # TODO Check bounds
-#         self.effectiveSashPos = ePos
-# 
-#     def getEffectiveSashPosition(self):
-#         return self.effectiveSashPos
-# 
-# 
-#     def isCollapsed(self):
-#         return self.getSashPosition() < self.minimalEffectiveSashPos
-# 
-#     def collapseWindow(self):
-#         if not self.isCollapsed():
-#             self.setSashPosition(1)
-# 
-#     def uncollapseWindow(self):
-#         if self.isCollapsed():
-#             self.setSashPosition(self.effectiveSashPos)
-# 
-# 
-#     def OnSashDragged(self, evt):
-#         from wxPython.wx import wxLAYOUT_VERTICAL
-# 
-#         # print "OnSashDragged", repr((evt.GetDragRect().width, evt.GetDragRect().height))
-# 
-#         if self.GetOrientation() == wxLAYOUT_VERTICAL:
-#             self.setSashPosition(evt.GetDragRect().width)
-#         else:
-#             self.setSashPosition(evt.GetDragRect().height)
-# 
-#         evt.Skip()
 
 

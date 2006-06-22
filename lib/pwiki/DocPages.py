@@ -160,10 +160,11 @@ class WikiPage(DocPage):
     
     Fetched via the WikiDataManager.getWikiPage method.
     """
-    def __init__(self, wikiDataManager, wikiWord):
+    def __init__(self, wikiDataManager, mainControl, wikiWord):
         DocPage.__init__(self, wikiDataManager)
 
         self.wikiData = self.wikiDataManager.getWikiData()
+        self.mainControl = mainControl
 
         self.wikiWord = wikiWord
 #         self.realWikiWord = None  # Real wiki word (may be different if wikiWord is an alias)
@@ -347,7 +348,7 @@ class WikiPage(DocPage):
         """
         Update additional cached informations (properties, todos, relations)
         """
-        formatting = self.wikiData.pWiki.getFormatting()
+        formatting = self.mainControl.getFormatting()
         
         page = PageAst.Page()
         page.buildAst(formatting, text, self.getFormatDetails())
@@ -380,7 +381,7 @@ class WikiPage(DocPage):
         self.wikiData.cachedGlobalProps = None
 
         # add a relationship to the scratchpad at the root
-        if self.wikiWord == self.wikiData.pWiki.wikiName:
+        if self.wikiWord == self.mainControl.wikiName:
             self.addChildRelationship(u"ScratchPad")
 
         # clear the dirty flag
@@ -393,7 +394,7 @@ class WikiPage(DocPage):
 #         self.lastUpdate = time()   # self.modified
 
         if fireEvent:
-            self.wikiData.pWiki.informWikiPageUpdate(self)  # TODO Remove
+            self.mainControl.informWikiPageUpdate(self)  # TODO Remove
             self.fireMiscEventKeys(("wiki page updated", "page updated"))
 
 

@@ -21,11 +21,12 @@ import srePersistent as _re
 LINEEND_SPLIT_RE = _re.compile(r"\r\n?|\n")
 
 
-from Configuration import isUnicode, isOSX
+from Configuration import isUnicode, isOSX, isLinux
 
 
-# To generate dependencies for py2exe
-import encodings.utf_8, encodings.latin_1
+# To generate dependencies for py2exe/py2app
+import encodings.utf_8, encodings.latin_1, encodings.utf_16, \
+        encodings.utf_16_be, encodings.utf_16_le
 
 
 
@@ -50,7 +51,7 @@ def lineendToInternal(text):
     
 
 
-if isOSX():      # TODO Linux
+if isOSX():
     # generate dependencies for py2app
     import encodings.mac_roman
     mbcsEnc = codecs.getencoder("mac_roman")
@@ -60,7 +61,17 @@ if isOSX():      # TODO Linux
     
     def lineendToOs(text):
         return convertLineEndings(text, "\r")
-   
+
+elif isLinux():
+    # Could be wrong encoding
+    mbcsEnc = codecs.getencoder("latin-1")
+    mbcsDec = codecs.getdecoder("latin-1")
+    mbcsReader = codecs.getreader("latin-1")
+    mbcsWriter = codecs.getwriter("latin-1")
+
+    def lineendToOs(text):
+        return convertLineEndings(text, "\n")
+
 else:
     # generate dependencies for py2exe
     import encodings.ascii

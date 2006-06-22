@@ -1,12 +1,12 @@
 import ConfigParser
-# import os
+import os
 # from os.path import *
 
 import codecs
 
 from wxPython.wx import wxPlatformInfo
 
-# Positioned here to avoid circular dependency with StringOps
+# Placed here to avoid circular dependency with StringOps
 def isUnicode():
     """
     Return if GUI is in unicode mode
@@ -18,6 +18,16 @@ def isOSX():
     Return if working on Mac OSX
     """
     return '__WXMAC__' in wxPlatformInfo
+    
+def isLinux():
+    """
+    Return if working on Linux system
+    """
+    try:
+        return os.uname[0] == "Linux"
+    except AttributeError:
+        return False
+
 
 from StringOps import utf8Enc, utf8Dec, mbcsDec, strToBool
 
@@ -322,6 +332,8 @@ GLOBALDEFAULTS = {
     ("main", "search_wiki_context_before"): "0", # No. of context characters before
     ("main", "search_wiki_context_after"): "0",  # and after a found pattern
     ("main", "search_wiki_count_occurrences"): "False", # Show for each page the number of found matches
+    ("main", "fastSearch_sizeX"): "200",  # Size of the fastsearch popup frame
+    ("main", "fastSearch_sizeY"): "400",
 
     ("main", "print_margins"): "0,0,0,0", # Left, upper, right, lower page margins on printing
     ("main", "print_plaintext_font"): "", # Font description for printing in plain text mode

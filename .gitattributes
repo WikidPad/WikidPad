@@ -391,6 +391,7 @@ icons/flood[!!-~]fill.gif -text
 icons/folder[!!-~]open.gif -text
 icons/folder.gif -text
 icons/folder2.gif -text
+icons/folderwiki.gif -text
 icons/gameboy.gif -text
 icons/gb[!!-~]advance.gif -text
 icons/glasses.gif -text
@@ -534,6 +535,7 @@ lib/pwiki/EnchantDriver.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
 lib/pwiki/Importers.py -text
+lib/pwiki/Localization.py -text
 lib/pwiki/LogWindow.py -text
 lib/pwiki/MiscEvent.py -text
 lib/pwiki/PageAst.py -text

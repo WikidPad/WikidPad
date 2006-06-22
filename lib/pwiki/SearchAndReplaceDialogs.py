@@ -9,6 +9,8 @@ from wxHelper import *
 
 from StringOps import uniToGui, guiToUni, escapeHtml
 
+from WindowLayout import setWindowPos, setWindowSize
+
 import WikiFormatting
 import PageAst
 
@@ -165,6 +167,7 @@ class SearchResultListBox(wxHtmlListBox):
         self.searchWikiDialog = parent
         self.found = []
         self.foundinfo = []
+        self.searchOp = None # last search operation set by showFound
         self.SetItemCount(0)
 
         EVT_LEFT_DOWN(self, self.OnLeftDown)
@@ -225,7 +228,13 @@ class SearchResultListBox(wxHtmlListBox):
             self.found = []
             self.foundinfo = []
             self.SetItemCount(0)
+            self.searchOp = None
         else:
+            # Store and prepare clone of search operation
+            self.searchOp = sarOp.clone()
+            self.searchOp.replaceOp = False
+            self.searchOp.cycleToStart = True
+
             self.found = found
             self.foundinfo = []
             # Load context settings
@@ -292,6 +301,10 @@ class SearchResultListBox(wxHtmlListBox):
 
 
     def _pageListFindNext(self):
+        """
+        After pressing F3 or clicking blue bar of an entry, position of
+        next found element should be shown
+        """
         sel = self.GetSelection()
         if sel == -1:
             return
@@ -309,11 +322,11 @@ class SearchResultListBox(wxHtmlListBox):
         
         wikiData = self.pWiki.wikiData
         text = wikiData.getContent(info.wikiWord)
-        searchOp = self.searchWikiDialog.buildSearchReplaceOperation()
-        searchOp.replaceOp = False
-        searchOp.cycleToStart = True
+#         searchOp = self.searchWikiDialog.buildSearchReplaceOperation()
+#         searchOp.replaceOp = False
+#         searchOp.cycleToStart = True
 
-        pos = searchOp.searchText(text, info.occPos[1])
+        pos = self.searchOp.searchText(text, info.occPos[1])
         if pos[0] == -1:
             # Page was changed after last search and contains no more any occurrence 
             info.occCount = 0
@@ -353,6 +366,9 @@ class SearchResultListBox(wxHtmlListBox):
                     info.occPos[1])
 
 #                 executeSearch(searchOp, 0)
+        
+        # Works in fast search popup only if called twice
+        self.pWiki.getActiveEditor().SetFocus()
         self.pWiki.getActiveEditor().SetFocus()
 
 
@@ -1212,3 +1228,96 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
             self.SetCursor(wxNullCursor)
 
 
+class FastSearchPopup(wxFrame):
+    """
+    Popup window which appears when hitting Enter in the fast search text field
+    in the main window.
+    Using frame because wxPopupWindow is not available on Mac OS
+    """
+    def __init__(self, parent, mainControl, ID, pos=wxDefaultPosition):
+        wxFrame.__init__(self, parent, ID, "fast search", pos=pos,
+                style=wxRESIZE_BORDER | wxFRAME_FLOAT_ON_PARENT |
+                wxFRAME_NO_TASKBAR)
+
+        self.mainControl = mainControl
+        self.searchText = None
+        
+        self.resultBox = SearchResultListBox(self, self.mainControl, -1)
+        
+        sizer = wxBoxSizer(wxVERTICAL)
+        sizer.Add(self.resultBox, 1, wxEXPAND)
+
+        self.SetSizer(sizer)
+        
+        config = self.mainControl.getConfig()
+        width = config.getint("main", "fastSearch_sizeX", 200)
+        height = config.getint("main", "fastSearch_sizeY", 400)
+
+        setWindowSize(self, (width, height))
+        setWindowPos(self, fullVisible=True)
+
+#         EVT_KILL_FOCUS(self, self.OnKillFocus)
+        EVT_KILL_FOCUS(self.resultBox, self.OnKillFocus)
+        EVT_CLOSE(self, self.OnClose)
+
+
+    def OnKillFocus(self, evt):
+        self.Close()
+        
+        
+    def OnClose(self, evt):
+        width, height = self.GetSizeTuple()
+        config = self.mainControl.getConfig()
+        config.set("main", "fastSearch_sizeX", str(width))
+        config.set("main", "fastSearch_sizeY", str(height))
+
+        evt.Skip()
+
+
+    def buildSearchReplaceOperation(self):
+        sarOp = SearchReplaceOperation()
+        sarOp.searchStr = self.searchText
+        sarOp.booleanOp = False # ?
+        sarOp.caseSensitive = False
+        sarOp.wholeWord = False
+        sarOp.cycleToStart = False
+        sarOp.wildCard = 'regex'
+        sarOp.wikiWide = True
+#         sarOp.listWikiPagesOp = self.listPagesOperation
+
+#         if not sarOp.booleanOp:
+#             sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
+  
+        return sarOp
+
+    def runSearchOnWiki(self, text):
+        """
+        lists all found pages which match search text
+        """
+        self.searchText = text
+        self._refreshPageList()
+#         if not self.ctrls.htmllbPages.IsEmpty():
+#             self.ctrls.htmllbPages.SetFocus()
+#             self.ctrls.htmllbPages.SetSelection(0)
+
+    def _refreshPageList(self):
+        self.SetCursor(wxHOURGLASS_CURSOR)
+        self.Freeze()
+        try:
+            sarOp = self.buildSearchReplaceOperation()
+            self.mainControl.saveCurrentDocPage()
+    
+            if len(sarOp.searchStr) > 0:
+                self.foundPages = self.mainControl.getWikiData().search(sarOp)
+                self.foundPages.sort()
+                self.resultBox.showFound(sarOp, self.foundPages,
+                        self.mainControl.getWikiData())
+            else:
+                self.foundPages = []
+                self.resultBox.showFound(None, None, None)
+
+            self.listNeedsRefresh = False
+
+        finally:
+            self.Thaw()
+            self.SetCursor(wxNullCursor)

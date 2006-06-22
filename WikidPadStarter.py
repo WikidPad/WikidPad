@@ -1,6 +1,6 @@
 #!/bin/python
 
-import sys, os, traceback, os.path, glob
+import sys, os, traceback, os.path, glob, time
 os.stat_float_times(True)
 
 if not hasattr(sys, 'frozen'):
@@ -45,6 +45,7 @@ def findDirs():
     """
     Returns tuple (wikiAppDir, globalConfigDir)
     """
+    global _exceptionDestDir
     wikiAppDir = None
 
     try:
@@ -83,8 +84,47 @@ def findDirs():
 
     if globalConfigDir is not None:
         globalConfigDir = mbcsDec(globalConfigDir, "replace")[0]
+        
+    _exceptionDestDir = globalConfigDir
 
     return (wikiAppDir, globalConfigDir)
+
+
+
+# global exception control
+
+
+def onException(typ, value, trace):
+    global _exceptionDestDir, _exceptionSessionTimeStamp, _exceptionOccurred
+    global _previousExcepthook
+
+    try:
+        f = open(os.path.join(_exceptionDestDir, "WikidPad_Error.log"), "a")
+        try:
+            if not _exceptionOccurred:
+                # Only write for first exception in session
+                f.write(_exceptionSessionTimeStamp) 
+                _exceptionOccurred = True
+            traceback.print_exception(typ, value, trace, file=f)
+            traceback.print_exception(typ, value, trace, file=sys.stdout)
+        finally:
+            f.close()
+    except:
+        print "Exception occurred during global exception handling:"
+        traceback.print_exc(file=sys.stdout)
+        print "Original exception:"
+        traceback.print_exception(typ, value, trace, file=sys.stdout)
+        _previousExcepthook(typ, value, trace)
+
+
+_exceptionDestDir = os.path.dirname(os.path.abspath(sys.argv[0]))
+_exceptionSessionTimeStamp = \
+        time.strftime("\n\nSession start: %Y-%m-%d %H:%M:%S\n")
+_exceptionOccurred = False
+
+
+_previousExcepthook = sys.excepthook
+sys.excepthook = onException
 
 
 
@@ -154,6 +194,14 @@ class App(wxApp):
 
 
         return True
+        
+    def OnExit(self):
+        global _exceptionDestDir, _exceptionOccurred
+        if _exceptionOccurred and hasattr(sys, 'frozen'):
+            wxMessageBox("An error occurred during this session\nSee file %s" %
+                    os.path.join(_exceptionDestDir, "WikidPad_Error.log"),
+                    "Error", style = wxOK)
+
 
 class ErrorFrame(wxFrame):
    def __init__(self, parent, id, title):

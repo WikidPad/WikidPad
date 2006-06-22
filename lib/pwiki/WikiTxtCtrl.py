@@ -1003,7 +1003,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         break # Execute only the first found script
 
                 except Exception, e:
-                    self.AddText(u"\nException: %s" % unicode(e))
+                    s = StringIO()
+                    traceback.print_exc(file=s)
+                    self.AddText(u"\nException: %s" % s.getvalue())
 
                 match = WikiFormatting.ScriptRE.search(text, match.end())
         else:

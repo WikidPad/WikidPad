@@ -1,5 +1,6 @@
 from weakref import WeakValueDictionary
 import os.path
+from threading import RLock
 
 from pwiki.WikiExceptions import *
 from pwiki.DocPages import WikiPage, FunctionalPage, AliasWikiPage
@@ -7,6 +8,37 @@ from pwiki.DocPages import WikiPage, FunctionalPage, AliasWikiPage
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
 import FileStorage
+
+
+
+# TODO Remove this hackish solution
+
+class WikiDataSynchronizedFunction:
+    def __init__(self, lock, function):
+        self.accessLock = lock
+        self.callFunction = function
+        
+    def __call__(self, *args, **kwargs):
+        self.accessLock.acquire()
+        try:
+            # print "WikiDataSynchronizedFunction", repr(self.callFunction)
+            return self.callFunction(*args, **kwargs)
+        finally:
+            self.accessLock.release()
+
+
+class WikiDataSynchronizedProxy:
+    """
+    Proxy class for synchronized access to a WikiData instance
+    """
+    def __init__(self, wikiData):
+        self.wikiData = wikiData
+        self.accessLock = RLock()
+        
+    def __getattr__(self, attr):
+        return WikiDataSynchronizedFunction(self.accessLock,
+                getattr(self.wikiData, attr))
+
 
 
 class WikiDataManager:
@@ -22,7 +54,9 @@ class WikiDataManager:
 
     def __init__(self, mainControl, wikiData):
         self.mainControl = mainControl
-        self.wikiData = wikiData
+        self.getBaseWikiData = wikiData
+        
+        self.wikiData = WikiDataSynchronizedProxy(self.getBaseWikiData)
         
         self.wikiPageDict = WeakValueDictionary()
         self.fileStorage = FileStorage.FileStorage(self.mainControl, self,
@@ -34,6 +68,9 @@ class WikiDataManager:
         
     def getFileStorage(self):
         return self.fileStorage
+        
+    def getMainControl():
+        return self.mainControl
 
 
     def getWikiPage(self, wikiWord):
@@ -60,9 +97,9 @@ class WikiDataManager:
             realWikiWord = self.wikiData.getAliasesWikiWord(wikiWord)
             if wikiWord == realWikiWord:
                 # no alias
-                value = WikiPage(self, wikiWord)
+                value = WikiPage(self, self.mainControl, wikiWord)
             else:
-                realpage = WikiPage(self, realWikiWord)
+                realpage = WikiPage(self, self.mainControl, realWikiWord)
                 value = AliasWikiPage(self, wikiWord, realpage)
 
             self.wikiPageDict[wikiWord] = value

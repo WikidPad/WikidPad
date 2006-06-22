@@ -501,11 +501,9 @@ class OptionsDialog(wxDialog):
         res.LoadOnDialog(self, self.pWiki, "OptionsDialog")
 
         self.ctrls = XrcControls(self)
-
-        # Necessary to avoid a crash        
-        self.emptyPanel = wxPanel(self.ctrls.panelPages)
-        self.emptyPanel.Fit()
         
+        self.emptyPanel = None
+
         self.panelList = []
         self.ctrls.lbPages.Clear()
         
@@ -515,6 +513,10 @@ class OptionsDialog(wxDialog):
             if pn:
                 panel = res.LoadPanel(self.ctrls.panelPages, pn)
             else:
+                if self.emptyPanel is None:
+                    # Necessary to avoid a crash        
+                    self.emptyPanel = wxPanel(self.ctrls.panelPages)
+                    self.emptyPanel.Fit()
                 panel = self.emptyPanel
                 
             self.panelList.append(panel)
@@ -787,9 +789,7 @@ class ExportDialog(wxDialog):
         
         self.ctrls = XrcControls(self)
         
-        # Necessary to avoid a crash        
-        self.emptyPanel = wxPanel(self.ctrls.additOptions)
-        self.emptyPanel.Fit()
+        self.emptyPanel = None
         
         exporterList = [] # List of tuples (<exporter object>, <export tag>,
                           # <readable description>, <additional options panel>)
@@ -798,6 +798,10 @@ class ExportDialog(wxDialog):
             for tp in ob.getExportTypes(self.ctrls.additOptions):
                 panel = tp[2]
                 if panel is None:
+                    if self.emptyPanel is None:
+                        # Necessary to avoid a crash        
+                        self.emptyPanel = wxPanel(self.ctrls.additOptions)
+                        self.emptyPanel.Fit()
                     panel = self.emptyPanel
                 else:
                     panel.Fit()
@@ -990,9 +994,7 @@ class ImportDialog(wxDialog):
 
         self.ctrls = XrcControls(self)
 
-        # Necessary to avoid a crash        
-        self.emptyPanel = wxPanel(self.ctrls.additOptions)
-        self.emptyPanel.Fit()
+        self.emptyPanel = None
         
         importerList = [] # List of tuples (<importer object>, <import tag=type>,
                           # <readable description>, <additional options panel>)
@@ -1001,6 +1003,10 @@ class ImportDialog(wxDialog):
             for tp in ob.getImportTypes(self.ctrls.additOptions):
                 panel = tp[2]
                 if panel is None:
+                    if self.emptyPanel is None:
+                        # Necessary to avoid a crash        
+                        self.emptyPanel = wxPanel(self.ctrls.additOptions)
+                        self.emptyPanel.Fit()
                     panel = self.emptyPanel
                 else:
                     panel.Fit()

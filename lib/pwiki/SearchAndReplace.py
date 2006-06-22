@@ -702,13 +702,15 @@ class SearchReplaceOperation:
         """
         Create clone of the object
         """
-        result = SearchReplaceOpData()
+        result = SearchReplaceOperation()
         
         # Shallow copy is enough because object contains only strings and
         # truth values
         result.__dict__.update(self.__dict__)  # TODO: Cleaner way to do that?
         
         result.clearCache()
+        
+        return result
 
 
     def clearCache(self):

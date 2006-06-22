@@ -103,7 +103,7 @@ def buildIconsSubmenu(iconCache):
     iconsMenu2 = wxMenu()
     iconsMenu.AppendMenu(wxNewId(), 'D-F', iconsMenu2)
     iconsMenu3 = wxMenu()
-    iconsMenu.AppendMenu(wxNewId(), 'H-L', iconsMenu3)
+    iconsMenu.AppendMenu(wxNewId(), 'G-L', iconsMenu3)
     iconsMenu4 = wxMenu()
     iconsMenu.AppendMenu(wxNewId(), 'M-P', iconsMenu4)
     iconsMenu5 = wxMenu()

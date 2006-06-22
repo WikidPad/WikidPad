@@ -7,18 +7,18 @@ import urllib_red as urllib
 from wxPython.wx import *
 from wxPython.stc import *
 from wxPython.html import *
-from wxHelper import GUI_ID, cloneImageList
+from wxHelper import GUI_ID, cloneImageList, keyDownToAccel
 
 from MiscEvent import MiscEventSourceMixin
 
 import Configuration
-from Configuration import createConfiguration
 from WindowLayout import WindowLayouter, setWindowPos, setWindowSize
 # from WikiData import *
 from wikidata import DbBackendUtils
 from wikidata.WikiDataManager import WikiDataManager
 import DocPages
 
+from CmdLineAction import CmdLineAction
 from WikiTxtCtrl import WikiTxtCtrl
 from WikiTreeCtrl import WikiTreeCtrl
 from WikiHtmlView import WikiHtmlView
@@ -144,7 +144,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 """)
             tbFile.close()
         self.globalConfigLoc = join(globalConfigDir, "WikidPad.config")
-        self.configuration = createConfiguration()
+        self.configuration = Configuration.createConfiguration()
 
         self.wikiPadHelp = join(self.wikiAppDir, 'WikidPadHelp',
                 'WikidPadHelp.wiki')
@@ -163,6 +163,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.spellChkDlg = None  # Stores spell check dialog, if present
         self.mainmenu = None
         self.editorMenu = None  # "Editor" menu
+        self.fastSearchField = None   # Text field in toolbar
         self.textBlocksActivation = {} # See self.buildTextBlocksMenu()
         # Position of the root menu of the text blocks within "Editor" menu
         self.textBlocksMenuPosition = None  
@@ -339,14 +340,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def getExtension(self, extensionName, fileName):
         extensionFileName = join(self.wikiAppDir, 'user_extensions', fileName)
         if exists(extensionFileName):
-            extFile = open(extensionFileName, "ra")
+            extFile = open(extensionFileName, "rU")
             userExtension = extFile.read()
             extFile.close()
         else:
             userExtension = None
             
         extensionFileName = join(self.wikiAppDir, 'extensions', fileName)
-        extFile = open(extensionFileName, "ra")
+        extFile = open(extensionFileName, "rU")
         systemExtension = extFile.read()
         extFile.close()
         
@@ -1192,11 +1193,28 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(6))
 
 
-
         helpMenu=wxMenu()
 
         def openHelp(evt):
-            os.startfile(self.wikiPadHelp)   # TODO!
+            try:
+                clAction = CmdLineAction([])
+                clAction.wikiToOpen = self.wikiPadHelp
+                PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
+                        self.globalConfigDir, clAction)
+                # os.startfile(self.wikiPadHelp)   # TODO!
+            except Exception, e:
+                traceback.print_exc()
+                self.displayErrorMessage('Error while starting new '
+                        'WikidPad instance', e)
+                return
+
+            # set the icon of the app
+            try:
+                self.wikiFrame.SetIcon(wxIcon(os.path.join(wikiAppDir, 'icons',
+                        'pwiki.ico'), wxBITMAP_TYPE_ICO))
+            except:
+                pass
+
 
         menuID=wxNewId()
         helpMenu.Append(menuID, '&Open WikidPadHelp', 'Open WikidPadHelp')
@@ -1355,10 +1373,20 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         tb.AddSimpleTool(tbID, icon, "Zoom Out", "Zoom Out")
         EVT_TOOL(self, tbID, lambda evt: self.activeEditor.CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
 
+        self.fastSearchField = wxTextCtrl(tb, GUI_ID.TF_FASTSEARCH,
+                style=wxTE_PROCESS_ENTER | wxTE_RICH)
+        tb.AddControl(self.fastSearchField)
+#         EVT_TEXT_ENTER(self, GUI_ID.TF_FASTSEARCH, self.OnFastSearchEnter)
+#         EVT_CHAR(self.fastSearchField, self.OnFastSearchChar)
+        EVT_KEY_DOWN(self.fastSearchField, self.OnFastSearchKeyDown)
+#         EVT_KEY_UP(self.fastSearchField, self.OnFastSearchChar)
+
         icon = self.lookupIcon("pin")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Wikize Selected Word", "Wikize Selected Word")
         EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.activeEditor))
+
+
 
         # get info for any plugin toolbar items and create them as necessary
         toolbarItems = reduce(lambda a, b: a+list(b),
@@ -1605,24 +1633,23 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         mainAreaPanel.SetFocus()
 
 
-#     def createWindow(self, winProps, parent):
-#         """
-#         Wrapper around _actualCreateWindow to maintain a cache
-#         of already existing windows
-#         """
-#         winName = winProps["name"]
-# 
-#         # Try in cache:
-#         window = self.createdWindowCache.get(winName)
-#         if window is not None:
-#             window.Reparent(parent)    # TODO Reparent not available for all OS'
-#             return window
-#             
-#         window = self._actualCreateWindow(winProps, parent)
-#         if window is not None:
-#             self.createdWindowCache[winName] = window
-#             
-#         return window
+    def OnFastSearchKeyDown(self, evt):
+        acc = keyDownToAccel(evt)
+        if acc == (wxACCEL_NORMAL, WXK_RETURN) or \
+                acc == (wxACCEL_NORMAL, WXK_NUMPAD_ENTER):
+            text = guiToUni(self.fastSearchField.GetValue())
+            tfHeight = self.fastSearchField.GetSize()[1]
+            pos = self.fastSearchField.ClientToScreen((0, tfHeight))
+
+            popup = FastSearchPopup(self, self, -1, pos=pos)
+            popup.Show()
+            popup.runSearchOnWiki(text)
+        else:
+            evt.Skip()
+
+#     def OnFastSearchChar(self, evt):
+#         print "OnFastSearchChar", repr(evt.GetUnicodeKey()), repr(evt.GetKeyCode())
+#         evt.Skip()
 
 
     def createWindow(self, winProps, parent):
@@ -2001,9 +2028,9 @@ These are your default global settings.
                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
                 return
             except Exception, ne:
-                self.displayErrorMessage(u"Error reading config file '%s'" %
-                        wikiConfigFilename, e)
                 traceback.print_exc()
+                self.displayErrorMessage(u"Error reading config file '%s'" %
+                        wikiConfigFilename, ne)
                 return False
 
         # config variables
