@@ -91,6 +91,9 @@ def findDirs():
 if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
     # Special option, called by deinstaller on request to delete personal
     # configuration files
+    dummyApp = wxApp(0)
+    dummyApp.SetAppName("WikidPad")
+
     wikiAppDir, globalConfigDir = findDirs()
     if globalConfigDir is None:
         sys.exit(1)
@@ -119,7 +122,11 @@ if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
         sys.exit(1)
 
 
-class App(wxApp):   
+class App(wxApp):
+    def __init__(self, *args, **kwargs):
+        wxApp.__init__(self, *args, **kwargs)
+        self.SetAppName("WikidPad")
+  
     def OnInit(self):
         ## _prof.start()
         appdir = os.path.dirname(os.path.abspath(sys.argv[0]))

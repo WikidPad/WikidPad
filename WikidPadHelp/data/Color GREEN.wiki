@@ -1,2 +1,2 @@
-++ Color GREEN
-[color: GREEN ]
+﻿++ Color GREEN
+[color: GREEN]

@@ -1,2 +1,2 @@
-++ Icon page
-[icon: page ]
+﻿++ Icon page
+[icon: page]

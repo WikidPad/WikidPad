@@ -1,2 +1,2 @@
-++ Icon sound file
-[icon: sound file ]
+﻿++ Icon sound file
+[icon: sound file]

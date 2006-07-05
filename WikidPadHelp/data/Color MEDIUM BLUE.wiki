@@ -1,2 +1,2 @@
-++ Color MEDIUM BLUE
-[color: MEDIUM BLUE ]
+﻿++ Color MEDIUM BLUE
+[color: MEDIUM BLUE]

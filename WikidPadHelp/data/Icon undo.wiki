@@ -1,2 +1,2 @@
-++ Icon undo
-[icon: undo ]
+﻿++ Icon undo
+[icon: undo]

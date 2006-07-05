@@ -1,2 +1,2 @@
-++ Icon scanner
-[icon: scanner ]
+﻿++ Icon scanner
+[icon: scanner]

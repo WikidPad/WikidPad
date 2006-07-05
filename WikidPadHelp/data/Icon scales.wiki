@@ -1,2 +1,2 @@
-++ Icon scales
-[icon: scales ]
+﻿++ Icon scales
+[icon: scales]

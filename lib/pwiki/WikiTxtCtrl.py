@@ -638,6 +638,24 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         wikiPage.save(content, False)
         self.pWiki.statusBar.SetStatusText(uniToGui("Copied snippet to ScratchPad"), 0)
 
+#     def styleSelection(self, styleChars):
+#         """
+#         Currently len(styleChars) must be 1.
+#         """
+#         (startBytePos, endBytePos) = self.GetSelection()
+#         if startBytePos == endBytePos:
+#             (startBytePos, endBytePos) = self.getNearestWordPositions()
+#             
+#         endBytePos = self.PositionAfter(endBytePos)
+# 
+#         bytePos = self.PositionAfter(self.GetCurrentPos())
+#         self.GotoPos(startBytePos)
+#         self.AddText(styleChars)
+#         self.GotoPos(endBytePos)   # +len(styleChars)
+#         self.AddText(styleChars)
+#         self.GotoPos(bytePos)       
+
+ 
     def styleSelection(self, styleChars):
         """
         Currently len(styleChars) must be 1.
@@ -646,13 +664,27 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if startBytePos == endBytePos:
             (startBytePos, endBytePos) = self.getNearestWordPositions()
             
-        endBytePos = self.PositionAfter(endBytePos)
+        emptySelection = startBytePos == endBytePos  # is selection empty
 
-        bytePos = self.PositionAfter(self.GetCurrentPos())
         self.GotoPos(startBytePos)
         self.AddText(styleChars)
+
+        for i in xrange(len(styleChars)):
+            endBytePos = self.PositionAfter(endBytePos)
+
         self.GotoPos(endBytePos)   # +len(styleChars)
         self.AddText(styleChars)
+
+#         bytePos = self.PositionAfter(self.GetCurrentPos())
+
+        bytePos = endBytePos
+        
+        if not emptySelection:
+            # Cursor will in the end stand after styled word
+            # if selection is empty, it will stand between the style characters
+            for i in xrange(len(styleChars)):
+                bytePos = self.PositionAfter(bytePos)
+
         self.GotoPos(bytePos)        
 
 

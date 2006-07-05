@@ -1,4 +1,4 @@
-++ Tree Icons
+﻿++ Tree Icons
 
 These are the list of icons that may be used with the:
 [icon: icon]
@@ -78,6 +78,7 @@ flood fill
 folder open
 folder
 folder2
+folderwiki
 gameboy
 gb advance
 glasses

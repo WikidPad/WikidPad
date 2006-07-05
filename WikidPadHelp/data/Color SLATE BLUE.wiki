@@ -1,2 +1,2 @@
-++ Color SLATE BLUE
-[color: SLATE BLUE ]
+﻿++ Color SLATE BLUE
+[color: SLATE BLUE]

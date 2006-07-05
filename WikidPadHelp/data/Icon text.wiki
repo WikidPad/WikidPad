@@ -1,2 +1,2 @@
-++ Icon text
-[icon: text ]
+﻿++ Icon text
+[icon: text]

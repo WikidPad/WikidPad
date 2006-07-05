@@ -1,2 +1,2 @@
-++ Icon mail
-[icon: mail ]
+﻿++ Icon mail
+[icon: mail]

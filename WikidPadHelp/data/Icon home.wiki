@@ -1,2 +1,2 @@
-++ Icon home
-[icon:home  ]
+﻿++ Icon home
+[icon: home]

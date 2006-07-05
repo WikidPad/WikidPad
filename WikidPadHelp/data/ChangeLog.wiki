@@ -1,6 +1,27 @@
 ﻿++ Change Log
 
 
+Jul. 5, 2006 (1.6rc4)
+
+Changes:
+
+    * Optical changes in extension "referrals.py" (thanks
+      to schnullibullihulli).
+    * Bug fixed: "compact_sqlite" db backend lost creation
+      date
+    * Bug fixed: Problems with handling of non-ascii
+      characters (searching for "É" didn't find "Éve")
+    * Bug fixed: No newline after "Parents: ..." start line
+      in HTML export.
+    * Bug fixed: Using "Bold" or "Italic" menu items at end
+      of page leads to wrong position of format characters
+      * or _.
+    * Slightly better support for Linux (provides default
+      setting for "mbcs" encoding, loads extensions with
+      universal newline support)
+
+
+
 May. 24, 2006 (1.6rc3)
 
 Changes:

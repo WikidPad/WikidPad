@@ -1,2 +1,2 @@
-++ Color SKY BLUE
-[color: SKY BLUE ]
+﻿++ Color SKY BLUE
+[color: SKY BLUE]

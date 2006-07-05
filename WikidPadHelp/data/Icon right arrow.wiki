@@ -1,2 +1,2 @@
-++ Icon right arrow
-[icon: right arrow ]
+﻿++ Icon right arrow
+[icon: right arrow]

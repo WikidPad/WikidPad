@@ -1,2 +1,2 @@
-++ Icon rename
-[icon: rename ]
+﻿++ Icon rename
+[icon: rename]

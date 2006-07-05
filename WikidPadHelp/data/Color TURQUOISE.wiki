@@ -1,2 +1,2 @@
-++ Color TURQUOISE
-[color: TURQUOISE ]
+﻿++ Color TURQUOISE
+[color: TURQUOISE]

@@ -1,2 +1,2 @@
-++ Icon tank
-[icon: tank ]
+﻿++ Icon tank
+[icon: tank]

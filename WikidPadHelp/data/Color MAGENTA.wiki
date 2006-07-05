@@ -1,2 +1,2 @@
-++ Color MAGENTA
-[color: MAGENTA ]
+﻿++ Color MAGENTA
+[color: MAGENTA]
