@@ -127,6 +127,20 @@ class SerializeStream:
                 self.writeBytes("\0")
             
             return tv
+            
+    def serArrString(self, as):
+        """
+        Serialize array of byte strings
+        """
+        l = self.serUint32(len(as)) # Length of array
+
+        if self.isReadMode() and l != len(as):
+            as = [""] * l
+
+        for i in xrange(l):
+            as[i] = self.serString(as[i])
+            
+        return as
 
 
     def close(self):

@@ -12,6 +12,8 @@ https://somewheresecure.com
 file:///C|/Documents%20and%20Settings/joeshmoe/readme.txt
 ftp://ftp.whereever.com/
 
+To create an absolute URL to a file you can also use "Add file URL" in "Editor" menu and choose the desired file in file dialog.
+
 
 ++ Relative URLs
 You can create URLs which are relative to the wiki directory. These start with rel:// followed by the relative position. For HTML export the rel:// is removed to create a relative HTML link (without protocol). For HTML preview they are converted to "file:" URLs.

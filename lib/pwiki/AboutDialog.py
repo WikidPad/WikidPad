@@ -3,6 +3,8 @@ from wxPython.html import *
 
 from StringOps import escapeHtml
 
+from WikidPadStarter import VERSION_STRING
+
 
 class AboutDialog(wxDialog):
     """ An about box that uses an HTML window """
@@ -13,7 +15,7 @@ class AboutDialog(wxDialog):
     <center>
         <table bgcolor="#CCCCCC" width="100%%" cellspacing="0" cellpadding="0" border="1">
             <tr>
-                <td align="center"><h2>wikidPad 1.7beta7</h2></td>
+                <td align="center"><h2>%s</h2></td>
             </tr>
         </table>
 
@@ -46,7 +48,8 @@ What makes wikidPad different from other notepad applications is the ease with w
     def __init__(self, pWiki):
         wxDialog.__init__(self, pWiki, -1, 'About WikidPad',
                           size=(470, 330) )
-        text = self.textTemplate % (escapeHtml(pWiki.globalConfigDir),)
+        text = self.textTemplate % (VERSION_STRING,
+                escapeHtml(pWiki.globalConfigDir))
 
         html = wxHtmlWindow(self, -1)
         html.SetPage(text)

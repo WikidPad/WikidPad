@@ -385,7 +385,7 @@ class HtmlXmlExporter:
         return outputFile
 
 
-    def exportContentToHtmlString(self, word, content, formatDetails=None,
+    def exportContentToHtmlString(self, word, content, formatDetails,
             links=None, startFile=True, onlyInclude=None, asHtmlPreview=False):
         """
         Read content of wiki word word, create an HTML page and return it
@@ -650,7 +650,7 @@ class HtmlXmlExporter:
         self.outAppend(u'</table>\n', eatPostBreak=True)
 
 
-    def formatContent(self, word, content, formatDetails=None, links=None,
+    def formatContent(self, word, content, formatDetails, links=None,
             asXml=False, asHtmlPreview=False):
         if links is None:
             self.links = {}

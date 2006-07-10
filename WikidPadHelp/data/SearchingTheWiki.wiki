@@ -9,6 +9,12 @@ CTRL-R brings up the "Find and Replace" dialog.
 
 +++ To search all pages
 
+++++ Fast search
+
+The toolbar contains a little search field. Just enter text you want to search for (you can use regular expression syntax), hit return and a list of matching wiki pages pops up.
+
+++++ Full search
+
 CTRL-ALT-F brings up the search dialog for the entire wiki.
 
 The dialog is non-modal, this means you can edit your wiki while the dialog is open.
@@ -17,8 +23,8 @@ The dialog is non-modal, this means you can edit your wiki while the dialog is o
 
 The whole right side of the dialog shows the search results, the left side allows to control how to search.
 
-From top to bottom:
 
+From top to bottom:
 
 ++++ Searching
 

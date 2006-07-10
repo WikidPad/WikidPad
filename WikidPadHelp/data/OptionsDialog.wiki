@@ -112,6 +112,10 @@ Interpret footnotes (e.g. "[42]") as wiki words instead of normal text.
 *First word at startup*
 Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last word when the wiki was closed is shown on opening.
 
+*New page title prefix*
+Control the heading level of the initial main title of new pages and fill between one and four '+' in this field. Default is "++".
+
+
 *Modif. date must match*
 *Filename must match*
 *Modif. date is enough*

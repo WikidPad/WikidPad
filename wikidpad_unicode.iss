@@ -41,17 +41,17 @@ Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 1.7beta6
+AppVerName=WikidPad 1.7beta7
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
 VersionInfoVersion=1.7
-VersionInfoTextVersion=WikidPad 1.7beta6
+VersionInfoTextVersion=WikidPad 1.7beta7
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-1.7beta6
+OutputBaseFilename=WikidPad-1.7beta7
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2006 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
@@ -61,18 +61,29 @@ Name: Gadfly; Description: Gadfly database; Types: custom compact full
 Name: Gadfly\Help; Description: Help wiki; Types: custom compact full
 Name: Sqlite; Description: Sqlite database; Types: full
 [Icons]
-Name: {group}\WikidPad; Filename: {app}\WikidPad.exe; IconFilename: {app}\icons\pwiki.ico; IconIndex: 0; Components: Program_files Gadfly\Help
-Name: {group}\{cm:UninstallProgram, WikidPad}; Filename: {uninstallexe}
+Name: {code:IconDest|Dummy}\WikidPad; Filename: {app}\WikidPad.exe; IconFilename: {app}\icons\pwiki.ico; Components: Program_files Gadfly\Help; IconIndex: 0
+Name: {code:IconDest|Dummy}\{cm:UninstallProgram, WikidPad}; Filename: {uninstallexe}
 [Registry]
-Root: HKCR; SubKey: .wiki; ValueType: string; ValueData: wikidPadFile; Flags: uninsdeletekey; Tasks: assocWiki
-Root: HKCR; SubKey: wikidPadFile; ValueType: string; ValueData: WikidPad File; Flags: uninsdeletekey; Tasks: assocWiki
-Root: HKCR; SubKey: wikidPadFile\Shell\Open\Command; ValueType: string; ValueData: """{app}\WikidPad.exe"" ""%1"""; Flags: uninsdeletevalue; Tasks: assocWiki
-Root: HKCR; Subkey: wikidPadFile\DefaultIcon; ValueType: string; ValueData: {app}\icons\pwiki.ico,0; Flags: uninsdeletevalue; Tasks: assocWiki
-Root: HKCR; Subkey: wiki; ValueType: string; ValueData: URL:WikidPad Protocol; Flags: uninsdeletekey; Tasks: assocWikiUrl
-Root: HKCR; Subkey: wiki; ValueType: string; ValueName: URL Protocol; Flags: uninsdeletevalue; Tasks: assocWikiUrl
-Root: HKCR; Subkey: wiki\shell; ValueType: string; ValueData: open; Flags: uninsdeletevalue; Tasks: assocWikiUrl
-Root: HKCR; Subkey: wiki\DefaultIcon; ValueType: string; ValueData: {app}\icons\pwiki.ico,0; Flags: uninsdeletevalue; Tasks: assocWikiUrl
-Root: HKCR; Subkey: wiki\shell\open\command; ValueType: string; ValueData: """{app}\WikidPad.exe"" ""%1"""; Flags: uninsdeletevalue; Tasks: assocWikiUrl
+Root: HKCR; SubKey: .wiki; ValueType: string; ValueData: wikidPadFile; Flags: uninsdeletekey; Tasks: assocWiki; Check: GlobalRegClasses
+Root: HKCR; SubKey: wikidPadFile; ValueType: string; ValueData: WikidPad File; Flags: uninsdeletekey; Tasks: assocWiki; Check: GlobalRegClasses
+Root: HKCR; SubKey: wikidPadFile\Shell\Open\Command; ValueType: string; ValueData: """{app}\WikidPad.exe"" ""%1"""; Flags: uninsdeletevalue; Tasks: assocWiki; Check: GlobalRegClasses
+Root: HKCR; Subkey: wikidPadFile\DefaultIcon; ValueType: string; ValueData: {app}\icons\pwiki.ico,0; Flags: uninsdeletevalue; Tasks: assocWiki; Check: GlobalRegClasses
+Root: HKCR; Subkey: wiki; ValueType: string; ValueData: URL:WikidPad Protocol; Flags: uninsdeletekey; Tasks: assocWikiUrl; Check: GlobalRegClasses
+Root: HKCR; Subkey: wiki; ValueType: string; ValueName: URL Protocol; Flags: uninsdeletevalue; Tasks: assocWikiUrl; Check: GlobalRegClasses
+Root: HKCR; Subkey: wiki\shell; ValueType: string; ValueData: open; Flags: uninsdeletevalue; Tasks: assocWikiUrl; Check: GlobalRegClasses
+Root: HKCR; Subkey: wiki\DefaultIcon; ValueType: string; ValueData: {app}\icons\pwiki.ico,0; Flags: uninsdeletevalue; Tasks: assocWikiUrl; Check: GlobalRegClasses
+Root: HKCR; Subkey: wiki\shell\open\command; ValueType: string; ValueData: """{app}\WikidPad.exe"" ""%1"""; Flags: uninsdeletevalue; Tasks: assocWikiUrl; Check: GlobalRegClasses
+
+Root: HKCU; Subkey: Software\Classes\.wiki; ValueType: string; ValueData: wikidPadFile; Flags: uninsdeletekey; Check: not GlobalRegClasses
+Root: HKCU; SubKey: Software\Classes\wikidPadFile; ValueType: string; ValueData: WikidPad File; Flags: uninsdeletekey; Tasks: assocWiki; Check: not GlobalRegClasses
+Root: HKCU; SubKey: Software\Classes\wikidPadFile\Shell\Open\Command; ValueType: string; ValueData: """{app}\WikidPad.exe"" ""%1"""; Flags: uninsdeletevalue; Tasks: assocWiki; Check: not GlobalRegClasses
+Root: HKCU; Subkey: Software\Classes\wikidPadFile\DefaultIcon; ValueType: string; ValueData: {app}\icons\pwiki.ico,0; Flags: uninsdeletevalue; Tasks: assocWiki; Check: not GlobalRegClasses
+Root: HKCU; Subkey: Software\Classes\wiki; ValueType: string; ValueData: URL:WikidPad Protocol; Flags: uninsdeletekey; Tasks: assocWikiUrl; Check: not GlobalRegClasses
+Root: HKCU; Subkey: Software\Classes\wiki; ValueType: string; ValueName: URL Protocol; Flags: uninsdeletevalue; Tasks: assocWikiUrl; Check: not GlobalRegClasses
+Root: HKCU; Subkey: Software\Classes\wiki\shell; ValueType: string; ValueData: open; Flags: uninsdeletevalue; Tasks: assocWikiUrl; Check: not GlobalRegClasses
+Root: HKCU; Subkey: Software\Classes\wiki\DefaultIcon; ValueType: string; ValueData: {app}\icons\pwiki.ico,0; Flags: uninsdeletevalue; Tasks: assocWikiUrl; Check: not GlobalRegClasses
+Root: HKCU; Subkey: Software\Classes\wiki\shell\open\command; ValueType: string; ValueData: """{app}\WikidPad.exe"" ""%1"""; Flags: uninsdeletevalue; Tasks: assocWikiUrl; Check: not GlobalRegClasses
+
 [Tasks]
 Name: assocWiki; Description: Associate WikidPad with .wiki files
 Name: assocWikiUrl; Description: "Handle URLs with ""wiki:"" by WikidPad"
@@ -81,6 +92,65 @@ Name: {app}\regexpr.cache; Type: files
 [UninstallDelete]
 Name: {app}\regexpr.cache; Type: files
 [Code]
+var
+  UserModeQuestion: TInputOptionWizardPage;
+  NotAdminMessage: TOutputMsgWizardPage;
+
+
+function ShouldAskForUsermode: Boolean;
+begin
+  result := UsingWinNT and IsAdminLoggedOn;
+end;
+
+procedure InitializeWizard;
+begin
+  if ShouldAskForUsermode then begin
+    UserModeQuestion := CreateInputOptionPage(wpLicense,
+      'Installation mode',
+      'You install as admin, choose for whom you want to install',
+      'Install WikidPad for',
+      True, False);
+    UserModeQuestion.Add('All Users');
+    UserModeQuestion.Add('Current User');
+
+    UserModeQuestion.SelectedValueIndex := 0;
+  end
+  else if UsingWinNT then begin
+    NotAdminMessage := CreateOutputMsgPage(wpLicense,
+      'Not in admin mode', 'You should install as admin',
+      'This program can be installed for all users if you run it as administrator. ' +
+      'You can now abort the setup and log in as administrator.'#13#13 +
+      'If you cannot or don''t want to do that, you can just continue and install ' +
+      'it for current user only.'#13#13 +
+      'If you continue, be aware that the installer maybe can''t ' +
+      'install in the suggested default directory. You may receive an ' +
+      'error message if you try that.');
+  end
+end;
+
+
+function IconDest(Param: String): String;
+begin
+  if ShouldAskForUsermode() and (UserModeQuestion.SelectedValueIndex = 0) then
+    // All users
+    Result := ExpandConstant('{commonprograms}\{groupname}')
+  else
+    // Current user
+    Result := ExpandConstant('{userprograms}\{groupname}');
+end;
+
+
+function GlobalRegClasses: Boolean;
+// Returns true iff registry entries should go to global HK_CR root.
+// If false, they go to HK_CU\Software\Classes
+begin
+  if ShouldAskForUsermode() and (UserModeQuestion.SelectedValueIndex = 0) then
+    Result := true
+  else
+    Result := not UsingWinNT;  // On Win 98/ME, it should always return true
+end;
+
+
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   resultCode: Integer;
@@ -96,3 +166,5 @@ begin
     end;
   end;
 end;
+
+

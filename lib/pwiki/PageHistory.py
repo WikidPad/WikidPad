@@ -16,7 +16,7 @@ class PageHistory:
                 ("deleted page", self.onDeletedWikiPage),
                 ("renamed page", self.onRenamedWikiPage),
                 ("opened wiki", self.onOpenedWiki)
-        )))
+        )), False)
               
 ##                 ("saving current page", self.savingCurrentWikiPage)
 

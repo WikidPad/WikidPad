@@ -45,8 +45,8 @@ from pwiki import PageAst
 
 class WikiData:
     "Interface to wiki data."
-    def __init__(self, pWiki, dataDir):
-        self.pWiki = pWiki
+    def __init__(self, dataManager, dataDir):
+        self.dataManager = dataManager
         self.dataDir = dataDir
         self.connWrap = None
         self.cachedContentNames = None
@@ -61,7 +61,7 @@ class WikiData:
         conn = gadfly.gadfly("wikidb", self.dataDir)
         self.connWrap = DbStructure.ConnectWrap(conn)
         
-        self.pagefileSuffix = self.pWiki.configuration.get("main",
+        self.pagefileSuffix = self.dataManager.getWikiConfig().get("main",
                 "db_pagefile_suffix", u".wiki")
         
         formatcheck, formatmsg = DbStructure.checkDatabaseFormat(self.connWrap)
@@ -79,7 +79,7 @@ class WikiData:
                 raise
 
         # Set marker for database type
-        self.pWiki.configuration.set("main", "wiki_database_type",
+        self.dataManager.getWikiConfig().set("main", "wiki_database_type",
                 "original_gadfly")
 
         # create word caches
@@ -193,7 +193,7 @@ class WikiData:
     # ---------- Renaming/deleting pages with cache update ----------
 
     def renameWord(self, word, toWord):
-        if not self.pWiki.getFormatting().isNakedWikiWord(toWord):
+        if not self.dataManager.getFormatting().isNakedWikiWord(toWord):
             raise WikiDataException, u"'%s' is an invalid wiki word" % toWord
 
         if self.isDefinedWikiWord(toWord):
@@ -232,7 +232,7 @@ class WikiData:
         delete everything about the wikiword passed in. an exception is raised
         if you try and delete the wiki root node.
         """
-        if word != self.pWiki.wikiName:
+        if word != self.dataManager.getWikiName():
             try:
                 self.commit()
                 # don't delete the relations to the word since other
@@ -917,7 +917,7 @@ def findShortestPath(graph, start, end, path):   # path=[]
 
 
 
-def listAvailableWikiDataHandlers(pWiki):
+def listAvailableWikiDataHandlers():
     """
     Returns a list with the names of available handlers from this module.
     Each item is a tuple (<internal name>, <descriptive name>)
@@ -928,7 +928,7 @@ def listAvailableWikiDataHandlers(pWiki):
         return []
 
 
-def getWikiDataHandler(pWiki, name):
+def getWikiDataHandler(name):
     """
     Returns a creation function (or class) for an appropriate
     WikiData object and a createWikiDB function or (None, None)

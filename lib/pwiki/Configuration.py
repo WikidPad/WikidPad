@@ -6,6 +6,9 @@ import codecs
 
 from wxPython.wx import wxPlatformInfo
 
+from MiscEvent import MiscEventSourceMixin
+
+
 # Placed here to avoid circular dependency with StringOps
 def isUnicode():
     """
@@ -28,10 +31,16 @@ def isLinux():
     except AttributeError:
         return False
 
+# from WikiExceptions import *
 
 from StringOps import utf8Enc, utf8Dec, mbcsDec, strToBool
 
 Error = ConfigParser.Error
+
+
+class UnknownOptionException(Exception): pass
+
+
 
 def _setValue(section, option, value, config):
     """
@@ -65,73 +74,16 @@ def _fillWithDefaults(config, defaults):
             _setValue(s, o, defaults[(s, o)], config)
 
 
-class Configuration:
-    """
-    Manages global and wiki specific configuration options.
-    Mainly wraps the ConfigParser
-    """
-    
-    def __init__(self, globaldef, wikidef):
-        """
-        globaldef -- default values for the global configuration file,
-                dictionary of type {(<section>, <option>): value}
-        wikidef -- Same for wiki configuration file
-        """
-        self.globalConfig = None
-        self.wikiConfig = None
-        
-        self.globalDefaults = globaldef
-        self.wikiDefaults = wikidef
 
+class _AbstractConfiguration:
     def get(self, section, option, default=None):
-        """
-        Return a configuration value returned as string/unicode which
-        is entered in given section and has specified option key.
-        """
-        if type(section) is unicode:
-            section = utf8Enc(section)[0]
+        assert 0  # abstract    
 
-        if type(option) is unicode:
-            option = utf8Enc(option)[0]
-            
-        result = None
-
-        if self.wikiConfig is not None and \
-                self.wikiDefaults.has_key((section, option)):
-            if self.wikiConfig.has_option(section, option):
-                result = self.wikiConfig.get(section, option)
-            else:
-                result = self.wikiDefaults[(section, option)]
-
-        elif self.globalDefaults.has_key((section, option)):
-            if self.globalConfig.has_option(section, option):
-                result = self.globalConfig.get(section, option)
-            else:
-                result = self.globalDefaults[(section, option)]
-        else:
-            raise Exception, "Unknown option" # TODO Better exception
-
-        if result is None:
-            return default
-
-        try:
-            result = utf8Dec(result)[0]
-        except UnicodeError:
-            # Result is not Utf-8 -> try mbcs
-            try:
-                result = mbcsDec(result)[0]
-            except UnicodeError:
-                # Result can't be converted
-                result = default
-
-        return result
-        
-        
     def getint(self, section, option, default=None):
         result = self.get(section, option)
         if result is None:
             return default
-        
+
         try:
             return int(result)
         except ValueError:
@@ -158,94 +110,302 @@ class Configuration:
         
         return strToBool(result, False)
 
-
-    def set(self, section, option, value):
-        if self.wikiConfig and \
-                self.wikiDefaults.has_key((section, option)):
-            _setValue(section, option, value, self.wikiConfig)
-        elif self.globalDefaults.has_key((section, option)):
-            _setValue(section, option, value, self.globalConfig)
-        else:
-            raise Exception, "Unknown option" # TODO Better exception
-
-
-    def fillGlobalWithDefaults(self):
-        _fillWithDefaults(self.globalConfig, self.globalDefaults)
-
-
-    def fillWikiWithDefaults(self):
-        _fillWithDefaults(self.wikiConfig, self.wikiDefaults)
-
-
-    def setWikiConfig(self, config, fn):
-        self.wikiConfig = config
-        self.wikiConfigFilename = fn
-
-    def getWikiConfig(self):
-        return self.wikiConfig
-
-    def getWikiConfigFilename(self):
-        return self.wikiConfigFilename
-
-    def setGlobalConfig(self, config, fn):
-        self.globalConfig = config
-        self.globalConfigFilename = fn
-
-    def getGlobalConfig(self):
-        return self.globalConfig
-
-    def getGlobalConfigFilename(self):
-        return self.globalConfigFilename
-
-
-    def loadWikiConfig(self, fn):
-        if fn is None:
-            self.setWikiConfig(None, None)
-            return
-
-        config = ConfigParser.ConfigParser()
-        config.read(fn)
-        self.setWikiConfig(config, fn)
-
-
-    def createEmptyWikiConfig(self, fn):
-        config = ConfigParser.ConfigParser()
-        self.setWikiConfig(config, fn)
-        
-        
-    def loadGlobalConfig(self, fn):
-        config = ConfigParser.ConfigParser()
-        config.read(fn)
-        self.setGlobalConfig(config, fn)
-
-
-    def createEmptyGlobalConfig(self, fn):
-        config = ConfigParser.ConfigParser()
-        self.setGlobalConfig(config, fn)
-
-        
-    def save(self):
-        """
-        Save all configurations
-        """
-        if self.wikiConfig:
-            configFile = open(self.wikiConfigFilename, 'w')
-            try:
-                self.wikiConfig.write(configFile)
-            finally:
-                configFile.close()
-
-        configFile = open(self.globalConfigFilename, 'w')
-        try:
-            self.globalConfig.write(configFile)
-        finally:
-            configFile.close()
-            
     def isUnicode(unself):
         """
         Return if GUI is in unicode mode
         """
         return isUnicode()
+
+
+
+class _SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
+    """
+    Wraps a single ConfigParser object
+    """
+
+    def __init__(self, configdef):
+        """
+        configdef -- Dictionary with defaults for configuration file
+        """
+        MiscEventSourceMixin.__init__(self)
+        
+        self.configParserObject = None
+        self.configPath = None
+        
+        self.configDefaults = configdef
+
+    def get(self, section, option, default=None):
+        """
+        Return a configuration value returned as string/unicode which
+        is entered in given section and has specified option key.
+        """
+        if type(section) is unicode:
+            section = utf8Enc(section)[0]
+
+        if type(option) is unicode:
+            option = utf8Enc(option)[0]
+            
+        result = None
+
+        if self.isOptionAllowed(section, option):
+            if self.configParserObject.has_option(section, option):
+                result = self.configParserObject.get(section, option)
+            else:
+                result = self.configDefaults[(section, option)]
+        else:
+            raise UnknownOptionException, "Unknown option %s:%s" % (section, option)
+
+        if result is None:
+            return default
+
+        try:
+            result = utf8Dec(result)[0]
+        except UnicodeError:
+            # Result is not Utf-8 -> try mbcs
+            try:
+                result = mbcsDec(result)[0]
+            except UnicodeError:
+                # Result can't be converted
+                result = default
+
+        return result
+
+
+    def isOptionAllowed(self, section, option):
+        """
+        The function test if an option is valid.
+        Only options can be set/retrieved which have an entry in the
+        defaults and if the configParserObject is valid.
+        """
+        return self.configParserObject is not None and \
+                self.configDefaults.has_key((section, option))
+
+
+    def set(self, section, option, value):
+        if type(section) is unicode:
+            section = utf8Enc(section)[0]
+
+        if type(option) is unicode:
+            option = utf8Enc(option)[0]
+            
+        if self.isOptionAllowed(section, option):
+            _setValue(section, option, value, self.configParserObject)
+        else:
+            raise UnknownOptionException, "Unknown option"
+
+
+    def fillWithDefaults(self):
+        _fillWithDefaults(self.configParserObject, self.configDefaults)
+
+
+    def setConfigParserObject(self, config, fn):
+        self.configParserObject = config
+        self.configPath = fn
+
+    def getConfigParserObject(self):
+        return self.configParserObject
+
+    def getConfigPath(self):
+        return self.configPath
+
+    def loadConfig(self, fn):
+        if fn is None:
+            self.setConfigParserObject(None, None)
+            return
+
+        config = ConfigParser.ConfigParser()
+        config.read(fn)
+        self.setConfigParserObject(config, fn)
+
+
+    def createEmptyConfig(self, fn):
+        config = ConfigParser.ConfigParser()
+        self.setConfigParserObject(config, fn)
+
+
+    def save(self):
+        """
+        Save all configurations
+        """
+        if self.configParserObject:
+            configFile = open(self.configPath, 'w')
+            try:
+                self.configParserObject.write(configFile)
+            finally:
+                configFile.close()
+    
+    def informChanged(self):
+        """
+        This should be called after configuration was changed to let
+        the object send out an event.
+        The set method does not send events automatically to prevent
+        the creation of many events (one per each set call) instead
+        of one at the end of changes
+        """
+        self.fireMiscEventKeys(("configuration changed",))
+
+
+
+class _CombinedConfiguration(_AbstractConfiguration):
+    """
+    Manages global and wiki specific configuration options.
+    Mainly wraps two _SingleConfiguration instances
+    """
+    
+    def __init__(self, globalconfig, wikiconfig):
+        """
+        globalconfig -- _SingleConfiguration object for global settings
+        wikiconfig -- Same for wiki settings
+        """
+        self.globalConfig = globalconfig
+        self.wikiConfig = wikiconfig
+
+    def get(self, section, option, default=None):
+        """
+        Return a configuration value returned as string/unicode which
+        is entered in given section and has specified option key.
+        """
+        if type(section) is unicode:
+            section = utf8Enc(section)[0]
+
+        if type(option) is unicode:
+            option = utf8Enc(option)[0]
+            
+        result = None
+
+        if self.wikiConfig is not None and \
+                self.wikiConfig.isOptionAllowed(section, option):
+            result = self.wikiConfig.get(section, option, default)
+        elif self.globalConfig is not None and \
+                self.globalConfig.isOptionAllowed(section, option):
+            result = self.globalConfig.get(section, option, default)
+        else:
+            raise UnknownOptionException, "Unknown option %s:%s" % (section, option)
+
+        if result is None:
+            return default
+
+        return result
+        
+        
+#     def getint(self, section, option, default=None):
+#         result = self.get(section, option)
+#         if result is None:
+#             return default
+#         
+#         try:
+#             return int(result)
+#         except ValueError:
+#             # Can't convert result string to integer
+#             return default
+# 
+# 
+#     def getfloat(self, section, option, default=None):
+#         result = self.get(section, option)
+#         if result is None:
+#             return default
+#         
+#         try:
+#             return float(result)
+#         except ValueError:
+#             # Can't convert result string to float
+#             return default
+# 
+# 
+#     def getboolean(self, section, option, default=None):
+#         result = self.get(section, option)
+#         if result is None:
+#             return default
+#         
+#         return strToBool(result, False)
+
+
+    def set(self, section, option, value):
+        if type(section) is unicode:
+            section = utf8Enc(section)[0]
+
+        if type(option) is unicode:
+            option = utf8Enc(option)[0]
+
+        if self.wikiConfig is not None and \
+                self.wikiConfig.isOptionAllowed(section, option):
+            self.wikiConfig.set(section, option, value)
+        elif self.globalConfig is not None and \
+                self.globalConfig.isOptionAllowed(section, option):
+            self.globalConfig.set(section, option, value)
+        else:
+            raise UnknownOptionException, "Unknown option %s:%s" % (section, option)
+
+
+    def fillGlobalWithDefaults(self):
+        self.globalConfig.fillWithDefaults()
+
+
+    def fillWikiWithDefaults(self):
+        self.wikiConfig.fillWithDefaults()
+
+
+#     def setWikiConfigParserObject(self, config, fn):
+#         self.wikiConfig.setConfigParserObject(config, fn)
+# 
+#     def getWikiConfigParserObject(self):
+#         return self.wikiConfig.getConfigParserObject()
+# 
+#     def getWikiConfigFilename(self):
+#         return self.wikiConfig.getConfigFilename()
+
+
+#     def setGlobalConfigParserObject(self, config, fn):
+#         self.globalConfig.setConfigParserObject(config, fn)
+# 
+#     def getGlobalConfigParserObject(self):
+#         return self.globalConfig.getConfigParserObject()
+# 
+#     def getGlobalConfigFilename(self):
+#         return self.globalConfig.getConfigFilename()
+
+    def loadWikiConfig(self, fn):
+        self.wikiConfig.loadConfig(fn)
+
+    def createEmptyWikiConfig(self, fn):
+        self.wikiConfig.createEmptyConfig(fn)
+
+    def getWikiConfig(self):
+        return self.wikiConfig
+
+    def setWikiConfig(self, config):
+        self.wikiConfig = config
+
+
+    def loadGlobalConfig(self, fn):
+        self.globalConfig.loadConfig(fn)
+
+    def createEmptyGlobalConfig(self, fn):
+        self.globalConfig.createEmptyConfig(fn)
+
+    def save(self):
+        """
+        Save all configurations
+        """
+        try:
+            if self.wikiConfig is not None:
+                self.wikiConfig.save()
+        except:
+            traceback.print_exc()
+
+        if self.globalConfig is not None:
+            self.globalConfig.save()
+    
+    def informChanged(self):
+        """
+        This should be called after configuration was changed. It is called
+        for its _SingleConfiguration objects in turn to let them send events
+        """
+        if self.globalConfig is not None:
+            self.globalConfig.informChanged()
+
+        if self.wikiConfig is not None:
+            self.wikiConfig.informChanged()
 
 
 
@@ -368,15 +528,21 @@ WIKIDEFAULTS = {
     # For file storage (esp. identity check)
     ("main", "fileStorage_identity_modDateMustMatch"): "False",  # Modification date must match for file to be identical
     ("main", "fileStorage_identity_filenameMustMatch"): "False",  # Filename must match for file 
-    ("main", "fileStorage_identity_modDateIsEnough"): "False"
+    ("main", "fileStorage_identity_modDateIsEnough"): "False",
             # Same modification date is enough to claim files identical (no content compare)
 
+    ("main", "wikiPageTitlePrefix"): "++"   # Prefix for main title of new pages
     }
 
 
 
-def createConfiguration():
-    return Configuration(GLOBALDEFAULTS, WIKIDEFAULTS)
+def createCombinedConfiguration():
+    return _CombinedConfiguration(_SingleConfiguration(GLOBALDEFAULTS),
+            _SingleConfiguration(WIKIDEFAULTS))
+            
+
+def createWikiConfiguration():
+    return _SingleConfiguration(WIKIDEFAULTS)
 
 
 

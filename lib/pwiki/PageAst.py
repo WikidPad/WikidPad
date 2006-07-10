@@ -137,7 +137,7 @@ class Page(Ast):
         
     def buildAst(self, formatting, text, formatDetails=None,
             threadholder=DUMBTHREADHOLDER):
-        self.tokens = formatting.tokenizePage(text, formatDetails=formatDetails,
+        self.tokens = formatting.tokenizePage(text, formatDetails,
                 threadholder=threadholder)
         
         _enrichTokens(formatting, self.tokens, formatDetails, threadholder)
@@ -225,7 +225,7 @@ class Todo(Ast):
         
         value = groupdict["todoValue"]
         self.valuetokens = formatting.tokenizeTodo(value,
-                formatDetails=formatDetails, threadholder=threadholder)
+                formatDetails, threadholder=threadholder)
 
         # The valuetokens contain start position relative to beginning of
         # value. This must be corrected to position rel. to whole page
@@ -283,7 +283,7 @@ class Table(Ast):
         content = groupdict["tableContent"]
       
         tokensIn = formatting.tokenizeTableContent(content,
-                formatDetails=formatDetails, threadholder=threadholder)
+                formatDetails, threadholder=threadholder)
         relpos = token.start + len(self.begin)
         
         contenttokens = []
@@ -420,7 +420,7 @@ class WikiWord(Ast):
 #         title = title[:delimPos]
 
         self.titleTokens = formatting.tokenizeTitle(title,
-                formatDetails=formatDetails, threadholder=threadholder)
+                formatDetails, threadholder=threadholder)
                 
         for t in self.titleTokens:
             t.start += relpos
@@ -480,7 +480,7 @@ class Url(Ast):
 #         title = title[:delimPos]
 
         self.titleTokens = formatting.tokenizeTitle(title,
-                formatDetails=formatDetails, threadholder=threadholder)
+                formatDetails, threadholder=threadholder)
                 
         for t in self.titleTokens:
             t.start += relpos

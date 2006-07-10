@@ -3,11 +3,14 @@
 import sys, os, traceback, os.path, glob, time
 os.stat_float_times(True)
 
+VERSION_STRING = "wikidPad 1.7beta7"
+
 if not hasattr(sys, 'frozen'):
     sys.path.append("lib")
 
-from pwiki import srePersistent
-srePersistent.loadCodeCache()
+import ExceptionLogger
+ExceptionLogger.startLogger(VERSION_STRING)
+
 
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
@@ -26,9 +29,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "gad
 from wxPython.wx import *
 import wxPython.xrc as xrc
 
-from pwiki.PersonalWikiFrame import PersonalWikiFrame
-from pwiki.StringOps import mbcsDec
-from pwiki.CmdLineAction import CmdLineAction
+
 
 # openThisWiki = None
 # openThisWikiWord = None
@@ -41,11 +42,103 @@ from pwiki.CmdLineAction import CmdLineAction
 #    if len(sys.argv) > 2:
 #       openThisWikiWord = sys.argv[2]
 
+
+# global exception control
+
+# class StdErrReplacement:
+#     def write(self, data):
+#         global _exceptionDestDir, _exceptionSessionTimeStamp, _exceptionOccurred
+#         global _previousExcepthook
+# 
+#         print "onWrite", repr(_exceptionDestDir)
+# 
+#         try:
+#             f = open(os.path.join(_exceptionDestDir, "WikidPad_Error.log"), "a")
+#             try:
+#                 if not _exceptionOccurred:
+#                     # (Only write for first exception in session) This isn't an exception
+#                     f.write(_exceptionSessionTimeStamp)
+#                     ## _exceptionOccurred = True
+#                 sys.stdout.write(data)
+#                 f.write(data)
+#             finally:
+#                 f.close()
+#         except:
+#             pass # TODO
+# 
+#     def writelines(self, it):
+#         for l in it:
+#             self.write(l)
+#             
+# #     def __getattr__(self, attr):
+# #         print "__getattr__", repr(attr)
+# #         return None
+# 
+# 
+# class ExceptionHandler:
+#     def __init__(self):
+#         global _exceptionDestDir, _exceptionSessionTimeStamp, _exceptionOccurred
+#         global _previousExcepthook
+#         self._exceptionDestDir = _exceptionDestDir
+#         self._exceptionSessionTimeStamp = _exceptionSessionTimeStamp
+#         self._exceptionOccurred = _exceptionOccurred
+#         self._previousExcepthook = _previousExcepthook
+#         self.traceback = traceback
+# 
+# 
+#     def __call__(self, typ, value, trace):
+#     #     global _exceptionDestDir, _exceptionSessionTimeStamp, _exceptionOccurred
+#     #     global _previousExcepthook
+#     #     global _traceback2
+#         import WikidPadStarter
+#     
+#         try:
+#             print "onException", repr(WikidPadStarter.traceback), repr(WikidPadStarter._exceptionDestDir)
+#     ##        traceback.print_exception(typ, value, trace, file=sys.stdout)
+#             f = open(os.path.join(WikidPadStarter._exceptionDestDir, "WikidPad_Error.log"), "a")
+#             try:
+#                 if not WikidPadStarter._exceptionOccurred:
+#                     # Only write for first exception in session
+#                     f.write(WikidPadStarter._exceptionSessionTimeStamp) 
+#                     WikidPadStarter._exceptionOccurred = True
+#                 WikidPadStarter.traceback.print_exception(typ, value, trace, file=f)
+#                 WikidPadStarter.traceback.print_exception(typ, value, trace, file=sys.stdout)
+#             finally:
+#                 f.close()
+#         except:
+#             print "Exception occurred during global exception handling:"
+#             WikidPadStarter.traceback.print_exc(file=sys.stdout)
+#             print "Original exception:"
+#             WikidPadStarter.traceback.print_exception(typ, value, trace, file=sys.stdout)
+#             WikidPadStarter._previousExcepthook(typ, value, trace)
+# 
+# 
+# _exceptionDestDir = os.path.dirname(os.path.abspath(sys.argv[0]))
+# _exceptionSessionTimeStamp = \
+#         time.strftime("\n\nVersion: '" + VERSION_STRING +
+#                 "' Session start: %Y-%m-%d %H:%M:%S\n")
+# _exceptionOccurred = False
+# 
+# 
+# _previousExcepthook = sys.excepthook
+# # sys.excepthook = ExceptionHandler()   # onException
+# 
+# _previousStdErr = sys.stderr
+# sys.stderr = StdErrReplacement()
+
+
+from pwiki import srePersistent
+srePersistent.loadCodeCache()
+
+from pwiki.PersonalWikiFrame import PersonalWikiFrame
+from pwiki.StringOps import mbcsDec
+from pwiki.CmdLineAction import CmdLineAction
+
+
 def findDirs():
     """
     Returns tuple (wikiAppDir, globalConfigDir)
     """
-    global _exceptionDestDir
     wikiAppDir = None
 
     try:
@@ -85,46 +178,10 @@ def findDirs():
     if globalConfigDir is not None:
         globalConfigDir = mbcsDec(globalConfigDir, "replace")[0]
         
-    _exceptionDestDir = globalConfigDir
+    ExceptionLogger._exceptionDestDir = globalConfigDir
 
     return (wikiAppDir, globalConfigDir)
 
-
-
-# global exception control
-
-
-def onException(typ, value, trace):
-    global _exceptionDestDir, _exceptionSessionTimeStamp, _exceptionOccurred
-    global _previousExcepthook
-
-    try:
-        f = open(os.path.join(_exceptionDestDir, "WikidPad_Error.log"), "a")
-        try:
-            if not _exceptionOccurred:
-                # Only write for first exception in session
-                f.write(_exceptionSessionTimeStamp) 
-                _exceptionOccurred = True
-            traceback.print_exception(typ, value, trace, file=f)
-            traceback.print_exception(typ, value, trace, file=sys.stdout)
-        finally:
-            f.close()
-    except:
-        print "Exception occurred during global exception handling:"
-        traceback.print_exc(file=sys.stdout)
-        print "Original exception:"
-        traceback.print_exception(typ, value, trace, file=sys.stdout)
-        _previousExcepthook(typ, value, trace)
-
-
-_exceptionDestDir = os.path.dirname(os.path.abspath(sys.argv[0]))
-_exceptionSessionTimeStamp = \
-        time.strftime("\n\nSession start: %Y-%m-%d %H:%M:%S\n")
-_exceptionOccurred = False
-
-
-_previousExcepthook = sys.excepthook
-sys.excepthook = onException
 
 
 
@@ -179,8 +236,22 @@ class App(wxApp):
         res.LoadFromString(rd)
         
         wikiAppDir, globalConfigDir = findDirs()
+        
+        if not globalConfigDir or not os.path.exists(globalConfigDir):
+            raise Exception(u"Error initializing environment, couldn't locate "
+                    u"global config directory")
+                    
+        self.globalConfigDir = globalConfigDir
+
+        self.globalConfigSubDir = os.path.join(self.globalConfigDir,
+                ".WikidPadGlobals")
+        if not os.path.exists(self.globalConfigSubDir):
+            os.mkdir(self.globalConfigSubDir)
+
+
         self.wikiFrame = PersonalWikiFrame(None, -1, "WikidPad", wikiAppDir,
-                globalConfigDir, CmdLineAction(sys.argv[1:]))
+                globalConfigDir, self.globalConfigSubDir,
+                CmdLineAction(sys.argv[1:]))
 
         self.SetTopWindow(self.wikiFrame)
         ## _prof.stop()
@@ -192,15 +263,20 @@ class App(wxApp):
         except:
             pass
 
-
         return True
         
+        
     def OnExit(self):
-        global _exceptionDestDir, _exceptionOccurred
-        if _exceptionOccurred and hasattr(sys, 'frozen'):
+#         global _exceptionDestDir, _exceptionOccurred
+        if ExceptionLogger._exceptionOccurred and hasattr(sys, 'frozen'):
             wxMessageBox("An error occurred during this session\nSee file %s" %
-                    os.path.join(_exceptionDestDir, "WikidPad_Error.log"),
+                    os.path.join(ExceptionLogger._exceptionDestDir, "WikidPad_Error.log"),
                     "Error", style = wxOK)
+
+
+    def getGlobalConfigSubDir(self):
+        return self.globalConfigSubDir
+
 
 
 class ErrorFrame(wxFrame):

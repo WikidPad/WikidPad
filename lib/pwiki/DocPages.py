@@ -11,6 +11,8 @@ from StringOps import strToBool, fileContentToUnicode, BOM_UTF8, utf8Enc, \
 import WikiFormatting
 import PageAst
 
+import WikidPadStarter
+
 
 class DocPage(MiscEventSourceMixin):
     """
@@ -308,7 +310,9 @@ class WikiPage(DocPage):
 
             if content is None:
                 title = self.getWikiPageTitle(self.getWikiWord())
-                content = u"++ %s\n\n" % title
+                content = u"%s %s\n\n" % \
+                        (self.wikiDataManager.getFormatting().getPageTitlePrefix(),
+                        title)
 
         return content
 
@@ -348,7 +352,7 @@ class WikiPage(DocPage):
         """
         Update additional cached informations (properties, todos, relations)
         """
-        formatting = self.mainControl.getFormatting()
+        formatting = self.wikiDataManager.getFormatting()
         
         page = PageAst.Page()
         page.buildAst(formatting, text, self.getFormatDetails())
@@ -381,7 +385,7 @@ class WikiPage(DocPage):
         self.wikiData.cachedGlobalProps = None
 
         # add a relationship to the scratchpad at the root
-        if self.wikiWord == self.mainControl.wikiName:
+        if self.wikiWord == self.wikiDataManager.getWikiName():
             self.addChildRelationship(u"ScratchPad")
 
         # clear the dirty flag
@@ -394,7 +398,7 @@ class WikiPage(DocPage):
 #         self.lastUpdate = time()   # self.modified
 
         if fireEvent:
-            self.mainControl.informWikiPageUpdate(self)  # TODO Remove
+            ##??? self.mainControl.informWikiPageUpdate(self)  # TODO Remove
             self.fireMiscEventKeys(("wiki page updated", "page updated"))
 
 
@@ -474,7 +478,8 @@ class FunctionalPage(DocPage):
 
     def getContent(self):
         if self.funcTag == "global/[TextBlocks]":
-            tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[TextBlocks].wiki")
+            tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
+                    "[TextBlocks].wiki")
             try:
                 tbFile = open(tbLoc, "rU")
                 tbContent = tbFile.read()
@@ -483,7 +488,8 @@ class FunctionalPage(DocPage):
             except:
                 tbContent = u""
         elif self.funcTag == "global/[PWL]":
-            tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[PWL].wiki")
+            tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
+                    "[PWL].wiki")
             try:
                 tbFile = open(tbLoc, "rU")
                 tbContent = tbFile.read()
@@ -525,7 +531,9 @@ class FunctionalPage(DocPage):
 #         self.wikiData.setContent(self.wikiWord, text)
 
         if self.funcTag == "global/[TextBlocks]":
-            tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[TextBlocks].wiki")
+            tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
+                    "[TextBlocks].wiki")
+#             tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[TextBlocks].wiki")
             tbFile = open(tbLoc, "w")
             try:
                 tbFile.write(BOM_UTF8)
@@ -533,7 +541,9 @@ class FunctionalPage(DocPage):
             finally:
                 tbFile.close()
         elif self.funcTag == "global/[PWL]":
-            tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[PWL].wiki")
+            tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
+                    "[PWL].wiki")
+#             tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[PWL].wiki")
             tbFile = open(tbLoc, "w")
             try:
                 tbFile.write(BOM_UTF8)

@@ -1000,28 +1000,12 @@ class WikiTreeCtrl(wxTreeCtrl):
         wxKeyFunctionSink(self.pWiki.getMiscEvent(), self, (
                 ("loading current page", self.onLoadingCurrentWikiPage),
                 ("closed current wiki", self.onClosedCurrentWiki),
-                ("updated current page props", self.onUpdatedCurrentPageProps), # TODO is event fired somewhere?
+                ("wiki page updated", self.onWikiPageUpdated),
                 ("renamed page", self.onRenamedWikiPage),
                 ("deleted page", self.onDeletedWikiPage)
         ))
 #         
 #         self.pWiki.getMiscEvent().addListener(self.meListener)
-
-
-
-
-#     def Reparent(self, parent):
-#         """
-#         Tree events seem to get lost on reparent, so bind them again
-#         """
-#         print "Reparent"
-#         wxTreeCtrl.Reparent(self, parent)
-#         ID = self.GetId()
-#         EVT_TREE_ITEM_ACTIVATED(self, ID, self.OnTreeItemActivated)
-#         EVT_TREE_SEL_CHANGED(self, ID, self.OnTreeItemActivated)
-#         EVT_TREE_ITEM_EXPANDING(self, ID, self.OnTreeItemExpand)
-#         EVT_TREE_ITEM_COLLAPSED(self, ID, self.OnTreeItemCollapse)
-
 
 
     def collapse(self):
@@ -1097,7 +1081,7 @@ class WikiTreeCtrl(wxTreeCtrl):
             self.Unselect()
 
 
-    def onUpdatedCurrentPageProps(self, miscevt):
+    def onWikiPageUpdated(self, miscevt):
         if not self.pWiki.configuration.getboolean("main", "tree_update_after_save"):
             return
 
@@ -1225,6 +1209,17 @@ class WikiTreeCtrl(wxTreeCtrl):
 
 
     def onRenamedWikiPage(self, miscevt):
+        # TODO Doesn't work
+#         rootItem = self.GetPyData(self.GetRootItem())
+#         print "onRenamedWikiPage", repr(rootItem)
+#         if miscevt.get("oldWord") == \
+#                 rootItem.getWikiWord():
+#             # Renamed word was root of the tree, so set it as root again
+#             self.pWiki.setCurrentWordAsRoot()
+#             
+#             # Updating the tree isn't necessary then, so return
+#             return
+
         if not self.pWiki.configuration.getboolean("main", "tree_update_after_save"):
             return
 

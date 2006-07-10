@@ -6,7 +6,8 @@ from Utilities import DUMBTHREADHOLDER
 
 import srePersistent as re
 
-from StringOps import Tokenizer, matchWhole, Token, htmlColorToRgbTuple
+from StringOps import Tokenizer, matchWhole, Token, htmlColorToRgbTuple, \
+        unescapeWithRe
 
 
 FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
@@ -45,24 +46,6 @@ def compileCombinedRegex(expressions, ignoreList=None):
 
     return re.compile(u"|".join(result),
             re.DOTALL | re.UNICODE | re.MULTILINE)
-
-
-
-# def _buildExpressionsUnindex(expressions, modifier):
-#     """
-#     Helper for getExpressionsFormatList().
-#     Create from an expressions list (see compileCombinedRegex) a tuple
-#     of format types so that result[i] is the "right" number from
-#     FormatTypes when i is the index returned as second element of a tuple
-#     in the tuples list returned by the Tokenizer.
-# 
-#     In fact it is mainly the second tuple item from each expressions
-#     list element.
-#     modifier -- Dict. If a format type in expressions matches a key
-#             in modifier, it is replaced by its value in the result
-#     """
-#     
-#     return [modifier.get(t, t) for re, t in expressions]
     
 
 # TODO Remove ?
@@ -144,10 +127,6 @@ class WikiPageFormatDetails(object):
     def __init__(self, withCamelCase=True, noFormat=False):
         self.withCamelCase = withCamelCase   # Interpret CamelCase as wiki word
         self.noFormat = noFormat   # No formatting at all, overrides other settings
-    
-
-
-
 
 # --------------------------------
 
@@ -157,20 +136,16 @@ class WikiFormatting:
     Provides access to the regular expressions needed especially
     for the Tokenizer in StringOps.py, but also for other purposes.
     It also contains a few test and conversion functions for wiki words
-
-    Active component which reacts on MiscEvents to change the
-    regexes and other data according to loaded wiki and
-    chosen options.
     """
-    def __init__(self, pWiki, wikiSyntax):
-        self.pWiki = pWiki
+    def __init__(self, wikiDocument, wikiSyntax):
+        self.wikiDocument = wikiDocument
         self.footnotesAsWws = False
         
         # Register for pWiki events
-        self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
-                ("options changed", self.rebuildFormatting),
-                ("opened wiki", self.rebuildFormatting)
-        )))
+#         self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
+#                 ("options changed", self.rebuildFormatting),
+#                 ("opened wiki", self.rebuildFormatting)
+#         )))
 
         for item in dir(wikiSyntax):
             if item.startswith("_"):   # TODO check if necessary
@@ -277,10 +252,10 @@ class WikiFormatting:
 
         ignoreList = []  # List of FormatTypes not to compile into the comb. regex
 
-        if self.pWiki.getConfig().getboolean(
+        if self.wikiDocument.getWikiConfig().getboolean(
                     "main", "footnotes_as_wikiwords", False):
             ignoreList.append(FormatTypes.Footnote)
-            self.footnotesAsWws = self.pWiki.getConfig().getboolean(
+            self.footnotesAsWws = self.wikiDocument.getWikiConfig().getboolean(
                     "main", "footnotes_as_wikiwords", False)
 
 
@@ -465,9 +440,18 @@ class WikiFormatting:
                 word.endswith(self.wikiWordEnd):
             return word[len(self.wikiWordStart):-len(self.wikiWordEnd)]
         return word
+        
+        
+    def getPageTitlePrefix(self):
+        """
+        Return the default prefix for a wiki page main title.
+        By default, it is u"++ "
+        """
+        return unescapeWithRe(self.wikiDocument.getWikiConfig().get(
+                "main", "wikiPageTitlePrefix", "++"))
 
 
-    def getExpressionsFormatList(self, expressions, formatDetails=None):
+    def getExpressionsFormatList(self, expressions, formatDetails):
         """
         Create from an expressions list (see compileCombinedRegex) a tuple
         of format types so that result[i] is the "right" number from
@@ -482,35 +466,30 @@ class WikiFormatting:
         modifier = {FormatTypes.WikiWord2: FormatTypes.WikiWord,
                 FormatTypes.Footnote: FormatTypes.Default}
         if formatDetails is None:
-            page = self.pWiki.getCurrentDocPage()
-            if page is None:
-                formatDetails = WikiPageFormatDetails() # Default
-            else:
-                formatDetails = page.getFormatDetails()
+#             page = self.pWiki.getCurrentDocPage()
+#             if page is None:
+            formatDetails = WikiPageFormatDetails() # Default
+#             else:
+#                 formatDetails = page.getFormatDetails()
         
         if not formatDetails.withCamelCase:
             modifier[FormatTypes.WikiWord] = FormatTypes.Default
         
-#         if self.footnotesAsWws:  # Footnotes (e.g. [42]) as wiki words?
-#             modifier[FormatTypes.Footnote] = FormatTypes.WikiWord
-#         else:
-#             modifier[FormatTypes.Footnote] = FormatTypes.Default
-            
         return [modifier.get(t, t) for re, t in expressions]
 
 
 
-    def tokenizePage(self, text, formatDetails=None,
+    def tokenizePage(self, text, formatDetails,
             threadholder=DUMBTHREADHOLDER):
         """
         Function used by PageAst module
         """
         if formatDetails is None:
-            page = self.pWiki.getCurrentDocPage()
-            if page is None:
-                formatDetails = WikiPageFormatDetails() # Default
-            else:
-                formatDetails = page.getFormatDetails()
+#             page = self.pWiki.getCurrentDocPage()
+#             if page is None:
+            formatDetails = WikiPageFormatDetails() # Default
+#             else:
+#                 formatDetails = page.getFormatDetails()
 
         if formatDetails.noFormat:
             # No formatting at all (used e.g. by some functional pages)
@@ -518,7 +497,7 @@ class WikiFormatting:
             
         # TODO Cache if necessary
         formatMap = self.getExpressionsFormatList(
-                self.formatExpressions, formatDetails=formatDetails)
+                self.formatExpressions, formatDetails)
                 
         tokenizer = Tokenizer(self.combinedPageRE, -1)
         
@@ -533,7 +512,7 @@ class WikiFormatting:
         """
         # TODO Cache if necessary
         formatMap = self.getExpressionsFormatList(
-                self.formatTodoExpressions, formatDetails=formatDetails)
+                self.formatTodoExpressions, formatDetails)
                 
         tokenizer = Tokenizer(self.combinedTodoRE, -1)
         
@@ -548,7 +527,7 @@ class WikiFormatting:
         """
         # TODO Cache if necessary
         formatMap = self.getExpressionsFormatList(
-                self.formatTableContentExpressions, formatDetails=formatDetails)
+                self.formatTableContentExpressions, formatDetails)
                 
         tokenizer = Tokenizer(self.combinedTableContentRE, -1)
         
@@ -563,7 +542,7 @@ class WikiFormatting:
         """
         # TODO Cache if necessary
         formatMap = self.getExpressionsFormatList(
-                self.formatWwTitleExpressions, formatDetails=formatDetails)
+                self.formatWwTitleExpressions, formatDetails)
                 
         tokenizer = Tokenizer(self.combinedWwTitleRE, -1)
 

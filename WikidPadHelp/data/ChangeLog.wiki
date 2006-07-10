@@ -1,7 +1,50 @@
 ﻿++ Change Log
 
 
-Jun. 02, 2006 (1.7beta6)
+Jul. 10, 2006 (1.7beta7)
+
+Changes:
+    * "Fast search" text field in toolbar. See SearchingTheWiki
+
+    * Error log file is now written in the same directory where
+      configuration file "WikidPad.config" is, it has a new name
+      ("WikidPad_Error.log" instead of "WikidPad.exe.log") and
+      writes timestamps and version number for each new session
+      where an error occurred.
+    * More verbose messages/exceptions when executing
+      scripts/evaluating expressions.
+
+    * Optical changes in extension "referrals.py" (thanks to
+      schnullibullihulli).
+    * Menus slightly reorganized, some menu items are at other
+      places and/or have another name.
+    * Wiki specific option to set page title prefix
+      (normally "++") for new wiki pages. This allows to freely
+      choose the heading level.
+      See OptionsDialog#*New# page# title# prefix*
+    * Possibility to add (absolute) URL with file dialog (menu
+      "Editor" -> "Add file URL"). 
+    * Fixed exporter bugs: No newline after "Parents: ..." start
+      line in HTML export, unnecessary newline after each item
+      in bulleted/numbered list.
+    * Bug fixed: "compact_sqlite" db backend lost creation date.
+
+    * Help wiki is opened now in the same process so file suffix
+      .wiki needs no longer to be associated with WikidPad to
+      show help.
+    * Internal: Different handling of clipboard copy which may
+      fix a bug (or not).
+    * Internal: Extension files are now loaded with universal
+      newline support, so newline conversion for Linux shouldn't
+      be necessary anymore.
+    * Windows binary installer now supports installation for
+      current user only (on NT-based systems) or for all users
+      (if installing as administrator, you are asked how to
+      install).
+
+
+
+Jun. 02, 2006 (1.7beta6, repository revision in "mbutscher" branch: 80)
 
 Changes:
     * Support for an additional "Views" tree which can be put at any

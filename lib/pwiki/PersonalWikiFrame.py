@@ -9,13 +9,13 @@ from wxPython.stc import *
 from wxPython.html import *
 from wxHelper import GUI_ID, cloneImageList, keyDownToAccel
 
-from MiscEvent import MiscEventSourceMixin
+from MiscEvent import MiscEventSourceMixin   # , DebugSimple
 
 import Configuration
 from WindowLayout import WindowLayouter, setWindowPos, setWindowSize
 # from WikiData import *
-from wikidata import DbBackendUtils
-from wikidata.WikiDataManager import WikiDataManager
+from wikidata import DbBackendUtils, WikiDataManager
+# from wikidata.WikiDataManager import WikiDataManager
 import DocPages
 
 from CmdLineAction import CmdLineAction
@@ -101,7 +101,7 @@ class wxGuiProgressHandler:
 
 class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
     def __init__(self, parent, id, title, wikiAppDir, globalConfigDir,
-            cmdLineAction):
+            globalConfigSubDir, cmdLineAction):
         wxFrame.__init__(self, parent, -1, title, size = (700, 550),
                          style=wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
         MiscEventSourceMixin.__init__(self)
@@ -115,20 +115,19 @@ class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
 
         self.sleepMode = False  # Is program in low resource sleep mode?
 
-        if not globalConfigDir or not exists(globalConfigDir):
-            self.displayErrorMessage(
-                    u"Error initializing environment, couldn't locate "+
-                    u"global config directory", u"Shutting Down")
-            self.Close()
+#         if not globalConfigDir or not exists(globalConfigDir):
+#             self.displayErrorMessage(
+#                     u"Error initializing environment, couldn't locate "+
+#                     u"global config directory", u"Shutting Down")
+#             self.Close()
 
 
         # initialize some variables
         self.globalConfigDir = globalConfigDir
         self.wikiAppDir = wikiAppDir
         
-        self.globalConfigSubDir = join(self.globalConfigDir, ".WikidPadGlobals")
-        if not exists(self.globalConfigSubDir):
-            os.mkdir(self.globalConfigSubDir)
+        self.globalConfigSubDir = globalConfigSubDir
+        
         # Create the "[TextBlocks].wiki" file in the global config subdirectory
         # if the file doesn't exist yet.
         tbLoc = join(self.globalConfigSubDir, "[TextBlocks].wiki")
@@ -144,7 +143,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 """)
             tbFile.close()
         self.globalConfigLoc = join(globalConfigDir, "WikidPad.config")
-        self.configuration = Configuration.createConfiguration()
+        self.configuration = Configuration.createCombinedConfiguration()
 
         self.wikiPadHelp = join(self.wikiAppDir, 'WikidPadHelp',
                 'WikidPadHelp.wiki')
@@ -153,7 +152,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # defaults
         self.wikiData = None
         self.wikiDataManager = None
-        self.wikiConfigFilename = None
 #         self.currentWikiWord = None
 #         self.currentWikiPage = None
         self.lastCursorPositionInPage = {}
@@ -170,6 +168,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.cmdIdToIconName = None # Maps command id (=menu id) to icon name
                                     # needed for "Editor"->"Add icon property"
         self.cmdIdToColorName = None # Same for color names
+        
+        self.eventRoundtrip = 0
         
         # setup plugin manager and hooks API
         self.pluginManager = PluginManager()
@@ -393,16 +393,30 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         return self.wikiDataManager.getWikiData()
 
     def getWikiDataManager(self):
+        """
+        Deprecated, use getWikiDocument() instead
+        """
         return self.wikiDataManager
         
+    def getWikiDocument(self):
+        return self.wikiDataManager
+
+
     def getWikiConfigPath(self):
-        return self.wikiConfigFilename
+        if self.wikiDataManager is None:
+            return None
+
+        return self.wikiDataManager.getWikiConfigPath()
 
     def getConfig(self):
         return self.configuration
         
     def getFormatting(self):
-        return self.formatting
+        if self.wikiDataManager is None:
+            return None
+
+        return self.wikiDataManager.getFormatting()
+#         return self.formatting
         
     def getLogWindow(self):
         return self.logWindow
@@ -508,6 +522,31 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return default
 
 
+#     def _onEventToFocusedWindow(self, evt):
+#         print "_onEventToFocusedWindow", repr(evt.GetId()), repr(wxWindow.FindFocus())
+#         wxWindow.FindFocus().AddPendingEvent(evt)
+
+
+    def _OnRoundtripEvent(self, evt):
+        """
+        Special event handler for events which must be handled by the
+        window which has currently the focus (e.g. "copy to clipboard" which
+        must be done by either editor or HTML preview).
+        
+        These events are sent further to the currently focused window.
+        If they are not consumed they go up to the parent window until
+        they are here again (make a "roundtrip").
+        This function also avoids an infinite loop of such events.
+        """
+        # Check for infinite loop
+        if self.eventRoundtrip > 0:
+            return
+
+        self.eventRoundtrip += 1
+        wxWindow.FindFocus().ProcessEvent(evt)
+        self.eventRoundtrip -= 1
+
+
     def addMenuItem(self, menu, label, text, evtfct=None, icondesc=None,
             menuID=None):
         if menuID is None:
@@ -522,6 +561,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         menu.AppendItem(menuitem)
         if evtfct is not None:
             EVT_MENU(self, menuID, evtfct)
+
         return menuitem
 
 
@@ -537,6 +577,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(wikiMenu, '&Open\t' + self.keyBindings.OpenWiki,
                 'Open Wiki', self.OnWikiOpen)
+
+# TODO
+#         self.addMenuItem(wikiMenu, '&Open in New Window\t' +
+#                 self.keyBindings.OpenWikiNewWindow,
+#                 'Open Wiki in a new window', self.OnWikiOpenNewWindow)
 
         self.addMenuItem(wikiMenu, 'Open as &Type',
                 'Open Wiki with a specified wiki database type',
@@ -557,10 +602,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.addMenuItem(wikiMenu, '&Search Wiki\t' +
                     self.keyBindings.SearchWiki, 'Search Wiki',
                     lambda evt: self.showSearchDialog(), "tb_lens")
-
-            self.addMenuItem(wikiMenu, '&View Bookmarks\t' +
-                    self.keyBindings.ViewBookmarks, 'View Bookmarks',
-                    lambda evt: self.viewBookmarks())
 
         wikiMenu.AppendSeparator()
 
@@ -894,7 +935,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
                     "Clipboard Catcher at Page\t" + self.keyBindings.CatchClipboardAtPage, 
-                    u"Text copied to clipboard is also pasted to this page",
+                    u"Text copied to clipboard is also appended to this page",
                     wxITEM_RADIO)
             wikiWordMenu.AppendItem(menuItem)
             EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
@@ -926,21 +967,47 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         wikiWordMenu.AppendSeparator()
 
-        menuID=wxNewId()
-        wikiWordMenu.Append(menuID, '&Activate Link/Word\t' + self.keyBindings.ActivateLink, 'Activate Link/Word')
-        EVT_MENU(self, menuID, lambda evt: self.activeEditor.activateLink())
+#         menuID=wxNewId()
+#         wikiWordMenu.Append(menuID, '&Activate Link/Word\t' + self.keyBindings.ActivateLink, 'Activate Link/Word')
+#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.activateLink())
+# 
+#         menuID=wxNewId()
+#         wikiWordMenu.Append(menuID, '&View Parents\t' + self.keyBindings.ViewParents, 'View Parents Of Current Wiki Word')
+#         EVT_MENU(self, menuID, lambda evt: self.viewParents(self.getCurrentWikiWord()))
+# 
+#         menuID=wxNewId()
+#         wikiWordMenu.Append(menuID, 'View &Parentless Nodes\t' + self.keyBindings.ViewParentless, 'View nodes with no parent relations')
+#         EVT_MENU(self, menuID, lambda evt: self.viewParentLess())
+# 
+#         menuID=wxNewId()
+#         wikiWordMenu.Append(menuID, 'View &Children\t' + self.keyBindings.ViewChildren, 'View Children Of Current Wiki Word')
+#         EVT_MENU(self, menuID, lambda evt: self.viewChildren(self.getCurrentWikiWord()))
 
-        menuID=wxNewId()
-        wikiWordMenu.Append(menuID, '&View Parents\t' + self.keyBindings.ViewParents, 'View Parents Of Current Wiki Word')
-        EVT_MENU(self, menuID, lambda evt: self.viewParents(self.getCurrentWikiWord()))
+        self.addMenuItem(wikiWordMenu, '&Activate Link/Word\t' +
+                self.keyBindings.ActivateLink, 'Activate link/word',
+                lambda evt: self.activeEditor.activateLink())
 
-        menuID=wxNewId()
-        wikiWordMenu.Append(menuID, 'View &Parentless Nodes\t' + self.keyBindings.ViewParentless, 'View nodes with no parent relations')
-        EVT_MENU(self, menuID, lambda evt: self.viewParentLess())
+        self.addMenuItem(wikiWordMenu, '&List Parents\t' +
+                self.keyBindings.ViewParents,
+                'View parents of current wiki word',
+                lambda evt: self.viewParents(self.getCurrentWikiWord()))
 
-        menuID=wxNewId()
-        wikiWordMenu.Append(menuID, 'View &Children\t' + self.keyBindings.ViewChildren, 'View Children Of Current Wiki Word')
-        EVT_MENU(self, menuID, lambda evt: self.viewChildren(self.getCurrentWikiWord()))
+        self.addMenuItem(wikiWordMenu, 'List &Parentless Nodes\t' +
+                self.keyBindings.ViewParentless,
+                'View nodes with no parent relations',
+                lambda evt: self.viewParentLess())
+
+        self.addMenuItem(wikiWordMenu, 'List &Children\t' +
+                self.keyBindings.ViewChildren,
+                'View children of current wiki word',
+                lambda evt: self.viewChildren(self.getCurrentWikiWord()))
+
+        self.addMenuItem(wikiWordMenu, 'List &Bookmarks\t' +
+                self.keyBindings.ViewBookmarks, 'View bookmarks',
+                lambda evt: self.viewBookmarks())
+
+
+        wikiWordMenu.AppendSeparator()
 
         self.addMenuItem(wikiWordMenu, 'Set As &Root\t' + self.keyBindings.SetAsRoot,
                 'Set current wiki word as tree root',
@@ -954,15 +1021,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         historyMenu=wxMenu()
 
         menuID=wxNewId()
-        historyMenu.Append(menuID, '&View History\t' + self.keyBindings.ViewHistory, 'View History')
+        historyMenu.Append(menuID, '&List History\t' +
+                self.keyBindings.ViewHistory, 'View History')
         EVT_MENU(self, menuID, lambda evt: self.viewHistory())
 
         menuID=wxNewId()
-        historyMenu.Append(menuID, '&Up History\t' + self.keyBindings.UpHistory, 'Up History')
+        historyMenu.Append(menuID, '&Up History\t' +
+                self.keyBindings.UpHistory, 'Up History')
         EVT_MENU(self, menuID, lambda evt: self.viewHistory(-1))
 
         menuID=wxNewId()
-        historyMenu.Append(menuID, '&Down History\t' + self.keyBindings.DownHistory, 'Down History')
+        historyMenu.Append(menuID, '&Down History\t' +
+                self.keyBindings.DownHistory, 'Down History')
         EVT_MENU(self, menuID, lambda evt: self.viewHistory(1))
 
         self.addMenuItem(historyMenu, '&Back\t' + self.keyBindings.GoBack,
@@ -975,7 +1045,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(historyMenu, '&Wiki Home\t' + self.keyBindings.GoHome,
                 'Go to Wiki Home Page',
-                lambda evt: self.openWikiPage(self.wikiName, forceTreeSyncFromRoot=True),
+                lambda evt: self.openWikiPage(self.getWikiDocument().getWikiName(),
+                    forceTreeSyncFromRoot=True),
                 "tb_home")
 
 
@@ -1016,30 +1087,46 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.editorMenu.AppendSeparator()
 
         self.addMenuItem(self.editorMenu, 'Cu&t\t' + self.keyBindings.Cut,
-                'Cut', lambda evt: self.activeEditor.Cut(),
+                'Cut', self._OnRoundtripEvent,  # lambda evt: self.activeEditor.Cut(),
                 "tb_cut", menuID=GUI_ID.CMD_CLIPBOARD_CUT)
 
+#         self.addMenuItem(self.editorMenu, '&Copy\t' + self.keyBindings.Copy,
+#                 'Copy', lambda evt: self.fireMiscEventKeys(("command copy",)), # lambda evt: self.activeEditor.Copy()
+#                 "tb_copy", menuID=GUI_ID.CMD_CLIPBOARD_COPY)
+
         self.addMenuItem(self.editorMenu, '&Copy\t' + self.keyBindings.Copy,
-                'Copy', lambda evt: self.fireMiscEventKeys(("command copy",)), # lambda evt: self.activeEditor.Copy()  # lambda evt: wxWindow.FindFocus().ProcessEvent(evt),
+                'Copy', self._OnRoundtripEvent,  # lambda evt: self.activeEditor.Copy()
                 "tb_copy", menuID=GUI_ID.CMD_CLIPBOARD_COPY)
 
+
+        # TODO support copying from preview
         self.addMenuItem(self.editorMenu, 'Copy to &ScratchPad\t' + \
                 self.keyBindings.CopyToScratchPad,
                 'Copy Text to ScratchPad', lambda evt: self.activeEditor.snip(),
                 "tb_copy")
 
+#         self.addMenuItem(self.editorMenu, '&Paste\t' + self.keyBindings.Paste,
+#                 'Paste', lambda evt: self.activeEditor.Paste(),
+#                 "tb_paste", menuID=GUI_ID.CMD_CLIPBOARD_PASTE)
+
         self.addMenuItem(self.editorMenu, '&Paste\t' + self.keyBindings.Paste,
-                'Paste', lambda evt: self.activeEditor.Paste(),
+                'Paste', self._OnRoundtripEvent,  # lambda evt: self.activeEditor.Paste(),
                 "tb_paste", menuID=GUI_ID.CMD_CLIPBOARD_PASTE)
 
 
         self.editorMenu.AppendSeparator()
 
         self.addMenuItem(self.editorMenu, '&Undo\t' + self.keyBindings.Undo,
-                'Undo', lambda evt: self.activeEditor.CmdKeyExecute(wxSTC_CMD_UNDO))
+                'Undo', self._OnRoundtripEvent, menuID=GUI_ID.CMD_UNDO)
 
         self.addMenuItem(self.editorMenu, '&Redo\t' + self.keyBindings.Redo,
-                'Redo', lambda evt: self.activeEditor.CmdKeyExecute(wxSTC_CMD_REDO))
+                'Redo', self._OnRoundtripEvent, menuID=GUI_ID.CMD_REDO)
+
+#         self.addMenuItem(self.editorMenu, '&Undo\t' + self.keyBindings.Undo,
+#                 'Undo', lambda evt: self.activeEditor.CmdKeyExecute(wxSTC_CMD_UNDO))
+# 
+#         self.addMenuItem(self.editorMenu, '&Redo\t' + self.keyBindings.Redo,
+#                 'Redo', lambda evt: self.activeEditor.CmdKeyExecute(wxSTC_CMD_REDO))
 
 
         self.editorMenu.AppendSeparator()
@@ -1069,15 +1156,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.editorMenu.AppendMenu(wxNewId(), 'Add color property', colorsMenu)
 
-        self.editorMenu.AppendSeparator()
+        self.addMenuItem(self.editorMenu, 'Add &file URL' +
+                self.keyBindings.AddFileUrl, 'Use file dialog to add URL',
+                lambda evt: self.showAddFileUrlDialog())
 
-        self.addMenuItem(self.editorMenu, '&Zoom In\t' + self.keyBindings.ZoomIn,
-                'Zoom In', lambda evt: self.activeEditor.CmdKeyExecute(wxSTC_CMD_ZOOMIN),
-                "tb_zoomin")
-
-        self.addMenuItem(self.editorMenu, 'Zoo&m Out\t' + self.keyBindings.ZoomOut,
-                'Zoom Out', lambda evt: self.activeEditor.CmdKeyExecute(wxSTC_CMD_ZOOMOUT),
-                "tb_zoomout")
 
 
         self.editorMenu.AppendSeparator()
@@ -1109,15 +1191,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
         menuID=wxNewId()
-        indentGuidesMenuItem = wxMenuItem(self.editorMenu, menuID,
-                "&View Indentation Guides", "View Indentation Guides", wxITEM_CHECK)
-        self.editorMenu.AppendItem(indentGuidesMenuItem)
-        EVT_MENU(self, menuID, self.OnCmdCheckIndentationGuides)
-
-        indentGuidesMenuItem.Check(self.getActiveEditor().GetIndentationGuides())
-
-
-        menuID=wxNewId()
         autoIndentMenuItem = wxMenuItem(self.editorMenu, menuID,
                 "Auto-indent", "Auto indentation", wxITEM_CHECK)
         self.editorMenu.AppendItem(autoIndentMenuItem)
@@ -1134,16 +1207,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         EVT_MENU(self, menuID, self.OnCmdCheckAutoBullets)
 
         autoBulletsMenuItem.Check(self.getActiveEditor().getAutoBullets())
-
-
-        menuID=wxNewId()
-        showLineNumbersMenuItem = wxMenuItem(self.editorMenu, menuID,
-                "Show line numbers", "Show line numbers",
-                wxITEM_CHECK)
-        self.editorMenu.AppendItem(showLineNumbersMenuItem)
-        EVT_MENU(self, menuID, self.OnCmdCheckShowLineNumbers)
-
-        showLineNumbersMenuItem.Check(self.getActiveEditor().getShowLineNumbers())
 
         self.editorMenu.AppendSeparator()
 
@@ -1193,7 +1256,35 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(6))
 
 
-        helpMenu=wxMenu()
+        viewMenu = wxMenu()
+
+        self.addMenuItem(viewMenu, '&Zoom In\t' + self.keyBindings.ZoomIn,
+                'Zoom In', lambda evt: self.activeEditor.CmdKeyExecute(wxSTC_CMD_ZOOMIN),
+                "tb_zoomin")
+
+        self.addMenuItem(viewMenu, 'Zoo&m Out\t' + self.keyBindings.ZoomOut,
+                'Zoom Out', lambda evt: self.activeEditor.CmdKeyExecute(wxSTC_CMD_ZOOMOUT),
+                "tb_zoomout")
+
+        viewMenu.AppendSeparator()
+
+        menuID=wxNewId()
+        indentGuidesMenuItem = wxMenuItem(viewMenu, menuID,
+                "&View Indentation Guides", "View Indentation Guides", wxITEM_CHECK)
+        viewMenu.AppendItem(indentGuidesMenuItem)
+        EVT_MENU(self, menuID, self.OnCmdCheckIndentationGuides)
+
+        indentGuidesMenuItem.Check(self.getActiveEditor().GetIndentationGuides())
+
+        menuID=wxNewId()
+        showLineNumbersMenuItem = wxMenuItem(viewMenu, menuID,
+                "Show line numbers", "Show line numbers",
+                wxITEM_CHECK)
+        viewMenu.AppendItem(showLineNumbersMenuItem)
+        EVT_MENU(self, menuID, self.OnCmdCheckShowLineNumbers)
+
+        showLineNumbersMenuItem.Check(self.getActiveEditor().getShowLineNumbers())
+        helpMenu = wxMenu()
 
         def openHelp(evt):
             try:
@@ -1208,12 +1299,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         'WikidPad instance', e)
                 return
 
-            # set the icon of the app
-            try:
-                self.wikiFrame.SetIcon(wxIcon(os.path.join(wikiAppDir, 'icons',
-                        'pwiki.ico'), wxBITMAP_TYPE_ICO))
-            except:
-                pass
+#             # set the icon of the app
+#             try:
+#                 self.wikiFrame.SetIcon(wxIcon(os.path.join(wikiAppDir, 'icons',
+#                         'pwiki.ico'), wxBITMAP_TYPE_ICO))
+#             except:
+#                 pass
 
 
         menuID=wxNewId()
@@ -1258,13 +1349,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.mainmenu.Append(wikiWordMenu, '&Wiki Words')
         self.mainmenu.Append(historyMenu, '&History')
         self.mainmenu.Append(self.editorMenu, '&Editor')
+        self.mainmenu.Append(viewMenu, '&View')
         if pluginMenu:
             self.mainmenu.Append(pluginMenu, "Pl&ugins")
         self.mainmenu.Append(helpMenu, 'He&lp')
 
         self.SetMenuBar(self.mainmenu)
 
-        if self.wikiConfigFilename:  # If a wiki is open
+        if self.getWikiConfigPath():  # If a wiki is open
             self.mainmenu.EnableTop(1, 1)
             self.mainmenu.EnableTop(2, 1)
             self.mainmenu.EnableTop(3, 1)
@@ -1308,7 +1400,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         icon = self.lookupIcon("tb_home")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Wiki Home", "Wiki Home")
-        EVT_TOOL(self, tbID, lambda evt: self.openWikiPage(self.wikiName, forceTreeSyncFromRoot=True))
+        EVT_TOOL(self, tbID,
+                lambda evt: self.openWikiPage(self.getWikiDocument().getWikiName(),
+                forceTreeSyncFromRoot=True))
 
         icon = self.lookupIcon("tb_doc")
         tbID = wxNewId()
@@ -1457,99 +1551,20 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # Build layout:
 
         self.windowLayouter = WindowLayouter(self, self.createWindow)
-        
-#         for pr in self._LAYOUT_DEFINITION:
-#             self.windowLayouter.addWindowProps(pr)
 
         cfstr = self.getConfig().get("main", "windowLayout")
         self.windowLayouter.setWinPropsByConfig(cfstr)
        
 
-#         print "initializeGui layout", repr(self.windowLayouter.getWinPropsForConfig())
-
         self.windowLayouter.realize()
 
-#         self.viewsTree = self.windowLayouter.getWindowForName("viewstree")
         self.tree = self.windowLayouter.getWindowForName("maintree")
         self.logWindow = self.windowLayouter.getWindowForName("log")
-
-
-
-#         # ------------------------------------------------------------------------------------
-#         # Create the left-right splitter window.
-#         # ------------------------------------------------------------------------------------
-#         self.treeSashWindow = SmartSashLayoutWindow(self, GUI_ID.SASH_WINDOW_TREE,
-#                 wxDefaultPosition, (200, 30), wxSW_3DSASH)
-#         self.treeSashWindow.align(wxLAYOUT_LEFT)
-#         self.treeSashWindow.setMinimalEffectiveSashPosition(10)
-#         
-#         pos = self.getConfig().getint("main", "splitter_pos", 170)
-# 
-#         self.treeSashWindow.setSashPosition(pos)
-#         if pos < 50: pos = 170
-#         self.treeSashWindow.setEffectiveSashPosition(pos)
-# 
-# 
-#         self.viewsTreeSashWindow = SmartSashLayoutWindow(self.treeSashWindow, -1,
-#                 wxDefaultPosition, (200, 30), wxSW_3DSASH)
-#         self.viewsTreeSashWindow.align(wxLAYOUT_BOTTOM)
-#         self.viewsTreeSashWindow.setMinimalEffectiveSashPosition(10)
-#         self.viewsTreeSashWindow.setSashPosition(60)
-#         
-#         self.viewsTree = self.createWindow({"name": "viewstree"},
-#                 self.viewsTreeSashWindow)
-# 
-# 
-# #         self.vertSplitter = self.createWindow({"name":
-# #                 "split(tree)(split(txteditor1)(log))"}, self)
-# #         self.vertSplitter.SetMinimumPaneSize(1)
-# 
-#         # ------------------------------------------------------------------------------------
-#         # Create the tree on the left.
-#         # ------------------------------------------------------------------------------------
-#         self.tree = self.createWindow({"name": "maintree"}, self.treeSashWindow)
-# 
-#         EVT_SIZE(self.treeSashWindow, lambda evt: wxLayoutAlgorithm().LayoutWindow(
-#                 self.treeSashWindow, self.tree))
-# 
-# 
-#         self.logSashWindow = SmartSashLayoutWindow(self, GUI_ID.SASH_WINDOW_LOG,
-#                 wxDefaultPosition, (200, 30), wxSW_3DSASH)  # wxNO_BORDER|wxSW_3D
-#         self.logSashWindow.align(wxLAYOUT_BOTTOM)
-#         self.logSashWindow.setMinimalEffectiveSashPosition(10)
-#         
-#         self.logSashWindow.setEffectiveSashPosition(self.configuration.getint(
-#                 "main", "log_window_effectiveSashPos", 120))
-#         self.logSashWindow.setSashPosition(self.configuration.getint(
-#                 "main", "log_window_sashPos", 1))
-# #         self.logSashWindow.SetDefaultSize((1000, 120))
-# #         self.logSashWindow.SetOrientation(wxLAYOUT_HORIZONTAL)
-# #         self.logSashWindow.SetAlignment(wxLAYOUT_BOTTOM)
-# #         self.logSashWindow.SetSashVisible(wxSASH_TOP, True)
-# 
-#         self.logWindow = self.createWindow({"name": "log"},
-#                 self.logSashWindow)
-
-
-        # ------------------------------------------------------------------------------------
-        # Create the editor
-        # ------------------------------------------------------------------------------------
-        ## self.createEditor()
-
-#         self.mainAreaPanel = wxNotebook(self, -1)
-#                 
-#         self.activeEditor = self.createWindow({"name": "txteditor1"},
-#                 self.mainAreaPanel)
-#         self.mainAreaPanel.AddPage(self.activeEditor, u"Edit")
-#         
-#         self.htmlView = WikiHtmlView(self, self.mainAreaPanel, -1)
-#         self.mainAreaPanel.AddPage(self.htmlView, u"Preview")
         
 
         EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(),
                 self.OnNotebookPageChanged)
         EVT_SET_FOCUS(self.mainAreaPanel, self.OnNotebookFocused)
-
 
 
         # ------------------------------------------------------------------------------------
@@ -1667,7 +1682,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 traceback.print_exc()
                 self.displayErrorMessage('There was an error loading the icons '
                         'for the tree control.', e)
-            if self.wikiConfigFilename is not None and winName == "viewstree":
+            if self.getWikiConfigPath() is not None and winName == "viewstree":
                 tree.setViewsAsRoot()
             return tree
         elif winName.startswith("txteditor"):
@@ -1838,7 +1853,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def newWiki(self, wikiName, wikiDir):
         "creates a new wiki"
-        wdhandlers = DbBackendUtils.listHandlers(self)
+        wdhandlers = DbBackendUtils.listHandlers()
         if len(wdhandlers) == 0:
             self.displayErrorMessage(
                     'No data handler available to create database.')
@@ -1876,13 +1891,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             wdhName = wdhandlers[index][0]
                 
-            wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(self, 
-                    wdhName)
-                    
-            if wikiDataFactory is None:
-                self.displayErrorMessage(
-                        'Data handler %s not available' % wdh[0])
-                return
+#             wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(self, 
+#                     wdhName)
+#                     
+#             if wikiDataFactory is None:
+#                 self.displayErrorMessage(
+#                         'Data handler %s not available' % wdh[0])
+#                 return
             
 
             # create the new dir for the wiki
@@ -1891,10 +1906,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             allIsWell = True
 
             dataDir = join(wikiDir, "data")
+            dataDir = mbcsDec(abspath(dataDir), "replace")[0]
 
             # create the data directory for the data files
             try:
-                createWikiDbFunc(wikiName, dataDir, False)
+                WikiDataManager.createWikiDb(self, wdhName, wikiName, dataDir,
+                        False)
+  #               createWikiDbFunc(wikiName, dataDir, False)
             except WikiDBExistsException:
                 # The DB exists, should it be overwritten
                 dlg=wxMessageDialog(self, u'A wiki database already exists '+
@@ -1902,7 +1920,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         u'Wiki DB Exists', wxYES_NO)
                 result = dlg.ShowModal()
                 if result == wxID_YES:
-                    createWikiDbFunc(wikiName, dataDir, True)
+  #                   createWikiDbFunc(wikiName, dataDir, True)
+                    WikiDataManager.createWikiDb(self, wdhName, wikiName, dataDir,
+                        True)
                 else:
                     allIsWell = False
 
@@ -1911,18 +1931,22 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.displayErrorMessage('There was an error creating the wiki database.', e)
                 traceback.print_exc()                
                 allIsWell = False
+                
+            self.closeWiki()
 
             if (allIsWell):
                 # everything is ok, write out the config file
                 # create a new config file for the new wiki
-                self.configuration.createEmptyWikiConfig(configFileLoc)
-                self.configuration.fillWikiWithDefaults()
+                wikiConfig = Configuration.createWikiConfiguration()
+#                 
+                wikiConfig.createEmptyConfig(configFileLoc)
+                wikiConfig.fillWithDefaults()
                 
-                self.configuration.set("main", "wiki_name", wikiName)
-                self.configuration.set("main", "last_wiki_word", wikiName)
-                self.configuration.set("main", "wiki_database_type", wdhName)
-                self.configuration.set("wiki_db", "data_dir", "data")
-                self.configuration.save()
+                wikiConfig.set("main", "wiki_name", wikiName)
+                wikiConfig.set("main", "last_wiki_word", wikiName)
+                wikiConfig.set("main", "wiki_database_type", wdhName)
+                wikiConfig.set("wiki_db", "data_dir", "data")
+                wikiConfig.save()
 
 #                 configFile = open(configFileLoc, 'w')
 #                 config.write(configFile)
@@ -1967,6 +1991,28 @@ These are your default global settings.
                 self.openWikiPage(self.wikiName, False, False)
 
 
+    def _askForDbType(self):
+        """
+        Show dialog to ask for the wiki data handler (= database type)
+        for opening a wiki
+        """
+        wdhandlers = DbBackendUtils.listHandlers()
+        if len(wdhandlers) == 0:
+            self.displayErrorMessage(
+                    'No data handler available to open database.')
+            return None
+
+        # Ask for the data handler to use
+        index = wxGetSingleChoiceIndex(u"Choose database type",
+                u"Choose database type", [wdh[1] for wdh in wdhandlers],
+                self)
+        if index == -1:
+            return None
+            
+        return wdhandlers[index][0]
+
+
+
     def openWiki(self, wikiConfigFilename, wikiWordToOpen=None,
             ignoreWdhName=False):
         """
@@ -1999,128 +2045,166 @@ These are your default global settings.
         self.closeWiki()
 #         self.buildMainMenu()   # ???
 
-        # read in the config file
-        # config = ConfigParser.ConfigParser()
-        try:
-            # config.read(wikiConfigFile)
-            self.configuration.loadWikiConfig(wikiConfigFilename)
-        except Exception, e:
-            # try to recover by checking if the parent dir contains the real wiki file
-            # if it does the current wiki file must be a wiki word file, so open the
-            # real wiki to the wiki word.
-            try:
-                parentDir = dirname(dirname(wikiConfigFilename))
-                if parentDir:
-                    wikiFiles = [file for file in os.listdir(parentDir) \
-                            if file.endswith(".wiki")]
-                    if len(wikiFiles) > 0:
-                        wikiWord = basename(wikiConfigFilename)
-                        wikiWord = wikiWord[0:len(wikiWord)-5]
-
-                        # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
-                        windows83Marker = wikiWord.find("~")
-                        if windows83Marker != -1:
-                            wikiWord = wikiWord[0:windows83Marker]
-                            matchingFiles = [file for file in wikiFiles \
-                                    if file.lower().startswith(wikiWord)]
-                            if matchingFiles:
-                                wikiWord = matchingFiles[0]
-                        self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
+            # read in the config file
+            # config = ConfigParser.ConfigParser()
+#             try:
+#                 # config.read(wikiConfigFile)
+#                 self.configuration.loadWikiConfig(wikiConfigFilename)
+#             except Exception, e:
+#                 # try to recover by checking if the parent dir contains the real wiki file
+#                 # if it does the current wiki file must be a wiki word file, so open the
+#                 # real wiki to the wiki word.
+# #                 try:
+#                 parentDir = dirname(dirname(wikiConfigFilename))
+#                 if parentDir:
+#                     wikiFiles = [file for file in os.listdir(parentDir) \
+#                             if file.endswith(".wiki")]
+#                     if len(wikiFiles) > 0:
+#                         wikiWord = basename(wikiConfigFilename)
+#                         wikiWord = wikiWord[0:len(wikiWord)-5]
+# 
+#                         # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
+#                         windows83Marker = wikiWord.find("~")
+#                         if windows83Marker != -1:
+#                             wikiWord = wikiWord[0:windows83Marker]
+#                             matchingFiles = [file for file in wikiFiles \
+#                                     if file.lower().startswith(wikiWord)]
+#                             if matchingFiles:
+#                                 wikiWord = matchingFiles[0]
+#                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
+#                 return
+# 
+# #                 except Exception, ne:
+# #                     traceback.print_exc()
+# #                     self.displayErrorMessage(u"Error reading config file '%s'" %
+# #                             wikiConfigFilename, ne)
+# #                     return False
+#     
+#             # config variables
+#             wikiName = self.configuration.get("main", "wiki_name")
+#             dataDir = self.configuration.get("wiki_db", "data_dir")
+#     
+#             # except Exception, e:
+#             if wikiName is None or dataDir is None:
+#                 raise BadConfigurationFileException(
+#                         "Wiki configuration file is corrupted")
+# #                 self.displayErrorMessage("Wiki configuration file is corrupted", e)
+# #                 # traceback.print_exc()
+# #                 return False
+# 
+#             # absolutize the path to data dir if it's not already
+#             if not isabs(dataDir):
+#                 dataDir = join(dirname(wikiConfigFilename), dataDir)
+#                 
+#             dataDir = mbcsDec(abspath(dataDir), "replace")[0]
+#     
+#     #         self.wikiConfigFilename = wikiConfigFilename
+#     #         self.wikiName = wikiName
+#     #         self.dataDir = dataDir
+#             
+#             # Path to file storage
+#             fileStorDir = join(dirname(wikiConfigFilename), "files")
+#     
+#             # create the db interface to the wiki data
+#             wikiDataManager = None
+# 
+# 
+#             if not ignoreWdhName:
+#                 wikidhName = self.configuration.get("main",
+#                         "wiki_database_type", "")
+#             else:
+#                 wikidhName = None
+#             if wikidhName:
+#                 if not WikiDataManager.isDbHandlerAvailable(wikidhName):
+#                     self.displayErrorMessage(   # TODO !!!!!!
+#                             'Required data handler %s not available' % wikidhName)
+#                     wikidhName = None
+#                 else:
+#                     wikiDataManager = WikiDataManager.openWikiDocument(self,
+#                             wikidhName, dataDir, fileStorDir, self.wikiSyntax)
+# 
+#             if not wikidhName:
+#                 wdhandlers = DbBackendUtils.listHandlers()
+#                 if len(wdhandlers) == 0:
+#                     raise NoDbHandlerException(
+#                             'No data handler available to open database.')
+# #                     self.displayErrorMessage(
+# #                             'No data handler available to open database.')
+#                     return
+# 
+#                 # Ask for the data handler to use
+#                 index = wxGetSingleChoiceIndex(u"Choose database type",
+#                         u"Choose database type", [wdh[1] for wdh in wdhandlers],
+#                         self)
+#                 if index == -1:
+#                     return
+#                     
+#                 wikiDataManager = WikiDataManager.openWikiDocument(self,
+#                         wdhandlers[index][0], dataDir, fileStorDir,
+#                         self.wikiSyntax)
+        if ignoreWdhName:
+            # Explicitly ask for wiki data handler
+            dbtype = self._askForDbType()
+            if dbtype is None:
                 return
-            except Exception, ne:
+        else:
+            # Try to get handler name from wiki config file
+            dbtype = None
+#                     
+
+        while True:
+            try:
+                wikiDataManager = WikiDataManager.openWikiDocument(self,
+                        wikiConfigFilename, self.wikiSyntax, dbtype)
+                break
+            except (UnknownDbHandlerException, DbHandlerNotAvailableException), e:
+                # Could not get handler name from wiki config file
+                # (probably old database) or required handler not available,
+                # so ask user
+                self.displayErrorMessage(str(e))
+                dbtype = self._askForDbType()
+                if dbtype is None:
+                    return False
+                    
+                continue # Try again
+            except Exception, e:
+                # Something else went wrong
+                self.displayErrorMessage("Error connecting to database in '%s'"
+                        % wikiConfigFilename, e)
                 traceback.print_exc()
-                self.displayErrorMessage(u"Error reading config file '%s'" %
-                        wikiConfigFilename, ne)
                 return False
 
-        # config variables
-        wikiName = self.configuration.get("main", "wiki_name")
-        dataDir = self.configuration.get("wiki_db", "data_dir")
+        # OK, things look good
 
-        # except Exception, e:
-        if wikiName is None or dataDir is None:
-            self.displayErrorMessage("Wiki configuration file is corrupted", e)
-            # traceback.print_exc()
-            return False
+        # set the member variables.
 
-        # absolutize the path to data dir if it's not already
-        if not isabs(dataDir):
-            dataDir = join(dirname(wikiConfigFilename), dataDir)
+        self.wikiDataManager = wikiDataManager
+        self.wikiDataManager.getMiscEvent().addListener(self)
+        self.wikiData = wikiDataManager.getWikiData()
 
-        # create the db interface to the wiki data
-        wikiData = None
-        try:
-            if not ignoreWdhName:
-                wikidhName = self.configuration.get("main",
-                        "wiki_database_type", "")
-            else:
-                wikidhName = None
-            if wikidhName:
-                wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(self, 
-                        wikidhName)
-                if wikiDataFactory is None:
-                    self.displayErrorMessage(
-                            'Required data handler %s not available' % wikidhName)
-                    wikidhName = None
-            
-            if not wikidhName:
-                wdhandlers = DbBackendUtils.listHandlers(self)
-                if len(wdhandlers) == 0:
-                    self.displayErrorMessage(
-                            'No data handler available to open database.')
-                    return
+        self.wikiName = self.wikiDataManager.getWikiName()
+        self.dataDir = self.wikiDataManager.getDataDir()
+        
+        self.getConfig().setWikiConfig(self.wikiDataManager.getWikiConfig())
 
-                # Ask for the data handler to use
-                index = wxGetSingleChoiceIndex(u"Choose database type",
-                        u"Choose database type", [wdh[1] for wdh in wdhandlers],
-                        self)
-                if index == -1:
-                    return
-                    
-                wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(self, 
-                        wdhandlers[index][0])
-                        
-                if wikiDataFactory is None:
-                    self.displayErrorMessage(
-                            'Data handler %s not available' % wdh[0])
-                    return
 
-            wikiData = wikiDataFactory(self, dataDir)
-        except Exception, e:
-            self.displayErrorMessage("Error connecting to database in '%s'" % dataDir, e)
-            traceback.print_exc()
-            return False
+#         # Set file storage according to configuration
+#         fs = self.getWikiDataManager().getFileStorage()
+# 
+#         fs.setModDateMustMatch(self.configuration.getboolean("main",
+#                 "fileStorage_identity_modDateMustMatch", False))
+#         fs.setFilenameMustMatch(self.configuration.getboolean("main",
+#                 "fileStorage_identity_filenameMustMatch", False))
+#         fs.setModDateIsEnough(self.configuration.getboolean("main",
+#                 "fileStorage_identity_modDateIsEnough", False))
+
 
         # what was the last wiki word opened
         lastWikiWord = wikiWordToOpen
         if not lastWikiWord:
-            lastWikiWord = self.configuration.get("main", "first_wiki_word")
+            lastWikiWord = self.configuration.get("main", "first_wiki_word", u"")
             if lastWikiWord == u"":
                 lastWikiWord = self.configuration.get("main", "last_wiki_word")
-
-        # OK, things look good
-
-        # Reset some of the members
-#         self.currentWikiWord = None
-#         self.currentWikiPage = None
-
-        # set the member variables.
-        self.wikiConfigFilename = wikiConfigFilename
-        ## self.wikiConfig = config
-        self.wikiName = wikiName
-        self.dataDir = dataDir
-        self.wikiData = wikiData
-        self.wikiDataManager = WikiDataManager(self, wikiData)
-
-        # Set file storage according to configuration
-        fs = self.getWikiDataManager().getFileStorage()
-        
-        fs.setModDateMustMatch(self.configuration.getboolean("main",
-                "fileStorage_identity_modDateMustMatch", False))
-        fs.setFilenameMustMatch(self.configuration.getboolean("main",
-                "fileStorage_identity_filenameMustMatch", False))
-        fs.setModDateIsEnough(self.configuration.getboolean("main",
-                "fileStorage_identity_modDateIsEnough", False))
 
         # reset the gui
         self.resetGui()
@@ -2164,7 +2248,7 @@ These are your default global settings.
         self.activeEditor.Enable(1)
 
         # update the last accessed wiki config var
-        self.lastAccessedWiki(self.wikiConfigFilename)
+        self.lastAccessedWiki(self.getWikiConfigPath())
 
         # Rebuild text blocks menu
         self.rereadTextBlocks()
@@ -2187,14 +2271,17 @@ These are your default global settings.
 
 
     def closeWiki(self, saveState=True):
-        if self.wikiConfigFilename:
+        if self.getWikiConfigPath():
             if saveState:
                 self.saveCurrentWikiState()
             if self.getWikiData():
-                self.getWikiData().close()
+                self.wikiDataManager.release()
+#                 self.getWikiData().close()
                 self.wikiData = None
+                if self.wikiDataManager is not None:
+                    self.wikiDataManager.getMiscEvent().removeListener(self)
                 self.wikiDataManager = None
-            self.wikiConfigFilename = None
+            self.getConfig().setWikiConfig(None)
             if self.clipboardCatcher is not None and \
                     self.clipboardCatcher.isActive():
                 self.clipboardCatcher.stop()
@@ -2274,7 +2361,7 @@ These are your default global settings.
                     u"page will be created"), 0)
             self.statusBar.SetStatusText(uniToGui(u""), 1)
 
-        self.activeEditor.loadWikiPage(page, evtprops)
+        self.getActiveEditor().loadWikiPage(page, evtprops)
 
         p2 = evtprops.copy()
         p2.update({"loaded current page": True})
@@ -2283,7 +2370,7 @@ These are your default global settings.
 
         # set the title and add the word to the history
         self.SetTitle(uniToGui(u"Wiki: %s - %s" %
-                (self.wikiConfigFilename, self.getCurrentWikiWord())))
+                (self.getWikiConfigPath(), self.getCurrentWikiWord())))
 
         self.configuration.set("main", "last_wiki_word", wikiWord)
 
@@ -2352,7 +2439,8 @@ These are your default global settings.
                     else:
                         page.save(text)
                         page.update(text)
-                        
+
+                    self.getWikiData().commit()
                     return True
                 except Exception, e:
                     if word is None:    # TODO !!!
@@ -2402,21 +2490,35 @@ These are your default global settings.
 
         try:
             self.saveCurrentDocPage()
-            self.getWikiDataManager().renameWikiWord(wikiWord, toWikiWord,
-                    modifyText)
 
-            # if the root was renamed we have a little more to do
-            if wikiWord == self.wikiName:
-                self.configuration.set("main", "wiki_name", toWikiWord)
-                self.configuration.set("main", "last_wiki_word", toWikiWord)
-                self.saveCurrentWikiState()
-                self.configuration.loadWikiConfig(None)
+            if wikiWord == self.getWikiDocument().getWikiName():
+                # Renaming of root word = renaming of wiki config file
+                wikiConfigFilename = self.getWikiDocument().getWikiConfigPath()
+                self.wikiHistory.remove(wikiConfigFilename)
+                self.getWikiDocument().renameWikiWord(wikiWord, toWikiWord,
+                        modifyText)
+                # Store some additional information
+                self.lastAccessedWiki(
+                        self.getWikiDocument().getWikiConfigPath())
 
-                self.wikiHistory.remove(self.wikiConfigFilename)
-                renamedConfigFile = join(dirname(self.wikiConfigFilename),
-                        u"%s.wiki" % toWikiWord)
-                os.rename(self.wikiConfigFilename, renamedConfigFile)
-                self.openWiki(renamedConfigFile)
+            else:
+                self.getWikiDocument().renameWikiWord(wikiWord, toWikiWord,
+                        modifyText)
+                    
+            
+
+#             # if the root was renamed we have a little more to do
+#             if wikiWord == prevWikiName:
+#                 self.configuration.set("main", "wiki_name", toWikiWord)
+#                 self.configuration.set("main", "last_wiki_word", toWikiWord)
+#                 self.saveCurrentWikiState()
+#                 self.configuration.loadWikiConfig(None)
+# 
+#                 self.wikiHistory.remove(prevWikiConfigFilename)
+#                 renamedConfigFile = join(dirname(self.wikiConfigFilename),
+#                         u"%s.wiki" % toWikiWord)
+#                 os.rename(self.wikiConfigFilename, renamedConfigFile)
+#                 self.openWiki(renamedConfigFile)
 
             self.getActiveEditor().loadWikiPage(None)
 
@@ -2452,13 +2554,13 @@ These are your default global settings.
         relpath = urllib.url2pathname(relurl[6:])
 
         return u"file:" + urllib.pathname2url(
-                abspath(join(dirname(self.wikiConfigFilename), relpath)))
+                abspath(join(dirname(self.getWikiConfigPath()), relpath)))
 
     def launchUrl(self, link):
 #         match = self.getFormatting().UrlRE.match(link)
 #         try:
 #             link2 = match.group(1)
-            
+
         link2 = link
         if self.configuration.getint(
                 "main", "new_window_on_follow_wiki_url") == 1 or \
@@ -2559,21 +2661,23 @@ These are your default global settings.
         hist = self.pageHistory.getHistory()
         histpos = self.pageHistory.getPosition()
 
+        historyLen = len(hist)
         dlg = wxSingleChoiceDialog(self,
                                    u"History",
                                    u"History",
                                    hist,
                                    wxCHOICEDLG_STYLE|wxOK|wxCANCEL)
         
-        historyLen = len(hist)
-        position = histpos + posDelta - 1
-        if (position < 0):
-            position = 0
-        elif (position >= historyLen):
-            position = historyLen-1
+        if historyLen > 0:
+            position = histpos + posDelta - 1
+            if (position < 0):
+                position = 0
+            elif (position >= historyLen):
+                position = historyLen-1
+    
+            dlg.SetSelection(position)
 
-        dlg.SetSelection(position)
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wxID_OK and dlg.GetSelection() > -1:
             self.pageHistory.goInHistory(dlg.GetSelection() - (histpos - 1))
 
         dlg.Destroy()
@@ -2668,8 +2772,8 @@ These are your default global settings.
                 self.tbIcon = TaskBarIcon(self)
 
             tooltip = None
-            if self.wikiConfigFilename:  # If a wiki is open
-                tooltip = u"Wiki: %s" % self.wikiConfigFilename  # self.wikiName
+            if self.getWikiConfigPath():  # If a wiki is open
+                tooltip = u"Wiki: %s" % self.getWikiConfigPath()  # self.wikiName
             else:
                 tooltip = u"Wikidpad"
 
@@ -3068,6 +3172,7 @@ These are your default global settings.
             self.setHideUndefined()
             self.refreshPageStatus()
             
+            # TODO Move this to WikiDataManager!
             # Set file storage according to configuration
             fs = self.getWikiDataManager().getFileStorage()
             
@@ -3198,7 +3303,39 @@ These are your default global settings.
 
         result = dlg.ShowModal()
         dlg.Destroy()
-        
+
+
+    def showAddFileUrlDialog(self):
+        dlg = wxFileDialog(self, u"Choose a file to create URL",
+                self.getLastActiveDir(), "", "*.*", wxOPEN)
+        if dlg.ShowModal() == wxID_OK:
+            url = urllib.pathname2url(dlg.GetPath())
+            if dlg.GetPath().endswith(".wiki"):
+                url = "wiki:" + url
+            else:
+#                 doCopy = False  # Necessary because key state may change between
+#                                 # the two ifs
+#                 if False:
+#                     # Relative rel: URL
+#                     locPath = self.editor.pWiki.getWikiConfigPath()
+#                     if locPath is not None:
+#                         locPath = dirname(locPath)
+#                         relPath = relativeFilePath(locPath, fn)
+#                         if relPath is None:
+#                             # Absolute path needed
+#                             urls.append("file:%s" % url)
+#                         else:
+#                             urls.append("rel://%s" % urllib.pathname2url(relPath))
+#                 else:
+    
+                # Absolute file: URL
+                url = "file:" + url
+                
+            self.getActiveEditor().AddText(url)
+            
+        dlg.Destroy()
+
+
 
     def showSpellCheckerDialog(self):
         if self.spellChkDlg != None:
@@ -3346,6 +3483,18 @@ These are your default global settings.
     # Event handlers from here on out.
     # ----------------------------------------------------------------------------------------
 
+
+    def miscEventHappened(self, miscevt):
+        """
+        Handle misc events
+        """
+        if miscevt.getSource() is self.getWikiDocument():
+            if miscevt.has_key("wiki page updated"):
+                # This was send from a WikiDocument(=WikiDataManager) object,
+                # send it again
+                self.fireMiscEventProps(miscevt.getProps())
+
+
     def OnWikiOpen(self, event):
         dlg = wxFileDialog(self, u"Choose a Wiki to open",
                 self.getLastActiveDir(), "", "*.wiki", wxOPEN)
@@ -3353,6 +3502,33 @@ These are your default global settings.
             self.openWiki(mbcsDec(abspath(dlg.GetPath()), "replace")[0])
         dlg.Destroy()
         
+    def OnWikiOpenNewWindow(self, event):
+        dlg = wxFileDialog(self, u"Choose a Wiki to open",
+                self.getLastActiveDir(), "", "*.wiki", wxOPEN)
+        if dlg.ShowModal() == wxID_OK:
+            try:
+                clAction = CmdLineAction([])
+                clAction.wikiToOpen = mbcsDec(abspath(dlg.GetPath()), "replace")[0]
+                PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
+                        self.globalConfigDir, clAction)
+                # os.startfile(self.wikiPadHelp)   # TODO!
+            except Exception, e:
+                traceback.print_exc()
+                self.displayErrorMessage('Error while starting new '
+                        'WikidPad instance', e)
+                return
+
+#             # set the icon of the app
+#             try:
+#                 self.wikiFrame.SetIcon(wxIcon(os.path.join(wikiAppDir, 'icons',
+#                         'pwiki.ico'), wxBITMAP_TYPE_ICO))
+#             except:
+#                 pass
+
+#             self.openWiki(mbcsDec(abspath(dlg.GetPath()), "replace")[0])
+        dlg.Destroy()
+
+
     def OnWikiOpenAsType(self, event):
         dlg = wxFileDialog(self, u"Choose a Wiki to open",
                 self.getLastActiveDir(), "", "*.wiki", wxOPEN)
@@ -3360,6 +3536,7 @@ These are your default global settings.
             self.openWiki(mbcsDec(abspath(dlg.GetPath()), "replace")[0],
                     ignoreWdhName=True)
         dlg.Destroy()
+        
         
     def OnWikiNew(self, event):
         dlg = wxTextEntryDialog (self,
@@ -3373,7 +3550,7 @@ These are your default global settings.
             # make sure this is a valid wiki word
             if wikiName.find(u' ') == -1 and \
                     self.getFormatting().isNakedWikiWord(wikiName):
-                startDir = self.wikiConfigFilename
+                startDir = self.getWikiConfigPath()
                 if startDir is None:
                     startDir = self.getLastActiveDir()
                 else:
@@ -3402,12 +3579,11 @@ These are your default global settings.
             self.recentWikisMenu.Remove(event.GetId())
 
 
-    def informWikiPageUpdate(self, wikiPage):
-        # self.tree.buildTreeForWord(wikiPage.wikiWord)    # self.currentWikiWord)
-        self.fireMiscEventProps({"updated current page props": None,
-                "wikiPage": wikiPage})
-
-
+#     def informWikiPageUpdate(self, wikiPage):
+#         # self.tree.buildTreeForWord(wikiPage.wikiWord)    # self.currentWikiWord)
+#         self.fireMiscEventProps({"updated page props": None,
+#                 "wikiPage": wikiPage})
+                
     def OnIdle(self, evt):
         if not self.configuration.getboolean("main", "auto_save"):  # self.autoSave:
             return
@@ -3506,10 +3682,13 @@ These are your default global settings.
         self.hooks.exit(self)
 
         wxTheClipboard.Flush()
-        if self.getWikiData():
-            self.getWikiData().close()
-            self.wikiData = None
-            self.wikiDataManager = None
+        
+        # Superfluous ? 
+#         if self.getWikiData():
+#             self.wikiDataManager.release()
+# #             self.getWikiData().close()
+#             self.wikiData = None
+#             self.wikiDataManager = None
 
         if self.tbIcon is not None:
             if self.tbIcon.IsIconInstalled():

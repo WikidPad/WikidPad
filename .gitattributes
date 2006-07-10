@@ -1,4 +1,5 @@
 * text=auto !eol
+/ExceptionLogger.py -text
 /WikidPad.py -text
 /WikidPad.xrc -text
 WikidPadHelp/WikidPadHelp.wiki -text
@@ -161,6 +162,7 @@ WikidPadHelp/data/Icon[!!-~]flood[!!-~]fill.wiki -text
 WikidPadHelp/data/Icon[!!-~]folder[!!-~]open.wiki -text
 WikidPadHelp/data/Icon[!!-~]folder.wiki -text
 WikidPadHelp/data/Icon[!!-~]folder2.wiki -text
+WikidPadHelp/data/Icon[!!-~]folderwiki.wiki -text
 WikidPadHelp/data/Icon[!!-~]gameboy.wiki -text
 WikidPadHelp/data/Icon[!!-~]gb[!!-~]advance.wiki -text
 WikidPadHelp/data/Icon[!!-~]glasses.wiki -text

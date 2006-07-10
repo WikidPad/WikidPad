@@ -225,7 +225,7 @@ class wxKeyFunctionSink(wxEvtHandler, KeyFunctionSink):
         self.ifdestroyed = ifdestroyed
         
         if self.evtSource is not None:
-            self.evtSource.addListener(self)
+            self.evtSource.addListener(self, False)
         
         if self.ifdestroyed is not None:
             EVT_WINDOW_DESTROY(self.ifdestroyed, self.OnDestroy)

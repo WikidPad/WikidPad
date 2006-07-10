@@ -60,12 +60,12 @@ class WikiHtmlView(wxHtmlWindow):
         self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
                 ("loaded current page", self.onLoadedCurrentWikiPage),
                 ("opened wiki", self.onOpenedWiki),
-                ("options changed", self.onOptionsChanged),
-                ("command copy", self.onCmdCopy)
+                ("options changed", self.onOptionsChanged)
 
+#                 ("command copy", self.onCmdCopy)
 #                 ("updated current page cache", self.updatedCurrentPageCache),
 #                 ("renamed page", self.renamedWikiPage)
-        )))
+        )), False)
         
         self.visible = False
         
@@ -79,6 +79,7 @@ class WikiHtmlView(wxHtmlWindow):
         
         EVT_KEY_DOWN(self, self.OnKeyDown)
         EVT_KEY_UP(self, self.OnKeyUp)
+        EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
 
         EVT_MOUSEWHEEL(self, self.OnMouseWheel) 
 
@@ -146,9 +147,7 @@ class WikiHtmlView(wxHtmlWindow):
             self.refresh()
 
 
-    def onCmdCopy(self, miscevt):
-        if wxWindow.FindFocus() != self:
-            return
+    def OnClipboardCopy(self, evt):
         copyTextToClipboard(self.SelectionToText())
 
 

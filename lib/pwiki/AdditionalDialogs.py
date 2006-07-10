@@ -429,6 +429,8 @@ class OptionsDialog(wxDialog):
     #    tre: regular expression,  f0+: nonegative float
 
     OPTION_TO_CONTROL = (
+            # application-wide options
+            
             ("auto_save", "cbAutoSave", "b"),
             ("auto_save_delay_key_pressed", "tfAutoSaveDelayKeyPressed", "i0+"),
             ("auto_save_delay_dirty", "tfAutoSaveDelayDirty", "i0+"),
@@ -473,14 +475,19 @@ class OptionsDialog(wxDialog):
             ("editor_attribute_color", "tfEditorAttributeColor", "color0"),
             ("editor_bg_color", "tfEditorBgColor", "color0"),
 
+
+            # wiki specific options
+            
             ("footnotes_as_wikiwords", "cbFootnotesAsWws", "b"),
             ("first_wiki_word", "tfFirstWikiWord", "t"),
-            
+
+            ("wikiPageTitlePrefix", "tfWikiPageTitlePrefix", "t"),
+
             ("fileStorage_identity_modDateMustMatch", "cbFsModDateMustMatch", "b"),
             ("fileStorage_identity_filenameMustMatch", "cbFsFilenameMustMatch", "b"),
             ("fileStorage_identity_modDateIsEnough", "cbFsModDateIsEnough", "b")
     )
-    
+
     _PANEL_LIST = (
             ("OptionsPageApplication", u"Application"),    
             ("OptionsPageTree", u"  Tree"),
@@ -489,7 +496,7 @@ class OptionsDialog(wxDialog):
             ("OptionsPageEditor", u"  Editor"),
             ("OptionsPageCurrentWiki", u"Current Wiki")
     )
-    
+
     def __init__(self, pWiki, ID, title="Options",
                  pos=wxDefaultPosition, size=wxDefaultSize,
                  style=wxNO_3D):
@@ -670,6 +677,8 @@ class OptionsDialog(wxDialog):
             self.pWiki.getConfig().set("main", "new_window_on_follow_wiki_url", "1")
         else:
             self.pWiki.getConfig().set("main", "new_window_on_follow_wiki_url", "0")
+
+        self.pWiki.getConfig().informChanged()
 
         evt.Skip()
 

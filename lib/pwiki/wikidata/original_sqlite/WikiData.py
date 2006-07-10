@@ -44,8 +44,8 @@ from pwiki import PageAst
 
 class WikiData:
     "Interface to wiki data."
-    def __init__(self, pWiki, dataDir):
-        self.pWiki = pWiki
+    def __init__(self, dataManager, dataDir):
+        self.dataManager = dataManager
         self.dataDir = dataDir
 
         dbfile = join(dataDir, "wikiovw.sli")   # means "wiki overview"
@@ -58,7 +58,7 @@ class WikiData:
 
         DbStructure.registerSqliteFunctions(self.connWrap)
 
-        self.pagefileSuffix = self.pWiki.configuration.get("main",
+        self.pagefileSuffix = self.dataManager.getWikiConfig().get("main",
                 "db_pagefile_suffix", u".wiki")
 
         formatcheck, formatmsg = DbStructure.checkDatabaseFormat(self.connWrap)
@@ -83,7 +83,7 @@ class WikiData:
         self.contentDbToOutput = lambda c: utf8Dec(c, "replace")[0]
         
         # Set marker for database type
-        self.pWiki.configuration.set("main", "wiki_database_type",
+        self.dataManager.getWikiConfig().set("main", "wiki_database_type",
                 "original_sqlite")
 
         # Function to convert unicode strings from input to content in database
@@ -264,7 +264,7 @@ class WikiData:
     # ---------- Renaming/deleting pages with cache update ----------
 
     def renameWord(self, word, toWord):
-        if not self.pWiki.getFormatting().isNakedWikiWord(toWord):
+        if not self.dataManager.getFormatting().isNakedWikiWord(toWord):
             raise WikiDataException, u"'%s' is an invalid wiki word" % toWord
 
         if self.isDefinedWikiWord(toWord):
@@ -304,7 +304,7 @@ class WikiData:
         delete everything about the wikiword passed in. an exception is raised
         if you try and delete the wiki root node.
         """
-        if word != self.pWiki.wikiName:
+        if word != self.dataManager.getWikiName():
             try:
                 # don't delete the relations to the word since other
                 # pages still have valid outward links to this page.
@@ -1168,36 +1168,7 @@ class WikiData:
         self.connWrap.execSql("vacuum")
 
 
-#     # TODO: Better error checking
-#     def copyWikiFilesToDatabase(self):
-#         """
-#         Helper to transfer wiki files into database for migrating from
-#         original WikidPad to specialized databases.
-# 
-#         Must be implemented if checkCapability returns a version number
-#         for "plain text import".
-#         """
-#         self.connWrap.commit()
-# 
-#         fnames = glob.glob(join(mbcsEnc(self.dataDir, "replace")[0], '*.wiki'))
-#         for fn in fnames:
-#             word = basename(mbcsDec(fn, "replace")[0]).replace('.wiki', '')   # mbcsDec
-# 
-#             fp = open(fn)
-#             content = fp.read()
-#             fp.close()
-#             content = fileContentToUnicode(content)
-# #             word = self.pWiki.getFormatting().normalizeWikiWordImport(word)
-#             if self.pWiki.getFormatting().isNakedWikiWord(word):
-#                 self.setContent(word, content, moddate=stat(fn).st_mtime)
-# #             self.connWrap.execSql("insert or replace into wikiwordcontent(word, "+\
-# #                     "content, modified) values (?,?,?)", (word, sqlite.Binary(content), \
-# #                         stat(fn).st_mtime))
-# 
-#         self.connWrap.commit()
-
-
-def listAvailableWikiDataHandlers(pWiki):
+def listAvailableWikiDataHandlers():
     """
     Returns a list with the names of available handlers from this module.
     Each item is a tuple (<internal name>, <descriptive name>)
@@ -1208,7 +1179,7 @@ def listAvailableWikiDataHandlers(pWiki):
         return []
 
 
-def getWikiDataHandler(pWiki, name):
+def getWikiDataHandler(name):
     """
     Returns a creation function (or class) for an appropriate
     WikiData object and a createWikiDB function or (None, None)

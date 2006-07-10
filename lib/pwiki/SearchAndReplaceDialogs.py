@@ -526,7 +526,7 @@ class SearchWikiDialog(wxDialog):   # TODO
 
         dlg.getMiscEvent().addListener(KeyFunctionSink((
                 ("nonmodal closed", self.onNonmodalClosedPageList),
-        )))
+        )), False)
 
         self.Show(False)
         dlg.Show(True)
@@ -1135,7 +1135,8 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
         
         text = getTextFromClipboard()
         if text:
-            page.buildAst(self.pWiki.getFormatting(), text)
+            page.buildAst(self.pWiki.getFormatting(), text,
+                    self.pWiki.getCurrentDocPage().getFormatDetails())
             wwTokens = page.findType(WikiFormatting.FormatTypes.WikiWord)
 
             found = {}
@@ -1169,7 +1170,8 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
         
         text = getTextFromClipboard()
         if text:
-            page.buildAst(self.pWiki.getFormatting(), text)
+            page.buildAst(self.pWiki.getFormatting(), text,
+                    self.pWiki.getCurrentDocPage().getFormatDetails())
             wwTokens = page.findType(WikiFormatting.FormatTypes.WikiWord)
 
             found = {}

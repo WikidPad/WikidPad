@@ -149,7 +149,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         # register some event handlers
         wxKeyFunctionSink(self.pWiki.getMiscEvent(), self, (
                 ("options changed", self.onOptionsChanged),  # fired by PersonalWikiFrame
-                ("command copy", self.onCmdCopy)
+                # ("command copy", self.onCmdCopy)
         ))
 
         self.wikiPageListener = KeyFunctionSink((
@@ -683,7 +683,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         page = PageAst.Page()
         page.buildAst(self.pWiki.getFormatting(), text,
-                threadholder=threadholder)
+                self.loadedDocPage.getFormatDetails(), threadholder=threadholder)
         
 #         print "buildStyling", repr(page.getTokens())
         
@@ -792,8 +792,14 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             
         emptySelection = startBytePos == endBytePos  # is selection empty
 
+        self.GotoPos(startBytePos)
+        self.AddText(styleChars)
+
         for i in xrange(len(styleChars)):
             endBytePos = self.PositionAfter(endBytePos)
+
+        self.GotoPos(endBytePos)   # +len(styleChars)
+        self.AddText(styleChars)
 
 #         bytePos = self.PositionAfter(self.GetCurrentPos())
 
@@ -805,10 +811,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             for i in xrange(len(styleChars)):
                 bytePos = self.PositionAfter(bytePos)
 
-        self.GotoPos(startBytePos)
-        self.AddText(styleChars)
-        self.GotoPos(endBytePos)   # +len(styleChars)
-        self.AddText(styleChars)
         self.GotoPos(bytePos)        
 
 
@@ -823,7 +825,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if page is None:
             page = PageAst.Page()
             self.pageAst = page
-            page.buildAst(self.pWiki.getFormatting(), self.GetText())
+            page.buildAst(self.pWiki.getFormatting(), self.GetText(),
+                    self.loadedDocPage.getFormatDetails())
         
         return page
 
@@ -1662,7 +1665,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         evt.Skip()
 
 
-    # TODO !!!!!!!!!!!!!
+    # TODO
 #     def setMouseCursor(self):
 #         """
 #         Set the right mouse cursor depending on some circumstances.
@@ -1688,13 +1691,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #             else:
 #                 self.SetCursor(WikiTxtCtrl.CURSOR_IBEAM)
 #                 return False
-
-
-# # Already defined in WikiTreeCtrl
-# def _getTextForNode(text):
-#     if text.startswith("["):
-#         return text[1:len(text)-1]
-#     return text
 
 
 # sorter for relations, removes brackets and sorts lower case
