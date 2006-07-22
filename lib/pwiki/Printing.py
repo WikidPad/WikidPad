@@ -210,13 +210,14 @@ class Printer:
             wordList = [root]
         elif selset == 1:
             # subtree
-            wordList = self.pWiki.wikiData.getAllSubWords([root])
+            wordList = self.pWiki.getWikiData().getAllSubWords([root])
         elif selset == 2:
             # whole wiki
-            wordList = self.pWiki.wikiData.getAllDefinedWikiPageNames()
+            wordList = self.pWiki.getWikiData().getAllDefinedWikiPageNames()
         else:
             # custom list
-            wordList = self.pWiki.wikiData.search(self.listPagesOperation, True)
+            wordList = self.pWiki.getWikiDocument().searchWiki(
+                    self.listPagesOperation, True)
             
         return wordList
 
@@ -253,7 +254,7 @@ class Printer:
 
     def doPreview(self):
         printObj = PlainTextPrint()
-        printObj.setContext(self.pWiki, self, self.pWiki.wikiData,
+        printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
                 self.buildWordList(), "plain_text", None, None)
 
         return printObj.doPreview()
@@ -261,7 +262,7 @@ class Printer:
                     
     def doPrint(self):
         printObj = PlainTextPrint()
-        printObj.setContext(self.pWiki, self, self.pWiki.wikiData,
+        printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
                 self.buildWordList(), "plain_text", None, None)
 
         return printObj.doPrint()
@@ -285,7 +286,10 @@ class PlainTextPrint:
 #         return self.fontDesc
             
     def _buildText(self):
-        contents = map(self.wikiData.getContent, self.wordList)
+        def getTextFromWord(word):
+            return self.wikiDocument.getWikiPage(word).getLiveText()
+
+        contents = map(getTextFromWord, self.wordList)
         # Ensure that each wiki word content ends with newline
         for i, c in enumerate(contents):
             if len(c) > 0 and c[-1] != "\n":
@@ -301,10 +305,10 @@ class PlainTextPrint:
         return separator.join(contents)  # TODO Make configurable
             
             
-    def setContext(self, pWiki, printer, wikiData, wordList, printType, options,
+    def setContext(self, pWiki, printer, wikiDocument, wordList, printType, options,
             addopt):
         self.pWiki = pWiki
-        self.wikiData = wikiData
+        self.wikiDocument = wikiDocument
         self.wordList = wordList
         self.printer = printer
 
@@ -330,53 +334,6 @@ class PlainTextPrint:
         frame.SetPosition(self.pWiki.GetPosition())
         frame.SetSize(self.pWiki.GetSize())
         frame.Show(True)
-
-#         html = self.convertHtml(pWiki, wikiData, wordList, printType, options,
-#                 addopt)
-#                 
-#         self.pWiki.htmlEasyPrinting.PreviewText(html)
-
-
-       
-        
-#     def doPrintSetup(self, pWiki):
-#         self.pWiki = pWiki
-#         pddata = wxPrintDialogData(self.printData)
-#         printerDialog = wxPrintDialog(self.pWiki, pddata)
-# #         printerDialog.GetPrintDialogData().SetSetupDialog(True) # ????
-#         printerDialog.ShowModal();
-# 
-#         # this makes a copy of the wx.PrintData instead of just saving
-#         # a reference to the one inside the PrintDialogData that will
-#         # be destroyed when the dialog is destroyed
-#         self.printData = wxPrintData( printerDialog.GetPrintDialogData().GetPrintData() )
-#         
-#         printerDialog.Destroy()
-
-        
-
-#     def convertHtml(self, pWiki, wikiData, wordList, printType, options, addopt):
-#         result = []
-#         if printType == "plain_text":
-#             for word in wordList:
-#                 text = wikiData.getContent(word)
-#                 htmlpage = self.convertPagePlainTextToHtml(text)
-#                 result.append(htmlpage)
-#                 result.append(u"<br /><br />\n")
-#                 
-#         html = u"".join(result)
-#         html = u'<font face="Courier New">%s</font>' % html
-#         return html
-#             
-#             
-#     def convertPagePlainTextToHtml(self, text):
-#         text = escapeHtml(text).replace(u"\t", u"    ")
-#                 
-#         def msrepl(mat):
-#             return u"&nbsp;" * (len(mat.group(0)) - 1) + u" "
-#               
-# #         print "convertPagePlainTextToHtml", repr(MULTISPACE_RE.sub(msrepl, text))
-#         return MULTISPACE_RE.sub(msrepl, text)
 
 
 class PlainTextPrintout(wxPrintout):

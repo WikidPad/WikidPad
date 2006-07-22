@@ -13,8 +13,8 @@ class PageHistory:
         # Register for pWiki events
         self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
                 ("loading current page", self.onLoadingCurrentWikiPage),
-                ("deleted page", self.onDeletedWikiPage),
-                ("renamed page", self.onRenamedWikiPage),
+                ("deleted wiki page", self.onDeletedWikiPage),
+                ("renamed wiki page", self.onRenamedWikiPage),
                 ("opened wiki", self.onOpenedWiki)
         )), False)
               
@@ -53,7 +53,7 @@ class PageHistory:
         Remove deleted word from history
         """
         newhist = []
-        word = miscevt.get("wikiWord") # self.pWiki.getCurrentWikiWord()
+        word = miscevt.get("wikiPage").getWikiWord() # self.pWiki.getCurrentWikiWord()
         
         # print "onDeletedWikiPage1",  self.pos, repr(self.history)
         
@@ -72,7 +72,7 @@ class PageHistory:
         """
         Rename word in history
         """
-        oldWord = miscevt.get("oldWord")
+        oldWord = miscevt.get("wikiPage").getWikiWord()
         newWord = miscevt.get("newWord")
         
         for i in xrange(len(self.history)):

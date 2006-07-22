@@ -241,7 +241,7 @@ class HtmlXmlExporter:
                 continue
 
             try:
-                content = wikiPage.getContent()
+                content = wikiPage.getLiveText()
                 formatDetails = wikiPage.getFormatDetails()
                 links = {}  # TODO Why links to all (even not exported) children?
                 for relation in wikiPage.getChildRelationships(
@@ -330,7 +330,7 @@ class HtmlXmlExporter:
                     (word, created, modified))
 
             try:
-                content = wikiPage.getContent()
+                content = wikiPage.getLiveText()
                 formatDetails = wikiPage.getFormatDetails()
                 links = {}
                 for relation in wikiPage.getChildRelationships(
@@ -373,7 +373,7 @@ class HtmlXmlExporter:
             fp = utf8Writer(realfp, "replace")
             
             wikiPage = self.wikiDataManager.getWikiPage(word)
-            content = wikiPage.getContent()
+            content = wikiPage.getLiveText()
             formatDetails = wikiPage.getFormatDetails()       
             fp.write(self.exportContentToHtmlString(word, content,
                     formatDetails, links, startFile, onlyInclude))
@@ -1158,8 +1158,11 @@ class TextExporter:
 
         for word in self.wordList:
             try:
-                content = self.wikiDataManager.getWikiData().getContent(word)
-                modified = self.wikiDataManager.getWikiData().getTimestamps(word)[0]
+                wikiPage = self.wikiDataManager.getWikiPage(word)
+                content = wikiPage.getLiveText()
+                modified = wikiPage.getTimestamps()[0]
+#                 content = self.wikiDataManager.getWikiData().getContent(word)
+#                 modified = self.wikiDataManager.getWikiData().getTimestamps(word)[0]
             except:
                 traceback.print_exc()
                 continue
@@ -1273,7 +1276,7 @@ class MultiPageTextExporter:
         
         searchOp.listWikiPagesOp = wpo
         
-        foundPages = self.mainControl.getWikiData().search(searchOp)
+        foundPages = self.mainControl.getWikiDocument().searchWiki(searchOp)
         
         return len(foundPages) == 0
 
@@ -1359,8 +1362,8 @@ class MultiPageTextExporter:
             for word in self.wordList:
                 self.exportFile.write("%s\n" % word)
                 page = self.wikiDataManager.getWikiPage(word)
-                self.exportFile.write(page.getContent())
-                
+                self.exportFile.write(page.getLiveText())
+
                 if sepCount > 0:
                     self.exportFile.write("\n%s\n" % self.separator)
                     sepCount -= 1

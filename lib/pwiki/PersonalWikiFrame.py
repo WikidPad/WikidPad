@@ -1,3 +1,6 @@
+## import hotshot
+## _prof = hotshot.Profile("hotshot.prf")
+
 import os, gc, traceback, sets, string
 from os.path import *
 from time import localtime, time, strftime
@@ -578,10 +581,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.addMenuItem(wikiMenu, '&Open\t' + self.keyBindings.OpenWiki,
                 'Open Wiki', self.OnWikiOpen)
 
-# TODO
-#         self.addMenuItem(wikiMenu, '&Open in New Window\t' +
-#                 self.keyBindings.OpenWikiNewWindow,
-#                 'Open Wiki in a new window', self.OnWikiOpenNewWindow)
+## TODO
+        self.addMenuItem(wikiMenu, '&Open in New Window\t' +
+                self.keyBindings.OpenWikiNewWindow,
+                'Open Wiki in a new window', self.OnWikiOpenNewWindow)
 
         self.addMenuItem(wikiMenu, 'Open as &Type',
                 'Open Wiki with a specified wiki database type',
@@ -1291,7 +1294,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 clAction = CmdLineAction([])
                 clAction.wikiToOpen = self.wikiPadHelp
                 PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
-                        self.globalConfigDir, clAction)
+                        self.globalConfigDir, self.globalConfigSubDir, clAction)
                 # os.startfile(self.wikiPadHelp)   # TODO!
             except Exception, e:
                 traceback.print_exc()
@@ -2154,7 +2157,7 @@ These are your default global settings.
 
         while True:
             try:
-                wikiDataManager = WikiDataManager.openWikiDocument(self,
+                wikiDataManager = WikiDataManager.openWikiDocument(
                         wikiConfigFilename, self.wikiSyntax, dbtype)
                 break
             except (UnknownDbHandlerException, DbHandlerNotAvailableException), e:
@@ -2383,10 +2386,14 @@ These are your default global settings.
 
 
     def saveCurrentDocPage(self, force = False):
+        ## _prof.start()
+      
         if force or self.getCurrentDocPage().getDirty()[0]:
             self.activeEditor.saveLoadedDocPage() # this calls in turn saveDocPage() below
 
         self.refreshPageStatus()
+        
+        ## _prof.stop()
 
 
 #             self.GetToolBar().FindById(GUI_ID.CMD_SAVE_WIKI).Enable(False)
@@ -2459,21 +2466,17 @@ These are your default global settings.
             self.statusBar.PopStatusText(0)
 
 
-    def deleteCurrentWikiPage(self, **evtprops):
+    def deleteCurrentWikiPage(self):
         if self.getCurrentWikiWord():
             # self.saveCurrentDocPage()
             if self.getWikiData().isDefinedWikiWord(self.getCurrentWikiWord()):
-                self.getWikiData().deleteWord(self.getCurrentWikiWord())
+                page = self.getCurrentDocPage()
+                page.deletePage()
+#                 self.getWikiData().deleteWord(self.getCurrentWikiWord())
+#                 # trigger hooks
+#                 self.hooks.deletedWikiWord(self, self.getCurrentWikiWord())
 
-                # trigger hooks
-                self.hooks.deletedWikiWord(self, self.getCurrentWikiWord())
-                
-                p2 = evtprops.copy()
-                p2["deleted page"] = True
-                p2["wikiWord"] = self.getCurrentWikiWord()
-                self.fireMiscEventProps(p2)
-
-            self.pageHistory.goAfterDeletion()
+#             self.pageHistory.goAfterDeletion()
 
 
     def renameCurrentWikiPage(self, toWikiWord, modifyText, **evtprops):
@@ -2504,8 +2507,7 @@ These are your default global settings.
             else:
                 self.getWikiDocument().renameWikiWord(wikiWord, toWikiWord,
                         modifyText)
-                    
-            
+
 
 #             # if the root was renamed we have a little more to do
 #             if wikiWord == prevWikiName:
@@ -2520,19 +2522,19 @@ These are your default global settings.
 #                 os.rename(self.wikiConfigFilename, renamedConfigFile)
 #                 self.openWiki(renamedConfigFile)
 
-            self.getActiveEditor().loadWikiPage(None)
-
-            # trigger hooks
-            self.hooks.renamedWikiWord(self, wikiWord, toWikiWord)                
-            # self.tree.collapse()
-            p2 = evtprops.copy()
-            p2["renamed page"] = True
-            p2["oldWord"] = wikiWord
-            p2["newWord"] = toWikiWord
-            self.fireMiscEventProps(p2)
-
-            self.openWikiPage(toWikiWord, forceTreeSyncFromRoot=False)
-            # self.findCurrentWordInTree()
+#             self.getActiveEditor().loadWikiPage(None)
+# 
+#             # trigger hooks
+#             self.hooks.renamedWikiWord(self, wikiWord, toWikiWord)                
+#             # self.tree.collapse()
+#             p2 = evtprops.copy()
+#             p2["renamed wiki page"] = True
+#             p2["oldWord"] = wikiWord
+#             p2["newWord"] = toWikiWord
+#             self.fireMiscEventProps(p2)
+# 
+#             self.openWikiPage(toWikiWord, forceTreeSyncFromRoot=False)
+#             # self.findCurrentWordInTree()
             return True
         except WikiDataException, e:
             traceback.print_exc()                
@@ -3489,10 +3491,42 @@ These are your default global settings.
         Handle misc events
         """
         if miscevt.getSource() is self.getWikiDocument():
-            if miscevt.has_key("wiki page updated"):
-                # This was send from a WikiDocument(=WikiDataManager) object,
-                # send it again
+            # Event from wiki document aka wiki data manager
+            if miscevt.has_key("deleted wiki page"):
+                wikiPage = miscevt.get("wikiPage")
+                # trigger hooks
+                self.hooks.deletedWikiWord(self,
+                        wikiPage.getWikiWord())
+
                 self.fireMiscEventProps(miscevt.getProps())
+                if wikiPage is self.getCurrentDocPage():
+                    self.pageHistory.goAfterDeletion()
+
+            elif miscevt.has_key("renamed wiki page"):
+                oldWord = miscevt.get("wikiPage").getWikiWord()
+                newWord = miscevt.get("newWord")
+
+                if miscevt.get("wikiPage") is self.getCurrentDocPage():
+                    self.getActiveEditor().loadWikiPage(None)
+
+                    # trigger hooks
+                    self.hooks.renamedWikiWord(self, oldWord, newWord)
+    
+                    self.openWikiPage(newWord, forceTreeSyncFromRoot=False)
+                    # self.findCurrentWordInTree()
+                else:
+                    # trigger hooks
+                    self.hooks.renamedWikiWord(self, oldWord, newWord)
+
+            elif miscevt.has_key("updated wiki page"):
+                # This was send from a WikiDocument(=WikiDataManager) object,
+                # send it again to listening components
+                self.fireMiscEventProps(miscevt.getProps())
+            elif miscevt.has_key("reread text blocks needed"):
+                self.rereadTextBlocks()
+            elif miscevt.has_key("reread personal word list needed"):
+                if self.spellChkDlg is not None:
+                    self.spellChkDlg.rereadPersonalWordLists()
 
 
     def OnWikiOpen(self, event):
@@ -3510,7 +3544,7 @@ These are your default global settings.
                 clAction = CmdLineAction([])
                 clAction.wikiToOpen = mbcsDec(abspath(dlg.GetPath()), "replace")[0]
                 PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
-                        self.globalConfigDir, clAction)
+                        self.globalConfigDir, self.globalConfigSubDir, clAction)
                 # os.startfile(self.wikiPadHelp)   # TODO!
             except Exception, e:
                 traceback.print_exc()

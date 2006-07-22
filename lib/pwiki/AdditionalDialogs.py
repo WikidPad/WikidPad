@@ -932,7 +932,7 @@ class ExportDialog(wxDialog):
             wordList = self.pWiki.getWikiData().getAllDefinedWikiPageNames()
         else:
             # custom list
-            wordList = self.pWiki.getWikiData().search(self.listPagesOperation, True)
+            wordList = self.pWiki.getWikiDocument().searchWiki(self.listPagesOperation, True)
 
 #         self.pWiki.getConfig().set("main", "html_export_pics_as_links",
 #                 self.ctrls.cbHtmlExportPicsAsLinks.GetValue())

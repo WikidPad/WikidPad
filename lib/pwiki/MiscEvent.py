@@ -86,7 +86,17 @@ class MiscEvent(object):
         """
         Has the event the specified key?
         """
-        return self.properties.has_key(key);
+        return self.properties.has_key(key)
+
+    def has_key_in(self, keyseq):
+        """
+        Returns true iff it has at least one key in the sequence of keys keyseq
+        """
+        for key in keyseq:
+            if self.has_key(key):
+                return True
+                
+        return False
 
     def getParent(self):
         """
@@ -130,6 +140,17 @@ class MiscEvent(object):
             except ValueError:
                 # Wasn't in the list
                 pass
+                
+    def hasListener(self, listener):
+        try:
+            self.listeners.index(weakref.ref(listener))
+            return True
+        except ValueError:
+            try:
+                self.listeners.index(listener)
+                return True
+            except ValueError:
+                return False
 
 
     def put(self, key, value = None):

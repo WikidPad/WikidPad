@@ -130,11 +130,11 @@ class SpellCheckerDialog(wxDialog):
         wdm = self.mainControl.getWikiDataManager()
         self.globalPwlPage = wdm.getFuncPage("global/[PWL]")
         self.spellChkAddedGlobal = \
-                sets.Set(self.globalPwlPage.getContent().split("\n"))
+                sets.Set(self.globalPwlPage.getLiveText().split("\n"))
 
         self.localPwlPage = wdm.getFuncPage("wiki/[PWL]")
         self.spellChkAddedLocal = \
-                sets.Set(self.localPwlPage.getContent().split("\n"))
+                sets.Set(self.localPwlPage.getLiveText().split("\n"))
 
 
     def checkNext(self, startPos=0):
@@ -298,7 +298,7 @@ class SpellCheckerDialog(wxDialog):
         self.spellChkAddedGlobal.add(self.currentCheckedWord)
         words = list(self.spellChkAddedGlobal)
         words.sort()
-        self.globalPwlPage.save(u"\n".join(words))
+        self.globalPwlPage.replaceLiveText(u"\n".join(words))
 
         self.OnIgnore(None)
 
@@ -310,7 +310,7 @@ class SpellCheckerDialog(wxDialog):
         self.spellChkAddedLocal.add(self.currentCheckedWord)
         words = list(self.spellChkAddedLocal)
         words.sort()
-        self.localPwlPage.save(u"\n".join(words))
+        self.localPwlPage.replaceLiveText(u"\n".join(words))
 
         self.OnIgnore(None)
 

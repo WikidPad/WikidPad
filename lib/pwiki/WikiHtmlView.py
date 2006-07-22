@@ -1,14 +1,3 @@
-# import os, traceback, codecs, array
-# from cStringIO import StringIO
-# import urllib_red as urllib
-# import string, re
-# import threading
-# 
-# from os.path import exists
-# 
-# from time import time, strftime
-# 
-
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
@@ -22,19 +11,6 @@ from MiscEvent import KeyFunctionSink
 from StringOps import uniToGui
 
 import Exporters
-
-# from wxPython.stc import *
-# import wxPython.xrc as xrc
-# 
-# from wxHelper import GUI_ID, XrcControls, XRCID
-# 
-# import WikiFormatting
-# from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException
-# from textwrap import fill
-# 
-# from StringOps import utf8Enc, utf8Dec, mbcsEnc, mbcsDec, uniToGui, guiToUni, \
-#         Tokenizer, revStr
-# from Configuration import isUnicode
 
 
 
@@ -60,15 +36,15 @@ class WikiHtmlView(wxHtmlWindow):
         self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
                 ("loaded current page", self.onLoadedCurrentWikiPage),
                 ("opened wiki", self.onOpenedWiki),
-                ("options changed", self.onOptionsChanged)
+                ("options changed", self.onOptionsChanged),
+                ("updated wiki page", self.onUpdatedWikiPage)
 
-#                 ("command copy", self.onCmdCopy)
 #                 ("updated current page cache", self.updatedCurrentPageCache),
-#                 ("renamed page", self.renamedWikiPage)
+#                 ("renamed wiki page", self.renamedWikiPage)
         )), False)
-        
+
         self.visible = False
-        
+
         self.currentLoadedWikiWord = None
         self.scrollPosCache = {}
         
@@ -80,7 +56,8 @@ class WikiHtmlView(wxHtmlWindow):
         EVT_KEY_DOWN(self, self.OnKeyDown)
         EVT_KEY_UP(self, self.OnKeyUp)
         EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
-
+        
+        EVT_SET_FOCUS(self, self.OnSetFocus)
         EVT_MOUSEWHEEL(self, self.OnMouseWheel) 
 
 
@@ -146,6 +123,14 @@ class WikiHtmlView(wxHtmlWindow):
         if self.visible:
             self.refresh()
 
+    def onUpdatedWikiPage(self, miscevt):
+        if self.visible:
+            self.refresh()
+
+
+    def OnSetFocus(self, evt):
+        if self.visible:
+            self.refresh()
 
     def OnClipboardCopy(self, evt):
         copyTextToClipboard(self.SelectionToText())

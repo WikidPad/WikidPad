@@ -10,10 +10,10 @@ class StdErrReplacement:
         try:
             f = open(os.path.join(EL._exceptionDestDir, "WikidPad_Error.log"), "a")
             try:
-                if not EL._exceptionOccurred:
+                if not EL._timestampPrinted:
                     # (Only write for first exception in session) This isn't an exception
                     f.write(EL._exceptionSessionTimeStamp)
-                    ## _exceptionOccurred = True
+                    EL._timestampPrinted = True
                 sys.stdout.write(data)
                 f.write(data)
             finally:
@@ -51,10 +51,12 @@ def onException(typ, value, trace):
 ##        traceback.print_exception(typ, value, trace, file=sys.stdout)
         f = open(os.path.join(EL._exceptionDestDir, "WikidPad_Error.log"), "a")
         try:
-            if not EL._exceptionOccurred:
+            if not EL._timestampPrinted:
                 # Only write for first exception in session
-                f.write(EL._exceptionSessionTimeStamp) 
-                EL._exceptionOccurred = True
+                f.write(EL._exceptionSessionTimeStamp)
+                EL._timestampPrinted = True
+            
+            EL._exceptionOccurred = True
             EL.traceback.print_exception(typ, value, trace, file=f)
             EL.traceback.print_exception(typ, value, trace, file=sys.stdout)
         finally:
@@ -75,6 +77,7 @@ def startLogger(versionstring):
             time.strftime("\n\nVersion: '" + versionstring +
                     "' Session start: %Y-%m-%d %H:%M:%S\n")
     EL._exceptionOccurred = False
+    EL._timestampPrinted = False
     
     
     EL._previousExcepthook = sys.excepthook

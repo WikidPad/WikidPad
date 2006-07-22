@@ -1,5 +1,5 @@
 from weakref import WeakValueDictionary
-import os, os.path
+import os, os.path, sets
 from threading import RLock
 
 from pwiki.MiscEvent import MiscEventSourceMixin
@@ -18,6 +18,10 @@ import DbBackendUtils, FileStorage
 
 
 _openDocuments = {}  # Dictionary {<path to data dir>: <WikiDataManager>}
+
+
+_globalFuncPages = WeakValueDictionary()  # weak dictionary
+        # {<funcTag starting with "global/">: <funcPage>}
 
 def isDbHandlerAvailable(dbtype):
     wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(dbtype)
@@ -46,12 +50,10 @@ def createWikiDb(pWiki, dbtype, wikiName, dataDir, overwrite=False):
     createWikiDbFunc(wikiName, dataDir, overwrite)
 
 
-# def openWikiDocument(pWiki, dbtype, dataDir, fileStorDir, wikiSyntax):   # createWikiDataManager
-def openWikiDocument(pWiki, wikiConfigFilename, wikiSyntax, dbtype=None):
+def openWikiDocument(wikiConfigFilename, wikiSyntax, dbtype=None):
     """
     Create a new instance of the WikiDataManager or return an already existing
     one
-    pWiki -- instance of PersonalWikiFrame
     dbtype -- internal name of database type
     wikiName -- Name of the wiki to create
     dataDir -- directory for storing the data files
@@ -61,7 +63,7 @@ def openWikiDocument(pWiki, wikiConfigFilename, wikiSyntax, dbtype=None):
 
     wdm = _openDocuments.get(wikiConfigFilename)
     if wdm is not None:
-        if dbtype != wdm.getDbtype():
+        if dbtype is not None and dbtype != wdm.getDbtype():
             # Same database can't be opened twice with different db handlers
             raise WrongDbHandlerException(("Database is already in use "
                     "with handler '%s'. Can't open with different handler.") %
@@ -70,7 +72,7 @@ def openWikiDocument(pWiki, wikiConfigFilename, wikiSyntax, dbtype=None):
         wdm.incRefCount()
         return wdm
 
-    wdm = WikiDataManager(pWiki, wikiConfigFilename, wikiSyntax, dbtype)
+    wdm = WikiDataManager(wikiConfigFilename, wikiSyntax, dbtype)
     
     _openDocuments[wikiConfigFilename] = wdm
 
@@ -133,11 +135,7 @@ class WikiDataManager(MiscEventSourceMixin):
     a WikiDataManager instance.
     """
 
-    # TODO Remove dependency to mainControl !!!
-
-    def __init__(self, mainControl, wikiConfigFilename, wikiSyntax, dbtype):  #  dataDir, fileStorDir, dbtype, ):
-        self.mainControl = mainControl
-
+    def __init__(self, wikiConfigFilename, wikiSyntax, dbtype):  #  dataDir, fileStorDir, dbtype, ):
         wikiConfig = createWikiConfiguration()
         
         while True:
@@ -260,6 +258,7 @@ class WikiDataManager(MiscEventSourceMixin):
         self.baseWikiData = wikiData
         self.wikiData = WikiDataSynchronizedProxy(self.baseWikiData)
         self.wikiPageDict = WeakValueDictionary()
+        self.funcPageDict = WeakValueDictionary()
 
 #         self.fileStorage = FileStorage.FileStorage(self,
 #                 os.path.join(os.path.dirname(
@@ -325,7 +324,7 @@ class WikiDataManager(MiscEventSourceMixin):
         return self.getWikiConfig().getConfigPath()
 
     def getFormatting(self):
-        return self.formatting  # self.mainControl.getFormatting()
+        return self.formatting
         
     def getWikiName(self):
         return self.wikiName
@@ -358,14 +357,14 @@ class WikiDataManager(MiscEventSourceMixin):
             realWikiWord = self.wikiData.getAliasesWikiWord(wikiWord)
             if wikiWord == realWikiWord:
                 # no alias
-                value = WikiPage(self, self.mainControl, wikiWord)
+                value = WikiPage(self, wikiWord)
             else:
-                realpage = WikiPage(self, self.mainControl, realWikiWord)
+                realpage = WikiPage(self, realWikiWord)
                 value = AliasWikiPage(self, wikiWord, realpage)
 
             self.wikiPageDict[wikiWord] = value
             
-        value.getMiscEvent().addListener(self)
+            value.getMiscEvent().addListener(self)
 
         return value
 
@@ -382,9 +381,19 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         Retrieve a functional page
         """
-        # TODO Ensure uniqueness as for wiki pages
-        value = FunctionalPage(self.mainControl, self, funcTag)
-        value.getMiscEvent().addListener(self)
+        global _globalFuncPages
+        if funcTag.startswith("global/"):
+            cacheDict = _globalFuncPages
+        else:
+            cacheDict = self.funcPageDict
+
+        value = cacheDict.get(funcTag)
+        if value is None:
+            value = FunctionalPage(self, funcTag)
+            if not value.getMiscEvent().hasListener(self):
+                value.getMiscEvent().addListener(self)
+            cacheDict[funcTag] = value
+
         return value
 
 
@@ -428,6 +437,8 @@ class WikiDataManager(MiscEventSourceMixin):
                 modified? This text replacement works unreliably
         """
         global _openDocuments
+        
+        oldWikiPage = self.getWikiPage(wikiWord)
 
         self.getWikiData().renameWord(wikiWord, toWikiWord)
 
@@ -454,12 +465,13 @@ class WikiDataManager(MiscEventSourceMixin):
             searchOp.caseSensitive = True
             searchOp.searchStr = wikiWord
     
-            for resultWord in self.getWikiData().search(searchOp):
+            for resultWord in self.searchWiki(searchOp):
                 page = self.getWikiPage(resultWord)
-                content = page.getContent()
+                content = page.getLiveText()
                 content = content.replace(wikiWord, toWikiWord)
-                page.save(content)
-                page.update(content, False)  # TODO AGA processing
+#                 page.save(content)
+#                 page.update(content, False)  # TODO AGA processing
+                page.replaceLiveText(content)
 
         # if the root was renamed we have a little more to do
         if wikiWord == self.getWikiName():
@@ -486,6 +498,47 @@ class WikiDataManager(MiscEventSourceMixin):
             del _openDocuments[wikiConfigPath]
             _openDocuments[renamedConfigPath] = self
 
+        oldWikiPage.informRenamedWikiPage(toWikiWord)
+
+
+    def searchWiki(self, sarOp, applyOrdering=True):  # TODO Threadholder
+        """
+        Search all wiki pages using the SearchAndReplaceOperation sarOp and
+        return list of all page names that match the search criteria.
+        If applyOrdering is True, the ordering of the sarOp is applied before
+        returning the list.
+        """
+        wikiData = self.getWikiData()
+        sarOp.beginWikiSearch(wikiData)
+        try:
+            # First search currently cached pages
+            exclusionSet = sets.Set()
+            preResultSet = sets.Set()
+            
+            for k in self.wikiPageDict.keys():
+                wikiPage = self.wikiPageDict.get(k)
+                if wikiPage is None:
+                    continue
+                    
+                text = wikiPage.getLiveText()
+                if sarOp.testWikiPage(k, text) == True:
+                    preResultSet.add(k)
+                
+                exclusionSet.add(k)
+
+            # Now search database
+            resultSet = self.getWikiData().search(sarOp, exclusionSet)
+            resultSet |= preResultSet
+            if applyOrdering:
+                result = sarOp.applyOrdering(resultSet)
+            else:
+                result = list(resultSet)
+
+        finally:
+            sarOp.endWikiSearch()
+            
+        return result
+
 
     def miscEventHappened(self, miscevt):
         """
@@ -495,11 +548,24 @@ class WikiDataManager(MiscEventSourceMixin):
             if miscevt.has_key("configuration changed"):
                 self.getFormatting().rebuildFormatting(miscevt)
         else:
-            if miscevt.has_key("wiki page updated"):
-                # This was send from a WikiPage object, send it again
+            # These messages come from (classes derived from) DocPages,
+            # they are mainly relayed
+
+            if miscevt.has_key_in(("updated wiki page", "deleted wiki page",
+                    "renamed wiki page")):
                 props = miscevt.getProps().copy()
                 props["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(props)
+            elif miscevt.has_key("updated func page"):
+                # This was send from a FuncPage object, send it again
+                # The event also contains more specific information
+                # handled by PesonalWikiFrame
+
+                props = miscevt.getProps().copy()
+                props["funcPage"] = miscevt.getSource()
+                self.fireMiscEventProps(props)
+
+                
             
         
 

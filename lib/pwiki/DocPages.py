@@ -43,6 +43,16 @@ class DocPage(MiscEventSourceMixin):
         except ValueError:
             # txted not in list
             pass
+            
+    def getTxtEditor(self):
+        """
+        Returns an arbitrary text editor associated with the page
+        or None if no editor is associated.
+        """
+        if len(self.txtEditors) > 0:
+            return self.txtEditors[0]
+        else:
+            return None
 
 
     def appendLiveText(self, text, fireEvent=True):
@@ -81,7 +91,8 @@ class DocPage(MiscEventSourceMixin):
             self.txtEditors[0].replaceText(text)
         else:
             self.save(text)
-            self.update(text, False)   # TODO: Really update? Handle auto-generated areas
+#             self.update(text, False)   # TODO: Really update? Handle auto-generated areas
+            self.update(text, True)   # TODO: Really update? Handle auto-generated areas
 
 
     def getContent(self):
@@ -162,11 +173,10 @@ class WikiPage(DocPage):
     
     Fetched via the WikiDataManager.getWikiPage method.
     """
-    def __init__(self, wikiDataManager, mainControl, wikiWord):
+    def __init__(self, wikiDataManager, wikiWord):
         DocPage.__init__(self, wikiDataManager)
 
         self.wikiData = self.wikiDataManager.getWikiData()
-        self.mainControl = mainControl
 
         self.wikiWord = wikiWord
 #         self.realWikiWord = None  # Real wiki word (may be different if wikiWord is an alias)
@@ -181,7 +191,6 @@ class WikiPage(DocPage):
 
     def getWikiWord(self):
         return self.wikiWord
-        
 
     def getTimestamps(self):
         if self.modified is None:
@@ -280,6 +289,34 @@ class WikiPage(DocPage):
 
     def isDefined(self):
         return self.wikiData.isDefinedWikiWord(self.getWikiWord())
+        
+        
+    def deletePage(self):
+        """
+        Deletes the page from database
+        """
+        if self.isDefined():
+            self.wikiData.deleteWord(self.getWikiWord())
+
+        self.fireMiscEventKeys(("deleted page", "deleted wiki page"))
+
+
+    def informRenamedWikiPage(self, newWord):
+        """
+        Informs object that the page was renamed to newWord.
+        This page object itself does not change its name but becomes invalid!
+
+        This function should be called by WikiDocument(=WikiDataManager) only,
+        use WikiDocument.renameWikiWord() to rename a page.
+        """
+        
+        p = {}
+        p["renamed page"] = True
+        p["renamed wiki page"] = True
+        p["newWord"] = newWord
+        
+        self.fireMiscEventProps(p)
+
 
     def getContent(self):
         """
@@ -399,7 +436,7 @@ class WikiPage(DocPage):
 
         if fireEvent:
             ##??? self.mainControl.informWikiPageUpdate(self)  # TODO Remove
-            self.fireMiscEventKeys(("wiki page updated", "page updated"))
+            self.fireMiscEventKeys(("updated wiki page", "updated page"))
 
 
     def addChildRelationship(self, toWord):
@@ -454,10 +491,9 @@ class FunctionalPage(DocPage):
     holds the data for a functional page. Such a page controls the behavior
     of the application or a special wiki
     """
-    def __init__(self, pWiki, wikiDataManager, funcTag):
+    def __init__(self, wikiDataManager, funcTag):
         DocPage.__init__(self, wikiDataManager)
 
-        self.pWiki = pWiki
         self.funcTag = funcTag
 
         # does this page need to be saved?
@@ -577,12 +613,16 @@ class FunctionalPage(DocPage):
         # clear the dirty flag
         self.updateDirtySince = None
 
-        if self.funcTag in ("global/[TextBlocks]", "wiki/[TextBlocks]"):
-            if fireEvent:
-                self.pWiki.rereadTextBlocks()
-        elif self.funcTag in ("global/[PWL]", "wiki/[PWL]"):
-            if fireEvent and self.pWiki.spellChkDlg is not None:
-                self.pWiki.spellChkDlg.rereadPersonalWordLists()
+        if fireEvent:
+            if self.funcTag in ("global/[TextBlocks]", "wiki/[TextBlocks]"):
+                self.fireMiscEventKeys(("updated func page", "updated page",
+                        "reread text blocks needed"))
+#                 self.pWiki.rereadTextBlocks()   # TODO!
+            elif self.funcTag in ("global/[PWL]", "wiki/[PWL]"):
+                self.fireMiscEventKeys(("updated func page", "updated page",
+                        "reread personal word list needed"))
+#             if fireEvent and self.pWiki.spellChkDlg is not None:
+#                 self.pWiki.spellChkDlg.rereadPersonalWordLists()
 
 
     def setDirty(self, dirt):

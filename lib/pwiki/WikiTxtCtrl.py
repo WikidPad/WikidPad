@@ -153,7 +153,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         ))
 
         self.wikiPageListener = KeyFunctionSink((
-                ("wiki page updated", self.onWikiPageUpdated),   # fired by a WikiPage
+                ("updated wiki page", self.onWikiPageUpdated),   # fired by a WikiPage
         ))
 
 
@@ -398,6 +398,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             miscevt = self.loadedDocPage.getMiscEvent()
             miscevt.removeListener(self.wikiPageListener)
             
+            self.SetDocPointer(None)
+            self.SetCodePage(wxSTC_CP_UTF8)
+
             self.loadedDocPage.removeTxtEditor(self)
             self.loadedDocPage = None
             self.pageType = "normal"
@@ -410,18 +413,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         wikiDataManager = self.pWiki.getWikiDataManager()
         
         self.loadedDocPage = funcPage
+        
         if self.loadedDocPage is None:
-            self.SetText(u"")
             return  # TODO How to handle?
-
-        miscevt = self.loadedDocPage.getMiscEvent()
-        miscevt.addListener(self.wikiPageListener)
-        self.loadedDocPage.addTxtEditor(self)
-
-        try:
-            content = self.loadedDocPage.getContent()
-        except WikiFileNotFoundException, e:
-            assert 0   # TODO
 
         globalProps = wikiDataManager.getWikiData().getGlobalProperties()
         # get the font that should be used in the editor
@@ -438,8 +432,26 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #         p2.update({"loading current page": True})
 #         self.pWiki.fireMiscEventProps(p2)  # TODO Remove this hack
 
-        # now fill the text into the editor
-        self.SetText(content)
+        miscevt = self.loadedDocPage.getMiscEvent()
+        miscevt.addListener(self.wikiPageListener)
+
+        otherEditor = self.loadedDocPage.getTxtEditor()
+        if otherEditor is not None:
+            # Another editor contains already this page, so share its
+            # Scintilla document object for synchronized editing
+            self.SetDocPointer(otherEditor.GetDocPointer())
+            self.SetCodePage(wxSTC_CP_UTF8)
+        else:
+            # Load content
+            try:
+                content = self.loadedDocPage.getLiveText()
+            except WikiFileNotFoundException, e:
+                assert 0   # TODO
+
+            # now fill the text into the editor
+            self.SetText(content)
+
+        self.loadedDocPage.addTxtEditor(self)
 
 
     def loadWikiPage(self, wikiPage, evtprops=None):
@@ -453,14 +465,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.loadedDocPage = wikiPage
 
         if self.loadedDocPage is None:
-            self.SetText(u"")
             return  # TODO How to handle?
-
-        miscevt = self.loadedDocPage.getMiscEvent()
-        miscevt.addListener(self.wikiPageListener)
-        self.loadedDocPage.addTxtEditor(self)
-
-        content = self.loadedDocPage.getContent()
 
         # get the font that should be used in the editor
         font = self.loadedDocPage.getPropertyOrGlobal("font",
@@ -472,15 +477,34 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             faces["mono"] = font
             self.SetStyles(faces)
             self.lastEditorFont = font
-            
+
+        miscevt = self.loadedDocPage.getMiscEvent()
+        miscevt.addListener(self.wikiPageListener)
+
+
+        otherEditor = self.loadedDocPage.getTxtEditor()
+        if otherEditor is not None:
+            # Another editor contains already this page, so share its
+            # Scintilla document object for synchronized editing
+            self.SetDocPointer(otherEditor.GetDocPointer())
+            self.SetCodePage(wxSTC_CP_UTF8)
+        else:
+            # Load content
+            try:
+                content = self.loadedDocPage.getLiveText()
+            except WikiFileNotFoundException, e:
+                assert 0   # TODO
+
+            # now fill the text into the editor
+            self.setTextAgaUpdated(content)
+
+        self.loadedDocPage.addTxtEditor(self)
+
         if evtprops is None:
             evtprops = {}
         p2 = evtprops.copy()
         p2.update({"loading current page": True})
         self.pWiki.fireMiscEventProps(p2)  # TODO Remove this hack
-
-        # now fill the text into the editor
-        self.setTextAgaUpdated(content)
 
         self.pageType = self.loadedDocPage.getProperties().get(u"pagetype",
                 [u"normal"])[-1]
@@ -974,7 +998,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         try:
                             importPage = self.pWiki.getWikiDataManager().\
                                     getWikiPage(script)
-                            content = importPage.getContent()
+                            content = importPage.getLiveText()
                             text += "\n" + content
                         except:
                             pass
@@ -987,7 +1011,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     try:
                         importPage = self.pWiki.getWikiDataManager().\
                                 getWikiPage(globscript)
-                        content = importPage.getContent()
+                        content = importPage.getLiveText()
                         text += "\n" + content
                     except:
                         pass

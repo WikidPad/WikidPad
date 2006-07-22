@@ -739,13 +739,13 @@ class SearchNode(AbstractNode):
         return style
 
     def listChildren(self):
-        wikiData = self.treeCtrl.pWiki.wikiData
-        datablock = wikiData.getSearchDatablock(self.searchTitle)
+        pWiki = self.treeCtrl.pWiki
+        datablock = pWiki.getWikiData().getSearchDatablock(self.searchTitle)
         searchOp = SearchReplaceOperation()
         searchOp.setPackedSettings(datablock)
         searchOp.setTitle(self.searchTitle)
         searchOp.replaceOp = False
-        words = wikiData.search(searchOp)
+        words = pWiki.getWikiDocument().searchWiki(searchOp)
         words.sort()
 
         return [WikiWordSearchNode(self.treeCtrl, self, w, searchOp=searchOp)
@@ -1000,9 +1000,9 @@ class WikiTreeCtrl(wxTreeCtrl):
         wxKeyFunctionSink(self.pWiki.getMiscEvent(), self, (
                 ("loading current page", self.onLoadingCurrentWikiPage),
                 ("closed current wiki", self.onClosedCurrentWiki),
-                ("wiki page updated", self.onWikiPageUpdated),
-                ("renamed page", self.onRenamedWikiPage),
-                ("deleted page", self.onDeletedWikiPage)
+                ("updated wiki page", self.onWikiPageUpdated),
+                ("renamed wiki page", self.onRenamedWikiPage),
+                ("deleted wiki page", self.onDeletedWikiPage)
         ))
 #         
 #         self.pWiki.getMiscEvent().addListener(self.meListener)

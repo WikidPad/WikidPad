@@ -873,26 +873,26 @@ class WikiData:
 #         return result
 
 
-    def search(self, sarOp, applyOrdering=True):
+    def search(self, sarOp, exclusionSet):
         """
         Search all content using the SearchAndReplaceOperation sarOp and
-        return list of all page names match the search criteria.
+        return set of all page names that match the search criteria.
+        sarOp.beginWikiSearch() must be called before calling this function,
+        sarOp.endWikiSearch() must be called after calling this function.
         This version uses sqlite user-defined functions.
-        TODO: Use search_fallback for other databases (currently not working!)
+        
+        exclusionSet -- set of wiki words for which their pages shouldn't be
+        searched here and which must not be part of the result set
         """
-        sarOp.beginWikiSearch(self)
-        try:
-            result = self.connWrap.execSqlQuerySingleColumn(
-                    "select word from wikiwordcontent where "+\
-                    "word not glob '[[]*' and testMatch(word, content, ?)",
-                    (sqlite.addTransObject(sarOp),))
-    
-            sqlite.delTransObject(sarOp)
-            
-            if applyOrdering:
-                result = sarOp.applyOrdering(result)
-        finally:
-            sarOp.endWikiSearch()
+        result = self.connWrap.execSqlQuerySingleColumn(
+                "select word from wikiwordcontent where "+\
+                "word not glob '[[]*' and testMatch(word, content, ?)",
+                (sqlite.addTransObject(sarOp),))
+
+        sqlite.delTransObject(sarOp)
+        
+        result = sets.Set(result)
+        result -= exclusionSet
 
         return result
 

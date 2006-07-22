@@ -223,7 +223,7 @@ class SearchResultListBox(wxHtmlListBox):
         except IndexError:
             return u""
 
-    def showFound(self, sarOp, found, wikiData):
+    def showFound(self, sarOp, found, wikiDocument):
         if found is None:
             self.found = []
             self.foundinfo = []
@@ -253,7 +253,7 @@ class SearchResultListBox(wxHtmlListBox):
                     self.foundinfo = [_SearchResultItemInfo(w) for w in found]
                 else:                    
                     for w in found:
-                        text = wikiData.getContent(w)
+                        text = wikiDocument.getWikiPage(w).getLiveText()
                         self.foundinfo.append(
                                 _SearchResultItemInfo(w).buildOccurrence(
                                 text, before, after, (-1, -1), -1))
@@ -263,7 +263,7 @@ class SearchResultListBox(wxHtmlListBox):
                     self.foundinfo = [_SearchResultItemInfo(w) for w in found]
                 else:
                     for w in found:
-                        text = wikiData.getContent(w)
+                        text = wikiDocument.getWikiPage(w).getLiveText()
                         pos = sarOp.searchText(text)
                         firstpos = pos
                         
@@ -320,8 +320,8 @@ class SearchResultListBox(wxHtmlListBox):
         after = self.pWiki.configuration.getint("main",
                 "search_wiki_context_after")
         
-        wikiData = self.pWiki.wikiData
-        text = wikiData.getContent(info.wikiWord)
+        wikiDocument = self.pWiki.getWikiDocument()
+        text = wikiDocument.getWikiPage(info.wikiWord).getLiveText()
 #         searchOp = self.searchWikiDialog.buildSearchReplaceOperation()
 #         searchOp.replaceOp = False
 #         searchOp.cycleToStart = True
@@ -487,13 +487,13 @@ class SearchWikiDialog(wxDialog):   # TODO
         self.Freeze()
         try:
             sarOp = self.buildSearchReplaceOperation()
-            self.pWiki.saveCurrentDocPage()
+            # self.pWiki.saveCurrentDocPage()
     
             if len(sarOp.searchStr) > 0:
-                self.foundPages = self.pWiki.getWikiData().search(sarOp)
+                self.foundPages = self.pWiki.getWikiDocument().searchWiki(sarOp)
                 self.foundPages.sort()
                 self.ctrls.htmllbPages.showFound(sarOp, self.foundPages,
-                        self.pWiki.wikiData)
+                        self.pWiki.getWikiDocument())
             else:
                 self.foundPages = []
                 self.ctrls.htmllbPages.showFound(None, None, None)
@@ -609,18 +609,21 @@ class SearchWikiDialog(wxDialog):   # TODO
             if self.ctrls.htmllbPages.GetCount() == 0:
                 return
                 
-            self.pWiki.saveCurrentDocPage()
+            # self.pWiki.saveCurrentDocPage()
             
             sarOp = self.buildSearchReplaceOperation()
             sarOp.replaceOp = True
             
-            wikiData = self.pWiki.wikiData
+            # wikiData = self.pWiki.getWikiData()
+            wikiDocument = self.pWiki.getWikiDocument()
 
             for i in xrange(self.ctrls.htmllbPages.GetCount()):
                 self.ctrls.htmllbPages.SetSelection(i)
                 wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
-                text = wikiData.getContent(wikiWord)
-                
+                wikiPage = wikiDocument.getWikiPage(wikiWord)
+#                 text = wikiData.getContent(wikiWord)
+                text = wikiPage.getLiveText()
+
                 charStartPos = 0
 
                 while True:
@@ -637,11 +640,12 @@ class SearchWikiDialog(wxDialog):   # TODO
                     text = text[:start] + repl + text[end:]  # TODO Faster?
                     charStartPos = start + len(repl)
 
-                wikiData.setContent(wikiWord, text)
+#                 wikiData.setContent(wikiWord, text)
+                wikiPage.replaceLiveText(text)
                 
-            # Reopen current word because its content could have been overwritten before
-            self.pWiki.openWikiPage(self.pWiki.getCurrentWikiWord(),
-                    addToHistory=False, forceReopen=True)
+#             # Reopen current word because its content could have been overwritten before
+#             self.pWiki.openWikiPage(self.pWiki.getCurrentWikiWord(),
+#                     addToHistory=False, forceReopen=True)
                     
             self._refreshPageList()
 
@@ -1217,7 +1221,7 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
         self.SetCursor(wxHOURGLASS_CURSOR)
         self.Freeze()
         try:
-            words = self.pWiki.getWikiData().search(lpOp)
+            words = self.pWiki.getWikiDocument().searchWiki(lpOp)
             
             self.ctrls.lbResultPreview.Clear()
             self.ctrls.lbResultPreview.AppendItems(words)
@@ -1307,13 +1311,13 @@ class FastSearchPopup(wxFrame):
         self.Freeze()
         try:
             sarOp = self.buildSearchReplaceOperation()
-            self.mainControl.saveCurrentDocPage()
+            # self.mainControl.saveCurrentDocPage()
     
             if len(sarOp.searchStr) > 0:
-                self.foundPages = self.mainControl.getWikiData().search(sarOp)
+                self.foundPages = self.mainControl.getWikiDocument().searchWiki(sarOp)
                 self.foundPages.sort()
                 self.resultBox.showFound(sarOp, self.foundPages,
-                        self.mainControl.getWikiData())
+                        self.mainControl.getWikiDocument())
             else:
                 self.foundPages = []
                 self.resultBox.showFound(None, None, None)

@@ -731,26 +731,31 @@ class WikiData:
 
     # ---------- Searching pages ----------
 
-    def search(self, sarOp, applyOrdering=True):
-        results = []
-        sarOp.beginWikiSearch(self)
-        try:
-            for word in self.getAllDefinedWikiPageNames():  #glob.glob(join(self.dataDir, '*.wiki')):
-                try:
-                    fileContents = self.getContent(word)
-                except WikiFileNotFoundException:
-                    # some error in cache (should not happen)
-                    continue
+    def search(self, sarOp, exclusionSet):
+        """
+        Search all content using the SearchAndReplaceOperation sarOp and
+        return set of all page names that match the search criteria.
+        sarOp.beginWikiSearch() must be called before calling this function,
+        sarOp.endWikiSearch() must be called after calling this function.
+        
+        exclusionSet -- set of wiki words for which their pages shouldn't be
+        searched here and which must not be part of the result set
+        """
+        result = sets.Set()
+        for word in self.getAllDefinedWikiPageNames():  #glob.glob(join(self.dataDir, '*.wiki')):
+            if word in exclusionSet:
+                continue
+            try:
+                fileContents = self.getContent(word)
+            except WikiFileNotFoundException:
+                # some error in cache (should not happen)
+                continue
 
-                if sarOp.testWikiPage(word, fileContents) == True:
-                    results.append(word)
-            if applyOrdering:
-                results = sarOp.applyOrdering(results)
+            if sarOp.testWikiPage(word, fileContents) == True:
+                result.add(word)
 
-        finally:
-            sarOp.endWikiSearch()
+        return result
 
-        return results
 
     def saveSearch(self, title, datablock):
         test = self.connWrap.execSqlQuerySingleItem(
