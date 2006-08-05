@@ -32,7 +32,7 @@ A dictionary consists of a .dic and an .aff file with the same name (like e.g. "
 
 ++ Defining the language
 
-At first you must define the language of a page or the whole wiki by specifying the "language" or "global.language" attribute. The language is just the name of the dictionary.
+You must define the language of a page or the whole wiki by specifying the "language" or "global.language" attribute. The language is just the name of the dictionary.
 
 To use US-English on this page, write
 
@@ -59,7 +59,7 @@ TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlRE.pattern + u"|" +
 
 If you have some experience with regular expressions, you can change it. 
 
-The expression contains a named group "negative". If something matches one of the entries in this group (joined with '|'), this is *not* interpreted as word (normally numbers, URLs and camel-case wiki words). This allows to ignore unwanted patterns.
+The expression contains a named group "negative". If something matches one of the entries in this group (joined with '|'), this is *not* interpreted as word (by default numbers, URLs and camel-case wiki words). This allows to ignore unwanted patterns.
 
 
 

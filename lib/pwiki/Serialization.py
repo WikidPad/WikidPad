@@ -11,8 +11,11 @@ from StringOps import utf8Dec, utf8Enc
 class SerializeStream:
     def __init__(self, fileObj=None, stringBuf=None, readMode=True):
         """
-        fileobj -- file-like object to wrap.
-        readmode -- True; read from fileobj, False: write to fileobj
+        fileObj -- file-like object to wrap.
+        stringBuf -- if not None, ignore fileObj, read from stringBuf
+                instead or write to a new string buffer depending
+                on readMode. Use getBytes() to retrieve written bytes
+        readMode -- True; read from fileobj, False: write to fileobj
         """
         self.fileObj = fileObj 
         self.readMode = readMode

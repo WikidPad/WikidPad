@@ -3,7 +3,7 @@ data_dir = data
 
 [main]
 footnotes_as_wikiwords = False
-last_wiki_word = ChangeLog
+last_wiki_word = OptionsDialog
 wiki_name = WikidPadHelp
 wiki_database_type = original_gadfly
 first_wiki_word = WikidPadHelp

@@ -12,6 +12,11 @@ The following options apply to the whole application and therefore to each wiki 
 *Minimize to Tray*
 Minimized to system tray instead of the normal taskbar.
 
+*Minimize on close button*
+Pressing the close button on the main frame (the little "X") does not close but minimize WikidPad. In conjunction with "Minimize to Tray" it minmizes to the try area.
+
+If you really want to close, use menu "Wiki"->"Exit" then or the context menu when right-clicking on the tray icon (if "Minimize to Tray" is active).
+
 *New window on wiki URL*
 When double clicking on a wiki: URL, a new instance of the application is started, otherwise, the current instance loads the new wiki.
 
@@ -20,6 +25,27 @@ Experimental feature, use not recommended!
 
 *Low resource usage*
 Try to reduce usage of Windows resources. Only interesting for Windows 9x/ME.
+
+*Single process per user*
+If you open a new WikidPad instance while another is already running, the new window is handled by the same process as the first one. This option has only an effect after restarting WikidPad. It is off by default.
+
+Advantages:
+
+    * You can safely open the same wiki in multiple windows (on the
+      same computer and by the same user only!)
+    * Less resources (esp. memory) are needed to run multiple windows
+
+Disadvantages:
+
+    * If one window is busy due to a search or database rebuild, all windows do not react.
+    * If one window crashes (in fact the process driving it) all windows crash.
+    * An IP-socket connection is needed for communication between
+      processes. The connection is invisible for other computers on
+      a network or the internet, but a personal firewall software
+      may alarm you nevertheless. Also, if multiple user use
+      WikidPad on the same computer at the same time, all must use
+      their own home directory as configuration directory (this is
+      the default).
 
 *Script security*
 Set the security level for script execution, see InlinePythonEval#+++# Security# concerns .

@@ -139,7 +139,7 @@ class AliasWikiPage(DocPage):
 #         if not self.wikiData.isAlias(self.wikiWord):
 #             return self
         
-        word = self.wikiData.getAliasesWikiWord(self.wikiWord)
+        word = self.wikiDataManager.getWikiData().getAliasesWikiWord(self.wikiWord)
         return self.wikiDataManager.getWikiPageNoError(word)
 
     def getContent(self):
@@ -176,10 +176,9 @@ class WikiPage(DocPage):
     def __init__(self, wikiDataManager, wikiWord):
         DocPage.__init__(self, wikiDataManager)
 
-        self.wikiData = self.wikiDataManager.getWikiData()
+#         self.wikiData = self.wikiDataManager.getWikiData()
 
         self.wikiWord = wikiWord
-#         self.realWikiWord = None  # Real wiki word (may be different if wikiWord is an alias)
         self.parentRelations = None
         self.todos = None
         self.props = None
@@ -191,11 +190,14 @@ class WikiPage(DocPage):
 
     def getWikiWord(self):
         return self.wikiWord
+        
+    def getWikiData(self):
+        return self.wikiDataManager.getWikiData()
 
     def getTimestamps(self):
         if self.modified is None:
             self.modified, self.created = \
-                    self.wikiData.getTimestamps(self.wikiWord)
+                    self.getWikiData().getTimestamps(self.wikiWord)
                     
         if self.modified is None:
             ti = time()
@@ -206,7 +208,7 @@ class WikiPage(DocPage):
     def getParentRelationships(self):
         if self.parentRelations is None:
             self.parentRelations = \
-                    self.wikiData.getParentRelationships(self.wikiWord)
+                    self.getWikiData().getParentRelationships(self.wikiWord)
         
         return self.parentRelations
 
@@ -216,13 +218,13 @@ class WikiPage(DocPage):
         """
         Does not support caching
         """
-        return self.wikiData.getChildRelationships(self.wikiWord,
+        return self.getWikiData().getChildRelationships(self.wikiWord,
                 existingonly, selfreference, withPosition=withPosition)
 
 
     def getProperties(self):
         if self.props is None:
-            data = self.wikiData.getPropertiesForWord(self.wikiWord)
+            data = self.getWikiData().getPropertiesForWord(self.wikiWord)
             self.props = {}
             for (key, val) in data:
                 self.addProperty(key, val)
@@ -241,7 +243,7 @@ class WikiPage(DocPage):
         if props.has_key(propkey):
             return props[propkey][-1]
         else:
-            globalProps = self.wikiData.getGlobalProperties()     
+            globalProps = self.getWikiData().getGlobalProperties()     
             return globalProps.get(u"global."+propkey, default)
 
 
@@ -255,21 +257,10 @@ class WikiPage(DocPage):
 
     def getTodos(self):
         if self.todos is None:
-            self.todos = self.wikiData.getTodosForWord(self.wikiWord)
+            self.todos = self.getWikiData().getTodosForWord(self.wikiWord)
                     
         return self.todos
         
-#     def getNonAliasPage(self):
-#         """
-#         If this page belongs to an alias of a wiki word, return a page for
-#         the real one, otherwise return self
-#         """
-#         if not self.wikiData.isAlias(self.wikiWord):
-#             return self
-#         
-#         word = self.wikiData.getAliasesWikiWord(self.wikiWord)
-#         return self.wikiDataManager.getWikiPageNoError(word)
-
     def getNonAliasPage(self):
         """
         If this page belongs to an alias of a wiki word, return a page for
@@ -288,7 +279,7 @@ class WikiPage(DocPage):
 
 
     def isDefined(self):
-        return self.wikiData.isDefinedWikiWord(self.getWikiWord())
+        return self.getWikiData().isDefinedWikiWord(self.getWikiWord())
         
         
     def deletePage(self):
@@ -296,7 +287,7 @@ class WikiPage(DocPage):
         Deletes the page from database
         """
         if self.isDefined():
-            self.wikiData.deleteWord(self.getWikiWord())
+            self.getWikiData().deleteWord(self.getWikiWord())
 
         self.fireMiscEventKeys(("deleted page", "deleted wiki page"))
 
@@ -327,7 +318,7 @@ class WikiPage(DocPage):
         content = None
 
         try:
-            content = self.wikiData.getContent(self.wikiWord)
+            content = self.getWikiData().getContent(self.wikiWord)
         except WikiFileNotFoundException, e:
             # Create initial content of new page
             
@@ -378,7 +369,7 @@ class WikiPage(DocPage):
         Saves the content of current wiki page.
         """
 #         self.lastSave = time()
-        self.wikiData.setContent(self.wikiWord, text)
+        self.getWikiData().setContent(self.wikiWord, text)
         self.saveDirtySince = None
 
         # Clear timestamp cache
@@ -409,7 +400,7 @@ class WikiPage(DocPage):
             propValue = t.grpdict["propertyValue"]
             if propName == u"alias":
                 if formatting.isNakedWikiWord(propValue):
-                    self.wikiData.setAsAlias(propValue)
+                    self.getWikiData().setAsAlias(propValue)
                     self.setProperty(u"alias", propValue)
             else:
                 self.setProperty(propName, propValue)
@@ -419,7 +410,7 @@ class WikiPage(DocPage):
             self.addChildRelationship(t.node.nakedWord)
 
         # kill the global prop cache in case any props were added
-        self.wikiData.cachedGlobalProps = None
+        self.getWikiData().cachedGlobalProps = None
 
         # add a relationship to the scratchpad at the root
         if self.wikiWord == self.wikiDataManager.getWikiName():
@@ -428,9 +419,9 @@ class WikiPage(DocPage):
         # clear the dirty flag
         self.updateDirtySince = None
 
-        self.wikiData.updateTodos(self.wikiWord, self.todos)
-        self.wikiData.updateChildRelations(self.wikiWord, self.childRelations)
-        self.wikiData.updateProperties(self.wikiWord, self.props)
+        self.getWikiData().updateTodos(self.wikiWord, self.todos)
+        self.getWikiData().updateChildRelations(self.wikiWord, self.childRelations)
+        self.getWikiData().updateProperties(self.wikiWord, self.props)
 
 #         self.lastUpdate = time()   # self.modified
 

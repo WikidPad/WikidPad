@@ -1,7 +1,7 @@
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
-import os, gc, traceback, sets, string
+import os, sys, gc, traceback, sets, string
 from os.path import *
 from time import localtime, time, strftime
 
@@ -13,6 +13,8 @@ from wxPython.html import *
 from wxHelper import GUI_ID, cloneImageList, keyDownToAccel
 
 from MiscEvent import MiscEventSourceMixin   # , DebugSimple
+
+from WikiExceptions import *
 
 import Configuration
 from WindowLayout import WindowLayouter, setWindowPos, setWindowSize
@@ -28,6 +30,8 @@ from WikiHtmlView import WikiHtmlView
 from AboutDialog import AboutDialog
 from LogWindow import LogWindow
 
+from Ipc import EVT_REMOTE_COMMAND
+
 import PropertyHandling, SpellChecker
 
 from PageHistory import PageHistory
@@ -37,7 +41,7 @@ from Printing import Printer, PrintMainDialog
 from AdditionalDialogs import *
 from SearchAndReplaceDialogs import *
 
-from WikiExceptions import *
+
 
 import Exporters
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
@@ -194,23 +198,25 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         # Initialize new component
         self.formatting = WikiFormatting.WikiFormatting(self, self.wikiSyntax)
-        
+
         # Connect page history
         self.pageHistory = PageHistory(self)
 
         self.propertyChecker = PropertyHandling.PropertyChecker(self)
 
+        self.configuration.setGlobalConfig(wxGetApp().getGlobalConfig())
+        
         # trigger hook
         self.hooks.startup(self)
 
-        # if it already exists read it in
-        if exists(self.globalConfigLoc):
-            try:
-                self.configuration.loadGlobalConfig(self.globalConfigLoc)
-            except Configuration.Error:
-                self.createDefaultGlobalConfig()
-        else:
-            self.createDefaultGlobalConfig()
+#         # if it already exists read it in
+#         if exists(self.globalConfigLoc):
+#             try:
+#                 self.configuration.loadGlobalConfig(self.globalConfigLoc)
+#             except Configuration.Error:
+#                 self.createDefaultGlobalConfig()
+#         else:
+#             self.createDefaultGlobalConfig()
 
         # Initialize printing
         self.printer = Printer(self)
@@ -228,8 +234,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             
 
         # resize the window to the last position/size
-        setWindowSize(self, (self.configuration.getint("main", "size_x", 10),
-                self.configuration.getint("main", "size_y", 10)))
+        setWindowSize(self, (self.configuration.getint("main", "size_x", 200),
+                self.configuration.getint("main", "size_y", 200)))
         setWindowPos(self, (self.configuration.getint("main", "pos_x", 10),
                 self.configuration.getint("main", "pos_y", 10)))
 
@@ -327,6 +333,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         if self.lowResources and self.IsIconized():
             self.resourceSleep()
+            
+        EVT_REMOTE_COMMAND(self, self.OnRemoteCommand)
 
 
     def loadExtensions(self):
@@ -356,19 +364,19 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         return importCode(systemExtension, userExtension, extensionName)
 
-    def createDefaultGlobalConfig(self):
-        self.configuration.createEmptyGlobalConfig(self.globalConfigLoc)
-        self.configuration.fillGlobalWithDefaults()
-
-        self.configuration.set("main", "wiki_history", self.wikiPadHelp)
-        self.configuration.set("main", "last_wiki", self.wikiPadHelp)
-        curSize = self.GetSize()
-        self.configuration.set("main", "size_x", str(curSize.x))
-        self.configuration.set("main", "size_y", str(curSize.y))
-        curPos = self.GetPosition()
-        self.configuration.set("main", "pos_x", str(curPos.x))
-        self.configuration.set("main", "pos_y", str(curPos.y))
-        self.configuration.set("main", "last_active_dir", os.getcwd())
+#     def createDefaultGlobalConfig(self):
+#         self.configuration.createEmptyGlobalConfig(self.globalConfigLoc)
+#         self.configuration.fillGlobalWithDefaults()
+# 
+#         self.configuration.set("main", "wiki_history", self.wikiPadHelp)
+#         self.configuration.set("main", "last_wiki", self.wikiPadHelp)
+#         curSize = self.GetSize()
+#         self.configuration.set("main", "size_x", str(curSize.x))
+#         self.configuration.set("main", "size_y", str(curSize.y))
+#         curPos = self.GetPosition()
+#         self.configuration.set("main", "pos_x", str(curPos.x))
+#         self.configuration.set("main", "pos_y", str(curPos.y))
+#         self.configuration.set("main", "last_active_dir", os.getcwd())
 
 
     def getCurrentWikiWord(self):
@@ -690,6 +698,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             wikiMenu.Append(menuID, '&Rebuild Wiki', 'Rebuild this wiki')
             EVT_MENU(self, menuID, lambda evt: self.rebuildWiki())
 
+        if wikiData is not None:
+            self.addMenuItem(wikiMenu, 'Reconnect',
+                    'Reconnect to database after connection failure',
+                    self.OnCmdReconnectDatabase)
+
         if wikiData is not None and wikiData.checkCapability("compactify") == 1:
             menuID=wxNewId()
             wikiMenu.Append(menuID, '&Vacuum Wiki', 'Free unused space in database')
@@ -722,7 +735,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         menuID=wxNewId()
         wikiMenu.Append(menuID, 'E&xit', 'Exit')
-        EVT_MENU(self, menuID, lambda evt: self.Close())
+        EVT_MENU(self, menuID, lambda evt: self.exitWiki())
         
         return wikiMenu
 
@@ -1287,27 +1300,28 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         EVT_MENU(self, menuID, self.OnCmdCheckShowLineNumbers)
 
         showLineNumbersMenuItem.Check(self.getActiveEditor().getShowLineNumbers())
+
+        viewMenu.AppendSeparator()
+
+        self.addMenuItem(viewMenu, 'Clone Window\t' + self.keyBindings.CloneWindow,
+                'Create new window for same wiki', self.OnCmdCloneWindow)
+
+
         helpMenu = wxMenu()
 
         def openHelp(evt):
             try:
                 clAction = CmdLineAction([])
                 clAction.wikiToOpen = self.wikiPadHelp
-                PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
-                        self.globalConfigDir, self.globalConfigSubDir, clAction)
+                wxGetApp().startPersonalWikiFrame(clAction)
+#                 PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
+#                         self.globalConfigDir, self.globalConfigSubDir, clAction)
                 # os.startfile(self.wikiPadHelp)   # TODO!
             except Exception, e:
                 traceback.print_exc()
                 self.displayErrorMessage('Error while starting new '
                         'WikidPad instance', e)
                 return
-
-#             # set the icon of the app
-#             try:
-#                 self.wikiFrame.SetIcon(wxIcon(os.path.join(wikiAppDir, 'icons',
-#                         'pwiki.ico'), wxBITMAP_TYPE_ICO))
-#             except:
-#                 pass
 
 
         menuID=wxNewId()
@@ -1618,7 +1632,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         EVT_IDLE(self, self.OnIdle)
 
         # Register the App close handler
-        EVT_CLOSE(self, self.OnWikiExit)
+        EVT_CLOSE(self, self.OnCloseButton)
 
         # Check resizing to layout sash windows
         EVT_SIZE(self, self.OnSize)
@@ -1669,6 +1683,38 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         print "OnFastSearchChar", repr(evt.GetUnicodeKey()), repr(evt.GetKeyCode())
 #         evt.Skip()
 
+    def OnCmdReconnectDatabase(self, evt):
+        result = wxMessageBox(u"Are you sure you want to reconnect? "
+                u"You may lose some data by this process.",
+                u'Reconnect database', wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+
+        wd = self.getWikiDocument()
+        if result == wxYES and wd is not None:
+            while True:
+                try:
+                    wd.reconnect()
+                    wd.setNoAutoSaveFlag(False)
+                    break
+                except Exception, e:
+                    traceback.print_exc()
+                    result = wxMessageBox(uniToGui((
+                            u'There was an error while reconnecting the database\n\n'
+                            u'Would you like to try it again?\n%s') %
+                            e), u'Error reconnecting!',
+                            wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+                    if result == wxNO:
+                        break
+
+    def OnRemoteCommand(self, evt):
+        try:
+            clAction = CmdLineAction(evt.getCmdLine())
+            wxGetApp().startPersonalWikiFrame(clAction)
+        except Exception, e:
+            traceback.print_exc()
+            self.displayErrorMessage('Error while starting new '
+                    'WikidPad instance', e)
+            return
+        
 
     def createWindow(self, winProps, parent):
         """
@@ -2306,6 +2352,72 @@ These are your default global settings.
             self.getWikiData().commit()
 
 
+    def checkDatabaseConnected(self):   # TODO: Show errors
+        """
+        Check if database is connected (and return True),
+        show message window if not.
+        Returns true if database is connected after executing function.
+        """
+        if self.getWikiData() is not None:
+            return True
+
+        while True:
+            wd = self.getWikiDocument()
+            if wd is not None:
+                result = wxMessageBox(u"No connection to database. "
+                        u"Try to reconnect?", u'Reconnect database?',
+                        wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+
+                if result == wxNO:
+                    return False
+
+                self.statusBar.PushStatusText(
+                        "Trying to reconnect database...", 0)
+                try:
+                    try:
+                        wd.reconnect()
+                        wd.setNoAutoSaveFlag(False)
+                        return True  # Success
+                    except:
+                        sys.stderr.write("Error while trying to reconnect:\n")
+                        traceback.print_exc()
+                        self.displayErrorMessage('Error while reconnecting '
+                                'database', e)
+
+                finally:
+                    self.statusBar.PopStatusText(0)
+
+
+    def tryAutoReconnect(self):
+        """
+        Try reconnect after an error, if not already tried automatically
+        """
+        wd = self.getWikiDocument()
+        if wd is None:
+            return False
+
+        if wd.getAutoReconnectTriedFlag():
+            # Automatic reconnect was tried already, so don't try again
+            return False
+            
+        self.statusBar.PushStatusText("Trying to reconnect ...", 0)
+
+        try:
+            try:
+                wd.setNoAutoSaveFlag(True)
+                wd.reconnect()
+                wd.setNoAutoSaveFlag(False)
+                return True
+            except:
+                sys.stderr.write("Error while trying to reconnect:\n")
+                traceback.print_exc()
+        finally:
+            self.statusBar.PopStatusText(0)
+            
+        return False
+
+
+
     def openFuncPage(self, funcTag, **evtprops):
         page = self.wikiDataManager.getFuncPage(funcTag)
 
@@ -2322,7 +2434,9 @@ These are your default global settings.
         """
         Opens a wiki page in the active editor.
         """
-                
+        if not self.checkDatabaseConnected():
+            return
+
         evtprops["addToHistory"] = addToHistory
         evtprops["forceTreeSyncFromRoot"] = forceTreeSyncFromRoot
 
@@ -2387,8 +2501,11 @@ These are your default global settings.
 
     def saveCurrentDocPage(self, force = False):
         ## _prof.start()
-      
+
         if force or self.getCurrentDocPage().getDirty()[0]:
+            # Reset error flag here, it can be set true again by saveDocPage
+            self.getWikiDocument().setNoAutoSaveFlag(False)
+            
             self.activeEditor.saveLoadedDocPage() # this calls in turn saveDocPage() below
 
         self.refreshPageStatus()
@@ -2426,12 +2543,18 @@ These are your default global settings.
         """
         if page is None:
             return False
+
+        if not self.checkDatabaseConnected():
+            return
+
         self.statusBar.PushStatusText(u"Saving page", 0)
-        word = page.getWikiWord()
-        if word is not None:
-            # trigger hooks
-            self.hooks.savingWikiWord(self, word)
         try:
+            word = page.getWikiWord()
+            if word is not None:
+                # trigger hooks
+                self.hooks.savingWikiWord(self, word)
+
+            reconnectTried = False  # Flag if reconnect was already tried after an error
             while True:
                 try:
                     if word is not None:
@@ -2449,7 +2572,28 @@ These are your default global settings.
 
                     self.getWikiData().commit()
                     return True
+
                 except Exception, e:
+                    traceback.print_exc()
+                    if self.tryAutoReconnect():
+                        continue
+#                     if not reconnectTried:
+#                         reconnectTried = True
+#                         wd = self.getWikiDocument()
+#                         if wd is not None:
+#                             self.statusBar.PushStatusText(
+#                                     "Error on save, trying to reconnect ...", 0)
+#                             try:
+#                                 try:
+#                                     wd.reconnect()
+#                                     wd.setNoAutoSaveFlag(False)
+#                                     break  # ... the "while True:" loop
+#                                 except:
+#                                     sys.stderr.write("Error while trying to reconnect:\n")
+#                                     traceback.print_exc()
+#                             finally:
+#                                 self.statusBar.PopStatusText(0)
+
                     if word is None:    # TODO !!!
                         word = u"---"
                     dlg = wxMessageDialog(self,
@@ -2459,8 +2603,8 @@ These are your default global settings.
                                         u'Error Saving!', wxYES_NO)
                     result = dlg.ShowModal()
                     dlg.Destroy()
-                    traceback.print_exc()
                     if result == wxID_NO:
+                        self.getWikiDocument().setNoAutoSaveFlag(True)
                         return False
         finally:
             self.statusBar.PopStatusText(0)
@@ -2571,7 +2715,7 @@ These are your default global settings.
                 # This is a relative link
                 link2 = self.makeRelUrlAbsolute(link2)
             try:
-                os.startfile(mbcsEnc(link2, "replace")[0])
+                os.startfile(mbcsEnc(link2, "replace")[0])    # TODO !!!
             except Exception, e:
                 traceback.print_exc()
                 self.displayErrorMessage(u"Couldn't start file", e)
@@ -2697,7 +2841,7 @@ These are your default global settings.
                 self.wikiHistory.pop(0)
 
             # add the item to the menu
-            menuID=wxNewId()
+            menuID = wxNewId()
             self.recentWikisMenu.Append(menuID, wikiConfigFilename)
             EVT_MENU(self, menuID, self.OnSelectRecentWiki)
 
@@ -3376,6 +3520,26 @@ These are your default global settings.
         self.getWikiData().vacuum()
 
 
+    def OnCmdCloneWindow(self, evt):
+        wd = self.getWikiDocument()
+        if wd is None:
+            return
+
+        try:
+            clAction = CmdLineAction([])
+            clAction.wikiToOpen = wd.getWikiConfigPath()
+            ww = self.getCurrentWikiWord()
+            if ww is not None:
+                clAction.wikiWordToOpen = ww
+
+            wxGetApp().startPersonalWikiFrame(clAction)
+        except Exception, e:
+            traceback.print_exc()
+            self.displayErrorMessage('Error while starting new '
+                    'WikidPad instance', e)
+            return
+
+
     def OnImportFromPagefiles(self, evt):
         dlg=wxMessageDialog(self, u"This could overwrite pages in the database. Continue?",
                             u"Import pagefiles", wxYES_NO)
@@ -3543,8 +3707,9 @@ These are your default global settings.
             try:
                 clAction = CmdLineAction([])
                 clAction.wikiToOpen = mbcsDec(abspath(dlg.GetPath()), "replace")[0]
-                PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
-                        self.globalConfigDir, self.globalConfigSubDir, clAction)
+                wxGetApp().startPersonalWikiFrame(clAction)
+#                 PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
+#                         self.globalConfigDir, self.globalConfigSubDir, clAction)
                 # os.startfile(self.wikiPadHelp)   # TODO!
             except Exception, e:
                 traceback.print_exc()
@@ -3552,14 +3717,6 @@ These are your default global settings.
                         'WikidPad instance', e)
                 return
 
-#             # set the icon of the app
-#             try:
-#                 self.wikiFrame.SetIcon(wxIcon(os.path.join(wikiAppDir, 'icons',
-#                         'pwiki.ico'), wxBITMAP_TYPE_ICO))
-#             except:
-#                 pass
-
-#             self.openWiki(mbcsDec(abspath(dlg.GetPath()), "replace")[0])
         dlg.Destroy()
 
 
@@ -3621,6 +3778,10 @@ These are your default global settings.
     def OnIdle(self, evt):
         if not self.configuration.getboolean("main", "auto_save"):  # self.autoSave:
             return
+        if self.getWikiDocument() is None or self.getWikiDocument().getNoAutoSaveFlag():
+            # No automatic saving due to previous error
+            return
+
         # check if the current wiki page needs to be saved
         if self.getCurrentDocPage():
             (saveDirtySince, updateDirtySince) = \
@@ -3634,7 +3795,6 @@ These are your default global settings.
                     if (currentTime - saveDirtySince) > \
                             self.autoSaveDelayAfterDirty:
                         self.saveCurrentDocPage()
-                        self.getWikiData().commit()
 #                     elif updateDirty:
 #                         if (currentTime - self.currentWikiPage.lastUpdate) > 5:
 #                             self.updateRelationships()
@@ -3666,7 +3826,22 @@ These are your default global settings.
         self.configuration.set("main", "show_lineNumbers", evt.IsChecked())
 
 
-    def OnWikiExit(self, evt):
+    def OnCloseButton(self, evt):
+        if self.configuration.getboolean("main", "minimize_on_closeButton"):
+            self.Iconize(True)
+        else:
+            self.exitWiki()
+#             self.Destroy()
+
+    def exitWiki(self):
+#         if not self.configuration.getboolean("main", "minimize_on_closeButton"):
+#             self.Close()
+#         else:
+#             self.prepareExit()
+#             self.Destroy()
+# 
+# 
+#     def prepareExit(self):
         # Stop clipboard catcher if running
         if self.clipboardCatcher is not None and self.clipboardCatcher.isActive():
             self.clipboardCatcher.stop()
@@ -3716,22 +3891,16 @@ These are your default global settings.
         self.hooks.exit(self)
 
         wxTheClipboard.Flush()
-        
-        # Superfluous ? 
-#         if self.getWikiData():
-#             self.wikiDataManager.release()
-# #             self.getWikiData().close()
-#             self.wikiData = None
-#             self.wikiDataManager = None
 
         if self.tbIcon is not None:
             if self.tbIcon.IsIconInstalled():
                 self.tbIcon.RemoveIcon()
-                
+
             self.tbIcon.Destroy()
             self.tbIcon = None
-
+            
         self.Destroy()
+
 
 
 class TaskBarIcon(wxTaskBarIcon):
@@ -3742,8 +3911,8 @@ class TaskBarIcon(wxTaskBarIcon):
         # Register menu events
         EVT_MENU(self, GUI_ID.TBMENU_RESTORE, self.OnLeftUp)
         EVT_MENU(self, GUI_ID.TBMENU_SAVE, lambda evt: (self.pwiki.saveCurrentDocPage(force=True),
-                self.pwiki.wikiData.commit()))
-        EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pwiki.Close())
+                self.pwiki.getWikiData().commit()))
+        EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pwiki.exitWiki())
 
         EVT_TASKBAR_LEFT_UP(self, self.OnLeftUp)
 

@@ -25,6 +25,7 @@ Source: dist\_ctypes.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_gdi_.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_html.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_misc_.pyd; DestDir: {app}; Components: Program_files
+Source: dist\_socket.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_stc.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_windows_.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_xrc.pyd; DestDir: {app}; Components: Program_files
@@ -41,17 +42,17 @@ Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 1.7beta7
+AppVerName=WikidPad 1.7beta8
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
 VersionInfoVersion=1.7
-VersionInfoTextVersion=WikidPad 1.7beta7
+VersionInfoTextVersion=WikidPad 1.7beta8
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-1.7beta7
+OutputBaseFilename=WikidPad-1.7beta8
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2006 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
@@ -166,5 +167,3 @@ begin
     end;
   end;
 end;
-
-

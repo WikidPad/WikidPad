@@ -1,7 +1,28 @@
 ﻿++ Change Log
 
 
-Jul. 10, 2006 (1.7beta7)
+Aug. 05, 2006 (1.7beta8)
+
+Changes:
+    * Official support for multiple windows with same wiki in
+      them, but only in the same process (therefore necessarily
+      on the same machine and by the same user), you can use
+      e.g. menu "View"->"Clone Window" for that. This function
+      is not meant as collaborative multi-user support. 
+    * Option to handle new WikidPad windows by a single process
+      (recommended if you want to open the same wiki in multiple
+      windows).
+      See OptionsDialog#*Single# process# per# user*
+
+    * Better error handling if file access drops (e.g. accessing
+      wiki db over a network). See WikiMaintenance#++# Reconnect
+
+    * Option to minimize wiki if close button on frame is pressed.
+      See OptionsDialog#*Minimize# on# close# button*
+
+
+
+Jul. 10, 2006 (1.7beta7, repository revision in "mbutscher" branch: 83)
 
 Changes:
     * "Fast search" text field in toolbar. See SearchingTheWiki

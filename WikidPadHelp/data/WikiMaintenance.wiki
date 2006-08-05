@@ -1,4 +1,38 @@
-++ Wiki Maintenance
+﻿++ Wiki Maintenance
+
+++ Rebuilding wiki
+
+In menu "Wiki"->"Rebuild Wiki".
+
+This will completely rebuild the internal database for the wiki. This is sometimes necessary if program previously terminated abnormally or if datafiles were deleted or added from outside of WikidPad.
+
+This feature can also be used to add large numbers of pages to the
+wiki.  Copy ".wiki" wikiword files into the data directory, then "Rebuild Wiki" to rebuild the database to include these files. This does not work for "Compact Sqlite" database type (see MigrationBetweenDbTypes for details).
+
+[alias: RebuildTheWiki]
+
+
+++ Vacuum wiki
+
+In menu "Wiki"->"Vacuum". This function is only available if currently loaded wiki is of type "Original Sqlite" or "Compact Sqlite".
+
+If information is deleted from an Sqlite database, the occupied hard disk space is not freed but later reused for new information to add. "Vacuum" makes this space available for the system again. After deleting large parts of a wiki, you can use "Vacuum" to free space, especially recommended for a "Compact Sqlite" wiki (where the page content is also stored in the database).
+
+
+++ Reconnect
+
+In menu "Wiki"->"Reconnect".
+
+If during a WikidPad session the access to the wiki database files is lost (e.g. network connection drops), you might get an error. To make WikidPad work again after access is reestablished, use "Reconnect".
+
+Initially, WikidPad tries automatically to reconnect and asks if it should try to reconnect each time you try to open another page or try to save a page.
+
+Autosave is automatically disabled after an error until a successful reconnect.
+
+
+++ Other things
+
++++ Finding and connecting parentless nodes
 
 As you add and remove links from the various pages in your wiki
 database you may end up with unlinked, or parentless, nodes.  To view

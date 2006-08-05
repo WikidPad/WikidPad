@@ -212,7 +212,7 @@ class WikiWordNode(AbstractNode):
             
             
         # fetch the global properties
-        globalProps = self.treeCtrl.pWiki.wikiData.getGlobalProperties() # TODO More elegant
+        globalProps = self.treeCtrl.pWiki.getWikiData().getGlobalProperties() # TODO More elegant
         # get the wikiPage properties
         props = wikiPage.getProperties()
 
@@ -420,7 +420,7 @@ class MainViewNode(AbstractNode):
         return style
         
     def listChildren(self):
-        wikiData = self.treeCtrl.pWiki.wikiData
+        wikiData = self.treeCtrl.pWiki.getWikiData()
         result = []
 
         # add to do list nodes
@@ -490,7 +490,7 @@ class TodoNode(AbstractNode):
         Returns a sequence of Nodes for the children of this node.
         This is called before expanding the node
         """
-        wikiData = self.treeCtrl.pWiki.wikiData
+        wikiData = self.treeCtrl.pWiki.getWikiData()
         addedTodoSubCategories = []
 #         addedRightSides = []
         addedWords = []
@@ -565,7 +565,7 @@ class PropCategoryNode(AbstractNode):
 
     def getNodePresentation(self):   # TODO Retrieve prop icon here
         style = NodeStyle()
-        globalProps = self.treeCtrl.pWiki.wikiData.getGlobalProperties()
+        globalProps = self.treeCtrl.pWiki.getWikiData().getGlobalProperties()
         key = u".".join(self.categories)
         propertyIcon = globalProps.get(u"global.%s.icon" % (key), u"page")
 
@@ -575,7 +575,7 @@ class PropCategoryNode(AbstractNode):
         return style
 
     def listChildren(self):
-        wikiData = self.treeCtrl.pWiki.wikiData
+        wikiData = self.treeCtrl.pWiki.getWikiData()
         result = []
         key = u".".join(self.categories + (u"",))
         
@@ -639,7 +639,7 @@ class PropValueNode(AbstractNode):
         return style
 
     def listChildren(self):
-        wikiData = self.treeCtrl.pWiki.wikiData
+        wikiData = self.treeCtrl.pWiki.getWikiData()
         result = []
         key = u".".join(self.categories)
         words = wikiData.getWordsWithPropertyValue(key, self.value)
@@ -710,10 +710,10 @@ class MainSearchesNode(AbstractNode):
         return style
         
     def isVisible(self):
-        return not not self.treeCtrl.pWiki.wikiData.getSavedSearchTitles()
+        return not not self.treeCtrl.pWiki.getWikiData().getSavedSearchTitles()
         
     def listChildren(self):
-        wikiData = self.treeCtrl.pWiki.wikiData
+        wikiData = self.treeCtrl.pWiki.getWikiData()
         
         searchTitles = wikiData.getSavedSearchTitles()
         return map(lambda s: SearchNode(self.treeCtrl, self, s), searchTitles)
@@ -804,7 +804,7 @@ class ModifiedWithinNode(AbstractNode):
         return style
 
     def listChildren(self):
-        wikiData = self.treeCtrl.pWiki.wikiData
+        wikiData = self.treeCtrl.pWiki.getWikiData()
         words = wikiData.getWikiWordsModifiedWithin(self.daySpan)
         words.sort()
                 
@@ -836,11 +836,11 @@ class MainParentlessNode(AbstractNode):
         return style
         
     def isVisible(self):
-        wikiData = self.treeCtrl.pWiki.wikiData
+        wikiData = self.treeCtrl.pWiki.getWikiData()
         return len(wikiData.getParentlessWikiWords()) > 1  # TODO Test if root is single element
         
     def listChildren(self):
-        wikiData = self.treeCtrl.pWiki.wikiData
+        wikiData = self.treeCtrl.pWiki.getWikiData()
         words = wikiData.getParentlessWikiWords()
         words.sort()
         
@@ -1027,7 +1027,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         if currentNode.IsOk():
             node = self.GetPyData(currentNode)
             if node.representsWikiWord():                    
-                if self.pWiki.wikiData.getAliasesWikiWord(node.getWikiWord()) ==\
+                if self.pWiki.getWikiData().getAliasesWikiWord(node.getWikiWord()) ==\
                         self.pWiki.getCurrentWikiWord():
                     return  # Is already on word -> nothing to do
             if node.representsFamilyWikiWord():
@@ -1089,7 +1089,7 @@ class WikiTreeCtrl(wxTreeCtrl):
                 self.GetRootItem())
         self.Bind(EVT_IDLE, self.OnIdle)
                 
-#         wikiData = self.pWiki.wikiData
+#         wikiData = self.pWiki.getWikiData()
 #         wikiWord = wikiData.getAliasesWikiWord(self.pWiki.getCurrentWikiWord())
 #         if not wikiWord in self.refreshCheckChildren:
 #             self.refreshCheckChildren.append(wikiWord)
@@ -1112,7 +1112,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
     def _generatorRefreshNodeAndChildren(self, parentnodeid):
         nodeObj = self.GetPyData(parentnodeid)
-        wikiData = self.pWiki.wikiData
+        wikiData = self.pWiki.getWikiData()
 
         self.setNodePresentation(parentnodeid, nodeObj.getNodePresentation())
         if not self.IsExpanded(parentnodeid):
@@ -1272,7 +1272,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 #         if selectNode:
 #             doexpand = True
 
-        wikiData = self.pWiki.wikiData
+        wikiData = self.pWiki.getWikiData()
         currentNode = self.GetSelection()    # self.GetRootItem()
         
         crumbs = None
@@ -1355,7 +1355,7 @@ class WikiTreeCtrl(wxTreeCtrl):
             nodeobj = self.GetPyData(child)
 #             if nodeobj.representsFamilyWikiWord() and nodeobj.getWikiWord() == findWord:
             if nodeobj.representsFamilyWikiWord() and \
-                    self.pWiki.wikiData.getAliasesWikiWord(nodeobj.getWikiWord())\
+                    self.pWiki.getWikiData().getAliasesWikiWord(nodeobj.getWikiWord())\
                     == findWord:
                 return child
             

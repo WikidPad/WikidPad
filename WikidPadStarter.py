@@ -1,6 +1,6 @@
 #!/bin/python
 
-import sys, os, traceback, os.path, glob, time
+import sys, os, traceback, os.path, glob, time, socket
 os.stat_float_times(True)
 
 VERSION_STRING = "wikidPad 1.7beta8"
@@ -30,109 +30,15 @@ from wxPython.wx import *
 import wxPython.xrc as xrc
 
 
-
-# openThisWiki = None
-# openThisWikiWord = None
-# if len(sys.argv) > 1:
-#    openThisWiki = sys.argv[1]
-#    if openThisWiki.startswith("wiki:"):
-#       openThisWiki = urllib.url2pathname(openThisWiki)
-#       openThisWiki = openThisWiki.replace("wiki:", "")
-# 
-#    if len(sys.argv) > 2:
-#       openThisWikiWord = sys.argv[2]
-
-
-# global exception control
-
-# class StdErrReplacement:
-#     def write(self, data):
-#         global _exceptionDestDir, _exceptionSessionTimeStamp, _exceptionOccurred
-#         global _previousExcepthook
-# 
-#         print "onWrite", repr(_exceptionDestDir)
-# 
-#         try:
-#             f = open(os.path.join(_exceptionDestDir, "WikidPad_Error.log"), "a")
-#             try:
-#                 if not _exceptionOccurred:
-#                     # (Only write for first exception in session) This isn't an exception
-#                     f.write(_exceptionSessionTimeStamp)
-#                     ## _exceptionOccurred = True
-#                 sys.stdout.write(data)
-#                 f.write(data)
-#             finally:
-#                 f.close()
-#         except:
-#             pass # TODO
-# 
-#     def writelines(self, it):
-#         for l in it:
-#             self.write(l)
-#             
-# #     def __getattr__(self, attr):
-# #         print "__getattr__", repr(attr)
-# #         return None
-# 
-# 
-# class ExceptionHandler:
-#     def __init__(self):
-#         global _exceptionDestDir, _exceptionSessionTimeStamp, _exceptionOccurred
-#         global _previousExcepthook
-#         self._exceptionDestDir = _exceptionDestDir
-#         self._exceptionSessionTimeStamp = _exceptionSessionTimeStamp
-#         self._exceptionOccurred = _exceptionOccurred
-#         self._previousExcepthook = _previousExcepthook
-#         self.traceback = traceback
-# 
-# 
-#     def __call__(self, typ, value, trace):
-#     #     global _exceptionDestDir, _exceptionSessionTimeStamp, _exceptionOccurred
-#     #     global _previousExcepthook
-#     #     global _traceback2
-#         import WikidPadStarter
-#     
-#         try:
-#             print "onException", repr(WikidPadStarter.traceback), repr(WikidPadStarter._exceptionDestDir)
-#     ##        traceback.print_exception(typ, value, trace, file=sys.stdout)
-#             f = open(os.path.join(WikidPadStarter._exceptionDestDir, "WikidPad_Error.log"), "a")
-#             try:
-#                 if not WikidPadStarter._exceptionOccurred:
-#                     # Only write for first exception in session
-#                     f.write(WikidPadStarter._exceptionSessionTimeStamp) 
-#                     WikidPadStarter._exceptionOccurred = True
-#                 WikidPadStarter.traceback.print_exception(typ, value, trace, file=f)
-#                 WikidPadStarter.traceback.print_exception(typ, value, trace, file=sys.stdout)
-#             finally:
-#                 f.close()
-#         except:
-#             print "Exception occurred during global exception handling:"
-#             WikidPadStarter.traceback.print_exc(file=sys.stdout)
-#             print "Original exception:"
-#             WikidPadStarter.traceback.print_exception(typ, value, trace, file=sys.stdout)
-#             WikidPadStarter._previousExcepthook(typ, value, trace)
-# 
-# 
-# _exceptionDestDir = os.path.dirname(os.path.abspath(sys.argv[0]))
-# _exceptionSessionTimeStamp = \
-#         time.strftime("\n\nVersion: '" + VERSION_STRING +
-#                 "' Session start: %Y-%m-%d %H:%M:%S\n")
-# _exceptionOccurred = False
-# 
-# 
-# _previousExcepthook = sys.excepthook
-# # sys.excepthook = ExceptionHandler()   # onException
-# 
-# _previousStdErr = sys.stderr
-# sys.stderr = StdErrReplacement()
-
-
 from pwiki import srePersistent
 srePersistent.loadCodeCache()
 
 from pwiki.PersonalWikiFrame import PersonalWikiFrame
-from pwiki.StringOps import mbcsDec
+from pwiki.StringOps import mbcsDec, createRandomString
 from pwiki.CmdLineAction import CmdLineAction
+from pwiki.Serialization import SerializeStream
+from pwiki import Ipc
+from pwiki.Configuration import createGlobalConfiguration
 
 
 def findDirs():
@@ -223,17 +129,16 @@ class App(wxApp):
     def __init__(self, *args, **kwargs):
         wxApp.__init__(self, *args, **kwargs)
         self.SetAppName("WikidPad")
+        # Do not initialize member variables here!
+
 
     def OnInit(self):
+         # TODO Load global config here!!!
         ## _prof.start()
-        appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
-        rf = open(os.path.join(appdir, "WikidPad.xrc"), "r")
-        rd = rf.read()
-        rf.close()
 
-        res = xrc.wxXmlResource.Get()
-        res.SetFlags(0)
-        res.LoadFromString(rd)
+        self.SetAppName("WikidPad")
+        self.removeAppLockOnExit = False
+        appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
         
         wikiAppDir, globalConfigDir = findDirs()
         
@@ -241,6 +146,7 @@ class App(wxApp):
             raise Exception(u"Error initializing environment, couldn't locate "
                     u"global config directory")
                     
+        self.wikiAppDir = wikiAppDir
         self.globalConfigDir = globalConfigDir
 
         self.globalConfigSubDir = os.path.join(self.globalConfigDir,
@@ -248,34 +154,186 @@ class App(wxApp):
         if not os.path.exists(self.globalConfigSubDir):
             os.mkdir(self.globalConfigSubDir)
 
+        # load or create global configuration
+        globalConfigLoc = os.path.join(self.globalConfigDir, "WikidPad.config")
+        self.globalConfig = createGlobalConfiguration()
+        if os.path.exists(globalConfigLoc):
+            try:
+                self.globalConfig.loadConfig(globalConfigLoc)
+            except Configuration.Error:
+                self.createDefaultGlobalConfig(globalConfigLoc)
+        else:
+            self.createDefaultGlobalConfig(globalConfigLoc)
 
-        self.wikiFrame = PersonalWikiFrame(None, -1, "WikidPad", wikiAppDir,
-                globalConfigDir, self.globalConfigSubDir,
-                CmdLineAction(sys.argv[1:]))
 
-        self.SetTopWindow(self.wikiFrame)
-        ## _prof.stop()
+        if self.globalConfig.getboolean("main", "single_process"):
+            # Single process mode means to create a server, detect an already
+            # running server and, if there, just send the commandline to
+            # the running server and quit then.            
 
-        # set the icon of the app
-        try:
-            self.wikiFrame.SetIcon(wxIcon(os.path.join(wikiAppDir, 'icons',
-                    'pwiki.ico'), wxBITMAP_TYPE_ICO))
-        except:
-            pass
+            # We create a "password" so that no other user can send commands to this
+            # WikidPad instance.
+            appCookie = createRandomString(30)
+            
+            port = Ipc.createCommandServer(appCookie)
+            
+            # True if this is the single existing instance which should write
+            # a new "AppLock.lock" file which either didn't exist or was invalid
+
+            singleInstance = True
+    
+            # TODO maybe more secure method to ensure atomic exist. check and
+            #   writing of file
+            if os.path.exists(os.path.join(self.globalConfigSubDir, "AppLock.lock")):
+                singleInstance = False
+                # There seems to be(!) another instance already
+                # TODO Try to send commandline
+                f = open(os.path.join(self.globalConfigSubDir, "AppLock.lock"), "ra")
+                appLockContent = f.read()
+                f.close()
+                
+                lines = appLockContent.split("\n")
+                if len(lines) != 3:
+                    return True # TODO Error handling!!!
+                    
+                appCookie = lines[0]
+                remotePort = int(lines[1])
+                
+                if port != remotePort:
+                    # Everything ok so far
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sock.settimeout(10.0)
+                    try:
+                        try:
+                            sock.connect(("127.0.0.1", remotePort))
+                            greet = self._readSocketLine(sock)
+                            if greet == "WikidPad_command_server 1.0":
+                                sock.send("cmdline\n" + appCookie + "\n")
+                                
+                                ack = self._readSocketLine(sock)
+                                if ack[0] == "+":
+                                    # app cookie ok
+                                    sst = SerializeStream(stringBuf="", readMode=False)
+                                    sst.serArrString(sys.argv[1:])
+                                    sock.send(sst.getBytes())
+                                
+                                    return True
+    
+                            # Reaching this point means something went wrong
+                            singleInstance = True  # TODO More fine grained reaction
+                        except socket.timeout, e:
+                            singleInstance = True
+                        except socket.error, e:
+                            if e.args[0] == 10061:
+                                # Connection refused (port not bound to a server)
+                                singleInstance = True
+                            else:
+                                raise
+                    finally:
+                        sock.close()
+    
+                else:
+                    # Sure indicator that AppLock file is invalid if newly
+                    # created server opened a port which is claimed to be used
+                    # already by previously started instance.
+                    singleInstance = True
+    
+            if not singleInstance:
+                return False
+
+            if port != -1:
+                # Server is connected, start it
+                Ipc.startCommandServer()
+    
+                appLockContent = appCookie + "\n" + str(port) + "\n"
+    
+                f = open(os.path.join(self.globalConfigSubDir, "AppLock.lock"), "wa")
+                f.write(appLockContent)
+                f.close()
+    
+                self.removeAppLockOnExit = True
+        
+
+        # Load wxPython XML resources
+        rf = open(os.path.join(appdir, "WikidPad.xrc"), "r")
+        rd = rf.read()
+        rf.close()
+
+        res = xrc.wxXmlResource.Get()
+        res.SetFlags(0)
+        res.LoadFromString(rd)
+
+        self.startPersonalWikiFrame(CmdLineAction(sys.argv[1:]))
 
         return True
         
         
+    def _readSocketLine(self, sock):
+        result = []
+        read = 0
+        while read < 300:
+            c = sock.recv(1)
+            if c == "\n" or c == "":
+                return "".join(result)
+            result.append(c)
+            read += 1
+            
+        return ""
+
+
     def OnExit(self):
-#         global _exceptionDestDir, _exceptionOccurred
+        if self.removeAppLockOnExit:
+            try:
+                os.remove(os.path.join(self.globalConfigSubDir, "AppLock.lock"))
+            except:  # OSError, ex:
+                traceback.print_exc()
+                # TODO Error message!
+
+        try:
+            Ipc.stopCommandServer()
+        except:
+            traceback.print_exc()
+
         if ExceptionLogger._exceptionOccurred and hasattr(sys, 'frozen'):
             wxMessageBox("An error occurred during this session\nSee file %s" %
                     os.path.join(ExceptionLogger._exceptionDestDir, "WikidPad_Error.log"),
                     "Error", style = wxOK)
 
 
+    def startPersonalWikiFrame(self, clAction):
+        wikiFrame = PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
+                self.globalConfigDir, self.globalConfigSubDir, clAction)
+
+        self.SetTopWindow(wikiFrame)
+        ## _prof.stop()
+
+        # set the icon of the app
+        try:
+            wikiFrame.SetIcon(wxIcon(os.path.join(self.wikiAppDir, 'icons',
+                    'pwiki.ico'), wxBITMAP_TYPE_ICO))
+        except:
+            pass
+
+
+    def createDefaultGlobalConfig(self, globalConfigLoc):
+        self.globalConfig.createEmptyConfig(globalConfigLoc)
+        self.globalConfig.fillWithDefaults()
+
+        wikidPadHelp = os.path.join(self.wikiAppDir, 'WikidPadHelp',
+                'WikidPadHelp.wiki')
+
+        self.globalConfig.set("main", "wiki_history", wikidPadHelp)
+        self.globalConfig.set("main", "last_wiki", wikidPadHelp)
+
+        self.globalConfig.set("main", "last_active_dir", os.getcwd())
+
+
     def getGlobalConfigSubDir(self):
         return self.globalConfigSubDir
+        
+    
+    def getGlobalConfig(self):
+        return self.globalConfig
 
 
 

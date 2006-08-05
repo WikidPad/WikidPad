@@ -58,10 +58,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.evalScope = None
         self.stylebytes = None
         self.stylingThreadHolder = ThreadHolder()
+        self.pageAst = None
         self.loadedDocPage = None
         self.lastCursorPositionInPage = {}   # TODO Clear caches when loading new wiki
         self.scrollPosCache = {}
         self.lastFont = None
+        self.ignoreOnChange = False
         self.pageType = "normal"   # The pagetype controls some special editor behaviour
 #         self.idleCounter = 0       # Used to reduce idle load
         
@@ -71,16 +73,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.autoCompBackBytesWithBracket = 0     # starts with '['
 
         # editor settings
-        self.SetIndent(4)
-        self.SetTabIndents(True)
-        self.SetBackSpaceUnIndents(True)
-        self.SetTabWidth(4)
-        self.SetUseTabs(0)  # TODO Configurable
-        self.SetEOLMode(wxSTC_EOL_LF)
-        self.AutoCompSetFillUps(u":=")  # TODO Add '.'?
-#         self.SetYCaretPolicy(wxSTC_CARET_SLOP, 2)  
-#         self.SetYCaretPolicy(wxSTC_CARET_JUMPS | wxSTC_CARET_EVEN, 4)  
-        self.SetYCaretPolicy(wxSTC_CARET_SLOP | wxSTC_CARET_EVEN, 4)  
+        self.applyBasicSciSettings()
 
         
         # configurable editor settings
@@ -292,6 +285,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             wxStyledTextCtrl.SetText(self, mbcsEnc(text, "replace")[0])
         self.ignoreOnChange = False
         self.EmptyUndoBuffer()
+        # self.applyBasicSciSettings()
 
 
     def replaceText(self, text):
@@ -360,6 +354,24 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         ce = cs + len(self.GetTextRange(start, end))
         return (cs, ce)
 
+    def applyBasicSciSettings(self):
+        """
+        Apply the basic Scintilla settings which are resetted to wrong
+        default values by some operations
+        """
+        self.SetCodePage(wxSTC_CP_UTF8)
+        self.SetIndent(4)
+        self.SetTabIndents(True)
+        self.SetBackSpaceUnIndents(True)
+        self.SetTabWidth(4)
+        self.SetUseTabs(0)  # TODO Configurable
+        self.SetEOLMode(wxSTC_EOL_LF)
+        self.AutoCompSetFillUps(u":=")  # TODO Add '.'?
+#         self.SetYCaretPolicy(wxSTC_CARET_SLOP, 2)  
+#         self.SetYCaretPolicy(wxSTC_CARET_JUMPS | wxSTC_CARET_EVEN, 4)  
+        self.SetYCaretPolicy(wxSTC_CARET_SLOP | wxSTC_CARET_EVEN, 4)  
+
+
 
     def saveLoadedDocPage(self):
         """
@@ -399,7 +411,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             miscevt.removeListener(self.wikiPageListener)
             
             self.SetDocPointer(None)
-            self.SetCodePage(wxSTC_CP_UTF8)
+            self.applyBasicSciSettings()
 
             self.loadedDocPage.removeTxtEditor(self)
             self.loadedDocPage = None
@@ -440,7 +452,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             # Another editor contains already this page, so share its
             # Scintilla document object for synchronized editing
             self.SetDocPointer(otherEditor.GetDocPointer())
-            self.SetCodePage(wxSTC_CP_UTF8)
+            self.applyBasicSciSettings()
         else:
             # Load content
             try:
@@ -450,6 +462,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
             # now fill the text into the editor
             self.SetText(content)
+
 
         self.loadedDocPage.addTxtEditor(self)
 
@@ -487,7 +500,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             # Another editor contains already this page, so share its
             # Scintilla document object for synchronized editing
             self.SetDocPointer(otherEditor.GetDocPointer())
-            self.SetCodePage(wxSTC_CP_UTF8)
+            self.applyBasicSciSettings()
         else:
             # Load content
             try:
@@ -1549,7 +1562,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         self.autoCompBackBytesWithoutBracket = self.bytelenSct(tofind)
                         formatting = self.pWiki.getFormatting()
                         acresult += filter(formatting.isCcWikiWord, 
-                                self.pWiki.wikiData.getWikiWordsStartingWith(
+                                self.pWiki.getWikiData().getWikiWordsStartingWith(
                                 tofind, True))
 
                     if mat2:
@@ -1557,9 +1570,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         tofind = line[-mat2.end():]
                         # print "mat2", repr(tofind)
                         self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
-                        acresult += map(lambda s: u"[" + s, self.pWiki.wikiData.\
+                        acresult += map(lambda s: u"[" + s, self.pWiki.getWikiData().\
                                 getWikiWordsStartingWith(tofind[1:], True))
-                        acresult += map(lambda s: u"[" + s, self.pWiki.wikiData.\
+                        acresult += map(lambda s: u"[" + s, self.pWiki.getWikiData().\
                                 getPropertyNamesStartingWith(tofind[1:]))
 
                     elif mat3:
@@ -1571,7 +1584,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         # print "mat3", repr(tofind)
                         self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
                         values = filter(lambda pv: pv.startswith(propvalpart),
-                                self.pWiki.wikiData.getDistinctPropertyValues(propkey))
+                                self.pWiki.getWikiData().getDistinctPropertyValues(propkey))
                         acresult += map(lambda v: u"[" + propkey + propfill + 
                                 v +  u"]", values)
 

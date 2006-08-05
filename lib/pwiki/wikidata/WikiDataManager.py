@@ -1,5 +1,5 @@
 from weakref import WeakValueDictionary
-import os, os.path, sets
+import os, os.path, sets, traceback
 from threading import RLock
 
 from pwiki.MiscEvent import MiscEventSourceMixin
@@ -287,6 +287,12 @@ class WikiDataManager(MiscEventSourceMixin):
         self.wikiConfiguration.getMiscEvent().addListener(self)
         
         self.getFormatting().rebuildFormatting(None)
+        self.noAutoSaveFlag = False # Flag is set (by PersonalWikiFrame),
+                # if some error occurred during saving and the user doesn't want
+                # to retry saving. WikiDataManager does not change or respect
+                # this flag.
+                
+        self.autoReconnectTriedFlag = False
 
 
     def incRefCount(self):
@@ -294,6 +300,14 @@ class WikiDataManager(MiscEventSourceMixin):
         return self.refCount
 
     def release(self):
+        """
+        Inform this instance that it is no longer needed by one of the
+        holding PersonalWikiFrame objects.
+        Decrements the internal refcounter, if it goes to zero, the used
+        WikiData instance is closed.
+        
+        Don't call any other method on the instance after calling this method.
+        """
         global _openDocuments
 
         self.refCount -= 1
@@ -302,6 +316,7 @@ class WikiDataManager(MiscEventSourceMixin):
             if self.wikiData is not None:
                 self.wikiData.close()
                 self.wikiData = None
+                self.baseWikiData = None
 
             del _openDocuments[self.getWikiConfig().getConfigPath()]
 
@@ -331,6 +346,34 @@ class WikiDataManager(MiscEventSourceMixin):
         
     def getDataDir(self):
         return self.dataDir
+        
+    def getNoAutoSaveFlag(self):
+        """
+        Flag is set (by PersonalWikiFrame),
+        if some error occurred during saving and the user doesn't want
+        to retry saving. WikiDataManager does not change or respect
+        this flag.
+        """
+        return self.noAutoSaveFlag
+        
+    def setNoAutoSaveFlag(self, val):
+        self.noAutoSaveFlag = val
+        # TODO send message?
+
+
+    def getAutoReconnectTriedFlag(self):
+        """
+        Flag is set (by PersonalWikiFrame),
+        if after some read/write error the program already tried to reconnect
+        to database and should not automatically try again, only on user
+        request.
+        """
+        return self.autoReconnectTriedFlag
+        
+    def setAutoReconnectTriedFlag(self, val):
+        self.autoReconnectTriedFlag = val
+        # TODO send message?
+
 
         
     def getWikiPage(self, wikiWord):
@@ -538,6 +581,39 @@ class WikiDataManager(MiscEventSourceMixin):
             sarOp.endWikiSearch()
             
         return result
+
+
+    def reconnect(self):
+        """
+        Closes current WikiData instance and opens a new one with the same
+        settings. This should be called if connection was interrupted by a network
+        problem or similar issues.
+        """
+        try:
+            if self.wikiData is not None:
+                self.wikiData.close()
+        except:
+            traceback.print_exc()
+
+        self.autoReconnectTriedFlag = True
+            
+        self.wikiData = None
+        self.baseWikiData = None
+
+        wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(self.dbtype)
+        if wikiDataFactory is None:
+            raise NoDbHandlerException("Data handler %s not available" % self.dbtype)
+
+        wikiData = wikiDataFactory(self, self.dataDir)
+
+        self.baseWikiData = wikiData
+        self.wikiData = WikiDataSynchronizedProxy(self.baseWikiData)
+        
+        # Reset flag so program automatically tries reconnecting on next error
+        self.autoReconnectTriedFlag = False
+
+        props = {"reconnected database": True,}
+        self.fireMiscEventProps(props)
 
 
     def miscEventHappened(self, miscevt):

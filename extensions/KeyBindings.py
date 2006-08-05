@@ -48,6 +48,7 @@ InsertDate="Ctrl-Alt-D"
 MakeWikiWord="Ctrl-J"
 ZoomIn=""
 ZoomOut=""
+CloneWindow=""
 IncrementalSearchCtrl="F"   # Hack, changing not recommended
 
 def makeBold(editor):

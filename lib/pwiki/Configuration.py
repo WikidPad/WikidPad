@@ -1,5 +1,5 @@
 import ConfigParser
-import os
+import os, traceback
 # from os.path import *
 
 import codecs
@@ -383,6 +383,13 @@ class _CombinedConfiguration(_AbstractConfiguration):
     def createEmptyGlobalConfig(self, fn):
         self.globalConfig.createEmptyConfig(fn)
 
+    def getGlobalConfig(self):
+        return self.globalConfig
+
+    def setGlobalConfig(self, config):
+        self.globalConfig = config
+
+
     def save(self):
         """
         Save all configurations
@@ -412,11 +419,11 @@ class _CombinedConfiguration(_AbstractConfiguration):
 GLOBALDEFAULTS = {
     ("main", "wiki_history"): None,   # Should be overwritten with concrete value
     ("main", "last_wiki"): "",   # Same
-    ("main", "size_x"): None,   # Same
-    ("main", "size_y"): None,   # Same
+    ("main", "size_x"): "500",
+    ("main", "size_y"): "300",
     
-    ("main", "pos_x"): None,   # Should be overwritten with concrete value
-    ("main", "pos_y"): None,   # Same
+    ("main", "pos_x"): "10",
+    ("main", "pos_y"): "10",
     ("main", "splitter_pos"): '170',
     ("main", "log_window_autoshow"): "True", # Automatically show log window if messages added
     ("main", "log_window_autohide"): "True", # Automatically hide log window if empty
@@ -503,13 +510,15 @@ GLOBALDEFAULTS = {
     ("main", "frame_stayOnTop"): "False",  # Should frame stay on top of all other windows?
     ("main", "lowresources"): "0",   # The value must be a number, not a truth value!
     ("main", "showontray"): "0",
+    ("main", "minimize_on_closeButton"): "False", # Minimize if the close button ("X") is pressed  
     ("main", "strftime"): u"%x %I:%M %p",  # time format when inserting time in a page
     ("main", "pagestatus_timeformat"): u"%x %I:%M %p",  # time format for the page status field in status bar
     ("main", "recent_time_formats"): u"%x %I:%M %p;%m/%d/%y;%d.%m.%y;%d.%m.%Y;%a %Y-%m-%d",
              # semicolon separated list of recently used time formats
-    ("main", "script_security_level"): "0"  # Allow the use of scripts and
+    ("main", "script_security_level"): "0",  # Allow the use of scripts and
             # import_scripts property? 0: No scripts at all; 1: No import_scripts;
             # 2: allow local import_scripts; 3: allow also global.import_scripts
+    ("main", "single_process"): "False" # Ensure that only a single process runs per user  
     }
 
 
@@ -544,5 +553,8 @@ def createCombinedConfiguration():
 def createWikiConfiguration():
     return _SingleConfiguration(WIKIDEFAULTS)
 
+
+def createGlobalConfiguration():
+    return _SingleConfiguration(GLOBALDEFAULTS)
 
 

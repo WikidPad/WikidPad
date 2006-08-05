@@ -71,7 +71,7 @@ class PrintMainDialog(wxDialog):
         self.ctrls.btnCancel.SetId(wxID_CANCEL)
         
         self.pWiki.saveCurrentDocPage(force=True)
-        self.pWiki.wikiData.commit()
+        self.pWiki.getWikiData().commit()
         
 #         for e in self.exporterList:
 #             e[3].Show(False)

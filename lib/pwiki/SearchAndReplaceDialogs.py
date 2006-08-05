@@ -663,7 +663,7 @@ class SearchWikiDialog(wxDialog):   # TODO
                 if title == u"":
                     return  # Cancel
                     
-                if title in self.pWiki.wikiData.getSavedSearchTitles():
+                if title in self.pWiki.getWikiData().getSavedSearchTitles():
                     answer = wxMessageBox(
                             u"Do you want to overwrite existing search '%s'?" %
                             title, u"Overwrite search",
@@ -671,7 +671,7 @@ class SearchWikiDialog(wxDialog):   # TODO
                     if answer == wxNO:
                         continue
 
-                self.pWiki.wikiData.saveSearch(title,
+                self.pWiki.getWikiData().saveSearch(title,
                         sarOp.getPackedSettings())
                 self._refreshSavedSearchesList()
                 break
@@ -704,7 +704,7 @@ class SearchWikiDialog(wxDialog):   # TODO
 
 
     def _refreshSavedSearchesList(self):
-        self.savedSearches = self.pWiki.wikiData.getSavedSearchTitles()
+        self.savedSearches = self.pWiki.getWikiData().getSavedSearchTitles()
         self.savedSearches.sort()
         
         self.ctrls.lbSavedSearches.Clear()
@@ -726,7 +726,7 @@ class SearchWikiDialog(wxDialog):   # TODO
             return
 
         for s in sels:
-            self.pWiki.wikiData.deleteSavedSearch(self.savedSearches[s])
+            self.pWiki.getWikiData().deleteSavedSearch(self.savedSearches[s])
         self._refreshSavedSearchesList()
 
 
@@ -743,7 +743,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         if len(sels) != 1:
             return False
         
-        datablock = self.pWiki.wikiData.getSearchDatablock(
+        datablock = self.pWiki.getWikiData().getSearchDatablock(
                 self.savedSearches[sels[0]])
         sarOp = SearchReplaceOperation()
         sarOp.setPackedSettings(datablock)

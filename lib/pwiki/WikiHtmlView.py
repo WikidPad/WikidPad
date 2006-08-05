@@ -82,7 +82,7 @@ class WikiHtmlView(wxHtmlWindow):
         if self.currentLoadedWikiWord:
             self.scrollPosCache[self.currentLoadedWikiWord] = self.GetViewStart()
         
-        self.exporterInstance.wikiData = self.pWiki.wikiData
+        self.exporterInstance.wikiData = self.pWiki.getWikiData()
         
         wikiPage = self.pWiki.getCurrentDocPage()
         if wikiPage is None:
@@ -94,9 +94,9 @@ class WikiHtmlView(wxHtmlWindow):
         
         html = self.exporterInstance.exportContentToHtmlString(word, content,
                 wikiPage.getFormatDetails(),
-#                 wikiPage.getLinkCreator(self.pWiki.wikiData), asHtmlPreview=True)
-                LinkCreator(self.pWiki.wikiData), asHtmlPreview=True)
-        
+#                 wikiPage.getLinkCreator(self.pWiki.getWikiData()), asHtmlPreview=True)
+                LinkCreator(self.pWiki.getWikiData()), asHtmlPreview=True)
+
         # TODO Reset after open wiki
 #         lx, ly = self.GetViewStart()
         zoom = self.pWiki.getConfig().getint("main", "preview_zoom", 0)
