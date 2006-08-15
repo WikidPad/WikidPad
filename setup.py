@@ -20,7 +20,7 @@ wikidpad = Target(
 
 
 setup(name='WikidPad',
-      version='1.6rc',
+      version='1.6',
       author='Michael Butscher',
       author_email='mbutscher@gmx.de',
       url='http://www.mbutscher.nextdesigns.net/software.html',

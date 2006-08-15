@@ -1,6 +1,13 @@
 ﻿++ Change Log
 
 
+Aug. 15, 2006 (1.6 final)
+
+Changes:
+    * Only name was changed
+
+
+
 Jul. 5, 2006 (1.6rc4)
 
 Changes:

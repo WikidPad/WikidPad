@@ -300,7 +300,7 @@ WikidPadHelp/data/index/WORDS.grl -text
 WikidPadHelp/data/index/wiki_idx.gfd -text
 WikidPadHelp/data/wikidb.gfd -text
 /WikidPadStarter.py -text
-/build.bat -text
+/bld.bat -text
 docs/api.txt -text
 docs/dev-setup.txt -text
 docs/dev.txt -text
@@ -560,7 +560,6 @@ lib/pwiki/wikidata/original_gadfly/__init__.py -text
 lib/pwiki/wxHelper.py -text
 lib/readme.txt -text
 /license.txt -text
-/pwiki.ico -text
 /setup.py -text
 /sql_mar.py -text
 /wikidpad_ansi.iss -text
