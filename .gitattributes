@@ -310,7 +310,7 @@ WikidPadHelp/data/index/wiki_idx.gfd -text
 WikidPadHelp/data/multipage[!!-~]text[!!-~]format.wiki -text
 WikidPadHelp/data/wikidb.gfd -text
 /WikidPadStarter.py -text
-/build.bat -text
+/bld.bat -text
 docs/api.txt -text
 docs/dev-setup.txt -text
 docs/dev.txt -text
@@ -586,7 +586,6 @@ lib/pwiki/wxHelper.py -text
 lib/readme.txt -text
 /license-spelladdon.txt -text
 /license.txt -text
-/pwiki.ico -text
 /setup.py -text
 /sql_mar.py -text
 /wikidpad_spelladdon.iss -text
