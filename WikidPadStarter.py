@@ -3,7 +3,7 @@
 import sys, os, traceback, os.path, glob, time, socket
 os.stat_float_times(True)
 
-VERSION_STRING = "wikidPad 1.7beta8"
+VERSION_STRING = "wikidPad 1.8beta1"
 
 if not hasattr(sys, 'frozen'):
     sys.path.append("lib")
@@ -29,10 +29,15 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "gad
 from wxPython.wx import *
 import wxPython.xrc as xrc
 
+wxWINDOWS_NT = 18   # For wxGetOsVersion()
+wxWIN95 = 20   # For wxGetOsVersion(), this includes also Win 98 and ME
+
+
 
 from pwiki import srePersistent
 srePersistent.loadCodeCache()
 
+from pwiki.wxHelper import IconCache
 from pwiki.PersonalWikiFrame import PersonalWikiFrame
 from pwiki.StringOps import mbcsDec, createRandomString
 from pwiki.CmdLineAction import CmdLineAction
@@ -46,37 +51,74 @@ def findDirs():
     Returns tuple (wikiAppDir, globalConfigDir)
     """
     wikiAppDir = None
+    
+    isWindows = (wxGetOsVersion()[0] == wxWIN95) or \
+            (wxGetOsVersion()[0] == wxWINDOWS_NT)
 
     try:
         wikiAppDir = os.path.dirname(os.path.abspath(sys.argv[0]))
         if not wikiAppDir:
             wikiAppDir = r"C:\Program Files\WikidPad"
             
+        globalConfigDir = None
+
         # This allows to keep the program with config on an USB stick
         if os.path.exists(os.path.join(wikiAppDir, "WikidPad.config")):
             globalConfigDir = wikiAppDir
         else:
             globalConfigDir = os.environ.get("HOME")
             if not (globalConfigDir and os.path.exists(globalConfigDir)):
-                globalConfigDir = os.environ.get("USERPROFILE")
-                if not (globalConfigDir and os.path.exists(globalConfigDir)):
+#                 globalConfigDir = os.environ.get("USERPROFILE")
+#                 if not (globalConfigDir and os.path.exists(globalConfigDir)):
                     # Instead of checking USERNAME, the user config dir. is
                     # now used
-                    globalConfigDir = wxStandardPaths.Get().GetUserConfigDir()
+                globalConfigDir = wxStandardPaths.Get().GetUserConfigDir()
+                if os.path.exists(globalConfigDir) and isWindows:
+                    try:
+                        realGlobalConfigDir = os.path.join(globalConfigDir,
+                                "WikidPad")
+                        if not os.path.exists(realGlobalConfigDir):
+                            # If it doesn't exist, create the directory
+                            os.mkdir(realGlobalConfigDir)
+                            
+                        globalConfigDir = realGlobalConfigDir
+                    except:
+                        traceback.print_exc()
+
 #                     user = os.environ.get("USERNAME")
 #                     if user:
 #                         globalConfigDir = r"c:\Documents And Settings\%s" % user
+
+#             if globalConfigDir and os.path.exists(globalConfigDir) and isWindows:
+#                 try:
+#                     realGlobalConfigDir = os.path.join(globalConfigDir, "WikidPad")
+#                     if not os.path.exists(realGlobalConfigDir):
+#                         # If it doesn't exist, create the directory
+#                         os.mkdir(realGlobalConfigDir)
+#                         # ... and try to move already created config files to it
+#                         oldCfgFile = os.path.join(globalConfigDir,
+#                                 "WikidPad.config")
+#                         oldGlobalsDir = os.path.join(globalConfigDir,
+#                                 ".WikidPadGlobals")
+#                         newCfgFile = os.path.join(realGlobalConfigDir,
+#                                 "WikidPad.config")
+#                         newGlobalsDir = os.path.join(realGlobalConfigDir,
+#                                 ".WikidPadGlobals")
+#                         if os.path.exists(oldCfgFile):
+#                             os.rename(oldCfgFile, newCfgFile)
+#                         if os.path.exists(oldGlobalsDir):
+#                             os.rename(oldGlobalsDir, newGlobalsDir)
+#                             
+#                     globalConfigDir = realGlobalConfigDir
+#                 except:
+#                     traceback.print_exc()
+
     finally:
         pass
-#     except Exception, e:
-#         return None, None
 
     if not globalConfigDir:
         globalConfigDir = wikiAppDir
 
-#     if not globalConfigDir or not os.path.exists(globalConfigDir):
-#         globalConfigDir = "C:\Windows"
-        
     # mbcs decoding
     if wikiAppDir is not None:
         wikiAppDir = mbcsDec(wikiAppDir, "replace")[0]
@@ -118,6 +160,12 @@ if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
             os.remove(os.path.join(globalConfigDir, "WikidPad.config"))
         except:
             pass
+            
+        if wikiAppDir != globalConfigDir:
+            try:
+                os.rmdir(globalConfigDir)
+            except:
+                pass
 
         sys.exit(0)
     
@@ -127,6 +175,9 @@ if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
 
 class App(wxApp): 
     def __init__(self, *args, **kwargs):
+        global app
+        app = self
+
         wxApp.__init__(self, *args, **kwargs)
         self.SetAppName("WikidPad")
         # Do not initialize member variables here!
@@ -164,7 +215,12 @@ class App(wxApp):
                 self.createDefaultGlobalConfig(globalConfigLoc)
         else:
             self.createDefaultGlobalConfig(globalConfigLoc)
+            
+        self.lowResources = self.globalConfig.getboolean("main", "lowresources")
 
+        # Build icon cache
+        iconDir = os.path.join(self.wikiAppDir, "icons")
+        self.iconCache = IconCache(iconDir, self.lowResources)
 
         if self.globalConfig.getboolean("main", "single_process"):
             # Single process mode means to create a server, detect an already
@@ -330,10 +386,21 @@ class App(wxApp):
 
     def getGlobalConfigSubDir(self):
         return self.globalConfigSubDir
-        
     
     def getGlobalConfig(self):
         return self.globalConfig
+        
+    def getLowResources(self):
+        """
+        Return state of the low resources global setting
+        """
+        return self.lowResources
+
+    def getIconCache(self):
+        """
+        Return the icon cache object
+        """
+        return self.iconCache
 
 
 

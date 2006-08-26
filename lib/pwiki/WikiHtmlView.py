@@ -78,9 +78,12 @@ class WikiHtmlView(wxHtmlWindow):
 
     def refresh(self):
         ## _prof.start()
-        # Store position of previous word, if any
+        # Store position of previous page, if any
         if self.currentLoadedWikiWord:
-            self.scrollPosCache[self.currentLoadedWikiWord] = self.GetViewStart()
+            prevPage = self.pWiki.getWikiDocument().getWikiPage(
+                    self.currentLoadedWikiWord)
+            prevPage.setPresentation(self.GetViewStart(), 3)
+#             self.scrollPosCache[self.currentLoadedWikiWord] = 
         
         self.exporterInstance.wikiData = self.pWiki.getWikiData()
         
@@ -94,7 +97,6 @@ class WikiHtmlView(wxHtmlWindow):
         
         html = self.exporterInstance.exportContentToHtmlString(word, content,
                 wikiPage.getFormatDetails(),
-#                 wikiPage.getLinkCreator(self.pWiki.getWikiData()), asHtmlPreview=True)
                 LinkCreator(self.pWiki.getWikiData()), asHtmlPreview=True)
 
         # TODO Reset after open wiki
@@ -104,7 +106,8 @@ class WikiHtmlView(wxHtmlWindow):
                 for s in self._DEFAULT_FONT_SIZES])
         self.SetPage(uniToGui(html))
         
-        lx, ly = self.scrollPosCache.get(self.currentLoadedWikiWord, (0, 0))
+        lx, ly = wikiPage.getPresentation()[3:5]
+#         lx, ly = self.scrollPosCache.get(self.currentLoadedWikiWord, (0, 0))
         self.Scroll(lx, ly)
         ## _prof.stop()
 

@@ -145,6 +145,10 @@ class ConnectWrap:
        
 
 
+VERSION_DB = 7
+VERSION_WRITECOMPAT = 7
+VERSION_READCOMPAT = 7
+
 
 # Helper for the following definitions
 class t:
@@ -191,25 +195,27 @@ TABLE_DEFINITIONS = {
         ("firstchangeid", t.i),
         ("created", t.r)
         ),
-                    
-                    
+
+
     "wikiwordcontent": (     # Essential for Compact
         ("word", t.t),
         ("content", t.b),
         ("compression", t.i),
         ("encryption", t.i),
         ("modified", t.r),
-        ("created", t.r)
+        ("created", t.r),
+        ("presentationdatablock", t.b),
+        ("wordnormcase", t.t)
         ),
-    
-    
+
+
     "wikirelations": (     # Cache
         ("word", t.t),
         ("relation", t.t),
         ("firstcharpos", t.imo)  # Position of the link from word to relation in chars
         ),
-    
-    
+
+
     "wikiwordprops": (     # Cache
         ("word", t.t),
         ("key", t.t),
@@ -434,10 +440,11 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
     
             connwrap.executemany("insert or replace into settings(key, value) "+
                         "values (?, ?)", (
-                    ("formatver", "6"),  # Version of database format the data was written
-                    ("writecompatver", "5"),  # Lowest format version which is write compatible
-                    ("readcompatver", "5"),  # Lowest format version which is read compatible
-                    ("branchtag", "WikidPadCompact")  # Tag of the WikidPad branch
+                    ("formatver", str(VERSION_DB)),  # Version of database format the data was written
+                    ("writecompatver", str(VERSION_WRITECOMPAT)),  # Lowest format version which is write compatible
+                    ("readcompatver", str(VERSION_READCOMPAT)),  # Lowest format version which is read compatible
+                    ("branchtag", "WikidPadCompact"),  # Tag of the WikidPad branch
+                    ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
                     )  )
 
             rebuildIndices(connwrap)
@@ -634,13 +641,13 @@ def checkDatabaseFormat(connwrap):
     formatver = getSettingsInt(connwrap, "formatver")
     writecompatver = getSettingsInt(connwrap, "writecompatver")
 
-    if writecompatver > 6:
+    if writecompatver > VERSION_WRITECOMPAT:
         # TODO: Check compatibility
         
         return 2, "Database has unknown format version='%i'" \
                 % formatver
                 
-    if formatver < 6:
+    if formatver < VERSION_DB:
         return 1, "Update needed, current format version='%i'" \
                 % formatver
         
@@ -895,21 +902,32 @@ def updateDatabase(connwrap):
         # --- WikiPad 1.7beta1 reached (formatver=6, writecompatver=5,
         #         readcompatver=5) ---
 
+    if formatver == 6:
+        # Add columns "presentationdatablock" and "wordnormcase" to wikiwordcontent
+
+        changeTableSchema(connwrap, "wikiwordcontent",
+                TABLE_DEFINITIONS["wikiwordcontent"])
+
+        formatver = 7
+
+        # --- WikiPad 1.8beta1 reached (formatver=7, writecompatver=7,
+        #         readcompatver=7) ---
+
     # Write format information
     connwrap.executemany("insert or replace into settings(key, value) "+
             "values (?, ?)", (
-        ("formatver", "6"),  # Version of database format the data was written
-        ("writecompatver", "5"),  # Lowest format version which is write compatible
-        ("readcompatver", "5"),  # Lowest format version which is read compatible
-        ("branchtag", "WikidPadCompact")  # Tag of the WikidPad branch
+        ("formatver", str(VERSION_DB)),  # Version of database format the data was written
+        ("writecompatver", str(VERSION_WRITECOMPAT)),  # Lowest format version which is write compatible
+        ("readcompatver", str(VERSION_READCOMPAT)),  # Lowest format version which is read compatible
+        ("branchtag", "WikidPadCompact"),  # Tag of the WikidPad branch
+        ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
         )   )
 
     rebuildIndices(connwrap)
     
     connwrap.commit()
 
-        
-    
+
 # class WikiDBExistsException(WikiDataException): pass
 # class WikiDBExistsException(Exception): pass
 
@@ -1043,5 +1061,30 @@ TABLE_DEFINITIONS = {
     "wikiwordprops", "todos". This column contains the position of the
     link, property or todo respectively in the wiki page in characters.
     
++++ 1.7bet1 (formatver=6) to 1.8beta (formatver=7)
+
+    "wikiwordcontent": (     # Essential for Compact
+        ("word", t.t),
+        ("content", t.b),
+        ("compression", t.i),
+        ("encryption", t.i),
+        ("modified", t.r),
+        ("created", t.r),
+        ("presentationdatablock", t.b),
+        ("wordnormcase", t.t)
+        ),
+
+Column "presentationdatablock" contains byte string describing how to present
+a particular page (window scroll and cursor position). Its content is
+en/decoded by the WikiDataManager.
+
+Column "wordnormcase" contains byte string returned by the normCase method
+of a Collator object (see "Localization.py"). The column's content should 
+be recreated at a rebuild.
+
+Added "locale" key in "settings" table. This is the name of the locale used to
+create the "wordnormcase" column content. A "-" means the column contains
+invalid data.
+
 """
 

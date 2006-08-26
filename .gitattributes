@@ -527,7 +527,6 @@ lib/gadfly/serialize.py -text
 lib/gadfly/server.py -text
 lib/gadfly/sql.py -text
 lib/gadfly/store.py -text
-lib/pwiki/AboutDialog.py -text
 lib/pwiki/AdditionalDialogs.py -text
 lib/pwiki/CmdLineAction.py -text
 lib/pwiki/Configuration.py -text
@@ -540,6 +539,7 @@ lib/pwiki/Ipc.py -text
 lib/pwiki/Localization.py -text
 lib/pwiki/LogWindow.py -text
 lib/pwiki/MiscEvent.py -text
+lib/pwiki/OptionsDialog.py -text
 lib/pwiki/PageAst.py -text
 lib/pwiki/PageHistory.py -text
 lib/pwiki/PersonalWikiFrame.py -text

@@ -4,7 +4,11 @@ import os, traceback
 
 import codecs
 
-from wxPython.wx import wxPlatformInfo
+from wxPython.wx import wxPlatformInfo, wxGetOsVersion
+
+wxWINDOWS_NT = 18   # For wxGetOsVersion() 
+wxWIN95 = 20   # For wxGetOsVersion(), this includes also Win 98 and ME
+
 
 from MiscEvent import MiscEventSourceMixin
 
@@ -30,6 +34,20 @@ def isLinux():
         return os.uname[0] == "Linux"
     except AttributeError:
         return False
+
+
+_ISWIN9x = wxGetOsVersion()[0] == wxWIN95
+
+def isWin9x():
+    """
+    Returns True if OS is WIndows 95/98/ME
+    """
+    return _ISWIN9x
+
+
+
+
+
 
 # from WikiExceptions import *
 

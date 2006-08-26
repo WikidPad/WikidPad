@@ -55,13 +55,21 @@ class WikiData:
 
         self.connWrap = DbStructure.ConnectWrap(sqlite.connect(dbfile))
         self.commit = self.connWrap.commit
+        
+##         DbStructure.rebuildIndices(self.connWrap)
 
         DbStructure.registerSqliteFunctions(self.connWrap)
 
         self.pagefileSuffix = self.dataManager.getWikiConfig().get("main",
                 "db_pagefile_suffix", u".wiki")
 
-        formatcheck, formatmsg = DbStructure.checkDatabaseFormat(self.connWrap)
+
+    def checkDatabaseFormat(self):
+        return DbStructure.checkDatabaseFormat(self.connWrap)
+
+
+    def connect(self):
+        formatcheck, formatmsg = self.checkDatabaseFormat()
 
         if formatcheck == 2:
             # Unknown format
@@ -283,20 +291,6 @@ class WikiData:
         except:
             self.connWrap.rollback()
             raise
-
-#             # now we have to search the wiki files and replace the old word with the new
-#             searchOp = SearchAndReplace.SearchReplaceOperation()
-#             searchOp.wikiWide = True
-#             searchOp.wildCard = 'no'
-#             searchOp.caseSensitive = True
-#             searchOp.searchStr = word
-#             
-#             results = self.search(searchOp)
-#             for resultWord in results:
-#                 content = self.getContent(resultWord)
-#                 content = content.replace(word, toWord)
-#                 self.setContent(resultWord, content)
-
 
 
     def deleteWord(self, word):
@@ -692,6 +686,13 @@ class WikiData:
                 "select distinct(key) from wikiwordprops")   #  order by key")
         return [name for name in names if name.startswith(startingWith)]
 
+# # Doesn't seem to be more efficient
+#         return self.connWrap.execSqlQuerySingleColumn(
+#                 "select distinct(key) from wikiwordprops "
+#                 "where key glob ?", (startingWith+"*",))   #  order by key")
+
+
+
     def getGlobalProperties(self):
         if not self.cachedGlobalProps:
             return self.updateCachedGlobalProps()
@@ -735,6 +736,8 @@ class WikiData:
                 self.setProperty(word, k, v)
                 if k == "alias":
                     self.setAsAlias(v)  # TODO
+                    
+        self.cachedGlobalProps = None   # reset global properties cache
 
     def updateCachedGlobalProps(self):
         """
@@ -892,6 +895,26 @@ class WikiData:
 
         self.cachedContentNames = {}
         self.cachedGlobalProps = None
+
+
+    def setPresentationBlock(self, word, datablock):
+        """
+        Save the presentation datablock (a byte string) for a word to
+        the database.
+        """
+        self.connWrap.execSql(
+                "update wikiwords set presentationdatablock = ? where "
+                "word = ?", (sqlite.Binary(datablock), word))
+
+    def getPresentationBlock(self, word):
+        """
+        Returns the presentation datablock (a byte string).
+        The function may return either an empty string or a valid datablock
+        """
+        return self.connWrap.execSqlQuerySingleItem(
+                "select presentationdatablock from wikiwords where word = ?",
+                (word,))
+
 
     def close(self):
         self.connWrap.commit()

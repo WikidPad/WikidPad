@@ -27,7 +27,6 @@ from CmdLineAction import CmdLineAction
 from WikiTxtCtrl import WikiTxtCtrl
 from WikiTreeCtrl import WikiTreeCtrl
 from WikiHtmlView import WikiHtmlView
-from AboutDialog import AboutDialog
 from LogWindow import LogWindow
 
 from Ipc import EVT_REMOTE_COMMAND
@@ -39,6 +38,7 @@ from SearchAndReplace import SearchReplaceOperation
 from Printing import Printer, PrintMainDialog
 
 from AdditionalDialogs import *
+from OptionsDialog import OptionsDialog
 from SearchAndReplaceDialogs import *
 
 
@@ -162,13 +162,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         self.currentWikiWord = None
 #         self.currentWikiPage = None
         self.lastCursorPositionInPage = {}
-        self.iconLookupCache = {}
         self.wikiHistory = []
         self.findDlg = None  # Stores find&replace or wiki search dialog, if present
         self.spellChkDlg = None  # Stores spell check dialog, if present
         self.mainmenu = None
         self.editorMenu = None  # "Editor" menu
         self.fastSearchField = None   # Text field in toolbar
+        self.editors = [] # List of all editors (WikiTxtCtrl objects)
+        
         self.textBlocksActivation = {} # See self.buildTextBlocksMenu()
         # Position of the root menu of the text blocks within "Editor" menu
         self.textBlocksMenuPosition = None  
@@ -228,10 +229,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
           
         # clipboard catcher  
         if WindowsHacks is None:
-            self.clipboardCatcher = None
+            self.win32Interceptor = None
         else:
-            self.clipboardCatcher = WindowsHacks.ClipboardCatcher(self)
-            
+            self.win32Interceptor = WindowsHacks.WikidPadWin32WPInterceptor(self)
+            self.win32Interceptor.intercept(self.GetHandle())
 
         # resize the window to the last position/size
         setWindowSize(self, (self.configuration.getint("main", "size_x", 200),
@@ -247,7 +248,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # Should reduce resources usage (less icons)
         # Do not set self.lowResources after initialization here!
-        self.lowResources = self.configuration.getboolean("main", "lowresources")
+        self.lowResources = wxGetApp().getLowResources()
+#         self.lowResources = self.configuration.getboolean("main", "lowresources")
 
         # get the wrap mode setting
         self.wrapMode = self.configuration.getboolean("main", "wrap_mode")
@@ -390,12 +392,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if self.activeEditor is None:
             return None
         return self.activeEditor.getLoadedDocPage()
-        
+
     def getActiveEditor(self):
         return self.activeEditor
-        
+
+    # TODO What about WikidPadHooks?
     def setActiveEditor(self, activeEditor):
-        self.activeEditor = activeEditor
+        if self.activeEditor != activeEditor:
+            self.activeEditor = activeEditor
+            self.refreshPageStatus()
+            self.fireMiscEventKeys(("changed active editor",))
 
     def getWikiData(self):
         if self.wikiDataManager is None:
@@ -433,39 +439,39 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         return self.logWindow
 
 
-    # TODO!
-    def fillIconLookupCache(self, createIconImageList=False):
-        """
-        Fills or refills the self.iconLookupCache (if createIconImageList is
-        false, self.iconImageList must exist already)
-        If createIconImageList is true, self.iconImageList is also
-        built
-        """
-
-        if createIconImageList:
-            # create the image icon list
-            self.iconImageList = wxImageList(16, 16)
-            self.iconLookupCache = {}
-
-        for icon in self.iconFileList:
-            iconFile = join(self.wikiAppDir, "icons", icon)
-            bitmap = wxBitmap(iconFile, wxBITMAP_TYPE_GIF)
-            try:
-                id = -1
-                if createIconImageList:
-                    id = self.iconImageList.Add(bitmap, wxNullBitmap)
-
-                if self.lowResources:   # and not icon.startswith("tb_"):
-                    bitmap = None
-
-                iconname = icon.replace('.gif', '')
-                if id == -1:
-                    id = self.iconLookupCache[iconname][0]
-
-                self.iconLookupCache[iconname] = (id, bitmap)
-            except Exception, e:
-                traceback.print_exc()
-                sys.stderr.write("couldn't load icon %s\n" % iconFile)
+#     # TODO!
+#     def fillIconLookupCache(self, createIconImageList=False):
+#         """
+#         Fills or refills the self.iconLookupCache (if createIconImageList is
+#         false, self.iconImageList must exist already)
+#         If createIconImageList is true, self.iconImageList is also
+#         built
+#         """
+# 
+#         if createIconImageList:
+#             # create the image icon list
+#             self.iconImageList = wxImageList(16, 16)
+#             self.iconLookupCache = {}
+# 
+#         for icon in self.iconFileList:
+#             iconFile = join(self.wikiAppDir, "icons", icon)
+#             bitmap = wxBitmap(iconFile, wxBITMAP_TYPE_GIF)
+#             try:
+#                 id = -1
+#                 if createIconImageList:
+#                     id = self.iconImageList.Add(bitmap, wxNullBitmap)
+# 
+#                 if self.lowResources:   # and not icon.startswith("tb_"):
+#                     bitmap = None
+# 
+#                 iconname = icon.replace('.gif', '')
+#                 if id == -1:
+#                     id = self.iconLookupCache[iconname][0]
+# 
+#                 self.iconLookupCache[iconname] = (id, bitmap)
+#             except Exception, e:
+#                 traceback.print_exc()
+#                 sys.stderr.write("couldn't load icon %s\n" % iconFile)
 
     def lookupIcon(self, iconname):
         """
@@ -473,21 +479,22 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         If the bitmap wasn't cached already, it is loaded and created.
         If icon is unknown, None is returned.
         """
-        try:
-            bitmap = self.iconLookupCache[iconname][1]
-            if bitmap is not None:
-                return bitmap
-                
-            # Bitmap not yet available -> create it and store in the cache
-            iconFile = join(self.wikiAppDir, "icons", iconname+".gif")
-            bitmap = wxBitmap(iconFile, wxBITMAP_TYPE_GIF)
-            
-            self.iconLookupCache[iconname] = (self.iconLookupCache[iconname][0],
-                    bitmap)
-            return bitmap
-
-        except KeyError:
-            return None
+        return wxGetApp().getIconCache().lookupIcon(iconname)
+#         try:
+#             bitmap = self.iconLookupCache[iconname][1]
+#             if bitmap is not None:
+#                 return bitmap
+#                 
+#             # Bitmap not yet available -> create it and store in the cache
+#             iconFile = join(self.wikiAppDir, "icons", iconname+".gif")
+#             bitmap = wxBitmap(iconFile, wxBITMAP_TYPE_GIF)
+#             
+#             self.iconLookupCache[iconname] = (self.iconLookupCache[iconname][0],
+#                     bitmap)
+#             return bitmap
+# 
+#         except KeyError:
+#             return None
 
 
     def lookupIconIndex(self, iconname):
@@ -495,10 +502,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         Returns the id number into self.iconImageList of the requested icon.
         If icon is unknown, -1 is returned.
         """
-        try:
-            return self.iconLookupCache[iconname][0]
-        except KeyError:
-            return -1
+        return wxGetApp().getIconCache().lookupIconIndex(iconname)
+#         try:
+#             return self.iconLookupCache[iconname][0]
+#         except KeyError:
+#             return -1
 
 
     def resolveIconDescriptor(self, desc, default=None):
@@ -514,23 +522,24 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         If no bitmap can be found, default is returned instead.
         """
-        if desc is None:
-            return default            
-        elif isinstance(desc, wxBitmap):
-            return desc
-        elif isinstance(desc, basestring):
-            result = self.lookupIcon(desc)
-            if result is not None:
-                return result
-            
-            return default
-        else:    # A sequence of possible names
-            for n in desc:
-                result = self.lookupIcon(n)
-                if result is not None:
-                    return result
-
-            return default
+        return wxGetApp().getIconCache().resolveIconDescriptor(desc, default)
+#         if desc is None:
+#             return default            
+#         elif isinstance(desc, wxBitmap):
+#             return desc
+#         elif isinstance(desc, basestring):
+#             result = self.lookupIcon(desc)
+#             if result is not None:
+#                 return result
+#             
+#             return default
+#         else:    # A sequence of possible names
+#             for n in desc:
+#                 result = self.lookupIcon(n)
+#                 if result is not None:
+#                     return result
+# 
+#             return default
 
 
 #     def _onEventToFocusedWindow(self, evt):
@@ -607,47 +616,21 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.recentWikisMenu.Append(menuID, wiki)
             EVT_MENU(self, menuID, self.OnSelectRecentWiki)
 
+        wikiMenu.AppendSeparator()
+
         if wikiData is not None:
-            wikiMenu.AppendSeparator()
+#             wikiMenu.AppendSeparator()
 
             self.addMenuItem(wikiMenu, '&Search Wiki\t' +
                     self.keyBindings.SearchWiki, 'Search Wiki',
                     lambda evt: self.showSearchDialog(), "tb_lens")
 
-        wikiMenu.AppendSeparator()
-
-        menuID = wxNewId()
-        menuItem = wxMenuItem(wikiMenu, menuID,
-                "&Show Tree Control\t" + self.keyBindings.ShowTreeControl,
-                "Show Tree Control", wxITEM_CHECK)
-        wikiMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.setShowTreeControl(
-                self.windowLayouter.isWindowCollapsed("maintree")))
-        EVT_UPDATE_UI(self, menuID, self.OnUpdateTreeCtrlMenuItem)
-
-        menuItem = wxMenuItem(wikiMenu, GUI_ID.CMD_SHOW_TOOLBAR,
-                "Show Toolbar\t" + self.keyBindings.ShowToolbar, 
-                "Show Toolbar", wxITEM_CHECK)
-        wikiMenu.AppendItem(menuItem)
-        EVT_MENU(self, GUI_ID.CMD_SHOW_TOOLBAR, lambda evt: self.setShowToolbar(
-                not self.getConfig().getboolean("main", "toolbar_show", True)))
-        EVT_UPDATE_UI(self, GUI_ID.CMD_SHOW_TOOLBAR,
-                self.OnUpdateToolbarMenuItem)
-
-        menuItem = wxMenuItem(wikiMenu, GUI_ID.CMD_STAY_ON_TOP,
-                "Stay on Top\t" + self.keyBindings.StayOnTop, 
-                "Stay on Top", wxITEM_CHECK)
-        wikiMenu.AppendItem(menuItem)
-        EVT_MENU(self, GUI_ID.CMD_STAY_ON_TOP, lambda evt: self.setStayOnTop(
-                not self.getStayOnTop()))
-        EVT_UPDATE_UI(self, GUI_ID.CMD_STAY_ON_TOP,
-                self.OnUpdateStayOnTopMenuItem)
 
         self.addMenuItem(wikiMenu, 'O&ptions...',
                 'Set Options', lambda evt: self.showOptionsDialog())
 
         wikiMenu.AppendSeparator()
-        
+
         if wikiData is not None:
             exportWikisMenu = wxMenu()
             wikiMenu.AppendMenu(wxNewId(), 'Export', exportWikisMenu)
@@ -930,8 +913,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "tb_doc")
 
         self.addMenuItem(wikiWordMenu, '&Save\t' + self.keyBindings.Save,
-                'Save Current Wiki Word',
-                lambda evt: (self.saveCurrentDocPage(force=True),
+                'Save all open pages',
+                lambda evt: (self.saveAllDocPages(force=True),
                 self.getWikiData().commit()), "tb_save")
 
         self.addMenuItem(wikiWordMenu, '&Rename\t' + self.keyBindings.Rename,
@@ -946,7 +929,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 'Add Bookmark to Page', lambda evt: self.insertAttribute("bookmarked", "true"),
                 "pin")
                 
-        if self.clipboardCatcher is not None:
+        if self.win32Interceptor is not None:
             wikiWordMenu.AppendSeparator()
 
             menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
@@ -1159,7 +1142,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     'Open icon select dialog', lambda evt: self.showIconSelectDialog())
         else:
             # Build full submenu for icons
-            iconsMenu, self.cmdIdToIconName = PropertyHandling.buildIconsSubmenu(self)
+            iconsMenu, self.cmdIdToIconName = PropertyHandling.buildIconsSubmenu(
+                    wxGetApp().getIconCache())
             for cmi in self.cmdIdToIconName.keys():
                 EVT_MENU(self, cmi, self.OnInsertIconAttribute)
 
@@ -1283,6 +1267,35 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "tb_zoomout")
 
         viewMenu.AppendSeparator()
+
+
+        menuID = wxNewId()
+        menuItem = wxMenuItem(viewMenu, menuID,
+                "&Show Tree Control\t" + self.keyBindings.ShowTreeControl,
+                "Show Tree Control", wxITEM_CHECK)
+        viewMenu.AppendItem(menuItem)
+        EVT_MENU(self, menuID, lambda evt: self.setShowTreeControl(
+                self.windowLayouter.isWindowCollapsed("maintree")))
+        EVT_UPDATE_UI(self, menuID, self.OnUpdateTreeCtrlMenuItem)
+
+        menuItem = wxMenuItem(viewMenu, GUI_ID.CMD_SHOW_TOOLBAR,
+                "Show Toolbar\t" + self.keyBindings.ShowToolbar, 
+                "Show Toolbar", wxITEM_CHECK)
+        viewMenu.AppendItem(menuItem)
+        EVT_MENU(self, GUI_ID.CMD_SHOW_TOOLBAR, lambda evt: self.setShowToolbar(
+                not self.getConfig().getboolean("main", "toolbar_show", True)))
+        EVT_UPDATE_UI(self, GUI_ID.CMD_SHOW_TOOLBAR,
+                self.OnUpdateToolbarMenuItem)
+
+        menuItem = wxMenuItem(viewMenu, GUI_ID.CMD_STAY_ON_TOP,
+                "Stay on Top\t" + self.keyBindings.StayOnTop, 
+                "Stay on Top", wxITEM_CHECK)
+        viewMenu.AppendItem(menuItem)
+        EVT_MENU(self, GUI_ID.CMD_STAY_ON_TOP, lambda evt: self.setStayOnTop(
+                not self.getStayOnTop()))
+        EVT_UPDATE_UI(self, GUI_ID.CMD_STAY_ON_TOP,
+                self.OnUpdateStayOnTopMenuItem)
+
 
         menuID=wxNewId()
         indentGuidesMenuItem = wxMenuItem(viewMenu, menuID,
@@ -1442,7 +1455,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         tb.AddSimpleTool(GUI_ID.CMD_SAVE_WIKI, icon, "Save Wiki Word (Ctrl-S)",
                 "Save Wiki Word")
         EVT_TOOL(self, GUI_ID.CMD_SAVE_WIKI,
-                lambda evt: (self.saveCurrentDocPage(force=True),
+                lambda evt: (self.saveAllDocPages(force=True),
                 self.getWikiData().commit()))
 
         icon = self.lookupIcon("tb_rename")
@@ -1545,24 +1558,24 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def initializeGui(self):
         "initializes the gui environment"
 
-        # ------------------------------------------------------------------------------------
-        # load the icons the program will use
-        # ------------------------------------------------------------------------------------
-
-        # add the gif handler for gif icon support
-        wxImage_AddHandler(wxGIFHandler())
-        ## create the image icon list
-        # iconList = wxImageList(16, 16)
-        # default icon is page.gif
-        icons = ['page.gif']
-        # add the rest of the icons
-        icons.extend([file for file in os.listdir(join(self.wikiAppDir, "icons"))
-                      if file.endswith('.gif') and file != 'page.gif'])
-
-        self.iconFileList = icons
-
-        # Create iconImageList
-        self.fillIconLookupCache(True)
+#         # ------------------------------------------------------------------------------------
+#         # load the icons the program will use
+#         # ------------------------------------------------------------------------------------
+# 
+#         # add the gif handler for gif icon support
+#         wxImage_AddHandler(wxGIFHandler())
+#         ## create the image icon list
+#         # iconList = wxImageList(16, 16)
+#         # default icon is page.gif
+#         icons = ['page.gif']
+#         # add the rest of the icons
+#         icons.extend([file for file in os.listdir(join(self.wikiAppDir, "icons"))
+#                       if file.endswith('.gif') and file != 'page.gif'])
+# 
+#         self.iconFileList = icons
+# 
+# #         # Create iconImageList
+# #         self.fillIconLookupCache(True)
 
 
         # Build layout:
@@ -1726,7 +1739,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             tree = WikiTreeCtrl(self, parent, -1)
             # assign the image list
             try:
-                tree.AssignImageList(cloneImageList(self.iconImageList))
+                tree.AssignImageList(wxGetApp().getIconCache().getNewImageList())
             except Exception, e:
                 traceback.print_exc()
                 self.displayErrorMessage('There was an error loading the icons '
@@ -1742,6 +1755,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             # enable and zoom the editor
             editor.Enable(0)
             editor.SetZoom(self.configuration.getint("main", "zoom"))
+            self.editors.append(editor)
             return editor
         elif winName == "log":
             return LogWindow(parent, -1, self)
@@ -1754,6 +1768,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             
             self.htmlView = WikiHtmlView(self, self.mainAreaPanel, -1)
             self.mainAreaPanel.AddPage(self.htmlView, u"Preview")
+
+#             editor = self.createWindow({"name": "txteditor2"},
+#                     self.mainAreaPanel)
+#             self.mainAreaPanel.AddPage(editor, u"Edit2")
             
             return self.mainAreaPanel
 
@@ -1837,10 +1855,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #     def testIt(self):
 
     def OnNotebookPageChanged(self, evt):
-        if evt.GetSelection() == 0:
-            self.activeEditor.SetFocus()
-        elif evt.GetSelection() == 1:
-            self.htmlView.SetFocus()
+        self.mainAreaPanel.GetPage(evt.GetSelection()).SetFocus()
+#         if evt.GetSelection() == 0:
+#             print "OnNotebookPageChanged2"
+#             self.activeEditor.SetFocus()
+#         elif evt.GetSelection() == 1:
+#             self.htmlView.SetFocus()
 
         self.htmlView.setVisible(evt.GetSelection() == 1)  # TODO
 
@@ -2031,7 +2051,7 @@ These are your default global settings.
                 
                 self.activeEditor.GotoPos(self.activeEditor.GetLength())
                 self.activeEditor.AddText(u"\n\n\t* WikiSettings\n")
-                self.saveCurrentDocPage(force=True)
+                self.saveAllDocPages(force=True)
                 
                 # trigger hook
                 self.hooks.createdWiki(self, wikiName, wikiDir)
@@ -2205,6 +2225,23 @@ These are your default global settings.
             try:
                 wikiDataManager = WikiDataManager.openWikiDocument(
                         wikiConfigFilename, self.wikiSyntax, dbtype)
+                frmcode, frmtext = wikiDataManager.checkDatabaseFormat()
+                if frmcode == 2:
+                    # Unreadable db format
+                    self.displayErrorMessage("Error connecting to database in '%s'"
+                        % wikiConfigFilename, frmtext)
+                    return False
+                elif frmcode == 1:
+                    # Update needed -> ask
+                    answer = wxMessageBox(u"The wiki needs an update to work "
+                            u"with this version of WikidPad. Older versions of "
+                            u"WikidPad may be unable to read the wiki after "
+                            u"an update.", u'Update database?',
+                            wxOK | wxCANCEL | wxICON_QUESTION, self)
+                    if answer == wxCANCEL:
+                        return False
+
+                wikiDataManager.connect()
                 break
             except (UnknownDbHandlerException, DbHandlerNotAvailableException), e:
                 # Could not get handler name from wiki config file
@@ -2294,7 +2331,7 @@ These are your default global settings.
         self.tree.SetScrollPos(wxHORIZONTAL, 0)
 
         # enable the editor control whether or not the wiki root was found
-        self.activeEditor.Enable(1)
+        for e in self.editors: e.Enable(1)
 
         # update the last accessed wiki config var
         self.lastAccessedWiki(self.getWikiConfigPath())
@@ -2323,6 +2360,8 @@ These are your default global settings.
         if self.getWikiConfigPath():
             if saveState:
                 self.saveCurrentWikiState()
+            for editor in self.editors:
+                editor.unloadCurrentDocPage()
             if self.getWikiData():
                 self.wikiDataManager.release()
 #                 self.getWikiData().close()
@@ -2331,9 +2370,8 @@ These are your default global settings.
                     self.wikiDataManager.getMiscEvent().removeListener(self)
                 self.wikiDataManager = None
             self.getConfig().setWikiConfig(None)
-            if self.clipboardCatcher is not None and \
-                    self.clipboardCatcher.isActive():
-                self.clipboardCatcher.stop()
+            if self.win32Interceptor is not None:
+                self.win32Interceptor.stop()
 
             self.setShowOnTray()
             self.fireMiscEventKeys(("closed current wiki",))
@@ -2345,7 +2383,7 @@ These are your default global settings.
 
         # save the current wiki page if it is dirty
         if self.getCurrentDocPage():
-            self.saveCurrentDocPage()
+            self.saveAllDocPages()
 
         # database commits
         if self.getWikiData():
@@ -2499,18 +2537,25 @@ These are your default global settings.
         self.hooks.openedWikiWord(self, wikiWord)
 
 
+    # TODO 
     def saveCurrentDocPage(self, force = False):
         ## _prof.start()
 
         if force or self.getCurrentDocPage().getDirty()[0]:
             # Reset error flag here, it can be set true again by saveDocPage
             self.getWikiDocument().setNoAutoSaveFlag(False)
-            
+
             self.activeEditor.saveLoadedDocPage() # this calls in turn saveDocPage() below
 
         self.refreshPageStatus()
         
         ## _prof.stop()
+
+    def saveAllDocPages(self, force = False):
+        self.getWikiDocument().setNoAutoSaveFlag(False)
+        self.fireMiscEventProps({"saving all pages": None, "force": force})
+        self.refreshPageStatus()
+#         self.saveCurrentDocPage(force)
 
 
 #             self.GetToolBar().FindById(GUI_ID.CMD_SAVE_WIKI).Enable(False)
@@ -2537,7 +2582,7 @@ These are your default global settings.
 
 
 
-    def saveDocPage(self, page, text):
+    def saveDocPage(self, page, text, pageAst):
         """
         Save page unconditionally
         """
@@ -2561,12 +2606,13 @@ These are your default global settings.
                         # only for real wiki pages
                         page.save(self.activeEditor.cleanAutoGenAreas(text))
                         page.update(self.activeEditor.updateAutoGenAreas(text))   # ?
-                        self.propertyChecker.checkPage(page,
-                                self.activeEditor.getPageAst())
+                        if pageAst is not None:
+                            self.propertyChecker.checkPage(page, pageAst)
 
                         # trigger hooks
                         self.hooks.savedWikiWord(self, word)
                     else:
+                        # for functional pages
                         page.save(text)
                         page.update(text)
 
@@ -2636,7 +2682,7 @@ These are your default global settings.
             return False
 
         try:
-            self.saveCurrentDocPage()
+            self.saveAllDocPages()
 
             if wikiWord == self.getWikiDocument().getWikiName():
                 # Renaming of root word = renaming of wiki config file
@@ -3025,19 +3071,18 @@ These are your default global settings.
 #                 self.clipboardCatcher.isActive()
 
     def OnClipboardCatcherOff(self, evt):
-        if self.clipboardCatcher.isActive():
-            self.clipboardCatcher.stop()
+        self.win32Interceptor.stop()
 
     def OnClipboardCatcherAtPage(self, evt):
-        self.clipboardCatcher.startAtPage(self.GetHandle(),
+        self.win32Interceptor.startAtPage(self.GetHandle(),
                 self.getCurrentDocPage())
 
     def OnClipboardCatcherAtCursor(self, evt):
-        self.clipboardCatcher.startAtCursor(self.GetHandle())
+        self.win32Interceptor.startAtCursor(self.GetHandle())
 
 
     def OnUpdateClipboardCatcher(self, evt):
-        cc = self.clipboardCatcher
+        cc = self.win32Interceptor
         if cc is None:
             return  # Shouldn't be called anyway
 
@@ -3049,7 +3094,7 @@ These are your default global settings.
             if cc.getMode() == cc.MODE_AT_PAGE:
                 evt.Check(True)
                 evt.SetText("Clipboard Catcher at: %s\t%s" % 
-                        (self.clipboardCatcher.getWikiWord(),
+                        (self.win32Interceptor.getWikiWord(),
                         self.keyBindings.CatchClipboardAtPage))
             else:
                 evt.Check(False)
@@ -3114,7 +3159,7 @@ These are your default global settings.
         dlg.Destroy()
 
         if not description is None:
-            self.saveCurrentDocPage()
+            self.saveAllDocPages()
             self.getWikiData().storeVersion(description)
 
 
@@ -3147,7 +3192,7 @@ These are your default global settings.
                     u'Retrieve version', wxYES_NO)
             if dlg.ShowModal() == wxID_YES:
                 dlg.Destroy()
-                self.saveCurrentDocPage()
+                self.saveAllDocPages()
                 word = self.getCurrentWikiWord()
                 self.getWikiData().applyStoredVersion(version[0])
                 self.rebuildWiki(skipConfirm=True)
@@ -3228,7 +3273,7 @@ These are your default global settings.
                 'Delete Wiki Word', wxYES_NO)
         result = dlg.ShowModal()
         if result == wxID_YES:
-            self.saveCurrentDocPage()
+            self.saveAllDocPages()
             try:
                 self.deleteCurrentWikiPage()
             except WikiDataException, e:
@@ -3271,11 +3316,11 @@ These are your default global settings.
                     self.getFormatting().normalizeWikiWord(wikiWord))
             # TODO Respect template property?
             title = DocPages.WikiPage.getWikiPageTitle(wikiWord)
-            self.saveDocPage(page, u"++ %s\n\n%s" % (title, text))
+            self.saveDocPage(page, u"++ %s\n\n%s" % (title, text), None)
 
 
     def showIconSelectDialog(self):
-        dlg = IconSelectDialog(self, -1)
+        dlg = IconSelectDialog(self, -1, wxGetApp().getIconCache())
         dlg.CenterOnParent(wxBOTH)
         iconname = None
         if dlg.ShowModal() == wxID_OK:
@@ -3357,7 +3402,7 @@ These are your default global settings.
 
 
     def OnCmdExportDialog(self, evt):
-        self.saveCurrentDocPage()
+        self.saveAllDocPages()
         self.getWikiData().commit()
 
         dlg = ExportDialog(self, -1)
@@ -3426,7 +3471,7 @@ These are your default global settings.
             expclass, exptype, addopt = self.EXPORT_PARAMS[typ]
             
             
-            self.saveCurrentDocPage(force=True)
+            self.saveAllDocPages(force=True)
             self.getWikiData().commit()
             
             ob = expclass(self)
@@ -3441,7 +3486,7 @@ These are your default global settings.
 
 
     def OnCmdImportDialog(self, evt):
-        self.saveCurrentDocPage()
+        self.saveAllDocPages()
         self.getWikiData().commit()
 
         dlg = ImportDialog(self, -1, self)
@@ -3518,6 +3563,12 @@ These are your default global settings.
 
     def vacuumWiki(self):
         self.getWikiData().vacuum()
+
+
+#     def OnCmdCloneWindow(self, evt):
+#         _prof.start()
+#         self._OnCmdCloneWindow(evt)
+#         _prof.stop()
 
 
     def OnCmdCloneWindow(self, evt):
@@ -3794,7 +3845,7 @@ These are your default global settings.
 #                     if saveDirty:
                     if (currentTime - saveDirtySince) > \
                             self.autoSaveDelayAfterDirty:
-                        self.saveCurrentDocPage()
+                        self.saveAllDocPages()
 #                     elif updateDirty:
 #                         if (currentTime - self.currentWikiPage.lastUpdate) > 5:
 #                             self.updateRelationships()
@@ -3843,8 +3894,8 @@ These are your default global settings.
 # 
 #     def prepareExit(self):
         # Stop clipboard catcher if running
-        if self.clipboardCatcher is not None and self.clipboardCatcher.isActive():
-            self.clipboardCatcher.stop()
+        if self.win32Interceptor is not None:
+            self.win32Interceptor.unintercept()
 
         # if the frame is not minimized
         # update the size/pos of the global config
@@ -3910,7 +3961,7 @@ class TaskBarIcon(wxTaskBarIcon):
 
         # Register menu events
         EVT_MENU(self, GUI_ID.TBMENU_RESTORE, self.OnLeftUp)
-        EVT_MENU(self, GUI_ID.TBMENU_SAVE, lambda evt: (self.pwiki.saveCurrentDocPage(force=True),
+        EVT_MENU(self, GUI_ID.TBMENU_SAVE, lambda evt: (self.pwiki.saveAllDocPages(force=True),
                 self.pwiki.getWikiData().commit()))
         EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pwiki.exitWiki())
 

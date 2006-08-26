@@ -1,5 +1,5 @@
 from time import time
-import os.path, re
+import os.path, re, struct
 
 from MiscEvent import MiscEventSourceMixin
 
@@ -18,10 +18,10 @@ class DocPage(MiscEventSourceMixin):
     """
     Abstract common base class for WikiPage and FunctionalPage
     """
-    def __init__(self, wikiDataManager):
+    def __init__(self, wikiDocument):
         MiscEventSourceMixin.__init__(self)
         
-        self.wikiDataManager = wikiDataManager
+        self.wikiDocument = wikiDocument
         self.txtEditors = []  # List of all editors (views) showing this page
 
 
@@ -67,7 +67,7 @@ class DocPage(MiscEventSourceMixin):
             self.txtEditors[0].AppendText(text)
         else:
             # Modify database
-#             wikiData = self.wikiDataManager.getWikiData()
+#             wikiData = self.wikiDocument.getWikiData()
             text = self.getLiveText() + text
             self.save(text, fireEvent=fireEvent)
             self.update(text, fireEvent=fireEvent)
@@ -117,14 +117,15 @@ class DocPage(MiscEventSourceMixin):
         assert 0 #abstract
 
 
+
 class AliasWikiPage(DocPage):
     """
     Fake page for an alias name of a wiki page. Most functions are delegated
     to underlying real page
-    Fetched via the WikiDataManager.getWikiPage method.
+    Fetched via the (WikiDocument=) WikiDataManager.getWikiPage method.
     """
-    def __init__(self, wikiDataManager, aliasWikiWord, realWikiPage):
-        self.wikiDataManager = wikiDataManager
+    def __init__(self, wikiDocument, aliasWikiWord, realWikiPage):
+        self.wikiDocument = wikiDocument
         self.aliasWikiWord = aliasWikiWord
         self.realWikiPage = realWikiPage
 
@@ -139,8 +140,8 @@ class AliasWikiPage(DocPage):
 #         if not self.wikiData.isAlias(self.wikiWord):
 #             return self
         
-        word = self.wikiDataManager.getWikiData().getAliasesWikiWord(self.wikiWord)
-        return self.wikiDataManager.getWikiPageNoError(word)
+        word = self.wikiDocument.getWikiData().getAliasesWikiWord(self.wikiWord)
+        return self.wikiDocument.getWikiPageNoError(word)
 
     def getContent(self):
         """
@@ -173,10 +174,10 @@ class WikiPage(DocPage):
     
     Fetched via the WikiDataManager.getWikiPage method.
     """
-    def __init__(self, wikiDataManager, wikiWord):
-        DocPage.__init__(self, wikiDataManager)
+    def __init__(self, wikiDocument, wikiWord):
+        DocPage.__init__(self, wikiDocument)
 
-#         self.wikiData = self.wikiDataManager.getWikiData()
+#         self.wikiData = self.wikiDocument.getWikiData()
 
         self.wikiWord = wikiWord
         self.parentRelations = None
@@ -192,7 +193,7 @@ class WikiPage(DocPage):
         return self.wikiWord
         
     def getWikiData(self):
-        return self.wikiDataManager.getWikiData()
+        return self.wikiDocument.getWikiData()
 
     def getTimestamps(self):
         if self.modified is None:
@@ -327,9 +328,9 @@ class WikiPage(DocPage):
             if len(parents) == 1:
                 # Check if there is a template page
                 try:
-                    parentPage = self.wikiDataManager.getWikiPage(parents[0])
+                    parentPage = self.wikiDocument.getWikiPage(parents[0])
                     templateWord = parentPage.getPropertyOrGlobal("template")
-                    templatePage = self.wikiDataManager.getWikiPage(templateWord)
+                    templatePage = self.wikiDocument.getWikiPage(templateWord)
                     content = templatePage.getContent()
                     # Load also properties from template page (especially pagetype prop.)
                     self.props = templatePage.getProperties()
@@ -339,7 +340,7 @@ class WikiPage(DocPage):
             if content is None:
                 title = self.getWikiPageTitle(self.getWikiWord())
                 content = u"%s %s\n\n" % \
-                        (self.wikiDataManager.getFormatting().getPageTitlePrefix(),
+                        (self.wikiDocument.getFormatting().getPageTitlePrefix(),
                         title)
 
         return content
@@ -380,7 +381,7 @@ class WikiPage(DocPage):
         """
         Update additional cached informations (properties, todos, relations)
         """
-        formatting = self.wikiDataManager.getFormatting()
+        formatting = self.wikiDocument.getFormatting()
         
         page = PageAst.Page()
         page.buildAst(formatting, text, self.getFormatDetails())
@@ -413,7 +414,7 @@ class WikiPage(DocPage):
         self.getWikiData().cachedGlobalProps = None
 
         # add a relationship to the scratchpad at the root
-        if self.wikiWord == self.wikiDataManager.getWikiName():
+        if self.wikiWord == self.wikiDocument.getWikiName():
             self.addChildRelationship(u"ScratchPad")
 
         # clear the dirty flag
@@ -474,6 +475,36 @@ class WikiPage(DocPage):
         return (self.saveDirtySince, self.updateDirtySince)
 
 
+    def getPresentation(self):
+        """
+        Get the presentation tuple (<cursor pos>, <editor scroll pos x>,
+            <e.s.p. y>, <preview s.p. x>, <p.s.p. y>)
+        """
+        datablock = self.wikiDocument.getWikiData().getPresentationBlock(
+                self.getWikiWord())
+
+        if datablock is None or datablock == "":
+            return (0, 0, 0, 0, 0)
+
+        try:
+            return struct.unpack("iiiii", datablock)
+        except struct.error:
+            return (0, 0, 0, 0, 0)
+
+
+    def setPresentation(self, data, startPos):
+        """
+        Set (a part of) the presentation tuple.
+        data -- tuple with new presentation data
+        startPos -- start position in the presentation tuple which should be
+                overwritten with data.
+        """
+        pt = self.getPresentation()
+        pt = pt[:startPos] + data + pt[startPos+len(data):]
+
+        self.wikiDocument.getWikiData().setPresentationBlock(self.getWikiWord(),
+                struct.pack("iiiii", *pt))
+
 
 # TODO Maybe split into single classes for each tag
 
@@ -482,8 +513,8 @@ class FunctionalPage(DocPage):
     holds the data for a functional page. Such a page controls the behavior
     of the application or a special wiki
     """
-    def __init__(self, wikiDataManager, funcTag):
-        DocPage.__init__(self, wikiDataManager)
+    def __init__(self, wikiDocument, funcTag):
+        DocPage.__init__(self, wikiDocument)
 
         self.funcTag = funcTag
 
@@ -503,41 +534,68 @@ class FunctionalPage(DocPage):
         return self.funcTag
 
 
-    def getContent(self):
-        if self.funcTag == "global/[TextBlocks]":
-            tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
-                    "[TextBlocks].wiki")
-            try:
-                tbFile = open(tbLoc, "rU")
-                tbContent = tbFile.read()
-                tbFile.close()
-                tbContent = fileContentToUnicode(tbContent)
-            except:
-                tbContent = u""
-        elif self.funcTag == "global/[PWL]":
-            tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
-                    "[PWL].wiki")
-            try:
-                tbFile = open(tbLoc, "rU")
-                tbContent = tbFile.read()
-                tbFile.close()
-                tbContent = fileContentToUnicode(tbContent)
-            except:
-                tbContent = u""
-        elif self.funcTag == "wiki/[TextBlocks]":
-            wikiData = self.wikiDataManager.getWikiData()
-            if wikiData.isDefinedWikiWord("[TextBlocks]"):
-                tbContent = wikiData.getContent("[TextBlocks]")
-            else:
-                tbContent = u""
-        elif self.funcTag == "wiki/[PWL]":
-            wikiData = self.wikiDataManager.getWikiData()
-            if wikiData.isDefinedWikiWord("[PWL]"):
-                tbContent = wikiData.getContent("[PWL]")
-            else:
-                tbContent = u""
+    def _loadGlobalPage(self, subtag):
+        tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
+                subtag+".wiki")
+        try:
+            tbFile = open(tbLoc, "rU")
+            tbContent = tbFile.read()
+            tbFile.close()
+            return fileContentToUnicode(tbContent)
+        except:
+            return u""
 
-        return tbContent
+
+    def _loadDbSpecificPage(self, subtag):
+        wikiData = self.wikiDocument.getWikiData()
+        if wikiData.isDefinedWikiWord(subtag):
+            return wikiData.getContent(subtag)
+        else:
+            return u""
+
+    def getContent(self):     
+        if self.funcTag in ("global/[TextBlocks]", "global/[PWL]",
+                "global/[CCBlacklist]"):
+            return self._loadGlobalPage(self.funcTag[7:])
+        elif self.funcTag in ("wiki/[TextBlocks]", "wiki/[PWL]",
+                "wiki/[CCBlacklist]"):
+            return self._loadDbSpecificPage(self.funcTag[5:])
+
+#     def getContent(self):
+#         if self.funcTag == "global/[TextBlocks]":
+#             tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
+#                     "[TextBlocks].wiki")
+#             try:
+#                 tbFile = open(tbLoc, "rU")
+#                 tbContent = tbFile.read()
+#                 tbFile.close()
+#                 tbContent = fileContentToUnicode(tbContent)
+#             except:
+#                 tbContent = u""
+#         elif self.funcTag == "global/[PWL]":
+#             tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
+#                     "[PWL].wiki")
+#             try:
+#                 tbFile = open(tbLoc, "rU")
+#                 tbContent = tbFile.read()
+#                 tbFile.close()
+#                 tbContent = fileContentToUnicode(tbContent)
+#             except:
+#                 tbContent = u""
+#         elif self.funcTag == "wiki/[TextBlocks]":
+#             wikiData = self.wikiDocument.getWikiData()
+#             if wikiData.isDefinedWikiWord("[TextBlocks]"):
+#                 tbContent = wikiData.getContent("[TextBlocks]")
+#             else:
+#                 tbContent = u""
+#         elif self.funcTag == "wiki/[PWL]":
+#             wikiData = self.wikiDocument.getWikiData()
+#             if wikiData.isDefinedWikiWord("[PWL]"):
+#                 tbContent = wikiData.getContent("[PWL]")
+#             else:
+#                 tbContent = u""
+# 
+#         return tbContent
 
 
     def getFormatDetails(self):
@@ -551,50 +609,78 @@ class FunctionalPage(DocPage):
         return WikiFormatting.WikiPageFormatDetails(noFormat=True)
 
 
+    def _saveGlobalPage(self, text, subtag):
+        tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
+                subtag+".wiki")
+        tbFile = open(tbLoc, "w")
+        try:
+            tbFile.write(BOM_UTF8)
+            tbFile.write(utf8Enc(text)[0])
+        finally:
+            tbFile.close()
+        
+    def _saveDbSpecificPage(self, text, subtag):
+        wikiData = self.wikiDocument.getWikiData()
+        if wikiData.isDefinedWikiWord(subtag) and text == u"":
+            # Delete content
+            wikiData.deleteContent(subtag)
+        else:
+            if text != u"":
+                wikiData.setContent(subtag, text)
+
+
+
     def save(self, text, fireEvent=True):
         """
         Saves the content of current wiki page.
         """
-#         self.wikiData.setContent(self.wikiWord, text)
-
-        if self.funcTag == "global/[TextBlocks]":
-            tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
-                    "[TextBlocks].wiki")
-#             tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[TextBlocks].wiki")
-            tbFile = open(tbLoc, "w")
-            try:
-                tbFile.write(BOM_UTF8)
-                tbFile.write(utf8Enc(text)[0])
-            finally:
-                tbFile.close()
-        elif self.funcTag == "global/[PWL]":
-            tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
-                    "[PWL].wiki")
-#             tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[PWL].wiki")
-            tbFile = open(tbLoc, "w")
-            try:
-                tbFile.write(BOM_UTF8)
-                tbFile.write(utf8Enc(text)[0])
-            finally:
-                tbFile.close()
-        elif self.funcTag == "wiki/[TextBlocks]":
-            wikiData = self.wikiDataManager.getWikiData()
-            if wikiData.isDefinedWikiWord("[TextBlocks]") and text == u"":
-                # Delete content
-                wikiData.deleteContent("[TextBlocks]")
-            else:
-                if text != u"":
-                    wikiData.setContent("[TextBlocks]", text)
-        elif self.funcTag == "wiki/[PWL]":
-            wikiData = self.wikiDataManager.getWikiData()
-            if wikiData.isDefinedWikiWord("[PWL]") and text == u"":
-                # Delete content
-                wikiData.deleteContent("[PWL]")
-            else:
-                if text != u"":
-                    wikiData.setContent("[PWL]", text)
+        
+        if self.funcTag in ("global/[TextBlocks]", "global/[PWL]",
+                "global/[CCBlacklist]"):
+            self._saveGlobalPage(text, self.funcTag[7:])
+        elif self.funcTag in ("wiki/[TextBlocks]", "wiki/[PWL]",
+                "wiki/[CCBlacklist]"):
+            self._saveDbSpecificPage(text, self.funcTag[5:])
 
         self.saveDirtySince = None
+
+
+#         if self.funcTag == "global/[TextBlocks]":
+#             tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
+#                     "[TextBlocks].wiki")
+# #             tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[TextBlocks].wiki")
+#             tbFile = open(tbLoc, "w")
+#             try:
+#                 tbFile.write(BOM_UTF8)
+#                 tbFile.write(utf8Enc(text)[0])
+#             finally:
+#                 tbFile.close()
+#         elif self.funcTag == "global/[PWL]":
+#             tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
+#                     "[PWL].wiki")
+# #             tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[PWL].wiki")
+#             tbFile = open(tbLoc, "w")
+#             try:
+#                 tbFile.write(BOM_UTF8)
+#                 tbFile.write(utf8Enc(text)[0])
+#             finally:
+#                 tbFile.close()
+#         elif self.funcTag == "wiki/[TextBlocks]":
+#             wikiData = self.wikiDocument.getWikiData()
+#             if wikiData.isDefinedWikiWord("[TextBlocks]") and text == u"":
+#                 # Delete content
+#                 wikiData.deleteContent("[TextBlocks]")
+#             else:
+#                 if text != u"":
+#                     wikiData.setContent("[TextBlocks]", text)
+#         elif self.funcTag == "wiki/[PWL]":
+#             wikiData = self.wikiDocument.getWikiData()
+#             if wikiData.isDefinedWikiWord("[PWL]") and text == u"":
+#                 # Delete content
+#                 wikiData.deleteContent("[PWL]")
+#             else:
+#                 if text != u"":
+#                     wikiData.setContent("[PWL]", text)
 
 
     def update(self, text, fireEvent=True):
@@ -606,14 +692,22 @@ class FunctionalPage(DocPage):
 
         if fireEvent:
             if self.funcTag in ("global/[TextBlocks]", "wiki/[TextBlocks]"):
+                # The text blocks for the text blocks submenu was updated
                 self.fireMiscEventKeys(("updated func page", "updated page",
                         "reread text blocks needed"))
 #                 self.pWiki.rereadTextBlocks()   # TODO!
             elif self.funcTag in ("global/[PWL]", "wiki/[PWL]"):
+                # The personal word list (words to ignore by spell checker)
+                # was updated
                 self.fireMiscEventKeys(("updated func page", "updated page",
                         "reread personal word list needed"))
 #             if fireEvent and self.pWiki.spellChkDlg is not None:
 #                 self.pWiki.spellChkDlg.rereadPersonalWordLists()
+            elif self.funcTag in ("global/[CCBlacklist]", "wiki/[CCBlacklist]"):
+                # The blacklist of camelcase words not to mark as wiki links
+                # was updated
+                self.fireMiscEventKeys(("updated func page", "updated page",
+                        "reread cc blacklist needed"))
 
 
     def setDirty(self, dirt):
@@ -632,4 +726,12 @@ class FunctionalPage(DocPage):
 
     def getDirtySince(self):
         return (self.saveDirtySince, self.updateDirtySince)
+
+    def getPresentation(self):
+        """Dummy"""
+        return (0, 0, 0, 0, 0)
+
+    def setPresentation(self, data, startPos):
+        """Dummy"""
+        pass
 

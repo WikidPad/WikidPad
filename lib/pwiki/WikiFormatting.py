@@ -167,6 +167,9 @@ class WikiFormatting:
         # Same after applying re.escape()
         self.wikiWordStartEsc = None
         self.wikiWordEndEsc = None
+        
+        # Set of camelcase words which shouldn't be seen as wiki words
+        self.ccWordBlacklist = sets.Set()  ## ("WikidPad", "NotWord")
 
         # self.rebuildFormatting(None)
 
@@ -287,12 +290,20 @@ class WikiFormatting:
                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO Explain (if it works)
 
     
+    def setCcWordBlacklist(self, bs):
+        self.ccWordBlacklist = bs
+        
+    # TODO remove search fragment if present before testing
+    def isInCcWordBlacklist(self, word):
+        return word in self.ccWordBlacklist
+
+
     def isWikiWord(self, word):
         """
         Test if word is syntactically a wiki word
         """
         if matchWhole(self.WikiWordEditorRE, word):
-            return True
+            return not word in self.ccWordBlacklist
         if self.WikiWordRE2.match(word):
             if self.footnotesAsWws:
                 return True
@@ -306,7 +317,7 @@ class WikiFormatting:
         Test if word is syntactically a naked camel-case wiki word
         """
         if matchWhole(self.WikiWordEditorRE, word):
-            return True
+            return not word in self.ccWordBlacklist
             
         return False       
 

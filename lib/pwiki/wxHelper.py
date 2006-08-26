@@ -1,6 +1,9 @@
+import os, os.path, traceback, sys
+
 from   wxPython.wx import wxNewId, wxSystemSettings_GetMetric, wxSYS_SCREEN_X, \
         wxSYS_SCREEN_Y, wxSplitterWindow, wxSashLayoutWindow, \
-        EVT_WINDOW_DESTROY, wxEvtHandler
+        EVT_WINDOW_DESTROY, wxEvtHandler, wxBitmap, wxBITMAP_TYPE_GIF, \
+        wxNullBitmap, wxImageList
 
 from wx.xrc import XRCCTRL, XRCID
 
@@ -213,6 +216,8 @@ def cloneImageList(imgList):
 class wxKeyFunctionSink(wxEvtHandler, KeyFunctionSink):
     """
     A MiscEvent sink which dispatches events further to other functions.
+    If the wxWindow ifdestroyed receives a destroy message, the sink
+    automatically disconnects from evtSource.
     """
     __slots__ = ("evtSource", "ifdestroyed")
 
@@ -232,12 +237,144 @@ class wxKeyFunctionSink(wxEvtHandler, KeyFunctionSink):
 
 
     def OnDestroy(self, evt):
-        self.evtSource.removeListener(self)
+        self.disconnect()
         evt.Skip()
 
 
     def addAsListenerTo(self, evtSource):
+        self.disconnect()
         self.evtSource = evtSource
         self.evtSource.addListener(self)
 
+    def disconnect(self):
+        """
+        Disconnect from evtSource.
+        """
+        if self.evtSource is None:
+            return
+        self.evtSource.removeListener(self)
+        self.evtSource = None
+
+
+
+
+class IconCache:
+    def __init__(self, iconDir, lowResources):
+        self.iconDir = iconDir
+        self.lowResources = lowResources
+        
+        # add the gif handler for gif icon support
+#         wxImage_AddHandler(wxGIFHandler())
+        # default icon is page.gif
+        icons = ['page.gif']
+        # add the rest of the icons
+        icons.extend([fn for fn in os.listdir(self.iconDir)
+                if fn.endswith('.gif') and fn != 'page.gif'])
+
+        self.iconFileList = icons
+        self.fillIconCache()
+
+
+    def fillIconCache(self):
+        """
+        Fills or refills the self.iconLookupCache (if createIconImageList is
+        false, self.iconImageList must exist already)
+        If createIconImageList is true, self.iconImageList is also
+        built
+        """
+
+        # create the image icon list
+        self.iconImageList = wxImageList(16, 16)
+        self.iconLookupCache = {}
+
+        for icon in self.iconFileList:
+#             iconFile = os.path.join(self.wikiAppDir, "icons", icon)
+            iconFile = os.path.join(self.iconDir, icon)
+            bitmap = wxBitmap(iconFile, wxBITMAP_TYPE_GIF)
+            try:
+                id = self.iconImageList.Add(bitmap, wxNullBitmap)
+
+                if self.lowResources:   # and not icon.startswith("tb_"):
+                    bitmap = None
+
+                iconname = icon.replace('.gif', '')
+                if id == -1:
+                    id = self.iconLookupCache[iconname][0]
+
+                self.iconLookupCache[iconname] = (id, bitmap)
+            except Exception, e:
+                traceback.print_exc()
+                sys.stderr.write("couldn't load icon %s\n" % iconFile)
+
+    def lookupIcon(self, iconname):
+        """
+        Returns the bitmap object for the given iconname.
+        If the bitmap wasn't cached already, it is loaded and created.
+        If icon is unknown, None is returned.
+        """
+        try:
+            bitmap = self.iconLookupCache[iconname][1]
+            if bitmap is not None:
+                return bitmap
+                
+            # Bitmap not yet available -> create it and store in the cache
+            iconFile = os.path.join(self.iconDir, iconname+".gif")
+            bitmap = wxBitmap(iconFile, wxBITMAP_TYPE_GIF)
+            
+            self.iconLookupCache[iconname] = (self.iconLookupCache[iconname][0],
+                    bitmap)
+            return bitmap
+
+        except KeyError:
+            return None
+
+
+    def lookupIconIndex(self, iconname):
+        """
+        Returns the id number into self.iconImageList of the requested icon.
+        If icon is unknown, -1 is returned.
+        """
+        try:
+            return self.iconLookupCache[iconname][0]
+        except KeyError:
+            return -1
+
+
+    def resolveIconDescriptor(self, desc, default=None):
+        """
+        Used for plugins of type "MenuFunctions" or "ToolbarFunctions".
+        Tries to find and return an appropriate wxBitmap object.
+        
+        An icon descriptor can be one of the following:
+            - None
+            - a wxBitmap object
+            - the filename of a bitmap
+            - a tuple of filenames, first existing file is used
+        
+        If no bitmap can be found, default is returned instead.
+        """
+        if desc is None:
+            return default            
+        elif isinstance(desc, wxBitmap):
+            return desc
+        elif isinstance(desc, basestring):
+            result = self.lookupIcon(desc)
+            if result is not None:
+                return result
+            
+            return default
+        else:    # A sequence of possible names
+            for n in desc:
+                result = self.lookupIcon(n)
+                if result is not None:
+                    return result
+
+            return default
+            
+            
+    def getNewImageList(self):
+        """
+        Return a new (cloned) image list
+        """
+        return cloneImageList(self.iconImageList)
 

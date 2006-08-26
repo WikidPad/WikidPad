@@ -187,6 +187,10 @@ class ConnectWrap:
        
 
 
+VERSION_DB = 3
+VERSION_WRITECOMPAT = 3
+VERSION_READCOMPAT = 2
+
 
 # Helper for the following definitions
 class t:
@@ -198,7 +202,6 @@ class t:
 t.t = "varchar"
 # t.pt = "text primary key not null"
 # t.b = "blob not null default x''"
-
 
 
 # Dictionary of definitions for all tables (as for changeTableSchema)
@@ -247,7 +250,9 @@ TABLE_DEFINITIONS = {
     "wikiwords": (     # Essential
         ("word", t.t),
         ("created", t.t),
-        ("modified", t.t)
+        ("modified", t.t),
+        ("presentationdatablock", t.t),
+        ("wordnormcase", t.t)
         ),
 
 
@@ -505,10 +510,11 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
                 changeTableSchema(connwrap, tn, TABLE_DEFINITIONS[tn])
                 
             for key, value in (
-                    ("formatver", "2"),  # Version of database format the data was written
-                    ("writecompatver", "2"),  # Lowest format version which is write compatible
-                    ("readcompatver", "2"),  # Lowest format version which is read compatible
-                    ("branchtag", "WikidPad")  # Tag of the WikidPad branch
+                    ("formatver", str(VERSION_DB)),  # Version of database format the data was written
+                    ("writecompatver", str(VERSION_WRITECOMPAT)),  # Lowest format version which is write compatible
+                    ("readcompatver", str(VERSION_READCOMPAT)),  # Lowest format version which is read compatible
+                    ("branchtag", "WikidPad"),  # Tag of the WikidPad branch
+                    ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
                     ):
                 setSettingsValue(connwrap, key, value)
     
@@ -583,13 +589,13 @@ def checkDatabaseFormat(connwrap):
     formatver = getSettingsInt(connwrap, "formatver")
     writecompatver = getSettingsInt(connwrap, "writecompatver")
 
-    if writecompatver > 2:
+    if writecompatver > VERSION_WRITECOMPAT:
         # TODO: Check compatibility
         
         return 2, "Database has unknown format version='%i'" \
                 % formatver
                 
-    if formatver < 2:
+    if formatver < VERSION_DB:
         return 1, "Update needed, current format version='%i'" \
                 % formatver
         
@@ -650,6 +656,7 @@ def updateDatabase(connwrap, dataDir):
         changeTableSchema(connwrap, "settings", 
                 TABLE_DEFINITIONS["settings"])
         
+        # Write initial format versions
         for key, value in (
                 ("formatver", "0"),  # Version of database format the data was written
                 ("writecompatver", "0"),  # Lowest format version which is write compatible
@@ -760,6 +767,15 @@ def updateDatabase(connwrap, dataDir):
         # --- WikiPad 1.6beta2 reached (formatver=2, writecompatver=2,
         #         readcompatver=2) ---
 
+    if formatver == 2:
+        changeTableSchema(connwrap, "wikiwords", 
+                TABLE_DEFINITIONS["wikiwords"])
+                
+        # --- WikiPad 1.8beta1 reached (formatver=3, writecompatver=3,
+        #         readcompatver=2) ---
+
+        formatver = 3
+
 
 # Will be used later
 #     if formatver == 2:
@@ -774,10 +790,11 @@ def updateDatabase(connwrap, dataDir):
 
     # Write format information
     for key, value in (
-            ("formatver", "2"),  # Version of database format the data was written
-            ("writecompatver", "2"),  # Lowest format version which is write compatible
-            ("readcompatver", "2"),  # Lowest format version which is read compatible
-            ("branchtag", "WikidPad")  # Tag of the WikidPad branch
+            ("formatver", str(VERSION_DB)),  # Version of database format the data was written
+            ("writecompatver", str(VERSION_WRITECOMPAT)),  # Lowest format version which is write compatible
+            ("readcompatver", str(VERSION_READCOMPAT)),  # Lowest format version which is read compatible
+            ("branchtag", "WikidPad"),  # Tag of the WikidPad branch
+            ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
             ):
         setSettingsValue(connwrap, key, value)
 
@@ -858,4 +875,30 @@ TABLE_DEFINITIONS = {
     All filenames of wiki files with brackets like e.g. "[Not Camelcase].wiki"
     are renamed to ones without brackets like "Not Camelcase.wiki"
 
+++ 1.6beta1 to 1.6beta2 (formatver=2):
+    Brackets are removed from all wikiwords stored in the database
+
+++ 1.7beta8 to 1.8beta1 (formatver=3):
+
+Table "wikiwords" changed to:
+        "wikiwords": (
+            ("word", t.t),
+            ("created", t.t),
+            ("modified", t.t),
+            ("presentationdatablock", t.t),
+            ("wordnormcase", t.t)
+            ),
+
+
+Column "presentationdatablock" contains byte string describing how to present
+a particular page (window scroll and cursor position). Its content is
+en/decoded by the WikiDataManager.
+
+Column "wordnormcase" contains byte string returned by the normCase method
+of a Collator object (see "Localization.py"). The column's content should 
+be recreated at a rebuild.
+
+Added "locale" key in "settings" table. This is the name of the locale used to
+create the "wordnormcase" column content. A "-" means the column contains
+invalid data.
 """

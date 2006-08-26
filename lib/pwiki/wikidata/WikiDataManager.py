@@ -1,5 +1,5 @@
 from weakref import WeakValueDictionary
-import os, os.path, sets, traceback
+import os, os.path, sets, traceback, sets
 from threading import RLock
 
 from pwiki.MiscEvent import MiscEventSourceMixin
@@ -152,7 +152,7 @@ class WikiDataManager(MiscEventSourceMixin):
                     wikiFiles = [file for file in os.listdir(parentDir) \
                             if file.endswith(".wiki")]
                     if len(wikiFiles) > 0:
-                        wikiWord = basename(wikiConfigFilename)
+                        wikiWord = os.path.basename(wikiConfigFilename)
                         wikiWord = wikiWord[0:len(wikiWord)-5]
     
                         # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
@@ -194,15 +194,13 @@ class WikiDataManager(MiscEventSourceMixin):
             
         dataDir = mbcsDec(os.path.abspath(dataDir), "replace")[0]
 
-#         self.wikiConfigFilename = wikiConfigFilename
+        self.wikiConfigFilename = wikiConfigFilename
+
 #         self.wikiName = wikiName
 #         self.dataDir = dataDir
         
-        # Path to file storage
-        fileStorDir = os.path.join(os.path.dirname(wikiConfigFilename), "files")
-
-        # create the db interface to the wiki data
-        wikiDataManager = None
+#         # create the db interface to the wiki data
+#         wikiDataManager = None
 
 
         if not dbtype:
@@ -216,7 +214,6 @@ class WikiDataManager(MiscEventSourceMixin):
             raise UnknownDbHandlerException(
                         'Required data handler %s not available' % wikidhName)
 
-#         if wikidhName:
         if not isDbHandlerAvailable(wikidhName):
             raise DbHandlerNotAvailableException(
                     'Required data handler %s not available' % wikidhName)
@@ -260,12 +257,33 @@ class WikiDataManager(MiscEventSourceMixin):
         self.wikiPageDict = WeakValueDictionary()
         self.funcPageDict = WeakValueDictionary()
 
-#         self.fileStorage = FileStorage.FileStorage(self,
-#                 os.path.join(os.path.dirname(
-#                 self.mainControl.getWikiConfigPath()), "files"))
+        self.wikiName = wikiName
+        self.dataDir = dataDir
+        self.dbtype = wikidhName
+
+        self.refCount = 1
+        
+        self.formatting = WikiFormatting(self, wikiSyntax)  # TODO wikiSyntax
+
+    
+    def checkDatabaseFormat(self):
+        """
+        Returns a pair (<frmcode>, <plain text>) where frmcode is an integer
+        and means:
+        0: Up to date,  1: Update needed,  2: Unknown format, update not possible
+        """
+        return self.wikiData.checkDatabaseFormat()
+
+
+    def connect(self):
+        self.wikiData.connect()
+
+        # Path to file storage
+        fileStorDir = os.path.join(os.path.dirname(self.wikiConfigFilename),
+                "files")
 
         self.fileStorage = FileStorage.FileStorage(self, fileStorDir)
-        
+
         # Set file storage according to configuration
         fs = self.fileStorage
 
@@ -276,17 +294,12 @@ class WikiDataManager(MiscEventSourceMixin):
         fs.setModDateIsEnough(self.getWikiConfig().getboolean("main",
                 "fileStorage_identity_modDateIsEnough", False))
 
-        
-        self.wikiName = wikiName
-        self.dataDir = dataDir
-        self.dbtype = wikidhName
-
-        self.refCount = 1
-        
-        self.formatting = WikiFormatting(self, wikiSyntax)  # TODO wikiSyntax
         self.wikiConfiguration.getMiscEvent().addListener(self)
-        
+
+
         self.getFormatting().rebuildFormatting(None)
+        self._updateCcWordBlacklist()
+        
         self.noAutoSaveFlag = False # Flag is set (by PersonalWikiFrame),
                 # if some error occurred during saving and the user doesn't want
                 # to retry saving. WikiDataManager does not change or respect
@@ -616,6 +629,18 @@ class WikiDataManager(MiscEventSourceMixin):
         self.fireMiscEventProps(props)
 
 
+    def _updateCcWordBlacklist(self):
+        """
+        Update the blacklist of camelcase words which should show up as normal
+        text.
+        """
+        pg = self.getFuncPage("global/[CCBlacklist]")
+        bls = sets.Set(pg.getLiveText().split("\n"))
+        pg = self.getFuncPage("wiki/[CCBlacklist]")
+        bls.union_update(pg.getLiveText().split("\n"))
+        self.getFormatting().setCcWordBlacklist(bls)
+
+
     def miscEventHappened(self, miscevt):
         """
         Handle misc events from DocPages
@@ -632,10 +657,16 @@ class WikiDataManager(MiscEventSourceMixin):
                 props = miscevt.getProps().copy()
                 props["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(props)
+            elif miscevt.has_key("reread cc blacklist needed"):
+                self._updateCcWordBlacklist()
+
+                props = miscevt.getProps().copy()
+                props["wikiPage"] = miscevt.getSource()
+                self.fireMiscEventProps(props)
             elif miscevt.has_key("updated func page"):
                 # This was send from a FuncPage object, send it again
                 # The event also contains more specific information
-                # handled by PesonalWikiFrame
+                # handled by PersonalWikiFrame
 
                 props = miscevt.getProps().copy()
                 props["funcPage"] = miscevt.getSource()

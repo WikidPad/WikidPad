@@ -584,7 +584,7 @@ class PropCategoryNode(AbstractNode):
         for name in wikiData.getPropertyNamesStartingWith(key):
             # Cut off uninteresting
             name = name[len(key):]
-            
+
             nextcat = name.split(u".", 1)[0]
             addedSubCategories[nextcat] = None
             
@@ -874,7 +874,9 @@ class MainFuncPagesNode(AbstractNode):
                 FuncPageNode(self.treeCtrl, self, "global/[TextBlocks]"),
                 FuncPageNode(self.treeCtrl, self, "wiki/[TextBlocks]"),
                 FuncPageNode(self.treeCtrl, self, "global/[PWL]"),
-                FuncPageNode(self.treeCtrl, self, "wiki/[PWL]")
+                FuncPageNode(self.treeCtrl, self, "wiki/[PWL]"),
+                FuncPageNode(self.treeCtrl, self, "global/[CCBlacklist]"),
+                FuncPageNode(self.treeCtrl, self, "wiki/[CCBlacklist]")
                 ]
 
 
@@ -889,7 +891,9 @@ class FuncPageNode(AbstractNode):
             "global/[TextBlocks]": u"Global text blocks",
             "wiki/[TextBlocks]": u"Wiki text blocks",
             "global/[PWL]": "Global spell list",
-            "wiki/[PWL]": "Wiki spell list"
+            "wiki/[PWL]": "Wiki spell list",
+            "global/[CCBlacklist]": "Global cc. blacklist",
+            "wiki/[CCBlacklist]": "Wiki cc. blacklist"
         }
 
     def __init__(self, tree, parentNode, funcTag):
@@ -949,7 +953,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
         res = xrc.wxXmlResource.Get()
         self.contextMenuWikiWords = res.LoadMenu("MenuTreectrlWikiWords")
-        
+
         self.contextMenuWikiWords.AppendSeparator()
 
         # Build icon menu
@@ -962,7 +966,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         else:
             # Build full submenu for icons
             iconsMenu, self.cmdIdToIconName = \
-                    PropertyHandling.buildIconsSubmenu(self.pWiki)
+                    PropertyHandling.buildIconsSubmenu(wxGetApp().getIconCache())
             for cmi in self.cmdIdToIconName.keys():
                 EVT_MENU(self, cmi, self.OnInsertIconAttribute)
 

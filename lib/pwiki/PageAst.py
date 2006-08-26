@@ -53,9 +53,13 @@ def _enrichTokens(formatting, tokens, formatDetails, threadholder):
             node.buildSubAst(formatting, tok, formatDetails, threadholder)
             tok.node = node
         elif tok.ttype == WikiFormatting.FormatTypes.WikiWord:
-            node = WikiWord()
-            node.buildSubAst(formatting, tok, formatDetails, threadholder)
-            tok.node = node
+            if formatting.isInCcWordBlacklist(tok.text):
+                # word is in camelcase blacklist, so make it normal text
+                tok.ttype = WikiFormatting.FormatTypes.Default
+            else:
+                node = WikiWord()
+                node.buildSubAst(formatting, tok, formatDetails, threadholder)
+                tok.node = node
         elif tok.ttype == WikiFormatting.FormatTypes.Url:
             node = Url()
             node.buildSubAst(formatting, tok, formatDetails, threadholder)
@@ -441,7 +445,7 @@ class WikiWord(Ast):
 
 
 class Url(Ast):
-    __slots__ = ("url", "titleTokens")
+    __slots__ = ("url", "titleTokens", "modeAppendix")
 
     def __init__(self):
         Ast.__init__(self)
@@ -461,31 +465,82 @@ class Url(Ast):
             threadholder=DUMBTHREADHOLDER):
         groupdict = token.grpdict
         
+        self.titleTokens = None
+        self.modeAppendix = ()
+        
         url = groupdict.get("titledurlUrl")
         if url is None:
             self.url = token.text
             self.titleTokens = None
-            return
-        
-        self.url = url.strip()
-        
-        title = groupdict.get("titledurlTitle")
-        if title is None:
-            self.titleTokens = None
-            return
+        else:
+            self.url = url.strip()
             
-        relpos = token.start + 1 + len(url) + len(groupdict.get("titledurlDelim"))
-
-#         delimPos = title.rindex(formatting.TitleWikiWordDelimiter)
-#         title = title[:delimPos]
-
-        self.titleTokens = formatting.tokenizeTitle(title,
-                formatDetails, threadholder=threadholder)
+            title = groupdict.get("titledurlTitle")
+            if title is None:
+                self.titleTokens = None
+            else:
+                relpos = token.start + 1 + len(url) + len(groupdict.get(
+                        "titledurlDelim"))
+        
+        #         delimPos = title.rindex(formatting.TitleWikiWordDelimiter)
+        #         title = title[:delimPos]
+        
+                self.titleTokens = formatting.tokenizeTitle(title,
+                        formatDetails, threadholder=threadholder)
+                        
+                for t in self.titleTokens:
+                    t.start += relpos
+        
+                _enrichTokens(formatting, self.titleTokens, formatDetails,
+                        threadholder)
+                        
+        # Now process the mode appendix (part after '>') from the URL, if present
+        
+        # The mode appendix consists of mode entries delimited by semicolons
+        #   Each entry consists of the first character which defines the mode
+        #   and optionally additional characters which contain further details
+        
+        cut = self.url.split(u">", 1)
+        
+        if len(cut) > 1:
+            self.url = cut[0]
+            
+            modeAppendix = []
+            for entry in cut[1].split(";"):
+                if entry == u"":
+                    continue
                 
-        for t in self.titleTokens:
-            t.start += relpos
+                modeAppendix.append((entry[0], entry[1:]))
+                
+            self.modeAppendix = modeAppendix
 
-        _enrichTokens(formatting, self.titleTokens, formatDetails, threadholder)
+
+    def containsModeInAppendix(self, mode):
+        """
+        Returns True iff character mode is a mode in the modeAppendix list
+        """
+        for m, a in self.modeAppendix:
+            if m == mode:
+                return True
+                
+        return False
+        
+    def getInfoForMode(self, mode, defaultEmpty=u"", defaultNonExist=None):
+        """
+        Return additional settings for mode (the part after the first mode
+        letter). If the mode is part of the appendix but doesn't contain any
+        further characters, defaultEmpty is returned. If the mode is not in
+        the index, defaultNonExist is returned.
+        """
+
+        for m, a in self.modeAppendix:
+            if m == mode:
+                if a == u"":
+                    return defaultEmpty
+                else:
+                    return a
+                
+        return defaultNonExist
 
 
     def _findType(self, typeToFind, result):

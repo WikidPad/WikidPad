@@ -51,20 +51,19 @@ class WikiData:
         self.connWrap = None
         self.cachedContentNames = None
 
-        self._reinit()
-
-
-    def _reinit(self):
-        """
-        Actual initialization or reinitialization after rebuildWiki()
-        """
         conn = gadfly.gadfly("wikidb", self.dataDir)
         self.connWrap = DbStructure.ConnectWrap(conn)
         
         self.pagefileSuffix = self.dataManager.getWikiConfig().get("main",
                 "db_pagefile_suffix", u".wiki")
-        
-        formatcheck, formatmsg = DbStructure.checkDatabaseFormat(self.connWrap)
+
+
+    def checkDatabaseFormat(self):
+        return DbStructure.checkDatabaseFormat(self.connWrap)
+
+
+    def connect(self):
+        formatcheck, formatmsg = self.checkDatabaseFormat()
 
         if formatcheck == 2:
             # Unknown format
@@ -127,8 +126,9 @@ class WikiData:
             if creadate is None:
                 creadate = ti
                 
-            self.execSql("insert into wikiwords(word, created, modified) "+
-                    "values (?, ?, ?)", (word, creadate, moddate))
+            self.execSql("insert into wikiwords(word, created, modified, "
+                    "presentationdatablock, wordnormcase) "
+                    "values (?, ?, ?, '', '')", (word, creadate, moddate))
         else:
             self.execSql("update wikiwords set modified = ? where word = ?",
                     (moddate, word))
@@ -366,7 +366,7 @@ class WikiData:
         
         # Create a sorted list of them
         words = list(wordSet)
-        words.sort()
+#         words.sort()
         
         return words
 
@@ -458,7 +458,11 @@ class WikiData:
         return wikiWords
 
     def getAllDefinedContentNames(self):
-        "get the names of all the content elements in the db, no aliases"
+        """
+        Get the names of all the content elements in the db, no aliases.
+        Content elements are wiki pages plus functional pages and possible
+        other data, their names begin with '['
+        """
         return self.execSqlQuerySingleColumn("select word from wikiwords")
 
     def refreshDefinedContentNames(self):
@@ -485,8 +489,9 @@ class WikiData:
         # Add new words:
         ti = time()
         for word in (diskPages - definedPages):
-            self.execSql("insert into wikiwords(word, created, modified) "
-                    "values (?, ?, ?)", (word, ti, ti))
+            self.execSql("insert into wikiwords(word, created, modified, "
+                    "presentationdatablock, wordnormcase) "
+                    "values (?, ?, ?, '', '')", (word, ti, ti))
 
         self.cachedContentNames = {}
 
@@ -608,7 +613,7 @@ class WikiData:
     def getGlobalProperties(self):
         if not self.cachedGlobalProps:
             data = self.execSqlQuery(
-                    "select key, value from wikiwordprops order by key")
+                    "select key, value from wikiwordprops")  # order by key
             globalMap = {}
             for (key, val) in data:
                 if key.startswith('global.'):
@@ -662,6 +667,8 @@ class WikiData:
                 self.setProperty(word, k, v)
                 if k == "alias":
                     self.setAsAlias(v)  # TODO
+                    
+        self.cachedGlobalProps = None   # reset global properties cache
 
     def deleteProperties(self, word):
         self.execSql("delete from wikiwordprops where word = ?", (word,))
@@ -733,7 +740,7 @@ class WikiData:
 
     def search(self, sarOp, exclusionSet):
         """
-        Search all content using the SearchAndReplaceOperation sarOp and
+        Search all wiki pages using the SearchAndReplaceOperation sarOp and
         return set of all page names that match the search criteria.
         sarOp.beginWikiSearch() must be called before calling this function,
         sarOp.endWikiSearch() must be called after calling this function.
@@ -815,6 +822,26 @@ class WikiData:
         self.cachedContentNames = {}
         self.cachedGlobalProps = None
 
+
+    def setPresentationBlock(self, word, datablock):
+        """
+        Save the presentation datablock (a byte string) for a word to
+        the database.
+        """
+        self.connWrap.execSql(
+                "update wikiwords set presentationdatablock = ? where "
+                "word = ?", (datablock, word))
+
+    def getPresentationBlock(self, word):
+        """
+        Returns the presentation datablock (a byte string).
+        The function may return either an empty string or a valid datablock
+        """
+        return self.connWrap.execSqlQuerySingleItem(
+                "select presentationdatablock from wikiwords where word = ?",
+                (word,), strConv=False)
+
+
     def close(self):
         self.commit()
         self.connWrap.close()
@@ -868,34 +895,6 @@ class WikiData:
             protocol
         """
         pass
-#         # recreate word caches
-#         self.cachedContentNames = {}
-#         for word in self.getAllDefinedContentNames():
-#             self.cachedContentNames[word] = 1
-# 
-#         # cache aliases
-#         aliases = self.getAllAliases()
-#         for alias in aliases:
-#             self.cachedContentNames[alias] = 2
-
-#         # get all of the wikiWords
-#         wikiWords = self.getAllPageNamesFromDisk()   # Replace this call
-#                 
-#         progresshandler.open(len(wikiWords) + 1)
-#         try:
-#             step = 1
-#     
-#             # re-save all of the pages
-#             self.clearCacheTables()
-#             for wikiWord in wikiWords:
-#                 progresshandler.update(step, u"Rebuilding %s" % wikiWord)
-#                 self._updatePageEntry(wikiWord)
-#                 wikiPage = self.createPage(wikiWord)
-#                 wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
-#                 step = step + 1
-#     
-#         finally:            
-#             progresshandler.close()
 
 
 ####################################################

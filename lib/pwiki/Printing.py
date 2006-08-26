@@ -70,7 +70,7 @@ class PrintMainDialog(wxDialog):
         self.ctrls.btnPrint.SetId(wxID_OK)
         self.ctrls.btnCancel.SetId(wxID_CANCEL)
         
-        self.pWiki.saveCurrentDocPage(force=True)
+        self.pWiki.saveAllDocPages(force=True)
         self.pWiki.getWikiData().commit()
         
 #         for e in self.exporterList:

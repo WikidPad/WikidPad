@@ -29,8 +29,13 @@ from StringOps import *
 # utf8Enc, utf8Dec, mbcsEnc, mbcsDec, uniToGui, guiToUni, \
 #        Tokenizer, wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
-from Configuration import isUnicode
+from Configuration import isUnicode, isWin9x
 
+
+try:
+    import WindowsHacks
+except:
+    WindowsHacks = None
 
 
 
@@ -60,8 +65,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.stylingThreadHolder = ThreadHolder()
         self.pageAst = None
         self.loadedDocPage = None
-        self.lastCursorPositionInPage = {}   # TODO Clear caches when loading new wiki
-        self.scrollPosCache = {}
+#         self.lastCursorPositionInPage = {}   # TODO Clear caches when loading new wiki
+#         self.scrollPosCache = {}
         self.lastFont = None
         self.ignoreOnChange = False
         self.pageType = "normal"   # The pagetype controls some special editor behaviour
@@ -140,8 +145,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.AutoCompSetSeparator(ord('~'))
 
         # register some event handlers
-        wxKeyFunctionSink(self.pWiki.getMiscEvent(), self, (
+        self.pwikiListener = wxKeyFunctionSink(self.pWiki.getMiscEvent(), self, (
                 ("options changed", self.onOptionsChanged),  # fired by PersonalWikiFrame
+                ("saving all pages", self.onSavingAllPages)
                 # ("command copy", self.onCmdCopy)
         ))
 
@@ -198,9 +204,21 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         EVT_MENU(self, GUI_ID.CMD_TEXT_DELETE, lambda evt: self.ReplaceSelection(""))
 
         EVT_MENU(self, GUI_ID.CMD_TEXT_SELECT_ALL, lambda evt: self.SelectAll())
+        
+#         self.interceptor = WindowsHacks.WikidPadWin32WPInterceptor(self.pWiki)
+#         self.interceptor.intercept(self.GetHandle())
+
 
     def getLoadedDocPage(self):
         return self.loadedDocPage
+
+    def close(self):
+        """
+        Close the editor (=prepare for destruction)
+        """
+        self.unloadCurrentDocPage({})
+        self.pwikiListener.disconnect()
+
 
     def Cut(self):
         self.Copy()
@@ -389,12 +407,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #             return
 
         text = self.GetText()
-        if self.pWiki.saveDocPage(page, text):
+        if self.pWiki.saveDocPage(page, text, self.getPageAst()):
             self.SetSavePoint()
 
         
-        
-    def _unloadCurrentDocPage(self, evtprops):
+    def unloadCurrentDocPage(self, evtprops=None):
         # Unload current page
         if self.loadedDocPage is not None:
             if self.loadedDocPage.getDirty()[0]:
@@ -402,9 +419,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
             wikiWord = self.loadedDocPage.getWikiWord()
             if wikiWord is not None:
-                self.lastCursorPositionInPage[wikiWord] = self.GetCurrentPos()
-                self.scrollPosCache[wikiWord] = (self.GetScrollPos(wxHORIZONTAL),
-                        self.GetScrollPos(wxVERTICAL))
+                self.loadedDocPage.setPresentation((self.GetCurrentPos(),
+                        self.GetScrollPos(wxHORIZONTAL),
+                        self.GetScrollPos(wxVERTICAL)), 0)
+#                 self.lastCursorPositionInPage[wikiWord] = self.GetCurrentPos()
+#                 self.scrollPosCache[wikiWord] = (self.GetScrollPos(wxHORIZONTAL),
+#                         self.GetScrollPos(wxVERTICAL))
 
 
             miscevt = self.loadedDocPage.getMiscEvent()
@@ -419,7 +439,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def loadFuncPage(self, funcPage, evtprops=None):
-        self._unloadCurrentDocPage(evtprops)
+        self.unloadCurrentDocPage(evtprops)
         # set the editor text
         content = None
         wikiDataManager = self.pWiki.getWikiDataManager()
@@ -471,7 +491,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         Save loaded page, if necessary, then load wikiPage into editor
         """
-        self._unloadCurrentDocPage(evtprops)        
+        self.unloadCurrentDocPage(evtprops)        
         # set the editor text
         wikiDataManager = self.pWiki.getWikiDataManager()
         
@@ -528,41 +548,52 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 self.GotoPos(self.GetLength())
             else:
                 # see if there is a saved position for this page
-                lastPos = self.lastCursorPositionInPage.get(
-                        self.loadedDocPage.getWikiWord(), 0)
+                lastPos, scrollPosX, scrollPosY = \
+                        self.loadedDocPage.getPresentation()[0:3]
+#                 lastPos = self.lastCursorPositionInPage.get(
+#                         self.loadedDocPage.getWikiWord(), 0)
                 self.GotoPos(lastPos)
 
-                scrollPos = self.scrollPosCache.get(
-                        self.loadedDocPage.getWikiWord())
-                if scrollPos is not None:
+#                 scrollPos = self.scrollPosCache.get(
+#                         self.loadedDocPage.getWikiWord())
+#                 if scrollPos is not None:
+                if scrollPosX != 0 or scrollPosY != 0:
                     # Bad hack: First scroll to position to avoid a visible jump
                     #   if scrolling works, then update display,
                     #   then scroll again because it may have failed the first time
 
-                    self.SetScrollPos(wxHORIZONTAL, scrollPos[0], False)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK, scrollPos[0], wxHORIZONTAL)
+                    self.SetScrollPos(wxHORIZONTAL, scrollPosX, False)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
+                            scrollPosX, wxHORIZONTAL)
                     self.ProcessEvent(screvt)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE, scrollPos[0], wxHORIZONTAL)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
+                            scrollPosX, wxHORIZONTAL)
                     self.ProcessEvent(screvt)
                     
-                    self.SetScrollPos(wxVERTICAL, scrollPos[1], True)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK, scrollPos[1], wxVERTICAL)
+                    self.SetScrollPos(wxVERTICAL, scrollPosY, True)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
+                            scrollPosY, wxVERTICAL)
                     self.ProcessEvent(screvt)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE, scrollPos[1], wxVERTICAL)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
+                            scrollPosY, wxVERTICAL)
                     self.ProcessEvent(screvt)
 
                     self.Update()
 
-                    self.SetScrollPos(wxHORIZONTAL, scrollPos[0], False)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK, scrollPos[0], wxHORIZONTAL)
+                    self.SetScrollPos(wxHORIZONTAL, scrollPosX, False)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
+                            scrollPosX, wxHORIZONTAL)
                     self.ProcessEvent(screvt)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE, scrollPos[0], wxHORIZONTAL)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
+                            scrollPosX, wxHORIZONTAL)
                     self.ProcessEvent(screvt)
                     
-                    self.SetScrollPos(wxVERTICAL, scrollPos[1], True)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK, scrollPos[1], wxVERTICAL)
+                    self.SetScrollPos(wxVERTICAL, scrollPosY, True)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
+                            scrollPosY, wxVERTICAL)
                     self.ProcessEvent(screvt)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE, scrollPos[1], wxVERTICAL)
+                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
+                            scrollPosY, wxVERTICAL)
                     self.ProcessEvent(screvt)
 
         elif self.pageType == u"form":
@@ -616,6 +647,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         self.pageType = self.loadedDocPage.getProperties().get(u"pagetype",
                 [u"normal"])[-1]
+
+
+    def onSavingAllPages(self, miscevt):
+        if self.loadedDocPage is not None and (
+                self.loadedDocPage.getDirty()[0] or miscevt.get("force", false)):
+            self.saveLoadedDocPage()
 
 
     def OnStyleNeeded(self, evt):
@@ -721,8 +758,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         page = PageAst.Page()
         page.buildAst(self.pWiki.getFormatting(), text,
                 self.loadedDocPage.getFormatDetails(), threadholder=threadholder)
-        
-#         print "buildStyling", repr(page.getTokens())
         
         stylebytes = self.processTokens(page.getTokens(), threadholder)
         
@@ -1496,6 +1531,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def OnKeyDown(self, evt):
 #         self.idleCounter = 0
         key = evt.GetKeyCode()
+
         self.lastKeyPressed = time()
 
         if key == WXK_F3 and not self.inIncrementalSearch:
@@ -1558,7 +1594,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     if mat1:
                         # may be CamelCase word
                         tofind = line[-mat1.end():]
-                        # print "mat1", repr(tofind)
                         self.autoCompBackBytesWithoutBracket = self.bytelenSct(tofind)
                         formatting = self.pWiki.getFormatting()
                         acresult += filter(formatting.isCcWikiWord, 
@@ -1568,7 +1603,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     if mat2:
                         # may be not-CamelCase word or in a property name
                         tofind = line[-mat2.end():]
-                        # print "mat2", repr(tofind)
                         self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
                         acresult += map(lambda s: u"[" + s, self.pWiki.getWikiData().\
                                 getWikiWordsStartingWith(tofind[1:], True))
@@ -1581,17 +1615,13 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         propkey = revStr(mat3.group(3))
                         propfill = revStr(mat3.group(2))
                         propvalpart = revStr(mat3.group(1))
-                        # print "mat3", repr(tofind)
                         self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
                         values = filter(lambda pv: pv.startswith(propvalpart),
                                 self.pWiki.getWikiData().getDistinctPropertyValues(propkey))
                         acresult += map(lambda v: u"[" + propkey + propfill + 
                                 v +  u"]", values)
 
-                    # print "line", repr(line)
-                    
                     if len(acresult) > 0:
-                        # print "acresult", repr(acresult), repr(endBytePos-startBytePos)
                         self.UserListShow(1, u"~".join(acresult))
                     
                 elif key == WXK_RETURN:
@@ -1609,6 +1639,43 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 evt.Skip()
 
 
+    def OnChar(self, evt):
+        key = evt.GetKeyCode()
+
+        # Return if this doesn't seem to be a real character input
+        if evt.ControlDown() or key < 32:
+            evt.Skip()
+            return
+            
+        if key >= WXK_START and (not isUnicode() or evt.GetUnicodeKey() != key):
+            evt.Skip()
+            return
+
+
+        if isWin9x() and (WindowsHacks is not None):
+            unichar = WindowsHacks.ansiInputToUnicodeChar(key)
+
+            if self.inIncrementalSearch:
+                self.searchStr += unichar
+                self.executeIncrementalSearch();
+            else:
+                self.AddText(unichar)
+
+        else:
+
+            if isUnicode():
+                unichar = unichr(evt.GetUnicodeKey())
+            else:
+                unichar = mbcsDec(chr(key))[0]
+                
+            # handle key presses while in incremental search here
+            if self.inIncrementalSearch:
+                self.searchStr += unichar
+                self.executeIncrementalSearch();
+            else:
+                evt.Skip()
+
+
     def OnSetFocus(self, evt):
         self.pWiki.setActiveEditor(self)
         evt.Skip()
@@ -1616,7 +1683,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def OnUserListSelection(self, evt):
         text = evt.GetText()
-        # print "OnUserListSelection", repr(evt.GetText())   # TODO: Non unicode version
         if text[0] == "[":
             toerase = self.autoCompBackBytesWithBracket
         else:
@@ -1625,22 +1691,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.SetSelection(self.GetCurrentPos() - toerase, self.GetCurrentPos())
         
         self.ReplaceSelection(text)
-        
-
-    def OnChar(self, evt):
-        key = evt.GetKeyCode()
-        # handle key presses while in incremental search here
-        if self.inIncrementalSearch and key < WXK_START and key > 31 and \
-                not evt.ControlDown():
-
-            if isUnicode():
-                self.searchStr += unichr(evt.GetUnicodeKey())
-            else:
-                self.searchStr += mbcsDec(chr(key))[0]
-
-            self.executeIncrementalSearch();
-        else:
-            evt.Skip()
 
 
     def OnClick(self, evt):
@@ -1681,16 +1731,17 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #         if self.idleCounter < 0:
 #             self.idleCounter = 0
         if (self.IsEnabled()):
-            # fix the line, pos and col numbers
-            currentLine = self.GetCurrentLine()+1
-            currentPos = self.GetCurrentPos()
-            currentCol = self.GetColumn(currentPos)
-            self.pWiki.statusBar.SetStatusText(uniToGui(u"Line: %d Col: %d Pos: %d" %
-                                            (currentLine, currentCol, currentPos)), 2)
+            if self is self.pWiki.getActiveEditor():
+                # fix the line, pos and col numbers
+                currentLine = self.GetCurrentLine()+1
+                currentPos = self.GetCurrentPos()
+                currentCol = self.GetColumn(currentPos)
+                self.pWiki.statusBar.SetStatusText(uniToGui(u"Line: %d Col: %d Pos: %d" %
+                                                (currentLine, currentCol, currentPos)), 2)
 
             stylebytes = self.stylebytes
             self.stylebytes = None
-    
+
             if stylebytes:
                 self.applyStyling(stylebytes)
 
@@ -1794,14 +1845,18 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
         # TODO works for Windows only
     def OnDropFiles(self, x, y, filenames):
         urls = []
+        
+        # Necessary because key state may change during the loop                                
+        controlPressed = wxGetKeyState(WXK_CONTROL)
+        shiftPressed = wxGetKeyState(WXK_SHIFT)
+        
         for fn in filenames:
             url = urllib.pathname2url(fn)
             if fn.endswith(".wiki"):
                 urls.append("wiki:%s" % url)
             else:
-                doCopy = False  # Necessary because key state may change between
-                                # the two ifs
-                if wxGetKeyState(WXK_CONTROL):
+                doCopy = False
+                if controlPressed:
                     # Copy file into file storage
                     fs = self.editor.pWiki.getWikiDataManager().getFileStorage()
                     try:
@@ -1813,7 +1868,7 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
                                 u"Couldn't copy file", e)
                         return
 
-                if wxGetKeyState(WXK_SHIFT) or doCopy:
+                if shiftPressed or doCopy:
                     # Relative rel: URL
                     locPath = self.editor.pWiki.getWikiConfigPath()
                     if locPath is not None:

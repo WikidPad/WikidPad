@@ -58,7 +58,13 @@ class WikiData:
 
         DbStructure.registerSqliteFunctions(self.connWrap)
 
-        formatcheck, formatmsg = DbStructure.checkDatabaseFormat(self.connWrap)
+
+    def checkDatabaseFormat(self):
+        return DbStructure.checkDatabaseFormat(self.connWrap)
+
+
+    def connect(self):
+        formatcheck, formatmsg = self.checkDatabaseFormat()
 
         if formatcheck == 2:
             # Unknown format
@@ -548,7 +554,11 @@ class WikiData:
                 "select word from wikiwordcontent where not word glob '[[]*'")
 
     def getAllDefinedContentNames(self):
-        "get the names of all the content elements in the db, no aliases"
+        """
+        Get the names of all the content elements in the db, no aliases.
+        Content elements are wiki pages plus functional pages and possible
+        other data, their names begin with '['
+        """
         return self.connWrap.execSqlQuerySingleColumn(
                 "select word from wikiwordcontent")
 
@@ -731,6 +741,9 @@ class WikiData:
                 if k == "alias":
                     self.setAsAlias(v)  # TODO
 
+        self.cachedGlobalProps = None   # reset global properties cache
+
+
     def updateCachedGlobalProps(self):
         """
         TODO: Should become part of public API!
@@ -875,7 +888,7 @@ class WikiData:
 
     def search(self, sarOp, exclusionSet):
         """
-        Search all content using the SearchAndReplaceOperation sarOp and
+        Search all wiki pages using the SearchAndReplaceOperation sarOp and
         return set of all page names that match the search criteria.
         sarOp.beginWikiSearch() must be called before calling this function,
         sarOp.endWikiSearch() must be called after calling this function.
@@ -950,6 +963,26 @@ class WikiData:
 
         self.cachedContentNames = {}
         self.cachedGlobalProps = None
+
+
+    def setPresentationBlock(self, word, datablock):
+        """
+        Save the presentation datablock (a byte string) for a word to
+        the database.
+        """
+        self.connWrap.execSql(
+                "update wikiwordcontent set presentationdatablock = ? where "
+                "word = ?", (sqlite.Binary(datablock), word))
+
+    def getPresentationBlock(self, word):
+        """
+        Returns the presentation datablock (a byte string).
+        The function may return either an empty string or a valid datablock
+        """
+        return self.connWrap.execSqlQuerySingleItem(
+                "select presentationdatablock from wikiwordcontent where word = ?",
+                (word,))
+
 
     def close(self):
         self.connWrap.commit()

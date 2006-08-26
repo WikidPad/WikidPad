@@ -249,9 +249,9 @@ class HtmlXmlExporter:
                     if not self.shouldExport(relation):
                         continue
                     # get aliases too
-                    relation = self.wikiData.getAliasesWikiWord(relation)
+                    relUnAlias = self.wikiData.getAliasesWikiWord(relation)
                     # TODO Use self.convertFilename here?
-                    links[relation] = u"#%s" % _escapeAnchor(relation)
+                    links[relation] = u"#%s" % _escapeAnchor(relUnAlias)
                     
                 formattedContent = self.formatContent(word, content,
                         formatDetails, links)
@@ -284,8 +284,8 @@ class HtmlXmlExporter:
                 if not self.shouldExport(relation):
                     continue
                 # get aliases too
-                relation = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
-                links[relation] = self.convertFilename(u"%s.html" % relation)  #   "#%s" ???
+                relUnAlias = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
+                links[relation] = self.convertFilename(u"%s.html" % relUnAlias)  #   "#%s" ???
 #                 wordForAlias = self.wikiData.getAliasesWikiWord(relation)
 #                 if wordForAlias:
 #                     links[relation] = self.convertFilename(
@@ -339,8 +339,9 @@ class HtmlXmlExporter:
                         continue
 
                     # get aliases too
-                    relation = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
-                    links[relation] = u"#%s" % _escapeAnchor(relation)
+                    relUnAlias = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
+                    links[relation] = u"#%s" % _escapeAnchor(relUnAlias)
+                    
 #                     wordForAlias = self.wikiData.getAliasesWikiWord(relation)
 #                     if wordForAlias:
 #                         links[relation] = u"#%s" % wordForAlias
@@ -907,24 +908,90 @@ class HtmlXmlExporter:
                             escapeHtml(link))
                 else:
                     lowerLink = link.lower()
-                    if self.asHtmlPreview:
-                        picsAsLinks = self.mainControl.getConfig().getboolean(
-                                "main", "html_preview_pics_as_links")
-                    else:
-                        picsAsLinks = not not self.addOpt[0]
-                        
-                    if (lowerLink.endswith(".jpg") or \
+                    
+                    # urlAsImage = False
+                    if tok.node.containsModeInAppendix("l"):
+                        urlAsImage = False
+                    elif tok.node.containsModeInAppendix("i"):
+                        urlAsImage = True
+                    elif self.asHtmlPreview and \
+                            self.mainControl.getConfig().getboolean(
+                            "main", "html_preview_pics_as_links"):
+                        urlAsImage = False
+                    elif not self.asHtmlPreview and self.addOpt[0]:
+                        urlAsImage = False
+                    elif lowerLink.endswith(".jpg") or \
                             lowerLink.endswith(".gif") or \
-                            lowerLink.endswith(".png")) and not picsAsLinks:
+                            lowerLink.endswith(".png"):
+                        urlAsImage = True
+                    else:
+                        urlAsImage = False
+                        
+                    
+#                     forceAsImage = False
+#                     # Determine if a picture should be shown as link or image
+#                     if tok.node.containsModeInAppendix("l"):  # l: make link
+#                         picsAsLinks = True
+#                     elif tok.node.containsModeInAppendix("i") or \
+#                             tok.node.containsModeInAppendix("s"):
+#                         picsAsLinks = False
+#                         forceAsImage = True
+#                     else:
+#                         if self.asHtmlPreview:
+#                             picsAsLinks = self.mainControl.getConfig().getboolean(
+#                                     "main", "html_preview_pics_as_links")
+#                         else:
+#                             picsAsLinks = not not self.addOpt[0]
+#                         
+#                     if (lowerLink.endswith(".jpg") or \
+#                             lowerLink.endswith(".gif") or \
+#                             lowerLink.endswith(".png") or forceAsImage) and \
+#                             not picsAsLinks:
+
+
+                    if urlAsImage:
                         # Ignore title, use image
+                        sizeInTag = u""
+
+                        sizeInfo = tok.node.getInfoForMode("s")
+                        if sizeInfo is not None:
+                            try:
+                                width, height = sizeInfo.split(u"x")
+                                width = int(width)
+                                height = int(height)
+                                if width >= 0 and height >= 0:
+                                    sizeInTag = ' width="%i" height="%i"' % \
+                                            (width, height)
+                            except:
+                                # something does not match syntax requirements
+                                pass
+                        
+                        alignInTag = u""
+                        alignInfo = tok.node.getInfoForMode("a")
+                        if alignInfo is not None:
+                            try:
+                                if alignInfo == u"t":
+                                    alignInTag = u' align="top"'
+                                elif alignInfo == u"m":
+                                    alignInTag = u' align="middle"'
+                                elif alignInfo == u"b":
+                                    alignInTag = u' align="bottom"'
+                                elif alignInfo == u"l":
+                                    alignInTag = u' align="left"'
+                                elif alignInfo == u"r":
+                                    alignInTag = u' align="right"'
+                            except:
+                                # something does not match syntax requirements
+                                pass
+
                         if self.asHtmlPreview and lowerLink.startswith("file:"):
                             # At least under Windows, wxWidgets has another
                             # opinion how a local file URL should look like
                             # than Python
                             p = urllib.url2pathname(link)  # TODO Relative URLs
                             link = wxFileSystem.FileNameToURL(p)
-                        self.outAppend(u'<img src="%s" border="0" />' % 
-                                escapeHtml(link))
+                        self.outAppend(u'<img src="%s" border="0"%s%s />' % 
+                                (escapeHtml(link), sizeInTag, alignInTag))
                     else:
 #                         self.outAppend(u'<a href="%s">%s</a>' %
 #                                 (escapeHtml(link), escapeHtml(link)))
@@ -939,7 +1006,7 @@ class HtmlXmlExporter:
                     # styleno == WikiFormatting.FormatTypes.WikiWord2:
                 word = tok.node.nakedWord # self.mainControl.getFormatting().normalizeWikiWord(tok.text)
                 link = self.links.get(word)
-                
+
                 if link:
                     if self.asXml:   # TODO XML
                         self.outAppend(u'<link type="wikiword">%s</link>' % 

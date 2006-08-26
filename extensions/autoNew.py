@@ -51,7 +51,7 @@ _testRE = re.compile(ur"^New[0-9]{6}$")
 
 
 def autoNew(wiki, evt):
-    wiki.saveCurrentDocPage()
+    wiki.saveAllDocPages()
     candidates = wiki.wikiData.getWikiWordsStartingWith(u"New",
             includeAliases=True)
             
