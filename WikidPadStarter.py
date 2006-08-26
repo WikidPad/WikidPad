@@ -3,7 +3,7 @@
 import sys, os, traceback, os.path, glob, time, socket
 os.stat_float_times(True)
 
-VERSION_STRING = "wikidPad 1.7beta8"
+VERSION_STRING = "wikidPad 1.7rc1"
 
 if not hasattr(sys, 'frozen'):
     sys.path.append("lib")
@@ -14,13 +14,6 @@ ExceptionLogger.startLogger(VERSION_STRING)
 
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
-
-# To ensure unicode selection, works only for me (Michael)
-
-# if not hasattr(sys, 'frozen'):
-#     sys.path =  \
-#             [r"C:\Programme\Python23\Lib\site-packages\wx-2.6-msw-unicode"] + sys.path
-
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "gadfly.zip"))
 # print "sys.path + ", os.path.join(os.path.abspath(sys.argv[0]), "gadfly.zip")

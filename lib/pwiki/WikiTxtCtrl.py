@@ -29,8 +29,13 @@ from StringOps import *
 # utf8Enc, utf8Dec, mbcsEnc, mbcsDec, uniToGui, guiToUni, \
 #        Tokenizer, wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
-from Configuration import isUnicode
+from Configuration import isUnicode, isWin9x
 
+
+try:
+    import WindowsHacks
+except:
+    WindowsHacks = None
 
 
 
@@ -721,8 +726,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         page = PageAst.Page()
         page.buildAst(self.pWiki.getFormatting(), text,
                 self.loadedDocPage.getFormatDetails(), threadholder=threadholder)
-        
-#         print "buildStyling", repr(page.getTokens())
         
         stylebytes = self.processTokens(page.getTokens(), threadholder)
         
@@ -1496,6 +1499,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def OnKeyDown(self, evt):
 #         self.idleCounter = 0
         key = evt.GetKeyCode()
+
         self.lastKeyPressed = time()
 
         if key == WXK_F3 and not self.inIncrementalSearch:
@@ -1558,7 +1562,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     if mat1:
                         # may be CamelCase word
                         tofind = line[-mat1.end():]
-                        # print "mat1", repr(tofind)
                         self.autoCompBackBytesWithoutBracket = self.bytelenSct(tofind)
                         formatting = self.pWiki.getFormatting()
                         acresult += filter(formatting.isCcWikiWord, 
@@ -1568,7 +1571,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     if mat2:
                         # may be not-CamelCase word or in a property name
                         tofind = line[-mat2.end():]
-                        # print "mat2", repr(tofind)
                         self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
                         acresult += map(lambda s: u"[" + s, self.pWiki.getWikiData().\
                                 getWikiWordsStartingWith(tofind[1:], True))
@@ -1581,17 +1583,13 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         propkey = revStr(mat3.group(3))
                         propfill = revStr(mat3.group(2))
                         propvalpart = revStr(mat3.group(1))
-                        # print "mat3", repr(tofind)
                         self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
                         values = filter(lambda pv: pv.startswith(propvalpart),
                                 self.pWiki.getWikiData().getDistinctPropertyValues(propkey))
                         acresult += map(lambda v: u"[" + propkey + propfill + 
                                 v +  u"]", values)
 
-                    # print "line", repr(line)
-                    
                     if len(acresult) > 0:
-                        # print "acresult", repr(acresult), repr(endBytePos-startBytePos)
                         self.UserListShow(1, u"~".join(acresult))
                     
                 elif key == WXK_RETURN:
@@ -1609,6 +1607,43 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 evt.Skip()
 
 
+    def OnChar(self, evt):
+        key = evt.GetKeyCode()
+
+        # Return if this doesn't seem to be a real character input
+        if evt.ControlDown() or key < 32:
+            evt.Skip()
+            return
+            
+        if key >= WXK_START and (not isUnicode() or evt.GetUnicodeKey() != key):
+            evt.Skip()
+            return
+
+
+        if isWin9x() and (WindowsHacks is not None):
+            unichar = WindowsHacks.ansiInputToUnicodeChar(key)
+
+            if self.inIncrementalSearch:
+                self.searchStr += unichar
+                self.executeIncrementalSearch();
+            else:
+                self.AddText(unichar)
+
+        else:
+
+            if isUnicode():
+                unichar = unichr(evt.GetUnicodeKey())
+            else:
+                unichar = mbcsDec(chr(key))[0]
+                
+            # handle key presses while in incremental search here
+            if self.inIncrementalSearch:
+                self.searchStr += unichar
+                self.executeIncrementalSearch();
+            else:
+                evt.Skip()
+
+
     def OnSetFocus(self, evt):
         self.pWiki.setActiveEditor(self)
         evt.Skip()
@@ -1616,7 +1651,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def OnUserListSelection(self, evt):
         text = evt.GetText()
-        # print "OnUserListSelection", repr(evt.GetText())   # TODO: Non unicode version
         if text[0] == "[":
             toerase = self.autoCompBackBytesWithBracket
         else:
@@ -1625,22 +1659,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.SetSelection(self.GetCurrentPos() - toerase, self.GetCurrentPos())
         
         self.ReplaceSelection(text)
-        
-
-    def OnChar(self, evt):
-        key = evt.GetKeyCode()
-        # handle key presses while in incremental search here
-        if self.inIncrementalSearch and key < WXK_START and key > 31 and \
-                not evt.ControlDown():
-
-            if isUnicode():
-                self.searchStr += unichr(evt.GetUnicodeKey())
-            else:
-                self.searchStr += mbcsDec(chr(key))[0]
-
-            self.executeIncrementalSearch();
-        else:
-            evt.Skip()
 
 
     def OnClick(self, evt):
@@ -1794,14 +1812,18 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
         # TODO works for Windows only
     def OnDropFiles(self, x, y, filenames):
         urls = []
+        
+        # Necessary because key state may change during the loop                                
+        controlPressed = wxGetKeyState(WXK_CONTROL)
+        shiftPressed = wxGetKeyState(WXK_SHIFT)
+        
         for fn in filenames:
             url = urllib.pathname2url(fn)
             if fn.endswith(".wiki"):
                 urls.append("wiki:%s" % url)
             else:
-                doCopy = False  # Necessary because key state may change between
-                                # the two ifs
-                if wxGetKeyState(WXK_CONTROL):
+                doCopy = False
+                if controlPressed:
                     # Copy file into file storage
                     fs = self.editor.pWiki.getWikiDataManager().getFileStorage()
                     try:
@@ -1813,7 +1835,7 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
                                 u"Couldn't copy file", e)
                         return
 
-                if wxGetKeyState(WXK_SHIFT) or doCopy:
+                if shiftPressed or doCopy:
                     # Relative rel: URL
                     locPath = self.editor.pWiki.getWikiConfigPath()
                     if locPath is not None:

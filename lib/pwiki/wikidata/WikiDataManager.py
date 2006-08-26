@@ -152,7 +152,7 @@ class WikiDataManager(MiscEventSourceMixin):
                     wikiFiles = [file for file in os.listdir(parentDir) \
                             if file.endswith(".wiki")]
                     if len(wikiFiles) > 0:
-                        wikiWord = basename(wikiConfigFilename)
+                        wikiWord = os.path.basename(wikiConfigFilename)
                         wikiWord = wikiWord[0:len(wikiWord)-5]
     
                         # if this is win95 or < the file name could be a 8.3 alias, file~1 for example

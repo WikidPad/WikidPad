@@ -1,6 +1,18 @@
 ﻿++ Change Log
 
 
+Aug. 26, 2006 (1.7rc1)
+
+    * Better handling of non Western-European languages on
+      Win 98/ME.
+    * Bug fixed: Wiki word aliases not shown as links on
+      HTML export.
+    * Bug fixed: Wrong URL creation mode when
+      releasing/pressing SHIFT or CTRL during drag&drop
+      operation.
+
+
+
 Aug. 05, 2006 (1.7beta8)
 
 Changes:

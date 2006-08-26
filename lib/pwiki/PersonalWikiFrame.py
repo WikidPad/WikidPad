@@ -27,7 +27,6 @@ from CmdLineAction import CmdLineAction
 from WikiTxtCtrl import WikiTxtCtrl
 from WikiTreeCtrl import WikiTreeCtrl
 from WikiHtmlView import WikiHtmlView
-from AboutDialog import AboutDialog
 from LogWindow import LogWindow
 
 from Ipc import EVT_REMOTE_COMMAND
@@ -39,6 +38,7 @@ from SearchAndReplace import SearchReplaceOperation
 from Printing import Printer, PrintMainDialog
 
 from AdditionalDialogs import *
+from OptionsDialog import OptionsDialog
 from SearchAndReplaceDialogs import *
 
 
@@ -228,10 +228,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
           
         # clipboard catcher  
         if WindowsHacks is None:
-            self.clipboardCatcher = None
+            self.win32Interceptor = None
         else:
-            self.clipboardCatcher = WindowsHacks.ClipboardCatcher(self)
-            
+            self.win32Interceptor = WindowsHacks.WikidPadWin32WPInterceptor(self)
+            self.win32Interceptor.intercept(self.GetHandle())
 
         # resize the window to the last position/size
         setWindowSize(self, (self.configuration.getint("main", "size_x", 200),
@@ -647,7 +647,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 'Set Options', lambda evt: self.showOptionsDialog())
 
         wikiMenu.AppendSeparator()
-        
+
         if wikiData is not None:
             exportWikisMenu = wxMenu()
             wikiMenu.AppendMenu(wxNewId(), 'Export', exportWikisMenu)
@@ -946,7 +946,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 'Add Bookmark to Page', lambda evt: self.insertAttribute("bookmarked", "true"),
                 "pin")
                 
-        if self.clipboardCatcher is not None:
+        if self.win32Interceptor is not None:
             wikiWordMenu.AppendSeparator()
 
             menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
@@ -2331,9 +2331,8 @@ These are your default global settings.
                     self.wikiDataManager.getMiscEvent().removeListener(self)
                 self.wikiDataManager = None
             self.getConfig().setWikiConfig(None)
-            if self.clipboardCatcher is not None and \
-                    self.clipboardCatcher.isActive():
-                self.clipboardCatcher.stop()
+            if self.win32Interceptor is not None:
+                self.win32Interceptor.stop()
 
             self.setShowOnTray()
             self.fireMiscEventKeys(("closed current wiki",))
@@ -3025,19 +3024,18 @@ These are your default global settings.
 #                 self.clipboardCatcher.isActive()
 
     def OnClipboardCatcherOff(self, evt):
-        if self.clipboardCatcher.isActive():
-            self.clipboardCatcher.stop()
+        self.win32Interceptor.stop()
 
     def OnClipboardCatcherAtPage(self, evt):
-        self.clipboardCatcher.startAtPage(self.GetHandle(),
+        self.win32Interceptor.startAtPage(self.GetHandle(),
                 self.getCurrentDocPage())
 
     def OnClipboardCatcherAtCursor(self, evt):
-        self.clipboardCatcher.startAtCursor(self.GetHandle())
+        self.win32Interceptor.startAtCursor(self.GetHandle())
 
 
     def OnUpdateClipboardCatcher(self, evt):
-        cc = self.clipboardCatcher
+        cc = self.win32Interceptor
         if cc is None:
             return  # Shouldn't be called anyway
 
@@ -3049,7 +3047,7 @@ These are your default global settings.
             if cc.getMode() == cc.MODE_AT_PAGE:
                 evt.Check(True)
                 evt.SetText("Clipboard Catcher at: %s\t%s" % 
-                        (self.clipboardCatcher.getWikiWord(),
+                        (self.win32Interceptor.getWikiWord(),
                         self.keyBindings.CatchClipboardAtPage))
             else:
                 evt.Check(False)
@@ -3843,8 +3841,8 @@ These are your default global settings.
 # 
 #     def prepareExit(self):
         # Stop clipboard catcher if running
-        if self.clipboardCatcher is not None and self.clipboardCatcher.isActive():
-            self.clipboardCatcher.stop()
+        if self.win32Interceptor is not None:
+            self.win32Interceptor.unintercept()
 
         # if the frame is not minimized
         # update the size/pos of the global config

@@ -156,7 +156,7 @@ def buildColorsSubmenu():
     colorsMenu.AppendMenu(wxNewId(), 'M-Z', colorsMenu2)
     
     # Set showColored to False if we are on Win 95/98/ME and use an unicode build
-    #   of wxPython
+    #   of wxPython because it would crash then
     showColored = not (wxGetOsVersion()[0] == wxWIN95 and isUnicode())
 
     for cn in _COLORS:    # ["BLACK"]:

@@ -662,6 +662,8 @@ class WikiData:
                 self.setProperty(word, k, v)
                 if k == "alias":
                     self.setAsAlias(v)  # TODO
+                    
+        self.cachedGlobalProps = None   # reset global properties cache
 
     def deleteProperties(self, word):
         self.execSql("delete from wikiwordprops where word = ?", (word,))

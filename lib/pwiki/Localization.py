@@ -3,7 +3,7 @@ import string, locale, sets
 from StringOps import utf8Enc
 
 
-# Factory functions for collators, classes shouldn't be called directly
+# Factory functions for collators. Classes shouldn't be called directly
 
 def createCollatorByString(locStr, caseSensitive):
     """
@@ -11,7 +11,10 @@ def createCollatorByString(locStr, caseSensitive):
     caseSensitive -- True iff collator should be case sensitive (the flag isn't
             guaranteed to be respected
     """
-    return _PythonCollator(locStr, caseSensitive)
+    if locStr.lower() == u"c":
+        return _CCollator(caseSensitive)
+    else:
+        return _PythonCollator(locStr, caseSensitive)
 
 
 def createCCollator(caseSensitive):
@@ -63,24 +66,22 @@ class AbstractCollator:
 
     def normCase(self, s):
         """
-        Normalize case for string s. If the collator is case sensitive, this
-        should just return the UTF-8 encoded string.
+        Normalize case for string s. It is recommended to just return
+        the UTF-8 encoding of the "lowered" string s. This should be even
+        true if the collator is case-sensitive.
         
-        If collator is case insensitive, it must fulfill:
+        The collator must fulfill:
         For all unicode strings a, b:
         
         1. normCase(a) == normCase(b) iff a == b or a is equal b except for case.
         2. normCase(a) is part of normCase(b) iff a is part of b (at least if
             case is ignored)
-            
-        It is recommended to just return the UTF-8 encoding of the "lowered"
-        string s.
+        
         """
         assert 0  # abstract
 
 
 # TODO case insensitivity
-
 
 class _CCollator(AbstractCollator):
     """
@@ -115,9 +116,17 @@ class _CCollator(AbstractCollator):
 
     def normCase(self, s):
         """
-        Normalize case for string s if collator case-insensitive
+        Normalize case for unicode string s and return byte string
         """
-        return utf8Enc(s)[0]
+        result = []
+        for c in s:
+            o = ord(c)
+            if o < 65 or o > 90:
+                result.append(c)
+            else:
+                result.append(unichr(o+32))
+
+        return utf8Enc(u"".join(result))[0]
         
 
 
@@ -126,12 +135,15 @@ class _PythonCollator(AbstractCollator):
     """
     Uses Python's localization support from the "locale" module.
     This class pretends to allow the use of multiple locale settings
-    at once, but Python doesn't allow that.
+    at once, but Python doesn't provide that.
     """
-    def __init__(self, loc, caseSensitive):
-        self.locCode = loc
-        self.prevLocale = locale.setlocale(locale.LC_ALL, self.locCode)
-        
+    def __init__(self, locStr, caseSensitive):
+        """
+        caseSensitive -- ignored here
+        """
+        self.locStr = locStr
+        self.prevLocale = locale.setlocale(locale.LC_ALL, self.locStr)
+
         self.caseSensitive = caseSensitive
 
     def strcoll(self, left, right):
@@ -140,5 +152,7 @@ class _PythonCollator(AbstractCollator):
     def strxfrm(self, s):
         locale.strxfrm(s)
 
+    def normCase(self, s):
+        return utf8Enc(s.lower)[0]
 
 

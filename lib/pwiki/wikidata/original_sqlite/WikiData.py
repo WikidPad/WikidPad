@@ -284,20 +284,6 @@ class WikiData:
             self.connWrap.rollback()
             raise
 
-#             # now we have to search the wiki files and replace the old word with the new
-#             searchOp = SearchAndReplace.SearchReplaceOperation()
-#             searchOp.wikiWide = True
-#             searchOp.wildCard = 'no'
-#             searchOp.caseSensitive = True
-#             searchOp.searchStr = word
-#             
-#             results = self.search(searchOp)
-#             for resultWord in results:
-#                 content = self.getContent(resultWord)
-#                 content = content.replace(word, toWord)
-#                 self.setContent(resultWord, content)
-
-
 
     def deleteWord(self, word):
         """
@@ -735,6 +721,8 @@ class WikiData:
                 self.setProperty(word, k, v)
                 if k == "alias":
                     self.setAsAlias(v)  # TODO
+                    
+        self.cachedGlobalProps = None   # reset global properties cache
 
     def updateCachedGlobalProps(self):
         """

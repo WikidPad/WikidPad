@@ -731,6 +731,9 @@ class WikiData:
                 if k == "alias":
                     self.setAsAlias(v)  # TODO
 
+        self.cachedGlobalProps = None   # reset global properties cache
+
+
     def updateCachedGlobalProps(self):
         """
         TODO: Should become part of public API!

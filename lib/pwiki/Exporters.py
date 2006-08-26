@@ -249,9 +249,9 @@ class HtmlXmlExporter:
                     if not self.shouldExport(relation):
                         continue
                     # get aliases too
-                    relation = self.wikiData.getAliasesWikiWord(relation)
+                    relUnAlias = self.wikiData.getAliasesWikiWord(relation)
                     # TODO Use self.convertFilename here?
-                    links[relation] = u"#%s" % _escapeAnchor(relation)
+                    links[relation] = u"#%s" % _escapeAnchor(relUnAlias)
                     
                 formattedContent = self.formatContent(word, content,
                         formatDetails, links)
@@ -284,8 +284,8 @@ class HtmlXmlExporter:
                 if not self.shouldExport(relation):
                     continue
                 # get aliases too
-                relation = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
-                links[relation] = self.convertFilename(u"%s.html" % relation)  #   "#%s" ???
+                relUnAlias = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
+                links[relation] = self.convertFilename(u"%s.html" % relUnAlias)  #   "#%s" ???
 #                 wordForAlias = self.wikiData.getAliasesWikiWord(relation)
 #                 if wordForAlias:
 #                     links[relation] = self.convertFilename(
@@ -339,8 +339,9 @@ class HtmlXmlExporter:
                         continue
 
                     # get aliases too
-                    relation = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
-                    links[relation] = u"#%s" % _escapeAnchor(relation)
+                    relUnAlias = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
+                    links[relation] = u"#%s" % _escapeAnchor(relUnAlias)
+                    
 #                     wordForAlias = self.wikiData.getAliasesWikiWord(relation)
 #                     if wordForAlias:
 #                         links[relation] = u"#%s" % wordForAlias
