@@ -251,24 +251,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.lowResources = wxGetApp().getLowResources()
 #         self.lowResources = self.configuration.getboolean("main", "lowresources")
 
-        # get the wrap mode setting
-        self.wrapMode = self.configuration.getboolean("main", "wrap_mode")
+#         # get the wrap mode setting
+#         self.wrapMode = self.configuration.getboolean("main", "wrap_mode")
 
         # get the position of the splitter
         self.lastSplitterPos = self.configuration.getint("main", "splitter_pos")
-
-        # is autosave on
-#         self.autoSave = True
-#         if (self.globalConfig.has_option("main", "auto_save")):
-#             self.autoSave = self.globalConfig.getboolean("main", "auto_save")
-
-#         # are indentationGuides enabled
-#         self.indentationGuides = self.configuration.getboolean("main",
-#                 "indentation_guides")
-
-#         # set the locale  # TODO Why?
-#         locale = wxLocale()
-#         self.locale = locale.GetCanonicalName()
 
         # get the default font for the editor
         self.defaultEditorFont = self.configuration.get("main", "font",
@@ -2274,17 +2261,6 @@ These are your default global settings.
         self.getConfig().setWikiConfig(self.wikiDataManager.getWikiConfig())
 
 
-#         # Set file storage according to configuration
-#         fs = self.getWikiDataManager().getFileStorage()
-# 
-#         fs.setModDateMustMatch(self.configuration.getboolean("main",
-#                 "fileStorage_identity_modDateMustMatch", False))
-#         fs.setFilenameMustMatch(self.configuration.getboolean("main",
-#                 "fileStorage_identity_filenameMustMatch", False))
-#         fs.setModDateIsEnough(self.configuration.getboolean("main",
-#                 "fileStorage_identity_modDateIsEnough", False))
-
-
         # what was the last wiki word opened
         lastWikiWord = wikiWordToOpen
         if not lastWikiWord:
@@ -2358,10 +2334,10 @@ These are your default global settings.
 
     def closeWiki(self, saveState=True):
         if self.getWikiConfigPath():
-            if saveState:
-                self.saveCurrentWikiState()
             for editor in self.editors:
                 editor.unloadCurrentDocPage()
+            if saveState:
+                self.saveCurrentWikiState()
             if self.getWikiData():
                 self.wikiDataManager.release()
 #                 self.getWikiData().close()
@@ -3546,6 +3522,7 @@ These are your default global settings.
 
         if skipConfirm or result == wxYES :
             try:
+                self.saveAllDocPages()
                 progresshandler = wxGuiProgressHandler(u"Rebuilding wiki",
                         u"Rebuilding wiki", 0, self)
                 self.getWikiDataManager().rebuildWiki(progresshandler)

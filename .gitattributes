@@ -262,6 +262,7 @@ WikidPadHelp/data/InlinePythonEval.wiki -text
 WikidPadHelp/data/InternatiönalChàracters.wiki -text
 WikidPadHelp/data/KeyBindings.wiki -text
 WikidPadHelp/data/MigrationBetweenDbTypes.wiki -text
+WikidPadHelp/data/Multipage[!!-~]text[!!-~]format.wiki -text
 WikidPadHelp/data/Not[!!-~]Camel[!!-~]Case.wiki -text
 WikidPadHelp/data/Options[!!-~]HTML[!!-~]preview_export.wiki -text
 WikidPadHelp/data/OptionsDialog.wiki -text
@@ -275,6 +276,7 @@ WikidPadHelp/data/ScratchPad.wiki -text
 WikidPadHelp/data/SearchingTheWiki.wiki -text
 WikidPadHelp/data/SpellChecking.wiki -text
 WikidPadHelp/data/SystemInfoTemplate.wiki -text
+WikidPadHelp/data/TMPTABLE.grl -text
 WikidPadHelp/data/TODOS.grl -text
 WikidPadHelp/data/Templates.wiki -text
 WikidPadHelp/data/TextBlocks.wiki -text
@@ -303,12 +305,14 @@ WikidPadHelp/data/WikidPadHelp.wiki -text
 WikidPadHelp/data/WikidPadOnUSB.wiki -text
 WikidPadHelp/data/WikidPadSupport.wiki -text
 WikidPadHelp/data/WordLinking.wiki -text
+WikidPadHelp/data/\[CCBlacklist\].wiki -text
 WikidPadHelp/data/index/DOCUMENTS.grl -text
 WikidPadHelp/data/index/TEXT_INDEX.grl -text
 WikidPadHelp/data/index/WORDS.grl -text
 WikidPadHelp/data/index/wiki_idx.gfd -text
 WikidPadHelp/data/multipage[!!-~]text[!!-~]format.wiki -text
 WikidPadHelp/data/wikidb.gfd -text
+WikidPadHelp/files/testimg.gif -text
 /WikidPadStarter.py -text
 /bld.bat -text
 docs/api.txt -text

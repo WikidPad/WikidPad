@@ -28,3 +28,32 @@ rel://../above/andBelow.txt
 ++ File storage
 You can also copy files into a subdirectory of the wiki directory from within WikidPad. See [FileStorage] for details.
 
+
+++ Images
+If an URL file ends with ".jpg", ".gif" or ".png", the URL is automatically shown as an image in preview and HTML export (currently the HTML export does not automatically export the image itself). The URL can be absolute or relative and can point into the file storage.
+
+Example (switch to preview to see the picture):
+
+rel://files/testimg.gif
+
+To show all such URLs as links instead, open "Options" dialog, page "HTML preview/export" and check "Show pics as links in preview" or "Show pics as links in export" or set it temporarily in the export dialog.
+
+For controlling of individual URLs, see next chapter.
+
+
+++ URL Appendix
+You can control details of URL presentation, especially for images, by using an URL appendix. This consists of a '>' character directly after the URL (no space) and some code characters which can be delimited by semicolons. The following codes are defined:
+
+    i Show URL as image, even if it has none of the default suffixes
+    l Show URL as link. 'i' and 'l' are mutually exclusive.
+    s Set size of an image, following the code is the width and height, delimited by 'x' (e.g. '200x300')
+    a Set alignment of image, the following character defines which alignment (*t*op, vertically
+    *m*iddle, *b*ottom, *r*ight or *l*eft). This setting is not respected by the preview.
+
+Examples:
+
+Control size and alignment:
+rel://files/testimg.gif>s50x50;al
+
+Show the URL as link:
+rel://files/testimg.gif>l

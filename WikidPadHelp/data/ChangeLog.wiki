@@ -1,6 +1,43 @@
 ﻿++ Change Log
 
 
+Aug. 30, 2006 (1.8beta1)
+
+Changes:
+    * New database format! After updating a wiki it won't be
+      readable anymore for older versions of WikidPad.
+    * Updating of wiki databases to new versions is now done only
+      after asking user.
+    * New position for configuration files on Windows inside
+      "Application Data\WikidPad" directory. You might have to move
+      "WikidPad.config" file and ".WikidPadGlobals" directory from
+      "Application Data" to the new location if updating from
+      a previous version. Name of "Application Data" directory
+      depends on OS language.
+    
+    * Cursor and scroll position are now saved between sessions.
+    * Possibility to set size and alignment for image URLs.
+      See UrlLinking#++# URL# Appendix
+    * Functional pages for "camelcase blacklist". Words on this
+      list are not shown as wiki links. See WordLinking
+    * Option to automatically remove bullets and numbers which
+      stand "lonely" on a line by pressing enter.
+      See BulletedLists
+    
+    * Menu functions "Show Tree Control", "Show Toolbar" and
+      "Stay on Top" moved to "View" menu
+    * Preview now shows indented paragraphs correctly (or,
+      at least, better)
+    
+    * Bug fixed: Wiki word aliases not shown as links on
+      HTML export.
+    * Bug fixed: Wrong URL creation mode when releasing/pressing
+      SHIFT or CTRL during drag&drop operation.
+    * Better handling of non Western-European languages on
+      Win 98/ME
+
+
+
 Aug. 05, 2006 (1.7beta8)
 
 Changes:
@@ -214,7 +251,7 @@ Mar. 24, 2006 (1.7beta2, repository revision in "mbutscher" branch: 70)
 
 Changes:
     * Importer/Exporter for new multipage text format (mpt).
-      See ([WikiExport], [WikiImport], [multipage text format])    
+      See ([WikiExport], [WikiImport], [Multipage text format])    
 
     * Tree node context menu allows now also choice of color and
       icon of a node as well as appending or prepending of 

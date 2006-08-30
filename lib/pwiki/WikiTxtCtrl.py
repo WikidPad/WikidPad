@@ -414,8 +414,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def unloadCurrentDocPage(self, evtprops=None):
         # Unload current page
         if self.loadedDocPage is not None:
-            if self.loadedDocPage.getDirty()[0]:
-                self.saveLoadedDocPage()
 
             wikiWord = self.loadedDocPage.getWikiWord()
             if wikiWord is not None:
@@ -425,6 +423,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #                 self.lastCursorPositionInPage[wikiWord] = self.GetCurrentPos()
 #                 self.scrollPosCache[wikiWord] = (self.GetScrollPos(wxHORIZONTAL),
 #                         self.GetScrollPos(wxVERTICAL))
+
+            if self.loadedDocPage.getDirty()[0]:
+                self.saveLoadedDocPage()
 
 
             miscevt = self.loadedDocPage.getMiscEvent()
@@ -1634,6 +1635,32 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     if self.pageType == u"form":
                         self._goToNextFormField()
                         return
+                elif key == WXK_RETURN:
+                    if self.pWiki.getConfig().getboolean("main",
+                            "editor_autoUnbullets"):
+                        # Check for lonely bullet or number
+                        endBytePos = self.GetCurrentPos()
+                        startBytePos = self.PositionFromLine(
+                                self.LineFromPosition(endBytePos))
+                        
+                        line = self.GetTextRange(startBytePos, endBytePos)
+                        mat = WikiFormatting.BulletRE.match(line)
+                        if mat and mat.end(0) == len(line):
+                            self.SetSelection(startBytePos, endBytePos)
+                            self.ReplaceSelection(mat.group("indentBullet"))
+                            return
+    
+                        mat = WikiFormatting.NumericBulletRE.match(line)
+                        if mat and mat.end(0) == len(line):
+                            self.SetSelection(startBytePos, endBytePos)
+    
+                            replacement = mat.group("indentNumeric")
+                            if mat.group("preLastNumeric") != u"":
+                                replacement += mat.group("preLastNumeric") + u" "
+    
+                            self.ReplaceSelection(replacement)
+                            return
+
                 evt.Skip()
             else:
                 evt.Skip()
@@ -1659,7 +1686,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 self.searchStr += unichar
                 self.executeIncrementalSearch();
             else:
-                self.AddText(unichar)
+                self.ReplaceSelection(unichar)
 
         else:
 

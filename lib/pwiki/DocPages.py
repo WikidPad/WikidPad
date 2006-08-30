@@ -504,6 +504,7 @@ class WikiPage(DocPage):
 
         self.wikiDocument.getWikiData().setPresentationBlock(self.getWikiWord(),
                 struct.pack("iiiii", *pt))
+#         self.setDirty(True)
 
 
 # TODO Maybe split into single classes for each tag

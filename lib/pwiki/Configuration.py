@@ -506,17 +506,19 @@ GLOBALDEFAULTS = {
     ("main", "html_body_background"): "",  # for HTML preview/export, URL for background image or "" for none
 
 
-    ("main", "sync_highlight_byte_limit"): "5120",  # Size limit when to start asyn. highlighting in editor
-    ("main", "async_highlight_delay"): "0.2",  # Delay after keypress before starting async. highlighting
     ("main", "editor_plaintext_color"): "", # Color of plain text (and non-exist. wikiwords) in editor
     ("main", "editor_link_color"): "", # Color of links (URL and wikiwords)
     ("main", "editor_attribute_color"): "", # Color of attributes (=properties) and scripts
     ("main", "editor_bg_color"): "",  # Background color of the editor
+    ("main", "sync_highlight_byte_limit"): "5120",  # Size limit when to start asyn. highlighting in editor
+    ("main", "async_highlight_delay"): "0.2",  # Delay after keypress before starting async. highlighting
+    ("main", "editor_autoUnbullets"): "True",  # When pressing return on line with lonely bullet, remove bullet?
+
 
     # For wiki-wide search
-    ("main", "search_wiki_context_before"): "0", # No. of context characters before
-    ("main", "search_wiki_context_after"): "0",  # and after a found pattern
-    ("main", "search_wiki_count_occurrences"): "False", # Show for each page the number of found matches
+    ("main", "search_wiki_context_before"): "20", # No. of context characters before
+    ("main", "search_wiki_context_after"): "30",  # and after a found pattern
+    ("main", "search_wiki_count_occurrences"): "True", # Show for each page the number of found matches
     ("main", "fastSearch_sizeX"): "200",  # Size of the fastsearch popup frame
     ("main", "fastSearch_sizeY"): "400",
 

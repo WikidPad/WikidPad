@@ -110,12 +110,6 @@ How long to wait after the page was initially modified (dirty) after last save (
 
 ++++ Editor
 
-*Sync. highlighting limit*
-Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 3000 to 5000 bytes
-
-*Highlight start delay*
-For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds
-
 *Plain text color*
 Specify the color of plain text (like this one) in the editor by pressing the little "..." button to start the color dialog or by entering a numeric HTML color (e.g. "#000000" for black) in the text field. Leaving the field empty chooses the default color.
 
@@ -127,6 +121,15 @@ Set the color of attributes and scripts (e.g. <%"this one"%>) in the editor. See
 
 *Background color*
 (Works only partially). Specify the background color of the editor. See "Plain text color" above for details.
+
+*Sync. highlighting limit*
+Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 3000 to 5000 bytes
+
+*Highlight start delay*
+For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds
+
+*Auto-unbullets*
+When this option is active and enter is pressed on a line which contains only a bullet or a numbering without text, the bullet is removed. See BulletedLists for details.
 
 
 +++ Current wiki

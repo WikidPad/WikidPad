@@ -38,6 +38,7 @@ Name: {app}\extensions; Components: Program_files
 Name: {app}\icons; Components: Program_files
 Name: {app}\WikidPadHelp; Components: Gadfly\Help
 Name: {app}\WikidPadHelp\data; Components: Gadfly\Help
+Name: {app}\WikidPadHelp\files
 Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true

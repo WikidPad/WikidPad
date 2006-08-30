@@ -37,6 +37,8 @@ setup(name='WikidPad',
                   ('', ['sqlite3.dll', 'WikidPad.xrc', 'readme_Wic.txt', "gadfly.zip"]),
                   ('WikidPadHelp', glob(os.path.join('WikidPadHelpOG-static', "*.wiki"))),
                   (os.path.join('WikidPadHelp', 'data'),
-                   glob(os.path.join('WikidPadHelpOG-static', 'data', "*.*"))),
+                    glob(os.path.join('WikidPadHelpOG-static', 'data', "*.*"))),
+                  (os.path.join('WikidPadHelp', 'files'),
+                    glob(os.path.join('WikidPadHelpOG-static', 'files', "*.*"))),
                   ('export', [os.path.join('export', 'wikistyle.css')])]
 )

@@ -566,22 +566,29 @@ class HtmlXmlExporter:
 
 
     def popState(self):
+        breakEat = len(self.statestack) <= 2 or self.asHtmlPreview
         if self.statestack[-1][0] == "normalindent":
-            self.outEatBreaks(u"</ul>\n")
+            if self.asHtmlPreview:
+                self.outEatBreaks(u"</blockquote>\n")
+            else:
+                self.outAppend(u"</ul>\n", eatPreBreak=breakEat,
+                        eatPostBreak=breakEat)
         elif self.statestack[-1][0] == "ol":
-            self.outEatBreaks(u"</ol>\n")
+            self.outAppend(u"</ol>\n", eatPreBreak=breakEat,
+                    eatPostBreak=breakEat)
             self.numericdeepness -= 1
         elif self.statestack[-1][0] == "ul":
-            self.outEatBreaks(u"</ul>\n")
-            
+            self.outAppend(u"</ul>\n", eatPreBreak=breakEat,
+                    eatPostBreak=breakEat)
+
         self.statestack.pop()
-        
+
     def hasStates(self):
         """
         Return true iff more than the basic state is on the state stack yet.
         """
         return len(self.statestack) > 1
-        
+
 
     def outAppend(self, toAppend, eatPreBreak=False, eatPostBreak=False):
         """
@@ -627,6 +634,23 @@ class HtmlXmlExporter:
 
         self.outAppend(toAppend, **kpars)
 
+
+    def outIndentation(self, indType):
+        """
+        Insert indentation, bullet, or numbered list start tag.
+        ind -- indentation depth
+        """
+        if indType == "normalindent" and self.asHtmlPreview:
+            self.outEatBreaks(u"<blockquote>")
+        else:
+            tag = {"normalindent": u"<ul>", "ul": u"<ul>", "ol": u"<ol>"}[indType]
+
+            if self.hasStates() or self.asHtmlPreview:
+                # It is already indented, so additional indents will not
+                # produce blank lines which must be eaten
+                self.outAppend(tag)
+            else:
+                self.outEatBreaks(tag)
 
     def getOutput(self):
         return u"".join(self.result)
@@ -775,7 +799,8 @@ class HtmlXmlExporter:
                                     ind > self.statestack[-1][1]:
                                 # More indentation than before -> open new <ul> level
     #                             print "normal2"
-                                self.outEatBreaks(u"<ul>")
+                                self.outIndentation("normalindent")
+
                                 self.statestack.append(("normalindent", ind))
                                 self.outAppend(escapeHtml(line))
                                 self.outAppend(u"<br />\n")
@@ -811,7 +836,8 @@ class HtmlXmlExporter:
                             if self.statestack[-1][0] == "normalindent" and \
                                     ind > self.statestack[-1][1]:
                                 # More indentation than before -> open new <ul> level
-                                self.outEatBreaks(u"<ul>")
+                                self.outIndentation("normalindent")
+#                                 self.outEatBreaks(u"<ul>")
                                 self.statestack.append(("normalindent", ind))
                                 self.outAppend(escapeHtml(line))
                             elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
@@ -1042,12 +1068,14 @@ class HtmlXmlExporter:
 
                 if ind > self.statestack[-1][1] or \
                         self.statestack[-1][0] != "ol":
-                    self.outEatBreaks(u"<ol>")
+#                     self.outEatBreaks(u"<ol>")
+                    self.outIndentation("ol")
                     self.statestack.append(("ol", ind))
                     self.numericdeepness += 1
 
                 while numbers > self.numericdeepness:
-                    self.outEatBreaks(u"<ol>")
+#                     self.outEatBreaks(u"<ol>")
+                    self.outIndentation("ol")
                     self.statestack.append(("ol", ind))
                     self.numericdeepness += 1
                     
@@ -1067,7 +1095,8 @@ class HtmlXmlExporter:
 
                 if ind > self.statestack[-1][1] or \
                         self.statestack[-1][0] != "ul":
-                    self.outEatBreaks(u"<ul>")
+#                     self.outEatBreaks(u"<ul>")
+                    self.outIndentation("ul")
                     self.statestack.append(("ul", ind))
 
                 self.eatPreBreak(u"<li />")
@@ -1078,20 +1107,14 @@ class HtmlXmlExporter:
             elif styleno == WikiFormatting.FormatTypes.Table:
                 ind = splitIndent(tok.grpdict["tableBegin"])[1]
                 
-#                 while self.statestack[-1][0] != "normalindent":  # TODO ?
-#                     self.popState()
                 while stacklen < len(self.statestack) and \
                         ind < self.statestack[-1][1]:
                     self.popState()
                     
-#                 while ind == self.statestack[-1][1] and \
-#                         self.statestack[-1][0] != "ul" and \
-#                         stacklen < len(self.statestack):
-#                     self.popState()
-
                 if ind > self.statestack[-1][1]: # or \
 #                        self.statestack[-1][0] != "ul":
-                    self.outEatBreaks(u"<ul>")
+#                     self.outEatBreaks(u"<ul>")
+                    self.outIndentation("normalindent")
                     self.statestack.append(("normalindent", ind))
 
                 self.outTable(content, tok.node)

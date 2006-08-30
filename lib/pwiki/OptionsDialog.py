@@ -13,10 +13,10 @@ from AdditionalDialogs import DateformatDialog, FontFaceDialog
 
 
 class OptionsDialog(wxDialog):
-    # List of tuples (<configuration file entry>, <gui control name>, <type>
+    # List of tuples (<configuration file entry>, <gui control name>, <type>)
     # Supported types: b: boolean checkbox, i0+: nonnegative integer, t: text
     #    tre: regular expression,  f0+: nonegative float, seli: integer position
-    #    of a selection in dropdown list,  color0: HTML color code
+    #    of a selection in dropdown list,  color0: HTML color code or empty
 
     OPTION_TO_CONTROL = (
             # application-wide options
@@ -62,16 +62,16 @@ class OptionsDialog(wxDialog):
             ("html_body_bgcolor", "tfHtmlBgColor", "color0"),
             ("html_body_background", "tfHtmlBgImage", "t"),
 
-            ("sync_highlight_byte_limit", "tfSyncHighlightingByteLimit", "i0+"),
-            ("async_highlight_delay", "tfAsyncHighlightingDelay", "f0+"),
             ("editor_plaintext_color", "tfEditorPlaintextColor", "color0"),
             ("editor_link_color", "tfEditorLinkColor", "color0"),
             ("editor_attribute_color", "tfEditorAttributeColor", "color0"),
             ("editor_bg_color", "tfEditorBgColor", "color0"),
-
+            ("sync_highlight_byte_limit", "tfSyncHighlightingByteLimit", "i0+"),
+            ("async_highlight_delay", "tfAsyncHighlightingDelay", "f0+"),
+            ("editor_autoUnbullets", "cbAutoUnbullets", "b"),
 
             # wiki specific options
-            
+
             ("footnotes_as_wikiwords", "cbFootnotesAsWws", "b"),
             ("first_wiki_word", "tfFirstWikiWord", "t"),
 

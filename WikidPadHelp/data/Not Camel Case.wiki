@@ -1,5 +1,1 @@
 ﻿++ Not Camel Case
-
-
-[icon=chart]
-[priority: 3]

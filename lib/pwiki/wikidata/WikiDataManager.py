@@ -137,6 +137,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
     def __init__(self, wikiConfigFilename, wikiSyntax, dbtype):  #  dataDir, fileStorDir, dbtype, ):
         wikiConfig = createWikiConfiguration()
+        self.connected = False
         
         while True:
             try:
@@ -276,6 +277,10 @@ class WikiDataManager(MiscEventSourceMixin):
 
 
     def connect(self):
+        # Connect might be called too often, so check if it was already done
+        if self.connected:
+            return
+
         self.wikiData.connect()
 
         # Path to file storage
@@ -306,6 +311,8 @@ class WikiDataManager(MiscEventSourceMixin):
                 # this flag.
                 
         self.autoReconnectTriedFlag = False
+        
+        self.connected = True
 
 
     def incRefCount(self):
@@ -474,8 +481,17 @@ class WikiDataManager(MiscEventSourceMixin):
             self.getWikiData().clearCacheTables()
             for wikiWord in wikiWords:
                 progresshandler.update(step, u"")   # , "Rebuilding %s" % wikiWord)
-                wikiPage = self.createWikiPage(wikiWord)
-                wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
+                try:
+                    wikiPage = self.getWikiPageNoError(wikiWord)
+                    if isinstance(wikiPage, AliasWikiPage):
+                        # This should never be an alias page, so fetch the
+                        # real underlying page
+                        wikiPage = WikiPage(self, wikiWord)
+
+                    wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
+                except:
+                    traceback.print_exc()
+
                 step = step + 1
 
         finally:
