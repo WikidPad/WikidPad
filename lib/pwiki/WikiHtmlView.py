@@ -4,6 +4,8 @@
 from wxPython.wx import *
 from wxPython.html import *
 
+
+from WikiExceptions import *
 from wxHelper import keyDownToAccel, copyTextToClipboard, GUI_ID
 
 from MiscEvent import KeyFunctionSink
@@ -14,7 +16,7 @@ import Exporters
 
 
 
-class LinkCreator:
+class LinkCreatorForPreview:
     """
     Faked link dictionary for HTML exporter
     """
@@ -80,13 +82,18 @@ class WikiHtmlView(wxHtmlWindow):
         ## _prof.start()
         # Store position of previous page, if any
         if self.currentLoadedWikiWord:
-            prevPage = self.pWiki.getWikiDocument().getWikiPage(
-                    self.currentLoadedWikiWord)
-            prevPage.setPresentation(self.GetViewStart(), 3)
-#             self.scrollPosCache[self.currentLoadedWikiWord] = 
-        
+            try:
+                prevPage = self.pWiki.getWikiDocument().getWikiPage(
+                        self.currentLoadedWikiWord)
+                prevPage.setPresentation(self.GetViewStart(), 3)
+    #             self.scrollPosCache[self.currentLoadedWikiWord] = 
+            except WikiWordNotFoundException, e:
+                pass
+
+        self.currentLoadedWikiWord = None
+
         self.exporterInstance.wikiData = self.pWiki.getWikiData()
-        
+
         wikiPage = self.pWiki.getCurrentDocPage()
         if wikiPage is None:
             return  # TODO Do anything else here?
@@ -94,10 +101,11 @@ class WikiHtmlView(wxHtmlWindow):
         word = wikiPage.getWikiWord()
         self.currentLoadedWikiWord = word
         content = self.pWiki.getCurrentText()
-        
+
         html = self.exporterInstance.exportContentToHtmlString(word, content,
                 wikiPage.getFormatDetails(),
-                LinkCreator(self.pWiki.getWikiData()), asHtmlPreview=True)
+                LinkCreatorForPreview(self.pWiki.getWikiData()),
+                asHtmlPreview=True)
 
         # TODO Reset after open wiki
 #         lx, ly = self.GetViewStart()

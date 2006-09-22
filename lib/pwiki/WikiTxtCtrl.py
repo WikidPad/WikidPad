@@ -663,11 +663,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         text = self.GetText()
         textlen = len(text)
 
-#         self.tokenizer.setTokenThread(None)
-
         t = self.stylingThreadHolder.getThread()
         if t is not None:
-#             t.cancel()
             self.stylingThreadHolder.setThread(None)
             self.stylebytes = None
             self.pageAst = None
@@ -689,7 +686,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             delay = self.pWiki.configuration.getfloat(
                     "main", "async_highlight_delay")
             t = threading.Thread(None, self.buildStyling, args = (text, delay, sth))
-#             t = threading.Timer(1, self.buildStyling, args = (text, sth))
             sth.setThread(t)
             t.start()
 
@@ -781,7 +777,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     styleno = WikiFormatting.FormatTypes.AvailWikiWord
                 else:
                     styleno = WikiFormatting.FormatTypes.WikiWord
-        
+
+            elif styleno == WikiFormatting.FormatTypes.Insertion:
+                styleno = WikiFormatting.FormatTypes.Script
             elif styleno == WikiFormatting.FormatTypes.ToDo:
                 styleno = -1
                 node = tok.node

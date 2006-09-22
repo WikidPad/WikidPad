@@ -57,6 +57,27 @@ def _escapeAnchor(name):
 
 
 
+class LinkCreatorForHtmlMultiPageExport:
+    """
+    Faked link dictionary for HTML exporter
+    """
+    def __init__(self, wikiData, htmlXmlExporter):
+        self.wikiData = wikiData
+        self.htmlXmlExporter = htmlXmlExporter
+        
+    def get(self, word, default = None):
+        if not self.wikiData.isDefinedWikiWord(word):
+            return default
+        if not self.htmlXmlExporter.shouldExport(word):
+            return default
+
+        relUnAlias = self.wikiData.getAliasesWikiWord(word)
+        if relUnAlias != word:
+            print "LinkCreatorForHtmlMultiPageExport", repr((relUnAlias, word))
+        return self.htmlXmlExporter.convertFilename(u"%s.html" % relUnAlias)
+
+
+
 # TODO UTF-8 support for HTML? Other encodings?
 
 class HtmlXmlExporter:
@@ -278,22 +299,17 @@ class HtmlXmlExporter:
             if not self.shouldExport(word, wikiPage):
                 continue
 
-            links = {}
-            for relation in wikiPage.getChildRelationships(
-                    existingonly=True, selfreference=False):
-                if not self.shouldExport(relation):
-                    continue
-                # get aliases too
-                relUnAlias = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
-                links[relation] = self.convertFilename(u"%s.html" % relUnAlias)  #   "#%s" ???
-#                 wordForAlias = self.wikiData.getAliasesWikiWord(relation)
-#                 if wordForAlias:
-#                     links[relation] = self.convertFilename(
-#                             u"%s.html" % wordForAlias)
-#                 else:
-#                     links[relation] = self.convertFilename(
-#                             u"%s.html" % relation)
-                                
+#             links = {}
+#             for relation in wikiPage.getChildRelationships(
+#                     existingonly=True, selfreference=False):
+#                 if not self.shouldExport(relation):
+#                     continue
+#                 # get aliases too
+#                 relUnAlias = self.wikiDataManager.getWikiData().getAliasesWikiWord(relation)
+#                 links[relation] = self.convertFilename(u"%s.html" % relUnAlias)  #   "#%s" ???
+
+            links = LinkCreatorForHtmlMultiPageExport(
+                    self.wikiDataManager.getWikiData(), self)                                
             self.exportWordToHtmlPage(self.exportDest, word, links, False)
         self.copyCssFile(self.exportDest)
         rootFile = join(self.exportDest, 
@@ -675,6 +691,121 @@ class HtmlXmlExporter:
         self.outAppend(u'</table>\n', eatPostBreak=True)
 
 
+    def _processInsertion(self, insertionAstNode):
+        """
+        Process an insertion (e.g. "[:page:WikiWord]")
+        """
+        wordList = None
+        content = None
+        key = insertionAstNode.key
+        value = insertionAstNode.value
+        wikiDocument = self.mainControl.getWikiDocument()
+
+        if key == u"page":
+            if ("wikipage/" + value) in self.insertionVisitStack:
+                # Prevent infinite recursion
+                return
+
+            docpage = wikiDocument.getWikiPageNoError(value)
+            content = docpage.getLiveText()
+
+            pageast = PageAst.Page()
+            pageast.buildAst(self.mainControl.getFormatting(), content,
+                    docpage.getFormatDetails())
+            tokens = pageast.getTokens()
+            
+            self.insertionVisitStack.append("wikipage/" + value)
+            self.processTokens(content, tokens)
+            del self.insertionVisitStack[-1]
+
+            return
+            
+        elif key == u"rel":
+            # List relatives (children, parents)
+            if value == u"parents":
+                wordList = wikiDocument.getWikiData().getParentRelationships(
+                        self.wikiWord)
+            elif value == u"children":
+                existingonly = (u"existingonly" in insertionAstNode.appendices) # or \
+                        # (u"existingonly +" in insertionAstNode.appendices)
+                wordList = wikiDocument.getWikiData().getChildRelationships(
+                        self.wikiWord, existingonly=existingonly,
+                        selfreference=False)
+            elif value == u"parentless":
+                wordList = wikiDocument.getWikiData().getParentlessWikiWords()
+                
+        elif key == u"savedsearch":
+            datablock = wikiDocument.getWikiData().getSearchDatablock(value)
+            if datablock is not None:
+                searchOp = SearchReplaceOperation()
+                searchOp.setPackedSettings(datablock)
+                searchOp.replaceOp = False
+                wordList = wikiDocument.searchWiki(searchOp)
+
+        if wordList is not None:
+            if len(wordList) == 0:
+                content = u""
+            else:
+                # wordList was set, so build a nicely formatted list of wiki words
+
+                # Check for desired number of columns (as appendix e.g.
+                # "columns 3" was set)
+                cols = 1
+                for ap in insertionAstNode.appendices:
+                    if ap.startswith(u"columns "):
+                        try:
+                            v = int(ap[8:])
+                            if v > 0:
+                                cols = v
+                                break
+                        except ValueError:
+                            pass
+                wordList.sort()
+    
+                if cols > 1:
+                    # We need a table for the wordlist
+                    content = [u"<table>\n"]
+                    colpos = 0
+                    for word in wordList:
+                        if colpos == 0:
+                            # Start table row
+                            content.append(u"<tr>")
+                        
+                        content.append(u'<td valign="top">[' + word + u"]</td>")
+                        
+                        colpos += 1
+                        if colpos == cols:
+                            # At the end of a row
+                            colpos = 0
+                            content.append(u"</tr> ")
+                            
+                    # Fill the last incomplete row with empty cells if necessary
+                    if colpos > 0:
+                        while colpos < cols:
+                            content.append(u"<td></td>")
+                            colpos += 1
+    
+                        content.append(u"</tr>\n")
+                    
+                    content.append(u"</table>")
+                    content = u"".join(content)
+                else:
+                    content = u"\n".join([u"[" + word + u"]" for word in wordList])
+
+
+        if content is not None:
+            # Content was set, so use standard formatting rules to create
+            # tokens out of it and process them
+            pageast = PageAst.Page()
+            docpage = wikiDocument.getWikiPageNoError(self.wikiWord)
+            pageast.buildAst(self.mainControl.getFormatting(), content,
+                    docpage.getFormatDetails())
+            tokens = pageast.getTokens()
+
+            self.processTokens(content, tokens)
+
+
+
     def formatContent(self, word, content, formatDetails, links=None,
             asXml=False, asHtmlPreview=False):
         if links is None:
@@ -684,10 +815,12 @@ class HtmlXmlExporter:
             
         self.asHtmlPreview = asHtmlPreview
         self.asXml = asXml
+        self.wikiWord = word
         # Replace tabs with spaces
         content = content.replace(u"\t", u" " * 4)  # TODO Configurable
         self.result = []
         self.statestack = [("normalindent", 0)]
+        self.insertionVisitStack = []
         # deepness of numeric bullets
         self.numericdeepness = 0
         self.preMode = 0  # Count how many <pre> tags are open
@@ -735,7 +868,8 @@ class HtmlXmlExporter:
         Actual token to HTML converter. May be called recursively
         """
         stacklen = len(self.statestack)
-        unescapeNormalText = self.mainControl.getFormatting().unescapeNormalText
+        formatting = self.mainControl.getFormatting()
+        unescapeNormalText = formatting.unescapeNormalText
         
         for i in xrange(len(tokens)):
             tok = tokens[i]
@@ -917,6 +1051,18 @@ class HtmlXmlExporter:
                         self.outAppend( u'<span class="property">[%s: %s]</span>' % 
                                 (escapeHtml(tok.grpdict["propertyName"]),
                                 escapeHtml(tok.grpdict["propertyValue"])) )
+
+            elif styleno == WikiFormatting.FormatTypes.Insertion:
+                self._processInsertion(tok.node)
+#                 visitEntry = tok.node.getVisitEntry()
+#                 if (not visitEntry is None) and \
+#                         (not visitEntry in self.insertionVisitStack):
+#                     self.insertionVisitStack.append(visitEntry)
+#                     subcontent, subtokens = tok.node.getInsertionContentAndTokens(
+#                             self.mainControl.getWikiDocument(), self.wikiWord,
+#                             formatting)
+# 
+#                     self.processTokens(subcontent, subtokens)
 
             elif styleno == WikiFormatting.FormatTypes.Url:
                 link = tok.node.url
@@ -1369,15 +1515,6 @@ class MultiPageTextExporter:
         foundPages = self.mainControl.getWikiDocument().searchWiki(searchOp)
         
         return len(foundPages) == 0
-
-
-
-#     _RNDBASESEQ = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-# 
-#     def _createRandomSequence(self):
-#         return u"".join([random.choice(self._RNDBASESEQ) for i in xrange(20)])
-   
-        
 
         # TODO Make it better somehow
     def _findSeparator(self):

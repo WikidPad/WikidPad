@@ -1,5 +1,5 @@
 from weakref import WeakValueDictionary
-import os, os.path, sets, traceback, sets
+import os, os.path, sets, traceback
 from threading import RLock
 
 from pwiki.MiscEvent import MiscEventSourceMixin
@@ -510,10 +510,16 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         global _openDocuments
         
-        oldWikiPage = self.getWikiPage(wikiWord)
+        try:        
+            oldWikiPage = self.getWikiPage(wikiWord)
+        except WikiWordNotFoundException:
+            # So create page first
+            oldWikiPage = self.createWikiPage(wikiWord)
+            oldWikiPage.save(oldWikiPage.getLiveText())
+            oldWikiPage.update(oldWikiPage.getLiveText())
 
         self.getWikiData().renameWord(wikiWord, toWikiWord)
-
+        
         # TODO: Replace always?
         
         # Check if replacing previous title of page with new one
@@ -528,22 +534,6 @@ class WikiDataManager(MiscEventSourceMixin):
             content = pageTitlePrefix + WikiPage.getWikiPageTitle(toWikiWord) + \
                     u"\n" + content[len(prevTitle):]
             page.replaceLiveText(content)
-
-        if modifyText:
-            # now we have to search the wiki files and replace the old word with the new
-            searchOp = SearchReplaceOperation()
-            searchOp.wikiWide = True
-            searchOp.wildCard = 'no'
-            searchOp.caseSensitive = True
-            searchOp.searchStr = wikiWord
-    
-            for resultWord in self.searchWiki(searchOp):
-                page = self.getWikiPage(resultWord)
-                content = page.getLiveText()
-                content = content.replace(wikiWord, toWikiWord)
-#                 page.save(content)
-#                 page.update(content, False)  # TODO AGA processing
-                page.replaceLiveText(content)
 
         # if the root was renamed we have a little more to do
         if wikiWord == self.getWikiName():
@@ -571,6 +561,23 @@ class WikiDataManager(MiscEventSourceMixin):
             _openDocuments[renamedConfigPath] = self
 
         oldWikiPage.informRenamedWikiPage(toWikiWord)
+        del self.wikiPageDict[wikiWord]
+
+        if modifyText:
+            # now we have to search the wiki files and replace the old word with the new
+            searchOp = SearchReplaceOperation()
+            searchOp.wikiWide = True
+            searchOp.wildCard = 'no'
+            searchOp.caseSensitive = True
+            searchOp.searchStr = wikiWord
+
+            for resultWord in self.searchWiki(searchOp):
+                page = self.getWikiPage(resultWord)
+                content = page.getLiveText()
+                content = content.replace(wikiWord, toWikiWord)
+#                 page.save(content)
+#                 page.update(content, False)  # TODO AGA processing
+                page.replaceLiveText(content)
 
 
     def searchWiki(self, sarOp, applyOrdering=True):  # TODO Threadholder

@@ -306,6 +306,17 @@ class IconCache:
                 traceback.print_exc()
                 sys.stderr.write("couldn't load icon %s\n" % iconFile)
 
+
+    # TODO !  Do not remove bitmaps which are in use
+    def clearIconBitmaps(self):
+        """
+        Remove all bitmaps stored in the cache, needed by
+        PersonalWiki.resourceSleep.
+        """
+        for k in self.iconLookupCache.keys():
+            self.iconLookupCache[k] = (self.iconLookupCache[k][0], None)
+
+
     def lookupIcon(self, iconname):
         """
         Returns the bitmap object for the given iconname.

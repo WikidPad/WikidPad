@@ -68,6 +68,11 @@ def _enrichTokens(formatting, tokens, formatDetails, threadholder):
             node = EscapeCharacter()
             node.buildSubAst(formatting, tok, formatDetails, threadholder)
             tok.node = node
+        elif tok.ttype == WikiFormatting.FormatTypes.Insertion:
+            node = Insertion()
+            node.buildSubAst(formatting, tok, formatDetails, threadholder)
+            tok.node = node            
+
 
 
 def _getRealTextForTokens(tokens):
@@ -112,7 +117,7 @@ def _findTokensForPos(tokens, pos):
 def iterWords(pageast):
     """
     Generator to find all words in page, generates a sequence of
-    (start, end, word) tuples.
+    (start, end, word) tuples. Used for spell checking
     """
     for texttoken in pageast.getTextualTokens():
         for mat in WikiFormatting.TextWordRE.finditer(texttoken.text):
@@ -554,6 +559,24 @@ class Url(Ast):
                 tok.node._findType(typeToFind, result)
 
 
+
+class Insertion(Ast):
+    __slots__ = ("key", "value", "appendices")
+
+    def __init__(self):
+        Ast.__init__(self)
+
+    def buildSubAst(self, formatting, token, formatDetails=None,
+            threadholder=DUMBTHREADHOLDER):
+        groupdict = token.grpdict
+        
+        self.key = groupdict.get("insertionKey")
+        values = groupdict.get("insertionValue").split(u";")
+        
+        self.value = values[0]
+        self.appendices = [v.lstrip() for v in values[1:]]
+
+
 class EscapeCharacter(Ast):
     __slots__ = ("unescaped")
 
@@ -562,7 +585,5 @@ class EscapeCharacter(Ast):
 
     def buildSubAst(self, formatting, token, formatDetails=None,
             threadholder=DUMBTHREADHOLDER):
-#        if token.text[1] in u"\n\r\f|*_[]\\":
             self.unescaped = token.text[1]
-#         else:
-#             self.unescaped = token.text
+

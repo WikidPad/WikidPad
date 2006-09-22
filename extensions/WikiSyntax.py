@@ -32,7 +32,7 @@ ItalicRE        = re.compile(ur"\b_(?P<italicContent>" + PlainCharacterPAT +
         ur"+?)_\b",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 HtmlTagRE = re.compile(
-        ur"</?[A-Za-z][A-Za-z0-9]*(?:/| [^\n]*)?>",
+        ur"</?[A-Za-z][A-Za-z0-9]*(?:/| [^\n>]*)?>",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 Heading4RE      = re.compile(u"^\\+\\+\\+\\+(?!\\+) ?(?P<h4Content>" +
         PlainCharacterPAT + ur"+?)\n",
@@ -159,6 +159,10 @@ PropertyRE      = re.compile(ur"\[[ \t]*(?P<propertyName>[\w\-\_\.]+?)[ \t]*" +
                   ur"[=:][ \t]*(?P<propertyValue>[\w\-\_ \t:;,.!?#/|]+?)\]",
                   re.DOTALL | re.UNICODE | re.MULTILINE)
 
+
+InsertionRE     = re.compile(ur"\[:[ \t]*(?P<insertionKey>[\w\-\_\.]+?)[ \t]*" +
+                  ur"[:][ \t]*(?P<insertionValue>[\w\-\_ \t;,.!?#/|]+?)\]",
+                  re.DOTALL | re.UNICODE | re.MULTILINE)
 
 # Reverse REs for autocompletion
 revSingleWikiWord    =       (ur"(?:[" +

@@ -1797,9 +1797,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.recentWikisMenu = None
         # self.showOnTrayMenuItem = None
 
-
-        for k in self.iconLookupCache.keys():
-            self.iconLookupCache[k] = (self.iconLookupCache[k][0], None)
+        # TODO Clear cache only if exactly one window uses centralized iconLookupCache
+        #      Maybe weak references?
+#         for k in self.iconLookupCache.keys():
+#             self.iconLookupCache[k] = (self.iconLookupCache[k][0], None)
+##      Even worse:  wxGetApp().getIconCache().clearIconBitmaps()
 
         gc.collect()
 

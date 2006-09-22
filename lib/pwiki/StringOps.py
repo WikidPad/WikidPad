@@ -55,7 +55,7 @@ if isOSX():
     # generate dependencies for py2app
     import encodings.mac_roman
     mbcsEnc = codecs.getencoder("mac_roman")
-    mbcsDec = codecs.getdecoder("mac_roman")
+    _mbcsDec = codecs.getdecoder("mac_roman")
     mbcsReader = codecs.getreader("mac_roman")
     mbcsWriter = codecs.getwriter("mac_roman")
     
@@ -65,7 +65,7 @@ if isOSX():
 elif isLinux():
     # Could be wrong encoding
     mbcsEnc = codecs.getencoder("latin-1")
-    mbcsDec = codecs.getdecoder("latin-1")
+    _mbcsDec = codecs.getdecoder("latin-1")
     mbcsReader = codecs.getreader("latin-1")
     mbcsWriter = codecs.getwriter("latin-1")
 
@@ -77,13 +77,20 @@ else:
     import encodings.ascii
     import encodings.mbcs
     mbcsEnc = codecs.getencoder("mbcs")
-    mbcsDec = codecs.getdecoder("mbcs")
+    _mbcsDec = codecs.getdecoder("mbcs")
     mbcsReader = codecs.getreader("mbcs")
     mbcsWriter = codecs.getwriter("mbcs")
 
     # TODO This is suitable for Windows only
     def lineendToOs(text):
         return convertLineEndings(text, "\r\n")
+
+
+def mbcsDec(input, errors="strict"):
+    if isinstance(input, unicode):
+        return input, len(input)
+    else:
+        return _mbcsDec(input, errors)
 
 
 if isUnicode():
