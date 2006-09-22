@@ -1627,7 +1627,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 self.searchStr += unichar
                 self.executeIncrementalSearch();
             else:
-                self.AddText(unichar)
+                self.ReplaceSelection(unichar)
 
         else:
 

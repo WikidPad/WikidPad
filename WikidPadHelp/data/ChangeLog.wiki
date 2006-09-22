@@ -1,6 +1,16 @@
 ﻿++ Change Log
 
 
+Sep. 22, 2006 (1.7rc2)
+
+    * Fixed bug: Some problems with non-ascii pathes.
+    * Fixed bug: No selection replacement on Win ME.
+    * Fixed bug: Renaming of wiki word failed if
+      link modification was wanted by the user or
+      if page was not yet saved.
+
+
+
 Aug. 26, 2006 (1.7rc1)
 
     * Better handling of non Western-European languages on
