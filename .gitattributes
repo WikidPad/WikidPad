@@ -310,7 +310,6 @@ WikidPadHelp/data/index/DOCUMENTS.grl -text
 WikidPadHelp/data/index/TEXT_INDEX.grl -text
 WikidPadHelp/data/index/WORDS.grl -text
 WikidPadHelp/data/index/wiki_idx.gfd -text
-WikidPadHelp/data/multipage[!!-~]text[!!-~]format.wiki -text
 WikidPadHelp/data/wikidb.gfd -text
 WikidPadHelp/files/testimg.gif -text
 /WikidPadStarter.py -text
