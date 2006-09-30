@@ -3,6 +3,7 @@
 /WikidPad.py -text
 /WikidPad.xrc -text
 WikidPadHelp/WikidPadHelp.wiki -text
+WikidPadHelp/data/Anchors.wiki -text
 WikidPadHelp/data/ApiDocs.wiki -text
 WikidPadHelp/data/ApplicationConfigurationFiles.wiki -text
 WikidPadHelp/data/AutoCompletion.wiki -text
@@ -259,6 +260,7 @@ WikidPadHelp/data/Icon[!!-~]zoomout.wiki -text
 WikidPadHelp/data/IconTestPage.wiki -text
 WikidPadHelp/data/IncrementalSearch.wiki -text
 WikidPadHelp/data/InlinePythonEval.wiki -text
+WikidPadHelp/data/Insertions.wiki -text
 WikidPadHelp/data/InternatiönalChàracters.wiki -text
 WikidPadHelp/data/KeyBindings.wiki -text
 WikidPadHelp/data/MigrationBetweenDbTypes.wiki -text

@@ -6,7 +6,7 @@ from wxPython.html import *
 
 
 from WikiExceptions import *
-from wxHelper import keyDownToAccel, copyTextToClipboard, GUI_ID
+from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID
 
 from MiscEvent import KeyFunctionSink
 
@@ -34,9 +34,10 @@ class WikiHtmlView(wxHtmlWindow):
     def __init__(self, pWiki, parent, ID):
         wxHtmlWindow.__init__(self, parent, ID)
         self.pWiki = pWiki
-        
+
         self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
                 ("loaded current page", self.onLoadedCurrentWikiPage),
+                ("reloaded current page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
                 ("options changed", self.onOptionsChanged),
                 ("updated wiki page", self.onUpdatedWikiPage)
@@ -48,8 +49,9 @@ class WikiHtmlView(wxHtmlWindow):
         self.visible = False
 
         self.currentLoadedWikiWord = None
-        self.scrollPosCache = {}
-        
+
+        self.anchor = None  # Name of anchor to jump to when view gets visible
+
         self.exporterInstance = Exporters.HtmlXmlExporter(self.pWiki)
         
         # TODO More elegant
@@ -78,6 +80,9 @@ class WikiHtmlView(wxHtmlWindow):
             wxHTML_FONT_SIZE_6, wxHTML_FONT_SIZE_7)
 
 
+    # TODO Called too often and at wrong time, e.g. when switching from
+    # preview to edit.
+
     def refresh(self):
         ## _prof.start()
         # Store position of previous page, if any
@@ -86,7 +91,6 @@ class WikiHtmlView(wxHtmlWindow):
                 prevPage = self.pWiki.getWikiDocument().getWikiPage(
                         self.currentLoadedWikiWord)
                 prevPage.setPresentation(self.GetViewStart(), 3)
-    #             self.scrollPosCache[self.currentLoadedWikiWord] = 
             except WikiWordNotFoundException, e:
                 pass
 
@@ -108,25 +112,43 @@ class WikiHtmlView(wxHtmlWindow):
                 asHtmlPreview=True)
 
         # TODO Reset after open wiki
-#         lx, ly = self.GetViewStart()
         zoom = self.pWiki.getConfig().getint("main", "preview_zoom", 0)
         self.SetFonts("", "", [max(s + 2 * zoom, 1)
                 for s in self._DEFAULT_FONT_SIZES])
         self.SetPage(uniToGui(html))
         
-        lx, ly = wikiPage.getPresentation()[3:5]
-#         lx, ly = self.scrollPosCache.get(self.currentLoadedWikiWord, (0, 0))
-        self.Scroll(lx, ly)
+        if self.anchor and self.HasAnchor(self.anchor):
+            self.ScrollToAnchor(self.anchor)
+            # Workaround because ScrollToAnchor scrolls too far
+            lx, ly = self.GetViewStart()
+            self.Scroll(lx, ly-1)
+        else:
+            lx, ly = wikiPage.getPresentation()[3:5]
+            self.Scroll(lx, ly)
+            
+        self.anchor = None
+
         ## _prof.stop()
 
 
     def onLoadedCurrentWikiPage(self, miscevt):
+        self.anchor = miscevt.get("anchor")
         if self.visible:
             self.refresh()
             
+    def onReloadedCurrentPage(self, miscevt):
+        """
+        Called when already loaded page should be loaded again, mainly
+        interesting if a link with anchor is activated
+        """
+        anchor = miscevt.get("anchor")
+        if anchor:
+            self.anchor = anchor
+            if self.visible:
+                self.refresh()
+
     def onOpenedWiki(self, miscevt):
         self.currentLoadedWikiWord = None
-        self.scrollPosCache = {}
 
         self.exporterInstance.setWikiDataManager(self.pWiki.getWikiDataManager())
 
@@ -151,14 +173,25 @@ class WikiHtmlView(wxHtmlWindow):
         href = linkinfo.GetHref()
         if href.startswith(u"internaljump:"):
             # Jump to another wiki page
-            self.pWiki.openWikiPage(href[13:], motionType="child")
+            
+            # First check for an anchor. In URLs, anchors are always
+            # separated by '#' regardless which character is used
+            # in the wiki syntax (normally '!')
+            try:
+                word, anchor = href[13:].split(u"#", 1)
+            except ValueError:
+                word = href[13:]
+                anchor = None
+                
+            # Now open wiki
+            self.pWiki.openWikiPage(word, motionType="child", anchor=anchor)
         else:
             self.pWiki.launchUrl(href)
 
 
     def OnKeyUp(self, evt):
-        acc = keyDownToAccel(evt)
-        if acc == (wxACCEL_CTRL, ord('C')):
+        acc = getAccelPairFromKeyDown(evt)
+        if acc == (wxACCEL_CTRL, ord('C')): 
             # Consume original clipboard copy function
             pass
         else:
@@ -166,7 +199,7 @@ class WikiHtmlView(wxHtmlWindow):
 
 
     def OnKeyDown(self, evt):
-        acc = keyDownToAccel(evt)
+        acc = getAccelPairFromKeyDown(evt)
         if acc == (wxACCEL_CTRL, ord('+')) or \
                 acc == (wxACCEL_CTRL, WXK_NUMPAD_ADD):
             zoom = self.pWiki.getConfig().getint("main", "preview_zoom", 0)

@@ -15,7 +15,7 @@ FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
         "Heading1", "Url", "Script", "Property", "ToDo", "WikiWord2",
         "HorizLine", "Bullet", "Numeric", "Suppress", "Footnote", "Table",
         "EscapedChar", "HtmlTag", "TableCellSplit", "TableRowSplit", "PreBlock",
-        "SuppressHighlight", "Insertion"], 0)
+        "SuppressHighlight", "Insertion", "Anchor"], 0)
 
 EMPTY_RE = re.compile(ur"", re.DOTALL | re.UNICODE | re.MULTILINE)
 
@@ -205,6 +205,7 @@ class WikiFormatting:
                 (self.Heading3RE, FormatTypes.Heading3),
                 (self.Heading2RE, FormatTypes.Heading2),
                 (self.Heading1RE, FormatTypes.Heading1),
+                (self.AnchorRE, FormatTypes.Anchor),
                 (self.BulletRE, FormatTypes.Bullet),
                 (self.NumericBulletRE, FormatTypes.Numeric),
                 (self.HorizLineRE, FormatTypes.HorizLine),

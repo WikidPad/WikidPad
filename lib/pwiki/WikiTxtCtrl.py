@@ -17,7 +17,7 @@ import wxPython.xrc as xrc
 from Utilities import *
 
 from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
-        wxKeyFunctionSink
+        wxKeyFunctionSink, getAccelPairFromKeyDown
 from MiscEvent import KeyFunctionSink
 
 import WikiFormatting
@@ -65,8 +65,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.stylingThreadHolder = ThreadHolder()
         self.pageAst = None
         self.loadedDocPage = None
-#         self.lastCursorPositionInPage = {}   # TODO Clear caches when loading new wiki
-#         self.scrollPosCache = {}
         self.lastFont = None
         self.ignoreOnChange = False
         self.pageType = "normal"   # The pagetype controls some special editor behaviour
@@ -147,7 +145,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         # register some event handlers
         self.pwikiListener = wxKeyFunctionSink(self.pWiki.getMiscEvent(), self, (
                 ("options changed", self.onOptionsChanged),  # fired by PersonalWikiFrame
-                ("saving all pages", self.onSavingAllPages)
+                ("saving all pages", self.onSavingAllPages),
+                ("reloaded current page", self.onReloadedCurrentPage)
                 # ("command copy", self.onCmdCopy)
         ))
 
@@ -399,9 +398,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             return
 
         page = self.loadedDocPage
-#         wikiWord = page.getWikiWord()
-#         if wikiWord is not None:
-#             self.lastCursorPositionInPage[wikiWord] = self.GetCurrentPos()
 
 #         if not self.loadedDocPage.getDirty()[0]:
 #             return
@@ -420,9 +416,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 self.loadedDocPage.setPresentation((self.GetCurrentPos(),
                         self.GetScrollPos(wxHORIZONTAL),
                         self.GetScrollPos(wxVERTICAL)), 0)
-#                 self.lastCursorPositionInPage[wikiWord] = self.GetCurrentPos()
-#                 self.scrollPosCache[wikiWord] = (self.GetScrollPos(wxHORIZONTAL),
-#                         self.GetScrollPos(wxVERTICAL))
 
             if self.loadedDocPage.getDirty()[0]:
                 self.saveLoadedDocPage()
@@ -542,66 +535,113 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         self.pageType = self.loadedDocPage.getProperties().get(u"pagetype",
                 [u"normal"])[-1]
-                
+
         if self.pageType == u"normal":
             if not self.loadedDocPage.isDefined():
                 # This is a new, not yet defined page, so go to the end of page
                 self.GotoPos(self.GetLength())
             else:
-                # see if there is a saved position for this page
-                lastPos, scrollPosX, scrollPosY = \
-                        self.loadedDocPage.getPresentation()[0:3]
-#                 lastPos = self.lastCursorPositionInPage.get(
-#                         self.loadedDocPage.getWikiWord(), 0)
-                self.GotoPos(lastPos)
+                anchor = evtprops.get("anchor")
+                if anchor:
+                    # Scroll page according to the anchor
+                    pageAst = self.getPageAst()
 
-#                 scrollPos = self.scrollPosCache.get(
-#                         self.loadedDocPage.getWikiWord())
-#                 if scrollPos is not None:
-                if scrollPosX != 0 or scrollPosY != 0:
-                    # Bad hack: First scroll to position to avoid a visible jump
-                    #   if scrolling works, then update display,
-                    #   then scroll again because it may have failed the first time
+                    anchorTokens = pageAst.findTypeFlat(WikiFormatting.FormatTypes.Anchor)
+                    for t in anchorTokens:
+                        if t.grpdict["anchorValue"] == anchor:
+                            # Go to the end and back again, so the anchor is
+                            # near the top
+                            self.GotoPos(self.GetLength())
+                            self.SetSelectionByCharPos(
+                                    t.start + t.getRealLength(),
+                                    t.start + t.getRealLength())
+                            break
+                    else:
+                        anchor = None # Not found
 
-                    self.SetScrollPos(wxHORIZONTAL, scrollPosX, False)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
-                            scrollPosX, wxHORIZONTAL)
-                    self.ProcessEvent(screvt)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
-                            scrollPosX, wxHORIZONTAL)
-                    self.ProcessEvent(screvt)
-                    
-                    self.SetScrollPos(wxVERTICAL, scrollPosY, True)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
-                            scrollPosY, wxVERTICAL)
-                    self.ProcessEvent(screvt)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
-                            scrollPosY, wxVERTICAL)
-                    self.ProcessEvent(screvt)
-
-                    self.Update()
-
-                    self.SetScrollPos(wxHORIZONTAL, scrollPosX, False)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
-                            scrollPosX, wxHORIZONTAL)
-                    self.ProcessEvent(screvt)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
-                            scrollPosX, wxHORIZONTAL)
-                    self.ProcessEvent(screvt)
-                    
-                    self.SetScrollPos(wxVERTICAL, scrollPosY, True)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
-                            scrollPosY, wxVERTICAL)
-                    self.ProcessEvent(screvt)
-                    screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
-                            scrollPosY, wxVERTICAL)
-                    self.ProcessEvent(screvt)
+                if not anchor:
+                    # see if there is a saved position for this page
+                    lastPos, scrollPosX, scrollPosY = \
+                            self.loadedDocPage.getPresentation()[0:3]
+                    self.GotoPos(lastPos)
+    
+                    if scrollPosX != 0 or scrollPosY != 0:
+                        # Bad hack: First scroll to position to avoid a visible jump
+                        #   if scrolling works, then update display,
+                        #   then scroll again because it may have failed the first time
+    
+                        self.SetScrollPos(wxHORIZONTAL, scrollPosX, False)
+                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
+                                scrollPosX, wxHORIZONTAL)
+                        self.ProcessEvent(screvt)
+                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
+                                scrollPosX, wxHORIZONTAL)
+                        self.ProcessEvent(screvt)
+                        
+                        self.SetScrollPos(wxVERTICAL, scrollPosY, True)
+                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
+                                scrollPosY, wxVERTICAL)
+                        self.ProcessEvent(screvt)
+                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
+                                scrollPosY, wxVERTICAL)
+                        self.ProcessEvent(screvt)
+    
+                        self.Update()
+    
+                        self.SetScrollPos(wxHORIZONTAL, scrollPosX, False)
+                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
+                                scrollPosX, wxHORIZONTAL)
+                        self.ProcessEvent(screvt)
+                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
+                                scrollPosX, wxHORIZONTAL)
+                        self.ProcessEvent(screvt)
+                        
+                        self.SetScrollPos(wxVERTICAL, scrollPosY, True)
+                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
+                                scrollPosY, wxVERTICAL)
+                        self.ProcessEvent(screvt)
+                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
+                                scrollPosY, wxVERTICAL)
+                        self.ProcessEvent(screvt)
 
         elif self.pageType == u"form":
             self.GotoPos(0)
             self._goToNextFormField()
         else:
             pass   # TODO Error message?
+
+
+    def onReloadedCurrentPage(self, miscevt):
+        """
+        Called when already loaded page should be loaded again, mainly
+        interesting if a link with anchor is activated
+        """
+        if not self is self.pWiki.getActiveEditor():
+            return
+
+        anchor = miscevt.get("anchor")
+        if not anchor:
+            return
+
+        if not self.loadedDocPage.isDefined():
+            return
+
+        if self.pageType == u"normal":
+            # Scroll page according to the anchor
+            pageAst = self.getPageAst()
+
+            anchorTokens = pageAst.findTypeFlat(WikiFormatting.FormatTypes.Anchor)
+            for t in anchorTokens:
+                if t.grpdict["anchorValue"] == anchor:
+                    # Go to the end and back again, so the anchor is
+                    # near the top
+                    self.GotoPos(self.GetLength())
+                    self.SetSelectionByCharPos(
+                            t.start + t.getRealLength(),
+                            t.start + t.getRealLength())
+                    break
+            else:
+                anchor = None # Not found
 
 
     def onOptionsChanged(self, miscevt):
@@ -780,6 +820,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
             elif styleno == WikiFormatting.FormatTypes.Insertion:
                 styleno = WikiFormatting.FormatTypes.Script
+            elif styleno == WikiFormatting.FormatTypes.Anchor:
+                styleno = WikiFormatting.FormatTypes.Bold
             elif styleno == WikiFormatting.FormatTypes.ToDo:
                 styleno = -1
                 node = tok.node
@@ -827,31 +869,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         # copy it to the clipboard also
         self.Copy()
 
-        # load the ScratchPad
-#         try:
-#             wikiPage = self.pWiki.getWikiDataManager().getWikiPage("ScratchPad")
-#         except WikiWordNotFoundException, e:
-#             wikiPage = self.pWiki.getWikiDataManager().createWikiPage("ScratchPad")
-# 
-#         content = ""
-# 
-#         # get the text from the scratch pad
-#         try:
-#             content = wikiPage.getContent()
-#         except WikiFileNotFoundException, e:
-#             content = u"++ Scratch Pad\n"
-
         wikiPage = self.pWiki.getWikiDataManager().getWikiPageNoError("ScratchPad")
         
         wikiPage.appendLiveText("\n%s\n---------------------------\n\n%s\n" %
                 (mbcsDec(strftime("%x %I:%M %p"), "replace")[0], text))
 
-
         # TODO strftime
-#         content = u"%s\n%s\n---------------------------\n\n%s\n" % \
-#                 (content, mbcsDec(strftime("%x %I:%M %p"))[0], text)
-#         wikiPage.save(content, False)
-#         self.pWiki.statusBar.SetStatusText(uniToGui("Copied snippet to ScratchPad"), 0)
 
     def styleSelection(self, styleChars):
         """
@@ -918,7 +941,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 searchStr = None
     
                 # open the wiki page
-                self.pWiki.openWikiPage(tok.node.nakedWord, motionType="child")
+                self.pWiki.openWikiPage(tok.node.nakedWord, motionType="child",
+                        anchor=tok.node.anchorFragment)
     
                 searchfrag = tok.node.searchFragment
                 # Unescape search fragment
@@ -1528,140 +1552,143 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def OnKeyDown(self, evt):
-#         self.idleCounter = 0
         key = evt.GetKeyCode()
 
         self.lastKeyPressed = time()
+        accP = getAccelPairFromKeyDown(evt)
+        matchesAccelPair = self.pWiki.keyBindings.matchesAccelPair
+        
 
-        if key == WXK_F3 and not self.inIncrementalSearch:
+        if self.inIncrementalSearch:
+            # handle key presses while in incremental search here
+            if matchesAccelPair("ContinueSearch", accP):
+                self.executeIncrementalSearch(next=True)
+            elif key < 256:
+                # escape ends the search
+                if key == WXK_ESCAPE:
+                    self.endIncrementalSearch()
+                # do the next search on another ctrl-s, or f
+                elif evt.ControlDown() and (      # key == ord('S') or
+                        key == ord(self.pWiki.keyBindings.IncrementalSearchCtrl)):
+                    self.executeIncrementalSearch(next=True)
+                # handle the delete key
+                elif key == WXK_BACK or key == WXK_DELETE:
+                    self.searchStr = self.searchStr[:len(self.searchStr)-1]
+                    self.executeIncrementalSearch();
+                # handle the other keys
+                else:
+                    evt.Skip() # OnChar is responsible for that
+
+            else:
+                # TODO Should also work for mouse!
+                self.anchorBytePosition = self.GetCurrentPos()
+                self.anchorCharPosition = \
+                        len(self.GetTextRange(0, self.GetCurrentPos()))
+
+                evt.Skip()
+
+        elif matchesAccelPair("ContinueSearch", accP):
+            # ContinueSearch is normally F3
             self.startIncrementalSearch()
             evt.Skip()
-        else:
 
-            # handle key presses while in incremental search here
-            if self.inIncrementalSearch:
-                if key < 256:
-                    # escape ends the search
-                    if key == WXK_ESCAPE:
-                        self.endIncrementalSearch()
-                    # do the next search on another ctrl-s, or f
-                    elif evt.ControlDown() and (key == ord('S') or \
-                            key == ord(self.pWiki.keyBindings.IncrementalSearchCtrl)):
-                        self.executeIncrementalSearch(next=True)
-                    # handle the delete key
-                    elif key == WXK_BACK or key == WXK_DELETE:
-                        self.searchStr = self.searchStr[:len(self.searchStr)-1]
-                        self.executeIncrementalSearch();
-                    # handle the other keys
-                    else:
-                        evt.Skip() # OnChar is responsible for that
+        elif evt.ControlDown() and \
+                key == ord(self.pWiki.keyBindings.IncrementalSearchCtrl) and \
+                    not evt.ShiftDown() and not evt.AltDown():
+                # Start incremental search
+                self.startIncrementalSearch()
 
-                elif key == WXK_F3:
-                    self.executeIncrementalSearch(next=True)
-                else:
-                    # TODO Should also work for mouse!
-                    self.anchorBytePosition = self.GetCurrentPos()
-                    self.anchorCharPosition = \
-                            len(self.GetTextRange(0, self.GetCurrentPos()))
+        elif matchesAccelPair("AutoComplete", accP):
+            # AutoComplete is normally Ctrl-Space
+            # Handle autocompletion
+            endBytePos = self.GetCurrentPos()
+            startBytePos = self.PositionFromLine(
+                    self.LineFromPosition(endBytePos))
+            line = self.GetTextRange(startBytePos, endBytePos)
+            rline = revStr(line)
+            mat1 = WikiFormatting.RevWikiWordRE.match(rline)
+            mat2 = WikiFormatting.RevWikiWordRE2.match(rline)
+            mat3 = WikiFormatting.RevPropertyValue.match(rline)
+            acresult = []
+            self.autoCompBackBytesWithoutBracket = 0
+            self.autoCompBackBytesWithBracket = 0
 
-                    evt.Skip()
+            # TODO Sort entries appropriate 
 
-            elif evt.ControlDown():
-                (selectStart, selectEnd) = self.GetSelection()
+            if mat1:
+                # may be CamelCase word
+                tofind = line[-mat1.end():]
+                self.autoCompBackBytesWithoutBracket = self.bytelenSct(tofind)
+                formatting = self.pWiki.getFormatting()
+                acresult += filter(formatting.isCcWikiWord, 
+                        self.pWiki.getWikiData().getWikiWordsStartingWith(
+                        tofind, True))
 
-                # activate link
-                if key == ord(self.pWiki.keyBindings.IncrementalSearchCtrl) and \
-                        not evt.ShiftDown() and not evt.AltDown():
-                    self.startIncrementalSearch()
+            if mat2:
+                # may be not-CamelCase word or in a property name
+                tofind = line[-mat2.end():]
+                self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
+                acresult += map(lambda s: u"[" + s, self.pWiki.getWikiData().\
+                        getWikiWordsStartingWith(tofind[1:], True))
+                acresult += map(lambda s: u"[" + s, self.pWiki.getWikiData().\
+                        getPropertyNamesStartingWith(tofind[1:]))
 
-                elif key == WXK_SPACE:
-                    # Handle autocompletion
+            elif mat3:
+                # In a property value
+                tofind = line[-mat3.end():]
+                propkey = revStr(mat3.group(3))
+                propfill = revStr(mat3.group(2))
+                propvalpart = revStr(mat3.group(1))
+                self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
+                values = filter(lambda pv: pv.startswith(propvalpart),
+                        self.pWiki.getWikiData().getDistinctPropertyValues(propkey))
+                acresult += map(lambda v: u"[" + propkey + propfill + 
+                        v +  u"]", values)
+
+            if len(acresult) > 0:
+                self.UserListShow(1, u"~".join(acresult))
+                
+        elif matchesAccelPair("ActivateLink2", accP):
+            # ActivateLink2 is normally Ctrl-Return
+            self.activateLink()
+
+        elif not evt.ControlDown() and not evt.ShiftDown():  # TODO Check all modifiers
+            if key == WXK_TAB:
+                if self.pageType == u"form":
+                    self._goToNextFormField()
+                    return
+                evt.Skip()
+            elif key == WXK_RETURN:
+                if self.pWiki.getConfig().getboolean("main",
+                        "editor_autoUnbullets"):
+                    # Check for lonely bullet or number
                     endBytePos = self.GetCurrentPos()
                     startBytePos = self.PositionFromLine(
                             self.LineFromPosition(endBytePos))
-                    line = self.GetTextRange(startBytePos, endBytePos)
-                    rline = revStr(line)
-                    mat1 = WikiFormatting.RevWikiWordRE.match(rline)
-                    mat2 = WikiFormatting.RevWikiWordRE2.match(rline)
-                    mat3 = WikiFormatting.RevPropertyValue.match(rline)
-                    acresult = []
-                    self.autoCompBackBytesWithoutBracket = 0
-                    self.autoCompBackBytesWithBracket = 0
-
-                    # TODO Sort entries appropriate 
-
-                    if mat1:
-                        # may be CamelCase word
-                        tofind = line[-mat1.end():]
-                        self.autoCompBackBytesWithoutBracket = self.bytelenSct(tofind)
-                        formatting = self.pWiki.getFormatting()
-                        acresult += filter(formatting.isCcWikiWord, 
-                                self.pWiki.getWikiData().getWikiWordsStartingWith(
-                                tofind, True))
-
-                    if mat2:
-                        # may be not-CamelCase word or in a property name
-                        tofind = line[-mat2.end():]
-                        self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
-                        acresult += map(lambda s: u"[" + s, self.pWiki.getWikiData().\
-                                getWikiWordsStartingWith(tofind[1:], True))
-                        acresult += map(lambda s: u"[" + s, self.pWiki.getWikiData().\
-                                getPropertyNamesStartingWith(tofind[1:]))
-
-                    elif mat3:
-                        # In a property value
-                        tofind = line[-mat3.end():]
-                        propkey = revStr(mat3.group(3))
-                        propfill = revStr(mat3.group(2))
-                        propvalpart = revStr(mat3.group(1))
-                        self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
-                        values = filter(lambda pv: pv.startswith(propvalpart),
-                                self.pWiki.getWikiData().getDistinctPropertyValues(propkey))
-                        acresult += map(lambda v: u"[" + propkey + propfill + 
-                                v +  u"]", values)
-
-                    if len(acresult) > 0:
-                        self.UserListShow(1, u"~".join(acresult))
                     
-                elif key == WXK_RETURN:
-                    self.activateLink()
-                else:
-                    evt.Skip()
-
-            elif not evt.ControlDown() and not evt.ShiftDown():  # TODO Check all modifiers
-                if key == WXK_TAB:
-                    if self.pageType == u"form":
-                        self._goToNextFormField()
+                    line = self.GetTextRange(startBytePos, endBytePos)
+                    mat = WikiFormatting.BulletRE.match(line)
+                    if mat and mat.end(0) == len(line):
+                        self.SetSelection(startBytePos, endBytePos)
+                        self.ReplaceSelection(mat.group("indentBullet"))
                         return
-                elif key == WXK_RETURN:
-                    if self.pWiki.getConfig().getboolean("main",
-                            "editor_autoUnbullets"):
-                        # Check for lonely bullet or number
-                        endBytePos = self.GetCurrentPos()
-                        startBytePos = self.PositionFromLine(
-                                self.LineFromPosition(endBytePos))
-                        
-                        line = self.GetTextRange(startBytePos, endBytePos)
-                        mat = WikiFormatting.BulletRE.match(line)
-                        if mat and mat.end(0) == len(line):
-                            self.SetSelection(startBytePos, endBytePos)
-                            self.ReplaceSelection(mat.group("indentBullet"))
-                            return
-    
-                        mat = WikiFormatting.NumericBulletRE.match(line)
-                        if mat and mat.end(0) == len(line):
-                            self.SetSelection(startBytePos, endBytePos)
-    
-                            replacement = mat.group("indentNumeric")
-                            if mat.group("preLastNumeric") != u"":
-                                replacement += mat.group("preLastNumeric") + u" "
-    
-                            self.ReplaceSelection(replacement)
-                            return
 
+                    mat = WikiFormatting.NumericBulletRE.match(line)
+                    if mat and mat.end(0) == len(line):
+                        self.SetSelection(startBytePos, endBytePos)
+
+                        replacement = mat.group("indentNumeric")
+                        if mat.group("preLastNumeric") != u"":
+                            replacement += mat.group("preLastNumeric") + u" "
+
+                        self.ReplaceSelection(replacement)
+                        return
                 evt.Skip()
             else:
                 evt.Skip()
+            
+        else:
+            evt.Skip()
 
 
     def OnChar(self, evt):
@@ -1919,6 +1946,7 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
 # 
 #                 urls.append("file:%s" % url)
 
+        urls = [url.replace("%24", "$") for url in urls]
 
         self.editor.DoDropText(x, y, " ".join(urls))
 

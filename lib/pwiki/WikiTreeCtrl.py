@@ -950,6 +950,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         EVT_TREE_ITEM_EXPANDING(self, ID, self.OnTreeItemExpand)
         EVT_TREE_ITEM_COLLAPSED(self, ID, self.OnTreeItemCollapse)
         EVT_RIGHT_DOWN(self, self.OnRightButtonDown)   # TODO Context menu
+        EVT_SET_FOCUS(self, self.OnSetFocus)
 
         res = xrc.wxXmlResource.Get()
         self.contextMenuWikiWords = res.LoadMenu("MenuTreectrlWikiWords")
@@ -1437,6 +1438,11 @@ class WikiTreeCtrl(wxTreeCtrl):
             self.GetPyData(item).onActivate()
         
         event.Skip()
+        
+    def OnSetFocus(self, event):
+        item = self.GetSelection()
+        if item.IsOk():
+            self.GetPyData(item).onActivate()
                     
     def OnTreeItemExpand(self, event):
         ## _prof.start()

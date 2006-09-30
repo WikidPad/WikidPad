@@ -386,7 +386,7 @@ class Table(Ast):
 
 
 class WikiWord(Ast):
-    __slots__ = ("nakedWord", "searchFragment", "titleTokens")
+    __slots__ = ("nakedWord", "searchFragment", "anchorFragment", "titleTokens")
 
     def __init__(self):
         Ast.__init__(self)
@@ -410,6 +410,11 @@ class WikiWord(Ast):
             frag = groupdict.get("wikiwordSearchfrag")
         self.searchFragment = frag
         
+        frag = groupdict.get("wikiwordnccAnchorfrag")
+        if frag is None:
+            frag = groupdict.get("wikiwordAnchorfrag")
+        self.anchorFragment = frag
+
         nw = groupdict.get("wikiwordncc")
         if nw is None:
             nw = groupdict.get("wikiword")

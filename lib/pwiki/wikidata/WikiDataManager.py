@@ -88,6 +88,50 @@ def openWikiDocument(wikiConfigFilename, wikiSyntax, dbtype=None):
 #     return WikiDataManager(pWiki, wd, dbtype)
 
 
+def splitConfigPathAndWord(wikiCombinedFilename):
+    """
+    wikiCombinedFilename -- Path of config filename or possibly name of a wiki file
+
+    return: tuple (cfg, wikiword) with cfg real config filepath (None if it
+            couldn't be found. wikiword is the wikiword to jump to or None
+    """
+    wikiConfig = createWikiConfiguration()
+    wikiConfigFilename = wikiCombinedFilename
+    wikiWord = None
+
+    while True:
+        try:
+            # config.read(wikiConfigFile)
+            wikiConfig.loadConfig(wikiConfigFilename)
+            return wikiConfigFilename, wikiWord
+        except Exception, e:
+            # try to recover by checking if the parent dir contains the real wiki file
+            # if it does the current wiki file must be a wiki word file, so open the
+            # real wiki to the wiki word.
+#                 try:
+            parentDir = os.path.dirname(os.path.dirname(wikiConfigFilename))
+            if parentDir:
+                wikiFiles = [file for file in os.listdir(parentDir) \
+                        if file.endswith(".wiki")]
+                if len(wikiFiles) > 0:
+                    wikiWord = os.path.basename(wikiConfigFilename)
+                    wikiWord = wikiWord[0:len(wikiWord)-5]
+
+                    # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
+                    windows83Marker = wikiWord.find("~")
+                    if windows83Marker != -1:
+                        wikiWord = wikiWord[0:windows83Marker]
+                        matchingFiles = [file for file in wikiFiles \
+                                if file.lower().startswith(wikiWord)]
+                        if matchingFiles:
+                            wikiWord = matchingFiles[0]
+
+                    wikiConfigFilename = os.path.join(parentDir, wikiFiles[0])
+                    continue
+#                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
+            return None, None
+    
+
 
 # TODO Remove this hackish solution
 
@@ -138,38 +182,39 @@ class WikiDataManager(MiscEventSourceMixin):
     def __init__(self, wikiConfigFilename, wikiSyntax, dbtype):  #  dataDir, fileStorDir, dbtype, ):
         wikiConfig = createWikiConfiguration()
         self.connected = False
+        wikiConfig.loadConfig(wikiConfigFilename)
         
-        while True:
-            try:
-                # config.read(wikiConfigFile)
-                wikiConfig.loadConfig(wikiConfigFilename)
-            except Exception, e:
-                # try to recover by checking if the parent dir contains the real wiki file
-                # if it does the current wiki file must be a wiki word file, so open the
-                # real wiki to the wiki word.
-    #                 try:
-                parentDir = os.path.dirname(os.path.dirname(wikiConfigFilename))
-                if parentDir:
-                    wikiFiles = [file for file in os.listdir(parentDir) \
-                            if file.endswith(".wiki")]
-                    if len(wikiFiles) > 0:
-                        wikiWord = os.path.basename(wikiConfigFilename)
-                        wikiWord = wikiWord[0:len(wikiWord)-5]
-    
-                        # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
-                        windows83Marker = wikiWord.find("~")
-                        if windows83Marker != -1:
-                            wikiWord = wikiWord[0:windows83Marker]
-                            matchingFiles = [file for file in wikiFiles \
-                                    if file.lower().startswith(wikiWord)]
-                            if matchingFiles:
-                                wikiWord = matchingFiles[0]
-                        wikiConfigFilename = os.path.join(parentDir, wikiFiles[0])
-                        continue
-#                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
-                raise
-
-            break
+#         while True:
+#             try:
+#                 # config.read(wikiConfigFile)
+#                 wikiConfig.loadConfig(wikiConfigFilename)
+#             except Exception, e:
+#                 # try to recover by checking if the parent dir contains the real wiki file
+#                 # if it does the current wiki file must be a wiki word file, so open the
+#                 # real wiki to the wiki word.
+#     #                 try:
+#                 parentDir = os.path.dirname(os.path.dirname(wikiConfigFilename))
+#                 if parentDir:
+#                     wikiFiles = [file for file in os.listdir(parentDir) \
+#                             if file.endswith(".wiki")]
+#                     if len(wikiFiles) > 0:
+#                         wikiWord = os.path.basename(wikiConfigFilename)
+#                         wikiWord = wikiWord[0:len(wikiWord)-5]
+#     
+#                         # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
+#                         windows83Marker = wikiWord.find("~")
+#                         if windows83Marker != -1:
+#                             wikiWord = wikiWord[0:windows83Marker]
+#                             matchingFiles = [file for file in wikiFiles \
+#                                     if file.lower().startswith(wikiWord)]
+#                             if matchingFiles:
+#                                 wikiWord = matchingFiles[0]
+#                         wikiConfigFilename = os.path.join(parentDir, wikiFiles[0])
+#                         continue
+# #                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
+#                 raise
+# 
+#             break
 
 #                 except Exception, ne:
 #                     traceback.print_exc()

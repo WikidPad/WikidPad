@@ -391,13 +391,14 @@ class SearchResultListBox(wxHtmlListBox):
         evt.Skip()
         
     def OnKeyDown(self, evt):
-        if evt.GetKeyCode() == WXK_F3 and not evt.ShiftDown() and \
-                not evt.MetaDown() and not evt.ControlDown() and \
-                not evt.CmdDown():
+        accP = getAccelPairFromKeyDown(evt)
+        matchesAccelPair = self.pWiki.keyBindings.matchesAccelPair
+        
+        if matchesAccelPair("ContinueSearch", accP):
+            # ContinueSearch is normally F3
             self._pageListFindNext()
-        elif evt.GetKeyCode() in (WXK_RETURN, WXK_NUMPAD_ENTER) and \
-                not evt.ShiftDown() and not evt.MetaDown() and \
-                not evt.ControlDown() and not evt.CmdDown():
+        elif accP == (wxACCEL_NORMAL, WXK_RETURN) or \
+                accP == (wxACCEL_NORMAL, WXK_NUMPAD_ENTER):
             self.OnDClick(evt)
         else:
             evt.Skip()

@@ -1,0 +1,56 @@
+﻿++ Insertions
+
+Insertions allow to insert some dynamic text into preview and HTML export of a page. This text can either be the content of another page or a list of wikipage links to pages which are parents or children of a page or to pages which form the result of a saved search.
+
+To insert, for example, the content of the IncrementalSearch page, write:
+
+[:page: IncrementalSearch]
+
+----
+
+If you switch now to the preview, you will see the content of the IncrementalSearch page above, instead of the insertion tag.
+
+
++++ Syntax
+The tag begins always with '[:' then comes the _insertion key_, then a colon and the _insertion value_,
+after that there may be additions, separated by semicolons, to describe the way of presentation in more detail. The tag is closed by a closing bracket.
+
+In the example above, "page" is the insertion key, "IncrementalSearch" is the value.
+
+The following keys and values are possible:
+
+    * *page* shows the content of the existing wiki page which is
+      given as insertion value.
+    * *rel* lists all wiki words related to this page in the way
+      described by the value:
+        * *parents*: all parents of the page
+        * *children*: all children (= all wiki links) of the page.
+          With addition "existingonly" only the really existing
+          pages are listed
+        * *parentless*: all parentless pages. The list is
+          independent from the page containing the insertion tag.
+    * *savedsearch* lists all wiki words found by the saved search
+      with the name given as value.
+
+For insertion tags which produce lists of wiki links (all but the "page" insertion), you can also have the addition "columns 123" where 123 stands for the number of columns the list should have. By default, there is only one column.
+
+
++++ Examples
+
+At first a few wiki links to demonstrate the functions: (KeyBindings, DeadLink, DeadLinkToo, ScratchPad, TextBlocks)
+
+It is recommended to switch to preview to see the effect of the tags:
+
+*\[:rel: parents]*
+[:rel: parents]
+
+*\[:rel: children]*
+[:rel: children]
+
+*\[:rel: children;existingonly;columns 2]*
+[:rel: children;existingonly;columns 2]
+
+*\[:savedsearch: nanny; columns 4]*  (all pages containing "any")
+[:savedsearch: nanny; columns 4]
+
+

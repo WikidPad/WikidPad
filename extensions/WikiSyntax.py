@@ -113,7 +113,8 @@ WikiWordRE      = re.compile(ur"\b(?<!~)" + singleWikiWord + ur"\b", # ur"(?:/" 
                              
 # Special version for syntax highlighting to allow appending search expression with '#'
 WikiWordEditorRE = re.compile(ur"(?P<wikiword>" + WikiWordRE.pattern +
-        ur")(?:#(?P<wikiwordSearchfrag>(?:(?:#.)|[^ \t\n#])+))?",
+        ur")(?:#(?P<wikiwordSearchfrag>(?:(?:#.)|[^ \t\n#])+)|"
+        ur"!(?P<wikiwordAnchorfrag>[A-Za-z0-9\_]+))?",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -140,7 +141,8 @@ WikiWordEditorRE2      = re.compile(
         ur"\[(?P<wikiwordncc>" + WikiWordNccPAT + ur")"
         ur"(?:(?P<wikiwordnccDelim>[ \t]*" + TitleWikiWordDelimiterPAT + ur")"
         ur"(?P<wikiwordnccTitle>" + PlainCharacterPAT + ur"+?))?\]"
-        ur"(?:#(?P<wikiwordnccSearchfrag>(?:(?:#.)|[^ \t\n#])+))?",
+        ur"(?:#(?P<wikiwordnccSearchfrag>(?:(?:#.)|[^ \t\n#])+)|"
+        ur"!(?P<wikiwordnccAnchorfrag>[A-Za-z0-9\_]+))?",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 SearchFragmentUnescapeRE   = re.compile(ur"#(.)",
@@ -214,6 +216,9 @@ HorizLineRE     = re.compile(u"----+", re.DOTALL | re.UNICODE | re.MULTILINE)
 # Orig: SuppressHighlightingRE = re.compile("\<\<(.*?)\>\>", re.DOTALL)
 SuppressHighlightingRE = re.compile(ur"^(?P<suppressIndent>[ \t]*)<<[ \t]*$"+
         ur"(?P<suppressContent>.*?)^[ \t]*>>[ \t]*$",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+
+AnchorRE = re.compile(ur"^[ \t]*anchor:[ \t]*(?P<anchorValue>[A-Za-z0-9\_]+)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 

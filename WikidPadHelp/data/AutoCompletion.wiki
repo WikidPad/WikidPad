@@ -1,4 +1,4 @@
-++ Auto Completion
+﻿++ Auto Completion
 
 As you type wiki words you can enter CTRL-SPACE to autocomplete them.
 For example.

@@ -43,17 +43,17 @@ Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 1.8beta1
+AppVerName=WikidPad 1.8beta2
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
 VersionInfoVersion=1.8
-VersionInfoTextVersion=WikidPad 1.8beta1
+VersionInfoTextVersion=WikidPad 1.8beta2
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-1.8beta1
+OutputBaseFilename=WikidPad-1.8beta2
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2006 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true

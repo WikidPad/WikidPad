@@ -1,7 +1,27 @@
 ﻿++ Change Log
 
 
-Aug. 30, 2006 (1.8beta1)
+Sep. 30, 2006 (1.8beta2)
+
+    * Support for insertion of pages, relations (parents, children,
+      ...) and saved searches. See [Insertions].
+    * Support for placing and jumping to anchors in wiki pages.
+      See [Anchors].
+    
+    * Setting of a few more shortcut keys possible in
+      KeyBindings.py (continue search, auto complete, ...)
+    
+    * Fixed bug: Some problems with non-ascii pathes.
+    * Fixed bug: No selection replacement on Win ME.
+    * Fixed bug: Renaming of wiki word failed if link modification
+      was wanted by the user or if page was not yet saved the
+      first time.
+    * Fixed bug: Opening a wiki page file instead of
+      wiki configuration file failed.
+
+
+
+Aug. 30, 2006 (1.8beta1, repository revision in "mbutscher" branch: 89)
 
 Changes:
     * New database format! After updating a wiki it won't be
@@ -38,7 +58,7 @@ Changes:
 
 
 
-Aug. 05, 2006 (1.7beta8)
+Aug. 05, 2006 (1.7beta8, repository revision in "mbutscher" branch: 85)
 
 Changes:
     * Official support for multiple windows with same wiki in
@@ -116,7 +136,7 @@ Changes:
       changed on page rename accordingly.
       See RenamingWikiWords#*Title# auto-rename*
     * Fixed bug: Upper case non-ascii letters were not found when
-      opening a wiki word (e.g. "É" didn't find Éve).
+      opening a wiki word (e.g. "Ã‰" didn't find Ã‰ve).
     * HTML-tag <pre> is now handled much better.
     * Changed controls in spell check dialog to circumvent problems
       with some languages on Win 98/ME

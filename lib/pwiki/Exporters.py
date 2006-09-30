@@ -72,8 +72,6 @@ class LinkCreatorForHtmlMultiPageExport:
             return default
 
         relUnAlias = self.wikiData.getAliasesWikiWord(word)
-        if relUnAlias != word:
-            print "LinkCreatorForHtmlMultiPageExport", repr((relUnAlias, word))
         return self.htmlXmlExporter.convertFilename(u"%s.html" % relUnAlias)
 
 
@@ -99,6 +97,8 @@ class HtmlXmlExporter:
         self.numericdeepness = None
         self.preMode = None  # Count how many <pre> tags are open
         self.links = None
+        self.wordAnchor = None  # For multiple wiki pages in one HTML page, this contains the anchor
+                # of the current word.
         self.convertFilename = removeBracketsFilename   # lambda s: mbcsEnc(s, "replace")[0]
         
         self.result = None
@@ -274,17 +274,20 @@ class HtmlXmlExporter:
                     # TODO Use self.convertFilename here?
                     links[relation] = u"#%s" % _escapeAnchor(relUnAlias)
                     
+                self.wordAnchor = _escapeAnchor(word)
                 formattedContent = self.formatContent(word, content,
                         formatDetails, links)
                 fp.write((u'<span class="wiki-name-ref">'+
                         u'[<a name="%s">%s</a>]</span><br /><br />'+
                         u'<span class="parent-nodes">parent nodes: %s</span>'+
                         u'<br />%s%s<hr size="1"/>') %
-                        (_escapeAnchor(word), word,
+                        (self.wordAnchor, word,
                         self.getParentLinks(wikiPage, False), formattedContent,
                         u'<br />\n'*10))
             except Exception, e:
                 traceback.print_exc()
+                
+        self.wordAnchor = None
 
         fp.write(self.getFileFooter())
         fp.reset()        
@@ -743,6 +746,8 @@ class HtmlXmlExporter:
                 wordList = wikiDocument.searchWiki(searchOp)
 
         if wordList is not None:
+            # Create content as a nicely formatted list of wiki words
+
             if len(wordList) == 0:
                 content = u""
             else:
@@ -1019,6 +1024,13 @@ class HtmlXmlExporter:
             elif styleno == WikiFormatting.FormatTypes.PreBlock:
                 self.outEatBreaks(u"<pre>%s</pre>" %
                         escapeHtmlNoBreaks(tok.grpdict["preContent"]))
+            elif styleno == WikiFormatting.FormatTypes.Anchor:
+                if self.wordAnchor:
+                    anchor = self.wordAnchor + u"#" + tok.grpdict["anchorValue"]
+                else:
+                    anchor = tok.grpdict["anchorValue"]
+
+                self.outAppend(u'<a name="%s"></a>' % anchor)
             elif styleno == WikiFormatting.FormatTypes.ToDo:
                 node = tok.node
                 namedelim = (node.name, node.delimiter)
@@ -1054,15 +1066,6 @@ class HtmlXmlExporter:
 
             elif styleno == WikiFormatting.FormatTypes.Insertion:
                 self._processInsertion(tok.node)
-#                 visitEntry = tok.node.getVisitEntry()
-#                 if (not visitEntry is None) and \
-#                         (not visitEntry in self.insertionVisitStack):
-#                     self.insertionVisitStack.append(visitEntry)
-#                     subcontent, subtokens = tok.node.getInsertionContentAndTokens(
-#                             self.mainControl.getWikiDocument(), self.wikiWord,
-#                             formatting)
-# 
-#                     self.processTokens(subcontent, subtokens)
 
             elif styleno == WikiFormatting.FormatTypes.Url:
                 link = tok.node.url
@@ -1180,6 +1183,10 @@ class HtmlXmlExporter:
                 link = self.links.get(word)
 
                 if link:
+                    # Add anchor fragment if present
+                    if tok.node.anchorFragment:
+                        link += u"#" + tok.node.anchorFragment
+
                     if self.asXml:   # TODO XML
                         self.outAppend(u'<link type="wikiword">%s</link>' % 
                                 escapeHtml(tok.text))

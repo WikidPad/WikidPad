@@ -33,8 +33,10 @@ Then just start typing text with WikiWords to create your wiki.
     * BulletedLists
     * WikiDocumentAttributes (cross-index your information)
     * TodoItems (track todos, questions, issues)
-    * WikiBookmarks
     * UrlLinking
+    * [Insertions]
+    * [Anchors]
+    * WikiBookmarks
 
     * RenamingWikiWords
     * WikiFonts

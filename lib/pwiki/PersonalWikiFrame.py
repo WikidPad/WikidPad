@@ -10,7 +10,8 @@ import urllib_red as urllib
 from wxPython.wx import *
 from wxPython.stc import *
 from wxPython.html import *
-from wxHelper import GUI_ID, cloneImageList, keyDownToAccel
+from wxHelper import GUI_ID, cloneImageList, getAccelPairFromKeyDown, \
+        getAccelPairFromString
 
 from MiscEvent import MiscEventSourceMixin   # , DebugSimple
 
@@ -103,6 +104,26 @@ class wxGuiProgressHandler:
         """
         self.progDlg.Destroy()
         self.progDlg = None
+
+
+class KeyBindingsCache:
+    def __init__(self, kbModule):
+        self.kbModule = kbModule
+        self.accelPairCache = {}
+        
+    def __getattr__(self, attr):
+        return getattr(self.kbModule, attr)
+        
+    def getAccelPair(self, attr):
+        try:
+            return self.accelPairCache[attr]
+        except KeyError:
+            ap = getAccelPairFromString("\t" + getattr(self, attr))
+            self.accelPairCache[attr] = ap
+            return ap
+
+    def matchesAccelPair(self, attr, accP):
+        return self.getAccelPair(attr) == accP
 
 
 
@@ -328,7 +349,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def loadExtensions(self):
         self.wikidPadHooks = self.getExtension('WikidPadHooks', u'WikidPadHooks.py')
-        self.keyBindings = self.getExtension('KeyBindings', u'KeyBindings.py')
+        self.keyBindings = KeyBindingsCache(
+                self.getExtension('KeyBindings', u'KeyBindings.py'))
         self.evalLib = self.getExtension('EvalLibrary', u'EvalLibrary.py')
         self.wikiSyntax = self.getExtension('SyntaxLibrary', u'WikiSyntax.py')
         self.presentationExt = self.getExtension('Presentation', u'Presentation.py')
@@ -1595,14 +1617,17 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         EVT_MENU(self, GUI_ID.CMD_SWITCH_FOCUS, self.OnSwitchFocus)
 
         # Add alternative accelerators for clipboard operations
-        ACCS = [
+        accs = [
             (wxACCEL_CTRL, WXK_INSERT, GUI_ID.CMD_CLIPBOARD_COPY),
             (wxACCEL_SHIFT, WXK_INSERT, GUI_ID.CMD_CLIPBOARD_PASTE),
             (wxACCEL_SHIFT, WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT),
-            (wxACCEL_NORMAL, WXK_F6, GUI_ID.CMD_SWITCH_FOCUS)
             ]
+            
+        accP = self.keyBindings.getAccelPair("SwitchFocus")
+        if accP != (None, None):
+            accs.append((accP[0], accP[1], GUI_ID.CMD_SWITCH_FOCUS))
 
-        self.SetAcceleratorTable(wxAcceleratorTable(ACCS))
+        self.SetAcceleratorTable(wxAcceleratorTable(accs))
 
         # ------------------------------------------------------------------------------------
         # Create the status bar
@@ -1666,7 +1691,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnFastSearchKeyDown(self, evt):
-        acc = keyDownToAccel(evt)
+        acc = getAccelPairFromKeyDown(evt)
         if acc == (wxACCEL_NORMAL, WXK_RETURN) or \
                 acc == (wxACCEL_NORMAL, WXK_NUMPAD_ENTER):
             text = guiToUni(self.fastSearchField.GetValue())
@@ -2071,17 +2096,14 @@ These are your default global settings.
 
 
 
-    def openWiki(self, wikiConfigFilename, wikiWordToOpen=None,
+    def openWiki(self, wikiCombinedFilename, wikiWordToOpen=None,
             ignoreWdhName=False):
         """
         opens up a wiki
         ignoreWdhName -- Should the name of the wiki data handler in the
                 wiki config file (if any) be ignored?
         """
-
-        # trigger hooks
-        self.hooks.openWiki(self, wikiConfigFilename)
-
+        
         # Save the state of the currently open wiki, if there was one open
         # if the new config is the same as the old, don't resave state since
         # this could be a wiki overwrite from newWiki. We don't want to overwrite
@@ -2092,114 +2114,28 @@ These are your default global settings.
 #                 uniToGui(u"Opening Wiki: %s" % wikiConfigFilename), 0)
 
         # make sure the config exists
-        if (not exists(wikiConfigFilename)):
-            self.displayErrorMessage(u"Wiki configuration file '%s' not found" %
-                    wikiConfigFilename)
-            if wikiConfigFilename in self.wikiHistory:
-                self.wikiHistory.remove(wikiConfigFilename)
+#         if (not exists(wikiConfigFilename)):
+#             self.displayErrorMessage(u"Wiki configuration file '%s' not found" %
+#                     wikiConfigFilename)
+#             if wikiConfigFilename in self.wikiHistory:
+#                 self.wikiHistory.remove(wikiConfigFilename)
+#             return False
+
+        # make sure the config exists
+        cfgPath, splittedWikiWord = WikiDataManager.splitConfigPathAndWord(
+                wikiCombinedFilename)
+                
+        if cfgPath is None:
             return False
 
 #        if self.wikiConfigFilename != wikiConfigFilename:
         self.closeWiki()
+
+        # trigger hooks
+        self.hooks.openWiki(self, wikiCombinedFilename)
+
 #         self.buildMainMenu()   # ???
 
-            # read in the config file
-            # config = ConfigParser.ConfigParser()
-#             try:
-#                 # config.read(wikiConfigFile)
-#                 self.configuration.loadWikiConfig(wikiConfigFilename)
-#             except Exception, e:
-#                 # try to recover by checking if the parent dir contains the real wiki file
-#                 # if it does the current wiki file must be a wiki word file, so open the
-#                 # real wiki to the wiki word.
-# #                 try:
-#                 parentDir = dirname(dirname(wikiConfigFilename))
-#                 if parentDir:
-#                     wikiFiles = [file for file in os.listdir(parentDir) \
-#                             if file.endswith(".wiki")]
-#                     if len(wikiFiles) > 0:
-#                         wikiWord = basename(wikiConfigFilename)
-#                         wikiWord = wikiWord[0:len(wikiWord)-5]
-# 
-#                         # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
-#                         windows83Marker = wikiWord.find("~")
-#                         if windows83Marker != -1:
-#                             wikiWord = wikiWord[0:windows83Marker]
-#                             matchingFiles = [file for file in wikiFiles \
-#                                     if file.lower().startswith(wikiWord)]
-#                             if matchingFiles:
-#                                 wikiWord = matchingFiles[0]
-#                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
-#                 return
-# 
-# #                 except Exception, ne:
-# #                     traceback.print_exc()
-# #                     self.displayErrorMessage(u"Error reading config file '%s'" %
-# #                             wikiConfigFilename, ne)
-# #                     return False
-#     
-#             # config variables
-#             wikiName = self.configuration.get("main", "wiki_name")
-#             dataDir = self.configuration.get("wiki_db", "data_dir")
-#     
-#             # except Exception, e:
-#             if wikiName is None or dataDir is None:
-#                 raise BadConfigurationFileException(
-#                         "Wiki configuration file is corrupted")
-# #                 self.displayErrorMessage("Wiki configuration file is corrupted", e)
-# #                 # traceback.print_exc()
-# #                 return False
-# 
-#             # absolutize the path to data dir if it's not already
-#             if not isabs(dataDir):
-#                 dataDir = join(dirname(wikiConfigFilename), dataDir)
-#                 
-#             dataDir = mbcsDec(abspath(dataDir), "replace")[0]
-#     
-#     #         self.wikiConfigFilename = wikiConfigFilename
-#     #         self.wikiName = wikiName
-#     #         self.dataDir = dataDir
-#             
-#             # Path to file storage
-#             fileStorDir = join(dirname(wikiConfigFilename), "files")
-#     
-#             # create the db interface to the wiki data
-#             wikiDataManager = None
-# 
-# 
-#             if not ignoreWdhName:
-#                 wikidhName = self.configuration.get("main",
-#                         "wiki_database_type", "")
-#             else:
-#                 wikidhName = None
-#             if wikidhName:
-#                 if not WikiDataManager.isDbHandlerAvailable(wikidhName):
-#                     self.displayErrorMessage(   # TODO !!!!!!
-#                             'Required data handler %s not available' % wikidhName)
-#                     wikidhName = None
-#                 else:
-#                     wikiDataManager = WikiDataManager.openWikiDocument(self,
-#                             wikidhName, dataDir, fileStorDir, self.wikiSyntax)
-# 
-#             if not wikidhName:
-#                 wdhandlers = DbBackendUtils.listHandlers()
-#                 if len(wdhandlers) == 0:
-#                     raise NoDbHandlerException(
-#                             'No data handler available to open database.')
-# #                     self.displayErrorMessage(
-# #                             'No data handler available to open database.')
-#                     return
-# 
-#                 # Ask for the data handler to use
-#                 index = wxGetSingleChoiceIndex(u"Choose database type",
-#                         u"Choose database type", [wdh[1] for wdh in wdhandlers],
-#                         self)
-#                 if index == -1:
-#                     return
-#                     
-#                 wikiDataManager = WikiDataManager.openWikiDocument(self,
-#                         wdhandlers[index][0], dataDir, fileStorDir,
-#                         self.wikiSyntax)
         if ignoreWdhName:
             # Explicitly ask for wiki data handler
             dbtype = self._askForDbType()
@@ -2213,12 +2149,12 @@ These are your default global settings.
         while True:
             try:
                 wikiDataManager = WikiDataManager.openWikiDocument(
-                        wikiConfigFilename, self.wikiSyntax, dbtype)
+                        cfgPath, self.wikiSyntax, dbtype)
                 frmcode, frmtext = wikiDataManager.checkDatabaseFormat()
                 if frmcode == 2:
                     # Unreadable db format
                     self.displayErrorMessage("Error connecting to database in '%s'"
-                        % wikiConfigFilename, frmtext)
+                        % cfgPath, frmtext)
                     return False
                 elif frmcode == 1:
                     # Update needed -> ask
@@ -2245,7 +2181,7 @@ These are your default global settings.
             except Exception, e:
                 # Something else went wrong
                 self.displayErrorMessage("Error connecting to database in '%s'"
-                        % wikiConfigFilename, e)
+                        % cfgPath, e)
                 traceback.print_exc()
                 return False
 
@@ -2265,6 +2201,8 @@ These are your default global settings.
 
         # what was the last wiki word opened
         lastWikiWord = wikiWordToOpen
+        if not lastWikiWord:
+            lastWikiWord = splittedWikiWord
         if not lastWikiWord:
             lastWikiWord = self.configuration.get("main", "first_wiki_word", u"")
             if lastWikiWord == u"":
@@ -2318,7 +2256,7 @@ These are your default global settings.
         self.rereadTextBlocks()
 
         # trigger hook
-        self.hooks.openedWiki(self, self.wikiName, wikiConfigFilename)
+        self.hooks.openedWiki(self, self.wikiName, wikiCombinedFilename)
 
         # return that the wiki was opened successfully
         return True
@@ -2464,11 +2402,15 @@ These are your default global settings.
             self.displayErrorMessage(u"'%s' is an invalid wiki word." % wikiWord)
             return
 
-        # don't reopen the currently open page
+        # don't reopen the currently open page, only send an event
         if (wikiWord == self.getCurrentWikiWord()) and not forceReopen:
-            # self.tree.buildTreeForWord(self.currentWikiWord)  # TODO Needed?
-            self.statusBar.SetStatusText(uniToGui(u"Wiki word '%s' already open" %
-                    wikiWord), 0)
+            p2 = evtprops.copy()
+            p2.update({"reloaded current page": True,
+                    "reloaded current wiki page": True})
+            self.fireMiscEventProps(p2)
+#             # self.tree.buildTreeForWord(self.currentWikiWord)  # TODO Needed?
+#             self.statusBar.SetStatusText(uniToGui(u"Wiki word '%s' already open" %
+#                     wikiWord), 0)
             return
 
         # trigger hook
@@ -2497,9 +2439,9 @@ These are your default global settings.
         self.getActiveEditor().loadWikiPage(page, evtprops)
 
         p2 = evtprops.copy()
-        p2.update({"loaded current page": True})
-        p2.update({"loaded current wiki page": True})
-        self.fireMiscEventProps(p2)        
+        p2.update({"loaded current page": True,
+                "loaded current wiki page": True})
+        self.fireMiscEventProps(p2)
 
         # set the title and add the word to the history
         self.SetTitle(uniToGui(u"Wiki: %s - %s" %

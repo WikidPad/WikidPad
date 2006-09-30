@@ -173,7 +173,7 @@ def copyTextToClipboard(text):
         cb.Close()
 
 
-def keyDownToAccel(evt):
+def getAccelPairFromKeyDown(evt):
     from wxPython.wx import wxACCEL_ALT, wxACCEL_SHIFT, wxACCEL_CTRL, \
             wxACCEL_NORMAL
     """
@@ -194,7 +194,15 @@ def keyDownToAccel(evt):
     
     return (modif, keyCode)
 
-# see also GetAccelFromString in wxPython's _core.py
+
+def getAccelPairFromString(s):
+    from   wxPython.wx import wxGetAccelFromString
+    ae = wxGetAccelFromString(s)
+    if ae is None:
+        return (None, None)
+
+    return ae.GetFlags(), ae.GetKeyCode()
+
 
 
 def cloneImageList(imgList):

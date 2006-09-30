@@ -49,7 +49,14 @@ MakeWikiWord="Ctrl-J"
 ZoomIn=""
 ZoomOut=""
 CloneWindow=""
+
+ContinueSearch="F3"
+AutoComplete="Ctrl-Space"
+ActivateLink2="Ctrl-Return"
+SwitchFocus="F6"
+
 IncrementalSearchCtrl="F"   # Hack, changing not recommended
+
 
 def makeBold(editor):
     editor.styleSelection(u'*')
