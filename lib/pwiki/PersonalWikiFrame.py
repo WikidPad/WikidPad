@@ -1,7 +1,7 @@
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
-import os, sys, gc, traceback, sets, string
+import os, sys, gc, traceback, sets, string, re
 from os.path import *
 from time import localtime, time, strftime
 
@@ -29,6 +29,7 @@ from WikiTxtCtrl import WikiTxtCtrl
 from WikiTreeCtrl import WikiTreeCtrl
 from WikiHtmlView import WikiHtmlView
 from LogWindow import LogWindow
+from DocPagePresenter import DocPagePresenter
 
 from Ipc import EVT_REMOTE_COMMAND
 
@@ -200,6 +201,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         self.eventRoundtrip = 0
         
+        self.currentDocPagePresenter = None
+        
         # setup plugin manager and hooks API
         self.pluginManager = PluginManager()
         self.hooks = self.pluginManager.registerPluginAPI(("hooks",1),
@@ -279,8 +282,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.lastSplitterPos = self.configuration.getint("main", "splitter_pos")
 
         # get the default font for the editor
-        self.defaultEditorFont = self.configuration.get("main", "font",
-                self.presentationExt.faces["mono"])
+#         self.defaultEditorFont = self.configuration.get("main", "font",
+#                 self.presentationExt.faces["mono"])
                 
         self.layoutMainTreePosition = self.configuration.getint("main",
                 "mainTree_position", 0)
@@ -398,19 +401,31 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         return docPage.getWikiWord()
 
     def getCurrentDocPage(self):
-        if self.activeEditor is None:
+        if self.currentDocPagePresenter is None:
             return None
-        return self.activeEditor.getLoadedDocPage()
+        return self.currentDocPagePresenter.getDocPage()
 
     def getActiveEditor(self):
-        return self.activeEditor
+        return self.currentDocPagePresenter.getSubControl("textedit")
+
+    def getCurrentDocPagePresenter(self):
+        return self.currentDocPagePresenter
 
     # TODO What about WikidPadHooks?
-    def setActiveEditor(self, activeEditor):
-        if self.activeEditor != activeEditor:
-            self.activeEditor = activeEditor
+    def setCurrentDocPagePresenter(self, currentPresenter):
+        if self.currentDocPagePresenter != currentPresenter:
+            self.currentDocPagePresenter = currentPresenter
             self.refreshPageStatus()
-            self.fireMiscEventKeys(("changed active editor",))
+            self.fireMiscEventKeys(("changed current docpage presenter",))
+            
+    def getCurrentDocPagePresenter(self):
+        return self.currentDocPagePresenter
+
+#     def setActiveEditor(self, activeEditor):
+#         if self.activeEditor != activeEditor:
+#             self.activeEditor = activeEditor
+#             self.refreshPageStatus()
+#             self.fireMiscEventKeys(("changed active editor",))
 
     def getWikiData(self):
         if self.wikiDataManager is None:
@@ -443,44 +458,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         return self.wikiDataManager.getFormatting()
 #         return self.formatting
-        
+
+    def getCollator(self):
+        return wxGetApp().getCollator()
+
     def getLogWindow(self):
         return self.logWindow
 
-
-#     # TODO!
-#     def fillIconLookupCache(self, createIconImageList=False):
-#         """
-#         Fills or refills the self.iconLookupCache (if createIconImageList is
-#         false, self.iconImageList must exist already)
-#         If createIconImageList is true, self.iconImageList is also
-#         built
-#         """
-# 
-#         if createIconImageList:
-#             # create the image icon list
-#             self.iconImageList = wxImageList(16, 16)
-#             self.iconLookupCache = {}
-# 
-#         for icon in self.iconFileList:
-#             iconFile = join(self.wikiAppDir, "icons", icon)
-#             bitmap = wxBitmap(iconFile, wxBITMAP_TYPE_GIF)
-#             try:
-#                 id = -1
-#                 if createIconImageList:
-#                     id = self.iconImageList.Add(bitmap, wxNullBitmap)
-# 
-#                 if self.lowResources:   # and not icon.startswith("tb_"):
-#                     bitmap = None
-# 
-#                 iconname = icon.replace('.gif', '')
-#                 if id == -1:
-#                     id = self.iconLookupCache[iconname][0]
-# 
-#                 self.iconLookupCache[iconname] = (id, bitmap)
-#             except Exception, e:
-#                 traceback.print_exc()
-#                 sys.stderr.write("couldn't load icon %s\n" % iconFile)
 
     def lookupIcon(self, iconname):
         """
@@ -489,21 +473,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         If icon is unknown, None is returned.
         """
         return wxGetApp().getIconCache().lookupIcon(iconname)
-#         try:
-#             bitmap = self.iconLookupCache[iconname][1]
-#             if bitmap is not None:
-#                 return bitmap
-#                 
-#             # Bitmap not yet available -> create it and store in the cache
-#             iconFile = join(self.wikiAppDir, "icons", iconname+".gif")
-#             bitmap = wxBitmap(iconFile, wxBITMAP_TYPE_GIF)
-#             
-#             self.iconLookupCache[iconname] = (self.iconLookupCache[iconname][0],
-#                     bitmap)
-#             return bitmap
-# 
-#         except KeyError:
-#             return None
 
 
     def lookupIconIndex(self, iconname):
@@ -512,10 +481,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         If icon is unknown, -1 is returned.
         """
         return wxGetApp().getIconCache().lookupIconIndex(iconname)
-#         try:
-#             return self.iconLookupCache[iconname][0]
-#         except KeyError:
-#             return -1
 
 
     def resolveIconDescriptor(self, desc, default=None):
@@ -532,28 +497,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         If no bitmap can be found, default is returned instead.
         """
         return wxGetApp().getIconCache().resolveIconDescriptor(desc, default)
-#         if desc is None:
-#             return default            
-#         elif isinstance(desc, wxBitmap):
-#             return desc
-#         elif isinstance(desc, basestring):
-#             result = self.lookupIcon(desc)
-#             if result is not None:
-#                 return result
-#             
-#             return default
-#         else:    # A sequence of possible names
-#             for n in desc:
-#                 result = self.lookupIcon(n)
-#                 if result is not None:
-#                     return result
-# 
-#             return default
-
-
-#     def _onEventToFocusedWindow(self, evt):
-#         print "_onEventToFocusedWindow", repr(evt.GetId()), repr(wxWindow.FindFocus())
-#         wxWindow.FindFocus().AddPendingEvent(evt)
 
 
     def _OnRoundtripEvent(self, evt):
@@ -993,7 +936,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(wikiWordMenu, '&Activate Link/Word\t' +
                 self.keyBindings.ActivateLink, 'Activate link/word',
-                lambda evt: self.activeEditor.activateLink())
+                lambda evt: self.getActiveEditor().activateLink())
 
         self.addMenuItem(wikiWordMenu, '&List Parents\t' +
                 self.keyBindings.ViewParents,
@@ -1061,15 +1004,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.editorMenu=wxMenu()
 
         self.addMenuItem(self.editorMenu, '&Bold\t' + self.keyBindings.Bold,
-                'Bold', lambda evt: self.keyBindings.makeBold(self.activeEditor),
+                'Bold', lambda evt: self.keyBindings.makeBold(self.getActiveEditor()),
                 "tb_bold")
 
         self.addMenuItem(self.editorMenu, '&Italic\t' + self.keyBindings.Italic,
-                'Italic', lambda evt: self.keyBindings.makeItalic(self.activeEditor),
+                'Italic', lambda evt: self.keyBindings.makeItalic(self.getActiveEditor()),
                 "tb_italic")
 
         self.addMenuItem(self.editorMenu, '&Heading\t' + self.keyBindings.Heading,
-                'Add Heading', lambda evt: self.keyBindings.addHeading(self.activeEditor),
+                'Add Heading', lambda evt: self.keyBindings.addHeading(self.getActiveEditor()),
                 "tb_heading")
 
         self.addMenuItem(self.editorMenu, 'Insert Date\t' + self.keyBindings.InsertDate,
@@ -1088,7 +1031,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.addMenuItem(self.editorMenu,
                 'Wikize Selected Word\t' + self.keyBindings.MakeWikiWord,
                 'Wikize Selected Word',
-                lambda evt: self.keyBindings.makeWikiWord(self.activeEditor),
+                lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()),
                 "pin")
 
 
@@ -1110,7 +1053,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # TODO support copying from preview
         self.addMenuItem(self.editorMenu, 'Copy to &ScratchPad\t' + \
                 self.keyBindings.CopyToScratchPad,
-                'Copy Text to ScratchPad', lambda evt: self.activeEditor.snip(),
+                'Copy Text to ScratchPad', lambda evt: self.getActiveEditor().snip(),
                 "tb_copy")
 
 #         self.addMenuItem(self.editorMenu, '&Paste\t' + self.keyBindings.Paste,
@@ -1189,7 +1132,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         menuID=wxNewId()
         self.editorMenu.Append(menuID, '&Rewrap Text\t' + self.keyBindings.RewrapText, 'Rewrap Text')
-        EVT_MENU(self, menuID, lambda evt: self.activeEditor.rewrapText())
+        EVT_MENU(self, menuID, lambda evt: self.getActiveEditor().rewrapText())
 
         menuID=wxNewId()
         wrapModeMenuItem = wxMenuItem(self.editorMenu, menuID, "&Wrap Mode", "Set wrap mode", wxITEM_CHECK)
@@ -1224,12 +1167,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(evaluationMenu, '&Eval\t' + self.keyBindings.Eval,
                 'Eval Script Blocks',
-                lambda evt: self.activeEditor.evalScriptBlocks())
+                lambda evt: self.getActiveEditor().evalScriptBlocks())
 
         for i in xrange(1,7):
             self.addMenuItem(evaluationMenu, 'Eval Function &%i\tCtrl-%i' % (i, i),
                     'Eval Script Function %i' % i,
-                    lambda evt, i=i: self.activeEditor.evalScriptBlocks(i))
+                    lambda evt, i=i: self.getActiveEditor().evalScriptBlocks(i))
                     
         self.editorMenu.AppendMenu(wxNewId(), "Evaluation", evaluationMenu,
                 "Evaluate scripts/expressions")
@@ -1268,11 +1211,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         viewMenu = wxMenu()
 
         self.addMenuItem(viewMenu, '&Zoom In\t' + self.keyBindings.ZoomIn,
-                'Zoom In', lambda evt: self.activeEditor.CmdKeyExecute(wxSTC_CMD_ZOOMIN),
+                'Zoom In', lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMIN),
                 "tb_zoomin")
 
         self.addMenuItem(viewMenu, 'Zoo&m Out\t' + self.keyBindings.ZoomOut,
-                'Zoom Out', lambda evt: self.activeEditor.CmdKeyExecute(wxSTC_CMD_ZOOMOUT),
+                'Zoom Out', lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMOUT),
                 "tb_zoomout")
 
         viewMenu.AppendSeparator()
@@ -1482,29 +1425,29 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         icon = self.lookupIcon("tb_heading")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Heading (Ctrl-Alt-H)", "Heading")
-        EVT_TOOL(self, tbID, lambda evt: self.keyBindings.addHeading(self.activeEditor))
+        EVT_TOOL(self, tbID, lambda evt: self.keyBindings.addHeading(self.getActiveEditor()))
 
         icon = self.lookupIcon("tb_bold")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Bold (Ctrl-B)", "Bold")
-        EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeBold(self.activeEditor))
+        EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeBold(self.getActiveEditor()))
 
         icon = self.lookupIcon("tb_italic")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Italic (Ctrl-I)", "Italic")
-        EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeItalic(self.activeEditor))
+        EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeItalic(self.getActiveEditor()))
 
         tb.AddSimpleTool(wxNewId(), seperator, "Separator", "Separator")
 
         icon = self.lookupIcon("tb_zoomin")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Zoom In", "Zoom In")
-        EVT_TOOL(self, tbID, lambda evt: self.activeEditor.CmdKeyExecute(wxSTC_CMD_ZOOMIN))
+        EVT_TOOL(self, tbID, lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMIN))
 
         icon = self.lookupIcon("tb_zoomout")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Zoom Out", "Zoom Out")
-        EVT_TOOL(self, tbID, lambda evt: self.activeEditor.CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
+        EVT_TOOL(self, tbID, lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
 
         self.fastSearchField = wxTextCtrl(tb, GUI_ID.TF_FASTSEARCH,
                 style=wxTE_PROCESS_ENTER | wxTE_RICH)
@@ -1517,7 +1460,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         icon = self.lookupIcon("pin")
         tbID = wxNewId()
         tb.AddSimpleTool(tbID, icon, "Wikize Selected Word", "Wikize Selected Word")
-        EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.activeEditor))
+        EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()))
 
 
 
@@ -1700,7 +1643,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             popup = FastSearchPopup(self, self, -1, pos=pos)
             popup.Show()
-            popup.runSearchOnWiki(text)
+            try:
+                popup.runSearchOnWiki(text)
+            except re.error, e:
+                popup.Show(False)
+                self.displayErrorMessage('Regular expression error', e)
         else:
             evt.Skip()
 
@@ -1760,7 +1707,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 tree.setViewsAsRoot()
             return tree
         elif winName.startswith("txteditor"):
-            editor = WikiTxtCtrl(self, parent, -1)
+            editor = WikiTxtCtrl(winProps["presenter"], parent, -1)
             editor.evalScope = { 'editor' : editor,
                     'pwiki' : self, 'lib': self.evalLib}
     
@@ -1773,19 +1720,32 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return LogWindow(parent, -1, self)
         elif winName == "main area panel":  # TODO remove this hack
             self.mainAreaPanel = wxNotebook(parent, -1)
-                    
-            self.activeEditor = self.createWindow({"name": "txteditor1"},
-                    self.mainAreaPanel)
-            self.mainAreaPanel.AddPage(self.activeEditor, u"Edit")
             
-            self.htmlView = WikiHtmlView(self, self.mainAreaPanel, -1)
+            presenter = DocPagePresenter(self)
+                    
+#             self.activeEditor = self.createWindow({"name": "txteditor1"},
+#                     self.mainAreaPanel)
+            editor = self.createWindow({"name": "txteditor1",
+                    "presenter": presenter}, self.mainAreaPanel)
+            self.mainAreaPanel.AddPage(editor, u"Edit")
+            presenter.setSubControl("textedit", editor)
+            
+            self.htmlView = WikiHtmlView(presenter, self.mainAreaPanel, -1)
             self.mainAreaPanel.AddPage(self.htmlView, u"Preview")
+            presenter.setSubControl("preview", self.htmlView)
+            
+            self.currentDocPagePresenter = presenter
+            self.currentDocPagePresenter.setVisible(True)
+            
 
 #             editor = self.createWindow({"name": "txteditor2"},
 #                     self.mainAreaPanel)
 #             self.mainAreaPanel.AddPage(editor, u"Edit2")
             
             return self.mainAreaPanel
+            
+    def getPagePresenterControlNames(self):
+        return ["textedit", "preview"]
 
 
     def appendLogMessage(self, msg):   # TODO make log window visible if necessary
@@ -1869,6 +1829,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #     def testIt(self):
 
     def OnNotebookPageChanged(self, evt):
+        if evt.GetSelection() == 0:
+            subControl = "textedit"
+        elif evt.GetSelection() == 1:
+            subControl = "preview"
+            
+        self.getCurrentDocPagePresenter().switchSubControl(subControl)
+        # self.htmlView.setVisible(evt.GetSelection() == 1)  # TODO
         self.mainAreaPanel.GetPage(evt.GetSelection()).SetFocus()
 #         if evt.GetSelection() == 0:
 #             print "OnNotebookPageChanged2"
@@ -1876,7 +1843,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         elif evt.GetSelection() == 1:
 #             self.htmlView.SetFocus()
 
-        self.htmlView.setVisible(evt.GetSelection() == 1)  # TODO
 
     def OnNotebookFocused(self, evt):
         self.mainAreaPanel.GetCurrentPage().SetFocus()
@@ -1919,10 +1885,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.tree.DeleteAllItems()
 
         # reset the editor
-        self.activeEditor.loadWikiPage(None)
-        self.activeEditor.SetSelection(-1, -1)
-        self.activeEditor.EmptyUndoBuffer()
-        self.activeEditor.Disable()
+        self.getActiveEditor().loadWikiPage(None)
+        self.getActiveEditor().SetSelection(-1, -1)
+        self.getActiveEditor().EmptyUndoBuffer()
+        self.getActiveEditor().Disable()
 
         # reset tray
         self.setShowOnTray()
@@ -1931,7 +1897,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """
         Return the raw input text of current wiki word
         """
-        return self.activeEditor.GetText()
+        return self.getActiveEditor().GetText()
 
 
     def newWiki(self, wikiName, wikiDir):
@@ -2063,8 +2029,8 @@ These are your default global settings.
                 p.save(text, False)
                 p.update(text, False)
                 
-                self.activeEditor.GotoPos(self.activeEditor.GetLength())
-                self.activeEditor.AddText(u"\n\n\t* WikiSettings\n")
+                self.getActiveEditor().GotoPos(self.getActiveEditor().GetLength())
+                self.getActiveEditor().AddText(u"\n\n\t* WikiSettings\n")
                 self.saveAllDocPages(force=True)
                 
                 # trigger hook
@@ -2274,8 +2240,9 @@ These are your default global settings.
 
     def closeWiki(self, saveState=True):
         if self.getWikiConfigPath():
-            for editor in self.editors:
-                editor.unloadCurrentDocPage()
+            self.fireMiscEventKeys(("closing current wiki",))
+#             for editor in self.editors:
+#                 editor.unloadCurrentDocPage()
             if saveState:
                 self.saveCurrentWikiState()
             if self.getWikiData():
@@ -2375,7 +2342,7 @@ These are your default global settings.
     def openFuncPage(self, funcTag, **evtprops):
         page = self.wikiDataManager.getFuncPage(funcTag)
 
-        self.activeEditor.loadFuncPage(page, evtprops)
+        self.getActiveEditor().loadFuncPage(page, evtprops)
 
         p2 = evtprops.copy()
         p2.update({"loaded current functional page": True})
@@ -2465,7 +2432,7 @@ These are your default global settings.
             # Reset error flag here, it can be set true again by saveDocPage
             self.getWikiDocument().setNoAutoSaveFlag(False)
 
-            self.activeEditor.saveLoadedDocPage() # this calls in turn saveDocPage() below
+            self.getActiveEditor().saveLoadedDocPage() # this calls in turn saveDocPage() below
 
         self.refreshPageStatus()
         
@@ -2524,8 +2491,8 @@ These are your default global settings.
                 try:
                     if word is not None:
                         # only for real wiki pages
-                        page.save(self.activeEditor.cleanAutoGenAreas(text))
-                        page.update(self.activeEditor.updateAutoGenAreas(text))   # ?
+                        page.save(self.getActiveEditor().cleanAutoGenAreas(text))
+                        page.update(self.getActiveEditor().updateAutoGenAreas(text))   # ?
                         if pageAst is not None:
                             self.propertyChecker.checkPage(page, pageAst)
 
@@ -3045,7 +3012,7 @@ These are your default global settings.
             if wikiWord:
                 dlg.Destroy()
                 self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
-                self.activeEditor.SetFocus()
+                self.getActiveEditor().SetFocus()
         dlg.Destroy()
 
 
@@ -3230,9 +3197,9 @@ These are your default global settings.
                         # TODO Allow retry or append/replace
                 return False
 
-            text = self.activeEditor.GetSelectedText()
+            text = self.getActiveEditor().GetSelectedText()
             page = self.wikiDataManager.createWikiPage(wikiWord)
-            self.activeEditor.ReplaceSelection(
+            self.getActiveEditor().ReplaceSelection(
                     self.getFormatting().normalizeWikiWord(wikiWord))
             # TODO Respect template property?
             title = DocPages.WikiPage.getWikiPageTitle(wikiWord)
@@ -3522,26 +3489,26 @@ These are your default global settings.
 
 
     def insertAttribute(self, name, value):
-        self.activeEditor.AppendText(u"\n\n[%s=%s]" % (name, value))
+        self.getActiveEditor().AppendText(u"\n\n[%s=%s]" % (name, value))
 #         self.saveCurrentDocPage()   # TODO Remove or activate this line?
 
     def addText(self, text):
         """
         Add text to current active editor view
         """
-        self.activeEditor.AddText(text)
+        self.getActiveEditor().AddText(text)
 
 
     def appendText(self, text):
         """
         Append text to current active editor view
         """
-        self.activeEditor.AppendText(text)
+        self.getActiveEditor().AppendText(text)
 
     def insertDate(self):
         # strftime can't handle unicode correctly, so conversion is needed
         mstr = mbcsEnc(self.configuration.get("main", "strftime"), "replace")[0]
-        self.activeEditor.AddText(mbcsDec(strftime(mstr), "replace")[0])
+        self.getActiveEditor().AddText(mbcsDec(strftime(mstr), "replace")[0])
 
     def getLastActiveDir(self):
         return self.configuration.get("main", "last_active_dir", os.getcwd())
@@ -3761,7 +3728,7 @@ These are your default global settings.
             if saveDirtySince is not None:
                 currentTime = time()
                 # only try and save if the user stops typing
-                if (currentTime - self.activeEditor.lastKeyPressed) > \
+                if (currentTime - self.getActiveEditor().lastKeyPressed) > \
                         self.autoSaveDelayAfterKeyPressed:
 #                     if saveDirty:
                     if (currentTime - saveDirtySince) > \
@@ -3851,7 +3818,7 @@ These are your default global settings.
         self.configuration.set("main", "windowLayout", layoutCfStr)
 
         self.configuration.set("main", "frame_stayOnTop", self.getStayOnTop())
-        self.configuration.set("main", "zoom", self.activeEditor.GetZoom())
+        self.configuration.set("main", "zoom", self.getActiveEditor().GetZoom())
         self.configuration.set("main", "wiki_history", ";".join(self.wikiHistory))
         self.writeGlobalConfig()
 

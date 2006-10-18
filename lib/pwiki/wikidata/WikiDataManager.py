@@ -2,6 +2,8 @@ from weakref import WeakValueDictionary
 import os, os.path, sets, traceback
 from threading import RLock
 
+from wxPython.wx import wxGetApp
+
 from pwiki.MiscEvent import MiscEventSourceMixin
 
 from pwiki.WikiExceptions import *
@@ -654,7 +656,7 @@ class WikiDataManager(MiscEventSourceMixin):
             resultSet = self.getWikiData().search(sarOp, exclusionSet)
             resultSet |= preResultSet
             if applyOrdering:
-                result = sarOp.applyOrdering(resultSet)
+                result = sarOp.applyOrdering(resultSet, wxGetApp().getCollator())
             else:
                 result = list(resultSet)
 

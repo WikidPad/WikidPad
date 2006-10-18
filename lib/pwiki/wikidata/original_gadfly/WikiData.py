@@ -347,28 +347,46 @@ class WikiData:
         NO LONGER VALID: (((also returns nodes that have files but
         no entries in the wikiwords table.)))
         """
-#         words = self._getAllPageNamesFromDisk()
-# 
-#         # Filter out non-wiki words
-#         wordSet = sets.Set([word for word in words if not word.startswith("[")])
-# 
-#         # Remove all which have parents
-#         relations = self.getAllRelations()
-#         for word, relation in relations:
-#             wordSet.discard(relation)
-
         wordSet = sets.Set(self.getAllDefinedWikiPageNames())
 
         # Remove all which have parents
         relations = self._getAllRelations()
-        for word, relation in relations:
-            wordSet.discard(relation)
+        childWords = sets.Set([relation for word, relation in relations])
         
-        # Create a sorted list of them
+        # Remove directly mentioned words (not an alias of the word)
+        wordSet -= childWords
+        
+#         for word, relation in relations:
+#             wordSet.discard(relation)
+
+        # Remove words where an alias of the word is a child
+        for word in tuple(wordSet):  # "tuple" to create a sequence copy of wordSet
+            for k, alias in self.getPropertiesForWord(word):
+                if k != u"alias":
+                    continue
+
+                if alias in childWords:
+                    wordSet.discard(word)
+                    break   # break inner for loop
+
+
+        # Create a list of them
         words = list(wordSet)
 #         words.sort()
         
         return words
+
+    def getUndefinedWords(self):
+        """
+        List words which are childs of a word but are not defined, neither
+        directly nor as alias.
+        """
+        
+        relations = self._getAllRelations()
+        childWords = sets.Set([relation for word, relation in relations])
+        
+        return [word for word in childWords
+                if not self.cachedContentNames.has_key(word)]
 
 
     def addRelationship(self, word, toWord):

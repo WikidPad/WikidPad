@@ -31,31 +31,37 @@ class LinkCreatorForPreview:
 
 
 class WikiHtmlView(wxHtmlWindow):
-    def __init__(self, pWiki, parent, ID):
+    def __init__(self, presenter, parent, ID):
         wxHtmlWindow.__init__(self, parent, ID)
-        self.pWiki = pWiki
+        self.presenter = presenter
 
-        self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
+        self.presenter.getMiscEvent().addListener(KeyFunctionSink((
                 ("loaded current page", self.onLoadedCurrentWikiPage),
                 ("reloaded current page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
+                ("closing current wiki", self.onClosingCurrentWiki),
                 ("options changed", self.onOptionsChanged),
-                ("updated wiki page", self.onUpdatedWikiPage)
+                ("updated wiki page", self.onUpdatedWikiPage),
+                ("changed live text", self.onChangedLiveText)
 
 #                 ("updated current page cache", self.updatedCurrentPageCache),
 #                 ("renamed wiki page", self.renamedWikiPage)
         )), False)
 
         self.visible = False
+        self.outOfSync = True   # HTML content is out of sync with live content
 
         self.currentLoadedWikiWord = None
 
         self.anchor = None  # Name of anchor to jump to when view gets visible
 
-        self.exporterInstance = Exporters.HtmlXmlExporter(self.pWiki)
         
-        # TODO More elegant
-        self.exporterInstance.pWiki = self.pWiki
+        # TODO Should be changed to presenter as control
+        self.exporterInstance = Exporters.HtmlXmlExporter(
+                self.presenter.getMainControl())
+
+#         # TODO More elegant
+#         self.exporterInstance.pWiki = self.pWiki
         
         EVT_KEY_DOWN(self, self.OnKeyDown)
         EVT_KEY_UP(self, self.OnKeyUp)
@@ -70,9 +76,14 @@ class WikiHtmlView(wxHtmlWindow):
         Informs the widget if it is really visible on the screen or not
         """
         if not self.visible and vis:
+            self.outOfSync = True   # Just to be sure
             self.refresh()
 
         self.visible = vis
+
+
+    def close(self):
+        self.setVisible(False)
 
 
     _DEFAULT_FONT_SIZES = (wxHTML_FONT_SIZE_1, wxHTML_FONT_SIZE_2, 
@@ -85,54 +96,61 @@ class WikiHtmlView(wxHtmlWindow):
 
     def refresh(self):
         ## _prof.start()
-        # Store position of previous page, if any
+
+        # Store position of currently displaayed page, if any
         if self.currentLoadedWikiWord:
             try:
-                prevPage = self.pWiki.getWikiDocument().getWikiPage(
+                prevPage = self.presenter.getWikiDocument().getWikiPage(
                         self.currentLoadedWikiWord)
                 prevPage.setPresentation(self.GetViewStart(), 3)
             except WikiWordNotFoundException, e:
                 pass
 
-        self.currentLoadedWikiWord = None
+        if self.outOfSync:
+            self.currentLoadedWikiWord = None
+    
+            self.exporterInstance.wikiData = self.presenter.getWikiDocument().\
+                    getWikiData()
+    
+            wikiPage = self.presenter.getDocPage()
+            if wikiPage is None:
+                return  # TODO Do anything else here?
+    
+            word = wikiPage.getWikiWord()
+            self.currentLoadedWikiWord = word
+            content = self.presenter.getLiveText()
+    
+            html = self.exporterInstance.exportContentToHtmlString(word, content,
+                    wikiPage.getFormatDetails(),
+                    LinkCreatorForPreview(
+                        self.presenter.getWikiDocument().getWikiData()),
+                    asHtmlPreview=True)
+    
+            # TODO Reset after open wiki
+            zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
+            self.SetFonts("", "", [max(s + 2 * zoom, 1)
+                    for s in self._DEFAULT_FONT_SIZES])
+            self.SetPage(uniToGui(html))
 
-        self.exporterInstance.wikiData = self.pWiki.getWikiData()
 
-        wikiPage = self.pWiki.getCurrentDocPage()
-        if wikiPage is None:
-            return  # TODO Do anything else here?
-
-        word = wikiPage.getWikiWord()
-        self.currentLoadedWikiWord = word
-        content = self.pWiki.getCurrentText()
-
-        html = self.exporterInstance.exportContentToHtmlString(word, content,
-                wikiPage.getFormatDetails(),
-                LinkCreatorForPreview(self.pWiki.getWikiData()),
-                asHtmlPreview=True)
-
-        # TODO Reset after open wiki
-        zoom = self.pWiki.getConfig().getint("main", "preview_zoom", 0)
-        self.SetFonts("", "", [max(s + 2 * zoom, 1)
-                for s in self._DEFAULT_FONT_SIZES])
-        self.SetPage(uniToGui(html))
-        
         if self.anchor and self.HasAnchor(self.anchor):
             self.ScrollToAnchor(self.anchor)
             # Workaround because ScrollToAnchor scrolls too far
             lx, ly = self.GetViewStart()
             self.Scroll(lx, ly-1)
-        else:
+        elif self.outOfSync:
             lx, ly = wikiPage.getPresentation()[3:5]
             self.Scroll(lx, ly)
             
         self.anchor = None
+        self.outOfSync = False
 
         ## _prof.stop()
 
 
     def onLoadedCurrentWikiPage(self, miscevt):
         self.anchor = miscevt.get("anchor")
+        self.outOfSync = True
         if self.visible:
             self.refresh()
             
@@ -150,15 +168,29 @@ class WikiHtmlView(wxHtmlWindow):
     def onOpenedWiki(self, miscevt):
         self.currentLoadedWikiWord = None
 
-        self.exporterInstance.setWikiDataManager(self.pWiki.getWikiDataManager())
+        self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
+
+    def onClosingCurrentWiki(self, miscevt):
+        if self.currentLoadedWikiWord:
+            try:
+                prevPage = self.presenter.getWikiDocument().getWikiPage(
+                        self.currentLoadedWikiWord)
+                prevPage.setPresentation(self.GetViewStart(), 3)
+            except WikiWordNotFoundException, e:
+                pass
 
     def onOptionsChanged(self, miscevt):
+        self.outOfSync = True
         if self.visible:
             self.refresh()
 
     def onUpdatedWikiPage(self, miscevt):
+        self.outOfSync = True
         if self.visible:
             self.refresh()
+            
+    def onChangedLiveText(self, miscevt):
+        self.outOfSync = True
 
 
     def OnSetFocus(self, evt):
@@ -184,9 +216,10 @@ class WikiHtmlView(wxHtmlWindow):
                 anchor = None
                 
             # Now open wiki
-            self.pWiki.openWikiPage(word, motionType="child", anchor=anchor)
+            self.presenter.getMainControl().openWikiPage(
+                    word, motionType="child", anchor=anchor)
         else:
-            self.pWiki.launchUrl(href)
+            self.presenter.getMainControl().launchUrl(href)
 
 
     def OnKeyUp(self, evt):
@@ -202,22 +235,22 @@ class WikiHtmlView(wxHtmlWindow):
         acc = getAccelPairFromKeyDown(evt)
         if acc == (wxACCEL_CTRL, ord('+')) or \
                 acc == (wxACCEL_CTRL, WXK_NUMPAD_ADD):
-            zoom = self.pWiki.getConfig().getint("main", "preview_zoom", 0)
-            self.pWiki.getConfig().set("main", "preview_zoom", str(zoom + 1))
+            zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
+            self.presenter.getConfig().set("main", "preview_zoom", str(zoom + 1))
             self.refresh()
         elif acc == (wxACCEL_CTRL, ord('-')) or \
                 acc == (wxACCEL_CTRL, WXK_NUMPAD_SUBTRACT):
-            zoom = self.pWiki.getConfig().getint("main", "preview_zoom", 0)
-            self.pWiki.getConfig().set("main", "preview_zoom", str(zoom - 1))
+            zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
+            self.presenter.getConfig().set("main", "preview_zoom", str(zoom - 1))
             self.refresh()
         else:
             evt.Skip()
 
     def OnMouseWheel(self, evt):
         if evt.ControlDown():
-            zoom = self.pWiki.getConfig().getint("main", "preview_zoom", 0)
+            zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
             zoom -= evt.GetWheelRotation() // evt.GetWheelDelta()
-            self.pWiki.getConfig().set("main", "preview_zoom", str(zoom))
+            self.presenter.getConfig().set("main", "preview_zoom", str(zoom))
             self.refresh()
         else:
             evt.Skip()

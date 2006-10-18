@@ -231,7 +231,7 @@ class HtmlXmlExporter:
         if not compatFilenames:
             startfile = mbcsEnc(startfile)[0]
             
-        if self.mainControl.configuration.getboolean(
+        if self.mainControl.getConfig().getboolean(
                 "main", "start_browser_after_export") and startfile:
             os.startfile(startfile)
 
@@ -439,7 +439,8 @@ class HtmlXmlExporter:
         """
         Return file header for an HTML file containing multiple pages
         """
-        return u"""<html>
+        return u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
     <head>
         <meta http-equiv="content-type" content="text/html">
         <title>%s</title>
@@ -511,7 +512,8 @@ class HtmlXmlExporter:
         wikiPage -- WikiPage object
         """
 
-        return u"""<html>
+        return u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <title>%s</title>
@@ -526,7 +528,8 @@ class HtmlXmlExporter:
         Ansi version of getFileHeader
         wikiPage -- WikiPage object
         """
-        return u"""<html>
+        return u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
     <head>
         <meta http-equiv="content-type" content="text/html">
         <title>%s</title>
@@ -544,7 +547,7 @@ class HtmlXmlExporter:
     def getParentLinks(self, wikiPage, asHref=True, wordsToInclude=None):
         parents = u""
         parentRelations = wikiPage.getParentRelationships()[:]
-        parentRelations.sort()
+        self.mainControl.getCollator().sort(parentRelations)
         
         for relation in parentRelations:
             if wordsToInclude and relation not in wordsToInclude:
@@ -736,7 +739,9 @@ class HtmlXmlExporter:
                         selfreference=False)
             elif value == u"parentless":
                 wordList = wikiDocument.getWikiData().getParentlessWikiWords()
-                
+            elif value == u"undefined":
+                wordList = wikiDocument.getWikiData().getUndefinedWords()
+
         elif key == u"savedsearch":
             datablock = wikiDocument.getWikiData().getSearchDatablock(value)
             if datablock is not None:
@@ -765,7 +770,7 @@ class HtmlXmlExporter:
                                 break
                         except ValueError:
                             pass
-                wordList.sort()
+                self.mainControl.getCollator().sort(wordList)
     
                 if cols > 1:
                     # We need a table for the wordlist
@@ -1208,12 +1213,12 @@ class HtmlXmlExporter:
                 # Numeric bullet
                 numbers = len(tok.grpdict["preLastNumeric"].split(u"."))
                 ind = splitIndent(tok.grpdict["indentNumeric"])[1]
-                
+
                 while ind < self.statestack[-1][1] and \
                         (self.statestack[-1][0] != "ol" or \
                         numbers < self.numericdeepness):
                     self.popState()
-                    
+
                 while ind == self.statestack[-1][1] and \
                         self.statestack[-1][0] != "ol" and \
                         self.hasStates():
@@ -1303,7 +1308,7 @@ class TextExporter:
             textPanel = res.LoadPanel(guiparent, "ExportSubText") # .ctrls.additOptions
         else:
             textPanel = None
-        
+
         return (
             ("raw_files", 'Set of *.wiki files', textPanel),
             )

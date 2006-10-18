@@ -57,9 +57,9 @@ def bytelenSct_mbcs(us):
 
 
 class WikiTxtCtrl(wxStyledTextCtrl):
-    def __init__(self, pWiki, parent, ID):
+    def __init__(self, presenter, parent, ID):
         wxStyledTextCtrl.__init__(self, parent, ID)
-        self.pWiki = pWiki
+        self.presenter = presenter
         self.evalScope = None
         self.stylebytes = None
         self.stylingThreadHolder = ThreadHolder()
@@ -80,12 +80,16 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         
         # configurable editor settings
-        config = self.pWiki.getConfig()
+        config = self.presenter.getConfig()
         self.setWrapMode(config.getboolean("main", "wrap_mode"))
         self.SetIndentationGuides(config.getboolean("main", "indentation_guides"))
         self.autoIndent = config.getboolean("main", "auto_indent")
         self.autoBullets = config.getboolean("main", "auto_bullets")
         self.setShowLineNumbers(config.getboolean("main", "show_lineNumbers"))
+        
+        self.defaultFont = config.get("main", "font",
+                self.presenter.getDefaultFontFaces()["mono"])
+
 
         # Self-modify to ansi/unicode version
         if isUnicode():
@@ -106,7 +110,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.UsePopUp(0)
 
         self.StyleSetSpec(wxSTC_STYLE_DEFAULT, "face:%(mono)s,size:%(size)d" %
-                self.pWiki.presentationExt.faces)
+                self.presenter.getDefaultFontFaces())
 
         for i in xrange(32):
             self.StyleSetEOLFilled(i, True)
@@ -143,9 +147,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.AutoCompSetSeparator(ord('~'))
 
         # register some event handlers
-        self.pwikiListener = wxKeyFunctionSink(self.pWiki.getMiscEvent(), self, (
+        self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(), self, (
                 ("options changed", self.onOptionsChanged),  # fired by PersonalWikiFrame
                 ("saving all pages", self.onSavingAllPages),
+                ("closing current wiki", self.onClosingCurrentWiki),
                 ("reloaded current page", self.onReloadedCurrentPage)
                 # ("command copy", self.onCmdCopy)
         ))
@@ -177,9 +182,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.anchorCharPosition = -1
         self.searchCharStartPos = 0
 
-#         # are WikiWords enabled
-#         self.wikiWordsEnabled = True
-        
         self.onOptionsChanged(None)
 
         # when was a key pressed last. used to check idle time.
@@ -216,7 +218,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         Close the editor (=prepare for destruction)
         """
         self.unloadCurrentDocPage({})
-        self.pwikiListener.disconnect()
+        self.presenterListener.disconnect()
 
 
     def Cut(self):
@@ -237,7 +239,17 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if wxWindow.FindFocus() != self:
             return
         self.Copy()
-
+        
+        
+    def setVisible(self, vis):
+        """
+        Informs the widget if it is really visible on the screen or not
+        """
+        self.Enable(vis)
+#         if not self.visible and vis:
+#             self.refresh()
+# 
+#         self.visible = vis
 
     def setWrapMode(self, onOrOff):
         if onOrOff:
@@ -275,9 +287,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def SetStyles(self, styleFaces = None):
         # create the styles
         if styleFaces is None:
-            styleFaces = self.pWiki.presentationExt.faces
+            styleFaces = self.presenter.getDefaultFontFaces()
             
-        config = self.pWiki.getConfig()
+        config = self.presenter.getConfig()
         for type, style in WikiFormatting.getStyles(styleFaces, config):
             self.StyleSetSpec(type, style)
 
@@ -403,7 +415,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #             return
 
         text = self.GetText()
-        if self.pWiki.saveDocPage(page, text, self.getPageAst()):
+        if self.presenter.getMainControl().\
+                saveDocPage(page, text, self.getPageAst()):
             self.SetSavePoint()
 
         
@@ -436,7 +449,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.unloadCurrentDocPage(evtprops)
         # set the editor text
         content = None
-        wikiDataManager = self.pWiki.getWikiDataManager()
+        wikiDataManager = self.presenter.getWikiDocument()
         
         self.loadedDocPage = funcPage
         
@@ -445,11 +458,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         globalProps = wikiDataManager.getWikiData().getGlobalProperties()
         # get the font that should be used in the editor
-        font = globalProps.get("global.font", self.pWiki.defaultEditorFont)
+        font = globalProps.get("global.font", self.defaultFont)
 
         # set the styles in the editor to the font
         if self.lastFont != font:
-            faces = self.pWiki.presentationExt.faces.copy()
+            faces = self.presenter.getDefaultFontFaces().copy()
             faces["mono"] = font
             self.SetStyles(faces)
             self.lastEditorFont = font
@@ -487,7 +500,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         self.unloadCurrentDocPage(evtprops)        
         # set the editor text
-        wikiDataManager = self.pWiki.getWikiDataManager()
+        wikiDataManager = self.presenter.getWikiDocument()
         
         self.loadedDocPage = wikiPage
 
@@ -496,11 +509,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # get the font that should be used in the editor
         font = self.loadedDocPage.getPropertyOrGlobal("font",
-                self.pWiki.defaultEditorFont)
+                self.defaultFont)
 
         # set the styles in the editor to the font
         if self.lastFont != font:
-            faces = self.pWiki.presentationExt.faces.copy()
+            faces = self.presenter.getDefaultFontFaces().copy()
             faces["mono"] = font
             self.SetStyles(faces)
             self.lastEditorFont = font
@@ -531,7 +544,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             evtprops = {}
         p2 = evtprops.copy()
         p2.update({"loading current page": True})
-        self.pWiki.fireMiscEventProps(p2)  # TODO Remove this hack
+        self.presenter.getMainControl().fireMiscEventProps(p2)  # TODO Remove this hack
 
         self.pageType = self.loadedDocPage.getProperties().get(u"pagetype",
                 [u"normal"])[-1]
@@ -565,11 +578,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                             self.loadedDocPage.getPresentation()[0:3]
                     self.GotoPos(lastPos)
     
-                    if scrollPosX != 0 or scrollPosY != 0:
+                    if True:  # scrollPosX != 0 or scrollPosY != 0:
                         # Bad hack: First scroll to position to avoid a visible jump
                         #   if scrolling works, then update display,
                         #   then scroll again because it may have failed the first time
-    
+                        
                         self.SetScrollPos(wxHORIZONTAL, scrollPosX, False)
                         screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
                                 scrollPosX, wxHORIZONTAL)
@@ -616,7 +629,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         Called when already loaded page should be loaded again, mainly
         interesting if a link with anchor is activated
         """
-        if not self is self.pWiki.getActiveEditor():
+        if not self.presenter.isCurrent():
             return
 
         anchor = miscevt.get("anchor")
@@ -645,19 +658,19 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def onOptionsChanged(self, miscevt):
-        faces = self.pWiki.presentationExt.faces.copy()
+        faces = self.presenter.getDefaultFontFaces().copy()
 
         if isinstance(self.loadedDocPage, 
                 (DocPages.WikiPage, DocPages.AliasWikiPage)):
 
             font = self.loadedDocPage.getPropertyOrGlobal("font",
-                    self.pWiki.defaultEditorFont)
+                    self.defaultFont)
             faces["mono"] = font
             self.lastEditorFont = font    # ???
 
         self.SetStyles(faces)
 
-        coltuple = htmlColorToRgbTuple(self.pWiki.getConfig().get(
+        coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
                 "main", "editor_bg_color"))
 
         if coltuple is None:
@@ -677,11 +690,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # get the font that should be used in the editor
         font = self.loadedDocPage.getPropertyOrGlobal("font",
-                self.pWiki.defaultEditorFont)
+                self.defaultFont)
 
         # set the styles in the editor to the font
         if self.lastFont != font:
-            faces = self.pWiki.presentationExt.faces.copy()
+            faces = self.presenter.getDefaultFontFaces().copy()
             faces["mono"] = font
             self.SetStyles(faces)
             self.lastEditorFont = font
@@ -695,6 +708,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 self.loadedDocPage.getDirty()[0] or miscevt.get("force", false)):
             self.saveLoadedDocPage()
 
+    def onClosingCurrentWiki(self, miscevt):
+        self.unloadCurrentDocPage()
 
     def OnStyleNeeded(self, evt):
         "Styles the text of the editor"
@@ -709,7 +724,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.stylebytes = None
             self.pageAst = None
 
-        if textlen < self.pWiki.configuration.getint(
+        if textlen < self.presenter.getConfig().getint(
                 "main", "sync_highlight_byte_limit"):
             # Synchronous styling
             self.stylingThreadHolder.setThread(None)
@@ -723,7 +738,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
             sth = self.stylingThreadHolder
             
-            delay = self.pWiki.configuration.getfloat(
+            delay = self.presenter.getConfig().getfloat(
                     "main", "async_highlight_delay")
             t = threading.Thread(None, self.buildStyling, args = (text, delay, sth))
             sth.setThread(t)
@@ -793,7 +808,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 return
 
         page = PageAst.Page()
-        page.buildAst(self.pWiki.getFormatting(), text,
+        page.buildAst(self.presenter.getFormatting(), text,
                 self.loadedDocPage.getFormatDetails(), threadholder=threadholder)
         
         stylebytes = self.processTokens(page.getTokens(), threadholder)
@@ -803,7 +818,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def processTokens(self, tokens, threadholder):
-        wikiData = self.pWiki.getWikiData()
+        wikiData = self.presenter.getWikiDocument().getWikiData()
         stylebytes = []
         
         for tok in tokens:
@@ -869,7 +884,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         # copy it to the clipboard also
         self.Copy()
 
-        wikiPage = self.pWiki.getWikiDataManager().getWikiPageNoError("ScratchPad")
+        wikiPage = self.presenter.getWikiDocument().getWikiPageNoError("ScratchPad")
         
         wikiPage.appendLiveText("\n%s\n---------------------------\n\n%s\n" %
                 (mbcsDec(strftime("%x %I:%M %p"), "replace")[0], text))
@@ -919,7 +934,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if page is None:
             page = PageAst.Page()
             self.pageAst = page
-            page.buildAst(self.pWiki.getFormatting(), self.GetText(),
+            page.buildAst(self.presenter.getFormatting(), self.GetText(),
                     self.loadedDocPage.getFormatDetails())
         
         return page
@@ -941,13 +956,13 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 searchStr = None
     
                 # open the wiki page
-                self.pWiki.openWikiPage(tok.node.nakedWord, motionType="child",
-                        anchor=tok.node.anchorFragment)
-    
+                self.presenter.getMainControl().openWikiPage(tok.node.nakedWord,
+                        motionType="child", anchor=tok.node.anchorFragment)
+
                 searchfrag = tok.node.searchFragment
                 # Unescape search fragment
                 if searchfrag is not None:
-                    searchfrag = self.pWiki.getFormatting().\
+                    searchfrag = self.presenter.getFormatting().\
                             SearchFragmentUnescapeRE.sub(ur"\1", searchfrag)
                     searchOp = SearchReplaceOperation()
                     searchOp.wildCard = "no"   # TODO Why not regex?
@@ -958,7 +973,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 return True
     
             elif tok.ttype == WikiFormatting.FormatTypes.Url:
-                self.pWiki.launchUrl(tok.node.url)
+                self.presenter.getMainControl().launchUrl(tok.node.url)
                 return True
                 
         return False
@@ -1039,7 +1054,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         Evaluates scripts. Respects "script_security_level" option
         """
-        securityLevel = self.pWiki.configuration.getint(
+        securityLevel = self.presenter.getConfig().getint(
                 "main", "script_security_level")
         if securityLevel == 0:
             # No scripts allowed
@@ -1047,7 +1062,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             wxMessageBox(u"Set in options, chapter \"Other\", \n"
                     "item \"Script security\" an appropriate value \n"
                     "to execute a script", u"Script execution disabled",
-                    wxOK, self.pWiki)
+                    wxOK, self.presenter.getMainControl())
             return
 
         # it is important to python to have consistent eol's
@@ -1067,7 +1082,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                             "import_scripts"]
                     for script in scripts:
                         try:
-                            importPage = self.pWiki.getWikiDataManager().\
+                            importPage = self.presenter.getWikiDocument().\
                                     getWikiPage(script)
                             content = importPage.getLiveText()
                             text += "\n" + content
@@ -1075,12 +1090,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                             pass
 
             if securityLevel > 2: # global.import_scripts property also allowed
-                globscript = self.pWiki.getWikiData().getGlobalProperties().get(
-                        "global.import_scripts")
+                globscript = self.presenter.getWikiDocument().getWikiData().\
+                        getGlobalProperties().get("global.import_scripts")
     
                 if globscript is not None:
                     try:
-                        importPage = self.pWiki.getWikiDataManager().\
+                        importPage = self.presenter.getWikiDocument().\
                                 getWikiPage(globscript)
                         content = importPage.getLiveText()
                         text += "\n" + content
@@ -1128,7 +1143,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         The original text is returned if option
         "process_autogenerated_areas" is False.
         """
-        if not self.pWiki.configuration.getboolean("main",
+        if not self.presenter.getConfig().getboolean("main",
                 "process_autogenerated_areas"):
             return text
 
@@ -1156,7 +1171,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         and on user request. The original text is returned if
         option "process_autogenerated_areas" is False.
         """
-        if not self.pWiki.configuration.getboolean("main",
+        if not self.presenter.getConfig().getboolean("main",
                 "process_autogenerated_areas"):
             return text
 
@@ -1223,7 +1238,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def startIncrementalSearch(self, searchStr=u''):
         self.SetFocus()
         self.searchStr = searchStr
-        self.pWiki.statusBar.SetStatusText(uniToGui(u"Search (ESC to stop): "), 0)
+        self.presenter.SetStatusText(u"Search (ESC to stop): ", 0)
         self.searchCharStartPos = len(self.GetTextRange(0, self.GetCurrentPos()))
 
         self.inIncrementalSearch = True
@@ -1235,8 +1250,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         Run incremental search
         """
-        self.pWiki.statusBar.SetStatusText(
-                uniToGui(u"Search (ESC to stop): %s" % self.searchStr), 0)
+        self.presenter.SetStatusText(
+                u"Search (ESC to stop): %s" % self.searchStr, 0)
         text = self.GetText()
         if len(self.searchStr) > 0:   # and not searchStr.endswith("\\"):
             charStartPos = self.searchCharStartPos
@@ -1274,7 +1289,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def endIncrementalSearch(self):
-        self.pWiki.statusBar.SetStatusText("", 0)
+        self.presenter.SetStatusText("", 0)
         self.inIncrementalSearch = False
         self.anchorBytePosition = -1
         self.anchorCharPosition = -1
@@ -1515,6 +1530,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def OnChange(self, evt):
         if not self.ignoreOnChange:
             self.loadedDocPage.setDirty(True)
+            self.presenter.informLiveTextChanged(self)
 
     def OnCharAdded(self, evt):
         "When the user presses enter reindent to the previous level"
@@ -1556,7 +1572,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         self.lastKeyPressed = time()
         accP = getAccelPairFromKeyDown(evt)
-        matchesAccelPair = self.pWiki.keyBindings.matchesAccelPair
+        matchesAccelPair = self.presenter.getMainControl().keyBindings.\
+                matchesAccelPair
         
 
         if self.inIncrementalSearch:
@@ -1569,7 +1586,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     self.endIncrementalSearch()
                 # do the next search on another ctrl-s, or f
                 elif evt.ControlDown() and (      # key == ord('S') or
-                        key == ord(self.pWiki.keyBindings.IncrementalSearchCtrl)):
+                        key == ord(self.presenter.getMainControl().keyBindings.\
+                            IncrementalSearchCtrl)):
                     self.executeIncrementalSearch(next=True)
                 # handle the delete key
                 elif key == WXK_BACK or key == WXK_DELETE:
@@ -1593,7 +1611,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             evt.Skip()
 
         elif evt.ControlDown() and \
-                key == ord(self.pWiki.keyBindings.IncrementalSearchCtrl) and \
+                key == ord(self.presenter.getMainControl().keyBindings.\
+                    IncrementalSearchCtrl) and \
                     not evt.ShiftDown() and not evt.AltDown():
                 # Start incremental search
                 self.startIncrementalSearch()
@@ -1615,23 +1634,25 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
             # TODO Sort entries appropriate 
 
+            wikiData = self.presenter.getWikiDocument().getWikiData()
+
             if mat1:
                 # may be CamelCase word
                 tofind = line[-mat1.end():]
                 self.autoCompBackBytesWithoutBracket = self.bytelenSct(tofind)
-                formatting = self.pWiki.getFormatting()
+                formatting = self.presenter.getFormatting()
                 acresult += filter(formatting.isCcWikiWord, 
-                        self.pWiki.getWikiData().getWikiWordsStartingWith(
+                        wikiData.getWikiWordsStartingWith(
                         tofind, True))
 
             if mat2:
                 # may be not-CamelCase word or in a property name
                 tofind = line[-mat2.end():]
                 self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
-                acresult += map(lambda s: u"[" + s, self.pWiki.getWikiData().\
-                        getWikiWordsStartingWith(tofind[1:], True))
-                acresult += map(lambda s: u"[" + s, self.pWiki.getWikiData().\
-                        getPropertyNamesStartingWith(tofind[1:]))
+                acresult += map(lambda s: u"[" + s,
+                        wikiData.getWikiWordsStartingWith(tofind[1:], True))
+                acresult += map(lambda s: u"[" + s,
+                        wikiData.getPropertyNamesStartingWith(tofind[1:]))
 
             elif mat3:
                 # In a property value
@@ -1641,7 +1662,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 propvalpart = revStr(mat3.group(1))
                 self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
                 values = filter(lambda pv: pv.startswith(propvalpart),
-                        self.pWiki.getWikiData().getDistinctPropertyValues(propkey))
+                        wikiData.getDistinctPropertyValues(propkey))
                 acresult += map(lambda v: u"[" + propkey + propfill + 
                         v +  u"]", values)
 
@@ -1659,7 +1680,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     return
                 evt.Skip()
             elif key == WXK_RETURN:
-                if self.pWiki.getConfig().getboolean("main",
+                if self.presenter.getConfig().getboolean("main",
                         "editor_autoUnbullets"):
                     # Check for lonely bullet or number
                     endBytePos = self.GetCurrentPos()
@@ -1729,7 +1750,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def OnSetFocus(self, evt):
-        self.pWiki.setActiveEditor(self)
+        self.presenter.makeCurrent()
         evt.Skip()
 
 
@@ -1783,13 +1804,13 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #         if self.idleCounter < 0:
 #             self.idleCounter = 0
         if (self.IsEnabled()):
-            if self is self.pWiki.getActiveEditor():
+            if self.presenter.isCurrent():
                 # fix the line, pos and col numbers
                 currentLine = self.GetCurrentLine()+1
                 currentPos = self.GetCurrentPos()
                 currentCol = self.GetColumn(currentPos)
-                self.pWiki.statusBar.SetStatusText(uniToGui(u"Line: %d Col: %d Pos: %d" %
-                                                (currentLine, currentCol, currentPos)), 2)
+                self.presenter.SetStatusText(u"Line: %d Col: %d Pos: %d" %
+                        (currentLine, currentCol, currentPos), 2)
 
             stylebytes = self.stylebytes
             self.stylebytes = None
@@ -1910,19 +1931,19 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
                 doCopy = False
                 if controlPressed:
                     # Copy file into file storage
-                    fs = self.editor.pWiki.getWikiDataManager().getFileStorage()
+                    fs = self.editor.presenter.getWikiDataManager().getFileStorage()
                     try:
                         fn = fs.createDestPath(fn)
                         doCopy = True
                     except Exception, e:
                         traceback.print_exc()
-                        self.editor.pWiki.displayErrorMessage(
+                        self.editor.presenter.getMainControl().displayErrorMessage(
                                 u"Couldn't copy file", e)
                         return
 
                 if shiftPressed or doCopy:
                     # Relative rel: URL
-                    locPath = self.editor.pWiki.getWikiConfigPath()
+                    locPath = self.editor.presenter.getMainControl().getWikiConfigPath()
                     if locPath is not None:
                         locPath = dirname(locPath)
                         relPath = relativeFilePath(locPath, fn)

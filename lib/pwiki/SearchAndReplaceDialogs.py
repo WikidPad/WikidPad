@@ -492,7 +492,7 @@ class SearchWikiDialog(wxDialog):   # TODO
     
             if len(sarOp.searchStr) > 0:
                 self.foundPages = self.pWiki.getWikiDocument().searchWiki(sarOp)
-                self.foundPages.sort()
+                self.pWiki.getCollator().sort(self.foundPages)
                 self.ctrls.htmllbPages.showFound(sarOp, self.foundPages,
                         self.pWiki.getWikiDocument())
             else:
@@ -706,7 +706,7 @@ class SearchWikiDialog(wxDialog):   # TODO
 
     def _refreshSavedSearchesList(self):
         self.savedSearches = self.pWiki.getWikiData().getSavedSearchTitles()
-        self.savedSearches.sort()
+        self.pWiki.getCollator().sort(self.savedSearches)
         
         self.ctrls.lbSavedSearches.Clear()
         for search in self.savedSearches:
@@ -1074,7 +1074,7 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
     def OnPageListSort(self, evt):
         self.ctrls.rbPagesInList.SetValue(True)
 
-        self.pageListData.sort()
+        self.pWiki.getCollator().sort(self.pageListData)
         
         self.ctrls.lbPageList.Clear()
         self.ctrls.lbPageList.AppendItems(self.pageListData)
@@ -1316,7 +1316,7 @@ class FastSearchPopup(wxFrame):
     
             if len(sarOp.searchStr) > 0:
                 self.foundPages = self.mainControl.getWikiDocument().searchWiki(sarOp)
-                self.foundPages.sort()
+                self.pWiki.getCollator().sort(self.foundPages)
                 self.resultBox.showFound(sarOp, self.foundPages,
                         self.mainControl.getWikiDocument())
             else:

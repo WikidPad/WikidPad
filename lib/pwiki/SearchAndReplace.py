@@ -78,7 +78,7 @@ class AbstractSearchNode:
         assert 0 #abstract
 
 
-    def orderNatural(self, wordSet):
+    def orderNatural(self, wordSet, coll):
         """
         Order the words in the wordSet in a natural order for this search
         node. The meaning of "natural" depends on the concrete node called.
@@ -88,6 +88,7 @@ class AbstractSearchNode:
         wordSet -- Mutable set with words containing
             the words to sort natural. On exit, it contains only the words
             not contained in the returned list
+        coll -- Collator for sorting
         Returns: List of words from wordSet which could be sorted in a
             natural order.
         """
@@ -151,16 +152,16 @@ class AndSearchNode(AbstractSearchNode):
         return Unknown
 
 
-    def orderNatural(self, wordSet):
+    def orderNatural(self, wordSet, coll):
         """
         Order of left operand has priority
         """
-        leftret = self.left.orderNatural(wordSet)
+        leftret = self.left.orderNatural(wordSet, coll)
         
         if len(wordSet) == 0:
             return leftret
 
-        rightret = self.right.orderNatural(wordSet)
+        rightret = self.right.orderNatural(wordSet, coll)
         
         return leftret + rightret
         
@@ -333,7 +334,7 @@ class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
         return self.wordSet.has_key(word)
 
 
-    def orderNatural(self, wordSet):
+    def orderNatural(self, wordSet, coll):
         result = []
         for w in self.wordList:
             if w in wordSet:
@@ -625,7 +626,7 @@ class ListWikiPagesOperation:
         return self.searchOpTree.testWikiPage(word, text)
 
     
-    def applyOrdering(self, wordSet):
+    def applyOrdering(self, wordSet, coll):
         """
         Returns the wordSet set ordered as set in self.ordering. It must
         be called after beginWikiSearch() and before corresponding
@@ -637,21 +638,22 @@ class ListWikiPagesOperation:
             return list(wordSet)
         elif self.ordering == "ascending":
             result = list(wordSet)
-            result.sort()
+            coll.sort(result)
             return result
         elif self.ordering == "natural":
-            return self.orderNatural(wordSet)
+            return self.orderNatural(wordSet, coll)
             
         return list(wordSet)  # TODO Error
 
 
-    def orderNatural(self, wordSet):
+    def orderNatural(self, wordSet, coll):
         """
         Return the list of words in a natural order. Meaning of "natural"
         is defined by the called search node(s). It must be called after
         beginWikiSearch() and before corresponding endWikiSearch() call.
         
         wordSet -- mutable set of words to order "natural"
+        coll -- Collator for sorting
         """
         if self.searchOpTree is None:
             result = list(wordSet)
@@ -662,7 +664,7 @@ class ListWikiPagesOperation:
 #         for w in words:
 #             wordSet[w] = None
             
-        naturalList = self.searchOpTree.orderNatural(wordSet)
+        naturalList = self.searchOpTree.orderNatural(wordSet, coll)
         remain = list(wordSet)
         remain.sort()
 
@@ -944,7 +946,7 @@ class SearchReplaceOperation:
                 self.searchOpTree.testWikiPage(word, text)
 
 
-    def applyOrdering(self, wordSet):
+    def applyOrdering(self, wordSet, coll):
         """
         Returns the wordSet set ordered as defined in self.ordering. It must
         be called after beginWikiSearch() and before corresponding
@@ -956,21 +958,22 @@ class SearchReplaceOperation:
             return list(wordSet)
         elif self.ordering == "ascending":
             result = list(wordSet)
-            result.sort()
+            coll.sort(result)
             return result
         elif self.ordering == "natural":
-            return self.orderNatural(wordSet)
+            return self.orderNatural(wordSet, coll)
             
         return list(wordSet)  # TODO Error
 
 
-    def orderNatural(self, wordSet):
+    def orderNatural(self, wordSet, coll):
         """
         Return the list of words in a natural order. Meaning of "natural"
         is defined by the called search node(s). It must be called after
         beginWikiSearch() and before corresponding endWikiSearch() call.
         
         wordSet -- mutable set of words to order "natural"
+        coll -- Collator for sorting
         """
 #         wordSet = {}
 #         for w in words:
@@ -979,7 +982,7 @@ class SearchReplaceOperation:
         if self.searchOpTree is None:
             self.rebuildSearchOpTree()
             
-        naturalList = self.searchOpTree.orderNatural(wordSet)
+        naturalList = self.searchOpTree.orderNatural(wordSet, coll)
         remain = list(wordSet)
         remain.sort()
         

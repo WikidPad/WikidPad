@@ -252,7 +252,7 @@ TABLE_DEFINITIONS = {
         ("created", t.t),
         ("modified", t.t),
         ("presentationdatablock", t.t),
-        ("wordnormcase", t.t)
+        ("wordnormcase", t.t)              # TODO: Remove on next format update
         ),
 
 

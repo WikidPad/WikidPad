@@ -283,7 +283,7 @@ class MiscEvent(object):
         @return self
         """
         for k in addkeys:
-            self.properties[k] = None
+            self.properties[k] = True
         return self
         
 
@@ -307,7 +307,7 @@ class MiscEvent(object):
         """
         event = self.createClone()
         for k in addkeys:
-            event.properties[k] = None
+            event.properties[k] = True
         return event
 
 

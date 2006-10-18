@@ -78,6 +78,9 @@ class WikiData:
                 self.connWrap.rollback()
                 raise
 
+        # Further possible updates   
+        DbStructure.updateDatabase2(self.connWrap)
+
         # Activate UTF8 support for text in database (content is blob!)
         DbStructure.registerUtf8Support(self.connWrap)
 
@@ -211,9 +214,10 @@ class WikiData:
                 creadate = ti
 
             # Word does not exist -> record creation date
-            self.connWrap.execSql("insert or replace into wikiwordcontent"+\
-                "(word, content, modified, created) values (?,?,?,?)",
-                (word, sqlite.Binary(content), moddate, creadate))
+            self.connWrap.execSql("insert or replace into wikiwordcontent"
+                "(word, content, modified, created, wordnormcase) "
+                "values (?,?,?,?,?)",
+                (word, sqlite.Binary(content), moddate, creadate, word.lower()))
 
     def renameContent(self, oldWord, newWord):
         """
@@ -221,8 +225,8 @@ class WikiData:
         after the call under newWord. The self.cachedContentNames
         dictionary is updated, other caches won't be updated.
         """
-        self.connWrap.execSql("update wikiwordcontent set word = ? where word = ?",
-                (newWord, oldWord))
+        self.connWrap.execSql("update wikiwordcontent set word = ?, wordnormcase = ? "
+                "where word = ?", (newWord, newWord.lower(), oldWord))
 
         del self.cachedContentNames[oldWord]
         self.cachedContentNames[newWord] = 1
@@ -431,10 +435,24 @@ class WikiData:
         """
         get the words that have no parents.
         """
+#                 "select word from wikiwordcontent where not word glob '[[]*' "
+#                 "except select relation from wikirelations")
 
         return self.connWrap.execSqlQuerySingleColumn(
                 "select word from wikiwordcontent where not word glob '[[]*' "
-                "except select relation from wikirelations")
+                "except select relation from wikirelations "
+                "except select word from wikiwordprops where key='alias' and "
+                "value in (select relation from wikirelations)")
+
+    def getUndefinedWords(self):
+        """
+        List words which are childs of a word but are not defined, neither
+        directly nor as alias.
+        """
+        return self.connWrap.execSqlQuerySingleColumn(
+                "select relation from wikirelations "
+                "except select word from wikiwordcontent where not word glob '[[]*' "
+                "except select value from wikiwordprops where key='alias'")
 
     def addRelationship(self, word, toWord):
         """
@@ -619,24 +637,28 @@ class WikiData:
         get the list of words with thisStr in them,
         if possible first these which start with thisStr.
         """
+        thisStr = thisStr.lower()
+
         result = self.connWrap.execSqlQuerySingleColumn(
-                "select word from wikiwordcontent where word like (? || '%')",
+                "select word from wikiwordcontent where wordnormcase like (? || '%')",
                 (thisStr,))
 
         if includeAliases:
             result += self.connWrap.execSqlQuerySingleColumn(
                     "select value from wikiwordprops where key = 'alias' and "
-                    "value like (? || '%')", (thisStr,))
+                    "utf8Normcase(value) like (? || '%')", (thisStr,))
 
         result += self.connWrap.execSqlQuerySingleColumn(
                 "select word from wikiwordcontent "
-                "where word like ('%' || ? || '%') and word not like (? || '%')"
-                "and word not glob '[[]*'", (thisStr, thisStr))
+                "where wordnormcase like ('%' || ? || '%') and "
+                "wordnormcase not like (? || '%') and word not glob '[[]*'",
+                (thisStr, thisStr))
 
         if includeAliases:
             result += self.connWrap.execSqlQuerySingleColumn(
                     "select value from wikiwordprops where key = 'alias' and "
-                    "value like ('%' || ? || '%') and value not like (? || '%')",
+                    "utf8Normcase(value) like ('%' || ? || '%') and "
+                    "utf8Normcase(value) not like (? || '%')",
                     (thisStr, thisStr))
 
         return result
@@ -1198,7 +1220,9 @@ class WikiData:
 #                 wikiPage = self.createPage(wikiWord)
 #                 wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
 #                 step = step + 1
-                
+
+        self.connWrap.execSql("update wikiwordcontent "
+                "set wordnormcase=utf8Normcase(word)")
         DbStructure.rebuildIndices(self.connWrap)
 
         # TODO
@@ -1215,14 +1239,14 @@ class WikiData:
             self.connWrap.execSql("update wikiwordcontent set "
                     "created=(select max(created) from wikiwordcontent as "
                     "inner where inner.word=wikiwordcontent.word)")
-            
+
             # Delete all but the newest page
             self.connWrap.execSql("delete from wikiwordcontent where "
                     "ROWID not in (select max(ROWID) from wikiwordcontent as "
                     "outer where modified=(select max(modified) from "
                     "wikiwordcontent as inner where inner.word=outer.word) "
                     "group by outer.word)")
-                    
+
             DbStructure.rebuildIndices(self.connWrap)
 
        # TODO: More repair operations

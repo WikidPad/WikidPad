@@ -535,6 +535,7 @@ lib/gadfly/store.py -text
 lib/pwiki/AdditionalDialogs.py -text
 lib/pwiki/CmdLineAction.py -text
 lib/pwiki/Configuration.py -text
+lib/pwiki/DocPagePresenter.py -text
 lib/pwiki/DocPages.py -text
 lib/pwiki/EnchantDriver.py -text
 lib/pwiki/Enum.py -text

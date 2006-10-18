@@ -202,7 +202,7 @@ TABLE_DEFINITIONS = {
         ("created", t.t),
         ("modified", t.t),
         ("presentationdatablock", t.b),
-        ("wordnormcase", t.t)
+        ("wordnormcase", t.t)   # Column word in lowercase
         ),
     
     
@@ -282,6 +282,7 @@ def rebuildIndices(connwrap):
     Delete and recreate all necessary indices of the database
     """
     connwrap.execSqlNoError("drop index wikiwords_pkey")
+    connwrap.execSqlNoError("drop index wikiwords_wordnormcase")
     connwrap.execSqlNoError("drop index wikirelations_pkey")
     connwrap.execSqlNoError("drop index wikirelations_word")
     connwrap.execSqlNoError("drop index wikirelations_relation")    
@@ -291,6 +292,7 @@ def rebuildIndices(connwrap):
 #     connwrap.execSqlNoError("drop index headversion_pkey")
 
     connwrap.execSqlNoError("create unique index wikiwords_pkey on wikiwords(word)")
+    connwrap.execSqlNoError("create index wikiwords_wordnormcase on wikiwords(wordnormcase)")
     connwrap.execSqlNoError("create unique index wikirelations_pkey on wikirelations(word, relation)")
     connwrap.execSqlNoError("create index wikirelations_word on wikirelations(word)")
     connwrap.execSqlNoError("create index wikirelations_relation on wikirelations(relation)")
@@ -443,8 +445,8 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
                     ("formatver", str(VERSION_DB)),  # Version of database format the data was written
                     ("writecompatver", str(VERSION_WRITECOMPAT)),  # Lowest format version which is write compatible
                     ("readcompatver", str(VERSION_READCOMPAT)),  # Lowest format version which is read compatible
-                    ("branchtag", "WikidPad"),  # Tag of the WikidPad branch
-                    ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
+                    ("branchtag", "WikidPad")  # Tag of the WikidPad branch
+#                     ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
                     )  )
 
             rebuildIndices(connwrap)
@@ -462,6 +464,15 @@ def mbcsToUtf8(s):
     return utf8Enc(mbcsDec(s)[0])[0]
 
 
+def sqlite_utf8Normcase(context, values):
+    """
+    Sqlite user-defined function "utf8Normcase" to get the lowercase of a word
+    encoded in UTF-8. The result is also encoded in UTF-8.
+    """
+    normalWord = utf8Dec(values[0].value_text(), "replace")[0].lower()
+    context.result_text(utf8Enc(normalWord)[0])
+
+
 # def sqlite_testMatch(context, values):
 #     """
 #     Sqlite user-defined function "testMatch" for WikiData.search()
@@ -476,13 +487,6 @@ def mbcsToUtf8(s):
 #         context.result_null()
 
 
-# def sqlite_nakedWord(context, values):
-#     """
-#     Sqlite user-defined function "nakedWord" to remove brackets around
-#     wiki words. Needed for version update from 4 to 5.
-#     """
-#     nakedword = wikiWordToLabel(utf8Dec(values[0].value_text(), "replace")[0])
-#     context.result_text(utf8Enc(nakedword)[0])
 
 
 
@@ -534,13 +538,12 @@ def registerSqliteFunctions(connwrap):
     """
     Register necessary user-defined functions for a connection
     """
-#     connwrap.getConnection().createFunction("textToBlob", 1, sqlite_textToBlob)
+    connwrap.getConnection().createFunction("utf8Normcase", 1, sqlite_utf8Normcase)
 #     connwrap.getConnection().createFunction("testMatch", 3, sqlite_testMatch)
 #     connwrap.getConnection().createFunction("latin1ToUtf8", 1, sqlite_latin1ToUtf8)
 #     connwrap.getConnection().createFunction("utf8ToLatin1", 1, sqlite_utf8ToLatin1)
 #     connwrap.getConnection().createFunction("mbcsToUtf8", 1, sqlite_mbcsToUtf8)
 #     connwrap.getConnection().createFunction("utf8ToMbcs", 1, sqlite_utf8ToMbcs)
-#     connwrap.getConnection().createFunction("nakedWord", 1, sqlite_nakedWord)
 
 
 def registerUtf8Support(connwrap):
@@ -573,14 +576,14 @@ def checkDatabaseFormat(connwrap):
     Returns: 0: Up to date,  1: Update needed,  2: Unknown format, update not possible
     """
     
-    indices = connwrap.execSqlQuerySingleColumn(
-            "select name from sqlite_master where type='index'")
-    tables = connwrap.execSqlQuerySingleColumn(
-            "select name from sqlite_master where type='table'")
+#     indices = connwrap.execSqlQuerySingleColumn(
+#             "select name from sqlite_master where type='index'")
+#     tables = connwrap.execSqlQuerySingleColumn(
+#             "select name from sqlite_master where type='table'")
+# 
+#     indices = map(string.upper, indices)
+#     tables = map(string.upper, tables)
 
-    indices = map(string.upper, indices)
-    tables = map(string.upper, tables)
-    
     if getSettingsValue(connwrap, "branchtag") != "WikidPad":
         return 2, "Database has unknown format branchtag='%s'" \
                 % getSettingsValue(connwrap, "branchtag")
@@ -608,17 +611,18 @@ def updateDatabase(connwrap):
     """
     connwrap.commit()
     
-    indices = connwrap.execSqlQuerySingleColumn(
-            "select name from sqlite_master where type='index'")
-    tables = connwrap.execSqlQuerySingleColumn(
-            "select name from sqlite_master where type='table'")
-
-    indices = map(string.upper, indices)
-    tables = map(string.upper, tables)
+#     indices = connwrap.execSqlQuerySingleColumn(
+#             "select name from sqlite_master where type='index'")
+#     tables = connwrap.execSqlQuerySingleColumn(
+#             "select name from sqlite_master where type='table'")
+# 
+#     indices = map(string.upper, indices)
+#     tables = map(string.upper, tables)
 
     formatver = getSettingsInt(connwrap, "formatver")
 
     if formatver == 0:
+        # Insert in table wikiwords column wordnormcase
         changeTableSchema(connwrap, "wikiwords", 
                 TABLE_DEFINITIONS["wikiwords"])
 
@@ -632,8 +636,8 @@ def updateDatabase(connwrap):
             ("formatver", str(VERSION_DB)),  # Version of database format the data was written
             ("writecompatver", str(VERSION_WRITECOMPAT)),  # Lowest format version which is write compatible
             ("readcompatver", str(VERSION_READCOMPAT)),  # Lowest format version which is read compatible
-            ("branchtag", "WikidPad"),  # Tag of the WikidPad branch
-            ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
+            ("branchtag", "WikidPad")  # Tag of the WikidPad branch
+#             ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
             )  )
 
     rebuildIndices(connwrap)
@@ -698,8 +702,25 @@ def updateDatabase(connwrap):
 #     
 #     connwrap.commit()
 
-        
-    
+
+
+def updateDatabase2(connwrap):
+    """
+    Second update function. Called when database version is current.
+    Performs further updates
+    """
+    wordnormcasemode = getSettingsValue(connwrap, "wordnormcasemode")
+    if wordnormcasemode != "lower":
+        # No wordnormcasemode or other mode defined
+
+        # Fill column wordnormcase
+        connwrap.execSql("update wikiwords set wordnormcase=utf8Normcase(word)")
+
+        connwrap.execSql("insert or replace into settings(key, value) "
+                "values ('wordnormcasemode', 'lower')")
+
+
+
 """
 Schema changes in WikidPad:
 

@@ -297,7 +297,7 @@ class SpellCheckerDialog(wxDialog):
         """  
         self.spellChkAddedGlobal.add(self.currentCheckedWord)
         words = list(self.spellChkAddedGlobal)
-        words.sort()
+        self.mainControl.getCollator().sort(words)
         self.globalPwlPage.replaceLiveText(u"\n".join(words))
 
         self.OnIgnore(None)
@@ -309,7 +309,7 @@ class SpellCheckerDialog(wxDialog):
         """
         self.spellChkAddedLocal.add(self.currentCheckedWord)
         words = list(self.spellChkAddedLocal)
-        words.sort()
+        self.mainControl.getCollator().sort(words)
         self.localPwlPage.replaceLiveText(u"\n".join(words))
 
         self.OnIgnore(None)

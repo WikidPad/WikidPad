@@ -457,8 +457,8 @@ class FontFaceDialog(wxDialog):
         fenum = wxFontEnumerator()
         fenum.EnumerateFacenames()
         facelist = fenum.GetFacenames()
-        facelist.sort()
-        
+        self.parent.getCollator().sort(facelist)
+
         for f in facelist:
             self.ctrls.lbFacenames.Append(f)
             

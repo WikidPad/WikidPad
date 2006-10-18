@@ -3,7 +3,7 @@
 import sys, os, traceback, os.path, glob, time, socket
 os.stat_float_times(True)
 
-VERSION_STRING = "wikidPad 1.8beta2"
+VERSION_STRING = "wikidPad 1.8beta3"
 
 if not hasattr(sys, 'frozen'):
     sys.path.append("lib")
@@ -44,6 +44,7 @@ from pwiki.CmdLineAction import CmdLineAction
 from pwiki.Serialization import SerializeStream
 from pwiki import Ipc
 from pwiki.Configuration import createGlobalConfiguration
+from pwiki.Localization import getCollatorByString
 
 
 def findDirs():
@@ -215,12 +216,16 @@ class App(wxApp):
                 self.createDefaultGlobalConfig(globalConfigLoc)
         else:
             self.createDefaultGlobalConfig(globalConfigLoc)
-            
+
         self.lowResources = self.globalConfig.getboolean("main", "lowresources")
 
         # Build icon cache
         iconDir = os.path.join(self.wikiAppDir, "icons")
         self.iconCache = IconCache(iconDir, self.lowResources)
+        
+        # self.collator = getCollatorByString("c")
+        self.collator = getCollatorByString("Python")
+        # self.collator = getCollatorByString("", True)
 
         if self.globalConfig.getboolean("main", "single_process"):
             # Single process mode means to create a server, detect an already
@@ -401,6 +406,9 @@ class App(wxApp):
         Return the icon cache object
         """
         return self.iconCache
+        
+    def getCollator(self):
+        return self.collator
 
 
 

@@ -285,6 +285,7 @@ def rebuildIndices(connwrap):
     Delete and recreate all necessary indices of the database
     """
     connwrap.execSqlNoError("drop index wikiwordcontent_pkey")
+    connwrap.execSqlNoError("drop index wikiwords_wordnormcase")
     connwrap.execSqlNoError("drop index wikirelations_pkey")
     connwrap.execSqlNoError("drop index wikirelations_word")
     connwrap.execSqlNoError("drop index wikirelations_relation")    
@@ -293,6 +294,7 @@ def rebuildIndices(connwrap):
     connwrap.execSqlNoError("drop index headversion_pkey")
         
     connwrap.execSqlNoError("create unique index wikiwordcontent_pkey on wikiwordcontent(word)")
+    connwrap.execSqlNoError("create index wikiwords_wordnormcase on wikiwordcontent(wordnormcase)")
     connwrap.execSqlNoError("create unique index wikirelations_pkey on wikirelations(word, relation)")
     connwrap.execSqlNoError("create index wikirelations_word on wikirelations(word)")
     connwrap.execSqlNoError("create index wikirelations_relation on wikirelations(relation)")
@@ -443,8 +445,8 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
                     ("formatver", str(VERSION_DB)),  # Version of database format the data was written
                     ("writecompatver", str(VERSION_WRITECOMPAT)),  # Lowest format version which is write compatible
                     ("readcompatver", str(VERSION_READCOMPAT)),  # Lowest format version which is read compatible
-                    ("branchtag", "WikidPadCompact"),  # Tag of the WikidPad branch
-                    ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
+                    ("branchtag", "WikidPadCompact")  # Tag of the WikidPad branch
+#                     ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
                     )  )
 
             rebuildIndices(connwrap)
@@ -536,6 +538,14 @@ def sqlite_nakedWord(context, values):
     context.result_text(utf8Enc(nakedword)[0])
 
 
+def sqlite_utf8Normcase(context, values):
+    """
+    Sqlite user-defined function "utf8Normcase" to get the lowercase of a word
+    encoded in UTF-8. The result is also encoded in UTF-8.
+    """
+    normalWord = utf8Dec(values[0].value_text(), "replace")[0].lower()
+    context.result_text(utf8Enc(normalWord)[0])
+
 
 # Get the default text handling functions
 bind_text = sqlite.def_bind_fctfinder(None, None, "")
@@ -592,6 +602,7 @@ def registerSqliteFunctions(connwrap):
     connwrap.getConnection().createFunction("mbcsToUtf8", 1, sqlite_mbcsToUtf8)
     connwrap.getConnection().createFunction("utf8ToMbcs", 1, sqlite_utf8ToMbcs)
     connwrap.getConnection().createFunction("nakedWord", 1, sqlite_nakedWord)
+    connwrap.getConnection().createFunction("utf8Normcase", 1, sqlite_utf8Normcase)
 
 
 def registerUtf8Support(connwrap):
@@ -919,13 +930,30 @@ def updateDatabase(connwrap):
         ("formatver", str(VERSION_DB)),  # Version of database format the data was written
         ("writecompatver", str(VERSION_WRITECOMPAT)),  # Lowest format version which is write compatible
         ("readcompatver", str(VERSION_READCOMPAT)),  # Lowest format version which is read compatible
-        ("branchtag", "WikidPadCompact"),  # Tag of the WikidPad branch
-        ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
+        ("branchtag", "WikidPadCompact")  # Tag of the WikidPad branch
+#         ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
         )   )
 
     rebuildIndices(connwrap)
     
     connwrap.commit()
+
+
+
+def updateDatabase2(connwrap):
+    """
+    Second update function. Called when database version is current.
+    Performs further updates
+    """
+    wordnormcasemode = getSettingsValue(connwrap, "wordnormcasemode")
+    if wordnormcasemode != "lower":
+        # No wordnormcasemode or other mode defined
+
+        # Fill column wordnormcase
+        connwrap.execSql("update wikiwordcontent set wordnormcase=utf8Normcase(word)")
+
+        connwrap.execSql("insert or replace into settings(key, value) "
+                "values ('wordnormcasemode', 'lower')")
 
 
 # class WikiDBExistsException(WikiDataException): pass

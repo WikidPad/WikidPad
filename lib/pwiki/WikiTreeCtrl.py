@@ -285,9 +285,11 @@ class WikiWordNode(AbstractNode):
             # Retrieve relations as list of children words
             relations = self._getValidChildren(wikiPage, withPosition=False)
             if childSortOrder.startswith(u"desc"):
-                relations.sort(_cmpLowerDesc) # sort alphabetically
+                relations.sort(_genCmpLowerDesc(
+                        self.treeCtrl.pWiki.getCollator())) # sort alphabetically
             elif childSortOrder.startswith(u"asc"):
-                relations.sort(_cmpLowerAsc)
+                relations.sort(_genCmpLowerAsc(
+                        self.treeCtrl.pWiki.getCollator()))
 
         relationData = []
         position = 1
@@ -437,7 +439,11 @@ class MainViewNode(AbstractNode):
         node = MainParentlessNode(self.treeCtrl, self)
         if node.isVisible():
             result.append(node)
-            
+        # add "undefined" view
+        node = MainUndefinedNode(self.treeCtrl, self)
+        if node.isVisible():
+            result.append(node)
+
         result.append(MainFuncPagesNode(self.treeCtrl, self))
             
         return result
@@ -521,9 +527,9 @@ class TodoNode(AbstractNode):
                 if nextSubCategory not in addedTodoSubCategories:
                     addedTodoSubCategories.append(nextSubCategory)
 
-        addedTodoSubCategories.sort()
+        self.treeCtrl.pWiki.getCollator().sort(addedTodoSubCategories)
 #         addedRightSides.sort()
-        addedWords.sort()
+        self.treeCtrl.pWiki.getCollator().sort(addedWords)
 
         result = []
         # First list real categories, then right sides, then words
@@ -589,13 +595,13 @@ class PropCategoryNode(AbstractNode):
             addedSubCategories[nextcat] = None
             
         subCats = addedSubCategories.keys()
-        subCats.sort()
+        self.treeCtrl.pWiki.getCollator().sort(subCats)
         result += map(lambda c: PropCategoryNode(self.treeCtrl, self,
                 self.categories + (c,)), subCats)
                 
         # Now the values:
         vals = wikiData.getDistinctPropertyValues(u".".join(self.categories))
-        vals.sort()
+        self.treeCtrl.pWiki.getCollator().sort(vals)
         result += map(lambda v: PropValueNode(self.treeCtrl, self,
                 self.categories, v), vals)
                 
@@ -643,7 +649,7 @@ class PropValueNode(AbstractNode):
         result = []
         key = u".".join(self.categories)
         words = wikiData.getWordsWithPropertyValue(key, self.value)
-        words.sort()                
+        self.treeCtrl.pWiki.getCollator().sort(words)                
 #         return [WikiWordSearchNode(self.treeCtrl, self, w) for w in words]
         return [WikiWordPropertySearchNode(self.treeCtrl, self, w,
                 key, self.value) for w in words]
@@ -746,7 +752,7 @@ class SearchNode(AbstractNode):
         searchOp.setTitle(self.searchTitle)
         searchOp.replaceOp = False
         words = pWiki.getWikiDocument().searchWiki(searchOp)
-        words.sort()
+        self.treeCtrl.pWiki.getCollator().sort(words)
 
         return [WikiWordSearchNode(self.treeCtrl, self, w, searchOp=searchOp)
                 for w in words]
@@ -806,7 +812,7 @@ class ModifiedWithinNode(AbstractNode):
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.getWikiData()
         words = wikiData.getWikiWordsModifiedWithin(self.daySpan)
-        words.sort()
+        self.treeCtrl.pWiki.getCollator().sort(words)
                 
         return [WikiWordSearchNode(self.treeCtrl, self, w) for w in words]
 
@@ -842,7 +848,7 @@ class MainParentlessNode(AbstractNode):
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.getWikiData()
         words = wikiData.getParentlessWikiWords()
-        words.sort()
+        self.treeCtrl.pWiki.getCollator().sort(words)
         
 #         words = filter(lambda w: w != self.treeCtrl.pWiki.wikiName, words)
                 
@@ -854,6 +860,30 @@ class MainParentlessNode(AbstractNode):
 #                 words)
 
 
+class MainUndefinedNode(AbstractNode):
+    """
+    Represents the "undefined" node
+    """
+    __slots__ = ()
+    
+    def getNodePresentation(self):
+        style = NodeStyle()
+        style.label = u"undefined-nodes"
+        style.icon = u"question"
+        style.hasChildren = True
+        return style
+
+    def isVisible(self):
+        wikiData = self.treeCtrl.pWiki.getWikiData()
+        return len(wikiData.getUndefinedWords()) > 0
+        
+    def listChildren(self):
+        wikiData = self.treeCtrl.pWiki.getWikiData()
+        words = wikiData.getUndefinedWords()
+        self.treeCtrl.pWiki.getCollator().sort(words)
+
+        return [WikiWordSearchNode(self.treeCtrl, self, w) for w in words
+                if w != self.treeCtrl.pWiki.wikiName]
 
 
 class MainFuncPagesNode(AbstractNode):
@@ -1528,13 +1558,15 @@ def _cmpCharPosition(a, b):
     return int(a[1] - b[1])
 
 # sorter for relations, removes brackets and sorts lower case
-def _cmpLowerDesc(a, b):
-    return cmp(b.lower(), a.lower())
+def _genCmpLowerDesc(coll):
+    def _cmpLowerDesc(a, b):
+        return coll.strcoll(b.lower(), a.lower())
+    return _cmpLowerDesc
 
-def _cmpLowerAsc(a, b):
-    return cmp(a.lower(), b.lower())
-
-
+def _genCmpLowerAsc(coll):
+    def _cmpLowerAsc(a, b):
+        return coll.strcoll(a.lower(), b.lower())
+    return _cmpLowerAsc
 
 
 

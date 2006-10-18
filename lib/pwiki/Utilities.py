@@ -39,3 +39,14 @@ class ThreadHolder(_DumbThreadHolder):
     def isCurrent(self):
         return threading.currentThread() is self.thread
 
+
+# class FlagHolder(object):
+#     __slots__ = ("__weakref__", "flag")
+#     
+#     def __init__(self):
+#         self.flag = True
+#         
+#     def setFlag(self, f):
+#         self.flag = flag
+        
+    

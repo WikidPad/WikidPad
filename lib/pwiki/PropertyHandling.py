@@ -112,7 +112,7 @@ def buildIconsSubmenu(iconCache):
     iconsMenu.AppendMenu(wxNewId(), 'T-Z', iconsMenu6)
 
     icons = iconCache.iconLookupCache.keys();  # TODO: Create function?
-    icons.sort()
+    icons.sort()    # TODO sort with collator
 
     for icname in icons:
         if icname.startswith("tb_"):
