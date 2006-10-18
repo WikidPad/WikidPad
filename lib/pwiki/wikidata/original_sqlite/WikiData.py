@@ -388,25 +388,14 @@ class WikiData:
         NO LONGER VALID: (((also returns nodes that have files but
         no entries in the wikiwords table.)))
         """
-#         words = self._getAllPageNamesFromDisk()
-# 
-#         # Filter out non-wiki words
-#         wordSet = sets.Set([word for word in words if not word.startswith("[")])
-# 
-#         # Remove all which have parents
-#         relations = self.getAllRelations()
-#         for word, relation in relations:
-#             wordSet.discard(relation)
-#         
-#         # Create a sorted list of them
-#         words = list(wordSet)
-#         words.sort()
-#         
-#         return words
-
+#                 "select word from wikiwords where not word glob '[[]*' "
+#                 "except select relation from wikirelations")
+                
         return self.connWrap.execSqlQuerySingleColumn(
                 "select word from wikiwords where not word glob '[[]*' "
-                "except select relation from wikirelations")
+                "except select relation from wikirelations "
+                "except select word from wikiwordprops where key='alias' and "
+                "value in (select relation from wikirelations)")
 
     def addRelationship(self, word, toWord):
         """

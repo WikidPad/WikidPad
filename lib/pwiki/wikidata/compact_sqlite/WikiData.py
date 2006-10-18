@@ -425,10 +425,14 @@ class WikiData:
         """
         get the words that have no parents.
         """
+#                 "select word from wikiwordcontent where not word glob '[[]*' "
+#                 "except select relation from wikirelations")
 
         return self.connWrap.execSqlQuerySingleColumn(
                 "select word from wikiwordcontent where not word glob '[[]*' "
-                "except select relation from wikirelations")
+                "except select relation from wikirelations "
+                "except select word from wikiwordprops where key='alias' and "
+                "value in (select relation from wikirelations)")
 
     def addRelationship(self, word, toWord):
         """

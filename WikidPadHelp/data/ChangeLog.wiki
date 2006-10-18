@@ -1,6 +1,17 @@
 ﻿++ Change Log
 
 
+Oct. 18, 2006 (1.7rc3)
+
+    * Bug fixed: Pages were shown as parentless even if an alias
+      of the page had a parent
+    * Bug fixed: Detection of Linux OS failed due to a typo
+    * Bug fixed: Opening a particular page on startup by mentioning
+      the .wiki file on commandline did not work
+    * Bug fixed: Special URLs containing $ couldn't be activated
+      (further fixes may be necessary)
+
+
 Sep. 22, 2006 (1.7rc2)
 
     * Fixed bug: Some problems with non-ascii pathes.

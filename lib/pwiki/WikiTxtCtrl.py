@@ -1861,6 +1861,7 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
 # 
 #                 urls.append("file:%s" % url)
 
+        urls = [url.replace("%24", "$") for url in urls]
 
         self.editor.DoDropText(x, y, " ".join(urls))
 

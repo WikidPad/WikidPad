@@ -31,7 +31,7 @@ def isLinux():
     Return if working on Linux system
     """
     try:
-        return os.uname[0] == "Linux"
+        return os.uname()[0] == "Linux"
     except AttributeError:
         return False
 

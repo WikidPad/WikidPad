@@ -536,7 +536,6 @@ lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
 lib/pwiki/Importers.py -text
 lib/pwiki/Ipc.py -text
-lib/pwiki/Localization.py -text
 lib/pwiki/LogWindow.py -text
 lib/pwiki/MiscEvent.py -text
 lib/pwiki/OptionsDialog.py -text

@@ -2061,18 +2061,14 @@ These are your default global settings.
         return wdhandlers[index][0]
 
 
-
-    def openWiki(self, wikiConfigFilename, wikiWordToOpen=None,
+    def openWiki(self, wikiCombinedFilename, wikiWordToOpen=None,
             ignoreWdhName=False):
         """
         opens up a wiki
         ignoreWdhName -- Should the name of the wiki data handler in the
                 wiki config file (if any) be ignored?
         """
-
-        # trigger hooks
-        self.hooks.openWiki(self, wikiConfigFilename)
-
+        
         # Save the state of the currently open wiki, if there was one open
         # if the new config is the same as the old, don't resave state since
         # this could be a wiki overwrite from newWiki. We don't want to overwrite
@@ -2083,114 +2079,28 @@ These are your default global settings.
 #                 uniToGui(u"Opening Wiki: %s" % wikiConfigFilename), 0)
 
         # make sure the config exists
-        if (not exists(wikiConfigFilename)):
-            self.displayErrorMessage(u"Wiki configuration file '%s' not found" %
-                    wikiConfigFilename)
-            if wikiConfigFilename in self.wikiHistory:
-                self.wikiHistory.remove(wikiConfigFilename)
+#         if (not exists(wikiConfigFilename)):
+#             self.displayErrorMessage(u"Wiki configuration file '%s' not found" %
+#                     wikiConfigFilename)
+#             if wikiConfigFilename in self.wikiHistory:
+#                 self.wikiHistory.remove(wikiConfigFilename)
+#             return False
+
+        # make sure the config exists
+        cfgPath, splittedWikiWord = WikiDataManager.splitConfigPathAndWord(
+                wikiCombinedFilename)
+                
+        if cfgPath is None:
             return False
 
 #        if self.wikiConfigFilename != wikiConfigFilename:
         self.closeWiki()
+
+        # trigger hooks
+        self.hooks.openWiki(self, wikiCombinedFilename)
+
 #         self.buildMainMenu()   # ???
 
-            # read in the config file
-            # config = ConfigParser.ConfigParser()
-#             try:
-#                 # config.read(wikiConfigFile)
-#                 self.configuration.loadWikiConfig(wikiConfigFilename)
-#             except Exception, e:
-#                 # try to recover by checking if the parent dir contains the real wiki file
-#                 # if it does the current wiki file must be a wiki word file, so open the
-#                 # real wiki to the wiki word.
-# #                 try:
-#                 parentDir = dirname(dirname(wikiConfigFilename))
-#                 if parentDir:
-#                     wikiFiles = [file for file in os.listdir(parentDir) \
-#                             if file.endswith(".wiki")]
-#                     if len(wikiFiles) > 0:
-#                         wikiWord = basename(wikiConfigFilename)
-#                         wikiWord = wikiWord[0:len(wikiWord)-5]
-# 
-#                         # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
-#                         windows83Marker = wikiWord.find("~")
-#                         if windows83Marker != -1:
-#                             wikiWord = wikiWord[0:windows83Marker]
-#                             matchingFiles = [file for file in wikiFiles \
-#                                     if file.lower().startswith(wikiWord)]
-#                             if matchingFiles:
-#                                 wikiWord = matchingFiles[0]
-#                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
-#                 return
-# 
-# #                 except Exception, ne:
-# #                     traceback.print_exc()
-# #                     self.displayErrorMessage(u"Error reading config file '%s'" %
-# #                             wikiConfigFilename, ne)
-# #                     return False
-#     
-#             # config variables
-#             wikiName = self.configuration.get("main", "wiki_name")
-#             dataDir = self.configuration.get("wiki_db", "data_dir")
-#     
-#             # except Exception, e:
-#             if wikiName is None or dataDir is None:
-#                 raise BadConfigurationFileException(
-#                         "Wiki configuration file is corrupted")
-# #                 self.displayErrorMessage("Wiki configuration file is corrupted", e)
-# #                 # traceback.print_exc()
-# #                 return False
-# 
-#             # absolutize the path to data dir if it's not already
-#             if not isabs(dataDir):
-#                 dataDir = join(dirname(wikiConfigFilename), dataDir)
-#                 
-#             dataDir = mbcsDec(abspath(dataDir), "replace")[0]
-#     
-#     #         self.wikiConfigFilename = wikiConfigFilename
-#     #         self.wikiName = wikiName
-#     #         self.dataDir = dataDir
-#             
-#             # Path to file storage
-#             fileStorDir = join(dirname(wikiConfigFilename), "files")
-#     
-#             # create the db interface to the wiki data
-#             wikiDataManager = None
-# 
-# 
-#             if not ignoreWdhName:
-#                 wikidhName = self.configuration.get("main",
-#                         "wiki_database_type", "")
-#             else:
-#                 wikidhName = None
-#             if wikidhName:
-#                 if not WikiDataManager.isDbHandlerAvailable(wikidhName):
-#                     self.displayErrorMessage(   # TODO !!!!!!
-#                             'Required data handler %s not available' % wikidhName)
-#                     wikidhName = None
-#                 else:
-#                     wikiDataManager = WikiDataManager.openWikiDocument(self,
-#                             wikidhName, dataDir, fileStorDir, self.wikiSyntax)
-# 
-#             if not wikidhName:
-#                 wdhandlers = DbBackendUtils.listHandlers()
-#                 if len(wdhandlers) == 0:
-#                     raise NoDbHandlerException(
-#                             'No data handler available to open database.')
-# #                     self.displayErrorMessage(
-# #                             'No data handler available to open database.')
-#                     return
-# 
-#                 # Ask for the data handler to use
-#                 index = wxGetSingleChoiceIndex(u"Choose database type",
-#                         u"Choose database type", [wdh[1] for wdh in wdhandlers],
-#                         self)
-#                 if index == -1:
-#                     return
-#                     
-#                 wikiDataManager = WikiDataManager.openWikiDocument(self,
-#                         wdhandlers[index][0], dataDir, fileStorDir,
-#                         self.wikiSyntax)
         if ignoreWdhName:
             # Explicitly ask for wiki data handler
             dbtype = self._askForDbType()
@@ -2204,7 +2114,7 @@ These are your default global settings.
         while True:
             try:
                 wikiDataManager = WikiDataManager.openWikiDocument(
-                        wikiConfigFilename, self.wikiSyntax, dbtype)
+                        cfgPath, self.wikiSyntax, dbtype)
                 break
             except (UnknownDbHandlerException, DbHandlerNotAvailableException), e:
                 # Could not get handler name from wiki config file
@@ -2219,7 +2129,7 @@ These are your default global settings.
             except Exception, e:
                 # Something else went wrong
                 self.displayErrorMessage("Error connecting to database in '%s'"
-                        % wikiConfigFilename, e)
+                        % cfgPath, e)
                 traceback.print_exc()
                 return False
 
@@ -2237,19 +2147,10 @@ These are your default global settings.
         self.getConfig().setWikiConfig(self.wikiDataManager.getWikiConfig())
 
 
-#         # Set file storage according to configuration
-#         fs = self.getWikiDataManager().getFileStorage()
-# 
-#         fs.setModDateMustMatch(self.configuration.getboolean("main",
-#                 "fileStorage_identity_modDateMustMatch", False))
-#         fs.setFilenameMustMatch(self.configuration.getboolean("main",
-#                 "fileStorage_identity_filenameMustMatch", False))
-#         fs.setModDateIsEnough(self.configuration.getboolean("main",
-#                 "fileStorage_identity_modDateIsEnough", False))
-
-
         # what was the last wiki word opened
         lastWikiWord = wikiWordToOpen
+        if not lastWikiWord:
+            lastWikiWord = splittedWikiWord
         if not lastWikiWord:
             lastWikiWord = self.configuration.get("main", "first_wiki_word", u"")
             if lastWikiWord == u"":
@@ -2303,7 +2204,7 @@ These are your default global settings.
         self.rereadTextBlocks()
 
         # trigger hook
-        self.hooks.openedWiki(self, self.wikiName, wikiConfigFilename)
+        self.hooks.openedWiki(self, self.wikiName, wikiCombinedFilename)
 
         # return that the wiki was opened successfully
         return True
