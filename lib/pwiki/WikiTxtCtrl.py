@@ -749,18 +749,21 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def OnContextMenu(self, evt):
         # Enable/Disable appropriate menu items
-        self.contextMenu.FindItemById(GUI_ID.CMD_UNDO).Enable(self.CanUndo())
-        self.contextMenu.FindItemById(GUI_ID.CMD_REDO).Enable(self.CanRedo())
+        item = self.contextMenu.FindItemById(GUI_ID.CMD_UNDO)
+        if item: item.Enable(self.CanUndo())
+        item = self.contextMenu.FindItemById(GUI_ID.CMD_REDO)
+        if item: item.Enable(self.CanRedo())
 
         cancopy = self.GetSelectionStart() != self.GetSelectionEnd()
-        self.contextMenu.FindItemById(GUI_ID.CMD_TEXT_DELETE).\
-                Enable(cancopy and self.CanPaste())
-        self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_CUT).\
-                Enable(cancopy and self.CanPaste())
-        self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_COPY).\
-                Enable(cancopy)
-        self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_PASTE).\
-                Enable(self.CanPaste())
+        
+        item = self.contextMenu.FindItemById(GUI_ID.CMD_TEXT_DELETE)
+        if item: item.Enable(cancopy and self.CanPaste())
+        item = self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_CUT)
+        if item: item.Enable(cancopy and self.CanPaste())
+        item = self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_COPY)
+        if item: item.Enable(cancopy)
+        item = self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_PASTE)
+        if item: item.Enable(self.CanPaste())
 
         # Show menu
         self.PopupMenu(self.contextMenu)

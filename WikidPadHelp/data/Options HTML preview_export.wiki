@@ -23,8 +23,12 @@ If this option is checked, links to image URLs (those ending with .png, .gif or 
 
 *Shows pics as links in export*
 Same for HTML export.
-
 In the export dialog, you can temporarily override this setting for one export.
+
+*Table of contents*
+Choose if you want a table of contents in tree form, list form or not at all, see WikiExport#*Additional# options*
+In the export dialog, you can temporarily override this setting for one export.
+
 
 
 +++ HTML page settings (attributes of "<body>"-tag)

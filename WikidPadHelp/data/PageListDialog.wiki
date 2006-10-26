@@ -24,7 +24,7 @@ All pages mentioned in the list on the left of the dialog are in the resulting p
 +++ The left list
 There are a lot of possibilities to give you precise control of the content and order of this list.
 
-To the right of the actual list box there are the buttons "Up" and "Down" with which you can move the currently selected item in the list. With "Sort" the whole list is sorted alphabetically (the sorting algorithm orders upper case before lower case and does not work correctly for non-English characters).
+To the right of the actual list box there are the buttons "Up" and "Down" with which you can move the currently selected item in the list. With "Sort" the whole list is sorted alphabetically (the sorting algorithm depends on the option settings, see OptionsDialog#*Sort# order* ).
 
 Below the list box is a text field in which you can add new list items. To add them, hit enter in the field or click on the "Add" button to the right of the field (there is another "Add" button below).
 
@@ -40,7 +40,17 @@ You have also possibilities to *paste entries from clipboard*. Simply copy text 
     * "Overwrite": Remove previous list entries and replace them by the new ones
     * "Intersect": Remove entries from current list which are not in the extracted words
 
-You can also *control the order* of the pages in the final list. *"Alphabetically"* has the same restrictions as described for the "Sort" button above. *"Natural"* tries to order in the way the user would expect the pages to be ordered (well, more or less). If you have created your own list of wikiwords, the "natural" order keeps them as they are sorted by you. "Natural" is the slowest order mode. *"Unordered"* uses the internal order of the database and is the fastest possible way.
+You can also *control the order* of the pages in the final list:
+    * "Alphabetically"
+    * "Natural" tries to order in the way the user would expect
+      the pages to be ordered (well, more or less). If you have
+      created your own list of wikiwords, the "natural" order keeps
+      them as they are sorted by you. "Natural" is the second
+      slowest order mode. 
+    * "As Tree" tries to sort as words would appear in the main
+      tree of WikidPad. This is the slowest order mode.
+    * "Unordered" uses the internal order of the database and is
+      the fastest possible way.
 
 If you are using the page list dialog inside wiki-wide searching, the order option is not available.
 

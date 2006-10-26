@@ -202,22 +202,54 @@ class Printer:
 
 
     def buildWordList(self):
+        import SearchAndReplace as Sar
+
+        # Create wordList (what to export)
         selset = self.selectionSet
         root = self.pWiki.getCurrentWikiWord()
-                    
+        
+        if root is None and selset in (0, 1):
+            self.pWiki.displayErrorMessage(u"No real wiki word selected as root")
+            return
+
+        lpOp = Sar.ListWikiPagesOperation()
+
         if selset == 0:
             # single page
-            wordList = [root]
+            item = Sar.ListItemWithSubtreeWikiPagesNode(lpOp, [root], 0)
+            lpOp.setSearchOpTree(item)
+            lpOp.ordering = "asroottree"  # Slow, but more intuitive
         elif selset == 1:
             # subtree
-            wordList = self.pWiki.getWikiData().getAllSubWords([root])
+            item = Sar.ListItemWithSubtreeWikiPagesNode(lpOp, [root], -1)
+            lpOp.setSearchOpTree(item)
+            lpOp.ordering = "asroottree"  # Slow, but more intuitive
+#             wordList = self.pWiki.getWikiData().getAllSubWords([root])
         elif selset == 2:
             # whole wiki
-            wordList = self.pWiki.getWikiData().getAllDefinedWikiPageNames()
+            item = Sar.AllWikiPagesNode(lpOp)
+            lpOp.setSearchOpTree(item)
+            lpOp.ordering = "asroottree"  # Slow, but more intuitive
+#             wordList = self.pWiki.getWikiData().getAllDefinedWikiPageNames()
         else:
             # custom list
-            wordList = self.pWiki.getWikiDocument().searchWiki(
-                    self.listPagesOperation, True)
+            lpOp = self.listPagesOperation
+        
+        wordList = self.pWiki.getWikiDocument().searchWiki(lpOp, True)
+ 
+#         if selset == 0:
+#             # single page
+#             wordList = [root]
+#         elif selset == 1:
+#             # subtree
+#             wordList = self.pWiki.getWikiData().getAllSubWords([root])
+#         elif selset == 2:
+#             # whole wiki
+#             wordList = self.pWiki.getWikiData().getAllDefinedWikiPageNames()
+#         else:
+#             # custom list
+#             wordList = self.pWiki.getWikiDocument().searchWiki(
+#                     self.listPagesOperation, True)
             
         return wordList
 

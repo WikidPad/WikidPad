@@ -38,13 +38,16 @@ from pwiki import srePersistent
 srePersistent.loadCodeCache()
 
 from pwiki.wxHelper import IconCache
+from pwiki.MiscEvent import KeyFunctionSink
 from pwiki.PersonalWikiFrame import PersonalWikiFrame
 from pwiki.StringOps import mbcsDec, createRandomString
 from pwiki.CmdLineAction import CmdLineAction
 from pwiki.Serialization import SerializeStream
 from pwiki import Ipc
 from pwiki.Configuration import createGlobalConfiguration
-from pwiki.Localization import getCollatorByString
+from pwiki.Localization import getCollatorByString, CASEMODE_UPPER_INSIDE, \
+        CASEMODE_UPPER_FIRST
+
 
 
 def findDirs():
@@ -216,6 +219,11 @@ class App(wxApp):
                 self.createDefaultGlobalConfig(globalConfigLoc)
         else:
             self.createDefaultGlobalConfig(globalConfigLoc)
+            
+        self.globalConfig.getMiscEvent().addListener(KeyFunctionSink((
+                ("configuration changed", self.onGlobalConfigurationChanged),
+        )), False)
+
 
         self.lowResources = self.globalConfig.getboolean("main", "lowresources")
 
@@ -224,7 +232,7 @@ class App(wxApp):
         self.iconCache = IconCache(iconDir, self.lowResources)
         
         # self.collator = getCollatorByString("c")
-        self.collator = getCollatorByString("Python")
+        # self.collator = getCollatorByString("Default")
         # self.collator = getCollatorByString("", True)
 
         if self.globalConfig.getboolean("main", "single_process"):
@@ -314,6 +322,10 @@ class App(wxApp):
     
                 self.removeAppLockOnExit = True
         
+        self.collator = None
+
+        # Further configuration settings
+        self._rereadGlobalConfig()
 
         # Load wxPython XML resources
         rf = open(os.path.join(appdir, "WikidPad.xrc"), "r")
@@ -342,6 +354,26 @@ class App(wxApp):
         return ""
 
 
+    def onGlobalConfigurationChanged(self, miscevt):
+        self._rereadGlobalConfig()
+
+
+    def _rereadGlobalConfig(self):
+        """
+        Make settings from global config which are changeable during session
+        """
+        collationOrder = self.globalConfig.get("main", "collation_order")
+        collationUppercaseFirst = self.globalConfig.getboolean("main",
+                "collation_uppercaseFirst")
+                
+        if collationUppercaseFirst:
+            collationCaseMode = CASEMODE_UPPER_FIRST
+        else:
+            collationCaseMode = CASEMODE_UPPER_INSIDE
+
+        self.collator = getCollatorByString(collationOrder, collationCaseMode)
+
+        
     def OnExit(self):
         if self.removeAppLockOnExit:
             try:

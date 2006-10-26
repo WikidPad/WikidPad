@@ -958,19 +958,21 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
     _ORDERCHOICE_TO_NAME = {
             0: "natural",
             1: "ascending",
-            2: "no"
+            2: "asroottree",
+            3: "no"
     }
 
     _ORDERNAME_TO_CHOICE = {
             "natural": 0,
             "ascending": 1,
-            "no": 2
+            "asroottree": 2,
+            "no": 3
     }
 
 
     def setValue(self, value):
         self.value = value
-        
+
     def getValue(self):
         return self.value
 
@@ -1316,7 +1318,7 @@ class FastSearchPopup(wxFrame):
     
             if len(sarOp.searchStr) > 0:
                 self.foundPages = self.mainControl.getWikiDocument().searchWiki(sarOp)
-                self.pWiki.getCollator().sort(self.foundPages)
+                self.mainControl.getCollator().sort(self.foundPages)
                 self.resultBox.showFound(sarOp, self.foundPages,
                         self.mainControl.getWikiDocument())
             else:

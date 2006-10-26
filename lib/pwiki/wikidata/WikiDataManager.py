@@ -414,6 +414,9 @@ class WikiDataManager(MiscEventSourceMixin):
     def getDataDir(self):
         return self.dataDir
         
+    def getCollator(self):
+        return wxGetApp().getCollator()
+        
     def getNoAutoSaveFlag(self):
         """
         Flag is set (by PersonalWikiFrame),
@@ -635,7 +638,7 @@ class WikiDataManager(MiscEventSourceMixin):
         returning the list.
         """
         wikiData = self.getWikiData()
-        sarOp.beginWikiSearch(wikiData)
+        sarOp.beginWikiSearch(self)
         try:
             # First search currently cached pages
             exclusionSet = sets.Set()
@@ -656,7 +659,7 @@ class WikiDataManager(MiscEventSourceMixin):
             resultSet = self.getWikiData().search(sarOp, exclusionSet)
             resultSet |= preResultSet
             if applyOrdering:
-                result = sarOp.applyOrdering(resultSet, wxGetApp().getCollator())
+                result = sarOp.applyOrdering(resultSet, self.getCollator())
             else:
                 result = list(resultSet)
 

@@ -1,7 +1,34 @@
 ﻿++ Change Log
 
 
-Sep. 30, 2006 (1.8beta2)
+Oct. 26, 2006 (1.8beta3)
+
+    * List undefined pages (dead wiki links), also appropriate
+      insertion added. See WikiMaintenance!finding_undefined_links,
+      [Insertions]
+    * Better alphabetical sort order for wiki words, todos,
+      attributes in tree. See OptionsDialog#*Sort# order*
+    * The order how wiki pages are ordered when printing or
+      exporting the whole wiki or a subtree to a single HTML page
+      is (hopefully) more logical. It is the same as the new
+      "As Tree" order used in PageListDialog#"As# Tree" .
+    * Option to generate a table of contents in tree or list form
+      for HTML exports, see WikiExport#*Additional# options* ,
+      [Options HTML preview_export]#*Table# of# contents*
+    
+    * Bug fixed: Detection of Linux OS failed due to a typo
+    * Bug fixed: Pages were shown as parentless even if an alias
+      of the page had a parent
+    * Bug fixed: Opening a particular page on startup by mentioning
+      the .wiki file on commandline did not work
+    * Bug fixed: Special URLs containing $ couldn't be activated
+      (further fixes may be necessary)
+    * Bug fixed: Bad HTML code if first cell of a table row is empty
+      and indented.
+
+
+
+Sep. 30, 2006 (1.8beta2, repository revision in "mbutscher" branch: 92)
 
     * Support for insertion of pages, relations (parents, children,
       ...) and saved searches. See [Insertions].

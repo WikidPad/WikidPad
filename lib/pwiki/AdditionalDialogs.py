@@ -598,6 +598,8 @@ class ExportDialog(wxDialog):
             dlg.Destroy()
 
     def OnOk(self, evt):
+        import SearchAndReplace as Sar
+
         # Run exporter
         ob, etype, desc, panel = \
                 self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
@@ -630,19 +632,31 @@ class ExportDialog(wxDialog):
         if root is None and selset in (0, 1):
             self.pWiki.displayErrorMessage(u"No real wiki word selected as root")
             return
+            
+        lpOp = Sar.ListWikiPagesOperation()
 
         if selset == 0:
             # single page
-            wordList = [root]
+            item = Sar.ListItemWithSubtreeWikiPagesNode(lpOp, [root], 0)
+            lpOp.setSearchOpTree(item)
+            lpOp.ordering = "asroottree"  # Slow, but more intuitive
         elif selset == 1:
             # subtree
-            wordList = self.pWiki.getWikiData().getAllSubWords([root])
+            item = Sar.ListItemWithSubtreeWikiPagesNode(lpOp, [root], -1)
+            lpOp.setSearchOpTree(item)
+            lpOp.ordering = "asroottree"  # Slow, but more intuitive
+#             wordList = self.pWiki.getWikiData().getAllSubWords([root])
         elif selset == 2:
             # whole wiki
-            wordList = self.pWiki.getWikiData().getAllDefinedWikiPageNames()
+            item = Sar.AllWikiPagesNode(lpOp)
+            lpOp.setSearchOpTree(item)
+            lpOp.ordering = "asroottree"  # Slow, but more intuitive
+#             wordList = self.pWiki.getWikiData().getAllDefinedWikiPageNames()
         else:
             # custom list
-            wordList = self.pWiki.getWikiDocument().searchWiki(self.listPagesOperation, True)
+            lpOp = self.listPagesOperation
+
+        wordList = self.pWiki.getWikiDocument().searchWiki(lpOp, True)
 
 #         self.pWiki.getConfig().set("main", "html_export_pics_as_links",
 #                 self.ctrls.cbHtmlExportPicsAsLinks.GetValue())

@@ -62,6 +62,12 @@ Automatically hide log window if no more error messages are present.
 *Append after clipboard snippet*
 Control what the ClipboardCatcher should append after each caught snippet.
 
+*Sort order*
+Choose the desired alphabetical sort algorithm for wiki words, todos, attributes in tree or PageListDialog.
+The "C" order is the way previous WikidPad versions worked (uppercase letters first, non-English characters in illogical order at the end).
+The new "Default" order sorts according to default order determined by the operating system. Normally, uppercase letters are sorted inorder (AaBbCc). If you want uppercase letters (more exactly: all characters but lowercase ones) before the rest (ABCabc), check
+*Uppercase first*.
+This setting has no effect for "C" order. Alphabetical sorting of children of a wiki word in tree is always inorder.
 
 ++++ Tree options
 

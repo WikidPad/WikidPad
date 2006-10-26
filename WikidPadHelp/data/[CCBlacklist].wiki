@@ -3,3 +3,5 @@ WikidPad
 WikidPadGlobals
 WikidPadCompact
 KBytes
+AaBbCc
+ABCabc

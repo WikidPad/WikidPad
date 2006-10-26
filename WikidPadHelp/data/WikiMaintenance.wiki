@@ -32,6 +32,7 @@ Autosave is automatically disabled after an error until a successful reconnect.
 
 ++ Other things
 
+
 +++ Finding and connecting parentless nodes
 
 As you add and remove links from the various pages in your wiki
@@ -43,5 +44,17 @@ or press Ctrl-Shift-Up
 
 You can then decide if you need to relink these nodes, or if you want
 to delete them via the CTRL-D delete command.
+
+anchor: finding_undefined_links
++++ Finding undefined wiki word links
+
+There may be also wiki word links to pages which do not exist, e. g. NonExisting. These are underlined and black in the editor. To list all such links, use the "undefined-nodes" node in the "Views" subtree. If you click on one of these links you go to an empty page for this word and can fill it with content.
+
+Sometimes words are unintentionally marked as wiki words. In this case you can either:
+
+    * Prefix the word with a backslash
+    * Add the attribute \[camelCaseWordsEnabled: false] on a page
+    * Enter the word into one of the blacklists, see WordLinking!exclude_from_linking.
+
 
 [icon: cog]

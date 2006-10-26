@@ -1,5 +1,5 @@
 from time import time
-import os.path, re, struct
+import os.path, re, struct, sets
 
 from MiscEvent import MiscEventSourceMixin
 
@@ -215,12 +215,29 @@ class WikiPage(DocPage):
 
         
     def getChildRelationships(self, existingonly=False, selfreference=True,
-            withPosition=False):
+            withPosition=False, excludeSet=sets.ImmutableSet()):
         """
+        get the child relations of this word
+        existingonly -- List only existing wiki words
+        selfreference -- List also wikiWord if it references itself
+        withPositions -- Return tuples (relation, firstcharpos) with char.
+            position of link in page (may be -1 to represent unknown)
+        excludeSet -- set of words which should be excluded from the list
+
         Does not support caching
         """
-        return self.getWikiData().getChildRelationships(self.wikiWord,
+        
+        relations = self.getWikiData().getChildRelationships(self.wikiWord,
                 existingonly, selfreference, withPosition=withPosition)
+                
+        if len(excludeSet) > 0:
+            # Filter out members of excludeSet
+            if withPosition:
+                relations = [r for r in relations if not r[0] in excludeSet]
+            else:
+                relations = [r for r in relations if not r in excludeSet]
+
+        return relations
 
 
     def getProperties(self):
@@ -507,6 +524,100 @@ class WikiPage(DocPage):
 #         self.setDirty(True)
 
 
+    # ----- Advanced functions -----
+
+    def getChildRelationshipsTreeOrder(self, existingonly=False,
+            excludeSet=sets.ImmutableSet()):
+        """
+        Return a list of children wiki words of the page, ordered as they would
+        appear in tree. Some children may be missing if they e.g.
+        are set as hidden.
+        excludeSet -- set of words which should be excluded from the list
+        existingonly -- true iff non-existing words should be hidden
+        """
+        
+        wikiDocument = self.wikiDocument
+        
+        # get the sort order for the children
+        childSortOrder = self.getPropertyOrGlobal(u'child_sort_order',
+                u"ascending")
+            
+        # Apply sort order
+        if childSortOrder == u"natural":
+            # Retrieve relations as list of tuples (child, firstcharpos)
+            relations = self.getChildRelationships(existingonly,
+                    selfreference=False, withPosition=True,
+                    excludeSet=excludeSet)
+            relations.sort(_cmpCharPosition)
+            # Remove firstcharpos
+            relations = [r[0] for r in relations]
+        else:
+            # Retrieve relations as list of children words
+            relations = self.getChildRelationships(existingonly, 
+                    selfreference=False, withPosition=False,
+                    excludeSet=excludeSet)
+            if childSortOrder.startswith(u"desc"):
+                coll = wikiDocument.getCollator()
+
+                def cmpLowerDesc(a, b):
+                    return coll.strcoll(
+                            b.lower(), a.lower())
+
+                relations.sort(cmpLowerDesc) # sort alphabetically
+            elif childSortOrder.startswith(u"asc"):
+                coll = wikiDocument.getCollator()
+
+                def cmpLowerAsc(a, b):
+                    return coll.strcoll(
+                            a.lower(), b.lower())
+
+                relations.sort(cmpLowerAsc)
+
+        relationData = []
+        position = 1
+        for relation in relations:
+            relationPage = wikiDocument.getWikiPageNoError(relation)
+            relationData.append((relation, relationPage, position))
+            position += 1
+
+        # Sort again, using tree position and priority properties
+        relationData.sort(_relationSort)
+
+        return [rd[0] for rd in relationData]
+
+
+        # TODO Remove aliases?
+    def _flatTreeHelper(self, page, deepness, excludeSet, result):
+        """
+        Recursive part of getFlatTree
+        """
+        children = page.getChildRelationshipsTreeOrder(existingonly=True,
+                excludeSet=excludeSet)
+                
+        subExcludeSet = excludeSet.copy()
+        # subExcludeSet.add(page.getWikiWord())
+        subExcludeSet.union_update(children)
+        for c in children:
+            subpage = self.wikiDocument.getWikiPage(c)
+            result.append((c, deepness + 1))
+            self._flatTreeHelper(subpage, deepness + 1, subExcludeSet, result)
+
+
+    def getFlatTree(self):
+        """
+        Returns a sequence of tuples (word, deepness) where the current
+        word is the first one with deepness 0.
+        TODO EXPLAIN FUNCTION !!!
+        """
+        result = [(self.getWikiWord(), 0)]
+        excludeSet = sets.Set((self.getWikiWord(),))
+        
+        self._flatTreeHelper(self, 0, excludeSet, result)
+        
+        return result
+
+
+
 # TODO Maybe split into single classes for each tag
 
 class FunctionalPage(DocPage):
@@ -561,43 +672,6 @@ class FunctionalPage(DocPage):
         elif self.funcTag in ("wiki/[TextBlocks]", "wiki/[PWL]",
                 "wiki/[CCBlacklist]"):
             return self._loadDbSpecificPage(self.funcTag[5:])
-
-#     def getContent(self):
-#         if self.funcTag == "global/[TextBlocks]":
-#             tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
-#                     "[TextBlocks].wiki")
-#             try:
-#                 tbFile = open(tbLoc, "rU")
-#                 tbContent = tbFile.read()
-#                 tbFile.close()
-#                 tbContent = fileContentToUnicode(tbContent)
-#             except:
-#                 tbContent = u""
-#         elif self.funcTag == "global/[PWL]":
-#             tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
-#                     "[PWL].wiki")
-#             try:
-#                 tbFile = open(tbLoc, "rU")
-#                 tbContent = tbFile.read()
-#                 tbFile.close()
-#                 tbContent = fileContentToUnicode(tbContent)
-#             except:
-#                 tbContent = u""
-#         elif self.funcTag == "wiki/[TextBlocks]":
-#             wikiData = self.wikiDocument.getWikiData()
-#             if wikiData.isDefinedWikiWord("[TextBlocks]"):
-#                 tbContent = wikiData.getContent("[TextBlocks]")
-#             else:
-#                 tbContent = u""
-#         elif self.funcTag == "wiki/[PWL]":
-#             wikiData = self.wikiDocument.getWikiData()
-#             if wikiData.isDefinedWikiWord("[PWL]"):
-#                 tbContent = wikiData.getContent("[PWL]")
-#             else:
-#                 tbContent = u""
-# 
-#         return tbContent
-
 
     def getFormatDetails(self):
         """
@@ -735,4 +809,45 @@ class FunctionalPage(DocPage):
     def setPresentation(self, data, startPos):
         """Dummy"""
         pass
+
+
+
+# Two search helpers for WikiPage.getChildRelationshipsTreeOrder
+
+def _relationSort(a, b):
+    propsA = a[1].getProperties()
+    propsB = b[1].getProperties()
+
+    aSort = None
+    bSort = None
+
+    try:
+        if (propsA.has_key(u'tree_position')):
+            aSort = int(propsA[u'tree_position'][-1])
+        elif (propsA.has_key(u'priority')):
+            aSort = int(propsA[u'priority'][-1])
+        else:
+            aSort = a[2]
+    except:
+        aSort = a[2]
+
+    try:            
+        if (propsB.has_key(u'tree_position')):
+            bSort = int(propsB[u'tree_position'][-1])
+        elif (propsB.has_key(u'priority')):
+            bSort = int(propsB[u'priority'][-1])
+        else:
+            bSort = b[2]
+    except:
+        bSort = b[2]
+
+    return cmp(aSort, bSort)
+
+
+def _cmpCharPosition(a, b):
+    """
+    Compare "natural", means using the char. positions of the links in page
+    """
+    return int(a[1] - b[1])
+
 

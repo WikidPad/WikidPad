@@ -341,7 +341,7 @@ class WikiData:
     def getChildRelationships(self, wikiWord, existingonly=False,
             selfreference=True, withPosition=False):
         """
-        get the child relations of this word
+        get the child relations of the wikiWord
         existingonly -- List only existing wiki words
         selfreference -- List also wikiWord if it references itself
         withPositions -- Return tuples (relation, firstcharpos) with char.

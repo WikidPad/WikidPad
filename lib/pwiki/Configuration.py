@@ -497,6 +497,8 @@ GLOBALDEFAULTS = {
     ("main", "html_export_proppattern_is_excluding"): "False",  # Same for HTML exporting
     ("main", "html_preview_pics_as_links"): "False",  # Show only links to pictures in HTML preview
     ("main", "html_export_pics_as_links"): "False",  # Same for HTML exporting
+    ("main", "export_table_of_contents"): "0",  # Show table of contents when exporting
+            # 0:None, 1:formatted as tree, 2:as list
 
     ("main", "html_body_link"): "",  # for HTML preview/export, color for link or "" for default
     ("main", "html_body_alink"): "",  # for HTML preview/export, color for active link or "" for default
@@ -538,7 +540,10 @@ GLOBALDEFAULTS = {
     ("main", "script_security_level"): "0",  # Allow the use of scripts and
             # import_scripts property? 0: No scripts at all; 1: No import_scripts;
             # 2: allow local import_scripts; 3: allow also global.import_scripts
-    ("main", "single_process"): "False" # Ensure that only a single process runs per user  
+    ("main", "single_process"): "False", # Ensure that only a single process runs per user  
+    ("main", "collation_order"): "Default", # Set collation order, Default: system default order, C: ASCII byte value
+    ("main", "collation_uppercaseFirst"): "False" # Sort uppercase first (ABCabc) or normal inside (AaBbCc)
+
     }
 
 

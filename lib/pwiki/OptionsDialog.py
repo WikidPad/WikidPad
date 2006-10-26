@@ -16,7 +16,8 @@ class OptionsDialog(wxDialog):
     # List of tuples (<configuration file entry>, <gui control name>, <type>)
     # Supported types: b: boolean checkbox, i0+: nonnegative integer, t: text
     #    tre: regular expression,  f0+: nonegative float, seli: integer position
-    #    of a selection in dropdown list,  color0: HTML color code or empty
+    #    of a selection in dropdown list, selt: Chosen text in dropdown list
+    #    color0: HTML color code or empty
 
     OPTION_TO_CONTROL = (
             # application-wide options
@@ -37,6 +38,9 @@ class OptionsDialog(wxDialog):
             ("clipboardCatcher_suffix", "tfClipboardCatcherSuffix", "t"),
             ("single_process", "cbSingleProcess", "b"),
 
+            ("collation_order", "chCollationOrder", "selt"),
+            ("collation_uppercaseFirst", "cbCollationUppercaseFirst", "b"),
+
             ("mainTree_position", "chMainTreePosition", "seli"),
             ("viewsTree_position", "chViewsTreePosition", "seli"),
 
@@ -54,6 +58,7 @@ class OptionsDialog(wxDialog):
             ("html_export_proppattern", "tfHtmlExportProppattern", "tre"),
             ("html_preview_pics_as_links", "cbHtmlPreviewPicsAsLinks", "b"),
             ("html_export_pics_as_links", "cbHtmlExportPicsAsLinks", "b"),
+            ("export_table_of_contents", "chTableOfContents", "seli"),
             
             ("html_body_link", "tfHtmlLinkColor", "color0"),
             ("html_body_alink", "tfHtmlALinkColor", "color0"),
@@ -143,6 +148,9 @@ class OptionsDialog(wxDialog):
             elif t == "seli":   # Selection -> transfer index
                 self.ctrls[c].SetSelection(
                         self.pWiki.getConfig().getint("main", o))
+            elif t == "selt":   # Selection -> transfer content string
+                self.ctrls[c].SetStringSelection(
+                        uniToGui(self.pWiki.getConfig().get("main", o)) )
 
         # Options with special treatment
         self.ctrls.cbLowResources.SetValue(
@@ -260,6 +268,9 @@ class OptionsDialog(wxDialog):
             elif t == "seli":   # Selection -> transfer index
                 self.pWiki.getConfig().set(
                         "main", o, unicode(self.ctrls[c].GetSelection()) )
+            elif t == "selt":   # Selection -> transfer content string
+                self.pWiki.getConfig().set(
+                        "main", o, guiToUni(self.ctrls[c].GetStringSelection()) )
 
         # Options with special treatment
         if self.ctrls.cbLowResources.GetValue():

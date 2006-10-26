@@ -1,4 +1,4 @@
-import re
+import re, sets
 from struct import pack, unpack
 
 from wxPython.wx import *
@@ -30,7 +30,7 @@ class AbstractSearchNode:
     def setSarOp(self, sarOp):
         self.sarOp = sarOp
     
-    def beginWikiSearch(self, wikiData):
+    def beginWikiSearch(self, wikiDocument):
         """
         Always called before a new wiki-wide search operation begins
         """
@@ -93,6 +93,12 @@ class AbstractSearchNode:
             natural order.
         """
         return []
+        
+    def getRootWords(self):
+        """
+        Return all words used as roots of subtrees (if any) for better tree sorting
+        """
+        return []
 
 
 
@@ -106,9 +112,9 @@ class AndSearchNode(AbstractSearchNode):
         self.left = left
         self.right = right
         
-    def beginWikiSearch(self, wikiData):
-        self.left.beginWikiSearch(wikiData)
-        self.right.beginWikiSearch(wikiData)
+    def beginWikiSearch(self, wikiDocument):
+        self.left.beginWikiSearch(wikiDocument)
+        self.right.beginWikiSearch(wikiDocument)
         
     def endWikiSearch(self):
         """
@@ -177,8 +183,8 @@ class NotSearchNode(AbstractSearchNode):
         AbstractSearchNode.__init__(self, sarOp)
         self.sub = sub
         
-    def beginWikiSearch(self, wikiData):
-        self.sub.beginWikiSearch(wikiData)
+    def beginWikiSearch(self, wikiDocument):
+        self.sub.beginWikiSearch(wikiDocument)
         
     def endWikiSearch(self):
         """
@@ -188,7 +194,7 @@ class NotSearchNode(AbstractSearchNode):
 
         
     def testWikiPage(self, word, text):
-        subret = self.left.testWikiPage(word, text)
+        subret = self.sub.testWikiPage(word, text)
         
         if subret == Unknown:
             return Unknown
@@ -220,7 +226,25 @@ class AllWikiPagesNode(AbstractSearchNode):
     """
     
     CLASS_PERSID = "AllPages"  # Class id for persistence storage
+
+    def __init__(self, sarOp):
+        AbstractSearchNode.__init__(self, sarOp)
+        self.wikiName = None
     
+    def beginWikiSearch(self, wikiDocument):
+        """
+        Always called before a new wiki-wide search operation begins.
+        Fills wordList and wordSet
+        """
+        self.wikiName = wikiDocument.getWikiName()
+
+    def endWikiSearch(self):
+        """
+        Called after a wiki-wide search operation ended.
+        Clears wordList
+        """
+        self.wikiName = None
+
     def testWikiPage(self, word, text):
         return True
 
@@ -234,6 +258,13 @@ class AllWikiPagesNode(AbstractSearchNode):
         
         if version != 0:
             raise SerializationException
+
+    def getRootWords(self):
+        """
+        Return all words used as roots of subtrees (if any) for better tree sorting
+        """
+        return [self.wikiName]
+
 
 
 class RegexWikiPageNode(AbstractSearchNode):
@@ -275,6 +306,7 @@ class RegexWikiPageNode(AbstractSearchNode):
         return self.compPat.pattern
 
 
+
 class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
     """
     Returns True for a specified root page and all pages below to a specified
@@ -293,7 +325,7 @@ class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
         self.wordList = None   # used for orderNatural()
 
 
-    def beginWikiSearch(self, wikiData):
+    def beginWikiSearch(self, wikiDocument):
         """
         Always called before a new wiki-wide search operation begins.
         Fills wordList and wordSet
@@ -310,7 +342,8 @@ class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
 
 #         wordList = []
         # for rw in self.rootWords:
-        subWords = wikiData.getAllSubWords(self.rootWords, self.level)
+        subWords = wikiDocument.getWikiData().getAllSubWords(
+                self.rootWords, self.level)
         for sw in subWords:
 #                 if wordSet.has_key(sw):
 #                     continue
@@ -370,6 +403,15 @@ class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
 
         # Serialize the level
         self.level = stream.serInt32(self.level)
+
+
+    def getRootWords(self):
+        """
+        Return all words used as roots of subtrees (if any) for better tree sorting
+        """
+        return self.rootWords
+
+
 
 
 
@@ -552,7 +594,7 @@ class ListWikiPagesOperation:
         self.searchOpTree = AllWikiPagesNode(self)
         self.ordering = "no"  # How to order the pages ("natural",
                               # "ascending"=Alphabetically ascending or "no")
-        self.wikiData = None
+        self.wikiDocument = None
 
     def setSearchOpTree(self, searchOpTree):
         self.searchOpTree = searchOpTree
@@ -588,23 +630,23 @@ class ListWikiPagesOperation:
         pass   # TODO !!!
 
 
-    def beginWikiSearch(self, wikiData):
+    def beginWikiSearch(self, wikiDocument):
         """
-        Called by WikiData to begin a wiki-wide search
+        Called by WikiDataManager(=WikiDocument) to begin a wiki-wide search
         """
-        self.wikiData = wikiData
+        self.wikiDocument = wikiDocument
 
         if self.searchOpTree is None:
             return   # TODO: Error ?
             
-        return self.searchOpTree.beginWikiSearch(wikiData)
+        return self.searchOpTree.beginWikiSearch(wikiDocument)
         
 
     def endWikiSearch(self):
         """
         End a wiki-wide search
         """
-        self.wikiData = None
+        self.wikiDocument = None
 
         if self.searchOpTree is None:
             return   # TODO: Error ?
@@ -625,10 +667,22 @@ class ListWikiPagesOperation:
             
         return self.searchOpTree.testWikiPage(word, text)
 
-    
+
+    def getRootWords(self):
+        """
+        Return all words used as roots of subtrees (if any) for better tree sorting
+        It must be called after beginWikiSearch() and before corresponding
+        endWikiSearch() call.
+        """
+        if self.searchOpTree is None:
+            return []
+            
+        return self.searchOpTree.getRootWords()
+
+
     def applyOrdering(self, wordSet, coll):
         """
-        Returns the wordSet set ordered as set in self.ordering. It must
+        Returns the wordSet set ordered as defined in self.ordering. It must
         be called after beginWikiSearch() and before corresponding
         endWikiSearch() call.
         
@@ -642,7 +696,52 @@ class ListWikiPagesOperation:
             return result
         elif self.ordering == "natural":
             return self.orderNatural(wordSet, coll)
+        elif self.ordering == "asroottree":
+            # Sort as in the root tree (= tree with the wiki name page as root)
+            wordSet = wordSet.copy()
+            result = []
+
+            rootWords = self.getRootWords()
+
+            if not self.wikiDocument.getWikiName() in rootWords:
+                rootWords.append(self.wikiDocument.getWikiName())
+
+            # Creation of the rootWordSet and later handling of it ensures
+            # that the order of the rootWords is preserved.
+            # Example: root words a, b, c are given in this order, but c
+            # is child of a. Without the special handling, the output
+            # order would be a, c, b
+            rootWordSet = sets.Set(self.getRootWords())
+            rootWordSet.intersection_update(wordSet)
+            wordSet.difference_update(rootWordSet)
+
+            for rootWord in rootWords:
+                rootPage = self.wikiDocument.getWikiPage(rootWord)
+                flatTree = rootPage.getFlatTree()
+                if rootWord in rootWordSet:
+                    result.append(rootWord)
+                    rootWordSet.remove(rootWord)
+
+                for word, deepness in flatTree:
+                    if word in wordSet:
+                        result.append(word)
+                        wordSet.remove(word)
+                        # Little optimization
+                        if len(wordSet) < 2:
+                            if len(wordSet) == 1:
+                                result.append(wordSet.pop())
+                            break
+
+            if len(wordSet) > 0:
+                # There are remaining words not in the root tree
+                # -> sort them ascending and append them to result
+                result2 = list(wordSet)
+                coll.sort(result2)
+                
+                result += result2
             
+            return result
+
         return list(wordSet)  # TODO Error
 
 
@@ -698,7 +797,7 @@ class SearchReplaceOperation:
         self.ordering = "no"  # How to order the pages
 
         self.searchOpTree = None # Cache information
-        self.wikiData = None
+        self.wikiDocument = None
         self.listWikiPagesOp = ListWikiPagesOperation()
 
     def clone(self):
@@ -902,18 +1001,18 @@ class SearchReplaceOperation:
         return self.searchOpTree.replace(text, foundData, self.replaceStr)
 
 
-    def beginWikiSearch(self, wikiData):
+    def beginWikiSearch(self, wikiDocument):
         """
-        Called by WikiData to begin a wiki-wide search
+        Called by WikiDocument(=WikiDataManager) to begin a wiki-wide search
         """
-        self.wikiData = wikiData
+        self.wikiDocument = wikiDocument
 
         if self.searchOpTree is None:
             self.rebuildSearchOpTree()
             
-        self.listWikiPagesOp.beginWikiSearch(wikiData)
+        self.listWikiPagesOp.beginWikiSearch(wikiDocument)
             
-        return self.searchOpTree.beginWikiSearch(wikiData)
+        return self.searchOpTree.beginWikiSearch(wikiDocument)
         
 
     def endWikiSearch(self):
@@ -925,7 +1024,7 @@ class SearchReplaceOperation:
             
         result = self.searchOpTree.endWikiSearch()
         self.listWikiPagesOp.endWikiSearch()
-        self.wikiData = None
+        self.wikiDocument = None
 
         return result
         

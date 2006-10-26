@@ -418,9 +418,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.refreshPageStatus()
             self.fireMiscEventKeys(("changed current docpage presenter",))
             
-    def getCurrentDocPagePresenter(self):
-        return self.currentDocPagePresenter
-
 #     def setActiveEditor(self, activeEditor):
 #         if self.activeEditor != activeEditor:
 #             self.activeEditor = activeEditor
@@ -1826,7 +1823,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         }
 #     )
 
-#     def testIt(self):
+    def testIt(self):
+        print "testIt", repr(self.getCurrentDocPage().getFlatTree())
+
 
     def OnNotebookPageChanged(self, evt):
         if evt.GetSelection() == 0:
@@ -3318,6 +3317,8 @@ These are your default global settings.
 
 
     def OnExportWiki(self, evt):
+        import SearchAndReplace as Sar
+        
         typ = evt.GetId()
         
         if typ != GUI_ID.MENU_EXPORT_WHOLE_AS_XML:
@@ -3337,16 +3338,32 @@ These are your default global settings.
                     GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES,
                     GUI_ID.MENU_EXPORT_WHOLE_AS_XML,
                     GUI_ID.MENU_EXPORT_WHOLE_AS_RAW):
-                wordList = self.getWikiData().getAllDefinedWikiPageNames()
+                # Export whole wiki
+
+                lpOp = Sar.ListWikiPagesOperation()
+                item = Sar.AllWikiPagesNode(lpOp)
+                lpOp.setSearchOpTree(item)
+                lpOp.ordering = "asroottree"  # Slow, but more intuitive
+                wordList = self.getWikiDocument().searchWiki(lpOp)
+
+#                 wordList = self.getWikiData().getAllDefinedWikiPageNames()
                 
             elif typ in (GUI_ID.MENU_EXPORT_SUB_AS_PAGE,
                     GUI_ID.MENU_EXPORT_SUB_AS_PAGES):
+                # Export a subtree of current word
                 if self.getCurrentWikiWord() is None:
                     self.pWiki.displayErrorMessage(
                             u"No real wiki word selected as root")
                     return
-                wordList = self.getWikiData().getAllSubWords(
-                        [self.getCurrentWikiWord()])
+                lpOp = Sar.ListWikiPagesOperation()
+                item = Sar.ListItemWithSubtreeWikiPagesNode(lpOp,
+                        [self.getCurrentWikiWord()], -1)
+                lpOp.setSearchOpTree(item)
+                lpOp.ordering = "asroottree"  # Slow, but more intuitive
+                wordList = self.getWikiDocument().searchWiki(lpOp)
+
+#                 wordList = self.getWikiData().getAllSubWords(
+#                         [self.getCurrentWikiWord()])
             else:
                 if self.getCurrentWikiWord() is None:
                     self.pWiki.displayErrorMessage(

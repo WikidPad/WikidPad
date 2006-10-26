@@ -16,7 +16,7 @@ lowercase letter in the word (this is called "camelcase", like e.g.
 WikiWord) or where a lowercase letter follows after multiple uppercase
 letters (ABCd).
 
-
+anchor: exclude_from_linking
 +++ Exclude wiki words from linking
 
 To exclude a wiki word from being interpreted as link, you can precede

@@ -1,4 +1,4 @@
-import sys # , hotshot
+import sys, sets # , hotshot
 
 ## _prof = hotshot.Profile("hotshot.prf")
 
@@ -132,21 +132,15 @@ class WikiWordNode(AbstractNode):
 
     def getAncestors(self):  # TODO Check for cache clearing conditions
         """
-        Returns a dictionary with the ancestor words (parent, grandparent, ...)
-        as keys (instead of a list for speed reasons).
+        Returns a set with the ancestor words (parent, grandparent, ...).
         """
         if self.ancestors is None:
             parent = self.getParentNode()
             if parent is not None:
                 result = parent.getAncestors().copy()
-                result[parent.getWikiWord()] = None
+                result.add(parent.getWikiWord())
             else:
-                result = {}
-#             result = {}
-#             anc = self.getParentNode()
-#             while anc is not None:
-#                 result[anc.getWikiWord()] = None
-#                 anc = anc.getParentNode()
+                result = sets.Set()
 
             self.ancestors = result
 
@@ -158,17 +152,25 @@ class WikiWordNode(AbstractNode):
         Get all valid children, filter out undefined and/or cycles
         if options are set accordingly
         """
-        relations = wikiPage.getChildRelationships(
-                existingonly=self.treeCtrl.getHideUndefined(),
-                selfreference=False, withPosition=withPosition)
 
         if self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
             # Filter out cycles
             ancestors = self.getAncestors()
-            if withPosition:
-                relations = [r for r in relations if not ancestors.has_key(r[0])]
-            else:
-                relations = [r for r in relations if not ancestors.has_key(r)]
+        else:
+            ancestors = sets.ImmutableSet()  # Empty
+
+        relations = wikiPage.getChildRelationships(
+                existingonly=self.treeCtrl.getHideUndefined(),
+                selfreference=False, withPosition=withPosition,
+                excludeSet=ancestors)
+
+#         if self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
+#             # Filter out cycles
+#             ancestors = self.getAncestors()
+#             if withPosition:
+#                 relations = [r for r in relations if not ancestors.has_key(r[0])]
+#             else:
+#                 relations = [r for r in relations if not ancestors.has_key(r)]
 
         return relations
 
@@ -267,50 +269,69 @@ class WikiWordNode(AbstractNode):
         return True
         
     def listChildren(self):
-        wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
-        wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
+        wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
+        wikiPage = wikiDocument.getWikiPageNoError(self.wikiWord)
 
-        # get the sort order for the children
-        childSortOrder = wikiPage.getPropertyOrGlobal(u'child_sort_order',
-                u"ascending")
-            
-        # Apply sort order
-        if childSortOrder == u"natural":
-            # Retrieve relations as list of tuples (child, firstcharpos)
-            relations = self._getValidChildren(wikiPage, withPosition=True)
-            relations.sort(_cmpCharPosition)
-            # Remove firstcharpos
-            relations = [r[0] for r in relations]
+        if self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
+            # Filter out cycles
+            ancestors = self.getAncestors()
         else:
-            # Retrieve relations as list of children words
-            relations = self._getValidChildren(wikiPage, withPosition=False)
-            if childSortOrder.startswith(u"desc"):
-                relations.sort(_genCmpLowerDesc(
-                        self.treeCtrl.pWiki.getCollator())) # sort alphabetically
-            elif childSortOrder.startswith(u"asc"):
-                relations.sort(_genCmpLowerAsc(
-                        self.treeCtrl.pWiki.getCollator()))
+            ancestors = sets.ImmutableSet()  # Empty
 
-        relationData = []
-        position = 1
-        for relation in relations:
-            relationPage = wikiDataManager.getWikiPageNoError(relation)
-            relationData.append((relation, relationPage, position))
-            position += 1
 
-        # Sort again, using tree position and priority properties
-        relationData.sort(_relationSort)
-
-        # if prev is None:
-        ## Create everything new
-
-        result = [WikiWordNode(self.treeCtrl, self, rd[0])
-                for rd in relationData]
+        children = wikiPage.getChildRelationshipsTreeOrder(
+                existingonly=self.treeCtrl.getHideUndefined(),
+                excludeSet=ancestors)
                 
+        result = [WikiWordNode(self.treeCtrl, self, c)
+                for c in children]
+
         if self.flagRoot:
             result.append(MainViewNode(self.treeCtrl, self))
                 
         return result
+
+#         # get the sort order for the children
+#         childSortOrder = wikiPage.getPropertyOrGlobal(u'child_sort_order',
+#                 u"ascending")
+#             
+#         # Apply sort order
+#         if childSortOrder == u"natural":
+#             # Retrieve relations as list of tuples (child, firstcharpos)
+#             relations = self._getValidChildren(wikiPage, withPosition=True)
+#             relations.sort(_cmpCharPosition)
+#             # Remove firstcharpos
+#             relations = [r[0] for r in relations]
+#         else:
+#             # Retrieve relations as list of children words
+#             relations = self._getValidChildren(wikiPage, withPosition=False)
+#             if childSortOrder.startswith(u"desc"):
+#                 relations.sort(_genCmpLowerDesc(
+#                         self.treeCtrl.pWiki.getCollator())) # sort alphabetically
+#             elif childSortOrder.startswith(u"asc"):
+#                 relations.sort(_genCmpLowerAsc(
+#                         self.treeCtrl.pWiki.getCollator()))
+# 
+#         relationData = []
+#         position = 1
+#         for relation in relations:
+#             relationPage = wikiDataManager.getWikiPageNoError(relation)
+#             relationData.append((relation, relationPage, position))
+#             position += 1
+# 
+#         # Sort again, using tree position and priority properties
+#         relationData.sort(_relationSort)
+# 
+#         # if prev is None:
+#         ## Create everything new
+# 
+#         result = [WikiWordNode(self.treeCtrl, self, rd[0])
+#                 for rd in relationData]
+#                 
+#         if self.flagRoot:
+#             result.append(MainViewNode(self.treeCtrl, self))
+#                 
+#         return result
 
 
     def onActivate(self):
@@ -345,10 +366,9 @@ class WikiWordRelabelNode(WikiWordNode):
 
     def getAncestors(self):
         """
-        Returns a dictionary with the ancestor words (parent, grandparent, ...)
-        as keys (instead of a list for speed reasons).
+        Returns a set with the ancestor words (parent, grandparent, ...).
         """
-        return {}
+        return sets.Set()
 
     def getNodePresentation(self):
         if self.newLabel:
@@ -1323,7 +1343,7 @@ class WikiTreeCtrl(wxTreeCtrl):
                 # If an ancestor of the current node is in the crumbs, the
                 # crumbs path is invalid because it contains a cycle
                 for c in crumbs:
-                    if ancestors.has_key(c):
+                    if c in ancestors:
                         crumbs = None
                         break
         
@@ -1521,76 +1541,53 @@ class WikiTreeCtrl(wxTreeCtrl):
                     self.Unbind(EVT_IDLE)
 #                     self.refreshCheckChildren = []
 
-def _relationSort(a, b):
-    propsA = a[1].getProperties()
-    propsB = b[1].getProperties()
 
-    aSort = None
-    bSort = None
-
-    try:
-        if (propsA.has_key(u'tree_position')):
-            aSort = int(propsA[u'tree_position'][-1])
-        elif (propsA.has_key(u'priority')):
-            aSort = int(propsA[u'priority'][-1])
-        else:
-            aSort = a[2]
-    except:
-        aSort = a[2]
-
-    try:            
-        if (propsB.has_key(u'tree_position')):
-            bSort = int(propsB[u'tree_position'][-1])
-        elif (propsB.has_key(u'priority')):
-            bSort = int(propsB[u'priority'][-1])
-        else:
-            bSort = b[2]
-    except:
-        bSort = b[2]
-
-    return cmp(aSort, bSort)
-
-
-def _cmpCharPosition(a, b):
-    """
-    Compare "natural", means using the char. positions of the links in page
-    """
-    return int(a[1] - b[1])
-
+# def _relationSort(a, b):
+#     propsA = a[1].getProperties()
+#     propsB = b[1].getProperties()
+# 
+#     aSort = None
+#     bSort = None
+# 
+#     try:
+#         if (propsA.has_key(u'tree_position')):
+#             aSort = int(propsA[u'tree_position'][-1])
+#         elif (propsA.has_key(u'priority')):
+#             aSort = int(propsA[u'priority'][-1])
+#         else:
+#             aSort = a[2]
+#     except:
+#         aSort = a[2]
+# 
+#     try:            
+#         if (propsB.has_key(u'tree_position')):
+#             bSort = int(propsB[u'tree_position'][-1])
+#         elif (propsB.has_key(u'priority')):
+#             bSort = int(propsB[u'priority'][-1])
+#         else:
+#             bSort = b[2]
+#     except:
+#         bSort = b[2]
+# 
+#     return cmp(aSort, bSort)
+# 
+# 
+# def _cmpCharPosition(a, b):
+#     """
+#     Compare "natural", means using the char. positions of the links in page
+#     """
+#     return int(a[1] - b[1])
+# 
 # sorter for relations, removes brackets and sorts lower case
-def _genCmpLowerDesc(coll):
-    def _cmpLowerDesc(a, b):
-        return coll.strcoll(b.lower(), a.lower())
-    return _cmpLowerDesc
+# def _genCmpLowerDesc(coll):
+#     def _cmpLowerDesc(a, b):
+#         return coll.strcoll(b.lower(), a.lower())
+#     return _cmpLowerDesc
+# 
+# def _genCmpLowerAsc(coll):
+#     def _cmpLowerAsc(a, b):
+#         return coll.strcoll(a.lower(), b.lower())
+#     return _cmpLowerAsc
 
-def _genCmpLowerAsc(coll):
-    def _cmpLowerAsc(a, b):
-        return coll.strcoll(a.lower(), b.lower())
-    return _cmpLowerAsc
-
-
-
-# class ViewOnlyTreeCtrl(WikiTreeCtrl):
-#     """
-#     Special tree, used to show only the "Views" nodes and subnodes
-#     """
-#     def __init__(self, pWiki, parent, ID):
-#         WikiTreeCtrl.__init__(self, pWiki, parent, ID)
-#         
-#     def onLoadingCurrentWikiPage(self, miscevt):
-#         currentNode = self.GetSelection()
-#         if currentNode.IsOk():
-#             node = self.GetPyData(currentNode)
-#             if node.representsWikiWord():                    
-#                 if self.pWiki.wikiData.getAliasesWikiWord(node.getWikiWord()) ==\
-#                         self.pWiki.getCurrentWikiWord():
-#                     return  # Is already on word -> nothing to do
-#                     
-#         self.Unselect()
-#         
-#     def buildTreeForWord(self, wikiWord, selectNode=False, doexpand=False):
-#         """
-#         No family wiki words in the "Views" tree
-#         return False
 
 

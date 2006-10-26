@@ -20,7 +20,7 @@ def getCollatorByString(locStr, caseMode=None):
     if locStr.lower() == u"c":
         return _CCollator(caseMode)
     else:
-        if locStr.lower() == u"python":
+        if locStr.lower() == u"default":
             locStr = u""
 
         if caseMode == CASEMODE_UPPER_FIRST:
