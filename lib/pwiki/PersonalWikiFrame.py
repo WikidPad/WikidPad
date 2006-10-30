@@ -1206,14 +1206,25 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
         viewMenu = wxMenu()
+        
+# self.addMenuItem(self.editorMenu, '&Redo\t' + self.keyBindings.Redo,
+#         'Redo', self._OnRoundtripEvent, menuID=GUI_ID.CMD_REDO)
 
+
+#         self.addMenuItem(viewMenu, '&Zoom In\t' + self.keyBindings.ZoomIn,
+#                 'Zoom In', lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMIN),
+#                 "tb_zoomin", menuID=GUI_ID.CMD_ZOOM_IN)
+# 
+#         self.addMenuItem(viewMenu, 'Zoo&m Out\t' + self.keyBindings.ZoomOut,
+#                 'Zoom Out', lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMOUT),
+#                 "tb_zoomout", menuID=GUI_ID.CMD_ZOOM_OUT)
         self.addMenuItem(viewMenu, '&Zoom In\t' + self.keyBindings.ZoomIn,
-                'Zoom In', lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMIN),
-                "tb_zoomin")
+                'Zoom In', self._OnRoundtripEvent, "tb_zoomin",
+                menuID=GUI_ID.CMD_ZOOM_IN)
 
         self.addMenuItem(viewMenu, 'Zoo&m Out\t' + self.keyBindings.ZoomOut,
-                'Zoom Out', lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMOUT),
-                "tb_zoomout")
+                'Zoom Out', self._OnRoundtripEvent, "tb_zoomout",
+                menuID=GUI_ID.CMD_ZOOM_OUT)
 
         viewMenu.AppendSeparator()
 
@@ -1436,15 +1447,25 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         tb.AddSimpleTool(wxNewId(), seperator, "Separator", "Separator")
 
+#         icon = self.lookupIcon("tb_zoomin")
+#         tbID = wxNewId()
+#         tb.AddSimpleTool(tbID, icon, "Zoom In", "Zoom In")
+#         EVT_TOOL(self, tbID, lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMIN))
+# 
+#         icon = self.lookupIcon("tb_zoomout")
+#         tbID = wxNewId()
+#         tb.AddSimpleTool(tbID, icon, "Zoom Out", "Zoom Out")
+#         EVT_TOOL(self, tbID, lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
         icon = self.lookupIcon("tb_zoomin")
-        tbID = wxNewId()
+        tbID = GUI_ID.CMD_ZOOM_IN
         tb.AddSimpleTool(tbID, icon, "Zoom In", "Zoom In")
-        EVT_TOOL(self, tbID, lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMIN))
+        EVT_TOOL(self, tbID, self._OnRoundtripEvent)
 
         icon = self.lookupIcon("tb_zoomout")
-        tbID = wxNewId()
+        tbID = GUI_ID.CMD_ZOOM_OUT
         tb.AddSimpleTool(tbID, icon, "Zoom Out", "Zoom Out")
-        EVT_TOOL(self, tbID, lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
+        EVT_TOOL(self, tbID, self._OnRoundtripEvent)
+
 
         self.fastSearchField = wxTextCtrl(tb, GUI_ID.TF_FASTSEARCH,
                 style=wxTE_PROCESS_ENTER | wxTE_RICH)
@@ -1683,7 +1704,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.displayErrorMessage('Error while starting new '
                     'WikidPad instance', e)
             return
-        
+
 
     def createWindow(self, winProps, parent):
         """
@@ -3120,7 +3141,7 @@ These are your default global settings.
             
         result = wxMessageBox(u"Do you want to modify all links to the wiki word "
                 u"'%s' renamed to '%s'?" % (wikiWord, toWikiWord),
-                u'Rename Wiki Word', wxYES_NO | wxCANCEL, self)
+                u'Rename Wiki Word', wxYES_NO | wxCANCEL | wxICON_QUESTION, self)
 
         if result == wxYES or result == wxNO:
             try:

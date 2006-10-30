@@ -203,6 +203,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, lambda evt: self.Copy())
         EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_PASTE, lambda evt: self.Paste())
         EVT_MENU(self, GUI_ID.CMD_TEXT_DELETE, lambda evt: self.ReplaceSelection(""))
+        EVT_MENU(self, GUI_ID.CMD_ZOOM_IN,
+                lambda evt: self.CmdKeyExecute(wxSTC_CMD_ZOOMIN))
+        EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT,
+                lambda evt: self.CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
 
         EVT_MENU(self, GUI_ID.CMD_TEXT_SELECT_ALL, lambda evt: self.SelectAll())
         
@@ -1298,6 +1302,22 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.anchorCharPosition = -1
 
 
+    def getContinuePosForSearch(self, sarOp):
+        """
+        Return the character position where to continue the given
+        search operation sarOp. It always continues at beginning
+        or end of current selection.
+        """
+        if sarOp.matchesPart(self.GetSelectedText()) is not None:
+            # currently selected text matches search operation
+            # -> continue searching at the end of selection
+            return self.GetSelectionCharPos()[1]
+        else:
+            # currently selected text does not match search
+            # -> continue searching at the beginning of selection
+            return self.GetSelectionCharPos()[0]
+
+
     def executeSearch(self, sarOp, searchCharStartPos=-1, next=False):
         """
         Returns a tuple with a least two elements (<start>, <after end>)
@@ -1307,8 +1327,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if sarOp.booleanOp:
             return (-1, -1)  # Not possible
 
-        if searchCharStartPos < 0:
+        if searchCharStartPos == -1:
             searchCharStartPos = self.searchCharStartPos
+        elif searchCharStartPos == -2:
+            searchCharStartPos = self.getContinuePosForSearch(sarOp)
 
 #         self.pWiki.statusBar.SetStatusText(
 #                 uniToGui(u"Search (ESC to stop): %s" % searchStr), 0)
@@ -1934,7 +1956,7 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
                 doCopy = False
                 if controlPressed:
                     # Copy file into file storage
-                    fs = self.editor.presenter.getWikiDataManager().getFileStorage()
+                    fs = self.editor.presenter.getWikiDocument().getFileStorage()
                     try:
                         fn = fs.createDestPath(fn)
                         doCopy = True

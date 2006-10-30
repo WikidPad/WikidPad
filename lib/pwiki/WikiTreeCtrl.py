@@ -518,7 +518,6 @@ class TodoNode(AbstractNode):
         """
         wikiData = self.treeCtrl.pWiki.getWikiData()
         addedTodoSubCategories = []
-#         addedRightSides = []
         addedWords = []
         for (wikiWord, todo) in wikiData.getTodos():
             # parse the todo for name and value
@@ -538,18 +537,22 @@ class TodoNode(AbstractNode):
 
                 nextSubCategory = entryCats[len(self.categories)]
 
-#                 if len(entryCats) - len(self.categories) == 1:
-#                     # nextSubCategory is the last category (the "right side")
-#                     # of the todo, so handle it differently
-#                     if nextSubCategory not in addedRightSides:
-#                         addedRightSides.append(nextSubCategory)
-#                 else:
                 if nextSubCategory not in addedTodoSubCategories:
                     addedTodoSubCategories.append(nextSubCategory)
 
-        self.treeCtrl.pWiki.getCollator().sort(addedTodoSubCategories)
-#         addedRightSides.sort()
-        self.treeCtrl.pWiki.getCollator().sort(addedWords)
+        collator = self.treeCtrl.pWiki.getCollator()
+        
+        def cmpAddWords(left, right):
+            result = collator.strcoll(left[0], right[0])
+            if result != 0:
+                return result
+            
+            return collator.strcoll(left[1], right[1])
+
+        collator.sort(addedTodoSubCategories)
+
+#         collator.sort(addedWords)
+        addedWords.sort(cmpAddWords)
 
         result = []
         # First list real categories, then right sides, then words
@@ -606,15 +609,15 @@ class PropCategoryNode(AbstractNode):
         key = u".".join(self.categories + (u"",))
         
         # Start with subcategories
-        addedSubCategories = {}
+        addedSubCategories = sets.Set()
         for name in wikiData.getPropertyNamesStartingWith(key):
             # Cut off uninteresting
             name = name[len(key):]
 
             nextcat = name.split(u".", 1)[0]
-            addedSubCategories[nextcat] = None
+            addedSubCategories.add(nextcat)
             
-        subCats = addedSubCategories.keys()
+        subCats = list(addedSubCategories)
         self.treeCtrl.pWiki.getCollator().sort(subCats)
         result += map(lambda c: PropCategoryNode(self.treeCtrl, self,
                 self.categories + (c,)), subCats)

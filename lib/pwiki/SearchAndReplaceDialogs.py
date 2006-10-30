@@ -295,7 +295,7 @@ class SearchResultListBox(wxHtmlListBox):
             
     def GetCount(self):
         return len(self.found)
-        
+
     def IsEmpty(self):
         return self.GetCount() == 0
 
@@ -431,7 +431,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         
         self.listNeedsRefresh = True  # Reflects listbox content current
                                       # search criteria?
-                                      
+
         self.savedSearches = None
         self.foundPages = []
         
@@ -572,9 +572,13 @@ class SearchWikiDialog(wxDialog):   # TODO
 
             searchOp = self.buildSearchReplaceOperation()
             searchOp.replaceOp = False
-            pagePosNext = self.pWiki.getActiveEditor().executeSearch(searchOp,
-                    0, next=nextOnPage)[1]
-                    
+            if nextOnPage:
+                pagePosNext = self.pWiki.getActiveEditor().executeSearch(searchOp,
+                        -2)[1]
+            else:
+                pagePosNext = self.pWiki.getActiveEditor().executeSearch(searchOp,
+                        0)[1]
+                
             if pagePosNext != -1:
                 return  # Found
                 
@@ -791,19 +795,19 @@ class SearchWikiDialog(wxDialog):   # TODO
 
 
 class SearchPageDialog(wxDialog):   # TODO
-    def __init__(self, pWiki, ID, title="Search Wiki",
+    def __init__(self, pWiki, ID, title="",
                  pos=wxDefaultPosition, size=wxDefaultSize,
                  style=wxNO_3D|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER):
         d = wxPreDialog()
         self.PostCreate(d)
-        
+
         self.pWiki = pWiki
 
         res = xrc.wxXmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "SearchPageDialog")
-        
+
         self.ctrls = XrcControls(self)
-        
+
         self.ctrls.btnClose.SetId(wxID_CANCEL)
         
         self.firstFind = True
@@ -827,7 +831,7 @@ class SearchPageDialog(wxDialog):   # TODO
         sarOp.booleanOp = False
         sarOp.caseSensitive = self.ctrls.cbCaseSensitive.GetValue()
         sarOp.wholeWord = self.ctrls.cbWholeWord.GetValue()
-        sarOp.cycleToStart = True #???
+        sarOp.cycleToStart = False #???
         
         if self.ctrls.cbRegEx.GetValue():
             sarOp.wildCard = 'regex'
@@ -839,19 +843,55 @@ class SearchPageDialog(wxDialog):   # TODO
         return sarOp
 
 
+    def _nextSearch(self, sarOp):
+        editor = self.pWiki.getActiveEditor()
+        if self.ctrls.rbSearchFrom.GetSelection() == 0:
+            # Search from cursor
+            contPos = editor.getContinuePosForSearch(sarOp)
+        else:
+            # Search from beginning
+            contPos = 0
+            self.ctrls.rbSearchFrom.SetSelection(0)
+        
+        start, end = self.pWiki.getActiveEditor().executeSearch(sarOp,
+                contPos)[:2]
+        if start == -1:
+            # No matches found
+            if contPos != 0:
+                # We started not at beginning, so ask if to wrap around
+                result = wxMessageBox(u"End of document reached. "
+                        u"Continue at beginning?",
+                        u"Continue at beginning?",
+                        wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+                if result == wxNO:
+                    return
+
+                start, end = self.pWiki.getActiveEditor().executeSearch(
+                        sarOp, 0)[:2]
+                if start != -1:
+                    return
+
+            # no more matches possible -> show dialog
+            wxMessageBox(u"No matches found.",
+                    u"No matches found", wxOK, self)
+
+
+
     def OnFindNext(self, evt):
         sarOp = self._buildSearchOperation()
-        sarOp.replaceOp = False        
-        self.pWiki.getActiveEditor().executeSearch(sarOp,
-                next=not self.firstFind)
+        sarOp.replaceOp = False
+        self._nextSearch(sarOp)
+
         self.firstFind = False
+
 
     def OnReplace(self, evt):
         sarOp = self._buildSearchOperation()
         sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
         sarOp.replaceOp = True
         self.pWiki.getActiveEditor().executeReplace(sarOp)
-        self.pWiki.getActiveEditor().executeSearch(sarOp, next=True)
+        self._nextSearch(sarOp)
+
 
     def OnReplaceAll(self, evt):
         sarOp = self._buildSearchOperation()
@@ -859,12 +899,16 @@ class SearchPageDialog(wxDialog):   # TODO
         sarOp.replaceOp = True
         sarOp.cycleToStart = False
         lastReplacePos = 0
-        while True:
-            lastReplacePos = self.pWiki.getActiveEditor().executeSearch(sarOp,
-                    lastReplacePos)[1]
-            if lastReplacePos == -1:
-                break
-            lastReplacePos = self.pWiki.getActiveEditor().executeReplace(sarOp)
+        editor = self.pWiki.getActiveEditor()
+        editor.BeginUndoAction()
+        try:
+            while True:
+                lastReplacePos = editor.executeSearch(sarOp, lastReplacePos)[1]
+                if lastReplacePos == -1:
+                    break
+                lastReplacePos = editor.executeReplace(sarOp)
+        finally:
+            editor.EndUndoAction()
 
 
 

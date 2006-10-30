@@ -56,7 +56,7 @@ class WikiHtmlView(wxHtmlWindow):
         self.anchor = None  # Name of anchor to jump to when view gets visible
 
         
-        # TODO Should be changed to presenter as control
+        # TODO Should be changed to presenter as controller
         self.exporterInstance = Exporters.HtmlXmlExporter(
                 self.presenter.getMainControl())
 
@@ -66,7 +66,9 @@ class WikiHtmlView(wxHtmlWindow):
         EVT_KEY_DOWN(self, self.OnKeyDown)
         EVT_KEY_UP(self, self.OnKeyUp)
         EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
-        
+        EVT_MENU(self, GUI_ID.CMD_ZOOM_IN, lambda evt: self.addZoom(1))
+        EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT, lambda evt: self.addZoom(-1))
+
         EVT_SET_FOCUS(self, self.OnSetFocus)
         EVT_MOUSEWHEEL(self, self.OnMouseWheel) 
 
@@ -230,28 +232,47 @@ class WikiHtmlView(wxHtmlWindow):
         else:
             evt.Skip()
 
+    def addZoom(self, step):
+        """
+        Modify the zoom setting by step relative to current zoom in
+        configuration.
+        """
+        zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
+        zoom += step
+
+        self.presenter.getConfig().set("main", "preview_zoom", str(zoom))
+        self.outOfSync = True
+        self.refresh()
+
+
 
     def OnKeyDown(self, evt):
         acc = getAccelPairFromKeyDown(evt)
         if acc == (wxACCEL_CTRL, ord('+')) or \
                 acc == (wxACCEL_CTRL, WXK_NUMPAD_ADD):
-            zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
-            self.presenter.getConfig().set("main", "preview_zoom", str(zoom + 1))
-            self.refresh()
+            self.addZoom(1)
+#             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
+#             self.presenter.getConfig().set("main", "preview_zoom", str(zoom + 1))
+#             self.outOfSync = True
+#             self.refresh()
         elif acc == (wxACCEL_CTRL, ord('-')) or \
                 acc == (wxACCEL_CTRL, WXK_NUMPAD_SUBTRACT):
-            zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
-            self.presenter.getConfig().set("main", "preview_zoom", str(zoom - 1))
-            self.refresh()
+            self.addZoom(-1)
+#             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
+#             self.presenter.getConfig().set("main", "preview_zoom", str(zoom - 1))
+#             self.outOfSync = True
+#             self.refresh()
         else:
             evt.Skip()
 
     def OnMouseWheel(self, evt):
         if evt.ControlDown():
-            zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
-            zoom -= evt.GetWheelRotation() // evt.GetWheelDelta()
-            self.presenter.getConfig().set("main", "preview_zoom", str(zoom))
-            self.refresh()
+            self.addZoom( -(evt.GetWheelRotation() // evt.GetWheelDelta()) )
+#             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
+#             zoom -= evt.GetWheelRotation() // evt.GetWheelDelta()
+#             self.presenter.getConfig().set("main", "preview_zoom", str(zoom))
+#             self.outOfSync = True
+#             self.refresh()
         else:
             evt.Skip()
 

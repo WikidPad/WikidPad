@@ -1,6 +1,18 @@
 ﻿++ Change Log
 
 
+Oct. 30, 2006 (1.8beta4)
+
+    * Menu items and toolbar icons for zoom in/out also work for
+      preview now.
+    * Better page search. Search starts at cursor position or
+      optional at beginning. Before wrapping search from page end
+      to beginning, user is asked.
+    * Bug fixed: Showing (more precisely searching) of words in
+      subcategories of todos in tree did not work.
+
+
+
 Oct. 26, 2006 (1.8beta3)
 
     * List undefined pages (dead wiki links), also appropriate
