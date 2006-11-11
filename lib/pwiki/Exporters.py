@@ -15,6 +15,7 @@ from wxHelper import XrcControls
 from WikiExceptions import WikiWordNotFoundException, ExportException
 import WikiFormatting
 from StringOps import *
+from TempFileSet import TempFileSet
 
 from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
         ListItemWithSubtreeWikiPagesNode
@@ -90,7 +91,7 @@ class HtmlXmlExporter:
 #         self.tokenizer = Tokenizer(
 #                 WikiFormatting.CombinedHtmlExportRE, -1)
                 
-        self.result = None
+        self.exportType = None
         self.statestack = None
         # deepness of numeric bullets
         self.numericdeepness = None
@@ -98,6 +99,7 @@ class HtmlXmlExporter:
         self.links = None
         self.wordAnchor = None  # For multiple wiki pages in one HTML page, this contains the anchor
                 # of the current word.
+        self.tempFileSet = None
         self.convertFilename = removeBracketsFilename   # lambda s: mbcsEnc(s, "replace")[0]
         
         self.result = None
@@ -219,6 +221,7 @@ class HtmlXmlExporter:
         self.wikiData = self.wikiDataManager.getWikiData()
 
         self.wordList = wordList
+        self.exportType = exportType
         self.exportDest = exportDest
         self.addOpt = addOpt
 
@@ -226,31 +229,43 @@ class HtmlXmlExporter:
             self.convertFilename = removeBracketsToCompFilename
         else:
             self.convertFilename = removeBracketsFilename    # lambda s: mbcsEnc(s, "replace")[0]
-        
+            
+        if exportType in (u"html_single", u"html_multi"):
+            # We must prepare a temporary file set for HTML exports
+            self.tempFileSet = TempFileSet()
+            self.tempFileSet.setPreferredPath(self.exportDest)
+            self.tempFileSet.setPreferredRelativeTo(self.exportDest)
+
         if exportType == u"html_single":
-            startfile = self.exportHtmlSingleFile()
+            startfile = self._exportHtmlSingleFile()
         elif exportType == u"html_multi":
-            startfile = self.exportHtmlMultipleFiles()
+            startfile = self._exportHtmlMultipleFiles()
         elif exportType == u"xml":
-            startfile = self.exportXml()
-            
-            
+            startfile = self._exportXml()
+
         if not compatFilenames:
             startfile = mbcsEnc(startfile)[0]
-            
+
+        wxGetApp().getInsertionPluginManager().taskEnd()
+
         if self.mainControl.getConfig().getboolean(
                 "main", "start_browser_after_export") and startfile:
             os.startfile(startfile)
+
+        self.tempFileSet.reset()
+        self.tempFileSet = None
 
 
     def setWikiDataManager(self, wikiDataManager):
         self.wikiDataManager = wikiDataManager
         self.wikiData = self.wikiDataManager.getWikiData()
 
+    def getTempFileSet(self):
+        return self.tempFileSet
 
-    def exportHtmlSingleFile(self):
+    def _exportHtmlSingleFile(self):
         if len(self.wordList) == 1:
-            return self.exportHtmlMultipleFiles()
+            return self._exportHtmlMultipleFiles()
 
         outputFile = join(self.exportDest,
                 self.convertFilename(u"%s.html" % self.mainControl.wikiName))
@@ -321,7 +336,7 @@ class HtmlXmlExporter:
         return outputFile
 
 
-    def exportHtmlMultipleFiles(self):
+    def _exportHtmlMultipleFiles(self):
         links = LinkCreatorForHtmlMultiPageExport(
                 self.wikiDataManager.getWikiData(), self)
                 
@@ -383,7 +398,7 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
         return rootFile
 
 
-    def exportXml(self):
+    def _exportXml(self):
 #         outputFile = join(self.exportDest,
 #                 self.convertFilename(u"%s.xml" % self.mainControl.wikiName))
 
@@ -893,6 +908,7 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
         """
         wordList = None
         content = None
+        htmlContent = None
         key = insertionAstNode.key
         value = insertionAstNode.value
         wikiDocument = self.mainControl.getWikiDocument()
@@ -939,6 +955,17 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                 searchOp.setPackedSettings(datablock)
                 searchOp.replaceOp = False
                 wordList = wikiDocument.searchWiki(searchOp)
+        else:
+            # Call external plugins
+            handler = wxGetApp().getInsertionPluginManager().getHandler(self,
+                    self.exportType, key)
+                    
+            if handler is not None:
+                htmlContent = handler.createContent(self, self.exportType,
+                        insertionAstNode)
+                if htmlContent is None:
+                    htmlContent = u""
+
 
         if wordList is not None:
             # Create content as a nicely formatted list of wiki words
@@ -1003,6 +1030,9 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
             tokens = pageast.getTokens()
 
             self.processTokens(content, tokens)
+
+        elif htmlContent is not None:
+            self.outAppend(htmlContent)
 
 
 
@@ -1084,9 +1114,19 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
             # print "formatContent", styleno, nextstyleno, repr(content[tok[0]:nexttok[0]])
 
+            
             if styleno in (WikiFormatting.FormatTypes.Default,
                 WikiFormatting.FormatTypes.EscapedChar,
                 WikiFormatting.FormatTypes.SuppressHighlight):
+                # Some sort of plain, unformatted text
+
+                if styleno == WikiFormatting.FormatTypes.EscapedChar:
+                    text = tok.node.unescaped
+                elif styleno == WikiFormatting.FormatTypes.SuppressHighlight:
+                    text = tok.grpdict["suppressContent"]
+                else:
+                    text = tok.text
+
                 if checkIndentation:
                     # With indentation check, we have a complicated mechanism
                     # here to check indentation, indent and dedent tracking
@@ -1094,9 +1134,13 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                     # tables (table cells, more precisely)
                     
                     # Normal text, maybe with newlines and indentation to process
-                    lines = tok.text.split(u"\n")
-                    if styleno == WikiFormatting.FormatTypes.EscapedChar:
-                        lines = [tok.node.unescaped]
+                    lines = text.split(u"\n")
+
+#                     if styleno == WikiFormatting.FormatTypes.EscapedChar:
+#                         lines = [tok.node.unescaped]
+#                     elif styleno == WikiFormatting.FormatTypes.SuppressHighlight:
+#                         lines = [tok.node.unescaped]
+                    
     
                     # Test if beginning of lines at beginning of a line in editor
                     if tok.start > 0 and content[tok.start - 1] != u"\n":
@@ -1191,10 +1235,11 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                     continue    # Next token
                 else:     # Not checkIndentation
                     # This is really simple
-                    if styleno == WikiFormatting.FormatTypes.EscapedChar:
-                        self.outAppend(escapeHtml(tok.node.unescaped))
-                    else:
-                        self.outAppend(escapeHtml(tok.text))
+                    self.outAppend(escapeHtml(text))
+#                     if styleno == WikiFormatting.FormatTypes.EscapedChar:
+#                         self.outAppend(escapeHtml(tok.node.unescaped))
+#                     else:
+#                         self.outAppend(escapeHtml(tok.text))
 
             
             
@@ -1779,6 +1824,7 @@ class MultiPageTextExporter:
         self.exportDest = exportDest
         self.addOpt = addOpt
         self.exportFile = None
+        self.rawExportFile = None
         
         # The hairy thing first: find a separator that doesn't appear
         # as a line in one of the pages to export
@@ -1786,39 +1832,37 @@ class MultiPageTextExporter:
         if self.separator is None:
             # _findSeparator gave up
             raise ExportException("No usable separator found")
-
-        self.rawExportFile = None
         try:
-            self.rawExportFile = open(self.exportDest, "w")
-
-            # Only UTF-8 mode currently
-            self.rawExportFile.write(BOM_UTF8)
-            self.exportFile = utf8Writer(self.rawExportFile, "replace")
-            
-            # Identifier line with file format
-            self.exportFile.write("Multipage text format 0\n")
-            # Separator line
-            self.exportFile.write("Separator: %s\n" % self.separator)
-
-            sepCount = len(self.wordList) - 1  # Number of separators yet to write
-            for word in self.wordList:
-                self.exportFile.write("%s\n" % word)
-                page = self.wikiDataManager.getWikiPage(word)
-                self.exportFile.write(page.getLiveText())
-
-                if sepCount > 0:
-                    self.exportFile.write("\n%s\n" % self.separator)
-                    sepCount -= 1
-        except Exception, e:
+            try:
+                self.rawExportFile = open(self.exportDest, "w")
+    
+                # Only UTF-8 mode currently
+                self.rawExportFile.write(BOM_UTF8)
+                self.exportFile = utf8Writer(self.rawExportFile, "replace")
+                
+                # Identifier line with file format
+                self.exportFile.write("Multipage text format 0\n")
+                # Separator line
+                self.exportFile.write("Separator: %s\n" % self.separator)
+    
+                sepCount = len(self.wordList) - 1  # Number of separators yet to write
+                for word in self.wordList:
+                    self.exportFile.write("%s\n" % word)
+                    page = self.wikiDataManager.getWikiPage(word)
+                    self.exportFile.write(page.getLiveText())
+    
+                    if sepCount > 0:
+                        self.exportFile.write("\n%s\n" % self.separator)
+                        sepCount -= 1
+            except Exception, e:
+                traceback.print_exc()
+                raise ExportException(unicode(e))
+        finally:
             if self.exportFile is not None:
                 self.exportFile.flush()
 
             if self.rawExportFile is not None:
                 self.rawExportFile.close()
-                
-            traceback.print_exc()
-            raise ExportException(unicode(e))
-
 
 
 def describeExporters(mainControl):

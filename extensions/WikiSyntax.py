@@ -162,8 +162,15 @@ PropertyRE      = re.compile(ur"\[[ \t]*(?P<propertyName>[\w\-\_\.]+?)[ \t]*" +
                   re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
+# InsertionRE     = re.compile(ur"\[:[ \t]*(?P<insertionKey>[\w\-\_\.]+?)[ \t]*" +
+#                   ur"[:][ \t]*(?P<insertionValue>[\w\-\_ \t;,.!?#/|]+?)\]",
+#                   re.DOTALL | re.UNICODE | re.MULTILINE)
 InsertionRE     = re.compile(ur"\[:[ \t]*(?P<insertionKey>[\w\-\_\.]+?)[ \t]*" +
-                  ur"[:][ \t]*(?P<insertionValue>[\w\-\_ \t;,.!?#/|]+?)\]",
+                  ur"[:][ \t]*(?:"
+                  ur"(?P<insertionValue>[\w\-\_ \t;,.!?#/|]+?)|"
+                  ur"(?P<insertionQuoteStarter>\"+|'+|/+|\\+)"
+                        ur"(?P<insertionQuotedValue>.*?)(?P=insertionQuoteStarter)"
+                  ur")\]",
                   re.DOTALL | re.UNICODE | re.MULTILINE)
 
 # Reverse REs for autocompletion
@@ -214,8 +221,8 @@ HorizLineRE     = re.compile(u"----+", re.DOTALL | re.UNICODE | re.MULTILINE)
 
 # suppression expression
 # Orig: SuppressHighlightingRE = re.compile("\<\<(.*?)\>\>", re.DOTALL)
-SuppressHighlightingRE = re.compile(ur"^(?P<suppressIndent>[ \t]*)<<[ \t]*$"+
-        ur"(?P<suppressContent>.*?)^[ \t]*>>[ \t]*$",
+SuppressHighlightingRE = re.compile(ur"^(?P<suppressIndent>[ \t]*)<<[ \t]*\n"+
+        ur"(?P<suppressContent>.*?)\n[ \t]*>>[ \t]*$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 AnchorRE = re.compile(ur"^[ \t]*anchor:[ \t]*(?P<anchorValue>[A-Za-z0-9\_]+)\n",

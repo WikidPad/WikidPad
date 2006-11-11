@@ -10,7 +10,7 @@ from pwiki.WikiExceptions import *
 from pwiki.StringOps import mbcsDec
 from pwiki.DocPages import WikiPage, FunctionalPage, AliasWikiPage
 
-from pwiki.Configuration import createWikiConfiguration
+# from pwiki.Configuration import createWikiConfiguration
 from pwiki.WikiFormatting import WikiFormatting
 
 from pwiki.SearchAndReplace import SearchReplaceOperation
@@ -97,7 +97,7 @@ def splitConfigPathAndWord(wikiCombinedFilename):
     return: tuple (cfg, wikiword) with cfg real config filepath (None if it
             couldn't be found. wikiword is the wikiword to jump to or None
     """
-    wikiConfig = createWikiConfiguration()
+    wikiConfig = wxGetApp().createWikiConfiguration()
     wikiConfigFilename = wikiCombinedFilename
     wikiWord = None
 
@@ -182,7 +182,7 @@ class WikiDataManager(MiscEventSourceMixin):
     """
 
     def __init__(self, wikiConfigFilename, wikiSyntax, dbtype):  #  dataDir, fileStorDir, dbtype, ):
-        wikiConfig = createWikiConfiguration()
+        wikiConfig = wxGetApp().createWikiConfiguration()
         self.connected = False
         wikiConfig.loadConfig(wikiConfigFilename)
         

@@ -10,7 +10,7 @@ Source: dist\extensions\referrals.py; DestDir: {app}\extensions\; Components: Pr
 Source: dist\extensions\autoNew.py; DestDir: {app}\extensions\; Components: Program_files
 Source: dist\icons\*.gif; DestDir: {app}\icons\; Components: Program_files; Flags: onlyifdoesntexist
 Source: dist\icons\pwiki.ico; DestDir: {app}\icons\; Components: Program_files; Flags: onlyifdoesntexist
-Source: dist\WikidPadHelp\*; DestDir: {app}\WikidPadHelp\; Components: Gadfly\Help; Flags: recursesubdirs
+Source: dist\WikidPadHelp\*; DestDir: {app}\WikidPadHelp\; Components: Gadfly\Help; Flags: recursesubdirs ignoreversion
 Source: dist\w9xpopen.exe; DestDir: {app}; Components: Program_files
 Source: dist\license.txt; DestDir: {app}; Components: Program_files
 Source: dist\readme_Wic.txt; DestDir: {app}; Components: Program_files

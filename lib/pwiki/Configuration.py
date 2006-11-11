@@ -4,7 +4,7 @@ import os, traceback
 
 import codecs
 
-from wxPython.wx import wxPlatformInfo, wxGetOsVersion
+from wxPython.wx import wxPlatformInfo, wxGetOsVersion, wxGetApp
 
 wxWINDOWS_NT = 18   # For wxGetOsVersion() 
 wxWIN95 = 20   # For wxGetOsVersion(), this includes also Win 98 and ME
@@ -136,7 +136,7 @@ class _AbstractConfiguration:
 
 
 
-class _SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
+class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
     """
     Wraps a single ConfigParser object
     """
@@ -264,15 +264,15 @@ class _SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
 
 
 
-class _CombinedConfiguration(_AbstractConfiguration):
+class CombinedConfiguration(_AbstractConfiguration):
     """
     Manages global and wiki specific configuration options.
-    Mainly wraps two _SingleConfiguration instances
+    Mainly wraps two SingleConfiguration instances
     """
     
     def __init__(self, globalconfig, wikiconfig):
         """
-        globalconfig -- _SingleConfiguration object for global settings
+        globalconfig -- SingleConfiguration object for global settings
         wikiconfig -- Same for wiki settings
         """
         self.globalConfig = globalconfig
@@ -424,7 +424,7 @@ class _CombinedConfiguration(_AbstractConfiguration):
     def informChanged(self):
         """
         This should be called after configuration was changed. It is called
-        for its _SingleConfiguration objects in turn to let them send events
+        for its SingleConfiguration objects in turn to let them send events
         """
         if self.globalConfig is not None:
             self.globalConfig.informChanged()
@@ -570,16 +570,16 @@ WIKIDEFAULTS = {
 
 
 
-def createCombinedConfiguration():
-    return _CombinedConfiguration(_SingleConfiguration(GLOBALDEFAULTS),
-            _SingleConfiguration(WIKIDEFAULTS))
-            
-
-def createWikiConfiguration():
-    return _SingleConfiguration(WIKIDEFAULTS)
-
-
-def createGlobalConfiguration():
-    return _SingleConfiguration(GLOBALDEFAULTS)
+# def createCombinedConfiguration():
+#     return CombinedConfiguration(createGlobalConfiguration(),
+#             createWikiConfiguration())
+#             
+# 
+# def createWikiConfiguration():
+#     return SingleConfiguration(WIKIDEFAULTS)
+# 
+# 
+# def createGlobalConfiguration():
+#     return SingleConfiguration(GLOBALDEFAULTS)
 
 

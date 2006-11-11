@@ -12,6 +12,9 @@ import threading
 from struct import pack, unpack
 
 import difflib, codecs, os.path, random
+
+import urllib_red as urllib
+
 from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE
 
 from Utilities import DUMBTHREADHOLDER
@@ -388,6 +391,14 @@ def relativeFilePath(location, toFilePath):
     result += fileParts
     
     return os.path.join(*result)
+
+
+def urlFromPathname(fn):
+    url = urllib.pathname2url(fn)
+    url.replace("%24", "$")
+    
+    return url
+
 
 
 _RNDBASESEQ = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

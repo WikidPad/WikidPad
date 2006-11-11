@@ -321,7 +321,9 @@ docs/dev-setup.txt -text
 docs/dev.txt -text
 export/wikistyle.css -text
 extensions/EvalLibrary.py -text
+extensions/GraphvizClBridge.py -text
 extensions/KeyBindings.py -text
+extensions/MimeTexCGIBridge.py -text
 extensions/Presentation.py -text
 extensions/WikiSyntax.py -text
 extensions/WikidPadHooks.py -text
@@ -544,6 +546,7 @@ lib/pwiki/Importers.py -text
 lib/pwiki/Ipc.py -text
 lib/pwiki/Localization.py -text
 lib/pwiki/LogWindow.py -text
+lib/pwiki/MainApp.py -text
 lib/pwiki/MiscEvent.py -text
 lib/pwiki/OptionsDialog.py -text
 lib/pwiki/PageAst.py -text
@@ -558,6 +561,7 @@ lib/pwiki/Serialization.py -text
 lib/pwiki/SpellChecker.py -text
 lib/pwiki/SqliteThin3.py -text
 lib/pwiki/StringOps.py -text
+lib/pwiki/TempFileSet.py -text
 lib/pwiki/Utilities.py -text
 lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiFormatting.py -text

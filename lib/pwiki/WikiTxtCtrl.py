@@ -1949,7 +1949,8 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
         shiftPressed = wxGetKeyState(WXK_SHIFT)
         
         for fn in filenames:
-            url = urllib.pathname2url(fn)
+            url = urlFromPathname(fn)
+
             if fn.endswith(".wiki"):
                 urls.append("wiki:%s" % url)
             else:
@@ -1976,11 +1977,11 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
                             # Absolute path needed
                             urls.append("file:%s" % url)
                         else:
-                            urls.append("rel://%s" % urllib.pathname2url(relPath))
+                            urls.append("rel://%s" % urlFromPathname(relPath))
                 else:
                     # Absolute file: URL
                     urls.append("file:%s" % url)
-                
+
 #             if f.endswith(".wiki"):
 #                 url = urllib.pathname2url(f)
 #                 urls.append("wiki:%s" % url)
@@ -1991,8 +1992,6 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
 #                 url = urllib.pathname2url(f)
 # 
 #                 urls.append("file:%s" % url)
-
-        urls = [url.replace("%24", "$") for url in urls]
 
         self.editor.DoDropText(x, y, " ".join(urls))
 

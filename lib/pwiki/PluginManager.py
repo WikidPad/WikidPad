@@ -1,4 +1,7 @@
-import os, sys
+import os, sys, traceback, sets
+
+from wxPython.wx import *
+
 
 from StringOps import mbcsEnc
 
@@ -190,3 +193,86 @@ class PluginManager(object):
             sys.modules[name] = module
 
         return module
+
+
+
+class InsertionPluginManager:
+    def __init__(self, byKeyDescriptions):
+        """
+        byKeyDescriptions -- sequence of tuples as returned by
+            describeInsertionKeys() of a plugin
+        """
+        self.byKeyDescriptions = byKeyDescriptions
+
+        # (<insertion key>, <import type>) tuple to initialized handler
+        # this is only filled on demand
+        self.ktToHandlerDict = {}
+
+        # Build ktToDescDict meaning
+        # (<insertion key>, <import type>) tuple to description tuple dictionary
+        ktToDescDict = {}
+        for keyDesc in self.byKeyDescriptions:
+            key, etlist, factory = keyDesc
+            for et in etlist:
+                ktToDescDict[(key, et)] = keyDesc
+
+        # (<insertion key>, <import type>) tuple to description tuple dictionary
+        self.ktToDescDict = ktToDescDict
+        
+        # Contains all handler objects for which taskStart() was called and
+        # respective taskEnd() wasn't called yet.
+        # Dictionary {id(handler): handler}
+
+        self.startedHandlers = {}
+        
+    def getHandler(self, exporter, exportType, insKey):
+        """
+        Return the appropriate handler for the parameter combination or None
+        exporter -- Calling exporter object
+        exportType -- string describing the export type
+        insKey -- insertion key
+        """
+        result = self.ktToHandlerDict.get((insKey, exportType), 0) # Can't use None here
+
+        if result == 0:
+            keyDesc = self.ktToDescDict.get((insKey, exportType))
+            if keyDesc is None:
+                result = None
+            else:
+                key, etlist, factory = keyDesc
+                try:
+                    obj = factory(wxGetApp())
+                except:
+                    traceback.print_exc()
+                    obj = None
+
+                for et in etlist:
+                    self.ktToHandlerDict[(key, et)] = obj
+                
+                result = obj
+        
+        if result is not None and not id(result) in self.startedHandlers:
+            # Handler must be started before it can be used.
+            try:
+                result.taskStart(exporter, exportType)
+                self.startedHandlers[id(result)] = result
+            except:
+                traceback.print_exc()
+                result = None
+
+        return result
+
+
+    def taskEnd(self):
+        """
+        Call taskEnd() of all created handlers.
+        """
+        for handler in self.startedHandlers.values():
+            try:
+                handler.taskEnd()
+            except:
+                traceback.print_exc()
+            
+        self.startedHandlers.clear()
+
+

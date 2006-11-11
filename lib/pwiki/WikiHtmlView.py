@@ -12,6 +12,8 @@ from MiscEvent import KeyFunctionSink
 
 from StringOps import uniToGui
 
+from TempFileSet import TempFileSet
+
 import Exporters
 
 
@@ -59,9 +61,11 @@ class WikiHtmlView(wxHtmlWindow):
         # TODO Should be changed to presenter as controller
         self.exporterInstance = Exporters.HtmlXmlExporter(
                 self.presenter.getMainControl())
+        
+        # TODO More elegantly
+        self.exporterInstance.exportType = u"html_preview"
+        self.exporterInstance.tempFileSet = TempFileSet()
 
-#         # TODO More elegant
-#         self.exporterInstance.pWiki = self.pWiki
         
         EVT_KEY_DOWN(self, self.OnKeyDown)
         EVT_KEY_UP(self, self.OnKeyUp)
@@ -80,6 +84,9 @@ class WikiHtmlView(wxHtmlWindow):
         if not self.visible and vis:
             self.outOfSync = True   # Just to be sure
             self.refresh()
+            
+        if not vis:
+            self.exporterInstance.tempFileSet.clear()
 
         self.visible = vis
 
@@ -117,8 +124,14 @@ class WikiHtmlView(wxHtmlWindow):
             wikiPage = self.presenter.getDocPage()
             if wikiPage is None:
                 return  # TODO Do anything else here?
-    
+                
             word = wikiPage.getWikiWord()
+            if word is None:
+                return  # TODO Do anything else here?
+
+            # Remove previously used temporary files
+            self.exporterInstance.tempFileSet.clear()
+
             self.currentLoadedWikiWord = word
             content = self.presenter.getLiveText()
     
@@ -132,6 +145,8 @@ class WikiHtmlView(wxHtmlWindow):
             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
             self.SetFonts("", "", [max(s + 2 * zoom, 1)
                     for s in self._DEFAULT_FONT_SIZES])
+                    
+#             print "refresh8", repr(html)
             self.SetPage(uniToGui(html))
 
 

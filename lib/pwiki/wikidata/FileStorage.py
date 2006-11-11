@@ -241,66 +241,6 @@ class FileStorage:
         return (None, False)
 
 
-
-
-
-#     def _isIdentical(self, path1, path2):
-#         """
-#         Checks if the files denoted by path1 and path2 are identical according
-#         to the settings of the object.
-# 
-#         The files must have passed the preliminary test by _preTestIdentity().
-#         """
-#         if not (os.path.isfile(path1) and os.path.isfile(path2)):
-#             # Both must be existing files
-#             return False
-# 
-#         fname1 = os.path.basename(path1)
-#         fname2 = os.path.basename(path2)
-# 
-#         if os.path.splitext(fname1)[1] != os.path.splitext(fname2)[1]:
-#             # file suffix must match always
-#             return False
-# 
-#         if self.filenameMustMatch and fname1 != fname2:
-#             return False
-# 
-#         stat1 = os.stat(path1)
-#         stat2 = os.stat(path2)
-#         
-#         if stat1.st_size != stat2.st_size:
-#             # Size must match always
-#             return False
-#             
-#         if self.modDateMustMatch and stat1.st_mtime != stat2.st_mtime:
-#             return False
-#             
-#         if self.modDateIsEnough and stat1.st_mtime == stat2.st_mtime:
-#             return True
-#             
-#         # End of fast tests, now the whole content must be compared
-#         
-#         file1 = file(path1, "rb")    
-#         file2 = file(path2, "rb")
-#         
-#         try:
-#             while True:
-#                 block1 = file1.read(1024 * 1024)
-#                 block2 = file2.read(1024 * 1024)
-#                 if len(block1) == 0 and len(block2) == 0:
-#                     # EOF
-#                     return True
-#                 if len(block1) != len(block2):
-#                     raise FSException("File compare error, file not readable or "
-#                             "changed during compare")
-# 
-#                 if block1 != block2:
-#                     return False
-#         finally:
-#             file2.close()
-#             file1.close()
-
-
     # TODO progress indicator
     def createDestPath(self, srcPath, guiProgressListener=None):
         """
@@ -320,58 +260,6 @@ class FileStorage:
         self.copyFile(srcPath, destpath)
         
         return destpath
-
-
-
-#     # TODO Maybe more efficient identity test
-#     def findDestPath(self, srcPath):
-#         """
-#         Find a path to a new destination
-#         of the source file denoted by srcPath. Some settings of
-#         the object determine how this is done exactly.
-#         Returns a tuple (path, exists) where path is the destination
-#         path and exists is True if an identical file exists already
-#         at the destination.
-#         If path is None, a new filename couldn't be found.
-#         """
-#         if not os.path.isfile(srcPath):
-#             raise FSException("Path '%s' must point to an existing file" %
-#                     srcPath)
-# 
-#         self._ensureStorage()
-# 
-#         fname = os.path.basename(srcPath)
-# 
-#         if self.filenameMustMatch:
-#             if self._isIdentical(srcPath, os.path.join(self.storagePath, fname)):
-#                 return (os.path.join(self.storagePath, fname), True)
-#         else:
-#             ext = os.path.splitext(srcPath)[1]
-#             candidates = glob.glob(os.path.join(self.storagePath, "*" + ext))
-#             for c in candidates:
-#                 if self._isIdentical(srcPath, c):
-#                     return (c, True)
-# 
-#         # No identical file found, so find a not yet used name for the new file.
-#         
-#         if not os.path.exists(os.path.join(self.storagePath, fname)):
-#             return (os.path.join(self.storagePath, fname), False)
-# 
-#         mat = _FILESPLITPAT.match(fname)
-#         if mat is None:
-#             raise FSException("Internal error: Bad source file name")
-# 
-#         coreName = mat.group("name")
-#         suffix = mat.group("suffix")
-# 
-#         for t in xrange(10):  # Number of tries
-#             newName = u"%s_%s%s" % (coreName, createRandomString(10), suffix)
-#             
-#         if not os.path.exists(os.path.join(self.storagePath, newName)):
-#             return (os.path.join(self.storagePath, newName), False)
-# 
-#         # Give up
-#         return (None, False)
 
 
     def copyFile(unself, srcPath, dstPath):

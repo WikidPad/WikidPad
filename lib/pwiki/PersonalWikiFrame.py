@@ -172,7 +172,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 """)
             tbFile.close()
         self.globalConfigLoc = join(globalConfigDir, "WikidPad.config")
-        self.configuration = Configuration.createCombinedConfiguration()
+        self.configuration = wxGetApp().createCombinedConfiguration()
 
         self.wikiPadHelp = join(self.wikiAppDir, 'WikidPadHelp',
                 'WikidPadHelp.wiki')
@@ -202,7 +202,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.eventRoundtrip = 0
         
         self.currentDocPagePresenter = None
-        
+
         # setup plugin manager and hooks API
         self.pluginManager = PluginManager()
         self.hooks = self.pluginManager.registerPluginAPI(("hooks",1),
@@ -211,10 +211,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
              "savedWikiWord", "renamedWikiWord", "deletedWikiWord", "exit"] )
         # interfaces for menu and toolbar plugins
         self.menuFunctions = self.pluginManager.registerPluginAPI(("MenuFunctions",1), 
-                                ["describeMenuItems"])
+                                ("describeMenuItems",))
         self.toolbarFunctions = self.pluginManager.registerPluginAPI(("ToolbarFunctions",1), 
-                                ["describeToolbarItems"])
-
+                                ("describeToolbarItems",))
+                                
         # load extensions
         self.loadExtensions()
 
@@ -439,7 +439,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def getWikiDocument(self):
         return self.wikiDataManager
 
-
     def getWikiConfigPath(self):
         if self.wikiDataManager is None:
             return None
@@ -454,7 +453,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return None
 
         return self.wikiDataManager.getFormatting()
-#         return self.formatting
 
     def getCollator(self):
         return wxGetApp().getCollator()
@@ -2006,7 +2004,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if (allIsWell):
                 # everything is ok, write out the config file
                 # create a new config file for the new wiki
-                wikiConfig = Configuration.createWikiConfiguration()
+                wikiConfig = wxGetApp().createWikiConfiguration()
 #                 
                 wikiConfig.createEmptyConfig(configFileLoc)
                 wikiConfig.fillWithDefaults()
@@ -3823,6 +3821,12 @@ These are your default global settings.
         if self.win32Interceptor is not None:
             self.win32Interceptor.unintercept()
 
+        self.closeWiki()
+        self.getCurrentDocPagePresenter().close()
+
+        # trigger hook
+        self.hooks.exit(self)
+
         # if the frame is not minimized
         # update the size/pos of the global config
         if not self.IsIconized():
@@ -3843,15 +3847,6 @@ These are your default global settings.
 
         self.configuration.set("main", "windowmode", windowmode)
 
-#         splitterPos = self.treeSashWindow.getSashPosition()
-# 
-#         self.configuration.set("main", "splitter_pos", splitterPos)
-# 
-#         self.configuration.set("main", "log_window_effectiveSashPos",
-#                 self.logSashWindow.getEffectiveSashPosition())
-#         self.configuration.set("main", "log_window_sashPos",
-#                 self.logSashWindow.getSashPosition())
-
         layoutCfStr = self.windowLayouter.getWinPropsForConfig()
         self.configuration.set("main", "windowLayout", layoutCfStr)
 
@@ -3861,11 +3856,7 @@ These are your default global settings.
         self.writeGlobalConfig()
 
         # save the current wiki state
-        self.closeWiki()
 #         self.saveCurrentWikiState()
-
-        # trigger hook
-        self.hooks.exit(self)
 
         wxTheClipboard.Flush()
 
@@ -3875,7 +3866,7 @@ These are your default global settings.
 
             self.tbIcon.Destroy()
             self.tbIcon = None
-            
+
         self.Destroy()
 
 

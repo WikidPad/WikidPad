@@ -12,6 +12,40 @@ from StringOps import uniToGui, guiToUni, htmlColorToRgbTuple,\
 from AdditionalDialogs import DateformatDialog, FontFaceDialog
 
 
+class PredefinedOptionsPanel(wxPanel):
+    def __init__(self, parent, resName):
+        p = wxPrePanel()
+        self.PostCreate(p)
+#         self.optionsDlg = optionsDlg
+        res = xrc.wxXmlResource.Get()
+
+        res.LoadOnPanel(self, parent, resName)
+        
+    def setVisible(self, vis):
+        return True
+
+    def checkOk(self):
+        return True
+
+    def handleOk(self):
+        pass
+
+
+class EmptyOptionsPanel(wxPanel):
+    def __init__(self, parent):
+        wxPanel.__init__(self, parent)
+
+    def setVisible(self, vis):
+        return True
+
+    def checkOk(self):
+        return True
+
+    def handleOk(self):
+        pass
+
+
+
 class OptionsDialog(wxDialog):
     # List of tuples (<configuration file entry>, <gui control name>, <type>)
     # Supported types: b: boolean checkbox, i0+: nonnegative integer, t: text
@@ -87,7 +121,7 @@ class OptionsDialog(wxDialog):
             ("fileStorage_identity_modDateIsEnough", "cbFsModDateIsEnough", "b")
     )
 
-    _PANEL_LIST = (
+    DEFAULT_PANEL_LIST = (
             ("OptionsPageApplication", u"Application"),    
             ("OptionsPageTree", u"  Tree"),
             ("OptionsPageHtml", u"  HTML preview/export"),
@@ -107,24 +141,29 @@ class OptionsDialog(wxDialog):
         res.LoadOnDialog(self, self.pWiki, "OptionsDialog")
 
         self.ctrls = XrcControls(self)
-        
+
         self.emptyPanel = None
 
         self.panelList = []
         self.ctrls.lbPages.Clear()
-        
+
         minw = 0
         minh = 0        
-        for pn, pt in self._PANEL_LIST:
-            if pn:
-                panel = res.LoadPanel(self.ctrls.panelPages, pn)
+        for pn, pt in wxGetApp().getOptionsDlgPanelList():
+            if isinstance(pn, basestring):
+                if pn != "":
+                    panel = PredefinedOptionsPanel(self.ctrls.panelPages, pn)
+    #                 res.LoadPanel(self.ctrls.panelPages, pn)
+                else:
+                    if self.emptyPanel is None:
+                        # Necessary to avoid a crash        
+                        self.emptyPanel = EmptyOptionsPanel(self.ctrls.panelPages)
+                        self.emptyPanel.Fit()
+                    panel = self.emptyPanel
             else:
-                if self.emptyPanel is None:
-                    # Necessary to avoid a crash        
-                    self.emptyPanel = wxPanel(self.ctrls.panelPages)
-                    self.emptyPanel.Fit()
-                panel = self.emptyPanel
-                
+                # Factory function or class
+                panel = pn(self.ctrls.panelPages, self, wxGetApp())
+
             self.panelList.append(panel)
             self.ctrls.lbPages.Append(pt)
             mins = panel.GetSize()
@@ -160,7 +199,12 @@ class OptionsDialog(wxDialog):
                 self.pWiki.getConfig().getint("main",
                 "new_window_on_follow_wiki_url") != 0)
 
-        self.ctrls.lbPages.SetSelection(0)  
+        self.activePageIndex = -1
+        for panel in self.panelList:
+            panel.Show(False)
+            panel.Enable(False)
+
+        self.ctrls.lbPages.SetSelection(0)
         self._refreshForPage()
 
         EVT_LISTBOX(self, GUI_ID.lbPages, self.OnLbPages)
@@ -193,11 +237,18 @@ class OptionsDialog(wxDialog):
 
 
     def _refreshForPage(self):
-        for p in self.panelList:
-            p.Show(False)
-            p.Enable(False)
+        if self.activePageIndex > -1:
+            panel = self.panelList[self.activePageIndex]
+            if not panel.setVisible(False):
+                return
             
-        panel = self.panelList[self.ctrls.lbPages.GetSelection()]
+            panel.Show(False)
+            panel.Enable(False)
+
+        self.activePageIndex = self.ctrls.lbPages.GetSelection()
+
+        panel = self.panelList[self.activePageIndex]
+        panel.setVisible(True)  # Not checking return value here
 
         # Enable appropriate addit. options panel
         panel.Enable(True)
@@ -256,6 +307,14 @@ class OptionsDialog(wxDialog):
         if not fieldsValid:
             self.Refresh()
             return
+            
+        # Check each panel
+        for i, panel in enumerate(self.panelList):
+            if not panel.checkOk():
+                # One panel has a problem (probably invalid data)
+                self.ctrls.lbPages.SetSelection(i)
+                self._refreshForPage()
+                return
 
         # Then transfer options from dialog to config file
         for o, c, t in self.OPTION_TO_CONTROL:
@@ -282,6 +341,10 @@ class OptionsDialog(wxDialog):
             self.pWiki.getConfig().set("main", "new_window_on_follow_wiki_url", "1")
         else:
             self.pWiki.getConfig().set("main", "new_window_on_follow_wiki_url", "0")
+
+        # Ok for each panel
+        for panel in self.panelList:
+            panel.handleOk()
 
         self.pWiki.getConfig().informChanged()
 

@@ -566,7 +566,24 @@ class Url(Ast):
 
 
 class Insertion(Ast):
-    __slots__ = ("key", "value", "appendices")
+    r"""
+    Insertions can be either quoted or non-quoted.
+    Non-quoted insertions look like:
+    [:key:value;appendix;appendix]
+    
+    They are used mainly for keys supported by WikidPad internally
+    
+    Quoted insertions look like:
+    [:key:"some data ..."]
+    
+    instead of the " there can be an arbitrary number (at least one) of
+    quotation characters ", ', / or \. So " can be replaced by e.g
+    "", ''', \ or //.
+
+    These insertions are mainly used for keys supported by external plugins
+    """
+    
+    __slots__ = ("key", "value", "appendices", "quotedValue")
 
     def __init__(self):
         Ast.__init__(self)
@@ -576,10 +593,18 @@ class Insertion(Ast):
         groupdict = token.grpdict
         
         self.key = groupdict.get("insertionKey")
-        values = groupdict.get("insertionValue").split(u";")
-        
-        self.value = values[0]
-        self.appendices = [v.lstrip() for v in values[1:]]
+        self.quotedValue = groupdict.get("insertionQuotedValue")
+
+        iv = groupdict.get("insertionValue")
+        if iv is not None:
+            values = iv.split(u";")
+
+            self.value = values[0]
+            self.appendices = [v.lstrip() for v in values[1:]]
+        else:
+            self.value = None
+            self.appendices = ()
+
 
 
 class EscapeCharacter(Ast):
