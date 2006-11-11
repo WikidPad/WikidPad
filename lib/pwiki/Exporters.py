@@ -644,7 +644,7 @@ class HtmlXmlExporter:
             for celltokens in row:
                 self.outAppend(u"<td>")
 #                 print "outTable2", repr(celltokens)
-                self.processTokens(content, celltokens)
+                self.processTokens(content, celltokens, checkIndentation=False)
                 self.outAppend(u"</td>")
             self.outAppend(u"</tr>\n")
 
@@ -706,7 +706,7 @@ class HtmlXmlExporter:
         return self.getOutput()
 
 
-    def processTokens(self, content, tokens):
+    def processTokens(self, content, tokens, checkIndentation=True):
         """
         Actual token to HTML converter. May be called recursively
         """
@@ -729,100 +729,113 @@ class HtmlXmlExporter:
             if styleno in (WikiFormatting.FormatTypes.Default,
                 WikiFormatting.FormatTypes.EscapedChar,
                 WikiFormatting.FormatTypes.SuppressHighlight):
-                # Normal text, maybe with newlines and indentation to process
-                lines = tok.text.split(u"\n")
-                if styleno == WikiFormatting.FormatTypes.EscapedChar:
-                    lines = [tok.node.unescaped]
-
-                # Test if beginning of lines at beginning of a line in editor
-                if tok.start > 0 and content[tok.start - 1] != u"\n":
-                    # if not -> output of the first, incomplete, line
-                    self.outAppend(escapeHtml(lines[0]))
-#                     print "processTokens12", repr(lines[0])
-                    del lines[0]
+                if checkIndentation:
+                    # With indentation check, we have a complicated mechanism
+                    # here to check indentation, indent and dedent tracking
+                    # The simple version without checking below is used for
+                    # tables (table cells, more precisely)
                     
-                    if len(lines) >= 1:
-                        # If further lines follow, break line
-                        if not self.preMode:
-                            self.outAppend(u"<br />\n")
-                        else:
-                            self.outAppend(u"\n")
-
-                if len(lines) >= 1:
-                    # All 'lines' now begin at a new line in the editor
-                    # and all but the last end at one
-                    for line in lines[:-1]:
-#                         print "processTokens15", repr(line)
-                        if line.strip() == u"":
-                            # Handle empty line
+                    # Normal text, maybe with newlines and indentation to process
+                    lines = tok.text.split(u"\n")
+                    if styleno == WikiFormatting.FormatTypes.EscapedChar:
+                        lines = [tok.node.unescaped]
+    
+                    # Test if beginning of lines at beginning of a line in editor
+                    if tok.start > 0 and content[tok.start - 1] != u"\n":
+                        # if not -> output of the first, incomplete, line
+                        self.outAppend(escapeHtml(lines[0]))
+    #                     print "processTokens12", repr(lines[0])
+                        del lines[0]
+                        
+                        if len(lines) >= 1:
+                            # If further lines follow, break line
                             if not self.preMode:
                                 self.outAppend(u"<br />\n")
                             else:
                                 self.outAppend(u"\n")
-                            continue
-                            
-                        if not self.preMode:
-                            line, ind = splitIndent(line)
     
-                            while stacklen < len(self.statestack) and \
-                                    ind < self.statestack[-1][1]:
-                                # Current indentation is less than previous (stored
-                                # on stack) so close open <ul> and <ol>
-                                self.popState()
+                    if len(lines) >= 1:
+                        # All 'lines' now begin at a new line in the editor
+                        # and all but the last end at one
+                        for line in lines[:-1]:
+    #                         print "processTokens15", repr(line)
+                            if line.strip() == u"":
+                                # Handle empty line
+                                if not self.preMode:
+                                    self.outAppend(u"<br />\n")
+                                else:
+                                    self.outAppend(u"\n")
+                                continue
+                                
+                            if not self.preMode:
+                                line, ind = splitIndent(line)
+        
+                                while stacklen < len(self.statestack) and \
+                                        ind < self.statestack[-1][1]:
+                                    # Current indentation is less than previous (stored
+                                    # on stack) so close open <ul> and <ol>
+                                    self.popState()
+        
+        #                         print "normal1", repr(line), repr(self.statestack[-1][0]), ind, repr(self.statestack[-1][1])
+                                if self.statestack[-1][0] == "normalindent" and \
+                                        ind > self.statestack[-1][1]:
+                                    # More indentation than before -> open new <ul> level
+        #                             print "normal2"
+                                    self.outEatBreaks(u"<ul>")
+                                    self.statestack.append(("normalindent", ind))
+                                    self.outAppend(escapeHtml(line))
+                                    self.outAppend(u"<br />\n")
+        
+                                elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
+                                    self.outAppend(escapeHtml(line))
+                                    self.outAppend(u"<br />\n")
+                            else:
+                                self.outAppend(escapeHtml(line))
+                                self.outAppend(u"\n")
+                                
+                        # Handle last line
+                        # Some tokens have own indentation handling
+                        # and last line is empty string in this case,
+                        # do not handle last line if such token follows
+                        if not nextstyleno in \
+                                (WikiFormatting.FormatTypes.Numeric,
+                                WikiFormatting.FormatTypes.Bullet,
+                                WikiFormatting.FormatTypes.Suppress,   # TODO Suppress?
+                                WikiFormatting.FormatTypes.Table,
+                                WikiFormatting.FormatTypes.PreBlock):
     
-    #                         print "normal1", repr(line), repr(self.statestack[-1][0]), ind, repr(self.statestack[-1][1])
-                            if self.statestack[-1][0] == "normalindent" and \
-                                    ind > self.statestack[-1][1]:
-                                # More indentation than before -> open new <ul> level
-    #                             print "normal2"
-                                self.outEatBreaks(u"<ul>")
-                                self.statestack.append(("normalindent", ind))
+                            line = lines[-1]
+                            if not self.preMode:
+                                line, ind = splitIndent(line)
+                                
+                                while stacklen < len(self.statestack) and \
+                                        ind < self.statestack[-1][1]:
+                                    # Current indentation is less than previous (stored
+                                    # on stack) so close open <ul> and <ol>
+                                    self.popState()
+                                        
+                                if self.statestack[-1][0] == "normalindent" and \
+                                        ind > self.statestack[-1][1]:
+                                    # More indentation than before -> open new <ul> level
+                                    self.outEatBreaks(u"<ul>")
+                                    self.statestack.append(("normalindent", ind))
+                                    self.outAppend(escapeHtml(line))
+                                elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
+                                    self.outAppend(escapeHtml(line))
+                            else:
                                 self.outAppend(escapeHtml(line))
-                                self.outAppend(u"<br />\n")
-    
-                            elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
-                                self.outAppend(escapeHtml(line))
-                                self.outAppend(u"<br />\n")
-                        else:
-                            self.outAppend(escapeHtml(line))
-                            self.outAppend(u"\n")
-                            
-                    # Handle last line
-                    # Some tokens have own indentation handling
-                    # and last line is empty string in this case,
-                    # do not handle last line if such token follows
-                    if not nextstyleno in \
-                            (WikiFormatting.FormatTypes.Numeric,
-                            WikiFormatting.FormatTypes.Bullet,
-                            WikiFormatting.FormatTypes.Suppress,   # TODO Suppress?
-                            WikiFormatting.FormatTypes.Table,
-                            WikiFormatting.FormatTypes.PreBlock):
-
-                        line = lines[-1]
-                        if not self.preMode:
-                            line, ind = splitIndent(line)
-                            
-                            while stacklen < len(self.statestack) and \
-                                    ind < self.statestack[-1][1]:
-                                # Current indentation is less than previous (stored
-                                # on stack) so close open <ul> and <ol>
-                                self.popState()
-                                    
-                            if self.statestack[-1][0] == "normalindent" and \
-                                    ind > self.statestack[-1][1]:
-                                # More indentation than before -> open new <ul> level
-                                self.outEatBreaks(u"<ul>")
-                                self.statestack.append(("normalindent", ind))
-                                self.outAppend(escapeHtml(line))
-                            elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
-                                self.outAppend(escapeHtml(line))
-                        else:
-                            self.outAppend(escapeHtml(line))
-                    
                         
-                # self.result.append(u"<br />\n")   # TODO <br />  ?
+                            
+                    # self.result.append(u"<br />\n")   # TODO <br />  ?
+    
+                    continue    # Next token
+                else:     # Not checkIndentation
+                    # This is really simple
+                    if styleno == WikiFormatting.FormatTypes.EscapedChar:
+                        self.outAppend(escapeHtml(tok.node.unescaped))
+                    else:
+                        self.outAppend(escapeHtml(tok.text))
 
-                continue    # Next token
             
             
             # if a known token RE matches:
