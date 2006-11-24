@@ -1,5 +1,5 @@
 from weakref import WeakValueDictionary
-import os, os.path, sets, traceback
+import os, os.path, sets, traceback, re
 from threading import RLock
 
 from wxPython.wx import wxGetApp
@@ -239,7 +239,7 @@ class WikiDataManager(MiscEventSourceMixin):
         # absolutize the path to data dir if it's not already
         if not os.path.isabs(dataDir):
             dataDir = os.path.join(os.path.dirname(wikiConfigFilename), dataDir)
-            
+
         dataDir = mbcsDec(os.path.abspath(dataDir), "replace")[0]
 
         self.wikiConfigFilename = wikiConfigFilename
@@ -352,6 +352,8 @@ class WikiDataManager(MiscEventSourceMixin):
         self.getFormatting().rebuildFormatting(None)
         self._updateCcWordBlacklist()
         
+        self.readAccessFailed = False
+        self.writeAccessFailed = False
         self.noAutoSaveFlag = False # Flag is set (by PersonalWikiFrame),
                 # if some error occurred during saving and the user doesn't want
                 # to retry saving. WikiDataManager does not change or respect
@@ -428,6 +430,28 @@ class WikiDataManager(MiscEventSourceMixin):
         
     def setNoAutoSaveFlag(self, val):
         self.noAutoSaveFlag = val
+        # TODO send message?
+
+
+    def getReadAccessFailed(self):
+        """
+        Flag is set (by PersonalWikiFrame),
+        """
+        return self.readAccessFailed
+        
+    def setReadAccessFailed(self, val):
+        self.readAccessFailed = val
+        # TODO send message?
+
+
+    def getWriteAccessFailed(self):
+        """
+        Flag is set (by PersonalWikiFrame),
+        """
+        return self.writeAccessFailed
+        
+    def setWriteAccessFailed(self, val):
+        self.writeAccessFailed = val
         # TODO send message?
 
 
@@ -615,19 +639,44 @@ class WikiDataManager(MiscEventSourceMixin):
 
         if modifyText:
             # now we have to search the wiki files and replace the old word with the new
-            searchOp = SearchReplaceOperation()
-            searchOp.wikiWide = True
-            searchOp.wildCard = 'no'
-            searchOp.caseSensitive = True
-            searchOp.searchStr = wikiWord
+            sarOp = SearchReplaceOperation()
+            sarOp.wikiWide = True
+            sarOp.wildCard = 'regex'
+            sarOp.caseSensitive = True
+            sarOp.searchStr = ur"\b" + re.escape(wikiWord) + ur"\b"
+            
+            for resultWord in self.searchWiki(sarOp):
+                wikiPage = self.getWikiPage(resultWord)
+                text = wikiPage.getLiveText()
+                sarOp.replaceStr = re.escape(toWikiWord)
+                sarOp.replaceOp = True
+                sarOp.cycleToStart = False
 
-            for resultWord in self.searchWiki(searchOp):
-                page = self.getWikiPage(resultWord)
-                content = page.getLiveText()
-                content = content.replace(wikiWord, toWikiWord)
-#                 page.save(content)
-#                 page.update(content, False)  # TODO AGA processing
-                page.replaceLiveText(content)
+                charStartPos = 0
+    
+                while True:
+                    found = sarOp.searchText(text, charStartPos)
+                    start, end = found[:2]
+                    
+                    if start is None: break
+                    
+                    repl = sarOp.replace(text, found)
+                    text = text[:start] + repl + text[end:]  # TODO Faster?
+                    charStartPos = start + len(repl)
+
+                wikiPage.replaceLiveText(text)
+#                 while True:
+#                     ############ Hier replace einbauen !!!!!!!
+# 
+#                     lastReplacePos = editor.executeSearch(sarOp, lastReplacePos)[1]
+#                     if lastReplacePos == -1:
+#                         break
+#                     lastReplacePos = editor.executeReplace(sarOp)
+# 
+#                 content = content.replace(wikiWord, toWikiWord)
+# #                 page.save(content)
+# #                 page.update(content, False)  # TODO AGA processing
+#                 page.replaceLiveText(content)
 
 
     def searchWiki(self, sarOp, applyOrdering=True):  # TODO Threadholder
@@ -648,7 +697,10 @@ class WikiDataManager(MiscEventSourceMixin):
                 wikiPage = self.wikiPageDict.get(k)
                 if wikiPage is None:
                     continue
-                    
+                if isinstance(wikiPage, AliasWikiPage):
+                    # Avoid to rename same page twice (alias and real) or more often
+                    continue
+
                 text = wikiPage.getLiveText()
                 if sarOp.testWikiPage(k, text) == True:
                     preResultSet.add(k)

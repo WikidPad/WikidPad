@@ -13,11 +13,10 @@ If WikidPad could not found a "WikidPad.config" file, it uses so-called environm
 
     1. If there is a "HOME" variable, its value (normally a
        directory) is used.
-    2. If not, but there is a "USERPROFILE" variable, its value
-       (normally a directory) is used.
-    3. If not, it asks the operating system for the appropriate user
+    2. If not, it asks the operating system for the appropriate user
        configuration directory (this is done through the wxPython
-       library)
+       library) and puts its data in a subdirectory "WikidPad" similar
+       to other applications (this is mainly intended for Windows).
 
 
 If WikidPad is running, you can find out where the files are stored by opening the "About" dialog (menu "Help") and scrolling the shown text down to the end. The configuration directory is mentioned there.

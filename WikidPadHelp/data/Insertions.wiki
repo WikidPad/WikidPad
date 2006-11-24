@@ -13,9 +13,27 @@ If you switch now to the preview, you will see the content of the IncrementalSea
 
 +++ Syntax
 The tag begins always with '[:' then comes the _insertion key_, then a colon and the _insertion value_,
-after that there may be additions, separated by semicolons, to describe the way of presentation in more detail. The tag is closed by a closing bracket.
+after that there may be appendices, separated by semicolons, to describe the way of presentation in more detail. The tag is closed by a closing bracket.
 
 In the example above, "page" is the insertion key, "IncrementalSearch" is the value.
+
+The value and appendices can be quoted (enclosed by quotation symbols) if they shall contain special characters or newlines. A quotation symbol is an arbitrary number of one of the quotation characters ", ', / or \ (double quotation mark, single quotation mark, slash or backslash). The starting and ending symbols must be the same. Examples for quotation symbols are:
+
+"
+'''
+//
+/////
+\\
+
+The above insertion example can therefore be written as:
+
+<<
+[:page: "IncrementalSearch"]
+[:page: '''IncrementalSearch''']
+[:page: //IncrementalSearch//]
+[:page: /////IncrementalSearch/////]
+[:page: \\IncrementalSearch\\]
+>>
 
 The following keys and values are possible:
 
@@ -25,7 +43,7 @@ The following keys and values are possible:
       described by the value:
         * *parents*: all parents of the page
         * *children*: all children (= all wiki links) of the page.
-          With addition "existingonly" only the really existing
+          With appendix "existingonly" only the really existing
           pages are listed
         * *parentless*: all parentless pages. The list is
           independent from the page containing the insertion tag.
@@ -33,8 +51,13 @@ The following keys and values are possible:
           independent from the page containing the insertion tag.
     * *savedsearch* lists all wiki words found by the saved search
       with the name given as value.
+    * *eval* Evaluate the given Python expression and handle its
+      result as if it replaces the insertion. You must switch on
+      the appropriate option "Process insertion scripts" on the
+      "Security" options page to make it work.
+      
 
-For insertion tags which produce lists of wiki links (all but the "page" insertion), you can also have the addition "columns 123" where 123 stands for the number of columns the list should have. By default, there is only one column.
+For insertion tags which produce lists of wiki links (all but the "page" and "eval" insertion), you can also have the appendices "columns 123" where 123 stands for the number of columns the list should have. By default, there is only one column.
 
 +++ Examples
 
@@ -54,4 +77,5 @@ It is recommended to switch to preview to see the effect of the tags:
 *\[:savedsearch: nanny; columns 4]*  (all pages containing "any")
 [:savedsearch: nanny; columns 4]
 
-
+*\[:eval:"5+6"]*
+[:eval:"5+6"]

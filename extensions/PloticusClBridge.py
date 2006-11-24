@@ -1,7 +1,8 @@
-import os, urllib
+import os, os.path
 
 import wx
 
+from pwiki.TempFileSet import createTempFile
 from pwiki.StringOps import mbcsEnc
 
 WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("Options", 1))
@@ -20,16 +21,18 @@ def describeInsertionKeys(ver, app):
     ver -- API version (can only be 1 currently)
     app -- wxApp object
     """
-    return ((u"eqn", ("html_single", "html_preview", "html_multi"), EqnHandler),)
+    return (
+            (u"ploticus", ("html_single", "html_preview", "html_multi"), PltHandler),
+            )
 
 
-class EqnHandler:
+class PltHandler:
     """
-    Class fulfilling the "insertion by key" protocol.
+    Base class fulfilling the "insertion by key" protocol.
     """
     def __init__(self, app):
         self.app = app
-        self.mimetexExe = None
+        self.extAppExe = None
         
     def taskStart(self, exporter, exportType):
         """
@@ -43,10 +46,9 @@ class EqnHandler:
         Calls to createContent() will only happen after a 
         call to taskStart() and before the call to taskEnd()
         """
-        # Find MimeTeX executable by configuration setting
-        self.mimetexExe = self.app.getGlobalConfig().get("main",
-                "plugin_mimeTex_exePath", "")
-
+        # Find Ploticus executable by configuration setting
+        self.extAppExe = self.app.getGlobalConfig().get("main",
+                "plugin_ploticus_exePath", "")
         
     def taskEnd(self):
         """
@@ -76,38 +78,39 @@ class EqnHandler:
         For HtmlXmlExporter a unistring is returned with the HTML code
         to insert instead of the insertion.        
         """
-        bstr = urllib.quote(mbcsEnc(insToken.value, "replace")[0])
+        # Retrieve quoted content of the insertion
+        bstr = mbcsEnc(insToken.value, "replace")[0]
 
         if not bstr:
             # Nothing in, nothing out
             return u""
         
-        if self.mimetexExe == "":
+        if self.extAppExe == "":
             # No path to MimeTeX executable -> show message
-            return "<pre>[Please set path to MimeTeX executable]</pre>"
-
-        # Prepare CGI environment. MimeTeX needs only "QUERY_STRING" environment
-        # variable
-        os.environ["QUERY_STRING"] = bstr
-
-        # Run MimeTeX process
-        childIn, childOut = os.popen2(self.mimetexExe, "b")
-
-        # Read stdout of process entirely
-        response = childOut.read()
-
-        # Cut off HTTP header (may need changes for non-Windows OS)
-        try:
-            response = response[(response.index("\n\n") + 2):]
-        except ValueError:
-            return "<pre>[Invalid response from MimeTeX]</pre>"
+            return "<pre>[Please set path to Ploticus executable]</pre>"
 
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
         tfs = exporter.getTempFileSet()
+
+        dstFullPath = tfs.createTempFile("", ".gif", relativeTo="")
+        url = tfs.getRelativeUrl(None, dstFullPath)
         
-        # Create .gif file out of returned data and retrieve URL for the file
-        url = tfs.createTempUrl(response, ".gif")
+        baseDir = os.path.dirname(exporter.getMainControl().getWikiConfigPath())
+
+        # Store token content in a temporary file
+        srcfilepath = createTempFile(bstr, ".plt")
+        try:
+            # Run external application
+            childIn, childOut, childErr = os.popen3(r'%s -dir "%s" "%s" -gif -o "%s"' % 
+                    (self.extAppExe, baseDir, srcfilepath, dstFullPath), "b")
+
+            errResponse = childErr.read()
+        finally:
+            os.unlink(srcfilepath)
+            
+        if errResponse != "":
+            return "<pre>[Ploticus error: %s]</pre>" % errResponse
 
         # Return appropriate HTML code for the image
         if exportType == "html_preview":
@@ -123,9 +126,7 @@ class EqnHandler:
         by the plugin. Currently not specified further.
         """
         return ()
-
-
-
+        
 
 def registerOptions(ver, app):
     """
@@ -135,12 +136,12 @@ def registerOptions(ver, app):
     app -- wxApp object
     """
     # Register option
-    app.getDefaultGlobalConfigDict()[("main", "plugin_mimeTex_exePath")] = u""
+    app.getDefaultGlobalConfigDict()[("main", "plugin_ploticus_exePath")] = u""
     # Register panel in options dialog
-    app.addOptionsDlgPanel(MimeTexOptionsPanel, u"  MimeTeX")
+    app.addOptionsDlgPanel(PloticusOptionsPanel, u"  Ploticus")
 
 
-class MimeTexOptionsPanel(wx.Panel):
+class PloticusOptionsPanel(wx.Panel):
     def __init__(self, parent, optionsDlg, app):
         """
         Called when "Options" dialog is opened to show the panel.
@@ -150,14 +151,14 @@ class MimeTexOptionsPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
         self.app = app
         
-        pt = self.app.getGlobalConfig().get("main", "plugin_mimeTex_exePath", "")
+        pt = self.app.getGlobalConfig().get("main", "plugin_ploticus_exePath", "")
         
         self.tfPath = wx.TextCtrl(self, -1, pt)
 
         mainsizer = wx.BoxSizer(wx.VERTICAL)
 
         inputsizer = wx.BoxSizer(wx.HORIZONTAL)
-        inputsizer.Add(wx.StaticText(self, -1, "Path to MimeTeX:"), 0,
+        inputsizer.Add(wx.StaticText(self, -1, "Path to Ploticus:"), 0,
                 wx.ALL | wx.EXPAND, 5)
         inputsizer.Add(self.tfPath, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(inputsizer, 0, wx.EXPAND)
@@ -196,6 +197,6 @@ class MimeTexOptionsPanel(wx.Panel):
         """
         pt = self.tfPath.GetValue()
         
-        self.app.getGlobalConfig().set("main", "plugin_mimeTex_exePath", pt)
+        self.app.getGlobalConfig().set("main", "plugin_ploticus_exePath", pt)
 
 

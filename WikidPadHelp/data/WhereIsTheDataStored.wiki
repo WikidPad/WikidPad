@@ -38,5 +38,4 @@ be edited or searched by external programs and is nearly as fast as
 "Compact Sqlite".
 
 
-
 [icon: question]

@@ -55,6 +55,57 @@ def bytelenSct_mbcs(us):
     return len(mbcsEnc(us)[0])
 
 
+class IncrementalSearchDialog(wxDialog):
+    def __init__(self, parent, id, txtCtrl, rect, font, presenter, usePrevSearch):
+        wxDialog.__init__(self, parent, id, u"", rect.GetPosition(),
+                rect.GetSize(), wxNO_BORDER)
+
+        self.txtCtrl = txtCtrl
+        self.presenter = presenter
+        self.tfInput = wxTextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD, u"",
+                style=wxTE_PROCESS_ENTER | wxTE_RICH)
+
+        EVT_TEXT(self, GUI_ID.INC_SEARCH_TEXT_FIELD, self.OnText)
+        EVT_KEY_DOWN(self.tfInput, self.OnKeyDownInput)
+        
+        self.tfInput.SetFont(font)
+        self.tfInput.SetBackgroundColour(wxColour(255, 255, 0))
+        mainsizer = wxBoxSizer(wxHORIZONTAL)
+        mainsizer.Add(self.tfInput, 1, wx.ALL | wx.EXPAND, 0)
+
+        self.SetSizer(mainsizer)
+        
+        if usePrevSearch:
+            self.tfInput.SetValue(self.txtCtrl.searchStr)
+
+
+    def OnText(self, evt):
+        self.txtCtrl.searchStr = self.tfInput.GetValue()
+        self.txtCtrl.executeIncrementalSearch()
+
+
+    def OnKeyDownInput(self, evt):
+        key = evt.GetKeyCode()
+        accP = getAccelPairFromKeyDown(evt)
+        matchesAccelPair = self.presenter.getMainControl().keyBindings.\
+                matchesAccelPair
+
+        if key in (WXK_ESCAPE, WXK_RETURN, WXK_NUMPAD_ENTER):
+            # Return or Esc
+            self.EndModal(wxID_OK)
+        elif matchesAccelPair("ContinueSearch", accP):
+            self.txtCtrl.executeIncrementalSearch(next=True)
+        # do the next search on another ctrl-s, or f
+        elif evt.ControlDown() and (      # key == ord('S') or
+                key == ord(self.presenter.getMainControl().keyBindings.\
+                    IncrementalSearchCtrl)):
+            self.txtCtrl.executeIncrementalSearch(next=True)
+        # handle the other keys
+        else:
+            evt.Skip()
+
+
+
 
 class WikiTxtCtrl(wxStyledTextCtrl):
     def __init__(self, presenter, parent, ID):
@@ -69,6 +120,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.ignoreOnChange = False
         self.pageType = "normal"   # The pagetype controls some special editor behaviour
 #         self.idleCounter = 0       # Used to reduce idle load
+        self.searchStr = u""
         
         # If autocompletion word was choosen, how many bytes to delete backward
         # before inserting word, if word ...
@@ -221,7 +273,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         Close the editor (=prepare for destruction)
         """
-        self.unloadCurrentDocPage({})
+        # self.unloadCurrentDocPage({})
         self.presenterListener.disconnect()
 
 
@@ -250,6 +302,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         Informs the widget if it is really visible on the screen or not
         """
         self.Enable(vis)
+        if not vis:
+            self.endIncrementalSearch()
+
+
 #         if not self.visible and vis:
 #             self.refresh()
 # 
@@ -908,26 +964,29 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             
         emptySelection = startBytePos == endBytePos  # is selection empty
 
-        self.GotoPos(startBytePos)
-        self.AddText(styleChars)
-
-        for i in xrange(len(styleChars)):
-            endBytePos = self.PositionAfter(endBytePos)
-
-        self.GotoPos(endBytePos)   # +len(styleChars)
-        self.AddText(styleChars)
-
-#         bytePos = self.PositionAfter(self.GetCurrentPos())
-
-        bytePos = endBytePos
-        
-        if not emptySelection:
-            # Cursor will in the end stand after styled word
-            # if selection is empty, it will stand between the style characters
+        self.BeginUndoAction()
+        try:
+            self.GotoPos(startBytePos)
+            self.AddText(styleChars)
+    
             for i in xrange(len(styleChars)):
-                bytePos = self.PositionAfter(bytePos)
-
-        self.GotoPos(bytePos)        
+                endBytePos = self.PositionAfter(endBytePos)
+    
+            self.GotoPos(endBytePos)
+            self.AddText(styleChars)
+    
+            bytePos = endBytePos
+            
+            if not emptySelection:
+                # Cursor will in the end stand after styled word
+                # if selection is empty, it will stand between the style characters
+                for i in xrange(len(styleChars)):
+                    bytePos = self.PositionAfter(bytePos)
+    
+            self.GotoPos(bytePos)
+        finally:
+            self.EndUndoAction()
+            
 
 
     def getPageAst(self):
@@ -1066,7 +1125,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if securityLevel == 0:
             # No scripts allowed
             # Print warning message
-            wxMessageBox(u"Set in options, chapter \"Other\", \n"
+            wxMessageBox(u"Set in options, page \"Security\", \n"
                     "item \"Script security\" an appropriate value \n"
                     "to execute a script", u"Script execution disabled",
                     wxOK, self.presenter.getMainControl())
@@ -1242,23 +1301,40 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         return self.agaFormatList(relations)
 
 
-    def startIncrementalSearch(self, searchStr=u''):
-        self.SetFocus()
-        self.searchStr = searchStr
-        self.presenter.SetStatusText(u"Search (ESC to stop): ", 0)
-        self.searchCharStartPos = len(self.GetTextRange(0, self.GetCurrentPos()))
-
+    def startIncrementalSearch(self, usePrevSearch):
+        sb = self.presenter.getStatusBar()
+        
         self.inIncrementalSearch = True
         self.anchorBytePosition = -1
         self.anchorCharPosition = -1
+        
+        rect = sb.GetFieldRect(0)
+        rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
+
+        dlg = IncrementalSearchDialog(self, -1, self, rect,
+                sb.GetFont(), self.presenter, usePrevSearch)
+        try:
+            dlg.ShowModal()
+        finally:
+            dlg.Destroy()
+        
+        self.inIncrementalSearch = False
+        self.anchorBytePosition = -1
+        self.anchorCharPosition = -1
+
+#         self.SetFocus()
+#         self.searchStr = searchStr
+#         self.presenter.SetStatusText(u"Search (ESC to stop): ", 0)
+#         self.searchCharStartPos = len(self.GetTextRange(0, self.GetCurrentPos()))
+
 
 
     def executeIncrementalSearch(self, next=False):
         """
         Run incremental search
         """
-        self.presenter.SetStatusText(
-                u"Search (ESC to stop): %s" % self.searchStr, 0)
+#         self.presenter.SetStatusText(
+#                 u"Search (ESC to stop): %s" % self.searchStr, 0)
         text = self.GetText()
         if len(self.searchStr) > 0:   # and not searchStr.endswith("\\"):
             charStartPos = self.searchCharStartPos
@@ -1296,11 +1372,14 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def endIncrementalSearch(self):
-        self.presenter.SetStatusText("", 0)
-        self.inIncrementalSearch = False
-        self.anchorBytePosition = -1
-        self.anchorCharPosition = -1
+        if self.inIncrementalSearch:
+#             self.presenter.SetStatusText("", 0)
+            self.inIncrementalSearch = False
+            self.anchorBytePosition = -1
+            self.anchorCharPosition = -1
 
+    def getInIncrementalSearch(self):
+        return self.inIncrementalSearch
 
     def getContinuePosForSearch(self, sarOp):
         """
@@ -1614,10 +1693,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         key == ord(self.presenter.getMainControl().keyBindings.\
                             IncrementalSearchCtrl)):
                     self.executeIncrementalSearch(next=True)
-                # handle the delete key
-                elif key == WXK_BACK or key == WXK_DELETE:
-                    self.searchStr = self.searchStr[:len(self.searchStr)-1]
-                    self.executeIncrementalSearch();
+#                 # handle the delete key
+#                 elif key == WXK_BACK or key == WXK_DELETE:
+#                     self.searchStr = self.searchStr[:len(self.searchStr)-1]
+#                     self.executeIncrementalSearch();
                 # handle the other keys
                 else:
                     evt.Skip() # OnChar is responsible for that
@@ -1632,7 +1711,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         elif matchesAccelPair("ContinueSearch", accP):
             # ContinueSearch is normally F3
-            self.startIncrementalSearch()
+            self.startIncrementalSearch(True)
             evt.Skip()
 
         elif evt.ControlDown() and \
@@ -1640,7 +1719,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     IncrementalSearchCtrl) and \
                     not evt.ShiftDown() and not evt.AltDown():
                 # Start incremental search
-                self.startIncrementalSearch()
+                self.startIncrementalSearch(False)
 
         elif matchesAccelPair("AutoComplete", accP):
             # AutoComplete is normally Ctrl-Space

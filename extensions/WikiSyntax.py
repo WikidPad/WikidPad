@@ -165,13 +165,24 @@ PropertyRE      = re.compile(ur"\[[ \t]*(?P<propertyName>[\w\-\_\.]+?)[ \t]*" +
 # InsertionRE     = re.compile(ur"\[:[ \t]*(?P<insertionKey>[\w\-\_\.]+?)[ \t]*" +
 #                   ur"[:][ \t]*(?P<insertionValue>[\w\-\_ \t;,.!?#/|]+?)\]",
 #                   re.DOTALL | re.UNICODE | re.MULTILINE)
-InsertionRE     = re.compile(ur"\[:[ \t]*(?P<insertionKey>[\w\-\_\.]+?)[ \t]*" +
-                  ur"[:][ \t]*(?:"
-                  ur"(?P<insertionValue>[\w\-\_ \t;,.!?#/|]+?)|"
+
+InsertionValueRE = re.compile(ur"(?:(?P<insertionValue>[\w][\w\-\_ \t,.!?#/|]*)|"
                   ur"(?P<insertionQuoteStarter>\"+|'+|/+|\\+)"
-                        ur"(?P<insertionQuotedValue>.*?)(?P=insertionQuoteStarter)"
-                  ur")\]",
+                  ur"(?P<insertionQuotedValue>.*?)(?P=insertionQuoteStarter))",
                   re.DOTALL | re.UNICODE | re.MULTILINE)
+
+InsertionAppendixRE = re.compile(ur";[ \t]*(?:"
+                  ur"(?P<insertionAppendix>[\w][\w\-\_ \t,.!?#/|]*)|"
+                  ur"(?P<insertionApxQuoteStarter>\"+|'+|/+|\\+)"
+                  ur"(?P<insertionQuotedAppendix>.*?)(?P=insertionApxQuoteStarter))",
+                  re.DOTALL | re.UNICODE | re.MULTILINE)
+
+InsertionRE     = re.compile(ur"\[:[ \t]*(?P<insertionKey>[\w][\w\-\_\.]*)[ \t]*" +
+                  ur":[ \t]*(?P<insertionContent>" +
+                  InsertionValueRE.pattern +
+                  ur"(?:" + InsertionAppendixRE.pattern + ur")*)\]",
+                  re.DOTALL | re.UNICODE | re.MULTILINE)
+
 
 # Reverse REs for autocompletion
 revSingleWikiWord    =       (ur"(?:[" +

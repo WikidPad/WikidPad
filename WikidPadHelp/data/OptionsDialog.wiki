@@ -20,9 +20,6 @@ If you really want to close, use menu "Wiki"->"Exit" then or the context menu wh
 *New window on wiki URL*
 When double clicking on a wiki: URL, a new instance of the application is started, otherwise, the current instance loads the new wiki.
 
-*Process auto-generated areas*
-Experimental feature, use not recommended!
-
 *Low resource usage*
 Try to reduce usage of Windows resources. Only interesting for Windows 9x/ME.
 
@@ -47,8 +44,6 @@ Disadvantages:
       their own home directory as configuration directory (this is
       the default).
 
-*Script security*
-Set the security level for script execution, see InlinePythonEval#+++# Security# concerns .
 
 *Statusbar time format*
 Set the time format the statusbar should use to show modification and creation date of the current wiki page. The format can only be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
@@ -68,6 +63,19 @@ The "C" order is the way previous WikidPad versions worked (uppercase letters fi
 The new "Default" order sorts according to default order determined by the operating system. Normally, uppercase letters are sorted inorder (AaBbCc). If you want uppercase letters (more exactly: all characters but lowercase ones) before the rest (ABCabc), check
 *Uppercase first*.
 This setting has no effect for "C" order. Alphabetical sorting of children of a wiki word in tree is always inorder.
+
+
+++++ Security options
+
+*Process auto-generated areas*
+Experimental feature, use not recommended!
+
+*Process insertion scripts*
+Control if insertions with key "eval" should be evaluated as Python expressions or not, see also [Insertions].
+
+*Script security*
+Set the security level for script execution, see InlinePythonEval#+++# Security# concerns .
+
 
 ++++ Tree options
 

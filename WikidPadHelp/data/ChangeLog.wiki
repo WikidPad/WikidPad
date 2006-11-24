@@ -1,7 +1,35 @@
 ﻿++ Change Log
 
 
-Oct. 30, 2006 (1.8beta4)
+Nov. 24, 2006 (1.8beta5)
+
+    * Changed insertion syntax where value or appendices can
+      be quoted to include arbitrary characters. See [Insertions].
+    * Plugins for accessing MimeTeX, Ploticus and GraphViz
+      applications via Insertions.
+      See [ExternalGraphicalApplications].
+    
+    * Tags to mark text as suppressed (<< >>) are no longer shown
+      in HTML preview/export
+    * "Wiki Info" dialog to show some basic information about the
+      current wiki. Rather empty at the moment.
+    * New behavior and look of incremental search. May change again
+      if users don't like it.
+    * Renaming links to a page when renaming the page now only
+      renames whole words.
+
+    * Windows binary installer: .wiki file of WikidPadHelp are now
+      always overwritten on updating.
+
+    * Internal: Plugin type "InsertionByKey" created which registers
+      special insertion keys to be handled by a plugin
+    * Internal: Plugin type "Options" created which allows to
+      register additional options (to be saved in config files) and
+      to add related pages in the options dialog.
+
+
+
+Oct. 30, 2006 (1.8beta4, repository revision in "mbutscher" branch: 96)
 
     * Menu items and toolbar icons for zoom in/out also work for
       preview now.
@@ -10,10 +38,11 @@ Oct. 30, 2006 (1.8beta4)
       to beginning, user is asked.
     * Bug fixed: Showing (more precisely searching) of words in
       subcategories of todos in tree did not work.
+    * Bug fixed: Zooming preview didn't show up dynamically.
 
 
 
-Oct. 26, 2006 (1.8beta3)
+Oct. 26, 2006 (1.8beta3, repository revision in "mbutscher" branch: 95)
 
     * List undefined pages (dead wiki links), also appropriate
       insertion added. See WikiMaintenance!finding_undefined_links,
@@ -175,8 +204,8 @@ Changes:
       changed on page rename accordingly.
       See RenamingWikiWords#*Title# auto-rename*
     * Fixed bug: Upper case non-ascii letters were not found when
-      opening a wiki word (e.g. "Ã‰" didn't find Ã‰ve).
-    * HTML-tag <pre> is now handled much better.
+      opening a wiki word (e.g. "Ãƒâ€°" didn't find Ãƒâ€°ve).
+    * HTML-tag \<pre> is now handled much better.
     * Changed controls in spell check dialog to circumvent problems
       with some languages on Win 98/ME
     

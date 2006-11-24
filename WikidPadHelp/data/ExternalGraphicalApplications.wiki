@@ -1,0 +1,102 @@
+﻿++ External Graphical Applications
+
+WikidPad allows access to some graphical applications which take some sort of script to generate images. You can include the script in a wiki and let the applications generate the appropriate image to show it in HTML preview and export.
+
+The supported applications are:
+
+    * MimeTeX to generate mathematical formulas
+    * GraphViz which is a set of applications to generate directed and nondirected graphs
+    * Ploticus to generate plots and charts (as you might have seen in your favorite spreadsheet program)
+
+
++++ Download and installation
+
+The mentioned applications are not part of the WikidPad release itself, you must download it separately. The URLs are:
+
+<<|
+    Appl.| Download| Docs
+    MimeTeX| http://www.forkosh.com/mimetex.html | http://www.forkosh.com/mimetex.html
+    GraphViz| http://graphviz.org/Download.php | http://graphviz.org/Documentation.php
+    Ploticus| http://ploticus.sourceforge.net/doc/download.html | http://prdownloads.sourceforge.net/ploticus/pl233site.tar.gz?download
+>>
+
+You can download all or only some of them as you like.
+
+Put the binaries in an arbitrary folder on your computer. If you do not plan to use them outside of WikidPad you can create a folder in the WikidPad installation directory and put them therein.
+
+Now start WikidPad and open the "Options" dialog. Below the "Plugin options" entry in the list on the left you see three entries, each for one of the programs. Clicking on them leads to the appropriate options page.
+
+For MimeTeX and Ploticus just enter the full path to the executable, for GraphViz only set the path to the directory containing the executables in the first text field. You can change the names of the executables itself in the fields below the first.
+
+
++++ Usage
+
+The programs are called using [Insertions]. The keys for the insertions are:
+    
+    * eqn: MimeTeX
+    * dot, neato, twopi, circo, fdp: GraphViz
+    * ploticus: Ploticus
+
+
+The values (which should be quoted) must follow the syntax of the respective program, please see the documentation of the applications for details.
+
+When exporting HTML, the rendered image files are put in the same directory where the HTML files are.
+
+
++++ Example
+
+If you have downloaded and installed all applications you can see here how the graphics look like:
+
+
+*MimeTeX*: You should know that [:eqn:"a^2 + b^2 = c^2"] is important!
+
+
+*GraphViz (Dot)*
+[:dot:"
+digraph {
+a -> b
+b -> c
+b -> d
+d -> a
+}
+"]
+
+
+*Ploticus*
+[:ploticus:"
+#proc areadef
+  title: Annual Revenues, in thousands
+  rectangle: 1 1 5 2
+  xrange: 0 4
+  yrange: -5000 15000
+  yaxis.stubs: incremental 5000
+  yaxis.grid: color=pink
+  xaxis.stubs: text
+ABC Corp
+NetStuff
+MicroMason
+
+#proc getdata
+  rotate: yes
+  data: 6430 -780 13470
+ 
+#proc bars
+  lenfield: 1
+  color: dullyellow
+  labelword: $ @@N
+  crossover: 0
+"]
+
+
++++ For programmers
+
+If you want to create your own plugin to handle insertions, look in the "extensions" directory in the WikidPad installation directory. The plugins "MimeTexCGIBridge.py", "GraphvizClBridge.py" and "PloticusClBridge.py" control the external applications. The plugin "ExampleInsertion.py" handles the insertion key "testexample" and is another example how to handle insertions by a plugin.
+
+[:testexample:"this";is;//a simple//;test]
+
+
+
+[alias: Ploticus]
+[alias: MimeTeX]
+[alias: GraphViz]
+[camelCaseWordsEnabled: false]

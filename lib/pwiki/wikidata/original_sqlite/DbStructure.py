@@ -719,6 +719,10 @@ def updateDatabase2(connwrap):
         connwrap.execSql("insert or replace into settings(key, value) "
                 "values ('wordnormcasemode', 'lower')")
 
+    # Write which version at last wrote to database
+    connwrap.execSql("insert or replace into settings(key, value) "
+            "values ('lastwritever', '"+str(VERSION_DB)+"')")
+    
 
 
 """

@@ -140,6 +140,9 @@ class WikiHtmlView(wxHtmlWindow):
                     LinkCreatorForPreview(
                         self.presenter.getWikiDocument().getWikiData()),
                     asHtmlPreview=True)
+
+            wxGetApp().getInsertionPluginManager().taskEnd()
+
     
             # TODO Reset after open wiki
             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)

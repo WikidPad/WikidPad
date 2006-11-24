@@ -52,6 +52,7 @@ Then just start typing text with WikiWords to create your wiki.
     * KeyBindings
     * ClipboardCatcher
     * InternatiönalChàracters
+    * ExternalGraphicalApplications
     * OptionsDialog
     * CommandLineSupport
     * WikidPadOnUSB / ApplicationConfigurationFiles

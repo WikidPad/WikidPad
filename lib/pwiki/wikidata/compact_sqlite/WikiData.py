@@ -1005,6 +1005,14 @@ class WikiData:
                 "select presentationdatablock from wikiwordcontent where word = ?",
                 (word,))
 
+    def testWrite(self):
+        """
+        Test if writing to database is possible. Throws a DbWriteAccessError
+        if writing failed.
+        TODO !
+        """
+        pass
+
 
     def close(self):
         self.connWrap.commit()

@@ -26,5 +26,9 @@ If it was created by original WikidPad the right choice is "Original Gadfly", fo
 If you open a wiki with "Open as Type", you are always asked for the database type to use. This is helpful when migrating from one database backend to another.
 
 
++++ Determining the database type of the currently open wiki
+
+Open the "Wiki Info" dialog in "Wiki" menu and look at the "Wiki database backend" entry.
+
 
 [camelCaseWordsEnabled=false]

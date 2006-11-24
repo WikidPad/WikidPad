@@ -119,6 +119,7 @@ class DocPagePresenter(MiscEventSourceMixin):
         
     def informLiveTextChanged(self, changer):
         self.fireMiscEventProps({"changed live text": True, "changer": changer})
+        
 
 
     # TODO getPageAst
@@ -133,7 +134,9 @@ class DocPagePresenter(MiscEventSourceMixin):
             # TODO!!! Check if mainControl's current presenter is this one
             self.fireMiscEventProps(miscevt.getProps())
 
-    
+
+    def getStatusBar(self):
+        return self.mainControl.GetStatusBar()
 
 
 

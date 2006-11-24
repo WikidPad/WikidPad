@@ -1,13 +1,7 @@
 [Files]
 Source: dist\WikidPad.exe; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\export\wikistyle.css; DestDir: {app}\export\; Components: Program_files; Flags: confirmoverwrite
-Source: dist\extensions\EvalLibrary.py; DestDir: {app}\extensions\; Components: Program_files
-Source: dist\extensions\KeyBindings.py; DestDir: {app}\extensions\; Components: Program_files
-Source: dist\extensions\WikidPadHooks.py; DestDir: {app}\extensions\; Components: Program_files
-Source: dist\extensions\WikiSyntax.py; DestDir: {app}\extensions\; Components: Program_files
-Source: dist\extensions\Presentation.py; DestDir: {app}\extensions\; Components: Program_files
-Source: dist\extensions\referrals.py; DestDir: {app}\extensions\; Components: Program_files
-Source: dist\extensions\autoNew.py; DestDir: {app}\extensions\; Components: Program_files
+Source: dist\extensions\*; DestDir: {app}\extensions\; Components: Program_files; Flags: recursesubdirs ignoreversion
 Source: dist\icons\*.gif; DestDir: {app}\icons\; Components: Program_files; Flags: onlyifdoesntexist
 Source: dist\icons\pwiki.ico; DestDir: {app}\icons\; Components: Program_files; Flags: onlyifdoesntexist
 Source: dist\WikidPadHelp\*; DestDir: {app}\WikidPadHelp\; Components: Gadfly\Help; Flags: recursesubdirs ignoreversion
@@ -43,17 +37,17 @@ Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 1.8beta4
+AppVerName=WikidPad 1.8beta5
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
 VersionInfoVersion=1.8
-VersionInfoTextVersion=WikidPad 1.8beta4
+VersionInfoTextVersion=WikidPad 1.8beta5
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-1.8beta4
+OutputBaseFilename=WikidPad-1.8beta5
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2006 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true

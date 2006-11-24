@@ -4,6 +4,7 @@ import re
 
 from os.path import exists, isdir, isfile
 
+import wx
 from wxPython.wx import *
 from wxPython.html import *
 import wxPython.xrc as xrc
@@ -921,10 +922,11 @@ class ChooseWikiWordDialog(wxDialog):
             return # We can only go to exactly one wiki word
             
         wikiWord = self.words[sels[0]]
-        self.pWiki.openWikiPage(wikiWord, forceTreeSyncFromRoot=True,
-                motionType=self.motionType)
-
-        self.EndModal(GUI_ID.btnDelete)
+        try:
+            self.pWiki.openWikiPage(wikiWord, forceTreeSyncFromRoot=True,
+                    motionType=self.motionType)
+        finally:
+            self.EndModal(GUI_ID.btnDelete)
 
 
     def OnDelete(self, evt):
@@ -1035,3 +1037,57 @@ What makes wikidPad different from other notepad applications is the ease with w
         self.Layout()
         self.CentreOnParent(wxBOTH)
 
+
+
+class WikiInfoDialog(wx.Dialog):
+    """
+    Show general information about currently open wiki
+    """
+    def __init__(self, parent, id, mainControl):
+        wx.Dialog.__init__(self, parent, id, 'Wiki Info',
+                          size=(470, 330) )
+                          
+        self.txtBgColor = self.GetBackgroundColour()
+
+        button = wx.Button(self, wxID_OK)
+        button.SetDefault()
+        wd = mainControl.getWikiDocument()
+
+        wikiData = wd.getWikiData()
+        
+        mainsizer = wx.BoxSizer(wx.VERTICAL)
+
+        label = u"Wiki database backend:"
+        if wd is None:
+            value = u"N/A"
+        else:
+            value = wd.getDbtype()
+
+        mainsizer.Add(self._buildLine(label, value), 0, wx.EXPAND)
+
+        label = u"Number of wiki pages:"
+        if wd is None:
+            value = u"N/A"
+        else:
+            value = unicode(len(wikiData.getAllDefinedWikiPageNames()))
+        mainsizer.Add(self._buildLine(label, value), 0, wx.EXPAND)
+
+        inputsizer = wx.BoxSizer(wx.HORIZONTAL)
+        inputsizer.Add(button, 0, wx.ALL | wx.EXPAND, 5)
+        inputsizer.Add((0, 0), 1)   # Stretchable spacer
+
+        mainsizer.Add(inputsizer, 0, wx.ALL | wx.EXPAND, 5)
+
+        self.SetSizer(mainsizer)
+        self.Fit()
+
+
+    def _buildLine(self, label, value):
+        inputsizer = wx.BoxSizer(wx.HORIZONTAL)
+        inputsizer.Add(wx.StaticText(self, -1, label), 1,
+                wx.ALL | wx.EXPAND, 5)
+        ctl = wx.TextCtrl(self, -1, value, style = wx.TE_READONLY)
+        ctl.SetBackgroundColour(self.txtBgColor)
+        inputsizer.Add(ctl, 1, wx.ALL | wx.EXPAND, 5)
+        
+        return inputsizer

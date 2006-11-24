@@ -583,7 +583,7 @@ class Insertion(Ast):
     These insertions are mainly used for keys supported by external plugins
     """
     
-    __slots__ = ("key", "value", "appendices", "quotedValue")
+    __slots__ = ("key", "value", "appendices")
 
     def __init__(self):
         Ast.__init__(self)
@@ -593,17 +593,43 @@ class Insertion(Ast):
         groupdict = token.grpdict
         
         self.key = groupdict.get("insertionKey")
-        self.quotedValue = groupdict.get("insertionQuotedValue")
+        
+        content = groupdict.get("insertionContent")
+        
+        mat = WikiFormatting.InsertionValueRE.match(content)
+        self.value = mat.group("insertionQuotedValue")
+        if self.value is None:
+            self.value = mat.group("insertionValue")
+            
+        nextStart = mat.end(0)
+        
+        self.appendices = []
 
-        iv = groupdict.get("insertionValue")
-        if iv is not None:
-            values = iv.split(u";")
+        while True:
+            mat = WikiFormatting.InsertionAppendixRE.match(content, nextStart)
+            if mat is None:
+                break
+    
+            apx = mat.group("insertionQuotedAppendix")
+            if apx is None:
+                apx = mat.group("insertionAppendix")
+                
+            self.appendices.append(apx)
 
-            self.value = values[0]
-            self.appendices = [v.lstrip() for v in values[1:]]
-        else:
-            self.value = None
-            self.appendices = ()
+            nextStart = mat.end(0)
+
+
+#         self.quotedValue = groupdict.get("insertionQuotedValue")
+# 
+#         iv = groupdict.get("insertionValue")
+#         if iv is not None:
+#             values = iv.split(u";")
+# 
+#             self.value = values[0]
+#             self.appendices = [v.lstrip() for v in values[1:]]
+#         else:
+#             self.value = None
+#             self.appendices = ()
 
 
 
@@ -616,4 +642,5 @@ class EscapeCharacter(Ast):
     def buildSubAst(self, formatting, token, formatDetails=None,
             threadholder=DUMBTHREADHOLDER):
             self.unescaped = token.text[1]
+
 

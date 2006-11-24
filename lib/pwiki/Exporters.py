@@ -1,6 +1,7 @@
 # from Enum import Enumeration
 import sys, os, string, re, traceback, sets
 from os.path import join, exists, splitext
+from cStringIO import StringIO
 import shutil
 ## from xml.sax.saxutils import escape
 from time import localtime
@@ -107,6 +108,9 @@ class HtmlXmlExporter:
         # Flag to control how to push output into self.result
         self.outFlagEatPostBreak = False
 
+
+    def getMainControl(self):
+        return self.mainControl        
         
     def getExportTypes(self, guiparent):
         """
@@ -295,6 +299,39 @@ class HtmlXmlExporter:
                     (self.getContentListBody(linkAsFragments=True),
                     u'<br />\n'*10))
 
+        links = {}
+#         notExport = sets.Set() # Cache to store all rejected words
+#         wordSet = sets.Set(self.wordList)
+# 
+#         def addWord(word):
+#             if word in links:
+#                 return
+#             if word in notExport:
+#                 return
+#                 
+#             unAlias = self.wikiData.getAliasesWikiWord(word)
+#             if unAlias not in wordSet:
+#                 notExport.add(word)
+#                 return
+# 
+#             wikiPage = self.wikiDataManager.getWikiPage(word)
+#             if not self.shouldExport(word, wikiPage):
+#                 notExport.add(word)
+#                 return
+#             
+#             links[word] = u"#%s" % _escapeAnchor(unAlias)
+
+        # First build links dictionary for all included words and their aliases
+        for word in self.wordList:
+            wikiPage = self.wikiDataManager.getWikiPage(word)
+            if not self.shouldExport(word, wikiPage):
+                continue
+            for alias in wikiPage.getProperties().get("alias", ()):
+                links[alias] = u"#%s" % _escapeAnchor(word)
+
+            links[word] = u"#%s" % _escapeAnchor(word)
+
+        # Then create the big page word by word
         for word in self.wordList:
 
             wikiPage = self.wikiDataManager.getWikiPage(word)
@@ -304,15 +341,15 @@ class HtmlXmlExporter:
             try:
                 content = wikiPage.getLiveText()
                 formatDetails = wikiPage.getFormatDetails()
-                links = {}  # TODO Why links to all (even not exported) children?
-                for relation in wikiPage.getChildRelationships(
-                        existingonly=True, selfreference=False):
-                    if not self.shouldExport(relation):
-                        continue
-                    # get aliases too
-                    relUnAlias = self.wikiData.getAliasesWikiWord(relation)
-                    # TODO Use self.convertFilename here?
-                    links[relation] = u"#%s" % _escapeAnchor(relUnAlias)
+#                 links = {}  # TODO Why links to all (even not exported) children?
+#                 for relation in wikiPage.getChildRelationships(
+#                         existingonly=True, selfreference=False):
+#                     if not self.shouldExport(relation):
+#                         continue
+#                     # get aliases too
+#                     relUnAlias = self.wikiData.getAliasesWikiWord(relation)
+#                     # TODO Use self.convertFilename here?
+#                     links[relation] = u"#%s" % _escapeAnchor(relUnAlias)
                     
                 self.wordAnchor = _escapeAnchor(word)
                 formattedContent = self.formatContent(word, content,
@@ -955,17 +992,56 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                 searchOp.setPackedSettings(datablock)
                 searchOp.replaceOp = False
                 wordList = wikiDocument.searchWiki(searchOp)
+        elif key == u"eval":
+            if not self.mainControl.getConfig().getboolean("main",
+                    "insertions_allow_eval", False):
+                # Evaluation of such insertions not allowed
+                content = "<pre>[Allow evaluation of insertions in "\
+                        "\"Options\", page \"Security\", option "\
+                        "\"Process insertion scripts\"]</pre>"
+            else:
+                evalScope = {"pwiki": self.getMainControl(),
+                        "lib": self.getMainControl().evalLib}
+                expr = value
+                if expr is None:
+                    expr = insertionAstNode.quotedValue
+                # TODO Test security
+                try:
+                    content = unicode(eval(re.sub(u"[\n\r]", u"", expr),
+                            evalScope))
+                except Exception, e:
+                    s = StringIO()
+                    traceback.print_exc(file=s)
+                    content = u"\n<<\n" + s.getvalue() + u"\n>>\n"
         else:
             # Call external plugins
             handler = wxGetApp().getInsertionPluginManager().getHandler(self,
                     self.exportType, key)
                     
             if handler is not None:
-                htmlContent = handler.createContent(self, self.exportType,
-                        insertionAstNode)
+                try:
+                    htmlContent = handler.createContent(self, self.exportType,
+                            insertionAstNode)
+                except Exception, e:
+                    s = StringIO()
+                    traceback.print_exc(file=s)
+                    htmlContent = u"<pre>" + s.getvalue() + u"</pre>"
+
                 if htmlContent is None:
                     htmlContent = u""
-
+            else:
+                # Try to find a generic handler for export type
+                # "wikidpad_language"
+                handler = wxGetApp().getInsertionPluginManager().getHandler(self,
+                        "wikidpad_language", key)
+                if handler is not None:
+                    try:
+                        content = handler.createContent(self,
+                                "wikidpad_language", insertionAstNode)
+                    except Exception, e:
+                        s = StringIO()
+                        traceback.print_exc(file=s)
+                        htmlContent = u"<pre>" + s.getvalue() + u"</pre>"
 
         if wordList is not None:
             # Create content as a nicely formatted list of wiki words

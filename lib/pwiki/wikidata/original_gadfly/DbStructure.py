@@ -803,6 +803,13 @@ def updateDatabase(connwrap, dataDir):
     connwrap.commit()
         
 
+def updateDatabase2(connwrap):
+    """
+    Second update function. Called when database version is current.
+    Performs further updates
+    """
+    setSettingsValue(connwrap, "lastwritever", str(VERSION_DB))
+
         
     
 # class WikiDBExistsException(WikiDataException): pass

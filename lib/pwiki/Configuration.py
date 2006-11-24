@@ -412,15 +412,16 @@ class CombinedConfiguration(_AbstractConfiguration):
         """
         Save all configurations
         """
+        if self.globalConfig is not None:
+            self.globalConfig.save()
+
         try:
             if self.wikiConfig is not None:
                 self.wikiConfig.save()
         except:
             traceback.print_exc()
 
-        if self.globalConfig is not None:
-            self.globalConfig.save()
-    
+
     def informChanged(self):
         """
         This should be called after configuration was changed. It is called
@@ -540,6 +541,7 @@ GLOBALDEFAULTS = {
     ("main", "script_security_level"): "0",  # Allow the use of scripts and
             # import_scripts property? 0: No scripts at all; 1: No import_scripts;
             # 2: allow local import_scripts; 3: allow also global.import_scripts
+    ("main", "insertions_allow_eval"): "False",  # Evaluate :eval: and possible other script insertions?
     ("main", "single_process"): "False", # Ensure that only a single process runs per user  
     ("main", "collation_order"): "Default", # Set collation order, Default: system default order, C: ASCII byte value
     ("main", "collation_uppercaseFirst"): "False" # Sort uppercase first (ABCabc) or normal inside (AaBbCc)

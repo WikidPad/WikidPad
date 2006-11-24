@@ -91,6 +91,7 @@ WikidPadHelp/data/CommandLineSupport.wiki -text
 WikidPadHelp/data/DatabaseTypes.wiki -text
 WikidPadHelp/data/DisableCamelCaseWords.wiki -text
 WikidPadHelp/data/DynamicViews.wiki -text
+WikidPadHelp/data/ExternalGraphicalApplications.wiki -text
 WikidPadHelp/data/FileStorage.wiki -text
 WikidPadHelp/data/FormPages.wiki -text
 WikidPadHelp/data/GlobalScriptLibrary.wiki -text
@@ -321,9 +322,11 @@ docs/dev-setup.txt -text
 docs/dev.txt -text
 export/wikistyle.css -text
 extensions/EvalLibrary.py -text
+extensions/ExampleInsertion.py -text
 extensions/GraphvizClBridge.py -text
 extensions/KeyBindings.py -text
 extensions/MimeTexCGIBridge.py -text
+extensions/PloticusClBridge.py -text
 extensions/Presentation.py -text
 extensions/WikiSyntax.py -text
 extensions/WikidPadHooks.py -text

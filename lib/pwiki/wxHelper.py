@@ -7,6 +7,7 @@ from   wxPython.wx import wxNewId, wxSystemSettings_GetMetric, wxSYS_SCREEN_X, \
 
 from wx.xrc import XRCCTRL, XRCID
 
+
 from MiscEvent import KeyFunctionSink
 
 
@@ -396,4 +397,44 @@ class IconCache:
         Return a new (cloned) image list
         """
         return cloneImageList(self.iconImageList)
+
+
+# class ColoredStatusBar(wx.StatusBar):
+#     def __init__(self, *args, **kwargs):
+#         wx.StatusBar.__init__(self, *args, **kwargs)
+#         self.bgColors = [None]
+#         self.Bind(wx.EVT_PAINT, self.OnPaint)
+# 
+#     def SetFieldsCount(self, number=1):
+#         wx.StatusBar.SetFieldsCount(self, number)
+#         self.bgColors = [None] * number
+#         
+#     def SetFieldBgColor(self, idx, color):
+#         self.bgColors[idx] = color
+#         
+#     def OnPaint(self, evt):
+# #         wx.StatusBar.Update(self)
+#         dc = wx.WindowDC(self)
+# 
+#         for i, color in enumerate(self.bgColors):
+#             if color is None:
+#                 continue
+# 
+#             rect = self.GetFieldRect(i)
+#             
+#             
+#             dc.SetBrush(wx.RED_BRUSH)
+#             dc.SetPen(wx.RED_PEN)
+#             dc.DrawRectangle(rect.x + 1, rect.y + 1, rect.width - 2,
+#                     rect.height - 2)
+#             dc.SetPen(wx.BLACK_PEN)
+#             dc.SetFont(self.GetFont())
+#             dc.SetClippingRect(rect)
+#             dc.DrawText(self.GetStatusText(i), rect.x + 2, rect.y + 2)
+#             dc.SetFont(wx.NullFont)
+#             dc.SetBrush(wx.NullBrush)
+#             dc.SetPen(wx.NullPen)
+# 
+#         evt.Skip()
+        
 

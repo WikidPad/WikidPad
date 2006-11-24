@@ -77,6 +77,9 @@ class WikiData:
                 self.connWrap.rollback()
                 raise
 
+        # Further possible updates   
+        DbStructure.updateDatabase2(self.connWrap)
+
         # Set marker for database type
         self.dataManager.getWikiConfig().set("main", "wiki_database_type",
                 "original_gadfly")
@@ -858,6 +861,14 @@ class WikiData:
         return self.connWrap.execSqlQuerySingleItem(
                 "select presentationdatablock from wikiwords where word = ?",
                 (word,), strConv=False)
+
+    def testWrite(self):
+        """
+        Test if writing to database is possible. Throws a DbWriteAccessError
+        if writing failed.
+        TODO !
+        """
+        pass
 
 
     def close(self):

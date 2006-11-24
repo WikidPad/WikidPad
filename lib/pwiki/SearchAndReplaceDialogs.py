@@ -608,51 +608,51 @@ class SearchWikiDialog(wxDialog):   # TODO
         
         if answer == wxNO:
             return
-        else:
-            self._refreshPageList()
-            
-            if self.ctrls.htmllbPages.GetCount() == 0:
-                return
-                
-            # self.pWiki.saveCurrentDocPage()
-            
-            sarOp = self.buildSearchReplaceOperation()
-            sarOp.replaceOp = True
-            
-            # wikiData = self.pWiki.getWikiData()
-            wikiDocument = self.pWiki.getWikiDocument()
 
-            for i in xrange(self.ctrls.htmllbPages.GetCount()):
-                self.ctrls.htmllbPages.SetSelection(i)
-                wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
-                wikiPage = wikiDocument.getWikiPage(wikiWord)
+        self._refreshPageList()
+        
+        if self.ctrls.htmllbPages.GetCount() == 0:
+            return
+            
+        # self.pWiki.saveCurrentDocPage()
+        
+        sarOp = self.buildSearchReplaceOperation()
+        sarOp.replaceOp = True
+        
+        # wikiData = self.pWiki.getWikiData()
+        wikiDocument = self.pWiki.getWikiDocument()
+
+        for i in xrange(self.ctrls.htmllbPages.GetCount()):
+            self.ctrls.htmllbPages.SetSelection(i)
+            wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
+            wikiPage = wikiDocument.getWikiPage(wikiWord)
 #                 text = wikiData.getContent(wikiWord)
-                text = wikiPage.getLiveText()
+            text = wikiPage.getLiveText()
 
-                charStartPos = 0
+            charStartPos = 0
 
-                while True:
-                    try:
-                        found = sarOp.searchText(text, charStartPos)
-                        start, end = found[:2]
-                    except:
-                        # Regex error -> Stop searching
-                        return
-                        
-                    if start is None: break
+            while True:
+                try:
+                    found = sarOp.searchText(text, charStartPos)
+                    start, end = found[:2]
+                except:
+                    # Regex error -> Stop searching
+                    return
                     
-                    repl = sarOp.replace(text, found)
-                    text = text[:start] + repl + text[end:]  # TODO Faster?
-                    charStartPos = start + len(repl)
+                if start is None: break
+                
+                repl = sarOp.replace(text, found)
+                text = text[:start] + repl + text[end:]  # TODO Faster?
+                charStartPos = start + len(repl)
 
 #                 wikiData.setContent(wikiWord, text)
-                wikiPage.replaceLiveText(text)
-                
+            wikiPage.replaceLiveText(text)
+            
 #             # Reopen current word because its content could have been overwritten before
 #             self.pWiki.openWikiPage(self.pWiki.getCurrentWikiWord(),
 #                     addToHistory=False, forceReopen=True)
-                    
-            self._refreshPageList()
+                
+        self._refreshPageList()
 
 
 

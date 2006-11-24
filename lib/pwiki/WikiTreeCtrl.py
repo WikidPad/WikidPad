@@ -1491,12 +1491,13 @@ class WikiTreeCtrl(wxTreeCtrl):
             self.GetPyData(item).onActivate()
         
         event.Skip()
-        
+
     def OnSetFocus(self, event):
         item = self.GetSelection()
         if item.IsOk():
             self.GetPyData(item).onActivate()
-                    
+        event.Skip()
+
     def OnTreeItemExpand(self, event):
         ## _prof.start()
         item = event.GetItem()

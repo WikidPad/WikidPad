@@ -5,7 +5,8 @@ import os, sys, gc, traceback, sets, string, re
 from os.path import *
 from time import localtime, time, strftime
 
-import urllib_red as urllib
+# import urllib_red as urllib
+import urllib
 
 from wxPython.wx import *
 from wxPython.stc import *
@@ -127,6 +128,13 @@ class KeyBindingsCache:
         return self.getAccelPair(attr) == accP
 
 
+class LossyWikiCloseDeniedException(Exception):
+    """
+    Special exception thrown from PersonalWikiFrame.closeWiki() if user denied
+    to close the wiki because it might lead to data loss
+    """
+    pass
+
 
 class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
     def __init__(self, parent, id, title, wikiAppDir, globalConfigDir,
@@ -221,8 +229,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # initialize the wiki syntax
         WikiFormatting.initialize(self.wikiSyntax)
         
-        # Initialize new component
-        self.formatting = WikiFormatting.WikiFormatting(self, self.wikiSyntax)
+#         # Initialize new component
+#         self.formatting = WikiFormatting.WikiFormatting(self, self.wikiSyntax)
 
         # Connect page history
         self.pageHistory = PageHistory(self)
@@ -326,7 +334,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.openWiki(wikiToOpen, wikiWordToOpen)
             else:
                 self.statusBar.SetStatusText(
-                        uniToGui(u"Couldn't open last wiki: %s" % wikiToOpen), 0)
+                        uniToGui(u"Last wiki doesn't exist: %s" % wikiToOpen), 0)
 
         # set the focus to the editor
 #         if self.vertSplitter.GetSashPosition() < 2:
@@ -336,7 +344,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         ## if not (self.showOnTray and self.IsIconized()):
             
         cmdLineAction.actionBeforeShow(self)
-        
+
         if cmdLineAction.exitFinally:
             self.Close()
             self.Destroy()
@@ -644,6 +652,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             wikiMenu.Append(menuID, '&Copy .wiki files to database', 'Copy .wiki files to database')
             EVT_MENU(self, menuID, self.OnImportFromPagefiles)
 
+        if wikiData is not None:
+            wikiMenu.AppendSeparator()            
+            self.addMenuItem(wikiMenu, 'Wiki &Info...',
+                    'Show general information about current wiki',
+                    self.OnShowWikiInfoDialog)
+
         if wikiData is not None and wikiData.checkCapability("versioning") == 1:
             wikiMenu.AppendSeparator()
     
@@ -767,14 +781,19 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         stack = [[0, u"Text blocks", wxMenu()]]
                 
         wikiData = self.getWikiData()
-        if wikiData is not None:
-            if wikiData.isDefinedWikiWord("[TextBlocks]"):
+        if wikiData is not None and self.requireReadAccess():
+            try:
                 # We have current wiki with appropriate functional page,
                 # so fill menu first with wiki specific text blocks
                 tbContent = wikiData.getContent("[TextBlocks]")
                 self._addToTextBlocksMenu(tbContent, stack, reusableIds)
 
                 stack[-1][2].AppendSeparator()
+            except WikiFileNotFoundException:
+                pass
+            except (IOError, OSError, DbReadAccessError), e:
+                self.lostReadAccess(e)
+                traceback.print_exc()
 
         # Fill menu with global text blocks
         tbLoc = join(self.globalConfigSubDir, "[TextBlocks].wiki")
@@ -1650,6 +1669,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnFastSearchKeyDown(self, evt):
+        """
+        Process EVT_KEY_DOWN in the fast search text field
+        """
         acc = getAccelPairFromKeyDown(evt)
         if acc == (wxACCEL_NORMAL, WXK_RETURN) or \
                 acc == (wxACCEL_NORMAL, WXK_NUMPAD_ENTER):
@@ -1678,12 +1700,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         wd = self.getWikiDocument()
         if result == wxYES and wd is not None:
+            wd.setReadAccessFailed(True)
+            wd.setWriteAccessFailed(True)
+            # Try reading
             while True:
                 try:
                     wd.reconnect()
-                    wd.setNoAutoSaveFlag(False)
-                    break
-                except Exception, e:
+                    wd.setReadAccessFailed(False)
+                    break   # Success
+                except (IOError, OSError, DbAccessError), e:
+                    sys.stderr.write("Error while trying to reconnect:\n")
                     traceback.print_exc()
                     result = wxMessageBox(uniToGui((
                             u'There was an error while reconnecting the database\n\n'
@@ -1691,7 +1717,30 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                             e), u'Error reconnecting!',
                             wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
                     if result == wxNO:
+                        return
+
+            # Try writing
+            while True:
+                try:
+                    # write out the current configuration
+                    self.writeCurrentConfig()
+                    self.getWikiData().testWrite()
+
+                    wd.setNoAutoSaveFlag(False)
+                    wd.setWriteAccessFailed(False)
+                    break   # Success
+                except (IOError, OSError, DbWriteAccessError), e:
+                    sys.stderr.write("Error while trying to write:\n")
+                    traceback.print_exc()
+                    result = wxMessageBox(uniToGui((
+                            u'There was an error while writing to the database\n\n'
+                            u'Would you like to try it again?\n%s') %
+                            e), u'Error writing!',
+                            wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+                    if result == wxNO:
                         break
+
+                
 
     def OnRemoteCommand(self, evt):
         try:
@@ -1764,17 +1813,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         return ["textedit", "preview"]
 
 
-    def appendLogMessage(self, msg):   # TODO make log window visible if necessary
+    def appendLogMessage(self, msg):
         """
         Add message to log window, make log window visible if necessary
         """
         if self.configuration.getboolean("main", "log_window_autoshow"):
-#             self.logSashWindow.uncollapseWindow()
             self.windowLayouter.uncollapseWindow("log")
         self.logWindow.appendMessage(msg)
 
     def hideLogWindow(self):
-#         self.logSashWindow.collapseWindow()
         self.windowLayouter.collapseWindow("log")
 
 
@@ -1843,23 +1890,35 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #     )
 
     def testIt(self):
-        print "testIt", repr(self.getCurrentDocPage().getFlatTree())
+        rect = self.statusBar.GetFieldRect(0)
+        
+        dc = wxWindowDC(self.statusBar)
+        dc.SetBrush(wxRED_BRUSH)
+        dc.SetPen(wxRED_PEN)
+        dc.DrawRectangle(rect.x, rect.y, rect.width, rect.height)
+        dc.SetPen(wxWHITE_PEN)
+        dc.SetFont(self.statusBar.GetFont())
+        dc.DrawText(u"Saving page", rect.x + 2, rect.y + 2)
+        dc.SetFont(wxNullFont)
+        dc.SetBrush(wxNullBrush)
+        dc.SetPen(wxNullPen)
+
+        # self.statusBar.Refresh()
+
 
 
     def OnNotebookPageChanged(self, evt):
-        if evt.GetSelection() == 0:
-            subControl = "textedit"
-        elif evt.GetSelection() == 1:
-            subControl = "preview"
-            
-        self.getCurrentDocPagePresenter().switchSubControl(subControl)
-        # self.htmlView.setVisible(evt.GetSelection() == 1)  # TODO
-        self.mainAreaPanel.GetPage(evt.GetSelection()).SetFocus()
-#         if evt.GetSelection() == 0:
-#             print "OnNotebookPageChanged2"
-#             self.activeEditor.SetFocus()
-#         elif evt.GetSelection() == 1:
-#             self.htmlView.SetFocus()
+        try:
+            if evt.GetSelection() == 0:
+                subControl = "textedit"
+            elif evt.GetSelection() == 1:
+                subControl = "preview"
+                
+            self.getCurrentDocPagePresenter().switchSubControl(subControl)
+            self.mainAreaPanel.GetPage(evt.GetSelection()).SetFocus()
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
 
 
     def OnNotebookFocused(self, evt):
@@ -1885,19 +1944,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         evt.Skip()
 
 
-#     def createEditor(self):
-#         self.activeEditor = WikiTxtCtrl(self, self.mainAreaPanel, -1)
-#         self.mainAreaPanel.AddPage(self.activeEditor, u"Edit")
-#         self.activeEditor.evalScope = { 'editor' : self.activeEditor,
-#                 'pwiki' : self, 'lib': self.evalLib}
-# 
-#         # enable and zoom the editor
-#         self.activeEditor.Enable(0)
-#         self.activeEditor.SetZoom(self.configuration.getint("main", "zoom"))
-
-
-
-
     def resetGui(self):
         # delete everything in the current tree
         self.tree.DeleteAllItems()
@@ -1911,11 +1957,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # reset tray
         self.setShowOnTray()
 
-    def getCurrentText(self):
-        """
-        Return the raw input text of current wiki word
-        """
-        return self.getActiveEditor().GetText()
+#     def getCurrentText(self):
+#         """
+#         Return the raw input text of current wiki word
+#         """
+#         return self.getActiveEditor().GetText()
 
 
     def newWiki(self, wikiName, wikiDir):
@@ -1925,8 +1971,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.displayErrorMessage(
                     'No data handler available to create database.')
             return
-
-        self.hooks.newWiki(self, wikiName, wikiDir)
 
         wikiName = string.replace(wikiName, u" ", u"")
         wikiDir = join(wikiDir, wikiName)
@@ -1941,12 +1985,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     u"(This deletes everything in and below this directory!)") %
                     wikiDir), u'Warning', wxYES_NO)
             result = dlg.ShowModal()
+            dlg.Destroy()
             if result == wxID_YES:
                 os.rmdir(wikiDir)  # TODO BUG!!!
                 createIt = True
             elif result == wxID_NO:
                 createIt = False
-            dlg.Destroy()
 
         if createIt:
             # Ask for the data handler to use
@@ -1998,34 +2042,30 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.displayErrorMessage('There was an error creating the wiki database.', e)
                 traceback.print_exc()                
                 allIsWell = False
-                
-            self.closeWiki()
-
+            
             if (allIsWell):
-                # everything is ok, write out the config file
-                # create a new config file for the new wiki
-                wikiConfig = wxGetApp().createWikiConfiguration()
-#                 
-                wikiConfig.createEmptyConfig(configFileLoc)
-                wikiConfig.fillWithDefaults()
-                
-                wikiConfig.set("main", "wiki_name", wikiName)
-                wikiConfig.set("main", "last_wiki_word", wikiName)
-                wikiConfig.set("main", "wiki_database_type", wdhName)
-                wikiConfig.set("wiki_db", "data_dir", "data")
-                wikiConfig.save()
+                try:
+                    self.hooks.newWiki(self, wikiName, wikiDir)
+    
+                    # everything is ok, write out the config file
+                    # create a new config file for the new wiki
+                    wikiConfig = wxGetApp().createWikiConfiguration()
+    #                 
+                    wikiConfig.createEmptyConfig(configFileLoc)
+                    wikiConfig.fillWithDefaults()
+                    
+                    wikiConfig.set("main", "wiki_name", wikiName)
+                    wikiConfig.set("main", "last_wiki_word", wikiName)
+                    wikiConfig.set("main", "wiki_database_type", wdhName)
+                    wikiConfig.set("wiki_db", "data_dir", "data")
+                    wikiConfig.save()
 
-#                 configFile = open(configFileLoc, 'w')
-#                 config.write(configFile)
-#                 configFile.close()
-
-#                 self.statusBar.SetStatusText(
-#                         uniToGui(u"Created Wiki: %s" % wikiName), 0)
-
-                # open the new wiki
-                self.openWiki(configFileLoc)
-                p = self.wikiDataManager.createWikiPage(u"WikiSettings")
-                text = u"""++ Wiki Settings
+                    self.closeWiki()
+                    
+                    # open the new wiki
+                    self.openWiki(configFileLoc)
+                    p = self.wikiDataManager.createWikiPage(u"WikiSettings")
+                    text = u"""++ Wiki Settings
 
 
 These are your default global settings.
@@ -2039,23 +2079,27 @@ These are your default global settings.
 
 [icon: cog]
 """
-                p.save(text, False)
-                p.update(text, False)
+                    p.save(text, False)
+                    p.update(text, False)
+    
+                    p = self.wikiDataManager.createWikiPage(u"ScratchPad")
+                    text = u"++ Scratch Pad\n\n"
+                    p.save(text, False)
+                    p.update(text, False)
+                    
+                    self.getActiveEditor().GotoPos(self.getActiveEditor().GetLength())
+                    self.getActiveEditor().AddText(u"\n\n\t* WikiSettings\n")
+                    self.saveAllDocPages(force=True)
+                    
+                    # trigger hook
+                    self.hooks.createdWiki(self, wikiName, wikiDir)
+    
+                    # reopen the root
+                    self.openWikiPage(self.wikiName, False, False)
 
-                p = self.wikiDataManager.createWikiPage(u"ScratchPad")
-                text = u"++ Scratch Pad\n\n"
-                p.save(text, False)
-                p.update(text, False)
-                
-                self.getActiveEditor().GotoPos(self.getActiveEditor().GetLength())
-                self.getActiveEditor().AddText(u"\n\n\t* WikiSettings\n")
-                self.saveAllDocPages(force=True)
-                
-                # trigger hook
-                self.hooks.createdWiki(self, wikiName, wikiDir)
-
-                # reopen the root
-                self.openWikiPage(self.wikiName, False, False)
+                except (IOError, OSError, DbAccessError), e:
+                    self.lostAccess(e)
+                    raise
 
 
     def _askForDbType(self):
@@ -2092,18 +2136,6 @@ These are your default global settings.
         # if the new config is the same as the old, don't resave state since
         # this could be a wiki overwrite from newWiki. We don't want to overwrite
         # the new config with the old one.
-
-        # status
-#         self.statusBar.SetStatusText(
-#                 uniToGui(u"Opening Wiki: %s" % wikiConfigFilename), 0)
-
-        # make sure the config exists
-#         if (not exists(wikiConfigFilename)):
-#             self.displayErrorMessage(u"Wiki configuration file '%s' not found" %
-#                     wikiConfigFilename)
-#             if wikiConfigFilename in self.wikiHistory:
-#                 self.wikiHistory.remove(wikiConfigFilename)
-#             return False
 
         # make sure the config exists
         cfgPath, splittedWikiWord = WikiDataManager.splitConfigPathAndWord(
@@ -2162,11 +2194,12 @@ These are your default global settings.
                     return False
                     
                 continue # Try again
-            except Exception, e:
-                # Something else went wrong
-                self.displayErrorMessage("Error connecting to database in '%s'"
-                        % cfgPath, e)
-                traceback.print_exc()
+            except (IOError, OSError, DbAccessError), e:
+#                 # Something else went wrong
+#                 self.displayErrorMessage("Error connecting to database in '%s'"
+#                         % cfgPath, e)
+#                 traceback.print_exc()
+                self.lostAccess(e)
                 return False
 
         # OK, things look good
@@ -2182,68 +2215,71 @@ These are your default global settings.
         
         self.getConfig().setWikiConfig(self.wikiDataManager.getWikiConfig())
 
-
-        # what was the last wiki word opened
-        lastWikiWord = wikiWordToOpen
-        if not lastWikiWord:
-            lastWikiWord = splittedWikiWord
-        if not lastWikiWord:
-            lastWikiWord = self.configuration.get("main", "first_wiki_word", u"")
-            if lastWikiWord == u"":
-                lastWikiWord = self.configuration.get("main", "last_wiki_word")
-
-        # reset the gui
-        self.resetGui()
-        self.buildMainMenu()
-
-        # enable the top level menus
-        if self.mainmenu:
-            self.mainmenu.EnableTop(1, 1)
-            self.mainmenu.EnableTop(2, 1)
-            self.mainmenu.EnableTop(3, 1)
+        try:
+            # what was the last wiki word opened
+            lastWikiWord = wikiWordToOpen
+            if not lastWikiWord:
+                lastWikiWord = splittedWikiWord
+            if not lastWikiWord:
+                lastWikiWord = self.configuration.get("main", "first_wiki_word", u"")
+                if lastWikiWord == u"":
+                    lastWikiWord = self.configuration.get("main", "last_wiki_word")
+    
+            # reset the gui
+            self.resetGui()
+            self.buildMainMenu()
+    
+            # enable the top level menus
+            if self.mainmenu:
+                self.mainmenu.EnableTop(1, 1)
+                self.mainmenu.EnableTop(2, 1)
+                self.mainmenu.EnableTop(3, 1)
+                
+            self.fireMiscEventKeys(("opened wiki",))
+    
+            # open the root
+            self.openWikiPage(self.wikiName)
+            self.setCurrentWordAsRoot()
             
-        self.fireMiscEventKeys(("opened wiki",))
-
-        # open the root
-        self.openWikiPage(self.wikiName)
-        self.setCurrentWordAsRoot()
-        
-        viewsTree = self.windowLayouter.getWindowForName("viewstree")
-        if viewsTree is not None:
-            viewsTree.setViewsAsRoot()
-
-
-        # set status
-#         self.statusBar.SetStatusText(
-#                 uniToGui(u"Opened wiki '%s'" % self.wikiName), 0)
-
-        # now try and open the last wiki page
-        if lastWikiWord and lastWikiWord != self.wikiName:
-            # if the word is not a wiki word see if a word that starts with the word can be found
-            if not self.getWikiData().isDefinedWikiWord(lastWikiWord):
-                wordsStartingWith = self.getWikiData().getWikiWordsStartingWith(
-                        lastWikiWord, True)
-                if wordsStartingWith:
-                    lastWikiWord = wordsStartingWith[0]
-            self.openWikiPage(lastWikiWord)
-            self.findCurrentWordInTree()
-
-        self.tree.SetScrollPos(wxHORIZONTAL, 0)
-
-        # enable the editor control whether or not the wiki root was found
-        for e in self.editors: e.Enable(1)
-
-        # update the last accessed wiki config var
-        self.lastAccessedWiki(self.getWikiConfigPath())
-
-        # Rebuild text blocks menu
-        self.rereadTextBlocks()
-
-        # trigger hook
-        self.hooks.openedWiki(self, self.wikiName, wikiCombinedFilename)
-
-        # return that the wiki was opened successfully
-        return True
+            viewsTree = self.windowLayouter.getWindowForName("viewstree")
+            if viewsTree is not None:
+                viewsTree.setViewsAsRoot()
+    
+    
+            # set status
+    #         self.statusBar.SetStatusText(
+    #                 uniToGui(u"Opened wiki '%s'" % self.wikiName), 0)
+    
+            # now try and open the last wiki page
+            if lastWikiWord and lastWikiWord != self.wikiName:
+                # if the word is not a wiki word see if a word that starts with the word can be found
+                if not self.getWikiData().isDefinedWikiWord(lastWikiWord):
+                    wordsStartingWith = self.getWikiData().getWikiWordsStartingWith(
+                            lastWikiWord, True)
+                    if wordsStartingWith:
+                        lastWikiWord = wordsStartingWith[0]
+                self.openWikiPage(lastWikiWord)
+                self.findCurrentWordInTree()
+    
+            self.tree.SetScrollPos(wxHORIZONTAL, 0)
+    
+            # enable the editor control whether or not the wiki root was found
+            for e in self.editors: e.Enable(1)
+    
+            # update the last accessed wiki config var
+            self.lastAccessedWiki(self.getWikiConfigPath())
+    
+            # Rebuild text blocks menu
+            self.rereadTextBlocks()
+    
+            # trigger hook
+            self.hooks.openedWiki(self, self.wikiName, wikiCombinedFilename)
+    
+            # return that the wiki was opened successfully
+            return True
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            return False
 
 
     def setCurrentWordAsRoot(self):
@@ -2252,24 +2288,54 @@ These are your default global settings.
         """
         # make sure the root has a relationship to the ScratchPad
         # self.currentWikiPage.addChildRelationship("ScratchPad")
-        if self.getCurrentWikiWord() is not None:
-            self.tree.setRootByWord(self.getCurrentWikiWord())
+        if not self.requireReadAccess():
+            return
+        try:
+            if self.getCurrentWikiWord() is not None:
+                self.tree.setRootByWord(self.getCurrentWikiWord())
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
 
 
     def closeWiki(self, saveState=True):
+        def errCloseAnywayMsg():
+            return wxMessageBox(u"There is no access to underlying wiki\n"
+                    "Close anyway and loose data?",
+                    u'Close anyway',
+                    wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION, self)
+
+
         if self.getWikiConfigPath():
-            self.fireMiscEventKeys(("closing current wiki",))
-#             for editor in self.editors:
-#                 editor.unloadCurrentDocPage()
-            if saveState:
-                self.saveCurrentWikiState()
-            if self.getWikiData():
-                self.wikiDataManager.release()
-#                 self.getWikiData().close()
-                self.wikiData = None
-                if self.wikiDataManager is not None:
-                    self.wikiDataManager.getMiscEvent().removeListener(self)
-                self.wikiDataManager = None
+            wd = self.getWikiDocument()
+            # Do not require access here, otherwise the user will not be able to
+            # close a disconnected wiki
+            if not wd.getReadAccessFailed() and not wd.getWriteAccessFailed():
+                try:
+                    self.fireMiscEventKeys(("closing current wiki",))
+        #             for editor in self.editors:
+        #                 editor.unloadCurrentDocPage()
+                    if saveState:
+                        self.saveCurrentWikiState()
+                    if self.getWikiData():
+                        wd.release()
+        #                 self.getWikiData().close()
+                        self.wikiData = None
+                        if self.wikiDataManager is not None:
+                            self.wikiDataManager.getMiscEvent().removeListener(self)
+                        self.wikiDataManager = None
+                except (IOError, OSError, DbAccessError), e:
+                    self.lostAccess(e)
+                    if errCloseAnywayMsg() == wxNO:
+                        raise
+                    else:
+                        traceback.print_exc()
+            else:
+                # We had already a problem, so ask what to do
+                if errCloseAnywayMsg() == wxNO:
+                    raise LossyWikiCloseDeniedException
+                # else go ahead
+
             self.getConfig().setWikiConfig(None)
             if self.win32Interceptor is not None:
                 self.win32Interceptor.stop()
@@ -2279,55 +2345,197 @@ These are your default global settings.
 
 
     def saveCurrentWikiState(self):
-        # write out the current config
-        self.writeCurrentConfig()
+        try:
+            # write out the current config
+            self.writeCurrentConfig()
+    
+            # save the current wiki page if it is dirty
+            if self.getCurrentDocPage():
+                self.saveAllDocPages()
+    
+            # database commits
+            if self.getWikiData():
+                self.getWikiData().commit()
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
 
-        # save the current wiki page if it is dirty
-        if self.getCurrentDocPage():
-            self.saveAllDocPages()
 
-        # database commits
-        if self.getWikiData():
-            self.getWikiData().commit()
-
-
-    def checkDatabaseConnected(self):   # TODO: Show errors
+    def requireReadAccess(self):
         """
-        Check if database is connected (and return True),
-        show message window if not.
-        Returns true if database is connected after executing function.
+        Check flag in WikiDocument if database is readable. If not, take
+        measures to re-establish it. If read access is probably possible,
+        return True
         """
-        if self.getWikiData() is not None:
+        wd = self.getWikiDocument()
+        if wd is None:
+            wxMessageBox(u"This operation requires an open database",
+                    u'No open database', wxOK, self)
+            return False
+
+        if not wd.getReadAccessFailed():
             return True
 
         while True:
             wd = self.getWikiDocument()
-            if wd is not None:
-                result = wxMessageBox(u"No connection to database. "
-                        u"Try to reconnect?", u'Reconnect database?',
-                        wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+            if wd is None:
+                return False
 
-                if result == wxNO:
-                    return False
+            self.SetFocus()
+            result = wxMessageBox(u"No connection to database. "
+                    u"Try to reconnect?", u'Reconnect database?',
+                    wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
 
-                self.statusBar.PushStatusText(
-                        "Trying to reconnect database...", 0)
+            if result == wxNO:
+                return False
+
+            self.statusBar.PushStatusText(
+                    "Trying to reconnect database...", 0)
+            try:
                 try:
-                    try:
-                        wd.reconnect()
-                        wd.setNoAutoSaveFlag(False)
-                        return True  # Success
-                    except:
-                        sys.stderr.write("Error while trying to reconnect:\n")
-                        traceback.print_exc()
-                        self.displayErrorMessage('Error while reconnecting '
-                                'database', e)
+                    wd.reconnect()
+                    wd.setNoAutoSaveFlag(False)
+                    wd.setReadAccessFailed(False)
+                    self.requireWriteAccess()  # Just to test it  # TODO ?
+                    return True  # Success
+                except DbReadAccessError, e:
+                    sys.stderr.write("Error while trying to reconnect:\n")
+                    traceback.print_exc()
+                    self.SetFocus()
+                    self.displayErrorMessage('Error while reconnecting '
+                            'database', e)
+            finally:
+                self.statusBar.PopStatusText(0)
 
-                finally:
-                    self.statusBar.PopStatusText(0)
+
+    def requireWriteAccess(self):
+        """
+        Check flag in WikiDocument if database is writable. If not, take
+        measures to re-establish it. If write access is probably possible,
+        return True
+        """
+        if not self.requireReadAccess():
+            return False
+        
+        if not self.getWikiDocument().getWriteAccessFailed():
+            return True
+
+        while True:
+            wd = self.getWikiDocument()
+            if wd is None:
+                return False
+
+            self.SetFocus()
+            result = wxMessageBox(u"This operation needs write access to database"
+                    u"Try to write?", u'Try writing?',
+                    wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+
+            if result == wxNO:
+                return False
+
+            self.statusBar.PushStatusText(
+                    "Trying to write to database...", 0)
+            try:
+                try:
+                    # write out the current configuration
+                    self.writeCurrentConfig()
+                    self.getWikiData().testWrite()
+
+                    wd.setNoAutoSaveFlag(False)
+                    wd.setWriteAccessFailed(False)
+                    return True  # Success
+                except (IOError, OSError, DbWriteAccessError), e:
+                    sys.stderr.write("Error while trying to write:\n")
+                    traceback.print_exc()
+                    self.SetFocus()
+                    self.displayErrorMessage('Error while writing to '
+                            'database', e)
+            finally:
+                self.statusBar.PopStatusText(0)
 
 
-    def tryAutoReconnect(self):
+    def lostAccess(self, exc):
+        if isinstance(exc, DbReadAccessError):
+            self.lostReadAccess(exc)
+        elif isinstance(exc, DbWriteAccessError):
+            self.lostWriteAccess(exc)
+        else:
+            self.lostReadAccess(exc)
+
+
+    def lostReadAccess(self, exc):
+        """
+        Called if read access was lost during an operation
+        """
+        if self.getWikiDocument().getReadAccessFailed():
+            # Was already handled -> ignore
+            return
+            
+        self.SetFocus()
+        wxMessageBox((u"Database connection error: %s.\n"
+                u"Try to re-establish, then run \"Wiki\"->\"Reconnect\"") % str(exc),
+                u'Connection lost', wxOK, self)
+
+#         wd.setWriteAccessFailed(True) ?
+        self.getWikiDocument().setReadAccessFailed(True)
+
+
+    def lostWriteAccess(self, exc):
+        """
+        Called if read access was lost during an operation
+        """
+        if self.getWikiDocument().getWriteAccessFailed():
+            # Was already handled -> ignore
+            return
+
+        self.SetFocus()
+        wxMessageBox((u"No write access to database: %s.\n"
+                u" Try to re-establish, then run \"Wiki\"->\"Reconnect\"") % str(exc),
+                u'Connection lost', wxOK, self)
+
+        self.getWikiDocument().setWriteAccessFailed(True)
+
+
+#     def checkDatabaseConnected(self):   # TODO: Make obsolete 
+#         """
+#         Check if database is connected (and return True),
+#         show message window if not.
+#         Returns true if database is connected after executing function.
+#         """
+#         if self.getWikiData() is not None:
+#             return True
+# 
+#         while True:
+#             wd = self.getWikiDocument()
+#             if wd is None:
+#                 return False
+# 
+#             result = wxMessageBox(u"No connection to database. "
+#                     u"Try to reconnect?", u'Reconnect database?',
+#                     wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+# 
+#             if result == wxNO:
+#                 return False
+# 
+#             self.statusBar.PushStatusText(
+#                     "Trying to reconnect database...", 0)
+#             try:
+#                 try:
+#                     wd.reconnect()
+#                     wd.setNoAutoSaveFlag(False)
+#                     return True  # Success
+#                 except (IOError, OSError), e:
+#                     sys.stderr.write("Error while trying to reconnect:\n")
+#                     traceback.print_exc()
+#                     self.displayErrorMessage('Error while reconnecting '
+#                             'database', e)
+# 
+#             finally:
+#                 self.statusBar.PopStatusText(0)
+
+
+
+    def tryAutoReconnect(self):   # TODO ???
         """
         Try reconnect after an error, if not already tried automatically
         """
@@ -2358,9 +2566,16 @@ These are your default global settings.
 
 
     def openFuncPage(self, funcTag, **evtprops):
-        page = self.wikiDataManager.getFuncPage(funcTag)
+        if not self.requireReadAccess():
+            return
 
-        self.getActiveEditor().loadFuncPage(page, evtprops)
+        try:
+            page = self.wikiDataManager.getFuncPage(funcTag)
+    
+            self.getActiveEditor().loadFuncPage(page, evtprops)
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
 
         p2 = evtprops.copy()
         p2.update({"loaded current functional page": True})
@@ -2373,7 +2588,7 @@ These are your default global settings.
         """
         Opens a wiki page in the active editor.
         """
-        if not self.checkDatabaseConnected():
+        if not self.requireReadAccess():
             return
 
         evtprops["addToHistory"] = addToHistory
@@ -2387,56 +2602,60 @@ These are your default global settings.
             self.displayErrorMessage(u"'%s' is an invalid wiki word." % wikiWord)
             return
 
-        # don't reopen the currently open page, only send an event
-        if (wikiWord == self.getCurrentWikiWord()) and not forceReopen:
-            p2 = evtprops.copy()
-            p2.update({"reloaded current page": True,
-                    "reloaded current wiki page": True})
-            self.fireMiscEventProps(p2)
-#             # self.tree.buildTreeForWord(self.currentWikiWord)  # TODO Needed?
-#             self.statusBar.SetStatusText(uniToGui(u"Wiki word '%s' already open" %
-#                     wikiWord), 0)
-            return
-
-        # trigger hook
-        self.hooks.openWikiWord(self, wikiWord)
-
-        # check if this is an alias
-        if (self.getWikiData().isAlias(wikiWord)):
-            wikiWord = self.getWikiData().getAliasesWikiWord(wikiWord)
-
-        # fetch the page info from the database
         try:
-            page = self.wikiDataManager.getWikiPage(wikiWord)
-            self.statusBar.SetStatusText(uniToGui(u"Opened wiki word '%s'" %
-                    wikiWord), 0)
-                    
-            self.refreshPageStatus(page)
-
-        except (WikiWordNotFoundException, WikiFileNotFoundException), e:
-            page = self.wikiDataManager.createWikiPage(wikiWord)
-            # trigger hooks
-            self.hooks.newWikiWord(self, wikiWord)
-            self.statusBar.SetStatusText(uniToGui(u"Wiki page not found, a new "
-                    u"page will be created"), 0)
-            self.statusBar.SetStatusText(uniToGui(u""), 1)
-
-        self.getActiveEditor().loadWikiPage(page, evtprops)
-
-        p2 = evtprops.copy()
-        p2.update({"loaded current page": True,
-                "loaded current wiki page": True})
-        self.fireMiscEventProps(p2)
-
-        # set the title and add the word to the history
-        self.SetTitle(uniToGui(u"Wiki: %s - %s" %
-                (self.getWikiConfigPath(), self.getCurrentWikiWord())))
-
-        self.configuration.set("main", "last_wiki_word", wikiWord)
-
-        # sync the tree
-        if forceTreeSyncFromRoot:
-            self.findCurrentWordInTree()
+            # don't reopen the currently open page, only send an event
+            if (wikiWord == self.getCurrentWikiWord()) and not forceReopen:
+                p2 = evtprops.copy()
+                p2.update({"reloaded current page": True,
+                        "reloaded current wiki page": True})
+                self.fireMiscEventProps(p2)
+    #             # self.tree.buildTreeForWord(self.currentWikiWord)  # TODO Needed?
+    #             self.statusBar.SetStatusText(uniToGui(u"Wiki word '%s' already open" %
+    #                     wikiWord), 0)
+                return
+    
+            # trigger hook
+            self.hooks.openWikiWord(self, wikiWord)
+    
+            # check if this is an alias
+            if (self.getWikiData().isAlias(wikiWord)):
+                wikiWord = self.getWikiData().getAliasesWikiWord(wikiWord)
+    
+            # fetch the page info from the database
+            try:
+                page = self.wikiDataManager.getWikiPage(wikiWord)
+                self.statusBar.SetStatusText(uniToGui(u"Opened wiki word '%s'" %
+                        wikiWord), 0)
+                        
+                self.refreshPageStatus(page)
+    
+            except (WikiWordNotFoundException, WikiFileNotFoundException), e:
+                page = self.wikiDataManager.createWikiPage(wikiWord)
+                # trigger hooks
+                self.hooks.newWikiWord(self, wikiWord)
+                self.statusBar.SetStatusText(uniToGui(u"Wiki page not found, a new "
+                        u"page will be created"), 0)
+                self.statusBar.SetStatusText(uniToGui(u""), 1)
+    
+            self.getActiveEditor().loadWikiPage(page, evtprops)
+    
+            p2 = evtprops.copy()
+            p2.update({"loaded current page": True,
+                    "loaded current wiki page": True})
+            self.fireMiscEventProps(p2)
+    
+            # set the title and add the word to the history
+            self.SetTitle(uniToGui(u"Wiki: %s - %s" %
+                    (self.getWikiConfigPath(), self.getCurrentWikiWord())))
+    
+            self.configuration.set("main", "last_wiki_word", wikiWord)
+    
+            # sync the tree
+            if forceTreeSyncFromRoot:
+                self.findCurrentWordInTree()
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
 
         # trigger hook
         self.hooks.openedWikiWord(self, wikiWord)
@@ -2446,20 +2665,32 @@ These are your default global settings.
     def saveCurrentDocPage(self, force = False):
         ## _prof.start()
 
-        if force or self.getCurrentDocPage().getDirty()[0]:
+        if (force or self.getCurrentDocPage().getDirty()[0]) and \
+                self.requireWriteAccess():
             # Reset error flag here, it can be set true again by saveDocPage
-            self.getWikiDocument().setNoAutoSaveFlag(False)
-
-            self.getActiveEditor().saveLoadedDocPage() # this calls in turn saveDocPage() below
+#             self.getWikiDocument().setNoAutoSaveFlag(False)
+            try:
+                self.getActiveEditor().saveLoadedDocPage() # this calls in turn saveDocPage() below
+            except (IOError, OSError, DbAccessError), e:
+                self.lostAccess(e)
+                raise
 
         self.refreshPageStatus()
         
         ## _prof.stop()
 
     def saveAllDocPages(self, force = False):
-        self.getWikiDocument().setNoAutoSaveFlag(False)
-        self.fireMiscEventProps({"saving all pages": None, "force": force})
-        self.refreshPageStatus()
+        if not self.requireWriteAccess():
+            return
+
+ #        self.getWikiDocument().setNoAutoSaveFlag(False)
+        try:
+            self.fireMiscEventProps({"saving all pages": None, "force": force})
+            self.refreshPageStatus()
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
+
 #         self.saveCurrentDocPage(force)
 
 
@@ -2494,7 +2725,7 @@ These are your default global settings.
         if page is None:
             return False
 
-        if not self.checkDatabaseConnected():
+        if not self.requireWriteAccess():
             return
 
         self.statusBar.PushStatusText(u"Saving page", 0)
@@ -2523,50 +2754,42 @@ These are your default global settings.
 
                     self.getWikiData().commit()
                     return True
+                except (IOError, OSError, DbAccessError), e:
+                    self.lostAccess(e)
+                    raise
 
-                except Exception, e:
-                    traceback.print_exc()
-                    if self.tryAutoReconnect():
-                        continue
-#                     if not reconnectTried:
-#                         reconnectTried = True
-#                         wd = self.getWikiDocument()
-#                         if wd is not None:
-#                             self.statusBar.PushStatusText(
-#                                     "Error on save, trying to reconnect ...", 0)
-#                             try:
-#                                 try:
-#                                     wd.reconnect()
-#                                     wd.setNoAutoSaveFlag(False)
-#                                     break  # ... the "while True:" loop
-#                                 except:
-#                                     sys.stderr.write("Error while trying to reconnect:\n")
-#                                     traceback.print_exc()
-#                             finally:
-#                                 self.statusBar.PopStatusText(0)
-
-                    if word is None:    # TODO !!!
-                        word = u"---"
-                    dlg = wxMessageDialog(self,
-                            uniToGui((u'There was an error saving the contents of '
-                            u'wiki page "%s".\n%s\n\nWould you like to try and '
-                            u'save this document again?') % (word, e)),
-                                        u'Error Saving!', wxYES_NO)
-                    result = dlg.ShowModal()
-                    dlg.Destroy()
-                    if result == wxID_NO:
-                        self.getWikiDocument().setNoAutoSaveFlag(True)
-                        return False
+#                 except (IOError, OSError), e:
+#                     traceback.print_exc()
+#                     if self.tryAutoReconnect():
+#                         continue
+# 
+#                     if word is None:    # TODO !!!
+#                         word = u"---"
+#                     dlg = wxMessageDialog(self,
+#                             uniToGui((u'There was an error saving the contents of '
+#                             u'wiki page "%s".\n%s\n\nWould you like to try and '
+#                             u'save this document again?') % (word, e)),
+#                                         u'Error Saving!', wxYES_NO)
+#                     result = dlg.ShowModal()
+#                     dlg.Destroy()
+#                     if result == wxID_NO:
+#                         self.getWikiDocument().setNoAutoSaveFlag(True)
+#                         return False
         finally:
             self.statusBar.PopStatusText(0)
 
 
     def deleteCurrentWikiPage(self):
-        if self.getCurrentWikiWord():
-            # self.saveCurrentDocPage()
-            if self.getWikiData().isDefinedWikiWord(self.getCurrentWikiWord()):
-                page = self.getCurrentDocPage()
-                page.deletePage()
+        if self.getCurrentWikiWord() and self.requireWriteAccess():
+            try:
+                # self.saveCurrentDocPage()
+                if self.getWikiData().isDefinedWikiWord(self.getCurrentWikiWord()):
+                    page = self.getCurrentDocPage()
+                    page.deletePage()
+            except (IOError, OSError, DbAccessError), e:
+                self.lostAccess(e)
+                raise
+
 #                 self.getWikiData().deleteWord(self.getCurrentWikiWord())
 #                 # trigger hooks
 #                 self.hooks.deletedWikiWord(self, self.getCurrentWikiWord())
@@ -2583,7 +2806,7 @@ These are your default global settings.
                 modified? This text replacement works unreliably
         """
         wikiWord = self.getCurrentWikiWord()
-        if wikiWord is None:
+        if wikiWord is None or not self.requireWriteAccess():
             return False
 
         try:
@@ -2603,34 +2826,10 @@ These are your default global settings.
                 self.getWikiDocument().renameWikiWord(wikiWord, toWikiWord,
                         modifyText)
 
-
-#             # if the root was renamed we have a little more to do
-#             if wikiWord == prevWikiName:
-#                 self.configuration.set("main", "wiki_name", toWikiWord)
-#                 self.configuration.set("main", "last_wiki_word", toWikiWord)
-#                 self.saveCurrentWikiState()
-#                 self.configuration.loadWikiConfig(None)
-# 
-#                 self.wikiHistory.remove(prevWikiConfigFilename)
-#                 renamedConfigFile = join(dirname(self.wikiConfigFilename),
-#                         u"%s.wiki" % toWikiWord)
-#                 os.rename(self.wikiConfigFilename, renamedConfigFile)
-#                 self.openWiki(renamedConfigFile)
-
-#             self.getActiveEditor().loadWikiPage(None)
-# 
-#             # trigger hooks
-#             self.hooks.renamedWikiWord(self, wikiWord, toWikiWord)                
-#             # self.tree.collapse()
-#             p2 = evtprops.copy()
-#             p2["renamed wiki page"] = True
-#             p2["oldWord"] = wikiWord
-#             p2["newWord"] = toWikiWord
-#             self.fireMiscEventProps(p2)
-# 
-#             self.openWikiPage(toWikiWord, forceTreeSyncFromRoot=False)
-#             # self.findCurrentWordInTree()
             return True
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
         except WikiDataException, e:
             traceback.print_exc()                
             self.displayErrorMessage(str(e))
@@ -2725,38 +2924,75 @@ These are your default global settings.
         words -- Sequence of the words to choose from
         motionType -- motion type to set in openWikiPage if word was choosen
         """
-        dlg = ChooseWikiWordDialog(self, -1, words, motionType, title)
-        dlg.CenterOnParent(wxBOTH)
-        dlg.ShowModal()
-        dlg.Destroy()
+        if not self.requireReadAccess():
+            return
+        try:
+            dlg = ChooseWikiWordDialog(self, -1, words, motionType, title)
+            dlg.CenterOnParent(wxBOTH)
+            dlg.ShowModal()
+            dlg.Destroy()
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
 
 
     def viewParents(self, ofWord):
-        parents = self.getWikiData().getParentRelationships(ofWord)
+        if not self.requireReadAccess():
+            return
+        try:
+            parents = self.getWikiData().getParentRelationships(ofWord)
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
         self.viewWordSelection(u"Parent nodes of '%s'" % ofWord, parents,
                 "parent")
 
 
     def viewParentLess(self):
-        parentLess = self.getWikiData().getParentlessWikiWords()
+        if not self.requireReadAccess():
+            return
+        try:
+            parentLess = self.getWikiData().getParentlessWikiWords()
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
         self.viewWordSelection(u"Parentless nodes", parentLess,
                 "random")
 
 
     def viewChildren(self, ofWord):
-        children = self.getWikiData().getChildRelationships(ofWord)
+        if not self.requireReadAccess():
+            return
+        try:
+            children = self.getWikiData().getChildRelationships(ofWord)
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
         self.viewWordSelection(u"Child nodes of '%s'" % ofWord, children,
                 "child")
 
     def viewBookmarks(self):
-        bookmarked = self.getWikiData().getWordsWithPropertyValue(
-                "bookmarked", u"true")
+        if not self.requireReadAccess():
+            return
+        try:
+            bookmarked = self.getWikiData().getWordsWithPropertyValue(
+                    "bookmarked", u"true")
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
         self.viewWordSelection(u"Bookmarks", bookmarked,
                 "random")
 
+
     def viewHistory(self, posDelta=0):
-        hist = self.pageHistory.getHistory()
-        histpos = self.pageHistory.getPosition()
+        if not self.requireReadAccess():
+            return
+        try:
+            hist = self.pageHistory.getHistory()
+            histpos = self.pageHistory.getPosition()
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
 
         historyLen = len(hist)
         dlg = wxSingleChoiceDialog(self,
@@ -2781,7 +3017,10 @@ These are your default global settings.
 
 
     def lastAccessedWiki(self, wikiConfigFilename):
-        "writes to the global config the location of the last accessed wiki"
+        """
+        Writes to the global config the location of the last accessed wiki
+        and updates file history.
+        """
         # create a new config file for the new wiki
         self.configuration.set("main", "last_wiki", wikiConfigFilename)
         if wikiConfigFilename not in self.wikiHistory:
@@ -2807,10 +3046,6 @@ These are your default global settings.
 
 
     def setShowTreeControl(self, onOrOff):
-#         if onOrOff:
-#             self.treeSashWindow.uncollapseWindow()
-#         else:
-#             self.treeSashWindow.collapseWindow()
         if onOrOff:
             self.windowLayouter.uncollapseWindow("maintree")
         else:
@@ -2821,9 +3056,9 @@ These are your default global settings.
         """
         Control, if toolbar should be shown or not
         """
-        self.getConfig().set("main", "toolbar_show", onOrOff)
+        self.getConfig().set("main", "toolbar_show", bool(onOrOff))
 
-        if onOrOff == (not self.GetToolBar() is None):
+        if bool(onOrOff) == (not self.GetToolBar() is None):
             # Desired state already reached
             return
 
@@ -3010,6 +3245,9 @@ These are your default global settings.
         "writes out the global config file"
         try:
             self.configuration.save()
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
         except Exception, e:
             self.displayErrorMessage("Error saving global configuration", e)
 
@@ -3018,20 +3256,24 @@ These are your default global settings.
         "writes out the current config file"
         try:
             self.configuration.save()
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
         except Exception, e:
             self.displayErrorMessage("Error saving current configuration", e)
 
 
     def showWikiWordOpenDialog(self):
         dlg = OpenWikiWordDialog(self, -1)
-        dlg.CenterOnParent(wxBOTH)
-        if dlg.ShowModal() == wxID_OK:
-            wikiWord = dlg.GetValue()
-            if wikiWord:
-                dlg.Destroy()
-                self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
-                self.getActiveEditor().SetFocus()
-        dlg.Destroy()
+        try:
+            dlg.CenterOnParent(wxBOTH)
+            if dlg.ShowModal() == wxID_OK:
+                wikiWord = dlg.GetValue()
+                if wikiWord:
+                    self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
+                    self.getActiveEditor().SetFocus()
+        finally:
+            dlg.Destroy()
 
 
     def showWikiWordRenameDialog(self, wikiWord=None, toWikiWord=None):
@@ -3132,25 +3374,30 @@ These are your default global settings.
             self.displayErrorMessage(u"The scratch pad cannot be renamed.")
             return False
 
-        if self.getWikiData().isDefinedWikiWord(toWikiWord):
-            self.displayErrorMessage(u"Cannot rename to '%s', word already exists" %
-                    toWikiWord)
+        try:
+            if self.getWikiData().isDefinedWikiWord(toWikiWord):
+                self.displayErrorMessage(u"Cannot rename to '%s', word already exists" %
+                        toWikiWord)
+                return False
+                
+            result = wxMessageBox(u"Do you want to modify all links to the wiki word "
+                    u"'%s' renamed to '%s'?" % (wikiWord, toWikiWord),
+                    u'Rename Wiki Word', wxYES_NO | wxCANCEL | wxICON_QUESTION, self)
+    
+            if result == wxYES or result == wxNO:
+                try:
+                    self.renameCurrentWikiPage(toWikiWord, result == wxYES)
+                    return True
+                except WikiDataException, e:
+                    traceback.print_exc()                
+                    self.displayErrorMessage(str(e))
+    
+    #         dlg.Destroy()
             return False
-            
-        result = wxMessageBox(u"Do you want to modify all links to the wiki word "
-                u"'%s' renamed to '%s'?" % (wikiWord, toWikiWord),
-                u'Rename Wiki Word', wxYES_NO | wxCANCEL | wxICON_QUESTION, self)
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
 
-        if result == wxYES or result == wxNO:
-            try:
-                self.renameCurrentWikiPage(toWikiWord, result == wxYES)
-                return True
-            except WikiDataException, e:
-                traceback.print_exc()                
-                self.displayErrorMessage(str(e))
-
-#         dlg.Destroy()
-        return False
 
     def showSearchDialog(self):
         if self.findDlg != None:
@@ -3178,9 +3425,12 @@ These are your default global settings.
                 'Delete Wiki Word', wxYES_NO)
         result = dlg.ShowModal()
         if result == wxID_YES:
-            self.saveAllDocPages()
             try:
+                self.saveAllDocPages()
                 self.deleteCurrentWikiPage()
+            except (IOError, OSError, DbAccessError), e:
+                self.lostAccess(e)
+                raise
             except WikiDataException, e:
                 self.displayErrorMessage(str(e))
 
@@ -3210,18 +3460,22 @@ These are your default global settings.
                 self.displayErrorMessage(u"'%s' is an invalid wiki word" % wikiWord)
                 return False
 
-            if self.getWikiData().isDefinedWikiWord(wikiWord):
-                self.displayErrorMessage(u"'%s' exists already" % wikiWord)
-                        # TODO Allow retry or append/replace
-                return False
-
-            text = self.getActiveEditor().GetSelectedText()
-            page = self.wikiDataManager.createWikiPage(wikiWord)
-            self.getActiveEditor().ReplaceSelection(
-                    self.getFormatting().normalizeWikiWord(wikiWord))
-            # TODO Respect template property?
-            title = DocPages.WikiPage.getWikiPageTitle(wikiWord)
-            self.saveDocPage(page, u"++ %s\n\n%s" % (title, text), None)
+            try:
+                if self.getWikiData().isDefinedWikiWord(wikiWord):
+                    self.displayErrorMessage(u"'%s' exists already" % wikiWord)
+                            # TODO Allow retry or append/replace
+                    return False
+    
+                text = self.getActiveEditor().GetSelectedText()
+                page = self.wikiDataManager.createWikiPage(wikiWord)
+                self.getActiveEditor().ReplaceSelection(
+                        self.getFormatting().normalizeWikiWord(wikiWord))
+                # TODO Respect template property?
+                title = DocPages.WikiPage.getWikiPageTitle(wikiWord)
+                self.saveDocPage(page, u"++ %s\n\n%s" % (title, text), None)
+            except (IOError, OSError, DbAccessError), e:
+                self.lostAccess(e)
+                raise
 
 
     def showIconSelectDialog(self):
@@ -3351,61 +3605,65 @@ These are your default global settings.
                     default_filename = "", default_extension = "",
                     wildcard = u"XML files (*.xml)|*.xml|All files (*.*)|*",
                     flags=wxSAVE | wxOVERWRITE_PROMPT, parent=self)
+        
+        try:
+            if dest:
+                if typ in (GUI_ID.MENU_EXPORT_WHOLE_AS_PAGE,
+                        GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES,
+                        GUI_ID.MENU_EXPORT_WHOLE_AS_XML,
+                        GUI_ID.MENU_EXPORT_WHOLE_AS_RAW):
+                    # Export whole wiki
+    
+                    lpOp = Sar.ListWikiPagesOperation()
+                    item = Sar.AllWikiPagesNode(lpOp)
+                    lpOp.setSearchOpTree(item)
+                    lpOp.ordering = "asroottree"  # Slow, but more intuitive
+                    wordList = self.getWikiDocument().searchWiki(lpOp)
+    
+    #                 wordList = self.getWikiData().getAllDefinedWikiPageNames()
+                    
+                elif typ in (GUI_ID.MENU_EXPORT_SUB_AS_PAGE,
+                        GUI_ID.MENU_EXPORT_SUB_AS_PAGES):
+                    # Export a subtree of current word
+                    if self.getCurrentWikiWord() is None:
+                        self.pWiki.displayErrorMessage(
+                                u"No real wiki word selected as root")
+                        return
+                    lpOp = Sar.ListWikiPagesOperation()
+                    item = Sar.ListItemWithSubtreeWikiPagesNode(lpOp,
+                            [self.getCurrentWikiWord()], -1)
+                    lpOp.setSearchOpTree(item)
+                    lpOp.ordering = "asroottree"  # Slow, but more intuitive
+                    wordList = self.getWikiDocument().searchWiki(lpOp)
+    
+    #                 wordList = self.getWikiData().getAllSubWords(
+    #                         [self.getCurrentWikiWord()])
+                else:
+                    if self.getCurrentWikiWord() is None:
+                        self.pWiki.displayErrorMessage(
+                                u"No real wiki word selected as root")
+                        return
+    
+                    wordList = (self.getCurrentWikiWord(),)
 
-        if dest:
-            if typ in (GUI_ID.MENU_EXPORT_WHOLE_AS_PAGE,
-                    GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES,
-                    GUI_ID.MENU_EXPORT_WHOLE_AS_XML,
-                    GUI_ID.MENU_EXPORT_WHOLE_AS_RAW):
-                # Export whole wiki
-
-                lpOp = Sar.ListWikiPagesOperation()
-                item = Sar.AllWikiPagesNode(lpOp)
-                lpOp.setSearchOpTree(item)
-                lpOp.ordering = "asroottree"  # Slow, but more intuitive
-                wordList = self.getWikiDocument().searchWiki(lpOp)
-
-#                 wordList = self.getWikiData().getAllDefinedWikiPageNames()
+                expclass, exptype, addopt = self.EXPORT_PARAMS[typ]
                 
-            elif typ in (GUI_ID.MENU_EXPORT_SUB_AS_PAGE,
-                    GUI_ID.MENU_EXPORT_SUB_AS_PAGES):
-                # Export a subtree of current word
-                if self.getCurrentWikiWord() is None:
-                    self.pWiki.displayErrorMessage(
-                            u"No real wiki word selected as root")
-                    return
-                lpOp = Sar.ListWikiPagesOperation()
-                item = Sar.ListItemWithSubtreeWikiPagesNode(lpOp,
-                        [self.getCurrentWikiWord()], -1)
-                lpOp.setSearchOpTree(item)
-                lpOp.ordering = "asroottree"  # Slow, but more intuitive
-                wordList = self.getWikiDocument().searchWiki(lpOp)
+                self.saveAllDocPages(force=True)
+                self.getWikiData().commit()
+                
+                ob = expclass(self)
+                if addopt is None:
+                    # Additional options not given -> take default provided by exporter
+                    addopt = ob.getAddOpt(None)
+    
+                ob.export(self.getWikiDataManager(), wordList, exptype, dest,
+                        False, addopt)
+    
+                self.configuration.set("main", "last_active_dir", dest)
 
-#                 wordList = self.getWikiData().getAllSubWords(
-#                         [self.getCurrentWikiWord()])
-            else:
-                if self.getCurrentWikiWord() is None:
-                    self.pWiki.displayErrorMessage(
-                            u"No real wiki word selected as root")
-                    return
-
-                wordList = (self.getCurrentWikiWord(),)
-
-            expclass, exptype, addopt = self.EXPORT_PARAMS[typ]
-            
-            
-            self.saveAllDocPages(force=True)
-            self.getWikiData().commit()
-            
-            ob = expclass(self)
-            if addopt is None:
-                # Additional options not given -> take default provided by exporter
-                addopt = ob.getAddOpt(None)
-
-            ob.export(self.getWikiDataManager(), wordList, exptype, dest,
-                    False, addopt)
-
-            self.configuration.set("main", "last_active_dir", dest)
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
 
 
     def OnCmdImportDialog(self, evt):
@@ -3454,8 +3712,12 @@ These are your default global settings.
     def showSpellCheckerDialog(self):
         if self.spellChkDlg != None:
             return
-            
-        self.spellChkDlg = SpellChecker.SpellCheckerDialog(self, -1, self)
+        try:
+            self.spellChkDlg = SpellChecker.SpellCheckerDialog(self, -1, self)
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
+
         self.spellChkDlg.CenterOnParent(wxBOTH)
         self.spellChkDlg.Show()
         self.spellChkDlg.checkNext(startPos=0)
@@ -3480,13 +3742,20 @@ These are your default global settings.
                 if self.getCurrentWikiWord() is not None:
                     self.openWikiPage(self.getCurrentWikiWord(),
                             forceTreeSyncFromRoot=True)
+            except (IOError, OSError, DbAccessError), e:
+                self.lostAccess(e)
+                raise
             except Exception, e:
                 self.displayErrorMessage(u"Error rebuilding wiki", e)
                 traceback.print_exc()
 
 
     def vacuumWiki(self):
-        self.getWikiData().vacuum()
+        try:
+            self.getWikiData().vacuum()
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
 
 
 #     def OnCmdCloneWindow(self, evt):
@@ -3619,6 +3888,11 @@ These are your default global settings.
         dlg.ShowModal()
         dlg.Destroy()
 
+    def OnShowWikiInfoDialog(self, evt):
+        dlg = WikiInfoDialog(self, -1, self)
+        dlg.ShowModal()
+        dlg.Destroy()
+
 
     # ----------------------------------------------------------------------------------------
     # Event handlers from here on out.
@@ -3629,43 +3903,47 @@ These are your default global settings.
         """
         Handle misc events
         """
-        if miscevt.getSource() is self.getWikiDocument():
-            # Event from wiki document aka wiki data manager
-            if miscevt.has_key("deleted wiki page"):
-                wikiPage = miscevt.get("wikiPage")
-                # trigger hooks
-                self.hooks.deletedWikiWord(self,
-                        wikiPage.getWikiWord())
-
-                self.fireMiscEventProps(miscevt.getProps())
-                if wikiPage is self.getCurrentDocPage():
-                    self.pageHistory.goAfterDeletion()
-
-            elif miscevt.has_key("renamed wiki page"):
-                oldWord = miscevt.get("wikiPage").getWikiWord()
-                newWord = miscevt.get("newWord")
-
-                if miscevt.get("wikiPage") is self.getCurrentDocPage():
-                    self.getActiveEditor().loadWikiPage(None)
-
+        try:
+            if miscevt.getSource() is self.getWikiDocument():
+                # Event from wiki document aka wiki data manager
+                if miscevt.has_key("deleted wiki page"):
+                    wikiPage = miscevt.get("wikiPage")
                     # trigger hooks
-                    self.hooks.renamedWikiWord(self, oldWord, newWord)
+                    self.hooks.deletedWikiWord(self,
+                            wikiPage.getWikiWord())
     
-                    self.openWikiPage(newWord, forceTreeSyncFromRoot=False)
-                    # self.findCurrentWordInTree()
-                else:
-                    # trigger hooks
-                    self.hooks.renamedWikiWord(self, oldWord, newWord)
-
-            elif miscevt.has_key("updated wiki page"):
-                # This was send from a WikiDocument(=WikiDataManager) object,
-                # send it again to listening components
-                self.fireMiscEventProps(miscevt.getProps())
-            elif miscevt.has_key("reread text blocks needed"):
-                self.rereadTextBlocks()
-            elif miscevt.has_key("reread personal word list needed"):
-                if self.spellChkDlg is not None:
-                    self.spellChkDlg.rereadPersonalWordLists()
+                    self.fireMiscEventProps(miscevt.getProps())
+                    if wikiPage is self.getCurrentDocPage():
+                        self.pageHistory.goAfterDeletion()
+    
+                elif miscevt.has_key("renamed wiki page"):
+                    oldWord = miscevt.get("wikiPage").getWikiWord()
+                    newWord = miscevt.get("newWord")
+    
+                    if miscevt.get("wikiPage") is self.getCurrentDocPage():
+                        self.getActiveEditor().loadWikiPage(None)
+    
+                        # trigger hooks
+                        self.hooks.renamedWikiWord(self, oldWord, newWord)
+        
+                        self.openWikiPage(newWord, forceTreeSyncFromRoot=False)
+                        # self.findCurrentWordInTree()
+                    else:
+                        # trigger hooks
+                        self.hooks.renamedWikiWord(self, oldWord, newWord)
+    
+                elif miscevt.has_key("updated wiki page"):
+                    # This was send from a WikiDocument(=WikiDataManager) object,
+                    # send it again to listening components
+                    self.fireMiscEventProps(miscevt.getProps())
+                elif miscevt.has_key("reread text blocks needed"):
+                    self.rereadTextBlocks()
+                elif miscevt.has_key("reread personal word list needed"):
+                    if self.spellChkDlg is not None:
+                        self.spellChkDlg.rereadPersonalWordLists()
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
 
 
     def OnWikiOpen(self, event):
@@ -3674,7 +3952,8 @@ These are your default global settings.
         if dlg.ShowModal() == wxID_OK:
             self.openWiki(mbcsDec(abspath(dlg.GetPath()), "replace")[0])
         dlg.Destroy()
-        
+
+
     def OnWikiOpenNewWindow(self, event):
         dlg = wxFileDialog(self, u"Choose a Wiki to open",
                 self.getLastActiveDir(), "", "*.wiki", wxOPEN)
@@ -3723,15 +4002,14 @@ These are your default global settings.
                     startDir = dirname(dirname(startDir))
 
                 dlg = wxDirDialog(self, u"Directory to store new wiki",
-#                         self.getLastActiveDir(),
                         startDir,
                         style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
                 if dlg.ShowModal() == wxID_OK:
-                    try:
-                        self.newWiki(wikiName, dlg.GetPath())
-                    except IOError, e:
-                        self.displayErrorMessage(u'There was an error while '+
-                                'creating your new Wiki.', e)
+#                     try:
+                    self.newWiki(wikiName, dlg.GetPath())
+#                     except IOError, e:
+#                         self.displayErrorMessage(u'There was an error while '+
+#                                 'creating your new Wiki.', e)
             else:
                 self.displayErrorMessage((u"'%s' is an invalid wiki word. "+
                 u"There must be no spaces and mixed caps") % wikiName)
@@ -3753,7 +4031,7 @@ These are your default global settings.
     def OnIdle(self, evt):
         if not self.configuration.getboolean("main", "auto_save"):  # self.autoSave:
             return
-        if self.getWikiDocument() is None or self.getWikiDocument().getNoAutoSaveFlag():
+        if self.getWikiDocument() is None or self.getWikiDocument().getWriteAccessFailed():
             # No automatic saving due to previous error
             return
 
@@ -3888,7 +4166,8 @@ class TaskBarIcon(wxTaskBarIcon):
         if self.pwiki.IsIconized():
             self.pwiki.Iconize(False)
             self.pwiki.Show(True)
-            self.pwiki.Raise()
+        
+        self.pwiki.Raise()
 
     def CreatePopupMenu(self):
         # Build menu

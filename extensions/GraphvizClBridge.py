@@ -1,8 +1,9 @@
-import os, urllib, os.path
+import os, os.path
 
 import wx
 
 from pwiki.TempFileSet import createTempFile
+from pwiki.StringOps import mbcsEnc
 
 WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("Options", 1))
 
@@ -50,7 +51,7 @@ class GraphVizBaseHandler:
         exporter -- Exporter object calling the handler
         exportType -- string describing the export type
         
-        Calls to createContent() and getHoverImage() will only happen after a 
+        Calls to createContent() will only happen after a 
         call to taskStart() and before the call to taskEnd()
         """
         # Find MimeTeX executable by configuration setting
@@ -67,7 +68,7 @@ class GraphVizBaseHandler:
     def taskEnd(self):
         """
         Called after export task ended and after the last call to
-        createContent() and getHoverImage().
+        createContent().
         """
         pass
 
@@ -83,12 +84,8 @@ class GraphVizBaseHandler:
 
         An insertion token has the following member variables:
             key: insertion key (unistring)
-            value: value of a non-quoted insertion (unistring) or None
-                for a quoted one
-            appendices: sequence of strings with the appendices for
-                non-quoted insertions
-            quotedValue: value of a quoted insertion (unistring) or None
-                for a non-quoted one
+            value: value of an insertion (unistring)
+            appendices: sequence of strings with the appendices
 
         Meaning and type of return value is solely defined by the type
         of the calling exporter.
@@ -97,7 +94,7 @@ class GraphVizBaseHandler:
         to insert instead of the insertion.        
         """
         # Retrieve quoted content of the insertion
-        bstr = insToken.quotedValue.encode("latin-1", "replace")
+        bstr = mbcsEnc(insToken.value, "replace")[0]
 
         if not bstr:
             # Nothing in, nothing out
@@ -105,7 +102,7 @@ class GraphVizBaseHandler:
         
         if self.extAppExe == "":
             # No path to MimeTeX executable -> show message
-            return "[Please set path to GraphViz executables]"
+            return "<pre>[Please set path to GraphViz executables]</pre>"
 
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
@@ -126,7 +123,7 @@ class GraphVizBaseHandler:
             os.unlink(srcfilepath)
             
         if errResponse != "":
-            return "[%s Error: %s]" % (self.EXAPPNAME, errResponse)
+            return "<pre>[%s Error: %s]</pre>" % (self.EXAPPNAME, errResponse)
 
 
         # Return appropriate HTML code for the image
@@ -137,20 +134,13 @@ class GraphVizBaseHandler:
             return u'<img src="%s" border="0" align="bottom" />' % url
 
 
-    def hasHoverImage(self):
+    def getExtraFeatures(self):
         """
-        Returns True if getHoverImage() exists.
+        Returns a list of bytestrings describing additional features supported
+        by the plugin. Currently not specified further.
         """
-        return False
+        return ()
         
-    def getHoverImage(self, insToken, tempFileSet):
-        """
-        Currently not called.
-        Returns path to a preview image of the presentation rendered by the
-        insertion. The file should be created using the tempFileSet, so it
-        can be deleted automatically if not longer in use.
-        """
-        assert False
 
 
 class DotHandler(GraphVizBaseHandler):
@@ -196,6 +186,11 @@ def registerOptions(ver, app):
 
 class GraphVizOptionsPanel(wx.Panel):
     def __init__(self, parent, optionsDlg, app):
+        """
+        Called when "Options" dialog is opened to show the panel.
+        Transfer here all options from the configuration file into the
+        text fields, check boxes, ...
+        """
         wx.Panel.__init__(self, parent)
         self.app = app
         
@@ -224,7 +219,6 @@ class GraphVizOptionsPanel(wx.Panel):
         self.tfFdp = wx.TextCtrl(self, -1, pt)
 
         mainsizer = wx.FlexGridSizer(6, 2, 0, 0)
-        # mainsizer.AddGrowableCol(1, 1  )
 
         mainsizer.Add(wx.StaticText(self, -1, "Directory of executables:"), 0,
                 wx.ALL | wx.EXPAND, 5)
@@ -254,12 +248,34 @@ class GraphVizOptionsPanel(wx.Panel):
         self.Fit()
 
     def setVisible(self, vis):
+        """
+        Called when panel is shown or hidden. The actual wxWindow.Show()
+        function is called automatically.
+        
+        If a panel is visible and becomes invisible because another panel is
+        selected, the plugin can veto by returning False.
+        When becoming visible, the return value is ignored.
+        """
         return True
 
     def checkOk(self):
+        """
+        Called when "OK" is pressed in dialog. The plugin should check here if
+        all input values are valid. If not, it should return False, then the
+        Options dialog automatically shows this panel.
+        
+        There should be a visual indication about what is wrong (e.g. red
+        background in text field). Be sure to reset the visual indication
+        if field is valid again.
+        """
         return True
 
     def handleOk(self):
+        """
+        This is called if checkOk() returned True for all panels. Transfer here
+        all values from text fields, checkboxes, ... into the configuration
+        file.
+        """
         pt = self.tfDir.GetValue()
         self.app.getGlobalConfig().set("main", "plugin_graphViz_dirExe", pt)
 

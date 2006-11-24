@@ -4,6 +4,31 @@ class WikiWordNotFoundException(WikiDataException): pass
 class WikiFileNotFoundException(WikiDataException): pass
 class WikiDBExistsException(WikiDataException): pass
 
+class DbAccessError(Exception):
+    """
+    Base classes for read or write errors when acessing database
+    where "database" also means wiki configuration and additional
+    files.
+    """
+    def __init__(self, originalException):
+        Exception.__init__(self, str(originalException))
+        self.originalException = originalException
+    
+    def getOriginalException(self):
+        return self.originalException
+
+class DbReadAccessError(DbAccessError):
+    """
+    Impossible to read (and therefore also to write to) database
+    """
+    pass
+
+class DbWriteAccessError(DbAccessError):
+    """
+    Impossible to write to database, reading may be possible
+    """
+    pass
+
 
 class ExportException(Exception): pass
 class ImportException(Exception): pass
