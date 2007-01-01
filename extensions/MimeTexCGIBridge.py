@@ -1,4 +1,5 @@
 import os, urllib
+from subprocess import list2cmdline
 
 import wx
 
@@ -20,7 +21,8 @@ def describeInsertionKeys(ver, app):
     ver -- API version (can only be 1 currently)
     app -- wxApp object
     """
-    return ((u"eqn", ("html_single", "html_preview", "html_multi"), EqnHandler),)
+    return ((u"eqn", ("html_single", "html_previewWX", "html_preview",
+            "html_multi"), EqnHandler),)
 
 
 class EqnHandler:
@@ -90,8 +92,10 @@ class EqnHandler:
         # variable
         os.environ["QUERY_STRING"] = bstr
 
+        cmdline = list2cmdline((self.mimetexExe,))
+
         # Run MimeTeX process
-        childIn, childOut = os.popen2(self.mimetexExe, "b")
+        childIn, childOut = os.popen2(cmdline, "b")
 
         # Read stdout of process entirely
         response = childOut.read()
@@ -107,10 +111,11 @@ class EqnHandler:
         tfs = exporter.getTempFileSet()
         
         # Create .gif file out of returned data and retrieve URL for the file
-        url = tfs.createTempUrl(response, ".gif")
+        pythonUrl = (exportType != "html_previewWX")
+        url = tfs.createTempUrl(response, ".gif", pythonUrl=pythonUrl)
 
         # Return appropriate HTML code for the image
-        if exportType == "html_preview":
+        if exportType == "html_previewWX":
             # Workaround for internal HTML renderer
             return u'<img src="%s" border="0" align="bottom" />&nbsp;' % url
         else:

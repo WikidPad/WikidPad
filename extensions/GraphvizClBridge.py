@@ -1,9 +1,10 @@
 import os, os.path
+from subprocess import list2cmdline
 
 import wx
 
 from pwiki.TempFileSet import createTempFile
-from pwiki.StringOps import mbcsEnc
+from pwiki.StringOps import mbcsEnc, mbcsDec, lineendToOs
 
 WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("Options", 1))
 
@@ -22,11 +23,11 @@ def describeInsertionKeys(ver, app):
     app -- wxApp object
     """
     return (
-            (u"dot", ("html_single", "html_preview", "html_multi"), DotHandler),
-            (u"neato", ("html_single", "html_preview", "html_multi"), NeatoHandler),
-            (u"twopi", ("html_single", "html_preview", "html_multi"), TwopiHandler),
-            (u"circo", ("html_single", "html_preview", "html_multi"), CircoHandler),
-            (u"fdp", ("html_single", "html_preview", "html_multi"), FdpHandler)
+            (u"dot", ("html_single", "html_previewWX", "html_preview", "html_multi"), DotHandler),
+            (u"neato", ("html_single", "html_previewWX", "html_preview", "html_multi"), NeatoHandler),
+            (u"twopi", ("html_single", "html_previewWX", "html_preview", "html_multi"), TwopiHandler),
+            (u"circo", ("html_single", "html_previewWX", "html_preview", "html_multi"), CircoHandler),
+            (u"fdp", ("html_single", "html_previewWX", "html_preview", "html_multi"), FdpHandler)
             )
 
 
@@ -94,7 +95,7 @@ class GraphVizBaseHandler:
         to insert instead of the insertion.        
         """
         # Retrieve quoted content of the insertion
-        bstr = mbcsEnc(insToken.value, "replace")[0]
+        bstr = lineendToOs(mbcsEnc(insToken.value, "replace")[0])
 
         if not bstr:
             # Nothing in, nothing out
@@ -108,26 +109,35 @@ class GraphVizBaseHandler:
         # temporary files)
         tfs = exporter.getTempFileSet()
 
+        pythonUrl = (exportType != "html_previewWX")
         dstFullPath = tfs.createTempFile("", ".png", relativeTo="")
-        url = tfs.getRelativeUrl(None, dstFullPath)
+        url = tfs.getRelativeUrl(None, dstFullPath, pythonUrl=pythonUrl)
 
         # Store token content in a temporary file
         srcfilepath = createTempFile(bstr, ".dot")
         try:
-            # Run external application
-            childIn, childOut, childErr = os.popen3('%s -Tpng "-o%s" "%s"' % 
-                    (self.extAppExe, dstFullPath, srcfilepath), "b")
+            cmdline = list2cmdline((self.extAppExe, "-Tpng", "-o" + dstFullPath,
+                    srcfilepath))
 
-            errResponse = childErr.read()
+            # Run external application
+            childIn, childOut, childErr = os.popen3(cmdline, "b")
+
+            if u"noerror" in [a.strip() for a in insToken.appendices]:
+                childErr.read()
+                errResponse = ""
+            else:
+                errResponse = childErr.read()
         finally:
             os.unlink(srcfilepath)
             
         if errResponse != "":
-            return "<pre>[%s Error: %s]</pre>" % (self.EXAPPNAME, errResponse)
+            appname = mbcsDec(self.EXAPPNAME, "replace")[0]
+            errResponse = mbcsDec(errResponse, "replace")[0]
+            return u"<pre>[%s Error: %s]</pre>" % (appname, errResponse)
 
 
         # Return appropriate HTML code for the image
-        if exportType == "html_preview":
+        if exportType == "html_previewWX":
             # Workaround for internal HTML renderer
             return u'<img src="%s" border="0" align="bottom" />&nbsp;' % url
         else:

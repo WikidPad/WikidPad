@@ -85,6 +85,11 @@ _dll = cdll.sqlite3
 
 utf8Encode = codecs.getencoder("UTF8")
 
+try:
+    mbcsEncode = codecs.getencoder("mbcs")
+except:
+    mbcsEncode = codecs.getencoder("iso-8859-1")
+
 
 
 def stdToUtf8(s):
@@ -93,6 +98,14 @@ def stdToUtf8(s):
         return utf8Encode(s)[0]
     else:
         return utf8Encode(dec(s)[0])[0]
+
+
+def mbcsEnc(s):
+    if type(s) is unicode:
+        return mbcsEncode(s)[0]
+    else:
+        return s
+
 
 
 def stdErrHandler(err):
@@ -497,7 +510,9 @@ class SqliteDb3:
             assert 0  # TODO: Err handling
 
         obref = c_void_p()
-        self.errhandler(_dll.sqlite3_open(c_char_p(stdToUtf8(dbname)), byref(obref)))
+        # This line works around a bug in sqlite. Might need change if bug
+        # is fixed
+        self.errhandler(_dll.sqlite3_open(c_char_p(mbcsEnc(dbname)), byref(obref)))
 
         self._dbpointer = obref
 

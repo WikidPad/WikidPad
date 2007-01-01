@@ -19,8 +19,8 @@ CTRL-ALT-F      search for words within the wiki
 CTRL-H          view history
 CTRL-ALT-UP     view history, select -1
 CTRL-ALT-DOWN   view history, select +1
-CTRL-ALT-LEFT   go back in history
-CTRL-ALT-RIGHT  go forward in history
+ALT-LEFT        go back in history
+ALT-RIGHT       go forward in history
 
 *Wiki Words*
 CTRL-O          open wiki word

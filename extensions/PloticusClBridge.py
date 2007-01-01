@@ -1,9 +1,10 @@
 import os, os.path
+from subprocess import list2cmdline
 
 import wx
 
 from pwiki.TempFileSet import createTempFile
-from pwiki.StringOps import mbcsEnc
+from pwiki.StringOps import mbcsEnc, mbcsDec, lineendToOs
 
 WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("Options", 1))
 
@@ -22,7 +23,7 @@ def describeInsertionKeys(ver, app):
     app -- wxApp object
     """
     return (
-            (u"ploticus", ("html_single", "html_preview", "html_multi"), PltHandler),
+            (u"ploticus", ("html_single", "html_previewWX", "html_preview", "html_multi"), PltHandler),
             )
 
 
@@ -79,7 +80,7 @@ class PltHandler:
         to insert instead of the insertion.        
         """
         # Retrieve quoted content of the insertion
-        bstr = mbcsEnc(insToken.value, "replace")[0]
+        bstr = lineendToOs(mbcsEnc(insToken.value, "replace")[0])
 
         if not bstr:
             # Nothing in, nothing out
@@ -93,27 +94,35 @@ class PltHandler:
         # temporary files)
         tfs = exporter.getTempFileSet()
 
+        pythonUrl = (exportType != "html_previewWX")
         dstFullPath = tfs.createTempFile("", ".gif", relativeTo="")
-        url = tfs.getRelativeUrl(None, dstFullPath)
+        url = tfs.getRelativeUrl(None, dstFullPath, pythonUrl=pythonUrl)
         
         baseDir = os.path.dirname(exporter.getMainControl().getWikiConfigPath())
 
         # Store token content in a temporary file
         srcfilepath = createTempFile(bstr, ".plt")
         try:
-            # Run external application
-            childIn, childOut, childErr = os.popen3(r'%s -dir "%s" "%s" -gif -o "%s"' % 
-                    (self.extAppExe, baseDir, srcfilepath, dstFullPath), "b")
+            cmdline = list2cmdline((self.extAppExe, "-dir", baseDir,
+                    srcfilepath, "-gif", "-o", dstFullPath))
 
-            errResponse = childErr.read()
+            # Run external application
+            childIn, childOut, childErr = os.popen3(cmdline, "b")
+            
+            if u"noerror" in [a.strip() for a in insToken.appendices]:
+                childErr.read()
+                errResponse = ""
+            else:
+                errResponse = childErr.read()
         finally:
             os.unlink(srcfilepath)
             
         if errResponse != "":
-            return "<pre>[Ploticus error: %s]</pre>" % errResponse
+            errResponse = mbcsDec(errResponse, "replace")[0]
+            return u"<pre>[Ploticus error: %s]</pre>" % errResponse
 
         # Return appropriate HTML code for the image
-        if exportType == "html_preview":
+        if exportType == "html_previewWX":
             # Workaround for internal HTML renderer
             return u'<img src="%s" border="0" align="bottom" />&nbsp;' % url
         else:

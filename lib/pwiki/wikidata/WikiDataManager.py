@@ -98,7 +98,10 @@ def splitConfigPathAndWord(wikiCombinedFilename):
             couldn't be found. wikiword is the wikiword to jump to or None
     """
     wikiConfig = wxGetApp().createWikiConfiguration()
-    wikiConfigFilename = wikiCombinedFilename
+    if os.path.supports_unicode_filenames:
+        wikiConfigFilename = mbcsDec(wikiCombinedFilename)[0]
+    else:
+        wikiConfigFilename = wikiCombinedFilename
     wikiWord = None
 
     while True:
@@ -184,6 +187,8 @@ class WikiDataManager(MiscEventSourceMixin):
     def __init__(self, wikiConfigFilename, wikiSyntax, dbtype):  #  dataDir, fileStorDir, dbtype, ):
         wikiConfig = wxGetApp().createWikiConfiguration()
         self.connected = False
+        self.readAccessFailed = False
+        self.writeAccessFailed = False
         wikiConfig.loadConfig(wikiConfigFilename)
         
 #         while True:
@@ -328,7 +333,11 @@ class WikiDataManager(MiscEventSourceMixin):
         if self.connected:
             return
 
-        self.wikiData.connect()
+        writeException = None
+        try:
+            self.wikiData.connect()
+        except DbWriteAccessError, e:
+            writeException = e
 
         # Path to file storage
         fileStorDir = os.path.join(os.path.dirname(self.wikiConfigFilename),
@@ -362,6 +371,10 @@ class WikiDataManager(MiscEventSourceMixin):
         self.autoReconnectTriedFlag = False
         
         self.connected = True
+        
+        if writeException:
+            self.writeAccessFailed = True
+            raise writeException
 
 
     def incRefCount(self):

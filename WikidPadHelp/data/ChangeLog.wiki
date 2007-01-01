@@ -1,5 +1,25 @@
 ﻿++ Change Log
 
+Dec. 27, 2006 (1.8beta6)
+
+    * "toc" insertion for a page-wide table of contents (with
+      appropriate settings in the CSS-file(s)). See [Insertions].
+    * "noerror" appendix for insertions for external graphical apps
+      (except MimeTeX) to ignore warning/error messages.
+      See ExternalGraphicalApplications.
+    * For Windows: Option to use Internet Explorer or
+      (with restrictions) Mozilla to render HTML preview
+      (including a new style sheet to control preview).
+      See [Options HTML preview_export]#*Preview# renderer*
+    * Option to set doctype for HTML preview/export.
+    * Option to set background color of selected text.
+    * Internal: Slightly better handling of databases without
+      write access.
+    * Further small changes in incremental search.
+    * Bug fixed: External graphical apps didn't work if path
+      to them contained space(s).
+
+
 
 Nov. 24, 2006 (1.8beta5)
 

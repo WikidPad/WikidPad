@@ -448,6 +448,17 @@ def binToStr(b):
 # ---------- Breaking text into tokens ----------
 
 class Token(object):
+    """
+    The class has the following members:
+        
+    ttype - Token type number (one of the "FormatTypes" enumeration numbers
+        in "WikiFormatting.py")
+    start - Character position of the token start in page
+    grpdict - Dictionary of the regular expression groups 
+    text - Actual text content of token
+    node - object derived from "Ast" class in "PageAst.py" if further
+        data must be stored or None.
+    """
     __slots__ = ("__weakref__", "ttype", "start", "grpdict", "text", "node")
     
     def __init__(self, ttype, start, grpdict, text, node=None):

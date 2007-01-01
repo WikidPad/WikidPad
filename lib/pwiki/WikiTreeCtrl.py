@@ -6,7 +6,7 @@ from wxPython.wx import *
 from wxPython.stc import *
 import wxPython.xrc as xrc
 
-from wxHelper import GUI_ID, wxKeyFunctionSink
+from wxHelper import GUI_ID, wxKeyFunctionSink, textToDataObject
 from MiscEvent import DebugSimple   # , KeyFunctionSink
 
 from WikiExceptions import WikiWordNotFoundException
@@ -995,15 +995,18 @@ class WikiTreeCtrl(wxTreeCtrl):
         wxTreeCtrl.__init__(self, parent, ID, style=wxTR_HAS_BUTTONS)
         self.pWiki = pWiki
 
+        self.SetBackgroundColour(wx.WHITE)
         self.refreshGenerator = None  # Generator called in OnIdle
-#         self.refreshCheckChildren = [] # List of nodes to check for new/deleted children
+        self.refreshCheckChildren = [] # List of nodes to check for new/deleted children
 
         EVT_TREE_ITEM_ACTIVATED(self, ID, self.OnTreeItemActivated)
         EVT_TREE_SEL_CHANGED(self, ID, self.OnTreeItemActivated)
         EVT_TREE_ITEM_EXPANDING(self, ID, self.OnTreeItemExpand)
         EVT_TREE_ITEM_COLLAPSED(self, ID, self.OnTreeItemCollapse)
+        EVT_TREE_BEGIN_DRAG(self, ID, self.OnTreeBeginDrag)
         EVT_RIGHT_DOWN(self, self.OnRightButtonDown)   # TODO Context menu
         EVT_SET_FOCUS(self, self.OnSetFocus)
+#        EVT_LEFT_DOWN(self, self.OnLeftDown)
 
         res = xrc.wxXmlResource.Get()
         self.contextMenuWikiWords = res.LoadMenu("MenuTreectrlWikiWords")
@@ -1053,7 +1056,6 @@ class WikiTreeCtrl(wxTreeCtrl):
                 self.OnPrependWikiWord)
 
 
-##        self.pWiki.getMiscEvent().addListener(DebugSimple("tree event:"))
         # Register for pWiki events
         wxKeyFunctionSink(self.pWiki.getMiscEvent(), self, (
                 ("loading current page", self.onLoadingCurrentWikiPage),
@@ -1062,8 +1064,6 @@ class WikiTreeCtrl(wxTreeCtrl):
                 ("renamed wiki page", self.onRenamedWikiPage),
                 ("deleted wiki page", self.onDeletedWikiPage)
         ))
-#         
-#         self.pWiki.getMiscEvent().addListener(self.meListener)
 
 
     def collapse(self):
@@ -1147,14 +1147,6 @@ class WikiTreeCtrl(wxTreeCtrl):
                 self.GetRootItem())
         self.Bind(EVT_IDLE, self.OnIdle)
                 
-#         wikiData = self.pWiki.getWikiData()
-#         wikiWord = wikiData.getAliasesWikiWord(self.pWiki.getCurrentWikiWord())
-#         if not wikiWord in self.refreshCheckChildren:
-#             self.refreshCheckChildren.append(wikiWord)
-
-
-        # self._refreshNodeAndChildren(self.GetRootItem())        
-        # print "onUpdatedCurrentPageProps2"
 
 
     def onDeletedWikiPage(self, miscevt):  # TODO May be called multiple times if
@@ -1441,7 +1433,7 @@ class WikiTreeCtrl(wxTreeCtrl):
         """
         Clear the tree and use the "Views" subnode as root of the tree.
         Used for a second "Views"-spcific tree
-        """      
+        """
         self.DeleteAllItems()
         # add the root node to the tree
         nodeobj = MainViewNode(self, None)
@@ -1524,6 +1516,24 @@ class WikiTreeCtrl(wxTreeCtrl):
     def OnTreeItemCollapse(self, event):
         self.DeleteChildren(event.GetItem())
 
+
+    def OnTreeBeginDrag(self, event):
+        itemobj = self.GetPyData(event.GetItem())
+        if isinstance(itemobj, WikiWordNode):
+            dataOb = textToDataObject(u"[" + itemobj.getWikiWord() + u"]")
+            dropsource = wxDropSource(self)
+            dropsource.SetData(dataOb)
+            dropsource.DoDragDrop(wxDrag_AllowMove)
+
+
+#     def OnLeftDown(self, event):
+# #         dataOb = textToDataObject(u"Test")
+#         dataOb = wx.TextDataObject("Test")
+#         dropsource = wx.DropSource(self)
+#         dropsource.SetData(dataOb)
+#         dropsource.DoDragDrop(wxDrag_AllowMove)
+
+
     def OnRightButtonDown(self, event):
         self.contextMenuNode = self.GetSelection()
         menu = self.GetPyData(self.contextMenuNode).getContextMenu()
@@ -1543,55 +1553,6 @@ class WikiTreeCtrl(wxTreeCtrl):
                 if self.refreshGenerator == gen:
                     self.refreshGenerator = None
                     self.Unbind(EVT_IDLE)
-#                     self.refreshCheckChildren = []
-
-
-# def _relationSort(a, b):
-#     propsA = a[1].getProperties()
-#     propsB = b[1].getProperties()
-# 
-#     aSort = None
-#     bSort = None
-# 
-#     try:
-#         if (propsA.has_key(u'tree_position')):
-#             aSort = int(propsA[u'tree_position'][-1])
-#         elif (propsA.has_key(u'priority')):
-#             aSort = int(propsA[u'priority'][-1])
-#         else:
-#             aSort = a[2]
-#     except:
-#         aSort = a[2]
-# 
-#     try:            
-#         if (propsB.has_key(u'tree_position')):
-#             bSort = int(propsB[u'tree_position'][-1])
-#         elif (propsB.has_key(u'priority')):
-#             bSort = int(propsB[u'priority'][-1])
-#         else:
-#             bSort = b[2]
-#     except:
-#         bSort = b[2]
-# 
-#     return cmp(aSort, bSort)
-# 
-# 
-# def _cmpCharPosition(a, b):
-#     """
-#     Compare "natural", means using the char. positions of the links in page
-#     """
-#     return int(a[1] - b[1])
-# 
-# sorter for relations, removes brackets and sorts lower case
-# def _genCmpLowerDesc(coll):
-#     def _cmpLowerDesc(a, b):
-#         return coll.strcoll(b.lower(), a.lower())
-#     return _cmpLowerDesc
-# 
-# def _genCmpLowerAsc(coll):
-#     def _cmpLowerAsc(a, b):
-#         return coll.strcoll(a.lower(), b.lower())
-#     return _cmpLowerAsc
 
 
 

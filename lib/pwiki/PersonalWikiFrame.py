@@ -5,6 +5,9 @@ import os, sys, gc, traceback, sets, string, re
 from os.path import *
 from time import localtime, time, strftime
 
+import wx, cPickle
+
+
 # import urllib_red as urllib
 import urllib
 
@@ -28,7 +31,7 @@ import DocPages
 from CmdLineAction import CmdLineAction
 from WikiTxtCtrl import WikiTxtCtrl
 from WikiTreeCtrl import WikiTreeCtrl
-from WikiHtmlView import WikiHtmlView
+from WikiHtmlView import createWikiHtmlView
 from LogWindow import LogWindow
 from DocPagePresenter import DocPagePresenter
 
@@ -545,7 +548,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         Builds the first, the "Wiki" menu and returns it
         """
         wikiData = self.getWikiData()
-        wikiMenu=wxMenu()
+        wikiMenu = wxMenu()
 
         self.addMenuItem(wikiMenu, '&New\t' + self.keyBindings.NewWiki,
                 'New Wiki', self.OnWikiNew)
@@ -1795,7 +1798,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.mainAreaPanel.AddPage(editor, u"Edit")
             presenter.setSubControl("textedit", editor)
             
-            self.htmlView = WikiHtmlView(presenter, self.mainAreaPanel, -1)
+            self.htmlView = createWikiHtmlView(presenter, self.mainAreaPanel, -1)
             self.mainAreaPanel.AddPage(self.htmlView, u"Preview")
             presenter.setSubControl("preview", self.htmlView)
             
@@ -2194,13 +2197,20 @@ These are your default global settings.
                     return False
                     
                 continue # Try again
-            except (IOError, OSError, DbAccessError), e:
-#                 # Something else went wrong
-#                 self.displayErrorMessage("Error connecting to database in '%s'"
-#                         % cfgPath, e)
-#                 traceback.print_exc()
-                self.lostAccess(e)
+            except (IOError, OSError, DbReadAccessError,
+                    BadConfigurationFileException), e:
+                # Something else went wrong
+                self.displayErrorMessage("Error connecting to database in '%s'"
+                        % cfgPath, e)
+                if not isinstance(e, DbReadAccessError):
+                    traceback.print_exc()
+#                 self.lostAccess(e)
                 return False
+            except DbWriteAccessError, e:
+                self.displayErrorMessage("Can't write to database '%s'"
+                        % cfgPath, e)
+                break
+
 
         # OK, things look good
 
@@ -2315,25 +2325,32 @@ These are your default global settings.
                     self.fireMiscEventKeys(("closing current wiki",))
         #             for editor in self.editors:
         #                 editor.unloadCurrentDocPage()
-                    if saveState:
+                    if self.getWikiData() and saveState:
                         self.saveCurrentWikiState()
-                    if self.getWikiData():
-                        wd.release()
-        #                 self.getWikiData().close()
-                        self.wikiData = None
-                        if self.wikiDataManager is not None:
-                            self.wikiDataManager.getMiscEvent().removeListener(self)
-                        self.wikiDataManager = None
                 except (IOError, OSError, DbAccessError), e:
                     self.lostAccess(e)
                     if errCloseAnywayMsg() == wxNO:
                         raise
                     else:
                         traceback.print_exc()
+                        self.fireMiscEventKeys(("dropping current wiki",))
+
+                try:
+                    if self.getWikiData():
+                        wd.release()
+                except (IOError, OSError, DbAccessError), e:
+                    pass                
+#                 self.getWikiData().close()
+                self.wikiData = None
+                if self.wikiDataManager is not None:
+                    self.wikiDataManager.getMiscEvent().removeListener(self)
+                self.wikiDataManager = None
             else:
                 # We had already a problem, so ask what to do
                 if errCloseAnywayMsg() == wxNO:
                     raise LossyWikiCloseDeniedException
+                
+                self.fireMiscEventKeys(("dropping current wiki",))
                 # else go ahead
 
             self.getConfig().setWikiConfig(None)
@@ -2426,7 +2443,7 @@ These are your default global settings.
                 return False
 
             self.SetFocus()
-            result = wxMessageBox(u"This operation needs write access to database"
+            result = wxMessageBox(u"This operation needs write access to database\n"
                     u"Try to write?", u'Try writing?',
                     wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
 

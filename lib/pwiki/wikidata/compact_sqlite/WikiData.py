@@ -17,7 +17,7 @@ from os import mkdir, unlink, listdir, rename, stat, utime
 from os.path import exists, join, basename
 from time import time, localtime
 import datetime
-import string, glob, types, sets
+import string, glob, types, sets, traceback
 import pwiki.srePersistent as re
 
 from pwiki.WikiExceptions import *   # TODO make normal import
@@ -50,10 +50,19 @@ class WikiData:
 
         dbfile = join(dataDir, "wiki.sli")
 
-        if (not exists(dbfile)):
-            DbStructure.createWikiDB(None, dataDir)  # , True
+        try:
+            if (not exists(dbfile)):
+                DbStructure.createWikiDB(None, dataDir)  # , True
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
 
-        self.connWrap = DbStructure.ConnectWrap(sqlite.connect(dbfile))
+        dbfile = mbcsDec(dbfile)[0]
+        try:
+            self.connWrap = DbStructure.ConnectWrap(sqlite.connect(dbfile))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
         self.commit = self.connWrap.commit
 
         DbStructure.registerSqliteFunctions(self.connWrap)
@@ -78,8 +87,13 @@ class WikiData:
                 self.connWrap.rollback()
                 raise
 
-        # Further possible updates   
-        DbStructure.updateDatabase2(self.connWrap)
+        lastException = None
+        try:
+            # Further possible updates
+            DbStructure.updateDatabase2(self.connWrap)
+        except sqlite.Error, e:
+            # Remember but continue
+            lastException = DbWriteAccessError(e)
 
         # Activate UTF8 support for text in database (content is blob!)
         DbStructure.registerUtf8Support(self.connWrap)
@@ -88,9 +102,13 @@ class WikiData:
         # return value, used by getContent()
         self.contentDbToOutput = lambda c: utf8Dec(c, "replace")[0]
         
-        # Set marker for database type
-        self.dataManager.getWikiConfig().set("main", "wiki_database_type",
-                "compact_sqlite")
+        try:
+            # Set marker for database type
+            self.dataManager.getWikiConfig().set("main", "wiki_database_type",
+                    "compact_sqlite")
+        except (IOError, OSError), e:
+            # Remember but continue
+            lastException = DbWriteAccessError(e)
 
         # Function to convert unicode strings from input to content in database
         # used by setContent
@@ -101,30 +119,42 @@ class WikiData:
         self.contentUniInputToDb = contentUniInputToDb
 
 
-        # Temporary table for findBestPathFromWordToWord
-
-        # These schema changes are only on a temporary table so they are not
-        # in DbStructure.py
-        self.connWrap.execSql("create temp table temppathfindparents "+
-                "(word text primary key, child text, steps integer)")
-
-        self.connWrap.execSql("create index temppathfindparents_steps "+
-                "on temppathfindparents(steps)")
-
-        # create word caches
-        self.cachedContentNames = {}
-
-        # cache aliases
-        aliases = self.getAllAliases()
-        for alias in aliases:
-            self.cachedContentNames[alias] = 2
-
-        # Cache real words
-        for word in self.getAllDefinedContentNames():
-            self.cachedContentNames[word] = 1
-
-        self.cachedGlobalProps = None
-        self.getGlobalProperties()
+        try:
+            # Temporary table for findBestPathFromWordToWord
+    
+            # These schema changes are only on a temporary table so they are not
+            # in DbStructure.py
+            self.connWrap.execSql("create temp table temppathfindparents "+
+                    "(word text primary key, child text, steps integer)")
+    
+            self.connWrap.execSql("create index temppathfindparents_steps "+
+                    "on temppathfindparents(steps)")
+    
+            # create word caches
+            self.cachedContentNames = {}
+    
+            # cache aliases
+            aliases = self.getAllAliases()
+            for alias in aliases:
+                self.cachedContentNames[alias] = 2
+    
+            # Cache real words
+            for word in self.getAllDefinedContentNames():
+                self.cachedContentNames[word] = 1
+    
+            self.cachedGlobalProps = None
+            self.getGlobalProperties()
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            try:
+                self.connWrap.rollback()
+            except (IOError, OSError, sqlite.Error), e2:
+                traceback.print_exc()
+                raise DbReadAccessError(e2)
+            raise DbReadAccessError(e)
+            
+        if lastException:
+            raise lastException
 
 
     def _reinit(self):
@@ -137,18 +167,17 @@ class WikiData:
     # ---------- Direct handling of page data ----------
     
     def getContent(self, word):
-        result = self.connWrap.execSqlQuerySingleItem("select content from "+\
-            "wikiwordcontent where word = ?", (word,), None)
-
-        if result is None:
-            raise WikiFileNotFoundException, "wiki page not found: %s" % word
-
-        # print "getContent", repr(result)
-        
-        # if self.contentDbToOutput:
-        return self.contentDbToOutput(result)
-        # else:
-        #     return result
+        try:
+            result = self.connWrap.execSqlQuerySingleItem("select content from "+\
+                "wikiwordcontent where word = ?", (word,), None)
+    
+            if result is None:
+                raise WikiFileNotFoundException, "wiki page not found: %s" % word
+    
+            return self.contentDbToOutput(result)
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
     def _getContentAndInfo(self, word):
@@ -157,13 +186,17 @@ class WikiData:
         
         Not part of public API!
         """
-        result = self.connWrap.execSqlQuery("select content, modified from "+\
-            "wikiwordcontent where word = ?", (word,))
-        if len(result) == 0:
-            raise WikiFileNotFoundException, "wiki page not found: %s" % word
-
-        content = self.contentDbToOutput(result[0][0])
-        return (content, result[0][1])
+        try:
+            result = self.connWrap.execSqlQuery("select content, modified from "+\
+                "wikiwordcontent where word = ?", (word,))
+            if len(result) == 0:
+                raise WikiFileNotFoundException, "wiki page not found: %s" % word
+    
+            content = self.contentDbToOutput(result[0][0])
+            return (content, result[0][1])
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
     def setContent(self, word, content, moddate = None, creadate = None):
@@ -199,25 +232,30 @@ class WikiData:
         
         assert type(content) is str
 
-        if self.connWrap.execSqlQuerySingleItem("select word from "+\
-                "wikiwordcontent where word=?", (word,), None) is not None:
+        try:
+            if self.connWrap.execSqlQuerySingleItem("select word from "+\
+                    "wikiwordcontent where word=?", (word,), None) is not None:
+    
+                # Word exists already
+    #             self.connWrap.execSql("insert or replace into wikiwordcontent"+\
+    #                 "(word, content, modified) values (?,?,?)",
+    #                 (word, sqlite.Binary(content), moddate))
+                self.connWrap.execSql("update wikiwordcontent set "
+                    "content=?, modified=? where word=?",
+                    (sqlite.Binary(content), moddate, word))
+            else:
+                if creadate is None:
+                    creadate = ti
+    
+                # Word does not exist -> record creation date
+                self.connWrap.execSql("insert or replace into wikiwordcontent"
+                    "(word, content, modified, created, wordnormcase) "
+                    "values (?,?,?,?,?)",
+                    (word, sqlite.Binary(content), moddate, creadate, word.lower()))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
 
-            # Word exists already
-#             self.connWrap.execSql("insert or replace into wikiwordcontent"+\
-#                 "(word, content, modified) values (?,?,?)",
-#                 (word, sqlite.Binary(content), moddate))
-            self.connWrap.execSql("update wikiwordcontent set "
-                "content=?, modified=? where word=?",
-                (sqlite.Binary(content), moddate, word))
-        else:
-            if creadate is None:
-                creadate = ti
-
-            # Word does not exist -> record creation date
-            self.connWrap.execSql("insert or replace into wikiwordcontent"
-                "(word, content, modified, created, wordnormcase) "
-                "values (?,?,?,?,?)",
-                (word, sqlite.Binary(content), moddate, creadate, word.lower()))
 
     def renameContent(self, oldWord, newWord):
         """
@@ -225,11 +263,15 @@ class WikiData:
         after the call under newWord. The self.cachedContentNames
         dictionary is updated, other caches won't be updated.
         """
-        self.connWrap.execSql("update wikiwordcontent set word = ?, wordnormcase = ? "
-                "where word = ?", (newWord, newWord.lower(), oldWord))
-
-        del self.cachedContentNames[oldWord]
-        self.cachedContentNames[newWord] = 1
+        try:
+            self.connWrap.execSql("update wikiwordcontent set word = ?, wordnormcase = ? "
+                    "where word = ?", (newWord, newWord.lower(), oldWord))
+    
+            del self.cachedContentNames[oldWord]
+            self.cachedContentNames[newWord] = 1
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
 
 
     def deleteContent(self, word):
@@ -239,7 +281,7 @@ class WikiData:
         try:
             self.connWrap.execSql("delete from wikiwordcontent where word = ?", (word,))
             del self.cachedContentNames[word]
-        except sqlite.Error:
+        except sqlite.Error:  # TODO !!!
             raise WikiFileNotFoundException, "wiki page for deletion not found: %s" % word
 
     def getTimestamps(self, word):
@@ -247,14 +289,18 @@ class WikiData:
         Returns a tuple with modification and creation date of
         a word or (None, None) if word is not in the database
         """
-        dates = self.connWrap.execSqlQuery(
-                "select modified, created from wikiwordcontent where word = ?",
-                (word,))
+        try:
+            dates = self.connWrap.execSqlQuery(
+                    "select modified, created from wikiwordcontent where word = ?",
+                    (word,))
 
-        if len(dates) > 0:
-            return (float(dates[0][0]), float(dates[0][1]))
-        else:
-            return (None, None)  # ?
+            if len(dates) > 0:
+                return (float(dates[0][0]), float(dates[0][1]))
+            else:
+                return (None, None)  # ?
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
     # ---------- Renaming/deleting pages with cache update ----------
@@ -266,33 +312,23 @@ class WikiData:
         if self.isDefinedWikiWord(toWord):
             raise WikiDataException, u"Cannot rename '%s' to '%s', '%s' already exists" % (word, toWord, toWord)
 
-        # commit anything pending so we can rollback on error
-        self.connWrap.commit()
-
         try:
-            self.connWrap.execSql("update wikirelations set word = ? where word = ?", (toWord, word))
-#             self.connWrap.execSql("update wikirelations set relation = ? where relation = ?", (toWord, word))
-            self.connWrap.execSql("update wikiwordprops set word = ? where word = ?", (toWord, word))
-            self.connWrap.execSql("update todos set word = ? where word = ?", (toWord, word))
-            self.renameContent(word, toWord)
-
-#             # now we have to search the wiki files and replace the old word with the new
-#             searchOp = SearchAndReplace.SearchReplaceOperation()
-#             searchOp.wikiWide = True
-#             searchOp.wildCard = 'no'
-#             searchOp.caseSensitive = True
-#             searchOp.searchStr = word
-#             
-#             results = self.search(searchOp)
-#             for resultWord in results:
-#                 content = self.getContent(resultWord)
-#                 content = content.replace(word, toWord)
-#                 self.setContent(resultWord, content)
-
+            # commit anything pending so we can rollback on error
             self.connWrap.commit()
-        except:
-            self.connWrap.rollback()
-            raise
+    
+            try:
+                self.connWrap.execSql("update wikirelations set word = ? where word = ?", (toWord, word))
+                self.connWrap.execSql("update wikiwordprops set word = ? where word = ?", (toWord, word))
+                self.connWrap.execSql("update todos set word = ? where word = ?", (toWord, word))
+                self.renameContent(word, toWord)
+    
+                self.connWrap.commit()
+            except:
+                self.connWrap.rollback()
+                raise
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
 
 
     def deleteWord(self, word):
@@ -302,27 +338,31 @@ class WikiData:
         """
         if word != self.dataManager.getWikiName():
             try:
-                # don't delete the relations to the word since other
-                # pages still have valid outward links to this page.
-                # just delete the content
-
                 self.connWrap.commit()
-                self.connWrap.execSql("delete from wikirelations where word = ?", (word,))
-                self.connWrap.execSql("delete from wikiwordprops where word = ?", (word,))
-                self.connWrap.execSql("delete from todos where word = ?", (word,))
-                self.deleteContent(word)
-                # self.connWrap.execSql("delete from wikiwordcontent where word = ?", (word,))
-                # del self.cachedContentNames[word]
-
-                self.connWrap.commit()
-
-                # due to some bug we have to close and reopen the db sometimes (gadfly)
-                ## self.dbConn.close()
-                ## self.dbConn = gadfly.gadfly("wikidb", self.dataDir)
-
-            except:
-                self.connWrap.rollback()
-                raise
+                try:
+                    # don't delete the relations to the word since other
+                    # pages still have valid outward links to this page.
+                    # just delete the content
+    
+                    self.connWrap.execSql("delete from wikirelations where word = ?", (word,))
+                    self.connWrap.execSql("delete from wikiwordprops where word = ?", (word,))
+                    self.connWrap.execSql("delete from todos where word = ?", (word,))
+                    self.deleteContent(word)
+                    # self.connWrap.execSql("delete from wikiwordcontent where word = ?", (word,))
+                    # del self.cachedContentNames[word]
+    
+                    self.connWrap.commit()
+    
+                    # due to some bug we have to close and reopen the db sometimes (gadfly)
+                    ## self.dbConn.close()
+                    ## self.dbConn = gadfly.gadfly("wikidb", self.dataDir)
+    
+                except:
+                    self.connWrap.rollback()
+                    raise
+            except (IOError, OSError, sqlite.Error), e:
+                traceback.print_exc()
+                raise DbWriteAccessError(e)
         else:
             raise WikiDataException, "You cannot delete the root wiki node"
 
@@ -361,11 +401,15 @@ class WikiData:
 
         if not selfreference:
             sql += " and relation != word"
-            
-        if withPosition:
-            return self.connWrap.execSqlQuery(sql, (wikiWord,))
-        else:
-            return self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
+
+        try:
+            if withPosition:
+                return self.connWrap.execSqlQuery(sql, (wikiWord,))
+            else:
+                return self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
 
@@ -418,50 +462,66 @@ class WikiData:
  
         # Parents of the real word
         wikiWord = self.getAliasesWikiWord(wikiWord)
-        parents = sets.Set(self.connWrap.execSqlQuerySingleColumn(
-                "select word from wikirelations where relation = ?", (wikiWord,)))
+        try:
+            parents = sets.Set(self.connWrap.execSqlQuerySingleColumn(
+                    "select word from wikirelations where relation = ?", (wikiWord,)))
+    
+            # Plus parents of aliases
+            aliases = [v for k, v in self.getPropertiesForWord(wikiWord)
+                    if k == u"alias"]
+    
+            for al in aliases:
+                parents.union_update(self.connWrap.execSqlQuerySingleColumn(
+                    "select word from wikirelations where relation = ?", (al,)))
+    
+            return list(parents)
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
-        # Plus parents of aliases
-        aliases = [v for k, v in self.getPropertiesForWord(wikiWord)
-                if k == u"alias"]
-
-        for al in aliases:
-            parents.union_update(self.connWrap.execSqlQuerySingleColumn(
-                "select word from wikirelations where relation = ?", (al,)))
-
-        return list(parents)
 
     def getParentlessWikiWords(self):
         """
         get the words that have no parents.
         """
-#                 "select word from wikiwordcontent where not word glob '[[]*' "
-#                 "except select relation from wikirelations")
+        try:
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select word from wikiwordcontent where not word glob '[[]*' "
+                    "except select relation from wikirelations "
+                    "except select word from wikiwordprops where key='alias' and "
+                    "value in (select relation from wikirelations)")
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
-        return self.connWrap.execSqlQuerySingleColumn(
-                "select word from wikiwordcontent where not word glob '[[]*' "
-                "except select relation from wikirelations "
-                "except select word from wikiwordprops where key='alias' and "
-                "value in (select relation from wikirelations)")
 
     def getUndefinedWords(self):
         """
         List words which are childs of a word but are not defined, neither
         directly nor as alias.
         """
-        return self.connWrap.execSqlQuerySingleColumn(
-                "select relation from wikirelations "
-                "except select word from wikiwordcontent where not word glob '[[]*' "
-                "except select value from wikiwordprops where key='alias'")
+        try:
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select relation from wikirelations "
+                    "except select word from wikiwordcontent where not word glob '[[]*' "
+                    "except select value from wikiwordprops where key='alias'")
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
 
     def addRelationship(self, word, toWord):
         """
         Add a relationship from word toWord.
         A relation from one word to another is unique and can't be added twice.
         """
-        self.connWrap.execSql(
-                "insert or replace into wikirelations(word, relation) "
-                "values (?, ?)", (word, toWord))
+        try:
+            self.connWrap.execSql(
+                    "insert or replace into wikirelations(word, relation) "
+                    "values (?, ?)", (word, toWord))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
 
     def updateChildRelations(self, word, childRelations):
         self.deleteChildRelationships(word)
@@ -469,8 +529,12 @@ class WikiData:
             self.addRelationship(word, r)
 
     def deleteChildRelationships(self, fromWord):
-        self.connWrap.execSql(
-                "delete from wikirelations where word = ?", (fromWord,))
+        try:
+            self.connWrap.execSql(
+                    "delete from wikirelations where word = ?", (fromWord,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
 
 
     # TODO Maybe optimize
@@ -519,57 +583,67 @@ class WikiData:
         if word == toWord:
             return [word]
 
-        # Clear temporary table
-        self.connWrap.execSql("delete from temppathfindparents")
-
-        self.connWrap.execSql("insert into temppathfindparents "+
-                "(word, child, steps) select word, relation, 1 from wikirelations "+
-                "where relation = ?", (word,))
-
-        step = 1
-        while True:
-            changes = self.connWrap.rowcount
-
-            if changes == 0:
-                # No more (grand-)parents
-                return []
-
-            if self.connWrap.execSqlQuerySingleItem("select word from "+
-                    "temppathfindparents where word=?", (toWord,)) is not None:
-                # Path found
-                result = [toWord]
-                crumb = toWord
-
-                while crumb != word:
-                    crumb = self.connWrap.execSqlQuerySingleItem(
-                            "select child from temppathfindparents where "+
-                            "word=?", (crumb,))
-                    result.append(crumb)
-
-                # print "findBestPathFromWordToWord result", word, toWord, repr(result)
-
-                # Clear temporary table
-                self.connWrap.execSql("delete from temppathfindparents")
-
-                return result
-
-            self.connWrap.execSql("""
-                insert or ignore into temppathfindparents (word, child, steps)
-                select wikirelations.word, temppathfindparents.word, ? from
-                    temppathfindparents inner join wikirelations on
-                    temppathfindparents.word == wikirelations.relation where
-                    temppathfindparents.steps == ?
-                """, (step+1, step))
-
-            step += 1
+        try:
+            # Clear temporary table
+            self.connWrap.execSql("delete from temppathfindparents")
+    
+            self.connWrap.execSql("insert into temppathfindparents "+
+                    "(word, child, steps) select word, relation, 1 from wikirelations "+
+                    "where relation = ?", (word,))
+    
+            step = 1
+            while True:
+                changes = self.connWrap.rowcount
+    
+                if changes == 0:
+                    # No more (grand-)parents
+                    return []
+    
+                if self.connWrap.execSqlQuerySingleItem("select word from "+
+                        "temppathfindparents where word=?", (toWord,)) is not None:
+                    # Path found
+                    result = [toWord]
+                    crumb = toWord
+    
+                    while crumb != word:
+                        crumb = self.connWrap.execSqlQuerySingleItem(
+                                "select child from temppathfindparents where "+
+                                "word=?", (crumb,))
+                        result.append(crumb)
+    
+                    # print "findBestPathFromWordToWord result", word, toWord, repr(result)
+    
+                    # Clear temporary table
+                    self.connWrap.execSql("delete from temppathfindparents")
+    
+                    return result
+    
+                self.connWrap.execSql("""
+                    insert or ignore into temppathfindparents (word, child, steps)
+                    select wikirelations.word, temppathfindparents.word, ? from
+                        temppathfindparents inner join wikirelations on
+                        temppathfindparents.word == wikirelations.relation where
+                        temppathfindparents.steps == ?
+                    """, (step+1, step))
+    
+                step += 1
+        
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
     # ---------- Listing/Searching wiki words (see also "alias handling", "searching pages")----------
 
     def getAllDefinedWikiPageNames(self):
         "get the names of all wiki pages in the db, no aliases"
-        return self.connWrap.execSqlQuerySingleColumn(
-                "select word from wikiwordcontent where not word glob '[[]*'")
+        try:
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select word from wikiwordcontent where not word glob '[[]*'")
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
 
     def getAllDefinedContentNames(self):
         """
@@ -577,8 +651,12 @@ class WikiData:
         Content elements are wiki pages plus functional pages and possible
         other data, their names begin with '['
         """
-        return self.connWrap.execSqlQuerySingleColumn(
-                "select word from wikiwordcontent")
+        try:
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select word from wikiwordcontent")
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
     def refreshDefinedContentNames(self):
@@ -639,29 +717,33 @@ class WikiData:
         """
         thisStr = thisStr.lower()
 
-        result = self.connWrap.execSqlQuerySingleColumn(
-                "select word from wikiwordcontent where wordnormcase like (? || '%')",
-                (thisStr,))
-
-        if includeAliases:
+        try:
+            result = self.connWrap.execSqlQuerySingleColumn(
+                    "select word from wikiwordcontent where wordnormcase like (? || '%')",
+                    (thisStr,))
+    
+            if includeAliases:
+                result += self.connWrap.execSqlQuerySingleColumn(
+                        "select value from wikiwordprops where key = 'alias' and "
+                        "utf8Normcase(value) like (? || '%')", (thisStr,))
+    
             result += self.connWrap.execSqlQuerySingleColumn(
-                    "select value from wikiwordprops where key = 'alias' and "
-                    "utf8Normcase(value) like (? || '%')", (thisStr,))
-
-        result += self.connWrap.execSqlQuerySingleColumn(
-                "select word from wikiwordcontent "
-                "where wordnormcase like ('%' || ? || '%') and "
-                "wordnormcase not like (? || '%') and word not glob '[[]*'",
-                (thisStr, thisStr))
-
-        if includeAliases:
-            result += self.connWrap.execSqlQuerySingleColumn(
-                    "select value from wikiwordprops where key = 'alias' and "
-                    "utf8Normcase(value) like ('%' || ? || '%') and "
-                    "utf8Normcase(value) not like (? || '%')",
+                    "select word from wikiwordcontent "
+                    "where wordnormcase like ('%' || ? || '%') and "
+                    "wordnormcase not like (? || '%') and word not glob '[[]*'",
                     (thisStr, thisStr))
-
-        return result
+    
+            if includeAliases:
+                result += self.connWrap.execSqlQuerySingleColumn(
+                        "select value from wikiwordprops where key = 'alias' and "
+                        "utf8Normcase(value) like ('%' || ? || '%') and "
+                        "utf8Normcase(value) not like (? || '%')",
+                        (thisStr, thisStr))
+    
+            return result
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 #         r1 = self.connWrap.execSqlQuerySingleColumn(
 #                 "select word from wikiwordcontent where word like (? || '%')",
@@ -673,9 +755,13 @@ class WikiData:
 
     def getWikiWordsModifiedWithin(self, days):
         timeDiff = float(time()-(86400*days))
-        return self.connWrap.execSqlQuerySingleColumn(
-                "select word from wikiwordcontent where modified >= ?",
-                (timeDiff,))
+        try:
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select word from wikiwordcontent where modified >= ?",
+                    (timeDiff,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
     def getFirstWikiWord(self):
@@ -684,9 +770,13 @@ class WikiData:
         for details. Returns either an existing wiki word or None if no
         wiki words in database.
         """
-        return self.connWrap.execSqlQuerySingleItem(
-                "select word from wikiwordcontent where not word glob '[[]*' "
-                "order by word limit 1")
+        try:
+            return self.connWrap.execSqlQuerySingleItem(
+                    "select word from wikiwordcontent where not word glob '[[]*' "
+                    "order by word limit 1")
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
     def getNextWikiWord(self, currWord):
@@ -699,9 +789,14 @@ class WikiData:
         iteration, it is guaranteed that you have visited all real
         wiki words (no aliases) then.
         """
-        return self.connWrap.execSqlQuerySingleItem(
-                "select word from wikiwordcontent where not word glob '[[]*' and "
-                "word > ? order by word limit 1", (currWord,))
+        try:
+            return self.connWrap.execSqlQuerySingleItem(
+                    "select word from wikiwordcontent where not word glob '[[]*' and "
+                    "word > ? order by word limit 1", (currWord,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
 
 
     # ---------- Property cache handling ----------
@@ -710,14 +805,24 @@ class WikiData:
         """
         Return all property names not beginning with "global."
         """
-        return self.connWrap.execSqlQuerySingleColumn(
-                "select distinct(key) from wikiwordprops "
-                "where key not glob 'global.*'")
+        try:
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select distinct(key) from wikiwordprops "
+                    "where key not glob 'global.*'")
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
 
     # TODO More efficient? (used by autocompletion)
     def getPropertyNamesStartingWith(self, startingWith):
-        names = self.connWrap.execSqlQuerySingleColumn(
-                "select distinct(key) from wikiwordprops")   #  order by key")
+        try:
+            names = self.connWrap.execSqlQuerySingleColumn(
+                    "select distinct(key) from wikiwordprops")   #  order by key")
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
         return [name for name in names if name.startswith(startingWith)]
 
     def getGlobalProperties(self):
@@ -727,32 +832,57 @@ class WikiData:
         return self.cachedGlobalProps
 
     def getDistinctPropertyValues(self, key):
-        return self.connWrap.execSqlQuerySingleColumn(
-                "select distinct(value) from wikiwordprops where key = ? "
-                # "order by value", (key,))
-                , (key,))
+        try:
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select distinct(value) from wikiwordprops where key = ? "
+                    # "order by value", (key,))
+                    , (key,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
 
     def getWordsForPropertyName(self, key):
-        return self.connWrap.execSqlQuerySingleColumn(
-                "select distinct(word) from wikiwordprops where key = ? ",
-                (key,))
+        try:
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select distinct(word) from wikiwordprops where key = ? ",
+                    (key,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
 
     def getWordsWithPropertyValue(self, key, value):
-        return self.connWrap.execSqlQuerySingleColumn(
-                "select word from wikiwordprops where key = ? and value = ?",
-                (key, value))
+        try:
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select word from wikiwordprops where key = ? and value = ?",
+                    (key, value))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
 
     def getPropertiesForWord(self, word):
         """
         Returns list of tuples (key, value) of key and value
         of all properties for word.
         """
-        return self.connWrap.execSqlQuery("select key, value "+
-                    "from wikiwordprops where word = ?", (word,))
+        try:
+            return self.connWrap.execSqlQuery("select key, value "+
+                        "from wikiwordprops where word = ?", (word,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
 
     def setProperty(self, word, key, value):
-        self.connWrap.execSql("insert into wikiwordprops(word, key, value) "
-                "values (?, ?, ?)", (word, key, value))
+        try:
+            self.connWrap.execSql("insert into wikiwordprops(word, key, value) "
+                    "values (?, ?, ?)", (word, key, value))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
+
 
     def updateProperties(self, word, props):
         self.deleteProperties(word)
@@ -770,8 +900,13 @@ class WikiData:
         """
         TODO: Should become part of public API!
         """
-        data = self.connWrap.execSqlQuery("select key, value from wikiwordprops "+\
-                "where key glob 'global.*'")
+        try:
+            data = self.connWrap.execSqlQuery("select key, value from wikiwordprops "
+                    "where key glob 'global.*'")
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
         globalMap = {}
         for (key, val) in data:
             globalMap[key] = val
@@ -780,8 +915,14 @@ class WikiData:
 
         return globalMap
 
+
     def deleteProperties(self, word):
-        self.connWrap.execSql("delete from wikiwordprops where word = ?", (word,))
+        try:
+            self.connWrap.execSql("delete from wikiwordprops where word = ?",
+                    (word,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
 
 
     # ---------- Alias handling ----------
@@ -812,33 +953,57 @@ class WikiData:
 
         
     def getAllAliases(self):
-        # get all of the aliases
-        return self.connWrap.execSqlQuerySingleColumn(
-                "select value from wikiwordprops where key = 'alias'")
+        try:
+            # get all of the aliases
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select value from wikiwordprops where key = 'alias'")
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
 
 
     # ---------- Todo cache handling ----------
 
     def getTodos(self):
-        return self.connWrap.execSqlQuery("select word, todo from todos")
+        try:
+            return self.connWrap.execSqlQuery("select word, todo from todos")
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
     def getTodosForWord(self, word):
         """
         Returns list of all todo items of word
         """
-        return self.connWrap.execSqlQuerySingleColumn("select todo from todos "
-                "where word = ?", (word,))
+        try:
+            return self.connWrap.execSqlQuerySingleColumn("select todo from todos "
+                    "where word = ?", (word,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
 
     def updateTodos(self, word, todos):
         self.deleteTodos(word)
         for t in todos:
             self.addTodo(word, t)
 
+
     def addTodo(self, word, todo):
-        self.connWrap.execSql("insert into todos(word, todo) values (?, ?)", (word, todo))
+        try:
+            self.connWrap.execSql("insert into todos(word, todo) values (?, ?)", (word, todo))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
+
 
     def deleteTodos(self, word):
-        self.connWrap.execSql("delete from todos where word = ?", (word,))
+        try:
+            self.connWrap.execSql("delete from todos where word = ?", (word,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
 
 
     # ---------- Searching pages ----------
@@ -919,10 +1084,15 @@ class WikiData:
         exclusionSet -- set of wiki words for which their pages shouldn't be
         searched here and which must not be part of the result set
         """
-        result = self.connWrap.execSqlQuerySingleColumn(
-                "select word from wikiwordcontent where "+\
-                "word not glob '[[]*' and testMatch(word, content, ?)",
-                (sqlite.addTransObject(sarOp),))
+        try:
+            result = self.connWrap.execSqlQuerySingleColumn(
+                    "select word from wikiwordcontent where "+\
+                    "word not glob '[[]*' and testMatch(word, content, ?)",
+                    (sqlite.addTransObject(sarOp),))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            sqlite.delTransObject(sarOp)
+            raise DbReadAccessError(e)
 
         sqlite.delTransObject(sarOp)
         
@@ -934,24 +1104,40 @@ class WikiData:
 
     def saveSearch(self, title, datablock):
         "save a search into the search_views table"
-        self.connWrap.execSql(
-                "insert or replace into search_views(title, datablock) "+\
-                "values (?, ?)", (title, sqlite.Binary(datablock)))
+        try:
+            self.connWrap.execSql(
+                    "insert or replace into search_views(title, datablock) "+\
+                    "values (?, ?)", (title, sqlite.Binary(datablock)))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
 
     def getSavedSearchTitles(self):
         """
         Return the titles of all stored searches in alphabetical order
         """
-        return self.connWrap.execSqlQuerySingleColumn(
-                "select title from search_views order by title")
+        try:
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select title from search_views order by title")
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
     def getSearchDatablock(self, title):
-        return self.connWrap.execSqlQuerySingleItem(
-                "select datablock from search_views where title = ?", (title,))
+        try:
+            return self.connWrap.execSqlQuerySingleItem(
+                    "select datablock from search_views where title = ?", (title,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
     def deleteSavedSearch(self, title):
-        self.connWrap.execSql(
-                "delete from search_views where title = ?", (title,))
+        try:
+            self.connWrap.execSql(
+                    "delete from search_views where title = ?", (title,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
 
 
     # ---------- Miscellaneous ----------
@@ -992,18 +1178,28 @@ class WikiData:
         Save the presentation datablock (a byte string) for a word to
         the database.
         """
-        self.connWrap.execSql(
-                "update wikiwordcontent set presentationdatablock = ? where "
-                "word = ?", (sqlite.Binary(datablock), word))
+        try:
+            self.connWrap.execSql(
+                    "update wikiwordcontent set presentationdatablock = ? where "
+                    "word = ?", (sqlite.Binary(datablock), word))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
+
 
     def getPresentationBlock(self, word):
         """
         Returns the presentation datablock (a byte string).
         The function may return either an empty string or a valid datablock
         """
-        return self.connWrap.execSqlQuerySingleItem(
-                "select presentationdatablock from wikiwordcontent where word = ?",
-                (word,))
+        try:
+            return self.connWrap.execSqlQuerySingleItem(
+                    "select presentationdatablock from wikiwordcontent where word = ?",
+                    (word,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
 
     def testWrite(self):
         """
@@ -1229,33 +1425,38 @@ class WikiData:
 #                 wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
 #                 step = step + 1
 
-        self.connWrap.execSql("update wikiwordcontent "
-                "set wordnormcase=utf8Normcase(word)")
-        DbStructure.rebuildIndices(self.connWrap)
-
-        # TODO
-        # Check the presence of important indexes
-
-        indexes = self.connWrap.execSqlQuerySingleColumn(
-                "select name from sqlite_master where type='index'")
-        indexes = map(string.upper, indexes)
-        
-        if not "WIKIWORDCONTENT_PKEY" in indexes:
-            # Maybe we have multiple pages with the same name in the database
-            
-            # Copy valid creation date to all pages
-            self.connWrap.execSql("update wikiwordcontent set "
-                    "created=(select max(created) from wikiwordcontent as "
-                    "inner where inner.word=wikiwordcontent.word)")
-
-            # Delete all but the newest page
-            self.connWrap.execSql("delete from wikiwordcontent where "
-                    "ROWID not in (select max(ROWID) from wikiwordcontent as "
-                    "outer where modified=(select max(modified) from "
-                    "wikiwordcontent as inner where inner.word=outer.word) "
-                    "group by outer.word)")
-
+        try:
+            self.connWrap.execSql("update wikiwordcontent "
+                    "set wordnormcase=utf8Normcase(word)")
             DbStructure.rebuildIndices(self.connWrap)
+    
+            # TODO
+            # Check the presence of important indexes
+    
+            indexes = self.connWrap.execSqlQuerySingleColumn(
+                    "select name from sqlite_master where type='index'")
+            indexes = map(string.upper, indexes)
+            
+            if not "WIKIWORDCONTENT_PKEY" in indexes:
+                # Maybe we have multiple pages with the same name in the database
+                
+                # Copy valid creation date to all pages
+                self.connWrap.execSql("update wikiwordcontent set "
+                        "created=(select max(created) from wikiwordcontent as "
+                        "inner where inner.word=wikiwordcontent.word)")
+    
+                # Delete all but the newest page
+                self.connWrap.execSql("delete from wikiwordcontent where "
+                        "ROWID not in (select max(ROWID) from wikiwordcontent as "
+                        "outer where modified=(select max(modified) from "
+                        "wikiwordcontent as inner where inner.word=outer.word) "
+                        "group by outer.word)")
+    
+                DbStructure.rebuildIndices(self.connWrap)
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
+
 
        # TODO: More repair operations
 
@@ -1282,8 +1483,13 @@ class WikiData:
         Must be implemented if checkCapability returns a version number
         for "compactify".        
         """
-        self.connWrap.commit()
-        self.connWrap.execSql("vacuum")
+        try:
+            self.connWrap.commit()
+            self.connWrap.execSql("vacuum")
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
+
 
 
     # TODO: Better error checking

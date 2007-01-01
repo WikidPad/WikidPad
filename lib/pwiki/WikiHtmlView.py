@@ -4,19 +4,25 @@
 from wxPython.wx import *
 from wxPython.html import *
 
-
 from WikiExceptions import *
 from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID
 
 from MiscEvent import KeyFunctionSink
 
 from StringOps import uniToGui
+from Configuration import isWindows
 
 from TempFileSet import TempFileSet
 
 import Exporters
 
-
+if isWindows():
+    try:
+        import WikiHtmlViewIE
+    except:
+        WikiHtmlViewIE = None
+else:
+    WikiHtmlViewIE = None
 
 class LinkCreatorForPreview:
     """
@@ -30,6 +36,25 @@ class LinkCreatorForPreview:
             return u"internaljump:%s" % word
         else:
             return default
+
+
+def createWikiHtmlView(presenter, parent, ID):
+    pvRenderer = presenter.getConfig().getint("main", "html_preview_renderer", 0)
+
+    if WikiHtmlViewIE and pvRenderer > 0:
+        # Set preview renderer to 0 = Internal
+        config = presenter.getConfig()
+        config.set("main", "html_preview_renderer", "0")
+        config.saveGlobalConfig()
+        hvIe = WikiHtmlViewIE.WikiHtmlViewIE(presenter, parent, ID,
+                pvRenderer == 2)
+        # If no error occurred, set back to previous value
+        config.set("main", "html_preview_renderer", str(pvRenderer))
+        config.saveGlobalConfig()
+        return hvIe
+    else:
+        return WikiHtmlView(presenter, parent, ID)
+
 
 
 class WikiHtmlView(wxHtmlWindow):
@@ -63,7 +88,8 @@ class WikiHtmlView(wxHtmlWindow):
                 self.presenter.getMainControl())
         
         # TODO More elegantly
-        self.exporterInstance.exportType = u"html_preview"
+        self.exporterInstance.exportType = u"html_previewWX"
+        self.exporterInstance.styleSheet = u""
         self.exporterInstance.tempFileSet = TempFileSet()
 
         
@@ -138,8 +164,7 @@ class WikiHtmlView(wxHtmlWindow):
             html = self.exporterInstance.exportContentToHtmlString(word, content,
                     wikiPage.getFormatDetails(),
                     LinkCreatorForPreview(
-                        self.presenter.getWikiDocument().getWikiData()),
-                    asHtmlPreview=True)
+                        self.presenter.getWikiDocument().getWikiData()))
 
             wxGetApp().getInsertionPluginManager().taskEnd()
 
@@ -238,6 +263,14 @@ class WikiHtmlView(wxHtmlWindow):
             # Now open wiki
             self.presenter.getMainControl().openWikiPage(
                     word, motionType="child", anchor=anchor)
+        elif href.startswith(u"#"):
+            anchor = href[1:]
+            if self.HasAnchor(anchor):
+                self.ScrollToAnchor(anchor)
+                # Workaround because ScrollToAnchor scrolls too far
+                lx, ly = self.GetViewStart()
+                self.Scroll(lx, ly-1)
+
         else:
             self.presenter.getMainControl().launchUrl(href)
 

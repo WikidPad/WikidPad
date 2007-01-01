@@ -71,6 +71,7 @@ TYPEDET_FIRST = 1   # Use types of first retrieved row
 
 class Connection:
     def __init__(self, dsn, *params, **keywords):
+        self.thinConn = None
         self.thinConn = SqliteThin3.SqliteDb3(dsn, self._errHandler)
         self.statementCache = {} # Cache for prepared statements
         self._autoCommit = False
@@ -189,8 +190,12 @@ class Connection:
         
         if not err in (SqliteThin3.SQLITE_OK, SqliteThin3.SQLITE_ROW,
                 SqliteThin3.SQLITE_DONE):
-            msg = self.thinConn.errmsg()
-            raise Error, msg + " [%i]" % err
+            if self.thinConn:
+                msg = self.thinConn.errmsg()
+                raise Error, msg + " [%i]" % err
+            else:
+                raise Error, "Sqlite open error %i" % err
+
             
     # TODO Explain
     def setBindFctFinder(self, fct):

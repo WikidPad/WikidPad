@@ -2,6 +2,9 @@
 
 import sys, os, traceback, os.path, socket
 
+# To generate dependency for py2exe
+import subprocess
+
 import ExceptionLogger
 
 from wxPython.wx import *
@@ -98,6 +101,7 @@ class App(wxApp):
 
     def OnInit(self):
         ## _prof.start()
+        global PREVIEW_CSS
 
         self.SetAppName("WikidPad")
         self.removeAppLockOnExit = False
@@ -116,7 +120,13 @@ class App(wxApp):
                 ".WikidPadGlobals")
         if not os.path.exists(self.globalConfigSubDir):
             os.mkdir(self.globalConfigSubDir)
-            
+
+        pCssLoc = os.path.join(self.globalConfigSubDir, "wikipreview.css")
+        if not os.path.exists(pCssLoc):
+            tbFile = open(pCssLoc, "wa")
+            tbFile.write(PREVIEW_CSS)
+            tbFile.close()
+
         # Create default config dicts
         self.defaultGlobalConfigDict = Configuration.GLOBALDEFAULTS.copy()
         self.defaultWikiConfigDict = Configuration.WIKIDEFAULTS.copy()
@@ -437,36 +447,52 @@ class App(wxApp):
         pl.append((factory, title))
 
 
+PREVIEW_CSS = """
+BODY {
+	font-family: Verdana; font-size: 90%;
+}
 
+.wiki-name-ref {
+	color: #888888; font-size: 75%;
+}
 
-# class ErrorFrame(wxFrame):
-#    def __init__(self, parent, id, title):
-#       wxFrame.__init__(self, parent, -1, title, size = (300, 200),
-#                        style=wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
-#       dlg_m = wxMessageDialog(self, "%s. %s." % ("Error starting wikidPad", e), 'Error!', wxOK)
-#       dlg_m.ShowModal()
-#       dlg_m.Destroy()
-#       self.Close()
-# 
-# class Error(wxApp):   
-#    def OnInit(self):
-#       errorFrame = ErrorFrame(None, -1, "Error")
-#       self.SetTopWindow(errorFrame)
-#       return False
-# 
-# app = None
-# exception = None
+.parent-nodes {
+	color: #888888; font-size: 75%;
+}
 
+.property {
+	color: #888888; font-size: 75%;
+}
 
-# try:
-#     app = App(0)
-#     app.MainLoop()
-#     srePersistent.saveCodeCache()
-#     
-# except Exception, e:
-#    traceback.print_exc()
-#    exception = e
-#    error = Error(0)
-#    error.MainLoop()
-#    
-# sys.exit()
+.script {
+	color: #888888; font-size: 75%;
+}
+
+.todo {
+	font-weight: bold;
+}
+
+.url-link {
+}
+
+.wiki-link {
+}
+
+.page-toc {
+}
+
+.page-toc-level1 {
+}
+
+.page-toc-level2 {
+    margin-left: 4mm;
+}
+
+.page-toc-level3 {
+    margin-left: 8mm;
+}
+
+.page-toc-level4 {
+    margin-left: 12mm;
+}
+"""

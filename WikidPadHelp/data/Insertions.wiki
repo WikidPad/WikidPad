@@ -51,6 +51,10 @@ The following keys and values are possible:
           independent from the page containing the insertion tag.
     * *savedsearch* lists all wiki words found by the saved search
       with the name given as value.
+    * *toc* shows a little table of contents with the headings of 
+      the current page. In HTML preview/export you can click on the
+      the lines to go to the actual headings. The value of this
+      insertion must be empty.
     * *eval* Evaluate the given Python expression and handle its
       result as if it replaces the insertion. You must switch on
       the appropriate option "Process insertion scripts" on the
@@ -76,6 +80,9 @@ It is recommended to switch to preview to see the effect of the tags:
 
 *\[:savedsearch: nanny; columns 4]*  (all pages containing "any")
 [:savedsearch: nanny; columns 4]
+
+*\[:toc: ""]*
+[:toc: ""]
 
 *\[:eval:"5+6"]*
 [:eval:"5+6"]

@@ -22,3 +22,26 @@ BODY {
 	font-weight: bold;
 }
 
+.url-link {
+}
+
+.wiki-link {
+}
+
+.page-toc {
+}
+
+.page-toc-level1 {
+}
+
+.page-toc-level2 {
+    margin-left: 4mm;
+}
+
+.page-toc-level3 {
+    margin-left: 8mm;
+}
+
+.page-toc-level4 {
+    margin-left: 12mm;
+}

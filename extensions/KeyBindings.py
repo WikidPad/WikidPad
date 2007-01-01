@@ -51,11 +51,13 @@ ZoomOut=""
 CloneWindow=""
 
 ContinueSearch="F3"
+BackwardSearch="Shift-F3"
 AutoComplete="Ctrl-Space"
 ActivateLink2="Ctrl-Return"
 SwitchFocus="F6"
+StartIncrementalSearch="Ctrl-F"
 
-IncrementalSearchCtrl="F"   # Hack, changing not recommended
+# IncrementalSearchCtrl="F"   # Hack, changing not recommended
 
 
 def makeBold(editor):

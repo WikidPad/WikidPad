@@ -25,14 +25,42 @@ If this option is checked, links to image URLs (those ending with .png, .gif or 
 Same for HTML export.
 In the export dialog, you can temporarily override this setting for one export.
 
+*Preview renderer*
+Under Windows you can choose the renderer for the HTML preview:
+
+    * Internal: Internal standard renderer. Not very capable, but it
+      doesn't need external components
+    * IE: Uses Internet Explorer.
+    * Mozilla: Uses Mozilla/Gecko rendering component if installed.
+      You can download it here:
+      http://www.iol.ie/~locka/mozilla/control.htm. *There seems to be
+      a severe bug that crashes WikidPad when pressing any key while
+      the Mozilla preview is shown!*
+
+Changes of this setting only have an effect for newly opened WikidPad windows.
+
+Mozilla and IE renderer use a CSS-file located in the configuration directory (see "Help" menu -> "About" and scroll to the end to find out where it is), subfolder ".WikidPadGlobals", file "wikipreview.css".
+
+    *Important remarks*
+    * Using IE or Mozilla as renderers means that any weaknesses of
+      these browsers (esp. regarding security) become part of
+      WikidPad. If e.g. a wiki page contains dangerous scripts in
+      JavaScript they might be executed when showing the page.
+    * If you chose Mozilla and the component is not installed,
+      WikidPad will crash when opening a new window (or when
+      restarting WikidPad). If this happens, try to start WikidPad
+      again. It should then use the internal renderer instead.
+
+
 *Table of contents*
 Choose if you want a table of contents in tree form, list form or not at all, see WikiExport#*Additional# options*
 In the export dialog, you can temporarily override this setting for one export.
 
 
 
-+++ HTML page settings (attributes of "<body>"-tag)
++++ HTML header settings
 
+++++ Attributes of "<body>"-tag
 The following settings for HTML export/preview can all be overridden by attributes for a particular wiki and for a particular page. These settings (either in options dialog or as attributes) only have an effect when exporting a set of HTML pages, not when exporting a single page containing multiple wiki words. For HTML preview only some of the settings have an effect at all.
 
 
@@ -56,3 +84,8 @@ Color of background. Attribute to override: "html.bgcolor".
 
 *Background image*
 Link (URL) to a background image. Doesn't work for preview. Attribute to override: "html.bgimage". 
+
+
+
+++++ DOCTYPE
+Sets the DOCTYPE to use in the header of an HTML file. You should only modify it if you understand what it is doing.

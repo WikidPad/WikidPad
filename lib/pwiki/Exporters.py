@@ -89,6 +89,8 @@ class HtmlXmlExporter:
         self.wikiData = None
         self.wordList = None
         self.exportDest = None
+        self.styleSheet = "wikistyle.css"
+        self.basePageAst = None
 #         self.tokenizer = Tokenizer(
 #                 WikiFormatting.CombinedHtmlExportRE, -1)
                 
@@ -246,6 +248,8 @@ class HtmlXmlExporter:
             startfile = self._exportHtmlMultipleFiles()
         elif exportType == u"xml":
             startfile = self._exportXml()
+            
+        # Other supported types: html_previewWX, html_previewIE, html_previewMOZ
 
         if not compatFilenames:
             startfile = mbcsEnc(startfile)[0]
@@ -273,6 +277,7 @@ class HtmlXmlExporter:
 
         outputFile = join(self.exportDest,
                 self.convertFilename(u"%s.html" % self.mainControl.wikiName))
+        self.styleSheet = "wikistyle.css"
 
         if exists(outputFile):
             os.unlink(outputFile)
@@ -298,7 +303,7 @@ class HtmlXmlExporter:
                     '%s%s<hr size="1"/>') %
                     (self.getContentListBody(linkAsFragments=True),
                     u'<br />\n'*10))
-
+                    
         links = {}
 #         notExport = sets.Set() # Cache to store all rejected words
 #         wordSet = sets.Set(self.wordList)
@@ -376,7 +381,8 @@ class HtmlXmlExporter:
     def _exportHtmlMultipleFiles(self):
         links = LinkCreatorForHtmlMultiPageExport(
                 self.wikiDataManager.getWikiData(), self)
-                
+        self.styleSheet = "wikistyle.css"
+
         if self.addOpt[1] in (1,2):
             # Write a table of contents in html page "index.html"
             self.links = links
@@ -391,16 +397,8 @@ class HtmlXmlExporter:
                 fp = utf8Writer(realfp, "replace")
 
                 # TODO Factor out HTML header generation                
-                fp.write(
-u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <title>Table of Contents</title>
-        <link type="text/css" rel="stylesheet" href="wikistyle.css">
-    </head>
-    <body>
-""")
+                fp.write(self._getGenericHtmlHeader(u"Table of Contents") + 
+                        u"    <body>\n")
                 if self.addOpt[1] == 1:
                     # Write a content tree
                     rootPage = self.mainControl.getWikiDocument().getWikiPage(
@@ -521,16 +519,15 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 
     def exportContentToHtmlString(self, word, content, formatDetails,
-            links=None, startFile=True, onlyInclude=None, asHtmlPreview=False):
+            links=None, startFile=True, onlyInclude=None):
         """
         Read content of wiki word word, create an HTML page and return it
         """
         result = []
-        
         wikiPage = self.wikiDataManager.getWikiPageNoError(word)
 
         formattedContent = self.formatContent(word, content, formatDetails,
-                links, asHtmlPreview=asHtmlPreview)
+                links)
 
         if isUnicode():
             result.append(self.getFileHeader(wikiPage))
@@ -550,19 +547,30 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
         
         return u"".join(result)
 
+
+    def _getGenericHtmlHeader(self, title):
+        charSet = u"; charset=UTF-8"
+        styleSheet = self.styleSheet
+        config = self.mainControl.getConfig()
+        docType = config.get("main", "html_header_doctype",
+                'DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"')
+
+        return u"""<!%(docType)s>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html%(charSet)s">
+        <title>%(title)s</title>
+        <link type="text/css" rel="stylesheet" href="%(styleSheet)s">
+    </head>
+""" % locals()
+
+
+
     def getFileHeaderMultiPage(self, title):
         """
         Return file header for an HTML file containing multiple pages
         """
-        return u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <title>%s</title>
-         <link type="text/css" rel="stylesheet" href="wikistyle.css">
-    </head>
-    <body>
-""" % title
+        return self._getGenericHtmlHeader(title) + u"    <body>\n"
 
             
     def _getBodyTag(self, wikiPage):
@@ -627,15 +635,8 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
         wikiPage -- WikiPage object
         """
 
-        return u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <title>%s</title>
-        <link type="text/css" rel="stylesheet" href="wikistyle.css">
-    </head>
-    %s
-""" % (wikiPage.getWikiWord(), self._getBodyTag(wikiPage))
+        return self._getGenericHtmlHeader(wikiPage.getWikiWord()) + \
+                u"    %s\n" % self._getBodyTag(wikiPage)
 
 
     def getFileHeaderNoCharset(self, wikiPage):
@@ -681,6 +682,10 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                 (_escapeAnchor(relation), relation)
                 
         return parents
+
+
+    def getBasePageAst(self):
+        return self.basePageAst
 
 
     def copyCssFile(self, dir):
@@ -830,9 +835,9 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 
     def popState(self):
-        breakEat = len(self.statestack) <= 2 or self.asHtmlPreview
+        breakEat = len(self.statestack) <= 2 or self.asIntHtmlPreview
         if self.statestack[-1][0] == "normalindent":
-            if self.asHtmlPreview:
+            if self.asIntHtmlPreview:
                 self.outEatBreaks(u"</blockquote>\n")
             else:
                 self.outAppend(u"</ul>\n", eatPreBreak=breakEat,
@@ -904,12 +909,12 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
         Insert indentation, bullet, or numbered list start tag.
         ind -- indentation depth
         """
-        if indType == "normalindent" and self.asHtmlPreview:
+        if indType == "normalindent" and self.asIntHtmlPreview:
             self.outEatBreaks(u"<blockquote>")
         else:
             tag = {"normalindent": u"<ul>", "ul": u"<ul>", "ol": u"<ol>"}[indType]
 
-            if self.hasStates() or self.asHtmlPreview:
+            if self.hasStates() or self.asIntHtmlPreview:
                 # It is already indented, so additional indents will not
                 # produce blank lines which must be eaten
                 self.outAppend(tag)
@@ -932,7 +937,12 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
             for celltokens in row:
                 self.outAppend(u"<td>")
 #                 print "outTable2", repr(celltokens)
-                self.processTokens(content, celltokens, checkIndentation=False)
+                opts = self.optsStack[-1].copy()
+                opts["checkIndentation"] = False
+                self.optsStack.append(opts)
+                self.processTokens(content, celltokens)
+                del self.optsStack[-1]
+                
                 self.outAppend(u"</td>")
             self.outAppend(u"</tr>\n")
 
@@ -964,7 +974,13 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
             tokens = pageast.getTokens()
             
             self.insertionVisitStack.append("wikipage/" + value)
+            
+            opts = self.optsStack[-1].copy()
+            opts["anchorForHeading"] = False
+            self.optsStack.append(opts)
             self.processTokens(content, tokens)
+            del self.optsStack[-1]
+            
             del self.insertionVisitStack[-1]
 
             return
@@ -992,6 +1008,66 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                 searchOp.setPackedSettings(datablock)
                 searchOp.replaceOp = False
                 wordList = wikiDocument.searchWiki(searchOp)
+        elif key == u"toc" and value == u"":
+            pageAst = self.getBasePageAst()
+            headtokens = [tok for tok in pageAst.getTokens() if tok.ttype in
+                    (WikiFormatting.FormatTypes.Heading4, 
+                    WikiFormatting.FormatTypes.Heading3,
+                    WikiFormatting.FormatTypes.Heading2,
+                    WikiFormatting.FormatTypes.Heading1)]
+
+            unescapeNormalText = \
+                    self.mainControl.getFormatting().unescapeNormalText
+
+#             lastLevel = 1
+#             htmlContent = [u"<ul>\n"]
+
+            htmlContent = [u'<div class="page-toc">\n']
+
+            for tok in headtokens:
+                styleno = tok.ttype
+                if styleno == WikiFormatting.FormatTypes.Heading4:
+                    headLevel = 4
+                elif styleno == WikiFormatting.FormatTypes.Heading3:
+                    headLevel = 3
+                elif styleno == WikiFormatting.FormatTypes.Heading2:
+                    headLevel = 2
+                elif styleno == WikiFormatting.FormatTypes.Heading1:
+                    headLevel = 1
+
+                headContent = tok.grpdict["h%iContent" % headLevel]
+                if self.asIntHtmlPreview:
+                    # Simple indent
+                    htmlContent.append(u"&nbsp;&nbsp;" * (headLevel - 1))
+                else:
+                    # use css
+                    htmlContent.append(u'<div class="page-toc-level%i">' %
+                            headLevel)
+                
+                htmlContent.append(u'<a href="#.h%i">%s</a>' % (tok.start,
+                        escapeHtml(unescapeNormalText(headContent))))
+
+                if self.asIntHtmlPreview:
+                    htmlContent.append(u'<br />\n')
+                else:
+                    htmlContent.append(u'</div>\n')
+
+#                 if headLevel > lastLevel:
+#                     htmlContent.append(u"<ul>\n" * (headLevel - lastLevel))
+#                 elif headLevel < lastLevel:
+#                     htmlContent.append(u"</ul>\n" * (lastLevel - headLevel))
+#                 lastLevel = headLevel
+# 
+#                 htmlContent.append(u'<li><a href="#.h%i">%s</a>\n' % (tok.start,
+#                         escapeHtml(unescapeNormalText(headContent))))
+#             
+#             htmlContent.append(u"</ul>\n")
+
+
+
+            htmlContent.append(u"</div>\n")
+            htmlContent = u"".join(htmlContent)
+
         elif key == u"eval":
             if not self.mainControl.getConfig().getboolean("main",
                     "insertions_allow_eval", False):
@@ -1015,12 +1091,19 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                     content = u"\n<<\n" + s.getvalue() + u"\n>>\n"
         else:
             # Call external plugins
+            exportType = self.exportType
             handler = wxGetApp().getInsertionPluginManager().getHandler(self,
-                    self.exportType, key)
+                    exportType, key)
+
+            if handler is None and self.asHtmlPreview:
+                # No handlert found -> try to find generic HTML preview handler
+                exportType = "html_preview"
+                handler = wxGetApp().getInsertionPluginManager().getHandler(self,
+                        exportType, key)
                     
             if handler is not None:
                 try:
-                    htmlContent = handler.createContent(self, self.exportType,
+                    htmlContent = handler.createContent(self, exportType,
                             insertionAstNode)
                 except Exception, e:
                     s = StringIO()
@@ -1036,6 +1119,8 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                         "wikidpad_language", key)
                 if handler is not None:
                     try:
+                        # This content is in WikidPad markup language
+                        # and must be postprocessed
                         content = handler.createContent(self,
                                 "wikidpad_language", insertionAstNode)
                     except Exception, e:
@@ -1113,19 +1198,22 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 
     def formatContent(self, word, content, formatDetails, links=None,
-            asXml=False, asHtmlPreview=False):
+            asXml=False):
         if links is None:
             self.links = {}
         else:
             self.links = links
-            
-        self.asHtmlPreview = asHtmlPreview
+ 
+        self.asIntHtmlPreview = (self.exportType == "html_previewWX")
+        self.asHtmlPreview = self.exportType in ("html_previewWX",
+                "html_previewIE", "html_previewMOZ")
         self.asXml = asXml
         self.wikiWord = word
         # Replace tabs with spaces
         content = content.replace(u"\t", u" " * 4)  # TODO Configurable
         self.result = []
         self.statestack = [("normalindent", 0)]
+        self.optsStack = [{}]
         self.insertionVisitStack = []
         # deepness of numeric bullets
         self.numericdeepness = 0
@@ -1134,9 +1222,10 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
         # TODO Without camel case
         page = PageAst.Page()
         page.buildAst(self.mainControl.getFormatting(), content, formatDetails)
+        self.basePageAst = page
 
         # Get property pattern
-        if asHtmlPreview:
+        if self.asHtmlPreview:
             proppattern = self.mainControl.getConfig().get(
                         "main", "html_preview_proppattern", u"")
         else:
@@ -1146,7 +1235,7 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
         self.proppattern = re.compile(proppattern,
                 re.DOTALL | re.UNICODE | re.MULTILINE)
 
-        if asHtmlPreview:
+        if self.asHtmlPreview:
             self.proppatternExcluding = self.mainControl.getConfig().getboolean(
                         "main", "html_preview_proppattern_is_excluding", u"True")
         else:
@@ -1155,7 +1244,7 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
         
 
         if len(page.getTokens()) >= 1:
-            if asHtmlPreview:
+            if self.asHtmlPreview:
                 facename = self.mainControl.getConfig().get(
                         "main", "facename_html_preview", u"")
                 if facename:
@@ -1163,13 +1252,13 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
             
             self.processTokens(content, page.getTokens())
                 
-            if asHtmlPreview and facename:
+            if self.asHtmlPreview and facename:
                 self.outAppend('</font>')
 
         return self.getOutput()
 
 
-    def processTokens(self, content, tokens, checkIndentation=True):
+    def processTokens(self, content, tokens):
         """
         Actual token to HTML converter. May be called recursively
         """
@@ -1203,7 +1292,7 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                 else:
                     text = tok.text
 
-                if checkIndentation:
+                if self.optsStack[-1].get("checkIndentation", True):
                     # With indentation check, we have a complicated mechanism
                     # here to check indentation, indent and dedent tracking
                     # The simple version without checking below is used for
@@ -1334,18 +1423,31 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                     self.preMode = max(0, self.preMode - 1)
                 # HTML tag -> export as is 
                 self.outAppend(tok.text)
-            elif styleno == WikiFormatting.FormatTypes.Heading4:
-                self.outEatBreaks(u"<h4>%s</h4>\n" % escapeHtml(
-                        unescapeNormalText(tok.grpdict["h4Content"])))
-            elif styleno == WikiFormatting.FormatTypes.Heading3:
-                self.outEatBreaks(u"<h3>%s</h3>\n" % escapeHtml(
-                        unescapeNormalText(tok.grpdict["h3Content"])))
-            elif styleno == WikiFormatting.FormatTypes.Heading2:
-                self.outEatBreaks(u"<h2>%s</h2>\n" % escapeHtml(
-                        unescapeNormalText(tok.grpdict["h2Content"])))
-            elif styleno == WikiFormatting.FormatTypes.Heading1:
-                self.outEatBreaks(u"<h1>%s</h1>\n" % escapeHtml(
-                        unescapeNormalText(tok.grpdict["h1Content"])))
+            elif styleno in (WikiFormatting.FormatTypes.Heading4, 
+                    WikiFormatting.FormatTypes.Heading3,
+                    WikiFormatting.FormatTypes.Heading2,
+                    WikiFormatting.FormatTypes.Heading1):
+                if styleno == WikiFormatting.FormatTypes.Heading4:
+                    headLevel = 4
+                elif styleno == WikiFormatting.FormatTypes.Heading3:
+                    headLevel = 3
+                elif styleno == WikiFormatting.FormatTypes.Heading2:
+                    headLevel = 2
+                elif styleno == WikiFormatting.FormatTypes.Heading1:
+                    headLevel = 1
+
+                if self.optsStack[-1].get("anchorForHeading", True):
+                    if self.wordAnchor:
+                        anchor = self.wordAnchor + (u"#.h%i" % tok.start)
+                    else:
+                        anchor = u".h%i" % tok.start
+
+                    self.outAppend(u'<a name="%s"></a>' % anchor)
+
+                headContent = tok.grpdict["h%iContent" % headLevel]
+                self.outEatBreaks(u"<h%i>%s</h%i>\n" % (headLevel, escapeHtml(
+                        unescapeNormalText(headContent)), headLevel))
+
             elif styleno == WikiFormatting.FormatTypes.HorizLine:
                 self.outEatBreaks(u'<hr size="1" />\n')
             elif styleno == WikiFormatting.FormatTypes.Script:
@@ -1432,27 +1534,6 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                         urlAsImage = False
                         
                     
-#                     forceAsImage = False
-#                     # Determine if a picture should be shown as link or image
-#                     if tok.node.containsModeInAppendix("l"):  # l: make link
-#                         picsAsLinks = True
-#                     elif tok.node.containsModeInAppendix("i") or \
-#                             tok.node.containsModeInAppendix("s"):
-#                         picsAsLinks = False
-#                         forceAsImage = True
-#                     else:
-#                         if self.asHtmlPreview:
-#                             picsAsLinks = self.mainControl.getConfig().getboolean(
-#                                     "main", "html_preview_pics_as_links")
-#                         else:
-#                             picsAsLinks = not not self.addOpt[0]
-#                         
-#                     if (lowerLink.endswith(".jpg") or \
-#                             lowerLink.endswith(".gif") or \
-#                             lowerLink.endswith(".png") or forceAsImage) and \
-#                             not picsAsLinks:
-
-
                     if urlAsImage:
                         # Ignore title, use image
                         sizeInTag = u""
@@ -1488,7 +1569,7 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                                 # something does not match syntax requirements
                                 pass
 
-                        if self.asHtmlPreview and lowerLink.startswith("file:"):
+                        if self.asIntHtmlPreview and lowerLink.startswith("file:"):
                             # At least under Windows, wxWidgets has another
                             # opinion how a local file URL should look like
                             # than Python
@@ -1499,12 +1580,12 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                     else:
 #                         self.outAppend(u'<a href="%s">%s</a>' %
 #                                 (escapeHtml(link), escapeHtml(link)))
-                        self.outAppend(u'<a href="%s">' % link)
+                        self.outAppend(u'<span class="url-link"><a href="%s">' % link)
                         if tok.node.titleTokens is not None:
                             self.processTokens(content, tok.node.titleTokens)
                         else:
                             self.outAppend(escapeHtml(link))                        
-                        self.outAppend(u'</a>')
+                        self.outAppend(u'</a></span>')
 
             elif styleno == WikiFormatting.FormatTypes.WikiWord:  # or \
                     # styleno == WikiFormatting.FormatTypes.WikiWord2:
@@ -1520,13 +1601,14 @@ u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
                         self.outAppend(u'<link type="wikiword">%s</link>' % 
                                 escapeHtml(tok.text))
                     else:
-                        self.outAppend(u'<a href="%s">' % escapeHtml(link))
+                        self.outAppend(u'<span class="wiki-link"><a href="%s">' %
+                                escapeHtml(link))
                         if tok.node.titleTokens is not None:
                             self.processTokens(content, tok.node.titleTokens)
                         else:
 #                             self.outAppend(escapeHtml(tok.text))                        
                             self.outAppend(escapeHtml(word))                        
-                        self.outAppend(u'</a>')
+                        self.outAppend(u'</a></span>')
                 else:
                     if tok.node.titleTokens is not None:
                         self.processTokens(content, tok.node.titleTokens)

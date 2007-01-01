@@ -17,7 +17,7 @@ from os import mkdir, unlink, listdir, rename, stat, utime
 from os.path import exists, join, basename
 from time import time, localtime
 import datetime
-import re, string, glob, sets, traceback
+import string, glob, sets, traceback
 # import pwiki.srePersistent as re
 
 from pwiki.WikiExceptions import *   # TODO make normal import
@@ -47,21 +47,32 @@ class WikiData:
     def __init__(self, dataManager, dataDir):
         self.dataManager = dataManager
         self.dataDir = dataDir
+        self.cachedContentNames = {}
 
         dbfile = join(dataDir, "wikiovw.sli")   # means "wiki overview"
 
-        if (not exists(dbfile)):
-            DbStructure.createWikiDB(None, dataDir)  # , True
+        try:
+            if (not exists(dbfile)):
+                DbStructure.createWikiDB(None, dataDir)  # , True
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
 
-        self.connWrap = DbStructure.ConnectWrap(sqlite.connect(dbfile))
-        self.commit = self.connWrap.commit
-        
-##         DbStructure.rebuildIndices(self.connWrap)
+        dbfile = mbcsDec(dbfile)[0]
+        try:
+            self.connWrap = DbStructure.ConnectWrap(sqlite.connect(dbfile))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
         DbStructure.registerSqliteFunctions(self.connWrap)
 
-        self.pagefileSuffix = self.dataManager.getWikiConfig().get("main",
-                "db_pagefile_suffix", u".wiki")
+        try:
+            self.pagefileSuffix = self.dataManager.getWikiConfig().get("main",
+                    "db_pagefile_suffix", u".wiki")
+        except (IOError, OSError), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
     def checkDatabaseFormat(self):
@@ -88,31 +99,40 @@ class WikiData:
                     raise DbWriteAccessError(e2)
                 raise DbWriteAccessError(e)
 
+        lastException = None
         try:
             # Further possible updates
             DbStructure.updateDatabase2(self.connWrap)
+        except sqlite.Error, e:
+            # Remember but continue
+            lastException = DbWriteAccessError(e)
 
-            # Activate UTF8 support for text in database (content is blob!)
-            DbStructure.registerUtf8Support(self.connWrap)
-    
-            # Function to convert from content in database to
-            # return value, used by getContent()
-            self.contentDbToOutput = lambda c: utf8Dec(c, "replace")[0]
-            
+        # Activate UTF8 support for text in database (content is blob!)
+        DbStructure.registerUtf8Support(self.connWrap)
+
+        # Function to convert from content in database to
+        # return value, used by getContent()
+        self.contentDbToOutput = lambda c: utf8Dec(c, "replace")[0]
+
+        try:
             # Set marker for database type
             self.dataManager.getWikiConfig().set("main", "wiki_database_type",
                     "original_sqlite")
+        except (IOError, OSError), e:
+            # Remember but continue
+            lastException = DbWriteAccessError(e)
     
-            # Function to convert unicode strings from input to content in database
-            # used by setContent
+        # Function to convert unicode strings from input to content in database
+        # used by setContent
+        def contentUniInputToDb(unidata):
+            return utf8Enc(unidata, "replace")[0]
+
+        self.contentUniInputToDb = contentUniInputToDb
     
-            def contentUniInputToDb(unidata):
-                return utf8Enc(unidata, "replace")[0]
     
-            self.contentUniInputToDb = contentUniInputToDb
-    
-    
+        try:
             # Temporary table for findBestPathFromWordToWord
+            # TODO: Possible for read-only dbs?
     
             # These schema changes are only on a temporary table so they are not
             # in DbStructure.py
@@ -142,15 +162,18 @@ class WikiData:
                 self.connWrap.rollback()
             except (IOError, OSError, sqlite.Error), e2:
                 traceback.print_exc()
-                raise DbWriteAccessError(e2)
-            raise DbWriteAccessError(e)
+                raise DbReadAccessError(e2)
+            raise DbReadAccessError(e)
+            
+        if lastException:
+            raise lastException
 
 
     def _reinit(self):
         """
         Actual initialization or reinitialization after rebuildWiki()
         """
-        
+        pass        
 
 
     # ---------- Direct handling of page data ----------
@@ -339,11 +362,6 @@ class WikiData:
                     # del self.cachedContentNames[word]
     
                     self.connWrap.commit()
-    
-                    # due to some bug we have to close and reopen the db sometimes (gadfly)
-                    ## self.dbConn.close()
-                    ## self.dbConn = gadfly.gadfly("wikidb", self.dataDir)
-    
                 except:
                     self.connWrap.rollback()
                     raise
@@ -410,7 +428,6 @@ class WikiData:
                     "select word from wikirelations where relation = ?", (al,)))
     
             return list(parents)
-
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -1394,6 +1411,28 @@ class WikiData:
 
 #         finally:            
 #             progresshandler.close()
+
+
+    def commit(self):
+        """
+        Do not call from this class, only from outside to handle errors.
+        """
+        try:
+            self.connWrap.commit()
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
+
+
+    def rollback(self):
+        """
+        Do not call from this class, only from outside to handle errors.
+        """
+        try:
+            self.connWrap.rollback()
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
 
 
     def vacuum(self):

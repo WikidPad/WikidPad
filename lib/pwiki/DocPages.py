@@ -511,11 +511,17 @@ class WikiPage(DocPage):
 
     def setPresentation(self, data, startPos):
         """
-        Set (a part of) the presentation tuple.
+        Set (a part of) the presentation tuple. This is silently ignored
+        if the "write access failed" or "read access failed" flags are
+        set in the wiki document.
         data -- tuple with new presentation data
         startPos -- start position in the presentation tuple which should be
                 overwritten with data.
         """
+        if self.wikiDocument.getReadAccessFailed() or \
+                self.wikiDocument.getWriteAccessFailed():
+            return
+
         pt = self.getPresentation()
         pt = pt[:startPos] + data + pt[startPos+len(data):]
 

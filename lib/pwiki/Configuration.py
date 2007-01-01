@@ -45,7 +45,8 @@ def isWin9x():
     return _ISWIN9x
 
 
-
+def isWindows():
+    return _ISWIN9x or wxGetOsVersion()[0] == wxWINDOWS_NT
 
 
 
@@ -407,19 +408,25 @@ class CombinedConfiguration(_AbstractConfiguration):
     def setGlobalConfig(self, config):
         self.globalConfig = config
 
+    def saveGlobalConfig(self):
+        if self.globalConfig is not None:
+            self.globalConfig.save()
+
 
     def save(self):
         """
         Save all configurations
         """
-        if self.globalConfig is not None:
-            self.globalConfig.save()
+        self.saveGlobalConfig()
 
         try:
             if self.wikiConfig is not None:
                 self.wikiConfig.save()
         except:
             traceback.print_exc()
+            
+            
+
 
 
     def informChanged(self):
@@ -498,6 +505,7 @@ GLOBALDEFAULTS = {
     ("main", "html_export_proppattern_is_excluding"): "False",  # Same for HTML exporting
     ("main", "html_preview_pics_as_links"): "False",  # Show only links to pictures in HTML preview
     ("main", "html_export_pics_as_links"): "False",  # Same for HTML exporting
+    ("main", "html_preview_renderer"): "0",  # 0: Internal wxWidgets; 1: IE; 2: Mozilla
     ("main", "export_table_of_contents"): "0",  # Show table of contents when exporting
             # 0:None, 1:formatted as tree, 2:as list
 
@@ -507,23 +515,27 @@ GLOBALDEFAULTS = {
     ("main", "html_body_text"): "",  # for HTML preview/export, color for text or "" for default
     ("main", "html_body_bgcolor"): "",  # for HTML preview/export, color for background or "" for default
     ("main", "html_body_background"): "",  # for HTML preview/export, URL for background image or "" for none
+    ("main", "html_header_doctype"): 'DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"',
 
 
     ("main", "editor_plaintext_color"): "", # Color of plain text (and non-exist. wikiwords) in editor
     ("main", "editor_link_color"): "", # Color of links (URL and wikiwords)
     ("main", "editor_attribute_color"): "", # Color of attributes (=properties) and scripts
     ("main", "editor_bg_color"): "",  # Background color of the editor
+    ("main", "editor_selection_bg_color"): "",  # Background color of the selection in the editor
     ("main", "sync_highlight_byte_limit"): "5120",  # Size limit when to start asyn. highlighting in editor
     ("main", "async_highlight_delay"): "0.2",  # Delay after keypress before starting async. highlighting
     ("main", "editor_autoUnbullets"): "True",  # When pressing return on line with lonely bullet, remove bullet?
 
 
-    # For wiki-wide search
+    # Search options
     ("main", "search_wiki_context_before"): "20", # No. of context characters before
     ("main", "search_wiki_context_after"): "30",  # and after a found pattern
     ("main", "search_wiki_count_occurrences"): "True", # Show for each page the number of found matches
     ("main", "fastSearch_sizeX"): "200",  # Size of the fastsearch popup frame
     ("main", "fastSearch_sizeY"): "400",
+    ("main", "incSearch_autoOffDelay"): "0", # Secs. of inactivity until stopping incremental
+            # search automatically, 0 means no auto. stop
 
     ("main", "print_margins"): "0,0,0,0", # Left, upper, right, lower page margins on printing
     ("main", "print_plaintext_font"): "", # Font description for printing in plain text mode

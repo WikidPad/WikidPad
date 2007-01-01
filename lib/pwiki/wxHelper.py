@@ -146,25 +146,50 @@ def getTextFromClipboard():
         cb.Close()
 
 
-def copyTextToClipboard(text): 
-    from wxPython.wx import wxTheClipboard, wxDataObjectComposite, wxDataFormat, \
-            wxCustomDataObject, wxDF_TEXT, wxDF_UNICODETEXT
-    from StringOps import lineendToOs, mbcsEnc
+def textToDataObject(text):
+#     from wxPython.wx import wxDataObjectComposite, wxDataFormat, \
+#             wxCustomDataObject, wxDF_TEXT, wxDF_UNICODETEXT
+    import wx
+    from StringOps import lineendToOs, mbcsEnc, utf8Enc
     import array
+    
+    cdataob = wx.CustomDataObject(wx.DataFormat(wx.DF_TEXT))
+    udataob = wx.CustomDataObject(wx.DataFormat(wx.DF_UNICODETEXT))
 
-    cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
-    udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
     realuni = lineendToOs(text)
     arruni = array.array("u")
     arruni.fromunicode(realuni+u"\x00")
     rawuni = arruni.tostring()
-    # print "Copy", repr(realuni), repr(rawuni), repr(mbcsenc(realuni)[0])
     udataob.SetData(rawuni)
     cdataob.SetData(mbcsEnc(realuni)[0]+"\x00")
 
-    dataob = wxDataObjectComposite()
-    dataob.Add(udataob)
+    dataob = wx.DataObjectComposite()
+    dataob.Add(udataob, True)
     dataob.Add(cdataob)
+
+    return dataob
+
+
+def copyTextToClipboard(text): 
+    from wxPython.wx import wxTheClipboard
+#     from StringOps import lineendToOs, mbcsEnc
+#     import array
+# 
+#     cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
+#     udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
+#     realuni = lineendToOs(text)
+#     arruni = array.array("u")
+#     arruni.fromunicode(realuni+u"\x00")
+#     rawuni = arruni.tostring()
+#     # print "Copy", repr(realuni), repr(rawuni), repr(mbcsenc(realuni)[0])
+#     udataob.SetData(rawuni)
+#     cdataob.SetData(mbcsEnc(realuni)[0]+"\x00")
+# 
+#     dataob = wxDataObjectComposite()
+#     dataob.Add(udataob)
+#     dataob.Add(cdataob)
+
+    dataob = textToDataObject(text)
 
     cb = wxTheClipboard
     cb.Open()

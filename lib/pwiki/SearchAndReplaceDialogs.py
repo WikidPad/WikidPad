@@ -139,13 +139,6 @@ class _SearchResultItemInfo(object):
             if stroc != u"":
                 result.append(u' <b>(%s)</b>' % stroc)
                 
-#             if self.occCount != -1:
-#                 result.append(u' <b>(%i/%i)</b>' % (self.occNumber, self.occCount))
-#             elif self.occNumber != -1:
-#                 # We have no count of occurrences but at least a occNumber
-#                 # (this means it isn't a boolean search op.)
-#                 result.append(u' <b>(%i/?)</b>' % self.occNumber)                
-                
             if self.occHtml != u"":
                 result.append(u'<br>\n')
                 result.append(self.occHtml)
@@ -154,8 +147,6 @@ class _SearchResultItemInfo(object):
             self.html = u"".join(result)
             
         return self.html
-
-#                         self.htmlfound.append('<table><tr><td bgcolor="#0000ff" width="6"></td><td>' + u"".join(bluew) + "</td></tr></table>")
 
 
 
@@ -169,6 +160,7 @@ class SearchResultListBox(wxHtmlListBox):
         self.foundinfo = []
         self.searchOp = None # last search operation set by showFound
         self.SetItemCount(0)
+        self.isShowingSearching = False  # Show only a visual feedback while searching
 
         EVT_LEFT_DOWN(self, self.OnLeftDown)
         EVT_LEFT_DCLICK(self, self.OnLeftDown)
@@ -176,54 +168,32 @@ class SearchResultListBox(wxHtmlListBox):
         EVT_LISTBOX_DCLICK(self, ID, self.OnDClick)
 
     
-#     def _buildContainerCell(self, i):
-#         parser = wxHtmlWinParser()
-#         
-#         dc = wxClientDC(self)
-#         font = dc.GetFont()
-#         
-#         # parser.SetDC(None)
-#         parser.SetDC(dc)
-# 
-#         # set FS
-#         # parser.SetStandardFonts()
-#         
-#         cell = parser.Parse("")  # self.OnGetItem(i))
-#         f2 = dc.GetFont()
-#         dc.SetFont(font)
-#         
-#         return None
-#         cell.Layout(self.GetClientSize().x - 2*self.GetMargins().x)
-#         parser.SetDC(None)
-#         
-#         print "_buildContainerCell2", repr(dc.thisown)
-#         
-#         return cell
-#     
-#     
-#     def OnDrawItem(self, dc, rect, i):
-#         # if selected
-#         return
-#         
-#         cell = self._buildContainerCell(i)
-#         
-#         rendinfo = wxHtmlRenderingInfo()
-#         cell.Draw(dc, rect.x+2, rect.y+2, 0, 2000000000, rendinfo)
-# 
-# 
-#     def OnMeasureItem(self, i):
-#         cell = self._buildContainerCell(i)
-#         return 30
-#         
-#         return cell.GetHeight() + cell.GetDescent() + 4
-
     def OnGetItem(self, i):
+        if self.isShowingSearching:
+            return u"<b>Searching...</b>"
+
         try:
             return self.foundinfo[i].getHtml()
         except IndexError:
             return u""
 
+    def showSearching(self):
+        """
+        Shows a "Searching..." as visual feedback while search runs
+        """
+        self.isShowingSearching = True
+        self.SetItemCount(1)
+        self.Refresh()
+        self.Update()
+
+
     def showFound(self, sarOp, found, wikiDocument):
+        """
+        Shows the results of search operation sarOp
+        found -- list of matching wiki words
+        wikiDocument -- WikiDocument(=WikiDataManager) object
+        """
+        self.isShowingSearching = False
         if found is None:
             self.found = []
             self.foundinfo = []
@@ -322,9 +292,6 @@ class SearchResultListBox(wxHtmlListBox):
         
         wikiDocument = self.pWiki.getWikiDocument()
         text = wikiDocument.getWikiPage(info.wikiWord).getLiveText()
-#         searchOp = self.searchWikiDialog.buildSearchReplaceOperation()
-#         searchOp.replaceOp = False
-#         searchOp.cycleToStart = True
 
         pos = self.searchOp.searchText(text, info.occPos[1])
         if pos[0] == -1:
@@ -351,22 +318,11 @@ class SearchResultListBox(wxHtmlListBox):
 
         info = self.foundinfo[sel]
 
-#         if self.pWiki.getCurrentWikiWord() == info.wikiWord:
-#             # Search next
-#             searchOp = self.searchWikiDialog.buildSearchReplaceOperation()
-#             searchOp.replaceOp = False
-#             searchOp.cycleToStart = True
-#             self.pWiki.editor.executeSearch(searchOp,
-#                     -1, next=True)[1]
-#         else:
         self.pWiki.openWikiPage(info.wikiWord)
-        # self.pagePosNext = 0
         if info.occPos[0] != -1:
             self.pWiki.getActiveEditor().SetSelectionByCharPos(info.occPos[0],
                     info.occPos[1])
 
-#                 executeSearch(searchOp, 0)
-        
         # Works in fast search popup only if called twice
         self.pWiki.getActiveEditor().SetFocus()
         self.pWiki.getActiveEditor().SetFocus()
@@ -382,10 +338,8 @@ class SearchResultListBox(wxHtmlListBox):
         
         if pos.x < (5 + 6):
             # Click inside the blue bar
-#             sel = self.GetSelection()
             self.SetSelection(hitsel)
             self._pageListFindNext()
-#             self.SetSelection(sel)
             return
         
         evt.Skip()
@@ -484,6 +438,7 @@ class SearchWikiDialog(wxDialog):   # TODO
 
 
     def _refreshPageList(self):
+        self.ctrls.htmllbPages.showSearching()
         self.SetCursor(wxHOURGLASS_CURSOR)
         self.Freeze()
         try:
@@ -1309,7 +1264,6 @@ class FastSearchPopup(wxFrame):
         setWindowSize(self, (width, height))
         setWindowPos(self, fullVisible=True)
 
-#         EVT_KILL_FOCUS(self, self.OnKillFocus)
         EVT_KILL_FOCUS(self.resultBox, self.OnKillFocus)
         EVT_CLOSE(self, self.OnClose)
 
@@ -1336,12 +1290,9 @@ class FastSearchPopup(wxFrame):
         sarOp.cycleToStart = False
         sarOp.wildCard = 'regex'
         sarOp.wikiWide = True
-#         sarOp.listWikiPagesOp = self.listPagesOperation
-
-#         if not sarOp.booleanOp:
-#             sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
   
         return sarOp
+
 
     def runSearchOnWiki(self, text):
         """
@@ -1349,11 +1300,10 @@ class FastSearchPopup(wxFrame):
         """
         self.searchText = text
         self._refreshPageList()
-#         if not self.ctrls.htmllbPages.IsEmpty():
-#             self.ctrls.htmllbPages.SetFocus()
-#             self.ctrls.htmllbPages.SetSelection(0)
+
 
     def _refreshPageList(self):
+        self.resultBox.showSearching()
         self.SetCursor(wxHOURGLASS_CURSOR)
         self.Freeze()
         try:

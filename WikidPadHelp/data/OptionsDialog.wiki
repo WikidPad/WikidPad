@@ -136,6 +136,9 @@ Set the color of attributes and scripts (e.g. <%"this one"%>) in the editor. See
 *Background color*
 (Works only partially). Specify the background color of the editor. See "Plain text color" above for details.
 
+*Selection bg. color*
+Specify the background color of selected text. See "Plain text color" above for details.
+
 *Sync. highlighting limit*
 Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 3000 to 5000 bytes
 
@@ -144,6 +147,18 @@ For async. highlighting how long to wait after key press (in seconds) before sta
 
 *Auto-unbullets*
 When this option is active and enter is pressed on a line which contains only a bullet or a numbering without text, the bullet is removed. See BulletedLists for details.
+
+
+++++ Searching
+
+*Context characters* *before* and *after*
+Chooses the number of characters to show before and after a found match as context in wiki-wide search. For an "anded" regex, the beginning of the page is shown with so many characters as the sum of the "before" and "after" values. Using context may slow down the searching a bit.
+
+*Count Occurrences*
+Counts how many matches a page contains and shows this number in parentheses after each page name in wiki-wide search results. This option slows down searching.
+
+*Delay before auto-close*
+Controls how many seconds of inactivity before the incremental search is closed automatically. 0 means "wait forever".
 
 
 +++ Current wiki

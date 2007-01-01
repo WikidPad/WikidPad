@@ -11,6 +11,8 @@ from StringOps import uniToGui, guiToUni, htmlColorToRgbTuple,\
 
 from AdditionalDialogs import DateformatDialog, FontFaceDialog
 
+import WikiHtmlView
+
 
 class PredefinedOptionsPanel(wxPanel):
     def __init__(self, parent, resName):
@@ -94,6 +96,7 @@ class OptionsDialog(wxDialog):
             ("html_export_proppattern", "tfHtmlExportProppattern", "tre"),
             ("html_preview_pics_as_links", "cbHtmlPreviewPicsAsLinks", "b"),
             ("html_export_pics_as_links", "cbHtmlExportPicsAsLinks", "b"),
+            ("html_preview_renderer", "chHtmlPreviewRenderer", "seli"),
             ("export_table_of_contents", "chTableOfContents", "seli"),
             
             ("html_body_link", "tfHtmlLinkColor", "color0"),
@@ -102,14 +105,21 @@ class OptionsDialog(wxDialog):
             ("html_body_text", "tfHtmlTextColor", "color0"),
             ("html_body_bgcolor", "tfHtmlBgColor", "color0"),
             ("html_body_background", "tfHtmlBgImage", "t"),
+            ("html_header_doctype", "tfHtmlDocType", "t"),
 
             ("editor_plaintext_color", "tfEditorPlaintextColor", "color0"),
             ("editor_link_color", "tfEditorLinkColor", "color0"),
             ("editor_attribute_color", "tfEditorAttributeColor", "color0"),
             ("editor_bg_color", "tfEditorBgColor", "color0"),
+            ("editor_selection_bg_color", "tfEditorSelectionBgColor", "color0"),
             ("sync_highlight_byte_limit", "tfSyncHighlightingByteLimit", "i0+"),
             ("async_highlight_delay", "tfAsyncHighlightingDelay", "f0+"),
             ("editor_autoUnbullets", "cbAutoUnbullets", "b"),
+
+            ("search_wiki_context_before", "tfWwSearchContextBefore", "i0+"),
+            ("search_wiki_context_after", "tfWwSearchContextAfter", "i0+"),
+            ("search_wiki_count_occurrences", "cbWwSearchCountOccurrences", "b"),
+            ("incSearch_autoOffDelay", "tfIncSearchAutoOffDelay", "i0+"),
 
             # wiki specific options
 
@@ -128,8 +138,10 @@ class OptionsDialog(wxDialog):
             ("OptionsPageSecurity", u"  Security"),
             ("OptionsPageTree", u"  Tree"),
             ("OptionsPageHtml", u"  HTML preview/export"),
+            ("OptionsPageHtmlHeader", u"    HTML header"),
             ("OptionsPageAutosave", u"  Autosave"),
             ("OptionsPageEditor", u"  Editor"),
+            ("OptionsPageSearching", u"  Searching"),            
             ("OptionsPageCurrentWiki", u"Current Wiki")
     )
 
@@ -202,6 +214,9 @@ class OptionsDialog(wxDialog):
                 self.pWiki.getConfig().getint("main",
                 "new_window_on_follow_wiki_url") != 0)
 
+        self.ctrls.chHtmlPreviewRenderer.Enable(
+                WikiHtmlView.WikiHtmlViewIE is not None)
+
         self.activePageIndex = -1
         for panel in self.panelList:
             panel.Show(False)
@@ -234,6 +249,8 @@ class OptionsDialog(wxDialog):
                 lambda evt: self.selectColor(self.ctrls.tfEditorAttributeColor))
         EVT_BUTTON(self, GUI_ID.btnSelectEditorBgColor,
                 lambda evt: self.selectColor(self.ctrls.tfEditorBgColor))
+        EVT_BUTTON(self, GUI_ID.btnSelectEditorSelectionBgColor,
+                lambda evt: self.selectColor(self.ctrls.tfEditorSelectionBgColor))
 
         EVT_BUTTON(self, GUI_ID.btnSelectPageStatusTimeFormat,
                 self.OnSelectPageStatusTimeFormat)

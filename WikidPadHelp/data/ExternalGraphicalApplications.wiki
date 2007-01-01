@@ -38,9 +38,19 @@ The programs are called using [Insertions]. The keys for the insertions are:
     * ploticus: Ploticus
 
 
-The values (which should be quoted) must follow the syntax of the respective program, please see the documentation of the applications for details.
+The values must follow the syntax of the respective program, please see the documentation of the applications for details.
+
+The values should be quoted (enclosed by quotation symbols) if they shall contain special characters or newlines. A quotation symbol is an arbitrary number of one of the quotation characters ", ', / or \ (double quotation mark, single quotation mark, slash or backslash). The starting and ending symbols must be the same. Examples for quotation symbols are:
+
+"
+'''
+//
+/////
+\\
 
 When exporting HTML, the rendered image files are put in the same directory where the HTML files are.
+
+If the GraphViz or Ploticus applications return errors or warnings, you see these instead of the rendered images. To suppress warnings/errors use the appendix "noerror" after the main value of the insertion.
 
 
 +++ Example
@@ -51,7 +61,7 @@ If you have downloaded and installed all applications you can see here how the g
 *MimeTeX*: You should know that [:eqn:"a^2 + b^2 = c^2"] is important!
 
 
-*GraphViz (Dot)*
+*GraphViz (Dot, with "noerror" appendix)*
 [:dot:"
 digraph {
 a -> b
@@ -59,7 +69,7 @@ b -> c
 b -> d
 d -> a
 }
-"]
+"; noerror]
 
 
 *Ploticus*

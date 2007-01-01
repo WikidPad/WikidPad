@@ -1,7 +1,7 @@
 """
 Temporary file management
 """
-import sys, os, traceback, sets, tempfile
+import sys, os, traceback, sets, tempfile, urllib
 
 import wx
 
@@ -100,7 +100,7 @@ class TempFileSet:
         return getRelativePath(relativeTo, fullPath)
         
     
-    def getRelativeUrl(self, relativeTo, fullPath):
+    def getRelativeUrl(self, relativeTo, fullPath, pythonUrl=False):
         """
         Returns URL relative to relativeTo. If relativeTo is ""
         the URL is absolute, if it is None the preferred relativeTo
@@ -109,7 +109,7 @@ class TempFileSet:
         if relativeTo is None:
             relativeTo = self.preferredRelativeTo
         
-        return getRelativeUrl(relativeTo, fullPath)
+        return getRelativeUrl(relativeTo, fullPath, pythonUrl=pythonUrl)
         
 
     def createTempFile(self, content, suffix, path=None, relativeTo=None):
@@ -128,7 +128,8 @@ class TempFileSet:
         return self.getRelativePath(relativeTo, fullPath)
 
 
-    def createTempFileAndUrl(self, content, suffix, path=None, relativeTo=None):
+    def createTempFileAndUrl(self, content, suffix, path=None, relativeTo=None,
+            pythonUrl=False):
         """
         Specialized function. Creates a file, fills it with content 
         (byte string), closes it and returns (filepath, url) tuple
@@ -139,10 +140,11 @@ class TempFileSet:
         fullPath = self.createTempFile(content, suffix, path, "")
         
         return (self.getRelativePath(relativeTo, fullPath),
-                self.getRelativeUrl(relativeTo, fullPath))
+                self.getRelativeUrl(relativeTo, fullPath, pythonUrl=pythonUrl))
 
 
-    def createTempUrl(self, content, suffix, path=None, relativeTo=None):
+    def createTempUrl(self, content, suffix, path=None, relativeTo=None,
+            pythonUrl=False):
         """
         Specialized function. Creates a file, fills it with content 
         (byte string), closes it and returns its URL.
@@ -151,7 +153,7 @@ class TempFileSet:
         """
         fullPath = self.createTempFile(content, suffix, path, "")
         
-        return self.getRelativeUrl(relativeTo, fullPath)
+        return self.getRelativeUrl(relativeTo, fullPath, pythonUrl=pythonUrl)
 
 
 
@@ -174,7 +176,8 @@ def createTempFile(content, suffix, path=None, relativeTo=None):
     return getRelativePath(relativeTo, fullPath)
 
 
-def createTempFileAndUrl(content, suffix, path=None, relativeTo=None):
+def createTempFileAndUrl(content, suffix, path=None, relativeTo=None,
+        pythonUrl=False):
     """
     Specialized function. Creates a file, fills it with content 
     (byte string), closes it and returns (filepath, url) tuple
@@ -185,10 +188,10 @@ def createTempFileAndUrl(content, suffix, path=None, relativeTo=None):
     fullPath = createTempFile(content, suffix, path, None)
     
     return (getRelativePath(relativeTo, fullPath),
-            getRelativeUrl(relativeTo, fullPath))
+            getRelativeUrl(relativeTo, fullPath, pythonUrl=pythonUrl))
 
 
-def createTempUrl(content, suffix, path=None, relativeTo=None):
+def createTempUrl(content, suffix, path=None, relativeTo=None, pythonUrl=False):
     """
     Specialized function. Creates a file in directory path, fills it with 
     content (byte string), closes it and returns its URL.
@@ -197,7 +200,7 @@ def createTempUrl(content, suffix, path=None, relativeTo=None):
     """
     fullPath = createTempFile(content, suffix, path, None)
     
-    return getRelativeUrl(relativeTo, fullPath)
+    return getRelativeUrl(relativeTo, fullPath, pythonUrl=pythonUrl)
 
 
 def getRelativePath(relativeTo, fullPath):
@@ -215,16 +218,22 @@ def getRelativePath(relativeTo, fullPath):
     return relPath
     
     
-def getRelativeUrl(relativeTo, fullPath):
+def getRelativeUrl(relativeTo, fullPath, pythonUrl=False):
     """
     Returns URL relative to relativeTo. If relativeTo is "" or None
     the URL is absolute.
     """
     if relativeTo is None or relativeTo == "":
-        return escapeHtml(wx.FileSystem.FileNameToURL(fullPath))
+        if pythonUrl:
+            return escapeHtml(urllib.pathname2url(fullPath))
+        else:
+            return escapeHtml(wx.FileSystem.FileNameToURL(fullPath))
 
     relPath = relativeFilePath(relativeTo, fullPath)
     if relPath is None:
-        return escapeHtml(wx.FileSystem.FileNameToURL(fullPath))
+        if pythonUrl:
+            return escapeHtml(urllib.pathname2url(fullPath))
+        else:
+            return escapeHtml(wx.FileSystem.FileNameToURL(fullPath))
 
     return urlFromPathname(relPath)

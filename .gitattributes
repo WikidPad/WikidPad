@@ -569,6 +569,7 @@ lib/pwiki/Utilities.py -text
 lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiFormatting.py -text
 lib/pwiki/WikiHtmlView.py -text
+lib/pwiki/WikiHtmlViewIE.py -text
 lib/pwiki/WikiTreeCtrl.py -text
 lib/pwiki/WikiTxtCtrl.py -text
 lib/pwiki/WindowLayout.py -text
