@@ -1,7 +1,11 @@
 ﻿++ Change Log
 
+Dec. 24, 2006 (1.7final)
 
-Nov. 22, 2006 (1.7rc4)
+    * Only version name was changed
+
+
+Nov. 22, 2006 (1.7rc4, repository revision in "mbutscher" branch: 98)
 
     * Windows binary installer: .wiki file of WikidPadHelp are now
       always overwritten on updating.
