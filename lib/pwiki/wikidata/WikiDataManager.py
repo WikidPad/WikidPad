@@ -660,7 +660,10 @@ class WikiDataManager(MiscEventSourceMixin):
             
             for resultWord in self.searchWiki(sarOp):
                 wikiPage = self.getWikiPage(resultWord)
-                text = wikiPage.getLiveText()
+                text = wikiPage.getLiveTextNoTemplate()
+                if text is None:
+                    continue
+
                 sarOp.replaceStr = re.escape(toWikiWord)
                 sarOp.replaceOp = True
                 sarOp.cycleToStart = False
@@ -714,10 +717,13 @@ class WikiDataManager(MiscEventSourceMixin):
                     # Avoid to rename same page twice (alias and real) or more often
                     continue
 
-                text = wikiPage.getLiveText()
+                text = wikiPage.getLiveTextNoTemplate()
+                if text is None:
+                    continue
+
                 if sarOp.testWikiPage(k, text) == True:
                     preResultSet.add(k)
-                
+
                 exclusionSet.add(k)
 
             # Now search database

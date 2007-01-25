@@ -1,6 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 
-import codecs, new, types, traceback, sys
+import codecs, new, types, traceback, sys, os
 from ctypes import *
 
 import SqliteThin3 as _module
@@ -58,6 +58,17 @@ SQLITE_UTF16LE = 3
 SQLITE_UTF16   = 4
 
 
+def isLinux():
+    """
+    Return if working on Linux system
+    """
+    try:
+        return os.uname()[0] == "Linux"
+    except AttributeError:
+        return False
+
+
+
 class Binary:
     "String wrapper to distinguish between blob and text for bind_auto"
 
@@ -81,7 +92,12 @@ class SqliteError3(Exception):
 
 
 
-_dll = cdll.sqlite3
+if isLinux():
+    _dll = CDLL("libsqlite3.so")
+else:
+    _dll = cdll.sqlite3
+
+
 
 utf8Encode = codecs.getencoder("UTF8")
 

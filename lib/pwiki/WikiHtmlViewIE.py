@@ -39,7 +39,7 @@ class LinkCreatorForPreviewIe:
         
     def get(self, word, default = None):
         if self.wikiData.isDefinedWikiWord(word):
-            return u"internaljump:%s" % word
+            return urllib.quote(u"internaljump:%s" % word, "/#:;@")
         else:
             return default
 
@@ -52,7 +52,7 @@ class LinkCreatorForPreviewMoz:
         
     def get(self, word, default = None):
         if self.wikiData.isDefinedWikiWord(word):
-            return u"file://internaljump/%s" % word
+            return urllib.quote(u"file://internaljump/%s" % word, "/#:;@")
         else:
             return default
 
@@ -303,11 +303,11 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 word = href[len(internaljumpPrefix):]
                 anchor = None
                 
-            if self.drivingMoz:
-                # unescape word
-                word = urllib.unquote(word)
-                if anchor:
-                    anchor = urllib.unquote(anchor)
+#             if self.drivingMoz:
+            # unescape word
+            word = urllib.unquote(word)
+            if anchor:
+                anchor = urllib.unquote(anchor)
 
             # Now open wiki
             self.presenter.getMainControl().openWikiPage(

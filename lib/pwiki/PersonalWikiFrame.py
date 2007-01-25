@@ -2310,8 +2310,8 @@ These are your default global settings.
 
     def closeWiki(self, saveState=True):
         def errCloseAnywayMsg():
-            return wxMessageBox(u"There is no access to underlying wiki\n"
-                    "Close anyway and loose data?",
+            return wxMessageBox(u"There is no (write-)access to underlying wiki\n"
+                    "Close anyway and loose possible changes?",
                     u'Close anyway',
                     wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION, self)
 

@@ -85,6 +85,14 @@ class DocPage(MiscEventSourceMixin):
             return self.getContent()
 
 
+    def getLiveTextNoTemplate(self):
+        """
+        Return None if page isn't existing instead of creating an automatic
+        live text (e.g. by template).
+        """
+        assert 0 #abstract
+
+
     def replaceLiveText(self, text):
         if len(self.txtEditors) > 0:
             # page is in text editor(s), so call replace on one of it
@@ -325,6 +333,20 @@ class WikiPage(DocPage):
         p["newWord"] = newWord
         
         self.fireMiscEventProps(p)
+
+
+    def getLiveTextNoTemplate(self):
+        """
+        Return None if page isn't existing instead of creating an automatic
+        live text (e.g. by template).
+        """
+        if len(self.txtEditors) > 0:
+            return self.getLiveText()
+        else:
+            if self.isDefined():
+                return self.getContent()
+            else:
+                return None
 
 
     def getContent(self):
@@ -671,6 +693,16 @@ class FunctionalPage(DocPage):
         else:
             return u""
 
+
+    def getLiveTextNoTemplate(self):
+        """
+        Return None if page isn't existing instead of creating an automatic
+        live text (e.g. by template).
+        Functional pages by definition exist always 
+        """
+        return self.getLiveText()
+
+
     def getContent(self):     
         if self.funcTag in ("global/[TextBlocks]", "global/[PWL]",
                 "global/[CCBlacklist]"):
@@ -678,6 +710,7 @@ class FunctionalPage(DocPage):
         elif self.funcTag in ("wiki/[TextBlocks]", "wiki/[PWL]",
                 "wiki/[CCBlacklist]"):
             return self._loadDbSpecificPage(self.funcTag[5:])
+
 
     def getFormatDetails(self):
         """
@@ -724,44 +757,6 @@ class FunctionalPage(DocPage):
             self._saveDbSpecificPage(text, self.funcTag[5:])
 
         self.saveDirtySince = None
-
-
-#         if self.funcTag == "global/[TextBlocks]":
-#             tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
-#                     "[TextBlocks].wiki")
-# #             tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[TextBlocks].wiki")
-#             tbFile = open(tbLoc, "w")
-#             try:
-#                 tbFile.write(BOM_UTF8)
-#                 tbFile.write(utf8Enc(text)[0])
-#             finally:
-#                 tbFile.close()
-#         elif self.funcTag == "global/[PWL]":
-#             tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
-#                     "[PWL].wiki")
-# #             tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[PWL].wiki")
-#             tbFile = open(tbLoc, "w")
-#             try:
-#                 tbFile.write(BOM_UTF8)
-#                 tbFile.write(utf8Enc(text)[0])
-#             finally:
-#                 tbFile.close()
-#         elif self.funcTag == "wiki/[TextBlocks]":
-#             wikiData = self.wikiDocument.getWikiData()
-#             if wikiData.isDefinedWikiWord("[TextBlocks]") and text == u"":
-#                 # Delete content
-#                 wikiData.deleteContent("[TextBlocks]")
-#             else:
-#                 if text != u"":
-#                     wikiData.setContent("[TextBlocks]", text)
-#         elif self.funcTag == "wiki/[PWL]":
-#             wikiData = self.wikiDocument.getWikiData()
-#             if wikiData.isDefinedWikiWord("[PWL]") and text == u"":
-#                 # Delete content
-#                 wikiData.deleteContent("[PWL]")
-#             else:
-#                 if text != u"":
-#                     wikiData.setContent("[PWL]", text)
 
 
     def update(self, text, fireEvent=True):

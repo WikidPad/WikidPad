@@ -38,6 +38,10 @@ except:
     WindowsHacks = None
 
 
+# Compiler flag for float division
+CO_FUTURE_DIVISION = 0x2000
+
+
 
 def bytelenSct_utf8(us):
     """
@@ -1228,6 +1232,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # if no selection eval all scripts
         if startPos == endPos or index > -1:
+            # Execute all or selected script blocks on the page (or other
+            #   related pages)
+
             # get the text of the current page
             text = self.GetText()
             
@@ -1279,9 +1286,13 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
                 match = WikiFormatting.ScriptRE.search(text, match.end())
         else:
+            # Evaluate selected text
             text = self.GetSelectedText()
             try:
-                result = eval(re.sub(u"[\n\r]", u"", text), self.evalScope)
+                compThunk = compile(re.sub(u"[\n\r]", u"", text), "<string>",
+                        "eval", CO_FUTURE_DIVISION)
+                result = eval(compThunk, self.evalScope)
+#                 result = eval(re.sub(u"[\n\r]", u"", text), self.evalScope)
             except Exception, e:
                 s = StringIO()
                 traceback.print_exc(file=s)

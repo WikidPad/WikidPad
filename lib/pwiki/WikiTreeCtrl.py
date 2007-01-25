@@ -1178,11 +1178,22 @@ class WikiTreeCtrl(wxTreeCtrl):
             
             # This is time consuming
             children = nodeObj.listChildren()
-            
+
+            childNodeIds = []
             nodeid, cookie = self.GetFirstChild(parentnodeid)
+            while nodeid is not None and nodeid.IsOk():
+                childNodeIds.append(nodeid)
+                nodeid, cookie = self.GetNextChild(parentnodeid, cookie)
+            
+            idIdx = 0
+            
+#             nodeid, cookie = self.GetFirstChild(parentnodeid)
+            del nodeid
+            
             tci = 0  # Tree child index
             for c in children:
-                if nodeid.IsOk():
+                if idIdx < len(childNodeIds):
+                    nodeid = childNodeIds[idIdx]
                     nodeObj = self.GetPyData(nodeid)
                     if c.nodeEquality(nodeObj):
                         # Previous child matches new child -> normal refreshing
@@ -1200,7 +1211,8 @@ class WikiTreeCtrl(wxTreeCtrl):
                             
                             yield None
                             
-                        nodeid, cookie = self.GetNextChild(nodeid, cookie)
+                        
+                        idIdx += 1
                         tci += 1                           
 
                     else:
@@ -1227,18 +1239,20 @@ class WikiTreeCtrl(wxTreeCtrl):
             
             selnodeid = self.GetSelection()
             
-            while nodeid.IsOk():
+            while idIdx < len(childNodeIds):
+                nodeid = childNodeIds[idIdx]
                 # Trying to prevent failure of GetNextChild() after deletion
                 delnodeid = nodeid                
-                nodeid, cookie = self.GetNextChild(nodeid, cookie)
+                idIdx += 1
                 
-                if selnodeid.IsOk() and selnodeid == delnodeid:
+                if selnodeid is not None and selnodeid.IsOk() and \
+                        selnodeid == delnodeid:
                     self.Unselect()
                 self.Delete(delnodeid)
         else:
-            # Recreation of children not necessary -> simple refresh<
+            # Recreation of children not necessary -> simple refresh
             nodeid, cookie = self.GetFirstChild(parentnodeid)
-            while nodeid.IsOk():
+            while nodeid is not None and nodeid.IsOk():
                 if self.IsExpanded(nodeid):
                     # Recursive generator call
                     try:
@@ -1253,7 +1267,7 @@ class WikiTreeCtrl(wxTreeCtrl):
                     
                     yield None
 
-                nodeid, cookie = self.GetNextChild(nodeid, cookie)
+                nodeid, cookie = self.GetNextChild(parentnodeid, cookie)
             
         raise StopIteration
 

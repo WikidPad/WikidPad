@@ -20,7 +20,7 @@ wikidpad = Target(
 
 
 setup(name='WikidPad',
-      version='1.8beta',
+      version='1.8rc',
       author='Michael Butscher',
       author_email='mbutscher@gmx.de',
       url='http://www.mbutscher.nextdesigns.net/software.html',
@@ -35,10 +35,10 @@ setup(name='WikidPad',
 #                   ('lib', glob('sql_mar.*')),
                   ('extensions', glob('extensions/*.*')),
                   ('', ['sqlite3.dll', 'WikidPad.xrc', 'readme_Wic.txt', "gadfly.zip"]),
-                  ('WikidPadHelp', glob(os.path.join('WikidPadHelpOG-static', "*.wiki"))),
+                  ('WikidPadHelp', glob(os.path.join('WikidPadHelpOG-static18', "*.wiki"))),
                   (os.path.join('WikidPadHelp', 'data'),
-                    glob(os.path.join('WikidPadHelpOG-static', 'data', "*.*"))),
+                    glob(os.path.join('WikidPadHelpOG-static18', 'data', "*.*"))),
                   (os.path.join('WikidPadHelp', 'files'),
-                    glob(os.path.join('WikidPadHelpOG-static', 'files', "*.*"))),
+                    glob(os.path.join('WikidPadHelpOG-static18', 'files', "*.*"))),
                   ('export', [os.path.join('export', 'wikistyle.css')])]
 )
