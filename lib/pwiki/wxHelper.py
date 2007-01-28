@@ -7,6 +7,7 @@ from   wxPython.wx import wxNewId, wxSystemSettings_GetMetric, wxSYS_SCREEN_X, \
 
 from wx.xrc import XRCCTRL, XRCID
 
+import wx
 
 from MiscEvent import KeyFunctionSink
 
@@ -422,6 +423,41 @@ class IconCache:
         Return a new (cloned) image list
         """
         return cloneImageList(self.iconImageList)
+        
+        
+    def getImageList(self):
+        """
+        Return the internal image list. The returned object should be given
+        wx components only with SetImageList, not AssignImageList
+        """
+        return self.iconImageList
+        
+
+
+
+
+class LayerSizer(wx.PySizer):
+    def __init__(self):
+        wx.PySizer.__init__(self)
+
+
+    def CalcMin(self):
+        minw = 0
+        minh = 0
+        for item in self.GetChildren():
+            mins = item.GetMinSize()
+            minw = max(minw, mins.width)
+            minh = max(minh, mins.height)
+
+        return wx.Size(minw, minh)
+
+
+    def RecalcSizes(self):
+        pos = self.GetPosition()
+        size = self.GetSize()
+        for item in self.GetChildren():
+            item.SetDimension(pos, size)
+
 
 
 # class ColoredStatusBar(wx.StatusBar):

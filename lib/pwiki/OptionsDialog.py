@@ -111,7 +111,9 @@ class OptionsDialog(wxDialog):
             ("editor_link_color", "tfEditorLinkColor", "color0"),
             ("editor_attribute_color", "tfEditorAttributeColor", "color0"),
             ("editor_bg_color", "tfEditorBgColor", "color0"),
+            ("editor_selection_fg_color", "tfEditorSelectionFgColor", "color0"),
             ("editor_selection_bg_color", "tfEditorSelectionBgColor", "color0"),
+            ("editor_caret_color", "tfEditorCaretColor", "color0"),
             ("sync_highlight_byte_limit", "tfSyncHighlightingByteLimit", "i0+"),
             ("async_highlight_delay", "tfAsyncHighlightingDelay", "f0+"),
             ("editor_autoUnbullets", "cbAutoUnbullets", "b"),
@@ -249,8 +251,13 @@ class OptionsDialog(wxDialog):
                 lambda evt: self.selectColor(self.ctrls.tfEditorAttributeColor))
         EVT_BUTTON(self, GUI_ID.btnSelectEditorBgColor,
                 lambda evt: self.selectColor(self.ctrls.tfEditorBgColor))
+        EVT_BUTTON(self, GUI_ID.btnSelectEditorSelectionFgColor,
+                lambda evt: self.selectColor(self.ctrls.tfEditorSelectionFgColor))
         EVT_BUTTON(self, GUI_ID.btnSelectEditorSelectionBgColor,
                 lambda evt: self.selectColor(self.ctrls.tfEditorSelectionBgColor))
+        EVT_BUTTON(self, GUI_ID.btnSelectEditorCaretColor,
+                lambda evt: self.selectColor(self.ctrls.tfEditorCaretColor))
+
 
         EVT_BUTTON(self, GUI_ID.btnSelectPageStatusTimeFormat,
                 self.OnSelectPageStatusTimeFormat)

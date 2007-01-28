@@ -9,6 +9,7 @@ CTRL-ALT-H      heading
 
 *Commands*
 CTRL-L          activate link
+CTRL-ALT-L      activate wikiword in a new tab
 CTRL-W          rewrap text at position
 CTRL-E          eval scripts
 CTRL-F          start incremental search, perform next search
@@ -26,22 +27,25 @@ ALT-RIGHT       go forward in history
 CTRL-O          open wiki word
 CTRL-S          save current word
 CTRL-R          replace
-CTRL-Alt-R      rename the current wiki word
+CTRL-ALT-R      rename the current wiki word
 CTRL-D          delete the current word, and content for that word
 CTRL-UP         view parents of current word
 CTRL-DOWN       view children of current word
 CTRL-SHIFT-UP   view parentless nodes
-Ctrl-Alt-B      add a bookmark
+CTRL-ALT-B      add a bookmark
 
-*Zooming*
+*View*
 CTRL-+          zoom in
 CTRL--          zoom out
+CTRL-SHIFT-A    show edit mode of current tab
+CTRL-SHIFT-S    show preview mode of current tab
+
 
 *Misc*
-Ctrl-T          hide/show the tree control
-Ctrl-N          new Wiki
-Ctrl-Alt-O      open wiki
-Ctrl-Shift-B    view bookmarks
+CTRL-T          hide/show the tree control
+CTRL-N          new Wiki
+CTRL-ALT-O      open wiki
+CTRL-SHIFT-B    view bookmarks
 F6              switch between tree and editor
-Ctrl-Tab        Switch between "Edit" and "Preview" tabs
+CTRL-TAB        switch between tabs
 

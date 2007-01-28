@@ -38,6 +38,10 @@ except:
     WindowsHacks = None
 
 
+# Compiler flag for float division
+CO_FUTURE_DIVISION = 0x2000
+
+
 
 def bytelenSct_utf8(us):
     """
@@ -81,7 +85,7 @@ class IncrementalSearchDialog(wxFrame):
         self.tfInput.SetFocus()
 
         config = self.txtCtrl.presenter.getConfig()
-        
+
         self.closeDelay = 1000 * config.getint("main", "incSearch_autoOffDelay",
                 0)  # Milliseconds to close or 0 to deactivate
 
@@ -266,7 +270,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.AutoCompSetSeparator(ord('~'))
 
         # register some event handlers
-        self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(), self, (
+        self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
+                self, (
+#         self.presenterListener = KeyFunctionSink((
                 ("options changed", self.onOptionsChanged),  # fired by PersonalWikiFrame
                 ("saving all pages", self.onSavingAllPages),
                 ("closing current wiki", self.onClosingCurrentWiki),
@@ -274,6 +280,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 ("reloaded current page", self.onReloadedCurrentPage)
                 # ("command copy", self.onCmdCopy)
         ))
+
+#         self.presenter.getMiscEvent().addListener(self.presenterListener)
+
 
         self.wikiPageListener = KeyFunctionSink((
                 ("updated wiki page", self.onWikiPageUpdated),   # fired by a WikiPage
@@ -341,8 +350,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         Close the editor (=prepare for destruction)
         """
-        # self.unloadCurrentDocPage({})
+        self.unloadCurrentDocPage({})   # ?
         self.presenterListener.disconnect()
+#         self.presenter.getMiscEvent().removeListener(self.presenterListener)
 
 
     def Cut(self):
@@ -621,6 +631,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         self.loadedDocPage.addTxtEditor(self)
 
+        self.presenter.setTitle(self.loadedDocPage.getTitle())
+
 
     def loadWikiPage(self, wikiPage, evtprops=None):
         """
@@ -671,8 +683,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if evtprops is None:
             evtprops = {}
         p2 = evtprops.copy()
-        p2.update({"loading current page": True})
-        self.presenter.getMainControl().fireMiscEventProps(p2)  # TODO Remove this hack
+        p2.update({"loading wiki page": True, "wikiPage": wikiPage})
+        self.presenter.fireMiscEventProps(p2)  # TODO Remove this hack
 
         self.pageType = self.loadedDocPage.getProperties().get(u"pagetype",
                 [u"normal"])[-1]
@@ -751,6 +763,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         else:
             pass   # TODO Error message?
 
+        self.presenter.setTitle(self.loadedDocPage.getTitle())
+
 
     def onReloadedCurrentPage(self, miscevt):
         """
@@ -803,12 +817,23 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         if coltuple is None:
             coltuple = (255, 255, 255)
-            
+
         color = wxColour(*coltuple)
-        
+
         for i in xrange(32):
             self.StyleSetBackground(i, color)
 
+        # Set selection foreground color
+        coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
+                "main", "editor_selection_fg_color"))
+
+        if coltuple is None:
+            coltuple = (0, 0, 0)
+
+        color = wxColour(*coltuple)
+        self.SetSelForeground(True, color)
+
+        # Set selection background color
         coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
                 "main", "editor_selection_bg_color"))
 
@@ -817,6 +842,17 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         color = wxColour(*coltuple)
         self.SetSelBackground(True, color)
+
+        # Set caret color
+        coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
+                "main", "editor_caret_color"))
+
+        if coltuple is None:
+            coltuple = (0, 0, 0)
+
+        color = wxColour(*coltuple)
+        self.SetCaretForeground(color)
+        
 
 
     def onWikiPageUpdated(self, miscevt):
@@ -1097,7 +1133,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         return page
 
 
-    def _activateTokens(self, tokens):
+    def activateTokens(self, tokens, newTab=False):
         """
         Helper for activateLink()
         """
@@ -1105,59 +1141,78 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             return False
 
         for tok in tokens:
-            if tok.ttype not in (WikiFormatting.FormatTypes.Url,
-                    WikiFormatting.FormatTypes.WikiWord):
-                continue
-        
             if tok.ttype == WikiFormatting.FormatTypes.WikiWord:
                 searchStr = None
     
                 # open the wiki page
-                self.presenter.getMainControl().openWikiPage(tok.node.nakedWord,
+                if newTab:
+                    presenter = self.presenter.getMainControl().\
+                            createNewDocPagePresenterTab()
+                else:
+                    presenter = self.presenter
+                
+                presenter.openWikiPage(tok.node.nakedWord,   # .getMainControl()
                         motionType="child", anchor=tok.node.anchorFragment)
 
                 searchfrag = tok.node.searchFragment
                 # Unescape search fragment
                 if searchfrag is not None:
-                    searchfrag = self.presenter.getFormatting().\
+                    searchfrag = presenter.getFormatting().\
                             SearchFragmentUnescapeRE.sub(ur"\1", searchfrag)
                     searchOp = SearchReplaceOperation()
                     searchOp.wildCard = "no"   # TODO Why not regex?
                     searchOp.searchStr = searchfrag
     
-                    self.executeSearch(searchOp, 0)
-    
+                    presenter.getSubControl("textedit").executeSearch(
+                            searchOp, 0)
+                            
+                presenter.getMainControl().getMainAreaPanel().\
+                        showDocPagePresenter(presenter)
+
                 return True
-    
+
             elif tok.ttype == WikiFormatting.FormatTypes.Url:
                 self.presenter.getMainControl().launchUrl(tok.node.url)
                 return True
+            else:
+                continue
                 
         return False
 
 
-    def activateLink(self, mousePosition=None):
-        "returns true if the link was activated"
-        linkPos = self.GetCurrentPos()
+    def getActivationTokens(self, mousePosition=None):
         # mouse position overrides current pos
         if mousePosition:
             linkPos = self.PositionFromPoint(mousePosition)
+        else:
+            linkPos = self.GetCurrentPos()
 
         pageAst = self.getPageAst()
         linkCharPos = len(self.GetTextRange(0, linkPos))
-        tokens = pageAst.getTokensForPos(linkCharPos)
 
-        if not self._activateTokens(tokens):
-            if linkCharPos > 0:
-                # Maybe a token left to the cursor was meant, so check
-                # one char to the left
-                tokens = pageAst.getTokensForPos(linkCharPos - 1)
+        result = pageAst.getTokensForPos(linkCharPos)
 
-                return self._activateTokens(tokens)
-        else:
-            return True
+        if linkCharPos > 0:
+            # Maybe a token left to the cursor was meant, so check
+            # one char to the left
+            result += pageAst.getTokensForPos(linkCharPos - 1)
 
-        return False
+        return result
+
+
+    def activateLink(self, mousePosition=None, newTab=False):
+        "returns true if the link was activated"
+        tokens = self.getActivationTokens(mousePosition)
+        return self.activateTokens(tokens, newTab)
+
+# 
+#         if not self.activateTokens(tokens):
+# 
+# 
+#         else:
+#             return True
+# 
+#         return False
 
 
 #  DO NOT DELETE!
@@ -1228,6 +1283,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # if no selection eval all scripts
         if startPos == endPos or index > -1:
+            # Execute all or selected script blocks on the page (or other
+            #   related pages)
+
             # get the text of the current page
             text = self.GetText()
             
@@ -1279,9 +1337,13 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
                 match = WikiFormatting.ScriptRE.search(text, match.end())
         else:
+            # Evaluate selected text
             text = self.GetSelectedText()
             try:
-                result = eval(re.sub(u"[\n\r]", u"", text), self.evalScope)
+                compThunk = compile(re.sub(u"[\n\r]", u"", text), "<string>",
+                        "eval", CO_FUTURE_DIVISION)
+                result = eval(compThunk, self.evalScope)
+#                 result = eval(re.sub(u"[\n\r]", u"", text), self.evalScope)
             except Exception, e:
                 s = StringIO()
                 traceback.print_exc(file=s)

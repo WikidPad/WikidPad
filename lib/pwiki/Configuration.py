@@ -522,7 +522,9 @@ GLOBALDEFAULTS = {
     ("main", "editor_link_color"): "", # Color of links (URL and wikiwords)
     ("main", "editor_attribute_color"): "", # Color of attributes (=properties) and scripts
     ("main", "editor_bg_color"): "",  # Background color of the editor
+    ("main", "editor_selection_fg_color"): "",  # Foreground color of the selection in the editor
     ("main", "editor_selection_bg_color"): "",  # Background color of the selection in the editor
+    ("main", "editor_caret_color"): "",  # Color of caret in the editor
     ("main", "sync_highlight_byte_limit"): "5120",  # Size limit when to start asyn. highlighting in editor
     ("main", "async_highlight_delay"): "0.2",  # Delay after keypress before starting async. highlighting
     ("main", "editor_autoUnbullets"): "True",  # When pressing return on line with lonely bullet, remove bullet?
@@ -549,14 +551,14 @@ GLOBALDEFAULTS = {
     ("main", "strftime"): u"%x %I:%M %p",  # time format when inserting time in a page
     ("main", "pagestatus_timeformat"): u"%x %I:%M %p",  # time format for the page status field in status bar
     ("main", "recent_time_formats"): u"%x %I:%M %p;%m/%d/%y;%d.%m.%y;%d.%m.%Y;%a %Y-%m-%d",
-             # semicolon separated list of recently used time formats
+             # semicolon-separated list of recently used time formats
     ("main", "script_security_level"): "0",  # Allow the use of scripts and
             # import_scripts property? 0: No scripts at all; 1: No import_scripts;
             # 2: allow local import_scripts; 3: allow also global.import_scripts
     ("main", "insertions_allow_eval"): "False",  # Evaluate :eval: and possible other script insertions?
     ("main", "single_process"): "False", # Ensure that only a single process runs per user  
     ("main", "collation_order"): "Default", # Set collation order, Default: system default order, C: ASCII byte value
-    ("main", "collation_uppercaseFirst"): "False" # Sort uppercase first (ABCabc) or normal inside (AaBbCc)
+    ("main", "collation_uppercaseFirst"): "False" # Sort uppercase first (ABCabc) or normal inorder (AaBbCc)
 
     }
 

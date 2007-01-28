@@ -32,9 +32,7 @@ class MiscEventSourceMixin:
                  
         return:  create clone event
         """
-        cm = self.getMiscEvent().createCloneAddProps(props)
-        cm.processSend(first)
-        return cm
+        return self.getMiscEvent().createCloneAddProps(props).processSend(first)
 
 
     def fireMiscEventKeys(self, keys, first=None):
@@ -45,13 +43,8 @@ class MiscEventSourceMixin:
 
         return:  create clone event
         """
-        cm = self.getMiscEvent().createCloneAddKeys(keys)
-        cm.processSend(first)
-        return cm
+        return self.getMiscEvent().createCloneAddKeys(keys).processSend(first)
 
-
-# class ListenerCleaner(object):
-#     __slots__ = ("__weakref__", "listeners")
 
 
 
@@ -114,7 +107,7 @@ class MiscEvent(object):
         result.listeners = self.listeners[:]
         
         if self.properties is not None:
-            result.properties = self.properties.clone()
+            result.properties = self.properties.copy()
 
         return result
 
@@ -151,6 +144,10 @@ class MiscEvent(object):
                 return True
             except ValueError:
                 return False
+
+
+    def setListeners(self, listeners):
+        self.listeners = listeners
 
 
     def put(self, key, value = None):
@@ -238,6 +235,8 @@ class MiscEvent(object):
         if deadRefFound:
             self.getParent().cleanDeadRefs()
             
+        return self
+            
             
     def createClone(self):
         """
@@ -313,14 +312,49 @@ class MiscEvent(object):
 
     def noChildrenForMe():
         """
-        Called by a listener toensure that it doesn't get any child events
+        Called by a listener to ensure that it doesn't get any child events
         of this event
         """
         if self.activeListenerIndex == -1:
             # TODO Create/Find a better exception
-            raise StandardError("Must be called during processing ofan event")
+            raise StandardError("Must be called during processing of an event")
             
         self.listeners[self.activeListenerIndex] = None
+
+
+
+class ResendingMiscEvent(MiscEvent):
+    """
+    This specialized MiscEvent registers as listener to a list of other
+    MiscEvents and resends any events send by them. When sending, source is
+    changed to the ResendingEvent (the parent, not the clone).
+    """
+    __slots__ = ("watchedEvents",)
+    
+    def __init__(self, source=None):
+        MiscEvent.__init__(self, source)
+        self.watchedEvents = []
+    
+    def setWatchedEvents(self, watchedEvents):
+        if watchedEvents is None:
+            watchedEvents = []
+
+        for ev in self.watchedEvents:
+            ev.removeListener(self)
+        
+        self.watchedEvents = watchedEvents
+        
+        for ev in self.watchedEvents:
+            ev.addListener(self)
+        
+    def getWatchedEvents(self):
+        return self.watchedEvents
+        
+    def miscEventHappened(self, miscevt):
+        newMiscevt = miscevt.createClone()
+        newMiscevt.setSource(self)
+        newMiscevt.setListeners(self.listeners[:])
+        newMiscevt.processSend()
 
 
 
@@ -355,5 +389,5 @@ class DebugSimple(object):
     
     def miscEventHappened(self, evt):
         print self.text, repr(evt.properties)
-        
-    
+
+

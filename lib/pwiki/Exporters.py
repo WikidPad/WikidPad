@@ -266,7 +266,10 @@ class HtmlXmlExporter:
 
     def setWikiDataManager(self, wikiDataManager):
         self.wikiDataManager = wikiDataManager
-        self.wikiData = self.wikiDataManager.getWikiData()
+        if self.wikiDataManager is None:
+            self.wikiData = None
+        else:
+            self.wikiData = self.wikiDataManager.getWikiData()
 
     def getTempFileSet(self):
         return self.tempFileSet
@@ -372,7 +375,7 @@ class HtmlXmlExporter:
         self.wordAnchor = None
 
         fp.write(self.getFileFooter())
-        fp.reset()        
+        fp.reset()
         realfp.close() 
         self.copyCssFile(self.exportDest)
         return outputFile

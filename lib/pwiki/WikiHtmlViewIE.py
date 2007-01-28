@@ -18,7 +18,8 @@ else:
 
 
 from WikiExceptions import *
-from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID
+from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
+        wxKeyFunctionSink
 
 from MiscEvent import KeyFunctionSink
 
@@ -39,7 +40,7 @@ class LinkCreatorForPreviewIe:
         
     def get(self, word, default = None):
         if self.wikiData.isDefinedWikiWord(word):
-            return u"internaljump:%s" % word
+            return urllib.quote(u"internaljump:%s" % word, "/#:;@")
         else:
             return default
 
@@ -52,7 +53,7 @@ class LinkCreatorForPreviewMoz:
         
     def get(self, word, default = None):
         if self.wikiData.isDefinedWikiWord(word):
-            return u"file://internaljump/%s" % word
+            return urllib.quote(u"file://internaljump/%s" % word, "/#:;@")
         else:
             return default
 
@@ -76,7 +77,8 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
         self.presenter = presenter
 
-        self.presenter.getMiscEvent().addListener(KeyFunctionSink((
+        self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
+                self, (
                 ("loaded current page", self.onLoadedCurrentWikiPage),
                 ("reloaded current page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
@@ -84,7 +86,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 ("options changed", self.onOptionsChanged),
                 ("updated wiki page", self.onUpdatedWikiPage),
                 ("changed live text", self.onChangedLiveText)
-        )), False)
+        ))
 
         self.visible = False
         self.outOfSync = True   # HTML content is out of sync with live content
@@ -109,6 +111,8 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         self.exporterInstance.styleSheet = "file:" + urllib.pathname2url(
                 os.path.join(wxGetApp().globalConfigSubDir,
                 'wikipreview.css'))
+        self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
+
 # 
 #         EVT_KEY_DOWN(self, self.OnKeyDown)
 #         EVT_KEY_UP(self, self.OnKeyUp)
@@ -137,6 +141,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
     def close(self):
         self.setVisible(False)
+        self.presenterListener.disconnect()
 
 
     _DEFAULT_FONT_SIZES = (wxHTML_FONT_SIZE_1, wxHTML_FONT_SIZE_2, 
@@ -303,11 +308,12 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 word = href[len(internaljumpPrefix):]
                 anchor = None
                 
-            if self.drivingMoz:
-                # unescape word
-                word = urllib.unquote(word)
-                if anchor:
-                    anchor = urllib.unquote(anchor)
+#             if self.drivingMoz:
+    
+            # unescape word
+            word = urllib.unquote(word)
+            if anchor:
+                anchor = urllib.unquote(anchor)
 
             # Now open wiki
             self.presenter.getMainControl().openWikiPage(

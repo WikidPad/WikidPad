@@ -223,7 +223,10 @@ class SearchResultListBox(wxHtmlListBox):
                     self.foundinfo = [_SearchResultItemInfo(w) for w in found]
                 else:                    
                     for w in found:
-                        text = wikiDocument.getWikiPage(w).getLiveText()
+                        text = wikiDocument.getWikiPageNoError(w).\
+                                getLiveTextNoTemplate()
+                        if text is None:
+                            continue
                         self.foundinfo.append(
                                 _SearchResultItemInfo(w).buildOccurrence(
                                 text, before, after, (-1, -1), -1))
@@ -233,7 +236,10 @@ class SearchResultListBox(wxHtmlListBox):
                     self.foundinfo = [_SearchResultItemInfo(w) for w in found]
                 else:
                     for w in found:
-                        text = wikiDocument.getWikiPage(w).getLiveText()
+                        text = wikiDocument.getWikiPageNoError(w).\
+                                getLiveTextNoTemplate()
+                        if text is None:
+                            continue
                         pos = sarOp.searchText(text)
                         firstpos = pos
                         
@@ -291,9 +297,13 @@ class SearchResultListBox(wxHtmlListBox):
                 "search_wiki_context_after")
         
         wikiDocument = self.pWiki.getWikiDocument()
-        text = wikiDocument.getWikiPage(info.wikiWord).getLiveText()
+        text = wikiDocument.getWikiPageNoError(info.wikiWord).\
+                getLiveTextNoTemplate()
+        if text is not None:
+            pos = self.searchOp.searchText(text, info.occPos[1])
+        else:
+            pos = (-1, -1)
 
-        pos = self.searchOp.searchText(text, info.occPos[1])
         if pos[0] == -1:
             # Page was changed after last search and contains no more any occurrence 
             info.occCount = 0
@@ -580,9 +590,11 @@ class SearchWikiDialog(wxDialog):   # TODO
         for i in xrange(self.ctrls.htmllbPages.GetCount()):
             self.ctrls.htmllbPages.SetSelection(i)
             wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
-            wikiPage = wikiDocument.getWikiPage(wikiWord)
+            wikiPage = wikiDocument.getWikiPageNoError(wikiWord)
 #                 text = wikiData.getContent(wikiWord)
-            text = wikiPage.getLiveText()
+            text = wikiPage.getLiveTextNoTemplate()
+            if text is None:
+                continue
 
             charStartPos = 0
 

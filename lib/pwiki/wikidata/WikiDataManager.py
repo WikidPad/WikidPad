@@ -502,6 +502,16 @@ class WikiDataManager(MiscEventSourceMixin):
         it wasn't garbage collected yet.
         """
         value = self.wikiPageDict.get(wikiWord)
+
+        if value is not None and isinstance(value, AliasWikiPage):
+            # Check if existing alias page is up to date
+            realWikiWord1 = value.getNonAliasPage().getWikiWord()
+            realWikiWord2 = self.wikiData.getAliasesWikiWord(wikiWord)
+            
+            if realWikiWord1 != realWikiWord2:
+                # if not, retrieve new page
+                value = None
+
         if value is None:
             # No active page available
             realWikiWord = self.wikiData.getAliasesWikiWord(wikiWord)
@@ -509,12 +519,14 @@ class WikiDataManager(MiscEventSourceMixin):
                 # no alias
                 value = WikiPage(self, wikiWord)
             else:
-                realpage = WikiPage(self, realWikiWord)
+#                 realpage = WikiPage(self, realWikiWord)
+                realpage = self.getWikiPageNoError(realWikiWord)
                 value = AliasWikiPage(self, wikiWord, realpage)
 
             self.wikiPageDict[wikiWord] = value
             
             value.getMiscEvent().addListener(self)
+            
 
         return value
 
@@ -660,7 +672,10 @@ class WikiDataManager(MiscEventSourceMixin):
             
             for resultWord in self.searchWiki(sarOp):
                 wikiPage = self.getWikiPage(resultWord)
-                text = wikiPage.getLiveText()
+                text = wikiPage.getLiveTextNoTemplate()
+                if text is None:
+                    continue
+
                 sarOp.replaceStr = re.escape(toWikiWord)
                 sarOp.replaceOp = True
                 sarOp.cycleToStart = False
@@ -714,10 +729,13 @@ class WikiDataManager(MiscEventSourceMixin):
                     # Avoid to rename same page twice (alias and real) or more often
                     continue
 
-                text = wikiPage.getLiveText()
+                text = wikiPage.getLiveTextNoTemplate()
+                if text is None:
+                    continue
+
                 if sarOp.testWikiPage(k, text) == True:
                     preResultSet.add(k)
-                
+
                 exclusionSet.add(k)
 
             # Now search database

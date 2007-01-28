@@ -485,6 +485,7 @@ icons/tb_bold.gif -text
 icons/tb_copy.gif -text
 icons/tb_cut.gif -text
 icons/tb_cycle.gif -text
+icons/tb_data[!!-~]file.gif -text
 icons/tb_delete.gif -text
 icons/tb_doc.gif -text
 icons/tb_forward.gif -text
@@ -550,6 +551,7 @@ lib/pwiki/Ipc.py -text
 lib/pwiki/Localization.py -text
 lib/pwiki/LogWindow.py -text
 lib/pwiki/MainApp.py -text
+lib/pwiki/MainAreaPanel.py -text
 lib/pwiki/MiscEvent.py -text
 lib/pwiki/OptionsDialog.py -text
 lib/pwiki/PageAst.py -text
@@ -575,6 +577,7 @@ lib/pwiki/WikiTxtCtrl.py -text
 lib/pwiki/WindowLayout.py -text
 lib/pwiki/WindowsHacks.py -text
 lib/pwiki/__init__.py -text
+lib/pwiki/customtreectrl.py -text
 lib/pwiki/macurl2path_red.py -text
 lib/pwiki/nturl2path_red.py -text
 lib/pwiki/sqlite3api.py -text

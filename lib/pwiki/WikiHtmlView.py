@@ -5,7 +5,8 @@ from wxPython.wx import *
 from wxPython.html import *
 
 from WikiExceptions import *
-from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID
+from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
+        wxKeyFunctionSink
 
 from MiscEvent import KeyFunctionSink
 
@@ -62,7 +63,8 @@ class WikiHtmlView(wxHtmlWindow):
         wxHtmlWindow.__init__(self, parent, ID)
         self.presenter = presenter
 
-        self.presenter.getMiscEvent().addListener(KeyFunctionSink((
+        self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
+                self, (
                 ("loaded current page", self.onLoadedCurrentWikiPage),
                 ("reloaded current page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
@@ -73,7 +75,9 @@ class WikiHtmlView(wxHtmlWindow):
 
 #                 ("updated current page cache", self.updatedCurrentPageCache),
 #                 ("renamed wiki page", self.renamedWikiPage)
-        )), False)
+        ))    # , False)
+
+#         self.presenter.getMiscEvent().addListener(self.presenterListener)
 
         self.visible = False
         self.outOfSync = True   # HTML content is out of sync with live content
@@ -91,6 +95,7 @@ class WikiHtmlView(wxHtmlWindow):
         self.exporterInstance.exportType = u"html_previewWX"
         self.exporterInstance.styleSheet = u""
         self.exporterInstance.tempFileSet = TempFileSet()
+        self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
 
         
         EVT_KEY_DOWN(self, self.OnKeyDown)
@@ -119,6 +124,8 @@ class WikiHtmlView(wxHtmlWindow):
 
     def close(self):
         self.setVisible(False)
+        self.presenterListener.disconnect()
+
 
 
     _DEFAULT_FONT_SIZES = (wxHTML_FONT_SIZE_1, wxHTML_FONT_SIZE_2, 

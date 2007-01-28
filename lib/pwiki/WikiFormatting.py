@@ -84,19 +84,19 @@ def getStyles(styleFaces, config):
                     "fore:%(colPlaintext)s,underline,face:%(mono)s,size:%(size)d" % styleFaces),      
             (FormatTypes.AvailWikiWord,
                     "fore:%(colLink)s,underline,face:%(mono)s,size:%(size)d" % styleFaces),      
-            (FormatTypes.Bold, "bold,face:%(mono)s,size:%(size)d" % styleFaces),   
-            (FormatTypes.Italic, "italic,face:%(mono)s,size:%(size)d" % styleFaces), 
-            (FormatTypes.Heading4, "bold,face:%(mono)s,size:%(heading4)d" % styleFaces),       
-            (FormatTypes.Heading3, "bold,face:%(mono)s,size:%(heading3)d" % styleFaces),       
-            (FormatTypes.Heading2, "bold,face:%(mono)s,size:%(heading2)d" % styleFaces),       
-            (FormatTypes.Heading1, "bold,face:%(mono)s,size:%(heading1)d" % styleFaces), 
+            (FormatTypes.Bold, "fore:%(colPlaintext)s,bold,face:%(mono)s,size:%(size)d" % styleFaces),   
+            (FormatTypes.Italic, "fore:%(colPlaintext)s,italic,face:%(mono)s,size:%(size)d" % styleFaces), 
+            (FormatTypes.Heading4, "fore:%(colPlaintext)s,bold,face:%(mono)s,size:%(heading4)d" % styleFaces),       
+            (FormatTypes.Heading3, "fore:%(colPlaintext)s,bold,face:%(mono)s,size:%(heading3)d" % styleFaces),       
+            (FormatTypes.Heading2, "fore:%(colPlaintext)s,bold,face:%(mono)s,size:%(heading2)d" % styleFaces),       
+            (FormatTypes.Heading1, "fore:%(colPlaintext)s,bold,face:%(mono)s,size:%(heading1)d" % styleFaces), 
             (FormatTypes.Url,
                     "fore:%(colLink)s,underline,face:%(mono)s,size:%(size)d" % styleFaces), 
             (FormatTypes.Script,
                     "fore:%(colAttribute)s,face:%(mono)s,size:%(size)d" % styleFaces),
             (FormatTypes.Property,
                     "bold,fore:%(colAttribute)s,face:%(mono)s,size:%(size)d" % styleFaces),
-            (FormatTypes.ToDo, "bold,face:%(mono)s,size:%(size)d" % styleFaces)]
+            (FormatTypes.ToDo, "fore:%(colPlaintext)s,bold,face:%(mono)s,size:%(size)d" % styleFaces)]
 
 # List of all styles mentioned in getStyles which can be used as scintilla registered style
 VALID_SCINTILLA_STYLES = sets.ImmutableSet((

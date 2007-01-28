@@ -15,9 +15,9 @@ from wxPython.wx import *
 from wxPython.stc import *
 from wxPython.html import *
 from wxHelper import GUI_ID, cloneImageList, getAccelPairFromKeyDown, \
-        getAccelPairFromString
+        getAccelPairFromString, LayerSizer
 
-from MiscEvent import MiscEventSourceMixin   # , DebugSimple
+from MiscEvent import MiscEventSourceMixin, ResendingMiscEvent  # , DebugSimple
 
 from WikiExceptions import *
 
@@ -33,6 +33,7 @@ from WikiTxtCtrl import WikiTxtCtrl
 from WikiTreeCtrl import WikiTreeCtrl
 from WikiHtmlView import createWikiHtmlView
 from LogWindow import LogWindow
+from MainAreaPanel import MainAreaPanel
 from DocPagePresenter import DocPagePresenter
 
 from Ipc import EVT_REMOTE_COMMAND
@@ -201,7 +202,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.mainmenu = None
         self.editorMenu = None  # "Editor" menu
         self.fastSearchField = None   # Text field in toolbar
-        self.editors = [] # List of all editors (WikiTxtCtrl objects)
         
         self.textBlocksActivation = {} # See self.buildTextBlocksMenu()
         # Position of the root menu of the text blocks within "Editor" menu
@@ -209,10 +209,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.cmdIdToIconName = None # Maps command id (=menu id) to icon name
                                     # needed for "Editor"->"Add icon property"
         self.cmdIdToColorName = None # Same for color names
-        
+
         self.eventRoundtrip = 0
-        
-        self.currentDocPagePresenter = None
+
+#         self.currentDocPagePresenter = None
+#         self.docPagePresenters = []
+        self.currentDocPagePresenterRMEvent = ResendingMiscEvent(self)
 
         # setup plugin manager and hooks API
         self.pluginManager = PluginManager()
@@ -225,23 +227,20 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                                 ("describeMenuItems",))
         self.toolbarFunctions = self.pluginManager.registerPluginAPI(("ToolbarFunctions",1), 
                                 ("describeToolbarItems",))
-                                
+
         # load extensions
         self.loadExtensions()
 
         # initialize the wiki syntax
         WikiFormatting.initialize(self.wikiSyntax)
-        
+
 #         # Initialize new component
 #         self.formatting = WikiFormatting.WikiFormatting(self, self.wikiSyntax)
-
-        # Connect page history
-        self.pageHistory = PageHistory(self)
 
         self.propertyChecker = PropertyHandling.PropertyChecker(self)
 
         self.configuration.setGlobalConfig(wxGetApp().getGlobalConfig())
-        
+
         # trigger hook
         self.hooks.startup(self)
 
@@ -253,6 +252,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #                 self.createDefaultGlobalConfig()
 #         else:
 #             self.createDefaultGlobalConfig()
+
+        # Connect page history
+        self.pageHistory = PageHistory(self)
 
         # Initialize printing
         self.printer = Printer(self)
@@ -354,7 +356,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
         self.Show(True)
-        
+
         if self.lowResources and self.IsIconized():
             self.resourceSleep()
             
@@ -412,28 +414,62 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         return docPage.getWikiWord()
 
     def getCurrentDocPage(self):
-        if self.currentDocPagePresenter is None:
+        if self.getCurrentDocPagePresenter() is None:
             return None
-        return self.currentDocPagePresenter.getDocPage()
+        return self.getCurrentDocPagePresenter().getDocPage()
 
     def getActiveEditor(self):
-        return self.currentDocPagePresenter.getSubControl("textedit")
+        return self.getCurrentDocPagePresenter().getSubControl("textedit")
+
+    def getMainAreaPanel(self):
+        return self.mainAreaPanel
 
     def getCurrentDocPagePresenter(self):
-        return self.currentDocPagePresenter
+        """
+        Convenience function
+        """
+        return self.mainAreaPanel.getCurrentDocPagePresenter()
 
-    # TODO What about WikidPadHooks?
-    def setCurrentDocPagePresenter(self, currentPresenter):
-        if self.currentDocPagePresenter != currentPresenter:
-            self.currentDocPagePresenter = currentPresenter
-            self.refreshPageStatus()
-            self.fireMiscEventKeys(("changed current docpage presenter",))
-            
-#     def setActiveEditor(self, activeEditor):
-#         if self.activeEditor != activeEditor:
-#             self.activeEditor = activeEditor
+#     def getCurrentDocPagePresenter(self):
+#         return self.currentDocPagePresenter
+# 
+#     def getIndexForDocPagePresenter(self, presenter):
+#         for i, p in enumerate(self.docPagePresenters):
+#             if p is presenter:
+#                 return i
+#         
+#         return -1
+# 
+#     # TODO What about WikidPadHooks?
+#     def setCurrentDocPagePresenter(self, currentPresenter):
+#         """
+#         Mainly called by OnNotebookPageChanged to inform presenters
+#         about change
+#         """
+#         if not (self.currentDocPagePresenter is currentPresenter):
+#             self.currentDocPagePresenter = currentPresenter
+#             for p in self.docPagePresenters:
+#                 p.setVisible(p is currentPresenter)
+#             rMEvent = self.getCurrentDocPagePresenterRMEvent()
+#             rMEvent.setWatchedEvents((self.currentDocPagePresenter.getMiscEvent(),))
 #             self.refreshPageStatus()
-#             self.fireMiscEventKeys(("changed active editor",))
+#             self.fireMiscEventKeys(("changed current docpage presenter",))
+# 
+#     def showDocPagePresenter(self, currentPresenter):
+#         """
+#         Sets current presenter by changing the active tab in the
+#         main area notebook which in turn calls setCurrentDocPagePresenter()
+#         """
+#         i = self.getIndexForDocPagePresenter(currentPresenter)
+#         if i > -1:
+#             self.mainAreaPanel.SetSelection(i)
+# 
+    def getCurrentDocPagePresenterRMEvent(self):
+        """
+        This ResendingMiscEvent resends any messsages from the currently
+        active DocPagePresenter
+        """
+        return self.currentDocPagePresenterRMEvent
 
     def getWikiData(self):
         if self.wikiDataManager is None:
@@ -955,6 +991,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.keyBindings.ActivateLink, 'Activate link/word',
                 lambda evt: self.getActiveEditor().activateLink())
 
+        self.addMenuItem(wikiWordMenu, '&Activate Link/Word in new tab\t' +
+                self.keyBindings.ActivateLinkNewTab, 'Activate link/word in new tab',
+                lambda evt: self.getActiveEditor().activateLink(newTab=True))
+
         self.addMenuItem(wikiWordMenu, '&List Parents\t' +
                 self.keyBindings.ViewParents,
                 'View parents of current wiki word',
@@ -1195,49 +1235,22 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "Evaluate scripts/expressions")
 
 
-
-#         menuID=wxNewId()
-#         self.editorMenu.Append(menuID, '&Eval\t' + self.keyBindings.Eval, 'Eval Script Blocks')
-#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks())
-# 
-#         menuID=wxNewId()
-#         self.editorMenu.Append(menuID, 'Eval Function &1\tCtrl-1', 'Eval Script Function 1')
-#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(1))
-# 
-#         menuID=wxNewId()
-#         self.editorMenu.Append(menuID, 'Eval Function &2\tCtrl-2', 'Eval Script Function 2')
-#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(2))
-# 
-#         menuID=wxNewId()
-#         self.editorMenu.Append(menuID, 'Eval Function &3\tCtrl-3', 'Eval Script Function 3')
-#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(3))
-# 
-#         menuID=wxNewId()
-#         self.editorMenu.Append(menuID, 'Eval Function &4\tCtrl-4', 'Eval Script Function 4')
-#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(4))
-# 
-#         menuID=wxNewId()
-#         self.editorMenu.Append(menuID, 'Eval Function &5\tCtrl-5', 'Eval Script Function 5')
-#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(5))
-# 
-#         menuID=wxNewId()
-#         self.editorMenu.Append(menuID, 'Eval Function &6\tCtrl-6', 'Eval Script Function 6')
-#         EVT_MENU(self, menuID, lambda evt: self.activeEditor.evalScriptBlocks(6))
-
-
         viewMenu = wxMenu()
         
-# self.addMenuItem(self.editorMenu, '&Redo\t' + self.keyBindings.Redo,
-#         'Redo', self._OnRoundtripEvent, menuID=GUI_ID.CMD_REDO)
+        self.addMenuItem(viewMenu, 'Show Editor\tCtrl-Shift-A',
+                'Show Editor',
+                lambda evt: self.getCurrentDocPagePresenter().switchSubControl(
+                    "textedit", gainFocus=True), "tb_doc",
+                    menuID=GUI_ID.CMD_TAB_SHOW_EDITOR)
 
+        self.addMenuItem(viewMenu, 'Show Preview\tCtrl-Shift-S',
+                'Show Preview',
+                lambda evt: self.getCurrentDocPagePresenter().switchSubControl(
+                    "preview", gainFocus=True),  "tb_data file",
+                    menuID=GUI_ID.CMD_TAB_SHOW_PREVIEW)
 
-#         self.addMenuItem(viewMenu, '&Zoom In\t' + self.keyBindings.ZoomIn,
-#                 'Zoom In', lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMIN),
-#                 "tb_zoomin", menuID=GUI_ID.CMD_ZOOM_IN)
-# 
-#         self.addMenuItem(viewMenu, 'Zoo&m Out\t' + self.keyBindings.ZoomOut,
-#                 'Zoom Out', lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMOUT),
-#                 "tb_zoomout", menuID=GUI_ID.CMD_ZOOM_OUT)
+        viewMenu.AppendSeparator()
+
         self.addMenuItem(viewMenu, '&Zoom In\t' + self.keyBindings.ZoomIn,
                 'Zoom In', self._OnRoundtripEvent, "tb_zoomin",
                 menuID=GUI_ID.CMD_ZOOM_IN)
@@ -1476,6 +1489,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         tbID = wxNewId()
 #         tb.AddSimpleTool(tbID, icon, "Zoom Out", "Zoom Out")
 #         EVT_TOOL(self, tbID, lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
+
+
+        icon = self.lookupIcon("tb_doc")
+        tbID = GUI_ID.CMD_TAB_SHOW_EDITOR
+        tb.AddSimpleTool(tbID, icon, "Show Editor", "Show Editor")
+
+        icon = self.lookupIcon("tb_data file")
+        tbID = GUI_ID.CMD_TAB_SHOW_PREVIEW
+        tb.AddSimpleTool(tbID, icon, "Show Preview", "Show Preview")
+
         icon = self.lookupIcon("tb_zoomin")
         tbID = GUI_ID.CMD_ZOOM_IN
         tb.AddSimpleTool(tbID, icon, "Zoom In", "Zoom In")
@@ -1548,25 +1571,21 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def initializeGui(self):
         "initializes the gui environment"
 
-#         # ------------------------------------------------------------------------------------
-#         # load the icons the program will use
-#         # ------------------------------------------------------------------------------------
-# 
-#         # add the gif handler for gif icon support
-#         wxImage_AddHandler(wxGIFHandler())
-#         ## create the image icon list
-#         # iconList = wxImageList(16, 16)
-#         # default icon is page.gif
-#         icons = ['page.gif']
-#         # add the rest of the icons
-#         icons.extend([file for file in os.listdir(join(self.wikiAppDir, "icons"))
-#                       if file.endswith('.gif') and file != 'page.gif'])
-# 
-#         self.iconFileList = icons
-# 
-# #         # Create iconImageList
-# #         self.fillIconLookupCache(True)
+        # ------------------------------------------------------------------------------------
+        # Create the status bar
+        # ------------------------------------------------------------------------------------
+        self.statusBar = wxStatusBar(self, -1)
+        self.statusBar.SetFieldsCount(3)
 
+        # Measure necessary widths of status fields
+        dc = wxClientDC(self.statusBar)
+        try:
+            dc.SetFont(self.statusBar.GetFont())
+            posWidth = dc.GetTextExtent(
+                    u"Line: 9999 Col: 9999 Pos: 9999999988888")[0]
+            dc.SetFont(wxNullFont)
+        finally:
+            del dc
 
         # Build layout:
 
@@ -1575,6 +1594,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         cfstr = self.getConfig().get("main", "windowLayout")
         self.windowLayouter.setWinPropsByConfig(cfstr)
        
+        
 
         self.windowLayouter.realize()
 
@@ -1582,9 +1602,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.logWindow = self.windowLayouter.getWindowForName("log")
         
 
-        EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(),
-                self.OnNotebookPageChanged)
-        EVT_SET_FOCUS(self.mainAreaPanel, self.OnNotebookFocused)
+#         EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(),
+#                 self.OnNotebookPageChanged)
+#         EVT_CONTEXT_MENU(self.mainAreaPanel, self.OnNotebookContextMenu)
+# 
+#         EVT_SET_FOCUS(self.mainAreaPanel, self.OnNotebookFocused)
 
 
         # ------------------------------------------------------------------------------------
@@ -1610,23 +1632,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.SetAcceleratorTable(wxAcceleratorTable(accs))
 
-        # ------------------------------------------------------------------------------------
-        # Create the status bar
-        # ------------------------------------------------------------------------------------
-        self.statusBar = wxStatusBar(self, -1)
-        self.statusBar.SetFieldsCount(3)
-
-        # Measure necessary widths of status fields
-        dc = wxClientDC(self.statusBar)
-        try:
-            dc.SetFont(self.statusBar.GetFont())
-            posWidth = dc.GetTextExtent(
-                    u"Line: 9999 Col: 9999 Pos: 9999999988888")[0]
-            dc.SetFont(wxNullFont)
-        finally:
-            del dc
-            
-        
         # Check if window should stay on top
         self.setStayOnTop(self.getConfig().getboolean("main", "frame_stayOnTop",
                 False))
@@ -1766,7 +1771,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             tree = WikiTreeCtrl(self, parent, -1)
             # assign the image list
             try:
-                tree.AssignImageList(wxGetApp().getIconCache().getNewImageList())
+                # For native wx tree:
+                # tree.AssignImageList(wxGetApp().getIconCache().getNewImageList())
+                # For custom tree control:
+                tree.SetImageListNoGrayedItems(
+                        wxGetApp().getIconCache().getImageList())
             except Exception, e:
                 traceback.print_exc()
                 self.displayErrorMessage('There was an error loading the icons '
@@ -1782,38 +1791,95 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             # enable and zoom the editor
             editor.Enable(0)
             editor.SetZoom(self.configuration.getint("main", "zoom"))
-            self.editors.append(editor)
             return editor
         elif winName == "log":
             return LogWindow(parent, -1, self)
         elif winName == "main area panel":  # TODO remove this hack
-            self.mainAreaPanel = wxNotebook(parent, -1)
+            self.mainAreaPanel = MainAreaPanel(parent, self, -1)
+            self.mainAreaPanel.getMiscEvent().addListener(self)
             
-            presenter = DocPagePresenter(self)
-                    
-#             self.activeEditor = self.createWindow({"name": "txteditor1"},
-#                     self.mainAreaPanel)
-            editor = self.createWindow({"name": "txteditor1",
-                    "presenter": presenter}, self.mainAreaPanel)
-            self.mainAreaPanel.AddPage(editor, u"Edit")
-            presenter.setSubControl("textedit", editor)
+            p = self.createNewDocPagePresenterTab()
+            self.mainAreaPanel.setCurrentDocPagePresenter(p)
+
+            return self.mainAreaPanel
+
+#             presenter = DocPagePresenter(self, self.mainAreaPanel)
+# 
+#             editor = self.createWindow({"name": "txteditor1",
+#                     "presenter": presenter}, self.mainAreaPanel)
+#             self.mainAreaPanel.AddPage(editor, u"Edit")
+#             presenter.setSubControl("textedit", editor)
+#             
+#             self.htmlView = createWikiHtmlView(presenter, self.mainAreaPanel, -1)
+#             self.mainAreaPanel.AddPage(self.htmlView, u"Preview")
+#             presenter.setSubControl("preview", self.htmlView)
             
-            self.htmlView = createWikiHtmlView(presenter, self.mainAreaPanel, -1)
-            self.mainAreaPanel.AddPage(self.htmlView, u"Preview")
-            presenter.setSubControl("preview", self.htmlView)
-            
-            self.currentDocPagePresenter = presenter
-            self.currentDocPagePresenter.setVisible(True)
+#             self.currentDocPagePresenter = presenter
+#             self.currentDocPagePresenter.setVisible(True)
             
 
 #             editor = self.createWindow({"name": "txteditor2"},
 #                     self.mainAreaPanel)
 #             self.mainAreaPanel.AddPage(editor, u"Edit2")
             
-            return self.mainAreaPanel
             
     def getPagePresenterControlNames(self):
         return ["textedit", "preview"]
+
+
+    def createNewDocPagePresenterTab(self):
+        presenter = DocPagePresenter(self.mainAreaPanel, self)
+
+        editor = self.createWindow({"name": "txteditor1",
+                "presenter": presenter}, presenter)
+        editor.setVisible(False)
+        presenter.setSubControl("textedit", editor)
+
+        htmlView = createWikiHtmlView(presenter, presenter, -1)
+        htmlView.setVisible(False)
+        presenter.setSubControl("preview", htmlView)
+
+        mainsizer = LayerSizer()  # wxBoxSizer(wxVERTICAL)
+        mainsizer.Add(editor) # , 0, wx.EXPAND)
+        mainsizer.Add(htmlView)  # , 0, wx.EXPAND)
+        presenter.SetSizer(mainsizer)
+
+        return self.mainAreaPanel.appendDocPagePresenterTab(presenter)
+
+
+#     def appendDocPagePresenterTab(self):
+#         presenter = DocPagePresenter(self.mainAreaPanel, self)
+# 
+# #         inputsizer.Add(wx.StaticText(self, -1, "Path to MimeTeX:"), 0,
+# #                 wx.ALL | wx.EXPAND, 5)
+# #         inputsizer.Add(self.tfPath, 1, wx.ALL | wx.EXPAND, 5)
+# 
+#         editor = self.createWindow({"name": "txteditor1",
+#                 "presenter": presenter}, presenter)
+#         editor.setVisible(False)
+#         presenter.setSubControl("textedit", editor)
+# 
+#         htmlView = createWikiHtmlView(presenter, presenter, -1)
+#         htmlView.setVisible(False)
+#         presenter.setSubControl("preview", htmlView)
+# 
+#         mainsizer = LayerSizer()  # wxBoxSizer(wxVERTICAL)
+#         mainsizer.Add(editor) # , 0, wx.EXPAND)
+#         mainsizer.Add(htmlView)  # , 0, wx.EXPAND)
+#         presenter.SetSizer(mainsizer)
+# #         self.Fit()
+# 
+#         self.docPagePresenters.append(presenter)
+#         self.mainAreaPanel.AddPage(presenter, "    ")
+#         presenter.getMiscEvent().addListener(self)
+# 
+#         presenter.switchSubControl("textedit")
+# 
+#         if self.getCurrentDocPagePresenter() is None:
+#             self.setCurrentDocPagePresenter(presenter)
+#             
+#         return presenter
+
 
 
     def appendLogMessage(self, msg):
@@ -1910,22 +1976,27 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
 
-    def OnNotebookPageChanged(self, evt):
-        try:
-            if evt.GetSelection() == 0:
-                subControl = "textedit"
-            elif evt.GetSelection() == 1:
-                subControl = "preview"
-                
-            self.getCurrentDocPagePresenter().switchSubControl(subControl)
-            self.mainAreaPanel.GetPage(evt.GetSelection()).SetFocus()
-        except (IOError, OSError, DbAccessError), e:
-            self.lostAccess(e)
-            raise
-
-
-    def OnNotebookFocused(self, evt):
-        self.mainAreaPanel.GetCurrentPage().SetFocus()
+#     def OnNotebookPageChanged(self, evt):
+#         try:
+#             presenter = self.mainAreaPanel.GetCurrentPage()
+#             self.setCurrentDocPagePresenter(presenter)
+#             self.mainAreaPanel.GetPage(evt.GetSelection()).SetFocus()
+#         except (IOError, OSError, DbAccessError), e:
+#             self.lostAccess(e)
+#             raise
+# 
+# 
+#     def OnNotebookContextMenu(self, evt):
+#         return
+#         pos = self.mainAreaPanel.ScreenToClient(wxGetMousePosition())
+#         tab = self.mainAreaPanel.HitTest(pos)[0]
+#         if tab == wxNOT_FOUND:
+#             return
+#         print "OnNotebookContextMenu", repr(tab)
+# 
+# 
+#     def OnNotebookFocused(self, evt):
+#         self.mainAreaPanel.GetCurrentPage().SetFocus()
 
     def OnIconize(self, evt):
         if self.lowResources:
@@ -2274,7 +2345,10 @@ These are your default global settings.
             self.tree.SetScrollPos(wxHORIZONTAL, 0)
     
             # enable the editor control whether or not the wiki root was found
-            for e in self.editors: e.Enable(1)
+#             for e in self.editors: e.Enable(1)
+            for dpp in self.getMainAreaPanel().getDocPagePresenters():
+                e = dpp.getSubControl("textedit")
+                e.Enable(True)
     
             # update the last accessed wiki config var
             self.lastAccessedWiki(self.getWikiConfigPath())
@@ -2296,13 +2370,15 @@ These are your default global settings.
         """
         Set current wiki word as root of the tree
         """
-        # make sure the root has a relationship to the ScratchPad
-        # self.currentWikiPage.addChildRelationship("ScratchPad")
+        self.setWordAsRoot(self.getCurrentWikiWord())
+
+
+    def setWordAsRoot(self, word):
         if not self.requireReadAccess():
             return
         try:
-            if self.getCurrentWikiWord() is not None:
-                self.tree.setRootByWord(self.getCurrentWikiWord())
+            if word is not None:
+                self.tree.setRootByWord(word)
         except (IOError, OSError, DbAccessError), e:
             self.lostAccess(e)
             raise
@@ -2310,8 +2386,8 @@ These are your default global settings.
 
     def closeWiki(self, saveState=True):
         def errCloseAnywayMsg():
-            return wxMessageBox(u"There is no access to underlying wiki\n"
-                    "Close anyway and loose data?",
+            return wxMessageBox(u"There is no (write-)access to underlying wiki\n"
+                    "Close anyway and loose possible changes?",
                     u'Close anyway',
                     wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION, self)
 
@@ -2323,8 +2399,6 @@ These are your default global settings.
             if not wd.getReadAccessFailed() and not wd.getWriteAccessFailed():
                 try:
                     self.fireMiscEventKeys(("closing current wiki",))
-        #             for editor in self.editors:
-        #                 editor.unloadCurrentDocPage()
                     if self.getWikiData() and saveState:
                         self.saveCurrentWikiState()
                 except (IOError, OSError, DbAccessError), e:
@@ -2581,120 +2655,151 @@ These are your default global settings.
         return False
 
 
-
     def openFuncPage(self, funcTag, **evtprops):
-        if not self.requireReadAccess():
-            return
-
-        try:
-            page = self.wikiDataManager.getFuncPage(funcTag)
-    
-            self.getActiveEditor().loadFuncPage(page, evtprops)
-        except (IOError, OSError, DbAccessError), e:
-            self.lostAccess(e)
-            raise
-
-        p2 = evtprops.copy()
-        p2.update({"loaded current functional page": True})
-        # p2.update({"loaded current page": True})
-        self.fireMiscEventProps(p2)        
+        dpp = self.getCurrentDocPagePresenter()
+        if dpp is None:
+            self.createNewDocPagePresenterTab()
+            dpp = self.getCurrentDocPagePresenter()
+            
+        dpp.openFuncPage(funcTag, **evtprops)
 
 
     def openWikiPage(self, wikiWord, addToHistory=True,
             forceTreeSyncFromRoot=False, forceReopen=False, **evtprops):
-        """
-        Opens a wiki page in the active editor.
-        """
-        if not self.requireReadAccess():
+        dpp = self.getCurrentDocPagePresenter()
+        if dpp is None:
+            self.createNewDocPagePresenterTab()
+            dpp = self.getCurrentDocPagePresenter()
+
+        dpp.openWikiPage(wikiWord, addToHistory, forceTreeSyncFromRoot,
+                forceReopen, **evtprops)
+
+
+    def saveCurrentDocPage(self, force=False):
+        dpp = self.getCurrentDocPagePresenter()
+        if dpp is None:
             return
-
-        evtprops["addToHistory"] = addToHistory
-        evtprops["forceTreeSyncFromRoot"] = forceTreeSyncFromRoot
-
-#         self.statusBar.SetStatusText(uniToGui(u"Opening wiki word '%s'" %
-#                 wikiWord), 0)
-
-        # make sure this is a valid wiki word
-        if not self.getFormatting().isNakedWikiWord(wikiWord):
-            self.displayErrorMessage(u"'%s' is an invalid wiki word." % wikiWord)
-            return
-
-        try:
-            # don't reopen the currently open page, only send an event
-            if (wikiWord == self.getCurrentWikiWord()) and not forceReopen:
-                p2 = evtprops.copy()
-                p2.update({"reloaded current page": True,
-                        "reloaded current wiki page": True})
-                self.fireMiscEventProps(p2)
-    #             # self.tree.buildTreeForWord(self.currentWikiWord)  # TODO Needed?
-    #             self.statusBar.SetStatusText(uniToGui(u"Wiki word '%s' already open" %
-    #                     wikiWord), 0)
-                return
-    
-            # trigger hook
-            self.hooks.openWikiWord(self, wikiWord)
-    
-            # check if this is an alias
-            if (self.getWikiData().isAlias(wikiWord)):
-                wikiWord = self.getWikiData().getAliasesWikiWord(wikiWord)
-    
-            # fetch the page info from the database
-            try:
-                page = self.wikiDataManager.getWikiPage(wikiWord)
-                self.statusBar.SetStatusText(uniToGui(u"Opened wiki word '%s'" %
-                        wikiWord), 0)
-                        
-                self.refreshPageStatus(page)
-    
-            except (WikiWordNotFoundException, WikiFileNotFoundException), e:
-                page = self.wikiDataManager.createWikiPage(wikiWord)
-                # trigger hooks
-                self.hooks.newWikiWord(self, wikiWord)
-                self.statusBar.SetStatusText(uniToGui(u"Wiki page not found, a new "
-                        u"page will be created"), 0)
-                self.statusBar.SetStatusText(uniToGui(u""), 1)
-    
-            self.getActiveEditor().loadWikiPage(page, evtprops)
-    
-            p2 = evtprops.copy()
-            p2.update({"loaded current page": True,
-                    "loaded current wiki page": True})
-            self.fireMiscEventProps(p2)
-    
-            # set the title and add the word to the history
-            self.SetTitle(uniToGui(u"Wiki: %s - %s" %
-                    (self.getWikiConfigPath(), self.getCurrentWikiWord())))
-    
-            self.configuration.set("main", "last_wiki_word", wikiWord)
-    
-            # sync the tree
-            if forceTreeSyncFromRoot:
-                self.findCurrentWordInTree()
-        except (IOError, OSError, DbAccessError), e:
-            self.lostAccess(e)
-            raise
-
-        # trigger hook
-        self.hooks.openedWikiWord(self, wikiWord)
+            
+        dpp.saveCurrentDocPage(force)
 
 
-    # TODO 
-    def saveCurrentDocPage(self, force = False):
-        ## _prof.start()
 
-        if (force or self.getCurrentDocPage().getDirty()[0]) and \
-                self.requireWriteAccess():
-            # Reset error flag here, it can be set true again by saveDocPage
-#             self.getWikiDocument().setNoAutoSaveFlag(False)
-            try:
-                self.getActiveEditor().saveLoadedDocPage() # this calls in turn saveDocPage() below
-            except (IOError, OSError, DbAccessError), e:
-                self.lostAccess(e)
-                raise
+    
+#     def openFuncPage(self, funcTag, **evtprops):
+#         if not self.requireReadAccess():
+#             return
+# 
+#         try:
+#             page = self.wikiDataManager.getFuncPage(funcTag)
+#     
+#             self.getActiveEditor().loadFuncPage(page, evtprops)
+#         except (IOError, OSError, DbAccessError), e:
+#             self.lostAccess(e)
+#             raise
+# 
+#         p2 = evtprops.copy()
+#         p2.update({"loaded current functional page": True})
+#         # p2.update({"loaded current page": True})
+#         self.fireMiscEventProps(p2)        
+# 
+# 
+#     def openWikiPage(self, wikiWord, addToHistory=True,
+#             forceTreeSyncFromRoot=False, forceReopen=False, **evtprops):
+#         """
+#         Opens a wiki page in the active editor.
+#         """
+#         if not self.requireReadAccess():
+#             return
+# 
+#         evtprops["addToHistory"] = addToHistory
+#         evtprops["forceTreeSyncFromRoot"] = forceTreeSyncFromRoot
+# 
+# #         self.statusBar.SetStatusText(uniToGui(u"Opening wiki word '%s'" %
+# #                 wikiWord), 0)
+# 
+#         # make sure this is a valid wiki word
+#         if not self.getFormatting().isNakedWikiWord(wikiWord):
+#             self.displayErrorMessage(u"'%s' is an invalid wiki word." % wikiWord)
+#             return
+# 
+#         try:
+#             # don't reopen the currently open page, only send an event
+#             if (wikiWord == self.getCurrentWikiWord()) and not forceReopen:
+#                 p2 = evtprops.copy()
+#                 p2.update({"reloaded current page": True,
+#                         "reloaded current wiki page": True})
+#                 self.fireMiscEventProps(p2)
+#     #             # self.tree.buildTreeForWord(self.currentWikiWord)  # TODO Needed?
+#     #             self.statusBar.SetStatusText(uniToGui(u"Wiki word '%s' already open" %
+#     #                     wikiWord), 0)
+#                 return
+#     
+#             # trigger hook
+#             self.hooks.openWikiWord(self, wikiWord)
+#     
+#             # check if this is an alias
+#             if (self.getWikiData().isAlias(wikiWord)):
+#                 wikiWord = self.getWikiData().getAliasesWikiWord(wikiWord)
+#     
+#             # fetch the page info from the database
+#             try:
+#                 page = self.wikiDataManager.getWikiPage(wikiWord)
+#                 self.statusBar.SetStatusText(uniToGui(u"Opened wiki word '%s'" %
+#                         wikiWord), 0)
+#                         
+#                 self.refreshPageStatus(page)
+#     
+#             except (WikiWordNotFoundException, WikiFileNotFoundException), e:
+#                 page = self.wikiDataManager.createWikiPage(wikiWord)
+#                 # trigger hooks
+#                 self.hooks.newWikiWord(self, wikiWord)
+#                 self.statusBar.SetStatusText(uniToGui(u"Wiki page not found, a new "
+#                         u"page will be created"), 0)
+#                 self.statusBar.SetStatusText(uniToGui(u""), 1)
+#     
+#             self.getActiveEditor().loadWikiPage(page, evtprops)
+#     
+#             p2 = evtprops.copy()
+#             p2.update({"loaded current page": True,
+#                     "loaded current wiki page": True})
+#             self.fireMiscEventProps(p2)
+#     
+#             # set the title and add the word to the history
+#             self.SetTitle(uniToGui(u"Wiki: %s - %s" %
+#                     (self.getWikiConfigPath(), self.getCurrentWikiWord())))
+#     
+#             self.configuration.set("main", "last_wiki_word", wikiWord)
+#     
+#             # sync the tree
+#             if forceTreeSyncFromRoot:
+#                 self.findCurrentWordInTree()
+#         except (IOError, OSError, DbAccessError), e:
+#             self.lostAccess(e)
+#             raise
+# 
+#         # trigger hook
+#         self.hooks.openedWikiWord(self, wikiWord)
+# 
+# 
+#     # TODO 
+#     def saveCurrentDocPage(self, force = False):
+#         ## _prof.start()
+# 
+#         if (force or self.getCurrentDocPage().getDirty()[0]) and \
+#                 self.requireWriteAccess():
+#             # Reset error flag here, it can be set true again by saveDocPage
+# #             self.getWikiDocument().setNoAutoSaveFlag(False)
+#             try:
+#                 self.getActiveEditor().saveLoadedDocPage() # this calls in turn saveDocPage() below
+#             except (IOError, OSError, DbAccessError), e:
+#                 self.lostAccess(e)
+#                 raise
+# 
+#         self.refreshPageStatus()
+#         
+#         ## _prof.stop()
 
-        self.refreshPageStatus()
-        
-        ## _prof.stop()
+
 
     def saveAllDocPages(self, force = False):
         if not self.requireWriteAccess():
@@ -2796,12 +2901,12 @@ These are your default global settings.
             self.statusBar.PopStatusText(0)
 
 
-    def deleteCurrentWikiPage(self):
-        if self.getCurrentWikiWord() and self.requireWriteAccess():
+    def deleteWikiWord(self, wikiWord):
+        if wikiWord and self.requireWriteAccess():
             try:
                 # self.saveCurrentDocPage()
-                if self.getWikiData().isDefinedWikiWord(self.getCurrentWikiWord()):
-                    page = self.getCurrentDocPage()
+                if self.getWikiData().isDefinedWikiWord(wikiWord):
+                    page = self.getWikiDocument().getWikiPage(wikiWord)
                     page.deletePage()
             except (IOError, OSError, DbAccessError), e:
                 self.lostAccess(e)
@@ -2814,7 +2919,7 @@ These are your default global settings.
 #             self.pageHistory.goAfterDeletion()
 
 
-    def renameCurrentWikiPage(self, toWikiWord, modifyText, **evtprops):
+    def renameWikiWord(self, wikiWord, toWikiWord, modifyText, **evtprops):
         """
         Renames current wiki word to toWikiWord.
         Returns True if renaming was done successful.
@@ -2822,7 +2927,6 @@ These are your default global settings.
         modifyText -- Should the text of links to the renamed page be
                 modified? This text replacement works unreliably
         """
-        wikiWord = self.getCurrentWikiWord()
         if wikiWord is None or not self.requireWriteAccess():
             return False
 
@@ -2906,25 +3010,25 @@ These are your default global settings.
         return False
 
 
-    def refreshPageStatus(self, page = None):
+    def refreshPageStatus(self, docPage = None):
         """
         Read information from page and present it in the field 1 of the
-        status bar.
+        status bar and in the title bar.
         """
         fmt = mbcsEnc(self.getConfig().get("main", "pagestatus_timeformat"),
                 "replace")[0]
 
-        if page is None:
-            page = self.getCurrentDocPage()
+        if docPage is None:
+            docPage = self.getCurrentDocPage()
 
-        if page is None or not isinstance(page,
+        if docPage is None or not isinstance(docPage,
                 (DocPages.WikiPage, DocPages.AliasWikiPage)):
             self.statusBar.SetStatusText(uniToGui(u""), 1)
             return
-            
+
         pageStatus = u""   # wikiWord
 
-        modTime, creaTime = page.getTimestamps()
+        modTime, creaTime = docPage.getTimestamps()
         if modTime is not None:
             pageStatus += u"Mod.: %s" % \
                     mbcsDec(strftime(fmt, localtime(modTime)), "replace")[0]
@@ -2932,6 +3036,10 @@ These are your default global settings.
                     mbcsDec(strftime(fmt, localtime(creaTime)), "replace")[0]
 
         self.statusBar.SetStatusText(uniToGui(pageStatus), 1)
+
+        self.SetTitle(uniToGui(u"Wiki: %s - %s" %
+                (self.getWikiConfigPath(), docPage.getWikiWord())))
+
 
 
     def viewWordSelection(self, title, words, motionType):
@@ -3017,14 +3125,14 @@ These are your default global settings.
                                    u"History",
                                    hist,
                                    wxCHOICEDLG_STYLE|wxOK|wxCANCEL)
-        
+
         if historyLen > 0:
             position = histpos + posDelta - 1
             if (position < 0):
                 position = 0
             elif (position >= historyLen):
                 position = historyLen-1
-    
+
             dlg.SetSelection(position)
 
         if dlg.ShowModal() == wxID_OK and dlg.GetSelection() > -1:
@@ -3293,18 +3401,21 @@ These are your default global settings.
             dlg.Destroy()
 
 
-    def showWikiWordRenameDialog(self, wikiWord=None, toWikiWord=None):
-        if self.getCurrentWikiWord() is None:
+    def showWikiWordRenameDialog(self, wikiWord=None):
+        if wikiWord is None:
+            wikiWord = self.getCurrentWikiWord()
+
+        if wikiWord is None:
             self.displayErrorMessage(u"No real wiki word selected to rename")
             return
 
+        wikiWord = self.getWikiData().getAliasesWikiWord(wikiWord)
         dlg = wxTextEntryDialog(self, uniToGui(u"Rename '%s' to:" %
-                self.getCurrentWikiWord()), u"Rename Wiki Word",
-                self.getCurrentWikiWord(), wxOK | wxCANCEL)
+                wikiWord), u"Rename Wiki Word", wikiWord, wxOK | wxCANCEL)
 
         try:
             while dlg.ShowModal() == wxID_OK and \
-                    not self.showWikiWordRenameConfirmDialog(
+                    not self.showWikiWordRenameConfirmDialog(wikiWord,
                             guiToUni(dlg.GetValue())):
                 pass
 
@@ -3368,13 +3479,13 @@ These are your default global settings.
 
 
     # TODO Check if new name already exists (?)
-    def showWikiWordRenameConfirmDialog(self, toWikiWord):
+    def showWikiWordRenameConfirmDialog(self, wikiWord, toWikiWord):
         """
         Checks if renaming operation is valid, presents either an error
         message or a confirmation dialog.
         Returns -- True iff renaming was done successfully
         """
-        wikiWord = self.getCurrentWikiWord()
+#         wikiWord = self.getCurrentWikiWord()
 
         if not toWikiWord or len(toWikiWord) == 0:
             return False
@@ -3403,7 +3514,7 @@ These are your default global settings.
     
             if result == wxYES or result == wxNO:
                 try:
-                    self.renameCurrentWikiPage(toWikiWord, result == wxYES)
+                    self.renameWikiWord(wikiWord, toWikiWord, result == wxYES)
                     return True
                 except WikiDataException, e:
                     traceback.print_exc()                
@@ -3426,17 +3537,18 @@ These are your default global settings.
 
 
     def showWikiWordDeleteDialog(self, wikiWord=None):
-        if not wikiWord:
+        if wikiWord is None:
             wikiWord = self.getCurrentWikiWord()
 
         if wikiWord == u"ScratchPad":
             self.displayErrorMessage(u"The scratch pad cannot be deleted")
             return
-            
+
         if wikiWord is None:
             self.displayErrorMessage(u"No real wiki word to delete")
             return
 
+        wikiWord = self.getWikiData().getAliasesWikiWord(wikiWord)
         dlg=wxMessageDialog(self,
                 uniToGui(u"Are you sure you want to delete wiki word '%s'?" % wikiWord),
                 'Delete Wiki Word', wxYES_NO)
@@ -3444,7 +3556,7 @@ These are your default global settings.
         if result == wxID_YES:
             try:
                 self.saveAllDocPages()
-                self.deleteCurrentWikiPage()
+                self.deleteWikiWord(wikiWord)
             except (IOError, OSError, DbAccessError), e:
                 self.lostAccess(e)
                 raise
@@ -3468,31 +3580,55 @@ These are your default global settings.
             self.displayErrorMessage(u"No real wiki word to modify")
             return
 
-        wikiWord = guiToUni(wxGetTextFromUser(u"Replace text by WikiWord:",
-                u"Replace by Wiki Word", self.getCurrentWikiWord(), self))
-
-        if wikiWord:
-            wikiWord = wikiWordToLabel(wikiWord)
-            if not self.getFormatting().isNakedWikiWord(wikiWord):
-                self.displayErrorMessage(u"'%s' is an invalid wiki word" % wikiWord)
-                return False
-
-            try:
-                if self.getWikiData().isDefinedWikiWord(wikiWord):
-                    self.displayErrorMessage(u"'%s' exists already" % wikiWord)
-                            # TODO Allow retry or append/replace
+        wikiWord = ""
+        newWord = True
+        try:
+            while True:
+                wikiWord = guiToUni(wxGetTextFromUser(u"Replace text by WikiWord:",
+                        u"Replace by Wiki Word", wikiWord, self))
+                        
+                if not wikiWord:
                     return False
-    
-                text = self.getActiveEditor().GetSelectedText()
+
+                wikiWord = wikiWordToLabel(wikiWord)
+                if not self.getFormatting().isNakedWikiWord(wikiWord):
+                    self.displayErrorMessage(u"'%s' is an invalid wiki word" % wikiWord)
+                    continue
+#                     return False
+
+                if self.getWikiData().isDefinedWikiWord(wikiWord):
+                    result = wxMessageBox(uniToGui((
+                            u'Wiki word %s exists already\n'
+                            u'Would you like to append to the word?') %
+                            wikiWord), u'Word exists',
+                            wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+                    
+                    if result == wxNO:
+                        continue
+                    
+                    newWord = False
+
+                break
+
+#                 self.displayErrorMessage(u"'%s' exists already" % wikiWord)
+#                         # TODO Allow retry or append/replace
+#                 return False
+
+            text = self.getActiveEditor().GetSelectedText()
+            if newWord:
                 page = self.wikiDataManager.createWikiPage(wikiWord)
-                self.getActiveEditor().ReplaceSelection(
-                        self.getFormatting().normalizeWikiWord(wikiWord))
                 # TODO Respect template property?
                 title = DocPages.WikiPage.getWikiPageTitle(wikiWord)
                 self.saveDocPage(page, u"++ %s\n\n%s" % (title, text), None)
-            except (IOError, OSError, DbAccessError), e:
-                self.lostAccess(e)
-                raise
+            else:
+                page = self.wikiDataManager.getWikiPage(wikiWord)
+                page.appendLiveText(u"\n\n" + text)
+
+            self.getActiveEditor().ReplaceSelection(
+                    self.getFormatting().normalizeWikiWord(wikiWord))
+        except (IOError, OSError, DbAccessError), e:
+            self.lostAccess(e)
+            raise
 
 
     def showIconSelectDialog(self):
@@ -3810,8 +3946,24 @@ These are your default global settings.
             self.getWikiData().copyWikiFilesToDatabase()
 
 
-    def insertAttribute(self, name, value):
-        self.getActiveEditor().AppendText(u"\n\n[%s=%s]" % (name, value))
+    def insertAttribute(self, name, value, wikiWord=None):
+        if wikiWord is None:
+            self.getActiveEditor().AppendText(u"\n\n[%s=%s]" % (name, value))
+        else:
+            try:
+                # self.saveCurrentDocPage()
+                if self.getWikiData().isDefinedWikiWord(wikiWord):
+                    page = self.getWikiDocument().getWikiPage(wikiWord)
+                    page.appendLiveText(u"\n\n[%s=%s]" % (name, value))
+            except (IOError, OSError, DbAccessError), e:
+                self.lostAccess(e)
+                raise
+
+
+
+            wikiWord = self.getCurrentWikiWord()
+
+        
 #         self.saveCurrentDocPage()   # TODO Remove or activate this line?
 
     def addText(self, text):
@@ -3958,6 +4110,18 @@ These are your default global settings.
                 elif miscevt.has_key("reread personal word list needed"):
                     if self.spellChkDlg is not None:
                         self.spellChkDlg.rereadPersonalWordLists()
+            elif miscevt.getSource() is self.getMainAreaPanel():
+                self.fireMiscEventProps(miscevt.getProps())
+#             elif miscevt.getSource() in self.docPagePresenters:
+#                 if miscevt.has_key("changed presenter title"):
+#                     for idx, pres in enumerate(self.docPagePresenters):
+#                         if pres is miscevt.getSource():
+#                             self.mainAreaPanel.SetPageText(idx,
+#                                     pres.getLongTitle())
+#                             self.SetTitle(uniToGui(u"Wiki: %s - %s" %
+#                                     (self.getWikiConfigPath(),
+#                                     pres.getShortTitle())))
+
         except (IOError, OSError, DbAccessError), e:
             self.lostAccess(e)
             raise
@@ -4117,10 +4281,7 @@ These are your default global settings.
             self.win32Interceptor.unintercept()
 
         self.closeWiki()
-        self.getCurrentDocPagePresenter().close()
-
-        # trigger hook
-        self.hooks.exit(self)
+#         self.getCurrentDocPagePresenter().close()
 
         # if the frame is not minimized
         # update the size/pos of the global config
@@ -4149,6 +4310,11 @@ These are your default global settings.
         self.configuration.set("main", "zoom", self.getActiveEditor().GetZoom())
         self.configuration.set("main", "wiki_history", ";".join(self.wikiHistory))
         self.writeGlobalConfig()
+
+        # trigger hook
+        self.hooks.exit(self)
+
+        self.getMainAreaPanel().close()
 
         # save the current wiki state
 #         self.saveCurrentWikiState()

@@ -136,8 +136,14 @@ Set the color of attributes and scripts (e.g. <%"this one"%>) in the editor. See
 *Background color*
 (Works only partially). Specify the background color of the editor. See "Plain text color" above for details.
 
+*Selection fg. color*
+Specify the foreground color of selected text. See "Plain text color" above for details.
+
 *Selection bg. color*
 Specify the background color of selected text. See "Plain text color" above for details.
+
+*Text cursor color*
+Set the color of the text cursor (the small blinking vertical bar).
 
 *Sync. highlighting limit*
 Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 3000 to 5000 bytes

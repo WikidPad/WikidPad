@@ -1,5 +1,5 @@
 from time import time
-import os.path, re, struct, sets
+import os.path, re, struct, sets, traceback
 
 from MiscEvent import MiscEventSourceMixin
 
@@ -62,9 +62,10 @@ class DocPage(MiscEventSourceMixin):
 
         fireEvent -- Send event if database was directly modified
         """
-        if len(self.txtEditors) > 0:
+        txtEditor = self.getTxtEditor()
+        if txtEditor is not None:
             # page is in text editor(s), so call AppendText on one of it
-            self.txtEditors[0].AppendText(text)
+            txtEditor.AppendText(text)
         else:
             # Modify database
 #             wikiData = self.wikiDocument.getWikiData()
@@ -78,17 +79,27 @@ class DocPage(MiscEventSourceMixin):
         Return current tex of page, either from a text editor or
         from the database
         """
-        if len(self.txtEditors) > 0:
+        txtEditor = self.getTxtEditor()
+        if txtEditor is not None:
             # page is in text editor(s), so call AppendText on one of it
-            return self.txtEditors[0].GetText()
+            return txtEditor.GetText()
         else:
             return self.getContent()
 
 
+    def getLiveTextNoTemplate(self):
+        """
+        Return None if page isn't existing instead of creating an automatic
+        live text (e.g. by template).
+        """
+        assert 0 #abstract
+
+
     def replaceLiveText(self, text):
-        if len(self.txtEditors) > 0:
+        txtEditor = self.getTxtEditor()
+        if txtEditor is not None:
             # page is in text editor(s), so call replace on one of it
-            self.txtEditors[0].replaceText(text)
+            txtEditor.replaceText(text)
         else:
             self.save(text)
 #             self.update(text, False)   # TODO: Really update? Handle auto-generated areas
@@ -102,6 +113,12 @@ class DocPage(MiscEventSourceMixin):
         """
         assert 0 #abstract
 
+
+    def getTitle(self):
+        """
+        Return human readable title of the page.
+        """
+        assert 0 #abstract
 
     def save(self, text, fireEvent=True):
         """
@@ -132,6 +149,35 @@ class AliasWikiPage(DocPage):
     def getWikiWord(self):
         return self.aliasWikiWord
 
+    def getTitle(self):
+        """
+        Return human readable title of the page.
+        """
+        return self.aliasWikiWord
+
+
+#     def addTxtEditor(self, txted):
+#         """
+#         Add txted to the list of editors (views) showing this page.
+#         """
+#         print "AliasWikiPage addTxtEditor1", repr(self.aliasWikiWord)
+#         return self.realWikiPage.addTxtEditor(txted)
+# 
+#     def removeTxtEditor(self, txted):
+#         """
+#         Remove txted from the list of editors (views) showing this page.
+#         """
+#         return self.realWikiPage.removeTxtEditor(txted)
+# 
+#     def getTxtEditor(self):
+#         """
+#         Returns an arbitrary text editor associated with the page
+#         or None if no editor is associated.
+#         """
+#         print "AliasWikiPage getTxtEditor1", repr(self.aliasWikiWord), repr(self.realWikiPage.getTxtEditor())
+#         return self.realWikiPage.getTxtEditor()
+
+
     def getNonAliasPage(self):
         """
         If this page belongs to an alias of a wiki word, return a page for
@@ -160,6 +206,7 @@ class AliasWikiPage(DocPage):
 
     def update(self, text, fireEvent=True):
         return self.realWikiPage.update(text, fireEvent)
+
 
 
     # TODO A bit hackish, maybe remove
@@ -192,6 +239,12 @@ class WikiPage(DocPage):
     def getWikiWord(self):
         return self.wikiWord
         
+    def getTitle(self):
+        """
+        Return human readable title of the page.
+        """
+        return self.getWikiWord()
+
     def getWikiData(self):
         return self.wikiDocument.getWikiData()
 
@@ -327,6 +380,20 @@ class WikiPage(DocPage):
         self.fireMiscEventProps(p)
 
 
+    def getLiveTextNoTemplate(self):
+        """
+        Return None if page isn't existing instead of creating an automatic
+        live text (e.g. by template).
+        """
+        if self.getTxtEditor() is not None:
+            return self.getLiveText()
+        else:
+            if self.isDefined():
+                return self.getContent()
+            else:
+                return None
+
+
     def getContent(self):
         """
         Returns page content. If page doesn't exist already the template
@@ -444,7 +511,6 @@ class WikiPage(DocPage):
 #         self.lastUpdate = time()   # self.modified
 
         if fireEvent:
-            ##??? self.mainControl.informWikiPageUpdate(self)  # TODO Remove
             self.fireMiscEventKeys(("updated wiki page", "updated page"))
 
 
@@ -492,21 +558,28 @@ class WikiPage(DocPage):
         return (self.saveDirtySince, self.updateDirtySince)
 
 
+    _DEFAULT_PRESENTATION = (0, 0, 0, 0, 0)
+
     def getPresentation(self):
         """
         Get the presentation tuple (<cursor pos>, <editor scroll pos x>,
             <e.s.p. y>, <preview s.p. x>, <p.s.p. y>)
         """
-        datablock = self.wikiDocument.getWikiData().getPresentationBlock(
+        wikiData = self.wikiDocument.getWikiData()
+
+        if wikiData is None:
+            return WikiPage._DEFAULT_PRESENTATION
+
+        datablock = wikiData.getPresentationBlock(
                 self.getWikiWord())
 
         if datablock is None or datablock == "":
-            return (0, 0, 0, 0, 0)
+            return WikiPage._DEFAULT_PRESENTATION
 
         try:
             return struct.unpack("iiiii", datablock)
         except struct.error:
-            return (0, 0, 0, 0, 0)
+            return WikiPage._DEFAULT_PRESENTATION
 
 
     def setPresentation(self, data, startPos):
@@ -522,11 +595,18 @@ class WikiPage(DocPage):
                 self.wikiDocument.getWriteAccessFailed():
             return
 
-        pt = self.getPresentation()
-        pt = pt[:startPos] + data + pt[startPos+len(data):]
+        try:
+            pt = self.getPresentation()
+            pt = pt[:startPos] + data + pt[startPos+len(data):]
+    
+            wikiData = self.wikiDocument.getWikiData()
+            if wikiData is None:
+                return
 
-        self.wikiDocument.getWikiData().setPresentationBlock(self.getWikiWord(),
-                struct.pack("iiiii", *pt))
+            wikiData.setPresentationBlock(self.getWikiWord(),
+                    struct.pack("iiiii", *pt))
+        except AttributeError:
+            traceback.print_exc()
 #         self.setDirty(True)
 
 
@@ -643,7 +723,14 @@ class FunctionalPage(DocPage):
 
     def getWikiWord(self):
         return None
-        
+
+    def getTitle(self):
+        """
+        Return human readable title of the page.
+        """
+        return u"<" + getHrNameForFuncTag(self.funcTag) + u">"
+
+
     def getFuncTag(self):
         """
         Return the functional tag of the page (a kind of filepath
@@ -671,6 +758,16 @@ class FunctionalPage(DocPage):
         else:
             return u""
 
+
+    def getLiveTextNoTemplate(self):
+        """
+        Return None if page isn't existing instead of creating an automatic
+        live text (e.g. by template).
+        Functional pages by definition exist always 
+        """
+        return self.getLiveText()
+
+
     def getContent(self):     
         if self.funcTag in ("global/[TextBlocks]", "global/[PWL]",
                 "global/[CCBlacklist]"):
@@ -678,6 +775,7 @@ class FunctionalPage(DocPage):
         elif self.funcTag in ("wiki/[TextBlocks]", "wiki/[PWL]",
                 "wiki/[CCBlacklist]"):
             return self._loadDbSpecificPage(self.funcTag[5:])
+
 
     def getFormatDetails(self):
         """
@@ -724,44 +822,6 @@ class FunctionalPage(DocPage):
             self._saveDbSpecificPage(text, self.funcTag[5:])
 
         self.saveDirtySince = None
-
-
-#         if self.funcTag == "global/[TextBlocks]":
-#             tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
-#                     "[TextBlocks].wiki")
-# #             tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[TextBlocks].wiki")
-#             tbFile = open(tbLoc, "w")
-#             try:
-#                 tbFile.write(BOM_UTF8)
-#                 tbFile.write(utf8Enc(text)[0])
-#             finally:
-#                 tbFile.close()
-#         elif self.funcTag == "global/[PWL]":
-#             tbLoc = os.path.join(WikidPadStarter.app.getGlobalConfigSubDir(),
-#                     "[PWL].wiki")
-# #             tbLoc = os.path.join(self.pWiki.globalConfigSubDir, "[PWL].wiki")
-#             tbFile = open(tbLoc, "w")
-#             try:
-#                 tbFile.write(BOM_UTF8)
-#                 tbFile.write(utf8Enc(text)[0])
-#             finally:
-#                 tbFile.close()
-#         elif self.funcTag == "wiki/[TextBlocks]":
-#             wikiData = self.wikiDocument.getWikiData()
-#             if wikiData.isDefinedWikiWord("[TextBlocks]") and text == u"":
-#                 # Delete content
-#                 wikiData.deleteContent("[TextBlocks]")
-#             else:
-#                 if text != u"":
-#                     wikiData.setContent("[TextBlocks]", text)
-#         elif self.funcTag == "wiki/[PWL]":
-#             wikiData = self.wikiDocument.getWikiData()
-#             if wikiData.isDefinedWikiWord("[PWL]") and text == u"":
-#                 # Delete content
-#                 wikiData.deleteContent("[PWL]")
-#             else:
-#                 if text != u"":
-#                     wikiData.setContent("[PWL]", text)
 
 
     def update(self, text, fireEvent=True):
@@ -857,3 +917,18 @@ def _cmpCharPosition(a, b):
     return int(a[1] - b[1])
 
 
+_FUNCTAG_TO_HR_NAME_MAP = {
+            "global/[TextBlocks]": u"Global text blocks",
+            "wiki/[TextBlocks]": u"Wiki text blocks",
+            "global/[PWL]": "Global spell list",
+            "wiki/[PWL]": "Wiki spell list",
+            "global/[CCBlacklist]": "Global cc. blacklist",
+            "wiki/[CCBlacklist]": "Wiki cc. blacklist"
+        }
+
+
+def getHrNameForFuncTag(funcTag):
+    """
+    Return the human readable name of functional page with tag funcTag.
+    """
+    return _FUNCTAG_TO_HR_NAME_MAP.get(funcTag, funcTag)

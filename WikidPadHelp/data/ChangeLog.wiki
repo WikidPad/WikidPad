@@ -1,6 +1,27 @@
 ﻿++ Change Log
 
-Dec. 27, 2006 (1.8beta6)
+Jan. 28, 2007 (1.9beta1)
+
+    * Userinterface change, no more tabs for edit and preview, but an arbitrary number of tabs for wiki pages, switching between edit and preview by icons in toolbar or shortcuts
+    * Shortcut and menu item to open a selected wikiword in a new tab
+    * New tree control which behaves and looks very similar (but not identically) to the native one.
+    * Option to set text cursor color. See OptionsDialog#*Text# cursor# color*
+    * Option to set selection foreground color. See OptionsDialog#*Selection# fg.# color*
+
+    * More clear error message if no write access when closing wiki
+    * Patch to find sqlite3 library on Linux (untested)
+    * Bug fixed: Functional pages inside "modified-within" node
+    * Bug fixed: Non-existing pages found by search if page was in cache yet
+    * Bug fixed: Possible crash when searching non-existing pages in cache
+    * Bug fixed: Change of text color didn't affect some styles (bold, headings, todo)
+    * Bug fixed: Link to page with spaces in name didn't work with IE as preview
+    * Bug fixed: Masses of superfluous tree nodes when updating tree on Linux (untested)
+    * Bug fixed: Integer division (e.g. 5/3) gave integer result (e.g. 1) on expression evaluation
+    * Bug (hopefully) fixed: Temporarily generated images not shown in IE 7 preview
+
+
+
+Dec. 27, 2006 (1.8beta6, repository revision in "mbutscher" branch: 100)
 
     * "toc" insertion for a page-wide table of contents (with
       appropriate settings in the CSS-file(s)). See [Insertions].
@@ -21,7 +42,7 @@ Dec. 27, 2006 (1.8beta6)
 
 
 
-Nov. 24, 2006 (1.8beta5)
+Nov. 24, 2006 (1.8beta5, repository revision in "mbutscher" branch: 99)
 
     * Changed insertion syntax where value or appendices can
       be quoted to include arbitrary characters. See [Insertions].

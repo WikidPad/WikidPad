@@ -1,4 +1,4 @@
-++ Wiki Word Navigation
+﻿++ Wiki Word Navigation
 
 *Open Parent/Children Words*
 
@@ -19,6 +19,7 @@ of different ways.
     1. Double click the link.
     2. Hold down control and click the link.
     3. Type Ctrl-L to Activate the link.
+    4. For wikiwords you can also use Ctrl-Shift-L
 
 *To Open Any Word*
 

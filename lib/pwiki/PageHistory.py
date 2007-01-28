@@ -10,15 +10,31 @@ class PageHistory:
         self.history = []
         self.pWiki = pWiki
         
-        # Register for pWiki events
-        self.pWiki.getMiscEvent().addListener(KeyFunctionSink((
-                ("loading current page", self.onLoadingCurrentWikiPage),
+        self.mainControlSink = KeyFunctionSink((
                 ("deleted wiki page", self.onDeletedWikiPage),
                 ("renamed wiki page", self.onRenamedWikiPage),
                 ("opened wiki", self.onOpenedWiki)
-        )), False)
-              
+        ))
+
+        self.currentDocPPresenterSink = KeyFunctionSink((
+                ("loading wiki page", self.onLoadingCurrentWikiPage),
+        ))
+        
+        # Register for pWiki events
+        self.pWiki.getMiscEvent().addListener(self.mainControlSink, False)
+        
+        self.pWiki.getCurrentDocPagePresenterRMEvent().addListener(
+                self.currentDocPPresenterSink, False)
+
+
 ##                 ("saving current page", self.savingCurrentWikiPage)
+
+
+    def close(self):
+        self.pWiki.getMiscEvent().removeListener(self.mainControlSink)
+        self.pWiki.getCurrentDocPagePresenterRMEvent().removeListener(
+                self.currentDocPPresenterSink)
+
 
     def onLoadingCurrentWikiPage(self, miscevt):
         if miscevt.get("motionType") == "history":
