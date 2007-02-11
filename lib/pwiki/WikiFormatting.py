@@ -562,3 +562,21 @@ class WikiFormatting:
         return tokenizer.tokenize(text, formatMap, FormatTypes.Default,
                 threadholder=threadholder)
 
+
+
+def isNakedWikiWordForNewWiki(word):
+    """
+    Function to solve a hen-egg problem:
+    We need a name to create a new wiki, but the wiki must exist already
+    to check if wiki name is syntactically correct.
+    """
+    global WikiWordEditorRE, WikiWordRE2
+
+    if matchWhole(WikiWordEditorRE, word):
+        return True
+
+    parword = u"[" + word + u"]"
+    if WikiWordRE2.match(parword):
+        return True
+
+    return False

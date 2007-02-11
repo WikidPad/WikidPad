@@ -358,7 +358,6 @@ class WikiData:
                     self.connWrap.execSql("delete from wikiwordprops where word = ?", (word,))
                     self.connWrap.execSql("delete from todos where word = ?", (word,))
                     self.deleteContent(word)
-                    # self.connWrap.execSql("delete from wikiwordcontent where word = ?", (word,))
                     # del self.cachedContentNames[word]
     
                     self.connWrap.commit()
@@ -696,7 +695,7 @@ class WikiData:
                         "value glob (? || '*')", (thisStr, thisStr))
             else:
                 return self.connWrap.execSqlQuerySingleColumn("select word "
-                        "from wikiwordcontent where word glob (? || '*')",
+                        "from wikiwords where word glob (? || '*')",
                         (thisStr,))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()

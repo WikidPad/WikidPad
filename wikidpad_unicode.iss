@@ -86,6 +86,7 @@ Name: assocWiki; Description: Associate WikidPad with .wiki files
 Name: assocWikiUrl; Description: "Handle URLs with ""wiki:"" by WikidPad"
 [InstallDelete]
 Name: {app}\regexpr.cache; Type: files
+Name: {app}\icons\tb_data file.gif; Type: files
 [UninstallDelete]
 Name: {app}\regexpr.cache; Type: files
 [Code]

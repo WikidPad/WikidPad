@@ -518,6 +518,7 @@ GLOBALDEFAULTS = {
     ("main", "html_header_doctype"): 'DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"',
 
 
+    # Editor options
     ("main", "editor_plaintext_color"): "", # Color of plain text (and non-exist. wikiwords) in editor
     ("main", "editor_link_color"): "", # Color of links (URL and wikiwords)
     ("main", "editor_attribute_color"): "", # Color of attributes (=properties) and scripts
@@ -528,6 +529,12 @@ GLOBALDEFAULTS = {
     ("main", "sync_highlight_byte_limit"): "5120",  # Size limit when to start asyn. highlighting in editor
     ("main", "async_highlight_delay"): "0.2",  # Delay after keypress before starting async. highlighting
     ("main", "editor_autoUnbullets"): "True",  # When pressing return on line with lonely bullet, remove bullet?
+
+
+    # Mouse options
+    ("main", "mouse_middleButton_withoutCtrl"): "0", # If middle mouse button is pressed on a link in editor or preview, without
+            # Ctrl pressed, should it then open link  0: in a new tab in foreground, 1: new tab background, 2: same tab
+    ("main", "mouse_middleButton_withCtrl"): "1", # Same, but if Ctrl is pressed
 
 
     # Search options

@@ -190,44 +190,6 @@ class WikiDataManager(MiscEventSourceMixin):
         self.readAccessFailed = False
         self.writeAccessFailed = False
         wikiConfig.loadConfig(wikiConfigFilename)
-        
-#         while True:
-#             try:
-#                 # config.read(wikiConfigFile)
-#                 wikiConfig.loadConfig(wikiConfigFilename)
-#             except Exception, e:
-#                 # try to recover by checking if the parent dir contains the real wiki file
-#                 # if it does the current wiki file must be a wiki word file, so open the
-#                 # real wiki to the wiki word.
-#     #                 try:
-#                 parentDir = os.path.dirname(os.path.dirname(wikiConfigFilename))
-#                 if parentDir:
-#                     wikiFiles = [file for file in os.listdir(parentDir) \
-#                             if file.endswith(".wiki")]
-#                     if len(wikiFiles) > 0:
-#                         wikiWord = os.path.basename(wikiConfigFilename)
-#                         wikiWord = wikiWord[0:len(wikiWord)-5]
-#     
-#                         # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
-#                         windows83Marker = wikiWord.find("~")
-#                         if windows83Marker != -1:
-#                             wikiWord = wikiWord[0:windows83Marker]
-#                             matchingFiles = [file for file in wikiFiles \
-#                                     if file.lower().startswith(wikiWord)]
-#                             if matchingFiles:
-#                                 wikiWord = matchingFiles[0]
-#                         wikiConfigFilename = os.path.join(parentDir, wikiFiles[0])
-#                         continue
-# #                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
-#                 raise
-# 
-#             break
-
-#                 except Exception, ne:
-#                     traceback.print_exc()
-#                     self.displayErrorMessage(u"Error reading config file '%s'" %
-#                             wikiConfigFilename, ne)
-#                     return False
 
         # config variables
         wikiName = wikiConfig.get("main", "wiki_name")
@@ -237,9 +199,6 @@ class WikiDataManager(MiscEventSourceMixin):
         if wikiName is None or dataDir is None:
             raise BadConfigurationFileException(
                     "Wiki configuration file is corrupted")
-#                 self.displayErrorMessage("Wiki configuration file is corrupted", e)
-#                 # traceback.print_exc()
-#                 return False
 
         # absolutize the path to data dir if it's not already
         if not os.path.isabs(dataDir):
@@ -248,13 +207,6 @@ class WikiDataManager(MiscEventSourceMixin):
         dataDir = mbcsDec(os.path.abspath(dataDir), "replace")[0]
 
         self.wikiConfigFilename = wikiConfigFilename
-
-#         self.wikiName = wikiName
-#         self.dataDir = dataDir
-        
-#         # create the db interface to the wiki data
-#         wikiDataManager = None
-
 
         if not dbtype:
             wikidhName = wikiConfig.get("main",
@@ -270,32 +222,6 @@ class WikiDataManager(MiscEventSourceMixin):
         if not isDbHandlerAvailable(wikidhName):
             raise DbHandlerNotAvailableException(
                     'Required data handler %s not available' % wikidhName)
-#                 wikidhName = None
-#         else:
-
-#         wikiDataManager = WikiDataManager.openWikiDocument(self,
-#                 wikidhName, dataDir, fileStorDir, self.wikiSyntax)
-
-#         if not wikidhName:
-#             wdhandlers = DbBackendUtils.listHandlers()
-#             if len(wdhandlers) == 0:
-#                 raise NoDbHandlerException(
-#                         'No data handler available to open database.')
-#                     self.displayErrorMessage(
-#                             'No data handler available to open database.')
-#                 return
-
-#             # Ask for the data handler to use
-#             index = wxGetSingleChoiceIndex(u"Choose database type",
-#                     u"Choose database type", [wdh[1] for wdh in wdhandlers],
-#                     self)
-#             if index == -1:
-#                 return
-                
-#             wikiDataManager = WikiDataManager.openWikiDocument(self,
-#                     wdhandlers[index][0], dataDir, fileStorDir,
-#                     self.wikiSyntax)
-
 
         self.wikiConfiguration = wikiConfig
 
@@ -526,9 +452,39 @@ class WikiDataManager(MiscEventSourceMixin):
             self.wikiPageDict[wikiWord] = value
             
             value.getMiscEvent().addListener(self)
-            
 
         return value
+
+
+    def _getWikiPageNoErrorNoCache(self, wikiWord):
+        """
+        Similar to getWikiPageNoError, but does not save retrieved
+        page in cache if it isn't there yet.
+        """
+        value = self.wikiPageDict.get(wikiWord)
+
+        if value is not None and isinstance(value, AliasWikiPage):
+            # Check if existing alias page is up to date
+            realWikiWord1 = value.getNonAliasPage().getWikiWord()
+            realWikiWord2 = self.wikiData.getAliasesWikiWord(wikiWord)
+            
+            if realWikiWord1 != realWikiWord2:
+                # if not, retrieve new page
+                value = None
+        
+        if value is None:
+            # No active page available
+            realWikiWord = self.wikiData.getAliasesWikiWord(wikiWord)
+            if wikiWord == realWikiWord:
+                # no alias
+                value = WikiPage(self, wikiWord)
+            else:
+#                 realpage = WikiPage(self, realWikiWord)
+                realpage = self.getWikiPageNoError(realWikiWord)
+                value = AliasWikiPage(self, wikiWord, realpage)
+
+        return value
+
 
 
     def createWikiPage(self, wikiWord):
@@ -581,7 +537,7 @@ class WikiDataManager(MiscEventSourceMixin):
             for wikiWord in wikiWords:
                 progresshandler.update(step, u"")   # , "Rebuilding %s" % wikiWord)
                 try:
-                    wikiPage = self.getWikiPageNoError(wikiWord)
+                    wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
                     if isinstance(wikiPage, AliasWikiPage):
                         # This should never be an alias page, so fetch the
                         # real underlying page
@@ -595,7 +551,6 @@ class WikiDataManager(MiscEventSourceMixin):
 
         finally:
             progresshandler.close()
-
 
         # Give possibility to do further reorganisation
         # specific to database backend
@@ -777,6 +732,8 @@ class WikiDataManager(MiscEventSourceMixin):
 
         self.baseWikiData = wikiData
         self.wikiData = WikiDataSynchronizedProxy(self.baseWikiData)
+        
+        self.wikiData.connect()
         
         # Reset flag so program automatically tries reconnecting on next error
         self.autoReconnectTriedFlag = False

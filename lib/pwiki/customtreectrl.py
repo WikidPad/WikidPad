@@ -1819,6 +1819,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         self._dropTarget = self._oldSelection = None
         self._dragImage = None
         self._underMouse = None
+        self._selectedNodeWhileMousePressed = None
 
         # TextCtrl initial settings for editable items        
         self._textCtrl = None
@@ -4834,16 +4835,16 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         
         keyCode = event.GetKeyCode()
 
-        if keyCode in [ord("+"), wx.WXK_ADD]:       # "+"
+        if keyCode in [ord("+"), wx.WXK_ADD, wx.WXK_NUMPAD_ADD]:       # "+"
             if self._current.HasPlus() and not self.IsExpanded(self._current) and self.IsEnabled(self._current):
                 self.Expand(self._current)
                 
-        elif keyCode in [ord("*"), wx.WXK_MULTIPLY]:  # "*"
+        elif keyCode in [ord("*"), wx.WXK_MULTIPLY, wx.WXK_NUMPAD_MULTIPLY]:  # "*"
             if not self.IsExpanded(self._current) and self.IsEnabled(self._current):
                 # expand all
                 self.ExpandAll(self._current)
 
-        elif keyCode in [ord("-"), wx.WXK_SUBTRACT]:  # "-"
+        elif keyCode in [ord("-"), wx.WXK_SUBTRACT, wx.WXK_NUMPAD_SUBTRACT]:  # "-"
             if self.IsExpanded(self._current):
                 self.Collapse(self._current)
             
@@ -5305,7 +5306,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             command = (event.RightIsDown() and [wxEVT_TREE_BEGIN_RDRAG] or [wxEVT_TREE_BEGIN_DRAG])[0]
 
             nevent = TreeEvent(command, self.GetId())
-            nevent._item = self._current
+            nevent._item = self._selectedNodeWhileMousePressed  # self._current
             nevent.SetEventObject(self)
             newpt = self.CalcScrolledPosition(pt)
             nevent.SetPoint(newpt)
@@ -5342,7 +5343,8 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                     del self._dragImage
 
                 # Create the custom draw image from the icons and the text of the item                    
-                self._dragImage = DragImage(self, self._current)
+                self._dragImage = DragImage(self, self._selectedNodeWhileMousePressed)  # self._current)
+#                 print "self._dragImage =", repr(self._selectedNodeWhileMousePressed.GetText())
                 self._dragImage.BeginDrag(wx.Point(0,0), self)
                 self._dragImage.Show()
                 self._dragImage.Move(self.CalcScrolledPosition(pt))
@@ -5380,8 +5382,13 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
             if self._dropTarget:
                 self._dropTarget.SetHilight(False)
-                
-            if self._oldSelection:
+            
+            if not self.HasFlag(TR_MULTIPLE) and \
+                    self._selectedNodeWhileMousePressed:
+                self.DoSelectItem(self._selectedNodeWhileMousePressed,
+                        unselect_others, extended_select)
+
+            elif self._oldSelection:
             
                 self._oldSelection.SetHilight(True)
                 self.RefreshLine(self._oldSelection)
@@ -5389,7 +5396,8 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             
             # generate the drag end event
             event = TreeEvent(wxEVT_TREE_END_DRAG, self.GetId())
-            event._item = item
+            event._item = self._selectedNodeWhileMousePressed  # item
+#             print "event._item =", repr(self._selectedNodeWhileMousePressed.GetText())
             event._pointDrag = self.CalcScrolledPosition(pt)
             event.SetEventObject(self)
 
@@ -5437,7 +5445,8 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                     
                 # If the item is already selected, do not update the selection.
                 # Multi-selections should not be cleared if a selected item is clicked.
-                if not self.IsSelected(item):
+                if not self.IsSelected(item) and not event.LeftDown():
+#                     print "selectitem"
                 
                     self.DoSelectItem(item, True, False)
 
@@ -5466,7 +5475,30 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                     if len(selections) > 1 and not event.CmdDown() and not event.ShiftDown():
                     
                         self.DoSelectItem(item, True, False)
-                    
+
+                else:
+
+                    is_multiple, extended_select, unselect_others = EventFlagsToSelType(self.GetTreeStyle(),
+                                                                                        event.ShiftDown(),
+                                                                                        event.CmdDown())
+
+#                     self.DoSelectItem(item,
+#                             unselect_others, extended_select)
+#                     print "LeftUp DoSelectItem"
+                    self._selectedNodeWhileMousePressed = None
+
+
+                    if flags & TREE_HITTEST_ONITEM:
+                        # how should the selection work for this event?
+                        if item.IsHyperText():
+                            self.SetItemVisited(item, True)
+                        
+#                         is_multiple, extended_select, unselect_others = EventFlagsToSelType(self.GetTreeStyle(),
+#                                                                                             event.ShiftDown(),
+#                                                                                             event.CmdDown())
+
+                        self.DoSelectItem(item, unselect_others, extended_select)
+
                 if self._lastOnSame:
                 
                     if item == self._current and (flags & TREE_HITTEST_ONITEMLABEL) and self.HasFlag(TR_EDIT_LABELS):
@@ -5502,6 +5534,8 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                 if event.LeftDown():
                 
                     self._lastOnSame = item == self._current
+                    self._selectedNodeWhileMousePressed = item
+#                     print "event.LeftDown()", repr(item.GetText())
                     
                 if flags & TREE_HITTEST_ONITEMBUTTON:
                 
@@ -5527,8 +5561,26 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                 # otherwise, perform the deselection on mouse-up.
                 # this allows multiple drag and drop to work.
                 # but if Cmd is down, toggle selection of the clicked item
-                if not self.IsSelected(item) or event.CmdDown():
+#                 if not self.IsSelected(item) or event.CmdDown():
+#                     print "not self.IsSelected(item)"
+#                     self._dropTarget.SetHilight(False)
+#                     self.RefreshLine(self._dropTarget)
+#                     if not (self.GetTreeStyle() & TR_MULTIPLE):
+#                         self._oldSelection = self.GetSelection()
+#     
+#                         if self._oldSelection:
+#                             self._oldSelection.SetHilight(False)
+#                             self.RefreshLine(self._oldSelection)
+# 
+#                         item.SetHilight(True)
+#                         self.RefreshLine(item)
+#                         
+#                         item.SetHilight(False)                    
+#                         if self._oldSelection:
+#                             self._oldSelection.SetHilight(True)
 
+
+                if event.CmdDown():
                     if flags & TREE_HITTEST_ONITEM:
                         # how should the selection work for this event?
                         if item.IsHyperText():

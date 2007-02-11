@@ -6,7 +6,7 @@ from wxPython.html import *
 
 from WikiExceptions import *
 from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
-        wxKeyFunctionSink
+        wxKeyFunctionSink, appendToMenuByMenuDesc
 
 from MiscEvent import KeyFunctionSink
 
@@ -85,7 +85,7 @@ class WikiHtmlView(wxHtmlWindow):
         self.currentLoadedWikiWord = None
 
         self.anchor = None  # Name of anchor to jump to when view gets visible
-
+        self.contextHref = None  # Link href on which context menu was opened
         
         # TODO Should be changed to presenter as controller
         self.exporterInstance = Exporters.HtmlXmlExporter(
@@ -100,11 +100,18 @@ class WikiHtmlView(wxHtmlWindow):
         
         EVT_KEY_DOWN(self, self.OnKeyDown)
         EVT_KEY_UP(self, self.OnKeyUp)
+
         EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
         EVT_MENU(self, GUI_ID.CMD_ZOOM_IN, lambda evt: self.addZoom(1))
         EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT, lambda evt: self.addZoom(-1))
+        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)        
+        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
+                self.OnActivateNewTabThis)        
+        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
+                self.OnActivateNewTabBackgroundThis)        
 
-        EVT_SET_FOCUS(self, self.OnSetFocus)
+        self.Bind(EVT_SET_FOCUS, self.OnSetFocus)
+        EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
         EVT_MOUSEWHEEL(self, self.OnMouseWheel) 
 
 
@@ -123,6 +130,7 @@ class WikiHtmlView(wxHtmlWindow):
 
 
     def close(self):
+        self.Unbind(EVT_SET_FOCUS)
         self.setVisible(False)
         self.presenterListener.disconnect()
 
@@ -252,9 +260,61 @@ class WikiHtmlView(wxHtmlWindow):
     def OnClipboardCopy(self, evt):
         copyTextToClipboard(self.SelectionToText())
 
+    # Maps configuration setting "mouse_middleButton_withoutCtrl" to a 
+    # tabMode for _activateLink.
+    _MIDDLE_CONFIG_TO_TABMODE = {0: 2, 1: 3, 2: 0}
+
+    def OnMiddleDown(self, evt):
+        pos = self.CalcUnscrolledPosition(evt.GetPosition())
+        cell = self.GetInternalRepresentation().FindCellByPos(pos.x, pos.y)
+        if cell is not None:
+            linkInfo = cell.GetLink()
+            if linkInfo is not None:
+                if not evt.ControlDown():
+                    middleConfig = self.presenter.getConfig().getint("main",
+                            "mouse_middleButton_withoutCtrl", 2)
+                else:
+                    middleConfig = self.presenter.getConfig().getint("main",
+                            "mouse_middleButton_withCtrl", 3)
+
+                tabMode = self._MIDDLE_CONFIG_TO_TABMODE[middleConfig]
+
+                self._activateLink(cell.GetLink().GetHref(), tabMode=tabMode)
+                return
+
+        evt.Skip()
+
 
     def OnLinkClicked(self, linkinfo):
         href = linkinfo.GetHref()
+        evt = linkinfo.GetEvent()
+
+        if evt.RightUp():
+            self.contextHref = linkinfo.GetHref()
+            menu = wxMenu()
+            if href.startswith(u"internaljump:"):
+                appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTERNAL_JUMP)
+            else:
+                appendToMenuByMenuDesc(menu, u"Activate;CMD_ACTIVATE_THIS")
+
+            self.PopupMenuXY(menu, evt.GetX(), evt.GetY())
+        else:
+            # Jump to another wiki page
+            
+            # First check for an anchor. In URLs, anchors are always
+            # separated by '#' regardless which character is used
+            # in the wiki syntax (normally '!')
+            # Now open wiki
+            self._activateLink(href, tabMode=0)
+
+
+    def _activateLink(self, href, tabMode=0):
+        """
+        Called if link was activated by clicking in the context menu, 
+        therefore only links starting with "internaljump:" can be
+        handled.
+        tabMode -- 0:Same tab; 2: new tab in foreground; 3: new tab in background
+        """
         if href.startswith(u"internaljump:"):
             # Jump to another wiki page
             
@@ -266,10 +326,27 @@ class WikiHtmlView(wxHtmlWindow):
             except ValueError:
                 word = href[13:]
                 anchor = None
-                
-            # Now open wiki
-            self.presenter.getMainControl().openWikiPage(
-                    word, motionType="child", anchor=anchor)
+
+            # open the wiki page
+            if tabMode & 2:
+                # New tab
+                presenter = self.presenter.getMainControl().\
+                        createNewDocPagePresenterTab()
+            else:
+                # Same tab
+                presenter = self.presenter
+
+            presenter.openWikiPage(word, motionType="child", anchor=anchor)
+
+            if not tabMode & 1:
+                # Show in foreground
+                presenter.switchSubControl("preview", True)
+
+                presenter.getMainControl().getMainAreaPanel().\
+                        showDocPagePresenter(presenter)
+            else:
+                presenter.switchSubControl("preview", False)
+
         elif href.startswith(u"#"):
             anchor = href[1:]
             if self.HasAnchor(anchor):
@@ -281,6 +358,16 @@ class WikiHtmlView(wxHtmlWindow):
         else:
             self.presenter.getMainControl().launchUrl(href)
 
+
+    def OnActivateThis(self, evt):
+        self._activateLink(self.contextHref, tabMode=0)
+
+    def OnActivateNewTabThis(self, evt):
+        self._activateLink(self.contextHref, tabMode=2)
+
+    def OnActivateNewTabBackgroundThis(self, evt):
+        self._activateLink(self.contextHref, tabMode=3)
+        
 
     def OnKeyUp(self, evt):
         acc = getAccelPairFromKeyDown(evt)
@@ -303,36 +390,28 @@ class WikiHtmlView(wxHtmlWindow):
         self.refresh()
 
 
-
     def OnKeyDown(self, evt):
         acc = getAccelPairFromKeyDown(evt)
         if acc == (wxACCEL_CTRL, ord('+')) or \
                 acc == (wxACCEL_CTRL, WXK_NUMPAD_ADD):
             self.addZoom(1)
-#             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
-#             self.presenter.getConfig().set("main", "preview_zoom", str(zoom + 1))
-#             self.outOfSync = True
-#             self.refresh()
         elif acc == (wxACCEL_CTRL, ord('-')) or \
                 acc == (wxACCEL_CTRL, WXK_NUMPAD_SUBTRACT):
             self.addZoom(-1)
-#             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
-#             self.presenter.getConfig().set("main", "preview_zoom", str(zoom - 1))
-#             self.outOfSync = True
-#             self.refresh()
         else:
             evt.Skip()
 
     def OnMouseWheel(self, evt):
         if evt.ControlDown():
             self.addZoom( -(evt.GetWheelRotation() // evt.GetWheelDelta()) )
-#             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
-#             zoom -= evt.GetWheelRotation() // evt.GetWheelDelta()
-#             self.presenter.getConfig().set("main", "preview_zoom", str(zoom))
-#             self.outOfSync = True
-#             self.refresh()
         else:
             evt.Skip()
 
 
 
+_CONTEXT_MENU_INTERNAL_JUMP = \
+u"""
+Activate;CMD_ACTIVATE_THIS
+Activate New Tab;CMD_ACTIVATE_NEW_TAB_THIS
+Activate New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
+"""

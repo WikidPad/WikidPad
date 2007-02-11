@@ -1,4 +1,4 @@
-import os, os.path, traceback, sys
+import os, os.path, traceback, sys, re
 
 from   wxPython.wx import wxNewId, wxSystemSettings_GetMetric, wxSYS_SCREEN_X, \
         wxSYS_SCREEN_Y, wxSplitterWindow, wxSashLayoutWindow, \
@@ -10,6 +10,13 @@ from wx.xrc import XRCCTRL, XRCID
 import wx
 
 from MiscEvent import KeyFunctionSink
+
+
+def _unescapeWithRe(text):
+    """
+    Unescape things like \n or \f. Throws exception if unescaping fails
+    """
+    return re.sub(u"", text, u"", 1)
 
 
 class wxIdPool:
@@ -246,6 +253,39 @@ def cloneImageList(imgList):
         result.AddIcon(imgList.GetIcon(i))
 
     return result
+
+
+def appendToMenuByMenuDesc(menu, desc):
+    """
+    Appends the menu items described in unistring desc to
+    menu.
+    menu -- already created wx-menu where items should be appended
+    desc consists of lines, each line represents an item. A line only
+    containing '-' is a separator. Other lines consist of multiple
+    parts separated by ';'. The first part is the display name of the
+    item, second part is the command id as it can be retrieved by GUI_ID,
+    third part (optional) is the long help text for status line.
+    """
+    for line in desc.split(u"\n"):
+        if line.strip() == u"":
+            continue
+        
+        parts = [p.strip() for p in line.split(u";")]
+        if len(parts) < 3:
+            parts += [u""] * (3 - len(parts))
+        
+        if parts[0] == u"-":
+            # Separator
+            menu.AppendSeparator()
+        else:
+            parts[0] = _unescapeWithRe(parts[0])
+            menuID = getattr(GUI_ID, parts[1], -1)
+            if menuID == -1:
+                continue
+            parts[2] = _unescapeWithRe(parts[2])
+            menu.Append(menuID, parts[0], parts[2])
+
+
 
 
 class wxKeyFunctionSink(wxEvtHandler, KeyFunctionSink):

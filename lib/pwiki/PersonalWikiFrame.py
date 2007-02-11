@@ -26,7 +26,8 @@ from WindowLayout import WindowLayouter, setWindowPos, setWindowSize
 # from WikiData import *
 from wikidata import DbBackendUtils, WikiDataManager
 # from wikidata.WikiDataManager import WikiDataManager
-import DocPages
+import DocPages, WikiFormatting
+
 
 from CmdLineAction import CmdLineAction
 from WikiTxtCtrl import WikiTxtCtrl
@@ -498,6 +499,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def getFormatting(self):
         if self.wikiDataManager is None:
             return None
+            
+    
 
         return self.wikiDataManager.getFormatting()
 
@@ -993,7 +996,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(wikiWordMenu, '&Activate Link/Word in new tab\t' +
                 self.keyBindings.ActivateLinkNewTab, 'Activate link/word in new tab',
-                lambda evt: self.getActiveEditor().activateLink(newTab=True))
+                lambda evt: self.getActiveEditor().activateLink(tabMode=2))
 
         self.addMenuItem(wikiWordMenu, '&List Parents\t' +
                 self.keyBindings.ViewParents,
@@ -1237,17 +1240,25 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         viewMenu = wxMenu()
         
-        self.addMenuItem(viewMenu, 'Show Editor\tCtrl-Shift-A',
+        self.addMenuItem(viewMenu, 'Show Editor\t' + self.keyBindings.ShowEditor,
                 'Show Editor',
                 lambda evt: self.getCurrentDocPagePresenter().switchSubControl(
-                    "textedit", gainFocus=True), "tb_doc",
+                    "textedit", gainFocus=True), "tb_editor",
                     menuID=GUI_ID.CMD_TAB_SHOW_EDITOR)
 
-        self.addMenuItem(viewMenu, 'Show Preview\tCtrl-Shift-S',
+        self.addMenuItem(viewMenu, 'Show Preview\t' +
+                self.keyBindings.ShowPreview,
                 'Show Preview',
                 lambda evt: self.getCurrentDocPagePresenter().switchSubControl(
-                    "preview", gainFocus=True),  "tb_data file",
+                    "preview", gainFocus=True),  "tb_preview",
                     menuID=GUI_ID.CMD_TAB_SHOW_PREVIEW)
+
+        self.addMenuItem(viewMenu, 'Switch Ed./Prev\t' +
+                self.keyBindings.ShowSwitchEditorPreview,
+                'Switch between editor and preview',
+                self.OnCmdSwitchEditorPreview,  # "tb_switch ed prev",
+                    menuID=GUI_ID.CMD_TAB_SHOW_SWITCH_EDITOR_PREVIEW)
+
 
         viewMenu.AppendSeparator()
 
@@ -1491,11 +1502,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         EVT_TOOL(self, tbID, lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
 
 
-        icon = self.lookupIcon("tb_doc")
+        icon = self.lookupIcon("tb_editor")
         tbID = GUI_ID.CMD_TAB_SHOW_EDITOR
         tb.AddSimpleTool(tbID, icon, "Show Editor", "Show Editor")
 
-        icon = self.lookupIcon("tb_data file")
+        icon = self.lookupIcon("tb_preview")
         tbID = GUI_ID.CMD_TAB_SHOW_PREVIEW
         tb.AddSimpleTool(tbID, icon, "Show Preview", "Show Preview")
 
@@ -1829,6 +1840,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def createNewDocPagePresenterTab(self):
         presenter = DocPagePresenter(self.mainAreaPanel, self)
+        presenter.setVisible(False)
+        presenter.Hide()
 
         editor = self.createWindow({"name": "txteditor1",
                 "presenter": presenter}, presenter)
@@ -2968,23 +2981,62 @@ These are your default global settings.
         """
         Return the absolute path for a rel: URL
         """
+#         unicodeUrl = isinstance(relurl, unicode)
+#         if unicodeUrl:
+#             relurl = relurl.encode("utf8", "replace")
+
         relpath = urllib.url2pathname(relurl[6:])
 
-        return u"file:" + urllib.pathname2url(
+        url = "file:" + urllib.pathname2url(
                 abspath(join(dirname(self.getWikiConfigPath()), relpath)))
+
+#         if unicodeUrl:
+#             url = url.decode("utf8", "replace")
+        
+        return url
+        
 
     def launchUrl(self, link):
 #         match = self.getFormatting().UrlRE.match(link)
 #         try:
 #             link2 = match.group(1)
 
+#         print "launchUrl1", repr(link)
         link2 = link
         if self.configuration.getint(
                 "main", "new_window_on_follow_wiki_url") == 1 or \
                 not link2.startswith(u"wiki:"):
+                
+            if link2.startswith(u"file:") or link2.startswith(u"rel:"):
+#                 print "launchUrl4"
+                # Now we have to do some work to interpret URL reasonably
+                try:
+                    linkAscii = link2.encode("ascii", "strict")
+                except UnicodeEncodeError:
+                    # URL contains non-ascii characters, so skip the following
+                    # unquoting
+                    linkAscii = None
+
+                if linkAscii:
+#                     print "launchUrl7", repr(linkAscii)
+                    # Get bytes out of percent-quoted URL
+                    linkBytes = urllib.unquote(linkAscii)
+                    try:
+                        # Try to interpret bytes as UTF-8
+                        link2 = linkBytes.decode("utf8", "strict")
+#                         print "launchUrl10", repr(linkBytes), repr(link2)
+                    except UnicodeDecodeError:
+                        try:
+                            # Failed -> try mbcs
+                            link2 = mbcsDec(linkBytes, "strict")[0]
+                        except UnicodeDecodeError:
+                            # Failed, too -> leave link2 unmodified
+                            pass
+
             if link2.startswith(u"rel://"):
                 # This is a relative link
                 link2 = self.makeRelUrlAbsolute(link2)
+
             try:
                 os.startfile(mbcsEnc(link2, "replace")[0])    # TODO !!!
             except Exception, e:
@@ -3946,6 +3998,16 @@ These are your default global settings.
             self.getWikiData().copyWikiFilesToDatabase()
 
 
+    def OnCmdSwitchEditorPreview(self, evt):
+        presenter = self.getCurrentDocPagePresenter()
+        
+        scName = presenter.getCurrentSubControlName()
+        if scName != "textedit":
+            presenter.switchSubControl("textedit", gainFocus=True)
+        else:
+            presenter.switchSubControl("preview", gainFocus=True)
+
+
     def insertAttribute(self, name, value, wikiWord=None):
         if wikiWord is None:
             self.getActiveEditor().AppendText(u"\n\n[%s=%s]" % (name, value))
@@ -4175,7 +4237,8 @@ These are your default global settings.
 
             # make sure this is a valid wiki word
             if wikiName.find(u' ') == -1 and \
-                    self.getFormatting().isNakedWikiWord(wikiName):
+                    WikiFormatting.isNakedWikiWordForNewWiki(wikiName):
+#                     self.getFormatting().isNakedWikiWord(wikiName):
                 startDir = self.getWikiConfigPath()
                 if startDir is None:
                     startDir = self.getLastActiveDir()

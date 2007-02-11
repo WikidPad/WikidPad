@@ -118,6 +118,9 @@ class OptionsDialog(wxDialog):
             ("async_highlight_delay", "tfAsyncHighlightingDelay", "f0+"),
             ("editor_autoUnbullets", "cbAutoUnbullets", "b"),
 
+            ("mouse_middleButton_withoutCtrl", "chMouseMiddleButtonWithoutCtrl", "seli"),
+            ("mouse_middleButton_withCtrl", "chMouseMiddleButtonWithCtrl", "seli"),
+
             ("search_wiki_context_before", "tfWwSearchContextBefore", "i0+"),
             ("search_wiki_context_after", "tfWwSearchContextAfter", "i0+"),
             ("search_wiki_count_occurrences", "cbWwSearchCountOccurrences", "b"),
@@ -143,6 +146,7 @@ class OptionsDialog(wxDialog):
             ("OptionsPageHtmlHeader", u"    HTML header"),
             ("OptionsPageAutosave", u"  Autosave"),
             ("OptionsPageEditor", u"  Editor"),
+            ("OptionsPageMouse", u"  Mouse"),
             ("OptionsPageSearching", u"  Searching"),            
             ("OptionsPageCurrentWiki", u"Current Wiki")
     )

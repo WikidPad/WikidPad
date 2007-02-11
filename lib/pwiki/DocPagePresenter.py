@@ -71,6 +71,15 @@ class LayeredControlPresenter(MiscEventSourceMixin):
 
         except ValueError:
             traceback.print_exc()
+            
+    def getCurrentSubControlName(self):
+        if self.lastVisibleIdx == -1:
+            return None
+
+        return self.mainControl.getPagePresenterControlNames()[
+                self.lastVisibleIdx]
+        
+            
 
 
     def isCurrent(self):
@@ -96,7 +105,7 @@ class LayeredControlPresenter(MiscEventSourceMixin):
     def close(self):
         for i in xrange(len(self.subControls)):
             self.subControls[i].close()
-            self.subControls[i].Destroy()
+#             self.subControls[i].Destroy()
 
         self.mainControl.getMiscEvent().removeListener(self)
 
@@ -174,7 +183,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         Handle misc events
         """
         if miscevt.getSource() is self.getMainControl():
-            # TODO!!! Check if mainControl's current presenter is this one
+            # TODO? Check if mainControl's current presenter is this one
             self.fireMiscEventProps(miscevt.getProps())
 
 
@@ -247,8 +256,6 @@ class BasicDocPagePresenter(LayeredControlPresenter):
                 self.getStatusBar().SetStatusText(uniToGui(u"Opened wiki word '%s'" %
                         wikiWord), 0)
                         
-                self.getMainControl().refreshPageStatus()  # page)
-    
             except (WikiWordNotFoundException, WikiFileNotFoundException), e:
                 page = self.getMainControl().getWikiDataManager().\
                         createWikiPage(wikiWord)
@@ -259,6 +266,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
                 self.getStatusBar().SetStatusText(uniToGui(u""), 1)
     
             self.getSubControl("textedit").loadWikiPage(page, evtprops)
+            self.getMainControl().refreshPageStatus()  # page)
     
             p2 = evtprops.copy()
             p2.update({"loaded current page": True,

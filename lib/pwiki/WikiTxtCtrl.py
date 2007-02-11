@@ -17,7 +17,7 @@ import wxPython.xrc as xrc
 from Utilities import *
 
 from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
-        wxKeyFunctionSink, getAccelPairFromKeyDown
+        wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc
 from MiscEvent import KeyFunctionSink
 
 import WikiFormatting
@@ -295,8 +295,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         EVT_STC_USERLISTSELECTION(self, ID, self.OnUserListSelection)
         
         EVT_LEFT_DOWN(self, self.OnClick)
+        EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
         EVT_LEFT_DCLICK(self, self.OnDoubleClick)
-        EVT_MOTION(self, self.OnMouseMove)
+#         EVT_MOTION(self, self.OnMouseMove)
         # EVT_STC_DOUBLECLICK(self, ID, self.OnDoubleClick)
         EVT_KEY_DOWN(self, self.OnKeyDown)
         EVT_CHAR(self, self.OnChar)
@@ -321,8 +322,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         WikiTxtCtrl.CURSOR_IBEAM = wxStockCursor(wxCURSOR_IBEAM)
         WikiTxtCtrl.CURSOR_HAND = wxStockCursor(wxCURSOR_HAND)
 
-        res = xrc.wxXmlResource.Get()
-        self.contextMenu = res.LoadMenu("MenuTextctrlPopup")
+#         res = xrc.wxXmlResource.Get()
+#         self.contextMenu = res.LoadMenu("MenuTextctrlPopup")
+
+        self.contextTokens = None
         
         # Connect context menu events to functions
         EVT_MENU(self, GUI_ID.CMD_UNDO, lambda evt: self.Undo())
@@ -336,6 +339,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 lambda evt: self.CmdKeyExecute(wxSTC_CMD_ZOOMIN))
         EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT,
                 lambda evt: self.CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
+
+        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)        
+        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
+                self.OnActivateNewTabThis)        
+        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
+                self.OnActivateNewTabBackgroundThis)        
 
         EVT_MENU(self, GUI_ID.CMD_TEXT_SELECT_ALL, lambda evt: self.SelectAll())
         
@@ -939,25 +948,48 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def OnContextMenu(self, evt):
+        menu = wxMenu()
+        appendToMenuByMenuDesc(menu, _CONTEXT_MENU_BASE)
+        
+        tokens = self.getTokensForMousePos(self.ScreenToClient(wxGetMousePosition()))
+        
+        self.contextTokens = tokens
+        addActivateItem = False
+        for tok in tokens:
+            if tok.ttype == WikiFormatting.FormatTypes.WikiWord:
+                addActivateItem = True
+            elif tok.ttype == WikiFormatting.FormatTypes.Url:
+                addActivateItem = True
+            elif tok.ttype == WikiFormatting.FormatTypes.Insertion and \
+                    tok.node.key == u"page":
+                addActivateItem = True
+                
+        if addActivateItem:
+            appendToMenuByMenuDesc(menu, _CONTEXT_MENU_ACTIVATE)
+
+        appendToMenuByMenuDesc(menu, _CONTEXT_MENU_BOTTOM)
+
         # Enable/Disable appropriate menu items
-        item = self.contextMenu.FindItemById(GUI_ID.CMD_UNDO)
+        item = menu.FindItemById(GUI_ID.CMD_UNDO)
         if item: item.Enable(self.CanUndo())
-        item = self.contextMenu.FindItemById(GUI_ID.CMD_REDO)
+        item = menu.FindItemById(GUI_ID.CMD_REDO)
         if item: item.Enable(self.CanRedo())
 
         cancopy = self.GetSelectionStart() != self.GetSelectionEnd()
         
-        item = self.contextMenu.FindItemById(GUI_ID.CMD_TEXT_DELETE)
+        item = menu.FindItemById(GUI_ID.CMD_TEXT_DELETE)
         if item: item.Enable(cancopy and self.CanPaste())
-        item = self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_CUT)
+        item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_CUT)
         if item: item.Enable(cancopy and self.CanPaste())
-        item = self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_COPY)
+        item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_COPY)
         if item: item.Enable(cancopy)
-        item = self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_PASTE)
+        item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_PASTE)
         if item: item.Enable(self.CanPaste())
 
         # Show menu
-        self.PopupMenu(self.contextMenu)
+        self.PopupMenu(menu)
+        self.contextTokens = None
+        menu.Destroy()
 
 
     def _goToNextFormField(self):
@@ -1133,9 +1165,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         return page
 
 
-    def activateTokens(self, tokens, newTab=False):
+    def activateTokens(self, tokens, tabMode=0):
         """
         Helper for activateLink()
+        tabMode -- 0:Same tab; 2: new tab in foreground; 3: new tab in background
         """
         if len(tokens) == 0:
             return False
@@ -1145,10 +1178,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 searchStr = None
     
                 # open the wiki page
-                if newTab:
+                if tabMode & 2:
+                    # New tab
                     presenter = self.presenter.getMainControl().\
                             createNewDocPagePresenterTab()
                 else:
+                    # Same tab
                     presenter = self.presenter
                 
                 presenter.openWikiPage(tok.node.nakedWord,   # .getMainControl()
@@ -1165,24 +1200,50 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     
                     presenter.getSubControl("textedit").executeSearch(
                             searchOp, 0)
-                            
-                presenter.getMainControl().getMainAreaPanel().\
-                        showDocPagePresenter(presenter)
+                
+                if not tabMode & 1:
+                    # Show in foreground
+                    presenter.getMainControl().getMainAreaPanel().\
+                            showDocPagePresenter(presenter)
 
                 return True
 
             elif tok.ttype == WikiFormatting.FormatTypes.Url:
                 self.presenter.getMainControl().launchUrl(tok.node.url)
                 return True
+
+            elif tok.ttype == WikiFormatting.FormatTypes.Insertion and \
+                    tok.node.key == u"page":
+                        
+                # open the wiki page
+                if tabMode & 2:
+                    # New tab
+                    presenter = self.presenter.getMainControl().\
+                            createNewDocPagePresenterTab()
+                else:
+                    # Same tab
+                    presenter = self.presenter
+                
+                presenter.openWikiPage(tok.node.value,   # .getMainControl()
+                        motionType="child", anchor=tok.node.value)
+
+                if not tabMode & 1:
+                    # Show in foreground
+                    presenter.getMainControl().getMainAreaPanel().\
+                            showDocPagePresenter(presenter)
+
+                return True
+
+
             else:
                 continue
                 
         return False
+        
 
-
-    def getActivationTokens(self, mousePosition=None):
+    def getTokensForMousePos(self, mousePosition=None):
         # mouse position overrides current pos
-        if mousePosition:
+        if mousePosition and mousePosition != wxDefaultPosition:
             linkPos = self.PositionFromPoint(mousePosition)
         else:
             linkPos = self.GetCurrentPos()
@@ -1200,19 +1261,26 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         return result
 
 
-    def activateLink(self, mousePosition=None, newTab=False):
-        "returns true if the link was activated"
-        tokens = self.getActivationTokens(mousePosition)
-        return self.activateTokens(tokens, newTab)
+    def activateLink(self, mousePosition=None, tabMode=0):
+        """
+        Activates link (wiki word or URL)
+        tabMode -- 0:Same tab; 2: new tab in foreground; 3: new tab in background
+        """
+        tokens = self.getTokensForMousePos(mousePosition)
+        return self.activateTokens(tokens, tabMode)
 
-# 
-#         if not self.activateTokens(tokens):
-# 
-# 
-#         else:
-#             return True
-# 
-#         return False
+
+    def OnActivateThis(self, evt):
+        if self.contextTokens:
+            self.activateTokens(self.contextTokens, 0)
+
+    def OnActivateNewTabThis(self, evt):
+        if self.contextTokens:
+            self.activateTokens(self.contextTokens, 2)
+
+    def OnActivateNewTabBackgroundThis(self, evt):
+        if self.contextTokens:
+            self.activateTokens(self.contextTokens, 3)
 
 
 #  DO NOT DELETE!
@@ -1456,10 +1524,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def startIncrementalSearch(self, initSearch=None):
         sb = self.presenter.getStatusBar()
-        
-#         self.inIncrementalSearch = True
-#         self.anchorBytePosition = -1
-#         self.anchorCharPosition = -1
+
         self.incSearchCharStartPos = self.GetSelectionCharPos()[1]
 
         rect = sb.GetFieldRect(0)
@@ -1467,19 +1532,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         dlg = IncrementalSearchDialog(self, -1, self, rect,
                 sb.GetFont(), self.presenter, initSearch)
-        # try:
         dlg.Show()
-#         finally:
-#             dlg.Destroy()
-        
-#         self.inIncrementalSearch = False
-#         self.anchorBytePosition = -1
-#         self.anchorCharPosition = -1
-
-#         self.SetFocus()
-#         self.searchStr = searchStr
-#         self.presenter.SetStatusText(u"Search (ESC to stop): ", 0)
-#         self.searchCharStartPos = len(self.GetTextRange(0, self.GetCurrentPos()))
 
 
 
@@ -1841,6 +1894,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             bytepos = self.GetCurrentPos()
         return (self.WordStartPosition(bytepos, 1), self.WordEndPosition(bytepos, 1))
 
+
     def OnChange(self, evt):
         if not self.ignoreOnChange:
             self.loadedDocPage.setDirty(True)
@@ -1888,46 +1942,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         accP = getAccelPairFromKeyDown(evt)
         matchesAccelPair = self.presenter.getMainControl().keyBindings.\
                 matchesAccelPair
-        
-
-#         if self.inIncrementalSearch:
-#             # handle key presses while in incremental search here
-#             if matchesAccelPair("ContinueSearch", accP):
-#                 self.executeIncrementalSearch(next=True)
-#             elif key < 256:
-#                 # escape ends the search
-#                 if key == WXK_ESCAPE:
-#                     self.endIncrementalSearch()
-#                 # do the next search on another ctrl-s, or f
-#                 elif evt.ControlDown() and (      # key == ord('S') or
-#                         key == ord(self.presenter.getMainControl().keyBindings.\
-#                             IncrementalSearchCtrl)):
-#                     self.executeIncrementalSearch(next=True)
-# #                 # handle the delete key
-# #                 elif key == WXK_BACK or key == WXK_DELETE:
-# #                     self.searchStr = self.searchStr[:len(self.searchStr)-1]
-# #                     self.executeIncrementalSearch();
-#                 # handle the other keys
-#                 else:
-#                     evt.Skip() # OnChar is responsible for that
-# 
-#             else:
-#                 # TODO Should also work for mouse!
-#                 self.anchorBytePosition = self.GetCurrentPos()
-#                 self.anchorCharPosition = \
-#                         len(self.GetTextRange(0, self.GetCurrentPos()))
-# 
-#                 evt.Skip()
 
         if matchesAccelPair("ContinueSearch", accP):
             # ContinueSearch is normally F3
             self.startIncrementalSearch(self.searchStr)
             evt.Skip()
 
-#         elif evt.ControlDown() and \
-#                 key == ord(self.presenter.getMainControl().keyBindings.\
-#                     IncrementalSearchCtrl) and \
-#                     not evt.ShiftDown() and not evt.AltDown():
         elif matchesAccelPair("StartIncrementalSearch", accP):
             # Start incremental search
             # First get selected text and prepare it as default value
@@ -2094,28 +2114,46 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         else:
             evt.Skip()
 
+    # Maps configuration setting "mouse_middleButton_withoutCtrl" to a 
+    # tabMode for _activateLink.
+    _MIDDLE_CONFIG_TO_TABMODE = {0: 2, 1: 3, 2: 0}
+
+    def OnMiddleDown(self, evt):
+        if not evt.ControlDown():
+            middleConfig = self.presenter.getConfig().getint("main",
+                    "mouse_middleButton_withoutCtrl", 2)
+        else:
+            middleConfig = self.presenter.getConfig().getint("main",
+                    "mouse_middleButton_withCtrl", 3)
+
+        tabMode = self._MIDDLE_CONFIG_TO_TABMODE[middleConfig]
+        
+        if not self.activateLink(evt.GetPosition(), tabMode=tabMode):
+            evt.Skip()
+
+
     def OnDoubleClick(self, evt):
         x = evt.GetX()
         y = evt.GetY()
         if not self.activateLink(wxPoint(x, y)):
             evt.Skip()
 
-    def OnMouseMove(self, evt):
-        if (not evt.ControlDown()) or evt.Dragging():
-            # self.SetCursor(WikiTxtCtrl.CURSOR_IBEAM)
-            evt.Skip()
-            return
-        else:
-            textPos = self.PositionFromPoint(evt.GetPosition())
-
-            if (self.isPositionInWikiWord(textPos) or
-                        self.isPositionInLink(textPos)):
-                self.SetCursor(WikiTxtCtrl.CURSOR_HAND)
-                return
-            else:
-                # self.SetCursor(WikiTxtCtrl.CURSOR_IBEAM)
-                evt.Skip()
-                return
+#     def OnMouseMove(self, evt):
+#         if (not evt.ControlDown()) or evt.Dragging():
+#             self.SetCursor(WikiTxtCtrl.CURSOR_IBEAM)
+#             evt.Skip()
+#             return
+#         else:
+#             textPos = self.PositionFromPoint(evt.GetPosition())
+# 
+#             if (self.isPositionInWikiWord(textPos) or
+#                         self.isPositionInLink(textPos)):
+#                 self.SetCursor(WikiTxtCtrl.CURSOR_HAND)
+#                 return
+#             else:
+#                 # self.SetCursor(WikiTxtCtrl.CURSOR_IBEAM)
+#                 evt.Skip()
+#                 return
 
 
     def OnIdle(self, evt):
@@ -2271,16 +2309,36 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
                     # Absolute file: URL
                     urls.append("file:%s" % url)
 
-#             if f.endswith(".wiki"):
-#                 url = urllib.pathname2url(f)
-#                 urls.append("wiki:%s" % url)
-#             else:
-#                 if f.startswith(self.controller.dataDir + sep):
-#                     f = "//" + f[len(self.controller.dataDir + sep):]
-#                 
-#                 url = urllib.pathname2url(f)
-# 
-#                 urls.append("file:%s" % url)
-
         self.editor.DoDropText(x, y, " ".join(urls))
 
+
+
+
+
+_CONTEXT_MENU_BASE = \
+u"""
+Undo;CMD_UNDO
+Redo;CMD_REDO
+-
+Cut;CMD_CLIPBOARD_CUT
+Copy;CMD_CLIPBOARD_COPY
+Paste;CMD_CLIPBOARD_PASTE
+Delete;CMD_TEXT_DELETE
+-
+Select All;CMD_TEXT_SELECT_ALL
+"""
+
+_CONTEXT_MENU_ACTIVATE = \
+u"""
+-
+Activate;CMD_ACTIVATE_THIS
+Activate New Tab;CMD_ACTIVATE_NEW_TAB_THIS
+Activate New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
+"""
+
+
+_CONTEXT_MENU_BOTTOM = \
+u"""
+-
+Close Tab;CMD_CLOSE_CURRENT_TAB
+"""

@@ -155,37 +155,11 @@ class AliasWikiPage(DocPage):
         """
         return self.aliasWikiWord
 
-
-#     def addTxtEditor(self, txted):
-#         """
-#         Add txted to the list of editors (views) showing this page.
-#         """
-#         print "AliasWikiPage addTxtEditor1", repr(self.aliasWikiWord)
-#         return self.realWikiPage.addTxtEditor(txted)
-# 
-#     def removeTxtEditor(self, txted):
-#         """
-#         Remove txted from the list of editors (views) showing this page.
-#         """
-#         return self.realWikiPage.removeTxtEditor(txted)
-# 
-#     def getTxtEditor(self):
-#         """
-#         Returns an arbitrary text editor associated with the page
-#         or None if no editor is associated.
-#         """
-#         print "AliasWikiPage getTxtEditor1", repr(self.aliasWikiWord), repr(self.realWikiPage.getTxtEditor())
-#         return self.realWikiPage.getTxtEditor()
-
-
     def getNonAliasPage(self):
         """
         If this page belongs to an alias of a wiki word, return a page for
         the real one, otherwise return self
         """
-#         if not self.wikiData.isAlias(self.wikiWord):
-#             return self
-        
         word = self.wikiDocument.getWikiData().getAliasesWikiWord(self.wikiWord)
         return self.wikiDocument.getWikiPageNoError(word)
 
@@ -508,7 +482,8 @@ class WikiPage(DocPage):
         self.getWikiData().updateChildRelations(self.wikiWord, self.childRelations)
         self.getWikiData().updateProperties(self.wikiWord, self.props)
 
-#         self.lastUpdate = time()   # self.modified
+        self.modified = None   # ?
+        self.created = None
 
         if fireEvent:
             self.fireMiscEventKeys(("updated wiki page", "updated page"))

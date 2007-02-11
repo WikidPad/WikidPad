@@ -29,7 +29,7 @@ from Configuration import isUnicode, isOSX, isLinux
 
 # To generate dependencies for py2exe/py2app
 import encodings.utf_8, encodings.latin_1, encodings.utf_16, \
-        encodings.utf_16_be, encodings.utf_16_le
+        encodings.utf_16_be, encodings.utf_16_le, encodings.ascii
 
 
 
@@ -394,6 +394,9 @@ def relativeFilePath(location, toFilePath):
 
 
 def urlFromPathname(fn):
+    if isinstance(fn, unicode):
+        fn = utf8Enc(fn, "replace")[0]
+
     url = urllib.pathname2url(fn)
     url.replace("%24", "$")
     

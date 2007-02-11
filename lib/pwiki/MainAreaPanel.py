@@ -109,7 +109,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         presenter.getMiscEvent().addListener(self)
 
         presenter.switchSubControl("textedit")
-        presenter.Show(True)
+        # presenter.Show(True)
 
         if self.getCurrentDocPagePresenter() is None:
             self.setCurrentDocPagePresenter(presenter)
@@ -199,10 +199,17 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                 if idx > -1:
                     self.SetPageText(idx,
                             presenter.getLongTitle())
-                    # TODO (Re)move this
-                    self.mainControl.SetTitle(u"Wiki: %s - %s" %
-                            (self.mainControl.getWikiConfigPath(),
-                            presenter.getShortTitle()))
+                            
+#                     # TODO (Re)move this
+# #                     if presenter is self.getCurrentDocPagePresenter():
+#                     title = (u"Wiki: %s - %s" %
+#                             (self.mainControl.getWikiConfigPath(),
+#                             presenter.getShortTitle()))
+# #                     if self.mainControl.GetTitle() != title:
+#                     self.mainControl.SetTitle(title)
+
+                    if presenter is self.getCurrentDocPagePresenter():
+                        self.mainControl.refreshPageStatus()
 
         elif miscevt.getSource() is self.mainControl:
             if miscevt.has_key("closed current wiki"):
