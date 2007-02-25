@@ -696,7 +696,7 @@ class WikiData:
                         "value glob (? || '*')", (thisStr, thisStr))
             else:
                 return self.connWrap.execSqlQuerySingleColumn("select word "
-                        "from wikiwordcontent where word glob (? || '*')",
+                        "from wikiwords where word glob (? || '*')",
                         (thisStr,))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
@@ -744,7 +744,8 @@ class WikiData:
         timeDiff = float(time()-(86400*days))
         try:
             return self.connWrap.execSqlQuerySingleColumn(
-                    "select word from wikiwords where modified >= ?",
+                    "select word from wikiwords where modified >= ? and "
+                    "not word glob '[[]*'",
                     (timeDiff,))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()

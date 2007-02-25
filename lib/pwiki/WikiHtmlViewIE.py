@@ -22,7 +22,7 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID
 
 from MiscEvent import KeyFunctionSink
 
-from StringOps import uniToGui, utf8Enc
+from StringOps import uniToGui, utf8Enc, utf8Dec
 
 from TempFileSet import TempFileSet
 
@@ -36,10 +36,10 @@ class LinkCreatorForPreviewIe:
     """
     def __init__(self, wikiData):
         self.wikiData = wikiData
-        
+
     def get(self, word, default = None):
         if self.wikiData.isDefinedWikiWord(word):
-            return urllib.quote(u"internaljump:%s" % word, "/#:;@")
+            return urllib.quote("internaljump:%s" % utf8Enc(word)[0], "/#:;@")
         else:
             return default
 
@@ -49,10 +49,10 @@ class LinkCreatorForPreviewMoz:
     """
     def __init__(self, wikiData):
         self.wikiData = wikiData
-        
+
     def get(self, word, default = None):
         if self.wikiData.isDefinedWikiWord(word):
-            return urllib.quote(u"file://internaljump/%s" % word, "/#:;@")
+            return urllib.quote("file://internaljump/%s" % utf8Enc(word)[0], "/#:;@")
         else:
             return default
 
@@ -94,11 +94,11 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         self.anchor = None  # Name of anchor to jump to when view gets visible
         self.passNavigate = 0
 
-        
+
         # TODO Should be changed to presenter as controller
         self.exporterInstance = Exporters.HtmlXmlExporter(
                 self.presenter.getMainControl())
-        
+
         # TODO More elegantly
         if self.drivingMoz:
             self.exporterInstance.exportType = u"html_previewMOZ"
@@ -159,14 +159,14 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
         if self.outOfSync:
             self.currentLoadedWikiWord = None
-    
+
             self.exporterInstance.wikiData = self.presenter.getWikiDocument().\
                     getWikiData()
-    
+
             wikiPage = self.presenter.getDocPage()
             if wikiPage is None:
                 return  # TODO Do anything else here?
-                
+
             word = wikiPage.getWikiWord()
             if word is None:
                 return  # TODO Do anything else here?
@@ -176,32 +176,32 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
             self.currentLoadedWikiWord = word
             content = self.presenter.getLiveText()
-            
+
             html = self.exporterInstance.exportContentToHtmlString(word, content,
                     wikiPage.getFormatDetails(),
                     self.LinkCreatorForPreview(
                         self.presenter.getWikiDocument().getWikiData()))
-                    
+
             htpath = self.exporterInstance.tempFileSet.createTempFile(
                     utf8Enc(uniToGui(html))[0], ".html", relativeTo="")
-                    
+
             url = "file:" + urllib.pathname2url(htpath)
-            
+
             # wxFileSystem.FileNameToURL
-                    
+
             # wxFileSystem.FileNameToURL(p)
 
             wxGetApp().getInsertionPluginManager().taskEnd()
-            
+
             if self.anchor:
                 url += "#" + self.anchor
 
-    
+
             # TODO Reset after open wiki
 #             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
 #             self.SetFonts("", "", [max(s + 2 * zoom, 1)
 #                     for s in self._DEFAULT_FONT_SIZES])
-                    
+
 #             sf = StringIO.StringIO(utf8Enc(uniToGui(html))[0])
 #             self.LoadStream(sf)
 #             sf.close()
@@ -217,7 +217,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 #             self.Scroll(lx, ly-1)
 #         elif self.outOfSync:
 #             pass
-            
+
         self.anchor = None
         self.outOfSync = False
 
@@ -229,7 +229,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         self.outOfSync = True
         if self.visible:
             self.refresh()
-            
+
     def onReloadedCurrentPage(self, miscevt):
         """
         Called when already loaded page should be loaded again, mainly
@@ -265,7 +265,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         self.outOfSync = True
         if self.visible:
             self.refresh()
-            
+
     def onChangedLiveText(self, miscevt):
         self.outOfSync = True
 
@@ -291,23 +291,25 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             internaljumpPrefix = u"internaljump:"
 
         if href.startswith(internaljumpPrefix):
+            href = href.encode("ascii", "replace")
             evt.Cancel = True
             # Jump to another wiki page
-            
+
             # First check for an anchor. In URLs, anchors are always
             # separated by '#' regardless which character is used
             # in the wiki syntax (normally '!')
             try:
-                word, anchor = href[len(internaljumpPrefix):].split(u"#", 1)
+                word, anchor = href[len(internaljumpPrefix):].split("#", 1)
             except ValueError:
                 word = href[len(internaljumpPrefix):]
                 anchor = None
-                
+
 #             if self.drivingMoz:
+
             # unescape word
-            word = urllib.unquote(word)
+            word = utf8Dec(urllib.unquote(word))[0]
             if anchor:
-                anchor = urllib.unquote(anchor)
+                anchor = utf8Dec(urllib.unquote(anchor))[0]
 
             # Now open wiki
             self.presenter.getMainControl().openWikiPage(
@@ -321,12 +323,12 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
 #     def OnKeyUp(self, evt):
 #         acc = getAccelPairFromKeyDown(evt)
-#         if acc == (wxACCEL_CTRL, ord('C')): 
+#         if acc == (wxACCEL_CTRL, ord('C')):
 #             # Consume original clipboard copy function
 #             pass
 #         else:
 #             evt.Skip()
-# 
+#
 #     def addZoom(self, step):
 #         """
 #         Modify the zoom setting by step relative to current zoom in
@@ -334,13 +336,13 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 #         """
 #         zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
 #         zoom += step
-# 
+#
 #         self.presenter.getConfig().set("main", "preview_zoom", str(zoom))
 #         self.outOfSync = True
 #         self.refresh()
-# 
-# 
-# 
+#
+#
+#
 #     def OnKeyDown(self, evt):
 #         acc = getAccelPairFromKeyDown(evt)
 #         if acc == (wxACCEL_CTRL, ord('+')) or \
@@ -351,12 +353,11 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 #             self.addZoom(-1)
 #         else:
 #             evt.Skip()
-# 
+#
 #     def OnMouseWheel(self, evt):
 #         if evt.ControlDown():
 #             self.addZoom( -(evt.GetWheelRotation() // evt.GetWheelDelta()) )
 #         else:
 #             evt.Skip()
-
 
 

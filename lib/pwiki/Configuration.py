@@ -467,6 +467,8 @@ GLOBALDEFAULTS = {
     ("main", "auto_indent"): "True",
     ("main", "show_lineNumbers"): "False", 
     ("main", "clipboardCatcher_suffix"): ur"\n",  # Suffix to append after each caught clipboard snippet
+    ("main", "clipboardCatcher_filterDouble"): "True",  # If same text shall be inserted twice (or more often)
+            # do not react
     ("main", "mainTree_position"): "0",  # Mode where to place the main tree,
             # 0:Left, 1:Right, 2:Above, 3:Below
     ("main", "viewsTree_position"): "0",  # Mode how to show the "Views" tree relative to main tree,

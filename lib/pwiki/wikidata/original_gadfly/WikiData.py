@@ -687,7 +687,8 @@ class WikiData:
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
-        return [row[0] for row in rows if float(row[1]) >= timeDiff]
+        return [row[0] for row in rows if float(row[1]) >= timeDiff and
+                not row[0].startswith('[')]
 
 
     def getFirstWikiWord(self):

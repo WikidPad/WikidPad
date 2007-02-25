@@ -270,7 +270,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.AutoCompSetSeparator(ord('~'))
 
         # register some event handlers
-        self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(), self, (
+        self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
+                None, (
                 ("options changed", self.onOptionsChanged),  # fired by PersonalWikiFrame
                 ("saving all pages", self.onSavingAllPages),
                 ("closing current wiki", self.onClosingCurrentWiki),

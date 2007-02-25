@@ -765,7 +765,9 @@ class WikiDataManager(MiscEventSourceMixin):
 
         self.baseWikiData = wikiData
         self.wikiData = WikiDataSynchronizedProxy(self.baseWikiData)
-        
+
+        self.wikiData.connect()
+
         # Reset flag so program automatically tries reconnecting on next error
         self.autoReconnectTriedFlag = False
 

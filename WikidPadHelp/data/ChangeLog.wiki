@@ -1,7 +1,27 @@
 ﻿++ Change Log
 
 
-Jan. 25, 2007 (1.8rc1)
+Feb. 25, 2007 (1.8rc2)
+
+    * Filter to remove double clipboard pastes when using the
+      clipboard catcher with certain applications (e.g.
+      Adobe Reader)
+    * Bug fixed: Functional pages were shown in
+      "modified-within" node
+    * Bug fixed: Reconnect didn't work
+    * Bug fixed: Creation of new wiki failed if no wiki was
+      currently loaded
+    * Bug fixed: Bad handling of wikiword links with non-ascii
+      characters in IE/Mozilla preview
+    * Bug fixed: Saving of files didn't work sometimes; when
+      closing WikidPad a message "This operation requires an
+      open database" appeared under some circumstances.
+    * Bug "reduced": Instant wiki-wide search result window
+      pops up always on primary monitor in dual monitor systems.
+
+
+
+Jan. 25, 2007 (1.8rc1, repository revision in "stable-1.8" branch: 102)
 
     * Bug fixed: Non-existing pages found by search if page was
       in cache yet
@@ -12,11 +32,11 @@ Jan. 25, 2007 (1.8rc1)
     * Bug fixed: Link to page with spaces in name didn't work
       with IE as preview
     * Bug fixed: Masses of superfluous tree nodes when updating
-      tree on Linux (untested)
+      tree on Linux
     * Bug fixed: Integer division (e.g. 5/3) gave integer result
       (e.g. 1) on expression evaluation
     * More clear error message if no write access when closing wiki
-    * Patch to find sqlite3 library on Linux (untested)
+    * Patch to find sqlite3 library on Linux
 
 
 

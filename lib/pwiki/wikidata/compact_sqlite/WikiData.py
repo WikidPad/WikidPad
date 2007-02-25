@@ -757,7 +757,8 @@ class WikiData:
         timeDiff = float(time()-(86400*days))
         try:
             return self.connWrap.execSqlQuerySingleColumn(
-                    "select word from wikiwordcontent where modified >= ?",
+                    "select word from wikiwordcontent where modified >= ? and "
+                    "not word glob '[[]*'",
                     (timeDiff,))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()

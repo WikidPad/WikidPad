@@ -26,7 +26,7 @@ from WindowLayout import WindowLayouter, setWindowPos, setWindowSize
 # from WikiData import *
 from wikidata import DbBackendUtils, WikiDataManager
 # from wikidata.WikiDataManager import WikiDataManager
-import DocPages
+import DocPages, WikiFormatting
 
 from CmdLineAction import CmdLineAction
 from WikiTxtCtrl import WikiTxtCtrl
@@ -4011,7 +4011,8 @@ These are your default global settings.
 
             # make sure this is a valid wiki word
             if wikiName.find(u' ') == -1 and \
-                    self.getFormatting().isNakedWikiWord(wikiName):
+                    WikiFormatting.isNakedWikiWordForNewWiki(wikiName):
+#                     self.getFormatting().isNakedWikiWord(wikiName):
                 startDir = self.getWikiConfigPath()
                 if startDir is None:
                     startDir = self.getLastActiveDir()

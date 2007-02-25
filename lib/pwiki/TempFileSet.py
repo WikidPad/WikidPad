@@ -225,14 +225,14 @@ def getRelativeUrl(relativeTo, fullPath, pythonUrl=False):
     """
     if relativeTo is None or relativeTo == "":
         if pythonUrl:
-            return escapeHtml(urllib.pathname2url(fullPath))
+            return escapeHtml(u"file:" + urllib.pathname2url(fullPath))
         else:
             return escapeHtml(wx.FileSystem.FileNameToURL(fullPath))
 
     relPath = relativeFilePath(relativeTo, fullPath)
     if relPath is None:
         if pythonUrl:
-            return escapeHtml(urllib.pathname2url(fullPath))
+            return escapeHtml(u"file:" + urllib.pathname2url(fullPath))
         else:
             return escapeHtml(wx.FileSystem.FileNameToURL(fullPath))
 

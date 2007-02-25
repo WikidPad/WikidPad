@@ -267,6 +267,7 @@ class BaseClipboardCatcher(BaseWinProcIntercept):
         assert 0  # abstract
 
 
+
 class WikidPadWin32WPInterceptor(BaseClipboardCatcher):
     """
     Specialized WikidPad clipboard catcher
@@ -282,6 +283,7 @@ class WikidPadWin32WPInterceptor(BaseClipboardCatcher):
         self.mainControl = mainControl
         self.wikiPage = None
         self.mode = WikidPadWin32WPInterceptor.MODE_OFF
+        self.lastText = None
         
     def startAtPage(self, hWnd, wikiPage):
         """
@@ -296,6 +298,7 @@ class WikidPadWin32WPInterceptor(BaseClipboardCatcher):
         if self.mode != WikidPadWin32WPInterceptor.MODE_OFF:
             self.stop()
 
+        self.lastText = None
         BaseClipboardCatcher.start(self, hWnd)
         self.wikiPage = wikiPage
         self.mode = WikidPadWin32WPInterceptor.MODE_AT_PAGE
@@ -307,12 +310,14 @@ class WikidPadWin32WPInterceptor(BaseClipboardCatcher):
         if self.mode != WikidPadWin32WPInterceptor.MODE_OFF:
             self.stop()
 
+        self.lastText = None
         BaseClipboardCatcher.start(self, hWnd)
         self.mode = WikidPadWin32WPInterceptor.MODE_AT_CURSOR
 
 
     def stop(self):
         BaseClipboardCatcher.stop(self)
+        self.lastText = None
         self.wikiPage = None
         self.mode = WikidPadWin32WPInterceptor.MODE_OFF
 
@@ -337,7 +342,6 @@ class WikidPadWin32WPInterceptor(BaseClipboardCatcher):
         text = getTextFromClipboard()
         if len(text) == 0:
             return
-
         try:
             suffix = unescapeWithRe(self.mainControl.getConfig().get(
                     "main", "clipboardCatcher_suffix", r"\n"))
@@ -347,13 +351,21 @@ class WikidPadWin32WPInterceptor(BaseClipboardCatcher):
 
         if self.mode == WikidPadWin32WPInterceptor.MODE_OFF:
             return
-        elif self.mode == WikidPadWin32WPInterceptor.MODE_AT_PAGE:
+            
+        if self.mainControl.getConfig().getboolean("main",
+                "clipboardCatcher_filterDouble", True) and self.lastText == text:
+            # Same text shall be inserted again
+            return
+
+        if self.mode == WikidPadWin32WPInterceptor.MODE_AT_PAGE:
             if self.wikiPage is None:
                 return
             self.wikiPage.appendLiveText(text + suffix)
             
         elif self.mode == WikidPadWin32WPInterceptor.MODE_AT_CURSOR:
             self.mainControl.getActiveEditor().ReplaceSelection(text + suffix)
+            
+        self.lastText = text
 
 
     def getWikiWord(self):
@@ -361,5 +373,3 @@ class WikidPadWin32WPInterceptor(BaseClipboardCatcher):
             return None
         else:
             return self.wikiPage.getWikiWord()
-
-
