@@ -229,6 +229,7 @@ class GraphVizOptionsPanel(wx.Panel):
         self.tfFdp = wx.TextCtrl(self, -1, pt)
 
         mainsizer = wx.FlexGridSizer(6, 2, 0, 0)
+        mainsizer.AddGrowableCol(1, 1)
 
         mainsizer.Add(wx.StaticText(self, -1, "Directory of executables:"), 0,
                 wx.ALL | wx.EXPAND, 5)

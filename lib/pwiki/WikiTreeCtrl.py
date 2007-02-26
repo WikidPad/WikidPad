@@ -13,6 +13,7 @@ from MiscEvent import DebugSimple   # , KeyFunctionSink
 
 from WikiExceptions import WikiWordNotFoundException
 import WikiFormatting
+from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 import PropertyHandling
 import DocPages
 from PageAst import tokenizeTodoValue
@@ -20,7 +21,7 @@ from SearchAndReplace import SearchReplaceOperation
 
 from StringOps import mbcsEnc, guiToUni, uniToGui, wikiWordToLabel, strToBool
 
-from AdditionalDialogs import OpenWikiWordDialog
+from AdditionalDialogs import SelectWikiWordDialog
 
 
 class NodeStyle(object):
@@ -156,7 +157,7 @@ class WikiWordNode(AbstractNode):
         if options are set accordingly
         """
 
-        if self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
+        if self.treeCtrl.pWiki.getConfig().getboolean("main", "tree_no_cycles"):
             # Filter out cycles
             ancestors = self.getAncestors()
         else:
@@ -167,7 +168,7 @@ class WikiWordNode(AbstractNode):
                 selfreference=False, withPosition=withPosition,
                 excludeSet=ancestors)
 
-#         if self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
+#         if self.treeCtrl.pWiki.getConfig().getboolean("main", "tree_no_cycles"):
 #             # Filter out cycles
 #             ancestors = self.getAncestors()
 #             if withPosition:
@@ -275,7 +276,7 @@ class WikiWordNode(AbstractNode):
         wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
         wikiPage = wikiDocument.getWikiPageNoError(self.wikiWord)
 
-        if self.treeCtrl.pWiki.configuration.getboolean("main", "tree_no_cycles"):
+        if self.treeCtrl.pWiki.getConfig().getboolean("main", "tree_no_cycles"):
             # Filter out cycles
             ancestors = self.getAncestors()
         else:
@@ -839,7 +840,7 @@ class ModifiedWithinNode(AbstractNode):
         wikiData = self.treeCtrl.pWiki.getWikiData()
         words = wikiData.getWikiWordsModifiedWithin(self.daySpan)
         self.treeCtrl.pWiki.getCollator().sort(words)
-                
+
         return [WikiWordSearchNode(self.treeCtrl, self, w) for w in words]
 
 #         return map(lambda w: WikiWordSearchNode(self.treeCtrl,
@@ -1010,6 +1011,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         # EVT_TREE_SEL_CHANGED(self, ID, self.OnTreeItemActivated)
         EVT_RIGHT_DOWN(self, self.OnRightButtonDown)
         EVT_RIGHT_UP(self, self.OnRightButtonUp)
+        EVT_MIDDLE_DOWN(self, self.OnMiddleButtonDown)
 #         self.Bind(EVT_SET_FOCUS, self.OnSetFocus)
         
         self._bindActivation()
@@ -1073,8 +1075,8 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 self.OnAppendWikiWord)
         EVT_MENU(self, GUI_ID.CMD_PREPEND_WIKIWORD_FOR_THIS,
                 self.OnPrependWikiWord)
-        EVT_MENU(self, GUI_ID.CMD_OPEN_THIS_WIKIWORD_IN_NEW_TAB,
-                self.OnOpenWikiWordInNewTab)
+        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
+                self.OnActivateNewTabThis)
         
         
 
@@ -1111,7 +1113,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         self.CollapseAndReset(rootNode)
         
     def getHideUndefined(self):
-        return self.pWiki.configuration.getboolean("main", "hideundefined")
+        return self.pWiki.getConfig().getboolean("main", "hideundefined")
 
     def onLoadingCurrentWikiPage(self, miscevt):
 #         if miscevt.get("forceTreeSyncFromRoot", False):
@@ -1141,7 +1143,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                             return
                 elif motionType == "child":
                     if not self.IsExpanded(currentNode) and \
-                            self.pWiki.configuration.getboolean("main",
+                            self.pWiki.getConfig().getboolean("main",
                             "tree_auto_follow"):
                         # Expand node to find child
                         self.Expand(currentNode)
@@ -1169,7 +1171,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #                                 return
 
         # No cheap way to find current word in tree    
-        if self.pWiki.configuration.getboolean("main", "tree_auto_follow") or \
+        if self.pWiki.getConfig().getboolean("main", "tree_auto_follow") or \
                 miscevt.get("forceTreeSyncFromRoot", False):
             # Configuration or event says to use expensive way
             if not self.buildTreeForWord(self.pWiki.getCurrentWikiWord(),
@@ -1185,7 +1187,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
     def onWikiPageUpdated(self, miscevt):
-        if not self.pWiki.configuration.getboolean("main", "tree_update_after_save"):
+        if not self.pWiki.getConfig().getboolean("main", "tree_update_after_save"):
             return
 
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
@@ -1196,7 +1198,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
     def onDeletedWikiPage(self, miscevt):  # TODO May be called multiple times if
                                            # multiple pages are deleted at once
-        if not self.pWiki.configuration.getboolean("main", "tree_update_after_save"):
+        if not self.pWiki.getConfig().getboolean("main", "tree_update_after_save"):
             return
 
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
@@ -1331,7 +1333,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #             # Updating the tree isn't necessary then, so return
 #             return
 
-        if not self.pWiki.configuration.getboolean("main", "tree_update_after_save"):
+        if not self.pWiki.getConfig().getboolean("main", "tree_update_after_save"):
             return
 
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
@@ -1355,7 +1357,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #         self.activeEditor.AppendText(u"\n\n[%s=%s]" % (name, value))
 
     def OnAppendWikiWord(self, evt):
-        dlg = OpenWikiWordDialog(self.pWiki, -1, title="Append Wiki Word")
+        dlg = SelectWikiWordDialog(self.pWiki, -1, title="Append Wiki Word")
         if dlg.ShowModal() == wxID_OK:
             parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
             page = self.pWiki.getWikiDataManager().getWikiPageNoError(parentWord)
@@ -1364,7 +1366,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         dlg.Destroy()
 
     def OnPrependWikiWord(self, evt):
-        dlg = OpenWikiWordDialog(self.pWiki, -1, title="Prepend Wiki Word")
+        dlg = SelectWikiWordDialog(self.pWiki, -1, title="Prepend Wiki Word")
         if dlg.ShowModal() == wxID_OK:
             parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
             page = self.pWiki.getWikiDataManager().getWikiPageNoError(parentWord)
@@ -1374,7 +1376,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         dlg.Destroy()
 
 
-    def OnOpenWikiWordInNewTab(self, evt):
+    def OnActivateNewTabThis(self, evt):
         wikiWord = self.GetPyData(self.contextMenuNode).getWikiWord()
         presenter = self.pWiki.createNewDocPagePresenterTab()
         presenter.openWikiPage(wikiWord)
@@ -1404,7 +1406,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             currentWikiWord = self.GetPyData(currentNode).getWikiWord() #self.getNodeValue(currentNode)
             crumbs = wikiData.findBestPathFromWordToWord(wikiWord, currentWikiWord)
             
-            if crumbs and self.pWiki.configuration.getboolean("main",
+            if crumbs and self.pWiki.getConfig().getboolean("main",
                     "tree_no_cycles"):
                 ancestors = self.GetPyData(currentNode).getAncestors()
                 # If an ancestor of the current node is in the crumbs, the
@@ -1690,6 +1692,47 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         else:
             self.contextMenuNode = None
+
+
+    def OnMiddleButtonDown(self, event):
+        selnode = self.GetSelection()
+        
+        clickPos = event.GetPosition()
+        if clickPos == wxDefaultPosition:
+            item = selnode
+        else:
+            item, flags = self.HitTest(clickPos)
+
+        if item is None or not item.IsOk():
+            return
+            
+        nodeObj = self.GetPyData(item)
+
+        if event.ControlDown():
+            configCode = self.pWiki.getConfig().getint("main",
+                    "mouse_middleButton_withCtrl")
+        else:
+            configCode = self.pWiki.getConfig().getint("main",
+                    "mouse_middleButton_withoutCtrl")
+                    
+        tabMode = MIDDLE_MOUSE_CONFIG_TO_TABMODE[configCode]
+
+        if (tabMode & 2) and isinstance(nodeObj, WikiWordNode):
+            self.pWiki.activateWikiWord(nodeObj.getWikiWord(), tabMode)
+        else:
+            self.SelectItem(item)
+
+#             # Create new tab
+#             presenter = self.pWiki.createNewDocPagePresenterTab()
+#             presenter.openWikiPage(nodeObj.getWikiWord())
+#             if configCode == 0:
+#                 # New tab in foreground
+#                 presenter.getMainControl().getMainAreaPanel().\
+#                                 showDocPagePresenter(presenter)
+# 
+#         elif configCode == 2:
+#             self.SelectItem(item)
+
 
 
     def OnIdle(self, event):

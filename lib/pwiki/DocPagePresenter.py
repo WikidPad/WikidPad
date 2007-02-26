@@ -109,16 +109,17 @@ class LayeredControlPresenter(MiscEventSourceMixin):
 
         self.mainControl.getMiscEvent().removeListener(self)
 
+#         # TODO Remove this hack
+# 
+#         def miscEventHappened(evt):
+#             pass
+#             
+#         self.miscEventHappened = miscEventHappened
+
         
     def SetFocus(self):
         self.subControls[self.lastVisibleIdx].SetFocus()
         
-#     def setSubFocus(self):
-#         """
-#         Setfocus for currently active subcontrol
-#         """
-#         self.subControls[self.lastVisibleIdx].SetFocus()
-
     # TODO getPageAst
 
 

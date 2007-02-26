@@ -1240,24 +1240,25 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         viewMenu = wxMenu()
         
+        self.addMenuItem(viewMenu, 'Switch Ed./Prev\t' +
+                self.keyBindings.ShowSwitchEditorPreview,
+                'Switch between editor and preview',
+                self.OnCmdSwitchEditorPreview,  "tb_switch ed prev",
+                    menuID=GUI_ID.CMD_TAB_SHOW_SWITCH_EDITOR_PREVIEW)
+
         self.addMenuItem(viewMenu, 'Show Editor\t' + self.keyBindings.ShowEditor,
                 'Show Editor',
                 lambda evt: self.getCurrentDocPagePresenter().switchSubControl(
-                    "textedit", gainFocus=True), "tb_editor",
+                    "textedit", gainFocus=True),  #  "tb_editor",
                     menuID=GUI_ID.CMD_TAB_SHOW_EDITOR)
 
         self.addMenuItem(viewMenu, 'Show Preview\t' +
                 self.keyBindings.ShowPreview,
                 'Show Preview',
                 lambda evt: self.getCurrentDocPagePresenter().switchSubControl(
-                    "preview", gainFocus=True),  "tb_preview",
+                    "preview", gainFocus=True),  #   "tb_preview",
                     menuID=GUI_ID.CMD_TAB_SHOW_PREVIEW)
 
-        self.addMenuItem(viewMenu, 'Switch Ed./Prev\t' +
-                self.keyBindings.ShowSwitchEditorPreview,
-                'Switch between editor and preview',
-                self.OnCmdSwitchEditorPreview,  # "tb_switch ed prev",
-                    menuID=GUI_ID.CMD_TAB_SHOW_SWITCH_EDITOR_PREVIEW)
 
 
         viewMenu.AppendSeparator()
@@ -1491,24 +1492,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         tb.AddSimpleTool(wxNewId(), seperator, "Separator", "Separator")
 
-#         icon = self.lookupIcon("tb_zoomin")
-#         tbID = wxNewId()
-#         tb.AddSimpleTool(tbID, icon, "Zoom In", "Zoom In")
-#         EVT_TOOL(self, tbID, lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMIN))
+#         icon = self.lookupIcon("tb_editor")
+#         tbID = GUI_ID.CMD_TAB_SHOW_EDITOR
+#         tb.AddSimpleTool(tbID, icon, "Show Editor", "Show Editor")
 # 
-#         icon = self.lookupIcon("tb_zoomout")
-#         tbID = wxNewId()
-#         tb.AddSimpleTool(tbID, icon, "Zoom Out", "Zoom Out")
-#         EVT_TOOL(self, tbID, lambda evt: self.getActiveEditor().CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
+#         icon = self.lookupIcon("tb_preview")
+#         tbID = GUI_ID.CMD_TAB_SHOW_PREVIEW
+#         tb.AddSimpleTool(tbID, icon, "Show Preview", "Show Preview")
 
-
-        icon = self.lookupIcon("tb_editor")
-        tbID = GUI_ID.CMD_TAB_SHOW_EDITOR
-        tb.AddSimpleTool(tbID, icon, "Show Editor", "Show Editor")
-
-        icon = self.lookupIcon("tb_preview")
-        tbID = GUI_ID.CMD_TAB_SHOW_PREVIEW
-        tb.AddSimpleTool(tbID, icon, "Show Preview", "Show Preview")
+        icon = self.lookupIcon("tb_switch ed prev")
+        tbID = GUI_ID.CMD_TAB_SHOW_SWITCH_EDITOR_PREVIEW
+        tb.AddSimpleTool(tbID, icon, "Switch Editor/Preview",
+                "Switch between editor and preview")
 
         icon = self.lookupIcon("tb_zoomin")
         tbID = GUI_ID.CMD_ZOOM_IN
@@ -2813,6 +2808,26 @@ These are your default global settings.
 #         ## _prof.stop()
 
 
+    def activateWikiWord(self, wikiWord, tabMode=0):
+        """
+        tabMode -- 0:Same tab; 2: new tab in foreground; 3: new tab in background
+        """
+        # open the wiki page
+        if tabMode & 2:
+            # New tab
+            presenter = self.createNewDocPagePresenterTab()
+        else:
+            # Same tab
+            presenter = self.getCurrentDocPagePresenter()
+        
+        presenter.openWikiPage(wikiWord, motionType="child")
+
+        if not tabMode & 1:
+            # Show in foreground
+            self.getMainAreaPanel().showDocPagePresenter(presenter)
+            
+        return presenter
+
 
     def saveAllDocPages(self, force = False):
         if not self.requireWriteAccess():
@@ -3444,11 +3459,12 @@ These are your default global settings.
         dlg = OpenWikiWordDialog(self, -1)
         try:
             dlg.CenterOnParent(wxBOTH)
-            if dlg.ShowModal() == wxID_OK:
-                wikiWord = dlg.GetValue()
-                if wikiWord:
-                    self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
-                    self.getActiveEditor().SetFocus()
+            dlg.ShowModal()
+#             if dlg.ShowModal() == wxID_OK:
+#                 wikiWord = dlg.GetValue()
+#                 if wikiWord:
+#                     self.openWikiPage(wikiWord, forceTreeSyncFromRoot=True)
+            self.getActiveEditor().SetFocus()
         finally:
             dlg.Destroy()
 
@@ -3796,17 +3812,20 @@ These are your default global settings.
 
     def OnExportWiki(self, evt):
         import SearchAndReplace as Sar
+
+        defdir = self.getConfig().get("main", "export_default_dir", u"")
+        if defdir == u"":
+            defdir = self.getLastActiveDir()
         
         typ = evt.GetId()
-        
         if typ != GUI_ID.MENU_EXPORT_WHOLE_AS_XML:
             # Export to dir
-            dest = wxDirSelector(u"Select Export Directory", self.getLastActiveDir(),
+            dest = wxDirSelector(u"Select Export Directory", defdir,
             wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON, parent=self)
         else:
             # Export to file
             dest = wxFileSelector(u"Select Export File",
-                    self.getLastActiveDir(),
+                    defdir,
                     default_filename = "", default_extension = "",
                     wildcard = u"XML files (*.xml)|*.xml|All files (*.*)|*",
                     flags=wxSAVE | wxOVERWRITE_PROMPT, parent=self)
@@ -3883,7 +3902,7 @@ These are your default global settings.
 
 
     def showAddFileUrlDialog(self):
-        dlg = wxFileDialog(self, u"Choose a file to create URL",
+        dlg = wxFileDialog(self, u"Choose a file to create URL for",
                 self.getLastActiveDir(), "", "*.*", wxOPEN)
         if dlg.ShowModal() == wxID_OK:
             url = urllib.pathname2url(dlg.GetPath())

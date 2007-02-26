@@ -23,6 +23,97 @@ from SearchAndReplaceDialogs import WikiPageListConstructionDialog
 from SearchAndReplace import ListWikiPagesOperation
 
 
+class SelectWikiWordDialog(wxDialog):
+    def __init__(self, pWiki, ID, title="Select Wiki Word",
+                 pos=wxDefaultPosition, size=wxDefaultSize,
+                 style=wxNO_3D):
+
+        d = wxPreDialog()
+        self.PostCreate(d)
+
+        self.pWiki = pWiki
+        self.wikiWord = None  
+        res = xrc.wxXmlResource.Get()
+        res.LoadOnDialog(self, self.pWiki, "SelectWikiWordDialog")
+
+        self.SetTitle(title)
+
+        self.ctrls = XrcControls(self)
+
+        self.ctrls.btnOk.SetId(wxID_OK)
+        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+
+        EVT_BUTTON(self, wxID_OK, self.OnOk)
+
+        EVT_TEXT(self, ID, self.OnText)
+        EVT_CHAR(self.ctrls.text, self.OnCharText)
+        EVT_CHAR(self.ctrls.lb, self.OnCharListBox)
+        EVT_LISTBOX(self, ID, self.OnListBox)
+        EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
+
+    def OnOk(self, evt):
+        if not self.pWiki.getWikiData().isDefinedWikiWord(self.wikiWord):
+            words = self.pWiki.getWikiData().getWikiWordsWith(self.wikiWord,
+                    True)
+            if len(words) > 0:
+                self.wikiWord = words[0]
+            else:
+                wikiWord = self.wikiWord
+                nakedWord = wikiWordToLabel(wikiWord)
+
+                if not self.pWiki.getFormatting().isNakedWikiWord(nakedWord):
+                    # Entered text is not a valid wiki word
+                    self.ctrls.text.SetFocus()
+                    return
+
+#                 # wikiWord is valid but nonexisting, so maybe create it?
+#                 result = wxMessageBox(
+#                         uniToGui(u"'%s' is not an existing wikiword. Create?" %
+#                         wikiWord), uniToGui(u"Create"),
+#                         wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+# 
+#                 if result == wxNO:
+#                     self.ctrls.text.SetFocus()
+#                     return
+#                 
+                self.wikiWord = wikiWord
+
+        self.EndModal(wxID_OK)
+        
+                
+    def GetValue(self):
+        return self.wikiWord
+
+    def OnText(self, evt):
+        self.wikiWord = guiToUni(evt.GetString())
+        self.ctrls.lb.Clear()
+        if len(self.wikiWord) > 0:
+            words = self.pWiki.getWikiData().getWikiWordsWith(self.wikiWord,
+                    True)
+            for word in words:
+                self.ctrls.lb.Append(word)
+
+    def OnListBox(self, evt):
+        self.wikiWord = guiToUni(evt.GetString())
+
+    def OnCharText(self, evt):
+        if (evt.GetKeyCode() == WXK_DOWN) and not self.ctrls.lb.IsEmpty():
+            self.ctrls.lb.SetFocus()
+            self.ctrls.lb.SetSelection(0)
+        elif (evt.GetKeyCode() == WXK_UP):
+            pass
+        else:
+            evt.Skip()
+            
+
+    def OnCharListBox(self, evt):
+        if (evt.GetKeyCode() == WXK_UP) and (self.ctrls.lb.GetSelection() == 0):
+            self.ctrls.text.SetFocus()
+            self.ctrls.lb.Deselect(0)
+        else:
+            evt.Skip()
+     
+
 class OpenWikiWordDialog(wxDialog):
     def __init__(self, pWiki, ID, title="Open Wiki Word",
                  pos=wxDefaultPosition, size=wxDefaultSize,
@@ -30,9 +121,9 @@ class OpenWikiWordDialog(wxDialog):
 
         d = wxPreDialog()
         self.PostCreate(d)
-        
+
         self.pWiki = pWiki
-        self.value = None     
+        self.wikiWord = None  
         res = xrc.wxXmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "OpenWikiWordDialog")
 
@@ -44,26 +135,35 @@ class OpenWikiWordDialog(wxDialog):
         self.ctrls.btnCancel.SetId(wxID_CANCEL)
 
         EVT_BUTTON(self, wxID_OK, self.OnOk)
-        # EVT_TEXT(self, XRCID("text"), self.OnText) 
 
         EVT_TEXT(self, ID, self.OnText)
         EVT_CHAR(self.ctrls.text, self.OnCharText)
         EVT_CHAR(self.ctrls.lb, self.OnCharListBox)
         EVT_LISTBOX(self, ID, self.OnListBox)
-        EVT_LISTBOX_DCLICK(self, XRCID("lb"), self.OnOk)
+        EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
         EVT_BUTTON(self, wxID_OK, self.OnOk)
-        EVT_BUTTON(self, XRCID("btnCreate"), self.OnCreate)
-        
+        EVT_BUTTON(self, GUI_ID.btnCreate, self.OnCreate)
+        EVT_BUTTON(self, GUI_ID.btnNewTab, self.OnNewTab)
+        EVT_BUTTON(self, GUI_ID.btnNewTabBackground, self.OnNewTabBackground)
+
     def OnOk(self, evt):
-        if not self.pWiki.getWikiData().isDefinedWikiWord(self.value):
-#             words = self.pWiki.getWikiData().getWikiWordsWith(self.value.lower(),
-#                     True)
-            words = self.pWiki.getWikiData().getWikiWordsWith(self.value,
+        self.activateSelectedWikiWord(0)
+
+    def OnNewTab(self, evt):
+        self.activateSelectedWikiWord(2)
+
+    def OnNewTabBackground(self, evt):
+        self.activateSelectedWikiWord(3)
+
+
+    def activateSelectedWikiWord(self, tabMode):
+        if not self.pWiki.getWikiData().isDefinedWikiWord(self.wikiWord):
+            words = self.pWiki.getWikiData().getWikiWordsWith(self.wikiWord,
                     True)
             if len(words) > 0:
-                self.value = words[0]
+                self.wikiWord = words[0]
             else:
-                wikiWord = self.value
+                wikiWord = self.wikiWord
                 nakedWord = wikiWordToLabel(wikiWord)
 
                 if not self.pWiki.getFormatting().isNakedWikiWord(nakedWord):
@@ -81,27 +181,27 @@ class OpenWikiWordDialog(wxDialog):
                     self.ctrls.text.SetFocus()
                     return
                 
-                self.value = wikiWord
-                                
+                self.wikiWord = nakedWord
+
+        self.pWiki.activateWikiWord(self.wikiWord, tabMode=tabMode)
         self.EndModal(wxID_OK)
+
         
-                
-    def GetValue(self):
-        return self.value
+
+#     def GetValue(self):
+#         return self.wikiWord
 
     def OnText(self, evt):
-        self.value = guiToUni(evt.GetString())
+        self.wikiWord = guiToUni(evt.GetString())
         self.ctrls.lb.Clear()
-        if len(self.value) > 0:
-#             words = self.pWiki.getWikiData().getWikiWordsWith(self.value.lower(),
-#                     True)
-            words = self.pWiki.getWikiData().getWikiWordsWith(self.value,
+        if len(self.wikiWord) > 0:
+            words = self.pWiki.getWikiData().getWikiWordsWith(self.wikiWord,
                     True)
             for word in words:
                 self.ctrls.lb.Append(word)
 
     def OnListBox(self, evt):
-        self.value = guiToUni(evt.GetString())
+        self.wikiWord = guiToUni(evt.GetString())
 
     def OnCharText(self, evt):
         if (evt.GetKeyCode() == WXK_DOWN) and not self.ctrls.lb.IsEmpty():
@@ -125,7 +225,7 @@ class OpenWikiWordDialog(wxDialog):
         """
         Create new WikiWord
         """
-        nakedWord = wikiWordToLabel(self.value)
+        nakedWord = wikiWordToLabel(self.wikiWord)
         if not self.pWiki.getFormatting().isNakedWikiWord(nakedWord):
             self.pWiki.displayErrorMessage(u"'%s' is an invalid WikiWord" % nakedWord)
             self.ctrls.text.SetFocus()
@@ -136,9 +236,9 @@ class OpenWikiWordDialog(wxDialog):
             self.ctrls.text.SetFocus()
             return
             
-        self.value = nakedWord
+        self.wikiWord = nakedWord
+        self.pWiki.activateWikiWord(self.wikiWord, tabMode=0)
         self.EndModal(wxID_OK)
- 
  
 
 class IconSelectDialog(wxDialog):
@@ -540,8 +640,12 @@ class ExportDialog(wxDialog):
 
         self.ctrls.btnOk.SetId(wxID_OK)
         self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        
+        defdir = self.pWiki.getConfig().get("main", "export_default_dir", u"")
+        if defdir == u"":
+            defdir = self.pWiki.getLastActiveDir()
 
-        self.ctrls.tfDestination.SetValue(self.pWiki.getLastActiveDir())
+        self.ctrls.tfDestination.SetValue(defdir)
 
         for e in self.exporterList:
             e[3].Show(False)

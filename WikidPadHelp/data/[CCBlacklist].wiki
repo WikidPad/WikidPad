@@ -5,3 +5,4 @@ WikidPadCompact
 KBytes
 AaBbCc
 ABCabc
+PyDeadObjectError

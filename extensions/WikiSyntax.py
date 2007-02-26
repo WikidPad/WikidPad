@@ -110,11 +110,15 @@ singleWikiWord    =          (ur"(?:[" +
 WikiWordRE      = re.compile(ur"\b(?<!~)" + singleWikiWord + ur"\b", # ur"(?:/" + singleWikiWord +
                              # ur")*\b",
                              re.DOTALL | re.UNICODE | re.MULTILINE)
-                             
+
+
+AnchorStart = ur"!"
+AnchorStartPAT = ur"!"
+
 # Special version for syntax highlighting to allow appending search expression with '#'
 WikiWordEditorRE = re.compile(ur"(?P<wikiword>" + WikiWordRE.pattern +
-        ur")(?:#(?P<wikiwordSearchfrag>(?:(?:#.)|[^ \t\n#])+)|"
-        ur"!(?P<wikiwordAnchorfrag>[A-Za-z0-9\_]+))?",
+        ur")(?:#(?P<wikiwordSearchfrag>(?:(?:#.)|[^ \t\n#])+)|" + 
+        AnchorStartPAT + ur"(?P<wikiwordAnchorfrag>[A-Za-z0-9\_]+))?",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -141,8 +145,8 @@ WikiWordEditorRE2      = re.compile(
         ur"\[(?P<wikiwordncc>" + WikiWordNccPAT + ur")"
         ur"(?:(?P<wikiwordnccDelim>[ \t]*" + TitleWikiWordDelimiterPAT + ur")"
         ur"(?P<wikiwordnccTitle>" + PlainCharacterPAT + ur"+?))?\]"
-        ur"(?:#(?P<wikiwordnccSearchfrag>(?:(?:#.)|[^ \t\n#])+)|"
-        ur"!(?P<wikiwordnccAnchorfrag>[A-Za-z0-9\_]+))?",
+        ur"(?:#(?P<wikiwordnccSearchfrag>(?:(?:#.)|[^ \t\n#])+)|" +
+        AnchorStartPAT + ur"(?P<wikiwordnccAnchorfrag>[A-Za-z0-9\_]+))?",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 SearchFragmentUnescapeRE   = re.compile(ur"#(.)",

@@ -8,6 +8,24 @@ from StringOps import escapeForIni, unescapeForIni
 class WinLayoutException(Exception):
     pass
 
+def getOverallDisplaysSize():
+    """
+    Estimate the width and height of the screen real estate with all
+    available displays. This assumes that all displays have same
+    resolution and are positioned in a rectangular shape.
+    """
+    width = 0
+    height = 0
+
+    for i in xrange(wxDisplay.GetCount()):
+        d = wxDisplay(i)
+        
+        rect = d.GetGeometry()
+        width = max(width, rect.x + rect.width)
+        height = max(height, rect.y + rect.height)
+
+    return (width, height)
+
 
 def setWindowPos(win, pos=None, fullVisible=False):
     """
@@ -21,8 +39,10 @@ def setWindowPos(win, pos=None, fullVisible=False):
     else:
         currentX, currentY = win.GetPositionTuple()
         
-    screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
-    screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
+#     screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
+#     screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
+
+    screenX, screenY = getOverallDisplaysSize()
     
     # fix any crazy screen positions
     if currentX < 0:
@@ -50,8 +70,11 @@ def setWindowSize(win, size):
     Set size of a wxWindow, but ensure that the size is valid
     """
     sizeX, sizeY = size
-    screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
-    screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
+
+#     screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
+#     screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
+
+    screenX, screenY = getOverallDisplaysSize()    
 
     # don't let the window be > than the size of the screen
     if sizeX > screenX:

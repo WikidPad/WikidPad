@@ -45,8 +45,8 @@ from pwiki import PageAst
 
 class WikiData:
     "Interface to wiki data."
-    def __init__(self, dataManager, dataDir):
-        self.dataManager = dataManager
+    def __init__(self, wikiDocument, dataDir):
+        self.wikiDocument = wikiDocument
         self.dataDir = dataDir
         self.connWrap = None
         self.cachedContentNames = None
@@ -59,7 +59,7 @@ class WikiData:
 
         self.connWrap = DbStructure.ConnectWrap(conn)
         try:
-            self.pagefileSuffix = self.dataManager.getWikiConfig().get("main",
+            self.pagefileSuffix = self.wikiDocument.getWikiConfig().get("main",
                     "db_pagefile_suffix", u".wiki")
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
@@ -95,7 +95,7 @@ class WikiData:
 
         try:
             # Set marker for database type
-            self.dataManager.getWikiConfig().set("main", "wiki_database_type",
+            self.wikiDocument.getWikiConfig().set("main", "wiki_database_type",
                     "original_gadfly")
         except (IOError, OSError), e:
             # Remember but continue
@@ -256,7 +256,7 @@ class WikiData:
     # ---------- Renaming/deleting pages with cache update ----------
 
     def renameWord(self, word, toWord):
-        if not self.dataManager.getFormatting().isNakedWikiWord(toWord):
+        if not self.wikiDocument.getFormatting().isNakedWikiWord(toWord):
             raise WikiDataException, u"'%s' is an invalid wiki word" % toWord
 
         if self.isDefinedWikiWord(toWord):
@@ -298,7 +298,7 @@ class WikiData:
         delete everything about the wikiword passed in. an exception is raised
         if you try and delete the wiki root node.
         """
-        if word != self.dataManager.getWikiName():
+        if word != self.wikiDocument.getWikiName():
             try:
                 try:
                     self.commit()
@@ -333,7 +333,7 @@ class WikiData:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
         else:
-            raise WikiDataException, "You cannot delete the root wiki node"
+            raise WikiDataException("You cannot delete the root wiki node")
 
 
 
@@ -670,14 +670,37 @@ class WikiData:
         "get the list of words with thisStr in them."
         thisStr = thisStr.lower()
 
-        result = [word for word in self.getAllDefinedWikiPageNames()
-                if word.lower().find(thisStr) != -1]
+
+        result1 = [word for word in self.getAllDefinedWikiPageNames()
+                if word.lower().startswith(thisStr)]
 
         if includeAliases:
-            result += [word for word in self.getAllAliases()
-                    if word.lower().find(thisStr) != -1]
+            result1 += [word for word in self.getAllAliases()
+                    if word.lower().startswith(thisStr)]
 
-        return result
+
+        result2 = [word for word in self.getAllDefinedWikiPageNames()
+                if word.lower().find(thisStr) != -1 and
+                not word.lower().startswith(thisStr)]
+
+        if includeAliases:
+            result2 += [word for word in self.getAllAliases()
+                    if word.lower().find(thisStr) != -1 and
+                    not word.lower().startswith(thisStr)]
+
+#         result = [word for word in self.getAllDefinedWikiPageNames()
+#                 if word.lower().find(thisStr) != -1]
+# 
+#         if includeAliases:
+#             result += [word for word in self.getAllAliases()
+#                     if word.lower().find(thisStr) != -1]
+
+        coll = self.wikiDocument.getCollator()
+        
+        coll.sort(result1)
+        coll.sort(result2)
+
+        return result1 + result2
 
 
     def getWikiWordsModifiedWithin(self, days):

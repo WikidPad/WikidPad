@@ -47,6 +47,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         wx.EVT_SET_FOCUS(self, self.OnFocused)
 
         wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_THIS_TAB, self.OnCloseThisTab)
+        wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_CURRENT_TAB, self.OnCloseCurrentTab)
 
 
     def close(self):
@@ -190,6 +191,8 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         if self.lastContextMenuPresenter is not None:
             self.closeDocPagePresenterTab(self.lastContextMenuPresenter)
 
+    def OnCloseCurrentTab(self, evt):
+        self.closeDocPagePresenterTab(self.getCurrentDocPagePresenter())
 
     def miscEventHappened(self, miscevt):
         if miscevt.getSource() in self.docPagePresenters:

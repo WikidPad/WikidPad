@@ -155,6 +155,15 @@ For async. highlighting how long to wait after key press (in seconds) before sta
 When this option is active and enter is pressed on a line which contains only a bullet or a numbering without text, the bullet is removed. See BulletedLists for details.
 
 
+++++ Mouse
+
+*Middle button without CTRL*
+Set the reaction of a middle button click on a wiki word in editor, internal preview, tree or wiki-wide search results if CTRL is nor pressed while clicking. You can choose between opening the word in a new tab in foreground, in background or in the same (active) tab.
+
+*Middle button with CTRL*
+Same as before, but set reaction if CTRL is pressed while clicking the middle button.
+
+
 ++++ Searching
 
 *Context characters* *before* and *after*
@@ -178,6 +187,9 @@ Wiki word which should be shown as first one each time the wiki is opened. If th
 
 *New page title prefix*
 Control the heading level of the initial main title of new pages and fill between one and four '+' in this field. Default is "++".
+
+*Default export dir.*
+Set the default export directory into which exports should go.
 
 
 *Modif. date must match*

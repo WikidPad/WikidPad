@@ -161,6 +161,9 @@ import cStringIO
 
 _NO_IMAGE = -1
 _PIXELS_PER_UNIT = 10
+wxWINDOWS_NT = 18   # For wxGetOsVersion(), this includes NT 4.0, 2000, XP
+wxWIN95 = 20   # For wxGetOsVersion(), this includes also Win 98 and ME
+
 
 # Start editing the current item after half a second (if the mouse hasn't
 # been clicked/moved)
@@ -1870,12 +1873,13 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         self._vistaselection = False        
 
         # Connection lines style
-        if wx.Platform != "__WXMAC__":
+#         if wx.Platform != "__WXMAC__":
+        if wx.GetOsVersion()[0] == wxWINDOWS_NT:
             self._dottedPen = wx.Pen("grey", 1, wx.USER_DASH)
             self._dottedPen.SetDashes([1,1])
             self._dottedPen.SetCap(wx.CAP_BUTT)
         else:
-            self._dottedPen = wx.Pen("grey", 1)
+            self._dottedPen = wx.Pen("light grey", 1)
 
         # Pen Used To Draw The Border Around Selected Items
         self._borderPen = wx.BLACK_PEN

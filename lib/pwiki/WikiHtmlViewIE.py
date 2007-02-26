@@ -78,7 +78,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         self.presenter = presenter
 
         self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
-                self, (
+                None, (
                 ("loaded current page", self.onLoadedCurrentWikiPage),
                 ("reloaded current page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),

@@ -16,6 +16,7 @@ WikidPadHelp/data/ChangeFileSuffix.wiki -text
 WikidPadHelp/data/ChangeLog.wiki -text
 WikidPadHelp/data/ChangeLog2003.wiki -text
 WikidPadHelp/data/ChangeLog2004.wiki -text
+WikidPadHelp/data/ChangeLog2005.wiki -text
 WikidPadHelp/data/ChangingKeyBindings.wiki -text
 WikidPadHelp/data/ClipboardCatcher.wiki -text
 WikidPadHelp/data/Color[!!-~]AQUAMARINE.wiki -text
@@ -485,7 +486,6 @@ icons/tb_bold.gif -text
 icons/tb_copy.gif -text
 icons/tb_cut.gif -text
 icons/tb_cycle.gif -text
-icons/tb_data[!!-~]file.gif -text
 icons/tb_delete.gif -text
 icons/tb_doc.gif -text
 icons/tb_forward.gif -text
@@ -497,6 +497,7 @@ icons/tb_paste.gif -text
 icons/tb_rename.gif -text
 icons/tb_save.gif -text
 icons/tb_seperator.gif -text
+icons/tb_switch[!!-~]ed[!!-~]prev.gif -text
 icons/tb_zoomin.gif -text
 icons/tb_zoomout.gif -text
 icons/text.gif -text

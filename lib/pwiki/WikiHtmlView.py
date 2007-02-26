@@ -11,7 +11,7 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 from MiscEvent import KeyFunctionSink
 
 from StringOps import uniToGui
-from Configuration import isWindows
+from Configuration import isWindows, MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
 from TempFileSet import TempFileSet
 
@@ -64,7 +64,7 @@ class WikiHtmlView(wxHtmlWindow):
         self.presenter = presenter
 
         self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
-                self, (
+                None, (
                 ("loaded current page", self.onLoadedCurrentWikiPage),
                 ("reloaded current page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
@@ -260,10 +260,6 @@ class WikiHtmlView(wxHtmlWindow):
     def OnClipboardCopy(self, evt):
         copyTextToClipboard(self.SelectionToText())
 
-    # Maps configuration setting "mouse_middleButton_withoutCtrl" to a 
-    # tabMode for _activateLink.
-    _MIDDLE_CONFIG_TO_TABMODE = {0: 2, 1: 3, 2: 0}
-
     def OnMiddleDown(self, evt):
         pos = self.CalcUnscrolledPosition(evt.GetPosition())
         cell = self.GetInternalRepresentation().FindCellByPos(pos.x, pos.y)
@@ -277,7 +273,7 @@ class WikiHtmlView(wxHtmlWindow):
                     middleConfig = self.presenter.getConfig().getint("main",
                             "mouse_middleButton_withCtrl", 3)
 
-                tabMode = self._MIDDLE_CONFIG_TO_TABMODE[middleConfig]
+                tabMode = MIDDLE_MOUSE_CONFIG_TO_TABMODE[middleConfig]
 
                 self._activateLink(cell.GetLink().GetHref(), tabMode=tabMode)
                 return

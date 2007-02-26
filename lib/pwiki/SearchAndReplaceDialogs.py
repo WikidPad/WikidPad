@@ -12,6 +12,7 @@ from StringOps import uniToGui, guiToUni, escapeHtml
 from WindowLayout import setWindowPos, setWindowSize
 
 import WikiFormatting
+from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 import PageAst
 
 from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation
@@ -164,8 +165,17 @@ class SearchResultListBox(wxHtmlListBox):
 
         EVT_LEFT_DOWN(self, self.OnLeftDown)
         EVT_LEFT_DCLICK(self, self.OnLeftDown)
+        EVT_MIDDLE_DOWN(self, self.OnMiddleButtonDown)
         EVT_KEY_DOWN(self, self.OnKeyDown)
         EVT_LISTBOX_DCLICK(self, ID, self.OnDClick)
+        EVT_CONTEXT_MENU(self, self.OnContextMenu)
+
+
+        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)
+        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
+                self.OnActivateNewTabThis)
+        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
+                self.OnActivateNewTabBackgroundThis)
 
     
     def OnGetItem(self, i):
@@ -353,6 +363,45 @@ class SearchResultListBox(wxHtmlListBox):
             return
         
         evt.Skip()
+
+
+    def OnMiddleButtonDown(self, evt):
+        pos = evt.GetPosition()
+        if pos == wxDefaultPosition:
+            hitsel = self.GetSelection()
+
+        hitsel = self.HitTest(pos)
+
+        if hitsel == wxNOT_FOUND:
+            evt.Skip()
+            return
+
+        if pos.x < (5 + 6):
+            # Click inside the blue bar
+            self.SetSelection(hitsel)
+            self._pageListFindNext()
+            return
+        
+        info = self.foundinfo[hitsel]
+
+        if evt.ControlDown():
+            configCode = self.pWiki.getConfig().getint("main",
+                    "mouse_middleButton_withCtrl")
+        else:
+            configCode = self.pWiki.getConfig().getint("main",
+                    "mouse_middleButton_withoutCtrl")
+                    
+        tabMode = MIDDLE_MOUSE_CONFIG_TO_TABMODE[configCode]
+
+        presenter = self.pWiki.activateWikiWord(info.wikiWord, tabMode)
+        if info.occPos[0] != -1:
+            presenter.getSubControl("textedit").SetSelectionByCharPos(
+                    info.occPos[0], info.occPos[1])
+
+        # Works in fast search popup only if called twice
+        self.pWiki.getActiveEditor().SetFocus()
+        self.pWiki.getActiveEditor().SetFocus()
+
         
     def OnKeyDown(self, evt):
         accP = getAccelPairFromKeyDown(evt)
@@ -366,6 +415,72 @@ class SearchResultListBox(wxHtmlListBox):
             self.OnDClick(evt)
         else:
             evt.Skip()
+
+
+    def OnContextMenu(self, evt):
+        pos = evt.GetPosition()
+        if pos == wxDefaultPosition:
+            hitsel = self.GetSelection()
+        else:
+            hitsel = self.HitTest(self.ScreenToClient(pos))
+
+        if hitsel == wxNOT_FOUND:
+            evt.Skip()
+            return
+
+        self.contextMenuSelection = hitsel
+        
+        menu = wxMenu()
+        appendToMenuByMenuDesc(menu, _CONTEXT_MENU_ACTIVATE)
+
+        # Show menu
+        self.PopupMenu(menu)
+        self.contextMenuSelection = -1
+        menu.Destroy()
+
+
+    def OnActivateThis(self, evt):
+        if self.contextMenuSelection > -1:
+            info = self.foundinfo[self.contextMenuSelection]
+
+            presenter = self.pWiki.activateWikiWord(info.wikiWord, 0)
+            if info.occPos[0] != -1:
+                presenter.getSubControl("textedit").SetSelectionByCharPos(
+                        info.occPos[0], info.occPos[1])
+    
+            # Works in fast search popup only if called twice
+            self.pWiki.getActiveEditor().SetFocus()
+            self.pWiki.getActiveEditor().SetFocus()
+
+
+    def OnActivateNewTabThis(self, evt):
+        if self.contextMenuSelection > -1:
+            info = self.foundinfo[self.contextMenuSelection]
+
+            presenter = self.pWiki.activateWikiWord(info.wikiWord, 2)
+            if info.occPos[0] != -1:
+                presenter.getSubControl("textedit").SetSelectionByCharPos(
+                        info.occPos[0], info.occPos[1])
+    
+            # Works in fast search popup only if called twice
+            self.pWiki.getActiveEditor().SetFocus()
+            self.pWiki.getActiveEditor().SetFocus()
+
+
+    def OnActivateNewTabBackgroundThis(self, evt):
+        if self.contextMenuSelection > -1:
+            info = self.foundinfo[self.contextMenuSelection]
+
+            presenter = self.pWiki.activateWikiWord(info.wikiWord, 3)
+            if info.occPos[0] != -1:
+                presenter.getSubControl("textedit").SetSelectionByCharPos(
+                        info.occPos[0], info.occPos[1])
+    
+            # Works in fast search popup only if called twice
+            self.pWiki.getActiveEditor().SetFocus()
+            self.pWiki.getActiveEditor().SetFocus()
+
+
 
 
 class SearchWikiDialog(wxDialog):   # TODO
@@ -1336,3 +1451,17 @@ class FastSearchPopup(wxFrame):
         finally:
             self.Thaw()
             self.SetCursor(wxNullCursor)
+
+
+
+
+_CONTEXT_MENU_ACTIVATE = \
+u"""
+Activate;CMD_ACTIVATE_THIS
+Activate New Tab;CMD_ACTIVATE_NEW_TAB_THIS
+Activate New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
+"""
+
+
+# Activate;CMD_ACTIVATE_THIS
+

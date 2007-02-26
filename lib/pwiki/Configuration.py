@@ -467,6 +467,8 @@ GLOBALDEFAULTS = {
     ("main", "auto_indent"): "True",
     ("main", "show_lineNumbers"): "False", 
     ("main", "clipboardCatcher_suffix"): ur"\n",  # Suffix to append after each caught clipboard snippet
+    ("main", "clipboardCatcher_filterDouble"): "True",  # If same text shall be inserted twice (or more often)
+            # do not react
     ("main", "mainTree_position"): "0",  # Mode where to place the main tree,
             # 0:Left, 1:Right, 2:Above, 3:Below
     ("main", "viewsTree_position"): "0",  # Mode how to show the "Views" tree relative to main tree,
@@ -532,9 +534,9 @@ GLOBALDEFAULTS = {
 
 
     # Mouse options
-    ("main", "mouse_middleButton_withoutCtrl"): "0", # If middle mouse button is pressed on a link in editor or preview, without
-            # Ctrl pressed, should it then open link  0: in a new tab in foreground, 1: new tab background, 2: same tab
-    ("main", "mouse_middleButton_withCtrl"): "1", # Same, but if Ctrl is pressed
+    ("main", "mouse_middleButton_withoutCtrl"): "1", # If middle mouse button is pressed on a link in editor or preview, without
+            # Ctrl pressed, should it then open link in  0: a new tab in foreground, 1: new tab background, 2: same tab
+    ("main", "mouse_middleButton_withCtrl"): "0", # Same, but if Ctrl is pressed
 
 
     # Search options
@@ -581,6 +583,7 @@ WIKIDEFAULTS = {
     ("main", "footnotes_as_wikiwords"): "False",  # Interpret footnotes (e.g. [42]) as wiki words?
     ("main", "db_pagefile_suffix"): ".wiki",  # Suffix of the page files for "Original ..."
                                              # db types
+    ("main", "export_default_dir"): u"",  # Default directory for exports, u"" means fill in last active directory
 
     # For file storage (esp. identity check)
     ("main", "fileStorage_identity_modDateMustMatch"): "False",  # Modification date must match for file to be identical
@@ -590,6 +593,11 @@ WIKIDEFAULTS = {
 
     ("main", "wikiPageTitlePrefix"): "++"   # Prefix for main title of new pages
     }
+
+
+# Maps configuration setting "mouse_middleButton_withoutCtrl" number to a 
+# tabMode number for WikiTxtCtrl._activateLink or WikiHtmlView._activateLink
+MIDDLE_MOUSE_CONFIG_TO_TABMODE = {0: 2, 1: 3, 2: 0}
 
 
 

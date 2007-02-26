@@ -1,0 +1,169 @@
+﻿++ Change Log 2005
+
+Dec. 29, 2005 (1.20beta4 / WikidPadCompact 1.5.5beta3, repository revision in "mbutscher" branch: 50)
+
+Changes:
+    * Extended table support: wiki words, bold and italic
+      text can now be used in table cells and the ...
+    * same support in todo items now works correctly
+
+    * Per-wiki-option to define a fixed wiki word to show when
+      wiki is opened
+    * Regular expression support for page search (menu
+      "Editor"->"Find and Replace")
+    * For wiki-wide search, the number of occurring matches on
+      a page can be displayed.
+    * Function key F6 to switch between tree and editor
+
+    * Some bugs fixed
+
+
+Dec. 20, 2005 (1.20beta3, repository revision in "mbutscher" branch: 48)
+
+*Warning*: This version has a new database format. It is converted
+automatically when opening a wiki the first time. Making a backup
+beforehand is therefore recommended! The conversion may need a few
+moments, please be patient.
+
+    * Basic table support. Example:
+
+    <<|
+    here| nowhere| somewhere
+    else| where?| elsewhere
+    >>
+
+    * The .wiki filenames have no more brackets
+    * Option to forbid cycles in trees (see [OptionsDialog])
+    * Option to filter properties to show in HTML preview and export (see [OptionsDialog])
+    * A few bugs fixed. Among others:
+        * Wrong line endings in clipboard
+        * WPCompact: Missing RE prevents wrap text from work
+        * WPCompact: Creation of new wikis and importing doesn't work (wrong formatver)
+
+
+Dec. 10, 2005 (1.20beta2, repository revision in "mbutscher" branch: 44)
+
+*Warning*: This version has a new database format. It is converted
+automatically when opening a wiki the first time. Making a backup
+beforehand is therefore recommended!
+
+    1. *User interface*
+        1. When choosing a wiki word to go to (by using the
+           "view parents", "view parentless nodes", etc. menu 
+           functions) you can in the dialog choose one or more wiki
+           pages to *delete*, so e.g. all parentless nodes can be
+           deleted at once.
+        2. *HTML-Preview*. At the top of the editor window there are
+           two tabs "Edit" and "Preview". If you click the "Preview"
+           tab you see the rendered HTML-View of the current editor
+           content. In the options you can choose the font face to
+           use in the preview.
+        3. *Completely new wiki-wide search dialog*. It replaces the
+           "view saved-searches" function and its dialog. You can now
+           edit the wiki while the dialog is open yet
+           (=non-modal dialog). For details see [SearchingTheWiki].
+    
+    2. *New options to handle tree*
+        1. *"Tree auto-follow"*: The tree tries to always select the
+           wiki word currently shown in the editor or HTML-view.
+        2. *"Tree update after save"*: After each (automatic or manual)
+           save the tree icons and shown children are updated. This
+           may need some time and may create some flicker going from
+           top to bottom through the tree.
+    
+    3. Other
+        1. *Faster startup* by caching initially created regular
+           expressions in a file named "regexpr.cache" in the
+           application directory. (Deleting it is always safe and
+           recommended after changing WikiSyntax)
+        2. Option to handle numeric only words (=*footnotes*) as
+           wiki words or regular text. This option applies to the
+           current wiki only
+        3. In export dialog: option to use *compatible filenames* which
+           contain ASCII-only characters, so sets of HTML files are
+           more compatible to other filesystems.
+    
+    4. Fixed bug
+        1. *WikiWord and [WikiWord]* were different words
+
+
+Oct. 13, 2005 (1.20beta1)
+
+    1. *Unicode support*. This means:
+        1. Characters from any language in the text (if font and 
+           operating system support them).
+        2. Arbitrary alphanumeric characters (as defined by Unicode 
+           consortium) for non-camelCase wiki words (if operating and 
+           file system supports it), except numeric only words, like
+           e.g. [42].
+        3. Support for all characters in incremental search.
+
+    2. Changes in *wiki syntax*:
+        1. Before and after the tags to escape formatting (<< and >>) 
+           only whitespaces are allowed on the same line. See 
+           TextFormatting.
+        2. Escaping spaces when executing a search as part of a link. 
+           Example: This link
+           WikiDocumentAttributes#creating# a# new# wiki .
+           A # is escaped as ##.
+        3. Arbitrary alphanumeric characters (see 1.2.)
+
+    3. The *editor*:
+        1. Drag and drop of text.
+        2. Faster syntax highlighting. For pages bigger than 10 KBytes, 
+           it is done in the background, so you might notice a delay 
+           before the highlighting is updated.
+        3. New menu item "Replace Text by WikiWord". Select some text you 
+           want to move to a new wiki page, choose the item and enter the 
+           name of the new page. On the old page, the text will be 
+           replaced by a link to the new one.
+        4. Possibility to change the date format for "Insert Date"
+        5. New menu item "Wikize selected word" to convert selected words 
+           to a valid wiki word.
+        6. Menu and toolbar plugin to add a list of the children and 
+           parents of a wiki word to a page.
+        7. Menu plugin to create new wiki words with auto-generated 
+           names. (Name looks like  [New124536] with a unique number).
+        8. Right handling of numbered lists with multiple levels of 
+           numbering (like this one). See also BulletedLists. Written by 
+           Gerhard Reitmayr.
+
+    4. The *user interface*:
+        1. Submenu to choose colors similar to icons.
+        2. In the dialogs "Open word" and "Search wiki" you can use
+           cursor up/down to move between text field and the list below
+           the field.
+        3. "Set as root" menu item to choose an arbitrary wiki word as 
+           root of the tree on the left.
+        4. Add menu and toolbar items as Python plugins (no documentation
+           yet, but example in extensions/referrals.py). Written by 
+           Gerhard Reitmayr.
+        5. Arbitrary nested todo and property entries in the View tree. 
+           See WikiDocumentAttributes and TodoItems.
+
+    5. *Options* dialog in the "Wiki" menu:
+        1. "Minimize to Tray".
+        2. "Hide undefined wiki words in tree". Undefined children words 
+           of a word are not shown in the tree if this is checked.
+        3. "Start browser after export". If this is checked, after 
+           exporting HTML or XML, the standard web browser is started to 
+           show the result.
+        4. "New window on wiki URL". If checked, activating a "wiki:" URL 
+           opens a new WikidPad window (only if   'Handle URLs with 
+           "wiki:" by WikidPad'   was checked when WikidPad was 
+           installed). If not checked, the same window is reused to open 
+           the selected wiki.
+        5. "Low resource usage". Uses less GDI and user resources on 
+           Windows 95/98/ME, especially if minimized. Changing this 
+           setting takes effect only after restarting WikidPad.
+
+    6. *Internals*:
+        1. Plugin manager by Gerhard Reitmayr.
+        2. Slower but more reliable HTML/XML export.
+
+
+Jan. 08, 2005
+
+    1. Fixed shell hook for opening .wiki files. Found fix here:
+        http://weblogs.asp.net/oldnewthing/archive/2004/10/20/245072.aspx
+    2. Added a 4th heading size (++++).

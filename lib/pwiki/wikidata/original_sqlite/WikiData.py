@@ -44,8 +44,8 @@ from pwiki import PageAst
 
 class WikiData:
     "Interface to wiki data."
-    def __init__(self, dataManager, dataDir):
-        self.dataManager = dataManager
+    def __init__(self, wikiDocument, dataDir):
+        self.wikiDocument = wikiDocument
         self.dataDir = dataDir
         self.cachedContentNames = {}
 
@@ -68,7 +68,7 @@ class WikiData:
         DbStructure.registerSqliteFunctions(self.connWrap)
 
         try:
-            self.pagefileSuffix = self.dataManager.getWikiConfig().get("main",
+            self.pagefileSuffix = self.wikiDocument.getWikiConfig().get("main",
                     "db_pagefile_suffix", u".wiki")
         except (IOError, OSError), e:
             traceback.print_exc()
@@ -116,7 +116,7 @@ class WikiData:
 
         try:
             # Set marker for database type
-            self.dataManager.getWikiConfig().set("main", "wiki_database_type",
+            self.wikiDocument.getWikiConfig().set("main", "wiki_database_type",
                     "original_sqlite")
         except (IOError, OSError), e:
             # Remember but continue
@@ -317,7 +317,7 @@ class WikiData:
     # ---------- Renaming/deleting pages with cache update ----------
 
     def renameWord(self, word, toWord):
-        if not self.dataManager.getFormatting().isNakedWikiWord(toWord):
+        if not self.wikiDocument.getFormatting().isNakedWikiWord(toWord):
             raise WikiDataException, u"'%s' is an invalid wiki word" % toWord
 
         if self.isDefinedWikiWord(toWord):
@@ -347,7 +347,7 @@ class WikiData:
         delete everything about the wikiword passed in. an exception is raised
         if you try and delete the wiki root node.
         """
-        if word != self.dataManager.getWikiName():
+        if word != self.wikiDocument.getWikiName():
             try:
                 self.connWrap.commit()
                 try:
@@ -368,7 +368,7 @@ class WikiData:
                 traceback.print_exc()
                 raise DbWriteAccessError(e)
         else:
-            raise WikiDataException, "You cannot delete the root wiki node"
+            raise WikiDataException("You cannot delete the root wiki node")
 
 
     # ---------- Handling of relationships cache ----------
@@ -710,29 +710,34 @@ class WikiData:
         thisStr = thisStr.lower()
 
         try:
-            result = self.connWrap.execSqlQuerySingleColumn(
+            result1 = self.connWrap.execSqlQuerySingleColumn(
                     "select word from wikiwords where wordnormcase like (? || '%')",
                     (thisStr,))
     
             if includeAliases:
-                result += self.connWrap.execSqlQuerySingleColumn(
+                result1 += self.connWrap.execSqlQuerySingleColumn(
                         "select value from wikiwordprops where key = 'alias' and "
                         "utf8Normcase(value) like (? || '%')", (thisStr,))
     
-            result += self.connWrap.execSqlQuerySingleColumn(
+            result2 = self.connWrap.execSqlQuerySingleColumn(
                     "select word from wikiwords "
                     "where wordnormcase like ('%' || ? || '%') and "
                     "wordnormcase not like (? || '%') and word not glob '[[]*'",
                     (thisStr, thisStr))
     
             if includeAliases:
-                result += self.connWrap.execSqlQuerySingleColumn(
+                result2 += self.connWrap.execSqlQuerySingleColumn(
                         "select value from wikiwordprops where key = 'alias' and "
                         "utf8Normcase(value) like ('%' || ? || '%') and "
                         "utf8Normcase(value) not like (? || '%')",
                         (thisStr, thisStr))
-    
-            return result
+                        
+            coll = self.wikiDocument.getCollator()
+            
+            coll.sort(result1)
+            coll.sort(result2)
+
+            return result1 + result2
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)

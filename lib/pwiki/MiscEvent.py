@@ -47,18 +47,121 @@ class MiscEventSourceMixin:
 
 
 
+class ListenerList(object):
+    __slots__ = ("__weakref__", "listeners", "userCount", "cleanupFlag")
+
+    def __init__(self):
+        self.listeners = []
+        self.userCount = 0
+        self.cleanupFlag = False
+        
+    def addListener(self, listener, isWeak=True):
+        """
+        isWeak -- Iff true, store weak reference to listener instead
+                of listener itself
+        """
+        if isWeak:
+            self.listeners.append(weakref.ref(listener))
+        else:
+            self.listeners.append(listener)
+
+    def removeListener(self, listener):
+        try:
+            self.listeners.remove(weakref.ref(listener))
+        except ValueError:
+            try:
+                self.listeners.remove(listener)
+            except ValueError:
+                # Wasn't in the list
+                pass
+                
+    def hasListener(self, listener):
+        try:
+            self.listeners.index(weakref.ref(listener))
+            return True
+        except ValueError:
+            try:
+                self.listeners.index(listener)
+                return True
+            except ValueError:
+                return False
+
+
+    def setListeners(self, listeners):
+        self.listeners = listeners
+        
+    def incListenerUser(self):
+        self.userCount += 1
+        return self.listeners
+        
+    def decListenerUser(self):
+        if self.userCount > 0:
+            self.userCount -= 1
+            
+            if self.userCount == 0 and self.cleanupFlag:
+                self.cleanDeadRefs()
+                self.cleanupFlag = False
+
+
+    def setCleanupFlag(self, value=True):
+        self.cleanupFlag = value
+
+
+    def getActualObject(lref):
+        if lref is None:
+            return None
+
+        if isinstance(lref, weakref.ReferenceType):
+            return lref()  # Retrieve real object from weakref object
+    getActualObject = staticmethod(getActualObject)
+
+
+    def getObjectAt(self, i):
+        lref = self.listeners[i]
+        if lref is None:
+            self.cleanupFlag = True
+            return None
+
+        if isinstance(lref, weakref.ReferenceType):
+            l = lref()
+            if l is None:
+                self.cleanupFlag = True
+                return None
+        else:
+            l = lref
+            
+        return l  # Return real
+
+
+    def cleanDeadRefs(self):
+        """
+        Remove references to already deleted objects.
+        """
+        i = 0
+        while i < len(self.listeners):
+            if self.getActualObject(self.listeners[i]) is None:
+                del self.listeners[i]
+                continue # Do not increment i here
+
+            i += 1
+            
+    def __len__(self):
+        return len(self.listeners)
+
+
+
 
 class MiscEvent(object):
-    __slots__ = ("__weakref__", "listeners", "source", "properties", "parent",
+    __slots__ = ("__weakref__", "listenerList", "source", "properties", "parent",
             "activeListenerIndex")
 
     def __init__(self, source = None):
-        self.listeners = []
+        self.listenerList = ListenerList()
         self.source = source
         self.properties = None
         self.parent = None
         
-        # Index into self.listeners which listeneris currently called
+        # Index into self.listeners which listener is currently called
         # needed for noChildrenForMe().
         self.activeListenerIndex = -1
 
@@ -104,7 +207,7 @@ class MiscEvent(object):
         """
         result = MiscEvent()
 
-        result.listeners = self.listeners[:]
+        result.listenerList = self.listenerList
         
         if self.properties is not None:
             result.properties = self.properties.copy()
@@ -119,36 +222,19 @@ class MiscEvent(object):
         isWeak -- Iff true, store weak reference to listener instead
                 of listener itself
         """
-        if isWeak:
-            self.listeners.append(weakref.ref(listener))
-        else:
-            self.listeners.append(listener)
+        return self.listenerList.addListener(listener, isWeak)
 
     def removeListener(self, listener):
-        try:
-            self.listeners.remove(weakref.ref(listener))
-        except ValueError:
-            try:
-                self.listeners.remove(listener)
-            except ValueError:
-                # Wasn't in the list
-                pass
+        return self.listenerList.removeListener(listener)
                 
     def hasListener(self, listener):
-        try:
-            self.listeners.index(weakref.ref(listener))
-            return True
-        except ValueError:
-            try:
-                self.listeners.index(listener)
-                return True
-            except ValueError:
-                return False
-
+        return self.listenerList.hasListener(listener)
 
     def setListeners(self, listeners):
-        self.listeners = listeners
+        return self.listenerList.setListeners(listeners)
 
+    def setListenerList(self, listenerList):
+        self.listenerList = listenerList
 
     def put(self, key, value = None):
         """
@@ -172,22 +258,13 @@ class MiscEvent(object):
         Remove references to already deleted objects. Mainly called by processSend
         to clean the parent event if a child finds a deadref.
         
-        Automatically calls cleanDeadRefs of its parent event (if existing).
         """
-        i = 0
-        while i < len(self.listeners):
-            lref = self.listeners[i]
+##        Automatically calls cleanDeadRefs of its parent event (if existing).
+        self.listenerList.cleanDeadRefs()
 
-            if isinstance(lref, weakref.ReferenceType):
-                l = lref()  # Retrieve real object from weakref object
-                if l is None:
-                    del self.listeners[i]
-                    continue # Do not increment i here
-            i += 1
-
-        parent = self.getParent()
-        if parent is not None:
-            parent.cleanDeadRefs()
+#         parent = self.getParent()
+#         if parent is not None:
+#             parent.cleanDeadRefs()
 
 
     def processSend(self, first = None):
@@ -203,38 +280,25 @@ class MiscEvent(object):
 
         if first is not None:
             first.miscEventHappened(self);
-            
-        deadRefFound = False
-        i = 0
-        while i < len(self.listeners):
-            if self.has_key("consumed"): break
-            
-            lref = self.listeners[i]
-            if lref is None:
-                # Removed by noChildrenForMe(), so ignore
-                i += 1
-                continue
-                
-            if isinstance(lref, weakref.ReferenceType):
-                l = lref()  # Retrieve real object from weakref object
+        
+        self.listenerList.incListenerUser()
+        try:
+            i = 0
+            while i < len(self.listenerList):
+                l = self.listenerList.getObjectAt(i)
                 if l is None:
-                    deadRefFound = True
-                    del self.listeners[i]
-                    continue # Do not increment i here
-            else:
-                # Direct listener instead of weak one
-                l = lref
+                    continue
+                
+                self.activeListenerIndex = i
+                l.miscEventHappened(self)
+                
+                i += 1
 
-            self.activeListenerIndex = i
-            l.miscEventHappened(self)
-            
-            i += 1
-            
+        finally:
+            self.listenerList.decListenerUser()
+
         self.activeListenerIndex = -1
 
-        if deadRefFound:
-            self.getParent().cleanDeadRefs()
-            
         return self
             
             
@@ -310,16 +374,16 @@ class MiscEvent(object):
         return event
 
 
-    def noChildrenForMe():
-        """
-        Called by a listener to ensure that it doesn't get any child events
-        of this event
-        """
-        if self.activeListenerIndex == -1:
-            # TODO Create/Find a better exception
-            raise StandardError("Must be called during processing of an event")
-            
-        self.listeners[self.activeListenerIndex] = None
+#     def noChildrenForMe():
+#         """
+#         Called by a listener to ensure that it doesn't get any child events
+#         of this event
+#         """
+#         if self.activeListenerIndex == -1:
+#             # TODO Create/Find a better exception
+#             raise StandardError("Must be called during processing of an event")
+#             
+#         self.listeners[self.activeListenerIndex] = None
 
 
 
@@ -353,7 +417,7 @@ class ResendingMiscEvent(MiscEvent):
     def miscEventHappened(self, miscevt):
         newMiscevt = miscevt.createClone()
         newMiscevt.setSource(self)
-        newMiscevt.setListeners(self.listeners[:])
+        newMiscevt.setListenerList(self.listenerList)
         newMiscevt.processSend()
 
 

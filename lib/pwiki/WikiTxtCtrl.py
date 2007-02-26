@@ -20,6 +20,7 @@ from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
         wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc
 from MiscEvent import KeyFunctionSink
 
+from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 import WikiFormatting
 import PageAst, DocPages
 from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException
@@ -38,7 +39,7 @@ except:
     WindowsHacks = None
 
 
-# Compiler flag for float division
+# Python compiler flag for float division
 CO_FUTURE_DIVISION = 0x2000
 
 
@@ -73,7 +74,6 @@ class IncrementalSearchDialog(wxFrame):
         self.tfInput = wxTextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
                 u"Incremental search (ENTER/ESC to finish)",
                 style=wxTE_PROCESS_ENTER | wxTE_RICH)
-        # self.tfInput.SetSelection(-1, -1)
 
         self.tfInput.SetFont(font)
         self.tfInput.SetBackgroundColour(IncrementalSearchDialog.COLOR_YELLOW)
@@ -98,6 +98,7 @@ class IncrementalSearchDialog(wxFrame):
 
         if searchInit:
             self.tfInput.SetValue(searchInit)
+            self.tfInput.SetSelection(-1, -1)
         
         if self.closeDelay:
             self.closeTimer = wxTimer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE)
@@ -271,7 +272,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # register some event handlers
         self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
-                self, (
+                None, (
 #         self.presenterListener = KeyFunctionSink((
                 ("options changed", self.onOptionsChanged),  # fired by PersonalWikiFrame
                 ("saving all pages", self.onSavingAllPages),
@@ -325,7 +326,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 #         res = xrc.wxXmlResource.Get()
 #         self.contextMenu = res.LoadMenu("MenuTextctrlPopup")
 
-        self.contextTokens = None
+        self.contextMenuTokens = None
         
         # Connect context menu events to functions
         EVT_MENU(self, GUI_ID.CMD_UNDO, lambda evt: self.Undo())
@@ -953,7 +954,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         
         tokens = self.getTokensForMousePos(self.ScreenToClient(wxGetMousePosition()))
         
-        self.contextTokens = tokens
+        self.contextMenuTokens = tokens
         addActivateItem = False
         for tok in tokens:
             if tok.ttype == WikiFormatting.FormatTypes.WikiWord:
@@ -988,7 +989,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
         # Show menu
         self.PopupMenu(menu)
-        self.contextTokens = None
+        self.contextMenuTokens = None
         menu.Destroy()
 
 
@@ -1271,16 +1272,16 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def OnActivateThis(self, evt):
-        if self.contextTokens:
-            self.activateTokens(self.contextTokens, 0)
+        if self.contextMenuTokens:
+            self.activateTokens(self.contextMenuTokens, 0)
 
     def OnActivateNewTabThis(self, evt):
-        if self.contextTokens:
-            self.activateTokens(self.contextTokens, 2)
+        if self.contextMenuTokens:
+            self.activateTokens(self.contextMenuTokens, 2)
 
     def OnActivateNewTabBackgroundThis(self, evt):
-        if self.contextTokens:
-            self.activateTokens(self.contextTokens, 3)
+        if self.contextMenuTokens:
+            self.activateTokens(self.contextMenuTokens, 3)
 
 
 #  DO NOT DELETE!
@@ -1971,7 +1972,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.autoCompBackBytesWithoutBracket = 0
             self.autoCompBackBytesWithBracket = 0
 
-            # TODO Sort entries appropriate 
+            # TODO Sort entries appropriately
 
             wikiData = self.presenter.getWikiDocument().getWikiData()
 
@@ -2114,10 +2115,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         else:
             evt.Skip()
 
-    # Maps configuration setting "mouse_middleButton_withoutCtrl" to a 
-    # tabMode for _activateLink.
-    _MIDDLE_CONFIG_TO_TABMODE = {0: 2, 1: 3, 2: 0}
-
     def OnMiddleDown(self, evt):
         if not evt.ControlDown():
             middleConfig = self.presenter.getConfig().getint("main",
@@ -2126,7 +2123,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             middleConfig = self.presenter.getConfig().getint("main",
                     "mouse_middleButton_withCtrl", 3)
 
-        tabMode = self._MIDDLE_CONFIG_TO_TABMODE[middleConfig]
+        tabMode = MIDDLE_MOUSE_CONFIG_TO_TABMODE[middleConfig]
         
         if not self.activateLink(evt.GetPosition(), tabMode=tabMode):
             evt.Skip()
