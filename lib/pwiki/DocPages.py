@@ -11,7 +11,7 @@ from StringOps import strToBool, fileContentToUnicode, BOM_UTF8, utf8Enc, \
 import WikiFormatting
 import PageAst
 
-from wxPython.wx import wxGetApp
+from wx import GetApp
 
 
 class DocPage(MiscEventSourceMixin):
@@ -744,7 +744,7 @@ class FunctionalPage(DocPage):
 
 
     def _loadGlobalPage(self, subtag):
-        tbLoc = os.path.join(wxGetApp().getGlobalConfigSubDir(),
+        tbLoc = os.path.join(GetApp().getGlobalConfigSubDir(),
                 subtag+".wiki")
         try:
             tbFile = open(tbLoc, "rU")
@@ -793,7 +793,7 @@ class FunctionalPage(DocPage):
 
 
     def _saveGlobalPage(self, text, subtag):
-        tbLoc = os.path.join(wxGetApp().getGlobalConfigSubDir(),
+        tbLoc = os.path.join(GetApp().getGlobalConfigSubDir(),
                 subtag+".wiki")
         tbFile = open(tbLoc, "w")
         try:

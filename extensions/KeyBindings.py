@@ -1,5 +1,4 @@
-from wxPython.wx import *
-from wxPython.stc import *
+import wx, wx.stc
 
 NewWiki="Ctrl-N"
 OpenWiki="Ctrl-Alt-O"
@@ -73,7 +72,7 @@ def makeItalic(editor):
 
 def addHeading(editor):
     bytePos = editor.PositionAfter(editor.GetCurrentPos())
-    editor.CmdKeyExecute(wxSTC_CMD_HOME)
+    editor.CmdKeyExecute(wx.stc.STC_CMD_HOME)
     editor.AddText(u'+')
     editor.GotoPos(bytePos)
 

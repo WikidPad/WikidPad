@@ -1,8 +1,9 @@
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
-from wxPython.wx import *
-from wxPython.html import *
+import wx, wx.html
+# from wxPython.wx import *
+# from wxPython.html import *
 
 from WikiExceptions import *
 from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
@@ -58,9 +59,9 @@ def createWikiHtmlView(presenter, parent, ID):
 
 
 
-class WikiHtmlView(wxHtmlWindow):
+class WikiHtmlView(wx.html.HtmlWindow):
     def __init__(self, presenter, parent, ID):
-        wxHtmlWindow.__init__(self, parent, ID)
+        wx.html.HtmlWindow.__init__(self, parent, ID)
         self.presenter = presenter
 
         self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
@@ -98,21 +99,21 @@ class WikiHtmlView(wxHtmlWindow):
         self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
 
         
-        EVT_KEY_DOWN(self, self.OnKeyDown)
-        EVT_KEY_UP(self, self.OnKeyUp)
+        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+        wx.EVT_KEY_UP(self, self.OnKeyUp)
 
-        EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
-        EVT_MENU(self, GUI_ID.CMD_ZOOM_IN, lambda evt: self.addZoom(1))
-        EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT, lambda evt: self.addZoom(-1))
-        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)        
-        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
+        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
+        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN, lambda evt: self.addZoom(1))
+        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT, lambda evt: self.addZoom(-1))
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)        
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
                 self.OnActivateNewTabThis)        
-        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
                 self.OnActivateNewTabBackgroundThis)        
 
-        self.Bind(EVT_SET_FOCUS, self.OnSetFocus)
-        EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
-        EVT_MOUSEWHEEL(self, self.OnMouseWheel) 
+        self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
+        wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
+        wx.EVT_MOUSEWHEEL(self, self.OnMouseWheel) 
 
 
     def setVisible(self, vis):
@@ -130,15 +131,26 @@ class WikiHtmlView(wxHtmlWindow):
 
 
     def close(self):
-        self.Unbind(EVT_SET_FOCUS)
+        self.Unbind(wx.EVT_SET_FOCUS)
         self.setVisible(False)
         self.presenterListener.disconnect()
 
 
+# This doesn't work for wxPython 2.8 and newer, constants are missing
+#     _DEFAULT_FONT_SIZES = (wx.html.HTML_FONT_SIZE_1, wx.html.HTML_FONT_SIZE_2, 
+#             wx.html.HTML_FONT_SIZE_3, wx.html.HTML_FONT_SIZE_4,
+#             wx.html.HTML_FONT_SIZE_5, wx.html.HTML_FONT_SIZE_6,
+#             wx.html.HTML_FONT_SIZE_7)
 
-    _DEFAULT_FONT_SIZES = (wxHTML_FONT_SIZE_1, wxHTML_FONT_SIZE_2, 
-            wxHTML_FONT_SIZE_3, wxHTML_FONT_SIZE_4, wxHTML_FONT_SIZE_5, 
-            wxHTML_FONT_SIZE_6, wxHTML_FONT_SIZE_7)
+    # These are the Windows sizes
+    _DEFAULT_FONT_SIZES = (7, 8, 10, 12, 16, 22, 30)
+    
+    # For Mac
+    # _DEFAULT_FONT_SIZES = (9, 12, 14, 18, 24, 30, 36)
+    # For __WXGPE__ (?)
+    # _DEFAULT_FONT_SIZES = (6, 7, 8, 9, 10, 12, 14)
+    # For others
+    # _DEFAULT_FONT_SIZES = (10, 12, 14, 16, 19, 24, 32)
 
 
     # TODO Called too often and at wrong time, e.g. when switching from
@@ -181,7 +193,7 @@ class WikiHtmlView(wxHtmlWindow):
                     LinkCreatorForPreview(
                         self.presenter.getWikiDocument().getWikiData()))
 
-            wxGetApp().getInsertionPluginManager().taskEnd()
+            wx.GetApp().getInsertionPluginManager().taskEnd()
 
     
             # TODO Reset after open wiki
@@ -287,7 +299,7 @@ class WikiHtmlView(wxHtmlWindow):
 
         if evt.RightUp():
             self.contextHref = linkinfo.GetHref()
-            menu = wxMenu()
+            menu = wx.Menu()
             if href.startswith(u"internaljump:"):
                 appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTERNAL_JUMP)
             else:
@@ -367,7 +379,7 @@ class WikiHtmlView(wxHtmlWindow):
 
     def OnKeyUp(self, evt):
         acc = getAccelPairFromKeyDown(evt)
-        if acc == (wxACCEL_CTRL, ord('C')): 
+        if acc == (wx.ACCEL_CTRL, ord('C')): 
             # Consume original clipboard copy function
             pass
         else:
@@ -388,11 +400,11 @@ class WikiHtmlView(wxHtmlWindow):
 
     def OnKeyDown(self, evt):
         acc = getAccelPairFromKeyDown(evt)
-        if acc == (wxACCEL_CTRL, ord('+')) or \
-                acc == (wxACCEL_CTRL, WXK_NUMPAD_ADD):
+        if acc == (wx.ACCEL_CTRL, ord('+')) or \
+                acc == (wx.ACCEL_CTRL, wx.WXK_NUMPAD_ADD):
             self.addZoom(1)
-        elif acc == (wxACCEL_CTRL, ord('-')) or \
-                acc == (wxACCEL_CTRL, WXK_NUMPAD_SUBTRACT):
+        elif acc == (wx.ACCEL_CTRL, ord('-')) or \
+                acc == (wx.ACCEL_CTRL, wx.WXK_NUMPAD_SUBTRACT):
             self.addZoom(-1)
         else:
             evt.Skip()

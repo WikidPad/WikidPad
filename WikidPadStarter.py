@@ -29,9 +29,9 @@ ExceptionLogger.startLogger(VERSION_STRING)
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "gadfly.zip"))
 # print "sys.path + ", os.path.join(os.path.abspath(sys.argv[0]), "gadfly.zip")
 
-
-from wxPython.wx import wxApp, wxMessageDialog, wxDEFAULT_FRAME_STYLE, \
-        wxNO_FULL_REPAINT_ON_RESIZE, wxFrame, wxOK
+import wx
+# from wxPython.wx import wxApp, wxMessageDialog, wxDEFAULT_FRAME_STYLE, \
+#         wxNO_FULL_REPAINT_ON_RESIZE, wxFrame, wxOK
 
 from pwiki import srePersistent
 srePersistent.loadCodeCache()
@@ -42,7 +42,7 @@ from pwiki.MainApp import App, findDirs
 if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
     # Special option, called by deinstaller on request to delete personal
     # configuration files
-    dummyApp = wxApp(0)
+    dummyApp = wx.App(0)
     dummyApp.SetAppName("WikidPad")
 
     wikiAppDir, globalConfigDir = findDirs()
@@ -80,16 +80,17 @@ if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
 
 
 
-class ErrorFrame(wxFrame):
+class ErrorFrame(wx.Frame):
    def __init__(self, parent, id, title):
-      wxFrame.__init__(self, parent, -1, title, size = (300, 200),
-                       style=wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
-      dlg_m = wxMessageDialog(self, "%s. %s." % ("Error starting wikidPad", e), 'Error!', wxOK)
+      wx.Frame.__init__(self, parent, -1, title, size = (300, 200),
+                       style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
+      dlg_m = wx.MessageDialog(self, "%s. %s." % ("Error starting wikidPad", e),
+            'Error!', wx.OK)
       dlg_m.ShowModal()
       dlg_m.Destroy()
       self.Close()
 
-class Error(wxApp):   
+class Error(wx.App):   
    def OnInit(self):
       errorFrame = ErrorFrame(None, -1, "Error")
       self.SetTopWindow(errorFrame)

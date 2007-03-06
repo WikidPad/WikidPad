@@ -1,8 +1,8 @@
 import re, sets
 from struct import pack, unpack
 
-from wxPython.wx import *
-from wxHelper import GUI_ID  #, setWindowPos, setWindowSize
+# from wxPython.wx import *
+# from wxHelper import GUI_ID  #, setWindowPos, setWindowSize
 
 from WikiExceptions import *
 

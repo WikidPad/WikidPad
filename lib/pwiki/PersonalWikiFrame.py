@@ -5,15 +5,16 @@ import os, sys, gc, traceback, sets, string, re
 from os.path import *
 from time import localtime, time, strftime
 
-import wx, cPickle
+import cPickle  # to create dependency?
 
+import wx
 
 # import urllib_red as urllib
 import urllib
 
-from wxPython.wx import *
-from wxPython.stc import *
-from wxPython.html import *
+# from wxPython.wx import *
+# from wxPython.stc import *
+# from wxPython.html import *
 from wxHelper import GUI_ID, cloneImageList, getAccelPairFromKeyDown, \
         getAccelPairFromString, LayerSizer
 
@@ -77,7 +78,7 @@ class wxGuiProgressHandler:
     Implementation of a GuiProgressListener to
     show a wxProgressDialog
     """
-    def __init__(self, title, msg, addsteps, parent, flags=wxPD_APP_MODAL):
+    def __init__(self, title, msg, addsteps, parent, flags=wx.PD_APP_MODAL):
         self.title = title
         self.msg = msg
         self.addsteps = addsteps
@@ -90,7 +91,7 @@ class wxGuiProgressHandler:
         take in sum. Will be called once before update()
         is called several times
         """
-        self.progDlg = wxProgressDialog(self.title, self.msg,
+        self.progDlg = wx.ProgressDialog(self.title, self.msg,
                 sum + self.addsteps, self.parent, self.flags)
         
     def update(self, step, msg):
@@ -141,11 +142,11 @@ class LossyWikiCloseDeniedException(Exception):
     pass
 
 
-class PersonalWikiFrame(wxFrame, MiscEventSourceMixin):
+class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
     def __init__(self, parent, id, title, wikiAppDir, globalConfigDir,
             globalConfigSubDir, cmdLineAction):
-        wxFrame.__init__(self, parent, -1, title, size = (700, 550),
-                         style=wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
+        wx.Frame.__init__(self, parent, -1, title, size = (700, 550),
+                         style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
         MiscEventSourceMixin.__init__(self)
 
         if cmdLineAction.cmdLineError:
@@ -185,7 +186,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 """)
             tbFile.close()
         self.globalConfigLoc = join(globalConfigDir, "WikidPad.config")
-        self.configuration = wxGetApp().createCombinedConfiguration()
+        self.configuration = wx.GetApp().createCombinedConfiguration()
 
         self.wikiPadHelp = join(self.wikiAppDir, 'WikidPadHelp',
                 'WikidPadHelp.wiki')
@@ -240,7 +241,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.propertyChecker = PropertyHandling.PropertyChecker(self)
 
-        self.configuration.setGlobalConfig(wxGetApp().getGlobalConfig())
+        self.configuration.setGlobalConfig(wx.GetApp().getGlobalConfig())
 
         # trigger hook
         self.hooks.startup(self)
@@ -286,7 +287,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # Should reduce resources usage (less icons)
         # Do not set self.lowResources after initialization here!
-        self.lowResources = wxGetApp().getLowResources()
+        self.lowResources = wx.GetApp().getLowResources()
 #         self.lowResources = self.configuration.getboolean("main", "lowresources")
 
 #         # get the wrap mode setting
@@ -505,7 +506,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         return self.wikiDataManager.getFormatting()
 
     def getCollator(self):
-        return wxGetApp().getCollator()
+        return wx.GetApp().getCollator()
 
     def getLogWindow(self):
         return self.logWindow
@@ -517,7 +518,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         If the bitmap wasn't cached already, it is loaded and created.
         If icon is unknown, None is returned.
         """
-        return wxGetApp().getIconCache().lookupIcon(iconname)
+        return wx.GetApp().getIconCache().lookupIcon(iconname)
 
 
     def lookupIconIndex(self, iconname):
@@ -525,23 +526,23 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         Returns the id number into self.iconImageList of the requested icon.
         If icon is unknown, -1 is returned.
         """
-        return wxGetApp().getIconCache().lookupIconIndex(iconname)
+        return wx.GetApp().getIconCache().lookupIconIndex(iconname)
 
 
     def resolveIconDescriptor(self, desc, default=None):
         """
         Used for plugins of type "MenuFunctions" or "ToolbarFunctions".
-        Tries to find and return an appropriate wxBitmap object.
+        Tries to find and return an appropriate wx.Bitmap object.
         
         An icon descriptor can be one of the following:
             - None
-            - a wxBitmap object
+            - a wx.Bitmap object
             - the filename of a bitmap
             - a tuple of filenames, first existing file is used
         
         If no bitmap can be found, default is returned instead.
         """
-        return wxGetApp().getIconCache().resolveIconDescriptor(desc, default)
+        return wx.GetApp().getIconCache().resolveIconDescriptor(desc, default)
 
 
     def _OnRoundtripEvent(self, evt):
@@ -560,16 +561,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
         self.eventRoundtrip += 1
-        wxWindow.FindFocus().ProcessEvent(evt)
+        wx.Window.FindFocus().ProcessEvent(evt)
         self.eventRoundtrip -= 1
 
 
     def addMenuItem(self, menu, label, text, evtfct=None, icondesc=None,
             menuID=None):
         if menuID is None:
-            menuID = wxNewId()
+            menuID = wx.NewId()
 
-        menuitem = wxMenuItem(menu, menuID, label, text)
+        menuitem = wx.MenuItem(menu, menuID, label, text)
         # if icondesc:  # (not self.lowResources) and
         bitmap = self.resolveIconDescriptor(icondesc)
         if bitmap:
@@ -577,7 +578,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         menu.AppendItem(menuitem)
         if evtfct is not None:
-            EVT_MENU(self, menuID, evtfct)
+            wx.EVT_MENU(self, menuID, evtfct)
 
         return menuitem
 
@@ -587,7 +588,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         Builds the first, the "Wiki" menu and returns it
         """
         wikiData = self.getWikiData()
-        wikiMenu = wxMenu()
+        wikiMenu = wx.Menu()
 
         self.addMenuItem(wikiMenu, '&New\t' + self.keyBindings.NewWiki,
                 'New Wiki', self.OnWikiNew)
@@ -604,14 +605,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 'Open Wiki with a specified wiki database type',
                 self.OnWikiOpenAsType)
 
-        self.recentWikisMenu = wxMenu()
-        wikiMenu.AppendMenu(wxNewId(), '&Recent', self.recentWikisMenu)
+        self.recentWikisMenu = wx.Menu()
+        wikiMenu.AppendMenu(wx.NewId(), '&Recent', self.recentWikisMenu)
 
         # init the list of items
         for wiki in self.wikiHistory:
-            menuID=wxNewId()
+            menuID=wx.NewId()
             self.recentWikisMenu.Append(menuID, wiki)
-            EVT_MENU(self, menuID, self.OnSelectRecentWiki)
+            wx.EVT_MENU(self, menuID, self.OnSelectRecentWiki)
 
         wikiMenu.AppendSeparator()
 
@@ -629,8 +630,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         wikiMenu.AppendSeparator()
 
         if wikiData is not None:
-            exportWikisMenu = wxMenu()
-            wikiMenu.AppendMenu(wxNewId(), 'Export', exportWikisMenu)
+            exportWikisMenu = wx.Menu()
+            wikiMenu.AppendMenu(wx.NewId(), 'Export', exportWikisMenu)
     
             self.addMenuItem(exportWikisMenu, 'Export Wiki as Single HTML Page',
                     'Export Wiki as Single HTML Page', self.OnExportWiki,
@@ -674,9 +675,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     lambda evt: self.printer.showPrintMainDialog())
 
         if wikiData is not None and wikiData.checkCapability("rebuild") == 1:
-            menuID=wxNewId()
+            menuID=wx.NewId()
             wikiMenu.Append(menuID, '&Rebuild Wiki', 'Rebuild this wiki')
-            EVT_MENU(self, menuID, lambda evt: self.rebuildWiki())
+            wx.EVT_MENU(self, menuID, lambda evt: self.rebuildWiki())
 
         if wikiData is not None:
             self.addMenuItem(wikiMenu, 'Reconnect',
@@ -684,15 +685,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.OnCmdReconnectDatabase)
 
         if wikiData is not None and wikiData.checkCapability("compactify") == 1:
-            menuID=wxNewId()
+            menuID=wx.NewId()
             wikiMenu.Append(menuID, '&Vacuum Wiki', 'Free unused space in database')
-            EVT_MENU(self, menuID, lambda evt: self.vacuumWiki())
+            wx.EVT_MENU(self, menuID, lambda evt: self.vacuumWiki())
 
         if wikiData is not None and \
                 wikiData.checkCapability("plain text import") == 1:
-            menuID=wxNewId()
+            menuID=wx.NewId()
             wikiMenu.Append(menuID, '&Copy .wiki files to database', 'Copy .wiki files to database')
-            EVT_MENU(self, menuID, self.OnImportFromPagefiles)
+            wx.EVT_MENU(self, menuID, self.OnImportFromPagefiles)
 
         if wikiData is not None:
             wikiMenu.AppendSeparator()            
@@ -703,25 +704,25 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if wikiData is not None and wikiData.checkCapability("versioning") == 1:
             wikiMenu.AppendSeparator()
     
-            menuID=wxNewId()
+            menuID=wx.NewId()
             wikiMenu.Append(menuID, '&Store version', 'Store new version')
-            EVT_MENU(self, menuID, lambda evt: self.showStoreVersionDialog())
+            wx.EVT_MENU(self, menuID, lambda evt: self.showStoreVersionDialog())
     
-            menuID=wxNewId()
+            menuID=wx.NewId()
             wikiMenu.Append(menuID, '&Retrieve version', 'Retrieve previous version')
-            EVT_MENU(self, menuID, lambda evt: self.showSavedVersionsDialog())
+            wx.EVT_MENU(self, menuID, lambda evt: self.showSavedVersionsDialog())
     
-            menuID=wxNewId()
+            menuID=wx.NewId()
             wikiMenu.Append(menuID, 'Delete &All Versions', 'Delete all stored versions')
-            EVT_MENU(self, menuID, lambda evt: self.showDeleteAllVersionsDialog())
+            wx.EVT_MENU(self, menuID, lambda evt: self.showDeleteAllVersionsDialog())
 
         wikiMenu.AppendSeparator()  # TODO May have two separators without anything between
 
 #         self.addMenuItem(wikiMenu, '&Test', 'Test', lambda evt: self.testIt())
 
-        menuID=wxNewId()
+        menuID=wx.NewId()
         wikiMenu.Append(menuID, 'E&xit', 'Exit')
-        EVT_MENU(self, menuID, lambda evt: self.exitWiki())
+        wx.EVT_MENU(self, menuID, lambda evt: self.exitWiki())
         
         return wikiMenu
 
@@ -760,14 +761,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             # Adjust the stack
             if deep > stack[-1][0]:
-                stack.append([deep, None, wxMenu()])
+                stack.append([deep, None, wx.Menu()])
             else:
                 while stack[-1][0] > deep:
                     title, menu = stack.pop()[1:3]
                     if title is None:
                         title = u"<No title>"
                     
-                    stack[-1][2].AppendMenu(wxNewId(), title, menu)
+                    stack[-1][2].AppendMenu(wx.NewId(), title, menu)
             
             # Create new entry if necessary
             title, menu = stack[-1][1:3]
@@ -782,10 +783,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 menuID = reusableIds.pop()
                 # No event binding, must have happened before because id is reused
             else:
-                menuID = wxNewId()
-                EVT_MENU(self, menuID, self.OnTextBlockUsed)
+                menuID = wx.NewId()
+                wx.EVT_MENU(self, menuID, self.OnTextBlockUsed)
 
-            menuItem = wxMenuItem(menu, menuID, entryTitle)
+            menuItem = wx.MenuItem(menu, menuID, entryTitle)
             menu.AppendItem(menuItem)
 
             self.textBlocksActivation[menuID] = (entryFlags, entryContent)
@@ -800,7 +801,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if title is None:
                 title = u"<No title>"
             
-            stack[-1][2].AppendMenu(wxNewId(), title, menu)
+            stack[-1][2].AppendMenu(wx.NewId(), title, menu)
 
 
     def buildTextBlocksMenu(self):
@@ -820,7 +821,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # reuse
         self.textBlocksActivation = {}
         
-        stack = [[0, u"Text blocks", wxMenu()]]
+        stack = [[0, u"Text blocks", wx.Menu()]]
                 
         wikiData = self.getWikiData()
         if wikiData is not None and self.requireReadAccess():
@@ -852,7 +853,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         stack[-1][2].AppendSeparator()
         stack[-1][2].Append(GUI_ID.CMD_REREAD_TEXT_BLOCKS, 'Reread text blocks',
                 'Reread the text block file(s) and recreate menu')
-        EVT_MENU(self, GUI_ID.CMD_REREAD_TEXT_BLOCKS, self.OnRereadTextBlocks)
+        wx.EVT_MENU(self, GUI_ID.CMD_REREAD_TEXT_BLOCKS, self.OnRereadTextBlocks)
 
         return stack[-1][2]
 
@@ -910,11 +911,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
 
-        self.mainmenu = wxMenuBar()   # Create menu bar.
+        self.mainmenu = wx.MenuBar()   # Create menu bar.
 
         wikiMenu = self.buildWikiMenu()
 
-        wikiWordMenu=wxMenu()
+        wikiWordMenu=wx.Menu()
 
         self.addMenuItem(wikiWordMenu, '&Open\t' + self.keyBindings.OpenWikiWord,
                 'Open Wiki Word', lambda evt: self.showWikiWordOpenDialog(),
@@ -940,35 +941,35 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if self.win32Interceptor is not None:
             wikiWordMenu.AppendSeparator()
 
-            menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
+            menuItem = wx.MenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
                     "Clipboard Catcher at Page\t" + self.keyBindings.CatchClipboardAtPage, 
                     u"Text copied to clipboard is also appended to this page",
-                    wxITEM_RADIO)
+                    wx.ITEM_RADIO)
             wikiWordMenu.AppendItem(menuItem)
-            EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
+            wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
                     self.OnClipboardCatcherAtPage)
-            EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
+            wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
                     self.OnUpdateClipboardCatcher)
 
 
-            menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
+            menuItem = wx.MenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
                     "Clipboard Catcher at Cursor\t" + self.keyBindings.CatchClipboardAtCursor, 
                     u"Text copied to clipboard is also added to cursor position",
-                    wxITEM_RADIO)
+                    wx.ITEM_RADIO)
             wikiWordMenu.AppendItem(menuItem)
-            EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
+            wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
                     self.OnClipboardCatcherAtCursor)
-            EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
+            wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
                     self.OnUpdateClipboardCatcher)
 
 
-            menuItem = wxMenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
+            menuItem = wx.MenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
                     "Clipboard Catcher off\t" + self.keyBindings.CatchClipboardOff, 
-                    u"Switch off clipboard catcher",wxITEM_RADIO)
+                    u"Switch off clipboard catcher",wx.ITEM_RADIO)
             wikiWordMenu.AppendItem(menuItem)
-            EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
+            wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
                     self.OnClipboardCatcherOff)
-            EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
+            wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
                     self.OnUpdateClipboardCatcher)
 
 
@@ -1029,22 +1030,22 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "tb_cycle")
 
 
-        historyMenu=wxMenu()
+        historyMenu=wx.Menu()
 
-        menuID=wxNewId()
+        menuID=wx.NewId()
         historyMenu.Append(menuID, '&List History\t' +
                 self.keyBindings.ViewHistory, 'View History')
-        EVT_MENU(self, menuID, lambda evt: self.viewHistory())
+        wx.EVT_MENU(self, menuID, lambda evt: self.viewHistory())
 
-        menuID=wxNewId()
+        menuID=wx.NewId()
         historyMenu.Append(menuID, '&Up History\t' +
                 self.keyBindings.UpHistory, 'Up History')
-        EVT_MENU(self, menuID, lambda evt: self.viewHistory(-1))
+        wx.EVT_MENU(self, menuID, lambda evt: self.viewHistory(-1))
 
-        menuID=wxNewId()
+        menuID=wx.NewId()
         historyMenu.Append(menuID, '&Down History\t' +
                 self.keyBindings.DownHistory, 'Down History')
-        EVT_MENU(self, menuID, lambda evt: self.viewHistory(1))
+        wx.EVT_MENU(self, menuID, lambda evt: self.viewHistory(1))
 
         self.addMenuItem(historyMenu, '&Back\t' + self.keyBindings.GoBack,
                 'Go Back', lambda evt: self.pageHistory.goInHistory(-1),
@@ -1061,7 +1062,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "tb_home")
 
 
-        self.editorMenu=wxMenu()
+        self.editorMenu=wx.Menu()
 
         self.addMenuItem(self.editorMenu, '&Bold\t' + self.keyBindings.Bold,
                 'Bold', lambda evt: self.keyBindings.makeBold(self.getActiveEditor()),
@@ -1144,7 +1145,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         self.textBlocksMenuPosition = self.editorMenu.GetMenuItemCount()
 
-        self.editorMenu.AppendMenu(wxNewId(), '&Text blocks',
+        self.editorMenu.AppendMenu(wx.NewId(), '&Text blocks',
                 self.buildTextBlocksMenu())
 
         # Build icon menu
@@ -1155,18 +1156,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         else:
             # Build full submenu for icons
             iconsMenu, self.cmdIdToIconName = PropertyHandling.buildIconsSubmenu(
-                    wxGetApp().getIconCache())
+                    wx.GetApp().getIconCache())
             for cmi in self.cmdIdToIconName.keys():
-                EVT_MENU(self, cmi, self.OnInsertIconAttribute)
+                wx.EVT_MENU(self, cmi, self.OnInsertIconAttribute)
 
-            self.editorMenu.AppendMenu(wxNewId(), 'Add icon property', iconsMenu)
+            self.editorMenu.AppendMenu(wx.NewId(), 'Add icon property', iconsMenu)
 
         # Build submenu for colors
         colorsMenu, self.cmdIdToColorName = PropertyHandling.buildColorsSubmenu()
         for cmi in self.cmdIdToColorName.keys():
-            EVT_MENU(self, cmi, self.OnInsertColorAttribute)
+            wx.EVT_MENU(self, cmi, self.OnInsertColorAttribute)
 
-        self.editorMenu.AppendMenu(wxNewId(), 'Add color property', colorsMenu)
+        self.editorMenu.AppendMenu(wx.NewId(), 'Add color property', colorsMenu)
 
         self.addMenuItem(self.editorMenu, 'Add &file URL' +
                 self.keyBindings.AddFileUrl, 'Use file dialog to add URL',
@@ -1180,50 +1181,50 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         formattingMenu.Append(menuID, '&Find\t', 'Find')
 #         EVT_MENU(self, menuID, lambda evt: self.showFindDialog())
 
-        menuID=wxNewId()
+        menuID=wx.NewId()
         self.editorMenu.Append(menuID, 'Find and &Replace\t' + self.keyBindings.FindAndReplace, 'Find and Replace')
-        EVT_MENU(self, menuID, lambda evt: self.showFindReplaceDialog())
+        wx.EVT_MENU(self, menuID, lambda evt: self.showFindReplaceDialog())
 
-        menuID=wxNewId()
+        menuID=wx.NewId()
         self.editorMenu.Append(menuID, 'Rep&lace Text by WikiWord\t' + self.keyBindings.ReplaceTextByWikiword, 'Replace selected text by WikiWord')
-        EVT_MENU(self, menuID, lambda evt: self.showReplaceTextByWikiwordDialog())
+        wx.EVT_MENU(self, menuID, lambda evt: self.showReplaceTextByWikiwordDialog())
 
         self.editorMenu.AppendSeparator()
 
-        menuID=wxNewId()
+        menuID=wx.NewId()
         self.editorMenu.Append(menuID, '&Rewrap Text\t' + self.keyBindings.RewrapText, 'Rewrap Text')
-        EVT_MENU(self, menuID, lambda evt: self.getActiveEditor().rewrapText())
+        wx.EVT_MENU(self, menuID, lambda evt: self.getActiveEditor().rewrapText())
 
-        menuID=wxNewId()
-        wrapModeMenuItem = wxMenuItem(self.editorMenu, menuID, "&Wrap Mode", "Set wrap mode", wxITEM_CHECK)
+        menuID=wx.NewId()
+        wrapModeMenuItem = wx.MenuItem(self.editorMenu, menuID, "&Wrap Mode", "Set wrap mode", wx.ITEM_CHECK)
         self.editorMenu.AppendItem(wrapModeMenuItem)
-        EVT_MENU(self, menuID, self.OnCmdCheckWrapMode)
+        wx.EVT_MENU(self, menuID, self.OnCmdCheckWrapMode)
 
         wrapModeMenuItem.Check(self.getActiveEditor().getWrapMode())
 
 
-        menuID=wxNewId()
-        autoIndentMenuItem = wxMenuItem(self.editorMenu, menuID,
-                "Auto-indent", "Auto indentation", wxITEM_CHECK)
+        menuID=wx.NewId()
+        autoIndentMenuItem = wx.MenuItem(self.editorMenu, menuID,
+                "Auto-indent", "Auto indentation", wx.ITEM_CHECK)
         self.editorMenu.AppendItem(autoIndentMenuItem)
-        EVT_MENU(self, menuID, self.OnCmdCheckAutoIndent)
+        wx.EVT_MENU(self, menuID, self.OnCmdCheckAutoIndent)
 
         autoIndentMenuItem.Check(self.getActiveEditor().getAutoIndent())
 
 
-        menuID=wxNewId()
-        autoBulletsMenuItem = wxMenuItem(self.editorMenu, menuID,
+        menuID=wx.NewId()
+        autoBulletsMenuItem = wx.MenuItem(self.editorMenu, menuID,
                 "Auto-bullets", "Show bullet on next line if current has one",
-                wxITEM_CHECK)
+                wx.ITEM_CHECK)
         self.editorMenu.AppendItem(autoBulletsMenuItem)
-        EVT_MENU(self, menuID, self.OnCmdCheckAutoBullets)
+        wx.EVT_MENU(self, menuID, self.OnCmdCheckAutoBullets)
 
         autoBulletsMenuItem.Check(self.getActiveEditor().getAutoBullets())
 
         self.editorMenu.AppendSeparator()
 
 
-        evaluationMenu=wxMenu()
+        evaluationMenu=wx.Menu()
 
         self.addMenuItem(evaluationMenu, '&Eval\t' + self.keyBindings.Eval,
                 'Eval Script Blocks',
@@ -1234,11 +1235,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     'Eval Script Function %i' % i,
                     lambda evt, i=i: self.getActiveEditor().evalScriptBlocks(i))
                     
-        self.editorMenu.AppendMenu(wxNewId(), "Evaluation", evaluationMenu,
+        self.editorMenu.AppendMenu(wx.NewId(), "Evaluation", evaluationMenu,
                 "Evaluate scripts/expressions")
 
 
-        viewMenu = wxMenu()
+        viewMenu = wx.Menu()
         
         self.addMenuItem(viewMenu, 'Switch Ed./Prev\t' +
                 self.keyBindings.ShowSwitchEditorPreview,
@@ -1274,48 +1275,48 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         viewMenu.AppendSeparator()
 
 
-        menuID = wxNewId()
-        menuItem = wxMenuItem(viewMenu, menuID,
+        menuID = wx.NewId()
+        menuItem = wx.MenuItem(viewMenu, menuID,
                 "&Show Tree Control\t" + self.keyBindings.ShowTreeControl,
-                "Show Tree Control", wxITEM_CHECK)
+                "Show Tree Control", wx.ITEM_CHECK)
         viewMenu.AppendItem(menuItem)
-        EVT_MENU(self, menuID, lambda evt: self.setShowTreeControl(
+        wx.EVT_MENU(self, menuID, lambda evt: self.setShowTreeControl(
                 self.windowLayouter.isWindowCollapsed("maintree")))
-        EVT_UPDATE_UI(self, menuID, self.OnUpdateTreeCtrlMenuItem)
+        wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateTreeCtrlMenuItem)
 
-        menuItem = wxMenuItem(viewMenu, GUI_ID.CMD_SHOW_TOOLBAR,
+        menuItem = wx.MenuItem(viewMenu, GUI_ID.CMD_SHOW_TOOLBAR,
                 "Show Toolbar\t" + self.keyBindings.ShowToolbar, 
-                "Show Toolbar", wxITEM_CHECK)
+                "Show Toolbar", wx.ITEM_CHECK)
         viewMenu.AppendItem(menuItem)
-        EVT_MENU(self, GUI_ID.CMD_SHOW_TOOLBAR, lambda evt: self.setShowToolbar(
+        wx.EVT_MENU(self, GUI_ID.CMD_SHOW_TOOLBAR, lambda evt: self.setShowToolbar(
                 not self.getConfig().getboolean("main", "toolbar_show", True)))
-        EVT_UPDATE_UI(self, GUI_ID.CMD_SHOW_TOOLBAR,
+        wx.EVT_UPDATE_UI(self, GUI_ID.CMD_SHOW_TOOLBAR,
                 self.OnUpdateToolbarMenuItem)
 
-        menuItem = wxMenuItem(viewMenu, GUI_ID.CMD_STAY_ON_TOP,
+        menuItem = wx.MenuItem(viewMenu, GUI_ID.CMD_STAY_ON_TOP,
                 "Stay on Top\t" + self.keyBindings.StayOnTop, 
-                "Stay on Top", wxITEM_CHECK)
+                "Stay on Top", wx.ITEM_CHECK)
         viewMenu.AppendItem(menuItem)
-        EVT_MENU(self, GUI_ID.CMD_STAY_ON_TOP, lambda evt: self.setStayOnTop(
+        wx.EVT_MENU(self, GUI_ID.CMD_STAY_ON_TOP, lambda evt: self.setStayOnTop(
                 not self.getStayOnTop()))
-        EVT_UPDATE_UI(self, GUI_ID.CMD_STAY_ON_TOP,
+        wx.EVT_UPDATE_UI(self, GUI_ID.CMD_STAY_ON_TOP,
                 self.OnUpdateStayOnTopMenuItem)
 
 
-        menuID=wxNewId()
-        indentGuidesMenuItem = wxMenuItem(viewMenu, menuID,
-                "&View Indentation Guides", "View Indentation Guides", wxITEM_CHECK)
+        menuID=wx.NewId()
+        indentGuidesMenuItem = wx.MenuItem(viewMenu, menuID,
+                "&View Indentation Guides", "View Indentation Guides", wx.ITEM_CHECK)
         viewMenu.AppendItem(indentGuidesMenuItem)
-        EVT_MENU(self, menuID, self.OnCmdCheckIndentationGuides)
+        wx.EVT_MENU(self, menuID, self.OnCmdCheckIndentationGuides)
 
         indentGuidesMenuItem.Check(self.getActiveEditor().GetIndentationGuides())
 
-        menuID=wxNewId()
-        showLineNumbersMenuItem = wxMenuItem(viewMenu, menuID,
+        menuID=wx.NewId()
+        showLineNumbersMenuItem = wx.MenuItem(viewMenu, menuID,
                 "Show line numbers", "Show line numbers",
-                wxITEM_CHECK)
+                wx.ITEM_CHECK)
         viewMenu.AppendItem(showLineNumbersMenuItem)
-        EVT_MENU(self, menuID, self.OnCmdCheckShowLineNumbers)
+        wx.EVT_MENU(self, menuID, self.OnCmdCheckShowLineNumbers)
 
         showLineNumbersMenuItem.Check(self.getActiveEditor().getShowLineNumbers())
 
@@ -1325,13 +1326,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 'Create new window for same wiki', self.OnCmdCloneWindow)
 
 
-        helpMenu = wxMenu()
+        helpMenu = wx.Menu()
 
         def openHelp(evt):
             try:
                 clAction = CmdLineAction([])
                 clAction.wikiToOpen = self.wikiPadHelp
-                wxGetApp().startPersonalWikiFrame(clAction)
+                wx.GetApp().startPersonalWikiFrame(clAction)
 #                 PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
 #                         self.globalConfigDir, self.globalConfigSubDir, clAction)
                 # os.startfile(self.wikiPadHelp)   # TODO!
@@ -1342,34 +1343,34 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 return
 
 
-        menuID=wxNewId()
+        menuID=wx.NewId()
         helpMenu.Append(menuID, '&Open WikidPadHelp', 'Open WikidPadHelp')
-        EVT_MENU(self, menuID, openHelp)
+        wx.EVT_MENU(self, menuID, openHelp)
 
         helpMenu.AppendSeparator()
 
-        menuID=wxNewId()
+        menuID=wx.NewId()
         helpMenu.Append(menuID, '&Visit wikidPad Homepage', 'Visit Homepage')
-        EVT_MENU(self, menuID, lambda evt: os.startfile('http://www.jhorman.org/wikidPad/'))
+        wx.EVT_MENU(self, menuID, lambda evt: os.startfile('http://www.jhorman.org/wikidPad/'))
 
         helpMenu.AppendSeparator()
 
-        menuID=wxNewId()
+        menuID=wx.NewId()
         helpMenu.Append(menuID, 'View &License', 'View License')
-        EVT_MENU(self, menuID, lambda evt: os.startfile(join(self.wikiAppDir, 'license.txt')))
+        wx.EVT_MENU(self, menuID, lambda evt: os.startfile(join(self.wikiAppDir, 'license.txt')))
 
         helpMenu.AppendSeparator()
 
-        menuID=wxNewId()
+        menuID=wx.NewId()
         helpMenu.Append(menuID, '&About', 'About WikidPad')
-        EVT_MENU(self, menuID, lambda evt: self.showAboutDialog())
+        wx.EVT_MENU(self, menuID, lambda evt: self.showAboutDialog())
 
         # get info for any plugin menu items and create them as necessary
         pluginMenu = None
         menuItems = reduce(lambda a, b: a+list(b),
                 self.menuFunctions.describeMenuItems(self), [])
         if len(menuItems) > 0:
-            pluginMenu = wxMenu()
+            pluginMenu = wx.Menu()
                 
             def addPluginMenuItem(function, label, statustext, icondesc=None,
                     menuID=None):
@@ -1419,78 +1420,78 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # Create the toolbar
         # ------------------------------------------------------------------------------------
 
-        tb = self.CreateToolBar(wxTB_HORIZONTAL | wxNO_BORDER | wxTB_FLAT | wxTB_TEXT)
+        tb = self.CreateToolBar(wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT)
         seperator = self.lookupIcon("tb_seperator")
 
         icon = self.lookupIcon("tb_back")
-        tbID = wxNewId()
+        tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, "Back (Ctrl-Alt-Back)", "Back")
-        EVT_TOOL(self, tbID, lambda evt: self.pageHistory.goInHistory(-1))
+        wx.EVT_TOOL(self, tbID, lambda evt: self.pageHistory.goInHistory(-1))
 
         icon = self.lookupIcon("tb_forward")
-        tbID = wxNewId()
+        tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, "Forward (Ctrl-Alt-Forward)", "Forward")
-        EVT_TOOL(self, tbID, lambda evt: self.pageHistory.goInHistory(1))
+        wx.EVT_TOOL(self, tbID, lambda evt: self.pageHistory.goInHistory(1))
 
         icon = self.lookupIcon("tb_home")
-        tbID = wxNewId()
+        tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, "Wiki Home", "Wiki Home")
-        EVT_TOOL(self, tbID,
+        wx.EVT_TOOL(self, tbID,
                 lambda evt: self.openWikiPage(self.getWikiDocument().getWikiName(),
                 forceTreeSyncFromRoot=True))
 
         icon = self.lookupIcon("tb_doc")
-        tbID = wxNewId()
+        tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, "Open Wiki Word  (Ctrl-O)", "Open Wiki Word")
-        EVT_TOOL(self, tbID, lambda evt: self.showWikiWordOpenDialog())
+        wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordOpenDialog())
 
         icon = self.lookupIcon("tb_lens")
-        tbID = wxNewId()
+        tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, "Search  (Ctrl-Alt-F)", "Search")
-        EVT_TOOL(self, tbID, lambda evt: self.showSearchDialog())
+        wx.EVT_TOOL(self, tbID, lambda evt: self.showSearchDialog())
 
         icon = self.lookupIcon("tb_cycle")
-        tbID = wxNewId()
+        tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, "Find current word in tree", "Find current word in tree")
-        EVT_TOOL(self, tbID, lambda evt: self.findCurrentWordInTree())
+        wx.EVT_TOOL(self, tbID, lambda evt: self.findCurrentWordInTree())
 
-        tb.AddSimpleTool(wxNewId(), seperator, "Separator", "Separator")
+        tb.AddSimpleTool(wx.NewId(), seperator, "Separator", "Separator")
 
         icon = self.lookupIcon("tb_save")
         tb.AddSimpleTool(GUI_ID.CMD_SAVE_WIKI, icon, "Save Wiki Word (Ctrl-S)",
                 "Save Wiki Word")
-        EVT_TOOL(self, GUI_ID.CMD_SAVE_WIKI,
+        wx.EVT_TOOL(self, GUI_ID.CMD_SAVE_WIKI,
                 lambda evt: (self.saveAllDocPages(force=True),
                 self.getWikiData().commit()))
 
         icon = self.lookupIcon("tb_rename")
-        tbID = wxNewId()
+        tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, "Rename Wiki Word (Ctrl-Alt-R)", "Rename Wiki Word")
-        EVT_TOOL(self, tbID, lambda evt: self.showWikiWordRenameDialog())
+        wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordRenameDialog())
 
         icon = self.lookupIcon("tb_delete")
-        tbID = wxNewId()
+        tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, "Delete (Ctrl-D)", "Delete Wiki Word")
-        EVT_TOOL(self, tbID, lambda evt: self.showWikiWordDeleteDialog())
+        wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordDeleteDialog())
 
-        tb.AddSimpleTool(wxNewId(), seperator, "Separator", "Separator")
+        tb.AddSimpleTool(wx.NewId(), seperator, "Separator", "Separator")
 
         icon = self.lookupIcon("tb_heading")
-        tbID = wxNewId()
+        tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, "Heading (Ctrl-Alt-H)", "Heading")
-        EVT_TOOL(self, tbID, lambda evt: self.keyBindings.addHeading(self.getActiveEditor()))
+        wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.addHeading(self.getActiveEditor()))
 
         icon = self.lookupIcon("tb_bold")
-        tbID = wxNewId()
+        tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, "Bold (Ctrl-B)", "Bold")
-        EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeBold(self.getActiveEditor()))
+        wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeBold(self.getActiveEditor()))
 
         icon = self.lookupIcon("tb_italic")
-        tbID = wxNewId()
+        tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, "Italic (Ctrl-I)", "Italic")
-        EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeItalic(self.getActiveEditor()))
+        wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeItalic(self.getActiveEditor()))
 
-        tb.AddSimpleTool(wxNewId(), seperator, "Separator", "Separator")
+        tb.AddSimpleTool(wx.NewId(), seperator, "Separator", "Separator")
 
 #         icon = self.lookupIcon("tb_editor")
 #         tbID = GUI_ID.CMD_TAB_SHOW_EDITOR
@@ -1508,26 +1509,26 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         icon = self.lookupIcon("tb_zoomin")
         tbID = GUI_ID.CMD_ZOOM_IN
         tb.AddSimpleTool(tbID, icon, "Zoom In", "Zoom In")
-        EVT_TOOL(self, tbID, self._OnRoundtripEvent)
+        wx.EVT_TOOL(self, tbID, self._OnRoundtripEvent)
 
         icon = self.lookupIcon("tb_zoomout")
         tbID = GUI_ID.CMD_ZOOM_OUT
         tb.AddSimpleTool(tbID, icon, "Zoom Out", "Zoom Out")
-        EVT_TOOL(self, tbID, self._OnRoundtripEvent)
+        wx.EVT_TOOL(self, tbID, self._OnRoundtripEvent)
 
 
-        self.fastSearchField = wxTextCtrl(tb, GUI_ID.TF_FASTSEARCH,
-                style=wxTE_PROCESS_ENTER | wxTE_RICH)
+        self.fastSearchField = wx.TextCtrl(tb, GUI_ID.TF_FASTSEARCH,
+                style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
         tb.AddControl(self.fastSearchField)
-#         EVT_TEXT_ENTER(self, GUI_ID.TF_FASTSEARCH, self.OnFastSearchEnter)
-#         EVT_CHAR(self.fastSearchField, self.OnFastSearchChar)
-        EVT_KEY_DOWN(self.fastSearchField, self.OnFastSearchKeyDown)
-#         EVT_KEY_UP(self.fastSearchField, self.OnFastSearchChar)
+#         wx.EVT_TEXT_ENTER(self, GUI_ID.TF_FASTSEARCH, self.OnFastSearchEnter)
+#         wx.EVT_CHAR(self.fastSearchField, self.OnFastSearchChar)
+        wx.EVT_KEY_DOWN(self.fastSearchField, self.OnFastSearchKeyDown)
+#         wx.EVT_KEY_UP(self.fastSearchField, self.OnFastSearchChar)
 
         icon = self.lookupIcon("pin")
-        tbID = wxNewId()
+        tbID = wx.NewId()
         tb.AddSimpleTool(tbID, icon, "Wikize Selected Word", "Wikize Selected Word")
-        EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()))
+        wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()))
 
 
 
@@ -1537,12 +1538,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         def addPluginTool(function, tooltip, statustext, icondesc, tbID=None):
             if tbID is None:
-                tbID = wxNewId()
+                tbID = wx.NewId()
                 
             icon = self.resolveIconDescriptor(icondesc, self.lookupIcon(u"tb_doc"))
             # tb.AddLabelTool(tbID, label, icon, wxNullBitmap, 0, tooltip)
             tb.AddSimpleTool(tbID, icon, tooltip, statustext)
-            EVT_TOOL(self, tbID, lambda evt: function(self, evt))
+            wx.EVT_TOOL(self, tbID, lambda evt: function(self, evt))
             
         for item in toolbarItems:
             addPluginTool(*item)
@@ -1580,16 +1581,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # ------------------------------------------------------------------------------------
         # Create the status bar
         # ------------------------------------------------------------------------------------
-        self.statusBar = wxStatusBar(self, -1)
+        self.statusBar = wx.StatusBar(self, -1)
         self.statusBar.SetFieldsCount(3)
 
         # Measure necessary widths of status fields
-        dc = wxClientDC(self.statusBar)
+        dc = wx.ClientDC(self.statusBar)
         try:
             dc.SetFont(self.statusBar.GetFont())
             posWidth = dc.GetTextExtent(
                     u"Line: 9999 Col: 9999 Pos: 9999999988888")[0]
-            dc.SetFont(wxNullFont)
+            dc.SetFont(wx.NullFont)
         finally:
             del dc
 
@@ -1608,11 +1609,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.logWindow = self.windowLayouter.getWindowForName("log")
         
 
-#         EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(),
+#         wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(),
 #                 self.OnNotebookPageChanged)
-#         EVT_CONTEXT_MENU(self.mainAreaPanel, self.OnNotebookContextMenu)
+#         wx.EVT_CONTEXT_MENU(self.mainAreaPanel, self.OnNotebookContextMenu)
 # 
-#         EVT_SET_FOCUS(self.mainAreaPanel, self.OnNotebookFocused)
+#         wx.EVT_SET_FOCUS(self.mainAreaPanel, self.OnNotebookFocused)
 
 
         # ------------------------------------------------------------------------------------
@@ -1623,20 +1624,20 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if self.getConfig().getboolean("main", "toolbar_show", True):
             self.setShowToolbar(True)
 
-        EVT_MENU(self, GUI_ID.CMD_SWITCH_FOCUS, self.OnSwitchFocus)
+        wx.EVT_MENU(self, GUI_ID.CMD_SWITCH_FOCUS, self.OnSwitchFocus)
 
         # Add alternative accelerators for clipboard operations
         accs = [
-            (wxACCEL_CTRL, WXK_INSERT, GUI_ID.CMD_CLIPBOARD_COPY),
-            (wxACCEL_SHIFT, WXK_INSERT, GUI_ID.CMD_CLIPBOARD_PASTE),
-            (wxACCEL_SHIFT, WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT),
+            (wx.ACCEL_CTRL, wx.WXK_INSERT, GUI_ID.CMD_CLIPBOARD_COPY),
+            (wx.ACCEL_SHIFT, wx.WXK_INSERT, GUI_ID.CMD_CLIPBOARD_PASTE),
+            (wx.ACCEL_SHIFT, wx.WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT),
             ]
             
         accP = self.keyBindings.getAccelPair("SwitchFocus")
         if accP != (None, None):
             accs.append((accP[0], accP[1], GUI_ID.CMD_SWITCH_FOCUS))
 
-        self.SetAcceleratorTable(wxAcceleratorTable(accs))
+        self.SetAcceleratorTable(wx.AcceleratorTable(accs))
 
         # Check if window should stay on top
         self.setStayOnTop(self.getConfig().getboolean("main", "frame_stayOnTop",
@@ -1646,16 +1647,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.SetStatusBar(self.statusBar)
 
         # Register the App IDLE handler
-        EVT_IDLE(self, self.OnIdle)
+        wx.EVT_IDLE(self, self.OnIdle)
 
         # Register the App close handler
-        EVT_CLOSE(self, self.OnCloseButton)
+        wx.EVT_CLOSE(self, self.OnCloseButton)
 
         # Check resizing to layout sash windows
-        EVT_SIZE(self, self.OnSize)
+        wx.EVT_SIZE(self, self.OnSize)
 
-        EVT_ICONIZE(self, self.OnIconize)
-        EVT_MAXIMIZE(self, self.OnMaximize)
+        wx.EVT_ICONIZE(self, self.OnIconize)
+        wx.EVT_MAXIMIZE(self, self.OnMaximize)
 
 
     def OnUpdateTreeCtrlMenuItem(self, evt):
@@ -1670,7 +1671,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnSwitchFocus(self, evt):
-        foc = wxWindow.FindFocus()
+        foc = wx.Window.FindFocus()
         mainAreaPanel = self.mainAreaPanel
         while foc != None:
             if foc == mainAreaPanel:
@@ -1684,11 +1685,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def OnFastSearchKeyDown(self, evt):
         """
-        Process EVT_KEY_DOWN in the fast search text field
+        Process wx.EVT_KEY_DOWN in the fast search text field
         """
         acc = getAccelPairFromKeyDown(evt)
-        if acc == (wxACCEL_NORMAL, WXK_RETURN) or \
-                acc == (wxACCEL_NORMAL, WXK_NUMPAD_ENTER):
+        if acc == (wx.ACCEL_NORMAL, wx.WXK_RETURN) or \
+                acc == (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER):
             text = guiToUni(self.fastSearchField.GetValue())
             tfHeight = self.fastSearchField.GetSize()[1]
             pos = self.fastSearchField.ClientToScreen((0, tfHeight))
@@ -1708,12 +1709,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         evt.Skip()
 
     def OnCmdReconnectDatabase(self, evt):
-        result = wxMessageBox(u"Are you sure you want to reconnect? "
+        result = wx.MessageBox(u"Are you sure you want to reconnect? "
                 u"You may lose some data by this process.",
-                u'Reconnect database', wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+                u'Reconnect database',
+                wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 
         wd = self.getWikiDocument()
-        if result == wxYES and wd is not None:
+        if result == wx.YES and wd is not None:
             wd.setReadAccessFailed(True)
             wd.setWriteAccessFailed(True)
             # Try reading
@@ -1725,12 +1727,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 except (IOError, OSError, DbAccessError), e:
                     sys.stderr.write("Error while trying to reconnect:\n")
                     traceback.print_exc()
-                    result = wxMessageBox(uniToGui((
+                    result = wx.MessageBox(uniToGui((
                             u'There was an error while reconnecting the database\n\n'
                             u'Would you like to try it again?\n%s') %
                             e), u'Error reconnecting!',
-                            wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
-                    if result == wxNO:
+                            wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
+                    if result == wx.NO:
                         return
 
             # Try writing
@@ -1746,12 +1748,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 except (IOError, OSError, DbWriteAccessError), e:
                     sys.stderr.write("Error while trying to write:\n")
                     traceback.print_exc()
-                    result = wxMessageBox(uniToGui((
+                    result = wx.MessageBox(uniToGui((
                             u'There was an error while writing to the database\n\n'
                             u'Would you like to try it again?\n%s') %
                             e), u'Error writing!',
-                            wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
-                    if result == wxNO:
+                            wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
+                    if result == wx.NO:
                         break
 
                 
@@ -1759,7 +1761,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def OnRemoteCommand(self, evt):
         try:
             clAction = CmdLineAction(evt.getCmdLine())
-            wxGetApp().startPersonalWikiFrame(clAction)
+            wx.GetApp().startPersonalWikiFrame(clAction)
         except Exception, e:
             traceback.print_exc()
             self.displayErrorMessage('Error while starting new '
@@ -1778,10 +1780,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             # assign the image list
             try:
                 # For native wx tree:
-                # tree.AssignImageList(wxGetApp().getIconCache().getNewImageList())
+                # tree.AssignImageList(wx.GetApp().getIconCache().getNewImageList())
                 # For custom tree control:
                 tree.SetImageListNoGrayedItems(
-                        wxGetApp().getIconCache().getImageList())
+                        wx.GetApp().getIconCache().getImageList())
             except Exception, e:
                 traceback.print_exc()
                 self.displayErrorMessage('There was an error loading the icons '
@@ -1969,16 +1971,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def testIt(self):
         rect = self.statusBar.GetFieldRect(0)
         
-        dc = wxWindowDC(self.statusBar)
-        dc.SetBrush(wxRED_BRUSH)
-        dc.SetPen(wxRED_PEN)
+        dc = wx.WindowDC(self.statusBar)
+        dc.SetBrush(wx.RED_BRUSH)
+        dc.SetPen(wx.RED_PEN)
         dc.DrawRectangle(rect.x, rect.y, rect.width, rect.height)
-        dc.SetPen(wxWHITE_PEN)
+        dc.SetPen(wx.WHITE_PEN)
         dc.SetFont(self.statusBar.GetFont())
         dc.DrawText(u"Saving page", rect.x + 2, rect.y + 2)
-        dc.SetFont(wxNullFont)
-        dc.SetBrush(wxNullBrush)
-        dc.SetPen(wxNullPen)
+        dc.SetFont(wx.NullFont)
+        dc.SetBrush(wx.NullBrush)
+        dc.SetPen(wx.NullPen)
 
         # self.statusBar.Refresh()
 
@@ -2062,21 +2064,21 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         createIt = True;
         if (exists(wikiDir)):
-            dlg=wxMessageDialog(self,
+            dlg=wx.MessageDialog(self,
                     uniToGui((u"A wiki already exists in '%s', overwrite? "
                     u"(This deletes everything in and below this directory!)") %
-                    wikiDir), u'Warning', wxYES_NO)
+                    wikiDir), u'Warning', wx.YES_NO)
             result = dlg.ShowModal()
             dlg.Destroy()
-            if result == wxID_YES:
+            if result == wx.ID_YES:
                 os.rmdir(wikiDir)  # TODO BUG!!!
                 createIt = True
-            elif result == wxID_NO:
+            elif result == wx.ID_NO:
                 createIt = False
 
         if createIt:
             # Ask for the data handler to use
-            index = wxGetSingleChoiceIndex(u"Choose database type",
+            index = wx.GetSingleChoiceIndex(u"Choose database type",
                     u"Choose database type", [wdh[1] for wdh in wdhandlers],
                     self)
             if index == -1:
@@ -2108,11 +2110,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
   #               createWikiDbFunc(wikiName, dataDir, False)
             except WikiDBExistsException:
                 # The DB exists, should it be overwritten
-                dlg=wxMessageDialog(self, u'A wiki database already exists '+
+                dlg=wx.MessageDialog(self, u'A wiki database already exists '+
                         u'in this location, overwrite?',
-                        u'Wiki DB Exists', wxYES_NO)
+                        u'Wiki DB Exists', wx.YES_NO)
                 result = dlg.ShowModal()
-                if result == wxID_YES:
+                if result == wx.ID_YES:
   #                   createWikiDbFunc(wikiName, dataDir, True)
                     WikiDataManager.createWikiDb(self, wdhName, wikiName, dataDir,
                         True)
@@ -2131,7 +2133,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     
                     # everything is ok, write out the config file
                     # create a new config file for the new wiki
-                    wikiConfig = wxGetApp().createWikiConfiguration()
+                    wikiConfig = wx.GetApp().createWikiConfiguration()
     #                 
                     wikiConfig.createEmptyConfig(configFileLoc)
                     wikiConfig.fillWithDefaults()
@@ -2196,7 +2198,7 @@ These are your default global settings.
             return None
 
         # Ask for the data handler to use
-        index = wxGetSingleChoiceIndex(u"Choose database type",
+        index = wx.GetSingleChoiceIndex(u"Choose database type",
                 u"Choose database type", [wdh[1] for wdh in wdhandlers],
                 self)
         if index == -1:
@@ -2256,12 +2258,12 @@ These are your default global settings.
                     return False
                 elif frmcode == 1:
                     # Update needed -> ask
-                    answer = wxMessageBox(u"The wiki needs an update to work "
+                    answer = wx.MessageBox(u"The wiki needs an update to work "
                             u"with this version of WikidPad. Older versions of "
                             u"WikidPad may be unable to read the wiki after "
                             u"an update.", u'Update database?',
-                            wxOK | wxCANCEL | wxICON_QUESTION, self)
-                    if answer == wxCANCEL:
+                            wx.OK | wx.CANCEL | wx.ICON_QUESTION, self)
+                    if answer == wx.CANCEL:
                         return False
 
                 wikiDataManager.connect()
@@ -2350,7 +2352,7 @@ These are your default global settings.
                 self.openWikiPage(lastWikiWord)
                 self.findCurrentWordInTree()
     
-            self.tree.SetScrollPos(wxHORIZONTAL, 0)
+            self.tree.SetScrollPos(wx.HORIZONTAL, 0)
     
             # enable the editor control whether or not the wiki root was found
 #             for e in self.editors: e.Enable(1)
@@ -2394,10 +2396,10 @@ These are your default global settings.
 
     def closeWiki(self, saveState=True):
         def errCloseAnywayMsg():
-            return wxMessageBox(u"There is no (write-)access to underlying wiki\n"
+            return wx.MessageBox(u"There is no (write-)access to underlying wiki\n"
                     "Close anyway and loose possible changes?",
                     u'Close anyway',
-                    wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION, self)
+                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
 
         if self.getWikiConfigPath():
@@ -2411,7 +2413,7 @@ These are your default global settings.
                         self.saveCurrentWikiState()
                 except (IOError, OSError, DbAccessError), e:
                     self.lostAccess(e)
-                    if errCloseAnywayMsg() == wxNO:
+                    if errCloseAnywayMsg() == wx.NO:
                         raise
                     else:
                         traceback.print_exc()
@@ -2429,7 +2431,7 @@ These are your default global settings.
                 self.wikiDataManager = None
             else:
                 # We had already a problem, so ask what to do
-                if errCloseAnywayMsg() == wxNO:
+                if errCloseAnywayMsg() == wx.NO:
                     raise LossyWikiCloseDeniedException
                 
                 self.fireMiscEventKeys(("dropping current wiki",))
@@ -2468,8 +2470,8 @@ These are your default global settings.
         """
         wd = self.getWikiDocument()
         if wd is None:
-            wxMessageBox(u"This operation requires an open database",
-                    u'No open database', wxOK, self)
+            wx.MessageBox(u"This operation requires an open database",
+                    u'No open database', wx.OK, self)
             return False
 
         if not wd.getReadAccessFailed():
@@ -2481,11 +2483,11 @@ These are your default global settings.
                 return False
 
             self.SetFocus()
-            result = wxMessageBox(u"No connection to database. "
+            result = wx.MessageBox(u"No connection to database. "
                     u"Try to reconnect?", u'Reconnect database?',
-                    wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+                    wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 
-            if result == wxNO:
+            if result == wx.NO:
                 return False
 
             self.statusBar.PushStatusText(
@@ -2525,11 +2527,11 @@ These are your default global settings.
                 return False
 
             self.SetFocus()
-            result = wxMessageBox(u"This operation needs write access to database\n"
+            result = wx.MessageBox(u"This operation needs write access to database\n"
                     u"Try to write?", u'Try writing?',
-                    wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+                    wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 
-            if result == wxNO:
+            if result == wx.NO:
                 return False
 
             self.statusBar.PushStatusText(
@@ -2571,9 +2573,9 @@ These are your default global settings.
             return
             
         self.SetFocus()
-        wxMessageBox((u"Database connection error: %s.\n"
+        wx.MessageBox((u"Database connection error: %s.\n"
                 u"Try to re-establish, then run \"Wiki\"->\"Reconnect\"") % str(exc),
-                u'Connection lost', wxOK, self)
+                u'Connection lost', wx.OK, self)
 
 #         wd.setWriteAccessFailed(True) ?
         self.getWikiDocument().setReadAccessFailed(True)
@@ -2588,9 +2590,9 @@ These are your default global settings.
             return
 
         self.SetFocus()
-        wxMessageBox((u"No write access to database: %s.\n"
+        wx.MessageBox((u"No write access to database: %s.\n"
                 u" Try to re-establish, then run \"Wiki\"->\"Reconnect\"") % str(exc),
-                u'Connection lost', wxOK, self)
+                u'Connection lost', wx.OK, self)
 
         self.getWikiDocument().setWriteAccessFailed(True)
 
@@ -3120,7 +3122,7 @@ These are your default global settings.
             return
         try:
             dlg = ChooseWikiWordDialog(self, -1, words, motionType, title)
-            dlg.CenterOnParent(wxBOTH)
+            dlg.CenterOnParent(wx.BOTH)
             dlg.ShowModal()
             dlg.Destroy()
         except (IOError, OSError, DbAccessError), e:
@@ -3187,11 +3189,11 @@ These are your default global settings.
             raise
 
         historyLen = len(hist)
-        dlg = wxSingleChoiceDialog(self,
+        dlg = wx.SingleChoiceDialog(self,
                                    u"History",
                                    u"History",
                                    hist,
-                                   wxCHOICEDLG_STYLE|wxOK|wxCANCEL)
+                                   wx.CHOICEDLG_STYLE | wx.OK | wx.CANCEL)
 
         if historyLen > 0:
             position = histpos + posDelta - 1
@@ -3202,7 +3204,7 @@ These are your default global settings.
 
             dlg.SetSelection(position)
 
-        if dlg.ShowModal() == wxID_OK and dlg.GetSelection() > -1:
+        if dlg.ShowModal() == wx.ID_OK and dlg.GetSelection() > -1:
             self.pageHistory.goInHistory(dlg.GetSelection() - (histpos - 1))
 
         dlg.Destroy()
@@ -3223,9 +3225,9 @@ These are your default global settings.
                 self.wikiHistory.pop(0)
 
             # add the item to the menu
-            menuID = wxNewId()
+            menuID = wx.NewId()
             self.recentWikisMenu.Append(menuID, wikiConfigFilename)
-            EVT_MENU(self, menuID, self.OnSelectRecentWiki)
+            wx.EVT_MENU(self, menuID, self.OnSelectRecentWiki)
 
         self.configuration.set("main", "last_active_dir", dirname(wikiConfigFilename))
         self.writeGlobalConfig()
@@ -3264,15 +3266,15 @@ These are your default global settings.
         """
         Returns if this window is set to stay on top of all others
         """
-        return not not self.GetWindowStyleFlag() & wxSTAY_ON_TOP 
+        return not not self.GetWindowStyleFlag() & wx.STAY_ON_TOP 
 
     def setStayOnTop(self, onOrOff):
         style = self.GetWindowStyleFlag()
         
         if onOrOff:
-            style |= wxSTAY_ON_TOP
+            style |= wx.STAY_ON_TOP
         else:
-            style &= ~wxSTAY_ON_TOP
+            style &= ~wx.STAY_ON_TOP
             
         self.SetWindowStyleFlag(style)
 
@@ -3301,8 +3303,8 @@ These are your default global settings.
             else:
                 tooltip = u"Wikidpad"
 
-            self.tbIcon.SetIcon(wxIcon(os.path.join(self.wikiAppDir, 'icons', 'pwiki.ico'),
-                    wxBITMAP_TYPE_ICO), uniToGui(tooltip))
+            self.tbIcon.SetIcon(wx.Icon(os.path.join(self.wikiAppDir, 'icons', 'pwiki.ico'),
+                    wx.BITMAP_TYPE_ICO), uniToGui(tooltip))
         else:
             if self.tbIcon is not None:
                 if self.tbIcon.IsIconInstalled():
@@ -3381,7 +3383,7 @@ These are your default global settings.
 
         self.windowLayouter.setWinPropsByConfig(layoutCfStr)
         # Handle no size events while realizing layout
-        self.Unbind(EVT_SIZE)
+        self.Unbind(wx.EVT_SIZE)
         
         self.windowLayouter.realize()
 
@@ -3392,7 +3394,7 @@ These are your default global settings.
 
         self.windowLayouter.layout()
 
-        EVT_SIZE(self, self.OnSize)
+        wx.EVT_SIZE(self, self.OnSize)
 
         self.tree = self.windowLayouter.getWindowForName("maintree")
         self.logWindow = self.windowLayouter.getWindowForName("log")
@@ -3458,7 +3460,7 @@ These are your default global settings.
     def showWikiWordOpenDialog(self):
         dlg = OpenWikiWordDialog(self, -1)
         try:
-            dlg.CenterOnParent(wxBOTH)
+            dlg.CenterOnParent(wx.BOTH)
             dlg.ShowModal()
 #             if dlg.ShowModal() == wxID_OK:
 #                 wikiWord = dlg.GetValue()
@@ -3478,11 +3480,11 @@ These are your default global settings.
             return
 
         wikiWord = self.getWikiData().getAliasesWikiWord(wikiWord)
-        dlg = wxTextEntryDialog(self, uniToGui(u"Rename '%s' to:" %
-                wikiWord), u"Rename Wiki Word", wikiWord, wxOK | wxCANCEL)
+        dlg = wx.TextEntryDialog(self, uniToGui(u"Rename '%s' to:" %
+                wikiWord), u"Rename Wiki Word", wikiWord, wx.OK | wx.CANCEL)
 
         try:
-            while dlg.ShowModal() == wxID_OK and \
+            while dlg.ShowModal() == wx.ID_OK and \
                     not self.showWikiWordRenameConfirmDialog(wikiWord,
                             guiToUni(dlg.GetValue())):
                 pass
@@ -3492,12 +3494,12 @@ These are your default global settings.
 
     # TODO Unicode
     def showStoreVersionDialog(self):
-        dlg = wxTextEntryDialog (self, u"Description:",
+        dlg = wx.TextEntryDialog (self, u"Description:",
                                  u"Store new version", u"",
-                                 wxOK | wxCANCEL)
+                                 wx.OK | wx.CANCEL)
 
         description = None
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             description = dlg.GetValue()
         dlg.Destroy()
 
@@ -3507,33 +3509,37 @@ These are your default global settings.
 
 
     def showDeleteAllVersionsDialog(self):
-        result = wxMessageBox(u"Do you want to delete all stored versions?",
-                u"Delete All Versions", wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION, self)
+        result = wx.MessageBox(u"Do you want to delete all stored versions?",
+                u"Delete All Versions",
+                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
-        if result == wxYES:
+        if result == wx.YES:
             self.getWikiData().deleteVersioningData()
 
 
     def showSavedVersionsDialog(self):
         if not self.getWikiData().hasVersioningData():
-            dlg=wxMessageDialog(self, u"This wiki does not contain any version information",
-                    u'Retrieve version', wxOK)
+            dlg=wx.MessageDialog(self,
+                    u"This wiki does not contain any version information",
+                    u'Retrieve version', wx.OK)
             dlg.ShowModal()
             dlg.Destroy()
             return
 
         dlg = SavedVersionsDialog(self, -1)
-        dlg.CenterOnParent(wxBOTH)
+        dlg.CenterOnParent(wx.BOTH)
 
         version = None
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             version = dlg.GetValue()
         dlg.Destroy()
 
         if version:
-            dlg=wxMessageDialog(self, u"This will overwrite current content if not stored as version. Continue?",
-                    u'Retrieve version', wxYES_NO)
-            if dlg.ShowModal() == wxID_YES:
+            dlg=wx.MessageDialog(self,
+                    u"This will overwrite current content if not stored as "
+                    u"version. Continue?",
+                    u'Retrieve version', wx.YES_NO)
+            if dlg.ShowModal() == wx.ID_YES:
                 dlg.Destroy()
                 self.saveAllDocPages()
                 word = self.getCurrentWikiWord()
@@ -3576,13 +3582,13 @@ These are your default global settings.
                         toWikiWord)
                 return False
                 
-            result = wxMessageBox(u"Do you want to modify all links to the wiki word "
+            result = wx.MessageBox(u"Do you want to modify all links to the wiki word "
                     u"'%s' renamed to '%s'?" % (wikiWord, toWikiWord),
-                    u'Rename Wiki Word', wxYES_NO | wxCANCEL | wxICON_QUESTION, self)
+                    u'Rename Wiki Word', wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION, self)
     
-            if result == wxYES or result == wxNO:
+            if result == wx.YES or result == wx.NO:
                 try:
-                    self.renameWikiWord(wikiWord, toWikiWord, result == wxYES)
+                    self.renameWikiWord(wikiWord, toWikiWord, result == wx.YES)
                     return True
                 except WikiDataException, e:
                     traceback.print_exc()                
@@ -3600,7 +3606,7 @@ These are your default global settings.
             return
 
         self.findDlg = SearchWikiDialog(self, -1)
-        self.findDlg.CenterOnParent(wxBOTH)
+        self.findDlg.CenterOnParent(wx.BOTH)
         self.findDlg.Show()
 
 
@@ -3617,11 +3623,11 @@ These are your default global settings.
             return
 
         wikiWord = self.getWikiData().getAliasesWikiWord(wikiWord)
-        dlg=wxMessageDialog(self,
+        dlg=wx.MessageDialog(self,
                 uniToGui(u"Are you sure you want to delete wiki word '%s'?" % wikiWord),
-                'Delete Wiki Word', wxYES_NO)
+                'Delete Wiki Word', wx.YES_NO)
         result = dlg.ShowModal()
-        if result == wxID_YES:
+        if result == wx.ID_YES:
             try:
                 self.saveAllDocPages()
                 self.deleteWikiWord(wikiWord)
@@ -3639,7 +3645,7 @@ These are your default global settings.
             return
 
         self.findDlg = SearchPageDialog(self, -1)
-        self.findDlg.CenterOnParent(wxBOTH)
+        self.findDlg.CenterOnParent(wx.BOTH)
         self.findDlg.Show()
 
 
@@ -3652,7 +3658,7 @@ These are your default global settings.
         newWord = True
         try:
             while True:
-                wikiWord = guiToUni(wxGetTextFromUser(u"Replace text by WikiWord:",
+                wikiWord = guiToUni(wx.GetTextFromUser(u"Replace text by WikiWord:",
                         u"Replace by Wiki Word", wikiWord, self))
                         
                 if not wikiWord:
@@ -3665,13 +3671,13 @@ These are your default global settings.
 #                     return False
 
                 if self.getWikiData().isDefinedWikiWord(wikiWord):
-                    result = wxMessageBox(uniToGui((
+                    result = wx.MessageBox(uniToGui((
                             u'Wiki word %s exists already\n'
                             u'Would you like to append to the word?') %
                             wikiWord), u'Word exists',
-                            wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+                            wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
                     
-                    if result == wxNO:
+                    if result == wx.NO:
                         continue
                     
                     newWord = False
@@ -3700,10 +3706,10 @@ These are your default global settings.
 
 
     def showIconSelectDialog(self):
-        dlg = IconSelectDialog(self, -1, wxGetApp().getIconCache())
-        dlg.CenterOnParent(wxBOTH)
+        dlg = IconSelectDialog(self, -1, wx.GetApp().getIconCache())
+        dlg.CenterOnParent(wx.BOTH)
         iconname = None
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             iconname = dlg.GetValue()
 
         dlg.Destroy()
@@ -3715,10 +3721,10 @@ These are your default global settings.
         fmt = self.configuration.get("main", "strftime")
 
         dlg = DateformatDialog(self, -1, self, deffmt = fmt)
-        dlg.CenterOnParent(wxBOTH)
+        dlg.CenterOnParent(wx.BOTH)
         dateformat = None
 
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             dateformat = dlg.GetValue()
         dlg.Destroy()
 
@@ -3728,12 +3734,12 @@ These are your default global settings.
 
     def showOptionsDialog(self):
         dlg = OptionsDialog(self, -1)
-        dlg.CenterOnParent(wxBOTH)
+        dlg.CenterOnParent(wx.BOTH)
 
         result = dlg.ShowModal()
         dlg.Destroy()
 
-        if result == wxID_OK:
+        if result == wx.ID_OK:
             # Perform operations to reset GUI parts after option changes
             self.autoSaveDelayAfterKeyPressed = self.configuration.getint(
                     "main", "auto_save_delay_key_pressed")
@@ -3786,7 +3792,7 @@ These are your default global settings.
         self.getWikiData().commit()
 
         dlg = ExportDialog(self, -1)
-        dlg.CenterOnParent(wxBOTH)
+        dlg.CenterOnParent(wx.BOTH)
 
         result = dlg.ShowModal()
         dlg.Destroy()
@@ -3820,15 +3826,15 @@ These are your default global settings.
         typ = evt.GetId()
         if typ != GUI_ID.MENU_EXPORT_WHOLE_AS_XML:
             # Export to dir
-            dest = wxDirSelector(u"Select Export Directory", defdir,
-            wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON, parent=self)
+            dest = wx.DirSelector(u"Select Export Directory", defdir,
+            wx.DD_DEFAULT_STYLE|wx.DD_NEW_DIR_BUTTON, parent=self)
         else:
             # Export to file
-            dest = wxFileSelector(u"Select Export File",
+            dest = wx.FileSelector(u"Select Export File",
                     defdir,
                     default_filename = "", default_extension = "",
                     wildcard = u"XML files (*.xml)|*.xml|All files (*.*)|*",
-                    flags=wxSAVE | wxOVERWRITE_PROMPT, parent=self)
+                    flags=wx.SAVE | wx.OVERWRITE_PROMPT, parent=self)
         
         try:
             if dest:
@@ -3895,16 +3901,16 @@ These are your default global settings.
         self.getWikiData().commit()
 
         dlg = ImportDialog(self, -1, self)
-        dlg.CenterOnParent(wxBOTH)
+        dlg.CenterOnParent(wx.BOTH)
 
         result = dlg.ShowModal()
         dlg.Destroy()
 
 
     def showAddFileUrlDialog(self):
-        dlg = wxFileDialog(self, u"Choose a file to create URL for",
-                self.getLastActiveDir(), "", "*.*", wxOPEN)
-        if dlg.ShowModal() == wxID_OK:
+        dlg = wx.FileDialog(self, u"Choose a file to create URL for",
+                self.getLastActiveDir(), "", "*.*", wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
             url = urllib.pathname2url(dlg.GetPath())
             if dlg.GetPath().endswith(".wiki"):
                 url = "wiki:" + url
@@ -3942,18 +3948,18 @@ These are your default global settings.
             self.lostAccess(e)
             raise
 
-        self.spellChkDlg.CenterOnParent(wxBOTH)
+        self.spellChkDlg.CenterOnParent(wx.BOTH)
         self.spellChkDlg.Show()
         self.spellChkDlg.checkNext(startPos=0)
 
 
     def rebuildWiki(self, skipConfirm = False):
         if not skipConfirm:
-            result = wxMessageBox(u"Are you sure you want to rebuild this wiki? "+
+            result = wx.MessageBox(u"Are you sure you want to rebuild this wiki? "
                     u"You may want to backup your data first!",
-                    u'Rebuild wiki', wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+                    u'Rebuild wiki', wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 
-        if skipConfirm or result == wxYES :
+        if skipConfirm or result == wx.YES :
             try:
                 self.saveAllDocPages()
                 progresshandler = wxGuiProgressHandler(u"Rebuilding wiki",
@@ -4000,7 +4006,7 @@ These are your default global settings.
             if ww is not None:
                 clAction.wikiWordToOpen = ww
 
-            wxGetApp().startPersonalWikiFrame(clAction)
+            wx.GetApp().startPersonalWikiFrame(clAction)
         except Exception, e:
             traceback.print_exc()
             self.displayErrorMessage('Error while starting new '
@@ -4009,11 +4015,11 @@ These are your default global settings.
 
 
     def OnImportFromPagefiles(self, evt):
-        dlg=wxMessageDialog(self, u"This could overwrite pages in the database. Continue?",
-                            u"Import pagefiles", wxYES_NO)
+        dlg=wx.MessageDialog(self, u"This could overwrite pages in the database. Continue?",
+                            u"Import pagefiles", wx.YES_NO)
 
         result = dlg.ShowModal()
-        if result == wxID_YES:
+        if result == wx.ID_YES:
             self.getWikiData().copyWikiFilesToDatabase()
 
 
@@ -4084,31 +4090,31 @@ These are your default global settings.
         if dlgtype == "text":
             if additional is None:
                 additional = u""
-            return guiToUni(wxGetTextFromUser(uniToGui(message),
+            return guiToUni(wx.GetTextFromUser(uniToGui(message),
                     uniToGui(title), uniToGui(additional), self))
         else:
             style = None
             if dlgtype == "o":
-                style = wxOK
+                style = wx.OK
             elif dlgtype == "oc":
-                style = wxOK | wxCANCEL
+                style = wx.OK | wx.CANCEL
             elif dlgtype == "yn":
-                style = wxYES_NO
+                style = wx.YES_NO
             elif dlgtype == "ync":
-                style = wxYES_NO | wxCANCEL
+                style = wx.YES_NO | wx.CANCEL
             
             if style is None:
                 raise RuntimeError, "Unknown dialog type"
 
-            result = wxMessageBox(uniToGui(message), uniToGui(title), style, self)
+            result = wx.MessageBox(uniToGui(message), uniToGui(title), style, self)
             
-            if result == wxOK:
+            if result == wx.OK:
                 return "ok"
-            elif result == wxCANCEL:
+            elif result == wx.CANCEL:
                 return "cancel"
-            elif result == wxYES:
+            elif result == wx.YES:
                 return "yes"
-            elif result == wxNO:
+            elif result == wx.NO:
                 return "no"
                 
             raise RuntimeError, "Internal Error"
@@ -4117,14 +4123,15 @@ These are your default global settings.
         """pops up a dialog box,
         used by scripts only
         """
-        dlg_m = wxMessageDialog(self, uniToGui(u"%s" % str), title, wxOK)
+        dlg_m = wx.MessageDialog(self, uniToGui(u"%s" % str), title, wx.OK)
         dlg_m.ShowModal()
         dlg_m.Destroy()
 
 
     def displayErrorMessage(self, errorStr, e=u""):
         "pops up a error dialog box"
-        dlg_m = wxMessageDialog(self, uniToGui(u"%s. %s." % (errorStr, e)), 'Error!', wxOK)
+        dlg_m = wx.MessageDialog(self, uniToGui(u"%s. %s." % (errorStr, e)),
+                'Error!', wx.OK)
         dlg_m.ShowModal()
         dlg_m.Destroy()
         try:
@@ -4209,21 +4216,21 @@ These are your default global settings.
 
 
     def OnWikiOpen(self, event):
-        dlg = wxFileDialog(self, u"Choose a Wiki to open",
-                self.getLastActiveDir(), "", "*.wiki", wxOPEN)
-        if dlg.ShowModal() == wxID_OK:
+        dlg = wx.FileDialog(self, u"Choose a Wiki to open",
+                self.getLastActiveDir(), "", "*.wiki", wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
             self.openWiki(mbcsDec(abspath(dlg.GetPath()), "replace")[0])
         dlg.Destroy()
 
 
     def OnWikiOpenNewWindow(self, event):
-        dlg = wxFileDialog(self, u"Choose a Wiki to open",
-                self.getLastActiveDir(), "", "*.wiki", wxOPEN)
-        if dlg.ShowModal() == wxID_OK:
+        dlg = wx.FileDialog(self, u"Choose a Wiki to open",
+                self.getLastActiveDir(), "", "*.wiki", wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
             try:
                 clAction = CmdLineAction([])
                 clAction.wikiToOpen = mbcsDec(abspath(dlg.GetPath()), "replace")[0]
-                wxGetApp().startPersonalWikiFrame(clAction)
+                wx.GetApp().startPersonalWikiFrame(clAction)
 #                 PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
 #                         self.globalConfigDir, self.globalConfigSubDir, clAction)
                 # os.startfile(self.wikiPadHelp)   # TODO!
@@ -4237,20 +4244,20 @@ These are your default global settings.
 
 
     def OnWikiOpenAsType(self, event):
-        dlg = wxFileDialog(self, u"Choose a Wiki to open",
-                self.getLastActiveDir(), "", "*.wiki", wxOPEN)
-        if dlg.ShowModal() == wxID_OK:
+        dlg = wx.FileDialog(self, u"Choose a Wiki to open",
+                self.getLastActiveDir(), "", "*.wiki", wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
             self.openWiki(mbcsDec(abspath(dlg.GetPath()), "replace")[0],
                     ignoreWdhName=True)
         dlg.Destroy()
         
         
     def OnWikiNew(self, event):
-        dlg = wxTextEntryDialog (self,
+        dlg = wx.TextEntryDialog (self,
                 u"Name for new wiki (must be in the form of a WikiWord):",
-                u"Create New Wiki", u"MyWiki", wxOK | wxCANCEL)
+                u"Create New Wiki", u"MyWiki", wx.OK | wx.CANCEL)
 
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             wikiName = guiToUni(dlg.GetValue())
             wikiName = wikiWordToLabel(wikiName)
 
@@ -4264,10 +4271,10 @@ These are your default global settings.
                 else:
                     startDir = dirname(dirname(startDir))
 
-                dlg = wxDirDialog(self, u"Directory to store new wiki",
+                dlg = wx.DirDialog(self, u"Directory to store new wiki",
                         startDir,
-                        style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON)
-                if dlg.ShowModal() == wxID_OK:
+                        style=wx.DD_DEFAULT_STYLE|wx.DD_NEW_DIR_BUTTON)
+                if dlg.ShowModal() == wx.ID_OK:
 #                     try:
                     self.newWiki(wikiName, dlg.GetPath())
 #                     except IOError, e:
@@ -4401,7 +4408,7 @@ These are your default global settings.
         # save the current wiki state
 #         self.saveCurrentWikiState()
 
-        wxTheClipboard.Flush()
+        wx.TheClipboard.Flush()
 
         if self.tbIcon is not None:
             if self.tbIcon.IsIconInstalled():
@@ -4414,18 +4421,18 @@ These are your default global settings.
 
 
 
-class TaskBarIcon(wxTaskBarIcon):
+class TaskBarIcon(wx.TaskBarIcon):
     def __init__(self, pwiki):
-        wxTaskBarIcon.__init__(self)
+        wx.TaskBarIcon.__init__(self)
         self.pwiki = pwiki
 
         # Register menu events
-        EVT_MENU(self, GUI_ID.TBMENU_RESTORE, self.OnLeftUp)
-        EVT_MENU(self, GUI_ID.TBMENU_SAVE, lambda evt: (self.pwiki.saveAllDocPages(force=True),
+        wx.EVT_MENU(self, GUI_ID.TBMENU_RESTORE, self.OnLeftUp)
+        wx.EVT_MENU(self, GUI_ID.TBMENU_SAVE, lambda evt: (self.pwiki.saveAllDocPages(force=True),
                 self.pwiki.getWikiData().commit()))
-        EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pwiki.exitWiki())
+        wx.EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pwiki.exitWiki())
 
-        EVT_TASKBAR_LEFT_UP(self, self.OnLeftUp)
+        wx.EVT_TASKBAR_LEFT_UP(self, self.OnLeftUp)
 
     def OnLeftUp(self, evt):
         if self.pwiki.IsIconized():
@@ -4436,7 +4443,7 @@ class TaskBarIcon(wxTaskBarIcon):
 
     def CreatePopupMenu(self):
         # Build menu
-        tbMenu = wxMenu()
+        tbMenu = wx.Menu()
         tbMenu.Append(GUI_ID.TBMENU_RESTORE, '&Restore')
         tbMenu.Append(GUI_ID.TBMENU_SAVE, '&Save\t')
         tbMenu.Append(GUI_ID.TBMENU_EXIT, 'E&xit')

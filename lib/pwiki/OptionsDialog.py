@@ -1,8 +1,8 @@
 import re
 
-from wxPython.wx import *
-# from wxPython.html import *
-import wxPython.xrc as xrc
+import wx, wx.xrc
+# from wxPython.wx import *
+# import wxPython.xrc as xrc
 
 from wxHelper import *
 
@@ -14,12 +14,12 @@ from AdditionalDialogs import DateformatDialog, FontFaceDialog
 import WikiHtmlView
 
 
-class PredefinedOptionsPanel(wxPanel):
+class PredefinedOptionsPanel(wx.Panel):
     def __init__(self, parent, resName):
-        p = wxPrePanel()
+        p = wx.PrePanel()
         self.PostCreate(p)
 #         self.optionsDlg = optionsDlg
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
 
         res.LoadOnPanel(self, parent, resName)
         
@@ -33,9 +33,9 @@ class PredefinedOptionsPanel(wxPanel):
         pass
 
 
-class EmptyOptionsPanel(wxPanel):
+class EmptyOptionsPanel(wx.Panel):
     def __init__(self, parent):
-        wxPanel.__init__(self, parent)
+        wx.Panel.__init__(self, parent)
 
     def setVisible(self, vis):
         return True
@@ -48,7 +48,7 @@ class EmptyOptionsPanel(wxPanel):
 
 
 
-class OptionsDialog(wxDialog):
+class OptionsDialog(wx.Dialog):
     # List of tuples (<configuration file entry>, <gui control name>, <type>)
     # Supported types: b: boolean checkbox, i0+: nonnegative integer, t: text
     #    tre: regular expression,  f0+: nonegative float, seli: integer position
@@ -155,13 +155,13 @@ class OptionsDialog(wxDialog):
     )
 
     def __init__(self, pWiki, ID, title="Options",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D):
-        d = wxPreDialog()
+                 pos=wx.DefaultPosition, size=wx.DefaultSize,
+                 style=wx.NO_3D):
+        d = wx.PreDialog()
         self.PostCreate(d)
         
         self.pWiki = pWiki
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "OptionsDialog")
 
         self.ctrls = XrcControls(self)
@@ -172,9 +172,9 @@ class OptionsDialog(wxDialog):
         self.ctrls.lbPages.Clear()
         
         
-        mainsizer = LayerSizer()  # wxBoxSizer(wxVERTICAL)
+        mainsizer = LayerSizer()  # wx.BoxSizer(wx.VERTICAL)
         
-        for pn, pt in wxGetApp().getOptionsDlgPanelList():
+        for pn, pt in wx.GetApp().getOptionsDlgPanelList():
             if isinstance(pn, basestring):
                 if pn != "":
                     panel = PredefinedOptionsPanel(self.ctrls.panelPages, pn)
@@ -187,7 +187,7 @@ class OptionsDialog(wxDialog):
                     panel = self.emptyPanel
             else:
                 # Factory function or class
-                panel = pn(self.ctrls.panelPages, self, wxGetApp())
+                panel = pn(self.ctrls.panelPages, self, wx.GetApp())
 
             self.panelList.append(panel)
             self.ctrls.lbPages.Append(pt)
@@ -227,8 +227,8 @@ class OptionsDialog(wxDialog):
         self.ctrls.panelPages.Fit()
         self.Fit()
 
-        self.ctrls.btnOk.SetId(wxID_OK)
-        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        self.ctrls.btnOk.SetId(wx.ID_OK)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
 
         # Transfer options to dialog
         for o, c, t in self.OPTION_TO_CONTROL:
@@ -264,41 +264,41 @@ class OptionsDialog(wxDialog):
         self.ctrls.lbPages.SetSelection(0)
         self._refreshForPage()
 
-        EVT_LISTBOX(self, GUI_ID.lbPages, self.OnLbPages)
+        wx.EVT_LISTBOX(self, GUI_ID.lbPages, self.OnLbPages)
 
-        EVT_BUTTON(self, wxID_OK, self.OnOk)
-        EVT_BUTTON(self, GUI_ID.btnSelectFaceHtmlPrev, self.OnSelectFaceHtmlPrev)
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectFaceHtmlPrev, self.OnSelectFaceHtmlPrev)
 
-        EVT_BUTTON(self, GUI_ID.btnSelectHtmlLinkColor,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlLinkColor,
                 lambda evt: self.selectColor(self.ctrls.tfHtmlLinkColor))
-        EVT_BUTTON(self, GUI_ID.btnSelectHtmlALinkColor,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlALinkColor,
                 lambda evt: self.selectColor(self.ctrls.tfHtmlALinkColor))
-        EVT_BUTTON(self, GUI_ID.btnSelectHtmlVLinkColor,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlVLinkColor,
                 lambda evt: self.selectColor(self.ctrls.tfHtmlVLinkColor))
-        EVT_BUTTON(self, GUI_ID.btnSelectHtmlTextColor,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlTextColor,
                 lambda evt: self.selectColor(self.ctrls.tfHtmlTextColor))
-        EVT_BUTTON(self, GUI_ID.btnSelectHtmlBgColor,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlBgColor,
                 lambda evt: self.selectColor(self.ctrls.tfHtmlBgColor))
 
-        EVT_BUTTON(self, GUI_ID.btnSelectEditorPlaintextColor,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorPlaintextColor,
                 lambda evt: self.selectColor(self.ctrls.tfEditorPlaintextColor))
-        EVT_BUTTON(self, GUI_ID.btnSelectEditorLinkColor,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorLinkColor,
                 lambda evt: self.selectColor(self.ctrls.tfEditorLinkColor))
-        EVT_BUTTON(self, GUI_ID.btnSelectEditorAttributeColor,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorAttributeColor,
                 lambda evt: self.selectColor(self.ctrls.tfEditorAttributeColor))
-        EVT_BUTTON(self, GUI_ID.btnSelectEditorBgColor,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorBgColor,
                 lambda evt: self.selectColor(self.ctrls.tfEditorBgColor))
-        EVT_BUTTON(self, GUI_ID.btnSelectEditorSelectionFgColor,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorSelectionFgColor,
                 lambda evt: self.selectColor(self.ctrls.tfEditorSelectionFgColor))
-        EVT_BUTTON(self, GUI_ID.btnSelectEditorSelectionBgColor,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorSelectionBgColor,
                 lambda evt: self.selectColor(self.ctrls.tfEditorSelectionBgColor))
-        EVT_BUTTON(self, GUI_ID.btnSelectEditorCaretColor,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorCaretColor,
                 lambda evt: self.selectColor(self.ctrls.tfEditorCaretColor))
-        EVT_BUTTON(self, GUI_ID.btnSelectExportDefaultDir,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectExportDefaultDir,
                 lambda evt: self.selectDirectory(self.ctrls.tfExportDefaultDir))
 
 
-        EVT_BUTTON(self, GUI_ID.btnSelectPageStatusTimeFormat,
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectPageStatusTimeFormat,
                 self.OnSelectPageStatusTimeFormat)
 
 
@@ -336,40 +336,40 @@ class OptionsDialog(wxDialog):
                 try:
                     rexp = guiToUni(self.ctrls[c].GetValue())
                     re.compile(rexp, re.DOTALL | re.UNICODE | re.MULTILINE)
-                    self.ctrls[c].SetBackgroundColour(wxWHITE)
+                    self.ctrls[c].SetBackgroundColour(wx.WHITE)
                 except:   # TODO Specific exception
                     fieldsValid = False
-                    self.ctrls[c].SetBackgroundColour(wxRED)
+                    self.ctrls[c].SetBackgroundColour(wx.RED)
             elif t == "i0+":
                 # Nonnegative integer field
                 try:
                     val = int(guiToUni(self.ctrls[c].GetValue()))
                     if val < 0:
                         raise ValueError
-                    self.ctrls[c].SetBackgroundColour(wxWHITE)
+                    self.ctrls[c].SetBackgroundColour(wx.WHITE)
                 except ValueError:
                     fieldsValid = False
-                    self.ctrls[c].SetBackgroundColour(wxRED)
+                    self.ctrls[c].SetBackgroundColour(wx.RED)
             elif t == "f0+":
                 # Nonnegative float field
                 try:
                     val = float(guiToUni(self.ctrls[c].GetValue()))
                     if val < 0:
                         raise ValueError
-                    self.ctrls[c].SetBackgroundColour(wxWHITE)
+                    self.ctrls[c].SetBackgroundColour(wx.WHITE)
                 except ValueError:
                     fieldsValid = False
-                    self.ctrls[c].SetBackgroundColour(wxRED)
+                    self.ctrls[c].SetBackgroundColour(wx.RED)
             elif t == "color0":
                 # HTML Color field or empty field
                 val = guiToUni(self.ctrls[c].GetValue())
                 rgb = htmlColorToRgbTuple(val)
                 
                 if val != "" and rgb is None:
-                    self.ctrls[c].SetBackgroundColour(wxRED)
+                    self.ctrls[c].SetBackgroundColour(wx.RED)
                     fieldsValid = False
                 else:
-                    self.ctrls[c].SetBackgroundColour(wxWHITE)
+                    self.ctrls[c].SetBackgroundColour(wx.WHITE)
 
         if not fieldsValid:
             self.Refresh()
@@ -420,14 +420,14 @@ class OptionsDialog(wxDialog):
 
     def OnSelectFaceHtmlPrev(self, evt):
         dlg = FontFaceDialog(self, -1, self.ctrls.tfFacenameHtmlPreview.GetValue())
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             self.ctrls.tfFacenameHtmlPreview.SetValue(dlg.GetValue())
         dlg.Destroy()
         
     def OnSelectPageStatusTimeFormat(self, evt):
         dlg = DateformatDialog(self, -1, self.pWiki, 
                 deffmt=self.ctrls.tfPageStatusTimeFormat.GetValue())
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             self.ctrls.tfPageStatusTimeFormat.SetValue(dlg.GetValue())
         dlg.Destroy()
 
@@ -437,13 +437,13 @@ class OptionsDialog(wxDialog):
         if rgb is None:
             rgb = 0, 0, 0
 
-        color = wxColour(*rgb)
-        colordata = wxColourData()
+        color = wx.Colour(*rgb)
+        colordata = wx.ColourData()
         colordata.SetColour(color)
 
-        dlg = wxColourDialog(self, colordata)
+        dlg = wx.ColourDialog(self, colordata)
         try:
-            if dlg.ShowModal() == wxID_OK:
+            if dlg.ShowModal() == wx.ID_OK:
                 color = dlg.GetColourData().GetColour()
                 if color.Ok():
                     tfield.SetValue(
@@ -454,9 +454,9 @@ class OptionsDialog(wxDialog):
 
 
     def selectDirectory(self, tfield):        
-        seldir = wxDirSelector(u"Select Directory",
+        seldir = wx.DirSelector(u"Select Directory",
                 tfield.GetValue(),
-                style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON, parent=self)
+                style=wx.DD_DEFAULT_STYLE|wx.DD_NEW_DIR_BUTTON, parent=self)
             
         if seldir:
             tfield.SetValue(seldir)

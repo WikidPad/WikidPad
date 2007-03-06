@@ -13,10 +13,6 @@ from WikiExceptions import *
 
 
 
-
-
-
-
 class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
     """
     The main area panel is embedded in the PersonalWikiFrame and holds and

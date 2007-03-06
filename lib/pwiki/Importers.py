@@ -2,21 +2,13 @@
 import os, string, re, traceback
 from os.path import join, exists, splitext
 import sys
-# import shutil
-# from time import localtime
 import urllib_red as urllib
 
-from wxPython.wx import *
-import wxPython.xrc as xrc
+# import wx
 
-from wxHelper import XrcControls
-
-# import WikiFormatting
 from StringOps import *
-# 
+
 from WikiExceptions import WikiWordNotFoundException, ImportException
-# import WikiFormatting
-# import PageAst
 
 
 

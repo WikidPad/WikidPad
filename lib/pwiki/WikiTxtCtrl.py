@@ -10,9 +10,10 @@ from os.path import exists, dirname
 from time import time, strftime, sleep
 from textwrap import fill
 
-from wxPython.wx import *
-from wxPython.stc import *
-import wxPython.xrc as xrc
+import wx, wx.stc
+# from wxPython.wx import *
+# from wxPython.stc import *
+# import wxPython.xrc as xrc
 
 from Utilities import *
 
@@ -60,24 +61,24 @@ def bytelenSct_mbcs(us):
     return len(mbcsEnc(us)[0])
 
 
-class IncrementalSearchDialog(wxFrame):
+class IncrementalSearchDialog(wx.Frame):
     
-    COLOR_YELLOW = wxColour(255, 255, 0);
-    COLOR_GREEN = wxColour(0, 255, 0);
+    COLOR_YELLOW = wx.Colour(255, 255, 0);
+    COLOR_GREEN = wx.Colour(0, 255, 0);
     
     def __init__(self, parent, id, txtCtrl, rect, font, presenter, searchInit=None):
-        wxFrame.__init__(self, parent, id, u"", rect.GetPosition(),
-                rect.GetSize(), wxNO_BORDER)
+        wx.Frame.__init__(self, parent, id, u"", rect.GetPosition(),
+                rect.GetSize(), wx.NO_BORDER)
 
         self.txtCtrl = txtCtrl
         self.presenter = presenter
-        self.tfInput = wxTextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
+        self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
                 u"Incremental search (ENTER/ESC to finish)",
-                style=wxTE_PROCESS_ENTER | wxTE_RICH)
+                style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
 
         self.tfInput.SetFont(font)
         self.tfInput.SetBackgroundColour(IncrementalSearchDialog.COLOR_YELLOW)
-        mainsizer = wxBoxSizer(wxHORIZONTAL)
+        mainsizer = wx.BoxSizer(wx.HORIZONTAL)
         mainsizer.Add(self.tfInput, 1, wx.ALL | wx.EXPAND, 0)
 
         self.SetSizer(mainsizer)
@@ -89,19 +90,19 @@ class IncrementalSearchDialog(wxFrame):
         self.closeDelay = 1000 * config.getint("main", "incSearch_autoOffDelay",
                 0)  # Milliseconds to close or 0 to deactivate
 
-        EVT_TEXT(self, GUI_ID.INC_SEARCH_TEXT_FIELD, self.OnText)
-        EVT_KEY_DOWN(self.tfInput, self.OnKeyDownInput)
-        EVT_KILL_FOCUS(self.tfInput, self.OnKillFocus)
-        EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
+        wx.EVT_TEXT(self, GUI_ID.INC_SEARCH_TEXT_FIELD, self.OnText)
+        wx.EVT_KEY_DOWN(self.tfInput, self.OnKeyDownInput)
+        wx.EVT_KILL_FOCUS(self.tfInput, self.OnKillFocus)
+        wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
                 self.OnTimerIncSearchClose)
-        EVT_MOUSE_EVENTS(self.tfInput, self.OnMouseAnyInput)
+        wx.EVT_MOUSE_EVENTS(self.tfInput, self.OnMouseAnyInput)
 
         if searchInit:
             self.tfInput.SetValue(searchInit)
             self.tfInput.SetSelection(-1, -1)
         
         if self.closeDelay:
-            self.closeTimer = wxTimer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE)
+            self.closeTimer = wx.Timer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE)
             self.closeTimer.Start(self.closeDelay, True)
 
     def OnKillFocus(self, evt):
@@ -119,7 +120,7 @@ class IncrementalSearchDialog(wxFrame):
             self.tfInput.SetBackgroundColour(IncrementalSearchDialog.COLOR_GREEN)
 
     def OnMouseAnyInput(self, evt):
-        if evt.Button(wxMOUSE_BTN_ANY) and self.closeDelay:
+        if evt.Button(wx.MOUSE_BTN_ANY) and self.closeDelay:
             # If a mouse button was pressed/released, restart timer
             self.closeTimer.Start(self.closeDelay, True)
 
@@ -136,10 +137,10 @@ class IncrementalSearchDialog(wxFrame):
                 matchesAccelPair
 
         foundPos = -2
-        if key in (WXK_RETURN, WXK_NUMPAD_ENTER):
+        if key in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
             # Return pressed
             self.Close()
-        elif key == WXK_ESCAPE:
+        elif key == wx.WXK_ESCAPE:
             # Esc -> Abort inc. search, go back to start
             self.txtCtrl.resetIncrementalSearch()
             self.Close()
@@ -148,17 +149,19 @@ class IncrementalSearchDialog(wxFrame):
         # do the next search on another ctrl-f
         elif matchesAccelPair("StartIncrementalSearch", accP):
             foundPos = self.txtCtrl.executeIncrementalSearch(next=True)
-        elif accP in ((wxACCEL_NORMAL, WXK_DOWN), (wxACCEL_NORMAL, WXK_PAGEDOWN),
-                (wxACCEL_NORMAL, WXK_NUMPAD_DOWN),
-                (wxACCEL_NORMAL, WXK_NUMPAD_PAGEDOWN),
-                (wxACCEL_NORMAL, WXK_NEXT)):
+        elif accP in ((wx.ACCEL_NORMAL, wx.WXK_DOWN),
+                (wx.ACCEL_NORMAL, wx.WXK_PAGEDOWN),
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_DOWN),
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN),
+                (wx.ACCEL_NORMAL, wx.WXK_NEXT)):
             foundPos = self.txtCtrl.executeIncrementalSearch(next=True)
         elif matchesAccelPair("BackwardSearch", accP):
             foundPos = self.txtCtrl.executeIncrementalSearchBackward()
-        elif accP in ((wxACCEL_NORMAL, WXK_UP), (wxACCEL_NORMAL, WXK_PAGEUP),
-                (wxACCEL_NORMAL, WXK_NUMPAD_UP),
-                (wxACCEL_NORMAL, WXK_NUMPAD_PAGEUP),
-                (wxACCEL_NORMAL, WXK_PRIOR)):
+        elif accP in ((wx.ACCEL_NORMAL, wx.WXK_UP),
+                (wx.ACCEL_NORMAL, wx.WXK_PAGEUP),
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_UP),
+                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP),
+                (wx.ACCEL_NORMAL, wx.WXK_PRIOR)):
             foundPos = self.txtCtrl.executeIncrementalSearchBackward()
         # handle the other keys
         else:
@@ -179,9 +182,9 @@ class IncrementalSearchDialog(wxFrame):
 
 
 
-class WikiTxtCtrl(wxStyledTextCtrl):
+class WikiTxtCtrl(wx.stc.StyledTextCtrl):
     def __init__(self, presenter, parent, ID):
-        wxStyledTextCtrl.__init__(self, parent, ID)
+        wx.stc.StyledTextCtrl.__init__(self, parent, ID)
         self.presenter = presenter
         self.evalScope = None
         self.stylebytes = None
@@ -234,39 +237,39 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         # for unicode build
         self.UsePopUp(0)
 
-        self.StyleSetSpec(wxSTC_STYLE_DEFAULT, "face:%(mono)s,size:%(size)d" %
+        self.StyleSetSpec(wx.stc.STC_STYLE_DEFAULT, "face:%(mono)s,size:%(size)d" %
                 self.presenter.getDefaultFontFaces())
 
         for i in xrange(32):
             self.StyleSetEOLFilled(i, True)
 
         # i plan on lexing myself
-        self.SetLexer(wxSTC_LEX_CONTAINER)
+        self.SetLexer(wx.stc.STC_LEX_CONTAINER)
         
         # make the text control a drop target for files and text
         self.SetDropTarget(WikiTxtCtrlDropTarget(self))
 
         # register some keyboard commands
-        self.CmdKeyAssign(ord('+'), wxSTC_SCMOD_CTRL, wxSTC_CMD_ZOOMIN)
-        self.CmdKeyAssign(ord('-'), wxSTC_SCMOD_CTRL, wxSTC_CMD_ZOOMOUT)
-        self.CmdKeyAssign(wxSTC_KEY_HOME, 0, wxSTC_CMD_HOMEWRAP)
-        self.CmdKeyAssign(wxSTC_KEY_END, 0, wxSTC_CMD_LINEENDWRAP)
-        self.CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_SCMOD_SHIFT,
-                wxSTC_CMD_HOMEWRAPEXTEND)
-        self.CmdKeyAssign(wxSTC_KEY_END, wxSTC_SCMOD_SHIFT,
-                wxSTC_CMD_LINEENDWRAPEXTEND)
+        self.CmdKeyAssign(ord('+'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMIN)
+        self.CmdKeyAssign(ord('-'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMOUT)
+        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, 0, wx.stc.STC_CMD_HOMEWRAP)
+        self.CmdKeyAssign(wx.stc.STC_KEY_END, 0, wx.stc.STC_CMD_LINEENDWRAP)
+        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, wx.stc.STC_SCMOD_SHIFT,
+                wx.stc.STC_CMD_HOMEWRAPEXTEND)
+        self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_SHIFT,
+                wx.stc.STC_CMD_LINEENDWRAPEXTEND)
 
 
         # Clear all key mappings for clipboard operations
         # PersonalWikiFrame handles them and calls the special clipboard functions
         # instead of the normal ones
-        self.CmdKeyClear(wxSTC_KEY_INSERT, wxSTC_SCMOD_CTRL)
-        self.CmdKeyClear(wxSTC_KEY_INSERT, wxSTC_SCMOD_SHIFT)
-        self.CmdKeyClear(wxSTC_KEY_DELETE, wxSTC_SCMOD_SHIFT)
+        self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_CTRL)
+        self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_SHIFT)
+        self.CmdKeyClear(wx.stc.STC_KEY_DELETE, wx.stc.STC_SCMOD_SHIFT)
 
-        self.CmdKeyClear(ord('X'), wxSTC_SCMOD_CTRL)
-        self.CmdKeyClear(ord('C'), wxSTC_SCMOD_CTRL)
-        self.CmdKeyClear(ord('V'), wxSTC_SCMOD_CTRL)
+        self.CmdKeyClear(ord('X'), wx.stc.STC_SCMOD_CTRL)
+        self.CmdKeyClear(ord('C'), wx.stc.STC_SCMOD_CTRL)
+        self.CmdKeyClear(ord('V'), wx.stc.STC_SCMOD_CTRL)
 
         # set the autocomplete separator
         self.AutoCompSetSeparator(ord('~'))
@@ -291,22 +294,22 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         ))
 
 
-        EVT_STC_STYLENEEDED(self, ID, self.OnStyleNeeded)
-        EVT_STC_CHARADDED(self, ID, self.OnCharAdded)
-        EVT_STC_CHANGE(self, ID, self.OnChange)
-        EVT_STC_USERLISTSELECTION(self, ID, self.OnUserListSelection)
+        wx.stc.EVT_STC_STYLENEEDED(self, ID, self.OnStyleNeeded)
+        wx.stc.EVT_STC_CHARADDED(self, ID, self.OnCharAdded)
+        wx.stc.EVT_STC_CHANGE(self, ID, self.OnChange)
+        wx.stc.EVT_STC_USERLISTSELECTION(self, ID, self.OnUserListSelection)
         
-        EVT_LEFT_DOWN(self, self.OnClick)
-        EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
-        EVT_LEFT_DCLICK(self, self.OnDoubleClick)
+        wx.EVT_LEFT_DOWN(self, self.OnClick)
+        wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
+        wx.EVT_LEFT_DCLICK(self, self.OnDoubleClick)
 #         EVT_MOTION(self, self.OnMouseMove)
         # EVT_STC_DOUBLECLICK(self, ID, self.OnDoubleClick)
-        EVT_KEY_DOWN(self, self.OnKeyDown)
-        EVT_CHAR(self, self.OnChar)
-        EVT_SET_FOCUS(self, self.OnSetFocus)
+        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+        wx.EVT_CHAR(self, self.OnChar)
+        wx.EVT_SET_FOCUS(self, self.OnSetFocus)
         
-        EVT_IDLE(self, self.OnIdle)
-        EVT_CONTEXT_MENU(self, self.OnContextMenu)
+        wx.EVT_IDLE(self, self.OnIdle)
+        wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
 
         # search related vars
 #         self.inIncrementalSearch = False
@@ -321,34 +324,31 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.eolMode = self.GetEOLMode()
 
         # Stock cursors. Created here because the App object must be created first
-        WikiTxtCtrl.CURSOR_IBEAM = wxStockCursor(wxCURSOR_IBEAM)
-        WikiTxtCtrl.CURSOR_HAND = wxStockCursor(wxCURSOR_HAND)
-
-#         res = xrc.wxXmlResource.Get()
-#         self.contextMenu = res.LoadMenu("MenuTextctrlPopup")
+        WikiTxtCtrl.CURSOR_IBEAM = wx.StockCursor(wx.CURSOR_IBEAM)
+        WikiTxtCtrl.CURSOR_HAND = wx.StockCursor(wx.CURSOR_HAND)
 
         self.contextMenuTokens = None
         
         # Connect context menu events to functions
-        EVT_MENU(self, GUI_ID.CMD_UNDO, lambda evt: self.Undo())
-        EVT_MENU(self, GUI_ID.CMD_REDO, lambda evt: self.Redo())
+        wx.EVT_MENU(self, GUI_ID.CMD_UNDO, lambda evt: self.Undo())
+        wx.EVT_MENU(self, GUI_ID.CMD_REDO, lambda evt: self.Redo())
 
-        EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CUT, lambda evt: self.Cut())
-        EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, lambda evt: self.Copy())
-        EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_PASTE, lambda evt: self.Paste())
-        EVT_MENU(self, GUI_ID.CMD_TEXT_DELETE, lambda evt: self.ReplaceSelection(""))
-        EVT_MENU(self, GUI_ID.CMD_ZOOM_IN,
-                lambda evt: self.CmdKeyExecute(wxSTC_CMD_ZOOMIN))
-        EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT,
-                lambda evt: self.CmdKeyExecute(wxSTC_CMD_ZOOMOUT))
+        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CUT, lambda evt: self.Cut())
+        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, lambda evt: self.Copy())
+        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_PASTE, lambda evt: self.Paste())
+        wx.EVT_MENU(self, GUI_ID.CMD_TEXT_DELETE, lambda evt: self.ReplaceSelection(""))
+        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN,
+                lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN))
+        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT,
+                lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT))
 
-        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)        
-        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)        
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
                 self.OnActivateNewTabThis)        
-        EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
                 self.OnActivateNewTabBackgroundThis)        
 
-        EVT_MENU(self, GUI_ID.CMD_TEXT_SELECT_ALL, lambda evt: self.SelectAll())
+        wx.EVT_MENU(self, GUI_ID.CMD_TEXT_SELECT_ALL, lambda evt: self.SelectAll())
         
 #         self.interceptor = WindowsHacks.WikidPadWin32WPInterceptor(self.pWiki)
 #         self.interceptor.intercept(self.GetHandle())
@@ -381,7 +381,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.ReplaceSelection(text)
 
     def onCmdCopy(self, miscevt):
-        if wxWindow.FindFocus() != self:
+        if wx.Window.FindFocus() != self:
             return
         self.Copy()
         
@@ -402,12 +402,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def setWrapMode(self, onOrOff):
         if onOrOff:
-            self.SetWrapMode(wxSTC_WRAP_WORD)
+            self.SetWrapMode(wx.stc.STC_WRAP_WORD)
         else:
-            self.SetWrapMode(wxSTC_WRAP_NONE)
+            self.SetWrapMode(wx.stc.STC_WRAP_NONE)
 
     def getWrapMode(self):
-        return self.GetWrapMode() == wxSTC_WRAP_WORD
+        return self.GetWrapMode() == wx.stc.STC_WRAP_WORD
 
     def setAutoIndent(self, onOff):
         self.autoIndent = onOff
@@ -423,7 +423,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def setShowLineNumbers(self, onOrOff):
         if onOrOff:
-            self.SetMarginWidth(0, self.TextWidth(wxSTC_STYLE_LINENUMBER, "_99999"))
+            self.SetMarginWidth(0, self.TextWidth(wx.stc.STC_STYLE_LINENUMBER,
+                    "_99999"))
             self.SetMarginWidth(1, 0)
         else:
             self.SetMarginWidth(0, 0)
@@ -458,9 +459,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.SetSelection(-1, -1)
         self.ignoreOnChange = True
         if isUnicode():
-            wxStyledTextCtrl.SetText(self, text)
+            wx.stc.StyledTextCtrl.SetText(self, text)
         else:
-            wxStyledTextCtrl.SetText(self, mbcsEnc(text, "replace")[0])
+            wx.stc.StyledTextCtrl.SetText(self, mbcsEnc(text, "replace")[0])
         self.ignoreOnChange = False
         self.EmptyUndoBuffer()
         # self.applyBasicSciSettings()
@@ -468,9 +469,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def replaceText(self, text):
         if isUnicode():
-            wxStyledTextCtrl.SetText(self, text)
+            wx.stc.StyledTextCtrl.SetText(self, text)
         else:
-            wxStyledTextCtrl.SetText(self, mbcsEnc(text, "replace")[0])
+            wx.stc.StyledTextCtrl.SetText(self, mbcsEnc(text, "replace")[0])
 
 
     def GetText_unicode(self):
@@ -478,7 +479,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         Overrides the wxStyledTextCtrl.GetText method in ansi mode
         to return unicode.
         """
-        return mbcsDec(wxStyledTextCtrl.GetText(self), "replace")[0]
+        return mbcsDec(wx.stc.StyledTextCtrl.GetText(self), "replace")[0]
 
     
     def GetTextRange_unicode(self, startPos, endPos):
@@ -487,7 +488,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         to return unicode.
         startPos and endPos are byte(!) positions into the editor buffer
         """
-        return mbcsDec(wxStyledTextCtrl.GetTextRange(self, startPos, endPos),
+        return mbcsDec(wx.stc.StyledTextCtrl.GetTextRange(self, startPos, endPos),
                 "replace")[0]
 
 
@@ -496,19 +497,19 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         Overrides the wxStyledTextCtrl.GetSelectedText method in ansi mode
         to return unicode.
         """
-        return mbcsDec(wxStyledTextCtrl.GetSelectedText(self), "replace")[0]
+        return mbcsDec(wx.stc.StyledTextCtrl.GetSelectedText(self), "replace")[0]
 
 
     def GetLine_unicode(self, line):
-        return mbcsDec(wxStyledTextCtrl.GetLine(self, line), "replace")[0]
+        return mbcsDec(wx.stc.StyledTextCtrl.GetLine(self, line), "replace")[0]
 
 
     def ReplaceSelection_unicode(self, txt):
-        return wxStyledTextCtrl.ReplaceSelection(self, mbcsEnc(txt, "replace")[0])
+        return wx.stc.StyledTextCtrl.ReplaceSelection(self, mbcsEnc(txt, "replace")[0])
 
 
     def AddText_unicode(self, txt):
-        return wxStyledTextCtrl.AddText(self, mbcsEnc(txt, "replace")[0])
+        return wx.stc.StyledTextCtrl.AddText(self, mbcsEnc(txt, "replace")[0])
 
 
     def SetSelectionByCharPos(self, start, end):
@@ -537,17 +538,17 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         Apply the basic Scintilla settings which are resetted to wrong
         default values by some operations
         """
-        self.SetCodePage(wxSTC_CP_UTF8)
+        self.SetCodePage(wx.stc.STC_CP_UTF8)
         self.SetIndent(4)
         self.SetTabIndents(True)
         self.SetBackSpaceUnIndents(True)
         self.SetTabWidth(4)
         self.SetUseTabs(0)  # TODO Configurable
-        self.SetEOLMode(wxSTC_EOL_LF)
+        self.SetEOLMode(wx.stc.STC_EOL_LF)
         self.AutoCompSetFillUps(u":=")  # TODO Add '.'?
 #         self.SetYCaretPolicy(wxSTC_CARET_SLOP, 2)  
 #         self.SetYCaretPolicy(wxSTC_CARET_JUMPS | wxSTC_CARET_EVEN, 4)  
-        self.SetYCaretPolicy(wxSTC_CARET_SLOP | wxSTC_CARET_EVEN, 4)  
+        self.SetYCaretPolicy(wx.stc.STC_CARET_SLOP | wx.stc.STC_CARET_EVEN, 4)  
 
 
 
@@ -576,8 +577,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             wikiWord = self.loadedDocPage.getWikiWord()
             if wikiWord is not None:
                 self.loadedDocPage.setPresentation((self.GetCurrentPos(),
-                        self.GetScrollPos(wxHORIZONTAL),
-                        self.GetScrollPos(wxVERTICAL)), 0)
+                        self.GetScrollPos(wx.HORIZONTAL),
+                        self.GetScrollPos(wx.VERTICAL)), 0)
 
             if self.loadedDocPage.getDirty()[0]:
                 self.saveLoadedDocPage()
@@ -734,38 +735,38 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         #   if scrolling works, then update display,
                         #   then scroll again because it may have failed the first time
                         
-                        self.SetScrollPos(wxHORIZONTAL, scrollPosX, False)
-                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
-                                scrollPosX, wxHORIZONTAL)
+                        self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
+                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+                                scrollPosX, wx.HORIZONTAL)
                         self.ProcessEvent(screvt)
-                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
-                                scrollPosX, wxHORIZONTAL)
+                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+                                scrollPosX, wx.HORIZONTAL)
                         self.ProcessEvent(screvt)
                         
-                        self.SetScrollPos(wxVERTICAL, scrollPosY, True)
-                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
-                                scrollPosY, wxVERTICAL)
+                        self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
+                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+                                scrollPosY, wx.VERTICAL)
                         self.ProcessEvent(screvt)
-                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
-                                scrollPosY, wxVERTICAL)
+                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+                                scrollPosY, wx.VERTICAL)
                         self.ProcessEvent(screvt)
     
                         self.Update()
     
-                        self.SetScrollPos(wxHORIZONTAL, scrollPosX, False)
-                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
-                                scrollPosX, wxHORIZONTAL)
+                        self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
+                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+                                scrollPosX, wx.HORIZONTAL)
                         self.ProcessEvent(screvt)
-                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
-                                scrollPosX, wxHORIZONTAL)
+                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+                                scrollPosX, wx.HORIZONTAL)
                         self.ProcessEvent(screvt)
                         
-                        self.SetScrollPos(wxVERTICAL, scrollPosY, True)
-                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBTRACK,
-                                scrollPosY, wxVERTICAL)
+                        self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
+                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+                                scrollPosY, wx.VERTICAL)
                         self.ProcessEvent(screvt)
-                        screvt = wxScrollWinEvent(wxEVT_SCROLLWIN_THUMBRELEASE,
-                                scrollPosY, wxVERTICAL)
+                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+                                scrollPosY, wx.VERTICAL)
                         self.ProcessEvent(screvt)
 
         elif self.pageType == u"form":
@@ -829,7 +830,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if coltuple is None:
             coltuple = (255, 255, 255)
 
-        color = wxColour(*coltuple)
+        color = wx.Colour(*coltuple)
 
         for i in xrange(32):
             self.StyleSetBackground(i, color)
@@ -841,7 +842,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if coltuple is None:
             coltuple = (0, 0, 0)
 
-        color = wxColour(*coltuple)
+        color = wx.Colour(*coltuple)
         self.SetSelForeground(True, color)
 
         # Set selection background color
@@ -851,7 +852,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if coltuple is None:
             coltuple = (192, 192, 192)
 
-        color = wxColour(*coltuple)
+        color = wx.Colour(*coltuple)
         self.SetSelBackground(True, color)
 
         # Set caret color
@@ -861,7 +862,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if coltuple is None:
             coltuple = (0, 0, 0)
 
-        color = wxColour(*coltuple)
+        color = wx.Colour(*coltuple)
         self.SetCaretForeground(color)
         
 
@@ -889,7 +890,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def onSavingAllPages(self, miscevt):
         if self.loadedDocPage is not None and (
-                self.loadedDocPage.getDirty()[0] or miscevt.get("force", false)):
+                self.loadedDocPage.getDirty()[0] or miscevt.get("force", False)):
             self.saveLoadedDocPage()
 
     def onClosingCurrentWiki(self, miscevt):
@@ -950,10 +951,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
 
     def OnContextMenu(self, evt):
-        menu = wxMenu()
+        menu = wx.Menu()
         appendToMenuByMenuDesc(menu, _CONTEXT_MENU_BASE)
         
-        tokens = self.getTokensForMousePos(self.ScreenToClient(wxGetMousePosition()))
+        tokens = self.getTokensForMousePos(self.ScreenToClient(wx.GetMousePosition()))
         
         self.contextMenuTokens = tokens
         addActivateItem = False
@@ -1022,7 +1023,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def storeStylingAndAst(self, stylebytes, page):
         self.stylebytes = stylebytes
         self.pageAst = page
-        self.AddPendingEvent(wxIdleEvent())
+        self.AddPendingEvent(wx.IdleEvent())
 
 
     def buildStyling(self, text, delay, threadholder=DUMBTHREADHOLDER):
@@ -1250,7 +1251,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def getTokensForMousePos(self, mousePosition=None):
         # mouse position overrides current pos
-        if mousePosition and mousePosition != wxDefaultPosition:
+        if mousePosition and mousePosition != wx.DefaultPosition:
             linkPos = self.PositionFromPoint(mousePosition)
         else:
             linkPos = self.GetCurrentPos()
@@ -1346,10 +1347,10 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if securityLevel == 0:
             # No scripts allowed
             # Print warning message
-            wxMessageBox(u"Set in options, page \"Security\", \n"
+            wx.MessageBox(u"Set in options, page \"Security\", \n"
                     "item \"Script security\" an appropriate value \n"
                     "to execute a script", u"Script execution disabled",
-                    wxOK, self.presenter.getMainControl())
+                    wx.OK, self.presenter.getMainControl())
             return
 
         # it is important to python to have consistent eol's
@@ -2055,12 +2056,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.activateLink()
 
         elif not evt.ControlDown() and not evt.ShiftDown():  # TODO Check all modifiers
-            if key == WXK_TAB:
+            if key == wx.WXK_TAB:
                 if self.pageType == u"form":
                     self._goToNextFormField()
                     return
                 evt.Skip()
-            elif key == WXK_RETURN:
+            elif key == wx.WXK_RETURN:
                 if self.presenter.getConfig().getboolean("main",
                         "editor_autoUnbullets"):
                     # Check for lonely bullet or number
@@ -2101,7 +2102,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             evt.Skip()
             return
             
-        if key >= WXK_START and (not isUnicode() or evt.GetUnicodeKey() != key):
+        if key >= wx.WXK_START and (not isUnicode() or evt.GetUnicodeKey() != key):
             evt.Skip()
             return
 
@@ -2152,7 +2153,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if evt.ControlDown():
             x = evt.GetX()
             y = evt.GetY()
-            if not self.activateLink(wxPoint(x, y)):
+            if not self.activateLink(wx.Point(x, y)):
                 evt.Skip()
         else:
             evt.Skip()
@@ -2174,7 +2175,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def OnDoubleClick(self, evt):
         x = evt.GetX()
         y = evt.GetY()
-        if not self.activateLink(wxPoint(x, y)):
+        if not self.activateLink(wx.Point(x, y)):
             evt.Skip()
 
 #     def OnMouseMove(self, evt):
@@ -2218,7 +2219,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
     def OnDestroy(self, evt):
         # This is how the clipboard contents can be preserved after
         # the app has exited.
-        wxTheClipboard.Flush()
+        wx.TheClipboard.Flush()
         evt.Skip()
 
 
@@ -2258,9 +2259,9 @@ def _removeBracketsAndSort(a, b):
     return cmp(a.lower(), b.lower())
 
 
-class WikiTxtCtrlDropTarget(wxPyDropTarget):
+class WikiTxtCtrlDropTarget(wx.PyDropTarget):
     def __init__(self, editor):
-        wxPyDropTarget.__init__(self)
+        wx.PyDropTarget.__init__(self)
 
         self.editor = editor
         self.resetDObject()
@@ -2269,12 +2270,12 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
         """
         (Re)sets the dataobject at init and after each drop
         """
-        dataob = wxDataObjectComposite()
-        self.tobj = wxTextDataObject()  # Char. size depends on wxPython build!
+        dataob = wx.DataObjectComposite()
+        self.tobj = wx.TextDataObject()  # Char. size depends on wxPython build!
 
         dataob.Add(self.tobj)
 
-        self.fobj = wxFileDataObject()
+        self.fobj = wx.FileDataObject()
         dataob.Add(self.fobj)
         
         self.dataob = dataob
@@ -2311,8 +2312,8 @@ class WikiTxtCtrlDropTarget(wxPyDropTarget):
         urls = []
         
         # Necessary because key state may change during the loop                                
-        controlPressed = wxGetKeyState(WXK_CONTROL)
-        shiftPressed = wxGetKeyState(WXK_SHIFT)
+        controlPressed = wx.GetKeyState(wx.WXK_CONTROL)
+        shiftPressed = wx.GetKeyState(wx.WXK_SHIFT)
         
         for fn in filenames:
             url = urlFromPathname(fn)

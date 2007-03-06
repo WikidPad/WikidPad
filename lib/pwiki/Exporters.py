@@ -7,8 +7,9 @@ import shutil
 from time import localtime
 import urllib_red as urllib
 
-from wxPython.wx import *
-import wxPython.xrc as xrc
+import wx
+# from wxPython.wx import *
+# import wxPython.xrc as xrc
 
 from wxHelper import XrcControls
 
@@ -123,7 +124,7 @@ class HtmlXmlExporter:
         guiparent as parent
         """
         if guiparent:
-            res = xrc.wxXmlResource.Get()
+            res = wx.xrc.XmlResource.Get()
             htmlPanel = res.LoadPanel(guiparent, "ExportSubHtml")
             ctrls = XrcControls(htmlPanel)
             config = self.mainControl.getConfig()
@@ -254,7 +255,7 @@ class HtmlXmlExporter:
         if not compatFilenames:
             startfile = mbcsEnc(startfile)[0]
 
-        wxGetApp().getInsertionPluginManager().taskEnd()
+        wx.GetApp().getInsertionPluginManager().taskEnd()
 
         if self.mainControl.getConfig().getboolean(
                 "main", "start_browser_after_export") and startfile:
@@ -1060,13 +1061,13 @@ class HtmlXmlExporter:
         else:
             # Call external plugins
             exportType = self.exportType
-            handler = wxGetApp().getInsertionPluginManager().getHandler(self,
+            handler = wx.GetApp().getInsertionPluginManager().getHandler(self,
                     exportType, key)
 
             if handler is None and self.asHtmlPreview:
                 # No handlert found -> try to find generic HTML preview handler
                 exportType = "html_preview"
-                handler = wxGetApp().getInsertionPluginManager().getHandler(self,
+                handler = wx.GetApp().getInsertionPluginManager().getHandler(self,
                         exportType, key)
                     
             if handler is not None:
@@ -1083,7 +1084,7 @@ class HtmlXmlExporter:
             else:
                 # Try to find a generic handler for export type
                 # "wikidpad_language"
-                handler = wxGetApp().getInsertionPluginManager().getHandler(self,
+                handler = wx.GetApp().getInsertionPluginManager().getHandler(self,
                         "wikidpad_language", key)
                 if handler is not None:
                     try:
@@ -1543,7 +1544,7 @@ class HtmlXmlExporter:
                             # opinion how a local file URL should look like
                             # than Python
                             p = urllib.url2pathname(link)  # TODO Relative URLs
-                            link = wxFileSystem.FileNameToURL(p)
+                            link = wx.FileSystem.FileNameToURL(p)
                         self.outAppend(u'<img src="%s" border="0"%s%s />' % 
                                 (escapeHtml(link), sizeInTag, alignInTag))
                     else:
@@ -1694,7 +1695,7 @@ class TextExporter:
         guiparent as parent
         """
         if guiparent:
-            res = xrc.wxXmlResource.Get()
+            res = wx.xrc.XmlResource.Get()
             textPanel = res.LoadPanel(guiparent, "ExportSubText") # .ctrls.additOptions
         else:
             textPanel = None

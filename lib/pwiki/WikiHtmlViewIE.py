@@ -4,10 +4,9 @@
 import cStringIO as StringIO
 import urllib, os.path
 
-from wxPython.wx import *
-from wxPython.html import *
-
-import wx
+import wx, wx.html
+# from wxPython.wx import *
+# from wxPython.html import *
 
 
 if wx.Platform == '__WXMSW__':
@@ -109,7 +108,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
         self.exporterInstance.tempFileSet = TempFileSet()
         self.exporterInstance.styleSheet = "file:" + urllib.pathname2url(
-                os.path.join(wxGetApp().globalConfigSubDir,
+                os.path.join(wx.GetApp().globalConfigSubDir,
                 'wikipreview.css'))
         self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
 
@@ -121,7 +120,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 #         EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT, lambda evt: self.addZoom(-1))
         iewin.EVT_BeforeNavigate2(self, self.GetId(), self.OnBeforeNavigate)
 
-        EVT_SET_FOCUS(self, self.OnSetFocus)
+        wx.EVT_SET_FOCUS(self, self.OnSetFocus)
 #         EVT_MOUSEWHEEL(self, self.OnMouseWheel)
 
 
@@ -142,11 +141,6 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
     def close(self):
         self.setVisible(False)
         self.presenterListener.disconnect()
-
-
-    _DEFAULT_FONT_SIZES = (wxHTML_FONT_SIZE_1, wxHTML_FONT_SIZE_2,
-            wxHTML_FONT_SIZE_3, wxHTML_FONT_SIZE_4, wxHTML_FONT_SIZE_5,
-            wxHTML_FONT_SIZE_6, wxHTML_FONT_SIZE_7)
 
 
     def refresh(self):
@@ -196,7 +190,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
             # wxFileSystem.FileNameToURL(p)
 
-            wxGetApp().getInsertionPluginManager().taskEnd()
+            wx.GetApp().getInsertionPluginManager().taskEnd()
 
             if self.anchor:
                 url += "#" + self.anchor

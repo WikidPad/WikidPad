@@ -1,9 +1,10 @@
 import sets, os.path
 
-from wxPython.wx import *
-from wxPython.html import *
-
-import wxPython.xrc as xrc
+import wx, wx.xrc
+# from wxPython.wx import *
+# from wxPython.html import *
+# 
+# import wxPython.xrc as xrc
 
 from wxHelper import *
 
@@ -22,26 +23,27 @@ import WikiFormatting
 
 
 
-class SpellCheckerDialog(wxDialog):
+class SpellCheckerDialog(wx.Dialog):
     def __init__(self, parent, ID, mainControl, title="Check spelling",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D):
-        d = wxPreDialog()
+                 pos=wx.DefaultPosition, size=wx.DefaultSize,
+                 style=wx.NO_3D):
+        d = wx.PreDialog()
         self.PostCreate(d)
         
         self.mainControl = mainControl
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, parent, "SpellCheckDialog")
         self.SetTitle(title)
         
         # Create styled explanation
-        tfToCheck = wxTextCtrl(self, GUI_ID.tfToCheck, style=wxTE_MULTILINE|wxTE_RICH)
+        tfToCheck = wx.TextCtrl(self, GUI_ID.tfToCheck,
+                style=wx.TE_MULTILINE|wx.TE_RICH)
         res.AttachUnknownControl("tfToCheck", tfToCheck, self)
-        tfReplaceWith = wxTextCtrl(self, GUI_ID.tfReplaceWith, style=wxTE_RICH)
+        tfReplaceWith = wx.TextCtrl(self, GUI_ID.tfReplaceWith, style=wx.TE_RICH)
         res.AttachUnknownControl("tfReplaceWith", tfReplaceWith, self)
 
         self.ctrls = XrcControls(self)
-        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         self.ctrls.lbReplaceSuggestions.InsertColumn(0, "Suggestion")
         
         self.wordRe = self.mainControl.getFormatting().TextWordRE
@@ -65,23 +67,23 @@ class SpellCheckerDialog(wxDialog):
 
         self._refreshDictionary()
 
-        EVT_BUTTON(self, GUI_ID.btnIgnore, self.OnIgnore)
-        EVT_BUTTON(self, GUI_ID.btnIgnoreAll, self.OnIgnoreAll)
-        EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
-        EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
-        EVT_BUTTON(self, GUI_ID.btnAddWordGlobal, self.OnAddWordGlobal)
-        EVT_BUTTON(self, GUI_ID.btnAddWordLocal, self.OnAddWordLocal)
-        EVT_BUTTON(self, wxID_CANCEL, self.OnClose)        
-        EVT_CLOSE(self, self.OnClose)
+        wx.EVT_BUTTON(self, GUI_ID.btnIgnore, self.OnIgnore)
+        wx.EVT_BUTTON(self, GUI_ID.btnIgnoreAll, self.OnIgnoreAll)
+        wx.EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
+        wx.EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
+        wx.EVT_BUTTON(self, GUI_ID.btnAddWordGlobal, self.OnAddWordGlobal)
+        wx.EVT_BUTTON(self, GUI_ID.btnAddWordLocal, self.OnAddWordLocal)
+        wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnClose)        
+        wx.EVT_CLOSE(self, self.OnClose)
 
                 
 #         EVT_LISTBOX(self, GUI_ID.lbReplaceSuggestions,
 #                 self.OnLbReplaceSuggestions)
-        EVT_LIST_ITEM_SELECTED(self, GUI_ID.lbReplaceSuggestions,
+        wx.EVT_LIST_ITEM_SELECTED(self, GUI_ID.lbReplaceSuggestions,
                 self.OnLbReplaceSuggestions)
 
-        EVT_CHAR(self.ctrls.tfReplaceWith, self.OnCharReplaceWith)
-        EVT_CHAR(self.ctrls.lbReplaceSuggestions, self.OnCharReplaceSuggestions)
+        wx.EVT_CHAR(self.ctrls.tfReplaceWith, self.OnCharReplaceWith)
+        wx.EVT_CHAR(self.ctrls.lbReplaceSuggestions, self.OnCharReplaceSuggestions)
 
 
     def _refreshDictionary(self):
@@ -117,9 +119,9 @@ class SpellCheckerDialog(wxDialog):
         
         self.ctrls.tfToCheck.SetValue("")
         # Show misspelled word in context
-        self.ctrls.tfToCheck.SetDefaultStyle(wxTextAttr(wxBLUE))
+        self.ctrls.tfToCheck.SetDefaultStyle(wx.TextAttr(wx.BLUE))
         self.ctrls.tfToCheck.AppendText(uniToGui(msg))
-        self.ctrls.tfToCheck.SetDefaultStyle(wxTextAttr(wxBLACK))
+        self.ctrls.tfToCheck.SetDefaultStyle(wx.TextAttr(wx.BLACK))
         self.ctrls.tfReplaceWith.SetValue(u"")
         self.ctrls.lbReplaceSuggestions.DeleteAllItems()
         
@@ -226,11 +228,11 @@ class SpellCheckerDialog(wxDialog):
         contextPost = contextPost.split(u"\n", 1)[0]
 
         # Show misspelled word in context
-        self.ctrls.tfToCheck.SetDefaultStyle(wxTextAttr(wxBLACK))
+        self.ctrls.tfToCheck.SetDefaultStyle(wx.TextAttr(wx.BLACK))
         self.ctrls.tfToCheck.AppendText(contextPre)
-        self.ctrls.tfToCheck.SetDefaultStyle(wxTextAttr(wxRED))
+        self.ctrls.tfToCheck.SetDefaultStyle(wx.TextAttr(wx.RED))
         self.ctrls.tfToCheck.AppendText(mat.group(0))
-        self.ctrls.tfToCheck.SetDefaultStyle(wxTextAttr(wxBLACK))
+        self.ctrls.tfToCheck.SetDefaultStyle(wx.TextAttr(wx.BLACK))
         self.ctrls.tfToCheck.AppendText(contextPost)
         
         self.ctrls.tfReplaceWith.SetValue(uniToGui(mat.group(0)))
@@ -242,7 +244,7 @@ class SpellCheckerDialog(wxDialog):
         for s in sugglist:
             self.ctrls.lbReplaceSuggestions.InsertStringItem(
                     self.ctrls.lbReplaceSuggestions.GetItemCount(), s)
-        self.ctrls.lbReplaceSuggestions.SetColumnWidth(0, wxLIST_AUTOSIZE)
+        self.ctrls.lbReplaceSuggestions.SetColumnWidth(0, wx.LIST_AUTOSIZE)
 
         self.ctrls.tfReplaceWith.SetFocus()
 
@@ -281,7 +283,7 @@ class SpellCheckerDialog(wxDialog):
 
     def getReplSuggSelect(self):
         return self.ctrls.lbReplaceSuggestions.GetNextItem(-1,
-                state=wxLIST_STATE_SELECTED)
+                state=wx.LIST_STATE_SELECTED)
 
     def OnLbReplaceSuggestions(self, evt):
         sel = self.getReplSuggSelect()
@@ -316,24 +318,24 @@ class SpellCheckerDialog(wxDialog):
 
 
     def OnCharReplaceWith(self, evt):
-        if (evt.GetKeyCode() == WXK_DOWN) and \
+        if (evt.GetKeyCode() == wx.WXK_DOWN) and \
                 not self.ctrls.lbReplaceSuggestions.GetItemCount() == 0:
             self.ctrls.lbReplaceSuggestions.SetFocus()
             self.ctrls.lbReplaceSuggestions.SetItemState(0,
-                    wxLIST_STATE_SELECTED|wxLIST_STATE_FOCUSED,
-                    wxLIST_STATE_SELECTED|wxLIST_STATE_FOCUSED)
+                    wx.LIST_STATE_SELECTED|wx.LIST_STATE_FOCUSED,
+                    wx.LIST_STATE_SELECTED|wx.LIST_STATE_FOCUSED)
             self.OnLbReplaceSuggestions(None)
-        elif (evt.GetKeyCode() == WXK_UP):
+        elif (evt.GetKeyCode() == wx.WXK_UP):
             pass
         else:
             evt.Skip()
 
     def OnCharReplaceSuggestions(self, evt):
-        if (evt.GetKeyCode() == WXK_UP) and \
+        if (evt.GetKeyCode() == wx.WXK_UP) and \
                 (self.getReplSuggSelect() == 0):
             self.ctrls.tfReplaceWith.SetFocus()
             self.ctrls.lbReplaceSuggestions.SetItemState(0, 0,
-                    wxLIST_STATE_SELECTED)
+                    wx.LIST_STATE_SELECTED)
         else:
             evt.Skip()
 

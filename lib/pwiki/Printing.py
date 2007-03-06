@@ -4,9 +4,9 @@ import re
 ## _prof = hotshot.Profile("hotshot.prf")
 
 
-
-from wxPython.wx import *
-import wxPython.xrc as xrc
+import wx, wx.xrc
+# from wxPython.wx import *
+# import wxPython.xrc as xrc
 
 from wxHelper import *
 
@@ -21,10 +21,10 @@ _CUT_RE = re.compile(ur"\n|\f| +|[^ \n\f]+",
 
 
 
-class PrintMainDialog(wxDialog):
+class PrintMainDialog(wx.Dialog):
     def __init__(self, pWiki, ID, title="Print",
-                 pos=wxDefaultPosition, size=wxDefaultSize):
-        d = wxPreDialog()
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
+        d = wx.PreDialog()
         self.PostCreate(d)
 
         self.pWiki = pWiki
@@ -32,7 +32,7 @@ class PrintMainDialog(wxDialog):
         
         self.plainTextFontDesc = self.printer.plainTextFontDesc
 
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "PrintMainDialog")
         
         self.ctrls = XrcControls(self)
@@ -67,8 +67,8 @@ class PrintMainDialog(wxDialog):
 #         
 #         self.exporterList = exporterList
 
-        self.ctrls.btnPrint.SetId(wxID_OK)
-        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        self.ctrls.btnPrint.SetId(wx.ID_OK)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         
         self.pWiki.saveAllDocPages(force=True)
         self.pWiki.getWikiData().commit()
@@ -83,15 +83,15 @@ class PrintMainDialog(wxDialog):
 #         self.exporterList[0][3].Show(True)
 #         self.ctrls.chExportTo.SetSelection(0)       
         
-#         EVT_CHOICE(self, XRCID("chExportTo"), self.OnExportTo)
-        EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
+#         wx.EVT_CHOICE(self, XRCID("chExportTo"), self.OnExportTo)
+        wx.EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
 
-        EVT_BUTTON(self, GUI_ID.btnPreview, self.OnPreview)
-        EVT_BUTTON(self, GUI_ID.btnPageSetup, self.OnPageSetup)
-        EVT_BUTTON(self, GUI_ID.btnChoosePlainTextFont,
+        wx.EVT_BUTTON(self, GUI_ID.btnPreview, self.OnPreview)
+        wx.EVT_BUTTON(self, GUI_ID.btnPageSetup, self.OnPageSetup)
+        wx.EVT_BUTTON(self, GUI_ID.btnChoosePlainTextFont,
                 self.OnChoosePlainTextFont)
-#         EVT_BUTTON(self, GUI_ID.btnPrintSetup, self.OnPrintSetup)
-        EVT_BUTTON(self, wxID_OK, self.OnPrint)
+#         wx.EVT_BUTTON(self, GUI_ID.btnPrintSetup, self.OnPrintSetup)
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnPrint)
 
 
 #     def OnExportTo(self, evt):
@@ -131,7 +131,7 @@ class PrintMainDialog(wxDialog):
 #             self.pWiki.printer.setFontDesc(self.plainTextFontDesc)
         self._transferOptionsToPrinter()
         if self.printer.doPrint():
-            self.EndModal(wxID_OK)
+            self.EndModal(wx.ID_OK)
 
 
     def OnChSelectedSet(self, evt):
@@ -139,19 +139,19 @@ class PrintMainDialog(wxDialog):
         if selset == 3:  # Custom
             dlg = WikiPageListConstructionDialog(self, self.pWiki, -1, 
                     value=self.printer.listPagesOperation)
-            if dlg.ShowModal() == wxID_OK:
+            if dlg.ShowModal() == wx.ID_OK:
                 self.printer.listPagesOperation = dlg.getValue()
             dlg.Destroy()
 
 
     def OnChoosePlainTextFont(self, evt):
-        fontdata = wxFontData()
+        fontdata = wx.FontData()
         if self.plainTextFontDesc:
-            font = wxFontFromNativeInfoString(self.plainTextFontDesc)
+            font = wx.FontFromNativeInfoString(self.plainTextFontDesc)
             fontdata.SetInitialFont(font)
             
-        dlg = wxFontDialog(self, fontdata)
-        if dlg.ShowModal() == wxID_OK:
+        dlg = wx.FontDialog(self, fontdata)
+        if dlg.ShowModal() == wx.ID_OK:
             # fontdata = dlg.GetFontData()
             font = dlg.GetFontData().GetChosenFont()
             self.plainTextFontDesc = font.GetNativeFontInfoDesc()
@@ -160,7 +160,7 @@ class PrintMainDialog(wxDialog):
 
 
     def OnPageSetup(self, evt):
-        pageDialog = wxPageSetupDialog(self.pWiki,
+        pageDialog = wx.PageSetupDialog(self.pWiki,
                 self.printer.getPageSetupDialogData())
         pageDialog.ShowModal();
         
@@ -174,8 +174,8 @@ class PrintMainDialog(wxDialog):
 class Printer:
     def __init__(self, pWiki):
         self.pWiki = pWiki
-        self.printData = wxPrintData()
-        self.psddata = wxPageSetupDialogData(self.printData)
+        self.printData = wx.PrintData()
+        self.psddata = wx.PageSetupDialogData(self.printData)
         self.selectionSet = 0
         self.listPagesOperation = ListWikiPagesOperation()
 
@@ -188,8 +188,8 @@ class Printer:
         except:
             margins = [0, 0, 0, 0]  # TODO Perhaps error message
             
-        self.psddata.SetMarginTopLeft(wxPoint(margins[0], margins[1]))
-        self.psddata.SetMarginBottomRight(wxPoint(margins[2], margins[3]))
+        self.psddata.SetMarginTopLeft(wx.Point(margins[0], margins[1]))
+        self.psddata.SetMarginBottomRight(wx.Point(margins[2], margins[3]))
         
 
     def setStdOptions(self, selectionSet, plainTextFontDesc, wpSeparator):
@@ -256,7 +256,7 @@ class Printer:
 
     def showPrintMainDialog(self):
         dlg = PrintMainDialog(self.pWiki, -1)
-        dlg.CenterOnParent(wxBOTH)
+        dlg.CenterOnParent(wx.BOTH)
 
         result = dlg.ShowModal()
         dlg.Destroy()
@@ -269,12 +269,12 @@ class Printer:
         Store options contained in a wxPageSetupData object. It makes its
         own copies of the data, so the original data can be destroyed.
         """
-        self.psddata = wxPageSetupDialogData(pageSetupData)
+        self.psddata = wx.PageSetupDialogData(pageSetupData)
 
         # this makes a copy of the wx.PrintData instead of just saving
         # a reference to the one inside the PrintDialogData that will
         # be destroyed when the dialog is destroyed
-        self.printData = wxPrintData(pageSetupData.GetPrintData())
+        self.printData = wx.PrintData(pageSetupData.GetPrintData())
 
         tl = self.psddata.GetMarginTopLeft()
         br = self.psddata.GetMarginBottomRight()
@@ -348,19 +348,19 @@ class PlainTextPrint:
         text = self._buildText()
 
         printout = PlainTextPrintout(text, self.printer)
-        printer = wxPrinter(wxPrintDialogData(self.printer.printData))
+        printer = wx.Printer(wx.PrintDialogData(self.printer.printData))
         return printer.Print(self.pWiki, printout, True)
 
 
     def doPreview(self):
         text = self._buildText()
         
-        pddata = wxPrintDialogData(self.printer.printData)
+        pddata = wx.PrintDialogData(self.printer.printData)
         printout = PlainTextPrintout(text, self.printer)
         printout2 = PlainTextPrintout(text, self.printer)
-        preview = wxPrintPreview(printout, printout2, pddata)
+        preview = wx.PrintPreview(printout, printout2, pddata)
 
-        frame = wxPreviewFrame(preview, self.pWiki, "Print Preview")
+        frame = wx.PreviewFrame(preview, self.pWiki, "Print Preview")
 
         frame.Initialize()
         frame.SetPosition(self.pWiki.GetPosition())
@@ -368,9 +368,9 @@ class PlainTextPrint:
         frame.Show(True)
 
 
-class PlainTextPrintout(wxPrintout):
+class PlainTextPrintout(wx.Printout):
     def __init__(self, text, printer, title="Printout"):
-        wxPrintout.__init__(self, title)
+        wx.Printout.__init__(self, title)
 
         self.mm2logUnitsFactor = None
         self.printer = printer
@@ -484,22 +484,23 @@ class PlainTextPrintout(wxPrintout):
         # Calculate print rectangle
         tlMarg = self.psddata.GetMarginTopLeft()
         brMarg = self.psddata.GetMarginBottomRight()
-        
+
         leftLu, topLu = self.mmlenToLogUnits((tlMarg.x, tlMarg.y))
         rMargLu, bMargLu = self.mmlenToLogUnits((brMarg.x, brMarg.y))
-        
+
         sizeLu = dc.GetSize()
         sizeLu.x = dc.DeviceToLogicalXRel(sizeLu.x)
         sizeLu.y = dc.DeviceToLogicalYRel(sizeLu.y)
 
         printRectLu = (leftLu, topLu, sizeLu.x - rMargLu, sizeLu.y - bMargLu)
-        
+
         fontDesc = self.printer.plainTextFontDesc
-        
+
         if not fontDesc:
-            font = wxFont(12, wxDEFAULT, wxNORMAL, wxNORMAL, FALSE, "Courier New")
+            font = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False,
+                    "Courier New")
         else:
-            font = wxFontFromNativeInfoString(fontDesc)
+            font = wx.FontFromNativeInfoString(fontDesc)
 #             font = wxFont()
 #             font.SetNativeFontInfo(fontDesc)
 
@@ -637,7 +638,7 @@ class PlainTextPrintout(wxPrintout):
             
 
 
-        dc.SetFont(wxNullFont) ## ?
+        dc.SetFont(wx.NullFont) ## ?
         
         return True
 

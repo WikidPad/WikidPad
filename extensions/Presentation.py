@@ -1,6 +1,6 @@
-from wxPython.wx import wxPlatform
+from wx import Platform
 
-if wxPlatform == '__WXMSW__':
+if Platform == '__WXMSW__':
     faces = { 'times': 'Times New Roman',
               'mono' : 'Courier New',
               'helv' : 'Arial',
@@ -26,7 +26,7 @@ else:
 
 # Original settings:
 """
-if wxPlatform == '__WXMSW__':
+if Platform == '__WXMSW__':
     faces = { 'times': 'Times New Roman',
               'mono' : 'Courier New',
               'helv' : 'Arial',
