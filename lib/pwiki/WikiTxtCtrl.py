@@ -196,8 +196,9 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         
         # If autocompletion word was choosen, how many bytes to delete backward
         # before inserting word, if word ...
-        self.autoCompBackBytesWithoutBracket = 0  # doesn't start with '['
-        self.autoCompBackBytesWithBracket = 0     # starts with '['
+#         self.autoCompBackBytesWithoutBracket = 0  # doesn't start with '['
+#         self.autoCompBackBytesWithBracket = 0     # starts with '['
+        self.autoCompBackBytesMap = {} # Maps selected word to number of backbytes
 
         # editor settings
         self.applyBasicSciSettings()
@@ -1148,6 +1149,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.EndUndoAction()
             
 
+    def getCachedPageAst(self):
+        """
+        Returns cached page ast or None if currently not cached
+        """
+        return self.pageAst
 
     def getPageAst(self):
         page = self.pageAst
@@ -1541,8 +1547,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         Run incremental search, called only by IncrementalSearchDialog
         """
-#         self.presenter.SetStatusText(
-#                 u"Search (ESC to stop): %s" % self.searchStr, 0)
         text = self.GetText()
         if len(self.searchStr) > 0:   # and not searchStr.endswith("\\"):
             if next:
@@ -1566,16 +1570,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 matchbytestart = self.bytelenSct(text[:match.start()])
                 matchbyteend = matchbytestart + \
                         self.bytelenSct(text[match.start():match.end()])
-#                 self.anchorBytePosition = matchbyteend
-#                 self.anchorCharPosition = match.end()
 
                 self.SetSelectionByCharPos(match.start(), match.end())
 
                 return match.end()
 
         self.SetSelection(-1, -1)
-#         self.anchorBytePosition = -1
-#         self.anchorCharPosition = -1
         self.GotoPos(self.bytelenSct(text[:self.incSearchCharStartPos]))
 
         return -1
@@ -1585,8 +1585,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         """
         Run incremental search, called only by IncrementalSearchDialog
         """
-#         self.presenter.SetStatusText(
-#                 u"Search (ESC to stop): %s" % self.searchStr, 0)
         text = self.GetText()
         if len(self.searchStr) > 0:   # and not searchStr.endswith("\\"):
             charStartPos = self.GetSelectionCharPos()[0]
@@ -1615,24 +1613,15 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                         if matchNext.end() > charStartPos:
                             break
                         match = matchNext
-                    
-#                 matchbytestart = self.bytelenSct(text[:match.start()])
-#                 matchbyteend = matchbytestart + \
-#                         self.bytelenSct(text[match.start():match.end()])
-#                 self.anchorBytePosition = matchbyteend
-#                 self.anchorCharPosition = match.end()
 
                 self.SetSelectionByCharPos(match.start(), match.end())
 
                 return match.start()
 
         self.SetSelection(-1, -1)
-#         self.anchorBytePosition = -1
-#         self.anchorCharPosition = -1
         self.GotoPos(self.bytelenSct(text[:self.incSearchCharStartPos]))
 
         return -1
-
 
 
     def resetIncrementalSearch(self):
@@ -1640,20 +1629,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         Called by IncrementalSearchDialog before aborting a inc. search
         """
         self.SetSelection(-1, -1)
-#         self.anchorBytePosition = -1
-#         self.anchorCharPosition = -1
         self.GotoPos(self.bytelenSct(self.GetText()[:self.incSearchCharStartPos]))
-        
 
-
-#     def endIncrementalSearch(self):
-#         if self.inIncrementalSearch:
-#             self.inIncrementalSearch = False
-#             self.anchorBytePosition = -1
-#             self.anchorCharPosition = -1
-# 
-#     def getInIncrementalSearch(self):
-#         return self.inIncrementalSearch
 
     def getContinuePosForSearch(self, sarOp):
         """
@@ -1680,18 +1657,12 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if sarOp.booleanOp:
             return (-1, -1)  # Not possible
 
-#         if searchCharStartPos == -1:
-#             searchCharStartPos = self.searchCharStartPos
         if searchCharStartPos == -2:
             searchCharStartPos = self.getContinuePosForSearch(sarOp)
 
-#         self.pWiki.statusBar.SetStatusText(
-#                 uniToGui(u"Search (ESC to stop): %s" % searchStr), 0)
         text = self.GetText()
         if len(sarOp.searchStr) > 0:
             charStartPos = searchCharStartPos
-#             if next and (self.anchorCharPosition != -1):
-#                 charStartPos = self.anchorCharPosition
             if next:
                 charStartPos = len(self.GetTextRange(0, self.GetSelectionEnd()))
             try:
@@ -1702,20 +1673,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 return (-1, -1)  # (self.anchorCharPosition, self.anchorCharPosition)
                 
             if start is not None:
-#                 matchbytestart = self.bytelenSct(text[:start])
-#                 matchbyteend = matchbytestart + \
-#                         self.bytelenSct(text[start:end])
-#                 self.anchorBytePosition = matchbytestart + \
-#                         self.bytelenSct(text[start:end])
-#                 self.anchorCharPosition = end
-#                 self.SetSelection(matchbytestart, matchbyteend)
                 self.SetSelectionByCharPos(start, end)
 
                 return found    # self.anchorCharPosition
 
         self.SetSelection(-1, -1)
-#         self.anchorBytePosition = -1
-#         self.anchorCharPosition = -1
         self.GotoPos(self.bytelenSct(text[:searchCharStartPos]))
 
         return (-1, -1)
@@ -1737,9 +1699,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         self.ReplaceSelection(replacement)
         selByteEnd = bytestart + self.bytelenSct(replacement)
         selCharEnd = len(self.GetTextRange(0, selByteEnd))
-#         self.SetSelection(matchbytestart, selByteEnd)
-#         self.anchorBytePosition = selByteEnd
-#         self.anchorCharPosition = selCharEnd
 
         return selCharEnd
 
@@ -1825,76 +1784,205 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.ReplaceTarget(filledText)
             self.GotoPos(curPos)
 
-    def getWikiWordText(self, position):
-        word = self.getTextInStyle(position, WikiFormatting.FormatTypes.WikiWord)
-        if not word:
-            word = self.getTextInStyle(position, WikiFormatting.FormatTypes.WikiWord2)
-        if not word:
-            word = self.getTextInStyle(position, WikiFormatting.FormatTypes.AvailWikiWord)
-        return word
-
-    def getWikiWordBeginEnd(self, position):
-        (start, end) = self.getBeginEndOfStyle(position, WikiFormatting.FormatTypes.WikiWord)
-        if start == -1 and end == -1:
-            (start, end) = self.getBeginEndOfStyle(position, WikiFormatting.FormatTypes.WikiWord2)
-        if start == -1 and end == -1:
-            (start, end) = self.getBeginEndOfStyle(position, WikiFormatting.FormatTypes.AvailWikiWord)
-        return (start, end)
-
-    def isPositionInWikiWord(self, position):
-        return self.isPositionInStyle(position, WikiFormatting.FormatTypes.WikiWord) \
-               or self.isPositionInStyle(position, WikiFormatting.FormatTypes.WikiWord2) \
-               or self.isPositionInStyle(position, WikiFormatting.FormatTypes.AvailWikiWord)
-
-    def isPositionInLink(self, position):
-        return self.isPositionInStyle(position, WikiFormatting.FormatTypes.Url)
-
-    def isPositionInStyle(self, position, style):
-        return self.GetStyleAt(position) == style
-
-    def getTextInStyle(self, position, style):
-        (start, end) = self.getBeginEndOfStyle(position, style)
-        if start >= 0 and end >= 0:
-            return self.GetTextRange(start, end+1)
-
-    def getBeginEndOfStyle(self, position, style):
-        currentStyle = self.GetStyleAt(position)
-        if currentStyle != style:
-            return (-1, -1)
-
-        startPos = 0
-        currentPos = position
-        while currentPos >= 0:
-            currentStyle = self.GetStyleAt(currentPos)
-            if currentStyle == style:
-                startPos = currentPos
-                if currentPos > 0:
-                    currentPos = currentPos - 1
-                else:
-                    break
-            else:
-                break
-
-        endPos = 0
-        currentPos = position
-        while currentPos < self.GetLength():
-            currentStyle = self.GetStyleAt(currentPos)
-            if currentStyle == style:
-                endPos = currentPos
-                currentPos = currentPos + 1
-            else:
-                break
-
-        if endPos > startPos:
-            return (startPos, endPos)
-        else:
-            return (-1, -1)
+#     def getWikiWordText(self, position):
+#         word = self.getTextInStyle(position, WikiFormatting.FormatTypes.WikiWord)
+#         if not word:
+#             word = self.getTextInStyle(position, WikiFormatting.FormatTypes.WikiWord2)
+#         if not word:
+#             word = self.getTextInStyle(position, WikiFormatting.FormatTypes.AvailWikiWord)
+#         return word
+# 
+#     def getWikiWordBeginEnd(self, position):
+#         (start, end) = self.getBeginEndOfStyle(position, WikiFormatting.FormatTypes.WikiWord)
+#         if start == -1 and end == -1:
+#             (start, end) = self.getBeginEndOfStyle(position, WikiFormatting.FormatTypes.WikiWord2)
+#         if start == -1 and end == -1:
+#             (start, end) = self.getBeginEndOfStyle(position, WikiFormatting.FormatTypes.AvailWikiWord)
+#         return (start, end)
+# 
+#     def isPositionInWikiWord(self, position):
+#         return self.isPositionInStyle(position, WikiFormatting.FormatTypes.WikiWord) \
+#                or self.isPositionInStyle(position, WikiFormatting.FormatTypes.WikiWord2) \
+#                or self.isPositionInStyle(position, WikiFormatting.FormatTypes.AvailWikiWord)
+# 
+#     def isPositionInLink(self, position):
+#         return self.isPositionInStyle(position, WikiFormatting.FormatTypes.Url)
+# 
+#     def isPositionInStyle(self, position, style):
+#         return self.GetStyleAt(position) == style
+# 
+#     def getTextInStyle(self, position, style):
+#         (start, end) = self.getBeginEndOfStyle(position, style)
+#         if start >= 0 and end >= 0:
+#             return self.GetTextRange(start, end+1)
+# 
+#     def getBeginEndOfStyle(self, position, style):
+#         currentStyle = self.GetStyleAt(position)
+#         if currentStyle != style:
+#             return (-1, -1)
+# 
+#         startPos = 0
+#         currentPos = position
+#         while currentPos >= 0:
+#             currentStyle = self.GetStyleAt(currentPos)
+#             if currentStyle == style:
+#                 startPos = currentPos
+#                 if currentPos > 0:
+#                     currentPos = currentPos - 1
+#                 else:
+#                     break
+#             else:
+#                 break
+# 
+#         endPos = 0
+#         currentPos = position
+#         while currentPos < self.GetLength():
+#             currentStyle = self.GetStyleAt(currentPos)
+#             if currentStyle == style:
+#                 endPos = currentPos
+#                 currentPos = currentPos + 1
+#             else:
+#                 break
+# 
+#         if endPos > startPos:
+#             return (startPos, endPos)
+#         else:
+#             return (-1, -1)
 
     def getNearestWordPositions(self, bytepos=None):
         if not bytepos:
             bytepos = self.GetCurrentPos()
         return (self.WordStartPosition(bytepos, 1), self.WordEndPosition(bytepos, 1))
 
+    def autoComplete(self):
+        """
+        Called when user wants autocompletion.
+        """
+        endBytePos = self.GetCurrentPos()
+        startBytePos = self.PositionFromLine(
+                self.LineFromPosition(endBytePos))
+        line = self.GetTextRange(startBytePos, endBytePos)
+        rline = revStr(line)
+        backBytesMap = {}
+#             self.autoCompBackBytesWithoutBracket = 0
+#             self.autoCompBackBytesWithBracket = 0
+
+        # TODO Sort entries appropriately
+
+        wikiDocument = self.presenter.getWikiDocument()
+        wikiData = wikiDocument.getWikiData()
+
+        mat1 = WikiFormatting.RevWikiWordRE.match(rline)
+        if mat1:
+            # may be CamelCase word
+            tofind = line[-mat1.end():]
+#                 self.autoCompBackBytesWithoutBracket = self.bytelenSct(tofind)
+            formatting = self.presenter.getFormatting()
+            bb = self.bytelenSct(tofind)
+            for word in wikiData.getWikiWordsStartingWith(tofind, True):
+                if not formatting.isCcWikiWord(word):
+                    continue
+                backBytesMap[word] = bb
+
+#                 acresult += filter(formatting.isCcWikiWord, 
+#                         wikiData.getWikiWordsStartingWith(
+#                         tofind, True))
+
+
+        mat2 = WikiFormatting.RevWikiWordRE2.match(rline)
+        mat3 = WikiFormatting.RevPropertyValue.match(rline)
+        if mat2:
+            # may be not-CamelCase word or in a property name
+            tofind = line[-mat2.end():]
+#                 self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
+            bb = self.bytelenSct(tofind)
+
+            for word in wikiData.getWikiWordsStartingWith(
+                    tofind[len(WikiFormatting.BracketStart):], True):
+                backBytesMap[WikiFormatting.BracketStart + word] = bb
+                
+            for prop in wikiData.getPropertyNamesStartingWith(tofind[1:]):
+                backBytesMap[WikiFormatting.BracketStart + prop] = bb
+
+#                 acresult += map(lambda s: u"[" + s,
+#                         wikiData.getWikiWordsStartingWith(tofind[1:], True))
+#                 acresult += map(lambda s: u"[" + s,
+#                         wikiData.getPropertyNamesStartingWith(tofind[1:]))
+        elif mat3:
+            # In a property value
+            tofind = line[-mat3.end():]
+            propkey = revStr(mat3.group(3))
+            propfill = revStr(mat3.group(2))
+            propvalpart = revStr(mat3.group(1))
+#                 self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
+            bb = self.bytelenSct(tofind)
+            values = filter(lambda pv: pv.startswith(propvalpart),
+                    wikiData.getDistinctPropertyValues(propkey))
+
+            for v in values:
+                backBytesMap[WikiFormatting.BracketStart + propkey +
+                        propfill + v + WikiFormatting.BracketEnd] = bb
+
+#                 acresult += map(lambda v: u"[" + propkey + propfill + 
+#                         v +  u"]", values)
+
+        mat = WikiFormatting.RevTodoREWithContent.match(rline)
+        if mat:
+            # Might be todo entry
+            tofind = line[-mat.end():]
+            bb = self.bytelenSct(tofind)
+            todos = [t[1] for t in wikiData.getTodos() if t[1].startswith(tofind)]
+            for t in todos:
+                backBytesMap[t] = bb
+
+        mat = WikiFormatting.RevWikiWordAnchorRE2.match(rline)
+        if mat:
+            # In an anchor of a possible bracketed wiki word
+            tofind = line[-mat.end():]
+            bb = self.bytelenSct(tofind)
+            wikiWord = revStr(mat.group("wikiWord"))
+            anchorBegin = revStr(mat.group("anchorBegin"))
+
+            try:
+                page = wikiDocument.getWikiPage(wikiWord) # May throw exception
+                anchors = [a for a in page.getAnchors()
+                        if a.startswith(anchorBegin)]
+                        
+                for a in anchors:
+                    backBytesMap[WikiFormatting.BracketStart + wikiWord +
+                            WikiFormatting.BracketEnd +
+                            WikiFormatting.AnchorStart + a] = bb
+            except WikiWordNotFoundException:
+                # wikiWord isn't a wiki word
+                pass
+
+        mat = WikiFormatting.RevWikiWordAnchorRE.match(rline)
+        if mat:
+            # In an anchor of a possible camel case word
+            tofind = line[-mat.end():]
+            bb = self.bytelenSct(tofind)
+            wikiWord = revStr(mat.group("wikiWord"))
+            anchorBegin = revStr(mat.group("anchorBegin"))
+
+            try:
+                page = wikiDocument.getWikiPage(wikiWord) # May throw exception
+                anchors = [a for a in page.getAnchors()
+                        if a.startswith(anchorBegin)]
+                        
+                for a in anchors:
+                    backBytesMap[wikiWord + WikiFormatting.AnchorStart +
+                            a] = bb
+            except WikiWordNotFoundException:
+                # wikiWord isn't a wiki word
+                pass
+
+        self.autoCompBackBytesMap = backBytesMap
+        acresult = backBytesMap.keys()
+        self.presenter.getWikiDocument().getCollator().sort(acresult)
+
+        if len(acresult) > 0:
+            self.UserListShow(1, u"~".join(acresult))
+        
 
     def OnChange(self, evt):
         if not self.ignoreOnChange:
@@ -1960,55 +2048,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         elif matchesAccelPair("AutoComplete", accP):
             # AutoComplete is normally Ctrl-Space
             # Handle autocompletion
-            endBytePos = self.GetCurrentPos()
-            startBytePos = self.PositionFromLine(
-                    self.LineFromPosition(endBytePos))
-            line = self.GetTextRange(startBytePos, endBytePos)
-            rline = revStr(line)
-            mat1 = WikiFormatting.RevWikiWordRE.match(rline)
-            mat2 = WikiFormatting.RevWikiWordRE2.match(rline)
-            mat3 = WikiFormatting.RevPropertyValue.match(rline)
-            acresult = []
-            self.autoCompBackBytesWithoutBracket = 0
-            self.autoCompBackBytesWithBracket = 0
+            self.autoComplete()
 
-            # TODO Sort entries appropriately
-
-            wikiData = self.presenter.getWikiDocument().getWikiData()
-
-            if mat1:
-                # may be CamelCase word
-                tofind = line[-mat1.end():]
-                self.autoCompBackBytesWithoutBracket = self.bytelenSct(tofind)
-                formatting = self.presenter.getFormatting()
-                acresult += filter(formatting.isCcWikiWord, 
-                        wikiData.getWikiWordsStartingWith(
-                        tofind, True))
-
-            if mat2:
-                # may be not-CamelCase word or in a property name
-                tofind = line[-mat2.end():]
-                self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
-                acresult += map(lambda s: u"[" + s,
-                        wikiData.getWikiWordsStartingWith(tofind[1:], True))
-                acresult += map(lambda s: u"[" + s,
-                        wikiData.getPropertyNamesStartingWith(tofind[1:]))
-
-            elif mat3:
-                # In a property value
-                tofind = line[-mat3.end():]
-                propkey = revStr(mat3.group(3))
-                propfill = revStr(mat3.group(2))
-                propvalpart = revStr(mat3.group(1))
-                self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
-                values = filter(lambda pv: pv.startswith(propvalpart),
-                        wikiData.getDistinctPropertyValues(propkey))
-                acresult += map(lambda v: u"[" + propkey + propfill + 
-                        v +  u"]", values)
-
-            if len(acresult) > 0:
-                self.UserListShow(1, u"~".join(acresult))
-                
         elif matchesAccelPair("ActivateLink2", accP):
             # ActivateLink2 is normally Ctrl-Return
             self.activateLink()
@@ -2096,10 +2137,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
 
     def OnUserListSelection(self, evt):
         text = evt.GetText()
-        if text[0] == "[":
-            toerase = self.autoCompBackBytesWithBracket
-        else:
-            toerase = self.autoCompBackBytesWithoutBracket
+        toerase = self.autoCompBackBytesMap[text]
+#         if text[0] == "[":
+#             toerase = self.autoCompBackBytesWithBracket
+#         else:
+#             toerase = self.autoCompBackBytesWithoutBracket
             
         self.SetSelection(self.GetCurrentPos() - toerase, self.GetCurrentPos())
         

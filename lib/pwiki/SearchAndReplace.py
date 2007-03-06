@@ -871,10 +871,10 @@ class SearchReplaceOperation:
         """
         stream = SerializeStream(stringBuf="", readMode=False)
         self.serializeBin(stream)
-        
+
         return stream.getBytes()
-        
-    
+
+
     def setPackedSettings(self, data):
         """
         Set member variables according to the byte sequence stored in
@@ -882,7 +882,7 @@ class SearchReplaceOperation:
         """
         stream = SerializeStream(stringBuf=data, readMode=True)
         self.serializeBin(stream)
-        
+
         self.clearCache()
 
 

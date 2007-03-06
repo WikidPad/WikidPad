@@ -19,6 +19,14 @@ PlainCharacterPAT = ur"(?:[^\\]|\\.)"
 
 PlainEscapedCharacterRE = re.compile(ur"\\(.)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
+        
+BracketStart = u"["
+BracketStartPAT = ur"\["
+BracketStartRevPAT = ur"\["
+BracketEnd = u"]"
+BracketEndPAT = ur"\]"
+BracketEndRevPAT = ur"\]"
+
 
 # PlainCharactersRE = re.compile(PlainCharacterPAT + "+",
 #         re.DOTALL | re.UNICODE | re.MULTILINE)
@@ -54,10 +62,10 @@ UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp|rel)://|mailto:)'
 
 
 
-TitledUrlRE =  re.compile(
-        ur"\[(?P<titledurlUrl>" + UrlRE.pattern + ur")"
+TitledUrlRE =  re.compile(BracketStartPAT + 
+        ur"(?P<titledurlUrl>" + UrlRE.pattern + ur")"
         ur"(?:(?P<titledurlDelim>[ \t]*" + TitleWikiWordDelimiterPAT + ur")"
-        ur"(?P<titledurlTitle>" + PlainCharacterPAT + ur"+?))?\]",
+        ur"(?P<titledurlTitle>" + PlainCharacterPAT + ur"+?))?" + BracketEndPAT,
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -123,17 +131,18 @@ WikiWordEditorRE = re.compile(ur"(?P<wikiword>" + WikiWordRE.pattern +
 
 
 # Only to exclude them from WikiWordRE2
-FootnoteRE     = re.compile(ur"\[[0-9]+?\]",
+FootnoteRE     = re.compile(BracketStartPAT + ur"[0-9]+?" + BracketEndPAT,
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
 # Pattern string for non camelcase wiki word
 WikiWordNccPAT = ur"[\w\-\_ \t]+?"
+WikiWordNccRevPAT = ur"[\w\-\_ \t]+?"
 
 
 
-WikiWordRE2     = re.compile(ur"\[(?:" + WikiWordNccPAT + ur")\]",
-        re.DOTALL | re.UNICODE | re.MULTILINE)
+WikiWordRE2     = re.compile(BracketStartPAT + ur"(?:" + WikiWordNccPAT +
+        ur")" + BracketEndPAT, re.DOTALL | re.UNICODE | re.MULTILINE)
 
 # Special version for syntax highlighting to allow appending search expression with '#'
 # WikiWordEditorRE2      = re.compile(
@@ -142,9 +151,10 @@ WikiWordRE2     = re.compile(ur"\[(?:" + WikiWordNccPAT + ur")\]",
 #         ur"(?:#(?P<wikiwordnccSearchfrag>(?:(?:#.)|[^ \t\n#])+))?",
 #         re.DOTALL | re.UNICODE | re.MULTILINE)
 WikiWordEditorRE2      = re.compile(
-        ur"\[(?P<wikiwordncc>" + WikiWordNccPAT + ur")"
+        BracketStartPAT + ur"(?P<wikiwordncc>" + WikiWordNccPAT + ur")"
         ur"(?:(?P<wikiwordnccDelim>[ \t]*" + TitleWikiWordDelimiterPAT + ur")"
-        ur"(?P<wikiwordnccTitle>" + PlainCharacterPAT + ur"+?))?\]"
+        ur"(?P<wikiwordnccTitle>" + PlainCharacterPAT + ur"+?))?" +
+        BracketEndPAT +
         ur"(?:#(?P<wikiwordnccSearchfrag>(?:(?:#.)|[^ \t\n#])+)|" +
         AnchorStartPAT + ur"(?P<wikiwordnccAnchorfrag>[A-Za-z0-9\_]+))?",
         re.DOTALL | re.UNICODE | re.MULTILINE)
@@ -161,9 +171,11 @@ TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlRE.pattern + u"|" +
 
 
 # parses the dynamic properties
-PropertyRE      = re.compile(ur"\[[ \t]*(?P<propertyName>[\w\-\_\.]+?)[ \t]*" +
-                  ur"[=:][ \t]*(?P<propertyValue>[\w\-\_ \t:;,.!?#/|]+?)\]",
-                  re.DOTALL | re.UNICODE | re.MULTILINE)
+PropertyRE      = re.compile(BracketStartPAT +
+        ur"[ \t]*(?P<propertyName>[\w\-\_\.]+?)[ \t]*"
+        ur"[=:][ \t]*(?P<propertyValue>[\w\-\_ \t:;,.!?#/|]+?)" + 
+        BracketEndPAT,
+        re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
 # InsertionRE     = re.compile(ur"\[:[ \t]*(?P<insertionKey>[\w\-\_\.]+?)[ \t]*" +
@@ -171,21 +183,22 @@ PropertyRE      = re.compile(ur"\[[ \t]*(?P<propertyName>[\w\-\_\.]+?)[ \t]*" +
 #                   re.DOTALL | re.UNICODE | re.MULTILINE)
 
 InsertionValueRE = re.compile(ur"(?:(?P<insertionValue>[\w][\w\-\_ \t,.!?#/|]*)|"
-                  ur"(?P<insertionQuoteStarter>\"+|'+|/+|\\+)"
-                  ur"(?P<insertionQuotedValue>.*?)(?P=insertionQuoteStarter))",
-                  re.DOTALL | re.UNICODE | re.MULTILINE)
+        ur"(?P<insertionQuoteStarter>\"+|'+|/+|\\+)"
+        ur"(?P<insertionQuotedValue>.*?)(?P=insertionQuoteStarter))",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
 
 InsertionAppendixRE = re.compile(ur";[ \t]*(?:"
-                  ur"(?P<insertionAppendix>[\w][\w\-\_ \t,.!?#/|]*)|"
-                  ur"(?P<insertionApxQuoteStarter>\"+|'+|/+|\\+)"
-                  ur"(?P<insertionQuotedAppendix>.*?)(?P=insertionApxQuoteStarter))",
-                  re.DOTALL | re.UNICODE | re.MULTILINE)
+        ur"(?P<insertionAppendix>[\w][\w\-\_ \t,.!?#/|]*)|"
+        ur"(?P<insertionApxQuoteStarter>\"+|'+|/+|\\+)"
+        ur"(?P<insertionQuotedAppendix>.*?)(?P=insertionApxQuoteStarter))",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
 
-InsertionRE     = re.compile(ur"\[:[ \t]*(?P<insertionKey>[\w][\w\-\_\.]*)[ \t]*" +
-                  ur":[ \t]*(?P<insertionContent>" +
-                  InsertionValueRE.pattern +
-                  ur"(?:" + InsertionAppendixRE.pattern + ur")*)\]",
-                  re.DOTALL | re.UNICODE | re.MULTILINE)
+InsertionRE     = re.compile(BracketStartPAT +
+        ur":[ \t]*(?P<insertionKey>[\w][\w\-\_\.]*)[ \t]*"
+        ur":[ \t]*(?P<insertionContent>" +
+        InsertionValueRE.pattern +
+        ur"(?:" + InsertionAppendixRE.pattern + ur")*)" + BracketEndPAT,
+        re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
 # Reverse REs for autocompletion
@@ -199,11 +212,29 @@ RevWikiWordRE      = re.compile(ur"^" + # revSingleWikiWord + ur"(?:/" +
                              revSingleWikiWord + ur"(?![\~])\b",
                              re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
-RevWikiWordRE2     = re.compile(ur"^[\w\-\_ \t.]+?\[",
+RevWikiWordRE2     = re.compile(ur"^" + WikiWordNccRevPAT + BracketStartRevPAT,
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
-RevPropertyValue     = re.compile(ur"^([\w\-\_ \t:;,.!?#/|]*?)([ \t]*[=:][ \t]*)([\w\-\_ \t\.]+?)\[",
+RevPropertyValue     = re.compile(
+        ur"^([\w\-\_ \t:;,.!?#/|]*?)([ \t]*[=:][ \t]*)([\w\-\_ \t\.]+?)" +
+        BracketStartRevPAT,
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
+
+
+RevTodoREWithContent = re.compile(ur"^[^\n:]{0,30}:(?:[^:\s]{0,40}\.)??"
+        ur"(?:odot|enod|tiaw|noitca|kcart|eussi|noitseuq|tcejorp)",
+        re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
+
+
+RevWikiWordAnchorRE = re.compile(ur"^(?P<anchorBegin>[A-Za-z0-9\_]{0,20})" +
+        AnchorStartPAT + ur"(?P<wikiWord>" + RevWikiWordRE.pattern[1:] + ur")",
+        re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
+        
+RevWikiWordAnchorRE2 = re.compile(ur"^(?P<anchorBegin>[A-Za-z0-9\_]{0,20})" + 
+        AnchorStartPAT + BracketEndRevPAT + ur"(?P<wikiWord>" + 
+        WikiWordNccRevPAT + ur")" + BracketStartRevPAT,
+        re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
+
 
 
 # script blocks
@@ -213,8 +244,6 @@ ScriptRE        = re.compile(u"\<%(.*?)%\>", re.DOTALL)
 AutoGenAreaRE = re.compile(ur"^([ \t]*<<[ \t]+)([^\n]+\n)(.*?)^([ \t]*>>[ \t]*\n)", re.DOTALL | re.LOCALE | re.MULTILINE)
         
 # todos, captures the todo item text
-## ToDoREWithContent = re.compile(u"^\s*((?:todo|action|track|issue|question|project)\\.?[^\\:\\s]*:[^\\r\\n]+)", re.MULTILINE)
-
 ToDoREWithContent = re.compile(ur"\b(?P<todoIndent>)"    # ur"(?P<todoIndent>^[ \t]*)"
         ur"(?P<todoName>(?:todo|done|wait|action|track|issue|question|project)(?:\.[^:\s]+)?)"
         ur"(?P<todoDelimiter>:)(?P<todoValue>" + PlainCharacterPAT + ur"+?)(?:$|(?=\|))",

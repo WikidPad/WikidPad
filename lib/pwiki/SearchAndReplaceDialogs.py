@@ -508,6 +508,9 @@ class SearchWikiDialog(wxDialog):   # TODO
         
         self.ctrls.btnClose.SetId(wxID_CANCEL)
         
+        self.ctrls.cbSearch.SetWindowStyle(self.ctrls.cbSearch.GetWindowStyle()
+                | wxTE_PROCESS_ENTER)
+        
         self.listNeedsRefresh = True  # Reflects listbox content current
                                       # search criteria?
 
@@ -530,24 +533,25 @@ class SearchWikiDialog(wxDialog):   # TODO
         EVT_BUTTON(self, GUI_ID.btnCopyPageNamesToClipboard,
                 self.OnCopyPageNamesToClipboard)
         
-        EVT_CHAR(self.ctrls.txtSearch, self.OnCharToFind)
+        EVT_CHAR(self.ctrls.cbSearch, self.OnCharToFind)
 #         EVT_CHAR(self.ctrls.rboxSearchType, self.OnCharToFind)
 #         EVT_CHAR(self.ctrls.cbCaseSensitive, self.OnCharToFind)
 #         EVT_CHAR(self.ctrls.cbWholeWord, self.OnCharToFind)
 
+        EVT_COMBOBOX(self, GUI_ID.cbSearch, self.OnSearchComboSelected) 
         EVT_LISTBOX_DCLICK(self, GUI_ID.lbSavedSearches, self.OnLoadAndRunSearch)
         EVT_RADIOBOX(self, GUI_ID.rboxSearchType, self.OnRadioBox)
         EVT_BUTTON(self, wxID_CANCEL, self.OnClose)        
         EVT_CLOSE(self, self.OnClose)
         
-        EVT_TEXT(self, GUI_ID.txtSearch, self.OnListRefreshNeeded)
+        EVT_TEXT(self, GUI_ID.cbSearch, self.OnListRefreshNeeded)
         EVT_CHECKBOX(self, GUI_ID.cbCaseSensitive, self.OnListRefreshNeeded)
         EVT_CHECKBOX(self, GUI_ID.cbWholeWord, self.OnListRefreshNeeded)
 
 
     def buildSearchReplaceOperation(self):
         sarOp = SearchReplaceOperation()
-        sarOp.searchStr = guiToUni(self.ctrls.txtSearch.GetValue())
+        sarOp.searchStr = guiToUni(self.ctrls.cbSearch.GetValue())
         sarOp.booleanOp = self.ctrls.rboxSearchType.GetSelection() == 1
         sarOp.caseSensitive = self.ctrls.cbCaseSensitive.GetValue()
         sarOp.wholeWord = self.ctrls.cbWholeWord.GetValue()
@@ -560,6 +564,25 @@ class SearchWikiDialog(wxDialog):   # TODO
             sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
             
         return sarOp
+
+
+    def showSearchReplaceOperation(self, sarOp):
+        self.ctrls.cbSearch.SetValue(uniToGui(sarOp.searchStr))
+        if sarOp.booleanOp:
+            self.ctrls.rboxSearchType.SetSelection(1)
+        else:
+            self.ctrls.rboxSearchType.SetSelection(0)
+        
+        self.ctrls.cbCaseSensitive.SetValue(sarOp.caseSensitive)
+        self.ctrls.cbWholeWord.SetValue(sarOp.wholeWord)
+
+        if not sarOp.booleanOp and sarOp.replaceOp:
+            self.ctrls.txtReplace.SetValue(uniToGui(sarOp.replaceStr))
+            
+        self.listPagesOperation = sarOp.listWikiPagesOp
+            
+        self.OnRadioBox(None)  # Refresh settings
+
 
 
     def _refreshPageList(self):
@@ -588,6 +611,7 @@ class SearchWikiDialog(wxDialog):   # TODO
 
     def OnSearchWiki(self, evt):
         self._refreshPageList()
+        self.addCurrentToHistory()
         if not self.ctrls.htmllbPages.IsEmpty():
             self.ctrls.htmllbPages.SetFocus()
             self.ctrls.htmllbPages.SetSelection(0)
@@ -627,6 +651,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         self._findNext()
 
     def _findNext(self):
+        self.addCurrentToHistory()
         if self.listNeedsRefresh:
             # Refresh list and start from beginning
             self._refreshPageList()
@@ -701,6 +726,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         
         # wikiData = self.pWiki.getWikiData()
         wikiDocument = self.pWiki.getWikiDocument()
+        self.addCurrentToHistory()
 
         for i in xrange(self.ctrls.htmllbPages.GetCount()):
             self.ctrls.htmllbPages.SetSelection(i)
@@ -735,6 +761,28 @@ class SearchWikiDialog(wxDialog):   # TODO
 #                     addToHistory=False, forceReopen=True)
                 
         self._refreshPageList()
+
+
+    def addCurrentToHistory(self):
+        sarOp = self.buildSearchReplaceOperation()
+        data = sarOp.getPackedSettings()
+        tpl = (sarOp.searchStr, sarOp.getPackedSettings())
+        hist = wxGetApp().getWikiSearchHistory()
+        try:
+            pos = hist.index(tpl)
+            del hist[pos]
+            hist.insert(0, tpl)
+        except ValueError:
+            # tpl not in hist
+            hist.insert(0, tpl)
+            if len(hist) > 10:
+                hist = hist[:10]
+            
+        wxGetApp().setWikiSearchHistory(hist)
+        text = self.ctrls.cbSearch.GetValue()
+        self.ctrls.cbSearch.Clear()
+        self.ctrls.cbSearch.SetValue(text)
+        self.ctrls.cbSearch.AppendItems([tpl[0] for tpl in hist])
 
 
 
@@ -835,23 +883,34 @@ class SearchWikiDialog(wxDialog):   # TODO
         sarOp = SearchReplaceOperation()
         sarOp.setPackedSettings(datablock)
         
-        self.ctrls.txtSearch.SetValue(uniToGui(sarOp.searchStr))
-        if sarOp.booleanOp:
-            self.ctrls.rboxSearchType.SetSelection(1)
-        else:
-            self.ctrls.rboxSearchType.SetSelection(0)
+        self.showSearchReplaceOperation(sarOp)
         
-        self.ctrls.cbCaseSensitive.SetValue(sarOp.caseSensitive)
-        self.ctrls.cbWholeWord.SetValue(sarOp.wholeWord)
-
-        if not sarOp.booleanOp and sarOp.replaceOp:
-            self.ctrls.txtReplace.SetValue(uniToGui(sarOp.replaceStr))
-            
-        self.listPagesOperation = sarOp.listWikiPagesOp
-            
-        self.OnRadioBox(None)  # Refresh settings
+#         self.ctrls.cbSearch.SetValue(uniToGui(sarOp.searchStr))
+#         if sarOp.booleanOp:
+#             self.ctrls.rboxSearchType.SetSelection(1)
+#         else:
+#             self.ctrls.rboxSearchType.SetSelection(0)
+#         
+#         self.ctrls.cbCaseSensitive.SetValue(sarOp.caseSensitive)
+#         self.ctrls.cbWholeWord.SetValue(sarOp.wholeWord)
+# 
+#         if not sarOp.booleanOp and sarOp.replaceOp:
+#             self.ctrls.txtReplace.SetValue(uniToGui(sarOp.replaceStr))
+#             
+#         self.listPagesOperation = sarOp.listWikiPagesOp
+#             
+#         self.OnRadioBox(None)  # Refresh settings
         
         return True
+
+
+    def OnSearchComboSelected(self, evt):
+        hist = wxGetApp().getWikiSearchHistory()
+        sarOp = SearchReplaceOperation()
+        sarOp.setPackedSettings(hist[evt.GetSelection()][1])
+        
+        self.showSearchReplaceOperation(sarOp)
+        self.ctrls.txtReplace.SetValue(guiToUni(sarOp.replaceStr))
 
 
     def OnCopyPageNamesToClipboard(self, evt):
@@ -871,6 +930,13 @@ class SearchWikiDialog(wxDialog):   # TODO
 #             pass
         if (evt.GetKeyCode() in (WXK_RETURN, WXK_NUMPAD_ENTER)):
             self.OnSearchWiki(evt)
+        elif evt.GetKeyCode() == WXK_TAB:
+            if evt.ShiftDown():
+                self.ctrls.cbSearch.Navigate(wxNavigationKeyEvent.IsBackward | 
+                        wxNavigationKeyEvent.FromTab)
+            else:
+                self.ctrls.cbSearch.Navigate(wxNavigationKeyEvent.IsForward | 
+                        wxNavigationKeyEvent.FromTab)
         else:
             evt.Skip()
 
@@ -897,7 +963,8 @@ class SearchPageDialog(wxDialog):   # TODO
         EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)        
         EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
         EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
-        EVT_BUTTON(self, wxID_CANCEL, self.OnClose)        
+        EVT_BUTTON(self, wxID_CANCEL, self.OnClose)
+        EVT_COMBOBOX(self, GUI_ID.cbSearch, self.OnSearchComboSelected) 
         EVT_CLOSE(self, self.OnClose)
 
 
@@ -908,12 +975,12 @@ class SearchPageDialog(wxDialog):   # TODO
 
     def _buildSearchOperation(self):
         sarOp = SearchReplaceOperation()
-        sarOp.searchStr = guiToUni(self.ctrls.txtSearch.GetValue())
+        sarOp.searchStr = guiToUni(self.ctrls.cbSearch.GetValue())
         sarOp.replaceOp = False
         sarOp.booleanOp = False
         sarOp.caseSensitive = self.ctrls.cbCaseSensitive.GetValue()
         sarOp.wholeWord = self.ctrls.cbWholeWord.GetValue()
-        sarOp.cycleToStart = False #???
+        sarOp.cycleToStart = False
         
         if self.ctrls.cbRegEx.GetValue():
             sarOp.wildCard = 'regex'
@@ -925,6 +992,50 @@ class SearchPageDialog(wxDialog):   # TODO
         return sarOp
 
 
+    def buildHistoryTuple(self):
+        """
+        Build a tuple for the search history from current settings
+        """
+        return (
+                guiToUni(self.ctrls.cbSearch.GetValue()),
+                guiToUni(self.ctrls.txtReplace.GetValue()),
+                bool(self.ctrls.cbCaseSensitive.GetValue()),
+                bool(self.ctrls.cbWholeWord.GetValue()),
+                bool(self.ctrls.cbRegEx.GetValue())
+                )
+
+
+    def showHistoryTuple(self, tpl):
+        """
+        Load settings from history tuple into controls
+        """
+        self.ctrls.cbSearch.SetValue(uniToGui(tpl[0]))
+        self.ctrls.txtReplace.SetValue(uniToGui(tpl[1]))
+        self.ctrls.cbCaseSensitive.SetValue(bool(tpl[2]))
+        self.ctrls.cbWholeWord.SetValue(bool(tpl[3]))
+        self.ctrls.cbRegEx.SetValue(bool(tpl[4]))
+
+
+    def addCurrentToHistory(self):
+        tpl = self.buildHistoryTuple()
+        hist = wxGetApp().getPageSearchHistory()
+        try:
+            pos = hist.index(tpl)
+            del hist[pos]
+            hist.insert(0, tpl)
+        except ValueError:
+            # tpl not in hist
+            hist.insert(0, tpl)
+            if len(hist) > 10:
+                hist = hist[:10]
+            
+        wxGetApp().setPageSearchHistory(hist)
+        text = self.ctrls.cbSearch.GetValue()
+        self.ctrls.cbSearch.Clear()
+        self.ctrls.cbSearch.SetValue(text)
+        self.ctrls.cbSearch.AppendItems([tpl[0] for tpl in hist])
+
+
     def _nextSearch(self, sarOp):
         editor = self.pWiki.getActiveEditor()
         if self.ctrls.rbSearchFrom.GetSelection() == 0:
@@ -934,7 +1045,8 @@ class SearchPageDialog(wxDialog):   # TODO
             # Search from beginning
             contPos = 0
             self.ctrls.rbSearchFrom.SetSelection(0)
-        
+            
+        self.addCurrentToHistory()
         start, end = self.pWiki.getActiveEditor().executeSearch(sarOp,
                 contPos)[:2]
         if start == -1:
@@ -962,6 +1074,7 @@ class SearchPageDialog(wxDialog):   # TODO
     def OnFindNext(self, evt):
         sarOp = self._buildSearchOperation()
         sarOp.replaceOp = False
+        self.addCurrentToHistory()
         self._nextSearch(sarOp)
 
         self.firstFind = False
@@ -971,6 +1084,7 @@ class SearchPageDialog(wxDialog):   # TODO
         sarOp = self._buildSearchOperation()
         sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
         sarOp.replaceOp = True
+        self.addCurrentToHistory()
         self.pWiki.getActiveEditor().executeReplace(sarOp)
         self._nextSearch(sarOp)
 
@@ -982,6 +1096,7 @@ class SearchPageDialog(wxDialog):   # TODO
         sarOp.cycleToStart = False
         lastReplacePos = 0
         editor = self.pWiki.getActiveEditor()
+        self.addCurrentToHistory()
         editor.BeginUndoAction()
         try:
             while True:
@@ -992,6 +1107,10 @@ class SearchPageDialog(wxDialog):   # TODO
         finally:
             editor.EndUndoAction()
 
+
+    def OnSearchComboSelected(self, evt):
+        hist = wxGetApp().getPageSearchHistory()
+        self.showHistoryTuple(hist[evt.GetSelection()])
 
 
 class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO

@@ -276,6 +276,7 @@ class HtmlXmlExporter:
 
     def _exportHtmlSingleFile(self):
         if len(self.wordList) == 1:
+            self.exportType = u"html_multi"
             return self._exportHtmlMultipleFiles()
 
         outputFile = join(self.exportDest,
@@ -759,42 +760,6 @@ class HtmlXmlExporter:
                 return self.links.get(relUnAlias)
 
 
-#         for wikiWord, deepness in flatTree:
-#             while deepness < deepStack[-1]:
-#                 deepStack.pop()
-#                 print "getContentTreeBody9", deepness, deepStack[-1]
-#                 result.append(u"</ul>\n")
-#             if not wikiWord in wordSet:
-#                 continue
-#                 
-#             if deepness > deepStack[-1]:
-#                 print "getContentTreeBody10", deepness, deepStack[-1]
-#                 deepStack.append(deepness)
-#                 result.append(u"<ul>\n")
-# 
-#             wordSet.remove(wikiWord)
-# 
-#             print "getContentTreeBody11", repr(wikiWord)
-#             result.append(u'<li><a href="%s">%s</a>\n' % (wordToLink(wikiWord),
-#                     wikiWord))
-# 
-#         result.append(u"</ul>\n" * (len(deepStack) - 1))
-# 
-#         # list words not in the tree
-#         if len(wordSet) > 0:
-#             print "getContentTreeBody13"
-#             remainList = list(wordSet)
-#             self.mainControl.getCollator().sort(remainList)
-#             
-#             print "getContentTreeBody14", repr(remainList)
-#             result.append(u"<ul>\n")
-#             for wikiWord in remainList:
-#                 result.append(u'<li><a href="%s">%s</a>\n' % (wordToLink(wikiWord),
-#                         wikiWord))
-# 
-#             result.append(u"</ul>\n")
-
-
         lastdeepness = 0
         
         for wikiWord, deepness in flatTree:
@@ -1268,6 +1233,7 @@ class HtmlXmlExporter:
         stacklen = len(self.statestack)
         formatting = self.mainControl.getFormatting()
         unescapeNormalText = formatting.unescapeNormalText
+        wikiDocument = self.mainControl.getWikiDocument()
         
         for i in xrange(len(tokens)):
             tok = tokens[i]
@@ -1594,11 +1560,26 @@ class HtmlXmlExporter:
                     # styleno == WikiFormatting.FormatTypes.WikiWord2:
                 word = tok.node.nakedWord # self.mainControl.getFormatting().normalizeWikiWord(tok.text)
                 link = self.links.get(word)
+                
+                selfLink = False
 
                 if link:
+                    if not self.exportType in (u"html_single", u"xml"):
+                        wikiData = wikiDocument.getWikiData()
+                        linkTo = wikiData.getAliasesWikiWord(word)
+                        linkFrom = wikiData.getAliasesWikiWord(self.wikiWord)
+                        if linkTo == linkFrom:
+                            # Page links to itself
+                            selfLink = True
+
                     # Add anchor fragment if present
                     if tok.node.anchorFragment:
-                        link += u"#" + tok.node.anchorFragment
+                        if selfLink:
+                            # Page links to itself, so replace link URL
+                            # by the anchor.
+                            link = u"#" + tok.node.anchorFragment
+                        else:
+                            link += u"#" + tok.node.anchorFragment
 
                     if self.asXml:   # TODO XML
                         self.outAppend(u'<link type="wikiword">%s</link>' % 

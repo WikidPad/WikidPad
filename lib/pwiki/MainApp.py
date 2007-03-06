@@ -130,6 +130,9 @@ class App(wxApp):
         # Create default config dicts
         self.defaultGlobalConfigDict = Configuration.GLOBALDEFAULTS.copy()
         self.defaultWikiConfigDict = Configuration.WIKIDEFAULTS.copy()
+        self.pageSearchHistory = []
+        self.wikiSearchHistory = []
+        
         self.optionsDlgPanelList = list(
                 OptionsDialog.OptionsDialog.DEFAULT_PANEL_LIST)
 
@@ -393,7 +396,19 @@ class App(wxApp):
 
     def getInsertionPluginManager(self):
         return self.insertionPluginManager
+        
+    def getPageSearchHistory(self):
+        return self.pageSearchHistory
+        
+    def setPageSearchHistory(self, hist):
+        self.pageSearchHistory = hist
 
+
+    def getWikiSearchHistory(self):
+        return self.wikiSearchHistory
+
+    def setWikiSearchHistory(self, hist):
+        self.wikiSearchHistory = hist
 
     def createGlobalConfiguration(self):
         return Configuration.SingleConfiguration(

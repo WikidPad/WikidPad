@@ -321,6 +321,35 @@ class WikiPage(DocPage):
         return title
         
     getWikiPageTitle = staticmethod(getWikiPageTitle)
+    
+    
+    def getLivePageAst(self):
+        pageAst = None
+        txtEditor = self.getTxtEditor()
+        if txtEditor is not None:
+            # page is in text editor(s), so call AppendText on one of it
+            pageAst = txtEditor.getCachedPageAst()
+
+        if pageAst is not None:
+            return pageAst
+            
+        formatting = self.wikiDocument.getFormatting()
+
+        pageAst = PageAst.Page()
+        text = self.getLiveText()
+        pageAst.buildAst(formatting, text, self.getFormatDetails())
+        
+        return pageAst
+
+
+    def getAnchors(self):
+        """
+        Return sequence of anchors in page
+        """
+        pageAst = self.getLivePageAst()
+        return [t.grpdict["anchorValue"]
+                for t in pageAst.findTypeFlat(WikiFormatting.FormatTypes.Anchor)]
+        
 
 
     def isDefined(self):
