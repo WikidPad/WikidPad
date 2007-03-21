@@ -3,7 +3,7 @@
 :Author: Aaron Watters
 :Maintainers: http://gadfly.sf.net/
 :Copyright: Aaron Robert Watters, 1994
-:Id: $Id: gfsocket.py,v 1.1 2005/06/05 05:51:23 jhorman Exp $:
+:Id: $Id: gfsocket.py,v 1.1 2006/01/07 15:01:23 Michael Butscher Exp $:
 """
 
 import sys, select, time, marshal, md5
@@ -29,7 +29,7 @@ def reply_success(data, socket):
     reply( (SUCCESS, data), socket)
 
 def reply(data, socket):
-    marshaldata = marshal.dumps(data)
+    marshaldata = marshal.dumps(data, MARSHAL_VERSION)
     send_packet(socket, marshaldata)
     socket.close()
 
@@ -44,10 +44,10 @@ def send_len(data, socket):
     socket.send(info)
 
 def send_certified_action(actor_name, action, arguments, password, socket):
-    marshaldata = marshal.dumps( (action, arguments) )
+    marshaldata = marshal.dumps( (action, arguments), MARSHAL_VERSION)
     cert = certificate(marshaldata, password)
     #print actor_name, cert,  marshaldata
-    marshaldata = marshal.dumps( (actor_name, cert, marshaldata) )
+    marshaldata = marshal.dumps( (actor_name, cert, marshaldata), MARSHAL_VERSION)
     send_packet(socket, marshaldata)
 
 def unpack_certified_data(data):
@@ -219,6 +219,9 @@ def certify(String, cert, password):
 
 #
 # $Log: gfsocket.py,v $
+# Revision 1.1  2006/01/07 15:01:23  Michael Butscher
+# First combined version of WikidPad/WikidPadCompact
+#
 # Revision 1.1  2005/06/05 05:51:23  jhorman
 # initial checkin
 #

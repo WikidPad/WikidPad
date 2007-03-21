@@ -3,12 +3,13 @@
 :Author: Aaron Watters
 :Maintainers: http://gadfly.sf.net/
 :Copyright: Aaron Robert Watters, 1994
-:Id: $Id: store.py,v 1.1 2005/06/05 05:51:23 jhorman Exp $:
+:Id: $Id: store.py,v 1.1 2006/01/07 15:01:25 Michael Butscher Exp $:
 """
 
 verbosity = 0
 
 import sys, os, md5, types, marshal
+from consts import MARSHAL_VERSION
 from kjbuckets_select import kjbuckets
 import serialize
 
@@ -33,9 +34,9 @@ def recursive_dump(data, prefix="["):
 
 def checksum_dump(data, file):
     """checksum and dump marshallable data to file"""
-    storage = marshal.dumps(data)
+    storage = marshal.dumps(data, MARSHAL_VERSION)
     checkpair = (checksum(storage), storage)
-    marshal.dump(checkpair, file)
+    marshal.dump(checkpair, file, MARSHAL_VERSION)
 
 def checksum_undump(file):
     """undump marshallable data from file, checksum"""
@@ -1385,6 +1386,9 @@ class DB_Logger:
 
 #
 # $Log: store.py,v $
+# Revision 1.1  2006/01/07 15:01:25  Michael Butscher
+# First combined version of WikidPad/WikidPadCompact
+#
 # Revision 1.1  2005/06/05 05:51:23  jhorman
 # initial checkin
 #

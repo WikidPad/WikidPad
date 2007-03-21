@@ -7,7 +7,7 @@ and not as slow as concievably possible.
 :Author: Aaron Watters
 :Maintainers: http://gadfly.sf.net/
 :Copyright: Aaron Robert Watters, 1994
-:Id: $Id: kjSet.py,v 1.1 2005/06/05 05:51:23 jhorman Exp $:
+:Id: $Id: kjSet.py,v 1.1 2006/01/07 15:01:24 Michael Butscher Exp $:
 """
 
 def NewSet(Sequence):
@@ -258,6 +258,9 @@ def BGtest(n):
 
 #
 # $Log: kjSet.py,v $
+# Revision 1.1  2006/01/07 15:01:24  Michael Butscher
+# First combined version of WikidPad/WikidPadCompact
+#
 # Revision 1.1  2005/06/05 05:51:23  jhorman
 # initial checkin
 #

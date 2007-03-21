@@ -524,6 +524,7 @@ lib/__init__.py -text
 lib/gadfly/__init__.py -text
 lib/gadfly/bindings.py -text
 lib/gadfly/client.py -text
+lib/gadfly/consts.py -text
 lib/gadfly/database.py -text
 lib/gadfly/gfsocket.py -text
 lib/gadfly/grammar.py -text
