@@ -34,7 +34,7 @@ if gadfly is not None:
 from pwiki.WikiExceptions import *   # TODO make normal import?
 from pwiki import SearchAndReplace
 
-from pwiki.StringOps import mbcsEnc, mbcsDec, utf8Enc, utf8Dec, BOM_UTF8, \
+from pwiki.StringOps import pathEnc, pathDec, utf8Enc, utf8Dec, BOM_UTF8, \
         fileContentToUnicode, wikiWordToLabel
 
 from pwiki import WikiFormatting
@@ -637,9 +637,9 @@ class WikiData:
 
     # TODO More general Wikiword to filename mapping
     def _getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
-        files = glob.glob(mbcsEnc(join(self.dataDir,
+        files = glob.glob(pathEnc(join(self.dataDir,
                 u'*' + self.pagefileSuffix), "replace")[0])
-        return [mbcsDec(basename(file), "replace")[0].replace(self.pagefileSuffix, '')
+        return [pathDec(basename(file), "replace")[0].replace(self.pagefileSuffix, '')
                 for file in files]   # TODO: Unsafe. Suffix like e.g. '.wiki' may appear
                                     #  in the word. E.g. "The.great.wiki.for.all.wiki"
 
@@ -650,7 +650,7 @@ class WikiData:
         Not part of public API!
         """
 
-        # return mbcsEnc(join(self.dataDir, "%s.wiki" % wikiWord))[0]
+        # return pathEnc(join(self.dataDir, "%s.wiki" % wikiWord))[0]
         return join(self.dataDir, (u"%s" + self.pagefileSuffix) % wikiWord)
 
     # TODO More reliably esp. for aliases

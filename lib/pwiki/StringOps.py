@@ -24,7 +24,7 @@ import srePersistent as _re
 LINEEND_SPLIT_RE = _re.compile(r"\r\n?|\n")
 
 
-from Configuration import isUnicode, isOSX, isLinux
+from Configuration import isUnicode, isOSX, isLinux, isWindows, isWin9x
 
 
 # To generate dependencies for py2exe/py2app
@@ -94,6 +94,17 @@ def mbcsDec(input, errors="strict"):
         return input, len(input)
     else:
         return _mbcsDec(input, errors)
+
+
+if isWindows() and not isWin9x():
+    def dummy(s, e=""):
+        return s, len(s)
+
+    pathEnc = dummy
+    pathDec = dummy
+else:
+    pathEnc = mbcsEnc
+    pathDec = mbcsDec
 
 
 if isUnicode():

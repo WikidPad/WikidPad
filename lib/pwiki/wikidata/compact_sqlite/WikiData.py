@@ -33,7 +33,7 @@ except:
 # finally:
 #     pass
 
-from pwiki.StringOps import getBinCompactForDiff, applyBinCompact, mbcsEnc, mbcsDec,\
+from pwiki.StringOps import getBinCompactForDiff, applyBinCompact, pathEnc, pathDec,\
         binCompactToCompact, fileContentToUnicode, utf8Enc, utf8Dec, Tokenizer
 
 from pwiki import WikiFormatting
@@ -57,7 +57,7 @@ class WikiData:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
-        dbfile = mbcsDec(dbfile)[0]
+        dbfile = pathDec(dbfile)[0]
         try:
             self.connWrap = DbStructure.ConnectWrap(sqlite.connect(dbfile))
         except (IOError, OSError, sqlite.Error), e:
@@ -1504,9 +1504,9 @@ class WikiData:
         """
         self.connWrap.commit()
 
-        fnames = glob.glob(join(mbcsEnc(self.dataDir, "replace")[0], '*.wiki'))
+        fnames = glob.glob(join(pathEnc(self.dataDir, "replace")[0], '*.wiki'))
         for fn in fnames:
-            word = basename(mbcsDec(fn, "replace")[0]).replace('.wiki', '')   # mbcsDec
+            word = basename(pathDec(fn, "replace")[0]).replace('.wiki', '')
 
             fp = open(fn)
             content = fp.read()

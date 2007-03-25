@@ -32,8 +32,8 @@ except:
 # finally:
 #     pass
 
-from pwiki.StringOps import getBinCompactForDiff, applyBinCompact, mbcsEnc, \
-        mbcsDec, binCompactToCompact, fileContentToUnicode, utf8Enc, utf8Dec, \
+from pwiki.StringOps import getBinCompactForDiff, applyBinCompact, pathEnc, \
+        pathDec, binCompactToCompact, fileContentToUnicode, utf8Enc, utf8Dec, \
         BOM_UTF8, Tokenizer
 
 from pwiki import WikiFormatting
@@ -58,7 +58,7 @@ class WikiData:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
-        dbfile = mbcsDec(dbfile)[0]
+        dbfile = pathDec(dbfile)[0]
         try:
             self.connWrap = DbStructure.ConnectWrap(sqlite.connect(dbfile))
         except (IOError, OSError, sqlite.Error), e:
@@ -665,9 +665,9 @@ class WikiData:
     # TODO More general Wikiword to filename mapping
     def _getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
         try:
-            files = glob.glob(mbcsEnc(join(self.dataDir,
+            files = glob.glob(pathEnc(join(self.dataDir,
                     u'*' + self.pagefileSuffix), "replace")[0])
-            return [mbcsDec(basename(file), "replace")[0].replace(self.pagefileSuffix, '')
+            return [pathDec(basename(file), "replace")[0].replace(self.pagefileSuffix, '')
                     for file in files]   # TODO: Unsafe. Suffix like e.g. '.wiki' may appear
                                         #  in the word. E.g. "The.great.wiki.for.all.wiki"
         except (IOError, OSError, sqlite.Error), e:

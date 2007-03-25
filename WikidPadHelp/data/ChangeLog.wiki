@@ -1,7 +1,17 @@
 ﻿++ Change Log
 
 
-Feb. 25, 2007 (1.8rc2)
+Mar. 25, 2007 (1.8rc3)
+
+    * Bug fixed (at least for Windows NT/2K/XP): Wiki words with
+      foreign characters were not recognized or recognized with
+      wrong characters after rebuild of wikis with
+      "Original ..." types.
+    * Bug fixed: Bad HTML links to anchors on same wiki page.
+
+
+
+Feb. 25, 2007 (1.8rc2, repository revision in "stable-1.8" branch: 105)
 
     * Filter to remove double clipboard pastes when using the
       clipboard catcher with certain applications (e.g.

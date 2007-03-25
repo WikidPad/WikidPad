@@ -3,7 +3,7 @@
 import sys, os, traceback, os.path, glob
 os.stat_float_times(True)
 
-VERSION_STRING = "wikidPad 1.8rc2"
+VERSION_STRING = "wikidPad 1.8rc3"
 
 if not hasattr(sys, 'frozen'):
     sys.path.append("lib")
