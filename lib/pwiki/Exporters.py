@@ -1393,18 +1393,11 @@ class HtmlXmlExporter:
                     self.preMode = max(0, self.preMode - 1)
                 # HTML tag -> export as is 
                 self.outAppend(tok.text)
-            elif styleno in (WikiFormatting.FormatTypes.Heading4, 
-                    WikiFormatting.FormatTypes.Heading3,
-                    WikiFormatting.FormatTypes.Heading2,
-                    WikiFormatting.FormatTypes.Heading1):
-                if styleno == WikiFormatting.FormatTypes.Heading4:
-                    headLevel = 4
-                elif styleno == WikiFormatting.FormatTypes.Heading3:
-                    headLevel = 3
-                elif styleno == WikiFormatting.FormatTypes.Heading2:
-                    headLevel = 2
-                elif styleno == WikiFormatting.FormatTypes.Heading1:
-                    headLevel = 1
+            elif styleno == WikiFormatting.FormatTypes.HtmlEntity:
+                # HTML entity -> export as is  (TODO: This is bad for XML)
+                self.outAppend(tok.text)
+            elif WikiFormatting.getHeadingLevel(styleno):
+                headLevel = WikiFormatting.getHeadingLevel(styleno)
 
                 if self.optsStack[-1].get("anchorForHeading", True):
                     if self.wordAnchor:

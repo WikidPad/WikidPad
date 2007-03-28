@@ -228,19 +228,39 @@ def getAccelPairFromString(s):
     return ae.GetFlags(), ae.GetKeyCode()
 
 
+def setHotKeyByString(win, hotKeyId, keyString):
+    accFlags, vkCode = getAccelPairFromString("\t" + keyString)
 
-def cloneImageList(imgList):
-    """
-    Create a copy of an wxImageList
-    """
-    sz = imgList.GetSize(0)
-    lng = imgList.GetImageCount()
-    result = wx.ImageList(sz[0], sz[1], True, lng)
+#     win.RegisterHotKey(hotKeyId, 0, 0)
+    win.UnregisterHotKey(hotKeyId)
+    if accFlags is not None:
+        modFlags = 0
+        if accFlags & wx.ACCEL_SHIFT:
+            modFlags |= wx.MOD_SHIFT
+        if accFlags & wx.ACCEL_CTRL:
+            modFlags |= wx.MOD_CONTROL
+        if accFlags & wx.ACCEL_ALT:
+            modFlags |= wx.MOD_ALT
+            
+#         print "setHotKeyByString7", hotKeyId
+        return win.RegisterHotKey(hotKeyId, modFlags, vkCode)
+    
+    return False
 
-    for i in xrange(lng):
-        result.AddIcon(imgList.GetIcon(i))
 
-    return result
+
+# def cloneImageList(imgList):
+#     """
+#     Create a copy of an wxImageList
+#     """
+#     sz = imgList.GetSize(0)
+#     lng = imgList.GetImageCount()
+#     result = wx.ImageList(sz[0], sz[1], True, lng)
+# 
+#     for i in xrange(lng):
+#         result.AddIcon(imgList.GetIcon(i))
+# 
+#     return result
 
 
 def appendToMenuByMenuDesc(menu, desc):
@@ -446,11 +466,11 @@ class IconCache:
             return default
             
             
-    def getNewImageList(self):
-        """
-        Return a new (cloned) image list
-        """
-        return cloneImageList(self.iconImageList)
+#     def getNewImageList(self):
+#         """
+#         Return a new (cloned) image list
+#         """
+#         return cloneImageList(self.iconImageList)
         
         
     def getImageList(self):
@@ -485,6 +505,12 @@ class LayerSizer(wx.PySizer):
         size = self.GetSize()
         for item in self.GetChildren():
             item.SetDimension(pos, size)
+
+
+
+class DummyWindow(wx.Window):
+    def __init__(self, parent, id=-1):
+        wx.Window.__init__(self, parent, id, size=(0,0))
 
 
 

@@ -1,6 +1,8 @@
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
+import traceback
+
 import wx, wx.html
 # from wxPython.wx import *
 # from wxPython.html import *
@@ -12,7 +14,7 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 from MiscEvent import KeyFunctionSink
 
 from StringOps import uniToGui
-from Configuration import isWindows, MIDDLE_MOUSE_CONFIG_TO_TABMODE
+from Configuration import isWindows, MIDDLE_MOUSE_CONFIG_TO_TABMODE, isOSX
 
 from TempFileSet import TempFileSet
 
@@ -143,8 +145,13 @@ class WikiHtmlView(wx.html.HtmlWindow):
 #             wx.html.HTML_FONT_SIZE_7)
 
     # These are the Windows sizes
-    _DEFAULT_FONT_SIZES = (7, 8, 10, 12, 16, 22, 30)
-    
+    if isWindows():
+        _DEFAULT_FONT_SIZES = (7, 8, 10, 12, 16, 22, 30)
+    elif isOSX():
+        _DEFAULT_FONT_SIZES = (9, 12, 14, 18, 24, 30, 36)
+    else:
+        _DEFAULT_FONT_SIZES = (10, 12, 14, 16, 19, 24, 32)
+
     # For Mac
     # _DEFAULT_FONT_SIZES = (9, 12, 14, 18, 24, 30, 36)
     # For __WXGPE__ (?)
@@ -153,13 +160,10 @@ class WikiHtmlView(wx.html.HtmlWindow):
     # _DEFAULT_FONT_SIZES = (10, 12, 14, 16, 19, 24, 32)
 
 
-    # TODO Called too often and at wrong time, e.g. when switching from
-    # preview to edit.
-
     def refresh(self):
         ## _prof.start()
 
-        # Store position of currently displaayed page, if any
+        # Store position of currently displayed page, if any
         if self.currentLoadedWikiWord:
             try:
                 prevPage = self.presenter.getWikiDocument().getWikiPage(

@@ -13,7 +13,7 @@ Used terms:
 
 
 
-from os import mkdir, unlink, rename    # listdir
+from os import mkdir, unlink, rename, stat    # listdir
 from os.path import exists, join, basename
 from time import time, localtime
 import datetime
@@ -34,7 +34,7 @@ if gadfly is not None:
 from pwiki.WikiExceptions import *   # TODO make normal import?
 from pwiki import SearchAndReplace
 
-from pwiki.StringOps import mbcsEnc, mbcsDec, utf8Enc, utf8Dec, BOM_UTF8, \
+from pwiki.StringOps import pathEnc, pathDec, utf8Enc, utf8Dec, BOM_UTF8, \
         fileContentToUnicode, wikiWordToLabel
 
 from pwiki import WikiFormatting
@@ -102,18 +102,18 @@ class WikiData:
             lastException = DbWriteAccessError(e)
 
         # create word caches
-        self.cachedContentNames = {}
+        self.cachedContentNames = None
 
         try:
-            # cache aliases
-            aliases = self.getAllAliases()
-            for alias in aliases:
-                self.cachedContentNames[alias] = 2
-    
-            # Cache real words
-            for word in self.getAllDefinedContentNames():
-                self.cachedContentNames[word] = 1
-    
+#             # cache aliases
+#             aliases = self.getAllAliases()
+#             for alias in aliases:
+#                 self.cachedContentNames[alias] = 2
+#     
+#             # Cache real words
+#             for word in self.getAllDefinedContentNames():
+#                 self.cachedContentNames[word] = 1
+#     
             self.cachedGlobalProps = None
             self.getGlobalProperties()
         except (IOError, OSError, ValueError), e:
@@ -179,7 +179,7 @@ class WikiData:
             traceback.print_exc()
             raise DbWriteAccessError(e)
                     
-        self.cachedContentNames[word] = 1
+        self._getCachedContentNames()[word] = 1
 
 
     def setContent(self, word, content, moddate = None, creadate = None):
@@ -215,8 +215,8 @@ class WikiData:
     
             rename(self.getWikiWordFileName(oldWord),
                     self.getWikiWordFileName(newWord))
-            del self.cachedContentNames[oldWord]
-            self.cachedContentNames[newWord] = 1
+            del self._getCachedContentNames()[oldWord]
+            self._getCachedContentNames()[newWord] = 1
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -228,7 +228,7 @@ class WikiData:
             self.execSql("delete from wikiwords where word = ?", (word,))
             if exists(self.getWikiWordFileName(word)):
                 unlink(self.getWikiWordFileName(word))
-            del self.cachedContentNames[word]
+            del self._getCachedContentNames()[word]
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -376,7 +376,8 @@ class WikiData:
                 pass
         
         if existingonly:
-            children = filter(lambda w: self.cachedContentNames.has_key(w), children)
+            children = filter(lambda w:
+                    self._getCachedContentNames().has_key(w), children)
 
         if withPosition:
             children = [(c, -1) for c in children]
@@ -474,17 +475,19 @@ class WikiData:
         childWords = sets.Set([relation for word, relation in relations])
         
         return [word for word in childWords
-                if not self.cachedContentNames.has_key(word)]
+                if not self._getCachedContentNames().has_key(word)]
 
 
-    def addRelationship(self, word, toWord):
+    def addRelationship(self, word, rel):
         """
-        Add a relationship from word toWord. Returns True if relation added.
+        Add a relationship from word to rel. rel is a tuple (toWord, pos).
+        The Gadfly implementation ignores pos.
+        Returns True if relation added.
         A relation from one word to another is unique and can't be added twice.
         """
         try:
             data = self.execSqlQuery("select relation from wikirelations where "
-                    "word = ? and relation = ?", (word, toWord))
+                    "word = ? and relation = ?", (word, rel[0]))
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -493,7 +496,7 @@ class WikiData:
         if len(data) < 1:
             try:
                 self.execSql("insert into wikirelations(word, relation, created) "
-                        "values (?, ?, ?)", (word, toWord, time()))
+                        "values (?, ?, ?)", (word, rel[0], time()))
             except (IOError, OSError, ValueError), e:
                 traceback.print_exc()
                 raise DbWriteAccessError(e)
@@ -602,7 +605,7 @@ class WikiData:
         so it must not rely on the presence of other cache
         information (e.g. relations)
         
-        The self.cachedContentNames is also updated.
+        The self.cachedContentNames is invalidated.
         """
         diskPages = sets.ImmutableSet(self._getAllPageNamesFromDisk())
         definedPages = sets.ImmutableSet(self.getAllDefinedContentNames())
@@ -615,31 +618,53 @@ class WikiData:
             # Add new words:
             ti = time()
             for word in (diskPages - definedPages):
+                st = stat(self.getWikiWordFileName(word))
                 self.execSql("insert into wikiwords(word, created, modified, "
                         "presentationdatablock, wordnormcase) "
-                        "values (?, ?, ?, '', '')", (word, ti, ti))
+                        "values (?, ?, ?, '', '')", (word, ti, st.st_mtime))
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
 
-        self.cachedContentNames = {}
+        self.cachedContentNames = None
+#         # cache aliases
+#         aliases = self.getAllAliases()
+#         for alias in aliases:
+#             self.cachedContentNames[alias] = 2
+# 
+#         # recreate word caches
+#         for word in self.getAllDefinedContentNames():
+#             self.cachedContentNames[word] = 1
 
-        # cache aliases
-        aliases = self.getAllAliases()
-        for alias in aliases:
-            self.cachedContentNames[alias] = 2
 
-        # recreate word caches
-        for word in self.getAllDefinedContentNames():
-            self.cachedContentNames[word] = 1
+    def _getCachedContentNames(self):
+        try:
+            if self.cachedContentNames is None:
+                result = {}
+        
+                # cache aliases
+                aliases = self.getAllAliases()
+                for alias in aliases:
+                    result[alias] = 2
+        
+                # Cache real words
+                for word in self.getAllDefinedContentNames():
+                    result[word] = 1
+                    
+                self.cachedContentNames = result
+
+            return self.cachedContentNames
+        except (IOError, OSError, ValueError), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
     # TODO More general Wikiword to filename mapping
     def _getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
-        files = glob.glob(mbcsEnc(join(self.dataDir,
+        files = glob.glob(pathEnc(join(self.dataDir,
                 u'*' + self.pagefileSuffix), "replace")[0])
-        return [mbcsDec(basename(file), "replace")[0].replace(self.pagefileSuffix, '')
+        return [pathDec(basename(file), "replace")[0].replace(self.pagefileSuffix, '')
                 for file in files]   # TODO: Unsafe. Suffix like e.g. '.wiki' may appear
                                     #  in the word. E.g. "The.great.wiki.for.all.wiki"
 
@@ -649,14 +674,12 @@ class WikiData:
         """
         Not part of public API!
         """
-
-        # return mbcsEnc(join(self.dataDir, "%s.wiki" % wikiWord))[0]
         return join(self.dataDir, (u"%s" + self.pagefileSuffix) % wikiWord)
 
     # TODO More reliably esp. for aliases
     def isDefinedWikiWord(self, word):
         "check if a word is a valid wikiword (page name or alias)"
-        return self.cachedContentNames.has_key(word)
+        return self._getCachedContentNames().has_key(word)
 
     def getWikiWordsStartingWith(self, thisStr, includeAliases=False):
         "get the list of words starting with thisStr. used for autocompletion."
@@ -897,14 +920,14 @@ class WikiData:
 
     def isAlias(self, word):
         "check if a word is an alias for another"
-        return self.cachedContentNames.get(word) == 2
+        return self._getCachedContentNames().get(word) == 2
 
     def setAsAlias(self, word):
         """
         Sets this word in internal cache to be an alias
         """
-        if self.cachedContentNames.get(word, 2) == 2:
-            self.cachedContentNames[word] = 2
+        if self._getCachedContentNames().get(word, 2) == 2:
+            self._getCachedContentNames()[word] = 2
 
 
     def getAllAliases(self):
@@ -1062,7 +1085,7 @@ class WikiData:
         DbStructure.recreateCacheTables(self.connWrap)
         self.connWrap.commit()
 
-        self.cachedContentNames = {}
+        self.cachedContentNames = None
         self.cachedGlobalProps = None
 
 

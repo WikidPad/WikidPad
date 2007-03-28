@@ -63,7 +63,21 @@ class SerializeStream:
         
     def readBytes(self, l):
         return self.fileObj.read(l)
-        
+
+
+    def serUint8(self, val):
+        """
+        Serialize 8bit unsigned integer val. This means: if stream is in read
+        mode, val is ignored and the int read from stream is returned,
+        if in write mode, val is written and returned
+        """
+        if self.isReadMode():
+            return unpack(">B", self.readBytes(1))[0]   # Why big-endian? Why not? 
+        else:
+            self.writeBytes(pack(">B", val))
+            return val
+
+
     def serUint32(self, val):
         """
         Serialize 32bit unsigned integer val. This means: if stream is in read
@@ -131,19 +145,34 @@ class SerializeStream:
             
             return tv
             
-    def serArrString(self, as):
+    def serArrString(self, abs):
         """
         Serialize array of byte strings
         """
-        l = self.serUint32(len(as)) # Length of array
+        l = self.serUint32(len(abs)) # Length of array
 
-        if self.isReadMode() and l != len(as):
-            as = [""] * l
+        if self.isReadMode() and l != len(abs):
+            abs = [""] * l
 
         for i in xrange(l):
-            as[i] = self.serString(as[i])
+            abs[i] = self.serString(abs[i])
             
-        return as
+        return abs
+        
+    def serArrUint32(self, an):
+        """
+        Serialize array of unsigned integer 32 bit
+        """
+        l = self.serUint32(len(an)) # Length of array
+
+        if self.isReadMode() and l != len(an):
+            an = [0] * l
+
+        for i in xrange(l):
+            an[i] = self.serUint32(an[i])
+            
+        return an
+        
 
 
     def close(self):

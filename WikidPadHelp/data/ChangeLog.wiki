@@ -1,6 +1,51 @@
 ﻿++ Change Log
 
-Feb. 26, 2007 (1.9beta2)
+
+Mar. 28, 2007 (1.9beta3)
+
+    * Autocompletion support for todo items and anchor fragments.
+      See AutoCompletion.
+    * HTML exporter now creates links which only contain anchor
+      ("#somewhere") if linking to the same page.
+    * Pagewide and wikiwide searches support now a history (not
+      saved between sessions)
+    * For "Replace All" operations the number of replacements is
+      given at the end of operation.
+
+    * Support for folding, includes storing of fold settings
+      between sessions. See [Folding].
+    * HTML entities like e.g. &nbsp; are handled now.
+      See TextFormatting!html.
+    * System-wide hotkey to show/hide WikidPad (probably Windows
+      only). Hotkeys are possible to be bound to the app and/or
+      a particular wiki. See OptionsDialog#*App-bound# hotkey*
+    * Option to offer closing bracket for bracketed wiki words
+      on autocompletion.
+      See OptionsDialog#*Append# closing# bracket# on# auto-complete*
+    * Option to play a sound each time clipboard catcher caught
+      text. See OptionsDialog#++++# Clipboard# catcher
+    * New menu items in system tray menu to control clipboard
+      catcher (for Windows).
+    * New pages found during rebuild (for Original ... db types)
+      get the modification date of the .wiki file.
+
+    * Bug fixed (at least for Windows 2K/XP): Wiki words with
+      foreign characters were not recognized or recognized with
+      wrong characters after rebuild of wikis with "Original ..."
+      types.
+    * Bug fixed: After rebuild of a database, wikiwords were no
+      longer recognized as existing (restart was needed).
+    * Bug (probably) fixed: Attribute \[child_sort_order: natural]
+      didn't always work properly.
+    * Bugs fixed: Some Linux quirks, but enough remaining yet.
+
+    * Internal: Changed wxPython namespace use from the
+      old-fashioned (wxFrame) to the "wx" namespace (wx.Frame).
+      There may be bugs yet.
+
+
+
+Feb. 26, 2007 (1.9beta2, repository revision in "mbutscher" branch: 106)
 
     * Configurable shortcuts for showing of editor/preview,
       switching between them

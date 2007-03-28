@@ -728,12 +728,13 @@ class SearchWikiDialog(wx.Dialog):   # TODO
         # wikiData = self.pWiki.getWikiData()
         wikiDocument = self.pWiki.getWikiDocument()
         self.addCurrentToHistory()
+        
+        replaceCount = 0
 
         for i in xrange(self.ctrls.htmllbPages.GetCount()):
             self.ctrls.htmllbPages.SetSelection(i)
             wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
             wikiPage = wikiDocument.getWikiPageNoError(wikiWord)
-#                 text = wikiData.getContent(wikiWord)
             text = wikiPage.getLiveTextNoTemplate()
             if text is None:
                 continue
@@ -753,15 +754,14 @@ class SearchWikiDialog(wx.Dialog):   # TODO
                 repl = sarOp.replace(text, found)
                 text = text[:start] + repl + text[end:]  # TODO Faster?
                 charStartPos = start + len(repl)
+                replaceCount += 1
 
-#                 wikiData.setContent(wikiWord, text)
             wikiPage.replaceLiveText(text)
-            
-#             # Reopen current word because its content could have been overwritten before
-#             self.pWiki.openWikiPage(self.pWiki.getCurrentWikiWord(),
-#                     addToHistory=False, forceReopen=True)
                 
         self._refreshPageList()
+        
+        wx.MessageBox(u"%i replacements done" % replaceCount, u"Replace All",
+                wx.OK, self)        
 
 
     def addCurrentToHistory(self):
@@ -1098,15 +1098,20 @@ class SearchPageDialog(wx.Dialog):   # TODO
         lastReplacePos = 0
         editor = self.pWiki.getActiveEditor()
         self.addCurrentToHistory()
+        replaceCount = 0
         editor.BeginUndoAction()
         try:
             while True:
                 lastReplacePos = editor.executeSearch(sarOp, lastReplacePos)[1]
                 if lastReplacePos == -1:
                     break
+                replaceCount += 1
                 lastReplacePos = editor.executeReplace(sarOp)
         finally:
             editor.EndUndoAction()
+            
+        wx.MessageBox(u"%i replacements done" % replaceCount, u"Replace All",
+                wx.OK, self)
 
 
     def OnSearchComboSelected(self, evt):

@@ -6,7 +6,16 @@ from StringOps import utf8Enc
 CASEMODE_UPPER_INSIDE = 0   # Sort upper case inside like aAbBcC
 CASEMODE_UPPER_FIRST = 1    # Sort upper case first like ABCabc
 
+def tt(s):
+    """
+    Currently only dummy: Lookup text in message table and return
+    localized message
+    """
+    return s
 
+
+def tt_noop(s):
+    return s
 
 
 # Factory functions for collators. Classes shouldn't be called directly

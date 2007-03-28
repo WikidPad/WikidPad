@@ -7,7 +7,7 @@ import ctypes, traceback
 from ctypes import c_int, c_uint, c_long, c_ulong, c_ushort, c_char, c_char_p, \
         c_wchar_p, c_byte, byref
 
-# from   wxPython.wx import 
+import wx
 
 from wxHelper import getTextFromClipboard
 
@@ -336,6 +336,26 @@ class WikidPadWin32WPInterceptor(BaseClipboardCatcher):
 #             print "WM_INPUTLANGCHANGE", repr((hWnd, wParam))
 
         return BaseClipboardCatcher.winProc(self, hWnd, uMsg, wParam, lParam)
+        
+        
+    def notifyUserOnClipboardChange(self):
+        config = self.mainControl.getConfig()
+        notifMode = config.getint("main", "clipboardCatcher_userNotification", 0)
+        if notifMode == 1:
+            soundPath = config.get("main", "clipboardCatcher_soundFile", u"")
+            if soundPath == u"":
+                wx.Bell()
+            else:
+                try:
+                    sound = wx.Sound(soundPath)
+                    if sound.IsOk():
+                        sound.Play(wx.SOUND_ASYNC)
+                        self.clipCatchNotifySound = sound  # save a reference
+                                # (This shoudln't be needed, but there seems to be a bug...)
+                    else:
+                        wx.Bell()
+                except NotImplementedError, v:
+                    wx.Bell()
 
 
     def handleClipboardChange(self):
@@ -361,9 +381,11 @@ class WikidPadWin32WPInterceptor(BaseClipboardCatcher):
             if self.wikiPage is None:
                 return
             self.wikiPage.appendLiveText(text + suffix)
+            self.notifyUserOnClipboardChange()
             
         elif self.mode == WikidPadWin32WPInterceptor.MODE_AT_CURSOR:
             self.mainControl.getActiveEditor().ReplaceSelection(text + suffix)
+            self.notifyUserOnClipboardChange()
             
         self.lastText = text
 

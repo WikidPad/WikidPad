@@ -14,8 +14,9 @@ FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
         "AvailWikiWord", "Bold", "Italic", "Heading4", "Heading3", "Heading2",
         "Heading1", "Url", "Script", "Property", "ToDo", "WikiWord2",
         "HorizLine", "Bullet", "Numeric", "Suppress", "Footnote", "Table",
-        "EscapedChar", "HtmlTag", "TableCellSplit", "TableRowSplit", "PreBlock",
-        "SuppressHighlight", "Insertion", "Anchor"], 0)
+        "EscapedChar", "HtmlTag", "HtmlEntity", "TableCellSplit",
+        "TableRowSplit", "PreBlock", "SuppressHighlight", "Insertion",
+        "Anchor"], 0)
 
 EMPTY_RE = re.compile(ur"", re.DOTALL | re.UNICODE | re.MULTILINE)
 
@@ -115,6 +116,25 @@ VALID_SCINTILLA_STYLES = sets.ImmutableSet((
         FormatTypes.ToDo))
 
 
+def getHeadingLevel(formatType):
+    """
+    Takes a formatType from Enumeration FormatTypes and returns
+    0 if it isn't one of the headings or the heading level (1 to 4)
+    if it is one of them.
+    """
+    if formatType == FormatTypes.Heading4:
+        return 4
+    elif formatType == FormatTypes.Heading3:
+        return 3
+    elif formatType == FormatTypes.Heading2:
+        return 2
+    elif formatType == FormatTypes.Heading1:
+        return 1
+        
+    return 0
+
+
+
 
 # --------------------------------
 
@@ -187,6 +207,7 @@ class WikiFormatting:
 
         self.formatExpressions = [
                 (self.PlainEscapedCharacterRE, FormatTypes.EscapedChar),
+                (self.HtmlEntityRE, FormatTypes.HtmlEntity),
                 (self.TableRE, FormatTypes.Table),
                 (self.PreBlockRE, FormatTypes.PreBlock),
                 (self.SuppressHighlightingRE, FormatTypes.SuppressHighlight),
@@ -216,6 +237,7 @@ class WikiFormatting:
                 
         self.formatTodoExpressions = [
                 (self.PlainEscapedCharacterRE, FormatTypes.EscapedChar),
+                (self.HtmlEntityRE, FormatTypes.HtmlEntity),
                 (self.TitledUrlRE, FormatTypes.Url),
                 (self.UrlRE, FormatTypes.Url),
                 (self.PropertyRE, FormatTypes.Property),
@@ -231,6 +253,7 @@ class WikiFormatting:
 
         self.formatTableContentExpressions = [
                 (self.PlainEscapedCharacterRE, FormatTypes.EscapedChar),
+                (self.HtmlEntityRE, FormatTypes.HtmlEntity),
                 (self.TitleWikiWordDelimiterPAT, FormatTypes.TableCellSplit),
                 (self.TableRowDelimiterPAT, FormatTypes.TableRowSplit),
                 (self.TitledUrlRE, FormatTypes.Url),
@@ -248,6 +271,7 @@ class WikiFormatting:
 
         self.formatWwTitleExpressions = [
                 (self.PlainEscapedCharacterRE, FormatTypes.EscapedChar),
+                (self.HtmlEntityRE, FormatTypes.HtmlEntity),
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
                 (self.HtmlTagRE, FormatTypes.HtmlTag)

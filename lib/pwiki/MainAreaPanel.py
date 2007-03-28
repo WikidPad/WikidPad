@@ -11,6 +11,7 @@ from MiscEvent import MiscEventSourceMixin, ResendingMiscEvent
 
 from WikiExceptions import *
 
+import Configuration
 
 
 class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
@@ -106,7 +107,9 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         presenter.getMiscEvent().addListener(self)
 
         presenter.switchSubControl("textedit")
-        # presenter.Show(True)
+
+        if Configuration.isLinux():
+            presenter.Show(True)
 
         if self.getCurrentDocPagePresenter() is None:
             self.setCurrentDocPagePresenter(presenter)

@@ -57,6 +57,7 @@ Then just start typing text with WikiWords to create your wiki.
     * CommandLineSupport
     * WikidPadOnUSB / ApplicationConfigurationFiles
     * [Templates]
+    * [Folding]
     * Different DatabaseTypes (WhereIsTheDataStored ?, MigrationBetweenDbTypes)
     * Defining TextBlocks
 

@@ -1,11 +1,50 @@
 ﻿++ Auto Completion
 
-As you type wiki words you can enter CTRL-SPACE to autocomplete them.
-For example.
+When pressing the keyboard shortcut for autocompletion (normally CTRL-SPACE), the program looks at the characters to the left of the text cursor on the same line and shows a list of suggestions how to complete the text.
 
-Put your cursor at the end of the word below and then
-press CTRL-SPACE.
+This works for the following components (for all of the following examples, move the cursor to the end of the line and press the shortcut):
 
-TextForm
+
++++ Wiki words
+
+An incomplete wiki word (with left bracket or without) can be completed. Examples:
+
+    TextForm
+    [Not Cam
+    
+For bracketed wiki words the closing bracket is normally not part of the suggestions, but there is an option to change that. See OptionsDialog#*Append# closing# bracket# on# auto-complete*
+
+
+
++++ Anchors of wiki words
+
+If you don't know what an anchor is, you might read [Anchors] first.
+
+If the wiki word is complete and suffixed with an exclamation mark, you can autocomplete an anchor which is present on the target page. Example:
+
+    [Anchors]!
+
+
+
++++ Attributes
+
+See WikiDocumentAttributes about attributes.
+
+Examples:
+
+    [con
+    [contact: 
+
+
+
++++ Todo items
+
+See TodoItems.
+
+Autocompletion only works within the first 40 characters in the todo key (the part before the ":", excluding the initial "todo", "done", "issue", ...) and the first 30 characters of the todo value (after the ':'). Examples:
+
+    todo.sys
+    todo:
+
 
 [bookmarked=true]

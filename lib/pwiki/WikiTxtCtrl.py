@@ -183,11 +183,16 @@ class IncrementalSearchDialog(wx.Frame):
 
 
 class WikiTxtCtrl(wx.stc.StyledTextCtrl):
+    NUMBER_MARGIN = 0
+    FOLD_MARGIN = 2
+    SELECT_MARGIN = 1
+    
     def __init__(self, presenter, parent, ID):
         wx.stc.StyledTextCtrl.__init__(self, parent, ID)
         self.presenter = presenter
         self.evalScope = None
         self.stylebytes = None
+        self.folding = None
         self.stylingThreadHolder = ThreadHolder()
         self.pageAst = None
         self.loadedDocPage = None
@@ -214,6 +219,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.autoIndent = config.getboolean("main", "auto_indent")
         self.autoBullets = config.getboolean("main", "auto_bullets")
         self.setShowLineNumbers(config.getboolean("main", "show_lineNumbers"))
+        self.foldingActive = config.getboolean("main", "editor_useFolding")
         
         self.defaultFont = config.get("main", "font",
                 self.presenter.getDefaultFontFaces()["mono"])
@@ -237,8 +243,36 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         # for unicode build
         self.UsePopUp(0)
 
+        self.SetMarginMask(self.FOLD_MARGIN, wx.stc.STC_MASK_FOLDERS)
+        self.SetMarginMask(self.NUMBER_MARGIN, 0)
+        self.SetMarginMask(self.SELECT_MARGIN, 0)
+
+        if self.foldingActive:
+            self.SetMarginWidth(self.FOLD_MARGIN, 16)
+        else:
+            self.SetMarginWidth(self.FOLD_MARGIN, 0)
+        self.SetMarginWidth(self.SELECT_MARGIN, 16)
+        self.SetMarginWidth(self.NUMBER_MARGIN, 0)
+        
+        self.SetMarginType(self.FOLD_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
+        self.SetMarginType(self.SELECT_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
+        self.SetMarginType(self.NUMBER_MARGIN, wx.stc.STC_MARGIN_NUMBER)
+
+        # Optical details
+        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDER, wx.stc.STC_MARK_PLUS)
+        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDEROPEN, wx.stc.STC_MARK_MINUS)
+        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDEREND, wx.stc.STC_MARK_EMPTY)
+        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDERMIDTAIL, wx.stc.STC_MARK_EMPTY)
+        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDEROPENMID, wx.stc.STC_MARK_EMPTY)
+        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDERSUB, wx.stc.STC_MARK_EMPTY)
+        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDERTAIL, wx.stc.STC_MARK_EMPTY)
+        self.SetFoldFlags(16)
+
+        self.SetMarginSensitive(self.FOLD_MARGIN, True)
         self.StyleSetSpec(wx.stc.STC_STYLE_DEFAULT, "face:%(mono)s,size:%(size)d" %
                 self.presenter.getDefaultFontFaces())
+                
+#         self.setFoldingActive(self.foldingActive)
 
         for i in xrange(32):
             self.StyleSetEOLFilled(i, True)
@@ -298,6 +332,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         wx.stc.EVT_STC_CHARADDED(self, ID, self.OnCharAdded)
         wx.stc.EVT_STC_CHANGE(self, ID, self.OnChange)
         wx.stc.EVT_STC_USERLISTSELECTION(self, ID, self.OnUserListSelection)
+        wx.stc.EVT_STC_MARGINCLICK(self, ID, self.OnMarginClick)
         
         wx.EVT_LEFT_DOWN(self, self.OnClick)
         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
@@ -423,15 +458,37 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
     def setShowLineNumbers(self, onOrOff):
         if onOrOff:
-            self.SetMarginWidth(0, self.TextWidth(wx.stc.STC_STYLE_LINENUMBER,
-                    "_99999"))
-            self.SetMarginWidth(1, 0)
+            self.SetMarginWidth(self.NUMBER_MARGIN,
+                    self.TextWidth(wx.stc.STC_STYLE_LINENUMBER, "_99999"))
+            self.SetMarginWidth(self.SELECT_MARGIN, 0)
         else:
-            self.SetMarginWidth(0, 0)
-            self.SetMarginWidth(1, 16)
+            self.SetMarginWidth(self.NUMBER_MARGIN, 0)
+            self.SetMarginWidth(self.SELECT_MARGIN, 16)
 
     def getShowLineNumbers(self):
-        return self.GetMarginWidth(0) != 0
+        return self.GetMarginWidth(self.NUMBER_MARGIN) != 0
+
+
+    def setFoldingActive(self, onOrOff, forceSync=False):
+        """
+        forceSync -- when setting folding on, the folding is completed
+            before function returns iff forceSync is True
+        """ 
+        if onOrOff:
+            self.SetMarginWidth(self.FOLD_MARGIN, 16)
+            self.foldingActive = True
+            if forceSync:
+                self.applyFolding(self.processFolding(
+                        self.getPageAst().getTokens(), DUMBTHREADHOLDER))
+            else:
+                self.OnStyleNeeded(None)
+        else:
+            self.SetMarginWidth(self.FOLD_MARGIN, 0)
+            self.unfoldAll()
+            self.foldingActive = False
+        
+    def getFoldingActive(self):
+        return self.foldingActive
 
 
     def SetStyles(self, styleFaces = None):
@@ -453,6 +510,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #         self.anchorCharPosition = -1
         self.incSearchCharStartPos = 0
         self.stylebytes = None
+        self.folding = None
         self.pageAst = None
         self.pageType = "normal"
 
@@ -579,6 +637,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 self.loadedDocPage.setPresentation((self.GetCurrentPos(),
                         self.GetScrollPos(wx.HORIZONTAL),
                         self.GetScrollPos(wx.VERTICAL)), 0)
+                self.loadedDocPage.setPresentation((self.getFoldInfo(),), 5)
 
             if self.loadedDocPage.getDirty()[0]:
                 self.saveLoadedDocPage()
@@ -726,10 +785,12 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
                 if not anchor:
                     # see if there is a saved position for this page
-                    lastPos, scrollPosX, scrollPosY = \
-                            self.loadedDocPage.getPresentation()[0:3]
+                    prst = self.loadedDocPage.getPresentation()
+                    lastPos, scrollPosX, scrollPosY = prst[0:3]
+                    foldInfo = prst[5]
+                    self.setFoldInfo(foldInfo)
                     self.GotoPos(lastPos)
-    
+
                     if True:  # scrollPosX != 0 or scrollPosY != 0:
                         # Bad hack: First scroll to position to avoid a visible jump
                         #   if scrolling works, then update display,
@@ -768,6 +829,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                         screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
                                 scrollPosY, wx.VERTICAL)
                         self.ProcessEvent(screvt)
+                    
 
         elif self.pageType == u"form":
             self.GotoPos(0)
@@ -913,7 +975,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.pageType = "normal"
 
 
-
     def OnStyleNeeded(self, evt):
         "Styles the text of the editor"
 
@@ -925,6 +986,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if t is not None:
             self.stylingThreadHolder.setThread(None)
             self.stylebytes = None
+            self.folding = None
             self.pageAst = None
 
         if textlen < self.presenter.getConfig().getint(
@@ -933,6 +995,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.stylingThreadHolder.setThread(None)
             self.buildStyling(text, 0, threadholder=DUMBTHREADHOLDER)
             self.applyStyling(self.stylebytes)
+            if self.getFoldingActive():
+                self.applyFolding(self.folding)
         else:
             # Asynchronous styling
             # This avoids further request from STC:
@@ -946,8 +1010,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             t = threading.Thread(None, self.buildStyling, args = (text, delay, sth))
             sth.setThread(t)
             t.start()
-
-        # self.buildStyling(text, True)
 
 
     def OnContextMenu(self, evt):
@@ -1020,9 +1082,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             charStartPos = end
 
 
-    def storeStylingAndAst(self, stylebytes, page):
+    def storeStylingAndAst(self, stylebytes, page, folding):
         self.stylebytes = stylebytes
         self.pageAst = page
+        self.folding = folding
         self.AddPendingEvent(wx.IdleEvent())
 
 
@@ -1037,9 +1100,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 self.loadedDocPage.getFormatDetails(), threadholder=threadholder)
         
         stylebytes = self.processTokens(page.getTokens(), threadholder)
-        
+        if self.getFoldingActive():
+            folding = self.processFolding(page.getTokens(), threadholder)
+        else:
+            folding = None
+
         if threadholder.isCurrent():
-            self.storeStylingAndAst(stylebytes, page)
+            self.storeStylingAndAst(stylebytes, page, folding)
 
 
     def processTokens(self, tokens, threadholder):
@@ -1096,11 +1163,127 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         return "".join(stylebytes)
 
 
+    def processFolding(self, tokens, threadholder):
+#         wikiData = self.presenter.getWikiDocument().getWikiData()
+        folding = []
+        currLine = 0
+        prevLevel = 0
+        levelStack = []
+        foldHeader = False
+        
+        for tok in tokens:
+            if not threadholder.isCurrent():
+                return None
+                
+            styleno = tok.ttype
+            headLevel = WikiFormatting.getHeadingLevel(styleno)
+            if headLevel > 0:
+                while levelStack and (levelStack[-1][0] != "heading" or
+                        levelStack[-1][1] > headLevel):
+                    del levelStack[-1]
+                if not levelStack or levelStack[-1] != ("heading", headLevel):
+                    levelStack.append(("heading", headLevel))
+                foldHeader = True
+
+            lfc = tok.text.count(u"\n")
+            if len(levelStack) > prevLevel:
+                foldHeader = True
+
+            if foldHeader and lfc > 0:
+                folding.append(len(levelStack) | wx.stc.STC_FOLDLEVELHEADERFLAG)
+                foldHeader = False
+                lfc -= 1
+
+            if lfc > 0:
+                folding += [len(levelStack) + 1] * lfc
+                
+            prevLevel = len(levelStack) + 1
+                
+        # final line
+        folding.append(len(levelStack) + 1)
+        
+        return folding
+
+
     def applyStyling(self, stylebytes):
         if len(stylebytes) == self.GetLength():
             self.StartStyling(0, 0xff)
             self.SetStyleBytes(len(stylebytes), stylebytes)
 
+    def applyFolding(self, folding):
+        if folding and self.getFoldingActive() and \
+                len(folding) == self.GetLineCount():
+            for ln in xrange(len(folding)):
+                self.SetFoldLevel(ln, folding[ln])
+
+
+    def unfoldAll(self):
+        """
+        Unfold all folded lines
+        """
+        for i in xrange(self.GetLineCount()):
+            self.SetFoldExpanded(i, True)
+        
+        self.ShowLines(0, self.GetLineCount()-1)
+        self.Refresh()
+
+
+    def foldAll(self):
+        """
+        Fold all foldable lines
+        """
+        if not self.getFoldingActive():
+            self.setFoldingActive(True, forceSync=True)
+
+        for ln in xrange(self.GetLineCount()):
+            if self.GetFoldLevel(ln) & wx.stc.STC_FOLDLEVELHEADERFLAG and \
+                    self.GetFoldExpanded(ln):
+                self.ToggleFold(ln)
+
+
+#                 self.SetFoldExpanded(ln, False)
+#             else:
+#                 self.HideLines(ln, ln)
+
+        self.Refresh()
+
+
+    def getFoldInfo(self):
+        if not self.getFoldingActive():
+            return None
+
+        result = [0] * self.GetLineCount()
+        for ln in xrange(self.GetLineCount()):
+            levComb = self.GetFoldLevel(ln)
+            levOut = levComb & 4095
+            if levComb & wx.stc.STC_FOLDLEVELHEADERFLAG:
+                levOut |= 4096
+            if self.GetFoldExpanded(ln):
+                levOut |= 8192
+            if self.GetLineVisible(ln):
+                levOut |= 16384            
+            result[ln] = levOut
+            
+        return result
+
+
+    def setFoldInfo(self, fldInfo):
+        if fldInfo is None or \
+                not self.getFoldingActive() or \
+                len(fldInfo) != self.GetLineCount():
+            return
+
+        for ln, levIn in enumerate(fldInfo):
+            levComb = levIn & 4095
+            if levIn & 4096:
+                levComb |= wx.stc.STC_FOLDLEVELHEADERFLAG
+                
+            self.SetFoldLevel(ln, levComb)
+            self.SetFoldExpanded(ln, bool(levIn & 8192))
+            if levIn & 16384:
+                self.ShowLines(ln, ln)
+            else:
+                self.HideLines(ln, ln)
 
     def snip(self):
         # get the selected text
@@ -1898,10 +2081,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #                 self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
             bb = self.bytelenSct(tofind)
 
+            # Should a closing bracket be appended to suggested words?
+            if self.presenter.getConfig().getboolean("main",
+                    "editor_autoComplete_closingBracket", False):
+                wordBracketEnd = WikiFormatting.BracketEnd
+            else:
+                wordBracketEnd = u""
+
             for word in wikiData.getWikiWordsStartingWith(
                     tofind[len(WikiFormatting.BracketStart):], True):
-                backBytesMap[WikiFormatting.BracketStart + word] = bb
-                
+                backBytesMap[WikiFormatting.BracketStart + word +
+                        wordBracketEnd] = bb
+
             for prop in wikiData.getPropertyNamesStartingWith(tofind[1:]):
                 backBytesMap[WikiFormatting.BracketStart + prop] = bb
 
@@ -1927,7 +2118,21 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #                 acresult += map(lambda v: u"[" + propkey + propfill + 
 #                         v +  u"]", values)
 
-        mat = WikiFormatting.RevTodoREWithContent.match(rline)
+        mat = WikiFormatting.RevTodoKeyRE.match(rline)
+        if mat:
+            # Might be todo entry
+            tofind = line[-mat.end():]
+            bb = self.bytelenSct(tofind)
+            for t in wikiData.getTodos():
+                td = t[1]
+                if not td.startswith(tofind):
+                    continue
+
+                tdmat = WikiFormatting.ToDoREWithCapturing.match(td)
+                key = tdmat.group(1) + u":"
+                backBytesMap[key] = bb
+
+        mat = WikiFormatting.RevTodoValueRE.match(rline)
         if mat:
             # Might be todo entry
             tofind = line[-mat.end():]
@@ -1948,7 +2153,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 page = wikiDocument.getWikiPage(wikiWord) # May throw exception
                 anchors = [a for a in page.getAnchors()
                         if a.startswith(anchorBegin)]
-                        
+
                 for a in anchors:
                     backBytesMap[WikiFormatting.BracketStart + wikiWord +
                             WikiFormatting.BracketEnd +
@@ -1979,11 +2184,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         self.autoCompBackBytesMap = backBytesMap
         acresult = backBytesMap.keys()
-        self.presenter.getWikiDocument().getCollator().sort(acresult)
-
-        if len(acresult) > 0:
-            self.UserListShow(1, u"~".join(acresult))
         
+        if len(acresult) > 0:
+            self.presenter.getWikiDocument().getCollator().sort(acresult)
+            self.UserListShow(1, u"~".join(acresult))
+
 
     def OnChange(self, evt):
         if not self.ignoreOnChange:
@@ -2211,9 +2416,14 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
             stylebytes = self.stylebytes
             self.stylebytes = None
+            folding = self.folding
+            self.folding = None
 
             if stylebytes:
                 self.applyStyling(stylebytes)
+            
+            if folding:
+                self.applyFolding(folding)
 
 
     def OnDestroy(self, evt):
@@ -2221,6 +2431,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         # the app has exited.
         wx.TheClipboard.Flush()
         evt.Skip()
+
+
+    def OnMarginClick(self, evt):
+        if evt.GetMargin() == self.FOLD_MARGIN:
+            pos = evt.GetPosition()
+            line = self.LineFromPosition(pos)
+            modifiers = evt.GetModifiers() #?
+
+            self.ToggleFold(line)
+        
+        evt.Skip()
+
 
 
     # TODO

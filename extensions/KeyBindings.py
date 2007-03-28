@@ -47,6 +47,11 @@ RewrapText="Ctrl-W"
 Eval="Ctrl-E"
 InsertDate="Ctrl-Alt-D"
 MakeWikiWord="Ctrl-J"
+
+ShowFolding=""
+UnfoldAll=""
+FoldAll=""
+
 ShowEditor="Ctrl-Shift-A"
 ShowPreview="Ctrl-Shift-S"
 ShowSwitchEditorPreview="Ctrl-Shift-Space"

@@ -81,3 +81,8 @@ with two| rows and| three columns delimited by \| and \
 >>
 
 
+anchor: html
++++ HTML tags and entities
+You can also use <b>HTML tags</b> and &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entities in WikidPad. Use preview to show the effect of them.
+
+

@@ -7,7 +7,7 @@ from time import localtime, time, strftime
 
 import cPickle  # to create dependency?
 
-import wx
+import wx, wx.html
 
 # import urllib_red as urllib
 import urllib
@@ -15,8 +15,10 @@ import urllib
 # from wxPython.wx import *
 # from wxPython.stc import *
 # from wxPython.html import *
-from wxHelper import GUI_ID, cloneImageList, getAccelPairFromKeyDown, \
-        getAccelPairFromString, LayerSizer
+from wxHelper import GUI_ID, getAccelPairFromKeyDown, \
+        getAccelPairFromString, LayerSizer, appendToMenuByMenuDesc, \
+        setHotKeyByString, DummyWindow
+
 
 from MiscEvent import MiscEventSourceMixin, ResendingMiscEvent  # , DebugSimple
 
@@ -143,6 +145,9 @@ class LossyWikiCloseDeniedException(Exception):
 
 
 class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
+    HOTKEY_ID_HIDESHOW_BYAPP = 1
+    HOTKEY_ID_HIDESHOW_BYWIKI = 2
+    
     def __init__(self, parent, id, title, wikiAppDir, globalConfigDir,
             globalConfigSubDir, cmdLineAction):
         wx.Frame.__init__(self, parent, -1, title, size = (700, 550),
@@ -334,6 +339,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.Maximize(True)
         if windowmode & 2:
             self.Iconize(True)
+            
+        # Set app-bound hot key
+        self.hotKeyDummyWindow = None
+        self._refreshHotKeys()
 
         # if a wiki to open is set, open it
         if wikiToOpen:
@@ -363,6 +372,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.resourceSleep()
             
         EVT_REMOTE_COMMAND(self, self.OnRemoteCommand)
+        
+#         wx.FileSystem.AddHandler(wx.ZipFSHandler())
+
 
 
     def loadExtensions(self):
@@ -704,9 +716,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if wikiData is not None and wikiData.checkCapability("versioning") == 1:
             wikiMenu.AppendSeparator()
     
-            menuID=wx.NewId()
-            wikiMenu.Append(menuID, '&Store version', 'Store new version')
-            wx.EVT_MENU(self, menuID, lambda evt: self.showStoreVersionDialog())
+#             menuID=wx.NewId()
+#             wikiMenu.Append(menuID, '&Store version', 'Store new version')
+#             wx.EVT_MENU(self, menuID, lambda evt: self.showStoreVersionDialog())
     
             menuID=wx.NewId()
             wikiMenu.Append(menuID, '&Retrieve version', 'Retrieve previous version')
@@ -1182,25 +1194,30 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         EVT_MENU(self, menuID, lambda evt: self.showFindDialog())
 
         menuID=wx.NewId()
-        self.editorMenu.Append(menuID, 'Find and &Replace\t' + self.keyBindings.FindAndReplace, 'Find and Replace')
+        self.editorMenu.Append(menuID, 'Find and &Replace\t' + 
+                self.keyBindings.FindAndReplace, 'Find and Replace')
         wx.EVT_MENU(self, menuID, lambda evt: self.showFindReplaceDialog())
 
         menuID=wx.NewId()
-        self.editorMenu.Append(menuID, 'Rep&lace Text by WikiWord\t' + self.keyBindings.ReplaceTextByWikiword, 'Replace selected text by WikiWord')
+        self.editorMenu.Append(menuID, 'Rep&lace Text by WikiWord\t' + 
+                self.keyBindings.ReplaceTextByWikiword, 'Replace selected text by WikiWord')
         wx.EVT_MENU(self, menuID, lambda evt: self.showReplaceTextByWikiwordDialog())
 
         self.editorMenu.AppendSeparator()
 
         menuID=wx.NewId()
-        self.editorMenu.Append(menuID, '&Rewrap Text\t' + self.keyBindings.RewrapText, 'Rewrap Text')
+        self.editorMenu.Append(menuID, '&Rewrap Text\t' + 
+                self.keyBindings.RewrapText, 'Rewrap Text')
         wx.EVT_MENU(self, menuID, lambda evt: self.getActiveEditor().rewrapText())
 
         menuID=wx.NewId()
-        wrapModeMenuItem = wx.MenuItem(self.editorMenu, menuID, "&Wrap Mode", "Set wrap mode", wx.ITEM_CHECK)
+        wrapModeMenuItem = wx.MenuItem(self.editorMenu, menuID, "&Wrap Mode",
+                "Set wrap mode", wx.ITEM_CHECK)
         self.editorMenu.AppendItem(wrapModeMenuItem)
         wx.EVT_MENU(self, menuID, self.OnCmdCheckWrapMode)
+        wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateWrapMode)
 
-        wrapModeMenuItem.Check(self.getActiveEditor().getWrapMode())
+#         wrapModeMenuItem.Check(self.getActiveEditor().getWrapMode())
 
 
         menuID=wx.NewId()
@@ -1208,8 +1225,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "Auto-indent", "Auto indentation", wx.ITEM_CHECK)
         self.editorMenu.AppendItem(autoIndentMenuItem)
         wx.EVT_MENU(self, menuID, self.OnCmdCheckAutoIndent)
+        wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateAutoIndent)
 
-        autoIndentMenuItem.Check(self.getActiveEditor().getAutoIndent())
+#         autoIndentMenuItem.Check(self.getActiveEditor().getAutoIndent())
 
 
         menuID=wx.NewId()
@@ -1218,8 +1236,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 wx.ITEM_CHECK)
         self.editorMenu.AppendItem(autoBulletsMenuItem)
         wx.EVT_MENU(self, menuID, self.OnCmdCheckAutoBullets)
+        wx.EVT_UPDATE_UI(self, menuID,
+                self.OnUpdateAutoBullets)
 
-        autoBulletsMenuItem.Check(self.getActiveEditor().getAutoBullets())
+#         autoBulletsMenuItem.Check(self.getActiveEditor().getAutoBullets())
 
         self.editorMenu.AppendSeparator()
 
@@ -1238,6 +1258,27 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.editorMenu.AppendMenu(wx.NewId(), "Evaluation", evaluationMenu,
                 "Evaluate scripts/expressions")
 
+
+        foldingMenu = wx.Menu()
+
+        menuID=wx.NewId()
+        showFoldingMenuItem = wx.MenuItem(foldingMenu, menuID,
+                "Show folding\t" + self.keyBindings.ShowFolding,
+                "Show folding marks and allow folding",
+                wx.ITEM_CHECK)
+        foldingMenu.AppendItem(showFoldingMenuItem)
+        wx.EVT_MENU(self, menuID, self.OnCmdCheckShowFolding)
+        wx.EVT_UPDATE_UI(self, menuID,
+                self.OnUpdateShowFolding)
+
+        self.addMenuItem(foldingMenu, '&Unfold All\t' +
+                self.keyBindings.UnfoldAll,
+                'Unfold everything in current editor',
+                lambda evt: self.getActiveEditor().unfoldAll())
+
+        self.addMenuItem(foldingMenu, '&Fold All\t' + self.keyBindings.FoldAll,
+                'Fold everything in current editor',
+                lambda evt: self.getActiveEditor().foldAll())
 
         viewMenu = wx.Menu()
         
@@ -1305,11 +1346,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         menuID=wx.NewId()
         indentGuidesMenuItem = wx.MenuItem(viewMenu, menuID,
-                "&View Indentation Guides", "View Indentation Guides", wx.ITEM_CHECK)
+                "&View Indentation Guides", "View Indentation Guides",
+                wx.ITEM_CHECK)
         viewMenu.AppendItem(indentGuidesMenuItem)
         wx.EVT_MENU(self, menuID, self.OnCmdCheckIndentationGuides)
+        wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateIndentationGuides)
 
-        indentGuidesMenuItem.Check(self.getActiveEditor().GetIndentationGuides())
+#         indentGuidesMenuItem.Check(self.getActiveEditor().GetIndentationGuides())
 
         menuID=wx.NewId()
         showLineNumbersMenuItem = wx.MenuItem(viewMenu, menuID,
@@ -1317,8 +1360,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 wx.ITEM_CHECK)
         viewMenu.AppendItem(showLineNumbersMenuItem)
         wx.EVT_MENU(self, menuID, self.OnCmdCheckShowLineNumbers)
+        wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateShowLineNumbers)
 
-        showLineNumbersMenuItem.Check(self.getActiveEditor().getShowLineNumbers())
+#         showLineNumbersMenuItem.Check(self.getActiveEditor().getShowLineNumbers())
 
         viewMenu.AppendSeparator()
 
@@ -1349,15 +1393,30 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         helpMenu.AppendSeparator()
 
-        menuID=wx.NewId()
-        helpMenu.Append(menuID, '&Visit wikidPad Homepage', 'Visit Homepage')
-        wx.EVT_MENU(self, menuID, lambda evt: os.startfile('http://www.jhorman.org/wikidPad/'))
-
-        helpMenu.AppendSeparator()
-
-        menuID=wx.NewId()
-        helpMenu.Append(menuID, 'View &License', 'View License')
-        wx.EVT_MENU(self, menuID, lambda evt: os.startfile(join(self.wikiAppDir, 'license.txt')))
+        if Configuration.isWindows():
+            menuID=wx.NewId()
+            helpMenu.Append(menuID, '&Visit wikidPad Homepage', 'Visit Homepage')
+            wx.EVT_MENU(self, menuID, lambda evt: os.startfile(
+                    'http://www.jhorman.org/wikidPad/'))
+    
+            helpMenu.AppendSeparator()
+    
+            menuID=wx.NewId()
+            helpMenu.Append(menuID, 'View &License', 'View License')
+            wx.EVT_MENU(self, menuID, lambda evt: os.startfile(
+                    join(self.wikiAppDir, 'license.txt')))
+        else:
+            menuID=wx.NewId()
+            helpMenu.Append(menuID, '&Visit wikidPad Homepage', 'Visit Homepage')
+            wx.EVT_MENU(self, menuID, lambda evt: wx.LaunchDefaultBrowser(
+                    'http://www.jhorman.org/wikidPad/'))
+    
+            helpMenu.AppendSeparator()
+    
+            menuID=wx.NewId()
+            helpMenu.Append(menuID, 'View &License', 'View License')
+            wx.EVT_MENU(self, menuID, lambda evt: wx.LaunchDefaultBrowser(
+                    join(self.wikiAppDir, 'license.txt')))
 
         helpMenu.AppendSeparator()
 
@@ -1385,6 +1444,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.mainmenu.Append(wikiWordMenu, '&Wiki Words')
         self.mainmenu.Append(historyMenu, '&History')
         self.mainmenu.Append(self.editorMenu, '&Editor')
+        self.mainmenu.Append(foldingMenu, '&Folding')
         self.mainmenu.Append(viewMenu, '&View')
         if pluginMenu:
             self.mainmenu.Append(pluginMenu, "Pl&ugins")
@@ -1757,7 +1817,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         break
 
                 
-
     def OnRemoteCommand(self, evt):
         try:
             clAction = CmdLineAction(evt.getCmdLine())
@@ -1767,6 +1826,45 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.displayErrorMessage('Error while starting new '
                     'WikidPad instance', e)
             return
+
+
+    def OnShowHideHotkey(self, evt):
+        if self.IsActive():
+            self.Iconize(True)
+        else:
+            if self.IsIconized():
+                self.Iconize(False)
+                self.Show(True)
+            
+            self.Raise()
+
+    
+    def _refreshHotKeys(self):
+        """
+        Refresh the system-wide hotkey settings according to configuration
+        """
+        # A dummy window must be destroyed and recreated because
+        # Unregistering a hotkey doesn't work
+        if self.hotKeyDummyWindow is not None:
+            self.hotKeyDummyWindow.Destroy()
+
+        self.hotKeyDummyWindow = DummyWindow(self, id=GUI_ID.WND_HOTKEY_DUMMY)
+        if self.configuration.getboolean("main",
+                "hotKey_showHide_byApp_isActive"):
+            setHotKeyByString(self.hotKeyDummyWindow,
+                    self.HOTKEY_ID_HIDESHOW_BYAPP,
+                    self.configuration.get("main",
+                    "hotKey_showHide_byApp", u""))
+
+        if self.getWikiDocument() is not None:
+            setHotKeyByString(self.hotKeyDummyWindow,
+                    self.HOTKEY_ID_HIDESHOW_BYWIKI,
+                    self.configuration.get("main",
+                    "hotKey_showHide_byWiki", u""))
+        wx.EVT_HOTKEY(self.hotKeyDummyWindow, self.HOTKEY_ID_HIDESHOW_BYAPP,
+                self.OnShowHideHotkey)
+        wx.EVT_HOTKEY(self.hotKeyDummyWindow, self.HOTKEY_ID_HIDESHOW_BYWIKI,
+                self.OnShowHideHotkey)
 
 
     def createWindow(self, winProps, parent):
@@ -1969,18 +2067,23 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #     )
 
     def testIt(self):
-        rect = self.statusBar.GetFieldRect(0)
+        self.hhelp = wx.html.HtmlHelpController()
+        self.hhelp.AddBook(join(self.wikiAppDir, "helptest/helptest.hhp"))
+#         self.hhelp.AddBook(join(self.wikiAppDir, "helptest.htb"))
+        self.hhelp.DisplayID(1)
         
-        dc = wx.WindowDC(self.statusBar)
-        dc.SetBrush(wx.RED_BRUSH)
-        dc.SetPen(wx.RED_PEN)
-        dc.DrawRectangle(rect.x, rect.y, rect.width, rect.height)
-        dc.SetPen(wx.WHITE_PEN)
-        dc.SetFont(self.statusBar.GetFont())
-        dc.DrawText(u"Saving page", rect.x + 2, rect.y + 2)
-        dc.SetFont(wx.NullFont)
-        dc.SetBrush(wx.NullBrush)
-        dc.SetPen(wx.NullPen)
+#         rect = self.statusBar.GetFieldRect(0)
+#         
+#         dc = wx.WindowDC(self.statusBar)
+#         dc.SetBrush(wx.RED_BRUSH)
+#         dc.SetPen(wx.RED_PEN)
+#         dc.DrawRectangle(rect.x, rect.y, rect.width, rect.height)
+#         dc.SetPen(wx.WHITE_PEN)
+#         dc.SetFont(self.statusBar.GetFont())
+#         dc.DrawText(u"Saving page", rect.x + 2, rect.y + 2)
+#         dc.SetFont(wx.NullFont)
+#         dc.SetBrush(wx.NullBrush)
+#         dc.SetPen(wx.NullPen)
 
         # self.statusBar.Refresh()
 
@@ -2365,7 +2468,9 @@ These are your default global settings.
     
             # Rebuild text blocks menu
             self.rereadTextBlocks()
-    
+            
+            self._refreshHotKeys()
+
             # trigger hook
             self.hooks.openedWiki(self, self.wikiName, wikiCombinedFilename)
     
@@ -2436,6 +2541,12 @@ These are your default global settings.
                 
                 self.fireMiscEventKeys(("dropping current wiki",))
                 # else go ahead
+
+            # Clear wiki-bound hot key (TODO: Does not work!)
+#             print "UnregisterHotKey", repr(self.HOTKEY_ID_HIDESHOW_BYWIKI), repr(
+
+#             self.UnregisterHotKey(self.HOTKEY_ID_HIDESHOW_BYWIKI)
+            self._refreshHotKeys()
 
             self.getConfig().setWikiConfig(None)
             if self.win32Interceptor is not None:
@@ -3055,7 +3166,11 @@ These are your default global settings.
                 link2 = self.makeRelUrlAbsolute(link2)
 
             try:
-                os.startfile(mbcsEnc(link2, "replace")[0])    # TODO !!!
+                if Configuration.isWindows():
+                    os.startfile(mbcsEnc(link2, "replace")[0])
+                else:
+                    # Better solution?
+                    wx.LaunchDefaultBrowser(link2)    # TODO
             except Exception, e:
                 traceback.print_exc()
                 self.displayErrorMessage(u"Couldn't start file", e)
@@ -3290,9 +3405,6 @@ These are your default global settings.
         else:
             onOrOff = self.configuration.getboolean("main", "showontray")
 
-#         if self.showOnTrayMenuItem:
-#             self.showOnTrayMenuItem.Check(self.showOnTray)   # TODO infinite loop?
-
         if onOrOff:
             if self.tbIcon is None:
                 self.tbIcon = TaskBarIcon(self)
@@ -3303,8 +3415,18 @@ These are your default global settings.
             else:
                 tooltip = u"Wikidpad"
 
-            self.tbIcon.SetIcon(wx.Icon(os.path.join(self.wikiAppDir, 'icons', 'pwiki.ico'),
-                    wx.BITMAP_TYPE_ICO), uniToGui(tooltip))
+            if Configuration.isLinux():
+                img = wx.Image(os.path.join(self.wikiAppDir, 'icons', 'pwiki.ico'),
+                        wx.BITMAP_TYPE_ICO)
+                img.Rescale(20, 20)
+                bmp = wx.BitmapFromImage(img)
+                icon = wx.IconFromBitmap(bmp)
+                self.tbIcon.SetIcon(icon, uniToGui(tooltip))
+            else:
+                self.tbIcon.SetIcon(wx.Icon(os.path.join(self.wikiAppDir,
+                        'icons', 'pwiki.ico'), wx.BITMAP_TYPE_ICO),
+                        uniToGui(tooltip))
+            
         else:
             if self.tbIcon is not None:
                 if self.tbIcon.IsIconInstalled():
@@ -3731,7 +3853,6 @@ These are your default global settings.
         if not dateformat is None:
             self.configuration.set("main", "strftime", dateformat)
 
-
     def showOptionsDialog(self):
         dlg = OptionsDialog(self, -1)
         dlg.CenterOnParent(wx.BOTH)
@@ -3760,6 +3881,7 @@ These are your default global settings.
             fs.setModDateIsEnough(self.configuration.getboolean("main",
                     "fileStorage_identity_modDateIsEnough", False))
 
+            # Move main tree and view tree if layout was changed
             newLayoutMainTreePosition = self.configuration.getint("main",
                 "mainTree_position", 0)
             newLayoutViewsTreePosition = self.configuration.getint("main",
@@ -3783,6 +3905,8 @@ These are your default global settings.
     
                 self.configuration.set("main", "windowLayout", layoutCfStr)
                 self.changeLayoutByCf(layoutCfStr)
+                
+            self._refreshHotKeys()
 
             self.fireMiscEventKeys(("options changed",))
 
@@ -4331,22 +4455,48 @@ These are your default global settings.
         self.getActiveEditor().setWrapMode(evt.IsChecked())
         self.configuration.set("main", "wrap_mode", evt.IsChecked())
 
+    def OnUpdateWrapMode(self, evt):
+        evt.Check(self.getActiveEditor().getWrapMode())
+
 
     def OnCmdCheckIndentationGuides(self, evt):        
         self.getActiveEditor().SetIndentationGuides(evt.IsChecked())
         self.configuration.set("main", "indentation_guides", evt.IsChecked())
 
+    def OnUpdateIndentationGuides(self, evt):
+        evt.Check(self.getActiveEditor().GetIndentationGuides())
+
+
     def OnCmdCheckAutoIndent(self, evt):        
         self.getActiveEditor().setAutoIndent(evt.IsChecked())
         self.configuration.set("main", "auto_indent", evt.IsChecked())
+
+    def OnUpdateAutoIndent(self, evt):
+        evt.Check(self.getActiveEditor().getAutoIndent())
+
 
     def OnCmdCheckAutoBullets(self, evt):        
         self.getActiveEditor().setAutoBullets(evt.IsChecked())
         self.configuration.set("main", "auto_bullets", evt.IsChecked())
 
+    def OnUpdateAutoBullets(self, evt):
+        evt.Check(self.getActiveEditor().getAutoBullets())
+
+
     def OnCmdCheckShowLineNumbers(self, evt):        
         self.getActiveEditor().setShowLineNumbers(evt.IsChecked())
         self.configuration.set("main", "show_lineNumbers", evt.IsChecked())
+
+    def OnUpdateShowLineNumbers(self, evt):
+        evt.Check(self.getActiveEditor().getShowLineNumbers())
+
+
+    def OnCmdCheckShowFolding(self, evt):        
+        self.getActiveEditor().setFoldingActive(evt.IsChecked())
+        self.configuration.set("main", "editor_useFolding", evt.IsChecked())
+
+    def OnUpdateShowFolding(self, evt):
+        evt.Check(self.getActiveEditor().getFoldingActive())
 
 
     def OnCloseButton(self, evt):
@@ -4422,31 +4572,56 @@ These are your default global settings.
 
 
 class TaskBarIcon(wx.TaskBarIcon):
-    def __init__(self, pwiki):
+    def __init__(self, pWiki):
         wx.TaskBarIcon.__init__(self)
-        self.pwiki = pwiki
+        self.pWiki = pWiki
 
         # Register menu events
         wx.EVT_MENU(self, GUI_ID.TBMENU_RESTORE, self.OnLeftUp)
-        wx.EVT_MENU(self, GUI_ID.TBMENU_SAVE, lambda evt: (self.pwiki.saveAllDocPages(force=True),
-                self.pwiki.getWikiData().commit()))
-        wx.EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pwiki.exitWiki())
+        wx.EVT_MENU(self, GUI_ID.TBMENU_SAVE, lambda evt: (self.pWiki.saveAllDocPages(force=True),
+                self.pWiki.getWikiData().commit()))
+        wx.EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pWiki.exitWiki())
+
+        if self.pWiki.win32Interceptor is not None:
+            wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
+                    self.pWiki.OnClipboardCatcherAtCursor)
+            wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
+                    self.pWiki.OnClipboardCatcherOff)
+
+            wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
+                    self.pWiki.OnUpdateClipboardCatcher)
+            wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
+                    self.pWiki.OnUpdateClipboardCatcher)
 
         wx.EVT_TASKBAR_LEFT_UP(self, self.OnLeftUp)
 
+
     def OnLeftUp(self, evt):
-        if self.pwiki.IsIconized():
-            self.pwiki.Iconize(False)
-            self.pwiki.Show(True)
+        if self.pWiki.IsIconized():
+            self.pWiki.Iconize(False)
+            self.pWiki.Show(True)
         
-        self.pwiki.Raise()
+        self.pWiki.Raise()
+
 
     def CreatePopupMenu(self):
-        # Build menu
         tbMenu = wx.Menu()
-        tbMenu.Append(GUI_ID.TBMENU_RESTORE, '&Restore')
-        tbMenu.Append(GUI_ID.TBMENU_SAVE, '&Save\t')
-        tbMenu.Append(GUI_ID.TBMENU_EXIT, 'E&xit')
+        # Build menu
+        if self.pWiki.win32Interceptor is not None:
+            menuItem = wx.MenuItem(tbMenu,
+                    GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
+                    u"Clipboard Catcher at Cursor", u"", wx.ITEM_CHECK)
+            tbMenu.AppendItem(menuItem)
+
+            menuItem = wx.MenuItem(tbMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
+                    u"Clipboard Catcher off", u"", wx.ITEM_CHECK)
+            tbMenu.AppendItem(menuItem)
+            
+            tbMenu.AppendSeparator()
+
+
+        appendToMenuByMenuDesc(tbMenu, _TASKBAR_CONTEXT_MENU_BASE)
+
 
         return tbMenu
 
@@ -4485,5 +4660,20 @@ def importCode(code, usercode, name, add_to_sys_modules=False):
 
     return module
 
+
+
+_TASKBAR_CONTEXT_MENU_BASE = \
+u"""
+Restore;TBMENU_RESTORE
+Save;TBMENU_SAVE
+Exit;TBMENU_EXIT
+"""
+
+# _TASKBAR_CONTEXT_MENU_CLIPCATCH = \
+# u"""
+# Clipboard Catcher at Cursor;CMD_CLIPBOARD_CATCHER_AT_CURSOR
+# Clipboard Catcher off;CMD_CLIPBOARD_CATCHER_OFF
+# -
+# """
 
 

@@ -295,49 +295,6 @@ class WikiWordNode(AbstractNode):
                 
         return result
 
-#         # get the sort order for the children
-#         childSortOrder = wikiPage.getPropertyOrGlobal(u'child_sort_order',
-#                 u"ascending")
-#             
-#         # Apply sort order
-#         if childSortOrder == u"natural":
-#             # Retrieve relations as list of tuples (child, firstcharpos)
-#             relations = self._getValidChildren(wikiPage, withPosition=True)
-#             relations.sort(_cmpCharPosition)
-#             # Remove firstcharpos
-#             relations = [r[0] for r in relations]
-#         else:
-#             # Retrieve relations as list of children words
-#             relations = self._getValidChildren(wikiPage, withPosition=False)
-#             if childSortOrder.startswith(u"desc"):
-#                 relations.sort(_genCmpLowerDesc(
-#                         self.treeCtrl.pWiki.getCollator())) # sort alphabetically
-#             elif childSortOrder.startswith(u"asc"):
-#                 relations.sort(_genCmpLowerAsc(
-#                         self.treeCtrl.pWiki.getCollator()))
-# 
-#         relationData = []
-#         position = 1
-#         for relation in relations:
-#             relationPage = wikiDataManager.getWikiPageNoError(relation)
-#             relationData.append((relation, relationPage, position))
-#             position += 1
-# 
-#         # Sort again, using tree position and priority properties
-#         relationData.sort(_relationSort)
-# 
-#         # if prev is None:
-#         ## Create everything new
-# 
-#         result = [WikiWordNode(self.treeCtrl, self, rd[0])
-#                 for rd in relationData]
-#                 
-#         if self.flagRoot:
-#             result.append(MainViewNode(self.treeCtrl, self))
-#                 
-#         return result
-
-
     def onActivate(self):
         self.treeCtrl.pWiki.openWikiPage(self.wikiWord)
         

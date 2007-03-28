@@ -54,15 +54,19 @@ Automatically show log window if new error messages arrive (see [WikiDocumentAtt
 *Auto-hide log window*
 Automatically hide log window if no more error messages are present.
 
-*Append after clipboard snippet*
-Control what the ClipboardCatcher should append after each caught snippet.
-
 *Sort order*
 Choose the desired alphabetical sort algorithm for wiki words, todos, attributes in tree or PageListDialog.
 The "C" order is the way previous WikidPad versions worked (uppercase letters first, non-English characters in illogical order at the end).
 The new "Default" order sorts according to default order determined by the operating system. Normally, uppercase letters are sorted inorder (AaBbCc). If you want uppercase letters (more exactly: all characters but lowercase ones) before the rest (ABCabc), check
 *Uppercase first*.
 This setting has no effect for "C" order. Alphabetical sorting of children of a wiki word in tree is always inorder.
+
+*App-bound hotkey*
+Here you can define a hotkey to show or hide WikidPad (they may only work on Windows). Hotkeys work system-wide, not only if WikidPad is active.
+
+In the text field you can enter a hotkey in the same way as the menu shortcuts are. The checkbox before the text field allows to temporarily deactivate the hotkey without deleting the field content.
+
+There is also an option to set a second hotkey which is bound to the current wiki instead of the app. See OptionsDialog#*Wiki-bound# hotkey* below in "Current wiki" options.
 
 
 ++++ Security options
@@ -154,6 +158,25 @@ For async. highlighting how long to wait after key press (in seconds) before sta
 *Auto-unbullets*
 When this option is active and enter is pressed on a line which contains only a bullet or a numbering without text, the bullet is removed. See BulletedLists for details.
 
+*Append closing bracket on auto-complete*
+When suggesting the completion for a bracketed wiki word, e.g. "[Not Came" you can decide if a closing bracket is suggested ("[Not Camel Case]") or not ("[Not Camel Case").
+
+
+++++ Clipboard catcher
+This page is only visible on Windows.
+
+*Append after clipboard snippet*
+Control what the ClipboardCatcher should append after each caught snippet.
+
+*Avoid doubled snippets*
+If the same text is pasted multiple times consecutively to the clipboard, it is pasted only the first time. Some applications execute a single paste command as mutliple pastes to the clipboard which would lead to multiple inserts without this option.
+
+*User notification*
+Choose if you want to hear a sound when a clipboard snippet is inserted.
+
+*Sound file*
+Choose the sound file to play (if you have chosen to be notified by sound above). If the field is empty, a default sound is played.
+
 
 ++++ Mouse
 
@@ -198,3 +221,4 @@ Set the default export directory into which exports should go.
 See [FileStorage].
 
 
+*Wiki-bound hotkey*

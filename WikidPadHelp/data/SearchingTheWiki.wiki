@@ -63,7 +63,7 @@ Find the next matching part of text in current page or next page in the search r
 Replace current selection with content of "Replace by" and go to next matching part.
 
 *Button "Replace All"*
-After asking for confirmation, replaces all occurrences matching to the search pattern by the replacement in all pages in the search results.
+After asking for confirmation, replaces all occurrences matching to the search pattern by the replacement in all pages in the search results. At the end of the operation you will be informed about the number of done replacements.
 
 
 ++++ Storing/Loading Searches

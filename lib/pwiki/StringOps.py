@@ -24,7 +24,7 @@ import srePersistent as _re
 LINEEND_SPLIT_RE = _re.compile(r"\r\n?|\n")
 
 
-from Configuration import isUnicode, isOSX, isLinux
+from Configuration import isUnicode, isOSX, isLinux, isWindows, isWin9x
 
 
 # To generate dependencies for py2exe/py2app
@@ -94,6 +94,17 @@ def mbcsDec(input, errors="strict"):
         return input, len(input)
     else:
         return _mbcsDec(input, errors)
+
+
+if isWindows() and not isWin9x():
+    def dummy(s, e=""):
+        return s, len(s)
+
+    pathEnc = dummy
+    pathDec = dummy
+else:
+    pathEnc = mbcsEnc
+    pathDec = mbcsDec
 
 
 if isUnicode():
@@ -551,23 +562,13 @@ class TokenIterator:
             mat = self.tokenre.search(self.text, self.charPos)
 
         if mat is None:
-#                     print "tokenize3", repr((defaultType, charpos, None,
-#                             text[charpos:textlen]))
-
             cp = self.charPos
             self.charPos = textlen
             return Token(self.defaultType, cp + self.tokenStartOffset, None,
                     self.text[cp:textlen])
             
-#                 print "tokenize4", repr((defaultType, textlen, None,
-#                         u""))
-#             result.append(Token(self.defaultType, textlen, None, u""))
-#             break
-
         start, end = mat.span()
         if self.charPos < start:
-#                         print "tokenize7", repr((defaultType, charpos, None,
-#                                 text[charpos:start]))
             self.nextMatch = mat
             cp = self.charPos
             self.charPos = start
@@ -580,9 +581,6 @@ class TokenIterator:
             if not groupdict[m] is None and m.startswith(u"style"):
                 # m is of the form:   style<index>
                 index = int(m[5:])
-
-#                     print "tokenize8", repr((formatMap[index], charpos, groupdict,
-#                             text[start:end]))
                 cp = self.charPos
                 self.charPos = end
                 return Token(self.formatMap[index], cp + self.tokenStartOffset,
@@ -593,14 +591,6 @@ class Tokenizer:
     def __init__(self, tokenre, defaultType):
         self.tokenre = tokenre
         self.defaultType = defaultType
-
-#         self.tokenThread = None
-# 
-#     def setTokenThread(self, tt):
-#         self.tokenThread = tt
-# 
-#     def getTokenThread(self):
-#         return self.tokenThread
 
     def tokenize(self, text, formatMap, defaultType, threadholder=DUMBTHREADHOLDER):
         result = []
@@ -615,53 +605,6 @@ class Tokenizer:
                 break
                 
         return result
-
-
-
-#         textlen = len(text)
-#         result = []
-#         charpos = 0    
-#         
-#         while True:
-#             mat = self.tokenre.search(text, charpos)
-#             if mat is None:
-#                 if charpos < textlen:
-# #                     print "tokenize3", repr((defaultType, charpos, None,
-# #                             text[charpos:textlen]))
-#                     result.append(Token(defaultType, charpos, None,
-#                             text[charpos:textlen]))
-#                 
-# #                 print "tokenize4", repr((defaultType, textlen, None,
-# #                         u""))
-#                 result.append(Token(defaultType, textlen, None, u""))
-#                 break
-#     
-#             groupdict = mat.groupdict()
-#             for m in groupdict.keys():
-#                 if not groupdict[m] is None and m.startswith(u"style"):
-#                     start, end = mat.span()
-#                     
-#                     # m is of the form:   style<index>
-#                     index = int(m[5:])
-#                     if charpos < start:
-# #                         print "tokenize7", repr((defaultType, charpos, None,
-# #                                 text[charpos:start]))
-#                         result.append(Token(defaultType, charpos, None,
-#                                 text[charpos:start]))                    
-#                         charpos = start
-#     
-# #                     print "tokenize8", repr((formatMap[index], charpos, groupdict,
-# #                             text[start:end]))
-#                     result.append(Token(formatMap[index], charpos, groupdict,
-#                             text[start:end]))
-#                     charpos = end
-#                     break
-#     
-#             if not threadholder.isCurrent():
-#                 break
-# 
-#         return result
-
 
 
 # ---------- Handling diff information ----------

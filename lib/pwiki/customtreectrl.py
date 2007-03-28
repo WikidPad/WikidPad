@@ -1903,8 +1903,9 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         self.SetImageListCheck(13, 13)
 
         # A constant to use my translation of RendererNative.DrawTreeItemButton
-        # if the wxPython version is less than 2.6.2.1.
-        if wx.VERSION_STRING < "2.6.2.1":
+        # if the wxPython version is less or equal 2.6.3.2.
+        ## if wx.VERSION_STRING < "2.6.2.1":
+        if wx.VERSION_STRING <= "2.6.3.2":
             self._drawingfunction = DrawTreeItemButton
         else:
             self._drawingfunction = wx.RendererNative.Get().DrawTreeItemButton

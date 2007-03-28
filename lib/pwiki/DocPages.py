@@ -7,6 +7,8 @@ from WikiExceptions import *   # TODO make normal import?
 
 from StringOps import strToBool, fileContentToUnicode, BOM_UTF8, utf8Enc, \
         utf8Dec
+        
+from Serialization import SerializeStream
 
 import WikiFormatting
 import PageAst
@@ -202,6 +204,8 @@ class WikiPage(DocPage):
 
         self.wikiWord = wikiWord
         self.parentRelations = None
+        self.childRelations = None
+        self.childRelationSet = sets.Set()
         self.todos = None
         self.props = None
         self.modified, self.created = None, None
@@ -495,14 +499,15 @@ class WikiPage(DocPage):
 
         wwTokens = page.findType(WikiFormatting.FormatTypes.WikiWord)
         for t in wwTokens:
-            self.addChildRelationship(t.node.nakedWord)
+            self.addChildRelationship(t.node.nakedWord, t.start)
 
         # kill the global prop cache in case any props were added
         self.getWikiData().cachedGlobalProps = None
 
         # add a relationship to the scratchpad at the root
         if self.wikiWord == self.wikiDocument.getWikiName():
-            self.addChildRelationship(u"ScratchPad")
+            # Position in page is really far down.
+            self.addChildRelationship(u"ScratchPad", 2000000000)
 
         # clear the dirty flag
         self.updateDirtySince = None
@@ -518,10 +523,11 @@ class WikiPage(DocPage):
             self.fireMiscEventKeys(("updated wiki page", "updated page"))
 
 
-    def addChildRelationship(self, toWord):
-        if toWord not in self.childRelations:
+    def addChildRelationship(self, toWord, pos):
+        if toWord not in self.childRelationSet:
             # if self.wikiData.addRelationship(self.wikiWord, toWord):
-            self.childRelations.append(toWord)
+            self.childRelations.append((toWord, pos))
+            self.childRelationSet.add(toWord)
         
     def setProperty(self, key, value):
         # if self.wikiData.setProperty(self.wikiWord, key, value):
@@ -535,6 +541,7 @@ class WikiPage(DocPage):
     def deleteChildRelationships(self):
         # self.wikiData.deleteChildRelationships(self.wikiWord)
         self.childRelations = []
+        self.childRelationSet = sets.Set()
 
     def deleteProperties(self):
         # self.wikiData.deleteProperties(self.wikiWord)
@@ -562,12 +569,15 @@ class WikiPage(DocPage):
         return (self.saveDirtySince, self.updateDirtySince)
 
 
-    _DEFAULT_PRESENTATION = (0, 0, 0, 0, 0)
+    _DEFAULT_PRESENTATION = (0, 0, 0, 0, 0, None)
 
     def getPresentation(self):
         """
         Get the presentation tuple (<cursor pos>, <editor scroll pos x>,
-            <e.s.p. y>, <preview s.p. x>, <p.s.p. y>)
+            <e.s.p. y>, <preview s.p. x>, <p.s.p. y>, <folding list>)
+        The folding list may be None or a list of UInt32 numbers
+        containing fold level, header flag and expand flag for each line
+        in editor.
         """
         wikiData = self.wikiDocument.getWikiData()
 
@@ -581,7 +591,28 @@ class WikiPage(DocPage):
             return WikiPage._DEFAULT_PRESENTATION
 
         try:
-            return struct.unpack("iiiii", datablock)
+            if len(datablock) == struct.calcsize("iiiii"):
+                # Version 0
+                return struct.unpack("iiiii", datablock) + (None,)
+            else:
+                ss = SerializeStream(stringBuf=datablock)
+                rcVer = ss.serUint8(1)
+                if rcVer > 1:
+                    return WikiPage._DEFAULT_PRESENTATION
+
+                # Compatible to version 1                
+                ver = ss.serUint8(1)
+                pt = [ss.serInt32(0), ss.serInt32(0), ss.serInt32(0),
+                        ss.serInt32(0), ss.serInt32(0), None]
+
+                # Fold list
+                fl = ss.serArrUint32([])
+                if len(fl) == 0:
+                    fl = None
+
+                pt[5] = fl
+
+                return tuple(pt)
         except struct.error:
             return WikiPage._DEFAULT_PRESENTATION
 
@@ -606,9 +637,28 @@ class WikiPage(DocPage):
             wikiData = self.wikiDocument.getWikiData()
             if wikiData is None:
                 return
+                
+            if pt[5] is None:
+                # Write it in old version 0
+                wikiData.setPresentationBlock(self.getWikiWord(),
+                        struct.pack("iiiii", *pt[:5]))
+            else:
+                # Write it in new version 1
+                ss = SerializeStream(stringBuf=True, readMode=False)
+                ss.serUint8(1)  # Read compatibility version
+                ss.serUint8(1)  # Real version
+                # First five numbers
+                for n in pt[:5]:
+                    ss.serInt32(n)
+                # Folding tuple
+                ft = pt[5]
+                if ft is None:
+                    ft = ()
+                ss.serArrUint32(pt[5])
 
-            wikiData.setPresentationBlock(self.getWikiWord(),
-                    struct.pack("iiiii", *pt))
+                wikiData.setPresentationBlock(self.getWikiWord(),
+                        ss.getBytes())
+
         except AttributeError:
             traceback.print_exc()
 #         self.setDirty(True)
@@ -634,6 +684,7 @@ class WikiPage(DocPage):
             
         # Apply sort order
         if childSortOrder == u"natural":
+            # TODO: Do it right 
             # Retrieve relations as list of tuples (child, firstcharpos)
             relations = self.getChildRelationships(existingonly,
                     selfreference=False, withPosition=True,

@@ -16,6 +16,9 @@ TitleWikiWordDelimiterPAT = ur"\|"
 
 
 PlainCharacterPAT = ur"(?:[^\\]|\\.)"
+PlainCharacterNoLfPAT = ur"(?:[^\\\n]|\\[^\n])"
+
+
 
 PlainEscapedCharacterRE = re.compile(ur"\\(.)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
@@ -42,6 +45,9 @@ ItalicRE        = re.compile(ur"\b_(?P<italicContent>" + PlainCharacterPAT +
 HtmlTagRE = re.compile(
         ur"</?[A-Za-z][A-Za-z0-9]*(?:/| [^\n>]*)?>",
         re.DOTALL | re.UNICODE | re.MULTILINE)
+HtmlEntityRE = re.compile(
+        ur"&(?:[A-Za-z0-9]{2,10}|#[0-9]{1,10}|#x[0-9a-fA-F]{1,8});",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
 Heading4RE      = re.compile(u"^\\+\\+\\+\\+(?!\\+) ?(?P<h4Content>" +
         PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
@@ -56,7 +62,7 @@ Heading1RE      = re.compile(u"^\\+(?!\\+) ?(?P<h1Content>" +
         re.DOTALL | re.UNICODE | re.MULTILINE)
 # UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp|rel)://|mailto:)[^"\s<>]*',
 #         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
-UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp|rel)://|mailto:)'
+UrlRE           = re.compile(ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|file://?)'
         ur'(?:(?![.,;:!?)]+["\s])[^"\s<>])*(?:>\S+)?',
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
@@ -221,8 +227,11 @@ RevPropertyValue     = re.compile(
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 
-RevTodoREWithContent = re.compile(ur"^[^\n:]{0,30}:(?:[^:\s]{0,40}\.)??"
+RevTodoKeyRE = re.compile(ur"^(?:[^:\s]{0,40}\.)??"
         ur"(?:odot|enod|tiaw|noitca|kcart|eussi|noitseuq|tcejorp)",
+        re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
+
+RevTodoValueRE = re.compile(ur"^[^\n:]{0,30}:" + RevTodoKeyRE.pattern[1:],
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 
@@ -241,13 +250,14 @@ RevWikiWordAnchorRE2 = re.compile(ur"^(?P<anchorBegin>[A-Za-z0-9\_]{0,20})" +
 ScriptRE        = re.compile(u"\<%(.*?)%\>", re.DOTALL)
 
 # Auto generated area
-AutoGenAreaRE = re.compile(ur"^([ \t]*<<[ \t]+)([^\n]+\n)(.*?)^([ \t]*>>[ \t]*\n)", re.DOTALL | re.LOCALE | re.MULTILINE)
+AutoGenAreaRE = re.compile(ur"^([ \t]*<<[ \t]+)([^\n]+\n)(.*?)^([ \t]*>>[ \t]*\n)",
+        re.DOTALL | re.LOCALE | re.MULTILINE)
         
 # todos, captures the todo item text
 ToDoREWithContent = re.compile(ur"\b(?P<todoIndent>)"    # ur"(?P<todoIndent>^[ \t]*)"
         ur"(?P<todoName>(?:todo|done|wait|action|track|issue|question|project)(?:\.[^:\s]+)?)"
-        ur"(?P<todoDelimiter>:)(?P<todoValue>" + PlainCharacterPAT + ur"+?)(?:$|(?=\|))",
-        re.DOTALL | re.UNICODE | re.MULTILINE)
+        ur"(?P<todoDelimiter>:)(?P<todoValue>" + PlainCharacterNoLfPAT +
+        ur"+?)(?:$|(?=\|))", re.DOTALL | re.UNICODE | re.MULTILINE)
 
 # todos, used in the tree control to parse saved todos. Because they were
 #   already identified as todos, the regexp can be quite simple

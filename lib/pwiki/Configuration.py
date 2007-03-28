@@ -465,9 +465,7 @@ GLOBALDEFAULTS = {
     ("main", "auto_bullets"): "True",  # Show bullet/number after newline if current line has bullet
     ("main", "auto_indent"): "True",
     ("main", "show_lineNumbers"): "False", 
-    ("main", "clipboardCatcher_suffix"): ur"\n",  # Suffix to append after each caught clipboard snippet
-    ("main", "clipboardCatcher_filterDouble"): "True",  # If same text shall be inserted twice (or more often)
-            # do not react
+    ("main", "editor_useFolding"): "False", 
     ("main", "mainTree_position"): "0",  # Mode where to place the main tree,
             # 0:Left, 1:Right, 2:Above, 3:Below
     ("main", "viewsTree_position"): "0",  # Mode how to show the "Views" tree relative to main tree,
@@ -485,6 +483,14 @@ GLOBALDEFAULTS = {
 #             "layout relation:below&layout relative to:main area panel&name:log&"\
 #                 "layout sash position:1&layout sash effective position:120",
 #             # !!!
+
+
+    ("main", "hotKey_showHide_byApp"): "", # System-wide hotkey to show/hide program. It is described
+            # in the usual shortcut syntax e.g. "Ctrl-Alt-A".
+            # This key is bound to the application. A second key can be bound to a particular
+            # wiki
+    ("main", "hotKey_showHide_byApp_isActive"): "True", # Separate switch to deactivate hotkey
+            # without deleting the hotkey setting itself
 
     ("main", "auto_save"): "True",  # Boolean field, if auto save should be active
     ("main", "auto_save_delay_key_pressed"): "3",  # Seconds to wait after last key pressed and ...
@@ -530,7 +536,15 @@ GLOBALDEFAULTS = {
     ("main", "sync_highlight_byte_limit"): "5120",  # Size limit when to start asyn. highlighting in editor
     ("main", "async_highlight_delay"): "0.2",  # Delay after keypress before starting async. highlighting
     ("main", "editor_autoUnbullets"): "True",  # When pressing return on line with lonely bullet, remove bullet?
+    ("main", "editor_autoComplete_closingBracket"): "False",  # Append closing bracket to suggested wiki words
+            # for autocompletion ("[Two" -> "[Two words]" instead of -> "[Two words")
 
+
+    ("main", "clipboardCatcher_suffix"): ur"\n",  # Suffix to append after each caught clipboard snippet
+    ("main", "clipboardCatcher_filterDouble"): "True",  # If same text shall be inserted twice (or more often)
+            # do not react
+    ("main", "clipboardCatcher_userNotification"): "0",  # Type of notification when new clipboard snippet is caught, 0: None; 1: Sound
+    ("main", "clipboardCatcher_soundFile"): "",  # Filepath of sound to play if notification type is 1. Empty path plays bell
 
     # Mouse options
     ("main", "mouse_middleButton_withoutCtrl"): "1", # If middle mouse button is pressed on a link in editor or preview, without
@@ -571,6 +585,7 @@ GLOBALDEFAULTS = {
     }
 
 
+
 WIKIDEFAULTS = {
     ("wiki_db", "data_dir"): u"data",
     ("main", "wiki_name"): None,
@@ -590,8 +605,13 @@ WIKIDEFAULTS = {
     ("main", "fileStorage_identity_modDateIsEnough"): "False",
             # Same modification date is enough to claim files identical (no content compare)
 
-    ("main", "wikiPageTitlePrefix"): "++"   # Prefix for main title of new pages
+    ("main", "wikiPageTitlePrefix"): "++",   # Prefix for main title of new pages
+
+    ("main", "hotKey_showHide_byWiki"): ""   # System-wide hotkey to show/hide program. It is described
+            # in the usual shortcut syntax e.g. "Ctrl-Alt-A".
+            # This key is bound to the wiki. Another key above can be bound to the whole app
     }
+
 
 
 # Maps configuration setting "mouse_middleButton_withoutCtrl" number to a 
