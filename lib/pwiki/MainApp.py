@@ -34,6 +34,51 @@ from PluginManager import PluginManager, InsertionPluginManager
 
 
 
+# # The following is a hack to workaround a problem when using regex engine
+# # with multiple threads
+# 
+# import sre_compile
+# import sre_parse
+# 
+# sre_compile.sre_parse = sre_parse
+# 
+# def compile_forSre(p, flags=0):
+#     # internal: convert pattern list to internal format
+# 
+#     if isstring(p):
+#         # import sre_parse
+#         pattern = p
+#         p = sre_parse.parse(p, flags)
+#     else:
+#         pattern = None
+# 
+#     code = _code(p, flags)
+# 
+#     # print code
+# 
+#     # XXX: <fl> get rid of this limitation!
+#     if p.pattern.groups > 100:
+#         raise AssertionError(
+#             "sorry, but this version only supports 100 named groups"
+#             )
+# 
+#     # map in either direction
+#     groupindex = p.pattern.groupdict
+#     indexgroup = [None] * p.pattern.groups
+#     for k, i in groupindex.items():
+#         indexgroup[i] = k
+# 
+#     return _sre.compile(
+#         pattern, flags, code,
+#         p.pattern.groups-1,
+#         groupindex, indexgroup
+#         )
+# 
+# 
+# sre_compile.compile = compile_forSre
+
+
+
 def findDirs():
     """
     Returns tuple (wikiAppDir, globalConfigDir)

@@ -408,6 +408,62 @@ class WikiData:
             raise DbReadAccessError(e)
 
 
+#     def getChildRelationshipsAndChildNumber(self, wikiWord, existingonly=False,
+#             selfreference=False):
+#         sql = ("select parent.relation, count(child.relation) "
+#                 "from wikirelations as parent left join wikirelations as child "
+#                 "on parent.relation=child.word where parent.word = ? "
+#                 "group by parent.relation")
+#         
+# #         return self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
+#         return self.connWrap.execSqlQuery(sql, (wikiWord,))
+#         
+# 
+# 
+#     def getChildRelationshipsAndHasChildren(self, wikiWord, existingonly=False,
+#             selfreference=False):
+#         """
+#         get the child relations to this word as sequence of tuples
+#             (<child word>, <has child children?>). Used when expanding
+#             a node in the tree control. If cycles are forbidden in the
+#             tree, a True in the "children" flag must be checked
+#             for cycles, a False is always correct.
+# 
+#         existingonly -- List only existing wiki words
+#         selfreference -- List also wikiWord if it references itself
+#         """
+#         innersql = "select relation from wikirelations as innerrel where "+\
+#                 "word = wikirelations.relation"
+#         if existingonly:
+#             # filter to only words in wikiwords or aliases
+#             innersql += " and (exists (select word from wikiwords "+\
+#                     "where word = relation) or exists "+\
+#                     "(select value from wikiwordprops "+\
+#                     "where value = relation and key = 'alias'))"
+# 
+#         if not selfreference:
+#             innersql += " and relation != word"
+# 
+# 
+#         outersql = "select relation, exists(%s) from wikirelations where word = ?"
+#         if existingonly:
+#             # filter to only words in wikiwords or aliases
+#             outersql += " and (exists (select word from wikiwords "+\
+#                     "where word = relation) or exists "+\
+#                     "(select value from wikiwordprops "+\
+#                     "where value = relation and key = 'alias'))"
+# 
+#         if not selfreference:
+#             outersql += " and relation != word"
+# 
+#         outersql = outersql % innersql
+# 
+# 
+#         return self.connWrap.execSqlQuery(outersql, (wikiWord,))
+
+
+
+
     def getParentRelationships(self, wikiWord):
         "get the parent relations to this word"
 #         return self.connWrap.execSqlQuerySingleColumn(
@@ -897,6 +953,15 @@ class WikiData:
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
+
+            
+#     def getPropertiesForWordAndKey(self, word, key):
+#         try:
+#             return self.connWrap.execSqlQuerySingleColumn("select value "+
+#                         "from wikiwordprops where word = ? and key = ?", (word, key))
+#         except (IOError, OSError, sqlite.Error), e:
+#             traceback.print_exc()
+#             raise DbReadAccessError(e)
 
 
     def setProperty(self, word, key, value):

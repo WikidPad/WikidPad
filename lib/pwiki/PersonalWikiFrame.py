@@ -33,7 +33,7 @@ import DocPages, WikiFormatting
 
 
 from CmdLineAction import CmdLineAction
-from WikiTxtCtrl import WikiTxtCtrl
+from WikiTxtCtrl import WikiTxtCtrl, FOLD_MENU
 from WikiTreeCtrl import WikiTreeCtrl
 from WikiHtmlView import createWikiHtmlView
 from LogWindow import LogWindow
@@ -57,7 +57,7 @@ from SearchAndReplaceDialogs import *
 import Exporters
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
         wikiWordToLabel, BOM_UTF8, fileContentToUnicode, splitIndent, \
-        unescapeWithRe
+        unescapeWithRe, escapeForIni, unescapeForIni
 
 import DocPages
 import WikiFormatting
@@ -1260,25 +1260,39 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
         foldingMenu = wx.Menu()
+        appendToMenuByMenuDesc(foldingMenu, FOLD_MENU, self.keyBindings)
 
-        menuID=wx.NewId()
-        showFoldingMenuItem = wx.MenuItem(foldingMenu, menuID,
-                "Show folding\t" + self.keyBindings.ShowFolding,
-                "Show folding marks and allow folding",
-                wx.ITEM_CHECK)
-        foldingMenu.AppendItem(showFoldingMenuItem)
-        wx.EVT_MENU(self, menuID, self.OnCmdCheckShowFolding)
-        wx.EVT_UPDATE_UI(self, menuID,
+        wx.EVT_MENU(self, GUI_ID.CMD_CHECKBOX_SHOW_FOLDING,
+                self.OnCmdCheckShowFolding)
+        wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CHECKBOX_SHOW_FOLDING,
                 self.OnUpdateShowFolding)
 
-        self.addMenuItem(foldingMenu, '&Unfold All\t' +
-                self.keyBindings.UnfoldAll,
-                'Unfold everything in current editor',
+        wx.EVT_MENU(self, GUI_ID.CMD_UNFOLD_ALL_IN_CURRENT,
                 lambda evt: self.getActiveEditor().unfoldAll())
-
-        self.addMenuItem(foldingMenu, '&Fold All\t' + self.keyBindings.FoldAll,
-                'Fold everything in current editor',
+        wx.EVT_MENU(self, GUI_ID.CMD_FOLD_ALL_IN_CURRENT,
                 lambda evt: self.getActiveEditor().foldAll())
+
+
+
+
+#         menuID=wx.NewId()
+#         showFoldingMenuItem = wx.MenuItem(foldingMenu, menuID,
+#                 "Show folding\t" + self.keyBindings.ShowFolding,
+#                 "Show folding marks and allow folding",
+#                 wx.ITEM_CHECK)
+#         foldingMenu.AppendItem(showFoldingMenuItem)
+#         wx.EVT_MENU(self, menuID, self.OnCmdCheckShowFolding)
+#         wx.EVT_UPDATE_UI(self, menuID,
+#                 self.OnUpdateShowFolding)
+# 
+#         self.addMenuItem(foldingMenu, '&Unfold All\t' +
+#                 self.keyBindings.UnfoldAll,
+#                 'Unfold everything in current editor',
+#                 lambda evt: self.getActiveEditor().unfoldAll())
+# 
+#         self.addMenuItem(foldingMenu, '&Fold All\t' + self.keyBindings.FoldAll,
+#                 'Fold everything in current editor',
+#                 lambda evt: self.getActiveEditor().foldAll())
 
         viewMenu = wx.Menu()
         
@@ -2410,15 +2424,23 @@ These are your default global settings.
         self.getConfig().setWikiConfig(self.wikiDataManager.getWikiConfig())
 
         try:
+            furtherWikiWords = []
             # what was the last wiki word opened
             lastWikiWord = wikiWordToOpen
             if not lastWikiWord:
                 lastWikiWord = splittedWikiWord
             if not lastWikiWord:
-                lastWikiWord = self.configuration.get("main", "first_wiki_word", u"")
+                lastWikiWord = self.getConfig().get("main",
+                        "first_wiki_word", u"")
                 if lastWikiWord == u"":
-                    lastWikiWord = self.configuration.get("main", "last_wiki_word")
-    
+                    lastWikiWord = self.getConfig().get("main",
+                            "last_wiki_word", None)
+                    fwws = self.getConfig().get("main",
+                            "further_wiki_words", u"")
+                    if fwws != u"":
+                        furtherWikiWords = [unescapeForIni(w) for w in
+                                fwws.split(u";")]
+
             # reset the gui
             self.resetGui()
             self.buildMainMenu()
@@ -2431,7 +2453,7 @@ These are your default global settings.
                 
             self.fireMiscEventKeys(("opened wiki",))
     
-            # open the root
+            # open the root    # TODO!
             self.openWikiPage(self.wikiName)
             self.setCurrentWordAsRoot()
             
@@ -2444,7 +2466,7 @@ These are your default global settings.
     #         self.statusBar.SetStatusText(
     #                 uniToGui(u"Opened wiki '%s'" % self.wikiName), 0)
     
-            # now try and open the last wiki page
+            # now try and open the last wiki page as leftmost tab
             if lastWikiWord and lastWikiWord != self.wikiName:
                 # if the word is not a wiki word see if a word that starts with the word can be found
                 if not self.getWikiData().isDefinedWikiWord(lastWikiWord):
@@ -2454,7 +2476,16 @@ These are your default global settings.
                         lastWikiWord = wordsStartingWith[0]
                 self.openWikiPage(lastWikiWord)
                 self.findCurrentWordInTree()
-    
+                
+            # If present, open further words in tabs on the right
+            for word in furtherWikiWords:
+                if not self.getWikiData().isDefinedWikiWord(word):
+                    wordsStartingWith = self.getWikiData().getWikiWordsStartingWith(
+                            word, True)
+                    if wordsStartingWith:
+                        word = wordsStartingWith[0]
+                self.activateWikiWord(word, tabMode=3)
+
             self.tree.SetScrollPos(wx.HORIZONTAL, 0)
     
             # enable the editor control whether or not the wiki root was found
@@ -2513,7 +2544,33 @@ These are your default global settings.
             # close a disconnected wiki
             if not wd.getReadAccessFailed() and not wd.getWriteAccessFailed():
                 try:
+                    # Store the last open wiki words
+                    
+                    # First create a list of open wiki words
+                    openWikiWords = []
+                    for pres in self.getMainAreaPanel().getDocPagePresenters():
+                        docPage = pres.getDocPage()
+                        if isinstance(docPage, (DocPages.AliasWikiPage,
+                                DocPages.WikiPage)):
+                            openWikiWords.append(
+                                    docPage.getNonAliasPage().getWikiWord())
+
                     self.fireMiscEventKeys(("closing current wiki",))
+
+                    if len(openWikiWords) > 0:
+                        # Write the leftmost word to "last_wiki_word" for
+                        # backward compatibility
+                        self.getConfig().set("main", "last_wiki_word",
+                                openWikiWords[0])
+
+                    # Write further words (after the leftmost) to config
+                    if len(openWikiWords) < 2:
+                        self.getConfig().set("main", "further_wiki_words", u"")
+                    else:
+                        fwws = u";".join([escapeForIni(w, u" ;")
+                                for w in openWikiWords[1:]])
+                        self.getConfig().set("main", "further_wiki_words", fwws)
+
                     if self.getWikiData() and saveState:
                         self.saveCurrentWikiState()
                 except (IOError, OSError, DbAccessError), e:

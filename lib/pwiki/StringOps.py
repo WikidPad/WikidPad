@@ -171,11 +171,11 @@ def strToBool(s, default=False):
     except ValueError:
         # Not an integer
         s = s.lower()
-        if s in (u"true", u"yes"):
+        if s in (u"true", u"yes", u"on"):
             return True
-        if s in (u"false", u"no"):
+        if s in (u"false", u"no", u"off"):
             return False
-            
+
         return default
 
 
@@ -592,12 +592,14 @@ class Tokenizer:
         self.tokenre = tokenre
         self.defaultType = defaultType
 
-    def tokenize(self, text, formatMap, defaultType, threadholder=DUMBTHREADHOLDER):
+    def tokenize(self, text, formatMap, defaultType,
+            threadholder=DUMBTHREADHOLDER, tokenStartOffset=0):
         result = []
         if not threadholder.isCurrent():
             return result
 
-        it = TokenIterator(self.tokenre, formatMap, defaultType, text)
+        it = TokenIterator(self.tokenre, formatMap, defaultType, text,
+                tokenStartOffset=tokenStartOffset)
         
         for t in it:
             result.append(t)

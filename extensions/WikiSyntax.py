@@ -22,12 +22,20 @@ PlainCharacterNoLfPAT = ur"(?:[^\\\n]|\\[^\n])"
 
 PlainEscapedCharacterRE = re.compile(ur"\\(.)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-        
+
+
+# How to start a non-camelcase wiki word or an attribute (normally opening bracket)
 BracketStart = u"["
+# Same, escaped for RE pattern
 BracketStartPAT = ur"\["
+# Same, escaped for reverse RE pattern (for autocompletion)
 BracketStartRevPAT = ur"\["
+
+# How to end a non-camelcase wiki word or an attribute (normally closing bracket)
 BracketEnd = u"]"
+# Same, escaped for RE pattern
 BracketEndPAT = ur"\]"
+# Same, escaped for reverse RE pattern (for autocompletion)
 BracketEndRevPAT = ur"\]"
 
 
@@ -137,8 +145,8 @@ WikiWordEditorRE = re.compile(ur"(?P<wikiword>" + WikiWordRE.pattern +
 
 
 # Only to exclude them from WikiWordRE2
-FootnoteRE     = re.compile(BracketStartPAT + ur"[0-9]+?" + BracketEndPAT,
-        re.DOTALL | re.UNICODE | re.MULTILINE)
+FootnoteRE     = re.compile(BracketStartPAT + ur"(?P<footnoteId>[0-9]+?)" +
+        BracketEndPAT, re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
 # Pattern string for non camelcase wiki word

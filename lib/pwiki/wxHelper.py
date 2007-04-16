@@ -1,14 +1,10 @@
 import os, os.path, traceback, sys, re
 
-# from   wxPython.wx import wxNewId, wxSystemSettings_GetMetric, wxSYS_SCREEN_X, \
-#         wxSYS_SCREEN_Y, wxSplitterWindow, wxSashLayoutWindow, \
-#         EVT_WINDOW_DESTROY, wxEvtHandler, wxBitmap, wxBITMAP_TYPE_GIF, \
-#         wxNullBitmap, wxImageList
-
 from wx.xrc import XRCCTRL, XRCID
 import wx
 
 from MiscEvent import KeyFunctionSink
+import Configuration
 
 
 def _unescapeWithRe(text):
@@ -58,118 +54,116 @@ class XrcControls:
         return XRCCTRL(self.__basepanel, name)
     
 
-# # DEPRECATED: Use same function in WindowLayout.py
-# def setWindowPos(win, pos=None, fullVisible=False):
-#     """
-#     Set position of a wxWindow, but ensure that the position is valid.
-#     If fullVisible is True, the window is moved to be full visible
-#     according to its current size. It is recommended to call
-#     setWindowSize first.
-#     """
-#     if pos is not None:
-#         currentX, currentY = pos
-#     else:
-#         currentX, currentY = win.GetPositionTuple()
-#         
-#     screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
-#     screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
-#     
-#     # fix any crazy screen positions
-#     if currentX < 0:
-#         currentX = 10
-#     if currentY < 0:
-#         currentY = 10
-#     if currentX > screenX:
-#         currentX = screenX-100
-#     if currentY > screenY:
-#         currentY = screenY-100
-#         
-#     if fullVisible:
-#         sizeX, sizeY = win.GetSizeTuple()
-#         if currentX + sizeX > screenX:
-#             currentX = screenX - sizeX
-#         if currentY + sizeY > screenY:
-#             currentY = screenY - sizeY
-# 
-#     win.SetPosition((currentX, currentY))
+
+if Configuration.isWin9x():
+    def getTextFromClipboard():
+        """
+        Retrieve text or unicode text from clipboard
+        """
+        from StringOps import lineendToInternal, mbcsDec
+        import array
+    
+        cb = wx.TheClipboard
+        cb.Open()
+        try:
+            dataob = wx.DataObjectComposite()
+            cdataob = wx.CustomDataObject(wx.DataFormat(wx.DF_TEXT))
+            udataob = wx.CustomDataObject(wx.DataFormat(wx.DF_UNICODETEXT))
+            cdataob.SetData("")
+            udataob.SetData("")
+            dataob.Add(udataob)
+            dataob.Add(cdataob)
+    
+            if cb.GetData(dataob):
+                if udataob.GetDataSize() > 0 and (udataob.GetDataSize() % 2) == 0:
+                    # We have unicode data
+                    # This might not work for all platforms:   # TODO Better impl.
+                    rawuni = udataob.GetData()
+                    arruni = array.array("u")
+                    arruni.fromstring(rawuni)
+                    realuni = lineendToInternal(arruni.tounicode())
+                    return realuni
+                elif cdataob.GetDataSize() > 0:
+                    realuni = lineendToInternal(
+                            mbcsDec(cdataob.GetData(), "replace")[0])
+                    return realuni
+                else:
+                    return u""
+            return None
+        finally:
+            cb.Close()
 
 
-# # DEPRECATED: Use same function in WindowLayout.py
-# def setWindowSize(win, size):
-#     """
-#     Set size of a wxWindow, but ensure that the size is valid
-#     """
-#     sizeX, sizeY = size
-#     screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
-#     screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
-# 
-#     # don't let the window be > than the size of the screen
-#     if sizeX > screenX:
-#         sizeX = screenX-20
-#     if sizeY > screenY:
-#         currentY = screenY-20
-# 
-#     # set the size
-#     win.SetSize((sizeX, sizeY))
-
-
-def getTextFromClipboard():
-    """
-    Retrieve text or unicode text from clipboard
-    """
-    from StringOps import lineendToInternal, mbcsDec
-    import array
-
-    cb = wx.TheClipboard
-    cb.Open()
-    try:
-        dataob = wx.DataObjectComposite()
+    def textToDataObject(text=None):
+        """
+        Create data object for an unicode string
+        """
+        from StringOps import lineendToOs, mbcsEnc, utf8Enc
+        import array
+        
         cdataob = wx.CustomDataObject(wx.DataFormat(wx.DF_TEXT))
         udataob = wx.CustomDataObject(wx.DataFormat(wx.DF_UNICODETEXT))
-        cdataob.SetData("")
-        udataob.SetData("")
-        dataob.Add(udataob)
-        dataob.Add(cdataob)
-
-        if cb.GetData(dataob):
-            if udataob.GetDataSize() > 0 and (udataob.GetDataSize() % 2) == 0:
-                # We have unicode data
-                # This might not work for all platforms:   # TODO Better impl.
-                rawuni = udataob.GetData()
-                arruni = array.array("u")
-                arruni.fromstring(rawuni)
-                realuni = lineendToInternal(arruni.tounicode())
-                return realuni
-            elif cdataob.GetDataSize() > 0:
-                realuni = lineendToInternal(
-                        mbcsDec(cdataob.GetData(), "replace")[0])
-                return realuni
-            else:
-                return ""
-        return None
-    finally:
-        cb.Close()
-
-
-def textToDataObject(text):
-    from StringOps import lineendToOs, mbcsEnc, utf8Enc
-    import array
     
-    cdataob = wx.CustomDataObject(wx.DataFormat(wx.DF_TEXT))
-    udataob = wx.CustomDataObject(wx.DataFormat(wx.DF_UNICODETEXT))
+        if text is not None:
+            realuni = lineendToOs(text)
+            arruni = array.array("u")
+            arruni.fromunicode(realuni+u"\x00")
+            rawuni = arruni.tostring()
+            udataob.SetData(rawuni)
+            cdataob.SetData(mbcsEnc(realuni)[0]+"\x00")
+        else:
+            cdataob.SetData("")
+            udataob.SetData("")
+    
+        dataob = wx.DataObjectComposite()
+        dataob.Add(udataob, True)
+        dataob.Add(cdataob)
+    
+        return dataob
 
-    realuni = lineendToOs(text)
-    arruni = array.array("u")
-    arruni.fromunicode(realuni+u"\x00")
-    rawuni = arruni.tostring()
-    udataob.SetData(rawuni)
-    cdataob.SetData(mbcsEnc(realuni)[0]+"\x00")
+else:    # Non-Windows 9x versions
 
-    dataob = wx.DataObjectComposite()
-    dataob.Add(udataob, True)
-    dataob.Add(cdataob)
+    def getTextFromClipboard():
+        """
+        Retrieve text or unicode text from clipboard
+        """
+        from StringOps import lineendToInternal, mbcsDec
+        import array
+    
+        cb = wx.TheClipboard
+        cb.Open()
+        try:
+            dataob = textToDataObject()
 
-    return dataob
+            if cb.GetData(dataob):
+                if dataob.GetTextLength() > 0:
+                    # We have unicode data
+                    # This might not work for all platforms:   # TODO Better impl.
+                    return lineendToInternal(dataob.GetText())
+                else:
+                    return u""
+            return None
+        finally:
+            cb.Close()
+
+
+    def textToDataObject(text=None):
+        """
+        Create data object for an unicode string
+        """
+        from StringOps import lineendToOs, mbcsEnc, utf8Enc
+        import array
+        
+        if text is None:
+            text = u""
+        
+        text = lineendToOs(text)
+
+        return wx.TextDataObject(text)
+
+
+
+
 
 
 def copyTextToClipboard(text): 
@@ -229,6 +223,14 @@ def getAccelPairFromString(s):
 
 
 def setHotKeyByString(win, hotKeyId, keyString):
+    # Search for Windows key
+    winMatch = re.search(u"(?<![^\+\-])win[\+\-]", keyString, re.IGNORECASE)
+    winKey = False
+    if winMatch:
+        winKey = True
+        keyString = keyString[:winMatch.start(0)] + \
+                keyString[winMatch.end(0):]
+
     accFlags, vkCode = getAccelPairFromString("\t" + keyString)
 
 #     win.RegisterHotKey(hotKeyId, 0, 0)
@@ -241,10 +243,12 @@ def setHotKeyByString(win, hotKeyId, keyString):
             modFlags |= wx.MOD_CONTROL
         if accFlags & wx.ACCEL_ALT:
             modFlags |= wx.MOD_ALT
+        if winKey:
+            modFlags |= wx.MOD_WIN
             
 #         print "setHotKeyByString7", hotKeyId
         return win.RegisterHotKey(hotKeyId, modFlags, vkCode)
-    
+
     return False
 
 
@@ -263,37 +267,64 @@ def setHotKeyByString(win, hotKeyId, keyString):
 #     return result
 
 
-def appendToMenuByMenuDesc(menu, desc):
+def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
     """
     Appends the menu items described in unistring desc to
     menu.
+    keyBindings -- a KeyBindingsCache object or None
+     
     menu -- already created wx-menu where items should be appended
     desc consists of lines, each line represents an item. A line only
     containing '-' is a separator. Other lines consist of multiple
     parts separated by ';'. The first part is the display name of the
-    item, second part is the command id as it can be retrieved by GUI_ID,
+    item, it may be preceded by '*' for a radio item or '+' for a checkbox
+    item.
+    
+    The second part is the command id as it can be retrieved by GUI_ID,
     third part (optional) is the long help text for status line.
+    
+    Fourth part (optional) is the shortcut, either written as e.g.
+    "Ctrl-A" or preceded with '*' and followed by a key to lookup
+    in the KeyBindings, e.g. "*ShowFolding". If keyBindings
+    parameter is None, all shortcuts are ignored.
     """
     for line in desc.split(u"\n"):
         if line.strip() == u"":
             continue
         
         parts = [p.strip() for p in line.split(u";")]
-        if len(parts) < 3:
-            parts += [u""] * (3 - len(parts))
+        if len(parts) < 4:
+            parts += [u""] * (4 - len(parts))
         
         if parts[0] == u"-":
             # Separator
             menu.AppendSeparator()
         else:
-            parts[0] = _unescapeWithRe(parts[0])
+            # First check for radio or checkbox items
+            kind = wx.ITEM_NORMAL
+            title = _unescapeWithRe(parts[0])
+            if title[0] == u"*":
+                # Radio item
+                title = title[1:]
+                kind = wx.ITEM_RADIO
+            elif title[0] == u"+":
+                # Checkbox item
+                title = title[1:]
+                kind = wx.ITEM_CHECK
+
+            # Check for shortcut
+            if parts[3] != u"" and keyBindings is not None:
+                if parts[3][0] == u"*":
+                    parts[3] = getattr(keyBindings, parts[3][1:], u"")
+                
+                if parts[3] != u"":
+                    title += u"\t" + parts[3]
+                
             menuID = getattr(GUI_ID, parts[1], -1)
             if menuID == -1:
                 continue
             parts[2] = _unescapeWithRe(parts[2])
-            menu.Append(menuID, parts[0], parts[2])
-
-
+            menu.Append(menuID, title, parts[2], kind)
 
 
 class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):

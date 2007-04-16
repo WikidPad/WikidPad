@@ -1,4 +1,4 @@
-import sets
+import sets, itertools
 from Enum import Enumeration
 from MiscEvent import KeyFunctionSink
 from Utilities import DUMBTHREADHOLDER
@@ -135,6 +135,30 @@ def getHeadingLevel(formatType):
 
 
 
+def coalesceTokens(tokens):
+    """
+    Coalesce neighboured "Default" tokens.
+    """
+    result = []
+    lenT = len(tokens)
+    if lenT < 2:
+        return tokens
+        
+    prevToken = tokens[0]
+    for token in itertools.islice(tokens, 1, None):
+        if prevToken.ttype == FormatTypes.Default and \
+               token.ttype == FormatTypes.Default:
+            prevToken.text = prevToken.text + token.text
+            continue
+
+        result.append(prevToken)
+        prevToken = token
+    
+    result.append(prevToken)
+    
+    return result
+
+
 
 # --------------------------------
 
@@ -142,11 +166,33 @@ class WikiPageFormatDetails(object):
     """
     Store some details of the formatting of a specific page
     """
-    __slots__ = ("__weakref__", "withCamelCase", "noFormat")
+    __slots__ = ("__weakref__", "withCamelCase", "footnotesAsWws",
+            "wikiDocument", "autoLinkMode", "noFormat")
     
-    def __init__(self, withCamelCase=True, noFormat=False):
-        self.withCamelCase = withCamelCase   # Interpret CamelCase as wiki word
+    def __init__(self, withCamelCase=True, footnotesAsWws=False,
+            wikiDocument=None, autoLinkMode=u"off", noFormat=False):
+        self.wikiDocument = wikiDocument   # WikiDocument object (needed for autoLink)
+
+        self.withCamelCase = withCamelCase   # Interpret CamelCase as wiki word?
+        self.footnotesAsWws = footnotesAsWws # Interpret footnotes
+                # (e.g. "[42]") as wikiwords?
+        self.autoLinkMode = autoLinkMode   # Mode to automatically create links from plain text
         self.noFormat = noFormat   # No formatting at all, overrides other settings
+
+
+    def isEquivTo(self, details):
+        """
+        Compares with other details object if both are "equivalent"
+        """
+        if self.noFormat and details.noFormat:
+            # Remaining doesn't matter in this case
+            return True
+            
+        return self.noFormat == details.noFormat and \
+                self.withCamelCase == details.withCamelCase and \
+                self.footnotesAsWws == details.footnotesAsWws and \
+                self.autoLinkMode == details.autoLinkMode
+        
 
 # --------------------------------
 
@@ -281,11 +327,11 @@ class WikiFormatting:
 
         ignoreList = []  # List of FormatTypes not to compile into the comb. regex
 
-        if self.wikiDocument.getWikiConfig().getboolean(
-                    "main", "footnotes_as_wikiwords", False):
+        self.footnotesAsWws = self.wikiDocument.getWikiConfig().getboolean(
+                "main", "footnotes_as_wikiwords", False)
+
+        if self.footnotesAsWws:
             ignoreList.append(FormatTypes.Footnote)
-            self.footnotesAsWws = self.wikiDocument.getWikiConfig().getboolean(
-                    "main", "footnotes_as_wikiwords", False)
 
 
         self.combinedPageRE = compileCombinedRegex(self.formatExpressions,
@@ -430,45 +476,6 @@ class WikiFormatting:
         return None
 
 
-#     def splitWikiWord(self, word):
-#         """
-#         Splits a wiki word with (optional) title and/or search fragment
-#         into its parts.
-#         It is only recognized if it is valid in the editor, this means
-#         a non camelcase word must be in brackets.
-#         Returns tuple (<naked word>, <title>, <search fragment>) where
-#         "naked" means it doesn't have brackets, "title" and/or "search fragment"
-#         may be None if they are not present. The search fragment is unescaped
-#         
-#         If word isn't a wiki word, (None, None, None) is returned.
-#         """
-#         mat = matchWhole(self.WikiWordEditorRE, word)
-#         if mat:
-#             # Camelcase word without brackets (has never a title)
-#             gd = mat.groupdict()
-#             nword = gd.get("wikiword")
-#             sfrag = gd.get("wikiwordSearchfrag")
-#             if sfrag is not None:
-#                 sfrag = self.SearchFragmentUnescapeRE.sub(ur"\1", sfrag)
-#             
-#             return (nword, None, sfrag)
-#             
-#         mat = matchWhole(self.WikiWordEditorRE2, word)
-#         if mat:
-#             # Sort out footnotes if appropriate
-#             if not self.footnotesAsWws and matchWhole(self.FootnoteRE, word):
-#                 return (None, None, None)
-#                 
-#             gd = mat.groupdict()
-#             nword = gd.get("wikiwordncc")
-#             title = gd.get("wikiwordnccTitle")
-#             sfrag = gd.get("wikiwordnccSearchfrag")
-#             if sfrag is not None:
-#                 sfrag = self.SearchFragmentUnescapeRE.sub(ur"\1", sfrag)
-#             
-#             return (nword, title, sfrag)
-
-
     def wikiWordToLabel(self, word):
         """
         Strip '[' and ']' if present and return naked word
@@ -500,14 +507,10 @@ class WikiFormatting:
         withCamelCase -- Recognize camel-case words as wiki words instead
                 of normal text
         """
-        modifier = {FormatTypes.WikiWord2: FormatTypes.WikiWord,
-                FormatTypes.Footnote: FormatTypes.Default}
+        modifier = {FormatTypes.WikiWord2: FormatTypes.WikiWord}
+                # FormatTypes.Footnote: FormatTypes.Default}
         if formatDetails is None:
-#             page = self.pWiki.getCurrentDocPage()
-#             if page is None:
             formatDetails = WikiPageFormatDetails() # Default
-#             else:
-#                 formatDetails = page.getFormatDetails()
         
         if not formatDetails.withCamelCase:
             modifier[FormatTypes.WikiWord] = FormatTypes.Default
@@ -522,11 +525,7 @@ class WikiFormatting:
         Function used by PageAst module
         """
         if formatDetails is None:
-#             page = self.pWiki.getCurrentDocPage()
-#             if page is None:
             formatDetails = WikiPageFormatDetails() # Default
-#             else:
-#                 formatDetails = page.getFormatDetails()
 
         if formatDetails.noFormat:
             # No formatting at all (used e.g. by some functional pages)
@@ -538,8 +537,8 @@ class WikiFormatting:
                 
         tokenizer = Tokenizer(self.combinedPageRE, -1)
         
-        return tokenizer.tokenize(text, formatMap, FormatTypes.Default,
-                threadholder=threadholder)
+        return tokenizer.tokenize(text, formatMap,
+                FormatTypes.Default, threadholder=threadholder)
 
 
     def tokenizeTodo(self, text, formatDetails=None,
@@ -550,11 +549,11 @@ class WikiFormatting:
         # TODO Cache if necessary
         formatMap = self.getExpressionsFormatList(
                 self.formatTodoExpressions, formatDetails)
-                
+
         tokenizer = Tokenizer(self.combinedTodoRE, -1)
-        
-        return tokenizer.tokenize(text, formatMap, FormatTypes.Default,
-                threadholder=threadholder)
+
+        return tokenizer.tokenize(text, formatMap,
+                FormatTypes.Default, threadholder=threadholder)
 
 
     def tokenizeTableContent(self, text, formatDetails=None,
@@ -565,11 +564,11 @@ class WikiFormatting:
         # TODO Cache if necessary
         formatMap = self.getExpressionsFormatList(
                 self.formatTableContentExpressions, formatDetails)
-                
+
         tokenizer = Tokenizer(self.combinedTableContentRE, -1)
-        
-        return tokenizer.tokenize(text, formatMap, FormatTypes.Default,
-                threadholder=threadholder)
+
+        return tokenizer.tokenize(text, formatMap,
+                FormatTypes.Default, threadholder=threadholder)
 
 
     def tokenizeTitle(self, text, formatDetails=None,
@@ -580,11 +579,11 @@ class WikiFormatting:
         # TODO Cache if necessary
         formatMap = self.getExpressionsFormatList(
                 self.formatWwTitleExpressions, formatDetails)
-                
+
         tokenizer = Tokenizer(self.combinedWwTitleRE, -1)
 
-        return tokenizer.tokenize(text, formatMap, FormatTypes.Default,
-                threadholder=threadholder)
+        return tokenizer.tokenize(text, formatMap,
+                FormatTypes.Default, threadholder=threadholder)
 
 
 

@@ -1,4 +1,4 @@
-import sys, sets # , hotshot
+import sys, sets   # , hotshot
 
 ## _prof = hotshot.Profile("hotshot.prf")
 
@@ -8,7 +8,8 @@ import wx, wx.xrc
 # import wxPython.xrc as xrc
 import customtreectrl
 
-from wxHelper import GUI_ID, wxKeyFunctionSink, textToDataObject
+from wxHelper import GUI_ID, wxKeyFunctionSink, textToDataObject, \
+        appendToMenuByMenuDesc
 from MiscEvent import DebugSimple   # , KeyFunctionSink
 
 from WikiExceptions import WikiWordNotFoundException
@@ -100,7 +101,7 @@ class AbstractNode(object):
         """
         pass
         
-    def getContextMenu(self):
+    def prepareContextMenu(self, menu):
         """
         Return a context menu for this item or None
         """
@@ -184,7 +185,26 @@ class WikiWordNode(AbstractNode):
         Check if represented word has valid children, filter out undefined
         and/or cycles if options are set accordingly
         """
-        return len(self._getValidChildren(wikiPage, withPosition=False)) > 0
+        if self.treeCtrl.pWiki.getConfig().getboolean("main", "tree_no_cycles"):
+            # Filter out cycles
+            ancestors = self.getAncestors()
+        else:
+            ancestors = sets.ImmutableSet()  # Empty
+
+        relations = wikiPage.getChildRelationships(
+                existingonly=self.treeCtrl.getHideUndefined(),
+                selfreference=False, withPosition=False)
+
+        if len(relations) > len(ancestors):
+            return True
+            
+        for r in relations:
+            if r not in ancestors:
+                return True
+                
+        return False
+        
+#         return len(self._getValidChildren(wikiPage, withPosition=False)) > 0
 
 
     def _createNodePresentation(self, baselabel):
@@ -204,7 +224,6 @@ class WikiWordNode(AbstractNode):
             self.flagChildren = True # Has at least ScratchPad and Views
         else:
             self.flagChildren = self._hasValidChildren(wikiPage)
-            
 
         style.hasChildren = self.flagChildren
         
@@ -286,7 +305,7 @@ class WikiWordNode(AbstractNode):
         children = wikiPage.getChildRelationshipsTreeOrder(
                 existingonly=self.treeCtrl.getHideUndefined(),
                 excludeSet=ancestors)
-                
+
         result = [WikiWordNode(self.treeCtrl, self, c)
                 for c in children]
 
@@ -301,7 +320,7 @@ class WikiWordNode(AbstractNode):
     def getWikiWord(self):
         return self.wikiWord
 
-    def getContextMenu(self):
+    def prepareContextMenu(self, menu):
         # Take context menu from tree   # TODO Better solution esp. for event handling
         return self.treeCtrl.contextMenuWikiWords
 
@@ -771,7 +790,8 @@ class MainModifiedWithinNode(AbstractNode):
         return map(lambda d: ModifiedWithinNode(self.treeCtrl, self, d),
                 [1, 3, 7, 30])
 
-    
+
+
 class ModifiedWithinNode(AbstractNode):
     """
     Represents a time span below the "modified-within" node
@@ -812,6 +832,7 @@ class ModifiedWithinNode(AbstractNode):
                 self.daySpan == other.daySpan
 
 
+
 class MainParentlessNode(AbstractNode):
     """
     Represents the "parentless" node
@@ -824,24 +845,19 @@ class MainParentlessNode(AbstractNode):
         style.icon = u"link"
         style.hasChildren = True
         return style
-        
+
     def isVisible(self):
         wikiData = self.treeCtrl.pWiki.getWikiData()
         return len(wikiData.getParentlessWikiWords()) > 1  # TODO Test if root is single element
-        
+
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.getWikiData()
         words = wikiData.getParentlessWikiWords()
         self.treeCtrl.pWiki.getCollator().sort(words)
         
-#         words = filter(lambda w: w != self.treeCtrl.pWiki.wikiName, words)
-                
         return [WikiWordSearchNode(self.treeCtrl, self, w) for w in words
                 if w != self.treeCtrl.pWiki.wikiName]
-                
-#         return map(lambda w: WikiWordSearchNode(self.treeCtrl,
-#                 wikiData.getPage(w, toload=[""])),
-#                 words)
+
 
 
 class MainUndefinedNode(AbstractNode):
@@ -860,7 +876,7 @@ class MainUndefinedNode(AbstractNode):
     def isVisible(self):
         wikiData = self.treeCtrl.pWiki.getWikiData()
         return len(wikiData.getUndefinedWords()) > 0
-        
+
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.getWikiData()
         words = wikiData.getUndefinedWords()
@@ -1504,7 +1520,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
     def setNodePresentation(self, node, style):
-        self.SetItemText(node, uniToGui(style.label))
+        self.SetItemText(node, uniToGui(style.label), recalcSize=False)
         self.setNodeImage(node, style.icon)
         self.SetItemBold(node, strToBool(style.bold, False))
         self.setNodeColor(node, style.color)
@@ -1560,7 +1576,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         childnodes = itemobj.listChildren()
 
-        #self.Freeze()
+        self.Freeze()
         try:
             for ch in childnodes:
                 newit = self.AppendItem(item, u"")
@@ -1568,7 +1584,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 self.setNodePresentation(newit, ch.getNodePresentation())
         finally:
             pass
-            #self.Thaw()
+            self.Thaw()
 
         ## _prof.stop()
      
@@ -1614,7 +1630,8 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         self.contextMenuNode = item
 
-        menu = self.GetPyData(item).getContextMenu()
+        menu = wx.Menu()
+        menu = self.GetPyData(item).prepareContextMenu(menu)
 
         if menu is not None:
             self.selectedNodeWhileContext = selnode
@@ -1662,7 +1679,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         if item is None or not item.IsOk():
             return
-            
+
         nodeObj = self.GetPyData(item)
 
         if event.ControlDown():
@@ -1703,4 +1720,16 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     self.Unbind(wx.EVT_IDLE)
 
 
+
+
+_CONTEXT_MENU_WIKIWORD = \
+u"""
+Activate New Tab;CMD_ACTIVATE_NEW_TAB_THIS
+Rename;CMD_RENAME_THIS_WIKIWORD
+Delete;CMD_DELETE_THIS_WIKIWORD
+Bookmark;CMD_BOOKMARK_THIS_WIKIWORD
+Set As Root;CMD_SETASROOT_THIS_WIKIWORD
+Append wiki word;CMD_APPEND_WIKIWORD_FOR_THIS
+Prepend wiki word;CMD_PREPEND_WIKIWORD_FOR_THIS
+"""
 

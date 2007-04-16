@@ -1,6 +1,7 @@
 import os, traceback, codecs, array, string, re
 from StringOps import *
 from Utilities import DUMBTHREADHOLDER
+from WikiExceptions import NotCurrentThreadException
 
 import WikiFormatting
 
@@ -114,6 +115,74 @@ def _findTokensForPos(tokens, pos):
         return [tok]
 
 
+def _doAutoLinkForTokens(tokens, formatDetails, threadholder):
+    if not threadholder.isCurrent():
+        return tokens
+
+    if formatDetails is None or \
+            formatDetails.autoLinkMode != u"relax":
+        return tokens
+        
+    # Run autoLink in relax mode
+    relaxList = formatDetails.wikiDocument.getAutoLinkRelaxRE()
+
+    result = []
+    
+    for token in tokens:
+        if token.ttype != WikiFormatting.FormatTypes.Default:
+            result.append(token)
+            continue
+        
+        text = token.text
+        start = token.start
+        
+        while text != u"":
+            threadholder.testCurrent()
+            # The foundWordText is the text as typed in the page
+            # foundWord is the word as entered in database
+            # These two may differ (esp. in whitespaces)
+            foundPos = len(text)
+            foundWord = None
+            foundWordText = None
+            
+            # Search all regexes for the earliest match
+            for regex, word in relaxList:
+                match = regex.search(text)
+                if match:
+                    pos = match.start(0)
+                    if pos < foundPos:
+                        # Match is earlier than previous
+                        foundPos = pos
+                        foundWord = word
+                        foundWordText = match.group(0)
+                        if pos == 0:
+                            # Can't find a better match -> stop loop
+                            break
+
+            # Add token for text before found word (if any)
+            preText = text[:foundPos]
+            if preText != u"":
+                result.append(Token(WikiFormatting.FormatTypes.Default,
+                        start, {}, preText))
+
+                start += len(preText)
+                text = text[len(preText):]
+            
+            if foundWord is not None:
+                token = Token(WikiFormatting.FormatTypes.WikiWord,
+                        start, {}, foundWordText)
+                node = WikiWord()
+                node.buildNodeForAutoLink(token, foundWord)
+                token.node = node
+
+                result.append(token)
+
+                start += len(foundWordText)
+                text = text[len(foundWordText):]
+
+    return result
+
+
 def iterWords(pageast):
     """
     Generator to find all words in page, generates a sequence of
@@ -126,11 +195,14 @@ def iterWords(pageast):
 
 
 class Page(Ast):
-    __slots__ = ("tokens",)
+    __slots__ = ("tokens", "footnoteAnchorDict")
 
     def __init__(self):
         Ast.__init__(self)
         self.tokens = None
+        self.footnoteAnchorDict = None  # Dictionary from footnote id (normally
+                # number of the footnote) to the last footnote token with
+                # this number (the anchor for links to this footnote)
         
     def getText(self):
         return _getRealTextForTokens(self.tokens)
@@ -144,13 +216,24 @@ class Page(Ast):
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.tokens, pos)
         
+
     def buildAst(self, formatting, text, formatDetails=None,
             threadholder=DUMBTHREADHOLDER):
-        self.tokens = formatting.tokenizePage(text, formatDetails,
-                threadholder=threadholder)
-        
-        _enrichTokens(formatting, self.tokens, formatDetails, threadholder)
-        
+        try:
+            tokens = formatting.tokenizePage(text, formatDetails,
+                    threadholder=threadholder)
+            
+            _enrichTokens(formatting, tokens, formatDetails, threadholder)
+    
+            self.tokens = WikiFormatting.coalesceTokens(tokens)
+            self.tokens = _doAutoLinkForTokens(self.tokens, formatDetails,
+                    threadholder)
+    
+            self.footnoteAnchorDict = None
+        except NotCurrentThreadException:
+            return
+
+
     def findTypeFlat(self, typeToFind):
         """
         Non-recursive search for tokens of the specified type
@@ -166,6 +249,8 @@ class Page(Ast):
             if tok.node is not None:
                 tok.node._findType(typeToFind, result)
 
+
+    # TODO Merge escaped characters to plain text tokens before or after
     def getTextualTokens(self):
         """
         Returns a sequence of tokens containing real text only which are then
@@ -207,6 +292,26 @@ class Page(Ast):
         return result
 
 
+    def getFootnoteAnchorDict(self):
+        """
+        buildAst must be called first
+        """
+        if self.footnoteAnchorDict is None:
+            if self.tokens is None:
+                return None
+
+            result = {}
+            fnTokens = self.findType(WikiFormatting.FormatTypes.Footnote)
+
+            for tok in fnTokens:
+                result[tok.grpdict["footnoteId"]] = tok
+
+            self.footnoteAnchorDict = result
+
+        return self.footnoteAnchorDict
+
+
+
 
 class Todo(Ast):
     __slots__ = ("indent", "name", "delimiter", "valuetokens")
@@ -243,6 +348,11 @@ class Todo(Ast):
             t.start += relpos
             
         _enrichTokens(formatting, self.valuetokens, formatDetails, threadholder)
+        
+        self.valuetokens = WikiFormatting.coalesceTokens(self.valuetokens)
+        self.valuetokens = _doAutoLinkForTokens(self.valuetokens, formatDetails,
+                threadholder)
+
 
 
     def _findType(self, typeToFind, result):
@@ -251,7 +361,7 @@ class Todo(Ast):
                 result.append(tok)
             if tok.node is not None:
                 tok.node._findType(typeToFind, result)
-        
+
 
 def tokenizeTodoValue(formatting, value):
     """
@@ -261,15 +371,12 @@ def tokenizeTodoValue(formatting, value):
     formatDetails = WikiFormatting.WikiPageFormatDetails()
     tokens = formatting.tokenizeTodo(value,
             formatDetails)
-    
+
     _enrichTokens(formatting, tokens, formatDetails, DUMBTHREADHOLDER)
-    
-    return tokens
 
-        
+    return tokens   # WikiFormatting.coalesceTokens(tokens)
 
 
-            
 class Table(Ast):
     __slots__ = ("begin", "end", "contenttokens")
 
@@ -332,6 +439,10 @@ class Table(Ast):
 
         _enrichTokens(formatting, self.contenttokens, formatDetails,
                 threadholder)
+                
+        self.contenttokens = WikiFormatting.coalesceTokens(self.contenttokens)
+        self.contenttokens = _doAutoLinkForTokens(self.contenttokens,
+                formatDetails, threadholder)
 
 
     def _findType(self, typeToFind, result):
@@ -347,19 +458,6 @@ class Table(Ast):
         cell = []
 #         print "calcGrid1", repr(self.contenttokens)
         for t in self.contenttokens:
-#             if t.ttype == WikiFormatting.FormatTypes.Default:
-#                 if t.text == u"\n":
-#                     if len(cell) > 0:
-#                         row.append(cell)
-#                         cell = []
-#                     if len(row) > 0:
-#                         grid.append(row)
-#                         row = []
-#                     continue
-#                 elif t.text == u"|":
-#                     row.append(cell)
-#                     cell = []
-#                     continue
             if t.ttype == WikiFormatting.FormatTypes.TableRowSplit:
                 if len(cell) > 0:
                     row.append(cell)
@@ -401,6 +499,13 @@ class WikiWord(Ast):
 
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.titleTokens, pos)
+        
+    def buildNodeForAutoLink(self, token, nakedWord):
+        self.searchFragment = None
+        self.anchorFragment = None
+        self.nakedWord = nakedWord
+        self.titleTokens = [Token(WikiFormatting.FormatTypes.Default,
+               token.start, {}, token.text)]
 
     def buildSubAst(self, formatting, token, formatDetails=None,
             threadholder=DUMBTHREADHOLDER):
@@ -440,6 +545,10 @@ class WikiWord(Ast):
             t.start += relpos
 
         _enrichTokens(formatting, self.titleTokens, formatDetails, threadholder)
+        
+        self.titleTokens = WikiFormatting.coalesceTokens(self.titleTokens)
+        # No call to _doAutoLinkForTokens, we don't search for links in the
+        # title of a link
 
 
     def _findType(self, typeToFind, result):
@@ -503,6 +612,11 @@ class Url(Ast):
         
                 _enrichTokens(formatting, self.titleTokens, formatDetails,
                         threadholder)
+                        
+                self.titleTokens = WikiFormatting.coalesceTokens(self.titleTokens)
+
+                # No call to _doAutoLinkForTokens, we don't search for links in the
+                # title of a link
                         
         # Now process the mode appendix (part after '>') from the URL, if present
         
@@ -574,13 +688,15 @@ class Insertion(Ast):
     They are used mainly for keys supported by WikidPad internally
     
     Quoted insertions look like:
-    [:key:"some data ..."]
-    
+    [:key:"some data ...";appendix;"appendix"]
+
     instead of the " there can be an arbitrary number (at least one) of
     quotation characters ", ', / or \. So " can be replaced by e.g
     "", ''', \ or //.
 
     These insertions are mainly used for keys supported by external plugins
+    
+    Having one or more appendices is optional.
     """
     
     __slots__ = ("key", "value", "appendices")

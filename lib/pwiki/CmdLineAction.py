@@ -20,15 +20,18 @@ class CmdLineAction:
         """
         sargs -- stripped args (normally sys.args[1:])
         """
-        self.wikiToOpen = None
-        self.wikiWordToOpen = None
-        self.exitFinally = False
-        self.showHelp = False
-        self.cmdLineError = False
-        self.exportWhat = None
-        self.exportType = None
-        self.exportDest = None
-        self.exportCompFn = False   # export compatible filenames?
+        self.wikiToOpen = None  # Path to wiki to open
+                # (interpreted by PersonalWikiFrame)
+        self.wikiWordToOpen = None  # Name of wiki word to open
+                # (interpreted by PersonalWikiFrame)
+        self.exitFinally = False   # Exit WikidPad when done
+                # (interpreted by PersonalWikiFrame)
+        self.showHelp = False   # Show help text?
+        self.cmdLineError = False   # Command line couldn't be interpreted
+        self.exportWhat = None   # String identifying what to export
+        self.exportType = None   # Export into which type of data?
+        self.exportDest = None   # Destination path to dir/file
+        self.exportCompFn = False   # Export with compatible filenames?
 
         if len(sargs) == 0:
             return

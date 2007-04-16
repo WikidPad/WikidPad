@@ -257,10 +257,9 @@ class WikiPage(DocPage):
 
         Does not support caching
         """
-        
         relations = self.getWikiData().getChildRelationships(self.wikiWord,
                 existingonly, selfreference, withPosition=withPosition)
-                
+
         if len(excludeSet) > 0:
             # Filter out members of excludeSet
             if withPosition:
@@ -444,9 +443,19 @@ class WikiPage(DocPage):
         formatting
         """
         withCamelCase = strToBool(self.getPropertyOrGlobal(
-                "camelCaseWordsEnabled"), True)
-        
-        return WikiFormatting.WikiPageFormatDetails(withCamelCase)
+                u"camelCaseWordsEnabled"), True)
+                
+        footnotesAsWws = self.wikiDocument.getWikiConfig().getboolean(
+                "main", "footnotes_as_wikiwords", False)
+                
+        autoLinkMode = self.getPropertyOrGlobal(u"auto_link", u"off").lower()
+
+        return WikiFormatting.WikiPageFormatDetails(
+                withCamelCase=withCamelCase,
+                footnotesAsWws=footnotesAsWws,
+                wikiDocument=self.wikiDocument,
+                autoLinkMode=autoLinkMode
+                )
 
 
     def extractPropertyTokensFromPageAst(self, pageAst):
@@ -460,7 +469,11 @@ class WikiPage(DocPage):
         """
         Saves the content of current wiki page.
         """
-#         self.lastSave = time()
+        if not self.getWikiData().isDefinedWikiWord(self.wikiWord):
+            # Pages isn't yet in database  -> fire event
+            # The event may be needed to invalidate a cache
+            self.fireMiscEventKeys(("saving new wiki page",))
+            
         self.getWikiData().setContent(self.wikiWord, text)
         self.saveDirtySince = None
 
@@ -468,25 +481,16 @@ class WikiPage(DocPage):
         self.modified = None
 
 
-    def update(self, text, fireEvent=True):
+
+    def refreshPropertiesFromPageAst(self, pageAst):
         """
-        Update additional cached informations (properties, todos, relations)
+        Update properties (aka attributes) only.
+        This is step one in update/rebuild process.
         """
         formatting = self.wikiDocument.getFormatting()
-        
-        page = PageAst.Page()
-        page.buildAst(formatting, text, self.getFormatDetails())
-
-        self.deleteChildRelationships()
         self.deleteProperties()
-        self.deleteTodos()
 
-        todoTokens = page.findType(WikiFormatting.FormatTypes.ToDo)
-        for t in todoTokens:
-            self.addTodo(t.grpdict["todoName"] + t.grpdict["todoDelimiter"] +
-                t.grpdict["todoValue"])
-
-        propTokens = self.extractPropertyTokensFromPageAst(page)
+        propTokens = self.extractPropertyTokensFromPageAst(pageAst)
         for t in propTokens:
             propName = t.grpdict["propertyName"]
             propValue = t.grpdict["propertyValue"]
@@ -497,14 +501,30 @@ class WikiPage(DocPage):
             else:
                 self.setProperty(propName, propValue)
 
-        wwTokens = page.findType(WikiFormatting.FormatTypes.WikiWord)
-        for t in wwTokens:
-            self.addChildRelationship(t.node.nakedWord, t.start)
-
         # kill the global prop cache in case any props were added
         self.getWikiData().cachedGlobalProps = None
 
-        # add a relationship to the scratchpad at the root
+        self.getWikiData().updateProperties(self.wikiWord, self.props)
+
+
+    def refreshMainDbCacheFromPageAst(self, pageAst, fireEvent=True):
+        """
+        Update everything else (todos, relations).
+        This is step two in update/rebuild process.
+        """
+        self.deleteTodos()
+        self.deleteChildRelationships()
+
+        todoTokens = pageAst.findType(WikiFormatting.FormatTypes.ToDo)
+        for t in todoTokens:
+            self.addTodo(t.grpdict["todoName"] + t.grpdict["todoDelimiter"] +
+                t.grpdict["todoValue"])
+
+        wwTokens = pageAst.findType(WikiFormatting.FormatTypes.WikiWord)
+        for t in wwTokens:
+            self.addChildRelationship(t.node.nakedWord, t.start)
+
+        # add a relationship to the scratchpad at the wiki root
         if self.wikiWord == self.wikiDocument.getWikiName():
             # Position in page is really far down.
             self.addChildRelationship(u"ScratchPad", 2000000000)
@@ -514,13 +534,34 @@ class WikiPage(DocPage):
 
         self.getWikiData().updateTodos(self.wikiWord, self.todos)
         self.getWikiData().updateChildRelations(self.wikiWord, self.childRelations)
-        self.getWikiData().updateProperties(self.wikiWord, self.props)
 
         self.modified = None   # ?
         self.created = None
 
         if fireEvent:
             self.fireMiscEventKeys(("updated wiki page", "updated page"))
+
+
+    def update(self, text, fireEvent=True):
+        """
+        Update additional cached informations (properties, todos, relations)
+        """
+        formatting = self.wikiDocument.getFormatting()
+        
+        pageAst = PageAst.Page()
+        details1 = self.getFormatDetails()
+        pageAst.buildAst(formatting, text, details1)
+        
+        self.refreshPropertiesFromPageAst(pageAst)
+
+        details2 = self.getFormatDetails()
+        if not details1.isEquivTo(details2):
+            # Formatting details have changed -> create new AST for second
+            # step of refresh.  (Maybe repeat step one?)
+            pageAst = PageAst.Page()
+            pageAst.buildAst(formatting, text, details2)
+
+        self.refreshMainDbCacheFromPageAst(pageAst, fireEvent)
 
 
     def addChildRelationship(self, toWord, pos):
@@ -722,7 +763,8 @@ class WikiPage(DocPage):
             position += 1
 
         # Sort again, using tree position and priority properties
-        relationData.sort(_relationSort)
+#         relationData.sort(_relationSort)
+        relationData.sort(key=_relationKey)
 
         return [rd[0] for rd in relationData]
 
@@ -752,9 +794,9 @@ class WikiPage(DocPage):
         """
         result = [(self.getWikiWord(), 0)]
         excludeSet = sets.Set((self.getWikiWord(),))
-        
+
         self._flatTreeHelper(self, 0, excludeSet, result)
-        
+
         return result
 
 
@@ -934,6 +976,24 @@ class FunctionalPage(DocPage):
 
 
 # Two search helpers for WikiPage.getChildRelationshipsTreeOrder
+
+def _relationKey(a):
+    propsA = a[1].getProperties()
+    aSort = None
+
+    try:
+        if (propsA.has_key(u'tree_position')):
+            aSort = int(propsA[u'tree_position'][-1])
+        elif (propsA.has_key(u'priority')):
+            aSort = int(propsA[u'priority'][-1])
+        else:
+            aSort = a[2]
+    except:
+        aSort = a[2]
+
+    return aSort    
+
+
 
 def _relationSort(a, b):
     propsA = a[1].getProperties()

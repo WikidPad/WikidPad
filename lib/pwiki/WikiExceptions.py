@@ -45,3 +45,4 @@ class UnknownDbHandlerException(Exception): pass
 
 class BadConfigurationFileException(Exception): pass
 
+class NotCurrentThreadException(Exception): pass

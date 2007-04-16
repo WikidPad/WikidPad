@@ -1,6 +1,8 @@
 from weakref import WeakValueDictionary
-import os, os.path, sets, traceback, re
+import os, os.path, sets, traceback
 from threading import RLock
+from pwiki.rtlibRepl import re  # Original re doesn't work right with
+        # multiple threads   (TODO!)
 
 from wx import GetApp
 
@@ -9,6 +11,9 @@ from pwiki.MiscEvent import MiscEventSourceMixin
 from pwiki.WikiExceptions import *
 from pwiki.StringOps import mbcsDec
 from pwiki.DocPages import WikiPage, FunctionalPage, AliasWikiPage
+
+import pwiki.PageAst as PageAst
+
 
 # from pwiki.Configuration import createWikiConfiguration
 from pwiki.WikiFormatting import WikiFormatting
@@ -232,6 +237,7 @@ class WikiDataManager(MiscEventSourceMixin):
         wikiData = wikiDataFactory(self, dataDir)
 
         self.baseWikiData = wikiData
+        self.autoLinkRelaxRE = None
         self.wikiData = WikiDataSynchronizedProxy(self.baseWikiData)
         self.wikiPageDict = WeakValueDictionary()
         self.funcPageDict = WeakValueDictionary()
@@ -522,18 +528,24 @@ class WikiDataManager(MiscEventSourceMixin):
         progresshandler -- Object, fulfilling the
             PersonalWikiFrame.GuiProgressHandler protocol
         """
+        formatting = self.getFormatting()
 
         self.getWikiData().refreshDefinedContentNames()
 
         # get all of the wikiWords
         wikiWords = self.getWikiData().getAllDefinedWikiPageNames()
 
-        progresshandler.open(len(wikiWords) + 1)
+        progresshandler.open(len(wikiWords) * 2 + 1)
+
+        # re-save all of the pages
         try:
             step = 1
 
-            # re-save all of the pages
             self.getWikiData().clearCacheTables()
+            
+            # Step one: update properties. There may be properties which
+            #   define how the rest has to be interpreted, therefore they
+            #   must be 
             for wikiWord in wikiWords:
                 progresshandler.update(step, u"")   # , "Rebuilding %s" % wikiWord)
                 try:
@@ -541,9 +553,37 @@ class WikiDataManager(MiscEventSourceMixin):
                     if isinstance(wikiPage, AliasWikiPage):
                         # This should never be an alias page, so fetch the
                         # real underlying page
+                        # This can only happen if there is a real page with
+                        # the same name as an alias
                         wikiPage = WikiPage(self, wikiWord)
 
-                    wikiPage.update(wikiPage.getContent(), False)  # TODO AGA processing
+                    pageAst = PageAst.Page()
+                    pageAst.buildAst(formatting, wikiPage.getContent(),
+                            wikiPage.getFormatDetails())
+
+                    wikiPage.refreshPropertiesFromPageAst(pageAst)
+                except:
+                    traceback.print_exc()
+
+                step = step + 1
+
+            # Step two: update the rest (todos, relations)
+            for wikiWord in wikiWords:
+                progresshandler.update(step, u"")   # , "Rebuilding %s" % wikiWord)
+                try:
+                    wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
+                    if isinstance(wikiPage, AliasWikiPage):
+                        # This should never be an alias page, so fetch the
+                        # real underlying page
+                        # This can only happen if there is a real page with
+                        # the same name as an alias
+                        wikiPage = WikiPage(self, wikiWord)
+
+                    pageAst = PageAst.Page()
+                    pageAst.buildAst(formatting, wikiPage.getContent(),
+                            wikiPage.getFormatDetails())
+
+                    wikiPage.refreshMainDbCacheFromPageAst(pageAst)
                 except:
                     traceback.print_exc()
 
@@ -661,6 +701,65 @@ class WikiDataManager(MiscEventSourceMixin):
 # #                 page.update(content, False)  # TODO AGA processing
 #                 page.replaceLiveText(content)
 
+    _AUTO_LINK_RELAX_SPLIT_RE = re.compile(r"[\W]", re.I | re.U)
+
+    def _createAutoLinkRelaxWordEntryRE(word):
+        """
+        Get compiled regular expression for one word in autoLink "relax"
+        mode
+        """
+        # Split into parts of contiguous alphanumeric characters
+        parts = WikiDataManager._AUTO_LINK_RELAX_SPLIT_RE.split(word)
+        # Filter empty parts
+        parts = [p for p in parts if p != u""]
+
+        # Instead of original non-alphanum characters allow arbitrary
+        # non-alphanum characters
+        pat = ur"\b" + (ur"[\W_]+".join(parts)) + ur"\b"
+        regex = re.compile(pat,
+                re.I | re.U)
+
+        return regex
+
+    _createAutoLinkRelaxWordEntryRE = staticmethod(
+            _createAutoLinkRelaxWordEntryRE)
+
+
+    # TODO threadholder?
+    def getAutoLinkRelaxRE(self):
+        """
+        Get regular expressions and words used to operate autoLink function in 
+        "relax" mode
+        """
+        if self.autoLinkRelaxRE is None:
+            # Build up regular expression
+            # First fetch all wiki words
+            words = self.getWikiData().getAllDefinedWikiPageNames() + \
+                    self.getWikiData().getAllAliases()
+
+#             words = [u"alpha", u"beta beta", u"gamma"]
+
+            # Sort longest words first
+            words.sort(key=lambda w: len(w), reverse=True)
+            
+#             fullPat = u"|".join([self._createAutoLinkRelaxWordEntryRE(w, i)
+#                     for i, w in enumerate(words)])
+# 
+#             # Word boundaries
+#             fullPat = ur"\b(?:" + fullPat + ur")\b"
+# 
+#             # Compile re
+# #             print "getAutoLinkRelaxRE5", repr(fullPat)
+#             fullRE = re.compile(fullPat, re.I | re.U)
+# 
+#             self.autoLinkRelaxRE = (fullRE, words)
+
+            self.autoLinkRelaxRE = [
+                    (self._createAutoLinkRelaxWordEntryRE(w), w)
+                    for w in words]
+
+        return self.autoLinkRelaxRE
+
 
     def searchWiki(self, sarOp, applyOrdering=True):  # TODO Threadholder
         """
@@ -723,6 +822,7 @@ class WikiDataManager(MiscEventSourceMixin):
             
         self.wikiData = None
         self.baseWikiData = None
+        self.autoLinkRelaxRE = None
 
         wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(self.dbtype)
         if wikiDataFactory is None:
@@ -765,11 +865,17 @@ class WikiDataManager(MiscEventSourceMixin):
             # These messages come from (classes derived from) DocPages,
             # they are mainly relayed
 
-            if miscevt.has_key_in(("updated wiki page", "deleted wiki page",
-                    "renamed wiki page")):
+            if miscevt.has_key_in(("deleted wiki page", "renamed wiki page")):
+                self.autoLinkRelaxRE = None
                 props = miscevt.getProps().copy()
                 props["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(props)
+            elif miscevt.has_key("updated wiki page"):            
+                props = miscevt.getProps().copy()
+                props["wikiPage"] = miscevt.getSource()
+                self.fireMiscEventProps(props)
+            elif miscevt.has_key("saving new wiki page"):            
+                self.autoLinkRelaxRE = None
             elif miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()
 

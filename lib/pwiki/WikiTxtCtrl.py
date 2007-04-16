@@ -182,6 +182,22 @@ class IncrementalSearchDialog(wx.Frame):
 
 
 
+etEVT_STYLE_DONE_COMMAND = wx.NewEventType()
+EVT_STYLE_DONE_COMMAND = wx.PyEventBinder(etEVT_STYLE_DONE_COMMAND, 0)
+
+class StyleDoneEvent(wx.PyCommandEvent):
+    """
+    This wx Event is fired when style and folding calculations are finished.
+    It is needed to savely transfer data from the style thread to the main thread.
+    """
+    def __init__(self, stylebytes, pageAst, foldingseq):
+        wx.PyCommandEvent.__init__(self, etEVT_STYLE_DONE_COMMAND, -1)
+        self.stylebytes = stylebytes
+        self.pageAst = pageAst
+        self.foldingseq = foldingseq
+
+
+
 class WikiTxtCtrl(wx.stc.StyledTextCtrl):
     NUMBER_MARGIN = 0
     FOLD_MARGIN = 2
@@ -192,14 +208,14 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.presenter = presenter
         self.evalScope = None
         self.stylebytes = None
-        self.folding = None
-        self.stylingThreadHolder = ThreadHolder()
+        self.foldingseq = None
         self.pageAst = None
+        self.pageType = "normal"   # The pagetype controls some special editor behaviour
+#         self.idleCounter = 0       # Used to reduce idle load
+        self.stylingThreadHolder = ThreadHolder()
         self.loadedDocPage = None
         self.lastFont = None
         self.ignoreOnChange = False
-        self.pageType = "normal"   # The pagetype controls some special editor behaviour
-#         self.idleCounter = 0       # Used to reduce idle load
         self.searchStr = u""
         
         # If autocompletion word was choosen, how many bytes to delete backward
@@ -282,7 +298,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         
         # make the text control a drop target for files and text
         self.SetDropTarget(WikiTxtCtrlDropTarget(self))
-
+        
         # register some keyboard commands
         self.CmdKeyAssign(ord('+'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMIN)
         self.CmdKeyAssign(ord('-'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMOUT)
@@ -345,6 +361,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         
         wx.EVT_IDLE(self, self.OnIdle)
         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
+        
+        EVT_STYLE_DONE_COMMAND(self, self.OnStyleDone)
 
         # search related vars
 #         self.inIncrementalSearch = False
@@ -358,9 +376,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.lastKeyPressed = time()
         self.eolMode = self.GetEOLMode()
 
-        # Stock cursors. Created here because the App object must be created first
-        WikiTxtCtrl.CURSOR_IBEAM = wx.StockCursor(wx.CURSOR_IBEAM)
-        WikiTxtCtrl.CURSOR_HAND = wx.StockCursor(wx.CURSOR_HAND)
+#         # Stock cursors. Created here because the App object must be created first
+#         WikiTxtCtrl.CURSOR_IBEAM = wx.StockCursor(wx.CURSOR_IBEAM)
+#         WikiTxtCtrl.CURSOR_HAND = wx.StockCursor(wx.CURSOR_HAND)
 
         self.contextMenuTokens = None
         
@@ -384,9 +402,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 self.OnActivateNewTabBackgroundThis)        
 
         wx.EVT_MENU(self, GUI_ID.CMD_TEXT_SELECT_ALL, lambda evt: self.SelectAll())
-        
-#         self.interceptor = WindowsHacks.WikidPadWin32WPInterceptor(self.pWiki)
-#         self.interceptor.intercept(self.GetHandle())
+
+#         wx.EVT_MENU(self, GUI_ID.CMD_UNFOLD_ALL_IN_CURRENT,
+#                 lambda evt: self.unfoldAll())
+#         wx.EVT_MENU(self, GUI_ID.CMD_FOLD_ALL_IN_CURRENT,
+#                 lambda evt: self.foldAll())
 
 
     def getLoadedDocPage(self):
@@ -425,15 +445,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         """
         Informs the widget if it is really visible on the screen or not
         """
+#         if vis:
+#             self.Enable(True)
         self.Enable(vis)
-#         if not vis:
-#             self.endIncrementalSearch()
-
-
-#         if not self.visible and vis:
-#             self.refresh()
-# 
-#         self.visible = vis
 
     def setWrapMode(self, onOrOff):
         if onOrOff:
@@ -510,7 +524,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #         self.anchorCharPosition = -1
         self.incSearchCharStartPos = 0
         self.stylebytes = None
-        self.folding = None
+        self.foldingseq = None
         self.pageAst = None
         self.pageType = "normal"
 
@@ -591,6 +605,17 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         ce = cs + len(self.GetTextRange(start, end))
         return (cs, ce)
 
+
+    def gotoCharPos(self, pos):
+        # Go to the end and back again, so the anchor is
+        # near the top
+        self.SetSelection(-1, -1)
+        self.GotoPos(self.GetLength())
+        self.GotoPos(self.bytelenSct(self.GetText()[:pos]))
+
+        # self.SetSelectionByCharPos(pos, pos)
+
+
     def applyBasicSciSettings(self):
         """
         Apply the basic Scintilla settings which are resetted to wrong
@@ -642,7 +667,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             if self.loadedDocPage.getDirty()[0]:
                 self.saveLoadedDocPage()
 
-
             miscevt = self.loadedDocPage.getMiscEvent()
             miscevt.removeListener(self.wikiPageListener)
             
@@ -651,6 +675,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
             self.loadedDocPage.removeTxtEditor(self)
             self.loadedDocPage = None
+
+            self.stylebytes = None
+            self.foldingseq = None
+            self.pageAst = None
             self.pageType = "normal"
 
 
@@ -773,12 +801,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     anchorTokens = pageAst.findTypeFlat(WikiFormatting.FormatTypes.Anchor)
                     for t in anchorTokens:
                         if t.grpdict["anchorValue"] == anchor:
-                            # Go to the end and back again, so the anchor is
-                            # near the top
-                            self.GotoPos(self.GetLength())
-                            self.SetSelectionByCharPos(
-                                    t.start + t.getRealLength(),
-                                    t.start + t.getRealLength())
+                            self.gotoCharPos(t.start + t.getRealLength())
+#                             # Go to the end and back again, so the anchor is
+#                             # near the top
+#                             self.GotoPos(self.GetLength())
+#                             self.SetSelectionByCharPos(
+#                                     t.start + t.getRealLength(),
+#                                     t.start + t.getRealLength())
                             break
                     else:
                         anchor = None # Not found
@@ -927,6 +956,16 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         color = wx.Colour(*coltuple)
         self.SetCaretForeground(color)
         
+        # Set default color (especially for folding lines)
+        coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
+                "main", "editor_plaintext_color"))
+        
+        if coltuple is None:
+            coltuple = (0, 0, 0)
+
+        color = wx.Colour(*coltuple)
+        self.StyleSetForeground(wx.stc.STC_STYLE_DEFAULT, color)
+
 
 
     def onWikiPageUpdated(self, miscevt):
@@ -986,7 +1025,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if t is not None:
             self.stylingThreadHolder.setThread(None)
             self.stylebytes = None
-            self.folding = None
+            self.foldingseq = None
             self.pageAst = None
 
         if textlen < self.presenter.getConfig().getint(
@@ -996,7 +1035,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.buildStyling(text, 0, threadholder=DUMBTHREADHOLDER)
             self.applyStyling(self.stylebytes)
             if self.getFoldingActive():
-                self.applyFolding(self.folding)
+                self.applyFolding(self.foldingseq)
         else:
             # Asynchronous styling
             # This avoids further request from STC:
@@ -1012,44 +1051,63 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             t.start()
 
 
+    # TODO Wrong reaction on press of context menu button on keyboard
     def OnContextMenu(self, evt):
+        mousePos = self.ScreenToClient(wx.GetMousePosition())
+        
+        leftFold = 0
+        for i in range(self.FOLD_MARGIN):
+            leftFold += self.GetMarginWidth(i)
+            
+        rightFold = leftFold + self.GetMarginWidth(self.FOLD_MARGIN)
+        
+
         menu = wx.Menu()
-        appendToMenuByMenuDesc(menu, _CONTEXT_MENU_BASE)
-        
-        tokens = self.getTokensForMousePos(self.ScreenToClient(wx.GetMousePosition()))
-        
-        self.contextMenuTokens = tokens
-        addActivateItem = False
-        for tok in tokens:
-            if tok.ttype == WikiFormatting.FormatTypes.WikiWord:
-                addActivateItem = True
-            elif tok.ttype == WikiFormatting.FormatTypes.Url:
-                addActivateItem = True
-            elif tok.ttype == WikiFormatting.FormatTypes.Insertion and \
-                    tok.node.key == u"page":
-                addActivateItem = True
-                
-        if addActivateItem:
-            appendToMenuByMenuDesc(menu, _CONTEXT_MENU_ACTIVATE)
 
-        appendToMenuByMenuDesc(menu, _CONTEXT_MENU_BOTTOM)
+        if mousePos.x >= leftFold and mousePos.x < rightFold:
+            # Right click in fold margin
+            
+            appendToMenuByMenuDesc(menu, FOLD_MENU)
+            
+            # print "Right click in fold margin"
+        else:
+            appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_BASE)
+            
+            tokens = self.getTokensForMousePos(mousePos)
+            
+            self.contextMenuTokens = tokens
+            addActivateItem = False
+            for tok in tokens:
+                if tok.ttype == WikiFormatting.FormatTypes.WikiWord:
+                    addActivateItem = True
+                elif tok.ttype == WikiFormatting.FormatTypes.Url:
+                    addActivateItem = True
+                elif tok.ttype == WikiFormatting.FormatTypes.Insertion and \
+                        tok.node.key == u"page":
+                    addActivateItem = True
+                    
+            if addActivateItem:
+                appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_ACTIVATE)
+    
+            appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_BOTTOM)
+    
+            # Enable/Disable appropriate menu items
+            item = menu.FindItemById(GUI_ID.CMD_UNDO)
+            if item: item.Enable(self.CanUndo())
+            item = menu.FindItemById(GUI_ID.CMD_REDO)
+            if item: item.Enable(self.CanRedo())
+    
+            cancopy = self.GetSelectionStart() != self.GetSelectionEnd()
+            
+            item = menu.FindItemById(GUI_ID.CMD_TEXT_DELETE)
+            if item: item.Enable(cancopy and not self.GetReadOnly())
+            item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_CUT)
+            if item: item.Enable(cancopy and not self.GetReadOnly())
+            item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_COPY)
+            if item: item.Enable(cancopy)
+            item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_PASTE)
+            if item: item.Enable(self.CanPaste())
 
-        # Enable/Disable appropriate menu items
-        item = menu.FindItemById(GUI_ID.CMD_UNDO)
-        if item: item.Enable(self.CanUndo())
-        item = menu.FindItemById(GUI_ID.CMD_REDO)
-        if item: item.Enable(self.CanRedo())
-
-        cancopy = self.GetSelectionStart() != self.GetSelectionEnd()
-        
-        item = menu.FindItemById(GUI_ID.CMD_TEXT_DELETE)
-        if item: item.Enable(cancopy and self.CanPaste())
-        item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_CUT)
-        if item: item.Enable(cancopy and self.CanPaste())
-        item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_COPY)
-        if item: item.Enable(cancopy)
-        item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_PASTE)
-        if item: item.Enable(self.CanPaste())
 
         # Show menu
         self.PopupMenu(menu)
@@ -1082,11 +1140,15 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             charStartPos = end
 
 
-    def storeStylingAndAst(self, stylebytes, page, folding):
+    def storeStylingAndAst(self, stylebytes, pageAst, foldingseq):
         self.stylebytes = stylebytes
-        self.pageAst = page
-        self.folding = folding
-        self.AddPendingEvent(wx.IdleEvent())
+        self.pageAst = pageAst
+        self.foldingseq = foldingseq
+        
+        self.AddPendingEvent(StyleDoneEvent(stylebytes, pageAst, foldingseq))
+        
+        
+#         self.AddPendingEvent(wx.IdleEvent())
 
 
     def buildStyling(self, text, delay, threadholder=DUMBTHREADHOLDER):
@@ -1101,12 +1163,12 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         
         stylebytes = self.processTokens(page.getTokens(), threadholder)
         if self.getFoldingActive():
-            folding = self.processFolding(page.getTokens(), threadholder)
+            foldingseq = self.processFolding(page.getTokens(), threadholder)
         else:
-            folding = None
+            foldingseq = None
 
         if threadholder.isCurrent():
-            self.storeStylingAndAst(stylebytes, page, folding)
+            self.storeStylingAndAst(stylebytes, page, foldingseq)
 
 
     def processTokens(self, tokens, threadholder):
@@ -1165,7 +1227,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
     def processFolding(self, tokens, threadholder):
 #         wikiData = self.presenter.getWikiDocument().getWikiData()
-        folding = []
+        foldingseq = []
         currLine = 0
         prevLevel = 0
         levelStack = []
@@ -1190,19 +1252,19 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 foldHeader = True
 
             if foldHeader and lfc > 0:
-                folding.append(len(levelStack) | wx.stc.STC_FOLDLEVELHEADERFLAG)
+                foldingseq.append(len(levelStack) | wx.stc.STC_FOLDLEVELHEADERFLAG)
                 foldHeader = False
                 lfc -= 1
 
             if lfc > 0:
-                folding += [len(levelStack) + 1] * lfc
+                foldingseq += [len(levelStack) + 1] * lfc
                 
             prevLevel = len(levelStack) + 1
                 
         # final line
-        folding.append(len(levelStack) + 1)
+        foldingseq.append(len(levelStack) + 1)
         
-        return folding
+        return foldingseq
 
 
     def applyStyling(self, stylebytes):
@@ -1210,11 +1272,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.StartStyling(0, 0xff)
             self.SetStyleBytes(len(stylebytes), stylebytes)
 
-    def applyFolding(self, folding):
-        if folding and self.getFoldingActive() and \
-                len(folding) == self.GetLineCount():
-            for ln in xrange(len(folding)):
-                self.SetFoldLevel(ln, folding[ln])
+    def applyFolding(self, foldingseq):
+        if foldingseq and self.getFoldingActive() and \
+                len(foldingseq) == self.GetLineCount():
+            for ln in xrange(len(foldingseq)):
+                self.SetFoldLevel(ln, foldingseq[ln])
 
 
     def unfoldAll(self):
@@ -1424,8 +1486,15 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                             showDocPagePresenter(presenter)
 
                 return True
+            elif tok.ttype == WikiFormatting.FormatTypes.Footnote:
+                pageAst = self.getPageAst()
+                anchorTok = pageAst.getFootnoteAnchorDict().get(tok.grpdict[
+                        "footnoteId"])
 
+                if anchorTok is not None:
+                    self.gotoCharPos(anchorTok.start)
 
+                return True
             else:
                 continue
                 
@@ -1448,7 +1517,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             # Maybe a token left to the cursor was meant, so check
             # one char to the left
             result += pageAst.getTokensForPos(linkCharPos - 1)
-
+            
         return result
 
 
@@ -2401,6 +2470,14 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #                 return
 
 
+    def OnStyleDone(self, evt):
+        if evt.stylebytes:
+            self.applyStyling(evt.stylebytes)
+        
+        if evt.foldingseq:
+            self.applyFolding(evt.foldingseq)
+
+
     def OnIdle(self, evt):
 #         self.idleCounter -= 1
 #         if self.idleCounter < 0:
@@ -2414,16 +2491,16 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 self.presenter.SetStatusText(u"Line: %d Col: %d Pos: %d" %
                         (currentLine, currentCol, currentPos), 2)
 
-            stylebytes = self.stylebytes
-            self.stylebytes = None
-            folding = self.folding
-            self.folding = None
-
-            if stylebytes:
-                self.applyStyling(stylebytes)
-            
-            if folding:
-                self.applyFolding(folding)
+#             stylebytes = self.stylebytes
+#             self.stylebytes = None
+#             folding = self.folding
+#             self.folding = None
+# 
+#             if stylebytes:
+#                 self.applyStyling(stylebytes)
+#             
+#             if folding:
+#                 self.applyFolding(folding)
 
 
     def OnDestroy(self, evt):
@@ -2527,9 +2604,10 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
 
 
     def OnDropText(self, x, y, text):
+        text = lineendToInternal(text)
         self.editor.DoDropText(x, y, text)
 
-        # TODO works for Windows only
+
     def OnDropFiles(self, x, y, filenames):
         urls = []
         
@@ -2575,9 +2653,7 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
 
 
 
-
-
-_CONTEXT_MENU_BASE = \
+_CONTEXT_MENU_INTEXT_BASE = \
 u"""
 Undo;CMD_UNDO
 Redo;CMD_REDO
@@ -2590,7 +2666,8 @@ Delete;CMD_TEXT_DELETE
 Select All;CMD_TEXT_SELECT_ALL
 """
 
-_CONTEXT_MENU_ACTIVATE = \
+
+_CONTEXT_MENU_INTEXT_ACTIVATE = \
 u"""
 -
 Activate;CMD_ACTIVATE_THIS
@@ -2599,8 +2676,21 @@ Activate New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
 """
 
 
-_CONTEXT_MENU_BOTTOM = \
+_CONTEXT_MENU_INTEXT_BOTTOM = \
 u"""
 -
 Close Tab;CMD_CLOSE_CURRENT_TAB
 """
+
+
+
+FOLD_MENU = \
+u"""
++Show folding;CMD_CHECKBOX_SHOW_FOLDING;Show folding marks and allow folding;*ShowFolding
+&Unfold All;CMD_UNFOLD_ALL_IN_CURRENT;Unfold everything in current editor;*UnfoldAll
+&Fold All;CMD_FOLD_ALL_IN_CURRENT;Fold everything in current editor;*FoldAll
+"""
+
+
+
+

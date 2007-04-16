@@ -589,7 +589,9 @@ GLOBALDEFAULTS = {
 WIKIDEFAULTS = {
     ("wiki_db", "data_dir"): u"data",
     ("main", "wiki_name"): None,
-    ("main", "last_wiki_word"): None,
+    ("main", "last_wiki_word"): None, # Show this wiki word as leftmost wiki word on startup if first_wiki_word is empty
+    ("main", "further_wiki_words"): u"", # Semicolon separated list of further wiki words to show in addit. tabs
+            # after last wiki word
     ("main", "first_wiki_word"): "", # Start with a special wiki word (If empty, use last word)
     ("main", "wiki_database_type"): u"",  # Type of database "original_gadfly" for WikidPad,
                                          # "compact_sqlite" for WikidPadCompact

@@ -2444,16 +2444,22 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         return item.IsHyperText()
 
 
-    def SetItemText(self, item, text):
+    def SetItemText(self, item, text, recalcSize=True):
         """Sets the item text."""
 
         if not item:
             raise Exception("\nERROR: Invalid Tree Item. ")
+        
+#         dc = wx.ClientDC(self)
+#         item.SetText(text)
+#         self.CalculateSize(item, dc)
+#         self.RefreshLine(item)
 
-        dc = wx.ClientDC(self)
         item.SetText(text)
-        self.CalculateSize(item, dc)
-        self.RefreshLine(item)
+        if recalcSize:
+            dc = wx.ClientDC(self)
+            self.CalculateSize(item, dc)
+            self.RefreshLine(item)
 
 
     def SetItemImage(self, item, image, which=TreeItemIcon_Normal):
@@ -3488,6 +3494,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         # Get total height of all children of the item in pixels
         if len(children) == 0:
             totalHeight = 0
+            childrenHeight = 0
         else:
             childrenHeight = children[-1].GetY() + self.GetLineHeight(children[-1])
             childrenHeight -= children[0].GetY()
@@ -5296,15 +5303,17 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         flags = 0
         item, flags = self._anchor.HitTest(pt, self, flags, 0)
 
-        if event.Dragging() and not self._isDragging and ((flags & TREE_HITTEST_ONITEMICON) or (flags & TREE_HITTEST_ONITEMLABEL)):
-        
+        if event.Dragging() and not self._isDragging and \
+                (self._dragCount != 0 or (flags & TREE_HITTEST_ONITEMICON) or
+                    (flags & TREE_HITTEST_ONITEMLABEL)):
+
             if self._dragCount == 0:
                 self._dragStart = pt
 
             self._countDrag = 0
             self._dragCount = self._dragCount + 1
 
-            if self._dragCount != 3:
+            if self._dragCount != 6:    # Orig. value: 3
                 # wait until user drags a bit further...
                 return
             
@@ -5410,6 +5419,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
             self._isDragging = False
             self._dropTarget = None
+            self._dragCount = 0  # Added ???
             
             self.SetCursor(self._oldCursor)
 

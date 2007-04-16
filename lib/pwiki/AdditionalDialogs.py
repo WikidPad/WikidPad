@@ -1052,16 +1052,19 @@ class ChooseWikiWordDialog(wx.Dialog):
                 delword = self.pWiki.getWikiData().getAliasesWikiWord(delword)
                 
                 if self.pWiki.getWikiData().isDefinedWikiWord(delword):
-                    self.pWiki.getWikiData().deleteWord(delword)
+                    page = self.pWiki.getWikiDocument().getWikiPage(delword)
+                    page.deletePage()
+                    
+                    # self.pWiki.getWikiData().deleteWord(delword)
         
                     # trigger hooks
                     self.pWiki.hooks.deletedWikiWord(self.pWiki, delword)
                     
-                    p2 = {}
-                    p2["deleted page"] = True
-                    p2["deleted wiki page"] = True
-                    p2["wikiWord"] = delword
-                    self.pWiki.fireMiscEventProps(p2)
+#                     p2 = {}
+#                     p2["deleted page"] = True
+#                     p2["deleted wiki page"] = True
+#                     p2["wikiWord"] = delword
+#                     self.pWiki.fireMiscEventProps(p2)
             
             self.pWiki.pageHistory.goAfterDeletion()
 

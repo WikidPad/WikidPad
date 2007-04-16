@@ -42,13 +42,11 @@ def _escapeAnchor(name):
     result = []
     for c in name:
         oc = ord(c)
-        if oc < 65 or oc > 122 or (90 < oc < 97):
+        if oc < 48 or (57 < oc < 65) or (90 < oc < 97) or oc > 122:
             if oc > 255:
                 result.append("$%04x" % oc)
             else:
                 result.append("=%02x" % oc)
-
-#             result.append(u"%%%02x" % oc)
         else:
             result.append(c)
     return u"".join(result)
@@ -935,12 +933,14 @@ class HtmlXmlExporter:
                 return
 
             docpage = wikiDocument.getWikiPageNoError(value)
-            content = docpage.getLiveText()
-
-            pageast = PageAst.Page()
-            pageast.buildAst(self.mainControl.getFormatting(), content,
-                    docpage.getFormatDetails())
-            tokens = pageast.getTokens()
+            pageAst = docpage.getLivePageAst()
+            
+#             content = docpage.getLiveText()
+# 
+#             pageast = PageAst.Page()
+#             pageast.buildAst(self.mainControl.getFormatting(), content,
+#                     docpage.getFormatDetails())
+            tokens = pageAst.getTokens()
             
             self.insertionVisitStack.append("wikipage/" + value)
             
@@ -1006,14 +1006,19 @@ class HtmlXmlExporter:
 
                 headContent = tok.grpdict["h%iContent" % headLevel]
                 if self.asIntHtmlPreview:
-                    # Simple indent
+                    # Simple indent for internal preview
                     htmlContent.append(u"&nbsp;&nbsp;" * (headLevel - 1))
                 else:
-                    # use css
+                    # use css otherwise
                     htmlContent.append(u'<div class="page-toc-level%i">' %
                             headLevel)
                 
-                htmlContent.append(u'<a href="#.h%i">%s</a>' % (tok.start,
+                if self.wordAnchor:
+                    anchor = self.wordAnchor + (u"#.h%i" % tok.start)
+                else:
+                    anchor = u".h%i" % tok.start
+
+                htmlContent.append(u'<a href="#%s">%s</a>' % (anchor,
                         escapeHtml(unescapeNormalText(headContent))))
 
                 if self.asIntHtmlPreview:
@@ -1188,10 +1193,6 @@ class HtmlXmlExporter:
         self.numericdeepness = 0
         self.preMode = 0  # Count how many <pre> tags are open
 
-        # TODO Without camel case
-        page = PageAst.Page()
-        page.buildAst(self.mainControl.getFormatting(), content, formatDetails)
-        self.basePageAst = page
 
         # Get property pattern
         if self.asHtmlPreview:
@@ -1210,7 +1211,11 @@ class HtmlXmlExporter:
         else:
             self.proppatternExcluding = self.mainControl.getConfig().getboolean(
                         "main", "html_export_proppattern_is_excluding", u"True")
-        
+ 
+        # TODO Without camel case
+        page = PageAst.Page()
+        page.buildAst(self.mainControl.getFormatting(), content, formatDetails)
+        self.basePageAst = page
 
         if len(page.getTokens()) >= 1:
             if self.asHtmlPreview:
@@ -1425,6 +1430,30 @@ class HtmlXmlExporter:
                     anchor = tok.grpdict["anchorValue"]
 
                 self.outAppend(u'<a name="%s"></a>' % anchor)
+            elif styleno == WikiFormatting.FormatTypes.Footnote:
+                footnoteId = tok.grpdict["footnoteId"]
+                fnAnchorTok = self.basePageAst.getFootnoteAnchorDict().get(
+                        footnoteId)
+                
+                if fnAnchorTok is None:
+                    self.outAppend(escapeHtml(tok.text))
+                else:
+                    if self.wordAnchor:
+                        fnAnchor = self.wordAnchor + u"#.f" + _escapeAnchor(
+                                footnoteId)
+                    else:
+                        fnAnchor = u".f" + _escapeAnchor(footnoteId)
+
+                    if fnAnchorTok.start == tok.start:
+                        # Current footnote token tok is an anchor (=last
+                        # footnote token with this footnoteId)
+
+                        self.outAppend(u'<a name="%s"></a>' % fnAnchor)
+                        self.outAppend(escapeHtml(tok.text))
+                    else:
+                        # Current token is not an anchor -> make it a link.
+                        self.outAppend(u'<a href="#%s">%s</a>' % (fnAnchor,
+                        escapeHtml(tok.text)))
             elif styleno == WikiFormatting.FormatTypes.ToDo:
                 node = tok.node
                 namedelim = (node.name, node.delimiter)

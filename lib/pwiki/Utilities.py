@@ -1,7 +1,6 @@
 import threading
 
-class ThreadTerm(Exception): pass
-
+from WikiExceptions import NotCurrentThreadException
 
 class _DumbThreadHolder(object):
     """
@@ -11,6 +10,10 @@ class _DumbThreadHolder(object):
     
     def isCurrent(self):
         return True
+        
+    def testCurrent(self):
+        pass
+
         
 DUMBTHREADHOLDER = _DumbThreadHolder()
 
@@ -31,13 +34,20 @@ class ThreadHolder(_DumbThreadHolder):
     def setThread(self, thread):
         self.thread = thread
         
-#     def testCurrent(self):
-#         """
-#         Throws ThreadTerm if self.thread is not equal current thread
-#         """
+    def testCurrent(self):
+        """
+        Throws NotCurrentThreadException if self.thread is not equal to
+        current thread
+        """
+        if threading.currentThread() is not self.thread:
+            raise NotCurrentThreadException()
 
     def isCurrent(self):
+        """
+        Return True if current thread is thread in holder
+        """
         return threading.currentThread() is self.thread
+        
 
 
 # class FlagHolder(object):

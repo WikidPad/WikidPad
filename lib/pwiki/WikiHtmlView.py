@@ -100,7 +100,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
         self.exporterInstance.tempFileSet = TempFileSet()
         self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
 
-        
+
         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
         wx.EVT_KEY_UP(self, self.OnKeyUp)
 
