@@ -78,7 +78,7 @@ class IncrementalSearchDialog(wxFrame):
         self.tfInput.SetFont(font)
         self.tfInput.SetBackgroundColour(IncrementalSearchDialog.COLOR_YELLOW)
         mainsizer = wxBoxSizer(wxHORIZONTAL)
-        mainsizer.Add(self.tfInput, 1, wx.ALL | wx.EXPAND, 0)
+        mainsizer.Add(self.tfInput, 1, wxALL | wxEXPAND, 0)
 
         self.SetSizer(mainsizer)
         self.Layout()
@@ -915,11 +915,11 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if item: item.Enable(self.CanRedo())
 
         cancopy = self.GetSelectionStart() != self.GetSelectionEnd()
-        
+ 
         item = self.contextMenu.FindItemById(GUI_ID.CMD_TEXT_DELETE)
-        if item: item.Enable(cancopy and self.CanPaste())
+        if item: item.Enable(cancopy and not self.GetReadOnly())
         item = self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_CUT)
-        if item: item.Enable(cancopy and self.CanPaste())
+        if item: item.Enable(cancopy and not self.GetReadOnly())
         item = self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_COPY)
         if item: item.Enable(cancopy)
         item = self.contextMenu.FindItemById(GUI_ID.CMD_CLIPBOARD_PASTE)
@@ -1227,6 +1227,7 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     wxOK, self.presenter.getMainControl())
             return
 
+        SCRIPTFORMAT = WikiFormatting.FormatTypes.Script
         # it is important to python to have consistent eol's
         self.ConvertEOLs(self.eolMode)
         (startPos, endPos) = self.GetSelection()
@@ -1235,42 +1236,50 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         if startPos == endPos or index > -1:
             # Execute all or selected script blocks on the page (or other
             #   related pages)
+            
+            pageAst = self.getPageAst()
+            scriptTokens = pageAst.findTypeFlat(SCRIPTFORMAT)
 
-            # get the text of the current page
-            text = self.GetText()
+#             # get the text of the current page
+#             text = self.GetText()
             
             # process script imports
             if securityLevel > 1: # Local import_scripts properties allowed
                 if self.loadedDocPage.getProperties().has_key(
                         "import_scripts"):
-                    scripts = self.loadedDocPage.getProperties()[
+                    scriptNames = self.loadedDocPage.getProperties()[
                             "import_scripts"]
-                    for script in scripts:
+                    for sn in scriptNames:
                         try:
                             importPage = self.presenter.getWikiDocument().\
-                                    getWikiPage(script)
-                            content = importPage.getLiveText()
-                            text += "\n" + content
+                                    getWikiPage(sn)
+                            pageAst = importPage.getLivePageAst()
+                            scriptTokens += pageAst.findTypeFlat(SCRIPTFORMAT)
+                            
+#                             content = importPage.getLiveText()
+#                             text += "\n" + content
                         except:
                             pass
 
             if securityLevel > 2: # global.import_scripts property also allowed
-                globscript = self.presenter.getWikiDocument().getWikiData().\
+                globScriptName = self.presenter.getWikiDocument().getWikiData().\
                         getGlobalProperties().get("global.import_scripts")
     
-                if globscript is not None:
+                if globScriptName is not None:
                     try:
                         importPage = self.presenter.getWikiDocument().\
-                                getWikiPage(globscript)
-                        content = importPage.getLiveText()
-                        text += "\n" + content
+                                getWikiPage(globScriptName)
+                        pageAst = importPage.getLivePageAst()
+                        scriptTokens += pageAst.findTypeFlat(SCRIPTFORMAT)
+#                         content = importPage.getLiveText()
+#                         text += "\n" + content
                     except:
                         pass
 
-            match = WikiFormatting.ScriptRE.search(text)
-            while(match):
-                script = re.sub(u"^[\r\n\s]+", "", match.group(1))
-                script = re.sub(u"[\r\n\s]+$", "", script)
+            for st in scriptTokens:
+                script = st.grpdict["scriptContent"]
+                script = re.sub(u"^[\r\n\s]+", u"", script)
+                script = re.sub(u"[\r\n\s]+$", u"", script)
                 try:
                     if index == -1:
                         script = re.sub(u"^\d:?\s?", u"", script)
@@ -1284,8 +1293,29 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                     s = StringIO()
                     traceback.print_exc(file=s)
                     self.AddText(u"\nException: %s" % s.getvalue())
+                
 
-                match = WikiFormatting.ScriptRE.search(text, match.end())
+
+
+#             match = WikiFormatting.ScriptRE.search(text)
+#             while(match):
+#                 script = re.sub(u"^[\r\n\s]+", "", match.group(1))
+#                 script = re.sub(u"[\r\n\s]+$", "", script)
+#                 try:
+#                     if index == -1:
+#                         script = re.sub(u"^\d:?\s?", u"", script)
+#                         exec(script) in self.evalScope
+#                     elif index > -1 and script.startswith(str(index)):
+#                         script = re.sub(u"^\d:?\s?", u"", script)
+#                         exec(script) in self.evalScope
+#                         break # Execute only the first found script
+# 
+#                 except Exception, e:
+#                     s = StringIO()
+#                     traceback.print_exc(file=s)
+#                     self.AddText(u"\nException: %s" % s.getvalue())
+# 
+#                 match = WikiFormatting.ScriptRE.search(text, match.end())
         else:
             # Evaluate selected text
             text = self.GetSelectedText()
@@ -1293,7 +1323,6 @@ class WikiTxtCtrl(wxStyledTextCtrl):
                 compThunk = compile(re.sub(u"[\n\r]", u"", text), "<string>",
                         "eval", CO_FUTURE_DIVISION)
                 result = eval(compThunk, self.evalScope)
-#                 result = eval(re.sub(u"[\n\r]", u"", text), self.evalScope)
             except Exception, e:
                 s = StringIO()
                 traceback.print_exc(file=s)
@@ -1303,6 +1332,101 @@ class WikiTxtCtrl(wxStyledTextCtrl):
             self.GotoPos(endPos)
             self.AddText(u" = %s" % unicode(result))
             self.GotoPos(pos)
+
+
+
+# 
+#     def evalScriptBlocks(self, index=-1):
+#         """
+#         Evaluates scripts. Respects "script_security_level" option
+#         """
+#         securityLevel = self.presenter.getConfig().getint(
+#                 "main", "script_security_level")
+#         if securityLevel == 0:
+#             # No scripts allowed
+#             # Print warning message
+#             wxMessageBox(u"Set in options, page \"Security\", \n"
+#                     "item \"Script security\" an appropriate value \n"
+#                     "to execute a script", u"Script execution disabled",
+#                     wxOK, self.presenter.getMainControl())
+#             return
+# 
+#         # it is important to python to have consistent eol's
+#         self.ConvertEOLs(self.eolMode)
+#         (startPos, endPos) = self.GetSelection()
+# 
+#         # if no selection eval all scripts
+#         if startPos == endPos or index > -1:
+#             # Execute all or selected script blocks on the page (or other
+#             #   related pages)
+# 
+#             # get the text of the current page
+#             text = self.GetText()
+#             
+#             # process script imports
+#             if securityLevel > 1: # Local import_scripts properties allowed
+#                 if self.loadedDocPage.getProperties().has_key(
+#                         "import_scripts"):
+#                     scripts = self.loadedDocPage.getProperties()[
+#                             "import_scripts"]
+#                     for script in scripts:
+#                         try:
+#                             importPage = self.presenter.getWikiDocument().\
+#                                     getWikiPage(script)
+#                             content = importPage.getLiveText()
+#                             text += "\n" + content
+#                         except:
+#                             pass
+# 
+#             if securityLevel > 2: # global.import_scripts property also allowed
+#                 globscript = self.presenter.getWikiDocument().getWikiData().\
+#                         getGlobalProperties().get("global.import_scripts")
+#     
+#                 if globscript is not None:
+#                     try:
+#                         importPage = self.presenter.getWikiDocument().\
+#                                 getWikiPage(globscript)
+#                         content = importPage.getLiveText()
+#                         text += "\n" + content
+#                     except:
+#                         pass
+# 
+#             match = WikiFormatting.ScriptRE.search(text)
+#             while(match):
+#                 script = re.sub(u"^[\r\n\s]+", "", match.group(1))
+#                 script = re.sub(u"[\r\n\s]+$", "", script)
+#                 try:
+#                     if index == -1:
+#                         script = re.sub(u"^\d:?\s?", u"", script)
+#                         exec(script) in self.evalScope
+#                     elif index > -1 and script.startswith(str(index)):
+#                         script = re.sub(u"^\d:?\s?", u"", script)
+#                         exec(script) in self.evalScope
+#                         break # Execute only the first found script
+# 
+#                 except Exception, e:
+#                     s = StringIO()
+#                     traceback.print_exc(file=s)
+#                     self.AddText(u"\nException: %s" % s.getvalue())
+# 
+#                 match = WikiFormatting.ScriptRE.search(text, match.end())
+#         else:
+#             # Evaluate selected text
+#             text = self.GetSelectedText()
+#             try:
+#                 compThunk = compile(re.sub(u"[\n\r]", u"", text), "<string>",
+#                         "eval", CO_FUTURE_DIVISION)
+#                 result = eval(compThunk, self.evalScope)
+# #                 result = eval(re.sub(u"[\n\r]", u"", text), self.evalScope)
+#             except Exception, e:
+#                 s = StringIO()
+#                 traceback.print_exc(file=s)
+#                 result = s.getvalue()
+# 
+#             pos = self.GetCurrentPos()
+#             self.GotoPos(endPos)
+#             self.AddText(u" = %s" % unicode(result))
+#             self.GotoPos(pos)
 
 
     def cleanAutoGenAreas(self, text):

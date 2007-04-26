@@ -203,7 +203,8 @@ RevPropertyValue     = re.compile(ur"^([\w\-\_ \t:;,.!?#/|]*?)([ \t]*[=:][ \t]*)
 
 
 # script blocks
-ScriptRE        = re.compile(u"\<%(.*?)%\>", re.DOTALL)
+# ScriptRE        = re.compile(u"\<%(.*?)%\>", re.DOTALL)
+ScriptRE        = re.compile(u"\<%(?P<scriptContent>.*?)%\>", re.DOTALL)
 
 # Auto generated area
 AutoGenAreaRE = re.compile(ur"^([ \t]*<<[ \t]+)([^\n]+\n)(.*?)^([ \t]*>>[ \t]*\n)", re.DOTALL | re.LOCALE | re.MULTILINE)
