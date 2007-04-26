@@ -1,5 +1,15 @@
 ﻿++ Change Log
 
+Apr. 26, 2007 (1.8rc4)
+
+    * Bug fixed: Removed inefficiency when exporting large sets
+      of wiki pages with many links (very large trees).
+    * Bug fixed: Editor context menu showed "Cut" and "Delete"
+      greyed out if pasting is not possible.
+    * Bug fixed: Script blocks were executed even if made invalid
+      with preceding backslash.
+
+
 
 Mar. 25, 2007 (1.8rc3)
 
