@@ -23,9 +23,8 @@ class LayeredControlPresenter(MiscEventSourceMixin):
     """
     def __init__(self, mainControl):
         self.mainControl = mainControl
-        self.subControls = [None] * len(
-                self.mainControl.getPagePresenterControlNames())
-        self.lastVisibleIdx = 0
+        self.subControls = {}
+        self.lastVisibleCtrlName = None
         self.visible = False
         self.shortTitle = ""
         self.longTitle = ""
@@ -36,19 +35,10 @@ class LayeredControlPresenter(MiscEventSourceMixin):
         return self.mainControl
 
     def setSubControl(self, scName, sc):
-        try:
-            idx = self.mainControl.getPagePresenterControlNames().index(scName)
-            self.subControls[idx] = sc
-        except ValueError:
-            traceback.print_exc()
+        self.subControls[scName] = sc
             
     def getSubControl(self, scName):
-        try:
-            idx = self.mainControl.getPagePresenterControlNames().index(scName)
-            return self.subControls[idx]
-        except ValueError:
-            traceback.print_exc()
-            return None
+        return self.subControls.get(scName)
 
 
     def switchSubControl(self, scName):
@@ -56,31 +46,23 @@ class LayeredControlPresenter(MiscEventSourceMixin):
         Make the chosen subcontrol visible, all other invisible
         """
         try:
-            idx = self.mainControl.getPagePresenterControlNames().index(scName)
-
-            if self.visible:
+            if self.visible and self.lastVisibleCtrlName != scName:
                 # First show subControl scName, then hide the others
                 # to avoid flicker
-                self.subControls[idx].setVisible(True)
-                for i in xrange(len(self.subControls)):
-                    if i != idx:
-                        self.subControls[i].setVisible(False)
+                self.subControls[scName].setVisible(True)
+                for n, c in self.subControls.iteritems():
+                    if n != scName:
+                        c.setVisible(False)
 
-            self.lastVisibleIdx = idx
+            self.lastVisibleCtrlName = scName
             self.setTitle(self.shortTitle)
 
-        except ValueError:
+        except KeyError:
             traceback.print_exc()
-            
+
     def getCurrentSubControlName(self):
-        if self.lastVisibleIdx == -1:
-            return None
-
-        return self.mainControl.getPagePresenterControlNames()[
-                self.lastVisibleIdx]
+        return self.lastVisibleCtrlName
         
-            
-
 
     def isCurrent(self):
         return self.getMainControl().getCurrentDocPagePresenter() is self
@@ -94,18 +76,17 @@ class LayeredControlPresenter(MiscEventSourceMixin):
             return
         
         if vis:
-            for i in xrange(len(self.subControls)):
-                self.subControls[i].setVisible(i == self.lastVisibleIdx)
+            for n, c in self.subControls.iteritems():
+                c.setVisible(n == self.lastVisibleCtrlName)
         else:
-            for i in xrange(len(self.subControls)):
-                self.subControls[i].setVisible(False)
+            for c in self.subControls.itervalues():
+                c.setVisible(False)
 
         self.visible = vis
         
     def close(self):
-        for i in xrange(len(self.subControls)):
-            self.subControls[i].close()
-#             self.subControls[i].Destroy()
+        for c in self.subControls.itervalues():
+            c.close()
 
         self.mainControl.getMiscEvent().removeListener(self)
 
@@ -118,7 +99,7 @@ class LayeredControlPresenter(MiscEventSourceMixin):
 
         
     def SetFocus(self):
-        self.subControls[self.lastVisibleIdx].SetFocus()
+        self.subControls[self.lastVisibleCtrlName].SetFocus()
         
     # TODO getPageAst
 
@@ -204,6 +185,8 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         except (IOError, OSError, DbAccessError), e:
             self.getMainControl().lostAccess(e)
             raise
+            
+        self.switchSubControl("textedit")
 
         p2 = evtprops.copy()
         p2.update({"loaded current functional page": True})
@@ -212,7 +195,8 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 
 
     def openWikiPage(self, wikiWord, addToHistory=True,
-            forceTreeSyncFromRoot=False, forceReopen=False, **evtprops):
+            forceTreeSyncFromRoot=False, forceReopen=False,
+            suggNewPageTitle=None, **evtprops):
         """
         Opens a wiki page in the editor of this presenter
         """
@@ -259,7 +243,8 @@ class BasicDocPagePresenter(LayeredControlPresenter):
                         
             except (WikiWordNotFoundException, WikiFileNotFoundException), e:
                 page = self.getMainControl().getWikiDataManager().\
-                        createWikiPage(wikiWord)
+                        createWikiPage(wikiWord,
+                        suggNewPageTitle=suggNewPageTitle)
                 # trigger hooks
                 self.getMainControl().hooks.newWikiWord(self, wikiWord)
                 self.getStatusBar().SetStatusText(uniToGui(u"Wiki page not found, a new "
@@ -277,10 +262,20 @@ class BasicDocPagePresenter(LayeredControlPresenter):
             # set the title and add the word to the history
 #             self.SetTitle(uniToGui(u"Wiki: %s - %s" %
 #                     (self.getWikiConfigPath(), self.getCurrentWikiWord())))   # TODO Handle by mainControl
-    
+
             self.getMainControl().getConfig().set("main", "last_wiki_word",
                     wikiWord)
-    
+
+            # Should the page by default be presented in editor or preview mode?
+            pv = page.getPropertyOrGlobal(u"view_pane")
+            if pv is not None:
+                pv = pv.lower()
+                if pv == u"preview":
+                    self.switchSubControl("preview")
+                elif pv == u"editor":
+                    self.switchSubControl("textedit")
+                # else: do nothing  (pv == u"off")
+
             # sync the tree
             if forceTreeSyncFromRoot:
                 self.getMainControl().findCurrentWordInTree()  # TODO ?
@@ -292,7 +287,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         self.getMainControl().hooks.openedWikiWord(self, wikiWord)
 
 
-    # TODO 
+
     def saveCurrentDocPage(self, force = False):
         ## _prof.start()
 
@@ -322,31 +317,36 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
     def __init__(self, parent, mainControl, id=-1):
         wx.Panel.__init__(self, parent, id)
         BasicDocPagePresenter.__init__(self, mainControl)
-
+        
     def switchSubControl(self, scName, gainFocus=False):
         """
         Make the chosen subcontrol visible, all other invisible
         """
         try:
-            idx = self.mainControl.getPagePresenterControlNames().index(scName)
-
             # First show subControl scName, then hide the others
             # to avoid flicker
-            if self.visible:
-                self.subControls[idx].setVisible(True)
-            self.subControls[idx].Show(True)
+            if self.visible and self.lastVisibleCtrlName != scName:
+                self.subControls[scName].setVisible(True)
+            
+            self.subControls[scName].Show(True)
 
-            for i in xrange(len(self.subControls)):
-                if i != idx:
+            for n, c in self.subControls.iteritems():
+                if n != scName:
                     if self.visible:
-                        self.subControls[i].setVisible(False)
-                    self.subControls[i].Show(False)
+                        c.setVisible(False)
+                    c.Show(False)
 
             if gainFocus:
-                self.subControls[idx].SetFocus()
+                self.subControls[scName].SetFocus()
 
-            self.lastVisibleIdx = idx
-        except ValueError:
+            self.lastVisibleCtrlName = scName
+            self.setTitle(self.shortTitle)   #?
+        except KeyError:
             traceback.print_exc()
 
-
+    def SetFocus(self):
+        try:
+#             print "SetFocus", repr(self.subControls[self.lastVisibleCtrlName])
+            self.subControls[self.lastVisibleCtrlName].SetFocus()
+        except KeyError:
+            wx.Panel.SetFocus(self)

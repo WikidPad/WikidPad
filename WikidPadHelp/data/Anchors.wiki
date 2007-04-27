@@ -20,3 +20,6 @@ Clicking on the link moves the cursor after the anchor tag.
     * Anchors are case-sensitive, therefore "here" and "Here" are
       different anchors.
     * The anchor tags are invisible in HTML preview and export.
+
+See also [Footnotes].
+

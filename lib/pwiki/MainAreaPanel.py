@@ -14,6 +14,21 @@ from WikiExceptions import *
 import Configuration
 
 
+
+# etEVT_AFTER_FOCUS = wx.NewEventType()
+# EVT_AFTER_FOCUS = wx.PyEventBinder(etEVT_AFTER_FOCUS, 0)
+# 
+# class AfterFocusEvent(wx.PyCommandEvent):
+#     """
+#     This wx Event is fired when style and folding calculations are finished.
+#     It is needed to savely transfer data from the style thread to the main thread.
+#     """
+#     def __init__(self, toFocus):
+#         wx.PyCommandEvent.__init__(self, etEVT_AFTER_FOCUS, -1)
+#         self.toFocus = toFocus
+
+
+
 class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
     """
     The main area panel is embedded in the PersonalWikiFrame and holds and
@@ -42,6 +57,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                 self.OnNotebookPageChanged)
         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
         wx.EVT_SET_FOCUS(self, self.OnFocused)
+#         EVT_AFTER_FOCUS(self, self.OnAfterFocus)
 
         wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_THIS_TAB, self.OnCloseThisTab)
         wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_CURRENT_TAB, self.OnCloseCurrentTab)
@@ -183,7 +199,12 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
     def OnFocused(self, evt):
         p = self.GetCurrentPage()
         if p is not None:
+#             self.AddPendingEvent(AfterFocusEvent(p))
             p.SetFocus()
+
+
+#     def OnAfterFocus(self, evt):
+#         evt.toFocus.SetFocus()
 
 
     def OnCloseThisTab(self, evt):

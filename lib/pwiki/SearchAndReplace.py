@@ -700,7 +700,7 @@ class ListWikiPagesOperation:
             # Sort as in the root tree (= tree with the wiki name page as root)
             wordSet = wordSet.copy()
             result = []
-
+            
             rootWords = self.getRootWords()
 
             if not self.wikiDocument.getWikiName() in rootWords:
@@ -717,7 +717,7 @@ class ListWikiPagesOperation:
 
             for rootWord in rootWords:
                 rootPage = self.wikiDocument.getWikiPage(rootWord)
-                flatTree = rootPage.getFlatTree()
+                flatTree = rootPage.getFlatTree(unalias=True)
                 if rootWord in rootWordSet:
                     result.append(rootWord)
                     rootWordSet.remove(rootWord)

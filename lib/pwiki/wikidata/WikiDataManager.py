@@ -250,6 +250,7 @@ class WikiDataManager(MiscEventSourceMixin):
         
         self.formatting = WikiFormatting(self, wikiSyntax)  # TODO wikiSyntax
 
+
     
     def checkDatabaseFormat(self):
         """
@@ -493,12 +494,16 @@ class WikiDataManager(MiscEventSourceMixin):
 
 
 
-    def createWikiPage(self, wikiWord):
+    def createWikiPage(self, wikiWord, suggNewPageTitle=None):
         """
         create a new wikiPage for the wikiWord. Cache is not updated until
-        page is saved
+        page is saved.
+        suggNewPageTitle -- if not None contains the title of the page to create
+                (without syntax specific prefix).
         """
-        return self.getWikiPageNoError(wikiWord)
+        page = self.getWikiPageNoError(wikiWord)
+        page.setSuggNewPageTitle(suggNewPageTitle)
+        return page
 
 
     def getFuncPage(self, funcTag):
@@ -620,12 +625,12 @@ class WikiDataManager(MiscEventSourceMixin):
 
         # Prefix is normally u"++"
         pageTitlePrefix = self.getFormatting().getPageTitlePrefix() + u" "
-        prevTitle = pageTitlePrefix + WikiPage.getWikiPageTitle(wikiWord) + u"\n"
+        prevTitle = pageTitlePrefix + self.getWikiPageTitle(wikiWord) + u"\n"
         page = self.getWikiPage(toWikiWord)
         content = page.getLiveText()
         if content.startswith(prevTitle):
             # Replace previous title with new one
-            content = pageTitlePrefix + WikiPage.getWikiPageTitle(toWikiWord) + \
+            content = pageTitlePrefix + self.getWikiPageTitle(toWikiWord) + \
                     u"\n" + content[len(prevTitle):]
             page.replaceLiveText(content)
 
@@ -688,41 +693,29 @@ class WikiDataManager(MiscEventSourceMixin):
                     charStartPos = start + len(repl)
 
                 wikiPage.replaceLiveText(text)
-#                 while True:
-#                     ############ Hier replace einbauen !!!!!!!
-# 
-#                     lastReplacePos = editor.executeSearch(sarOp, lastReplacePos)[1]
-#                     if lastReplacePos == -1:
-#                         break
-#                     lastReplacePos = editor.executeReplace(sarOp)
-# 
-#                 content = content.replace(wikiWord, toWikiWord)
-# #                 page.save(content)
-# #                 page.update(content, False)  # TODO AGA processing
-#                 page.replaceLiveText(content)
 
-    _AUTO_LINK_RELAX_SPLIT_RE = re.compile(r"[\W]", re.I | re.U)
 
-    def _createAutoLinkRelaxWordEntryRE(word):
+#     _AUTO_LINK_RELAX_SPLIT_RE = re.compile(r"[\W]", re.I | re.U)
+
+    def _createAutoLinkRelaxWordEntryRE(self, word):
         """
         Get compiled regular expression for one word in autoLink "relax"
         mode
         """
         # Split into parts of contiguous alphanumeric characters
-        parts = WikiDataManager._AUTO_LINK_RELAX_SPLIT_RE.split(word)
+        parts = self.formatting.AutoLinkRelaxSplitRE.split(word)
         # Filter empty parts
         parts = [p for p in parts if p != u""]
 
         # Instead of original non-alphanum characters allow arbitrary
         # non-alphanum characters
-        pat = ur"\b" + (ur"[\W_]+".join(parts)) + ur"\b"
-        regex = re.compile(pat,
-                re.I | re.U)
+        pat = ur"\b" + (self.formatting.AutoLinkRelaxJoinPAT.join(parts)) + ur"\b"
+        regex = re.compile(pat, self.formatting.AutoLinkRelaxJoinFlags)
 
         return regex
 
-    _createAutoLinkRelaxWordEntryRE = staticmethod(
-            _createAutoLinkRelaxWordEntryRE)
+#     _createAutoLinkRelaxWordEntryRE = staticmethod(
+#             _createAutoLinkRelaxWordEntryRE)
 
 
     # TODO threadholder?
@@ -737,28 +730,32 @@ class WikiDataManager(MiscEventSourceMixin):
             words = self.getWikiData().getAllDefinedWikiPageNames() + \
                     self.getWikiData().getAllAliases()
 
-#             words = [u"alpha", u"beta beta", u"gamma"]
-
             # Sort longest words first
             words.sort(key=lambda w: len(w), reverse=True)
-            
-#             fullPat = u"|".join([self._createAutoLinkRelaxWordEntryRE(w, i)
-#                     for i, w in enumerate(words)])
-# 
-#             # Word boundaries
-#             fullPat = ur"\b(?:" + fullPat + ur")\b"
-# 
-#             # Compile re
-# #             print "getAutoLinkRelaxRE5", repr(fullPat)
-#             fullRE = re.compile(fullPat, re.I | re.U)
-# 
-#             self.autoLinkRelaxRE = (fullRE, words)
 
             self.autoLinkRelaxRE = [
                     (self._createAutoLinkRelaxWordEntryRE(w), w)
                     for w in words]
 
         return self.autoLinkRelaxRE
+
+
+    def getWikiPageTitle(self, wikiWord):
+        """
+        Return a title for a newly created page.
+        """
+        creaMode = self.getWikiConfig().getint("main",
+                "wikiPageTitle_creationMode", 1)
+        if creaMode == 0:
+            # Let wikiword untouched
+            return wikiWord
+        else:  # creaMode == 1: Add spaces before uppercase letters,
+                # e.g. NewWikiWord -> New Wiki Word
+            title = re.sub(ur'([A-Z\xc0-\xde]+)([A-Z\xc0-\xde][a-z\xdf-\xff])',
+                    r'\1 \2', wikiWord)
+            title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2',
+                    title)
+            return title
 
 
     def searchWiki(self, sarOp, applyOrdering=True):  # TODO Threadholder
@@ -852,6 +849,10 @@ class WikiDataManager(MiscEventSourceMixin):
         pg = self.getFuncPage("wiki/[CCBlacklist]")
         bls.union_update(pg.getLiveText().split("\n"))
         self.getFormatting().setCcWordBlacklist(bls)
+
+
+    def getAliasesWikiWord(word):
+        return self.getWikiData().getAliasesWikiWord(word)
 
 
     def miscEventHappened(self, miscevt):

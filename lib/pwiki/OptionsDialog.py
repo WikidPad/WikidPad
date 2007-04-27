@@ -147,6 +147,9 @@ class OptionsDialog(wx.Dialog):
             ("first_wiki_word", "tfFirstWikiWord", "t"),
 
             ("wikiPageTitlePrefix", "tfWikiPageTitlePrefix", "t"),
+            ("wikiPageTitle_creationMode", "chWikiPageTitleCreationMode", "seli"),
+            ("wikiPageTitle_fromLinkTitle", "cbWikiPageTitleFromLinkTitle", "b"),
+
             ("export_default_dir", "tfExportDefaultDir", "t"),
 
             ("fileStorage_identity_modDateMustMatch", "cbFsModDateMustMatch", "b"),

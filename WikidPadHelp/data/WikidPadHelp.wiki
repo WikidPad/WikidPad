@@ -23,6 +23,8 @@ Then just start typing text with WikiWords to create your wiki.
 
     * On the fly wiki WordLinking
     * Wiki words can be CamelCase or [Not Camel Case].
+    * UrlLinking
+    * [Anchors] and [Footnotes]
     * TreeIcons
     * TreeNodeColors
     * WikiWordNavigation (KeyBindings)
@@ -33,9 +35,7 @@ Then just start typing text with WikiWords to create your wiki.
     * BulletedLists
     * WikiDocumentAttributes (cross-index your information)
     * TodoItems (track todos, questions, issues)
-    * UrlLinking
     * [Insertions]
-    * [Anchors]
     * WikiBookmarks
 
     * RenamingWikiWords

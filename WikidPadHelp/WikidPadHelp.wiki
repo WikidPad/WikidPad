@@ -3,12 +3,17 @@ data_dir = data
 
 [main]
 footnotes_as_wikiwords = False
-last_wiki_word = OptionsDialog
+wikipagetitle_creationmode = 1
+last_wiki_word = WikidPadHelp
 filestorage_identity_moddatemustmatch = False
 wiki_name = WikidPadHelp
 wiki_database_type = original_gadfly
 wikipagetitleprefix = ++
+hotkey_showhide_bywiki = 
+wikipagetitle_fromlinktitle = True
 filestorage_identity_filenamemustmatch = False
 filestorage_identity_moddateisenough = False
+further_wiki_words = 
+export_default_dir = 
 first_wiki_word = WikidPadHelp
 

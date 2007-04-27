@@ -1,7 +1,60 @@
 ﻿++ Change Log
 
 
-Mar. 28, 2007 (1.9beta3)
+Apr. 27, 2007 (1.9beta4)
+
+    * Clicking on footnotes moves to the last footnote on page
+      (footnote anchor). See [Footnotes]
+    * Support for "auto_link" attribute: find (groups of) words
+      that match a wiki word and make them links. Precise behavior
+      may change in the future.
+      See [WikiDocumentAttributes]#*auto_link*
+    * Attribute "view_pane" to control if a page should show editor
+      or preview by default when opening it.
+      See [WikiDocumentAttributes]#*view_pane*
+    * Support for "win" modifier (=Windows key) for hotkeys.
+      See OptionsDialog#*App-bound# hotkey*
+    * Added wiki-bound options to control titles of newly created
+      pages.
+    * Option to write tabulators in editor
+      (Menu: "Editor"->"Settings"->"Tabs to spaces")
+    * List of all open wiki words is stored between sessions
+      (does not work if "First word at startup" is set in options).
+    * Right clicking on fold margin in editor shows fold menu.
+    
+    * Rebuild is now slower, but more reliable.
+    * Better update of a page if some important attributes were
+      changed.
+    * Directory "user_extensions" can now additionally be placed
+      inside ".WikidPadGlobals" directory in configuration dir.
+      (TODO: documentation).
+    * Some changes to produce more standard-conforming HTML.
+    
+    * Internal: Added function \PersonalWikiFrame.reloadMenuPlugins
+      to reload plugins while WikidPad is active (for developers).
+    * Internal: New subpackage rtlibRepl (runtime library
+      replacement) to replace things from Python runtime which
+      might need change, currently used for re module.
+    * Internal: Some speedup and convenience changes in
+      customtreectrl.py
+    
+    * Bug fixed: editor context menu showed "Cut" and "Delete"
+      greyed out if pasting is not possible.
+    * Bug fixed: Links were sometimes not recognized when having
+      the same page in two tabs.
+    * Bug fixed: Some clipboard and drag&drop problems on Linux
+      (other problems exist yet).
+    * Bug fixed: Removed inefficiency when exporting large sets
+      of wiki pages with many links (very large trees).
+    * Bug fixed: "page" insertion did not work.
+    * Bug fixed: Visited pages where always marked modified if
+      folding was active.
+    * Bug fixed: Script blocks were executed even if made invalid
+      with preceding backslash.
+
+
+
+Mar. 28, 2007 (1.9beta3, repository revision in "mbutscher" branch: 111)
 
     * Autocompletion support for todo items and anchor fragments.
       See AutoCompletion.

@@ -43,6 +43,7 @@ CTRL-SHIFT-S    show preview mode of current tab
 
 *Misc*
 CTRL-T          hide/show the tree control
+CTRL-ALT-D      Insert current date/time
 CTRL-N          new Wiki
 CTRL-ALT-O      open wiki
 CTRL-SHIFT-B    view bookmarks

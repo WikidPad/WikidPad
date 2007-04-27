@@ -35,10 +35,10 @@ def describeMenuItems(wiki):
 
     The  callback function  must take 2 parameters:
         wiki - Calling PersonalWikiFrame
-        evt - wxCommandEvent
+        evt - wx.CommandEvent
 
     An  icon descriptor  can be one of the following:
-        - a wxBitmap object
+        - a wx.Bitmap object
         - the filename of a bitmap (if file not found, no icon is used)
         - a tuple of filenames, first existing file is used
     """

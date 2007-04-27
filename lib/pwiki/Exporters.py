@@ -221,7 +221,7 @@ class HtmlXmlExporter:
         
 #         print "export1", repr((pWiki, wikiDataManager, wordList, exportType, exportDest,
 #             compatFilenames, addopt))
-        
+
         self.wikiDataManager = wikiDataManager
         self.wikiData = self.wikiDataManager.getWikiData()
 
@@ -516,8 +516,9 @@ class HtmlXmlExporter:
             fp.reset()        
             realfp.close()
         except Exception, e:
+            sys.stderr.write("Error while exporting word %s" % repr(word))
             traceback.print_exc()
-        
+
         return outputFile
 
 
@@ -935,8 +936,6 @@ class HtmlXmlExporter:
             docpage = wikiDocument.getWikiPageNoError(value)
             pageAst = docpage.getLivePageAst()
             
-#             content = docpage.getLiveText()
-# 
 #             pageast = PageAst.Page()
 #             pageast.buildAst(self.mainControl.getFormatting(), content,
 #                     docpage.getFormatDetails())
@@ -947,7 +946,7 @@ class HtmlXmlExporter:
             opts = self.optsStack[-1].copy()
             opts["anchorForHeading"] = False
             self.optsStack.append(opts)
-            self.processTokens(content, tokens)
+            self.processTokens(docpage.getLiveText(), tokens)
             del self.optsStack[-1]
             
             del self.insertionVisitStack[-1]
@@ -1124,35 +1123,56 @@ class HtmlXmlExporter:
                             pass
                 self.mainControl.getCollator().sort(wordList)
     
+                # TODO: Generate ready-made HTML content
                 if cols > 1:
                     # We need a table for the wordlist
-                    content = [u"<table>\n"]
+                    self.outAppend(u"<table>\n")
                     colpos = 0
                     for word in wordList:
                         if colpos == 0:
                             # Start table row
-                            content.append(u"<tr>")
-                        
-                        content.append(u'<td valign="top">[' + word + u"]</td>")
+                            self.outAppend(u"<tr>")
+                            
+                        wwNode = PageAst.WikiWord()
+                        wwNode.buildNodeForWord(word)
+
+                        self.outAppend(u'<td valign="top">')
+                        self._processWikiWord(word, wwNode)
+                        self.outAppend(u'</td>')
                         
                         colpos += 1
                         if colpos == cols:
                             # At the end of a row
                             colpos = 0
-                            content.append(u"</tr> ")
+                            self.outAppend(u"</tr>\n")
                             
                     # Fill the last incomplete row with empty cells if necessary
                     if colpos > 0:
                         while colpos < cols:
-                            content.append(u"<td></td>")
+                            self.outAppend(u"<td></td>")
                             colpos += 1
     
-                        content.append(u"</tr>\n")
+                        self.outAppend(u"</tr>\n")
                     
-                    content.append(u"</table>")
-                    content = u"".join(content)
+                    self.outAppend(u"</table>")
                 else:
-                    content = u"\n".join([u"[" + word + u"]" for word in wordList])
+                    firstWord = True
+                    for word in wordList:
+                        if firstWord:
+                            firstWord = False
+                        else:
+                            self.outAppend("<br />\n")
+                            
+                        wwNode = PageAst.WikiWord()
+                        wwNode.buildNodeForWord(word)
+
+                        self.outAppend(u'<td valign="top">')
+                        self._processWikiWord(word, wwNode)
+                        self.outAppend(u'</td>')
+                        
+#                     content = u"\n".join([u"[" + word + u"]" for word in wordList])
+                    
+                return
 
 
         if content is not None:
@@ -1168,6 +1188,50 @@ class HtmlXmlExporter:
 
         elif htmlContent is not None:
             self.outAppend(htmlContent)
+            
+            
+    def _processWikiWord(self, tokenText, astNode):
+        word = astNode.nakedWord
+        link = self.links.get(word)
+        
+        selfLink = False
+
+        if link:
+            # Test if link to same page itself (maybe with an anchor fragment)
+            if not self.exportType in (u"html_single", u"xml"):
+                wikiData = self.mainControl.getWikiDocument().getWikiData()
+                linkTo = wikiData.getAliasesWikiWord(word)
+                linkFrom = wikiData.getAliasesWikiWord(self.wikiWord)
+                if linkTo == linkFrom:
+                    # Page links to itself
+                    selfLink = True
+
+            # Add anchor fragment if present
+            if astNode.anchorFragment:
+                if selfLink:
+                    # Page links to itself, so replace link URL
+                    # by the anchor.
+                    link = u"#" + astNode.anchorFragment
+                else:
+                    link += u"#" + astNode.anchorFragment
+
+            if self.asXml:   # TODO XML
+                self.outAppend(u'<link type="wikiword">%s</link>' % 
+                        escapeHtml(tokenText))
+            else:
+                self.outAppend(u'<span class="wiki-link"><a href="%s">' %
+                        escapeHtml(link))
+                if astNode.titleTokens is not None:
+                    self.processTokens(content, astNode.titleTokens)
+                else:
+                    self.outAppend(escapeHtml(word))                        
+                self.outAppend(u'</a></span>')
+        else:
+            if astNode.titleTokens is not None:
+                self.processTokens(content, astNode.titleTokens)
+            else:
+                self.outAppend(escapeHtml(tokenText))                        
+        
 
 
 
@@ -1567,7 +1631,7 @@ class HtmlXmlExporter:
                             # than Python
                             p = urllib.url2pathname(link)  # TODO Relative URLs
                             link = wx.FileSystem.FileNameToURL(p)
-                        self.outAppend(u'<img src="%s" border="0"%s%s />' % 
+                        self.outAppend(u'<img src="%s" alt="" border="0"%s%s />' % 
                                 (escapeHtml(link), sizeInTag, alignInTag))
                     else:
 #                         self.outAppend(u'<a href="%s">%s</a>' %
@@ -1579,48 +1643,47 @@ class HtmlXmlExporter:
                             self.outAppend(escapeHtml(link))                        
                         self.outAppend(u'</a></span>')
 
-            elif styleno == WikiFormatting.FormatTypes.WikiWord:  # or \
-                    # styleno == WikiFormatting.FormatTypes.WikiWord2:
-                word = tok.node.nakedWord # self.mainControl.getFormatting().normalizeWikiWord(tok.text)
-                link = self.links.get(word)
-                
-                selfLink = False
-
-                if link:
-                    if not self.exportType in (u"html_single", u"xml"):
-                        wikiData = wikiDocument.getWikiData()
-                        linkTo = wikiData.getAliasesWikiWord(word)
-                        linkFrom = wikiData.getAliasesWikiWord(self.wikiWord)
-                        if linkTo == linkFrom:
-                            # Page links to itself
-                            selfLink = True
-
-                    # Add anchor fragment if present
-                    if tok.node.anchorFragment:
-                        if selfLink:
-                            # Page links to itself, so replace link URL
-                            # by the anchor.
-                            link = u"#" + tok.node.anchorFragment
-                        else:
-                            link += u"#" + tok.node.anchorFragment
-
-                    if self.asXml:   # TODO XML
-                        self.outAppend(u'<link type="wikiword">%s</link>' % 
-                                escapeHtml(tok.text))
-                    else:
-                        self.outAppend(u'<span class="wiki-link"><a href="%s">' %
-                                escapeHtml(link))
-                        if tok.node.titleTokens is not None:
-                            self.processTokens(content, tok.node.titleTokens)
-                        else:
-#                             self.outAppend(escapeHtml(tok.text))                        
-                            self.outAppend(escapeHtml(word))                        
-                        self.outAppend(u'</a></span>')
-                else:
-                    if tok.node.titleTokens is not None:
-                        self.processTokens(content, tok.node.titleTokens)
-                    else:
-                        self.outAppend(escapeHtml(tok.text))                        
+            elif styleno == WikiFormatting.FormatTypes.WikiWord:
+                self._processWikiWord(tok.text, tok.node)
+#                 word = tok.node.nakedWord
+#                 link = self.links.get(word)
+#                 
+#                 selfLink = False
+# 
+#                 if link:
+#                     if not self.exportType in (u"html_single", u"xml"):
+#                         wikiData = wikiDocument.getWikiData()
+#                         linkTo = wikiData.getAliasesWikiWord(word)
+#                         linkFrom = wikiData.getAliasesWikiWord(self.wikiWord)
+#                         if linkTo == linkFrom:
+#                             # Page links to itself
+#                             selfLink = True
+# 
+#                     # Add anchor fragment if present
+#                     if tok.node.anchorFragment:
+#                         if selfLink:
+#                             # Page links to itself, so replace link URL
+#                             # by the anchor.
+#                             link = u"#" + tok.node.anchorFragment
+#                         else:
+#                             link += u"#" + tok.node.anchorFragment
+# 
+#                     if self.asXml:   # TODO XML
+#                         self.outAppend(u'<link type="wikiword">%s</link>' % 
+#                                 escapeHtml(tok.text))
+#                     else:
+#                         self.outAppend(u'<span class="wiki-link"><a href="%s">' %
+#                                 escapeHtml(link))
+#                         if tok.node.titleTokens is not None:
+#                             self.processTokens(content, tok.node.titleTokens)
+#                         else:
+#                             self.outAppend(escapeHtml(word))                        
+#                         self.outAppend(u'</a></span>')
+#                 else:
+#                     if tok.node.titleTokens is not None:
+#                         self.processTokens(content, tok.node.titleTokens)
+#                     else:
+#                         self.outAppend(escapeHtml(tok.text))                        
 
             elif styleno == WikiFormatting.FormatTypes.Numeric:
                 # Numeric bullet

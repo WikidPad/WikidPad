@@ -56,16 +56,16 @@ HtmlTagRE = re.compile(
 HtmlEntityRE = re.compile(
         ur"&(?:[A-Za-z0-9]{2,10}|#[0-9]{1,10}|#x[0-9a-fA-F]{1,8});",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-Heading4RE      = re.compile(u"^\\+\\+\\+\\+(?!\\+) ?(?P<h4Content>" +
+Heading4RE      = re.compile(ur"^\+{4}(?!\+) ?(?P<h4Content>" +
         PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-Heading3RE      = re.compile(u"^\\+\\+\\+(?!\\+) ?(?P<h3Content>" +
+Heading3RE      = re.compile(ur"^\+{3}(?!\+) ?(?P<h3Content>" +
         PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-Heading2RE      = re.compile(u"^\\+\\+(?!\\+) ?(?P<h2Content>" +
+Heading2RE      = re.compile(ur"^\+{2}(?!\+) ?(?P<h2Content>" +
         PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-Heading1RE      = re.compile(u"^\\+(?!\\+) ?(?P<h1Content>" +
+Heading1RE      = re.compile(ur"^\+{1}(?!\+) ?(?P<h1Content>" +
         PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 # UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp|rel)://|mailto:)[^"\s<>]*',
@@ -192,9 +192,6 @@ PropertyRE      = re.compile(BracketStartPAT +
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
-# InsertionRE     = re.compile(ur"\[:[ \t]*(?P<insertionKey>[\w\-\_\.]+?)[ \t]*" +
-#                   ur"[:][ \t]*(?P<insertionValue>[\w\-\_ \t;,.!?#/|]+?)\]",
-#                   re.DOTALL | re.UNICODE | re.MULTILINE)
 
 InsertionValueRE = re.compile(ur"(?:(?P<insertionValue>[\w][\w\-\_ \t,.!?#/|]*)|"
         ur"(?P<insertionQuoteStarter>\"+|'+|/+|\\+)"
@@ -253,9 +250,16 @@ RevWikiWordAnchorRE2 = re.compile(ur"^(?P<anchorBegin>[A-Za-z0-9\_]{0,20})" +
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 
+AutoLinkRelaxSplitRE = re.compile(r"[\W]+", re.IGNORECASE | re.UNICODE)  # SPN
+
+AutoLinkRelaxJoinPAT = ur"[\W]+"
+# AutoLinkRelaxJoinPAT = ur"[ \n\t]+"
+AutoLinkRelaxJoinFlags = re.IGNORECASE | re.UNICODE
+
 
 # script blocks
-ScriptRE        = re.compile(u"\<%(.*?)%\>", re.DOTALL)
+# ScriptRE        = re.compile(u"\<%(.*?)%\>", re.DOTALL)
+ScriptRE        = re.compile(u"\<%(?P<scriptContent>.*?)%\>", re.DOTALL)
 
 # Auto generated area
 AutoGenAreaRE = re.compile(ur"^([ \t]*<<[ \t]+)([^\n]+\n)(.*?)^([ \t]*>>[ \t]*\n)",
@@ -281,8 +285,8 @@ EmptyLineRE     = re.compile(ur"^[ \t\r\n]*$",
 
 HorizLineRE     = re.compile(u"----+", re.DOTALL | re.UNICODE | re.MULTILINE)
 
+
 # suppression expression
-# Orig: SuppressHighlightingRE = re.compile("\<\<(.*?)\>\>", re.DOTALL)
 SuppressHighlightingRE = re.compile(ur"^(?P<suppressIndent>[ \t]*)<<[ \t]*\n"+
         ur"(?P<suppressContent>.*?)\n[ \t]*>>[ \t]*$",
         re.DOTALL | re.UNICODE | re.MULTILINE)

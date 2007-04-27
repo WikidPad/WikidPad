@@ -147,7 +147,7 @@ class LossyWikiCloseDeniedException(Exception):
 class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
     HOTKEY_ID_HIDESHOW_BYAPP = 1
     HOTKEY_ID_HIDESHOW_BYWIKI = 2
-    
+
     def __init__(self, parent, id, title, wikiAppDir, globalConfigDir,
             globalConfigSubDir, cmdLineAction):
         wx.Frame.__init__(self, parent, -1, title, size = (700, 550),
@@ -384,12 +384,23 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.evalLib = self.getExtension('EvalLibrary', u'EvalLibrary.py')
         self.wikiSyntax = self.getExtension('SyntaxLibrary', u'WikiSyntax.py')
         self.presentationExt = self.getExtension('Presentation', u'Presentation.py')
-        dirs = [ join(self.wikiAppDir, u'user_extensions'),
+        dirs = [ join(self.globalConfigSubDir, u'user_extensions'),
+                join(self.wikiAppDir, u'user_extensions'),
                 join(self.wikiAppDir, u'extensions') ]
         self.pluginManager.loadPlugins( dirs, [ u'KeyBindings.py',
                 u'EvalLibrary.py', u'WikiSyntax.py' ] )
 
+
     def getExtension(self, extensionName, fileName):
+        extensionFileName = join(self.globalConfigSubDir, u'user_extensions',
+                fileName)
+        if exists(extensionFileName):
+            extFile = open(extensionFileName, "rU")
+            userUserExtension = extFile.read()
+            extFile.close()
+        else:
+            userUserExtension = None
+
         extensionFileName = join(self.wikiAppDir, 'user_extensions', fileName)
         if exists(extensionFileName):
             extFile = open(extensionFileName, "rU")
@@ -397,27 +408,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             extFile.close()
         else:
             userExtension = None
-            
+
         extensionFileName = join(self.wikiAppDir, 'extensions', fileName)
         extFile = open(extensionFileName, "rU")
         systemExtension = extFile.read()
         extFile.close()
         
-        return importCode(systemExtension, userExtension, extensionName)
-
-#     def createDefaultGlobalConfig(self):
-#         self.configuration.createEmptyGlobalConfig(self.globalConfigLoc)
-#         self.configuration.fillGlobalWithDefaults()
-# 
-#         self.configuration.set("main", "wiki_history", self.wikiPadHelp)
-#         self.configuration.set("main", "last_wiki", self.wikiPadHelp)
-#         curSize = self.GetSize()
-#         self.configuration.set("main", "size_x", str(curSize.x))
-#         self.configuration.set("main", "size_y", str(curSize.y))
-#         curPos = self.GetPosition()
-#         self.configuration.set("main", "pos_x", str(curPos.x))
-#         self.configuration.set("main", "pos_y", str(curPos.y))
-#         self.configuration.set("main", "last_active_dir", os.getcwd())
+        return importCode(systemExtension, userExtension, userUserExtension,
+                extensionName)
 
 
     def getCurrentWikiWord(self):
@@ -737,6 +735,29 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         wx.EVT_MENU(self, menuID, lambda evt: self.exitWiki())
         
         return wikiMenu
+
+
+
+    def buildPluginsMenu(self):
+        """
+        Builds or rebuilds the plugin menu
+        """
+#         pluginMenu = None
+        # get info for any plugin menu items and create them as necessary
+        pluginMenu = wx.Menu()
+        menuItems = reduce(lambda a, b: a+list(b),
+                self.menuFunctions.describeMenuItems(self), [])
+        if len(menuItems) > 0:
+            def addPluginMenuItem(function, label, statustext, icondesc=None,
+                    menuID=None):
+                self.addMenuItem(pluginMenu, label, statustext,
+                        lambda evt: function(self, evt), icondesc, menuID)
+
+            for item in menuItems:
+                addPluginMenuItem(*item)
+                
+        return pluginMenu
+
 
 
     def _addToTextBlocksMenu(self, tbContent, stack, reusableIds):
@@ -1210,36 +1231,45 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.keyBindings.RewrapText, 'Rewrap Text')
         wx.EVT_MENU(self, menuID, lambda evt: self.getActiveEditor().rewrapText())
 
+
+        subMenu = wx.Menu()
+
         menuID=wx.NewId()
-        wrapModeMenuItem = wx.MenuItem(self.editorMenu, menuID, "&Wrap Mode",
+        wrapModeMenuItem = wx.MenuItem(subMenu, menuID, "&Wrap Mode",
                 "Set wrap mode", wx.ITEM_CHECK)
-        self.editorMenu.AppendItem(wrapModeMenuItem)
+        subMenu.AppendItem(wrapModeMenuItem)
         wx.EVT_MENU(self, menuID, self.OnCmdCheckWrapMode)
         wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateWrapMode)
 
-#         wrapModeMenuItem.Check(self.getActiveEditor().getWrapMode())
-
 
         menuID=wx.NewId()
-        autoIndentMenuItem = wx.MenuItem(self.editorMenu, menuID,
+        autoIndentMenuItem = wx.MenuItem(subMenu, menuID,
                 "Auto-indent", "Auto indentation", wx.ITEM_CHECK)
-        self.editorMenu.AppendItem(autoIndentMenuItem)
+        subMenu.AppendItem(autoIndentMenuItem)
         wx.EVT_MENU(self, menuID, self.OnCmdCheckAutoIndent)
         wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateAutoIndent)
 
-#         autoIndentMenuItem.Check(self.getActiveEditor().getAutoIndent())
-
 
         menuID=wx.NewId()
-        autoBulletsMenuItem = wx.MenuItem(self.editorMenu, menuID,
+        autoBulletsMenuItem = wx.MenuItem(subMenu, menuID,
                 "Auto-bullets", "Show bullet on next line if current has one",
                 wx.ITEM_CHECK)
-        self.editorMenu.AppendItem(autoBulletsMenuItem)
+        subMenu.AppendItem(autoBulletsMenuItem)
         wx.EVT_MENU(self, menuID, self.OnCmdCheckAutoBullets)
         wx.EVT_UPDATE_UI(self, menuID,
                 self.OnUpdateAutoBullets)
 
-#         autoBulletsMenuItem.Check(self.getActiveEditor().getAutoBullets())
+        menuID=wx.NewId()
+        autoBulletsMenuItem = wx.MenuItem(subMenu, menuID,
+                "Tabs to spaces", "Write spaces when hitting TAB key",
+                wx.ITEM_CHECK)
+        subMenu.AppendItem(autoBulletsMenuItem)
+        wx.EVT_MENU(self, menuID, self.OnCmdCheckTabsToSpaces)
+        wx.EVT_UPDATE_UI(self, menuID,
+                self.OnUpdateTabsToSpaces)
+
+
+        self.editorMenu.AppendMenu(-1, "Settings", subMenu)
 
         self.editorMenu.AppendSeparator()
 
@@ -1424,9 +1454,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             helpMenu.Append(menuID, '&Visit wikidPad Homepage', 'Visit Homepage')
             wx.EVT_MENU(self, menuID, lambda evt: wx.LaunchDefaultBrowser(
                     'http://www.jhorman.org/wikidPad/'))
-    
+
             helpMenu.AppendSeparator()
-    
+
             menuID=wx.NewId()
             helpMenu.Append(menuID, 'View &License', 'View License')
             wx.EVT_MENU(self, menuID, lambda evt: wx.LaunchDefaultBrowser(
@@ -1439,19 +1469,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         wx.EVT_MENU(self, menuID, lambda evt: self.showAboutDialog())
 
         # get info for any plugin menu items and create them as necessary
-        pluginMenu = None
-        menuItems = reduce(lambda a, b: a+list(b),
-                self.menuFunctions.describeMenuItems(self), [])
-        if len(menuItems) > 0:
-            pluginMenu = wx.Menu()
-                
-            def addPluginMenuItem(function, label, statustext, icondesc=None,
-                    menuID=None):
-                self.addMenuItem(pluginMenu, label, statustext,
-                        lambda evt: function(self, evt), icondesc, menuID)
-            
-            for item in menuItems:
-                addPluginMenuItem(*item)
+#         pluginMenu = None
+#         pluginMenu = wx.Menu()
+#         menuItems = reduce(lambda a, b: a+list(b),
+#                 self.menuFunctions.describeMenuItems(self), [])
+#         if len(menuItems) > 0:
+#             def addPluginMenuItem(function, label, statustext, icondesc=None,
+#                     menuID=None):
+#                 self.addMenuItem(pluginMenu, label, statustext,
+#                         lambda evt: function(self, evt), icondesc, menuID)
+# 
+#             for item in menuItems:
+#                 addPluginMenuItem(*item)
 
 
         self.mainmenu.Append(wikiMenu, 'W&iki')
@@ -1460,8 +1489,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.mainmenu.Append(self.editorMenu, '&Editor')
         self.mainmenu.Append(foldingMenu, '&Folding')
         self.mainmenu.Append(viewMenu, '&View')
-        if pluginMenu:
-            self.mainmenu.Append(pluginMenu, "Pl&ugins")
+#         if pluginMenu:
+#         self.mainmenu.Append(pluginMenu, "Pl&ugins")
+        self.mainmenu.Append(self.buildPluginsMenu(), "Pl&ugins")
+
         self.mainmenu.Append(helpMenu, 'He&lp')
 
         self.SetMenuBar(self.mainmenu)
@@ -1943,8 +1974,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #             self.mainAreaPanel.AddPage(editor, u"Edit2")
             
             
-    def getPagePresenterControlNames(self):
-        return ["textedit", "preview"]
+#     def getPagePresenterControlNames(self):
+#         return ["textedit", "preview"]
 
 
     def createNewDocPagePresenterTab(self):
@@ -1961,47 +1992,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         htmlView.setVisible(False)
         presenter.setSubControl("preview", htmlView)
 
-        mainsizer = LayerSizer()  # wxBoxSizer(wxVERTICAL)
-        mainsizer.Add(editor) # , 0, wx.EXPAND)
-        mainsizer.Add(htmlView)  # , 0, wx.EXPAND)
+        mainsizer = LayerSizer()
+        mainsizer.Add(editor)
+        mainsizer.Add(htmlView)
         presenter.SetSizer(mainsizer)
 
         return self.mainAreaPanel.appendDocPagePresenterTab(presenter)
-
-
-#     def appendDocPagePresenterTab(self):
-#         presenter = DocPagePresenter(self.mainAreaPanel, self)
-# 
-# #         inputsizer.Add(wx.StaticText(self, -1, "Path to MimeTeX:"), 0,
-# #                 wx.ALL | wx.EXPAND, 5)
-# #         inputsizer.Add(self.tfPath, 1, wx.ALL | wx.EXPAND, 5)
-# 
-#         editor = self.createWindow({"name": "txteditor1",
-#                 "presenter": presenter}, presenter)
-#         editor.setVisible(False)
-#         presenter.setSubControl("textedit", editor)
-# 
-#         htmlView = createWikiHtmlView(presenter, presenter, -1)
-#         htmlView.setVisible(False)
-#         presenter.setSubControl("preview", htmlView)
-# 
-#         mainsizer = LayerSizer()  # wxBoxSizer(wxVERTICAL)
-#         mainsizer.Add(editor) # , 0, wx.EXPAND)
-#         mainsizer.Add(htmlView)  # , 0, wx.EXPAND)
-#         presenter.SetSizer(mainsizer)
-# #         self.Fit()
-# 
-#         self.docPagePresenters.append(presenter)
-#         self.mainAreaPanel.AddPage(presenter, "    ")
-#         presenter.getMiscEvent().addListener(self)
-# 
-#         presenter.switchSubControl("textedit")
-# 
-#         if self.getCurrentDocPagePresenter() is None:
-#             self.setCurrentDocPagePresenter(presenter)
-#             
-#         return presenter
-
 
 
     def appendLogMessage(self, msg):
@@ -2014,6 +2010,22 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def hideLogWindow(self):
         self.windowLayouter.collapseWindow("log")
+
+
+    def reloadMenuPlugins(self):
+        if self.mainmenu is not None:
+            self.menuFunctions = self.pluginManager.registerPluginAPI((
+                    "MenuFunctions",1), ("describeMenuItems",))
+                    
+            self.loadExtensions()
+
+#             self.pluginManager.loadPlugins( dirs, [ u'KeyBindings.py',
+#                     u'EvalLibrary.py', u'WikiSyntax.py' ] )
+            
+            # This is a rebuild of an existing menu (after loading a new wikiData)
+            self.mainmenu.Replace(6, self.buildPluginsMenu(), "Pl&ugins")
+            return
+
 
 
     def resourceSleep(self):
@@ -3871,7 +3883,7 @@ These are your default global settings.
             if newWord:
                 page = self.wikiDataManager.createWikiPage(wikiWord)
                 # TODO Respect template property?
-                title = DocPages.WikiPage.getWikiPageTitle(wikiWord)
+                title = self.wikiDataManager.getWikiPageTitle(wikiWord)
                 self.saveDocPage(page, u"++ %s\n\n%s" % (title, text), None)
             else:
                 page = self.wikiDataManager.getWikiPage(wikiWord)
@@ -4061,12 +4073,12 @@ These are your default global settings.
                 
                 self.saveAllDocPages(force=True)
                 self.getWikiData().commit()
-                
+
+               
                 ob = expclass(self)
                 if addopt is None:
                     # Additional options not given -> take default provided by exporter
                     addopt = ob.getAddOpt(None)
-    
                 ob.export(self.getWikiDataManager(), wordList, exptype, dest,
                         False, addopt)
     
@@ -4540,6 +4552,14 @@ These are your default global settings.
         evt.Check(self.getActiveEditor().getAutoBullets())
 
 
+    def OnCmdCheckTabsToSpaces(self, evt):        
+        self.getActiveEditor().setTabsToSpaces(evt.IsChecked())
+        self.configuration.set("main", "editor_tabsToSpaces", evt.IsChecked())
+
+    def OnUpdateTabsToSpaces(self, evt):
+        evt.Check(self.getActiveEditor().getTabsToSpaces())
+
+
     def OnCmdCheckShowLineNumbers(self, evt):        
         self.getActiveEditor().setShowLineNumbers(evt.IsChecked())
         self.configuration.set("main", "show_lineNumbers", evt.IsChecked())
@@ -4683,7 +4703,7 @@ class TaskBarIcon(wx.TaskBarIcon):
         return tbMenu
 
 
-def importCode(code, usercode, name, add_to_sys_modules=False):
+def importCode(code, usercode, userUserCode, name, add_to_sys_modules=False):
     """
     Import dynamically generated code as a module. 
     usercode and code are the objects containing the code
@@ -4712,10 +4732,13 @@ def importCode(code, usercode, name, add_to_sys_modules=False):
     exec code in module.__dict__
     if usercode is not None:
         exec usercode in module.__dict__
+    if userUserCode is not None:
+        exec userUserCode in module.__dict__
     if add_to_sys_modules:
         sys.modules[name] = module
 
     return module
+
 
 
 

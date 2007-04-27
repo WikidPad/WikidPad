@@ -1296,21 +1296,6 @@
           </object>
           <object class="sizeritem">
             <object class="wxStaticText">
-              <label>New page title prefix:</label>
-            </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxTextCtrl" name="tfWikiPageTitlePrefix"/>
-            <flag>wxALL|wxEXPAND</flag>
-            <border>5</border>
-          </object>
-          <object class="spacer">
-            <size>0,0</size>
-          </object>
-          <object class="sizeritem">
-            <object class="wxStaticText">
               <label>Default export dir.:</label>
             </object>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -1331,6 +1316,75 @@
           </object>
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+      <object class="spacer">
+        <size>5,5</size>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>Title of new pages</label>
+          <font>
+            <size>8</size>
+            <style>default</style>
+            <weight>bold</weight>
+            <family>normal</family>
+            <underlined>0</underlined>
+          </font>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <cols>2</cols>
+          <growablecols>1</growablecols>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Title prefix:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfWikiPageTitlePrefix"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Wiki word to title:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chWikiPageTitleCreationMode">
+              <content>
+                <item>As is</item>
+                <item>Add spaces</item>
+              </content>
+              <selection>1</selection>
+                </object>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbWikiPageTitleFromLinkTitle">
+          <label>Use link title if present</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+        </object>
+        <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
       <object class="sizeritem">
         <object class="wxStaticText" name="">
@@ -1370,6 +1424,9 @@
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
+      </object>
+      <object class="spacer">
+        <size>5,5</size>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">

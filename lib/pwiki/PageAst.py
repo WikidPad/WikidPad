@@ -172,7 +172,7 @@ def _doAutoLinkForTokens(tokens, formatDetails, threadholder):
                 token = Token(WikiFormatting.FormatTypes.WikiWord,
                         start, {}, foundWordText)
                 node = WikiWord()
-                node.buildNodeForAutoLink(token, foundWord)
+                node.buildNodeForWord(foundWord, token)
                 token.node = node
 
                 result.append(token)
@@ -181,6 +181,13 @@ def _doAutoLinkForTokens(tokens, formatDetails, threadholder):
                 text = text[len(foundWordText):]
 
     return result
+
+
+def getTextFromTokenList(tl):
+    """
+    Extract text from a list of tokens
+    """
+    return u"".join([t.text for t in tl])
 
 
 def iterWords(pageast):
@@ -500,12 +507,15 @@ class WikiWord(Ast):
     def getTokensForPos(self, pos):
         return _findTokensForPos(self.titleTokens, pos)
         
-    def buildNodeForAutoLink(self, token, nakedWord):
+    def buildNodeForWord(self, nakedWord, token=None):
         self.searchFragment = None
         self.anchorFragment = None
         self.nakedWord = nakedWord
-        self.titleTokens = [Token(WikiFormatting.FormatTypes.Default,
-               token.start, {}, token.text)]
+        if token is not None:
+            self.titleTokens = [Token(WikiFormatting.FormatTypes.Default,
+                   token.start, {}, token.text)]
+        else:
+            self.titleTokens = None
 
     def buildSubAst(self, formatting, token, formatDetails=None,
             threadholder=DUMBTHREADHOLDER):

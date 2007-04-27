@@ -207,27 +207,22 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         wx.stc.StyledTextCtrl.__init__(self, parent, ID)
         self.presenter = presenter
         self.evalScope = None
-        self.stylebytes = None
-        self.foldingseq = None
-        self.pageAst = None
+        self.stylingThreadHolder = ThreadHolder()
+        self.clearStylingCache()
+#         self.stylebytes = None
+#         self.foldingseq = None
+#         self.pageAst = None
         self.pageType = "normal"   # The pagetype controls some special editor behaviour
 #         self.idleCounter = 0       # Used to reduce idle load
-        self.stylingThreadHolder = ThreadHolder()
         self.loadedDocPage = None
         self.lastFont = None
         self.ignoreOnChange = False
         self.searchStr = u""
         
         # If autocompletion word was choosen, how many bytes to delete backward
-        # before inserting word, if word ...
-#         self.autoCompBackBytesWithoutBracket = 0  # doesn't start with '['
-#         self.autoCompBackBytesWithBracket = 0     # starts with '['
+        # before inserting word
         self.autoCompBackBytesMap = {} # Maps selected word to number of backbytes
 
-        # editor settings
-        self.applyBasicSciSettings()
-
-        
         # configurable editor settings
         config = self.presenter.getConfig()
         self.setWrapMode(config.getboolean("main", "wrap_mode"))
@@ -236,6 +231,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.autoBullets = config.getboolean("main", "auto_bullets")
         self.setShowLineNumbers(config.getboolean("main", "show_lineNumbers"))
         self.foldingActive = config.getboolean("main", "editor_useFolding")
+        self.tabsToSpaces = config.getboolean("main", "editor_tabsToSpaces")
+
+        # editor settings
+        self.applyBasicSciSettings()
         
         self.defaultFont = config.get("main", "font",
                 self.presenter.getDefaultFontFaces()["mono"])
@@ -320,6 +319,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.CmdKeyClear(ord('X'), wx.stc.STC_SCMOD_CTRL)
         self.CmdKeyClear(ord('C'), wx.stc.STC_SCMOD_CTRL)
         self.CmdKeyClear(ord('V'), wx.stc.STC_SCMOD_CTRL)
+        
+        self.SetModEventMask(
+                wx.stc.STC_MOD_INSERTTEXT | wx.stc.STC_MOD_DELETETEXT)
 
         # set the autocomplete separator
         self.AutoCompSetSeparator(ord('~'))
@@ -346,7 +348,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         wx.stc.EVT_STC_STYLENEEDED(self, ID, self.OnStyleNeeded)
         wx.stc.EVT_STC_CHARADDED(self, ID, self.OnCharAdded)
-        wx.stc.EVT_STC_CHANGE(self, ID, self.OnChange)
+        wx.stc.EVT_STC_MODIFIED(self, ID, self.OnModified)
         wx.stc.EVT_STC_USERLISTSELECTION(self, ID, self.OnUserListSelection)
         wx.stc.EVT_STC_MARGINCLICK(self, ID, self.OnMarginClick)
         
@@ -469,6 +471,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         
     def getAutoBullets(self):
         return self.autoBullets
+        
+    def setTabsToSpaces(self, onOff):
+        self.tabsToSpaces = onOff
+        self.SetUseTabs(not onOff)
+        
+    def getTabsToSpaces(self):
+        return self.tabsToSpaces
 
     def setShowLineNumbers(self, onOrOff):
         if onOrOff:
@@ -523,9 +532,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #         self.anchorBytePosition = -1
 #         self.anchorCharPosition = -1
         self.incSearchCharStartPos = 0
-        self.stylebytes = None
-        self.foldingseq = None
-        self.pageAst = None
+        self.clearStylingCache()
+#         self.stylebytes = None
+#         self.foldingseq = None
+#         self.pageAst = None
         self.pageType = "normal"
 
         self.SetSelection(-1, -1)
@@ -626,12 +636,12 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.SetTabIndents(True)
         self.SetBackSpaceUnIndents(True)
         self.SetTabWidth(4)
-        self.SetUseTabs(0)  # TODO Configurable
+        self.SetUseTabs(not self.tabsToSpaces)
         self.SetEOLMode(wx.stc.STC_EOL_LF)
         self.AutoCompSetFillUps(u":=")  # TODO Add '.'?
 #         self.SetYCaretPolicy(wxSTC_CARET_SLOP, 2)  
 #         self.SetYCaretPolicy(wxSTC_CARET_JUMPS | wxSTC_CARET_EVEN, 4)  
-        self.SetYCaretPolicy(wx.stc.STC_CARET_SLOP | wx.stc.STC_CARET_EVEN, 4)  
+        self.SetYCaretPolicy(wx.stc.STC_CARET_SLOP | wx.stc.STC_CARET_EVEN, 4) 
 
 
 
@@ -676,9 +686,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.loadedDocPage.removeTxtEditor(self)
             self.loadedDocPage = None
 
-            self.stylebytes = None
-            self.foldingseq = None
-            self.pageAst = None
+            self.clearStylingCache()
+#             self.stylebytes = None
+#             self.foldingseq = None
+#             self.pageAst = None
             self.pageType = "normal"
 
 
@@ -749,7 +760,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         # get the font that should be used in the editor
         font = self.loadedDocPage.getPropertyOrGlobal("font",
                 self.defaultFont)
-
+        
         # set the styles in the editor to the font
         if self.lastFont != font:
             faces = self.presenter.getDefaultFontFaces().copy()
@@ -784,7 +795,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         p2 = evtprops.copy()
         p2.update({"loading wiki page": True, "wikiPage": wikiPage})
         self.presenter.fireMiscEventProps(p2)  # TODO Remove this hack
-
+        
         self.pageType = self.loadedDocPage.getProperties().get(u"pagetype",
                 [u"normal"])[-1]
 
@@ -819,7 +830,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     foldInfo = prst[5]
                     self.setFoldInfo(foldInfo)
                     self.GotoPos(lastPos)
-
+                    
                     if True:  # scrollPosX != 0 or scrollPosY != 0:
                         # Bad hack: First scroll to position to avoid a visible jump
                         #   if scrolling works, then update display,
@@ -858,7 +869,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                         screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
                                 scrollPosY, wx.VERTICAL)
                         self.ProcessEvent(screvt)
-                    
 
         elif self.pageType == u"form":
             self.GotoPos(0)
@@ -1024,9 +1034,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         t = self.stylingThreadHolder.getThread()
         if t is not None:
             self.stylingThreadHolder.setThread(None)
-            self.stylebytes = None
-            self.foldingseq = None
-            self.pageAst = None
+            self.clearStylingCache()
+#             self.stylebytes = None
+#             self.foldingseq = None
+#             self.pageAst = None
 
         if textlen < self.presenter.getConfig().getint(
                 "main", "sync_highlight_byte_limit"):
@@ -1060,15 +1071,14 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             leftFold += self.GetMarginWidth(i)
             
         rightFold = leftFold + self.GetMarginWidth(self.FOLD_MARGIN)
-        
 
         menu = wx.Menu()
 
         if mousePos.x >= leftFold and mousePos.x < rightFold:
             # Right click in fold margin
-            
+
             appendToMenuByMenuDesc(menu, FOLD_MENU)
-            
+
             # print "Right click in fold margin"
         else:
             appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_BASE)
@@ -1138,6 +1148,12 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 break
                 
             charStartPos = end
+
+
+    def clearStylingCache(self):
+        self.stylebytes = None
+        self.foldingseq = None
+        self.pageAst = None
 
 
     def storeStylingAndAst(self, stylebytes, pageAst, foldingseq):
@@ -1347,6 +1363,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             else:
                 self.HideLines(ln, ln)
 
+
+#     def repairFolding(self):
+#         if not self.getFoldingActive():
+#             return None
+        
+
+
     def snip(self):
         # get the selected text
         text = self.GetSelectedText()
@@ -1438,9 +1461,19 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 else:
                     # Same tab
                     presenter = self.presenter
+                    
+                titleFromLink = self.presenter.getConfig().getboolean("main",
+                        "wikiPageTitle_fromLinkTitle", False)
                 
+                if not titleFromLink or tok.node.titleTokens is None:
+                    suggNewPageTitle = None
+                else:
+                    suggNewPageTitle = PageAst.getTextFromTokenList(
+                            tok.node.titleTokens)
+
                 presenter.openWikiPage(tok.node.nakedWord,   # .getMainControl()
-                        motionType="child", anchor=tok.node.anchorFragment)
+                        motionType="child", anchor=tok.node.anchorFragment,
+                        suggNewPageTitle=suggNewPageTitle)
 
                 searchfrag = tok.node.searchFragment
                 # Unescape search fragment
@@ -1590,6 +1623,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #         return False
 
 
+    # TODO More efficient
     def evalScriptBlocks(self, index=-1):
         """
         Evaluates scripts. Respects "script_security_level" option
@@ -1605,6 +1639,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     wx.OK, self.presenter.getMainControl())
             return
 
+        SCRIPTFORMAT = WikiFormatting.FormatTypes.Script
         # it is important to python to have consistent eol's
         self.ConvertEOLs(self.eolMode)
         (startPos, endPos) = self.GetSelection()
@@ -1613,42 +1648,50 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if startPos == endPos or index > -1:
             # Execute all or selected script blocks on the page (or other
             #   related pages)
+            
+            pageAst = self.getPageAst()
+            scriptTokens = pageAst.findTypeFlat(SCRIPTFORMAT)
 
-            # get the text of the current page
-            text = self.GetText()
+#             # get the text of the current page
+#             text = self.GetText()
             
             # process script imports
             if securityLevel > 1: # Local import_scripts properties allowed
                 if self.loadedDocPage.getProperties().has_key(
                         "import_scripts"):
-                    scripts = self.loadedDocPage.getProperties()[
+                    scriptNames = self.loadedDocPage.getProperties()[
                             "import_scripts"]
-                    for script in scripts:
+                    for sn in scriptNames:
                         try:
                             importPage = self.presenter.getWikiDocument().\
-                                    getWikiPage(script)
-                            content = importPage.getLiveText()
-                            text += "\n" + content
+                                    getWikiPage(sn)
+                            pageAst = importPage.getLivePageAst()
+                            scriptTokens += pageAst.findTypeFlat(SCRIPTFORMAT)
+                            
+#                             content = importPage.getLiveText()
+#                             text += "\n" + content
                         except:
                             pass
 
             if securityLevel > 2: # global.import_scripts property also allowed
-                globscript = self.presenter.getWikiDocument().getWikiData().\
+                globScriptName = self.presenter.getWikiDocument().getWikiData().\
                         getGlobalProperties().get("global.import_scripts")
     
-                if globscript is not None:
+                if globScriptName is not None:
                     try:
                         importPage = self.presenter.getWikiDocument().\
-                                getWikiPage(globscript)
-                        content = importPage.getLiveText()
-                        text += "\n" + content
+                                getWikiPage(globScriptName)
+                        pageAst = importPage.getLivePageAst()
+                        scriptTokens += pageAst.findTypeFlat(SCRIPTFORMAT)
+#                         content = importPage.getLiveText()
+#                         text += "\n" + content
                     except:
                         pass
 
-            match = WikiFormatting.ScriptRE.search(text)
-            while(match):
-                script = re.sub(u"^[\r\n\s]+", "", match.group(1))
-                script = re.sub(u"[\r\n\s]+$", "", script)
+            for st in scriptTokens:
+                script = st.grpdict["scriptContent"]
+                script = re.sub(u"^[\r\n\s]+", u"", script)
+                script = re.sub(u"[\r\n\s]+$", u"", script)
                 try:
                     if index == -1:
                         script = re.sub(u"^\d:?\s?", u"", script)
@@ -1662,8 +1705,29 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     s = StringIO()
                     traceback.print_exc(file=s)
                     self.AddText(u"\nException: %s" % s.getvalue())
+                
 
-                match = WikiFormatting.ScriptRE.search(text, match.end())
+
+
+#             match = WikiFormatting.ScriptRE.search(text)
+#             while(match):
+#                 script = re.sub(u"^[\r\n\s]+", "", match.group(1))
+#                 script = re.sub(u"[\r\n\s]+$", "", script)
+#                 try:
+#                     if index == -1:
+#                         script = re.sub(u"^\d:?\s?", u"", script)
+#                         exec(script) in self.evalScope
+#                     elif index > -1 and script.startswith(str(index)):
+#                         script = re.sub(u"^\d:?\s?", u"", script)
+#                         exec(script) in self.evalScope
+#                         break # Execute only the first found script
+# 
+#                 except Exception, e:
+#                     s = StringIO()
+#                     traceback.print_exc(file=s)
+#                     self.AddText(u"\nException: %s" % s.getvalue())
+# 
+#                 match = WikiFormatting.ScriptRE.search(text, match.end())
         else:
             # Evaluate selected text
             text = self.GetSelectedText()
@@ -1671,7 +1735,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 compThunk = compile(re.sub(u"[\n\r]", u"", text), "<string>",
                         "eval", CO_FUTURE_DIVISION)
                 result = eval(compThunk, self.evalScope)
-#                 result = eval(re.sub(u"[\n\r]", u"", text), self.evalScope)
             except Exception, e:
                 s = StringIO()
                 traceback.print_exc(file=s)
@@ -2259,10 +2322,12 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.UserListShow(1, u"~".join(acresult))
 
 
-    def OnChange(self, evt):
+    def OnModified(self, evt):
         if not self.ignoreOnChange:
-            self.loadedDocPage.setDirty(True)
-            self.presenter.informLiveTextChanged(self)
+            if evt.GetModificationType() & \
+                    (wx.stc.STC_MOD_INSERTTEXT | wx.stc.STC_MOD_DELETETEXT):
+                self.loadedDocPage.setDirty(True)
+                self.presenter.informLiveTextChanged(self)
 
     def OnCharAdded(self, evt):
         "When the user presses enter reindent to the previous level"
@@ -2490,17 +2555,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 currentCol = self.GetColumn(currentPos)
                 self.presenter.SetStatusText(u"Line: %d Col: %d Pos: %d" %
                         (currentLine, currentCol, currentPos), 2)
-
-#             stylebytes = self.stylebytes
-#             self.stylebytes = None
-#             folding = self.folding
-#             self.folding = None
-# 
-#             if stylebytes:
-#                 self.applyStyling(stylebytes)
-#             
-#             if folding:
-#                 self.applyFolding(folding)
 
 
     def OnDestroy(self, evt):

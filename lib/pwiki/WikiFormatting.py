@@ -343,13 +343,13 @@ class WikiFormatting:
         self.combinedWwTitleRE = compileCombinedRegex(
                 self.formatWwTitleExpressions, ignoreList)
 
-
+        # TODO remove
         self.wikiWordStart = u"["
         self.wikiWordEnd = u"]"
-        
+
         self.wikiWordStartEsc = ur"\["
         self.wikiWordEndEsc = ur"\]"
-        
+
 #         if self.pWiki.wikiConfigFilename:
 #             self.footnotesAsWws = self.pWiki.getConfig().getboolean(
 #                     "main", "footnotes_as_wikiwords", False)

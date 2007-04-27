@@ -64,7 +64,9 @@ This setting has no effect for "C" order. Alphabetical sorting of children of a 
 *App-bound hotkey*
 Here you can define a hotkey to show or hide WikidPad (they may only work on Windows). Hotkeys work system-wide, not only if WikidPad is active.
 
-In the text field you can enter a hotkey in the same way as the menu shortcuts are. The checkbox before the text field allows to temporarily deactivate the hotkey without deleting the field content.
+In the text field you can enter a hotkey in the same way as the menu shortcuts are. Unlike menu shortcuts, you can also use "win" as modifier (like "alt" or "ctrl"), but the hotkey must have at least one of "ctrl" or "alt" modifiers to work.
+
+The checkbox before the text field allows to temporarily deactivate the hotkey without deleting the field content.
 
 There is also an option to set a second hotkey which is bound to the current wiki instead of the app. See OptionsDialog#*Wiki-bound# hotkey* below in "Current wiki" options.
 
@@ -203,10 +205,10 @@ Controls how many seconds of inactivity before the incremental search is closed 
 These options apply to the active wiki only
 
 *Footnotes as wiki words*
-Interpret footnotes (e.g. "[42]") as wiki words instead of normal text.
+Interpret [Footnotes] (e.g. "[42]") as wiki words.
 
 *First word at startup*
-Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last word when the wiki was closed is shown on opening.
+Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last words when the wiki was closed is shown on opening.
 
 *New page title prefix*
 Control the heading level of the initial main title of new pages and fill between one and four '+' in this field. Default is "++".
@@ -222,3 +224,7 @@ See [FileStorage].
 
 
 *Wiki-bound hotkey*
+Wiki-bound hotkey to show/hide wiki. See OptionsDialog#*App-bound# hotkey*
+
+
+

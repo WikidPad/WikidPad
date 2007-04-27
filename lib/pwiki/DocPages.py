@@ -209,6 +209,8 @@ class WikiPage(DocPage):
         self.todos = None
         self.props = None
         self.modified, self.created = None, None
+        self.suggNewPageTitle = None  # Title to use for page if it is
+                # newly created
 
         # does this page need to be saved?
         self.saveDirtySince = None  # None, if not dirty or timestamp when it became dirty
@@ -223,6 +225,9 @@ class WikiPage(DocPage):
         """
         return self.getWikiWord()
 
+    def getWikiDocument(self):
+        return self.wikiDocument
+
     def getWikiData(self):
         return self.wikiDocument.getWikiData()
 
@@ -236,6 +241,12 @@ class WikiPage(DocPage):
             self.modified, self.created = ti, ti
         
         return self.modified, self.created
+        
+    def getSuggNewPageTitle(self):
+        return self.suggNewPageTitle
+        
+    def setSuggNewPageTitle(self, suggNewPageTitle):
+        self.suggNewPageTitle = suggNewPageTitle
 
     def getParentRelationships(self):
         if self.parentRelations is None:
@@ -318,12 +329,12 @@ class WikiPage(DocPage):
         return self
         
 
-    def getWikiPageTitle(wikiWord):   # static
-        title = re.sub(ur'([A-Z\xc0-\xde]+)([A-Z\xc0-\xde][a-z\xdf-\xff])', r'\1 \2', wikiWord)
-        title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2', title)
-        return title
-        
-    getWikiPageTitle = staticmethod(getWikiPageTitle)
+#     def getWikiPageTitle(wikiWord):   # static
+#         title = re.sub(ur'([A-Z\xc0-\xde]+)([A-Z\xc0-\xde][a-z\xdf-\xff])', r'\1 \2', wikiWord)
+#         title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2', title)
+#         return title
+#         
+#     getWikiPageTitle = staticmethod(getWikiPageTitle)
     
     
     def getLivePageAst(self):
@@ -352,7 +363,6 @@ class WikiPage(DocPage):
         pageAst = self.getLivePageAst()
         return [t.grpdict["anchorValue"]
                 for t in pageAst.findTypeFlat(WikiFormatting.FormatTypes.Anchor)]
-        
 
 
     def isDefined(self):
@@ -428,7 +438,12 @@ class WikiPage(DocPage):
                     pass
 
             if content is None:
-                title = self.getWikiPageTitle(self.getWikiWord())
+                if self.suggNewPageTitle is None:
+                    title = self.getWikiDocument().getWikiPageTitle(
+                            self.getWikiWord())
+                else:
+                    title = self.suggNewPageTitle
+
                 content = u"%s %s\n\n" % \
                         (self.wikiDocument.getFormatting().getPageTitlePrefix(),
                         title)
@@ -770,32 +785,48 @@ class WikiPage(DocPage):
 
 
         # TODO Remove aliases?
-    def _flatTreeHelper(self, page, deepness, excludeSet, result):
+    def _flatTreeHelper(self, page, deepness, excludeSet, result, unalias):
         """
         Recursive part of getFlatTree
         """
-        children = page.getChildRelationshipsTreeOrder(existingonly=True,
-                excludeSet=excludeSet)
-                
-        subExcludeSet = excludeSet.copy()
-        # subExcludeSet.add(page.getWikiWord())
-        subExcludeSet.union_update(children)
+#         print "_flatTreeHelper1", repr((page.getWikiWord(), deepness, len(excludeSet)))
+        excludeSet.add(page.getNonAliasPage().getWikiWord())
+        children = page.getChildRelationshipsTreeOrder(existingonly=True)
+
+#         subExcludeSet = excludeSet.copy()
+#         subExcludeSet.union_update(children)
         for c in children:
             subpage = self.wikiDocument.getWikiPage(c)
-            result.append((c, deepness + 1))
-            self._flatTreeHelper(subpage, deepness + 1, subExcludeSet, result)
+            nonAliasWord = subpage.getNonAliasPage().getWikiWord()
+            if nonAliasWord in excludeSet:
+                continue
+            if unalias:
+                result.append((nonAliasWord, deepness + 1))
+            else:
+                result.append((c, deepness + 1))
+            self._flatTreeHelper(subpage, deepness + 1, excludeSet, result,
+                    unalias)
 
 
-    def getFlatTree(self):
+    def getFlatTree(self, unalias=False):
         """
         Returns a sequence of tuples (word, deepness) where the current
         word is the first one with deepness 0.
+        The words may contain aliases, but no word appears twice neither
+        will both a word and its alias appear in the list.
+        unalias -- replace all aliases by their real word
         TODO EXPLAIN FUNCTION !!!
         """
-        result = [(self.getWikiWord(), 0)]
-        excludeSet = sets.Set((self.getWikiWord(),))
+        if unalias:
+            result = [(self.getNonAliasPage().getWikiWord(), 0)]
+        else:
+            result = [(self.getWikiWord(), 0)]
 
-        self._flatTreeHelper(self, 0, excludeSet, result)
+        excludeSet = sets.Set()   # sets.Set((self.getWikiWord(),))
+
+        self._flatTreeHelper(self, 0, excludeSet, result, unalias)
+
+#         print "getFlatTree", repr(result)
 
         return result
 

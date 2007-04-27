@@ -1,6 +1,6 @@
 #!/bin/python
 
-import sys, os, traceback, os.path, glob
+import sys, os, traceback, os.path, glob, shutil
 os.stat_float_times(True)
 
 VERSION_STRING = "wikidPad 1.9beta4"
@@ -51,16 +51,17 @@ if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
         
     try:
         globalConfigSubDir = os.path.join(globalConfigDir, ".WikidPadGlobals")
-        subfiles = glob.glob(os.path.join(globalConfigSubDir, "*"))
-        for f in subfiles:
-            try:
-                os.remove(f)
-            except:
-                pass
-        try:
-            os.rmdir(globalConfigSubDir)
-        except:
-            pass
+        shutil.rmtree(globalConfigSubDir, True)
+#         subfiles = glob.glob(os.path.join(globalConfigSubDir, "*"))
+#         for f in subfiles:
+#             try:
+#                 os.remove(f)
+#             except:
+#                 pass
+#         try:
+#             os.rmdir(globalConfigSubDir)
+#         except:
+#             pass
 
         try:
             os.remove(os.path.join(globalConfigDir, "WikidPad.config"))

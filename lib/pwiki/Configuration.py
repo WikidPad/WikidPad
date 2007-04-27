@@ -464,6 +464,7 @@ GLOBALDEFAULTS = {
     ("main", "indentation_guides"): "True",
     ("main", "auto_bullets"): "True",  # Show bullet/number after newline if current line has bullet
     ("main", "auto_indent"): "True",
+    ("main", "editor_tabsToSpaces"): "True",  # Write spaces when hitting TAB key
     ("main", "show_lineNumbers"): "False", 
     ("main", "editor_useFolding"): "False", 
     ("main", "mainTree_position"): "0",  # Mode where to place the main tree,
@@ -608,6 +609,11 @@ WIKIDEFAULTS = {
             # Same modification date is enough to claim files identical (no content compare)
 
     ("main", "wikiPageTitlePrefix"): "++",   # Prefix for main title of new pages
+    ("main", "wikiPageTitle_creationMode"): "1",   # How to create title from name of a new wiki word:
+            # 0: Use wiki word as title as it is ("NewWikiWord" -> "NewWikiWord")
+            # 1: Add spaces before uppercase letter ("NewWikiWord" -> "New Wiki Word")
+    ("main", "wikiPageTitle_fromLinkTitle"): "True",   # TODO !!!!!!!!!!
+
 
     ("main", "hotKey_showHide_byWiki"): ""   # System-wide hotkey to show/hide program. It is described
             # in the usual shortcut syntax e.g. "Ctrl-Alt-A".

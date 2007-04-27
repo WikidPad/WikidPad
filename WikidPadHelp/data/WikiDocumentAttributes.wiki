@@ -134,10 +134,10 @@ Controls language of a page or the wiki (with "global." prepended) for [SpellChe
 Specify the color of a link in preview/HTML export with a numeric HTML color (e.g. "#000000" for black).
 
 *html.alinkcolor*
-Color of a link while hovering over it with the mouse or while mouse is pressed (depends on browser). Doesn't work for preview.
+Color of a link while hovering over it with the mouse or while mouse is pressed (depends on browser). Doesn't work for internal preview.
 
 *html.vlinkcolor*
-Color of an already visited link. Doesn't work for preview.
+Color of an already visited link. Doesn't work for internal preview.
 
 *html.textcolor*
 Color of normal text.
@@ -146,8 +146,30 @@ Color of normal text.
 Color of background.
 
 *html.bgimage*
-Link (URL) to a background image. Doesn't work for preview.
+Link (URL) to a background image. Doesn't work for internal preview.
 
+
+*auto_link*
+Allow recognition of non-camelcase wiki words in normal text (without brackets). Supported values:
+
+    * off: Switch off recognition
+    * relax: Recognition is case-insensitive and maps arbitrary
+      non alpha-numeric characters in text to white spaces in the
+      wiki word.
+
+When active, e.g. text "multipage text, format" is recognized as wikiword [Multipage text format].
+
+You can also use "global.auto_link" to set the option for the whole wiki.
+
+
+*view_pane*
+Controls which pane should be shown when a page is opened:
+
+    * off: Don't change pane
+    * editor: Show editor pane
+    * preview: Show preview pane
+
+You can also use "global.view_pane".
 
 
 +++ Error checking
