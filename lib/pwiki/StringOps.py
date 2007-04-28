@@ -21,7 +21,7 @@ from Utilities import DUMBTHREADHOLDER
 
 import srePersistent as _re
 
-LINEEND_SPLIT_RE = _re.compile(r"\r\n?|\n")
+LINEEND_SPLIT_RE = _re.compile(r"\r\n?|\n", _re.UNICODE)
 
 
 from Configuration import isUnicode, isOSX, isLinux, isWindows, isWin9x
@@ -312,6 +312,25 @@ def escapeWithRe(text):
     return text.replace(u"\\", u"\\\\").replace("\n", "\\n").\
             replace("\r", "\\r")
 
+
+ALPHANUM_RE = _re.compile(u"\w", _re.UNICODE)
+
+def re_escape_uni(pattern):
+    """
+    Escape all non-alphanumeric characters in pattern.
+    Fixed version of re.escape for unicode characters
+    """
+    s = list(pattern)
+    for i in range(len(pattern)):
+        c = pattern[i]
+        if not ALPHANUM_RE.match(c):
+            if c == "\000":
+                s[i] = "\\000"
+            else:
+                s[i] = "\\" + c
+    return u"".join(s)
+
+
 def unescapeWithRe(text):
     """
     Unescape things like \n or \f. Throws exception if unescaping fails
@@ -339,7 +358,24 @@ def rgbToHtmlColor(r, g, b):
     Return HTML color '#hhhhhh' format string.
     """
     return "#%02X%02X%02X" % (r, g, b)
-    
+
+
+def b64Cutter(s):
+    """
+    Cut a sequence of base64 characters into chunks of 70 characters
+    and join them with newlines. Pythons base64 decoder can read this.
+    """
+    result = []
+    while len(s) > 70:
+        result.append(s[:70])
+        s = s[70:]
+
+    if len(s) > 0:
+        result.append(s)
+
+    return "\n".join(result)
+
+
     
 def splitpath(path):
     """

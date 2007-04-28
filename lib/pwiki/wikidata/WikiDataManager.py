@@ -9,7 +9,7 @@ from wx import GetApp
 from pwiki.MiscEvent import MiscEventSourceMixin
 
 from pwiki.WikiExceptions import *
-from pwiki.StringOps import mbcsDec
+from pwiki.StringOps import mbcsDec, re_escape_uni
 from pwiki.DocPages import WikiPage, FunctionalPage, AliasWikiPage
 
 import pwiki.PageAst as PageAst
@@ -668,7 +668,7 @@ class WikiDataManager(MiscEventSourceMixin):
             sarOp.wikiWide = True
             sarOp.wildCard = 'regex'
             sarOp.caseSensitive = True
-            sarOp.searchStr = ur"\b" + re.escape(wikiWord) + ur"\b"
+            sarOp.searchStr = ur"\b" + re_escape_uni(wikiWord) + ur"\b"
             
             for resultWord in self.searchWiki(sarOp):
                 wikiPage = self.getWikiPage(resultWord)
@@ -676,7 +676,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 if text is None:
                     continue
 
-                sarOp.replaceStr = re.escape(toWikiWord)
+                sarOp.replaceStr = re_escape_uni(toWikiWord)
                 sarOp.replaceOp = True
                 sarOp.cycleToStart = False
 

@@ -1,7 +1,16 @@
 ﻿++ Change Log
 
 
-Apr. 27, 2007 (1.9beta4)
+Apr. 28, 2007 (1.9beta5)
+
+    * Bug fixed: Preview didn't work with titled wikiwords
+    * Bug fixed: When renaming wikiword with non-ascii characters
+      and modifying links, non-ascii characters were preceded with
+      backslashes
+
+
+
+Apr. 27, 2007 (1.9beta4, repository revision in "mbutscher" branch: 114)
 
     * Clicking on footnotes moves to the last footnote on page
       (footnote anchor). See [Footnotes]

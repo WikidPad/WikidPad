@@ -1137,7 +1137,7 @@ class HtmlXmlExporter:
                         wwNode.buildNodeForWord(word)
 
                         self.outAppend(u'<td valign="top">')
-                        self._processWikiWord(word, wwNode)
+                        self._processWikiWord(word, wwNode, None)
                         self.outAppend(u'</td>')
                         
                         colpos += 1
@@ -1167,7 +1167,7 @@ class HtmlXmlExporter:
                         wwNode.buildNodeForWord(word)
 
                         self.outAppend(u'<td valign="top">')
-                        self._processWikiWord(word, wwNode)
+                        self._processWikiWord(word, wwNode, None)
                         self.outAppend(u'</td>')
                         
 #                     content = u"\n".join([u"[" + word + u"]" for word in wordList])
@@ -1190,7 +1190,7 @@ class HtmlXmlExporter:
             self.outAppend(htmlContent)
             
             
-    def _processWikiWord(self, tokenText, astNode):
+    def _processWikiWord(self, tokenText, astNode, fullContent):
         word = astNode.nakedWord
         link = self.links.get(word)
         
@@ -1222,13 +1222,13 @@ class HtmlXmlExporter:
                 self.outAppend(u'<span class="wiki-link"><a href="%s">' %
                         escapeHtml(link))
                 if astNode.titleTokens is not None:
-                    self.processTokens(content, astNode.titleTokens)
+                    self.processTokens(fullContent, astNode.titleTokens)
                 else:
                     self.outAppend(escapeHtml(word))                        
                 self.outAppend(u'</a></span>')
         else:
             if astNode.titleTokens is not None:
-                self.processTokens(content, astNode.titleTokens)
+                self.processTokens(fullContent, astNode.titleTokens)
             else:
                 self.outAppend(escapeHtml(tokenText))                        
         
@@ -1644,7 +1644,7 @@ class HtmlXmlExporter:
                         self.outAppend(u'</a></span>')
 
             elif styleno == WikiFormatting.FormatTypes.WikiWord:
-                self._processWikiWord(tok.text, tok.node)
+                self._processWikiWord(tok.text, tok.node, content)
 #                 word = tok.node.nakedWord
 #                 link = self.links.get(word)
 #                 
@@ -1986,7 +1986,7 @@ class MultiPageTextExporter:
         self.wordList
         """
         searchOp = SearchReplaceOperation()
-        searchOp.searchStr = u"^" + re.escape(sep) + u"$"
+        searchOp.searchStr = u"^" + re_escape_uni(sep) + u"$"
         searchOp.booleanOp = False
         searchOp.caseSensitive = True
         searchOp.wholeWord = False

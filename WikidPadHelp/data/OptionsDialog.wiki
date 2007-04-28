@@ -210,12 +210,19 @@ Interpret [Footnotes] (e.g. "[42]") as wiki words.
 *First word at startup*
 Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last words when the wiki was closed is shown on opening.
 
-*New page title prefix*
-Control the heading level of the initial main title of new pages and fill between one and four '+' in this field. Default is "++".
-
 *Default export dir.*
 Set the default export directory into which exports should go.
 
+*Title prefix*
+Control the heading level of the initial main title of new pages and fill between one and four '+' in this field. Default is "++".
+
+*Wikiword to title*
+How should the main title of new pages be generated from the wikiword:
+    * As is: Use wikiword as title
+    * Add spaces: Add spaces to wikiword in front of each uppercase letter ("NewWikiWord" -> "New Wiki Word")
+
+*Use link title if present*
+If you came to a not yet created page through a titled link (e.g. [WikiWord| This is the title]) and this option is checked, the link title will be used as title of the page.
 
 *Modif. date must match*
 *Filename must match*
