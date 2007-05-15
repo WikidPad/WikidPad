@@ -188,7 +188,7 @@ class WikiPage(DocPage):
 #         self.wikiData = self.wikiDocument.getWikiData()
 
         self.wikiWord = wikiWord
-        self.parentRelations = None
+#         self.parentRelations = None
         self.todos = None
         self.props = None
         self.modified, self.created = None, None
@@ -215,11 +215,12 @@ class WikiPage(DocPage):
         return self.modified, self.created
 
     def getParentRelationships(self):
-        if self.parentRelations is None:
-            self.parentRelations = \
-                    self.getWikiData().getParentRelationships(self.wikiWord)
-        
-        return self.parentRelations
+        return self.getWikiData().getParentRelationships(self.wikiWord)
+#         if self.parentRelations is None:
+#             self.parentRelations = \
+#                     self.getWikiData().getParentRelationships(self.wikiWord)
+#         
+#         return self.parentRelations
 
         
     def getChildRelationships(self, existingonly=False, selfreference=True,

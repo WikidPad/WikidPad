@@ -7,7 +7,7 @@ from wxPython.wx import wxGetApp
 from pwiki.MiscEvent import MiscEventSourceMixin
 
 from pwiki.WikiExceptions import *
-from pwiki.StringOps import mbcsDec
+from pwiki.StringOps import mbcsDec, re_sub_escape
 from pwiki.DocPages import WikiPage, FunctionalPage, AliasWikiPage
 
 # from pwiki.Configuration import createWikiConfiguration
@@ -664,7 +664,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 if text is None:
                     continue
 
-                sarOp.replaceStr = re.escape(toWikiWord)
+                sarOp.replaceStr = re_sub_escape(toWikiWord)
                 sarOp.replaceOp = True
                 sarOp.cycleToStart = False
 

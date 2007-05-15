@@ -2140,6 +2140,8 @@ These are your default global settings.
         # this could be a wiki overwrite from newWiki. We don't want to overwrite
         # the new config with the old one.
 
+        wikiCombinedFilename = abspath(wikiCombinedFilename)
+
         # make sure the config exists
         cfgPath, splittedWikiWord = WikiDataManager.splitConfigPathAndWord(
                 wikiCombinedFilename)

@@ -319,6 +319,13 @@ def unescapeWithRe(text):
     return _re.sub(u"", text, u"", 1)
 
 
+def re_sub_escape(pattern):
+    """
+    Escape the replacement pattern for a re.sub function
+    """
+    return pattern.replace(u"\\", u"\\\\")
+
+
 def htmlColorToRgbTuple(html):
     """
     Calculate RGB integer tuple from html '#hhhhhh' format string.
