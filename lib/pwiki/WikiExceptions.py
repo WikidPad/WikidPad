@@ -4,6 +4,8 @@ class WikiWordNotFoundException(WikiDataException): pass
 class WikiFileNotFoundException(WikiDataException): pass
 class WikiDBExistsException(WikiDataException): pass
 
+
+
 class DbAccessError(Exception):
     """
     Base classes for read or write errors when acessing database
@@ -43,6 +45,9 @@ class WrongDbHandlerException(Exception): pass
 class DbHandlerNotAvailableException(Exception): pass
 class UnknownDbHandlerException(Exception): pass
 
+class MissingConfigurationFileException(Exception): pass
 class BadConfigurationFileException(Exception): pass
 
 class NotCurrentThreadException(Exception): pass
+
+class BadFuncPageTagException(Exception): pass

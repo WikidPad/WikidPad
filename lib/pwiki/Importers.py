@@ -1,14 +1,15 @@
 # from Enum import Enumeration
-import os, string, re, traceback
+import sys, os, string, re, traceback, time
 from os.path import join, exists, splitext
-import sys
+from calendar import timegm
 import urllib_red as urllib
 
 # import wx
 
 from StringOps import *
 
-from WikiExceptions import WikiWordNotFoundException, ImportException
+from WikiExceptions import WikiWordNotFoundException, ImportException, \
+        BadFuncPageTagException
 
 
 
@@ -71,6 +72,38 @@ class MultiPageTextImporter:
         return ()
 
 
+    def collectContent(self):
+        """
+        Collect lines from current position of importFile up to separator
+        or file end collect all lines and return them as list of lines.
+        """
+        content = []                    
+        while True:
+            # Read lines of wikiword
+            line = self.importFile.readline()
+            if line == u"":
+                # The last page in mpt file without separator
+                # ends as the real wiki page
+#                 content = u"".join(content)
+                break
+            
+            if line == self.separator:
+                if len(content) > 0:
+                    # Iff last line of mpt page is empty, the original
+                    # page ended with a newline, so remove last
+                    # character (=newline)
+
+                    content[-1] = content[-1][:-1]
+#                     content = u"".join(content)
+                break
+
+            content.append(line)
+            
+        return u"".join(content)
+
+
+
+
     def doImport(self, wikiDataManager, importType, importSrc,
             compatFilenames, addOpt):
         """
@@ -88,8 +121,13 @@ class MultiPageTextImporter:
         except IOError:
             raise ImportException("Opening import file failed")
             
-        wikiData = wikiDataManager.getWikiData()
-            
+        self.wikiDataManager = wikiDataManager
+#         wikiData = self.wikiDataManager.getWikiData()
+
+        
+        # TODO Do not stop on each import error, instead create error list and
+        #   continue
+
         try:
             try:
                 # Wrap input file to convert format
@@ -112,7 +150,7 @@ class MultiPageTextImporter:
                 # of the file format
                 self.formatVer = int(line[22:-1])
                 
-                if self.formatVer > 0:
+                if self.formatVer > 1:
                     raise ImportException(
                             "File format number %i is not supported" %
                             self.formatVer)
@@ -124,46 +162,24 @@ class MultiPageTextImporter:
                     
                 self.separator = line[11:]
                 
-                formatting = self.mainControl.getFormatting()
-                
-                while True:
-                    # Read next wikiword
-                    line = self.importFile.readline()
-                    if line == u"":
-                        break
-
-                    wikiWord = line[:-1]
-                    if not formatting.isNakedWikiWord(wikiWord):
-                        raise ImportException("Bad wiki word: %s" % wikiWord)
-
-                    content = []                    
+                if self.formatVer == 0:
+                    self.doImportVer0()
+                elif self.formatVer == 1:
                     while True:
-                        # Read lines of wikiword
-                        line = self.importFile.readline()
-                        if line == u"":
-                            # The last page in mpt file without separator
-                            # ends as the real wiki page
-                            content = u"".join(content)
+                        tag = self.importFile.readline()
+                        if tag == u"":
+                            # End of file
                             break
-                        
-                        if line == self.separator:
-                            if len(content) > 0:
-                                # Iff last line of mpt page is empty, the original
-                                # page ended with a newline, so remove last
-                                # character (=newline)
-
-                                content[-1] = content[-1][:-1]
-                                content = u"".join(content)
-                                break
-                                
-                        content.append(line)
-                    
-                    page = wikiDataManager.getWikiPageNoError(wikiWord)
-
-                    page.replaceLiveText(content)
-#                     page.save(content)
-#                     page.update(content, False)
-
+                        tag = tag[:-1]
+                        if tag.startswith(u"funcpage/"):
+                            self.importItemFuncPage(tag[9:])
+                        elif tag.startswith(u"savedsearch/"):
+                            self.importItemSavedSearch(tag[12:])
+                        elif tag.startswith(u"wikipage/"):
+                            self.importItemWikiPage(tag[9:])
+                        else:
+                            # Unknown tag -> Ignore until separator
+                            self.collectContent()
             except ImportException:
                 raise
             except Exception, e:
@@ -173,6 +189,100 @@ class MultiPageTextImporter:
         finally:
             self.rawImportFile.close()
 
+
+    def doImportVer0(self):
+        """
+        Import wikiwords if format version is 0.
+        """
+        formatting = self.mainControl.getFormatting()
+        
+        while True:
+            # Read next wikiword
+            line = self.importFile.readline()
+            if line == u"":
+                break
+
+            wikiWord = line[:-1]
+            if not formatting.isNakedWikiWord(wikiWord):
+                raise ImportException("Bad wiki word: %s" % wikiWord)
+
+            content = self.collectContent()
+            page = self.wikiDataManager.getWikiPageNoError(wikiWord)
+
+            page.replaceLiveText(content)
+
+
+    def importItemFuncPage(self, subtag):
+        # The subtag is functional page tag
+        try:
+            # subtag is unicode but func tags are bytestrings
+            subtag = str(subtag)
+        except UnicodeEncodeError:
+            return
+
+        content = self.collectContent()
+        try:
+            page = self.wikiDataManager.getFuncPage(subtag)
+            page.replaceLiveText(content)
+        except BadFuncPageTagException:
+            # This function tag is bad or unknown -> ignore
+            return  # TODO Report error
+        
+    
+    def importItemSavedSearch(self, subtag):
+        # The subtag is the title of the search
+        
+        # Content is base64 encoded
+        b64Content = self.collectContent()
+        
+        try:
+            datablock = base64BlockDecode(b64Content)
+            self.wikiDataManager.getWikiData().saveSearch(subtag, datablock)
+        except TypeError:
+            # base64 decoding failed
+            return  # TODO Report error
+
+
+    def importItemWikiPage(self, subtag):
+        timeStampLine = self.importFile.readline()[:-1]
+        timeStrings = timeStampLine.split(u"  ")
+        if len(timeStrings) < 3:
+            return  # TODO Report error
+        
+        timeStrings = timeStrings[:3]
+
+        try:
+            timeStrings = [str(ts) for ts in timeStrings]
+        except UnicodeEncodeError:
+            return  # TODO Report error
+            
+        try:
+            timeStamps = [timegm(time.strptime(ts, "%Y-%m-%d/%H:%M:%S"))
+                    for ts in timeStrings]
+#             timeStamps = [time.strptime(ts, "%Y-%m-%d/%H:%M:%S")
+#                     for ts in timeStrings]
+#             print "importItemWikiPage8", repr(timeStamps)
+#             timeStamps = [time.mktime(ts)
+#                     for ts in timeStamps]
+            
+        except (ValueError, OverflowError):
+            traceback.print_exc()
+            return  # TODO Report error
+            
+        timeStrings = [unicode(time.strftime(
+        "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
+        for ts in timeStamps]
+
+        
+        content = self.collectContent()
+        page = self.wikiDataManager.getWikiPageNoError(subtag)
+
+        page.replaceLiveText(content)
+        if page.getTxtEditor() is not None:
+            page.save(content)
+#                 page.update(content)   # ?
+
+        page.setTimestamps(timeStamps)
 
 
 def describeImporters(mainControl):

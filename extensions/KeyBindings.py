@@ -49,6 +49,7 @@ InsertDate="Ctrl-Alt-D"
 MakeWikiWord="Ctrl-J"
 
 ShowFolding=""
+ToggleCurrentFolding=""
 UnfoldAll=""
 FoldAll=""
 

@@ -21,6 +21,7 @@ srePersistent.loadCodeCache()
 
 from wxHelper import IconCache
 from MiscEvent import KeyFunctionSink
+from WikiExceptions import *
 from PersonalWikiFrame import PersonalWikiFrame
 from StringOps import mbcsDec, createRandomString
 from CmdLineAction import CmdLineAction
@@ -188,7 +189,7 @@ class App(wx.App):
         if os.path.exists(globalConfigLoc):
             try:
                 self.globalConfig.loadConfig(globalConfigLoc)
-            except Configuration.Error:
+            except Configuration.Error, MissingConfigurationFileException:
                 self.createDefaultGlobalConfig(globalConfigLoc)
         else:
             self.createDefaultGlobalConfig(globalConfigLoc)

@@ -399,9 +399,12 @@ class SearchResultListBox(wx.HtmlListBox):
             presenter.getSubControl("textedit").SetSelectionByCharPos(
                     info.occPos[0], info.occPos[1])
 
-        # Works in fast search popup only if called twice
-        self.pWiki.getActiveEditor().SetFocus()
-        self.pWiki.getActiveEditor().SetFocus()
+        if configCode != 1:
+            # If not new tab opened in background -> focus editor
+
+            # Works in fast search popup only if called twice
+            self.pWiki.getActiveEditor().SetFocus()
+            self.pWiki.getActiveEditor().SetFocus()
 
         
     def OnKeyDown(self, evt):
@@ -476,10 +479,11 @@ class SearchResultListBox(wx.HtmlListBox):
             if info.occPos[0] != -1:
                 presenter.getSubControl("textedit").SetSelectionByCharPos(
                         info.occPos[0], info.occPos[1])
-    
-            # Works in fast search popup only if called twice
-            self.pWiki.getActiveEditor().SetFocus()
-            self.pWiki.getActiveEditor().SetFocus()
+            
+            # Don't change focus when activating new tab in background
+#             # Works in fast search popup only if called twice
+#             self.pWiki.getActiveEditor().SetFocus()
+#             self.pWiki.getActiveEditor().SetFocus()
 
 
 
@@ -916,8 +920,8 @@ class SearchWikiDialog(wx.Dialog):   # TODO
 
     def OnCopyPageNamesToClipboard(self, evt):
         formatting = self.pWiki.getFormatting()
-        wordsText = u"".join([u"%s%s%s\n" % (formatting.wikiWordStart, w,
-                formatting.wikiWordEnd) for w in self.foundPages])
+        wordsText = u"".join([u"%s%s%s\n" % (formatting.BracketStart, w,
+                formatting.BracketEnd) for w in self.foundPages])
 
         copyTextToClipboard(wordsText)
 
@@ -1452,16 +1456,16 @@ class WikiPageListConstructionDialog(wx.Dialog, MiscEventSourceMixin):   # TODO
 
     def OnPageListCopyToClipboard(self, evt):
         formatting = self.pWiki.getFormatting()
-        wordsText = u"".join([u"%s%s%s\n" % (formatting.wikiWordStart, w,
-                formatting.wikiWordEnd) for w in self.pageListData])
+        wordsText = u"".join([u"%s%s%s\n" % (formatting.BracketStart, w,
+                formatting.BracketEnd) for w in self.pageListData])
 
         copyTextToClipboard(wordsText)
 
 
     def OnResultCopyToClipboard(self, evt):
         formatting = self.pWiki.getFormatting()
-        wordsText = u"".join([u"%s%s%s\n" % (formatting.wikiWordStart, w,
-                formatting.wikiWordEnd) for w in self.resultListData])
+        wordsText = u"".join([u"%s%s%s\n" % (formatting.BracketStart, w,
+                formatting.BracketEnd) for w in self.resultListData])
 
         copyTextToClipboard(wordsText)
 
@@ -1501,7 +1505,7 @@ class FastSearchPopup(wx.Frame):
 
         self.mainControl = mainControl
         self.searchText = None
-        
+
         self.resultBox = SearchResultListBox(self, self.mainControl, -1)
         
         sizer = wx.BoxSizer(wx.VERTICAL)

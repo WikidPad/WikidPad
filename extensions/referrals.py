@@ -79,7 +79,7 @@ def referrals(wiki, evt):
 
     formatting = wiki.getFormatting()
     def bracketWord(word):
-        return formatting.wikiWordStart + word + formatting.wikiWordEnd
+        return formatting.BracketStart + word + formatting.BracketEnd
 
     wiki.getActiveEditor().AddText(u"\n------------------------\n")
 

@@ -297,8 +297,8 @@ class WikiData:
 
     def getTimestamps(self, word):
         """
-        Returns a tuple with modification and creation date of
-        a word or (None, None) if word is not in the database
+        Returns a tuple with modification, creation and visit date of
+        a word or (None, None, None) if word is not in the database
         """
         try:
             dates = self.connWrap.execSqlQuery(
@@ -306,12 +306,36 @@ class WikiData:
                     (word,))
     
             if len(dates) > 0:
-                return (float(dates[0][0]), float(dates[0][1]))
+                return (float(dates[0][0]), float(dates[0][1]), 0.0)
             else:
-                return (None, None)  # ?
+                return (None, None, None)  # ?
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
+
+
+    def setTimestamps(self, word, timestamps):
+        """
+        Set timestamps for an existing wiki page.
+        """
+        moddate, creadate = timestamps[:2]
+
+        try:
+            data = self.connWrap.execSqlQuery("select word from wikiwords "
+                    "where word = ?", (word,))
+        except (IOError, OSError, ValueError), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+        try:
+            if len(data) < 1:
+                raise WikiFileNotFoundException
+            else:
+                self.connWrap.execSql("update wikiwords set modified = ?, "
+                        "created = ? where word = ?", (moddate, creadate, word))
+        except (IOError, OSError, ValueError), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
 
 
 
@@ -763,21 +787,36 @@ class WikiData:
         "check if a word is a valid wikiword (page name or alias)"
         return self._getCachedContentNames().has_key(word)
 
-    def getWikiWordsStartingWith(self, thisStr, includeAliases=False):
+    def getWikiWordsStartingWith(self, thisStr, includeAliases=False,
+            caseNormed=False):
         "get the list of words starting with thisStr. used for autocompletion."
 
         # Escape some characters:   # TODO more elegant
         thisStr = thisStr.replace("[", "[[").replace("]", "[]]").replace("[[", "[[]")
         try:
-            if includeAliases:
-                return self.connWrap.execSqlQuerySingleColumn(
-                        "select word from wikiwords where word glob (? || '*') union "
-                        "select value from wikiwordprops where key = 'alias' and "
-                        "value glob (? || '*')", (thisStr, thisStr))
+            if caseNormed:
+                thisStr = thisStr.lower()   # TODO More general normcase function
+                if includeAliases:
+                    return self.connWrap.execSqlQuerySingleColumn(
+                            "select word from wikiwords where wordnormcase glob (? || '*') union "
+                            "select value from wikiwordprops where key = 'alias' and "
+                            "utf8Normcase(value) glob (? || '*')", (thisStr, thisStr))
+                else:
+                    return self.connWrap.execSqlQuerySingleColumn("select word "
+                            "from wikiwords where wordnormcase glob (? || '*')",
+                            (thisStr,))
             else:
-                return self.connWrap.execSqlQuerySingleColumn("select word "
-                        "from wikiwords where word glob (? || '*')",
-                        (thisStr,))
+                if includeAliases:
+                    return self.connWrap.execSqlQuerySingleColumn(
+                            "select word from wikiwords where wordnormcase glob (? || '*') union "
+                            "select value from wikiwordprops where key = 'alias' and "
+                            "value glob (? || '*')", (thisStr, thisStr))
+                else:
+                    return self.connWrap.execSqlQuerySingleColumn("select word "
+                            "from wikiwords where word glob (? || '*')",
+                            (thisStr,))
+
+                
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -788,13 +827,13 @@ class WikiData:
         get the list of words with thisStr in them,
         if possible first these which start with thisStr.
         """
-        thisStr = thisStr.lower()
+        thisStr = thisStr.lower()   # TODO More general normcase function
 
         try:
             result1 = self.connWrap.execSqlQuerySingleColumn(
                     "select word from wikiwords where wordnormcase like (? || '%')",
                     (thisStr,))
-    
+
             if includeAliases:
                 result1 += self.connWrap.execSqlQuerySingleColumn(
                         "select value from wikiwordprops where key = 'alias' and "

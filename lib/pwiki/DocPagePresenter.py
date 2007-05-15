@@ -134,7 +134,13 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 
     def getWikiDocument(self):
         return self.getMainControl().getWikiDocument()
-        
+
+    def getActiveEditor(self):
+        """
+        For compatibility with older scripts.
+        """
+        return self.getSubControl("textedit")
+
     def getFormatting(self):
         return self.getWikiDocument().getFormatting()
     
@@ -318,6 +324,7 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
         wx.Panel.__init__(self, parent, id)
         BasicDocPagePresenter.__init__(self, mainControl)
         
+        
     def switchSubControl(self, scName, gainFocus=False):
         """
         Make the chosen subcontrol visible, all other invisible
@@ -346,7 +353,6 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
 
     def SetFocus(self):
         try:
-#             print "SetFocus", repr(self.subControls[self.lastVisibleCtrlName])
             self.subControls[self.lastVisibleCtrlName].SetFocus()
         except KeyError:
             wx.Panel.SetFocus(self)

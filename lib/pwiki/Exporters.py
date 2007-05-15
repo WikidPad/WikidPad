@@ -1,17 +1,17 @@
 # from Enum import Enumeration
-import sys, os, string, re, traceback, sets
+import sys, os, string, re, traceback, sets, locale, time
 from os.path import join, exists, splitext
 from cStringIO import StringIO
 import shutil
 ## from xml.sax.saxutils import escape
-from time import localtime
+
 import urllib_red as urllib
 
 import wx
 # from wxPython.wx import *
 # import wxPython.xrc as xrc
 
-from wxHelper import XrcControls
+from wxHelper import XrcControls, GUI_ID
 
 
 from WikiExceptions import WikiWordNotFoundException, ExportException
@@ -25,6 +25,7 @@ from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
 from Configuration import isUnicode
 
 import WikiFormatting
+import DocPages
 import PageAst
 
 
@@ -210,7 +211,7 @@ class HtmlXmlExporter:
         """
         Run export operation.
         
-        wikiData -- WikiData object
+        wikiDataManager -- WikiDataManager object
         wordList -- Sequence of wiki words to export
         exportType -- string tag to identify how to export
         exportDest -- Path to destination directory or file to export to
@@ -457,9 +458,9 @@ class HtmlXmlExporter:
                 continue
                 
             # Why localtime?
-            modified, created = wikiPage.getTimestamps()
-            created = localtime(float(created))
-            modified = localtime(float(modified))
+            modified, created = wikiPage.getTimestamps()[:2]
+            created = time.localtime(float(created))
+            modified = time.localtime(float(modified))
             
             fp.write(u'<wikiword name="%s" created="%s" modified="%s">' %
                     (word, created, modified))
@@ -979,7 +980,19 @@ class HtmlXmlExporter:
         elif key == u"toc" and value == u"":
             pageAst = self.getBasePageAst()
             headtokens = [tok for tok in pageAst.getTokens() if tok.ttype in
-                    (WikiFormatting.FormatTypes.Heading4, 
+                    (
+                    WikiFormatting.FormatTypes.Heading15,
+                    WikiFormatting.FormatTypes.Heading14,
+                    WikiFormatting.FormatTypes.Heading13,
+                    WikiFormatting.FormatTypes.Heading12,
+                    WikiFormatting.FormatTypes.Heading11,
+                    WikiFormatting.FormatTypes.Heading10,
+                    WikiFormatting.FormatTypes.Heading9,
+                    WikiFormatting.FormatTypes.Heading8,
+                    WikiFormatting.FormatTypes.Heading7,
+                    WikiFormatting.FormatTypes.Heading6,
+                    WikiFormatting.FormatTypes.Heading5,
+                    WikiFormatting.FormatTypes.Heading4, 
                     WikiFormatting.FormatTypes.Heading3,
                     WikiFormatting.FormatTypes.Heading2,
                     WikiFormatting.FormatTypes.Heading1)]
@@ -994,14 +1007,15 @@ class HtmlXmlExporter:
 
             for tok in headtokens:
                 styleno = tok.ttype
-                if styleno == WikiFormatting.FormatTypes.Heading4:
-                    headLevel = 4
-                elif styleno == WikiFormatting.FormatTypes.Heading3:
-                    headLevel = 3
-                elif styleno == WikiFormatting.FormatTypes.Heading2:
-                    headLevel = 2
-                elif styleno == WikiFormatting.FormatTypes.Heading1:
-                    headLevel = 1
+                headLevel = WikiFormatting.getHeadingLevel(styleno)
+#                 if styleno == WikiFormatting.FormatTypes.Heading4:
+#                     headLevel = 4
+#                 elif styleno == WikiFormatting.FormatTypes.Heading3:
+#                     headLevel = 3
+#                 elif styleno == WikiFormatting.FormatTypes.Heading2:
+#                     headLevel = 2
+#                 elif styleno == WikiFormatting.FormatTypes.Heading1:
+#                     headLevel = 1
 
                 headContent = tok.grpdict["h%iContent" % headLevel]
                 if self.asIntHtmlPreview:
@@ -1477,8 +1491,10 @@ class HtmlXmlExporter:
                     self.outAppend(u'<a name="%s"></a>' % anchor)
 
                 headContent = tok.grpdict["h%iContent" % headLevel]
-                self.outEatBreaks(u"<h%i>%s</h%i>\n" % (headLevel, escapeHtml(
-                        unescapeNormalText(headContent)), headLevel))
+                # HTML only supports 6 heading levels
+                boundHeadLevel = min(6, headLevel)
+                self.outEatBreaks(u"<h%i>%s</h%i>\n" % (boundHeadLevel, escapeHtml(
+                        unescapeNormalText(headContent)), boundHeadLevel))
 
             elif styleno == WikiFormatting.FormatTypes.HorizLine:
                 self.outEatBreaks(u'<hr size="1" />\n')
@@ -1850,7 +1866,7 @@ class TextExporter:
         """
         Run export operation.
         
-        wikiData -- WikiData object
+        wikiDataManager -- WikiDataManager object
         wordList -- Sequence of wiki words to export
         exportType -- string tag to identify how to export
         exportDest -- Path to destination directory or file to export to
@@ -1911,7 +1927,26 @@ class TextExporter:
             except:
                 traceback.print_exc()
                 continue
-                
+
+
+class MultiPageTextAddOptPanel(wx.Panel):
+    def __init__(self, parent):
+        p = wx.PrePanel()
+        self.PostCreate(p)
+
+        res = wx.xrc.XmlResource.Get()
+        res.LoadOnPanel(self, parent, "ExportSubMultipageText")
+        
+        self.ctrls = XrcControls(self)
+        
+        wx.EVT_CHOICE(self, GUI_ID.chFileVersion, self.OnFileVersionChoice)
+
+
+    def OnFileVersionChoice(self, evt):
+        enabled = evt.GetSelection() > 0
+        
+        self.ctrls.cbWriteWikiFuncPages.Enable(enabled)
+        self.ctrls.cbWriteSavedSearches.Enable(enabled)
 
 
 
@@ -1935,9 +1970,14 @@ class MultiPageTextExporter:
         If panels for additional options must be created, they should use
         guiparent as parent
         """
+        if guiparent:
+            optPanel = MultiPageTextAddOptPanel(guiparent)
+        else:
+            optPanel = None
+
         return (
-                (u"multipage_text", "Multipage text", None),
-                )
+            (u"multipage_text", "Multipage text", optPanel),
+            )
 
 
     def getExportDestinationWildcards(self, exportType):
@@ -1972,12 +2012,26 @@ class MultiPageTextExporter:
         """
         Reads additional options from panel addoptpanel.
         If getAddOptVersion() > -1, the return value must be a sequence
-        of simple string and/or numeric objects. Otherwise, any object
-        can be returned (normally the addoptpanel itself)
+        of simple (unicode) string and/or numeric objects. Otherwise, any object
+        can be returned (normally the addoptpanel itself).
+        
+        The tuple elements mean: (<format version>,)
         """
-        return ()
+        if addoptpanel is None:
+            # Return default set in options
+            fileVersion = 1
+            writeWikiFuncPages = 1
+            writeSavedSearches = 1            
+        else:
+            ctrls = addoptpanel.ctrls
+            fileVersion = ctrls.chFileVersion.GetSelection()
+            writeWikiFuncPages = boolToInt(ctrls.cbWriteWikiFuncPages.GetValue())
+            writeSavedSearches = boolToInt(ctrls.cbWriteSavedSearches.GetValue())
+
+        return (fileVersion, writeWikiFuncPages, writeSavedSearches)
 
 
+    # TODO Check also wiki func pages !!!
     def _checkPossibleSeparator(self, sep):
         """
         Run search operation to test if separator string sep
@@ -1986,7 +2040,7 @@ class MultiPageTextExporter:
         self.wordList
         """
         searchOp = SearchReplaceOperation()
-        searchOp.searchStr = u"^" + re_escape_uni(sep) + u"$"
+        searchOp.searchStr = u"^" + re.escape(sep) + u"$"
         searchOp.booleanOp = False
         searchOp.caseSensitive = True
         searchOp.wholeWord = False
@@ -2004,29 +2058,30 @@ class MultiPageTextExporter:
         
         return len(foundPages) == 0
 
+
         # TODO Make it better somehow
     def _findSeparator(self):
         """
         Find a separator (=something not used as line in a page to export)
         """
-        # Try dashes
-        sep = u"------"
-        
-        while len(sep) < 11:
-            if self._checkPossibleSeparator(sep):
-                return sep
-            sep += u"-"
-
-        # Try dots
-        sep = u"...."
-        while len(sep) < 11:
-            if self._checkPossibleSeparator(sep):
-                return sep
-            sep += u"."
+#         # Try dashes
+#         sep = u"------"
+#         
+#         while len(sep) < 11:
+#             if self._checkPossibleSeparator(sep):
+#                 return sep
+#             sep += u"-"
+# 
+#         # Try dots
+#         sep = u"...."
+#         while len(sep) < 11:
+#             if self._checkPossibleSeparator(sep):
+#                 return sep
+#             sep += u"."
             
-        # Try random strings (5 tries)
-        for i in xrange(5):
-            sep = u"-----%s-----" % createRandomString(20)
+        # Try random strings (15 tries)
+        for i in xrange(15):
+            sep = u"-----%s-----" % createRandomString(25)
             if self._checkPossibleSeparator(sep):
                 return sep
 
@@ -2039,7 +2094,7 @@ class MultiPageTextExporter:
         """
         Run export operation.
         
-        wikiData -- WikiData object
+        wikiDataManager -- WikiDataManager object
         wordList -- Sequence of wiki words to export
         exportType -- string tag to identify how to export
         exportDest -- Path to destination directory or file to export to
@@ -2054,12 +2109,16 @@ class MultiPageTextExporter:
         self.exportFile = None
         self.rawExportFile = None
         
+        self.formatVer = min(addOpt[0], 1)
+        self.writeWikiFuncPages = addOpt[1] and (self.formatVer > 0)
+        self.writeSavedSearches = addOpt[2] and (self.formatVer > 0)
+
         # The hairy thing first: find a separator that doesn't appear
         # as a line in one of the pages to export
         self.separator = self._findSeparator()
         if self.separator is None:
             # _findSeparator gave up
-            raise ExportException("No usable separator found")
+            raise ExportException(u"No usable separator found")
         try:
             try:
                 self.rawExportFile = open(self.exportDest, "w")
@@ -2069,19 +2128,64 @@ class MultiPageTextExporter:
                 self.exportFile = utf8Writer(self.rawExportFile, "replace")
                 
                 # Identifier line with file format
-                self.exportFile.write("Multipage text format 0\n")
+                self.exportFile.write(u"Multipage text format %i\n" %
+                        self.formatVer)
                 # Separator line
-                self.exportFile.write("Separator: %s\n" % self.separator)
-    
+                self.exportFile.write(u"Separator: %s\n" % self.separator)
+
+
+                # Write wiki-bound functional pages
+                if self.writeWikiFuncPages:
+                    # Only wiki related functional pages
+                    wikiFuncTags = [ft for ft in DocPages.getFuncTags()
+                            if ft.startswith("wiki/")]
+                    
+                    for ft in wikiFuncTags:
+                        self.exportFile.write(u"funcpage/%s\n" % ft)
+                        page = self.wikiDataManager.getFuncPage(ft)
+                        self.exportFile.write(page.getLiveText())
+
+                        self.exportFile.write("\n%s\n" % self.separator)
+                        
+
+                # Write saved searches
+                if self.writeSavedSearches:
+                    wikiData = self.wikiDataManager.getWikiData()
+                    searchTitles = wikiData.getSavedSearchTitles()
+
+                    for st in searchTitles:
+                        self.exportFile.write(u"savedsearch/%s\n" % st)
+                        datablock = wikiData.getSearchDatablock(st)
+                        self.exportFile.write(base64BlockEncode(datablock))
+                        
+                        self.exportFile.write("\n%s\n" % self.separator)
+
+                locale.setlocale(locale.LC_ALL, '')
+                # Write actual wiki words
                 sepCount = len(self.wordList) - 1  # Number of separators yet to write
                 for word in self.wordList:
-                    self.exportFile.write("%s\n" % word)
                     page = self.wikiDataManager.getWikiPage(word)
+
+                    if self.formatVer == 0:
+                        self.exportFile.write(u"%s\n" % word)
+                    else:
+                        self.exportFile.write(u"wikipage/%s\n" % word)
+                        # modDate, creaDate, visitDate
+                        timeStamps = page.getTimestamps()[:3]
+                        timeStrings = [unicode(time.strftime(
+                                "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
+                                for ts in timeStamps]
+                        
+                        self.exportFile.write(u"%s  %s  %s\n" % tuple(timeStrings))
+#                         self.exportFile.write(unicode("%.10f %.10f %.10f\n" %
+#                                 (modDate, creaDate, visitDate)))
+
                     self.exportFile.write(page.getLiveText())
     
                     if sepCount > 0:
                         self.exportFile.write("\n%s\n" % self.separator)
                         sepCount -= 1
+
             except Exception, e:
                 traceback.print_exc()
                 raise ExportException(unicode(e))

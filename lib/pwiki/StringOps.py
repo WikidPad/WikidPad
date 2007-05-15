@@ -11,9 +11,10 @@ import threading
 
 from struct import pack, unpack
 
-import difflib, codecs, os.path, random
+import difflib, codecs, os.path, random, base64
 
-import urllib_red as urllib
+# import urllib_red as urllib
+import urllib, urlparse, cgi
 
 from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE
 
@@ -146,13 +147,16 @@ def unicodeToCompFilename(us):
             result.append("$%04x" % ord(c))
             continue
         if c in u"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"+\
-                u"{}[]()+-*_,.%":   # Allowed characters
+                u"{}()+-_,.%":   # Allowed characters
             result.append(str(c))
             continue
         
         result.append("=%02x" % ord(c))
         
     return "".join(result)
+
+
+# def unicodeToAllCharFilename
 
 
 def strToBool(s, default=False):
@@ -191,18 +195,24 @@ def fileContentToUnicode(content):
         return mbcsDec(content, "replace")[0]
         
         
-def wikiWordToLabel(word):
-    """
-    Strip '[' and ']' if non camelcase word and return it
-    """
-    if word.startswith(u"[") and word.endswith(u"]"):
-        return word[1:-1]
-    return word
+# def wikiWordToLabel(word):
+#     """
+#     Strip '[' and ']' if non camelcase word and return it
+#     """
+#     if word.startswith(u"[") and word.endswith(u"]"):
+#         return word[1:-1]
+#     return word
 
 
 def removeBracketsFilename(fn):
+    """
+    Remove brackets (real brackets, not configurable) from a filename
+    """
     n, ext = os.path.splitext(fn)
-    return wikiWordToLabel(n) + ext
+    if n.startswith(u"[") and n.endswith(u"]"):
+        n = n[1:-1]
+
+    return n + ext
 
 
 def revStr(s):
@@ -308,34 +318,22 @@ def unescapeForIni(text):
     return _re.sub(ur"\\x([0-9a-f]{2})", _unescapeForIniHelper, text)    
 
 
-def escapeWithRe(text):
-    return text.replace(u"\\", u"\\\\").replace("\n", "\\n").\
-            replace("\r", "\\r")
-
-
-ALPHANUM_RE = _re.compile(u"\w", _re.UNICODE)
-
-def re_escape_uni(pattern):
-    """
-    Escape all non-alphanumeric characters in pattern.
-    Fixed version of re.escape for unicode characters
-    """
-    s = list(pattern)
-    for i in range(len(pattern)):
-        c = pattern[i]
-        if not ALPHANUM_RE.match(c):
-            if c == "\000":
-                s[i] = "\\000"
-            else:
-                s[i] = "\\" + c
-    return u"".join(s)
-
+# def escapeWithRe(text):
+#     return text.replace(u"\\", u"\\\\").replace("\n", "\\n").\
+#             replace("\r", "\\r")
 
 def unescapeWithRe(text):
     """
     Unescape things like \n or \f. Throws exception if unescaping fails
     """
     return _re.sub(u"", text, u"", 1)
+
+
+def re_sub_escape(pattern):
+    """
+    Escape the replacement pattern for a re.sub function
+    """
+    return pattern.replace(u"\\", u"\\\\")
 
 
 def htmlColorToRgbTuple(html):
@@ -360,20 +358,26 @@ def rgbToHtmlColor(r, g, b):
     return "#%02X%02X%02X" % (r, g, b)
 
 
-def b64Cutter(s):
+def base64BlockEncode(data):
     """
     Cut a sequence of base64 characters into chunks of 70 characters
     and join them with newlines. Pythons base64 decoder can read this.
     """
+    b64 = base64.b64encode(data)
+    
     result = []
-    while len(s) > 70:
-        result.append(s[:70])
-        s = s[70:]
+    while len(b64) > 70:
+        result.append(b64[:70])
+        b64 = b64[70:]
 
-    if len(s) > 0:
-        result.append(s)
+    if len(b64) > 0:
+        result.append(b64)
 
-    return "\n".join(result)
+    return u"\n".join(result)
+
+
+# Just for completeness
+base64BlockDecode = base64.b64decode
 
 
     
@@ -492,6 +496,34 @@ def binToStr(b):
     br = b[4+l : ]
     return (s, br)
 
+
+def wikiUrlToPathAndWord(url):
+    """
+    Split a "wiki:" protocol URL into the path of the config file
+    and the name of the wikiword to open if given in query string.
+    
+    Returns (path, wikiword) where wikiword may be None
+    """
+    # Change "wiki:" url to "http:" for urlparse
+    linkHt = "http:" + url[5:]
+    parsed = urlparse.urlparse(linkHt)
+    # Parse query string into dictionary
+    queryDict = cgi.parse_qs(parsed[4])
+    # Retrieve wikiword to open if existing
+    # queryDict values are lists of values therefore this expression 
+    wikiWordToOpen = queryDict.get("wikiword", (None,))[0]
+    
+    # Modify parsed to create clean url by clearing query and fragment
+    parsed = list(parsed)
+    parsed[4] = ""
+    parsed[5] = ""
+    parsed = tuple(parsed)
+    
+    url = urlparse.urlunparse(parsed)[5:]
+    
+    filePath = urllib.url2pathname(url)
+    
+    return (filePath, wikiWordToOpen)
 
 
 

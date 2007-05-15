@@ -5,7 +5,7 @@ import urllib_red as urllib
 import wx
 # from wxPython.wx import *
 
-from StringOps import mbcsDec
+from StringOps import mbcsDec, wikiUrlToPathAndWord
 
 import Exporters
 
@@ -43,8 +43,10 @@ class CmdLineAction:
             sargs = [mbcsDec(a, "replace")[0] for a in sargs]
             self.wikiToOpen = sargs[0]
             if self.wikiToOpen.startswith("wiki:"):
-                self.wikiToOpen = urllib.url2pathname(self.wikiToOpen)
-                self.wikiToOpen = self.wikiToOpen.replace("wiki:", "")
+                self.wikiToOpen, self.wikiWordToOpen = wikiUrlToPathAndWord(
+                        self.wikiToOpen)
+#                 self.wikiToOpen = urllib.url2pathname(self.wikiToOpen)
+#                 self.wikiToOpen = self.wikiToOpen.replace("wiki:", "")
 
             if len(sargs) > 1:
                 self.wikiWordToOpen = sargs[1]

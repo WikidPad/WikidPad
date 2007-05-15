@@ -6,7 +6,6 @@ from pwiki.StringOps import mbcsDec
 
 locale.setlocale(locale.LC_ALL, '')
 
-
 # String containing the delimiter between the title of a wiki word (to show in
 # HTML and the real word, as e.g. [title | WikiWord]
 TitleWikiWordDelimiter = ur"|"
@@ -39,8 +38,8 @@ BracketEndPAT = ur"\]"
 BracketEndRevPAT = ur"\]"
 
 
-# PlainCharactersRE = re.compile(PlainCharacterPAT + "+",
-#         re.DOTALL | re.UNICODE | re.MULTILINE)
+PlainCharactersRE = re.compile(PlainCharacterPAT + "+",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
 # basic formatting
@@ -55,6 +54,39 @@ HtmlTagRE = re.compile(
         re.DOTALL | re.UNICODE | re.MULTILINE)
 HtmlEntityRE = re.compile(
         ur"&(?:[A-Za-z0-9]{2,10}|#[0-9]{1,10}|#x[0-9a-fA-F]{1,8});",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+Heading15RE      = re.compile(ur"^\+{15}(?!\+) ?(?P<h15Content>" +
+        PlainCharacterPAT + ur"+?)\n",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+Heading14RE      = re.compile(ur"^\+{14}(?!\+) ?(?P<h14Content>" +
+        PlainCharacterPAT + ur"+?)\n",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+Heading13RE      = re.compile(ur"^\+{13}(?!\+) ?(?P<h13Content>" +
+        PlainCharacterPAT + ur"+?)\n",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+Heading12RE      = re.compile(ur"^\+{12}(?!\+) ?(?P<h12Content>" +
+        PlainCharacterPAT + ur"+?)\n",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+Heading11RE      = re.compile(ur"^\+{11}(?!\+) ?(?P<h11Content>" +
+        PlainCharacterPAT + ur"+?)\n",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+Heading10RE      = re.compile(ur"^\+{10}(?!\+) ?(?P<h10Content>" +
+        PlainCharacterPAT + ur"+?)\n",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+Heading9RE      = re.compile(ur"^\+{9}(?!\+) ?(?P<h9Content>" +
+        PlainCharacterPAT + ur"+?)\n",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+Heading8RE      = re.compile(ur"^\+{8}(?!\+) ?(?P<h8Content>" +
+        PlainCharacterPAT + ur"+?)\n",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+Heading7RE      = re.compile(ur"^\+{7}(?!\+) ?(?P<h7Content>" +
+        PlainCharacterPAT + ur"+?)\n",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+Heading6RE      = re.compile(ur"^\+{6}(?!\+) ?(?P<h6Content>" +
+        PlainCharacterPAT + ur"+?)\n",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+Heading5RE      = re.compile(ur"^\+{5}(?!\+) ?(?P<h5Content>" +
+        PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 Heading4RE      = re.compile(ur"^\+{4}(?!\+) ?(?P<h4Content>" +
         PlainCharacterPAT + ur"+?)\n",

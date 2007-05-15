@@ -10,6 +10,7 @@ wxWIN95 = 20   # For wx.GetOsVersion(), this includes also Win 98 and ME
 
 
 from MiscEvent import MiscEventSourceMixin
+from WikiExceptions import *
 
 
 # Placed here to avoid circular dependency with StringOps
@@ -232,8 +233,11 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
             return
 
         config = ConfigParser.ConfigParser()
-        config.read(fn)
-        self.setConfigParserObject(config, fn)
+        readFiles = config.read(fn)
+        if len(readFiles) > 0:
+            self.setConfigParserObject(config, fn)
+        else:
+            raise MissingConfigurationFileException(u"Config file not found")
 
 
     def createEmptyConfig(self, fn):
@@ -465,8 +469,10 @@ GLOBALDEFAULTS = {
     ("main", "auto_bullets"): "True",  # Show bullet/number after newline if current line has bullet
     ("main", "auto_indent"): "True",
     ("main", "editor_tabsToSpaces"): "True",  # Write spaces when hitting TAB key
-    ("main", "show_lineNumbers"): "False", 
-    ("main", "editor_useFolding"): "False", 
+    ("main", "show_lineNumbers"): "False",
+    ("main", "editor_useFolding"): "False",
+    ("main", "wikiWord_rename_wikiLinks"): "2", # When renaming wiki word, should it try to rename links to the word, too?
+            # 0:No, 1:Yes, 2:Ask for each renaming
     ("main", "mainTree_position"): "0",  # Mode where to place the main tree,
             # 0:Left, 1:Right, 2:Above, 3:Below
     ("main", "viewsTree_position"): "0",  # Mode how to show the "Views" tree relative to main tree,
@@ -612,8 +618,8 @@ WIKIDEFAULTS = {
     ("main", "wikiPageTitle_creationMode"): "1",   # How to create title from name of a new wiki word:
             # 0: Use wiki word as title as it is ("NewWikiWord" -> "NewWikiWord")
             # 1: Add spaces before uppercase letter ("NewWikiWord" -> "New Wiki Word")
-    ("main", "wikiPageTitle_fromLinkTitle"): "True",   # TODO !!!!!!!!!!
-
+    ("main", "wikiPageTitle_fromLinkTitle"): "False",   # If clicking on a title link, e.g. [wiki word|interesting title]
+            # of a non-existing page use that title as title of the page.
 
     ("main", "hotKey_showHide_byWiki"): ""   # System-wide hotkey to show/hide program. It is described
             # in the usual shortcut syntax e.g. "Ctrl-Alt-A".

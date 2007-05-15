@@ -12,7 +12,7 @@ from os.path import exists, join
 
 from pwiki.WikiExceptions import *
 from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, applyBinCompact, \
-        getBinCompactForDiff, wikiWordToLabel
+        getBinCompactForDiff
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
 import pwiki.sqlite3api as sqlite

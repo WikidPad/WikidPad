@@ -13,7 +13,7 @@ import wx, wx.html, wx.xrc
 from wxHelper import *
 
 from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, \
-        wikiWordToLabel, escapeForIni, unescapeForIni, escapeHtml
+        escapeForIni, unescapeForIni, escapeHtml
 import WikiFormatting
 from WikiExceptions import *
 import Exporters, Importers
@@ -59,10 +59,11 @@ class SelectWikiWordDialog(wx.Dialog):
             if len(words) > 0:
                 self.wikiWord = words[0]
             else:
+                formatting = self.pWiki.getFormatting()
                 wikiWord = self.wikiWord
-                nakedWord = wikiWordToLabel(wikiWord)
+                nakedWord = formatting.wikiWordToLabel(wikiWord)
 
-                if not self.pWiki.getFormatting().isNakedWikiWord(nakedWord):
+                if not formatting.isNakedWikiWord(nakedWord):
                     # Entered text is not a valid wiki word
                     self.ctrls.text.SetFocus()
                     return
@@ -149,9 +150,11 @@ class OpenWikiWordDialog(wx.Dialog):
 
     def OnOk(self, evt):
         self.activateSelectedWikiWord(0)
+        self.EndModal(wx.ID_OK)
 
     def OnNewTab(self, evt):
         self.activateSelectedWikiWord(2)
+        self.EndModal(wx.ID_OK)
 
     def OnNewTabBackground(self, evt):
         self.activateSelectedWikiWord(3)
@@ -164,10 +167,11 @@ class OpenWikiWordDialog(wx.Dialog):
             if len(words) > 0:
                 self.wikiWord = words[0]
             else:
+                formatting = self.pWiki.getFormatting()
                 wikiWord = self.wikiWord
-                nakedWord = wikiWordToLabel(wikiWord)
+                nakedWord = formatting.wikiWordToLabel(wikiWord)
 
-                if not self.pWiki.getFormatting().isNakedWikiWord(nakedWord):
+                if not formatting.isNakedWikiWord(nakedWord):
                     # Entered text is not a valid wiki word
                     self.ctrls.text.SetFocus()
                     return
@@ -185,7 +189,7 @@ class OpenWikiWordDialog(wx.Dialog):
                 self.wikiWord = nakedWord
 
         self.pWiki.activateWikiWord(self.wikiWord, tabMode=tabMode)
-        self.EndModal(wx.ID_OK)
+
 
         
 
@@ -226,8 +230,9 @@ class OpenWikiWordDialog(wx.Dialog):
         """
         Create new WikiWord
         """
-        nakedWord = wikiWordToLabel(self.wikiWord)
-        if not self.pWiki.getFormatting().isNakedWikiWord(nakedWord):
+        formatting = self.pWiki.getFormatting()
+        nakedWord = formatting.wikiWordToLabel(self.wikiWord)
+        if not formatting.isNakedWikiWord(nakedWord):
             self.pWiki.displayErrorMessage(u"'%s' is an invalid WikiWord" % nakedWord)
             self.ctrls.text.SetFocus()
             return

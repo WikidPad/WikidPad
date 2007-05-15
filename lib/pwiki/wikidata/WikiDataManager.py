@@ -9,7 +9,7 @@ from wx import GetApp
 from pwiki.MiscEvent import MiscEventSourceMixin
 
 from pwiki.WikiExceptions import *
-from pwiki.StringOps import mbcsDec, re_escape_uni
+from pwiki.StringOps import mbcsDec, re_sub_escape
 from pwiki.DocPages import WikiPage, FunctionalPage, AliasWikiPage
 
 import pwiki.PageAst as PageAst
@@ -121,23 +121,27 @@ def splitConfigPathAndWord(wikiCombinedFilename):
 #                 try:
             parentDir = os.path.dirname(os.path.dirname(wikiConfigFilename))
             if parentDir:
-                wikiFiles = [file for file in os.listdir(parentDir) \
-                        if file.endswith(".wiki")]
-                if len(wikiFiles) > 0:
-                    wikiWord = os.path.basename(wikiConfigFilename)
-                    wikiWord = wikiWord[0:len(wikiWord)-5]
+                try:
+                    wikiFiles = [file for file in os.listdir(parentDir) \
+                            if file.endswith(".wiki")]
+                    if len(wikiFiles) > 0:
+                        wikiWord = os.path.basename(wikiConfigFilename)
+                        wikiWord = wikiWord[0:len(wikiWord)-5]
+    
+                        # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
+                        windows83Marker = wikiWord.find("~")
+                        if windows83Marker != -1:
+                            wikiWord = wikiWord[0:windows83Marker]
+                            matchingFiles = [file for file in wikiFiles \
+                                    if file.lower().startswith(wikiWord)]
+                            if matchingFiles:
+                                wikiWord = matchingFiles[0]
+                        wikiConfigFilename = os.path.join(parentDir, wikiFiles[0])
+                        continue
+                except (WindowsError, IOError, OSError):
+                    # something went wrong -> give up
+                    return None, None
 
-                    # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
-                    windows83Marker = wikiWord.find("~")
-                    if windows83Marker != -1:
-                        wikiWord = wikiWord[0:windows83Marker]
-                        matchingFiles = [file for file in wikiFiles \
-                                if file.lower().startswith(wikiWord)]
-                        if matchingFiles:
-                            wikiWord = matchingFiles[0]
-
-                    wikiConfigFilename = os.path.join(parentDir, wikiFiles[0])
-                    continue
 #                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
             return None, None
     
@@ -440,7 +444,7 @@ class WikiDataManager(MiscEventSourceMixin):
             # Check if existing alias page is up to date
             realWikiWord1 = value.getNonAliasPage().getWikiWord()
             realWikiWord2 = self.wikiData.getAliasesWikiWord(wikiWord)
-            
+
             if realWikiWord1 != realWikiWord2:
                 # if not, retrieve new page
                 value = None
@@ -457,7 +461,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 value = AliasWikiPage(self, wikiWord, realpage)
 
             self.wikiPageDict[wikiWord] = value
-            
+
             value.getMiscEvent().addListener(self)
 
         return value
@@ -668,7 +672,7 @@ class WikiDataManager(MiscEventSourceMixin):
             sarOp.wikiWide = True
             sarOp.wildCard = 'regex'
             sarOp.caseSensitive = True
-            sarOp.searchStr = ur"\b" + re_escape_uni(wikiWord) + ur"\b"
+            sarOp.searchStr = ur"\b" + re.escape(wikiWord) + ur"\b"
             
             for resultWord in self.searchWiki(sarOp):
                 wikiPage = self.getWikiPage(resultWord)
@@ -676,7 +680,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 if text is None:
                     continue
 
-                sarOp.replaceStr = re_escape_uni(toWikiWord)
+                sarOp.replaceStr = re_sub_escape(toWikiWord)
                 sarOp.replaceOp = True
                 sarOp.cycleToStart = False
 

@@ -3,7 +3,7 @@ import os.path, re, struct, sets, traceback
 
 from MiscEvent import MiscEventSourceMixin
 
-from WikiExceptions import *   # TODO make normal import?
+from WikiExceptions import *
 
 from StringOps import strToBool, fileContentToUnicode, BOM_UTF8, utf8Enc, \
         utf8Dec
@@ -83,7 +83,7 @@ class DocPage(MiscEventSourceMixin):
         """
         txtEditor = self.getTxtEditor()
         if txtEditor is not None:
-            # page is in text editor(s), so call AppendText on one of it
+            # page is in text editor(s), so call GetText on one of it
             return txtEditor.GetText()
         else:
             return self.getContent()
@@ -94,7 +94,7 @@ class DocPage(MiscEventSourceMixin):
         Return None if page isn't existing instead of creating an automatic
         live text (e.g. by template).
         """
-        assert 0 #abstract
+        raise NotImplementedError #abstract
 
 
     def replaceLiveText(self, text):
@@ -113,27 +113,27 @@ class DocPage(MiscEventSourceMixin):
         Returns page content. If page doesn't exist already some content
         is created automatically (may be empty string).
         """
-        assert 0 #abstract
+        raise NotImplementedError #abstract
 
 
     def getTitle(self):
         """
         Return human readable title of the page.
         """
-        assert 0 #abstract
+        raise NotImplementedError #abstract
 
     def save(self, text, fireEvent=True):
         """
         Saves the content of current doc page.
         """
-        assert 0 #abstract
+        raise NotImplementedError #abstract
 
 
     def update(self, text, fireEvent=True):
         """
         Update additional cached informations of doc page
         """
-        assert 0 #abstract
+        raise NotImplementedError #abstract
 
 
 
@@ -203,12 +203,12 @@ class WikiPage(DocPage):
 #         self.wikiData = self.wikiDocument.getWikiData()
 
         self.wikiWord = wikiWord
-        self.parentRelations = None
+#         self.parentRelations = None
         self.childRelations = None
         self.childRelationSet = sets.Set()
         self.todos = None
         self.props = None
-        self.modified, self.created = None, None
+        self.modified, self.created, self.visited = None, None, None
         self.suggNewPageTitle = None  # Title to use for page if it is
                 # newly created
 
@@ -233,15 +233,22 @@ class WikiPage(DocPage):
 
     def getTimestamps(self):
         if self.modified is None:
-            self.modified, self.created = \
+            self.modified, self.created, self.visited = \
                     self.getWikiData().getTimestamps(self.wikiWord)
                     
         if self.modified is None:
             ti = time()
-            self.modified, self.created = ti, ti
+            self.modified, self.created, self.visited = ti, ti, 0.0
         
-        return self.modified, self.created
+        return self.modified, self.created, self.visited
+
+    def setTimestamps(self, timestamps):
+        timestamps = timestamps[:3]
+        self.modified, self.created, self.visited = timestamps
         
+        self.getWikiData().setTimestamps(self.wikiWord, timestamps)
+
+
     def getSuggNewPageTitle(self):
         return self.suggNewPageTitle
         
@@ -249,11 +256,12 @@ class WikiPage(DocPage):
         self.suggNewPageTitle = suggNewPageTitle
 
     def getParentRelationships(self):
-        if self.parentRelations is None:
-            self.parentRelations = \
-                    self.getWikiData().getParentRelationships(self.wikiWord)
-        
-        return self.parentRelations
+        return self.getWikiData().getParentRelationships(self.wikiWord)
+#         if self.parentRelations is None:
+#             self.parentRelations = \
+#                     self.getWikiData().getParentRelationships(self.wikiWord)
+#         
+#         return self.parentRelations
 
         
     def getChildRelationships(self, existingonly=False, selfreference=True,
@@ -841,6 +849,9 @@ class FunctionalPage(DocPage):
     """
     def __init__(self, wikiDocument, funcTag):
         DocPage.__init__(self, wikiDocument)
+        
+        if not isFuncTag(funcTag):
+            raise BadFuncPageTagException("Func tag %s does not exist" % funcTag)
 
         self.funcTag = funcTag
 
@@ -925,7 +936,8 @@ class FunctionalPage(DocPage):
             tbFile.write(utf8Enc(text)[0])
         finally:
             tbFile.close()
-        
+
+
     def _saveDbSpecificPage(self, text, subtag):
         wikiData = self.wikiDocument.getWikiData()
         if wikiData.isDefinedWikiWord(subtag) and text == u"":
@@ -934,7 +946,6 @@ class FunctionalPage(DocPage):
         else:
             if text != u"":
                 wikiData.setContent(subtag, text)
-
 
 
     def save(self, text, fireEvent=True):
@@ -964,14 +975,11 @@ class FunctionalPage(DocPage):
                 # The text blocks for the text blocks submenu was updated
                 self.fireMiscEventKeys(("updated func page", "updated page",
                         "reread text blocks needed"))
-#                 self.pWiki.rereadTextBlocks()   # TODO!
             elif self.funcTag in ("global/[PWL]", "wiki/[PWL]"):
                 # The personal word list (words to ignore by spell checker)
                 # was updated
                 self.fireMiscEventKeys(("updated func page", "updated page",
                         "reread personal word list needed"))
-#             if fireEvent and self.pWiki.spellChkDlg is not None:
-#                 self.pWiki.spellChkDlg.rereadPersonalWordLists()
             elif self.funcTag in ("global/[CCBlacklist]", "wiki/[CCBlacklist]"):
                 # The blacklist of camelcase words not to mark as wiki links
                 # was updated
@@ -1078,3 +1086,15 @@ def getHrNameForFuncTag(funcTag):
     Return the human readable name of functional page with tag funcTag.
     """
     return _FUNCTAG_TO_HR_NAME_MAP.get(funcTag, funcTag)
+    
+
+def getFuncTags():
+    """
+    Return all available func tags
+    """
+    return _FUNCTAG_TO_HR_NAME_MAP.keys()
+
+
+def isFuncTag(funcTag):
+    return _FUNCTAG_TO_HR_NAME_MAP.has_key(funcTag)
+

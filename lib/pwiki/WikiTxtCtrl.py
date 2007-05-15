@@ -324,7 +324,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 wx.stc.STC_MOD_INSERTTEXT | wx.stc.STC_MOD_DELETETEXT)
 
         # set the autocomplete separator
-        self.AutoCompSetSeparator(ord('~'))
+        self.AutoCompSetSeparator(1)   # ord('~')
 
         # register some event handlers
         self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
@@ -911,6 +911,20 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             else:
                 anchor = None # Not found
 
+    def _getColorFromOption(self, option, defColTuple):
+        """
+        Helper for onOptionsChanged() to read a color from an option
+        and create a wx.Colour object from it.
+        """
+        coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
+                "main", option))
+
+        if coltuple is None:
+            coltuple = defColTuple
+
+        return wx.Colour(*coltuple)
+
+
 
     def onOptionsChanged(self, miscevt):
         faces = self.presenter.getDefaultFontFaces().copy()
@@ -924,57 +938,71 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.lastEditorFont = font    # ???
 
         self.SetStyles(faces)
+        
+        color = self._getColorFromOption("editor_bg_color", (255, 255, 255))
 
-        coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
-                "main", "editor_bg_color"))
-
-        if coltuple is None:
-            coltuple = (255, 255, 255)
-
-        color = wx.Colour(*coltuple)
+#         coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
+#                 "main", "editor_bg_color"))
+# 
+#         if coltuple is None:
+#             coltuple = (255, 255, 255)
+# 
+#         color = wx.Colour(*coltuple)
 
         for i in xrange(32):
             self.StyleSetBackground(i, color)
-
-        # Set selection foreground color
-        coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
-                "main", "editor_selection_fg_color"))
-
-        if coltuple is None:
-            coltuple = (0, 0, 0)
-
-        color = wx.Colour(*coltuple)
-        self.SetSelForeground(True, color)
-
-        # Set selection background color
-        coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
-                "main", "editor_selection_bg_color"))
-
-        if coltuple is None:
-            coltuple = (192, 192, 192)
-
-        color = wx.Colour(*coltuple)
-        self.SetSelBackground(True, color)
-
-        # Set caret color
-        coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
-                "main", "editor_caret_color"))
-
-        if coltuple is None:
-            coltuple = (0, 0, 0)
-
-        color = wx.Colour(*coltuple)
-        self.SetCaretForeground(color)
-        
+        self.StyleSetBackground(wx.stc.STC_STYLE_DEFAULT, color)
+            
+        self.SetSelForeground(True, self._getColorFromOption(
+                "editor_selection_fg_color", (0, 0, 0)))
+        self.SetSelBackground(True, self._getColorFromOption(
+                "editor_selection_bg_color", (192, 192, 192)))
+        self.SetCaretForeground(self._getColorFromOption(
+                "editor_caret_color", (0, 0, 0)))
         # Set default color (especially for folding lines)
-        coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
-                "main", "editor_plaintext_color"))
-        
-        if coltuple is None:
-            coltuple = (0, 0, 0)
+        self.StyleSetForeground(wx.stc.STC_STYLE_DEFAULT, self._getColorFromOption(
+                "editor_plaintext_color", (0, 0, 0)))
 
-        color = wx.Colour(*coltuple)
-        self.StyleSetForeground(wx.stc.STC_STYLE_DEFAULT, color)
+
+#         # Set selection foreground color
+#         coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
+#                 "main", "editor_selection_fg_color"))
+# 
+#         if coltuple is None:
+#             coltuple = (0, 0, 0)
+# 
+#         color = wx.Colour(*coltuple)
+#         self.SetSelForeground(True, color)
+# 
+#         # Set selection background color
+#         coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
+#                 "main", "editor_selection_bg_color"))
+# 
+#         if coltuple is None:
+#             coltuple = (192, 192, 192)
+# 
+#         color = wx.Colour(*coltuple)
+#         self.SetSelBackground(True, color)
+# 
+#         # Set caret color
+#         coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
+#                 "main", "editor_caret_color"))
+# 
+#         if coltuple is None:
+#             coltuple = (0, 0, 0)
+# 
+#         color = wx.Colour(*coltuple)
+#         self.SetCaretForeground(color)
+#         
+#         # Set default color (especially for folding lines)
+#         coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
+#                 "main", "editor_plaintext_color"))
+#         
+#         if coltuple is None:
+#             coltuple = (0, 0, 0)
+# 
+#         color = wx.Colour(*coltuple)
+#         self.StyleSetForeground(wx.stc.STC_STYLE_DEFAULT, color)
 
 
 
@@ -1044,9 +1072,15 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             # Synchronous styling
             self.stylingThreadHolder.setThread(None)
             self.buildStyling(text, 0, threadholder=DUMBTHREADHOLDER)
+
             self.applyStyling(self.stylebytes)
+            # We can't call applyFolding directly because this in turn
+            # calls repairFoldingVisibility which can't work while in
+            # EVT_STC_STYLENEEDED event (at least for wxPython 2.6.2)
+            # storeStylingAndAst() sends a StyleDoneEvent instead
             if self.getFoldingActive():
-                self.applyFolding(self.foldingseq)
+#                 self.applyFolding(self.foldingseq)
+                self.storeStylingAndAst(None, self.pageAst, self.foldingseq)
         else:
             # Asynchronous styling
             # This avoids further request from STC:
@@ -1230,6 +1264,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 stylebytes.append(chr(WikiFormatting.FormatTypes.Default) *
                         self.bytelenSct(node.end)) 
 
+            elif styleno in WikiFormatting.ADDITIONAL_HEADING_STYLES:
+                styleno = WikiFormatting.FormatTypes.Heading4
             elif styleno not in WikiFormatting.VALID_SCINTILLA_STYLES:
                 # Style is not known to Scintilla, so use default instead
                 styleno = WikiFormatting.FormatTypes.Default
@@ -1293,6 +1329,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 len(foldingseq) == self.GetLineCount():
             for ln in xrange(len(foldingseq)):
                 self.SetFoldLevel(ln, foldingseq[ln])
+            self.repairFoldingVisibility()
 
 
     def unfoldAll(self):
@@ -1303,7 +1340,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.SetFoldExpanded(i, True)
         
         self.ShowLines(0, self.GetLineCount()-1)
-        self.Refresh()
 
 
     def foldAll(self):
@@ -1317,13 +1353,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             if self.GetFoldLevel(ln) & wx.stc.STC_FOLDLEVELHEADERFLAG and \
                     self.GetFoldExpanded(ln):
                 self.ToggleFold(ln)
-
-
 #                 self.SetFoldExpanded(ln, False)
 #             else:
 #                 self.HideLines(ln, ln)
 
         self.Refresh()
+
+
+    def toggleCurrentFolding(self):
+        if not self.getFoldingActive():
+            return
+
+        self.ToggleFold(self.LineFromPosition(self.GetCurrentPos()))
 
 
     def getFoldInfo(self):
@@ -1362,12 +1403,65 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 self.ShowLines(ln, ln)
             else:
                 self.HideLines(ln, ln)
-
-
-#     def repairFolding(self):
-#         if not self.getFoldingActive():
-#             return None
         
+        self.repairFoldingVisibility()
+
+
+
+    def repairFoldingVisibility(self):
+        if not self.getFoldingActive():
+            return
+            
+        lc = self.GetLineCount()
+        
+        if lc == 0:
+            return
+
+        self.ShowLines(0, 0)
+        if lc == 1:
+            return
+            
+        combLevel = self.GetFoldLevel(0)
+        prevLevel = combLevel & 4095
+        prevIsHeader = combLevel & wx.stc.STC_FOLDLEVELHEADERFLAG
+        prevIsExpanded = self.GetFoldExpanded(0)
+        prevVisible = True  # First line must always be visible
+        prevLn = 0
+        
+#         print "0", prevLevel, bool(prevIsHeader), bool(prevIsExpanded), bool(prevVisible)
+
+        for ln in xrange(1, lc):
+            combLevel = self.GetFoldLevel(ln)
+            level = combLevel & 4095
+            isHeader = combLevel & wx.stc.STC_FOLDLEVELHEADERFLAG
+            isExpanded = self.GetFoldExpanded(ln)
+            visible = self.GetLineVisible(ln)
+#             print ln, level, bool(isHeader), bool(isExpanded), bool(visible)
+
+            if prevVisible and not visible:
+                # Previous line visible, current not -> check if we must show it
+                if ((level <= prevLevel) and \
+                            not (prevIsHeader and not prevIsExpanded)) or \
+                        (prevIsHeader and prevIsExpanded):
+                    # if current level is not larger than previous this indicates
+                    # an error except that the previous line is a header line and 
+                    # folded (not expanded).
+                    # Other possibility of an error is if previous line is a
+                    # header and IS expanded.
+                    
+                    # Show line in these cases
+                    self.SetFoldExpanded(prevLn, True) # Needed?
+                    self.ShowLines(ln, ln)
+                    # self.EnsureVisible(ln)
+                    visible = True
+
+            prevLevel = level
+            prevIsHeader = isHeader
+            prevIsExpanded = isExpanded
+            prevVisible = visible
+            prevLn = ln
+
+
 
 
     def snip(self):
@@ -2100,75 +2194,12 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.ReplaceTarget(filledText)
             self.GotoPos(curPos)
 
-#     def getWikiWordText(self, position):
-#         word = self.getTextInStyle(position, WikiFormatting.FormatTypes.WikiWord)
-#         if not word:
-#             word = self.getTextInStyle(position, WikiFormatting.FormatTypes.WikiWord2)
-#         if not word:
-#             word = self.getTextInStyle(position, WikiFormatting.FormatTypes.AvailWikiWord)
-#         return word
-# 
-#     def getWikiWordBeginEnd(self, position):
-#         (start, end) = self.getBeginEndOfStyle(position, WikiFormatting.FormatTypes.WikiWord)
-#         if start == -1 and end == -1:
-#             (start, end) = self.getBeginEndOfStyle(position, WikiFormatting.FormatTypes.WikiWord2)
-#         if start == -1 and end == -1:
-#             (start, end) = self.getBeginEndOfStyle(position, WikiFormatting.FormatTypes.AvailWikiWord)
-#         return (start, end)
-# 
-#     def isPositionInWikiWord(self, position):
-#         return self.isPositionInStyle(position, WikiFormatting.FormatTypes.WikiWord) \
-#                or self.isPositionInStyle(position, WikiFormatting.FormatTypes.WikiWord2) \
-#                or self.isPositionInStyle(position, WikiFormatting.FormatTypes.AvailWikiWord)
-# 
-#     def isPositionInLink(self, position):
-#         return self.isPositionInStyle(position, WikiFormatting.FormatTypes.Url)
-# 
-#     def isPositionInStyle(self, position, style):
-#         return self.GetStyleAt(position) == style
-# 
-#     def getTextInStyle(self, position, style):
-#         (start, end) = self.getBeginEndOfStyle(position, style)
-#         if start >= 0 and end >= 0:
-#             return self.GetTextRange(start, end+1)
-# 
-#     def getBeginEndOfStyle(self, position, style):
-#         currentStyle = self.GetStyleAt(position)
-#         if currentStyle != style:
-#             return (-1, -1)
-# 
-#         startPos = 0
-#         currentPos = position
-#         while currentPos >= 0:
-#             currentStyle = self.GetStyleAt(currentPos)
-#             if currentStyle == style:
-#                 startPos = currentPos
-#                 if currentPos > 0:
-#                     currentPos = currentPos - 1
-#                 else:
-#                     break
-#             else:
-#                 break
-# 
-#         endPos = 0
-#         currentPos = position
-#         while currentPos < self.GetLength():
-#             currentStyle = self.GetStyleAt(currentPos)
-#             if currentStyle == style:
-#                 endPos = currentPos
-#                 currentPos = currentPos + 1
-#             else:
-#                 break
-# 
-#         if endPos > startPos:
-#             return (startPos, endPos)
-#         else:
-#             return (-1, -1)
 
     def getNearestWordPositions(self, bytepos=None):
         if not bytepos:
             bytepos = self.GetCurrentPos()
         return (self.WordStartPosition(bytepos, 1), self.WordEndPosition(bytepos, 1))
+
 
     def autoComplete(self):
         """
@@ -2180,10 +2211,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         line = self.GetTextRange(startBytePos, endBytePos)
         rline = revStr(line)
         backBytesMap = {}
-#             self.autoCompBackBytesWithoutBracket = 0
-#             self.autoCompBackBytesWithBracket = 0
 
-        # TODO Sort entries appropriately
+        # TODO Sort entries appropriately (whatever this means)
 
         wikiDocument = self.presenter.getWikiDocument()
         wikiData = wikiDocument.getWikiData()
@@ -2192,25 +2221,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if mat1:
             # may be CamelCase word
             tofind = line[-mat1.end():]
-#                 self.autoCompBackBytesWithoutBracket = self.bytelenSct(tofind)
             formatting = self.presenter.getFormatting()
             bb = self.bytelenSct(tofind)
-            for word in wikiData.getWikiWordsStartingWith(tofind, True):
+            for word in wikiData.getWikiWordsStartingWith(tofind, True, True):
                 if not formatting.isCcWikiWord(word):
                     continue
                 backBytesMap[word] = bb
-
-#                 acresult += filter(formatting.isCcWikiWord, 
-#                         wikiData.getWikiWordsStartingWith(
-#                         tofind, True))
-
 
         mat2 = WikiFormatting.RevWikiWordRE2.match(rline)
         mat3 = WikiFormatting.RevPropertyValue.match(rline)
         if mat2:
             # may be not-CamelCase word or in a property name
             tofind = line[-mat2.end():]
-#                 self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
             bb = self.bytelenSct(tofind)
 
             # Should a closing bracket be appended to suggested words?
@@ -2221,24 +2243,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 wordBracketEnd = u""
 
             for word in wikiData.getWikiWordsStartingWith(
-                    tofind[len(WikiFormatting.BracketStart):], True):
+                    tofind[len(WikiFormatting.BracketStart):], True, True):
                 backBytesMap[WikiFormatting.BracketStart + word +
                         wordBracketEnd] = bb
 
             for prop in wikiData.getPropertyNamesStartingWith(tofind[1:]):
                 backBytesMap[WikiFormatting.BracketStart + prop] = bb
-
-#                 acresult += map(lambda s: u"[" + s,
-#                         wikiData.getWikiWordsStartingWith(tofind[1:], True))
-#                 acresult += map(lambda s: u"[" + s,
-#                         wikiData.getPropertyNamesStartingWith(tofind[1:]))
         elif mat3:
             # In a property value
             tofind = line[-mat3.end():]
             propkey = revStr(mat3.group(3))
             propfill = revStr(mat3.group(2))
             propvalpart = revStr(mat3.group(1))
-#                 self.autoCompBackBytesWithBracket = self.bytelenSct(tofind)
             bb = self.bytelenSct(tofind)
             values = filter(lambda pv: pv.startswith(propvalpart),
                     wikiData.getDistinctPropertyValues(propkey))
@@ -2246,9 +2262,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             for v in values:
                 backBytesMap[WikiFormatting.BracketStart + propkey +
                         propfill + v + WikiFormatting.BracketEnd] = bb
-
-#                 acresult += map(lambda v: u"[" + propkey + propfill + 
-#                         v +  u"]", values)
 
         mat = WikiFormatting.RevTodoKeyRE.match(rline)
         if mat:
@@ -2319,7 +2332,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         
         if len(acresult) > 0:
             self.presenter.getWikiDocument().getCollator().sort(acresult)
-            self.UserListShow(1, u"~".join(acresult))
+            self.UserListShow(1, u"\x01".join(acresult))
 
 
     def OnModified(self, evt):
@@ -2571,6 +2584,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             modifiers = evt.GetModifiers() #?
 
             self.ToggleFold(line)
+            self.repairFoldingVisibility()
         
         evt.Skip()
 
@@ -2741,6 +2755,7 @@ Close Tab;CMD_CLOSE_CURRENT_TAB
 FOLD_MENU = \
 u"""
 +Show folding;CMD_CHECKBOX_SHOW_FOLDING;Show folding marks and allow folding;*ShowFolding
+&Toggle current folding;CMD_TOGGLE_CURRENT_FOLDING;Toggle folding of the current line;*ToggleCurrentFolding
 &Unfold All;CMD_UNFOLD_ALL_IN_CURRENT;Unfold everything in current editor;*UnfoldAll
 &Fold All;CMD_FOLD_ALL_IN_CURRENT;Fold everything in current editor;*FoldAll
 """

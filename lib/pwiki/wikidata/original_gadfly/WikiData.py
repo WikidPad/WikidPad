@@ -35,7 +35,7 @@ from pwiki.WikiExceptions import *   # TODO make normal import?
 from pwiki import SearchAndReplace
 
 from pwiki.StringOps import pathEnc, pathDec, utf8Enc, utf8Dec, BOM_UTF8, \
-        fileContentToUnicode, wikiWordToLabel
+        fileContentToUnicode
 
 from pwiki import WikiFormatting
 from pwiki import PageAst
@@ -236,8 +236,8 @@ class WikiData:
 
     def getTimestamps(self, word):
         """
-        Returns a tuple with modification and creation date of
-        a word or (None, None) if word is not in the database
+        Returns a tuple with modification, creation and visit date of
+        a word or (None, None, None) if word is not in the database
         """
         try:
             dates = self.connWrap.execSqlQuery(
@@ -245,12 +245,37 @@ class WikiData:
                     (word,))
     
             if len(dates) > 0:
-                return (float(dates[0][0]), float(dates[0][1]))
+                return (float(dates[0][0]), float(dates[0][1]), 0.0)
             else:
-                return (None, None)  # ?
+                return (None, None, None)  # ?
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
+
+
+    def setTimestamps(self, word, timestamps):
+        """
+        Set timestamps for an existing wiki page.
+        """
+        moddate, creadate = timestamps[:2]
+
+        try:
+            data = self.connWrap.execSqlQuery("select word from wikiwords "
+                    "where word = ?", (word,))
+        except (IOError, OSError, ValueError), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+        try:
+            if len(data) < 1:
+                raise WikiFileNotFoundException
+            else:
+                self.connWrap.execSql("update wikiwords set modified = ?, "
+                        "created = ? where word = ?", (moddate, creadate, word))
+        except (IOError, OSError, ValueError), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
+
 
 
     # ---------- Renaming/deleting pages with cache update ----------
@@ -681,17 +706,26 @@ class WikiData:
         "check if a word is a valid wikiword (page name or alias)"
         return self._getCachedContentNames().has_key(word)
 
-    def getWikiWordsStartingWith(self, thisStr, includeAliases=False):
+    def getWikiWordsStartingWith(self, thisStr, includeAliases=False, 
+            caseNormed=False):
         "get the list of words starting with thisStr. used for autocompletion."
         words = self.getAllDefinedContentNames()
         if includeAliases:
             words.extend(self.getAllAliases())
-        startingWith = [word for word in words if word.startswith(thisStr)]
-        return startingWith
+        
+        if caseNormed:
+            thisStr = thisStr.lower()   # TODO More general normcase function
+            startingWith = [word for word in words
+                    if word.lower().startswith(thisStr)]
+            return startingWith
+        else:
+            startingWith = [word for word in words if word.startswith(thisStr)]
+            return startingWith
+
 
     def getWikiWordsWith(self, thisStr, includeAliases=False):
         "get the list of words with thisStr in them."
-        thisStr = thisStr.lower()
+        thisStr = thisStr.lower()   # TODO More general normcase function
 
 
         result1 = [word for word in self.getAllDefinedWikiPageNames()

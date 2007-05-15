@@ -15,20 +15,6 @@ import Configuration
 
 
 
-# etEVT_AFTER_FOCUS = wx.NewEventType()
-# EVT_AFTER_FOCUS = wx.PyEventBinder(etEVT_AFTER_FOCUS, 0)
-# 
-# class AfterFocusEvent(wx.PyCommandEvent):
-#     """
-#     This wx Event is fired when style and folding calculations are finished.
-#     It is needed to savely transfer data from the style thread to the main thread.
-#     """
-#     def __init__(self, toFocus):
-#         wx.PyCommandEvent.__init__(self, etEVT_AFTER_FOCUS, -1)
-#         self.toFocus = toFocus
-
-
-
 class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
     """
     The main area panel is embedded in the PersonalWikiFrame and holds and
@@ -52,6 +38,8 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
         # Last presenter for which a context menu was shown
         self.lastContextMenuPresenter = None
+        
+        self.ignorePageChangedEvent = False
 
         wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.GetId(),
                 self.OnNotebookPageChanged)
@@ -70,6 +58,13 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
     def getCurrentDocPagePresenter(self):
         return self.currentDocPagePresenter
+        
+    def getCurrentTabTitle(self):
+        sel = self.GetSelection()
+        if sel == -1:
+            return u""
+        
+        return self.GetPageText(sel)
 
 
     def getDocPagePresenters(self):
@@ -170,18 +165,31 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
 
     def OnNotebookPageChanged(self, evt):
+        # Tricky hack to set focus to the notebook page
+        if self.ignorePageChangedEvent:
+            evt.Skip()
+            self.ignorePageChangedEvent = False
+            return
+
         try:
             presenter = self.docPagePresenters[evt.GetSelection()]
-#             presenter = self.GetCurrentPage()
-#             print "OnNotebookPageChanged2", repr(presenter), repr(evt.GetSelection()), repr(presenter.GetChildren())
             self.setCurrentDocPagePresenter(presenter)
-#             self.GetPage(evt.GetSelection()).SetFocus()
+
+            # Flag the event to ignore and resend it
+            # it is then processed by wx.Notebook code
+            # where the focus is set to the notebook itself
+            self.ignorePageChangedEvent = True
+            self.ProcessEvent(evt)
+
+            # Now we can set the focus to the presenter
+            # which in turn sets it to the active subcontrol
             presenter.SetFocus()
+#             self.GetPage(evt.GetSelection()).SetFocus()
         except (IOError, OSError, DbAccessError), e:
             self.mainControl.lostAccess(e)
             raise #???
         
-        evt.Skip()
+        # evt.Skip()
 
 
     def OnContextMenu(self, evt):
@@ -199,12 +207,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
     def OnFocused(self, evt):
         p = self.GetCurrentPage()
         if p is not None:
-#             self.AddPendingEvent(AfterFocusEvent(p))
             p.SetFocus()
-
-
-#     def OnAfterFocus(self, evt):
-#         evt.toFocus.SetFocus()
 
 
     def OnCloseThisTab(self, evt):

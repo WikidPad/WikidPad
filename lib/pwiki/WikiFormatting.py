@@ -16,7 +16,11 @@ FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
         "HorizLine", "Bullet", "Numeric", "Suppress", "Footnote", "Table",
         "EscapedChar", "HtmlTag", "HtmlEntity", "TableCellSplit",
         "TableRowSplit", "PreBlock", "SuppressHighlight", "Insertion",
-        "Anchor"], 0)
+        "Anchor",
+        "Heading5", "Heading6", "Heading7", "Heading8", "Heading9",
+        "Heading10", "Heading11", "Heading12", "Heading13", "Heading14",
+        "Heading15"
+        ], 0)
 
 EMPTY_RE = re.compile(ur"", re.DOTALL | re.UNICODE | re.MULTILINE)
 
@@ -59,7 +63,9 @@ def initialize(wikiSyntax):
             continue
         setattr(ownmodule, item, getattr(wikiSyntax, item))
 
-    
+
+# Headings 5 to 15 are mapped to heading 4 in scintilla editor
+
 def getStyles(styleFaces, config):
     # Read colors from config
     colPlaintext = config.get("main", "editor_plaintext_color", "#000000")
@@ -116,22 +122,48 @@ VALID_SCINTILLA_STYLES = sets.ImmutableSet((
         FormatTypes.ToDo))
 
 
+# Headings 5 to 15 are mapped to heading 4 in scintilla editor
+ADDITIONAL_HEADING_STYLES = sets.ImmutableSet((
+        FormatTypes.Heading15,
+        FormatTypes.Heading14,
+        FormatTypes.Heading13,
+        FormatTypes.Heading12,
+        FormatTypes.Heading11,
+        FormatTypes.Heading10,
+        FormatTypes.Heading9,
+        FormatTypes.Heading8,
+        FormatTypes.Heading7,
+        FormatTypes.Heading6,
+        FormatTypes.Heading5))
+
+
+
+_HEADING_LEVEL_MAP = {
+        FormatTypes.Heading15: 15,
+        FormatTypes.Heading14: 14,
+        FormatTypes.Heading13: 13,
+        FormatTypes.Heading12: 12,
+        FormatTypes.Heading11: 11,
+        FormatTypes.Heading10: 10,
+        FormatTypes.Heading9:  9,
+        FormatTypes.Heading8:  8,
+        FormatTypes.Heading7:  7,
+        FormatTypes.Heading6:  6,
+        FormatTypes.Heading5:  5,
+        FormatTypes.Heading4:  4,
+        FormatTypes.Heading3:  3,
+        FormatTypes.Heading2:  2,
+        FormatTypes.Heading1:  1
+        }
+
+
 def getHeadingLevel(formatType):
     """
     Takes a formatType from Enumeration FormatTypes and returns
     0 if it isn't one of the headings or the heading level (1 to 4)
     if it is one of them.
     """
-    if formatType == FormatTypes.Heading4:
-        return 4
-    elif formatType == FormatTypes.Heading3:
-        return 3
-    elif formatType == FormatTypes.Heading2:
-        return 2
-    elif formatType == FormatTypes.Heading1:
-        return 1
-        
-    return 0
+    return _HEADING_LEVEL_MAP.get(formatType, 0)
 
 
 
@@ -225,14 +257,14 @@ class WikiFormatting:
         self.combinedPageRE = None
         self.combinedCellRE = None
         
-        self.wikiWordStart = None  # String describing the beginning of a wiki
-                # word or property, normally u"["
-                
-        self.wikiWordEnd = None  # Same for end of word, normally u"]"
-
-        # Same after applying re.escape()
-        self.wikiWordStartEsc = None
-        self.wikiWordEndEsc = None
+#         self.wikiWordStart = None  # String describing the beginning of a wiki
+#                 # word or property, normally u"["
+#                 
+#         self.wikiWordEnd = None  # Same for end of word, normally u"]"
+# 
+#         # Same after applying re.escape()
+#         self.wikiWordStartEsc = None
+#         self.wikiWordEndEsc = None
         
         # Set of camelcase words which shouldn't be seen as wiki words
         self.ccWordBlacklist = sets.Set()  ## ("WikidPad", "NotWord")
@@ -268,6 +300,17 @@ class WikiFormatting:
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
                 (self.HtmlTagRE, FormatTypes.HtmlTag),
+                (self.Heading15RE, FormatTypes.Heading15),
+                (self.Heading14RE, FormatTypes.Heading14),
+                (self.Heading13RE, FormatTypes.Heading13),
+                (self.Heading12RE, FormatTypes.Heading12),
+                (self.Heading11RE, FormatTypes.Heading11),
+                (self.Heading10RE, FormatTypes.Heading10),
+                (self.Heading9RE, FormatTypes.Heading9),
+                (self.Heading8RE, FormatTypes.Heading8),
+                (self.Heading7RE, FormatTypes.Heading7),
+                (self.Heading6RE, FormatTypes.Heading6),
+                (self.Heading5RE, FormatTypes.Heading5),
                 (self.Heading4RE, FormatTypes.Heading4),
                 (self.Heading3RE, FormatTypes.Heading3),
                 (self.Heading2RE, FormatTypes.Heading2),
@@ -343,12 +386,11 @@ class WikiFormatting:
         self.combinedWwTitleRE = compileCombinedRegex(
                 self.formatWwTitleExpressions, ignoreList)
 
-        # TODO remove
-        self.wikiWordStart = u"["
-        self.wikiWordEnd = u"]"
-
-        self.wikiWordStartEsc = ur"\["
-        self.wikiWordEndEsc = ur"\]"
+#         self.wikiWordStart = u"["
+#         self.wikiWordEnd = u"]"
+# 
+#         self.wikiWordStartEsc = ur"\["
+#         self.wikiWordEndEsc = ur"\]"
 
 #         if self.pWiki.wikiConfigFilename:
 #             self.footnotesAsWws = self.pWiki.getConfig().getboolean(
@@ -401,7 +443,7 @@ class WikiFormatting:
         if self.isCcWikiWord(word):
             return True
             
-        parword = self.wikiWordStart + word + self.wikiWordEnd
+        parword = self.BracketStart + word + self.BracketEnd
         if self.WikiWordRE2.match(parword):
             if self.footnotesAsWws:
                 return True
@@ -429,14 +471,14 @@ class WikiFormatting:
             
         if matchWhole(self.WikiWordEditorRE2, word):
             if matchWhole(self.WikiWordEditorRE,
-                    word[len(self.wikiWordStart):-len(self.wikiWordEnd)]):
+                    word[len(self.BracketStart):-len(self.BracketEnd)]):
                 # If word is '[WikiWord]', return 'WikiWord' instead
-                return word[len(self.wikiWordStart):-len(self.wikiWordEnd)]
+                return word[len(self.BracketStart):-len(self.BracketEnd)]
             else:
                 return word
         
         # No valid wiki word -> try to add brackets
-        parword = self.wikiWordStart + word + self.wikiWordEnd
+        parword = self.BracketStart + word + self.BracketEnd
         if self.WikiWordRE2.match(parword):
             return parword
 
@@ -461,17 +503,18 @@ class WikiFormatting:
                 # If word is '[WikiWord]', return 'WikiWord' instead
                 return mat.group("wikiwordncc")
             else:
-                return self.wikiWordStart + mat.group("wikiwordncc") + \
-                        self.wikiWordEnd
+                return self.BracketStart + mat.group("wikiwordncc") + \
+                        self.BracketEnd
         
         # No valid wiki word -> try to add brackets
-        parword = self.wikiWordStart + word + self.wikiWordEnd
+        parword = self.BracketStart + word + self.BracketEnd
         mat = matchWhole(self.WikiWordEditorRE2, parword)
         if mat:
             if not self.footnotesAsWws and self.FootnoteRE.match(parword):
                 return None
 
-            return self.wikiWordStart + mat.group("wikiwordncc") + self.wikiWordEnd
+            return self.BracketStart + mat.group("wikiwordncc") + \
+                    self.BracketEnd
 
         return None
 
@@ -480,9 +523,9 @@ class WikiFormatting:
         """
         Strip '[' and ']' if present and return naked word
         """
-        if word.startswith(self.wikiWordStart) and \
-                word.endswith(self.wikiWordEnd):
-            return word[len(self.wikiWordStart):-len(self.wikiWordEnd)]
+        if word.startswith(self.BracketStart) and \
+                word.endswith(self.BracketEnd):
+            return word[len(self.BracketStart) : -len(self.BracketEnd)]
         return word
         
         
@@ -593,13 +636,25 @@ def isNakedWikiWordForNewWiki(word):
     We need a name to create a new wiki, but the wiki must exist already
     to check if wiki name is syntactically correct.
     """
-    global WikiWordEditorRE, WikiWordRE2
+    global WikiWordEditorRE, WikiWordRE2, BracketStart, BracketEnd
 
     if matchWhole(WikiWordEditorRE, word):
         return True
 
-    parword = u"[" + word + u"]"
+    parword = BracketStart + word + BracketEnd
     if WikiWordRE2.match(parword):
         return True
 
     return False
+
+
+def wikiWordToLabelForNewWiki(word):
+    """
+    Strip '[' and ']' if present and return naked word
+    """
+    global BracketStart, BracketEnd
+
+    if word.startswith(BracketStart) and \
+            word.endswith(BracketEnd):
+        return word[len(BracketStart) : -len(BracketEnd)]
+    return word

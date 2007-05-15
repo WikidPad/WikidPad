@@ -9,7 +9,7 @@ from WikiExceptions import *
 from Serialization import SerializeStream
 
 from StringOps import utf8Enc, utf8Dec, boolToChar, charToBool, strToBin, \
-        binToStr, re_escape_uni
+        binToStr
         
 
 
@@ -934,7 +934,7 @@ class SearchReplaceOperation:
             return SimpleStrNode(self, searchStr)
         else:
             if self.wildCard == 'no':
-                searchStr = re_escape_uni(searchStr)
+                searchStr = re.escape(searchStr)
 
             if self.wholeWord:
                 searchStr = ur"\b%s\b" % searchStr

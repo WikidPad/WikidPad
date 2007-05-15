@@ -20,7 +20,7 @@ import DocPages
 from PageAst import tokenizeTodoValue
 from SearchAndReplace import SearchReplaceOperation
 
-from StringOps import mbcsEnc, guiToUni, uniToGui, wikiWordToLabel, strToBool
+from StringOps import mbcsEnc, guiToUni, uniToGui, strToBool
 
 from AdditionalDialogs import SelectWikiWordDialog
 

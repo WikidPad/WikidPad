@@ -12,7 +12,7 @@ from os.path import exists, join
 
 from pwiki.WikiExceptions import *
 from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, applyBinCompact, \
-        getBinCompactForDiff, wikiWordToLabel
+        getBinCompactForDiff
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
 import pwiki.sqlite3api as sqlite
@@ -534,7 +534,12 @@ def sqlite_nakedWord(context, values):
     Sqlite user-defined function "nakedWord" to remove brackets around
     wiki words. Needed for version update from 4 to 5.
     """
-    nakedword = wikiWordToLabel(utf8Dec(values[0].value_text(), "replace")[0])
+    word = utf8Dec(values[0].value_text(), "replace")[0]
+    if word.startswith(u"[") and word.endswith(u"]"):
+        nakedword = word[1:-1]
+    else:
+        nakedword = word
+
     context.result_text(utf8Enc(nakedword)[0])
 
 

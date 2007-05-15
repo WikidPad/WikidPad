@@ -255,6 +255,33 @@
         <object class="wxBoxSizer">
           <orient>wxHORIZONTAL</orient>
           <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Rename links when renaming wiki word:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chWikiWordRenameWikiLinks">
+              <content>
+                <item>No</item>
+                <item>Yes</item>
+                <item>Ask</item>
+              </content>
+              <selection>2</selection>
+            </object>
+            <option>0</option>
+            <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <option>0</option>
+        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
             <object class="wxCheckBox" name="cbHotKeyShowHideByAppIsActive">
               <label>App-bound hotkey:</label>
         </object>
@@ -3066,6 +3093,67 @@
       </object>
     </object>
     <style></style>
+  </object>
+  <object class="wxPanel" name="ExportSubMultipageText">
+    <object class="wxBoxSizer">
+      <orient>wxHORIZONTAL</orient>
+      <object class="spacer">
+        <size>10,10</size>
+        <option>1</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxVERTICAL</orient>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <orient>wxHORIZONTAL</orient>
+              <object class="sizeritem">
+                <object class="wxStaticText">
+                  <label>Format version</label>
+            </object>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <border>5</border>
+          </object>
+              <object class="sizeritem">
+                <object class="wxChoice" name="chFileVersion">
+                  <content>
+                    <item>0</item>
+                    <item>1 (since 1.9beta6)</item>
+                  </content>
+                  <selection>1</selection>
+            </object>
+                <option>0</option>
+                <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <border>5</border>
+          </object>
+            </object>
+            <option>0</option>
+            <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+          <object class="sizeritem">
+            <object class="wxCheckBox" name="cbWriteWikiFuncPages">
+              <label>Write wiki func. pages</label>
+              <checked>1</checked>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxCheckBox" name="cbWriteSavedSearches">
+              <label>Write saved searches</label>
+              <checked>1</checked>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <option>0</option>
+        <flag>wxEXPAND</flag>
+      </object>
+    </object>
   </object>
   <object class="wxDialog" name="ExportDialog">
     <title>Export</title>

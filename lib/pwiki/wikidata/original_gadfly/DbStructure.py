@@ -13,7 +13,7 @@ import glob
 
 from pwiki.WikiExceptions import *
 from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, \
-        removeBracketsFilename, wikiWordToLabel
+        removeBracketsFilename
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
 import gadfly
@@ -567,6 +567,16 @@ def getSettingsInt(connwrap, key, default=None):
             "where key='%s'" % (key,), default))
 
 
+def oldWikiWordToLabel(word):
+    """
+    Strip '[' and ']' if non camelcase word and return it
+    """
+    if word.startswith(u"[") and word.endswith(u"]"):
+        return word[1:-1]
+    return word
+
+
+
 def checkDatabaseFormat(connwrap):
     """
     Check the database format.
@@ -713,7 +723,7 @@ def updateDatabase(connwrap, dataDir):
         
         uniqueCtl = {}
         for w, c, m in dataIn:
-            w = wikiWordToLabel(w)
+            w = oldWikiWordToLabel(w)
             if not uniqueCtl.has_key(w):
                 connwrap.execSql("insert into wikiwords(word, created, modified) "
                         "values (?, ?, ?)", (w, c, m))
@@ -730,7 +740,7 @@ def updateDatabase(connwrap, dataDir):
 
         uniqueCtl = {}
         for w, r, c in dataIn:
-            w, r = wikiWordToLabel(w), wikiWordToLabel(r)
+            w, r = oldWikiWordToLabel(w), oldWikiWordToLabel(r)
             if not uniqueCtl.has_key((w, r)):
                 connwrap.execSql("insert into wikirelations(word, relation, created) "
                         "values (?, ?, ?)", (w, r, c))
@@ -747,7 +757,7 @@ def updateDatabase(connwrap, dataDir):
 
         for w, k, v in dataIn:
             connwrap.execSql("insert into wikiwordprops(word, key, value) "
-                    "values (?, ?, ?)", (wikiWordToLabel(w), k, v))
+                    "values (?, ?, ?)", (oldWikiWordToLabel(w), k, v))
 
         # table todos
         dataIn = connwrap.execSqlQuery(
@@ -760,7 +770,7 @@ def updateDatabase(connwrap, dataDir):
 
         for w, t in dataIn:
             connwrap.execSql("insert into todos(word, todo) "
-                    "values (?, ?)", (wikiWordToLabel(w), t))
+                    "values (?, ?)", (oldWikiWordToLabel(w), t))
 
         formatver = 2
 

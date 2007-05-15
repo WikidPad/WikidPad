@@ -88,6 +88,8 @@ class OptionsDialog(wx.Dialog):
             ("collation_order", "chCollationOrder", "selt"),
             ("collation_uppercaseFirst", "cbCollationUppercaseFirst", "b"),
 
+            ("wikiWord_rename_wikiLinks", "chWikiWordRenameWikiLinks", "seli"),
+
             ("hotKey_showHide_byApp", "tfHotKeyShowHideByApp", "t"),
             ("hotKey_showHide_byApp_isActive", "cbHotKeyShowHideByAppIsActive",
                 "b"),
