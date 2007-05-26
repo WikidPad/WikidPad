@@ -600,6 +600,7 @@ lib/pwiki/wxHelper.py -text
 lib/readme.txt -text
 /license-spelladdon.txt -text
 /license.txt -text
+/readme_Wic.txt -text
 /setup.py -text
 /sql_mar.py -text
 /wikidpad_spelladdon.iss -text

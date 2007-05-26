@@ -1,6 +1,19 @@
 ﻿++ Change Log
 
-Apr. 26, 2007 (1.8rc4)
+
+May 24, 2007 (1.8rc5)
+
+    * Bug fixed: When renaming wikiword with non-ascii or
+      non-alphanumeric characters and modifying links, non-ascii
+      characters were preceded with backslashes
+    * Bug fixed: Sometimes the parent list of a page is not updated
+      after changes.
+    * Internal bug fixed: When calling PersonalWikiFrame.openWiki with
+      a relative path by a script or plugin, errors may occur.
+
+
+
+Apr. 26, 2007 (1.8rc4, repository revision in "stable-1.8" branch: 114)
 
     * Bug fixed: Removed inefficiency when exporting large sets
       of wiki pages with many links (very large trees).
@@ -11,7 +24,7 @@ Apr. 26, 2007 (1.8rc4)
 
 
 
-Mar. 25, 2007 (1.8rc3)
+Mar. 25, 2007 (1.8rc3, repository revision in "stable-1.8" branch: 110)
 
     * Bug fixed (at least for Windows NT/2K/XP): Wiki words with
       foreign characters were not recognized or recognized with
