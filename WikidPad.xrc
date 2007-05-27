@@ -382,6 +382,13 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
+        <object class="wxCheckBox" name="cbTreeAutoHide">
+          <label>Tree auto-hide</label>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
         <object class="wxFlexGridSizer">
           <object class="sizeritem">
             <object class="wxStaticText">
@@ -1456,8 +1463,22 @@
         <size>5,5</size>
       </object>
       <object class="sizeritem">
-        <object class="wxBoxSizer">
-          <orient>wxHORIZONTAL</orient>
+        <object class="wxFlexGridSizer">
+          <cols>2</cols>
+          <growablecols>1</growablecols>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Wiki icon:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfWikiIcon">
+                </object>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
           <object class="sizeritem">
             <object class="wxStaticText">
               <label>Wiki-bound hotkey:</label>
@@ -1472,8 +1493,7 @@
             <border>5</border>
           </object>
         </object>
-        <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
     </object>
   </object>

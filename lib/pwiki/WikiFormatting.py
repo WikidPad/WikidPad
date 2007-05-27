@@ -358,6 +358,24 @@ class WikiFormatting:
                 ]
 
 
+        self.formatTableContentTabDelimitExpressions = [
+                (self.PlainEscapedCharacterRE, FormatTypes.EscapedChar),
+                (self.HtmlEntityRE, FormatTypes.HtmlEntity),
+                (ur"\t", FormatTypes.TableCellSplit),
+                (self.TableRowDelimiterPAT, FormatTypes.TableRowSplit),
+                (self.TitledUrlRE, FormatTypes.Url),
+                (self.UrlRE, FormatTypes.Url),
+#                 (self.ToDoREWithContent, FormatTypes.ToDo),  # TODO Doesn't work
+                (self.FootnoteRE, FormatTypes.Footnote),
+                (self.WikiWordEditorRE2, FormatTypes.WikiWord2),
+                (self.WikiWordEditorRE, FormatTypes.WikiWord),
+                (self.BoldRE, FormatTypes.Bold),
+                (self.ItalicRE, FormatTypes.Italic),
+                (self.HtmlTagRE, FormatTypes.HtmlTag)
+#                 (self.PlainCharactersRE, FormatTypes.Default)
+                ]
+
+
         self.formatWwTitleExpressions = [
                 (self.PlainEscapedCharacterRE, FormatTypes.EscapedChar),
                 (self.HtmlEntityRE, FormatTypes.HtmlEntity),
@@ -383,6 +401,8 @@ class WikiFormatting:
                 ignoreList)
         self.combinedTableContentRE = compileCombinedRegex(
                 self.formatTableContentExpressions, ignoreList)
+        self.combinedTableContentTabDelimitRE = compileCombinedRegex(
+                self.formatTableContentTabDelimitExpressions, ignoreList)
         self.combinedWwTitleRE = compileCombinedRegex(
                 self.formatWwTitleExpressions, ignoreList)
 
@@ -599,16 +619,20 @@ class WikiFormatting:
                 FormatTypes.Default, threadholder=threadholder)
 
 
-    def tokenizeTableContent(self, text, formatDetails=None,
+    def tokenizeTableContent(self, text, formatDetails=None, useTabDelimit=False,
             threadholder=DUMBTHREADHOLDER):
         """
         Function used by PageAst module
+        useTabDelimit -- Use tabs as cell delimiters instead of XXX
         """
         # TODO Cache if necessary
         formatMap = self.getExpressionsFormatList(
                 self.formatTableContentExpressions, formatDetails)
-
-        tokenizer = Tokenizer(self.combinedTableContentRE, -1)
+                
+        if useTabDelimit:
+            tokenizer = Tokenizer(self.combinedTableContentTabDelimitRE, -1)
+        else:
+            tokenizer = Tokenizer(self.combinedTableContentRE, -1)
 
         return tokenizer.tokenize(text, formatMap,
                 FormatTypes.Default, threadholder=threadholder)

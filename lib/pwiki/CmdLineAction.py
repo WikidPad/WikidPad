@@ -5,7 +5,7 @@ import urllib_red as urllib
 import wx
 # from wxPython.wx import *
 
-from StringOps import mbcsDec, wikiUrlToPathAndWord
+from StringOps import mbcsDec, wikiUrlToPathWordAndAnchor
 
 import Exporters
 
@@ -24,6 +24,7 @@ class CmdLineAction:
                 # (interpreted by PersonalWikiFrame)
         self.wikiWordToOpen = None  # Name of wiki word to open
                 # (interpreted by PersonalWikiFrame)
+        self.anchorToOpen = None   # Name of anchor to open in wiki word
         self.exitFinally = False   # Exit WikidPad when done
                 # (interpreted by PersonalWikiFrame)
         self.showHelp = False   # Show help text?
@@ -43,21 +44,21 @@ class CmdLineAction:
             sargs = [mbcsDec(a, "replace")[0] for a in sargs]
             self.wikiToOpen = sargs[0]
             if self.wikiToOpen.startswith("wiki:"):
-                self.wikiToOpen, self.wikiWordToOpen = wikiUrlToPathAndWord(
-                        self.wikiToOpen)
+                self.wikiToOpen, self.wikiWordToOpen, self.anchorToOpen = \
+                        wikiUrlToPathWordAndAnchor(self.wikiToOpen)
 #                 self.wikiToOpen = urllib.url2pathname(self.wikiToOpen)
 #                 self.wikiToOpen = self.wikiToOpen.replace("wiki:", "")
 
             if len(sargs) > 1:
                 self.wikiWordToOpen = sargs[1]
-                
+
             return
             
         # New style
         try:
             opts, rargs = getopt.getopt(sargs, "hw:p:x",
                     ["help", "wiki=", "page=", "exit", "export-what=",
-                    "export-type=", "export-dest=", "export-compfn"])
+                    "export-type=", "export-dest=", "export-compfn", "anchor"])
         except getopt.GetoptError:
             self.cmdLineError = True
             return
@@ -69,6 +70,8 @@ class CmdLineAction:
                 self.wikiToOpen = mbcsDec(a, "replace")[0]
             elif o in ("-p", "--page"):
                 self.wikiWordToOpen = mbcsDec(a, "replace")[0]
+            elif o == "--anchor":
+                self.anchorToOpen = mbcsDec(a, "replace")[0]
             elif o in ("-x", "--exit"):
                 self.exitFinally = True
             elif o == "--export-what":

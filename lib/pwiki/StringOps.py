@@ -497,12 +497,12 @@ def binToStr(b):
     return (s, br)
 
 
-def wikiUrlToPathAndWord(url):
+def wikiUrlToPathWordAndAnchor(url):
     """
-    Split a "wiki:" protocol URL into the path of the config file
-    and the name of the wikiword to open if given in query string.
+    Split a "wiki:" protocol URL into the path of the config file,
+    the name of the wikiword and the anchor to open if given in query string.
     
-    Returns (path, wikiword) where wikiword may be None
+    Returns (path, wikiword, anchor) where wikiword may be None
     """
     # Change "wiki:" url to "http:" for urlparse
     linkHt = "http:" + url[5:]
@@ -511,8 +511,9 @@ def wikiUrlToPathAndWord(url):
     queryDict = cgi.parse_qs(parsed[4])
     # Retrieve wikiword to open if existing
     # queryDict values are lists of values therefore this expression 
-    wikiWordToOpen = queryDict.get("wikiword", (None,))[0]
-    
+    wikiWordToOpen = queryDict.get("page", (None,))[0]
+    anchorToOpen = queryDict.get("anchor", (None,))[0]
+
     # Modify parsed to create clean url by clearing query and fragment
     parsed = list(parsed)
     parsed[4] = ""
@@ -523,7 +524,7 @@ def wikiUrlToPathAndWord(url):
     
     filePath = urllib.url2pathname(url)
     
-    return (filePath, wikiWordToOpen)
+    return (filePath, wikiWordToOpen, anchorToOpen)
 
 
 

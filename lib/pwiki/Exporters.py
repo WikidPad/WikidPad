@@ -1261,8 +1261,8 @@ class HtmlXmlExporter:
                 "html_previewIE", "html_previewMOZ")
         self.asXml = asXml
         self.wikiWord = word
-        # Replace tabs with spaces
-        content = content.replace(u"\t", u" " * 4)  # TODO Configurable
+        # Replace tabs with spaces (TODO Which problem did I want to solve here?)
+        # content = content.replace(u"\t", u" " * 4)  # TODO Configurable
         self.result = []
         self.statestack = [("normalindent", 0)]
         self.optsStack = [{}]
@@ -1622,7 +1622,7 @@ class HtmlXmlExporter:
                             except:
                                 # something does not match syntax requirements
                                 pass
-                        
+
                         alignInTag = u""
                         alignInfo = tok.node.getInfoForMode("a")
                         if alignInfo is not None:

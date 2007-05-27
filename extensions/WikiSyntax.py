@@ -329,7 +329,8 @@ AnchorRE = re.compile(ur"^[ \t]*anchor:[ \t]*(?P<anchorValue>[A-Za-z0-9\_]+)\n",
 
 TableRowDelimiterPAT = ur"\n"
 
-TableRE = re.compile(ur"(?P<tableBegin>^[ \t]*<<\|[ \t]*$)"
+TableRE = re.compile(ur"(?P<tableBegin>^[ \t]*<<\|"
+        ur"(?P<tableModeAppendix>[a-zA-Z0-9_;]*)[ \t]*$)"
         ur"(?P<tableContent>" + PlainCharacterPAT +
         ur"*?)(?P<tableEnd>^[ \t]*>>[ \t]*$)",
         re.DOTALL | re.UNICODE | re.MULTILINE)

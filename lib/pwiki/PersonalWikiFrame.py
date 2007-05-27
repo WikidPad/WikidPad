@@ -53,7 +53,7 @@ from SearchAndReplaceDialogs import *
 import Exporters
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
         BOM_UTF8, fileContentToUnicode, splitIndent, \
-        unescapeWithRe, escapeForIni, unescapeForIni, wikiUrlToPathAndWord
+        unescapeWithRe, escapeForIni, unescapeForIni, wikiUrlToPathWordAndAnchor
 
 import DocPages
 import WikiFormatting
@@ -315,6 +315,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # if a wiki to open wasn't passed in use the last_wiki from the global config
         wikiToOpen = cmdLineAction.wikiToOpen
         wikiWordToOpen = cmdLineAction.wikiWordToOpen
+        anchorToOpen = cmdLineAction.anchorToOpen
 
         if not wikiToOpen:
             wikiToOpen = self.configuration.get("main", "last_wiki")
@@ -343,7 +344,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # if a wiki to open is set, open it
         if wikiToOpen:
             if exists(wikiToOpen):
-                self.openWiki(wikiToOpen, wikiWordToOpen)
+                self.openWiki(wikiToOpen, wikiWordToOpen,
+                anchorToOpen=anchorToOpen)
             else:
                 self.statusBar.SetStatusText(
                         uniToGui(u"Last wiki doesn't exist: %s" % wikiToOpen), 0)
@@ -379,9 +381,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.evalLib = self.getExtension('EvalLibrary', u'EvalLibrary.py')
         self.wikiSyntax = self.getExtension('SyntaxLibrary', u'WikiSyntax.py')
         self.presentationExt = self.getExtension('Presentation', u'Presentation.py')
-        dirs = [ join(self.globalConfigSubDir, u'user_extensions'),
+        dirs = ( join(self.globalConfigSubDir, u'user_extensions'),
                 join(self.wikiAppDir, u'user_extensions'),
-                join(self.wikiAppDir, u'extensions') ]
+                join(self.wikiAppDir, u'extensions') )
         self.pluginManager.loadPlugins( dirs, [ u'KeyBindings.py',
                 u'EvalLibrary.py', u'WikiSyntax.py' ] )
 
@@ -2282,7 +2284,7 @@ These are your default global settings.
 
 
     def openWiki(self, wikiCombinedFilename, wikiWordToOpen=None,
-            ignoreWdhName=False):
+            ignoreWdhName=False, anchorToOpen=None):
         """
         opens up a wiki
         ignoreWdhName -- Should the name of the wiki data handler in the
@@ -2449,7 +2451,8 @@ These are your default global settings.
                             lastWikiWord, True)
                     if wordsStartingWith:
                         lastWikiWord = wordsStartingWith[0]
-                self.openWikiPage(lastWikiWord)
+
+                self.openWikiPage(lastWikiWord, anchor=anchorToOpen)
                 self.findCurrentWordInTree()
                 
             # If present, open further words in tabs on the right
@@ -2476,6 +2479,9 @@ These are your default global settings.
             self.rereadTextBlocks()
             
             self._refreshHotKeys()
+            
+            # reset tray
+            self.setShowOnTray()
 
             # trigger hook
             self.hooks.openedWiki(self, self.wikiName, wikiCombinedFilename)
@@ -3070,9 +3076,11 @@ These are your default global settings.
 #             link2 = urlparse.urlunparse(parsed)[5:]
 #             
 #             filePath = urllib.url2pathname(link2)
-            filePath, wikiWordToOpen = wikiUrlToPathAndWord(link2)
+            filePath, wikiWordToOpen, anchorToOpen = wikiUrlToPathWordAndAnchor(
+                    link2)
             if exists(filePath):
-                self.openWiki(filePath, wikiWordToOpen=wikiWordToOpen)  # ?
+                self.openWiki(filePath, wikiWordToOpen=wikiWordToOpen,
+                        anchorToOpen=anchorToOpen)  # ?
                 return True
             else:
                 self.statusBar.SetStatusText(
@@ -3302,28 +3310,43 @@ These are your default global settings.
         else:
             onOrOff = self.configuration.getboolean("main", "showontray")
 
+
+        tooltip = None
+        if self.getWikiConfigPath():  # If a wiki is open
+            tooltip = u"Wiki: %s" % self.getWikiConfigPath()  # self.wikiName
+            iconName = self.getConfig().get("main", "wiki_icon", u"")
+        else:
+            tooltip = u"Wikidpad"
+            iconName = u""
+
+        bmp = None
+        if iconName != u"":
+            bmp = wx.GetApp().getIconCache().lookupIcon(iconName)
+
+
         if onOrOff:
             if self.tbIcon is None:
                 self.tbIcon = TaskBarIcon(self)
 
-            tooltip = None
-            if self.getWikiConfigPath():  # If a wiki is open
-                tooltip = u"Wiki: %s" % self.getWikiConfigPath()  # self.wikiName
-            else:
-                tooltip = u"Wikidpad"
-
             if Configuration.isLinux():
-                img = wx.Image(os.path.join(self.wikiAppDir, 'icons', 'pwiki.ico'),
-                        wx.BITMAP_TYPE_ICO)
+                if bmp is not None:
+                    img = bmp.ConvertToImage()
+                else:
+                    img = wx.Image(os.path.join(self.wikiAppDir, 'icons',
+                            'pwiki.ico'), wx.BITMAP_TYPE_ICO)
+
                 img.Rescale(20, 20)
                 bmp = wx.BitmapFromImage(img)
                 icon = wx.IconFromBitmap(bmp)
                 self.tbIcon.SetIcon(icon, uniToGui(tooltip))
             else:
-                self.tbIcon.SetIcon(wx.Icon(os.path.join(self.wikiAppDir,
-                        'icons', 'pwiki.ico'), wx.BITMAP_TYPE_ICO),
-                        uniToGui(tooltip))
-            
+                if bmp is not None:                
+                    self.tbIcon.SetIcon(wx.IconFromBitmap(bmp),
+                            uniToGui(tooltip))
+                else:
+                    self.tbIcon.SetIcon(wx.GetApp().standardIcon,
+                            uniToGui(tooltip))
+
         else:
             if self.tbIcon is not None:
                 if self.tbIcon.IsIconInstalled():
@@ -3331,6 +3354,17 @@ These are your default global settings.
 
                 self.tbIcon.Destroy()
                 self.tbIcon = None
+
+#         # TODO  Move to better function
+#         if bmp is not None:                
+#             self.SetIcon(wx.IconFromBitmap(bmp))
+#         else:
+#             print "setShowOnTray25", repr(os.path.join(self.wikiAppDir,
+#                     'icons', 'pwiki.ico')), repr(wx.Icon(os.path.join(self.wikiAppDir,
+#                     'icons', 'pwiki.ico'), wx.BITMAP_TYPE_ICO))
+# #             self.SetIcon(wx.Icon(os.path.join(self.wikiAppDir,
+# #                     'icons', 'pwiki.ico'), wx.BITMAP_TYPE_ICO))
+#             self.SetIcon(wx.GetApp().standardIcon)
 
 
     def setHideUndefined(self, onOrOff=None):

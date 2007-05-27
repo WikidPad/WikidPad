@@ -41,6 +41,21 @@ To show all such URLs as links instead, open "Options" dialog, page "HTML previe
 For controlling of individual URLs, see next chapter.
 
 
+++ Wiki: URLs
+To link from one wiki to another you can create links beginning with "wiki:", e.g.
+
+wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki
+
+
+You can add parameter "page" to specify the wiki page to open (replace spaces by "%20"):
+
+wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki?page=ThePage%20with%20spaces
+
+You can also specify an anchor on the page to jump to:
+
+wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki?page=ThePage%20with%20spaces&anchor=here
+
+
 ++ URL Appendix
 You can control details of URL presentation, especially for images, by using an URL appendix. This consists of a '>' character directly after the URL (no space) and some code characters which can be delimited by semicolons. The following codes are defined:
 

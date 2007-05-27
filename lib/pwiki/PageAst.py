@@ -396,7 +396,7 @@ def tokenizeTodoValue(formatting, value):
 
 
 class Table(Ast):
-    __slots__ = ("begin", "end", "contenttokens")
+    __slots__ = ("begin", "end", "modeAppendix", "contenttokens")
 
     def __init__(self):
         Ast.__init__(self)
@@ -415,11 +415,22 @@ class Table(Ast):
         self.begin = groupdict["tableBegin"]
         self.end = groupdict["tableEnd"]
         content = groupdict["tableContent"]
-      
+        modeStr = groupdict["tableModeAppendix"]
+
+        modeAppendix = []
+        for entry in modeStr.split(";"):
+            if entry == u"":
+                continue
+
+            modeAppendix.append((entry[0], entry[1:]))
+
+        self.modeAppendix = modeAppendix
+
         tokensIn = formatting.tokenizeTableContent(content,
-                formatDetails, threadholder=threadholder)
+                formatDetails, useTabDelimit=self.containsModeInAppendix(u"t"),
+                threadholder=threadholder)
         relpos = token.start + len(self.begin)
-        
+
         contenttokens = []
 
         # Filter out empty tokens and relocate them
@@ -469,7 +480,36 @@ class Table(Ast):
                 result.append(tok)
             if tok.node is not None:
                 tok.node._findType(typeToFind, result)
+
+
+    def containsModeInAppendix(self, mode):
+        """
+        Returns True iff character mode is a mode in the modeAppendix list
+        """
+        for m, a in self.modeAppendix:
+            if m == mode:
+                return True
                 
+        return False
+        
+    def getInfoForMode(self, mode, defaultEmpty=u"", defaultNonExist=None):
+        """
+        Return additional settings for mode (the part after the first mode
+        letter). If the mode is part of the appendix but doesn't contain any
+        further characters, defaultEmpty is returned. If the mode is not in
+        the index, defaultNonExist is returned.
+        """
+
+        for m, a in self.modeAppendix:
+            if m == mode:
+                if a == u"":
+                    return defaultEmpty
+                else:
+                    return a
+                
+        return defaultNonExist
+
+  
     def calcGrid(self):
         grid = []
         row = []

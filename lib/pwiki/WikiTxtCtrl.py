@@ -2216,20 +2216,21 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         wikiDocument = self.presenter.getWikiDocument()
         wikiData = wikiDocument.getWikiData()
+        
+        formatting = self.presenter.getFormatting()
 
-        mat1 = WikiFormatting.RevWikiWordRE.match(rline)
+        mat1 = formatting.RevWikiWordRE.match(rline)
         if mat1:
             # may be CamelCase word
             tofind = line[-mat1.end():]
-            formatting = self.presenter.getFormatting()
             bb = self.bytelenSct(tofind)
             for word in wikiData.getWikiWordsStartingWith(tofind, True, True):
                 if not formatting.isCcWikiWord(word):
                     continue
                 backBytesMap[word] = bb
 
-        mat2 = WikiFormatting.RevWikiWordRE2.match(rline)
-        mat3 = WikiFormatting.RevPropertyValue.match(rline)
+        mat2 = formatting.RevWikiWordRE2.match(rline)
+        mat3 = formatting.RevPropertyValue.match(rline)
         if mat2:
             # may be not-CamelCase word or in a property name
             tofind = line[-mat2.end():]
@@ -2238,17 +2239,17 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             # Should a closing bracket be appended to suggested words?
             if self.presenter.getConfig().getboolean("main",
                     "editor_autoComplete_closingBracket", False):
-                wordBracketEnd = WikiFormatting.BracketEnd
+                wordBracketEnd = formatting.BracketEnd
             else:
                 wordBracketEnd = u""
 
             for word in wikiData.getWikiWordsStartingWith(
-                    tofind[len(WikiFormatting.BracketStart):], True, True):
-                backBytesMap[WikiFormatting.BracketStart + word +
+                    tofind[len(formatting.BracketStart):], True, True):
+                backBytesMap[formatting.BracketStart + word +
                         wordBracketEnd] = bb
 
             for prop in wikiData.getPropertyNamesStartingWith(tofind[1:]):
-                backBytesMap[WikiFormatting.BracketStart + prop] = bb
+                backBytesMap[formatting.BracketStart + prop] = bb
         elif mat3:
             # In a property value
             tofind = line[-mat3.end():]
@@ -2260,10 +2261,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     wikiData.getDistinctPropertyValues(propkey))
 
             for v in values:
-                backBytesMap[WikiFormatting.BracketStart + propkey +
-                        propfill + v + WikiFormatting.BracketEnd] = bb
+                backBytesMap[formatting.BracketStart + propkey +
+                        propfill + v + formatting.BracketEnd] = bb
 
-        mat = WikiFormatting.RevTodoKeyRE.match(rline)
+        mat = formatting.RevTodoKeyRE.match(rline)
         if mat:
             # Might be todo entry
             tofind = line[-mat.end():]
@@ -2273,11 +2274,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 if not td.startswith(tofind):
                     continue
 
-                tdmat = WikiFormatting.ToDoREWithCapturing.match(td)
+                tdmat = formatting.ToDoREWithCapturing.match(td)
                 key = tdmat.group(1) + u":"
                 backBytesMap[key] = bb
 
-        mat = WikiFormatting.RevTodoValueRE.match(rline)
+        mat = formatting.RevTodoValueRE.match(rline)
         if mat:
             # Might be todo entry
             tofind = line[-mat.end():]
@@ -2286,7 +2287,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             for t in todos:
                 backBytesMap[t] = bb
 
-        mat = WikiFormatting.RevWikiWordAnchorRE2.match(rline)
+        mat = formatting.RevWikiWordAnchorRE2.match(rline)
         if mat:
             # In an anchor of a possible bracketed wiki word
             tofind = line[-mat.end():]
@@ -2300,14 +2301,14 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                         if a.startswith(anchorBegin)]
 
                 for a in anchors:
-                    backBytesMap[WikiFormatting.BracketStart + wikiWord +
-                            WikiFormatting.BracketEnd +
-                            WikiFormatting.AnchorStart + a] = bb
+                    backBytesMap[formatting.BracketStart + wikiWord +
+                            formatting.BracketEnd +
+                            formatting.AnchorStart + a] = bb
             except WikiWordNotFoundException:
                 # wikiWord isn't a wiki word
                 pass
 
-        mat = WikiFormatting.RevWikiWordAnchorRE.match(rline)
+        mat = formatting.RevWikiWordAnchorRE.match(rline)
         if mat:
             # In an anchor of a possible camel case word
             tofind = line[-mat.end():]
@@ -2321,7 +2322,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                         if a.startswith(anchorBegin)]
                         
                 for a in anchors:
-                    backBytesMap[wikiWord + WikiFormatting.AnchorStart +
+                    backBytesMap[wikiWord + formatting.AnchorStart +
                             a] = bb
             except WikiWordNotFoundException:
                 # wikiWord isn't a wiki word
@@ -2331,8 +2332,22 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         acresult = backBytesMap.keys()
         
         if len(acresult) > 0:
-            self.presenter.getWikiDocument().getCollator().sort(acresult)
-            self.UserListShow(1, u"\x01".join(acresult))
+            # formatting.BracketEnd
+            acresultTuples = []
+            for r in acresult:
+                if r.endswith(formatting.BracketEnd):
+                    rc = r[: -len(formatting.BracketEnd)]
+                else:
+                    rc = r
+                acresultTuples.append((rc, r))
+                
+            self.presenter.getWikiDocument().getCollator().sortByKey(
+                    acresultTuples)
+            self.UserListShow(1, u"\x01".join(
+                    [art[1] for art in acresultTuples]))
+
+#             self.presenter.getWikiDocument().getCollator().sort(acresult)
+#             self.UserListShow(1, u"\x01".join(acresult))
 
 
     def OnModified(self, evt):

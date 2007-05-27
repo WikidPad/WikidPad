@@ -22,7 +22,11 @@ Uses ASCII-only filenames for exported files so that they can be transferred to 
 *Export to*
 You can export a single HTML page, one HTML page for each wiki page, an XML document, a [Multipage text format] file or a set of .wiki files (mainly interesting for Compact version to migrate to original).
 
-*Additional options*
+*Destination file/directory*
+Here you can set where the exported file(s) should be stored. If file or directory is needed depends on the type given in "Export to". For XML and multipage text it is a single file, for other types it is a directory (because multiple files must be written).
+
+
++++ Additional options for HTML exports
 For the HTML exports you can choose if you want to:
     * export URLs to images as \<img> tags or as normal links
     * create a table of contents either as a tree or as a list.
@@ -35,11 +39,22 @@ For the HTML exports you can choose if you want to:
     
 The defaults for these options can be set in the options dialog.
 
+
++++ Additional options for .wiki file exports
 For the .wiki export you can choose if the files should have system encoding or UTF-8 with or without BOM (byte-order mark). The import function of Compact can't recognize UTF-8 without BOM correctly.
 
 
-*Destination file/directory*
-Here you can set where the exported file(s) should be stored. If file or directory is needed depends on the type given in "Export to". For XML and multipage text it is a single file, for other types it is a directory (because multiple files must be written).
++++ Additional options for multipage text format
+
+*Version*
+Choose which version the file should have. If you use version 1 it can be read only by WikidPad 1.9beta6 and later. Version 0 can also be read by earlier versions but looses information.
+
+*Write wiki func. pages*
+Store also wiki-bound functional pages in the file. Only available for format version 1 and later.
+
+*Write saved searches*
+Store also saved searches in the file. Only available for format version 1 and later.
+
 
 
 ------------------------------------------------------------

@@ -1357,6 +1357,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                         showDocPagePresenter(presenter)
         self.selectedNodeWhileContext = self.contextMenuNode
         self.SelectItem(self.contextMenuNode)
+        if self.pWiki.getConfig().getboolean("main", "tree_autohide", False):
+            # Auto-hide tree
+            self.pWiki.setShowTreeControl(False)
 
     def buildTreeForWord(self, wikiWord, selectNode=False, doexpand=False):
         """
@@ -1543,6 +1546,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         item = event.GetItem()   
         if item is not None and item.IsOk():
             self.GetPyData(item).onActivate()
+            if self.pWiki.getConfig().getboolean("main", "tree_autohide", False):
+                # Auto-hide tree
+                self.pWiki.setShowTreeControl(False)
         else:
             pass
 #         event.Skip()
@@ -1693,6 +1699,11 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         if (tabMode & 2) and isinstance(nodeObj, WikiWordNode):
             self.pWiki.activateWikiWord(nodeObj.getWikiWord(), tabMode)
+            
+            if not (tabMode & 1) and self.pWiki.getConfig().getboolean("main",
+                    "tree_autohide", False):
+                # Not opened in background -> auto-hide tree if option selected
+                self.pWiki.setShowTreeControl(False)
         else:
             self.SelectItem(item)
 

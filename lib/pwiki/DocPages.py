@@ -94,7 +94,7 @@ class DocPage(MiscEventSourceMixin):
         Return None if page isn't existing instead of creating an automatic
         live text (e.g. by template).
         """
-        raise NotImplementedError #abstract
+        raise NotImplementedError   # abstract
 
 
     def replaceLiveText(self, text):

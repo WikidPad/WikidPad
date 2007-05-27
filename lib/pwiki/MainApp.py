@@ -304,8 +304,12 @@ class App(wx.App):
                 ("Options", 1), ("registerOptions",))
         
         # Load plugins
-        dirs = ( os.path.join(self.wikiAppDir, u'user_extensions'),
+#         dirs = ( os.path.join(self.wikiAppDir, u'user_extensions'),
+#                 os.path.join(self.wikiAppDir, u'extensions') )
+        dirs = ( os.path.join(self.globalConfigSubDir, u'user_extensions'),
+                os.path.join(self.wikiAppDir, u'user_extensions'),
                 os.path.join(self.wikiAppDir, u'extensions') )
+
         self.pluginManager.loadPlugins( dirs, [ u'KeyBindings.py',
                 u'EvalLibrary.py', u'WikiSyntax.py' ] )
 
@@ -332,6 +336,10 @@ class App(wx.App):
         res = wx.xrc.XmlResource.Get()
         res.SetFlags(0)
         res.LoadFromString(rd)
+        
+        # print "Set standardIcon"
+        self.standardIcon = wx.Icon(os.path.join(self.wikiAppDir, 'icons',
+                    'pwiki.ico'), wx.BITMAP_TYPE_ICO)
 
         self.startPersonalWikiFrame(CmdLineAction(sys.argv[1:]))
 
@@ -401,8 +409,12 @@ class App(wx.App):
 
         # set the icon of the app
         try:
-            wikiFrame.SetIcon(wx.Icon(os.path.join(self.wikiAppDir, 'icons',
-                    'pwiki.ico'), wx.BITMAP_TYPE_ICO))
+            # Method lookupIcon returns a wx.Bitmap
+#             icon = wx.IconFromBitmap(self.iconCache.lookupIcon("boy"))
+#             wikiFrame.SetIcon(icon)
+#             wikiFrame.SetIcon(wx.Icon(os.path.join(self.wikiAppDir, 'icons',
+#                     'pwiki.ico'), wx.BITMAP_TYPE_ICO))
+            wikiFrame.SetIcon(self.standardIcon)
         except:
             pass
 

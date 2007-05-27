@@ -68,12 +68,32 @@ class AbstractCollator:
         if not ascend:
             lst.reverse()
 
+    def sortByKey(self, lst, ascend=True):
+        """
+        Similar to sort(), but lst items are sequences where only the first
+        element is taken for sorting.
+        """
+        lst.sort(self.strcollByKey)
+        if not ascend:
+            lst.reverse()
+
+
     def strcoll(self, left, right):
         """
         Compare strings left and right and return integer value smaller, greater or
         equal 0 following the same rules as the built-in cmp() function
         """
-        assert 0  # abstract
+        raise NotImplementedError   # abstract
+
+
+    def strcollByKey(self, left, right):
+        """
+        Compare tuples left and right (first elements only) and return integer
+        value smaller, greater or equal 0 following the same rules as the
+        built-in cmp() function.
+        """
+        return self.strcoll(left[0], right[0])
+
 
     def strxfrm(self, s):
         """
@@ -83,7 +103,7 @@ class AbstractCollator:
         For all unicode strings a, b:
         cmp(strxfrm(a), strxfrm(b)) == strcoll(a, b)
         """
-        assert 0  # abstract
+        raise NotImplementedError   # abstract
 
 #     def normCase(self, s):
 #         """

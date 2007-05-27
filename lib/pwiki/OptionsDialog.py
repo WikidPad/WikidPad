@@ -100,6 +100,7 @@ class OptionsDialog(wx.Dialog):
             ("tree_auto_follow", "cbTreeAutoFollow", "b"),
             ("tree_update_after_save", "cbTreeUpdateAfterSave", "b"),
             ("tree_no_cycles", "cbTreeNoCycles", "b"),
+            ("tree_autohide", "cbTreeAutoHide", "b"),
             
             ("start_browser_after_export", "cbStartBrowserAfterExport", "b"),
             ("facename_html_preview", "tfFacenameHtmlPreview", "t"),
@@ -158,6 +159,8 @@ class OptionsDialog(wx.Dialog):
             ("fileStorage_identity_filenameMustMatch", "cbFsFilenameMustMatch", "b"),
             ("fileStorage_identity_modDateIsEnough", "cbFsModDateIsEnough", "b"),
             
+            ("wiki_icon", "tfWikiIcon", "t"),
+
             ("hotKey_showHide_byWiki", "tfHotKeyShowHideByWiki", "t")
     )
 

@@ -1,6 +1,56 @@
 ﻿++ Change Log
 
 
+May 27, 2007 (1.9beta6)
+
+    * New entry in "KeyBindings.py" for "ToggleCurrentFolding"
+      which allows to toggle the folding in the current line.
+    * Headings extended up to level 15.
+    * New version of export/import format "multipage text" which
+      can now store creation and modification date of a page as
+      well as saved searches and wiki-bound functional pages
+      (to allow a simple and complete transfer of a whole wiki
+      from one database type to another).
+    * When opening a wiki page in a new tab in background the open
+      dialog or the search results popup window stay open.
+    * Better behavior of recent files menu.
+    * Tree shows tooltips if current entry is too long to fit
+      in the window.
+    * Function to repair folding visibility to avoid folded (hidden)
+      lines which can't be unfolded anymore when header line
+      vanishes.
+    * Slightly more reasonable sorting of auto-complete suggestions.
+    * New format for main window title.
+    * "wiki:" URLs can contain now "page=" and "anchor=" parameters
+      to jump to particular pages and anchors in the pages.
+      See UrlLinking#++# Wiki:# URLs
+    * Possibility to use tabulator instead of | to delimit cells.
+      See TextFormatting#+++# Tables
+    
+    * Option to control if links to wikiwords should be renamed
+      when wikiword is renamed, can be either be "no", "yes" or
+      "ask for each renaming operation" (which is default and was
+      also the previous behavior).
+      See OptionsDialog#*Rename# links# when# renaming# wiki# word*
+    * Option to automatically hide the tree(s) after selecting
+      an entry in it. See OptionsDialog#*Tree# auto-hide*
+    * Wiki-specific option to set the systray icon (does not work
+      for main window icon). See OptionsDialog#*Wiki# icon*
+    
+    * Internal: customtreectrl.py updated to be based now on
+      rev. 1.14 in wxWidgets repository.
+    * Internal: Changes to allow usage of something else than
+      single brackets to tag wikiwords, attributes and insertions.
+    * Bug fixed: When renaming wikiword with non-ascii or
+      non-alphanumeric characters and modifying links, non-ascii
+      characters were preceded with backslashes
+    * Bug fixed: Sometimes the parent list of a page is not updated
+      after changes.
+    * Internal bug fixed: When calling PersonalWikiFrame.openWiki
+      with a relative path by a script or plugin, errors may occur.
+
+
+
 Apr. 28, 2007 (1.9beta5)
 
     * Bug fixed: Preview didn't work with titled wikiwords

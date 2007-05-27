@@ -61,6 +61,9 @@ The new "Default" order sorts according to default order determined by the opera
 *Uppercase first*.
 This setting has no effect for "C" order. Alphabetical sorting of children of a wiki word in tree is always inorder.
 
+*Rename links when renaming wiki word*
+When renaming a wiki word, WikidPad can try to rename all links to this word as well, but this is not fully reliable. Here you can check if this renaming should be done or not or if WikidPad should ask for each renaming.
+
 *App-bound hotkey*
 Here you can define a hotkey to show or hide WikidPad (they may only work on Windows). Hotkeys work system-wide, not only if WikidPad is active.
 
@@ -98,6 +101,9 @@ If a page contains wiki word links to non-existing pages, these are not shown as
 
 *No cycles in tree*
 If two or more pages reference each other (e.g. NodeA -> NodeB -> NodeA) these cycles are not shown. Precisely: if a child of a word is already an ancestor (parent, grandparent, ...) of this word, it is not shown.
+
+*Tree auto-hide*
+After selecting an item in tree, the tree is hidden automatically.
 
 *Position main tree*
 Controls where to place the main tree (to the left, right, top or bottom)
@@ -229,6 +235,8 @@ If you came to a not yet created page through a titled link (e.g. [WikiWord| Thi
 *Modif. date is enough*
 See [FileStorage].
 
+*Wiki icon*
+Set here the name of icon to use in the system tray instead of the default icon. If the field is empty the default icon is used. The icon of the main window is not influenced by this setting (because it does not work).
 
 *Wiki-bound hotkey*
 Wiki-bound hotkey to show/hide wiki. See OptionsDialog#*App-bound# hotkey*

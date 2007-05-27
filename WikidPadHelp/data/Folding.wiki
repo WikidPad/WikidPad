@@ -6,7 +6,7 @@ Folding means to hide or show a logical group of text lines when clicking on a p
 
 First, to show the folding symbol use "Show folding" in the "Folding" menu. You will see an additional margin on the left of the editor window and a minus sign to the left of each heading (meaning "unfolded").
 
-If you now click on one of the signs, all normal text below it until the next heading with same or higher level (+ is higher than ++ is higher than +++ and so on) is hidden and the minus becomes a plus (meaning folded). A second click reverts the situation.
+If you now click on one of the signs, all normal text below it until the next heading with same or higher level (+ is higher than ++ is higher than +++ and so on) is hidden and the minus becomes a plus (meaning folded). A second click reverts the situation. Instead of clicking you can also select "toggle current folding" in the "Folding" menu.
 
 The functions "Unfold All" and "Fold All" in the "Folding" menu (un-)fold all parts in the current text editor.
 
