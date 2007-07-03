@@ -521,7 +521,8 @@ class WikiTxtCtrl(wxStyledTextCtrl):
         Apply the basic Scintilla settings which are resetted to wrong
         default values by some operations
         """
-        self.SetCodePage(wxSTC_CP_UTF8)
+        if isUnicode():
+            self.SetCodePage(wxSTC_CP_UTF8)
         self.SetIndent(4)
         self.SetTabIndents(True)
         self.SetBackSpaceUnIndents(True)
