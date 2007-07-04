@@ -1,7 +1,14 @@
 ﻿++ Change Log
 
 
-May 24, 2007 (1.8rc5)
+Jul 3, 2007 (1.8rc6)
+
+    * Bug fixed: Setting Scintilla codepage fails on non-Unicode
+      wxPython (does not affect Windows binary)
+
+
+
+May 24, 2007 (1.8rc5, repository revision in "stable-1.8" branch: 118)
 
     * Bug fixed: When renaming wikiword with non-ascii or
       non-alphanumeric characters and modifying links, non-ascii
