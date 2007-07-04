@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 import cStringIO as StringIO
-import urllib, os.path
+import urllib, os.path, traceback
 
 import wx, wx.html
 # from wxPython.wx import *
@@ -270,8 +270,13 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
 
     def OnSetFocus(self, evt):
-        if self.visible:
-            self.refresh()
+        # Trying to fix mysterious crashes (but doesn't help)
+        try:
+            if self.visible:
+                self.refresh()
+        except:
+            traceback.print_exc()
+            
 
 #     def OnClipboardCopy(self, evt):
 #         copyTextToClipboard(self.SelectionToText())

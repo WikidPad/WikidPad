@@ -280,6 +280,7 @@ WikidPadHelp/data/SEARCH_VIEWS.grl -text
 WikidPadHelp/data/SETTINGS.grl -text
 WikidPadHelp/data/ScratchPad.wiki -text
 WikidPadHelp/data/SearchingTheWiki.wiki -text
+WikidPadHelp/data/ShortHintAttribute.wiki -text
 WikidPadHelp/data/SpellChecking.wiki -text
 WikidPadHelp/data/SystemInfoTemplate.wiki -text
 WikidPadHelp/data/TMPTABLE.grl -text
@@ -325,6 +326,7 @@ docs/dev.txt -text
 export/wikistyle.css -text
 extensions/EvalLibrary.py -text
 extensions/ExampleInsertion.py -text
+extensions/GnuplotClBridge.py -text
 extensions/GraphvizClBridge.py -text
 extensions/KeyBindings.py -text
 extensions/MimeTexCGIBridge.py -text

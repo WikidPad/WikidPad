@@ -455,7 +455,7 @@ def urlFromPathname(fn):
 
 
 
-_RNDBASESEQ = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+_RNDBASESEQ = u"1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 def createRandomString(length):
     """

@@ -128,7 +128,6 @@ else:    # Non-Windows 9x versions
         Retrieve text or unicode text from clipboard
         """
         from StringOps import lineendToInternal, mbcsDec
-        import array
     
         cb = wx.TheClipboard
         cb.Open()
@@ -137,8 +136,6 @@ else:    # Non-Windows 9x versions
 
             if cb.GetData(dataob):
                 if dataob.GetTextLength() > 0:
-                    # We have unicode data
-                    # This might not work for all platforms:   # TODO Better impl.
                     return lineendToInternal(dataob.GetText())
                 else:
                     return u""
@@ -152,7 +149,6 @@ else:    # Non-Windows 9x versions
         Create data object for an unicode string
         """
         from StringOps import lineendToOs, mbcsEnc, utf8Enc
-        import array
         
         if text is None:
             text = u""
@@ -162,28 +158,30 @@ else:    # Non-Windows 9x versions
         return wx.TextDataObject(text)
 
 
+# bmp.ConvertToImage()
+def getBitmapFromClipboard():
+    """
+    Retrieve bitmap from clipboard if available
+    """
+    cb = wx.TheClipboard
+    cb.Open()
+    try:
+        dataob = wx.BitmapDataObject()
+
+        if cb.GetData(dataob):
+            result = dataob.GetBitmap()
+            if result is not wx.NullBitmap:
+                return result
+            else:
+                return None
+        return None
+    finally:
+        cb.Close()
 
 
 
 
 def copyTextToClipboard(text): 
-#     from StringOps import lineendToOs, mbcsEnc
-#     import array
-# 
-#     cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
-#     udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
-#     realuni = lineendToOs(text)
-#     arruni = array.array("u")
-#     arruni.fromunicode(realuni+u"\x00")
-#     rawuni = arruni.tostring()
-#     # print "Copy", repr(realuni), repr(rawuni), repr(mbcsenc(realuni)[0])
-#     udataob.SetData(rawuni)
-#     cdataob.SetData(mbcsEnc(realuni)[0]+"\x00")
-# 
-#     dataob = wxDataObjectComposite()
-#     dataob.Add(udataob)
-#     dataob.Add(cdataob)
-
     dataob = textToDataObject(text)
 
     cb = wx.TheClipboard
@@ -518,7 +516,7 @@ class IconCache:
 class LayerSizer(wx.PySizer):
     def __init__(self):
         wx.PySizer.__init__(self)
-
+        self.addedItemIds = set()
 
     def CalcMin(self):
         minw = 0
@@ -529,6 +527,13 @@ class LayerSizer(wx.PySizer):
             minh = max(minh, mins.height)
 
         return wx.Size(minw, minh)
+        
+    
+    def Add(self, item):
+        pId = id(item)
+        if pId not in self.addedItemIds:
+             self.addedItemIds.add(pId)
+             wx.PySizer.Add(self, item)
 
 
     def RecalcSizes(self):

@@ -125,7 +125,12 @@ class BasicDocPagePresenter(LayeredControlPresenter):
     controlling e.g. a notebook which has the actual subcontrols as
     children
     """
-
+    
+    
+    def __init__(self, mainControl):
+        LayeredControlPresenter.__init__(self, mainControl)
+        self.docPage = None
+        
     def getConfig(self):
         return self.getMainControl().getConfig()
 
@@ -143,14 +148,26 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 
     def getFormatting(self):
         return self.getWikiDocument().getFormatting()
-    
+
     def SetStatusText(self, text, field):
             self.getStatusBar().SetStatusText(uniToGui(text), field)
-    
+
     # TODO move doc page into PagePresenter
     def getDocPage(self):
-        return self.getSubControl("textedit").getLoadedDocPage()
-    
+        return self.docPage
+#         return self.getSubControl("textedit").getLoadedDocPage()
+
+
+    def setDocPage(self, dp):
+        if self.docPage is not None:
+            self.docPage.getMiscEvent().removeListener(self)
+
+        self.docPage = dp
+
+        if self.docPage is not None:
+            self.docPage.getMiscEvent().addListener(self)
+
+
     def getWikiWord(self):
         docPage = self.getDocPage()
         if docPage is None or not isinstance(docPage,
@@ -160,10 +177,15 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 
     def getLiveText(self):
         return self.getSubControl("textedit").GetText()
-        
-        
+
+
     def informLiveTextChanged(self, changer):
-        self.fireMiscEventProps({"changed live text": True, "changer": changer})
+        """
+        Called by the txt editor control
+        """
+        if self.getDocPage() is not None:
+            self.getDocPage().informLiveTextChanged(changer)
+#         self.fireMiscEventProps({"changed live text": True, "changer": changer})
 
 
     def miscEventHappened(self, miscevt):
@@ -174,10 +196,13 @@ class BasicDocPagePresenter(LayeredControlPresenter):
             # TODO? Check if mainControl's current presenter is this one
             self.fireMiscEventProps(miscevt.getProps())
 
+        elif miscevt.getSource() is self.docPage:
+            if miscevt.has_key("changed live text"):
+                self.fireMiscEventProps(miscevt.getProps())
+
 
     def getStatusBar(self):
         return self.getMainControl().GetStatusBar()
-
 
 
     def openFuncPage(self, funcTag, **evtprops):

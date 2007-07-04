@@ -56,6 +56,8 @@ Mozilla and IE renderer use a CSS-file located in the configuration directory (s
 Choose if you want a table of contents in tree form, list form or not at all, see WikiExport#*Additional# options*
 In the export dialog, you can temporarily override this setting for one export.
 
+*Title of toc*
+Set the title of the table of contents according to your language. The default is "Table of Contents". For German it could be e.g. "Inhaltsverzeichnis".
 
 
 +++ HTML header settings

@@ -239,6 +239,41 @@ class FileStorage:
 
         # Give up
         return (None, False)
+    
+    
+    def findDestPathNoSource(self, suffix, prefix=u""):
+        """
+        Find a path to a destination.
+        """
+        self._ensureStorage()
+
+        if prefix:
+            fname = prefix + suffix
+
+            destPath = os.path.join(self.storagePath, fname)
+            if not os.path.exists(destPath):
+                return destPath
+        else:
+            prefix = u""
+
+
+#         mat = _FILESPLITPAT.match(fname)
+#         if mat is None:
+#             raise FSException("Internal error: Bad source file name")
+# 
+#         coreName = mat.group("name")
+#         suffix = mat.group("suffix")
+
+        for t in xrange(20):  # Number of tries
+            newName = u"%s_%s%s" % (prefix, createRandomString(20), suffix)
+
+            destPath = os.path.join(self.storagePath, newName)
+            if not os.path.exists(destPath):
+                return destPath
+
+        # Give up
+        return None
+        
 
 
     # TODO progress indicator

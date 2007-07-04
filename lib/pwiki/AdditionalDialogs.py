@@ -621,6 +621,8 @@ class ExportDialog(wx.Dialog):
         exporterList = [] # List of tuples (<exporter object>, <export tag>,
                           # <readable description>, <additional options panel>)
         
+        addOptSizer = LayerSizer()
+        
         for ob in Exporters.describeExporters(self.pWiki):   # TODO search plugins
             for tp in ob.getExportTypes(self.ctrls.additOptions):
                 panel = tp[2]
@@ -628,20 +630,29 @@ class ExportDialog(wx.Dialog):
                     if self.emptyPanel is None:
                         # Necessary to avoid a crash        
                         self.emptyPanel = wx.Panel(self.ctrls.additOptions)
-                        self.emptyPanel.Fit()
+                        # self.emptyPanel.Fit()
                     panel = self.emptyPanel
                 else:
-                    panel.Fit()
+                    pass
+                    # panel.Fit()
 
                 # Add Tuple (Exporter object, export type tag,
                 #     export type description, additional options panel)
-                exporterList.append((ob, tp[0], tp[1], panel)) 
+                exporterList.append((ob, tp[0], tp[1], panel))
+                addOptSizer.Add(panel)
+
+
+        self.ctrls.additOptions.SetSizer(addOptSizer)
+        self.ctrls.additOptions.SetMinSize(addOptSizer.GetMinSize())
 
         self.ctrls.additOptions.Fit()
-        mins = self.ctrls.additOptions.GetMinSize()
-
-        self.ctrls.additOptions.SetMinSize(wx.Size(mins.width+10, mins.height+10))
         self.Fit()
+
+#         self.ctrls.additOptions.Fit()
+#         mins = self.ctrls.additOptions.GetMinSize()
+# 
+#         self.ctrls.additOptions.SetMinSize(wx.Size(mins.width+10, mins.height+10))
+#         self.Fit()
 
         self.exporterList = exporterList
 
@@ -844,6 +855,8 @@ class ImportDialog(wx.Dialog):
         importerList = [] # List of tuples (<importer object>, <import tag=type>,
                           # <readable description>, <additional options panel>)
         
+        addOptSizer = LayerSizer()
+
         for ob in Importers.describeImporters(self.mainControl):   # TODO search plugins
             for tp in ob.getImportTypes(self.ctrls.additOptions):
                 panel = tp[2]
@@ -851,20 +864,29 @@ class ImportDialog(wx.Dialog):
                     if self.emptyPanel is None:
                         # Necessary to avoid a crash        
                         self.emptyPanel = wx.Panel(self.ctrls.additOptions)
-                        self.emptyPanel.Fit()
+                        # self.emptyPanel.Fit()
                     panel = self.emptyPanel
                 else:
-                    panel.Fit()
+                    pass
+                    # panel.Fit()
 
                 # Add Tuple (Importer object, import type tag,
                 #     import type description, additional options panel)
-                importerList.append((ob, tp[0], tp[1], panel)) 
+                importerList.append((ob, tp[0], tp[1], panel))
+                addOptSizer.Add(panel)
+
+        self.ctrls.additOptions.SetSizer(addOptSizer)
+        self.ctrls.additOptions.SetMinSize(addOptSizer.GetMinSize())
 
         self.ctrls.additOptions.Fit()
-        mins = self.ctrls.additOptions.GetMinSize()
-        
-        self.ctrls.additOptions.SetMinSize(wx.Size(mins.width+10, mins.height+10))
         self.Fit()
+
+#         self.ctrls.additOptions.Fit()
+#         mins = self.ctrls.additOptions.GetMinSize()
+#         
+#         self.ctrls.additOptions.SetMinSize(wx.Size(mins.width+10, mins.height+10))
+#         self.Fit()
+
         
         self.importerList = importerList
 
@@ -1205,3 +1227,134 @@ class WikiInfoDialog(wx.Dialog):
         inputsizer.Add(ctl, 1, wx.ALL | wx.EXPAND, 5)
         
         return inputsizer
+
+
+
+
+# TODO Move to better module
+class ImagePasteSaver:
+    """
+    Helper class to store image settings (format, quality) and to 
+    perform saving on request.
+    """
+    def __init__(self):
+        self.prefix = u""  # Prefix before random numbers in filename
+        self.formatNo = 0  # Currently either 0:None, 1:PNG or 2:JPG
+        self.quality = 75   # Quality for JPG image
+
+
+    def readOptionsFromConfig(self, config):
+        """
+        config -- SingleConfiguration or CombinedConfiguration to read default
+                settings from into the object
+        """
+        self.prefix = config.get("main", "editor_imagePaste_filenamePrefix", u"")
+
+        self.formatNo = config.getint("main", "editor_imagePaste_fileType", u"")
+
+        quality = config.getint("main", "editor_imagePaste_quality", 75)
+        quality = min(100, quality)
+        quality = max(0, quality)
+
+        self.quality = quality
+
+
+    def setQualityByString(self, s):
+        try:
+            quality = int(s)
+            quality = min(100, quality)
+            quality = max(0, quality)
+    
+            self.quality = quality
+        except ValueError:
+            return
+
+
+#     def setFormatByFormatNo(self, formatNo):
+#         if formatNo == 1:
+#             self.format = "png"
+#         elif formatNo == 2:
+#             self.format = "jpg"
+#         else:  # formatNo == 0
+#             self.format = "none"
+
+
+    def saveFile(self, fs, img):
+        """
+        fs -- FileStorage to save into
+        img -- wx.Image to save
+
+        Returns absolute path of saved image or None if not saved
+        """
+        if self.formatNo < 1 or self.formatNo > 2:
+            return None
+
+        img.SetOptionInt(u"quality", self.quality)
+
+        if self.formatNo == 1:   # PNG
+            destPath = fs.findDestPathNoSource(u".png", self.prefix)
+        elif self.formatNo == 2:   # JPG
+            destPath = fs.findDestPathNoSource(u".jpg", self.prefix)
+
+        if destPath is None:
+            # Couldn't find unused filename
+            return None
+
+        if self.formatNo == 1:   # PNG
+            img.SaveFile(destPath, wx.BITMAP_TYPE_PNG)
+        elif self.formatNo == 2:   # JPG
+            img.SaveFile(destPath, wx.BITMAP_TYPE_JPEG)
+
+        return destPath
+
+
+
+class ImagePasteDialog(wx.Dialog):
+    def __init__(self, pWiki, ID, imgpastesaver, title="Image paste options",
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
+        d = wx.PreDialog()
+        self.PostCreate(d)
+
+        self.pWiki = pWiki
+        res = wx.xrc.XmlResource.Get()
+        res.LoadOnDialog(self, self.pWiki, "ImagePasteDialog")
+
+        self.ctrls = XrcControls(self)
+
+        self.SetTitle(title)
+
+        self.ctrls.tfEditorImagePasteFilenamePrefix.SetValue(imgpastesaver.prefix)
+        self.ctrls.chEditorImagePasteFileType.SetSelection(imgpastesaver.formatNo)
+        self.ctrls.tfEditorImagePasteQuality.SetValue(unicode(
+                imgpastesaver.quality))
+
+        self.imgpastesaver = ImagePasteSaver()
+
+        self.ctrls.btnOk.SetId(wx.ID_OK)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
+
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+
+
+    def getImagePasteSaver(self):
+        return self.imgpastesaver
+
+
+    def OnOk(self, evt):
+        try:
+            imgpastesaver = ImagePasteSaver()
+            imgpastesaver.prefix = \
+                    self.ctrls.tfEditorImagePasteFilenamePrefix.GetValue()
+            imgpastesaver.formatNo = \
+                    self.ctrls.chEditorImagePasteFileType.GetSelection()
+            imgpastesaver.setQualityByString(
+                    self.ctrls.tfEditorImagePasteQuality.GetValue())
+
+            self.imgpastesaver = imgpastesaver
+        finally:
+            self.EndModal(wx.ID_OK)
+
+
+
+
+

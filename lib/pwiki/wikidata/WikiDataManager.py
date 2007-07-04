@@ -629,10 +629,16 @@ class WikiDataManager(MiscEventSourceMixin):
 
         # Prefix is normally u"++"
         pageTitlePrefix = self.getFormatting().getPageTitlePrefix() + u" "
-        prevTitle = pageTitlePrefix + self.getWikiPageTitle(wikiWord) + u"\n"
+        wikiWordTitle = self.getWikiPageTitle(wikiWord)
+        
+        if wikiWordTitle is not None:
+            prevTitle = pageTitlePrefix + self.getWikiPageTitle(wikiWord) + u"\n"
+        else:
+            prevTitle = None
+
         page = self.getWikiPage(toWikiWord)
         content = page.getLiveText()
-        if content.startswith(prevTitle):
+        if prevTitle is not None and content.startswith(prevTitle):
             # Replace previous title with new one
             content = pageTitlePrefix + self.getWikiPageTitle(toWikiWord) + \
                     u"\n" + content[len(prevTitle):]
@@ -746,20 +752,24 @@ class WikiDataManager(MiscEventSourceMixin):
 
     def getWikiPageTitle(self, wikiWord):
         """
-        Return a title for a newly created page.
+        Return a title for a newly created page. It may return None if no title
+        should be shown.
         """
         creaMode = self.getWikiConfig().getint("main",
                 "wikiPageTitle_creationMode", 1)
         if creaMode == 0:
             # Let wikiword untouched
             return wikiWord
-        else:  # creaMode == 1: Add spaces before uppercase letters,
-                # e.g. NewWikiWord -> New Wiki Word
+        elif creaMode == 1:
+            # Add spaces before uppercase letters,
+            # e.g. NewWikiWord -> New Wiki Word
             title = re.sub(ur'([A-Z\xc0-\xde]+)([A-Z\xc0-\xde][a-z\xdf-\xff])',
                     r'\1 \2', wikiWord)
             title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2',
                     title)
             return title
+        else:  # creaMode == 2: No title at all.
+            return None
 
 
     def searchWiki(self, sarOp, applyOrdering=True):  # TODO Threadholder

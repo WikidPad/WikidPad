@@ -172,6 +172,12 @@ Controls which pane should be shown when a page is opened:
 You can also use "global.view_pane".
 
 
+*short_hint*
+If you place the mouse pointer over the wiki link to a page which contains this attribute, the value of the attribute is shown as a tooltip. E.g. place the mouse pointer over this link and let it rest one moment:
+    ShortHintAttribute
+
+
+
 +++ Error checking
 
 The content of a page is checked on saving for logical errors in some of the special attributes. There is a log window below the editor (normally hidden) which shows error messages if something is wrong.

@@ -108,6 +108,13 @@ class DocPage(MiscEventSourceMixin):
             self.update(text, True)   # TODO: Really update? Handle auto-generated areas
 
 
+    def informLiveTextChanged(self, changer):
+        """
+        Called by the txt editor control
+        """
+        self.fireMiscEventProps({"changed live text": True, "changer": changer})
+
+
     def getContent(self):
         """
         Returns page content. If page doesn't exist already some content
@@ -452,9 +459,12 @@ class WikiPage(DocPage):
                 else:
                     title = self.suggNewPageTitle
 
-                content = u"%s %s\n\n" % \
-                        (self.wikiDocument.getFormatting().getPageTitlePrefix(),
-                        title)
+                if title is not None:
+                    content = u"%s %s\n\n" % \
+                            (self.wikiDocument.getFormatting().getPageTitlePrefix(),
+                            title)
+                else:
+                    content = u""
 
         return content
 

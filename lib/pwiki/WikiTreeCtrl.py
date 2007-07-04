@@ -977,6 +977,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         self.SetBackgroundColour(wx.WHITE)
         self.SetSpacing(0)
+#         self.SetCursor(wx.NullCursor)
         self.refreshGenerator = None  # Generator called in OnIdle
         self.refreshCheckChildren = [] # List of nodes to check for new/deleted children
 
@@ -1025,7 +1026,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         self.contextMenuWikiWords.AppendMenu(wx.NewId(), 'Add color property',
                 colorsMenu)
-                
+
         self.contextMenuNode = None  # Tree node for which a context menu was shown
         self.selectedNodeWhileContext = None # Tree node which was selected
                 # before context menu was shown (when context menu is closed
@@ -1050,8 +1051,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 self.OnPrependWikiWord)
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
                 self.OnActivateNewTabThis)
-        
-        
+
 
 
         # Register for pWiki events
@@ -1084,6 +1084,13 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         """
         rootNode = self.GetRootItem()
         self.CollapseAndReset(rootNode)
+
+    def expandRoot(self):
+        """
+        Called after rebuilding tree
+        """
+        rootNode = self.GetRootItem()
+        self.Expand(rootNode)
         
     def getHideUndefined(self):
         return self.pWiki.getConfig().getboolean("main", "hideundefined")

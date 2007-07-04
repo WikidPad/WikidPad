@@ -115,7 +115,8 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
-        wx.EVT_MOUSEWHEEL(self, self.OnMouseWheel) 
+        wx.EVT_MOUSEWHEEL(self, self.OnMouseWheel)
+        wx.EVT_MOTION(self, self.OnMouseMotion)        
 
 
     def setVisible(self, vis):
@@ -418,6 +419,47 @@ class WikiHtmlView(wx.html.HtmlWindow):
             self.addZoom( -(evt.GetWheelRotation() // evt.GetWheelDelta()) )
         else:
             evt.Skip()
+            
+            
+    def OnMouseMotion(self, evt):
+        evt.Skip()
+
+        pos = self.CalcUnscrolledPosition(evt.GetPosition())
+        cell = self.GetInternalRepresentation().FindCellByPos(pos.x, pos.y)
+        callTip = u""
+
+        if cell is not None:
+            linkInfo = cell.GetLink()
+            if linkInfo is not None:
+                href = linkInfo.GetHref()
+                if href.startswith(u"internaljump:"):
+                    # Jump to another wiki page
+                    
+                    # First check for an anchor. In URLs, anchors are always
+                    # separated by '#' regardless which character is used
+                    # in the wiki syntax (normally '!')
+                    try:
+                        wikiWord, anchor = href[13:].split(u"#", 1)
+                    except ValueError:
+                        wikiWord = href[13:]
+                        anchor = None
+
+                    wikiDocument = self.presenter.getWikiDocument()
+                    if wikiDocument is None:
+                        return
+                    wikiData = wikiDocument.getWikiData()
+
+                    if wikiData.isDefinedWikiWord(wikiWord):
+                        wikiWord = wikiData.getAliasesWikiWord(wikiWord)
+                        
+                        propList = wikiData.getPropertiesForWord(wikiWord)
+                        for key, value in propList:
+                            if key == u"short_hint":
+                                callTip = value
+                                break
+
+
+        self.SetToolTipString(callTip)
 
 
 

@@ -1,7 +1,23 @@
 ﻿++ Change Log
 
 
-May 27, 2007 (1.9beta6)
+Jul 04, 2007 (1.9beta7)
+
+* Limited (no error messages) support for gnuplot. See ExternalGraphicalApplications
+* Option to have no title on newly generated pages. See OptionsDialog#*Wikiword# to# title*
+* Possibility to save images on the clipboard as files in the "files" directory of a wiki. See OptionsDialog#+++++# Image# pasting
+* Option to set title of HTML table of contents. See [Options HTML preview_export]#*Title# of# toc*
+* New attribute "short_hint" to provide tooltip text when hovering with the mouse over a wikiword having this attribute. Also option to set tooltip appearance delay for editor. See WikiDocumentAttributes#*short_hint*
+
+* Small enhancements in spell checker dialog.
+* Using the shortcut to display wiki-wide search or replace dialog while the dialog is open switches focus to it.
+* Ctrl-F4 closes current tab (not customizable)
+
+* Bug fixed: Setting Scintilla codepage fails on non-Unicode wxPython (does not affect Windows binary)
+
+
+
+May 27, 2007 (1.9beta6, repository revision in "mbutscher" branch: 119)
 
     * New entry in "KeyBindings.py" for "ToggleCurrentFolding"
       which allows to toggle the folding in the current line.
@@ -51,7 +67,7 @@ May 27, 2007 (1.9beta6)
 
 
 
-Apr. 28, 2007 (1.9beta5)
+Apr. 28, 2007 (1.9beta5, repository revision in "mbutscher" branch: 116)
 
     * Bug fixed: Preview didn't work with titled wikiwords
     * Bug fixed: When renaming wikiword with non-ascii characters

@@ -18,10 +18,12 @@ import wx, wx.stc
 from Utilities import *
 
 from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
-        wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc
+        wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc, \
+        getBitmapFromClipboard
 from MiscEvent import KeyFunctionSink
 
 from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
+from AdditionalDialogs import ImagePasteSaver, ImagePasteDialog
 import WikiFormatting
 import PageAst, DocPages
 from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException
@@ -100,7 +102,7 @@ class IncrementalSearchDialog(wx.Frame):
         if searchInit:
             self.tfInput.SetValue(searchInit)
             self.tfInput.SetSelection(-1, -1)
-        
+
         if self.closeDelay:
             self.closeTimer = wx.Timer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE)
             self.closeTimer.Start(self.closeDelay, True)
@@ -130,7 +132,7 @@ class IncrementalSearchDialog(wx.Frame):
     def OnKeyDownInput(self, evt):
         if self.closeDelay:
             self.closeTimer.Start(self.closeDelay, True)
-        
+
         key = evt.GetKeyCode()
         accP = getAccelPairFromKeyDown(evt)
         matchesAccelPair = self.presenter.getMainControl().keyBindings.\
@@ -202,19 +204,16 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
     NUMBER_MARGIN = 0
     FOLD_MARGIN = 2
     SELECT_MARGIN = 1
-    
+
     def __init__(self, presenter, parent, ID):
         wx.stc.StyledTextCtrl.__init__(self, parent, ID)
         self.presenter = presenter
         self.evalScope = None
         self.stylingThreadHolder = ThreadHolder()
         self.clearStylingCache()
-#         self.stylebytes = None
-#         self.foldingseq = None
-#         self.pageAst = None
         self.pageType = "normal"   # The pagetype controls some special editor behaviour
 #         self.idleCounter = 0       # Used to reduce idle load
-        self.loadedDocPage = None
+#         self.loadedDocPage = None
         self.lastFont = None
         self.ignoreOnChange = False
         self.searchStr = u""
@@ -238,6 +237,12 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         
         self.defaultFont = config.get("main", "font",
                 self.presenter.getDefaultFontFaces()["mono"])
+
+        self.CallTipSetForeground(wx.Colour(0, 0, 0))
+
+        shorthintDelay = self.presenter.getConfig().getint("main",
+                "editor_shortHint_delay", 500)
+        self.SetMouseDwellTime(shorthintDelay)
 
 
         # Self-modify to ansi/unicode version
@@ -351,6 +356,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         wx.stc.EVT_STC_MODIFIED(self, ID, self.OnModified)
         wx.stc.EVT_STC_USERLISTSELECTION(self, ID, self.OnUserListSelection)
         wx.stc.EVT_STC_MARGINCLICK(self, ID, self.OnMarginClick)
+        wx.stc.EVT_STC_DWELLSTART(self, ID, self.OnDwellStart)
+        wx.stc.EVT_STC_DWELLEND(self, ID, self.OnDwellEnd)
         
         wx.EVT_LEFT_DOWN(self, self.OnClick)
         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
@@ -412,7 +419,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
 
     def getLoadedDocPage(self):
-        return self.loadedDocPage
+        return self.presenter.getDocPage()
 
     def close(self):
         """
@@ -432,10 +439,58 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
     def Paste(self):
         text = getTextFromClipboard()
-        if text is None:
+        if text:
+            self.ReplaceSelection(text)
             return
+        else:
+            bmp = getBitmapFromClipboard()
+            if bmp is not None:
+                img = bmp.ConvertToImage()
+                del bmp
+                fs = self.presenter.getWikiDocument().getFileStorage()
+                imgsav = ImagePasteSaver()
+                imgsav.readOptionsFromConfig(self.presenter.getConfig())
+                
+                if self.presenter.getConfig().getboolean("main",
+                        "editor_imagePaste_askOnEachPaste", True):
+                    # Options say to present dialog on an image paste operation
+                    dlg = ImagePasteDialog(self.presenter.getMainControl(), -1,
+                            imgsav)
+                    try:
+                        dlg.ShowModal()
+                        imgsav = dlg.getImagePasteSaver()
+                    finally:
+                        dlg.Destroy()
 
-        self.ReplaceSelection(text)
+                destPath = imgsav.saveFile(fs, img)
+                if destPath is None:
+                    # Couldn't find unused filename or saving denied
+                    return
+                    
+#                 destPath = fs.findDestPathNoSource(u".png", u"")
+#                 
+#                 print "Paste6", repr(destPath)
+#                 if destPath is None:
+#                     # Couldn't find unused filename
+#                     return
+# 
+#                 img.SaveFile(destPath, wx.BITMAP_TYPE_PNG)
+
+                locPath = self.presenter.getMainControl().getWikiConfigPath()
+
+                if locPath is not None:
+                    locPath = dirname(locPath)
+                    relPath = relativeFilePath(locPath, destPath)
+                    url = None
+                    if relPath is None:
+                        # Absolute path needed
+                        url = "file:%s" % urlFromPathname(destPath)
+                    else:
+                        url = "rel://%s" % urlFromPathname(relPath)
+
+                    if url:
+                        self.ReplaceSelection(url)
+
 
     def onCmdCopy(self, miscevt):
         if wx.Window.FindFocus() != self:
@@ -631,7 +686,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         Apply the basic Scintilla settings which are resetted to wrong
         default values by some operations
         """
-        self.SetCodePage(wx.stc.STC_CP_UTF8)
+        if isUnicode():
+            self.SetCodePage(wx.stc.STC_CP_UTF8)
         self.SetIndent(4)
         self.SetTabIndents(True)
         self.SetBackSpaceUnIndents(True)
@@ -649,10 +705,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         """
         Save loaded wiki page into database. Does not check if dirty
         """
-        if self.loadedDocPage is None:
+        if self.getLoadedDocPage() is None:
             return
 
-        page = self.loadedDocPage
+        page = self.getLoadedDocPage()
 
 #         if not self.loadedDocPage.getDirty()[0]:
 #             return
@@ -665,26 +721,27 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         
     def unloadCurrentDocPage(self, evtprops=None):
         # Unload current page
-        if self.loadedDocPage is not None:
+        docPage = self.getLoadedDocPage()
+        if docPage is not None:
 
-            wikiWord = self.loadedDocPage.getWikiWord()
+            wikiWord = docPage.getWikiWord()
             if wikiWord is not None:
-                self.loadedDocPage.setPresentation((self.GetCurrentPos(),
+                docPage.setPresentation((self.GetCurrentPos(),
                         self.GetScrollPos(wx.HORIZONTAL),
                         self.GetScrollPos(wx.VERTICAL)), 0)
-                self.loadedDocPage.setPresentation((self.getFoldInfo(),), 5)
+                docPage.setPresentation((self.getFoldInfo(),), 5)
 
-            if self.loadedDocPage.getDirty()[0]:
+            if docPage.getDirty()[0]:
                 self.saveLoadedDocPage()
 
-            miscevt = self.loadedDocPage.getMiscEvent()
+            miscevt = docPage.getMiscEvent()
             miscevt.removeListener(self.wikiPageListener)
             
             self.SetDocPointer(None)
             self.applyBasicSciSettings()
 
-            self.loadedDocPage.removeTxtEditor(self)
-            self.loadedDocPage = None
+            docPage.removeTxtEditor(self)
+            self.presenter.setDocPage(None)
 
             self.clearStylingCache()
 #             self.stylebytes = None
@@ -699,9 +756,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         content = None
         wikiDataManager = self.presenter.getWikiDocument()
         
-        self.loadedDocPage = funcPage
+        self.presenter.setDocPage(funcPage)
         
-        if self.loadedDocPage is None:
+        if self.getLoadedDocPage() is None:
             return  # TODO How to handle?
 
         globalProps = wikiDataManager.getWikiData().getGlobalProperties()
@@ -719,10 +776,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #         p2.update({"loading current page": True})
 #         self.pWiki.fireMiscEventProps(p2)  # TODO Remove this hack
 
-        miscevt = self.loadedDocPage.getMiscEvent()
+        miscevt = self.getLoadedDocPage().getMiscEvent()
         miscevt.addListener(self.wikiPageListener)
 
-        otherEditor = self.loadedDocPage.getTxtEditor()
+        otherEditor = self.getLoadedDocPage().getTxtEditor()
         if otherEditor is not None:
             # Another editor contains already this page, so share its
             # Scintilla document object for synchronized editing
@@ -731,7 +788,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         else:
             # Load content
             try:
-                content = self.loadedDocPage.getLiveText()
+                content = self.getLoadedDocPage().getLiveText()
             except WikiFileNotFoundException, e:
                 assert 0   # TODO
 
@@ -739,9 +796,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.SetText(content)
 
 
-        self.loadedDocPage.addTxtEditor(self)
+        self.getLoadedDocPage().addTxtEditor(self)
 
-        self.presenter.setTitle(self.loadedDocPage.getTitle())
+        self.presenter.setTitle(self.getLoadedDocPage().getTitle())
 
 
     def loadWikiPage(self, wikiPage, evtprops=None):
@@ -752,13 +809,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         # set the editor text
         wikiDataManager = self.presenter.getWikiDocument()
         
-        self.loadedDocPage = wikiPage
+        self.presenter.setDocPage(wikiPage)
 
-        if self.loadedDocPage is None:
+        if self.getLoadedDocPage() is None:
             return  # TODO How to handle?
 
         # get the font that should be used in the editor
-        font = self.loadedDocPage.getPropertyOrGlobal("font",
+        font = self.getLoadedDocPage().getPropertyOrGlobal("font",
                 self.defaultFont)
         
         # set the styles in the editor to the font
@@ -768,11 +825,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.SetStyles(faces)
             self.lastEditorFont = font
 
-        miscevt = self.loadedDocPage.getMiscEvent()
+        miscevt = self.getLoadedDocPage().getMiscEvent()
         miscevt.addListener(self.wikiPageListener)
 
 
-        otherEditor = self.loadedDocPage.getTxtEditor()
+        otherEditor = self.getLoadedDocPage().getTxtEditor()
         if otherEditor is not None:
             # Another editor contains already this page, so share its
             # Scintilla document object for synchronized editing
@@ -781,14 +838,14 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         else:
             # Load content
             try:
-                content = self.loadedDocPage.getLiveText()
+                content = self.getLoadedDocPage().getLiveText()
             except WikiFileNotFoundException, e:
                 assert 0   # TODO
 
             # now fill the text into the editor
             self.setTextAgaUpdated(content)
 
-        self.loadedDocPage.addTxtEditor(self)
+        self.getLoadedDocPage().addTxtEditor(self)
 
         if evtprops is None:
             evtprops = {}
@@ -796,11 +853,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         p2.update({"loading wiki page": True, "wikiPage": wikiPage})
         self.presenter.fireMiscEventProps(p2)  # TODO Remove this hack
         
-        self.pageType = self.loadedDocPage.getProperties().get(u"pagetype",
+        self.pageType = self.getLoadedDocPage().getProperties().get(u"pagetype",
                 [u"normal"])[-1]
 
         if self.pageType == u"normal":
-            if not self.loadedDocPage.isDefined():
+            if not self.getLoadedDocPage().isDefined():
                 # This is a new, not yet defined page, so go to the end of page
                 self.GotoPos(self.GetLength())
             else:
@@ -825,7 +882,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
                 if not anchor:
                     # see if there is a saved position for this page
-                    prst = self.loadedDocPage.getPresentation()
+                    prst = self.getLoadedDocPage().getPresentation()
                     lastPos, scrollPosX, scrollPosY = prst[0:3]
                     foldInfo = prst[5]
                     self.setFoldInfo(foldInfo)
@@ -876,7 +933,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         else:
             pass   # TODO Error message?
 
-        self.presenter.setTitle(self.loadedDocPage.getTitle())
+        self.presenter.setTitle(self.getLoadedDocPage().getTitle())
 
 
     def onReloadedCurrentPage(self, miscevt):
@@ -891,7 +948,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if not anchor:
             return
 
-        if not self.loadedDocPage.isDefined():
+        if not self.getLoadedDocPage().isDefined():
             return
 
         if self.pageType == u"normal":
@@ -929,10 +986,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
     def onOptionsChanged(self, miscevt):
         faces = self.presenter.getDefaultFontFaces().copy()
 
-        if isinstance(self.loadedDocPage, 
+        if isinstance(self.getLoadedDocPage(), 
                 (DocPages.WikiPage, DocPages.AliasWikiPage)):
 
-            font = self.loadedDocPage.getPropertyOrGlobal("font",
+            font = self.getLoadedDocPage().getPropertyOrGlobal("font",
                     self.defaultFont)
             faces["mono"] = font
             self.lastEditorFont = font    # ???
@@ -963,57 +1020,19 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.StyleSetForeground(wx.stc.STC_STYLE_DEFAULT, self._getColorFromOption(
                 "editor_plaintext_color", (0, 0, 0)))
 
-
-#         # Set selection foreground color
-#         coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
-#                 "main", "editor_selection_fg_color"))
-# 
-#         if coltuple is None:
-#             coltuple = (0, 0, 0)
-# 
-#         color = wx.Colour(*coltuple)
-#         self.SetSelForeground(True, color)
-# 
-#         # Set selection background color
-#         coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
-#                 "main", "editor_selection_bg_color"))
-# 
-#         if coltuple is None:
-#             coltuple = (192, 192, 192)
-# 
-#         color = wx.Colour(*coltuple)
-#         self.SetSelBackground(True, color)
-# 
-#         # Set caret color
-#         coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
-#                 "main", "editor_caret_color"))
-# 
-#         if coltuple is None:
-#             coltuple = (0, 0, 0)
-# 
-#         color = wx.Colour(*coltuple)
-#         self.SetCaretForeground(color)
-#         
-#         # Set default color (especially for folding lines)
-#         coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
-#                 "main", "editor_plaintext_color"))
-#         
-#         if coltuple is None:
-#             coltuple = (0, 0, 0)
-# 
-#         color = wx.Colour(*coltuple)
-#         self.StyleSetForeground(wx.stc.STC_STYLE_DEFAULT, color)
-
+        shorthintDelay = self.presenter.getConfig().getint("main",
+                "editor_shortHint_delay", 500)
+        self.SetMouseDwellTime(shorthintDelay)
 
 
     def onWikiPageUpdated(self, miscevt):
-        if self.loadedDocPage is None or \
-                not isinstance(self.loadedDocPage,
+        if self.getLoadedDocPage() is None or \
+                not isinstance(self.getLoadedDocPage(),
                 (DocPages.WikiPage, DocPages.AliasWikiPage)):
             return
 
         # get the font that should be used in the editor
-        font = self.loadedDocPage.getPropertyOrGlobal("font",
+        font = self.getLoadedDocPage().getPropertyOrGlobal("font",
                 self.defaultFont)
 
         # set the styles in the editor to the font
@@ -1023,13 +1042,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.SetStyles(faces)
             self.lastEditorFont = font
 
-        self.pageType = self.loadedDocPage.getProperties().get(u"pagetype",
+        self.pageType = self.getLoadedDocPage().getProperties().get(u"pagetype",
                 [u"normal"])[-1]
 
 
     def onSavingAllPages(self, miscevt):
-        if self.loadedDocPage is not None and (
-                self.loadedDocPage.getDirty()[0] or miscevt.get("force", False)):
+        if self.getLoadedDocPage() is not None and (
+                self.getLoadedDocPage().getDirty()[0] or miscevt.get("force", False)):
             self.saveLoadedDocPage()
 
     def onClosingCurrentWiki(self, miscevt):
@@ -1040,15 +1059,16 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         An access error occurred. Get rid of any data without trying to save
         it.
         """
-        if self.loadedDocPage is not None:
-            miscevt = self.loadedDocPage.getMiscEvent()
+        if self.getLoadedDocPage() is not None:
+            miscevt = self.getLoadedDocPage().getMiscEvent()
             miscevt.removeListener(self.wikiPageListener)
             
             self.SetDocPointer(None)
             self.applyBasicSciSettings()
 
-            self.loadedDocPage.removeTxtEditor(self)
-            self.loadedDocPage = None
+            self.getLoadedDocPage().removeTxtEditor(self)
+            self.presenter.setDocPage(None)
+#             self.loadedDocPage = None
             self.pageType = "normal"
 
 
@@ -1209,7 +1229,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         page = PageAst.Page()
         page.buildAst(self.presenter.getFormatting(), text,
-                self.loadedDocPage.getFormatDetails(), threadholder=threadholder)
+                self.getLoadedDocPage().getFormatDetails(), threadholder=threadholder)
         
         stylebytes = self.processTokens(page.getTokens(), threadholder)
         if self.getFoldingActive():
@@ -1530,7 +1550,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             page = PageAst.Page()
             self.pageAst = page
             page.buildAst(self.presenter.getFormatting(), self.GetText(),
-                    self.loadedDocPage.getFormatDetails())
+                    self.getLoadedDocPage().getFormatDetails())
         
         return page
 
@@ -1751,9 +1771,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             
             # process script imports
             if securityLevel > 1: # Local import_scripts properties allowed
-                if self.loadedDocPage.getProperties().has_key(
+                if self.getLoadedDocPage().getProperties().has_key(
                         "import_scripts"):
-                    scriptNames = self.loadedDocPage.getProperties()[
+                    scriptNames = self.getLoadedDocPage().getProperties()[
                             "import_scripts"]
                     for sn in scriptNames:
                         try:
@@ -1931,7 +1951,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         """
         Can be called by an aga to present all parents of the current page.
         """
-        relations = self.loadedDocPage.getParentRelationships()[:]
+        relations = self.getLoadedDocPage().getParentRelationships()[:]
 
         # Apply sort order
         relations.sort(_removeBracketsAndSort) # sort alphabetically
@@ -2176,7 +2196,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             wrapPosition = 70
             try:
                 wrapPosition = int(
-                        self.loadedDocPage.getPropertyOrGlobal(
+                        self.getLoadedDocPage().getPropertyOrGlobal(
                         "wrap", "70"))
             except:
                 pass
@@ -2354,7 +2374,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if not self.ignoreOnChange:
             if evt.GetModificationType() & \
                     (wx.stc.STC_MOD_INSERTTEXT | wx.stc.STC_MOD_DELETETEXT):
-                self.loadedDocPage.setDirty(True)
+                self.getLoadedDocPage().setDirty(True)
                 self.presenter.informLiveTextChanged(self)
 
     def OnCharAdded(self, evt):
@@ -2602,6 +2622,47 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.repairFoldingVisibility()
         
         evt.Skip()
+        
+        
+    def OnDwellStart(self, evt):
+        wikiDocument = self.presenter.getWikiDocument()
+        if wikiDocument is None:
+            return
+        wikiData = wikiDocument.getWikiData()
+        
+        bytePos = evt.GetPosition()
+        charPos = len(self.GetTextRange(0, bytePos))
+        
+        pageAst = self.getPageAst()
+
+        tokens = pageAst.getTokensForPos(charPos)
+
+        if charPos > 0:
+            # Maybe a token left to the cursor was meant, so check
+            # one char to the left
+            tokens += pageAst.getTokensForPos(charPos - 1)
+            
+        callTip = None
+        for tok in tokens:
+            if tok.ttype == WikiFormatting.FormatTypes.WikiWord:
+                wikiWord = tok.node.nakedWord
+                if wikiData.isDefinedWikiWord(wikiWord):
+                    wikiWord = wikiData.getAliasesWikiWord(wikiWord)
+                    propList = wikiData.getPropertiesForWord(wikiWord)
+                    for key, value in propList:
+                        if key == u"short_hint":
+                            callTip = value
+                            break
+
+                    if callTip:
+                        break
+
+        if callTip:
+            self.CallTipShow(bytePos, callTip)
+
+
+    def OnDwellEnd(self, evt):
+        self.CallTipCancel()
 
 
 

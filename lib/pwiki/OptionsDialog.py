@@ -114,7 +114,8 @@ class OptionsDialog(wx.Dialog):
             ("html_export_pics_as_links", "cbHtmlExportPicsAsLinks", "b"),
             ("html_preview_renderer", "chHtmlPreviewRenderer", "seli"),
             ("export_table_of_contents", "chTableOfContents", "seli"),
-            
+            ("html_toc_title", "tfHtmlTocTitle", "t"),
+
             ("html_body_link", "tfHtmlLinkColor", "color0"),
             ("html_body_alink", "tfHtmlALinkColor", "color0"),
             ("html_body_vlink", "tfHtmlVLinkColor", "color0"),
@@ -123,6 +124,18 @@ class OptionsDialog(wx.Dialog):
             ("html_body_background", "tfHtmlBgImage", "t"),
             ("html_header_doctype", "tfHtmlDocType", "t"),
 
+            ("sync_highlight_byte_limit", "tfSyncHighlightingByteLimit", "i0+"),
+            ("async_highlight_delay", "tfAsyncHighlightingDelay", "f0+"),
+            ("editor_shortHint_delay", "tfEditorShortHintDelay", "i0+"),
+            ("editor_autoUnbullets", "cbAutoUnbullets", "b"),
+            ("editor_autoComplete_closingBracket",
+                "cbAutoCompleteClosingBracket", "b"),
+
+            ("editor_imagePaste_filenamePrefix", "tfEditorImagePasteFilenamePrefix", "t"),
+            ("editor_imagePaste_fileType", "chEditorImagePasteFileType", "seli"),
+            ("editor_imagePaste_quality", "tfEditorImagePasteQuality", "i0+"),
+            ("editor_imagePaste_askOnEachPaste", "cbEditorImagePasteAskOnEachPaste", "b"),
+
             ("editor_plaintext_color", "tfEditorPlaintextColor", "color0"),
             ("editor_link_color", "tfEditorLinkColor", "color0"),
             ("editor_attribute_color", "tfEditorAttributeColor", "color0"),
@@ -130,11 +143,6 @@ class OptionsDialog(wx.Dialog):
             ("editor_selection_fg_color", "tfEditorSelectionFgColor", "color0"),
             ("editor_selection_bg_color", "tfEditorSelectionBgColor", "color0"),
             ("editor_caret_color", "tfEditorCaretColor", "color0"),
-            ("sync_highlight_byte_limit", "tfSyncHighlightingByteLimit", "i0+"),
-            ("async_highlight_delay", "tfAsyncHighlightingDelay", "f0+"),
-            ("editor_autoUnbullets", "cbAutoUnbullets", "b"),
-            ("editor_autoComplete_closingBracket",
-                "cbAutoCompleteClosingBracket", "b"),
 
             ("mouse_middleButton_withoutCtrl", "chMouseMiddleButtonWithoutCtrl", "seli"),
             ("mouse_middleButton_withCtrl", "chMouseMiddleButtonWithCtrl", "seli"),
@@ -183,6 +191,7 @@ class OptionsDialog(wx.Dialog):
             ("OptionsPageHtmlHeader", u"    HTML header"),
             ("OptionsPageAutosave", u"  Autosave"),
             ("OptionsPageEditor", u"  Editor"),
+            ("OptionsPageEditorColors", u"    Editor Colors"),
             ("OptionsPageClipboardCatcher", u"    Clipboard Catcher"),
             ("OptionsPageMouse", u"  Mouse"),
             ("OptionsPageSearching", u"  Searching"),            

@@ -132,6 +132,8 @@ class HtmlXmlExporter:
                     "html_export_pics_as_links"))
             ctrls.chTableOfContents.SetSelection(config.getint("main",
                     "export_table_of_contents"))
+            ctrls.tfHtmlTocTitle.SetValue(config.get("main",
+                    "html_toc_title"))
 
         else:
             htmlPanel = None
@@ -197,13 +199,16 @@ class HtmlXmlExporter:
 
             return ( boolToInt(config.getboolean("main",
                     "html_export_pics_as_links")),
-                    config.getint("main", "export_table_of_contents") )
+                    config.getint("main", "export_table_of_contents"),
+                    config.get("main", "html_toc_title") )
         else:
             ctrls = XrcControls(addoptpanel)
+
             picsAsLinks = boolToInt(ctrls.cbPicsAsLinks.GetValue())
             tableOfContents = ctrls.chTableOfContents.GetSelection()
+            tocTitle = ctrls.tfHtmlTocTitle.GetValue()
 
-            return (picsAsLinks, tableOfContents)
+            return (picsAsLinks, tableOfContents, tocTitle)
 
 
     def export(self, wikiDataManager, wordList, exportType, exportDest,
@@ -289,6 +294,8 @@ class HtmlXmlExporter:
         realfp = open(outputFile, "w")
         fp = utf8Writer(realfp, "replace")
         fp.write(self.getFileHeaderMultiPage(self.mainControl.wikiName))
+        
+        tocTitle = self.addOpt[2]
 
         if self.addOpt[1] == 1:
             # Write a content tree at beginning
@@ -296,16 +303,18 @@ class HtmlXmlExporter:
                         self.mainControl.getWikiDocument().getWikiName())
             flatTree = rootPage.getFlatTree()
 
-            fp.write((u'<h2>Table of Contents</h2>\n'
+            fp.write((u'<h2>%s</h2>\n'
                     '%s%s<hr size="1"/>') %
-                    (self.getContentTreeBody(flatTree, linkAsFragments=True),
+                    (tocTitle, # = "Table of Contents"
+                    self.getContentTreeBody(flatTree, linkAsFragments=True),
                     u'<br />\n'*10))
 
         elif self.addOpt[1] == 2:
             # Write a content list at beginning
-            fp.write((u'<h2>Table of Contents</h2>\n'
+            fp.write((u'<h2>%s</h2>\n'
                     '%s%s<hr size="1"/>') %
-                    (self.getContentListBody(linkAsFragments=True),
+                    (tocTitle, # = "Table of Contents"
+                    self.getContentListBody(linkAsFragments=True),
                     u'<br />\n'*10))
                     
         links = {}
@@ -401,7 +410,7 @@ class HtmlXmlExporter:
                 fp = utf8Writer(realfp, "replace")
 
                 # TODO Factor out HTML header generation                
-                fp.write(self._getGenericHtmlHeader(u"Table of Contents") + 
+                fp.write(self._getGenericHtmlHeader(self.addOpt[2]) + 
                         u"    <body>\n")
                 if self.addOpt[1] == 1:
                     # Write a content tree
@@ -409,14 +418,18 @@ class HtmlXmlExporter:
                                 self.mainControl.getWikiDocument().getWikiName())
                     flatTree = rootPage.getFlatTree()
     
-                    fp.write((u'<h2>Table of Contents</h2>\n'
+                    fp.write((u'<h2>%s</h2>\n'
                             '%s') %
-                            (self.getContentTreeBody(flatTree, linkAsFragments=False),))
+                            (self.addOpt[2],  # = "Table of Contents"
+                            self.getContentTreeBody(flatTree, linkAsFragments=False)
+                            ))
                 elif self.addOpt[1] == 2:
                     # Write a content list
-                    fp.write((u'<h2>Table of Contents</h2>\n'
+                    fp.write((u'<h2>%s</h2>\n'
                             '%s') %
-                            (self.getContentListBody(linkAsFragments=False),))
+                            (self.addOpt[2],  # = "Table of Contents"
+                            self.getContentListBody(linkAsFragments=False)
+                            ))
 
                 fp.write(self.getFileFooter())
 
@@ -1233,8 +1246,23 @@ class HtmlXmlExporter:
                 self.outAppend(u'<link type="wikiword">%s</link>' % 
                         escapeHtml(tokenText))
             else:
-                self.outAppend(u'<span class="wiki-link"><a href="%s">' %
-                        escapeHtml(link))
+                title = None
+                if wikiData.isDefinedWikiWord(word):
+                    wikiWord = wikiData.getAliasesWikiWord(word)
+
+                    propList = wikiData.getPropertiesForWord(wikiWord)
+                    for key, value in propList:
+                        if key == u"short_hint":
+                            title = value
+                            break
+
+                if title is not None:
+                    self.outAppend(u'<span class="wiki-link"><a href="%s" title="%s">' %
+                            (escapeHtml(link), escapeHtml(title)))
+                else:
+                    self.outAppend(u'<span class="wiki-link"><a href="%s">' %
+                            escapeHtml(link))
+
                 if astNode.titleTokens is not None:
                     self.processTokens(fullContent, astNode.titleTokens)
                 else:
@@ -1245,7 +1273,6 @@ class HtmlXmlExporter:
                 self.processTokens(fullContent, astNode.titleTokens)
             else:
                 self.outAppend(escapeHtml(tokenText))                        
-        
 
 
 
@@ -1661,46 +1688,6 @@ class HtmlXmlExporter:
 
             elif styleno == WikiFormatting.FormatTypes.WikiWord:
                 self._processWikiWord(tok.text, tok.node, content)
-#                 word = tok.node.nakedWord
-#                 link = self.links.get(word)
-#                 
-#                 selfLink = False
-# 
-#                 if link:
-#                     if not self.exportType in (u"html_single", u"xml"):
-#                         wikiData = wikiDocument.getWikiData()
-#                         linkTo = wikiData.getAliasesWikiWord(word)
-#                         linkFrom = wikiData.getAliasesWikiWord(self.wikiWord)
-#                         if linkTo == linkFrom:
-#                             # Page links to itself
-#                             selfLink = True
-# 
-#                     # Add anchor fragment if present
-#                     if tok.node.anchorFragment:
-#                         if selfLink:
-#                             # Page links to itself, so replace link URL
-#                             # by the anchor.
-#                             link = u"#" + tok.node.anchorFragment
-#                         else:
-#                             link += u"#" + tok.node.anchorFragment
-# 
-#                     if self.asXml:   # TODO XML
-#                         self.outAppend(u'<link type="wikiword">%s</link>' % 
-#                                 escapeHtml(tok.text))
-#                     else:
-#                         self.outAppend(u'<span class="wiki-link"><a href="%s">' %
-#                                 escapeHtml(link))
-#                         if tok.node.titleTokens is not None:
-#                             self.processTokens(content, tok.node.titleTokens)
-#                         else:
-#                             self.outAppend(escapeHtml(word))                        
-#                         self.outAppend(u'</a></span>')
-#                 else:
-#                     if tok.node.titleTokens is not None:
-#                         self.processTokens(content, tok.node.titleTokens)
-#                     else:
-#                         self.outAppend(escapeHtml(tok.text))                        
-
             elif styleno == WikiFormatting.FormatTypes.Numeric:
                 # Numeric bullet
                 numbers = len(tok.grpdict["preLastNumeric"].split(u"."))

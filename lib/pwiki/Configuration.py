@@ -523,6 +523,7 @@ GLOBALDEFAULTS = {
     ("main", "html_preview_renderer"): "0",  # 0: Internal wxWidgets; 1: IE; 2: Mozilla
     ("main", "export_table_of_contents"): "0",  # Show table of contents when exporting
             # 0:None, 1:formatted as tree, 2:as list
+    ("main", "html_toc_title"): u"Table of Contents",  # title of table of contents
 
     ("main", "html_body_link"): "",  # for HTML preview/export, color for link or "" for default
     ("main", "html_body_alink"): "",  # for HTML preview/export, color for active link or "" for default
@@ -534,6 +535,22 @@ GLOBALDEFAULTS = {
 
 
     # Editor options
+    ("main", "sync_highlight_byte_limit"): "5120",  # Size limit when to start asyn. highlighting in editor
+    ("main", "async_highlight_delay"): "0.2",  # Delay after keypress before starting async. highlighting
+    ("main", "editor_shortHint_delay"): "500",  # Delay in milliseconds until the short hint defined for a wikiword is displayed
+            # 0 deactivates short hints
+    ("main", "editor_autoUnbullets"): "True",  # When pressing return on line with lonely bullet, remove bullet?
+    ("main", "editor_autoComplete_closingBracket"): "False",  # Append closing bracket to suggested wiki words
+            # for autocompletion ("[Two" -> "[Two words]" instead of -> "[Two words")
+    
+    ("main", "editor_imagePaste_filenamePrefix"): "",  # Prefix to put before the filename.
+    ("main", "editor_imagePaste_fileType"): "1",  # When pasting images into WikidPad, which file type
+            # should be used. 0: Deactivate image-paste; 1: PNG format; 2: JPEG
+    ("main", "editor_imagePaste_quality"): "75",  # Which quality should the (JPEG-)image have?
+            # 0 zero means very bad, 100 means very good
+    ("main", "editor_imagePaste_askOnEachPaste"): "True",  # When pasting image, ask each time for settings?
+
+    # Editor color options
     ("main", "editor_plaintext_color"): "", # Color of plain text (and non-exist. wikiwords) in editor
     ("main", "editor_link_color"): "", # Color of links (URL and wikiwords)
     ("main", "editor_attribute_color"): "", # Color of attributes (=properties) and scripts
@@ -541,11 +558,6 @@ GLOBALDEFAULTS = {
     ("main", "editor_selection_fg_color"): "",  # Foreground color of the selection in the editor
     ("main", "editor_selection_bg_color"): "",  # Background color of the selection in the editor
     ("main", "editor_caret_color"): "",  # Color of caret in the editor
-    ("main", "sync_highlight_byte_limit"): "5120",  # Size limit when to start asyn. highlighting in editor
-    ("main", "async_highlight_delay"): "0.2",  # Delay after keypress before starting async. highlighting
-    ("main", "editor_autoUnbullets"): "True",  # When pressing return on line with lonely bullet, remove bullet?
-    ("main", "editor_autoComplete_closingBracket"): "False",  # Append closing bracket to suggested wiki words
-            # for autocompletion ("[Two" -> "[Two words]" instead of -> "[Two words")
 
 
     ("main", "clipboardCatcher_suffix"): ur"\n",  # Suffix to append after each caught clipboard snippet
@@ -619,6 +631,7 @@ WIKIDEFAULTS = {
     ("main", "wikiPageTitle_creationMode"): "1",   # How to create title from name of a new wiki word:
             # 0: Use wiki word as title as it is ("NewWikiWord" -> "NewWikiWord")
             # 1: Add spaces before uppercase letter ("NewWikiWord" -> "New Wiki Word")
+            # 2: No title at all
     ("main", "wikiPageTitle_fromLinkTitle"): "False",   # If clicking on a title link, e.g. [wiki word|interesting title]
             # of a non-existing page use that title as title of the page.
 

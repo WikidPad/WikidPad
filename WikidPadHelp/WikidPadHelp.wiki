@@ -2,6 +2,7 @@
 data_dir = data
 
 [main]
+wiki_icon = 
 footnotes_as_wikiwords = False
 wikipagetitle_creationmode = 1
 last_wiki_word = WikidPadHelp

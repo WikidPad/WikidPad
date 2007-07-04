@@ -136,6 +136,42 @@ How long to wait after the page was initially modified (dirty) after last save (
 
 ++++ Editor
 
+*Sync. highlighting limit*
+Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 3000 to 5000 bytes
+
+*Highlight start delay*
+For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds
+
+*Short hint delay*
+Set how many milliseconds before showing the short hint tooltip in editor. 0 deactivates the tooltip. See WikiDocumentAttributes#*short_hint* for details.
+
+*Auto-unbullets*
+When this option is active and enter is pressed on a line which contains only a bullet or a numbering without text, the bullet is removed. See BulletedLists for details.
+
+*Append closing bracket on auto-complete*
+When suggesting the completion for a bracketed wiki word, e.g. "[Not Came" you can decide if a closing bracket is suggested ("[Not Camel Case]") or not ("[Not Camel Case").
+
++++++ Image pasting
+When pasting bitmap data into WikidPad it can be saved as an image file into the "files" directory of the wiki and a link to it can be generated. These options control how to do that:
+
+*Filename prefix*
+A prefix to use for the filename. If this filename plus suffix exists already in "files" dir, an underscore and a sequence of 20 random letters or numbers is appended to create a unique filename. E.g. you want to store a PNG-file with prefix "foo" then WikidPad checks if "foo.png" is already in the "files" directory (if prefix is empty, this is not tried). If "foo.png" exists it tries something like "foo_2NIUXQ0OGVRDT1O3JNUN.png". If this exists already it tries again (up to 20 times) before giving up.
+
+*File type*
+
+    * None: Don't store images at all
+    * PNG: Store in PNG format (losless compression)
+    * JPEG: Store in JPEG format (lossy compression)
+
+*Quality*
+Number to define quality of JPEG compression (0:worst, 75:default, 100:best)
+
+*Ask settings on each paste*
+If checked each time you paste an image, a dialog box asks for the above settings to set them individually.
+
+
+++++ Editor colors
+
 *Plain text color*
 Specify the color of plain text (like this one) in the editor by pressing the little "..." button to start the color dialog or by entering a numeric HTML color (e.g. "#000000" for black) in the text field. Leaving the field empty chooses the default color.
 
@@ -156,18 +192,6 @@ Specify the background color of selected text. See "Plain text color" above for 
 
 *Text cursor color*
 Set the color of the text cursor (the small blinking vertical bar).
-
-*Sync. highlighting limit*
-Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 3000 to 5000 bytes
-
-*Highlight start delay*
-For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds
-
-*Auto-unbullets*
-When this option is active and enter is pressed on a line which contains only a bullet or a numbering without text, the bullet is removed. See BulletedLists for details.
-
-*Append closing bracket on auto-complete*
-When suggesting the completion for a bracketed wiki word, e.g. "[Not Came" you can decide if a closing bracket is suggested ("[Not Camel Case]") or not ("[Not Camel Case").
 
 
 ++++ Clipboard catcher
@@ -226,6 +250,7 @@ Control the heading level of the initial main title of new pages and fill betwee
 How should the main title of new pages be generated from the wikiword:
     * As is: Use wikiword as title
     * Add spaces: Add spaces to wikiword in front of each uppercase letter ("NewWikiWord" -> "New Wiki Word")
+    * No title: Don't show a title at all
 
 *Use link title if present*
 If you came to a not yet created page through a titled link (e.g. [WikiWord| This is the title]) and this option is checked, the link title will be used as title of the page.

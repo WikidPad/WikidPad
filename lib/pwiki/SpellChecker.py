@@ -118,10 +118,12 @@ class SpellCheckerDialog(wx.Dialog):
         """
         
         self.ctrls.tfToCheck.SetValue("")
-        # Show misspelled word in context
+        # Show message in blue
         self.ctrls.tfToCheck.SetDefaultStyle(wx.TextAttr(wx.BLUE))
         self.ctrls.tfToCheck.AppendText(uniToGui(msg))
         self.ctrls.tfToCheck.SetDefaultStyle(wx.TextAttr(wx.BLACK))
+        # To scroll text to beginning
+        self.ctrls.tfToCheck.SetInsertionPoint(0)
         self.ctrls.tfReplaceWith.SetValue(u"")
         self.ctrls.lbReplaceSuggestions.DeleteAllItems()
         
@@ -234,8 +236,8 @@ class SpellCheckerDialog(wx.Dialog):
         self.ctrls.tfToCheck.AppendText(mat.group(0))
         self.ctrls.tfToCheck.SetDefaultStyle(wx.TextAttr(wx.BLACK))
         self.ctrls.tfToCheck.AppendText(contextPost)
-        
-        self.ctrls.tfReplaceWith.SetValue(uniToGui(mat.group(0)))
+        # To scroll text to beginning
+        self.ctrls.tfToCheck.SetInsertionPoint(0)
         
         # List suggestions
         sugglist = self.enchantDict.suggest(mat.group(0))
@@ -245,10 +247,16 @@ class SpellCheckerDialog(wx.Dialog):
             self.ctrls.lbReplaceSuggestions.InsertStringItem(
                     self.ctrls.lbReplaceSuggestions.GetItemCount(), s)
         self.ctrls.lbReplaceSuggestions.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+        
+        if len(sugglist) > 0:
+            self.ctrls.tfReplaceWith.SetValue(uniToGui(sugglist[0]))
+        else:
+            self.ctrls.tfReplaceWith.SetValue(uniToGui(mat.group(0)))
 
         self.ctrls.tfReplaceWith.SetFocus()
 
         return True
+
 
     def OnClose(self, evt):
         self.mainControl.spellChkDlg = None

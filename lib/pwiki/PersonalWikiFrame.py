@@ -1710,7 +1710,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         accs = [
             (wx.ACCEL_CTRL, wx.WXK_INSERT, GUI_ID.CMD_CLIPBOARD_COPY),
             (wx.ACCEL_SHIFT, wx.WXK_INSERT, GUI_ID.CMD_CLIPBOARD_PASTE),
-            (wx.ACCEL_SHIFT, wx.WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT)
+            (wx.ACCEL_SHIFT, wx.WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT),
+            (wx.ACCEL_CTRL, wx.WXK_F4, GUI_ID.CMD_CLOSE_CURRENT_TAB)   # TODO Which combination for non-Windows?
             ]
             
         accP = self.keyBindings.getAccelPair("SwitchFocus")
@@ -1737,6 +1738,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         wx.EVT_ICONIZE(self, self.OnIconize)
         wx.EVT_MAXIMIZE(self, self.OnMaximize)
+        
+        wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_CURRENT_TAB, self._OnRoundtripEvent)
 
 
     def OnUpdateTreeCtrlMenuItem(self, evt):
@@ -2471,10 +2474,10 @@ These are your default global settings.
             for dpp in self.getMainAreaPanel().getDocPagePresenters():
                 e = dpp.getSubControl("textedit")
                 e.Enable(True)
-    
+
             # update the last accessed wiki config var
             self.lastAccessedWiki(self.getWikiConfigPath())
-    
+
             # Rebuild text blocks menu
             self.rereadTextBlocks()
             
@@ -2994,8 +2997,12 @@ These are your default global settings.
 #         unicodeUrl = isinstance(relurl, unicode)
 #         if unicodeUrl:
 #             relurl = relurl.encode("utf8", "replace")
+#             relurl = relurl.decode("latin-1", "replace")
 
         relpath = urllib.url2pathname(relurl[6:])
+
+#         print "makeRelUrlAbsolute3", repr((relurl, relpath))
+#         print "makeRelUrlAbsolute4", repr(abspath(join(dirname(self.getWikiConfigPath()), relpath)))
 
         url = "file:" + urllib.pathname2url(
                 abspath(join(dirname(self.getWikiConfigPath()), relpath)))
@@ -3003,6 +3010,7 @@ These are your default global settings.
 #         if unicodeUrl:
 #             url = url.decode("utf8", "replace")
         
+#         print "makeRelUrlAbsolute10", repr(url)
         return url
         
 
@@ -3329,6 +3337,8 @@ These are your default global settings.
                 self.tbIcon = TaskBarIcon(self)
 
             if Configuration.isLinux():
+                # On Linux, the tray icon must be resized here, otherwise
+                # it might be too large.
                 if bmp is not None:
                     img = bmp.ConvertToImage()
                 else:
@@ -3666,6 +3676,8 @@ These are your default global settings.
 
     def showSearchDialog(self):
         if self.findDlg != None:
+            if isinstance(self.findDlg, SearchWikiDialog):
+                self.findDlg.SetFocus()
             return
 
         self.findDlg = SearchWikiDialog(self, -1)
@@ -3705,6 +3717,8 @@ These are your default global settings.
 
     def showFindReplaceDialog(self):
         if self.findDlg != None:
+            if isinstance(self.findDlg, SearchPageDialog):
+                self.findDlg.SetFocus()
             return
 
         self.findDlg = SearchPageDialog(self, -1)
@@ -3757,7 +3771,10 @@ These are your default global settings.
                 page = self.wikiDataManager.createWikiPage(wikiWord)
                 # TODO Respect template property?
                 title = self.wikiDataManager.getWikiPageTitle(wikiWord)
-                self.saveDocPage(page, u"++ %s\n\n%s" % (title, text), None)
+                if title is not None:
+                    self.saveDocPage(page, u"++ %s\n\n%s" % (title, text), None)
+                else:
+                    self.saveDocPage(page, text, None)
             else:
                 page = self.wikiDataManager.getWikiPage(wikiWord)
                 page.appendLiveText(u"\n\n" + text)
@@ -4019,7 +4036,7 @@ These are your default global settings.
         self.spellChkDlg.checkNext(startPos=0)
 
 
-    def rebuildWiki(self, skipConfirm = False):
+    def rebuildWiki(self, skipConfirm=False):
         if not skipConfirm:
             result = wx.MessageBox(u"Are you sure you want to rebuild this wiki? "
                     u"You may want to backup your data first!",
@@ -4038,6 +4055,7 @@ These are your default global settings.
                 if self.getCurrentWikiWord() is not None:
                     self.openWikiPage(self.getCurrentWikiWord(),
                             forceTreeSyncFromRoot=True)
+                self.tree.expandRoot()
             except (IOError, OSError, DbAccessError), e:
                 self.lostAccess(e)
                 raise
@@ -4360,6 +4378,9 @@ These are your default global settings.
         """
         # Clear menu
         rwMenu = self.recentWikisMenu
+        if rwMenu is None:
+            return
+
         for i in xrange(rwMenu.GetMenuItemCount()):
             item = rwMenu.FindItemByPosition(0)
             rwMenu.DestroyItem(item)
