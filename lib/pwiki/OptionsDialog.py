@@ -375,7 +375,8 @@ class OptionsDialog(wxDialog):
 
 
     def OnSelectFaceHtmlPrev(self, evt):
-        dlg = FontFaceDialog(self, -1, self.ctrls.tfFacenameHtmlPreview.GetValue())
+        dlg = FontFaceDialog(self, -1, self.pWiki,
+                self.ctrls.tfFacenameHtmlPreview.GetValue())
         if dlg.ShowModal() == wxID_OK:
             self.ctrls.tfFacenameHtmlPreview.SetValue(dlg.GetValue())
         dlg.Destroy()

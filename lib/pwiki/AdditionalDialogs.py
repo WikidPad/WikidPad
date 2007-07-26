@@ -433,7 +433,7 @@ class FontFaceDialog(wxDialog):
     Presents a list of available fonts (its face names) and renders a sample
     string with currently selected face.
     """
-    def __init__(self, parent, ID, value="",
+    def __init__(self, parent, ID, mainControl, value="",
                  pos=wxDefaultPosition, size=wxDefaultSize,
                  style=wxNO_3D):
         """
@@ -444,6 +444,7 @@ class FontFaceDialog(wxDialog):
         self.PostCreate(d)
         
         self.parent = parent
+        self.mainControl = mainControl
         self.value = value
 
         res = xrc.wxXmlResource.Get()
@@ -458,7 +459,7 @@ class FontFaceDialog(wxDialog):
         fenum = wxFontEnumerator()
         fenum.EnumerateFacenames()
         facelist = fenum.GetFacenames()
-        self.parent.getCollator().sort(facelist)
+        self.mainControl.getCollator().sort(facelist)
 
         for f in facelist:
             self.ctrls.lbFacenames.Append(f)

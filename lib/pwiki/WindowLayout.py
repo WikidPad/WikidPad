@@ -352,13 +352,15 @@ class WindowLayouter:
                     str(sashWindow.getEffectiveSashPosition())
 
 
-    def cleanMainWindow(self):
+    def cleanMainWindow(self, excluded=()):
         """
         Destroy all direct children of mainWindow which were created here
         to allow a new layout.
+        
+        excluded -- Sequence or set of window objects which shoudl be preserved
         """
         for w in self.directMainChildren:
-            if w.GetParent() is self.mainWindow:
+            if (w not in excluded) and (w.GetParent() is self.mainWindow):
                 w.Destroy()
 
 

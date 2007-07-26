@@ -1,7 +1,16 @@
 ﻿++ Change Log
 
 
-Jul 3, 2007 (1.8rc6)
+Jul. 26, 2007 (1.8rc7)
+
+    * Bug fixed: Font face choice dialog from options dialog did
+      not work.
+    * Bug fixed: Linux/GTK: Changes of frame layout crashed
+      WikidPad.
+
+
+
+Jul. 3, 2007 (1.8rc6, repository revision in "stable-1.8" branch: 120)
 
     * Bug fixed: Setting Scintilla codepage fails on non-Unicode
       wxPython (does not affect Windows binary)

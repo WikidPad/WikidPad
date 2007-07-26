@@ -3177,10 +3177,11 @@ These are your default global settings.
         cachedWindows = {}
         for n, w in self.windowLayouter.winNameToObject.iteritems():
             cachedWindows[n] = w
-            w.Reparent(None)
+#             w.Reparent(None)
+            w.Reparent(self)
 
-        self.windowLayouter.cleanMainWindow()
-        
+        self.windowLayouter.cleanMainWindow(cachedWindows.values())
+
         # make own creator function which provides already existing windows
         def cachedCreateWindow(winProps, parent):
             """
@@ -3188,16 +3189,17 @@ These are your default global settings.
             of already existing windows
             """
             winName = winProps["name"]
-    
+
             # Try in cache:
             window = cachedWindows.get(winName)
             if window is not None:
                 window.Reparent(parent)    # TODO Reparent not available for all OS'
+                del cachedWindows[winName]
                 return window
-                
+
             window = self.createWindow(winProps, parent)
-            if window is not None:
-                cachedWindows[winName] = window
+#             if window is not None:
+#                 cachedWindows[winName] = window
 
             return window
         
@@ -3208,18 +3210,18 @@ These are your default global settings.
 
         self.windowLayouter.setWinPropsByConfig(layoutCfStr)
         # Handle no size events while realizing layout
-        self.Unbind(EVT_SIZE)
+        self.Unbind(wx.EVT_SIZE)
         
         self.windowLayouter.realize()
 
-        # Destroy windows which weren't reused (have parent None)
+        # Destroy windows which weren't reused
         for n, w in cachedWindows.iteritems():
-            if w.GetParent() is None:
-                w.Destroy()
+#             if w.GetParent() is None:
+            w.Destroy()
 
         self.windowLayouter.layout()
 
-        EVT_SIZE(self, self.OnSize)
+        wx.EVT_SIZE(self, self.OnSize)
 
         self.tree = self.windowLayouter.getWindowForName("maintree")
         self.logWindow = self.windowLayouter.getWindowForName("log")
@@ -3574,6 +3576,9 @@ These are your default global settings.
                             (mainPos, viewsPos)
     
                 self.configuration.set("main", "windowLayout", layoutCfStr)
+                # Call of changeLayoutByCf() crashes on Linux/GTK so save
+                # data beforehand
+                self.saveCurrentWikiState()
                 self.changeLayoutByCf(layoutCfStr)
 
             self.fireMiscEventKeys(("options changed",))
