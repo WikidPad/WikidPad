@@ -46,6 +46,7 @@ class LogMessage:
         self.gotoWikiWord = gotoWikiWord
         self.selection = selection
 
+
     def getCheckedWikiWord(self):
         return self.checkedWikiWord
         
@@ -86,6 +87,9 @@ class LogWindow(wx.Panel):
         wx.EVT_BUTTON(self, GUI_ID.btnClearLog, self.OnClearLog)
         wx.EVT_BUTTON(self, GUI_ID.btnHideLogWindow, self.OnHideLogWindow)
 
+
+    def close(self):
+        pass
 
     def appendMessage(self, msg):
         l = self.ctrls.lcEntries.GetItemCount()

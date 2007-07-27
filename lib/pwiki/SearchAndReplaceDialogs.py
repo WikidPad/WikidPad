@@ -196,6 +196,16 @@ class SearchResultListBox(wx.HtmlListBox):
         self.SetItemCount(1)
         self.Refresh()
         self.Update()
+        
+    def ensureNotShowSearching(self):
+        """
+        This function is called after a search operation and a call to
+        showFound should(!) have been happened. If it did not happened,
+        the list is cleared.
+        """
+        if self.isShowingSearching:
+            # This can only happend if showFound wasn't called
+            self.showFound(None, None, None)
 
 
     def showFound(self, sarOp, found, wikiDocument):
@@ -228,7 +238,8 @@ class SearchResultListBox(wx.HtmlListBox):
                     "search_wiki_count_occurrences")
                     
             if sarOp.booleanOp:
-                # No specific position to show, so show beginning of page
+                # No specific position to show as context, so show beginning of page
+                # Also, no occurrence counting possible
                 context = before + after
                 if context == 0:
                     self.foundinfo = [_SearchResultItemInfo(w) for w in found]
@@ -554,6 +565,14 @@ class SearchWikiDialog(wx.Dialog):   # TODO
         wx.EVT_CHECKBOX(self, GUI_ID.cbWholeWord, self.OnListRefreshNeeded)
 
 
+    def displayErrorMessage(self, errorStr, e=u""):
+        """
+        pops up a error dialog box
+        """
+        wx.MessageBox(uniToGui(u"%s. %s." % (errorStr, e)), u"Error!",
+            wx.OK, self)
+
+
     def buildSearchReplaceOperation(self):
         sarOp = SearchReplaceOperation()
         sarOp.searchStr = guiToUni(self.ctrls.cbSearch.GetValue())
@@ -612,14 +631,19 @@ class SearchWikiDialog(wx.Dialog):   # TODO
         finally:
             self.Thaw()
             self.SetCursor(wx.NullCursor)
+            self.ctrls.htmllbPages.ensureNotShowSearching()
 
 
     def OnSearchWiki(self, evt):
-        self._refreshPageList()
-        self.addCurrentToHistory()
-        if not self.ctrls.htmllbPages.IsEmpty():
-            self.ctrls.htmllbPages.SetFocus()
-            self.ctrls.htmllbPages.SetSelection(0)
+        try:
+            self._refreshPageList()
+            self.addCurrentToHistory()
+            if not self.ctrls.htmllbPages.IsEmpty():
+                self.ctrls.htmllbPages.SetFocus()
+                self.ctrls.htmllbPages.SetSelection(0)
+        except re.error, e:
+            self.displayErrorMessage('Error in regular expression', e)
+
             
     def OnSetPageList(self, evt):
         """
@@ -656,59 +680,71 @@ class SearchWikiDialog(wx.Dialog):   # TODO
         self._findNext()
 
     def _findNext(self):
-        self.addCurrentToHistory()
         if self.listNeedsRefresh:
-            # Refresh list and start from beginning
-            self._refreshPageList()
-            
+            try:
+                # Refresh list and start from beginning
+                self._refreshPageList()
+            except re.error, e:
+                self.displayErrorMessage('Error in regular expression', e)
+                return
+
+        self.addCurrentToHistory()
         if self.ctrls.htmllbPages.GetCount() == 0:
             return
-            
-        while True:            
+        
+        try:
+            while True:            
+                    
+                #########self.ctrls.lb.SetSelection(self.listPosNext)
                 
-            #########self.ctrls.lb.SetSelection(self.listPosNext)
-            
-            wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
-            
-            if not wikiWord:
-                self.ctrls.htmllbPages.SetSelection(0)
                 wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
+                
+                if not wikiWord:
+                    self.ctrls.htmllbPages.SetSelection(0)
+                    wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
+    
+                if self.pWiki.getCurrentWikiWord() != wikiWord:
+                    self.pWiki.openWikiPage(wikiWord)
+                    nextOnPage = False
+                else:
+                    nextOnPage = True
+    
+                searchOp = self.buildSearchReplaceOperation()
+                searchOp.replaceOp = False
+                if nextOnPage:
+                    pagePosNext = self.pWiki.getActiveEditor().executeSearch(searchOp,
+                            -2)[1]
+                else:
+                    pagePosNext = self.pWiki.getActiveEditor().executeSearch(searchOp,
+                            0)[1]
+                    
+                if pagePosNext != -1:
+                    return  # Found
+                    
+                if self.ctrls.htmllbPages.GetSelection() == \
+                        self.ctrls.htmllbPages.GetCount() - 1:
+                    # Nothing more found on the last page in list, so back to
+                    # begin of list and stop
+                    self.ctrls.htmllbPages.SetSelection(0)
+                    return
+                    
+                # Otherwise: Go to next page in list            
+                self.ctrls.htmllbPages.SetSelection(
+                        self.ctrls.htmllbPages.GetSelection() + 1)
+        except re.error, e:
+            self.displayErrorMessage('Error in regular expression', e)
 
-            if self.pWiki.getCurrentWikiWord() != wikiWord:
-                self.pWiki.openWikiPage(wikiWord)
-                nextOnPage = False
-            else:
-                nextOnPage = True
-
-            searchOp = self.buildSearchReplaceOperation()
-            searchOp.replaceOp = False
-            if nextOnPage:
-                pagePosNext = self.pWiki.getActiveEditor().executeSearch(searchOp,
-                        -2)[1]
-            else:
-                pagePosNext = self.pWiki.getActiveEditor().executeSearch(searchOp,
-                        0)[1]
-                
-            if pagePosNext != -1:
-                return  # Found
-                
-            if self.ctrls.htmllbPages.GetSelection() == \
-                    self.ctrls.htmllbPages.GetCount() - 1:
-                # Nothing more found on the last page in list, so back to
-                # begin of list and stop
-                self.ctrls.htmllbPages.SetSelection(0)
-                return
-                
-            # Otherwise: Go to next page in list            
-            self.ctrls.htmllbPages.SetSelection(
-                    self.ctrls.htmllbPages.GetSelection() + 1)
 
 
     def OnReplace(self, evt):
         sarOp = self.buildSearchReplaceOperation()
         sarOp.replaceOp = True
-        self.pWiki.getActiveEditor().executeReplace(sarOp)
-        
+        try:
+            self.pWiki.getActiveEditor().executeReplace(sarOp)
+        except re.error, e:
+            self.displayErrorMessage('Error in regular expression', e)
+            return
+
         self._findNext()
 
 
@@ -719,53 +755,57 @@ class SearchWikiDialog(wx.Dialog):   # TODO
         if answer == wx.NO:
             return
 
-        self._refreshPageList()
-        
-        if self.ctrls.htmllbPages.GetCount() == 0:
-            return
+        try:
+            self._refreshPageList()
             
-        # self.pWiki.saveCurrentDocPage()
-        
-        sarOp = self.buildSearchReplaceOperation()
-        sarOp.replaceOp = True
-        
-        # wikiData = self.pWiki.getWikiData()
-        wikiDocument = self.pWiki.getWikiDocument()
-        self.addCurrentToHistory()
-        
-        replaceCount = 0
-
-        for i in xrange(self.ctrls.htmllbPages.GetCount()):
-            self.ctrls.htmllbPages.SetSelection(i)
-            wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
-            wikiPage = wikiDocument.getWikiPageNoError(wikiWord)
-            text = wikiPage.getLiveTextNoTemplate()
-            if text is None:
-                continue
-
-            charStartPos = 0
-
-            while True:
-                try:
-                    found = sarOp.searchText(text, charStartPos)
-                    start, end = found[:2]
-                except:
-                    # Regex error -> Stop searching
-                    return
+            if self.ctrls.htmllbPages.GetCount() == 0:
+                return
+                
+            # self.pWiki.saveCurrentDocPage()
+            
+            sarOp = self.buildSearchReplaceOperation()
+            sarOp.replaceOp = True
+            
+            # wikiData = self.pWiki.getWikiData()
+            wikiDocument = self.pWiki.getWikiDocument()
+            self.addCurrentToHistory()
+            
+            replaceCount = 0
+    
+            for i in xrange(self.ctrls.htmllbPages.GetCount()):
+                self.ctrls.htmllbPages.SetSelection(i)
+                wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
+                wikiPage = wikiDocument.getWikiPageNoError(wikiWord)
+                text = wikiPage.getLiveTextNoTemplate()
+                if text is None:
+                    continue
+    
+                charStartPos = 0
+    
+                while True:
+                    try:
+                        found = sarOp.searchText(text, charStartPos)
+                        start, end = found[:2]
+                    except:
+                        # Regex error -> Stop searching
+                        return
+                        
+                    if start is None: break
                     
-                if start is None: break
-                
-                repl = sarOp.replace(text, found)
-                text = text[:start] + repl + text[end:]  # TODO Faster?
-                charStartPos = start + len(repl)
-                replaceCount += 1
-
-            wikiPage.replaceLiveText(text)
-                
-        self._refreshPageList()
-        
-        wx.MessageBox(u"%i replacements done" % replaceCount, u"Replace All",
+                    repl = sarOp.replace(text, found)
+                    text = text[:start] + repl + text[end:]  # TODO Faster?
+                    charStartPos = start + len(repl)
+                    replaceCount += 1
+    
+                wikiPage.replaceLiveText(text)
+                    
+            self._refreshPageList()
+            
+            wx.MessageBox(u"%i replacements done" % replaceCount, u"Replace All",
                 wx.OK, self)        
+
+        except re.error, e:
+            self.displayErrorMessage('Error in regular expression', e)
 
 
     def addCurrentToHistory(self):
@@ -875,7 +915,11 @@ class SearchWikiDialog(wx.Dialog):   # TODO
         
     def OnLoadAndRunSearch(self, evt):
         if self._loadSearch():
-            self._refreshPageList()
+            try:
+                self._refreshPageList()
+            except re.error, e:
+                self.displayErrorMessage('Error in regular expression', e)
+
 
     def _loadSearch(self):
         sels = self.ctrls.lbSavedSearches.GetSelections()
@@ -889,22 +933,6 @@ class SearchWikiDialog(wx.Dialog):   # TODO
         sarOp.setPackedSettings(datablock)
         
         self.showSearchReplaceOperation(sarOp)
-        
-#         self.ctrls.cbSearch.SetValue(uniToGui(sarOp.searchStr))
-#         if sarOp.booleanOp:
-#             self.ctrls.rboxSearchType.SetSelection(1)
-#         else:
-#             self.ctrls.rboxSearchType.SetSelection(0)
-#         
-#         self.ctrls.cbCaseSensitive.SetValue(sarOp.caseSensitive)
-#         self.ctrls.cbWholeWord.SetValue(sarOp.wholeWord)
-# 
-#         if not sarOp.booleanOp and sarOp.replaceOp:
-#             self.ctrls.txtReplace.SetValue(uniToGui(sarOp.replaceStr))
-#             
-#         self.listPagesOperation = sarOp.listWikiPagesOp
-#             
-#         self.OnRadioBox(None)  # Refresh settings
         
         return True
 
@@ -1041,6 +1069,14 @@ class SearchPageDialog(wx.Dialog):   # TODO
         self.ctrls.cbSearch.AppendItems([tpl[0] for tpl in hist])
 
 
+    def displayErrorMessage(self, errorStr, e=u""):
+        """
+        pops up a error dialog box
+        """
+        wx.MessageBox(uniToGui(u"%s. %s." % (errorStr, e)), u"Error!",
+            wx.OK, self)
+
+
     def _nextSearch(self, sarOp):
         editor = self.pWiki.getActiveEditor()
         if self.ctrls.rbSearchFrom.GetSelection() == 0:
@@ -1052,7 +1088,7 @@ class SearchPageDialog(wx.Dialog):   # TODO
             self.ctrls.rbSearchFrom.SetSelection(0)
             
         self.addCurrentToHistory()
-        start, end = self.pWiki.getActiveEditor().executeSearch(sarOp,
+        start, end = editor.executeSearch(sarOp,
                 contPos)[:2]
         if start == -1:
             # No matches found
@@ -1065,7 +1101,7 @@ class SearchPageDialog(wx.Dialog):   # TODO
                 if result == wx.NO:
                     return
 
-                start, end = self.pWiki.getActiveEditor().executeSearch(
+                start, end = editor.executeSearch(
                         sarOp, 0)[:2]
                 if start != -1:
                     return
@@ -1080,9 +1116,12 @@ class SearchPageDialog(wx.Dialog):   # TODO
         sarOp = self._buildSearchOperation()
         sarOp.replaceOp = False
         self.addCurrentToHistory()
-        self._nextSearch(sarOp)
+        try:
+            self._nextSearch(sarOp)
+            self.firstFind = False
+        except re.error, e:
+            self.displayErrorMessage('Error in regular expression', e)
 
-        self.firstFind = False
 
 
     def OnReplace(self, evt):
@@ -1090,8 +1129,12 @@ class SearchPageDialog(wx.Dialog):   # TODO
         sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
         sarOp.replaceOp = True
         self.addCurrentToHistory()
-        self.pWiki.getActiveEditor().executeReplace(sarOp)
-        self._nextSearch(sarOp)
+        try:
+            self.pWiki.getActiveEditor().executeReplace(sarOp)
+            self._nextSearch(sarOp)
+        except re.error, e:
+            self.displayErrorMessage('Error in regular expression', e)
+
 
 
     def OnReplaceAll(self, evt):
@@ -1523,6 +1566,13 @@ class FastSearchPopup(wx.Frame):
         wx.EVT_KILL_FOCUS(self.resultBox, self.OnKillFocus)
         wx.EVT_CLOSE(self, self.OnClose)
 
+    def displayErrorMessage(self, errorStr, e=u""):
+        """
+        pops up a error dialog box
+        """
+        wx.MessageBox(uniToGui(u"%s. %s." % (errorStr, e)), u"Error!",
+            wx.OK, self)
+
 
     def OnKillFocus(self, evt):
         self.Close()
@@ -1555,7 +1605,10 @@ class FastSearchPopup(wx.Frame):
         lists all found pages which match search text
         """
         self.searchText = text
-        self._refreshPageList()
+        try:
+            self._refreshPageList()
+        except re.error, e:
+            self.displayErrorMessage('Error in regular expression', e)
 
 
     def _refreshPageList(self):
@@ -1580,8 +1633,7 @@ class FastSearchPopup(wx.Frame):
         finally:
             self.Thaw()
             self.SetCursor(wx.NullCursor)
-
-
+            self.resultBox.ensureNotShowSearching()
 
 
 _CONTEXT_MENU_ACTIVATE = \

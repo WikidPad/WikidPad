@@ -957,6 +957,9 @@ class HtmlXmlExporter:
             
             self.insertionVisitStack.append("wikipage/" + value)
             
+            # Inside an inserted page we don't want anchors to the
+            # headings to avoid collisions with headings of surrounding
+            # page.
             opts = self.optsStack[-1].copy()
             opts["anchorForHeading"] = False
             self.optsStack.append(opts)
@@ -1021,14 +1024,6 @@ class HtmlXmlExporter:
             for tok in headtokens:
                 styleno = tok.ttype
                 headLevel = WikiFormatting.getHeadingLevel(styleno)
-#                 if styleno == WikiFormatting.FormatTypes.Heading4:
-#                     headLevel = 4
-#                 elif styleno == WikiFormatting.FormatTypes.Heading3:
-#                     headLevel = 3
-#                 elif styleno == WikiFormatting.FormatTypes.Heading2:
-#                     headLevel = 2
-#                 elif styleno == WikiFormatting.FormatTypes.Heading1:
-#                     headLevel = 1
 
                 headContent = tok.grpdict["h%iContent" % headLevel]
                 if self.asIntHtmlPreview:
@@ -1224,9 +1219,9 @@ class HtmlXmlExporter:
         selfLink = False
 
         if link:
+            wikiData = self.mainControl.getWikiDocument().getWikiData()
             # Test if link to same page itself (maybe with an anchor fragment)
             if not self.exportType in (u"html_single", u"xml"):
-                wikiData = self.mainControl.getWikiDocument().getWikiData()
                 linkTo = wikiData.getAliasesWikiWord(word)
                 linkFrom = wikiData.getAliasesWikiWord(self.wikiWord)
                 if linkTo == linkFrom:

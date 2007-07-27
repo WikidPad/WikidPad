@@ -211,6 +211,59 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Structure window pos.:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chDocStructurePosition">
+              <content>
+                <item>Hidden</item>
+                <item>Left</item>
+                <item>Right</item>
+                <item>Top</item>
+                <item>Bottom</item>
+              </content>
+              <selection>0</selection>
+                </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Structure window depth:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <cols>2</cols>
+          <rows>2</rows>
+          <object class="sizeritem">
+            <object class="wxSpinCtrl" name="scDocStructureDepth">
+              <value>15</value>
+              <min>1</min>
+              <max>15</max>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <option>0</option>
+        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbDocStructureAutoHide">
+          <label>Auto-hide structure window</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
         <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -3244,6 +3297,9 @@
   <object class="wxMenu" name="MenuDocPagePresenterTabPopup">
     <object class="wxMenuItem" name="CMD_CLOSE_THIS_TAB">
       <label>Close tab</label>
+    </object>
+    <object class="wxMenuItem" name="CMD_THIS_TAB_SHOW_SWITCH_EDITOR_PREVIEW">
+      <label>Switch Ed./Prev</label>
     </object>
   </object>
   <object class="wxMenu" name="MenuTreectrlWikiWords">

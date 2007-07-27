@@ -1,5 +1,7 @@
 from time import time
-import os.path, re, struct, sets, traceback
+import os.path, re, struct, sets, traceback, threading
+
+import wx
 
 from MiscEvent import MiscEventSourceMixin
 
@@ -7,7 +9,9 @@ from WikiExceptions import *
 
 from StringOps import strToBool, fileContentToUnicode, BOM_UTF8, utf8Enc, \
         utf8Dec
-        
+
+from Utilities import DUMBTHREADHOLDER
+
 from Serialization import SerializeStream
 
 import WikiFormatting
@@ -25,13 +29,20 @@ class DocPage(MiscEventSourceMixin):
         
         self.wikiDocument = wikiDocument
         self.txtEditors = []  # List of all editors (views) showing this page
-
+        self.livePageAst = None   # Cached PageAst of live text
+        self.livePageAstLock = threading.RLock()  # lock while building live AST
+        self.editorTextCache = None  # Caches live text instead of asking an editor for it.
+                # if no text editor is registered, this cache is invalid
 
     def addTxtEditor(self, txted):
         """
         Add txted to the list of editors (views) showing this page.
         """
         if not txted in self.txtEditors:
+            if len(self.txtEditors) == 0:
+                self.livePageAst = None
+                self.editorTextCache = None
+
             self.txtEditors.append(txted)
 
 
@@ -42,6 +53,10 @@ class DocPage(MiscEventSourceMixin):
         try:
             idx = self.txtEditors.index(txted)
             del self.txtEditors[idx]
+            if len(self.txtEditors) == 0:
+                self.livePageAst = None
+                self.editorTextCache = None
+
         except ValueError:
             # txted not in list
             pass
@@ -78,13 +93,16 @@ class DocPage(MiscEventSourceMixin):
 
     def getLiveText(self):
         """
-        Return current tex of page, either from a text editor or
+        Return current text of page, either from a text editor or
         from the database
         """
         txtEditor = self.getTxtEditor()
         if txtEditor is not None:
-            # page is in text editor(s), so call GetText on one of it
-            return txtEditor.GetText()
+            # page is in text editor(s), so use cache or call GetText on one of it
+            if self.editorTextCache is None:
+                self.editorTextCache = txtEditor.GetText()
+            return self.editorTextCache
+#             return txtEditor.GetText()
         else:
             return self.getContent()
 
@@ -102,8 +120,11 @@ class DocPage(MiscEventSourceMixin):
         if txtEditor is not None:
             # page is in text editor(s), so call replace on one of it
             txtEditor.replaceText(text)
+            self.livePageAst = None
+            self.editorTextCache = None
         else:
             self.save(text)
+            self.livePageAst = None
 #             self.update(text, False)   # TODO: Really update? Handle auto-generated areas
             self.update(text, True)   # TODO: Really update? Handle auto-generated areas
 
@@ -112,7 +133,53 @@ class DocPage(MiscEventSourceMixin):
         """
         Called by the txt editor control
         """
+        # Clear cache
+        self.livePageAst = None    
+        self.editorTextCache = None
         self.fireMiscEventProps({"changed live text": True, "changer": changer})
+
+
+    def getLivePageAst(self, text=None, threadholder=DUMBTHREADHOLDER):
+        """
+        Return PageAst of live text. In rare cases the live text may have
+        changed while method is running and the result is inaccurate.
+        
+        text: unistring with text to assume as live-text of page. This may be
+                necessary to avoid calls to wxPython from non-GUI thread
+        
+        This method is thread-safe.
+        """
+        self.livePageAstLock.acquire()
+        try:
+            if not threadholder.isCurrent():
+                return None
+    
+            pageAst = self.livePageAst
+            
+            if pageAst is not None:
+                return pageAst
+                
+            if text is None:
+                text = self.getLiveText()  # TODO May call wxPython method, therefore
+                        # not threadsafe
+            
+            pageAst = PageAst.Page()
+            pageAst.buildAst(self.wikiDocument.getFormatting(), text,
+                    self.getFormatDetails(), threadholder=threadholder)
+            
+            if not threadholder.isCurrent():
+                return None
+    
+            self.livePageAst = pageAst
+
+#             # Fire an appropriate event in the main thread
+#             wx.CallAfter(self.fireMiscEventProps,
+#                     {"created live page ast": True})   # , "page ast": pageAst
+
+            return pageAst
+
+        finally:
+            self.livePageAstLock.release()
 
 
     def getContent(self):
@@ -190,6 +257,8 @@ class AliasWikiPage(DocPage):
     def update(self, text, fireEvent=True):
         return self.realWikiPage.update(text, fireEvent)
 
+    def getLivePageAst(self, threadholder=DUMBTHREADHOLDER):
+        return self.realWikiPage.getLivePageAst(threadholder)
 
 
     # TODO A bit hackish, maybe remove
@@ -344,31 +413,23 @@ class WikiPage(DocPage):
         return self
         
 
-#     def getWikiPageTitle(wikiWord):   # static
-#         title = re.sub(ur'([A-Z\xc0-\xde]+)([A-Z\xc0-\xde][a-z\xdf-\xff])', r'\1 \2', wikiWord)
-#         title = re.sub(ur'([a-z\xdf-\xff])([A-Z\xc0-\xde])', r'\1 \2', title)
-#         return title
+#     def getLivePageAst(self):
+#         pageAst = None
+#         txtEditor = self.getTxtEditor()
+#         if txtEditor is not None:
+#             # page is in text editor(s), so call AppendText on one of it
+#             pageAst = txtEditor.getCachedPageAst()
+# 
+#         if pageAst is not None:
+#             return pageAst
+#             
+#         formatting = self.wikiDocument.getFormatting()
+# 
+#         pageAst = PageAst.Page()
+#         text = self.getLiveText()
+#         pageAst.buildAst(formatting, text, self.getFormatDetails())
 #         
-#     getWikiPageTitle = staticmethod(getWikiPageTitle)
-    
-    
-    def getLivePageAst(self):
-        pageAst = None
-        txtEditor = self.getTxtEditor()
-        if txtEditor is not None:
-            # page is in text editor(s), so call AppendText on one of it
-            pageAst = txtEditor.getCachedPageAst()
-
-        if pageAst is not None:
-            return pageAst
-            
-        formatting = self.wikiDocument.getFormatting()
-
-        pageAst = PageAst.Page()
-        text = self.getLiveText()
-        pageAst.buildAst(formatting, text, self.getFormatDetails())
-        
-        return pageAst
+#         return pageAst
 
 
     def getAnchors(self):

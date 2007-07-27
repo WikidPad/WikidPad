@@ -33,6 +33,7 @@ from WikiTxtCtrl import WikiTxtCtrl, FOLD_MENU
 from WikiTreeCtrl import WikiTreeCtrl
 from WikiHtmlView import createWikiHtmlView
 from LogWindow import LogWindow
+from DocStructureCtrl import DocStructureCtrl
 from MainAreaPanel import MainAreaPanel
 from DocPagePresenter import DocPagePresenter
 
@@ -202,6 +203,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.wikiHistory = []
         self.findDlg = None  # Stores find&replace or wiki search dialog, if present
         self.spellChkDlg = None  # Stores spell check dialog, if present
+        self.mainAreaPanel = None
         self.mainmenu = None
         self.editorMenu = None  # "Editor" menu
         self.fastSearchField = None   # Text field in toolbar
@@ -305,6 +307,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "mainTree_position", 0)
         self.layoutViewsTreePosition = self.configuration.getint("main",
                 "viewsTree_position", 0)
+        self.layoutDocStructurePosition = self.configuration.getint("main",
+                "docStructure_position", 0)
 
         # this will keep track of the last font used in the editor
         self.lastEditorFont = None
@@ -437,6 +441,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """
         Convenience function
         """
+        if self.mainAreaPanel is None:
+            return None
+
         return self.mainAreaPanel.getCurrentDocPagePresenter()
 
     def getCurrentDocPagePresenterRMEvent(self):
@@ -1353,6 +1360,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         wx.EVT_UPDATE_UI(self, GUI_ID.CMD_SHOW_TOOLBAR,
                 self.OnUpdateToolbarMenuItem)
 
+        menuID = wx.NewId()
+        menuItem = wx.MenuItem(viewMenu, menuID,
+                "Show &Doc. Structure\t" + self.keyBindings.ShowDocStructure,
+                "Show Document Structure", wx.ITEM_CHECK)
+        viewMenu.AppendItem(menuItem)
+        wx.EVT_MENU(self, menuID, lambda evt: self.setShowDocStructure(
+                self.windowLayouter.isWindowCollapsed("doc structure")))
+        wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateDocStructureMenuItem)
+
         menuItem = wx.MenuItem(viewMenu, GUI_ID.CMD_STAY_ON_TOP,
                 "Stay on Top\t" + self.keyBindings.StayOnTop, 
                 "Stay on Top", wx.ITEM_CHECK)
@@ -1743,11 +1759,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnUpdateTreeCtrlMenuItem(self, evt):
-#         evt.Check(not self.treeSashWindow.isCollapsed())
         evt.Check(not self.windowLayouter.isWindowCollapsed("maintree"))
-        
+
     def OnUpdateToolbarMenuItem(self, evt):
         evt.Check(not self.GetToolBar() is None)
+
+    def OnUpdateDocStructureMenuItem(self, evt):
+        evt.Check(not self.windowLayouter.isWindowCollapsed("doc structure"))
 
     def OnUpdateStayOnTopMenuItem(self, evt):
         evt.Check(self.getStayOnTop())
@@ -1923,10 +1941,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return editor
         elif winName == "log":
             return LogWindow(parent, -1, self)
+        elif winName == "doc structure":
+            return DocStructureCtrl(parent, -1, self)
         elif winName == "main area panel":  # TODO remove this hack
             self.mainAreaPanel = MainAreaPanel(parent, self, -1)
             self.mainAreaPanel.getMiscEvent().addListener(self)
-            
+
             p = self.createNewDocPagePresenterTab()
             self.mainAreaPanel.setCurrentDocPagePresenter(p)
 
@@ -1983,7 +2003,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         Add message to log window, make log window visible if necessary
         """
         if self.configuration.getboolean("main", "log_window_autoshow"):
-            self.windowLayouter.uncollapseWindow("log")
+            self.windowLayouter.expandWindow("log")
         self.logWindow.appendMessage(msg)
 
     def hideLogWindow(self):
@@ -3045,7 +3065,7 @@ These are your default global settings.
                         except UnicodeDecodeError:
                             # Failed, too -> leave link2 unmodified
                             pass
-
+                            
             if link2.startswith(u"rel://"):
                 # This is a relative link
                 link2 = self.makeRelUrlAbsolute(link2)
@@ -3268,10 +3288,13 @@ These are your default global settings.
 
 
     def setShowTreeControl(self, onOrOff):
+        self.windowLayouter.expandWindow("maintree", onOrOff)
         if onOrOff:
-            self.windowLayouter.uncollapseWindow("maintree")
-        else:
-            self.windowLayouter.collapseWindow("maintree")
+            self.windowLayouter.focusWindow("maintree")
+#         if onOrOff:
+#             self.windowLayouter.expandWindow("maintree")
+#         else:
+#             self.windowLayouter.collapseWindow("maintree")
 
 
     def setShowToolbar(self, onOrOff):
@@ -3289,6 +3312,13 @@ These are your default global settings.
         else:
             self.GetToolBar().Destroy()
             self.SetToolBar(None)
+
+
+    def setShowDocStructure(self, onOrOff):
+        self.windowLayouter.expandWindow("doc structure", onOrOff)
+        if onOrOff:
+            self.windowLayouter.focusWindow("doc structure")
+
 
     def getStayOnTop(self):
         """
@@ -3388,18 +3418,18 @@ These are your default global settings.
             onOrOff = self.configuration.getboolean("main", "hideundefined")
 
 
-    _LAYOUT_WITHOUT_VIEWSTREE = "name:main area panel;"\
-        "layout relation:%s&layout relative to:main area panel&name:maintree&"\
-            "layout sash position:170&layout sash effective position:170;"\
-        "layout relation:below&layout relative to:main area panel&name:log&"\
-            "layout sash position:1&layout sash effective position:120"
-
-    _LAYOUT_WITH_VIEWSTREE = "name:main area panel;"\
-            "layout relation:%s&layout relative to:main area panel&name:maintree&"\
-                "layout sash position:170&layout sash effective position:170;"\
-            "layout relation:%s&layout relative to:maintree&name:viewstree;"\
-            "layout relation:below&layout relative to:main area panel&name:log&"\
-                "layout sash position:1&layout sash effective position:120"
+#     _LAYOUT_WITHOUT_VIEWSTREE = "name:main area panel;"\
+#         "layout relation:%s&layout relative to:main area panel&name:maintree&"\
+#             "layout sash position:170&layout sash effective position:170;"\
+#         "layout relation:below&layout relative to:main area panel&name:log&"\
+#             "layout sash position:1&layout sash effective position:120"
+# 
+#     _LAYOUT_WITH_VIEWSTREE = "name:main area panel;"\
+#             "layout relation:%s&layout relative to:main area panel&name:maintree&"\
+#                 "layout sash position:170&layout sash effective position:170;"\
+#             "layout relation:%s&layout relative to:maintree&name:viewstree;"\
+#             "layout relation:below&layout relative to:main area panel&name:log&"\
+#                 "layout sash position:1&layout sash effective position:120"
 
     def changeLayoutByCf(self, layoutCfStr):
         """
@@ -3415,10 +3445,11 @@ These are your default global settings.
         cachedWindows = {}
         for n, w in self.windowLayouter.winNameToObject.iteritems():
             cachedWindows[n] = w
-            w.Reparent(None)
+#             w.Reparent(None)
+            w.Reparent(self)
 
-        self.windowLayouter.cleanMainWindow()
-        
+        self.windowLayouter.cleanMainWindow(cachedWindows.values())
+
         # make own creator function which provides already existing windows
         def cachedCreateWindow(winProps, parent):
             """
@@ -3426,16 +3457,17 @@ These are your default global settings.
             of already existing windows
             """
             winName = winProps["name"]
-    
+
             # Try in cache:
             window = cachedWindows.get(winName)
             if window is not None:
                 window.Reparent(parent)    # TODO Reparent not available for all OS'
+                del cachedWindows[winName]
                 return window
-                
+
             window = self.createWindow(winProps, parent)
-            if window is not None:
-                cachedWindows[winName] = window
+#             if window is not None:
+#                 cachedWindows[winName] = window
 
             return window
         
@@ -3450,10 +3482,10 @@ These are your default global settings.
         
         self.windowLayouter.realize()
 
-        # Destroy windows which weren't reused (have parent None)
+        # Destroy windows which weren't reused
         for n, w in cachedWindows.iteritems():
-            if w.GetParent() is None:
-                w.Destroy()
+#             if w.GetParent() is None:
+            w.Destroy()
 
         self.windowLayouter.layout()
 
@@ -3845,24 +3877,51 @@ These are your default global settings.
                 "mainTree_position", 0)
             newLayoutViewsTreePosition = self.configuration.getint("main",
                 "viewsTree_position", 0)
+            newLayoutDocStructurePosition = self.configuration.getint("main",
+                "docStructure_position", 0)
             if self.layoutViewsTreePosition != newLayoutViewsTreePosition or \
-                self.layoutMainTreePosition != newLayoutMainTreePosition:
+                    self.layoutMainTreePosition != newLayoutMainTreePosition or \
+                    self.layoutDocStructurePosition != newLayoutDocStructurePosition:
                 self.layoutViewsTreePosition = newLayoutViewsTreePosition
                 self.layoutMainTreePosition = newLayoutMainTreePosition
-                
+                self.layoutDocStructurePosition = newLayoutDocStructurePosition
                 mainPos = {0:"left", 1:"right", 2:"above", 3:"below"}\
                         [newLayoutMainTreePosition]
 
-                if newLayoutViewsTreePosition == 0:
-                    # Don't show "Views" tree
-                    layoutCfStr = self._LAYOUT_WITHOUT_VIEWSTREE % mainPos
-                else:
+                # Set layout for main tree
+                layoutCfStr = "name:main area panel;"\
+                        "layout relation:%s&layout relative to:main area panel&name:maintree&"\
+                        "layout sash position:170&layout sash effective position:170" % \
+                        mainPos
+
+                # Add layout for Views tree
+                if newLayoutViewsTreePosition > 0:
+#                     # Don't show "Views" tree
+#                     layoutCfStr = self._LAYOUT_WITHOUT_VIEWSTREE % mainPos
+#                 else:
                     viewsPos = {1:"above", 2:"below", 3:"left", 4:"right"}\
                             [newLayoutViewsTreePosition]
-                    layoutCfStr = self._LAYOUT_WITH_VIEWSTREE % \
-                            (mainPos, viewsPos)
-    
+#                     layoutCfStr += self._LAYOUT_WITH_VIEWSTREE % \
+#                             (mainPos, viewsPos)
+                    layoutCfStr += ";layout relation:%s&layout relative to:maintree&name:viewstree" % \
+                            viewsPos
+
+                # Layout for doc structure window
+                if newLayoutDocStructurePosition > 0:
+                    docStructPos = {1:"left", 2:"right", 3:"above", 4:"below"}\
+                        [newLayoutDocStructurePosition]
+                    layoutCfStr += ";layout relation:%s&layout relative to:main area panel&name:doc structure&"\
+                                "layout sash position:120&layout sash effective position:120" % \
+                                docStructPos
+
+                # Layout for log window
+                layoutCfStr += ";layout relation:below&layout relative to:main area panel&name:log&"\
+                            "layout sash position:1&layout sash effective position:120"
+
                 self.configuration.set("main", "windowLayout", layoutCfStr)
+                # Call of changeLayoutByCf() crashes on Linux/GTK so save
+                # data beforehand
+                self.saveCurrentWikiState()
                 self.changeLayoutByCf(layoutCfStr)
                 
             self._refreshHotKeys()
@@ -4109,12 +4168,13 @@ These are your default global settings.
 
     def OnCmdSwitchEditorPreview(self, evt):
         presenter = self.getCurrentDocPagePresenter()
+        self.getMainAreaPanel().switchDocPagePresenterTabEditorPreview(presenter)
         
-        scName = presenter.getCurrentSubControlName()
-        if scName != "textedit":
-            presenter.switchSubControl("textedit", gainFocus=True)
-        else:
-            presenter.switchSubControl("preview", gainFocus=True)
+#         scName = presenter.getCurrentSubControlName()
+#         if scName != "textedit":
+#             presenter.switchSubControl("textedit", gainFocus=True)
+#         else:
+#             presenter.switchSubControl("preview", gainFocus=True)
 
 
     def insertAttribute(self, name, value, wikiWord=None):

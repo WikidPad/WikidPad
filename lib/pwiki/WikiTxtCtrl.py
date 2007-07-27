@@ -20,7 +20,7 @@ from Utilities import *
 from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
         wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc, \
         getBitmapFromClipboard
-from MiscEvent import KeyFunctionSink
+from MiscEvent import KeyFunctionSinkAR
 
 from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 from AdditionalDialogs import ImagePasteSaver, ImagePasteDialog
@@ -192,10 +192,10 @@ class StyleDoneEvent(wx.PyCommandEvent):
     This wx Event is fired when style and folding calculations are finished.
     It is needed to savely transfer data from the style thread to the main thread.
     """
-    def __init__(self, stylebytes, pageAst, foldingseq):
+    def __init__(self, stylebytes, foldingseq):
         wx.PyCommandEvent.__init__(self, etEVT_STYLE_DONE_COMMAND, -1)
         self.stylebytes = stylebytes
-        self.pageAst = pageAst
+#         self.pageAst = pageAst
         self.foldingseq = foldingseq
 
 
@@ -346,7 +346,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #         self.presenter.getMiscEvent().addListener(self.presenterListener)
 
 
-        self.wikiPageListener = KeyFunctionSink((
+        self.wikiPageSinkAR = KeyFunctionSinkAR((
                 ("updated wiki page", self.onWikiPageUpdated),   # fired by a WikiPage
         ))
 
@@ -734,8 +734,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             if docPage.getDirty()[0]:
                 self.saveLoadedDocPage()
 
-            miscevt = docPage.getMiscEvent()
-            miscevt.removeListener(self.wikiPageListener)
+#             miscevt = docPage.getMiscEvent()
+#             miscevt.removeListener(self.wikiPageSinkAR)
+            self.wikiPageSinkAR.disconnect()
             
             self.SetDocPointer(None)
             self.applyBasicSciSettings()
@@ -776,8 +777,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #         p2.update({"loading current page": True})
 #         self.pWiki.fireMiscEventProps(p2)  # TODO Remove this hack
 
-        miscevt = self.getLoadedDocPage().getMiscEvent()
-        miscevt.addListener(self.wikiPageListener)
+#         miscevt = self.getLoadedDocPage().getMiscEvent()
+#         miscevt.addListener(self.wikiPageSinkAR)
+        self.wikiPageSinkAR.setEventSource(self.getLoadedDocPage())
 
         otherEditor = self.getLoadedDocPage().getTxtEditor()
         if otherEditor is not None:
@@ -825,8 +827,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.SetStyles(faces)
             self.lastEditorFont = font
 
-        miscevt = self.getLoadedDocPage().getMiscEvent()
-        miscevt.addListener(self.wikiPageListener)
+#         miscevt = self.getLoadedDocPage().getMiscEvent()
+#         miscevt.addListener(self.wikiPageSinkAR)
+        self.wikiPageSinkAR.setEventSource(self.getLoadedDocPage())
 
 
         otherEditor = self.getLoadedDocPage().getTxtEditor()
@@ -1060,8 +1063,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         it.
         """
         if self.getLoadedDocPage() is not None:
-            miscevt = self.getLoadedDocPage().getMiscEvent()
-            miscevt.removeListener(self.wikiPageListener)
+#             miscevt = self.getLoadedDocPage().getMiscEvent()
+#             miscevt.removeListener(self.wikiPageSinkAR)
+            self.wikiPageSinkAR.disconnect()
             
             self.SetDocPointer(None)
             self.applyBasicSciSettings()
@@ -1075,8 +1079,15 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
     def OnStyleNeeded(self, evt):
         "Styles the text of the editor"
 
-        # get the text to regex against
-        text = self.GetText()
+        docPage = self.getLoadedDocPage()
+        if docPage is None:
+            # This avoids further request from STC:
+            self.stopStcStyler()
+            return
+
+        # get the text to regex against (use doc pages getLiveText because
+        # it's cached
+        text = docPage.getLiveText()  # self.GetText()
         textlen = len(text)
 
         t = self.stylingThreadHolder.getThread()
@@ -1093,19 +1104,20 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.stylingThreadHolder.setThread(None)
             self.buildStyling(text, 0, threadholder=DUMBTHREADHOLDER)
 
-            self.applyStyling(self.stylebytes)
+            self.applyStyling(self.stylebytes)   # TODO Necessary?
             # We can't call applyFolding directly because this in turn
             # calls repairFoldingVisibility which can't work while in
             # EVT_STC_STYLENEEDED event (at least for wxPython 2.6.2)
             # storeStylingAndAst() sends a StyleDoneEvent instead
             if self.getFoldingActive():
 #                 self.applyFolding(self.foldingseq)
-                self.storeStylingAndAst(None, self.pageAst, self.foldingseq)
+                self.storeStylingAndAst(None, self.foldingseq)
         else:
             # Asynchronous styling
             # This avoids further request from STC:
-            self.StartStyling(self.GetLength(), 0xff)  # len(text) may be != self.GetLength()
-            self.SetStyling(0, 0)
+            self.stopStcStyler()
+#             self.StartStyling(self.GetLength(), 0xff)  # len(text) may be != self.GetLength()
+#             self.SetStyling(0, 0)
 
             sth = self.stylingThreadHolder
             
@@ -1207,18 +1219,24 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
     def clearStylingCache(self):
         self.stylebytes = None
         self.foldingseq = None
-        self.pageAst = None
+#         self.pageAst = None
 
 
-    def storeStylingAndAst(self, stylebytes, pageAst, foldingseq):
+    def stopStcStyler(self):
+        """
+        Stops further styling requests from Scintilla until text is modified
+        """
+        self.StartStyling(self.GetLength(), 0xff)
+        self.SetStyling(0, 0)
+
+
+
+    def storeStylingAndAst(self, stylebytes, foldingseq):
         self.stylebytes = stylebytes
-        self.pageAst = pageAst
+#         self.pageAst = pageAst
         self.foldingseq = foldingseq
         
-        self.AddPendingEvent(StyleDoneEvent(stylebytes, pageAst, foldingseq))
-        
-        
-#         self.AddPendingEvent(wx.IdleEvent())
+        self.AddPendingEvent(StyleDoneEvent(stylebytes, foldingseq))
 
 
     def buildStyling(self, text, delay, threadholder=DUMBTHREADHOLDER):
@@ -1227,18 +1245,28 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             if not threadholder.isCurrent():
                 return
 
-        page = PageAst.Page()
-        page.buildAst(self.presenter.getFormatting(), text,
-                self.getLoadedDocPage().getFormatDetails(), threadholder=threadholder)
-        
-        stylebytes = self.processTokens(page.getTokens(), threadholder)
+#         page = PageAst.Page()
+#         page.buildAst(self.presenter.getFormatting(), text,
+#                 self.getLoadedDocPage().getFormatDetails(), threadholder=threadholder)
+        docPage = self.getLoadedDocPage()
+        if docPage is None:
+            return
+
+        pageAst = docPage.getLivePageAst(text, threadholder)
+        if not threadholder.isCurrent():
+            return
+
+        stylebytes = self.processTokens(pageAst.getTokens(), threadholder)
+        if not threadholder.isCurrent():
+            return
+
         if self.getFoldingActive():
-            foldingseq = self.processFolding(page.getTokens(), threadholder)
+            foldingseq = self.processFolding(pageAst.getTokens(), threadholder)
         else:
             foldingseq = None
 
         if threadholder.isCurrent():
-            self.storeStylingAndAst(stylebytes, page, foldingseq)
+            self.storeStylingAndAst(stylebytes, foldingseq)
 
 
     def processTokens(self, tokens, threadholder):
@@ -1532,27 +1560,33 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.EndUndoAction()
             
 
-    def getCachedPageAst(self):
-        """
-        Returns cached page ast or None if currently not cached
-        """
-        return self.pageAst
+#     def getCachedPageAst(self):
+#         """
+#         Returns cached page ast or None if currently not cached
+#         """
+#         return self.pageAst
 
     def getPageAst(self):
-        page = self.pageAst
-        if page is None:
-            t = self.stylingThreadHolder.getThread()
-            if t is not None:
-                t.join()
-                page = self.pageAst
+        docPage = self.getLoadedDocPage()
+        if docPage is None:
+            return None
         
-        if page is None:
-            page = PageAst.Page()
-            self.pageAst = page
-            page.buildAst(self.presenter.getFormatting(), self.GetText(),
-                    self.getLoadedDocPage().getFormatDetails())
-        
-        return page
+        return docPage.getLivePageAst()
+
+#         page = self.pageAst
+#         if page is None:
+#             t = self.stylingThreadHolder.getThread()
+#             if t is not None:
+#                 t.join()
+#                 page = self.pageAst
+#         
+#         if page is None:
+#             page = PageAst.Page()
+#             self.pageAst = page
+#             page.buildAst(self.presenter.getFormatting(), self.GetText(),
+#                     self.getLoadedDocPage().getFormatDetails())
+#         
+#         return page
 
 
     def activateTokens(self, tokens, tabMode=0):
@@ -2067,6 +2101,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         Return the character position where to continue the given
         search operation sarOp. It always continues at beginning
         or end of current selection.
+        
+        If sarOp uses a regular expression, this function may throw
+        a re.error exception.
         """
         if sarOp.matchesPart(self.GetSelectedText()) is not None:
             # currently selected text matches search operation

@@ -456,8 +456,14 @@ GLOBALDEFAULTS = {
     ("main", "splitter_pos"): '170',
     ("main", "log_window_autoshow"): "True", # Automatically show log window if messages added
     ("main", "log_window_autohide"): "True", # Automatically hide log window if empty
-    ("main", "log_window_sashPos"): "1",  # Real splitter pos
-    ("main", "log_window_effectiveSashPos"): "120",  # Splitter pos when calling showEffWindow
+    ("main", "log_window_sashPos"): "1",  # Real splitter pos (obsolete, contained in windowLayout)
+    ("main", "log_window_effectiveSashPos"): "120",  # Splitter pos when calling showEffWindow (obsolete, contained in windowLayout)
+    ("main", "docStructure_position"): "0",  # Mode where to place the document structure window,
+            # 0: Hidden, 1:Left, 2:Right, 3:Above, 4:Below
+    ("main", "docStructure_depth"): "15",  # Maximum number of heading which is shown in document structure window
+            # (between 1 and 15)
+    ("main", "docStructure_autohide"): "False", # Automatically hide doc structure after something was activated in it.
+
     ("main", "toolbar_show"): "True",  # Show the toolbar?
     ("main", "zoom"): '0',  # Zoom factor for editor
     ("main", "preview_zoom"): '0',  # Zoom factor for preview

@@ -1053,7 +1053,6 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 self.OnActivateNewTabThis)
 
 
-
         # Register for pWiki events
         wxKeyFunctionSink(self.pWiki.getMiscEvent(), self, (
                 ("loading wiki page", self.onLoadingCurrentWikiPage),
@@ -1077,6 +1076,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
     def _unbindActivation(self):
         self.Unbind(wx.EVT_TREE_SEL_CHANGING)
         self.Unbind(wx.EVT_TREE_SEL_CHANGED)
+        
+    def close(self):
+        pass
 
     def collapse(self):
         """
@@ -1556,9 +1558,6 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             if self.pWiki.getConfig().getboolean("main", "tree_autohide", False):
                 # Auto-hide tree
                 self.pWiki.setShowTreeControl(False)
-        else:
-            pass
-#         event.Skip()
 
 
     def OnTreeItemSelChanging(self, evt):

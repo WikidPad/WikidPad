@@ -138,7 +138,7 @@ ADDITIONAL_HEADING_STYLES = sets.ImmutableSet((
 
 
 
-_HEADING_LEVEL_MAP = {
+HEADING_LEVEL_MAP = {
         FormatTypes.Heading15: 15,
         FormatTypes.Heading14: 14,
         FormatTypes.Heading13: 13,
@@ -163,7 +163,7 @@ def getHeadingLevel(formatType):
     0 if it isn't one of the headings or the heading level (1 to 4)
     if it is one of them.
     """
-    return _HEADING_LEVEL_MAP.get(formatType, 0)
+    return HEADING_LEVEL_MAP.get(formatType, 0)
 
 
 

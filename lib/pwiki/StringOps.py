@@ -52,7 +52,7 @@ def convertLineEndings(text, newLe):
 
 def lineendToInternal(text):
     return convertLineEndings(text, "\n")
-    
+
 
 
 if isOSX():
@@ -62,7 +62,7 @@ if isOSX():
     _mbcsDec = codecs.getdecoder("mac_roman")
     mbcsReader = codecs.getreader("mac_roman")
     mbcsWriter = codecs.getwriter("mac_roman")
-    
+
     def lineendToOs(text):
         return convertLineEndings(text, "\r")
 
@@ -114,7 +114,7 @@ if isUnicode():
         Convert unicode text to a format usable for wx GUI
         """
         return text   # Nothing to do
-        
+
     def guiToUni(text):
         """
         Convert wx GUI string format to unicode
@@ -126,7 +126,7 @@ else:
         Convert unicode text to a format usable for wx GUI
         """
         return mbcsEnc(text, "replace")[0]
-        
+
     def guiToUni(text):
         """
         Convert wx GUI string format to unicode
@@ -150,9 +150,9 @@ def unicodeToCompFilename(us):
                 u"{}()+-_,.%":   # Allowed characters
             result.append(str(c))
             continue
-        
+
         result.append("=%02x" % ord(c))
-        
+
     return "".join(result)
 
 
@@ -165,10 +165,10 @@ def strToBool(s, default=False):
     boolean, return default if string can't be
     interpreted
     """
-    
+
     if s is None:
         return default
-    
+
     # Try to interpret as integer
     try:
         return int(s) != 0
@@ -193,8 +193,8 @@ def fileContentToUnicode(content):
         return utf8Dec(content[len(BOM_UTF8):], "replace")[0]
     else:
         return mbcsDec(content, "replace")[0]
-        
-        
+
+
 # def wikiWordToLabel(word):
 #     """
 #     Strip '[' and ']' if non camelcase word and return it
@@ -222,7 +222,7 @@ def revStr(s):
     s = list(s)
     s.reverse()
     return u"".join(s)
-    
+
 def splitkeep(s, delim):
     """
     Similar to split, but keeps the delimiter as separate element, e.g.
@@ -232,7 +232,7 @@ def splitkeep(s, delim):
     for e in s.split(delim):
         result.append(e)
         result.append(delim)
-        
+
     return result[:-1]
 
 
@@ -250,8 +250,8 @@ def matchWhole(reObj, s):
     """
     reObj -- Compiled regular expression
     s -- String to match
-    
-    Similar to reObj.match(s), but returns MatchObject only if the 
+
+    Similar to reObj.match(s), but returns MatchObject only if the
     whole string s is covered by the match, returns None otherwise
     """
     mat = reObj.match(s)
@@ -259,9 +259,9 @@ def matchWhole(reObj, s):
         return None
     if mat.end(0) < len(s):
         return None
-        
+
     return mat
-    
+
 
 
 ## Copied from xml.sax.saxutils and modified to reduce dependencies
@@ -292,19 +292,19 @@ def escapeForIni(text, toEscape=u""):
     Return an escaped version of string. Always escaped will be backslash and
     all characters with ASCII value < 32. Additional characters can be given in
     the toEscape parameter (as unicode string, only characters < 128).
-    
+
     Returns: unicode string
     """
     # Escape '\' and for readability escape \r \n \f and \t separately
     text = text.replace(u"\\", u"\\x%02x" % ord("\\"))
-    
+
     # Escape everything with ord < 32
     for i in xrange(32):
         text = text.replace(unichr(i), u"\\x%02x" % i)
-        
+
     for c in toEscape:
         text = text.replace(c, u"\\x%02x" % ord(c))
-    
+
     return text
 
 
@@ -315,7 +315,7 @@ def unescapeForIni(text):
     """
     Inverse of escapeForIni()
     """
-    return _re.sub(ur"\\x([0-9a-f]{2})", _unescapeForIniHelper, text)    
+    return _re.sub(ur"\\x([0-9a-f]{2})", _unescapeForIniHelper, text)
 
 
 # def escapeWithRe(text):
@@ -350,7 +350,7 @@ def htmlColorToRgbTuple(html):
         return (r, g, b)
     except:
         return None
-        
+
 def rgbToHtmlColor(r, g, b):
     """
     Return HTML color '#hhhhhh' format string.
@@ -364,7 +364,7 @@ def base64BlockEncode(data):
     and join them with newlines. Pythons base64 decoder can read this.
     """
     b64 = base64.b64encode(data)
-    
+
     result = []
     while len(b64) > 70:
         result.append(b64[:70])
@@ -380,7 +380,7 @@ def base64BlockEncode(data):
 base64BlockDecode = base64.b64decode
 
 
-    
+
 def splitpath(path):
     """
     Cut a path into all of its pieces, starting with drive name, through
@@ -406,7 +406,7 @@ def relativeFilePath(location, toFilePath):
     Returns a relative (if possible) path to address the file
     toFilePath if you are in directory location.
     Both parameters should be normalized with os.path.abspath
-    
+
     Function returns None if an absolute path is needed!
 
     location -- Directory where you are
@@ -415,10 +415,10 @@ def relativeFilePath(location, toFilePath):
     locParts = splitpath(location)
     if locParts[-1] == "":
         del locParts[-1]
-    
+
     locLen = len(locParts)
     fileParts = splitpath(toFilePath)
-    
+
     for i in xrange(len(locParts)):
         if len(fileParts) == 0:
             break  # TODO Error ???
@@ -430,7 +430,7 @@ def relativeFilePath(location, toFilePath):
         del fileParts[0]
 
     result = []
-    
+
     if len(locParts) == locLen:
         # Nothing matches at all, absolute path needed
         return None
@@ -438,9 +438,9 @@ def relativeFilePath(location, toFilePath):
     if len(locParts) > 0:
         # go back some steps
         result += [".."] * len(locParts)
-    
+
     result += fileParts
-    
+
     return os.path.join(*result)
 
 
@@ -450,7 +450,7 @@ def urlFromPathname(fn):
 
     url = urllib.pathname2url(fn)
     url.replace("%24", "$")
-    
+
     return url
 
 
@@ -470,7 +470,7 @@ def boolToChar(b):
         return "1"
     else:
         return "\0"
-        
+
 def charToBool(c):
     return c != "\0"
 
@@ -479,14 +479,14 @@ def boolToInt(b):
         return 1
     else:
         return 0
-    
+
 
 def strToBin(s):
     """
     s -- String to convert to binary (NOT unicode!)
     """
     return pack(">I", len(s)) + s   # Why big-endian? Why not?
-    
+
 def binToStr(b):
     """
     Returns tuple (s, br) with string s and rest of the binary data br
@@ -501,7 +501,7 @@ def wikiUrlToPathWordAndAnchor(url):
     """
     Split a "wiki:" protocol URL into the path of the config file,
     the name of the wikiword and the anchor to open if given in query string.
-    
+
     Returns (path, wikiword, anchor) where wikiword may be None
     """
     # Change "wiki:" url to "http:" for urlparse
@@ -510,7 +510,7 @@ def wikiUrlToPathWordAndAnchor(url):
     # Parse query string into dictionary
     queryDict = cgi.parse_qs(parsed[4])
     # Retrieve wikiword to open if existing
-    # queryDict values are lists of values therefore this expression 
+    # queryDict values are lists of values therefore this expression
     wikiWordToOpen = queryDict.get("page", (None,))[0]
     anchorToOpen = queryDict.get("anchor", (None,))[0]
 
@@ -519,11 +519,11 @@ def wikiUrlToPathWordAndAnchor(url):
     parsed[4] = ""
     parsed[5] = ""
     parsed = tuple(parsed)
-    
+
     url = urlparse.urlunparse(parsed)[5:]
-    
+
     filePath = urllib.url2pathname(url)
-    
+
     return (filePath, wikiWordToOpen, anchorToOpen)
 
 
@@ -533,24 +533,24 @@ def wikiUrlToPathWordAndAnchor(url):
 class Token(object):
     """
     The class has the following members:
-        
+
     ttype - Token type number (one of the "FormatTypes" enumeration numbers
         in "WikiFormatting.py")
     start - Character position of the token start in page
-    grpdict - Dictionary of the regular expression groups 
+    grpdict - Dictionary of the regular expression groups
     text - Actual text content of token
     node - object derived from "Ast" class in "PageAst.py" if further
         data must be stored or None.
     """
     __slots__ = ("__weakref__", "ttype", "start", "grpdict", "text", "node")
-    
+
     def __init__(self, ttype, start, grpdict, text, node=None):
         self.ttype = ttype
         self.start = start
         self.grpdict = grpdict
         self.text = text
         self.node = node
-        
+
     def __repr__(self):
         return u"Token(%s, %s, %s, <dict>, %s)" % (repr(self.ttype),
                 repr(self.start), repr(self.text), repr(self.node))
@@ -562,13 +562,13 @@ class Token(object):
         doesn't exist at all, length of self.text is returned.
         """
         result = -1
-        
+
         if self.node is not None:
             result = self.node.getLength()
-        
+
         if result == -1:
             result = len(self.text)
-            
+
         return result
 
 
@@ -588,7 +588,7 @@ class Token(object):
     def shallowCopy(self):
         return Token(self.ttype, self.start, self.grpdict, self.text, self.node)
 
-    
+
 
 class TokenIterator:
     """
@@ -610,10 +610,10 @@ class TokenIterator:
 
     def __iter__(self):
         return self
-        
+
     def setCharPos(charPos):
         self.charPos = charPos
-        
+
     def getCharPos(self):
         return self.charPos
 
@@ -635,14 +635,14 @@ class TokenIterator:
             self.charPos = textlen
             return Token(self.defaultType, cp + self.tokenStartOffset, None,
                     self.text[cp:textlen])
-            
+
         start, end = mat.span()
         if self.charPos < start:
             self.nextMatch = mat
             cp = self.charPos
             self.charPos = start
             return Token(self.defaultType, cp + self.tokenStartOffset, None,
-                    self.text[cp:start])                   
+                    self.text[cp:start])
 
 
         groupdict = mat.groupdict()
@@ -669,12 +669,12 @@ class Tokenizer:
 
         it = TokenIterator(self.tokenre, formatMap, defaultType, text,
                 tokenStartOffset=tokenStartOffset)
-        
+
         for t in it:
             result.append(t)
             if not threadholder.isCurrent():
                 break
-                
+
         return result
 
 
@@ -739,22 +739,22 @@ def binCompactToCompact(bops):
             pos += 12
             s = bops[pos:pos+d[2]]
             pos += d[2]
-            
+
             result.append( (0, d[0], d[1], s) )
         elif t == 1:
             d = unpack("<ii", bops[pos:pos+8])
             pos += 8
-            
+
             result.append( (1, d[0], d[1]) )
         elif t == 2:
             d = unpack("<ii", bops[pos:pos+8])
             pos += 8
             s = bops[pos:pos+d[1]]
             pos += d[1]
-            
+
             result.append( (2, d[0], s) )
 
-    return result            
+    return result
 
 
 def applyCompact(a, cops):
@@ -799,4 +799,3 @@ def getBinCompactForDiff(a, b):
     sm = difflib.SequenceMatcher(None, a, b)
     ops = sm.get_opcodes()
     return compactToBinCompact(difflibToCompact(ops, b))
-

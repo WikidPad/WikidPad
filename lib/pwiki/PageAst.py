@@ -116,6 +116,13 @@ def _findTokensForPos(tokens, pos):
 
 
 def _doAutoLinkForTokens(tokens, formatDetails, threadholder):
+    """
+    Takes a list of tokens and checks plain text tokens for
+    included auto_link words, creates WikiWord tokens for them
+    and returns a modified copy of the list.
+    The function may return the unmodified list object if auto_link
+    is not used.
+    """
     if not threadholder.isCurrent():
         return tokens
 

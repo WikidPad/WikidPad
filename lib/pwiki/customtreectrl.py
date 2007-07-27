@@ -5322,7 +5322,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
                 if self.GetEventHandler().ProcessEvent(hevent):
                     if hevent.IsAllowed():
-                        self.SetToolTip(hevent._label)
+                        self.SetToolTipString(hevent._label)
                     else:
                         if flags & TREE_HITTEST_ONITEMLABEL:
                             hPt = event.GetPosition()

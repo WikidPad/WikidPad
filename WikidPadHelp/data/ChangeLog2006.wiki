@@ -1,0 +1,538 @@
+﻿++ Change Log2006
+
+Dec. 27, 2006 (1.8beta6, repository revision in "mbutscher" branch: 100)
+
+    * "toc" insertion for a page-wide table of contents (with
+      appropriate settings in the CSS-file(s)). See [Insertions].
+    * "noerror" appendix for insertions for external graphical apps
+      (except MimeTeX) to ignore warning/error messages.
+      See ExternalGraphicalApplications.
+    * For Windows: Option to use Internet Explorer or
+      (with restrictions) Mozilla to render HTML preview
+      (including a new style sheet to control preview).
+      See [Options HTML preview_export]#*Preview# renderer*
+    * Option to set doctype for HTML preview/export.
+    * Option to set background color of selected text.
+    * Internal: Slightly better handling of databases without
+      write access.
+    * Further small changes in incremental search.
+    * Bug fixed: External graphical apps didn't work if path
+      to them contained space(s).
+
+
+
+Nov. 24, 2006 (1.8beta5, repository revision in "mbutscher" branch: 99)
+
+    * Changed insertion syntax where value or appendices can
+      be quoted to include arbitrary characters. See [Insertions].
+    * Plugins for accessing MimeTeX, Ploticus and GraphViz
+      applications via Insertions.
+      See [ExternalGraphicalApplications].
+    
+    * Tags to mark text as suppressed (<< >>) are no longer shown
+      in HTML preview/export
+    * "Wiki Info" dialog to show some basic information about the
+      current wiki. Rather empty at the moment.
+    * New behavior and look of incremental search. May change again
+      if users don't like it.
+    * Renaming links to a page when renaming the page now only
+      renames whole words.
+
+    * Windows binary installer: .wiki file of WikidPadHelp are now
+      always overwritten on updating.
+
+    * Internal: Plugin type "InsertionByKey" created which registers
+      special insertion keys to be handled by a plugin
+    * Internal: Plugin type "Options" created which allows to
+      register additional options (to be saved in config files) and
+      to add related pages in the options dialog.
+
+
+
+Oct. 30, 2006 (1.8beta4, repository revision in "mbutscher" branch: 96)
+
+    * Menu items and toolbar icons for zoom in/out also work for
+      preview now.
+    * Better page search. Search starts at cursor position or
+      optional at beginning. Before wrapping search from page end
+      to beginning, user is asked.
+    * Bug fixed: Showing (more precisely searching) of words in
+      subcategories of todos in tree did not work.
+    * Bug fixed: Zooming preview didn't show up dynamically.
+
+
+
+Oct. 26, 2006 (1.8beta3, repository revision in "mbutscher" branch: 95)
+
+    * List undefined pages (dead wiki links), also appropriate
+      insertion added. See WikiMaintenance!finding_undefined_links,
+      [Insertions]
+    * Better alphabetical sort order for wiki words, todos,
+      attributes in tree. See OptionsDialog#*Sort# order*
+    * The order how wiki pages are ordered when printing or
+      exporting the whole wiki or a subtree to a single HTML page
+      is (hopefully) more logical. It is the same as the new
+      "As Tree" order used in PageListDialog#"As# Tree" .
+    * Option to generate a table of contents in tree or list form
+      for HTML exports, see WikiExport#*Additional# options* ,
+      [Options HTML preview_export]#*Table# of# contents*
+    
+    * Bug fixed: Detection of Linux OS failed due to a typo
+    * Bug fixed: Pages were shown as parentless even if an alias
+      of the page had a parent
+    * Bug fixed: Opening a particular page on startup by mentioning
+      the .wiki file on commandline did not work
+    * Bug fixed: Special URLs containing $ couldn't be activated
+      (further fixes may be necessary)
+    * Bug fixed: Bad HTML code if first cell of a table row is empty
+      and indented.
+
+
+
+Sep. 30, 2006 (1.8beta2, repository revision in "mbutscher" branch: 92)
+
+    * Support for insertion of pages, relations (parents, children,
+      ...) and saved searches. See [Insertions].
+    * Support for placing and jumping to anchors in wiki pages.
+      See [Anchors].
+    
+    * Setting of a few more shortcut keys possible in
+      KeyBindings.py (continue search, auto complete, ...)
+    
+    * Fixed bug: Some problems with non-ascii pathes.
+    * Fixed bug: No selection replacement on Win ME.
+    * Fixed bug: Renaming of wiki word failed if link modification
+      was wanted by the user or if page was not yet saved the
+      first time.
+    * Fixed bug: Opening a wiki page file instead of
+      wiki configuration file failed.
+
+
+
+Aug. 30, 2006 (1.8beta1, repository revision in "mbutscher" branch: 89)
+
+Changes:
+    * New database format! After updating a wiki it won't be
+      readable anymore for older versions of WikidPad.
+    * Updating of wiki databases to new versions is now done only
+      after asking user.
+    * New position for configuration files on Windows inside
+      "Application Data\WikidPad" directory. You might have to move
+      "WikidPad.config" file and ".WikidPadGlobals" directory from
+      "Application Data" to the new location if updating from
+      a previous version. Name of "Application Data" directory
+      depends on OS language.
+    
+    * Cursor and scroll position are now saved between sessions.
+    * Possibility to set size and alignment for image URLs.
+      See UrlLinking#++# URL# Appendix
+    * Functional pages for "camelcase blacklist". Words on this
+      list are not shown as wiki links. See WordLinking
+    * Option to automatically remove bullets and numbers which
+      stand "lonely" on a line by pressing enter.
+      See BulletedLists
+    
+    * Menu functions "Show Tree Control", "Show Toolbar" and
+      "Stay on Top" moved to "View" menu
+    * Preview now shows indented paragraphs correctly (or,
+      at least, better)
+    
+    * Bug fixed: Wiki word aliases not shown as links on
+      HTML export.
+    * Bug fixed: Wrong URL creation mode when releasing/pressing
+      SHIFT or CTRL during drag&drop operation.
+    * Better handling of non Western-European languages on
+      Win 98/ME
+
+
+
+Aug. 05, 2006 (1.7beta8, repository revision in "mbutscher" branch: 85)
+
+Changes:
+    * Official support for multiple windows with same wiki in
+      them, but only in the same process (therefore necessarily
+      on the same machine and by the same user), you can use
+      e.g. menu "View"->"Clone Window" for that. This function
+      is not meant as collaborative multi-user support. 
+    * Option to handle new WikidPad windows by a single process
+      (recommended if you want to open the same wiki in multiple
+      windows).
+      See OptionsDialog#*Single# process# per# user*
+
+    * Better error handling if file access drops (e.g. accessing
+      wiki db over a network). See WikiMaintenance#++# Reconnect
+
+    * Option to minimize wiki if close button on frame is pressed.
+      See OptionsDialog#*Minimize# on# close# button*
+
+
+
+Jul. 10, 2006 (1.7beta7, repository revision in "mbutscher" branch: 83)
+
+Changes:
+    * "Fast search" text field in toolbar. See SearchingTheWiki
+
+    * Error log file is now written in the same directory where
+      configuration file "WikidPad.config" is, it has a new name
+      ("WikidPad_Error.log" instead of "WikidPad.exe.log") and
+      writes timestamps and version number for each new session
+      where an error occurred.
+    * More verbose messages/exceptions when executing
+      scripts/evaluating expressions.
+
+    * Optical changes in extension "referrals.py" (thanks to
+      schnullibullihulli).
+    * Menus slightly reorganized, some menu items are at other
+      places and/or have another name.
+    * Wiki specific option to set page title prefix
+      (normally "++") for new wiki pages. This allows to freely
+      choose the heading level.
+      See OptionsDialog#*New# page# title# prefix*
+    * Possibility to add (absolute) URL with file dialog (menu
+      "Editor" -> "Add file URL"). 
+    * Fixed exporter bugs: No newline after "Parents: ..." start
+      line in HTML export, unnecessary newline after each item
+      in bulleted/numbered list.
+    * Bug fixed: "compact_sqlite" db backend lost creation date.
+
+    * Help wiki is opened now in the same process so file suffix
+      .wiki needs no longer to be associated with WikidPad to
+      show help.
+    * Internal: Different handling of clipboard copy which may
+      fix a bug (or not).
+    * Internal: Extension files are now loaded with universal
+      newline support, so newline conversion for Linux shouldn't
+      be necessary anymore.
+    * Windows binary installer now supports installation for
+      current user only (on NT-based systems) or for all users
+      (if installing as administrator, you are asked how to
+      install).
+
+
+
+Jun. 02, 2006 (1.7beta6, repository revision in "mbutscher" branch: 80)
+
+Changes:
+    * Support for an additional "Views" tree which can be put at any
+      side of main tree, also option to put main tree at any side of
+      editor (layout change during session has bugs).
+      See OptionsDialog#*Position# main# tree* .
+    * Clipboard catcher: New option to insert at cursor.
+      See ClipboardCatcher.
+    * Option for showing line numbers in editor
+    * If ++ title of page was unmodified since page creation, it is
+      changed on page rename accordingly.
+      See RenamingWikiWords#*Title# auto-rename*
+    * Fixed bug: Upper case non-ascii letters were not found when
+      opening a wiki word (e.g. "ÃƒÆ’Ã¢â‚¬Â°" didn't find ÃƒÆ’Ã¢â‚¬Â°ve).
+    * HTML-tag \<pre> is now handled much better.
+    * Changed controls in spell check dialog to circumvent problems
+      with some languages on Win 98/ME
+    
+    * Fixed bug: No preview if newly created page wasn't saved first.
+    * Fixed bug: No preview if page contains plain text only.
+    * Fixed bug: WikidPad didn't work if date pattern for
+      creation/modification date in status line created/contained
+      non-ascii characters.
+    * Fixed bug: double-escaped relative URLs (could be seen e.g. if
+      path has spaces)
+    * Fixed bug: Copying text to ScratchPad didn't work if copying
+      from ScratchPad
+    
+    * Internal: "C:\Windows" is no longer used as configuration
+      directory if all other possibilities fail.
+
+
+
+May 08, 2006 (1.7beta5, repository revision in "mbutscher" branch: 77)
+
+Changes:
+
+    * Clipboard catcher (Windows only): Every piece of text added to
+      the clipboard is also appended to a wiki page if the clipboard
+      catcher is active. There is also an option to set some suffix
+      after each caught piece of text from clipboard (by default, a
+      newline is added). See ClipboardCatcher.
+    * File storage introduced: Copy files into a subdirectory of the
+      wiki within WikidPad. See FileStorage.
+
+    * Options to choose text colors for editor. See
+      OptionsDialog#*Plain# text# color* and following.
+    * Control background and text color of HTML export (and partially
+      for preview) by attributes (for wiki or page) or by options for
+      the whole application.
+      See [Options HTML preview_export]#+++# HTML# page# settings
+
+    * If a wiki word node is clicked which is subnode of an attribute
+      node, the particular attribute is selected as it worked already
+      for todo items.
+
+    * New menu item to hide/show toolbar.
+    * New menu item to keep window always on top.
+    * New options dialog consisting of multiple pages.
+    
+    * Simpler function for some standard dialogs for scripts.
+      See [ApiDocs]#stdDialog
+
+    * Changed method to find configuration directory, more suitable
+      for WikidPad on USB-stick and more reliable. See WikidPadOnUSB
+      and ApplicationConfigurationFiles.
+
+
+Bugs fixed:
+
+    * Todo item part shows up twice in tree with same content if part
+      is also right side of a todo entry. Now shows up only once.
+    * Wrong cursor position after using bold or italic from
+      menu/toolbar
+    * "Show referring Wikis" in the "Plugins" menu didn't work
+    * Exception when refreshing tree while "saved searches" node is
+      expanded
+    * Exception when trying to paste something non-textual from
+      clipboard
+    * Workaround for wxPython bug: Crash when showing colored menu
+      items on Win 98/Me
+
+
+
+Apr. 21, 2006 (1.7beta4, repository revision in "mbutscher" branch: 74)
+
+Changes:
+
+    * One or more of the characters .,;:!? can directly follow
+      an URL and aren't counted as part of it. If you need such
+      a character as last one in an URL, enclose the URL in brackets.
+    * Attribute names can consist of all alphanumeric
+      (unicode definition) characters.
+    * Support for zoom in preview (with Ctrl-+, Ctrl-- and
+      Ctrl-Mousewheel).
+    * Better formatting of titles of newly created wiki pages
+      (e.g. wikiword "URLViewer" now leads to title "++ URL Viewer"
+      instead of "++ URLV iewer"
+
+    * Bug fixed: Tree always visible on WikidPad start, even if
+      made invisible before previous termination.
+    * Bug fixed: Creation of new wikis didn't work
+    * Bug fixed: Searches not saveable, saved searches not usable
+    * Bug "reduced": Scroll position of page in editor not remembered
+      properly. The fix may lead to some visible jumps: sometimes
+      you will see the beginning of page for a short time before
+      it jumps to the stored position. Moreover, even with the
+      fix the stored position may be imprecise sometimes.
+
+
+
+Apr. 16, 2006 (1.7beta3, repository revision in "mbutscher" branch: 73)
+
+Changes:
+
+    * Better alias support. E.g. pages linking to an alias of
+      WikiWord are now listed as parents of this word.
+    * Support for relative URLS with rel: protocol, see [UrlLinking]
+    
+    * Initial support for checking special attributes for validity
+      (currently only "alias", "icon", "color", "bold") with an
+      own "Log Window" for error messages, see [WikiDocumentAttributes].
+    
+    * Support for spell checking, see [SpellChecking].
+    * Todo items can now be terminated with newline or |
+    * On multiple attributes of same name on one page (e.g.
+      multiple "icon" attributes) the last one is now preferred
+      instead of the first one.
+    
+    * Bug fixed: Cursor position on a page is now stored for
+      each page even if page is not modified and saved
+    * Scroll position of editor is now stored (during session) as
+      cursor position already is.
+    * Scroll policy of editor modified to better handling
+    
+    * Bug fixed: Command line export didn't work because of wrong
+      default additional options
+    * Bug fixed: Gaps between paragraphs in editor when using some
+      fonts (e.g. Verdana) and asynchronous highlighting.
+    * Bug fixed: Tree not shown if set invisible and then made
+      visible by dragging splitter sash.
+
+
+
+Mar. 24, 2006 (1.7beta2, repository revision in "mbutscher" branch: 70)
+
+Changes:
+    * Importer/Exporter for new multipage text format (mpt).
+      See ([WikiExport], [WikiImport], [Multipage text format])    
+
+    * Tree node context menu allows now also choice of color and
+      icon of a node as well as appending or prepending of 
+      wiki words to a page.
+    * Options to switch off automatic bullet/numbering creation
+      and auto-indent (see [BulletedLists])
+
+    * Introduced <\<pre >>  block to create preformatted,
+      monospaced text
+    * Todo items (e.g. "\todo:", "\track:") can start after
+      arbitrary text now, not only at the beginning of a line.
+      This is currently experimental! It might be changed back
+      if user have problems with this (see [TodoItems]).
+
+    * Display of modification and creation date of page in status
+      line (customizable date format, see [OptionsDialog])
+    * Support for changing of file suffix of page files in the
+      config file (not part of options GUI) (see [ChangeFileSuffix])
+    * Uses now also environment variable "USERPROFILE" to find
+      configuration directory
+
+    * Bug fixed: page-wide "Replace All" could run in an endless
+      loop (e.g. when replacing "e" by "ee").
+
+
+
+Mar. 09, 2006 (1.7beta1, repository revision in "mbutscher" branch: 63)
+
+*Warning*: This version has a new database format for
+"Compact Sqlite" databases. It is converted automatically
+when opening a wiki the first time. Making a backup beforehand
+is therefore recommended!
+
+Changes:
+    * Introduced new db backend "Original Sqlite".
+      See [WhereIsTheDataStored] and [MigrationBetweenDbTypes].
+    * For "Set Date Format" dialog last 10 entries are remembered
+    * Option to interpret image URLs for HTML preview and export
+      either as images or as normal links (see [OptionsDialog])
+    * Export dialog has checkbox to temporarily override this option
+      setting.
+
+    * Attribute \[pagetype: form] introduced to support special
+      behavior of the editor for form-like pages. (see [FormPages])
+
+    * Support for global.child_sort_order attribute.
+    * Support for \[child_sort_order: natural] (but not really
+      stable). See [WikiDocumentAttributes].
+    * Presentation attributes (bold, color, icon) in todo entries
+      used to format the entry in tree instead of the page.
+    * See [WikiDocumentAttributes].
+
+    * When trying to run a script, but script security doesn't
+      allow to run scripts, a message box appears to explain.
+
+
+Fixed bugs:
+    * No titled URLs/wiki words in tables
+    * Invalid HTML anchors created
+    * Exporting of raw .wiki files didn't work for
+      "Original Gadfly" databases
+
+
+
+Feb. 24, 2006 (1.6beta4, repository revision in "mbutscher" branch: 60)
+
+Changes:
+    * Commandline support for exporting (parts of) a wiki and
+      deletion of personal configuration (see [CommandLineSupport])
+    * Windows binary installer: Support for deleting config.
+      files on uninstall
+    * Support HTML tags in WikidPad
+
+    * Support for wiki specific text blocks (see [TextBlocks])
+    * Editing of text blocks files from within WikidPad as
+      "functional pages", located under Views in tree
+    * Editor font now changes instantly after saving page
+    * Now at most one script is executed when pressing
+      Ctrl-Number (search order: local page, imported scripts,
+      global imported scripts page)
+
+    * Better handling of property "camelCaseWordsEnabled" during
+      database update/rebuild.
+    * Gadfly database backend: Rebuild does no more loose
+      creation and modification date of a page.
+
+
+Fixed bugs:
+    * Crash on non-ascii characters in path to wiki database
+    * Refresh of text blocks menu didn't work
+    * When word in tree node had no children but got one after
+      update, no '+' icon appeared after refresh.
+    * Problems with wiki-wide search and page search
+    * Jumping to wiki word didn't work if cursor and word were
+      at end of page.
+
+
+
+Feb. 09, 2006 (1.6beta3, repository revision in "mbutscher" branch: 57)
+
+Changes:
+    * 'global.import_scripts' property introduced (see
+      [InlinePythonEval]) 
+    * Security option to control if scripts should be executed
+      and (global.)import_scripts property should be respected
+      (see [InlinePythonEval]) 
+
+    * 'template' property introduced to use content of one page
+      as template for children of another page. (see
+      [WikiDocumentAttributes]).
+
+    * Hierarchical global presentation deduction: e.g. a property
+      'global.work.color' will be applied to pages containing
+      'work', "work.somewhere", "work.somewhere.else" ...
+      properties, except there is e.g. a
+      'global.work.somewhere.else.color' property. This works for
+      'color', 'icon' and 'bold' properties which control the
+      presentation of the tree nodes (see [WikiDocumentAttributes]).
+
+    * Differential user_extensions: A file in "user_extensions"
+      now only needs to contain the  definitions which are
+      different compared to the file in "extensions"
+
+    * In configuration directory, a directory ".WikidPadGlobals"
+      will be created if not existing
+    * In ".WikidPadGlobals" a file "[TextBlocks].wiki" will be
+      created if not existing. This file describes content of
+      the "Editor"->"Text blocks" submenu and can be customized
+      (see [TextBlocks]).
+    
+    * Bug in autoNew.py script fixed
+    * Bug with renaming in "compact_sqlite" database fixed
+
+
+
+Jan. 25, 2006 (1.6beta2, repository revision in "mbutscher" branch: 55)
+
+*Warning*: This version has a new database format. It is converted
+automatically when opening a wiki the first time. Making a backup
+beforehand is therefore recommended!
+
+Changes:
+    * No more brackets around wiki words in the "Open Wiki Word"
+      and all other dialogs
+    * Characters can be escaped with backslash and are then
+      interpreted as normal text (see [TextFormatting])
+    * New dialog to choose which pages to search for, to export
+      or to print (see [PageListDialog], [Printing], [WikiExport],
+      [SearchingTheWiki])
+    * New options to control the auto save timing
+      (see [OptionsDialog])
+
+    * Some bugs fixed
+
+
+
+Jan. 13, 2006 (1.6beta1, repository revision in "mbutscher" branch: 53)
+
+Changes:
+    * WikidPad and WikidPadCompact merged into one application
+      (therefore the new version number) (see [DatabaseTypes])
+    * In wiki-wide search cycling through found matching occurrences
+      on a page with F3 or clicking on the little blue bar
+    * Basic printing support (see [Printing])
+    * Support for titled wiki words and URLs (e.g
+      [http://www.somewhere.com/aaa/bbb |Somewhere]
+      [ScratchPad |This text is shown in preview and HTML export] )
+      The title of the link is not stored in the XML export!
+
+    * Options to control timing behavior of syntax highlighter (see
+      [OptionsDialog])
+    * Option to set background color of text editor (works only
+      partially)
+
+    * Bug fixed: non camel-case words starting with camel-case word
+      (e.g. [WikiWord with something]) incorrectly recognized in tree

@@ -48,11 +48,24 @@ Disadvantages:
 *Statusbar time format*
 Set the time format the statusbar should use to show modification and creation date of the current wiki page. The format can only be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
 
+
 *Auto-show log window*
 Automatically show log window if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
 
 *Auto-hide log window*
 Automatically hide log window if no more error messages are present.
+
+
+*Structure window pos.*
+Where (relative to main window) should the DocStructureWindow be positioned? "Hidden" deactivates it.
+KNOWN BUG: After changing the position of the window, restarting WikidPad is necessary.
+
+*Structure window depth*
+Up to (and including) which heading level should headings be displayed? "1" Means only top-level heading (one plus sign), "15" means all headings.
+
+*Auto-hide structure window*
+After double-clicking an entry in DocStructureWindow the window is collapsed (hidden) automatically if this is checked.
+
 
 *Sort order*
 Choose the desired alphabetical sort algorithm for wiki words, todos, attributes in tree or PageListDialog.

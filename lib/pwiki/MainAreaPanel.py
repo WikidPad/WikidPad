@@ -38,7 +38,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
         # Last presenter for which a context menu was shown
         self.lastContextMenuPresenter = None
-        
+
         self.ignorePageChangedEvent = False
 
         wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.GetId(),
@@ -49,6 +49,8 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
         wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_THIS_TAB, self.OnCloseThisTab)
         wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_CURRENT_TAB, self.OnCloseCurrentTab)
+        wx.EVT_MENU(self, GUI_ID.CMD_THIS_TAB_SHOW_SWITCH_EDITOR_PREVIEW,
+                self.OnCmdSwitchThisEditorPreview)
 
 
     def close(self):
@@ -163,6 +165,20 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             self.closeDocPagePresenterTab(presenter)
 
 
+    def switchDocPagePresenterTabEditorPreview(self, presenter):
+        """
+        Switch between editor and preview in the given presenter
+        (if presenter is owned by the MainAreaPanel).
+        """
+        if not presenter in self.docPagePresenters:
+            return
+        
+        scName = presenter.getCurrentSubControlName()
+        if scName != "textedit":
+            presenter.switchSubControl("textedit", gainFocus=True)
+        else:
+            presenter.switchSubControl("preview", gainFocus=True)
+
 
     def OnNotebookPageChanged(self, evt):
         # Tricky hack to set focus to the notebook page
@@ -216,6 +232,17 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
     def OnCloseCurrentTab(self, evt):
         self.closeDocPagePresenterTab(self.getCurrentDocPagePresenter())
+
+
+    def OnCmdSwitchThisEditorPreview(self, evt):
+        """
+        Switch between editor and preview in the presenter for which
+        context menu was used.
+        """
+        if self.lastContextMenuPresenter is not None:
+            self.switchDocPagePresenterTabEditorPreview(self.lastContextMenuPresenter)
+
+
 
     def miscEventHappened(self, miscevt):
         if miscevt.getSource() in self.docPagePresenters:

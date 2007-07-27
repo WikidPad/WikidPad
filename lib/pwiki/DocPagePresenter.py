@@ -120,7 +120,8 @@ class LayeredControlPresenter(MiscEventSourceMixin):
 class BasicDocPagePresenter(LayeredControlPresenter):
     """
     Controls the group of all widgets (subcontrols) used to present/edit 
-    a particular doc page, currently only WikiTxtCtrl and WikiHtmlView.
+    a particular doc page, currently only the WikiTxtCtrl (subcontrol name
+    "textedit") and WikiHtmlView or WikiHtmlViewIE (name "preview").
     This version isn't itself a wx panel and is mainly thought for
     controlling e.g. a notebook which has the actual subcontrols as
     children
@@ -176,7 +177,13 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         return docPage.getWikiWord()
 
     def getLiveText(self):
-        return self.getSubControl("textedit").GetText()
+        docPage = self.getDocPage()
+        if docPage is None:
+            return None
+        
+        return docPage.getLiveText()
+        
+        # return self.getSubControl("textedit").GetText()
 
 
     def informLiveTextChanged(self, changer):
@@ -220,7 +227,8 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         self.switchSubControl("textedit")
 
         p2 = evtprops.copy()
-        p2.update({"loaded current functional page": True})
+        p2.update({"loaded current doc page": True,
+                "loaded current functional page": True})
         # p2.update({"loaded current page": True})
         self.fireMiscEventProps(p2)        
 
@@ -271,7 +279,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
                 page = self.getMainControl().getWikiDataManager().getWikiPage(wikiWord)
                 self.getStatusBar().SetStatusText(uniToGui(u"Opened wiki word '%s'" %
                         wikiWord), 0)
-                        
+
             except (WikiWordNotFoundException, WikiFileNotFoundException), e:
                 page = self.getMainControl().getWikiDataManager().\
                         createWikiPage(wikiWord,
@@ -286,7 +294,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
             self.getMainControl().refreshPageStatus()  # page)
     
             p2 = evtprops.copy()
-            p2.update({"loaded current page": True,
+            p2.update({"loaded current doc page": True,
                     "loaded current wiki page": True})
             self.fireMiscEventProps(p2)
     
@@ -318,7 +326,6 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         self.getMainControl().hooks.openedWikiWord(self, wikiWord)
 
 
-
     def saveCurrentDocPage(self, force = False):
         ## _prof.start()
 
@@ -337,6 +344,24 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 
         ## _prof.stop()
 
+
+    def stdDialog(self, dlgtype, title, message, additional=None):
+        """
+        Show message dialogs, used for scripts.
+        Calls same function from PersonalWikiFrame.
+        """
+        self.mainControl.stdDialog(dlgtype, title, message, additional)
+
+
+    def displayMessage(self, title, str):
+        """pops up a dialog box,
+        used by scripts only
+        """
+        self.mainControl.displayMessage(title, str)
+
+
+    def displayErrorMessage(self, errorStr, e=u""):
+        self.mainControl.displayErrorMessage(errorStr, e)
 
 
 class DocPagePresenter(wx.Panel, BasicDocPagePresenter):

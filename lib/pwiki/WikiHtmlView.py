@@ -68,7 +68,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
         self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
                 None, (
-                ("loaded current page", self.onLoadedCurrentWikiPage),
+                ("loaded current wiki page", self.onLoadedCurrentWikiPage),
                 ("reloaded current page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
                 ("closing current wiki", self.onClosingCurrentWiki),
@@ -218,19 +218,24 @@ class WikiHtmlView(wx.html.HtmlWindow):
         elif self.outOfSync:
             lx, ly = wikiPage.getPresentation()[3:5]
             self.Scroll(lx, ly)
-            
+
         self.anchor = None
         self.outOfSync = False
 
         ## _prof.stop()
-
+        
+        
+    def gotoAnchor(self, anchor):
+        self.anchor = anchor
+        if self.visible:
+            self.refresh()
 
     def onLoadedCurrentWikiPage(self, miscevt):
         self.anchor = miscevt.get("anchor")
         self.outOfSync = True
         if self.visible:
             self.refresh()
-            
+
     def onReloadedCurrentPage(self, miscevt):
         """
         Called when already loaded page should be loaded again, mainly
@@ -238,9 +243,10 @@ class WikiHtmlView(wx.html.HtmlWindow):
         """
         anchor = miscevt.get("anchor")
         if anchor:
-            self.anchor = anchor
-            if self.visible:
-                self.refresh()
+            self.gotoAnchor(anchor)
+#             self.anchor = anchor
+#             if self.visible:
+#                 self.refresh()
 
     def onOpenedWiki(self, miscevt):
         self.currentLoadedWikiWord = None

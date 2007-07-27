@@ -5,6 +5,7 @@ import wx
 
 from StringOps import escapeForIni, unescapeForIni
 
+from Configuration import isLinux
 
 class WinLayoutException(Exception):
     pass
@@ -87,6 +88,16 @@ def setWindowSize(win, size):
     win.SetSize((sizeX, sizeY))
 
 
+#     m_sashCursorWE = new wxCursor(wxCURSOR_SIZEWE);
+#     m_sashCursorNS = new wxCursor(wxCURSOR_SIZENS);
+
+SASH_TOP = 0
+SASH_RIGHT = 1
+SASH_BOTTOM = 2
+SASH_LEFT = 3
+SASH_NONE = 100
+
+
 class SmartSashLayoutWindow(wx.SashLayoutWindow):
     def __init__(self, *args, **kwargs):
         wx.SashLayoutWindow.__init__(self, *args, **kwargs)
@@ -100,6 +111,32 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
         self.SetMinimumSizeY(1)
 
         wx.EVT_SASH_DRAGGED(self, self.GetId(), self.OnSashDragged)
+
+        if isLinux():
+            self._CURSOR_SIZEWE = wx.StockCursor(wx.CURSOR_SIZEWE)
+            self._CURSOR_SIZENS = wx.StockCursor(wx.CURSOR_SIZENS)
+            wx.EVT_MOTION(self, self.MouseMotion)
+            wx.EVT_LEAVE_WINDOW(self, self.OnMouseLeave)
+        
+    if isLinux():
+
+        def MouseMotion(self, evt):
+            if evt.Moving():
+                x, y = evt.GetPosition()
+                sashHit = self.SashHitTest(x, y)
+                
+                if sashHit == SASH_NONE:
+                    self.SetCursor(wx.NullCursor)
+                elif sashHit == SASH_LEFT or sashHit == SASH_RIGHT:
+                    self.SetCursor(self._CURSOR_SIZEWE)
+                elif sashHit == SASH_TOP or sashHit == SASH_BOTTOM:
+                    self.SetCursor(self._CURSOR_SIZENS)
+                    
+            evt.Skip()
+    
+        def OnMouseLeave(self, evt):
+            self.SetCursor(wx.NullCursor)
+            evt.Skip()
 
 
     def setInnerAutoLayout(self, centerWindow):
@@ -160,17 +197,19 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
     def getEffectiveSashPosition(self):
         return self.effectiveSashPos
 
-
     def isCollapsed(self):
         return self.getSashPosition() < self.minimalEffectiveSashPos
+
+    def expandWindow(self, flag=True):
+        if flag and self.isCollapsed():
+            self.setSashPosition(self.effectiveSashPos)
+        elif not flag and not self.isCollapsed():
+            self.setSashPosition(1)
 
     def collapseWindow(self):
         if not self.isCollapsed():
             self.setSashPosition(1)
 
-    def uncollapseWindow(self):
-        if self.isCollapsed():
-            self.setSashPosition(self.effectiveSashPos)
 
 
     def OnSashDragged(self, evt):
@@ -205,7 +244,7 @@ class WindowLayouter:
 
     def __init__(self, mainWindow, createWindowFunc):
         """
-        mainWindow -- normally a frame in which the other winodws
+        mainWindow -- normally a frame in which the other windows
             should be layouted
         createWindowFunc -- a function taking a dictionary of properties
             (especially with a "name" property describing the name/type
@@ -217,8 +256,8 @@ class WindowLayouter:
 #         self.centerWindowProps = None
         self.windowPropsList = []  # List of window properties, first window is
                 # center window. List is filled during lay. definition
-                
-                
+
+
         # The following 4 are filled during layout realization
 
         self.directMainChildren = []  # List of window objects which are
@@ -242,10 +281,10 @@ class WindowLayouter:
 
         if len(self.windowPropsList) == 0:
             return  # TODO Error?
-            
+
         centerWindowProps = self.windowPropsList[0]
         centerWindowName = centerWindowProps["name"]
-        
+
         for pr in self.windowPropsList[1:]:
             winName = pr["name"]
             
@@ -253,12 +292,15 @@ class WindowLayouter:
             if relTo == centerWindowName:
                 enclWin = self.mainWindow
             else:
-                enclWin = self.winNameToSashWindow[relTo]
-                
+                try:
+                    enclWin = self.winNameToSashWindow[relTo]
+                except KeyError:
+                    enclWin = self.mainWindow
+
             sashWin = SmartSashLayoutWindow(enclWin, -1,
                 wx.DefaultPosition, (30, 30), wx.SW_3DSASH)
             objWin = self.createWindowFunc(pr, sashWin)
-            
+
             if objWin is None:
                 sashWin.Destroy()
                 continue
@@ -301,14 +343,33 @@ class WindowLayouter:
         Returns None if window not in layouter
         """
         return self.winNameToObject.get(winName)
+        
+    def focusWindow(self, winName):
+        """
+        Set focus to window named winName
+        """
+        w = self.getWindowForName(winName)
+        
+        if w is None:
+            return
+        
+        w.SetFocus()
 
 
     def isWindowCollapsed(self, winName):
         sashWin = self.winNameToSashWindow.get(winName)
         if sashWin is None:
-            return False
+            return True
 
         return sashWin.isCollapsed()
+
+
+    def expandWindow(self, winName, flag=True):
+        sashWin = self.winNameToSashWindow.get(winName)
+        if sashWin is None:
+            return
+            
+        return sashWin.expandWindow(flag)
 
     def collapseWindow(self, winName):
         sashWin = self.winNameToSashWindow.get(winName)
@@ -316,13 +377,6 @@ class WindowLayouter:
             return
             
         return sashWin.collapseWindow()
-
-    def uncollapseWindow(self, winName):
-        sashWin = self.winNameToSashWindow.get(winName)
-        if sashWin is None:
-            return
-            
-        return sashWin.uncollapseWindow()
 
 
     def updateWindowProps(self, winProps):
@@ -343,13 +397,15 @@ class WindowLayouter:
                     str(sashWindow.getEffectiveSashPosition())
 
 
-    def cleanMainWindow(self):
+    def cleanMainWindow(self, excluded=()):
         """
         Destroy all direct children of mainWindow which were created here
         to allow a new layout.
+        
+        excluded -- Sequence or set of window objects which shoudl be preserved
         """
         for w in self.directMainChildren:
-            if w.GetParent() is self.mainWindow:
+            if (w not in excluded) and (w.GetParent() is self.mainWindow):
                 w.Destroy()
 
 

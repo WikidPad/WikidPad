@@ -78,7 +78,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
         self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
                 None, (
-                ("loaded current page", self.onLoadedCurrentWikiPage),
+                ("loaded current wiki page", self.onLoadedCurrentWikiPage),
                 ("reloaded current page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
                 ("closing current wiki", self.onClosingCurrentWiki),
@@ -91,6 +91,8 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         self.outOfSync = True   # HTML content is out of sync with live content
 
         self.currentLoadedWikiWord = None
+        self.currentLoadedUrl = None  # Contains the URL of the temporary HTML
+                # file without anchors
 
         self.anchor = None  # Name of anchor to jump to when view gets visible
         self.passNavigate = 0
@@ -155,12 +157,14 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 #                 prevPage.setPresentation(self.GetViewStart(), 3)
             except WikiWordNotFoundException, e:
                 pass
-
         if self.outOfSync:
             self.currentLoadedWikiWord = None
 
-            self.exporterInstance.wikiData = self.presenter.getWikiDocument().\
-                    getWikiData()
+            wikiDoc = self.presenter.getWikiDocument()
+            if wikiDoc is None:
+                return
+
+            self.exporterInstance.wikiData = wikiDoc.getWikiData()
 
             wikiPage = self.presenter.getDocPage()
             if wikiPage is None:
@@ -191,6 +195,8 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             # wxFileSystem.FileNameToURL(p)
 
             wx.GetApp().getInsertionPluginManager().taskEnd()
+ 
+            self.currentLoadedUrl = url
 
             if self.anchor:
                 url += "#" + self.anchor
@@ -208,6 +214,11 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             self.passNavigate += 1
             self.LoadUrl(url)
 
+        else:  # Not outOfSync
+            if self.anchor:
+                self.passNavigate += 1
+                self.LoadUrl(self.currentLoadedUrl + u"#" + self.anchor)
+
 
 #         if self.anchor and self.HasAnchor(self.anchor):
 #             self.ScrollToAnchor(self.anchor)
@@ -223,6 +234,12 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         ## _prof.stop()
 
 
+    def gotoAnchor(self, anchor):
+        self.anchor = anchor
+        if self.visible:
+#             self.outOfSync = True
+            self.refresh()
+
     def onLoadedCurrentWikiPage(self, miscevt):
         self.anchor = miscevt.get("anchor")
         self.outOfSync = True
@@ -236,9 +253,10 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         """
         anchor = miscevt.get("anchor")
         if anchor:
-            self.anchor = anchor
-            if self.visible:
-                self.refresh()
+            self.gotoAnchor(anchor)
+#             self.anchor = anchor
+#             if self.visible:
+#                 self.refresh()
 
     def onOpenedWiki(self, miscevt):
         self.currentLoadedWikiWord = None

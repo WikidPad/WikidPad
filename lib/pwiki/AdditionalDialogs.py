@@ -540,7 +540,7 @@ class FontFaceDialog(wx.Dialog):
     Presents a list of available fonts (its face names) and renders a sample
     string with currently selected face.
     """
-    def __init__(self, parent, ID, value="",
+    def __init__(self, parent, ID, mainControl, value="",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D):
         """
@@ -549,23 +549,24 @@ class FontFaceDialog(wx.Dialog):
         """
         d = wx.PreDialog()
         self.PostCreate(d)
-        
+
         self.parent = parent
+        self.mainControl = mainControl
         self.value = value
 
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.parent, "FontFaceDialog")
-        
+
         self.ctrls = XrcControls(self)
-        
+
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
-        
+
         # Fill font listbox
         fenum = wx.FontEnumerator()
         fenum.EnumerateFacenames()
         facelist = fenum.GetFacenames()
-        self.parent.getCollator().sort(facelist)
+        self.mainControl.getCollator().sort(facelist)
 
         for f in facelist:
             self.ctrls.lbFacenames.Append(f)
@@ -1332,12 +1333,22 @@ class ImagePasteDialog(wx.Dialog):
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
+        
+        self.OnFileTypeChoice(None)
 
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,
+                self.OnFileTypeChoice)
 
 
     def getImagePasteSaver(self):
         return self.imgpastesaver
+        
+    
+    def OnFileTypeChoice(self, evt):
+        # Make quality field gray if not JPG format
+        enabled = self.ctrls.chEditorImagePasteFileType.GetSelection() == 2
+        self.ctrls.tfEditorImagePasteQuality.Enable(enabled)
 
 
     def OnOk(self, evt):

@@ -17,6 +17,7 @@ WikidPadHelp/data/ChangeLog.wiki -text
 WikidPadHelp/data/ChangeLog2003.wiki -text
 WikidPadHelp/data/ChangeLog2004.wiki -text
 WikidPadHelp/data/ChangeLog2005.wiki -text
+WikidPadHelp/data/ChangeLog2006.wiki -text
 WikidPadHelp/data/ChangingKeyBindings.wiki -text
 WikidPadHelp/data/ClipboardCatcher.wiki -text
 WikidPadHelp/data/Color[!!-~]AQUAMARINE.wiki -text
@@ -91,6 +92,7 @@ WikidPadHelp/data/ColorTestPage.wiki -text
 WikidPadHelp/data/CommandLineSupport.wiki -text
 WikidPadHelp/data/DatabaseTypes.wiki -text
 WikidPadHelp/data/DisableCamelCaseWords.wiki -text
+WikidPadHelp/data/DocStructureWindow.wiki -text
 WikidPadHelp/data/DynamicViews.wiki -text
 WikidPadHelp/data/ExternalGraphicalApplications.wiki -text
 WikidPadHelp/data/FileStorage.wiki -text
@@ -548,6 +550,7 @@ lib/pwiki/CmdLineAction.py -text
 lib/pwiki/Configuration.py -text
 lib/pwiki/DocPagePresenter.py -text
 lib/pwiki/DocPages.py -text
+lib/pwiki/DocStructureCtrl.py -text
 lib/pwiki/EnchantDriver.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text

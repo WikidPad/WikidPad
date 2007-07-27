@@ -1,7 +1,8 @@
 # TODO Weak references!
 
-import weakref
+import weakref, traceback
 
+import wx
 
 class MiscEventSourceMixin:
     """
@@ -131,6 +132,15 @@ class ListenerList(object):
             l = lref
             
         return l  # Return real
+
+
+    def invalidateObjectAt(self, i):
+        """
+        Sets listener at index i to None (invalid) and flags list for
+        cleaning.
+        """
+        self.listeners[i] = None
+        self.cleanupFlag = True
 
 
     def cleanDeadRefs(self):
@@ -290,8 +300,15 @@ class MiscEvent(object):
                     continue
                 
                 self.activeListenerIndex = i
-                l.miscEventHappened(self)
-                
+                try:
+                    l.miscEventHappened(self)
+                except wx.PyDeadObjectError:
+                    # The object is a wxPython object for which the C++ part was
+                    # deleted already, so remove object from listener list.
+                    self.listenerList.invalidateObjectAt(i)
+                except:
+                    traceback.print_exc()
+
                 i += 1
 
         finally:
@@ -438,6 +455,88 @@ class KeyFunctionSink(object):
         for k, f in self.activationTable:
             if evt.has_key(k):
                 f(evt)
+
+
+class KeyFunctionSinkAR(KeyFunctionSink):
+    """
+    Key function sink which automatically adds/removes itself as listener
+    to one particular object (Auto Register).
+    """
+    __slots__= ("eventSource",)
+    
+    def __init__(self, activationTable, eventSource=None):
+        """
+        activationTable -- Sequence of tuples (<key in props>, <function to call>)
+        eventSource -- object with getMiscEvent() function to listen to (may be None)
+        """
+        KeyFunctionSink.__init__(self, activationTable)
+        
+        self.eventSource = eventSource
+        
+        if self.eventSource is not None:
+            self.eventSource.getMiscEvent().addListener(self)
+
+    def getEventSource(self):
+        return self.eventSource
+        
+    def setEventSource(self, eventSource):
+        """
+        Set the event source (may be None). This automatically removes itself
+        as listener from the previous eventSource and registers to the new one
+        """
+        if self.eventSource is not None:
+            self.eventSource.getMiscEvent().removeListener(self)
+            
+        self.eventSource = eventSource
+
+        if self.eventSource is not None:
+            self.eventSource.getMiscEvent().addListener(self)
+
+    def disconnect(self):
+        """
+        Convenience function for setEventSource(None)
+        """
+        self.setEventSource(None)
+
+
+
+# class EventResenderAR(MiscEventSourceMixin):
+#     def __init__(self, eventSource=None):
+#         """
+#         eventSource -- object with getMiscEvent() function to listen to (may be None)
+#         """
+#         self.eventSource = eventSource
+#         
+#         if self.eventSource is not None:
+#             self.eventSource.getMiscEvent().addListener(self)
+# 
+#     def getEventSource(self):
+#         return self.eventSource
+#         
+#     def setEventSource(self, eventSource):
+#         """
+#         Set the event source (may be None). This automatically removes itself
+#         as listener from the previous eventSource and registers to the new one
+#         """
+#         if self.eventSource is not None:
+#             self.eventSource.getMiscEvent().removeListener(self)
+#             
+#         self.eventSource = eventSource
+# 
+#         if self.eventSource is not None:
+#             self.eventSource.getMiscEvent().addListener(self)
+# 
+#     def disconnect(self):
+#         """
+#         Convenience function for setEventSource(None)
+#         """
+#         self.setEventSource(None)
+
+
+
+    
+
+
 
 
 class DebugSimple(object):
