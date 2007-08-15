@@ -149,23 +149,26 @@ class DocStructureCtrl(wx.ListCtrl):
         depth = max(depth, 1)
 
         pageAst = docPage.getLivePageAst(text, threadholder)
-        
+
         result = []
         for headTType in HEADING_LEVEL_MAP.keys():
             if not threadholder.isCurrent():
                 return
-            
+
             headLevel = getHeadingLevel(headTType)
             if headLevel > depth:
                 continue
 
             tokens = pageAst.findTypeFlat(headTType)
-            
+
             for tok in tokens:
+                title = tok.text
+                if title.endswith(u"\n"):
+                    title = title[-1]
                 result.append((tok.start, headLevel, tok.text))
-        
+
         result.sort()
-        
+
         if not threadholder.isCurrent():
             return
 

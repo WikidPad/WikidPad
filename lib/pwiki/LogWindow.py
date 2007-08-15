@@ -5,8 +5,6 @@ GUI support and error checking for handling properties (=attributes)
 import sets, traceback
 
 import wx, wx.xrc
-# from wxPython.wx import *
-# import wxPython.xrc as xrc
 
 from wxHelper import *
 

@@ -39,6 +39,9 @@ class InterfaceError(Error):
 
 class DatabaseError(Error):
     pass
+    
+class ReadOnlyDbError(DatabaseError):
+    pass
 
 class DataError(DatabaseError):
     pass
@@ -190,7 +193,9 @@ class Connection:
         
         if not err in (SqliteThin3.SQLITE_OK, SqliteThin3.SQLITE_ROW,
                 SqliteThin3.SQLITE_DONE):
-            if self.thinConn:
+            if err == SqliteThin3.SQLITE_READONLY:
+                raise ReadOnlyDbError("Sqlite DB read-only error [%i]" % err)
+            elif self.thinConn:
                 msg = self.thinConn.errmsg()
                 raise Error, msg + " [%i]" % err
             else:
@@ -229,6 +234,7 @@ Connection.Warning = Warning
 Connection.Error = Error
 Connection.InterfaceError = InterfaceError
 Connection.DatabaseError = DatabaseError
+Connection.ReadOnlyDbError = ReadOnlyDbError
 Connection.DataError = DataError
 Connection.OperationalError = OperationalError
 Connection.IntegrityError = IntegrityError

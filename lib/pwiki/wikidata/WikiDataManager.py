@@ -198,6 +198,7 @@ class WikiDataManager(MiscEventSourceMixin):
         self.connected = False
         self.readAccessFailed = False
         self.writeAccessFailed = False
+        self.writeAccessDenied = False
         wikiConfig.loadConfig(wikiConfigFilename)
 
         # config variables
@@ -208,6 +209,21 @@ class WikiDataManager(MiscEventSourceMixin):
         if wikiName is None or dataDir is None:
             raise BadConfigurationFileException(
                     "Wiki configuration file is corrupted")
+        
+        # os.access does not answer reliably if file is writable,
+        # therefore we have to just open it in writable mode
+        try:
+            f = open(wikiConfigFilename, "r+b")
+            self.writeAccessDenied = False
+            f.close()
+        except IOError:
+            self.writeAccessDenied = True
+            
+        wikiConfig.setWriteAccessDenied(self.writeAccessDenied)
+
+
+#         self.writeAccessDenied = not os.access(wikiConfigFilename, os.W_OK)
+#         print "WikiDataManager7", repr(self.writeAccessDenied)
 
         # absolutize the path to data dir if it's not already
         if not os.path.isabs(dataDir):
@@ -274,6 +290,7 @@ class WikiDataManager(MiscEventSourceMixin):
         try:
             self.wikiData.connect()
         except DbWriteAccessError, e:
+            traceback.print_exc()
             writeException = e
 
         # Path to file storage
@@ -403,6 +420,20 @@ class WikiDataManager(MiscEventSourceMixin):
     def setWriteAccessFailed(self, val):
         self.writeAccessFailed = val
         # TODO send message?
+        
+    def getWriteAccessDenied(self):
+        """
+        Flag is set (by PersonalWikiFrame),
+        """
+        return self.writeAccessDenied
+
+
+    def isReadOnlyEffect(self):
+        """
+        Return true if underlying wiki is effectively read-only, this means
+        "for any reason", regardless if error or intention.
+        """
+        return self.writeAccessFailed or self.writeAccessDenied
 
 
     def getAutoReconnectTriedFlag(self):

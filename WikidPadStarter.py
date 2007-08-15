@@ -14,24 +14,11 @@ ExceptionLogger.startLogger(VERSION_STRING)
 
 # ## import hotshot
 # ## _prof = hotshot.Profile("hotshot.prf")
-# 
-# # To ensure unicode selection, works only for me (Michael)
-# 
-# # if not hasattr(sys, 'frozen'):
-# #     sys.path =  \
-# #             [r"C:\Programme\Python23\Lib\site-packages\wx-2.6-msw-unicode"] + sys.path
-# 
-# 
-# 
-# 
-# from wxPython.wx import *
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "gadfly.zip"))
 # print "sys.path + ", os.path.join(os.path.abspath(sys.argv[0]), "gadfly.zip")
 
 import wx
-# from wxPython.wx import wxApp, wxMessageDialog, wxDEFAULT_FRAME_STYLE, \
-#         wxNO_FULL_REPAINT_ON_RESIZE, wxFrame, wxOK
 
 from pwiki import srePersistent
 srePersistent.loadCodeCache()
@@ -50,8 +37,18 @@ if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
         sys.exit(1)
         
     try:
-        globalConfigSubDir = os.path.join(globalConfigDir, ".WikidPadGlobals")
-        shutil.rmtree(globalConfigSubDir, True)
+        try:
+            globalConfigSubDir = os.path.join(globalConfigDir, "WikidPadGlobals")
+            shutil.rmtree(globalConfigSubDir, True)
+        except:
+            pass
+
+        try:
+            globalConfigSubDir = os.path.join(globalConfigDir, ".WikidPadGlobals")
+            shutil.rmtree(globalConfigSubDir, True)
+        except:
+            pass
+
 #         subfiles = glob.glob(os.path.join(globalConfigSubDir, "*"))
 #         for f in subfiles:
 #             try:
@@ -65,6 +62,11 @@ if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
 
         try:
             os.remove(os.path.join(globalConfigDir, "WikidPad.config"))
+        except:
+            pass
+
+        try:
+            os.remove(os.path.join(globalConfigDir, ".WikidPad.config"))
         except:
             pass
             

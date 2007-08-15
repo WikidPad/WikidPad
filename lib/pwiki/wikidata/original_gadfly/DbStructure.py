@@ -5,7 +5,7 @@ DB formats to the current one
 """
 
 
-import string, codecs, types
+import string, codecs, types    , traceback
 
 from os import mkdir, unlink, rename
 from os.path import exists, join, split, basename
@@ -139,8 +139,8 @@ class ConnectWrap:
             return _utf8ToUni(row[0])
         else:
             return row[0]
-        
-        
+
+
     def execSqlNoError(self, sql):  # TODO Support unicode conversion
         """
         Ignore sqlite errors on execution
@@ -149,6 +149,16 @@ class ConnectWrap:
             self.execute(sql)
         except:   #  TODO: Specific exception catch?
             pass
+            
+    def execSqlInsert(self, table, fields, values):
+        """
+        Gadfly-specific function. In 2.0 it will be able to create default
+        values for non-existant fields.
+        """
+        fieldStr = ", ".join(fields)
+        qmStr = ", ".join(["?"] * len(fields))
+        self.execSql("insert into %s(%s) values (%s)" % (table, fieldStr, qmStr),
+                values)
 
 
     def getLastRowid(self):
@@ -286,6 +296,16 @@ TABLE_DEFINITIONS = {
         ("key", t.t),
         ("value", t.t)
         )
+
+
+    # For 2.0 versions:
+#     "defaultvals": (   # Default values for new database fields
+#         ("table", t.t),
+#         ("field", t.t),
+#         ("value", t.t)
+#         )
+        
+        
     }
 
 
@@ -818,7 +838,10 @@ def updateDatabase2(connwrap):
     Second update function. Called when database version is current.
     Performs further updates
     """
-    setSettingsValue(connwrap, "lastwritever", str(VERSION_DB))
+    try:
+        setSettingsValue(connwrap, "lastwritever", str(VERSION_DB))
+    except IOError:
+        pass
 
         
     

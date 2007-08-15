@@ -1,10 +1,6 @@
 import sets, os.path
 
 import wx, wx.xrc
-# from wxPython.wx import *
-# from wxPython.html import *
-# 
-# import wxPython.xrc as xrc
 
 from wxHelper import *
 

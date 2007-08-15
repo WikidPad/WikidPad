@@ -50,6 +50,10 @@ class WikiData:
         self.dataDir = dataDir
         self.connWrap = None
         self.cachedContentNames = None
+        
+        # Only if this is true, the database is called to commit.
+        # This is necessary for read-only databases
+        self.commitNeeded = False
 
         try:
             conn = gadfly.gadfly("wikidb", self.dataDir)
@@ -169,12 +173,17 @@ class WikiData:
                 if creadate is None:
                     creadate = ti
                     
-                self.execSql("insert into wikiwords(word, created, modified, "
-                        "presentationdatablock, wordnormcase) "
-                        "values (?, ?, ?, '', '')", (word, creadate, moddate))
+                self.connWrap.execSqlInsert("wikiwords", ("word", "created", 
+                        "modified", "presentationdatablock", "wordnormcase"),
+                        (word, creadate, moddate, "", ""))
+
+#                 self.execSql("insert into wikiwords(word, created, modified, "
+#                         "presentationdatablock, wordnormcase) "
+#                         "values (?, ?, ?, '', '')", (word, creadate, moddate))
             else:
                 self.execSql("update wikiwords set modified = ? where word = ?",
                         (moddate, word))
+                self.commitNeeded = True
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -212,6 +221,7 @@ class WikiData:
         try:
             self.execSql("update wikiwords set word = ? where word = ?",
                     (newWord, oldWord))
+            self.commitNeeded = True
     
             rename(self.getWikiWordFileName(oldWord),
                     self.getWikiWordFileName(newWord))
@@ -226,6 +236,7 @@ class WikiData:
     def deleteContent(self, word):
         try:
             self.execSql("delete from wikiwords where word = ?", (word,))
+            self.commitNeeded = True
             if exists(self.getWikiWordFileName(word)):
                 unlink(self.getWikiWordFileName(word))
             del self._getCachedContentNames()[word]
@@ -288,7 +299,7 @@ class WikiData:
             raise WikiDataException, u"Cannot rename '%s' to '%s', '%s' already exists" % (word, toWord, toWord)
 
         # commit anything pending so we can rollback on error
-        self.connWrap.commit()
+        self.commit()
         try:
             try:
                 self.connWrap.execSql("update wikirelations set word = ? where word = ?", (toWord, word))
@@ -296,7 +307,7 @@ class WikiData:
                 self.connWrap.execSql("update wikiwordprops set word = ? where word = ?", (toWord, word))
                 self.connWrap.execSql("update todos set word = ? where word = ?", (toWord, word))
                 self.renameContent(word, toWord)
-                self.connWrap.commit()
+                self.commit()
             except:
                 self.connWrap.rollback()
                 raise
@@ -335,6 +346,7 @@ class WikiData:
                     self.execSql("delete from wikiwordprops where word = ?", (word,))
                     # self.execSql("delete from wikiwords where word = ?", (word,))
                     self.execSql("delete from todos where word = ?", (word,))
+                    self.commitNeeded = True
                     self.deleteContent(word)
     #                 del self.cachedContentNames[word]
     #                 wikiFile = self.getWikiWordFileName(word)
@@ -520,8 +532,11 @@ class WikiData:
         returnValue = False
         if len(data) < 1:
             try:
-                self.execSql("insert into wikirelations(word, relation, created) "
-                        "values (?, ?, ?)", (word, rel[0], time()))
+                self.connWrap.execSqlInsert("wikirelations", ("word", "relation",
+                        "created"), (word, rel[0], time()))
+
+#                 self.execSql("insert into wikirelations(word, relation, created) "
+#                         "values (?, ?, ?)", (word, rel[0], time()))
             except (IOError, OSError, ValueError), e:
                 traceback.print_exc()
                 raise DbWriteAccessError(e)
@@ -537,6 +552,7 @@ class WikiData:
     def deleteChildRelationships(self, fromWord):
         try:
             self.execSql("delete from wikirelations where word = ?", (fromWord,))
+            self.commitNeeded = True
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -639,14 +655,19 @@ class WikiData:
             # Delete no-more-existing words
             for word in (definedPages - diskPages):
                 self.execSql("delete from wikiwords where word = ?", (word,))
+                self.commitNeeded = True
             
             # Add new words:
             ti = time()
             for word in (diskPages - definedPages):
                 st = stat(self.getWikiWordFileName(word))
-                self.execSql("insert into wikiwords(word, created, modified, "
-                        "presentationdatablock, wordnormcase) "
-                        "values (?, ?, ?, '', '')", (word, ti, st.st_mtime))
+                self.connWrap.execSqlInsert("wikiwords", ("word", "created", 
+                        "modified", "presentationdatablock", "wordnormcase"),
+                        (word, ti, st.st_mtime, "", ""))
+
+#                 self.execSql("insert into wikiwords(word, created, modified, "
+#                         "presentationdatablock, wordnormcase) "
+#                         "values (?, ?, ?, '', '')", (word, ti, st.st_mtime))
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -910,8 +931,11 @@ class WikiData:
         returnValue = False
         if len(data) < 1:
             try:
-                self.execSql("insert into wikiwordprops(word, key, value) "+
-                        "values (?, ?, ?)", (word, key, value))
+                self.connWrap.execSqlInsert("wikiwordprops", ("word", "key",
+                        "value"), (word, key, value))
+
+#                 self.execSql("insert into wikiwordprops(word, key, value) "+
+#                         "values (?, ?, ?)", (word, key, value))
             except (IOError, OSError, ValueError), e:
                 traceback.print_exc()
                 raise DbWriteAccessError(e)
@@ -932,6 +956,7 @@ class WikiData:
     def deleteProperties(self, word):
         try:
             self.execSql("delete from wikiwordprops where word = ?", (word,))
+            self.commitNeeded = True
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -1002,7 +1027,9 @@ class WikiData:
 
     def addTodo(self, word, todo):
         try:
-            self.execSql("insert into todos(word, todo) values (?, ?)", (word, todo))
+            self.connWrap.execSqlInsert("todos", ("word", "todo"), (word, todo))
+
+#             self.execSql("insert into todos(word, todo) values (?, ?)", (word, todo))
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -1010,6 +1037,7 @@ class WikiData:
     def deleteTodos(self, word):
         try:
             self.execSql("delete from todos where word = ?", (word,))
+            self.commitNeeded = True
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -1058,9 +1086,12 @@ class WikiData:
                         "update search_views set datablock = ? where "+\
                         "title = ?", (datablock, title))
             else:
-                self.connWrap.execSql(
-                        "insert into search_views(title, datablock) "+\
-                        "values (?, ?)", (title, datablock))
+                self.connWrap.execSqlInsert("search_views", ("title", "datablock"),
+                        (title, datablock))
+
+#                 self.connWrap.execSql(
+#                         "insert into search_views(title, datablock) "+\
+#                         "values (?, ?)", (title, datablock))
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -1117,7 +1148,7 @@ class WikiData:
         Needed before rebuilding the whole wiki
         """
         DbStructure.recreateCacheTables(self.connWrap)
-        self.connWrap.commit()
+        self.commit()
 
         self.cachedContentNames = None
         self.cachedGlobalProps = None
@@ -1179,7 +1210,15 @@ class WikiData:
         return self.connWrap.execSqlQuerySingleColumn(sql, params)
 
     def commit(self):
-        self.connWrap.commit()
+        if self.commitNeeded:
+            self.connWrap.commit()
+        
+        self.commitNeeded = False
+        
+    def rollback(self):
+        self.connWrap.rollback()
+        self.commitNeeded = False
+        
 
     # ---------- Other optional functionality ----------
 

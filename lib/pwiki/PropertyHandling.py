@@ -7,7 +7,7 @@ import sets, traceback
 import pwiki.srePersistent as _re
 
 import wx
-# from wxPython.wx import *
+
 from wxHelper import *
 
 from WikiExceptions import *

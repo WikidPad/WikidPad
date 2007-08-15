@@ -55,7 +55,7 @@ class TempFileSet:
     def mkstemp(self, suffix=None, prefix=None, dir=None, text=False):
         """
         Same as tempfile.mkstemp from standard library, but
-        stores returned path also in the bag.
+        stores returned path also in the set.
         """
         if dir is None:
             dir = self.preferredPath
@@ -69,7 +69,7 @@ class TempFileSet:
 
     def clear(self):
         """
-        Delete all files of which the path is stored in the bag
+        Delete all files of which the path is stored in the set
         """
         for fullPath in self.fileSet:
             try:

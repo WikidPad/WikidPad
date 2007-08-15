@@ -152,6 +152,7 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         self.configPath = None
         
         self.configDefaults = configdef
+        self.writeAccessDenied = False
 
     def get(self, section, option, default=None):
         """
@@ -188,6 +189,15 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
                 result = default
 
         return result
+        
+    def setWriteAccessDenied(self, flag):
+        self.writeAccessDenied = flag
+        
+    def getWriteAccessDenied(self):
+        return self.writeAccessDenied
+        
+    def isReadOnlyEffect(self):
+        return self.writeAccessDenied
 
 
     def isOptionAllowed(self, section, option):
@@ -199,7 +209,7 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         return self.configParserObject is not None and \
                 self.configDefaults.has_key((section, option))
 
-
+    # TODO Allow in read-only mode?
     def set(self, section, option, value):
         if type(section) is unicode:
             section = utf8Enc(section)[0]
@@ -249,6 +259,9 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         """
         Save all configurations
         """
+        if self.isReadOnlyEffect():
+            return
+
         if self.configParserObject:
             configFile = open(self.configPath, 'w')
             try:
@@ -298,6 +311,9 @@ class CombinedConfiguration(_AbstractConfiguration):
         if self.wikiConfig is not None and \
                 self.wikiConfig.isOptionAllowed(section, option):
             result = self.wikiConfig.get(section, option, default)
+        # TODO more elegantly
+        elif WIKIDEFAULTS.has_key((section, option)):
+            result = default
         elif self.globalConfig is not None and \
                 self.globalConfig.isOptionAllowed(section, option):
             result = self.globalConfig.get(section, option, default)
@@ -427,9 +443,6 @@ class CombinedConfiguration(_AbstractConfiguration):
                 self.wikiConfig.save()
         except:
             traceback.print_exc()
-            
-            
-
 
 
     def informChanged(self):

@@ -67,9 +67,9 @@ AutoComplete="Ctrl-Space"
 ActivateLink2="Ctrl-Return"
 SwitchFocus="F6"
 StartIncrementalSearch="Ctrl-F"
-
-# IncrementalSearchCtrl="F"   # Hack, changing not recommended
-
+CloseCurrentTab="Ctrl-F4"
+GoNextTab=""
+GoPreviousTab=""
 
 def makeBold(editor):
     editor.styleSelection(u'*')

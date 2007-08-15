@@ -5,9 +5,6 @@ import re
 from os.path import exists, isdir, isfile
 
 import wx, wx.html, wx.xrc
-# from wxPython.wx import *
-# from wxPython.html import *
-# import wxPython.xrc as xrc
 
 
 from wxHelper import *

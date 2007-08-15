@@ -8,8 +8,6 @@ import shutil
 import urllib_red as urllib
 
 import wx
-# from wxPython.wx import *
-# import wxPython.xrc as xrc
 
 from wxHelper import XrcControls, GUI_ID
 
@@ -22,7 +20,7 @@ from TempFileSet import TempFileSet
 from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
         ListItemWithSubtreeWikiPagesNode
 
-from Configuration import isUnicode
+import Configuration
 
 import WikiFormatting
 import DocPages
@@ -253,7 +251,7 @@ class HtmlXmlExporter:
             startfile = self._exportHtmlMultipleFiles()
         elif exportType == u"xml":
             startfile = self._exportXml()
-            
+
         # Other supported types: html_previewWX, html_previewIE, html_previewMOZ
 
         if not compatFilenames:
@@ -263,7 +261,12 @@ class HtmlXmlExporter:
 
         if self.mainControl.getConfig().getboolean(
                 "main", "start_browser_after_export") and startfile:
-            os.startfile(startfile)
+            if Configuration.isWindows():
+                 os.startfile(startfile)
+                # os.startfile(mbcsEnc(link2, "replace")[0])
+            else:
+                # Better solution?
+                wx.LaunchDefaultBrowser(startfile)    # TODO
 
         self.tempFileSet.reset()
         self.tempFileSet = None
@@ -547,7 +550,7 @@ class HtmlXmlExporter:
         formattedContent = self.formatContent(word, content, formatDetails,
                 links)
 
-        if isUnicode():
+        if Configuration.isUnicode():
             result.append(self.getFileHeader(wikiPage))
         else:
             # Retrieve file header without encoding mentioned

@@ -170,9 +170,9 @@ class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
         # initialize some variables
         self.globalConfigDir = globalConfigDir
         self.wikiAppDir = wikiAppDir
-        
+
         self.globalConfigSubDir = globalConfigSubDir
-        
+
         # Create the "[TextBlocks].wiki" file in the global config subdirectory
         # if the file doesn't exist yet.
         tbLoc = join(self.globalConfigSubDir, "[TextBlocks].wiki")
@@ -187,7 +187,7 @@ wrap: 80;a=[wrap: 80]\\n
 camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 """)
             tbFile.close()
-        self.globalConfigLoc = join(globalConfigDir, "WikidPad.config")
+#         self.globalConfigLoc = join(globalConfigDir, "WikidPad.config")
         self.configuration = wx.GetApp().createCombinedConfiguration()
 
         self.wikiPadHelp = join(self.wikiAppDir, 'WikidPadHelp',
@@ -248,15 +248,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # trigger hook
         self.hooks.startup(self)
-
-#         # if it already exists read it in
-#         if exists(self.globalConfigLoc):
-#             try:
-#                 self.configuration.loadGlobalConfig(self.globalConfigLoc)
-#             except Configuration.Error:
-#                 self.createDefaultGlobalConfig()
-#         else:
-#             self.createDefaultGlobalConfig()
 
         # Connect page history
         self.pageHistory = PageHistory(self)
@@ -546,7 +537,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def addMenuItem(self, menu, label, text, evtfct=None, icondesc=None,
-            menuID=None):
+            menuID=None, updatefct=None):
         if menuID is None:
             menuID = wx.NewId()
 
@@ -559,6 +550,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         menu.AppendItem(menuitem)
         if evtfct is not None:
             wx.EVT_MENU(self, menuID, evtfct)
+
+        if updatefct is not None:
+            wx.EVT_UPDATE_UI(self, menuID, updatefct)
 
         return menuitem
 
@@ -652,7 +646,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         if wikiData is not None:
             self.addMenuItem(wikiMenu, 'Import...',
-                    'Import dialog', self.OnCmdImportDialog)
+                    'Import dialog', self.OnCmdImportDialog,
+                    updatefct=self.OnUpdateDisReadOnlyWiki)
 
 
         if wikiData is not None:
@@ -661,9 +656,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     lambda evt: self.printer.showPrintMainDialog())
 
         if wikiData is not None and wikiData.checkCapability("rebuild") == 1:
-            menuID=wx.NewId()
-            wikiMenu.Append(menuID, '&Rebuild Wiki', 'Rebuild this wiki')
-            wx.EVT_MENU(self, menuID, lambda evt: self.rebuildWiki())
+            self.addMenuItem(wikiMenu, '&Rebuild Wiki',
+                    'Rebuild this wiki', lambda evt: self.rebuildWiki(),
+                    menuID=GUI_ID.MENU_REBUILD_WIKI,
+                    updatefct=self.OnUpdateDisReadOnlyWiki)
+
+#             wikiMenu.Append(GUI_ID.MENU_REBUILD_WIKI, '&Rebuild Wiki',
+#                     'Rebuild this wiki')
+#             wx.EVT_MENU(self, GUI_ID.MENU_REBUILD_WIKI,
+#                     lambda evt: self.rebuildWiki())
 
         if wikiData is not None:
             self.addMenuItem(wikiMenu, 'Reconnect',
@@ -671,15 +672,27 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.OnCmdReconnectDatabase)
 
         if wikiData is not None and wikiData.checkCapability("compactify") == 1:
-            menuID=wx.NewId()
-            wikiMenu.Append(menuID, '&Vacuum Wiki', 'Free unused space in database')
-            wx.EVT_MENU(self, menuID, lambda evt: self.vacuumWiki())
+            self.addMenuItem(wikiMenu, '&Vacuum Wiki',
+                    'Free unused space in database',
+                    lambda evt: self.vacuumWiki(),
+                    menuID=GUI_ID.MENU_VACUUM_WIKI,
+                    updatefct=self.OnUpdateDisReadOnlyWiki)
+
+#             wikiMenu.Append(GUI_ID.MENU_VACUUM_WIKI, '&Vacuum Wiki',
+#                     'Free unused space in database')
+#             wx.EVT_MENU(self, GUI_ID.MENU_VACUUM_WIKI,
+#                     lambda evt: self.vacuumWiki())
 
         if wikiData is not None and \
                 wikiData.checkCapability("plain text import") == 1:
-            menuID=wx.NewId()
-            wikiMenu.Append(menuID, '&Copy .wiki files to database', 'Copy .wiki files to database')
-            wx.EVT_MENU(self, menuID, self.OnImportFromPagefiles)
+            self.addMenuItem(wikiMenu, '&Copy .wiki files to database',
+                    'Copy .wiki files to database',
+                    self.OnImportFromPagefiles,
+                    updatefct=self.OnUpdateDisReadOnlyWiki)
+
+#             menuID=wx.NewId()
+#             wikiMenu.Append(menuID, '&Copy .wiki files to database', 'Copy .wiki files to database')
+#             wx.EVT_MENU(self, menuID, self.OnImportFromPagefiles)
 
         if wikiData is not None:
             wikiMenu.AppendSeparator()            
@@ -868,6 +881,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnTextBlockUsed(self, evt):
+        if self.isReadOnlyPage():
+            return
+
         try:
             entryFlags, entryContent = self.textBlocksActivation[evt.GetId()]
             if entryFlags is None:
@@ -906,10 +922,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnInsertIconAttribute(self, evt):
+        if self.isReadOnlyPage():
+            return
+
         self.insertAttribute("icon", self.cmdIdToIconName[evt.GetId()])
 
 
     def OnInsertColorAttribute(self, evt):
+        if self.isReadOnlyPage():
+            return
+
         self.insertAttribute("color", self.cmdIdToColorName[evt.GetId()])
 
 
@@ -936,19 +958,26 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.addMenuItem(wikiWordMenu, '&Save\t' + self.keyBindings.Save,
                 'Save all open pages',
                 lambda evt: (self.saveAllDocPages(force=True),
-                self.getWikiData().commit()), "tb_save")
+                self.getWikiData().commit()), "tb_save",
+                menuID=GUI_ID.CMD_SAVE_WIKI,
+                updatefct=self.OnUpdateDisReadOnlyWiki)
 
+        # TODO More fine grained check for en-/disabling of rename and delete?
         self.addMenuItem(wikiWordMenu, '&Rename\t' + self.keyBindings.Rename,
                 'Rename Current Wiki Word', lambda evt: self.showWikiWordRenameDialog(),
-                "tb_rename")
+                "tb_rename",
+                menuID=GUI_ID.CMD_RENAME_PAGE,
+                updatefct=self.OnUpdateDisReadOnlyWiki)
 
         self.addMenuItem(wikiWordMenu, '&Delete\t' + self.keyBindings.Delete,
                 'Delete Wiki Word', lambda evt: self.showWikiWordDeleteDialog(),
-                "tb_delete")
+                "tb_delete",
+                menuID=GUI_ID.CMD_DELETE_PAGE,
+                updatefct=self.OnUpdateDisReadOnlyWiki)
 
         self.addMenuItem(wikiWordMenu, 'Add Bookmark\t' + self.keyBindings.AddBookmark,
                 'Add Bookmark to Page', lambda evt: self.insertAttribute("bookmarked", "true"),
-                "pin")
+                "pin", updatefct=self.OnUpdateDisReadOnlyWiki)
                 
         if self.win32Interceptor is not None:
             wikiWordMenu.AppendSeparator()
@@ -1078,19 +1107,25 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(self.editorMenu, '&Bold\t' + self.keyBindings.Bold,
                 'Bold', lambda evt: self.keyBindings.makeBold(self.getActiveEditor()),
-                "tb_bold")
+                "tb_bold",
+                menuID=GUI_ID.CMD_FORMAT_BOLD,
+                updatefct=self.OnUpdateDisReadOnlyPage)
 
         self.addMenuItem(self.editorMenu, '&Italic\t' + self.keyBindings.Italic,
                 'Italic', lambda evt: self.keyBindings.makeItalic(self.getActiveEditor()),
-                "tb_italic")
+                "tb_italic",
+                menuID=GUI_ID.CMD_FORMAT_ITALIC,
+                updatefct=self.OnUpdateDisReadOnlyPage)
 
         self.addMenuItem(self.editorMenu, '&Heading\t' + self.keyBindings.Heading,
                 'Add Heading', lambda evt: self.keyBindings.addHeading(self.getActiveEditor()),
-                "tb_heading")
+                "tb_heading",
+                menuID=GUI_ID.CMD_FORMAT_HEADING_PLUS,
+                updatefct=self.OnUpdateDisReadOnlyPage)
 
         self.addMenuItem(self.editorMenu, 'Insert Date\t' + self.keyBindings.InsertDate,
                 'Insert Date', lambda evt: self.insertDate(),
-                "date")
+                "date", updatefct=self.OnUpdateDisReadOnlyPage)
 
         self.addMenuItem(self.editorMenu, 'Set Date Format',
                 'Set Date Format', lambda evt: self.showDateformatDialog())
@@ -1105,14 +1140,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 'Wikize Selected Word\t' + self.keyBindings.MakeWikiWord,
                 'Wikize Selected Word',
                 lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()),
-                "pin")
+                "pin", menuID=GUI_ID.CMD_FORMAT_WIKIZE_SELECTED,
+                updatefct=self.OnUpdateDisReadOnlyPage)
 
 
         self.editorMenu.AppendSeparator()
 
         self.addMenuItem(self.editorMenu, 'Cu&t\t' + self.keyBindings.Cut,
                 'Cut', self._OnRoundtripEvent,  # lambda evt: self.activeEditor.Cut(),
-                "tb_cut", menuID=GUI_ID.CMD_CLIPBOARD_CUT)
+                "tb_cut", menuID=GUI_ID.CMD_CLIPBOARD_CUT,
+                updatefct=self.OnUpdateDisReadOnlyPage)
 
 #         self.addMenuItem(self.editorMenu, '&Copy\t' + self.keyBindings.Copy,
 #                 'Copy', lambda evt: self.fireMiscEventKeys(("command copy",)), # lambda evt: self.activeEditor.Copy()
@@ -1127,7 +1164,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.addMenuItem(self.editorMenu, 'Copy to &ScratchPad\t' + \
                 self.keyBindings.CopyToScratchPad,
                 'Copy Text to ScratchPad', lambda evt: self.getActiveEditor().snip(),
-                "tb_copy")
+                "tb_copy", updatefct=self.OnUpdateDisReadOnlyWiki)
 
 #         self.addMenuItem(self.editorMenu, '&Paste\t' + self.keyBindings.Paste,
 #                 'Paste', lambda evt: self.activeEditor.Paste(),
@@ -1135,7 +1172,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(self.editorMenu, '&Paste\t' + self.keyBindings.Paste,
                 'Paste', self._OnRoundtripEvent,  # lambda evt: self.activeEditor.Paste(),
-                "tb_paste", menuID=GUI_ID.CMD_CLIPBOARD_PASTE)
+                "tb_paste", menuID=GUI_ID.CMD_CLIPBOARD_PASTE,
+                updatefct=self.OnUpdateDisReadOnlyPage)
 
 
         self.editorMenu.AppendSeparator()
@@ -1157,14 +1195,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         self.textBlocksMenuPosition = self.editorMenu.GetMenuItemCount()
 
-        self.editorMenu.AppendMenu(wx.NewId(), '&Text blocks',
+        self.editorMenu.AppendMenu(GUI_ID.MENU_TEXT_BLOCKS, '&Text blocks',
                 self.buildTextBlocksMenu())
+        wx.EVT_UPDATE_UI(self, GUI_ID.MENU_TEXT_BLOCKS,
+                self.OnUpdateDisReadOnlyPage)
 
         # Build icon menu
         if self.lowResources:
             # Add only menu item for icon select dialog
             self.addMenuItem(self.editorMenu, 'Add icon property',
-                    'Open icon select dialog', lambda evt: self.showIconSelectDialog())
+                    'Open icon select dialog',
+                    lambda evt: self.showIconSelectDialog(),
+                    updatefct=self.OnUpdateDisReadOnlyPage)
         else:
             # Build full submenu for icons
             iconsMenu, self.cmdIdToIconName = PropertyHandling.buildIconsSubmenu(
@@ -1172,19 +1214,26 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             for cmi in self.cmdIdToIconName.keys():
                 wx.EVT_MENU(self, cmi, self.OnInsertIconAttribute)
 
-            self.editorMenu.AppendMenu(wx.NewId(), 'Add icon property', iconsMenu)
+            self.editorMenu.AppendMenu(GUI_ID.MENU_ADD_ICON_ATTRIBUTE,
+                    'Add icon property', iconsMenu)
+            wx.EVT_UPDATE_UI(self, GUI_ID.MENU_ADD_ICON_ATTRIBUTE,
+                    self.OnUpdateDisReadOnlyPage)
+
 
         # Build submenu for colors
         colorsMenu, self.cmdIdToColorName = PropertyHandling.buildColorsSubmenu()
         for cmi in self.cmdIdToColorName.keys():
             wx.EVT_MENU(self, cmi, self.OnInsertColorAttribute)
 
-        self.editorMenu.AppendMenu(wx.NewId(), 'Add color property', colorsMenu)
+        self.editorMenu.AppendMenu(GUI_ID.MENU_ADD_COLOR_ATTRIBUTE,
+                'Add color property', colorsMenu)
+        wx.EVT_UPDATE_UI(self, GUI_ID.MENU_ADD_COLOR_ATTRIBUTE,
+                self.OnUpdateDisReadOnlyPage)
 
         self.addMenuItem(self.editorMenu, 'Add &file URL' +
                 self.keyBindings.AddFileUrl, 'Use file dialog to add URL',
-                lambda evt: self.showAddFileUrlDialog())
-
+                lambda evt: self.showAddFileUrlDialog(),
+                updatefct=self.OnUpdateDisReadOnlyPage)
 
 
         self.editorMenu.AppendSeparator()
@@ -1193,22 +1242,40 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         formattingMenu.Append(menuID, '&Find\t', 'Find')
 #         EVT_MENU(self, menuID, lambda evt: self.showFindDialog())
 
-        menuID=wx.NewId()
-        self.editorMenu.Append(menuID, 'Find and &Replace\t' + 
-                self.keyBindings.FindAndReplace, 'Find and Replace')
-        wx.EVT_MENU(self, menuID, lambda evt: self.showFindReplaceDialog())
 
-        menuID=wx.NewId()
-        self.editorMenu.Append(menuID, 'Rep&lace Text by WikiWord\t' + 
-                self.keyBindings.ReplaceTextByWikiword, 'Replace selected text by WikiWord')
-        wx.EVT_MENU(self, menuID, lambda evt: self.showReplaceTextByWikiwordDialog())
+        self.addMenuItem(self.editorMenu, 'Find and &Replace\t' + 
+                self.keyBindings.FindAndReplace,
+                'Find and Replace',
+                lambda evt: self.showFindReplaceDialog())
+
+        self.addMenuItem(self.editorMenu, 'Rep&lace Text by WikiWord\t' + 
+                self.keyBindings.ReplaceTextByWikiword,
+                'Replace selected text by WikiWord',
+                lambda evt: self.showReplaceTextByWikiwordDialog(),
+                updatefct=self.OnUpdateDisReadOnlyPage)
+
+#         menuID=wx.NewId()
+#         self.editorMenu.Append(menuID, 'Find and &Replace\t' + 
+#                 self.keyBindings.FindAndReplace, 'Find and Replace')
+#         wx.EVT_MENU(self, menuID, lambda evt: self.showFindReplaceDialog())
+# 
+#         menuID=wx.NewId()
+#         self.editorMenu.Append(menuID, 'Rep&lace Text by WikiWord\t' + 
+#                 self.keyBindings.ReplaceTextByWikiword, 'Replace selected text by WikiWord')
+#         wx.EVT_MENU(self, menuID, lambda evt: self.showReplaceTextByWikiwordDialog())
 
         self.editorMenu.AppendSeparator()
 
-        menuID=wx.NewId()
-        self.editorMenu.Append(menuID, '&Rewrap Text\t' + 
-                self.keyBindings.RewrapText, 'Rewrap Text')
-        wx.EVT_MENU(self, menuID, lambda evt: self.getActiveEditor().rewrapText())
+        self.addMenuItem(self.editorMenu, '&Rewrap Text\t' + 
+                self.keyBindings.RewrapText,
+                'Rewrap Text',
+                lambda evt: self.getActiveEditor().rewrapText(),
+                updatefct=self.OnUpdateDisReadOnlyPage)
+
+#         menuID=wx.NewId()
+#         self.editorMenu.Append(menuID, '&Rewrap Text\t' + 
+#                 self.keyBindings.RewrapText, 'Rewrap Text')
+#         wx.EVT_MENU(self, menuID, lambda evt: self.getActiveEditor().rewrapText())
 
 
         subMenu = wx.Menu()
@@ -1554,38 +1621,47 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         tb.AddSimpleTool(wx.NewId(), seperator, "Separator", "Separator")
 
         icon = self.lookupIcon("tb_save")
-        tb.AddSimpleTool(GUI_ID.CMD_SAVE_WIKI, icon, "Save Wiki Word (Ctrl-S)",
-                "Save Wiki Word")
-        wx.EVT_TOOL(self, GUI_ID.CMD_SAVE_WIKI,
-                lambda evt: (self.saveAllDocPages(force=True),
-                self.getWikiData().commit()))
+        tb.AddSimpleTool(GUI_ID.CMD_SAVE_WIKI, icon,
+                "Save Wiki Word " + self.keyBindings.Save, "Save Wiki Word")
+#         wx.EVT_TOOL(self, GUI_ID.CMD_SAVE_WIKI,
+#                 lambda evt: (self.saveAllDocPages(force=True),
+#                 self.getWikiData().commit()))
 
         icon = self.lookupIcon("tb_rename")
-        tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Rename Wiki Word (Ctrl-Alt-R)", "Rename Wiki Word")
-        wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordRenameDialog())
+#         tbID = wx.NewId()
+        tb.AddSimpleTool(GUI_ID.CMD_RENAME_PAGE, icon,
+                "Rename Wiki Word  " + self.keyBindings.Rename,
+                "Rename Wiki Word")
+#         wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordRenameDialog())
 
         icon = self.lookupIcon("tb_delete")
-        tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Delete (Ctrl-D)", "Delete Wiki Word")
-        wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordDeleteDialog())
+#         tbID = wx.NewId()
+        tb.AddSimpleTool(GUI_ID.CMD_DELETE_PAGE, icon,
+                "Delete  " + self.keyBindings.Delete, "Delete Wiki Word")
+#         wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordDeleteDialog())
 
         tb.AddSimpleTool(wx.NewId(), seperator, "Separator", "Separator")
 
         icon = self.lookupIcon("tb_heading")
-        tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Heading (Ctrl-Alt-H)", "Heading")
-        wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.addHeading(self.getActiveEditor()))
+#         tbID = wx.NewId()
+        tb.AddSimpleTool(GUI_ID.CMD_FORMAT_HEADING_PLUS, icon,
+                "Heading  " + self.keyBindings.Heading, "Heading")
+#         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.addHeading(
+#                 self.getActiveEditor()))
 
         icon = self.lookupIcon("tb_bold")
-        tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Bold (Ctrl-B)", "Bold")
-        wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeBold(self.getActiveEditor()))
+#         tbID = wx.NewId()
+        tb.AddSimpleTool(GUI_ID.CMD_FORMAT_BOLD, icon,
+                "Bold  " + self.keyBindings.Bold, "Bold")
+#         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeBold(
+#                 self.getActiveEditor()))
 
         icon = self.lookupIcon("tb_italic")
-        tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Italic (Ctrl-I)", "Italic")
-        wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeItalic(self.getActiveEditor()))
+#         tbID = wx.NewId()
+        tb.AddSimpleTool(GUI_ID.CMD_FORMAT_ITALIC, icon,
+                "Italic  " + self.keyBindings.Italic, "Italic")
+#         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeItalic(
+#                 self.getActiveEditor()))
 
         tb.AddSimpleTool(wx.NewId(), seperator, "Separator", "Separator")
 
@@ -1622,11 +1698,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         wx.EVT_KEY_UP(self.fastSearchField, self.OnFastSearchChar)
 
         icon = self.lookupIcon("pin")
-        tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Wikize Selected Word", "Wikize Selected Word")
-        wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()))
-
-
+#         tbID = wx.NewId()
+        tb.AddSimpleTool(GUI_ID.CMD_FORMAT_WIKIZE_SELECTED, icon,
+                "Wikize Selected Word  " + self.keyBindings.MakeWikiWord,
+                "Wikize Selected Word")
+#         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()))
 
         # get info for any plugin toolbar items and create them as necessary
         toolbarItems = reduce(lambda a, b: a+list(b),
@@ -1647,28 +1723,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         tb.Realize()
 
-
-
-#     _LAYOUT_DEFINITION = (
-#         {
-#             "name": "main area panel"
-#         },
-#         {
-#             "name": "maintree",
-#             "layout relative to": "main area panel",
-#             "layout relation": "left"
-#         },
-#         {
-#             "name": "viewstree",
-#             "layout relative to": "maintree",
-#             "layout relation": "below"
-#         },
-#         {
-#             "name": "log",
-#             "layout relative to": "main area panel",
-#             "layout relation": "below"
-#         }
-#     )
 
 
     def initializeGui(self):
@@ -1722,17 +1776,36 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         wx.EVT_MENU(self, GUI_ID.CMD_SWITCH_FOCUS, self.OnSwitchFocus)
 
+        # Table with additional possible accelerators
+        ADD_ACCS = (
+                ("CloseCurrentTab", GUI_ID.CMD_CLOSE_CURRENT_TAB),
+                ("SwitchFocus", GUI_ID.CMD_SWITCH_FOCUS),
+                ("GoNextTab", GUI_ID.CMD_GO_NEXT_TAB),
+                ("GoPreviousTab", GUI_ID.CMD_GO_PREVIOUS_TAB)
+                )
+
+
         # Add alternative accelerators for clipboard operations
         accs = [
-            (wx.ACCEL_CTRL, wx.WXK_INSERT, GUI_ID.CMD_CLIPBOARD_COPY),
-            (wx.ACCEL_SHIFT, wx.WXK_INSERT, GUI_ID.CMD_CLIPBOARD_PASTE),
-            (wx.ACCEL_SHIFT, wx.WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT),
-            (wx.ACCEL_CTRL, wx.WXK_F4, GUI_ID.CMD_CLOSE_CURRENT_TAB)   # TODO Which combination for non-Windows?
-            ]
-            
-        accP = self.keyBindings.getAccelPair("SwitchFocus")
-        if accP != (None, None):
-            accs.append((accP[0], accP[1], GUI_ID.CMD_SWITCH_FOCUS))
+                (wx.ACCEL_CTRL, wx.WXK_INSERT, GUI_ID.CMD_CLIPBOARD_COPY),
+                (wx.ACCEL_SHIFT, wx.WXK_INSERT, GUI_ID.CMD_CLIPBOARD_PASTE),
+                (wx.ACCEL_SHIFT, wx.WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT)
+                ]
+        
+
+        # Add additional accelerators
+        for keyName, menuId in ADD_ACCS:
+            accP = self.keyBindings.getAccelPair(keyName)
+            if accP != (None, None):
+                accs.append((accP[0], accP[1], menuId))
+
+#         accP = self.keyBindings.getAccelPair("CloseCurrentTab")
+#         if accP != (None, None):
+#             accs.append((accP[0], accP[1], GUI_ID.CMD_CLOSE_CURRENT_TAB))
+# 
+#         accP = self.keyBindings.getAccelPair("SwitchFocus")
+#         if accP != (None, None):
+#             accs.append((accP[0], accP[1], GUI_ID.CMD_SWITCH_FOCUS))
 
         self.SetAcceleratorTable(wx.AcceleratorTable(accs))
 
@@ -1756,6 +1829,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         wx.EVT_MAXIMIZE(self, self.OnMaximize)
         
         wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_CURRENT_TAB, self._OnRoundtripEvent)
+        wx.EVT_MENU(self, GUI_ID.CMD_GO_NEXT_TAB, self._OnRoundtripEvent)
+        wx.EVT_MENU(self, GUI_ID.CMD_GO_PREVIOUS_TAB, self._OnRoundtripEvent)
 
 
     def OnUpdateTreeCtrlMenuItem(self, evt):
@@ -3503,10 +3578,16 @@ These are your default global settings.
         self.win32Interceptor.stop()
 
     def OnClipboardCatcherAtPage(self, evt):
+        if self.isReadOnlyPage():
+            return
+
         self.win32Interceptor.startAtPage(self.GetHandle(),
                 self.getCurrentDocPage())
 
     def OnClipboardCatcherAtCursor(self, evt):
+        if self.isReadOnlyPage():
+            return
+
         self.win32Interceptor.startAtCursor(self.GetHandle())
 
 
@@ -3514,12 +3595,17 @@ These are your default global settings.
         cc = self.win32Interceptor
         if cc is None:
             return  # Shouldn't be called anyway
+            
+        wikiDoc = self.getWikiDocument()
+        enableCatcher = not self.isReadOnlyPage()
 
         if evt.GetId() == GUI_ID.CMD_CLIPBOARD_CATCHER_OFF:
             evt.Check(cc.getMode() == cc.MODE_OFF)
         elif evt.GetId() == GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR:
+            evt.Enable(enableCatcher)
             evt.Check(cc.getMode() == cc.MODE_AT_CURSOR)
         elif evt.GetId() == GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE:
+            evt.Enable(enableCatcher)
             if cc.getMode() == cc.MODE_AT_PAGE:
                 evt.Check(True)
                 evt.SetText("Clipboard Catcher at: %s\t%s" % 
@@ -3572,6 +3658,9 @@ These are your default global settings.
 
         if wikiWord is None:
             self.displayErrorMessage(u"No real wiki word selected to rename")
+            return
+        
+        if self.isReadOnlyPage():
             return
 
         wikiWord = self.getWikiData().getAliasesWikiWord(wikiWord)
@@ -3728,6 +3817,9 @@ These are your default global settings.
         if wikiWord is None:
             self.displayErrorMessage(u"No real wiki word to delete")
             return
+            
+        if self.isReadOnlyPage():
+            return
 
         wikiWord = self.getWikiData().getAliasesWikiWord(wikiWord)
         dlg=wx.MessageDialog(self,
@@ -3761,6 +3853,9 @@ These are your default global settings.
     def showReplaceTextByWikiwordDialog(self):
         if self.getCurrentWikiWord() is None:
             self.displayErrorMessage(u"No real wiki word to modify")
+            return
+        
+        if self.isReadOnlyPage():
             return
 
         wikiWord = ""
@@ -4039,6 +4134,9 @@ These are your default global settings.
 
 
     def OnCmdImportDialog(self, evt):
+        if self.isReadOnlyWiki():
+            return
+
         self.saveAllDocPages()
         self.getWikiData().commit()
 
@@ -4050,6 +4148,9 @@ These are your default global settings.
 
 
     def showAddFileUrlDialog(self):
+        if self.isReadOnlyPage():
+            return
+
         dlg = wx.FileDialog(self, u"Choose a file to create URL for",
                 self.getLastActiveDir(), "", "*.*", wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
@@ -4096,6 +4197,9 @@ These are your default global settings.
 
 
     def rebuildWiki(self, skipConfirm=False):
+        if self.isReadOnlyWiki():
+            return
+
         if not skipConfirm:
             result = wx.MessageBox(u"Are you sure you want to rebuild this wiki? "
                     u"You may want to backup your data first!",
@@ -4124,6 +4228,9 @@ These are your default global settings.
 
 
     def vacuumWiki(self):
+        if self.isReadOnlyWiki():
+            return
+
         try:
             self.getWikiData().vacuum()
         except (IOError, OSError, DbAccessError), e:
@@ -4158,6 +4265,9 @@ These are your default global settings.
 
 
     def OnImportFromPagefiles(self, evt):
+        if self.isReadOnlyWiki():
+            return
+
         dlg=wx.MessageDialog(self, u"This could overwrite pages in the database. Continue?",
                             u"Import pagefiles", wx.YES_NO)
 
@@ -4211,6 +4321,9 @@ These are your default global settings.
         self.getActiveEditor().AppendText(text)
 
     def insertDate(self):
+        if self.isReadOnlyPage():
+            return
+
         # strftime can't handle unicode correctly, so conversion is needed
         mstr = mbcsEnc(self.configuration.get("main", "strftime"), "replace")[0]
         self.getActiveEditor().AddText(mbcsDec(strftime(mstr), "replace")[0])
@@ -4360,8 +4473,9 @@ These are your default global settings.
 
 
     def OnWikiOpen(self, event):
+        startDir = dirname(self.getLastActiveDir())
         dlg = wx.FileDialog(self, u"Choose a Wiki to open",
-                self.getLastActiveDir(), "", "*.wiki", wx.OPEN)
+                startDir, "", "*.wiki", wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             self.openWiki(mbcsDec(abspath(dlg.GetPath()), "replace")[0])
         dlg.Destroy()
@@ -4492,6 +4606,31 @@ These are your default global settings.
     def OnSize(self, evt):
         if self.windowLayouter is not None:
             self.windowLayouter.layout()
+
+
+    def isReadOnlyWiki(self):
+        wikiDoc = self.getWikiDocument()
+        return (wikiDoc is None) or wikiDoc.isReadOnlyEffect()
+
+
+    def isReadOnlyPage(self):
+        docPage = self.getCurrentDocPage()
+        return (docPage is None) or docPage.isReadOnlyEffect()
+                
+
+
+    def OnUpdateDisReadOnlyWiki(self, evt):
+        """
+        Called for ui-update to disable menu item if wiki is read-only.
+        """
+        evt.Enable(not self.isReadOnlyWiki())
+
+
+    def OnUpdateDisReadOnlyPage(self, evt):
+        """
+        Called for ui-update to disable menu item if page is read-only.
+        """
+        evt.Enable(not self.isReadOnlyPage())
 
 
     def OnCmdCheckWrapMode(self, evt):        

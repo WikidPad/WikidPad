@@ -3,7 +3,6 @@ import sys, os, getopt
 import urllib_red as urllib
 
 import wx
-# from wxPython.wx import *
 
 from StringOps import mbcsDec, wikiUrlToPathWordAndAnchor
 

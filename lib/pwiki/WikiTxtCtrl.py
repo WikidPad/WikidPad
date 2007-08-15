@@ -11,9 +11,6 @@ from time import time, strftime, sleep
 from textwrap import fill
 
 import wx, wx.stc
-# from wxPython.wx import *
-# from wxPython.stc import *
-# import wxPython.xrc as xrc
 
 from Utilities import *
 
@@ -723,7 +720,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         # Unload current page
         docPage = self.getLoadedDocPage()
         if docPage is not None:
-
             wikiWord = docPage.getWikiWord()
             if wikiWord is not None:
                 docPage.setPresentation((self.GetCurrentPos(),
@@ -797,9 +793,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             # now fill the text into the editor
             self.SetText(content)
 
-
         self.getLoadedDocPage().addTxtEditor(self)
-
+        self._checkForReadOnly()
         self.presenter.setTitle(self.getLoadedDocPage().getTitle())
 
 
@@ -849,6 +844,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.setTextAgaUpdated(content)
 
         self.getLoadedDocPage().addTxtEditor(self)
+        self._checkForReadOnly()
 
         if evtprops is None:
             evtprops = {}
@@ -970,6 +966,17 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     break
             else:
                 anchor = None # Not found
+                
+    def _checkForReadOnly(self):
+        """
+        Set/unset read-only mode of editor according to read-only state of page.
+        """
+        docPage = self.getLoadedDocPage()
+        if docPage is None:
+            self.SetReadOnly(True)
+        else:
+            self.SetReadOnly(docPage.isReadOnlyEffect())
+
 
     def _getColorFromOption(self, option, defColTuple):
         """
@@ -2292,7 +2299,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             # may be not-CamelCase word or in a property name
             tofind = line[-mat2.end():]
             bb = self.bytelenSct(tofind)
-
+            
             # Should a closing bracket be appended to suggested words?
             if self.presenter.getConfig().getboolean("main",
                     "editor_autoComplete_closingBracket", False):
@@ -2305,7 +2312,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 backBytesMap[formatting.BracketStart + word +
                         wordBracketEnd] = bb
 
-            for prop in wikiData.getPropertyNamesStartingWith(tofind[1:]):
+            for prop in wikiData.getPropertyNamesStartingWith(tofind[
+                    len(formatting.BracketStart):]):
                 backBytesMap[formatting.BracketStart + prop] = bb
         elif mat3:
             # In a property value

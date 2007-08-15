@@ -5,9 +5,6 @@ import cStringIO as StringIO
 import urllib, os.path, traceback
 
 import wx, wx.html
-# from wxPython.wx import *
-# from wxPython.html import *
-
 
 if wx.Platform == '__WXMSW__':
     import wx.activex

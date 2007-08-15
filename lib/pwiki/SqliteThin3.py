@@ -93,7 +93,13 @@ class SqliteError3(Exception):
 
 
 if isLinux():
-    _dll = CDLL("libsqlite3.so")
+    import platform
+    pyver = tuple((int(s) for s in platform.python_version_tuple()))
+    
+    if pyver >= (2, 5, 0):
+        _dll = CDLL("libsqlite3.so.0")
+    else:
+        _dll = CDLL("libsqlite3.so")
 else:
     _dll = cdll.sqlite3
 

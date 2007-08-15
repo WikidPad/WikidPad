@@ -4,8 +4,6 @@
 import traceback
 
 import wx, wx.html
-# from wxPython.wx import *
-# from wxPython.html import *
 
 from WikiExceptions import *
 from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \

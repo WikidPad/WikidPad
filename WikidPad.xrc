@@ -2422,7 +2422,7 @@
               <label></label>
               <content>
                 <item>S&amp;imple regex</item>
-                <item>&quot;&amp;Anded&quot; regex</item>
+                <item>&quot;An&amp;ded&quot; regex</item>
               </content>
               <style>wxRA_SPECIFY_ROWS|wxWANTS_CHARS</style>
         </object>
@@ -2626,7 +2626,7 @@
       </object>
               <object class="sizeritem">
                 <object class="wxButton" name="btnCopyPageNamesToClipboard">
-                  <label>Page &amp;names</label>
+                  <label>&amp;Page names</label>
             </object>
                 <option>0</option>
                 <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>

@@ -8,8 +8,6 @@ import subprocess
 import ExceptionLogger
 
 import wx, wx.xrc
-# from wxPython.wx import *
-# import wxPython.xrc as xrc
 
 wxWINDOWS_NT = 18   # For wx.GetOsVersion()
 wxWIN95 = 20   # For wx.GetOsVersion(), this includes also Win 98 and ME
@@ -34,52 +32,6 @@ from Localization import getCollatorByString, CASEMODE_UPPER_INSIDE, \
 from PluginManager import PluginManager, InsertionPluginManager
 
 
-
-# # The following is a hack to workaround a problem when using regex engine
-# # with multiple threads
-# 
-# import sre_compile
-# import sre_parse
-# 
-# sre_compile.sre_parse = sre_parse
-# 
-# def compile_forSre(p, flags=0):
-#     # internal: convert pattern list to internal format
-# 
-#     if isstring(p):
-#         # import sre_parse
-#         pattern = p
-#         p = sre_parse.parse(p, flags)
-#     else:
-#         pattern = None
-# 
-#     code = _code(p, flags)
-# 
-#     # print code
-# 
-#     # XXX: <fl> get rid of this limitation!
-#     if p.pattern.groups > 100:
-#         raise AssertionError(
-#             "sorry, but this version only supports 100 named groups"
-#             )
-# 
-#     # map in either direction
-#     groupindex = p.pattern.groupdict
-#     indexgroup = [None] * p.pattern.groups
-#     for k, i in groupindex.items():
-#         indexgroup[i] = k
-# 
-#     return _sre.compile(
-#         pattern, flags, code,
-#         p.pattern.groups-1,
-#         groupindex, indexgroup
-#         )
-# 
-# 
-# sre_compile.compile = compile_forSre
-
-
-
 def findDirs():
     """
     Returns tuple (wikiAppDir, globalConfigDir)
@@ -99,12 +51,16 @@ def findDirs():
     # This allows to keep the program with config on an USB stick
     if os.path.exists(os.path.join(wikiAppDir, "WikidPad.config")):
         globalConfigDir = wikiAppDir
+    elif os.path.exists(os.path.join(wikiAppDir, ".WikidPad.config")):
+        globalConfigDir = wikiAppDir
     else:
         globalConfigDir = os.environ.get("HOME")
         if not (globalConfigDir and os.path.exists(globalConfigDir)):
             # Instead of checking USERNAME, the user config dir. is
             # now used
             globalConfigDir = wx.StandardPaths.Get().GetUserConfigDir()
+            # For Windows the user config dir is "...\Application data"
+            # therefore we go down to "...\Application data\WikidPad"
             if os.path.exists(globalConfigDir) and isWindows:
                 try:
                     realGlobalConfigDir = os.path.join(globalConfigDir,
@@ -112,7 +68,7 @@ def findDirs():
                     if not os.path.exists(realGlobalConfigDir):
                         # If it doesn't exist, create the directory
                         os.mkdir(realGlobalConfigDir)
-                        
+
                     globalConfigDir = realGlobalConfigDir
                 except:
                     traceback.print_exc()
@@ -153,9 +109,9 @@ class App(wx.App):
         self.SetAppName("WikidPad")
         self.removeAppLockOnExit = False
         appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
-        
+
         wikiAppDir, globalConfigDir = findDirs()
-        
+
         if not globalConfigDir or not os.path.exists(globalConfigDir):
             raise Exception(u"Error initializing environment, couldn't locate "
                     u"global config directory")
@@ -163,10 +119,22 @@ class App(wx.App):
         self.wikiAppDir = wikiAppDir
         self.globalConfigDir = globalConfigDir
 
+        # Find/create global config subdirectory "WikidPadGlobals"
+        if Configuration.isWindows():
+            defaultGlobalConfigSubDir = os.path.join(self.globalConfigDir,
+                    "WikidPadGlobals")
+        else:
+            defaultGlobalConfigSubDir = os.path.join(self.globalConfigDir,
+                    ".WikidPadGlobals")
+
         self.globalConfigSubDir = os.path.join(self.globalConfigDir,
-                ".WikidPadGlobals")
+                "WikidPadGlobals")
         if not os.path.exists(self.globalConfigSubDir):
-            os.mkdir(self.globalConfigSubDir)
+            self.globalConfigSubDir = os.path.join(self.globalConfigDir,
+                    ".WikidPadGlobals")
+            if not os.path.exists(self.globalConfigSubDir):
+                self.globalConfigSubDir = defaultGlobalConfigSubDir
+                os.mkdir(self.globalConfigSubDir)
 
         pCssLoc = os.path.join(self.globalConfigSubDir, "wikipreview.css")
         if not os.path.exists(pCssLoc):
@@ -184,15 +152,41 @@ class App(wx.App):
                 OptionsDialog.OptionsDialog.DEFAULT_PANEL_LIST)
 
         # load or create global configuration
-        globalConfigLoc = os.path.join(self.globalConfigDir, "WikidPad.config")
         self.globalConfig = self.createGlobalConfiguration()
+#         globalConfigLoc = os.path.join(self.globalConfigDir, "WikidPad.config")
+#         if os.path.exists(globalConfigLoc):
+#             try:
+#                 self.globalConfig.loadConfig(globalConfigLoc)
+#             except Configuration.Error, MissingConfigurationFileException:
+#                 self.createDefaultGlobalConfig(globalConfigLoc)
+#         else:
+#             self.createDefaultGlobalConfig(globalConfigLoc)
+
+
+        # Find/create global config file "WikidPad.config"
+        if Configuration.isWindows():
+            defaultGlobalConfigLoc = os.path.join(self.globalConfigDir,
+                    "WikidPad.config")
+        else:
+            defaultGlobalConfigLoc = os.path.join(self.globalConfigDir,
+                    ".WikidPad.config")
+
+        globalConfigLoc = os.path.join(self.globalConfigDir, "WikidPad.config")
         if os.path.exists(globalConfigLoc):
             try:
                 self.globalConfig.loadConfig(globalConfigLoc)
             except Configuration.Error, MissingConfigurationFileException:
                 self.createDefaultGlobalConfig(globalConfigLoc)
         else:
-            self.createDefaultGlobalConfig(globalConfigLoc)
+            globalConfigLoc = os.path.join(self.globalConfigDir,
+                    ".WikidPad.config")
+            if os.path.exists(globalConfigLoc):
+                try:
+                    self.globalConfig.loadConfig(globalConfigLoc)
+                except Configuration.Error, MissingConfigurationFileException:
+                    self.createDefaultGlobalConfig(globalConfigLoc)
+            else:
+                self.createDefaultGlobalConfig(defaultGlobalConfigLoc)
             
         self.globalConfig.getMiscEvent().addListener(KeyFunctionSink((
                 ("configuration changed", self.onGlobalConfigurationChanged),

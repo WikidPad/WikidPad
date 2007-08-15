@@ -1,7 +1,6 @@
 import sets
 
 import wx
-# from  wxPython.wx import *
 
 from StringOps import escapeForIni, unescapeForIni
 

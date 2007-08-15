@@ -3,9 +3,7 @@ import sys, sets   # , hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
 import wx, wx.xrc
-# from wxPython.wx import *
-# from wxPython.stc import *
-# import wxPython.xrc as xrc
+
 import customtreectrl
 
 from wxHelper import GUI_ID, wxKeyFunctionSink, textToDataObject, \

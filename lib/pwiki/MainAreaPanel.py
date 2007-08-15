@@ -14,7 +14,6 @@ from WikiExceptions import *
 import Configuration
 
 
-
 class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
     """
     The main area panel is embedded in the PersonalWikiFrame and holds and
@@ -34,15 +33,23 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
         res = xrc.XmlResource.Get()
         self.contextMenu = res.LoadMenu("MenuDocPagePresenterTabPopup")
+        
+        self.tabDragCursor = wx.StockCursor(wx.CURSOR_HAND)
+        self.tabDragging = False
 
 
         # Last presenter for which a context menu was shown
         self.lastContextMenuPresenter = None
 
-        self.ignorePageChangedEvent = False
+        self.runningPageChangedEvent = False
 
-        wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.GetId(),
-                self.OnNotebookPageChanged)
+#         wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.GetId(),
+#                 self.OnNotebookPageChanged)
+        self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChanged)
+        wx.EVT_LEFT_DOWN(self, self.OnLeftDown)
+        wx.EVT_LEFT_UP(self, self.OnLeftUp)
+        wx.EVT_MOTION(self, self.OnMotion)
+        
         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
         wx.EVT_SET_FOCUS(self, self.OnFocused)
 #         EVT_AFTER_FOCUS(self, self.OnAfterFocus)
@@ -51,6 +58,9 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_CURRENT_TAB, self.OnCloseCurrentTab)
         wx.EVT_MENU(self, GUI_ID.CMD_THIS_TAB_SHOW_SWITCH_EDITOR_PREVIEW,
                 self.OnCmdSwitchThisEditorPreview)
+        wx.EVT_MENU(self, GUI_ID.CMD_GO_NEXT_TAB, self.OnGoTab)
+        wx.EVT_MENU(self, GUI_ID.CMD_GO_PREVIOUS_TAB, self.OnGoTab)
+        
 
 
     def close(self):
@@ -182,19 +192,20 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
     def OnNotebookPageChanged(self, evt):
         # Tricky hack to set focus to the notebook page
-        if self.ignorePageChangedEvent:
+        if self.runningPageChangedEvent:
             evt.Skip()
-            self.ignorePageChangedEvent = False
+            self.runningPageChangedEvent = False
             return
 
         try:
+            # Flag the event to ignore and resend it.
+            # It is then processed by wx.Notebook code
+            # where the focus is set to the notebook itself
+            self.runningPageChangedEvent = True
+
             presenter = self.docPagePresenters[evt.GetSelection()]
             self.setCurrentDocPagePresenter(presenter)
 
-            # Flag the event to ignore and resend it
-            # it is then processed by wx.Notebook code
-            # where the focus is set to the notebook itself
-            self.ignorePageChangedEvent = True
             self.ProcessEvent(evt)
 
             # Now we can set the focus to the presenter
@@ -202,10 +213,9 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             presenter.SetFocus()
 #             self.GetPage(evt.GetSelection()).SetFocus()
         except (IOError, OSError, DbAccessError), e:
+            self.runningPageChangedEvent = False
             self.mainControl.lostAccess(e)
             raise #???
-        
-        # evt.Skip()
 
 
     def OnContextMenu(self, evt):
@@ -234,6 +244,23 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         self.closeDocPagePresenterTab(self.getCurrentDocPagePresenter())
 
 
+    def OnGoTab(self, evt):
+        pageCount = self.GetPageCount()
+        if pageCount < 2:
+            return
+
+        if evt.GetId() == GUI_ID.CMD_GO_NEXT_TAB:
+            newIdx = self.GetSelection() + 1
+            if newIdx >= pageCount:
+                newIdx = 0
+        elif evt.GetId() == GUI_ID.CMD_GO_PREVIOUS_TAB:
+            newIdx = self.GetSelection() - 1
+            if newIdx < 0:
+                newIdx = pageCount - 1
+        
+        self.SetSelection(newIdx)
+
+
     def OnCmdSwitchThisEditorPreview(self, evt):
         """
         Switch between editor and preview in the presenter for which
@@ -242,6 +269,55 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         if self.lastContextMenuPresenter is not None:
             self.switchDocPagePresenterTabEditorPreview(self.lastContextMenuPresenter)
 
+
+    def OnLeftDown(self, evt):
+        tab = self.HitTest(evt.GetPosition())[0]
+        self.tabDragging = tab != wx.NOT_FOUND
+        if self.tabDragging:
+            self.CaptureMouse()
+        
+        evt.Skip()
+
+
+    def OnLeftUp(self, evt):
+        if self.tabDragging:
+            self.ReleaseMouse()
+            self.tabDragging = False
+            tab = self.HitTest(evt.GetPosition())[0]
+            if not self.runningPageChangedEvent and tab != wx.NOT_FOUND and \
+                    tab != self.GetSelection():
+                self.SetCursor(wx.NullCursor)
+                
+                oldTab = self.GetSelection()
+                title = self.GetPageText(oldTab)
+                
+                # window and presenter should be identical, but to be sure
+                window = self.GetPage(oldTab)
+                presenter = self.docPagePresenters[oldTab]
+                
+                self.Unbind(wx.EVT_NOTEBOOK_PAGE_CHANGED)
+                self.Freeze()
+                try:
+                    self.RemovePage(oldTab)
+                    del self.docPagePresenters[oldTab]
+        
+                    self.docPagePresenters.insert(tab, presenter)
+                    self.InsertPage(tab, window, title, select=True)
+                finally:
+                    self.Thaw()
+                    self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED,
+                            self.OnNotebookPageChanged)
+        evt.Skip()
+
+
+    def OnMotion(self, evt):
+#        if evt.Dragging() and evt.LeftIsDown():
+        if self.tabDragging:
+            tab = self.HitTest(evt.GetPosition())[0]
+            if tab != wx.NOT_FOUND and tab != self.GetSelection():
+                self.SetCursor(self.tabDragCursor)
+            else:
+                self.SetCursor(wx.STANDARD_CURSOR)
 
 
     def miscEventHappened(self, miscevt):
@@ -252,14 +328,6 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                 if idx > -1:
                     self.SetPageText(idx,
                             presenter.getLongTitle())
-                            
-#                     # TODO (Re)move this
-# #                     if presenter is self.getCurrentDocPagePresenter():
-#                     title = (u"Wiki: %s - %s" %
-#                             (self.mainControl.getWikiConfigPath(),
-#                             presenter.getShortTitle()))
-# #                     if self.mainControl.GetTitle() != title:
-#                     self.mainControl.SetTitle(title)
 
                     if presenter is self.getCurrentDocPagePresenter():
                         self.mainControl.refreshPageStatus()

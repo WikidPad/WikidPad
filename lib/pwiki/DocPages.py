@@ -79,6 +79,9 @@ class DocPage(MiscEventSourceMixin):
 
         fireEvent -- Send event if database was directly modified
         """
+        if self.isReadOnlyEffect():
+            return
+
         txtEditor = self.getTxtEditor()
         if txtEditor is not None:
             # page is in text editor(s), so call AppendText on one of it
@@ -116,6 +119,9 @@ class DocPage(MiscEventSourceMixin):
 
 
     def replaceLiveText(self, text):
+        if self.isReadOnlyEffect():
+            return
+
         txtEditor = self.getTxtEditor()
         if txtEditor is not None:
             # page is in text editor(s), so call replace on one of it
@@ -195,6 +201,15 @@ class DocPage(MiscEventSourceMixin):
         Return human readable title of the page.
         """
         raise NotImplementedError #abstract
+
+
+    def isReadOnlyEffect(self):
+        """
+        Return true if page is effectively read-only, this means
+        "for any reason", regardless if error or intention.
+        """
+        return self.wikiDocument.isReadOnlyEffect()
+
 
     def save(self, text, fireEvent=True):
         """
@@ -319,6 +334,9 @@ class WikiPage(DocPage):
         return self.modified, self.created, self.visited
 
     def setTimestamps(self, timestamps):
+        if self.isReadOnlyEffect():
+            return
+
         timestamps = timestamps[:3]
         self.modified, self.created, self.visited = timestamps
         
@@ -370,7 +388,7 @@ class WikiPage(DocPage):
             data = self.getWikiData().getPropertiesForWord(self.wikiWord)
             self.props = {}
             for (key, val) in data:
-                self.addProperty(key, val)
+                self._addProperty(key, val)
                 
         return self.props
 
@@ -390,7 +408,7 @@ class WikiPage(DocPage):
             return globalProps.get(u"global."+propkey, default)
 
 
-    def addProperty(self, key, val):
+    def _addProperty(self, key, val):
         values = self.props.get(key)
         if not values:
             values = []
@@ -449,6 +467,9 @@ class WikiPage(DocPage):
         """
         Deletes the page from database
         """
+        if self.isReadOnlyEffect():
+            return
+
         if self.isDefined():
             self.getWikiData().deleteWord(self.getWikiWord())
 
@@ -563,6 +584,9 @@ class WikiPage(DocPage):
         """
         Saves the content of current wiki page.
         """
+        if self.isReadOnlyEffect():
+            return
+
         if not self.getWikiData().isDefinedWikiWord(self.wikiWord):
             # Pages isn't yet in database  -> fire event
             # The event may be needed to invalidate a cache
@@ -581,6 +605,9 @@ class WikiPage(DocPage):
         Update properties (aka attributes) only.
         This is step one in update/rebuild process.
         """
+        if self.isReadOnlyEffect():
+            return
+
         formatting = self.wikiDocument.getFormatting()
         self.deleteProperties()
 
@@ -606,6 +633,9 @@ class WikiPage(DocPage):
         Update everything else (todos, relations).
         This is step two in update/rebuild process.
         """
+        if self.isReadOnlyEffect():
+            return
+
         self.deleteTodos()
         self.deleteChildRelationships()
 
@@ -640,6 +670,9 @@ class WikiPage(DocPage):
         """
         Update additional cached informations (properties, todos, relations)
         """
+        if self.isReadOnlyEffect():
+            return
+
         formatting = self.wikiDocument.getFormatting()
         
         pageAst = PageAst.Page()
@@ -659,34 +692,55 @@ class WikiPage(DocPage):
 
 
     def addChildRelationship(self, toWord, pos):
+        if self.isReadOnlyEffect():
+            return
+
         if toWord not in self.childRelationSet:
             # if self.wikiData.addRelationship(self.wikiWord, toWord):
             self.childRelations.append((toWord, pos))
             self.childRelationSet.add(toWord)
         
     def setProperty(self, key, value):
+        if self.isReadOnlyEffect():
+            return
+
         # if self.wikiData.setProperty(self.wikiWord, key, value):
-        self.addProperty(key, value)
+        self._addProperty(key, value)
         
     def addTodo(self, todo):
+        if self.isReadOnlyEffect():
+            return
+
         if todo not in self.todos:
             # if self.wikiData.addTodo(self.wikiWord, todo):
             self.todos.append(todo)
 
     def deleteChildRelationships(self):
+        if self.isReadOnlyEffect():
+            return
+
         # self.wikiData.deleteChildRelationships(self.wikiWord)
         self.childRelations = []
         self.childRelationSet = sets.Set()
 
     def deleteProperties(self):
+        if self.isReadOnlyEffect():
+            return
+
         # self.wikiData.deleteProperties(self.wikiWord)
         self.props = {}
 
     def deleteTodos(self):
+        if self.isReadOnlyEffect():
+            return
+
         # self.wikiData.deleteTodos(self.wikiWord)
         self.todos = []
 
     def setDirty(self, dirt):
+        if self.isReadOnlyEffect():
+            return
+
         if dirt:
             if self.saveDirtySince is None:
                 ti = time()
@@ -761,6 +815,9 @@ class WikiPage(DocPage):
         startPos -- start position in the presentation tuple which should be
                 overwritten with data.
         """
+        if self.isReadOnlyEffect():
+            return
+
         if self.wikiDocument.getReadAccessFailed() or \
                 self.wikiDocument.getWriteAccessFailed():
             return
@@ -1010,6 +1067,9 @@ class FunctionalPage(DocPage):
 
 
     def _saveDbSpecificPage(self, text, subtag):
+        if self.isReadOnlyEffect():
+            return
+
         wikiData = self.wikiDocument.getWikiData()
         if wikiData.isDefinedWikiWord(subtag) and text == u"":
             # Delete content
@@ -1023,6 +1083,8 @@ class FunctionalPage(DocPage):
         """
         Saves the content of current wiki page.
         """
+        if self.isReadOnlyEffect():
+            return
         
         if self.funcTag in ("global/[TextBlocks]", "global/[PWL]",
                 "global/[CCBlacklist]"):
@@ -1038,6 +1100,9 @@ class FunctionalPage(DocPage):
         """
         Update additional cached informations (properties, todos, relations)
         """
+        if self.isReadOnlyEffect():
+            return
+
         # clear the dirty flag
         self.updateDirtySince = None
 
@@ -1057,8 +1122,22 @@ class FunctionalPage(DocPage):
                 self.fireMiscEventKeys(("updated func page", "updated page",
                         "reread cc blacklist needed"))
 
+    def isReadOnlyEffect(self):
+        """
+        Return true if page is effectively read-only, this means
+        "for any reason", regardless if error or intention.
+        Global func. pages do not depend on the wiki state so they are writable.
+        """
+        if self.funcTag.startswith("global/"):
+            # Global pages are not stored in the wiki and are always writable
+            return False
+        else:
+            return DocPage.isReadOnlyEffect(self)
 
     def setDirty(self, dirt):
+        if self.isReadOnlyEffect():
+            return
+
         if dirt:
             if self.saveDirtySince is None:
                 ti = time()

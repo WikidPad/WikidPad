@@ -1,8 +1,6 @@
 import re
 
 import wx, wx.xrc
-# from wxPython.wx import *
-# import wxPython.xrc as xrc
 
 from wxHelper import *
 

@@ -1,9 +1,6 @@
 import sys, traceback, re
 
 import wx, wx.html, wx.xrc
-# from wxPython.wx import *
-# from wxPython.html import *
-# import wxPython.xrc as xrc
 
 from MiscEvent import MiscEventSourceMixin, KeyFunctionSink
 from wxHelper import *
@@ -512,7 +509,7 @@ class SearchWikiDialog(wx.Dialog):   # TODO
         res.LoadOnDialog(self, self.pWiki, "SearchWikiDialog")
         lbox = SearchResultListBox(self, self.pWiki, GUI_ID.htmllbPages)
         res.AttachUnknownControl("htmllbPages", lbox, self)
-        
+
         self.ctrls = XrcControls(self)
         
 #         searchContentPage = res.LoadPanel(self.ctrls.nbFilters,
@@ -535,6 +532,7 @@ class SearchWikiDialog(wx.Dialog):   # TODO
         
         self.listPagesOperation = ListWikiPagesOperation()
         self._refreshSavedSearchesList()
+        self._refreshSearchHistoryCombo()
 
         wx.EVT_BUTTON(self, GUI_ID.btnFindPages, self.OnSearchWiki)
         wx.EVT_BUTTON(self, GUI_ID.btnSetPageList, self.OnSetPageList)
@@ -824,10 +822,11 @@ class SearchWikiDialog(wx.Dialog):   # TODO
                 hist = hist[:10]
             
         wx.GetApp().setWikiSearchHistory(hist)
+        self._refreshSearchHistoryCombo()
+#         self.ctrls.cbSearch.Clear()
+#         self.ctrls.cbSearch.AppendItems([tpl[0] for tpl in hist])
         text = self.ctrls.cbSearch.GetValue()
-        self.ctrls.cbSearch.Clear()
         self.ctrls.cbSearch.SetValue(text)
-        self.ctrls.cbSearch.AppendItems([tpl[0] for tpl in hist])
 
 
 
@@ -890,6 +889,12 @@ class SearchWikiDialog(wx.Dialog):   # TODO
         self.ctrls.lbSavedSearches.Clear()
         for search in self.savedSearches:
             self.ctrls.lbSavedSearches.Append(uniToGui(search))
+
+
+    def _refreshSearchHistoryCombo(self):
+        hist = wx.GetApp().getWikiSearchHistory()
+        self.ctrls.cbSearch.Clear()
+        self.ctrls.cbSearch.AppendItems([tpl[0] for tpl in hist])
 
 
     def OnDeleteSearches(self, evt):
@@ -992,6 +997,7 @@ class SearchPageDialog(wx.Dialog):   # TODO
         self.ctrls.btnClose.SetId(wx.ID_CANCEL)
         
         self.firstFind = True
+        self._refreshSearchHistoryCombo()
 
         wx.EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)        
         wx.EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
@@ -1063,9 +1069,15 @@ class SearchPageDialog(wx.Dialog):   # TODO
                 hist = hist[:10]
             
         wx.GetApp().setPageSearchHistory(hist)
+#         self.ctrls.cbSearch.Clear()
+#         self.ctrls.cbSearch.AppendItems([tpl[0] for tpl in hist])
+        self._refreshSearchHistoryCombo()
         text = self.ctrls.cbSearch.GetValue()
-        self.ctrls.cbSearch.Clear()
         self.ctrls.cbSearch.SetValue(text)
+
+    def _refreshSearchHistoryCombo(self):
+        hist = wx.GetApp().getPageSearchHistory()
+        self.ctrls.cbSearch.Clear()
         self.ctrls.cbSearch.AppendItems([tpl[0] for tpl in hist])
 
 
@@ -1164,6 +1176,8 @@ class SearchPageDialog(wx.Dialog):   # TODO
     def OnSearchComboSelected(self, evt):
         hist = wx.GetApp().getPageSearchHistory()
         self.showHistoryTuple(hist[evt.GetSelection()])
+
+
 
 
 class WikiPageListConstructionDialog(wx.Dialog, MiscEventSourceMixin):   # TODO

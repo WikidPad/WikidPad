@@ -131,30 +131,10 @@ class WikiData:
     
     
         try:
-            # Temporary table for findBestPathFromWordToWord
-            # TODO: Possible for read-only dbs?
-    
-            # These schema changes are only on a temporary table so they are not
-            # in DbStructure.py
-            self.connWrap.execSql("create temp table temppathfindparents "+
-                    "(word text primary key, child text, steps integer)")
-    
-            self.connWrap.execSql("create index temppathfindparents_steps "+
-                    "on temppathfindparents(steps)")
-    
+            self._createTempTables()
+
             # create word caches
             self.cachedContentNames = None
-#             self.cachedContentNames = {}
-#     
-#             # cache aliases
-#             aliases = self.getAllAliases()
-#             for alias in aliases:
-#                 self.cachedContentNames[alias] = 2
-#     
-#             # Cache real words
-#             for word in self.getAllDefinedContentNames():
-#                 self.cachedContentNames[word] = 1
-    
             self.cachedGlobalProps = None
             self.getGlobalProperties()
         except (IOError, OSError, sqlite.Error), e:
@@ -177,9 +157,25 @@ class WikiData:
         pass        
 
 
+    def _createTempTables(self):
+        # Temporary table for findBestPathFromWordToWord
+        # TODO: Possible for read-only dbs?
+
+        # These schema changes are only on a temporary table so they are not
+        # in DbStructure.py
+        self.connWrap.execSql("create temp table temppathfindparents "+
+                "(word text primary key, child text, steps integer)")
+
+        self.connWrap.execSql("create index temppathfindparents_steps "+
+                "on temppathfindparents(steps)")
+
+
     # ---------- Direct handling of page data ----------
     
     def getContent(self, word):
+        """
+        Function must work for read-only wiki.
+        """
         try:
             if (not exists(self.getWikiWordFileName(word))):
                 raise WikiFileNotFoundException, \
@@ -299,6 +295,7 @@ class WikiData:
         """
         Returns a tuple with modification, creation and visit date of
         a word or (None, None, None) if word is not in the database
+        Function must work for read-only wiki.
         """
         try:
             dates = self.connWrap.execSqlQuery(
@@ -402,6 +399,7 @@ class WikiData:
             selfreference=True, withPosition=False):
         """
         get the child relations of this word
+        Function must work for read-only wiki.
         existingonly -- List only existing wiki words
         selfreference -- List also wikiWord if it references itself
         withPositions -- Return tuples (relation, firstcharpos) with char.
@@ -489,7 +487,10 @@ class WikiData:
 
 
     def getParentRelationships(self, wikiWord):
-        "get the parent relations to this word"
+        """
+        get the parent relations to this word
+        Function must work for read-only wiki.
+        """
 #         return self.connWrap.execSqlQuerySingleColumn(
 #                 "select word from wikirelations where relation = ?", (wikiWord,))
 
@@ -518,6 +519,7 @@ class WikiData:
     def getParentlessWikiWords(self):
         """
         get the words that have no parents.
+        Function must work for read-only wiki.
 
         NO LONGER VALID: (((also returns nodes that have files but
         no entries in the wikiwords table.)))
@@ -539,6 +541,7 @@ class WikiData:
         """
         List words which are childs of a word but are not defined, neither
         directly nor as alias.
+        Function must work for read-only wiki.
         """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
@@ -583,6 +586,7 @@ class WikiData:
         Return all words which are children, grandchildren, etc.
         of words and the words itself. Used by the "export/print Sub-Tree"
         functions. All returned words are real existing words, no aliases.
+        Function must work for read-only wiki.
         """
         checkList = [(self.getAliasesWikiWord(w), 0) for w in words]
         checkList.reverse()
@@ -618,6 +622,8 @@ class WikiData:
         word and toWord are included as first/last element. If word == toWord,
         it is included only once as the single element of the list.
         If there is no path from word to toWord, [] is returned
+        Function must work for read-only wiki (should hold although function
+        writes to temporary table.
         """
 
         if word == toWord:
@@ -677,7 +683,11 @@ class WikiData:
     # ---------- Listing/Searching wiki words (see also "alias handling", "searching pages")----------
 
     def getAllDefinedWikiPageNames(self):
-        "get the names of all wiki pages in the db, no aliases"
+        """
+        get the names of all wiki pages in the db, no aliases, no functional
+        pages.
+        Function must work for read-only wiki.
+        """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
                     "select word from wikiwords where not word glob '[[]*'")
@@ -687,7 +697,10 @@ class WikiData:
 
 
     def getAllDefinedContentNames(self):
-        "get the names of all the content elements in the db, no aliases"
+        """
+        get the names of all the content elements in the db, no aliases
+        Function must work for read-only wiki.
+        """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
                     "select word from wikiwords")
@@ -700,7 +713,8 @@ class WikiData:
         """
         Refreshes the internal list of defined pages which
         may be different from the list of pages for which
-        content is available (not possible for compact database).
+        content is available (not possible for compact database)
+        because there may be a DB entry without a file or vice versa.
         The function tries to conserve additional informations
         (creation/modif. date) if possible.
         
@@ -742,6 +756,9 @@ class WikiData:
 
 
     def _getCachedContentNames(self):
+        """
+        Function works for read-only wiki.
+        """
         try:
             if self.cachedContentNames is None:
                 result = {}
@@ -780,16 +797,23 @@ class WikiData:
     def getWikiWordFileName(self, wikiWord):
         """
         Not part of public API!
+        Function must work for read-only wiki.
         """
         return join(self.dataDir, (u"%s" + self.pagefileSuffix) % wikiWord)
 
     def isDefinedWikiWord(self, word):
-        "check if a word is a valid wikiword (page name or alias)"
+        """
+        check if a word is a valid wikiword (page name or alias)
+        Function must work for read-only wiki.
+        """
         return self._getCachedContentNames().has_key(word)
 
     def getWikiWordsStartingWith(self, thisStr, includeAliases=False,
             caseNormed=False):
-        "get the list of words starting with thisStr. used for autocompletion."
+        """
+        get the list of words starting with thisStr. used for autocompletion.
+        Function must work for read-only wiki.
+        """
 
         # Escape some characters:   # TODO more elegant
         thisStr = thisStr.replace("[", "[[").replace("]", "[]]").replace("[[", "[[]")
@@ -826,6 +850,7 @@ class WikiData:
         """
         get the list of words with thisStr in them,
         if possible first these which start with thisStr.
+        Function must work for read-only wiki.
         """
         thisStr = thisStr.lower()   # TODO More general normcase function
 
@@ -865,6 +890,9 @@ class WikiData:
 
 
     def getWikiWordsModifiedWithin(self, days):
+        """
+        Function must work for read-only wiki.
+        """
         timeDiff = float(time()-(86400*days))
         try:
             return self.connWrap.execSqlQuerySingleColumn(
@@ -882,6 +910,7 @@ class WikiData:
         Returns the name of the "first" wiki word. See getNextWikiWord()
         for details. Returns either an existing wiki word or None if no
         wiki words in database.
+        Function must work for read-only wiki.
         """
         try:
             return self.connWrap.execSqlQuerySingleItem(
@@ -901,6 +930,7 @@ class WikiData:
         and if the list of existing wiki words is not modified during
         iteration, it is guaranteed that you have visited all real
         wiki words (no aliases) then.
+        Function must work for read-only wiki.
         """
         try:
             return self.connWrap.execSqlQuerySingleItem(
@@ -917,6 +947,7 @@ class WikiData:
     def getPropertyNames(self):
         """
         Return all property names not beginning with "global."
+        Function must work for read-only wiki.
         """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
@@ -929,6 +960,9 @@ class WikiData:
 
     # TODO More efficient? (used by autocompletion)
     def getPropertyNamesStartingWith(self, startingWith):
+        """
+        Function must work for read-only wiki.
+        """
         try:
             names = self.connWrap.execSqlQuerySingleColumn(
                     "select distinct(key) from wikiwordprops")   #  order by key")
@@ -946,12 +980,18 @@ class WikiData:
 
 
     def getGlobalProperties(self):
+        """
+        Function must work for read-only wiki.
+        """
         if not self.cachedGlobalProps:
             return self.updateCachedGlobalProps()
 
         return self.cachedGlobalProps
 
     def getDistinctPropertyValues(self, key):
+        """
+        Function must work for read-only wiki.
+        """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
                     "select distinct(value) from wikiwordprops where key = ? ",
@@ -962,6 +1002,9 @@ class WikiData:
 
                 
     def getWordsForPropertyName(self, key):
+        """
+        Function must work for read-only wiki.
+        """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
                     "select distinct(word) from wikiwordprops where key = ? ",
@@ -972,6 +1015,9 @@ class WikiData:
 
 
     def getWordsWithPropertyValue(self, key, value):
+        """
+        Function must work for read-only wiki.
+        """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
                     "select word from wikiwordprops where key = ? and value = ?",
@@ -985,6 +1031,7 @@ class WikiData:
         """
         Returns list of tuples (key, value) of key and value
         of all properties for word.
+        Function must work for read-only wiki.
         """
         try:
             return self.connWrap.execSqlQuery("select key, value "+
@@ -1028,6 +1075,7 @@ class WikiData:
     def updateCachedGlobalProps(self):
         """
         TODO: Should become part of public API!
+        Function must work for read-only wiki.
         """
         try:
             data = self.connWrap.execSqlQuery("select key, value from wikiwordprops "
@@ -1062,6 +1110,7 @@ class WikiData:
         """
         If alias is an alias wiki word, return the original word,
         otherwise return alias
+        Function must work for read-only wiki.
         """
         if not self.isAlias(alias):
             return alias
@@ -1073,7 +1122,10 @@ class WikiData:
 
 
     def isAlias(self, word):
-        "check if a word is an alias for another"
+        """
+        check if a word is an alias for another.
+        Function must work for read-only wiki.
+        """
         return self._getCachedContentNames().get(word) == 2
 
 
@@ -1085,6 +1137,9 @@ class WikiData:
             self._getCachedContentNames()[word] = 2
         
     def getAllAliases(self):
+        """
+        Function must work for read-only wiki.
+        """
         try:
             # get all of the aliases
             return self.connWrap.execSqlQuerySingleColumn(
@@ -1098,6 +1153,9 @@ class WikiData:
     # ---------- Todo cache handling ----------
 
     def getTodos(self):
+        """
+        Function must work for read-only wiki.
+        """
         try:
             return self.connWrap.execSqlQuery("select word, todo from todos")
         except (IOError, OSError, sqlite.Error), e:
@@ -1107,7 +1165,8 @@ class WikiData:
 
     def getTodosForWord(self, word):
         """
-        Returns list of all todo items of word
+        Returns list of all todo items of word.
+        Function must work for read-only wiki.
         """
         try:
             return self.connWrap.execSqlQuerySingleColumn("select todo from todos "
@@ -1148,6 +1207,7 @@ class WikiData:
         return set of all page names that match the search criteria.
         sarOp.beginWikiSearch() must be called before calling this function,
         sarOp.endWikiSearch() must be called after calling this function.
+        Function must work for read-only wiki.
         
         exclusionSet -- set of wiki words for which their pages shouldn't be
         searched here and which must not be part of the result set
@@ -1182,6 +1242,7 @@ class WikiData:
     def getSavedSearchTitles(self):
         """
         Return the titles of all stored searches in alphabetical order
+        Function must work for read-only wiki.
         """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
@@ -1192,6 +1253,9 @@ class WikiData:
 
 
     def getSearchDatablock(self, title):
+        """
+        Function must work for read-only wiki.
+        """
         try:
             return self.connWrap.execSqlQuerySingleItem(
                     "select datablock from search_views where title = ?", (title,))
@@ -1224,6 +1288,7 @@ class WikiData:
         Check the capabilities of this WikiData implementation.
         The capkey names the capability, the function returns normally
         a version number or None if not supported
+        Function must work for read-only wiki.
         """
         return WikiData._CAPABILITIES.get(capkey, None)
 
@@ -1264,6 +1329,7 @@ class WikiData:
         """
         Returns the presentation datablock (a byte string).
         The function may return either an empty string or a valid datablock
+        Function must work for read-only wiki.
         """
         try:
             return self.connWrap.execSqlQuerySingleItem(
@@ -1290,6 +1356,9 @@ class WikiData:
 
         
     def close(self):
+        """
+        Function must work for read-only wiki.
+        """
         try:
             self.connWrap.commit()
             self.connWrap.close()

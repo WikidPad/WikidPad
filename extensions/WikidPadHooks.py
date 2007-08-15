@@ -47,7 +47,7 @@ def openedWiki(wikidPad, wikiName, wikiConfig):
     """
     pass
 
-def openWikiWord(wikidPad, wikiWord):
+def openWikiWord(docPagePresenter, wikiWord):
     """
     Called when a new or existing wiki word is about to be opened.
     The previous active page is already saved, new one is not yet loaded.
@@ -56,7 +56,7 @@ def openWikiWord(wikidPad, wikiWord):
     """
     pass
 
-def newWikiWord(wikidPad, wikiWord):
+def newWikiWord(docPagePresenter, wikiWord):
     """
     Called when a new wiki word is about to be created.
     The wikidPad.currentWikiPage of the new word is already available
@@ -65,7 +65,7 @@ def newWikiWord(wikidPad, wikiWord):
     """
     pass
 
-def openedWikiWord(wikidPad, wikiWord):
+def openedWikiWord(docPagePresenter, wikiWord):
     """
     Called when a new or existing wiki word was opened successfully.
 

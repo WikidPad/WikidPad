@@ -121,16 +121,8 @@ class WikiData:
 
 
         try:
-            # Temporary table for findBestPathFromWordToWord
-    
-            # These schema changes are only on a temporary table so they are not
-            # in DbStructure.py
-            self.connWrap.execSql("create temp table temppathfindparents "+
-                    "(word text primary key, child text, steps integer)")
-    
-            self.connWrap.execSql("create index temppathfindparents_steps "+
-                    "on temppathfindparents(steps)")
-    
+            self._createTempTables()
+
             # create word caches
             self.cachedContentNames = None
     
@@ -163,6 +155,17 @@ class WikiData:
         Actual initialization or reinitialization after rebuildWiki()
         """
         
+    def _createTempTables(self):
+        # Temporary table for findBestPathFromWordToWord
+        # TODO: Possible for read-only dbs?
+
+        # These schema changes are only on a temporary table so they are not
+        # in DbStructure.py
+        self.connWrap.execSql("create temp table temppathfindparents "+
+                "(word text primary key, child text, steps integer)")
+
+        self.connWrap.execSql("create index temppathfindparents_steps "+
+                "on temppathfindparents(steps)")
 
 
     # ---------- Direct handling of page data ----------
