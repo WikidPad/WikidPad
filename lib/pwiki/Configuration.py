@@ -4,10 +4,11 @@ import os, traceback
 
 import codecs
 
-from wxPython.wx import wxPlatformInfo, wxGetOsVersion, wxGetApp
+import wx
+# from wxPython.wx import wxPlatformInfo, wxGetOsVersion, wxGetApp
 
-wxWINDOWS_NT = 18   # For wxGetOsVersion() 
-wxWIN95 = 20   # For wxGetOsVersion(), this includes also Win 98 and ME
+wxWINDOWS_NT = 18   # For wx.GetOsVersion() 
+wxWIN95 = 20   # For wx.GetOsVersion(), this includes also Win 98 and ME
 
 
 from MiscEvent import MiscEventSourceMixin
@@ -18,13 +19,13 @@ def isUnicode():
     """
     Return if GUI is in unicode mode
     """
-    return wxPlatformInfo[2] == "unicode"
+    return wx.PlatformInfo[2] == "unicode"
 
 def isOSX():
     """
     Return if working on Mac OSX
     """
-    return '__WXMAC__' in wxPlatformInfo
+    return '__WXMAC__' in wx.PlatformInfo
     
 def isLinux():
     """
@@ -36,7 +37,7 @@ def isLinux():
         return False
 
 
-_ISWIN9x = wxGetOsVersion()[0] == wxWIN95
+_ISWIN9x = wx.GetOsVersion()[0] == wxWIN95
 
 def isWin9x():
     """
@@ -46,7 +47,7 @@ def isWin9x():
 
 
 def isWindows():
-    return _ISWIN9x or wxGetOsVersion()[0] == wxWINDOWS_NT
+    return _ISWIN9x or wx.GetOsVersion()[0] == wxWINDOWS_NT
 
 
 

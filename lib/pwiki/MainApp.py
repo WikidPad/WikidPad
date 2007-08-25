@@ -7,8 +7,9 @@ import subprocess
 
 import ExceptionLogger
 
-from wxPython.wx import *
-import wxPython.xrc as xrc
+import wx, wx.xrc
+# from wxPython.wx import *
+# import wxPython.xrc as xrc
 
 wxWINDOWS_NT = 18   # For wxGetOsVersion()
 wxWIN95 = 20   # For wxGetOsVersion(), this includes also Win 98 and ME
@@ -39,8 +40,8 @@ def findDirs():
     """
     wikiAppDir = None
     
-    isWindows = (wxGetOsVersion()[0] == wxWIN95) or \
-            (wxGetOsVersion()[0] == wxWINDOWS_NT)
+    isWindows = (wx.GetOsVersion()[0] == wxWIN95) or \
+            (wx.GetOsVersion()[0] == wxWINDOWS_NT)
 
 #     try:
     wikiAppDir = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -57,7 +58,7 @@ def findDirs():
         if not (globalConfigDir and os.path.exists(globalConfigDir)):
             # Instead of checking USERNAME, the user config dir. is
             # now used
-            globalConfigDir = wxStandardPaths.Get().GetUserConfigDir()
+            globalConfigDir = wx.StandardPaths.Get().GetUserConfigDir()
             if os.path.exists(globalConfigDir) and isWindows:
                 try:
                     realGlobalConfigDir = os.path.join(globalConfigDir,
@@ -89,12 +90,12 @@ def findDirs():
 
 
 
-class App(wxApp): 
+class App(wx.App): 
     def __init__(self, *args, **kwargs):
         global app
         app = self
 
-        wxApp.__init__(self, *args, **kwargs)
+        wx.App.__init__(self, *args, **kwargs)
         self.SetAppName("WikidPad")
         # Do not initialize member variables here!
 
@@ -279,7 +280,7 @@ class App(wxApp):
         rd = rf.read()
         rf.close()
 
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.SetFlags(0)
         res.LoadFromString(rd)
 
@@ -337,9 +338,9 @@ class App(wxApp):
             traceback.print_exc()
 
         if ExceptionLogger._exceptionOccurred and hasattr(sys, 'frozen'):
-            wxMessageBox("An error occurred during this session\nSee file %s" %
+            wx.MessageBox("An error occurred during this session\nSee file %s" %
                     os.path.join(ExceptionLogger._exceptionDestDir, "WikidPad_Error.log"),
-                    "Error", style = wxOK)
+                    "Error", style = wx.OK)
 
 
     def startPersonalWikiFrame(self, clAction):
@@ -351,8 +352,8 @@ class App(wxApp):
 
         # set the icon of the app
         try:
-            wikiFrame.SetIcon(wxIcon(os.path.join(self.wikiAppDir, 'icons',
-                    'pwiki.ico'), wxBITMAP_TYPE_ICO))
+            wikiFrame.SetIcon(wx.Icon(os.path.join(self.wikiAppDir, 'icons',
+                    'pwiki.ico'), wx.BITMAP_TYPE_ICO))
         except:
             pass
 

@@ -6,8 +6,7 @@ import sys
 # from time import localtime
 import urllib_red as urllib
 
-from wxPython.wx import *
-import wxPython.xrc as xrc
+# import wx, wx.xrc
 
 from wxHelper import XrcControls
 

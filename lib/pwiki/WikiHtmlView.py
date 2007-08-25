@@ -1,8 +1,9 @@
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
-from wxPython.wx import *
-from wxPython.html import *
+import wx, wx.html
+# from wxPython.wx import *
+# from wxPython.html import *
 
 from WikiExceptions import *
 from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID
@@ -10,7 +11,7 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID
 from MiscEvent import KeyFunctionSink
 
 from StringOps import uniToGui
-from Configuration import isWindows
+from Configuration import isWindows, isOSX
 
 from TempFileSet import TempFileSet
 
@@ -57,9 +58,9 @@ def createWikiHtmlView(presenter, parent, ID):
 
 
 
-class WikiHtmlView(wxHtmlWindow):
+class WikiHtmlView(wx.html.HtmlWindow):
     def __init__(self, presenter, parent, ID):
-        wxHtmlWindow.__init__(self, parent, ID)
+        wx.html.HtmlWindow.__init__(self, parent, ID)
         self.presenter = presenter
 
         self.presenter.getMiscEvent().addListener(KeyFunctionSink((
@@ -93,14 +94,14 @@ class WikiHtmlView(wxHtmlWindow):
         self.exporterInstance.tempFileSet = TempFileSet()
 
         
-        EVT_KEY_DOWN(self, self.OnKeyDown)
-        EVT_KEY_UP(self, self.OnKeyUp)
-        EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
-        EVT_MENU(self, GUI_ID.CMD_ZOOM_IN, lambda evt: self.addZoom(1))
-        EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT, lambda evt: self.addZoom(-1))
+        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+        wx.EVT_KEY_UP(self, self.OnKeyUp)
+        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
+        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN, lambda evt: self.addZoom(1))
+        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT, lambda evt: self.addZoom(-1))
 
-        EVT_SET_FOCUS(self, self.OnSetFocus)
-        EVT_MOUSEWHEEL(self, self.OnMouseWheel) 
+        wx.EVT_SET_FOCUS(self, self.OnSetFocus)
+        wx.EVT_MOUSEWHEEL(self, self.OnMouseWheel) 
 
 
     def setVisible(self, vis):
@@ -121,9 +122,19 @@ class WikiHtmlView(wxHtmlWindow):
         self.setVisible(False)
 
 
-    _DEFAULT_FONT_SIZES = (wxHTML_FONT_SIZE_1, wxHTML_FONT_SIZE_2, 
-            wxHTML_FONT_SIZE_3, wxHTML_FONT_SIZE_4, wxHTML_FONT_SIZE_5, 
-            wxHTML_FONT_SIZE_6, wxHTML_FONT_SIZE_7)
+# This doesn't work for wxPython 2.8 and newer, constants are missing
+#     _DEFAULT_FONT_SIZES = (wx.html.HTML_FONT_SIZE_1, wx.html.HTML_FONT_SIZE_2, 
+#             wx.html.HTML_FONT_SIZE_3, wx.html.HTML_FONT_SIZE_4,
+#             wx.html.HTML_FONT_SIZE_5, wx.html.HTML_FONT_SIZE_6,
+#             wx.html.HTML_FONT_SIZE_7)
+
+    # These are the Windows sizes
+    if isWindows():
+        _DEFAULT_FONT_SIZES = (7, 8, 10, 12, 16, 22, 30)
+    elif isOSX():
+        _DEFAULT_FONT_SIZES = (9, 12, 14, 18, 24, 30, 36)
+    else:
+        _DEFAULT_FONT_SIZES = (10, 12, 14, 16, 19, 24, 32)
 
 
     # TODO Called too often and at wrong time, e.g. when switching from
@@ -166,7 +177,7 @@ class WikiHtmlView(wxHtmlWindow):
                     LinkCreatorForPreview(
                         self.presenter.getWikiDocument().getWikiData()))
 
-            wxGetApp().getInsertionPluginManager().taskEnd()
+            wx.GetApp().getInsertionPluginManager().taskEnd()
 
     
             # TODO Reset after open wiki
@@ -277,7 +288,7 @@ class WikiHtmlView(wxHtmlWindow):
 
     def OnKeyUp(self, evt):
         acc = getAccelPairFromKeyDown(evt)
-        if acc == (wxACCEL_CTRL, ord('C')): 
+        if acc == (wx.ACCEL_CTRL, ord('C')): 
             # Consume original clipboard copy function
             pass
         else:
@@ -299,15 +310,15 @@ class WikiHtmlView(wxHtmlWindow):
 
     def OnKeyDown(self, evt):
         acc = getAccelPairFromKeyDown(evt)
-        if acc == (wxACCEL_CTRL, ord('+')) or \
-                acc == (wxACCEL_CTRL, WXK_NUMPAD_ADD):
+        if acc == (wx.ACCEL_CTRL, ord('+')) or \
+                acc == (wx.ACCEL_CTRL, wx.WXK_NUMPAD_ADD):
             self.addZoom(1)
 #             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
 #             self.presenter.getConfig().set("main", "preview_zoom", str(zoom + 1))
 #             self.outOfSync = True
 #             self.refresh()
-        elif acc == (wxACCEL_CTRL, ord('-')) or \
-                acc == (wxACCEL_CTRL, WXK_NUMPAD_SUBTRACT):
+        elif acc == (wx.ACCEL_CTRL, ord('-')) or \
+                acc == (wx.ACCEL_CTRL, wx.WXK_NUMPAD_SUBTRACT):
             self.addZoom(-1)
 #             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
 #             self.presenter.getConfig().set("main", "preview_zoom", str(zoom - 1))

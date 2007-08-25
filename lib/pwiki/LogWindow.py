@@ -4,8 +4,9 @@ GUI support and error checking for handling properties (=attributes)
 
 import sets, traceback
 
-from wxPython.wx import *
-import wxPython.xrc as xrc
+import wx, wx.xrc
+# from wxPython.wx import *
+# import wxPython.xrc as xrc
 
 from wxHelper import *
 
@@ -68,22 +69,22 @@ class LogMessage:
 
 
 
-class LogWindow(wxPanel):
+class LogWindow(wx.Panel):
     def __init__(self, parent, id, mainControl):
-        d = wxPrePanel()
+        d = wx.PrePanel()
         self.PostCreate(d)
 
         self.mainControl = mainControl
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnPanel(self, parent, "LogWindow")
         self.ctrls = XrcControls(self)
         self.ctrls.lcEntries.InsertColumn(0, u"Message")
 
         self.messages = []
         
-        EVT_LIST_ITEM_ACTIVATED(self, GUI_ID.lcEntries, self.OnEntryActivated) 
-        EVT_BUTTON(self, GUI_ID.btnClearLog, self.OnClearLog)
-        EVT_BUTTON(self, GUI_ID.btnHideLogWindow, self.OnHideLogWindow)
+        wx.EVT_LIST_ITEM_ACTIVATED(self, GUI_ID.lcEntries, self.OnEntryActivated) 
+        wx.EVT_BUTTON(self, GUI_ID.btnClearLog, self.OnClearLog)
+        wx.EVT_BUTTON(self, GUI_ID.btnHideLogWindow, self.OnHideLogWindow)
 
 
     def appendMessage(self, msg):
@@ -92,7 +93,7 @@ class LogWindow(wxPanel):
         self.ctrls.lcEntries.EnsureVisible(l)
 
         self.messages.append(msg)
-        self.ctrls.lcEntries.SetColumnWidth(0, wxLIST_AUTOSIZE)
+        self.ctrls.lcEntries.SetColumnWidth(0, wx.LIST_AUTOSIZE)
 
 
     def removeWithCheckedWikiWord(self, checkedWikiWord):

@@ -1,6 +1,7 @@
 import os, sys, traceback, sets
 
-from wxPython.wx import *
+import wx
+# from wxPython.wx import *
 
 
 from StringOps import mbcsEnc
@@ -241,7 +242,7 @@ class InsertionPluginManager:
             else:
                 key, etlist, factory = keyDesc
                 try:
-                    obj = factory(wxGetApp())
+                    obj = factory(wx.GetApp())
                 except:
                     traceback.print_exc()
                     obj = None

@@ -2,7 +2,8 @@ from weakref import WeakValueDictionary
 import os, os.path, sets, traceback, re
 from threading import RLock
 
-from wxPython.wx import wxGetApp
+import wx
+# from wxPython.wx import wxGetApp
 
 from pwiki.MiscEvent import MiscEventSourceMixin
 
@@ -97,7 +98,7 @@ def splitConfigPathAndWord(wikiCombinedFilename):
     return: tuple (cfg, wikiword) with cfg real config filepath (None if it
             couldn't be found. wikiword is the wikiword to jump to or None
     """
-    wikiConfig = wxGetApp().createWikiConfiguration()
+    wikiConfig = wx.GetApp().createWikiConfiguration()
     if os.path.supports_unicode_filenames:
         wikiConfigFilename = mbcsDec(wikiCombinedFilename)[0]
     else:
@@ -185,7 +186,7 @@ class WikiDataManager(MiscEventSourceMixin):
     """
 
     def __init__(self, wikiConfigFilename, wikiSyntax, dbtype):  #  dataDir, fileStorDir, dbtype, ):
-        wikiConfig = wxGetApp().createWikiConfiguration()
+        wikiConfig = wx.GetApp().createWikiConfiguration()
         self.connected = False
         self.readAccessFailed = False
         self.writeAccessFailed = False
@@ -430,7 +431,7 @@ class WikiDataManager(MiscEventSourceMixin):
         return self.dataDir
         
     def getCollator(self):
-        return wxGetApp().getCollator()
+        return wx.GetApp().getCollator()
         
     def getNoAutoSaveFlag(self):
         """

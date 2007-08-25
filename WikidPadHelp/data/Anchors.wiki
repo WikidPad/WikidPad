@@ -8,7 +8,7 @@ anchor: here
 
 The anchor tag must be alone on a line, no text before or after it. After "anchor:" you give the anchor a name which must consist only of letters A to Z (upper or lowercase), digits and underscore. It must not contain spaces, other special characters or non-English characters.
 
-To go to a particular anchor in a wiki word, append a ! and the anchor name to the wiki word, e.g.:
+To go to a particular anchor in a wiki word, append a ! and the anchor name to the wiki word (non-camelcase wiki words must be put in brackets), e.g.:
 
 [Anchors]!here
 

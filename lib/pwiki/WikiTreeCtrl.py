@@ -2,9 +2,10 @@ import sys, sets # , hotshot
 
 ## _prof = hotshot.Profile("hotshot.prf")
 
-from wxPython.wx import *
-from wxPython.stc import *
-import wxPython.xrc as xrc
+import wx, wx.xrc
+# from wxPython.wx import *
+# from wxPython.stc import *
+# import wxPython.xrc as xrc
 
 from wxHelper import GUI_ID, wxKeyFunctionSink, textToDataObject
 from MiscEvent import DebugSimple   # , KeyFunctionSink
@@ -990,25 +991,25 @@ class FuncPageNode(AbstractNode):
 # ----------------------------------------------------------------------
 
 
-class WikiTreeCtrl(wxTreeCtrl):
+class WikiTreeCtrl(wx.TreeCtrl):
     def __init__(self, pWiki, parent, ID):        
-        wxTreeCtrl.__init__(self, parent, ID, style=wxTR_HAS_BUTTONS)
+        wx.TreeCtrl.__init__(self, parent, ID, style=wx.TR_HAS_BUTTONS)
         self.pWiki = pWiki
 
         self.SetBackgroundColour(wx.WHITE)
         self.refreshGenerator = None  # Generator called in OnIdle
         self.refreshCheckChildren = [] # List of nodes to check for new/deleted children
 
-        EVT_TREE_ITEM_ACTIVATED(self, ID, self.OnTreeItemActivated)
-        EVT_TREE_SEL_CHANGED(self, ID, self.OnTreeItemActivated)
-        EVT_TREE_ITEM_EXPANDING(self, ID, self.OnTreeItemExpand)
-        EVT_TREE_ITEM_COLLAPSED(self, ID, self.OnTreeItemCollapse)
-        EVT_TREE_BEGIN_DRAG(self, ID, self.OnTreeBeginDrag)
-        EVT_RIGHT_DOWN(self, self.OnRightButtonDown)   # TODO Context menu
-        EVT_SET_FOCUS(self, self.OnSetFocus)
+        wx.EVT_TREE_ITEM_ACTIVATED(self, ID, self.OnTreeItemActivated)
+        wx.EVT_TREE_SEL_CHANGED(self, ID, self.OnTreeItemActivated)
+        wx.EVT_TREE_ITEM_EXPANDING(self, ID, self.OnTreeItemExpand)
+        wx.EVT_TREE_ITEM_COLLAPSED(self, ID, self.OnTreeItemCollapse)
+        wx.EVT_TREE_BEGIN_DRAG(self, ID, self.OnTreeBeginDrag)
+        wx.EVT_RIGHT_DOWN(self, self.OnRightButtonDown)   # TODO Context menu
+        wx.EVT_SET_FOCUS(self, self.OnSetFocus)
 #        EVT_LEFT_DOWN(self, self.OnLeftDown)
 
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         self.contextMenuWikiWords = res.LoadMenu("MenuTreectrlWikiWords")
 
         self.contextMenuWikiWords.AppendSeparator()
@@ -1016,43 +1017,43 @@ class WikiTreeCtrl(wxTreeCtrl):
         # Build icon menu
         if self.pWiki.lowResources:
             # Add only menu item for icon select dialog
-            menuID = wxNewId()
+            menuID = wx.NewId()
             self.contextMenuWikiWords.Append(menuID, 'Add icon property',
                     'Open icon select dialog')
-            EVT_MENU(self, menuID, lambda evt: self.pWiki.showIconSelectDialog())
+            wx.EVT_MENU(self, menuID, lambda evt: self.pWiki.showIconSelectDialog())
         else:
             # Build full submenu for icons
             iconsMenu, self.cmdIdToIconName = \
-                    PropertyHandling.buildIconsSubmenu(wxGetApp().getIconCache())
+                    PropertyHandling.buildIconsSubmenu(wx.GetApp().getIconCache())
             for cmi in self.cmdIdToIconName.keys():
-                EVT_MENU(self, cmi, self.OnInsertIconAttribute)
+                wx.EVT_MENU(self, cmi, self.OnInsertIconAttribute)
 
-            self.contextMenuWikiWords.AppendMenu(wxNewId(),
+            self.contextMenuWikiWords.AppendMenu(wx.NewId(),
                     'Add icon property', iconsMenu)
 
         # Build submenu for colors
         colorsMenu, self.cmdIdToColorName = PropertyHandling.buildColorsSubmenu()
         for cmi in self.cmdIdToColorName.keys():
-            EVT_MENU(self, cmi, self.OnInsertColorAttribute)
+            wx.EVT_MENU(self, cmi, self.OnInsertColorAttribute)
 
-        self.contextMenuWikiWords.AppendMenu(wxNewId(), 'Add color property',
+        self.contextMenuWikiWords.AppendMenu(wx.NewId(), 'Add color property',
                 colorsMenu)
                 
         self.contextMenuNode = None  # Tree node for which a context menu was shown
 
 
         # TODO Let PersonalWikiFrame handle this 
-        EVT_MENU(self, GUI_ID.CMD_RENAME_WIKIWORD,
+        wx.EVT_MENU(self, GUI_ID.CMD_RENAME_WIKIWORD,
                 lambda evt: self.pWiki.showWikiWordRenameDialog())
-        EVT_MENU(self, GUI_ID.CMD_DELETE_WIKIWORD,
+        wx.EVT_MENU(self, GUI_ID.CMD_DELETE_WIKIWORD,
                 lambda evt: self.pWiki.showWikiWordDeleteDialog())
-        EVT_MENU(self, GUI_ID.CMD_BOOKMARK_WIKIWORD,
+        wx.EVT_MENU(self, GUI_ID.CMD_BOOKMARK_WIKIWORD,
                 lambda evt: self.pWiki.insertAttribute("bookmarked", "true"))
-        EVT_MENU(self, GUI_ID.CMD_SETASROOT_WIKIWORD,
+        wx.EVT_MENU(self, GUI_ID.CMD_SETASROOT_WIKIWORD,
                 lambda evt: self.pWiki.setCurrentWordAsRoot())
-        EVT_MENU(self, GUI_ID.CMD_APPEND_WIKIWORD,
+        wx.EVT_MENU(self, GUI_ID.CMD_APPEND_WIKIWORD,
                 self.OnAppendWikiWord)
-        EVT_MENU(self, GUI_ID.CMD_PREPEND_WIKIWORD,
+        wx.EVT_MENU(self, GUI_ID.CMD_PREPEND_WIKIWORD,
                 self.OnPrependWikiWord)
 
 
@@ -1145,7 +1146,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
                 self.GetRootItem())
-        self.Bind(EVT_IDLE, self.OnIdle)
+        self.Bind(wx.EVT_IDLE, self.OnIdle)
                 
 
 
@@ -1156,7 +1157,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
                 self.GetRootItem())
-        self.Bind(EVT_IDLE, self.OnIdle)
+        self.Bind(wx.EVT_IDLE, self.OnIdle)
         
         
 
@@ -1289,13 +1290,13 @@ class WikiTreeCtrl(wxTreeCtrl):
 
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
                 self.GetRootItem())
-        self.Bind(EVT_IDLE, self.OnIdle)
+        self.Bind(wx.EVT_IDLE, self.OnIdle)
 #         self.collapse()   # TODO?
 
 
     def onClosedCurrentWiki(self, miscevt):
         self.refreshGenerator = None
-        self.Unbind(EVT_IDLE)
+        self.Unbind(wx.EVT_IDLE)
 
     def OnInsertIconAttribute(self, evt):
         self.pWiki.insertAttribute("icon", self.cmdIdToIconName[evt.GetId()])
@@ -1307,7 +1308,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
     def OnAppendWikiWord(self, evt):
         dlg = OpenWikiWordDialog(self.pWiki, -1, title="Append Wiki Word")
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
             page = self.pWiki.getWikiDataManager().getWikiPageNoError(parentWord)
             page.appendLiveText("\n[%s]" % dlg.GetValue())
@@ -1316,7 +1317,7 @@ class WikiTreeCtrl(wxTreeCtrl):
 
     def OnPrependWikiWord(self, evt):
         dlg = OpenWikiWordDialog(self.pWiki, -1, title="Prepend Wiki Word")
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
             page = self.pWiki.getWikiDataManager().getWikiPageNoError(parentWord)
             text = page.getLiveText()
@@ -1464,23 +1465,19 @@ class WikiTreeCtrl(wxTreeCtrl):
             index = self.pWiki.lookupIconIndex(image)
             if index == -1:
                 index = self.pWiki.lookupIconIndex(u"page")
-            ## if icon:
-                ## self.SetItemImage(node, index, wxTreeItemIcon_Selected)
-                ## self.SetItemImage(node, index, wxTreeItemIcon_Expanded)
-                ## self.SetItemImage(node, index, wxTreeItemIcon_SelectedExpanded)
-            self.SetItemImage(node, index, wxTreeItemIcon_Normal)
+            self.SetItemImage(node, index, wx.TreeItemIcon_Normal)
         except:
             try:
-                self.SetItemImage(node, 0, wxTreeItemIcon_Normal)
+                self.SetItemImage(node, 0, wx.TreeItemIcon_Normal)
             except:
                 pass    
                 
                     
     def setNodeColor(self, node, color):
         if color == "null":
-            self.SetItemTextColour(node, wxNullColour)
+            self.SetItemTextColour(node, wx.NullColour)
         else:
-            self.SetItemTextColour(node, wxNamedColour(color))
+            self.SetItemTextColour(node, wx.NamedColour(color))
 
 
     def setNodePresentation(self, node, style):
@@ -1535,9 +1532,9 @@ class WikiTreeCtrl(wxTreeCtrl):
         itemobj = self.GetPyData(event.GetItem())
         if isinstance(itemobj, WikiWordNode):
             dataOb = textToDataObject(u"[" + itemobj.getWikiWord() + u"]")
-            dropsource = wxDropSource(self)
+            dropsource = wx.DropSource(self)
             dropsource.SetData(dataOb)
-            dropsource.DoDragDrop(wxDrag_AllowMove)
+            dropsource.DoDragDrop(wx.Drag_AllowMove)
 
 
 #     def OnLeftDown(self, event):
@@ -1566,7 +1563,7 @@ class WikiTreeCtrl(wxTreeCtrl):
             except StopIteration:
                 if self.refreshGenerator == gen:
                     self.refreshGenerator = None
-                    self.Unbind(EVT_IDLE)
+                    self.Unbind(wx.EVT_IDLE)
 
 
 

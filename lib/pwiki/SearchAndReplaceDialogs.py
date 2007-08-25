@@ -1,8 +1,9 @@
 import sys, traceback, re
 
-from wxPython.wx import *
-from wxPython.html import *
-import wxPython.xrc as xrc
+import wx, wx.html, wx.xrc
+# from wxPython.wx import *
+# from wxPython.html import *
+# import wxPython.xrc as xrc
 
 from MiscEvent import MiscEventSourceMixin, KeyFunctionSink
 from wxHelper import *
@@ -17,16 +18,16 @@ import PageAst
 from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation
 
 
-class SearchWikiOptionsDialog(wxDialog):
+class SearchWikiOptionsDialog(wx.Dialog):
     def __init__(self, parent, pWiki, ID=-1, title="Search Wiki",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER):
-        d = wxPreDialog()
+                 pos=wx.DefaultPosition, size=wx.DefaultSize,
+                 style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
+        d = wx.PreDialog()
         self.PostCreate(d)
 
         self.pWiki = pWiki
 
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, parent, "SearchWikiOptionsDialog")
 
         self.ctrls = XrcControls(self)
@@ -42,24 +43,27 @@ class SearchWikiOptionsDialog(wxDialog):
                 self.pWiki.configuration.getboolean("main",
                 "search_wiki_count_occurrences"))
 
-        self.ctrls.btnOk.SetId(wxID_OK)
-        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        self.ctrls.btnOk.SetId(wx.ID_OK)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
-        EVT_BUTTON(self, wxID_OK, self.OnOk)
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
 
 
     def OnOk(self, evt):
         # If a text field contains an invalid value, its background becomes red
         try:
-            self.ctrls.tfContextBefore.SetBackgroundColour(wxRED)
+            self.ctrls.tfContextBefore.SetBackgroundColour(wx.RED)
             before = int(self.ctrls.tfContextBefore.GetValue())
             if before < 0: raise Exception
-            self.ctrls.tfContextBefore.SetBackgroundColour(wxWHITE)
+            self.ctrls.tfContextBefore.SetBackgroundColour(wx.WHITE)
 
-            self.ctrls.tfContextAfter.SetBackgroundColour(wxRED)
+            self.ctrls.tfContextAfter.SetBackgroundColour(wx.RED)
             after = int(self.ctrls.tfContextAfter.GetValue())
             if after < 0: raise Exception
-            self.ctrls.tfContextAfter.SetBackgroundColour(wxWHITE)
+            self.ctrls.tfContextAfter.SetBackgroundColour(wx.WHITE)
 
             self.pWiki.configuration.set("main",
                 "search_wiki_context_before", before)
@@ -72,7 +76,7 @@ class SearchWikiOptionsDialog(wxDialog):
             self.Refresh()
             return
 
-        self.EndModal(wxID_OK)
+        self.EndModal(wx.ID_OK)
 
 
 
@@ -150,9 +154,9 @@ class _SearchResultItemInfo(object):
 
 
 
-class SearchResultListBox(wxHtmlListBox):
+class SearchResultListBox(wx.HtmlListBox):
     def __init__(self, parent, pWiki, ID):
-        wxHtmlListBox.__init__(self, parent, ID, style = wxSUNKEN_BORDER)
+        wx.HtmlListBox.__init__(self, parent, ID, style = wx.SUNKEN_BORDER)
         
         self.pWiki = pWiki
         self.searchWikiDialog = parent
@@ -162,10 +166,10 @@ class SearchResultListBox(wxHtmlListBox):
         self.SetItemCount(0)
         self.isShowingSearching = False  # Show only a visual feedback while searching
 
-        EVT_LEFT_DOWN(self, self.OnLeftDown)
-        EVT_LEFT_DCLICK(self, self.OnLeftDown)
-        EVT_KEY_DOWN(self, self.OnKeyDown)
-        EVT_LISTBOX_DCLICK(self, ID, self.OnDClick)
+        wx.EVT_LEFT_DOWN(self, self.OnLeftDown)
+        wx.EVT_LEFT_DCLICK(self, self.OnLeftDown)
+        wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+        wx.EVT_LISTBOX_DCLICK(self, ID, self.OnDClick)
 
     
     def OnGetItem(self, i):
@@ -342,7 +346,7 @@ class SearchResultListBox(wxHtmlListBox):
         pos = evt.GetPosition()
         hitsel = self.HitTest(pos)
         
-        if hitsel == wxNOT_FOUND:
+        if hitsel == wx.NOT_FOUND:
             evt.Skip()
             return
         
@@ -361,23 +365,23 @@ class SearchResultListBox(wxHtmlListBox):
         if matchesAccelPair("ContinueSearch", accP):
             # ContinueSearch is normally F3
             self._pageListFindNext()
-        elif accP == (wxACCEL_NORMAL, WXK_RETURN) or \
-                accP == (wxACCEL_NORMAL, WXK_NUMPAD_ENTER):
+        elif accP == (wx.ACCEL_NORMAL, wx.WXK_RETURN) or \
+                accP == (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER):
             self.OnDClick(evt)
         else:
             evt.Skip()
 
 
-class SearchWikiDialog(wxDialog):   # TODO
+class SearchWikiDialog(wx.Dialog):   # TODO
     def __init__(self, pWiki, ID, title="Search Wiki",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER):
-        d = wxPreDialog()
+                 pos=wx.DefaultPosition, size=wx.DefaultSize,
+                 style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
+        d = wx.PreDialog()
         self.PostCreate(d)
         
         self.pWiki = pWiki
 
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "SearchWikiDialog")
         lbox = SearchResultListBox(self, self.pWiki, GUI_ID.htmllbPages)
         res.AttachUnknownControl("htmllbPages", lbox, self)
@@ -391,7 +395,7 @@ class SearchWikiDialog(wxDialog):   # TODO
 #         
 #         self.Fit()
         
-        self.ctrls.btnClose.SetId(wxID_CANCEL)
+        self.ctrls.btnClose.SetId(wx.ID_CANCEL)
         
         self.listNeedsRefresh = True  # Reflects listbox content current
                                       # search criteria?
@@ -401,33 +405,36 @@ class SearchWikiDialog(wxDialog):   # TODO
         
         self.listPagesOperation = ListWikiPagesOperation()
         self._refreshSavedSearchesList()
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
-        EVT_BUTTON(self, GUI_ID.btnFindPages, self.OnSearchWiki)
-        EVT_BUTTON(self, GUI_ID.btnSetPageList, self.OnSetPageList)
-        EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)        
-        EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
-        EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
-        EVT_BUTTON(self, GUI_ID.btnSaveSearch, self.OnSaveSearch)
-        EVT_BUTTON(self, GUI_ID.btnDeleteSearches, self.OnDeleteSearches)
-        EVT_BUTTON(self, GUI_ID.btnLoadSearch, self.OnLoadSearch)
-        EVT_BUTTON(self, GUI_ID.btnLoadAndRunSearch, self.OnLoadAndRunSearch)
-        EVT_BUTTON(self, GUI_ID.btnOptions, self.OnOptions)
-        EVT_BUTTON(self, GUI_ID.btnCopyPageNamesToClipboard,
+        wx.EVT_BUTTON(self, GUI_ID.btnFindPages, self.OnSearchWiki)
+        wx.EVT_BUTTON(self, GUI_ID.btnSetPageList, self.OnSetPageList)
+        wx.EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)        
+        wx.EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
+        wx.EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
+        wx.EVT_BUTTON(self, GUI_ID.btnSaveSearch, self.OnSaveSearch)
+        wx.EVT_BUTTON(self, GUI_ID.btnDeleteSearches, self.OnDeleteSearches)
+        wx.EVT_BUTTON(self, GUI_ID.btnLoadSearch, self.OnLoadSearch)
+        wx.EVT_BUTTON(self, GUI_ID.btnLoadAndRunSearch, self.OnLoadAndRunSearch)
+        wx.EVT_BUTTON(self, GUI_ID.btnOptions, self.OnOptions)
+        wx.EVT_BUTTON(self, GUI_ID.btnCopyPageNamesToClipboard,
                 self.OnCopyPageNamesToClipboard)
         
-        EVT_CHAR(self.ctrls.txtSearch, self.OnCharToFind)
+        wx.EVT_CHAR(self.ctrls.txtSearch, self.OnCharToFind)
 #         EVT_CHAR(self.ctrls.rboxSearchType, self.OnCharToFind)
 #         EVT_CHAR(self.ctrls.cbCaseSensitive, self.OnCharToFind)
 #         EVT_CHAR(self.ctrls.cbWholeWord, self.OnCharToFind)
 
-        EVT_LISTBOX_DCLICK(self, GUI_ID.lbSavedSearches, self.OnLoadAndRunSearch)
-        EVT_RADIOBOX(self, GUI_ID.rboxSearchType, self.OnRadioBox)
-        EVT_BUTTON(self, wxID_CANCEL, self.OnClose)        
-        EVT_CLOSE(self, self.OnClose)
+        wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lbSavedSearches, self.OnLoadAndRunSearch)
+        wx.EVT_RADIOBOX(self, GUI_ID.rboxSearchType, self.OnRadioBox)
+        wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnClose)        
+        wx.EVT_CLOSE(self, self.OnClose)
         
-        EVT_TEXT(self, GUI_ID.txtSearch, self.OnListRefreshNeeded)
-        EVT_CHECKBOX(self, GUI_ID.cbCaseSensitive, self.OnListRefreshNeeded)
-        EVT_CHECKBOX(self, GUI_ID.cbWholeWord, self.OnListRefreshNeeded)
+        wx.EVT_TEXT(self, GUI_ID.txtSearch, self.OnListRefreshNeeded)
+        wx.EVT_CHECKBOX(self, GUI_ID.cbCaseSensitive, self.OnListRefreshNeeded)
+        wx.EVT_CHECKBOX(self, GUI_ID.cbWholeWord, self.OnListRefreshNeeded)
 
 
     def buildSearchReplaceOperation(self):
@@ -449,7 +456,7 @@ class SearchWikiDialog(wxDialog):   # TODO
 
     def _refreshPageList(self):
         self.ctrls.htmllbPages.showSearching()
-        self.SetCursor(wxHOURGLASS_CURSOR)
+        self.SetCursor(wx.HOURGLASS_CURSOR)
         self.Freeze()
         try:
             sarOp = self.buildSearchReplaceOperation()
@@ -468,7 +475,7 @@ class SearchWikiDialog(wxDialog):   # TODO
         
         finally:
             self.Thaw()
-            self.SetCursor(wxNullCursor)
+            self.SetCursor(wx.NullCursor)
 
 
     def OnSearchWiki(self, evt):
@@ -568,10 +575,10 @@ class SearchWikiDialog(wxDialog):   # TODO
 
 
     def OnReplaceAll(self, evt):
-        answer = wxMessageBox(u"Replace all occurrences?", u"Replace All",
-                wxYES_NO | wxNO_DEFAULT, self)
+        answer = wx.MessageBox(u"Replace all occurrences?", u"Replace All",
+                wx.YES_NO | wx.NO_DEFAULT, self)
         
-        if answer == wxNO:
+        if answer == wx.NO:
             return
 
         self._refreshPageList()
@@ -630,17 +637,17 @@ class SearchWikiDialog(wxDialog):   # TODO
         if len(sarOp.searchStr) > 0:
             title = sarOp.getTitle()
             while True:
-                title = guiToUni(wxGetTextFromUser("Title:",
+                title = guiToUni(wx.GetTextFromUser("Title:",
                         "Choose search title", title, self))
                 if title == u"":
                     return  # Cancel
                     
                 if title in self.pWiki.getWikiData().getSavedSearchTitles():
-                    answer = wxMessageBox(
+                    answer = wx.MessageBox(
                             u"Do you want to overwrite existing search '%s'?" %
                             title, u"Overwrite search",
-                            wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION, self)
-                    if answer == wxNO:
+                            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
+                    if answer == wx.NO:
                         continue
 
                 self.pWiki.getWikiData().saveSearch(title,
@@ -664,7 +671,7 @@ class SearchWikiDialog(wxDialog):   # TODO
 
     def OnOptions(self, evt):
         dlg = SearchWikiOptionsDialog(self, self.pWiki, -1)
-        dlg.CenterOnParent(wxBOTH)
+        dlg.CenterOnParent(wx.BOTH)
 
         dlg.ShowModal()
         dlg.Destroy()
@@ -690,11 +697,11 @@ class SearchWikiDialog(wxDialog):   # TODO
         if len(sels) == 0:
             return
             
-        answer = wxMessageBox(
+        answer = wx.MessageBox(
                 u"Do you want to delete %i search(es)?" % len(sels),
                 u"Delete search",
-                wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION, self)
-        if answer == wxNO:
+                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
+        if answer == wx.NO:
             return
 
         for s in sels:
@@ -754,36 +761,39 @@ class SearchWikiDialog(wxDialog):   # TODO
 #                 self.ctrls.lb.SetSelection(0)
 #         elif (evt.GetKeyCode() == WXK_UP):
 #             pass
-        if (evt.GetKeyCode() in (WXK_RETURN, WXK_NUMPAD_ENTER)):
+        if (evt.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER)):
             self.OnSearchWiki(evt)
         else:
             evt.Skip()
 
 
 
-class SearchPageDialog(wxDialog):   # TODO
+class SearchPageDialog(wx.Dialog):   # TODO
     def __init__(self, pWiki, ID, title="",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER):
-        d = wxPreDialog()
+                 pos=wx.DefaultPosition, size=wx.DefaultSize,
+                 style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
+        d = wx.PreDialog()
         self.PostCreate(d)
 
         self.pWiki = pWiki
 
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "SearchPageDialog")
 
         self.ctrls = XrcControls(self)
 
-        self.ctrls.btnClose.SetId(wxID_CANCEL)
+        self.ctrls.btnClose.SetId(wx.ID_CANCEL)
         
         self.firstFind = True
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
-        EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)        
-        EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
-        EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
-        EVT_BUTTON(self, wxID_CANCEL, self.OnClose)        
-        EVT_CLOSE(self, self.OnClose)
+        wx.EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)        
+        wx.EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
+        wx.EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
+        wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnClose)        
+        wx.EVT_CLOSE(self, self.OnClose)
 
 
     def OnClose(self, evt):
@@ -826,11 +836,11 @@ class SearchPageDialog(wxDialog):   # TODO
             # No matches found
             if contPos != 0:
                 # We started not at beginning, so ask if to wrap around
-                result = wxMessageBox(u"End of document reached. "
+                result = wx.MessageBox(u"End of document reached. "
                         u"Continue at beginning?",
                         u"Continue at beginning?",
-                        wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
-                if result == wxNO:
+                        wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
+                if result == wx.NO:
                     return
 
                 start, end = self.pWiki.getActiveEditor().executeSearch(
@@ -839,8 +849,8 @@ class SearchPageDialog(wxDialog):   # TODO
                     return
 
             # no more matches possible -> show dialog
-            wxMessageBox(u"No matches found.",
-                    u"No matches found", wxOK, self)
+            wx.MessageBox(u"No matches found.",
+                    u"No matches found", wx.OK, self)
 
 
 
@@ -879,11 +889,11 @@ class SearchPageDialog(wxDialog):   # TODO
 
 
 
-class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
+class WikiPageListConstructionDialog(wx.Dialog, MiscEventSourceMixin):   # TODO
     def __init__(self, parent, pWiki, ID, value=None, allowOrdering=True,
-            title="Page List", pos=wxDefaultPosition, size=wxDefaultSize,
-            style=wxNO_3D|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER):
-        d = wxPreDialog()
+            title="Page List", pos=wx.DefaultPosition, size=wx.DefaultSize,
+            style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
+        d = wx.PreDialog()
         self.PostCreate(d)
         MiscEventSourceMixin.__init__(self)
 
@@ -893,13 +903,13 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
         self.pageListData = []  # Wiki words in the left pagelist
         self.resultListData = []
 
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, parent, "WikiPageListConstructionDialog")
         
         self.ctrls = XrcControls(self)
         
-        self.ctrls.btnOk.SetId(wxID_OK)
-        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        self.ctrls.btnOk.SetId(wx.ID_OK)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         
         self.ctrls.tfPageListToAdd.SetValue(uniToGui(
                 self.pWiki.getCurrentWikiWord()))
@@ -927,37 +937,40 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
         if not allowOrdering:
             self.ctrls.chOrdering.SetSelection(self._ORDERNAME_TO_CHOICE["no"])
             self.ctrls.chOrdering.Enable(False)
+            
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
-        EVT_TEXT(self, GUI_ID.tfSubtreeLevels,
+        wx.EVT_TEXT(self, GUI_ID.tfSubtreeLevels,
                 lambda evt: self.ctrls.rbPagesInList.SetValue(True))
-        EVT_TEXT(self, GUI_ID.tfMatchRe,
+        wx.EVT_TEXT(self, GUI_ID.tfMatchRe,
                 lambda evt: self.ctrls.rbPagesMatchRe.SetValue(True))
         
-        EVT_BUTTON(self, wxID_CANCEL, self.OnClose)        
-        EVT_CLOSE(self, self.OnClose)
-        EVT_BUTTON(self, wxID_OK, self.OnOk)
+        wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnClose)        
+        wx.EVT_CLOSE(self, self.OnClose)
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
 
-        EVT_TEXT_ENTER(self, GUI_ID.tfPageListToAdd, self.OnPageListAdd)
-        EVT_BUTTON(self, GUI_ID.btnPageListUp, self.OnPageListUp) 
-        EVT_BUTTON(self, GUI_ID.btnPageListDown, self.OnPageListDown) 
-        EVT_BUTTON(self, GUI_ID.btnPageListSort, self.OnPageListSort) 
+        wx.EVT_TEXT_ENTER(self, GUI_ID.tfPageListToAdd, self.OnPageListAdd)
+        wx.EVT_BUTTON(self, GUI_ID.btnPageListUp, self.OnPageListUp) 
+        wx.EVT_BUTTON(self, GUI_ID.btnPageListDown, self.OnPageListDown) 
+        wx.EVT_BUTTON(self, GUI_ID.btnPageListSort, self.OnPageListSort) 
 
-        EVT_BUTTON(self, GUI_ID.btnPageListAdd, self.OnPageListAdd) 
-        EVT_BUTTON(self, GUI_ID.btnPageListDelete, self.OnPageListDelete) 
-        EVT_BUTTON(self, GUI_ID.btnPageListClearList, self.OnPageListClearList) 
+        wx.EVT_BUTTON(self, GUI_ID.btnPageListAdd, self.OnPageListAdd) 
+        wx.EVT_BUTTON(self, GUI_ID.btnPageListDelete, self.OnPageListDelete) 
+        wx.EVT_BUTTON(self, GUI_ID.btnPageListClearList, self.OnPageListClearList) 
 
-        EVT_BUTTON(self, GUI_ID.btnPageListCopyToClipboard,
+        wx.EVT_BUTTON(self, GUI_ID.btnPageListCopyToClipboard,
                 self.OnPageListCopyToClipboard) 
 
-        EVT_BUTTON(self, GUI_ID.btnPageListAddFromClipboard,
+        wx.EVT_BUTTON(self, GUI_ID.btnPageListAddFromClipboard,
                 self.OnPageListAddFromClipboard) 
-        EVT_BUTTON(self, GUI_ID.btnPageListOverwriteFromClipboard,
+        wx.EVT_BUTTON(self, GUI_ID.btnPageListOverwriteFromClipboard,
                 self.OnPageListOverwriteFromClipboard) 
-        EVT_BUTTON(self, GUI_ID.btnPageListIntersectWithClipboard,
+        wx.EVT_BUTTON(self, GUI_ID.btnPageListIntersectWithClipboard,
                 self.OnPageListIntersectWithClipboard) 
 
-        EVT_BUTTON(self, GUI_ID.btnResultListPreview, self.OnResultListPreview) 
-        EVT_BUTTON(self, GUI_ID.btnResultCopyToClipboard,
+        wx.EVT_BUTTON(self, GUI_ID.btnResultListPreview, self.OnResultListPreview) 
+        wx.EVT_BUTTON(self, GUI_ID.btnResultCopyToClipboard,
                 self.OnResultCopyToClipboard) 
 
 
@@ -1004,9 +1017,9 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
             try:
                 re.compile(pattern, re.DOTALL | re.UNICODE | re.MULTILINE)
             except re.error, e:
-                wxMessageBox("Bad regular expression '%s':\n%s" %
+                wx.MessageBox("Bad regular expression '%s':\n%s" %
                         (pattern, unicode(e)), u"Regular expression error",
-                        wxOK, self)
+                        wx.OK, self)
                 return None
             item = Sar.RegexWikiPageNode(lpOp, pattern)
         elif self.ctrls.rbPagesInList.GetValue():
@@ -1036,25 +1049,25 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
             
         self.value = val 
         if self.IsModal():
-            self.EndModal(wxID_OK)
+            self.EndModal(wx.ID_OK)
         else:
             self.Destroy()
-            self.fireMiscEventProps({"nonmodal closed": wxID_OK,
+            self.fireMiscEventProps({"nonmodal closed": wx.ID_OK,
                     "listWikiPagesOp": self.value})
 
     def OnClose(self, evt):
         self.value = None
         if self.IsModal():
-            self.EndModal(wxID_CANCEL)
+            self.EndModal(wx.ID_CANCEL)
         else:
             self.Destroy()
-            self.fireMiscEventProps({"nonmodal closed": wxID_CANCEL,
+            self.fireMiscEventProps({"nonmodal closed": wx.ID_CANCEL,
                     "listWikiPagesOp": None})
 
 
     def OnPageListUp(self, evt):
         sel = self.ctrls.lbPageList.GetSelection()
-        if sel == wxNOT_FOUND or sel == 0:
+        if sel == wx.NOT_FOUND or sel == 0:
             return
             
         dispWord = self.ctrls.lbPageList.GetString(sel)
@@ -1070,7 +1083,7 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
         
     def OnPageListDown(self, evt):
         sel = self.ctrls.lbPageList.GetSelection()
-        if sel == wxNOT_FOUND or sel == len(self.pageListData) - 1:
+        if sel == wx.NOT_FOUND or sel == len(self.pageListData) - 1:
             return
 
         dispWord = self.ctrls.lbPageList.GetString(sel)
@@ -1105,7 +1118,7 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
             return  # Already in list
 
         sel = self.ctrls.lbPageList.GetSelection()
-        if sel == wxNOT_FOUND:
+        if sel == wx.NOT_FOUND:
             self.ctrls.lbPageList.Append(uniToGui(word))
             self.pageListData.append(word)
             self.ctrls.lbPageList.SetSelection(len(self.pageListData) - 1)
@@ -1121,7 +1134,7 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
         self.ctrls.rbPagesInList.SetValue(True)
 
         sel = self.ctrls.lbPageList.GetSelection()
-        if sel == wxNOT_FOUND:
+        if sel == wx.NOT_FOUND:
             return
 
         self.ctrls.lbPageList.Delete(sel)
@@ -1232,7 +1245,7 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
         if lpOp is None:
             return
 
-        self.SetCursor(wxHOURGLASS_CURSOR)
+        self.SetCursor(wx.HOURGLASS_CURSOR)
         self.Freeze()
         try:
             words = self.pWiki.getWikiDocument().searchWiki(lpOp)
@@ -1245,27 +1258,27 @@ class WikiPageListConstructionDialog(wxDialog, MiscEventSourceMixin):   # TODO
             self.resultListData = words
         finally:
             self.Thaw()
-            self.SetCursor(wxNullCursor)
+            self.SetCursor(wx.NullCursor)
 
 
-class FastSearchPopup(wxFrame):
+class FastSearchPopup(wx.Frame):
     """
     Popup window which appears when hitting Enter in the fast search text field
     in the main window.
-    Using frame because wxPopupWindow is not available on Mac OS
+    Using frame because wx.PopupWindow is not available on Mac OS
     """
-    def __init__(self, parent, mainControl, ID, pos=wxDefaultPosition):
-        wxFrame.__init__(self, parent, ID, "fast search", pos=pos,
-                style=wxRESIZE_BORDER | wxFRAME_FLOAT_ON_PARENT |
-                wxFRAME_NO_TASKBAR)
+    def __init__(self, parent, mainControl, ID, pos=wx.DefaultPosition):
+        wx.Frame.__init__(self, parent, ID, "fast search", pos=pos,
+                style=wx.RESIZE_BORDER | wx.FRAME_FLOAT_ON_PARENT |
+                wx.FRAME_NO_TASKBAR)
 
         self.mainControl = mainControl
         self.searchText = None
         
         self.resultBox = SearchResultListBox(self, self.mainControl, -1)
         
-        sizer = wxBoxSizer(wxVERTICAL)
-        sizer.Add(self.resultBox, 1, wxEXPAND)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.resultBox, 1, wx.EXPAND)
 
         self.SetSizer(sizer)
         
@@ -1275,9 +1288,12 @@ class FastSearchPopup(wxFrame):
 
         setWindowSize(self, (width, height))
         setWindowPos(self, fullVisible=True)
+        
+        # Fixes focus bug under Linux
+        self.resultBox.SetFocus()
 
-        EVT_KILL_FOCUS(self.resultBox, self.OnKillFocus)
-        EVT_CLOSE(self, self.OnClose)
+        wx.EVT_KILL_FOCUS(self.resultBox, self.OnKillFocus)
+        wx.EVT_CLOSE(self, self.OnClose)
 
 
     def OnKillFocus(self, evt):
@@ -1316,7 +1332,7 @@ class FastSearchPopup(wxFrame):
 
     def _refreshPageList(self):
         self.resultBox.showSearching()
-        self.SetCursor(wxHOURGLASS_CURSOR)
+        self.SetCursor(wx.HOURGLASS_CURSOR)
         self.Freeze()
         try:
             sarOp = self.buildSearchReplaceOperation()
@@ -1335,4 +1351,4 @@ class FastSearchPopup(wxFrame):
 
         finally:
             self.Thaw()
-            self.SetCursor(wxNullCursor)
+            self.SetCursor(wx.NullCursor)

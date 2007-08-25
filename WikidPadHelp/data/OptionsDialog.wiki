@@ -99,7 +99,7 @@ Controls where to place the main tree (to the left, right, top or bottom)
 *Position view tree*
 You can also have a second tree which has the "Views" node as root. You can place it relative to the main tree (above, below, left or right) or choose "hidden" if you don't want it. 
 
-*KNOWN BUG*: After changing the position of main or view tree, the trees do not react on clicks properly any longer. Restart WikidPad.
+*KNOWN BUG*: After changing the position of main or view tree, the trees do not react on clicks properly any longer. Restart WikidPad. See RestartWikidPad for details.
 
 
 

@@ -1,6 +1,7 @@
 import sets
 
-from  wxPython.wx import *
+import wx
+# from  wxPython.wx import *
 
 from StringOps import escapeForIni, unescapeForIni
 
@@ -17,8 +18,8 @@ def getOverallDisplaysSize():
     width = 0
     height = 0
 
-    for i in xrange(wxDisplay.GetCount()):
-        d = wxDisplay(i)
+    for i in xrange(wx.Display.GetCount()):
+        d = wx.Display(i)
         
         rect = d.GetGeometry()
         width = max(width, rect.x + rect.width)
@@ -29,7 +30,7 @@ def getOverallDisplaysSize():
 
 def setWindowPos(win, pos=None, fullVisible=False):
     """
-    Set position of a wxWindow, but ensure that the position is valid.
+    Set position of a wx.Window, but ensure that the position is valid.
     If fullVisible is True, the window is moved to be full visible
     according to its current size. It is recommended to call
     setWindowSize first.
@@ -67,7 +68,7 @@ def setWindowPos(win, pos=None, fullVisible=False):
 
 def setWindowSize(win, size):
     """
-    Set size of a wxWindow, but ensure that the size is valid
+    Set size of a wx.Window, but ensure that the size is valid
     """
     sizeX, sizeY = size
 
@@ -80,17 +81,17 @@ def setWindowSize(win, size):
     if sizeX > screenX:
         sizeX = screenX-20
     if sizeY > screenY:
-        currentY = screenY-20
+        sizeY = screenY-20
 
     # set the size
     win.SetSize((sizeX, sizeY))
 
 
-class SmartSashLayoutWindow(wxSashLayoutWindow):
+class SmartSashLayoutWindow(wx.SashLayoutWindow):
     def __init__(self, *args, **kwargs):
-        from wxPython.wx import EVT_SASH_DRAGGED
+#         from wxPython.wx import EVT_SASH_DRAGGED
 
-        wxSashLayoutWindow.__init__(self, *args, **kwargs)
+        wx.SashLayoutWindow.__init__(self, *args, **kwargs)
         
         self.effectiveSashPos = 0
         self.minimalEffectiveSashPos = 0
@@ -100,7 +101,7 @@ class SmartSashLayoutWindow(wxSashLayoutWindow):
         self.SetMinimumSizeX(1)
         self.SetMinimumSizeY(1)
 
-        EVT_SASH_DRAGGED(self, self.GetId(), self.OnSashDragged)
+        wx.EVT_SASH_DRAGGED(self, self.GetId(), self.OnSashDragged)
 
 
     def setInnerAutoLayout(self, centerWindow):
@@ -108,36 +109,36 @@ class SmartSashLayoutWindow(wxSashLayoutWindow):
             return
 
         self.centerWindow = centerWindow
-        EVT_SIZE(self, self.OnSize)
+        wx.EVT_SIZE(self, self.OnSize)
 
 
     def align(self, al):
-        from wxPython.wx import wxLAYOUT_TOP, wxLAYOUT_BOTTOM, wxLAYOUT_LEFT, \
-                wxLAYOUT_RIGHT, wxLAYOUT_HORIZONTAL, wxLAYOUT_VERTICAL, \
-                wxSASH_TOP, wxSASH_BOTTOM, wxSASH_LEFT, wxSASH_RIGHT
+#         from wxPython.wx import wxLAYOUT_TOP, wxLAYOUT_BOTTOM, wxLAYOUT_LEFT, \
+#                 wxLAYOUT_RIGHT, wxLAYOUT_HORIZONTAL, wxLAYOUT_VERTICAL, \
+#                 wxSASH_TOP, wxSASH_BOTTOM, wxSASH_LEFT, wxSASH_RIGHT
         
-        if al == wxLAYOUT_TOP:
-            self.SetOrientation(wxLAYOUT_HORIZONTAL)
-            self.SetAlignment(wxLAYOUT_TOP)
-            self.SetSashVisible(wxSASH_BOTTOM, True)
-        elif al == wxLAYOUT_BOTTOM:
-            self.SetOrientation(wxLAYOUT_HORIZONTAL)
-            self.SetAlignment(wxLAYOUT_BOTTOM)
-            self.SetSashVisible(wxSASH_TOP, True)
-        elif al == wxLAYOUT_LEFT:
-            self.SetOrientation(wxLAYOUT_VERTICAL)
-            self.SetAlignment(wxLAYOUT_LEFT)
-            self.SetSashVisible(wxSASH_RIGHT, True)
-        elif al == wxLAYOUT_RIGHT:
-            self.SetOrientation(wxLAYOUT_VERTICAL)
-            self.SetAlignment(wxLAYOUT_RIGHT)
-            self.SetSashVisible(wxSASH_LEFT, True)
+        if al == wx.LAYOUT_TOP:
+            self.SetOrientation(wx.LAYOUT_HORIZONTAL)
+            self.SetAlignment(wx.LAYOUT_TOP)
+            self.SetSashVisible(wx.SASH_BOTTOM, True)
+        elif al == wx.LAYOUT_BOTTOM:
+            self.SetOrientation(wx.LAYOUT_HORIZONTAL)
+            self.SetAlignment(wx.LAYOUT_BOTTOM)
+            self.SetSashVisible(wx.SASH_TOP, True)
+        elif al == wx.LAYOUT_LEFT:
+            self.SetOrientation(wx.LAYOUT_VERTICAL)
+            self.SetAlignment(wx.LAYOUT_LEFT)
+            self.SetSashVisible(wx.SASH_RIGHT, True)
+        elif al == wx.LAYOUT_RIGHT:
+            self.SetOrientation(wx.LAYOUT_VERTICAL)
+            self.SetAlignment(wx.LAYOUT_RIGHT)
+            self.SetSashVisible(wx.SASH_LEFT, True)
 
 
     def setSashPosition(self, pos):
-        from wxPython.wx import wxSizeEvent, wxLAYOUT_VERTICAL
+#         from wxPython.wx import wxSizeEvent, wxLAYOUT_VERTICAL
 
-        if self.GetOrientation() == wxLAYOUT_VERTICAL:
+        if self.GetOrientation() == wx.LAYOUT_VERTICAL:
             self.SetDefaultSize((pos, 1000))
         else:
             self.SetDefaultSize((1000, pos))
@@ -147,7 +148,7 @@ class SmartSashLayoutWindow(wxSashLayoutWindow):
             self.effectiveSashPos = pos
             
         parent = self.GetParent()
-        sevent = wxSizeEvent(parent.GetSize())
+        sevent = wx.SizeEvent(parent.GetSize())
         parent.ProcessEvent(sevent)
 
     def getSashPosition(self):
@@ -181,11 +182,11 @@ class SmartSashLayoutWindow(wxSashLayoutWindow):
 
 
     def OnSashDragged(self, evt):
-        from wxPython.wx import wxLAYOUT_VERTICAL
+#         from wxPython.wx import wxLAYOUT_VERTICAL
 
         # print "OnSashDragged", repr((evt.GetDragRect().width, evt.GetDragRect().height))
 
-        if self.GetOrientation() == wxLAYOUT_VERTICAL:
+        if self.GetOrientation() == wx.LAYOUT_VERTICAL:
             self.setSashPosition(evt.GetDragRect().width)
         else:
             self.setSashPosition(evt.GetDragRect().height)
@@ -197,7 +198,7 @@ class SmartSashLayoutWindow(wxSashLayoutWindow):
         if self.centerWindow is None:
             return
             
-        wxLayoutAlgorithm().LayoutWindow(self, self.centerWindow)
+        wx.LayoutAlgorithm().LayoutWindow(self, self.centerWindow)
 
 
 class WindowLayouter:
@@ -206,10 +207,10 @@ class WindowLayouter:
     """
     
     _RELATION_TO_ALIGNMENT = {
-            "above": wxLAYOUT_TOP,
-            "below": wxLAYOUT_BOTTOM,
-            "left": wxLAYOUT_LEFT,
-            "right": wxLAYOUT_RIGHT
+            "above": wx.LAYOUT_TOP,
+            "below": wx.LAYOUT_BOTTOM,
+            "left": wx.LAYOUT_LEFT,
+            "right": wx.LAYOUT_RIGHT
     }
 
     def __init__(self, mainWindow, createWindowFunc):
@@ -218,7 +219,7 @@ class WindowLayouter:
             should be layouted
         createWindowFunc -- a function taking a dictionary of properties
             (especially with a "name" property describing the name/type
-            of window) and a parent wxWindow object to create a new window
+            of window) and a parent wx.Window object to create a new window
             of requested type with requested properties
         """
         self.mainWindow = mainWindow
@@ -234,13 +235,13 @@ class WindowLayouter:
                 # direct children of the mainWindow. Destroying the windows
                 # in this list resets the mainWindow for a new layout
                 
-        self.winNameToObject = {}  # Map from window name to wxWindow object
+        self.winNameToObject = {}  # Map from window name to wx.Window object
         self.winNameToSashWindow = {}  # Map from window name to enclosing
                 # sash window object
         self.winNameToWinProps = {}
 
 #         self.toRelayout = Set()  # Set of window objects for which the
-#                 # wxLayoutAlgorithm.LayoutWindow() must be called
+#                 # wx.LayoutAlgorithm.LayoutWindow() must be called
 
 
     def realize(self):
@@ -265,7 +266,7 @@ class WindowLayouter:
                 enclWin = self.winNameToSashWindow[relTo]
                 
             sashWin = SmartSashLayoutWindow(enclWin, -1,
-                wxDefaultPosition, (30, 30), wxSW_3DSASH)
+                wx.DefaultPosition, (30, 30), wx.SW_3DSASH)
             objWin = self.createWindowFunc(pr, sashWin)
             
             if objWin is None:
@@ -371,7 +372,7 @@ class WindowLayouter:
         if len(self.windowPropsList) == 0:
             return
 
-        wxLayoutAlgorithm().LayoutWindow(self.mainWindow,
+        wx.LayoutAlgorithm().LayoutWindow(self.mainWindow,
                 self.winNameToObject[self.windowPropsList[0]["name"]])
 
 

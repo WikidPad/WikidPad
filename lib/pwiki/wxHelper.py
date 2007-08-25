@@ -1,9 +1,10 @@
 import os, os.path, traceback, sys
 
-from   wxPython.wx import wxNewId, wxSystemSettings_GetMetric, wxSYS_SCREEN_X, \
-        wxSYS_SCREEN_Y, wxSplitterWindow, wxSashLayoutWindow, \
-        EVT_WINDOW_DESTROY, wxEvtHandler, wxBitmap, wxBITMAP_TYPE_GIF, \
-        wxNullBitmap, wxImageList
+import wx
+# from   wxPython.wx import wxNewId, wxSystemSettings_GetMetric, wxSYS_SCREEN_X, \
+#         wxSYS_SCREEN_Y, wxSplitterWindow, wxSashLayoutWindow, \
+#         EVT_WINDOW_DESTROY, wxEvtHandler, wxBitmap, wxBITMAP_TYPE_GIF, \
+#         wxNullBitmap, wxImageList
 
 from wx.xrc import XRCCTRL, XRCID
 
@@ -28,7 +29,7 @@ class wxIdPool:
             try:
                 return self.poolmap[name]
             except KeyError:
-                id=wxNewId()
+                id=wx.NewId()
                 self.poolmap[name]=id
                 return id
 
@@ -54,7 +55,7 @@ class XrcControls:
 # DEPRECATED: Use same function in WindowLayout.py
 def setWindowPos(win, pos=None, fullVisible=False):
     """
-    Set position of a wxWindow, but ensure that the position is valid.
+    Set position of a wx.Window, but ensure that the position is valid.
     If fullVisible is True, the window is moved to be full visible
     according to its current size. It is recommended to call
     setWindowSize first.
@@ -64,8 +65,8 @@ def setWindowPos(win, pos=None, fullVisible=False):
     else:
         currentX, currentY = win.GetPositionTuple()
         
-    screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
-    screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
+    screenX = wx.SystemSettings_GetMetric(wx.SYS_SCREEN_X)
+    screenY = wx.SystemSettings_GetMetric(wx.SYS_SCREEN_Y)
     
     # fix any crazy screen positions
     if currentX < 0:
@@ -90,11 +91,11 @@ def setWindowPos(win, pos=None, fullVisible=False):
 # DEPRECATED: Use same function in WindowLayout.py
 def setWindowSize(win, size):
     """
-    Set size of a wxWindow, but ensure that the size is valid
+    Set size of a wx.Window, but ensure that the size is valid
     """
     sizeX, sizeY = size
-    screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
-    screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
+    screenX = wx.SystemSettings_GetMetric(wx.SYS_SCREEN_X)
+    screenY = wx.SystemSettings_GetMetric(wx.SYS_SCREEN_Y)
 
     # don't let the window be > than the size of the screen
     if sizeX > screenX:
@@ -110,17 +111,17 @@ def getTextFromClipboard():
     """
     Retrieve text or unicode text from clipboard
     """
-    from wxPython.wx import wxTheClipboard, wxDataObjectComposite, wxDataFormat, \
-            wxCustomDataObject, wxDF_TEXT, wxDF_UNICODETEXT
+#     from wxPython.wx import wxTheClipboard, wxDataObjectComposite, wxDataFormat, \
+#             wxCustomDataObject, wxDF_TEXT, wxDF_UNICODETEXT
     from StringOps import lineendToInternal, mbcsDec
     import array
 
-    cb = wxTheClipboard
+    cb = wx.TheClipboard
     cb.Open()
     try:
-        dataob = wxDataObjectComposite()
-        cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
-        udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
+        dataob = wx.DataObjectComposite()
+        cdataob = wx.CustomDataObject(wx.DataFormat(wx.DF_TEXT))
+        udataob = wx.CustomDataObject(wx.DataFormat(wx.DF_UNICODETEXT))
         cdataob.SetData("")
         udataob.SetData("")
         dataob.Add(udataob)
@@ -149,7 +150,6 @@ def getTextFromClipboard():
 def textToDataObject(text):
 #     from wxPython.wx import wxDataObjectComposite, wxDataFormat, \
 #             wxCustomDataObject, wxDF_TEXT, wxDF_UNICODETEXT
-    import wx
     from StringOps import lineendToOs, mbcsEnc, utf8Enc
     import array
     
@@ -171,7 +171,7 @@ def textToDataObject(text):
 
 
 def copyTextToClipboard(text): 
-    from wxPython.wx import wxTheClipboard
+#     from wxPython.wx import wxTheClipboard
 #     from StringOps import lineendToOs, mbcsEnc
 #     import array
 # 
@@ -191,7 +191,7 @@ def copyTextToClipboard(text):
 
     dataob = textToDataObject(text)
 
-    cb = wxTheClipboard
+    cb = wx.TheClipboard
     cb.Open()
     try:
         cb.SetData(dataob)
@@ -200,8 +200,8 @@ def copyTextToClipboard(text):
 
 
 def getAccelPairFromKeyDown(evt):
-    from wxPython.wx import wxACCEL_ALT, wxACCEL_SHIFT, wxACCEL_CTRL, \
-            wxACCEL_NORMAL
+#     from wxPython.wx import wxACCEL_ALT, wxACCEL_SHIFT, wxACCEL_CTRL, \
+#             wxACCEL_NORMAL
     """
     evt -- wx KeyEvent received from a key down event
     return: tuple (modifier, keycode) suitable e.g. as AcceleratorEntry
@@ -209,21 +209,21 @@ def getAccelPairFromKeyDown(evt):
     """
     keyCode = evt.GetKeyCode()
     
-    modif = wxACCEL_NORMAL
+    modif = wx.ACCEL_NORMAL
 
     if evt.ShiftDown():
-        modif |= wxACCEL_SHIFT
+        modif |= wx.ACCEL_SHIFT
     if evt.ControlDown():
-        modif |= wxACCEL_CTRL
+        modif |= wx.ACCEL_CTRL
     if evt.AltDown():
-        modif |= wxACCEL_ALT
+        modif |= wx.ACCEL_ALT
     
     return (modif, keyCode)
 
 
 def getAccelPairFromString(s):
-    from   wxPython.wx import wxGetAccelFromString
-    ae = wxGetAccelFromString(s)
+#     from   wxPython.wx import wxGetAccelFromString
+    ae = wx.GetAccelFromString(s)
     if ae is None:
         return (None, None)
 
@@ -233,13 +233,13 @@ def getAccelPairFromString(s):
 
 def cloneImageList(imgList):
     """
-    Create a copy of an wxImageList
+    Create a copy of an wx.ImageList
     """
-    from wxPython.wx import wxImageList
+#     from wxPython.wx import wxImageList
 
     sz = imgList.GetSize(0)
     lng = imgList.GetImageCount()
-    result = wxImageList(sz[0], sz[1], True, lng)
+    result = wx.ImageList(sz[0], sz[1], True, lng)
 
     for i in xrange(lng):
         result.AddIcon(imgList.GetIcon(i))
@@ -247,17 +247,17 @@ def cloneImageList(imgList):
     return result
 
 
-class wxKeyFunctionSink(wxEvtHandler, KeyFunctionSink):
+class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):
     """
     A MiscEvent sink which dispatches events further to other functions.
-    If the wxWindow ifdestroyed receives a destroy message, the sink
+    If the wx.Window ifdestroyed receives a destroy message, the sink
     automatically disconnects from evtSource.
     """
     __slots__ = ("evtSource", "ifdestroyed")
 
 
     def __init__(self, evtSource, ifdestroyed, activationTable):
-        wxEvtHandler.__init__(self)
+        wx.EvtHandler.__init__(self)
         KeyFunctionSink.__init__(self, activationTable)
 
         self.evtSource = evtSource
@@ -267,7 +267,7 @@ class wxKeyFunctionSink(wxEvtHandler, KeyFunctionSink):
             self.evtSource.addListener(self, False)
         
         if self.ifdestroyed is not None:
-            EVT_WINDOW_DESTROY(self.ifdestroyed, self.OnDestroy)
+            wx.EVT_WINDOW_DESTROY(self.ifdestroyed, self.OnDestroy)
 
 
     def OnDestroy(self, evt):
@@ -318,15 +318,15 @@ class IconCache:
         """
 
         # create the image icon list
-        self.iconImageList = wxImageList(16, 16)
+        self.iconImageList = wx.ImageList(16, 16)
         self.iconLookupCache = {}
 
         for icon in self.iconFileList:
 #             iconFile = os.path.join(self.wikiAppDir, "icons", icon)
             iconFile = os.path.join(self.iconDir, icon)
-            bitmap = wxBitmap(iconFile, wxBITMAP_TYPE_GIF)
+            bitmap = wx.Bitmap(iconFile, wx.BITMAP_TYPE_GIF)
             try:
-                id = self.iconImageList.Add(bitmap, wxNullBitmap)
+                id = self.iconImageList.Add(bitmap, wx.NullBitmap)
 
                 if self.lowResources:   # and not icon.startswith("tb_"):
                     bitmap = None
@@ -364,7 +364,7 @@ class IconCache:
                 
             # Bitmap not yet available -> create it and store in the cache
             iconFile = os.path.join(self.iconDir, iconname+".gif")
-            bitmap = wxBitmap(iconFile, wxBITMAP_TYPE_GIF)
+            bitmap = wx.Bitmap(iconFile, wx.BITMAP_TYPE_GIF)
             
             self.iconLookupCache[iconname] = (self.iconLookupCache[iconname][0],
                     bitmap)
@@ -388,11 +388,11 @@ class IconCache:
     def resolveIconDescriptor(self, desc, default=None):
         """
         Used for plugins of type "MenuFunctions" or "ToolbarFunctions".
-        Tries to find and return an appropriate wxBitmap object.
+        Tries to find and return an appropriate wx.Bitmap object.
         
         An icon descriptor can be one of the following:
             - None
-            - a wxBitmap object
+            - a wx.Bitmap object
             - the filename of a bitmap
             - a tuple of filenames, first existing file is used
         
@@ -400,7 +400,7 @@ class IconCache:
         """
         if desc is None:
             return default            
-        elif isinstance(desc, wxBitmap):
+        elif isinstance(desc, wx.Bitmap):
             return desc
         elif isinstance(desc, basestring):
             result = self.lookupIcon(desc)

@@ -4,10 +4,10 @@ import re
 
 from os.path import exists, isdir, isfile
 
-import wx
-from wxPython.wx import *
-from wxPython.html import *
-import wxPython.xrc as xrc
+import wx, wx.html, wx.xrc
+# from wxPython.wx import *
+# from wxPython.html import *
+# import wxPython.xrc as xrc
 
 from wxHelper import *
 
@@ -23,36 +23,40 @@ from SearchAndReplaceDialogs import WikiPageListConstructionDialog
 from SearchAndReplace import ListWikiPagesOperation
 
 
-class OpenWikiWordDialog(wxDialog):
-    def __init__(self, pWiki, ID, title="Open Wiki Word",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D):
 
-        d = wxPreDialog()
+class OpenWikiWordDialog(wx.Dialog):
+    def __init__(self, pWiki, ID, title="Open Wiki Word",
+                 pos=wx.DefaultPosition, size=wx.DefaultSize,
+                 style=wx.NO_3D):
+
+        d = wx.PreDialog()
         self.PostCreate(d)
         
         self.pWiki = pWiki
         self.value = None     
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "OpenWikiWordDialog")
 
         self.SetTitle(title)
 
         self.ctrls = XrcControls(self)
 
-        self.ctrls.btnOk.SetId(wxID_OK)
-        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        self.ctrls.btnOk.SetId(wx.ID_OK)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
-        EVT_BUTTON(self, wxID_OK, self.OnOk)
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
         # EVT_TEXT(self, XRCID("text"), self.OnText) 
 
-        EVT_TEXT(self, ID, self.OnText)
-        EVT_CHAR(self.ctrls.text, self.OnCharText)
-        EVT_CHAR(self.ctrls.lb, self.OnCharListBox)
-        EVT_LISTBOX(self, ID, self.OnListBox)
-        EVT_LISTBOX_DCLICK(self, XRCID("lb"), self.OnOk)
-        EVT_BUTTON(self, wxID_OK, self.OnOk)
-        EVT_BUTTON(self, XRCID("btnCreate"), self.OnCreate)
+        wx.EVT_TEXT(self, ID, self.OnText)
+        wx.EVT_CHAR(self.ctrls.text, self.OnCharText)
+        wx.EVT_CHAR(self.ctrls.lb, self.OnCharListBox)
+        wx.EVT_LISTBOX(self, ID, self.OnListBox)
+        wx.EVT_LISTBOX_DCLICK(self, XRCID("lb"), self.OnOk)
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        wx.EVT_BUTTON(self, XRCID("btnCreate"), self.OnCreate)
         
     def OnOk(self, evt):
         if not self.pWiki.getWikiData().isDefinedWikiWord(self.value):
@@ -72,18 +76,18 @@ class OpenWikiWordDialog(wxDialog):
                     return
 
                 # wikiWord is valid but nonexisting, so maybe create it?
-                result = wxMessageBox(
+                result = wx.MessageBox(
                         uniToGui(u"'%s' is not an existing wikiword. Create?" %
                         wikiWord), uniToGui(u"Create"),
-                        wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, self)
+                        wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 
-                if result == wxNO:
+                if result == wx.NO:
                     self.ctrls.text.SetFocus()
                     return
                 
                 self.value = wikiWord
                                 
-        self.EndModal(wxID_OK)
+        self.EndModal(wx.ID_OK)
         
                 
     def GetValue(self):
@@ -104,17 +108,17 @@ class OpenWikiWordDialog(wxDialog):
         self.value = guiToUni(evt.GetString())
 
     def OnCharText(self, evt):
-        if (evt.GetKeyCode() == WXK_DOWN) and not self.ctrls.lb.IsEmpty():
+        if (evt.GetKeyCode() == wx.WXK_DOWN) and not self.ctrls.lb.IsEmpty():
             self.ctrls.lb.SetFocus()
             self.ctrls.lb.SetSelection(0)
-        elif (evt.GetKeyCode() == WXK_UP):
+        elif (evt.GetKeyCode() == wx.WXK_UP):
             pass
         else:
             evt.Skip()
             
 
     def OnCharListBox(self, evt):
-        if (evt.GetKeyCode() == WXK_UP) and (self.ctrls.lb.GetSelection() == 0):
+        if (evt.GetKeyCode() == wx.WXK_UP) and (self.ctrls.lb.GetSelection() == 0):
             self.ctrls.text.SetFocus()
             self.ctrls.lb.Deselect(0)
         else:
@@ -137,15 +141,15 @@ class OpenWikiWordDialog(wxDialog):
             return
             
         self.value = nakedWord
-        self.EndModal(wxID_OK)
+        self.EndModal(wx.ID_OK)
  
  
 
-class IconSelectDialog(wxDialog):
+class IconSelectDialog(wx.Dialog):
     def __init__(self, parent, ID, iconCache, title="Select Icon",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D|wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER):
-        wxDialog.__init__(self, parent, ID, title, pos, size, style)
+                 pos=wx.DefaultPosition, size=wx.DefaultSize,
+                 style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
+        wx.Dialog.__init__(self, parent, ID, title, pos, size, style)
 
         self.iconCache = iconCache
         self.iconImageList = self.iconCache.iconImageList
@@ -158,51 +162,54 @@ class IconSelectDialog(wxDialog):
         
         # Now continue with the normal construction of the dialog
         # contents
-        sizer = wxBoxSizer(wxVERTICAL)
+        sizer = wx.BoxSizer(wx.VERTICAL)
 
-        label = wxStaticText(self, -1, "Select Icon")
-        sizer.Add(label, 0, wxALIGN_CENTRE|wxALL, 5)
+        label = wx.StaticText(self, -1, "Select Icon")
+        sizer.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
-        box = wxBoxSizer(wxVERTICAL)
+        box = wx.BoxSizer(wx.VERTICAL)
 
-        self.lc = wxListCtrl(self, -1, wxDefaultPosition, wxSize(145, 200), 
-                style = wxLC_REPORT | wxLC_NO_HEADER)    ## | wxBORDER_NONE
+        self.lc = wx.ListCtrl(self, -1, wx.DefaultPosition, wx.Size(145, 200), 
+                style = wx.LC_REPORT | wx.LC_NO_HEADER)    ## | wx.BORDER_NONE
                 
-        self.lc.SetImageList(self.iconImageList, wxIMAGE_LIST_SMALL)
+        self.lc.SetImageList(self.iconImageList, wx.IMAGE_LIST_SMALL)
         self.lc.InsertColumn(0, "Icon")
 
         for icn in self.iconNames:
             self.lc.InsertImageStringItem(sys.maxint, icn,
                     self.iconCache.lookupIconIndex(icn))
-        self.lc.SetColumnWidth(0, wxLIST_AUTOSIZE)
+        self.lc.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         
         
-        box.Add(self.lc, 1, wxALIGN_CENTRE|wxALL|wxEXPAND, 5)
+        box.Add(self.lc, 1, wx.ALIGN_CENTRE|wx.ALL|wx.EXPAND, 5)
 
-        sizer.Add(box, 1, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5)
+        sizer.Add(box, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
-        line = wxStaticLine(self, -1, size=(20,-1), style=wxLI_HORIZONTAL)
-        sizer.Add(line, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxRIGHT|wxTOP, 5)
+        line = wx.StaticLine(self, -1, size=(20,-1), style=wx.LI_HORIZONTAL)
+        sizer.Add(line, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.TOP, 5)
 
-        box = wxBoxSizer(wxHORIZONTAL)
+        box = wx.BoxSizer(wx.HORIZONTAL)
 
-        btn = wxButton(self, wxID_OK, " OK ")
+        btn = wx.Button(self, wx.ID_OK, " OK ")
         btn.SetDefault()
-        box.Add(btn, 0, wxALIGN_CENTRE|wxALL, 5)
+        box.Add(btn, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
-        btn = wxButton(self, wxID_CANCEL, " Cancel ")
-        box.Add(btn, 0, wxALIGN_CENTRE|wxALL, 5)
+        btn = wx.Button(self, wx.ID_CANCEL, " Cancel ")
+        box.Add(btn, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
-        sizer.Add(box, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5)
+        sizer.Add(box, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
         self.SetSizer(sizer)
         self.SetAutoLayout(True)
         sizer.Fit(self)
 
         self.value = None
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
-        EVT_BUTTON(self, wxID_OK, self.OnOkPressed)
-        EVT_LIST_ITEM_ACTIVATED(self, self.lc.GetId(), self.OnOkPressed)
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOkPressed)
+        wx.EVT_LIST_ITEM_ACTIVATED(self, self.lc.GetId(), self.OnOkPressed)
 
     def GetValue(self):
         """
@@ -212,34 +219,35 @@ class IconSelectDialog(wxDialog):
 
 
     def OnOkPressed(self, evt):
-        no = self.lc.GetNextItem(-1, state = wxLIST_STATE_SELECTED)
+        no = self.lc.GetNextItem(-1, state = wx.LIST_STATE_SELECTED)
         if no > -1:
             self.value = self.iconNames[no]
         else:
             self.value = None
             
-        self.EndModal(wxID_OK)
+        self.EndModal(wx.ID_OK)
 
 
 
-class SavedVersionsDialog(wxDialog):
+class SavedVersionsDialog(wx.Dialog):
     def __init__(self, pWiki, ID, title="Saved Versions",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D):
-        wxDialog.__init__(self, pWiki, ID, title, pos, size, style)
+                 pos=wx.DefaultPosition, size=wx.DefaultSize,
+                 style=wx.NO_3D):
+        wx.Dialog.__init__(self, pWiki, ID, title, pos, size, style)
         self.pWiki = pWiki
         self.value = None        
         
         # Now continue with the normal construction of the dialog
         # contents
-        sizer = wxBoxSizer(wxVERTICAL)
+        sizer = wx.BoxSizer(wx.VERTICAL)
 
-        label = wxStaticText(self, -1, "Saved Versions")
-        sizer.Add(label, 0, wxALIGN_CENTRE|wxALL, 5)
+        label = wx.StaticText(self, -1, "Saved Versions")
+        sizer.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
-        box = wxBoxSizer(wxVERTICAL)
+        box = wx.BoxSizer(wx.VERTICAL)
 
-        self.lb = wxListBox(self, -1, wxDefaultPosition, wxSize(165, 200), [], wxLB_SINGLE)
+        self.lb = wx.ListBox(self, -1, wx.DefaultPosition, wx.Size(165, 200),
+                [], wx.LB_SINGLE)
 
         # fill in the listbox
         self.versions = self.pWiki.getWikiData().getStoredVersions()
@@ -247,36 +255,40 @@ class SavedVersionsDialog(wxDialog):
         for version in self.versions:
             self.lb.Append(version[1])
 
-        box.Add(self.lb, 1, wxALIGN_CENTRE|wxALL, 5)
+        box.Add(self.lb, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
 
-        sizer.AddSizer(box, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5)
+        sizer.AddSizer(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
-        line = wxStaticLine(self, -1, size=(20,-1), style=wxLI_HORIZONTAL)
-        sizer.Add(line, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxRIGHT|wxTOP, 5)
+        line = wx.StaticLine(self, -1, size=(20,-1), style=wx.LI_HORIZONTAL)
+        sizer.Add(line, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.TOP, 5)
 
-        box = wxBoxSizer(wxHORIZONTAL)
+        box = wx.BoxSizer(wx.HORIZONTAL)
 
-        btn = wxButton(self, wxID_OK, " Retrieve ")
+        btn = wx.Button(self, wx.ID_OK, " Retrieve ")
         btn.SetDefault()
-        box.Add(btn, 0, wxALIGN_CENTRE|wxALL, 5)
+        box.Add(btn, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
-        btn = wxButton(self, wxID_CANCEL, " Cancel ")
-        box.Add(btn, 0, wxALIGN_CENTRE|wxALL, 5)
+        btn = wx.Button(self, wx.ID_CANCEL, " Cancel ")
+        box.Add(btn, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
-        sizer.AddSizer(box, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5)
+        sizer.AddSizer(box, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
         self.SetSizer(sizer)
         self.SetAutoLayout(True)
         sizer.Fit(self)
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
+        
+        ## EVT_BUTTON(self, wx.ID_OK, self.OnRetrieve)
 
-        ## EVT_BUTTON(self, wxID_OK, self.OnRetrieve)
-        EVT_LISTBOX(self, ID, self.OnListBox)
-        EVT_LISTBOX_DCLICK(self, ID, lambda evt: self.EndModal(wxID_OK))
+        wx.EVT_LISTBOX(self, ID, self.OnListBox)
+        wx.EVT_LISTBOX_DCLICK(self, ID, lambda evt: self.EndModal(wx.ID_OK))
         
 ##    def OnRetrieve(self, evt):
 ##        if self.value:
 ##            self.pWiki.getWikiData().deleteSavedSearch(self.value)
-##            self.EndModal(wxID_CANCEL)
+##            self.EndModal(wx.ID_CANCEL)
         
     def GetValue(self):
         """ Returns None or tuple (<id>, <description>, <creation date>)
@@ -288,7 +300,7 @@ class SavedVersionsDialog(wxDialog):
 
 
 
-class DateformatDialog(wxDialog):
+class DateformatDialog(wx.Dialog):
 
     # HTML explanation for strftime:
     FORMATHELP = """<html>
@@ -352,29 +364,29 @@ class DateformatDialog(wxDialog):
 """
 
     def __init__(self, parent, ID, mainControl, title="Choose Date Format",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D, deffmt=u""):
+                 pos=wx.DefaultPosition, size=wx.DefaultSize,
+                 style=wx.NO_3D, deffmt=u""):
         """
         deffmt -- Initial value for format string
         """
-        d = wxPreDialog()
+        d = wx.PreDialog()
         self.PostCreate(d)
         
         self.mainControl = mainControl
         self.value = None     
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, parent, "DateformatDialog")
         self.SetTitle(title)
         
         # Create HTML explanation
-        html = wxHtmlWindow(self, -1)
+        html = wx.html.HtmlWindow(self, -1)
         html.SetPage(self.FORMATHELP)
         res.AttachUnknownControl("htmlExplain", html, self)
         
         self.ctrls = XrcControls(self)
         
-        self.ctrls.btnOk.SetId(wxID_OK)
-        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        self.ctrls.btnOk.SetId(wx.ID_OK)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         
         # Set dropdown list of recent time formats
         tfs = self.mainControl.getConfig().get("main", "recent_time_formats")
@@ -385,8 +397,11 @@ class DateformatDialog(wxDialog):
         self.ctrls.fieldFormat.SetValue(deffmt)
         self.OnText(None)
         
-        EVT_BUTTON(self, wxID_OK, self.OnOk)
-        EVT_TEXT(self, XRCID("fieldFormat"), self.OnText) 
+        # Fixes focus bug under Linux
+        self.SetFocus()
+        
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        wx.EVT_TEXT(self, XRCID("fieldFormat"), self.OnText) 
 
         
     def OnText(self, evt):
@@ -424,39 +439,39 @@ class DateformatDialog(wxDialog):
             tfs = u";".join([escapeForIni(f, u";") for f in self.recentFormats])
             self.mainControl.getConfig().set("main", "recent_time_formats", tfs)
 
-        self.EndModal(wxID_OK)
+        self.EndModal(wx.ID_OK)
 
 
 
-class FontFaceDialog(wxDialog):
+class FontFaceDialog(wx.Dialog):
     """
     Presents a list of available fonts (its face names) and renders a sample
     string with currently selected face.
     """
     def __init__(self, parent, ID, mainControl, value="",
-                 pos=wxDefaultPosition, size=wxDefaultSize,
-                 style=wxNO_3D):
+                 pos=wx.DefaultPosition, size=wx.DefaultSize,
+                 style=wx.NO_3D):
         """
         value -- Current value of a text field containing a face name (used to
                  choose default item in the shown list box)
         """
-        d = wxPreDialog()
+        d = wx.PreDialog()
         self.PostCreate(d)
         
         self.parent = parent
         self.mainControl = mainControl
         self.value = value
 
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.parent, "FontFaceDialog")
         
         self.ctrls = XrcControls(self)
         
-        self.ctrls.btnOk.SetId(wxID_OK)
-        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        self.ctrls.btnOk.SetId(wx.ID_OK)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         
         # Fill font listbox
-        fenum = wxFontEnumerator()
+        fenum = wx.FontEnumerator()
         fenum.EnumerateFacenames()
         facelist = fenum.GetFacenames()
         self.mainControl.getCollator().sort(facelist)
@@ -475,9 +490,12 @@ class FontFaceDialog(wxDialog):
 
             self.OnFaceSelected(None)
             
-        EVT_BUTTON(self, wxID_OK, self.OnOk)
-        EVT_LISTBOX(self, GUI_ID.lbFacenames, self.OnFaceSelected)
-        EVT_LISTBOX_DCLICK(self, GUI_ID.lbFacenames, self.OnOk)
+        # Fixes focus bug under Linux
+        self.SetFocus()
+            
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        wx.EVT_LISTBOX(self, GUI_ID.lbFacenames, self.OnFaceSelected)
+        wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lbFacenames, self.OnOk)
 
 
     def OnOk(self, evt):
@@ -496,16 +514,16 @@ class FontFaceDialog(wxDialog):
 
 
 
-class ExportDialog(wxDialog):
+class ExportDialog(wx.Dialog):
     def __init__(self, pWiki, ID, title="Export",
-                 pos=wxDefaultPosition, size=wxDefaultSize):
-        d = wxPreDialog()
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
+        d = wx.PreDialog()
         self.PostCreate(d)
         
         self.pWiki = pWiki
         
         self.listPagesOperation = ListWikiPagesOperation()
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "ExportDialog")
         
         self.ctrls = XrcControls(self)
@@ -521,7 +539,7 @@ class ExportDialog(wxDialog):
                 if panel is None:
                     if self.emptyPanel is None:
                         # Necessary to avoid a crash        
-                        self.emptyPanel = wxPanel(self.ctrls.additOptions)
+                        self.emptyPanel = wx.Panel(self.ctrls.additOptions)
                         self.emptyPanel.Fit()
                     panel = self.emptyPanel
                 else:
@@ -534,13 +552,13 @@ class ExportDialog(wxDialog):
         self.ctrls.additOptions.Fit()
         mins = self.ctrls.additOptions.GetMinSize()
 
-        self.ctrls.additOptions.SetMinSize(wxSize(mins.width+10, mins.height+10))
+        self.ctrls.additOptions.SetMinSize(wx.Size(mins.width+10, mins.height+10))
         self.Fit()
 
         self.exporterList = exporterList
 
-        self.ctrls.btnOk.SetId(wxID_OK)
-        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        self.ctrls.btnOk.SetId(wx.ID_OK)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
 
         self.ctrls.tfDestination.SetValue(self.pWiki.getLastActiveDir())
 
@@ -556,11 +574,14 @@ class ExportDialog(wxDialog):
         self.ctrls.chExportTo.SetSelection(0)  
         self._refreshForEtype()
         
-        EVT_CHOICE(self, GUI_ID.chExportTo, self.OnExportTo)
-        EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
+        # Fixes focus bug under Linux
+        self.SetFocus()
+        
+        wx.EVT_CHOICE(self, GUI_ID.chExportTo, self.OnExportTo)
+        wx.EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
 
-        EVT_BUTTON(self, wxID_OK, self.OnOk)
-        EVT_BUTTON(self, GUI_ID.btnSelectDestination, self.OnSelectDest)
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectDestination, self.OnSelectDest)
 
 
     def _refreshForEtype(self):
@@ -595,7 +616,7 @@ class ExportDialog(wxDialog):
         if selset == 3:  # Custom
             dlg = WikiPageListConstructionDialog(self, self.pWiki, -1, 
                     value=self.listPagesOperation)
-            if dlg.ShowModal() == wxID_OK:
+            if dlg.ShowModal() == wx.ID_OK:
                 self.listPagesOperation = dlg.getValue()
             dlg.Destroy()
 
@@ -674,7 +695,7 @@ class ExportDialog(wxDialog):
         except ExportException, e:
             self.pWiki.displayErrorMessage("Error while exporting", unicode(e))
 
-        self.EndModal(wxID_OK)
+        self.EndModal(wx.ID_OK)
 
         
     def OnSelectDest(self, evt):
@@ -685,9 +706,9 @@ class ExportDialog(wxDialog):
 
         if expDestWildcards is None:
             # Only transfer between GUI elements, so no unicode conversion
-            seldir = wxDirSelector(u"Select Export Directory",
+            seldir = wx.DirSelector(u"Select Export Directory",
                     self.ctrls.tfDestination.GetValue(),
-                    style=wxDD_DEFAULT_STYLE|wxDD_NEW_DIR_BUTTON, parent=self)
+                    style=wx.DD_DEFAULT_STYLE|wx.DD_NEW_DIR_BUTTON, parent=self)
                 
             if seldir:
                 self.ctrls.tfDestination.SetValue(seldir)
@@ -704,27 +725,27 @@ class ExportDialog(wxDialog):
             
             wcs = u"|".join(wcs)
             
-            selfile = wxFileSelector(u"Select Export File",
+            selfile = wx.FileSelector(u"Select Export File",
                     self.ctrls.tfDestination.GetValue(),
                     default_filename = "", default_extension = "",
-                    wildcard = wcs, flags=wxSAVE | wxOVERWRITE_PROMPT,
+                    wildcard = wcs, flags=wx.SAVE | wx.OVERWRITE_PROMPT,
                     parent=self)
 
             if selfile:
                 self.ctrls.tfDestination.SetValue(selfile)
 
 
-class ImportDialog(wxDialog):
+class ImportDialog(wx.Dialog):
     def __init__(self, parent, ID, mainControl, title="Import",
-                 pos=wxDefaultPosition, size=wxDefaultSize):
-        d = wxPreDialog()
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
+        d = wx.PreDialog()
         self.PostCreate(d)
         
         self.parent = parent
         self.mainControl = mainControl
         
         self.listPagesOperation = ListWikiPagesOperation()
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.parent, "ImportDialog")
 
         self.ctrls = XrcControls(self)
@@ -740,7 +761,7 @@ class ImportDialog(wxDialog):
                 if panel is None:
                     if self.emptyPanel is None:
                         # Necessary to avoid a crash        
-                        self.emptyPanel = wxPanel(self.ctrls.additOptions)
+                        self.emptyPanel = wx.Panel(self.ctrls.additOptions)
                         self.emptyPanel.Fit()
                     panel = self.emptyPanel
                 else:
@@ -753,13 +774,13 @@ class ImportDialog(wxDialog):
         self.ctrls.additOptions.Fit()
         mins = self.ctrls.additOptions.GetMinSize()
         
-        self.ctrls.additOptions.SetMinSize(wxSize(mins.width+10, mins.height+10))
+        self.ctrls.additOptions.SetMinSize(wx.Size(mins.width+10, mins.height+10))
         self.Fit()
         
         self.importerList = importerList
 
-        self.ctrls.btnOk.SetId(wxID_OK)
-        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        self.ctrls.btnOk.SetId(wx.ID_OK)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         
         self.ctrls.tfSource.SetValue(self.mainControl.getLastActiveDir())
         
@@ -773,11 +794,14 @@ class ImportDialog(wxDialog):
 #         self.importerList[0][3].Show(True)
         self.ctrls.chImportFormat.SetSelection(0)
         self._refreshForItype()
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
-        EVT_CHOICE(self, GUI_ID.chImportFormat, self.OnImportFormat)
+        wx.EVT_CHOICE(self, GUI_ID.chImportFormat, self.OnImportFormat)
 
-        EVT_BUTTON(self, wxID_OK, self.OnOk)
-        EVT_BUTTON(self, GUI_ID.btnSelectSource, self.OnSelectSrc)
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectSource, self.OnSelectSrc)
 
 
     def _refreshForItype(self):
@@ -847,7 +871,7 @@ class ImportDialog(wxDialog):
             self.mainControl.displayErrorMessage("Error while importing",
                     unicode(e))
 
-        self.EndModal(wxID_OK)
+        self.EndModal(wx.ID_OK)
 
         
     def OnSelectSrc(self, evt):
@@ -858,9 +882,9 @@ class ImportDialog(wxDialog):
 
         if impSrcWildcards is None:
             # Only transfer between GUI elements, so no unicode conversion
-            seldir = wxDirSelector(u"Select Import Directory",
+            seldir = wx.DirSelector(u"Select Import Directory",
                     self.ctrls.tfSource.GetValue(),
-                    style=wxDD_DEFAULT_STYLE, parent=self)
+                    style=wx.DD_DEFAULT_STYLE, parent=self)
 
             if seldir:
                 self.ctrls.tfSource.SetValue(seldir)
@@ -877,10 +901,10 @@ class ImportDialog(wxDialog):
             
             wcs = u"|".join(wcs)
             
-            selfile = wxFileSelector(u"Select Import File",
+            selfile = wx.FileSelector(u"Select Import File",
                     self.ctrls.tfSource.GetValue(),
                     default_filename = "", default_extension = "",
-                    wildcard = wcs, flags=wxOPEN | wxFILE_MUST_EXIST,
+                    wildcard = wcs, flags=wx.OPEN | wx.FILE_MUST_EXIST,
                     parent=self)
 
             if selfile:
@@ -888,14 +912,14 @@ class ImportDialog(wxDialog):
 
 
 
-class ChooseWikiWordDialog(wxDialog):
+class ChooseWikiWordDialog(wx.Dialog):
     def __init__(self, pWiki, ID, words, motionType, title="Choose Wiki Word",
-                 pos=wxDefaultPosition, size=wxDefaultSize):
-        d = wxPreDialog()
+                 pos=wx.DefaultPosition, size=wx.DefaultSize):
+        d = wx.PreDialog()
         self.PostCreate(d)
         
         self.pWiki = pWiki
-        res = xrc.wxXmlResource.Get()
+        res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "ChooseWikiWordDialog")
         
         self.ctrls = XrcControls(self)
@@ -909,12 +933,15 @@ class ChooseWikiWordDialog(wxDialog):
         
         self.ctrls.lb.Set(wordsgui)
 
-        self.ctrls.btnOk.SetId(wxID_OK)
-        self.ctrls.btnCancel.SetId(wxID_CANCEL)
+        self.ctrls.btnOk.SetId(wx.ID_OK)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
-        EVT_BUTTON(self, GUI_ID.btnDelete, self.OnDelete)
-        EVT_BUTTON(self, wxID_OK, self.OnOk)
-        EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
+        wx.EVT_BUTTON(self, GUI_ID.btnDelete, self.OnDelete)
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
 
 
     def OnOk(self, evt):
@@ -933,11 +960,11 @@ class ChooseWikiWordDialog(wxDialog):
     def OnDelete(self, evt):
         sellen = len(self.ctrls.lb.GetSelections())
         if sellen > 0:
-            answer = wxMessageBox(u"Do you want to delete %i wiki page(s)?" % sellen,
+            answer = wx.MessageBox(u"Do you want to delete %i wiki page(s)?" % sellen,
                     u"Delete Wiki Page(s)",
-                    wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION, self)
+                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
-            if answer != wxYES:
+            if answer != wx.YES:
                 return
 
             self.pWiki.saveAllDocPages()
@@ -963,7 +990,7 @@ class ChooseWikiWordDialog(wxDialog):
             
             self.pWiki.pageHistory.goAfterDeletion()
 
-            self.EndModal(wxID_OK)
+            self.EndModal(wx.ID_OK)
 
 
 def _children(win, indent=0):
@@ -972,7 +999,7 @@ def _children(win, indent=0):
         _children(c, indent=indent+2)
 
 
-class AboutDialog(wxDialog):
+class AboutDialog(wx.Dialog):
     """ An about box that uses an HTML window """
 
     textTemplate = '''
@@ -1012,34 +1039,37 @@ What makes wikidPad different from other notepad applications is the ease with w
 '''
 
     def __init__(self, pWiki):
-        wxDialog.__init__(self, pWiki, -1, 'About WikidPad',
+        wx.Dialog.__init__(self, pWiki, -1, 'About WikidPad',
                           size=(470, 330) )
         text = self.textTemplate % (VERSION_STRING,
                 escapeHtml(pWiki.globalConfigDir))
 
-        html = wxHtmlWindow(self, -1)
+        html = wx.html.HtmlWindow(self, -1)
         html.SetPage(text)
-        button = wxButton(self, wxID_OK, "Okay")
+        button = wx.Button(self, wx.ID_OK, "Okay")
 
         # constraints for the html window
-        lc = wxLayoutConstraints()
-        lc.top.SameAs(self, wxTop, 5)
-        lc.left.SameAs(self, wxLeft, 5)
-        lc.bottom.SameAs(button, wxTop, 5)
-        lc.right.SameAs(self, wxRight, 5)
+        lc = wx.LayoutConstraints()
+        lc.top.SameAs(self, wx.Top, 5)
+        lc.left.SameAs(self, wx.Left, 5)
+        lc.bottom.SameAs(button, wx.Top, 5)
+        lc.right.SameAs(self, wx.Right, 5)
         html.SetConstraints(lc)
 
         # constraints for the button
-        lc = wxLayoutConstraints()
-        lc.bottom.SameAs(self, wxBottom, 5)
-        lc.centreX.SameAs(self, wxCentreX)
+        lc = wx.LayoutConstraints()
+        lc.bottom.SameAs(self, wx.Bottom, 5)
+        lc.centreX.SameAs(self, wx.CentreX)
         lc.width.AsIs()
         lc.height.AsIs()
         button.SetConstraints(lc)
 
         self.SetAutoLayout(True)
         self.Layout()
-        self.CentreOnParent(wxBOTH)
+        self.CentreOnParent(wx.BOTH)
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
 
 
@@ -1053,7 +1083,7 @@ class WikiInfoDialog(wx.Dialog):
                           
         self.txtBgColor = self.GetBackgroundColour()
 
-        button = wx.Button(self, wxID_OK)
+        button = wx.Button(self, wx.ID_OK)
         button.SetDefault()
         wd = mainControl.getWikiDocument()
 
@@ -1081,9 +1111,12 @@ class WikiInfoDialog(wx.Dialog):
         inputsizer.Add((0, 0), 1)   # Stretchable spacer
 
         mainsizer.Add(inputsizer, 0, wx.ALL | wx.EXPAND, 5)
-
+        
         self.SetSizer(mainsizer)
         self.Fit()
+
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
 
     def _buildLine(self, label, value):

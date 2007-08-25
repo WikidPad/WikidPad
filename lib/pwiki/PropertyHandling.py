@@ -6,8 +6,9 @@ import sets, traceback
 
 import pwiki.srePersistent as _re
 
-from wxPython.wx import *
-# import wxPython.xrc as xrc
+import wx
+# from wxPython.wx import *
+
 from wxHelper import *
 
 from WikiExceptions import *
@@ -96,20 +97,20 @@ def buildIconsSubmenu(iconCache):
     Returns tuple (icon sub menu, dict from menu id to icon name)
     """
     iconMap = {}
-    iconsMenu = wxMenu()
+    iconsMenu = wx.Menu()
 
-    iconsMenu1 = wxMenu()
-    iconsMenu.AppendMenu(wxNewId(), 'A-C', iconsMenu1)
-    iconsMenu2 = wxMenu()
-    iconsMenu.AppendMenu(wxNewId(), 'D-F', iconsMenu2)
-    iconsMenu3 = wxMenu()
-    iconsMenu.AppendMenu(wxNewId(), 'G-L', iconsMenu3)
-    iconsMenu4 = wxMenu()
-    iconsMenu.AppendMenu(wxNewId(), 'M-P', iconsMenu4)
-    iconsMenu5 = wxMenu()
-    iconsMenu.AppendMenu(wxNewId(), 'Q-S', iconsMenu5)
-    iconsMenu6 = wxMenu()
-    iconsMenu.AppendMenu(wxNewId(), 'T-Z', iconsMenu6)
+    iconsMenu1 = wx.Menu()
+    iconsMenu.AppendMenu(wx.NewId(), 'A-C', iconsMenu1)
+    iconsMenu2 = wx.Menu()
+    iconsMenu.AppendMenu(wx.NewId(), 'D-F', iconsMenu2)
+    iconsMenu3 = wx.Menu()
+    iconsMenu.AppendMenu(wx.NewId(), 'G-L', iconsMenu3)
+    iconsMenu4 = wx.Menu()
+    iconsMenu.AppendMenu(wx.NewId(), 'M-P', iconsMenu4)
+    iconsMenu5 = wx.Menu()
+    iconsMenu.AppendMenu(wx.NewId(), 'Q-S', iconsMenu5)
+    iconsMenu6 = wx.Menu()
+    iconsMenu.AppendMenu(wx.NewId(), 'T-Z', iconsMenu6)
 
     icons = iconCache.iconLookupCache.keys();  # TODO: Create function?
     icons.sort()    # TODO sort with collator
@@ -131,10 +132,10 @@ def buildIconsSubmenu(iconCache):
         elif icname[0] <= 'z':
             iconsSubMenu = iconsMenu6
 
-        menuID = wxNewId()
+        menuID = wx.NewId()
         iconMap[menuID] = icname
 
-        menuItem = wxMenuItem(iconsSubMenu, menuID, icname, icname)
+        menuItem = wx.MenuItem(iconsSubMenu, menuID, icname, icname)
         bitmap = iconCache.lookupIcon(icname)
         menuItem.SetBitmap(bitmap)
         iconsSubMenu.AppendItem(menuItem)
@@ -148,16 +149,16 @@ def buildColorsSubmenu():
     Returns tuple (color sub menu, dict from menu id to color name)
     """
     colorMap = {}
-    colorsMenu = wxMenu()
+    colorsMenu = wx.Menu()
 
-    colorsMenu1 = wxMenu()
-    colorsMenu.AppendMenu(wxNewId(), 'A-L', colorsMenu1)
-    colorsMenu2 = wxMenu()
-    colorsMenu.AppendMenu(wxNewId(), 'M-Z', colorsMenu2)
+    colorsMenu1 = wx.Menu()
+    colorsMenu.AppendMenu(wx.NewId(), 'A-L', colorsMenu1)
+    colorsMenu2 = wx.Menu()
+    colorsMenu.AppendMenu(wx.NewId(), 'M-Z', colorsMenu2)
     
     # Set showColored to False if we are on Win 95/98/ME and use an unicode build
     #   of wxPython because it would crash then
-    showColored = not (wxGetOsVersion()[0] == wxWIN95 and isUnicode())
+    showColored = not (wx.GetOsVersion()[0] == wxWIN95 and isUnicode())
 
     for cn in _COLORS:    # ["BLACK"]:
         colorsSubMenu = None
@@ -167,19 +168,19 @@ def buildColorsSubmenu():
         else:
             colorsSubMenu = colorsMenu2
 
-        menuID = wxNewId()
+        menuID = wx.NewId()
         colorMap[menuID] = cn
-        menuItem = wxMenuItem(colorsSubMenu, menuID, cn, cn)
+        menuItem = wx.MenuItem(colorsSubMenu, menuID, cn, cn)
         
         if showColored:
-            cl = wxNamedColour(cn)
+            cl = wx.NamedColour(cn)
     
             menuItem.SetBackgroundColour(cl)
     
             # if color is dark, text should be white
             #   (checking green component seems to be enough)
             if cl.Green() < 128:
-                menuItem.SetTextColour(wxWHITE)
+                menuItem.SetTextColour(wx.WHITE)
 
         colorsSubMenu.AppendItem(menuItem)
 

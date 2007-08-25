@@ -1,6 +1,16 @@
 ﻿++ Change Log
 
 
+Aug. 25, 2007 (1.8rc8)
+
+    * Internal: wxPython naming scheme changed to solve problems
+      with newer versions of wxPython
+    * Bug fixed: Linux/GTK: Dialog not focused properly
+    * Bug fixed: Linux: Start browser (after export and when URL is activated)
+      did not work
+
+
+
 Jul. 26, 2007 (1.8rc7)
 
     * Bug fixed: Font face choice dialog from options dialog did

@@ -2,7 +2,7 @@ import sys, os, getopt
 
 import urllib_red as urllib
 
-from wxPython.wx import *
+# from wxPython.wx import *
 
 
 from StringOps import mbcsDec
@@ -156,8 +156,8 @@ class CmdLineAction:
         """
         Show dialog with addRemark and command line usage information.
         """
-        wxMessageBox(addRemark + self.USAGE, "Usage information",
-                style=wxOK, parent=pWiki)
+        wx.MessageBox(addRemark + self.USAGE, "Usage information",
+                style=wx.OK, parent=pWiki)
 
 
 
