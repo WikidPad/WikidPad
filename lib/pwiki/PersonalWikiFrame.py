@@ -3763,7 +3763,7 @@ These are your default global settings.
         if skipConfirm or result == wx.YES :
             try:
                 self.saveAllDocPages()
-                progresshandler = wx.GuiProgressHandler(u"Rebuilding wiki",
+                progresshandler = wxGuiProgressHandler(u"Rebuilding wiki",
                         u"Rebuilding wiki", 0, self)
                 self.getWikiDataManager().rebuildWiki(progresshandler)
 
