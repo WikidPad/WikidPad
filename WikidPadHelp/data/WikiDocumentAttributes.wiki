@@ -120,6 +120,9 @@ You can also use the attribute global.child_sort_order to control the default fo
 See [Templates].
 
 
+*template_head: choose if a new page created from a template 
+
+
 *pagetype: type of the page*
 Controls some behavior of the editor.
 

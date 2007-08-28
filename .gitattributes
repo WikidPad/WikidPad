@@ -6,9 +6,9 @@ WikidPadHelp/WikidPadHelp.wiki -text
 WikidPadHelp/data/Anchors.wiki -text
 WikidPadHelp/data/ApiDocs.wiki -text
 WikidPadHelp/data/ApplicationConfigurationFiles.wiki -text
+WikidPadHelp/data/ArticleFoobaromatic.wiki -text
 WikidPadHelp/data/AutoCompletion.wiki -text
 WikidPadHelp/data/AutoSave.wiki -text
-WikidPadHelp/data/BoughtFoobaromatic.wiki -text
 WikidPadHelp/data/BoughtTemplate.wiki -text
 WikidPadHelp/data/BulletedLists.wiki -text
 WikidPadHelp/data/CamelCase.wiki -text
@@ -278,6 +278,7 @@ WikidPadHelp/data/PageListDialog.wiki -text
 WikidPadHelp/data/Printing.wiki -text
 WikidPadHelp/data/REGISTRATION.grl -text
 WikidPadHelp/data/RenamingWikiWords.wiki -text
+WikidPadHelp/data/RestartWikidPad.wiki -text
 WikidPadHelp/data/SEARCH_VIEWS.grl -text
 WikidPadHelp/data/SETTINGS.grl -text
 WikidPadHelp/data/ScratchPad.wiki -text
@@ -292,6 +293,7 @@ WikidPadHelp/data/TextBlocks.wiki -text
 WikidPadHelp/data/TextFormatting.wiki -text
 WikidPadHelp/data/That[!!-~]Arent[!!-~]Wiki[!!-~]Words.wiki -text
 WikidPadHelp/data/ThirdPartyLibraries.wiki -text
+WikidPadHelp/data/TimeViewWindow.wiki -text
 WikidPadHelp/data/TodoItems.wiki -text
 WikidPadHelp/data/TreeIcons.wiki -text
 WikidPadHelp/data/TreeNodeColors.wiki -text
@@ -575,6 +577,7 @@ lib/pwiki/SpellChecker.py -text
 lib/pwiki/SqliteThin3.py -text
 lib/pwiki/StringOps.py -text
 lib/pwiki/TempFileSet.py -text
+lib/pwiki/TimeViewCtrl.py -text
 lib/pwiki/Utilities.py -text
 lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiFormatting.py -text

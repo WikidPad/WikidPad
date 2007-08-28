@@ -1,8 +1,7 @@
-﻿++ Article: Foobaromatic
+﻿++ Article Foobaromatic
 
 Manufacturer: Yoyodyne
 Price: 135,70
 Date of buy: 01/22/2006
 Remark: Makes weird noises
-
 

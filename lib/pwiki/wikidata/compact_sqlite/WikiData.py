@@ -828,13 +828,29 @@ class WikiData:
 #                 "where word like ('%' || ? || '%') and word not like (? || '%')"
 #                 "and word not glob '[[]*'", (thisStr, thisStr))
 
-    def getWikiWordsModifiedWithin(self, days):
+    def getWikiWordsModifiedLastDays(self, days):
         timeDiff = float(time()-(86400*days))
         try:
             return self.connWrap.execSqlQuerySingleColumn(
                     "select word from wikiwordcontent where modified >= ? and "
                     "not word glob '[[]*'",
                     (timeDiff,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+
+    def getWikiWordsModifiedWithin(self, startTime, endTime):
+        """
+        Function must work for read-only wiki.
+        startTime and endTime are floating values as returned by time.time()
+        startTime is inclusive, endTime is exclusive
+        """
+        try:
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select word from wikiwordcontent where modified >= ? and "
+                    "modified < ? and not word glob '[[]*'",
+                    (startTime, endTime))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)

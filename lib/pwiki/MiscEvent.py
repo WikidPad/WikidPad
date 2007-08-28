@@ -180,6 +180,9 @@ class MiscEvent(object):
 
     def setSource(self, source):
         self.source = source
+        
+    def getMiscEvent(self):
+        return self
 
     def get(self, key, default = None):
         """

@@ -1207,19 +1207,19 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         searchOp.wikiWide = False
         searchOp.wildCard = 'regex'
         searchOp.caseSensitive = True
-        searchOp.searchStr = "&&[a-z]"
-        
+        searchOp.searchStr = "&&[a-zA-Z]"
+
         text = self.GetText()
         charStartPos = len(self.GetTextRange(0, self.GetSelectionEnd()))
         while True:
             start, end = searchOp.searchText(text, charStartPos)[:2]
             if start is None: break
-            
+
             fieldcode = text[start + 2]
             if fieldcode == "i":
                 self.SetSelectionByCharPos(start, end)
                 break
-                
+
             charStartPos = end
 
 

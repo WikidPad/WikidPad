@@ -72,8 +72,23 @@ def setWindowSize(win, size):
     """
     sizeX, sizeY = size
 
-#     screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
-#     screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
+    screenX, screenY = getOverallDisplaysSize()    
+
+    # don't let the window be > than the size of the screen
+    if sizeX > screenX:
+        sizeX = screenX-20
+    if sizeY > screenY:
+        sizeY = screenY-20
+
+    # set the size
+    win.SetSize((sizeX, sizeY))
+
+
+def setWindowClientSize(win, size):
+    """
+    Similar to setWindowSize(), but sets the client size of the window
+    """
+    sizeX, sizeY = size
 
     screenX, screenY = getOverallDisplaysSize()    
 
@@ -81,11 +96,14 @@ def setWindowSize(win, size):
     if sizeX > screenX:
         sizeX = screenX-20
     if sizeY > screenY:
-        currentY = screenY-20
+        sizeY = screenY-20
 
     # set the size
-    win.SetSize((sizeX, sizeY))
-
+    win.SetClientSize((sizeX, sizeY))
+    
+    
+    
+    
 
 #     m_sashCursorWE = new wxCursor(wxCURSOR_SIZEWE);
 #     m_sashCursorNS = new wxCursor(wxCURSOR_SIZENS);

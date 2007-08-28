@@ -11,7 +11,8 @@ import Utilities
 from Utilities import DUMBTHREADHOLDER
 from MiscEvent import KeyFunctionSinkAR
 
-from Configuration import isWindows
+# from Configuration import isWindows
+from wxHelper import EnhancedListControl
 
 from WikiFormatting import HEADING_LEVEL_MAP, getHeadingLevel
 
@@ -22,9 +23,9 @@ from WikiFormatting import HEADING_LEVEL_MAP, getHeadingLevel
 #        Tokenizer, wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
 
-class DocStructureCtrl(wx.ListCtrl):
+class DocStructureCtrl(EnhancedListControl):
     def __init__(self, parent, ID, mainControl):
-        wx.ListCtrl.__init__(self, parent, ID,
+        EnhancedListControl.__init__(self, parent, ID,
                 style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.LC_NO_HEADER)
 
         self.mainControl = mainControl
@@ -70,6 +71,7 @@ class DocStructureCtrl(wx.ListCtrl):
 
 
     def OnSize(self, evt):
+        evt.Skip()
         oldReadablySized = self.readablySized
         size = evt.GetSize()
         self.readablySized = size.GetHeight() >= 5 and size.GetWidth() >= 5
@@ -195,35 +197,35 @@ class DocStructureCtrl(wx.ListCtrl):
             self.Thaw()
 
 
-    def getAllSelectedIndices(self):
-        result = []
-        sel = -1
-        while True:
-            sel = self.GetNextItem(sel, state=wx.LIST_STATE_SELECTED)
-            if sel == -1:
-                break
-            result.append(sel)
-
-        return result
-
-
-    if isWindows():
-        _SETSSI_ITEMMASK = wx.LIST_STATE_SELECTED | wx.LIST_STATE_FOCUSED
-    else:
-        # TODO Check for MacOS
-        _SETSSI_ITEMMASK = wx.LIST_STATE_SELECTED
-
-    def setSingleSelectedIndex(self, pos):
-        # Unselect all selected
-        for prev in self.getAllSelectedIndices():
-            self.SetItemState(prev, 0, self._SETSSI_ITEMMASK)
-
-        if pos > -1:
-            self.SetItemState(pos, self._SETSSI_ITEMMASK, self._SETSSI_ITEMMASK)
+#     def getAllSelectedIndices(self):
+#         result = []
+#         sel = -1
+#         while True:
+#             sel = self.GetNextItem(sel, state=wx.LIST_STATE_SELECTED)
+#             if sel == -1:
+#                 break
+#             result.append(sel)
+# 
+#         return result
+# 
+# 
+#     if isWindows():
+#         _SETSSI_ITEMMASK = wx.LIST_STATE_SELECTED | wx.LIST_STATE_FOCUSED
+#     else:
+#         # TODO Check for MacOS
+#         _SETSSI_ITEMMASK = wx.LIST_STATE_SELECTED
+# 
+#     def setSingleSelectedIndex(self, pos):
+#         # Unselect all selected
+#         for prev in self.getAllSelectedIndices():
+#             self.SetItemState(prev, 0, self._SETSSI_ITEMMASK)
+# 
+#         if pos > -1:
+#             self.SetItemState(pos, self._SETSSI_ITEMMASK, self._SETSSI_ITEMMASK)
 
 
     def OnKillFocus(self, evt):
-        self.setSingleSelectedIndex(-1)
+        self.SelectSingle(-1)
         evt.Skip()
         
         

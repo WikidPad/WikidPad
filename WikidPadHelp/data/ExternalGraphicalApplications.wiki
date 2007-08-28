@@ -22,6 +22,8 @@ The mentioned applications are not part of the WikidPad release itself, you must
     Gnuplot| http://www.gnuplot.info/download.html | http://www.gnuplot.info/documentation.html
 >>
 
+A helpful tutorial for creating directed graphs with GraphViz' dot utility is http://kabru.eecs.umich.edu/bin/view/TWiki/HowtoDirectedGraphs.
+
 You can download all or only some of them as you like.
 
 Put the binaries in an arbitrary folder on your computer. If you do not plan to use them outside of WikidPad you can create a folder in the WikidPad installation directory and put them therein.

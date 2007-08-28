@@ -12,6 +12,9 @@ from MiscEvent import MiscEventSourceMixin, ResendingMiscEvent
 from WikiExceptions import *
 
 import Configuration
+from StringOps import escapeForIni
+
+import DocPages
 
 
 class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
@@ -81,6 +84,21 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
     def getDocPagePresenters(self):
         return self.docPagePresenters
+        
+    def getOpenWikiWords(self):
+        if not self.mainControl.isWikiLoaded():
+            return None
+
+        result = []
+        for pres in self.getDocPagePresenters():
+            docPage = pres.getDocPage()
+            if isinstance(docPage, (DocPages.AliasWikiPage,
+                    DocPages.WikiPage)):
+                result.append(
+                        docPage.getNonAliasPage().getWikiWord())
+                        
+        return result
+
 
     def getIndexForDocPagePresenter(self, presenter):
         for i, p in enumerate(self.docPagePresenters):
@@ -88,6 +106,28 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                 return i
         
         return -1
+
+
+    def updateConfig(self):
+        """
+        Update configuration info about open tabs
+        """
+        
+        openWikiWords = self.getOpenWikiWords()
+        
+        if openWikiWords is None:
+            return
+        
+        if len(openWikiWords) < 2:
+            self.mainControl.getConfig().set("main", "further_wiki_words", u"")
+        else:
+            fwws = u";".join([escapeForIni(w, u" ;")
+                    for w in openWikiWords[1:]])
+            self.mainControl.getConfig().set("main", "further_wiki_words", fwws)
+
+        if len(openWikiWords) > 0:
+            self.mainControl.getConfig().set("main", "last_wiki_word",
+                    openWikiWords[0])
 
 
     # TODO What about WikidPadHooks?
@@ -137,6 +177,8 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         if self.getCurrentDocPagePresenter() is None:
             self.setCurrentDocPagePresenter(presenter)
             
+        self.updateConfig()
+
         return presenter
 
 
@@ -155,6 +197,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         # Actual deletion
         del self.docPagePresenters[idx]
         self.DeletePage(idx)
+        self.updateConfig()
 
 
     def closeAllButCurrentTab(self):
@@ -313,6 +356,12 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
     def OnMotion(self, evt):
 #        if evt.Dragging() and evt.LeftIsDown():
         if self.tabDragging:
+            # Just to be sure
+            if not evt.Dragging():
+                self.tabDragging = False
+                evt.Skip()
+                return
+
             tab = self.HitTest(evt.GetPosition())[0]
             if tab != wx.NOT_FOUND and tab != self.GetSelection():
                 self.SetCursor(self.tabDragCursor)

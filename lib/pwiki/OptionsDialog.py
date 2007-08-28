@@ -58,10 +58,20 @@ class EmptyOptionsPanel(wx.Panel):
 
 class OptionsDialog(wx.Dialog):
     # List of tuples (<configuration file entry>, <gui control name>, <type>)
-    # Supported types: b: boolean checkbox, i0+: nonnegative integer, t: text
-    #    tre: regular expression,  f0+: nonegative float, seli: integer position
-    #    of a selection in dropdown list, selt: Chosen text in dropdown list
-    #    color0: HTML color code or empty, spin: Numeric SpinCtrl
+    # Supported types:
+    #     b: boolean checkbox
+    #     i0+: nonnegative integer
+    #     t: text
+    #     tre: regular expression
+    #     ttdf: time/date format
+    #     f0+: nonegative float
+    #     seli: integer position of a selection in dropdown list
+    #     selt: Chosen text in dropdown list
+    #     color0: HTML color code or empty
+    #     spin: Numeric SpinCtrl
+    
+    # ttdf and color0 entries have a 4th item with the name
+    # of the "..." button to call a dialog to set.
 
     OPTION_TO_CONTROL = (
             # application-wide options
@@ -74,7 +84,8 @@ class OptionsDialog(wx.Dialog):
             ("minimize_on_closeButton", "cbMinimizeOnCloseButton", "b"),
 
             ("hideundefined", "cbHideUndefinedWords", "b"),
-            ("pagestatus_timeformat", "tfPageStatusTimeFormat", "t"),
+            ("pagestatus_timeformat", "tfPageStatusTimeFormat", "ttdf",
+                "btnSelectPageStatusTimeFormat"),
             ("log_window_autoshow", "cbLogWindowAutoShow", "b"),
             ("log_window_autohide", "cbLogWindowAutoHide", "b"),
             ("docStructure_position", "chDocStructurePosition", "seli"),
@@ -94,6 +105,8 @@ class OptionsDialog(wx.Dialog):
             ("hotKey_showHide_byApp", "tfHotKeyShowHideByApp", "t"),
             ("hotKey_showHide_byApp_isActive", "cbHotKeyShowHideByAppIsActive",
                 "b"),
+            ("wikiOpenNew_defaultDir", "tfWikiOpenNewDefaultDir",
+                "t"),
 
             ("mainTree_position", "chMainTreePosition", "seli"),
             ("viewsTree_position", "chViewsTreePosition", "seli"),
@@ -117,11 +130,16 @@ class OptionsDialog(wx.Dialog):
             ("export_table_of_contents", "chTableOfContents", "seli"),
             ("html_toc_title", "tfHtmlTocTitle", "t"),
 
-            ("html_body_link", "tfHtmlLinkColor", "color0"),
-            ("html_body_alink", "tfHtmlALinkColor", "color0"),
-            ("html_body_vlink", "tfHtmlVLinkColor", "color0"),
-            ("html_body_text", "tfHtmlTextColor", "color0"),
-            ("html_body_bgcolor", "tfHtmlBgColor", "color0"),
+            ("html_body_link", "tfHtmlLinkColor", "color0",
+                "btnSelectHtmlLinkColor"),
+            ("html_body_alink", "tfHtmlALinkColor", "color0",
+                "btnSelectHtmlALinkColor"),
+            ("html_body_vlink", "tfHtmlVLinkColor", "color0",
+                "btnSelectHtmlVLinkColor"),
+            ("html_body_text", "tfHtmlTextColor", "color0",
+                "btnSelectHtmlTextColor"),
+            ("html_body_bgcolor", "tfHtmlBgColor", "color0",
+                "btnSelectHtmlBgColor"),
             ("html_body_background", "tfHtmlBgImage", "t"),
             ("html_header_doctype", "tfHtmlDocType", "t"),
 
@@ -137,23 +155,36 @@ class OptionsDialog(wx.Dialog):
             ("editor_imagePaste_quality", "tfEditorImagePasteQuality", "i0+"),
             ("editor_imagePaste_askOnEachPaste", "cbEditorImagePasteAskOnEachPaste", "b"),
 
-            ("editor_plaintext_color", "tfEditorPlaintextColor", "color0"),
-            ("editor_link_color", "tfEditorLinkColor", "color0"),
-            ("editor_attribute_color", "tfEditorAttributeColor", "color0"),
-            ("editor_bg_color", "tfEditorBgColor", "color0"),
-            ("editor_selection_fg_color", "tfEditorSelectionFgColor", "color0"),
-            ("editor_selection_bg_color", "tfEditorSelectionBgColor", "color0"),
-            ("editor_caret_color", "tfEditorCaretColor", "color0"),
+            ("editor_plaintext_color", "tfEditorPlaintextColor", "color0",
+                    "btnSelectEditorPlaintextColor"),
+            ("editor_link_color", "tfEditorLinkColor", "color0",
+                    "btnSelectEditorLinkColor"),
+            ("editor_attribute_color", "tfEditorAttributeColor", "color0",
+                    "btnSelectEditorAttributeColor"),
+            ("editor_bg_color", "tfEditorBgColor", "color0",
+                    "btnSelectEditorBgColor"),
+            ("editor_selection_fg_color", "tfEditorSelectionFgColor", "color0",
+                    "btnSelectEditorSelectionFgColor"),
+            ("editor_selection_bg_color", "tfEditorSelectionBgColor", "color0",
+                    "btnSelectEditorSelectionBgColor"),
+            ("editor_caret_color", "tfEditorCaretColor", "color0",
+                    "btnSelectEditorCaretColor"),
 
             ("mouse_middleButton_withoutCtrl", "chMouseMiddleButtonWithoutCtrl", "seli"),
             ("mouse_middleButton_withCtrl", "chMouseMiddleButtonWithCtrl", "seli"),
+
+            ("timeView_position", "chTimeViewPosition", "seli"),
+            ("timeView_dateFormat", "tfTimeViewDateFormat", "ttdf",
+                "btnSelectTimeViewDateFormat"),
+            ("timeView_autohide", "cbTimeViewAutoHide", "b"),
 
             ("search_wiki_context_before", "tfWwSearchContextBefore", "i0+"),
             ("search_wiki_context_after", "tfWwSearchContextAfter", "i0+"),
             ("search_wiki_count_occurrences", "cbWwSearchCountOccurrences", "b"),
             ("incSearch_autoOffDelay", "tfIncSearchAutoOffDelay", "i0+"),
 
-            # wiki specific options
+
+            # wiki-specific options
 
             ("footnotes_as_wikiwords", "cbFootnotesAsWws", "b"),
             ("first_wiki_word", "tfFirstWikiWord", "t"),
@@ -195,6 +226,7 @@ class OptionsDialog(wx.Dialog):
             ("OptionsPageEditorColors", u"    Editor Colors"),
             ("OptionsPageClipboardCatcher", u"    Clipboard Catcher"),
             ("OptionsPageMouse", u"  Mouse"),
+            ("OptionsPageTimeView", u"  Time view"),
             ("OptionsPageSearching", u"  Searching"),            
             ("OptionsPageCurrentWiki", u"Current Wiki")
     )
@@ -211,6 +243,10 @@ class OptionsDialog(wx.Dialog):
 
         self.combinedOptionToControl = self.OPTION_TO_CONTROL
         self.combinedPanelList = wx.GetApp().getOptionsDlgPanelList()
+        
+        # Maps ids of the GUI controls named in self.combinedOptionToControl
+        # to the entries (the appropriate tuple) there
+        self.idToOptionEntryMap = {}
 
         if Configuration.isWindows():
             self.combinedOptionToControl += self.OPTION_TO_CONTROL_WINDOWS_ONLY
@@ -255,7 +291,6 @@ class OptionsDialog(wx.Dialog):
         self.ctrls.panelPages.SetSizer(mainsizer)
         self.ctrls.panelPages.SetMinSize(mainsizer.GetMinSize())
 
-
         self.ctrls.panelPages.Fit()
         self.Fit()
 
@@ -263,11 +298,14 @@ class OptionsDialog(wx.Dialog):
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
 
         # Transfer options to dialog
-        for o, c, t in self.combinedOptionToControl:
+        for oct in self.combinedOptionToControl:
+            o, c, t = oct[:3]
+            self.idToOptionEntryMap[self.ctrls[c].GetId()] = oct
+
             if t == "b":   # boolean field = checkbox
                 self.ctrls[c].SetValue(
                         self.pWiki.getConfig().getboolean("main", o))
-            elif t in ("t", "tre", "i0+", "f0+", "color0"):  # text field or regular expression field
+            elif t in ("t", "tre", "ttdf", "i0+", "f0+", "color0"):  # text field or regular expression field
                 self.ctrls[c].SetValue(
                         uniToGui(self.pWiki.getConfig().get("main", o)) )
             elif t == "seli":   # Selection -> transfer index
@@ -279,6 +317,17 @@ class OptionsDialog(wx.Dialog):
             elif t == "spin":   # Numeric SpinCtrl -> transfer number
                 self.ctrls[c].SetValue(
                         self.pWiki.getConfig().getint("main", o))
+
+            # Register events for "..." buttons
+            if t in ("color0", "ttdf"):
+                params = oct[3:]
+                if len(params) > 0:
+                    # params[0] is name of the "..." button after the text field
+                    dottedButtonId = self.ctrls[params[0]].GetId()
+                    self.idToOptionEntryMap[dottedButtonId] = oct
+
+                    wx.EVT_BUTTON(self, dottedButtonId,
+                            self.OnDottedButtonPressed)
 
         # Options with special treatment
         self.ctrls.cbLowResources.SetValue(
@@ -300,38 +349,41 @@ class OptionsDialog(wx.Dialog):
 
         self.ctrls.lbPages.SetSelection(0)
         self._refreshForPage()
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
         wx.EVT_LISTBOX(self, GUI_ID.lbPages, self.OnLbPages)
-
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+
 
         wx.EVT_BUTTON(self, GUI_ID.btnSelectFaceHtmlPrev, self.OnSelectFaceHtmlPrev)
 
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlLinkColor,
-                lambda evt: self.selectColor(self.ctrls.tfHtmlLinkColor))
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlALinkColor,
-                lambda evt: self.selectColor(self.ctrls.tfHtmlALinkColor))
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlVLinkColor,
-                lambda evt: self.selectColor(self.ctrls.tfHtmlVLinkColor))
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlTextColor,
-                lambda evt: self.selectColor(self.ctrls.tfHtmlTextColor))
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlBgColor,
-                lambda evt: self.selectColor(self.ctrls.tfHtmlBgColor))
-
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorPlaintextColor,
-                lambda evt: self.selectColor(self.ctrls.tfEditorPlaintextColor))
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorLinkColor,
-                lambda evt: self.selectColor(self.ctrls.tfEditorLinkColor))
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorAttributeColor,
-                lambda evt: self.selectColor(self.ctrls.tfEditorAttributeColor))
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorBgColor,
-                lambda evt: self.selectColor(self.ctrls.tfEditorBgColor))
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorSelectionFgColor,
-                lambda evt: self.selectColor(self.ctrls.tfEditorSelectionFgColor))
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorSelectionBgColor,
-                lambda evt: self.selectColor(self.ctrls.tfEditorSelectionBgColor))
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorCaretColor,
-                lambda evt: self.selectColor(self.ctrls.tfEditorCaretColor))
+#         wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlLinkColor,
+#                 lambda evt: self.selectColor(self.ctrls.tfHtmlLinkColor))
+#         wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlALinkColor,
+#                 lambda evt: self.selectColor(self.ctrls.tfHtmlALinkColor))
+#         wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlVLinkColor,
+#                 lambda evt: self.selectColor(self.ctrls.tfHtmlVLinkColor))
+#         wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlTextColor,
+#                 lambda evt: self.selectColor(self.ctrls.tfHtmlTextColor))
+#         wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlBgColor,
+#                 lambda evt: self.selectColor(self.ctrls.tfHtmlBgColor))
+# 
+#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorPlaintextColor,
+#                 lambda evt: self.selectColor(self.ctrls.tfEditorPlaintextColor))
+#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorLinkColor,
+#                 lambda evt: self.selectColor(self.ctrls.tfEditorLinkColor))
+#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorAttributeColor,
+#                 lambda evt: self.selectColor(self.ctrls.tfEditorAttributeColor))
+#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorBgColor,
+#                 lambda evt: self.selectColor(self.ctrls.tfEditorBgColor))
+#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorSelectionFgColor,
+#                 lambda evt: self.selectColor(self.ctrls.tfEditorSelectionFgColor))
+#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorSelectionBgColor,
+#                 lambda evt: self.selectColor(self.ctrls.tfEditorSelectionBgColor))
+#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorCaretColor,
+#                 lambda evt: self.selectColor(self.ctrls.tfEditorCaretColor))
 
         wx.EVT_BUTTON(self, GUI_ID.btnSelectClipCatchSoundFile,
                 lambda evt: self.selectFile(self.ctrls.tfClipCatchSoundFile,
@@ -340,11 +392,17 @@ class OptionsDialog(wx.Dialog):
         wx.EVT_BUTTON(self, GUI_ID.btnSelectExportDefaultDir,
                 lambda evt: self.selectDirectory(self.ctrls.tfExportDefaultDir))
 
-        wx.EVT_BUTTON(self, GUI_ID.btnSelectPageStatusTimeFormat,
-                self.OnSelectPageStatusTimeFormat)
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectWikiOpenNewDefaultDir,
+                lambda evt: self.selectDirectory(
+                self.ctrls.tfWikiOpenNewDefaultDir))
 
         wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,
                 self.OnEditorImagePasteFileTypeChoice)
+
+#         wx.EVT_BUTTON(self, GUI_ID.btnSelectPageStatusTimeFormat,
+#                 lambda evt: self.selectDateTimeFormat(
+#                 self.ctrls.tfPageStatusTimeFormat))
+
 
 
     def _refreshForPage(self):
@@ -374,8 +432,11 @@ class OptionsDialog(wx.Dialog):
 
     def OnOk(self, evt):
         fieldsValid = True
+
         # First check validity of field contents
-        for o, c, t in self.combinedOptionToControl:
+        for oct in self.combinedOptionToControl:
+            o, c, t = oct[:3]
+
             if t == "tre":
                 # Regular expression field, test if re is valid
                 try:
@@ -439,12 +500,14 @@ class OptionsDialog(wx.Dialog):
                 self._refreshForPage()
                 return
 
-        # Then transfer options from dialog to config file
-        for o, c, t in self.combinedOptionToControl:
+        # Then transfer options from dialog to config object
+        for oct in self.combinedOptionToControl:
+            o, c, t = oct[:3]
+
             # TODO Handle unicode text controls
             if t == "b":
                 self.pWiki.getConfig().set("main", o, repr(self.ctrls[c].GetValue()))
-            elif t in ("t", "tre", "i0+", "f0+", "color0"):
+            elif t in ("t", "tre", "ttdf", "i0+", "f0+", "color0"):
                 self.pWiki.getConfig().set(
                         "main", o, guiToUni(self.ctrls[c].GetValue()) )
             elif t == "seli":   # Selection -> transfer index
@@ -485,16 +548,32 @@ class OptionsDialog(wx.Dialog):
             self.ctrls.tfFacenameHtmlPreview.SetValue(dlg.GetValue())
         dlg.Destroy()
         
-    def OnSelectPageStatusTimeFormat(self, evt):
-        dlg = DateformatDialog(self, -1, self.pWiki, 
-                deffmt=self.ctrls.tfPageStatusTimeFormat.GetValue())
-        if dlg.ShowModal() == wx.ID_OK:
-            self.ctrls.tfPageStatusTimeFormat.SetValue(dlg.GetValue())
-        dlg.Destroy()
+#     def OnSelectPageStatusTimeFormat(self, evt):
+#         dlg = DateformatDialog(self, -1, self.pWiki, 
+#                 deffmt=self.ctrls.tfPageStatusTimeFormat.GetValue())
+#         if dlg.ShowModal() == wx.ID_OK:
+#             self.ctrls.tfPageStatusTimeFormat.SetValue(dlg.GetValue())
+#         dlg.Destroy()
 
     def OnEditorImagePasteFileTypeChoice(self, evt):
         enabled = self.ctrls.chEditorImagePasteFileType.GetSelection() == 2
         self.ctrls.tfEditorImagePasteQuality.Enable(enabled)
+
+
+    def OnDottedButtonPressed(self, evt):
+        """
+        Called when a "..." button is pressed (for some of them) to show
+        and alternative way to specify the input, e.g. showing a color selector
+        for color entries instead of using the bare text field
+        """
+        oct = self.idToOptionEntryMap[evt.GetId()]
+        o, c, t = oct[:3]
+        params = oct[3:]
+        
+        if t == "color0":
+            self.selectColor(self.ctrls[c])
+        elif t == "ttdf":   # Date/time format
+            self.selectDateTimeFormat(self.ctrls[c])
 
 
     def selectColor(self, tfield):
@@ -533,4 +612,14 @@ class OptionsDialog(wx.Dialog):
             
         if selfile:
             tfield.SetValue(selfile)
+            
+    def selectDateTimeFormat(self, tfield):
+        dlg = DateformatDialog(self, -1, self.pWiki, 
+                deffmt=tfield.GetValue())
+        try:
+            if dlg.ShowModal() == wx.ID_OK:
+                tfield.SetValue(dlg.GetValue())
+        finally:
+            dlg.Destroy()
+
 

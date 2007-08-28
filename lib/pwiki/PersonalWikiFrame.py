@@ -34,6 +34,7 @@ from WikiTreeCtrl import WikiTreeCtrl
 from WikiHtmlView import createWikiHtmlView
 from LogWindow import LogWindow
 from DocStructureCtrl import DocStructureCtrl
+from TimeViewCtrl import TimeViewCtrl
 from MainAreaPanel import MainAreaPanel
 from DocPagePresenter import DocPagePresenter
 
@@ -153,7 +154,7 @@ class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
 
         if cmdLineAction.cmdLineError:
             cmdLineAction.showCmdLineUsage(self,
-                    u"Bad formatted command line.\n\n")
+                    _(u"Bad formatted command line.") + u"\n\n")
             self.Close()
             self.Destroy()
             return
@@ -300,6 +301,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 "viewsTree_position", 0)
         self.layoutDocStructurePosition = self.configuration.getint("main",
                 "docStructure_position", 0)
+        self.layoutTimeViewPosition = self.configuration.getint("main",
+                "timeView_position", 0)
 
         # this will keep track of the last font used in the editor
         self.lastEditorFont = None
@@ -309,7 +312,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # if a wiki to open wasn't passed in use the last_wiki from the global config
         wikiToOpen = cmdLineAction.wikiToOpen
-        wikiWordToOpen = cmdLineAction.wikiWordToOpen
+        wikiWordsToOpen = cmdLineAction.wikiWordsToOpen
         anchorToOpen = cmdLineAction.anchorToOpen
 
         if not wikiToOpen:
@@ -339,7 +342,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # if a wiki to open is set, open it
         if wikiToOpen:
             if exists(wikiToOpen):
-                self.openWiki(wikiToOpen, wikiWordToOpen,
+                self.openWiki(wikiToOpen, wikiWordsToOpen,
                 anchorToOpen=anchorToOpen)
             else:
                 self.statusBar.SetStatusText(
@@ -459,6 +462,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def getWikiDocument(self):
         return self.wikiDataManager
 
+    def isWikiLoaded(self):
+        return self.getWikiDocument() is not None
+        
     def getWikiConfigPath(self):
         if self.wikiDataManager is None:
             return None
@@ -916,9 +922,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 
         self.editorMenu.InsertMenu(self.textBlocksMenuPosition, oldItemId,
                 '&Text blocks', tbmenu)
-
-
-
 
 
     def OnInsertIconAttribute(self, evt):
@@ -1436,6 +1439,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.windowLayouter.isWindowCollapsed("doc structure")))
         wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateDocStructureMenuItem)
 
+        menuID = wx.NewId()
+        menuItem = wx.MenuItem(viewMenu, menuID,
+                "&Show Time View\t" + self.keyBindings.ShowTimeView,
+                "Show Time View", wx.ITEM_CHECK)
+        viewMenu.AppendItem(menuItem)
+        wx.EVT_MENU(self, menuID, lambda evt: self.setShowTimeView(
+                self.windowLayouter.isWindowCollapsed("time view")))
+        wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateTimeViewMenuItem)
+
         menuItem = wx.MenuItem(viewMenu, GUI_ID.CMD_STAY_ON_TOP,
                 "Stay on Top\t" + self.keyBindings.StayOnTop, 
                 "Stay on Top", wx.ITEM_CHECK)
@@ -1692,10 +1704,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.fastSearchField = wx.TextCtrl(tb, GUI_ID.TF_FASTSEARCH,
                 style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
         tb.AddControl(self.fastSearchField)
-#         wx.EVT_TEXT_ENTER(self, GUI_ID.TF_FASTSEARCH, self.OnFastSearchEnter)
-#         wx.EVT_CHAR(self.fastSearchField, self.OnFastSearchChar)
         wx.EVT_KEY_DOWN(self.fastSearchField, self.OnFastSearchKeyDown)
-#         wx.EVT_KEY_UP(self.fastSearchField, self.OnFastSearchChar)
 
         icon = self.lookupIcon("pin")
 #         tbID = wx.NewId()
@@ -1841,6 +1850,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def OnUpdateDocStructureMenuItem(self, evt):
         evt.Check(not self.windowLayouter.isWindowCollapsed("doc structure"))
+
+    def OnUpdateTimeViewMenuItem(self, evt):
+        evt.Check(not self.windowLayouter.isWindowCollapsed("time view"))
 
     def OnUpdateStayOnTopMenuItem(self, evt):
         evt.Check(self.getStayOnTop())
@@ -2018,6 +2030,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return LogWindow(parent, -1, self)
         elif winName == "doc structure":
             return DocStructureCtrl(parent, -1, self)
+        elif winName == "time view":
+            return TimeViewCtrl(parent, -1, self)
         elif winName == "main area panel":  # TODO remove this hack
             self.mainAreaPanel = MainAreaPanel(parent, self, -1)
             self.mainAreaPanel.getMiscEvent().addListener(self)
@@ -2381,7 +2395,7 @@ These are your default global settings.
 
 
 
-    def openWiki(self, wikiCombinedFilename, wikiWordToOpen=None,
+    def openWiki(self, wikiCombinedFilename, wikiWordsToOpen=None,
             ignoreWdhName=False, anchorToOpen=None):
         """
         opens up a wiki
@@ -2389,6 +2403,10 @@ These are your default global settings.
                 wiki config file (if any) be ignored?
         """
         
+        # Fix special case
+        if wikiWordsToOpen == (None,):
+            wikiWordsToOpen = None
+
         # Save the state of the currently open wiki, if there was one open
         # if the new config is the same as the old, don't resave state since
         # this could be a wiki overwrite from newWiki. We don't want to overwrite
@@ -2450,10 +2468,10 @@ These are your default global settings.
                     return False
                 elif frmcode == 1:
                     # Update needed -> ask
-                    answer = wx.MessageBox(u"The wiki needs an update to work "
+                    answer = wx.MessageBox(_(u"The wiki needs an update to work "
                             u"with this version of WikidPad. Older versions of "
                             u"WikidPad may be unable to read the wiki after "
-                            u"an update.", u'Update database?',
+                            u"an update."), _(u'Update database?'),
                             wx.OK | wx.CANCEL | wx.ICON_QUESTION, self)
                     if answer == wx.CANCEL:
                         return False
@@ -2474,14 +2492,14 @@ These are your default global settings.
                     BadConfigurationFileException,
                     MissingConfigurationFileException), e:
                 # Something else went wrong
-                self.displayErrorMessage("Error connecting to database in '%s'"
+                self.displayErrorMessage(_(u"Error connecting to database in '%s'")
                         % cfgPath, e)
                 if not isinstance(e, DbReadAccessError):
                     traceback.print_exc()
 #                 self.lostAccess(e)
                 return False
             except DbWriteAccessError, e:
-                self.displayErrorMessage("Can't write to database '%s'"
+                self.displayErrorMessage(_(u"Can't write to database '%s'")
                         % cfgPath, e)
                 break   # ???
 
@@ -2501,20 +2519,48 @@ These are your default global settings.
         try:
             furtherWikiWords = []
             # what was the last wiki word opened
-            lastWikiWord = wikiWordToOpen
-            if not lastWikiWord:
-                lastWikiWord = splittedWikiWord
-            if not lastWikiWord:
-                lastWikiWord = self.getConfig().get("main",
+#             lastWikiWord = wikiWordToOpen
+#             if not lastWikiWord:
+#                 lastWikiWord = splittedWikiWord
+#             if not lastWikiWord:
+#                 lastWikiWord = self.getConfig().get("main",
+#                         "first_wiki_word", u"")
+#                 if lastWikiWord == u"":
+#                     lastWikiWord = self.getConfig().get("main",
+#                             "last_wiki_word", None)
+#                     fwws = self.getConfig().get("main",
+#                             "further_wiki_words", u"")
+#                     print "openWiki", repr(fwws)
+#                     if fwws != u"":
+#                         furtherWikiWords = [unescapeForIni(w) for w in
+#                                 fwws.split(u";")]
+
+            lastWikiWords = wikiWordsToOpen
+            if wikiWordsToOpen is None:
+                if splittedWikiWord:
+                    # Take wiki word from combinedFilename
+                    wikiWordsToOpen = (splittedWikiWord,)
+                else:
+                    # Try to find first wiki word
+                    firstWikiWord = self.getConfig().get("main",
                         "first_wiki_word", u"")
-                if lastWikiWord == u"":
-                    lastWikiWord = self.getConfig().get("main",
-                            "last_wiki_word", None)
-                    fwws = self.getConfig().get("main",
-                            "further_wiki_words", u"")
-                    if fwws != u"":
-                        furtherWikiWords = [unescapeForIni(w) for w in
-                                fwws.split(u";")]
+                    if firstWikiWord != u"":
+                        wikiWordsToOpen = (firstWikiWord,)
+                    else:
+                        # Nothing worked so take the last open wiki words
+                        lastWikiWord = self.getConfig().get("main",
+                                "last_wiki_word", u"")
+                        fwws = self.getConfig().get("main",
+                                "further_wiki_words", u"")
+                        if fwws != u"":
+                            furtherWikiWords = [unescapeForIni(w) for w in
+                                    fwws.split(u";")]
+                        else:
+                            furtherWikiWords = ()
+                        
+                        wikiWordsToOpen = (lastWikiWord,) + \
+                                tuple(furtherWikiWords)
+
 
             # reset the gui
 #             self.resetGui()
@@ -2542,19 +2588,20 @@ These are your default global settings.
     #                 uniToGui(u"Opened wiki '%s'" % self.wikiName), 0)
     
             # now try and open the last wiki page as leftmost tab
-            if lastWikiWord and lastWikiWord != self.wikiName:
+            if len(wikiWordsToOpen) > 0 and wikiWordsToOpen[0] != self.wikiName:
+                firstWikiWord = wikiWordsToOpen[0]
                 # if the word is not a wiki word see if a word that starts with the word can be found
-                if not self.getWikiData().isDefinedWikiWord(lastWikiWord):
+                if not self.getWikiData().isDefinedWikiWord(firstWikiWord):
                     wordsStartingWith = self.getWikiData().getWikiWordsStartingWith(
-                            lastWikiWord, True)
+                            firstWikiWord, True)
                     if wordsStartingWith:
-                        lastWikiWord = wordsStartingWith[0]
+                        firstWikiWord = wordsStartingWith[0]
 
-                self.openWikiPage(lastWikiWord, anchor=anchorToOpen)
+                self.openWikiPage(firstWikiWord, anchor=anchorToOpen)
                 self.findCurrentWordInTree()
-                
+
             # If present, open further words in tabs on the right
-            for word in furtherWikiWords:
+            for word in wikiWordsToOpen[1:]:
                 if not self.getWikiData().isDefinedWikiWord(word):
                     wordsStartingWith = self.getWikiData().getWikiWordsStartingWith(
                             word, True)
@@ -2565,7 +2612,6 @@ These are your default global settings.
             self.tree.SetScrollPos(wx.HORIZONTAL, 0)
     
             # enable the editor control whether or not the wiki root was found
-#             for e in self.editors: e.Enable(1)
             for dpp in self.getMainAreaPanel().getDocPagePresenters():
                 e = dpp.getSubControl("textedit")
                 e.Enable(True)
@@ -2626,29 +2672,29 @@ These are your default global settings.
                     # Store the last open wiki words
                     
                     # First create a list of open wiki words
-                    openWikiWords = []
-                    for pres in self.getMainAreaPanel().getDocPagePresenters():
-                        docPage = pres.getDocPage()
-                        if isinstance(docPage, (DocPages.AliasWikiPage,
-                                DocPages.WikiPage)):
-                            openWikiWords.append(
-                                    docPage.getNonAliasPage().getWikiWord())
+#                     openWikiWords = []
+#                     for pres in self.getMainAreaPanel().getDocPagePresenters():
+#                         docPage = pres.getDocPage()
+#                         if isinstance(docPage, (DocPages.AliasWikiPage,
+#                                 DocPages.WikiPage)):
+#                             openWikiWords.append(
+#                                     docPage.getNonAliasPage().getWikiWord())
 
                     self.fireMiscEventKeys(("closing current wiki",))
 
-                    if len(openWikiWords) > 0:
-                        # Write the leftmost word to "last_wiki_word" for
-                        # backward compatibility
-                        self.getConfig().set("main", "last_wiki_word",
-                                openWikiWords[0])
+#                     if len(openWikiWords) > 0:
+#                         # Write the leftmost word to "last_wiki_word" for
+#                         # backward compatibility
+#                         self.getConfig().set("main", "last_wiki_word",
+#                                 openWikiWords[0])
 
-                    # Write further words (after the leftmost) to config
-                    if len(openWikiWords) < 2:
-                        self.getConfig().set("main", "further_wiki_words", u"")
-                    else:
-                        fwws = u";".join([escapeForIni(w, u" ;")
-                                for w in openWikiWords[1:]])
-                        self.getConfig().set("main", "further_wiki_words", fwws)
+#                     # Write further words (after the leftmost) to config
+#                     if len(openWikiWords) < 2:
+#                         self.getConfig().set("main", "further_wiki_words", u"")
+#                     else:
+#                         fwws = u";".join([escapeForIni(w, u" ;")
+#                                 for w in openWikiWords[1:]])
+#                         self.getConfig().set("main", "further_wiki_words", fwws)
 
                     if self.getWikiData() and saveState:
                         self.saveCurrentWikiState()
@@ -2676,6 +2722,12 @@ These are your default global settings.
                     raise LossyWikiCloseDeniedException
                 
                 self.fireMiscEventKeys(("dropping current wiki",))
+
+                self.wikiData = None
+                if self.wikiDataManager is not None:
+                    self.wikiDataManager.getMiscEvent().removeListener(self)
+                self.wikiDataManager = None
+                
                 # else go ahead
 
             # Clear wiki-bound hot key (TODO: Does not work!)
@@ -3182,7 +3234,7 @@ These are your default global settings.
             filePath, wikiWordToOpen, anchorToOpen = wikiUrlToPathWordAndAnchor(
                     link2)
             if exists(filePath):
-                self.openWiki(filePath, wikiWordToOpen=wikiWordToOpen,
+                self.openWiki(filePath, wikiWordsToOpen=(wikiWordToOpen,),
                         anchorToOpen=anchorToOpen)  # ?
                 return True
             else:
@@ -3393,6 +3445,11 @@ These are your default global settings.
         self.windowLayouter.expandWindow("doc structure", onOrOff)
         if onOrOff:
             self.windowLayouter.focusWindow("doc structure")
+
+    def setShowTimeView(self, onOrOff):
+        self.windowLayouter.expandWindow("time view", onOrOff)
+        if onOrOff:
+            self.windowLayouter.focusWindow("time view")
 
 
     def getStayOnTop(self):
@@ -3967,19 +4024,26 @@ These are your default global settings.
             fs.setModDateIsEnough(self.configuration.getboolean("main",
                     "fileStorage_identity_modDateIsEnough", False))
 
-            # Move main tree and view tree if layout was changed
+
+            # Build new layout config string
             newLayoutMainTreePosition = self.configuration.getint("main",
                 "mainTree_position", 0)
             newLayoutViewsTreePosition = self.configuration.getint("main",
                 "viewsTree_position", 0)
             newLayoutDocStructurePosition = self.configuration.getint("main",
                 "docStructure_position", 0)
+            newLayoutTimeViewPosition = self.configuration.getint("main",
+                "timeView_position", 0)    
             if self.layoutViewsTreePosition != newLayoutViewsTreePosition or \
                     self.layoutMainTreePosition != newLayoutMainTreePosition or \
-                    self.layoutDocStructurePosition != newLayoutDocStructurePosition:
+                    self.layoutDocStructurePosition != newLayoutDocStructurePosition or \
+                    self.layoutTimeViewPosition != newLayoutTimeViewPosition:
+
                 self.layoutViewsTreePosition = newLayoutViewsTreePosition
                 self.layoutMainTreePosition = newLayoutMainTreePosition
                 self.layoutDocStructurePosition = newLayoutDocStructurePosition
+                self.layoutTimeViewPosition = newLayoutTimeViewPosition
+
                 mainPos = {0:"left", 1:"right", 2:"above", 3:"below"}\
                         [newLayoutMainTreePosition]
 
@@ -4001,6 +4065,13 @@ These are your default global settings.
                     layoutCfStr += ";layout relation:%s&layout relative to:maintree&name:viewstree" % \
                             viewsPos
 
+                if newLayoutTimeViewPosition > 0:
+                    timeViewPos = {1:"left", 2:"right", 3:"above", 4:"below"}\
+                        [newLayoutTimeViewPosition]
+                    layoutCfStr += ";layout relation:%s&layout relative to:main area panel&name:time view&"\
+                                "layout sash position:120&layout sash effective position:120" % \
+                                timeViewPos
+
                 # Layout for doc structure window
                 if newLayoutDocStructurePosition > 0:
                     docStructPos = {1:"left", 2:"right", 3:"above", 4:"below"}\
@@ -4012,6 +4083,7 @@ These are your default global settings.
                 # Layout for log window
                 layoutCfStr += ";layout relation:below&layout relative to:main area panel&name:log&"\
                             "layout sash position:1&layout sash effective position:120"
+                            
 
                 self.configuration.set("main", "windowLayout", layoutCfStr)
                 # Call of changeLayoutByCf() crashes on Linux/GTK so save
@@ -4252,9 +4324,14 @@ These are your default global settings.
         try:
             clAction = CmdLineAction([])
             clAction.wikiToOpen = wd.getWikiConfigPath()
-            ww = self.getCurrentWikiWord()
-            if ww is not None:
-                clAction.wikiWordToOpen = ww
+            wws = self.getMainAreaPanel().getOpenWikiWords()
+            
+            if wws is not None:
+                clAction.wikiWordsToOpen = wws
+            
+#             ww = self.getCurrentWikiWord()
+#             if ww is not None:
+#                 clAction.wikiWordsToOpen = (ww,)
 
             wx.GetApp().startPersonalWikiFrame(clAction)
         except Exception, e:
@@ -4472,10 +4549,28 @@ These are your default global settings.
             raise
 
 
+    def getDefDirForWikiOpenNew(self):
+        """
+        Return the appropriate default directory to start when user
+        wants to create a new or open an existing wiki.
+        """
+        startDir = self.getConfig().get("main",
+                "wikiOpenNew_defaultDir", u"")
+        if startDir == u"":
+            startDir = self.getWikiConfigPath()
+            if startDir is None:
+                startDir = self.getLastActiveDir()
+            else:
+                startDir = dirname(dirname(startDir))
+        
+        return startDir
+
+
+
+
     def OnWikiOpen(self, event):
-        startDir = dirname(self.getLastActiveDir())
         dlg = wx.FileDialog(self, u"Choose a Wiki to open",
-                startDir, "", "*.wiki", wx.OPEN)
+                self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             self.openWiki(mbcsDec(abspath(dlg.GetPath()), "replace")[0])
         dlg.Destroy()
@@ -4483,7 +4578,7 @@ These are your default global settings.
 
     def OnWikiOpenNewWindow(self, event):
         dlg = wx.FileDialog(self, u"Choose a Wiki to open",
-                self.getLastActiveDir(), "", "*.wiki", wx.OPEN)
+                self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             try:
                 clAction = CmdLineAction([])
@@ -4503,13 +4598,13 @@ These are your default global settings.
 
     def OnWikiOpenAsType(self, event):
         dlg = wx.FileDialog(self, u"Choose a Wiki to open",
-                self.getLastActiveDir(), "", "*.wiki", wx.OPEN)
+                self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             self.openWiki(mbcsDec(abspath(dlg.GetPath()), "replace")[0],
                     ignoreWdhName=True)
         dlg.Destroy()
-        
-        
+
+
     def OnWikiNew(self, event):
         dlg = wx.TextEntryDialog (self,
                 u"Name for new wiki (must be in the form of a WikiWord):",
@@ -4523,14 +4618,9 @@ These are your default global settings.
             # make sure this is a valid wiki word
             if wikiName.find(u' ') == -1 and \
                     WikiFormatting.isNakedWikiWordForNewWiki(wikiName):
-                startDir = self.getWikiConfigPath()
-                if startDir is None:
-                    startDir = self.getLastActiveDir()
-                else:
-                    startDir = dirname(dirname(startDir))
 
                 dlg = wx.DirDialog(self, u"Directory to store new wiki",
-                        startDir,
+                        self.getDefDirForWikiOpenNew(),
                         style=wx.DD_DEFAULT_STYLE|wx.DD_NEW_DIR_BUTTON)
                 if dlg.ShowModal() == wx.ID_OK:
 #                     try:

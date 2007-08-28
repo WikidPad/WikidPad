@@ -71,6 +71,9 @@ class PrintMainDialog(wx.Dialog):
         self.pWiki.saveAllDocPages(force=True)
         self.pWiki.getWikiData().commit()
         
+        # Fixes focus bug under Linux
+        self.SetFocus()
+        
 #         for e in self.exporterList:
 #             e[3].Show(False)
 #             e[3].Enable(False)

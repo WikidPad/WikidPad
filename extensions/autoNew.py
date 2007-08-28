@@ -52,7 +52,7 @@ _testRE = re.compile(ur"^New[0-9]{6}$")
 
 def autoNew(wiki, evt):
     wiki.saveAllDocPages()
-    candidates = wiki.wikiData.getWikiWordsStartingWith(u"New",
+    candidates = wiki.getWikiData().getWikiWordsStartingWith(u"New",
             includeAliases=True)
             
     candidates = filter(lambda w: _testRE.match(w), candidates)

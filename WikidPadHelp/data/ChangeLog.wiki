@@ -1,6 +1,25 @@
 ﻿++ Change Log
 
-Jul 27, 2007 (1.9beta8)
+
+Aug. 28, 2007 (1.9beta9)
+
+    * Very basic support for a time view/timeline. Much work to do
+      yet. See TimeViewWindow
+    * Option to set default directory where to start when
+      opening/creating a wiki.
+    * Attribute "template_head" to automatically change heading of
+      pages created from a template.
+      See [Templates]#+++# Automatic# heading# replacement
+
+    * Bug fixed: Plugin "Create new page" did not work with
+      "Original Sqlite" databases
+    * Bug fixed: Linux/GTK: Dialog not focused properly
+    * Bug fixed: When cloning window only first wiki word tab was
+      shown in the new window
+
+
+
+Jul 27, 2007 (1.9beta8, repository revision in "mbutscher" branch: 123)
 
     * New document structure window. See DocStructureWindow
     * Search dialogs (except incremental search) now show an error

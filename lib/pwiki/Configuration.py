@@ -517,6 +517,9 @@ GLOBALDEFAULTS = {
             # wiki
     ("main", "hotKey_showHide_byApp_isActive"): "True", # Separate switch to deactivate hotkey
             # without deleting the hotkey setting itself
+            
+    ("main", "wikiOpenNew_defaultDir"): u"",   # Default directory to show when opening
+            # or creating a wiki. If entry is empty, a built-in default is used.
 
     ("main", "auto_save"): "True",  # Boolean field, if auto save should be active
     ("main", "auto_save_delay_key_pressed"): "3",  # Seconds to wait after last key pressed and ...
@@ -590,6 +593,12 @@ GLOBALDEFAULTS = {
             # Ctrl pressed, should it then open link in  0: a new tab in foreground, 1: new tab background, 2: same tab
     ("main", "mouse_middleButton_withCtrl"): "0", # Same, but if Ctrl is pressed
 
+    # Time view options
+    ("main", "timeView_position"): "0",  # Mode where to place the time view window,
+            # 0: Hidden, 1:Left, 2:Right, 3:Above, 4:Below
+    ("main", "timeView_dateFormat"): u"%Y %m %d",  # Time format to show and enter dates in the time view,
+            # especially in the timeline    
+    ("main", "timeView_autohide"): "False", # Automatically hide time view after something was selected in it.
 
     # Search options
     ("main", "search_wiki_context_before"): "20", # No. of context characters before

@@ -43,6 +43,9 @@ class SearchWikiOptionsDialog(wx.Dialog):
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
 
@@ -533,6 +536,9 @@ class SearchWikiDialog(wx.Dialog):   # TODO
         self.listPagesOperation = ListWikiPagesOperation()
         self._refreshSavedSearchesList()
         self._refreshSearchHistoryCombo()
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
         wx.EVT_BUTTON(self, GUI_ID.btnFindPages, self.OnSearchWiki)
         wx.EVT_BUTTON(self, GUI_ID.btnSetPageList, self.OnSetPageList)
@@ -998,6 +1004,9 @@ class SearchPageDialog(wx.Dialog):   # TODO
         
         self.firstFind = True
         self._refreshSearchHistoryCombo()
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
         wx.EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)        
         wx.EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
@@ -1228,6 +1237,9 @@ class WikiPageListConstructionDialog(wx.Dialog, MiscEventSourceMixin):   # TODO
         if not allowOrdering:
             self.ctrls.chOrdering.SetSelection(self._ORDERNAME_TO_CHOICE["no"])
             self.ctrls.chOrdering.Enable(False)
+            
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
         wx.EVT_TEXT(self, GUI_ID.tfSubtreeLevels,
                 lambda evt: self.ctrls.rbPagesInList.SetValue(True))
@@ -1576,6 +1588,9 @@ class FastSearchPopup(wx.Frame):
 
         setWindowSize(self, (width, height))
         setWindowPos(self, fullVisible=True)
+        
+        # Fixes focus bug under Linux
+        self.resultBox.SetFocus()
 
         wx.EVT_KILL_FOCUS(self.resultBox, self.OnKillFocus)
         wx.EVT_CLOSE(self, self.OnClose)

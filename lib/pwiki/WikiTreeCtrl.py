@@ -812,8 +812,10 @@ class ModifiedWithinNode(AbstractNode):
         return style
 
     def listChildren(self):
-        wikiData = self.treeCtrl.pWiki.getWikiData()
-        words = wikiData.getWikiWordsModifiedWithin(self.daySpan)
+#         wikiData = self.treeCtrl.pWiki.getWikiData()
+#         words = wikiData.getWikiWordsModifiedLastDays(self.daySpan)
+        wikiDoc = self.treeCtrl.pWiki.getWikiDocument()
+        words = wikiDoc.getWikiWordsModifiedLastDays(self.daySpan)
         self.treeCtrl.pWiki.getCollator().sort(words)
 
         return [WikiWordSearchNode(self.treeCtrl, self, w) for w in words]

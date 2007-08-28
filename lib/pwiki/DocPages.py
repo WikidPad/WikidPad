@@ -351,11 +351,6 @@ class WikiPage(DocPage):
 
     def getParentRelationships(self):
         return self.getWikiData().getParentRelationships(self.wikiWord)
-#         if self.parentRelations is None:
-#             self.parentRelations = \
-#                     self.getWikiData().getParentRelationships(self.wikiWord)
-#         
-#         return self.parentRelations
 
         
     def getChildRelationships(self, existingonly=False, selfreference=True,
@@ -414,7 +409,15 @@ class WikiPage(DocPage):
             values = []
             self.props[key] = values
         values.append(val)
-        
+
+
+    def cloneDeepProperties(self):
+        result = {}
+        for key, value in self.props.iteritems():
+            result[key] = value[:]
+            
+        return result
+
 
     def getTodos(self):
         if self.todos is None:
@@ -507,6 +510,34 @@ class WikiPage(DocPage):
                 return None
 
 
+    def _changeHeadingForTemplate(self, content):
+        """
+        Return modified or unmodified content
+        """
+        # Prefix is normally u"++"
+        pageTitlePrefix = \
+                self.getWikiDocument().getFormatting().getPageTitlePrefix() + u" "
+        wikiWordHead = \
+                self.getWikiDocument().getWikiPageTitle(self.getWikiWord())
+                
+        if wikiWordHead is None:
+            return content
+            
+        wikiWordHead = pageTitlePrefix + wikiWordHead + u"\n"
+            
+        # Remove current heading, if present. removeFirst holds number of
+        # characters to remove at beginning when prepending new title 
+
+        removeFirst = 0
+        if content.startswith(pageTitlePrefix):
+            try:
+                removeFirst = content.index(u"\n", len(pageTitlePrefix)) + 1
+            except ValueError:
+                pass
+                
+        return wikiWordHead + content[removeFirst:]
+
+
     def getContent(self):
         """
         Returns page content. If page doesn't exist already the template
@@ -526,11 +557,21 @@ class WikiPage(DocPage):
                 # Check if there is a template page
                 try:
                     parentPage = self.wikiDocument.getWikiPage(parents[0])
+                    # TODO Error checking
                     templateWord = parentPage.getPropertyOrGlobal("template")
                     templatePage = self.wikiDocument.getWikiPage(templateWord)
+                    
+                    # getLiveText() would be more logical, but this may
+                    # mean that content is up to date, while attributes
+                    # are not updated.
                     content = templatePage.getContent()
-                    # Load also properties from template page (especially pagetype prop.)
-                    self.props = templatePage.getProperties()
+                    # Load properties from template page
+                    self.props = templatePage.cloneDeepProperties()
+                    
+                    # Check if template title should be changed
+                    tplTitle = self.getPropertyOrGlobal(u"template_head", u"auto")
+                    if tplTitle in (u"auto", u"automatic"):
+                        content = self._changeHeadingForTemplate(content)
                 except (WikiWordNotFoundException, WikiFileNotFoundException):
                     pass
 

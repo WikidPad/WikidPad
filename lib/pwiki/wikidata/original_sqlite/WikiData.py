@@ -814,7 +814,6 @@ class WikiData:
         get the list of words starting with thisStr. used for autocompletion.
         Function must work for read-only wiki.
         """
-
         # Escape some characters:   # TODO more elegant
         thisStr = thisStr.replace("[", "[[").replace("]", "[]]").replace("[[", "[[]")
         try:
@@ -832,7 +831,7 @@ class WikiData:
             else:
                 if includeAliases:
                     return self.connWrap.execSqlQuerySingleColumn(
-                            "select word from wikiwords where wordnormcase glob (? || '*') union "
+                            "select word from wikiwords where word glob (? || '*') union "
                             "select value from wikiwordprops where key = 'alias' and "
                             "value glob (? || '*')", (thisStr, thisStr))
                 else:
@@ -889,7 +888,7 @@ class WikiData:
 
 
 
-    def getWikiWordsModifiedWithin(self, days):
+    def getWikiWordsModifiedLastDays(self, days):
         """
         Function must work for read-only wiki.
         """
@@ -903,8 +902,22 @@ class WikiData:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
-                
-    
+    def getWikiWordsModifiedWithin(self, startTime, endTime):
+        """
+        Function must work for read-only wiki.
+        startTime and endTime are floating values as returned by time.time()
+        startTime is inclusive, endTime is exclusive
+        """
+        try:
+            return self.connWrap.execSqlQuerySingleColumn(
+                    "select word from wikiwords where modified >= ? and "
+                    "modified < ? and not word glob '[[]*'",
+                    (startTime, endTime))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+
     def getFirstWikiWord(self):
         """
         Returns the name of the "first" wiki word. See getNextWikiWord()

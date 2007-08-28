@@ -298,12 +298,10 @@ class BasicDocPagePresenter(LayeredControlPresenter):
                     "loaded current wiki page": True})
             self.fireMiscEventProps(p2)
     
-            # set the title and add the word to the history
-#             self.SetTitle(uniToGui(u"Wiki: %s - %s" %
-#                     (self.getWikiConfigPath(), self.getCurrentWikiWord())))   # TODO Handle by mainControl
+#             self.getMainControl().getConfig().set("main", "last_wiki_word",
+#                     wikiWord)
 
-            self.getMainControl().getConfig().set("main", "last_wiki_word",
-                    wikiWord)
+            self.getMainControl().getMainAreaPanel().updateConfig()
 
             # Should the page by default be presented in editor or preview mode?
             pv = page.getPropertyOrGlobal(u"view_pane")

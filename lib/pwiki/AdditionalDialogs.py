@@ -40,6 +40,9 @@ class SelectWikiWordDialog(wx.Dialog):
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
 
@@ -132,6 +135,9 @@ class OpenWikiWordDialog(wx.Dialog):
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
 
@@ -148,13 +154,6 @@ class OpenWikiWordDialog(wx.Dialog):
     def OnOk(self, evt):
         self.activateSelectedWikiWord(0)
         self.EndModal(wx.ID_OK)
-
-    def OnNewTab(self, evt):
-        self.activateSelectedWikiWord(2)
-        self.EndModal(wx.ID_OK)
-
-    def OnNewTabBackground(self, evt):
-        self.activateSelectedWikiWord(3)
 
 
     def activateSelectedWikiWord(self, tabMode):
@@ -188,10 +187,8 @@ class OpenWikiWordDialog(wx.Dialog):
         self.pWiki.activateWikiWord(self.wikiWord, tabMode=tabMode)
 
 
-        
-
-#     def GetValue(self):
-#         return self.wikiWord
+    def GetValue(self):
+        return self.wikiWord
 
     def OnText(self, evt):
         self.wikiWord = guiToUni(evt.GetString())
@@ -242,6 +239,15 @@ class OpenWikiWordDialog(wx.Dialog):
         self.wikiWord = nakedWord
         self.pWiki.activateWikiWord(self.wikiWord, tabMode=0)
         self.EndModal(wx.ID_OK)
+ 
+    def OnNewTab(self, evt):
+        self.activateSelectedWikiWord(2)
+        self.EndModal(wx.ID_OK)
+
+    def OnNewTabBackground(self, evt):
+        self.activateSelectedWikiWord(3)
+
+
  
 
 class IconSelectDialog(wx.Dialog):
@@ -303,6 +309,9 @@ class IconSelectDialog(wx.Dialog):
         sizer.Fit(self)
 
         self.value = None
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOkPressed)
         wx.EVT_LIST_ITEM_ACTIVATED(self, self.lc.GetId(), self.OnOkPressed)
@@ -372,6 +381,9 @@ class SavedVersionsDialog(wx.Dialog):
         self.SetSizer(sizer)
         self.SetAutoLayout(True)
         sizer.Fit(self)
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
         ## wx.EVT_BUTTON(self, wxID_OK, self.OnRetrieve)
         wx.EVT_LISTBOX(self, ID, self.OnListBox)
@@ -489,6 +501,9 @@ class DateformatDialog(wx.Dialog):
         self.ctrls.fieldFormat.SetValue(deffmt)
         self.OnText(None)
         
+        # Fixes focus bug under Linux
+        self.SetFocus()
+        
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
         wx.EVT_TEXT(self, XRCID("fieldFormat"), self.OnText) 
 
@@ -578,6 +593,9 @@ class FontFaceDialog(wx.Dialog):
                 self.ctrls.lbFacenames.SetSelection(0)
 
             self.OnFaceSelected(None)
+            
+        # Fixes focus bug under Linux
+        self.SetFocus()
             
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
         wx.EVT_LISTBOX(self, GUI_ID.lbFacenames, self.OnFaceSelected)
@@ -674,6 +692,9 @@ class ExportDialog(wx.Dialog):
 
         self.ctrls.chExportTo.SetSelection(0)  
         self._refreshForEtype()
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
         
         wx.EVT_CHOICE(self, GUI_ID.chExportTo, self.OnExportTo)
         wx.EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
@@ -903,6 +924,9 @@ class ImportDialog(wx.Dialog):
 #         self.importerList[0][3].Show(True)
         self.ctrls.chImportFormat.SetSelection(0)
         self._refreshForItype()
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
         wx.EVT_CHOICE(self, GUI_ID.chImportFormat, self.OnImportFormat)
 
@@ -1041,6 +1065,9 @@ class ChooseWikiWordDialog(wx.Dialog):
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
         wx.EVT_BUTTON(self, GUI_ID.btnDelete, self.OnDelete)
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
@@ -1170,6 +1197,9 @@ What makes wikidPad different from other notepad applications is the ease with w
         self.SetAutoLayout(True)
         self.Layout()
         self.CentreOnParent(wx.BOTH)
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
 
 
@@ -1211,9 +1241,12 @@ class WikiInfoDialog(wx.Dialog):
         inputsizer.Add((0, 0), 1)   # Stretchable spacer
 
         mainsizer.Add(inputsizer, 0, wx.ALL | wx.EXPAND, 5)
-
+        
         self.SetSizer(mainsizer)
         self.Fit()
+
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
 
     def _buildLine(self, label, value):
@@ -1332,6 +1365,9 @@ class ImagePasteDialog(wx.Dialog):
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         
         self.OnFileTypeChoice(None)
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
         wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,

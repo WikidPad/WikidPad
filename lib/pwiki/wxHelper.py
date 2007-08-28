@@ -349,14 +349,20 @@ class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):
 
 
     def OnDestroy(self, evt):
+        # Event may be sent for child windows. Ignore them
+        if not self.ifdestroyed is evt.GetEventObject():
+            evt.Skip()
+            return
+
         self.disconnect()
         evt.Skip()
 
 
-    def addAsListenerTo(self, evtSource):
+    def setEventSource(self, evtSource):
         self.disconnect()
         self.evtSource = evtSource
-        self.evtSource.addListener(self)
+        if evtSource is not None:
+            self.evtSource.addListener(self)
 
     def disconnect(self):
         """
@@ -547,6 +553,40 @@ class LayerSizer(wx.PySizer):
 class DummyWindow(wx.Window):
     def __init__(self, parent, id=-1):
         wx.Window.__init__(self, parent, id, size=(0,0))
+
+
+class EnhancedListControl(wx.ListCtrl):
+    def __init__(*args, **kwargs):
+        wx.ListCtrl.__init__(*args, **kwargs)
+        
+    def GetAllSelected(self):
+        result = []
+        sel = -1
+        while True:
+            sel = self.GetNextItem(sel, state=wx.LIST_STATE_SELECTED)
+            if sel == -1:
+                break
+            result.append(sel)
+
+        return result
+
+
+    if Configuration.isWindows():
+        _SETSSI_ITEMMASK = wx.LIST_STATE_SELECTED | wx.LIST_STATE_FOCUSED
+    else:
+        # TODO Check for MacOS
+        _SETSSI_ITEMMASK = wx.LIST_STATE_SELECTED
+
+
+    def SelectSingle(self, idx):
+        # Unselect all selected
+        for prev in self.GetAllSelected():
+            self.SetItemState(prev, 0, self._SETSSI_ITEMMASK)
+
+        if idx > -1:
+            self.SetItemState(idx, self._SETSSI_ITEMMASK, self._SETSSI_ITEMMASK)
+
+
 
 
 

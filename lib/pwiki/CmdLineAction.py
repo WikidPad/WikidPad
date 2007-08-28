@@ -21,7 +21,7 @@ class CmdLineAction:
         """
         self.wikiToOpen = None  # Path to wiki to open
                 # (interpreted by PersonalWikiFrame)
-        self.wikiWordToOpen = None  # Name of wiki word to open
+        self.wikiWordsToOpen = None  # Name of wiki words to open
                 # (interpreted by PersonalWikiFrame)
         self.anchorToOpen = None   # Name of anchor to open in wiki word
         self.exitFinally = False   # Exit WikidPad when done
@@ -43,13 +43,15 @@ class CmdLineAction:
             sargs = [mbcsDec(a, "replace")[0] for a in sargs]
             self.wikiToOpen = sargs[0]
             if self.wikiToOpen.startswith("wiki:"):
-                self.wikiToOpen, self.wikiWordToOpen, self.anchorToOpen = \
+                self.wikiToOpen, wikiWordToOpen, self.anchorToOpen = \
                         wikiUrlToPathWordAndAnchor(self.wikiToOpen)
+                        
+                self.wikiWordsToOpen = (wikiWordToOpen,)
 #                 self.wikiToOpen = urllib.url2pathname(self.wikiToOpen)
 #                 self.wikiToOpen = self.wikiToOpen.replace("wiki:", "")
 
             if len(sargs) > 1:
-                self.wikiWordToOpen = sargs[1]
+                self.wikiWordsToOpen = (sargs[1],)
 
             return
             
@@ -62,13 +64,14 @@ class CmdLineAction:
             self.cmdLineError = True
             return
 
+        wikiWordsToOpen = []
         for o, a in opts:
             if o in ("-h", "--help"):
                 self.showHelp = True
             elif o in ("-w", "--wiki"):
                 self.wikiToOpen = mbcsDec(a, "replace")[0]
             elif o in ("-p", "--page"):
-                self.wikiWordToOpen = mbcsDec(a, "replace")[0]
+                wikiWordsToOpen.append(mbcsDec(a, "replace")[0])
             elif o == "--anchor":
                 self.anchorToOpen = mbcsDec(a, "replace")[0]
             elif o in ("-x", "--exit"):
@@ -81,6 +84,10 @@ class CmdLineAction:
                 self.exportDest = mbcsDec(a, "replace")[0]
             elif o == "--export-compfn":
                 self.exportCompFn = True
+        
+        if len(wikiWordsToOpen) > 0:
+            self.wikiWordsToOpen = tuple(wikiWordsToOpen)
+
 
     def actionBeforeShow(self, pWiki):
         """
@@ -105,11 +112,12 @@ class CmdLineAction:
         # Handle self.exportWhat
         wordList = None
         if self.exportWhat in (u"page", u"word"):
-            # single page
-            wordList = [self.wikiWordToOpen]
+            # single pages
+            wordList = list(self.wikiWordsToOpen)
         elif self.exportWhat == u"subtree":
             # subtree
-            wordList = pWiki.getWikiData().getAllSubWords([self.wikiWordToOpen])
+            wordList = pWiki.getWikiData().getAllSubWords(
+                    list(self.wikiWordsToOpen))
         elif self.exportWhat == u"wiki":
             # whole wiki
             wordList = pWiki.getWikiData().getAllDefinedWikiPageNames()

@@ -1,0 +1,7 @@
+﻿++ Restart WikidPad
+
+Especially after some layout changes in the options it may be necessary to restart WikidPad.
+
+It is important to know that this means to close *all* open WikidPad windows and then starting WikidPad again.
+
+Before doing layout changes you should also close all WikidPad windows except one in which you do the layout settings. Otherwise the changes in the configuration file may be overwritten by other open windows.

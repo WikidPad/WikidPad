@@ -1,5 +1,5 @@
 from weakref import WeakValueDictionary
-import os, os.path, sets, traceback
+import os, os.path, sets, time, traceback
 from threading import RLock
 from pwiki.rtlibRepl import re  # Original re doesn't work right with
         # multiple threads   (TODO!)
@@ -846,6 +846,24 @@ class WikiDataManager(MiscEventSourceMixin):
             sarOp.endWikiSearch()
             
         return result
+
+
+    def getWikiWordsModifiedWithin(self, startTime, endTime):
+        """
+        startTime and endTime are floating values as returned by time.time()
+        startTime is inclusive, endTime is exclusive
+        """
+        return self.getWikiData().getWikiWordsModifiedWithin(startTime, endTime)
+
+
+    def getWikiWordsModifiedLastDays(self, days):
+        """
+        Return wiki words modified during the last number of days.
+        """
+        endTime = time.time()
+        startTime = float(endTime-(86400*days))
+        
+        return self.getWikiData().getWikiWordsModifiedWithin(startTime, endTime)
 
 
     def reconnect(self):

@@ -29,6 +29,13 @@ If a line has a "lonely" bullet or number on it and you press enter, the bullet 
 You can switch off this behavior as well in "Options" dialog, page "Editor", option "Auto-unbullets".
 
 
++++ Indenting afterwards
+
+If you have written a list already and want to indent it (more) afterwards, select the list (at least two lines must be selected) and press TAB.
+
+If you want to reduce indentation, press SHIFT-TAB instead.
+
+
 +++ Caution
 
 Be sure to indent your list, otherwise the following text is interpreted as part of the list and therefore indented in the HTML view.

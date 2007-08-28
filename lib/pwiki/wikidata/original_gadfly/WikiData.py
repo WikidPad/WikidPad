@@ -781,7 +781,7 @@ class WikiData:
         return result1 + result2
 
 
-    def getWikiWordsModifiedWithin(self, days):
+    def getWikiWordsModifiedLastDays(self, days):
         timeDiff = time()-(86400*days)
         try:
             rows = self.execSqlQuery("select word, modified from wikiwords")
@@ -790,6 +790,21 @@ class WikiData:
             raise DbReadAccessError(e)
         return [row[0] for row in rows if float(row[1]) >= timeDiff and
                 not row[0].startswith('[')]
+
+    def getWikiWordsModifiedWithin(self, startTime, endTime):
+        """
+        Function must work for read-only wiki.
+        startTime and endTime are floating values as returned by time.time()
+        startTime is inclusive, endTime is exclusive
+        """
+        try:
+            rows = self.execSqlQuery("select word, modified from wikiwords")            
+        except (IOError, OSError, ValueError), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+            
+        return [row[0] for row in rows if float(row[1]) >= startTime and
+                float(row[1]) < endTime and not row[0].startswith('[')]
 
 
     def getFirstWikiWord(self):

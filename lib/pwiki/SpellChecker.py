@@ -62,6 +62,9 @@ class SpellCheckerDialog(wx.Dialog):
         self.localPwlPage = None
 
         self._refreshDictionary()
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
 
         wx.EVT_BUTTON(self, GUI_ID.btnIgnore, self.OnIgnore)
         wx.EVT_BUTTON(self, GUI_ID.btnIgnoreAll, self.OnIgnoreAll)
