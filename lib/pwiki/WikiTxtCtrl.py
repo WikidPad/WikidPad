@@ -329,21 +329,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.AutoCompSetSeparator(1)   # ord('~')
 
         # register some event handlers
-        self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
-                None, (
-#         self.presenterListener = KeyFunctionSink((
+        self.presenterListener = wxKeyFunctionSink((
                 ("options changed", self.onOptionsChanged),  # fired by PersonalWikiFrame
                 ("saving all pages", self.onSavingAllPages),
                 ("closing current wiki", self.onClosingCurrentWiki),
                 ("dropping current wiki", self.onDroppingCurrentWiki),
                 ("reloaded current page", self.onReloadedCurrentPage)
-                # ("command copy", self.onCmdCopy)
-        ))
+        ), self.presenter.getMiscEvent())
 
 #         self.presenter.getMiscEvent().addListener(self.presenterListener)
 
 
-        self.wikiPageSinkAR = KeyFunctionSinkAR((
+        self.wikiPageSink = wxKeyFunctionSink((
                 ("updated wiki page", self.onWikiPageUpdated),   # fired by a WikiPage
         ))
 
@@ -730,9 +727,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             if docPage.getDirty()[0]:
                 self.saveLoadedDocPage()
 
-#             miscevt = docPage.getMiscEvent()
-#             miscevt.removeListener(self.wikiPageSinkAR)
-            self.wikiPageSinkAR.disconnect()
+            self.wikiPageSink.disconnect()
             
             self.SetDocPointer(None)
             self.applyBasicSciSettings()
@@ -773,9 +768,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #         p2.update({"loading current page": True})
 #         self.pWiki.fireMiscEventProps(p2)  # TODO Remove this hack
 
-#         miscevt = self.getLoadedDocPage().getMiscEvent()
-#         miscevt.addListener(self.wikiPageSinkAR)
-        self.wikiPageSinkAR.setEventSource(self.getLoadedDocPage())
+        self.wikiPageSink.setEventSource(self.getLoadedDocPage().getMiscEvent())
 
         otherEditor = self.getLoadedDocPage().getTxtEditor()
         if otherEditor is not None:
@@ -822,10 +815,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.SetStyles(faces)
             self.lastEditorFont = font
 
-#         miscevt = self.getLoadedDocPage().getMiscEvent()
-#         miscevt.addListener(self.wikiPageSinkAR)
-        self.wikiPageSinkAR.setEventSource(self.getLoadedDocPage())
-
+        self.wikiPageSink.setEventSource(self.getLoadedDocPage().getMiscEvent())
 
         otherEditor = self.getLoadedDocPage().getTxtEditor()
         if otherEditor is not None:
@@ -1070,9 +1060,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         it.
         """
         if self.getLoadedDocPage() is not None:
-#             miscevt = self.getLoadedDocPage().getMiscEvent()
-#             miscevt.removeListener(self.wikiPageSinkAR)
-            self.wikiPageSinkAR.disconnect()
+            self.wikiPageSink.disconnect()
             
             self.SetDocPointer(None)
             self.applyBasicSciSettings()

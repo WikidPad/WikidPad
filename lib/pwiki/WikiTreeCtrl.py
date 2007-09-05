@@ -1054,7 +1054,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
         # Register for pWiki events
-        wxKeyFunctionSink(self.pWiki.getMiscEvent(), self, (
+        wxKeyFunctionSink((
                 ("loading wiki page", self.onLoadingCurrentWikiPage),
                 ("closed current wiki", self.onClosedCurrentWiki),
                 ("updated wiki page", self.onWikiPageUpdated),
@@ -1062,12 +1062,11 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 ("deleted wiki page", self.onDeletedWikiPage),
                 ("changed current docpage presenter",
                     self.onChangedDocPagePresenter)
-        ))
+        ), self.pWiki.getMiscEvent(), self)
 
-        wxKeyFunctionSink(self.pWiki.getCurrentDocPagePresenterRMEvent(), self,
-                (
+        wxKeyFunctionSink((
                 ("loading wiki page", self.onLoadingCurrentWikiPage),
-        ))
+        ), self.pWiki.getCurrentDocPagePresenterRMEvent(), self)
 
     def _bindActivation(self):
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnTreeItemActivated)

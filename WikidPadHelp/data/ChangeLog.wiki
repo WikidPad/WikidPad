@@ -1,5 +1,17 @@
 ﻿++ Change Log
 
+Sep. 05, 2007 (1.9beta10)
+
+    * Bug fixed: OS not recognized if using source version on
+      Windows with wxPython 2.8
+    * Bug fixed: Linux/GTK: Mouse no longer responsive after
+      clicking (and a bit dragging) on tabs
+    * Bug fixed: Modification date was changed when saving
+      an open page even if page wasn't modified (forced saving
+      was used too often)
+    * Bug fixed: Template pages did not work
+
+
 
 Aug. 28, 2007 (1.9beta9)
 

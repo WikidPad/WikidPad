@@ -166,8 +166,20 @@ import cStringIO
 
 _NO_IMAGE = -1
 _PIXELS_PER_UNIT = 10
-wxWINDOWS_NT = 18   # For wxGetOsVersion(), this includes NT 4.0, 2000, XP
-wxWIN95 = 20   # For wxGetOsVersion(), this includes also Win 98 and ME
+
+# Bug workaround: In wxPython 2.6 these constants weren't defined
+#    in 2.8 they are defined under a different name and with different values
+
+try:
+    wxWINDOWS_NT = wx.OS_WINDOWS_NT
+except AttributeError:
+    wxWINDOWS_NT = 18   # For wxGetOsVersion(), this includes NT 4.0, 2000, XP
+    
+try:
+    wxWIN95 = wx.OS_WINDOWS_9X
+except AttributeError:
+    wxWIN95 = 20   # For wx.GetOsVersion(), this includes also Win 98 and ME
+
 
 
 # Start editing the current item after half a second (if the mouse hasn't

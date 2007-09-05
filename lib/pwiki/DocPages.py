@@ -413,7 +413,7 @@ class WikiPage(DocPage):
 
     def cloneDeepProperties(self):
         result = {}
-        for key, value in self.props.iteritems():
+        for key, value in self.getProperties().iteritems():
             result[key] = value[:]
             
         return result

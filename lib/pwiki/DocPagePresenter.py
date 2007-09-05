@@ -13,111 +13,10 @@ import DocPages
 
 from StringOps import uniToGui
 
-# import Exporters
+from WindowLayout import LayeredControlPresenter
 
 
-class LayeredControlPresenter(MiscEventSourceMixin):
-    """
-    Controls appearance of multiple controls laying over each other in
-    one panel or notebook.
-    """
-    def __init__(self, mainControl):
-        self.mainControl = mainControl
-        self.subControls = {}
-        self.lastVisibleCtrlName = None
-        self.visible = False
-        self.shortTitle = ""
-        self.longTitle = ""
-
-        self.mainControl.getMiscEvent().addListener(self)
-
-    def getMainControl(self):
-        return self.mainControl
-
-    def setSubControl(self, scName, sc):
-        self.subControls[scName] = sc
-            
-    def getSubControl(self, scName):
-        return self.subControls.get(scName)
-
-
-    def switchSubControl(self, scName):
-        """
-        Make the chosen subcontrol visible, all other invisible
-        """
-        try:
-            if self.visible and self.lastVisibleCtrlName != scName:
-                # First show subControl scName, then hide the others
-                # to avoid flicker
-                self.subControls[scName].setVisible(True)
-                for n, c in self.subControls.iteritems():
-                    if n != scName:
-                        c.setVisible(False)
-
-            self.lastVisibleCtrlName = scName
-            self.setTitle(self.shortTitle)
-
-        except KeyError:
-            traceback.print_exc()
-
-    def getCurrentSubControlName(self):
-        return self.lastVisibleCtrlName
-        
-
-    def isCurrent(self):
-        return self.getMainControl().getCurrentDocPagePresenter() is self
-    
-    def makeCurrent(self):
-        self.mainControl.getMainAreaPanel().setCurrentDocPagePresenter(self)
-
-
-    def setVisible(self, vis):
-        if self.visible == vis:
-            return
-        
-        if vis:
-            for n, c in self.subControls.iteritems():
-                c.setVisible(n == self.lastVisibleCtrlName)
-        else:
-            for c in self.subControls.itervalues():
-                c.setVisible(False)
-
-        self.visible = vis
-        
-    def close(self):
-        for c in self.subControls.itervalues():
-            c.close()
-
-        self.mainControl.getMiscEvent().removeListener(self)
-
-#         # TODO Remove this hack
-# 
-#         def miscEventHappened(evt):
-#             pass
-#             
-#         self.miscEventHappened = miscEventHappened
-
-        
-    def SetFocus(self):
-        self.subControls[self.lastVisibleCtrlName].SetFocus()
-        
-    # TODO getPageAst
-
-
-    def setTitle(self, shortTitle):
-        self.shortTitle = shortTitle
-        self.longTitle = shortTitle
-        self.fireMiscEventProps({"changed presenter title": True})
-
-    def getShortTitle(self):
-        return self.shortTitle
-
-    def getLongTitle(self):
-        return self.longTitle
-
-
-
-class BasicDocPagePresenter(LayeredControlPresenter):
+class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
     """
     Controls the group of all widgets (subcontrols) used to present/edit 
     a particular doc page, currently only the WikiTxtCtrl (subcontrol name
@@ -126,12 +25,18 @@ class BasicDocPagePresenter(LayeredControlPresenter):
     controlling e.g. a notebook which has the actual subcontrols as
     children
     """
-    
-    
+
     def __init__(self, mainControl):
-        LayeredControlPresenter.__init__(self, mainControl)
+        LayeredControlPresenter.__init__(self)
+        self.mainControl = mainControl
         self.docPage = None
-        
+
+        self.getMainControl().getMiscEvent().addListener(self)
+
+
+    def getMainControl(self):
+        return self.mainControl
+
     def getConfig(self):
         return self.getMainControl().getConfig()
 
@@ -152,6 +57,21 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 
     def SetStatusText(self, text, field):
             self.getStatusBar().SetStatusText(uniToGui(text), field)
+
+    def isCurrent(self):
+        return self.getMainControl().getCurrentDocPagePresenter() is self
+    
+    def makeCurrent(self):
+        self.mainControl.getMainAreaPanel().setCurrentDocPagePresenter(self)
+
+    def setTitle(self, shortTitle):
+        LayeredControlPresenter.setTitle(self, shortTitle)
+        self.fireMiscEventProps({"changed presenter title": True})
+        
+    def close(self):
+        LayeredControlPresenter.close(self)
+        self.getMainControl().getMiscEvent().removeListener(self)
+
 
     # TODO move doc page into PagePresenter
     def getDocPage(self):

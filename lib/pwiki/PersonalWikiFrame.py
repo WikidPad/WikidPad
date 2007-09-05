@@ -22,7 +22,7 @@ from MiscEvent import MiscEventSourceMixin, ResendingMiscEvent  # , DebugSimple
 from WikiExceptions import *
 
 import Configuration
-from WindowLayout import WindowLayouter, setWindowPos, setWindowSize
+from WindowLayout import WindowSashLayouter, setWindowPos, setWindowSize
 from wikidata import DbBackendUtils, WikiDataManager
 
 import DocPages, WikiFormatting
@@ -960,7 +960,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(wikiWordMenu, '&Save\t' + self.keyBindings.Save,
                 'Save all open pages',
-                lambda evt: (self.saveAllDocPages(force=True),
+                lambda evt: (self.saveAllDocPages(),
                 self.getWikiData().commit()), "tb_save",
                 menuID=GUI_ID.CMD_SAVE_WIKI,
                 updatefct=self.OnUpdateDisReadOnlyWiki)
@@ -1755,7 +1755,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # Build layout:
 
-        self.windowLayouter = WindowLayouter(self, self.createWindow)
+        self.windowLayouter = WindowSashLayouter(self, self.createWindow)
 
         cfstr = self.getConfig().get("main", "windowLayout")
         self.windowLayouter.setWinPropsByConfig(cfstr)
@@ -2360,7 +2360,7 @@ These are your default global settings.
                     
                     self.getActiveEditor().GotoPos(self.getActiveEditor().GetLength())
                     self.getActiveEditor().AddText(u"\n\n\t* WikiSettings\n")
-                    self.saveAllDocPages(force=True)
+                    self.saveAllDocPages()
                     
                     # trigger hook
                     self.hooks.createdWiki(self, wikiName, wikiDir)
@@ -2751,7 +2751,7 @@ These are your default global settings.
             self.writeCurrentConfig()
     
             # save the current wiki page if it is dirty
-            if self.getCurrentDocPage():
+            if self.isWikiLoaded():
                 self.saveAllDocPages()
     
             # database commits
@@ -2979,38 +2979,12 @@ These are your default global settings.
         if not self.requireWriteAccess():
             return
 
- #        self.getWikiDocument().setNoAutoSaveFlag(False)
         try:
             self.fireMiscEventProps({"saving all pages": None, "force": force})
             self.refreshPageStatus()
         except (IOError, OSError, DbAccessError), e:
             self.lostAccess(e)
             raise
-
-#         self.saveCurrentDocPage(force)
-
-
-#             self.GetToolBar().FindById(GUI_ID.CMD_SAVE_WIKI).Enable(False)
-
-#             rect = self.statusBar.GetFieldRect(0)
-# 
-#             dc = wxWindowDC(self.statusBar)
-#             try:
-#                 dc.SetBrush(wxRED_BRUSH)
-#                 dc.SetPen(wxRED_PEN)
-#                 dc.DrawRectangle(rect.x, rect.y, rect.width, rect.height)
-#                 dc.SetPen(wxWHITE_PEN)
-#                 dc.SetFont(self.statusBar.GetFont())
-#                 dc.DrawText(u"Saving page", rect.x + 2, rect.y + 2)
-#                 self.activeEditor.saveLoadedDocPage()
-#                 dc.SetFont(wxNullFont)
-#                 dc.SetBrush(wxNullBrush)
-#                 dc.SetPen(wxNullPen)
-#             finally:
-#                 del dc
-# 
-#             
-#             self.statusBar.Refresh()
 
 
 
@@ -3020,6 +2994,9 @@ These are your default global settings.
         """
         if page is None:
             return False
+          
+        if page.isReadOnlyEffect():
+            return True   # return False?
 
         if not self.requireWriteAccess():
             return
@@ -3603,7 +3580,7 @@ These are your default global settings.
 
             return window
         
-        self.windowLayouter = WindowLayouter(self, cachedCreateWindow)
+        self.windowLayouter = WindowSashLayouter(self, cachedCreateWindow)
 
 #         for pr in self._TEST_LAYOUT_DEFINITION:
 #             self.windowLayouter.addWindowProps(pr)
@@ -4187,7 +4164,7 @@ These are your default global settings.
 
                 expclass, exptype, addopt = self.EXPORT_PARAMS[typ]
                 
-                self.saveAllDocPages(force=True)
+                self.saveAllDocPages()
                 self.getWikiData().commit()
 
                
@@ -4858,7 +4835,8 @@ class TaskBarIcon(wx.TaskBarIcon):
 
         # Register menu events
         wx.EVT_MENU(self, GUI_ID.TBMENU_RESTORE, self.OnLeftUp)
-        wx.EVT_MENU(self, GUI_ID.TBMENU_SAVE, lambda evt: (self.pWiki.saveAllDocPages(force=True),
+        wx.EVT_MENU(self, GUI_ID.TBMENU_SAVE,
+                lambda evt: (self.pWiki.saveAllDocPages(),
                 self.pWiki.getWikiData().commit()))
         wx.EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pWiki.exitWiki())
 

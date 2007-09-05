@@ -250,19 +250,40 @@ def setHotKeyByString(win, hotKeyId, keyString):
     return False
 
 
+def cloneFont(font):
+    return wx.Font(font.GetPointSize(), font.GetFamily(), font.GetStyle(),
+                font.GetWeight(), font.GetUnderlined(), font.GetFaceName(),
+                font.GetDefaultEncoding())
 
-# def cloneImageList(imgList):
-#     """
-#     Create a copy of an wxImageList
-#     """
-#     sz = imgList.GetSize(0)
-#     lng = imgList.GetImageCount()
-#     result = wx.ImageList(sz[0], sz[1], True, lng)
-# 
-#     for i in xrange(lng):
-#         result.AddIcon(imgList.GetIcon(i))
-# 
-#     return result
+
+def drawTextRight(dc, text, startX, startY, width):
+    """
+    Draw text on a device context right aligned.
+    startX, startY -- Upper left corner of box in which to align
+    width -- Width of the box in which text should be aligned
+    """
+    # Calc offset to right align text
+    offsetX = width - dc.GetTextExtent(text)[0]
+    if offsetX < 0:
+        offsetX = 0
+    
+    dc.DrawText(text, startX + offsetX, startY)
+
+
+def drawTextCenter(dc, text, startX, startY, width):
+    """
+    Draw text on a device context center aligned.
+    startX, startY -- Upper left corner of box in which to align
+    width -- Width of the box in which text should be aligned
+    """
+    # Calc offset to center align text
+    offsetX = (width - dc.GetTextExtent(text)[0]) // 2
+    if offsetX < 0:
+        offsetX = 0
+    
+    dc.DrawText(text, startX + offsetX, startY)
+
+
 
 
 def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
@@ -331,18 +352,18 @@ class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):
     If the wxWindow ifdestroyed receives a destroy message, the sink
     automatically disconnects from evtSource.
     """
-    __slots__ = ("evtSource", "ifdestroyed")
+    __slots__ = ("eventSource", "ifdestroyed")
 
 
-    def __init__(self, evtSource, ifdestroyed, activationTable):
+    def __init__(self, activationTable, eventSource=None, ifdestroyed=None):
         wx.EvtHandler.__init__(self)
         KeyFunctionSink.__init__(self, activationTable)
 
-        self.evtSource = evtSource
+        self.eventSource = eventSource
         self.ifdestroyed = ifdestroyed
         
-        if self.evtSource is not None:
-            self.evtSource.addListener(self, False)
+        if self.eventSource is not None:
+            self.eventSource.addListener(self, False)
         
         if self.ifdestroyed is not None:
             wx.EVT_WINDOW_DESTROY(self.ifdestroyed, self.OnDestroy)
@@ -358,20 +379,20 @@ class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):
         evt.Skip()
 
 
-    def setEventSource(self, evtSource):
+    def setEventSource(self, eventSource):
         self.disconnect()
-        self.evtSource = evtSource
-        if evtSource is not None:
-            self.evtSource.addListener(self)
+        self.eventSource = eventSource
+        if eventSource is not None:
+            self.eventSource.addListener(self)
 
     def disconnect(self):
         """
-        Disconnect from evtSource.
+        Disconnect from eventSource.
         """
-        if self.evtSource is None:
+        if self.eventSource is None:
             return
-        self.evtSource.removeListener(self)
-        self.evtSource = None
+        self.eventSource.removeListener(self)
+        self.eventSource = None
 
 
 
@@ -514,8 +535,6 @@ class IconCache:
         wx components only with SetImageList, not AssignImageList
         """
         return self.iconImageList
-        
-
 
 
 
@@ -545,8 +564,16 @@ class LayerSizer(wx.PySizer):
     def RecalcSizes(self):
         pos = self.GetPosition()
         size = self.GetSize()
+        size = wx.Size(size.GetWidth(), size.GetHeight())
         for item in self.GetChildren():
-            item.SetDimension(pos, size)
+            win = item.GetWindow()
+            if win is None:
+                item.SetDimension(pos, size)
+            else:
+                # Bad hack
+                # Needed because some ctrls like e.g. ListCtrl do not support
+                # to overwrite virtual methods like DoSetSize
+                win.SetDimensions(pos.x, pos.y, size.GetWidth(), size.GetHeight())
 
 
 

@@ -6,6 +6,9 @@ from StringOps import escapeForIni, unescapeForIni
 
 from Configuration import isLinux
 
+from wxHelper import LayerSizer
+
+
 class WinLayoutException(Exception):
     pass
 
@@ -247,7 +250,7 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
         wx.LayoutAlgorithm().LayoutWindow(self, self.centerWindow)
 
 
-class WindowLayouter:
+class WindowSashLayouter:
     """
     Helps layouting a couple of (SmartSashLayout)Window's in a main window
     """
@@ -514,6 +517,133 @@ def stringToWinprops(s):
         result[k] = v
         
     return result
+
+
+class LayeredControlPresenter:
+    """
+    Controls appearance of multiple controls laying over each other in
+    one panel or notebook.
+    """
+    def __init__(self):
+        self.subControls = {}
+        self.lastVisibleCtrlName = None
+        self.visible = False
+        self.shortTitle = ""
+        self.longTitle = ""
+
+    def setSubControl(self, scName, sc):
+        self.subControls[scName] = sc
+
+    def getSubControl(self, scName):
+        return self.subControls.get(scName)
+
+
+    def switchSubControl(self, scName):
+        """
+        Make the chosen subcontrol visible, all other invisible
+        """
+        try:
+            if self.visible and self.lastVisibleCtrlName != scName:
+                # First show subControl scName, then hide the others
+                # to avoid flicker
+                self.subControls[scName].setVisible(True)
+                for n, c in self.subControls.iteritems():
+                    if n != scName:
+                        c.setVisible(False)
+
+            self.lastVisibleCtrlName = scName
+            self.setTitle(self.shortTitle)
+
+        except KeyError:
+            traceback.print_exc()
+
+    def getCurrentSubControlName(self):
+        return self.lastVisibleCtrlName
+        
+
+    def setVisible(self, vis):
+        if self.visible == vis:
+            return
+        
+        if vis:
+            for n, c in self.subControls.iteritems():
+                c.setVisible(n == self.lastVisibleCtrlName)
+        else:
+            for c in self.subControls.itervalues():
+                c.setVisible(False)
+
+        self.visible = vis
+        
+    def close(self):
+        for c in self.subControls.itervalues():
+            c.close()
+
+        
+    def SetFocus(self):
+        self.subControls[self.lastVisibleCtrlName].SetFocus()
+        
+    def setTitle(self, shortTitle):
+        self.shortTitle = shortTitle
+        self.longTitle = shortTitle
+
+    def getShortTitle(self):
+        return self.shortTitle
+
+    def getLongTitle(self):
+        return self.longTitle
+
+
+class LayeredControlPanel(wx.Panel, LayeredControlPresenter):
+    """
+    A layered presenter which is itself a wx.Panel and contains
+    the subcontrols.
+    """
+    def __init__(self, parent, id=-1):
+        wx.Panel.__init__(self, parent, id, style=wx.NO_BORDER)
+        LayeredControlPresenter.__init__(self)
+        
+        self.SetSizer(LayerSizer())
+
+
+    def setSubControl(self, scName, sc):
+        # TODO handle case if existing sc is replaced
+        LayeredControlPresenter.setSubControl(self, scName, sc)
+        self.GetSizer().Add(sc)
+
+
+    def switchSubControl(self, scName, gainFocus=False):
+        """
+        Make the chosen subcontrol visible, all other invisible
+        """
+        try:
+            # First show subControl scName, then hide the others
+            # to avoid flicker
+            if self.visible and self.lastVisibleCtrlName != scName:
+                self.subControls[scName].setVisible(True)
+            
+            self.subControls[scName].Show(True)
+
+            for n, c in self.subControls.iteritems():
+                if n != scName:
+                    if self.visible:
+                        c.setVisible(False)
+                    c.Show(False)
+
+            if gainFocus:
+                self.subControls[scName].SetFocus()
+
+            self.lastVisibleCtrlName = scName
+            self.setTitle(self.shortTitle)   #?
+        except KeyError:
+            traceback.print_exc()
+
+    def SetFocus(self):
+        try:
+            self.subControls[self.lastVisibleCtrlName].SetFocus()
+        except KeyError:
+            wx.Panel.SetFocus(self)
+
+
 
 
             

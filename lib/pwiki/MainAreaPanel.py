@@ -233,6 +233,21 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             presenter.switchSubControl("preview", gainFocus=True)
 
 
+#     # Problem with mouse capture on Linux  (MacOS?)
+#     if Configuration.isWindows():
+#         def CaptureMouseIfOk(self):
+#             return self.CaptureMouse()
+#         
+#         def ReleaseMouseIfOk(self):
+#             return self.ReleaseMouse()
+#     else:
+#         def CaptureMouseIfOk(self):
+#             pass
+#         
+#         def ReleaseMouseIfOk(self):
+#             pass
+
+
     def OnNotebookPageChanged(self, evt):
         # Tricky hack to set focus to the notebook page
         if self.runningPageChangedEvent:
@@ -316,21 +331,21 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
     def OnLeftDown(self, evt):
         tab = self.HitTest(evt.GetPosition())[0]
         self.tabDragging = tab != wx.NOT_FOUND
-        if self.tabDragging:
-            self.CaptureMouse()
+#         if self.tabDragging:
+#             self.CaptureMouseIfOk()
         
         evt.Skip()
 
 
     def OnLeftUp(self, evt):
         if self.tabDragging:
-            self.ReleaseMouse()
+#             self.ReleaseMouseIfOk()
             self.tabDragging = False
+            self.SetCursor(wx.NullCursor)
             tab = self.HitTest(evt.GetPosition())[0]
             if not self.runningPageChangedEvent and tab != wx.NOT_FOUND and \
                     tab != self.GetSelection():
-                self.SetCursor(wx.NullCursor)
-                
+
                 oldTab = self.GetSelection()
                 title = self.GetPageText(oldTab)
                 
@@ -358,7 +373,9 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         if self.tabDragging:
             # Just to be sure
             if not evt.Dragging():
+#                 self.ReleaseMouseIfOk()
                 self.tabDragging = False
+                self.SetCursor(wx.NullCursor)
                 evt.Skip()
                 return
 
@@ -366,7 +383,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             if tab != wx.NOT_FOUND and tab != self.GetSelection():
                 self.SetCursor(self.tabDragCursor)
             else:
-                self.SetCursor(wx.STANDARD_CURSOR)
+                self.SetCursor(wx.NullCursor)
 
 
     def miscEventHappened(self, miscevt):

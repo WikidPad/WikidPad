@@ -73,8 +73,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
         self.presenter = presenter
 
-        self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
-                None, (
+        self.presenterListener = wxKeyFunctionSink((
                 ("loaded current wiki page", self.onLoadedCurrentWikiPage),
                 ("reloaded current page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
@@ -82,7 +81,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 ("options changed", self.onOptionsChanged),
                 ("updated wiki page", self.onUpdatedWikiPage),
                 ("changed live text", self.onChangedLiveText)
-        ))
+        ), self.presenter.getMiscEvent())
 
         self.visible = False
         self.outOfSync = True   # HTML content is out of sync with live content
@@ -112,7 +111,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
 
 #
-#         EVT_KEY_DOWN(self, self.OnKeyDown)
+#         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
 #         EVT_KEY_UP(self, self.OnKeyUp)
 #         EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
 #         EVT_MENU(self, GUI_ID.CMD_ZOOM_IN, lambda evt: self.addZoom(1))
@@ -363,6 +362,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 #
 #
 #     def OnKeyDown(self, evt):
+#         print "OnKeyDown1"
 #         acc = getAccelPairFromKeyDown(evt)
 #         if acc == (wxACCEL_CTRL, ord('+')) or \
 #                 acc == (wxACCEL_CTRL, WXK_NUMPAD_ADD):

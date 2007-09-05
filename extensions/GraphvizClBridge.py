@@ -4,7 +4,7 @@ from subprocess import list2cmdline
 import wx
 
 from pwiki.TempFileSet import createTempFile
-from pwiki.StringOps import mbcsEnc, mbcsDec, lineendToOs
+from pwiki.StringOps import mbcsEnc, mbcsDec, utf8Enc, lineendToOs
 
 WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("Options", 1))
 
@@ -95,7 +95,7 @@ class GraphVizBaseHandler:
         to insert instead of the insertion.        
         """
         # Retrieve quoted content of the insertion
-        bstr = lineendToOs(mbcsEnc(insToken.value, "replace")[0])
+        bstr = lineendToOs(utf8Enc(insToken.value, "replace")[0])   # mbcsEnc
 
         if not bstr:
             # Nothing in, nothing out

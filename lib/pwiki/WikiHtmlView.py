@@ -64,8 +64,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
         wx.html.HtmlWindow.__init__(self, parent, ID)
         self.presenter = presenter
 
-        self.presenterListener = wxKeyFunctionSink(self.presenter.getMiscEvent(),
-                None, (
+        self.presenterListener = wxKeyFunctionSink((
                 ("loaded current wiki page", self.onLoadedCurrentWikiPage),
                 ("reloaded current page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
@@ -73,12 +72,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
                 ("options changed", self.onOptionsChanged),
                 ("updated wiki page", self.onUpdatedWikiPage),
                 ("changed live text", self.onChangedLiveText)
-
-#                 ("updated current page cache", self.updatedCurrentPageCache),
-#                 ("renamed wiki page", self.renamedWikiPage)
-        ))    # , False)
-
-#         self.presenter.getMiscEvent().addListener(self.presenterListener)
+        ), self.presenter.getMiscEvent())
 
         self.visible = False
         self.outOfSync = True   # HTML content is out of sync with live content

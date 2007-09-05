@@ -5,8 +5,20 @@ import os, traceback
 import codecs
 import wx
 
-wxWINDOWS_NT = 18   # For wx.GetOsVersion() 
-wxWIN95 = 20   # For wx.GetOsVersion(), this includes also Win 98 and ME
+import MainApp
+
+# Bug workaround: In wxPython 2.6 these constants weren't defined
+#    in 2.8 they are defined under a different name and with different values
+
+try:
+    wxWINDOWS_NT = wx.OS_WINDOWS_NT
+except AttributeError:
+    wxWINDOWS_NT = 18   # For wx.GetOsVersion()
+    
+try:
+    wxWIN95 = wx.OS_WINDOWS_9X
+except AttributeError:
+    wxWIN95 = 20   # For wx.GetOsVersion(), this includes also Win 98 and ME
 
 
 from MiscEvent import MiscEventSourceMixin

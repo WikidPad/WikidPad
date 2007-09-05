@@ -9,18 +9,14 @@ import wx
 
 import Utilities
 from Utilities import DUMBTHREADHOLDER
-from MiscEvent import KeyFunctionSinkAR
+# from MiscEvent import KeyFunctionSinkAR
 
-# from Configuration import isWindows
-from wxHelper import EnhancedListControl
+from wxHelper import EnhancedListControl, wxKeyFunctionSink
 
 from WikiFormatting import HEADING_LEVEL_MAP, getHeadingLevel
 
 # from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException
 
-# from StringOps import *
-# utf8Enc, utf8Dec, mbcsEnc, mbcsDec, uniToGui, guiToUni, \
-#        Tokenizer, wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
 
 class DocStructureCtrl(EnhancedListControl):
@@ -32,23 +28,21 @@ class DocStructureCtrl(EnhancedListControl):
 
         self.InsertColumn(0, u"", width=3000)
 
-#         self.mainAreaPanel = self.mainControl.getMainAreaPanel()
-#         self.mainAreaPanel.getMiscEvent().addListener(self)
-
         self.updatingThreadHolder = Utilities.ThreadHolder()
         self.tocList = [] # List of tuples (char. start in text, headLevel, heading text)
         self.mainControl.getMiscEvent().addListener(self)
         self.readablySized = True   # False if this window has a size
                 # that it can't be read (one dim. less than 5 pixels)
 
-        self.docPagePresenterSinkAR = KeyFunctionSinkAR((
+        self.docPagePresenterSink = wxKeyFunctionSink((
                 ("loaded current doc page", self.onUpdateNeeded),
                 ("changed live text", self.onUpdateNeeded),
                 ("options changed", self.onUpdateNeeded)
         ))
 
-        self.docPagePresenterSinkAR.setEventSource(
-                self.mainControl.getCurrentDocPagePresenter())
+        currPres = self.mainControl.getCurrentDocPagePresenter()
+        if currPres is not None:
+            self.docPagePresenterSink.setEventSource(currPres.getMiscEvent())
 
         self.updateList()
 
@@ -64,7 +58,7 @@ class DocStructureCtrl(EnhancedListControl):
     def close(self):
         """
         """
-        self.docPagePresenterSinkAR.disconnect()
+        self.docPagePresenterSink.disconnect()
 
     def OnDestroy(self, evt):
         self.close()
@@ -81,10 +75,10 @@ class DocStructureCtrl(EnhancedListControl):
             return
         
         if oldReadablySized:
-            self.docPagePresenterSinkAR.disconnect()
+            self.docPagePresenterSink.disconnect()
         else:
-            self.docPagePresenterSinkAR.setEventSource(
-                    self.mainControl.getCurrentDocPagePresenter())
+            self.docPagePresenterSink.setEventSource(
+                    self.mainControl.getCurrentDocPagePresenter().getMiscEvent())
             self.updateList()
 
 
@@ -94,8 +88,8 @@ class DocStructureCtrl(EnhancedListControl):
         """
         if self.readablySized and miscevt.getSource() is self.mainControl:
             if miscevt.has_key("changed current docpage presenter"):
-                self.docPagePresenterSinkAR.setEventSource(
-                        self.mainControl.getCurrentDocPagePresenter())
+                self.docPagePresenterSink.setEventSource(
+                        self.mainControl.getCurrentDocPagePresenter().getMiscEvent())
                 self.updateList()
 
 
@@ -111,7 +105,7 @@ class DocStructureCtrl(EnhancedListControl):
 
 
     def updateList(self):
-        presenter = self.docPagePresenterSinkAR.getEventSource()
+        presenter = self.mainControl.getCurrentDocPagePresenter()
         if presenter is None:
             return
 
@@ -138,8 +132,6 @@ class DocStructureCtrl(EnhancedListControl):
         Build toc list and put data in self.tocList. Finally call applyTocList()
         to show data.
         """
-#         print "buildTocList start"
-#         try:
         if docPage is None:
             return
         
@@ -193,6 +185,7 @@ class DocStructureCtrl(EnhancedListControl):
             self.DeleteAllItems()
             for start, headLevel, text in self.tocList:
                 self.InsertStringItem(self.GetItemCount(), text)
+            self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         finally:
             self.Thaw()
 
@@ -245,7 +238,7 @@ class DocStructureCtrl(EnhancedListControl):
                 displaying is done
         """
 
-        presenter = self.docPagePresenterSinkAR.getEventSource()
+        presenter = self.mainControl.getCurrentDocPagePresenter()
         if presenter is None:
             return
 
@@ -272,7 +265,7 @@ class DocStructureCtrl(EnhancedListControl):
 
 
     def OnItemActivated(self, evt):
-        presenter = self.docPagePresenterSinkAR.getEventSource()
+        presenter = self.mainControl.getCurrentDocPagePresenter()
         if presenter is None:
             return
 

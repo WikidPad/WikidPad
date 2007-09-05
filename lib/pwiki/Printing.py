@@ -68,7 +68,7 @@ class PrintMainDialog(wx.Dialog):
         self.ctrls.btnPrint.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         
-        self.pWiki.saveAllDocPages(force=True)
+        self.pWiki.saveAllDocPages()
         self.pWiki.getWikiData().commit()
         
         # Fixes focus bug under Linux

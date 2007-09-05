@@ -18,7 +18,7 @@ import DocPages
 
 _user32dll = ctypes.windll.User32
 _kernel32dll = ctypes.windll.Kernel32
-
+_shell32dll = ctypes.windll.Shell32
 
 GWL_WNDPROC = -4
 WM_CHANGECBCHAIN = 781
@@ -31,6 +31,8 @@ WM_KEYDOWN = 256
 LOCALE_IDEFAULTANSICODEPAGE = 0x1004
 
 MB_PRECOMPOSED = 1
+
+SW_SHOW = 5
 
 
 SetClipboardViewer = _user32dll.SetClipboardViewer
@@ -103,8 +105,28 @@ WindowProcType = ctypes.WINFUNCTYPE(ctypes.c_uint, ctypes.c_int, ctypes.c_uint,
 #     WPARAM wParam,	// first message parameter
 #     LPARAM lParam 	// second message parameter
 #    );
+
+
+try:
+    SHShellExecuteW = _shell32dll.SHShellExecuteW
+except AttributeError:
+    # TODO: Can this happen on Win9x?
+    # Even worse: What to do if it does not happen?
+    SHShellExecuteW = None
+
+# HINSTANCE ShellExecute(
+# 
+#     HWND hwnd,	// handle to parent window
+#     LPCTSTR lpOperation,	// pointer to string that specifies operation to perform
+#     LPCTSTR lpFile,	// pointer to filename or folder name string
+#     LPCTSTR lpParameters,	// pointer to string that specifies executable-file parameters 
+#     LPCTSTR lpDirectory,	// pointer to string that specifies default directory
+#     INT nShowCmd 	// whether file is shown when opened
+#    );
+#    
    
-   
+# res = _shell32dll.ShellExecuteW(hwnd, 0, ctypes.c_wchar_p(ur"file:///C|/Daten/Projekte/Wikidpad/Current/wikidpad_unicode.iss"), 0, 0, SW_SHOW)
+
 
 def ansiInputToUnicodeChar(ansiCode):
     """

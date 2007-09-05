@@ -255,9 +255,9 @@ class OptionsDialog(wx.Dialog):
             for i, e in enumerate(self.combinedPanelList):
                 if e[0] == "OptionsPageClipboardCatcher":
                     continue
-                
+
                 newPL.append(e)
-            
+
             self.combinedPanelList = newPL
 
         self.ctrls = XrcControls(self)
@@ -266,8 +266,8 @@ class OptionsDialog(wx.Dialog):
 
         self.panelList = []
         self.ctrls.lbPages.Clear()
-        
-        
+
+
         mainsizer = LayerSizer()  # wx.BoxSizer(wx.VERTICAL)
         
         for pn, pt in self.combinedPanelList:
