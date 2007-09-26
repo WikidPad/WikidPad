@@ -1,7 +1,18 @@
 ﻿++ Change Log
 
 
-Aug. 25, 2007 (1.8rc8)
+Sep. 26, 2007 (1.8rc9)
+
+    * Bug fixed: Updating wikis from WikidPad 1.1 failed
+    * Bug fixed: Source code did not work correctly with
+      wxPython 2.8
+    * Larger default delays for autosave
+    * Bug fixed (completely?): Starting URLs with characters not in
+      system codepage failed.
+
+
+
+Aug. 25, 2007 (1.8rc8, repository revision in "stable-1.8" branch: 125)
 
     * Internal: wxPython naming scheme changed to solve problems
       with newer versions of wxPython
@@ -11,7 +22,7 @@ Aug. 25, 2007 (1.8rc8)
 
 
 
-Jul. 26, 2007 (1.8rc7)
+Jul. 26, 2007 (1.8rc7, repository revision in "stable-1.8" branch: 122)
 
     * Bug fixed: Font face choice dialog from options dialog did
       not work.

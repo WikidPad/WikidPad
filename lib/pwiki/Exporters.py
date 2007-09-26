@@ -24,6 +24,8 @@ from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
 
 import Configuration
 
+import OsAbstract
+
 import WikiFormatting
 import PageAst
 
@@ -74,7 +76,8 @@ class LinkCreatorForHtmlMultiPageExport:
             return default
 
         relUnAlias = self.wikiData.getAliasesWikiWord(word)
-        return self.htmlXmlExporter.convertFilename(u"%s.html" % relUnAlias)
+        return urlFromPathname(self.htmlXmlExporter.convertFilename(
+                u"%s.html" % relUnAlias))
 
 
 
@@ -259,12 +262,13 @@ class HtmlXmlExporter:
 
         if self.mainControl.getConfig().getboolean(
                 "main", "start_browser_after_export") and startfile:
-            if Configuration.isWindows():
-                 os.startfile(startfile)
-                # os.startfile(mbcsEnc(link2, "replace")[0])
-            else:
-                # Better solution?
-                wx.LaunchDefaultBrowser(startfile)    # TODO
+            OsAbstract.startFile(startfile)
+#             if Configuration.isWindows():
+#                  os.startfile(startfile)
+#                 # os.startfile(mbcsEnc(link2, "replace")[0])
+#             else:
+#                 # Better solution?
+#                 wx.LaunchDefaultBrowser(startfile)    # TODO
 
         self.tempFileSet.reset()
         self.tempFileSet = None
@@ -315,26 +319,6 @@ class HtmlXmlExporter:
                     u'<br />\n'*10))
                     
         links = {}
-#         notExport = sets.Set() # Cache to store all rejected words
-#         wordSet = sets.Set(self.wordList)
-# 
-#         def addWord(word):
-#             if word in links:
-#                 return
-#             if word in notExport:
-#                 return
-#                 
-#             unAlias = self.wikiData.getAliasesWikiWord(word)
-#             if unAlias not in wordSet:
-#                 notExport.add(word)
-#                 return
-# 
-#             wikiPage = self.wikiDataManager.getWikiPage(word)
-#             if not self.shouldExport(word, wikiPage):
-#                 notExport.add(word)
-#                 return
-#             
-#             links[word] = u"#%s" % _escapeAnchor(unAlias)
 
         # First build links dictionary for all included words and their aliases
         for word in self.wordList:
@@ -356,15 +340,6 @@ class HtmlXmlExporter:
             try:
                 content = wikiPage.getLiveText()
                 formatDetails = wikiPage.getFormatDetails()
-#                 links = {}  # TODO Why links to all (even not exported) children?
-#                 for relation in wikiPage.getChildRelationships(
-#                         existingonly=True, selfreference=False):
-#                     if not self.shouldExport(relation):
-#                         continue
-#                     # get aliases too
-#                     relUnAlias = self.wikiData.getAliasesWikiWord(relation)
-#                     # TODO Use self.convertFilename here?
-#                     links[relation] = u"#%s" % _escapeAnchor(relUnAlias)
                     
                 self.wordAnchor = _escapeAnchor(word)
                 formattedContent = self.formatContent(word, content,
@@ -1550,8 +1525,8 @@ class HtmlXmlExporter:
                             # than Python
                             p = urllib.url2pathname(link)  # TODO Relative URLs
                             link = wx.FileSystem.FileNameToURL(p)
-                        self.outAppend(u'<img src="%s" border="0"%s%s />' % 
-                                (escapeHtml(link), sizeInTag, alignInTag))
+                        self.outAppend(u'<img src="%s" alt="" border="0"%s%s />' % 
+                                (link, sizeInTag, alignInTag))
                     else:
 #                         self.outAppend(u'<a href="%s">%s</a>' %
 #                                 (escapeHtml(link), escapeHtml(link)))
@@ -1592,7 +1567,7 @@ class HtmlXmlExporter:
                                 escapeHtml(tok.text))
                     else:
                         self.outAppend(u'<span class="wiki-link"><a href="%s">' %
-                                escapeHtml(link))
+                                link)
                         if tok.node.titleTokens is not None:
                             self.processTokens(content, tok.node.titleTokens)
                         else:

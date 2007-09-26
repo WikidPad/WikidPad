@@ -411,11 +411,123 @@ def relativeFilePath(location, toFilePath):
     return os.path.join(*result)
 
 
-def urlFromPathname(fn):
-    url = urllib.pathname2url(fn)
-    url.replace("%24", "$")
+
+_URL_RESERVED = frozenset((u";", u"?", u":", u"@", u"&", u"=", u"+", u",", u"/"))
+        
+def urlQuote(s, safe='/'):
+    """
+    Modified version of urllib.quote
     
-    return url
+    Each part of a URL, e.g. the path info, the query, etc., has a
+    different set of reserved characters that must be quoted.
+
+    RFC 2396 Uniform Resource Identifiers (URI): Generic Syntax lists
+    the following reserved characters.
+
+    reserved    = ";" | "/" | "?" | ":" | "@" | "&" | "=" | "+" |
+                  "$" | ","
+
+    Each of these characters is reserved in some component of a URL,
+    but not necessarily in all of them.
+
+    The function is intended for quoting the path
+    section of a URL.  Thus, it will not encode '/'.  This character
+    is reserved, but in typical usage the quote function is being
+    called on a path where the existing slash characters are used as
+    reserved characters.
+    """
+    result = []
+    
+    for c in s:
+        if c not in safe and (ord(c) < 33 or c in _URL_RESERVED):
+            result.append("%%%02X" % ord(c))
+        else:
+            result.append(c)
+
+    return "".join(result)
+
+
+def ntUrlFromPathname(p):
+    r"""
+    Modified version of nturl2path.pathname2url.
+
+    Convert a DOS/Windows path name to a file url.
+
+            C:\foo\bar\spam.foo
+
+                    becomes
+
+            ///C|/foo/bar/spam.foo
+    """
+    if not ':' in p:
+        # No drive specifier, just convert slashes and quote the name
+        if p[:2] == '\\\\':
+        # path is something like \\host\path\on\remote\host
+        # convert this to ////host/path/on/remote/host
+        # (notice doubling of slashes at the start of the path)
+            p = '\\\\' + p
+        components = p.split('\\')
+        return urlQuote('/'.join(components))
+    comp = p.split(':')
+    if len(comp) != 2 or len(comp[0]) > 1:
+        error = 'Bad path: ' + p
+        raise IOError, error
+
+    drive = urlQuote(comp[0].upper())
+    components = comp[1].split('\\')
+    path = '///' + drive + '|'
+    for comp in components:
+        if comp:
+            path = path + '/' + urlQuote(comp)
+    return path
+
+
+def _macpncomp2url(component):
+    component = urlQuote(component[:31], safe='')  # We want to quote slashes
+    return component
+
+def macUrlFromPathname(pathname):
+    """
+    Modified version of macurl2path.pathname2url.
+
+    convert mac pathname to /-delimited pathname
+    """
+    if '/' in pathname:
+        raise RuntimeError, "Cannot convert pathname containing slashes"
+    components = pathname.split(':')
+    # Remove empty first and/or last component
+    if components[0] == '':
+        del components[0]
+    if components[-1] == '':
+        del components[-1]
+    # Replace empty string ('::') by .. (will result in '/../' later)
+    for i in range(len(components)):
+        if components[i] == '':
+            components[i] = '..'
+    # Truncate names longer than 31 bytes
+    components = map(_macpncomp2url, components)
+
+    if os.path.isabs(pathname):
+        return '/' + '/'.join(components)
+    else:
+        return '/'.join(components)
+
+
+if os.name == 'nt':
+    urlFromPathname = ntUrlFromPathname
+elif os.name == 'mac':
+    urlFromPathname = macUrlFromPathname
+else:
+    def urlFromPathname(fn):
+        # TODO Really do this for non-Windows systems?
+    
+        if isinstance(fn, unicode):
+            fn = utf8Enc(fn, "replace")[0]
+            
+        url = urllib.pathname2url(fn)
+        url.replace("%24", "$")
+    
+        return url
 
 
 

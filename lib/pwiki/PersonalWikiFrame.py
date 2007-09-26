@@ -3,7 +3,7 @@
 
 import os, sys, gc, traceback, sets, string, re
 from os.path import *
-from time import localtime, time, strftime
+from time import localtime, time, strftime, sleep
 
 import cPickle
 
@@ -23,9 +23,10 @@ from WikiExceptions import *
 
 import Configuration
 from WindowLayout import WindowLayouter, setWindowPos, setWindowSize
-# from WikiData import *
 from wikidata import DbBackendUtils, WikiDataManager
-# from wikidata.WikiDataManager import WikiDataManager
+
+import OsAbstract
+
 import DocPages, WikiFormatting
 
 from CmdLineAction import CmdLineAction
@@ -349,8 +350,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         cmdLineAction.actionBeforeShow(self)
 
         if cmdLineAction.exitFinally:
-            self.Close()
-            self.Destroy()
+            self.exitWiki()
+#             self.Close()
+#             self.Destroy()
             return
 
         self.Show(True)
@@ -1325,13 +1327,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         menuID=wx.NewId()
         helpMenu.Append(menuID, '&Visit wikidPad Homepage', 'Visit Homepage')
-        wx.EVT_MENU(self, menuID, lambda evt: os.startfile('http://www.jhorman.org/wikidPad/'))
+        wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(
+                u'http://www.jhorman.org/wikidPad/'))
 
         helpMenu.AppendSeparator()
 
         menuID=wx.NewId()
         helpMenu.Append(menuID, 'View &License', 'View License')
-        wx.EVT_MENU(self, menuID, lambda evt: os.startfile(join(self.wikiAppDir, 'license.txt')))
+        wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(
+                join(self.wikiAppDir, u'license.txt')))
 
         helpMenu.AppendSeparator()
 
@@ -1399,12 +1403,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         icon = self.lookupIcon("tb_back")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Back (Ctrl-Alt-Back)", "Back")
+        tb.AddSimpleTool(tbID, icon, "Back", "Back")
         wx.EVT_TOOL(self, tbID, lambda evt: self.pageHistory.goInHistory(-1))
 
         icon = self.lookupIcon("tb_forward")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Forward (Ctrl-Alt-Forward)", "Forward")
+        tb.AddSimpleTool(tbID, icon, "Forward", "Forward")
         wx.EVT_TOOL(self, tbID, lambda evt: self.pageHistory.goInHistory(1))
 
         icon = self.lookupIcon("tb_home")
@@ -1416,12 +1420,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         icon = self.lookupIcon("tb_doc")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Open Wiki Word  (Ctrl-O)", "Open Wiki Word")
+        tb.AddSimpleTool(tbID, icon, "Open Wiki Word", "Open Wiki Word")
         wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordOpenDialog())
 
         icon = self.lookupIcon("tb_lens")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Search  (Ctrl-Alt-F)", "Search")
+        tb.AddSimpleTool(tbID, icon, "Search", "Search")
         wx.EVT_TOOL(self, tbID, lambda evt: self.showSearchDialog())
 
         icon = self.lookupIcon("tb_cycle")
@@ -1432,7 +1436,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         tb.AddSimpleTool(wx.NewId(), seperator, "Separator", "Separator")
 
         icon = self.lookupIcon("tb_save")
-        tb.AddSimpleTool(GUI_ID.CMD_SAVE_WIKI, icon, "Save Wiki Word (Ctrl-S)",
+        tb.AddSimpleTool(GUI_ID.CMD_SAVE_WIKI, icon, "Save Wiki Word",
                 "Save Wiki Word")
         wx.EVT_TOOL(self, GUI_ID.CMD_SAVE_WIKI,
                 lambda evt: (self.saveAllDocPages(force=True),
@@ -1440,29 +1444,29 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         icon = self.lookupIcon("tb_rename")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Rename Wiki Word (Ctrl-Alt-R)", "Rename Wiki Word")
+        tb.AddSimpleTool(tbID, icon, "Rename Wiki Word", "Rename Wiki Word")
         wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordRenameDialog())
 
         icon = self.lookupIcon("tb_delete")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Delete (Ctrl-D)", "Delete Wiki Word")
+        tb.AddSimpleTool(tbID, icon, "Delete", "Delete Wiki Word")
         wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordDeleteDialog())
 
         tb.AddSimpleTool(wx.NewId(), seperator, "Separator", "Separator")
 
         icon = self.lookupIcon("tb_heading")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Heading (Ctrl-Alt-H)", "Heading")
+        tb.AddSimpleTool(tbID, icon, "Heading", "Heading")
         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.addHeading(self.getActiveEditor()))
 
         icon = self.lookupIcon("tb_bold")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Bold (Ctrl-B)", "Bold")
+        tb.AddSimpleTool(tbID, icon, "Bold", "Bold")
         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeBold(self.getActiveEditor()))
 
         icon = self.lookupIcon("tb_italic")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Italic (Ctrl-I)", "Italic")
+        tb.AddSimpleTool(tbID, icon, "Italic)", "Italic")
         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeItalic(self.getActiveEditor()))
 
         tb.AddSimpleTool(wx.NewId(), seperator, "Separator", "Separator")
@@ -2885,11 +2889,11 @@ These are your default global settings.
                 # This is a relative link
                 link2 = self.makeRelUrlAbsolute(link2)
             try:
-                if Configuration.isWindows():
-                    os.startfile(mbcsEnc(link2, "replace")[0])
-                else:
-                    # Better solution?
-                    wx.LaunchDefaultBrowser(link2)    # TODO
+#                 if Configuration.isWindows():
+                OsAbstract.startFile(link2)
+#                 else:
+#                     # Better solution?
+#                     wx.LaunchDefaultBrowser(link2)    # TODO
             except Exception, e:
                 traceback.print_exc()
                 self.displayErrorMessage(u"Couldn't start file", e)
@@ -3141,6 +3145,7 @@ These are your default global settings.
                     self.tbIcon.RemoveIcon()
 
                 self.tbIcon.Destroy()
+                sleep(0.01)            
                 self.tbIcon = None
 
 

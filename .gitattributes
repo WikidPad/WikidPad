@@ -553,6 +553,7 @@ lib/pwiki/LogWindow.py -text
 lib/pwiki/MainApp.py -text
 lib/pwiki/MiscEvent.py -text
 lib/pwiki/OptionsDialog.py -text
+lib/pwiki/OsAbstract.py -text
 lib/pwiki/PageAst.py -text
 lib/pwiki/PageHistory.py -text
 lib/pwiki/PersonalWikiFrame.py -text

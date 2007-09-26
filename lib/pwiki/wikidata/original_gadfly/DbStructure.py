@@ -150,6 +150,16 @@ class ConnectWrap:
         except:   #  TODO: Specific exception catch?
             pass
 
+    def execSqlInsert(self, table, fields, values):
+        """
+        Gadfly-specific function. In 2.0 it will be able to create default
+        values for non-existant fields.
+        """
+        fieldStr = ", ".join(fields)
+        qmStr = ", ".join(["?"] * len(fields))
+        self.execSql("insert into %s(%s) values (%s)" % (table, fieldStr, qmStr),
+                values)
+
 
     def getLastRowid(self):
         return self.dbCursor.lastrowid
@@ -208,45 +218,6 @@ t.t = "varchar"
 # Some of the tables are optional and don't have to be in the DB
 
 TABLE_DEFINITIONS = {
-#     "changelog": (     # Essential if versioning used
-#         ("id", t.pi),
-#         ("word", t.t),
-#         ("op", t.i),
-#         ("content", t.b),
-#         ("compression", t.i),
-#         ("encryption", t.i),
-#         ("moddate", t.r)
-#         ),
-# 
-#  
-#     "headversion": (     # Essential if versioning used
-#         ("word", t.t),
-#         ("content", t.b),
-#         ("compression", t.i),
-#         ("encryption", t.i),
-#         ("modified", t.r),
-#         ("created", t.r)
-#         ),
-#     
-#     
-#     "versions": (     # Essential if versioning used
-#         ("id", t.pi),
-#         ("description", t.t),
-#         ("firstchangeid", t.i),
-#         ("created", t.r)
-#         ),
-#                     
-#                     
-#     "wikiwordcontent": (     # Essential for Compact
-#         ("word", t.t),
-#         ("content", t.b),
-#         ("compression", t.i),
-#         ("encryption", t.i),
-#         ("modified", t.r),
-#         ("created", t.r)
-#         ),
-    
-    
     "wikiwords": (     # Essential
         ("word", t.t),
         ("created", t.t),
@@ -715,8 +686,11 @@ def updateDatabase(connwrap, dataDir):
         for w, c, m in dataIn:
             w = wikiWordToLabel(w)
             if not uniqueCtl.has_key(w):
-                connwrap.execSql("insert into wikiwords(word, created, modified) "
-                        "values (?, ?, ?)", (w, c, m))
+                connwrap.execSqlInsert("wikiwords", ("word", "created", 
+                        "modified", "presentationdatablock", "wordnormcase"),
+                        (w, c, m, "", ""))
+#                 connwrap.execSql("insert into wikiwords(word, created, modified) "
+#                         "values (?, ?, ?)", (w, c, m))
                 uniqueCtl[w] = None
 
         # table wikirelations
@@ -732,8 +706,10 @@ def updateDatabase(connwrap, dataDir):
         for w, r, c in dataIn:
             w, r = wikiWordToLabel(w), wikiWordToLabel(r)
             if not uniqueCtl.has_key((w, r)):
-                connwrap.execSql("insert into wikirelations(word, relation, created) "
-                        "values (?, ?, ?)", (w, r, c))
+                connwrap.execSqlInsert("wikirelations", ("word", "relation", 
+                        "created"), (w, r, c))
+#                 connwrap.execSql("insert into wikirelations(word, relation, created) "
+#                         "values (?, ?, ?)", (w, r, c))
                 uniqueCtl[(w, r)] = None
 
         # table wikiwordprops
@@ -746,8 +722,10 @@ def updateDatabase(connwrap, dataDir):
         rebuildIndices(connwrap)
 
         for w, k, v in dataIn:
-            connwrap.execSql("insert into wikiwordprops(word, key, value) "
-                    "values (?, ?, ?)", (wikiWordToLabel(w), k, v))
+            connwrap.execSqlInsert("wikiwordprops", ("word", "key", 
+                    "value"), (wikiWordToLabel(w), k, v))
+#             connwrap.execSql("insert into wikiwordprops(word, key, value) "
+#                     "values (?, ?, ?)", (wikiWordToLabel(w), k, v))
 
         # table todos
         dataIn = connwrap.execSqlQuery(
@@ -759,8 +737,10 @@ def updateDatabase(connwrap, dataDir):
         rebuildIndices(connwrap)
 
         for w, t in dataIn:
-            connwrap.execSql("insert into todos(word, todo) "
-                    "values (?, ?)", (wikiWordToLabel(w), t))
+            connwrap.execSqlInsert("todos", ("word", "todo"),
+                    (wikiWordToLabel(w), t))
+#             connwrap.execSql("insert into todos(word, todo) "
+#                     "values (?, ?)", (wikiWordToLabel(w), t))
 
         formatver = 2
 
@@ -808,7 +788,10 @@ def updateDatabase2(connwrap):
     Second update function. Called when database version is current.
     Performs further updates
     """
-    setSettingsValue(connwrap, "lastwritever", str(VERSION_DB))
+    try:
+        setSettingsValue(connwrap, "lastwritever", str(VERSION_DB))
+    except IOError:
+        pass
 
         
     

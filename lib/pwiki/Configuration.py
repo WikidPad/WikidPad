@@ -3,12 +3,22 @@ import os, traceback
 # from os.path import *
 
 import codecs
-
 import wx
+
 # from wxPython.wx import wxPlatformInfo, wxGetOsVersion, wxGetApp
 
-wxWINDOWS_NT = 18   # For wx.GetOsVersion() 
-wxWIN95 = 20   # For wx.GetOsVersion(), this includes also Win 98 and ME
+# Bug workaround: In wxPython 2.6 these constants weren't defined
+#    in 2.8 they are defined under a different name and with different values
+
+try:
+    wxWINDOWS_NT = wx.OS_WINDOWS_NT
+except AttributeError:
+    wxWINDOWS_NT = 18   # For wx.GetOsVersion()
+    
+try:
+    wxWIN95 = wx.OS_WINDOWS_9X
+except AttributeError:
+    wxWIN95 = 20   # For wx.GetOsVersion(), this includes also Win 98 and ME
 
 
 from MiscEvent import MiscEventSourceMixin
@@ -38,16 +48,19 @@ def isLinux():
 
 
 _ISWIN9x = wx.GetOsVersion()[0] == wxWIN95
+_ISWINNT = wx.GetOsVersion()[0] == wxWINDOWS_NT
 
 def isWin9x():
     """
-    Returns True if OS is WIndows 95/98/ME
+    Returns True if OS is Windows 95/98/ME
     """
     return _ISWIN9x
 
+def isWinNT():
+    return _ISWINNT
 
 def isWindows():
-    return _ISWIN9x or wx.GetOsVersion()[0] == wxWINDOWS_NT
+    return _ISWIN9x or _ISWINNT
 
 
 
@@ -489,8 +502,8 @@ GLOBALDEFAULTS = {
 #             # !!!
 
     ("main", "auto_save"): "True",  # Boolean field, if auto save should be active
-    ("main", "auto_save_delay_key_pressed"): "3",  # Seconds to wait after last key pressed and ...
-    ("main", "auto_save_delay_dirty"): "15",  # secs. to wait after page became dirty before auto save
+    ("main", "auto_save_delay_key_pressed"): "5",  # Seconds to wait after last key pressed and ...
+    ("main", "auto_save_delay_dirty"): "60",  # secs. to wait after page became dirty before auto save
      
     ("main", "hideundefined"): "False", # hide undefined wikiwords in tree
     ("main", "tree_auto_follow"): "True", # The tree selection follows when opening a wiki word

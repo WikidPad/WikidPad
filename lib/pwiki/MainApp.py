@@ -11,11 +11,6 @@ import wx, wx.xrc
 # from wxPython.wx import *
 # import wxPython.xrc as xrc
 
-wxWINDOWS_NT = 18   # For wxGetOsVersion()
-wxWIN95 = 20   # For wxGetOsVersion(), this includes also Win 98 and ME
-
-
-
 import srePersistent
 srePersistent.loadCodeCache()
 
@@ -31,6 +26,11 @@ import OptionsDialog
 from Localization import getCollatorByString, CASEMODE_UPPER_INSIDE, \
         CASEMODE_UPPER_FIRST
 from PluginManager import PluginManager, InsertionPluginManager
+
+
+# For wx.GetOsVersion()
+wxWINDOWS_NT = Configuration.wxWINDOWS_NT
+wxWIN95 = Configuration.wxWIN95
 
 
 
