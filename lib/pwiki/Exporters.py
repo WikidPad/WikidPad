@@ -22,6 +22,8 @@ from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
 
 import Configuration
 
+import OsAbstract
+
 import WikiFormatting
 import DocPages
 import PageAst
@@ -71,7 +73,8 @@ class LinkCreatorForHtmlMultiPageExport:
             return default
 
         relUnAlias = self.wikiData.getAliasesWikiWord(word)
-        return self.htmlXmlExporter.convertFilename(u"%s.html" % relUnAlias)
+        return urlFromPathname(self.htmlXmlExporter.convertFilename(
+                u"%s.html" % relUnAlias))
 
 
 
@@ -261,12 +264,13 @@ class HtmlXmlExporter:
 
         if self.mainControl.getConfig().getboolean(
                 "main", "start_browser_after_export") and startfile:
-            if Configuration.isWindows():
-                 os.startfile(startfile)
-                # os.startfile(mbcsEnc(link2, "replace")[0])
-            else:
-                # Better solution?
-                wx.LaunchDefaultBrowser(startfile)    # TODO
+            OsAbstract.startFile(startfile)
+#             if Configuration.isWindows():
+#                  os.startfile(startfile)
+#                 # os.startfile(mbcsEnc(link2, "replace")[0])
+#             else:
+#                 # Better solution?
+#                 wx.LaunchDefaultBrowser(startfile)    # TODO
 
         self.tempFileSet.reset()
         self.tempFileSet = None
@@ -283,6 +287,12 @@ class HtmlXmlExporter:
         return self.tempFileSet
 
     def _exportHtmlSingleFile(self):
+        config = self.mainControl.getConfig()
+        sepLineCount = config.getint("main",
+                "html_export_singlePage_sepLineCount", 10)
+        
+        if sepLineCount < 0:
+            sepLineCount = 10
         if len(self.wordList) == 1:
             self.exportType = u"html_multi"
             return self._exportHtmlMultipleFiles()
@@ -297,7 +307,7 @@ class HtmlXmlExporter:
         realfp = open(outputFile, "w")
         fp = utf8Writer(realfp, "replace")
         fp.write(self.getFileHeaderMultiPage(self.mainControl.wikiName))
-        
+
         tocTitle = self.addOpt[2]
 
         if self.addOpt[1] == 1:
@@ -310,7 +320,7 @@ class HtmlXmlExporter:
                     '%s%s<hr size="1"/>') %
                     (tocTitle, # = "Table of Contents"
                     self.getContentTreeBody(flatTree, linkAsFragments=True),
-                    u'<br />\n'*10))
+                    u'<br />\n' * sepLineCount))
 
         elif self.addOpt[1] == 2:
             # Write a content list at beginning
@@ -318,29 +328,9 @@ class HtmlXmlExporter:
                     '%s%s<hr size="1"/>') %
                     (tocTitle, # = "Table of Contents"
                     self.getContentListBody(linkAsFragments=True),
-                    u'<br />\n'*10))
+                    u'<br />\n' * sepLineCount))
                     
         links = {}
-#         notExport = sets.Set() # Cache to store all rejected words
-#         wordSet = sets.Set(self.wordList)
-# 
-#         def addWord(word):
-#             if word in links:
-#                 return
-#             if word in notExport:
-#                 return
-#                 
-#             unAlias = self.wikiData.getAliasesWikiWord(word)
-#             if unAlias not in wordSet:
-#                 notExport.add(word)
-#                 return
-# 
-#             wikiPage = self.wikiDataManager.getWikiPage(word)
-#             if not self.shouldExport(word, wikiPage):
-#                 notExport.add(word)
-#                 return
-#             
-#             links[word] = u"#%s" % _escapeAnchor(unAlias)
 
         # First build links dictionary for all included words and their aliases
         for word in self.wordList:
@@ -362,15 +352,6 @@ class HtmlXmlExporter:
             try:
                 content = wikiPage.getLiveText()
                 formatDetails = wikiPage.getFormatDetails()
-#                 links = {}  # TODO Why links to all (even not exported) children?
-#                 for relation in wikiPage.getChildRelationships(
-#                         existingonly=True, selfreference=False):
-#                     if not self.shouldExport(relation):
-#                         continue
-#                     # get aliases too
-#                     relUnAlias = self.wikiData.getAliasesWikiWord(relation)
-#                     # TODO Use self.convertFilename here?
-#                     links[relation] = u"#%s" % _escapeAnchor(relUnAlias)
                     
                 self.wordAnchor = _escapeAnchor(word)
                 formattedContent = self.formatContent(word, content,
@@ -381,7 +362,7 @@ class HtmlXmlExporter:
                         u'<br />%s%s<hr size="1"/>') %
                         (self.wordAnchor, word,
                         self.getParentLinks(wikiPage, False), formattedContent,
-                        u'<br />\n'*10))
+                        u'<br />\n' * sepLineCount))
             except Exception, e:
                 traceback.print_exc()
                 
@@ -842,6 +823,27 @@ class HtmlXmlExporter:
         Return true iff more than the basic state is on the state stack yet.
         """
         return len(self.statestack) > 1
+        
+        
+    def isHtmlSizeValue(sizeStr):
+        """
+        Test unistring sizestr if it is a valid HTML size info and returns
+        True or False
+        """
+        sizeStr = sizeStr.strip()
+        if len(sizeStr) == 0:
+            return False
+
+        if sizeStr[-1] == "%":
+            sizeStr = sizeStr[:-1]
+
+        try:
+            val = int(sizeStr)
+            return val >= 0
+        except ValueError:
+            return False
+
+    isHtmlSizeValue = staticmethod(isHtmlSizeValue)
 
 
     def outAppend(self, toAppend, eatPreBreak=False, eatPostBreak=False):
@@ -1256,10 +1258,10 @@ class HtmlXmlExporter:
 
                 if title is not None:
                     self.outAppend(u'<span class="wiki-link"><a href="%s" title="%s">' %
-                            (escapeHtml(link), escapeHtml(title)))
+                            (link, escapeHtmlNoBreaks(title)))
                 else:
                     self.outAppend(u'<span class="wiki-link"><a href="%s">' %
-                            escapeHtml(link))
+                            link)
 
                 if astNode.titleTokens is not None:
                     self.processTokens(fullContent, astNode.titleTokens)
@@ -1639,10 +1641,9 @@ class HtmlXmlExporter:
                         if sizeInfo is not None:
                             try:
                                 width, height = sizeInfo.split(u"x")
-                                width = int(width)
-                                height = int(height)
-                                if width >= 0 and height >= 0:
-                                    sizeInTag = ' width="%i" height="%i"' % \
+                                if self.isHtmlSizeValue(width) and \
+                                        self.isHtmlSizeValue(height):
+                                    sizeInTag = ' width="%s" height="%s"' % \
                                             (width, height)
                             except:
                                 # something does not match syntax requirements
@@ -1673,7 +1674,7 @@ class HtmlXmlExporter:
                             p = urllib.url2pathname(link)  # TODO Relative URLs
                             link = wx.FileSystem.FileNameToURL(p)
                         self.outAppend(u'<img src="%s" alt="" border="0"%s%s />' % 
-                                (escapeHtml(link), sizeInTag, alignInTag))
+                                (link, sizeInTag, alignInTag))
                     else:
 #                         self.outAppend(u'<a href="%s">%s</a>' %
 #                                 (escapeHtml(link), escapeHtml(link)))

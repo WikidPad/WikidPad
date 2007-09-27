@@ -1,5 +1,5 @@
 from time import strftime
-import pwiki.urllib_red as urllib
+from pwiki.StringOps import urlFromPathname
 
 def now():
     return strftime("%x %I:%M %p")
@@ -21,5 +21,5 @@ def addTime(editor):
 
 def encodeSelection(editor):
     text = editor.GetSelectedText()
-    url = urllib.pathname2url(text)
+    url = urlFromPathname(text)
     editor.ReplaceSelection("file:%s" % url)

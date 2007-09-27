@@ -108,11 +108,11 @@ WindowProcType = ctypes.WINFUNCTYPE(ctypes.c_uint, ctypes.c_int, ctypes.c_uint,
 
 
 try:
-    SHShellExecuteW = _shell32dll.SHShellExecuteW
+    ShellExecuteW = _shell32dll.ShellExecuteW
 except AttributeError:
     # TODO: Can this happen on Win9x?
     # Even worse: What to do if it does not happen?
-    SHShellExecuteW = None
+    ShellExecuteW = None
 
 # HINSTANCE ShellExecute(
 # 
@@ -125,7 +125,6 @@ except AttributeError:
 #    );
 #    
    
-# res = _shell32dll.ShellExecuteW(hwnd, 0, ctypes.c_wchar_p(ur"file:///C|/Daten/Projekte/Wikidpad/Current/wikidpad_unicode.iss"), 0, 0, SW_SHOW)
 
 
 def ansiInputToUnicodeChar(ansiCode):
@@ -171,6 +170,19 @@ def ansiInputToUnicodeChar(ansiCode):
         return unichr(uniChar[0]) + unichr(uniChar[1])
 
     assert 0
+
+
+
+if ShellExecuteW:
+    def startFile(link):
+        if not isinstance(link, unicode):
+            link = unicode(link)
+        # TODO Test result?
+        res = _shell32dll.ShellExecuteW(0, 0, ctypes.c_wchar_p(link), 0, 0,
+                SW_SHOW)
+                
+        return res
+
 
 
 class BaseWinProcIntercept:

@@ -60,7 +60,8 @@ class WikiData:
 
         dbfile = pathDec(dbfile)[0]
         try:
-            self.connWrap = DbStructure.ConnectWrap(sqlite.connect(dbfile))
+            self.connWrap = DbStructure.ConnectWrapSyncCommit(
+                    sqlite.connect(dbfile))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -347,7 +348,7 @@ class WikiData:
 
         try:
             # commit anything pending so we can rollback on error
-            self.connWrap.commit()
+            self.connWrap.syncCommit()
     
             try:
                 self.connWrap.execSql("update wikirelations set word = ? where word = ?", (toWord, word))
@@ -371,7 +372,7 @@ class WikiData:
         """
         if word != self.wikiDocument.getWikiName():
             try:
-                self.connWrap.commit()
+                self.connWrap.syncCommit()
                 try:
                     # don't delete the relations to the word since other
                     # pages still have valid outward links to this page.
@@ -888,19 +889,20 @@ class WikiData:
 
 
 
-    def getWikiWordsModifiedLastDays(self, days):
-        """
-        Function must work for read-only wiki.
-        """
-        timeDiff = float(time()-(86400*days))
-        try:
-            return self.connWrap.execSqlQuerySingleColumn(
-                    "select word from wikiwords where modified >= ? and "
-                    "not word glob '[[]*'",
-                    (timeDiff,))
-        except (IOError, OSError, sqlite.Error), e:
-            traceback.print_exc()
-            raise DbReadAccessError(e)
+#     def getWikiWordsModifiedLastDays(self, days):
+#         """
+#         Function must work for read-only wiki.
+#         """
+#         timeDiff = float(time()-(86400*days))
+#         try:
+#             return self.connWrap.execSqlQuerySingleColumn(
+#                     "select word from wikiwords where modified >= ? and "
+#                     "not word glob '[[]*'",
+#                     (timeDiff,))
+#         except (IOError, OSError, sqlite.Error), e:
+#             traceback.print_exc()
+#             raise DbReadAccessError(e)
+
 
     def getWikiWordsModifiedWithin(self, startTime, endTime):
         """
@@ -913,6 +915,93 @@ class WikiData:
                     "select word from wikiwords where modified >= ? and "
                     "modified < ? and not word glob '[[]*'",
                     (startTime, endTime))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+
+    _STAMP_TYPE_TO_FIELD = {
+            0: "modified",
+            1: "created"
+        }
+
+    def getTimeMinMax(self, stampType):
+        """
+        Return the minimal and maximal timestamp values over all wiki words
+        as tuple (minT, maxT) of float time values.
+        A time value of 0.0 is not taken into account.
+        If there are no wikiwords with time value != 0.0, (None, None) is
+        returned.
+        
+        stampType -- 0: Modification time, 1: Creation, 2: Last visit
+        """
+        field = self._STAMP_TYPE_TO_FIELD.get(stampType)
+        if field is None:
+            # Visited not supported yet
+            return (None, None)
+
+        try:
+            result = self.connWrap.execSqlQuery(
+                    ("select min(%s), max(%s) from wikiwords where %s > 0 and "
+                    "not word glob '[[]*'") % (field, field, field))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+        if len(result) == 0:
+            # No matching wiki words found
+            return (None, None)
+        else:
+            return tuple(result[0])
+
+
+    def getWikiWordsBefore(self, stampType, stamp, limit=None):
+        """
+        Get a list of tuples of wiki words and dates related to a particular
+        time before stamp.
+        
+        stampType -- 0: Modification time, 1: Creation, 2: Last visit
+        limit -- How much words to return or None for all
+        """
+        field = self._STAMP_TYPE_TO_FIELD.get(stampType)
+        if field is None:
+            # Visited not supported yet
+            return []
+            
+        if limit is None:
+            limit = -1
+            
+        try:
+            return self.connWrap.execSqlQuery(
+                    ("select word, %s from wikiwords where %s > 0 and %s < ? "
+                    "and not word glob '[[]*' order by %s desc limit ?") %
+                    (field, field, field, field), (stamp, limit))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+
+    def getWikiWordsAfter(self, stampType, stamp, limit=None):
+        """
+        Get a list of of tuples of wiki words and dates related to a particular
+        time after OR AT stamp.
+        
+        stampType -- 0: Modification time, 1: Creation, 2: Last visit
+        limit -- How much words to return or None for all
+        """
+        field = self._STAMP_TYPE_TO_FIELD.get(stampType)
+        if field is None:
+            # Visited not supported yet
+            return []
+            
+        if limit is None:
+            limit = -1
+
+        try:
+            return self.connWrap.execSqlQuery(
+                    ("select word, %s from wikiwords where %s > ? "
+                    "and not word glob '[[]*' order by %s asc limit ?") %
+                    (field, field, field), (stamp, limit))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -1315,7 +1404,7 @@ class WikiData:
         """
         try:
             DbStructure.recreateCacheTables(self.connWrap)
-            self.connWrap.commit()
+            self.connWrap.syncCommit()
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -1358,7 +1447,7 @@ class WikiData:
         if writing failed.
         """
         try:
-            self.connWrap.commit()
+            self.connWrap.syncCommit()
             self.connWrap.execSql("insert or replace into settings(key, value) "
                     "values ('formatver', ?)", (DbStructure.getSettingsValue(
                     self.connWrap, "formatver"),))
@@ -1373,7 +1462,7 @@ class WikiData:
         Function must work for read-only wiki.
         """
         try:
-            self.connWrap.commit()
+            self.connWrap.syncCommit()
             self.connWrap.close()
     
             self.connWrap = None
@@ -1659,7 +1748,7 @@ class WikiData:
         for "compactify".        
         """
         try:
-            self.connWrap.commit()
+            self.connWrap.syncCommit()
             self.connWrap.execSql("vacuum")
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()

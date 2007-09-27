@@ -34,13 +34,13 @@ def isUnicode():
 
 def isOSX():
     """
-    Return if working on Mac OSX
+    Return if running on Mac OSX
     """
     return '__WXMAC__' in wx.PlatformInfo
     
 def isLinux():
     """
-    Return if working on Linux system
+    Return if running on Linux system
     """
     try:
         return os.uname()[0] == "Linux"
@@ -49,16 +49,22 @@ def isLinux():
 
 
 _ISWIN9x = wx.GetOsVersion()[0] == wxWIN95
+_ISWINNT = wx.GetOsVersion()[0] == wxWINDOWS_NT
 
 def isWin9x():
     """
-    Returns True if OS is WIndows 95/98/ME
+    Returns True if OS is Windows 95/98/ME
     """
     return _ISWIN9x
 
+def isWinNT():
+    """
+    Returns True if OS is Windows NT/2000/XP...
+    """
+    return _ISWINNT
 
 def isWindows():
-    return _ISWIN9x or wx.GetOsVersion()[0] == wxWINDOWS_NT
+    return _ISWIN9x or _ISWINNT
 
 
 
@@ -534,8 +540,8 @@ GLOBALDEFAULTS = {
             # or creating a wiki. If entry is empty, a built-in default is used.
 
     ("main", "auto_save"): "True",  # Boolean field, if auto save should be active
-    ("main", "auto_save_delay_key_pressed"): "3",  # Seconds to wait after last key pressed and ...
-    ("main", "auto_save_delay_dirty"): "15",  # secs. to wait after page became dirty before auto save
+    ("main", "auto_save_delay_key_pressed"): "5",  # Seconds to wait after last key pressed and ...
+    ("main", "auto_save_delay_dirty"): "60",  # secs. to wait after page became dirty before auto save
      
     ("main", "hideundefined"): "False", # hide undefined wikiwords in tree
     ("main", "tree_auto_follow"): "True", # The tree selection follows when opening a wiki word
@@ -558,6 +564,8 @@ GLOBALDEFAULTS = {
     ("main", "export_table_of_contents"): "0",  # Show table of contents when exporting
             # 0:None, 1:formatted as tree, 2:as list
     ("main", "html_toc_title"): u"Table of Contents",  # title of table of contents
+    ("main", "html_export_singlePage_sepLineCount"): u"10",  # How many empty lines to separate
+            # two wiki pages in a single HTML page
 
     ("main", "html_body_link"): "",  # for HTML preview/export, color for link or "" for default
     ("main", "html_body_alink"): "",  # for HTML preview/export, color for active link or "" for default
@@ -605,12 +613,19 @@ GLOBALDEFAULTS = {
             # Ctrl pressed, should it then open link in  0: a new tab in foreground, 1: new tab background, 2: same tab
     ("main", "mouse_middleButton_withCtrl"): "0", # Same, but if Ctrl is pressed
 
-    # Time view options
+    # Time view/time line/calendar options
     ("main", "timeView_position"): "0",  # Mode where to place the time view window,
             # 0: Hidden, 1:Left, 2:Right, 3:Above, 4:Below
     ("main", "timeView_dateFormat"): u"%Y %m %d",  # Time format to show and enter dates in the time view,
             # especially in the timeline    
     ("main", "timeView_autohide"): "False", # Automatically hide time view after something was selected in it.
+    ("main", "timeView_showWordListOnHovering"): "True", # If True the wordlist of a date is shown when hovering
+            # over the entry
+    ("main", "timeView_showWordListOnSelect"): "False", # If True the wordlist of a date is shown when 
+            # entry is selected
+    ("main", "timeline_showEmptyDays"): "True", # Show days for which no wikiword is associated?
+    ("main", "timeline_sortDateAscending"): "True", # If True the newer days are downward in the list, otherwise upward
+
 
     # Search options
     ("main", "search_wiki_context_before"): "20", # No. of context characters before

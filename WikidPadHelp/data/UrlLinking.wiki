@@ -38,7 +38,7 @@ rel://files/testimg.gif
 
 To show all such URLs as links instead, open "Options" dialog, page "HTML preview/export" and check "Show pics as links in preview" or "Show pics as links in export" or set it temporarily in the export dialog.
 
-For controlling of individual URLs, see next chapter.
+For controlling of individual URLs, see "URL Appendix" below.
 
 
 ++ Wiki: URLs
@@ -61,7 +61,8 @@ You can control details of URL presentation, especially for images, by using an 
 
     i Show URL as image, even if it has none of the default suffixes
     l Show URL as link. 'i' and 'l' are mutually exclusive.
-    s Set size of an image, following the code is the width and height, delimited by 'x' (e.g. '200x300')
+    s Set size of an image, following the code is the width and height in pixels or
+      as percentage of space on page, delimited by 'x' (e.g. '200x300', "60%x70%")
     a Set alignment of image, the following character defines which alignment (*t*op, vertically
     *m*iddle, *b*ottom, *r*ight or *l*eft). This setting is not respected by the preview.
 

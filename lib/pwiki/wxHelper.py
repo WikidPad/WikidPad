@@ -596,6 +596,9 @@ class EnhancedListControl(wx.ListCtrl):
             result.append(sel)
 
         return result
+    
+    def GetFirstSelected(self):
+        return self.GetNextItem(-1, state=wx.LIST_STATE_SELECTED)
 
 
     if Configuration.isWindows():

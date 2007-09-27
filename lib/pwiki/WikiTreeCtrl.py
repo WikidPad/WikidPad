@@ -1557,6 +1557,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             if self.pWiki.getConfig().getboolean("main", "tree_autohide", False):
                 # Auto-hide tree
                 self.pWiki.setShowTreeControl(False)
+        
+        # Is said to fix a selection redraw problem
+        self.Refresh()
 
 
     def OnTreeItemSelChanging(self, evt):
@@ -1594,20 +1597,23 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 self.SetPyData(newit, ch)
                 self.setNodePresentation(newit, ch.getNodePresentation())
         finally:
-            pass
             self.Thaw()
 
         ## _prof.stop()
-     
+
 
     def OnTreeItemCollapse(self, event):
         self.DeleteChildren(event.GetItem())
+        # Is said to fix a selection redraw problem
+        self.Refresh()
 
 
     def OnTreeBeginDrag(self, event):
+        formatting = self.pWiki.getFormatting()
         itemobj = self.GetPyData(event.GetItem())
         if isinstance(itemobj, WikiWordNode):
-            dataOb = textToDataObject(u"[" + itemobj.getWikiWord() + u"]")
+            dataOb = textToDataObject(formatting.BracketStart +
+                    itemobj.getWikiWord() + formatting.BracketEnd)
             dropsource = wx.DropSource(self)
             dropsource.SetData(dataOb)
             dropsource.DoDragDrop(wx.Drag_AllowMove)

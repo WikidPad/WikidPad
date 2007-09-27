@@ -24,59 +24,60 @@ import pwiki.sqlite3api as sqlite
 
 # Connection (and Cursor)-Wrapper to simplify some operations
 
-class ConnectWrap:
+class ConnectWrapBase:
+    """
+    Connection (and Cursor)-Wrapper to simplify some operations.
+    Base class to versions with synchronous and asynchronous commit.
+    """
     def __init__(self, connection):
         self.__dict__["dbConn"] = connection
         self.__dict__["dbCursor"] = connection.cursor()
-        
-        # To make access a bit faster
-        self.__dict__["execSql"] = self.dbCursor.execute
-        
-        self.__dict__["execute"] = self.dbCursor.execute
-        self.__dict__["executemany"] = self.dbCursor.executemany
-        self.__dict__["commit"] = self.dbConn.commit
-        self.__dict__["rollback"] = self.dbConn.rollback
-        self.__dict__["fetchone"] = self.dbCursor.fetchone
-        self.__dict__["fetchall"] = self.dbCursor.fetchall
-        
-        
+     
+#         self.__dict__["execute"] = self.dbCursor.execute
+#         self.__dict__["executemany"] = self.dbCursor.executemany
+#         self.__dict__["fetchone"] = self.dbCursor.fetchone
+#         self.__dict__["fetchall"] = self.dbCursor.fetchall
+   
     def __setattr__(self, attr, value):
         setattr(self.dbCursor, attr, value)
-        
+
     def __getattr__(self,  attr):
         return getattr(self.dbCursor, attr)
 
-#     def execSql(self, sql, params=None):
-#         "utility method, executes the sql"
-#         if params:
-#             self.execute(sql, params)
-#         else:
-#             self.execute(sql)
-            
+
+    # The following are mainly the versions for synchronized commit
+    # For async commit they are wrapped by a lock
+
+    def execSql(self, sql, params=None):
+        "utility method, executes the sql"
+        if params:
+            self.dbCursor.execute(sql, params)
+        else:
+            self.dbCursor.execute(sql)
+
 
     def execSqlQuery(self, sql, params=None):
         "utility method, executes the sql, returns query result"
-        ## print "execSqlQuery sql", sql, repr(params)
         if params:
-            self.execute(sql, params, typeDetect=sqlite.TYPEDET_FIRST)
+            self.dbCursor.execute(sql, params, typeDetect=sqlite.TYPEDET_FIRST)
         else:
-            self.execute(sql, typeDetect=sqlite.TYPEDET_FIRST)
+            self.dbCursor.execute(sql, typeDetect=sqlite.TYPEDET_FIRST)
 
         return self.dbCursor.fetchall()
- 
-        
-    def execSqlQueryIter(self, sql, params=None):
-        """
-        utility method, executes the sql, returns an iterator
-        over the query results
-        """
-        ## print "execSqlQuery sql", sql, repr(params)
-        if params:
-            self.execute(sql, params, typeDetect=sqlite.TYPEDET_FIRST)
-        else:
-            self.execute(sql, typeDetect=sqlite.TYPEDET_FIRST)
 
-        return iter(self.dbCursor)
+
+#     def execSqlQueryIter(self, sql, params=None):
+#         """
+#         utility method, executes the sql, returns an iterator
+#         over the query results
+#         """
+#         ## print "execSqlQuery sql", sql, repr(params)
+#         if params:
+#             self.dbCursor.execute(sql, params, typeDetect=sqlite.TYPEDET_FIRST)
+#         else:
+#             self.dbCursor.execute(sql, typeDetect=sqlite.TYPEDET_FIRST)
+# 
+#         return iter(self.dbCursor)
 
 
     def execSqlQuerySingleColumn(self, sql, params=None):
@@ -91,48 +92,32 @@ class ConnectWrap:
         one column and returns result. If query results
         to 0 rows, default is returned (defaults to None)
         """
-        self.execSql(sql, params)
+        self.dbCursor.execute(sql, params)
         row = self.fetchone()
         if row is None:
             return default
             
         return row[0]
-        
+
         
     def execSqlNoError(self, sql):
         """
         Ignore sqlite errors on execution
         """
         try:
-            self.execute(sql)
+            self.dbCursor.execute(sql)
         except sqlite.Error:
             pass
 
 
     def getLastRowid(self):
         return self.dbCursor.lastrowid
-        
-    def getConnection(self):
-        """
-        Return wrapped DB-API connection
-        """
-        return self.dbConn
-        
-    def getCursor(self):
-        return self.dbCursor
-        
+
+
     def closeCursor(self):
         if self.dbCursor:
             self.dbCursor.close()
             self.dbCursor == None
-            
-    def __del__(self):
-        """
-        Only the implicit generated cursor is closed automatically
-        on deletion, the connection is not.
-        """
-        self.closeCursor()
-
 
     def close(self):
         """
@@ -142,7 +127,226 @@ class ConnectWrap:
             self.closeCursor()
             self.dbConn.close()
             self.dbConn == None
-       
+
+
+    def __del__(self):
+        """
+        Only the implicit generated cursor is closed automatically
+        on deletion, the connection is not.
+        """
+        self.closeCursor()
+     
+    def getConnection(self):
+        """
+        Return wrapped DB-API connection
+        """
+        return self.dbConn
+        
+    def getCursor(self):
+        return self.dbCursor
+
+
+
+class ConnectWrapSyncCommit(ConnectWrapBase):
+    """
+    Connection wrapper for synchronous commit
+    """
+    def __init__(self, connection):
+        ConnectWrapBase.__init__(self, connection)
+        
+        # To make access a bit faster
+        self.__dict__["commit"] = self.dbConn.commit
+        self.__dict__["syncCommit"] = self.dbConn.commit
+        self.__dict__["rollback"] = self.dbConn.rollback
+
+
+    # Other functions are already defined by ConnectWrapBase
+
+
+
+class ConnectWrapAsyncCommit(ConnectWrapBase):
+    """
+    Connection wrapper for asynchronous commit (experimental)
+    """
+    def __init__(self, connection):
+        ConnectWrapBase.__init__(self, connection)
+        
+        self.__dict__["accessLock"] = threading.RLock()
+        self.__dict__["commitTimer"] = None
+        self.__dict__["commitNeeded"] = False
+
+
+    def commit(self):
+        self.accessLock.acquire()
+        try:
+            if not self.commitNeeded:
+                return
+            if self.commitTimer is not None and self.commitTimer.isAlive():
+                return
+            t = threading.Timer(0.6, self._timerCommit)
+            self.commitTimer = t
+            t.start()
+        finally:
+            self.accessLock.release()
+
+
+    def _timerCommit(self):
+        """
+        Called by timer to commit.
+        """
+        self.accessLock.acquire()
+        try:    
+            if not self.commitNeeded:
+                return
+            self.dbConn.commit()
+            self.commitNeeded = False
+        finally:
+            self.accessLock.release()
+        
+
+    def syncCommit(self):
+        """
+        Execute commit immediately and synchronous.
+        """
+        self.accessLock.acquire()
+        try:
+            if self.commitTimer is not None and self.commitTimer.isAlive():
+                self.commitTimer.cancel()
+            self.dbConn.commit()
+            self.commitNeeded = False
+        finally:
+            self.accessLock.release()
+
+
+    def rollback(self):
+        self.accessLock.acquire()
+        try:    
+            if self.commitTimer is not None and self.commitTimer.isAlive():
+                self.commitTimer.cancel()
+            self.dbConn.rollback()
+            self.commitNeeded = False
+        finally:
+            self.accessLock.release()
+
+
+    def _commitIfPending(self):
+        """
+        Execute commit synchronously if timer currently runs.
+        This function is not secured by a lock as it is only called
+        by other functions.
+        """
+        if self.commitTimer is not None and self.commitTimer.isAlive():
+            self.commitTimer.cancel()
+
+            if not self.commitNeeded:
+                return
+            self.dbConn.commit()
+            self.commitNeeded = False
+
+
+    def execSql(self, sql, params=None):
+        "utility method, executes the sql"
+        self.accessLock.acquire()
+        try:
+            # Commit first before executing something that changes database
+            self._commitIfPending()
+            self.commitNeeded = True
+            return ConnectWrapBase.execSql(self, sql, params)
+        finally:
+            self.accessLock.release()
+
+    def execSqlQuery(self, sql, params=None):
+        "utility method, executes the sql, returns query result"
+        self.accessLock.acquire()
+        try:
+            return ConnectWrapBase.execSqlQuery(self, sql, params)
+        finally:
+            self.accessLock.release()
+
+
+#     def execSqlQueryIter(self, sql, params=None):
+#         """
+#         utility method, executes the sql, returns an iterator
+#         over the query results
+#         """
+#         ## print "execSqlQuery sql", sql, repr(params)
+#         if params:
+#             self.dbCursor.execute(sql, params, typeDetect=sqlite.TYPEDET_FIRST)
+#         else:
+#             self.dbCursor.execute(sql, typeDetect=sqlite.TYPEDET_FIRST)
+# 
+#         return iter(self.dbCursor)
+
+
+    def execSqlQuerySingleColumn(self, sql, params=None):
+        "utility method, executes the sql, returns query result"
+        self.accessLock.acquire()
+        try:
+            return ConnectWrapBase.execSqlQuerySingleColumn(self, sql, params)
+        finally:
+            self.accessLock.release()
+        
+
+    def execSqlQuerySingleItem(self, sql, params=None, default=None):
+        """
+        Executes a query to retrieve at most one row with
+        one column and returns result. If query results
+        to 0 rows, default is returned (defaults to None)
+        """
+        self.accessLock.acquire()
+        try:
+            return ConnectWrapBase.execSqlQuerySingleItem(self, sql, params,
+                    default)
+        finally:
+            self.accessLock.release()
+
+        
+    def execSqlNoError(self, sql):
+        """
+        Ignore sqlite errors on execution
+        """
+        self.accessLock.acquire()
+        try:
+            # Commit first before executing something that changes database
+            self._commitIfPending()
+            self.commitNeeded = True
+            return ConnectWrapBase.execSqlNoError(self, sql)
+        finally:
+            self.accessLock.release()
+
+
+    def getLastRowid(self):
+        self.accessLock.acquire()
+        try:
+            return ConnectWrapBase.getLastRowid(self)
+        finally:
+            self.accessLock.release()
+
+        
+    def closeCursor(self):
+        self.accessLock.acquire()
+        try:
+            # Commit first before executing something that changes database
+            self._commitIfPending()
+            return ConnectWrapBase.closeCursor(self)
+        finally:
+            self.accessLock.release()
+
+
+    def close(self):
+        """
+        Close cursor and connection
+        """
+        self.accessLock.acquire()
+        try:
+            # Commit first before executing something that changes database
+            self._commitIfPending()
+            ConnectWrapBase.close(self)
+        finally:
+            self.accessLock.release()
+
+
+
 
 
 VERSION_DB = 1
@@ -199,8 +403,8 @@ TABLE_DEFINITIONS = {
                     
     "wikiwords": (     # Essential
         ("word", t.t),
-        ("created", t.t),
-        ("modified", t.t),
+        ("created", t.r),
+        ("modified", t.r),
         ("presentationdatablock", t.b),
         ("wordnormcase", t.t)   # Column word in lowercase
         ),
@@ -283,6 +487,8 @@ def rebuildIndices(connwrap):
     """
     connwrap.execSqlNoError("drop index wikiwords_pkey")
     connwrap.execSqlNoError("drop index wikiwords_wordnormcase")
+    connwrap.execSqlNoError("drop index wikiwords_modified")
+    connwrap.execSqlNoError("drop index wikiwords_created")
     connwrap.execSqlNoError("drop index wikirelations_pkey")
     connwrap.execSqlNoError("drop index wikirelations_word")
     connwrap.execSqlNoError("drop index wikirelations_relation")    
@@ -293,6 +499,8 @@ def rebuildIndices(connwrap):
 
     connwrap.execSqlNoError("create unique index wikiwords_pkey on wikiwords(word)")
     connwrap.execSqlNoError("create index wikiwords_wordnormcase on wikiwords(wordnormcase)")
+    connwrap.execSqlNoError("create index wikiwords_modified on wikiwordcontent(modified)")
+    connwrap.execSqlNoError("create index wikiwords_created on wikiwordcontent(created)")
     connwrap.execSqlNoError("create unique index wikirelations_pkey on wikirelations(word, relation)")
     connwrap.execSqlNoError("create index wikirelations_word on wikirelations(word)")
     connwrap.execSqlNoError("create index wikirelations_relation on wikirelations(relation)")
@@ -375,7 +583,8 @@ def changeTableSchema(connwrap, tablename, schema, forcechange=False):
     # A pragma statement would trigger a commit but we don't want this
     oldAc = connwrap.getConnection().getAutoCommit()
     # If autoCommit is on, no automatic begin or commit statements will
-    # be created by the DB-interface (this sounds contradictional, but is true)
+    # be created by the DB-interface (this sounds contradictional, but is true
+    # because sqlite itself is then responsible for the automatic commit)
     
     # Without silent=True, the command would create a commit here
     connwrap.getConnection().setAutoCommit(True, silent=True)
@@ -434,7 +643,7 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
                 unlink(dbfile)
 
         # create the database
-        connwrap = ConnectWrap(sqlite.connect(dbfile))
+        connwrap = ConnectWrapSyncCommit(sqlite.connect(dbfile))
         
         try:
             for tn in MAIN_TABLES:
@@ -450,7 +659,7 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
                     )  )
 
             rebuildIndices(connwrap)
-            connwrap.commit()
+            connwrap.syncCommit()
             
         finally:
             # close the connection
@@ -609,7 +818,7 @@ def updateDatabase(connwrap):
     Update a database from an older version to current (checkDatabaseFormat()
     should have returned 1 before calling this function)
     """
-    connwrap.commit()
+    connwrap.syncCommit()
     
 #     indices = connwrap.execSqlQuerySingleColumn(
 #             "select name from sqlite_master where type='index'")
@@ -642,7 +851,7 @@ def updateDatabase(connwrap):
 
     rebuildIndices(connwrap)
 
-    connwrap.commit()
+    connwrap.syncCommit()
 
         
 
@@ -787,11 +996,11 @@ Table "wikiwords" changed to:
             )
 
 
-Column "presentationdatablock" contains byte string describing how to present
+Added column "presentationdatablock" contains byte string describing how to present
 a particular page (window scroll and cursor position). Its content is
 en/decoded by the WikiDataManager.
 
-Column "wordnormcase" contains byte string returned by the normCase method
+Added column "wordnormcase" contains byte string returned by the normCase method
 of a Collator object (see "Localization.py"). The column's content should 
 be recreated at a rebuild.
 

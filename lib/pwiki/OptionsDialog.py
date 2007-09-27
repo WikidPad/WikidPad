@@ -129,6 +129,8 @@ class OptionsDialog(wx.Dialog):
             ("html_preview_renderer", "chHtmlPreviewRenderer", "seli"),
             ("export_table_of_contents", "chTableOfContents", "seli"),
             ("html_toc_title", "tfHtmlTocTitle", "t"),
+            ("html_export_singlePage_sepLineCount",
+                    "tfHtmlExportSinglePageSepLineCount", "i0+"),
 
             ("html_body_link", "tfHtmlLinkColor", "color0",
                 "btnSelectHtmlLinkColor"),
@@ -177,6 +179,13 @@ class OptionsDialog(wx.Dialog):
             ("timeView_dateFormat", "tfTimeViewDateFormat", "ttdf",
                 "btnSelectTimeViewDateFormat"),
             ("timeView_autohide", "cbTimeViewAutoHide", "b"),
+
+            ("timeView_showWordListOnHovering",
+                    "cbTimeViewShowWordListOnHovering", "b"),
+            ("timeView_showWordListOnSelect",
+                    "cbTimeViewShowWordListOnSelect", "b"),
+            ("timeline_showEmptyDays", "cbTimelineShowEmptyDays", "b"),
+            ("timeline_sortDateAscending", "cbTimelineSortDateAscending", "b"),
 
             ("search_wiki_context_before", "tfWwSearchContextBefore", "i0+"),
             ("search_wiki_context_after", "tfWwSearchContextAfter", "i0+"),

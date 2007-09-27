@@ -19,7 +19,7 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 
 from MiscEvent import KeyFunctionSink
 
-from StringOps import uniToGui, utf8Enc, utf8Dec
+from StringOps import uniToGui, utf8Enc, utf8Dec, urlFromPathname, urlQuote
 
 from TempFileSet import TempFileSet
 
@@ -36,7 +36,7 @@ class LinkCreatorForPreviewIe:
 
     def get(self, word, default = None):
         if self.wikiData.isDefinedWikiWord(word):
-            return urllib.quote("internaljump:%s" % utf8Enc(word)[0], "/#:;@")
+            return urlQuote(u"internaljump:%s" % word, u"/#:;@")
         else:
             return default
 
@@ -49,7 +49,7 @@ class LinkCreatorForPreviewMoz:
 
     def get(self, word, default = None):
         if self.wikiData.isDefinedWikiWord(word):
-            return urllib.quote("file://internaljump/%s" % utf8Enc(word)[0], "/#:;@")
+            return urlQuote(u"file://internaljump/%s" % word, u"/#:;@")
         else:
             return default
 
@@ -105,7 +105,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             self.exporterInstance.exportType = u"html_previewIE"
 
         self.exporterInstance.tempFileSet = TempFileSet()
-        self.exporterInstance.styleSheet = "file:" + urllib.pathname2url(
+        self.exporterInstance.styleSheet = "file:" + urlFromPathname(
                 os.path.join(wx.GetApp().globalConfigSubDir,
                 'wikipreview.css'))
         self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
@@ -180,11 +180,11 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                     wikiPage.getFormatDetails(),
                     self.LinkCreatorForPreview(
                         self.presenter.getWikiDocument().getWikiData()))
-
+                        
             htpath = self.exporterInstance.tempFileSet.createTempFile(
-                    utf8Enc(uniToGui(html))[0], ".html", relativeTo="")
+                    utf8Enc(html)[0], ".html", relativeTo="")
 
-            url = "file:" + urllib.pathname2url(htpath)
+            url = "file:" + urlFromPathname(htpath)
 
             # wxFileSystem.FileNameToURL
 
@@ -309,7 +309,14 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             internaljumpPrefix = u"internaljump:"
 
         if href.startswith(internaljumpPrefix):
-            href = href.encode("ascii", "replace")
+
+            if self.drivingMoz:
+                # Unlike stated, the Mozilla ActiveX control has some
+                # differences to the IE control. For instance, it returns
+                # here an UTF-8 URL-quoted string, while IE returns the
+                # unicode as it is.
+                href = utf8Dec(urllib.unquote(href.encode("ascii", "replace")))[0]
+
             evt.Cancel = True
             # Jump to another wiki page
 
@@ -325,9 +332,9 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 #             if self.drivingMoz:
 
             # unescape word
-            word = utf8Dec(urllib.unquote(word))[0]
+            word = urllib.unquote(word) # utf8Dec(urllib.unquote(word))[0]
             if anchor:
-                anchor = utf8Dec(urllib.unquote(anchor))[0]
+                anchor = urllib.unquote(anchor)  # utf8Dec(urllib.unquote(anchor))[0]
 
             # Now open wiki
             self.presenter.getMainControl().openWikiPage(

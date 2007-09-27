@@ -185,10 +185,10 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
     #             self.statusBar.SetStatusText(uniToGui(u"Wiki word '%s' already open" %
     #                     wikiWord), 0)
                 return
-    
+
             # trigger hook
             self.getMainControl().hooks.openWikiWord(self, wikiWord)
-    
+
             # check if this is an alias
             wikiData = self.getMainControl().getWikiData()
             if (wikiData.isAlias(wikiWord)):
@@ -209,7 +209,7 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
                 self.getStatusBar().SetStatusText(uniToGui(u"Wiki page not found, a new "
                         u"page will be created"), 0)
                 self.getStatusBar().SetStatusText(uniToGui(u""), 1)
-    
+
             self.getSubControl("textedit").loadWikiPage(page, evtprops)
             self.getMainControl().refreshPageStatus()  # page)
     
@@ -291,8 +291,8 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
     def __init__(self, parent, mainControl, id=-1):
         wx.Panel.__init__(self, parent, id)
         BasicDocPagePresenter.__init__(self, mainControl)
-        
-        
+
+
     def switchSubControl(self, scName, gainFocus=False):
         """
         Make the chosen subcontrol visible, all other invisible
@@ -324,3 +324,7 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
             self.subControls[self.lastVisibleCtrlName].SetFocus()
         except KeyError:
             wx.Panel.SetFocus(self)
+
+
+
+

@@ -1,6 +1,36 @@
 ﻿++ Change Log
 
-Sep. 05, 2007 (1.9beta10)
+
+Sep. 27, 2007 (1.9beta11)
+
+    * Optional shortcut to focus fast search field
+    * Options for timeline to suppress "empty" days and to sort
+      dates descending. See OptionsDialog#++++# Time# view
+    * Options for timeline to switch off wiki page list
+      on hovering over date, instead showing it after clicking
+      on it is possible. See OptionsDialog#++++# Time# view
+    * Option to set number of separator lines between wiki pages
+      in single HTML page output.
+      See [Options HTML preview_export]#*Single# page# separator# lines*
+    * Larger default delays for autosave
+    * Possibility to set image size in percent.
+      See UrlLinking#++# URL# Appendix
+    * Shortcuts "ActivateLink", "ActivateLinkNewTab" and
+      "ActivateLink2" now also work in incremental search mode
+    
+    * Bug fixed: Updating wikis from WikidPad 1.1 failed
+    * Bug fixed: Source code did not work correctly with
+      wxPython 2.8 (OS not recognized properly)
+    * Bug fixed: Exception possible when running WikidPad from
+      commandline while doc structure window is open
+    * Bug fixed: Starting URLs with characters not in system
+      codepage failed
+    * Bug fixed: Wrong shortcuts shown in tooltips of toolbar
+      buttons
+
+
+
+Sep. 05, 2007 (1.9beta10, repository revision in "mbutscher" branch: 127)
 
     * Bug fixed: OS not recognized if using source version on
       Windows with wxPython 2.8
@@ -13,7 +43,7 @@ Sep. 05, 2007 (1.9beta10)
 
 
 
-Aug. 28, 2007 (1.9beta9)
+Aug. 28, 2007 (1.9beta9, repository revision in "mbutscher" branch: 126)
 
     * Very basic support for a time view/timeline. Much work to do
       yet. See TimeViewWindow

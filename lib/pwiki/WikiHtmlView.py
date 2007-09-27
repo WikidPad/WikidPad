@@ -189,7 +189,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
                     wikiPage.getFormatDetails(),
                     LinkCreatorForPreview(
                         self.presenter.getWikiDocument().getWikiData()))
-
+            
             wx.GetApp().getInsertionPluginManager().taskEnd()
 
     
@@ -412,6 +412,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
         else:
             evt.Skip()
 
+
     def OnMouseWheel(self, evt):
         if evt.ControlDown():
             self.addZoom( -(evt.GetWheelRotation() // evt.GetWheelDelta()) )
@@ -449,7 +450,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
                     if wikiData.isDefinedWikiWord(wikiWord):
                         wikiWord = wikiData.getAliasesWikiWord(wikiWord)
-                        
+
                         propList = wikiData.getPropertiesForWord(wikiWord)
                         for key, value in propList:
                             if key == u"short_hint":

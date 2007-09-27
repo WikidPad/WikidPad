@@ -3,7 +3,11 @@ import sys, traceback, time, os.path
 # global exception control
 class StdErrReplacement:
     def write(self, data):
-        import ExceptionLogger as EL
+        try:
+            import ExceptionLogger as EL
+        except ImportError:
+            # This should only happen while interpreter shuts down
+            return
 #         global _exceptionDestDir, _exceptionSessionTimeStamp, _exceptionOccurred
 #         global _previousExcepthook
 

@@ -1,6 +1,6 @@
 from weakref import WeakValueDictionary
 import os, os.path, sets, time, traceback
-from threading import RLock
+from threading import RLock, Thread
 from pwiki.rtlibRepl import re  # Original re doesn't work right with
         # multiple threads   (TODO!)
 
@@ -157,7 +157,7 @@ class WikiDataSynchronizedFunction:
     def __call__(self, *args, **kwargs):
         self.accessLock.acquire()
         try:
-            # print "WikiDataSynchronizedFunction", repr(self.callFunction)
+#             print "WikiDataSynchronizedFunction", repr(self.callFunction), repr(args)
             return self.callFunction(*args, **kwargs)
         finally:
             self.accessLock.release()
@@ -170,10 +170,20 @@ class WikiDataSynchronizedProxy:
     def __init__(self, wikiData):
         self.wikiData = wikiData
         self.accessLock = RLock()
+#         self.syncCommit = WikiDataSynchronizedFunction(self.accessLock,
+#                 getattr(self.wikiData, "commit"))
+#         self.commit = self.asyncCommit
+# 
+#     def asyncCommit(self):
+#         Thread(target=self.syncCommit).start()
 
     def __getattr__(self, attr):
-        return WikiDataSynchronizedFunction(self.accessLock,
+        result = WikiDataSynchronizedFunction(self.accessLock,
                 getattr(self.wikiData, attr))
+                
+        self.__dict__[attr] = result
+
+        return result
 
 
 class WikiDataManager(MiscEventSourceMixin):

@@ -560,6 +560,9 @@ class LayeredControlPresenter:
     def getCurrentSubControlName(self):
         return self.lastVisibleCtrlName
         
+    def getCurrentSubControl(self):
+        return self.subControls.get(self.lastVisibleCtrlName)
+
 
     def setVisible(self, vis):
         if self.visible == vis:

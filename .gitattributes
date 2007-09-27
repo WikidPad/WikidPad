@@ -564,6 +564,7 @@ lib/pwiki/MainApp.py -text
 lib/pwiki/MainAreaPanel.py -text
 lib/pwiki/MiscEvent.py -text
 lib/pwiki/OptionsDialog.py -text
+lib/pwiki/OsAbstract.py -text
 lib/pwiki/PageAst.py -text
 lib/pwiki/PageHistory.py -text
 lib/pwiki/PersonalWikiFrame.py -text
@@ -577,7 +578,6 @@ lib/pwiki/SpellChecker.py -text
 lib/pwiki/SqliteThin3.py -text
 lib/pwiki/StringOps.py -text
 lib/pwiki/TempFileSet.py -text
-lib/pwiki/TimeViewCtrl.py -text
 lib/pwiki/Utilities.py -text
 lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiFormatting.py -text
@@ -598,6 +598,13 @@ lib/pwiki/rtlibRepl/sre_constants.py -text
 lib/pwiki/rtlibRepl/sre_parse.py -text
 lib/pwiki/sqlite3api.py -text
 lib/pwiki/srePersistent.py -text
+lib/pwiki/timeView/CalendarPanel.py -text
+lib/pwiki/timeView/DatedWikiWordFilters.py -text
+lib/pwiki/timeView/TimePresentationBase.py -text
+lib/pwiki/timeView/TimeViewCtrl.py -text
+lib/pwiki/timeView/TimelinePanel.py -text
+lib/pwiki/timeView/WikiWordListPopup.py -text
+lib/pwiki/timeView/__init__.py -text
 lib/pwiki/urllib_red.py -text
 lib/pwiki/wikidata/DbBackendUtils.py -text
 lib/pwiki/wikidata/FileStorage.py -text

@@ -781,15 +781,15 @@ class WikiData:
         return result1 + result2
 
 
-    def getWikiWordsModifiedLastDays(self, days):
-        timeDiff = time()-(86400*days)
-        try:
-            rows = self.execSqlQuery("select word, modified from wikiwords")
-        except (IOError, OSError, ValueError), e:
-            traceback.print_exc()
-            raise DbReadAccessError(e)
-        return [row[0] for row in rows if float(row[1]) >= timeDiff and
-                not row[0].startswith('[')]
+#     def getWikiWordsModifiedLastDays(self, days):
+#         timeDiff = time()-(86400*days)
+#         try:
+#             rows = self.execSqlQuery("select word, modified from wikiwords")
+#         except (IOError, OSError, ValueError), e:
+#             traceback.print_exc()
+#             raise DbReadAccessError(e)
+#         return [row[0] for row in rows if float(row[1]) >= timeDiff and
+#                 not row[0].startswith('[')]
 
     def getWikiWordsModifiedWithin(self, startTime, endTime):
         """
@@ -805,6 +805,116 @@ class WikiData:
             
         return [row[0] for row in rows if float(row[1]) >= startTime and
                 float(row[1]) < endTime and not row[0].startswith('[')]
+
+
+    _STAMP_TYPE_TO_FIELD = {
+            0: "modified",
+            1: "created"
+        }
+
+    def getTimeMinMax(self, stampType):
+        """
+        Return the minimal and maximal timestamp values over all wiki words
+        as tuple (minT, maxT) of float time values.
+        A time value of 0.0 is not taken into account.
+        If there are no wikiwords with time value != 0.0, (None, None) is
+        returned.
+        
+        stampType -- 0: Modification time, 1: Creation, 2: Last visit
+        """
+        field = self._STAMP_TYPE_TO_FIELD.get(stampType)
+        if field is None:
+            # Visited not supported yet
+            return (None, None)
+
+        try:
+            rows = self.execSqlQuery("select word, %s from wikiwords" % field)
+        except (IOError, OSError, ValueError), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+        minT = None
+        maxT = None
+        
+        # Find initial record for setting min/max
+        for i in xrange(len(rows)):
+            row = rows[i]
+            if row[0].startswith('[') or row[1] == 0.0:
+                continue
+            
+            minT = row[1]
+            maxT = row[1]
+            break
+        
+        for i in xrange(i + 1, len(rows)):
+            row = rows[i]
+            if row[0].startswith('[') or row[1] == 0.0:
+                continue
+
+            minT = min(minT, row[1])
+            maxT = max(maxT, row[1])
+            
+        return (minT, maxT)
+
+
+    def getWikiWordsBefore(self, stampType, stamp, limit=None):
+        """
+        Get a list of tuples of wiki words and dates related to a particular
+        time before stamp.
+        
+        stampType -- 0: Modification time, 1: Creation, 2: Last visit
+        limit -- How much count entries to return or None for all
+        """
+        field = self._STAMP_TYPE_TO_FIELD.get(stampType)
+        if field is None:
+            # Visited not supported yet
+            return []
+
+        try:
+            rows = self.execSqlQuery("select word, %s from wikiwords" % field)
+        except (IOError, OSError, ValueError), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+        rows = [row for row in rows if float(row[1]) < stamp and
+                row[1] > 0 and not row[0].startswith('[')]
+
+        rows.sort(key=lambda row: row[1], reverse=True)
+
+        if limit is not None:
+            return rows[:limit]
+        else:
+            return rows
+
+
+    def getWikiWordsAfter(self, stampType, stamp, limit=None):
+        """
+        Get a list of of tuples of wiki words and dates related to a particular
+        time after OR AT stamp.
+        
+        stampType -- 0: Modification time, 1: Creation, 2: Last visit
+        limit -- How much words to return or None for all
+        """
+        field = self._STAMP_TYPE_TO_FIELD.get(stampType)
+        if field is None:
+            # Visited not supported yet
+            return []
+
+        try:
+            rows = self.execSqlQuery("select word, %s from wikiwords" % field)
+        except (IOError, OSError, ValueError), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+        rows = [row for row in rows if float(row[1]) >= stamp and
+                not row[0].startswith('[')]
+
+        rows.sort(key=lambda row: row[1])
+
+        if limit is not None:
+            return rows[:limit]
+        else:
+            return rows
 
 
     def getFirstWikiWord(self):

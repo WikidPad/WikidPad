@@ -71,6 +71,9 @@ StartIncrementalSearch="Ctrl-F"
 CloseCurrentTab="Ctrl-F4"
 GoNextTab=""
 GoPreviousTab=""
+FocusFastSearchField=""
+
+
 
 def makeBold(editor):
     editor.styleSelection(u'*')

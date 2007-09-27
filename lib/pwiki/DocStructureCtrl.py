@@ -58,6 +58,7 @@ class DocStructureCtrl(EnhancedListControl):
     def close(self):
         """
         """
+        self.updatingThreadHolder.setThread(None)
         self.docPagePresenterSink.disconnect()
 
     def OnDestroy(self, evt):
@@ -158,8 +159,8 @@ class DocStructureCtrl(EnhancedListControl):
             for tok in tokens:
                 title = tok.text
                 if title.endswith(u"\n"):
-                    title = title[-1]
-                result.append((tok.start, headLevel, tok.text))
+                    title = title[:-1]
+                result.append((tok.start, headLevel, title))
 
         result.sort()
 

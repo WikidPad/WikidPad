@@ -1,3 +1,6 @@
+## import hotshot
+## _prof = hotshot.Profile("hotshot.prf")
+
 import os, traceback, codecs, array
 from cStringIO import StringIO
 import urllib_red as urllib
@@ -30,7 +33,7 @@ from StringOps import *
 # utf8Enc, utf8Dec, mbcsEnc, mbcsDec, uniToGui, guiToUni, \
 #        Tokenizer, wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
-from Configuration import isUnicode, isWin9x
+from Configuration import isUnicode, isWin9x, isLinux
 
 
 try:
@@ -162,6 +165,18 @@ class IncrementalSearchDialog(wx.Frame):
                 (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP),
                 (wx.ACCEL_NORMAL, wx.WXK_PRIOR)):
             foundPos = self.txtCtrl.executeIncrementalSearchBackward()
+        elif matchesAccelPair("ActivateLink", accP):
+            # ActivateLink is normally Ctrl-L
+            self.Close()
+            self.txtCtrl.activateLink()
+        elif matchesAccelPair("ActivateLinkNewTab", accP):
+            # ActivateLinkNewTab is normally Ctrl-Alt-L
+            self.Close()
+            self.txtCtrl.activateLink(tabMode=2)        
+        elif matchesAccelPair("ActivateLink2", accP):
+            # ActivateLink2 is normally Ctrl-Return
+            self.Close()
+            self.txtCtrl.activateLink()
         # handle the other keys
         else:
             evt.Skip()
@@ -203,7 +218,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
     SELECT_MARGIN = 1
 
     def __init__(self, presenter, parent, ID):
-        wx.stc.StyledTextCtrl.__init__(self, parent, ID)
+        wx.stc.StyledTextCtrl.__init__(self, parent, ID, style=wx.WANTS_CHARS | wx.TE_PROCESS_ENTER)
         self.presenter = presenter
         self.evalScope = None
         self.stylingThreadHolder = ThreadHolder()
@@ -214,7 +229,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.lastFont = None
         self.ignoreOnChange = False
         self.searchStr = u""
-        
+
         # If autocompletion word was choosen, how many bytes to delete backward
         # before inserting word
         self.autoCompBackBytesMap = {} # Maps selected word to number of backbytes
@@ -231,7 +246,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         # editor settings
         self.applyBasicSciSettings()
-        
+
         self.defaultFont = config.get("main", "font",
                 self.presenter.getDefaultFontFaces()["mono"])
 
@@ -419,6 +434,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         """
         Close the editor (=prepare for destruction)
         """
+        self.stylingThreadHolder.setThread(None)
         self.unloadCurrentDocPage({})   # ?
         self.presenterListener.disconnect()
 #         self.presenter.getMiscEvent().removeListener(self.presenterListener)
@@ -714,6 +730,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         
     def unloadCurrentDocPage(self, evtprops=None):
+        ## _prof.start()
         # Unload current page
         docPage = self.getLoadedDocPage()
         if docPage is not None:
@@ -740,6 +757,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #             self.foldingseq = None
 #             self.pageAst = None
             self.pageType = "normal"
+        
+        ## _prof.stop()
 
 
     def loadFuncPage(self, funcPage, evtprops=None):
@@ -1683,7 +1702,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             linkPos = self.PositionFromPoint(mousePosition)
         else:
             linkPos = self.GetCurrentPos()
-
+            
         pageAst = self.getPageAst()
         linkCharPos = len(self.GetTextRange(0, linkPos))
 
@@ -2787,12 +2806,17 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
 
     def OnDropFiles(self, x, y, filenames):
         urls = []
-        
+
         # Necessary because key state may change during the loop                                
         controlPressed = wx.GetKeyState(wx.WXK_CONTROL)
         shiftPressed = wx.GetKeyState(wx.WXK_SHIFT)
-        
+
         for fn in filenames:
+            if isLinux():
+                # On Linux, at least Ubuntu, fn is a UTF-8 encoded unicode(!?)
+                # string
+                fn = utf8Dec(fn.encode("latin-1", "replace"))[0]
+
             url = urlFromPathname(fn)
 
             if fn.endswith(".wiki"):

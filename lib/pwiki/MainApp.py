@@ -204,9 +204,9 @@ class App(wx.App):
             # We create a "password" so that no other user can send commands to this
             # WikidPad instance.
             appCookie = createRandomString(30)
-            
+
             port = Ipc.createCommandServer(appCookie)
-            
+
             # True if this is the single existing instance which should write
             # a new "AppLock.lock" file which either didn't exist or was invalid
 
@@ -514,6 +514,11 @@ class App(wx.App):
             pl.append(("", u"Plugin options"))
 
         pl.append((factory, title))
+
+
+
+
+
 
 
 PREVIEW_CSS = """

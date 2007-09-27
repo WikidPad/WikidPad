@@ -3,7 +3,7 @@
 
 import os, sys, gc, traceback, sets, string, re
 from os.path import *
-from time import localtime, time, strftime
+from time import localtime, time, strftime, sleep
 
 import cPickle  # to create dependency?
 
@@ -25,6 +25,8 @@ import Configuration
 from WindowLayout import WindowSashLayouter, setWindowPos, setWindowSize
 from wikidata import DbBackendUtils, WikiDataManager
 
+import OsAbstract
+
 import DocPages, WikiFormatting
 
 
@@ -34,7 +36,7 @@ from WikiTreeCtrl import WikiTreeCtrl
 from WikiHtmlView import createWikiHtmlView
 from LogWindow import LogWindow
 from DocStructureCtrl import DocStructureCtrl
-from TimeViewCtrl import TimeViewCtrl
+from timeView.TimeViewCtrl import TimeViewCtrl
 from MainAreaPanel import MainAreaPanel
 from DocPagePresenter import DocPagePresenter
 
@@ -55,7 +57,8 @@ from SearchAndReplaceDialogs import *
 import Exporters
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
         BOM_UTF8, fileContentToUnicode, splitIndent, \
-        unescapeWithRe, escapeForIni, unescapeForIni, wikiUrlToPathWordAndAnchor
+        unescapeWithRe, escapeForIni, unescapeForIni, \
+        wikiUrlToPathWordAndAnchor, urlFromPathname
 
 import DocPages
 import WikiFormatting
@@ -121,7 +124,10 @@ class KeyBindingsCache:
         
     def __getattr__(self, attr):
         return getattr(self.kbModule, attr)
-        
+    
+    def get(self, attr, default=None):
+        return getattr(self.kbModule, attr, None)
+
     def getAccelPair(self, attr):
         try:
             return self.accelPairCache[attr]
@@ -358,8 +364,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         cmdLineAction.actionBeforeShow(self)
 
         if cmdLineAction.exitFinally:
-            self.Close()
-            self.Destroy()
+            self.exitWiki()
+#             self.Close()
+#             self.Destroy()
             return
 
         self.Show(True)
@@ -1037,7 +1044,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(wikiWordMenu, '&Activate Link/Word\t' +
                 self.keyBindings.ActivateLink, 'Activate link/word',
-                lambda evt: self.getActiveEditor().activateLink())
+                lambda evt: self.getActiveEditor().activateLink()) # ,
+#                 menuID=GUI_ID.CMD_ACTIVATE_LINK)
 
         self.addMenuItem(wikiWordMenu, '&Activate Link/Word in new tab\t' +
                 self.keyBindings.ActivateLinkNewTab, 'Activate link/word in new tab',
@@ -1077,30 +1085,30 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         historyMenu=wx.Menu()
 
         menuID=wx.NewId()
-        historyMenu.Append(menuID, '&List History\t' +
-                self.keyBindings.ViewHistory, 'View History')
+        historyMenu.Append(menuID, _('&List History\t') +
+                self.keyBindings.ViewHistory, _('View History'))
         wx.EVT_MENU(self, menuID, lambda evt: self.viewHistory())
 
         menuID=wx.NewId()
-        historyMenu.Append(menuID, '&Up History\t' +
-                self.keyBindings.UpHistory, 'Up History')
+        historyMenu.Append(menuID, _('&Up History\t') +
+                self.keyBindings.UpHistory, _('Up History'))
         wx.EVT_MENU(self, menuID, lambda evt: self.viewHistory(-1))
 
         menuID=wx.NewId()
-        historyMenu.Append(menuID, '&Down History\t' +
-                self.keyBindings.DownHistory, 'Down History')
+        historyMenu.Append(menuID, _('&Down History\t') +
+                self.keyBindings.DownHistory, _('Down History'))
         wx.EVT_MENU(self, menuID, lambda evt: self.viewHistory(1))
 
-        self.addMenuItem(historyMenu, '&Back\t' + self.keyBindings.GoBack,
-                'Go Back', lambda evt: self.pageHistory.goInHistory(-1),
+        self.addMenuItem(historyMenu, _('&Back\t') + self.keyBindings.GoBack,
+                _('Go Back'), lambda evt: self.pageHistory.goInHistory(-1),
                 "tb_back")
 
-        self.addMenuItem(historyMenu, '&Forward\t' + self.keyBindings.GoForward,
-                'Go Forward', lambda evt: self.pageHistory.goInHistory(1),
+        self.addMenuItem(historyMenu, _('&Forward\t') + self.keyBindings.GoForward,
+                _('Go Forward'), lambda evt: self.pageHistory.goInHistory(1),
                 "tb_forward")
 
-        self.addMenuItem(historyMenu, '&Wiki Home\t' + self.keyBindings.GoHome,
-                'Go to Wiki Home Page',
+        self.addMenuItem(historyMenu, _('&Wiki Home\t') + self.keyBindings.GoHome,
+                _('Go to Wiki Home Page'),
                 lambda evt: self.openWikiPage(self.getWikiDocument().getWikiName(),
                     forceTreeSyncFromRoot=True),
                 "tb_home")
@@ -1507,30 +1515,30 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         helpMenu.AppendSeparator()
 
-        if Configuration.isWindows():
-            menuID=wx.NewId()
-            helpMenu.Append(menuID, '&Visit wikidPad Homepage', 'Visit Homepage')
-            wx.EVT_MENU(self, menuID, lambda evt: os.startfile(
-                    'http://www.jhorman.org/wikidPad/'))
-    
-            helpMenu.AppendSeparator()
-    
-            menuID=wx.NewId()
-            helpMenu.Append(menuID, 'View &License', 'View License')
-            wx.EVT_MENU(self, menuID, lambda evt: os.startfile(
-                    join(self.wikiAppDir, 'license.txt')))
-        else:
-            menuID=wx.NewId()
-            helpMenu.Append(menuID, '&Visit wikidPad Homepage', 'Visit Homepage')
-            wx.EVT_MENU(self, menuID, lambda evt: wx.LaunchDefaultBrowser(
-                    'http://www.jhorman.org/wikidPad/'))
+        menuID=wx.NewId()
+        helpMenu.Append(menuID, '&Visit wikidPad Homepage', 'Visit Homepage')
+        wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(
+                u'http://www.jhorman.org/wikidPad/'))
 
-            helpMenu.AppendSeparator()
+        helpMenu.AppendSeparator()
 
-            menuID=wx.NewId()
-            helpMenu.Append(menuID, 'View &License', 'View License')
-            wx.EVT_MENU(self, menuID, lambda evt: wx.LaunchDefaultBrowser(
-                    join(self.wikiAppDir, 'license.txt')))
+        menuID=wx.NewId()
+        helpMenu.Append(menuID, 'View &License', 'View License')
+        wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(
+                join(self.wikiAppDir, u'license.txt')))
+
+#         else:
+#             menuID=wx.NewId()
+#             helpMenu.Append(menuID, '&Visit wikidPad Homepage', 'Visit Homepage')
+#             wx.EVT_MENU(self, menuID, lambda evt: wx.LaunchDefaultBrowser(
+#                     'http://www.jhorman.org/wikidPad/'))
+# 
+#             helpMenu.AppendSeparator()
+# 
+#             menuID=wx.NewId()
+#             helpMenu.Append(menuID, 'View &License', 'View License')
+#             wx.EVT_MENU(self, menuID, lambda evt: wx.LaunchDefaultBrowser(
+#                     join(self.wikiAppDir, 'license.txt')))
 
         helpMenu.AppendSeparator()
 
@@ -1576,18 +1584,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.mainmenu.EnableTop(2, 0)
             self.mainmenu.EnableTop(3, 0)
 
-        # turn on or off the wrap mode menu item. this must be done here,
-        # after the menus are added to the menu bar
-#         if self.wrapMode:
-#             wrapModeMenuItem.Check(1)
-
-        # turn on or off auto-save
-#         if self.autoSave:
-#             autoSaveMenuItem.Check(1)
-
-        # turn on or off indentation guides
-#         if self.indentationGuides:
-#             indentGuidesMenuItem.Check(1)
 
 
     def buildToolbar(self):
@@ -1600,41 +1596,49 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         icon = self.lookupIcon("tb_back")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Back (Ctrl-Alt-Back)", "Back")
+        tb.AddSimpleTool(tbID, icon, _(u"Back ") + self.keyBindings.GoBack,
+                _(u"Back"))
         wx.EVT_TOOL(self, tbID, lambda evt: self.pageHistory.goInHistory(-1))
 
         icon = self.lookupIcon("tb_forward")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Forward (Ctrl-Alt-Forward)", "Forward")
+        tb.AddSimpleTool(tbID, icon, _(u"Forward ") + self.keyBindings.GoForward,
+                _(u"Forward"))
         wx.EVT_TOOL(self, tbID, lambda evt: self.pageHistory.goInHistory(1))
 
         icon = self.lookupIcon("tb_home")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Wiki Home", "Wiki Home")
+        tb.AddSimpleTool(tbID, icon, _(u"Wiki Home ") + self.keyBindings.GoHome,
+                _(u"Wiki Home"))
         wx.EVT_TOOL(self, tbID,
                 lambda evt: self.openWikiPage(self.getWikiDocument().getWikiName(),
                 forceTreeSyncFromRoot=True))
 
         icon = self.lookupIcon("tb_doc")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Open Wiki Word  (Ctrl-O)", "Open Wiki Word")
+        tb.AddSimpleTool(tbID, icon,
+                _(u"Open Wiki Word ") + self.keyBindings.OpenWikiWord,
+                _(u"Open Wiki Word"))
         wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordOpenDialog())
 
         icon = self.lookupIcon("tb_lens")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Search  (Ctrl-Alt-F)", "Search")
+        tb.AddSimpleTool(tbID, icon, _(u"Search ") + self.keyBindings.SearchWiki,
+                _(u"Search"))
         wx.EVT_TOOL(self, tbID, lambda evt: self.showSearchDialog())
 
         icon = self.lookupIcon("tb_cycle")
         tbID = wx.NewId()
-        tb.AddSimpleTool(tbID, icon, "Find current word in tree", "Find current word in tree")
+        tb.AddSimpleTool(tbID, icon, _(u"Find current word in tree"),
+                _(u"Find current word in tree"))
         wx.EVT_TOOL(self, tbID, lambda evt: self.findCurrentWordInTree())
 
         tb.AddSimpleTool(wx.NewId(), seperator, "Separator", "Separator")
 
         icon = self.lookupIcon("tb_save")
         tb.AddSimpleTool(GUI_ID.CMD_SAVE_WIKI, icon,
-                "Save Wiki Word " + self.keyBindings.Save, "Save Wiki Word")
+                _(u"Save Wiki Word ") + self.keyBindings.Save,
+                _(u"Save Wiki Word"))
 #         wx.EVT_TOOL(self, GUI_ID.CMD_SAVE_WIKI,
 #                 lambda evt: (self.saveAllDocPages(force=True),
 #                 self.getWikiData().commit()))
@@ -1642,14 +1646,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         icon = self.lookupIcon("tb_rename")
 #         tbID = wx.NewId()
         tb.AddSimpleTool(GUI_ID.CMD_RENAME_PAGE, icon,
-                "Rename Wiki Word  " + self.keyBindings.Rename,
-                "Rename Wiki Word")
+                _(u"Rename Wiki Word ") + self.keyBindings.Rename,
+                _(u"Rename Wiki Word"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordRenameDialog())
 
         icon = self.lookupIcon("tb_delete")
 #         tbID = wx.NewId()
         tb.AddSimpleTool(GUI_ID.CMD_DELETE_PAGE, icon,
-                "Delete  " + self.keyBindings.Delete, "Delete Wiki Word")
+                _(u"Delete ") + self.keyBindings.Delete, _(u"Delete Wiki Word"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordDeleteDialog())
 
         tb.AddSimpleTool(wx.NewId(), seperator, "Separator", "Separator")
@@ -1657,21 +1661,21 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         icon = self.lookupIcon("tb_heading")
 #         tbID = wx.NewId()
         tb.AddSimpleTool(GUI_ID.CMD_FORMAT_HEADING_PLUS, icon,
-                "Heading  " + self.keyBindings.Heading, "Heading")
+                _(u"Heading ") + self.keyBindings.Heading, _(u"Heading"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.addHeading(
 #                 self.getActiveEditor()))
 
         icon = self.lookupIcon("tb_bold")
 #         tbID = wx.NewId()
         tb.AddSimpleTool(GUI_ID.CMD_FORMAT_BOLD, icon,
-                "Bold  " + self.keyBindings.Bold, "Bold")
+                _(u"Bold ") + self.keyBindings.Bold, _(u"Bold"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeBold(
 #                 self.getActiveEditor()))
 
         icon = self.lookupIcon("tb_italic")
 #         tbID = wx.NewId()
         tb.AddSimpleTool(GUI_ID.CMD_FORMAT_ITALIC, icon,
-                "Italic  " + self.keyBindings.Italic, "Italic")
+                _(u"Italic ") + self.keyBindings.Italic, _(u"Italic"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeItalic(
 #                 self.getActiveEditor()))
 
@@ -1687,17 +1691,17 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         icon = self.lookupIcon("tb_switch ed prev")
         tbID = GUI_ID.CMD_TAB_SHOW_SWITCH_EDITOR_PREVIEW
-        tb.AddSimpleTool(tbID, icon, "Switch Editor/Preview",
-                "Switch between editor and preview")
+        tb.AddSimpleTool(tbID, icon, _(u"Switch Editor/Preview"),
+                _(u"Switch between editor and preview"))
 
         icon = self.lookupIcon("tb_zoomin")
         tbID = GUI_ID.CMD_ZOOM_IN
-        tb.AddSimpleTool(tbID, icon, "Zoom In", "Zoom In")
+        tb.AddSimpleTool(tbID, icon, _(u"Zoom In"), _(u"Zoom In"))
         wx.EVT_TOOL(self, tbID, self._OnRoundtripEvent)
 
         icon = self.lookupIcon("tb_zoomout")
         tbID = GUI_ID.CMD_ZOOM_OUT
-        tb.AddSimpleTool(tbID, icon, "Zoom Out", "Zoom Out")
+        tb.AddSimpleTool(tbID, icon, _(u"Zoom Out"), _(u"Zoom Out"))
         wx.EVT_TOOL(self, tbID, self._OnRoundtripEvent)
 
 
@@ -1709,8 +1713,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         icon = self.lookupIcon("pin")
 #         tbID = wx.NewId()
         tb.AddSimpleTool(GUI_ID.CMD_FORMAT_WIKIZE_SELECTED, icon,
-                "Wikize Selected Word  " + self.keyBindings.MakeWikiWord,
-                "Wikize Selected Word")
+                _(u"Wikize Selected Word ") + self.keyBindings.MakeWikiWord,
+                _(u"Wikize Selected Word"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()))
 
         # get info for any plugin toolbar items and create them as necessary
@@ -1790,7 +1794,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 ("CloseCurrentTab", GUI_ID.CMD_CLOSE_CURRENT_TAB),
                 ("SwitchFocus", GUI_ID.CMD_SWITCH_FOCUS),
                 ("GoNextTab", GUI_ID.CMD_GO_NEXT_TAB),
-                ("GoPreviousTab", GUI_ID.CMD_GO_PREVIOUS_TAB)
+                ("GoPreviousTab", GUI_ID.CMD_GO_PREVIOUS_TAB),
+                ("FocusFastSearchField", GUI_ID.CMD_FOCUS_FAST_SEARCH_FIELD)
+#                 ("ActivateLink2", GUI_ID.CMD_ACTIVATE_LINK)
                 )
 
 
@@ -1800,21 +1806,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 (wx.ACCEL_SHIFT, wx.WXK_INSERT, GUI_ID.CMD_CLIPBOARD_PASTE),
                 (wx.ACCEL_SHIFT, wx.WXK_DELETE, GUI_ID.CMD_CLIPBOARD_CUT)
                 ]
-        
+
 
         # Add additional accelerators
         for keyName, menuId in ADD_ACCS:
             accP = self.keyBindings.getAccelPair(keyName)
             if accP != (None, None):
                 accs.append((accP[0], accP[1], menuId))
-
-#         accP = self.keyBindings.getAccelPair("CloseCurrentTab")
-#         if accP != (None, None):
-#             accs.append((accP[0], accP[1], GUI_ID.CMD_CLOSE_CURRENT_TAB))
-# 
-#         accP = self.keyBindings.getAccelPair("SwitchFocus")
-#         if accP != (None, None):
-#             accs.append((accP[0], accP[1], GUI_ID.CMD_SWITCH_FOCUS))
 
         self.SetAcceleratorTable(wx.AcceleratorTable(accs))
 
@@ -1840,6 +1838,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_CURRENT_TAB, self._OnRoundtripEvent)
         wx.EVT_MENU(self, GUI_ID.CMD_GO_NEXT_TAB, self._OnRoundtripEvent)
         wx.EVT_MENU(self, GUI_ID.CMD_GO_PREVIOUS_TAB, self._OnRoundtripEvent)
+        wx.EVT_MENU(self, GUI_ID.CMD_FOCUS_FAST_SEARCH_FIELD,
+                self.OnCmdFocusFastSearchField)
 
 
     def OnUpdateTreeCtrlMenuItem(self, evt):
@@ -1966,6 +1966,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             
             self.Raise()
 
+    
+    def OnCmdFocusFastSearchField(self, evt):
+        if self.fastSearchField is not None:
+            self.fastSearchField.SetFocus()
     
     def _refreshHotKeys(self):
         """
@@ -2937,6 +2941,7 @@ These are your default global settings.
 
     def openWikiPage(self, wikiWord, addToHistory=True,
             forceTreeSyncFromRoot=False, forceReopen=False, **evtprops):
+        ## _prof.start()
         dpp = self.getCurrentDocPagePresenter()
         if dpp is None:
             self.createNewDocPagePresenterTab()
@@ -2944,6 +2949,7 @@ These are your default global settings.
 
         dpp.openWikiPage(wikiWord, addToHistory, forceTreeSyncFromRoot,
                 forceReopen, **evtprops)
+        ## _prof.stop()
 
 
     def saveCurrentDocPage(self, force=False):
@@ -3128,7 +3134,7 @@ These are your default global settings.
 #         print "makeRelUrlAbsolute3", repr((relurl, relpath))
 #         print "makeRelUrlAbsolute4", repr(abspath(join(dirname(self.getWikiConfigPath()), relpath)))
 
-        url = "file:" + urllib.pathname2url(
+        url = "file:" + urlFromPathname(
                 abspath(join(dirname(self.getWikiConfigPath()), relpath)))
 
 #         if unicodeUrl:
@@ -3175,11 +3181,11 @@ These are your default global settings.
                 link2 = self.makeRelUrlAbsolute(link2)
 
             try:
-                if Configuration.isWindows():
-                    os.startfile(mbcsEnc(link2, "replace")[0])
-                else:
-                    # Better solution?
-                    wx.LaunchDefaultBrowser(link2)    # TODO
+#                 if Configuration.isWindows():
+                OsAbstract.startFile(link2)
+#                 else:
+#                     # Better solution?
+#                     wx.LaunchDefaultBrowser(link2)    # TODO
             except Exception, e:
                 traceback.print_exc()
                 self.displayErrorMessage(u"Couldn't start file", e)
@@ -3414,6 +3420,7 @@ These are your default global settings.
         if onOrOff:
             self.buildToolbar()
         else:
+            self.fastSearchField = None    
             self.GetToolBar().Destroy()
             self.SetToolBar(None)
 
@@ -4203,7 +4210,7 @@ These are your default global settings.
         dlg = wx.FileDialog(self, u"Choose a file to create URL for",
                 self.getLastActiveDir(), "", "*.*", wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
-            url = urllib.pathname2url(dlg.GetPath())
+            url = urlFromPathname(dlg.GetPath())
             if dlg.GetPath().endswith(".wiki"):
                 url = "wiki:" + url
             else:
@@ -4760,10 +4767,16 @@ These are your default global settings.
         if self.configuration.getboolean("main", "minimize_on_closeButton"):
             self.Iconize(True)
         else:
-            self.exitWiki()
+            self._prepareExitWiki()
+#             self.Show(True)
+            evt.Skip()
 #             self.Destroy()
 
     def exitWiki(self):
+        self.Close()
+
+
+    def _prepareExitWiki(self):
 #         if not self.configuration.getboolean("main", "minimize_on_closeButton"):
 #             self.Close()
 #         else:
@@ -4776,6 +4789,7 @@ These are your default global settings.
         if self.win32Interceptor is not None:
             self.win32Interceptor.unintercept()
 
+        self.getMainAreaPanel().updateConfig()
         self.closeWiki()
 #         self.getCurrentDocPagePresenter().close()
 
@@ -4820,11 +4834,10 @@ These are your default global settings.
         if self.tbIcon is not None:
             if self.tbIcon.IsIconInstalled():
                 self.tbIcon.RemoveIcon()
-
+            
             self.tbIcon.Destroy()
+            sleep(0.01)            
             self.tbIcon = None
-
-        self.Destroy()
 
 
 
@@ -4878,7 +4891,7 @@ class TaskBarIcon(wx.TaskBarIcon):
             tbMenu.AppendSeparator()
 
 
-        appendToMenuByMenuDesc(tbMenu, _TASKBAR_CONTEXT_MENU_BASE)
+        appendToMenuByMenuDesc(tbMenu, _SYSTRAY_CONTEXT_MENU_BASE)
 
 
         return tbMenu
@@ -4923,7 +4936,7 @@ def importCode(code, usercode, userUserCode, name, add_to_sys_modules=False):
 
 
 
-_TASKBAR_CONTEXT_MENU_BASE = \
+_SYSTRAY_CONTEXT_MENU_BASE = \
 u"""
 Restore;TBMENU_RESTORE
 Save;TBMENU_SAVE

@@ -59,6 +59,10 @@ In the export dialog, you can temporarily override this setting for one export.
 *Title of toc*
 Set the title of the table of contents according to your language. The default is "Table of Contents". For German it could be e.g. "Inhaltsverzeichnis".
 
+*Single page separator lines*
+Set the number of separator lines to separate wiki pages in a single HTML page on export.
+
+
 
 +++ HTML header settings
 
