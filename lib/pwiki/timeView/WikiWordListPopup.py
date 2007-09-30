@@ -50,6 +50,17 @@ class WikiWordListPopup(wx.Frame):
 
         self.resultBox.InsertColumn(0, u"", width=10)
         self.listContent = wikiWords
+        
+        # Calculate minimal width of list
+        dc = wx.ClientDC(self)
+        try:
+            dc.SetFont(self.resultBox.GetFont())
+            self._listMinWidth = dc.GetTextExtent(u"MMMMMMMM")[0]
+            dc.SetFont(wx.NullFont)
+        finally:
+            dc = None
+
+#         self._listMinWidth = 60
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.resultBox, 1, wx.EXPAND)
@@ -87,6 +98,9 @@ class WikiWordListPopup(wx.Frame):
                 self.resultBox.InsertStringItem(i, w)
                 
             self.resultBox.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+            if self.resultBox.GetColumnWidth(0) < self._listMinWidth:
+                self.resultBox.SetColumnWidth(0, self._listMinWidth)
+
         finally:
             self.Thaw()
             

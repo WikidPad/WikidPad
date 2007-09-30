@@ -365,8 +365,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         if cmdLineAction.exitFinally:
             self.exitWiki()
-#             self.Close()
-#             self.Destroy()
             return
 
         self.Show(True)
@@ -4768,14 +4766,13 @@ These are your default global settings.
             self.Iconize(True)
         else:
             self._prepareExitWiki()
+            self.Destroy()
             evt.Skip()
-
-        self.Destroy()
 
 
     def exitWiki(self):
-        self.Close()
-
+        self._prepareExitWiki()
+        self.Destroy()
 
     def _prepareExitWiki(self):
 #         if not self.configuration.getboolean("main", "minimize_on_closeButton"):
