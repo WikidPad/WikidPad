@@ -1885,8 +1885,10 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         self._isonhyperlink = False
 
         # Default CustomTreeCtrl background colour.    
-        self._backgroundColour = wx.WHITE
-        
+#         self._backgroundColour = wx.WHITE
+        self._backgroundColour = wx.SystemSettings.GetColour(
+                wx.SYS_COLOUR_WINDOW)
+
         # Background image settings
         self._backgroundImage = None
         self._imageStretchStyle = _StyleTile
@@ -1965,6 +1967,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         # Bind the events
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+        self.Bind(wx.EVT_SYS_COLOUR_CHANGED, self.OnSysColourChanged)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
@@ -4788,7 +4791,8 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
 #         dc = wx.PaintDC(self)
         dc = wx.BufferedPaintDC(self)
-        dc.SetBackground(wx.WHITE_BRUSH)
+        bgBrush = wx.Brush(self._backgroundColour)
+        dc.SetBackground(bgBrush)
         dc.Clear()
         dc.SetBackground(wx.NullBrush)
 
@@ -4826,6 +4830,12 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                 dc.SetClippingRect(rect)
 
             self.TileBackground(dc)
+
+
+    def OnSysColourChanged(self, evt):
+        self._backgroundColour = wx.SystemSettings.GetColour(
+                wx.SYS_COLOUR_WINDOW)        
+        self.Refresh()
 
 
     def TileBackground(self, dc):

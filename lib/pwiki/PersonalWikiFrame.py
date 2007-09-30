@@ -4768,9 +4768,10 @@ These are your default global settings.
             self.Iconize(True)
         else:
             self._prepareExitWiki()
-#             self.Show(True)
             evt.Skip()
-#             self.Destroy()
+
+        self.Destroy()
+
 
     def exitWiki(self):
         self.Close()
@@ -4834,7 +4835,7 @@ These are your default global settings.
         if self.tbIcon is not None:
             if self.tbIcon.IsIconInstalled():
                 self.tbIcon.RemoveIcon()
-            
+
             self.tbIcon.Destroy()
             sleep(0.01)            
             self.tbIcon = None
