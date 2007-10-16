@@ -999,6 +999,7 @@ class WikiTreeCtrl(wx.TreeCtrl):
         self.SetBackgroundColour(wx.WHITE)
         self.refreshGenerator = None  # Generator called in OnIdle
         self.refreshCheckChildren = [] # List of nodes to check for new/deleted children
+        self.sizeVisible = True
 
         wx.EVT_TREE_ITEM_ACTIVATED(self, ID, self.OnTreeItemActivated)
         wx.EVT_TREE_SEL_CHANGED(self, ID, self.OnTreeItemActivated)
@@ -1007,6 +1008,7 @@ class WikiTreeCtrl(wx.TreeCtrl):
         wx.EVT_TREE_BEGIN_DRAG(self, ID, self.OnTreeBeginDrag)
         wx.EVT_RIGHT_DOWN(self, self.OnRightButtonDown)   # TODO Context menu
         wx.EVT_SET_FOCUS(self, self.OnSetFocus)
+        wx.EVT_SIZE(self, self.OnSize)
 #        EVT_LEFT_DOWN(self, self.OnLeftDown)
 
         res = wx.xrc.XmlResource.Get()
@@ -1566,4 +1568,12 @@ class WikiTreeCtrl(wx.TreeCtrl):
                     self.Unbind(wx.EVT_IDLE)
 
 
+    def OnSize(self, evt):
+        evt.Skip()
+        oldVisible = self.sizeVisible
+        size = evt.GetSize()
+        self.sizeVisible = size.GetHeight() >= 5 and size.GetWidth() >= 5
+
+        if (oldVisible != self.sizeVisible) and oldVisible:
+            self.pWiki.mainAreaPanel.SetFocus()
 
