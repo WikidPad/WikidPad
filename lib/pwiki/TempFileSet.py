@@ -1,7 +1,7 @@
 """
 Temporary file management
 """
-import sys, os, traceback, sets, tempfile, urllib
+import sys, os, os.path, traceback, sets, tempfile, urllib
 
 import wx
 
@@ -52,18 +52,24 @@ class TempFileSet:
         """
         self.fileSet.add(fullPath)
 
-    def mkstemp(self, suffix=None, prefix=None, dir=None, text=False):
+
+    def mkstemp(self, suffix=None, prefix=None, path=None, text=False):
         """
         Same as tempfile.mkstemp from standard library, but
         stores returned path also in the set.
         """
-        if dir is None:
-            dir = self.preferredPath
-        
-        fd, fullPath = tempfile.mkstemp(suffix, prefix, dir, text)
-        
+        if path is None:
+            path = self.preferredPath
+            if path is not None and not os.path.exists(path):
+                try:
+                    os.makedirs(path)
+                except OSError:
+                    path = None
+
+        fd, fullPath = tempfile.mkstemp(suffix, prefix, path, text)
+
         self.fileSet.add(fullPath)
-        
+
         return fd, fullPath
 
 
@@ -75,8 +81,10 @@ class TempFileSet:
             try:
                 os.remove(fullPath)
             except:
-                traceback.print_exc()
-        
+                pass
+                # TODO: Option to show also these exceptions
+                # traceback.print_exc()
+
         self.fileSet.clear()
 
 
@@ -121,10 +129,15 @@ class TempFileSet:
         """
         if path is None:
             path = self.preferredPath
-            
+            if path is not None and not os.path.exists(path):
+                try:
+                    os.makedirs(path)
+                except OSError:
+                    path = None
+
         fullPath = createTempFile(content, suffix, path)
         self.fileSet.add(fullPath)
-        
+
         return self.getRelativePath(relativeTo, fullPath)
 
 
@@ -138,7 +151,7 @@ class TempFileSet:
             for preferred relativeTo path or "" for absolute path/URL
         """
         fullPath = self.createTempFile(content, suffix, path, "")
-        
+
         return (self.getRelativePath(relativeTo, fullPath),
                 self.getRelativeUrl(relativeTo, fullPath, pythonUrl=pythonUrl))
 

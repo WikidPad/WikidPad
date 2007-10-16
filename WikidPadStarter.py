@@ -3,10 +3,20 @@
 import sys, os, traceback, os.path, glob, shutil   # , gettext
 os.stat_float_times(True)
 
-VERSION_STRING = "wikidPad 1.9beta11"
+from Consts import VERSION_STRING
 
 if not hasattr(sys, 'frozen'):
     sys.path.append("lib")
+#     sys.path.append(r"C:\Daten\Projekte\Wikidpad\Current\lib")
+
+
+# Dummy for localization
+def N_(s):
+    return s
+__builtins__["N_"] = N_
+#     __builtins__.__dict__["N_"] = N_
+del N_
+
 
 import ExceptionLogger
 ExceptionLogger.startLogger(VERSION_STRING)
@@ -17,7 +27,9 @@ ExceptionLogger.startLogger(VERSION_STRING)
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
         "gadfly.zip"))
+# sys.path.append(r"C:\Daten\Projekte\Wikidpad\Current\gadfly.zip")
 # print "sys.path + ", os.path.join(os.path.abspath(sys.argv[0]), "gadfly.zip")
+
 
 import wx
 
@@ -87,16 +99,13 @@ if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
         sys.exit(1)
 else:
     # Dummy localization function
-    def N_(s):
-        return s
     def _(s):
         return s
 
-    __builtins__["N_"] = N_
     __builtins__["_"] = _
+#     __builtins__.__dict__["_"] = _
 
     del _
-    del N_
 
 #     # Start initial localization support before reading config
 #     gettext.install("WikidPad", os.path.join(wikiAppDir, "Lang"), True)

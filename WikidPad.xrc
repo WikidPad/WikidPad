@@ -1653,6 +1653,39 @@
       </object>
     </object>
   </object>
+  <object class="wxPanel" name="OptionsPageAdvanced">
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxStaticText">
+          <label>Change these only if you know what you are doing!</label>
+          <fg>#A80000</fg>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbWikiLockFileIgnore">
+          <label>Ignore wiki lock file</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbWikiLockFileCreate">
+          <label>Create wiki lock file</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="spacer">
+        <size>5,5</size>
+      </object>
+    </object>
+  </object>
   <object class="wxPanel" name="OptionsPageCurrentWiki">
     <object class="wxBoxSizer">
       <orient>wxVERTICAL</orient>
@@ -3416,6 +3449,181 @@
         <option>5</option>
         <flag>wxALL|wxEXPAND</flag>
       </object>
+    </object>
+    <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
+  </object>
+  <object class="wxDialog" name="AddWikiToFavoriteWikisDialog">
+    <title>Add Wiki to Favorites</title>
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <cols>2</cols>
+          <growablecols>1</growablecols>
+          <object class="sizeritem">
+            <object class="wxStaticText" name="">
+              <label>Title:</label>
+        </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+      </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="txtTitle">
+        </object>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+            <minsize>200,-1</minsize>
+              </object>
+          <object class="sizeritem">
+            <object class="wxStaticText" name="">
+              <label>Shortcut:</label>
+        </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+      </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="txtShortcut">
+        </object>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+            <minsize>200,-1</minsize>
+              </object>
+          <object class="sizeritem">
+            <object class="wxStaticText" name="">
+              <label>Path or URL:</label>
+        </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+      </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="txtPathOrUrl">
+        </object>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+            <minsize>200,-1</minsize>
+              </object>
+        </object>
+        <flag>wxEXPAND</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbOpenInNewWindow">
+          <label>Open in new window</label>
+                    </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticBoxSizer">
+          <label></label>
+          <orient>wxVERTICAL</orient>
+          <object class="sizeritem">
+            <object class="wxCheckBox" name="cbShowInToolbar">
+              <label>Show in toolbar</label>
+                    </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+      </object>
+          <object class="sizeritem">
+            <object class="wxFlexGridSizer">
+              <object class="spacer">
+                <size>20,0</size>
+                <flag>wxALL|wxEXPAND</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="">
+                  <label>At position:</label>
+        </object>
+                <option>0</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <border>5</border>
+      </object>
+              <cols>4</cols>
+              <object class="sizeritem">
+                <object class="wxBoxSizer">
+                  <orient>wxHORIZONTAL</orient>
+                  <object class="sizeritem">
+                    <object class="wxSpinCtrl" name="spinIconPosition">
+                      <value>1</value>
+                      <min>1</min>
+                      <max>9</max>
+                    </object>
+                    <option>0</option>
+                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                    <border>5</border>
+                  </object>
+                </object>
+              </object>
+              <object class="spacer">
+                <size>0,0</size>
+                <option>0</option>
+                <flag>wxALL</flag>
+              </object>
+              <object class="spacer">
+                <size>0,0</size>
+                <flag>wxALL|wxEXPAND</flag>
+              </object>
+              <object class="sizeritem">
+                <object class="wxStaticText" name="">
+                  <label>Icon:</label>
+        </object>
+                <option>0</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <border>5</border>
+      </object>
+              <object class="sizeritem">
+                <object class="wxTextCtrl" name="txtIcon">
+        </object>
+                <option>0</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <border>5</border>
+              </object>
+              <object class="sizeritem">
+                <object class="wxButton" name="btnSelectIcon">
+                  <label>...</label>
+            </object>
+                <option>0</option>
+                <flag>wxALL|wxALIGN_BOTTOM</flag>
+                <border>5</border>
+                <minsize>20,-1</minsize>
+          </object>
+            </object>
+          </object>
+        </object>
+        <option>0</option>
+        <flag>wxALL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnOk">
+              <label>OK</label>
+                </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+              </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnCancel">
+              <label>Cancel</label>
+                </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+              </object>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND</flag>
+          </object>
     </object>
     <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
   </object>

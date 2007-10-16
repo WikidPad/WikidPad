@@ -15,7 +15,7 @@ import WikiFormatting
 from WikiExceptions import *
 import Exporters, Importers
 
-from WikidPadStarter import VERSION_STRING
+from Consts import VERSION_STRING
 
 from SearchAndReplaceDialogs import WikiPageListConstructionDialog
 from SearchAndReplace import ListWikiPagesOperation
@@ -184,7 +184,8 @@ class OpenWikiWordDialog(wx.Dialog):
                 
                 self.wikiWord = nakedWord
 
-        self.pWiki.activateWikiWord(self.wikiWord, tabMode=tabMode)
+        self.pWiki.activatePageByUnifiedName(u"wikipage/" + self.wikiWord,
+                tabMode=tabMode)
 
 
     def GetValue(self):
@@ -237,7 +238,9 @@ class OpenWikiWordDialog(wx.Dialog):
             return
             
         self.wikiWord = nakedWord
-        self.pWiki.activateWikiWord(self.wikiWord, tabMode=0)
+#         self.pWiki.activateWikiWord(self.wikiWord, tabMode=0)
+        self.pWiki.activatePageByUnifiedName(u"wikipage/" + self.wikiWord,
+                tabMode=0)
         self.EndModal(wx.ID_OK)
  
     def OnNewTab(self, evt):
@@ -250,7 +253,7 @@ class OpenWikiWordDialog(wx.Dialog):
 
  
 
-class IconSelectDialog(wx.Dialog):
+class SelectIconDialog(wx.Dialog):
     def __init__(self, parent, ID, iconCache, title="Select Icon",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
@@ -320,7 +323,23 @@ class IconSelectDialog(wx.Dialog):
         """
         Return name of selected icon or None
         """
-        return self.value    
+        return self.value
+
+    @staticmethod
+    def runModal(parent, ID, iconCache, title="Select Icon",
+            pos=wx.DefaultPosition, size=wx.DefaultSize,
+            style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
+
+        dlg = SelectIconDialog(parent, ID, iconCache, title, pos, size, style)
+        try:
+            dlg.CenterOnParent(wx.BOTH)
+            if dlg.ShowModal() == wx.ID_OK:
+                return dlg.GetValue()
+            else:
+                return None
+
+        finally:
+            dlg.Destroy()
 
 
     def OnOkPressed(self, evt):
@@ -1377,7 +1396,6 @@ class ImagePasteDialog(wx.Dialog):
     def getImagePasteSaver(self):
         return self.imgpastesaver
         
-    
     def OnFileTypeChoice(self, evt):
         # Make quality field gray if not JPG format
         enabled = self.ctrls.chEditorImagePasteFileType.GetSelection() == 2

@@ -32,6 +32,9 @@ class CmdLineAction:
         self.exportType = None   # Export into which type of data?
         self.exportDest = None   # Destination path to dir/file
         self.exportCompFn = False   # Export with compatible filenames?
+        self.rebuild = False # Rebuild the wiki
+        self.frameToOpen = 1  # Open wiki in new frame? (yet unrecognized) 
+                # 1:New frame, 2:Already open frame, 0:Use config default 
 
         if len(sargs) == 0:
             return
@@ -41,25 +44,19 @@ class CmdLineAction:
 
             # mbcs decoding of parameters
             sargs = [mbcsDec(a, "replace")[0] for a in sargs]
-            self.wikiToOpen = sargs[0]
-            if self.wikiToOpen.startswith("wiki:"):
-                self.wikiToOpen, wikiWordToOpen, self.anchorToOpen = \
-                        wikiUrlToPathWordAndAnchor(self.wikiToOpen)
-                        
-                self.wikiWordsToOpen = (wikiWordToOpen,)
-#                 self.wikiToOpen = urllib.url2pathname(self.wikiToOpen)
-#                 self.wikiToOpen = self.wikiToOpen.replace("wiki:", "")
+            self.setWikiToOpen(sargs[0])
 
             if len(sargs) > 1:
                 self.wikiWordsToOpen = (sargs[1],)
 
             return
-            
+
         # New style
         try:
             opts, rargs = getopt.getopt(sargs, "hw:p:x",
                     ["help", "wiki=", "page=", "exit", "export-what=",
-                    "export-type=", "export-dest=", "export-compfn", "anchor"])
+                    "export-type=", "export-dest=", "export-compfn", "anchor",
+					"rebuild"])
         except getopt.GetoptError:
             self.cmdLineError = True
             return
@@ -84,20 +81,39 @@ class CmdLineAction:
                 self.exportDest = mbcsDec(a, "replace")[0]
             elif o == "--export-compfn":
                 self.exportCompFn = True
-        
+            elif o == "--rebuild":
+                self.rebuild = True
+
         if len(wikiWordsToOpen) > 0:
             self.wikiWordsToOpen = tuple(wikiWordsToOpen)
+
+
+    def setWikiToOpen(self, wto):
+        if wto.startswith("wiki:"):
+            self.wikiToOpen, wikiWordToOpen, self.anchorToOpen = \
+                    wikiUrlToPathWordAndAnchor(wto)
+
+            self.wikiWordsToOpen = (wikiWordToOpen,)
+#                 self.wikiToOpen = urllib.url2pathname(self.wikiToOpen)
+#                 self.wikiToOpen = self.wikiToOpen.replace("wiki:", "")
+        else:
+            self.wikiToOpen = wto
 
 
     def actionBeforeShow(self, pWiki):
         """
         Actions to do before the main frame is shown
         """
+        self.rebuildAction(pWiki)
         self.exportAction(pWiki)
-        
+
         if self.showHelp:
             self.showCmdLineUsage(pWiki)
-            
+
+
+    def rebuildAction(self, pWiki):
+        if self.rebuild:
+            pWiki.rebuildWiki(True)
 
     def exportAction(self, pWiki):
         if not (self.exportWhat or self.exportType or self.exportDest):
@@ -165,6 +181,7 @@ class CmdLineAction:
     --export-type <type>: tag of the export type
     --export-dest <destination path>: path of destination directory for export
     --export-compfn: Use compatible filenames on export
+    --rebuild: rebuild the Wiki database
 """
         
     def showCmdLineUsage(self, pWiki, addRemark=u""):

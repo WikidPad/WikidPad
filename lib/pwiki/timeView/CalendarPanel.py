@@ -132,13 +132,17 @@ class CalendarPanel(wx.Window, TimePresentationBase):
             self.selectedDay = None
 
             # Register for pWiki events
-            self.sink = wxKeyFunctionSink((
+            self.__sinkMc = wxKeyFunctionSink((
                     ("opened wiki", self.onUpdateNeeded),
                     ("closed current wiki", self.onUpdateNeeded),
                     ("updated wiki page", self.onUpdateNeeded),
-                    ("deleted wiki page", self.onUpdateNeeded),
-                    ("options changed", self.onUpdateNeeded)
+                    ("deleted wiki page", self.onUpdateNeeded)
+#                     ("options changed", self.onUpdateNeeded)
             ), self.mainControl.getMiscEvent(), self)
+
+            self.__sinkApp = wxKeyFunctionSink((
+                    ("options changed", self.onUpdateNeeded),
+            ), wx.GetApp().getMiscEvent(), self)
 
             self.firstResize = False
             self.updateContent()
@@ -146,31 +150,15 @@ class CalendarPanel(wx.Window, TimePresentationBase):
 
     def OnSize(self, evt):
         evt.Skip()
-        self.adjustToSize()
-        
 
-    def setVisible(self, vis):
-        pass
-        
-    def close(self):
-        pass
+        oldVisible = self.isVisibleEffect()
+        self.adjustToSize()
+        if oldVisible != self.isVisibleEffect():
+            self.handleVisibilityChange()
 
 
     def onUpdateNeeded(self, miscevt):
         self.updateContent()
-
-
-#     def _calcShortWeekDayNames(self):
-#             # Go over all short weekday names
-#             # Begin with an arbitrary Sunday as wxPython uses Sunday
-#             # as first weekday internally
-#             swd = []
-#             day = wx.DateTimeFromDMY(26, 8, 2007)
-#             for i in xrange(7):
-#                 swd.append(day.Format(u"%a"))
-#                 day += wx.TimeSpan_Day()
-#                 
-#             self.shortWeekDays = swd
 
 
     def updateContent(self):
@@ -261,25 +249,28 @@ class CalendarPanel(wx.Window, TimePresentationBase):
         """
         pWidth, pHeight = self.GetSizeTuple()
 
+        self.sizeVisible = pWidth >= 5 and pHeight >= 5
+
         oldMonthCount = self.monthCols * self.monthRows
 
-        # How many months side by side
-        self.monthCols = \
-                (pWidth - 2 * self.minOuterMarginDistHor) // \
-                    (self.minMonthWidth + self.minMonthDistHor)
-
-        self.monthRows = \
-                (pHeight - 2 * self.minOuterMarginDistVert) // \
-                    (self.minMonthHeight + self.minMonthDistVert)
-
-        tooSmall = False
-        if self.monthCols < 1:
-            self.monthCols = 1
-            tooSmall = True
-
-        if self.monthRows < 1:
-            self.monthRows = 1
-            tooSmall = True
+        if self.isVisibleEffect():
+            # How many months side by side
+            self.monthCols = \
+                    (pWidth - 2 * self.minOuterMarginDistHor) // \
+                        (self.minMonthWidth + self.minMonthDistHor)
+    
+            self.monthRows = \
+                    (pHeight - 2 * self.minOuterMarginDistVert) // \
+                        (self.minMonthHeight + self.minMonthDistVert)
+    
+            if self.monthCols < 1:
+                self.monthCols = 1
+    
+            if self.monthRows < 1:
+                self.monthRows = 1
+        else:
+            self.monthCols = 0
+            self.monthRows = 0
 
         # Initial values for layout
         self.outerMarginLeft = self.minOuterMarginDistHor

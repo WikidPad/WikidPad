@@ -7,7 +7,7 @@ import wx
 import wx.xrc as xrc
 
 from wxHelper import GUI_ID
-from MiscEvent import MiscEventSourceMixin, ResendingMiscEvent
+from MiscEvent import MiscEventSourceMixin, ProxyMiscEvent
 
 from WikiExceptions import *
 
@@ -32,7 +32,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
         self.currentDocPagePresenter = None
         self.docPagePresenters = []
-#         self.currentDocPagePresenterRMEvent = ResendingMiscEvent(self)
+        self.currentDocPagePresenterProxyEvent = ProxyMiscEvent(self)
 
         res = xrc.XmlResource.Get()
         self.contextMenu = res.LoadMenu("MenuDocPagePresenterTabPopup")
@@ -139,8 +139,9 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         if not (self.currentDocPagePresenter is currentPresenter):
             self.currentDocPagePresenter = currentPresenter
             for p in self.docPagePresenters:
-                p.setVisible(p is currentPresenter)
-            rMEvent = self.mainControl.getCurrentDocPagePresenterRMEvent()
+                p.setLayerVisible(p is currentPresenter)
+#             rMEvent = self.mainControl.getCurrentDocPagePresenterProxyEvent()
+            rMEvent = self.getCurrentDocPagePresenterProxyEvent()
             rMEvent.setWatchedEvents((self.currentDocPagePresenter.getMiscEvent(),))
             self.mainControl.refreshPageStatus()
             self.fireMiscEventKeys(("changed current docpage presenter",))
@@ -156,12 +157,12 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             self.SetSelection(i)
 
 
-#     def getCurrentDocPagePresenterRMEvent(self):
-#         """
-#         This ResendingMiscEvent resends any messsages from the currently
-#         active DocPagePresenter
-#         """
-#         return self.currentDocPagePresenterRMEvent
+    def getCurrentDocPagePresenterProxyEvent(self):
+        """
+        This ProxyMiscEvent resends any messsages from the currently
+        active DocPagePresenter
+        """
+        return self.currentDocPagePresenterProxyEvent
 
 
     def appendDocPagePresenterTab(self, presenter):

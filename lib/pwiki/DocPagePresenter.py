@@ -15,6 +15,9 @@ from StringOps import uniToGui
 
 from WindowLayout import LayeredControlPresenter
 
+from PageHistory import PageHistory
+
+
 
 class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
     """
@@ -30,6 +33,9 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
         LayeredControlPresenter.__init__(self)
         self.mainControl = mainControl
         self.docPage = None
+        
+        # Connect page history
+        self.pageHistory = PageHistory(self.getMainControl(), self)
 
         self.getMainControl().getMiscEvent().addListener(self)
 
@@ -45,6 +51,10 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
 
     def getWikiDocument(self):
         return self.getMainControl().getWikiDocument()
+        
+    def getPageHistory():
+        return self.pageHistory
+        
 
     def getActiveEditor(self):
         """
@@ -71,12 +81,12 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
     def close(self):
         LayeredControlPresenter.close(self)
         self.getMainControl().getMiscEvent().removeListener(self)
+#        self.setDocPage(None)
+        self.pageHistory.close()
 
 
-    # TODO move doc page into PagePresenter
     def getDocPage(self):
         return self.docPage
-#         return self.getSubControl("textedit").getLoadedDocPage()
 
 
     def setDocPage(self, dp):
@@ -96,14 +106,21 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
             return None
         return docPage.getWikiWord()
 
+
+    def getUnifiedPageName(self):
+        docPage = self.getDocPage()
+        if docPage is None:
+            return None
+        
+        return docPage.getUnifiedPageName()
+        
+
     def getLiveText(self):
         docPage = self.getDocPage()
         if docPage is None:
             return None
         
         return docPage.getLiveText()
-        
-        # return self.getSubControl("textedit").GetText()
 
 
     def informLiveTextChanged(self, changer):
@@ -112,7 +129,6 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
         """
         if self.getDocPage() is not None:
             self.getDocPage().informLiveTextChanged(changer)
-#         self.fireMiscEventProps({"changed live text": True, "changer": changer})
 
 
     def miscEventHappened(self, miscevt):
@@ -126,16 +142,41 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
         elif miscevt.getSource() is self.docPage:
             if miscevt.has_key("changed live text"):
                 self.fireMiscEventProps(miscevt.getProps())
+            elif miscevt.has_key("deleted page"):
+                self.pageHistory.goAfterDeletion()
+            elif miscevt.has_key("renamed wiki page"):
+                oldWord = self.docPage.getWikiWord()
+                newWord = miscevt.get("newWord")
+
+                self.getSubControl("textedit").loadWikiPage(None)
+                self.openWikiPage(newWord, forceTreeSyncFromRoot=False)
+
 
 
     def getStatusBar(self):
         return self.getMainControl().GetStatusBar()
 
 
-    def openFuncPage(self, funcTag, **evtprops):
+    def openDocPage(self, unifiedPageName, *args, **kwargs):
+        """
+        Open a doc page identified by its unified page name
+        """
+        if len(unifiedPageName) == 0:
+            return
+        
+        if unifiedPageName.startswith(u"wikipage/"):
+            self.openWikiPage(unifiedPageName[9:], *args, **kwargs)
+        else:
+            self.openFuncPage(unifiedPageName, *args, **kwargs)
+
+
+    def openFuncPage(self, funcTag, addToHistory=True, **evtprops):
         if not self.getMainControl().requireReadAccess():
             return
+            
+        oldPage = self.getDocPage()
 
+        evtprops["addToHistory"] = addToHistory
         try:
             page = self.getMainControl().getWikiDataManager().getFuncPage(funcTag)
     
@@ -148,7 +189,9 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
 
         p2 = evtprops.copy()
         p2.update({"loaded current doc page": True,
-                "loaded current functional page": True})
+                "loaded current functional page": True,
+                "docPage": page,
+                "oldDocPage": oldPage})
         # p2.update({"loaded current page": True})
         self.fireMiscEventProps(p2)        
 
@@ -161,6 +204,8 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
         """
         if not self.getMainControl().requireReadAccess():
             return
+
+        oldPage = self.getDocPage()
 
         evtprops["addToHistory"] = addToHistory
         evtprops["forceTreeSyncFromRoot"] = forceTreeSyncFromRoot
@@ -178,7 +223,7 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
             # don't reopen the currently open page, only send an event
             if (wikiWord == self.getWikiWord()) and not forceReopen:
                 p2 = evtprops.copy()
-                p2.update({"reloaded current page": True,
+                p2.update({"reloaded current doc page": True,
                         "reloaded current wiki page": True})
                 self.fireMiscEventProps(p2)
     #             # self.tree.buildTreeForWord(self.currentWikiWord)  # TODO Needed?
@@ -215,7 +260,10 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
     
             p2 = evtprops.copy()
             p2.update({"loaded current doc page": True,
-                    "loaded current wiki page": True})
+                    "loaded current wiki page": True,
+                    "docPage": page,
+                    "oldDocPage": oldPage})
+
             self.fireMiscEventProps(p2)
     
 #             self.getMainControl().getConfig().set("main", "last_wiki_word",
@@ -292,32 +340,47 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
         wx.Panel.__init__(self, parent, id)
         BasicDocPagePresenter.__init__(self, mainControl)
 
+        wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_LIST,
+                lambda evt: self.viewHistory())
+        wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_LIST_UP,
+                lambda evt: self.viewHistory(-1))
+        wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_LIST_DOWN,
+                lambda evt: self.viewHistory(1))
+        wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_GO_BACK,
+                lambda evt: self.pageHistory.goInHistory(-1))
+        wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD,
+                lambda evt: self.pageHistory.goInHistory(1))
+
 
     def switchSubControl(self, scName, gainFocus=False):
         """
         Make the chosen subcontrol visible, all other invisible
         """
         try:
-            # First show subControl scName, then hide the others
-            # to avoid flicker
-            if self.visible and self.lastVisibleCtrlName != scName:
-                self.subControls[scName].setVisible(True)
-            
-            self.subControls[scName].Show(True)
-
-            for n, c in self.subControls.iteritems():
-                if n != scName:
-                    if self.visible:
-                        c.setVisible(False)
-                    c.Show(False)
-
-            if gainFocus:
-                self.subControls[scName].SetFocus()
-
-            self.lastVisibleCtrlName = scName
-            self.setTitle(self.shortTitle)   #?
+            subControl = self.subControls[scName]
         except KeyError:
             traceback.print_exc()
+            return
+
+        # First show subControl scName, then hide the others
+        # to avoid flicker
+        if self.visible and self.lastVisibleCtrlName != scName:
+            subControl.setLayerVisible(True)
+
+        subControl.Show(True)
+
+        if gainFocus:
+            subControl.SetFocus()
+
+        for n, c in self.subControls.iteritems():
+            if n != scName:
+                if self.visible:
+                    c.setLayerVisible(False)
+                c.Show(False)
+
+        self.lastVisibleCtrlName = scName
+        self.setTitle(self.shortTitle)   #?
+
 
     def SetFocus(self):
         try:
@@ -325,6 +388,38 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
         except KeyError:
             wx.Panel.SetFocus(self)
 
+
+    def viewHistory(self, posDelta=0):
+        if not self.getMainControl().requireReadAccess():
+            return
+
+        try:
+            hist = self.pageHistory.getHistoryList()
+            histpos = self.pageHistory.getPosition()
+        except (IOError, OSError, DbAccessError), e:
+            self.getMainControl().lostAccess(e)
+            raise
+
+        historyLen = len(hist)
+        dlg = wx.SingleChoiceDialog(self,
+                                   u"History",
+                                   u"History",
+                                   hist,
+                                   wx.CHOICEDLG_STYLE | wx.OK | wx.CANCEL)
+
+        if historyLen > 0:
+            position = histpos + posDelta - 1
+            if (position < 0):
+                position = 0
+            elif (position >= historyLen):
+                position = historyLen-1
+
+            dlg.SetSelection(position)
+
+        if dlg.ShowModal() == wx.ID_OK and dlg.GetSelection() > -1:
+            self.pageHistory.goInHistory(dlg.GetSelection() - (histpos - 1))
+
+        dlg.Destroy()
 
 
 

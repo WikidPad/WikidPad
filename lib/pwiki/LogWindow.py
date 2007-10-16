@@ -80,10 +80,12 @@ class LogWindow(wx.Panel):
         self.ctrls.lcEntries.InsertColumn(0, u"Message")
 
         self.messages = []
+        self.sizeVisible = True
         
         wx.EVT_LIST_ITEM_ACTIVATED(self, GUI_ID.lcEntries, self.OnEntryActivated) 
         wx.EVT_BUTTON(self, GUI_ID.btnClearLog, self.OnClearLog)
         wx.EVT_BUTTON(self, GUI_ID.btnHideLogWindow, self.OnHideLogWindow)
+        wx.EVT_SIZE(self, self.OnSize)
 
 
     def close(self):
@@ -145,4 +147,32 @@ class LogWindow(wx.Panel):
 
     def OnHideLogWindow(self, evt):
         self.mainControl.hideLogWindow()
+
+
+    def isVisibleEffect(self):
+        """
+        Is this control effectively visible?
+        """
+        return self.sizeVisible
+
+
+    def handleVisibilityChange(self):
+        """
+        Only call after isVisibleEffect() really changed its value.
+        The new value is taken from isVisibleEffect(), the old is assumed
+        to be the opposite.
+        """
+        if not self.isVisibleEffect():
+            if wx.Window.FindFocus() is self:
+                self.mainControl.getMainAreaPanel().SetFocus()
+
+
+    def OnSize(self, evt):
+        evt.Skip()
+        oldVisible = self.isVisibleEffect()
+        size = evt.GetSize()
+        self.sizeVisible = size.GetHeight() >= 5 and size.GetWidth() >= 5
+        
+        if oldVisible != self.isVisibleEffect():
+            self.handleVisibilityChange()
 

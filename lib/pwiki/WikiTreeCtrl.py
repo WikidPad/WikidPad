@@ -901,12 +901,13 @@ class MainFuncPagesNode(AbstractNode):
         
     def listChildren(self):
         return [
-                FuncPageNode(self.treeCtrl, self, "global/[TextBlocks]"),
-                FuncPageNode(self.treeCtrl, self, "wiki/[TextBlocks]"),
-                FuncPageNode(self.treeCtrl, self, "global/[PWL]"),
-                FuncPageNode(self.treeCtrl, self, "wiki/[PWL]"),
-                FuncPageNode(self.treeCtrl, self, "global/[CCBlacklist]"),
-                FuncPageNode(self.treeCtrl, self, "wiki/[CCBlacklist]")
+                FuncPageNode(self.treeCtrl, self, u"global/[TextBlocks]"),
+                FuncPageNode(self.treeCtrl, self, u"wiki/[TextBlocks]"),
+                FuncPageNode(self.treeCtrl, self, u"global/[PWL]"),
+                FuncPageNode(self.treeCtrl, self, u"wiki/[PWL]"),
+                FuncPageNode(self.treeCtrl, self, u"global/[CCBlacklist]"),
+                FuncPageNode(self.treeCtrl, self, u"wiki/[CCBlacklist]"),
+                FuncPageNode(self.treeCtrl, self, u"global/[FavoriteWikis]")
                 ]
 
 
@@ -980,14 +981,15 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #         self.SetCursor(wx.NullCursor)
         self.refreshGenerator = None  # Generator called in OnIdle
         self.refreshCheckChildren = [] # List of nodes to check for new/deleted children
+        self.sizeVisible = True
 
         # EVT_TREE_ITEM_ACTIVATED(self, ID, self.OnTreeItemActivated)
         # EVT_TREE_SEL_CHANGED(self, ID, self.OnTreeItemActivated)
         wx.EVT_RIGHT_DOWN(self, self.OnRightButtonDown)
         wx.EVT_RIGHT_UP(self, self.OnRightButtonUp)
         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleButtonDown)
-#         self.Bind(EVT_SET_FOCUS, self.OnSetFocus)
-        
+        wx.EVT_SIZE(self, self.OnSize)
+
         self._bindActivation()
 
         wx.EVT_TREE_BEGIN_RDRAG(self, ID, self.OnTreeBeginRDrag)
@@ -1008,7 +1010,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             menuID = wx.NewId()
             self.contextMenuWikiWords.Append(menuID, 'Add icon property',
                     'Open icon select dialog')
-            wx.EVT_MENU(self, menuID, lambda evt: self.pWiki.showIconSelectDialog())
+            wx.EVT_MENU(self, menuID, lambda evt: self.pWiki.showSelectIconDialog())
         else:
             # Build full submenu for icons
             iconsMenu, self.cmdIdToIconName = \
@@ -1054,19 +1056,22 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
         # Register for pWiki events
-        wxKeyFunctionSink((
+        self.__sinkMc = wxKeyFunctionSink((
                 ("loading wiki page", self.onLoadingCurrentWikiPage),
                 ("closed current wiki", self.onClosedCurrentWiki),
                 ("updated wiki page", self.onWikiPageUpdated),
-                ("renamed wiki page", self.onRenamedWikiPage),
-                ("deleted wiki page", self.onDeletedWikiPage),
                 ("changed current docpage presenter",
                     self.onChangedDocPagePresenter)
         ), self.pWiki.getMiscEvent(), self)
 
-        wxKeyFunctionSink((
+        self.__sinkDocPagePresenter = wxKeyFunctionSink((
                 ("loading wiki page", self.onLoadingCurrentWikiPage),
-        ), self.pWiki.getCurrentDocPagePresenterRMEvent(), self)
+        ), self.pWiki.getCurrentDocPagePresenterProxyEvent(), self)
+
+        self.__sinkWikiDoc = wxKeyFunctionSink((
+                ("renamed wiki page", self.onRenamedWikiPage),
+                ("deleted wiki page", self.onDeletedWikiPage),
+        ), self.pWiki.getCurrentWikiDocumentProxyEvent(), self)
 
     def _bindActivation(self):
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnTreeItemActivated)
@@ -1077,7 +1082,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         self.Unbind(wx.EVT_TREE_SEL_CHANGED)
         
     def close(self):
-        pass
+        self.__sinkMc.disconnect()
+        self.__sinkDocPagePresenter.disconnect()
+        self.__sinkWikiDoc.disconnect()
 
     def collapse(self):
         """
@@ -1709,7 +1716,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         tabMode = MIDDLE_MOUSE_CONFIG_TO_TABMODE[configCode]
 
         if (tabMode & 2) and isinstance(nodeObj, WikiWordNode):
-            self.pWiki.activateWikiWord(nodeObj.getWikiWord(), tabMode)
+#             self.pWiki.activateWikiWord(nodeObj.getWikiWord(), tabMode)
+            self.pWiki.activatePageByUnifiedName(
+                    u"wikipage/" + nodeObj.getWikiWord(), tabMode)
             
             if not (tabMode & 1) and self.pWiki.getConfig().getboolean("main",
                     "tree_autohide", False):
@@ -1740,6 +1749,35 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 if self.refreshGenerator == gen:
                     self.refreshGenerator = None
                     self.Unbind(wx.EVT_IDLE)
+
+
+    def isVisibleEffect(self):
+        """
+        Is this control effectively visible?
+        """
+        return self.sizeVisible
+
+
+    def handleVisibilityChange(self):
+        """
+        Only call after isVisibleEffect() really changed its value.
+        The new value is taken from isVisibleEffect(), the old is assumed
+        to be the opposite.
+        """
+        if not self.isVisibleEffect():
+            if wx.Window.FindFocus() is self:
+                self.pWiki.getMainAreaPanel().SetFocus()
+
+
+    def OnSize(self, evt):
+        evt.Skip()
+        oldVisible = self.isVisibleEffect()
+        size = evt.GetSize()
+        self.sizeVisible = size.GetHeight() >= 5 and size.GetWidth() >= 5
+
+        if oldVisible != self.isVisibleEffect():
+            self.handleVisibilityChange()
+
 
 
 

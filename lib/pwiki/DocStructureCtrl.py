@@ -31,14 +31,19 @@ class DocStructureCtrl(EnhancedListControl):
         self.updatingThreadHolder = Utilities.ThreadHolder()
         self.tocList = [] # List of tuples (char. start in text, headLevel, heading text)
         self.mainControl.getMiscEvent().addListener(self)
-        self.readablySized = True   # False if this window has a size
+        self.sizeVisible = True   # False if this window has a size
                 # that it can't be read (one dim. less than 5 pixels)
 
         self.docPagePresenterSink = wxKeyFunctionSink((
                 ("loaded current doc page", self.onUpdateNeeded),
-                ("changed live text", self.onUpdateNeeded),
-                ("options changed", self.onUpdateNeeded)
+                ("changed live text", self.onUpdateNeeded)
+#                 ("options changed", self.onUpdateNeeded)
         ))
+        
+        self.__sinkApp = wxKeyFunctionSink((
+                ("options changed", self.onUpdateNeeded),
+        ), wx.GetApp().getMiscEvent(), self)
+
 
         currPres = self.mainControl.getCurrentDocPagePresenter()
         if currPres is not None:
@@ -60,6 +65,31 @@ class DocStructureCtrl(EnhancedListControl):
         """
         self.updatingThreadHolder.setThread(None)
         self.docPagePresenterSink.disconnect()
+        self.__sinkApp.disconnect()
+
+
+    def isVisibleEffect(self):
+        """
+        Is this control effectively visible?
+        """
+        return self.sizeVisible
+
+
+    def handleVisibilityChange(self):
+        """
+        Only call after isVisibleEffect() really changed its value.
+        The new value is taken from isVisibleEffect(), the old is assumed
+        to be the opposite.
+        """
+        if self.isVisibleEffect():
+            self.docPagePresenterSink.setEventSource(
+                    self.mainControl.getCurrentDocPagePresenter().getMiscEvent())
+            self.updateList()
+        else:
+            self.docPagePresenterSink.disconnect()
+            if wx.Window.FindFocus() is self:
+                self.mainControl.getMainAreaPanel().SetFocus()
+
 
     def OnDestroy(self, evt):
         self.close()
@@ -67,27 +97,27 @@ class DocStructureCtrl(EnhancedListControl):
 
     def OnSize(self, evt):
         evt.Skip()
-        oldReadablySized = self.readablySized
+        oldVisible = self.isVisibleEffect()
         size = evt.GetSize()
-        self.readablySized = size.GetHeight() >= 5 and size.GetWidth() >= 5
+        self.sizeVisible = size.GetHeight() >= 5 and size.GetWidth() >= 5
         
-        if oldReadablySized == self.readablySized:
-            # No change
-            return
+        if oldVisible != self.isVisibleEffect():
+            self.handleVisibilityChange()
+
         
-        if oldReadablySized:
-            self.docPagePresenterSink.disconnect()
-        else:
-            self.docPagePresenterSink.setEventSource(
-                    self.mainControl.getCurrentDocPagePresenter().getMiscEvent())
-            self.updateList()
+#         if oldSizeVisible:
+#             self.docPagePresenterSink.disconnect()
+#         else:
+#             self.docPagePresenterSink.setEventSource(
+#                     self.mainControl.getCurrentDocPagePresenter().getMiscEvent())
+#             self.updateList()
 
 
     def miscEventHappened(self, miscevt):
         """
         Handle misc events
         """
-        if self.readablySized and miscevt.getSource() is self.mainControl:
+        if self.sizeVisible and miscevt.getSource() is self.mainControl:
             if miscevt.has_key("changed current docpage presenter"):
                 self.docPagePresenterSink.setEventSource(
                         self.mainControl.getCurrentDocPagePresenter().getMiscEvent())

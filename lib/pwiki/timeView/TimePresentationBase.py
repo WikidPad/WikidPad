@@ -28,13 +28,39 @@ class TimePresentationBase:
         self.popupShiftY = 5
 
         self.labelEdit = False  # Is currently a label edit running?
+        
+        # Is control in the top layer?
+        self.layerVisible = True
+        self.sizeVisible = True
 
         wx.EVT_MOTION(self, self.OnMouseMotion)
         wx.EVT_LEAVE_WINDOW(self, self.OnMouseLeave)
 
 
-    def setVisible(self, vis):
-        pass
+    def isVisibleEffect(self):
+        """
+        Is this control effectively visible?
+        """
+        return self.layerVisible and self.sizeVisible
+
+
+    def handleVisibilityChange(self):
+        """
+        Only call after isVisibleEffect() really changed its value.
+        The new value is taken from isVisibleEffect(), the old is assumed
+        to be the opposite.
+        """
+        if not self.isVisibleEffect():
+            if wx.Window.FindFocus() is self:
+                self.mainControl.getMainAreaPanel().SetFocus()
+
+
+    def setLayerVisible(self, vis):
+        oldVisible = self.isVisibleEffect()
+        self.layerVisible = vis
+        if oldVisible != self.isVisibleEffect():
+            self.handleVisibilityChange()
+    
         
     def close(self):
         pass

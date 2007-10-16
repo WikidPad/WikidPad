@@ -272,7 +272,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
 
         # Popup menu must be created by Python code to replace clipboard functions
-        # for unicode build
+        # for unicode build on Win 98/ME
         self.UsePopUp(0)
 
         self.SetMarginMask(self.FOLD_MARGIN, wx.stc.STC_MASK_FOLDERS)
@@ -345,12 +345,16 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         # register some event handlers
         self.presenterListener = wxKeyFunctionSink((
-                ("options changed", self.onOptionsChanged),  # fired by PersonalWikiFrame
+#                 ("options changed", self.onOptionsChanged),  # fired by PersonalWikiFrame
                 ("saving all pages", self.onSavingAllPages),
                 ("closing current wiki", self.onClosingCurrentWiki),
                 ("dropping current wiki", self.onDroppingCurrentWiki),
-                ("reloaded current page", self.onReloadedCurrentPage)
+                ("reloaded current doc page", self.onReloadedCurrentPage)
         ), self.presenter.getMiscEvent())
+
+        self.__sinkApp = wxKeyFunctionSink((
+                ("options changed", self.onOptionsChanged),
+        ), wx.GetApp().getMiscEvent(), self)
 
 #         self.presenter.getMiscEvent().addListener(self.presenterListener)
 
@@ -508,7 +512,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.Copy()
         
         
-    def setVisible(self, vis):
+    def setLayerVisible(self, vis):
         """
         Informs the widget if it is really visible on the screen or not
         """
@@ -593,14 +597,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         Overrides the wxStyledTextCtrl method.
         text -- Unicode text content to set
         """
-#         self.inIncrementalSearch = False
-#         self.anchorBytePosition = -1
-#         self.anchorCharPosition = -1
         self.incSearchCharStartPos = 0
         self.clearStylingCache()
-#         self.stylebytes = None
-#         self.foldingseq = None
-#         self.pageAst = None
         self.pageType = "normal"
 
         self.SetSelection(-1, -1)
@@ -1671,7 +1669,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 else:
                     # Same tab
                     presenter = self.presenter
-                
+
                 presenter.openWikiPage(tok.node.value,   # .getMainControl()
                         motionType="child", anchor=tok.node.value)
 
@@ -1683,18 +1681,29 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 return True
             elif tok.ttype == WikiFormatting.FormatTypes.Footnote:
                 pageAst = self.getPageAst()
-                anchorTok = pageAst.getFootnoteAnchorDict().get(tok.grpdict[
-                        "footnoteId"])
+                footnoteId = tok.grpdict["footnoteId"]
 
+                anchorTok = pageAst.getFootnoteAnchorDict().get(footnoteId)
                 if anchorTok is not None:
-                    self.gotoCharPos(anchorTok.start)
+                    if anchorTok.start != tok.start:
+                        # Activated footnote was not last -> go to last
+                        self.gotoCharPos(anchorTok.start)
+                    else:
+                        # Activated footnote was last -> go to first
+                        fnTokens = pageAst.findType(
+                                WikiFormatting.FormatTypes.Footnote)
+
+                        for ft in fnTokens:
+                            if ft.grpdict["footnoteId"] == footnoteId:
+                                self.gotoCharPos(ft.start)
+                                break
 
                 return True
             else:
                 continue
-                
+
         return False
-        
+
 
     def getTokensForMousePos(self, mousePosition=None):
         # mouse position overrides current pos
@@ -1702,7 +1711,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             linkPos = self.PositionFromPoint(mousePosition)
         else:
             linkPos = self.GetCurrentPos()
-            
+
         pageAst = self.getPageAst()
         linkCharPos = len(self.GetTextRange(0, linkPos))
 

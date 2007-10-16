@@ -66,26 +66,46 @@ class ListenerList(object):
         else:
             self.listeners.append(listener)
 
+
     def removeListener(self, listener):
+        if self.userCount == 0:
+            # No users -> manipulate list directly
+            try:
+                self.listeners.remove(weakref.ref(listener))
+            except ValueError:
+                try:
+                    self.listeners.remove(listener)
+                except ValueError:
+                    # Wasn't in the list
+                    pass
+        else:
+            # Invalidate listener
+            i = self.findListener(listener)
+            if i != -1:
+                self.invalidateObjectAt(i)
+
+
+    def findListener(self, listener):
         try:
-            self.listeners.remove(weakref.ref(listener))
+            return self.listeners.index(weakref.ref(listener))
         except ValueError:
             try:
-                self.listeners.remove(listener)
+                return self.listeners.index(listener)
             except ValueError:
-                # Wasn't in the list
-                pass
-                
+                return -1
+
+
     def hasListener(self, listener):
-        try:
-            self.listeners.index(weakref.ref(listener))
-            return True
-        except ValueError:
-            try:
-                self.listeners.index(listener)
-                return True
-            except ValueError:
-                return False
+        return self.findListener(listener) != -1
+#         try:
+#             self.listeners.index(weakref.ref(listener))
+#             return True
+#         except ValueError:
+#             try:
+#                 self.listeners.index(listener)
+#                 return True
+#             except ValueError:
+#                 return False
 
 
     def setListeners(self, listeners):
@@ -132,8 +152,7 @@ class ListenerList(object):
             l = lref
             
         return l  # Return real
-
-
+    
     def invalidateObjectAt(self, i):
         """
         Sets listener at index i to None (invalid) and flags list for
@@ -158,6 +177,9 @@ class ListenerList(object):
     def __len__(self):
         return len(self.listeners)
 
+    def __repr__(self):
+        return "<MiscEvent.ListenerList " + hex(id(self)) + " " + \
+                repr(self.listeners) + ">"
 
 
 
@@ -300,6 +322,7 @@ class MiscEvent(object):
             while i < len(self.listenerList):
                 l = self.listenerList.getObjectAt(i)
                 if l is None:
+                    i += 1
                     continue
                 
                 self.activeListenerIndex = i
@@ -314,8 +337,10 @@ class MiscEvent(object):
 
                 i += 1
 
+
         finally:
             self.listenerList.decListenerUser()
+
 
         self.activeListenerIndex = -1
 
@@ -407,36 +432,43 @@ class MiscEvent(object):
 
 
 
-class ResendingMiscEvent(MiscEvent):
+# TODO Derivation from MiscEvent is not elegant
+
+class ProxyMiscEvent(MiscEvent):
     """
     This specialized MiscEvent registers as listener to a list of other
-    MiscEvents and resends any events send by them. When sending, source is
-    changed to the ResendingEvent (the parent, not the clone).
+    MiscEvents and resends any events send by them.
     """
     __slots__ = ("watchedEvents",)
-    
+
     def __init__(self, source=None):
         MiscEvent.__init__(self, source)
-        self.watchedEvents = []
-    
+        self.watchedEvents = ()
+
+    def setWatchedEvent(self, watchedEvent):
+        if watchedEvent is None:
+            self.setWatchedEvents(())
+        else:
+            self.setWatchedEvents((watchedEvent,))
+
     def setWatchedEvents(self, watchedEvents):
         if watchedEvents is None:
-            watchedEvents = []
+            watchedEvents = ()
 
         for ev in self.watchedEvents:
             ev.removeListener(self)
-        
+
         self.watchedEvents = watchedEvents
-        
+
         for ev in self.watchedEvents:
             ev.addListener(self)
-        
+
     def getWatchedEvents(self):
         return self.watchedEvents
-        
+
     def miscEventHappened(self, miscevt):
         newMiscevt = miscevt.createClone()
-        newMiscevt.setSource(self)
+#         newMiscevt.setSource(self)
         newMiscevt.setListenerList(self.listenerList)
         newMiscevt.processSend()
 

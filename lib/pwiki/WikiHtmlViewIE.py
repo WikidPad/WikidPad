@@ -75,13 +75,17 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
         self.presenterListener = wxKeyFunctionSink((
                 ("loaded current wiki page", self.onLoadedCurrentWikiPage),
-                ("reloaded current page", self.onReloadedCurrentPage),
+                ("reloaded current doc page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
                 ("closing current wiki", self.onClosingCurrentWiki),
-                ("options changed", self.onOptionsChanged),
+#                 ("options changed", self.onOptionsChanged),
                 ("updated wiki page", self.onUpdatedWikiPage),
                 ("changed live text", self.onChangedLiveText)
         ), self.presenter.getMiscEvent())
+
+        self.__sinkApp = wxKeyFunctionSink((
+                ("options changed", self.onOptionsChanged),
+        ), wx.GetApp().getMiscEvent(), self)
 
         self.visible = False
         self.outOfSync = True   # HTML content is out of sync with live content
@@ -105,9 +109,11 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             self.exporterInstance.exportType = u"html_previewIE"
 
         self.exporterInstance.tempFileSet = TempFileSet()
+        self._updateTempFilePrefPath()
         self.exporterInstance.styleSheet = "file:" + urlFromPathname(
                 os.path.join(wx.GetApp().globalConfigSubDir,
                 'wikipreview.css'))
+
         self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
 
 #
@@ -122,7 +128,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 #         EVT_MOUSEWHEEL(self, self.OnMouseWheel)
 
 
-    def setVisible(self, vis):
+    def setLayerVisible(self, vis):
         """
         Informs the widget if it is really visible on the screen or not
         """
@@ -137,7 +143,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
 
     def close(self):
-        self.setVisible(False)
+        self.setLayerVisible(False)
         self.presenterListener.disconnect()
 
 
@@ -236,6 +242,17 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 #             self.outOfSync = True
             self.refresh()
 
+
+    def _updateTempFilePrefPath(self):
+        wikiDoc = self.presenter.getWikiDocument()
+
+        if wikiDoc is not None:
+            self.exporterInstance.tempFileSet.setPreferredPath(
+                    wikiDoc.getWikiTempDir())
+        else:
+            self.exporterInstance.tempFileSet.setPreferredPath(None)
+
+
     def onLoadedCurrentWikiPage(self, miscevt):
         self.anchor = miscevt.get("anchor")
         self.outOfSync = True
@@ -257,20 +274,16 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
     def onOpenedWiki(self, miscevt):
         self.currentLoadedWikiWord = None
 
+        self._updateTempFilePrefPath()
         self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
 
     def onClosingCurrentWiki(self, miscevt):
-        if self.currentLoadedWikiWord:
-            try:
-                pass
-#                 prevPage = self.presenter.getWikiDocument().getWikiPage(
-#                         self.currentLoadedWikiWord)
-#                 prevPage.setPresentation(self.GetViewStart(), 3)
-            except WikiWordNotFoundException, e:
-                pass
+        pass
+
 
     def onOptionsChanged(self, miscevt):
         self.outOfSync = True
+        self._updateTempFilePrefPath()
         if self.visible:
             self.refresh()
 

@@ -34,7 +34,7 @@ except:
 
 from pwiki.StringOps import getBinCompactForDiff, applyBinCompact, pathEnc, \
         pathDec, binCompactToCompact, fileContentToUnicode, utf8Enc, utf8Dec, \
-        BOM_UTF8, Tokenizer
+        BOM_UTF8, Tokenizer, uniWithNone
 
 from pwiki import WikiFormatting
 from pwiki import PageAst
@@ -44,10 +44,11 @@ from pwiki import PageAst
 
 class WikiData:
     "Interface to wiki data."
-    def __init__(self, wikiDocument, dataDir):
+    def __init__(self, wikiDocument, dataDir, tempDir):
         self.wikiDocument = wikiDocument
         self.dataDir = dataDir
         self.cachedContentNames = None
+#         tempDir = uniWithNone(tempDir)
 
         dbfile = join(dataDir, "wikiovw.sli")   # means "wiki overview"
 
@@ -65,6 +66,8 @@ class WikiData:
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
+
+#         self.connWrap.execSql("pragma temp_store_directory = '%s'" % tempDir)
 
         DbStructure.registerSqliteFunctions(self.connWrap)
 
@@ -129,8 +132,7 @@ class WikiData:
             return utf8Enc(unidata, "replace")[0]
 
         self.contentUniInputToDb = contentUniInputToDb
-    
-    
+
         try:
             self._createTempTables()
 

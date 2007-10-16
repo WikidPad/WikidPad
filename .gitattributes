@@ -1,4 +1,5 @@
 * text=auto !eol
+/Consts.py -text
 /ExceptionLogger.py -text
 /WikidPad.py -text
 /WikidPad.xrc -text
@@ -578,6 +579,7 @@ lib/pwiki/SpellChecker.py -text
 lib/pwiki/SqliteThin3.py -text
 lib/pwiki/StringOps.py -text
 lib/pwiki/TempFileSet.py -text
+lib/pwiki/TextTree.py -text
 lib/pwiki/Utilities.py -text
 lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiFormatting.py -text

@@ -7,7 +7,7 @@ import wx
 
 # from MiscEvent import KeyFunctionSinkAR
 from pwiki.wxHelper import GUI_ID, EnhancedListControl, wxKeyFunctionSink, cloneFont, \
-        getAccelPairFromKeyDown, appendToMenuByMenuDesc
+        getAccelPairFromKeyDown, appendToMenuByMenuDesc, IdRecycler
 
 from pwiki.Configuration import isWindows
 
@@ -50,9 +50,8 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         self.clientHeight = self.GetClientSizeTuple()[1]
         
         self.visibleItemCount = (self.clientHeight - 4) // self.itemHeight
-        self.readablySized = True
         
-        self.contextMenuWikiWords = {}  # {menuid: wiki word to go to}
+        self.contextMenuWikiWords = IdRecycler()  # {menuid: wiki word to go to}
         self.listContent = [] # Tuples (wx.DateTime day, <number of wikiwords for day>)
         self.listMaxWordCount = 0  # max number of wikiwords over entries in listContent
         self.wikiWordListPopup = None
@@ -124,18 +123,22 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
                 self.fixedItemIndex = 0
 
             # Register for pWiki events
-            self.sink = wxKeyFunctionSink((
+            self.__sinkMc = wxKeyFunctionSink((
                     ("opened wiki", self.onUpdateNeeded),
                     ("closed current wiki", self.onUpdateNeeded),
                     ("updated wiki page", self.onUpdateNeeded),
-                    ("deleted wiki page", self.onUpdateNeeded),
-                    ("options changed", self.onUpdateNeeded)
+                    ("deleted wiki page", self.onUpdateNeeded)
+#                     ("options changed", self.onUpdateNeeded)
             ), self.mainControl.getMiscEvent(), self)
+            
+            self.__sinkApp = wxKeyFunctionSink((
+                    ("options changed", self.onUpdateNeeded),
+            ), wx.GetApp().getMiscEvent(), self)
 
             self.firstResize = False
             
 #         size = evt.GetSize()
-        self.readablySized = size.GetHeight() >= 5 and size.GetWidth() >= 5
+        self.sizeVisible = size.GetHeight() >= 5 and size.GetWidth() >= 5
 
         if len(self.listContent) > self.visibleItemCount:
             self.updateContent()
@@ -154,11 +157,20 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
     def SetSize(self, size):
         wx.ListCtrl.SetSize(self, size)
+
+        oldVisible = self.isVisibleEffect()
         self.adjustToSize()
+        if oldVisible != self.isVisibleEffect():
+            self.handleVisibilityChange()
+
 
     def SetDimensions(self, x, y, width, height, flags=wx.SIZE_AUTO):
         wx.ListCtrl.SetDimensions(self, x, y, width, height, flags)
+
+        oldVisible = self.isVisibleEffect()
         self.adjustToSize()
+        if oldVisible != self.isVisibleEffect():
+            self.handleVisibilityChange()
 
 
     def onUpdateNeeded(self, miscevt):
@@ -171,7 +183,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         self.wikiWordFilter.setWikiDocument(self.mainControl.getWikiDocument())
         self.wikiWordFilter.setDayResolution(self.stepDays)
         
-        if not self.readablySized or not self.mainControl.isWikiLoaded():
+        if not self.isVisibleEffect() or not self.mainControl.isWikiLoaded():
             self.listMaxWordCount = 0
             self.listContent = []
             self.updatePresentation()
@@ -491,31 +503,39 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
                 appendToMenuByMenuDesc(menu, _CONTEXT_MENU_TIMELINE)
                 self.PopupMenu(menu)
                 return
-    
+
             self.mainControl.getCollator().sort(wikiWords)
-    
-            reusableIds = self.contextMenuWikiWords.keys()
+
+#             reusableIds = self.contextMenuWikiWords.keys()
             menu = wx.Menu()
-            
-            cmc = {}
-            
+
+#             cmc = {}
+
             for word in wikiWords:
-                if len(reusableIds) > 0:
-                    menuId = reusableIds.pop()
-                else:
-                    menuId = wx.NewId()
-                    wx.EVT_MENU(self, menuId, self.OnWikiWordInMenu)
-    
-                cmc[menuId] = word
-                menuItem = wx.MenuItem(menu, menuId, word)
-                menu.AppendItem(menuItem)
+                menuID, reused = self.contextMenuWikiWords.assocGetIdAndReused(
+                        word)
                 
-            # Add remaining ids to prevent them from getting lost
-            for i in reusableIds:
-                cmc[i] = None
-    
-            self.contextMenuWikiWords = cmc
-            
+                if not reused:
+                    # For a new id, an event must be set
+                    wx.EVT_MENU(self, menuID, self.OnWikiWordInMenu)
+
+#                 if len(reusableIds) > 0:
+#                     menuId = reusableIds.pop()
+#                 else:
+#                     menuId = wx.NewId()
+#                     wx.EVT_MENU(self, menuId, self.OnWikiWordInMenu)
+# 
+#                 cmc[menuId] = word
+                menuItem = wx.MenuItem(menu, menuID, word)
+                menu.AppendItem(menuItem)
+
+#             # Add remaining ids to prevent them from getting lost
+#             for i in reusableIds:
+#                 cmc[i] = None
+#     
+#             self.contextMenuWikiWords = cmc
+
+
             appendToMenuByMenuDesc(menu, u"-\n" + _CONTEXT_MENU_TIMELINE)
             
             self.PopupMenu(menu)
@@ -573,7 +593,9 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
     def OnWikiWordInMenu(self, evt):
         word = self.contextMenuWikiWords[evt.GetId()]
-        self.mainControl.activateWikiWord(word, 0)
+#         self.mainControl.activateWikiWord(word, 0)
+        self.mainControl.activatePageByUnifiedName(
+                u"wikipage/" + word, 0)
 
 
 

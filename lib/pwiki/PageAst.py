@@ -248,6 +248,14 @@ class Page(Ast):
             return
 
 
+    def buildPureText(self, text):
+        """
+        Takes the text as pure text, ignoring any formatting.
+        """
+        self.tokens = [Token(WikiFormatting.FormatTypes.Default, 0, {}, text)]
+        self.footnoteAnchorDict = None
+
+
     def findTypeFlat(self, typeToFind):
         """
         Non-recursive search for tokens of the specified type

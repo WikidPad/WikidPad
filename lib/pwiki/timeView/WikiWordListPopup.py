@@ -137,7 +137,9 @@ class WikiWordListPopup(wx.Frame):
             return
         
         wikiWord = self.wikiWords[item]
-        self.mainControl.activateWikiWord(wikiWord, 0)
+#         self.mainControl.activateWikiWord(wikiWord, 0)
+        self.mainControl.activatePageByUnifiedName(
+                u"wikipage/" + wikiWord, 0)
         
         if self.mainControl.getConfig().getboolean("main",
                 "timeView_autohide", False):
@@ -165,7 +167,9 @@ class WikiWordListPopup(wx.Frame):
                     
         tabMode = MIDDLE_MOUSE_CONFIG_TO_TABMODE[configCode]
 
-        presenter = self.mainControl.activateWikiWord(wikiWord, tabMode)
+#         presenter = self.mainControl.activateWikiWord(wikiWord, tabMode)
+        presenter = self.mainControl.activatePageByUnifiedName(
+                u"wikipage/" + wikiWord, tabMode)
 
         if not (tabMode & 1):
             # If not tab opened in background -> hide time view if option

@@ -45,11 +45,12 @@ from pwiki import PageAst
 
 class WikiData:
     "Interface to wiki data."
-    def __init__(self, wikiDocument, dataDir):
+    def __init__(self, wikiDocument, dataDir, tempDir):
         self.wikiDocument = wikiDocument
         self.dataDir = dataDir
         self.connWrap = None
         self.cachedContentNames = None
+        # tempDir is ignored
         
         # Only if this is true, the database is called to commit.
         # This is necessary for read-only databases

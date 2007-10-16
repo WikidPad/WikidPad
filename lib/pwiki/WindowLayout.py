@@ -546,10 +546,10 @@ class LayeredControlPresenter:
             if self.visible and self.lastVisibleCtrlName != scName:
                 # First show subControl scName, then hide the others
                 # to avoid flicker
-                self.subControls[scName].setVisible(True)
+                self.subControls[scName].setLayerVisible(True)
                 for n, c in self.subControls.iteritems():
                     if n != scName:
-                        c.setVisible(False)
+                        c.setLayerVisible(False)
 
             self.lastVisibleCtrlName = scName
             self.setTitle(self.shortTitle)
@@ -564,16 +564,16 @@ class LayeredControlPresenter:
         return self.subControls.get(self.lastVisibleCtrlName)
 
 
-    def setVisible(self, vis):
+    def setLayerVisible(self, vis):
         if self.visible == vis:
             return
         
         if vis:
             for n, c in self.subControls.iteritems():
-                c.setVisible(n == self.lastVisibleCtrlName)
+                c.setLayerVisible(n == self.lastVisibleCtrlName)
         else:
             for c in self.subControls.itervalues():
-                c.setVisible(False)
+                c.setLayerVisible(False)
 
         self.visible = vis
         
@@ -622,14 +622,14 @@ class LayeredControlPanel(wx.Panel, LayeredControlPresenter):
             # First show subControl scName, then hide the others
             # to avoid flicker
             if self.visible and self.lastVisibleCtrlName != scName:
-                self.subControls[scName].setVisible(True)
+                self.subControls[scName].setLayerVisible(True)
             
             self.subControls[scName].Show(True)
 
             for n, c in self.subControls.iteritems():
                 if n != scName:
                     if self.visible:
-                        c.setVisible(False)
+                        c.setLayerVisible(False)
                     c.Show(False)
 
             if gainFocus:

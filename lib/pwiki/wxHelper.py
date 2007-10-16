@@ -31,8 +31,8 @@ class wxIdPool:
             try:
                 return self.poolmap[name]
             except KeyError:
-                id=wx.NewId()
-                self.poolmap[name]=id
+                id = wx.NewId()
+                self.poolmap[name] = id
                 return id
 
 
@@ -53,6 +53,67 @@ class XrcControls:
     def __getitem__(self, name):
         return XRCCTRL(self.__basepanel, name)
     
+
+
+class IdRecycler:
+    """
+    You can get ids from it, associate them with a value, later clear the
+    associations and reuse ids
+    """
+    def __init__(self):
+        self.unusedSet = set()
+        self.assoc = {}
+    
+    def assocGetId(self, value):
+        """
+        Get a new or unused id and associate it with value. Returns the id.
+        """
+        if len(self.unusedSet) == 0:
+            id = wx.NewId()
+        else:
+            id = self.unusedSet.pop()
+        
+        self.assoc[id] = value
+        return id
+    
+    def assocGetIdAndReused(self, value):
+        """
+        Get a new or unused id and associate it with value.
+        Returns tuple (id, reused) where reused is True iff id is not new.
+        """
+        if len(self.unusedSet) == 0:
+            id = wx.NewId()
+            reused = False
+        else:
+            id = self.unusedSet.pop()
+            reused = True
+
+        self.assoc[id] = value
+        return (id, reused)
+
+
+    def get(self, id, default=None):
+        """
+        Get value for an id as for a dict object.
+        """
+        return self.assoc.get(id, default)
+        
+    def __getitem__(self, id):
+        """
+        Get value for an id as for a dict object.
+        """
+        return self.assoc[id]
+
+    def iteritems(self):
+        return self.assoc.iteritems()
+
+    def clearAssoc(self):
+        """
+        Clear the associations, but store all ids for later reuse.
+        """
+        self.unusedSet.update(self.assoc.iterkeys())
+        self.assoc.clear()
+
 
 
 if Configuration.isWin9x():
@@ -158,7 +219,6 @@ else:    # Non-Windows 9x versions
         return wx.TextDataObject(text)
 
 
-# bmp.ConvertToImage()
 def getBitmapFromClipboard():
     """
     Retrieve bitmap from clipboard if available
@@ -177,7 +237,6 @@ def getBitmapFromClipboard():
         return None
     finally:
         cb.Close()
-
 
 
 
@@ -284,6 +343,12 @@ def drawTextCenter(dc, text, startX, startY, width):
     dc.DrawText(text, startX + offsetX, startY)
 
 
+def clearMenu(menu):
+    """
+    Remove all items from a menu.
+    """
+    for item in menu.GetMenuItems():
+        menu.DestroyItem(item)
 
 
 def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
@@ -363,8 +428,8 @@ class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):
         self.ifdestroyed = ifdestroyed
         
         if self.eventSource is not None:
-            self.eventSource.addListener(self, False)
-        
+            self.eventSource.addListener(self, self.ifdestroyed is None)
+
         if self.ifdestroyed is not None:
             wx.EVT_WINDOW_DESTROY(self.ifdestroyed, self.OnDestroy)
 
@@ -394,6 +459,9 @@ class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):
         self.eventSource.removeListener(self)
         self.eventSource = None
 
+    def __repr__(self):
+        return "<wxHelper.wxKeyFunctionSink " + hex(id(self)) + " ifdstr: " + \
+                repr(self.ifdestroyed) + ">"
 
 
 

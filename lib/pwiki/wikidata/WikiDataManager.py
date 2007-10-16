@@ -1,5 +1,5 @@
 from weakref import WeakValueDictionary
-import os, os.path, sets, time, traceback
+import os, os.path, sets, time, shutil, traceback
 from threading import RLock, Thread
 from pwiki.rtlibRepl import re  # Original re doesn't work right with
         # multiple threads   (TODO!)
@@ -57,7 +57,8 @@ def createWikiDb(pWiki, dbtype, wikiName, dataDir, overwrite=False):
     createWikiDbFunc(wikiName, dataDir, overwrite)
 
 
-def openWikiDocument(wikiConfigFilename, wikiSyntax, dbtype=None):
+def openWikiDocument(wikiConfigFilename, wikiSyntax, dbtype=None,
+        ignoreLock=False, createLock=True):
     """
     Create a new instance of the WikiDataManager or return an already existing
     one
@@ -79,8 +80,9 @@ def openWikiDocument(wikiConfigFilename, wikiSyntax, dbtype=None):
         wdm.incRefCount()
         return wdm
 
-    wdm = WikiDataManager(wikiConfigFilename, wikiSyntax, dbtype)
-    
+    wdm = WikiDataManager(wikiConfigFilename, wikiSyntax, dbtype, ignoreLock,
+            createLock)
+
     _openDocuments[wikiConfigFilename] = wdm
 
     return wdm
@@ -145,6 +147,22 @@ def splitConfigPathAndWord(wikiCombinedFilename):
 #                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
             return None, None
     
+    
+def getGlobalFuncPage(funcTag):
+    global _globalFuncPages
+    
+    if len(funcTag) == 0:
+        return None  # TODO throw exception?
+    
+    if not funcTag.startswith(u"global/"):
+        return None  # TODO throw exception?
+
+    value = _globalFuncPages.get(funcTag)
+    if value is None:
+        value = FunctionalPage(None, funcTag)
+        _globalFuncPages[funcTag] = value
+
+    return value
 
 
 # TODO Remove this hackish solution
@@ -203,12 +221,32 @@ class WikiDataManager(MiscEventSourceMixin):
     a WikiDataManager instance.
     """
 
-    def __init__(self, wikiConfigFilename, wikiSyntax, dbtype):  #  dataDir, fileStorDir, dbtype, ):
+    def __init__(self, wikiConfigFilename, wikiSyntax, dbtype, ignoreLock=False,
+            createLock=True):
+        MiscEventSourceMixin.__init__(self)
+
+        self.lockFileName = wikiConfigFilename + u".lock"
+        if not ignoreLock and os.path.exists(self.lockFileName):
+            raise LockedWikiException(
+                    _(u"Wiki is probably already in use by other instance"))
+
+        if createLock:
+            try:
+                f = open(self.lockFileName, "w")
+                self.writeAccessDenied = False
+                f.close()
+            except IOError:
+                self.lockFileName = None
+                self.writeAccessDenied = True
+        else:
+            self.lockFileName = None
+
         wikiConfig = GetApp().createWikiConfiguration()
         self.connected = False
         self.readAccessFailed = False
         self.writeAccessFailed = False
         self.writeAccessDenied = False
+
         wikiConfig.loadConfig(wikiConfigFilename)
 
         # config variables
@@ -218,7 +256,7 @@ class WikiDataManager(MiscEventSourceMixin):
         # except Exception, e:
         if wikiName is None or dataDir is None:
             raise BadConfigurationFileException(
-                    "Wiki configuration file is corrupted")
+                    _(u"Wiki configuration file is corrupted"))
         
         # os.access does not answer reliably if file is writable,
         # therefore we have to just open it in writable mode
@@ -228,12 +266,8 @@ class WikiDataManager(MiscEventSourceMixin):
             f.close()
         except IOError:
             self.writeAccessDenied = True
-            
+
         wikiConfig.setWriteAccessDenied(self.writeAccessDenied)
-
-
-#         self.writeAccessDenied = not os.access(wikiConfigFilename, os.W_OK)
-#         print "WikiDataManager7", repr(self.writeAccessDenied)
 
         # absolutize the path to data dir if it's not already
         if not os.path.isabs(dataDir):
@@ -241,7 +275,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
         dataDir = mbcsDec(os.path.abspath(dataDir), "replace")[0]
 
-        self.wikiConfigFilename = wikiConfigFilename
+#         self.wikiConfigFilename = wikiConfigFilename
 
         if not dbtype:
             wikidhName = wikiConfig.get("main",
@@ -252,19 +286,22 @@ class WikiDataManager(MiscEventSourceMixin):
         if not wikidhName:
             # Probably old database version without handler tag
             raise UnknownDbHandlerException(
-                        'Required data handler %s not available' % wikidhName)
+                    u'No data handler information found, probably '
+                    u'"Original Gadfly" is right.')
 
         if not isDbHandlerAvailable(wikidhName):
             raise DbHandlerNotAvailableException(
-                    'Required data handler %s not available' % wikidhName)
+                    'Required data handler %s unknown to WikidPad' % wikidhName)
 
         self.wikiConfiguration = wikiConfig
 
         wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(wikidhName)
         if wikiDataFactory is None:
-            raise NoDbHandlerException("Data handler %s not available" % wikidhName)
+            raise NoDbHandlerException(
+                    "Required data handler %s not available" % wikidhName)
 
-        wikiData = wikiDataFactory(self, dataDir)
+        self.ensureWikiTempDir()
+        wikiData = wikiDataFactory(self, dataDir, self.getWikiTempDir())
 
         self.baseWikiData = wikiData
         self.autoLinkRelaxRE = None
@@ -304,7 +341,7 @@ class WikiDataManager(MiscEventSourceMixin):
             writeException = e
 
         # Path to file storage
-        fileStorDir = os.path.join(os.path.dirname(self.wikiConfigFilename),
+        fileStorDir = os.path.join(os.path.dirname(self.getWikiConfigPath()),
                 "files")
 
         self.fileStorage = FileStorage.FileStorage(self, fileStorDir)
@@ -320,7 +357,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 "fileStorage_identity_modDateIsEnough", False))
 
         self.wikiConfiguration.getMiscEvent().addListener(self)
-
+        GetApp().getMiscEvent().addListener(self)
 
         self.getFormatting().rebuildFormatting(None)
         self._updateCcWordBlacklist()
@@ -359,12 +396,25 @@ class WikiDataManager(MiscEventSourceMixin):
         self.refCount -= 1
 
         if self.refCount <= 0:
+            wikiTempDir = self.getWikiTempDir()
+
             if self.wikiData is not None:
                 self.wikiData.close()
                 self.wikiData = None
                 self.baseWikiData = None
 
+            GetApp().getMiscEvent().removeListener(self)
+
             del _openDocuments[self.getWikiConfig().getConfigPath()]
+
+            if self.lockFileName is not None:
+                try:
+                    os.unlink(self.lockFileName)
+                except:
+                    traceback.print_exc()
+
+            if wikiTempDir is not None:
+                shutil.rmtree(wikiTempDir, True)
 
         return self.refCount
 
@@ -382,7 +432,7 @@ class WikiDataManager(MiscEventSourceMixin):
         return self.wikiConfiguration
         
     def getWikiConfigPath(self):
-        return self.getWikiConfig().getConfigPath()
+        return self.wikiConfiguration.getConfigPath()
 
     def getFormatting(self):
         return self.formatting
@@ -396,6 +446,27 @@ class WikiDataManager(MiscEventSourceMixin):
     def getCollator(self):
         return GetApp().getCollator()
         
+    def getWikiTempDir(self):
+#         if GetApp().getGlobalConfig().getboolean("main", "tempFiles_inWikiDir",
+#                 False) and not self.isReadOnlyEffect():
+#             return os.path.join(os.path.dirname(self.getWikiConfigPath()),
+#                     "temp")
+#         else:
+        return None
+
+
+    def ensureWikiTempDir(self):
+        """
+        Try to ensure existence of wiki temp directory
+        """
+        tempDir = self.getWikiTempDir()
+        
+        if tempDir is not None:
+            try:
+                os.makedirs(tempDir)
+            except OSError:
+                self.setReadAccessFailed(True)
+
     def getNoAutoSaveFlag(self):
         """
         Flag is set (by PersonalWikiFrame),
@@ -556,17 +627,16 @@ class WikiDataManager(MiscEventSourceMixin):
         Retrieve a functional page
         """
         global _globalFuncPages
-        if funcTag.startswith("global/"):
-            cacheDict = _globalFuncPages
+        if funcTag.startswith(u"global/"):
+            value = getGlobalFuncPage(funcTag)
         else:
-            cacheDict = self.funcPageDict
+            value = self.funcPageDict.get(funcTag)
+            if value is None:
+                value = FunctionalPage(self, funcTag)
+                self.funcPageDict[funcTag] = value
 
-        value = cacheDict.get(funcTag)
-        if value is None:
-            value = FunctionalPage(self, funcTag)
-            if not value.getMiscEvent().hasListener(self):
-                value.getMiscEvent().addListener(self)
-            cacheDict[funcTag] = value
+        if not value.getMiscEvent().hasListener(self):
+            value.getMiscEvent().addListener(self)
 
         return value
 
@@ -898,7 +968,8 @@ class WikiDataManager(MiscEventSourceMixin):
         if wikiDataFactory is None:
             raise NoDbHandlerException("Data handler %s not available" % self.dbtype)
 
-        wikiData = wikiDataFactory(self, self.dataDir)
+        self.ensureWikiTempDir()
+        wikiData = wikiDataFactory(self, self.dataDir, self.getWikiTempDir())
 
         self.baseWikiData = wikiData
         self.wikiData = WikiDataSynchronizedProxy(self.baseWikiData)
@@ -922,7 +993,7 @@ class WikiDataManager(MiscEventSourceMixin):
         pg = self.getFuncPage("wiki/[CCBlacklist]")
         bls.union_update(pg.getLiveText().split("\n"))
         self.getFormatting().setCcWordBlacklist(bls)
-
+        
 
     def getAliasesWikiWord(word):
         return self.getWikiData().getAliasesWikiWord(word)
@@ -935,6 +1006,9 @@ class WikiDataManager(MiscEventSourceMixin):
         if miscevt.getSource() is self.wikiConfiguration:
             if miscevt.has_key("configuration changed"):
                 self.getFormatting().rebuildFormatting(miscevt)
+        elif miscevt.getSource() is GetApp():
+            if miscevt.has_key("reread cc blacklist needed"):
+                self._updateCcWordBlacklist()
         else:
             # These messages come from (classes derived from) DocPages,
             # they are mainly relayed
@@ -952,20 +1026,18 @@ class WikiDataManager(MiscEventSourceMixin):
                 self.autoLinkRelaxRE = None
             elif miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()
-
+                
                 props = miscevt.getProps().copy()
-                props["wikiPage"] = miscevt.getSource()
+                props["funcPage"] = miscevt.getSource()
                 self.fireMiscEventProps(props)
             elif miscevt.has_key("updated func page"):
                 # This was send from a FuncPage object, send it again
                 # The event also contains more specific information
                 # handled by PersonalWikiFrame
-
                 props = miscevt.getProps().copy()
                 props["funcPage"] = miscevt.getSource()
+
                 self.fireMiscEventProps(props)
 
-                
-            
-        
+
 

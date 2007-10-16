@@ -158,6 +158,18 @@ def unicodeToCompFilename(us):
 
 # def unicodeToAllCharFilename
 
+def strWithNone(s):
+    if s is None:
+        return ""
+    
+    return s
+
+def uniWithNone(u):
+    if u is None:
+        return u""
+    
+    return u
+
 
 def strToBool(s, default=False):
     """
@@ -244,6 +256,19 @@ def splitIndent(text):
     pl = len(text)
     text = text.lstrip()
     return (text, pl-len(text))
+
+
+def splitFill(text, delim, count, fill=u""):
+    """
+    Split text by delim into up to count pieces. If less
+    pieces than count+1 are available, additional pieces are added containing
+    fill.
+    """
+    result = text.split(delim, count)
+    if len(result) < count + 1:
+        result += [fill] * (count + 1 - len(result))
+    
+    return result
 
 
 def matchWhole(reObj, s):
@@ -333,7 +358,8 @@ def re_sub_escape(pattern):
     """
     Escape the replacement pattern for a re.sub function
     """
-    return pattern.replace(u"\\", u"\\\\")
+    return pattern.replace(u"\\", u"\\\\").replace(u"\n", u"\\n").replace(
+            u"\r", u"\\r").replace(u"\t", u"\\t").replace(u"\f", u"\\f")
 
 
 def htmlColorToRgbTuple(html):
@@ -442,6 +468,35 @@ def relativeFilePath(location, toFilePath):
     result += fileParts
 
     return os.path.join(*result)
+
+
+def flexibleUrlUnquote(link):
+    if link is None:
+        return None
+
+    try:
+        linkAscii = link.encode("ascii", "strict")
+    except UnicodeEncodeError:
+        # URL contains non-ascii characters, so skip the following
+        # unquoting
+        linkAscii = None
+
+    if linkAscii:
+        # Get bytes out of percent-quoted URL
+        linkBytes = urllib.unquote(linkAscii)
+        # Try to interpret bytes as UTF-8
+        try:
+            link = linkBytes.decode("utf8", "strict")
+        except UnicodeDecodeError:
+            # Failed -> try mbcs
+            try:
+                link = mbcsDec(linkBytes, "strict")[0]
+            except UnicodeDecodeError:
+                # Failed, too -> leave link unmodified
+                pass
+    
+    return link
+
 
 
 _URL_RESERVED = frozenset((u";", u"?", u":", u"@", u"&", u"=", u"+", u",", u"/"))
@@ -565,7 +620,6 @@ else:
 
 
 
-
 _RNDBASESEQ = u"1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 def createRandomString(length):
@@ -622,8 +676,8 @@ def wikiUrlToPathWordAndAnchor(url):
     queryDict = cgi.parse_qs(parsed[4])
     # Retrieve wikiword to open if existing
     # queryDict values are lists of values therefore this expression
-    wikiWordToOpen = queryDict.get("page", (None,))[0]
-    anchorToOpen = queryDict.get("anchor", (None,))[0]
+    wikiWordToOpen = flexibleUrlUnquote(queryDict.get("page", (None,))[0])
+    anchorToOpen = flexibleUrlUnquote(queryDict.get("anchor", (None,))[0])
 
     # Modify parsed to create clean url by clearing query and fragment
     parsed = list(parsed)
@@ -631,7 +685,7 @@ def wikiUrlToPathWordAndAnchor(url):
     parsed[5] = ""
     parsed = tuple(parsed)
 
-    url = urlparse.urlunparse(parsed)[5:]
+    url = flexibleUrlUnquote(urlparse.urlunparse(parsed)[5:])
 
     filePath = urllib.url2pathname(url)
 

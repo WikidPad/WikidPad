@@ -13,7 +13,8 @@ import srePersistent
 srePersistent.loadCodeCache()
 
 from wxHelper import IconCache
-from MiscEvent import KeyFunctionSink
+from MiscEvent import KeyFunctionSink, MiscEventSourceMixin
+
 from WikiExceptions import *
 from PersonalWikiFrame import PersonalWikiFrame
 from StringOps import mbcsDec, createRandomString
@@ -93,11 +94,12 @@ def findDirs():
 
 
 
-class App(wx.App): 
+class App(wx.App, MiscEventSourceMixin): 
     def __init__(self, *args, **kwargs):
         global app
         app = self
 
+        MiscEventSourceMixin.__init__(self)
         wx.App.__init__(self, *args, **kwargs)
         self.SetAppName("WikidPad")
         # Do not initialize member variables here!

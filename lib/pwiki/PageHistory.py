@@ -5,42 +5,53 @@ class PageHistory:
     Represents the history of visited wikiwords. Active component which reacts
     on MiscEvents.
     """
-    def __init__(self, pWiki):
+    def __init__(self, mainControl, docPagePresenter):
         self.pos = 0   # Pos is index into history but points one element *behind* current word
         self.history = []
-        self.pWiki = pWiki
+        self.mainControl = mainControl
         
         self.mainControlSink = KeyFunctionSink((
+                ("opened wiki", self.onOpenedWiki),
+        ))
+        
+        self.docPagePresenter = docPagePresenter
+
+        self.docPPresenterSink = KeyFunctionSink((
+                ("loaded current doc page", self.onLoadedCurrentDocPage),
+        ))
+
+        self.__sinkWikiDoc = KeyFunctionSink((
                 ("deleted wiki page", self.onDeletedWikiPage),
-                ("renamed wiki page", self.onRenamedWikiPage),
-                ("opened wiki", self.onOpenedWiki)
+                ("renamed wiki page", self.onRenamedWikiPage)
         ))
 
-        self.currentDocPPresenterSink = KeyFunctionSink((
-                ("loading wiki page", self.onLoadingCurrentWikiPage),
-        ))
-        
-        # Register for pWiki events
-        self.pWiki.getMiscEvent().addListener(self.mainControlSink, False)
-        
-        self.pWiki.getCurrentDocPagePresenterRMEvent().addListener(
-                self.currentDocPPresenterSink, False)
 
+        # Register for events
+        self.mainControl.getMiscEvent().addListener(self.mainControlSink, False)
+        
+        self.docPagePresenter.getMiscEvent().addListener(
+                self.docPPresenterSink, False)
+
+        self.mainControl.getCurrentWikiDocumentProxyEvent().addListener(
+                self.__sinkWikiDoc)
 
 ##                 ("saving current page", self.savingCurrentWikiPage)
 
 
+
     def close(self):
-        self.pWiki.getMiscEvent().removeListener(self.mainControlSink)
-        self.pWiki.getCurrentDocPagePresenterRMEvent().removeListener(
-                self.currentDocPPresenterSink)
+        self.mainControl.getMiscEvent().removeListener(self.mainControlSink)
+        self.docPagePresenter.getMiscEvent().removeListener(
+                self.docPPresenterSink)
+        self.mainControl.getCurrentWikiDocumentProxyEvent().removeListener(
+                self.__sinkWikiDoc)
 
 
-    def onLoadingCurrentWikiPage(self, miscevt):
+    def onLoadedCurrentDocPage(self, miscevt):
         if miscevt.get("motionType") == "history":
             # history was used to move to new word, so don't add word to
             # history, move only pos
-            delta = miscevt.get("historyDelta")
+            delta = miscevt.get("historyDelta", 0)
             self.pos += delta
         else:
             if not miscevt.get("addToHistory", True):
@@ -51,9 +62,17 @@ class PageHistory:
                 # We are not at the end, so cut history                
                 self.history = self.history[:self.pos]
 
-            word = self.pWiki.getCurrentWikiWord()
-            if self.pos == 0 or self.history[self.pos-1] != word:
-                self.history.append(word)
+            page = miscevt.get("docPage")
+            if page is None:
+                return
+                
+            upname = page.getUnifiedPageName()
+            if not upname.startswith(u"wikipage/"):
+                # Page is not a wiki page but a functional page
+                return
+
+            if self.pos == 0 or self.history[self.pos-1] != upname:
+                self.history.append(upname)
                 self.pos += 1
                 # Otherwise, we would add the same word which is already
                 # at the end
@@ -69,12 +88,12 @@ class PageHistory:
         Remove deleted word from history
         """
         newhist = []
-        word = miscevt.get("wikiPage").getWikiWord() # self.pWiki.getCurrentWikiWord()
+        upname = u"wikipage/" + miscevt.get("wikiPage").getWikiWord() # self.mainControl.getCurrentWikiWord()
         
         # print "onDeletedWikiPage1",  self.pos, repr(self.history)
         
         for w in self.history:
-            if w != word:
+            if w != upname:
                 newhist.append(w)
             else:
                 if self.pos > len(newhist):
@@ -88,12 +107,12 @@ class PageHistory:
         """
         Rename word in history
         """
-        oldWord = miscevt.get("wikiPage").getWikiWord()
-        newWord = miscevt.get("newWord")
+        oldUpname = u"wikipage/" + miscevt.get("wikiPage").getWikiWord()
+        newUpname = u"wikipage/" + miscevt.get("newWord")
         
         for i in xrange(len(self.history)):
-            if self.history[i] == oldWord:
-                self.history[i] = newWord
+            if self.history[i] == oldUpname:
+                self.history[i] = newUpname
 
 
     def onOpenedWiki(self, miscevt):
@@ -115,7 +134,7 @@ class PageHistory:
         if delta == 0:
             return
 
-        self.pWiki.openWikiPage(self.history[newpos - 1],
+        self.docPagePresenter.openDocPage(self.history[newpos - 1],
                 motionType="history", historyDelta=delta)
 
 
@@ -124,16 +143,16 @@ class PageHistory:
         Called after a page was deleted
         """
         if not self.history:
-            self.pWiki.openWikiPage(self.pWiki.getWikiName(),
+            self.docPagePresenter.openDocPage(self.mainControl.getWikiName(),
                     motionType="random")
             return
             
-        self.pWiki.openWikiPage(self.history[self.pos - 1],
+        self.docPagePresenter.openDocPage(self.history[self.pos - 1],
                 motionType="history", historyDelta=0)
         
         
-    def getHistory(self):
-        return self.history
+    def getHistoryList(self):
+        return [h[9:] for h in self.history]
         
     def getPosition(self):
         return self.pos

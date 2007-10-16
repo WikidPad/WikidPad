@@ -66,13 +66,17 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
         self.presenterListener = wxKeyFunctionSink((
                 ("loaded current wiki page", self.onLoadedCurrentWikiPage),
-                ("reloaded current page", self.onReloadedCurrentPage),
+                ("reloaded current doc page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
                 ("closing current wiki", self.onClosingCurrentWiki),
-                ("options changed", self.onOptionsChanged),
+#                 ("options changed", self.onOptionsChanged),
                 ("updated wiki page", self.onUpdatedWikiPage),
                 ("changed live text", self.onChangedLiveText)
         ), self.presenter.getMiscEvent())
+        
+        self.__sinkApp = wxKeyFunctionSink((
+                ("options changed", self.onOptionsChanged),
+        ), wx.GetApp().getMiscEvent(), self)
 
         self.visible = False
         self.outOfSync = True   # HTML content is out of sync with live content
@@ -90,6 +94,8 @@ class WikiHtmlView(wx.html.HtmlWindow):
         self.exporterInstance.exportType = u"html_previewWX"
         self.exporterInstance.styleSheet = u""
         self.exporterInstance.tempFileSet = TempFileSet()
+        self._updateTempFilePrefPath()
+
         self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
 
 
@@ -111,7 +117,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
         wx.EVT_MOTION(self, self.OnMouseMotion)        
 
 
-    def setVisible(self, vis):
+    def setLayerVisible(self, vis):
         """
         Informs the widget if it is really visible on the screen or not
         """
@@ -127,7 +133,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
     def close(self):
         self.Unbind(wx.EVT_SET_FOCUS)
-        self.setVisible(False)
+        self.setLayerVisible(False)
         self.presenterListener.disconnect()
 
 
@@ -215,18 +221,30 @@ class WikiHtmlView(wx.html.HtmlWindow):
         self.outOfSync = False
 
         ## _prof.stop()
-        
-        
+
+
     def gotoAnchor(self, anchor):
         self.anchor = anchor
         if self.visible:
             self.refresh()
+
+
+    def _updateTempFilePrefPath(self):
+        wikiDoc = self.presenter.getWikiDocument()
+
+        if wikiDoc is not None:
+            self.exporterInstance.tempFileSet.setPreferredPath(
+                    wikiDoc.getWikiTempDir())
+        else:
+            self.exporterInstance.tempFileSet.setPreferredPath(None)
+
 
     def onLoadedCurrentWikiPage(self, miscevt):
         self.anchor = miscevt.get("anchor")
         self.outOfSync = True
         if self.visible:
             self.refresh()
+
 
     def onReloadedCurrentPage(self, miscevt):
         """
@@ -243,6 +261,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
     def onOpenedWiki(self, miscevt):
         self.currentLoadedWikiWord = None
 
+        self._updateTempFilePrefPath()
         self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
 
     def onClosingCurrentWiki(self, miscevt):
@@ -256,6 +275,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
     def onOptionsChanged(self, miscevt):
         self.outOfSync = True
+        self._updateTempFilePrefPath()
         if self.visible:
             self.refresh()
 

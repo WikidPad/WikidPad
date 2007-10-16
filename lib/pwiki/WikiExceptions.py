@@ -47,6 +47,7 @@ class UnknownDbHandlerException(Exception): pass
 
 class MissingConfigurationFileException(Exception): pass
 class BadConfigurationFileException(Exception): pass
+class LockedWikiException(Exception): pass
 
 class NotCurrentThreadException(Exception): pass
 

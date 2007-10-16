@@ -203,6 +203,15 @@ class DocPage(MiscEventSourceMixin):
         raise NotImplementedError #abstract
 
 
+    def getUnifiedPageName(self):
+        """
+        Return the name of the unified name of the page, which is
+        "wikipage/" + the wiki word for wiki pages or the functional tag
+        for functional pages.
+        """
+        raise NotImplementedError #abstract
+
+
     def isReadOnlyEffect(self):
         """
         Return true if page is effectively read-only, this means
@@ -246,6 +255,14 @@ class AliasWikiPage(DocPage):
         """
         return self.aliasWikiWord
 
+    def getUnifiedPageName(self):
+        """
+        Return the name of the unified name of the page, which is
+        "wikipage/" + the wiki word for wiki pages or the functional tag
+        for functional pages.
+        """
+        return u"wikipage/" + self.aliasWikiWord
+
     def getNonAliasPage(self):
         """
         If this page belongs to an alias of a wiki word, return a page for
@@ -281,15 +298,48 @@ class AliasWikiPage(DocPage):
         return getattr(self.realWikiPage, attr)
 
 
+class DataCarryingPage(DocPage):
+    """
+    A page that carries data for itself (mainly everything except an alias page)
+    """
+    def __init__(self, wikiDocument):
+        DocPage.__init__(self, wikiDocument)
+        
+        # does this page need to be saved?
+        self.saveDirtySince = None  # None, if not dirty or timestamp when it became dirty
+        self.updateDirtySince = None
+        
 
-class WikiPage(DocPage):
+    def setDirty(self, dirt):
+        if self.isReadOnlyEffect():
+            return
+
+        if dirt:
+            if self.saveDirtySince is None:
+                ti = time()
+                self.saveDirtySince = ti
+                self.updateDirtySince = ti
+        else:
+            self.saveDirtySince = None
+            self.updateDirtySince = None
+
+    def getDirty(self):
+        return (self.saveDirtySince is not None,
+                self.updateDirtySince is not None)
+
+    def getDirtySince(self):
+        return (self.saveDirtySince, self.updateDirtySince)
+
+
+
+class WikiPage(DataCarryingPage):
     """
     holds the data for a real wikipage (no alias).
     
     Fetched via the WikiDataManager.getWikiPage method.
     """
     def __init__(self, wikiDocument, wikiWord):
-        DocPage.__init__(self, wikiDocument)
+        DataCarryingPage.__init__(self, wikiDocument)
 
 #         self.wikiData = self.wikiDocument.getWikiData()
 
@@ -303,10 +353,6 @@ class WikiPage(DocPage):
         self.suggNewPageTitle = None  # Title to use for page if it is
                 # newly created
 
-        # does this page need to be saved?
-        self.saveDirtySince = None  # None, if not dirty or timestamp when it became dirty
-        self.updateDirtySince = None
-
     def getWikiWord(self):
         return self.wikiWord
         
@@ -315,6 +361,15 @@ class WikiPage(DocPage):
         Return human readable title of the page.
         """
         return self.getWikiWord()
+
+
+    def getUnifiedPageName(self):
+        """
+        Return the name of the unified name of the page, which is
+        "wikipage/" + the wiki word for wiki pages or the functional tag
+        for functional pages.
+        """
+        return u"wikipage/" + self.wikiWord
 
     def getWikiDocument(self):
         return self.wikiDocument
@@ -487,12 +542,12 @@ class WikiPage(DocPage):
         This function should be called by WikiDocument(=WikiDataManager) only,
         use WikiDocument.renameWikiWord() to rename a page.
         """
-        
+
         p = {}
         p["renamed page"] = True
         p["renamed wiki page"] = True
         p["newWord"] = newWord
-        
+
         self.fireMiscEventProps(p)
 
 
@@ -519,12 +574,12 @@ class WikiPage(DocPage):
                 self.getWikiDocument().getFormatting().getPageTitlePrefix() + u" "
         wikiWordHead = \
                 self.getWikiDocument().getWikiPageTitle(self.getWikiWord())
-                
+
         if wikiWordHead is None:
             return content
-            
+
         wikiWordHead = pageTitlePrefix + wikiWordHead + u"\n"
-            
+
         # Remove current heading, if present. removeFirst holds number of
         # characters to remove at beginning when prepending new title 
 
@@ -534,7 +589,7 @@ class WikiPage(DocPage):
                 removeFirst = content.index(u"\n", len(pageTitlePrefix)) + 1
             except ValueError:
                 pass
-                
+
         return wikiWordHead + content[removeFirst:]
 
 
@@ -778,27 +833,6 @@ class WikiPage(DocPage):
         # self.wikiData.deleteTodos(self.wikiWord)
         self.todos = []
 
-    def setDirty(self, dirt):
-        if self.isReadOnlyEffect():
-            return
-
-        if dirt:
-            if self.saveDirtySince is None:
-                ti = time()
-                self.saveDirtySince = ti
-                self.updateDirtySince = ti
-        else:
-            self.saveDirtySince = None
-            self.updateDirtySince = None
-
-    def getDirty(self):
-        return (self.saveDirtySince is not None,
-                self.updateDirtySince is not None)
-
-    def getDirtySince(self):
-        return (self.saveDirtySince, self.updateDirtySince)
-
-
     _DEFAULT_PRESENTATION = (0, 0, 0, 0, 0, None)
 
     def getPresentation(self):
@@ -1009,15 +1043,16 @@ class WikiPage(DocPage):
 
 
 
+
 # TODO Maybe split into single classes for each tag
 
-class FunctionalPage(DocPage):
+class FunctionalPage(DataCarryingPage):
     """
     holds the data for a functional page. Such a page controls the behavior
     of the application or a special wiki
     """
     def __init__(self, wikiDocument, funcTag):
-        DocPage.__init__(self, wikiDocument)
+        DataCarryingPage.__init__(self, wikiDocument)
         
         if not isFuncTag(funcTag):
             raise BadFuncPageTagException("Func tag %s does not exist" % funcTag)
@@ -1046,10 +1081,18 @@ class FunctionalPage(DocPage):
         """
         return self.funcTag
 
+    def getUnifiedPageName(self):
+        """
+        Return the name of the unified name of the page, which is
+        "wikipage/" + the wiki word for wiki pages or the functional tag
+        for functional pages.
+        """
+        return self.funcTag
+
 
     def _loadGlobalPage(self, subtag):
         tbLoc = os.path.join(GetApp().getGlobalConfigSubDir(),
-                subtag+".wiki")
+                subtag + ".wiki")
         try:
             tbFile = open(tbLoc, "rU")
             tbContent = tbFile.read()
@@ -1077,11 +1120,11 @@ class FunctionalPage(DocPage):
 
 
     def getContent(self):     
-        if self.funcTag in ("global/[TextBlocks]", "global/[PWL]",
-                "global/[CCBlacklist]"):
+        if self.funcTag in (u"global/[TextBlocks]", u"global/[PWL]",
+                u"global/[CCBlacklist]", u"global/[FavoriteWikis]"):
             return self._loadGlobalPage(self.funcTag[7:])
-        elif self.funcTag in ("wiki/[TextBlocks]", "wiki/[PWL]",
-                "wiki/[CCBlacklist]"):
+        elif self.funcTag in (u"wiki/[TextBlocks]", u"wiki/[PWL]",
+                u"wiki/[CCBlacklist]"):
             return self._loadDbSpecificPage(self.funcTag[5:])
 
 
@@ -1094,6 +1137,39 @@ class FunctionalPage(DocPage):
         For functional pages this is normally no formatting
         """
         return WikiFormatting.WikiPageFormatDetails(noFormat=True)
+
+
+    def getLivePageAst(self, text=None, threadholder=DUMBTHREADHOLDER):
+        """
+        The PageAst of a func. page is always a single "default" token
+        containing the whole text.
+        """
+        self.livePageAstLock.acquire()
+        try:
+            if not threadholder.isCurrent():
+                return None
+    
+            pageAst = self.livePageAst
+            
+            if pageAst is not None:
+                return pageAst
+                
+            if text is None:
+                text = self.getLiveText()  # TODO May call wxPython method, therefore
+                        # not threadsafe
+            
+            pageAst = PageAst.Page()
+            pageAst.buildPureText(text)
+            
+            if not threadholder.isCurrent():
+                return None
+    
+            self.livePageAst = pageAst
+
+            return pageAst
+
+        finally:
+            self.livePageAstLock.release()
 
 
     def _saveGlobalPage(self, text, subtag):
@@ -1127,11 +1203,11 @@ class FunctionalPage(DocPage):
         if self.isReadOnlyEffect():
             return
         
-        if self.funcTag in ("global/[TextBlocks]", "global/[PWL]",
-                "global/[CCBlacklist]"):
+        if self.funcTag in (u"global/[TextBlocks]", u"global/[PWL]",
+                u"global/[CCBlacklist]", u"global/[FavoriteWikis]"):
             self._saveGlobalPage(text, self.funcTag[7:])
-        elif self.funcTag in ("wiki/[TextBlocks]", "wiki/[PWL]",
-                "wiki/[CCBlacklist]"):
+        elif self.funcTag in (u"wiki/[TextBlocks]", u"wiki/[PWL]",
+                u"wiki/[CCBlacklist]"):
             self._saveDbSpecificPage(text, self.funcTag[5:])
 
         self.saveDirtySince = None
@@ -1148,20 +1224,29 @@ class FunctionalPage(DocPage):
         self.updateDirtySince = None
 
         if fireEvent:
-            if self.funcTag in ("global/[TextBlocks]", "wiki/[TextBlocks]"):
+            if self.funcTag.startswith(u"wiki/"):
+                evtSource = self
+            else:
+                evtSource = GetApp()
+
+            if self.funcTag in (u"global/[TextBlocks]", u"wiki/[TextBlocks]"):
                 # The text blocks for the text blocks submenu was updated
-                self.fireMiscEventKeys(("updated func page", "updated page",
+                evtSource.fireMiscEventKeys(("updated func page", "updated page",
                         "reread text blocks needed"))
-            elif self.funcTag in ("global/[PWL]", "wiki/[PWL]"):
+            elif self.funcTag in (u"global/[PWL]", u"wiki/[PWL]"):
                 # The personal word list (words to ignore by spell checker)
                 # was updated
-                self.fireMiscEventKeys(("updated func page", "updated page",
+                evtSource.fireMiscEventKeys(("updated func page", "updated page",
                         "reread personal word list needed"))
-            elif self.funcTag in ("global/[CCBlacklist]", "wiki/[CCBlacklist]"):
+            elif self.funcTag in (u"global/[CCBlacklist]", u"wiki/[CCBlacklist]"):
                 # The blacklist of camelcase words not to mark as wiki links
                 # was updated
-                self.fireMiscEventKeys(("updated func page", "updated page",
+                evtSource.fireMiscEventKeys(("updated func page", "updated page",
                         "reread cc blacklist needed"))
+            elif self.funcTag == u"global/[FavoriteWikis]":
+                # The list of favorite wikis was updated
+                evtSource.fireMiscEventKeys(("updated func page", "updated page",
+                        "reread favorite wikis needed"))
 
     def isReadOnlyEffect(self):
         """
@@ -1169,31 +1254,12 @@ class FunctionalPage(DocPage):
         "for any reason", regardless if error or intention.
         Global func. pages do not depend on the wiki state so they are writable.
         """
-        if self.funcTag.startswith("global/"):
+        if self.funcTag.startswith(u"global/"):
             # Global pages are not stored in the wiki and are always writable
             return False
         else:
-            return DocPage.isReadOnlyEffect(self)
+            return DataCarryingPage.isReadOnlyEffect(self)
 
-    def setDirty(self, dirt):
-        if self.isReadOnlyEffect():
-            return
-
-        if dirt:
-            if self.saveDirtySince is None:
-                ti = time()
-                self.saveDirtySince = ti
-                self.updateDirtySince = ti
-        else:
-            self.saveDirtySince = None
-            self.updateDirtySince = None
-
-    def getDirty(self):
-        return (self.saveDirtySince is not None,
-                self.updateDirtySince is not None)
-
-    def getDirtySince(self):
-        return (self.saveDirtySince, self.updateDirtySince)
 
     def getPresentation(self):
         """Dummy"""
@@ -1261,14 +1327,16 @@ def _cmpCharPosition(a, b):
     """
     return int(a[1] - b[1])
 
-
+# TODO: Allow localization (then, this map must be created after localization is
+#     set or changed.
 _FUNCTAG_TO_HR_NAME_MAP = {
-            "global/[TextBlocks]": u"Global text blocks",
-            "wiki/[TextBlocks]": u"Wiki text blocks",
-            "global/[PWL]": "Global spell list",
-            "wiki/[PWL]": "Wiki spell list",
-            "global/[CCBlacklist]": "Global cc. blacklist",
-            "wiki/[CCBlacklist]": "Wiki cc. blacklist"
+            u"global/[TextBlocks]": N_(u"Global text blocks"),
+            u"wiki/[TextBlocks]": N_(u"Wiki text blocks"),
+            u"global/[PWL]": N_(u"Global spell list"),
+            u"wiki/[PWL]": N_(u"Wiki spell list"),
+            u"global/[CCBlacklist]": N_(u"Global cc. blacklist"),
+            u"wiki/[CCBlacklist]": N_(u"Wiki cc. blacklist"),
+            u"global/[FavoriteWikis]": N_(u"Favorite wikis"),
         }
 
 
@@ -1276,7 +1344,7 @@ def getHrNameForFuncTag(funcTag):
     """
     Return the human readable name of functional page with tag funcTag.
     """
-    return _FUNCTAG_TO_HR_NAME_MAP.get(funcTag, funcTag)
+    return _(_FUNCTAG_TO_HR_NAME_MAP.get(funcTag, funcTag))
     
 
 def getFuncTags():

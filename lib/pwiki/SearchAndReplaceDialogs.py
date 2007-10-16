@@ -405,7 +405,10 @@ class SearchResultListBox(wx.HtmlListBox):
                     
         tabMode = MIDDLE_MOUSE_CONFIG_TO_TABMODE[configCode]
 
-        presenter = self.pWiki.activateWikiWord(info.wikiWord, tabMode)
+#         presenter = self.pWiki.activateWikiWord(info.wikiWord, tabMode)
+        presenter = self.pWiki.activatePageByUnifiedName(
+                u"wikipage/" + info.wikiWord, tabMode)
+
         if info.occPos[0] != -1:
             presenter.getSubControl("textedit").SetSelectionByCharPos(
                     info.occPos[0], info.occPos[1])
@@ -458,7 +461,9 @@ class SearchResultListBox(wx.HtmlListBox):
         if self.contextMenuSelection > -1:
             info = self.foundinfo[self.contextMenuSelection]
 
-            presenter = self.pWiki.activateWikiWord(info.wikiWord, 0)
+#             presenter = self.pWiki.activateWikiWord(info.wikiWord, 0)
+            presenter = self.pWiki.activatePageByUnifiedName(
+                    u"wikipage/" + info.wikiWord, 0)
             if info.occPos[0] != -1:
                 presenter.getSubControl("textedit").SetSelectionByCharPos(
                         info.occPos[0], info.occPos[1])
@@ -472,7 +477,9 @@ class SearchResultListBox(wx.HtmlListBox):
         if self.contextMenuSelection > -1:
             info = self.foundinfo[self.contextMenuSelection]
 
-            presenter = self.pWiki.activateWikiWord(info.wikiWord, 2)
+#             presenter = self.pWiki.activateWikiWord(info.wikiWord, 2)
+            presenter = self.pWiki.activatePageByUnifiedName(
+                    u"wikipage/" + info.wikiWord, 2)
             if info.occPos[0] != -1:
                 presenter.getSubControl("textedit").SetSelectionByCharPos(
                         info.occPos[0], info.occPos[1])
@@ -486,7 +493,9 @@ class SearchResultListBox(wx.HtmlListBox):
         if self.contextMenuSelection > -1:
             info = self.foundinfo[self.contextMenuSelection]
 
-            presenter = self.pWiki.activateWikiWord(info.wikiWord, 3)
+#             presenter = self.pWiki.activateWikiWord(info.wikiWord, 3)
+            presenter = self.pWiki.activatePageByUnifiedName(
+                    u"wikipage/" + info.wikiWord, 3)
             if info.occPos[0] != -1:
                 presenter.getSubControl("textedit").SetSelectionByCharPos(
                         info.occPos[0], info.occPos[1])
