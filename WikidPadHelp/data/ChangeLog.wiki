@@ -1,7 +1,15 @@
 ﻿++ Change Log
 
 
-Sep. 26, 2007 (1.8rc9)
+Oct. 26, 2007 (1.8rc10)
+
+    * When hiding the focused tree, focus is transferred to
+      main area panel
+    * Internal: Introduced VERSION_TUPLE
+
+
+
+Sep. 26, 2007 (1.8rc9, repository revision in "stable-1.8" branch: 128)
 
     * Bug fixed: Updating wikis from WikidPad 1.1 failed
     * Bug fixed: Source code did not work correctly with

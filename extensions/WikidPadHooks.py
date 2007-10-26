@@ -1,4 +1,4 @@
-from os.path import join
+
 
 WIKIDPAD_PLUGIN = (("hooks", 1),)
 

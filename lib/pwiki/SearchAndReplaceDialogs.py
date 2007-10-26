@@ -1288,7 +1288,7 @@ class FastSearchPopup(wx.Frame):
 
         setWindowSize(self, (width, height))
         setWindowPos(self, fullVisible=True)
-        
+
         # Fixes focus bug under Linux
         self.resultBox.SetFocus()
 
@@ -1298,8 +1298,8 @@ class FastSearchPopup(wx.Frame):
 
     def OnKillFocus(self, evt):
         self.Close()
-        
-        
+
+
     def OnClose(self, evt):
         width, height = self.GetSizeTuple()
         config = self.mainControl.getConfig()
@@ -1318,7 +1318,7 @@ class FastSearchPopup(wx.Frame):
         sarOp.cycleToStart = False
         sarOp.wildCard = 'regex'
         sarOp.wikiWide = True
-  
+
         return sarOp
 
 
@@ -1337,7 +1337,7 @@ class FastSearchPopup(wx.Frame):
         try:
             sarOp = self.buildSearchReplaceOperation()
             # self.mainControl.saveCurrentDocPage()
-    
+
             if len(sarOp.searchStr) > 0:
                 self.foundPages = self.mainControl.getWikiDocument().searchWiki(sarOp)
                 self.mainControl.getCollator().sort(self.foundPages)
