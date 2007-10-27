@@ -1,7 +1,30 @@
 ﻿++ Change Log
 
 
-Sep. 27, 2007 (1.9beta11)
+Oct. 27, 2007 (1.9beta12)
+
+    * Support for customizing favorite wikis. See FavoriteWikis
+    * Command line option to rebuild wiki (patch by mstute).
+      See CommandLineSupport#*--rebuild*
+    * Lock file for wiki to avoid to inadvertently open same wiki
+      twice. See WikiLockFile
+    * No more page history for whole window, instead history for
+      each tab
+    * Option to use single process is now on by default
+    * Better handling of changes in global text blocks and
+      recent file list if multiple WikidPad windows are open
+      in same process.
+    * When hiding a focused tool window, focus is transferred
+      to main area panel.
+    
+    * Bug fixed: An added icon/color property always used
+      default brackets [], even if changed in WikiSyntax.py
+    * Bug fixed: Linux/GTK: Opening context menu of quick
+      search result list crashed WikidPad.
+
+
+
+Sep. 30, 2007 (1.9beta11, repository revision in "mbutscher" branch: 131)
 
     * Optional shortcut to focus fast search field
     * Options for timeline to suppress "empty" days and to sort

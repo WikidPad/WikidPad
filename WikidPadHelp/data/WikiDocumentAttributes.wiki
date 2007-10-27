@@ -116,11 +116,16 @@ Possible values are:
 You can also use the attribute global.child_sort_order to control the default for the wiki (without this attribute "ascending" is used)
 
 
+*export: Export this page*
+Control if the page containing this attribute should be exported. Only possible value is "false".
+The HTML exporter respects this attribute, others, like the multipage text exporter, do not.
+
+
 *template: page which content should be used as template*
 See [Templates].
 
 
-*template_head: choose if a new page created from a template 
+*template_head: choose if a new page created from a template*
 
 
 *pagetype: type of the page*

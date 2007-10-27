@@ -218,15 +218,19 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.mainAreaPanel = None
         self.mainmenu = None
 #         self.editorMenu = None  # "Editor" menu
+
+        self.recentWikisMenu = None
+        self.recentWikisActivation = IdRecycler()
+
         self.textBlocksMenu = None
-        self.pluginsMenu = None
+        self.textBlocksActivation = IdRecycler() # See self.fillTextBlocksMenu()
+
         self.favoriteWikisMenu = None
+        self.favoriteWikisActivation = IdRecycler() 
+
+        self.pluginsMenu = None
         self.fastSearchField = None   # Text field in toolbar
         
-        self.textBlocksActivation = IdRecycler() # See self.fillTextBlocksMenu()
-        self.favoriteWikisActivation = IdRecycler() 
-#         # Position of the root menu of the text blocks within "Editor" menu
-#         self.textBlocksMenuPosition = None  
         self.cmdIdToIconName = None # Maps command id (=menu id) to icon name
                                     # needed for "Editor"->"Add icon property"
         self.cmdIdToColorName = None # Same for color names
@@ -625,17 +629,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.recentWikisMenu = wx.Menu()
         wikiMenu.AppendMenu(wx.NewId(), '&Recent', self.recentWikisMenu)
 
-        for i in xrange(15):
-            menuID = getattr(GUI_ID, "CMD_OPEN_RECENT_WIKI%i" % i)
-            wx.EVT_MENU(self, menuID, self.OnSelectRecentWiki)
-
-        self.refreshRecentWikisMenu()
-
-#         # init the list of items
-#         for wiki in self.wikiHistory:
-#             menuID = wx.NewId()
-#             self.recentWikisMenu.Append(menuID, wiki)
+#         for i in xrange(15):
+#             menuID = getattr(GUI_ID, "CMD_OPEN_RECENT_WIKI%i" % i)
 #             wx.EVT_MENU(self, menuID, self.OnSelectRecentWiki)
+
+        self.rereadRecentWikis()
+
 
         wikiMenu.AppendSeparator()
 
@@ -791,91 +790,81 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 addPluginMenuItem(*item)
 
 
-
-#     def _addToTextBlocksMenu(self, tbContent, stack):
+#     # TODO Reuse menu ids
+#     def refreshRecentWikisMenu(self):
 #         """
-#         Helper for buildTextBlocksMenu() to build up menu
+#         Refreshes the list of recent wiki menus from self.wikiHistory
 #         """
-#         for line in tbContent.split(u"\n"):
-#             if line.strip() == u"":
-#                 continue
+#         # Clear menu
+#         rwMenu = self.recentWikisMenu
+#         if rwMenu is None:
+#             return
 # 
-#             # Parse line                
-#             text, deep = splitIndent(line)
-#             try:
-#                 entryPrefix, entryContent = text.split(u"=", 1)
-#             except:
-#                 continue
-#                 
-#             entryPrefixes = entryPrefix.split(u";")
-#             entryTitle = entryPrefixes[0]
-#             if len(entryPrefixes) > 1:
-#                 entryFlags = entryPrefixes[1]
-#             else:
-#                 entryFlags = u""
+#         for i in xrange(rwMenu.GetMenuItemCount()):
+#             item = rwMenu.FindItemByPosition(0)
+#             rwMenu.DestroyItem(item)
 # 
-#             if entryTitle == u"":
-#                 entryTitle = entryContent[:60]
-#                 entryTitle = entryTitle.split("\\n", 1)[0]
+#         # Add new items
+#         for i, wiki in enumerate(self.wikiHistory):
+#             menuID = getattr(GUI_ID, "CMD_OPEN_RECENT_WIKI%i" % i) # wx.NewId()
+#             self.recentWikisMenu.Append(menuID, wiki)
+# #             wx.EVT_MENU(self, menuID, self.OnSelectRecentWiki)
 # 
-#             try:
-#                 entryContent = unescapeWithRe(entryContent)
-#                 entryTitle = unescapeWithRe(entryTitle)
-#             except:
-#                 continue
 # 
-#             # Adjust the stack
-#             if deep > stack[-1][0]:
-#                 stack.append([deep, None, wx.Menu()])
-#             else:
-#                 while stack[-1][0] > deep:
-#                     title, menu = stack.pop()[1:3]
-#                     if title is None:
-#                         title = u"<No title>"
-#                     
-#                     stack[-1][2].AppendMenu(wx.NewId(), title, menu)
-#             
-#             # Create new entry if necessary
-#             title, menu = stack[-1][1:3]
-#             if title is None:
-#                 # Entry defines title
-#                 stack[-1][1] = entryTitle
-#                 
-#             if entryContent == u"":
-#                 continue
-#             
-#             menuID, reused = self.textBlocksActivation.assocGetIdAndReused(
-#                     (entryFlags, entryContent))
-#             
-#             if not reused:
-#                 # For a new id, an event must be set
-#                 wx.EVT_MENU(self, menuID, self.OnTextBlockUsed)
-#             
-# 
-# #             if len(reusableIds) > 0:
-# #                 menuID = reusableIds.pop()
-# #                 # No event binding, must have happened before because id is reused
-# #             else:
-# #                 menuID = wx.NewId()
-# #                 wx.EVT_MENU(self, menuID, self.OnTextBlockUsed)
-# # 
-#             menuItem = wx.MenuItem(menu, menuID, entryTitle)
-#             menu.AppendItem(menuItem)
-# # 
-# #             self.textBlocksActivation[menuID] = (entryFlags, entryContent)
-# # 
-# #         # Add the remaining ids so nothing gets lost
-# #         for i in reusableIds:
-# #             self.textBlocksActivation[i] = (None, None)
-# 
-#         # Finally empty stack
-#         while len(stack) > 1:
-#             title, menu = stack.pop()[1:3]
-#             if title is None:
-#                 title = u"<No title>"
-#             
-#             stack[-1][2].AppendMenu(wx.NewId(), title, menu)
+#     def OnSelectRecentWiki(self, event):
+#         recentItem = self.recentWikisMenu.FindItemById(event.GetId())
+#         self.openWiki(recentItem.GetText())
 
+
+    def fillRecentWikisMenu(self, menu):
+        """
+        Refreshes the list of recent wiki menus from self.wikiHistory
+        """
+        idRecycler = self.recentWikisActivation
+        idRecycler.clearAssoc()
+
+        # Add new items
+        for wiki in self.wikiHistory:
+            menuID, reused = idRecycler.assocGetIdAndReused(wiki)
+
+            if not reused:
+                # For a new id, an event must be set
+                wx.EVT_MENU(self, menuID, self.OnRecentWikiUsed)
+
+            menu.Append(menuID, uniToGui(wiki))
+
+
+    def OnRecentWikiUsed(self, evt):
+        entry = self.recentWikisActivation.get(evt.GetId())
+
+        if entry is None:
+            return
+
+        self.openWiki(entry)
+
+
+    def rereadRecentWikis(self):
+        """
+        Starts rereading and rebuilding of the text blocks submenu
+        """
+        if self.recentWikisMenu is None:
+            return
+        
+        history = self.configuration.get("main", "wiki_history")
+        if not history:
+            return
+        
+        self.wikiHistory = history.split(u";")
+
+        clearMenu(self.recentWikisMenu)
+        self.fillRecentWikisMenu(self.recentWikisMenu)
+
+
+    def informRecentWikisChanged(self):
+        self.configuration.set("main", "wiki_history",
+                ";".join(self.wikiHistory))
+        wx.GetApp().fireMiscEventKeys(
+                ("reread recent wikis needed",))
 
     def fillTextBlocksMenu(self, menu):
         """
@@ -885,47 +874,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         menu -- An empty wx.Menu to add items and submenus to
         """
-#         reusableIds = sets.Set(self.textBlocksActivation.keys())
-
-        # IDRecycler with menu id as key and the entry as value
+        # Clear IdRecycler
         self.textBlocksActivation.clearAssoc()
 
-#         # TextTree.addToMenu needs this as stack bottom. All menu items and
-#         # submenus are added (directly or transitively to the menu in the
-#         # stack bottom
-#         stack = [[0, _(u"Text blocks"), menu]]
-
-#         wikiData = self.getWikiData()
-#         if wikiData is not None and self.requireReadAccess():
-#             try:
-#                 # We have current wiki with appropriate functional page,
-#                 # so fill menu first with wiki specific text blocks
-#                 tbContent = wikiData.getContent("[TextBlocks]")
-#                 self._addToTextBlocksMenu(tbContent, stack, reusableIds)
-# 
-#                 stack[-1][2].AppendSeparator()
-#             except WikiFileNotFoundException:
-#                 pass
-#             except (IOError, OSError, DbReadAccessError), e:
-#                 self.lostReadAccess(e)
-#                 traceback.print_exc()
-# 
-#         tbLoc = join(self.globalConfigSubDir, "[TextBlocks].wiki")
-#         try:
-#             tbFile = open(tbLoc, "rU")
-#             tbContent = tbFile.read()
-#             tbFile.close()
-#             tbContent = fileContentToUnicode(tbContent)
-#         except:
-#             tbContent = u""
-# 
-#         self._addToTextBlocksMenu(tbContent, stack, reusableIds)
 
         wikiDoc = self.getWikiDocument()
         if wikiDoc is not None and self.requireReadAccess():
             try:
                 page = wikiDoc.getFuncPage(u"wiki/[TextBlocks]")
-#                 self._addToTextBlocksMenu(page.getContent(), stack)
                 treeData = TextTree.buildTreeFromText(page.getContent(),
                         TextTree.TextBlocksEntry.factory)
                 TextTree.addTreeToMenu(treeData,
@@ -939,7 +895,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
         page = WikiDataManager.getGlobalFuncPage(u"global/[TextBlocks]")
-#         self._addToTextBlocksMenu(page.getContent(), stack)
         treeData = TextTree.buildTreeFromText(page.getContent(),
                 TextTree.TextBlocksEntry.factory)
         TextTree.addTreeToMenu(treeData,
@@ -977,17 +932,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """
         Starts rereading and rebuilding of the text blocks submenu
         """
-#         oldItem = self.editorMenu.FindItemByPosition(
-#                 self.textBlocksMenuPosition)
-#         oldItemId = oldItem.GetId()
-#         
-#         self.editorMenu.DeleteItem(oldItem)
+        if self.textBlocksMenu is None:
+            return
 
         clearMenu(self.textBlocksMenu)
         self.fillTextBlocksMenu(self.textBlocksMenu)
-                
-#         self.editorMenu.InsertMenu(self.textBlocksMenuPosition, oldItemId,
-#                 '&Text blocks', tbmenu)
 
 
     def fillFavoriteWikisMenu(self, menu):
@@ -999,11 +948,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         menu -- An empty wx.Menu to add items and submenus to
         """
         self.favoriteWikisActivation.clearAssoc()
-
-#         # TextTree.addToMenu needs this as stack bottom. All menu items and
-#         # submenus are added (directly or transitively to the menu in the
-#         # stack bottom
-#         stack = [[0, _(u"Favorite wikis"), menu]]
 
         wikiDoc = self.getWikiDocument()
 
@@ -1026,12 +970,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _(u"Manage favorites"))
         wx.EVT_MENU(self, GUI_ID.CMD_MANAGE_FAVORITE_WIKIS,
                 self.OnManageFavoriteWikis)
-
-#         stack[-1][2].AppendSeparator()
-#         stack[-1][2].Append(GUI_ID.CMD_REREAD_TEXT_BLOCKS,
-#                 _(u"Reread text blocks"),
-#                 _(u"Reread the text block file(s) and recreate menu"))
-#         wx.EVT_MENU(self, GUI_ID.CMD_REREAD_TEXT_BLOCKS, self.OnRereadTextBlocks)
 
 
     def OnFavoriteWikiUsed(self, evt):
@@ -1068,7 +1006,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         except KeyError:
             pass
 
+
     def rereadFavoriteWikis(self):
+        if self.favoriteWikisMenu is None:
+            return
+
         clearMenu(self.favoriteWikisMenu)
         self.fillFavoriteWikisMenu(self.favoriteWikisMenu)
         
@@ -1103,6 +1045,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 page.appendLiveText(u"\n" + entry.getTextLine() + u"\n")
 
             self.saveDocPage(page)
+
 
     def OnManageFavoriteWikis(self, evt):
         self.activatePageByUnifiedName(u"global/[FavoriteWikis]", tabMode=2)
@@ -2365,6 +2308,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # Set menu/menu items to None
         self.mainmenu = None
         self.recentWikisMenu = None
+        self.textBlocksMenu = None
+        self.favoriteWikisMenu = None
         # self.showOnTrayMenuItem = None
 
         # TODO Clear cache only if exactly one window uses centralized iconLookupCache
@@ -2654,7 +2599,7 @@ These are your default global settings.
             # Try to remove combined filename from recent files if existing
             try:
                 self.wikiHistory.remove(wikiCombinedFilename)
-                self.refreshRecentWikisMenu()
+                self.informRecentWikisChanged()
             except ValueError:
                 pass
             return False
@@ -2666,7 +2611,7 @@ These are your default global settings.
         # below if everything went fine).
         try:
             self.wikiHistory.remove(cfgPath)
-            self.refreshRecentWikisMenu()
+            self.informRecentWikisChanged()
         except ValueError:
             pass
 
@@ -2756,7 +2701,7 @@ These are your default global settings.
         self.currentWikiDocumentProxyEvent.setWatchedEvent(
                 self.wikiDataManager.getMiscEvent())
 
-#!!!         self.wikiDataManager.getMiscEvent().addListener(self)
+#         self.wikiDataManager.getMiscEvent().addListener(self)
         self.wikiData = wikiDataManager.getWikiData()
 
         self.wikiName = self.wikiDataManager.getWikiName()
@@ -3617,6 +3562,7 @@ These are your default global settings.
 #             self.wikiHistory.append(wikiConfigFilename)
 
             # only keep 5 items
+            # TODO Configurable
             if len(self.wikiHistory) > 5:
 #                 self.wikiHistory.pop(0)
                 self.wikiHistory = self.wikiHistory[:5]
@@ -3625,7 +3571,7 @@ These are your default global settings.
 #             menuID = wx.NewId()
 #             self.recentWikisMenu.Append(menuID, wikiConfigFilename)
 #             wx.EVT_MENU(self, menuID, self.OnSelectRecentWiki)
-            self.refreshRecentWikisMenu()
+            self.informRecentWikisChanged()
 
         self.configuration.set("main", "last_active_dir", dirname(wikiConfigFilename))
         self.writeGlobalConfig()
@@ -4784,6 +4730,8 @@ These are your default global settings.
                         self.spellChkDlg.rereadPersonalWordLists()
                 elif miscevt.has_key("reread favorite wikis needed"):
                     self.rereadFavoriteWikis()
+                elif miscevt.has_key("reread recent wikis needed"):
+                    self.rereadRecentWikis()
 
 
         except (IOError, OSError, DbAccessError), e:
@@ -4875,38 +4823,7 @@ These are your default global settings.
         dlg.Destroy()
 
 
-    # TODO Reuse menu ids
-    def refreshRecentWikisMenu(self):
-        """
-        Refreshes the list of recent wiki menus from self.wikiHistory
-        """
-        # Clear menu
-        rwMenu = self.recentWikisMenu
-        if rwMenu is None:
-            return
 
-        for i in xrange(rwMenu.GetMenuItemCount()):
-            item = rwMenu.FindItemByPosition(0)
-            rwMenu.DestroyItem(item)
-
-        # Add new items
-        for i, wiki in enumerate(self.wikiHistory):
-            menuID = getattr(GUI_ID, "CMD_OPEN_RECENT_WIKI%i" % i) # wx.NewId()
-            self.recentWikisMenu.Append(menuID, wiki)
-#             wx.EVT_MENU(self, menuID, self.OnSelectRecentWiki)
-
-
-    def OnSelectRecentWiki(self, event):
-        recentItem = self.recentWikisMenu.FindItemById(event.GetId())
-        self.openWiki(recentItem.GetText())
-#         if not self.openWiki(recentItem.GetText()):
-#             self.recentWikisMenu.Remove(event.GetId())
-
-
-#     def informWikiPageUpdate(self, wikiPage):
-#         # self.tree.buildTreeForWord(wikiPage.wikiWord)    # self.currentWikiWord)
-#         self.fireMiscEventProps({"updated page props": None,
-#                 "wikiPage": wikiPage})
 
 
     def OnIdle(self, evt):

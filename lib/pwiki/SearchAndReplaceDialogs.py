@@ -10,7 +10,7 @@ from StringOps import uniToGui, guiToUni, escapeHtml
 from WindowLayout import setWindowPos, setWindowSize
 
 import WikiFormatting
-from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
+from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE, isLinux
 import PageAst
 
 from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation
@@ -163,6 +163,7 @@ class SearchResultListBox(wx.HtmlListBox):
         self.searchOp = None # last search operation set by showFound
         self.SetItemCount(0)
         self.isShowingSearching = False  # Show only a visual feedback while searching
+        self.contextMenuSelection = -2
 
         wx.EVT_LEFT_DOWN(self, self.OnLeftDown)
         wx.EVT_LEFT_DCLICK(self, self.OnLeftDown)
@@ -447,14 +448,14 @@ class SearchResultListBox(wx.HtmlListBox):
             return
 
         self.contextMenuSelection = hitsel
-        
-        menu = wx.Menu()
-        appendToMenuByMenuDesc(menu, _CONTEXT_MENU_ACTIVATE)
+        try:
+            menu = wx.Menu()
+            appendToMenuByMenuDesc(menu, _CONTEXT_MENU_ACTIVATE)
+            self.PopupMenu(menu)
+            menu.Destroy()
+        finally:
+            self.contextMenuSelection = -2
 
-        # Show menu
-        self.PopupMenu(menu)
-        self.contextMenuSelection = -1
-        menu.Destroy()
 
 
     def OnActivateThis(self, evt):
@@ -1612,10 +1613,22 @@ class FastSearchPopup(wx.Frame):
             wx.OK, self)
 
 
-    def OnKillFocus(self, evt):
-        self.Close()
-        
-        
+    # def OnKillFocus(self, evt):
+
+    # TODO What about Mac?
+    if isLinux():
+        def OnKillFocus(self, evt):
+            evt.Skip()
+            if self.resultBox.contextMenuSelection == -2:
+                # Close only if context menu is not open
+                # otherwise crashes on GTK
+                self.Close()
+    else:
+        def OnKillFocus(self, evt):
+            evt.Skip()
+            self.Close()
+
+
     def OnClose(self, evt):
         width, height = self.GetSizeTuple()
         config = self.mainControl.getConfig()

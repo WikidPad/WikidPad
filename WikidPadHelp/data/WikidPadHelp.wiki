@@ -55,6 +55,7 @@ Then just start typing text with WikiWords to create your wiki.
     * ExternalGraphicalApplications
     * DocStructureWindow
     * TimeViewWindow
+    * FavoriteWikis
     * OptionsDialog
     * CommandLineSupport
     * WikidPadOnUSB / ApplicationConfigurationFiles
@@ -69,6 +70,7 @@ Then just start typing text with WikiWords to create your wiki.
     * WikidPadSupport
     * ChangeLog
     * GlobalScriptLibrary
+    * WikiLockFile
     * ApiDocs / WikidPadHooks
     * ThirdPartyLibraries
 

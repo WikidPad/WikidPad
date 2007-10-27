@@ -1,0 +1,65 @@
+﻿++ Favorite Wikis
+
+The "Favorites" menu can be customized to contain links to wikis you need often and allows to open them by selecting a menu entry and optionally by an icon in the toolbar and/or by a shortcut.
+
+
++++ Add wiki
+
+To simply add a wiki, choose "Add wiki" in the "Favorites" menu. In the dialog you can enter
+
+    * the title of the wiki
+    * a keyboard shortcut (e.g. "Alt-1") if desired
+    * the path or wiki URL of the wiki (by default, this field contains the path of the current wiki),
+    * if you want to open the wiki in a new window
+    * if you want to show an icon in toolbar. If so, you can also enter
+        * the position in toolbar relative to other favorite icons (up to 9 icons can be there)
+        * the name of the icon to show
+
+
++++ Manage wikis
+
+Currentöy an advanced management can only be done by editing some text, the so-called functional page of the favorite wikis. To open it, either go in tree to "Views"->"Func. pages"->"Favorite wikis" or use in "Favorites" menu the entry "Manage favorites".
+
+A line in the page follows the syntax:
+
+Title\tShortcut;Flags;Iconname=Path
+
+    * Title is the wiki title shown in "Favorites" menu
+    * After \t you can enter the shortcut. If you don't want a shortcut, you can omit the \t as well
+    * Flags can contain an 'n' to show the wiki in a new window and/or a digit to determine icon position in toolbar. Flags can also be empty.
+    * Iconname is name of the icon
+    * Path can be a path or a wiki URL of the wiki to open
+
+
+++++ Examples
+
+Only the necessary things:
+
+CoolWiki=C:\Data\Wikis\CoolWiki\CoolWiki.wiki
+
+
+
+With shortcut:
+
+CoolWiki\tAlt-1=C:\Data\Wikis\CoolWiki\CoolWiki.wiki
+
+
+
+With shortcut and new window:
+
+CoolWiki\tAlt-1;n=C:\Data\Wikis\CoolWiki\CoolWiki.wiki
+
+
+
+Full blown with shortcut and icon "flash" at position 2 in toolbar:
+
+CoolWiki\tAlt-1;2n;flash=C:\Data\Wikis\CoolWiki\CoolWiki.wiki
+
+
+
++++ Remarks
+
+If multiple entries refer to the same toolbar position, only one of the icons is shown (chosen arbitrarily).
+
+
+

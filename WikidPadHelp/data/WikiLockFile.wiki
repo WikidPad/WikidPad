@@ -1,0 +1,25 @@
+﻿++ Wiki Lock File
+
+If the same wiki is opened by different WikidPad processes at the same time, this can lead to data corruption. To avoid this, WikidPad creates a lock file when opening a wiki.
+
+If another process now tries to open the same wiki, you get a warning that you should not open the wiki again, but you can ignore this warning, especially, if WikidPad terminated abnormally before and left the lock file behind.
+
+The lock file is placed in the same directory where the configuration file for the wiki is. It has the name of this config. file plus a ".lock" suffix and is empty. If the wiki is detected to be read-only, no lock file is created.
+
+
++++ Options
+
+The "Advanced" page in the options dialog provides two options to control the lock file behavior. These should only be changed if it is absolutely necessary.
+
+
+*Ignore wiki lock file*
+(Default: off) When checked, a wiki is opened without warning even if a lock file is already present.
+
+
+*Create wiki lock file*
+(Default: on) When not checked, no lock file is created when opening a wiki (and it isn't deleted when closing it). This setting does not affect the behavior of the wikis already opened.
+
+
+
+
+[camelCaseWordsEnabled: false]

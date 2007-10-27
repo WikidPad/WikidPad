@@ -3,7 +3,7 @@
 import sys, os, traceback, os.path, glob, shutil   # , gettext
 os.stat_float_times(True)
 
-from Consts import VERSION_STRING
+from Consts import VERSION_STRING, VERSION_TUPLE
 
 if not hasattr(sys, 'frozen'):
     sys.path.append("lib")
