@@ -10,6 +10,6 @@ wiki_database_type = original_gadfly
 wikipagetitleprefix = ++
 filestorage_identity_filenamemustmatch = False
 filestorage_identity_moddateisenough = False
-further_wiki_words = 
+further_wiki_words = BulletedLists
 first_wiki_word = WikidPadHelp
 

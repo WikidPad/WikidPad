@@ -9,15 +9,24 @@ from StringOps import escapeForIni, unescapeForIni
 class WinLayoutException(Exception):
     pass
 
-def getOverallDisplaysSize():
+
+
+# def getOverallDisplaysSize():
+def getOverallDisplaysClientSize():
     """
-    Estimate the width and height of the screen real estate with all
+    Estimate the rectangle of the screen real estate with all
     available displays. This assumes that all displays have same
     resolution and are positioned in a rectangular shape.
     """
+    # TODO: Find solution for multiple displays with taskbar always visible
+
+    if wx.Display.GetCount() == 1:
+        return wx.GetClientDisplayRect()
+
+    # The following may be wrong if taskbar is always visible
     width = 0
     height = 0
-
+    
     for i in xrange(wx.Display.GetCount()):
         d = wx.Display(i)
         
@@ -25,7 +34,7 @@ def getOverallDisplaysSize():
         width = max(width, rect.x + rect.width)
         height = max(height, rect.y + rect.height)
 
-    return (width, height)
+    return wx.Rect(0, 0, width, height)
 
 
 def setWindowPos(win, pos=None, fullVisible=False):
@@ -40,30 +49,27 @@ def setWindowPos(win, pos=None, fullVisible=False):
     else:
         currentX, currentY = win.GetPositionTuple()
         
-#     screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
-#     screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
-
-    screenX, screenY = getOverallDisplaysSize()
+#     screenX, screenY = getOverallDisplaysSize()
+    clRect = getOverallDisplaysClientSize()
     
     # fix any crazy screen positions
-    if currentX < 0:
-        currentX = 10
-    if currentY < 0:
-        currentY = 10
-    if currentX > screenX:
-        currentX = screenX-100
-    if currentY > screenY:
-        currentY = screenY-100
-        
+    if currentX < clRect.x:
+        currentX = clRect.x + 10
+    if currentY < clRect.y:
+        currentY = clRect.y + 10
+    if currentX > clRect.width:
+        currentX = clRect.width - 100
+    if currentY > clRect.height:
+        currentY = clRect.height - 100
+
     if fullVisible:
         sizeX, sizeY = win.GetSizeTuple()
-        if currentX + sizeX > screenX:
-            currentX = screenX - sizeX
-        if currentY + sizeY > screenY:
-            currentY = screenY - sizeY
+        if (currentX - clRect.x) + sizeX > clRect.width:
+            currentX = clRect.width - sizeX + clRect.x
+        if (currentY - clRect.y) + sizeY > clRect.height:
+            currentY = clRect.height - sizeY + clRect.y
 
     win.SetPosition((currentX, currentY))
-
 
 
 def setWindowSize(win, size):
@@ -72,19 +78,39 @@ def setWindowSize(win, size):
     """
     sizeX, sizeY = size
 
-#     screenX = wxSystemSettings_GetMetric(wxSYS_SCREEN_X)
-#     screenY = wxSystemSettings_GetMetric(wxSYS_SCREEN_Y)
-
-    screenX, screenY = getOverallDisplaysSize()    
+#     screenX, screenY = getOverallDisplaysSize()    
+    clRect = getOverallDisplaysClientSize()
 
     # don't let the window be > than the size of the screen
-    if sizeX > screenX:
-        sizeX = screenX-20
-    if sizeY > screenY:
-        sizeY = screenY-20
+    if sizeX > clRect.width:
+        sizeX = clRect.width - 20
+    if sizeY > clRect.height:
+        sizeY = clRect.height - 20
 
     # set the size
     win.SetSize((sizeX, sizeY))
+
+
+def setWindowClientSize(win, size):
+    """
+    Similar to setWindowSize(), but sets the client size of the window
+    """
+    sizeX, sizeY = size
+
+#     screenX, screenY = getOverallDisplaysSize()    
+    clRect = getOverallDisplaysClientSize()
+
+    # don't let the window be > than the size of the screen
+    if sizeX > clRect.width:
+        sizeX = clRect.width - 20
+    if sizeY > clRect.height:
+        sizeY = clRect.height - 20
+
+    # set the size
+    win.SetClientSize((sizeX, sizeY))
+
+
+
 
 
 class SmartSashLayoutWindow(wx.SashLayoutWindow):

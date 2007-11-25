@@ -968,9 +968,6 @@ class HtmlXmlExporter:
             unescapeNormalText = \
                     self.mainControl.getFormatting().unescapeNormalText
 
-#             lastLevel = 1
-#             htmlContent = [u"<ul>\n"]
-
             htmlContent = [u'<div class="page-toc">\n']
 
             for tok in headtokens:
@@ -993,8 +990,16 @@ class HtmlXmlExporter:
                     htmlContent.append(u'<div class="page-toc-level%i">' %
                             headLevel)
                 
-                htmlContent.append(u'<a href="#.h%i">%s</a>' % (tok.start,
+                if self.wordAnchor:
+                    anchor = self.wordAnchor + (u"#.h%i" % tok.start)
+                else:
+                    anchor = u".h%i" % tok.start
+
+                htmlContent.append(u'<a href="#%s">%s</a>' % (anchor,
                         escapeHtml(unescapeNormalText(headContent))))
+
+#                 htmlContent.append(u'<a href="#.h%i">%s</a>' % (tok.start,
+#                         escapeHtml(unescapeNormalText(headContent))))
 
                 if self.asIntHtmlPreview:
                     htmlContent.append(u'<br />\n')
