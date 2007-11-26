@@ -48,11 +48,13 @@ def createWikiDb(pWiki, dbtype, wikiName, dataDir, overwrite=False):
 
     wdm = _openDocuments.get(dataDir)
     if wdm is not None:
-        raise WikiDBExistsException("Database exists already and is currently in use")
+        raise WikiDBExistsException(
+                _(u"Database exists already and is currently in use"))
 
     wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(dbtype)
     if wikiDataFactory is None:
-        raise NoDbHandlerException("Data handler %s not available" % dbtype)
+        raise NoDbHandlerException(
+                _(u"Data handler %s not available") % dbtype)
 
     createWikiDbFunc(wikiName, dataDir, overwrite)
 
@@ -73,8 +75,8 @@ def openWikiDocument(wikiConfigFilename, wikiSyntax, dbtype=None,
     if wdm is not None:
         if dbtype is not None and dbtype != wdm.getDbtype():
             # Same database can't be opened twice with different db handlers
-            raise WrongDbHandlerException(("Database is already in use "
-                    "with handler '%s'. Can't open with different handler.") %
+            raise WrongDbHandlerException(_(u"Database is already in use "
+                    u"with handler '%s'. Can't open with different handler.") %
                     wdm.getDbtype())
 
         wdm.incRefCount()
@@ -286,19 +288,19 @@ class WikiDataManager(MiscEventSourceMixin):
         if not wikidhName:
             # Probably old database version without handler tag
             raise UnknownDbHandlerException(
-                    u'No data handler information found, probably '
-                    u'"Original Gadfly" is right.')
+                    _(u'No data handler information found, probably '
+                    u'"Original Gadfly" is right.'))
 
         if not isDbHandlerAvailable(wikidhName):
             raise DbHandlerNotAvailableException(
-                    'Required data handler %s unknown to WikidPad' % wikidhName)
+                    _(u'Required data handler %s unknown to WikidPad') % wikidhName)
 
         self.wikiConfiguration = wikiConfig
 
         wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(wikidhName)
         if wikiDataFactory is None:
             raise NoDbHandlerException(
-                    "Required data handler %s not available" % wikidhName)
+                    _(u"Required data handler %s not available") % wikidhName)
 
         self.ensureWikiTempDir()
         wikiData = wikiDataFactory(self, dataDir, self.getWikiTempDir())
@@ -538,7 +540,8 @@ class WikiDataManager(MiscEventSourceMixin):
         if word doesn't exist
         """
         if not self.wikiData.isDefinedWikiWord(wikiWord):
-            raise WikiWordNotFoundException, u"Word '%s' not in wiki" % wikiWord
+            raise WikiWordNotFoundException(
+                    _(u"Word '%s' not in wiki") % wikiWord)
 
         return self.getWikiPageNoError(wikiWord)
 
@@ -966,7 +969,8 @@ class WikiDataManager(MiscEventSourceMixin):
 
         wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(self.dbtype)
         if wikiDataFactory is None:
-            raise NoDbHandlerException("Data handler %s not available" % self.dbtype)
+            raise NoDbHandlerException(
+                    _(u"Data handler %s not available") % self.dbtype)
 
         self.ensureWikiTempDir()
         wikiData = wikiDataFactory(self, self.dataDir, self.getWikiTempDir())

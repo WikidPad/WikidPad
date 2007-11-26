@@ -86,7 +86,8 @@ class EqnHandler:
         
         if self.mimetexExe == "":
             # No path to MimeTeX executable -> show message
-            return "<pre>[Please set path to MimeTeX executable]</pre>"
+            return u"<pre>" + _(u"[Please set path to MimeTeX executable]") + \
+                    "</pre>"
 
         # Prepare CGI environment. MimeTeX needs only "QUERY_STRING" environment
         # variable
@@ -104,7 +105,8 @@ class EqnHandler:
         try:
             response = response[(response.index("\n\n") + 2):]
         except ValueError:
-            return "<pre>[Invalid response from MimeTeX]</pre>"
+            return u"<pre>" + _(u"[Invalid response from MimeTeX]") + \
+                    "</pre>"
 
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
@@ -164,7 +166,7 @@ class MimeTexOptionsPanel(wx.Panel):
         mainsizer = wx.BoxSizer(wx.VERTICAL)
 
         inputsizer = wx.BoxSizer(wx.HORIZONTAL)
-        inputsizer.Add(wx.StaticText(self, -1, "Path to MimeTeX:"), 0,
+        inputsizer.Add(wx.StaticText(self, -1, _(u"Path to MimeTeX:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         inputsizer.Add(self.tfPath, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(inputsizer, 0, wx.EXPAND)

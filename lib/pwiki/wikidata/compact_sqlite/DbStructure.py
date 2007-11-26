@@ -663,9 +663,8 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
             connwrap.close()
 
     else:
-        raise WikiDBExistsException, "database already exists at location: %s" % dataDir
-    
-
+        raise WikiDBExistsException(
+                _(u"database already exists at location: %s") % dataDir)
 
 
 
@@ -853,11 +852,11 @@ def checkDatabaseFormat(connwrap):
     tables = map(string.upper, tables)
     
     if not "SETTINGS" in tables:
-        return 1, "Update needed"
+        return 1, _(u"Update needed")
         
         
     if getSettingsValue(connwrap, "branchtag") != "WikidPadCompact":
-        return 2, "Database has unknown format branchtag='%s'" \
+        return 2, _(u"Database has unknown format branchtag='%s'") \
                 % getSettingsValue(connwrap, "branchtag")
 
     formatver = getSettingsInt(connwrap, "formatver")
@@ -866,14 +865,14 @@ def checkDatabaseFormat(connwrap):
     if writecompatver > VERSION_WRITECOMPAT:
         # TODO: Check compatibility
         
-        return 2, "Database has unknown format version='%i'" \
+        return 2, _(u"Database has unknown format version='%i'") \
                 % formatver
                 
     if formatver < VERSION_DB:
-        return 1, "Update needed, current format version='%i'" \
+        return 1, _(u"Update needed, current format version='%i'") \
                 % formatver
         
-    return 0, "Database format is up to date"
+    return 0, _(u"Database format is up to date")
 
 
 def updateDatabase(connwrap):

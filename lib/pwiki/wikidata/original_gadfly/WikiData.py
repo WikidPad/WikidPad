@@ -139,9 +139,9 @@ class WikiData:
     def getContent(self, word):
         try:
             if (not exists(self.getWikiWordFileName(word))):
-                raise WikiFileNotFoundException, \
-                        u"wiki page not found for word: %s" % word
-    
+                raise WikiFileNotFoundException(
+                        _(u"Wiki page not found for word: %s") % word)
+
             fp = open(self.getWikiWordFileName(word), "rU")
             content = fp.read()
             fp.close()
@@ -294,10 +294,12 @@ class WikiData:
 
     def renameWord(self, word, toWord):
         if not self.wikiDocument.getFormatting().isNakedWikiWord(toWord):
-            raise WikiDataException, u"'%s' is an invalid wiki word" % toWord
+            raise WikiDataException(_(u"'%s' is an invalid wiki word") % toWord)
 
         if self.isDefinedWikiWord(toWord):
-            raise WikiDataException, u"Cannot rename '%s' to '%s', '%s' already exists" % (word, toWord, toWord)
+            raise WikiDataException(
+                    _(u"Cannot rename '%s' to '%s', '%s' already exists") %
+                    (word, toWord, toWord))
 
         # commit anything pending so we can rollback on error
         self.commit()
@@ -371,7 +373,7 @@ class WikiData:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
         else:
-            raise WikiDataException("You cannot delete the root wiki node")
+            raise WikiDataException(_(u"You cannot delete the root wiki node"))
 
 
 

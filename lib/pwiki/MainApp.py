@@ -1,4 +1,5 @@
-#!/bin/python
+## import hotshot
+## _prof = hotshot.Profile("hotshot.prf")
 
 import sys, os, traceback, os.path, socket
 
@@ -23,8 +24,7 @@ from Serialization import SerializeStream
 import Ipc
 import Configuration
 import OptionsDialog
-from Localization import getCollatorByString, CASEMODE_UPPER_INSIDE, \
-        CASEMODE_UPPER_FIRST
+import Localization
 from PluginManager import PluginManager, InsertionPluginManager
 
 
@@ -116,8 +116,8 @@ class App(wx.App, MiscEventSourceMixin):
         wikiAppDir, globalConfigDir = findDirs()
 
         if not globalConfigDir or not os.path.exists(globalConfigDir):
-            raise Exception(u"Error initializing environment, couldn't locate "
-                    u"global config directory")
+            raise Exception(_(u"Error initializing environment, couldn't locate "
+                    u"global config directory"))
                     
         self.wikiAppDir = wikiAppDir
         self.globalConfigDir = globalConfigDir
@@ -156,15 +156,6 @@ class App(wx.App, MiscEventSourceMixin):
 
         # load or create global configuration
         self.globalConfig = self.createGlobalConfiguration()
-#         globalConfigLoc = os.path.join(self.globalConfigDir, "WikidPad.config")
-#         if os.path.exists(globalConfigLoc):
-#             try:
-#                 self.globalConfig.loadConfig(globalConfigLoc)
-#             except Configuration.Error, MissingConfigurationFileException:
-#                 self.createDefaultGlobalConfig(globalConfigLoc)
-#         else:
-#             self.createDefaultGlobalConfig(globalConfigLoc)
-
 
         # Find/create global config file "WikidPad.config"
         if Configuration.isWindows():
@@ -194,7 +185,12 @@ class App(wx.App, MiscEventSourceMixin):
         self.globalConfig.getMiscEvent().addListener(KeyFunctionSink((
                 ("configuration changed", self.onGlobalConfigurationChanged),
         )), False)
-
+        
+        ## _prof.start()
+        Localization.loadLangList(self.wikiAppDir)
+        
+        Localization.loadI18nDict(self.wikiAppDir, self.globalConfig.get(
+                "main", "gui_language", u""))
 
         self.lowResources = self.globalConfig.getboolean("main", "lowresources")
 
@@ -226,7 +222,7 @@ class App(wx.App, MiscEventSourceMixin):
                 
                 lines = appLockContent.split("\n")
                 if len(lines) != 3:
-                    sys.stderr.write("Invalid AppLock.lock file\n")
+                    sys.stderr.write(_(u"Invalid AppLock.lock file\n"))
                     return True # TODO Error handling!!!
                     
                 appCookie = lines[0]
@@ -325,15 +321,21 @@ class App(wx.App, MiscEventSourceMixin):
         # Further configuration settings
         self._rereadGlobalConfig()
 
-        # Load wxPython XML resources
-        rf = open(os.path.join(appdir, "WikidPad.xrc"), "r")
-        rd = rf.read()
-        rf.close()
+        rd = Localization.getI18nXrcData(self.wikiAppDir,
+                self.globalConfigSubDir, "WikidPad")
+        ## _prof.stop()
+
+#         # Load wxPython XML resources
+#         rf = open(os.path.join(appdir, "WikidPad.xrc"), "r")
+#         rd = rf.read()
+#         rf.close()
 
         res = wx.xrc.XmlResource.Get()
         res.SetFlags(0)
+#         rd = rd.decode("utf-8")
+#         sys.stderr.write(repr(type(rd)) + "\n")
         res.LoadFromString(rd)
-        
+
         # print "Set standardIcon"
         self.standardIcon = wx.Icon(os.path.join(self.wikiAppDir, 'icons',
                     'pwiki.ico'), wx.BITMAP_TYPE_ICO)
@@ -369,11 +371,12 @@ class App(wx.App, MiscEventSourceMixin):
                 "collation_uppercaseFirst")
                 
         if collationUppercaseFirst:
-            collationCaseMode = CASEMODE_UPPER_FIRST
+            collationCaseMode = Localization.CASEMODE_UPPER_FIRST
         else:
-            collationCaseMode = CASEMODE_UPPER_INSIDE
+            collationCaseMode = Localization.CASEMODE_UPPER_INSIDE
 
-        self.collator = getCollatorByString(collationOrder, collationCaseMode)
+        self.collator = Localization.getCollatorByString(collationOrder,
+                collationCaseMode)
 
         
     def OnExit(self):
@@ -392,7 +395,7 @@ class App(wx.App, MiscEventSourceMixin):
             traceback.print_exc()
 
         if ExceptionLogger._exceptionOccurred and hasattr(sys, 'frozen'):
-            wx.MessageBox("An error occurred during this session\nSee file %s" %
+            wx.MessageBox(_(u"An error occurred during this session\nSee file %s") %
                     os.path.join(ExceptionLogger._exceptionDestDir, "WikidPad_Error.log"),
                     "Error", style = wx.OK)
 

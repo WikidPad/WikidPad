@@ -414,7 +414,7 @@ class MainViewNode(AbstractNode):
     
     def getNodePresentation(self):
         style = NodeStyle()
-        style.label = u"Views"
+        style.label = _(u"Views")
         style.icon = u"orgchart"
         style.hasChildren = True
         return style
@@ -711,7 +711,7 @@ class MainSearchesNode(AbstractNode):
     
     def getNodePresentation(self):
         style = NodeStyle()
-        style.label = u"searches"
+        style.label = _(u"searches")
         style.icon = u"lens"
         style.hasChildren = True
         return style
@@ -779,7 +779,7 @@ class MainModifiedWithinNode(AbstractNode):
     
     def getNodePresentation(self):
         style = NodeStyle()
-        style.label = u"modified-within"
+        style.label = _(u"modified-within")
         style.icon = u"date"
         style.hasChildren = True
         return style
@@ -805,9 +805,9 @@ class ModifiedWithinNode(AbstractNode):
         style = NodeStyle()
         style.icon = u"date"
         if self.daySpan == 1:
-            style.label = u"1 day"
+            style.label = _(u"1 day")
         else:
-            style.label = u"%i days" % self.daySpan
+            style.label = _(u"%i days") % self.daySpan
         style.hasChildren = True   #?
         return style
 
@@ -868,7 +868,7 @@ class MainUndefinedNode(AbstractNode):
     
     def getNodePresentation(self):
         style = NodeStyle()
-        style.label = u"undefined-nodes"
+        style.label = _(u"undefined-nodes")
         style.icon = u"question"
         style.hasChildren = True
         return style
@@ -894,7 +894,7 @@ class MainFuncPagesNode(AbstractNode):
     
     def getNodePresentation(self):
         style = NodeStyle()
-        style.label = u"Func. pages"
+        style.label = _(u"Func. pages")
         style.icon = u"cog"
         style.hasChildren = True
         return style
@@ -1008,8 +1008,8 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         if self.pWiki.lowResources:
             # Add only menu item for icon select dialog
             menuID = wx.NewId()
-            self.contextMenuWikiWords.Append(menuID, 'Add icon property',
-                    'Open icon select dialog')
+            self.contextMenuWikiWords.Append(menuID, _(u'Add icon attribute'),
+                    _(u'Open icon select dialog'))
             wx.EVT_MENU(self, menuID, lambda evt: self.pWiki.showSelectIconDialog())
         else:
             # Build full submenu for icons
@@ -1019,14 +1019,14 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 wx.EVT_MENU(self, cmi, self.OnInsertIconAttribute)
 
             self.contextMenuWikiWords.AppendMenu(wx.NewId(),
-                    'Add icon property', iconsMenu)
+                    _(u'Add icon attribute'), iconsMenu)
 
         # Build submenu for colors
         colorsMenu, self.cmdIdToColorName = PropertyHandling.buildColorsSubmenu()
         for cmi in self.cmdIdToColorName.keys():
             wx.EVT_MENU(self, cmi, self.OnInsertColorAttribute)
 
-        self.contextMenuWikiWords.AppendMenu(wx.NewId(), 'Add color property',
+        self.contextMenuWikiWords.AppendMenu(wx.NewId(), _(u'Add color attribute'),
                 colorsMenu)
 
         self.contextMenuNode = None  # Tree node for which a context menu was shown
@@ -1345,7 +1345,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #         self.activeEditor.AppendText(u"\n\n[%s=%s]" % (name, value))
 
     def OnAppendWikiWord(self, evt):
-        dlg = SelectWikiWordDialog(self.pWiki, -1, title="Append Wiki Word")
+        dlg = SelectWikiWordDialog(self.pWiki, -1, title=_(u"Append Wiki Word"))
         if dlg.ShowModal() == wx.ID_OK:
             parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
             page = self.pWiki.getWikiDataManager().getWikiPageNoError(parentWord)
@@ -1354,7 +1354,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         dlg.Destroy()
 
     def OnPrependWikiWord(self, evt):
-        dlg = SelectWikiWordDialog(self.pWiki, -1, title="Prepend Wiki Word")
+        dlg = SelectWikiWordDialog(self.pWiki, -1, title=_(u"Prepend Wiki Word"))
         if dlg.ShowModal() == wx.ID_OK:
             parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
             page = self.pWiki.getWikiDataManager().getWikiPageNoError(parentWord)
@@ -1792,4 +1792,17 @@ Set As Root;CMD_SETASROOT_THIS_WIKIWORD
 Append wiki word;CMD_APPEND_WIKIWORD_FOR_THIS
 Prepend wiki word;CMD_PREPEND_WIKIWORD_FOR_THIS
 """
+
+
+# Entries to support i18n of context menus
+
+N_(u"Activate New Tab")
+N_(u"Rename")
+N_(u"Delete")
+N_(u"Bookmark")
+N_(u"Set As Root")
+N_(u"Append wiki word")
+N_(u"Prepend wiki word")
+
+
 

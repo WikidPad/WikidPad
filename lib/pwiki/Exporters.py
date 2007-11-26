@@ -140,9 +140,9 @@ class HtmlXmlExporter:
             htmlPanel = None
         
         return (
-            (u"html_single", u'Single HTML page', htmlPanel),
-            (u"html_multi", u'Set of HTML pages', htmlPanel),
-            (u"xml", u'XML file', None)
+            (u"html_single", _(u'Single HTML page'), htmlPanel),
+            (u"html_multi", _(u'Set of HTML pages'), htmlPanel),
+            (u"xml", _(u'XML file'), None)
             )
 
 
@@ -169,7 +169,7 @@ class HtmlXmlExporter:
         If an export type goes to a directory, None is returned
         """
         if exportType == u"xml":
-            return (("XML files (*.xml)", "*.xml"),) 
+            return ((_(u"XML files (*.xml)"), "*.xml"),) 
         
         return None
 
@@ -365,7 +365,7 @@ class HtmlXmlExporter:
                         u'<br />\n' * sepLineCount))
             except Exception, e:
                 traceback.print_exc()
-                
+
         self.wordAnchor = None
 
         fp.write(self.getFileFooter())
@@ -823,8 +823,8 @@ class HtmlXmlExporter:
         Return true iff more than the basic state is on the state stack yet.
         """
         return len(self.statestack) > 1
-        
-        
+
+
     def isHtmlSizeValue(sizeStr):
         """
         Test unistring sizestr if it is a valid HTML size info and returns
@@ -1021,9 +1021,6 @@ class HtmlXmlExporter:
             unescapeNormalText = \
                     self.mainControl.getFormatting().unescapeNormalText
 
-#             lastLevel = 1
-#             htmlContent = [u"<ul>\n"]
-
             htmlContent = [u'<div class="page-toc">\n']
 
             for tok in headtokens:
@@ -1072,9 +1069,9 @@ class HtmlXmlExporter:
             if not self.mainControl.getConfig().getboolean("main",
                     "insertions_allow_eval", False):
                 # Evaluation of such insertions not allowed
-                content = "<pre>[Allow evaluation of insertions in "\
-                        "\"Options\", page \"Security\", option "\
-                        "\"Process insertion scripts\"]</pre>"
+                content = _(u"<pre>[Allow evaluation of insertions in "
+                        "\"Options\", page \"Security\", option "
+                        "\"Process insertion scripts\"]</pre>")
             else:
                 evalScope = {"pwiki": self.getMainControl(),
                         "lib": self.getMainControl().evalLib}
@@ -1962,7 +1959,7 @@ class MultiPageTextExporter:
             optPanel = None
 
         return (
-            (u"multipage_text", "Multipage text", optPanel),
+            (u"multipage_text", _(u"Multipage text"), optPanel),
             )
 
 
@@ -1975,8 +1972,8 @@ class MultiPageTextExporter:
         If an export type goes to a directory, None is returned
         """
         if exportType == u"multipage_text":
-            return (("Multipage files (*.mpt)", "*.mpt"),
-                    ("Text file (*.txt)", "*.txt")) 
+            return ((_(u"Multipage files (*.mpt)"), "*.mpt"),
+                    (_(u"Text file (*.txt)"), "*.txt")) 
 
         return None
 
@@ -2104,7 +2101,7 @@ class MultiPageTextExporter:
         self.separator = self._findSeparator()
         if self.separator is None:
             # _findSeparator gave up
-            raise ExportException(u"No usable separator found")
+            raise ExportException(_(u"No usable separator found"))
         try:
             try:
                 self.rawExportFile = open(self.exportDest, "w")
@@ -2132,7 +2129,7 @@ class MultiPageTextExporter:
                         self.exportFile.write(page.getLiveText())
 
                         self.exportFile.write("\n%s\n" % self.separator)
-                        
+
 
                 # Write saved searches
                 if self.writeSavedSearches:

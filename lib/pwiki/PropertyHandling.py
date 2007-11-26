@@ -19,74 +19,74 @@ from LogWindow import LogMessage
 wxWIN95 = 20   # For wx.GetOsVersion(), this includes also Win 98 and ME
 
 _COLORS = [
-    "AQUAMARINE",
-    "BLACK",
-    "BLUE VIOLET",
-    "BLUE",
-    "BROWN",
-    "CADET BLUE",
-    "CORAL",
-    "CORNFLOWER BLUE",
-    "CYAN",
-    "DARK GREEN",
-    "DARK GREY",
-    "DARK OLIVE GREEN",
-    "DARK ORCHID",
-    "DARK SLATE BLUE",
-    "DARK SLATE GREY",
-    "DARK TURQUOISE",
-    "DIM GREY",
-    "FIREBRICK",
-    "FOREST GREEN",
-    "GOLD",
-    "GOLDENROD",
-    "GREEN YELLOW",
-    "GREEN",
-    "GREY",
-    "INDIAN RED",
-    "KHAKI",
-    "LIGHT BLUE",
-    "LIGHT GREY",
-    "LIGHT STEEL BLUE",
-    "LIME GREEN",
-    "MAGENTA",
-    "MAROON",
-    "MEDIUM AQUAMARINE",
-    "MEDIUM BLUE",
-    "MEDIUM FOREST GREEN",
-    "MEDIUM GOLDENROD",
-    "MEDIUM ORCHID",
-    "MEDIUM SEA GREEN",
-    "MEDIUM SLATE BLUE",
-    "MEDIUM SPRING GREEN",
-    "MEDIUM TURQUOISE",
-    "MEDIUM VIOLET RED",
-    "MIDNIGHT BLUE",
-    "NAVY",
-    "ORANGE RED",
-    "ORANGE",
-    "ORCHID",
-    "PALE GREEN",
-    "PINK",
-    "PLUM",
-    "PURPLE",
-    "RED",
-    "SALMON",
-    "SEA GREEN",
-    "SIENNA",
-    "SKY BLUE",
-    "SLATE BLUE",
-    "SPRING GREEN",
-    "STEEL BLUE",
-    "TAN",
-    "THISTLE",
-    "TURQUOISE",
-    "VIOLET RED",
-    "VIOLET",
-    "WHEAT",
-    "WHITE",
-    "YELLOW GREEN",
-    "YELLOW"
+    N_(u"AQUAMARINE"),
+    N_(u"BLACK"),
+    N_(u"BLUE VIOLET"),
+    N_(u"BLUE"),
+    N_(u"BROWN"),
+    N_(u"CADET BLUE"),
+    N_(u"CORAL"),
+    N_(u"CORNFLOWER BLUE"),
+    N_(u"CYAN"),
+    N_(u"DARK GREEN"),
+    N_(u"DARK GREY"),
+    N_(u"DARK OLIVE GREEN"),
+    N_(u"DARK ORCHID"),
+    N_(u"DARK SLATE BLUE"),
+    N_(u"DARK SLATE GREY"),
+    N_(u"DARK TURQUOISE"),
+    N_(u"DIM GREY"),
+    N_(u"FIREBRICK"),
+    N_(u"FOREST GREEN"),
+    N_(u"GOLD"),
+    N_(u"GOLDENROD"),
+    N_(u"GREEN YELLOW"),
+    N_(u"GREEN"),
+    N_(u"GREY"),
+    N_(u"INDIAN RED"),
+    N_(u"KHAKI"),
+    N_(u"LIGHT BLUE"),
+    N_(u"LIGHT GREY"),
+    N_(u"LIGHT STEEL BLUE"),
+    N_(u"LIME GREEN"),
+    N_(u"MAGENTA"),
+    N_(u"MAROON"),
+    N_(u"MEDIUM AQUAMARINE"),
+    N_(u"MEDIUM BLUE"),
+    N_(u"MEDIUM FOREST GREEN"),
+    N_(u"MEDIUM GOLDENROD"),
+    N_(u"MEDIUM ORCHID"),
+    N_(u"MEDIUM SEA GREEN"),
+    N_(u"MEDIUM SLATE BLUE"),
+    N_(u"MEDIUM SPRING GREEN"),
+    N_(u"MEDIUM TURQUOISE"),
+    N_(u"MEDIUM VIOLET RED"),
+    N_(u"MIDNIGHT BLUE"),
+    N_(u"NAVY"),
+    N_(u"ORANGE RED"),
+    N_(u"ORANGE"),
+    N_(u"ORCHID"),
+    N_(u"PALE GREEN"),
+    N_(u"PINK"),
+    N_(u"PLUM"),
+    N_(u"PURPLE"),
+    N_(u"RED"),
+    N_(u"SALMON"),
+    N_(u"SEA GREEN"),
+    N_(u"SIENNA"),
+    N_(u"SKY BLUE"),
+    N_(u"SLATE BLUE"),
+    N_(u"SPRING GREEN"),
+    N_(u"STEEL BLUE"),
+    N_(u"TAN"),
+    N_(u"THISTLE"),
+    N_(u"TURQUOISE"),
+    N_(u"VIOLET RED"),
+    N_(u"VIOLET"),
+    N_(u"WHEAT"),
+    N_(u"WHITE"),
+    N_(u"YELLOW GREEN"),
+    N_(u"YELLOW")
 ]
 
 
@@ -99,17 +99,17 @@ def buildIconsSubmenu(iconCache):
     iconsMenu = wx.Menu()
 
     iconsMenu1 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), 'A-C', iconsMenu1)
+    iconsMenu.AppendMenu(wx.NewId(), u'A-C', iconsMenu1)
     iconsMenu2 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), 'D-F', iconsMenu2)
+    iconsMenu.AppendMenu(wx.NewId(), u'D-F', iconsMenu2)
     iconsMenu3 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), 'G-L', iconsMenu3)
+    iconsMenu.AppendMenu(wx.NewId(), u'G-L', iconsMenu3)
     iconsMenu4 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), 'M-P', iconsMenu4)
+    iconsMenu.AppendMenu(wx.NewId(), u'M-P', iconsMenu4)
     iconsMenu5 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), 'Q-S', iconsMenu5)
+    iconsMenu.AppendMenu(wx.NewId(), u'Q-S', iconsMenu5)
     iconsMenu6 = wx.Menu()
-    iconsMenu.AppendMenu(wx.NewId(), 'T-Z', iconsMenu6)
+    iconsMenu.AppendMenu(wx.NewId(), u'T-Z', iconsMenu6)
 
     icons = iconCache.iconLookupCache.keys();  # TODO: Create function?
     icons.sort()    # TODO sort with collator
@@ -118,17 +118,17 @@ def buildIconsSubmenu(iconCache):
         if icname.startswith("tb_"):
             continue
         iconsSubMenu = None
-        if icname[0] <= 'c':
+        if icname[0] <= u'c':
             iconsSubMenu = iconsMenu1
-        elif icname[0] <= 'f':
+        elif icname[0] <= u'f':
             iconsSubMenu = iconsMenu2
-        elif icname[0] <= 'l':
+        elif icname[0] <= u'l':
             iconsSubMenu = iconsMenu3
-        elif icname[0] <= 'p':
+        elif icname[0] <= u'p':
             iconsSubMenu = iconsMenu4
-        elif icname[0] <= 's':
+        elif icname[0] <= u's':
             iconsSubMenu = iconsMenu5
-        elif icname[0] <= 'z':
+        elif icname[0] <= u'z':
             iconsSubMenu = iconsMenu6
 
         menuID = wx.NewId()
@@ -151,9 +151,9 @@ def buildColorsSubmenu():
     colorsMenu = wx.Menu()
 
     colorsMenu1 = wx.Menu()
-    colorsMenu.AppendMenu(wx.NewId(), 'A-L', colorsMenu1)
+    colorsMenu.AppendMenu(wx.NewId(), u'A-L', colorsMenu1)
     colorsMenu2 = wx.Menu()
-    colorsMenu.AppendMenu(wx.NewId(), 'M-Z', colorsMenu2)
+    colorsMenu.AppendMenu(wx.NewId(), u'M-Z', colorsMenu2)
     
     # Set showColored to False if we are on Win 95/98/ME and use an unicode build
     #   of wxPython because it would crash then
@@ -161,15 +161,17 @@ def buildColorsSubmenu():
 
     for cn in _COLORS:    # ["BLACK"]:
         colorsSubMenu = None
-        if cn[0] <= 'L':
+        translatedColorName = _(cn)
+        if translatedColorName[0] <= 'L':
             colorsSubMenu = colorsMenu1
-        ## elif cn[0] <= 'Z':
+        ## elif translatedColorName[0] <= 'Z':
         else:
             colorsSubMenu = colorsMenu2
 
         menuID = wx.NewId()
         colorMap[menuID] = cn
-        menuItem = wx.MenuItem(colorsSubMenu, menuID, cn, cn)
+        menuItem = wx.MenuItem(colorsSubMenu, menuID, translatedColorName,
+                translatedColorName)
         
         if showColored:
             cl = wx.NamedColour(cn)
@@ -268,7 +270,7 @@ class PropertyCheckAlias(AbstractPropertyCheck):
      
         if not formatting.isNakedWikiWord(propValue):
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                    u"Alias value isn't a valid wikiword: [%s: %s]" %
+                    _(u"Alias value isn't a valid wikiword: [%s: %s]") %
                     (propName, propValue), wikiWord, wikiWord, (start, end))
             self.mainControl.appendLogMessage(msg)
             return
@@ -281,7 +283,8 @@ class PropertyCheckAlias(AbstractPropertyCheck):
                 wikiData.isDefinedWikiWord(propValue):
             # Word exists and isn't an alias
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                    u"A real wikiword with the alias name exists already: [%s: %s]" %
+                    _(u"A real wikiword with the alias name exists already: "
+                    u"[%s: %s]") %
                     (propName, propValue), wikiWord, wikiWord, (start, end))
             self.mainControl.appendLogMessage(msg)
             return
@@ -289,7 +292,7 @@ class PropertyCheckAlias(AbstractPropertyCheck):
         words = wikiData.getWordsWithPropertyValue(u"alias", propValue)
         if len(words) > 1 or (len(words) > 0 and words[0] != wikiWord):
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                    u"'%s' is already alias for the wiki word(s): %s" %
+                    _(u"'%s' is already alias for the wiki word(s): %s") %
                     (propValue, u"; ".join(words)), wikiWord, wikiWord,
                     (start, end))
             self.mainControl.appendLogMessage(msg)
@@ -336,7 +339,7 @@ class PropertyCheckPresentation(AbstractPropertyCheck):
         # Check for double entries with different values on same page
         if propName in self.foundEntryNames:
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                    u"The attribute %s was already set differently on this page" %
+                    _(u"The attribute %s was already set differently on this page") %
                     (propName,), wikiWord, wikiWord, (start, end))
             self.mainControl.appendLogMessage(msg)
         else:
@@ -348,7 +351,7 @@ class PropertyCheckPresentation(AbstractPropertyCheck):
             words = wikiData.getWordsForPropertyName(propName)
             if len(words) > 1 or (len(words) > 0 and words[0] != wikiWord):
                 msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                        u"Attribute '%s' is already defined on the wiki page(s): %s" %
+                        _(u"Attribute '%s' is already defined on the wiki page(s): %s") %
                         (propName, u"; ".join(words)), wikiWord, wikiWord,
                         (start, end))
                 self.mainControl.appendLogMessage(msg)
@@ -357,13 +360,13 @@ class PropertyCheckPresentation(AbstractPropertyCheck):
         if propName.endswith(u"icon"):
             if self.mainControl.lookupIconIndex(propValue) == -1:
                 msg = LogMessage(self.mainControl, LogMessage.SEVERITY_HINT,
-                        u"Icon name doesn't exist: [%s: %s]" %
+                        _(u"Icon name doesn't exist: [%s: %s]") %
                         (propName, propValue), wikiWord, wikiWord, (start, end))
                 self.mainControl.appendLogMessage(msg)
         elif propName.endswith(u"color"):
             if propValue.upper() not in _COLORS:
                 msg = LogMessage(self.mainControl, LogMessage.SEVERITY_HINT,
-                        u"Color name doesn't exist: [%s: %s]" %
+                        _(u"Color name doesn't exist: [%s: %s]") %
                         (propName, propValue), wikiWord, wikiWord, (start, end))
                 self.mainControl.appendLogMessage(msg)
 
@@ -438,12 +441,12 @@ class PropertyChecker:
                 propTuple = (propName, propValue)
                 if propTuple in foundProps:
                     msg = LogMessage(self.mainControl, LogMessage.SEVERITY_HINT,
-                            u"Same property twice: [%s: %s]" % propTuple,
+                            _(u"Same attribute twice: [%s: %s]") % propTuple,
                             wikiPage.getWikiWord(), wikiPage.getWikiWord(),
                             (t.start, t.start + t.getRealLength()))
                     self.mainControl.appendLogMessage(msg)
                     continue # if first property had messages there's no need to repeat them
-    
+
                 foundProps.add(propTuple)
                     
                 c, match = self.findCheckObject(propName)

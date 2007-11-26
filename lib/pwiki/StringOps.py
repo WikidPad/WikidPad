@@ -207,6 +207,30 @@ def fileContentToUnicode(content):
         return mbcsDec(content, "replace")[0]
 
 
+def loadEntireFile(filename):
+    """
+    Load entire file (text mode) and return its content.
+    """
+    rf = open(filename, "rU")
+    try:
+        result = rf.read()
+        return result
+    finally:
+        rf.close()
+
+
+def writeEntireFile(filename, content):
+    """
+    Write entire file (text mode).
+    """
+    rf = open(filename, "w")
+    try:
+        rf.write(content)
+        return
+    finally:
+        rf.close()
+
+
 # def wikiWordToLabel(word):
 #     """
 #     Strip '[' and ']' if non camelcase word and return it

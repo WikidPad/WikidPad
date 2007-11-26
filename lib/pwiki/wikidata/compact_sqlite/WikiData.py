@@ -167,10 +167,10 @@ class WikiData:
 
         # These schema changes are only on a temporary table so they are not
         # in DbStructure.py
-        self.connWrap.execSql("create temp table temppathfindparents "+
+        self.connWrap.execSql("create temp table temppathfindparents "
                 "(word text primary key, child text, steps integer)")
 
-        self.connWrap.execSql("create index temppathfindparents_steps "+
+        self.connWrap.execSql("create index temppathfindparents_steps "
                 "on temppathfindparents(steps)")
 
 
@@ -180,7 +180,7 @@ class WikiData:
         try:
             result = self.connWrap.execSqlQuerySingleItem("select content from "+\
                 "wikiwordcontent where word = ?", (word,), None)
-    
+
             if result is None:
                 raise WikiFileNotFoundException, "wiki page not found: %s" % word
     
@@ -342,10 +342,12 @@ class WikiData:
 
     def renameWord(self, word, toWord):
         if not self.wikiDocument.getFormatting().isNakedWikiWord(toWord):
-            raise WikiDataException, u"'%s' is an invalid wiki word" % toWord
+            raise WikiDataException(_(u"'%s' is an invalid wiki word") % toWord)
 
         if self.isDefinedWikiWord(toWord):
-            raise WikiDataException, u"Cannot rename '%s' to '%s', '%s' already exists" % (word, toWord, toWord)
+            raise WikiDataException(
+                    _(u"Cannot rename '%s' to '%s', '%s' already exists") %
+                    (word, toWord, toWord))
 
         try:
             # commit anything pending so we can rollback on error
@@ -399,7 +401,7 @@ class WikiData:
                 traceback.print_exc()
                 raise DbWriteAccessError(e)
         else:
-            raise WikiDataException("You cannot delete the root wiki node")
+            raise WikiDataException(_(u"You cannot delete the root wiki node"))
 
 
     # ---------- Handling of relationships cache ----------
@@ -1208,7 +1210,8 @@ class WikiData:
 
 
         # execSqlQueryIter is insecure, don't use
-        itr = self.connWrap.execSqlQueryIter("select word, content from wikiwordcontent")
+        itr = self.connWrap.execSqlQueryIter(
+                "select word, content from wikiwordcontent")
 
         results = []
 
@@ -1611,14 +1614,14 @@ class WikiData:
             self.connWrap.execSql("update wikiwordcontent "
                     "set wordnormcase=utf8Normcase(word)")
             DbStructure.rebuildIndices(self.connWrap)
-    
+
             # TODO
             # Check the presence of important indexes
-    
+
             indexes = self.connWrap.execSqlQuerySingleColumn(
                     "select name from sqlite_master where type='index'")
             indexes = map(string.upper, indexes)
-            
+
             if not "WIKIWORDCONTENT_PKEY" in indexes:
                 # Maybe we have multiple pages with the same name in the database
                 

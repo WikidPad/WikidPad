@@ -326,7 +326,7 @@ class WikidPadWin32WPInterceptor(BaseClipboardCatcher):
         if not isinstance(wikiPage,
                 (DocPages.WikiPage, DocPages.AliasWikiPage)):
             self.mainControl.displayErrorMessage(
-                    u"Only a real wiki page can be a clipboard catcher")
+                    _(u"Only a real wiki page can be a clipboard catcher"))
             return
             
         if self.mode != WikidPadWin32WPInterceptor.MODE_OFF:

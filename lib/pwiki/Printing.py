@@ -114,14 +114,14 @@ class PrintMainDialog(wx.Dialog):
             
         self.printer.setStdOptions(sel, self.plainTextFontDesc,
                 self.ctrls.tfWikiPageSeparator.GetValue())
-        
+
 
     def OnPreview(self, evt):
 #         if self.plainTextFontDesc is not None:        
 #             self.pWiki.printer.setFontDesc(self.plainTextFontDesc)
         self._transferOptionsToPrinter()
         self.printer.doPreview()
-        
+
 
 #     def OnPrintSetup(self, evt):
 #         self.pWiki.printer.doPrintSetup(self.pWiki)
@@ -210,7 +210,8 @@ class Printer:
         root = self.pWiki.getCurrentWikiWord()
         
         if root is None and selset in (0, 1):
-            self.pWiki.displayErrorMessage(u"No real wiki word selected as root")
+            self.pWiki.displayErrorMessage(
+                    _(u"No real wiki word selected as root"))
             return
 
         lpOp = Sar.ListWikiPagesOperation()
@@ -361,7 +362,7 @@ class PlainTextPrint:
         printout2 = PlainTextPrintout(text, self.printer)
         preview = wx.PrintPreview(printout, printout2, pddata)
 
-        frame = wx.PreviewFrame(preview, self.pWiki, "Print Preview")
+        frame = wx.PreviewFrame(preview, self.pWiki, _(u"Print Preview"))
 
         frame.Initialize()
         frame.SetPosition(self.pWiki.GetPosition())
@@ -370,7 +371,7 @@ class PlainTextPrint:
 
 
 class PlainTextPrintout(wx.Printout):
-    def __init__(self, text, printer, title="Printout"):
+    def __init__(self, text, printer, title=_(u"Printout")):
         wx.Printout.__init__(self, title)
 
         self.mm2logUnitsFactor = None

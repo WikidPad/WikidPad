@@ -169,9 +169,8 @@ class CmdLineAction:
                 self.exportCompFn, exporter.getAddOpt(None))
 
 
-
     USAGE = \
-"""Options:
+_(u"""Options:
 
     -h, --help: Show this message box
     -w, --wiki  <wiki path>: set the wiki to open on startup
@@ -182,13 +181,13 @@ class CmdLineAction:
     --export-dest <destination path>: path of destination directory for export
     --export-compfn: Use compatible filenames on export
     --rebuild: rebuild the Wiki database
-"""
-        
+""")
+
     def showCmdLineUsage(self, pWiki, addRemark=u""):
         """
         Show dialog with addRemark and command line usage information.
         """
-        wx.MessageBox(addRemark + self.USAGE, "Usage information",
+        wx.MessageBox(addRemark + self.USAGE, _(u"Usage information"),
                 style=wx.OK, parent=pWiki)
 
 

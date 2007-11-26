@@ -343,10 +343,12 @@ class WikiData:
 
     def renameWord(self, word, toWord):
         if not self.wikiDocument.getFormatting().isNakedWikiWord(toWord):
-            raise WikiDataException, u"'%s' is an invalid wiki word" % toWord
+            raise WikiDataException(_(u"'%s' is an invalid wiki word") % toWord)
 
         if self.isDefinedWikiWord(toWord):
-            raise WikiDataException, u"Cannot rename '%s' to '%s', '%s' already exists" % (word, toWord, toWord)
+            raise WikiDataException(
+                    _(u"Cannot rename '%s' to '%s', '%s' already exists") %
+                    (word, toWord, toWord))
 
         try:
             # commit anything pending so we can rollback on error
@@ -393,7 +395,7 @@ class WikiData:
                 traceback.print_exc()
                 raise DbWriteAccessError(e)
         else:
-            raise WikiDataException("You cannot delete the root wiki node")
+            raise WikiDataException(_(u"You cannot delete the root wiki node"))
 
 
     # ---------- Handling of relationships cache ----------

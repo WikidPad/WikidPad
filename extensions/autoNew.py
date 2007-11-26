@@ -44,7 +44,8 @@ def describeMenuItems(wiki):
     """
     global nextNumber
     
-    return ((autoNew, "Create new page\tShift-Ctrl-N", "Create new page"),)
+    return ((autoNew, _(u"Create new page") + u"\tShift-Ctrl-N",
+            _(u"Create new page")),)
 
 
 _testRE = re.compile(ur"^New[0-9]{6}$")

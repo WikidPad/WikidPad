@@ -9,14 +9,6 @@ The following options apply to the whole application and therefore to each wiki 
 
 ++++ General options
 
-*Minimize to Tray*
-Minimized to system tray instead of the normal taskbar.
-
-*Minimize on close button*
-Pressing the close button on the main frame (the little "X") does not close but minimize WikidPad. In conjunction with "Minimize to Tray" it minmizes to the try area.
-
-If you really want to close, use menu "Wiki"->"Exit" then or the context menu when right-clicking on the tray icon (if "Minimize to Tray" is active).
-
 *New window on wiki URL*
 When double clicking on a wiki: URL, a new instance of the application is started, otherwise, the current instance loads the new wiki.
 
@@ -44,32 +36,8 @@ Disadvantages:
       their own home directory as configuration directory (this is
       the default).
 
-
-*Statusbar time format*
-Set the time format the statusbar should use to show modification and creation date of the current wiki page. The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
-
-
 *Default open/new dir.*
 Directory to start when using "Wiki"->"New" or "Wiki"->"Open" in the menu. If empty, WikidPad chooses a default.
-
-
-*Auto-show log window*
-Automatically show log window if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
-
-*Auto-hide log window*
-Automatically hide log window if no more error messages are present.
-
-
-*Structure window pos.*
-Where (relative to main window) should the DocStructureWindow be positioned? "Hidden" deactivates it.
-*KNOWN BUG*: After changing the position of the window, restarting WikidPad is necessary. See RestartWikidPad for details.
-
-*Structure window depth*
-Up to (and including) which heading level should headings be displayed? "1" Means only top-level heading (one plus sign), "15" means all headings.
-
-*Auto-hide structure window*
-After double-clicking an entry in DocStructureWindow the window is collapsed (hidden) automatically if this is checked.
-
 
 *Sort order*
 Choose the desired alphabetical sort algorithm for wiki words, todos, attributes in tree or PageListDialog.
@@ -89,6 +57,43 @@ In the text field you can enter a hotkey in the same way as the menu shortcuts a
 The checkbox before the text field allows to temporarily deactivate the hotkey without deleting the field content.
 
 There is also an option to set a second hotkey which is bound to the current wiki instead of the app. See OptionsDialog#*Wiki-bound# hotkey* below in "Current wiki" options.
+
+
+++++ User interface
+
+*Minimize to Tray*
+Minimized to system tray instead of the normal taskbar.
+
+*Minimize on close button*
+Pressing the close button on the main frame (the little "X") does not close but minimize WikidPad. In conjunction with "Minimize to Tray" it minmizes to the try area.
+
+If you really want to close, use menu "Wiki"->"Exit" then or the context menu when right-clicking on the tray icon (if "Minimize to Tray" is active).
+
+*Statusbar time format*
+Set the time format the statusbar should use to show modification and creation date of the current wiki page. The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
+
+*UI language*
+Choose the preferred language of the user interface.
+
+This setting only takes effect after restarting WikidPad.
+
+*Auto-show log window*
+Automatically show log window if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
+
+*Auto-hide log window*
+Automatically hide log window if no more error messages are present.
+
+
+*Structure window pos.*
+Where (relative to main window) should the DocStructureWindow be positioned? "Hidden" deactivates it.
+*KNOWN BUG*: After changing the position of the window, restarting WikidPad is necessary. See RestartWikidPad for details.
+
+*Structure window depth*
+Up to (and including) which heading level should headings be displayed? "1" Means only top-level heading (one plus sign), "15" means all headings.
+
+*Auto-hide structure window*
+After double-clicking an entry in DocStructureWindow the window is collapsed (hidden) automatically if this is checked.
+
 
 
 ++++ Security options

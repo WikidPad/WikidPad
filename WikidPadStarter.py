@@ -10,12 +10,15 @@ if not hasattr(sys, 'frozen'):
 #     sys.path.append(r"C:\Daten\Projekte\Wikidpad\Current\lib")
 
 
-# Dummy for localization
+# Dummies for localization
 def N_(s):
     return s
 __builtins__["N_"] = N_
-#     __builtins__.__dict__["N_"] = N_
 del N_
+
+
+__builtins__["_"] = N_
+
 
 
 import ExceptionLogger
@@ -95,17 +98,36 @@ if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
 
         sys.exit(0)
     
+    except SystemExit:
+        raise
     except:
         sys.exit(1)
-else:
-    # Dummy localization function
-    def _(s):
-        return s
 
-    __builtins__["_"] = _
-#     __builtins__.__dict__["_"] = _
+elif len(sys.argv) >= 3 and sys.argv[1] == "--updtrans":
+    try:
+        # Update translation from .pot file
+        args = sys.argv[2:]
+    
+        # We need a dummy app to call findDirs()
+        dummyApp = wx.App(0)
+        dummyApp.SetAppName("WikidPad")
+    
+        wikiAppDir, globalConfigDir = findDirs()
+    
+        if len(args) == 1:
+            args.append(os.path.join(wikiAppDir, "WikidPad.pot"))
+        
+        from pwiki import I18nPoUpdater
+        I18nPoUpdater.main(args)
 
-    del _
+        sys.exit(0)
+    except SystemExit:
+        raise
+    except:
+        traceback.print_exc()
+        sys.exit(1)
+   
+    
 
 #     # Start initial localization support before reading config
 #     gettext.install("WikidPad", os.path.join(wikiAppDir, "Lang"), True)

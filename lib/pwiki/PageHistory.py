@@ -143,7 +143,8 @@ class PageHistory:
         Called after a page was deleted
         """
         if not self.history:
-            self.docPagePresenter.openDocPage(self.mainControl.getWikiName(),
+            self.docPagePresenter.openDocPage(u"wikipage/" + 
+                    self.docPagePresenter.getWikiDocument().getWikiName(),
                     motionType="random")
             return
             

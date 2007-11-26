@@ -375,11 +375,11 @@ def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
     for line in desc.split(u"\n"):
         if line.strip() == u"":
             continue
-        
+
         parts = [p.strip() for p in line.split(u";")]
         if len(parts) < 4:
             parts += [u""] * (4 - len(parts))
-        
+
         if parts[0] == u"-":
             # Separator
             menu.AppendSeparator()
@@ -408,7 +408,7 @@ def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
             if menuID == -1:
                 continue
             parts[2] = _unescapeWithRe(parts[2])
-            menu.Append(menuID, title, parts[2], kind)
+            menu.Append(menuID, _(title), _(parts[2]), kind)
 
 
 class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):

@@ -488,3 +488,11 @@ Activate;CMD_ACTIVATE_THIS
 Activate New Tab;CMD_ACTIVATE_NEW_TAB_THIS
 Activate New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
 """
+
+
+# Entries to support i18n of context menus
+
+N_(u"Activate")
+N_(u"Activate New Tab")
+N_(u"Activate New Tab Backgrd.")
+

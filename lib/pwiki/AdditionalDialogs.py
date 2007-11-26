@@ -174,8 +174,8 @@ class OpenWikiWordDialog(wx.Dialog):
 
                 # wikiWord is valid but nonexisting, so maybe create it?
                 result = wx.MessageBox(
-                        uniToGui(u"'%s' is not an existing wikiword. Create?" %
-                        wikiWord), uniToGui(u"Create"),
+                        uniToGui(_(u"'%s' is not an existing wikiword. Create?") %
+                        wikiWord), uniToGui(_(u"Create")),
                         wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 
                 if result == wx.NO:
@@ -228,12 +228,12 @@ class OpenWikiWordDialog(wx.Dialog):
         formatting = self.pWiki.getFormatting()
         nakedWord = formatting.wikiWordToLabel(self.wikiWord)
         if not formatting.isNakedWikiWord(nakedWord):
-            self.pWiki.displayErrorMessage(u"'%s' is an invalid WikiWord" % nakedWord)
+            self.pWiki.displayErrorMessage(_(u"'%s' is an invalid WikiWord") % nakedWord)
             self.ctrls.text.SetFocus()
             return
         
         if self.pWiki.getWikiData().isDefinedWikiWord(nakedWord):
-            self.pWiki.displayErrorMessage(u"'%s' exists already" % nakedWord)
+            self.pWiki.displayErrorMessage(_(u"'%s' exists already") % nakedWord)
             self.ctrls.text.SetFocus()
             return
             
@@ -272,7 +272,7 @@ class SelectIconDialog(wx.Dialog):
         # contents
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        label = wx.StaticText(self, -1, "Select Icon")
+        label = wx.StaticText(self, -1, _(u"Select Icon"))
         sizer.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
         box = wx.BoxSizer(wx.VERTICAL)
@@ -281,7 +281,7 @@ class SelectIconDialog(wx.Dialog):
                 style = wx.LC_REPORT | wx.LC_NO_HEADER)    ## | wx.BORDER_NONE
                 
         self.lc.SetImageList(self.iconImageList, wx.IMAGE_LIST_SMALL)
-        self.lc.InsertColumn(0, "Icon")
+        self.lc.InsertColumn(0, _(u"Icon"))
 
         for icn in self.iconNames:
             self.lc.InsertImageStringItem(sys.maxint, icn,
@@ -298,11 +298,11 @@ class SelectIconDialog(wx.Dialog):
 
         box = wx.BoxSizer(wx.HORIZONTAL)
 
-        btn = wx.Button(self, wx.ID_OK, " OK ")
+        btn = wx.Button(self, wx.ID_OK, _(u" OK "))
         btn.SetDefault()
         box.Add(btn, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
-        btn = wx.Button(self, wx.ID_CANCEL, " Cancel ")
+        btn = wx.Button(self, wx.ID_CANCEL, _(u" Cancel "))
         box.Add(btn, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
         sizer.Add(box, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
@@ -365,7 +365,7 @@ class SavedVersionsDialog(wx.Dialog):
         # contents
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        label = wx.StaticText(self, -1, "Saved Versions")
+        label = wx.StaticText(self, -1, _(u"Saved Versions"))
         sizer.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
         box = wx.BoxSizer(wx.VERTICAL)
@@ -388,11 +388,11 @@ class SavedVersionsDialog(wx.Dialog):
 
         box = wx.BoxSizer(wx.HORIZONTAL)
 
-        btn = wx.Button(self, wx.ID_OK, " Retrieve ")
+        btn = wx.Button(self, wx.ID_OK, _(u" Retrieve "))
         btn.SetDefault()
         box.Add(btn, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
-        btn = wx.Button(self, wx.ID_CANCEL, " Cancel ")
+        btn = wx.Button(self, wx.ID_CANCEL, _(u" Cancel "))
         box.Add(btn, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
 
         sizer.AddSizer(box, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
@@ -426,7 +426,7 @@ class SavedVersionsDialog(wx.Dialog):
 class DateformatDialog(wx.Dialog):
 
     # HTML explanation for strftime:
-    FORMATHELP = """<html>
+    FORMATHELP = N_(u"""<html>
 <body bgcolor="#FFFFFF">
 
 <table border="1" align="center" style="border-collapse: collapse">
@@ -484,7 +484,7 @@ class DateformatDialog(wx.Dialog):
 </table>
 </body>
 </html>
-"""
+""")
 
     def __init__(self, parent, ID, mainControl, title="Choose Date Format",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
@@ -503,7 +503,7 @@ class DateformatDialog(wx.Dialog):
         
         # Create HTML explanation
         html = wx.html.HtmlWindow(self, -1)
-        html.SetPage(self.FORMATHELP)
+        html.SetPage(_(self.FORMATHELP))
         res.AttachUnknownControl("htmlExplain", html, self)
         
         self.ctrls = XrcControls(self)
@@ -528,7 +528,7 @@ class DateformatDialog(wx.Dialog):
 
         
     def OnText(self, evt):
-        preview = "<invalid>"
+        preview = _(u"<invalid>")
         text = guiToUni(self.ctrls.fieldFormat.GetValue())
         try:
             # strftime can't handle unicode correctly, so conversion is needed
@@ -738,10 +738,10 @@ class ExportDialog(wx.Dialog):
 
         if expDestWildcards is None:
             # Directory destination
-            self.ctrls.stDestination.SetLabel(u"Destination directory:")
+            self.ctrls.stDestination.SetLabel(_(u"Destination directory:"))
         else:
             # File destination
-            self.ctrls.stDestination.SetLabel(u"Destination file:")
+            self.ctrls.stDestination.SetLabel(_(u"Destination file:"))
 
 
     def OnExportTo(self, evt):
@@ -771,18 +771,18 @@ class ExportDialog(wx.Dialog):
             # Export to a directory
             if not exists(guiToUni(self.ctrls.tfDestination.GetValue())):
                 self.pWiki.displayErrorMessage(
-                        u"Destination directory does not exist")
+                        _(u"Destination directory does not exist"))
                 return
             
             if not isdir(guiToUni(self.ctrls.tfDestination.GetValue())):
                 self.pWiki.displayErrorMessage(
-                        u"Destination must be a directory")
+                        _(u"Destination must be a directory"))
                 return
         else:
             if exists(guiToUni(self.ctrls.tfDestination.GetValue())) and \
                     not isfile(guiToUni(self.ctrls.tfDestination.GetValue())):
                 self.pWiki.displayErrorMessage(
-                        u"Destination must be a file")
+                        _(u"Destination must be a file"))
                 return
 
 
@@ -791,7 +791,8 @@ class ExportDialog(wx.Dialog):
         root = self.pWiki.getCurrentWikiWord()
         
         if root is None and selset in (0, 1):
-            self.pWiki.displayErrorMessage(u"No real wiki word selected as root")
+            self.pWiki.displayErrorMessage(
+                    _(u"No real wiki word selected as root"))
             return
             
         lpOp = Sar.ListWikiPagesOperation()
@@ -831,7 +832,7 @@ class ExportDialog(wx.Dialog):
                     guiToUni(self.ctrls.tfDestination.GetValue()), 
                     self.ctrls.compatFilenames.GetValue(), ob.getAddOpt(panel))
         except ExportException, e:
-            self.pWiki.displayErrorMessage("Error while exporting", unicode(e))
+            self.pWiki.displayErrorMessage(_(u"Error while exporting"), unicode(e))
 
         self.EndModal(wx.ID_OK)
 
@@ -844,7 +845,7 @@ class ExportDialog(wx.Dialog):
 
         if expDestWildcards is None:
             # Only transfer between GUI elements, so no unicode conversion
-            seldir = wx.DirSelector(u"Select Export Directory",
+            seldir = wx.DirSelector(_(u"Select Export Directory"),
                     self.ctrls.tfDestination.GetValue(),
                     style=wx.DD_DEFAULT_STYLE|wx.DD_NEW_DIR_BUTTON, parent=self)
                 
@@ -858,12 +859,12 @@ class ExportDialog(wx.Dialog):
                 wcs.append(wd)
                 wcs.append(wp)
                 
-            wcs.append(u"All files (*.*)")
+            wcs.append(_(u"All files (*.*)"))
             wcs.append(u"*")
             
             wcs = u"|".join(wcs)
             
-            selfile = wx.FileSelector(u"Select Export File",
+            selfile = wx.FileSelector(_(u"Select Export File"),
                     self.ctrls.tfDestination.GetValue(),
                     default_filename = "", default_extension = "",
                     wildcard = wcs, flags=wx.SAVE | wx.OVERWRITE_PROMPT,
@@ -972,10 +973,10 @@ class ImportDialog(wx.Dialog):
 
         if impSrcWildcards is None:
             # Directory source
-            self.ctrls.stSource.SetLabel(u"Source directory:")
+            self.ctrls.stSource.SetLabel(_(u"Source directory:"))
         else:
             # File source
-            self.ctrls.stSource.SetLabel(u"Source file:")
+            self.ctrls.stSource.SetLabel(_(u"Source file:"))
 
 
     def OnImportFormat(self, evt):
@@ -991,7 +992,7 @@ class ImportDialog(wx.Dialog):
                 
         if not exists(guiToUni(self.ctrls.tfSource.GetValue())):
             self.mainControl.displayErrorMessage(
-                    u"Source does not exist")
+                    _(u"Source does not exist"))
             return
 
         # If this returns None, import goes to a directory
@@ -1001,12 +1002,12 @@ class ImportDialog(wx.Dialog):
             
             if not isdir(guiToUni(self.ctrls.tfSource.GetValue())):
                 self.mainControl.displayErrorMessage(
-                        u"Source must be a directory")
+                        _(u"Source must be a directory"))
                 return
         else:
             if not isfile(guiToUni(self.ctrls.tfSource.GetValue())):
                 self.mainControl.displayErrorMessage(
-                        u"Source must be a file")
+                        _(u"Source must be a file"))
                 return
 
         if panel is self.emptyPanel:
@@ -1017,7 +1018,7 @@ class ImportDialog(wx.Dialog):
                     guiToUni(self.ctrls.tfSource.GetValue()), 
                     False, ob.getAddOpt(panel))
         except ImportException, e:
-            self.mainControl.displayErrorMessage("Error while importing",
+            self.mainControl.displayErrorMessage(_(u"Error while importing"),
                     unicode(e))
 
         self.EndModal(wx.ID_OK)
@@ -1031,7 +1032,7 @@ class ImportDialog(wx.Dialog):
 
         if impSrcWildcards is None:
             # Only transfer between GUI elements, so no unicode conversion
-            seldir = wx.DirSelector(u"Select Import Directory",
+            seldir = wx.DirSelector(_(u"Select Import Directory"),
                     self.ctrls.tfSource.GetValue(),
                     style=wx.DD_DEFAULT_STYLE, parent=self)
 
@@ -1045,12 +1046,12 @@ class ImportDialog(wx.Dialog):
                 wcs.append(wd)
                 wcs.append(wp)
                 
-            wcs.append(u"All files (*.*)")
-            wcs.append(u"*")
+            wcs.append(_(u"All files (*.*)"))
+            wcs.append(_(u"*"))
             
             wcs = u"|".join(wcs)
             
-            selfile = wx.FileSelector(u"Select Import File",
+            selfile = wx.FileSelector(_(u"Select Import File"),
                     self.ctrls.tfSource.GetValue(),
                     default_filename = "", default_extension = "",
                     wildcard = wcs, flags=wx.OPEN | wx.FILE_MUST_EXIST,
@@ -1109,8 +1110,9 @@ class ChooseWikiWordDialog(wx.Dialog):
     def OnDelete(self, evt):
         sellen = len(self.ctrls.lb.GetSelections())
         if sellen > 0:
-            answer = wx.MessageBox(u"Do you want to delete %i wiki page(s)?" % sellen,
-                    u"Delete Wiki Page(s)",
+            answer = wx.MessageBox(
+                    _(u"Do you want to delete %i wiki page(s)?") % sellen,
+                    (u"Delete Wiki Page(s)"),
                     wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
 
             if answer != wx.YES:
@@ -1151,7 +1153,7 @@ def _children(win, indent=0):
 class AboutDialog(wx.Dialog):
     """ An about box that uses an HTML window """
 
-    textTemplate = '''
+    TEXT_TEMPLATE = N_('''
 <html>
 <body bgcolor="#FFFFFF">
     <center>
@@ -1185,17 +1187,17 @@ What makes wikidPad different from other notepad applications is the ease with w
     <p />Your configuration directory is: %s
 </body>
 </html>
-'''
+''')
 
     def __init__(self, pWiki):
-        wx.Dialog.__init__(self, pWiki, -1, 'About WikidPad',
+        wx.Dialog.__init__(self, pWiki, -1, _(u'About WikidPad'),
                           size=(470, 330) )
-        text = self.textTemplate % (VERSION_STRING,
+        text = _(self.TEXT_TEMPLATE) % (VERSION_STRING,
                 escapeHtml(pWiki.globalConfigDir))
 
         html = wx.html.HtmlWindow(self, -1)
         html.SetPage(text)
-        button = wx.Button(self, wx.ID_OK, "Okay")
+        button = wx.Button(self, wx.ID_OK, _(u"Okay"))
 
         # constraints for the html window
         lc = wx.LayoutConstraints()
@@ -1240,17 +1242,17 @@ class WikiInfoDialog(wx.Dialog):
         
         mainsizer = wx.BoxSizer(wx.VERTICAL)
 
-        label = u"Wiki database backend:"
+        label = _(u"Wiki database backend:")
         if wd is None:
-            value = u"N/A"
+            value = _(u"N/A")
         else:
             value = wd.getDbtype()
 
         mainsizer.Add(self._buildLine(label, value), 0, wx.EXPAND)
 
-        label = u"Number of wiki pages:"
+        label = _(u"Number of wiki pages:")
         if wd is None:
-            value = u"N/A"
+            value = _(u"N/A")
         else:
             value = unicode(len(wikiData.getAllDefinedWikiPageNames()))
         mainsizer.Add(self._buildLine(label, value), 0, wx.EXPAND)

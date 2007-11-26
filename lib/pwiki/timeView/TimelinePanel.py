@@ -760,3 +760,9 @@ u"""
 +Sort dates ascending;CMD_CHECKBOX_TIMELINE_DATE_ASCENDING;List dates ascending or descending
 """
 
+# Entries to support i18n of context menus
+
+N_(u"Show empty days")
+N_(u"Sort dates ascending")
+
+

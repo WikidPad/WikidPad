@@ -20,12 +20,15 @@ Source: dist\_ctypes.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_gdi_.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_html.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_misc_.pyd; DestDir: {app}; Components: Program_files
+Source: dist\pyexpat.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_socket.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_stc.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_windows_.pyd; DestDir: {app}; Components: Program_files
 Source: dist\_xrc.pyd; DestDir: {app}; Components: Program_files
 Source: dist\zlib.pyd; DestDir: {app}; Components: Program_files
 Source: dist\WikidPad.xrc; DestDir: {app}; Components: Program_files
+Source: dist\WikidPad_*.po; DestDir: {app}; Components: Program_files; Flags: ignoreversion sortfilesbyextension
+Source: dist\langlist.txt; DestDir: {app}; Components: Program_files; Flags: ignoreversion
 Source: dist\gadfly.zip; DestDir: {app}; Components: Gadfly
 Source: dist\library.zip; DestDir: {app}; Components: Program_files
 [Dirs]
@@ -38,17 +41,17 @@ Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 1.9beta12
+AppVerName=WikidPad 1.9beta13
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=1.9.12.0
-VersionInfoTextVersion=WikidPad 1.9beta12
+VersionInfoVersion=1.9.13.0
+VersionInfoTextVersion=WikidPad 1.9beta13
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-1.9beta12
+OutputBaseFilename=WikidPad-1.9beta13
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2007 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
@@ -89,6 +92,7 @@ Name: {app}\regexpr.cache; Type: files
 Name: {app}\icons\tb_data file.gif; Type: files
 [UninstallDelete]
 Name: {app}\regexpr.cache; Type: files
+Name: {app}\WikidPad_*.xrc; Type: files; Components: ; Tasks: 
 [Code]
 var
   UserModeQuestion: TInputOptionWizardPage;

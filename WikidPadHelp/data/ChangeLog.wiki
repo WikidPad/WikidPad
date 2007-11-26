@@ -1,7 +1,22 @@
 ﻿++ Change Log
 
 
-Oct. 27, 2007 (1.9beta12)
+Nov. 26, 2007 (1.9beta13)
+
+    * Support for internationalization of screen messages and dialogs
+      (GUI). Not supported are: attributes (e.g. "\[alias: WikiWord]"),
+      shortcuts ("Ctrl-A"), external plugins, some internal messages
+      (e.g. regular expression errors)
+
+    * Bug fixed for Windows: An always visible taskbar could partly
+      hide popup and tooltip windows
+
+    * Internal bug fixed: Deleting plugin modules from a plugin API
+      didn't work
+
+
+
+Oct. 27, 2007 (1.9beta12, repository revision in "mbutscher" branch: 134)
 
     * Support for customizing favorite wikis. See FavoriteWikis
     * Command line option to rebuild wiki (patch by mstute).
@@ -16,7 +31,7 @@ Oct. 27, 2007 (1.9beta12)
       in same process.
     * When hiding a focused tool window, focus is transferred
       to main area panel.
-    
+
     * Bug fixed: An added icon/color property always used
       default brackets [], even if changed in WikiSyntax.py
     * Bug fixed: Linux/GTK: Opening context menu of quick

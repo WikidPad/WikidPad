@@ -88,8 +88,8 @@ class PltHandler:
         
         if self.extAppExe == "":
             # No path to MimeTeX executable -> show message
-            return "<pre>[Please set path to Ploticus executable]</pre>"
-
+            return u"<pre>" + _(u"[Please set path to Ploticus executable]") +\
+                    u"</pre>"
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
         tfs = exporter.getTempFileSet()
@@ -119,7 +119,8 @@ class PltHandler:
             
         if errResponse != "":
             errResponse = mbcsDec(errResponse, "replace")[0]
-            return u"<pre>[Ploticus error: %s]</pre>" % errResponse
+            return u"<pre>" + _(u"[Ploticus error: %s]") % errResponse + \
+                    u"</pre>"
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
@@ -169,7 +170,7 @@ class PloticusOptionsPanel(wx.Panel):
         mainsizer = wx.BoxSizer(wx.VERTICAL)
 
         inputsizer = wx.BoxSizer(wx.HORIZONTAL)
-        inputsizer.Add(wx.StaticText(self, -1, "Path to Ploticus:"), 0,
+        inputsizer.Add(wx.StaticText(self, -1, _(u"Path to Ploticus:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         inputsizer.Add(self.tfPath, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(inputsizer, 0, wx.EXPAND)

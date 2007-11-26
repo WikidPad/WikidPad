@@ -266,7 +266,7 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
         # Create list of controls which should enabled only if checkbox
         # "show in toolbar" is checked
         self.dependingOnShowInToolbar = (
-                self.ctrls.spinIconPosition, self.ctrls.txtIcon, 
+                self.ctrls.spinIconPosition, self.ctrls.tfIcon, 
                 self.ctrls.btnSelectIcon
                 )
                 
@@ -274,14 +274,14 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
 
         title, shortcut = splitFill(uniWithNone(self.entry.title), u"\t", 1)
 
-        self.ctrls.txtTitle.SetValue(title)
-        self.ctrls.txtShortcut.SetValue(shortcut)
-        self.ctrls.txtPathOrUrl.SetValue(uniWithNone(self.entry.value))
+        self.ctrls.tfTitle.SetValue(title)
+        self.ctrls.tfShortcut.SetValue(shortcut)
+        self.ctrls.tfPathOrUrl.SetValue(uniWithNone(self.entry.value))
         self.ctrls.cbOpenInNewWindow.SetValue(u"n" in self.entry.flags)
         self.ctrls.cbShowInToolbar.SetValue(toolbarPos != -1)
 
         self.ctrls.spinIconPosition.SetValue(toolbarPos)
-        self.ctrls.txtIcon.SetValue(uniWithNone(self.entry.iconDesc))
+        self.ctrls.tfIcon.SetValue(uniWithNone(self.entry.iconDesc))
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
@@ -292,6 +292,7 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
         self.SetFocus()
 
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectPath, self.OnSelectPath)
         wx.EVT_BUTTON(self, GUI_ID.btnSelectIcon, self.OnSelectIcon)
 
         wx.EVT_CHECKBOX(self, GUI_ID.cbShowInToolbar,
@@ -308,7 +309,33 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
         enabled = self.ctrls.cbShowInToolbar.GetValue()
         for ct in self.dependingOnShowInToolbar:
             ct.Enable(enabled)
+
+
+    def OnSelectPath(self, evt):
+        """
+        The "..." button after the "path or URL" field was pressed
+        """
+
+#         # Build wildcard string
+#         wcs = []
+#         for wd, wp in expDestWildcards:
+#             wcs.append(wd)
+#             wcs.append(wp)
+#             
+#         wcs.append(_(u"All files (*.*)"))
+#         wcs.append(u"*")
+#         
+#         wcs = u"|".join(wcs)
             
+        selfile = wx.FileSelector(_(u"Select wiki for favorites"),
+                self.ctrls.tfPathOrUrl.GetValue(),
+                default_filename = "", default_extension = "",
+                wildcard = u"*.wiki", flags=wx.OPEN, parent=self)
+
+        if selfile:
+            self.ctrls.tfPathOrUrl.SetValue(selfile)
+
+
     def OnSelectIcon(self, evt):
         """
         The "..." button after the icon field was pressed
@@ -317,21 +344,21 @@ class AddWikiToFavoriteWikisDialog(wx.Dialog):
                 wx.GetApp().getIconCache())
         
         if iconDesc is not None:
-            self.ctrls.txtIcon.SetValue(iconDesc)
+            self.ctrls.tfIcon.SetValue(iconDesc)
 
 
     def OnOk(self, evt):
         try:
             entry = self.entry
             
-            entry.title = self.ctrls.txtTitle.GetValue()
+            entry.title = self.ctrls.tfTitle.GetValue()
 
-            shortcut = self.ctrls.txtShortcut.GetValue()
+            shortcut = self.ctrls.tfShortcut.GetValue()
             if shortcut != u"":
                 entry.title += u"\t" + shortcut
 
-            entry.value = self.ctrls.txtPathOrUrl.GetValue()
-            entry.iconDesc = self.ctrls.txtIcon.GetValue()
+            entry.value = self.ctrls.tfPathOrUrl.GetValue()
+            entry.iconDesc = self.ctrls.tfIcon.GetValue()
             
             flags = u""
             if self.ctrls.cbOpenInNewWindow.GetValue():

@@ -144,7 +144,7 @@ class SpellCheckerDialog(wx.Dialog):
         self._refreshDictionary()   # TODO Make faster?
         
         if self.enchantDict is None:
-            self._showInfo(u"No dictionary found for this page")
+            self._showInfo(_(u"No dictionary found for this page"))
             return False  # No dictionary  # TODO: Next page
 
         text = self.mainControl.getActiveEditor().GetText()
@@ -153,7 +153,8 @@ class SpellCheckerDialog(wx.Dialog):
 
         if startWikiWord is None:
             # No wiki loaded or no wiki word in editor
-            self._showInfo(u"No wiki open or current page is a functional page")
+            self._showInfo(
+                    _(u"No wiki open or current page is a functional page"))
             return False
 
         startWikiWord = self.mainControl.getWikiData().getAliasesWikiWord(
@@ -175,7 +176,7 @@ class SpellCheckerDialog(wx.Dialog):
                     
                     if nw is None or nw == startWikiWord:
                         # Something went wrong or we are where we started
-                        self._showInfo(u"No (more) misspelled words found")
+                        self._showInfo(_(u"No (more) misspelled words found"))
                         return False
                         
                     text = self.mainControl.getWikiDataManager().getWikiPage(nw).getLiveText()
@@ -183,7 +184,7 @@ class SpellCheckerDialog(wx.Dialog):
                     startPos = 0
                     continue
                 else:
-                    self._showInfo(u"No (more) misspelled words found")
+                    self._showInfo(_(u"No (more) misspelled words found"))
                     return False
 
             start, end = mat.span()

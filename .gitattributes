@@ -1,6 +1,7 @@
 * text=auto !eol
 /Consts.py -text
 /ExceptionLogger.py -text
+/WikidPad.pot -text
 /WikidPad.py -text
 /WikidPad.xrc -text
 WikidPadHelp/WikidPadHelp.wiki -text
@@ -326,6 +327,7 @@ WikidPadHelp/data/index/wiki_idx.gfd -text
 WikidPadHelp/data/wikidb.gfd -text
 WikidPadHelp/files/testimg.gif -text
 /WikidPadStarter.py -text
+/WikidPad_de_DE.po -text
 /bld.bat -text
 docs/api.txt -text
 docs/dev-setup.txt -text
@@ -530,6 +532,7 @@ icons/zip[!!-~]disk.gif -text
 icons/zoomin.gif -text
 icons/zoomout.gif -text
 installer/WikidPad.nsi -text
+/langlist.txt -text
 lib/__init__.py -text
 lib/gadfly/__init__.py -text
 lib/gadfly/bindings.py -text
@@ -559,6 +562,7 @@ lib/pwiki/DocStructureCtrl.py -text
 lib/pwiki/EnchantDriver.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
+lib/pwiki/I18nPoUpdater.py -text
 lib/pwiki/Importers.py -text
 lib/pwiki/Ipc.py -text
 lib/pwiki/Localization.py -text
@@ -630,8 +634,11 @@ lib/pwiki/wxHelper.py -text
 lib/readme.txt -text
 /license-spelladdon.txt -text
 /license.txt -text
+/msgfmt.py -text
+/pygettext.py -text
 /readme_Wic.txt -text
 /setup.py -text
 /sql_mar.py -text
+/updateI18N.py -text
 /wikidpad_spelladdon.iss -text
 /wikidpad_unicode.iss -text

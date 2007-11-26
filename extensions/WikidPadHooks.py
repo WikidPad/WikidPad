@@ -5,6 +5,8 @@ WIKIDPAD_PLUGIN = (("hooks", 1),)
 def startup(wikidPad):
     """
     Called when application starts
+    
+    wikidPad -- PersonalWikiFrameObject
     """
 
     pass
@@ -13,6 +15,7 @@ def newWiki(wikidPad, wikiName, wikiDir):
     """
     Called when a new wiki is about to be created.
 
+    wikidPad -- PersonalWikiFrameObject
     wikiName -- name of the wiki (already checked to be a proper CamelCase word)
     wikiDir -- directory to create the wiki in (more precisely the .wiki config
            file). This directory may already exist
@@ -25,6 +28,7 @@ def createdWiki(wikidPad, wikiName, wikiDir):
 
     The home wiki word (equals name of the wiki) is not yet loaded.
 
+    wikidPad -- PersonalWikiFrameObject
     wikiName -- name of the wiki
     wikiDir -- directory the wiki was created in
     """
@@ -34,6 +38,7 @@ def openWiki(wikidPad, wikiConfig):
     """
     Called when an existing wiki is about to be opened.
 
+    wikidPad -- PersonalWikiFrameObject
     wikiConfig -- path to the .wiki config file
     """
     pass
@@ -42,6 +47,7 @@ def openedWiki(wikidPad, wikiName, wikiConfig):
     """
     Called when an existing wiki was opened successfully
 
+    wikidPad -- PersonalWikiFrameObject
     wikiName -- name of the wiki
     wikiConfig -- path to the .wiki config file
     """
@@ -77,6 +83,7 @@ def savingWikiWord(wikidPad, wikiWord):
     """
     Called when a new or existing wiki word is about to be saved
 
+    wikidPad -- PersonalWikiFrameObject
     wikiWord -- name of the wiki word to create
     """
     pass
@@ -85,6 +92,7 @@ def savedWikiWord(wikidPad, wikiWord):
     """
     Called when a wiki word was saved successfully
 
+    wikidPad -- PersonalWikiFrameObject
     wikiWord -- name of the wiki word to create
     """
     pass
@@ -96,6 +104,7 @@ def renamedWikiWord(wikidPad, fromWord, toWord):
     The changed data is already saved in the fileset,
     the GUI is not updated yet, the renamed page is not yet loaded.
 
+    wikidPad -- PersonalWikiFrameObject
     fromWord -- name of the wiki word before renaming
     toWord -- name of the wiki word after renaming
     """
@@ -109,6 +118,7 @@ def deletedWikiWord(wikidPad, wikiWord):
     the GUI is not updated yet, another page (normally
     the last in history before the deleted one) is not yet loaded.
 
+    wikidPad -- PersonalWikiFrameObject
     wikiWord -- name of the deleted wiki word
     """
     pass
@@ -119,5 +129,7 @@ def exit(wikidPad):
 
     The global and the wiki configuration (if any) are saved already,
     the current wiki page (if any) is saved already.
+
+    wikidPad -- PersonalWikiFrameObject
     """
     pass

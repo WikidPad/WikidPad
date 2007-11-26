@@ -216,7 +216,7 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
         # make sure this is a valid wiki word
         if not self.getMainControl().getFormatting().isNakedWikiWord(wikiWord):
             self.getMainControl().displayErrorMessage(
-                    u"'%s' is an invalid wiki word." % wikiWord)
+                    _(u"'%s' is an invalid wiki word.") % wikiWord)
             return
 
         try:
@@ -251,8 +251,9 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
                         suggNewPageTitle=suggNewPageTitle)
                 # trigger hooks
                 self.getMainControl().hooks.newWikiWord(self, wikiWord)
-                self.getStatusBar().SetStatusText(uniToGui(u"Wiki page not found, a new "
-                        u"page will be created"), 0)
+                self.getStatusBar().SetStatusText(
+                        uniToGui(_(u"Wiki page not found, a new "
+                        u"page will be created")), 0)
                 self.getStatusBar().SetStatusText(uniToGui(u""), 1)
 
             self.getSubControl("textedit").loadWikiPage(page, evtprops)
@@ -402,8 +403,8 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
 
         historyLen = len(hist)
         dlg = wx.SingleChoiceDialog(self,
-                                   u"History",
-                                   u"History",
+                                   _(u"History"),
+                                   _(u"History"),
                                    hist,
                                    wx.CHOICEDLG_STYLE | wx.OK | wx.CANCEL)
 

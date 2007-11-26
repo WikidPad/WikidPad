@@ -75,7 +75,7 @@ class IncrementalSearchDialog(wx.Frame):
         self.txtCtrl = txtCtrl
         self.presenter = presenter
         self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
-                u"Incremental search (ENTER/ESC to finish)",
+                _(u"Incremental search (ENTER/ESC to finish)"),
                 style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
 
         self.tfInput.SetFont(font)
@@ -1065,7 +1065,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
     def onSavingAllPages(self, miscevt):
         if self.getLoadedDocPage() is not None and (
-                self.getLoadedDocPage().getDirty()[0] or miscevt.get("force", False)):
+                self.getLoadedDocPage().getDirty()[0] or miscevt.get("force",
+                False)):
             self.saveLoadedDocPage()
 
     def onClosingCurrentWiki(self, miscevt):
@@ -1612,7 +1613,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         for tok in tokens:
             if tok.ttype == WikiFormatting.FormatTypes.WikiWord:
                 searchStr = None
-    
+
                 # open the wiki page
                 if tabMode & 2:
                     # New tab
@@ -1631,7 +1632,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     suggNewPageTitle = PageAst.getTextFromTokenList(
                             tok.node.titleTokens)
 
-                presenter.openWikiPage(tok.node.nakedWord,   # .getMainControl()
+                presenter.openWikiPage(tok.node.nakedWord,
                         motionType="child", anchor=tok.node.anchorFragment,
                         suggNewPageTitle=suggNewPageTitle)
 
@@ -1804,9 +1805,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if securityLevel == 0:
             # No scripts allowed
             # Print warning message
-            wx.MessageBox(u"Set in options, page \"Security\", \n"
+            wx.MessageBox(_(u"Set in options, page \"Security\", \n"
                     "item \"Script security\" an appropriate value \n"
-                    "to execute a script", u"Script execution disabled",
+                    "to execute a script"), _(u"Script execution disabled"),
                     wx.OK, self.presenter.getMainControl())
             return
 
@@ -1875,7 +1876,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 except Exception, e:
                     s = StringIO()
                     traceback.print_exc(file=s)
-                    self.AddText(u"\nException: %s" % s.getvalue())
+                    self.AddText(_(u"\nException: %s") % s.getvalue())
                 
 
 
@@ -2466,7 +2467,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                         nextNum = prevNum+1
                         adjustment = len(str(nextNum)) - len(prevNumStr)
 
-                        self.AddText(u"%s%s%d. " % (u" " * (self.GetLineIndentation(currentLine-1) - adjustment), match.group(2), int(prevNum)+1))
+                        self.AddText(u"%s%s%d. " % (u" " *
+                                (self.GetLineIndentation(currentLine-1) - adjustment),
+                                match.group(2), int(prevNum)+1))
                         return
 
                 if self.autoIndent:
@@ -2662,7 +2665,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 currentLine = self.GetCurrentLine()+1
                 currentPos = self.GetCurrentPos()
                 currentCol = self.GetColumn(currentPos)
-                self.presenter.SetStatusText(u"Line: %d Col: %d Pos: %d" %
+                self.presenter.SetStatusText(_(u"Line: %d Col: %d Pos: %d") %
                         (currentLine, currentCol, currentPos), 2)
 
 
@@ -2841,7 +2844,7 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
                     except Exception, e:
                         traceback.print_exc()
                         self.editor.presenter.getMainControl().displayErrorMessage(
-                                u"Couldn't copy file", e)
+                                _(u"Couldn't copy file"), e)
                         return
 
                 if shiftPressed or doCopy:
@@ -2903,5 +2906,25 @@ u"""
 """
 
 
+# Entries to support i18n of context menus
+
+N_(u"Undo")
+N_(u"Redo")
+N_(u"Cut")
+N_(u"Copy")
+N_(u"Paste")
+N_(u"Delete")
+N_(u"Select All")
+
+N_(u"Activate")
+N_(u"Activate New Tab")
+N_(u"Activate New Tab Backgrd.")
+
+N_(u"Close Tab")
+
+N_(u"Show folding")
+N_(u"&Toggle current folding")
+N_(u"&Unfold All")
+N_(u"&Fold All")
 
 

@@ -30,7 +30,7 @@ class MultiPageTextImporter:
         guiparent as parent
         """
         return (
-                (u"multipage_text", "Multipage text", None),
+                (u"multipage_text", _(u"Multipage text"), None),
                 )
 
 
@@ -43,8 +43,8 @@ class MultiPageTextImporter:
         If an export type goes to a directory, None is returned
         """
         if importType == u"multipage_text":
-            return (("Multipage files (*.mpt)", "*.mpt"),
-                    ("Text file (*.txt)", "*.txt")) 
+            return ((_(u"Multipage files (*.mpt)"), "*.mpt"),
+                    (_(u"Text file (*.txt)"), "*.txt")) 
 
         return None
 
@@ -119,7 +119,7 @@ class MultiPageTextImporter:
         try:
             self.rawImportFile = open(importSrc, "rU")
         except IOError:
-            raise ImportException("Opening import file failed")
+            raise ImportException(_(u"Opening import file failed"))
             
         self.wikiDataManager = wikiDataManager
 #         wikiData = self.wikiDataManager.getWikiData()
@@ -144,22 +144,24 @@ class MultiPageTextImporter:
                     line = self.importFile.readline()
 
                 if not line.startswith("Multipage text format "):
-                    raise ImportException("Bad file format, header not detected")
-                
+                    raise ImportException(
+                            _(u"Bad file format, header not detected"))
+
                 # Following in the format identifier line is a version number
                 # of the file format
                 self.formatVer = int(line[22:-1])
                 
                 if self.formatVer > 1:
                     raise ImportException(
-                            "File format number %i is not supported" %
+                            _(u"File format number %i is not supported") %
                             self.formatVer)
 
                 # Next is the separator line
                 line = self.importFile.readline()
                 if not line.startswith("Separator: "):
-                    raise ImportException("Bad file format, header not detected")
-                    
+                    raise ImportException(
+                            _(u"Bad file format, header not detected"))
+
                 self.separator = line[11:]
                 
                 if self.formatVer == 0:
@@ -204,7 +206,7 @@ class MultiPageTextImporter:
 
             wikiWord = line[:-1]
             if not formatting.isNakedWikiWord(wikiWord):
-                raise ImportException("Bad wiki word: %s" % wikiWord)
+                raise ImportException(_(u"Bad wiki word: %s") % wikiWord)
 
             content = self.collectContent()
             page = self.wikiDataManager.getWikiPageNoError(wikiWord)
@@ -273,7 +275,7 @@ class MultiPageTextImporter:
         "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
         for ts in timeStamps]
 
-        
+
         content = self.collectContent()
         page = self.wikiDataManager.getWikiPageNoError(subtag)
 

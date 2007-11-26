@@ -187,8 +187,8 @@ class FileStorage:
                     # EOF
                     return True
                 if len(block1) != len(block2):
-                    raise FSException("File compare error, file not readable or "
-                            "changed during compare")
+                    raise FSException(_(u"File compare error, file not readable or "
+                            u"changed during compare"))
 
                 if block1 != block2:
                     return False
@@ -209,7 +209,7 @@ class FileStorage:
         """
 
         if not os.path.isfile(srcPath):
-            raise FSException("Path '%s' must point to an existing file" %
+            raise FSException(_(u"Path '%s' must point to an existing file") %
                     srcPath)
 
         self._ensureStorage()
@@ -226,7 +226,7 @@ class FileStorage:
 
         mat = _FILESPLITPAT.match(fname)
         if mat is None:
-            raise FSException("Internal error: Bad source file name")
+            raise FSException(_(u"Internal error: Bad source file name"))
 
         coreName = mat.group("name")
         suffix = mat.group("suffix")
@@ -289,7 +289,7 @@ class FileStorage:
             return destpath
             
         if destpath is None:
-            raise FSException("Copy of file '%s' couldn't be created" %
+            raise FSException(_(u"Copy of file '%s' couldn't be created") %
                     srcPath)
                     
         self.copyFile(srcPath, destpath)

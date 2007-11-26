@@ -103,7 +103,8 @@ class GraphVizBaseHandler:
         
         if self.extAppExe == "":
             # No path to MimeTeX executable -> show message
-            return "<pre>[Please set path to GraphViz executables]</pre>"
+            return u"<pre>" + _(u"[Please set path to GraphViz executables]") + \
+                    "</pre>"
 
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
@@ -133,7 +134,8 @@ class GraphVizBaseHandler:
         if errResponse != "":
             appname = mbcsDec(self.EXAPPNAME, "replace")[0]
             errResponse = mbcsDec(errResponse, "replace")[0]
-            return u"<pre>[%s Error: %s]</pre>" % (appname, errResponse)
+            return u"<pre>" + _(u"[%s Error: %s]") % (appname, errResponse) +\
+                     u"</pre>"
 
 
         # Return appropriate HTML code for the image
@@ -233,27 +235,27 @@ class GraphVizOptionsPanel(wx.Panel):
         mainsizer = wx.FlexGridSizer(6, 2, 0, 0)
         mainsizer.AddGrowableCol(1, 1)
 
-        mainsizer.Add(wx.StaticText(self, -1, "Directory of executables:"), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _(u"Directory of executables:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(self.tfDir, 1, wx.ALL | wx.EXPAND, 5)
 
-        mainsizer.Add(wx.StaticText(self, -1, "Name of dot executable:"), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _(u"Name of dot executable:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(self.tfDot, 1, wx.ALL | wx.EXPAND, 5)
 
-        mainsizer.Add(wx.StaticText(self, -1, "Name of neato executable:"), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _(u"Name of neato executable:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(self.tfNeato, 1, wx.ALL | wx.EXPAND, 5)
 
-        mainsizer.Add(wx.StaticText(self, -1, "Name of twopi executable:"), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _(u"Name of twopi executable:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(self.tfTwopi, 1, wx.ALL | wx.EXPAND, 5)
 
-        mainsizer.Add(wx.StaticText(self, -1, "Name of circo executable:"), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _(u"Name of circo executable:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(self.tfCirco, 1, wx.ALL | wx.EXPAND, 5)
 
-        mainsizer.Add(wx.StaticText(self, -1, "Name of fdp executable:"), 0,
+        mainsizer.Add(wx.StaticText(self, -1, _(u"Name of fdp executable:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(self.tfFdp, 1, wx.ALL | wx.EXPAND, 5)
 

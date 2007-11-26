@@ -88,7 +88,7 @@ class PluginAPI(object):
         return registered
 
     def deleteModule(self, module):
-        for f in __functionNames:
+        for f in self.__functionNames:
             if hasattr(module, f):
                 self.__plugins[f].remove(getattr(module,f))
     

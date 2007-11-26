@@ -191,7 +191,7 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
             else:
                 result = self.configDefaults[(section, option)]
         else:
-            raise UnknownOptionException, "Unknown option %s:%s" % (section, option)
+            raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
 
         if result is None:
             return default
@@ -238,7 +238,7 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         if self.isOptionAllowed(section, option):
             _setValue(section, option, value, self.configParserObject)
         else:
-            raise UnknownOptionException, "Unknown option"
+            raise UnknownOptionException, _(u"Unknown option")
 
 
     def fillWithDefaults(self):
@@ -265,7 +265,7 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         if len(readFiles) > 0:
             self.setConfigParserObject(config, fn)
         else:
-            raise MissingConfigurationFileException(u"Config file not found")
+            raise MissingConfigurationFileException(_(u"Config file not found"))
 
 
     def createEmptyConfig(self, fn):
@@ -336,7 +336,7 @@ class CombinedConfiguration(_AbstractConfiguration):
                 self.globalConfig.isOptionAllowed(section, option):
             result = self.globalConfig.get(section, option, default)
         else:
-            raise UnknownOptionException, "Unknown option %s:%s" % (section, option)
+            raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
 
         if result is None:
             return default
@@ -390,7 +390,7 @@ class CombinedConfiguration(_AbstractConfiguration):
                 self.globalConfig.isOptionAllowed(section, option):
             self.globalConfig.set(section, option, value)
         else:
-            raise UnknownOptionException, "Unknown option %s:%s" % (section, option)
+            raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
 
 
     def fillGlobalWithDefaults(self):
@@ -500,6 +500,7 @@ GLOBALDEFAULTS = {
     ("main", "preview_zoom"): '0',  # Zoom factor for preview
     ("main", "last_active_dir"): None,   # Should be overwritten with concrete value
     ## ("main", "font"): "Courier New",
+    ("main", "gui_language"): u"",   # Language (as locale code) to use in GUI. Empty string means system default language
     ("main", "font"): None,
     ("main", "wrap_mode"): "True",
     ("main", "indentation_guides"): "True",

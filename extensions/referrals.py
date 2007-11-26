@@ -42,7 +42,8 @@ def describeMenuItems(wiki):
         - the filename of a bitmap (if file not found, no icon is used)
         - a tuple of filenames, first existing file is used
     """
-    return ((referrals, "Show referring pages\tCtrl-Shift-P", "Show referring pages"),)
+    return ((referrals, _(u"Show referring pages") + u"\tCtrl-Shift-P",
+            _(u"Show referring pages")),)
 
 
 def describeToolbarItems(wiki):
@@ -68,7 +69,8 @@ def describeToolbarItems(wiki):
         - the filename of a bitmap (if file not found, a default icon is used)
         - a tuple of filenames, first existing file is used
     """
-    return ((referrals, "Referers", "Show referring pages", ("rename", "tb_rename")),)
+    return ((referrals, _(u"Referers"), _(u"Show referring pages"),
+            ("rename", "tb_rename")),)
     #icon = wiki.lookupIcon("tb_rename")
     # return ((referrals, "Referers", "Show referring pages", icon),)
 
@@ -85,7 +87,7 @@ def referrals(wiki, evt):
 
     parents = wiki.wikiData.getParentRelationships(wiki.getCurrentWikiWord())
     parents = [bracketWord(word) for word in parents]
-    wiki.getActiveEditor().AddText(u"*%s page(s) referring to* %s\n" %
+    wiki.getActiveEditor().AddText(_(u"*%s page(s) referring to* %s\n") %
             (len(parents), bracketWord(wiki.getCurrentWikiWord())))
 
     for word in parents:
@@ -94,7 +96,7 @@ def referrals(wiki, evt):
 
     children = wiki.wikiData.getChildRelationships(wiki.getCurrentWikiWord())
     children = [bracketWord(word) for word in children]
-    wiki.getActiveEditor().AddText(u"*%s page(s) referred to by* %s\n" %
+    wiki.getActiveEditor().AddText(_(u"*%s page(s) referred to by* %s\n") %
             (len(children), bracketWord(wiki.getCurrentWikiWord())))
 
     for word in children:

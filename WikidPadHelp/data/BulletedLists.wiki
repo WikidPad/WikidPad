@@ -1,12 +1,12 @@
 ﻿++ Bulleted Lists
 
-To start a bulleted list type an asterisk at the beginning of the line.
+To start a bulleted list the line must be indented with a tabulator.
+After the tabulator type an asterisk followed by a space.
 For example:
 
     * Put your cursor at the end of this line and press enter.
 
-The start a numbered bulleted list type a number followed by a period
-at the beginning of the line. For example:
+The start a numbered bulleted list type an indented number followed by a period at the beginning of the line. For example:
 
     1. Put your cursor at the end of this line and press enter.
 
@@ -18,7 +18,7 @@ You can switch off the automatic generation of bullets/numbers with the "auto-bu
 
 You can also switch off the automatic indentation with "auto-indent" option:
 
-    If this line is indented and you press return, next will be as well.
+    If this line is indented and you press enter, next will be as well.
 
 
 If a line has a "lonely" bullet or number on it and you press enter, the bullet is removed:

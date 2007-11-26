@@ -85,7 +85,8 @@ class GptHandler:
         
         if self.extAppExe == "":
             # No path to Gnuplot executable -> show message
-            return "<pre>[Please set path to Gnuplot executable]</pre>"
+            return u"<pre>" + _(u"[Please set path to Gnuplot executable]") +\
+                    u"</pre>"
 
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
@@ -122,7 +123,8 @@ class GptHandler:
             
         if errResponse != "":
             errResponse = mbcsDec(errResponse, "replace")[0]
-            return u"<pre>[Gnuplot error: %s]</pre>" % errResponse
+            return u"<pre>" + _(u"[Gnuplot error: %s]") % errResponse +\
+                    u"</pre>"
 
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
@@ -172,7 +174,7 @@ class GnuplotOptionsPanel(wx.Panel):
         mainsizer = wx.BoxSizer(wx.VERTICAL)
 
         inputsizer = wx.BoxSizer(wx.HORIZONTAL)
-        inputsizer.Add(wx.StaticText(self, -1, "Path to Gnuplot:"), 0,
+        inputsizer.Add(wx.StaticText(self, -1, _(u"Path to Gnuplot:")), 0,
                 wx.ALL | wx.EXPAND, 5)
         inputsizer.Add(self.tfPath, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(inputsizer, 0, wx.EXPAND)

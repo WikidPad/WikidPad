@@ -655,10 +655,10 @@ class WikiPage(DataCarryingPage):
         """
         withCamelCase = strToBool(self.getPropertyOrGlobal(
                 u"camelCaseWordsEnabled"), True)
-                
+
         footnotesAsWws = self.wikiDocument.getWikiConfig().getboolean(
                 "main", "footnotes_as_wikiwords", False)
-                
+
         autoLinkMode = self.getPropertyOrGlobal(u"auto_link", u"off").lower()
 
         return WikiFormatting.WikiPageFormatDetails(
@@ -1055,7 +1055,8 @@ class FunctionalPage(DataCarryingPage):
         DataCarryingPage.__init__(self, wikiDocument)
         
         if not isFuncTag(funcTag):
-            raise BadFuncPageTagException("Func tag %s does not exist" % funcTag)
+            raise BadFuncPageTagException(
+                    _(u"Func. tag %s does not exist") % funcTag)
 
         self.funcTag = funcTag
 
