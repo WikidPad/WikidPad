@@ -33,7 +33,7 @@ class OpenWikiWordDialog(wx.Dialog):
         self.PostCreate(d)
         
         self.pWiki = pWiki
-        self.value = None     
+        self.value = u""     
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "OpenWikiWordDialog")
 
@@ -59,6 +59,9 @@ class OpenWikiWordDialog(wx.Dialog):
         wx.EVT_BUTTON(self, XRCID("btnCreate"), self.OnCreate)
         
     def OnOk(self, evt):
+        if len(self.value) == 0:
+            return
+
         if not self.pWiki.getWikiData().isDefinedWikiWord(self.value):
 #             words = self.pWiki.getWikiData().getWikiWordsWith(self.value.lower(),
 #                     True)

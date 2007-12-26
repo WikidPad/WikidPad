@@ -1,7 +1,14 @@
 ﻿++ Change Log
 
 
-Nov. 25, 2007 (1.8rc11)
+Dec. 26, 2007 (1.8rc12)
+
+    * Bug fixed: Bad handling of empty input in
+      "Open Wiki Word" dialog
+
+
+
+Nov. 25, 2007 (1.8rc11, repository revision in "stable-1.8" branch: 135)
 
     * Bug fixed: Bad HTML anchors for headings when exporting
       to single HTML file
