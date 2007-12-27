@@ -18,6 +18,8 @@ import urllib, urlparse, cgi
 
 from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE
 
+import wx
+
 from Utilities import DUMBTHREADHOLDER
 
 import srePersistent as _re
@@ -207,37 +209,28 @@ def fileContentToUnicode(content):
         return mbcsDec(content, "replace")[0]
 
 
-def loadEntireFile(filename):
-    """
-    Load entire file (text mode) and return its content.
-    """
-    rf = open(filename, "rU")
-    try:
-        result = rf.read()
-        return result
-    finally:
-        rf.close()
-
-
-def writeEntireFile(filename, content):
-    """
-    Write entire file (text mode).
-    """
-    rf = open(filename, "w")
-    try:
-        rf.write(content)
-        return
-    finally:
-        rf.close()
-
-
-# def wikiWordToLabel(word):
+# def loadEntireFile(filename):
 #     """
-#     Strip '[' and ']' if non camelcase word and return it
+#     Load entire file (text mode) and return its content.
 #     """
-#     if word.startswith(u"[") and word.endswith(u"]"):
-#         return word[1:-1]
-#     return word
+#     rf = open(filename, "rU")
+#     try:
+#         result = rf.read()
+#         return result
+#     finally:
+#         rf.close()
+# 
+# 
+# def writeEntireFile(filename, content):
+#     """
+#     Write entire file (text mode).
+#     """
+#     rf = open(filename, "w")
+#     try:
+#         rf.write(content)
+#         return
+#     finally:
+#         rf.close()
 
 
 def removeBracketsFilename(fn):
@@ -280,6 +273,10 @@ def splitIndent(text):
     pl = len(text)
     text = text.lstrip()
     return (text, pl-len(text))
+    
+    
+def measureIndent(indent):
+    return len(indent)
 
 
 def splitFill(text, delim, count, fill=u""):
@@ -431,6 +428,51 @@ base64BlockDecode = base64.b64decode
 
 
 
+EXTENDED_STRFTIME_RE = _re.compile(
+        r"([^%]+|%(?:%|[%aAbBcdHIJmMpSUwWxXyYZ])|(?:%u))",
+        _re.DOTALL | _re.UNICODE | _re.MULTILINE)
+
+
+def formatWxDate(frmStr, date):
+    """
+    Format a date (wxDateTime) according to frmStr similar to strftime.
+    """
+    if frmStr == "":
+        return frmStr
+    
+    resParts = []
+    
+    for part in EXTENDED_STRFTIME_RE.split(frmStr):
+        if not part:
+            continue
+        if part == "%u":
+            # Create weekday following ISO-8601
+            wd = date.GetWeekDay()
+            if wd == 0:
+                # Sunday has number 7
+                wd = 7
+            resParts.append("%i" % wd)
+        else:
+            resParts.append(part)
+    
+    frmStr = "".join(resParts)
+
+    return date.Format(unescapeWithRe(frmStr))
+
+
+def strftimeUB(frmStr, timet=None):
+    """
+    Similar to time.strftime, but uses a time_t number as time (no structure),
+    also unescapes some backslash codes and supports unicode.
+    """
+    if timet is None:
+        return formatWxDate(frmStr, wx.DateTime_Now())
+
+    return formatWxDate(frmStr, wx.DateTimeFromTimeT(timet))
+
+
+
+
 def splitpath(path):
     """
     Cut a path into all of its pieces, starting with drive name, through
@@ -523,7 +565,7 @@ def flexibleUrlUnquote(link):
 
 
 
-_URL_RESERVED = frozenset((u";", u"?", u":", u"@", u"&", u"=", u"+", u",", u"/"))
+URL_RESERVED = frozenset((u";", u"?", u":", u"@", u"&", u"=", u"+", u",", u"/"))
 
 def urlQuote(s, safe='/'):
     """
@@ -550,7 +592,7 @@ def urlQuote(s, safe='/'):
     result = []
     
     for c in s:
-        if c not in safe and (ord(c) < 33 or c in _URL_RESERVED):
+        if c not in safe and (ord(c) < 33 or c in URL_RESERVED):
             result.append("%%%02X" % ord(c))
         else:
             result.append(c)

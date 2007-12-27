@@ -21,6 +21,32 @@ about school of the kids.
 Open the "Views" node in the tree on the left to see how these attributes
 become available for reference.
 
+If you have multiple attributes with same key but different value, e.g.
+<<
+[alias: Foo]
+[alias: Bar]
+[alias: FooBar]
+>>
+
+You can write them as multiple values in a single attribute, separated by semicolon, e.g.
+<<
+[alias: Foo; Bar; FooBar]
+>>
+
+You can also quote the values, if they contain disallowed characters, e.g.
+[contact: "Carl [Home]"]
+
+The precise quoting syntax is the same as for [Insertions]#+++# Syntax
+
+
++++ Autocompletion
+
+Attributes also support auto completion. Try it:
+
+Place cursor after the m and press CTRL-SPACE
+[im
+
+
 +++ Attribute Based Tree Formatting
 
 There are 3 special attributes you can attach to a page that control
@@ -71,14 +97,6 @@ When creating a new wiki some default global attributes are
 automatically attached to the root wiki document on the WikiSettings page.
 
 
-+++ Autocompletion
-
-Attributes also support auto completion. Try it:
-
-Place cursor after the m and press CTRL-SPACE
-[im
-
-
 +++ Special Attributes
 
 *priority: 1-5*
@@ -92,6 +110,27 @@ importance setting of the node if "importance" is not already set.
 *font: font face name*
 Change the editor font of a page or the whole wiki.
 See WikiFonts for example and details.
+
+
+*camelCaseWordsEnabled: "true" or "false"*
+Control, if on one page or all pages (prefixed with "global") CamelCaseWords should be interpreted as wiki links.
+
+Bracketed words (e.g. [CamelCaseWords] are always seen as links).
+
+
+*paragraph_mode: "true" or "false"*
+Choose if for one or all pages a newline in editor is shown as new line in HTML preview/export (paragraph_mode: false) or is ignored and only an empty line starts a new paragraph (paragraph_mode: true).
+
+This paragraph is shown in
+preview differently if you
+remove the backslash from the following attribute,
+save the page and then switch to preview.
+
+This will be a new paragraph. To make a line break
+in paragraph mode, write the HTML tag 'br'.<br>
+Now we start again here.
+
+\[paragraph_mode: true]
 
 
 *alias: other page name*
@@ -122,10 +161,12 @@ The HTML exporter respects this attribute, others, like the multipage text expor
 
 
 *template: page which content should be used as template*
-See [Templates].
+See [Templates]
 
 
-*template_head: choose if a new page created from a template*
+*template_head: "auto" or "manual"*
+Choose if a new page created from a template should take the heading from the template or should automatically create a new one.
+See [Templates]
 
 
 *pagetype: type of the page*

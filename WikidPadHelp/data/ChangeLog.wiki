@@ -1,7 +1,30 @@
 ﻿++ Change Log
 
 
-Nov. 26, 2007 (1.9beta13)
+Dec. 27, 2007 (1.9beta14)
+
+    * New letter for time formats (e.g. Statusbar time format option):
+      %u shows ISO-8601 weekday number (1=monday, 7=sunday)
+    * Windows: Option to set a prefix string before each snippet from
+      clipboard catcher (prefix and suffix now support time formats).
+      See OptionsDialog#*Prepend# before# clipboard# snippet*
+    * Non-Windows: Support for a file-launcher program which takes the
+      path to a file and opens the right application. Normally the
+      "xdg-open" script does this.
+      See OptionsDialog#*Path# to# file# launcher*
+    * Support for multi-value attributes and quoted values.
+      See WikiDocumentAttributes
+    * New attribute "paragraph_mode" to control if single newlines
+      in text should be ignored and only an empty line starts a
+      new paragraph. See WikiDocumentAttributes#*paragraph_mode:
+    * Original Gadfly DB type: Faster algorithm to find opened word
+      in tree (thanks to Geoff)
+
+    * Bug fixed: Bad handling of empty input in "Open Wiki Word" dialog.
+
+
+
+Nov. 26, 2007 (1.9beta13, repository revision in "mbutscher" branch: 136)
 
     * Support for internationalization of screen messages and dialogs
       (GUI). Not supported are: attributes (e.g. "\[alias: WikiWord]"),

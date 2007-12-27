@@ -480,10 +480,10 @@ class TodoNode(AbstractNode):
         formatting = self.treeCtrl.pWiki.getFormatting()
         tokens = tokenizeTodoValue(formatting, self.categories[-1])
         for tok in tokens:
-            if tok.ttype == WikiFormatting.FormatTypes.Property and \
-                    tok.grpdict["propertyName"] in _SETTABLE_PROPS:
+            if tok.ttype == WikiFormatting.FormatTypes.PropertyInTodo and \
+                    tok.grpdict["propertyKey"] in _SETTABLE_PROPS:
                 # Use the found property to set the style of this node
-                setattr(style, tok.grpdict["propertyName"],
+                setattr(style, tok.grpdict["propertyKey"],
                         tok.grpdict["propertyValue"])
 
         return style
@@ -696,8 +696,8 @@ class WikiWordPropertySearchNode(WikiWordRelabelNode):
             
         propTokens = wikiPage.extractPropertyTokensFromPageAst(pageAst)
         for t in propTokens:
-            if t.grpdict["propertyName"] == self.propName and \
-                    t.grpdict["propertyValue"] == self.propValue:
+            if t.node.key == self.propName and \
+                    self.propValue in t.node.values:
                 editor.SetSelectionByCharPos(t.start, t.start + t.getRealLength())
                 break
 
@@ -972,7 +972,8 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
     def __init__(self, pWiki, parent, ID):        
         # wxTreeCtrl.__init__(self, parent, ID, style=wxTR_HAS_BUTTONS)
         customtreectrl.CustomTreeCtrl.__init__(self, parent, ID,
-                style=wx.TR_HAS_BUTTONS)
+                style=wx.TR_HAS_BUTTONS |
+                customtreectrl.TR_HAS_VARIABLE_ROW_HEIGHT)
 
         self.pWiki = pWiki
 
@@ -1062,7 +1063,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 ("updated wiki page", self.onWikiPageUpdated),
                 ("changed current docpage presenter",
                     self.onChangedDocPagePresenter)
-        ), self.pWiki.getMiscEvent(), self)
+        ), self.pWiki.getMiscEvent(), None)
 
         self.__sinkDocPagePresenter = wxKeyFunctionSink((
                 ("loading wiki page", self.onLoadingCurrentWikiPage),
@@ -1382,7 +1383,6 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         If nothing is found, searches for a path from wikiWord to the root.
         Expands the tree out and returns True if a path is found 
         """
-        
 #         if selectNode:
 #             doexpand = True
 

@@ -41,19 +41,14 @@ class Ast(object):
 
 
 def _enrichTokens(formatting, tokens, formatDetails, threadholder):
+    result = []
+    
     for tok in tokens:
-        if not threadholder.isCurrent():
-            return
+        threadholder.testCurrent()
+#         if not threadholder.isCurrent():
+#             return result
 
-        if tok.ttype == WikiFormatting.FormatTypes.ToDo:
-            node = Todo()
-            node.buildSubAst(formatting, tok, formatDetails, threadholder)
-            tok.node = node
-        elif tok.ttype == WikiFormatting.FormatTypes.Table:
-            node = Table()
-            node.buildSubAst(formatting, tok, formatDetails, threadholder)
-            tok.node = node
-        elif tok.ttype == WikiFormatting.FormatTypes.WikiWord:
+        if tok.ttype == WikiFormatting.FormatTypes.WikiWord:
             if formatting.isInCcWordBlacklist(tok.text):
                 # word is in camelcase blacklist, so make it normal text
                 tok.ttype = WikiFormatting.FormatTypes.Default
@@ -61,18 +56,44 @@ def _enrichTokens(formatting, tokens, formatDetails, threadholder):
                 node = WikiWord()
                 node.buildSubAst(formatting, tok, formatDetails, threadholder)
                 tok.node = node
-        elif tok.ttype == WikiFormatting.FormatTypes.Url:
-            node = Url()
+        elif tok.ttype == WikiFormatting.FormatTypes.HeadingCatchAll:
+            tok = formatting.differentiateHeadingLevel(tok.text, tok.start,
+                    formatDetails)
+        elif tok.ttype in _ENRICHMAP:
+            node = _ENRICHMAP[tok.ttype]()
             node.buildSubAst(formatting, tok, formatDetails, threadholder)
             tok.node = node
-        elif tok.ttype == WikiFormatting.FormatTypes.EscapedChar:
-            node = EscapeCharacter()
-            node.buildSubAst(formatting, tok, formatDetails, threadholder)
-            tok.node = node
-        elif tok.ttype == WikiFormatting.FormatTypes.Insertion:
-            node = Insertion()
-            node.buildSubAst(formatting, tok, formatDetails, threadholder)
-            tok.node = node            
+
+        result.append(tok)
+
+
+    return result
+
+
+#         if tok.ttype == WikiFormatting.FormatTypes.ToDo:
+#             node = Todo()
+#             node.buildSubAst(formatting, tok, formatDetails, threadholder)
+#             tok.node = node
+#         elif tok.ttype == WikiFormatting.FormatTypes.Property:
+#             node = Property()
+#             node.buildSubAst(formatting, tok, formatDetails, threadholder)
+#             tok.node = node            
+#         elif tok.ttype == WikiFormatting.FormatTypes.Table:
+#             node = Table()
+#             node.buildSubAst(formatting, tok, formatDetails, threadholder)
+#             tok.node = node
+#         elif tok.ttype == WikiFormatting.FormatTypes.Url:
+#             node = Url()
+#             node.buildSubAst(formatting, tok, formatDetails, threadholder)
+#             tok.node = node
+#         elif tok.ttype == WikiFormatting.FormatTypes.EscapedChar:
+#             node = EscapeCharacter()
+#             node.buildSubAst(formatting, tok, formatDetails, threadholder)
+#             tok.node = node
+#         elif tok.ttype == WikiFormatting.FormatTypes.Insertion:
+#             node = Insertion()
+#             node.buildSubAst(formatting, tok, formatDetails, threadholder)
+#             tok.node = node            
 
 
 
@@ -123,8 +144,9 @@ def _doAutoLinkForTokens(tokens, formatDetails, threadholder):
     The function may return the unmodified list object if auto_link
     is not used.
     """
-    if not threadholder.isCurrent():
-        return tokens
+#     if not threadholder.isCurrent():
+#         return tokens
+    threadholder.testCurrent()
 
     if formatDetails is None or \
             formatDetails.autoLinkMode != u"relax":
@@ -237,7 +259,7 @@ class Page(Ast):
             tokens = formatting.tokenizePage(text, formatDetails,
                     threadholder=threadholder)
             
-            _enrichTokens(formatting, tokens, formatDetails, threadholder)
+            tokens = _enrichTokens(formatting, tokens, formatDetails, threadholder)
     
             self.tokens = WikiFormatting.coalesceTokens(tokens)
             self.tokens = _doAutoLinkForTokens(self.tokens, formatDetails,
@@ -380,7 +402,8 @@ class Todo(Ast):
         for t in self.valuetokens:
             t.start += relpos
             
-        _enrichTokens(formatting, self.valuetokens, formatDetails, threadholder)
+        self.valuetokens = _enrichTokens(formatting, self.valuetokens, formatDetails,
+                threadholder)
         
         self.valuetokens = WikiFormatting.coalesceTokens(self.valuetokens)
         self.valuetokens = _doAutoLinkForTokens(self.valuetokens, formatDetails,
@@ -405,7 +428,7 @@ def tokenizeTodoValue(formatting, value):
     tokens = formatting.tokenizeTodo(value,
             formatDetails)
 
-    _enrichTokens(formatting, tokens, formatDetails, DUMBTHREADHOLDER)
+    tokens = _enrichTokens(formatting, tokens, formatDetails, DUMBTHREADHOLDER)
 
     return tokens   # WikiFormatting.coalesceTokens(tokens)
 
@@ -481,9 +504,9 @@ class Table(Ast):
 # 
 #         self.contenttokens = contenttokens
 
-        _enrichTokens(formatting, self.contenttokens, formatDetails,
-                threadholder)
-                
+        self.contenttokens = _enrichTokens(formatting, self.contenttokens,
+                formatDetails, threadholder)
+
         self.contenttokens = WikiFormatting.coalesceTokens(self.contenttokens)
         self.contenttokens = _doAutoLinkForTokens(self.contenttokens,
                 formatDetails, threadholder)
@@ -608,11 +631,6 @@ class WikiWord(Ast):
             return
             
         relpos = token.start + 1 + len(nw) + len(groupdict.get("wikiwordnccDelim"))
-#         if title is not None:
-#             relpos += len(title)
-
-#         delimPos = title.rindex(formatting.TitleWikiWordDelimiter)
-#         title = title[:delimPos]
 
         self.titleTokens = formatting.tokenizeTitle(title,
                 formatDetails, threadholder=threadholder)
@@ -620,7 +638,8 @@ class WikiWord(Ast):
         for t in self.titleTokens:
             t.start += relpos
 
-        _enrichTokens(formatting, self.titleTokens, formatDetails, threadholder)
+        self.titleTokens = _enrichTokens(formatting, self.titleTokens,
+                formatDetails, threadholder)
         
         self.titleTokens = WikiFormatting.coalesceTokens(self.titleTokens)
         # No call to _doAutoLinkForTokens, we don't search for links in the
@@ -686,8 +705,8 @@ class Url(Ast):
                 for t in self.titleTokens:
                     t.start += relpos
         
-                _enrichTokens(formatting, self.titleTokens, formatDetails,
-                        threadholder)
+                self.titleTokens = _enrichTokens(formatting, self.titleTokens,
+                        formatDetails, threadholder)
                         
                 self.titleTokens = WikiFormatting.coalesceTokens(self.titleTokens)
 
@@ -811,17 +830,71 @@ class Insertion(Ast):
             nextStart = mat.end(0)
 
 
-#         self.quotedValue = groupdict.get("insertionQuotedValue")
-# 
-#         iv = groupdict.get("insertionValue")
-#         if iv is not None:
-#             values = iv.split(u";")
-# 
-#             self.value = values[0]
-#             self.appendices = [v.lstrip() for v in values[1:]]
-#         else:
-#             self.value = None
-#             self.appendices = ()
+class Property(Ast):
+    r"""
+    Properties can be either quoted or non-quoted.
+    Non-quoted insertions look like:
+    [key:value;value;value]
+    
+    They are used mainly for keys supported by WikidPad internally
+    
+    Quoted insertions look like:
+    [:key:"some data ...";appendix;"appendix"]
+
+    instead of the " there can be an arbitrary number (at least one) of
+    quotation characters ", ', / or \. So " can be replaced by e.g
+    "", ''', \ or //.
+
+    These insertions are mainly used for keys supported by external plugins
+    
+    Having more than one value is optional.
+    """
+    
+    __slots__ = ("key", "values", "tokLength")
+
+    def __init__(self):
+        Ast.__init__(self)
+
+    def buildSubAst(self, formatting, token, formatDetails=None,
+            threadholder=DUMBTHREADHOLDER):
+        groupdict = token.grpdict
+
+        self.tokLength = len(token.text)
+        
+        self.key = groupdict.get("propertyKey")
+
+        content = groupdict.get("propertyContent")
+
+        mat = WikiFormatting.PropertyValueRE.match(content)
+        
+        values = []
+
+        value = mat.group("propertyQuotedValue")
+        if value is None:
+            value = mat.group("propertyValue")
+
+        values.append(value)
+
+        nextStart = mat.end(0)
+
+        while True:
+            mat = WikiFormatting.PropertyFurtherValueRE.match(content, nextStart)
+            if mat is None:
+                break
+    
+            value = mat.group("propertyFurtherQuotedValue")
+            if value is None:
+                value = mat.group("propertyFurtherValue")
+    
+            values.append(value)
+
+            nextStart = mat.end(0)
+        
+        self.values = values
+
+
+    def getLength(self):
+        return self.tokLength
 
 
 
@@ -834,5 +907,21 @@ class EscapeCharacter(Ast):
     def buildSubAst(self, formatting, token, formatDetails=None,
             threadholder=DUMBTHREADHOLDER):
             self.unescaped = token.text[1]
+
+
+
+
+
+
+# Map token types to appropriate node factory function (normally the class)
+# See _enrichTokens() above
+_ENRICHMAP = {
+        WikiFormatting.FormatTypes.ToDo: Todo,
+        WikiFormatting.FormatTypes.Property: Property,
+        WikiFormatting.FormatTypes.Table: Table,
+        WikiFormatting.FormatTypes.Url: Url,
+        WikiFormatting.FormatTypes.EscapedChar: EscapeCharacter,
+        WikiFormatting.FormatTypes.Insertion: Insertion
+        }
 
 

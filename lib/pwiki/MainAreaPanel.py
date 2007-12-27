@@ -141,8 +141,9 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             for p in self.docPagePresenters:
                 p.setLayerVisible(p is currentPresenter)
 #             rMEvent = self.mainControl.getCurrentDocPagePresenterProxyEvent()
-            rMEvent = self.getCurrentDocPagePresenterProxyEvent()
-            rMEvent.setWatchedEvents((self.currentDocPagePresenter.getMiscEvent(),))
+            proxyEvent = self.getCurrentDocPagePresenterProxyEvent()
+            proxyEvent.setWatchedEvents(
+                    (self.currentDocPagePresenter.getMiscEvent(),))
             self.mainControl.refreshPageStatus()
             self.fireMiscEventKeys(("changed current docpage presenter",))
 
@@ -267,10 +268,9 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
             self.ProcessEvent(evt)
 
-            # Now we can set the focus to the presenter
+            # Now we can set the focus back to the presenter
             # which in turn sets it to the active subcontrol
             presenter.SetFocus()
-#             self.GetPage(evt.GetSelection()).SetFocus()
         except (IOError, OSError, DbAccessError), e:
             self.runningPageChangedEvent = False
             self.mainControl.lostAccess(e)

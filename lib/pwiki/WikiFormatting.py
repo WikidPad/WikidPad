@@ -7,7 +7,7 @@ from Utilities import DUMBTHREADHOLDER
 import srePersistent as re
 
 from StringOps import Tokenizer, matchWhole, Token, htmlColorToRgbTuple, \
-        unescapeWithRe
+        unescapeWithRe, TokenIterator
 
 
 FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
@@ -16,10 +16,11 @@ FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
         "HorizLine", "Bullet", "Numeric", "Suppress", "Footnote", "Table",
         "EscapedChar", "HtmlTag", "HtmlEntity", "TableCellSplit",
         "TableRowSplit", "PreBlock", "SuppressHighlight", "Insertion",
-        "Anchor",
+        "Anchor", "Newline", "Indentation", "PropertyInTodo",
+
         "Heading5", "Heading6", "Heading7", "Heading8", "Heading9",
         "Heading10", "Heading11", "Heading12", "Heading13", "Heading14",
-        "Heading15"
+        "Heading15", "HeadingCatchAll"
         ], 0)
 
 EMPTY_RE = re.compile(ur"", re.DOTALL | re.UNICODE | re.MULTILINE)
@@ -199,10 +200,11 @@ class WikiPageFormatDetails(object):
     Store some details of the formatting of a specific page
     """
     __slots__ = ("__weakref__", "withCamelCase", "footnotesAsWws",
-            "wikiDocument", "autoLinkMode", "noFormat")
+            "wikiDocument", "autoLinkMode", "noFormat", "paragraphMode")
     
     def __init__(self, withCamelCase=True, footnotesAsWws=False,
-            wikiDocument=None, autoLinkMode=u"off", noFormat=False):
+            wikiDocument=None, autoLinkMode=u"off", noFormat=False,
+            paragraphMode=False):
         self.wikiDocument = wikiDocument   # WikiDocument object (needed for autoLink)
 
         self.withCamelCase = withCamelCase   # Interpret CamelCase as wiki word?
@@ -210,21 +212,25 @@ class WikiPageFormatDetails(object):
                 # (e.g. "[42]") as wikiwords?
         self.autoLinkMode = autoLinkMode   # Mode to automatically create links from plain text
         self.noFormat = noFormat   # No formatting at all, overrides other settings
+        
+        # If True, ignore single newlines, only empty line starts new paragraph
+        # Not relevant for page AST creation but for exporting (e.g. to HTML)
+        self.paragraphMode = paragraphMode 
 
 
     def isEquivTo(self, details):
         """
         Compares with other details object if both are "equivalent"
         """
-        if self.noFormat and details.noFormat:
+        if self.noFormat or details.noFormat:
             # Remaining doesn't matter in this case
-            return True
-            
-        return self.noFormat == details.noFormat and \
-                self.withCamelCase == details.withCamelCase and \
+            return self.noFormat == details.noFormat
+
+        return self.withCamelCase == details.withCamelCase and \
                 self.footnotesAsWws == details.footnotesAsWws and \
-                self.autoLinkMode == details.autoLinkMode
-        
+                self.autoLinkMode == details.autoLinkMode and \
+                self.paragraphMode == details.paragraphMode
+
 
 # --------------------------------
 
@@ -300,26 +306,31 @@ class WikiFormatting:
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
                 (self.HtmlTagRE, FormatTypes.HtmlTag),
-                (self.Heading15RE, FormatTypes.Heading15),
-                (self.Heading14RE, FormatTypes.Heading14),
-                (self.Heading13RE, FormatTypes.Heading13),
-                (self.Heading12RE, FormatTypes.Heading12),
-                (self.Heading11RE, FormatTypes.Heading11),
-                (self.Heading10RE, FormatTypes.Heading10),
-                (self.Heading9RE, FormatTypes.Heading9),
-                (self.Heading8RE, FormatTypes.Heading8),
-                (self.Heading7RE, FormatTypes.Heading7),
-                (self.Heading6RE, FormatTypes.Heading6),
-                (self.Heading5RE, FormatTypes.Heading5),
-                (self.Heading4RE, FormatTypes.Heading4),
-                (self.Heading3RE, FormatTypes.Heading3),
-                (self.Heading2RE, FormatTypes.Heading2),
-                (self.Heading1RE, FormatTypes.Heading1),
+                (self.HeadingCatchAllRE, FormatTypes.HeadingCatchAll),
+#                 
+#                 (self.Heading15RE, FormatTypes.Heading15),
+#                 (self.Heading14RE, FormatTypes.Heading14),
+#                 (self.Heading13RE, FormatTypes.Heading13),
+#                 (self.Heading12RE, FormatTypes.Heading12),
+#                 (self.Heading11RE, FormatTypes.Heading11),
+#                 (self.Heading10RE, FormatTypes.Heading10),
+#                 (self.Heading9RE, FormatTypes.Heading9),
+#                 (self.Heading8RE, FormatTypes.Heading8),
+#                 (self.Heading7RE, FormatTypes.Heading7),
+#                 (self.Heading6RE, FormatTypes.Heading6),
+#                 (self.Heading5RE, FormatTypes.Heading5),
+#                 (self.Heading4RE, FormatTypes.Heading4),
+#                 (self.Heading3RE, FormatTypes.Heading3),
+#                 (self.Heading2RE, FormatTypes.Heading2),
+#                 (self.Heading1RE, FormatTypes.Heading1),
                 (self.AnchorRE, FormatTypes.Anchor),
                 (self.BulletRE, FormatTypes.Bullet),
                 (self.NumericBulletRE, FormatTypes.Numeric),
                 (self.HorizLineRE, FormatTypes.HorizLine),
-                (self.InsertionRE, FormatTypes.Insertion)
+                (self.InsertionRE, FormatTypes.Insertion),
+                (ur"\n", FormatTypes.Newline),
+                (ur"^[ \t]+", FormatTypes.Indentation)
+#                 (ur"[^\n]+", FormatTypes.Default)
 #                 (self.PlainCharactersRE, FormatTypes.Default)
                 ]
                 
@@ -329,7 +340,7 @@ class WikiFormatting:
                 (self.HtmlEntityRE, FormatTypes.HtmlEntity),
                 (self.TitledUrlRE, FormatTypes.Url),
                 (self.UrlRE, FormatTypes.Url),
-                (self.PropertyRE, FormatTypes.Property),
+                (self.PropertyInTodoRE, FormatTypes.PropertyInTodo),
                 (self.FootnoteRE, FormatTypes.Footnote),
                 (self.WikiWordEditorRE2, FormatTypes.WikiWord2),
                 (self.WikiWordEditorRE, FormatTypes.WikiWord),
@@ -386,6 +397,25 @@ class WikiFormatting:
                 ]
 
 
+        self.formatHeadings= [
+                (self.Heading15RE, FormatTypes.Heading15),
+                (self.Heading14RE, FormatTypes.Heading14),
+                (self.Heading13RE, FormatTypes.Heading13),
+                (self.Heading12RE, FormatTypes.Heading12),
+                (self.Heading11RE, FormatTypes.Heading11),
+                (self.Heading10RE, FormatTypes.Heading10),
+                (self.Heading9RE, FormatTypes.Heading9),
+                (self.Heading8RE, FormatTypes.Heading8),
+                (self.Heading7RE, FormatTypes.Heading7),
+                (self.Heading6RE, FormatTypes.Heading6),
+                (self.Heading5RE, FormatTypes.Heading5),
+                (self.Heading4RE, FormatTypes.Heading4),
+                (self.Heading3RE, FormatTypes.Heading3),
+                (self.Heading2RE, FormatTypes.Heading2),
+                (self.Heading1RE, FormatTypes.Heading1)
+                ]
+
+
         ignoreList = []  # List of FormatTypes not to compile into the comb. regex
 
         self.footnotesAsWws = self.wikiDocument.getWikiConfig().getboolean(
@@ -405,6 +435,9 @@ class WikiFormatting:
                 self.formatTableContentTabDelimitExpressions, ignoreList)
         self.combinedWwTitleRE = compileCombinedRegex(
                 self.formatWwTitleExpressions, ignoreList)
+        self.combinedHeadingsRE = compileCombinedRegex(
+                self.formatHeadings, ignoreList)
+
 
 #         self.wikiWordStart = u"["
 #         self.wikiWordEnd = u"]"
@@ -651,6 +684,16 @@ class WikiFormatting:
 
         return tokenizer.tokenize(text, formatMap,
                 FormatTypes.Default, threadholder=threadholder)
+
+
+    def differentiateHeadingLevel(self, text, tokenStartOffset, formatDetails=None):
+        formatMap = self.getExpressionsFormatList(
+                self.formatHeadings, formatDetails)
+
+        it = TokenIterator(self.combinedHeadingsRE, formatMap,
+                FormatTypes.Default, text, tokenStartOffset=tokenStartOffset)
+        
+        return it.next()
 
 
 

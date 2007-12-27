@@ -436,24 +436,25 @@ class PropertyChecker:
             self.mainControl.getLogWindow().removeWithCheckedWikiWord(
                     wikiPage.getWikiWord())
             for t in propTokens:
-                propName = t.grpdict["propertyName"]
-                propValue = t.grpdict["propertyValue"]
-                propTuple = (propName, propValue)
-                if propTuple in foundProps:
-                    msg = LogMessage(self.mainControl, LogMessage.SEVERITY_HINT,
-                            _(u"Same attribute twice: [%s: %s]") % propTuple,
-                            wikiPage.getWikiWord(), wikiPage.getWikiWord(),
-                            (t.start, t.start + t.getRealLength()))
-                    self.mainControl.appendLogMessage(msg)
-                    continue # if first property had messages there's no need to repeat them
+                propKey = t.node.key
+                for propValue in t.node.values:
+                    propTuple = (propKey, propValue)
 
-                foundProps.add(propTuple)
-                    
-                c, match = self.findCheckObject(propName)
-                if c is not None:                
-                    c.checkEntry(propName, propValue, foundProps, t.start,
-                            t.start + t.getRealLength(), match)
-                            
+                    if propTuple in foundProps:
+                        msg = LogMessage(self.mainControl, LogMessage.SEVERITY_HINT,
+                                _(u"Same attribute twice: [%s: %s]") % propTuple,
+                                wikiPage.getWikiWord(), wikiPage.getWikiWord(),
+                                (t.start, t.start + t.getRealLength()))
+                        self.mainControl.appendLogMessage(msg)
+                        continue # if first property had messages there's no need to repeat them
+
+                    foundProps.add(propTuple)
+
+                    c, match = self.findCheckObject(propKey)
+                    if c is not None:                
+                        c.checkEntry(propKey, propValue, foundProps, t.start,
+                                t.start + t.getRealLength(), match)
+
             self.mainControl.getLogWindow().checkAutoHide()
         finally:
             self._endPageCheck()

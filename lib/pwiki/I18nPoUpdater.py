@@ -5,7 +5,7 @@
 
 import codecs
 
-from StringOps import writeEntireFile, loadEntireFile
+from Utilities import writeEntireTxtFile, loadEntireTxtFile
 
 import Localization
 
@@ -76,7 +76,7 @@ def refreshPot(potFilename, presetMessages):
         infile = potFilename + '.pot'
 
     try:
-        content = loadEntireFile(infile)
+        content = loadEntireTxtFile(infile)
         content = content.decode("utf-8")
         lines = content.split(u"\n")
 
@@ -163,6 +163,6 @@ def main(args):
     presetMessages = Localization.buildMessageDict(args[0])
     newContent = refreshPot(args[1], presetMessages)
     newContent = newContent.encode("utf-8")
-    writeEntireFile(args[0], newContent)
+    writeEntireTxtFile(args[0], newContent)
 
 

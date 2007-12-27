@@ -1,5 +1,5 @@
 import sys, traceback
-from time import strftime
+# from time import strftime
 import re
 
 from os.path import exists, isdir, isfile
@@ -10,7 +10,7 @@ import wx, wx.html, wx.xrc
 from wxHelper import *
 
 from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, \
-        escapeForIni, unescapeForIni, escapeHtml
+        escapeForIni, unescapeForIni, escapeHtml, strftimeUB
 import WikiFormatting
 from WikiExceptions import *
 import Exporters, Importers
@@ -125,7 +125,7 @@ class OpenWikiWordDialog(wx.Dialog):
         self.PostCreate(d)
 
         self.pWiki = pWiki
-        self.wikiWord = None  
+        self.wikiWord = u""  
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "OpenWikiWordDialog")
 
@@ -157,6 +157,9 @@ class OpenWikiWordDialog(wx.Dialog):
 
 
     def activateSelectedWikiWord(self, tabMode):
+        if len(self.wikiWord) == 0:
+            return
+
         if not self.pWiki.getWikiData().isDefinedWikiWord(self.wikiWord):
             words = self.pWiki.getWikiData().getWikiWordsWith(self.wikiWord,
                     True)
@@ -426,7 +429,7 @@ class SavedVersionsDialog(wx.Dialog):
 class DateformatDialog(wx.Dialog):
 
     # HTML explanation for strftime:
-    FORMATHELP = N_(u"""<html>
+    FORMATHELP = N_(ur"""<html>
 <body bgcolor="#FFFFFF">
 
 <table border="1" align="center" style="border-collapse: collapse">
@@ -458,6 +461,8 @@ class DateformatDialog(wx.Dialog):
         <td align="left">Locale's equivalent of either AM or PM.</td></tr>
     <tr><td align="center" valign="baseline"><code>%S</code></td>
         <td align="left">Second as a decimal number [00,61].</td></tr>
+    <tr><td align="center" valign="baseline"><code>%u</code></td>
+        <td align="left">Weekday as a decimal number [1(Monday),7].</td></tr>
     <tr><td align="center" valign="baseline"><code>%U</code></td>
         <td align="left">Week number of the year (Sunday as the first day of the
                 week) as a decimal number [00,53].  All days in a new year
@@ -480,6 +485,10 @@ class DateformatDialog(wx.Dialog):
         <td align="left">Time zone name (no characters if no time zone exists).</td></tr>
     <tr><td align="center" valign="baseline"><code>%%</code></td>
         <td align="left">A literal "<tt class="character">%</tt>" character.</td></tr>
+    <tr><td align="center" valign="baseline"><code>\n</code></td>
+        <td align="left">A newline.</td></tr>
+    <tr><td align="center" valign="baseline"><code>\\</code></td>
+        <td align="left">A literal "<tt class="character">\</tt>" character.</td></tr>
     </tbody>
 </table>
 </body>
@@ -496,7 +505,7 @@ class DateformatDialog(wx.Dialog):
         self.PostCreate(d)
         
         self.mainControl = mainControl
-        self.value = None     
+        self.value = u""     
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, parent, "DateformatDialog")
         self.SetTitle(title)
@@ -526,16 +535,18 @@ class DateformatDialog(wx.Dialog):
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
         wx.EVT_TEXT(self, XRCID("fieldFormat"), self.OnText) 
 
-        
+
     def OnText(self, evt):
         preview = _(u"<invalid>")
         text = guiToUni(self.ctrls.fieldFormat.GetValue())
         try:
-            # strftime can't handle unicode correctly, so conversion is needed
-            mstr = mbcsEnc(text, "replace")[0]
-            preview = mbcsDec(strftime(mstr), "replace")[0]
+#             # strftime can't handle unicode correctly, so conversion is needed
+#             mstr = mbcsEnc(text, "replace")[0]
+#             preview = mbcsDec(strftime(mstr), "replace")[0]
+            preview = strftimeUB(text)
             self.value = text
         except:
+            traceback.print_exc()
             pass
 
         self.ctrls.fieldPreview.SetLabel(preview)

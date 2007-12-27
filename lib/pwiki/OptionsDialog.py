@@ -21,7 +21,7 @@ class PredefinedOptionsPanel(wx.Panel):
         self.PostCreate(p)
 #         self.optionsDlg = optionsDlg
         res = wx.xrc.XmlResource.Get()
-
+        
         res.LoadOnPanel(self, parent, resName)
         
     def setVisible(self, vis):
@@ -237,12 +237,19 @@ class OptionsDialog(wx.Dialog):
 
     # Windows specific options
     OPTION_TO_CONTROL_WINDOWS_ONLY = (
+            ("clipboardCatcher_prefix", "tfClipboardCatcherPrefix", "t"),
             ("clipboardCatcher_suffix", "tfClipboardCatcherSuffix", "t"),
             ("clipboardCatcher_filterDouble", "cbClipboardCatcherFilterDouble",
                     "b"),
             ("clipboardCatcher_userNotification", "chClipCatchUserNotification", "seli"),
             ("clipboardCatcher_soundFile", "tfClipCatchSoundFile", "t")
     )
+
+    # Non-Windows specific options    
+    OPTION_TO_CONTROL_NON_WINDOWS_ONLY = (
+            ("fileLauncher_path", "tfFileLauncherPath", "t"),
+    )
+    
 
 
     DEFAULT_PANEL_LIST = (
@@ -256,6 +263,7 @@ class OptionsDialog(wx.Dialog):
             ("OptionsPageEditor", N_(u"  Editor")),
             ("OptionsPageEditorColors", N_(u"    Editor Colors")),
             ("OptionsPageClipboardCatcher", N_(u"    Clipboard Catcher")),
+            ("OptionsPageFileLauncher", N_(u"  File Launcher")),
             ("OptionsPageMouse", N_(u"  Mouse")),
             ("OptionsPageTimeView", N_(u"  Time view")),
             ("OptionsPageSearching", N_(u"  Searching")),  
@@ -282,7 +290,18 @@ class OptionsDialog(wx.Dialog):
 
         if Configuration.isWindows():
             self.combinedOptionToControl += self.OPTION_TO_CONTROL_WINDOWS_ONLY
+
+            newPL = []
+            for e in self.combinedPanelList:
+                if e[0] == "OptionsPageFileLauncher":
+                    continue
+
+                newPL.append(e)
+
+            self.combinedPanelList = newPL
         else:
+            self.combinedOptionToControl += self.OPTION_TO_CONTROL_NON_WINDOWS_ONLY
+
             newPL = []
             for i, e in enumerate(self.combinedPanelList):
                 if e[0] == "OptionsPageClipboardCatcher":
@@ -444,8 +463,14 @@ class OptionsDialog(wx.Dialog):
                 lambda evt: self.selectDirectory(
                 self.ctrls.tfWikiOpenNewDefaultDir))
 
+        wx.EVT_BUTTON(self, GUI_ID.btnSelectFileLauncherPath,
+                lambda evt: self.selectFile(self.ctrls.tfFileLauncherPath,
+                _(u"All files (*.*)|*")))
+
+
         wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,
                 self.OnEditorImagePasteFileTypeChoice)
+
 
 #         wx.EVT_BUTTON(self, GUI_ID.btnSelectPageStatusTimeFormat,
 #                 lambda evt: self.selectDateTimeFormat(
@@ -666,7 +691,8 @@ class OptionsDialog(wx.Dialog):
 
     def selectFile(self, tfield, wildcard=u""):        
         selfile = wx.FileSelector(_(u"Select File"),
-                tfield.GetValue(), wildcard = wildcard + _(u"|All files (*.*)|*"),
+                tfield.GetValue(), wildcard = wildcard + u"|" + \
+                        _(u"All files (*.*)|*"),
                 flags=wx.OPEN, parent=self)
             
         if selfile:

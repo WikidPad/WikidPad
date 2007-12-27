@@ -97,9 +97,13 @@ class HtmlXmlExporter:
                 
         self.exportType = None
         self.statestack = None
+        
+        # If true ignores newlines, only an empty line starts a new paragraph
+        self.paragraphMode = False
         # deepness of numeric bullets
         self.numericdeepness = None
         self.preMode = None  # Count how many <pre> tags are open
+        self.consecEmptyLineCount = 0  # Consecutive empty line count
         self.links = None
         self.wordAnchor = None  # For multiple wiki pages in one HTML page, this contains the anchor
                 # of the current word.
@@ -264,7 +268,7 @@ class HtmlXmlExporter:
 
         if self.mainControl.getConfig().getboolean(
                 "main", "start_browser_after_export") and startfile:
-            OsAbstract.startFile(startfile)
+            OsAbstract.startFile(self.mainControl, startfile)
 #             if Configuration.isWindows():
 #                  os.startfile(startfile)
 #                 # os.startfile(mbcsEnc(link2, "replace")[0])
@@ -936,6 +940,26 @@ class HtmlXmlExporter:
         self.outAppend(u'</table>\n', eatPostBreak=True)
 
 
+    # TODO Process paragraph-wise formatting
+    def resetConsecEmptyLineCount(self):
+        if not self.paragraphMode or self.preMode:
+            self.consecEmptyLineCount = 0
+        else:
+            if self.consecEmptyLineCount > 0:
+                self.outAppend(u"<br />\n" * (self.consecEmptyLineCount + 1))
+            
+            self.consecEmptyLineCount = 0
+
+
+    def incConsecEmptyLineCount(self):
+        self.consecEmptyLineCount += 1
+
+        if self.preMode:
+            self.outAppend(u"\n")
+        elif not self.paragraphMode:
+            self.outAppend(u"<br />\n")
+
+
     def _processInsertion(self, insertionAstNode):
         """
         Process an insertion (e.g. "[:page:WikiWord]")
@@ -1294,7 +1318,8 @@ class HtmlXmlExporter:
         # deepness of numeric bullets
         self.numericdeepness = 0
         self.preMode = 0  # Count how many <pre> tags are open
-
+        self.consecEmptyLineCount = 0
+        self.paragraphMode = formatDetails.paragraphMode
 
         # Get property pattern
         if self.asHtmlPreview:
@@ -1327,7 +1352,7 @@ class HtmlXmlExporter:
                     self.outAppend('<font face="%s">' % facename)
             
             self.processTokens(content, page.getTokens())
-                
+            
             if self.asHtmlPreview and facename:
                 self.outAppend('</font>')
 
@@ -1338,11 +1363,23 @@ class HtmlXmlExporter:
         """
         Actual token to HTML converter. May be called recursively
         """
+
+        # print "--processTokens1", repr(tokens)
+
+        # Save state stack length so we do only pop states which were pushed
+        # by this method (and not by some calling method which can in fact be
+        # the same method because of recursion).
+
         stacklen = len(self.statestack)
         formatting = self.mainControl.getFormatting()
         unescapeNormalText = formatting.unescapeNormalText
         wikiDocument = self.mainControl.getWikiDocument()
-        
+
+        # Stores the indent of current line until it is used.
+        # -1: indentation already processed
+
+        lineIndentBuffer = 0
+
         for i in xrange(len(tokens)):
             tok = tokens[i]
             try:
@@ -1354,140 +1391,155 @@ class HtmlXmlExporter:
             styleno = tok.ttype
             nextstyleno = nexttok.ttype
 
-            # print "formatContent", styleno, nextstyleno, repr(content[tok[0]:nexttok[0]])
+#             print "--processTokens4", repr((tok.text, self.statestack[-1]))
 
-            
+            if lineIndentBuffer > -1 and not self.preMode and not styleno in \
+                    (WikiFormatting.FormatTypes.Numeric,
+                    WikiFormatting.FormatTypes.Bullet,
+                    WikiFormatting.FormatTypes.SuppressHighlight,
+                    WikiFormatting.FormatTypes.Table,
+                    WikiFormatting.FormatTypes.PreBlock,
+                    WikiFormatting.FormatTypes.Newline,
+                    WikiFormatting.FormatTypes.Indentation):
+
+                # We have a not yet processed indentation (lineIndentBuffer > -1)
+                # and are not in <pre> mode and the next token does neither
+                # invalidate the indent buffer (FormatTypes.Newline
+                # and Indetation) nor  processes indentation itself
+                # (the other token types above)
+                # -> Adjust statestack
+
+                # This line is not empty so reset counter
+                # (which may close a paragraph and open a new one if necessary)
+                self.resetConsecEmptyLineCount()
+
+                while stacklen < len(self.statestack) and \
+                        lineIndentBuffer < self.statestack[-1][1]:
+                    # Current indentation is less than previous (stored
+                    # on stack) so close open <ul> and <ol>
+                    self.popState()
+
+                if self.statestack[-1][0] == "normalindent" and \
+                        lineIndentBuffer > self.statestack[-1][1]:
+                    # More indentation than before -> open new indentation level
+                    self.outIndentation("normalindent")
+                    self.statestack.append(("normalindent", lineIndentBuffer))
+
+                # Indentation process
+                lineIndentBuffer = -1
+
             if styleno in (WikiFormatting.FormatTypes.Default,
-                WikiFormatting.FormatTypes.EscapedChar,
-                WikiFormatting.FormatTypes.SuppressHighlight):
+                WikiFormatting.FormatTypes.EscapedChar):
                 # Some sort of plain, unformatted text
 
                 if styleno == WikiFormatting.FormatTypes.EscapedChar:
                     text = tok.node.unescaped
-                elif styleno == WikiFormatting.FormatTypes.SuppressHighlight:
-                    text = tok.grpdict["suppressContent"]
                 else:
                     text = tok.text
 
-                if self.optsStack[-1].get("checkIndentation", True):
-                    # With indentation check, we have a complicated mechanism
-                    # here to check indentation, indent and dedent tracking
-                    # The simple version without checking below is used for
-                    # tables (table cells, more precisely)
-                    
-                    # Normal text, maybe with newlines and indentation to process
-                    lines = text.split(u"\n")
+                self.outAppend(escapeHtml(text))
 
-#                     if styleno == WikiFormatting.FormatTypes.EscapedChar:
-#                         lines = [tok.node.unescaped]
-#                     elif styleno == WikiFormatting.FormatTypes.SuppressHighlight:
-#                         lines = [tok.node.unescaped]
-                    
-    
-                    # Test if beginning of lines at beginning of a line in editor
-                    if tok.start > 0 and content[tok.start - 1] != u"\n":
-                        # if not -> output of the first, incomplete, line
-                        self.outAppend(escapeHtml(lines[0]))
-    #                     print "processTokens12", repr(lines[0])
-                        del lines[0]
-                        
-                        if len(lines) >= 1:
-                            # If further lines follow, break line
-                            if not self.preMode:
-                                self.outAppend(u"<br />\n")
-                            else:
-                                self.outAppend(u"\n")
-    
-                    if len(lines) >= 1:
-                        # All 'lines' now begin at a new line in the editor
-                        # and all but the last end at one
-                        for line in lines[:-1]:
-    #                         print "processTokens15", repr(line)
-                            if line.strip() == u"":
-                                # Handle empty line
-                                if not self.preMode:
-                                    self.outAppend(u"<br />\n")
-                                else:
-                                    self.outAppend(u"\n")
-                                continue
-                                
-                            if not self.preMode:
-                                line, ind = splitIndent(line)
-        
-                                while stacklen < len(self.statestack) and \
-                                        ind < self.statestack[-1][1]:
-                                    # Current indentation is less than previous (stored
-                                    # on stack) so close open <ul> and <ol>
-                                    self.popState()
-        
-        #                         print "normal1", repr(line), repr(self.statestack[-1][0]), ind, repr(self.statestack[-1][1])
-                                if self.statestack[-1][0] == "normalindent" and \
-                                        ind > self.statestack[-1][1]:
-                                    # More indentation than before -> open new <ul> level
-        #                             print "normal2"
-                                    self.outIndentation("normalindent")
-    
-                                    self.statestack.append(("normalindent", ind))
-                                    self.outAppend(escapeHtml(line))
-                                    self.outAppend(u"<br />\n")
-        
-                                elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
-                                    self.outAppend(escapeHtml(line))
-                                    self.outAppend(u"<br />\n")
-                            else:
-                                self.outAppend(escapeHtml(line))
-                                self.outAppend(u"\n")
-                                
-                        # Handle last line
-                        # Some tokens have own indentation handling
-                        # and last line is empty string in this case,
-                        # do not handle last line if such token follows
-                        if not nextstyleno in \
-                                (WikiFormatting.FormatTypes.Numeric,
-                                WikiFormatting.FormatTypes.Bullet,
-                                WikiFormatting.FormatTypes.Suppress,   # TODO Suppress?
-                                WikiFormatting.FormatTypes.Table,
-                                WikiFormatting.FormatTypes.PreBlock):
-    
-                            line = lines[-1]
-                            if not self.preMode:
-                                line, ind = splitIndent(line)
-                                
-                                while stacklen < len(self.statestack) and \
-                                        ind < self.statestack[-1][1]:
-                                    # Current indentation is less than previous (stored
-                                    # on stack) so close open <ul> and <ol>
-                                    self.popState()
-                                        
-                                if self.statestack[-1][0] == "normalindent" and \
-                                        ind > self.statestack[-1][1]:
-                                    # More indentation than before -> open new <ul> level
-                                    self.outIndentation("normalindent")
-    #                                 self.outEatBreaks(u"<ul>")
-                                    self.statestack.append(("normalindent", ind))
-                                    self.outAppend(escapeHtml(line))
-                                elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
-                                    self.outAppend(escapeHtml(line))
-                            else:
-                                self.outAppend(escapeHtml(line))
-                        
-                            
-                    # self.result.append(u"<br />\n")   # TODO <br />  ?
-    
-                    continue    # Next token
-                else:     # Not checkIndentation
-                    # This is really simple
-                    self.outAppend(escapeHtml(text))
-#                     if styleno == WikiFormatting.FormatTypes.EscapedChar:
-#                         self.outAppend(escapeHtml(tok.node.unescaped))
+
+#                 if self.optsStack[-1].get("checkIndentation", True):
 #                     else:
-#                         self.outAppend(escapeHtml(tok.text))
+#                         if line.strip() == u"":
+#                             # Handle empty line
+#                             if not self.preMode:
+#                                 self.outAppend(u"<br />\n")
+#                             else:
+#                                 self.outAppend(u"\n")
+#                             continue
+#                             
+#                         if not self.preMode:
+#                             line, ind = splitIndent(line)
+#     
+#                             while stacklen < len(self.statestack) and \
+#                                     lineIndentBuffer < self.statestack[-1][1]:
+#                                 # Current indentation is less than previous (stored
+#                                 # on stack) so close open <ul> and <ol>
+#                                 self.popState()
+#     
+#                             if self.statestack[-1][0] == "normalindent" and \
+#                                     lineIndentBuffer > self.statestack[-1][1]:
+#                                 # More indentation than before -> open new <ul> level
+#                                 self.outIndentation("normalindent")
+# 
+#                                 self.statestack.append(("normalindent", lineIndentBuffer))
+#                                 self.outAppend(escapeHtml(line))
+#                                 self.outAppend(u"<br />\n")
+#     
+#                             elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
+#                                 self.outAppend(escapeHtml(line))
+#                                 self.outAppend(u"<br />\n")
+#                         else:
+#                             self.outAppend(escapeHtml(line))
+#                             self.outAppend(u"\n")
+#                                 
+#                         # Handle last line (which is either last line of content
+#                         # or has some different token(s) between raw text and
+#                         # newline
+# 
+#                         # Some tokens have own indentation handling
+#                         # and last line is empty string in this case,
+#                         # do not handle last line if such token follows
+#                         if not nextstyleno in \
+#                                 (WikiFormatting.FormatTypes.Numeric,
+#                                 WikiFormatting.FormatTypes.Bullet,
+#                                 WikiFormatting.FormatTypes.Suppress,   # TODO Suppress?
+#                                 WikiFormatting.FormatTypes.Table,
+#                                 WikiFormatting.FormatTypes.PreBlock):
+#     
+#                             line = lines[-1]
+#                             if not self.preMode:
+#                                 line, ind = splitIndent(line)
+#                                 
+#                                 while stacklen < len(self.statestack) and \
+#                                         ind < self.statestack[-1][1]:
+#                                     # Current indentation is less than previous (stored
+#                                     # on stack) so close open <ul> and <ol>
+#                                     self.popState()
+#                                         
+#                                 if self.statestack[-1][0] == "normalindent" and \
+#                                         ind > self.statestack[-1][1]:
+#                                     # More indentation than before -> open new <ul> level
+#                                     self.outIndentation("normalindent")
+#     #                                 self.outEatBreaks(u"<ul>")
+#                                     self.statestack.append(("normalindent", ind))
+#                                     self.outAppend(escapeHtml(line))
+#                                 elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
+#                                     self.outAppend(escapeHtml(line))
+#                             else:
+#                                 self.outAppend(escapeHtml(line))
+# 
+#     
+#                     continue    # Next token
+#                 else:     # Not checkIndentation
+#                     # This is really simple
+#                     self.outAppend(escapeHtml(text))
 
-            
             
             # if a known token RE matches:
             
-            if styleno == WikiFormatting.FormatTypes.Bold:
+            elif styleno == WikiFormatting.FormatTypes.Indentation:
+                if not self.preMode and \
+                        self.optsStack[-1].get("checkIndentation", True):
+                    lineIndentBuffer = measureIndent(tok.text)
+                else:
+                    self.outAppend(tok.text)
+            elif styleno == WikiFormatting.FormatTypes.Newline:
+                if not self.preMode and lineIndentBuffer > -1:
+                    # Unprocessed indentation means empty line
+                    self.incConsecEmptyLineCount()
+                else:
+                    if self.preMode:
+                        self.outAppend(u"\n")
+                    elif not self.paragraphMode:
+                        self.outAppend(u"<br />\n")
+                    else:
+                        self.outAppend(u" ")
+
+                lineIndentBuffer = 0
+            elif styleno == WikiFormatting.FormatTypes.Bold:
                 self.outAppend(u"<b>" + escapeHtml(
                         unescapeNormalText(tok.grpdict["boldContent"])) + u"</b>")
             elif styleno == WikiFormatting.FormatTypes.Italic:
@@ -1525,6 +1577,9 @@ class HtmlXmlExporter:
             elif styleno == WikiFormatting.FormatTypes.Script:
                 pass  # Hide scripts 
             elif styleno == WikiFormatting.FormatTypes.PreBlock:
+                self.resetConsecEmptyLineCount()
+                lineIndentBuffer = -1
+
                 self.outEatBreaks(u"<pre>%s</pre>" %
                         escapeHtmlNoBreaks(tok.grpdict["preContent"]))
             elif styleno == WikiFormatting.FormatTypes.Anchor:
@@ -1576,20 +1631,24 @@ class HtmlXmlExporter:
                     self.outAppend(u'</span>')
 
             elif styleno == WikiFormatting.FormatTypes.Property:
-                if self.asXml:
-                    self.outAppend( u'<property name="%s" value="%s"/>' % 
-                            (escapeHtml(tok.grpdict["propertyName"]),
-                            escapeHtml(tok.grpdict["propertyValue"])) )
-                else:
-                    standardProperty = u"%s: %s" % (tok.grpdict["propertyName"],
-                            tok.grpdict["propertyValue"])
-                    standardPropertyMatching = \
-                            not not self.proppattern.match(standardProperty)
-                    # Output only for different truth values
-                    if standardPropertyMatching != self.proppatternExcluding:
-                        self.outAppend( u'<span class="property">[%s: %s]</span>' % 
-                                (escapeHtml(tok.grpdict["propertyName"]),
-                                escapeHtml(tok.grpdict["propertyValue"])) )
+                propKey = tok.node.key
+                for propValue in tok.node.values:
+
+                    if self.asXml:
+                        self.outAppend( u'<property name="%s" value="%s"/>' % 
+                                (escapeHtml(propKey),
+                                escapeHtml(propValue)) )
+                    else:
+                        standardProperty = u"%s: %s" % (propKey, propValue)
+                        standardPropertyMatching = \
+                                bool(self.proppattern.match(standardProperty))
+                        # Output only for different truth values
+                        # (Either it matches and matching props should not be
+                        # hidden or vice versa)
+                        if standardPropertyMatching != self.proppatternExcluding:
+                            self.outAppend( u'<span class="property">[%s: %s]</span>' % 
+                                    (escapeHtml(propKey),
+                                    escapeHtml(propValue)) )
 
             elif styleno == WikiFormatting.FormatTypes.Insertion:
                 self._processInsertion(tok.node)
@@ -1689,6 +1748,9 @@ class HtmlXmlExporter:
                 numbers = len(tok.grpdict["preLastNumeric"].split(u"."))
                 ind = splitIndent(tok.grpdict["indentNumeric"])[1]
 
+                self.resetConsecEmptyLineCount()
+                lineIndentBuffer = -1
+
                 while ind < self.statestack[-1][1] and \
                         (self.statestack[-1][0] != "ol" or \
                         numbers < self.numericdeepness):
@@ -1715,9 +1777,12 @@ class HtmlXmlExporter:
                 self.eatPreBreak(u"<li />")
 
             elif styleno == WikiFormatting.FormatTypes.Bullet:
-                # Numeric bullet
+                # Unnumbered bullet
                 ind = splitIndent(tok.grpdict["indentBullet"])[1]
                 
+                self.resetConsecEmptyLineCount()
+                lineIndentBuffer = -1
+
                 while ind < self.statestack[-1][1]:
                     self.popState()
                     
@@ -1733,12 +1798,34 @@ class HtmlXmlExporter:
                     self.statestack.append(("ul", ind))
 
                 self.eatPreBreak(u"<li />")
-            elif styleno == WikiFormatting.FormatTypes.Suppress:
-                while self.statestack[-1][0] != "normalindent":
+            elif styleno == WikiFormatting.FormatTypes.SuppressHighlight:
+                ind = splitIndent(tok.grpdict["suppressIndent"])[1]
+
+                self.resetConsecEmptyLineCount()
+                lineIndentBuffer = -1
+
+                while ind < self.statestack[-1][1]:
                     self.popState()
+                    
+                while ind == self.statestack[-1][1] and \
+                        self.statestack[-1][0] != "ul" and \
+                        self.hasStates():
+                    self.popState()
+
+                if ind > self.statestack[-1][1] or \
+                        self.statestack[-1][0] != "normalindent":
+#                     self.outEatBreaks(u"<ul>")
+                    self.outIndentation("normalindent")
+                    self.statestack.append(("normalindent", ind))
+
+#                 while self.statestack[-1][0] != "normalindent":
+#                     self.popState()
                 self.outAppend(escapeHtml(tok.grpdict["suppressContent"]))
             elif styleno == WikiFormatting.FormatTypes.Table:
                 ind = splitIndent(tok.grpdict["tableBegin"])[1]
+                
+                self.resetConsecEmptyLineCount()
+                lineIndentBuffer = -1
                 
                 while stacklen < len(self.statestack) and \
                         ind < self.statestack[-1][1]:
@@ -2155,16 +2242,16 @@ class MultiPageTextExporter:
                         self.exportFile.write(u"wikipage/%s\n" % word)
                         # modDate, creaDate, visitDate
                         timeStamps = page.getTimestamps()[:3]
-                        timeStrings = [unicode(time.strftime(
-                                "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
+#                         timeStrings = [unicode(time.strftime(
+#                                 "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
+#                                 for ts in timeStamps]
+                        timeStrings = [strftimeUB("%Y-%m-%d/%H:%M:%S", ts)
                                 for ts in timeStamps]
-                        
+
                         self.exportFile.write(u"%s  %s  %s\n" % tuple(timeStrings))
-#                         self.exportFile.write(unicode("%.10f %.10f %.10f\n" %
-#                                 (modDate, creaDate, visitDate)))
 
                     self.exportFile.write(page.getLiveText())
-    
+
                     if sepCount > 0:
                         self.exportFile.write("\n%s\n" % self.separator)
                         sepCount -= 1

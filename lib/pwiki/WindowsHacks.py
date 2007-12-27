@@ -5,13 +5,13 @@ by the OS-independent wxPython library.
 
 import ctypes, traceback
 from ctypes import c_int, c_uint, c_long, c_ulong, c_ushort, c_char, c_char_p, \
-        c_wchar_p, c_byte, byref
+        c_wchar_p, c_byte, byref   # , WindowsError
 
 import wx
 
 from wxHelper import getTextFromClipboard
 
-from StringOps import unescapeWithRe
+from StringOps import strftimeUB   # unescapeWithRe
 
 import DocPages
 
@@ -174,7 +174,7 @@ def ansiInputToUnicodeChar(ansiCode):
 
 
 if ShellExecuteW:
-    def startFile(link):
+    def startFile(mainControl, link):
         if not isinstance(link, unicode):
             link = unicode(link)
         # TODO Test result?
@@ -229,7 +229,7 @@ class BaseWinProcIntercept:
         """
         if uMsg == WM_DESTROY and hWnd == self.hWnd:
             self.unintercept()
-            
+        
         return CallWindowProc(c_int(self.oldWndProc), c_int(hWnd), c_uint(uMsg),
                 c_uint(wParam), c_ulong(lParam))
 
@@ -397,7 +397,14 @@ class WikidPadWin32WPInterceptor(BaseClipboardCatcher):
         if len(text) == 0:
             return
         try:
-            suffix = unescapeWithRe(self.mainControl.getConfig().get(
+            prefix = strftimeUB(self.mainControl.getConfig().get(
+                    "main", "clipboardCatcher_prefix", r""))
+        except:
+            traceback.print_exc()
+            prefix = u""   # TODO Error message?
+
+        try:
+            suffix = strftimeUB(self.mainControl.getConfig().get(
                     "main", "clipboardCatcher_suffix", r"\n"))
         except:
             traceback.print_exc()
@@ -414,11 +421,11 @@ class WikidPadWin32WPInterceptor(BaseClipboardCatcher):
         if self.mode == WikidPadWin32WPInterceptor.MODE_AT_PAGE:
             if self.wikiPage is None:
                 return
-            self.wikiPage.appendLiveText(text + suffix)
+            self.wikiPage.appendLiveText(prefix + text + suffix)
             self.notifyUserOnClipboardChange()
             
         elif self.mode == WikidPadWin32WPInterceptor.MODE_AT_CURSOR:
-            self.mainControl.getActiveEditor().ReplaceSelection(text + suffix)
+            self.mainControl.getActiveEditor().ReplaceSelection(prefix + text + suffix)
             self.notifyUserOnClipboardChange()
             
         self.lastText = text

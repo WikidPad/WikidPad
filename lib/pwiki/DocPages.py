@@ -660,12 +660,16 @@ class WikiPage(DataCarryingPage):
                 "main", "footnotes_as_wikiwords", False)
 
         autoLinkMode = self.getPropertyOrGlobal(u"auto_link", u"off").lower()
+        
+        paragraphMode = strToBool(self.getPropertyOrGlobal(
+                u"paragraph_mode"), False)
 
         return WikiFormatting.WikiPageFormatDetails(
                 withCamelCase=withCamelCase,
                 footnotesAsWws=footnotesAsWws,
                 wikiDocument=self.wikiDocument,
-                autoLinkMode=autoLinkMode
+                autoLinkMode=autoLinkMode,
+                paragraphMode=paragraphMode
                 )
 
 
@@ -709,14 +713,14 @@ class WikiPage(DataCarryingPage):
 
         propTokens = self.extractPropertyTokensFromPageAst(pageAst)
         for t in propTokens:
-            propName = t.grpdict["propertyName"]
-            propValue = t.grpdict["propertyValue"]
-            if propName == u"alias":
-                if formatting.isNakedWikiWord(propValue):
-                    self.getWikiData().setAsAlias(propValue)
-                    self.setProperty(u"alias", propValue)
-            else:
-                self.setProperty(propName, propValue)
+            propKey = t.node.key
+            for propValue in t.node.values:
+                if propKey == u"alias":
+                    if formatting.isNakedWikiWord(propValue):
+                        self.getWikiData().setAsAlias(propValue)
+                        self.setProperty(u"alias", propValue)
+                else:
+                    self.setProperty(propKey, propValue)
 
         # kill the global prop cache in case any props were added
         self.getWikiData().cachedGlobalProps = None

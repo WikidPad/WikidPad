@@ -1,20 +1,19 @@
-from time import strftime
-from pwiki.StringOps import urlFromPathname
+from pwiki.StringOps import urlFromPathname, strftimeUB
 
 def now():
-    return strftime("%x %I:%M %p")
+    return strftimeUB("%x %I:%M %p")
 
 def addDateTime(editor):
     return editor.AddText(now())
 
 def date():
-    return strftime("%x")
+    return strftimeUB("%x")
 
 def addDate(editor):
     return editor.AddText(date())
 
 def time():
-    return strftime("%I:%M %p")
+    return strftimeUB("%I:%M %p")
 
 def addTime(editor):
     return editor.AddText(time())

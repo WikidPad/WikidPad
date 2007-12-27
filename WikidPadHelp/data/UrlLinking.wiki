@@ -64,7 +64,7 @@ You can control details of URL presentation, especially for images, by using an 
     s Set size of an image, following the code is the width and height in pixels or
       as percentage of space on page, delimited by 'x' (e.g. '200x300', "60%x70%")
     a Set alignment of image, the following character defines which alignment (*t*op, vertically
-    *m*iddle, *b*ottom, *r*ight or *l*eft). This setting is not respected by the preview.
+    *m*iddle, *b*ottom, *r*ight or *l*eft). This setting is not respected by the internal preview.
 
 Examples:
 

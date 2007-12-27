@@ -19,5 +19,5 @@
 # (1, 9, 4, 2) is something after 1.9beta4
 # (2, 0, 200, 0) is 2.0final
 
-VERSION_TUPLE = ("wikidPad", 1, 9, 13, 0)
-VERSION_STRING = "wikidPad 1.9beta13"
+VERSION_TUPLE = ("wikidPad", 1, 9, 14, 0)
+VERSION_STRING = "wikidPad 1.9beta14"

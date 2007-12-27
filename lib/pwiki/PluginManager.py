@@ -83,15 +83,17 @@ class PluginAPI(object):
                     self.__plugins[f].append(getattr(module,f))
                     registered = True
             if not registered:
-                print "plugin", module.__name__, " exposes ", self.descriptor, \
-                      "but does not support any interface methods!"
+                sys.stderr.write("plugin " + module.__name__ + " exposes " +
+                        self.descriptor + 
+                        " but does not support any interface methods!")
         return registered
 
     def deleteModule(self, module):
         for f in self.__functionNames:
             if hasattr(module, f):
                 self.__plugins[f].remove(getattr(module,f))
-    
+
+
 class PluginManager(object):
     """manages all PluginAPIs and plugins."""
     def __init__(self):

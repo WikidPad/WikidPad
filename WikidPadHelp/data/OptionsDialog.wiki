@@ -217,19 +217,31 @@ Set the color of the text cursor (the small blinking vertical bar).
 
 
 ++++ Clipboard catcher
+
 This page is only visible on Windows.
 
+*Prepend before clipboard snippet*
+Control what the ClipboardCatcher should prepend before each caught snippet. This option supports time formats (as these shown in "Set Date Format" dialog in "Editor" menu)
+
 *Append after clipboard snippet*
-Control what the ClipboardCatcher should append after each caught snippet.
+Control what the ClipboardCatcher should append after each caught snippet. This option supports time formats (as these shown in "Set Date Format" dialog in "Editor" menu)
 
 *Avoid doubled snippets*
-If the same text is pasted multiple times consecutively to the clipboard, it is pasted only the first time. Some applications execute a single paste command as mutliple pastes to the clipboard which would lead to multiple inserts without this option.
+If the same text is pasted multiple times consecutively to the clipboard, it is pasted only the first time. Some applications execute a single paste command as multiple pastes to the clipboard which would lead to multiple inserts without this option.
 
 *User notification*
 Choose if you want to hear a sound when a clipboard snippet is inserted.
 
 *Sound file*
 Choose the sound file to play (if you have chosen to be notified by sound above). If the field is empty, a default sound is played.
+
+
+++++ File Launcher
+
+This page is only visible on non-Windows systems.
+
+*Path to file launcher*
+Enter here the path to a script or program which takes the path or URL of a file and runs the application associated with this file. For Linux, find the "xdg-open" script (or install it first) which should do that.
 
 
 ++++ Mouse

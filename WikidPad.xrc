@@ -1317,8 +1317,21 @@
     <object class="wxBoxSizer">
       <orient>wxVERTICAL</orient>
       <object class="sizeritem">
-        <object class="wxBoxSizer">
-          <orient>wxHORIZONTAL</orient>
+        <object class="wxFlexGridSizer">
+          <cols>2</cols>
+          <growablecols>1</growablecols>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Prepend before clipboard snippet:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfClipboardCatcherPrefix"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
           <object class="sizeritem">
             <object class="wxStaticText">
               <label>Append after clipboard snippet:</label>
@@ -1333,7 +1346,7 @@
           </object>
         </object>
         <option>0</option>
-        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbClipboardCatcherFilterDouble">
@@ -1381,6 +1394,40 @@
           </object>
           <object class="sizeritem">
             <object class="wxButton" name="btnSelectClipCatchSoundFile">
+              <label>...</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxALIGN_BOTTOM</flag>
+            <border>5</border>
+            <minsize>20,-1</minsize>
+          </object>
+          <growablecols>1</growablecols>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+    </object>
+  </object>
+  <object class="wxPanel" name="OptionsPageFileLauncher">
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <cols>3</cols>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Path to file launcher:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfFileLauncherPath"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnSelectFileLauncherPath">
               <label>...</label>
             </object>
             <option>0</option>

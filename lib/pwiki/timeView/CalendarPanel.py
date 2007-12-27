@@ -10,6 +10,8 @@ from pwiki.wxHelper import GUI_ID, wxKeyFunctionSink, cloneFont, \
         drawTextRight, drawTextCenter, getAccelPairFromKeyDown, \
         appendToMenuByMenuDesc
 
+from pwiki.StringOps import formatWxDate
+
 from pwiki.WindowLayout import setWindowPos, setWindowClientSize, LayeredControlPanel
 from pwiki.Configuration import isWindows
 
@@ -349,7 +351,7 @@ class CalendarPanel(wx.Window, TimePresentationBase):
         yPos = startY
         dc.SetFont(self.boldFont)
 #         monthName = wx.DateTime.GetMonthName(month[0], wx.DateTime.Name_Abbr)
-        monthName = date.Format(u"%b %Y")
+        monthName = formatWxDate(u"%b %Y", date)
         drawTextCenter(dc, monthName, startX, yPos, self.monthWidth)
         
 #         dc.DrawText(monthName, startX, yPos)

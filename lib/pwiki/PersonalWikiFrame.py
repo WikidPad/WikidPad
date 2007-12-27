@@ -3,7 +3,7 @@
 
 import os, sys, gc, traceback, sets, string, re
 from os.path import *
-from time import localtime, time, strftime, sleep
+from time import localtime, time, sleep
 
 import cPickle  # to create dependency?
 
@@ -60,7 +60,8 @@ import Exporters
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
         BOM_UTF8, fileContentToUnicode, splitIndent, \
         unescapeWithRe, escapeForIni, unescapeForIni, \
-        wikiUrlToPathWordAndAnchor, urlFromPathname, flexibleUrlUnquote
+        wikiUrlToPathWordAndAnchor, urlFromPathname, flexibleUrlUnquote, \
+        strftimeUB
 
 import DocPages
 import WikiFormatting
@@ -426,7 +427,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         extFile = open(extensionFileName, "rU")
         systemExtension = extFile.read()
         extFile.close()
-        
+
         return importCode(systemExtension, userExtension, userUserExtension,
                 extensionName)
 
@@ -680,10 +681,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     _(u'Export Sub-Tree as Set of HTML Pages'), self.OnExportWiki,
                     menuID=GUI_ID.MENU_EXPORT_SUB_AS_PAGES)
     
-            self.addMenuItem(exportWikisMenu,
-                    _(u'Export Wiki as XML'),
-                    _(u'Export Wiki as XML in UTF-8'), self.OnExportWiki,
-                    menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_XML)
+#             self.addMenuItem(exportWikisMenu,
+#                     _(u'Export Wiki as XML'),
+#                     _(u'Export Wiki as XML in UTF-8'), self.OnExportWiki,
+#                     menuID=GUI_ID.MENU_EXPORT_WHOLE_AS_XML)
     
             self.addMenuItem(exportWikisMenu,
                     _(u'Export Wiki to .wiki files'),
@@ -1674,14 +1675,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         menuID=wx.NewId()
         helpMenu.Append(menuID, _(u'&Visit wikidPad Homepage'), _(u'Visit Homepage'))
-        wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(
+        wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(self, 
                 u'http://www.jhorman.org/wikidPad/'))
 
         helpMenu.AppendSeparator()
 
         menuID=wx.NewId()
         helpMenu.Append(menuID, _(u'View &License'), _(u'View License'))
-        wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(
+        wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(self, 
                 join(self.wikiAppDir, u'license.txt')))
 
 #         else:
@@ -3168,7 +3169,7 @@ These are your default global settings.
             
         dpp.saveCurrentDocPage(force)
 
-#     def activateWikiWord(self, wikiWord, tabMode=0):
+
     def activatePageByUnifiedName(self, unifName, tabMode=0):
         """
         tabMode -- 0:Same tab; 2: new tab in foreground; 3: new tab in background
@@ -3232,7 +3233,6 @@ These are your default global settings.
                 # trigger hooks
                 self.hooks.savingWikiWord(self, word)
 
-#             reconnectTried = False  # Flag if reconnect was already tried after an error
             while True:
                 try:
                     if word is not None:
@@ -3254,24 +3254,6 @@ These are your default global settings.
                 except (IOError, OSError, DbAccessError), e:
                     self.lostAccess(e)
                     raise
-
-#                 except (IOError, OSError), e:
-#                     traceback.print_exc()
-#                     if self.tryAutoReconnect():
-#                         continue
-# 
-#                     if word is None:    # TODO !!!
-#                         word = u"---"
-#                     dlg = wxMessageDialog(self,
-#                             uniToGui((u'There was an error saving the contents of '
-#                             u'wiki page "%s".\n%s\n\nWould you like to try and '
-#                             u'save this document again?') % (word, e)),
-#                                         u'Error Saving!', wxYES_NO)
-#                     result = dlg.ShowModal()
-#                     dlg.Destroy()
-#                     if result == wxID_NO:
-#                         self.getWikiDocument().setNoAutoSaveFlag(True)
-#                         return False
         finally:
             self.statusBar.PopStatusText(0)
 
@@ -3279,19 +3261,12 @@ These are your default global settings.
     def deleteWikiWord(self, wikiWord):
         if wikiWord and self.requireWriteAccess():
             try:
-                # self.saveCurrentDocPage()
                 if self.getWikiData().isDefinedWikiWord(wikiWord):
                     page = self.getWikiDocument().getWikiPage(wikiWord)
                     page.deletePage()
             except (IOError, OSError, DbAccessError), e:
                 self.lostAccess(e)
                 raise
-
-#                 self.getWikiData().deleteWord(self.getCurrentWikiWord())
-#                 # trigger hooks
-#                 self.hooks.deletedWikiWord(self, self.getCurrentWikiWord())
-
-#             self.pageHistory.goAfterDeletion()
 
 
     def renameWikiWord(self, wikiWord, toWikiWord, modifyText, **evtprops):
@@ -3335,32 +3310,20 @@ These are your default global settings.
         try:
             self.tree.buildTreeForWord(self.getCurrentWikiWord(), selectNode=True)
         except Exception, e:
-            sys.stderr.write("%s\n" % e)
+            traceback.print_exc()
 
 
     def makeRelUrlAbsolute(self, relurl):
         """
         Return the absolute path for a rel: URL
         """
-#         unicodeUrl = isinstance(relurl, unicode)
-#         if unicodeUrl:
-#             relurl = relurl.encode("utf8", "replace")
-#             relurl = relurl.decode("latin-1", "replace")
-
         relpath = urllib.url2pathname(relurl[6:])
-
-#         print "makeRelUrlAbsolute3", repr((relurl, relpath))
-#         print "makeRelUrlAbsolute4", repr(abspath(join(dirname(self.getWikiConfigPath()), relpath)))
 
         url = "file:" + urlFromPathname(
                 abspath(join(dirname(self.getWikiConfigPath()), relpath)))
 
-#         if unicodeUrl:
-#             url = url.decode("utf8", "replace")
-        
-#         print "makeRelUrlAbsolute10", repr(url)
         return url
-        
+
 
     def launchUrl(self, link):
         link2 = flexibleUrlUnquote(link)
@@ -3368,44 +3331,12 @@ These are your default global settings.
                 "main", "new_window_on_follow_wiki_url") == 1 or \
                 not link2.startswith(u"wiki:"):
 
-#             if link2.startswith(u"file:") or link2.startswith(u"rel:"):
-#                 link2 = flexibleUrlUnquote(link2)
-
-# #                 print "launchUrl4"
-#                 # Now we have to do some work to interpret URL reasonably
-#                 try:
-#                     linkAscii = link2.encode("ascii", "strict")
-#                 except UnicodeEncodeError:
-#                     # URL contains non-ascii characters, so skip the following
-#                     # unquoting
-#                     linkAscii = None
-# 
-#                 if linkAscii:
-# #                     print "launchUrl7", repr(linkAscii)
-#                     # Get bytes out of percent-quoted URL
-#                     linkBytes = urllib.unquote(linkAscii)
-#                     # Try to interpret bytes as UTF-8
-#                     try:
-#                         link2 = linkBytes.decode("utf8", "strict")
-# #                         print "launchUrl10", repr(linkBytes), repr(link2)
-#                     except UnicodeDecodeError:
-#                         # Failed -> try mbcs
-#                         try:
-#                             link2 = mbcsDec(linkBytes, "strict")[0]
-#                         except UnicodeDecodeError:
-#                             # Failed, too -> leave link2 unmodified
-#                             pass
-                            
             if link2.startswith(u"rel://"):
                 # This is a relative link
                 link2 = self.makeRelUrlAbsolute(link2)
 
             try:
-#                 if Configuration.isWindows():
-                OsAbstract.startFile(link2)
-#                 else:
-#                     # Better solution?
-#                     wx.LaunchDefaultBrowser(link2)    # TODO
+                OsAbstract.startFile(self, link2)
             except Exception, e:
                 traceback.print_exc()
                 self.displayErrorMessage(_(u"Couldn't start file"), e)
@@ -3448,17 +3379,14 @@ These are your default global settings.
 
         modTime, creaTime = docPage.getTimestamps()[:2]
         if modTime is not None:
-            pageStatus += _(u"Mod.: %s") % \
-                    mbcsDec(strftime(fmt, localtime(modTime)), "replace")[0]
-            pageStatus += _(u"; Crea.: %s") % \
-                    mbcsDec(strftime(fmt, localtime(creaTime)), "replace")[0]
+#             pageStatus += _(u"Mod.: %s") % \
+#                     mbcsDec(strftime(fmt, localtime(modTime)), "replace")[0]
+#             pageStatus += _(u"; Crea.: %s") % \
+#                     mbcsDec(strftime(fmt, localtime(creaTime)), "replace")[0]
+            pageStatus += _(u"Mod.: %s") % strftimeUB(fmt, modTime)
+            pageStatus += _(u"; Crea.: %s") % strftimeUB(fmt, creaTime)
 
         self.statusBar.SetStatusText(uniToGui(pageStatus), 1)
-
-#         self.SetTitle(uniToGui(u"Wiki: %s - %s" %
-#                 (self.getWikiConfigPath(), docPage.getWikiWord())))
-
-#         tt = self.getMainAreaPanel().getCurrentTabTitle()
 
         self.SetTitle(uniToGui(u"%s: %s - %s - WikidPad" %
                 (self.getWikiDocument().getWikiName(), docPage.getWikiWord(),
@@ -3519,6 +3447,7 @@ These are your default global settings.
         self.viewWordSelection(_(u"Child nodes of '%s'") % ofWord, children,
                 "child")
 
+
     def viewBookmarks(self):
         if not self.requireReadAccess():
             return
@@ -3532,39 +3461,6 @@ These are your default global settings.
                 "random")
 
 
-#     def viewHistory(self, posDelta=0):
-#         if not self.requireReadAccess():
-#             return
-# 
-#         try:
-#             hist = self.pageHistory.getHistoryList()
-#             histpos = self.pageHistory.getPosition()
-#         except (IOError, OSError, DbAccessError), e:
-#             self.lostAccess(e)
-#             raise
-# 
-#         historyLen = len(hist)
-#         dlg = wx.SingleChoiceDialog(self,
-#                                    u"History",
-#                                    u"History",
-#                                    hist,
-#                                    wx.CHOICEDLG_STYLE | wx.OK | wx.CANCEL)
-# 
-#         if historyLen > 0:
-#             position = histpos + posDelta - 1
-#             if (position < 0):
-#                 position = 0
-#             elif (position >= historyLen):
-#                 position = historyLen-1
-# 
-#             dlg.SetSelection(position)
-# 
-#         if dlg.ShowModal() == wx.ID_OK and dlg.GetSelection() > -1:
-#             self.pageHistory.goInHistory(dlg.GetSelection() - (histpos - 1))
-# 
-#         dlg.Destroy()
-
-
     def lastAccessedWiki(self, wikiConfigFilename):
         """
         Writes to the global config the location of the last accessed wiki
@@ -3574,18 +3470,12 @@ These are your default global settings.
         self.configuration.set("main", "last_wiki", wikiConfigFilename)
         if wikiConfigFilename not in self.wikiHistory:
             self.wikiHistory = [wikiConfigFilename] + self.wikiHistory
-#             self.wikiHistory.append(wikiConfigFilename)
 
             # only keep 5 items
             # TODO Configurable
             if len(self.wikiHistory) > 5:
-#                 self.wikiHistory.pop(0)
                 self.wikiHistory = self.wikiHistory[:5]
 
-            # add the item to the menu
-#             menuID = wx.NewId()
-#             self.recentWikisMenu.Append(menuID, wikiConfigFilename)
-#             wx.EVT_MENU(self, menuID, self.OnSelectRecentWiki)
             self.informRecentWikisChanged()
 
         self.configuration.set("main", "last_active_dir", dirname(wikiConfigFilename))
@@ -3602,10 +3492,6 @@ These are your default global settings.
         self.windowLayouter.expandWindow("maintree", onOrOff)
         if onOrOff:
             self.windowLayouter.focusWindow("maintree")
-#         if onOrOff:
-#             self.windowLayouter.expandWindow("maintree")
-#         else:
-#             self.windowLayouter.collapseWindow("maintree")
 
 
     def getShowToolbar(self):
@@ -4596,9 +4482,12 @@ These are your default global settings.
         if self.isReadOnlyPage():
             return
 
-        # strftime can't handle unicode correctly, so conversion is needed
-        mstr = mbcsEnc(self.configuration.get("main", "strftime"), "replace")[0]
-        self.getActiveEditor().AddText(mbcsDec(strftime(mstr), "replace")[0])
+#         # strftime can't handle unicode correctly, so conversion is needed
+#         mstr = mbcsEnc(self.configuration.get("main", "strftime"), "replace")[0]
+#         self.getActiveEditor().AddText(mbcsDec(strftime(mstr), "replace")[0])
+
+        mstr = self.configuration.get("main", "strftime")
+        self.getActiveEditor().AddText(strftimeUB(mstr))
 
     def getLastActiveDir(self):
         return self.configuration.get("main", "last_active_dir", os.getcwd())
@@ -4699,8 +4588,6 @@ These are your default global settings.
                             wikiPage.getWikiWord())
     
                     self.fireMiscEventProps(miscevt.getProps())
-#                     if wikiPage is self.getCurrentDocPage():
-#                         self.pageHistory.goAfterDeletion()
     
                 elif miscevt.has_key("renamed wiki page"):
                     oldWord = miscevt.get("wikiPage").getWikiWord()
@@ -4709,33 +4596,14 @@ These are your default global settings.
                     # trigger hooks
                     self.hooks.renamedWikiWord(self, oldWord, newWord)
 
-#                     if miscevt.get("wikiPage") is self.getCurrentDocPage():
-#                         self.getActiveEditor().loadWikiPage(None)
-#     
-#                         # trigger hooks
-#                         self.hooks.renamedWikiWord(self, oldWord, newWord)
-#         
-#                         self.openWikiPage(newWord, forceTreeSyncFromRoot=False)
-#                         # self.findCurrentWordInTree()
-#                     else:
-#                         # trigger hooks
-#                         self.hooks.renamedWikiWord(self, oldWord, newWord)
-
                 elif miscevt.has_key("updated wiki page"):
                     # This was send from a WikiDocument(=WikiDataManager) object,
                     # send it again to listening components
                     self.fireMiscEventProps(miscevt.getProps())
             elif miscevt.getSource() is self.getMainAreaPanel():
                 self.fireMiscEventProps(miscevt.getProps())
-#             elif miscevt.getSource() in self.docPagePresenters:
-#                 if miscevt.has_key("changed presenter title"):
-#                     for idx, pres in enumerate(self.docPagePresenters):
-#                         if pres is miscevt.getSource():
-#                             self.mainAreaPanel.SetPageText(idx,
-#                                     pres.getLongTitle())
-#                             self.SetTitle(uniToGui(u"Wiki: %s - %s" %
-#                                     (self.getWikiConfigPath(),
-#                                     pres.getShortTitle())))
+#                 if miscevt.has_key("changed current docpage presenter"):
+#                     self.hooks.switchedToWikiWord(self, oldWord, newWord)
 
             # Depending on wiki-related or global func. page, the following
             # events come from document or application object

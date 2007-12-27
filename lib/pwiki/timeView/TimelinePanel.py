@@ -9,6 +9,8 @@ import wx
 from pwiki.wxHelper import GUI_ID, EnhancedListControl, wxKeyFunctionSink, cloneFont, \
         getAccelPairFromKeyDown, appendToMenuByMenuDesc, IdRecycler
 
+from pwiki.StringOps import formatWxDate
+
 from pwiki.Configuration import isWindows
 
 from TimePresentationBase import TimePresentationBase
@@ -404,7 +406,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
                     txtCol = wx.BLACK
                     
                 # Date column
-                col0txt = t.Format(formatStr)
+                col0txt = formatWxDate(formatStr, t)
                 listItemD = wx.ListItem()
                 listItemD.SetId(i)
                 listItemD.SetBackgroundColour(bgCol)

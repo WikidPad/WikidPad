@@ -10,7 +10,7 @@ import threading
 
 from os.path import exists, dirname
 
-from time import time, strftime, sleep
+from time import time, sleep
 from textwrap import fill
 
 import wx, wx.stc
@@ -1302,6 +1302,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 styleno = WikiFormatting.FormatTypes.Script
             elif styleno == WikiFormatting.FormatTypes.Anchor:
                 styleno = WikiFormatting.FormatTypes.Bold
+            elif styleno == WikiFormatting.FormatTypes.PropertyInTodo:
+                styleno = WikiFormatting.FormatTypes.Property
             elif styleno == WikiFormatting.FormatTypes.ToDo:
                 styleno = -1
                 node = tok.node
@@ -1524,7 +1526,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
 
 
-
     def snip(self):
         # get the selected text
         text = self.GetSelectedText()
@@ -1534,10 +1535,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         wikiPage = self.presenter.getWikiDocument().getWikiPageNoError("ScratchPad")
         
+#         wikiPage.appendLiveText("\n%s\n---------------------------\n\n%s\n" %
+#                 (mbcsDec(strftime("%x %I:%M %p"), "replace")[0], text))
         wikiPage.appendLiveText("\n%s\n---------------------------\n\n%s\n" %
-                (mbcsDec(strftime("%x %I:%M %p"), "replace")[0], text))
-
-        # TODO strftime
+                (strftimeUB("%x %I:%M %p"), text))
 
     def styleSelection(self, styleChars):
         """

@@ -55,6 +55,14 @@ HtmlTagRE = re.compile(
 HtmlEntityRE = re.compile(
         ur"&(?:[A-Za-z0-9]{2,10}|#[0-9]{1,10}|#x[0-9a-fA-F]{1,8});",
         re.DOTALL | re.UNICODE | re.MULTILINE)
+        
+        
+# This regex must match all possible heading levels
+HeadingCatchAllRE = re.compile(ur"^\+{1,15}(?!\+) ?" +
+        PlainCharacterPAT + ur"+?\n",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+
+
 Heading15RE      = re.compile(ur"^\+{15}(?!\+) ?(?P<h15Content>" +
         PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
@@ -115,7 +123,6 @@ TitledUrlRE =  re.compile(BracketStartPAT +
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
-# The following 2 are not in WikiFormatting.FormatExpressions
 BulletRE        = re.compile(ur"^(?P<indentBullet>[ \t]*)(?P<actualBullet>\*[ \t])",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 NumericBulletRE = re.compile(ur"^(?P<indentNumeric>[ \t]*)(?P<preLastNumeric>(?:\d+\.)*)(\d+)\.[ \t]",
@@ -215,38 +222,50 @@ TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlRE.pattern + u"|" +
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SP only
 
 
+PropertyValueRE = re.compile(ur"(?:[ \t]*"
+        ur"(?:(?P<propertyValQuoteStarter>\"+|'+|/+|\\+)"
+        ur"(?P<propertyQuotedValue>.*?)(?P=propertyValQuoteStarter)|"
+        ur"(?P<propertyValue>[\w\-\_ \t:,.!?#/|]+)))",
+        re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
-# parses the dynamic properties
+
+PropertyFurtherValueRE = re.compile(ur"(?:;[ \t]*"
+        ur"(?:(?P<propertyFurtherValQuoteStarter>\"+|'+|/+|\\+)"
+        ur"(?P<propertyFurtherQuotedValue>.*?)(?P=propertyFurtherValQuoteStarter)|"
+        ur"(?P<propertyFurtherValue>[\w\-\_ \t:,.!?#/|]+)))",
+        re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
+
+
+# parses the dynamic properties (aka attributes)
 PropertyRE      = re.compile(BracketStartPAT +
-        ur"[ \t]*(?P<propertyName>[\w\-\_\.]+?)[ \t]*"
-        ur"[=:][ \t]*(?P<propertyValue>[\w\-\_ \t:;,.!?#/|]+?)" + 
+        ur"[ \t]*(?P<propertyKey>[\w\-\_\.]+?)[ \t]*"
+        ur"[=:](?P<propertyContent>" + PropertyValueRE.pattern +
+        PropertyFurtherValueRE.pattern + ur"*)" + BracketEndPAT,
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+
+
+
+
+# parses the dynamic properties in a todo item
+PropertyInTodoRE      = re.compile(BracketStartPAT +
+        ur"[ \t]*(?P<propertyKey>[\w\-\_\.]+?)[ \t]*"
+        ur"[=:][ \t]*(?P<propertyValue>[\w\-\_ \t:,.!?#/|]+?)" + 
         BracketEndPAT,
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
 
-# InsertionValueRE = re.compile(ur"(?:(?P<insertionValue>[\w][\w\-\_ \t,.!?#/|]*)|"
-#         ur"(?P<insertionQuoteStarter>\"+|'+|/+|\\+)"
-#         ur"(?P<insertionQuotedValue>.*?)(?P=insertionQuoteStarter))",
-#         re.DOTALL | re.UNICODE | re.MULTILINE)
-# 
-# InsertionAppendixRE = re.compile(ur";[ \t]*(?:"
-#         ur"(?P<insertionAppendix>[\w][\w\-\_ \t,.!?#/|]*)|"
-#         ur"(?P<insertionApxQuoteStarter>\"+|'+|/+|\\+)"
-#         ur"(?P<insertionQuotedAppendix>.*?)(?P=insertionApxQuoteStarter))",
-#         re.DOTALL | re.UNICODE | re.MULTILINE)
-
 InsertionValueRE = re.compile(ur"(?:"
         ur"(?P<insertionQuoteStarter>\"+|'+|/+|\\+)"
         ur"(?P<insertionQuotedValue>.*?)(?P=insertionQuoteStarter)|"
         ur"(?P<insertionValue>[\w\-\_ \t,.!?#/|]*))",
-        re.DOTALL | re.UNICODE | re.MULTILINE)
+        re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 InsertionAppendixRE = re.compile(ur";[ \t]*(?:"
         ur"(?P<insertionApxQuoteStarter>\"+|'+|/+|\\+)"
         ur"(?P<insertionQuotedAppendix>.*?)(?P=insertionApxQuoteStarter)|"
         ur"(?P<insertionAppendix>[\w\-\_ \t,.!?#/|]*))",
-        re.DOTALL | re.UNICODE | re.MULTILINE)
+        re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 InsertionRE     = re.compile(BracketStartPAT +
         ur":[ \t]*(?P<insertionKey>[\w][\w\-\_\.]*)[ \t]*"

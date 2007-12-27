@@ -29,6 +29,4 @@ The clipboard catcher is disabled when:
 
 In the options dialog, page "Application", there is an entry "Append after clipboard snippet" where you can set which character(s) should be appended after each caught snippet.
 
-In this field you can use the same escapes as in the replace field of
-the "Find and Replace" dialog in regular expression mode. (see also
-[Printing]#++++# Page# separator )
+In this field you can use the same escapes as in the replace field of the "Find and Replace" dialog in regular expression mode as well as time formats as these shown in "Set Date Format" dialog in "Editor" menu. (see also [Printing]#++++# Page# separator )

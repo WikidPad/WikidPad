@@ -50,6 +50,31 @@ class ThreadHolder(_DumbThreadHolder):
         
 
 
+
+def loadEntireTxtFile(filename):
+    """
+    Load entire file (text mode) and return its content.
+    """
+    rf = open(filename, "rU")
+    try:
+        result = rf.read()
+        return result
+    finally:
+        rf.close()
+
+
+def writeEntireTxtFile(filename, content):
+    """
+    Write entire file (text mode).
+    """
+    rf = open(filename, "w")
+    try:
+        rf.write(content)
+        return
+    finally:
+        rf.close()
+
+
 # class FlagHolder(object):
 #     __slots__ = ("__weakref__", "flag")
 #     

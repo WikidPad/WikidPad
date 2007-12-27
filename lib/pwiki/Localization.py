@@ -4,8 +4,8 @@ import string, locale, codecs, sets, os, os.path, traceback
 
 from xml.dom import minidom
 
-
-from StringOps import utf8Enc, loadEntireFile, writeEntireFile
+from Utilities import loadEntireTxtFile, writeEntireTxtFile
+from StringOps import utf8Enc
 
 
 CASEMODE_UPPER_INSIDE = 0   # Sort upper case inside like aAbBcC
@@ -344,7 +344,7 @@ def loadLangList(appDir):
     result = []
 
     try:
-        data = loadEntireFile(os.path.join(appDir, "langlist.txt"))
+        data = loadEntireTxtFile(os.path.join(appDir, "langlist.txt"))
         data = data.decode("utf-8")
         
         # Remove BOM if present
@@ -519,6 +519,9 @@ def loadI18nDict(appDir, locStr=None):
     if not locStr:
         locStr = locale.getdefaultlocale()[0]
 
+    if locStr is None:
+        locStr = ""
+
     locList = _expand_lang(locStr)
 
     for locEntry in locList:
@@ -588,7 +591,7 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
     
     if i18nPoPath is None:
         # No translation
-        return loadEntireFile(os.path.join(appDir, baseXrcName + ".xrc"))
+        return loadEntireTxtFile(os.path.join(appDir, baseXrcName + ".xrc"))
 
     # Retrieve modification time of .po and .xrc file to compare with cache
     # Cache is only valid if newer than both
@@ -604,7 +607,7 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
 
         if os.path.exists(cachePath) and os.stat(cachePath).st_mtime > poModTime:
             # Valid cache found
-            return loadEntireFile(cachePath)
+            return loadEntireTxtFile(cachePath)
     except:
         traceback.print_exc()  # Really?
 
@@ -616,14 +619,14 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
 
         if os.path.exists(cachePath) and os.stat(cachePath).st_mtime > poModTime:
             # Valid cache found
-            return loadEntireFile(cachePath)
+            return loadEntireTxtFile(cachePath)
     except:
         traceback.print_exc()  # Really?
 
 
     # No valid cache -> build content
 
-    untranslated = loadEntireFile(os.path.join(appDir, baseXrcName + ".xrc"))
+    untranslated = loadEntireTxtFile(os.path.join(appDir, baseXrcName + ".xrc"))
 
     xmlDoc = minidom.parseString(untranslated)
     elementsContainingText = xmlDoc.getElementsByTagName("label") + \
@@ -668,7 +671,7 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
         cachePath = os.path.join(appDir,
                 baseXrcName + "_" + i18nLocale + ".xrc")
         
-        writeEntireFile(cachePath, translated)
+        writeEntireTxtFile(cachePath, translated)
         
         return translated
     except:
@@ -679,7 +682,7 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
         cachePath = os.path.join(globalConfigSubDir,
                 baseXrcName + "_" + i18nLocale + ".xrc")
         
-        writeEntireFile(cachePath, translated)
+        writeEntireTxtFile(cachePath, translated)
         
         return translated
     except:

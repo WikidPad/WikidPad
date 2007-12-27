@@ -1,11 +1,14 @@
 import ConfigParser
 import os, traceback
+import cStringIO as StringIO
+
 # from os.path import *
 
 import codecs
 import wx
 
 import MainApp
+import Utilities
 
 # Bug workaround: In wxPython 2.6 these constants weren't defined
 #    in 2.8 they are defined under a different name and with different values
@@ -281,12 +284,17 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
             return
 
         if self.configParserObject:
-            configFile = open(self.configPath, 'w')
-            try:
-                self.configParserObject.write(configFile)
-            finally:
-                configFile.close()
-    
+            sfile = StringIO.StringIO()
+            self.configParserObject.write(sfile)
+            Utilities.writeEntireTxtFile(self.configPath, sfile.getvalue())
+# 
+#             
+#             configFile = open(self.configPath, 'w')
+#             try:
+#                 self.configParserObject.write(configFile)
+#             finally:
+#                 configFile.close()
+
     def informChanged(self):
         """
         This should be called after configuration was changed to let
@@ -605,6 +613,7 @@ GLOBALDEFAULTS = {
             # 0 zero means very bad, 100 means very good
     ("main", "editor_imagePaste_askOnEachPaste"): "True",  # When pasting image, ask each time for settings?
 
+
     # Editor color options
     ("main", "editor_plaintext_color"): "", # Color of plain text (and non-exist. wikiwords) in editor
     ("main", "editor_link_color"): "", # Color of links (URL and wikiwords)
@@ -615,11 +624,19 @@ GLOBALDEFAULTS = {
     ("main", "editor_caret_color"): "",  # Color of caret in the editor
 
 
+    # Clipboard catcher (Windows only)
+    ("main", "clipboardCatcher_prefix"): ur"",  # Prefix to prepend before each caught clipboard snippet
     ("main", "clipboardCatcher_suffix"): ur"\n",  # Suffix to append after each caught clipboard snippet
     ("main", "clipboardCatcher_filterDouble"): "True",  # If same text shall be inserted twice (or more often)
             # do not react
     ("main", "clipboardCatcher_userNotification"): "0",  # Type of notification when new clipboard snippet is caught, 0: None; 1: Sound
     ("main", "clipboardCatcher_soundFile"): "",  # Filepath of sound to play if notification type is 1. Empty path plays bell
+
+
+    # File Launcher (for non-Windows OS)
+    ("main", "fileLauncher_path"): u"", # Path to an external program taking a path or URL to start appropriate application
+            # depending on file type. For Windows, the console command "start" does this.
+
 
     # Mouse options
     ("main", "mouse_middleButton_withoutCtrl"): "1", # If middle mouse button is pressed on a link in editor or preview, without

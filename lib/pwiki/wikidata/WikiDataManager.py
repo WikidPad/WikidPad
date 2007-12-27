@@ -130,8 +130,8 @@ def splitConfigPathAndWord(wikiCombinedFilename):
                             if file.endswith(".wiki")]
                     if len(wikiFiles) > 0:
                         wikiWord = os.path.basename(wikiConfigFilename)
-                        wikiWord = wikiWord[0:len(wikiWord)-5]
-    
+                        wikiWord = wikiWord[0 : len(wikiWord) - 5]
+
                         # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
                         windows83Marker = wikiWord.find("~")
                         if windows83Marker != -1:
@@ -144,9 +144,9 @@ def splitConfigPathAndWord(wikiCombinedFilename):
                         continue
                 except (WindowsError, IOError, OSError):
                     # something went wrong -> give up
+                    traceback.print_exc()
                     return None, None
 
-#                         self.openWiki(join(parentDir, wikiFiles[0]), wikiWord)
             return None, None
     
     
