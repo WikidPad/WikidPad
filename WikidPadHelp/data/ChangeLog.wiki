@@ -1,7 +1,18 @@
 ﻿++ Change Log
 
 
-Dec. 26, 2007 (1.8rc12)
+Jan. 25, 2008 (1.8rc13)
+
+    * Bug fixed: Linux: Some problems with non-ascii characters
+      in pathes (some other issues are there yet)
+    * Linux: Assumed file system encoding is now UTF-8
+    * Bug fixed: Command line help did not appear
+    * In "Delete wiki word" confirmation dialog, "No" is now
+      the default answer
+
+
+
+Dec. 26, 2007 (1.8rc12, repository revision in "stable-1.8" branch: 137)
 
     * Bug fixed: Bad handling of empty input in
       "Open Wiki Word" dialog

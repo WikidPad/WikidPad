@@ -8,7 +8,7 @@ import wx
 from pwiki.MiscEvent import MiscEventSourceMixin
 
 from pwiki.WikiExceptions import *
-from pwiki.StringOps import mbcsDec, re_sub_escape
+from pwiki.StringOps import mbcsDec, re_sub_escape, pathEnc
 from pwiki.DocPages import WikiPage, FunctionalPage, AliasWikiPage
 
 # from pwiki.Configuration import createWikiConfiguration
@@ -638,7 +638,7 @@ class WikiDataManager(MiscEventSourceMixin):
             renamedConfigPath = os.path.join(
                     os.path.dirname(wikiConfigPath),
                     u"%s.wiki" % toWikiWord)
-            os.rename(wikiConfigPath, renamedConfigPath)
+            os.rename(pathEnc(wikiConfigPath), pathEnc(renamedConfigPath))
 
             # Load it again
             wikiConfig.loadConfig(renamedConfigPath)

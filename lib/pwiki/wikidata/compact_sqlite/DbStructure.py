@@ -12,7 +12,7 @@ from os.path import exists, join
 
 from pwiki.WikiExceptions import *
 from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, applyBinCompact, \
-        getBinCompactForDiff, wikiWordToLabel
+        getBinCompactForDiff, wikiWordToLabel, pathEnc
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
 import pwiki.sqlite3api as sqlite
@@ -426,15 +426,15 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
     Warning: If overwrite is True, a previous file will be deleted!
     """
     dbfile = join(dataDir, "wiki.sli")
-    if (not exists(dbfile) or overwrite):
-        if (not exists(dataDir)):
-            mkdir(dataDir)
+    if (not exists(pathEnc(dbfile)) or overwrite):
+        if (not exists(pathEnc(dataDir))):
+            mkdir(pathEnc(dataDir))
         else:
-            if exists(dbfile) and overwrite:
-                unlink(dbfile)
+            if exists(pathEnc(dbfile)) and overwrite:
+                unlink(pathEnc(dbfile))
 
         # create the database
-        connwrap = ConnectWrap(sqlite.connect(dbfile))
+        connwrap = ConnectWrap(sqlite.connect(pathEnc(dbfile)))
         
         try:
             for tn in MAIN_TABLES:

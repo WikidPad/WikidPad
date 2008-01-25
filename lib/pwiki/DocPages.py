@@ -6,7 +6,7 @@ from MiscEvent import MiscEventSourceMixin
 from WikiExceptions import *   # TODO make normal import?
 
 from StringOps import strToBool, fileContentToUnicode, BOM_UTF8, utf8Enc, \
-        utf8Dec
+        utf8Dec, pathEnc
 
 import WikiFormatting
 import PageAst
@@ -709,7 +709,7 @@ class FunctionalPage(DocPage):
         tbLoc = os.path.join(wx.GetApp().getGlobalConfigSubDir(),
                 subtag+".wiki")
         try:
-            tbFile = open(tbLoc, "rU")
+            tbFile = open(pathEnc(tbLoc), "rU")
             tbContent = tbFile.read()
             tbFile.close()
             return fileContentToUnicode(tbContent)
@@ -757,7 +757,7 @@ class FunctionalPage(DocPage):
     def _saveGlobalPage(self, text, subtag):
         tbLoc = os.path.join(wx.GetApp().getGlobalConfigSubDir(),
                 subtag+".wiki")
-        tbFile = open(tbLoc, "w")
+        tbFile = open(pathEnc(tbLoc), "w")
         try:
             tbFile.write(BOM_UTF8)
             tbFile.write(utf8Enc(text)[0])

@@ -3,13 +3,13 @@ data_dir = data
 
 [main]
 footnotes_as_wikiwords = False
-last_wiki_word = WikidPadHelp
+last_wiki_word = ChangeLog
 filestorage_identity_moddatemustmatch = False
 wiki_name = WikidPadHelp
 wiki_database_type = original_gadfly
 wikipagetitleprefix = ++
 filestorage_identity_filenamemustmatch = False
 filestorage_identity_moddateisenough = False
-further_wiki_words = BulletedLists
+further_wiki_words = 
 first_wiki_word = WikidPadHelp
 

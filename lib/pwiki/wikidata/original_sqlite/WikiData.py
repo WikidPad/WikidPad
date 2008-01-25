@@ -52,15 +52,16 @@ class WikiData:
         dbfile = join(dataDir, "wikiovw.sli")   # means "wiki overview"
 
         try:
-            if (not exists(dbfile)):
+            if (not exists(pathEnc(dbfile))):
                 DbStructure.createWikiDB(None, dataDir)  # , True
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
-        dbfile = pathDec(dbfile)[0]
+        dbfile = pathDec(dbfile)
         try:
-            self.connWrap = DbStructure.ConnectWrap(sqlite.connect(dbfile))
+            self.connWrap = DbStructure.ConnectWrap(
+                    sqlite.connect(pathEnc(dbfile)))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -660,16 +661,25 @@ class WikiData:
             raise DbWriteAccessError(e)
 
 
-
-
     # TODO More general Wikiword to filename mapping
     def _getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
         try:
             files = glob.glob(pathEnc(join(self.dataDir,
-                    u'*' + self.pagefileSuffix), "replace")[0])
-            return [pathDec(basename(file), "replace")[0].replace(self.pagefileSuffix, '')
-                    for file in files]   # TODO: Unsafe. Suffix like e.g. '.wiki' may appear
-                                        #  in the word. E.g. "The.great.wiki.for.all.wiki"
+                    u'*' + self.pagefileSuffix)))
+            
+            result = []
+            for file in files:
+                word = pathDec(basename(file))
+                if word.endswith(self.pagefileSuffix):
+                    word = word[:-len(self.pagefileSuffix)]
+                
+                result.append(word)
+            
+            return result
+
+#         return [pathDec(basename(file)).replace(self.pagefileSuffix, '')
+#                 for file in files]   # TODO: Unsafe. Suffix like e.g. '.wiki' may appear
+#                                     #  in the word. E.g. "The.great.wiki.for.all.wiki"
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -677,7 +687,8 @@ class WikiData:
 
     # TODO More general Wikiword to filename mapping
     def getWikiWordFileName(self, wikiWord):
-        return join(self.dataDir, (u"%s" + self.pagefileSuffix) % wikiWord)
+        return pathEnc(join(self.dataDir,
+                (u"%s" + self.pagefileSuffix) % wikiWord))
 
     def isDefinedWikiWord(self, word):
         "check if a word is a valid wikiword (page name or alias)"

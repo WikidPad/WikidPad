@@ -12,8 +12,8 @@ from os.path import exists, join, split, basename
 import glob
 
 from pwiki.WikiExceptions import *
-from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, \
-        removeBracketsFilename, wikiWordToLabel
+from pwiki.StringOps import mbcsEnc, utf8Enc, utf8Dec, \
+        removeBracketsFilename, wikiWordToLabel, pathEnc
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
 import gadfly
@@ -464,16 +464,16 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
     Warning: If overwrite is True, a previous file will be deleted!
     """
     dbfile = join(dataDir, "wiki.sli")
-    if (not exists(dbfile) or overwrite):
-        if (not exists(dataDir)):
-            mkdir(dataDir)
+    if (not exists(pathEnc(dbfile)) or overwrite):
+        if (not exists(pathEnc(dataDir))):
+            mkdir(pathEnc(dataDir))
         else:
-            if exists(dbfile) and overwrite:
-                unlink(dbfile)
+            if exists(pathEnc(dbfile)) and overwrite:
+                unlink(pathEnc(dbfile))
 
         # create the database
         connection = gadfly.gadfly()
-        connection.startup("wikidb", dataDir)
+        connection.startup("wikidb", pathEnc(dataDir))
         connwrap = ConnectWrap(connection)
         
         try:
@@ -648,20 +648,20 @@ def updateDatabase(connwrap, dataDir):
         # to have no brackets
         filenames = glob.glob(join(mbcsEnc(dataDir, "replace")[0], '*.wiki'))
         for fn in filenames:
-            fn = mbcsDec(fn, "replace")[0]
+#             fn = mbcsDec(fn, "replace")[0]
             bn = basename(fn)
             newbname = removeBracketsFilename(bn)
             if bn == newbname:
                 continue
                     
-            newname = mbcsEnc(join(dataDir, newbname), "replace")[0]
-            if exists(newname):
+            newname = join(dataDir, newbname)
+            if exists(pathEnc(newname)):
                 # A file with the designated new name of fn already exists
                 # -> do nothing
                 continue
             
             try:
-                rename(fn, newname)
+                rename(pathEnc(fn), pathEnc(newname))
             except (IOError, OSError):
                 pass
         

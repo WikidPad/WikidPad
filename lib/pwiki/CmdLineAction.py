@@ -2,7 +2,7 @@ import sys, os, getopt
 
 import urllib_red as urllib
 
-# from wxPython.wx import *
+import wx
 
 
 from StringOps import mbcsDec

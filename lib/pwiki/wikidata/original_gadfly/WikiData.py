@@ -637,11 +637,26 @@ class WikiData:
 
     # TODO More general Wikiword to filename mapping
     def _getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
-        files = glob.glob(pathEnc(join(self.dataDir,
-                u'*' + self.pagefileSuffix), "replace")[0])
-        return [pathDec(basename(file), "replace")[0].replace(self.pagefileSuffix, '')
-                for file in files]   # TODO: Unsafe. Suffix like e.g. '.wiki' may appear
-                                    #  in the word. E.g. "The.great.wiki.for.all.wiki"
+        try:
+            files = glob.glob(pathEnc(join(self.dataDir,
+                    u'*' + self.pagefileSuffix)))
+            
+            result = []
+            for file in files:
+                word = pathDec(basename(file))
+                if word.endswith(self.pagefileSuffix):
+                    word = word[:-len(self.pagefileSuffix)]
+                
+                result.append(word)
+            
+            return result
+
+#         return [pathDec(basename(file)).replace(self.pagefileSuffix, '')
+#                 for file in files]   # TODO: Unsafe. Suffix like e.g. '.wiki' may appear
+#                                     #  in the word. E.g. "The.great.wiki.for.all.wiki"
+        except (IOError, OSError), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
     # TODO More general Wikiword to filename mapping
@@ -651,7 +666,8 @@ class WikiData:
         """
 
         # return pathEnc(join(self.dataDir, "%s.wiki" % wikiWord))[0]
-        return join(self.dataDir, (u"%s" + self.pagefileSuffix) % wikiWord)
+        return pathEnc(join(self.dataDir,
+                (u"%s" + self.pagefileSuffix) % wikiWord))
 
     # TODO More reliably esp. for aliases
     def isDefinedWikiWord(self, word):

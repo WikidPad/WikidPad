@@ -66,8 +66,8 @@ class IncrementalSearchDialog(wx.Frame):
     COLOR_GREEN = wx.Colour(0, 255, 0);
     
     def __init__(self, parent, id, txtCtrl, rect, font, presenter, searchInit=None):
-        wx.Frame.__init__(self, parent, id, u"", rect.GetPosition(),
-                rect.GetSize(), wx.NO_BORDER)
+        wx.Frame.__init__(self, parent, id, u"WikidPad i-search",
+                rect.GetPosition(), rect.GetSize(), wx.NO_BORDER)
 
         self.txtCtrl = txtCtrl
         self.presenter = presenter
@@ -195,7 +195,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.pageType = "normal"   # The pagetype controls some special editor behaviour
 #         self.idleCounter = 0       # Used to reduce idle load
         self.searchStr = u""
-        
+
         # If autocompletion word was choosen, how many bytes to delete backward
         # before inserting word, if word ...
         self.autoCompBackBytesWithoutBracket = 0  # doesn't start with '['

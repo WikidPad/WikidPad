@@ -67,10 +67,13 @@ if isOSX():
 
 elif isLinux():
     # Could be wrong encoding
-    mbcsEnc = codecs.getencoder("latin-1")
-    _mbcsDec = codecs.getdecoder("latin-1")
-    mbcsReader = codecs.getreader("latin-1")
-    mbcsWriter = codecs.getwriter("latin-1")
+#     LINUX_ENCODING = "latin-1"
+    LINUX_ENCODING = "utf8"
+
+    mbcsEnc = codecs.getencoder(LINUX_ENCODING)
+    _mbcsDec = codecs.getdecoder(LINUX_ENCODING)
+    mbcsReader = codecs.getreader(LINUX_ENCODING)
+    mbcsWriter = codecs.getwriter(LINUX_ENCODING)
 
     def lineendToOs(text):
         return convertLineEndings(text, "\n")
@@ -96,15 +99,21 @@ def mbcsDec(input, errors="strict"):
         return _mbcsDec(input, errors)
 
 
-if isWindows() and not isWin9x():
-    def dummy(s, e=""):
-        return s, len(s)
+# if isWindows() and not isWin9x():
+if os.path.supports_unicode_filenames:
+    def dummy(s):
+        return s
 
     pathEnc = dummy
     pathDec = dummy
 else:
-    pathEnc = mbcsEnc
-    pathDec = mbcsDec
+    def pathEnc(s):
+        if isinstance(s, str):
+            return s
+        return mbcsEnc(s, "replace")[0]
+
+    def pathDec(s):
+        return mbcsDec(s, "replace")[0]
 
 
 if isUnicode():

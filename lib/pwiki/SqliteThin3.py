@@ -1,6 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 
-import codecs, new, types, traceback, sys, os
+import codecs, new, types, traceback, sys, os, platform
 from ctypes import *
 
 import SqliteThin3 as _module
@@ -93,13 +93,15 @@ class SqliteError3(Exception):
 
 
 if isLinux():
-    import platform
     pyver = tuple((int(s) for s in platform.python_version_tuple()))
     
     if pyver >= (2, 5, 0):
         _dll = CDLL("libsqlite3.so.0")
     else:
         _dll = CDLL("libsqlite3.so")
+elif platform.uname()[0] == "Darwin":
+    # Mac OS 9 (or 9.1.0 specifically?)
+    _dll = CDLL("libsqlite3.0.dylib")
 else:
     _dll = cdll.sqlite3
 

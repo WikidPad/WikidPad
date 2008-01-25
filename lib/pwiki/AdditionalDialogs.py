@@ -12,7 +12,7 @@ import wx, wx.html, wx.xrc
 from wxHelper import *
 
 from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, \
-        wikiWordToLabel, escapeForIni, unescapeForIni, escapeHtml
+        wikiWordToLabel, escapeForIni, unescapeForIni, escapeHtml, pathEnc
 import WikiFormatting
 from WikiExceptions import *
 import Exporters, Importers
@@ -634,18 +634,18 @@ class ExportDialog(wx.Dialog):
         expDestWildcards = ob.getExportDestinationWildcards(etype)
         if expDestWildcards is None:
             # Export to a directory
-            if not exists(guiToUni(self.ctrls.tfDestination.GetValue())):
+            if not exists(pathEnc(self.ctrls.tfDestination.GetValue())):
                 self.pWiki.displayErrorMessage(
                         u"Destination directory does not exist")
                 return
             
-            if not isdir(guiToUni(self.ctrls.tfDestination.GetValue())):
+            if not isdir(pathEnc(self.ctrls.tfDestination.GetValue())):
                 self.pWiki.displayErrorMessage(
                         u"Destination must be a directory")
                 return
         else:
-            if exists(guiToUni(self.ctrls.tfDestination.GetValue())) and \
-                    not isfile(guiToUni(self.ctrls.tfDestination.GetValue())):
+            if exists(pathEnc(self.ctrls.tfDestination.GetValue())) and \
+                    not isfile(pathEnc(self.ctrls.tfDestination.GetValue())):
                 self.pWiki.displayErrorMessage(
                         u"Destination must be a file")
                 return
@@ -843,7 +843,7 @@ class ImportDialog(wx.Dialog):
         ob, itype, desc, panel = \
                 self.importerList[self.ctrls.chImportFormat.GetSelection()][:4]
                 
-        if not exists(guiToUni(self.ctrls.tfSource.GetValue())):
+        if not exists(pathEnc(self.ctrls.tfSource.GetValue())):
             self.mainControl.displayErrorMessage(
                     u"Source does not exist")
             return

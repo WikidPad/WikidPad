@@ -4,7 +4,7 @@ import wx
 # from wxPython.wx import *
 
 
-from StringOps import mbcsEnc
+from StringOps import mbcsEnc, pathEnc
 
 """The PluginManager and PluginAPI classes implement a generic plugin framework.
    Plugin apis are created by the PluginManager and can be used to call all
@@ -138,7 +138,7 @@ class PluginManager(object):
            appearing in earlier directories are not loaded from later ones."""
         exclusions = excludeFiles[:]
         for directory in directories:
-            if not os.access(mbcsEnc(directory, "replace")[0], os.F_OK):
+            if not os.access(pathEnc(directory), os.F_OK):
                 continue
             files = os.listdir(directory)
             for name in files:
@@ -148,7 +148,7 @@ class PluginManager(object):
                 if name in exclusions:
                     continue
                 if os.path.isfile(fullname) and ext == '.py':
-                    module = self.importCode(open(fullname), moduleName)
+                    module = self.importCode(open(pathEnc(fullname)), moduleName)
                 elif os.path.isdir(fullname):
                     module = self.importDirectory(fullname)
                 if module and hasattr(module, "WIKIDPAD_PLUGIN"):

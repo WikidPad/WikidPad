@@ -91,7 +91,7 @@ class MultiPageTextImporter:
         addOpt -- additional options returned by getAddOpt()
         """
         try:
-            self.rawImportFile = open(importSrc, "rU")
+            self.rawImportFile = open(pathEnc(importSrc), "rU")
         except IOError:
             raise ImportException("Opening import file failed")
             

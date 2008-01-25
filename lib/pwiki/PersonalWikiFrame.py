@@ -53,7 +53,7 @@ from SearchAndReplaceDialogs import *
 import Exporters
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
         wikiWordToLabel, BOM_UTF8, fileContentToUnicode, splitIndent, \
-        unescapeWithRe
+        unescapeWithRe, pathEnc
 
 import DocPages
 import WikiFormatting
@@ -173,7 +173,7 @@ class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
         # if the file doesn't exist yet.
         tbLoc = join(self.globalConfigSubDir, "[TextBlocks].wiki")
         if not exists(tbLoc):
-            tbFile = open(tbLoc, "wa")
+            tbFile = open(pathEnc(tbLoc), "w")
             tbFile.write(BOM_UTF8)
             tbFile.write(
 """importance: high;a=[importance: high]\\n
@@ -334,7 +334,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # if a wiki to open is set, open it
         if wikiToOpen:
-            if exists(wikiToOpen):
+            if exists(pathEnc(wikiToOpen)):
                 self.openWiki(wikiToOpen, wikiWordToOpen)
             else:
                 self.statusBar.SetStatusText(
@@ -377,15 +377,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def getExtension(self, extensionName, fileName):
         extensionFileName = join(self.wikiAppDir, 'user_extensions', fileName)
-        if exists(extensionFileName):
-            extFile = open(extensionFileName, "rU")
+        if exists(pathEnc(extensionFileName)):
+            extFile = open(pathEnc(extensionFileName), "rU")
             userExtension = extFile.read()
             extFile.close()
         else:
             userExtension = None
             
         extensionFileName = join(self.wikiAppDir, 'extensions', fileName)
-        extFile = open(extensionFileName, "rU")
+        extFile = open(pathEnc(extensionFileName), "rU")
         systemExtension = extFile.read()
         extFile.close()
         
@@ -523,8 +523,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
         self.eventRoundtrip += 1
-        wx.Window.FindFocus().ProcessEvent(evt)
-        self.eventRoundtrip -= 1
+        try:
+            focus = wx.Window.FindFocus()
+            if focus is not None:
+                focus.ProcessEvent(evt)
+        finally:
+            self.eventRoundtrip -= 1
 
 
     def addMenuItem(self, menu, label, text, evtfct=None, icondesc=None,
@@ -803,7 +807,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # Fill menu with global text blocks
         tbLoc = join(self.globalConfigSubDir, "[TextBlocks].wiki")
         try:
-            tbFile = open(tbLoc, "rU")
+            tbFile = open(pathEnc(tbLoc), "rU")
             tbContent = tbFile.read()
             tbFile.close()
             tbContent = fileContentToUnicode(tbContent)
@@ -1987,7 +1991,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         self.statusBar.SetStatusText(uniToGui(u"Creating Wiki: %s" % wikiName), 0)
 
         createIt = True;
-        if (exists(wikiDir)):
+        if (exists(pathEnc(wikiDir))):
             dlg=wx.MessageDialog(self,
                     uniToGui((u"A wiki already exists in '%s', overwrite? "
                     u"(This deletes everything in and below this directory!)") %
@@ -2905,7 +2909,7 @@ These are your default global settings.
                     
             link2 = urllib.url2pathname(link2)
             link2 = link2.replace("wiki:", "")
-            if exists(link2):
+            if exists(pathEnc(link2)):
                 self.openWiki(link2, "")  # ?
                 return True
             else:
@@ -3454,7 +3458,7 @@ These are your default global settings.
 
         dlg=wx.MessageDialog(self,
                 uniToGui(u"Are you sure you want to delete wiki word '%s'?" % wikiWord),
-                'Delete Wiki Word', wx.YES_NO)
+                'Delete Wiki Word', wx.YES_NO | wx.NO_DEFAULT)
         result = dlg.ShowModal()
         if result == wx.ID_YES:
             try:

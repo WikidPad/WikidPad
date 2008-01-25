@@ -66,7 +66,7 @@ def isWindows():
 
 # from WikiExceptions import *
 
-from StringOps import utf8Enc, utf8Dec, mbcsDec, strToBool
+from StringOps import utf8Enc, utf8Dec, mbcsDec, strToBool, pathEnc
 
 Error = ConfigParser.Error
 
@@ -247,7 +247,7 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
             return
 
         config = ConfigParser.ConfigParser()
-        config.read(fn)
+        config.read(pathEnc(fn))
         self.setConfigParserObject(config, fn)
 
 
@@ -261,7 +261,7 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         Save all configurations
         """
         if self.configParserObject:
-            configFile = open(self.configPath, 'w')
+            configFile = open(pathEnc(self.configPath), 'w')
             try:
                 self.configParserObject.write(configFile)
             finally:

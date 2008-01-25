@@ -51,15 +51,16 @@ class WikiData:
         dbfile = join(dataDir, "wiki.sli")
 
         try:
-            if (not exists(dbfile)):
+            if (not exists(pathEnc(dbfile))):
                 DbStructure.createWikiDB(None, dataDir)  # , True
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
-        dbfile = pathDec(dbfile)[0]
+#         dbfile = pathDec(dbfile)
         try:
-            self.connWrap = DbStructure.ConnectWrap(sqlite.connect(dbfile))
+            self.connWrap = DbStructure.ConnectWrap(
+                    sqlite.connect(pathEnc(dbfile)))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -1504,9 +1505,9 @@ class WikiData:
         """
         self.connWrap.commit()
 
-        fnames = glob.glob(join(pathEnc(self.dataDir, "replace")[0], '*.wiki'))
+        fnames = glob.glob(pathEnc(join(self.dataDir, '*.wiki')))
         for fn in fnames:
-            word = basename(pathDec(fn, "replace")[0]).replace('.wiki', '')
+            word = pathDec(basename(fn)).replace('.wiki', '')
 
             fp = open(fn)
             content = fp.read()
@@ -1514,7 +1515,7 @@ class WikiData:
             content = fileContentToUnicode(content)
 #             word = self.pWiki.getFormatting().normalizeWikiWordImport(word)
             if self.dataManager.getFormatting().isNakedWikiWord(word):
-                self.setContent(word, content, moddate=stat(fn).st_mtime)
+                self.setContent(word, content, moddate=stat(pathEnc(fn)).st_mtime)
 #             self.connWrap.execSql("insert or replace into wikiwordcontent(word, "+\
 #                     "content, modified) values (?,?,?)", (word, sqlite.Binary(content), \
 #                         stat(fn).st_mtime))
