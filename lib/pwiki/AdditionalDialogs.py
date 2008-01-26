@@ -9,8 +9,14 @@ import wx, wx.html, wx.xrc
 
 from wxHelper import *
 
+try:
+    import sqlite3api as sqlite
+except:
+    sqlite = None
+
+
 from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, \
-        escapeForIni, unescapeForIni, escapeHtml, strftimeUB
+        escapeForIni, unescapeForIni, escapeHtml, strftimeUB, pathEnc
 import WikiFormatting
 from WikiExceptions import *
 import Exporters, Importers
@@ -780,18 +786,18 @@ class ExportDialog(wx.Dialog):
         expDestWildcards = ob.getExportDestinationWildcards(etype)
         if expDestWildcards is None:
             # Export to a directory
-            if not exists(guiToUni(self.ctrls.tfDestination.GetValue())):
+            if not exists(pathEnc(self.ctrls.tfDestination.GetValue())):
                 self.pWiki.displayErrorMessage(
                         _(u"Destination directory does not exist"))
                 return
             
-            if not isdir(guiToUni(self.ctrls.tfDestination.GetValue())):
+            if not isdir(pathEnc(self.ctrls.tfDestination.GetValue())):
                 self.pWiki.displayErrorMessage(
                         _(u"Destination must be a directory"))
                 return
         else:
-            if exists(guiToUni(self.ctrls.tfDestination.GetValue())) and \
-                    not isfile(guiToUni(self.ctrls.tfDestination.GetValue())):
+            if exists(pathEnc(self.ctrls.tfDestination.GetValue())) and \
+                    not isfile(pathEnc(self.ctrls.tfDestination.GetValue())):
                 self.pWiki.displayErrorMessage(
                         _(u"Destination must be a file"))
                 return
@@ -1164,7 +1170,7 @@ def _children(win, indent=0):
 class AboutDialog(wx.Dialog):
     """ An about box that uses an HTML window """
 
-    TEXT_TEMPLATE = N_('''
+    TEXT_TEMPLATE = N_(u'''
 <html>
 <body bgcolor="#FFFFFF">
     <center>
@@ -1196,6 +1202,7 @@ What makes wikidPad different from other notepad applications is the ease with w
     <hr />
     
     <p />Your configuration directory is: %s
+    <p />Sqlite version: %s
 </body>
 </html>
 ''')
@@ -1203,8 +1210,14 @@ What makes wikidPad different from other notepad applications is the ease with w
     def __init__(self, pWiki):
         wx.Dialog.__init__(self, pWiki, -1, _(u'About WikidPad'),
                           size=(470, 330) )
+        
+        if sqlite is None:
+            sqliteVer = _(u"N/A")
+        else:
+            sqliteVer = sqlite.getLibVersion()
+
         text = _(self.TEXT_TEMPLATE) % (VERSION_STRING,
-                escapeHtml(pWiki.globalConfigDir))
+                escapeHtml(pWiki.globalConfigDir), escapeHtml(sqliteVer))
 
         html = wx.html.HtmlWindow(self, -1)
         html.SetPage(text)

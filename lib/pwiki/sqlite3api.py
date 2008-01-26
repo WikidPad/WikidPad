@@ -15,7 +15,7 @@ from SqliteThin3 import def_bind_fctfinder, def_column_fctfinder, \
         SQLITE_UTF8, SQLITE_UTF16BE, \
         SQLITE_UTF16LE, SQLITE_UTF16, \
         SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, SQLITE_NULL, \
-        AUTO_COLUMN_CONVERTS, \
+        AUTO_COLUMN_CONVERTS, getLibVersion, \
         \
         addTransObject, getTransObject, delTransObject
 

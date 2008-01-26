@@ -6,13 +6,13 @@ import os, sys, traceback, sets, string, re
 import wx
 import wx.xrc as xrc
 
-from wxHelper import GUI_ID
+from wxHelper import GUI_ID, copyTextToClipboard
 from MiscEvent import MiscEventSourceMixin, ProxyMiscEvent
 
 from WikiExceptions import *
 
 import Configuration
-from StringOps import escapeForIni
+from StringOps import escapeForIni, pathWordAndAnchorToWikiUrl
 
 import DocPages
 
@@ -63,7 +63,8 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                 self.OnCmdSwitchThisEditorPreview)
         wx.EVT_MENU(self, GUI_ID.CMD_GO_NEXT_TAB, self.OnGoTab)
         wx.EVT_MENU(self, GUI_ID.CMD_GO_PREVIOUS_TAB, self.OnGoTab)
-        
+        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD,
+                self.OnCmdClipboardCopyUrlToThisWikiWord)
 
 
     def close(self):
@@ -327,6 +328,18 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         """
         if self.lastContextMenuPresenter is not None:
             self.switchDocPagePresenterTabEditorPreview(self.lastContextMenuPresenter)
+
+
+    def OnCmdClipboardCopyUrlToThisWikiWord(self, evt):
+        wikiWord = self.lastContextMenuPresenter.getWikiWord()
+        if wikiWord is None:
+            wx.MessageBox(
+                    _(u"This can only be done for the page of a wiki word"),
+                    _(u'Not a wiki page'), wx.OK, self)
+            return
+
+        path = self.mainControl.getWikiDocument().getWikiConfigPath()
+        copyTextToClipboard(pathWordAndAnchorToWikiUrl(path, wikiWord, None))
 
 
     def OnLeftDown(self, evt):

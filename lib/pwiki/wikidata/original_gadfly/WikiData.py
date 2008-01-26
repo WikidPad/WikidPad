@@ -35,7 +35,7 @@ from pwiki.WikiExceptions import *   # TODO make normal import?
 from pwiki import SearchAndReplace
 
 from pwiki.StringOps import pathEnc, pathDec, utf8Enc, utf8Dec, BOM_UTF8, \
-        fileContentToUnicode
+        fileContentToUnicode, loadEntireTxtFile, writeEntireTxtFile
 
 from pwiki import WikiFormatting
 from pwiki import PageAst
@@ -142,10 +142,13 @@ class WikiData:
                 raise WikiFileNotFoundException(
                         _(u"Wiki page not found for word: %s") % word)
 
-            fp = open(self.getWikiWordFileName(word), "rU")
-            content = fp.read()
-            fp.close()
-    
+            content = loadEntireTxtFile(self.getWikiWordFileName(word))
+#             fp = open(self.getWikiWordFileName(word), "rU")
+#             try:
+#                 content = fp.read()
+#             finally:
+#                 fp.close()
+
             return fileContentToUnicode(content)
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
@@ -202,10 +205,14 @@ class WikiData:
         creadate -- Creation date to store or None for current        
         """
         try:
-            output = open(self.getWikiWordFileName(word), 'w')
-            output.write(BOM_UTF8)
-            output.write(utf8Enc(content)[0])
-            output.close()
+#             output = open(self.getWikiWordFileName(word), 'w')
+#             try:
+#                 output.write(BOM_UTF8)
+#                 output.write(utf8Enc(content)[0])
+#             finally:
+#                 output.close()
+            writeEntireTxtFile(self.getWikiWordFileName(word),
+                    (BOM_UTF8, utf8Enc(content)[0]))
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -393,36 +400,84 @@ class WikiData:
         return relations
 
     def getChildRelationships(self, wikiWord, existingonly=False,
-            selfreference=True, withPosition=False):
+            selfreference=True, withFields=()):
         """
         get the child relations of this word
         existingonly -- List only existing wiki words
         selfreference -- List also wikiWord if it references itself
-        withPositions -- Return tuples (relation, firstcharpos) with char.
-            position of link in page (may be -1 to represent unknown).
-            The Gadfly implementation always returns -1
+        withFields -- Seq. of names of fields which should be included in
+            the output. If this is not empty, tuples are returned
+            (relation, ...) with ... as further fields in the order mentioned
+            in withfields.
+
+            Possible field names:
+                "firstcharpos": position of link in page (may be -1 to represent
+                    unknown). The Gadfly implementation always returns -1
+                "modified": Modification date
+
         """
-        sql = "select relation from wikirelations where word = ?"
-        try:
-            children = self.execSqlQuerySingleColumn(sql, (wikiWord,))
-        except (IOError, OSError, ValueError), e:
-            traceback.print_exc()
-            raise DbReadAccessError(e)
-
-        if not selfreference:
-            try:
-                children.remove(wikiWord)
-            except ValueError:
-                pass
+        def moddateLookup(rel):
+            result = self.getTimestamps(rel)[0]
+            if result is None:
+                return 0
+            
+            return result
         
-        if existingonly:
-            children = filter(lambda w:
-                    self._getCachedContentNames().has_key(w), children)
+        
+        if withFields is None:
+            withFields = ()
 
-        if withPosition:
-            children = [(c, -1) for c in children]
+        addFields = ""
+        converters = [lambda s: s]
+        for field in withFields:
+            if field == "firstcharpos":
+                addFields += ", relation" # Dummy field
+                converters.append(lambda s: -1)
+            elif field == "modified":
+                addFields += ", relation"
+                converters.append(moddateLookup)
+
+        sql = "select relation%s from wikirelations where word = ?" % addFields
+
+        if len(withFields) == 0:
+            try:
+                children = self.execSqlQuerySingleColumn(sql, (wikiWord,))
+            except (IOError, OSError, ValueError), e:
+                traceback.print_exc()
+                raise DbReadAccessError(e)
+    
+            if not selfreference:
+                try:
+                    children.remove(wikiWord)
+                except ValueError:
+                    pass
+            
+            if existingonly:
+                children = filter(lambda w:
+                        self._getCachedContentNames().has_key(w), children)
+        else:
+            try:
+                children = self.execSqlQuery(sql, (wikiWord,))
+            except (IOError, OSError, ValueError), e:
+                traceback.print_exc()
+                raise DbReadAccessError(e)
+                
+            newChildren = []
+            for c in children:
+                newC = tuple((conv(item) for item, conv in zip(c, converters)))
+                if not selfreference and newC[0] == wikiWord:
+                    continue
+                
+                if existingonly and \
+                        not self._getCachedContentNames().has_key(newC[0]):
+                    continue
+                
+                newChildren.append(newC)
+            
+            children = newChildren
 
         return children
+
 
 #     # TODO More efficient
 #     def _hasChildren(self, wikiWord, existingonly=False,
@@ -753,11 +808,26 @@ class WikiData:
 
     # TODO More general Wikiword to filename mapping
     def _getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
-        files = glob.glob(pathEnc(join(self.dataDir,
-                u'*' + self.pagefileSuffix), "replace")[0])
-        return [pathDec(basename(file), "replace")[0].replace(self.pagefileSuffix, '')
-                for file in files]   # TODO: Unsafe. Suffix like e.g. '.wiki' may appear
-                                    #  in the word. E.g. "The.great.wiki.for.all.wiki"
+        try:
+            files = glob.glob(pathEnc(join(self.dataDir,
+                    u'*' + self.pagefileSuffix)))
+            
+            result = []
+            for file in files:
+                word = pathDec(basename(file))
+                if word.endswith(self.pagefileSuffix):
+                    word = word[:-len(self.pagefileSuffix)]
+                
+                result.append(word)
+            
+            return result
+
+#         return [pathDec(basename(file)).replace(self.pagefileSuffix, '')
+#                 for file in files]   # TODO: Unsafe. Suffix like e.g. '.wiki' may appear
+#                                     #  in the word. E.g. "The.great.wiki.for.all.wiki"
+        except (IOError, OSError), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
     # TODO More general Wikiword to filename mapping
@@ -765,7 +835,8 @@ class WikiData:
         """
         Not part of public API!
         """
-        return join(self.dataDir, (u"%s" + self.pagefileSuffix) % wikiWord)
+        return pathEnc(join(self.dataDir,
+                (u"%s" + self.pagefileSuffix) % wikiWord))
 
     # TODO More reliably esp. for aliases
     def isDefinedWikiWord(self, word):

@@ -79,13 +79,16 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 ("opened wiki", self.onOpenedWiki),
                 ("closing current wiki", self.onClosingCurrentWiki),
 #                 ("options changed", self.onOptionsChanged),
-                ("updated wiki page", self.onUpdatedWikiPage),
                 ("changed live text", self.onChangedLiveText)
         ), self.presenter.getMiscEvent())
 
         self.__sinkApp = wxKeyFunctionSink((
                 ("options changed", self.onOptionsChanged),
-        ), wx.GetApp().getMiscEvent(), self)
+        ), wx.GetApp().getMiscEvent())
+
+        self.__sinkDocPage = wxKeyFunctionSink((
+                ("updated wiki page", self.onUpdatedWikiPage),
+        ), self.presenter.getCurrentDocPageProxyEvent())
 
         self.visible = False
         self.outOfSync = True   # HTML content is out of sync with live content
@@ -145,6 +148,8 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
     def close(self):
         self.setLayerVisible(False)
         self.presenterListener.disconnect()
+        self.__sinkApp.disconnect()
+        self.__sinkDocPage.disconnect()
 
 
     def refresh(self):

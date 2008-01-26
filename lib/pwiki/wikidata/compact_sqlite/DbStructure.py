@@ -12,7 +12,7 @@ from os.path import exists, join
 
 from pwiki.WikiExceptions import *
 from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, applyBinCompact, \
-        getBinCompactForDiff
+        getBinCompactForDiff, pathEnc
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
 import pwiki.sqlite3api as sqlite
@@ -492,6 +492,7 @@ def rebuildIndices(connwrap):
     connwrap.execSqlNoError("drop index wikirelations_word")
     connwrap.execSqlNoError("drop index wikirelations_relation")    
     connwrap.execSqlNoError("drop index wikiwordprops_word")
+    connwrap.execSqlNoError("drop index wikiwordprops_keyvalue")
     connwrap.execSqlNoError("drop index changelog_word")
     connwrap.execSqlNoError("drop index headversion_pkey")
         
@@ -503,6 +504,7 @@ def rebuildIndices(connwrap):
     connwrap.execSqlNoError("create index wikirelations_word on wikirelations(word)")
     connwrap.execSqlNoError("create index wikirelations_relation on wikirelations(relation)")
     connwrap.execSqlNoError("create index wikiwordprops_word on wikiwordprops(word)")
+    connwrap.execSqlNoError("create index wikiwordprops_keyvalue on wikiwordprops(key, value)")
     connwrap.execSqlNoError("create index changelog_word on changelog(word)")
     connwrap.execSqlNoError("create unique index headversion_pkey on headversion(word)")
 
@@ -632,12 +634,12 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
     Warning: If overwrite is True, a previous file will be deleted!
     """
     dbfile = join(dataDir, "wiki.sli")
-    if (not exists(dbfile) or overwrite):
-        if (not exists(dataDir)):
-            mkdir(dataDir)
+    if (not exists(pathEnc(dbfile)) or overwrite):
+        if (not exists(pathEnc(dataDir))):
+            mkdir(pathEnc(dataDir))
         else:
-            if exists(dbfile) and overwrite:
-                unlink(dbfile)
+            if exists(pathEnc(dbfile)) and overwrite:
+                unlink(pathEnc(dbfile))
 
         # create the database
         connwrap = ConnectWrapSyncCommit(sqlite.connect(dbfile))

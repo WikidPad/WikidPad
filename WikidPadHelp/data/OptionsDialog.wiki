@@ -302,8 +302,12 @@ Change these settings only if you know what you are doing.
 See [WikiLockFile]
 
 
+
 +++ Current wiki
 These options apply to the active wiki only
+
+
+++++ General options
 
 *Footnotes as wiki words*
 Interpret [Footnotes] (e.g. "[42]") as wiki words.
@@ -313,6 +317,16 @@ Wiki word which should be shown as first one each time the wiki is opened. If th
 
 *Default export dir.*
 Set the default export directory into which exports should go.
+
+*Remember expanded tree nodes*
+Control if expanded tree nodes should be remembered by WikidPad. This means if you collapse a tree node which contains expanded child nodes yet and expand the node later, the child nodes are expanded again. The following modes are supported:
+    * Not at all: Doesn't remember expanded nodes (like before version 1.9beta15)
+    * While wiki open: Forgets the node states when wiki is closed
+    * Always: Stores the node states in wiki configuration file and restores them on reopening
+
+It may happen that the mechanism stores expanded nodes which don't exist any longer, e.g. if the link from parent page to a child page is deleted and the child page was represented by an expanded node this is not always recognized by WikidPad, so some "garbage" may be stored.
+
+By setting the option to "Not at all" then closing the options dialog, then setting the option back to what you had before, all node state information is cleared. The info of the main tree (not the "Views" tree) is also cleared when setting a new root.
 
 *Title prefix*
 Control the heading level of the initial main title of new pages and fill between one and four '+' in this field. Default is "++".
@@ -326,11 +340,6 @@ How should the main title of new pages be generated from the wikiword:
 *Use link title if present*
 If you came to a not yet created page through a titled link (e.g. [WikiWord| This is the title]) and this option is checked, the link title will be used as title of the page.
 
-*Modif. date must match*
-*Filename must match*
-*Modif. date is enough*
-See [FileStorage].
-
 *Wiki icon*
 Set here the name of icon to use in the system tray instead of the default icon. If the field is empty the default icon is used. The icon of the main window is not influenced by this setting (because it does not work).
 
@@ -338,4 +347,10 @@ Set here the name of icon to use in the system tray instead of the default icon.
 Wiki-bound hotkey to show/hide wiki. See OptionsDialog#*App-bound# hotkey*
 
 
+++++ File storage
+
+*Modif. date must match*
+*Filename must match*
+*Modif. date is enough*
+See [FileStorage].
 

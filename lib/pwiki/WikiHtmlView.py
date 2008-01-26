@@ -69,14 +69,17 @@ class WikiHtmlView(wx.html.HtmlWindow):
                 ("reloaded current doc page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
                 ("closing current wiki", self.onClosingCurrentWiki),
-#                 ("options changed", self.onOptionsChanged),
-                ("updated wiki page", self.onUpdatedWikiPage),
+#                 ("changed options", self.onOptionsChanged),
                 ("changed live text", self.onChangedLiveText)
         ), self.presenter.getMiscEvent())
         
         self.__sinkApp = wxKeyFunctionSink((
                 ("options changed", self.onOptionsChanged),
-        ), wx.GetApp().getMiscEvent(), self)
+        ), wx.GetApp().getMiscEvent())
+        
+        self.__sinkDocPage = wxKeyFunctionSink((
+                ("updated wiki page", self.onUpdatedWikiPage),
+        ), self.presenter.getCurrentDocPageProxyEvent())
 
         self.visible = False
         self.outOfSync = True   # HTML content is out of sync with live content
@@ -135,6 +138,8 @@ class WikiHtmlView(wx.html.HtmlWindow):
         self.Unbind(wx.EVT_SET_FOCUS)
         self.setLayerVisible(False)
         self.presenterListener.disconnect()
+        self.__sinkApp.disconnect()
+        self.__sinkDocPage.disconnect()
 
 
 # This doesn't work for wxPython 2.8 and newer, constants are missing

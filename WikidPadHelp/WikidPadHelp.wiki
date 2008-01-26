@@ -2,12 +2,16 @@
 data_dir = data
 
 [main]
+tree_expandednodes_descriptorpathes_views = 
+tree_expandednodes_rememberduration = 1
 wiki_icon = 
 footnotes_as_wikiwords = False
 wikipagetitle_creationmode = 1
+tree_expandednodes_descriptorpathes_main = 
 last_wiki_word = WikidPadHelp
 filestorage_identity_moddatemustmatch = False
 wiki_name = WikidPadHelp
+tree_last_root_wiki_word = WikidPadHelp
 wiki_database_type = original_gadfly
 wikipagetitleprefix = ++
 hotkey_showhide_bywiki = 

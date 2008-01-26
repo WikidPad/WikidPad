@@ -225,13 +225,18 @@ class OptionsDialog(wx.Dialog):
 
             ("export_default_dir", "tfExportDefaultDir", "t"),
 
-            ("fileStorage_identity_modDateMustMatch", "cbFsModDateMustMatch", "b"),
-            ("fileStorage_identity_filenameMustMatch", "cbFsFilenameMustMatch", "b"),
-            ("fileStorage_identity_modDateIsEnough", "cbFsModDateIsEnough", "b"),
-            
+            ("tree_expandedNodes_rememberDuration",
+                    "chTreeExpandedNodesRememberDuration", "seli"),
+
             ("wiki_icon", "tfWikiIcon", "t"),
 
-            ("hotKey_showHide_byWiki", "tfHotKeyShowHideByWiki", "t")
+            ("hotKey_showHide_byWiki", "tfHotKeyShowHideByWiki", "t"),
+
+
+            ("fileStorage_identity_modDateMustMatch", "cbFsModDateMustMatch", "b"),
+            ("fileStorage_identity_filenameMustMatch", "cbFsFilenameMustMatch", "b"),
+            ("fileStorage_identity_modDateIsEnough", "cbFsModDateIsEnough", "b")
+            
     )
 
 
@@ -268,7 +273,8 @@ class OptionsDialog(wx.Dialog):
             ("OptionsPageTimeView", N_(u"  Time view")),
             ("OptionsPageSearching", N_(u"  Searching")),  
             ("OptionsPageAdvanced", N_(u"  Advanced")),  
-            ("OptionsPageCurrentWiki", N_(u"Current Wiki"))
+            ("OptionsPageCurrentWiki", N_(u"Current Wiki")),
+            ("OptionsPageCwFileStorage", N_(u"  File Storage"))
     )
 
     def __init__(self, pWiki, ID, title="Options",

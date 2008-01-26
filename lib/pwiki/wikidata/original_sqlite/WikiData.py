@@ -34,7 +34,7 @@ except:
 
 from pwiki.StringOps import getBinCompactForDiff, applyBinCompact, pathEnc, \
         pathDec, binCompactToCompact, fileContentToUnicode, utf8Enc, utf8Dec, \
-        BOM_UTF8, Tokenizer, uniWithNone
+        BOM_UTF8, Tokenizer, uniWithNone, loadEntireTxtFile, writeEntireTxtFile
 
 from pwiki import WikiFormatting
 from pwiki import PageAst
@@ -48,26 +48,23 @@ class WikiData:
         self.wikiDocument = wikiDocument
         self.dataDir = dataDir
         self.cachedContentNames = None
-#         tempDir = uniWithNone(tempDir)
 
         dbfile = join(dataDir, "wikiovw.sli")   # means "wiki overview"
-
+        
         try:
-            if (not exists(dbfile)):
+            if (not exists(pathEnc(dbfile))):
                 DbStructure.createWikiDB(None, dataDir)  # , True
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
-        dbfile = pathDec(dbfile)[0]
+        dbfile = pathDec(dbfile)
         try:
             self.connWrap = DbStructure.ConnectWrapSyncCommit(
                     sqlite.connect(dbfile))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
-
-#         self.connWrap.execSql("pragma temp_store_directory = '%s'" % tempDir)
 
         DbStructure.registerSqliteFunctions(self.connWrap)
 
@@ -184,11 +181,12 @@ class WikiData:
                 raise WikiFileNotFoundException, \
                         u"wiki page not found for word: %s" % word
     
-            fp = open(self.getWikiWordFileName(word), "rU")
-            try:
-                content = fp.read()
-            finally:
-                fp.close()
+            content = loadEntireTxtFile(self.getWikiWordFileName(word))
+#             fp = open(self.getWikiWordFileName(word), "rU")
+#             try:
+#                 content = fp.read()
+#             finally:
+#                 fp.close()
     
             return fileContentToUnicode(content)
         except (IOError, OSError, sqlite.Error), e:
@@ -242,12 +240,14 @@ class WikiData:
         
         assert type(content) is unicode
         try:
-            output = open(self.getWikiWordFileName(word), 'w')
-            try:
-                output.write(BOM_UTF8)
-                output.write(utf8Enc(content)[0])
-            finally:
-                output.close()
+#             output = open(self.getWikiWordFileName(word), 'w')
+#             try:
+#                 output.write(BOM_UTF8)
+#                 output.write(utf8Enc(content)[0])
+#             finally:
+#                 output.close()
+            writeEntireTxtFile(self.getWikiWordFileName(word),
+                    (BOM_UTF8, utf8Enc(content)[0]))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -401,19 +401,43 @@ class WikiData:
     # ---------- Handling of relationships cache ----------
 
     def getChildRelationships(self, wikiWord, existingonly=False,
-            selfreference=True, withPosition=False):
+            selfreference=True, withFields=()):
         """
         get the child relations of this word
         Function must work for read-only wiki.
         existingonly -- List only existing wiki words
         selfreference -- List also wikiWord if it references itself
-        withPositions -- Return tuples (relation, firstcharpos) with char.
-            position of link in page (may be -1 to represent unknown)
+        withFields -- Seq. of names of fields which should be included in
+            the output. If this is not empty, tuples are returned
+            (relation, ...) with ... as further fields in the order mentioned
+            in withfields.
+
+            Possible field names:
+                "firstcharpos": position of link in page (may be -1 to represent
+                    unknown)
+                "modified": Modification date of child
         """
-        if withPosition:
-            sql = "select relation, firstcharpos from wikirelations where word = ?"
-        else:
-            sql = "select relation from wikirelations where word = ?"
+        if withFields is None:
+            withFields = ()
+
+        addFields = ""
+        converters = [lambda s: s]
+        for field in withFields:
+            if field == "firstcharpos":
+                addFields += ", firstcharpos"
+                converters.append(lambda s: s)
+            elif field == "modified":
+                # "modified" isn't a field of wikirelations. We need
+                # some SQL magic to retrieve the modification date
+#                 addFields += (", ifnull((select modified from wikiwords "
+#                         "where wikiwords.word = relation), 0.0)")
+                addFields += (", ifnull((select modified from wikiwords "
+                        "where wikiwords.word = relation or "
+                        "wikiwords.word = (select word from wikiwordprops "
+                        "where key = 'alias' and value = relation)), 0.0)")
+                converters.append(float)
+
+        sql = "select relation%s from wikirelations where word = ?" % addFields
 
         if existingonly:
             # filter to only words in wikiwords or aliases
@@ -426,8 +450,9 @@ class WikiData:
             sql += " and relation != word"
             
         try:
-            if withPosition:
-                return self.connWrap.execSqlQuery(sql, (wikiWord,))
+            if len(withFields) > 0:
+                return [tuple(c(item) for c, item in zip(converters, row))
+                        for row in self.connWrap.execSqlQuery(sql, (wikiWord,))]
             else:
                 return self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
         except (IOError, OSError, sqlite.Error), e:
@@ -789,10 +814,21 @@ class WikiData:
     def _getAllPageNamesFromDisk(self):   # Used for rebuilding wiki
         try:
             files = glob.glob(pathEnc(join(self.dataDir,
-                    u'*' + self.pagefileSuffix), "replace")[0])
-            return [pathDec(basename(file), "replace")[0].replace(self.pagefileSuffix, '')
-                    for file in files]   # TODO: Unsafe. Suffix like e.g. '.wiki' may appear
-                                        #  in the word. E.g. "The.great.wiki.for.all.wiki"
+                    u'*' + self.pagefileSuffix)))
+            
+            result = []
+            for file in files:
+                word = pathDec(basename(file))
+                if word.endswith(self.pagefileSuffix):
+                    word = word[:-len(self.pagefileSuffix)]
+                
+                result.append(word)
+            
+            return result
+
+#         return [pathDec(basename(file)).replace(self.pagefileSuffix, '')
+#                 for file in files]   # TODO: Unsafe. Suffix like e.g. '.wiki' may appear
+#                                     #  in the word. E.g. "The.great.wiki.for.all.wiki"
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)

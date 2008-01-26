@@ -347,7 +347,6 @@ class WikiFormatting:
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
                 (self.HtmlTagRE, FormatTypes.HtmlTag)
-#                 (self.PlainCharactersRE, FormatTypes.Default)
                 ]
                 
 
@@ -365,7 +364,6 @@ class WikiFormatting:
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
                 (self.HtmlTagRE, FormatTypes.HtmlTag)
-#                 (self.PlainCharactersRE, FormatTypes.Default)
                 ]
 
 
@@ -383,7 +381,6 @@ class WikiFormatting:
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
                 (self.HtmlTagRE, FormatTypes.HtmlTag)
-#                 (self.PlainCharactersRE, FormatTypes.Default)
                 ]
 
 
@@ -393,7 +390,6 @@ class WikiFormatting:
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
                 (self.HtmlTagRE, FormatTypes.HtmlTag)
-#                 (self.PlainCharactersRE, FormatTypes.Default)
                 ]
 
 

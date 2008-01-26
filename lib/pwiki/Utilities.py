@@ -47,32 +47,22 @@ class ThreadHolder(_DumbThreadHolder):
         Return True if current thread is thread in holder
         """
         return threading.currentThread() is self.thread
-        
 
 
-
-def loadEntireTxtFile(filename):
+def seqStartsWith(seq, startSeq):
     """
-    Load entire file (text mode) and return its content.
+    Returns True iff sequence startSeq is the beginning of sequence seq or
+    equal to seq.
     """
-    rf = open(filename, "rU")
-    try:
-        result = rf.read()
-        return result
-    finally:
-        rf.close()
+    if len(seq) < len(startSeq):
+        return False
+    
+    if len(seq) > len(startSeq):
+        return seq[:len(startSeq)] == startSeq
+    
+    return seq == startSeq
 
 
-def writeEntireTxtFile(filename, content):
-    """
-    Write entire file (text mode).
-    """
-    rf = open(filename, "w")
-    try:
-        rf.write(content)
-        return
-    finally:
-        rf.close()
 
 
 # class FlagHolder(object):
@@ -85,3 +75,29 @@ def writeEntireTxtFile(filename, content):
 #         self.flag = flag
         
     
+    
+class StringPathSet(set):
+    """
+    A string path is a tuple of (uni-)strings. A StringPathSet is a set
+    of those pathes with basic set functionality and a function
+    to find all pathes in set which start with a given tuple of strings.
+    """
+    
+    # TODO More efficient
+    def iterStartsWith(self, startseq):
+        for sp in self:
+            if seqStartsWith(sp, startseq):
+                yield sp
+        
+    def listStartsWith(self, startseq):
+        return list(self.iterStartsWith(startseq))
+        
+    
+    def discardStartsWith(self, startseq):
+        """
+        Discard all elements starting with startseq
+        """
+        for sp in self.listStartsWith(startseq):
+            self.discard(sp)
+
+

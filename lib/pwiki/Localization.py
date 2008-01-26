@@ -4,8 +4,7 @@ import string, locale, codecs, sets, os, os.path, traceback
 
 from xml.dom import minidom
 
-from Utilities import loadEntireTxtFile, writeEntireTxtFile
-from StringOps import utf8Enc
+from StringOps import utf8Enc, loadEntireTxtFile, writeEntireTxtFile, pathEnc
 
 
 CASEMODE_UPPER_INSIDE = 0   # Sort upper case inside like aAbBcC
@@ -264,7 +263,7 @@ def buildMessageDict(filename):
         infile = filename + '.po'
 
     try:
-        lines = codecs.open(infile, "r", "utf-8").readlines()
+        lines = codecs.open(pathEnc(infile), "r", "utf-8").readlines()
     except IOError, msg:
 #         print >> sys.stderr, msg
         raise
@@ -534,7 +533,7 @@ def loadI18nDict(appDir, locStr=None):
             return
         
         path = os.path.join(appDir, "WikidPad_" + locEntry + ".po")
-        if not os.path.exists(path):
+        if not os.path.exists(pathEnc(path)):
             continue
         
         try:
@@ -595,8 +594,8 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
 
     # Retrieve modification time of .po and .xrc file to compare with cache
     # Cache is only valid if newer than both
-    poModTime = os.stat(i18nPoPath).st_mtime
-    poModTime2 = os.stat(os.path.join(appDir, baseXrcName + ".xrc")).st_mtime
+    poModTime = os.stat(pathEnc(i18nPoPath)).st_mtime
+    poModTime2 = os.stat(pathEnc(os.path.join(appDir, baseXrcName + ".xrc"))).st_mtime
 
     poModTime = max(poModTime, poModTime2)
 
@@ -605,7 +604,8 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
         cachePath = os.path.join(appDir,
                 baseXrcName + "_" + i18nLocale + ".xrc")
 
-        if os.path.exists(cachePath) and os.stat(cachePath).st_mtime > poModTime:
+        if os.path.exists(pathEnc(cachePath)) and \
+                os.stat(pathEnc(cachePath)).st_mtime > poModTime:
             # Valid cache found
             return loadEntireTxtFile(cachePath)
     except:
@@ -617,7 +617,8 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
         cachePath = os.path.join(globalConfigSubDir,
                 baseXrcName + "_" + i18nLocale + ".xrc")
 
-        if os.path.exists(cachePath) and os.stat(cachePath).st_mtime > poModTime:
+        if os.path.exists(pathEnc(cachePath)) and \
+                os.stat(pathEnc(cachePath)).st_mtime > poModTime:
             # Valid cache found
             return loadEntireTxtFile(cachePath)
     except:

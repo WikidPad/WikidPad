@@ -8,7 +8,7 @@ from MiscEvent import MiscEventSourceMixin
 from WikiExceptions import *
 
 from StringOps import strToBool, fileContentToUnicode, BOM_UTF8, utf8Enc, \
-        utf8Dec
+        utf8Dec, pathEnc, loadEntireTxtFile, writeEntireTxtFile
 
 from Utilities import DUMBTHREADHOLDER
 
@@ -210,8 +210,8 @@ class DocPage(MiscEventSourceMixin):
         for functional pages.
         """
         raise NotImplementedError #abstract
-
-
+        
+    
     def isReadOnlyEffect(self):
         """
         Return true if page is effectively read-only, this means
@@ -254,7 +254,7 @@ class AliasWikiPage(DocPage):
         Return human readable title of the page.
         """
         return self.aliasWikiWord
-
+        
     def getUnifiedPageName(self):
         """
         Return the name of the unified name of the page, which is
@@ -409,23 +409,33 @@ class WikiPage(DataCarryingPage):
 
         
     def getChildRelationships(self, existingonly=False, selfreference=True,
-            withPosition=False, excludeSet=sets.ImmutableSet()):
+            withFields=(), excludeSet=sets.ImmutableSet()):
         """
         get the child relations of this word
         existingonly -- List only existing wiki words
         selfreference -- List also wikiWord if it references itself
-        withPositions -- Return tuples (relation, firstcharpos) with char.
-            position of link in page (may be -1 to represent unknown)
+        withFields -- Seq. of names of fields which should be included in
+            the output. If this is not empty, tuples are returned
+            (relation, ...) with ... as further fields in the order mentioned
+            in withfields.
+
+            Possible field names:
+                "firstcharpos": position of link in page (may be -1 to represent
+                    unknown)
+                "modified": Modification date
         excludeSet -- set of words which should be excluded from the list
 
         Does not support caching
         """
+        if withFields is None:
+            withFields = ()
+
         relations = self.getWikiData().getChildRelationships(self.wikiWord,
-                existingonly, selfreference, withPosition=withPosition)
+                existingonly, selfreference, withFields=withFields)
 
         if len(excludeSet) > 0:
             # Filter out members of excludeSet
-            if withPosition:
+            if len(withFields) > 0:
                 relations = [r for r in relations if not r[0] in excludeSet]
             else:
                 relations = [r for r in relations if not r in excludeSet]
@@ -958,15 +968,31 @@ class WikiPage(DataCarryingPage):
             # TODO: Do it right 
             # Retrieve relations as list of tuples (child, firstcharpos)
             relations = self.getChildRelationships(existingonly,
-                    selfreference=False, withPosition=True,
+                    selfreference=False, withFields=("firstcharpos",),
                     excludeSet=excludeSet)
-            relations.sort(_cmpCharPosition)
+            relations.sort(_cmpNumbersItem1)
             # Remove firstcharpos
             relations = [r[0] for r in relations]
+        elif childSortOrder == u"mod_oldest":
+            # Retrieve relations as list of tuples (child, modifTime)
+            relations = self.getChildRelationships(existingonly,
+                    selfreference=False, withFields=("modified",),
+                    excludeSet=excludeSet)
+            relations.sort(_cmpNumbersItem1)
+            # Remove firstcharpos
+            relations = [r[0] for r in relations]
+        elif childSortOrder == u"mod_newest":
+            # Retrieve relations as list of tuples (child, modifTime)
+            relations = self.getChildRelationships(existingonly,
+                    selfreference=False, withFields=("modified",),
+                    excludeSet=excludeSet)
+            relations.sort(_cmpNumbersItem1Rev)
+            # Remove firstcharpos
+            relations = [r[0] for r in relations]            
         else:
             # Retrieve relations as list of children words
             relations = self.getChildRelationships(existingonly, 
-                    selfreference=False, withPosition=False,
+                    selfreference=False, withFields=(),
                     excludeSet=excludeSet)
             if childSortOrder.startswith(u"desc"):
                 coll = wikiDocument.getCollator()
@@ -1099,9 +1125,7 @@ class FunctionalPage(DataCarryingPage):
         tbLoc = os.path.join(GetApp().getGlobalConfigSubDir(),
                 subtag + ".wiki")
         try:
-            tbFile = open(tbLoc, "rU")
-            tbContent = tbFile.read()
-            tbFile.close()
+            tbContent = loadEntireTxtFile(tbLoc)
             return fileContentToUnicode(tbContent)
         except:
             return u""
@@ -1180,12 +1204,8 @@ class FunctionalPage(DataCarryingPage):
     def _saveGlobalPage(self, text, subtag):
         tbLoc = os.path.join(GetApp().getGlobalConfigSubDir(),
                 subtag+".wiki")
-        tbFile = open(tbLoc, "w")
-        try:
-            tbFile.write(BOM_UTF8)
-            tbFile.write(utf8Enc(text)[0])
-        finally:
-            tbFile.close()
+
+        writeEntireTxtFile(tbLoc, (BOM_UTF8, utf8Enc(text)[0]))
 
 
     def _saveDbSpecificPage(self, text, subtag):
@@ -1326,11 +1346,31 @@ def _relationSort(a, b):
     return cmp(aSort, bSort)
 
 
-def _cmpCharPosition(a, b):
+def _floatToCompInt(f):
+    if f > 0:
+        return 1
+    elif f < 0:
+        return -1
+    else:
+        return 0
+
+
+def _cmpNumbersItem1(a, b):
     """
-    Compare "natural", means using the char. positions of the links in page
+    Compare "natural", means using the char. positions or moddates of
+    the links in page.
     """
-    return int(a[1] - b[1])
+    return _floatToCompInt(a[1] - b[1])
+
+
+def _cmpNumbersItem1Rev(a, b):
+    """
+    Compare "natural", means using the char. positions or moddates of
+    the links in page.
+    """
+    return _floatToCompInt(b[1] - a[1])
+
+
 
 # TODO: Allow localization (then, this map must be created after localization is
 #     set or changed.

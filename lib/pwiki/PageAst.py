@@ -42,7 +42,7 @@ class Ast(object):
 
 def _enrichTokens(formatting, tokens, formatDetails, threadholder):
     result = []
-    
+
     for tok in tokens:
         threadholder.testCurrent()
 #         if not threadholder.isCurrent():

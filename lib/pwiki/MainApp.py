@@ -18,7 +18,7 @@ from MiscEvent import KeyFunctionSink, MiscEventSourceMixin
 
 from WikiExceptions import *
 from PersonalWikiFrame import PersonalWikiFrame
-from StringOps import mbcsDec, createRandomString
+from StringOps import mbcsDec, createRandomString, pathEnc
 from CmdLineAction import CmdLineAction
 from Serialization import SerializeStream
 import Ipc
@@ -51,25 +51,25 @@ def findDirs():
     globalConfigDir = None
 
     # This allows to keep the program with config on an USB stick
-    if os.path.exists(os.path.join(wikiAppDir, "WikidPad.config")):
+    if os.path.exists(pathEnc(os.path.join(wikiAppDir, "WikidPad.config"))):
         globalConfigDir = wikiAppDir
-    elif os.path.exists(os.path.join(wikiAppDir, ".WikidPad.config")):
+    elif os.path.exists(pathEnc(os.path.join(wikiAppDir, ".WikidPad.config"))):
         globalConfigDir = wikiAppDir
     else:
         globalConfigDir = os.environ.get("HOME")
-        if not (globalConfigDir and os.path.exists(globalConfigDir)):
+        if not (globalConfigDir and os.path.exists(pathEnc(globalConfigDir))):
             # Instead of checking USERNAME, the user config dir. is
             # now used
             globalConfigDir = wx.StandardPaths.Get().GetUserConfigDir()
             # For Windows the user config dir is "...\Application data"
             # therefore we go down to "...\Application data\WikidPad"
-            if os.path.exists(globalConfigDir) and isWindows:
+            if os.path.exists(pathEnc(globalConfigDir)) and isWindows:
                 try:
                     realGlobalConfigDir = os.path.join(globalConfigDir,
                             "WikidPad")
-                    if not os.path.exists(realGlobalConfigDir):
+                    if not os.path.exists(pathEnc(realGlobalConfigDir)):
                         # If it doesn't exist, create the directory
-                        os.mkdir(realGlobalConfigDir)
+                        os.mkdir(pathEnc(realGlobalConfigDir))
 
                     globalConfigDir = realGlobalConfigDir
                 except:
@@ -132,16 +132,16 @@ class App(wx.App, MiscEventSourceMixin):
 
         self.globalConfigSubDir = os.path.join(self.globalConfigDir,
                 "WikidPadGlobals")
-        if not os.path.exists(self.globalConfigSubDir):
+        if not os.path.exists(pathEnc(self.globalConfigSubDir)):
             self.globalConfigSubDir = os.path.join(self.globalConfigDir,
                     ".WikidPadGlobals")
-            if not os.path.exists(self.globalConfigSubDir):
+            if not os.path.exists(pathEnc(self.globalConfigSubDir)):
                 self.globalConfigSubDir = defaultGlobalConfigSubDir
                 os.mkdir(self.globalConfigSubDir)
 
         pCssLoc = os.path.join(self.globalConfigSubDir, "wikipreview.css")
-        if not os.path.exists(pCssLoc):
-            tbFile = open(pCssLoc, "wa")
+        if not os.path.exists(pathEnc(pCssLoc)):
+            tbFile = open(pathEnc(pCssLoc), "w")
             tbFile.write(PREVIEW_CSS)
             tbFile.close()
 
@@ -166,7 +166,7 @@ class App(wx.App, MiscEventSourceMixin):
                     ".WikidPad.config")
 
         globalConfigLoc = os.path.join(self.globalConfigDir, "WikidPad.config")
-        if os.path.exists(globalConfigLoc):
+        if os.path.exists(pathEnc(globalConfigLoc)):
             try:
                 self.globalConfig.loadConfig(globalConfigLoc)
             except Configuration.Error, MissingConfigurationFileException:
@@ -174,7 +174,7 @@ class App(wx.App, MiscEventSourceMixin):
         else:
             globalConfigLoc = os.path.join(self.globalConfigDir,
                     ".WikidPad.config")
-            if os.path.exists(globalConfigLoc):
+            if os.path.exists(pathEnc(globalConfigLoc)):
                 try:
                     self.globalConfig.loadConfig(globalConfigLoc)
                 except Configuration.Error, MissingConfigurationFileException:
@@ -183,7 +183,7 @@ class App(wx.App, MiscEventSourceMixin):
                 self.createDefaultGlobalConfig(defaultGlobalConfigLoc)
             
         self.globalConfig.getMiscEvent().addListener(KeyFunctionSink((
-                ("configuration changed", self.onGlobalConfigurationChanged),
+                ("changed configuration", self.onGlobalConfigurationChanged),
         )), False)
         
         ## _prof.start()
@@ -212,11 +212,13 @@ class App(wx.App, MiscEventSourceMixin):
     
             # TODO maybe more secure method to ensure atomic exist. check and
             #   writing of file
-            if os.path.exists(os.path.join(self.globalConfigSubDir, "AppLock.lock")):
+            if os.path.exists(pathEnc(os.path.join(
+                    self.globalConfigSubDir, "AppLock.lock"))):
                 singleInstance = False
                 # There seems to be(!) another instance already
                 # TODO Try to send commandline
-                f = open(os.path.join(self.globalConfigSubDir, "AppLock.lock"), "ra")
+                f = open(pathEnc(os.path.join(
+                        self.globalConfigSubDir, "AppLock.lock")), "r")
                 appLockContent = f.read()
                 f.close()
                 
@@ -253,7 +255,7 @@ class App(wx.App, MiscEventSourceMixin):
                         except socket.timeout, e:
                             singleInstance = True
                         except socket.error, e:
-                            if e.args[0] == 10061:
+                            if (e.args[0] == 10061 or e.args[0] == 111):
                                 # Connection refused (port not bound to a server)
                                 singleInstance = True
                             else:
@@ -276,7 +278,8 @@ class App(wx.App, MiscEventSourceMixin):
     
                 appLockContent = appCookie + "\n" + str(port) + "\n"
     
-                f = open(os.path.join(self.globalConfigSubDir, "AppLock.lock"), "wa")
+                f = open(pathEnc(os.path.join(
+                        self.globalConfigSubDir, "AppLock.lock")), "w")
                 f.write(appLockContent)
                 f.close()
     

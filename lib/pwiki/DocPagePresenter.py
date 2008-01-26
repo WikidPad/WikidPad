@@ -8,7 +8,7 @@ import wx
 from WikiExceptions import *
 from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID
 
-from MiscEvent import MiscEventSourceMixin  # , KeyFunctionSink
+from MiscEvent import MiscEventSourceMixin, ProxyMiscEvent  # , KeyFunctionSink
 import DocPages
 
 from StringOps import uniToGui
@@ -33,6 +33,10 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
         LayeredControlPresenter.__init__(self)
         self.mainControl = mainControl
         self.docPage = None
+
+        self.currentDocPageProxyEvent = ProxyMiscEvent(self)
+        self.currentDocPageProxyEvent.addListener(self)
+
         
         # Connect page history
         self.pageHistory = PageHistory(self.getMainControl(), self)
@@ -81,8 +85,8 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
     def close(self):
         LayeredControlPresenter.close(self)
         self.getMainControl().getMiscEvent().removeListener(self)
-#        self.setDocPage(None)
         self.pageHistory.close()
+        self.setDocPage(None)  # TODO: Was commented out?
 
 
     def getDocPage(self):
@@ -90,13 +94,26 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
 
 
     def setDocPage(self, dp):
-        if self.docPage is not None:
-            self.docPage.getMiscEvent().removeListener(self)
+#         if self.docPage is not None:
+#             self.docPage.getMiscEvent().removeListener(self)
 
         self.docPage = dp
 
         if self.docPage is not None:
-            self.docPage.getMiscEvent().addListener(self)
+            self.currentDocPageProxyEvent.setWatchedEvent(
+                self.docPage.getMiscEvent())
+        else:
+            self.currentDocPageProxyEvent.setWatchedEvent(None)
+
+#             self.docPage.getMiscEvent().addListener(self)
+
+
+    def getCurrentDocPageProxyEvent(self):
+        """
+        This ProxyMiscEvent resends any messsages from the currently
+        active DocPage
+        """
+        return self.currentDocPageProxyEvent
 
 
     def getWikiWord(self):

@@ -1809,6 +1809,32 @@
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
+      <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <cols>2</cols>
+          <growablecols>1</growablecols>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Remember expanded tree nodes:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chTreeExpandedNodesRememberDuration">
+              <content>
+                <item>Not at all</item>
+                <item>While wiki open</item>
+                <item>Always</item>
+              </content>
+              <selection>2</selection>
+            </object>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
       <object class="spacer">
         <size>5,5</size>
       </object>
@@ -1874,11 +1900,52 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
+        <object class="wxStaticLine"/>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+      <object class="sizeritem">
         <object class="wxBoxSizer">
           <orient>wxHORIZONTAL</orient>
         </object>
         <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
+      <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <cols>2</cols>
+          <growablecols>1</growablecols>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Wiki icon:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfWikiIcon"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Wiki-bound hotkey:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfHotKeyShowHideByWiki"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+    </object>
+  </object>
+  <object class="wxPanel" name="OptionsPageCwFileStorage">
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
       <object class="sizeritem">
         <object class="wxStaticText" name="">
           <label>File storage identity check</label>
@@ -1917,40 +1984,6 @@
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
-      </object>
-      <object class="spacer">
-        <size>5,5</size>
-      </object>
-      <object class="sizeritem">
-        <object class="wxFlexGridSizer">
-          <cols>2</cols>
-          <growablecols>1</growablecols>
-          <object class="sizeritem">
-            <object class="wxStaticText">
-              <label>Wiki icon:</label>
-            </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxTextCtrl" name="tfWikiIcon"/>
-            <flag>wxALL|wxEXPAND</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxStaticText">
-              <label>Wiki-bound hotkey:</label>
-            </object>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxTextCtrl" name="tfHotKeyShowHideByWiki"/>
-            <flag>wxALL|wxEXPAND</flag>
-            <border>5</border>
-          </object>
-        </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
     </object>
   </object>
@@ -3735,6 +3768,10 @@
     <object class="wxMenuItem" name="CMD_THIS_TAB_SHOW_SWITCH_EDITOR_PREVIEW">
       <label>Switch Ed./Prev</label>
     </object>
+    <object class="wxMenuItem" name="CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD">
+      <label>Copy URL to clipboard</label>
+      <help>Copy full &quot;wiki:&quot; URL of the word to clipboard</help>
+    </object>
   </object>
   <object class="wxMenu" name="MenuTreectrlWikiWords">
     <object class="wxMenuItem" name="CMD_ACTIVATE_NEW_TAB_THIS">
@@ -3764,6 +3801,10 @@
     <object class="wxMenuItem" name="CMD_PREPEND_WIKIWORD_FOR_THIS">
       <label>Prepend wiki word</label>
       <help>Prepend a new or existing wiki word</help>
+    </object>
+    <object class="wxMenuItem" name="CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD">
+      <label>Copy URL to clipboard</label>
+      <help>Copy full &quot;wiki:&quot; URL of the word to clipboard</help>
     </object>
   </object>
   <object class="wxPanel" name="ExportSubText">

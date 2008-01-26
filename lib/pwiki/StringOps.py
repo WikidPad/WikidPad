@@ -70,10 +70,13 @@ if isOSX():
 
 elif isLinux():
     # Could be wrong encoding
-    mbcsEnc = codecs.getencoder("latin-1")
-    _mbcsDec = codecs.getdecoder("latin-1")
-    mbcsReader = codecs.getreader("latin-1")
-    mbcsWriter = codecs.getwriter("latin-1")
+#     LINUX_ENCODING = "latin-1"
+    LINUX_ENCODING = "utf8"
+
+    mbcsEnc = codecs.getencoder(LINUX_ENCODING)
+    _mbcsDec = codecs.getdecoder(LINUX_ENCODING)
+    mbcsReader = codecs.getreader(LINUX_ENCODING)
+    mbcsWriter = codecs.getwriter(LINUX_ENCODING)
 
     def lineendToOs(text):
         return convertLineEndings(text, "\n")
@@ -87,7 +90,6 @@ else:
     mbcsReader = codecs.getreader("mbcs")
     mbcsWriter = codecs.getwriter("mbcs")
 
-    # TODO This is suitable for Windows only
     def lineendToOs(text):
         return convertLineEndings(text, "\r\n")
 
@@ -99,15 +101,21 @@ def mbcsDec(input, errors="strict"):
         return _mbcsDec(input, errors)
 
 
-if isWindows() and not isWin9x():
-    def dummy(s, e=""):
-        return s, len(s)
+# if isWindows() and not isWin9x():
+if os.path.supports_unicode_filenames:
+    def dummy(s):
+        return s
 
     pathEnc = dummy
     pathDec = dummy
 else:
-    pathEnc = mbcsEnc
-    pathDec = mbcsDec
+    def pathEnc(s):
+        if isinstance(s, str):
+            return s
+        return mbcsEnc(s, "replace")[0]
+
+    def pathDec(s):
+        return mbcsDec(s, "replace")[0]
 
 
 if isUnicode():
@@ -209,28 +217,35 @@ def fileContentToUnicode(content):
         return mbcsDec(content, "replace")[0]
 
 
-# def loadEntireFile(filename):
-#     """
-#     Load entire file (text mode) and return its content.
-#     """
-#     rf = open(filename, "rU")
-#     try:
-#         result = rf.read()
-#         return result
-#     finally:
-#         rf.close()
-# 
-# 
-# def writeEntireFile(filename, content):
-#     """
-#     Write entire file (text mode).
-#     """
-#     rf = open(filename, "w")
-#     try:
-#         rf.write(content)
-#         return
-#     finally:
-#         rf.close()
+def loadEntireTxtFile(filename):
+    """
+    Load entire file (text mode) and return its content.
+    """
+    rf = open(pathEnc(filename), "rU")
+    try:
+        result = rf.read()
+        return result
+    finally:
+        rf.close()
+
+
+def writeEntireTxtFile(filename, content):
+    """
+    Write entire file (text mode).
+    content can either be a byte string or a tuple or list of byte strings
+    which are then written one by one to the file.
+    """
+    rf = open(pathEnc(filename), "w")
+    try:
+        if isinstance(content, tuple) or isinstance(content, list):
+            for c in content:
+                rf.write(c)
+        else:
+            rf.write(content)
+        return
+    finally:
+        rf.close()
+
 
 
 def removeBracketsFilename(fn):
@@ -454,7 +469,7 @@ def formatWxDate(frmStr, date):
             resParts.append("%i" % wd)
         else:
             resParts.append(part)
-    
+
     frmStr = "".join(resParts)
 
     return date.Format(unescapeWithRe(frmStr))
@@ -463,7 +478,8 @@ def formatWxDate(frmStr, date):
 def strftimeUB(frmStr, timet=None):
     """
     Similar to time.strftime, but uses a time_t number as time (no structure),
-    also unescapes some backslash codes and supports unicode.
+    also unescapes some backslash codes, supports unicode and shows local time
+    if timet is GMT.
     """
     if timet is None:
         return formatWxDate(frmStr, wx.DateTime_Now())
@@ -569,7 +585,7 @@ URL_RESERVED = frozenset((u";", u"?", u":", u"@", u"&", u"=", u"+", u",", u"/"))
 
 def urlQuote(s, safe='/'):
     """
-    Modified version of urllib.quote
+    Modified version of urllib.quote supporting unicode.
     
     Each part of a URL, e.g. the path info, the query, etc., has a
     different set of reserved characters that must be quoted.
@@ -733,7 +749,7 @@ def wikiUrlToPathWordAndAnchor(url):
     Split a "wiki:" protocol URL into the path of the config file,
     the name of the wikiword and the anchor to open if given in query string.
 
-    Returns (path, wikiword, anchor) where wikiword may be None
+    Returns (path, wikiword, anchor) where wikiword and/or anchor may be None
     """
     # Change "wiki:" url to "http:" for urlparse
     linkHt = "http:" + url[5:]
@@ -756,6 +772,33 @@ def wikiUrlToPathWordAndAnchor(url):
     filePath = urllib.url2pathname(url)
 
     return (filePath, wikiWordToOpen, anchorToOpen)
+    
+    
+def pathWordAndAnchorToWikiUrl(filePath, wikiWordToOpen, anchorToOpen):
+    url = urlFromPathname(filePath)
+    
+    queryStringNeeded = (wikiWordToOpen is not None) or \
+            (anchorToOpen is not None)
+
+    result = ["wiki:", url]
+    if queryStringNeeded:
+        result.append("?")
+        ampNeeded = False
+
+        if wikiWordToOpen is not None:
+            result.append("page=")
+            result.append(urlQuote(wikiWordToOpen, safe=""))
+            ampNeeded = True
+        
+        if anchorToOpen is not None:
+            if ampNeeded:
+                result.append("&")
+            result.append("anchor=")
+            result.append(urlQuote(anchorToOpen, safe=""))
+            ampNeeded = True
+
+    return "".join(result)
+    
 
 
 

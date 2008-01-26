@@ -117,7 +117,7 @@ def _fillWithDefaults(config, defaults):
 
 class _AbstractConfiguration:
     def get(self, section, option, default=None):
-        assert 0  # abstract    
+        raise NotImplementedError   # abstract
 
     def getint(self, section, option, default=None):
         result = self.get(section, option)
@@ -286,14 +286,11 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         if self.configParserObject:
             sfile = StringIO.StringIO()
             self.configParserObject.write(sfile)
-            Utilities.writeEntireTxtFile(self.configPath, sfile.getvalue())
-# 
-#             
-#             configFile = open(self.configPath, 'w')
-#             try:
-#                 self.configParserObject.write(configFile)
-#             finally:
-#                 configFile.close()
+            configFile = open(self.configPath, 'w')
+            try:
+                self.configParserObject.write(configFile)
+            finally:
+                configFile.close()
 
     def informChanged(self):
         """
@@ -303,7 +300,7 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         the creation of many events (one per each set call) instead
         of one at the end of changes
         """
-        self.fireMiscEventKeys(("configuration changed",))
+        self.fireMiscEventKeys(("changed configuration",))
 
 
 
@@ -691,6 +688,12 @@ WIKIDEFAULTS = {
     ("wiki_db", "data_dir"): u"data",
     ("main", "wiki_name"): None,
     ("main", "last_wiki_word"): None, # Show this wiki word as leftmost wiki word on startup if first_wiki_word is empty
+    ("main", "tree_last_root_wiki_word"): None, # Last root word of wiki tree
+    ("main", "tree_expandedNodes_rememberDuration"): u"2", # How long should open nodes in tree be remembered?
+            # 0: Not at all; 1: During session; 2: Between sessions in wiki config file
+    ("main", "tree_expandedNodes_descriptorPathes_main"): u"", # ";"-delimited sequence of node descriptor pathes of expanded nodes in tree.
+            # Descriptors of a path are delimited by ','. This config. entry applies to main tree
+    ("main", "tree_expandedNodes_descriptorPathes_views"): u"", # Same as above but applies to "Views" tree if present
     ("main", "further_wiki_words"): u"", # Semicolon separated list of further wiki words to show in addit. tabs
             # after last wiki word
     ("main", "first_wiki_word"): "", # Start with a special wiki word (If empty, use last word)

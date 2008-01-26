@@ -137,10 +137,13 @@ class CalendarPanel(wx.Window, TimePresentationBase):
             self.__sinkMc = wxKeyFunctionSink((
                     ("opened wiki", self.onUpdateNeeded),
                     ("closed current wiki", self.onUpdateNeeded),
+#                     ("changed options", self.onUpdateNeeded)
+            ), self.mainControl.getMiscEvent(), self)
+
+            self.__sinkWikiDoc = wxKeyFunctionSink((
                     ("updated wiki page", self.onUpdateNeeded),
                     ("deleted wiki page", self.onUpdateNeeded)
-#                     ("options changed", self.onUpdateNeeded)
-            ), self.mainControl.getMiscEvent(), self)
+            ), self.mainControl.getCurrentWikiDocumentProxyEvent(), self)
 
             self.__sinkApp = wxKeyFunctionSink((
                     ("options changed", self.onUpdateNeeded),

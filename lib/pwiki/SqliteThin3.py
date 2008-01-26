@@ -1,6 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 
-import codecs, new, types, traceback, sys, os
+import codecs, new, types, traceback, sys, os, platform
 from ctypes import *
 
 import SqliteThin3 as _module
@@ -93,13 +93,15 @@ class SqliteError3(Exception):
 
 
 if isLinux():
-    import platform
     pyver = tuple((int(s) for s in platform.python_version_tuple()))
     
     if pyver >= (2, 5, 0):
         _dll = CDLL("libsqlite3.so.0")
     else:
         _dll = CDLL("libsqlite3.so")
+elif platform.uname()[0] == "Darwin":
+    # Mac OS 9 (or 9.1.0 specifically?)
+    _dll = CDLL("libsqlite3.0.dylib")
 else:
     _dll = cdll.sqlite3
 
@@ -289,22 +291,7 @@ def column_null(stmt, col):
     """
     return None
     
-"""
-# The remaining column functions are created as callable objects
-    
-class _ColumnGetter:
-    def __init__(self, restype, fctname):
-        sqlitefct = getattr(_dll, "sqlite3_"+fctname)
-        sqlitefct.restype = restype
-        self.sqlitefct = sqlitefct
 
-    def __call__(self, stmt, col):   # Zero indexed column number
-        return self.sqlitefct(stmt._stmtpointer, c_int(col))  # .value
-
-    # setattr(_module, fctname, _ColumnGetter(restype, fctname))
-
-
-"""
 
 
 
@@ -343,6 +330,7 @@ AUTO_COLUMN_CONVERTS = {
     }
 
    
+   
     
 def def_column_fctfinder(stmt, col):
     """
@@ -355,6 +343,30 @@ def def_column_fctfinder(stmt, col):
     
 
 
+class PresetColFctfinder:
+    """
+    Create a column functionfinder which has for each column a preset
+    type.
+    """
+    def __init__(self, preset):
+        """
+        preset -- Sequence of type constants (SQLITE_*) or column functions,
+            one for each column
+        """
+        self.presetFcts = [AUTO_COLUMN_CONVERTS.get(p, p) for p in preset]
+    
+    def __call__(self, stmt, col):
+        return self.presetFcts[col]
+
+
+
+def getLibVersion():
+    """
+    Retrieve sqlite version as bytestring
+    """
+    _dll.sqlite3_libversion.restype = c_char_p
+
+    return utf8Encode(_dll.sqlite3_libversion())[0]
 
 
 

@@ -14,7 +14,8 @@ import urllib
 
 from wxHelper import GUI_ID, getAccelPairFromKeyDown, \
         getAccelPairFromString, LayerSizer, appendToMenuByMenuDesc, \
-        setHotKeyByString, DummyWindow, IdRecycler, clearMenu
+        setHotKeyByString, DummyWindow, IdRecycler, clearMenu, \
+        copyTextToClipboard
 
 import TextTree
 
@@ -61,7 +62,8 @@ from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
         BOM_UTF8, fileContentToUnicode, splitIndent, \
         unescapeWithRe, escapeForIni, unescapeForIni, \
         wikiUrlToPathWordAndAnchor, urlFromPathname, flexibleUrlUnquote, \
-        strftimeUB
+        strftimeUB, pathEnc, loadEntireTxtFile, writeEntireTxtFile, \
+        pathWordAndAnchorToWikiUrl
 
 import DocPages
 import WikiFormatting
@@ -186,17 +188,14 @@ class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
         # Create the "[TextBlocks].wiki" file in the global config subdirectory
         # if the file doesn't exist yet.
         tbLoc = join(self.globalConfigSubDir, "[TextBlocks].wiki")
-        if not exists(tbLoc):
-            tbFile = open(tbLoc, "wa")
-            tbFile.write(BOM_UTF8)
-            tbFile.write(
+        if not exists(pathEnc(tbLoc)):
+            writeEntireTxtFile(tbLoc, (BOM_UTF8, 
 """importance: high;a=[importance: high]\\n
 importance: low;a=[importance: low]\\n
 tree_position: 0;a=[tree_position: 0]\\n
 wrap: 80;a=[wrap: 80]\\n
 camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
-""")
-            tbFile.close()
+"""))
 #         self.globalConfigLoc = join(globalConfigDir, "WikidPad.config")
         self.configuration = wx.GetApp().createCombinedConfiguration()
         
@@ -283,10 +282,19 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
           
         # clipboard catcher  
         if WindowsHacks is None:
-            self.win32Interceptor = None
+            self._interceptCollection = None
+            self.clipboardInterceptor = None
+            self.browserMoveInterceptor = None
         else:
-            self.win32Interceptor = WindowsHacks.WikidPadWin32WPInterceptor(self)
-            self.win32Interceptor.intercept(self.GetHandle())
+            self.clipboardInterceptor = WindowsHacks.ClipboardCatchIceptor(self)
+            self.browserMoveInterceptor = WindowsHacks.BrowserMoveIceptor(self)
+
+            self._interceptCollection = WindowsHacks.WinProcInterceptCollection(
+                    (self.clipboardInterceptor,
+                    self.browserMoveInterceptor))
+            self._interceptCollection.start(self.GetHandle())
+
+#             self.clipboardInterceptor.intercept(self.GetHandle())
 
         # resize the window to the last position/size
         setWindowSize(self, (self.configuration.getint("main", "size_x", 200),
@@ -361,7 +369,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # if a wiki to open is set, open it
         if wikiToOpen:
-            if exists(wikiToOpen):
+            if exists(pathEnc(wikiToOpen)):
                 self.openWiki(wikiToOpen, wikiWordsToOpen,
                 anchorToOpen=anchorToOpen)
             else:
@@ -408,25 +416,19 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def getExtension(self, extensionName, fileName):
         extensionFileName = join(self.globalConfigSubDir, u'user_extensions',
                 fileName)
-        if exists(extensionFileName):
-            extFile = open(extensionFileName, "rU")
-            userUserExtension = extFile.read()
-            extFile.close()
+        if exists(pathEnc(extensionFileName)):
+            userUserExtension = loadEntireTxtFile(extensionFileName)
         else:
             userUserExtension = None
 
         extensionFileName = join(self.wikiAppDir, 'user_extensions', fileName)
-        if exists(extensionFileName):
-            extFile = open(extensionFileName, "rU")
-            userExtension = extFile.read()
-            extFile.close()
+        if exists(pathEnc(extensionFileName)):
+            userExtension = loadEntireTxtFile(extensionFileName)
         else:
             userExtension = None
 
         extensionFileName = join(self.wikiAppDir, 'extensions', fileName)
-        extFile = open(extensionFileName, "rU")
-        systemExtension = extFile.read()
-        extFile.close()
+        systemExtension = loadEntireTxtFile(extensionFileName)
 
         return importCode(systemExtension, userExtension, userUserExtension,
                 extensionName)
@@ -563,8 +565,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
         self.eventRoundtrip += 1
-        wx.Window.FindFocus().ProcessEvent(evt)
-        self.eventRoundtrip -= 1
+        try:
+            focus = wx.Window.FindFocus()
+            if focus is not None:
+                focus.ProcessEvent(evt)
+        finally:
+            self.eventRoundtrip -= 1
 
 
     def _OnEventToCurrentDocPPresenter(self, evt):
@@ -1007,7 +1013,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     # Handle an URL
                     filePath, wikiWordToOpen, anchorToOpen = \
                             wikiUrlToPathWordAndAnchor(entry.value)
-                    if exists(filePath):
+                    if exists(pathEnc(filePath)):
                         self.openWiki(filePath, wikiWordsToOpen=(wikiWordToOpen,),
                                 anchorToOpen=anchorToOpen)
                 else:
@@ -1119,7 +1125,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _(u'Add Bookmark to Page'), lambda evt: self.insertAttribute("bookmarked", "true"),
                 "pin", updatefct=self.OnUpdateDisReadOnlyWiki)
                 
-        if self.win32Interceptor is not None:
+        if self.clipboardInterceptor is not None:
             wikiWordMenu.AppendSeparator()
 
             menuItem = wx.MenuItem(wikiWordMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
@@ -1177,7 +1183,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 lambda evt: self.getActiveEditor().activateLink()) # ,
 #                 menuID=GUI_ID.CMD_ACTIVATE_LINK)
 
-        self.addMenuItem(wikiWordMenu, _(u'&Activate Link/Word in new tab') + u'\t' +
+        self.addMenuItem(wikiWordMenu, _(u'Activate Link/&Word in new tab') + u'\t' +
                 self.keyBindings.ActivateLinkNewTab, _(u'Activate link/word in new tab'),
                 lambda evt: self.getActiveEditor().activateLink(tabMode=2))
 
@@ -1199,6 +1205,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.addMenuItem(wikiWordMenu, _(u'List &Bookmarks') + u'\t' +
                 self.keyBindings.ViewBookmarks, _(u'View bookmarks'),
                 lambda evt: self.viewBookmarks())
+
+        self.addMenuItem(wikiWordMenu, _(u'Copy &URL to clipboard') + u'\t' +
+                self.keyBindings.ClipboardCopyUrlToCurrentWikiword,
+                _(u'Copy full "wiki:" URL of the word to clipboard'),
+                self.OnCmdClipboardCopyUrlToCurrentWikiWord)
 
 
         wikiWordMenu.AppendSeparator()
@@ -2166,14 +2177,35 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if self.IsIconized():
                 self.Iconize(False)
                 self.Show(True)
-            
+
             self.Raise()
 
-    
+
     def OnCmdFocusFastSearchField(self, evt):
         if self.fastSearchField is not None:
             self.fastSearchField.SetFocus()
-    
+
+
+    def OnCmdClipboardCopyUrlToCurrentWikiWord(self, evt):
+        wikiWord = self.getCurrentWikiWord()
+        if wikiWord is None:
+            return
+        
+        path = self.getWikiDocument().getWikiConfigPath()
+        copyTextToClipboard(pathWordAndAnchorToWikiUrl(path, wikiWord, None))
+
+
+    def goBrowserBack(self):
+        evt = wx.CommandEvent(wx.wxEVT_COMMAND_MENU_SELECTED,
+                GUI_ID.CMD_PAGE_HISTORY_GO_BACK)
+        self._OnEventToCurrentDocPPresenter(evt)
+
+    def goBrowserForward(self):
+        evt = wx.CommandEvent(wx.wxEVT_COMMAND_MENU_SELECTED,
+                GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD)
+        self._OnEventToCurrentDocPPresenter(evt)
+
+
     def _refreshHotKeys(self):
         """
         Refresh the system-wide hotkey settings according to configuration
@@ -2209,7 +2241,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """
         winName = winProps["name"]
         if winName == "maintree" or winName == "viewstree":
-            tree = WikiTreeCtrl(self, parent, -1)
+            tree = WikiTreeCtrl(self, parent, -1, winName[:-4])
             # assign the image list
             try:
                 # For native wx tree:
@@ -2223,6 +2255,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         'for the tree control.'), e)
             if self.getWikiConfigPath() is not None and winName == "viewstree":
                 tree.setViewsAsRoot()
+                tree.expandRoot()
             return tree
         elif winName.startswith("txteditor"):
             editor = WikiTxtCtrl(winProps["presenter"], parent, -1)
@@ -2437,7 +2470,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         self.statusBar.SetStatusText(uniToGui(u"Creating Wiki: %s" % wikiName), 0)
 
         createIt = True;
-        if (exists(wikiDir)):
+        if (exists(pathEnc(wikiDir))):
             dlg=wx.MessageDialog(self,
                     uniToGui(_(u"A wiki already exists in '%s', overwrite? "
                     u"(This deletes everything in and below this directory!)") %
@@ -2726,22 +2759,6 @@ These are your default global settings.
         
         try:
             furtherWikiWords = []
-            # what was the last wiki word opened
-#             lastWikiWord = wikiWordToOpen
-#             if not lastWikiWord:
-#                 lastWikiWord = splittedWikiWord
-#             if not lastWikiWord:
-#                 lastWikiWord = self.getConfig().get("main",
-#                         "first_wiki_word", u"")
-#                 if lastWikiWord == u"":
-#                     lastWikiWord = self.getConfig().get("main",
-#                             "last_wiki_word", None)
-#                     fwws = self.getConfig().get("main",
-#                             "further_wiki_words", u"")
-#                     print "openWiki", repr(fwws)
-#                     if fwws != u"":
-#                         furtherWikiWords = [unescapeForIni(w) for w in
-#                                 fwws.split(u";")]
 
             lastWikiWords = wikiWordsToOpen
             if wikiWordsToOpen is None:
@@ -2781,16 +2798,29 @@ These are your default global settings.
                 self.mainmenu.EnableTop(3, 1)
                 
             self.fireMiscEventKeys(("opened wiki",))
-    
-            # open the root    # TODO!
+
+            # open the home page    # TODO!
             self.openWikiPage(self.wikiName)
-            self.setCurrentWordAsRoot()
             
+            lastRoot = self.getConfig().get("main", "tree_last_root_wiki_word",
+                    None)
+            if not (lastRoot and
+                    self.getWikiDocument().isDefinedWikiWord(lastRoot)):
+                lastRoot = self.wikiName
+            
+            self.tree.setRootByWord(lastRoot)
+            self.tree.readExpandedNodesFromConfig()
+            self.tree.expandRoot()
+            self.getConfig().set("main", "tree_last_root_wiki_word", lastRoot)
+
             viewsTree = self.windowLayouter.getWindowForName("viewstree")
             if viewsTree is not None:
                 viewsTree.setViewsAsRoot()
-    
-    
+                viewsTree.readExpandedNodesFromConfig()
+                viewsTree.expandRoot()
+
+
+
             # set status
     #         self.statusBar.SetStatusText(
     #                 uniToGui(u"Opened wiki '%s'" % self.wikiName), 0)
@@ -2851,15 +2881,19 @@ These are your default global settings.
         """
         Set current wiki word as root of the tree
         """
-        self.setWordAsRoot(self.getCurrentWikiWord())
+        self.setWikiWordAsRoot(self.getCurrentWikiWord())
 
 
-    def setWordAsRoot(self, word):
+    def setWikiWordAsRoot(self, word):
         if not self.requireReadAccess():
             return
         try:
-            if word is not None:
+            if word is not None and \
+                    self.getWikiDocument().isDefinedWikiWord(word):
                 self.tree.setRootByWord(word)
+                self.tree.expandRoot()
+                self.getConfig().set("main", "tree_last_root_wiki_word", word)
+
         except (IOError, OSError, DbAccessError), e:
             self.lostAccess(e)
             raise
@@ -2880,32 +2914,7 @@ These are your default global settings.
             # close a disconnected wiki
             if not wd.getReadAccessFailed() and not wd.getWriteAccessFailed():
                 try:
-                    # Store the last open wiki words
-                    
-                    # First create a list of open wiki words
-#                     openWikiWords = []
-#                     for pres in self.getMainAreaPanel().getDocPagePresenters():
-#                         docPage = pres.getDocPage()
-#                         if isinstance(docPage, (DocPages.AliasWikiPage,
-#                                 DocPages.WikiPage)):
-#                             openWikiWords.append(
-#                                     docPage.getNonAliasPage().getWikiWord())
-
                     self.fireMiscEventKeys(("closing current wiki",))
-
-#                     if len(openWikiWords) > 0:
-#                         # Write the leftmost word to "last_wiki_word" for
-#                         # backward compatibility
-#                         self.getConfig().set("main", "last_wiki_word",
-#                                 openWikiWords[0])
-
-#                     # Write further words (after the leftmost) to config
-#                     if len(openWikiWords) < 2:
-#                         self.getConfig().set("main", "further_wiki_words", u"")
-#                     else:
-#                         fwws = u";".join([escapeForIni(w, u" ;")
-#                                 for w in openWikiWords[1:]])
-#                         self.getConfig().set("main", "further_wiki_words", fwws)
 
                     if self.getWikiData() and saveState:
                         self.saveCurrentWikiState()
@@ -2950,8 +2959,8 @@ These are your default global settings.
             self._refreshHotKeys()
 
             self.getConfig().setWikiConfig(None)
-            if self.win32Interceptor is not None:
-                self.win32Interceptor.stop()
+            if self.clipboardInterceptor is not None:
+                self.clipboardInterceptor.catchOff()
 
 #             self.setShowOnTray()
             self.resetGui()
@@ -3348,7 +3357,7 @@ These are your default global settings.
 
             filePath, wikiWordToOpen, anchorToOpen = wikiUrlToPathWordAndAnchor(
                     link2)
-            if exists(filePath):
+            if exists(pathEnc(filePath)):
                 self.openWiki(filePath, wikiWordsToOpen=(wikiWordToOpen,),
                         anchorToOpen=anchorToOpen)  # ?
                 return True
@@ -3706,24 +3715,23 @@ These are your default global settings.
 #                 self.clipboardCatcher.isActive()
 
     def OnClipboardCatcherOff(self, evt):
-        self.win32Interceptor.stop()
+        self.clipboardInterceptor.catchOff()
 
     def OnClipboardCatcherAtPage(self, evt):
         if self.isReadOnlyPage():
             return
 
-        self.win32Interceptor.startAtPage(self.GetHandle(),
-                self.getCurrentDocPage())
+        self.clipboardInterceptor.catchAtPage(self.getCurrentDocPage())
 
     def OnClipboardCatcherAtCursor(self, evt):
         if self.isReadOnlyPage():
             return
 
-        self.win32Interceptor.startAtCursor(self.GetHandle())
+        self.clipboardInterceptor.catchAtCursor()
 
 
     def OnUpdateClipboardCatcher(self, evt):
-        cc = self.win32Interceptor
+        cc = self.clipboardInterceptor
         if cc is None:
             return  # Shouldn't be called anyway
             
@@ -3740,7 +3748,7 @@ These are your default global settings.
             if cc.getMode() == cc.MODE_AT_PAGE:
                 evt.Check(True)
                 evt.SetText(_(u"Clipboard Catcher at: %s\t%s") % 
-                        (self.win32Interceptor.getWikiWord(),
+                        (self.clipboardInterceptor.getWikiWord(),
                         self.keyBindings.CatchClipboardAtPage))
             else:
                 evt.Check(False)
@@ -4587,7 +4595,7 @@ These are your default global settings.
                     self.hooks.deletedWikiWord(self,
                             wikiPage.getWikiWord())
     
-                    self.fireMiscEventProps(miscevt.getProps())
+#                     self.fireMiscEventProps(miscevt.getProps())
     
                 elif miscevt.has_key("renamed wiki page"):
                     oldWord = miscevt.get("wikiPage").getWikiWord()
@@ -4596,10 +4604,10 @@ These are your default global settings.
                     # trigger hooks
                     self.hooks.renamedWikiWord(self, oldWord, newWord)
 
-                elif miscevt.has_key("updated wiki page"):
-                    # This was send from a WikiDocument(=WikiDataManager) object,
-                    # send it again to listening components
-                    self.fireMiscEventProps(miscevt.getProps())
+#                 elif miscevt.has_key("updated wiki page"):
+#                     # This was send from a WikiDocument(=WikiDataManager) object,
+#                     # send it again to listening components
+#                     self.fireMiscEventProps(miscevt.getProps())
             elif miscevt.getSource() is self.getMainAreaPanel():
                 self.fireMiscEventProps(miscevt.getProps())
 #                 if miscevt.has_key("changed current docpage presenter"):
@@ -4740,6 +4748,9 @@ These are your default global settings.
     def OnSize(self, evt):
         if self.windowLayouter is not None:
             self.windowLayouter.layout()
+            if self.lowResources:
+                self.resourceWakeup()
+
 
 
     def isReadOnlyWiki(self):
@@ -4846,9 +4857,11 @@ These are your default global settings.
 # 
 #     def prepareExit(self):
         # Stop clipboard catcher if running
-        if self.win32Interceptor is not None:
-            self.win32Interceptor.unintercept()
+#         if self.clipboardInterceptor is not None:
+#             self.clipboardInterceptor.catchOff()
 
+        if self._interceptCollection is not None:
+            self._interceptCollection.close()
 
         self.getMainAreaPanel().updateConfig()
         self.closeWiki()
@@ -4917,7 +4930,7 @@ class TaskBarIcon(wx.TaskBarIcon):
                 self.pWiki.getWikiData().commit()))
         wx.EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pWiki.exitWiki())
 
-        if self.pWiki.win32Interceptor is not None:
+        if self.pWiki.clipboardInterceptor is not None:
             wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
                     self.pWiki.OnClipboardCatcherAtCursor)
             wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
@@ -4942,7 +4955,7 @@ class TaskBarIcon(wx.TaskBarIcon):
     def CreatePopupMenu(self):
         tbMenu = wx.Menu()
         # Build menu
-        if self.pWiki.win32Interceptor is not None:
+        if self.pWiki.clipboardInterceptor is not None:
             menuItem = wx.MenuItem(tbMenu,
                     GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
                     _(u"Clipboard Catcher at Cursor"), u"", wx.ITEM_CHECK)

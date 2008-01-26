@@ -1,73 +1,35 @@
 ﻿++ Migration Between Db Types
 
-It is recommended to make a backup before applying the following procedures.
+The following procedure describes how to migrate a wiki from one database type to another.
 
-When migrating you will loose stored searches and the modification and
-creation dates of the wiki pages!
-
-Definition: The *data-directory* is the directory named "data" in the directory of your wiki.
+It is recommended to make a backup before applying it.
 
 
-Please read and follow every of the following parts which matches your desired migration.
+    1. Open dialog from menu "Wiki" -> "Export" -> "Other Export..."
+    2. Set in dialog:
+    
+        What to export: Whole wiki
+        Export to: Multipage text
+        Compatible filenames: (Doesn't matter)
+        Format version: 1
+        Write wiki func. page: Check
+        Write saved searches: Check
+        Destination file: (Choose a non existing filename in an existing directory)
+    
+    3. Hit OK
+    4. Create a new wiki with same name and the desired new database type
+    5. Delete "WikiSettings" page in the new wiki
+    6. Open dialog from menu "Wiki" -> "Import..."
+    7. Set in dialog:
+    
+        Import format: Multipage text
+        Source file: (Same path you gave as destination file above)
+    
+    8. Hit OK
+    9. Use menu "Wiki" -> "Rebuild Wiki"
 
 
-+++ If you migrate from "Compact Sqlite":
-    1. Start WikidPad
-    2. Open your wiki
-    3. Choose "Wiki" -> "Export" -> "Export wiki to .wiki files"
-    4. Select the data-directory of your wiki as target
-
-
-
-+++ If you migrate from "Original Gadfly":
-If you are unsure if you want to go back to "Original Gadfly" later you should not delete the Gadfly database files in the data-directory (file "wikidb.gfd", all files with suffix .grl and the complete "index" directory) because they can't be recreated automatically (Sqlite db types can recreate their database files).
-
-
-
-+++ If you migrate to "Original Gadfly":
-If no Gadfly database files in the data-directory are present (file "wikidb.gfd", all files with suffix .grl and the complete "index" directory), you must copy them from another wiki with type "Original Gadfly" into the data-directory.
-
-
-
-+++ For each migration:
-    1. Start WikidPad (if not done already)
-    2. Use "Wiki" -> "Open as Type" to open the wiki to migrate, but choose the new desired db type.
-
-
-
-+++ If you migrate to "Compact Sqlite":
-Run "Copy .wiki files to database" from "Wiki" menu. This copies the files from the data-directory into the database which contains the real pages for "Compact Sqlite" data type.
-
-
-
-+++ For each migration:
-    3. Run "Wiki" -> "Rebuild Wiki"
-    4. Close and possibly reopen WikidPad
-
-
-
-+++ If you migrate to "Original Gadfly":
-Other files than the following in the data-directory are not needed by "Original Gadfly" and can therefore be deleted:
-    * file "wikidb.gfd"
-    * all files with suffix .grl
-    * all files with suffix .wiki
-    * the complete "index" directory
-
-
-+++ If you migrate to "Original Sqlite":
-Other files than the following in the data-directory are not needed by "Original Sqlite" and can therefore be deleted:
-    * file "wikiovw.sli"
-    * all files with suffix .wiki
-
-
-+++ If you migrate to "Compact Sqlite":
-Other files than the following in the data-directory are not needed by "Compact Sqlite" and can therefore be deleted:
-    * file "wiki.sli"
-
-You can even delete the \*.wiki files, but do not delete the one \*.wiki file in the directory
-above the data-directory!
-
-
+Now you can close the new wiki, delete or move away the old one and move the new one at its place.
 
 
 [camelCaseWordsEnabled: false]

@@ -149,6 +149,8 @@ See InlinePythonEval.
 Possible values are:
     * ascending: Sort alphabetically ascending
     * descending: Sort alphabetically descending
+    * mod_oldest: Sort by modification date, oldest first
+    * mod_newest: Sort by modification date, newest first
     * unsorted: Make no attempt to sort (fastest)
     * natural: Sort in order of appearance of the words on the page (may not always work)
 

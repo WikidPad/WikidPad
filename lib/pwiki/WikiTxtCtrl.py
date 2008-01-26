@@ -69,8 +69,8 @@ class IncrementalSearchDialog(wx.Frame):
     COLOR_GREEN = wx.Colour(0, 255, 0);
     
     def __init__(self, parent, id, txtCtrl, rect, font, presenter, searchInit=None):
-        wx.Frame.__init__(self, parent, id, u"", rect.GetPosition(),
-                rect.GetSize(), wx.NO_BORDER)
+        wx.Frame.__init__(self, parent, id, u"WikidPad i-search",
+                rect.GetPosition(), rect.GetSize(), wx.NO_BORDER)
 
         self.txtCtrl = txtCtrl
         self.presenter = presenter
@@ -421,7 +421,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
                 self.OnActivateNewTabThis)        
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
-                self.OnActivateNewTabBackgroundThis)        
+                self.OnActivateNewTabBackgroundThis)
+
+        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_ANCHOR,
+                self.OnClipboardCopyUrlToThisAnchor)
+
 
         wx.EVT_MENU(self, GUI_ID.CMD_TEXT_SELECT_ALL, lambda evt: self.SelectAll())
 
@@ -1166,6 +1170,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             
             self.contextMenuTokens = tokens
             addActivateItem = False
+            addUrlToClipboardItem = False
             for tok in tokens:
                 if tok.ttype == WikiFormatting.FormatTypes.WikiWord:
                     addActivateItem = True
@@ -1174,9 +1179,15 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 elif tok.ttype == WikiFormatting.FormatTypes.Insertion and \
                         tok.node.key == u"page":
                     addActivateItem = True
-                    
+                elif tok.ttype == WikiFormatting.FormatTypes.Anchor:
+                    addUrlToClipboardItem = True
+
             if addActivateItem:
                 appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_ACTIVATE)
+            
+            if addUrlToClipboardItem:
+                appendToMenuByMenuDesc(menu,
+                        _CONTEXT_MENU_INTEXT_URL_TO_CLIPBOARD)            
     
             appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_BOTTOM)
     
@@ -1748,52 +1759,21 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if self.contextMenuTokens:
             self.activateTokens(self.contextMenuTokens, 3)
 
+    def OnClipboardCopyUrlToThisAnchor(self, evt):
+        wikiWord = self.presenter.getWikiWord()
+        if wikiWord is None:
+            wx.MessageBox(
+                    _(u"This can only be done for the page of a wiki word"),
+                    _(u'Not a wiki page'), wx.OK, self)
+            return
 
-#  DO NOT DELETE!
-#     def launchUrl(self, link):   # TODO Works only for Windows
-#         match = WikiFormatting.UrlRE.match(link)
-#         try:
-#             link2 = match.group(1)
-#             
-#             if link2.startswith("wiki:"):
-#                 if self.pWiki.configuration.getint(
-#                         "main", "new_window_on_follow_wiki_url") == 1:
-#                     os.startfile(link2)
-#                     return True
-#                 else:
-#                     link2 = urllib.url2pathname(link2)
-#                     link2 = link2.replace(u"wiki:", u"")
-#                     if exists(link2):
-#                         self.openWiki(link2, u"")
-#                         return True
-#                     else:
-#                         self.SetStatusText(
-#                                 uniToGui(u"Couldn't find wiki: %s" % link2))
-#                         return False
-#             elif link2.startswith("file:"):
-#                 link2 = link2.replace(u"file:", u"")
-#                 if "|" in link2:
-#                     # Link is absolute
-#                     filepath = urllib.url2pathname(link2)
-#                 else:
-#                     # Link is relative, cut off leading '/'
-#                     while link2.startswith("/"):
-#                         link2 = link2[1:]
-#                     filepath = urllib.url2pathname(link2)
-#                     filepath = join(self.dataDir, filepath)
-#                     
-#                 if exists(filepath):
-#                     os.startfile(filepath)
-#                     return True
-#                 else:
-#                     self.SetStatusText(
-#                             uniToGui(u"Couldn't find file: %s" % filepath))
-#                     return False
-#             else:
-#                 os.startfile(link2)
-#         except:
-#             pass
-#         return False
+        path = self.presenter.getWikiDocument().getWikiConfigPath()
+        for tok in self.contextMenuTokens:
+            if tok.ttype == WikiFormatting.FormatTypes.Anchor:
+                anchor = tok.grpdict.get("anchorValue", u"")
+                copyTextToClipboard(pathWordAndAnchorToWikiUrl(path, wikiWord,
+                        anchor))
+                return
 
 
     # TODO More efficient
@@ -1824,9 +1804,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             
             pageAst = self.getPageAst()
             scriptTokens = pageAst.findTypeFlat(SCRIPTFORMAT)
-
-#             # get the text of the current page
-#             text = self.GetText()
             
             # process script imports
             if securityLevel > 1: # Local import_scripts properties allowed
@@ -1840,9 +1817,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                                     getWikiPage(sn)
                             pageAst = importPage.getLivePageAst()
                             scriptTokens += pageAst.findTypeFlat(SCRIPTFORMAT)
-                            
-#                             content = importPage.getLiveText()
-#                             text += "\n" + content
                         except:
                             pass
 
@@ -2889,6 +2863,11 @@ Activate New Tab;CMD_ACTIVATE_NEW_TAB_THIS
 Activate New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
 """
 
+_CONTEXT_MENU_INTEXT_URL_TO_CLIPBOARD = \
+u"""
+-
+Copy anchor URL to clipboard;CMD_CLIPBOARD_COPY_URL_TO_THIS_ANCHOR
+"""
 
 _CONTEXT_MENU_INTEXT_BOTTOM = \
 u"""
@@ -2920,6 +2899,8 @@ N_(u"Select All")
 N_(u"Activate")
 N_(u"Activate New Tab")
 N_(u"Activate New Tab Backgrd.")
+
+N_(u"Copy anchor URL to clipboard")
 
 N_(u"Close Tab")
 

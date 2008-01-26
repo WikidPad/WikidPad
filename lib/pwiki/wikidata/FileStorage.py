@@ -6,7 +6,7 @@ data or programs)
 import os, os.path, traceback, glob, shutil, sets
 
 import pwiki.srePersistent as _re
-from pwiki.StringOps import createRandomString
+from pwiki.StringOps import createRandomString, pathEnc
 
 
 class FSException(Exception):
@@ -66,7 +66,7 @@ class FileStorage:
         """
         Test if file storage (=directory) exists.
         """
-        return os.path.exists(self.storagePath)
+        return os.path.exists(pathEnc(self.storagePath))
         
     def _ensureStorage(self):
         """
@@ -107,7 +107,7 @@ class FileStorage:
         if self.filenameMustMatch and srcfname != destfname:
             return False
 
-        deststat = os.stat(destpath)
+        deststat = os.stat(pathEnc(destpath))
         
         if deststat.st_size != srcstat.st_size:
             # Size must match always
@@ -127,7 +127,7 @@ class FileStorage:
         srcPath -- Must be a path to an existing file
         """
         srcfname = os.path.basename(srcPath)
-        srcstat = os.stat(srcPath)
+        srcstat = os.stat(pathEnc(srcPath))
 
         
         ccSameName = sets.Set()     # candidate category: same filename
@@ -151,7 +151,7 @@ class FileStorage:
                 continue
 
             if self._preTestIdentity(p, srcfname, srcstat):
-                deststat = os.stat(p)
+                deststat = os.stat(pathEnc(p))
                 if deststat.st_mtime == srcstat.st_mtime:
                     ccSameMod.add(p)
                 else:
@@ -168,8 +168,8 @@ class FileStorage:
         The files must have passed the preliminary test by _preTestIdentity().
         """
         
-        stat1 = os.stat(path1)
-        stat2 = os.stat(path2)
+        stat1 = os.stat(pathEnc(path1))
+        stat2 = os.stat(pathEnc(path2))
 
         if self.modDateIsEnough and stat1.st_mtime == stat2.st_mtime:
             return True
@@ -221,7 +221,7 @@ class FileStorage:
         # No identical file found, so find a not yet used name for the new file.
         fname = os.path.basename(srcPath)
 
-        if not os.path.exists(os.path.join(self.storagePath, fname)):
+        if not os.path.exists(pathEnc(os.path.join(self.storagePath, fname))):
             return (os.path.join(self.storagePath, fname), False)
 
         mat = _FILESPLITPAT.match(fname)
@@ -234,7 +234,8 @@ class FileStorage:
         for t in xrange(10):  # Number of tries
             newName = u"%s_%s%s" % (coreName, createRandomString(10), suffix)
             
-            if not os.path.exists(os.path.join(self.storagePath, newName)):
+            if not os.path.exists(pathEnc(os.path.join(
+                    self.storagePath, newName))):
                 return (os.path.join(self.storagePath, newName), False)
 
         # Give up
@@ -251,7 +252,7 @@ class FileStorage:
             fname = prefix + suffix
 
             destPath = os.path.join(self.storagePath, fname)
-            if not os.path.exists(destPath):
+            if not os.path.exists(pathEnc(destPath)):
                 return destPath
         else:
             prefix = u""
@@ -268,7 +269,7 @@ class FileStorage:
             newName = u"%s_%s%s" % (prefix, createRandomString(20), suffix)
 
             destPath = os.path.join(self.storagePath, newName)
-            if not os.path.exists(destPath):
+            if not os.path.exists(pathEnc(destPath)):
                 return destPath
 
         # Give up

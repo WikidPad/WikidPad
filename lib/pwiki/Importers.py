@@ -117,7 +117,7 @@ class MultiPageTextImporter:
         addOpt -- additional options returned by getAddOpt()
         """
         try:
-            self.rawImportFile = open(importSrc, "rU")
+            self.rawImportFile = open(pathEnc(importSrc), "rU")
         except IOError:
             raise ImportException(_(u"Opening import file failed"))
             
@@ -271,10 +271,7 @@ class MultiPageTextImporter:
             traceback.print_exc()
             return  # TODO Report error
             
-#         timeStrings = [unicode(time.strftime(
-#         "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
-#         for ts in timeStamps]
-        timeStrings = [strftimeUB("%Y-%m-%d/%H:%M:%S", ts) for ts in timeStamps]
+#         timeStrings = [strftimeUB("%Y-%m-%d/%H:%M:%S", ts) for ts in timeStamps]
 
         content = self.collectContent()
         page = self.wikiDataManager.getWikiPageNoError(subtag)

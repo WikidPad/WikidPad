@@ -9,7 +9,7 @@ from wx import GetApp
 from pwiki.MiscEvent import MiscEventSourceMixin
 
 from pwiki.WikiExceptions import *
-from pwiki.StringOps import mbcsDec, re_sub_escape
+from pwiki.StringOps import mbcsDec, re_sub_escape, pathEnc
 from pwiki.DocPages import WikiPage, FunctionalPage, AliasWikiPage
 
 import pwiki.PageAst as PageAst
@@ -228,13 +228,13 @@ class WikiDataManager(MiscEventSourceMixin):
         MiscEventSourceMixin.__init__(self)
 
         self.lockFileName = wikiConfigFilename + u".lock"
-        if not ignoreLock and os.path.exists(self.lockFileName):
+        if not ignoreLock and os.path.exists(pathEnc(self.lockFileName)):
             raise LockedWikiException(
                     _(u"Wiki is probably already in use by other instance"))
 
         if createLock:
             try:
-                f = open(self.lockFileName, "w")
+                f = open(pathEnc(self.lockFileName), "w")
                 self.writeAccessDenied = False
                 f.close()
             except IOError:
@@ -263,7 +263,7 @@ class WikiDataManager(MiscEventSourceMixin):
         # os.access does not answer reliably if file is writable,
         # therefore we have to just open it in writable mode
         try:
-            f = open(wikiConfigFilename, "r+b")
+            f = open(pathEnc(wikiConfigFilename), "r+b")
             self.writeAccessDenied = False
             f.close()
         except IOError:
@@ -533,6 +533,9 @@ class WikiDataManager(MiscEventSourceMixin):
         # TODO send message?
 
 
+    def isDefinedWikiWord(self, wikiWord):
+        return self.wikiData.isDefinedWikiWord(wikiWord)
+
         
     def getWikiPage(self, wikiWord):
         """
@@ -668,9 +671,9 @@ class WikiDataManager(MiscEventSourceMixin):
             
             # Step one: update properties. There may be properties which
             #   define how the rest has to be interpreted, therefore they
-            #   must be 
+            #   must be processed first.
             for wikiWord in wikiWords:
-                progresshandler.update(step, u"")   # , "Rebuilding %s" % wikiWord)
+                progresshandler.update(step, _(u"Update attributes"))   # , "Rebuilding %s" % wikiWord)
                 try:
                     wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
                     if isinstance(wikiPage, AliasWikiPage):
@@ -692,7 +695,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
             # Step two: update the rest (todos, relations)
             for wikiWord in wikiWords:
-                progresshandler.update(step, u"")   # , "Rebuilding %s" % wikiWord)
+                progresshandler.update(step, _(u"Update pages"))   # , "Rebuilding %s" % wikiWord)
                 try:
                     wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
                     if isinstance(wikiPage, AliasWikiPage):
@@ -712,12 +715,13 @@ class WikiDataManager(MiscEventSourceMixin):
 
                 step = step + 1
 
+            progresshandler.update(step - 1, u"Final cleanup")
+            # Give possibility to do further reorganisation
+            # specific to database backend
+            self.getWikiData().cleanupAfterRebuild(progresshandler)
+
         finally:
             progresshandler.close()
-
-        # Give possibility to do further reorganisation
-        # specific to database backend
-        self.getWikiData().cleanupAfterRebuild(progresshandler)
 
 
     def renameWikiWord(self, wikiWord, toWikiWord, modifyText):
@@ -1008,8 +1012,11 @@ class WikiDataManager(MiscEventSourceMixin):
         Handle misc events from DocPages
         """
         if miscevt.getSource() is self.wikiConfiguration:
-            if miscevt.has_key("configuration changed"):
+            if miscevt.has_key("changed configuration"):
                 self.getFormatting().rebuildFormatting(miscevt)
+                props = miscevt.getProps().copy()
+                props["changed wiki configuration"] = True
+                self.fireMiscEventProps(props)                
         elif miscevt.getSource() is GetApp():
             if miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()

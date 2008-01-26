@@ -1,7 +1,28 @@
 ﻿++ Change Log
 
 
-Dec. 27, 2007 (1.9beta14)
+Jan. 26, 2008 (1.9beta15)
+
+    * Menu function to copy URL of current wiki word to clipboard.
+      See UrlLinking#++# Wiki:# URLs
+    * Support for ordering tree children by modification date
+      (Sqlite wikis should be rebuilt to speed this up).
+      See WikiDocumentAttributes#*child_sort_order
+    * Now remembers last used tree root and expanded nodes (optional).
+      See OptionsDialog#*Remember# expanded# tree# nodes*
+    * Windows: Hardware buttons on mouse or keyboard to navigate
+      backward/forward in browser are now recognized (doesn't work
+      for external Mozilla preview)
+    * Linux: Assumed file system encoding is now UTF-8
+    
+    * Bug fixed: Linux: Some problems with non-ascii characters in pathes
+      (some other issues are there yet)
+    * Bug fixed: Multipage text export used local time instead of GMT time
+      for modif./crea. times of pages
+
+
+
+Dec. 27, 2007 (1.9beta14, repository revision in "mbutscher" branch: 138)
 
     * New letter for time formats (e.g. Statusbar time format option):
       %u shows ISO-8601 weekday number (1=monday, 7=sunday)

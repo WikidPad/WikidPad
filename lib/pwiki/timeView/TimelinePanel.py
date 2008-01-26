@@ -127,12 +127,15 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
             # Register for pWiki events
             self.__sinkMc = wxKeyFunctionSink((
                     ("opened wiki", self.onUpdateNeeded),
-                    ("closed current wiki", self.onUpdateNeeded),
+                    ("closed current wiki", self.onUpdateNeeded)
+#                     ("changed options", self.onUpdateNeeded)
+            ), self.mainControl.getMiscEvent(), self)
+
+            self.__sinkWikiDoc = wxKeyFunctionSink((
                     ("updated wiki page", self.onUpdateNeeded),
                     ("deleted wiki page", self.onUpdateNeeded)
-#                     ("options changed", self.onUpdateNeeded)
-            ), self.mainControl.getMiscEvent(), self)
-            
+            ), self.mainControl.getCurrentWikiDocumentProxyEvent(), self)
+
             self.__sinkApp = wxKeyFunctionSink((
                     ("options changed", self.onUpdateNeeded),
             ), wx.GetApp().getMiscEvent(), self)

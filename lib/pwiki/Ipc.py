@@ -116,7 +116,7 @@ def createCommandServer(appCookie):
             theServer = server
             return port  # Free port found
         except socket.error, e:
-            if not e.args[0] == 10048:
+            if not (e.args[0] == 10048 or e.args[0] == 98):
                 # Not "Address already in use" error, so reraise
                 raise
 

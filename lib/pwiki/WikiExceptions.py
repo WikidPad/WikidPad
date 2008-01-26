@@ -4,6 +4,11 @@ class WikiWordNotFoundException(WikiDataException): pass
 class WikiFileNotFoundException(WikiDataException): pass
 class WikiDBExistsException(WikiDataException): pass
 
+# For non-Windows systems
+try:
+    WindowsError
+except NameError:
+    class WindowsError(Exception): pass
 
 
 class DbAccessError(Exception):

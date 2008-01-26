@@ -22,7 +22,6 @@ import pwiki.srePersistent as re
 
 from pwiki.WikiExceptions import *   # TODO make normal import
 from pwiki import SearchAndReplace
-# from SqliteThin3 import *
 
 try:
     import pwiki.sqlite3api as sqlite
@@ -35,7 +34,7 @@ except:
 
 from pwiki.StringOps import getBinCompactForDiff, applyBinCompact, pathEnc, pathDec,\
         binCompactToCompact, fileContentToUnicode, utf8Enc, utf8Dec, Tokenizer, \
-        uniWithNone
+        uniWithNone, loadEntireTxtFile
 
 from pwiki import WikiFormatting
 from pwiki import PageAst
@@ -54,13 +53,13 @@ class WikiData:
         dbfile = join(dataDir, "wiki.sli")
 
         try:
-            if (not exists(dbfile)):
+            if (not exists(pathEnc(dbfile))):
                 DbStructure.createWikiDB(None, dataDir)  # , True
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
-        dbfile = pathDec(dbfile)[0]
+        dbfile = pathDec(dbfile)
         try:
             self.connWrap = DbStructure.ConnectWrapSyncCommit(
                     sqlite.connect(dbfile))
@@ -416,18 +415,42 @@ class WikiData:
 
 
     def getChildRelationships(self, wikiWord, existingonly=False,
-            selfreference=True, withPosition=False):
+            selfreference=True, withFields=()):
         """
-        get the child relations of the wikiWord
+        get the child relations of this word
+        Function must work for read-only wiki.
         existingonly -- List only existing wiki words
         selfreference -- List also wikiWord if it references itself
-        withPositions -- Return tuples (relation, firstcharpos) with char.
-            position of link in page (may be -1 to represent unknown)
+        withFields -- Seq. of names of fields which should be included in
+            the output. If this is not empty, tuples are returned
+            (relation, ...) with ... as further fields in the order mentioned
+            in withfields.
+
+            Possible field names:
+                "firstcharpos": position of link in page (may be -1 to represent
+                    unknown)
+                "modified": Modification date
         """
-        if withPosition:
-            sql = "select relation, firstcharpos from wikirelations where word = ?"
-        else:
-            sql = "select relation from wikirelations where word = ?"
+        if withFields is None:
+            withFields = ()
+
+        addFields = ""
+        converters = [lambda s: s]
+        for field in withFields:
+            if field == "firstcharpos":
+                addFields += ", firstcharpos"
+                converters.append(lambda s: s)
+            elif field == "modified":
+                # "modified" isn't a field of wikirelations. We need
+                # some SQL magic to retrieve the modification date
+                addFields += (", ifnull((select modified from wikiwordcontent "
+                        "where wikiwordcontent.word = relation or "
+                        "wikiwordcontent.word = (select word from wikiwordprops "
+                        "where key = 'alias' and value = relation)), 0.0)")
+                converters.append(float)
+
+        
+        sql = "select relation%s from wikirelations where word = ?" % addFields
 
         if existingonly:
             # filter to only words in wikiwords or aliases
@@ -438,15 +461,16 @@ class WikiData:
 
         if not selfreference:
             sql += " and relation != word"
-
+            
         try:
-            if withPosition:
+            if len(withFields) > 0:
                 return self.connWrap.execSqlQuery(sql, (wikiWord,))
             else:
                 return self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
+
 
 
 
@@ -1710,20 +1734,17 @@ class WikiData:
         """
         self.connWrap.syncCommit()
 
-        fnames = glob.glob(join(pathEnc(self.dataDir, "replace")[0], '*.wiki'))
+        fnames = glob.glob(pathEnc(join(self.dataDir, '*.wiki')))
         for fn in fnames:
-            word = basename(pathDec(fn, "replace")[0]).replace('.wiki', '')   # pathDec
+            word = pathDec(basename(fn)).replace('.wiki', '')
 
-            fp = open(fn)
-            content = fp.read()
-            fp.close()
-            content = fileContentToUnicode(content)
-#             word = self.pWiki.getFormatting().normalizeWikiWordImport(word)
+#             fp = open(fn)
+#             content = fp.read()
+#             fp.close()
+#             content = fileContentToUnicode(content)
+            content = fileContentToUnicode(loadEntireTxtFile(fn))
             if self.wikiDocument.getFormatting().isNakedWikiWord(word):
                 self.setContent(word, content, moddate=stat(fn).st_mtime)
-#             self.connWrap.execSql("insert or replace into wikiwordcontent(word, "+\
-#                     "content, modified) values (?,?,?)", (word, sqlite.Binary(content), \
-#                         stat(fn).st_mtime))
 
         self.connWrap.commit()
 

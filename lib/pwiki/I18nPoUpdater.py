@@ -5,9 +5,32 @@
 
 import codecs
 
-from Utilities import writeEntireTxtFile, loadEntireTxtFile
-
 import Localization
+
+
+# Nearly same as functions in StringOps, but copied here to reduce dependencies
+def loadEntireTxtFile(filename):
+    """
+    Load entire file (text mode) and return its content.
+    """
+    rf = open(filename, "rU")
+    try:
+        result = rf.read()
+        return result
+    finally:
+        rf.close()
+
+
+def writeEntireTxtFile(filename, content):
+    """
+    Write entire file (text mode).
+    """
+    rf = open(filename, "w")
+    try:
+        rf.write(content)
+        return
+    finally:
+        rf.close()
 
 
 

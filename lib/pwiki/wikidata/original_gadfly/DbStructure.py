@@ -13,7 +13,7 @@ import glob
 
 from pwiki.WikiExceptions import *
 from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, \
-        removeBracketsFilename
+        removeBracketsFilename, pathEnc
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
 import gadfly
@@ -474,12 +474,12 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
     Warning: If overwrite is True, a previous file will be deleted!
     """
     dbfile = join(dataDir, "wiki.sli")
-    if (not exists(dbfile) or overwrite):
-        if (not exists(dataDir)):
-            mkdir(dataDir)
+    if (not exists(pathEnc(dbfile)) or overwrite):
+        if (not exists(pathEnc(dataDir))):
+            mkdir(pathEnc(dataDir))
         else:
-            if exists(dbfile) and overwrite:
-                unlink(dbfile)
+            if exists(pathEnc(dbfile)) and overwrite:
+                unlink(pathEnc(dbfile))
 
         # create the database
         connection = gadfly.gadfly()
@@ -676,7 +676,7 @@ def updateDatabase(connwrap, dataDir):
                 continue
                     
             newname = mbcsEnc(join(dataDir, newbname), "replace")[0]
-            if exists(newname):
+            if exists(pathEnc(newname)):
                 # A file with the designated new name of fn already exists
                 # -> do nothing
                 continue

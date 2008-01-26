@@ -5,7 +5,7 @@ import sys, os, os.path, traceback, sets, tempfile, urllib
 
 import wx
 
-from StringOps import urlFromPathname, relativeFilePath, escapeHtml
+from StringOps import urlFromPathname, relativeFilePath, escapeHtml, pathEnc
 
 
 class TempFileSet:
@@ -56,17 +56,18 @@ class TempFileSet:
     def mkstemp(self, suffix=None, prefix=None, path=None, text=False):
         """
         Same as tempfile.mkstemp from standard library, but
-        stores returned path also in the set.
+        stores returned path also in the set and does automatic path encoding.
         """
         if path is None:
             path = self.preferredPath
-            if path is not None and not os.path.exists(path):
+            if path is not None and not os.path.exists(pathEnc(path)):
                 try:
-                    os.makedirs(path)
+                    os.makedirs(pathEnc(path))
                 except OSError:
                     path = None
 
-        fd, fullPath = tempfile.mkstemp(suffix, prefix, path, text)
+        fd, fullPath = tempfile.mkstemp(pathEnc(suffix), pathEnc(prefix),
+                pathEnc(path), text)
 
         self.fileSet.add(fullPath)
 
@@ -79,7 +80,7 @@ class TempFileSet:
         """
         for fullPath in self.fileSet:
             try:
-                os.remove(fullPath)
+                os.remove(pathEnc(fullPath))
             except:
                 pass
                 # TODO: Option to show also these exceptions
@@ -129,7 +130,7 @@ class TempFileSet:
         """
         if path is None:
             path = self.preferredPath
-            if path is not None and not os.path.exists(path):
+            if path is not None and not os.path.exists(pathEnc(path)):
                 try:
                     os.makedirs(path)
                 except OSError:
@@ -180,7 +181,8 @@ def createTempFile(content, suffix, path=None, relativeTo=None):
     relativeTo -- path relative to which the path should be or None
         for absolute path
     """
-    fd, fullPath = tempfile.mkstemp(suffix=suffix, dir=path, text=False)
+    fd, fullPath = tempfile.mkstemp(suffix=pathEnc(suffix), dir=pathEnc(path),
+            text=False)
     try:
         os.write(fd, content)
     finally:

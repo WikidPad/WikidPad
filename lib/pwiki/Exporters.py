@@ -305,10 +305,10 @@ class HtmlXmlExporter:
                 self.convertFilename(u"%s.html" % self.mainControl.wikiName))
         self.styleSheet = "wikistyle.css"
 
-        if exists(outputFile):
-            os.unlink(outputFile)
+        if exists(pathEnc(outputFile)):
+            os.unlink(pathEnc(outputFile))
 
-        realfp = open(outputFile, "w")
+        realfp = open(pathEnc(outputFile), "w")
         fp = utf8Writer(realfp, "replace")
         fp.write(self.getFileHeaderMultiPage(self.mainControl.wikiName))
 
@@ -391,10 +391,10 @@ class HtmlXmlExporter:
             # TODO Configurable name
             outputFile = join(self.exportDest, self.convertFilename(u"index.html"))
             try:
-                if exists(outputFile):
-                    os.unlink(outputFile)
+                if exists(pathEnc(outputFile)):
+                    os.unlink(pathEnc(outputFile))
     
-                realfp = open(outputFile, "w")
+                realfp = open(pathEnc(outputFile), "w")
                 fp = utf8Writer(realfp, "replace")
 
                 # TODO Factor out HTML header generation                
@@ -444,10 +444,10 @@ class HtmlXmlExporter:
 
         outputFile = self.exportDest
 
-        if exists(outputFile):
-            os.unlink(outputFile)
+        if exists(pathEnc(outputFile)):
+            os.unlink(pathEnc(outputFile))
 
-        realfp = open(outputFile, "w")
+        realfp = open(pathEnc(outputFile), "w")
         fp = utf8Writer(realfp, "replace")
 
         fp.write(u'<?xml version="1.0" encoding="utf-8" ?>')
@@ -504,10 +504,10 @@ class HtmlXmlExporter:
             onlyInclude=None):
         outputFile = join(dir, self.convertFilename(u"%s.html" % word))
         try:
-            if exists(outputFile):
-                os.unlink(outputFile)
+            if exists(pathEnc(outputFile)):
+                os.unlink(pathEnc(outputFile))
 
-            realfp = open(outputFile, "w")
+            realfp = open(pathEnc(outputFile), "w")
             fp = utf8Writer(realfp, "replace")
             
             wikiPage = self.wikiDataManager.getWikiPage(word)
@@ -695,10 +695,10 @@ class HtmlXmlExporter:
 
 
     def copyCssFile(self, dir):
-        if not exists(mbcsEnc(join(dir, 'wikistyle.css'))[0]):
-            cssFile = mbcsEnc(join(self.mainControl.wikiAppDir, 'export', 'wikistyle.css'))[0]
-            if exists(cssFile):
-                shutil.copy(cssFile, dir)
+        if not exists(pathEnc(join(dir, 'wikistyle.css'))[0]):
+            cssFile = pathEnc(join(self.mainControl.wikiAppDir, 'export', 'wikistyle.css'))[0]
+            if exists(pathEnc(cssFile)):
+                shutil.copy(pathEnc(cssFile), pathEnc(dir))
 
     def shouldExport(self, wikiWord, wikiPage=None):
         if not wikiPage:
@@ -1985,7 +1985,7 @@ class TextExporter:
 #                 if exists(outputFile):
 #                     os.unlink(outputFile)
     
-                fp = open(outputFile, "wb")
+                fp = open(pathEnc(outputFile), "wb")
                 fp.write(filehead)
                 fp.write(enc(content, "replace")[0])
                 fp.close()
@@ -2191,7 +2191,7 @@ class MultiPageTextExporter:
             raise ExportException(_(u"No usable separator found"))
         try:
             try:
-                self.rawExportFile = open(self.exportDest, "w")
+                self.rawExportFile = open(pathEnc(self.exportDest), "w")
     
                 # Only UTF-8 mode currently
                 self.rawExportFile.write(BOM_UTF8)
@@ -2242,10 +2242,11 @@ class MultiPageTextExporter:
                         self.exportFile.write(u"wikipage/%s\n" % word)
                         # modDate, creaDate, visitDate
                         timeStamps = page.getTimestamps()[:3]
-#                         timeStrings = [unicode(time.strftime(
-#                                 "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
-#                                 for ts in timeStamps]
-                        timeStrings = [strftimeUB("%Y-%m-%d/%H:%M:%S", ts)
+                        
+                        # Do not use StringOps.strftimeUB here as its output
+                        # relates to local time, but we need UTC here.
+                        timeStrings = [unicode(time.strftime(
+                                "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
                                 for ts in timeStamps]
 
                         self.exportFile.write(u"%s  %s  %s\n" % tuple(timeStrings))
