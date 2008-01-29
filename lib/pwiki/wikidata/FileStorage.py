@@ -6,7 +6,7 @@ data or programs)
 import os, os.path, traceback, glob, shutil, sets
 
 import pwiki.srePersistent as _re
-from pwiki.StringOps import createRandomString
+from pwiki.StringOps import createRandomString, pathEnc
 
 
 class FSException(Exception):

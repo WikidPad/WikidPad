@@ -96,6 +96,7 @@ class IncrementalSearchDialog(wx.Frame):
         wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
                 self.OnTimerIncSearchClose)
         wx.EVT_MOUSE_EVENTS(self.tfInput, self.OnMouseAnyInput)
+        wx.EVT_CLOSE(self, self.OnClose)
 
         if searchInit:
             self.tfInput.SetValue(searchInit)
@@ -106,6 +107,12 @@ class IncrementalSearchDialog(wx.Frame):
 
     def OnKillFocus(self, evt):
         self.Close()
+        
+    def OnClose(self, evt):
+        if self.closeDelay:
+            self.closeTimer.Stop()
+
+        evt.Skip()
 
     def OnText(self, evt):
         self.txtCtrl.searchStr = self.tfInput.GetValue()
