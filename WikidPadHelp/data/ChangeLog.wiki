@@ -1,6 +1,16 @@
 ﻿++ Change Log
 
 
+Jul. 26, 2008 (1.8rc14)
+
+    * Better handling of malformed regular expressions
+      in search fields
+    * Support for all uppercase and lowercase letters in the
+      Unicode set for creating camel-case wiki words independent
+      of OS language
+
+
+
 Jan. 25, 2008 (1.8rc13)
 
     * Bug fixed: Linux: Some problems with non-ascii characters

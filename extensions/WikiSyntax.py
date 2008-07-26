@@ -2,10 +2,9 @@ import locale
 import string
 
 import pwiki.srePersistent as re
-from pwiki.StringOps import mbcsDec
+from pwiki.StringOps import mbcsDec, UPPERCASE, LOWERCASE
 
 locale.setlocale(locale.LC_ALL, '')
-
 
 # String containing the delimiter between the title of a wiki word (to show in
 # HTML and the real word, as e.g. [title | WikiWord]
@@ -75,8 +74,8 @@ NumericBulletRE = re.compile(ur"^(?P<indentNumeric>[ \t]*)(?P<preLastNumeric>(?:
 
 # TODO To unicode
 
-UPPERCASE = mbcsDec(string.uppercase)[0]
-LOWERCASE = mbcsDec(string.lowercase)[0]
+# UPPERCASE = mbcsDec(string.uppercase)[0]
+# LOWERCASE = mbcsDec(string.lowercase)[0]
 LETTERS = UPPERCASE + LOWERCASE
 
 

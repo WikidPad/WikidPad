@@ -871,6 +871,12 @@ def updateDatabase(connwrap):
             searchOp.wikiWide = True
             searchOp.booleanOp = True
 
+            try:
+                # Raises exception if search is invalid
+                searchOp.rebuildSearchOpTree()
+            except:
+                continue
+
             datablock = searchOp.getPackedSettings()
 
             connwrap.execSql(
