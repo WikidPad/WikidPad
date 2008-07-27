@@ -581,7 +581,7 @@ class SearchWikiDialog(wx.Dialog):   # TODO
 
     def displayErrorMessage(self, errorStr, e=u""):
         """
-        pops up a error dialog box
+        Pops up an error dialog box
         """
         wx.MessageBox(uniToGui(u"%s. %s." % (errorStr, e)), _(u"Error!"),
             wx.OK, self)
@@ -830,6 +830,11 @@ class SearchWikiDialog(wx.Dialog):   # TODO
 
     def addCurrentToHistory(self):
         sarOp = self.buildSearchReplaceOperation()
+        try:
+            sarOp.rebuildSearchOpTree()
+        except re.error:
+            # Ignore silently
+            return
         data = sarOp.getPackedSettings()
         tpl = (sarOp.searchStr, sarOp.getPackedSettings())
         hist = wx.GetApp().getWikiSearchHistory()
@@ -855,7 +860,13 @@ class SearchWikiDialog(wx.Dialog):   # TODO
     # TODO Store search mode
     def OnSaveSearch(self, evt):
         sarOp = self.buildSearchReplaceOperation()
-        
+        try:
+            sarOp.rebuildSearchOpTree()
+        except re.error, e:
+            self.pWiki.displayErrorMessage(_(u'Error in regular expression'),
+                    _(unicode(e)))
+            return
+
         if len(sarOp.searchStr) > 0:
             title = sarOp.getTitle()
             while True:
@@ -1109,7 +1120,7 @@ class SearchPageDialog(wx.Dialog):   # TODO
 
     def displayErrorMessage(self, errorStr, e=u""):
         """
-        pops up a error dialog box
+        Pops up an error dialog box
         """
         wx.MessageBox(uniToGui(u"%s. %s." % (errorStr, e)), _(u"Error!"),
             wx.OK, self)
@@ -1337,7 +1348,7 @@ class WikiPageListConstructionDialog(wx.Dialog, MiscEventSourceMixin):   # TODO
                 re.compile(pattern, re.DOTALL | re.UNICODE | re.MULTILINE)
             except re.error, e:
                 wx.MessageBox(_(u"Bad regular expression '%s':\n%s") %
-                        (pattern, _(unicode(e))), _(u"Regular expression error"),
+                        (pattern, _(unicode(e))), _(u"Error in regular expression"),
                         wx.OK, self)
                 return None
             item = Sar.RegexWikiPageNode(lpOp, pattern)
@@ -1613,13 +1624,23 @@ class FastSearchPopup(wx.Frame):
 
         wx.EVT_KILL_FOCUS(self.resultBox, self.OnKillFocus)
         wx.EVT_CLOSE(self, self.OnClose)
+        wx.EVT_KEY_DOWN(self.resultBox, self.OnKeyDown)
 
     def displayErrorMessage(self, errorStr, e=u""):
         """
-        pops up a error dialog box
+        Pops up an error dialog box
         """
         wx.MessageBox(uniToGui(u"%s. %s." % (errorStr, e)), u"Error!",
             wx.OK, self)
+
+
+    def OnKeyDown(self, evt):
+        accP = getAccelPairFromKeyDown(evt)
+
+        if accP == (wx.ACCEL_NORMAL, wx.WXK_ESCAPE):
+            self.Close()
+        else:
+            evt.Skip()
 
 
     # def OnKillFocus(self, evt):

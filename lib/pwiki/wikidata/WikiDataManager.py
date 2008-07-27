@@ -257,11 +257,13 @@ class WikiDataManager(MiscEventSourceMixin):
 
         # except Exception, e:
         if wikiName is None or dataDir is None:
+            self._releaseLockFile()
             raise BadConfigurationFileException(
                     _(u"Wiki configuration file is corrupted"))
         
-        # os.access does not answer reliably if file is writable,
-        # therefore we have to just open it in writable mode
+        # os.access does not answer reliably if file is writable
+        # (at least on Windows), therefore we have to just open it
+        # in writable mode
         try:
             f = open(pathEnc(wikiConfigFilename), "r+b")
             self.writeAccessDenied = False
@@ -287,11 +289,13 @@ class WikiDataManager(MiscEventSourceMixin):
 
         if not wikidhName:
             # Probably old database version without handler tag
+            self._releaseLockFile()
             raise UnknownDbHandlerException(
                     _(u'No data handler information found, probably '
                     u'"Original Gadfly" is right.'))
 
         if not isDbHandlerAvailable(wikidhName):
+            self._releaseLockFile()
             raise DbHandlerNotAvailableException(
                     _(u'Required data handler %s unknown to WikidPad') % wikidhName)
 
@@ -299,6 +303,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
         wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(wikidhName)
         if wikiDataFactory is None:
+            self._releaseLockFile()
             raise NoDbHandlerException(
                     _(u"Required data handler %s not available") % wikidhName)
 
@@ -384,6 +389,17 @@ class WikiDataManager(MiscEventSourceMixin):
         self.refCount += 1
         return self.refCount
 
+    def _releaseLockFile(self):
+        """
+        Release lock file if it was created before
+        """
+        if self.lockFileName is not None:
+            try:
+                os.unlink(self.lockFileName)
+            except:
+                traceback.print_exc()
+
+
     def release(self):
         """
         Inform this instance that it is no longer needed by one of the
@@ -409,11 +425,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
             del _openDocuments[self.getWikiConfig().getConfigPath()]
 
-            if self.lockFileName is not None:
-                try:
-                    os.unlink(self.lockFileName)
-                except:
-                    traceback.print_exc()
+            self._releaseLockFile()
 
             if wikiTempDir is not None:
                 shutil.rmtree(wikiTempDir, True)

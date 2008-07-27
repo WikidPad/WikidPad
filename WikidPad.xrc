@@ -141,6 +141,14 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
+        <object class="wxCheckBox" name="cbWikiPathesRelative">
+          <label>Store relative pathes to wikis</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
         <object class="wxFlexGridSizer">
           <cols>3</cols>
           <growablecols>1</growablecols>
@@ -325,6 +333,25 @@
           <object class="spacer">
             <size>0,0</size>
           </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Recent wikis list length:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxSpinCtrl" name="scRecentWikisListLength">
+              <value>5</value>
+              <min>1</min>
+              <max>99</max>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="spacer">
+            <size>0,0</size>
+          </object>
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
@@ -496,6 +523,27 @@
         <object class="wxFlexGridSizer">
           <object class="sizeritem">
             <object class="wxStaticText">
+              <label>Background color:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfTreeBgColor"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnSelectTreeBgColor">
+              <label>...</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxALIGN_BOTTOM</flag>
+            <border>5</border>
+            <minsize>20,-1</minsize>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
               <label>Position main tree:</label>
             </object>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -513,6 +561,9 @@
             </object>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
+          </object>
+          <object class="spacer">
+            <size>0,0</size>
           </object>
           <object class="sizeritem">
             <object class="wxStaticText">
@@ -535,8 +586,11 @@
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
           </object>
-          <cols>2</cols>
+          <cols>3</cols>
           <rows>2</rows>
+          <object class="spacer">
+            <size>0,0</size>
+          </object>
         </object>
         <option>0</option>
         <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -1279,6 +1333,27 @@
           </object>
           <object class="sizeritem">
             <object class="wxButton" name="btnSelectEditorSelectionBgColor">
+              <label>...</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxALIGN_BOTTOM</flag>
+            <border>5</border>
+            <minsize>20,-1</minsize>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Margin color:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfEditorMarginBgColor"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnSelectEditorMarginBgColor">
               <label>...</label>
             </object>
             <option>0</option>

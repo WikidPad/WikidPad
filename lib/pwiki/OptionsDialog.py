@@ -82,6 +82,7 @@ class OptionsDialog(wx.Dialog):
             # application-wide options
             
             ("single_process", "cbSingleProcess", "b"),
+            ("wikiPathes_relative", "cbWikiPathesRelative", "b"),
             ("wikiOpenNew_defaultDir", "tfWikiOpenNewDefaultDir",
                 "t"),
             ("collation_order", "chCollationOrder", "selt",
@@ -98,6 +99,7 @@ class OptionsDialog(wx.Dialog):
             ("pagestatus_timeformat", "tfPageStatusTimeFormat", "ttdf",
                 "btnSelectPageStatusTimeFormat"),
             ("gui_language", "chGuiLanguage", "guilang"),
+            ("recentWikisList_length", "scRecentWikisListLength", "spin"),
 
             ("log_window_autoshow", "cbLogWindowAutoShow", "b"),
             ("log_window_autohide", "cbLogWindowAutoHide", "b"),
@@ -119,6 +121,8 @@ class OptionsDialog(wx.Dialog):
             ("hideundefined", "cbHideUndefinedWords", "b"),
             ("tree_no_cycles", "cbTreeNoCycles", "b"),
             ("tree_autohide", "cbTreeAutoHide", "b"),
+            ("tree_bg_color", "tfTreeBgColor", "color0",
+                    "btnSelectTreeBgColor"),
 
 
             ("start_browser_after_export", "cbStartBrowserAfterExport", "b"),
@@ -183,6 +187,8 @@ class OptionsDialog(wx.Dialog):
                     "btnSelectEditorSelectionFgColor"),
             ("editor_selection_bg_color", "tfEditorSelectionBgColor", "color0",
                     "btnSelectEditorSelectionBgColor"),
+            ("editor_margin_bg_color", "tfEditorMarginBgColor", "color0",
+                    "btnSelectEditorMarginBgColor"),
             ("editor_caret_color", "tfEditorCaretColor", "color0",
                     "btnSelectEditorCaretColor"),
 
@@ -289,7 +295,6 @@ class OptionsDialog(wx.Dialog):
 
         self.combinedOptionToControl = self.OPTION_TO_CONTROL
         self.combinedPanelList = wx.GetApp().getOptionsDlgPanelList()
-        
         # Maps ids of the GUI controls named in self.combinedOptionToControl
         # to the entries (the appropriate tuple) there
         self.idToOptionEntryMap = {}

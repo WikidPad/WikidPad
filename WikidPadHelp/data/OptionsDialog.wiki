@@ -36,6 +36,9 @@ Disadvantages:
       their own home directory as configuration directory (this is
       the default).
 
+*Store relative pathes to wikis*
+Pathes to the recently opened wikis are stored as relative pathes if this is checked. Useful e.g. if you have WikidPad and your wikis on an USB-stick.
+
 *Default open/new dir.*
 Directory to start when using "Wiki"->"New" or "Wiki"->"Open" in the menu. If empty, WikidPad chooses a default.
 
@@ -76,6 +79,9 @@ Set the time format the statusbar should use to show modification and creation d
 Choose the preferred language of the user interface.
 
 This setting only takes effect after restarting WikidPad.
+
+*Recent wikis list length*
+Set the number of wikis to show in menu "Wiki"->"Recent"
 
 *Auto-show log window*
 Automatically show log window if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
@@ -126,6 +132,9 @@ If two or more pages reference each other (e.g. NodeA -> NodeB -> NodeA) these c
 
 *Tree auto-hide*
 After selecting an item in tree, the tree is hidden automatically.
+
+*Background color*
+Specify background color of tree.
 
 *Position main tree*
 Controls where to place the main tree (to the left, right, top or bottom)
@@ -211,6 +220,9 @@ Specify the foreground color of selected text. See "Plain text color" above for 
 
 *Selection bg. color*
 Specify the background color of selected text. See "Plain text color" above for details.
+
+*Margin color*
+Specify the color of the editor margin on the left (normally gray) which can also contain line numbers.
 
 *Text cursor color*
 Set the color of the text cursor (the small blinking vertical bar).

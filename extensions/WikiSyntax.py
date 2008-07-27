@@ -2,7 +2,7 @@ import locale
 import string
 
 import pwiki.srePersistent as re
-from pwiki.StringOps import mbcsDec
+from pwiki.StringOps import mbcsDec, UPPERCASE, LOWERCASE
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -110,7 +110,7 @@ Heading1RE      = re.compile(ur"^\+{1}(?!\+) ?(?P<h1Content>" +
         re.DOTALL | re.UNICODE | re.MULTILINE)
 # UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp|rel)://|mailto:)[^"\s<>]*',
 #         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
-UrlRE           = re.compile(ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|file://?)'
+UrlRE           = re.compile(ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'
         ur'(?:(?![.,;:!?)]+["\s])[^"\s<>])*(?:>\S+)?',
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
@@ -134,11 +134,10 @@ NumericBulletRE = re.compile(ur"^(?P<indentNumeric>[ \t]*)(?P<preLastNumeric>(?:
 #WikiWordRE2     = re.compile("\[[a-zA-Z0-9\-\_\s]+?\]")
 
 
-# TODO To unicode
-
-UPPERCASE = mbcsDec(string.uppercase)[0]
-LOWERCASE = mbcsDec(string.lowercase)[0]
+# UPPERCASE = mbcsDec(string.uppercase)[0]
+# LOWERCASE = mbcsDec(string.lowercase)[0]
 LETTERS = UPPERCASE + LOWERCASE
+
 
 
 # # Pattern string for delimiter for search fragment after wiki word
@@ -316,12 +315,10 @@ RevWikiWordAnchorRE2 = re.compile(ur"^(?P<anchorBegin>[A-Za-z0-9\_]{0,20})" +
 AutoLinkRelaxSplitRE = re.compile(r"[\W]+", re.IGNORECASE | re.UNICODE)  # SPN
 
 AutoLinkRelaxJoinPAT = ur"[\W]+"
-# AutoLinkRelaxJoinPAT = ur"[ \n\t]+"
 AutoLinkRelaxJoinFlags = re.IGNORECASE | re.UNICODE
 
 
 # script blocks
-# ScriptRE        = re.compile(u"\<%(.*?)%\>", re.DOTALL)
 ScriptRE        = re.compile(u"\<%(?P<scriptContent>.*?)%\>", re.DOTALL)
 
 # Auto generated area
@@ -332,7 +329,8 @@ AutoGenAreaRE = re.compile(ur"^([ \t]*<<[ \t]+)([^\n]+\n)(.*?)^([ \t]*>>[ \t]*\n
 ToDoREWithContent = re.compile(ur"\b(?P<todoIndent>)"    # ur"(?P<todoIndent>^[ \t]*)"
         ur"(?P<todoName>(?:todo|done|wait|action|track|issue|question|project)(?:\.[^:\s]+)?)"
         ur"(?P<todoDelimiter>:)(?P<todoValue>" + PlainCharacterNoLfPAT +
-        ur"+?)(?:$|(?=\|))", re.DOTALL | re.UNICODE | re.MULTILINE)
+        ur"+?)(?:$|\|)", re.DOTALL | re.UNICODE | re.MULTILINE)
+#         ur"+?)(?:$|(?=\|))", re.DOTALL | re.UNICODE | re.MULTILINE)
 
 # todos, used in the tree control to parse saved todos. Because they were
 #   already identified as todos, the regexp can be quite simple

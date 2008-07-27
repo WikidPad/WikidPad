@@ -23,8 +23,11 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
     controls the doc page presenters.
     """
 
-    def __init__(self, parent, mainControl, id=-1):
+    def __init__(self, mainControl, parent, id):
         wx.Notebook.__init__(self, parent, id)
+
+#         nb = wx.PreNotebook()
+#         self.PostCreate(nb)
         MiscEventSourceMixin.__init__(self)
 
         self.mainControl = mainControl
@@ -34,17 +37,16 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         self.docPagePresenters = []
         self.currentDocPagePresenterProxyEvent = ProxyMiscEvent(self)
 
+        # Last presenter for which a context menu was shown
+        self.lastContextMenuPresenter = None
+
+        self.runningPageChangedEvent = False
+    
         res = xrc.XmlResource.Get()
         self.contextMenu = res.LoadMenu("MenuDocPagePresenterTabPopup")
         
         self.tabDragCursor = wx.StockCursor(wx.CURSOR_HAND)
         self.tabDragging = False
-
-
-        # Last presenter for which a context menu was shown
-        self.lastContextMenuPresenter = None
-
-        self.runningPageChangedEvent = False
 
 #         wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.GetId(),
 #                 self.OnNotebookPageChanged)

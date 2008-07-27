@@ -10,7 +10,7 @@ wikidpad = Target(
     # used for the versioninfo resource
     version = '1.9',
     name = 'WikidPad',
-    copyright = '(C) 2005-2007 Jason Horman, Michael Butscher, Gerhard Reitmayr',
+    copyright = '(C) 2005-2008 Jason Horman, Michael Butscher, Gerhard Reitmayr',
     description = 'Single user wiki notepad',
     comments='',
 
@@ -20,7 +20,15 @@ wikidpad = Target(
 )
 
 
-setup(name='WikidPad',
+excludes = ["win32api", "win32con", "win32pipe"]
+
+setup(
+    options = {"py2exe": {"compressed": 1,
+                          "optimize": 2,
+                          "ascii": 1,
+                          "excludes": excludes}},
+
+    name='WikidPad',
     version = '1.9beta',
     author = 'Michael Butscher',
     author_email = 'mbutscher@gmx.de',

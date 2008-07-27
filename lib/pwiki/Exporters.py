@@ -253,22 +253,22 @@ class HtmlXmlExporter:
             self.tempFileSet.setPreferredRelativeTo(self.exportDest)
 
         if exportType == u"html_single":
-            startfile = self._exportHtmlSingleFile()
+            browserFile = self._exportHtmlSingleFile()
         elif exportType == u"html_multi":
-            startfile = self._exportHtmlMultipleFiles()
+            browserFile = self._exportHtmlMultipleFiles()
         elif exportType == u"xml":
-            startfile = self._exportXml()
+            browserFile = self._exportXml()
 
         # Other supported types: html_previewWX, html_previewIE, html_previewMOZ
 
-        if not compatFilenames:
-            startfile = mbcsEnc(startfile)[0]
+#         if not compatFilenames:
+#             browserFile = mbcsEnc(browserFile)[0]
 
         wx.GetApp().getInsertionPluginManager().taskEnd()
 
         if self.mainControl.getConfig().getboolean(
-                "main", "start_browser_after_export") and startfile:
-            OsAbstract.startFile(self.mainControl, startfile)
+                "main", "start_browser_after_export") and browserFile:
+            OsAbstract.startFile(self.mainControl, browserFile)
 #             if Configuration.isWindows():
 #                  os.startfile(startfile)
 #                 # os.startfile(mbcsEnc(link2, "replace")[0])

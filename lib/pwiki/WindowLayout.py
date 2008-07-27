@@ -6,7 +6,7 @@ from StringOps import escapeForIni, unescapeForIni
 
 from Configuration import isLinux
 
-from wxHelper import LayerSizer
+from wxHelper import LayerSizer, ProxyPanel
 
 
 class WinLayoutException(Exception):
@@ -236,7 +236,6 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
             self.setSashPosition(1)
 
 
-
     def OnSashDragged(self, evt):
         # print "OnSashDragged", repr((evt.GetDragRect().width, evt.GetDragRect().height))
 
@@ -282,23 +281,27 @@ class WindowSashLayouter:
         self.windowPropsList = []  # List of window properties, first window is
                 # center window. List is filled during lay. definition
 
-
-        # The following 4 are filled during layout realization
-
-        self.directMainChildren = []  # List of window objects which are
-                # direct children of the mainWindow. Destroying the windows
-                # in this list resets the mainWindow for a new layout
-                
-        self.winNameToObject = {}  # Map from window name to wxWindow object
-        self.winNameToSashWindow = {}  # Map from window name to enclosing
-                # sash window object
-        self.winNameToWinProps = {}
+        self._resetWinStructure()
 
 #         self.toRelayout = Set()  # Set of window objects for which the
 #                 # wxLayoutAlgorithm.LayoutWindow() must be called
 
 
-    def realize(self):
+    def _resetWinStructure(self):
+        # The following 4 are filled during layout realization
+
+        self.directMainChildren = []  # List of window objects which are
+                # direct children of the mainWindow. Destroying the windows
+                # in this list resets the mainWindow for a new layout
+
+        self.winNameToProxy = {}
+        self.winNameToObject = {}  # Map from window name to wxWindow object
+        self.winNameToSashWindow = {}  # Map from window name to enclosing
+                # sash window object
+        self.winNameToWinProps = {}
+        
+
+    def realize(self, proxiedCachedWindows=None):
         """
         Called after a new layout is defined to realize it.
         """
@@ -306,6 +309,11 @@ class WindowSashLayouter:
 
         if len(self.windowPropsList) == 0:
             return  # TODO Error?
+            
+        if proxiedCachedWindows is None:
+            proxiedCachedWindows = {}
+            
+        self._resetWinStructure()
 
         centerWindowProps = self.windowPropsList[0]
         centerWindowName = centerWindowProps["name"]
@@ -324,11 +332,22 @@ class WindowSashLayouter:
 
             sashWin = SmartSashLayoutWindow(enclWin, -1,
                 wx.DefaultPosition, (30, 30), wx.SW_3DSASH)
-            objWin = self.createWindowFunc(pr, sashWin)
-
-            if objWin is None:
-                sashWin.Destroy()
-                continue
+            
+            proxyWin = proxiedCachedWindows.get(winName)
+            if proxyWin is not None:
+                proxyWin.Reparent(sashWin)    # TODO Reparent not available for all OS'
+                objWin = proxyWin.getSubWindow()
+                del proxiedCachedWindows[winName]
+            else:
+                proxyWin = ProxyPanel(sashWin)
+                objWin = self.createWindowFunc(pr, proxyWin)
+    
+                if objWin is None:
+                    proxyWin.Destroy()
+                    sashWin.Destroy()
+                    continue
+    
+                proxyWin.setSubWindow(objWin)
 
             relation = pr["layout relation"]
             
@@ -343,6 +362,7 @@ class WindowSashLayouter:
             sashWin.setSashPosition(sashPos)
             sashWin.setEffectiveSashPosition(sashEffPos)
 
+            self.winNameToProxy[winName] = proxyWin
             self.winNameToObject[winName] = objWin
             self.winNameToSashWindow[winName] = sashWin
             self.winNameToWinProps[winName] = pr
@@ -350,16 +370,90 @@ class WindowSashLayouter:
             if enclWin is self.mainWindow:
                 self.directMainChildren.append(sashWin)
             else:
-                enclWin.setInnerAutoLayout(self.winNameToObject[relTo])
-#                 self.toRelayout.add((enclWin, self.winNameToObject[relTo]))
+#                 enclWin.setInnerAutoLayout(self.winNameToObject[relTo])
+                enclWin.setInnerAutoLayout(self.winNameToProxy[relTo])
 
 
         # Create center window
         winName = centerWindowProps["name"]
-        objWin = self.createWindowFunc(centerWindowProps, self.mainWindow)
+        
+        proxyWin = proxiedCachedWindows.get(winName)
+        
+        if proxyWin is not None:
+            proxyWin.Reparent(self.mainWindow)    # TODO Reparent not available for all OS'
+            objWin = proxyWin.getSubWindow()
+            del proxiedCachedWindows[winName]
+        else:
+            proxyWin = ProxyPanel(self.mainWindow)
+            objWin = self.createWindowFunc(centerWindowProps, proxyWin)
+
+            if objWin is None:
+                proxyWin.Destroy()
+                return
+
+            proxyWin.setSubWindow(objWin)
+
+#         objWin = self.createWindowFunc(centerWindowProps, self.mainWindow)
+        
         if not objWin is None:
+#             proxyWin.setSubWindow(objWin)
+            self.winNameToProxy[winName] = proxyWin
             self.winNameToObject[winName] = objWin
-            self.directMainChildren.append(objWin)
+            self.directMainChildren.append(proxyWin)
+
+
+
+    def realizeNewLayoutByCf(self, layoutCfStr):
+        """
+        Create a new window layouter according to the
+        layout configuration string layoutCfStr. Try to reuse and reparent
+        existing windows.
+        BUG: Reparenting seems to disturb event handling for tree events and
+            isn't available for all OS'
+        """
+        # Reparent reusable windows so they aren't destroyed when
+        #   cleaning main window
+        # TODO Reparent not available for all OS'
+        proxiedCachedWindows = {}
+#         for n, w in self.windowLayouter.winNameToObject.iteritems():
+        for n, w in self.winNameToProxy.iteritems():
+            proxiedCachedWindows[n] = w
+#             w.Reparent(None)
+            w.Reparent(self.mainWindow)    # TODO Reparent not available for all OS'
+
+        self.cleanMainWindow(proxiedCachedWindows.values())
+
+#         # make own creator function which provides already existing windows
+#         def cachedCreateWindow(winProps, parent):
+#             """
+#             Wrapper around _actualCreateWindow to maintain a cache
+#             of already existing windows
+#             """
+#             winName = winProps["name"]
+# 
+#             # Try in cache:
+#             window = cachedWindows.get(winName)
+# #             print "--cachedCreateWindow", repr(winName), repr(window)
+#             if window is not None:
+#                 window.Reparent(parent)    # TODO Reparent not available for all OS'
+#                 del cachedWindows[winName]
+#                 return window
+# 
+#             window = createWindowFunc(winProps, parent)
+# 
+#             return window
+        
+#         result = WindowSashLayouter(self.mainWindow, cachedCreateWindow)
+
+        self.setWinPropsByConfig(layoutCfStr)
+
+        self.realize(proxiedCachedWindows)
+
+        # Destroy windows which weren't reused
+        # TODO Call close method of object window if present
+        for n, w in proxiedCachedWindows.iteritems():
+            w.Destroy()
+
 
 
     def getWindowForName(self, winName):
@@ -430,7 +524,7 @@ class WindowSashLayouter:
         excluded -- Sequence or set of window objects which shoudl be preserved
         """
         for w in self.directMainChildren:
-            if (w not in excluded) and (w.GetParent() is self.mainWindow):
+            if (w not in excluded):    # ???  and (w.GetParent() is self.mainWindow):
                 w.Destroy()
 
 
@@ -440,9 +534,9 @@ class WindowSashLayouter:
         """
         if len(self.windowPropsList) == 0:
             return
-
+            
         wx.LayoutAlgorithm().LayoutWindow(self.mainWindow,
-                self.winNameToObject[self.windowPropsList[0]["name"]])
+                self.winNameToProxy[self.windowPropsList[0]["name"]])
 
 
 #     def setCenterWindowProps(self, winProps):
@@ -498,10 +592,11 @@ class WindowSashLayouter:
         by getWinPropsForConfig(). This method is an alternative to
         addWindowProps().
         """
+        self.windowPropsList = []
         for ps in cfstr.split(";"):
             winProps = stringToWinprops(ps)
+#             self.addWindowProps(winProps)
             self.addWindowProps(winProps)
-
 
 
 

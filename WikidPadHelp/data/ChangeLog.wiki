@@ -1,7 +1,26 @@
 ﻿++ Change Log
 
+Jul. 27, 2008 (1.9beta16)
 
-Jan. 26, 2008 (1.9beta15)
+    * Option to set color of editor margin.
+      See OptionsDialog#*Margin# color*
+    * Option to set color of tree background.
+      See OptionsDialog#++++# Tree# options
+    * Option to set length of recent wikis list.
+      See OptionsDialog#*Recent# wikis# list# length*
+    * Option to store relative pathes to recent wikis.
+      See OptionsDialog#*Store# relative# pathes# to# wikis*
+    
+    * Bug fixed: "Open Wiki Word" dialog was sometimes closed
+      when keeping it open makes more sense
+    * Bug reduced(?): Linux: Handling of local file URLs to start
+      applications works better
+    * Support for all uppercase and lowercase letters in the
+      Unicode set for creating camel-case wiki words independent of OS language
+
+
+
+Jan. 26, 2008 (1.9beta15, repository revision in "mbutscher" branch: 140)
 
     * Menu function to copy URL of current wiki word to clipboard.
       See UrlLinking#++# Wiki:# URLs

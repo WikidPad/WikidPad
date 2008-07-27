@@ -48,7 +48,7 @@ from Ipc import EVT_REMOTE_COMMAND
 import PropertyHandling, SpellChecker
 
 # from PageHistory import PageHistory
-from SearchAndReplace import SearchReplaceOperation
+ #from SearchAndReplace import SearchReplaceOperation
 from Printing import Printer, PrintMainDialog
 
 from AdditionalDialogs import *
@@ -63,13 +63,13 @@ from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
         unescapeWithRe, escapeForIni, unescapeForIni, \
         wikiUrlToPathWordAndAnchor, urlFromPathname, flexibleUrlUnquote, \
         strftimeUB, pathEnc, loadEntireTxtFile, writeEntireTxtFile, \
-        pathWordAndAnchorToWikiUrl
+        pathWordAndAnchorToWikiUrl, relativeFilePath
 
 import DocPages
 import WikiFormatting
 
 
-import PageAst   # For experiments only
+# import PageAst   # For experiments only
 
 from PluginManager import *
 
@@ -209,15 +209,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # defaults
         self.wikiData = None
         self.wikiDataManager = None
-#         self.currentWikiWord = None
-#         self.currentWikiPage = None
         self.lastCursorPositionInPage = {}
         self.wikiHistory = []
         self.findDlg = None  # Stores find&replace or wiki search dialog, if present
         self.spellChkDlg = None  # Stores spell check dialog, if present
         self.mainAreaPanel = None
+#         self._mainAreaPanelCreated = False
         self.mainmenu = None
-#         self.editorMenu = None  # "Editor" menu
 
         self.recentWikisMenu = None
         self.recentWikisActivation = IdRecycler()
@@ -806,32 +804,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 addPluginMenuItem(*item)
 
 
-#     # TODO Reuse menu ids
-#     def refreshRecentWikisMenu(self):
-#         """
-#         Refreshes the list of recent wiki menus from self.wikiHistory
-#         """
-#         # Clear menu
-#         rwMenu = self.recentWikisMenu
-#         if rwMenu is None:
-#             return
-# 
-#         for i in xrange(rwMenu.GetMenuItemCount()):
-#             item = rwMenu.FindItemByPosition(0)
-#             rwMenu.DestroyItem(item)
-# 
-#         # Add new items
-#         for i, wiki in enumerate(self.wikiHistory):
-#             menuID = getattr(GUI_ID, "CMD_OPEN_RECENT_WIKI%i" % i) # wx.NewId()
-#             self.recentWikisMenu.Append(menuID, wiki)
-# #             wx.EVT_MENU(self, menuID, self.OnSelectRecentWiki)
-# 
-# 
-#     def OnSelectRecentWiki(self, event):
-#         recentItem = self.recentWikisMenu.FindItemById(event.GetId())
-#         self.openWiki(recentItem.GetText())
-
-
     def fillRecentWikisMenu(self, menu):
         """
         Refreshes the list of recent wiki menus from self.wikiHistory
@@ -861,7 +833,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def rereadRecentWikis(self):
         """
-        Starts rereading and rebuilding of the text blocks submenu
+        Starts rereading and rebuilding of the recent wikis submenu
         """
         if self.recentWikisMenu is None:
             return
@@ -871,6 +843,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
         
         self.wikiHistory = history.split(u";")
+        
+        maxLen = self.configuration.getint(
+                "main", "recentWikisList_length", 5)
+        if len(self.wikiHistory) > maxLen:
+            self.wikiHistory = self.wikiHistory[:maxLen]
 
         clearMenu(self.recentWikisMenu)
         self.fillRecentWikisMenu(self.recentWikisMenu)
@@ -1049,7 +1026,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             path = document.getWikiConfigPath()
             title = document.getWikiName()
 
-        entry = TextTree.FavoriteWikisEntry(title, u"", u"", path)
+        entry = TextTree.FavoriteWikisEntry(title, u"", u"",
+                self._getStorableWikiPath(path))
         entry = TextTree.AddWikiToFavoriteWikisDialog.runModal(self, -1, entry)
         
         if entry is not None:
@@ -1965,14 +1943,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         
         # Create main area panel first
-
         self.mainAreaPanel = MainAreaPanel(self, self, -1)
+#         self.mainAreaPanel = MainAreaPanel(self)
         self.mainAreaPanel.getMiscEvent().addListener(self)
 
         p = self.createNewDocPagePresenterTab()
         self.mainAreaPanel.setCurrentDocPagePresenter(p)
-
-
+ 
         # Build layout:
 
         self.windowLayouter = WindowSashLayouter(self, self.createWindow)
@@ -1981,9 +1958,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.windowLayouter.setWinPropsByConfig(cfstr)
        
         self.windowLayouter.realize()
+#         self.windowLayouter.layout()
 
         self.tree = self.windowLayouter.getWindowForName("maintree")
         self.logWindow = self.windowLayouter.getWindowForName("log")
+
+
         
 
 #         wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(),
@@ -2043,7 +2023,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # Register the App close handler
         wx.EVT_CLOSE(self, self.OnCloseButton)
 
-        # Check resizing to layout sash windows
+#         # Check resizing to layout sash windows
         wx.EVT_SIZE(self, self.OnSize)
 
         wx.EVT_ICONIZE(self, self.OnIconize)
@@ -2273,6 +2253,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         elif winName == "time view":
             return TimeViewCtrl(parent, -1, self)
         elif winName == "main area panel":  # TODO remove this hack
+            self.mainAreaPanel.Reparent(parent)
+                
+#             if not self._mainAreaPanelCreated:
+#                 print "--Parent main area panel2", repr(parent)
+#                 self.mainAreaPanel.Create(parent, -1)
+#                 self._mainAreaPanelCreated = True
+
+#             self.mainAreaPanel.Reparent(parent)
 #             self.mainAreaPanel = MainAreaPanel(parent, self, -1)
 #             self.mainAreaPanel.getMiscEvent().addListener(self)
 # 
@@ -2448,11 +2436,29 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # reset tray
         self.setShowOnTray()
 
-#     def getCurrentText(self):
-#         """
-#         Return the raw input text of current wiki word
-#         """
-#         return self.getActiveEditor().GetText()
+
+    def _getRelativeWikiPath(self, path):
+        """
+        Converts the absolute path to a relative path if possible. Otherwise
+        the unmodified path is returned.
+        """
+        relPath = relativeFilePath(self.wikiAppDir, path)
+        
+        if relPath is None:
+            return path
+        else:
+            return relPath
+
+
+    def _getStorableWikiPath(self, path):
+        """
+        Converts the absolute path to a relative path if possible and if option
+        is set to do this. Otherwise the unmodified path is returned.
+        """
+        if not self.getConfig().getboolean("main", "wikiPathes_relative", False):
+            return path
+
+        return self._getRelativeWikiPath(path)
 
 
     def newWiki(self, wikiName, wikiDir):
@@ -2478,7 +2484,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             result = dlg.ShowModal()
             dlg.Destroy()
             if result == wx.ID_YES:
-                os.rmdir(wikiDir)  # TODO BUG!!!
+                os.rmdir(wikiDir)  # TODO bug
                 createIt = True
             elif result == wx.ID_NO:
                 createIt = False
@@ -2623,7 +2629,7 @@ These are your default global settings.
         ignoreWdhName -- Should the name of the wiki data handler in the
                 wiki config file (if any) be ignored?
         """
-        
+
         # Fix special case
         if wikiWordsToOpen == (None,):
             wikiWordsToOpen = None
@@ -2632,8 +2638,8 @@ These are your default global settings.
         # if the new config is the same as the old, don't resave state since
         # this could be a wiki overwrite from newWiki. We don't want to overwrite
         # the new config with the old one.
-        
-        wikiCombinedFilename = abspath(wikiCombinedFilename)
+
+        wikiCombinedFilename = abspath(join(self.wikiAppDir, wikiCombinedFilename))
 
         # make sure the config exists
         cfgPath, splittedWikiWord = WikiDataManager.splitConfigPathAndWord(
@@ -2644,28 +2650,35 @@ These are your default global settings.
                         % wikiCombinedFilename)
 
             # Try to remove combined filename from recent files if existing
-            try:
-                self.wikiHistory.remove(wikiCombinedFilename)
-                self.informRecentWikisChanged()
-            except ValueError:
-                pass
-            return False
             
+            self.removeFromWikiHistory(wikiCombinedFilename)
+#             try:
+#                 self.wikiHistory.remove(
+#                         self._getRelativeWikiPath(wikiCombinedFilename))
+#                 self.informRecentWikisChanged()
+#             except ValueError:
+#                 pass
+
+
+            return False
+
 #        if self.wikiConfigFilename != wikiConfigFilename:
         self.closeWiki()
         
         # Remove path from recent file list if present (we will add it again
-        # below if everything went fine).
-        try:
-            self.wikiHistory.remove(cfgPath)
-            self.informRecentWikisChanged()
-        except ValueError:
-            pass
+        # on top if everything went fine).
+        
+        self.removeFromWikiHistory(cfgPath)
+        
+#         try:
+#             self.wikiHistory.remove(cfgPath)
+#             self.informRecentWikisChanged()
+#         except ValueError:
+#             pass
+
 
         # trigger hooks
         self.hooks.openWiki(self, wikiCombinedFilename)
-
-#         self.buildMainMenu()   # ???
 
         if ignoreWdhName:
             # Explicitly ask for wiki data handler
@@ -2709,7 +2722,7 @@ These are your default global settings.
                 # Could not get handler name from wiki config file
                 # (probably old database) or required handler not available,
                 # so ask user
-                self.displayErrorMessage(str(e))
+                self.displayErrorMessage(unicode(e))
                 dbtype = self._askForDbType()
                 if dbtype is None:
                     return False
@@ -2725,7 +2738,31 @@ These are your default global settings.
                 else:
                     ignoreLock = True
                     continue # Try again
+
+            except (BadConfigurationFileException,
+                    MissingConfigurationFileException), e:
+                self.displayErrorMessage(_(u"Configuration file '%s' is corrupted or "
+                        u"missing.\nYou may have to change some settings in configuration "
+                        u'page "Current Wiki" and below which were lost.') % cfgPath)
+                wdhName = self._askForDbType()
+                if wdhName is None:
+                    return False
+
+                wikiName = basename(cfgPath)[:-5] # Remove ".wiki"
+
+                wikiConfig = wx.GetApp().createWikiConfiguration()
+
+                wikiConfig.createEmptyConfig(cfgPath)
+                wikiConfig.fillWithDefaults()
+
+                wikiConfig.set("main", "wiki_name", wikiName)
+                wikiConfig.set("main", "last_wiki_word", wikiName)
+                wikiConfig.set("main", "wiki_database_type", wdhName)
+                wikiConfig.set("wiki_db", "data_dir", "data")
+                wikiConfig.save()
                 
+                continue # Try again
+
             except (IOError, OSError, DbReadAccessError,
                     BadConfigurationFileException,
                     MissingConfigurationFileException), e:
@@ -3097,7 +3134,7 @@ These are your default global settings.
             
         self.SetFocus()
         wx.MessageBox(_(u"Database connection error: %s.\n"
-                u"Try to re-establish, then run \"Wiki\"->\"Reconnect\"") % str(exc),
+                u"Try to re-establish, then run \"Wiki\"->\"Reconnect\"") % unicode(exc),
                 _(u'Connection lost'), wx.OK, self)
 
 #         wd.setWriteAccessFailed(True) ?
@@ -3114,7 +3151,7 @@ These are your default global settings.
 
         self.SetFocus()
         wx.MessageBox(_(u"No write access to database: %s.\n"
-                u" Try to re-establish, then run \"Wiki\"->\"Reconnect\"") % str(exc),
+                u" Try to re-establish, then run \"Wiki\"->\"Reconnect\"") % unicode(exc),
                 _(u'Connection lost'), wx.OK, self)
 
         self.getWikiDocument().setWriteAccessFailed(True)
@@ -3295,7 +3332,8 @@ These are your default global settings.
             if wikiWord == self.getWikiDocument().getWikiName():
                 # Renaming of root word = renaming of wiki config file
                 wikiConfigFilename = self.getWikiDocument().getWikiConfigPath()
-                self.wikiHistory.remove(wikiConfigFilename)
+                self.removeFromWikiHistory(wikiConfigFilename)
+#                 self.wikiHistory.remove(wikiConfigFilename)
                 self.getWikiDocument().renameWikiWord(wikiWord, toWikiWord,
                         modifyText)
                 # Store some additional information
@@ -3311,7 +3349,7 @@ These are your default global settings.
             raise
         except WikiDataException, e:
             traceback.print_exc()                
-            self.displayErrorMessage(str(e))
+            self.displayErrorMessage(unicode(e))
             return False
 
 
@@ -3335,17 +3373,17 @@ These are your default global settings.
 
 
     def launchUrl(self, link):
-        link2 = flexibleUrlUnquote(link)
+#         link2 = flexibleUrlUnquote(link)
         if self.configuration.getint(
                 "main", "new_window_on_follow_wiki_url") == 1 or \
-                not link2.startswith(u"wiki:"):
+                not link.startswith(u"wiki:"):
 
-            if link2.startswith(u"rel://"):
+            if link.startswith(u"rel://"):
                 # This is a relative link
-                link2 = self.makeRelUrlAbsolute(link2)
+                link = self.makeRelUrlAbsolute(link)
 
             try:
-                OsAbstract.startFile(self, link2)
+                OsAbstract.startFile(self, link)
             except Exception, e:
                 traceback.print_exc()
                 self.displayErrorMessage(_(u"Couldn't start file"), e)
@@ -3356,16 +3394,17 @@ These are your default global settings.
                 "main", "new_window_on_follow_wiki_url") != 1:
 
             filePath, wikiWordToOpen, anchorToOpen = wikiUrlToPathWordAndAnchor(
-                    link2)
-            if exists(pathEnc(filePath)):
+                    link)
+            if exists(filePath):
                 self.openWiki(filePath, wikiWordsToOpen=(wikiWordToOpen,),
                         anchorToOpen=anchorToOpen)  # ?
                 return True
             else:
                 self.statusBar.SetStatusText(
-                        uniToGui(_(u"Couldn't open wiki: %s") % link2), 0)
+                        uniToGui(_(u"Couldn't open wiki: %s") % link), 0)
                 return False
         return False
+
 
 
     def refreshPageStatus(self, docPage = None):
@@ -3470,20 +3509,41 @@ These are your default global settings.
                 "random")
 
 
+    def removeFromWikiHistory(self, path):
+        """
+        Remove path from wiki history (if present) and sends an event.
+        """
+        try:
+            self.wikiHistory.remove(self._getRelativeWikiPath(path))
+            self.informRecentWikisChanged()
+        except ValueError:
+            pass
+
+        # Try absolute
+        try:
+            self.wikiHistory.remove(path)
+            self.informRecentWikisChanged()
+        except ValueError:
+            pass
+
+
     def lastAccessedWiki(self, wikiConfigFilename):
         """
         Writes to the global config the location of the last accessed wiki
         and updates file history.
         """
+        wikiConfigFilename = self._getStorableWikiPath(wikiConfigFilename)
+        
         # create a new config file for the new wiki
         self.configuration.set("main", "last_wiki", wikiConfigFilename)
         if wikiConfigFilename not in self.wikiHistory:
             self.wikiHistory = [wikiConfigFilename] + self.wikiHistory
 
-            # only keep 5 items
-            # TODO Configurable
-            if len(self.wikiHistory) > 5:
-                self.wikiHistory = self.wikiHistory[:5]
+            # only keep most recent items
+            maxLen = self.configuration.getint(
+                    "main", "recentWikisList_length", 5)
+            if len(self.wikiHistory) > maxLen:
+                self.wikiHistory = self.wikiHistory[:maxLen]
 
             self.informRecentWikisChanged()
 
@@ -3539,7 +3599,7 @@ These are your default global settings.
         """
         Returns if this window is set to stay on top of all others
         """
-        return not not self.GetWindowStyleFlag() & wx.STAY_ON_TOP 
+        return bool(self.GetWindowStyleFlag() & wx.STAY_ON_TOP)
 
     def setStayOnTop(self, onOrOff):
         style = self.GetWindowStyleFlag()
@@ -3548,7 +3608,7 @@ These are your default global settings.
             style |= wx.STAY_ON_TOP
         else:
             style &= ~wx.STAY_ON_TOP
-            
+
         self.SetWindowStyleFlag(style)
 
 
@@ -3654,54 +3714,54 @@ These are your default global settings.
         BUG: Reparenting seems to disturb event handling for tree events and
             isn't available for all OS'
         """
-        # Reparent reusable windows so they aren't destroyed when
-        #   cleaning main window
-        # TODO Reparent not available for all OS'
-        cachedWindows = {}
-        for n, w in self.windowLayouter.winNameToObject.iteritems():
-            cachedWindows[n] = w
-#             w.Reparent(None)
-            w.Reparent(self)
-
-        self.windowLayouter.cleanMainWindow(cachedWindows.values())
-
-        # make own creator function which provides already existing windows
-        def cachedCreateWindow(winProps, parent):
-            """
-            Wrapper around _actualCreateWindow to maintain a cache
-            of already existing windows
-            """
-            winName = winProps["name"]
-
-            # Try in cache:
-            window = cachedWindows.get(winName)
-            if window is not None:
-                window.Reparent(parent)    # TODO Reparent not available for all OS'
-                del cachedWindows[winName]
-                return window
-
-            window = self.createWindow(winProps, parent)
+#         # Reparent reusable windows so they aren't destroyed when
+#         #   cleaning main window
+#         # TODO Reparent not available for all OS'
+#         cachedWindows = {}
+# #         for n, w in self.windowLayouter.winNameToObject.iteritems():
+#         for n, w in self.windowLayouter.winNameToProxy.iteritems():
+#             print "--toCache", repr(n), repr(w)
+#             cachedWindows[n] = w
+# #             w.Reparent(None)
+#             w.Reparent(self)
+# 
+#         self.windowLayouter.cleanMainWindow(cachedWindows.values())
+# 
+#         # make own creator function which provides already existing windows
+#         def cachedCreateWindow(winProps, parent):
+#             """
+#             Wrapper around _actualCreateWindow to maintain a cache
+#             of already existing windows
+#             """
+#             winName = winProps["name"]
+# 
+#             # Try in cache:
+#             window = cachedWindows.get(winName)
+# #             print "--cachedCreateWindow", repr(winName), repr(window)
 #             if window is not None:
-#                 cachedWindows[winName] = window
+#                 window.Reparent(parent)    # TODO Reparent not available for all OS'
+#                 del cachedWindows[winName]
+#                 return window
+# 
+#             window = self.createWindow(winProps, parent)
+# 
+#             return window
+#         
+#         self.windowLayouter = WindowSashLayouter(self, cachedCreateWindow)
+# 
+#         # Destroy windows which weren't reused
+#         # TODO Call close method of object window if present
+#         for n, w in cachedWindows.iteritems():
+#             w.Destroy()
+# 
+#         self.windowLayouter.setWinPropsByConfig(layoutCfStr)
 
-            return window
-        
-        self.windowLayouter = WindowSashLayouter(self, cachedCreateWindow)
-
-#         for pr in self._TEST_LAYOUT_DEFINITION:
-#             self.windowLayouter.addWindowProps(pr)
-
-        self.windowLayouter.setWinPropsByConfig(layoutCfStr)
         # Handle no size events while realizing layout
         self.Unbind(wx.EVT_SIZE)
-        
-        self.windowLayouter.realize()
 
-        # Destroy windows which weren't reused
-        for n, w in cachedWindows.iteritems():
-#             if w.GetParent() is None:
-            w.Destroy()
+        self.windowLayouter.realizeNewLayoutByCf(layoutCfStr)
 
+#         self.windowLayouter.realize()
         self.windowLayouter.layout()
 
         wx.EVT_SIZE(self, self.OnSize)
@@ -3926,7 +3986,7 @@ These are your default global settings.
                     return True
                 except WikiDataException, e:
                     traceback.print_exc()                
-                    self.displayErrorMessage(str(e))
+                    self.displayErrorMessage(unicode(e))
     
             return False
         except (IOError, OSError, DbAccessError), e:
@@ -3973,7 +4033,7 @@ These are your default global settings.
                 self.lostAccess(e)
                 raise
             except WikiDataException, e:
-                self.displayErrorMessage(str(e))
+                self.displayErrorMessage(unicode(e))
 
         dlg.Destroy()
 
@@ -4096,8 +4156,13 @@ These are your default global settings.
                     "main", "auto_save_delay_key_pressed")
             self.autoSaveDelayAfterDirty = self.configuration.getint(
                     "main", "auto_save_delay_dirty")
+            maxLen = self.configuration.getint(
+                    "main", "recentWikisList_length", 5)
+            self.wikiHistory = self.wikiHistory[:maxLen]
+
             self.setShowOnTray()
             self.setHideUndefined()
+            self.rereadRecentWikis()
             self.refreshPageStatus()
             
             # TODO Move this to WikiDataManager!

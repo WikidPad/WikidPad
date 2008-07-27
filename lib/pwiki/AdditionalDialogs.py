@@ -158,13 +158,15 @@ class OpenWikiWordDialog(wx.Dialog):
         wx.EVT_BUTTON(self, GUI_ID.btnNewTabBackground, self.OnNewTabBackground)
 
     def OnOk(self, evt):
-        self.activateSelectedWikiWord(0)
-        self.EndModal(wx.ID_OK)
+        if self.activateSelectedWikiWord(0):
+            self.EndModal(wx.ID_OK)
 
 
     def activateSelectedWikiWord(self, tabMode):
         if len(self.wikiWord) == 0:
-            return
+            # Nothing entered means probably the user doesn't want to
+            # continue, so return True
+            return True
 
         if not self.pWiki.getWikiData().isDefinedWikiWord(self.wikiWord):
             words = self.pWiki.getWikiData().getWikiWordsWith(self.wikiWord,
@@ -177,9 +179,11 @@ class OpenWikiWordDialog(wx.Dialog):
                 nakedWord = formatting.wikiWordToLabel(wikiWord)
 
                 if not formatting.isNakedWikiWord(nakedWord):
+                    self.pWiki.displayErrorMessage(
+                            _(u"'%s' is an invalid WikiWord") % wikiWord)
                     # Entered text is not a valid wiki word
                     self.ctrls.text.SetFocus()
-                    return
+                    return False
 
                 # wikiWord is valid but nonexisting, so maybe create it?
                 result = wx.MessageBox(
@@ -189,12 +193,14 @@ class OpenWikiWordDialog(wx.Dialog):
 
                 if result == wx.NO:
                     self.ctrls.text.SetFocus()
-                    return
+                    return False
                 
                 self.wikiWord = nakedWord
 
         self.pWiki.activatePageByUnifiedName(u"wikipage/" + self.wikiWord,
                 tabMode=tabMode)
+        
+        return True
 
 
     def GetValue(self):
@@ -245,7 +251,7 @@ class OpenWikiWordDialog(wx.Dialog):
             self.pWiki.displayErrorMessage(_(u"'%s' exists already") % nakedWord)
             self.ctrls.text.SetFocus()
             return
-            
+
         self.wikiWord = nakedWord
 #         self.pWiki.activateWikiWord(self.wikiWord, tabMode=0)
         self.pWiki.activatePageByUnifiedName(u"wikipage/" + self.wikiWord,
@@ -253,8 +259,8 @@ class OpenWikiWordDialog(wx.Dialog):
         self.EndModal(wx.ID_OK)
  
     def OnNewTab(self, evt):
-        self.activateSelectedWikiWord(2)
-        self.EndModal(wx.ID_OK)
+        if self.activateSelectedWikiWord(2):
+            self.EndModal(wx.ID_OK)
 
     def OnNewTabBackground(self, evt):
         self.activateSelectedWikiWord(3)

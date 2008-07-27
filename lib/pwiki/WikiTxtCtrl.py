@@ -380,7 +380,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
         wx.EVT_CHAR(self, self.OnChar)
         wx.EVT_SET_FOCUS(self, self.OnSetFocus)
-        
+
         wx.EVT_IDLE(self, self.OnIdle)
         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
         
@@ -1040,6 +1040,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         # Set default color (especially for folding lines)
         self.StyleSetForeground(wx.stc.STC_STYLE_DEFAULT, self._getColorFromOption(
                 "editor_plaintext_color", (0, 0, 0)))
+        self.StyleSetBackground(wx.stc.STC_STYLE_LINENUMBER, self._getColorFromOption(
+                "editor_margin_bg_color", (212, 208, 200)))
 
         shorthintDelay = self.presenter.getConfig().getint("main",
                 "editor_shortHint_delay", 500)
@@ -1295,7 +1297,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
     def processTokens(self, tokens, threadholder):
         wikiData = self.presenter.getWikiDocument().getWikiData()
-        stylebytes = []
+        stylebytes = SnippetCollector()
         
         for tok in tokens:
             if not threadholder.isCurrent():
@@ -1303,6 +1305,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
             styleno = tok.ttype
             bytestylelen = self.bytelenSct(tok.text)
+            targetlen = bytestylelen + len(stylebytes)
             if styleno == WikiFormatting.FormatTypes.WikiWord:
                 if wikiData.isDefinedWikiWord(tok.node.nakedWord):
                     styleno = WikiFormatting.FormatTypes.AvailWikiWord
@@ -1320,10 +1323,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 node = tok.node
                 stylebytes.append(chr(WikiFormatting.FormatTypes.Default) *
                         self.bytelenSct(node.indent))
-                        
+
                 stylebytes.append(chr(WikiFormatting.FormatTypes.ToDo) *
                         (self.bytelenSct(node.name) + self.bytelenSct(node.delimiter)))
-                        
+
                 stylebytes.append(self.processTokens(node.valuetokens, threadholder))
 
             elif styleno == WikiFormatting.FormatTypes.Table:
@@ -1346,9 +1349,12 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
             if styleno != -1:
                 stylebytes.append(chr(styleno) * bytestylelen)
-                
 
-        return "".join(stylebytes)
+            if len(stylebytes) < targetlen:
+                stylebytes.append(chr(WikiFormatting.FormatTypes.Default) *
+                        (targetlen - len(stylebytes)))
+
+        return stylebytes.value()
 
 
     def processFolding(self, tokens, threadholder):
@@ -2536,24 +2542,14 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if isWin9x() and (WindowsHacks is not None):
             unichar = WindowsHacks.ansiInputToUnicodeChar(key)
 
-#             if self.inIncrementalSearch:
-#                 self.searchStr += unichar
-#                 self.executeIncrementalSearch();
-#             else:
             self.ReplaceSelection(unichar)
 
         else:
-
             if isUnicode():
                 unichar = unichr(evt.GetUnicodeKey())
             else:
                 unichar = mbcsDec(chr(key))[0]
-                
-#             # handle key presses while in incremental search here
-#             if self.inIncrementalSearch:
-#                 self.searchStr += unichar
-#                 self.executeIncrementalSearch();
-#             else:
+
             evt.Skip()
 
 
@@ -2562,13 +2558,14 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         evt.Skip()
 
 
+#     def OnMouseWheel(self, evt):
+#         evt.Skip()
+
+
+
     def OnUserListSelection(self, evt):
         text = evt.GetText()
         toerase = self.autoCompBackBytesMap[text]
-#         if text[0] == "[":
-#             toerase = self.autoCompBackBytesWithBracket
-#         else:
-#             toerase = self.autoCompBackBytesWithoutBracket
             
         self.SetSelection(self.GetCurrentPos() - toerase, self.GetCurrentPos())
         

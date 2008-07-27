@@ -22,7 +22,8 @@ from PageAst import tokenizeTodoValue
 from SearchAndReplace import SearchReplaceOperation
 
 from StringOps import mbcsEnc, guiToUni, uniToGui, strToBool, \
-        pathWordAndAnchorToWikiUrl, escapeForIni, unescapeForIni
+        pathWordAndAnchorToWikiUrl, escapeForIni, unescapeForIni, \
+        htmlColorToRgbTuple
 
 from AdditionalDialogs import SelectWikiWordDialog
 
@@ -763,7 +764,7 @@ class MainSearchesNode(AbstractNode):
         return style
         
     def isVisible(self):
-        return not not self.treeCtrl.pWiki.getWikiData().getSavedSearchTitles()
+        return bool(self.treeCtrl.pWiki.getWikiData().getSavedSearchTitles())
         
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.getWikiData()
@@ -1047,15 +1048,18 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         # The setting affects the configuration entries used to set up tree
         self.treeType = treeType
 
-        self.SetBackgroundColour(wx.WHITE)
+#         self.SetBackgroundColour(wx.WHITE)
+
         self.SetSpacing(0)
         self.refreshGenerator = None  # Generator called in OnIdle
 #        self.refreshCheckChildren = [] # List of nodes to check for new/deleted children
         self.sizeVisible = True
         # Descriptor pathes of all expanded nodes to remember or None
         # if functionality was switched off by user
-        self.expandedNodePathes = StringPathSet() 
+        self.expandedNodePathes = StringPathSet()
         
+        self.onOptionsChanged(None)
+
 
         # EVT_TREE_ITEM_ACTIVATED(self, ID, self.OnTreeItemActivated)
         # EVT_TREE_SEL_CHANGED(self, ID, self.OnTreeItemActivated)
@@ -1151,6 +1155,11 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 ("changed wiki configuration", self.onChangedWikiConfiguration)
         ), self.pWiki.getCurrentWikiDocumentProxyEvent(), self)
 
+        self.__sinkApp = wxKeyFunctionSink((
+                ("options changed", self.onOptionsChanged),
+        ), wx.GetApp().getMiscEvent(), self)
+
+
     def _bindActivation(self):
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnTreeItemActivated)
         self.Bind(wx.EVT_TREE_SEL_CHANGING, self.OnTreeItemSelChanging)
@@ -1163,6 +1172,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         self.__sinkMc.disconnect()
         self.__sinkDocPagePresenter.disconnect()
         self.__sinkWikiDoc.disconnect()
+        self.__sinkApp.disconnect()
 
     def collapse(self):
         """
@@ -1290,6 +1300,18 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 # Recursively handle childs of expanded node
                 self._addExpandedNodesToPathSet(nodeId)
             nodeId, cookie = self.GetNextChild(parentNodeId, cookie)
+
+
+    def onOptionsChanged(self, miscevt):
+        config = self.pWiki.getConfig()
+        
+        coltuple = htmlColorToRgbTuple(config.get("main", "tree_bg_color"))   
+        
+        if coltuple is None:
+            coltuple = (255, 255, 255)
+
+        self.SetBackgroundColour(wx.Colour(*coltuple))
+        self.Refresh()
 
 
     def onChangedWikiConfiguration(self, miscevt):

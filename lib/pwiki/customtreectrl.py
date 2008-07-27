@@ -1886,8 +1886,10 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
         # Default CustomTreeCtrl background colour.    
 #         self._backgroundColour = wx.WHITE
-        self._backgroundColour = wx.SystemSettings.GetColour(
-                wx.SYS_COLOUR_WINDOW)
+#         self._backgroundColour = wx.SystemSettings.GetColour(
+#                 wx.SYS_COLOUR_WINDOW)
+
+        self._backgroundColour = wx.NullColour
 
         # Background image settings
         self._backgroundImage = None
@@ -4791,7 +4793,14 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
 #         dc = wx.PaintDC(self)
         dc = wx.BufferedPaintDC(self)
-        bgBrush = wx.Brush(self._backgroundColour)
+        
+        
+        
+        if self._backgroundColour == wx.NullColour:
+            bgBrush = wx.Brush(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))
+        else:
+            bgBrush = wx.Brush(self._backgroundColour)
+
         dc.SetBackground(bgBrush)
         dc.Clear()
         dc.SetBackground(wx.NullBrush)
@@ -4833,8 +4842,8 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
 
     def OnSysColourChanged(self, evt):
-        self._backgroundColour = wx.SystemSettings.GetColour(
-                wx.SYS_COLOUR_WINDOW)        
+#         self._backgroundColour = wx.SystemSettings.GetColour(
+#                 wx.SYS_COLOUR_WINDOW)        
         self.Refresh()
 
 
@@ -5935,6 +5944,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
     def SetBackgroundColour(self, colour):
         """Changes the background colour of CustomTreeCtrl."""
 
+        self._backgroundColour = colour
         if not wx.Window.SetBackgroundColour(self, colour):
             return False
 

@@ -646,8 +646,46 @@ class LayerSizer(wx.PySizer):
 
 
 class DummyWindow(wx.Window):
+    """
+    Used to catch hotkeys because there seems to be a bug which prevents
+    deleting of them so instead the whole window is deleted and recreated.
+    """
     def __init__(self, parent, id=-1):
         wx.Window.__init__(self, parent, id, size=(0,0))
+
+
+# class ProxyPanel(wx.Panel):
+class ProxyPanel(wx.Panel):
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent, -1)
+        
+        self.subWindow = None
+        
+        wx.EVT_SIZE(self, self.OnSize)
+
+    def __repr__(self):
+        return "<ProxyPanel " + str(id(self)) + " for " + repr(self.subWindow) + ">"
+
+
+    def setSubWindow(self, subWindow):
+        self.subWindow = subWindow
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        sizer.Add(subWindow, 1, wx.EXPAND, 0)
+
+        self.SetSizer(sizer)
+#         self.SetAutoLayout(True)
+#         sizer.Fit(self)
+
+    def getSubWindow(self):
+        return self.subWindow
+
+
+    def OnSize(self, evt):
+        evt.Skip()
+        size = evt.GetSize()
+
 
 
 class EnhancedListControl(wx.ListCtrl):

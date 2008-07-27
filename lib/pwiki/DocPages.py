@@ -177,7 +177,7 @@ class DocPage(MiscEventSourceMixin):
                 return None
     
             self.livePageAst = pageAst
-
+            
 #             # Fire an appropriate event in the main thread
 #             wx.CallAfter(self.fireMiscEventProps,
 #                     {"created live page ast": True})   # , "page ast": pageAst
@@ -289,8 +289,8 @@ class AliasWikiPage(DocPage):
     def update(self, text, fireEvent=True):
         return self.realWikiPage.update(text, fireEvent)
 
-    def getLivePageAst(self, threadholder=DUMBTHREADHOLDER):
-        return self.realWikiPage.getLivePageAst(threadholder)
+    def getLivePageAst(self, text=None, threadholder=DUMBTHREADHOLDER):
+        return self.realWikiPage.getLivePageAst(text, threadholder)
 
 
     # TODO A bit hackish, maybe remove

@@ -277,7 +277,7 @@ class RegexWikiPageNode(AbstractSearchNode):
                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
     
     def testWikiPage(self, word, text):
-        return not not self.compPat.match(word)
+        return bool(self.compPat.match(word))
 
     def serializeBin(self, stream):
         """
@@ -311,7 +311,7 @@ class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
     """
 
     CLASS_PERSID = "ListItemWithSubtreePages"  # Class id for persistence storage
-    
+
     def __init__(self, sarOp, rootWords=None, level=-1):
         AbstractSearchNode.__init__(self, sarOp)
         self.rootWords = rootWords
@@ -515,7 +515,7 @@ class RegexTextNode(AbstractContentSearchNode):
 
 
     def testText(self, text):
-        return not not self.rePattern.search(text)
+        return bool(self.rePattern.search(text))
 
 
     def matchesPart(self, toReplace):
@@ -898,6 +898,8 @@ class SearchReplaceOperation:
         """
         Rebuild the search operation tree. Automatically called by
         searchText() and testText() if necessary.
+        The function may raise an exception (especially regex exception)
+        if the search string ontains syntax errors.
         """
         # TODO Test empty string
 
