@@ -39,8 +39,8 @@ SQLITE_DONE       = 101  # sqlite_step() has finished executing
 
 # Memory handling values for bind_*
 
-SQLITE_STATIC = 0
-SQLITE_TRANSIENT = -1
+SQLITE_STATIC = c_void_p(0)
+SQLITE_TRANSIENT = c_void_p(-1)
 
 
 # Column (more precisely value-) types, returned by _SqliteStatement3.column_type()

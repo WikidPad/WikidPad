@@ -177,23 +177,34 @@ class PrintMainDialog(wx.Dialog):
 class Printer:
     def __init__(self, pWiki):
         self.pWiki = pWiki
-        self.printData = wx.PrintData()
-        self.psddata = wx.PageSetupDialogData(self.printData)
+        # self.printData and self.psddata are only filled with values on demand
+        # this avoids error messages if no printer is installed
+        self.printData = None
+        self.psddata = None
+
         self.selectionSet = 0
         self.listPagesOperation = ListWikiPagesOperation()
 
         self.plainTextFontDesc = self.pWiki.configuration.get(
                 "main", "print_plaintext_font")
-        try:
-            margintext = self.pWiki.configuration.get(
-                    "main", "print_margins")
-            margins = map(int, margintext.split(u","))
-        except:
-            margins = [0, 0, 0, 0]  # TODO Perhaps error message
-            
-        self.psddata.SetMarginTopLeft(wx.Point(margins[0], margins[1]))
-        self.psddata.SetMarginBottomRight(wx.Point(margins[2], margins[3]))
         
+    def _ensurePrintData(self):
+        """
+        Fill fields with PrintData and PageSetupDialogData if not yet done.
+        """
+        if self.printData is None:
+            self.printData = wx.PrintData()
+            self.psddata = wx.PageSetupDialogData(self.printData)
+
+            try:
+                margintext = self.pWiki.configuration.get(
+                        "main", "print_margins")
+                margins = map(int, margintext.split(u","))
+            except:
+                margins = [0, 0, 0, 0]  # TODO Perhaps error message
+                
+            self.psddata.SetMarginTopLeft(wx.Point(margins[0], margins[1]))
+            self.psddata.SetMarginBottomRight(wx.Point(margins[2], margins[3]))
 
     def setStdOptions(self, selectionSet, plainTextFontDesc, wpSeparator):
         self.selectionSet = selectionSet
@@ -258,6 +269,7 @@ class Printer:
 
 
     def showPrintMainDialog(self):
+        self._ensurePrintData()
         dlg = PrintMainDialog(self.pWiki, -1)
         dlg.CenterOnParent(wx.BOTH)
 

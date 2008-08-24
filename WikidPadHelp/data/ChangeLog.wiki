@@ -1,7 +1,23 @@
 ﻿++ Change Log
 
 
-Jul. 26, 2008 (1.8rc14)
+Aug. 24, 2008 (1.8rc15)
+
+    * Bug fixed: Sometimes too many empty lines in internal
+      preview
+    * Bug fixed: Startup error if no printer is installed
+    * Bug fixed: Segfault of sqlite on 64-bit Linux
+      (thanks to Anton Markov)
+    * Bug fixed: "anded" regex search searched only for
+      first term (thanks to milus)
+    * Bug fixed: Problems with temp-path for external plugins
+      on Linux (thanks to jonjacksonuk and franxxk)
+    * Linux standard encoding is now determined by
+      locale.getpreferredencoding() (thanks to Kamil Śliwak)
+
+
+
+Jul. 26, 2008 (1.8rc14, repository revision in "stable-1.8" branch: 142)
 
     * Better handling of malformed regular expressions
       in search fields
@@ -11,7 +27,7 @@ Jul. 26, 2008 (1.8rc14)
 
 
 
-Jan. 25, 2008 (1.8rc13)
+Jan. 25, 2008 (1.8rc13, repository revision in "stable-1.8" branch: 139)
 
     * Bug fixed: Linux: Some problems with non-ascii characters
       in pathes (some other issues are there yet)

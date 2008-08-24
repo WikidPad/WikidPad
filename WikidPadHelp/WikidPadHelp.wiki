@@ -3,13 +3,16 @@ data_dir = data
 
 [main]
 footnotes_as_wikiwords = False
-last_wiki_word = ChangeLog
+tree_expandednodes_descriptorpathes_main = wikipage/WikidPadHelp,wikipage/SearchingTheWiki;wikipage/WikidPadHelp
+last_wiki_word = WikidPadHelp
 filestorage_identity_moddatemustmatch = False
 wiki_name = WikidPadHelp
+tree_last_root_wiki_word = WikidPadHelp
 wiki_database_type = original_gadfly
 wikipagetitleprefix = ++
 filestorage_identity_filenamemustmatch = False
 filestorage_identity_moddateisenough = False
 further_wiki_words = 
+tree_expandednodes_descriptorpathes_views = helpernode/main/view
 first_wiki_word = WikidPadHelp
 

@@ -113,6 +113,7 @@ class HtmlXmlExporter:
         
         # Flag to control how to push output into self.result
         self.outFlagEatPostBreak = False
+        self.outFlagPostBreakEaten = False
 
 
     def getMainControl(self):
@@ -817,16 +818,21 @@ class HtmlXmlExporter:
         if toAppend == u"":    # .strip()
             return
 
-        if self.outFlagEatPostBreak and toAppend.strip() == "<br />":
+        if self.outFlagEatPostBreak and toAppend.strip() == u"<br />":
             self.outFlagEatPostBreak = eatPostBreak
+            self.outFlagPostBreakEaten = True
             return
-        
+
         if eatPreBreak and len(self.result) > 0 and \
-                self.result[-1].strip() == "<br />":
+                self.result[-1].strip() == u"<br />" and \
+                not self.outFlagPostBreakEaten:
             self.result[-1] = toAppend
             self.outFlagEatPostBreak = eatPostBreak
             return
-            
+        
+        if self.outFlagPostBreakEaten:
+            self.outFlagPostBreakEaten = (toAppend.strip() == u"<br />")
+
         self.outFlagEatPostBreak = eatPostBreak
         self.result.append(toAppend)
         
@@ -837,10 +843,11 @@ class HtmlXmlExporter:
         If last element in self.result is a <br />, delete it.
         Then append toAppend to self.result
         """
-        if len(self.result) > 0 and self.result[-1].strip() == "<br />":
-            self.result[-1] = toAppend
-        else:
-            self.result.append(toAppend)
+        self.outAppend(toAppend, eatPreBreak=True)
+#         if len(self.result) > 0 and self.result[-1].strip() == "<br />":
+#             self.result[-1] = toAppend
+#         else:
+#             self.result.append(toAppend)
 
 
     def outEatBreaks(self, toAppend, **kpars):
@@ -1170,6 +1177,9 @@ class HtmlXmlExporter:
         self.statestack = [("normalindent", 0)]
         self.optsStack = [{}]
         self.insertionVisitStack = []
+        self.outFlagEatPostBreak = False
+        self.outFlagPostBreakEaten = False
+
         # deepness of numeric bullets
         self.numericdeepness = 0
         self.preMode = 0  # Count how many <pre> tags are open
@@ -1409,8 +1419,9 @@ class HtmlXmlExporter:
             elif styleno == WikiFormatting.FormatTypes.Script:
                 pass  # Hide scripts 
             elif styleno == WikiFormatting.FormatTypes.PreBlock:
-                self.outEatBreaks(u"<pre>%s</pre>" %
-                        escapeHtmlNoBreaks(tok.grpdict["preContent"]))
+                self.outAppend(u"<pre>%s</pre>" %
+                        escapeHtmlNoBreaks(tok.grpdict["preContent"]), True,
+                        not self.asIntHtmlPreview)
             elif styleno == WikiFormatting.FormatTypes.Anchor:
                 if self.wordAnchor:
                     anchor = self.wordAnchor + u"#" + tok.grpdict["anchorValue"]
@@ -1613,8 +1624,9 @@ class HtmlXmlExporter:
                     self.outIndentation("ol")
                     self.statestack.append(("ol", ind))
                     self.numericdeepness += 1
-                    
-                self.eatPreBreak(u"<li />")
+
+                self.outAppend(u"<li />", not self.asIntHtmlPreview)
+#                 self.eatPreBreak(u"<li />")
 
             elif styleno == WikiFormatting.FormatTypes.Bullet:
                 # Numeric bullet
@@ -1634,7 +1646,8 @@ class HtmlXmlExporter:
                     self.outIndentation("ul")
                     self.statestack.append(("ul", ind))
 
-                self.eatPreBreak(u"<li />")
+                self.outAppend(u"<li />", not self.asIntHtmlPreview)
+#                 self.eatPreBreak(u"<li />")
             elif styleno == WikiFormatting.FormatTypes.Suppress:
                 while self.statestack[-1][0] != "normalindent":
                     self.popState()

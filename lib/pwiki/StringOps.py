@@ -11,7 +11,7 @@ import threading
 
 from struct import pack, unpack
 
-import difflib, codecs, os.path, random
+import difflib, codecs, os.path, random, locale
 
 import urllib_red as urllib
 
@@ -68,7 +68,11 @@ if isOSX():
 elif isLinux():
     # Could be wrong encoding
 #     LINUX_ENCODING = "latin-1"
-    LINUX_ENCODING = "utf8"
+#     LINUX_ENCODING = "utf8"
+    LINUX_ENCODING = locale.getpreferredencoding()
+
+    if not LINUX_ENCODING:
+        LINUX_ENCODING = "utf8"
 
     mbcsEnc = codecs.getencoder(LINUX_ENCODING)
     _mbcsDec = codecs.getdecoder(LINUX_ENCODING)
@@ -108,11 +112,15 @@ if os.path.supports_unicode_filenames:
     pathDec = dummy
 else:
     def pathEnc(s):
+        if s is None:
+            return None
         if isinstance(s, str):
             return s
         return mbcsEnc(s, "replace")[0]
 
     def pathDec(s):
+        if s is None:
+            return None
         return mbcsDec(s, "replace")[0]
 
 

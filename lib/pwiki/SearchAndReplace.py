@@ -130,7 +130,7 @@ class AndSearchNode(AbstractSearchNode):
         if leftret == False:
             return False
             
-        rightret = self.left.testWikiPage(word, text)
+        rightret = self.right.testWikiPage(word, text)
         
         if rightret == False:
             return False
