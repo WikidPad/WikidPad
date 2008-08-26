@@ -63,6 +63,7 @@ Then just start typing text with WikiWords to create your wiki.
     * [Folding]
     * Different DatabaseTypes (WhereIsTheDataStored ?, MigrationBetweenDbTypes)
     * Defining TextBlocks
+    * WikiStructureGraphs
 
 *Other/Questions*
 

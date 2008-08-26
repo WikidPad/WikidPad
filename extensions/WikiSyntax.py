@@ -224,14 +224,14 @@ TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlRE.pattern + u"|" +
 PropertyValueRE = re.compile(ur"(?:[ \t]*"
         ur"(?:(?P<propertyValQuoteStarter>\"+|'+|/+|\\+)"
         ur"(?P<propertyQuotedValue>.*?)(?P=propertyValQuoteStarter)|"
-        ur"(?P<propertyValue>[\w\-\_ \t:,.!?#/|]+)))",
+        ur"(?P<propertyValue>[\w\-\_ \t:,.!?#/|]*)))",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 
 PropertyFurtherValueRE = re.compile(ur"(?:;[ \t]*"
         ur"(?:(?P<propertyFurtherValQuoteStarter>\"+|'+|/+|\\+)"
         ur"(?P<propertyFurtherQuotedValue>.*?)(?P=propertyFurtherValQuoteStarter)|"
-        ur"(?P<propertyFurtherValue>[\w\-\_ \t:,.!?#/|]+)))",
+        ur"(?P<propertyFurtherValue>[\w\-\_\t:,.!?#/|][\w\-\_ \t:,.!?#/|]*)))",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 
@@ -263,7 +263,7 @@ InsertionValueRE = re.compile(ur"(?:"
 InsertionAppendixRE = re.compile(ur";[ \t]*(?:"
         ur"(?P<insertionApxQuoteStarter>\"+|'+|/+|\\+)"
         ur"(?P<insertionQuotedAppendix>.*?)(?P=insertionApxQuoteStarter)|"
-        ur"(?P<insertionAppendix>[\w\-\_ \t,.!?#/|]*))",
+        ur"(?P<insertionAppendix>[\w\-\_\t:,.!?#/|][\w\-\_ \t,.!?#/|]*))",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 InsertionRE     = re.compile(BracketStartPAT +

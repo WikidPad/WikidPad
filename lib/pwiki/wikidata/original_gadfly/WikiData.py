@@ -35,7 +35,7 @@ from pwiki.WikiExceptions import *   # TODO make normal import?
 from pwiki import SearchAndReplace
 
 from pwiki.StringOps import pathEnc, pathDec, utf8Enc, utf8Dec, BOM_UTF8, \
-        fileContentToUnicode, loadEntireTxtFile, writeEntireTxtFile
+        fileContentToUnicode, loadEntireTxtFile, writeEntireTxtFile, Conjunction
 
 from pwiki import WikiFormatting
 from pwiki import PageAst
@@ -294,6 +294,64 @@ class WikiData:
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
+
+
+    def getExistingWikiWordInfo(self, wikiWord, withFields=()):
+        """
+        Get information about an existing wiki word
+        Aliases must be resolved beforehand.
+        Function must work for read-only wiki.
+        withFields -- Seq. of names of fields which should be included in
+            the output. If this is not empty, a tuple is returned
+            (relation, ...) with ... as further fields in the order mentioned
+            in withfields.
+
+            Possible field names:
+                "modified": Modification date of page
+                "created": Creation date of page
+                "visited": Last visit date of page (currently always returns 0)
+                "firstcharpos": Dummy returning very high value
+        """
+        if withFields is None:
+            withFields = ()
+
+        addFields = ""
+        converters = [lambda s: s]
+
+        for field in withFields:
+            if field == "modified":
+                addFields += ", modified"
+                converters.append(float)
+            elif field == "created":
+                addFields += ", created"
+                converters.append(float)
+            elif field == "visited":
+                # Fake "visited" field
+                addFields += ", 0.0"
+                converters.append(lambda s: 0.0)
+            elif field == "firstcharpos":
+                # Fake character position. TODO More elegantly
+                addFields += ", 0"
+                converters.append(lambda s: 2000000000L)
+
+
+        sql = "select word%s from wikiwords where word = ?" % addFields
+
+        try:
+            if len(withFields) > 0:
+                dbresult = [tuple(c(item) for c, item in zip(converters, row))
+                        for row in self.connWrap.execSqlQuery(sql, (wikiWord,))]
+            else:
+                dbresult = self.connWrap.execSqlQuerySingleColumn(sql, (wikiWord,))
+            
+            if len(dbresult) == 0:
+                raise WikiWordNotFoundException(wikiWord)
+            
+            return dbresult[0]
+        except (IOError, OSError, ValueError), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
 
 
 
@@ -1118,6 +1176,36 @@ class WikiData:
         try:
             return self.execSqlQuerySingleColumn("select distinct(value) "
                     "from wikiwordprops where key = ?", (key,))  #  order by value
+        except (IOError, OSError, ValueError), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+
+    def getPropertyTriples(self, word, key, value):
+        """
+        Function must work for read-only wiki.
+        word, key and value can either be unistrings or None.
+        """
+        
+        conjunction = Conjunction("where ", "and ")
+        
+        query = "select word, key, value from wikiwordprops "
+        parameters = []
+        
+        if word is not None:
+            parameters.append(word)
+            query += conjunction() + "word = ? "
+        
+        if key is not None:
+            parameters.append(key)
+            query += conjunction() + "key = ? "
+
+        if value is not None:
+            parameters.append(value)
+            query += conjunction() + "value = ? "
+
+        try:
+            return self.connWrap.execSqlQuery(query, tuple(parameters))
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbReadAccessError(e)

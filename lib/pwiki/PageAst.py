@@ -804,7 +804,7 @@ class Insertion(Ast):
         groupdict = token.grpdict
         
         self.key = groupdict.get("insertionKey")
-        
+
         content = groupdict.get("insertionContent")
         
         mat = WikiFormatting.InsertionValueRE.match(content)

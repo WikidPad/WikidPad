@@ -1910,6 +1910,14 @@
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbTreeForceScratchpadVisibility">
+          <label>Force ScratchPad visibility in tree</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
       <object class="spacer">
         <size>5,5</size>
       </object>

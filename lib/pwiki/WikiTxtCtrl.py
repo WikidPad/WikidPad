@@ -1792,9 +1792,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if securityLevel == 0:
             # No scripts allowed
             # Print warning message
-            wx.MessageBox(_(u"Set in options, page \"Security\", \n"
-                    "item \"Script security\" an appropriate value \n"
-                    "to execute a script"), _(u"Script execution disabled"),
+            wx.MessageBox(_(u"Set in menu \"Wiki\", item \"Options...\", "
+                    "options page \"Security\", \n"
+                    "item \"Script security\" an appropriate value "
+                    "to execute a script."), _(u"Script execution disabled"),
                     wx.OK, self.presenter.getMainControl())
             return
 

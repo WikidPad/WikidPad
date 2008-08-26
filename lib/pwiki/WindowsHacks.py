@@ -3,7 +3,7 @@ This is a Windows (32 bit) specific file for handling some operations not provid
 by the OS-independent wxPython library.
 """
 
-import ctypes, traceback
+import ctypes, os, os.path, traceback
 from ctypes import c_int, c_uint, c_long, c_ulong, c_ushort, c_char, c_char_p, \
         c_wchar_p, c_byte, byref   # , WindowsError
 
@@ -11,7 +11,7 @@ import wx
 
 from wxHelper import getTextFromClipboard
 
-from StringOps import strftimeUB   # unescapeWithRe
+from StringOps import strftimeUB, pathEnc   # unescapeWithRe
 
 import DocPages
 
@@ -129,7 +129,88 @@ except AttributeError:
 #     INT nShowCmd 	// whether file is shown when opened
 #    );
 #    
-   
+
+
+
+class SHFILEOPSTRUCTW(ctypes.Structure):
+    _fields_ = [
+        ("hwnd", ctypes.c_uint),
+        ("wFunc", ctypes.c_uint),
+        ("pFrom", ctypes.c_wchar_p),
+        ("pTo", ctypes.c_wchar_p),
+        ("fFlags", ctypes.c_uint),
+        ("fAnyOperationsAborted", ctypes.c_uint),
+        ("hNameMappings", ctypes.c_uint),
+        ("lpszProgressTitle", ctypes.c_wchar_p)
+        ]
+
+
+# typedef struct _SHFILEOPSTRUCTW {
+# 	HWND hwnd;
+# 	UINT wFunc;
+# 	LPCWSTR pFrom;
+# 	LPCWSTR pTo;
+# 	FILEOP_FLAGS fFlags;
+# 	BOOL fAnyOperationsAborted;
+# 	PVOID hNameMappings;
+# 	LPCWSTR lpszProgressTitle;
+# } SHFILEOPSTRUCTW,*LPSHFILEOPSTRUCTW;
+
+
+FO_COPY = 2
+
+FOF_MULTIDESTFILES = 1
+FOF_NOCONFIRMATION = 16
+FOF_NOCONFIRMMKDIR = 512
+FOF_NOERRORUI = 1024
+FOF_SILENT = 4
+
+
+try:
+    SHFileOperationW = _shell32dll.SHFileOperationW
+except AttributeError:
+    SHFileOperationW = None
+
+# int SHFileOperation(LPSHFILEOPSTRUCT lpFileOp);
+
+
+if SHFileOperationW is not None:
+    def copyFile(srcPath, dstPath):
+        """
+        Copy file from srcPath to dstPath. dstPath may be overwritten if
+        existing already. dstPath must point to a file, not a directory.
+        If some directories in dstPath do not exist, they are created.
+        
+        This function only works on Win NT!
+        """
+        dstDir = os.path.dirname(dstPath)
+            
+        if not os.path.exists(pathEnc(dstDir)):
+            os.makedirs(dstDir)
+        
+        fileOp = SHFILEOPSTRUCTW()
+        
+        srcPathWc = ctypes.c_wchar_p(srcPath + u"\0")
+        dstPathWc = ctypes.c_wchar_p(dstPath + u"\0")
+    
+        fileOp.hwnd = 0
+        fileOp.wFunc = FO_COPY
+        fileOp.pFrom = srcPathWc
+        fileOp.pTo = dstPathWc
+        fileOp.fFlags = FOF_MULTIDESTFILES | FOF_NOCONFIRMATION | \
+                FOF_NOCONFIRMMKDIR | FOF_SILENT  # | FOF_NOERRORUI
+        fileOp.fAnyOperationsAborted = 0
+        fileOp.hNameMappings = 0
+        fileOp.lpszProgressTitle = 0
+        
+        res = SHFileOperationW(ctypes.byref(fileOp))
+
+        
+        return res
+
+
+
+
 
 
 def ansiInputToUnicodeChar(ansiCode):

@@ -128,7 +128,7 @@ class KeyBindingsCache:
         self.accelPairCache = {}
         
     def __getattr__(self, attr):
-        return getattr(self.kbModule, attr)
+        return getattr(self.kbModule, attr, u"")
     
     def get(self, attr, default=None):
         return getattr(self.kbModule, attr, None)
@@ -277,7 +277,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         history = self.configuration.get("main", "wiki_history")
         if history:
             self.wikiHistory = history.split(u";")
-          
+
         # clipboard catcher  
         if WindowsHacks is None:
             self._interceptCollection = None
@@ -513,6 +513,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def getLogWindow(self):
         return self.logWindow
 
+    def getKeyBindings(self):
+        return self.keyBindings
+
 
     def lookupIcon(self, iconname):
         """
@@ -652,7 +655,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
         self.addMenuItem(wikiMenu, _(u'O&ptions...'),
-                _(u'Set Options'), lambda evt: self.showOptionsDialog())
+                _(u'Set Options'), lambda evt: self.showOptionsDialog(),
+                menuID = wx.ID_PREFERENCES)
 
         wikiMenu.AppendSeparator()
 
@@ -778,7 +782,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         menuID=wx.NewId()
         wikiMenu.Append(menuID, _(u'E&xit'), _(u'Exit'))
         wx.EVT_MENU(self, menuID, lambda evt: self.exitWiki())
-        
+        wx.App.SetMacExitMenuItemId(menuID)
+
         return wikiMenu
 
 
@@ -1669,44 +1674,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         helpMenu.AppendSeparator()
 
-        menuID=wx.NewId()
+        menuID = wx.NewId()
         helpMenu.Append(menuID, _(u'View &License'), _(u'View License'))
         wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(self, 
                 join(self.wikiAppDir, u'license.txt')))
 
-#         else:
-#             menuID=wx.NewId()
-#             helpMenu.Append(menuID, '&Visit wikidPad Homepage', 'Visit Homepage')
-#             wx.EVT_MENU(self, menuID, lambda evt: wx.LaunchDefaultBrowser(
-#                     'http://www.jhorman.org/wikidPad/'))
-# 
-#             helpMenu.AppendSeparator()
-# 
-#             menuID=wx.NewId()
-#             helpMenu.Append(menuID, 'View &License', 'View License')
-#             wx.EVT_MENU(self, menuID, lambda evt: wx.LaunchDefaultBrowser(
-#                     join(self.wikiAppDir, 'license.txt')))
+        if wx.Platform != "__WXMAC__":
+            #don't need final separator if about item is going to app menu
+            helpMenu.AppendSeparator()
 
-        helpMenu.AppendSeparator()
-
-        menuID=wx.NewId()
+        menuID = wx.ID_ABOUT
         helpMenu.Append(menuID, _(u'&About'), _(u'About WikidPad'))
         wx.EVT_MENU(self, menuID, lambda evt: self.showAboutDialog())
-
-        # get info for any plugin menu items and create them as necessary
-#         pluginMenu = None
-#         pluginMenu = wx.Menu()
-#         menuItems = reduce(lambda a, b: a+list(b),
-#                 self.menuFunctions.describeMenuItems(self), [])
-#         if len(menuItems) > 0:
-#             def addPluginMenuItem(function, label, statustext, icondesc=None,
-#                     menuID=None):
-#                 self.addMenuItem(pluginMenu, label, statustext,
-#                         lambda evt: function(self, evt), icondesc, menuID)
-# 
-#             for item in menuItems:
-#                 addPluginMenuItem(*item)
-
 
         self.mainmenu.Append(wikiMenu, _(u'W&iki'))
         self.mainmenu.Append(wikiWordMenu, _(u'&Wiki Words'))
@@ -1723,7 +1702,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.fillPluginsMenu(self.pluginsMenu)
         self.mainmenu.Append(self.pluginsMenu, _(u"Pl&ugins"))
 
-        self.mainmenu.Append(helpMenu, _(u'He&lp'))
+
+        #Mac does not use menu accellerators anyway and wx special cases &Help to the in build Help menu
+        #this check stops 2 help menus on mac
+        if wx.Platform == "__WXMAC__": 
+            self.mainmenu.Append(helpMenu, _(u'&Help'))
+        else:
+            self.mainmenu.Append(helpMenu, _(u'He&lp'))
 
         self.SetMenuBar(self.mainmenu)
 
@@ -2285,10 +2270,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         htmlView.setLayerVisible(False)
         presenter.setSubControl("preview", htmlView)
 
-        mainsizer = LayerSizer()
-        mainsizer.Add(editor)
-        mainsizer.Add(htmlView)
-        presenter.SetSizer(mainsizer)
+#         mainsizer = LayerSizer()
+#         mainsizer.Add(editor)
+#         mainsizer.Add(htmlView)
+#         presenter.SetSizer(mainsizer)
 
         return self.mainAreaPanel.appendDocPagePresenterTab(presenter)
 
@@ -2669,13 +2654,6 @@ These are your default global settings.
         # on top if everything went fine).
         
         self.removeFromWikiHistory(cfgPath)
-        
-#         try:
-#             self.wikiHistory.remove(cfgPath)
-#             self.informRecentWikisChanged()
-#         except ValueError:
-#             pass
-
 
         # trigger hooks
         self.hooks.openWiki(self, wikiCombinedFilename)
@@ -4980,6 +4958,8 @@ These are your default global settings.
             #   on tray
             sleep(0.1)
             self.tbIcon = None
+        
+        wx.GetApp().unregisterMainFrame(self)
 
 
 

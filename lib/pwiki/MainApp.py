@@ -1,7 +1,7 @@
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
-import sys, os, traceback, os.path, socket
+import sys, os, traceback, os.path, socket, sets
 
 # To generate dependency for py2exe
 import subprocess
@@ -111,7 +111,10 @@ class App(wx.App, MiscEventSourceMixin):
 
         self.SetAppName("WikidPad")
         self.removeAppLockOnExit = False
+        wx.EVT_END_SESSION(self, self.OnEndSession)
         appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
+        
+        self.mainFrameSet = sets.Set()
 
         wikiAppDir, globalConfigDir = findDirs()
 
@@ -363,7 +366,7 @@ class App(wx.App, MiscEventSourceMixin):
 
     def onGlobalConfigurationChanged(self, miscevt):
         self._rereadGlobalConfig()
-
+        
 
     def _rereadGlobalConfig(self):
         """
@@ -378,10 +381,24 @@ class App(wx.App, MiscEventSourceMixin):
         else:
             collationCaseMode = Localization.CASEMODE_UPPER_INSIDE
 
-        self.collator = Localization.getCollatorByString(collationOrder,
-                collationCaseMode)
+        try:
+            self.collator = Localization.getCollatorByString(collationOrder,
+                    collationCaseMode)
+        except:
+            try:
+                self.collator = Localization.getCollatorByString(u"Default",
+                        collationCaseMode)
+            except:
+                self.collator = Localization.getCollatorByString(u"C",
+                        collationCaseMode)
 
-        
+
+    def OnEndSession(self, evt):
+        # Loop over copy of set as original set is modified during loop
+        for wikiFrame in sets.ImmutableSet(self.mainFrameSet):
+            wikiFrame.exitWiki()
+
+
     def OnExit(self):
         self.getInsertionPluginManager().taskEnd()
 
@@ -408,6 +425,7 @@ class App(wx.App, MiscEventSourceMixin):
                 self.globalConfigDir, self.globalConfigSubDir, clAction)
 
         self.SetTopWindow(wikiFrame)
+        self.mainFrameSet.add(wikiFrame)
         ## _prof.stop()
 
         # set the icon of the app
@@ -420,6 +438,10 @@ class App(wx.App, MiscEventSourceMixin):
             wikiFrame.SetIcon(self.standardIcon)
         except:
             pass
+
+
+    def unregisterMainFrame(self, wikiFrame):
+        self.mainFrameSet.discard(wikiFrame)
 
 
     def createDefaultGlobalConfig(self, globalConfigLoc):

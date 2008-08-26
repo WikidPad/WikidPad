@@ -8,6 +8,11 @@ from pwiki.StringOps import mbcsEnc, mbcsDec, lineendToOs
 
 WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("Options", 1))
 
+
+OUTPUT_FORMAT_GIF = 0
+OUTPUT_FORMAT_PNG = 1
+
+
 def describeInsertionKeys(ver, app):
     """
     API function for "InsertionByKey" plugins
@@ -51,6 +56,15 @@ class PltHandler:
         self.extAppExe = self.app.getGlobalConfig().get("main",
                 "plugin_ploticus_exePath", "")
         
+        if self.app.getGlobalConfig().getint("main",
+                "plugin_ploticus_outputFormat", OUTPUT_FORMAT_GIF) == OUTPUT_FORMAT_GIF:
+            self.outputSuffix = ".gif"
+            self.outputParameter = "-gif"
+        else:
+            self.outputSuffix = ".png"
+            self.outputParameter = "-png"
+
+
     def taskEnd(self):
         """
         Called after export task ended and after the last call to
@@ -95,7 +109,8 @@ class PltHandler:
         tfs = exporter.getTempFileSet()
 
         pythonUrl = (exportType != "html_previewWX")
-        dstFullPath = tfs.createTempFile("", ".gif", relativeTo="")
+        
+        dstFullPath = tfs.createTempFile("", self.outputSuffix, relativeTo="")
         url = tfs.getRelativeUrl(None, dstFullPath, pythonUrl=pythonUrl)
         
         baseDir = os.path.dirname(exporter.getMainControl().getWikiConfigPath())
@@ -104,7 +119,7 @@ class PltHandler:
         srcfilepath = createTempFile(bstr, ".plt")
         try:
             cmdline = list2cmdline((self.extAppExe, "-dir", baseDir,
-                    srcfilepath, "-gif", "-o", dstFullPath))
+                    srcfilepath, self.outputParameter, "-o", dstFullPath))
 
             # Run external application
             childIn, childOut, childErr = os.popen3(cmdline, "b")
@@ -125,10 +140,10 @@ class PltHandler:
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
             # Workaround for internal HTML renderer
-            return (u'<img src="%s" border="0" align="bottom" alt="formula"/>'
+            return (u'<img src="%s" border="0" align="bottom" alt="formula" />'
                     u'&nbsp;') % url
         else:
-            return u'<img src="%s" border="0" align="bottom" alt="formula"/>' \
+            return u'<img src="%s" border="0" align="bottom" alt="formula" />' \
                     % url
 
 
@@ -138,7 +153,8 @@ class PltHandler:
         by the plugin. Currently not specified further.
         """
         return ()
-        
+
+
 
 def registerOptions(ver, app):
     """
@@ -149,6 +165,7 @@ def registerOptions(ver, app):
     """
     # Register option
     app.getDefaultGlobalConfigDict()[("main", "plugin_ploticus_exePath")] = u""
+    app.getDefaultGlobalConfigDict()[("main", "plugin_ploticus_outputFormat")] = u"0"
     # Register panel in options dialog
     app.addOptionsDlgPanel(PloticusOptionsPanel, u"  Ploticus")
 
@@ -162,10 +179,17 @@ class PloticusOptionsPanel(wx.Panel):
         """
         wx.Panel.__init__(self, parent)
         self.app = app
-        
+
         pt = self.app.getGlobalConfig().get("main", "plugin_ploticus_exePath", "")
-        
+        outputFormat = self.app.getGlobalConfig().getint("main", "plugin_ploticus_outputFormat", 0)
+        outputFormat = min(1, max(0, outputFormat))
+
         self.tfPath = wx.TextCtrl(self, -1, pt)
+
+        self.chOutputFormat = wx.Choice(self, -1)
+        self.chOutputFormat.Append(u"GIF")
+        self.chOutputFormat.Append(u"PNG")
+        self.chOutputFormat.SetSelection(outputFormat)
 
         mainsizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -174,7 +198,13 @@ class PloticusOptionsPanel(wx.Panel):
                 wx.ALL | wx.EXPAND, 5)
         inputsizer.Add(self.tfPath, 1, wx.ALL | wx.EXPAND, 5)
         mainsizer.Add(inputsizer, 0, wx.EXPAND)
-        
+
+        inputsizer = wx.BoxSizer(wx.HORIZONTAL)
+        inputsizer.Add(wx.StaticText(self, -1, _(u"Output format:")), 0,
+                wx.ALL | wx.EXPAND, 5)
+        inputsizer.Add(self.chOutputFormat, 1, wx.ALL | wx.EXPAND, 5)
+        mainsizer.Add(inputsizer, 0, wx.EXPAND)
+
         self.SetSizer(mainsizer)
         self.Fit()
 
@@ -210,5 +240,12 @@ class PloticusOptionsPanel(wx.Panel):
         pt = self.tfPath.GetValue()
         
         self.app.getGlobalConfig().set("main", "plugin_ploticus_exePath", pt)
+        
+        outputFormat = self.chOutputFormat.GetSelection()
+        outputFormat = min(1, max(0, outputFormat))
+        
+        self.app.getGlobalConfig().set("main", "plugin_ploticus_outputFormat",
+                unicode(outputFormat))
+
 
 

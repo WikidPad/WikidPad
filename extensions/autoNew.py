@@ -42,16 +42,17 @@ def describeMenuItems(wiki):
         - the filename of a bitmap (if file not found, no icon is used)
         - a tuple of filenames, first existing file is used
     """
-    global nextNumber
     
-    return ((autoNew, _(u"Create new page") + u"\tShift-Ctrl-N",
-            _(u"Create new page")),)
+    kb = wiki.getKeyBindings()
+    
+    return ((autoNewNumbered, _(u"Create new page") + u"\t" +
+            kb.Plugin_AutoNew_Numbered, _(u"Create new page")),)
 
 
 _testRE = re.compile(ur"^New[0-9]{6}$")
 
 
-def autoNew(wiki, evt):
+def autoNewNumbered(wiki, evt):
     wiki.saveAllDocPages()
     candidates = wiki.getWikiData().getWikiWordsStartingWith(u"New",
             includeAliases=True)

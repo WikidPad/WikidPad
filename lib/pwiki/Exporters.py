@@ -1,6 +1,6 @@
 # from Enum import Enumeration
-import sys, os, string, re, traceback, sets, locale, time
-from os.path import join, exists, splitext
+import sys, os, string, re, traceback, sets, locale, time, urllib
+from os.path import join, exists, splitext, abspath
 from cStringIO import StringIO
 import shutil
 ## from xml.sax.saxutils import escape
@@ -15,6 +15,7 @@ from wxHelper import XrcControls, GUI_ID
 from WikiExceptions import WikiWordNotFoundException, ExportException
 import WikiFormatting
 from StringOps import *
+from Utilities import StackedCopyDict
 from TempFileSet import TempFileSet
 
 from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
@@ -27,6 +28,98 @@ import OsAbstract
 import WikiFormatting
 import DocPages
 import PageAst
+
+
+
+
+class AbstractExporter:
+    def __init__(self, mainControl):
+        self.wikiDataManager = None
+        self.mainControl = mainControl
+
+    def getMainControl(self):
+        return self.mainControl    
+ 
+    def setWikiDataManager(self, wikiDataManager):
+        self.wikiDataManager = wikiDataManager
+
+    def setWikiDocument(self, wikiDocument):
+        self.wikiDataManager = wikiDocument
+
+
+    def getWikiDataManager(self):
+        return self.wikiDataManager
+
+    def getWikiDocument(self):
+        return self.wikiDataManager
+
+    def getExportTypes(self, guiparent):
+        """
+        Return sequence of tuples with the description of export types provided
+        by this object. A tuple has the form (<exp. type>,
+            <human readable description>, <panel for add. options or None>)
+        If panels for additional options must be created, they should use
+        guiparent as parent
+        """
+        raise NotImplementedError
+
+
+    def getExportDestinationWildcards(self, exportType):
+        """
+        If an export type is intended to go to a file, this function
+        returns a (possibly empty) sequence of tuples
+        (wildcard description, wildcard filepattern).
+        
+        If an export type goes to a directory, None is returned
+        """
+        raise NotImplementedError
+
+
+    def getAddOptVersion(self):
+        """
+        Returns the version of the additional options information returned
+        by getAddOpt(). If the return value is -1, the version info can't
+        be stored between application sessions.
+        
+        Otherwise, the addopt information can be stored between sessions
+        and can later handled back to the export method of the object
+        without previously showing the export dialog.
+        """
+        raise NotImplementedError
+
+
+    def getAddOpt(self, addoptpanel):
+        """
+        Reads additional options from panel addoptpanel.
+        If getAddOptVersion() > -1, the return value must be a sequence
+        of simple string, unicode and/or numeric objects. Otherwise, any object
+        can be returned (normally the addoptpanel itself).
+        Here, it returns a tuple with following items:
+            * bool (as integer) if pictures should be exported as links
+            * integer to control creation of table of contents
+                (0: No; 1: as tree; 2: as list)
+            * unistring: TOC title
+            * unistring: name of export subdir for volatile files
+                (= automatically generated files, e.g. formula images
+                from MimeTeX).
+        """
+        raise NotImplementedError
+
+
+    def export(self, wikiDataManager, wordList, exportType, exportDest,
+            compatFilenames, addOpt):
+        """
+        Run export operation.
+        
+        wikiDataManager -- WikiDataManager object
+        wordList -- Sequence of wiki words to export
+        exportType -- string tag to identify how to export
+        exportDest -- Path to destination directory or file to export to
+        compatFilenames -- Should the filenames be encoded to be lowest
+                           level compatible
+        addOpt -- additional options returned by getAddOpt()
+        """
+        raise NotImplementedError
 
 
 
@@ -77,16 +170,73 @@ class LinkCreatorForHtmlMultiPageExport:
                 u"%s.html" % relUnAlias))
 
 
+class SizeValue:
+    """
+    Represents a single size value, either a pixel or percent size.
+    """
+
+    UNIT_INVALID = 0
+    UNIT_PIXEL = 1
+    UNIT_FACTOR = 2
+    _UNIT_PERCENT = 3
+    
+    def __init__(self, valStr):
+        self.unit = SizeValue.UNIT_INVALID
+        self.value = 0.0
+        self.setValueStr(valStr)
+
+    def getUnit(self):
+        return self.unit
+    
+    def isValid(self):
+        return self.unit != SizeValue.UNIT_INVALID
+        
+    def getValue(self):
+        return self.value
+
+    def setValueStr(self, valStr):
+        """
+        Set members fo class        
+        """
+        valStr = valStr.strip()
+        if len(valStr) == 0:
+            self.unit = SizeValue.UNIT_INVALID
+            return False
+
+        if valStr[-1] == "%":
+            valStr = valStr[:-1]
+            self.unit = SizeValue._UNIT_PERCENT
+        else:
+            self.unit = SizeValue.UNIT_PIXEL
+
+        try:
+            val = float(valStr)
+            if val >= 0.0:
+                self.value = float(val)
+                if self.unit == SizeValue._UNIT_PERCENT:
+                    self.value /= 100.0
+                    self.unit = SizeValue.UNIT_FACTOR
+                
+                return True
+            else:
+                self.unit = SizeValue.UNIT_INVALID
+                return False
+
+        except ValueError:
+            self.unit = SizeValue.UNIT_INVALID
+            return False
+
+
+
 
 # TODO UTF-8 support for HTML? Other encodings?
 
-class HtmlXmlExporter:
+class HtmlXmlExporter(AbstractExporter):
     def __init__(self, mainControl):
         """
         mainControl -- Currently PersonalWikiFrame object
         """
-
-        self.mainControl = mainControl
+        AbstractExporter.__init__(self, mainControl)
         self.wikiData = None
         self.wordList = None
         self.exportDest = None
@@ -97,6 +247,7 @@ class HtmlXmlExporter:
                 
         self.exportType = None
         self.statestack = None
+        self.referencedStorageFiles = None
         
         # If true ignores newlines, only an empty line starts a new paragraph
         self.paragraphMode = False
@@ -114,11 +265,22 @@ class HtmlXmlExporter:
         
         # Flag to control how to push output into self.result
         self.outFlagEatPostBreak = False
+        self.outFlagPostBreakEaten = False
 
 
     def getMainControl(self):
         return self.mainControl        
-        
+
+    def setWikiDataManager(self, wikiDataManager):
+        self.wikiDataManager = wikiDataManager
+        if self.wikiDataManager is None:
+            self.wikiData = None
+        else:
+            self.wikiData = self.wikiDataManager.getWikiData()
+
+    def setWikiDocument(self, wikiDataManager):
+        self.setWikiDataManager(wikiDataManager)
+
     def getExportTypes(self, guiparent):
         """
         Return sequence of tuples with the description of export types provided
@@ -196,7 +358,15 @@ class HtmlXmlExporter:
         Reads additional options from panel addoptpanel.
         If getAddOptVersion() > -1, the return value must be a sequence
         of simple string, unicode and/or numeric objects. Otherwise, any object
-        can be returned (normally the addoptpanel itself)
+        can be returned (normally the addoptpanel itself).
+        Here, it returns a tuple with following items:
+            * bool (as integer) if pictures should be exported as links
+            * integer to control creation of table of contents
+                (0: No; 1: as tree; 2: as list)
+            * unistring: TOC title
+            * unistring: name of export subdir for volatile files
+                (= automatically generated files, e.g. formula images
+                from MimeTeX).
         """
         if addoptpanel is None:
             # Return default set in options
@@ -205,7 +375,9 @@ class HtmlXmlExporter:
             return ( boolToInt(config.getboolean("main",
                     "html_export_pics_as_links")),
                     config.getint("main", "export_table_of_contents"),
-                    config.get("main", "html_toc_title") )
+                    config.get("main", "html_toc_title"),
+                    u"volatile"
+                     )
         else:
             ctrls = XrcControls(addoptpanel)
 
@@ -213,7 +385,7 @@ class HtmlXmlExporter:
             tableOfContents = ctrls.chTableOfContents.GetSelection()
             tocTitle = ctrls.tfHtmlTocTitle.GetValue()
 
-            return (picsAsLinks, tableOfContents, tocTitle)
+            return (picsAsLinks, tableOfContents, tocTitle, u"volatile")
 
 
     def export(self, wikiDataManager, wordList, exportType, exportDest,
@@ -236,7 +408,15 @@ class HtmlXmlExporter:
         self.wikiDataManager = wikiDataManager
         self.wikiData = self.wikiDataManager.getWikiData()
 
-        self.wordList = wordList
+        self.wordList = []
+        for w in wordList:
+            if self.wikiDataManager.isDefinedWikiWord(w):
+                self.wordList.append(w)
+
+        if len(self.wordList) == 0:
+            return
+
+#         self.wordList = wordList
         self.exportType = exportType
         self.exportDest = exportDest
         self.addOpt = addOpt
@@ -246,11 +426,26 @@ class HtmlXmlExporter:
         else:
             self.convertFilename = removeBracketsFilename    # lambda s: mbcsEnc(s, "replace")[0]
             
+        self.referencedStorageFiles = None
+
         if exportType in (u"html_single", u"html_multi"):
+            volatileDir = self.addOpt[3]
+
+            volatileDir = join(self.exportDest, volatileDir)
+
+            # Check if volatileDir is really a subdirectory of exportDest
+            clearVolatile = testContainedInDir(self.exportDest, volatileDir)
+            if clearVolatile:
+                # Warning!!! rmtree() is very dangerous, don't make a mistake here!
+                shutil.rmtree(volatileDir, True)
+
             # We must prepare a temporary file set for HTML exports
             self.tempFileSet = TempFileSet()
-            self.tempFileSet.setPreferredPath(self.exportDest)
+            self.tempFileSet.setPreferredPath(volatileDir)
             self.tempFileSet.setPreferredRelativeTo(self.exportDest)
+
+            self.referencedStorageFiles = set()
+
 
         if exportType == u"html_single":
             browserFile = self._exportHtmlSingleFile()
@@ -266,6 +461,17 @@ class HtmlXmlExporter:
 
         wx.GetApp().getInsertionPluginManager().taskEnd()
 
+        if self.referencedStorageFiles is not None:
+            # Some files must be available
+            wikiPath = self.wikiDataManager.getWikiPath()
+            
+            if abspath(wikiPath) != abspath(self.exportDest):
+                # Now we have to copy the referenced files to new location
+                for rsf in self.referencedStorageFiles:
+                    OsAbstract.copyFile(join(wikiPath, rsf),
+                            join(self.exportDest, rsf))
+
+
         if self.mainControl.getConfig().getboolean(
                 "main", "start_browser_after_export") and browserFile:
             OsAbstract.startFile(self.mainControl, browserFile)
@@ -278,14 +484,6 @@ class HtmlXmlExporter:
 
         self.tempFileSet.reset()
         self.tempFileSet = None
-
-
-    def setWikiDataManager(self, wikiDataManager):
-        self.wikiDataManager = wikiDataManager
-        if self.wikiDataManager is None:
-            self.wikiData = None
-        else:
-            self.wikiData = self.wikiDataManager.getWikiData()
 
     def getTempFileSet(self):
         return self.tempFileSet
@@ -578,7 +776,7 @@ class HtmlXmlExporter:
         """
         return self._getGenericHtmlHeader(title) + u"    <body>\n"
 
-            
+
     def _getBodyTag(self, wikiPage):
         # Get application defaults from config
         config = self.mainControl.getConfig()
@@ -829,6 +1027,34 @@ class HtmlXmlExporter:
         return len(self.statestack) > 1
 
 
+    def _getImageDims(self, absUrl):
+        """
+        Return tuple (width, height) of image absUrl or (None, None) if it
+        couldn't be determined.
+        """
+        try:
+            if absUrl.startswith(u"file:"):
+                absLink = pathnameFromUrl(absUrl)
+                imgFile = file(absLink, "rb")
+            else:
+                imgFile = urllib.urlopen(absUrl)
+                imgData = imgFile.read()
+                imgFile.close()
+                imgFile = StringIO(imgData)
+
+            img = wx.EmptyImage(0, 0)
+            img.LoadStream(imgFile)
+            imgFile.close()
+            
+            if img.Ok():
+                return img.GetWidth(), img.GetHeight()
+
+            return None, None
+
+        except IOError:
+            return None, None
+
+
     def isHtmlSizeValue(sizeStr):
         """
         Test unistring sizestr if it is a valid HTML size info and returns
@@ -858,16 +1084,21 @@ class HtmlXmlExporter:
         if toAppend == u"":    # .strip()
             return
 
-        if self.outFlagEatPostBreak and toAppend.strip() == "<br />":
+        if self.outFlagEatPostBreak and toAppend.strip() == u"<br />":
             self.outFlagEatPostBreak = eatPostBreak
+            self.outFlagPostBreakEaten = True
             return
-        
+
         if eatPreBreak and len(self.result) > 0 and \
-                self.result[-1].strip() == "<br />":
+                self.result[-1].strip() == u"<br />" and \
+                not self.outFlagPostBreakEaten:
             self.result[-1] = toAppend
             self.outFlagEatPostBreak = eatPostBreak
             return
-            
+        
+        if self.outFlagPostBreakEaten:
+            self.outFlagPostBreakEaten = (toAppend.strip() == u"<br />")
+
         self.outFlagEatPostBreak = eatPostBreak
         self.result.append(toAppend)
         
@@ -878,10 +1109,11 @@ class HtmlXmlExporter:
         If last element in self.result is a <br />, delete it.
         Then append toAppend to self.result
         """
-        if len(self.result) > 0 and self.result[-1].strip() == "<br />":
-            self.result[-1] = toAppend
-        else:
-            self.result.append(toAppend)
+        self.outAppend(toAppend, eatPreBreak=True)
+#         if len(self.result) > 0 and self.result[-1].strip() == "<br />":
+#             self.result[-1] = toAppend
+#         else:
+#             self.result.append(toAppend)
 
 
     def outEatBreaks(self, toAppend, **kpars):
@@ -927,12 +1159,16 @@ class HtmlXmlExporter:
             self.outAppend(u"<tr>")
             for celltokens in row:
                 self.outAppend(u"<td>")
-#                 print "outTable2", repr(celltokens)
-                opts = self.optsStack[-1].copy()
-                opts["checkIndentation"] = False
-                self.optsStack.append(opts)
+
+#                 opts = self.optsStack[-1].copy()
+#                 opts["checkIndentation"] = False
+#                 self.optsStack.append(opts)
+#                 self.processTokens(content, celltokens)
+#                 del self.optsStack[-1]
+                self.optsStack.push()
+                self.optsStack["checkIndentation"] = False
                 self.processTokens(content, celltokens)
-                del self.optsStack[-1]
+                self.optsStack.pop()
                 
                 self.outAppend(u"</td>")
             self.outAppend(u"</tr>\n")
@@ -989,12 +1225,17 @@ class HtmlXmlExporter:
             # Inside an inserted page we don't want anchors to the
             # headings to avoid collisions with headings of surrounding
             # page.
-            opts = self.optsStack[-1].copy()
-            opts["anchorForHeading"] = False
-            self.optsStack.append(opts)
-            self.processTokens(docpage.getLiveText(), tokens)
-            del self.optsStack[-1]
+#             opts = self.optsStack[-1].copy()
+#             opts["anchorForHeading"] = False
+#             self.optsStack.append(opts)
+#             self.processTokens(docpage.getLiveText(), tokens)
+#             del self.optsStack[-1]
             
+            self.optsStack.push()
+            self.optsStack["anchorForHeading"] = False
+            self.processTokens(docpage.getLiveText(), tokens)
+            self.optsStack.pop()
+
             del self.insertionVisitStack[-1]
 
             return
@@ -1285,7 +1526,10 @@ class HtmlXmlExporter:
                             link)
 
                 if astNode.titleTokens is not None:
+                    self.optsStack.push()
+                    self.optsStack["inWwOrUrlTitle"] = True
                     self.processTokens(fullContent, astNode.titleTokens)
+                    self.optsStack.pop()
                 else:
                     self.outAppend(escapeHtml(word))                        
                 self.outAppend(u'</a></span>')
@@ -1313,13 +1557,19 @@ class HtmlXmlExporter:
         # content = content.replace(u"\t", u" " * 4)  # TODO Configurable
         self.result = []
         self.statestack = [("normalindent", 0)]
-        self.optsStack = [{}]
+#         self.optsStack = [{}]
+        self.optsStack = StackedCopyDict()
         self.insertionVisitStack = []
+        self.outFlagEatPostBreak = False
+        self.outFlagPostBreakEaten = False
+
         # deepness of numeric bullets
         self.numericdeepness = 0
         self.preMode = 0  # Count how many <pre> tags are open
         self.consecEmptyLineCount = 0
         self.paragraphMode = formatDetails.paragraphMode
+        
+
 
         # Get property pattern
         if self.asHtmlPreview:
@@ -1405,7 +1655,7 @@ class HtmlXmlExporter:
                 # We have a not yet processed indentation (lineIndentBuffer > -1)
                 # and are not in <pre> mode and the next token does neither
                 # invalidate the indent buffer (FormatTypes.Newline
-                # and Indetation) nor  processes indentation itself
+                # and Indentation) nor processes indentation itself
                 # (the other token types above)
                 # -> Adjust statestack
 
@@ -1439,90 +1689,11 @@ class HtmlXmlExporter:
 
                 self.outAppend(escapeHtml(text))
 
-
-#                 if self.optsStack[-1].get("checkIndentation", True):
-#                     else:
-#                         if line.strip() == u"":
-#                             # Handle empty line
-#                             if not self.preMode:
-#                                 self.outAppend(u"<br />\n")
-#                             else:
-#                                 self.outAppend(u"\n")
-#                             continue
-#                             
-#                         if not self.preMode:
-#                             line, ind = splitIndent(line)
-#     
-#                             while stacklen < len(self.statestack) and \
-#                                     lineIndentBuffer < self.statestack[-1][1]:
-#                                 # Current indentation is less than previous (stored
-#                                 # on stack) so close open <ul> and <ol>
-#                                 self.popState()
-#     
-#                             if self.statestack[-1][0] == "normalindent" and \
-#                                     lineIndentBuffer > self.statestack[-1][1]:
-#                                 # More indentation than before -> open new <ul> level
-#                                 self.outIndentation("normalindent")
-# 
-#                                 self.statestack.append(("normalindent", lineIndentBuffer))
-#                                 self.outAppend(escapeHtml(line))
-#                                 self.outAppend(u"<br />\n")
-#     
-#                             elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
-#                                 self.outAppend(escapeHtml(line))
-#                                 self.outAppend(u"<br />\n")
-#                         else:
-#                             self.outAppend(escapeHtml(line))
-#                             self.outAppend(u"\n")
-#                                 
-#                         # Handle last line (which is either last line of content
-#                         # or has some different token(s) between raw text and
-#                         # newline
-# 
-#                         # Some tokens have own indentation handling
-#                         # and last line is empty string in this case,
-#                         # do not handle last line if such token follows
-#                         if not nextstyleno in \
-#                                 (WikiFormatting.FormatTypes.Numeric,
-#                                 WikiFormatting.FormatTypes.Bullet,
-#                                 WikiFormatting.FormatTypes.Suppress,   # TODO Suppress?
-#                                 WikiFormatting.FormatTypes.Table,
-#                                 WikiFormatting.FormatTypes.PreBlock):
-#     
-#                             line = lines[-1]
-#                             if not self.preMode:
-#                                 line, ind = splitIndent(line)
-#                                 
-#                                 while stacklen < len(self.statestack) and \
-#                                         ind < self.statestack[-1][1]:
-#                                     # Current indentation is less than previous (stored
-#                                     # on stack) so close open <ul> and <ol>
-#                                     self.popState()
-#                                         
-#                                 if self.statestack[-1][0] == "normalindent" and \
-#                                         ind > self.statestack[-1][1]:
-#                                     # More indentation than before -> open new <ul> level
-#                                     self.outIndentation("normalindent")
-#     #                                 self.outEatBreaks(u"<ul>")
-#                                     self.statestack.append(("normalindent", ind))
-#                                     self.outAppend(escapeHtml(line))
-#                                 elif self.statestack[-1][0] in ("normalindent", "ol", "ul"):
-#                                     self.outAppend(escapeHtml(line))
-#                             else:
-#                                 self.outAppend(escapeHtml(line))
-# 
-#     
-#                     continue    # Next token
-#                 else:     # Not checkIndentation
-#                     # This is really simple
-#                     self.outAppend(escapeHtml(text))
-
-            
             # if a known token RE matches:
             
             elif styleno == WikiFormatting.FormatTypes.Indentation:
                 if not self.preMode and \
-                        self.optsStack[-1].get("checkIndentation", True):
+                        self.optsStack.get("checkIndentation", True):
                     lineIndentBuffer = measureIndent(tok.text)
                 else:
                     self.outAppend(tok.text)
@@ -1558,7 +1729,7 @@ class HtmlXmlExporter:
             elif WikiFormatting.getHeadingLevel(styleno):
                 headLevel = WikiFormatting.getHeadingLevel(styleno)
 
-                if self.optsStack[-1].get("anchorForHeading", True):
+                if self.optsStack.get("anchorForHeading", True):
                     if self.wordAnchor:
                         anchor = self.wordAnchor + (u"#.h%i" % tok.start)
                     else:
@@ -1579,9 +1750,9 @@ class HtmlXmlExporter:
             elif styleno == WikiFormatting.FormatTypes.PreBlock:
                 self.resetConsecEmptyLineCount()
                 lineIndentBuffer = -1
-
-                self.outEatBreaks(u"<pre>%s</pre>" %
-                        escapeHtmlNoBreaks(tok.grpdict["preContent"]))
+                self.outAppend(u"<pre>%s</pre>" %
+                        escapeHtmlNoBreaks(tok.grpdict["preContent"]), True,
+                        not self.asIntHtmlPreview)
             elif styleno == WikiFormatting.FormatTypes.Anchor:
                 if self.wordAnchor:
                     anchor = self.wordAnchor + u"#" + tok.grpdict["anchorValue"]
@@ -1656,20 +1827,40 @@ class HtmlXmlExporter:
             elif styleno == WikiFormatting.FormatTypes.Url:
                 link = tok.node.url
                 if link.startswith(u"rel://"):
+                    absUrl = self.mainControl.makeRelUrlAbsolute(link)
+ 
                     # Relative URL
                     if self.asHtmlPreview:
                         # If preview, make absolute
-                        link = self.mainControl.makeRelUrlAbsolute(link)
+                        link = absUrl
                     else:
+                        if self.referencedStorageFiles is not None:
+                            # Get absolute path to the file
+                            absLink = pathnameFromUrl(absUrl)
+                            # and to the file storage
+                            stPath = self.wikiDataManager.getFileStorage().getStoragePath()
+                            
+                            isCont = testContainedInDir(stPath, absLink)
+                            if isCont:
+                                # File is in file storage -> add to
+                                # referenced storage files                            
+                                self.referencedStorageFiles.add(
+                                        relativeFilePath(
+                                        self.wikiDataManager.getWikiPath(),
+                                        absLink))
+
                         # If export, reformat a bit
                         link = link[6:]
+                else:
+                    absUrl = link
+
 
                 if self.asXml:   # TODO XML
                     self.outAppend(u'<link type="href">%s</link>' % 
                             escapeHtml(link))
                 else:
                     lowerLink = link.lower()
-                    
+
                     # urlAsImage = False
                     if tok.node.containsModeInAppendix("l"):
                         urlAsImage = False
@@ -1683,27 +1874,57 @@ class HtmlXmlExporter:
                         urlAsImage = False
                     elif lowerLink.endswith(".jpg") or \
                             lowerLink.endswith(".gif") or \
-                            lowerLink.endswith(".png"):
+                            lowerLink.endswith(".png") or \
+                            lowerLink.endswith(".bmp"):
                         urlAsImage = True
                     else:
                         urlAsImage = False
-                        
-                    
+
+
                     if urlAsImage:
                         # Ignore title, use image
                         sizeInTag = u""
 
+                        # Size info for direct setting in HTML code
                         sizeInfo = tok.node.getInfoForMode("s")
+                        # Relative size info which modifies real image size
+                        relSizeInfo = tok.node.getInfoForMode("r")
+
                         if sizeInfo is not None:
                             try:
-                                width, height = sizeInfo.split(u"x")
-                                if self.isHtmlSizeValue(width) and \
-                                        self.isHtmlSizeValue(height):
+                                widthStr, heightStr = sizeInfo.split(u"x")
+                                if self.isHtmlSizeValue(widthStr) and \
+                                        self.isHtmlSizeValue(heightStr):
                                     sizeInTag = ' width="%s" height="%s"' % \
-                                            (width, height)
+                                            (widthStr, heightStr)
                             except:
                                 # something does not match syntax requirements
                                 pass
+                        
+                        elif relSizeInfo is not None:
+                            params = relSizeInfo.split(u"x")
+                            if len(params) == 1:
+                                if params[0] == u"":
+                                    widthStr, heightStr = "100%", "100%"
+                                else:
+                                    widthStr, heightStr = params[0], params[0]
+                            else:
+                                widthStr, heightStr = params[0], params[1]
+
+                            width = SizeValue(widthStr)
+                            height = SizeValue(heightStr)
+
+                            if width.isValid() and height.isValid() and \
+                                    (width.getUnit() == height.getUnit()):
+                                imgWidth, imgHeight = self._getImageDims(absUrl)
+                                if imgWidth is not None:
+                                    # TODO !!!
+                                    if width.getUnit() == width.UNIT_FACTOR:
+                                        imgWidth = int(imgWidth * width.getValue())
+                                        imgHeight = int(imgHeight * height.getValue())
+
+                                    sizeInTag = ' width="%s" height="%s"' % \
+                                            (imgWidth, imgHeight)
 
                         alignInTag = u""
                         alignInfo = tok.node.getInfoForMode("a")
@@ -1727,19 +1948,23 @@ class HtmlXmlExporter:
                             # At least under Windows, wxWidgets has another
                             # opinion how a local file URL should look like
                             # than Python
-                            p = urllib.url2pathname(link)  # TODO Relative URLs
+#                             p = urllib.url2pathname(link)  # TODO Relative URLs
+                            p = pathnameFromUrl(link)  # TODO Relative URLs
                             link = wx.FileSystem.FileNameToURL(p)
                         self.outAppend(u'<img src="%s" alt="" border="0"%s%s />' % 
                                 (link, sizeInTag, alignInTag))
                     else:
-#                         self.outAppend(u'<a href="%s">%s</a>' %
-#                                 (escapeHtml(link), escapeHtml(link)))
-                        self.outAppend(u'<span class="url-link"><a href="%s">' % link)
-                        if tok.node.titleTokens is not None:
-                            self.processTokens(content, tok.node.titleTokens)
-                        else:
-                            self.outAppend(escapeHtml(link))                        
-                        self.outAppend(u'</a></span>')
+                        if not self.optsStack.get("inWwOrUrlTitle", False):
+                            # If we would be in a title, only image urls are allowed
+                            self.outAppend(u'<span class="url-link"><a href="%s">' % link)
+                            if tok.node.titleTokens is not None:
+                                self.optsStack.push()
+                                self.optsStack["inWwOrUrlTitle"] = True
+                                self.processTokens(content, tok.node.titleTokens)
+                                self.optsStack.pop()
+                            else:
+                                self.outAppend(escapeHtml(link))                        
+                            self.outAppend(u'</a></span>')
 
             elif styleno == WikiFormatting.FormatTypes.WikiWord:
                 self._processWikiWord(tok.text, tok.node, content)
@@ -1774,7 +1999,8 @@ class HtmlXmlExporter:
                     self.statestack.append(("ol", ind))
                     self.numericdeepness += 1
                     
-                self.eatPreBreak(u"<li />")
+                self.outAppend(u"<li />", not self.asIntHtmlPreview)
+#                 self.eatPreBreak()
 
             elif styleno == WikiFormatting.FormatTypes.Bullet:
                 # Unnumbered bullet
@@ -1785,7 +2011,7 @@ class HtmlXmlExporter:
 
                 while ind < self.statestack[-1][1]:
                     self.popState()
-                    
+
                 while ind == self.statestack[-1][1] and \
                         self.statestack[-1][0] != "ul" and \
                         self.hasStates():
@@ -1797,7 +2023,8 @@ class HtmlXmlExporter:
                     self.outIndentation("ul")
                     self.statestack.append(("ul", ind))
 
-                self.eatPreBreak(u"<li />")
+                self.outAppend(u"<li />", not self.asIntHtmlPreview)
+#                 self.eatPreBreak(u"<li />")
             elif styleno == WikiFormatting.FormatTypes.SuppressHighlight:
                 ind = splitIndent(tok.grpdict["suppressIndent"])[1]
 
@@ -1845,17 +2072,19 @@ class HtmlXmlExporter:
 
 
 
-class TextExporter:
+class TextExporter(AbstractExporter):
     """
     Exports raw text
     """
     def __init__(self, mainControl):
-        self.mainControl = mainControl
-        self.wikiDataManager = None
+        AbstractExporter.__init__(self, mainControl)
         self.wordList = None
         self.exportDest = None
         self.convertFilename = removeBracketsFilename # lambda s: s   
 
+
+    def getWikiDataManager(self):
+        return self.wikiDataManager
 
     def getExportTypes(self, guiparent):
         """
@@ -2020,13 +2249,12 @@ class MultiPageTextAddOptPanel(wx.Panel):
 
 
 
-class MultiPageTextExporter:
+class MultiPageTextExporter(AbstractExporter):
     """
     Exports in multipage text format
     """
     def __init__(self, mainControl):
-        self.mainControl = mainControl
-        self.wikiDataManager = None
+        AbstractExporter.__init__(self, mainControl)
         self.wordList = None
         self.exportDest = None
         self.addOpt = None

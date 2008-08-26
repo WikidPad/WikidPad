@@ -22,6 +22,7 @@ The mentioned applications are not part of the WikidPad release itself, you must
     Gnuplot| http://www.gnuplot.info/download.html | http://www.gnuplot.info/documentation.html
 >>
 
+
 A helpful tutorial for creating directed graphs with GraphViz' dot utility is http://kabru.eecs.umich.edu/bin/view/TWiki/HowtoDirectedGraphs.
 
 You can download all or only some of them as you like.
@@ -59,7 +60,7 @@ The programs are called using [Insertions]. The keys for the insertions are:
 
 The values must follow the syntax of the respective program, please see the documentation of the applications for details.
 
-The values should be quoted (enclosed by quotation symbols) if they shall contain special characters or newlines. A quotation symbol is an arbitrary number of one of the quotation characters ", ', / or \ (double quotation mark, single quotation mark, slash or backslash). The starting and ending symbols must be the same. Examples for quotation symbols are:
+The values should be quoted (enclosed by quotation symbols) if they contain special characters or newlines. A quotation symbol is an arbitrary number of one of the quotation characters ", ', / or \ (double quotation mark, single quotation mark, slash or backslash). The starting and ending symbols must be the same. Examples for quotation symbols are:
 
 "
 '''
@@ -67,12 +68,12 @@ The values should be quoted (enclosed by quotation symbols) if they shall contai
 /////
 \\
 
-When exporting HTML, the rendered image files are put in the same directory where the HTML files are.
+When exporting HTML, the rendered image files are put in a subdirectory "volatile" in the same directory where the HTML files are. If "volatile" is already present in the destination directory, *all of its contents (including subfolders) are deleted* to avoid filling it up with old versions of the files!
 
 If the GraphViz or Ploticus applications return errors or warnings, you see these instead of the rendered images. To suppress warnings/errors use the appendix "noerror" after the main value of the insertion.
 
 
-+++ Example
++++ Examples
 
 If you have downloaded and installed all applications you can see here how the graphics look like:
 
@@ -132,7 +133,5 @@ If you want to create your own plugin to handle insertions, look in the "extensi
 
 
 
-[alias: Ploticus]
-[alias: MimeTeX]
-[alias: GraphViz]
+[alias: Ploticus; MimeTeX; GraphViz; Gnuplot]
 [camelCaseWordsEnabled: false]

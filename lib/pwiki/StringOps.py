@@ -11,7 +11,7 @@ import os, threading, traceback
 
 from struct import pack, unpack
 
-import difflib, codecs, os.path, random, base64
+import difflib, codecs, os.path, random, base64, locale
 
 # import urllib_red as urllib
 import urllib, urlparse, cgi
@@ -71,7 +71,11 @@ if isOSX():
 elif isLinux():
     # Could be wrong encoding
 #     LINUX_ENCODING = "latin-1"
-    LINUX_ENCODING = "utf8"
+#     LINUX_ENCODING = "utf8"
+    LINUX_ENCODING = locale.getpreferredencoding()
+
+    if not LINUX_ENCODING:
+        LINUX_ENCODING = "utf8"
 
     mbcsEnc = codecs.getencoder(LINUX_ENCODING)
     _mbcsDec = codecs.getdecoder(LINUX_ENCODING)
@@ -110,11 +114,15 @@ if os.path.supports_unicode_filenames:
     pathDec = dummy
 else:
     def pathEnc(s):
+        if s is None:
+            return None
         if isinstance(s, str):
             return s
         return mbcsEnc(s, "replace")[0]
 
     def pathDec(s):
+        if s is None:
+            return None
         return mbcsDec(s, "replace")[0]
 
 
@@ -509,14 +517,18 @@ def splitpath(path):
     return result
 
 
-def relativeFilePath(location, toFilePath):
+def getRelativeFilePathAndTestContained(location, toFilePath):
     """
     Returns a relative (if possible) path to address the file
-    toFilePath if you are in directory location.
+    toFilePath if you are in directory location as first tuple item.
+
+
+    Function returns None as first tuple item if an absolute path is needed!
+    
+    Tests if toFilePath is a file or dir contained in location and returns
+        truth value in second tuple item
+
     Both parameters should be normalized with os.path.abspath
-
-    Function returns None if an absolute path is needed!
-
     location -- Directory where you are
     toFilePath -- absolute path to file you want to reach
     """
@@ -541,15 +553,44 @@ def relativeFilePath(location, toFilePath):
 
     if len(locParts) == locLen:
         # Nothing matches at all, absolute path needed
-        return None
-
+        return None, False
+        
+    isContained = len(fileParts) > 0
     if len(locParts) > 0:
         # go back some steps
         result += [".."] * len(locParts)
+        isContained = False
 
     result += fileParts
+    
+    if len(result) == 0:
+        return u"", False
+    else:
+        return os.path.join(*result), isContained
 
-    return os.path.join(*result)
+
+
+def relativeFilePath(location, toFilePath):
+    """
+    Returns a relative (if possible) path to address the file
+    toFilePath if you are in directory location.
+    Both parameters should be normalized with os.path.abspath
+
+    Function returns None if an absolute path is needed!
+
+    location -- Directory where you are
+    toFilePath -- absolute path to file you want to reach
+    """
+    return getRelativeFilePathAndTestContained(location, toFilePath)[0]
+
+
+def testContainedInDir(location, toFilePath):
+    """
+    Tests if toFilePath is a file or dir contained in location.
+    Both parameters should be normalized with os.path.abspath
+    """
+    return getRelativeFilePathAndTestContained(location, toFilePath)[1]
+
 
 
 
@@ -946,6 +987,10 @@ def pathWordAndAnchorToWikiUrl(filePath, wikiWordToOpen, anchorToOpen):
     return "".join(result)
     
 
+def joinRegexes(patternList):
+    return u"(?:(?:" + u")|(?:".join(patternList) + u"))"
+
+
 
 class SnippetCollector:
     """
@@ -974,6 +1019,25 @@ class SnippetCollector:
     
     def __len__(self):
         return self.length
+
+
+
+class Conjunction:
+    def __init__(self, firstpart, otherpart):
+        self.firstpart = firstpart
+        self.otherpart = otherpart
+        self.first = True
+
+    def __call__(self):
+        if self.first:
+            self.first = False
+            return self.firstpart
+        else:
+            return self.otherpart
+
+    def __repr__(self):
+        return "<Conjunction(%s, %s) %s>" % (self.firstpart, self.otherpart,
+                self.first)
 
 
 

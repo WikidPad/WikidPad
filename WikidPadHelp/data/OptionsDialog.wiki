@@ -340,6 +340,9 @@ It may happen that the mechanism stores expanded nodes which don't exist any lon
 
 By setting the option to "Not at all" then closing the options dialog, then setting the option back to what you had before, all node state information is cleared. The info of the main tree (not the "Views" tree) is also cleared when setting a new root.
 
+*Force ScratchPad visibility in tree*
+Shows the special page ScratchPad always as child of the tree root, even if it is not really a child.
+
 *Title prefix*
 Control the heading level of the initial main title of new pages and fill between one and four '+' in this field. Default is "++".
 

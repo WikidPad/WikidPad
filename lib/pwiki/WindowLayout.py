@@ -709,7 +709,11 @@ class LayeredControlPanel(wx.Panel, LayeredControlPresenter):
 
 
     def setSubControl(self, scName, sc):
-        # TODO handle case if existing sc is replaced
+        oldSc = self.getSubControl(scName)
+        if oldSc is not None:
+            self.GetSizer().Detach(oldSc)
+            oldSc.close()
+
         LayeredControlPresenter.setSubControl(self, scName, sc)
         self.GetSizer().Add(sc)
 

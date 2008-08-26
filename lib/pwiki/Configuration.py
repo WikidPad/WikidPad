@@ -700,6 +700,11 @@ WIKIDEFAULTS = {
     ("main", "tree_expandedNodes_descriptorPathes_main"): u"", # ";"-delimited sequence of node descriptor pathes of expanded nodes in tree.
             # Descriptors of a path are delimited by ','. This config. entry applies to main tree
     ("main", "tree_expandedNodes_descriptorPathes_views"): u"", # Same as above but applies to "Views" tree if present
+
+    ("main", "tree_force_scratchpad_visibility"): "True",  # Always show scratchpad below wiki root even
+            # if it is not a child of it
+
+
     ("main", "further_wiki_words"): u"", # Semicolon separated list of further wiki words to show in addit. tabs
             # after last wiki word
     ("main", "first_wiki_word"): "", # Start with a special wiki word (If empty, use last word)

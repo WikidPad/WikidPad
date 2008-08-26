@@ -3,10 +3,11 @@ Handles the storage of external files (e.g. images, but also other
 data or programs)
 """
 
-import os, os.path, traceback, glob, shutil, sets
+import os, os.path, traceback, glob, sets
 
 import pwiki.srePersistent as _re
 from pwiki.StringOps import createRandomString, pathEnc
+from pwiki.OsAbstract import copyFile
 
 
 class FSException(Exception):
@@ -60,6 +61,9 @@ class FileStorage:
 
     def setModDateIsEnough(self, val):
         self.modDateIsEnough = val
+    
+    def getStoragePath(self):
+        return self.storagePath
 
 
     def _storageExists(self):
@@ -89,7 +93,7 @@ class FileStorage:
     def _preTestIdentity(self, destpath, srcfname, srcstat):
         """
         Preliminary test if the destination file denoted by destpath and
-        the source describe by its name srcfnam without path and
+        the source described by its name srcfnam without path and
         its stats COULD BE identical.
         If the function returns False, they are definitely different,
         if it returns True, further tests are necessary.
@@ -301,9 +305,9 @@ class FileStorage:
     def copyFile(unself, srcPath, dstPath):
         """
         Copy file from srcPath to dstPath. dstPath my be overwritten if
-        existing already. This just calls shutil.copy2().
+        existing already.
         """
-        shutil.copy2(srcPath, dstPath)
+        copyFile(srcPath, dstPath)
 
 
 #     def findIdenticalFile(self, srcPath):

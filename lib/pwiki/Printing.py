@@ -40,30 +40,6 @@ class PrintMainDialog(wx.Dialog):
         self.ctrls.tfWikiPageSeparator.SetValue(
                 self.pWiki.configuration.get("main",
                 "print_plaintext_wpseparator"))
-#         # Necessary to avoid a crash        
-#         emptyPanel = wxPanel(self.ctrls.additOptions)
-#         emptyPanel.Fit()
-#         
-#         exporterList = [] # List of tuples (<exporter object>, <export tag>,
-#                           # <readable description>, <additional options panel>)
-#         
-#         for ob in Exporters.describeExporters():   # TODO search plugins
-#             for tp in ob.getExportTypes(self.ctrls.additOptions):
-#                 panel = tp[2]
-#                 if panel is None:
-#                     panel = emptyPanel
-#                 else:
-#                     panel.Fit()
-# 
-#                 exporterList.append((ob, tp[0], tp[1], panel))
-#         
-#         self.ctrls.additOptions.Fit()
-#         mins = self.ctrls.additOptions.GetMinSize()
-#         
-#         self.ctrls.additOptions.SetMinSize(wxSize(mins.width+10, mins.height+10))
-#         self.Fit()
-#         
-#         self.exporterList = exporterList
 
         self.ctrls.btnPrint.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
@@ -74,37 +50,13 @@ class PrintMainDialog(wx.Dialog):
         # Fixes focus bug under Linux
         self.SetFocus()
         
-#         for e in self.exporterList:
-#             e[3].Show(False)
-#             e[3].Enable(False)
-#             self.ctrls.chExportTo.Append(e[2])
-#             
-#         # Enable first addit. options panel
-#         self.exporterList[0][3].Enable(True)
-#         self.exporterList[0][3].Show(True)
-#         self.ctrls.chExportTo.SetSelection(0)       
-        
-#         wx.EVT_CHOICE(self, XRCID("chExportTo"), self.OnExportTo)
         wx.EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
 
         wx.EVT_BUTTON(self, GUI_ID.btnPreview, self.OnPreview)
         wx.EVT_BUTTON(self, GUI_ID.btnPageSetup, self.OnPageSetup)
         wx.EVT_BUTTON(self, GUI_ID.btnChoosePlainTextFont,
                 self.OnChoosePlainTextFont)
-#         wx.EVT_BUTTON(self, GUI_ID.btnPrintSetup, self.OnPrintSetup)
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnPrint)
-
-
-#     def OnExportTo(self, evt):
-#         for e in self.exporterList:
-#             e[3].Show(False)
-#             e[3].Enable(False)
-#             
-#         # Enable appropriate addit. options panel
-#         self.exporterList[evt.GetSelection()][3].Enable(True)
-#         self.exporterList[evt.GetSelection()][3].Show(True)
-# 
-#         evt.Skip()
 
 
     def _transferOptionsToPrinter(self):
@@ -117,19 +69,11 @@ class PrintMainDialog(wx.Dialog):
 
 
     def OnPreview(self, evt):
-#         if self.plainTextFontDesc is not None:        
-#             self.pWiki.printer.setFontDesc(self.plainTextFontDesc)
         self._transferOptionsToPrinter()
         self.printer.doPreview()
 
 
-#     def OnPrintSetup(self, evt):
-#         self.pWiki.printer.doPrintSetup(self.pWiki)
-
-
     def OnPrint(self, evt):
-#         if self.plainTextFontDesc is not None:        
-#             self.pWiki.printer.setFontDesc(self.plainTextFontDesc)
         self._transferOptionsToPrinter()
         if self.printer.doPrint():
             self.EndModal(wx.ID_OK)
@@ -175,22 +119,34 @@ class PrintMainDialog(wx.Dialog):
 class Printer:
     def __init__(self, pWiki):
         self.pWiki = pWiki
-        self.printData = wx.PrintData()
-        self.psddata = wx.PageSetupDialogData(self.printData)
+        # self.printData and self.psddata are only filled with values on demand
+        # this avoids error messages if no printer is installed
+        self.printData = None
+        self.psddata = None
+
         self.selectionSet = 0
         self.listPagesOperation = ListWikiPagesOperation()
 
         self.plainTextFontDesc = self.pWiki.configuration.get(
                 "main", "print_plaintext_font")
-        try:
-            margintext = self.pWiki.configuration.get(
-                    "main", "print_margins")
-            margins = map(int, margintext.split(u","))
-        except:
-            margins = [0, 0, 0, 0]  # TODO Perhaps error message
-            
-        self.psddata.SetMarginTopLeft(wx.Point(margins[0], margins[1]))
-        self.psddata.SetMarginBottomRight(wx.Point(margins[2], margins[3]))
+        
+    def _ensurePrintData(self):
+        """
+        Fill fields with PrintData and PageSetupDialogData if not yet done.
+        """
+        if self.printData is None:
+            self.printData = wx.PrintData()
+            self.psddata = wx.PageSetupDialogData(self.printData)
+
+            try:
+                margintext = self.pWiki.configuration.get(
+                        "main", "print_margins")
+                margins = map(int, margintext.split(u","))
+            except:
+                margins = [0, 0, 0, 0]  # TODO Perhaps error message
+                
+            self.psddata.SetMarginTopLeft(wx.Point(margins[0], margins[1]))
+            self.psddata.SetMarginBottomRight(wx.Point(margins[2], margins[3]))
         
 
     def setStdOptions(self, selectionSet, plainTextFontDesc, wpSeparator):
@@ -226,37 +182,22 @@ class Printer:
             item = Sar.ListItemWithSubtreeWikiPagesNode(lpOp, [root], -1)
             lpOp.setSearchOpTree(item)
             lpOp.ordering = "asroottree"  # Slow, but more intuitive
-#             wordList = self.pWiki.getWikiData().getAllSubWords([root])
         elif selset == 2:
             # whole wiki
             item = Sar.AllWikiPagesNode(lpOp)
             lpOp.setSearchOpTree(item)
             lpOp.ordering = "asroottree"  # Slow, but more intuitive
-#             wordList = self.pWiki.getWikiData().getAllDefinedWikiPageNames()
         else:
             # custom list
             lpOp = self.listPagesOperation
         
         wordList = self.pWiki.getWikiDocument().searchWiki(lpOp, True)
  
-#         if selset == 0:
-#             # single page
-#             wordList = [root]
-#         elif selset == 1:
-#             # subtree
-#             wordList = self.pWiki.getWikiData().getAllSubWords([root])
-#         elif selset == 2:
-#             # whole wiki
-#             wordList = self.pWiki.getWikiData().getAllDefinedWikiPageNames()
-#         else:
-#             # custom list
-#             wordList = self.pWiki.getWikiDocument().searchWiki(
-#                     self.listPagesOperation, True)
-            
         return wordList
 
 
     def showPrintMainDialog(self):
+        self._ensurePrintData()
         dlg = PrintMainDialog(self.pWiki, -1)
         dlg.CenterOnParent(wx.BOTH)
 
@@ -313,12 +254,6 @@ class PlainTextPrint:
             ("plain_text", u'Plain text', None),
             )
             
-#     def setFontDesc(self, fontDesc):
-#         self.fontDesc = fontDesc     
-#                
-#     def getFontDesc(self):
-#         return self.fontDesc
-            
     def _buildText(self):
         def getTextFromWord(word):
             return self.wikiDocument.getWikiPage(word).getLiveText()
@@ -335,7 +270,6 @@ class PlainTextPrint:
         except:
             separator = u"\n\n\n\n"   # TODO Error message
         
-#         print "_buildText", repr(separator.join(contents))        
         return separator.join(contents)  # TODO Make configurable
             
             
@@ -442,13 +376,7 @@ class PlainTextPrintout(wx.Printout):
 
         return (xr, yr)
 
-#     def OnBeginDocument(self, start, end):
-#         wxPrintout.base_OnBeginDocument(self, start, end)
-#         print "OnBeginDocument"
-#         return True
-
     def OnBeginPrinting(self):
-#         print "OnBeginPrinting"
         self.base_OnBeginPrinting()
         self.mm2logUnitsFactor = None
         return True
@@ -471,12 +399,6 @@ class PlainTextPrintout(wx.Printout):
 
         dc = self.GetDC()
 
-#         print "MapMode1", dc.GetMapMode(), wxMM_TWIPS, wxMM_TEXT, repr(dc.GetSizeMM())
-#         dc.SetMapMode(wxMM_TWIPS)
-#         print "MapMode2", repr(dc.GetSizeMM())
-        
-#         print "OnPrintPage size", repr(dc.GetSizeMM()), repr(self.GetPageSizeMM())
-        
         if self.mm2logUnitsFactor is None:
             self._calcMmScaling(dc)
 
@@ -503,8 +425,6 @@ class PlainTextPrintout(wx.Printout):
                     "Courier New")
         else:
             font = wx.FontFromNativeInfoString(fontDesc)
-#             font = wxFont()
-#             font.SetNativeFontInfo(fontDesc)
 
         dc.SetFont(font)
 
@@ -534,40 +454,12 @@ class PlainTextPrintout(wx.Printout):
         posxLu, posyLu = printRectLu[0:2]
         prAreaWidth = printRectLu[2] - printRectLu[0]
 
-
-#         def flushPage():
-#             if currLine != u"":
-#                 # Flush line first
-#                 if pageNum != -1:
-#                     dc.DrawText(currLine, posxLu, posyLu)
-#                 currLine = u""
-#                 
-#             pagepos += 1
-#             posyLu = printRectLu[1]
-#             self.pageCharStartIndex.append(textpos)
-# 
-# 
-#         def flushLine():
-#             # Draw current row, start new one
-#             if pageNum != -1:
-#                 dc.DrawText(currLine, posxLu, posyLu)
-#             currLine = u""
-#             posyLu += stepY
-#             if posyLu + stepY > printRectLu[3]: # Next line wouldn't fit on this page
-#                 # End of page reached
-#                 flushPage()
-
         i = 0
         while i < len(cuttedText):    # _CUT_RE.finditer(text[textpos:]):
             part = cuttedText[i]
             
             flushLine = False
             flushPage = False
-#             print "Part", repr(part)
-#             mat = _CUT_RE.search(text, textpos)
-#             part = mat.group(0)
-            
-#             print "Match", repr(mat.groupdict()), textpos
             
             if part[0] == u" ":
                 # One or more spaces
@@ -637,10 +529,8 @@ class PlainTextPrintout(wx.Printout):
                 self.pageCharStartIndex.append(textpos)
                 
             i += 1
-            
 
-
-        dc.SetFont(wx.NullFont) ## ?
+        dc.SetFont(wx.NullFont)
         
         return True
 

@@ -228,6 +228,10 @@ If you place the mouse pointer over the wiki link to a page which contains this 
     ShortHintAttribute
 
 
+*global.graph.relation.exclude*
+*global.graph.relation.include*
+See WikiStructureGraphs.
+
 
 +++ Error checking
 

@@ -1,5 +1,7 @@
 from wx import Platform
 
+
+
 if Platform == '__WXMSW__':
     faces = { 'times': 'Times New Roman',
               'mono' : 'Courier New',
@@ -22,6 +24,16 @@ else:
               'heading2': 12,
               'heading1': 12
              }
+
+
+if Platform == '__WXMSW__':
+    INTHTML_FONTSIZES = (7, 8, 10, 12, 16, 22, 30)
+
+elif Platform == '__WXMAC__':
+    INTHTML_FONTSIZES = (9, 12, 14, 18, 24, 30, 36)
+
+else:
+    INTHTML_FONTSIZES = (10, 12, 14, 16, 19, 24, 32)
 
 
 # Original settings:

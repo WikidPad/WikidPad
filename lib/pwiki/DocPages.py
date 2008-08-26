@@ -34,6 +34,9 @@ class DocPage(MiscEventSourceMixin):
         self.editorTextCache = None  # Caches live text instead of asking an editor for it.
                 # if no text editor is registered, this cache is invalid
 
+    def getWikiDocument(self):
+        return self.wikiDocument
+
     def addTxtEditor(self, txted):
         """
         Add txted to the list of editors (views) showing this page.
@@ -409,7 +412,8 @@ class WikiPage(DataCarryingPage):
 
         
     def getChildRelationships(self, existingonly=False, selfreference=True,
-            withFields=(), excludeSet=sets.ImmutableSet()):
+            withFields=(), excludeSet=sets.ImmutableSet(),
+            includeSet=sets.ImmutableSet()):
         """
         get the child relations of this word
         existingonly -- List only existing wiki words
@@ -424,13 +428,16 @@ class WikiPage(DataCarryingPage):
                     unknown)
                 "modified": Modification date
         excludeSet -- set of words which should be excluded from the list
+        includeSet -- wikiWords to include in the result
 
         Does not support caching
         """
+        wikiData = self.getWikiData()
+        
         if withFields is None:
             withFields = ()
 
-        relations = self.getWikiData().getChildRelationships(self.wikiWord,
+        relations = wikiData.getChildRelationships(self.wikiWord,
                 existingonly, selfreference, withFields=withFields)
 
         if len(excludeSet) > 0:
@@ -439,6 +446,33 @@ class WikiPage(DataCarryingPage):
                 relations = [r for r in relations if not r[0] in excludeSet]
             else:
                 relations = [r for r in relations if not r in excludeSet]
+
+        if len(includeSet) > 0:
+            # First unalias wiki pages and remove non-existing ones
+            clearedIncSet = sets.Set()
+            for w in includeSet:
+                w = wikiData.getAliasesWikiWord(w)  # TODO: Use wikiDoc.filterAliasesWikiWord()
+                if w is None:
+                    continue
+                
+                if not wikiData.isDefinedWikiWord(w):
+                    continue
+
+                clearedIncSet.add(w)
+            
+            # Then remove items already present in relations
+            if len(clearedIncSet) > 0:
+                if len(withFields) > 0:
+                    for r in relations:
+                        clearedIncSet.discard(r[0])
+                else:
+                    for r in relations:
+                        clearedIncSet.discard(r)
+
+            # Now collect info
+            if len(clearedIncSet) > 0:
+                relations += [wikiData.getExistingWikiWordInfo(r,
+                        withFields=withFields) for r in clearedIncSet]
 
         return relations
 
@@ -758,10 +792,15 @@ class WikiPage(DataCarryingPage):
         for t in wwTokens:
             self.addChildRelationship(t.node.nakedWord, t.start)
 
-        # add a relationship to the scratchpad at the wiki root
-        if self.wikiWord == self.wikiDocument.getWikiName():
-            # Position in page is really far down.
-            self.addChildRelationship(u"ScratchPad", 2000000000)
+#         # add a relationship to the scratchpad at the wiki root
+#         # if visibility is forced
+#         print "--testvisib"
+#         if self.wikiWord == self.wikiDocument.getWikiName() and \
+#                 self.wikiDocument.getWikiConfig().getboolean(
+#                     "main", "tree_force_scratchpad_visibility", False):  # True):
+#             # Position in page is really far down.
+#             print "--addChild"
+#             self.addChildRelationship(u"ScratchPad", 2000000000)
 
         # clear the dirty flag
         self.updateDirtySince = None
@@ -948,13 +987,14 @@ class WikiPage(DataCarryingPage):
     # ----- Advanced functions -----
 
     def getChildRelationshipsTreeOrder(self, existingonly=False,
-            excludeSet=sets.ImmutableSet()):
+            excludeSet=sets.ImmutableSet(), includeSet=sets.ImmutableSet()):
         """
         Return a list of children wiki words of the page, ordered as they would
         appear in tree. Some children may be missing if they e.g.
         are set as hidden.
-        excludeSet -- set of words which should be excluded from the list
         existingonly -- true iff non-existing words should be hidden
+        excludeSet -- set of words which should be excluded from the list
+        includeSet -- wikiWords to include in the result
         """
         
         wikiDocument = self.wikiDocument
@@ -969,7 +1009,8 @@ class WikiPage(DataCarryingPage):
             # Retrieve relations as list of tuples (child, firstcharpos)
             relations = self.getChildRelationships(existingonly,
                     selfreference=False, withFields=("firstcharpos",),
-                    excludeSet=excludeSet)
+                    excludeSet=excludeSet, includeSet=includeSet)
+
             relations.sort(_cmpNumbersItem1)
             # Remove firstcharpos
             relations = [r[0] for r in relations]
@@ -977,7 +1018,7 @@ class WikiPage(DataCarryingPage):
             # Retrieve relations as list of tuples (child, modifTime)
             relations = self.getChildRelationships(existingonly,
                     selfreference=False, withFields=("modified",),
-                    excludeSet=excludeSet)
+                    excludeSet=excludeSet, includeSet=includeSet)
             relations.sort(_cmpNumbersItem1)
             # Remove firstcharpos
             relations = [r[0] for r in relations]
@@ -985,7 +1026,7 @@ class WikiPage(DataCarryingPage):
             # Retrieve relations as list of tuples (child, modifTime)
             relations = self.getChildRelationships(existingonly,
                     selfreference=False, withFields=("modified",),
-                    excludeSet=excludeSet)
+                    excludeSet=excludeSet, includeSet=includeSet)
             relations.sort(_cmpNumbersItem1Rev)
             # Remove firstcharpos
             relations = [r[0] for r in relations]            
@@ -993,7 +1034,7 @@ class WikiPage(DataCarryingPage):
             # Retrieve relations as list of children words
             relations = self.getChildRelationships(existingonly, 
                     selfreference=False, withFields=(),
-                    excludeSet=excludeSet)
+                    excludeSet=excludeSet, includeSet=includeSet)
             if childSortOrder.startswith(u"desc"):
                 coll = wikiDocument.getCollator()
 

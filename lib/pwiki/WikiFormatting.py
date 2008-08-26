@@ -106,7 +106,7 @@ def getStyles(styleFaces, config):
                     "bold,fore:%(colAttribute)s,face:%(mono)s,size:%(size)d" % styleFaces),
             (FormatTypes.ToDo, "fore:%(colPlaintext)s,bold,face:%(mono)s,size:%(size)d" % styleFaces)]
 
-# List of all styles mentioned in getStyles which can be used as scintilla registered style
+# Set of all styles mentioned in getStyles which can be used as scintilla registered style
 VALID_SCINTILLA_STYLES = sets.ImmutableSet((
         FormatTypes.Default,
         FormatTypes.WikiWord,
@@ -363,7 +363,8 @@ class WikiFormatting:
                 (self.WikiWordEditorRE, FormatTypes.WikiWord),
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
-                (self.HtmlTagRE, FormatTypes.HtmlTag)
+                (self.HtmlTagRE, FormatTypes.HtmlTag),
+                (self.InsertionRE, FormatTypes.Insertion)
                 ]
 
 
@@ -380,13 +381,15 @@ class WikiFormatting:
                 (self.WikiWordEditorRE, FormatTypes.WikiWord),
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
-                (self.HtmlTagRE, FormatTypes.HtmlTag)
+                (self.HtmlTagRE, FormatTypes.HtmlTag),
+                (self.InsertionRE, FormatTypes.Insertion)
                 ]
 
 
         self.formatWwTitleExpressions = [
                 (self.PlainEscapedCharacterRE, FormatTypes.EscapedChar),
                 (self.HtmlEntityRE, FormatTypes.HtmlEntity),
+                (self.UrlRE, FormatTypes.Url),
                 (self.BoldRE, FormatTypes.Bold),
                 (self.ItalicRE, FormatTypes.Italic),
                 (self.HtmlTagRE, FormatTypes.HtmlTag)

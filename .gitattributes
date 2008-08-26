@@ -5,6 +5,8 @@
 /WikidPad.py -text
 /WikidPad.xrc -text
 WikidPadHelp/WikidPadHelp.wiki -text
+WikidPadHelp/data/ACLs.wiki -text
+WikidPadHelp/data/ADSs.wiki -text
 WikidPadHelp/data/Anchors.wiki -text
 WikidPadHelp/data/ApiDocs.wiki -text
 WikidPadHelp/data/ApplicationConfigurationFiles.wiki -text
@@ -312,6 +314,7 @@ WikidPadHelp/data/WikiFonts.wiki -text
 WikidPadHelp/data/WikiImport.wiki -text
 WikidPadHelp/data/WikiLockFile.wiki -text
 WikidPadHelp/data/WikiMaintenance.wiki -text
+WikidPadHelp/data/WikiStructureGraphs.wiki -text
 WikidPadHelp/data/WikiSyntax.wiki -text
 WikidPadHelp/data/WikiWordHistory.wiki -text
 WikidPadHelp/data/WikiWordNavigation.wiki -text
@@ -337,6 +340,7 @@ extensions/EvalLibrary.py -text
 extensions/ExampleInsertion.py -text
 extensions/GnuplotClBridge.py -text
 extensions/GraphvizClBridge.py -text
+extensions/GraphvizStructureView.py -text
 extensions/KeyBindings.py -text
 extensions/MimeTexCGIBridge.py -text
 extensions/PloticusClBridge.py -text

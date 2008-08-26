@@ -1,8 +1,8 @@
 ﻿+ Todo Items
 
-In WikidPad "todo", "done", "action", "track", "issue" and "question" are
-special keywords that enable you to track important items under the
-"View" menu in the tree.
+In WikidPad "todo", "done", "action", "track", "issue", "question" and
+"project" are special keywords that enable you to track important
+items under the "View" menu in the tree.
 
 todo: I have to do this.
 done: I have done this.

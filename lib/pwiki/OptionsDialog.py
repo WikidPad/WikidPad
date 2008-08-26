@@ -234,6 +234,9 @@ class OptionsDialog(wx.Dialog):
             ("tree_expandedNodes_rememberDuration",
                     "chTreeExpandedNodesRememberDuration", "seli"),
 
+            ("tree_force_scratchpad_visibility",
+                    "cbTreeForceScratchpadVisibility", "b"),
+
             ("wiki_icon", "tfWikiIcon", "t"),
 
             ("hotKey_showHide_byWiki", "tfHotKeyShowHideByWiki", "t"),

@@ -15,6 +15,7 @@ tree_last_root_wiki_word = WikidPadHelp
 tree_expandednodes_descriptorpathes_main = 
 wikipagetitleprefix = ++
 hotkey_showhide_bywiki = 
+tree_force_scratchpad_visibility = True
 wikipagetitle_fromlinktitle = True
 export_default_dir = 
 filestorage_identity_moddateisenough = False

@@ -26,6 +26,9 @@ You can export a single HTML page, one HTML page for each wiki page, an XML docu
 Here you can set where the exported file(s) should be stored. If file or directory is needed depends on the type given in "Export to". For XML and multipage text it is a single file, for other types it is a directory (because multiple files must be written).
 
 
+When exporting as HTML all files in the file storage which are referenced by a relative URL (URL beginning with "rel://") in the exported pages are copied to a "files" directory in the destination directory. This does also apply to files in subdirectories of the "files" directory.
+
+
 +++ Additional options for HTML exports
 For the HTML exports you can choose if you want to:
     * export URLs to images as \<img> tags or as normal links
@@ -35,7 +38,7 @@ For the HTML exports you can choose if you want to:
       "index.html" file.
       Using "As tree" is recommended when exporting the whole or
       nearly the whole wiki, "As list" is better for small subsets
-      of a wiki as the tree options gives weird results here.
+      of a wiki as the tree option gives weird results here.
     
 The defaults for these options can be set in the options dialog.
 

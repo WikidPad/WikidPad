@@ -428,6 +428,7 @@ class WikiDataManager(MiscEventSourceMixin):
             self._releaseLockFile()
 
             if wikiTempDir is not None:
+                # Warning!!! rmtree() is very dangerous, don't make a mistake here!
                 shutil.rmtree(wikiTempDir, True)
 
         return self.refCount
@@ -447,6 +448,9 @@ class WikiDataManager(MiscEventSourceMixin):
         
     def getWikiConfigPath(self):
         return self.wikiConfiguration.getConfigPath()
+        
+    def getWikiPath(self):
+        return os.path.dirname(self.getWikiConfigPath())        
 
     def getFormatting(self):
         return self.formatting
@@ -466,6 +470,9 @@ class WikiDataManager(MiscEventSourceMixin):
 #             return os.path.join(os.path.dirname(self.getWikiConfigPath()),
 #                     "temp")
 #         else:
+
+        # Warning! The returned directory will be deleted with shutil.rmtree when the wiki is
+        # finally released!
         return None
 
 
@@ -965,6 +972,37 @@ class WikiDataManager(MiscEventSourceMixin):
         return self.getWikiData().getWikiWordsModifiedWithin(startTime, endTime)
 
 
+    def _updateCcWordBlacklist(self):
+        """
+        Update the blacklist of camelcase words which should show up as normal
+        text.
+        """
+        pg = self.getFuncPage("global/[CCBlacklist]")
+        bls = sets.Set(pg.getLiveText().split("\n"))
+        pg = self.getFuncPage("wiki/[CCBlacklist]")
+        bls.union_update(pg.getLiveText().split("\n"))
+        self.getFormatting().setCcWordBlacklist(bls)
+        
+
+    def getAliasesWikiWord(self, word):
+        return self.getWikiData().getAliasesWikiWord(word)
+
+    def filterAliasesWikiWord(self, word):
+        """
+        Returns None if word doesn't exist,
+        returns word if word isn't an alias,
+        return the real word if word is an alias.
+        """
+        if not self.isDefinedWikiWord(word):
+            return None
+        
+        return self.getAliasesWikiWord(word)
+
+
+    def getPropertyTriples(self, word, key, value):
+        return self.getWikiData().getPropertyTriples(word, key, value)
+
+
     def reconnect(self):
         """
         Closes current WikiData instance and opens a new one with the same
@@ -1003,20 +1041,6 @@ class WikiDataManager(MiscEventSourceMixin):
         self.fireMiscEventProps(props)
 
 
-    def _updateCcWordBlacklist(self):
-        """
-        Update the blacklist of camelcase words which should show up as normal
-        text.
-        """
-        pg = self.getFuncPage("global/[CCBlacklist]")
-        bls = sets.Set(pg.getLiveText().split("\n"))
-        pg = self.getFuncPage("wiki/[CCBlacklist]")
-        bls.union_update(pg.getLiveText().split("\n"))
-        self.getFormatting().setCcWordBlacklist(bls)
-        
-
-    def getAliasesWikiWord(word):
-        return self.getWikiData().getAliasesWikiWord(word)
 
 
     def miscEventHappened(self, miscevt):

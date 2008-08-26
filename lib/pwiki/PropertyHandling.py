@@ -371,6 +371,57 @@ class PropertyCheckPresentation(AbstractPropertyCheck):
                 self.mainControl.appendLogMessage(msg)
 
 
+# TODO Move to extension
+class PropertyCheckGlobalGraphInclude(AbstractPropertyCheck):
+    """
+    Property check for presentation properties "icon", "color" and "bold" and
+    their global counterparts.
+    """
+    def __init__(self, mainControl, propChecker):
+        AbstractPropertyCheck.__init__(self, mainControl, propChecker)
+        self.foundEntryNames = None  # Set of found presentation entry names 
+
+
+    def getResponsibleRegex(self):
+        """
+        Return a compiled regular expression of the property name(s) (keys)
+        this object is responsible for
+        """
+        return _re.compile(ur"^global\.graph\.relations\.include$",
+                _re.DOTALL | _re.UNICODE | _re.MULTILINE)
+
+
+#     def beginPageCheck(self, wikiPage, pageAst):
+#         AbstractPropertyCheck.beginPageCheck(self, wikiPage, pageAst)
+# 
+# 
+#     def endPageCheck(self):
+#         AbstractPropertyCheck.endPageCheck(self)
+
+
+    def checkEntry(self, propName, propValue, foundProps, start, end, match):
+        """
+        Check property entry and issue messages if necessary
+        foundProps -- Set of tuples (propName, propValue) of previously found
+            props on a page
+        """
+        wikiWord = self.wikiPage.getWikiWord()
+        wikiDoc = self.wikiPage.getWikiDocument()
+        
+        props = wikiDoc.getPropertyTriples(None,
+                "global.graph.relations.exclude", None)
+        
+        if len(props) > 0:
+            # Check for double entries with different values on same page
+            msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
+                    _(u"The attribute 'global.graph.relations.exclude' (e.g. on page '%s') "
+                        "overrides the '...include' property") %
+                    (props[0][0],), wikiWord, wikiWord, (start, end))
+            
+            self.mainControl.appendLogMessage(msg)
+            
+
+
 class PropertyChecker:
     """
     Component which checks a page for possible errors in the written properties
@@ -378,7 +429,8 @@ class PropertyChecker:
     def __init__(self, mainControl):
         self.mainControl = mainControl
         self.singleCheckList = [PropertyCheckAlias(self.mainControl, self),
-                PropertyCheckPresentation(self.mainControl, self)]
+                PropertyCheckPresentation(self.mainControl, self),
+                PropertyCheckGlobalGraphInclude(self.mainControl, self)]
 
         # Fill singleCheckREs (needed by findCheckObject)
         self.singleCheckREs = []

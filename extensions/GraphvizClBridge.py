@@ -141,10 +141,10 @@ class GraphVizBaseHandler:
         # Return appropriate HTML code for the image
         if exportType == "html_previewWX":
             # Workaround for internal HTML renderer
-            return (u'<img src="%s" border="0" align="bottom" alt="formula"/>'
+            return (u'<img src="%s" border="0" align="bottom" alt="formula" />'
                     u'&nbsp;') % url
         else:
-            return u'<img src="%s" border="0" align="bottom" alt="formula"/>' \
+            return u'<img src="%s" border="0" align="bottom" alt="formula" />' \
                     % url
 
 

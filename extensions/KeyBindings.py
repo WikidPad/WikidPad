@@ -32,7 +32,10 @@ UpHistory="Ctrl-Alt-Up"
 DownHistory="Ctrl-Alt-Down"
 GoBack="Alt-Left"
 GoForward="Alt-Right"
-GoHome="Ctrl-Q"
+if wx.Platform == "__WXMAC__":
+    GoHome="Ctrl-Shift-H"
+else:
+    GoHome="Ctrl-Q"
 Bold="Ctrl-B"
 Italic="Ctrl-I"
 Heading="Ctrl-Alt-H"
@@ -74,6 +77,12 @@ GoNextTab=""
 GoPreviousTab=""
 FocusFastSearchField=""
 
+Plugin_AutoNew_Numbered = "Shift-Ctrl-N"
+
+Plugin_GraphVizStructure_ShowRelationGraph = ""
+Plugin_GraphVizStructure_ShowRelationGraphSource = ""
+Plugin_GraphVizStructure_ShowChildGraph = ""
+Plugin_GraphVizStructure_ShowChildGraphSource = ""
 
 
 def makeBold(editor):

@@ -185,8 +185,9 @@ class WikiWordNode(AbstractNode):
         Get all valid children, filter out undefined and/or cycles
         if options are set accordingly
         """
+        config = self.treeCtrl.pWiki.getConfig()
 
-        if self.treeCtrl.pWiki.getConfig().getboolean("main", "tree_no_cycles"):
+        if config.getboolean("main", "tree_no_cycles"):
             # Filter out cycles
             ancestors = self.getAncestors()
         else:
@@ -249,7 +250,7 @@ class WikiWordNode(AbstractNode):
         
         # Has children?
         if self.flagRoot:
-            self.flagChildren = True # Has at least ScratchPad and Views
+            self.flagChildren = True # Has at least Views
         else:
             self.flagChildren = self._hasValidChildren(wikiPage)
 
@@ -331,9 +332,16 @@ class WikiWordNode(AbstractNode):
             ancestors = sets.ImmutableSet()  # Empty
 
 
+        if self.treeCtrl.pWiki.getConfig().getboolean(
+                "main", "tree_force_scratchpad_visibility", False) and \
+                self.flagRoot:
+            includeSet = sets.ImmutableSet((u"ScratchPad",))
+        else:
+            includeSet = sets.ImmutableSet()
+
         children = wikiPage.getChildRelationshipsTreeOrder(
                 existingonly=self.treeCtrl.getHideUndefined(),
-                excludeSet=ancestors)
+                excludeSet=ancestors, includeSet=includeSet)
 
         result = [WikiWordNode(self.treeCtrl, self, c)
                 for c in children]
@@ -906,7 +914,7 @@ class MainParentlessNode(AbstractNode):
 
     def isVisible(self):
         wikiData = self.treeCtrl.pWiki.getWikiData()
-        return len(wikiData.getParentlessWikiWords()) > 1  # TODO Test if root is single element
+        return len(wikiData.getParentlessWikiWords()) > 0  # TODO Test if root is single element
 
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.getWikiData()
@@ -1312,6 +1320,11 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         self.SetBackgroundColour(wx.Colour(*coltuple))
         self.Refresh()
+        
+        self.refreshGenerator = self._generatorRefreshNodeAndChildren(
+                self.GetRootItem())
+        self.Bind(wx.EVT_IDLE, self.OnIdle)
+
 
 
     def onChangedWikiConfiguration(self, miscevt):
@@ -1334,7 +1347,11 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     u"")
 
     def _generatorRefreshNodeAndChildren(self, parentnodeid):
-        nodeObj = self.GetPyData(parentnodeid)
+        try:        
+            nodeObj = self.GetPyData(parentnodeid)
+        except Exception:
+            raise StopIteration
+        
         wikiData = self.pWiki.getWikiData()
         
         nodeStyle = nodeObj.getNodePresentation()

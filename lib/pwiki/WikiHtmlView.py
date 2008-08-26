@@ -92,6 +92,8 @@ class WikiHtmlView(wx.html.HtmlWindow):
         # TODO Should be changed to presenter as controller
         self.exporterInstance = Exporters.HtmlXmlExporter(
                 self.presenter.getMainControl())
+                
+        self._DEFAULT_FONT_SIZES = self.presenter.getMainControl().presentationExt.INTHTML_FONTSIZES
         
         # TODO More elegantly
         self.exporterInstance.exportType = u"html_previewWX"
@@ -149,15 +151,16 @@ class WikiHtmlView(wx.html.HtmlWindow):
 #             wx.html.HTML_FONT_SIZE_7)
 
     # These are the Windows sizes
-    if isWindows():
-        _DEFAULT_FONT_SIZES = (7, 8, 10, 12, 16, 22, 30)
-    elif isOSX():
-        _DEFAULT_FONT_SIZES = (9, 12, 14, 18, 24, 30, 36)
-    else:
-        _DEFAULT_FONT_SIZES = (10, 12, 14, 16, 19, 24, 32)
+#     if isWindows():
+#         _DEFAULT_FONT_SIZES = (7, 8, 10, 12, 16, 22, 30)
+#     elif isOSX():
+#         _DEFAULT_FONT_SIZES = (9, 12, 14, 18, 24, 30, 36)
+#     else:
+#         _DEFAULT_FONT_SIZES = (10, 12, 14, 16, 19, 24, 32)
 
-    # For Mac
-    # _DEFAULT_FONT_SIZES = (9, 12, 14, 18, 24, 30, 36)
+
+
+
     # For __WXGPE__ (?)
     # _DEFAULT_FONT_SIZES = (6, 7, 8, 9, 10, 12, 14)
     # For others
@@ -200,7 +203,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
                     wikiPage.getFormatDetails(),
                     LinkCreatorForPreview(
                         self.presenter.getWikiDocument().getWikiData()))
-            
+
             wx.GetApp().getInsertionPluginManager().taskEnd()
 
     
@@ -449,7 +452,11 @@ class WikiHtmlView(wx.html.HtmlWindow):
         evt.Skip()
 
         pos = self.CalcUnscrolledPosition(evt.GetPosition())
-        cell = self.GetInternalRepresentation().FindCellByPos(pos.x, pos.y)
+        irep = self.GetInternalRepresentation()
+        if irep is None:
+            cell = None
+        else:
+            cell = irep.FindCellByPos(pos.x, pos.y)
         callTip = u""
 
         if cell is not None:

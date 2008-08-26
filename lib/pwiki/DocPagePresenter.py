@@ -13,7 +13,7 @@ import DocPages
 
 from StringOps import uniToGui
 
-from WindowLayout import LayeredControlPresenter
+from WindowLayout import LayeredControlPresenter, LayerSizer
 
 from PageHistory import PageHistory
 
@@ -357,6 +357,7 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
     def __init__(self, parent, mainControl, id=-1):
         wx.Panel.__init__(self, parent, id)
         BasicDocPagePresenter.__init__(self, mainControl)
+        self.SetSizer(LayerSizer())
 
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_LIST,
                 lambda evt: self.viewHistory())
@@ -369,6 +370,17 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD,
                 lambda evt: self.pageHistory.goInHistory(1))
 
+
+    def setSubControl(self, scName, sc):
+        oldSc = self.getSubControl(scName)
+        if oldSc is not None:
+            self.GetSizer().Detach(oldSc)
+            oldSc.close()
+
+#         LayeredControlPresenter.setSubControl(self, scName, sc)
+        BasicDocPagePresenter.setSubControl(self, scName, sc)
+        self.GetSizer().Add(sc)
+        self.Layout()
 
     def switchSubControl(self, scName, gainFocus=False):
         """

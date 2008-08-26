@@ -1,6 +1,50 @@
 ﻿++ Change Log
 
-Jul. 27, 2008 (1.9beta16)
+
+Aug. 26, 2008 (1.9beta17)
+
+    * When exporting, files in the file storage
+      ("files" directory) which are referenced on exported pages
+      are copied to export destination "files" folder.
+      See FileStorage#+++# On# HTML# export
+    * When exporting, generated files (by MimeTeX, GraphViz, ...)
+      are put to subfolder "volatile" which is deleted each time
+      the exporting is repeated (otherwise the folder would be
+      filled up with old versions of the files).
+      See ExternalGraphicalApplications#When# exporting# HTML
+    * "r" appendix to image URLs to resize relative to image size.
+      See UrlLinking#++# URL# Appendix
+    * It's now possible to give an image URL as title for
+      a wikiword or URL to use image as link. See UrlLinking
+
+    * New plugin to create relation graph (with GraphViz) between
+      wikiwords (thanks to josip_ine). See WikiStructureGraphs
+
+    * Option to (not) force visibility of page "ScratchPad".
+      See OptionsDialog#*Force# ScratchPad# visibility# in# tree*
+    * Attribute values ending with semicolon (e.g. [test:foo; ])
+      are now illegal (not interpreted as attribute)
+    * Menu plugins can now also read their shortcuts
+      from "KeyBindings.py" as main program does.
+
+    * Windows 2K/XP and later: Copying files into file storage or
+      export directory now also copies ACLs and ADSs if possible
+    * Mac: Some improvements (thanks to Gareth Simpson)
+
+    * Bug fixed: Sometimes too many empty lines in internal preview
+    * Bug fixed: Startup error if no printer is installed
+    * Bug fixed: "anded" regex search searched only for first term
+      (thanks to milus)
+    * Bug fixed: Segfault of sqlite on 64-bit Linux
+      (thanks to Anton Markov)
+    * Bug fixed: Linux: Problems with temporaries path for
+      external plugins (thanks to jonjacksonuk and franxxk)
+    * Linux standard encoding is now determined by
+      locale.getpreferredencoding() (thanks to Kamil Śliwak)
+
+
+
+Jul. 27, 2008 (1.9beta16, repository revision in "mbutscher" branch: 143)
 
     * Option to set color of editor margin.
       See OptionsDialog#*Margin# color*

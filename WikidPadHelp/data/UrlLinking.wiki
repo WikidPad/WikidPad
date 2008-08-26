@@ -14,6 +14,14 @@ ftp://ftp.whereever.com/
 
 To create an absolute URL to a file you can also use "Add file URL" in "Editor" menu and choose the desired file in file dialog.
 
+To show a different title in the HTML preview/export as a link, use e.g.
+
+[ftp://ftp.whereever.com/ |Go somewhere]
+
+Switch to preview to see the "Go somewhere" only. You can also use an image URL (see below) as title to show a clickable image:
+
+[https://somewheresecure.com| rel://files/testimg.gif>r40%]
+
 
 ++ Relative URLs
 You can create URLs which are relative to the wiki directory. These start with rel:// followed by the relative position. For HTML export the rel:// is removed to create a relative HTML link (without protocol). For HTML preview they are converted to "file:" URLs.
@@ -30,7 +38,7 @@ You can also copy files into a subdirectory of the wiki directory from within Wi
 
 
 ++ Images
-If an URL file ends with ".jpg", ".gif" or ".png", the URL is automatically shown as an image in preview and HTML export (currently the HTML export does not automatically export the image itself). The URL can be absolute or relative and can point into the file storage.
+If an URL file ends with ".jpg", ".gif", ".png" or ".bmp", the URL is automatically shown as an image in preview and HTML export (an image in the file storage with relative URL is copied to a subdirectory "files" in the export destination directory). The URL can be absolute or relative and can point into the file storage.
 
 Example (switch to preview to see the picture):
 
@@ -67,7 +75,11 @@ You can control details of URL presentation, especially for images, by using an 
     i Show URL as image, even if it has none of the default suffixes
     l Show URL as link. 'i' and 'l' are mutually exclusive.
     s Set size of an image, following the code is the width and height in pixels or
-      as percentage of space on page, delimited by 'x' (e.g. '200x300', "60%x70%")
+      as percentage of *surrounding* space on page (according to HTML standard),
+      delimited by 'x' (e.g. '200x300', "60%x70%")
+    r Set size in percent relative to image size (e.g. "50%x30%"). Only one given
+      percent value is used for width and height ("40%" is same as "40%x40%"). No value
+      at all is interpreted as "100%x100%".
     a Set alignment of image, the following character defines which alignment (*t*op, vertically
     *m*iddle, *b*ottom, *r*ight or *l*eft). This setting is not respected by the internal preview.
 
@@ -78,3 +90,6 @@ rel://files/testimg.gif>s50x50;al
 
 Show the URL as link:
 rel://files/testimg.gif>l
+
+Relative size:
+rel://files/testimg.gif>r110%x60%

@@ -2,11 +2,14 @@
 OS abstraction
 """
 
-import os
+import os, shutil, os.path
 import wx
 
 import Configuration
-from StringOps import mbcsEnc, urlQuote, pathnameFromUrl, URL_RESERVED
+from StringOps import mbcsEnc, urlQuote, pathnameFromUrl, URL_RESERVED, pathEnc
+
+
+# import WindowsHacks
 
 try:
     import WindowsHacks
@@ -35,10 +38,31 @@ else:
         if startPath == u"":
             wx.LaunchDefaultBrowser(link)
             return
-        
+
         if link.startswith("file:"):
             link = pathnameFromUrl(link[5:])
 
         os.spawnlp(os.P_NOWAIT, startPath, startPath, link)
+
+
+# Define copyFile
+if Configuration.isWinNT() and WindowsHacks:
+    copyFile = WindowsHacks.copyFile
+else:
+    # TODO Mac version    
+    def copyFile(srcPath, dstPath):
+        """
+        Copy file from srcPath to dstPath. dstPath may be overwritten if
+        existing already. dstPath must point to a file, not a directory.
+        If some directories in dstPath do not exist, they are created.
+        
+        This currently just calls shutil.copy2() TODO!
+        """
+        dstDir = os.path.dirname(dstPath)
+            
+        if not os.path.exists(pathEnc(dstDir)):
+            os.makedirs(dstDir)
+    
+        shutil.copy2(srcPath, dstPath)
 
 

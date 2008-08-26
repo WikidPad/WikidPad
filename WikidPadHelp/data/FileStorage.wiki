@@ -32,3 +32,9 @@ If "Modif. date is enough" is disabled or no file with identical date could be f
     * You can copy files by hand in the repository, they will be handled as any other files. You can also modify or delete files in the normal way, but you should avoid to run file operation in the "files" directory and at the very same moment let WikidPad perform any operations in the storage.
     * You can't copy directories by the mechanism, files only, but you can copy them by hand in the "files" directory. These subdirectories are not searched by the identity check.
     * During identity check and copying WikidPad does not respond to any key presses or mouse clicks.
+
+
++++ On HTML export
+
+When exporting as HTML all files in the file storage which are referenced by a relative URL (URL beginning with "rel://") in the exported pages are copied to a "files" directory in the destination directory. This does also apply to files in subdirectories of the "files" directory.
+
