@@ -157,7 +157,7 @@ TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlRE.pattern + u"|" +
 
 # parses the dynamic properties
 PropertyRE      = re.compile(ur"\[[ \t]*(?P<propertyName>[\w\-\_\.]+?)[ \t]*" +
-                  ur"[=:][ \t]*(?P<propertyValue>[\w\-\_ \t:;,.!?#/|]+?)\]",
+                  ur"[=:][ \t]*(?P<propertyValue>[\w\-\_ \t:;,.!?#%/|]+?)\]",
                   re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -165,13 +165,13 @@ PropertyRE      = re.compile(ur"\[[ \t]*(?P<propertyName>[\w\-\_\.]+?)[ \t]*" +
 #                   ur"[:][ \t]*(?P<insertionValue>[\w\-\_ \t;,.!?#/|]+?)\]",
 #                   re.DOTALL | re.UNICODE | re.MULTILINE)
 
-InsertionValueRE = re.compile(ur"(?:(?P<insertionValue>[\w][\w\-\_ \t,.!?#/|]*)|"
+InsertionValueRE = re.compile(ur"(?:(?P<insertionValue>[\w][\w\-\_ \t,.!?#%/|]*)|"
                   ur"(?P<insertionQuoteStarter>\"+|'+|/+|\\+)"
                   ur"(?P<insertionQuotedValue>.*?)(?P=insertionQuoteStarter))",
                   re.DOTALL | re.UNICODE | re.MULTILINE)
 
 InsertionAppendixRE = re.compile(ur";[ \t]*(?:"
-                  ur"(?P<insertionAppendix>[\w][\w\-\_ \t,.!?#/|]*)|"
+                  ur"(?P<insertionAppendix>[\w][\w\-\_ \t,.!?#%/|]*)|"
                   ur"(?P<insertionApxQuoteStarter>\"+|'+|/+|\\+)"
                   ur"(?P<insertionQuotedAppendix>.*?)(?P=insertionApxQuoteStarter))",
                   re.DOTALL | re.UNICODE | re.MULTILINE)

@@ -263,7 +263,7 @@ class SearchResultListBox(wx.HtmlListBox):
                             occ = 1
                             while True:
                                 pos = sarOp.searchText(text, pos[1])
-                                if pos[0] is None:
+                                if pos[0] is None or pos[0] == pos[1]:
                                     break
                                 occ += 1
 
@@ -326,6 +326,10 @@ class SearchResultListBox(wx.HtmlListBox):
             # Search went back to beginning, number of last occ. ist also occ.count
             info.occCount = info.occNumber
             info.buildOccurrence(text, before, after, pos, 1)
+        elif pos[0] == info.occPos[1]:
+            # Match is empty
+            info.occCount = info.occNumber
+            info.buildOccurrence(text, before, after, pos, 1)            
         else:
             info.buildOccurrence(text, before, after, pos, info.occNumber + 1)
 
@@ -623,7 +627,6 @@ class SearchWikiDialog(wx.Dialog):   # TODO
                 self.ctrls.htmllbPages.SetSelection(i)
                 wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
                 wikiPage = wikiDocument.getWikiPageNoError(wikiWord)
-#                 text = wikiData.getContent(wikiWord)
                 text = wikiPage.getLiveTextNoTemplate()
                 if text is None:
                     continue
@@ -643,14 +646,12 @@ class SearchWikiDialog(wx.Dialog):   # TODO
                     repl = sarOp.replace(text, found)
                     text = text[:start] + repl + text[end:]  # TODO Faster?
                     charStartPos = start + len(repl)
-    
-#                 wikiData.setContent(wikiWord, text)
+                    if start == end:
+                        # Otherwise replacing would go infinitely
+                        break
+
                 wikiPage.replaceLiveText(text)
                 
-#             # Reopen current word because its content could have been overwritten before
-#             self.pWiki.openWikiPage(self.pWiki.getCurrentWikiWord(),
-#                     addToHistory=False, forceReopen=True)
-                    
             self._refreshPageList()
 
         except re.error, e:
@@ -918,15 +919,19 @@ class SearchPageDialog(wx.Dialog):   # TODO
         sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
         sarOp.replaceOp = True
         sarOp.cycleToStart = False
-        lastReplacePos = 0
+        lastSearchPos = 0
         editor = self.pWiki.getActiveEditor()
         editor.BeginUndoAction()
         try:
             while True:
-                lastReplacePos = editor.executeSearch(sarOp, lastReplacePos)[1]
-                if lastReplacePos == -1:
+                nextReplacePos = editor.executeSearch(sarOp, lastSearchPos)[1]
+                if nextReplacePos == -1:
                     break
-                lastReplacePos = editor.executeReplace(sarOp)
+                nextSearchPos = editor.executeReplace(sarOp)
+                if lastSearchPos == nextReplacePos:
+                    # Otherwise it would run infinitely
+                    break
+                lastSearchPos = nextSearchPos
         finally:
             editor.EndUndoAction()
 

@@ -1,7 +1,19 @@
 ﻿++ Change Log
 
 
-Aug. 24, 2008 (1.8rc15)
+Sep. 26, 2008 (1.8rc16)
+
+    * Bug fixed: Renaming may modify page heading in wrong way
+      ("++ X" renamed to 'Y X' results in "++ Y Y X")
+    * Bug fixed: Searching for regular expressions matching nothing
+      (e.g. "|") may freeze WikidPad
+    
+    * Development: Script "buildGadflyZips.py" added to relieve
+      creation of WikidPad from source.
+
+
+
+Aug. 24, 2008 (1.8rc15, repository revision in "stable-1.8" branch: 144)
 
     * Bug fixed: Sometimes too many empty lines in internal
       preview

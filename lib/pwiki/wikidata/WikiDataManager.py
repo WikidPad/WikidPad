@@ -615,13 +615,14 @@ class WikiDataManager(MiscEventSourceMixin):
         # Prefix is normally u"++"
         pageTitlePrefix = self.getFormatting().getPageTitlePrefix() + u" "
         prevTitle = pageTitlePrefix + WikiPage.getWikiPageTitle(wikiWord) + u"\n"
-        page = self.getWikiPage(toWikiWord)
-        content = page.getLiveText()
-        if content.startswith(prevTitle):
-            # Replace previous title with new one
-            content = pageTitlePrefix + WikiPage.getWikiPageTitle(toWikiWord) + \
-                    u"\n" + content[len(prevTitle):]
-            page.replaceLiveText(content)
+
+#         page = self.getWikiPage(toWikiWord)
+#         content = page.getLiveText()
+#         if content.startswith(prevTitle):
+#             # Replace previous title with new one
+#             content = pageTitlePrefix + WikiPage.getWikiPageTitle(toWikiWord) + \
+#                     u"\n" + content[len(prevTitle):]
+#             page.replaceLiveText(content)
 
         # if the root was renamed we have a little more to do
         if wikiWord == self.getWikiName():
@@ -682,18 +683,15 @@ class WikiDataManager(MiscEventSourceMixin):
                     charStartPos = start + len(repl)
 
                 wikiPage.replaceLiveText(text)
-#                 while True:
-#                     ############ Hier replace einbauen !!!!!!!
-# 
-#                     lastReplacePos = editor.executeSearch(sarOp, lastReplacePos)[1]
-#                     if lastReplacePos == -1:
-#                         break
-#                     lastReplacePos = editor.executeReplace(sarOp)
-# 
-#                 content = content.replace(wikiWord, toWikiWord)
-# #                 page.save(content)
-# #                 page.update(content, False)  # TODO AGA processing
-#                 page.replaceLiveText(content)
+
+        # Now we modify the page heading if not yet done by text replacing
+        page = self.getWikiPage(toWikiWord)
+        content = page.getLiveText()
+        if content.startswith(prevTitle):
+            # Replace previous title with new one
+            content = pageTitlePrefix + WikiPage.getWikiPageTitle(toWikiWord) + \
+                    u"\n" + content[len(prevTitle):]
+            page.replaceLiveText(content)
 
 
     def searchWiki(self, sarOp, applyOrdering=True):  # TODO Threadholder
