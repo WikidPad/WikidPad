@@ -942,7 +942,7 @@ class SearchReplaceOperation:
                 reFlags = re.MULTILINE | re.UNICODE
             else:
                 reFlags = re.IGNORECASE | re.MULTILINE | re.UNICODE
-                
+            
             return RegexTextNode(self, re.compile(searchStr, reFlags))
 
 
@@ -1018,10 +1018,12 @@ class SearchReplaceOperation:
         """
         End a wiki-wide search
         """
-        if self.searchOpTree is None:
-            self.rebuildSearchOpTree()   # TODO: Error ?
-            
-        result = self.searchOpTree.endWikiSearch()
+        result = None
+#         if self.searchOpTree is None:
+#             self.rebuildSearchOpTree()   # TODO: Error ?
+        if self.searchOpTree is not None:
+            result = self.searchOpTree.endWikiSearch()
+
         self.listWikiPagesOp.endWikiSearch()
         self.wikiDocument = None
 

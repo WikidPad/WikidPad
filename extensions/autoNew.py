@@ -65,5 +65,9 @@ def autoNewNumbered(wiki, evt):
     else:
         nextNumber = max(numbers) + 1
     wiki.openWikiPage(u"New%06i" % nextNumber)
-    wiki.getActiveEditor().SetFocus()
+    dpp = wiki.getCurrentDocPagePresenter()
+    if dpp is None:
+        return
+    dpp.switchSubControl("textedit", True)
+    dpp.SetFocus()
 

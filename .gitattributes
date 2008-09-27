@@ -332,6 +332,7 @@ WikidPadHelp/files/testimg.gif -text
 /WikidPadStarter.py -text
 /WikidPad_de_DE.po -text
 /bld.bat -text
+/buildGadflyZips.py -text
 docs/api.txt -text
 docs/dev-setup.txt -text
 docs/dev.txt -text
@@ -590,6 +591,7 @@ lib/pwiki/SqliteThin3.py -text
 lib/pwiki/StringOps.py -text
 lib/pwiki/TempFileSet.py -text
 lib/pwiki/TextTree.py -text
+lib/pwiki/UserActionCoord.py -text
 lib/pwiki/Utilities.py -text
 lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiFormatting.py -text

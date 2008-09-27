@@ -646,10 +646,10 @@ class LayeredControlPresenter:
             if self.visible and self.lastVisibleCtrlName != scName:
                 # First show subControl scName, then hide the others
                 # to avoid flicker
-                self.subControls[scName].setLayerVisible(True)
+                self.subControls[scName].setLayerVisible(True, scName)
                 for n, c in self.subControls.iteritems():
                     if n != scName:
-                        c.setLayerVisible(False)
+                        c.setLayerVisible(False, n)
 
             self.lastVisibleCtrlName = scName
             self.setTitle(self.shortTitle)
@@ -664,16 +664,16 @@ class LayeredControlPresenter:
         return self.subControls.get(self.lastVisibleCtrlName)
 
 
-    def setLayerVisible(self, vis):
+    def setLayerVisible(self, vis, scName=""):
         if self.visible == vis:
             return
         
         if vis:
             for n, c in self.subControls.iteritems():
-                c.setLayerVisible(n == self.lastVisibleCtrlName)
+                c.setLayerVisible(n == self.lastVisibleCtrlName, n)
         else:
-            for c in self.subControls.itervalues():
-                c.setLayerVisible(False)
+            for n, c in self.subControls.iteritems():
+                c.setLayerVisible(False, n)
 
         self.visible = vis
         
@@ -726,14 +726,14 @@ class LayeredControlPanel(wx.Panel, LayeredControlPresenter):
             # First show subControl scName, then hide the others
             # to avoid flicker
             if self.visible and self.lastVisibleCtrlName != scName:
-                self.subControls[scName].setLayerVisible(True)
+                self.subControls[scName].setLayerVisible(True, scName)
             
             self.subControls[scName].Show(True)
 
             for n, c in self.subControls.iteritems():
                 if n != scName:
                     if self.visible:
-                        c.setLayerVisible(False)
+                        c.setLayerVisible(False, n)
                     c.Show(False)
 
             if gainFocus:

@@ -155,7 +155,7 @@ class _SearchResultItemInfo(object):
 class SearchResultListBox(wx.HtmlListBox):
     def __init__(self, parent, pWiki, ID):
         wx.HtmlListBox.__init__(self, parent, ID, style = wx.SUNKEN_BORDER)
-        
+
         self.pWiki = pWiki
         self.searchWikiDialog = parent
         self.found = []
@@ -179,7 +179,7 @@ class SearchResultListBox(wx.HtmlListBox):
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
                 self.OnActivateNewTabBackgroundThis)
 
-    
+
     def OnGetItem(self, i):
         if self.isShowingSearching:
             return u"<b>" + _(u"Searching...") + u"</b>"
@@ -272,7 +272,7 @@ class SearchResultListBox(wx.HtmlListBox):
                             occ = 1
                             while True:
                                 pos = sarOp.searchText(text, pos[1])
-                                if pos[0] is None:
+                                if pos[0] is None or pos[0] == pos[1]:
                                     break
                                 occ += 1
 
@@ -328,13 +328,17 @@ class SearchResultListBox(wx.HtmlListBox):
             pos = (-1, -1)
 
         if pos[0] == -1:
-            # Page was changed after last search and contains no more any occurrence 
+            # Page was changed after last search and doen't contain any occurrence anymore
             info.occCount = 0
             info.buildOccurrence(text, 0, 0, pos, -1)
         elif pos[0] < info.occPos[1]:
             # Search went back to beginning, number of last occ. ist also occ.count
             info.occCount = info.occNumber
             info.buildOccurrence(text, before, after, pos, 1)
+        elif pos[0] == info.occPos[1]:
+            # Match is empty
+            info.occCount = info.occNumber
+            info.buildOccurrence(text, before, after, pos, 1)            
         else:
             info.buildOccurrence(text, before, after, pos, info.occNumber + 1)
 
@@ -814,7 +818,10 @@ class SearchWikiDialog(wx.Dialog):   # TODO
                     text = text[:start] + repl + text[end:]  # TODO Faster?
                     charStartPos = start + len(repl)
                     replaceCount += 1
-    
+                    if start == end:
+                        # Otherwise replacing would go infinitely
+                        break
+
                 wikiPage.replaceLiveText(text)
                     
             self._refreshPageList()
@@ -1193,18 +1200,22 @@ class SearchPageDialog(wx.Dialog):   # TODO
         sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
         sarOp.replaceOp = True
         sarOp.cycleToStart = False
-        lastReplacePos = 0
+        lastSearchPos = 0
         editor = self.pWiki.getActiveEditor()
         self.addCurrentToHistory()
         replaceCount = 0
         editor.BeginUndoAction()
         try:
             while True:
-                lastReplacePos = editor.executeSearch(sarOp, lastReplacePos)[1]
-                if lastReplacePos == -1:
+                nextReplacePos = editor.executeSearch(sarOp, lastSearchPos)[1]
+                if nextReplacePos == -1:
                     break
                 replaceCount += 1
-                lastReplacePos = editor.executeReplace(sarOp)
+                nextSearchPos = editor.executeReplace(sarOp)
+                if lastSearchPos == nextReplacePos:
+                    # Otherwise it would run infinitely
+                    break
+                lastSearchPos = nextSearchPos
         finally:
             editor.EndUndoAction()
             

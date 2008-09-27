@@ -35,7 +35,7 @@ class LinkCreatorForPreview:
         
     def get(self, word, default = None):
         if self.wikiData.isDefinedWikiWord(word):
-            return u"internaljump:%s" % word
+            return u"internaljump:wikipage/%s" % word
         else:
             return default
 
@@ -117,12 +117,13 @@ class WikiHtmlView(wx.html.HtmlWindow):
                 self.OnActivateNewTabBackgroundThis)        
 
         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
+        wx.EVT_LEFT_DCLICK(self, self.OnLeftDClick)
         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
         wx.EVT_MOUSEWHEEL(self, self.OnMouseWheel)
         wx.EVT_MOTION(self, self.OnMouseMotion)        
 
 
-    def setLayerVisible(self, vis):
+    def setLayerVisible(self, vis, scName=""):
         """
         Informs the widget if it is really visible on the screen or not
         """
@@ -198,7 +199,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
             self.currentLoadedWikiWord = word
             content = self.presenter.getLiveText()
-    
+
             html = self.exporterInstance.exportContentToHtmlString(word, content,
                     wikiPage.getFormatDetails(),
                     LinkCreatorForPreview(
@@ -212,7 +213,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
             self.SetFonts("", "", [max(s + 2 * zoom, 1)
                     for s in self._DEFAULT_FONT_SIZES])
                     
-#             print "refresh8", repr(html)
+#             print "-- refresh8", html.encode("mbcs", "ignore")
             self.SetPage(uniToGui(html))
 
 
@@ -303,6 +304,28 @@ class WikiHtmlView(wx.html.HtmlWindow):
     def OnClipboardCopy(self, evt):
         copyTextToClipboard(self.SelectionToText())
 
+
+    def OnLeftDClick(self, evt):
+        pos = self.CalcUnscrolledPosition(evt.GetPosition())
+        cell = self.GetInternalRepresentation().FindCellByPos(pos.x, pos.y)
+        if cell is not None:
+            linkInfo = cell.GetLink()
+            if linkInfo is not None:
+                evt.Skip()
+                return
+                
+        pres = self.presenter
+        mc = pres.getMainControl()
+                
+        paramDict = {"page": pres.getDocPage(), "presenter": pres,
+                "main control": mc}
+                
+        mc.getUserActionCoord().reactOnUserEvent(
+                u"mouse/leftdoubleclick/preview/body", paramDict)
+
+#         self.presenter.switchSubControl("textedit")
+
+        
     def OnMiddleDown(self, evt):
         pos = self.CalcUnscrolledPosition(evt.GetPosition())
         cell = self.GetInternalRepresentation().FindCellByPos(pos.x, pos.y)
@@ -331,7 +354,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
         if evt.RightUp():
             self.contextHref = linkinfo.GetHref()
             menu = wx.Menu()
-            if href.startswith(u"internaljump:"):
+            if href.startswith(u"internaljump:wikipage/"):
                 appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTERNAL_JUMP)
             else:
                 appendToMenuByMenuDesc(menu, u"Activate;CMD_ACTIVATE_THIS")
@@ -350,20 +373,20 @@ class WikiHtmlView(wx.html.HtmlWindow):
     def _activateLink(self, href, tabMode=0):
         """
         Called if link was activated by clicking in the context menu, 
-        therefore only links starting with "internaljump:" can be
+        therefore only links starting with "internaljump:wikipage/" can be
         handled.
         tabMode -- 0:Same tab; 2: new tab in foreground; 3: new tab in background
         """
-        if href.startswith(u"internaljump:"):
+        if href.startswith(u"internaljump:wikipage/"):
             # Jump to another wiki page
             
             # First check for an anchor. In URLs, anchors are always
             # separated by '#' regardless which character is used
             # in the wiki syntax (normally '!')
             try:
-                word, anchor = href[13:].split(u"#", 1)
+                word, anchor = href[22:].split(u"#", 1)
             except ValueError:
-                word = href[13:]
+                word = href[22:]
                 anchor = None
 
             # open the wiki page
@@ -385,6 +408,10 @@ class WikiHtmlView(wx.html.HtmlWindow):
                         showDocPagePresenter(presenter)
             else:
                 presenter.switchSubControl("preview", False)
+
+        elif href == u"internaljump:action/history/back":
+            # Go back in history
+            self.presenter.getMainControl().goBrowserBack()
 
         elif href.startswith(u"#"):
             anchor = href[1:]
@@ -463,16 +490,16 @@ class WikiHtmlView(wx.html.HtmlWindow):
             linkInfo = cell.GetLink()
             if linkInfo is not None:
                 href = linkInfo.GetHref()
-                if href.startswith(u"internaljump:"):
+                if href.startswith(u"internaljump:wikipage/"):
                     # Jump to another wiki page
                     
                     # First check for an anchor. In URLs, anchors are always
                     # separated by '#' regardless which character is used
                     # in the wiki syntax (normally '!')
                     try:
-                        wikiWord, anchor = href[13:].split(u"#", 1)
+                        wikiWord, anchor = href[22:].split(u"#", 1)
                     except ValueError:
-                        wikiWord = href[13:]
+                        wikiWord = href[22:]
                         anchor = None
 
                     wikiDocument = self.presenter.getWikiDocument()

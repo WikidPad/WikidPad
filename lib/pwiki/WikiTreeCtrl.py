@@ -247,7 +247,7 @@ class WikiWordNode(AbstractNode):
         style = NodeStyle()
         
         style.label = baselabel
-        
+
         # Has children?
         if self.flagRoot:
             self.flagChildren = True # Has at least Views

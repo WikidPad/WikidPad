@@ -138,14 +138,15 @@ class DocPage(MiscEventSourceMixin):
             self.update(text, True)   # TODO: Really update? Handle auto-generated areas
 
 
-    def informLiveTextChanged(self, changer):
+    def informEditorTextChanged(self, changer):
         """
         Called by the txt editor control
         """
         # Clear cache
         self.livePageAst = None    
         self.editorTextCache = None
-        self.fireMiscEventProps({"changed live text": True, "changer": changer})
+        self.fireMiscEventProps({"changed editor text": True,
+                "changed live text": True, "changer": changer})
 
 
     def getLivePageAst(self, text=None, threadholder=DUMBTHREADHOLDER):

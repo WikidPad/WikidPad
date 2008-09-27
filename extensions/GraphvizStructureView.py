@@ -9,6 +9,9 @@ from subprocess import list2cmdline
 
 import wx
 
+from pwiki.wxHelper import copyTextToClipboard, GUI_ID
+
+
 from pwiki.TempFileSet import createTempFile, TempFileSet
 from pwiki.StringOps import mbcsEnc, mbcsDec, utf8Enc, lineendToOs, uniToGui, \
         joinRegexes, rgbToHtmlColor, escapeHtmlNoBreaks
@@ -268,7 +271,7 @@ class GraphVizBaseHandler:
         
         if self.extAppExe == "":
             # No path to executable -> show message
-            return u"Please set path to GraphViz executables", None
+            return u"Please set path to GraphViz executables in options", None
 
         # Get exporters temporary file set (manages creation and deletion of
         # temporary files)
@@ -395,6 +398,8 @@ class GraphView(wx.html.HtmlWindow):
         self._updateTempFilePrefPath()
         
         self.mode = mode
+        
+        wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
 
 
     def _updateTempFilePrefPath(self):
@@ -416,7 +421,7 @@ class GraphView(wx.html.HtmlWindow):
 #         self.__sinkDocPage.disconnect()
 
 
-    def setLayerVisible(self, vis):
+    def setLayerVisible(self, vis, scName=""):
         """
         Informs the widget if it is really visible on the screen or not
         """
@@ -441,39 +446,53 @@ class GraphView(wx.html.HtmlWindow):
 
     def refresh(self):
         if self.outOfSync:
-                wikiPage = self.presenter.getDocPage()
-                if wikiPage is None:
-                    return  # TODO Do anything else here?
-                    
-                word = wikiPage.getWikiWord()
-                if word is None:
-                    return  # TODO Do anything else here?
-    
-                # Remove previously used temporary files
-                self.tempFileSet.clear()
+            self.graphDotHandler.findExe()
+            wikiPage = self.presenter.getDocPage()
+            if wikiPage is None:
+                return  # TODO Do anything else here?
                 
-                if self.mode.startswith("relation graph/"):
-                    source = buildRelationGraphSource(self.presenter.getWikiDocument(), word)
-                else:  # self.mode.startswith("child graph/"):
-                    source = buildChildGraphSource(self.presenter.getWikiDocument(), word)
+            word = wikiPage.getWikiWord()
+            if word is None:
+                return  # TODO Do anything else here?
 
-                if self.mode.endswith("/dot"):
-                    response, url = self.graphDotHandler.createImage(self.tempFileSet,
-                            "html_previewWX", source, [])
-                            
-                    if response:
-                        self.presenter.displayErrorMessage(response)
-                        self.outOfSync = False
-                        return
-        
-                    self.SetPage(uniToGui(u'<img src="%s" border="0" align="top" alt="relation" />'
-                            % url))
+            # Remove previously used temporary files
+            self.tempFileSet.clear()
 
-                else:  # self.mode.endswith("/dot/source"):
-                    self.SetPage(uniToGui(u'<pre>%s</pre>' %
-                            escapeHtmlNoBreaks(source)))
+            if self.mode.startswith("relation graph/"):
+                source = buildRelationGraphSource(self.presenter.getWikiDocument(), word)
+            else:  # self.mode.startswith("child graph/"):
+                source = buildChildGraphSource(self.presenter.getWikiDocument(), word)
+
+            if self.mode.endswith("/dot"):
+                response, url = self.graphDotHandler.createImage(self.tempFileSet,
+                        "html_previewWX", source, [])
+
+                if response:
+                    self.presenter.displayErrorMessage(response)
+                    self.outOfSync = False
+                    return
+
+                self.SetPage(uniToGui(u'<img src="%s" border="0" align="top" alt="relation" />'
+                        % url))
+
+            else:  # self.mode.endswith("/dot/source"):
+                if self.graphDotHandler.extAppExe == "":
+                    # No path to executable -> show message
+                    warning = u"To see the graph, you must install GraphViz executable\n"\
+                            u"and set the path to it in options\n\n"
+                else:
+                    warning = u""
+
+                self.SetPage(uniToGui(u'<pre>%s%s</pre>' %
+                        (escapeHtmlNoBreaks(warning), escapeHtmlNoBreaks(source))))
 
         self.outOfSync = False
+
+
+    def OnClipboardCopy(self, evt):
+        copyTextToClipboard(self.SelectionToText())
+
+
 
 
 

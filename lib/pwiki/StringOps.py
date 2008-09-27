@@ -800,7 +800,7 @@ else:
 
 
 
-def ntPathnameFromUrl(url):
+def ntPathnameFromUrl(url, testFileType=True):
     r"""
     Modified version of nturl2path.url2pathname.
     
@@ -813,6 +813,11 @@ def ntPathnameFromUrl(url):
             C:\foo\bar\spam.foo
     """
     import string
+    if url.startswith("file:"):
+        url = url[5:]
+    elif testFileType:
+        raise RuntimeError, 'Cannot convert non-local URL to pathname'
+
     if not '|' in url:
         # No drive specifier, just convert slashes
         if url[:4] == '////':
@@ -837,7 +842,7 @@ def ntPathnameFromUrl(url):
 
 
 
-def macPathnameFromUrl(url):
+def macPathnameFromUrl(url, testFileType=True):
     "Convert /-delimited url to mac pathname"
     #
     # XXXX The .. handling should be fixed...
@@ -879,12 +884,28 @@ def macPathnameFromUrl(url):
     return flexibleUrlUnquote(rv)
 
 
+def elsePathnameFromUrl(url, testFileType=True):
+    "Convert /-delimited url to pathname"
+    #
+    # XXXX The .. handling should be fixed...
+    #
+    if url.startswith("file:"):
+        url = url[5:]
+    elif testFileType:
+        raise RuntimeError, 'Cannot convert non-local URL to pathname'
+    
+    return flexibleUrlUnquote(url)
+
+
+
+
 if os.name == 'nt':
     pathnameFromUrl = ntPathnameFromUrl
 elif os.name == 'mac':
     pathnameFromUrl = macPathnameFromUrl
 else:
-    pathnameFromUrl = flexibleUrlUnquote
+#     pathnameFromUrl = flexibleUrlUnquote
+    pathnameFromUrl = elsePathnameFromUrl
 
 
 
@@ -954,7 +975,7 @@ def wikiUrlToPathWordAndAnchor(url):
     parsed[5] = ""
     parsed = tuple(parsed)
 
-    filePath = pathnameFromUrl(urlparse.urlunparse(parsed)[5:])
+    filePath = pathnameFromUrl(urlparse.urlunparse(parsed)[5:], False)
 
 #     filePath = urllib.url2pathname(url)
 

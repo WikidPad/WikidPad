@@ -592,24 +592,33 @@ class WikiData:
         wordSet = sets.Set(self.getAllDefinedWikiPageNames())
 
         # Remove all which have parents
-        relations = self._getAllRelations()
-        childWords = sets.Set([relation for word, relation in relations])
-        
-        # Remove directly mentioned words (not an alias of the word)
-        wordSet -= childWords
-        
-#         for word, relation in relations:
-#             wordSet.discard(relation)
+#         relations = self._getAllRelations()
+#         childWords = sets.Set([relation for word, relation in relations])
+# 
+#         childWords = sets.Set()
+        for word, relation in self._getAllRelations():
+            relation = self.getAliasesWikiWord(relation)
+            if word == relation:
+                continue
+            
+            wordSet.discard(relation)
+            
 
-        # Remove words where an alias of the word is a child
-        for word in tuple(wordSet):  # "tuple" to create a sequence copy of wordSet
-            for k, alias in self.getPropertiesForWord(word):
-                if k != u"alias":
-                    continue
 
-                if alias in childWords:
-                    wordSet.discard(word)
-                    break   # break inner for loop
+
+#         # Remove directly mentioned words (not an alias of the word)
+#         wordSet -= childWords
+# 
+# 
+#         # Remove words where an alias of the word is a child
+#         for word in tuple(wordSet):  # "tuple" to create a sequence copy of wordSet
+#             for k, alias in self.getPropertiesForWord(word):
+#                 if k != u"alias":
+#                     continue
+# 
+#                 if alias in childWords:
+#                     wordSet.discard(word)
+#                     break   # break inner for loop
 
 
         # Create a list of them

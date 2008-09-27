@@ -40,7 +40,10 @@ class Container(Item):
         if self.title is None:
             self.title = item.title
 
-        if item.isEntry() and item.value != u"":
+        if item.isEntry():
+            if item.value != u"":
+                self.items.append(item)
+        else:
             self.items.append(item)
 
     def getItems(self):
@@ -48,6 +51,9 @@ class Container(Item):
 
     def isEntry(self):
         return False
+        
+    def __repr__(self):
+        return "TextTree.Container("+ repr(self.title) + ", " + repr(self.items) + ")"
 
 
 class TextBlocksEntry(Item):
@@ -91,6 +97,9 @@ class TextBlocksEntry(Item):
                 return None
         
         return TextBlocksEntry(entryTitle, entryFlags, entryValue)
+        
+    def __repr__(self):
+        return "TextBlocksEntry" + repr((self.title, self.flags, self.value))
 
 
 
@@ -166,7 +175,7 @@ def buildTreeFromText(content, entryFactory):
     content --- Text to build tree from
     """
     stack = [(0, Container())]
-
+    
     for line in content.split(u"\n"):
         if line.strip() == u"":
             continue
@@ -177,10 +186,10 @@ def buildTreeFromText(content, entryFactory):
         entry = entryFactory(text)
         if entry is None:
             continue
-
+        
         # Adjust the stack
         if deep > stack[-1][0]:
-            stack.append([deep, Container()])
+            stack.append((deep, Container()))
         else:
             while stack[-1][0] > deep:
                 container = stack.pop()[1]
@@ -233,11 +242,11 @@ def addTreeToMenu(container, menu, idRecycler, evtSender, evtRcvFunc):
 
             menuItem = wx.MenuItem(menu, menuID, item.title)
             menu.AppendItem(menuItem)
-        else:
+        elif isinstance(item, Container):
             # Handle subcontainer recursively
             submenu = wx.Menu()
-            addToMenu(item, submenu, idRecycler, evtSender, evtRcvFunc)
-            menu.AppendMenu(wx.NewId(), item.title, menu)
+            addTreeToMenu(item, submenu, idRecycler, evtSender, evtRcvFunc)
+            menu.AppendMenu(wx.NewId(), item.title, submenu)
 
    
    

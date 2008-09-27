@@ -49,6 +49,8 @@ The following keys and values are built into WikidPad (further are possible by p
           independent from the page containing the insertion tag.
         * *undefined*: all undefined wiki word links. The list is
           independent from the page containing the insertion tag.
+        * *back*: go back in history of WikidPad tab (or browser
+          on export)
     * *savedsearch* lists all wiki words found by the saved search
       with the name given as value.
     * *toc* shows a little table of contents with the headings of 

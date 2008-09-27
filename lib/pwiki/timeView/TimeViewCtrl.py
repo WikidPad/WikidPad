@@ -54,7 +54,7 @@ class TimeViewCtrl(wx.Notebook):
         pass
 
 
-    def setLayerVisible(self, vis):
+    def setLayerVisible(self, vis, scName=""):
         pass
 
 

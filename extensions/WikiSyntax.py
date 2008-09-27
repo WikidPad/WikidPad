@@ -108,12 +108,11 @@ Heading2RE      = re.compile(ur"^\+{2}(?!\+) ?(?P<h2Content>" +
 Heading1RE      = re.compile(ur"^\+{1}(?!\+) ?(?P<h1Content>" +
         PlainCharacterPAT + ur"+?)\n",
         re.DOTALL | re.UNICODE | re.MULTILINE)
-# UrlRE           = re.compile(ur'(?:(?:wiki|file|https?|ftp|rel)://|mailto:)[^"\s<>]*',
-#         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
+
+
 UrlRE           = re.compile(ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'
         ur'(?:(?![.,;:!?)]+["\s])[^"\s<>])*(?:>\S+)?',
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
-
 
 
 TitledUrlRE =  re.compile(BracketStartPAT + 
@@ -129,13 +128,6 @@ NumericBulletRE = re.compile(ur"^(?P<indentNumeric>[ \t]*)(?P<preLastNumeric>(?:
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 
-# WikiWords
-#WikiWordRE      = re.compile(r"\b(?<!~)(?:[A-Z\xc0-\xde\x8a-\x8f]+[a-z\xdf-\xff\x9a-\x9f]+[A-Z\xc0-\xde\x8a-\x8f]+[a-zA-Z0-9\xc0-\xde\x8a-\x8f\xdf-\xff\x9a-\x9f]*|[A-Z\xc0-\xde\x8a-\x8f]{2,}[a-z\xdf-\xff\x9a-\x9f]+)\b")
-#WikiWordRE2     = re.compile("\[[a-zA-Z0-9\-\_\s]+?\]")
-
-
-# UPPERCASE = mbcsDec(string.uppercase)[0]
-# LOWERCASE = mbcsDec(string.lowercase)[0]
 LETTERS = UPPERCASE + LOWERCASE
 
 
@@ -224,14 +216,14 @@ TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlRE.pattern + u"|" +
 PropertyValueRE = re.compile(ur"(?:[ \t]*"
         ur"(?:(?P<propertyValQuoteStarter>\"+|'+|/+|\\+)"
         ur"(?P<propertyQuotedValue>.*?)(?P=propertyValQuoteStarter)|"
-        ur"(?P<propertyValue>[\w\-\_ \t:,.!?#/|]*)))",
+        ur"(?P<propertyValue>[\w\-\_ \t:,.!?#%/|]*)))",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 
 PropertyFurtherValueRE = re.compile(ur"(?:;[ \t]*"
         ur"(?:(?P<propertyFurtherValQuoteStarter>\"+|'+|/+|\\+)"
         ur"(?P<propertyFurtherQuotedValue>.*?)(?P=propertyFurtherValQuoteStarter)|"
-        ur"(?P<propertyFurtherValue>[\w\-\_\t:,.!?#/|][\w\-\_ \t:,.!?#/|]*)))",
+        ur"(?P<propertyFurtherValue>[\w\-\_\t:,.!?#%/|][\w\-\_ \t:,.!?#%/|]*)))",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 
@@ -248,7 +240,7 @@ PropertyRE      = re.compile(BracketStartPAT +
 # parses the dynamic properties in a todo item
 PropertyInTodoRE      = re.compile(BracketStartPAT +
         ur"[ \t]*(?P<propertyKey>[\w\-\_\.]+?)[ \t]*"
-        ur"[=:][ \t]*(?P<propertyValue>[\w\-\_ \t:,.!?#/|]+?)" + 
+        ur"[=:][ \t]*(?P<propertyValue>[\w\-\_ \t:,.!?#%/|]+?)" + 
         BracketEndPAT,
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
@@ -257,13 +249,13 @@ PropertyInTodoRE      = re.compile(BracketStartPAT +
 InsertionValueRE = re.compile(ur"(?:"
         ur"(?P<insertionQuoteStarter>\"+|'+|/+|\\+)"
         ur"(?P<insertionQuotedValue>.*?)(?P=insertionQuoteStarter)|"
-        ur"(?P<insertionValue>[\w\-\_ \t,.!?#/|]*))",
+        ur"(?P<insertionValue>[\w\-\_ \t,.!?#%/|]*))",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 InsertionAppendixRE = re.compile(ur";[ \t]*(?:"
         ur"(?P<insertionApxQuoteStarter>\"+|'+|/+|\\+)"
         ur"(?P<insertionQuotedAppendix>.*?)(?P=insertionApxQuoteStarter)|"
-        ur"(?P<insertionAppendix>[\w\-\_\t:,.!?#/|][\w\-\_ \t,.!?#/|]*))",
+        ur"(?P<insertionAppendix>[\w\-\_\t:,.!?#%/|][\w\-\_ \t,.!?#%/|]*))",
         re.DOTALL | re.UNICODE | re.MULTILINE)  # SPN
 
 InsertionRE     = re.compile(BracketStartPAT +

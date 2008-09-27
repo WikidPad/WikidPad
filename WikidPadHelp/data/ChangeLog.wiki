@@ -1,7 +1,46 @@
 ﻿++ Change Log
 
 
-Aug. 26, 2008 (1.9beta17)
+Sep. 27, 2008 (1.9beta18)
+
+    * Insertion [:rel:back] introduced to go back in history.
+      See [Insertions]
+    
+    * Option that double-clicking into preview switches to editor
+    * Option to close tab when clicking on it with middle mouse button
+    * Option to control what happens when dropping files.
+      For all three see OptionsDialog#++++# Mouse
+    
+    * Clipboard catcher does no longer catch when copying from
+      WikidPad itself
+    * Most menu items and toolbar icons are grayed out if not usable
+      (not yet completed)
+    * Pages are now counted as parentless if they have only itself
+      as parent
+    * Closing a wiki pushes it on top of recent files list.
+    
+    * Bug fixed: Copying of GraphViz source produced by
+      "GraphvizStructureView" plugin into clipboard did not always work
+    * Bug fixed: Renaming may modify page heading in wrong way
+      ("++ X" renamed to 'Y X' results in "++ Y Y X")
+    * Bug fixed: "wikistyle.css" is not copied on export
+    * Bug fixed: Default "wikistyle.css" has no style definition
+      for heading levels 5 to 15
+    * Bug fixed: Searching for regular expressions matching nothing
+      (e.g. "|") may freeze WikidPad
+    * Bug fixed: Nesting of text blocks into submenus doesn't work
+    * Bug fixed: Empty lines between bullets/numbered items in
+      HTML preview
+    
+    * Development: Menu items and toolbar icons from plugins can now
+      provide an update function to enable/disable when appropriate.
+      See plugin "referrals.py" as example.
+    * Development: Script "buildGadflyZips.py" added to relieve
+      creation of WikidPad from source.
+
+
+
+Aug. 26, 2008 (1.9beta17, repository revision in "mbutscher" branch: 145)
 
     * When exporting, files in the file storage
       ("files" directory) which are referenced on exported pages

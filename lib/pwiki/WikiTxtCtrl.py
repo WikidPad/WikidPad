@@ -27,6 +27,7 @@ from AdditionalDialogs import ImagePasteSaver, ImagePasteDialog
 import WikiFormatting
 import PageAst, DocPages
 from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException
+import UserActionCoord
 
 from SearchAndReplace import SearchReplaceOperation
 from StringOps import *
@@ -453,6 +454,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.ReplaceSelection("")
 
     def Copy(self):
+        cbIcept = self.presenter.getMainControl().getClipboardInterceptor()        
+        if cbIcept is not None:
+            cbIcept.informCopyInWikidPad()
         copyTextToClipboard(self.GetSelectedText())
 
     def Paste(self):
@@ -516,7 +520,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.Copy()
         
         
-    def setLayerVisible(self, vis):
+    def setLayerVisible(self, vis, scName=""):
         """
         Informs the widget if it is really visible on the screen or not
         """
@@ -1677,27 +1681,34 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 self.presenter.getMainControl().launchUrl(tok.node.url)
                 return True
 
-            elif tok.ttype == WikiFormatting.FormatTypes.Insertion and \
-                    tok.node.key == u"page":
+            elif tok.ttype == WikiFormatting.FormatTypes.Insertion:
+                if tok.node.key == u"page":
                         
-                # open the wiki page
-                if tabMode & 2:
-                    # New tab
-                    presenter = self.presenter.getMainControl().\
-                            createNewDocPagePresenterTab()
-                else:
-                    # Same tab
-                    presenter = self.presenter
+                    # open the wiki page
+                    if tabMode & 2:
+                        # New tab
+                        presenter = self.presenter.getMainControl().\
+                                createNewDocPagePresenterTab()
+                    else:
+                        # Same tab
+                        presenter = self.presenter
+    
+                    presenter.openWikiPage(tok.node.value,   # .getMainControl()
+                            motionType="child", anchor=tok.node.value)
+    
+                    if not tabMode & 1:
+                        # Show in foreground
+                        presenter.getMainControl().getMainAreaPanel().\
+                                showDocPagePresenter(presenter)
+    
+                    return True
 
-                presenter.openWikiPage(tok.node.value,   # .getMainControl()
-                        motionType="child", anchor=tok.node.value)
+                    # TODO: Make this work correctly
+#                 elif tok.node.key == u"rel":
+#                     if tok.node.value == u"back":
+#                         # Go back in history
+#                         self.presenter.getMainControl().goBrowserBack()
 
-                if not tabMode & 1:
-                    # Show in foreground
-                    presenter.getMainControl().getMainAreaPanel().\
-                            showDocPagePresenter(presenter)
-
-                return True
             elif tok.ttype == WikiFormatting.FormatTypes.Footnote:
                 pageAst = self.getPageAst()
                 footnoteId = tok.grpdict["footnoteId"]
@@ -2419,7 +2430,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             if evt.GetModificationType() & \
                     (wx.stc.STC_MOD_INSERTTEXT | wx.stc.STC_MOD_DELETETEXT):
                 self.getLoadedDocPage().setDirty(True)
-                self.presenter.informLiveTextChanged(self)
+                self.presenter.informEditorTextChanged(self)
 
     def OnCharAdded(self, evt):
         "When the user presses enter reindent to the previous level"
@@ -2702,6 +2713,67 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.CallTipCancel()
 
 
+    @staticmethod
+    def userActionPasteFiles(unifName, paramDict):
+        """
+        User action to handle pasting or dropping of files into editor.
+        """
+        editor = paramDict.get("editor")
+        if editor is None:
+            return
+
+        filenames =paramDict.get("filenames")
+        x = paramDict.get("x")
+        y = paramDict.get("y")
+        
+        if unifName == u"action/editor/this/paste/files/insert/url/absolute":
+            modeCopyToStorage = False
+            modeRelativeUrl = False
+        elif unifName == u"action/editor/this/paste/files/insert/url/relative":
+            modeCopyToStorage = False
+            modeRelativeUrl = True
+        elif unifName == u"action/editor/this/paste/files/insert/url/tostorage":
+            modeCopyToStorage = True
+            modeRelativeUrl = False
+
+        urls = []
+
+        for fn in filenames:
+            url = urlFromPathname(fn)
+    
+            if fn.endswith(".wiki"):
+                urls.append("wiki:%s" % url)
+            else:
+                doCopy = False
+                if modeCopyToStorage:
+                    # Copy file into file storage
+                    fs = editor.presenter.getWikiDocument().getFileStorage()
+                    try:
+                        fn = fs.createDestPath(fn)
+                        doCopy = True
+                    except Exception, e:
+                        traceback.print_exc()
+                        editor.presenter.getMainControl().displayErrorMessage(
+                                _(u"Couldn't copy file"), e)
+                        return
+    
+                if modeRelativeUrl or doCopy:
+                    # Relative rel: URL
+                    locPath = editor.presenter.getMainControl().getWikiConfigPath()
+                    if locPath is not None:
+                        locPath = dirname(locPath)
+                        relPath = relativeFilePath(locPath, fn)
+                        if relPath is None:
+                            # Absolute path needed
+                            urls.append("file:%s" % url)
+                        else:
+                            urls.append("rel://%s" % urlFromPathname(relPath))
+                else:
+                    # Absolute file: URL
+                    urls.append("file:%s" % url)
+    
+        editor.DoDropText(x, y, " ".join(urls))
+
 
     # TODO
 #     def setMouseCursor(self):
@@ -2795,47 +2867,55 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
         # Necessary because key state may change during the loop                                
         controlPressed = wx.GetKeyState(wx.WXK_CONTROL)
         shiftPressed = wx.GetKeyState(wx.WXK_SHIFT)
+        
+        if isLinux():
+            # On Linux, at least Ubuntu, fn is a UTF-8 encoded unicode(!?)
+            # string
+            try:
+                filenames = [utf8Dec(fn.encode("latin-1"))[0]
+                        for fn in filenames]
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                pass
 
-        for fn in filenames:
-            if isLinux():
-                # On Linux, at least Ubuntu, fn is a UTF-8 encoded unicode(!?)
-                # string
-                fn = utf8Dec(fn.encode("latin-1", "replace"))[0]
 
-            url = urlFromPathname(fn)
+        mc = self.editor.presenter.getMainControl()
+        
+        paramDict = {"editor": self.editor, "filenames": filenames,
+                "x": x, "y": y, "main control": mc}
+        
+        if controlPressed:
+            suffix = u"/modkeys/ctrl"
+        elif shiftPressed:
+            suffix = u"/modkeys/shift"
+        else:
+            suffix = u""
 
-            if fn.endswith(".wiki"):
-                urls.append("wiki:%s" % url)
-            else:
-                doCopy = False
-                if controlPressed:
-                    # Copy file into file storage
-                    fs = self.editor.presenter.getWikiDocument().getFileStorage()
-                    try:
-                        fn = fs.createDestPath(fn)
-                        doCopy = True
-                    except Exception, e:
-                        traceback.print_exc()
-                        self.editor.presenter.getMainControl().displayErrorMessage(
-                                _(u"Couldn't copy file"), e)
-                        return
+        mc.getUserActionCoord().reactOnUserEvent(
+                u"mouse/leftdrop/editor/files" + suffix, paramDict)
 
-                if shiftPressed or doCopy:
-                    # Relative rel: URL
-                    locPath = self.editor.presenter.getMainControl().getWikiConfigPath()
-                    if locPath is not None:
-                        locPath = dirname(locPath)
-                        relPath = relativeFilePath(locPath, fn)
-                        if relPath is None:
-                            # Absolute path needed
-                            urls.append("file:%s" % url)
-                        else:
-                            urls.append("rel://%s" % urlFromPathname(relPath))
-                else:
-                    # Absolute file: URL
-                    urls.append("file:%s" % url)
 
-        self.editor.DoDropText(x, y, " ".join(urls))
+
+
+# User actions to register
+_ACTION_EDITOR_PASTE_FILES_ABSOLUTE = UserActionCoord.SimpleAction("",
+        u"action/editor/this/paste/files/insert/url/absolute",
+        WikiTxtCtrl.userActionPasteFiles)
+
+_ACTION_EDITOR_PASTE_FILES_RELATIVE = UserActionCoord.SimpleAction("",
+        u"action/editor/this/paste/files/insert/url/relative",
+        WikiTxtCtrl.userActionPasteFiles)
+
+_ACTION_EDITOR_PASTE_FILES_TOSTORAGE = UserActionCoord.SimpleAction("",
+        u"action/editor/this/paste/files/insert/url/tostorage",
+        WikiTxtCtrl.userActionPasteFiles)
+
+
+_ACTIONS = (
+        _ACTION_EDITOR_PASTE_FILES_ABSOLUTE, _ACTION_EDITOR_PASTE_FILES_RELATIVE,
+        _ACTION_EDITOR_PASTE_FILES_TOSTORAGE)
+
+
+UserActionCoord.registerActions(_ACTIONS)
 
 
 

@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 import cStringIO as StringIO
-import urllib, os.path, traceback
+import urllib, os, os.path, traceback
 
 import wx, wx.html
 
@@ -19,7 +19,8 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 
 from MiscEvent import KeyFunctionSink
 
-from StringOps import uniToGui, utf8Enc, utf8Dec, urlFromPathname, urlQuote
+from StringOps import uniToGui, utf8Enc, utf8Dec, urlFromPathname, urlQuote, \
+        writeEntireTxtFile
 
 from TempFileSet import TempFileSet
 
@@ -36,7 +37,7 @@ class LinkCreatorForPreviewIe:
 
     def get(self, word, default = None):
         if self.wikiData.isDefinedWikiWord(word):
-            return urlQuote(u"internaljump:%s" % word, u"/#:;@")
+            return urlQuote(u"internaljump:wikipage/%s" % word, u"/#:;@")
         else:
             return default
 
@@ -49,7 +50,7 @@ class LinkCreatorForPreviewMoz:
 
     def get(self, word, default = None):
         if self.wikiData.isDefinedWikiWord(word):
-            return urlQuote(u"file://internaljump/%s" % word, u"/#:;@")
+            return urlQuote(u"file://internaljump/wikipage/%s" % word, u"/#:;@")
         else:
             return default
 
@@ -98,6 +99,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 # file without anchors
 
         self.anchor = None  # Name of anchor to jump to when view gets visible
+        self.lastAnchor = None
         self.passNavigate = 0
 
 
@@ -119,19 +121,17 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
         self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
 
-#
-#         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
-#         EVT_KEY_UP(self, self.OnKeyUp)
-#         EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
-#         EVT_MENU(self, GUI_ID.CMD_ZOOM_IN, lambda evt: self.addZoom(1))
-#         EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT, lambda evt: self.addZoom(-1))
+        # Create temporary html file
+        self.htpath = self.exporterInstance.tempFileSet.createTempFile(
+                    u"", ".html", relativeTo="")
+
         iewin.EVT_BeforeNavigate2(self, self.GetId(), self.OnBeforeNavigate)
 
         wx.EVT_SET_FOCUS(self, self.OnSetFocus)
 #         EVT_MOUSEWHEEL(self, self.OnMouseWheel)
 
 
-    def setLayerVisible(self, vis):
+    def setLayerVisible(self, vis, scName=""):
         """
         Informs the widget if it is really visible on the screen or not
         """
@@ -147,6 +147,12 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
     def close(self):
         self.setLayerVisible(False)
+        try:
+            os.remove(pathEnc(self.htpath))
+        except:
+            pass
+            # TODO: Option to show also these exceptions
+            # traceback.print_exc()
         self.presenterListener.disconnect()
         self.__sinkApp.disconnect()
         self.__sinkDocPage.disconnect()
@@ -155,7 +161,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
     def refresh(self):
         ## _prof.start()
 
-        # Store position of currently displaayed page, if any
+        # Store position of currently displayed page, if any
         if self.currentLoadedWikiWord:
             try:
                 pass
@@ -165,26 +171,28 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             except WikiWordNotFoundException, e:
                 pass
         if self.outOfSync:
-            self.currentLoadedWikiWord = None
+#             self.currentLoadedWikiWord = None
 
             wikiDoc = self.presenter.getWikiDocument()
             if wikiDoc is None:
+                self.currentLoadedWikiWord = None
                 return
 
             self.exporterInstance.wikiData = wikiDoc.getWikiData()
 
             wikiPage = self.presenter.getDocPage()
             if wikiPage is None:
+                self.currentLoadedWikiWord = None
                 return  # TODO Do anything else here?
 
             word = wikiPage.getWikiWord()
             if word is None:
+                self.currentLoadedWikiWord = None
                 return  # TODO Do anything else here?
 
             # Remove previously used temporary files
             self.exporterInstance.tempFileSet.clear()
 
-            self.currentLoadedWikiWord = word
             content = self.presenter.getLiveText()
 
             html = self.exporterInstance.exportContentToHtmlString(word, content,
@@ -192,48 +200,36 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                     self.LinkCreatorForPreview(
                         self.presenter.getWikiDocument().getWikiData()))
                         
-            htpath = self.exporterInstance.tempFileSet.createTempFile(
-                    utf8Enc(html)[0], ".html", relativeTo="")
+#             htpath = self.exporterInstance.tempFileSet.createTempFile(
+#                     utf8Enc(html)[0], ".html", relativeTo="")
 
-            url = "file:" + urlFromPathname(htpath)
+            writeEntireTxtFile(self.htpath, utf8Enc(html)[0])
 
-            # wxFileSystem.FileNameToURL
-
-            # wxFileSystem.FileNameToURL(p)
+            url = "file:" + urlFromPathname(self.htpath)
 
             wx.GetApp().getInsertionPluginManager().taskEnd()
- 
+            
             self.currentLoadedUrl = url
+            if self.currentLoadedWikiWord == word and \
+                    self.anchor is None:
+                self.RefreshPage()
 
-            if self.anchor:
-                url += "#" + self.anchor
-
-
-            # TODO Reset after open wiki
-#             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
-#             self.SetFonts("", "", [max(s + 2 * zoom, 1)
-#                     for s in self._DEFAULT_FONT_SIZES])
-
-#             sf = StringIO.StringIO(utf8Enc(uniToGui(html))[0])
-#             self.LoadStream(sf)
-#             sf.close()
-
-            self.passNavigate += 1
-            self.LoadUrl(url)
+            else:                        
+                self.currentLoadedWikiWord = word 
+    
+                if self.anchor:
+                    url += "#" + self.anchor
+    
+    
+                self.passNavigate += 1
+                self.LoadUrl(url)
+                self.lastAnchor = self.anchor
 
         else:  # Not outOfSync
             if self.anchor:
                 self.passNavigate += 1
                 self.LoadUrl(self.currentLoadedUrl + u"#" + self.anchor)
-
-
-#         if self.anchor and self.HasAnchor(self.anchor):
-#             self.ScrollToAnchor(self.anchor)
-#             # Workaround because ScrollToAnchor scrolls too far
-#             lx, ly = self.GetViewStart()
-#             self.Scroll(lx, ly-1)
-#         elif self.outOfSync:
-#             pass
+                self.lastAnchor = self.anchor
 
         self.anchor = None
         self.outOfSync = False
@@ -315,7 +311,6 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
 
     def OnBeforeNavigate(self, evt):
-#         print "OnBeforeNavigate", repr(evt.URL)
         if self.passNavigate:
             self.passNavigate -= 1
             return
@@ -326,7 +321,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         else:
             internaljumpPrefix = u"internaljump:"
 
-        if href.startswith(internaljumpPrefix):
+        if href.startswith(internaljumpPrefix + u"wikipage/"):
 
             if self.drivingMoz:
                 # Unlike stated, the Mozilla ActiveX control has some
@@ -342,9 +337,9 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             # separated by '#' regardless which character is used
             # in the wiki syntax (normally '!')
             try:
-                word, anchor = href[len(internaljumpPrefix):].split("#", 1)
+                word, anchor = href[len(internaljumpPrefix) + 9:].split("#", 1)
             except ValueError:
-                word = href[len(internaljumpPrefix):]
+                word = href[len(internaljumpPrefix) + 9:]
                 anchor = None
 
 #             if self.drivingMoz:
@@ -357,8 +352,22 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             # Now open wiki
             self.presenter.getMainControl().openWikiPage(
                     word, motionType="child", anchor=anchor)
-        elif href.startswith(u"file:"):
-            pass
+        elif href == (internaljumpPrefix + u"action/history/back"):
+            # Go back in history
+            self.presenter.getMainControl().goBrowserBack()
+
+        elif href == (internaljumpPrefix + u"mouse/leftdoubleclick/preview/body"):
+            pres = self.presenter
+            mc = pres.getMainControl()
+
+            paramDict = {"page": pres.getDocPage(), "presenter": pres,
+                    "main control": mc}
+                    
+            mc.getUserActionCoord().reactOnUserEvent(
+                    u"mouse/leftdoubleclick/preview/body", paramDict)
+
+#         elif href.startswith(u"file:"):
+#             pass
         else:
             evt.Cancel = True
             self.presenter.getMainControl().launchUrl(href)

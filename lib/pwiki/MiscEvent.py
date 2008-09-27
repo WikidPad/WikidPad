@@ -134,6 +134,8 @@ class ListenerList(object):
 
         if isinstance(lref, weakref.ReferenceType):
             return lref()  # Retrieve real object from weakref object
+            
+        return lref
     getActualObject = staticmethod(getActualObject)
 
 
@@ -444,6 +446,12 @@ class ProxyMiscEvent(MiscEvent):
     def __init__(self, source=None):
         MiscEvent.__init__(self, source)
         self.watchedEvents = ()
+
+    def setWatchedSource(self, watchedSource):
+        if watchedSource is None:
+            self.setWatchedEvent(None)
+        else:
+            self.setWatchedEvent(watchedSource.getMiscEvent())
 
     def setWatchedEvent(self, watchedEvent):
         if watchedEvent is None:

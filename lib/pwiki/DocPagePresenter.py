@@ -94,18 +94,14 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
 
 
     def setDocPage(self, dp):
-#         if self.docPage is not None:
-#             self.docPage.getMiscEvent().removeListener(self)
-
         self.docPage = dp
+        self.currentDocPageProxyEvent.setWatchedSource(dp)
 
-        if self.docPage is not None:
-            self.currentDocPageProxyEvent.setWatchedEvent(
-                self.docPage.getMiscEvent())
-        else:
-            self.currentDocPageProxyEvent.setWatchedEvent(None)
-
-#             self.docPage.getMiscEvent().addListener(self)
+#         if self.docPage is not None:
+#             self.currentDocPageProxyEvent.setWatchedEvent(
+#                 self.docPage.getMiscEvent())
+#         else:
+#             self.currentDocPageProxyEvent.setWatchedEvent(None)
 
 
     def getCurrentDocPageProxyEvent(self):
@@ -140,12 +136,12 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
         return docPage.getLiveText()
 
 
-    def informLiveTextChanged(self, changer):
+    def informEditorTextChanged(self, changer):
         """
         Called by the txt editor control
         """
         if self.getDocPage() is not None:
-            self.getDocPage().informLiveTextChanged(changer)
+            self.getDocPage().informEditorTextChanged(changer)
 
 
     def miscEventHappened(self, miscevt):
@@ -157,12 +153,12 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
             self.fireMiscEventProps(miscevt.getProps())
 
         elif miscevt.getSource() is self.docPage:
-            if miscevt.has_key("changed live text"):
-                self.fireMiscEventProps(miscevt.getProps())
-            elif miscevt.has_key("deleted page"):
-                self.pageHistory.goAfterDeletion()
-            elif miscevt.has_key("renamed wiki page"):
-                oldWord = self.docPage.getWikiWord()
+#             if miscevt.has_key("changed editor text"):
+#                 self.fireMiscEventProps(miscevt.getProps())
+#             elif miscevt.has_key("deleted page"):
+#                 self.pageHistory.goAfterDeletion()
+            if miscevt.has_key("renamed wiki page"):
+#                 oldWord = self.docPage.getWikiWord()
                 newWord = miscevt.get("newWord")
 
                 self.getSubControl("textedit").loadWikiPage(None)
@@ -403,7 +399,8 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
             subControl.SetFocus()
 
         for n, c in self.subControls.iteritems():
-            if n != scName:
+#             if n != scName:
+            if c is not subControl:
                 if self.visible:
                     c.setLayerVisible(False)
                 c.Show(False)

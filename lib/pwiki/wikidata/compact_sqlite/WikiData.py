@@ -602,11 +602,20 @@ class WikiData:
         get the words that have no parents.
         """
         try:
+#             return self.connWrap.execSqlQuerySingleColumn(
+#                     "select word from wikiwordcontent where not word glob '[[]*' "
+#                     "except select relation from wikirelations "
+#                     "except select word from wikiwordprops where key='alias' and "
+#                     "value in (select relation from wikirelations)")
+
             return self.connWrap.execSqlQuerySingleColumn(
                     "select word from wikiwordcontent where not word glob '[[]*' "
-                    "except select relation from wikirelations "
-                    "except select word from wikiwordprops where key='alias' and "
-                    "value in (select relation from wikirelations)")
+                    "except select "
+                    "ifnull(wikiwordprops.word, wikirelations.relation) as unaliased "
+                    "from wikirelations left join wikiwordprops "
+                    "on wikirelations.relation = wikiwordprops.value and "
+                    "wikiwordprops.key = 'alias' where unaliased != wikirelations.word")
+
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)

@@ -1562,6 +1562,103 @@
           </object>
           <cols>2</cols>
           <rows>2</rows>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Left double click in preview:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chMouseDblClickPreviewBody">
+              <content>
+                <item>Nothing</item>
+                <item>Switch tab to edit</item>
+                <item>New tab with edit</item>
+              </content>
+              <selection>0</selection>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Middle click on tab:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chMouseMdlClickPageTab">
+              <content>
+                <item>Nothing</item>
+                <item>Close tab</item>
+              </content>
+              <selection>0</selection>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Dropping files:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chMouseLeftDropEditor">
+              <content>
+                <item>Nothing</item>
+                <item>Absolute URL</item>
+                <item>Relative URL</item>
+                <item>Relative into file storage</item>
+              </content>
+              <selection>0</selection>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Dropping files with SHIFT:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chMouseLeftDropEditorShift">
+              <content>
+                <item>Nothing</item>
+                <item>Absolute URL</item>
+                <item>Relative URL</item>
+                <item>Relative into file storage</item>
+              </content>
+              <selection>0</selection>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Dropping files with CTRL:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chMouseLeftDropEditorCtrl">
+              <content>
+                <item>Nothing</item>
+                <item>Absolute URL</item>
+                <item>Relative URL</item>
+                <item>Relative into file storage</item>
+              </content>
+              <selection>0</selection>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
         </object>
         <option>0</option>
         <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -2920,6 +3017,7 @@
             <option>1</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
+            <minsize>-1,80</minsize>
           </object>
           <object class="sizeritem">
             <object class="wxFlexGridSizer">

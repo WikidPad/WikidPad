@@ -2,24 +2,24 @@
 data_dir = data
 
 [main]
-tree_expandednodes_rememberduration = 1
 wiki_icon = 
 footnotes_as_wikiwords = False
 wiki_database_type = original_gadfly
 wikipagetitle_creationmode = 1
-filestorage_identity_filenamemustmatch = False
+tree_expandednodes_descriptorpathes_main = 
+further_wiki_words = 
 last_wiki_word = WikidPadHelp
 filestorage_identity_moddatemustmatch = False
 wiki_name = WikidPadHelp
 tree_last_root_wiki_word = WikidPadHelp
-tree_expandednodes_descriptorpathes_main = 
+tree_expandednodes_rememberduration = 1
 wikipagetitleprefix = ++
 hotkey_showhide_bywiki = 
 tree_force_scratchpad_visibility = True
 wikipagetitle_fromlinktitle = True
 export_default_dir = 
 filestorage_identity_moddateisenough = False
-further_wiki_words = 
 tree_expandednodes_descriptorpathes_views = 
+filestorage_identity_filenamemustmatch = False
 first_wiki_word = WikidPadHelp
 

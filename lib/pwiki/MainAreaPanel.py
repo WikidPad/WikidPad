@@ -53,6 +53,8 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChanged)
         wx.EVT_LEFT_DOWN(self, self.OnLeftDown)
         wx.EVT_LEFT_UP(self, self.OnLeftUp)
+        wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
+        
         wx.EVT_MOTION(self, self.OnMotion)
         
         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
@@ -67,7 +69,6 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         wx.EVT_MENU(self, GUI_ID.CMD_GO_PREVIOUS_TAB, self.OnGoTab)
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD,
                 self.OnCmdClipboardCopyUrlToThisWikiWord)
-
 
     def close(self):
         for p in self.docPagePresenters:
@@ -382,6 +383,21 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                     self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED,
                             self.OnNotebookPageChanged)
         evt.Skip()
+
+
+    def OnMiddleDown(self, evt):
+        tab = self.HitTest(evt.GetPosition())[0]
+        if tab == wx.NOT_FOUND:
+            return
+        
+        pres = self.docPagePresenters[tab]
+        mc = self.mainControl
+
+        paramDict = {"page": pres.getDocPage(), "presenter": pres,
+                "main control": mc}
+        mc.getUserActionCoord().reactOnUserEvent(
+                u"mouse/middleclick/pagetab", paramDict)
+
 
 
     def OnMotion(self, evt):

@@ -823,13 +823,22 @@ class HtmlXmlExporter(AbstractExporter):
         else:
             bgimg = u''
             
+            
+        if self.exportType == u"html_previewIE":
+            dblClick = 'ondblclick="window.location.href = &quot;internaljump:mouse/leftdoubleclick/preview/body&quot;;"'
+
+        elif self.exportType == u"html_previewMOZ":
+            dblClick = 'ondblclick="window.location.href = &quot;file://internaljump/mouse/leftdoubleclick/preview/body&quot;;"'
+        else:
+            dblClick = ''
+
         # Build tagstring
-        bodytag = u" ".join((linkcol, alinkcol, vlinkcol, textcol, bgcol, bgimg))
-        if len(bodytag) > 5:  # the 5 spaces
+        bodytag = u" ".join((linkcol, alinkcol, vlinkcol, textcol, bgcol, bgimg, dblClick))
+        if len(bodytag) > 6:  # the 6 spaces
             bodytag = "<body %s>" % bodytag
         else:
             bodytag = "<body>"
-            
+
         return bodytag
 
 
@@ -893,10 +902,10 @@ class HtmlXmlExporter(AbstractExporter):
 
 
     def copyCssFile(self, dir):
-        if not exists(pathEnc(join(dir, 'wikistyle.css'))[0]):
-            cssFile = pathEnc(join(self.mainControl.wikiAppDir, 'export', 'wikistyle.css'))[0]
+        if not exists(pathEnc(join(dir, self.styleSheet))):
+            cssFile = pathEnc(join(self.mainControl.wikiAppDir, 'export', self.styleSheet))
             if exists(pathEnc(cssFile)):
-                shutil.copy(pathEnc(cssFile), pathEnc(dir))
+                OsAbstract.copyFile(pathEnc(cssFile), pathEnc(join(dir, self.styleSheet)))
 
     def shouldExport(self, wikiWord, wikiPage=None):
         if not wikiPage:
@@ -904,10 +913,10 @@ class HtmlXmlExporter(AbstractExporter):
                 wikiPage = self.wikiDataManager.getWikiPage(wikiWord)
             except WikiWordNotFoundException:
                 return False
-            
+
         #print "shouldExport", mbcsEnc(wikiWord)[0], repr(wikiPage.props.get("export", ("True",))), \
          #       type(wikiPage.props.get("export", ("True",)))
-            
+
         return strToBool(wikiPage.getProperties().get("export", ("True",))[-1])
 
 
@@ -1255,6 +1264,17 @@ class HtmlXmlExporter(AbstractExporter):
                 wordList = wikiDocument.getWikiData().getParentlessWikiWords()
             elif value == u"undefined":
                 wordList = wikiDocument.getWikiData().getUndefinedWords()
+            elif value == u"back":
+                if self.exportType in (u"html_previewWX", u"html_previewIE"):
+                    htmlContent = \
+                            u'<a href="internaljump:action/history/back">Back</a>'
+                elif self.exportType == u"html_previewMOZ":
+                    htmlContent = \
+                            u'<a href="file://internaljump/action/history/back">Back</a>'
+                else:
+                    htmlContent = \
+                            u'<a href="javascript:history.go(-1)">Back</a>'
+
 
         elif key == u"savedsearch":
             datablock = wikiDocument.getWikiData().getSearchDatablock(value)
@@ -1358,7 +1378,7 @@ class HtmlXmlExporter(AbstractExporter):
                     exportType, key)
 
             if handler is None and self.asHtmlPreview:
-                # No handlert found -> try to find generic HTML preview handler
+                # No handler found -> try to find generic HTML preview handler
                 exportType = "html_preview"
                 handler = wx.GetApp().getInsertionPluginManager().getHandler(self,
                         exportType, key)
@@ -1999,8 +2019,7 @@ class HtmlXmlExporter(AbstractExporter):
                     self.statestack.append(("ol", ind))
                     self.numericdeepness += 1
                     
-                self.outAppend(u"<li />", not self.asIntHtmlPreview)
-#                 self.eatPreBreak()
+                self.outAppend(u"<li />", True) # not self.asIntHtmlPreview)
 
             elif styleno == WikiFormatting.FormatTypes.Bullet:
                 # Unnumbered bullet
@@ -2023,8 +2042,7 @@ class HtmlXmlExporter(AbstractExporter):
                     self.outIndentation("ul")
                     self.statestack.append(("ul", ind))
 
-                self.outAppend(u"<li />", not self.asIntHtmlPreview)
-#                 self.eatPreBreak(u"<li />")
+                self.outAppend(u"<li />", True) # not self.asIntHtmlPreview)
             elif styleno == WikiFormatting.FormatTypes.SuppressHighlight:
                 ind = splitIndent(tok.grpdict["suppressIndent"])[1]
 

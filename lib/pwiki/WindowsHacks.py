@@ -524,7 +524,7 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
         self.hWnd = None
         self.nextWnd = None
 
-        self.firstCCMessage = False
+        self.ignoreNextCCMessage = False
 
         self.mainControl = mainControl
         self.wikiPage = None
@@ -534,8 +534,7 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
 
     def getMode(self):
         return self.mode
-
-
+        
     def _cbViewerChainIn(self):
         """
         Hook into clipboard viewer chain.
@@ -545,7 +544,7 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
 
         # SetClipboardViewer sends automatically an initial clipboard changed (CC)
         # message which should be ignored
-        self.firstCCMessage = True
+        self.ignoreNextCCMessage = True
         self.nextWnd = SetClipboardViewer(c_int(self.hWnd))
 
 
@@ -590,6 +589,17 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
         self._cbViewerChainOut()
 
 
+    def informCopyInWikidPad(self):
+        """
+        Informs the interceptor, that currently something is copied in the
+        editor in WikidPad itself. If mode is MODE_AT_CURSOR this
+        clipboard content is then not copied back into the editor.
+        """
+        if self.mode == ClipboardCatchIceptor.MODE_AT_CURSOR:
+            self.ignoreNextCCMessage = True
+            self.lastText = None
+
+
     def startAfterIntercept(self, interceptCollection):
         """
         Called for each interceptor of a collection after the actual
@@ -627,8 +637,8 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
                         c_uint(params.wParam), c_ulong(params.lParam))
 
         elif params.uMsg == WM_DRAWCLIPBOARD:
-            if self.firstCCMessage:
-                self.firstCCMessage = False
+            if self.ignoreNextCCMessage:
+                self.ignoreNextCCMessage = False
             else:
                 self.handleClipboardChange()
 
@@ -762,14 +772,14 @@ class BrowserMoveIceptor(BaseWinInterceptor):
 #     def __init__(self):
 #         BaseWinProcIntercept.__init__(self)
 #         self.nextWnd = None
-#         self.firstCCMessage = False
+#         self.ignoreNextCCMessage = False
 # 
 # 
 #     def start(self, hWnd):
 #         self.intercept(hWnd)
 #         # SetClipboardViewer sends automatically an initial clipboard changed (CC)
 #         # message which should be ignored
-#         self.firstCCMessage = True
+#         self.ignoreNextCCMessage = True
 #         self.nextWnd = SetClipboardViewer(c_int(self.hWnd))
 # 
 # 
@@ -798,8 +808,8 @@ class BrowserMoveIceptor(BaseWinInterceptor):
 #                 SendMessage(c_int(self.nextWnd), c_int(uMsg), c_uint(wParam),
 #                         c_ulong(lParam))
 #         elif uMsg == WM_DRAWCLIPBOARD:
-#             if self.firstCCMessage:
-#                 self.firstCCMessage = False
+#             if self.ignoreNextCCMessage:
+#                 self.ignoreNextCCMessage = False
 #             else:
 #                 self.handleClipboardChange()
 # 

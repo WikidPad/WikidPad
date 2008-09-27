@@ -195,7 +195,42 @@ class OptionsDialog(wx.Dialog):
 
             ("mouse_middleButton_withoutCtrl", "chMouseMiddleButtonWithoutCtrl", "seli"),
             ("mouse_middleButton_withCtrl", "chMouseMiddleButtonWithCtrl", "seli"),
+            ("userEvent_mouse/leftdoubleclick/preview/body", "chMouseDblClickPreviewBody", "selt",
+                    [
+                    u"action/none",
+                    u"action/presenter/this/subcontrol/textedit",
+                    u"action/presenter/new/foreground/end/page/this/subcontrol/textedit"
+                    ]),
+                
+            ("userEvent_mouse/middleclick/pagetab", "chMouseMdlClickPageTab", "selt",
+                    [
+                    u"action/none",
+                    u"action/presenter/this/close"
+                    ]),
 
+            ("userEvent_mouse/leftdrop/editor/files", "chMouseLeftDropEditor", "selt",
+                    [
+                    u"action/none",
+                    u"action/editor/this/paste/files/insert/url/absolute",
+                    u"action/editor/this/paste/files/insert/url/relative",
+                    u"action/editor/this/paste/files/insert/url/tostorage"
+                    ]),
+
+            ("userEvent_mouse/leftdrop/editor/files/modkeys/shift", "chMouseLeftDropEditorShift", "selt",
+                    [
+                    u"action/none",
+                    u"action/editor/this/paste/files/insert/url/absolute",
+                    u"action/editor/this/paste/files/insert/url/relative",
+                    u"action/editor/this/paste/files/insert/url/tostorage"
+                    ]),
+
+            ("userEvent_mouse/leftdrop/editor/files/modkeys/ctrl", "chMouseLeftDropEditorCtrl", "selt",
+                    [
+                    u"action/none",
+                    u"action/editor/this/paste/files/insert/url/absolute",
+                    u"action/editor/this/paste/files/insert/url/relative",
+                    u"action/editor/this/paste/files/insert/url/tostorage"
+                    ]),
 
             ("timeView_position", "chTimeViewPosition", "seli"),
             ("timeView_dateFormat", "tfTimeViewDateFormat", "ttdf",
@@ -293,6 +328,7 @@ class OptionsDialog(wx.Dialog):
         self.PostCreate(d)
 
         self.pWiki = pWiki
+        self.oldSettings = {}
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "OptionsDialog")
 
@@ -367,6 +403,7 @@ class OptionsDialog(wx.Dialog):
         for oct in self.combinedOptionToControl:
             o, c, t = oct[:3]
             self.idToOptionEntryMap[self.ctrls[c].GetId()] = oct
+            self.oldSettings[o] = self.pWiki.getConfig().get("main", o)
 
             if t == "b":   # boolean field = checkbox
                 self.ctrls[c].SetValue(
@@ -634,9 +671,13 @@ class OptionsDialog(wx.Dialog):
         for panel in self.panelList:
             panel.handleOk()
 
-        self.pWiki.getConfig().informChanged()
+        self.pWiki.getConfig().informChanged(self.oldSettings)
 
         evt.Skip()
+
+
+    def getOldSettings(self):
+        return self.oldSettings
 
 
     def OnSelectFaceHtmlPrev(self, evt):

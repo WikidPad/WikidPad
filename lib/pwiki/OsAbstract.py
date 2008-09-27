@@ -40,7 +40,7 @@ else:
             return
 
         if link.startswith("file:"):
-            link = pathnameFromUrl(link[5:])
+            link = pathnameFromUrl(link)
 
         os.spawnlp(os.P_NOWAIT, startPath, startPath, link)
 

@@ -599,4 +599,49 @@ BODY {
 .page-toc-level4 {
     margin-left: 12mm;
 }
+
+.page-toc-level5 {
+    margin-left: 16mm;
+}
+
+.page-toc-level6 {
+    margin-left: 20mm;
+}
+
+.page-toc-level7 {
+    margin-left: 24mm;
+}
+
+.page-toc-level8 {
+    margin-left: 28mm;
+}
+
+.page-toc-level9 {
+    margin-left: 32mm;
+}
+
+.page-toc-level10 {
+    margin-left: 36mm;
+}
+
+.page-toc-level11 {
+    margin-left: 40mm;
+}
+
+.page-toc-level12 {
+    margin-left: 44mm;
+}
+
+.page-toc-level13 {
+    margin-left: 48mm;
+}
+
+.page-toc-level14 {
+    margin-left: 52mm;
+}
+
+.page-toc-level15 {
+    margin-left: 56mm;
+}
+
 """

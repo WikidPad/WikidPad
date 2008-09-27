@@ -772,14 +772,14 @@ class WikiDataManager(MiscEventSourceMixin):
             prevTitle = pageTitlePrefix + self.getWikiPageTitle(wikiWord) + u"\n"
         else:
             prevTitle = None
-
-        page = self.getWikiPage(toWikiWord)
-        content = page.getLiveText()
-        if prevTitle is not None and content.startswith(prevTitle):
-            # Replace previous title with new one
-            content = pageTitlePrefix + self.getWikiPageTitle(toWikiWord) + \
-                    u"\n" + content[len(prevTitle):]
-            page.replaceLiveText(content)
+            
+#         page = self.getWikiPage(toWikiWord)
+#         content = page.getLiveText()
+#         if prevTitle is not None and content.startswith(prevTitle):
+#             # Replace previous title with new one
+#             content = pageTitlePrefix + self.getWikiPageTitle(toWikiWord) + \
+#                     u"\n" + content[len(prevTitle):]
+#             page.replaceLiveText(content)
 
         # if the root was renamed we have a little more to do
         if wikiWord == self.getWikiName():
@@ -840,6 +840,18 @@ class WikiDataManager(MiscEventSourceMixin):
                     charStartPos = start + len(repl)
 
                 wikiPage.replaceLiveText(text)
+                wikiPage.update(text)
+
+
+        # Now we modify the page heading if not yet done by text replacing
+        page = self.getWikiPage(toWikiWord)
+        content = page.getLiveText()
+        if prevTitle is not None and content.startswith(prevTitle):
+            # Replace previous title with new one
+            content = pageTitlePrefix + self.getWikiPageTitle(toWikiWord) + \
+                    u"\n" + content[len(prevTitle):]
+            page.replaceLiveText(content)
+            page.update(content)
 
 
 #     _AUTO_LINK_RELAX_SPLIT_RE = re.compile(r"[\W]", re.I | re.U)
@@ -930,7 +942,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 if isinstance(wikiPage, AliasWikiPage):
                     # Avoid to rename same page twice (alias and real) or more often
                     continue
-
+                    
                 text = wikiPage.getLiveTextNoTemplate()
                 if text is None:
                     continue

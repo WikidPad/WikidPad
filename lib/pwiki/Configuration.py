@@ -292,7 +292,7 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
             finally:
                 configFile.close()
 
-    def informChanged(self):
+    def informChanged(self, oldSettings):
         """
         This should be called after configuration was changed to let
         the object send out an event.
@@ -300,7 +300,8 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         the creation of many events (one per each set call) instead
         of one at the end of changes
         """
-        self.fireMiscEventKeys(("changed configuration",))
+        self.fireMiscEventProps({"changed configuration": True,
+                "old config settings": oldSettings})
 
 
 
@@ -468,16 +469,16 @@ class CombinedConfiguration(_AbstractConfiguration):
             traceback.print_exc()
 
 
-    def informChanged(self):
+    def informChanged(self, oldSettings):
         """
         This should be called after configuration was changed. It is called
         for its SingleConfiguration objects in turn to let them send events
         """
         if self.globalConfig is not None:
-            self.globalConfig.informChanged()
+            self.globalConfig.informChanged(oldSettings)
 
         if self.wikiConfig is not None:
-            self.wikiConfig.informChanged()
+            self.wikiConfig.informChanged(oldSettings)
 
 
 
@@ -642,6 +643,24 @@ GLOBALDEFAULTS = {
     ("main", "mouse_middleButton_withoutCtrl"): "1", # If middle mouse button is pressed on a link in editor or preview, without
             # Ctrl pressed, should it then open link in  0: a new tab in foreground, 1: new tab background, 2: same tab
     ("main", "mouse_middleButton_withCtrl"): "0", # Same, but if Ctrl is pressed
+
+
+    ("main", "userEvent_mouse/leftdoubleclick/preview/body"): u"action/none", # How to react when user double-clicks somewhere into body of preview?
+            # "action/none": Do nothing; "action/presenter/this/subcontrol/textedit": Switch current subcontrol to textedit mode;
+            # "action/presenter/new/foreground/end/page/this/subcontrol/textedit": New tab with same wikiword in edit mode
+
+    ("main", "userEvent_mouse/middleclick/pagetab"): u"action/none",  # How to react on middle click on tab?
+            # "action/none": Do nothing; "action/presenter/this/close" close this tab
+
+    ("main", "userEvent_mouse/leftdrop/editor/files"): u"action/editor/this/paste/files/insert/url/absolute",  # How to react on dropping files to editor?
+            # "action/none": Do nothing; "action/editor/this/paste/files/insert/url/absolute" insert absolute urls,
+            # ".../relative": relative URLs, ".../tostorage": copy to files storage and create relative URL
+
+    ("main", "userEvent_mouse/leftdrop/editor/files/modkeys/shift"): u"action/editor/this/paste/files/insert/url/relative",
+            # How to react on dropping files to editor if shift key is pressed?
+
+    ("main", "userEvent_mouse/leftdrop/editor/files/modkeys/ctrl"): u"action/editor/this/paste/files/insert/url/tostorage",
+            # How to react on dropping files to editor if ctrl key is pressed?
 
     # Time view/time line/calendar options
     ("main", "timeView_position"): "0",  # Mode where to place the time view window,

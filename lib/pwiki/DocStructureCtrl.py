@@ -203,8 +203,6 @@ class DocStructureCtrl(EnhancedListControl):
             self.applyTocList()
         else:
             wx.CallAfter(self.applyTocList)
-#         finally:
-#             print "buildTocList end"
 
 
     def applyTocList(self):
@@ -219,33 +217,6 @@ class DocStructureCtrl(EnhancedListControl):
             self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         finally:
             self.Thaw()
-
-
-#     def getAllSelectedIndices(self):
-#         result = []
-#         sel = -1
-#         while True:
-#             sel = self.GetNextItem(sel, state=wx.LIST_STATE_SELECTED)
-#             if sel == -1:
-#                 break
-#             result.append(sel)
-# 
-#         return result
-# 
-# 
-#     if isWindows():
-#         _SETSSI_ITEMMASK = wx.LIST_STATE_SELECTED | wx.LIST_STATE_FOCUSED
-#     else:
-#         # TODO Check for MacOS
-#         _SETSSI_ITEMMASK = wx.LIST_STATE_SELECTED
-# 
-#     def setSingleSelectedIndex(self, pos):
-#         # Unselect all selected
-#         for prev in self.getAllSelectedIndices():
-#             self.SetItemState(prev, 0, self._SETSSI_ITEMMASK)
-# 
-#         if pos > -1:
-#             self.SetItemState(pos, self._SETSSI_ITEMMASK, self._SETSSI_ITEMMASK)
 
 
     def OnKillFocus(self, evt):

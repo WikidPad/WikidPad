@@ -32,6 +32,9 @@ def describeMenuItems(wiki):
     them can be replaced by None:
         - icon descriptor (see below, if no icon found, it won't show one)
         - menu item id.
+        - update function
+        - kind of menu item (wx.ITEM_NORMAL, wx.ITEM_CHECK)
+
 
     The  callback function  must take 2 parameters:
         wiki - Calling PersonalWikiFrame
@@ -41,9 +44,13 @@ def describeMenuItems(wiki):
         - a wxBitmap object
         - the filename of a bitmap (if file not found, no icon is used)
         - a tuple of filenames, first existing file is used
+
+    The  update function  must take 2 parameters:
+        wiki - Calling PersonalWikiFrame
+        evt - wxUpdateUIEvent
     """
-    return ((referrals, _(u"Show referring pages") + u"\tCtrl-Shift-P",
-            _(u"Show referring pages")),)
+    return ((referrals, _(u"Insert referring pages") + u"\tCtrl-Shift-P",
+            _(u"Insert referring pages"), None, None, referralsUpdate),)
 
 
 def describeToolbarItems(wiki):
@@ -59,6 +66,7 @@ def describeToolbarItems(wiki):
     It can contain the following additional items (in this order), each of
     them can be replaced by None:
         - tool id.
+        - update function
 
     The  callback function  must take 2 parameters:
         wiki - Calling PersonalWikiFrame
@@ -68,11 +76,13 @@ def describeToolbarItems(wiki):
         - a wxBitmap object
         - the filename of a bitmap (if file not found, a default icon is used)
         - a tuple of filenames, first existing file is used
+
+    The  update function  must take 2 parameters:
+        wiki - Calling PersonalWikiFrame
+        evt - wxUpdateUIEvent
     """
-    return ((referrals, _(u"Referers"), _(u"Show referring pages"),
-            ("rename", "tb_rename")),)
-    #icon = wiki.lookupIcon("tb_rename")
-    # return ((referrals, "Referers", "Show referring pages", icon),)
+    return ((referrals, _(u"Referers"), _(u"Insert referring pages"),
+            ("rename", "tb_rename"), None, referralsUpdate),)
 
 
 def referrals(wiki, evt):
@@ -102,3 +112,23 @@ def referrals(wiki, evt):
     for word in children:
         wiki.getActiveEditor().AddText(u"%s\n" % word)
     wiki.getActiveEditor().AddText(u"------------------------\n")
+
+
+def referralsUpdate(wiki, evt):
+    if wiki.getCurrentWikiWord() is None:
+        evt.Enable(False)
+        return
+    
+    dpp = wiki.getCurrentDocPagePresenter()
+    if dpp is None:
+        evt.Enable(False)
+        return
+
+    if dpp.getCurrentSubControlName() != "textedit":
+        evt.Enable(False)
+        return
+
+    evt.Enable(True)     
+
+    
+    

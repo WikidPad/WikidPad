@@ -55,7 +55,7 @@ class TimePresentationBase:
                 self.mainControl.getMainAreaPanel().SetFocus()
 
 
-    def setLayerVisible(self, vis):
+    def setLayerVisible(self, vis, scName=""):
         oldVisible = self.isVisibleEffect()
         self.layerVisible = vis
         if oldVisible != self.isVisibleEffect():
