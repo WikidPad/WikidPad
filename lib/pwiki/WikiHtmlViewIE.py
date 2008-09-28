@@ -355,6 +355,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         elif href == (internaljumpPrefix + u"action/history/back"):
             # Go back in history
             self.presenter.getMainControl().goBrowserBack()
+            evt.Cancel = True
 
         elif href == (internaljumpPrefix + u"mouse/leftdoubleclick/preview/body"):
             pres = self.presenter
@@ -365,12 +366,13 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                     
             mc.getUserActionCoord().reactOnUserEvent(
                     u"mouse/leftdoubleclick/preview/body", paramDict)
+            evt.Cancel = True
 
 #         elif href.startswith(u"file:"):
 #             pass
         else:
-            evt.Cancel = True
             self.presenter.getMainControl().launchUrl(href)
+            evt.Cancel = True
 
 
 #     def OnKeyUp(self, evt):

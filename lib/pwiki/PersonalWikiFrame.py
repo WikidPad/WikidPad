@@ -4534,7 +4534,7 @@ These are your default global settings.
     def OnCmdSwitchEditorPreview(self, evt):
         presenter = self.getCurrentDocPagePresenter()
         self.getMainAreaPanel().switchDocPagePresenterTabEditorPreview(presenter)
-        
+
 #         scName = presenter.getCurrentSubControlName()
 #         if scName != "textedit":
 #             presenter.switchSubControl("textedit", gainFocus=True)
