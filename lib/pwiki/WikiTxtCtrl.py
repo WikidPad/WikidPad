@@ -809,6 +809,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 assert 0   # TODO
 
             # now fill the text into the editor
+            self.SetReadOnly(False)
             self.SetText(content)
 
         self.getLoadedDocPage().addTxtEditor(self)
@@ -856,6 +857,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 assert 0   # TODO
 
             # now fill the text into the editor
+            self.SetReadOnly(False)
             self.setTextAgaUpdated(content)
 
         self.getLoadedDocPage().addTxtEditor(self)
@@ -1019,8 +1021,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             faces["mono"] = font
             self.lastEditorFont = font    # ???
 
+        self._checkForReadOnly()
         self.SetStyles(faces)
-        
+
         color = self._getColorFromOption("editor_bg_color", (255, 255, 255))
 
 #         coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(

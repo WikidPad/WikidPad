@@ -88,6 +88,7 @@ class DocPage(MiscEventSourceMixin):
         txtEditor = self.getTxtEditor()
         if txtEditor is not None:
             # page is in text editor(s), so call AppendText on one of it
+            # TODO Call self.SetReadOnly(False) first?
             txtEditor.AppendText(text)
         else:
             # Modify database
@@ -128,6 +129,7 @@ class DocPage(MiscEventSourceMixin):
         txtEditor = self.getTxtEditor()
         if txtEditor is not None:
             # page is in text editor(s), so call replace on one of it
+            # TODO Call self.SetReadOnly(False) first?
             txtEditor.replaceText(text)
             self.livePageAst = None
             self.editorTextCache = None
@@ -617,8 +619,12 @@ class WikiPage(DataCarryingPage):
         # Prefix is normally u"++"
         pageTitlePrefix = \
                 self.getWikiDocument().getFormatting().getPageTitlePrefix() + u" "
-        wikiWordHead = \
-                self.getWikiDocument().getWikiPageTitle(self.getWikiWord())
+                
+        if self.suggNewPageTitle is None:
+            wikiWordHead = self.getWikiDocument().getWikiPageTitle(
+                    self.getWikiWord())
+        else:
+            wikiWordHead = self.suggNewPageTitle
 
         if wikiWordHead is None:
             return content
@@ -669,7 +675,7 @@ class WikiPage(DataCarryingPage):
                     self.props = templatePage.cloneDeepProperties()
                     
                     # Check if template title should be changed
-                    tplTitle = self.getPropertyOrGlobal(u"template_head", u"auto")
+                    tplTitle = parentPage.getPropertyOrGlobal(u"template_head", u"auto")
                     if tplTitle in (u"auto", u"automatic"):
                         content = self._changeHeadingForTemplate(content)
                 except (WikiWordNotFoundException, WikiFileNotFoundException):

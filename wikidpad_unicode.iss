@@ -41,17 +41,17 @@ Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 1.9beta18_1
+AppVerName=WikidPad 1.9beta18_2
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=1.9.18.1
-VersionInfoTextVersion=WikidPad 1.9beta18_1
+VersionInfoVersion=1.9.18.2
+VersionInfoTextVersion=WikidPad 1.9beta18_2
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-1.9beta18_1
+OutputBaseFilename=WikidPad-1.9beta18_2
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2008 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
@@ -59,7 +59,7 @@ UsePreviousAppDir=true
 Name: Program_files; Description: Main program files; Flags: fixed; Types: custom compact full
 Name: Gadfly; Description: Gadfly database; Types: custom compact full
 Name: Gadfly\Help; Description: Help wiki; Types: custom compact full
-Name: Sqlite; Description: Sqlite database; Types: full
+Name: Sqlite; Description: Sqlite database; Types: custom compact full
 [Icons]
 Name: {code:IconDest|Dummy}\WikidPad; Filename: {app}\WikidPad.exe; IconFilename: {app}\icons\pwiki.ico; Components: Program_files Gadfly\Help; IconIndex: 0
 Name: {code:IconDest|Dummy}\{cm:UninstallProgram, WikidPad}; Filename: {uninstallexe}
@@ -93,6 +93,8 @@ Name: {app}\icons\tb_data file.gif; Type: files
 [UninstallDelete]
 Name: {app}\regexpr.cache; Type: files
 Name: {app}\WikidPad_*.xrc; Type: files; Components: ; Tasks: 
+[Run]
+Filename: {app}\WikidPad.exe; WorkingDir: {app}; Description: Start WikidPad; Flags: postinstall skipifsilent nowait
 [Code]
 var
   UserModeQuestion: TInputOptionWizardPage;

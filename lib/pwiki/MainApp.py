@@ -151,6 +151,7 @@ class App(wx.App, MiscEventSourceMixin):
         # Create default config dicts
         self.defaultGlobalConfigDict = Configuration.GLOBALDEFAULTS.copy()
         self.defaultWikiConfigDict = Configuration.WIKIDEFAULTS.copy()
+        self.wikiConfigFallthroughDict = Configuration.WIKIFALLTHROUGH.copy()
         self.pageSearchHistory = []
         self.wikiSearchHistory = []
         
@@ -500,7 +501,7 @@ class App(wx.App, MiscEventSourceMixin):
 
     def createWikiConfiguration(self):
         return Configuration.SingleConfiguration(
-                self.getDefaultWikiConfigDict())
+                self.getDefaultWikiConfigDict(), self.wikiConfigFallthroughDict)
 
     def createCombinedConfiguration(self):
         return Configuration.CombinedConfiguration(
@@ -517,12 +518,31 @@ class App(wx.App, MiscEventSourceMixin):
 
     def getDefaultWikiConfigDict(self):
         """
-        Returns the dictionary of the global configuration defaults.
+        Returns the dictionary of the wiki configuration defaults.
         It is a copy of Configuration.WIKIDEFAULTS.
         The dictionary can be manipulated by plugins to add further
         configuration options.
         """
         return self.defaultWikiConfigDict
+
+    def getWikiConfigFallthroughDict(self):
+        """
+        Returns the dictionary of the wiki fallthrough settings.
+        The fallthrough dict must only contain keys which are present
+        as options in wiki config. and global config.        
+        If the key in wiki config. has the equal value as the same key
+        in the fallthrough dict, the combined configuration takes the
+        key value from global config. instead.
+
+        This is intended for wiki-bound options which can be set to
+        "use default" mode to use the app-bound setting instead.
+
+        It is a copy of Configuration.WIKIFALLTHROUGH.
+        The dictionary can be manipulated by plugins to add further
+        configuration options.
+        """
+        return self.wikiConfigFallthroughDict
+        
 
     def getOptionsDlgPanelList(self):        
         return self.optionsDlgPanelList

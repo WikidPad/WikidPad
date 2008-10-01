@@ -5,7 +5,7 @@ import wx, wx.xrc
 from wxHelper import *
 
 from StringOps import uniToGui, guiToUni, htmlColorToRgbTuple,\
-        rgbToHtmlColor
+        rgbToHtmlColor, strToBool
 
 from AdditionalDialogs import DateformatDialog, FontFaceDialog
 
@@ -101,7 +101,7 @@ class OptionsDialog(wx.Dialog):
             ("gui_language", "chGuiLanguage", "guilang"),
             ("recentWikisList_length", "scRecentWikisListLength", "spin"),
 
-            ("log_window_autoshow", "cbLogWindowAutoShow", "b"),
+            ("option/user/log_window_autoshow", "cbLogWindowAutoShowUser", "b"),
             ("log_window_autohide", "cbLogWindowAutoHide", "b"),
             ("docStructure_position", "chDocStructurePosition", "seli"),
             ("docStructure_depth", "scDocStructureDepth", "spin"),
@@ -272,6 +272,8 @@ class OptionsDialog(wx.Dialog):
             ("tree_force_scratchpad_visibility",
                     "cbTreeForceScratchpadVisibility", "b"),
 
+            ("option/wiki/log_window_autoshow", "cbLogWindowAutoShowWiki", "b3"),
+
             ("wiki_icon", "tfWikiIcon", "t"),
 
             ("hotKey_showHide_byWiki", "tfHotKeyShowHideByWiki", "t"),
@@ -408,6 +410,18 @@ class OptionsDialog(wx.Dialog):
             if t == "b":   # boolean field = checkbox
                 self.ctrls[c].SetValue(
                         self.pWiki.getConfig().getboolean("main", o))
+            elif t == "b3":   # boolean field = checkbox
+                value = self.pWiki.getConfig().get("main", o)
+                if value == "Gray":
+                    self.ctrls[c].Set3StateValue(wx.CHK_UNDETERMINED)
+                else:
+                    if strToBool(value):
+                        self.ctrls[c].Set3StateValue(wx.CHK_CHECKED)
+                    else:
+                        self.ctrls[c].Set3StateValue(wx.CHK_UNCHECKED)
+
+#                 self.ctrls[c].SetValue(
+#                         self.pWiki.getConfig().getboolean("main", o))
             elif t in ("t", "tre", "ttdf", "i0+", "f0+", "color0"):  # text field or regular expression field
                 self.ctrls[c].SetValue(
                         uniToGui(self.pWiki.getConfig().get("main", o)) )
@@ -458,6 +472,11 @@ class OptionsDialog(wx.Dialog):
         self.ctrls.chHtmlPreviewRenderer.Enable(
                 WikiHtmlView.WikiHtmlViewIE is not None)
         
+        wikiDoc = self.pWiki.getWikiDocument()
+        if wikiDoc is not None:        
+            self.ctrls.cbWikiReadOnly.SetValue(
+                    wikiDoc.getWriteAccessDeniedByConfig())
+        
         self.OnEditorImagePasteFileTypeChoice(None)
 
         self.activePageIndex = -1
@@ -477,32 +496,6 @@ class OptionsDialog(wx.Dialog):
 
         wx.EVT_BUTTON(self, GUI_ID.btnSelectFaceHtmlPrev, self.OnSelectFaceHtmlPrev)
 
-#         wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlLinkColor,
-#                 lambda evt: self.selectColor(self.ctrls.tfHtmlLinkColor))
-#         wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlALinkColor,
-#                 lambda evt: self.selectColor(self.ctrls.tfHtmlALinkColor))
-#         wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlVLinkColor,
-#                 lambda evt: self.selectColor(self.ctrls.tfHtmlVLinkColor))
-#         wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlTextColor,
-#                 lambda evt: self.selectColor(self.ctrls.tfHtmlTextColor))
-#         wx.EVT_BUTTON(self, GUI_ID.btnSelectHtmlBgColor,
-#                 lambda evt: self.selectColor(self.ctrls.tfHtmlBgColor))
-# 
-#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorPlaintextColor,
-#                 lambda evt: self.selectColor(self.ctrls.tfEditorPlaintextColor))
-#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorLinkColor,
-#                 lambda evt: self.selectColor(self.ctrls.tfEditorLinkColor))
-#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorAttributeColor,
-#                 lambda evt: self.selectColor(self.ctrls.tfEditorAttributeColor))
-#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorBgColor,
-#                 lambda evt: self.selectColor(self.ctrls.tfEditorBgColor))
-#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorSelectionFgColor,
-#                 lambda evt: self.selectColor(self.ctrls.tfEditorSelectionFgColor))
-#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorSelectionBgColor,
-#                 lambda evt: self.selectColor(self.ctrls.tfEditorSelectionBgColor))
-#         wx.EVT_BUTTON(self, GUI_ID.btnSelectEditorCaretColor,
-#                 lambda evt: self.selectColor(self.ctrls.tfEditorCaretColor))
-
         wx.EVT_BUTTON(self, GUI_ID.btnSelectClipCatchSoundFile,
                 lambda evt: self.selectFile(self.ctrls.tfClipCatchSoundFile,
                 _(u"Wave files (*.wav)|*.wav")))
@@ -521,11 +514,6 @@ class OptionsDialog(wx.Dialog):
 
         wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,
                 self.OnEditorImagePasteFileTypeChoice)
-
-
-#         wx.EVT_BUTTON(self, GUI_ID.btnSelectPageStatusTimeFormat,
-#                 lambda evt: self.selectDateTimeFormat(
-#                 self.ctrls.tfPageStatusTimeFormat))
 
 
 
@@ -625,6 +613,13 @@ class OptionsDialog(wx.Dialog):
                 self._refreshForPage()
                 return
 
+        
+        # Options with special treatment (before standard handling)
+        wikiDoc = self.pWiki.getWikiDocument()
+
+        if wikiDoc is not None and not self.ctrls.cbWikiReadOnly.GetValue():
+            wikiDoc.setWriteAccessDeniedByConfig(False)
+
         # Then transfer options from dialog to config object
         for oct in self.combinedOptionToControl:
             o, c, t = oct[:3]
@@ -632,6 +627,15 @@ class OptionsDialog(wx.Dialog):
             # TODO Handle unicode text controls
             if t == "b":
                 self.pWiki.getConfig().set("main", o, repr(self.ctrls[c].GetValue()))
+            elif t == "b3":
+                value = self.ctrls[c].Get3StateValue()
+                if value == wx.CHK_UNDETERMINED:
+                    self.pWiki.getConfig().set("main", o, "Gray")
+                elif value == wx.CHK_CHECKED:
+                    self.pWiki.getConfig().set("main", o, "True")
+                elif value == wx.CHK_UNCHECKED:
+                    self.pWiki.getConfig().set("main", o, "False")
+
             elif t in ("t", "tre", "ttdf", "i0+", "f0+", "color0"):
                 self.pWiki.getConfig().set(
                         "main", o, guiToUni(self.ctrls[c].GetValue()) )
@@ -656,7 +660,7 @@ class OptionsDialog(wx.Dialog):
                     self.pWiki.getConfig().set("main", o,
                             Localization.getLangList()[idx - 1][0])
 
-        # Options with special treatment
+        # Options with special treatment (after standard handling)
         if self.ctrls.cbLowResources.GetValue():
             self.pWiki.getConfig().set("main", "lowresources", "1")
         else:
@@ -666,6 +670,9 @@ class OptionsDialog(wx.Dialog):
             self.pWiki.getConfig().set("main", "new_window_on_follow_wiki_url", "1")
         else:
             self.pWiki.getConfig().set("main", "new_window_on_follow_wiki_url", "0")
+
+        if wikiDoc is not None and self.ctrls.cbWikiReadOnly.GetValue():
+            wikiDoc.setWriteAccessDeniedByConfig(True)
 
         # Ok for each panel
         for panel in self.panelList:
@@ -702,7 +709,7 @@ class OptionsDialog(wx.Dialog):
     def OnDottedButtonPressed(self, evt):
         """
         Called when a "..." button is pressed (for some of them) to show
-        and alternative way to specify the input, e.g. showing a color selector
+        an alternative way to specify the input, e.g. showing a color selector
         for color entries instead of using the bare text field
         """
         oct = self.idToOptionEntryMap[evt.GetId()]

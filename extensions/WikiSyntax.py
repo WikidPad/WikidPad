@@ -341,7 +341,7 @@ HorizLineRE     = re.compile(u"----+", re.DOTALL | re.UNICODE | re.MULTILINE)
 
 # suppression expression
 SuppressHighlightingRE = re.compile(ur"^(?P<suppressIndent>[ \t]*)<<[ \t]*\n"+
-        ur"(?P<suppressContent>.*?)\n[ \t]*>>[ \t]*$",
+        ur"(?P<suppressContent>.*?)\n?^[ \t]*>>[ \t]*$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 AnchorRE = re.compile(ur"^[ \t]*anchor:[ \t]*(?P<anchorValue>[A-Za-z0-9\_]+)\n",
@@ -359,6 +359,6 @@ TableRE = re.compile(ur"(?P<tableBegin>^[ \t]*<<\|"
 
 PreBlockRE = re.compile(ur"(?P<preBegin>^[ \t]*<<pre[ \t]*\n)"
         ur"(?P<preContent>."         #  + PlainCharacterPAT +
-        ur"*?)(?P<preEnd>\n[ \t]*>>[ \t]*$(\n)?)",
+        ur"*?)(?P<preEnd>\n?^[ \t]*>>[ \t]*$(\n)?)",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 

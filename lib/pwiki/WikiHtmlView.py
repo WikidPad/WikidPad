@@ -217,11 +217,14 @@ class WikiHtmlView(wx.html.HtmlWindow):
             self.SetPage(uniToGui(html))
 
 
-        if self.anchor and self.HasAnchor(self.anchor):
-            self.ScrollToAnchor(self.anchor)
-            # Workaround because ScrollToAnchor scrolls too far
-            lx, ly = self.GetViewStart()
-            self.Scroll(lx, ly-1)
+        if self.anchor:   #  and self.HasAnchor(self.anchor):
+            if self.HasAnchor(self.anchor):
+                self.ScrollToAnchor(self.anchor)
+                # Workaround because ScrollToAnchor scrolls too far
+                lx, ly = self.GetViewStart()
+                self.Scroll(lx, ly-1)
+            else:
+                self.Scroll(0, 0)
         elif self.outOfSync:
             lx, ly = wikiPage.getPresentation()[3:5]
             self.Scroll(lx, ly)
@@ -420,7 +423,8 @@ class WikiHtmlView(wx.html.HtmlWindow):
                 # Workaround because ScrollToAnchor scrolls too far
                 lx, ly = self.GetViewStart()
                 self.Scroll(lx, ly-1)
-
+            else:
+                self.Scroll(0, 0)
         else:
             self.presenter.getMainControl().launchUrl(href)
 

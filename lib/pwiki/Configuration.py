@@ -163,9 +163,11 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
     Wraps a single ConfigParser object
     """
 
-    def __init__(self, configdef):
+    def __init__(self, configdef, fallthroughDict=None):
         """
         configdef -- Dictionary with defaults for configuration file
+        fallthroughDict -- Dictionary with settings for fallthrough mode
+                (only stored here, but processed by CombinedConfiguration)
         """
         MiscEventSourceMixin.__init__(self)
         
@@ -173,7 +175,13 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         self.configPath = None
         
         self.configDefaults = configdef
+        
+        if fallthroughDict is None:
+            self.fallthroughDict = {}
+        else:
+            self.fallthroughDict = fallthroughDict
         self.writeAccessDenied = False
+
 
     def get(self, section, option, default=None):
         """
@@ -241,7 +249,7 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
         if self.isOptionAllowed(section, option):
             _setValue(section, option, value, self.configParserObject)
         else:
-            raise UnknownOptionException, _(u"Unknown option")
+            raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
 
 
     def fillWithDefaults(self):
@@ -274,6 +282,9 @@ class SingleConfiguration(_AbstractConfiguration, MiscEventSourceMixin):
     def createEmptyConfig(self, fn):
         config = ConfigParser.ConfigParser()
         self.setConfigParserObject(config, fn)
+        
+    def getFallthroughDict(self):
+        return self.fallthroughDict
 
 
     def save(self):
@@ -331,18 +342,51 @@ class CombinedConfiguration(_AbstractConfiguration):
             option = utf8Enc(option)[0]
             
         result = None
+        
+        checkWiki = True
+        checkGlobal = True
+        
+        if option.startswith("option/wiki/"):
+            option = option[12:]
+            checkGlobal = False
+        elif option.startswith("option/user/"):
+            option = option[12:]
+            checkWiki = False
 
-        if self.wikiConfig is not None and \
-                self.wikiConfig.isOptionAllowed(section, option):
-            result = self.wikiConfig.get(section, option, default)
-        # TODO more elegantly
-        elif WIKIDEFAULTS.has_key((section, option)):
-            result = default
-        elif self.globalConfig is not None and \
-                self.globalConfig.isOptionAllowed(section, option):
-            result = self.globalConfig.get(section, option, default)
-        else:
-            raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
+        if checkWiki:
+            if self.wikiConfig is not None and \
+                    self.wikiConfig.isOptionAllowed(section, option):
+                result = self.wikiConfig.get(section, option, default)
+                ftDict = self.wikiConfig.getFallthroughDict()
+                if not ftDict.has_key((section, option)) or \
+                        ftDict[(section, option)] != result:
+                    checkGlobal = False
+                
+            # TODO more elegantly
+            elif WIKIDEFAULTS.has_key((section, option)):
+                result = default
+                checkGlobal = False
+            elif not checkGlobal:
+                raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
+
+        if checkGlobal:
+            if self.globalConfig is not None:
+                result = self.globalConfig.get(section, option, default)
+            else:
+                raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
+
+
+#         if self.wikiConfig is not None and \
+#                 self.wikiConfig.isOptionAllowed(section, option):
+#             result = self.wikiConfig.get(section, option, default)
+#         # TODO more elegantly
+#         elif WIKIDEFAULTS.has_key((section, option)):
+#             result = default
+#         elif self.globalConfig is not None and \
+#                 self.globalConfig.isOptionAllowed(section, option):
+#             result = self.globalConfig.get(section, option, default)
+#         else:
+#             raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
 
         if result is None:
             return default
@@ -350,37 +394,6 @@ class CombinedConfiguration(_AbstractConfiguration):
         return result
         
         
-#     def getint(self, section, option, default=None):
-#         result = self.get(section, option)
-#         if result is None:
-#             return default
-#         
-#         try:
-#             return int(result)
-#         except ValueError:
-#             # Can't convert result string to integer
-#             return default
-# 
-# 
-#     def getfloat(self, section, option, default=None):
-#         result = self.get(section, option)
-#         if result is None:
-#             return default
-#         
-#         try:
-#             return float(result)
-#         except ValueError:
-#             # Can't convert result string to float
-#             return default
-# 
-# 
-#     def getboolean(self, section, option, default=None):
-#         result = self.get(section, option)
-#         if result is None:
-#             return default
-#         
-#         return strToBool(result, False)
-
 
     def set(self, section, option, value):
         if type(section) is unicode:
@@ -388,15 +401,34 @@ class CombinedConfiguration(_AbstractConfiguration):
 
         if type(option) is unicode:
             option = utf8Enc(option)[0]
-
-        if self.wikiConfig is not None and \
-                self.wikiConfig.isOptionAllowed(section, option):
+            
+        if option.startswith("option/wiki/"):
+            option = option[12:]
             self.wikiConfig.set(section, option, value)
-        elif self.globalConfig is not None and \
-                self.globalConfig.isOptionAllowed(section, option):
+        elif option.startswith("option/user/"):
+            option = option[12:]
             self.globalConfig.set(section, option, value)
+        elif self.wikiConfig is not None and \
+                self.wikiConfig.getFallthroughDict().has_key((section, option)):
+            raise UnknownOptionException, _(u"Ambiguos option set %s:%s") % (section, option)
         else:
-            raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
+            if self.wikiConfig is not None and \
+                    self.wikiConfig.isOptionAllowed(section, option):
+                self.wikiConfig.set(section, option, value)
+            elif self.globalConfig is not None:
+                self.globalConfig.set(section, option, value)
+            else:
+                raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
+
+
+#         if self.wikiConfig is not None and \
+#                 self.wikiConfig.isOptionAllowed(section, option):
+#             self.wikiConfig.set(section, option, value)
+#         elif self.globalConfig is not None and \
+#                 self.globalConfig.isOptionAllowed(section, option):
+#             self.globalConfig.set(section, option, value)
+#         else:
+#             raise UnknownOptionException, _(u"Unknown option %s:%s") % (section, option)
 
 
     def fillGlobalWithDefaults(self):
@@ -405,26 +437,6 @@ class CombinedConfiguration(_AbstractConfiguration):
 
     def fillWikiWithDefaults(self):
         self.wikiConfig.fillWithDefaults()
-
-
-#     def setWikiConfigParserObject(self, config, fn):
-#         self.wikiConfig.setConfigParserObject(config, fn)
-# 
-#     def getWikiConfigParserObject(self):
-#         return self.wikiConfig.getConfigParserObject()
-# 
-#     def getWikiConfigFilename(self):
-#         return self.wikiConfig.getConfigFilename()
-
-
-#     def setGlobalConfigParserObject(self, config, fn):
-#         self.globalConfig.setConfigParserObject(config, fn)
-# 
-#     def getGlobalConfigParserObject(self):
-#         return self.globalConfig.getConfigParserObject()
-# 
-#     def getGlobalConfigFilename(self):
-#         return self.globalConfig.getConfigFilename()
 
     def loadWikiConfig(self, fn):
         self.wikiConfig.loadConfig(fn)
@@ -734,6 +746,10 @@ WIKIDEFAULTS = {
     ("main", "db_pagefile_suffix"): ".wiki",  # Suffix of the page files for "Original ..."
                                              # db types
     ("main", "export_default_dir"): u"",  # Default directory for exports, u"" means fill in last active directory
+    
+    ("main", "wiki_readOnly"): "False",   # Should wiki be read only?
+
+    ("main", "log_window_autoshow"): "Gray", # Automatically show log window if messages added?
 
     # For file storage (esp. identity check)
     ("main", "fileStorage_identity_modDateMustMatch"): "False",  # Modification date must match for file to be identical
@@ -754,6 +770,12 @@ WIKIDEFAULTS = {
     ("main", "hotKey_showHide_byWiki"): ""   # System-wide hotkey to show/hide program. It is described
             # in the usual shortcut syntax e.g. "Ctrl-Alt-A".
             # This key is bound to the wiki. Another key above can be bound to the whole app
+    }
+
+
+WIKIFALLTHROUGH ={
+    ("main", "log_window_autoshow"): "Gray"
+
     }
 
 

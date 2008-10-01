@@ -352,6 +352,12 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             # Now open wiki
             self.presenter.getMainControl().openWikiPage(
                     word, motionType="child", anchor=anchor)
+
+        elif href.startswith(internaljumpPrefix + u"action/scroll/selfanchor/"):
+            anchorFragment = href[len(internaljumpPrefix + u"action/scroll/selfanchor/"):]
+            self.gotoAnchor(anchorFragment)
+            evt.Cancel = True
+
         elif href == (internaljumpPrefix + u"action/history/back"):
             # Go back in history
             self.presenter.getMainControl().goBrowserBack()

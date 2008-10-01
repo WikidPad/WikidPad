@@ -37,6 +37,10 @@ class DbWriteAccessError(DbAccessError):
     pass
 
 
+
+class InternalError(Exception): pass
+
+
 class ExportException(Exception): pass
 class ImportException(Exception): pass
 

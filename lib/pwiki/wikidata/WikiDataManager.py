@@ -271,7 +271,10 @@ class WikiDataManager(MiscEventSourceMixin):
         except IOError:
             self.writeAccessDenied = True
 
-        wikiConfig.setWriteAccessDenied(self.writeAccessDenied)
+        self.wikiConfiguration = wikiConfig
+
+        wikiConfig.setWriteAccessDenied(self.writeAccessDenied or
+                self.getWriteAccessDeniedByConfig())
 
         # absolutize the path to data dir if it's not already
         if not os.path.isabs(dataDir):
@@ -298,8 +301,6 @@ class WikiDataManager(MiscEventSourceMixin):
             self._releaseLockFile()
             raise DbHandlerNotAvailableException(
                     _(u'Required data handler %s unknown to WikidPad') % wikidhName)
-
-        self.wikiConfiguration = wikiConfig
 
         wikiDataFactory, createWikiDbFunc = DbBackendUtils.getHandler(wikidhName)
         if wikiDataFactory is None:
@@ -528,6 +529,26 @@ class WikiDataManager(MiscEventSourceMixin):
         Flag is set (by PersonalWikiFrame),
         """
         return self.writeAccessDenied
+        
+    def getWriteAccessDeniedByConfig(self):
+        return self.getWikiConfig().getboolean("main", "wiki_readOnly")
+
+
+    def setWriteAccessDeniedByConfig(self, newValue):
+        wikiConfig = self.getWikiConfig()
+
+        if wikiConfig.getboolean("main", "wiki_readOnly") == newValue:
+            return
+
+        if self.writeAccessFailed or self.writeAccessDenied:
+            return  # Don't touch if readonly for other reasons
+
+        if newValue:
+            wikiConfig.set("main", "wiki_readOnly", "True")
+            wikiConfig.setWriteAccessDenied(True)
+        else:
+            wikiConfig.setWriteAccessDenied(False)
+            wikiConfig.set("main", "wiki_readOnly", "False")
 
 
     def isReadOnlyEffect(self):
@@ -535,7 +556,8 @@ class WikiDataManager(MiscEventSourceMixin):
         Return true if underlying wiki is effectively read-only, this means
         "for any reason", regardless if error or intention.
         """
-        return self.writeAccessFailed or self.writeAccessDenied
+        return self.writeAccessFailed or self.writeAccessDenied or \
+                self.getWriteAccessDeniedByConfig()
 
 
     def getAutoReconnectTriedFlag(self):

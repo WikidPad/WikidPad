@@ -488,6 +488,22 @@ class HtmlXmlExporter(AbstractExporter):
     def getTempFileSet(self):
         return self.tempFileSet
 
+
+
+    _INTERNALJUMP_PREFIXMAP = {
+        u"html_previewWX": u"internaljump:",
+        u"html_previewIE": u"internaljump:",
+        u"html_previewMOZ": u"file://internaljump/"
+    }
+
+    def _getInternaljumpPrefix(self):
+        try:
+            return self._INTERNALJUMP_PREFIXMAP[self.exportType]
+        except IndexError:
+            raise InternalError(
+                    u"Trying to get internal jump prefix for non-preview export")
+
+
     def _exportHtmlSingleFile(self):
         config = self.mainControl.getConfig()
         sepLineCount = config.getint("main",
@@ -824,11 +840,13 @@ class HtmlXmlExporter(AbstractExporter):
             bgimg = u''
             
             
-        if self.exportType == u"html_previewIE":
-            dblClick = 'ondblclick="window.location.href = &quot;internaljump:mouse/leftdoubleclick/preview/body&quot;;"'
+        if self.exportType in (u"html_previewIE", u"html_previewMOZ"):
+            dblClick = 'ondblclick="window.location.href = &quot;' + \
+                    self._getInternaljumpPrefix() + \
+                    'mouse/leftdoubleclick/preview/body&quot;;"'
 
-        elif self.exportType == u"html_previewMOZ":
-            dblClick = 'ondblclick="window.location.href = &quot;file://internaljump/mouse/leftdoubleclick/preview/body&quot;;"'
+#         elif self.exportType == u"html_previewMOZ":
+#             dblClick = 'ondblclick="window.location.href = &quot;file://internaljump/mouse/leftdoubleclick/preview/body&quot;;"'
         else:
             dblClick = ''
 
@@ -1265,12 +1283,16 @@ class HtmlXmlExporter(AbstractExporter):
             elif value == u"undefined":
                 wordList = wikiDocument.getWikiData().getUndefinedWords()
             elif value == u"back":
-                if self.exportType in (u"html_previewWX", u"html_previewIE"):
+                if self.exportType in (u"html_previewWX", u"html_previewIE",
+                        u"html_previewMOZ"):
                     htmlContent = \
-                            u'<a href="internaljump:action/history/back">Back</a>'
-                elif self.exportType == u"html_previewMOZ":
-                    htmlContent = \
-                            u'<a href="file://internaljump/action/history/back">Back</a>'
+                            u'<a href="' + self._getInternaljumpPrefix() + \
+                            u'action/history/back">Back</a>'
+#                     htmlContent = \
+#                             u'<a href="internaljump:action/history/back">Back</a>'
+#                 elif self.exportType == u"html_previewMOZ":
+#                     htmlContent = \
+#                             u'<a href="file://internaljump/action/history/back">Back</a>'
                 else:
                     htmlContent = \
                             u'<a href="javascript:history.go(-1)">Back</a>'
@@ -1520,7 +1542,11 @@ class HtmlXmlExporter(AbstractExporter):
                 if selfLink:
                     # Page links to itself, so replace link URL
                     # by the anchor.
-                    link = u"#" + astNode.anchorFragment
+                    if self.exportType in (u"html_previewIE", u"html_previewMOZ"):
+                        link = self._getInternaljumpPrefix() + \
+                                "action/scroll/selfanchor/" + astNode.anchorFragment
+                    else:
+                        link = u"#" + astNode.anchorFragment
                 else:
                     link += u"#" + astNode.anchorFragment
 

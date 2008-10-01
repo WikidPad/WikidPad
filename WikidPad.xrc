@@ -362,7 +362,7 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
-        <object class="wxCheckBox" name="cbLogWindowAutoShow">
+        <object class="wxCheckBox" name="cbLogWindowAutoShowUser">
           <label>Auto-show log window</label>
         </object>
         <option>0</option>
@@ -2010,6 +2010,23 @@
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbTreeForceScratchpadVisibility">
           <label>Force ScratchPad visibility in tree</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbWikiReadOnly">
+          <label>Read-only wiki</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbLogWindowAutoShowWiki">
+          <label>Auto-show log window</label>
+          <style>wxCHK_3STATE|wxCHK_ALLOW_3RD_STATE_FOR_USER</style>
         </object>
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
