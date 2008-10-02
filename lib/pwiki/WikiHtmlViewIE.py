@@ -9,6 +9,7 @@ import wx, wx.html
 if wx.Platform == '__WXMSW__':
     import wx.activex
     import wx.lib.iewin as iewin
+    from WindowsHacks import getLongPath
 else:
     iewin = None
 
@@ -20,7 +21,7 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 from MiscEvent import KeyFunctionSink
 
 from StringOps import uniToGui, utf8Enc, utf8Dec, urlFromPathname, urlQuote, \
-        writeEntireTxtFile
+        writeEntireTxtFile, pathnameFromUrl
 
 from TempFileSet import TempFileSet
 
@@ -124,6 +125,8 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         # Create temporary html file
         self.htpath = self.exporterInstance.tempFileSet.createTempFile(
                     u"", ".html", relativeTo="")
+                    
+        self.normHtpath = os.path.normcase(getLongPath(self.htpath))
 
         iewin.EVT_BeforeNavigate2(self, self.GetId(), self.OnBeforeNavigate)
 
@@ -217,7 +220,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             else:                        
                 self.currentLoadedWikiWord = word 
     
-                if self.anchor:
+                if self.anchor is not None:
                     url += "#" + self.anchor
     
     
@@ -226,7 +229,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 self.lastAnchor = self.anchor
 
         else:  # Not outOfSync
-            if self.anchor:
+            if self.anchor is not None:
                 self.passNavigate += 1
                 self.LoadUrl(self.currentLoadedUrl + u"#" + self.anchor)
                 self.lastAnchor = self.anchor
@@ -314,7 +317,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         if self.passNavigate:
             self.passNavigate -= 1
             return
-
+            
         href = evt.URL
         if self.drivingMoz:
             internaljumpPrefix = u"file://internaljump/"
@@ -353,10 +356,10 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             self.presenter.getMainControl().openWikiPage(
                     word, motionType="child", anchor=anchor)
 
-        elif href.startswith(internaljumpPrefix + u"action/scroll/selfanchor/"):
-            anchorFragment = href[len(internaljumpPrefix + u"action/scroll/selfanchor/"):]
-            self.gotoAnchor(anchorFragment)
-            evt.Cancel = True
+#         elif href.startswith(internaljumpPrefix + u"action/scroll/selfanchor/"):
+#             anchorFragment = href[len(internaljumpPrefix + u"action/scroll/selfanchor/"):]
+#             self.gotoAnchor(anchorFragment)
+#             evt.Cancel = True
 
         elif href == (internaljumpPrefix + u"action/history/back"):
             # Go back in history
@@ -369,13 +372,21 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
             paramDict = {"page": pres.getDocPage(), "presenter": pres,
                     "main control": mc}
-                    
+
             mc.getUserActionCoord().reactOnUserEvent(
                     u"mouse/leftdoubleclick/preview/body", paramDict)
             evt.Cancel = True
 
-#         elif href.startswith(u"file:"):
-#             pass
+        elif href.startswith(u"file:"):
+            hrefSplit = href.split("#", 1)
+            hrefNoFragment = hrefSplit[0]
+            normedPath = os.path.normcase(getLongPath(pathnameFromUrl(hrefNoFragment)))
+            if self.normHtpath == normedPath and len(hrefSplit) == 2:
+                self.gotoAnchor(hrefSplit[1])
+                evt.Cancel = True
+            else:
+                self.presenter.getMainControl().launchUrl(href)
+                evt.Cancel = True
         else:
             self.presenter.getMainControl().launchUrl(href)
             evt.Cancel = True

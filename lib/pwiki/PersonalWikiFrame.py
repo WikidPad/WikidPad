@@ -78,6 +78,8 @@ from PluginManager import *
 try:
     import WindowsHacks
 except:
+    if Configuration.isWindows():
+        traceback.print_exc()
     WindowsHacks = None
 
 

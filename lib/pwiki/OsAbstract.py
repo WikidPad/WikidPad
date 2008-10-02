@@ -2,7 +2,7 @@
 OS abstraction
 """
 
-import os, shutil, os.path
+import os, shutil, os.path, traceback
 import wx
 
 import Configuration
@@ -14,6 +14,8 @@ from StringOps import mbcsEnc, urlQuote, pathnameFromUrl, URL_RESERVED, pathEnc
 try:
     import WindowsHacks
 except:
+    if Configuration.isWindows():
+        traceback.print_exc()
     WindowsHacks = None
 
 

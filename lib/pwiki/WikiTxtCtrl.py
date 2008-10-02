@@ -34,12 +34,14 @@ from StringOps import *
 # utf8Enc, utf8Dec, mbcsEnc, mbcsDec, uniToGui, guiToUni, \
 #        Tokenizer, wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
-from Configuration import isUnicode, isWin9x, isLinux
+from Configuration import isUnicode, isWin9x, isLinux, isWindows
 
 
 try:
     import WindowsHacks
 except:
+    if isWindows():
+        traceback.print_exc()
     WindowsHacks = None
 
 

@@ -818,7 +818,7 @@ def ntPathnameFromUrl(url, testFileType=True):
     elif testFileType:
         raise RuntimeError, 'Cannot convert non-local URL to pathname'
 
-    if not '|' in url:
+    if (not ':' in url) and (not '|' in url):
         # No drive specifier, just convert slashes
         if url[:4] == '////':
             # path is something like ////host/path/on/remote/host
@@ -828,8 +828,12 @@ def ntPathnameFromUrl(url, testFileType=True):
         components = url.split('/')
         # make sure not to convert quoted slashes :-)
         return flexibleUrlUnquote('\\'.join(components))
+
     comp = url.split('|')
-    if len(comp) != 2 or comp[0][-1] not in string.ascii_letters:
+    if len(comp) == 1:
+        comp = url.split(':')
+
+    if len(comp) != 2 or len(comp[0]) == 0 or comp[0][-1] not in string.ascii_letters:
         error = 'Bad URL: ' + url
         raise IOError, error
     drive = comp[0][-1].upper()

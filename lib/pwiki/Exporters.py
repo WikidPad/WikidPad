@@ -1542,11 +1542,11 @@ class HtmlXmlExporter(AbstractExporter):
                 if selfLink:
                     # Page links to itself, so replace link URL
                     # by the anchor.
-                    if self.exportType in (u"html_previewIE", u"html_previewMOZ"):
-                        link = self._getInternaljumpPrefix() + \
-                                "action/scroll/selfanchor/" + astNode.anchorFragment
-                    else:
-                        link = u"#" + astNode.anchorFragment
+#                     if self.exportType in (u"html_previewIE", u"html_previewMOZ"):
+#                         link = self._getInternaljumpPrefix() + \
+#                                 "action/scroll/selfanchor/" + astNode.anchorFragment
+#                     else:
+                    link = u"#" + astNode.anchorFragment
                 else:
                     link += u"#" + astNode.anchorFragment
 

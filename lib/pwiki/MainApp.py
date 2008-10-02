@@ -28,6 +28,7 @@ import Localization
 from PluginManager import PluginManager, InsertionPluginManager
 
 
+
 # For wx.GetOsVersion()
 wxWINDOWS_NT = Configuration.wxWINDOWS_NT
 wxWIN95 = Configuration.wxWIN95

@@ -22,6 +22,7 @@ if isWindows():
     try:
         import WikiHtmlViewIE
     except:
+#         traceback.print_exc()
         WikiHtmlViewIE = None
 else:
     WikiHtmlViewIE = None

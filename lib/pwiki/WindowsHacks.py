@@ -5,14 +5,14 @@ by the OS-independent wxPython library.
 
 import ctypes, os, os.path, traceback
 from ctypes import c_int, c_uint, c_long, c_ulong, c_ushort, c_char, c_char_p, \
-        c_wchar_p, c_byte, byref   # , WindowsError
+        c_wchar_p, c_byte, byref, create_string_buffer, create_unicode_buffer   # , WindowsError
 
 import wx
 
 from wxHelper import getTextFromClipboard
 
-from StringOps import strftimeUB, pathEnc   # unescapeWithRe
-
+from StringOps import strftimeUB, pathEnc, mbcsEnc, mbcsDec   # unescapeWithRe
+import Configuration
 import DocPages
 
 
@@ -31,6 +31,8 @@ WM_KEYDOWN = 256
 WM_APPCOMMAND = 0x0319
 APPCOMMAND_BROWSER_BACKWARD = 1
 APPCOMMAND_BROWSER_FORWARD = 2
+
+MAX_PATH = 260
 
 
 LOCALE_IDEFAULTANSICODEPAGE = 0x1004
@@ -209,6 +211,53 @@ if SHFileOperationW is not None:
         return res
 
 
+
+# DWORD GetLongPathName(
+#   LPCTSTR lpszShortPath,
+#   LPTSTR lpszLongPath,
+#   DWORD cchBuffer
+# );
+
+if Configuration.isWin9x():
+    GetLongPathName = _kernel32dll.GetLongPathNameA
+    
+    def getLongPath(path):
+        path = mbcsEnc(path)[0]
+        if len(path) > MAX_PATH:
+            # Path too long for ANSI
+            return path
+        result = create_string_buffer(MAX_PATH)
+        rv = GetLongPathName(path, result, MAX_PATH)
+        if rv == 0 or rv > MAX_PATH:
+            return path
+        else:
+            return result.value
+else:
+    GetLongPathName = _kernel32dll.GetLongPathNameW
+    
+    def getLongPath(path):
+        if isinstance(path, str):
+            path = mbcsDec(path)[0]
+        
+        if not isinstance(path, unicode):
+            return path
+
+        if len(path) > 32760:
+            # Path too long for UNICODE
+            return path
+
+        result = create_unicode_buffer(1024)
+        rv = GetLongPathName(u"\\\\?\\" + path, result, 1024)
+        if rv == 0:
+            return path
+        if rv > 1024:
+            result = create_unicode_buffer(rv)
+            rv = GetLongPathName(u"\\\\?\\" + path, result, rv)
+            
+            if rv == 0:
+                return path
+
+        return result.value[4:]
 
 
 
