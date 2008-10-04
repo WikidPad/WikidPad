@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2008-10-02 20:06\n"
+"POT-Creation-Date: 2008-10-04 20:56\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1680,23 +1680,23 @@ msgstr ""
 msgid "XML files (*.xml)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:1379
+#: lib\pwiki\Exporters.py:1380
 msgid "<pre>[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2321 lib\pwiki\Importers.py:33
+#: lib\pwiki\Exporters.py:2340 lib\pwiki\Importers.py:33
 msgid "Multipage text"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2334 lib\pwiki\Importers.py:46
+#: lib\pwiki\Exporters.py:2353 lib\pwiki\Importers.py:46
 msgid "Multipage files (*.mpt)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2335 lib\pwiki\Importers.py:47
+#: lib\pwiki\Exporters.py:2354 lib\pwiki\Importers.py:47
 msgid "Text file (*.txt)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2463
+#: lib\pwiki\Exporters.py:2482
 msgid "No usable separator found"
 msgstr ""
 

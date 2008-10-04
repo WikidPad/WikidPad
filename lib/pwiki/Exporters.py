@@ -1282,9 +1282,10 @@ class HtmlXmlExporter(AbstractExporter):
                 wordList = wikiDocument.getWikiData().getParentlessWikiWords()
             elif value == u"undefined":
                 wordList = wikiDocument.getWikiData().getUndefinedWords()
+            elif value == u"top":
+                htmlContent = u'<a href="#">Top</a>'
             elif value == u"back":
-                if self.exportType in (u"html_previewWX", u"html_previewIE",
-                        u"html_previewMOZ"):
+                if self.asHtmlPreview:
                     htmlContent = \
                             u'<a href="' + self._getInternaljumpPrefix() + \
                             u'action/history/back">Back</a>'
@@ -1434,15 +1435,17 @@ class HtmlXmlExporter(AbstractExporter):
 
         if wordList is not None:
             # Create content as a nicely formatted list of wiki words
-
+            
             if len(wordList) == 0:
                 content = u""
             else:
                 # wordList was set, so build a nicely formatted list of wiki words
 
                 # Check for desired number of columns (as appendix e.g.
-                # "columns 3" was set)
+                # "columns 3" was set) and other settings
                 cols = 1
+                asList = False
+
                 for ap in insertionAstNode.appendices:
                     if ap.startswith(u"columns "):
                         try:
@@ -1452,6 +1455,9 @@ class HtmlXmlExporter(AbstractExporter):
                                 break
                         except ValueError:
                             pass
+                    elif ap == "aslist":
+                        asList = True
+
                 self.mainControl.getCollator().sort(wordList)
     
                 # TODO: Generate ready-made HTML content
@@ -1486,7 +1492,20 @@ class HtmlXmlExporter(AbstractExporter):
                         self.outAppend(u"</tr>\n")
                     
                     self.outAppend(u"</table>")
-                else:
+                elif asList:
+                    
+                    firstWord = True
+                    for word in wordList:
+                        if firstWord:
+                            firstWord = False
+                        else:
+                            self.outAppend(", ")
+                        wwNode = PageAst.WikiWord()
+                        wwNode.buildNodeForWord(word)
+
+                        self._processWikiWord(word, wwNode, None)
+
+                else:   # cols == 1 and not asList
                     firstWord = True
                     for word in wordList:
                         if firstWord:

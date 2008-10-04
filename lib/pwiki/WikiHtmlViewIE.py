@@ -102,6 +102,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         self.anchor = None  # Name of anchor to jump to when view gets visible
         self.lastAnchor = None
         self.passNavigate = 0
+        self.reloadAfterLoad = 0
 
 
         # TODO Should be changed to presenter as controller
@@ -129,6 +130,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         self.normHtpath = os.path.normcase(getLongPath(self.htpath))
 
         iewin.EVT_BeforeNavigate2(self, self.GetId(), self.OnBeforeNavigate)
+        iewin.EVT_NavigateComplete2(self, self.GetId(), self.OnAfterNavigate)
 
         wx.EVT_SET_FOCUS(self, self.OnSetFocus)
 #         EVT_MOUSEWHEEL(self, self.OnMouseWheel)
@@ -316,8 +318,9 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
     def OnBeforeNavigate(self, evt):
         if self.passNavigate:
             self.passNavigate -= 1
+            self.reloadAfterLoad += 1
             return
-            
+
         href = evt.URL
         if self.drivingMoz:
             internaljumpPrefix = u"file://internaljump/"
@@ -390,6 +393,15 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         else:
             self.presenter.getMainControl().launchUrl(href)
             evt.Cancel = True
+
+
+    def OnAfterNavigate(self, evt):
+        if self.reloadAfterLoad == 0:
+            evt.Skip()
+            return
+
+        self.reloadAfterLoad -= 1
+        self.RefreshPage(iewin.REFRESH_COMPLETELY)
 
 
 #     def OnKeyUp(self, evt):
