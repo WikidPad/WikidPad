@@ -102,7 +102,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         self.anchor = None  # Name of anchor to jump to when view gets visible
         self.lastAnchor = None
         self.passNavigate = 0
-        self.reloadAfterLoad = 0
+ #        self.reloadAfterLoad = 0
 
 
         # TODO Should be changed to presenter as controller
@@ -123,14 +123,20 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
         self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
 
-        # Create temporary html file
-        self.htpath = self.exporterInstance.tempFileSet.createTempFile(
+        # Create two temporary html files (IE 7 needs two to work)
+        self.htpaths = [None, None]
+        self.htpaths[0] = self.exporterInstance.tempFileSet.createTempFile(
+                    u"", ".html", relativeTo="")
+        self.htpaths[1] = self.exporterInstance.tempFileSet.createTempFile(
                     u"", ".html", relativeTo="")
                     
-        self.normHtpath = os.path.normcase(getLongPath(self.htpath))
+        self.normHtpaths = [os.path.normcase(getLongPath(self.htpaths[0])),
+                os.path.normcase(getLongPath(self.htpaths[1]))]
+                
+        self.currentHtpath = 0 # index into self.htpaths
 
         iewin.EVT_BeforeNavigate2(self, self.GetId(), self.OnBeforeNavigate)
-        iewin.EVT_NavigateComplete2(self, self.GetId(), self.OnAfterNavigate)
+#         iewin.EVT_NavigateComplete2(self, self.GetId(), self.OnAfterNavigate)
 
         wx.EVT_SET_FOCUS(self, self.OnSetFocus)
 #         EVT_MOUSEWHEEL(self, self.OnMouseWheel)
@@ -153,11 +159,17 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
     def close(self):
         self.setLayerVisible(False)
         try:
-            os.remove(pathEnc(self.htpath))
+            os.remove(pathEnc(self.htpaths[0]))
+        except:
+            pass
+
+        try:
+            os.remove(pathEnc(self.htpaths[1]))
         except:
             pass
             # TODO: Option to show also these exceptions
             # traceback.print_exc()
+
         self.presenterListener.disconnect()
         self.__sinkApp.disconnect()
         self.__sinkDocPage.disconnect()
@@ -205,34 +217,40 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                     self.LinkCreatorForPreview(
                         self.presenter.getWikiDocument().getWikiData()))
                         
-#             htpath = self.exporterInstance.tempFileSet.createTempFile(
-#                     utf8Enc(html)[0], ".html", relativeTo="")
-
-            writeEntireTxtFile(self.htpath, utf8Enc(html)[0])
-
-            url = "file:" + urlFromPathname(self.htpath)
-
             wx.GetApp().getInsertionPluginManager().taskEnd()
             
-            self.currentLoadedUrl = url
             if self.currentLoadedWikiWord == word and \
                     self.anchor is None:
+                        
+                htpath = self.htpaths[self.currentHtpath]
+                
+                writeEntireTxtFile(htpath, utf8Enc(html)[0])
+                url = "file:" + urlFromPathname(htpath)
+                self.currentLoadedUrl = url
                 self.RefreshPage()
 
             else:                        
-                self.currentLoadedWikiWord = word 
+                self.currentLoadedWikiWord = word
+
+                self.currentHtpath = 1 - self.currentHtpath
+                htpath = self.htpaths[self.currentHtpath]
+                
+                writeEntireTxtFile(htpath, utf8Enc(html)[0])
+                url = "file:" + urlFromPathname(htpath)
+                self.currentLoadedUrl = url
     
                 if self.anchor is not None:
                     url += "#" + self.anchor
     
-    
                 self.passNavigate += 1
+#                 self.reloadAfterLoad += 1
                 self.LoadUrl(url)
                 self.lastAnchor = self.anchor
 
         else:  # Not outOfSync
             if self.anchor is not None:
                 self.passNavigate += 1
+#                 self.reloadAfterLoad += 1
                 self.LoadUrl(self.currentLoadedUrl + u"#" + self.anchor)
                 self.lastAnchor = self.anchor
 
@@ -318,7 +336,6 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
     def OnBeforeNavigate(self, evt):
         if self.passNavigate:
             self.passNavigate -= 1
-            self.reloadAfterLoad += 1
             return
 
         href = evt.URL
@@ -384,7 +401,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             hrefSplit = href.split("#", 1)
             hrefNoFragment = hrefSplit[0]
             normedPath = os.path.normcase(getLongPath(pathnameFromUrl(hrefNoFragment)))
-            if self.normHtpath == normedPath and len(hrefSplit) == 2:
+            if len(hrefSplit) == 2 and normedPath in self.normHtpaths:
                 self.gotoAnchor(hrefSplit[1])
                 evt.Cancel = True
             else:
@@ -395,13 +412,13 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             evt.Cancel = True
 
 
-    def OnAfterNavigate(self, evt):
-        if self.reloadAfterLoad == 0:
-            evt.Skip()
-            return
-
-        self.reloadAfterLoad -= 1
-        self.RefreshPage(iewin.REFRESH_COMPLETELY)
+#     def OnAfterNavigate(self, evt):
+#         if self.reloadAfterLoad == 0:
+#             evt.Skip()
+#             return
+# 
+#         self.reloadAfterLoad -= 1
+#         self.RefreshPage(iewin.REFRESH_COMPLETELY)
 
 
 #     def OnKeyUp(self, evt):

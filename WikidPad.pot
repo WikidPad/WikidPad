@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2008-10-04 20:56\n"
+"POT-Creation-Date: 2008-10-06 19:30\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1472,8 +1472,8 @@ msgstr ""
 msgid "Destination must be a file"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:818 lib\pwiki\PersonalWikiFrame.py:4347
-#: lib\pwiki\PersonalWikiFrame.py:4361 lib\pwiki\Printing.py:170
+#: lib\pwiki\AdditionalDialogs.py:818 lib\pwiki\PersonalWikiFrame.py:4365
+#: lib\pwiki\PersonalWikiFrame.py:4379 lib\pwiki\Printing.py:170
 msgid "No real wiki word selected as root"
 msgstr ""
 
@@ -1481,7 +1481,7 @@ msgstr ""
 msgid "Error while exporting"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:871 lib\pwiki\PersonalWikiFrame.py:4316
+#: lib\pwiki\AdditionalDialogs.py:871 lib\pwiki\PersonalWikiFrame.py:4334
 msgid "Select Export Directory"
 msgstr ""
 
@@ -1489,7 +1489,7 @@ msgstr ""
 msgid "All files (*.*)"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:890 lib\pwiki\PersonalWikiFrame.py:4320
+#: lib\pwiki\AdditionalDialogs.py:890 lib\pwiki\PersonalWikiFrame.py:4338
 msgid "Select Export File"
 msgstr ""
 
@@ -1993,7 +1993,7 @@ msgstr ""
 msgid "E&xit"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:830 lib\pwiki\PersonalWikiFrame.py:5136
+#: lib\pwiki\PersonalWikiFrame.py:830 lib\pwiki\PersonalWikiFrame.py:5154
 msgid "Exit"
 msgstr ""
 
@@ -2018,8 +2018,8 @@ msgid "Manage favorites"
 msgstr ""
 
 #: lib\pwiki\PersonalWikiFrame.py:1043 lib\pwiki\PersonalWikiFrame.py:1704
-#: lib\pwiki\PersonalWikiFrame.py:2183 lib\pwiki\PersonalWikiFrame.py:4516
-#: lib\pwiki\PersonalWikiFrame.py:4767
+#: lib\pwiki\PersonalWikiFrame.py:2183 lib\pwiki\PersonalWikiFrame.py:4534
+#: lib\pwiki\PersonalWikiFrame.py:4785
 msgid "Error while starting new WikidPad instance"
 msgstr ""
 
@@ -2040,7 +2040,7 @@ msgid "Rename Current Wiki Word"
 msgstr ""
 
 #: lib\pwiki\PersonalWikiFrame.py:1156 lib\pwiki\PersonalWikiFrame.py:1838
-#: lib\pwiki\PersonalWikiFrame.py:4048
+#: lib\pwiki\PersonalWikiFrame.py:4066
 msgid "Delete Wiki Word"
 msgstr ""
 
@@ -2052,7 +2052,7 @@ msgstr ""
 msgid "Add Bookmark to Page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1169 lib\pwiki\PersonalWikiFrame.py:3837
+#: lib\pwiki\PersonalWikiFrame.py:1169 lib\pwiki\PersonalWikiFrame.py:3855
 msgid "Clipboard Catcher at Page"
 msgstr ""
 
@@ -2060,7 +2060,7 @@ msgstr ""
 msgid "Text copied to clipboard is also appended to this page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1180 lib\pwiki\PersonalWikiFrame.py:5069
+#: lib\pwiki\PersonalWikiFrame.py:1180 lib\pwiki\PersonalWikiFrame.py:5087
 msgid "Clipboard Catcher at Cursor"
 msgstr ""
 
@@ -2068,7 +2068,7 @@ msgstr ""
 msgid "Text copied to clipboard is also added to cursor position"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1191 lib\pwiki\PersonalWikiFrame.py:5073
+#: lib\pwiki\PersonalWikiFrame.py:1191 lib\pwiki\PersonalWikiFrame.py:5091
 msgid "Clipboard Catcher off"
 msgstr ""
 
@@ -2560,7 +2560,7 @@ msgid "Save Wiki Word"
 msgstr ""
 
 #: lib\pwiki\PersonalWikiFrame.py:1831 lib\pwiki\PersonalWikiFrame.py:1832
-#: lib\pwiki\PersonalWikiFrame.py:3889 lib\pwiki\PersonalWikiFrame.py:4002
+#: lib\pwiki\PersonalWikiFrame.py:3907 lib\pwiki\PersonalWikiFrame.py:4020
 msgid "Rename Wiki Word"
 msgstr ""
 
@@ -2592,7 +2592,7 @@ msgstr ""
 msgid "Reconnect database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2145 lib\pwiki\PersonalWikiFrame.py:3083
+#: lib\pwiki\PersonalWikiFrame.py:2145 lib\pwiki\PersonalWikiFrame.py:3101
 msgid "Error while trying to reconnect:\n"
 msgstr ""
 
@@ -2607,7 +2607,7 @@ msgstr ""
 msgid "Error reconnecting!"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2166 lib\pwiki\PersonalWikiFrame.py:3130
+#: lib\pwiki\PersonalWikiFrame.py:2166 lib\pwiki\PersonalWikiFrame.py:3148
 msgid "Error while trying to write:\n"
 msgstr ""
 
@@ -2703,284 +2703,284 @@ msgstr ""
 msgid "Can't write to database '%s'"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2972
+#: lib\pwiki\PersonalWikiFrame.py:2990
 msgid "There is no (write-)access to underlying wiki\n"
 "Close anyway and loose possible changes?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2974
+#: lib\pwiki\PersonalWikiFrame.py:2992
 msgid "Close anyway"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3053
+#: lib\pwiki\PersonalWikiFrame.py:3071
 msgid "This operation requires an open database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3054
+#: lib\pwiki\PersonalWikiFrame.py:3072
 msgid "No open database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3066
+#: lib\pwiki\PersonalWikiFrame.py:3084
 msgid "No connection to database. Try to reconnect?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3067
+#: lib\pwiki\PersonalWikiFrame.py:3085
 msgid "Reconnect database?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3074
+#: lib\pwiki\PersonalWikiFrame.py:3092
 msgid "Trying to reconnect database..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3086
+#: lib\pwiki\PersonalWikiFrame.py:3104
 msgid "Error while reconnecting database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3111
+#: lib\pwiki\PersonalWikiFrame.py:3129
 msgid "This operation needs write access to database\n"
 "Try to write?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3112
+#: lib\pwiki\PersonalWikiFrame.py:3130
 msgid "Try writing?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3119
+#: lib\pwiki\PersonalWikiFrame.py:3137
 msgid "Trying to write to database..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3133
+#: lib\pwiki\PersonalWikiFrame.py:3151
 msgid "Error while writing to database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3157
+#: lib\pwiki\PersonalWikiFrame.py:3175
 msgid "Database connection error: %s.\n"
 "Try to re-establish, then run \"Wiki\"->\"Reconnect\""
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3159 lib\pwiki\PersonalWikiFrame.py:3176
+#: lib\pwiki\PersonalWikiFrame.py:3177 lib\pwiki\PersonalWikiFrame.py:3194
 msgid "Connection lost"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3174
+#: lib\pwiki\PersonalWikiFrame.py:3192
 msgid "No write access to database: %s.\n"
 " Try to re-establish, then run \"Wiki\"->\"Reconnect\""
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3193
+#: lib\pwiki\PersonalWikiFrame.py:3211
 msgid "Trying to reconnect ..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3202
+#: lib\pwiki\PersonalWikiFrame.py:3220
 msgid "Error while trying to reconnect:"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3411
+#: lib\pwiki\PersonalWikiFrame.py:3429
 msgid "Couldn't start file"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3426
+#: lib\pwiki\PersonalWikiFrame.py:3444
 msgid "Couldn't open wiki: %s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3456
+#: lib\pwiki\PersonalWikiFrame.py:3474
 msgid "Mod.: %s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3457
+#: lib\pwiki\PersonalWikiFrame.py:3475
 msgid "; Crea.: %s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3493
+#: lib\pwiki\PersonalWikiFrame.py:3511
 msgid "Parent nodes of '%s'"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3505
+#: lib\pwiki\PersonalWikiFrame.py:3523
 msgid "Parentless nodes"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3517
+#: lib\pwiki\PersonalWikiFrame.py:3535
 msgid "Child nodes of '%s'"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3530
+#: lib\pwiki\PersonalWikiFrame.py:3548
 msgid "Bookmarks"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3651
+#: lib\pwiki\PersonalWikiFrame.py:3669
 msgid "Wiki: %s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3832
+#: lib\pwiki\PersonalWikiFrame.py:3850
 msgid "Clipboard Catcher at: %s\t%s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3848
+#: lib\pwiki\PersonalWikiFrame.py:3866
 msgid "Error saving global configuration"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3859
+#: lib\pwiki\PersonalWikiFrame.py:3877
 msgid "Error saving current configuration"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3881
+#: lib\pwiki\PersonalWikiFrame.py:3899
 msgid "No real wiki word selected to rename"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3888
+#: lib\pwiki\PersonalWikiFrame.py:3906
 msgid "Rename '%s' to:"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3902
+#: lib\pwiki\PersonalWikiFrame.py:3920
 msgid "Description:"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3903
+#: lib\pwiki\PersonalWikiFrame.py:3921
 msgid "Store new version"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3917
+#: lib\pwiki\PersonalWikiFrame.py:3935
 msgid "Do you want to delete all stored versions?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3918
+#: lib\pwiki\PersonalWikiFrame.py:3936
 msgid "Delete All Versions"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3928
+#: lib\pwiki\PersonalWikiFrame.py:3946
 msgid "This wiki does not contain any version information"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3929 lib\pwiki\PersonalWikiFrame.py:3946
+#: lib\pwiki\PersonalWikiFrame.py:3947 lib\pwiki\PersonalWikiFrame.py:3964
 msgid "Retrieve version"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3944
+#: lib\pwiki\PersonalWikiFrame.py:3962
 msgid "This will overwrite current content if not stored as version. Continue?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3973 lib\pwiki\PersonalWikiFrame.py:4096
+#: lib\pwiki\PersonalWikiFrame.py:3991 lib\pwiki\PersonalWikiFrame.py:4114
 #: lib\pwiki\wikidata\compact_sqlite\WikiData.py:400
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:362
 #: lib\pwiki\wikidata\original_sqlite\WikiData.py:407
 msgid "'%s' is an invalid wiki word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3977
+#: lib\pwiki\PersonalWikiFrame.py:3995
 msgid "Can't rename to itself"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3981
+#: lib\pwiki\PersonalWikiFrame.py:3999
 msgid "The scratch pad cannot be renamed."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3987
+#: lib\pwiki\PersonalWikiFrame.py:4005
 msgid "Cannot rename to '%s', word already exists"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4000
+#: lib\pwiki\PersonalWikiFrame.py:4018
 msgid "Do you want to modify all links to the wiki word '%s' renamed to '%s'?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4035
+#: lib\pwiki\PersonalWikiFrame.py:4053
 msgid "The scratch pad cannot be deleted"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4039
+#: lib\pwiki\PersonalWikiFrame.py:4057
 msgid "No real wiki word to delete"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4047
+#: lib\pwiki\PersonalWikiFrame.py:4065
 msgid "Are you sure you want to delete wiki word '%s'?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4076
+#: lib\pwiki\PersonalWikiFrame.py:4094
 msgid "No real wiki word to modify"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4087
+#: lib\pwiki\PersonalWikiFrame.py:4105
 msgid "Replace text by WikiWord:"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4088
+#: lib\pwiki\PersonalWikiFrame.py:4106
 msgid "Replace by Wiki Word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4101
+#: lib\pwiki\PersonalWikiFrame.py:4119
 msgid "Wiki word %s exists already\n"
 "Would you like to append to the word?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4104
+#: lib\pwiki\PersonalWikiFrame.py:4122
 msgid "Word exists"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4323
+#: lib\pwiki\PersonalWikiFrame.py:4341
 msgid "XML files (*.xml)|*.xml|All files (*.*)|*"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4404
+#: lib\pwiki\PersonalWikiFrame.py:4422
 msgid "Choose a file to create URL for"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4455
+#: lib\pwiki\PersonalWikiFrame.py:4473
 msgid "Are you sure you want to rebuild this wiki? You may want to backup your data first!"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4457
+#: lib\pwiki\PersonalWikiFrame.py:4475
 msgid "Rebuild wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4463 lib\pwiki\PersonalWikiFrame.py:4464
+#: lib\pwiki\PersonalWikiFrame.py:4481 lib\pwiki\PersonalWikiFrame.py:4482
 msgid "Rebuilding wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4478
+#: lib\pwiki\PersonalWikiFrame.py:4496
 msgid "Error rebuilding wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4526
+#: lib\pwiki\PersonalWikiFrame.py:4544
 msgid "This could overwrite pages in the database. Continue?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4527
+#: lib\pwiki\PersonalWikiFrame.py:4545
 msgid "Import pagefiles"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4625
+#: lib\pwiki\PersonalWikiFrame.py:4643
 msgid "Unknown dialog type"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4638
+#: lib\pwiki\PersonalWikiFrame.py:4656
 msgid "Internal Error"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4749 lib\pwiki\PersonalWikiFrame.py:4757
-#: lib\pwiki\PersonalWikiFrame.py:4775
+#: lib\pwiki\PersonalWikiFrame.py:4767 lib\pwiki\PersonalWikiFrame.py:4775
+#: lib\pwiki\PersonalWikiFrame.py:4793
 msgid "Choose a Wiki to open"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4785
+#: lib\pwiki\PersonalWikiFrame.py:4803
 msgid "Name for new wiki (must be in the form of a WikiWord):"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4786
+#: lib\pwiki\PersonalWikiFrame.py:4804
 msgid "Create New Wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4797
+#: lib\pwiki\PersonalWikiFrame.py:4815
 msgid "Directory to store new wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4807
+#: lib\pwiki\PersonalWikiFrame.py:4825
 msgid "'%s' is an invalid wiki word. There must be no spaces and mixed caps"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5134
+#: lib\pwiki\PersonalWikiFrame.py:5152
 msgid "Restore"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5135
+#: lib\pwiki\PersonalWikiFrame.py:5153
 msgid "Save"
 msgstr ""
 

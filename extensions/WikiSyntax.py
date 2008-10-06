@@ -235,8 +235,6 @@ PropertyRE      = re.compile(BracketStartPAT +
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
-
-
 # parses the dynamic properties in a todo item
 PropertyInTodoRE      = re.compile(BracketStartPAT +
         ur"[ \t]*(?P<propertyKey>[\w\-\_\.]+?)[ \t]*"

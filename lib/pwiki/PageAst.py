@@ -810,7 +810,7 @@ class Insertion(Ast):
         mat = WikiFormatting.InsertionValueRE.match(content)
         self.value = mat.group("insertionQuotedValue")
         if self.value is None:
-            self.value = mat.group("insertionValue")
+            self.value = mat.group("insertionValue").rstrip()
             
         nextStart = mat.end(0)
         
@@ -823,8 +823,8 @@ class Insertion(Ast):
     
             apx = mat.group("insertionQuotedAppendix")
             if apx is None:
-                apx = mat.group("insertionAppendix")
-                
+                apx = mat.group("insertionAppendix").rstrip()
+
             self.appendices.append(apx)
 
             nextStart = mat.end(0)
@@ -871,7 +871,7 @@ class Property(Ast):
 
         value = mat.group("propertyQuotedValue")
         if value is None:
-            value = mat.group("propertyValue")
+            value = mat.group("propertyValue").rstrip()
 
         values.append(value)
 
@@ -884,7 +884,7 @@ class Property(Ast):
     
             value = mat.group("propertyFurtherQuotedValue")
             if value is None:
-                value = mat.group("propertyFurtherValue")
+                value = mat.group("propertyFurtherValue").rstrip()
     
             values.append(value)
 

@@ -2883,6 +2883,24 @@ These are your default global settings.
                 viewsTree.expandRoot()
 
 
+            # Remove/Replace undefined wiki words
+            wwo = []
+            for word in wikiWordsToOpen:
+                if self.getWikiData().isDefinedWikiWord(word):
+                    wwo.append(word)
+                    continue
+
+                wordsStartingWith = self.getWikiData().getWikiWordsStartingWith(
+                        word, True)
+                if len(wordsStartingWith) > 0:
+                    word = wordsStartingWith[0]
+                    wwo.append(word)
+                    continue
+
+            wikiWordsToOpen = wwo
+
+
+
 
             # set status
     #         self.statusBar.SetStatusText(
