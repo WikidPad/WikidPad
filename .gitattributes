@@ -1,6 +1,7 @@
 * text=auto !eol
 FreeIcons/IconSet/3D.gif -text
 FreeIcons/IconSet/FreeIcons-License.txt -text
+FreeIcons/IconSet/_ReadMe.txt -text
 FreeIcons/IconSet/addressbook1.gif -text
 FreeIcons/IconSet/addressbook2.gif -text
 FreeIcons/IconSet/alarm[!!-~]red.gif -text
@@ -58,6 +59,7 @@ FreeIcons/IconSet/cherry.gif -text
 FreeIcons/IconSet/clip.gif -text
 FreeIcons/IconSet/clock.gif -text
 FreeIcons/IconSet/cog.gif -text
+FreeIcons/IconSet/cog1.gif -text
 FreeIcons/IconSet/comment.gif -text
 FreeIcons/IconSet/comments.gif -text
 FreeIcons/IconSet/controls.gif -text
@@ -68,6 +70,7 @@ FreeIcons/IconSet/cup.gif -text
 FreeIcons/IconSet/daisy.gif -text
 FreeIcons/IconSet/database.gif -text
 FreeIcons/IconSet/date.gif -text
+FreeIcons/IconSet/date1.gif -text
 FreeIcons/IconSet/day.gif -text
 FreeIcons/IconSet/dice.gif -text
 FreeIcons/IconSet/disk.gif -text
@@ -144,8 +147,9 @@ FreeIcons/IconSet/lightbulb.gif -text
 FreeIcons/IconSet/linewidth.gif -text
 FreeIcons/IconSet/link[!!-~]broken.gif -text
 FreeIcons/IconSet/link[!!-~]error.gif -text
-FreeIcons/IconSet/link[!!-~]new.gif -text
 FreeIcons/IconSet/link[!!-~]rename.gif -text
+FreeIcons/IconSet/link.gif -text
+FreeIcons/IconSet/link1.gif -text
 FreeIcons/IconSet/list[!!-~]bulleted.gif -text
 FreeIcons/IconSet/list[!!-~]numbered.gif -text
 FreeIcons/IconSet/list[!!-~]outlined.gif -text
@@ -171,11 +175,13 @@ FreeIcons/IconSet/movie2.gif -text
 FreeIcons/IconSet/music.gif -text
 FreeIcons/IconSet/music2.gif -text
 FreeIcons/IconSet/note.gif -text
+FreeIcons/IconSet/note1.gif -text
 FreeIcons/IconSet/note2.gif -text
 FreeIcons/IconSet/note3.gif -text
 FreeIcons/IconSet/notepad.gif -text
 FreeIcons/IconSet/orgchart.gif -text
 FreeIcons/IconSet/package.gif -text
+FreeIcons/IconSet/page.gif -text
 FreeIcons/IconSet/painting.gif -text
 FreeIcons/IconSet/pc[!!-~]board.gif -text
 FreeIcons/IconSet/pc.gif -text
@@ -190,10 +196,12 @@ FreeIcons/IconSet/picture[!!-~]galery.gif -text
 FreeIcons/IconSet/picture[!!-~]tiles.gif -text
 FreeIcons/IconSet/picture.gif -text
 FreeIcons/IconSet/pictures.gif -text
+FreeIcons/IconSet/pin.gif -text
 FreeIcons/IconSet/plug.gif -text
 FreeIcons/IconSet/printer.gif -text
 FreeIcons/IconSet/puzzle.gif -text
 FreeIcons/IconSet/question.gif -text
+FreeIcons/IconSet/question1.gif -text
 FreeIcons/IconSet/question2.gif -text
 FreeIcons/IconSet/santa.gif -text
 FreeIcons/IconSet/script.gif -text
@@ -228,11 +236,14 @@ FreeIcons/IconSet/tb_back.gif -text
 FreeIcons/IconSet/tb_bold.gif -text
 FreeIcons/IconSet/tb_copy.gif -text
 FreeIcons/IconSet/tb_cut.gif -text
+FreeIcons/IconSet/tb_cycle.gif -text
 FreeIcons/IconSet/tb_delete.gif -text
+FreeIcons/IconSet/tb_doc.gif -text
 FreeIcons/IconSet/tb_forward.gif -text
 FreeIcons/IconSet/tb_heading.gif -text
 FreeIcons/IconSet/tb_home.gif -text
 FreeIcons/IconSet/tb_italic.gif -text
+FreeIcons/IconSet/tb_lens.gif -text
 FreeIcons/IconSet/tb_open.gif -text
 FreeIcons/IconSet/tb_paste.gif -text
 FreeIcons/IconSet/tb_paste_link.gif -text
@@ -244,12 +255,12 @@ FreeIcons/IconSet/tb_save.gif -text
 FreeIcons/IconSet/tb_search.gif -text
 FreeIcons/IconSet/tb_seperator.gif -text
 FreeIcons/IconSet/tb_switch[!!-~]ed[!!-~]prev.gif -text
-FreeIcons/IconSet/tb_toggleview.gif -text
 FreeIcons/IconSet/tb_undo.gif -text
 FreeIcons/IconSet/tb_zoomin.gif -text
 FreeIcons/IconSet/tb_zoomout.gif -text
 FreeIcons/IconSet/tick.gif -text
 FreeIcons/IconSet/todo.gif -text
+FreeIcons/IconSet/todo1.gif -text
 FreeIcons/IconSet/tools.gif -text
 FreeIcons/IconSet/tools2.gif -text
 FreeIcons/IconSet/tree.gif -text
