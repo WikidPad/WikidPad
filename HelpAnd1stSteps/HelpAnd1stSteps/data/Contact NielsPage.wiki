@@ -1,0 +1,12 @@
+﻿++ Contact Niels Page
+----
+Name:	Niels H. D. Page
+Adress:	Pagestreet 25
+Phone:	010-1234567
+Mobile:	06-12345678
+eMail:	niels.page@email.com
+
+Remarks:
+Fundamental contributor to the understanding of quantum wiki mechanics.
+----
+previous: [:rel:back]

@@ -1,0 +1,7 @@
+﻿++ Scratch Pad
+[tree_position: 1000]
+----
+The scratch pad is a holding place for random text. Selected text from other pages can easily be copied and appended to this page from anywhere in Wikidpad by typing CTRL-ALT-C.
+----
+
+

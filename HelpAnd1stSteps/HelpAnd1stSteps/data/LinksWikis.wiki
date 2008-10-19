@@ -1,0 +1,60 @@
+﻿++ Links Wikis
+Contents:	[:toc:]
+[:rel:back]
+----
++++ General
+To link from one wiki to another you can create URL-links beginning with "\wiki://"
+
+*Remarks*
+    * Wiki links do not allow relative paths, so no working example can be presented here. Clicking any of the examples will result in the opening of an new, but empty wikidpad window.
+    * An easy way to create a wiki url, is to use the menu item "Wiki Words / Copy URL to clipboard" in the page to link and then paste the URL wherever you like in the linking page.
+    * The "Copy URL to clipboard" function is also available in context menus for wiki word tree items, for tabs and for "anchor: ..." lines in the editor. In the last case the URL also contains the anchor you clicked on.
+
+    ----
+++++ Linking to a wiki
+To link from one wiki to another, use the "wiki link":
+
+wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki] [1]
+
+    ----
+++++ Linking to a page in a wiki
+Add the "page" parameter to specify the wiki page to be opened:
+
+wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki?page=ThePage%20with%20spaces [1]
+
+    ----
+++++ Linking to an anchor on a page in a wiki
+You can also specify an anchor on the page to jump to:
+
+wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki?page=ThePage%20with%20spaces&anchor=here [1]
+
+
+[:rel:top]
+Footnotes:
+[1] _If you type all or part of the link yourself, then replace possible spaces in the path, file or page name by "%20"_
+----
++++ Link titles
+++++ Text
+A link text can in preview and export be replaced by a link title, that then serves as a clickable synonym for the link.
+
+    * [wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki | Foowiki]
+    * [wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki?page=ThePage%20with%20spaces | Foowiki: ThePage with spaces]
+    * [wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki?page=ThePage%20with%20spaces&anchor=here | Foowiki: ThePage with spaces; anchor here]
+
+    ----
+++++ Images
+Instead of a text, also an image can be used as a "title" or synonym for a link.
+
+    * [wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki | rel://files/wordpad.png>am] Foowiki
+    * [wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki?page=ThePage%20with%20spaces | rel://files/notepad.png>am]    Foowiki: ThePage with spaces
+    * [wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki?page=ThePage%20with%20spaces&anchor=here | rel://files/note_anchor.png>am]    Foowiki: ThePage with spaces; anchor here
+
+The images can be formatted with the default image attributes; see [TextImages|Textformatting: images].
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+inserts:&nbsp;&nbsp; [FilesRelativePathsIp]; [FilesWikiFileStoreIp]
+attributes: [camelCaseWordsEnabled: false]
+[help.status:done]

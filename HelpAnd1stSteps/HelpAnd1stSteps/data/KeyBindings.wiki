@@ -1,0 +1,121 @@
+﻿++ KeyBindings
+[:toc:]<br />
+[:rel:back]
+----
++++ General
+Wikidpad is installed with a number of predefined key bindings or "shortcut keys", as listed below. Many of these key bindings may be changed.
+
+[:rel:top]
+----
++++ Default setting
+++++ Wiki
+	<<|
+Ctrl-N | open new Wiki
+Ctrl-Alt-O | open existing Wiki
+>>
+[:rel:top]
+----
+++++ Edit / Preview / Treeview
++++++ View
+	<<|
+Ctrl-+ | zoom in
+Ctrl-- | zoom out
+Ctrl-Shift-A | show edit mode of current tab
+Ctrl-Shift-S | show preview mode of current tab
+Ctrl-T | hide/show the tree control
+F6 | switch between tree and editor
+Ctrl-Tab | switch between tabbed pages
+>>
+
+	----
++++++ Text formatting
+	<<|
+Ctrl-B | bold
+Ctrl-I | italic
+Ctrl-Alt-H | heading
+Ctrl-Alt-D | insert current date/time
+Ctrl-W | rewrap text at position
+>>
+
+	----
++++++ Page control
+	<<|
+Ctrl-Alt-R | rename the current wiki word / page
+Ctrl-S | save current page
+Ctrl-D | delete the current word, and content for that word
+Ctrl-Shift-UP | view parentless nodes
+>>
+[:rel:top]
+----
+++++ Page navigation
++++++ Pages
+	<<|
+Ctrl-L | open linked page
+Ctrl-ALT-L | open linked page in a new tab
+Ctrl-O | open page
+>>
+
+	----
++++++ History
+	<<|
+Ctrl-H | show history
+Ctrl-Alt-UP | show history, select -1
+Ctrl-Alt-DOWN | show history, select +1
+Alt-Left | go back in history
+Alt-Right | go forward in history
+>>
+
+	----
++++++ Relatives
+	<<|
+Ctrl-Up | view parents of current word
+Ctrl-Down | view children of current word
+>>
+
+	----
++++++ Bookmarks
+	<<|
+Ctrl-Alt-B | add a bookmark
+Ctrl-Shift-B | show bookmarks
+>>
+[:rel:top]
+----
+++++ Search
+	<<|
+Ctrl-F | start incremental search, perform next search
+F3 | start incremental search, perform next search
+Ctrl-Alt-F | search for words within the wiki
+Ctrl-R | find & replace
+>>
+[:rel:top]
+----
+++++ Miscelaneous
+	<<|
+Ctrl-E | eval scripts
+>>
+[:rel:top]
+----
++++ Change key bindings
+Under the wikidPad install directory:
+
+	* file:///C|/WikidPad/program%20Files/WikidPad by default
+
+There is a directory called "extensions". In this directory there is a
+file called keybindings.py. This file contains the variables used by
+wikidPad to assign key bindings. Copy this file into a directory in
+the wikidPad install directory called "user_extensions" (create it if
+it doesn't exist). Edit this file to override the default key
+bindings. This file will not be touched when upgrading wikidPad.
+
+	* file:///C|/WikidPad/program%20Files/WikidPad/extensions/KeyBindings.py
+	* file:///C|/WikidPad/program%20Files/WikidPad/user_extensions/KeyBindings.py
+
+Please note that if you change this file you should keep a backup of it
+outside of the wikidPad directory so that if/when you upgrade wikidPad
+in the future you don't lose your key bindings.
+
+----
+previous: [:rel:back]<br />
+parents:&nbsp; [:rel:parents; aslist]<br />
+attributes: [tree_position: 13], [paragraph_mode: true]<br />
+[help.status:done]

@@ -1,0 +1,35 @@
+﻿++ Wp Insertions
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Insertions allow to insert some dynamic text into preview and HTML export of a page. This can either be:
+	* the text of a different page.
+	* one or more links to anchors or pages.
+	* the result of a python evaluation.
+	* the result of a structure graph.
+	* the result of a call to a plugin.
+
+++++ Syntax
+The syntax greatly resembles that of [WpAttributes |attributes], with one extra colon ":" in front of the key. To insert, for example, the content of the page: GlobalAttributesPageMisc, use the page insertion: \[:page:\GlobalAttributesPageMisc], giving:
+
+	[:page:GlobalAttributesPageMisc]
+
+In preview this will result in the insertion being replaced with a text on the global attribute: "view_pane".
+
+Attribute values can be enclosed in [QuotationCharacters |quotation characters] to allow them to contain reserved characters. This is particularly applicable to eval and plugin insertions.
+
+++++ Types of insertions
+There are different types of insertions, that are all described on their own pages:
+	* [TextInsertions |Page insertions]
+	* [Link insertions |Link insertions]
+	* [StructureGraphs |Structure graph insertions]
+	* [ExternalGraphicalApplications |Plugin insertions]
+	* [InlinePythonEval |Eval insertions]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 5]
+[help.status:done]

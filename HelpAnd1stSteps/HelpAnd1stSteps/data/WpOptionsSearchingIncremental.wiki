@@ -1,0 +1,4 @@
+﻿	*Application settings: Searching, incremental search*
+	----
+&bull; *Delay before auto-close*
+Controls how many seconds of inactivity before the incremental search is closed automatically. 0 means "wait forever".

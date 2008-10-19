@@ -1,0 +1,30 @@
+﻿++ International characters
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Page links may contain international characters.
+
+[:rel:top]
+----
++++ Examples
+    * ÄtTheBeginning
+    * AtTheEnð
+    * StuckÄtTheMiddle
+    * XxXxÖx
+    * SšTtz
+    * zžtsš
+    * ŠSTŽZ
+    * ÓsÔsÖsÚsÜsÝ
+
+[:rel:top]
+----
++++ Attention!
+These links may work in Wikidpad, but when published to html, they don't all work in the browser.
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 22]
+[help.status:done]

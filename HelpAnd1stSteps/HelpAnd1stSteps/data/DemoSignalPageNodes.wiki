@@ -1,0 +1,137 @@
+﻿++ Demo Signal Page Nodes
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+A number of page attributes is available, that control the appearance of the page's node in the treeview window. Most have to do with the appearance of the node, but there are also attributes to control position and sort order. In principle the attributes described below are about the visibility of page nodes in the treeview.
+
+[:rel:top]
+----
++++ Node appearance
+These attributes control the appearance of the page node; there are three of them: icon, color and bold. Their goal is to make a page node stand out in the tree so that it catches the eye and/or can be found quickly. They can be used to simply brighten up the tree or to flag or otherwise indicate pages as having a perticular status, meaning or content.
+
+There are other functions, that can influence the appearance of a page node in the tree, like [DemoSignalUserTags|User tags] and [DemoSignalTodoTags|Todo tags], but those settings are always overridden by the page node attributes.
+
+The page node attributes have no global representation. 
+	----
+++++ Icon
+The \[icon: icon name] attribute allows to change the icon for the page node from the default "page" icon to a specific one. This attribute:
+	* [icon: folder]
+changes the icon for this page into a folder.
+
+Wikidpad has a large number of icons available for the page nodes in the tree. A complete list of them can be found in the help pages. An easy way to add an icon attribute to a page is to select it from the list, using the option: menu / Editor / "Add icon attribute".
+
+	----
++++++ User icons
+The icons can be found in the "icons" folder of the Wikidpad program folder. Additional icons for use in the treeview can be added to this folder. They have to be 16x16 GIF images; other formats and sizes are not supported. Added icons are not visible until Wikidpad has been restarted. After restart they will appear in the menu / Editor / "Add icon attribute" list.
+
+	----
+++++ Color
+The \[color: color name] attribute allows to set the color of the page's node name from the default "black" to a specific one. This attribute:
+	* [color: gold]
+changes the color of the node name for this page into gold.
+
+Wikidpad has a large number of default color names available to choose from. An easy way to add a color attribute to a page is to select it from the list, using the option: menu / Editor / "Add color attribute".
+
+*Remarks*
+	* A complete list of the supported color names is available in the help pages.
+	* The available color names are a subset of the html cross browser color names; the remaining html color names are not supported <small><sup>[1]</sup></small>.
+	* The 6 digit and 3 digit html hex color numbers are not supported for color attributes.
+	* In html, multiword color names are written as camelcase words, like: "\ForestGreen"; in Wikidpad attributes they have to be written as seperate words, like "forest green", in order to not confuse them with page links.
+	* Wikidpad color names are not case sensitive.
+
+	----
+++++ Bold
+The \[bold: value] attribute controls the font style "bold" for the node name. The possible values are "true" and "false"; false is the default. This attribute:
+	* [bold: true]
+sets the font style for the node title of this page to bold.
+
+The \[bold: false] variant can be used, to prevent other functions from setting the font style for the node title to bold.
+
+[:rel:top]
+<small><i>[1] For more information on html colors see: [http://www.w3schools.com/Html/html_colors.asp |W3 Schools: Colors].</i></small>
+----
++++ Node priority
+The \[priority: value] attribute allows to add (append) the node name with a priority indication; the possible values are 1 trough to 5. This attribute:
+	* [priority: 2]
+will append a priority setting "(2)" to the node name of this page, making it look like <small><b><span style="color:forestgreen">"\DemoSignalPageNodes (2)"</span></b></small>
+	----
+++++ "Views / priority" node.
+The priority setting acts like a page tag <small><sup>[4]</sup></small>; pages that have a priority setting will also appear in the "prority" node of the "views" section in the treeview, subdivided according to priority level. This way pages with - a certain - priority setting can be identified and navigated to quickly.
+	----
+++++ Global
+Since the priority attribute acts like a tag, it is possible to add global settings to it, that will signal any page that has a priority attached to it, by giving it's node a certain appearance in the treeview  <small><sup>[4]</sup></small>. These settings are similar to the node appearance atributes described above and have a sortlike result. They are:
+	* \[global.priority.(level).icon: icon name]
+	* \[global.priority.(level).color: color name]
+	* \[global.priority.(level).bold: true/false]
+As an example: the global attributes:
+	* [global.priority.2.color: coral]
+	* [global.priority.2.bold: true]
+would set the node name of any page in the wiki, that has priority 2 defined for it to bold and orange (coral). This will be the case for both the page nodes in the treeview ánd the page nodes within the "views / priority" node. For this page however, the global node formatting is overruled by the node apperance attributes earlier on this page.
+
+The level number is optional and can be left out, the attribute then applies to any page, that has a priority, dispite it's level.
+
+[:rel:top]
+<small><i>[4] See also: [DemoSignalUserTags|User tags] and [DemoSignalTodoTags|Todo tags].</i></small>
+----
++++ Node position
+In the treeview any node is always a child of some other node, with the exeption of the root node. In the treeview child nodes are always sorted according to some key; by default alphabetically on node name and ascending.
+
+The \[tree_position: value] attribute allows to assign an absolute position to a page node, independant of the sort order. Value can be any whole number; both positive and negative. The first child node has position "0". This attribute:
+	* [tree_position:1]
+should make this page's node the second node in the list of children.
+
+Node positions are absolute with respect to the parent node; not with repect to the treeview itself. If a page has multiple parents, then tree_position will influence the child list of each and any of those parents. Setting tree-position can be of good use for children of higher level pages with menu's or indexes on them; not so much for lower level pages that can have many parents and therefore can appear in many diffenrent child lists.
+
+Node positions do not have to be consequtive; any number can be used, as long as it results in what is expected. This wiki uses position numbers of 1000 and higher, to make sure that schratchpad, settings, templates and other service pages are always at the end of the child list. Negative positions can be used, to make sure that certain children álways are the first children in the list.
+
+*Remarks*
+	* The order of the top level nodes of this demo are all controlled by the \[tree_position: value] attribute.
+
+[:rel:top]
+----
++++ Child node sort order
+The sort order for the children of a specific page can be controled by means of the \[child_sort_order: sort type] attribute. Possible values for "sort type" are:
+
+<<|
+ascending 				| Sort by node name; alphabetically, ascending
+descending 			| Sort by node name; alphabetically, descending
+mod_oldest			| Sort by modification date; oldest first
+mod_newest&nbsp;&nbsp; 	| Sort by modification date; newest first
+unsorted 				| Make no attempt to sort (fastest)
+natural 				| Sort in order of appearance of the words on the page (may not always work correctly)
+>>
+
+This attribute only influences the sort order for the children of the page that the attribute is on. For all other parent nodes the chilren remain sorted according to the default setting for the wiki.
+
+	----
+++++ Global
+Child_sort_order has a global representation \[global.child_sort_order: sort type]. With this attribute the default sort order for the whole wiki can be set. The default is "acsending". This attribute:
+	* \[global.child_sort_order: usorted]
+would set the default sort order for the wiki to "unsorted".
+
+[:rel:top]
+----
++++ Remarks
+    * The priority setting is supposed to influence the \[importance:value] setting, but it doesn't. In fact nothing seems to influence the importance setting of a node, other then the importance attribute itself. This attribute is scarcely described in the help pages and it is not what the added value of this attribute is; íf there ís any!
+    * There's something about tree_position; hére setting it to two makes it the first, instead of the second or third.
+
+[:rel:top]
+----
++++ Todo's
+todo.demo.projectdemo.demo3: check out all posibilities
+
+question.demo.development: what is with the importance attribute?
+is is mentioned, but nowhere described; also it does not respond to priority setting, as is described that it should
+action.demo.development: check out tree_position.
+It does not seem to function consistantly. See remarks.
+
+[:rel:top]
+----
++++ Results
+
+[demo.status.waiting:actions]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]

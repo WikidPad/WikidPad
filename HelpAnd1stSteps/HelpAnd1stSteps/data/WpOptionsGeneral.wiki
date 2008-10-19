@@ -1,0 +1,41 @@
+﻿	*Application settings: General*
+	----
+&bull; *Low resource usage*
+Try to reduce usage of Windows resources. Only interesting for Windows 9x/ME.
+
+&bull; *Single process per user*
+If you open a new WikidPad instance while another is already running, the new window is handled by the same process as the first one. This option has only an effect after restarting WikidPad. It is off by default.
+
+Advantages:
+
+    * You can safely open the same wiki in multiple windows (on the
+      same computer and by the same user only!)
+    * Less resources (esp. memory) are needed to run multiple windows
+
+Disadvantages:
+
+    * If one window is busy due to a search or database rebuild, all windows do not react.
+    * If one window crashes (in fact the process driving it) all windows crash.
+    * An IP-socket connection is needed for communication between
+      processes. The connection is invisible for other computers on
+      a network or the internet, but a personal firewall software
+      may alarm you nevertheless. Also, if multiple user use
+      WikidPad on the same computer at the same time, all must use
+      their own home directory as configuration directory (this is
+      the default).
+
+&bull; *Sort order*
+Choose the desired alphabetical sort algorithm for wiki words, todos, attributes in tree or PageListDialog.
+The "C" order is the way previous WikidPad versions worked (uppercase letters first, non-English characters in illogical order at the end).
+The new "Default" order sorts according to default order determined by the operating system. Normally, uppercase letters are sorted inorder (\AaBbCc). If you want uppercase letters (more exactly: all characters but lowercase ones) before the rest (\ABCabc), check
+	_Uppercase first_.
+	This setting has no effect for "C" order. Alphabetical sorting of children of a wiki word in tree is always inorder.
+
+&bull; *App-bound hotkey*
+Here you can define a hotkey to show or hide WikidPad (they may only work on Windows). Hotkeys work system-wide, not only if WikidPad is active.
+
+In the text field you can enter a hotkey in the same way as the menu shortcuts are. Unlike menu shortcuts, you can also use "win" as modifier (like "alt" or "ctrl"), but the hotkey must have at least one of "ctrl" or "alt" modifiers to work.
+
+The checkbox before the text field allows to temporarily deactivate the hotkey without deleting the field content.
+
+There is also an option to set a second hotkey which is bound to the current wiki instead of the app. See \OptionsDialog#*Wiki-bound# hotkey* below in "Current wiki" options.

@@ -1,0 +1,23 @@
+﻿++ Wiki Lock File
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+If the same wiki is opened by different WikidPad processes at the same time, this can lead to data corruption. To avoid this, WikidPad creates a lock file when opening a wiki.
+
+If another process now tries to open the same wiki, you get a warning that you should not open the wiki again, but you can ignore this warning, especially, if WikidPad terminated abnormally before and left the lock file behind.
+
+The lock file is placed in the same directory where the configuration file for the wiki is. It has the name of this config. file plus a ".lock" suffix and is empty. If the wiki is detected to be read-only, no lock file is created.
+
+[:rel:top]
+----
++++ Settings
+++++ Options
+[:page:WpOptionsAdvanced]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1]
+[help.status:busy]

@@ -1,0 +1,31 @@
+﻿++ The Log Window
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+The Log window is Wikidpad's message area. Wikidpad continuously checks pages for changes and possible errors. Specifically when there are errors in the area of attributes, the log window will appear and a message will be displayed. Like in the screenshot below, where the icon attribute has been specified twice.
+
+	rel://files/WorkspaceExample5.png
+
+The log window normally is hidden - default setting - it will only appear, when there are messages to show.
+
+Double clicking a message brings the editor to the offending attribute. Position may be a bit off if page was modified after saving.
+
+Currently only the attributes alias, color, icon and bold are checked for errors. The presentation attributes inside todo items are not checked.
+
+[:rel:top]
+----
++++ Settings
+++++ Options
+[:page:WikiOptionsLogWindow]
+
+[:rel:top]
+----
+[:page:WpOptionsUserInterfaceLogWindow]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 6]
+[help.status:done]

@@ -1,0 +1,4 @@
+﻿	*Editor: settings, wrap*
+	----
+&bull; *Wrap mode*
+Switches wrap mode on or off.

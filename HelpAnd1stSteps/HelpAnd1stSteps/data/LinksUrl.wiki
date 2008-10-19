@@ -1,0 +1,66 @@
+﻿++ Links Url
+Contents:	[:toc:]
+[:rel:back]
+----
++++ General
+To create a link to an external item, the default HTML URL can be used, with the format:
+    * scheme://host.domain:port/path/filename [1].
+Wikidpad supports the general [LinksUrlSchemes|schemes]: http, https, ftp, mailto, outlook and file [2]. This means that those links can be defined, by simply typing or pasting them into your page; example:
+    * http://www.w3schools.com/html/html_url.asp
+Wikidpad supports two further links types of it's own, that are shaped as separate schemes:
+    * wiki: used for linking to other (wikidpad) wiki's; see also [LinksWikis|External links: Wiki's].
+    * rel: to make linking with relative path's possible; see [LinksUrl|Relative paths]!RelPaths below.
+Due to it's nature, Wikidpad cannot use relative paths until a page is exported/published to HTML. The reason for this, is that during preview it's not the wiki folder, that is the "home" folder, but the Wikidpad program folder or the temp folder. [3]
+
+A absolute file URL can be quickly created, by using the menu item: "Editor / Add file URL"
+
+[:rel:top]
+----
++++ Link titles
+++++ As text
+As in a standard HTML page, a link text can - in preview and HTML export - be replaced by a link title, that then serves as a clickable synonym for the link. For that the link has to be enclosed in square brackets and the link and title text have to be separated by a "|" character. Example:
+    *  [http://www.w3schools.com/html/html_url.asp |W3 Schools: URL's]
+
+    ----
+++++ As images
+As in a standard HTML page, a link text can - in preview and HTML export - be replaced by an image, that then serves as a clickable synonym for the link. For that the link has to be enclosed in square brackets and the link and the image specification have to be separated by vertical bar "|". Example:
+    *  [http://www.w3schools.com/html/html_url.asp |rel://files/w3schools.gif>am]   W3 Schools: URL's
+The image specification has the general form of a URL, with the possibility to add image formatting attributes; see [TextImages|Textformatting: Images] for more information on specifying image links.
+
+[:rel:top]
+Footnotes:
+[1] _See http://www.w3schools.com/html/html_url.asp for more information on url's_
+[2] _Scheme is sometimes also referred to as "protocol"_
+[3] _This means that you can also not use relative paths within html elements, like in the src="..." attribute for an image element. In order for them to show up in preview correctly, you háve to use absolute paths or a wikidpad rel rel link._
+----
++++ Files
+anchor:RelPaths
+++++ Relative paths
+[:page:FilesRelativePathsIp]
+    ----
+++++ File store
+[:page:FilesWikiFileStoreIp]
+
+[:rel:top]
+----
++++ Settings
+++++ Options
+	*Application settings*
+	----
+&bull; *Dropping files*
+&bull; *Dropping files with SHIFT*
+&bull; *Dropping files with CTRL*
+Control what should happen if you drag and drop files from explorer into the editor with no key pressed, with SHIFT pressed or with CTRL pressed.
+
+Possible choices are:
+    * Nothing
+    * Absolute URL: Insert absolute URL(s) to the file(s)
+    * Relative URL: URL(s) starting with "rel:"
+    * Relative into storage: Copy file(s) into file storage and create relative URL(s) to it
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+inserts:&nbsp;&nbsp; [FilesRelativePathsIp]; [FilesWikiFileStoreIp]
+[help.status:done]

@@ -1,0 +1,18 @@
+﻿++ Help Dummies
+[:rel:back]
+----
+Dummy pages that are only there to demonstrate some linking or other function.
+The list on this page serves to keep them together here and not make them clutter the treeview and all sort of other views in unwanted places
+
+	* WikiWords
+	* ABcd
+	* WikiworD
+	* [Case Link]
+	* [Case link]
+	* [WikidPad]
+	* TextVariable
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1010], [template: HelpDummyTemplate]

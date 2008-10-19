@@ -1,0 +1,26 @@
+﻿++ The Structure View
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+The "structure view" is not an index into the wiki pages, but into the current page in the current tab. It shows the various leveled headings of the page. Clicking on a heading in the view navigates to that heading in the current page; both in the editor and in preview.
+
+	rel://files/StructureViewExample1.png
+
+[:rel:top]
+----
++++ Settings
+++++ Menu:
+[:page:MenuViewStructure]
+
+[:rel:top]
+----
+++++ Options
+[:page:WpOptionsUserInterfaceStructWindow]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 8]
+[help.status:done]

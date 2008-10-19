@@ -1,0 +1,13 @@
+﻿	*Application settings: Html preview*
+	----
+&bull; *Font name for html preview*
+Enter the desired font name for the HTML preview. Clicking on the "..." button shows a list of available fonts.
+
+&bull; *Show pics as links in preview*
+If this option is checked, links to image URLs (those ending with .png, .gif or .jpg) are shown like other links in the preview. If it is unchecked, the images (if available) are shown.
+
+&bull; *Props. to yes/no include in preview*
+A regular expression for the properties to be shown in HTML preview or not. See [ThePreview].
+
+&bull; *Preview renderer*
+Under Windows you can choose the renderer for the HTML preview. See [ThePreview] and [TextHtmlElements].

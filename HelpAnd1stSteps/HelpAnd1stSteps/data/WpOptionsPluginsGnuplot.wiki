@@ -1,0 +1,4 @@
+﻿	*Application settings: Plugins, Gnuplot*
+	----
+&bull; *Path to Gnuplot*
+The path to the Gnuplot executable.

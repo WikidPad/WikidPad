@@ -1,0 +1,10 @@
+﻿	*Wiki words: clipboard catcher*
+	----
+&bull; *Clipboard catcher at page*
+Switches the clipboard catcher on and appends copied text to the page for which it was activated.
+
+&bull; *Clipboard catcher at cursor*
+Switches the clipboard catcher on and inserts copied text at the current cursor position.
+
+&bull; *Clipboard catcher off*
+Switches the clipboard catcher off.

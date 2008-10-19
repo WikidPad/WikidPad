@@ -1,0 +1,8 @@
+﻿	<b>Structure graphs: see [StructureGraphs]</b>
+	----
+&bull; *[global.graph.relation.exclude:* _attribute keys to exclude_*]*
+Sets the default for attribute keys that should be excluded from structure graphs; default = _None_.
+
+&bull; *[global.graph.relation.include:* _attribute keys to include_*]*
+Sets the default for attribute keys that should be included from structure graphs; default = _All_.
+If global.graph.relation.exclude is also set, then global.graph.relation.include is ignored.

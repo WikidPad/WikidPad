@@ -1,0 +1,42 @@
+﻿++ Intro 5: Indexing
+Contents:	[:toc:]
+[:rel:back]
+----
++++ General
+Wiki pages can be fitted with "user tags" that create alternative indexes for the pages in the [TheTreeView |views tree]. Depending on whether it is a simple tag or a structured tag, pages can be indexed on one key/value pair or on a hierarchical group/value combination. For more detailed information on creating and using "user tags" see: [SignalUserTags |Page signalling: user tags].
+
+A more specific and restricted use of indexing can be done with "todo tags". These are somewhat different from user tags but all in all they have the same function. Details on todo tags are available in: [SignalTodoTags |Page signalling: todo tags]
+
+[:rel:top]
+----
++++ User tags
+The user tag is in effect a page attribute and has the format \[_key_: _value_]. Value is free to choose and key is free to choose too in as far as it isn't equal to any of the WikidPad attribute keys. So "museum" is valid, but "icon", "color", "bold" and some more are off limits. Also hierarchical keys with structured grouping can be used, like: \[_key_._subkey1_._subkey2_._etc_: _value_].
+
+Adding tags like \[contact:private] and \[contact:business] to pages with contact details would create a node "contact" in the views tree and the subnotes "business" and "private" and eacht subnote would list the pages that contain the relevant tag, like in the screenshot below.
+
+	rel://files/intro/IndexingExample1.png
+
+[:rel:top]
+----
++++ Examples
+Suppose within the scope of a research on [Intro Rembrandt van Rijn |Rembrandt van Rijn] you created a number of pages with details on works that he crafted; one work per page, like the one that was done on the [Intro Nachtwacht |"Nachtwacht"]. Now for a good reason you decide that you need to be able to group - i.e. index - the works on type: painting, etching and drawing, so you ad the tags:
+	* \[type: painting]
+	* \[type: drawing]
+	* \[type: etching]
+to the relevant pages. With this you have added the extra node "type" to the views tree, that groups the "works" pages on type, like in the screenshot below.
+
+	rel://files/intro/IndexingExample2.png
+
+But besides this you also need to group the works on location; both museum and city, so you add the tags: \[museum: _museum name_] and \[location: _city name_] to the pages, resulting in two extra index nodes in the views tree, like below:
+
+	rel://files/intro/IndexingExample3.png rel://files/intro/IndexingExample4.png
+
+You could however also combine museum and location into one structured index - or group index - using óne tag like: \[location._cityname_: _museum name_], resulting in something as in the example below.
+
+	rel://files/intro/IndexingExample5.png
+
+[:rel:top]<p align=center>[Intro4LinkFunctions |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro6Signalling |Next page &raquo;]</p>----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: -1]
+[intro.status:done]

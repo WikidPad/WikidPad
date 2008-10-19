@@ -1,0 +1,15 @@
+﻿++ Ger Reit
+----
+Name:	Gerhard Reitmayr
+Adress:	Reitmayr stra&szlig;e 127
+Phone:  000-0000000
+Mobile: 666-6666666
+eMail:  gerreit@wikidmail.com
+
+Remarks:
+&&i
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [pagetype: form]

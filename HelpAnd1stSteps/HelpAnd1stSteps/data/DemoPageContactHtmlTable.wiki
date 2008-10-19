@@ -1,0 +1,13 @@
+﻿----
+<table>
+<tr><td>Name:</td><td>&&i</td></tr>
+<tr><td>Adress:</td><td>&&i</td></tr>
+<tr><td>Phone:</td><td>&&i</td></tr>
+<tr><td>Mobile:</td><td>&&i</td></tr>
+<tr><td>eMail:</td><td>&&i</td></tr>
+<tr><td>Remarks:</td><td>&&i</td></tr>
+</table>
+----
+previous: [:rel:back]
+attributes: [paragraph_mode:true], [pagetype: form]
+

@@ -1,0 +1,4 @@
+﻿	*View: main tree*
+	----
+&bull; *Show tree control: Ctrl-T*
+Show or hide the main tree window. Very usefull when the tree option "Tree auto-hide" has been set to true.

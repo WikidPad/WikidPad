@@ -1,0 +1,18 @@
+﻿++ Release Template
+Contents:   [:toc:]
+[:rel:back]
+----
++++ 1.9 beta 18
+
+
+[:rel:top]
+----
++++ 1.9 beta 18
+
+
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+

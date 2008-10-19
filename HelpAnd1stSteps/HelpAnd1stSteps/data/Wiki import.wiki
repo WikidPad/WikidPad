@@ -1,0 +1,19 @@
+﻿++ Wiki import
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Currently import only supports importing [MultipageTextFormat]. To call up the import dialog, select the option Wiki / Import.. from the "Wiki" menu.
+
++++ The dialog window
+&bull; *Import format*
+Here you choose the type of import you want. Currently only Multipage text is supported.
+
+&bull; *Source file/directory*
+Here you select the file to import.
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

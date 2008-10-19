@@ -1,0 +1,20 @@
+﻿++ Text Formatting
+[:rel:back]
+----
++++ Subjects
+
+    1. [TextBasics|Basics]
+    2. [TextImages|Images]
+    3. [TextLists|Lists]
+    4. [TextFootnotes|Footnotes]
+    5. [TextTables|Tables]
+    6. [TextHtmlElements|Html elements]
+    7. [TextInsertions|Insertions]
+
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 4]
+[help.status:done]

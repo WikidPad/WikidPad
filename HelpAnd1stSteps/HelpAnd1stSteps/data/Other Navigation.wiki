@@ -1,0 +1,37 @@
+﻿++ Other Navigation
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+This page lists navigation functions that don't fit in one of the other categories.
+
+	----
+++++ Home
+This function jumps to the wiki's root page and makes that the current page of the current tab. You can execute the function by either:
+	* pressing Ctrl-Q
+	* clicking the rel://files/tb_home.gif button on the toolbar
+	* selecting History / "Wiki Home" from the main menu
+
+	----
+++++ Open page
+You can go/jump straight to any page in the wiki with the "open page" function. To use it:
+	* press Ctrl-O
+This will open the "Open page" dialog window, like in the screenshot below:
+
+	rel://files/OpenPageExample1.png
+
+Start typing the first characters of the page name you are looking for in the inputfield and WikidPad will show a list of all the page names that start with those characters. If the page you are looking for is in the list, you can go there by either:
+	* navigating to it's link in the list using the cursor keys and pressing Enter
+	* selecting it with the mouse and clicking OK
+	* double clicking it with the mouse
+If the page you are looking for doesn't (yet) exist in the wiki, the dialog allows you to create a new page. This will however become a parentless page, since WikidPad will not automatically add the new page's link to the current page.
+
+You can also choose to:
+	* open the page in a new tab and making that the current tab
+	* open the page in a new tab without making it the current tab
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

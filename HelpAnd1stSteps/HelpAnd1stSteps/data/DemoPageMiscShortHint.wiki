@@ -1,0 +1,6 @@
+﻿++ Demo Page Misc Short Hint
+----
+[short_hint:This is a short hint for the DemoPageMiscShortHint page]
+----
+[:rel:back], [:rel:parents; aslist]
+

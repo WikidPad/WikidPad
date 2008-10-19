@@ -1,0 +1,52 @@
+﻿++ Text Insertions Html Formatting
+Contents:   [:toc:]
+[:rel:back]<br />
+*Attention:* These examples realy do not work in internal preview!
+----
++++ General
+You can use text insertions in a number of html block elements.
+
+
+*Attention!*
+    * *None* of this works with the internal preview renderer; only with the external renderers and in html export!
+    * Special care needs to be taken, when constructing html elements, since wikidpad inserts linbreaks (\<br /\>) in all sorts of places, where you don't want them for html elements; i.e. at the end of every line.
+    * The insertion of linebreaks by wikidpad can be partly stopped, by adding a paragraph_mode attribute to the page and setting that to "true". This however means, that everywhere on the page, that you dó want a linebreak, you have to insert a \<br /\> yourself.
+    * The examples on this page do not use "paragraph_mode = true"; they consist of óne long line of text, to prevent the insertion of linebreaks in unwanted places. The alternative way to do it, but not realy easy-referenceable.
+    * Another (partial) way out of this, is to put the actual text on a different page and insert that into the element.
+    * If you use indentation, then wikidpad tries to trick it's way out of that, by converting the indented lines into an unordered list (with no bullets). The inserted ul tags can get quite in the way of your html block elements.
+
+[:rel:top]
+----
++++ Span element
+An inserted note in a span element.
+    <span style='color: Navy; background-color: #ffd'>[:page:TextInsertionNoteIp]</span>
+
+[:rel:top]
+----
++++ Div element
+<div style="float: right; background-color: #ffd; width: 40%; border: 1px #8CACBB solid"><p style="color: Navy; text-align:center; margin: 1"><b><i>Note title</i></b></p><hr style="height: 1px; background-color: #8CACBB; color: #8CACBB" />[:page:TextInsertionNoteIp]</div>An inserted note in a<br />floating:right div element.<br />
+
+[:rel:top]
+----
++++ Pre element
+An inserted snippet in a pre element.
+    <pre style="background-color: #F7F9FA; border: 1px #8CACBB dashed; padding: 4px; margin: 0,8">[:page:TextInsertionShortCodeIp]</pre>
+
+[:rel:top]
+----
++++ Textarea element
+An inserted note in a textArea.
+<textarea style="background-color: #F7F9FA; margin: 0,8" rows="3" cols="20">[:page:TextInsertionNoteIp]</textarea>
+
+[:rel:top]
+----
++++ Textarea and pre element
+An inserted snippet in a textArea element within a pre element
+<pre style="margin: 0,8"><textarea style="background-color: #F7F9FA; border: 1px #8CACBB dashed; padding: 4px" rows="6" cols=80%>[:page:TextInsertionLongCodeIp]</textarea></pre>*Remark:* You can't use HTML or links in a textArea
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+inserts:&nbsp;&nbsp; TextInsertionShortCodeIp, TextInsertionLongCodeIp, TextInsertionNoteIp
+[help.status:done]

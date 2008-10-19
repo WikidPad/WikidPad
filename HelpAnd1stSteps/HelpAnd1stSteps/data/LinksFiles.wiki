@@ -1,0 +1,78 @@
+﻿++ Links Files
+Contents:	[:toc:]
+[:rel:back]
+----
++++ General
+You can add links to files to your page and open them with some external application. You do this with a URL of the type file-url. These files can be of any type, but they can only be "opened" when their extention is associated with the correct application.
+
+    ----
+++++ Important: Image files!
+File links to image files of the type: ".jpg", ".gif", ".png" and ".bmp" are by default inserted into the text as image, not as link. See also [TextImages|Textformatting: Images]. To insert a file link for such an image file, add ">l" to the end of the url.
+
+    ----
+++++ Local disk files
+    * .txt document: rel://files/license.txt
+    * .rtf document: rel://files/license.rtf
+    * .pdf document: rel://files/license.pdf
+    * .htm webpage: rel://html/help/LinksFiles.html
+    * .png image: rel://files/bubbles64.png>l
+    * .mp3 sound: rel://files/ballon.mp3
+
+
+    ----
+++++ Remote disk files
+Files on remote ftp locations - network, the web - can be linked using the ftp format of the file link.
+
+    * Download winzip: ftp://wherever.com/ftp/winzip.exe (Fake link; for demo purposes only).
+
+[:rel:top]
+----
++++ Link titles
+++++ Text
+A link text can in preview and export be replaced by a link title, that then serves as a clickable synonym for the link.
+
+    * [rel://files/license.txt | .txt document]
+    * [rel://files/license.rtf | .rtf document]
+    * [rel://files/license.pdf | .pdf document]
+    * [rel://html/help/LinksFiles.html |.htm webpage]
+    * [rel://files/bubbles64.png>l |.png image]
+    * [rel://files/ballon.mp3 | .mp3 sound]
+
+
+    ----
+++++ Images
+Instead of a text, also an image can be used as a "title" or synonym for a link.
+
+    * [rel://files/license.txt | rel://files/notepad.png>am]  .txt document
+    * [rel://files/license.rtf | rel://files/wordpad.png>am]  .rtf document
+    * [rel://files/license.pdf | rel://files/adobe.png>am]    .pdf document
+    * [rel://html/help/LinksFiles.html | rel://files/webpage32.png>am]    .htm webpage
+    * [rel://files/bubbles64.png>l | rel://files/colors32.png>am]    .png image
+    * [rel://files/ballon.mp3 | rel://files/music.png>am]    .mp3 sound
+
+
+The images can be formatted with the default image attributes; see [TextImages|Textformatting: images].
+
+[:rel:top]
+----
++++ Files
+++++ Relative paths
+[:page:FilesRelativePathsIp]
+    ----
+++++ File store
+[:page:FilesWikiFileStoreIp]
+
+[:rel:top]
+----
++++ Remarks
+    * Relative links are shown in preview as a absolute links.
+    * You can "follow" a file link, like any other link in wikidpad.
+    * If you "follow" a file link, it will be opened according to it's extention; in principle it will open the file with the application that was set as default for the extention.
+    * The external IE renderer does not handle (url) links to images very well. Often it does not show it at all and when it sometimes dóes, it seems to show it in a page of it's own, instead of the default image viewer. The "back" function then does not bring you back to the original page anymore.
+    * HTML export is case sensitive; if file or folder names are not written correctly (correct case), the related files are not copied over to the export folder! 
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

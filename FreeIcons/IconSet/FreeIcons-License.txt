@@ -1,0 +1,26 @@
+This icon set consists of icons from the following sources:
+
+
+Silk icon set
+Copyright © 2008 Mark James (famfamfam)
+License: Creative Commons Attribution 2.5
+Source: http://www.famfamfam.com/
+
+
+Silk Companion icon set
+Copyright © 2008 Damien Guard
+License: Creative Commons Attribution 2.5
+Source: http://damieng.com/
+
+
+Diagona icon set
+Copyright © 2008 Yusuke Kamiyamane (pinvoke)
+License: Creative Commons Attribution 3.0
+Source: http://www.pinvoke.com/
+
+
+Crystal icon set
+Copyright © 2008 Everaldo Coelho (Crystal project)
+License: GNU Lesser General Public License (LGPL)
+Source: http://www.everaldo.com/crystal/
+

@@ -1,0 +1,10 @@
+﻿CoolWiki
+ISpell
+JavaScript
+MySpell
+OpenOffice
+URLs
+UserProfile
+WikidPad
+WikidPadCompact
+WikidPadGlobals

@@ -1,0 +1,4 @@
+﻿	<b>Miscellaneous: see [PageMiscellaneous]</b>
+	----
+&bull; *[global.view_pane:* _off / editor / preview_*]*
+Sets the default for mode in whitch a page should be opened; default = _Off_.

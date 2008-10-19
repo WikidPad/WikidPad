@@ -1,0 +1,28 @@
+﻿++ Demo External Links
+[:rel:back]
+----
+External links are specified, using Url links. See [DemoLinksUrl|Url links] for general information and additional possibilities of external linking
+
+    1. [DemoLinksUrl|Url links]
+    2. [DemoLinksWebsites|Websites]
+    3. [DemoLinksFiles|Files]
+    4. [DemoLinksWikis|Wiki's]
+    5. [DemoTextImages|Textformatting: images]
+    6. [DemoFilesWikiFileStore|File store]
+
+
+[:rel:top]
+----
++++ Todo's
+done.demo.projectdemo.demo1: check out all possibilities and combinations
+
+[:rel:top]
+----
++++ Results
+
+[demo.status.waiting: subjects]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position:2], [template: DemoSubjectTemplate]

@@ -1,0 +1,27 @@
+﻿++ The Time View
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+
+Wikidpad supports an alternative index into the wiki pages in the form of the "time view" or "chrono view". The time view is an index on "date last modified"; it shows the dates in chronological order.
+
+	rel://files/ChronoViewExample1.png
+
+[:rel:top]
+----
++++ Settings
+++++ Menu:
+[:page:MenuViewTime]
+
+[:rel:top]
+----
+++++ Options
+[:page:WpOptionsTimeView]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 7]
+[help.status:done]

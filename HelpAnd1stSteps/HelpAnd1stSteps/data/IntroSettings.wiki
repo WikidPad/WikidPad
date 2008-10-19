@@ -1,0 +1,21 @@
+﻿++ Intro Settings
+[:rel:back]
+----
+
+*Specific settings*
+
+[global.intro.status.new.color:steel blue]
+[global.intro.status.busy.color:navy]
+[global.intro.status.check.color:forest green]
+[global.intro.status.done.color:black]
+[global.intro.status.waiting.color:orange]
+[global.intro.status.waiting.icon:question new]
+[global.intro.status.waiting.issues.icon:flag red]
+
+*Default settings*
+not applicable
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1001], [icon:wp_settings]

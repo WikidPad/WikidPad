@@ -1,0 +1,16 @@
+﻿In Wikidpad relative paths can't be used, the way they can in regular html. The way to do it in Wikidpad, is to use the "rel" scheme. This scheme has the format: "\rel://" (without the backslash!) and is during preview replaced with the path to the folder of the active wiki. Html export turns it into a correct relative path reference. The rel scheme can be used both for file references and image references.
+
+The rel reference follows the rules for the html relative path specification; this means that:
+
+    <<|
+\rel://filename.ext |refers to a file in the folder of the current wiki
+\rel://files/filename.ext |refers to a file in the "files" subfolder of the current wiki folder.
+\rel://../filename.ext |refers to a file in the folder above the current wiki folder in the file hiërarchie
+>>
+
+In a wiki that has been exported to html, the "home" or "root" folder is not the current wiki folder, but the export folder. As of version 19beta 17 wikidpad copies all files with relatives path's over to the export folder, with the correct folder structure.
+
+*Remarks*
+    * A relative URL can easily be created, by draging it from Windows Explorer onto the editor, while holding down the shift key. This does however not work for files ending with ".wiki"; the created links for these files use the wiki scheme, that does not allow relative paths.
+    * For those who are not realy into html and relative path declarations, a more comprehensive example can be [FilesRelativePathsExamples|found here].
+    * For more information on URL links see [LinksUrl|Url links]!Top

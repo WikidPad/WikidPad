@@ -1,0 +1,100 @@
+﻿++ FullSearch
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Full search provides an extended search facility for wiki wide searches. To start the full search dialog either:
+	* press Ctrl-Alt-F
+	* select Wiki / "Search Wiki" from the main menu
+The search dialog is non-modal, this means that you can move between pages and edit them while the dialog is open. The right side of the dialog shows the search results, the left side contains the options to control the search. Full search supports a "find & replace" mode.
+
+*Attention* Full search operates on the data in the database. If there is a page in the editor that is not yet saved, then those changes can't be seen by the search dialog.
+
+[:rel:top]
+----
++++ The search dialog
+This section lists the options that are available to control the search.
+	----
+++++ Searching
+&bull; *Text field "Wiki Search"*
+The pattern to be searched for. You can use [RegEx |regular expressions] here. The radio buttons beneath control how the pattern should be interpreted.
+
+&bull; *Simple regex*
+Choose this if the pattern contains only a single RegEx.
+
+&bull; *Anded" regex*
+Choose this if the pattern contains multiple RegEx's connected with "and". For example: to search for pages with both "search" ánd "wiki" in them type: "search and wiki".
+_Remarks:_ Some operations are not available in "Anded" regex mode.
+
+&bull; *Case sensitive*
+Controls whether the search should be case sensitive or not.
+
+&bull; *Whole word*
+Controls whether the search should be "whole word" only or also "partial word"
+
+&bull; *Button "Find"*
+Starts the search process. If finished, a list of matching pages is listed on the right, optional with the number of occurring matches in parentheses and/or a few characters of context if set in the options.
+
+&bull; *Button "Set Page list"*
+Opens the [PageListDialog], the Wiki Search Dialog vanishes until you close the other dialog. You can use the dialog to limit the pages that should be searched by the "Find" operation. If you save the search, the settings in the [PageListDialog] are also stored as part óf it.
+	----
+++++ Replacing
+&bull; *Text field "Replace By"*
+Enter here with which a found pattern on a page (or all pages) should be replaced. This field and the following three buttons are only available for "Simple regex" mode.
+
+&bull; *Button "Find Next"*
+Find the next matching part of text in current page or next page in the search results and select it.
+
+&bull; *Button "Replace"*
+Replace current selection with content of "Replace by" and go to next matching part.
+
+&bull; *Button "Replace All"*
+After asking for confirmation, replaces all occurrences matching to the search pattern by the replacement in all pages in the search results. At the end of the operation you will be informed about the number of done replacements.
+	----
+++++ Storing/Loading Searches
+&bull; *List of "Saved Searches"*
+Contains the titles of all searches stored in this wiki. The saved searches can also be seen in the tree after expanding "Views" and therein "saved searches" (only presented if searches exist).
+_Remarks:_ Expanding one of the searches starts the search operation.
+
+&bull; *Button "Save Search"*
+Saves the current content of the "Wiki Search" field and the settings that apply to it (not the replacement) in the wiki. First you are asked for the title of the search. If the title already exists, you must confirm to overwrite the previous search with this title.
+
+&bull; *Button "Delete Search(es)"*
+Delete the searches selected in the list after confirmation
+
+&bull; *Button "Load Search"*
+Loads selected search into the searching area.
+
+&bull; *Button "Load and Run Search"*
+Same as hitting "Load Search" and "Find" button subsequently. Double clicking in the list has the same effect.
+	----
+++++ Other
+&bull; *Copy to clipboard: Button "Page names"*
+This copies the content of the result to the clipboard.
+
+&bull; *Button "Options"*
+Starts a dialog to set options for the search; for their meaning see "Settings" below.
+
+&bull; *Button "Close"*
+Close the dialog, same as hitting ESC key.
+
+[:rel:top]
+----
++++ The result list
+Each item in the result list consist of the page name, one or two optional numbers in parentheses behind the name (one number: Number of occurrences, two numbers: currently shown occurrence, then "/", then number of occurrences or a question mark if unknown)
+
+In the result list, double clicking on an item (not on its blue bar!) brings you to the page and (if existing) to the matching occurrence shown for the list item. If the page was already loaded, a double click brings you to the next occurrence on this page.
+
+If a particular occurrence is shown in the list, you can select this item and press F3 or click on the little blue bar on the left to show the next occurrence on this page.
+
+[:rel:top]
+----
++++ Settings
+++++ Options
+[:page:WpOptionsSearchingFull]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

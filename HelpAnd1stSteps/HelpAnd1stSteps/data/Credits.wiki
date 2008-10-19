@@ -1,0 +1,75 @@
+﻿++ Credits
+Contents:[:toc:]
+[:rel:back]
+----
++++ Third party graphics
+Graphics used by this software:
+
+	* rel://files/wp_home.gif Silk icon set
+		Copyright © 2008 Mark James (famfamfam)
+		License:	[http://creativecommons.org/licenses/by/2.5/ |Creative Commons Attribution 2.5]
+		Source:     [http://www.famfamfam.com/]
+
+
+	* rel://files/folder%20home.gif Silk Companion icon set
+		Copyright © 2008 Damien Guard
+		License:	[http://creativecommons.org/licenses/by/2.5/ |Creative Commons Attribution 2.5]
+		Source:     [http://damieng.com/]
+
+
+	* rel://files/camera.gif Diagona icon set
+		Copyright © 2008 Yusuke Kamiyamane (pinvoke) 
+		License:	[http://creativecommons.org/licenses/by/3.0/ |Creative Commons Attribution 3.0]
+		Source:	[http://www.pinvoke.com/]
+
+
+	* rel://files/wordpad.gif Crystal icon set
+		Copyright © 2008 Everaldo Coelho (Crystal project) 
+		License:	[http://www.gnu.org/copyleft/lesser.html |GNU Lesser General Public License (LGPL)]
+		Source:	[http://www.everaldo.com/crystal/]
+
+
+[:rel:top]
+----
++++ Third party libraries
+Components used by this software:
+
+
+    * Python
+    Copyright © 2001-2005 Python Software Foundation.
+    All Rights Reserved.
+    
+    Copyright © 2000 BeOpen.com.
+    All Rights Reserved.
+    
+    Copyright © 1995-2001 Corporation for National Research Initiatives.
+    All Rights Reserved.
+    
+    Copyright © 1991-1995 Stichting Mathematisch Centrum, Amsterdam.
+    All Rights Reserved.
+    
+    
+    * wxWidgets/wxPython
+    Copyright © 1998 Julian Smart, Robert Roebling et al
+    
+    
+    * ctypes
+    Copyright © 2000, 2001, 2002, 2003, 2004 Thomas Heller
+
+
+    * enchant
+    Copyright © 2003, 2004 Dom Lachowicz
+    
+    
+    * pyEnchant
+    Copyright © 2004-2005, Ryan Kelly
+    
+    
+    * sqlite
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position:1], [camelCaseWordsEnabled: false], [icon: award]
+

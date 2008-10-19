@@ -1,0 +1,41 @@
+﻿++ Text Insertions Page Formatting
+Contents:   [:toc:]
+[:rel:back]
+----
++++ Test area
+
+++++ Header 1
+Between the horizontal lines underneath is an inserted page
+    ----
+    [:page:DemoTextInsertionsPageFormattingIp]
+    ----
+    Follow [TextInsertionsPageFormattingIp|this link] to see how the original page is influenced by these attributes
+    
+++++ Header 2
+This is just some text, to see what the influence of page formatting attributes on the inserted page is on the text of this page. Although it lóóks like it has meaning, it doesn't.
+
+    * HTML Cross-browser color names - like: \DarkSlateBlue - don't work here
+    * colors have to specified with their #Hex HTML color number, like:
+        * #000000 for Black
+        * #483D8B for \DarkSlateBlue
+    * linkcolor, textcolor and bgcolor also work in preview, the others don't
+    * Can be set for the whole Wiki by adding the "global." attribute
+
+[:rel:top]
+----
++++ Remarks
+    * Html attributes on the inserted page have no influence on the inserting page[1].
+    * The paragraph_mode attribute has no influence on the inserting page[1].
+    * The font attribute has no influence on the inserting page, which is correct, since it only influences the editor[2].
+    * The wrap attribute has no influence on the inserting page, which is correct, since it only influences the editor[2][3].
+    * The camelCaseWordsEnabled attribute has no influence on the inserting page, which is correct, since it only influences the editor[2].
+
+[:rel:top]
+[1] _This is the case for both Preview ánd HTML Export._
+[2] _During editing the page is not yet inserted yet, so this couldn't work anyway._
+[3] _The wrap attribute only forms an input for the Rewrap function (Ctrl+W)._
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+inserts:&nbsp;&nbsp; TextInsertionsPageFormattingIp
+[help.status:done]

@@ -1,0 +1,12 @@
+﻿	*Application settings: Autosave*
+	----
+&bull; *Autosave active*
+Save current page content to disk (if modified) after a few seconds of inactivity.
+
+There are two delays which *both* must be exceeded before a save operation is triggered (if Autosave is active).
+
+&bull; *Delay after key pressed*
+How long to wait after the last keypress in the editor (default: 3 seconds). Recommended value: 1 to 5 seconds.
+
+&bull; *Delay after page dirty*
+How long to wait after the page was initially modified (dirty) after last save (default: 15 seconds). Recommended value: 15 to 180 seconds.

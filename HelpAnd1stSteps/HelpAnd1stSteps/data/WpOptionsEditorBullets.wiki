@@ -1,0 +1,4 @@
+﻿	*Application settings: Editor, bullets*
+	----
+&bull; *Auto-unbullets*
+When this option is active and enter is pressed on a line which contains only a bullet or a numbering without text, the bullet is removed.

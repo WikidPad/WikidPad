@@ -1,0 +1,7 @@
+﻿	*Application settings: Searching, full search*
+	----
+&bull; *Context characters:* *before* and *after*
+Chooses the number of characters to show before and after a found match as context in wiki-wide search. For an "anded" regex, the beginning of the page is shown with so many characters as the sum of the "before" and "after" values. Using context may slow down the searching a bit.
+
+&bull; *Count Occurrences*
+Counts how many matches a page contains and shows this number in parentheses after each page name in wiki-wide search results. This option slows down searching.

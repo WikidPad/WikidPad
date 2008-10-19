@@ -1,0 +1,101 @@
+﻿++ Demo Text Tables
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+In Wikidpad tables can be used. For the time being however, this remains limited to the default html table style. No formatting facilities are available for tables.
+
+A table is defined inside a table block; a construct analogous to the escape blocks (see [DemoTextEscape|Textformatting: Escape]). A table block is defined by the "\<\<|" and "\>\>" start and ending tags. These tags must be alone on an otherwise empty line; you cán however put a tab in front of the opening tag, to indent the table. Each line of text in the block forms a table row, individual cells in the row are separated by a vertical bar (" | "). Example:
+
+	<<|
+row 1 | cell | cell | cell
+row 2 | cell | cell | cell
+>>
+
+[:rel:top]
+----
++++ Formatting cell content
+In a table cell the following formatting elements can be used:
+	<<|
+Bold text | *bold*
+Italic text |  _italics_
+Images | rel://files/library64.png
+Page links | [DemoTextTables|Top]!Top
+Web links | http://www.w3schools.com/
+File links | rel://files/license.txt
+Wiki links | [wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki | rel://files/wordpad.png>am]    Foowiki with an image title
+Footnotes | This is text with a footnote [1].
+Page insertions | See [DemoTextInsertionsTextFormatting|Textformatting: insertions]
+[DemoTextHtmlElements|Html elements] | <small>HTML small tekst, </small><br />HTML standard tekst, <br /><big>HTML big tekst</big>
+>>
+
+
+	<<|
+Wikidpad elements that can nót be used inside tables are:
+<ul>\
+<li>Lists</li>\
+<li>Headings</li>\
+<li>Horizontal lines&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>\
+<li>Escape blocks</li>\
+<li>Link insertions</li>\
+<li>Attributes</li></ul><small>Done with html.</small>
+>>
+
+[:rel:top]
+[1] _This is footnote 1._
+----
++++ Multi line cell content
+The content of a cell can be split over two or more lines, by breaking it up over as many page lines and separating the line parts by a backslash. An example in this case, tells more then text can:
+
+	<<|
+row 1 | cell 1, line 1\
+cell 1, line 2\
+cell 1, line 3 | cell2 | cell 3, line 1\
+cell 3, line 2
+row 2| cell 1 | cell 2, line 1\
+cell 2, line 2 | cell 3
+>>
+
+In the above example the definition for row 1 effectively has been split over 4 consecutive page lines, resulting in a not all together easy-reference structure. An easier way would be to simply add a few html "\<br /\>" tags in the cell content, to break it up; like this:
+
+	<<|
+row 1 | cell 1, line 1<br />cell 1, line 2<br />cell 1, line 3 | cell2 | cell 3, line 1<br />cell 3, line 2
+row 2| cell 1 | cell 2, line 1<br />cell 2, line 2 | cell 3
+>>
+
+View this section in the editor, to see the difference in structure and reference.
+
+[:rel:top]
+----
++++ Tab as cell delimiter
+As an alternative, also the Tab can be used as cell delimiter. To use this, start the table block with the "\<\<|t" tag instead of the "\<\<|" tag. Example:
+
+	<<|t
+row 1	cell	cell	cell
+row 2	cell	cell	cell
+>>
+
+*Important!*
+This facility can only be used, when the option: menu / Editor / Settings / "Tabs to spaces" is not switch on.
+A table cell can contain wiki word links, bold and italic text. 
+
+[:rel:top]
+----
++++ Remarks
+    * Template remark
+
+[:rel:top]
+----
++++ Todo's
+done.demo.projectdemo.demo2: check out all posibilities
+\action.demo.textformatting.tables: template action
+
+[:rel:top]
+----
++++ Results
+
+[demo.status:done]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]

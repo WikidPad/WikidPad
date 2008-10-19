@@ -1,0 +1,6 @@
+﻿This is the first level nested page.
+
+Following indented is the second level nested page.
+	----
+	[:page:TextInsertionNesting3Ip]
+	----

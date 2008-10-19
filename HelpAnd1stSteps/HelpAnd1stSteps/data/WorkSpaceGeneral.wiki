@@ -1,0 +1,58 @@
+﻿++ Work Space General
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Below is a screenshot of Wikidpad's default workspace. To the right is the page view, with a number of wiki pages opened in different tabbed pages and to the left is the [TheTreeView |tree view] or "main tree". Furthermore there are of course the menu bar and the toolbar and at the bottom the status bar, that gives information on the current page in the current tab.
+
+	rel://files/WorkspaceExample1.png
+
+The page view is shared by both the [TheEditor |editor] and [ThePreview |html preview]. The page view is the area where all the real work is done, where pages are created and formatted and the result is judged in html preview. The screenshot above shows the page in the editor, the screenshot below shows it in preview. Multiple pages can be worked on at the same time, since Wikidpad supports tabbed pages.
+The main tree forms an active index into the pages; it can be split in two, showing the page tree and the views tree in different sections.
+
+	rel://files/WorkspaceExample2.png
+
+[:rel:top]
+----
++++ Additional windows
+Wikidpad supports three additional view windows, that each supports working with a wiki in it's own different way. These windows are:
+
+	* [TheLogWindow |The log window]
+	* [TheTimeView |The time view window]
+	* [TheStructureView |The document structure view window]
+
+[:rel:top]
+----
+anchor:RestartWikidPad
++++ Restart WikidPad
+Especially after changing options that change the layout of the workspace it may be necessary to restart WikidPad. Which options these are, is normally mentioned in the relevant settings sections, but one of them is changing the preview renderer.
+
+It is important to know that this means to close *all* open WikidPad windows and then starting WikidPad again.
+
+Before doing layout changes you should also close all WikidPad windows except the one in which you do the layout settings. Otherwise the changes in the configuration file might be overwritten again when closing the other open windows.
+
+[:rel:top]
+----
++++ Settings
+++++ Menu
+[:page:MenuViewWorkspace]
+
+[:rel:top]
+----
+++++ Options
+[:page:WpOptionsGeneral]
+
+[:rel:top]
+----
+[:page:WpOptionsUserInterface]
+
+[:rel:top]
+----
+[:page:WpOptionsMouse]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1]
+[help.status:done]

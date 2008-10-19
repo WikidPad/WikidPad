@@ -1,0 +1,13 @@
+﻿++ Demo Project
+[:rel:back]
+----
+    * [DemoMembers|Project members]
+    * [DemoProjects|Projects]
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+settings:&nbsp; [DemoProjectTemplates], [DemoProjectSettings]
+attributes: [tree_position:1]
+
+

@@ -1,0 +1,148 @@
+﻿++ Demo Text Images
+Contents:[:toc:]
+[:rel:back]
+----
++++ General
+This item is about inserting image files as images. To insert image files as links, see [DemoLinksFiles|Files].
+
+An image as an image rel://files/library64.png>at Original size (64x64)
+
+[:rel:top]
+----
++++ Sizing
+++++ Absolute size (in pixels)
+Half size (32x32) rel://files/library64.png>s32x32
+
+Streched size (64x32) rel://files/library64.png>s64x32
+
+Enlarged size (80x80) rel://files/library64.png>s80x80
+
+    ----
+++++ Relative to surrounding page area
+Tenth size (10%x10%) rel://files/library64.png>s10%x10%4
+
+Streched size (20%x10%) rel://files/library64.png>s20%x10%
+
+    ----
+++++ Relative to image
+Half size (50%) rel://files/library64.png>r50%
+
+Tenth size (10%x10%) rel://files/library64.png>r10%x10%
+
+Streched size (20%x10%) rel://files/library64.png>r20%x10%
+
+[:rel:top]
+----
++++ Alignment
+++++ Default
+The alignment defaults to rel://files/library48.png inline, vertical Bottom (image has white space at the bottom)
+
+    ----
+++++ Vertical
+This is aligned rel://files/library48.png>at vertical Top
+
+This is aligned rel://files/library48.png>am vertical Middle
+
+This is aligned rel://files/library48.png>ab vertical Bottom
+
+    ----
+++++ Horizontal
+rel://files/library48.png>ar This is aligned horizontal Right
+If there is text to the left of the link, the image drops a line in html
+Moving any following text below the image, takes empty lines or \<br /> tags
+
+rel://files/library48.png>al This is aligned horizontal Left
+If there is text to the left of the link, the image drops a line in html<br /><br />
+[:rel:top]
+----
+++++ Combined horizontal and vertical
+rel://files/library48.png>ar;at This is aligned horizontal right, vertical Top
+----
+rel://files/library48.png>ar;am This is aligned horizontal right, vertical Middle
+----
+rel://files/library48.png>ar;ab This is aligned horizontal right, vertical Bottom <br /><br /><br />
+
+rel://files/library48.png>al;at This is aligned horizontal left, vertical Top
+----
+rel://files/library48.png>al;am This is aligned horizontal left, vertical Middle
+----
+rel://files/library48.png>al;ab This is aligned horizontal left, vertical Bottom <br /><br /><br />
+[:rel:top]
+----
++++ Combined alignment and size
+++++ Vertical
+This is aligned rel://files/library48.png>at;r75% vertical Top; size 75%
+
+This is aligned rel://files/library48.png>am;r125% vertical Middle; size 125%
+
+This is aligned rel://files/library48.png>ab;r75% vertical Bottom; size 75%
+
+    ----
+++++ Horizontal
+rel://files/library48.png>ar;r150% This is aligned horizontal Right; size 150%
+If there is text to the left of the link, the image drops a line in html
+Moving any following text below the image, takes empty lines or \<br /> tags
+
+rel://files/library48.png>al;r125% This is aligned horizontal Left; size 125%
+If there is text to the left of the link, the image drops a line in html<br /><br />
+
+[:rel:top]
+----
++++ Titles
+++++ Text
+Like with file and URL links, you can add a title to the image "link". Nothing is however done with this title. Example:
+
+An image with a title [rel://files/library64.png>at | link test] Original size (64x64)
+
+It would be a good idea if this title were to be used as the "alt" text for the image.
+
+    ----
+++++ Images    
+It is possible to add an image as a title to the image; meaning that wikidpad does not complain about it. Nothing is however done with that image; it is not shown in preview, neither is it exported to html. Which is correct, since trying to do this is of course r...... Example:
+
+An image with an image [rel://files/library64.png>at | rel://files/notepad2.png>am] Original size (64x64)
+
+Images cán however with good reasons be used as "titles" for the other link types, like: [DemoLinksWebsites|Websites], [DemoLinksFiles|Files] and [DemoLinksWikis|Wiki's]. See also: [DemoLinksUrl|Url links], 
+
+[:rel:top]
+----
++++ Files
+++++ Relative paths
+[:page:DemoFilesRelativePathsIp]
+    ----
+++++ File store
+[:page:DemoFilesWikiFileStoreIp]
+
+[:rel:top]
+----
++++ Remarks
+    * Inserting images is restricted to the formats: ".jpg", ".gif", ".png" and ".bmp".
+    * To insert an image, that does not have one of the default extentions, add the "i" attribute to the link. Example:rel://files/smile.smiley>i.
+    * To use more then 1 attribute for an image, seperate them by a semicolon (" >i;at;r75% ").
+    * Sizes are specified as Width x Hight.
+    * There is no equivalent for align: horizontal Center for the simple reason, that it does not exist in html either.
+    * Horizontal and vertical allignment can not be combined; html does not support this either. For horizontal alignment the "float" atribute is used; this alligns "Top" by default.
+    * The alignment settings are *not* respected by the *internal preview* renderer!
+    * The internal preview renderer alligns *Bottom* by default.
+    * The difference in alignment makes a page look different when shown in the internal renderer, then when shown in an external renderer.
+
+[:rel:top]
+----
++++ Todo's
+done.demo.projectdemo.demo1: check out all possibilities and combinations
+done.demo.projectdemo.demo1: refer to relative links
+done.demo.projectdemo.demo1: refer to file store
+done.demo.projectdemo.demo1: refer to other possibilities with images
+
+action.demo.development: Check if the image title can be used as/converted to the image "alt" text, as in \<img src="url" alt="text" /\>
+
+[:rel:top]
+----
++++ Results
+
+[demo.status.waiting: actions]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+inserts:&nbsp;&nbsp; [DemoFilesRelativePathsIp]; [DemoFilesWikiFileStoreIp]

@@ -1,0 +1,4 @@
+﻿	<b>Page nodes: see [SignalPageNodes]</b>
+	----
+&bull; *[global.child_sort_order:* _sort type_*]*
+Sets the default child sort order for the page tree; default = ascending.

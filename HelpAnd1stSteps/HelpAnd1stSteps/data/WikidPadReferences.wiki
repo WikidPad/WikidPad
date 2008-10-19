@@ -1,0 +1,16 @@
+﻿++ Wikid Pad References
+[:rel:back]
+----
+WikidPad has a lot of different types of setting available with witch both the workspace itself ánd wiki's can be controled. Most of the settings are specified with the subject they belong to. This section lists all of the possible settings per type [1].
+
+	* [MenuOptions |Menu settings]
+	* [WpOptions |Application settings]
+	* [WikiOptions |Wiki settings]
+	* [WpAttributes |Attributes]
+	* [WpInsertions |Insertions]
+
+[1] _The pages are constructed using "page insertions", that are shared with the actual subject pages._
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 15], [template: HelpSubjectTemplate]

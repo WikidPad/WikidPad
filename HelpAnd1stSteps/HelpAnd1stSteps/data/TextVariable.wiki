@@ -1,0 +1,6 @@
+﻿++ Text Variable
+----
+Page for demo purposes only.
+----
+[:rel:back], [:rel:parents; aslist]
+

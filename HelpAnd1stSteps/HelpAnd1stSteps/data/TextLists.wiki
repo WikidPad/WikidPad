@@ -1,0 +1,176 @@
+﻿++ Text Lists
+[:toc:]
+[:rel:back]
+----
++++ General
+Wikidpad allows the use of single- and multilevel lists; in principle these are:
+    * the unordered or bulleted list
+    * the ordered or numbered list
+There is also a third (hidden) list, that is used in Wikidpad to support indentation; see [TextBasics|Textformatting: Basics]
+
+[:rel:top]
+----
++++ Unordered lists
+++++ General
+An unordered list is a bulleted list. To create items for such a list, start with an empty line and type: a tab, an asterisk and a space and then type the text of the list item; so "    \* item text" will result in:
+    * Item text
+Compare the results in both editor and preview.
+
+A multilevel list can be created, using indentation; like this:
+    * item 1
+        * item 2
+        * item 3
+    * item 4
+The level of a list item is defined by it's indentation; i.e. the number of tabs in front of it.
+    ----
+++++ Auto list
+To add a second item to a list, put the cursor at the end of a list item (if it isn't already there) and press Enter; so "    \* item text" followed by an Enter will result in:
+    * Item text
+    * 
+A new list item will be created on the next line and all that has to be done, is to type the item text. This mechanism also supports multi level lists and will indent a new item in accordance with that of the preceding item [3]. To end the auto listing, do the same, but press Enter twice. [1]!!
+
+This automatic creation of list items is called auto-bulleting. It can be switched on and of using the option: menu / Editor / Settings / Auto-bullets.
+The automatic ending of a list can also be switched on and of with the option: menu / Wiki / Options / Editor /Auto-unbullets.
+
+    ----
+++++ Indentation adjustment
+The indentation of two or more consecutive list items, and with it their list level, can be increased by selecting them and pressing Tab. To reduce indentation, press Shift+Tab instead. So selecting items 2 and 3 in the list below
+    * item 1
+    * item 2
+    * item 3
+    * item 4
+and pressing tab, wil result in:
+    * item 1
+        * item 2
+        * item 3
+    * item 4
+See in preview how this not only influences the indentation, but also the type of bullets used. Tabs can of course also be added or removed manually.
+    ----
+++++ Caution!!
+Due to some misconduct of the Wikidpad parsing and conversion mechanism, it also interpretes lines starting with an asterisk followed by a space, but with nó tab in front of it, as a bulleted list [2]. In this case however it will indent any and all lines on the rest of the page and there is no way, to end that. To see the result, remove the backslashes in front of the "list items" below and switch (back) to preview.
+
+\* Part
+\* of list
+
+So be sure to indent any bulleted lists, to prevent this problem from occurring!
+
+If you dó need something on the first position of a line and a bullet would also do the trick for you, you could use the [TextHtmlInternal |html entity] "\&bull;" resulting in:
+
+&bull; Part (\&bull; Part)
+&bull; of list (\&bull; of list)
+
+[:rel:top]
+[1] _And then follow that up with a "Backspace" since WikidPad will stop the list, but it won't stop indenting and you need the backspace to stop thát to!_ [2]
+[2] _This behaviour might be changed in an upcoming version of WikidPad._
+[3] _There is a known bug concerning incorrect indentation when menu / Editor / Settings / "Tabs to spaces" is set to false._
+----
++++ Ordered lists
+++++ General
+An ordered list is a numbered list. To create such a list, start with an empty line and type: a tab, any digit or number, a period and a space and then type the text of the list item; so "    \1. item text" will result in:
+    1. Item text
+The numbers of the list items can be any number, they don't have to be consecutive and the list may countain doubles. For html preview and export this makes no difference; the list is transformed into an html "ordered list" element ("\<ol\>"), that will number the list consecutive, starting with one, no matter whát it's definition is in the editor. Compare the list below in both editor and preview:
+    100. item 100
+    25. item 25
+    36. item 36
+    25. item 25
+    2. item 2
+
+Wikidpad supports hierarchical ordered lists, like these:
+    1. item 1
+        1. item 1.1
+            1. item 1.1.1
+        1. item 1.2
+    1. item 2
+
+Use indentation to control the levels of the items. Next to single numbers in combination with indentation, also hierarchical numbers of the type 15.4.3. can be used to define a leveled list; see the following list as an example:
+    1. item 1
+    1.1. item 1.1
+    1.1.1. item 1.1.1
+    1.2. item 1.2
+    2. item 2
+Wikidpad shóuld control the levels correctly, but evidently it doesn't. If there is no level indentation (tabs) used in the list definition or if it is not done correctly, the list will not turn out as it should. It shóuld turn out exactly like the general example for the hierarchical ordered list above. [4]
+    ----
+++++ Attention!
+You can not have two consecutive numbered lists, separated only by an empty line. WikidPad will not accept the empty line as an end-of-list indication; it will ignore it and will combine both lists into one [5]; like this (switch to preview):
+	1. list 1 item 1
+	2. list 1 item 2
+
+	1. list 2 item 1
+	2. list 2 item 2
+You can break this behaviour by putting the [TextHtmlInternal |html entity] "\&nbsp;" at the start of the empty line, separating both lists. The line is now no longer considered empty and the entity generates a (non breakable) space, so it won't be visible in the endresult.
+    ----
+++++ Auto list 
+The editor supports auto-bulleting for ordered lists, the same way it does for unordered lists and it is controled by the same options. As an extra the editor will also auto-number any next item, that is added to the list; so "    \1. item text", followed by an Enter, will result in:
+    1. Item text
+    2. 
+This will only number a newly added or inserted item relative to the preceding item in the list; it will nót renumber the entire list, when an item is inserted somewhere in the middel of the list. This works both for single level lists ánd for multi level hierarchical lists; pressing Enter at the end of item 1.1.1 will result in:
+    1. item 1
+        1. item 1.1
+            1. item 1.1.1
+            2. 
+        1. item 1.2
+    1. item 2
+The editor also supports auto-numbering of hierarchical numbers: so "    \15.4.3. item text 15.4.3", followed by an Enter will result in:
+    15.4.3. Item text 15.4.3
+    15.4.4. 
+
+with the correct level of indentation; compare it with the leveled list above.
+    ----
+++++ Indentation adjustment
+The indentation and therefore the numbering level can be changed the same way as for unordered lists. So selecting items 2 and 3 in the list below
+    1. item 1
+    2. item 2
+    3. item 3
+    4. item 4
+and pressing tab, wil result in:
+    1. item 1
+        2. item 2
+        3. item 3
+    4. item 4
+See in preview how this not only influences the indentation, but also the numbering of the items.
+
+[:rel:top]
+[4] _This will be corrected in an upcomming (beta) version of WikidPad._
+[5] _This behaviour might change in an upcoming (beta) version of Wikidpad._
+----
++++ Mixed lists
+The ordered and unordered list types can be be mixed freely into one list; example:
+    1. Project 1
+        1. Assess feasibility request 
+            * Analyse request
+            * Research html requirements
+                1. Check xhtml possibilities and restrictions
+                1. Check css possibilities and restrictions
+                2. Check restrictions of internal previewer
+            * Assess syntax requirements
+        2. Todo: research possibilities Wikidpad
+            * Research editor
+            * Research parser
+            * Research converter
+                * Preview converter
+                * Export converter
+        3. Implement request
+            * Design solution
+            * Program solution
+            * Test solution
+            * Implement solution
+    2. Project 2
+    2. Project n
+
+
+[:rel:top]
+----
++++ Settings
+++++ Menu
+[:page:MenuEditorSettingsAutoBullets]
+
+[:rel:top]
+----
+++++ Options
+[:page:WpOptionsEditorBullets]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

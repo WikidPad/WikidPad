@@ -1,0 +1,24 @@
+﻿++ Line Numbers
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+The wikidpad editor supports the display of line numbers. This can be switched on or off.
+
+	rel://files/WorkSpaceExample3.png
+
+[:rel:top]
+----
++++ Settings
+++++ Menu
+	*View*
+	----
+&bull; *Show line numbers*
+Switches the display of line numbers in the editor on or off.
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1]
+[help.status:done]

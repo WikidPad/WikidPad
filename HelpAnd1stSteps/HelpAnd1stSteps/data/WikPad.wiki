@@ -1,0 +1,15 @@
+﻿++ Wik Pad
+----
+Name:	Wikid Padinski
+Adress:	Wikidstreet 666
+Phone:  000-0000000
+Mobile: 666-6666666
+eMail:  wikpad@wikidmail.com
+
+Remarks:
+Seriously wikid type.
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [pagetype: form]

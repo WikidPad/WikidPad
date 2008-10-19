@@ -1,0 +1,11 @@
+﻿++ Personal contacts
+[:rel:back]
+----
+	* [Contact AlbertWiki]
+	* [Contact NielsPage]
+	* [Contact MarieTree]
+	* [Contact JasonHorman]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [template: PageContactTemplate], \[template: \PageContactForm]

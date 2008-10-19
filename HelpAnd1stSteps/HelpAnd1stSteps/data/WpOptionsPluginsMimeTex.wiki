@@ -1,0 +1,4 @@
+﻿	*Application settings: Plugins, MimeTex*
+	----
+&bull; *Path to MimeTex*
+The path to the \MimeTex executable.

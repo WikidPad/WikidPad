@@ -1,0 +1,21 @@
+﻿++ Wiki Settings
+[:rel:back]
+----
+
+*Specific settings*
+[global.template: BaseTemplate]
+[global.font:Arial]
+
+*Default settings*
+<<
+[global.importance.low.color: grey]
+[global.importance.high.bold: true]
+[global.contact.icon: contact]
+>>
+[global.wrap: 70]
+
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1001], [icon:wp_settings]

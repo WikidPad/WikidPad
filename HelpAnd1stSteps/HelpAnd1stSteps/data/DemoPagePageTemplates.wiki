@@ -1,0 +1,116 @@
+﻿++ Demo Page Page Templates
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Often a series of pages has to be made, that have the same starting content. Contact pages are a good example; they always have (roughly) the same items: name, street, city, zip, country, etc. on them in the same layout and following order. To prevent from having to type all these items again and again for every new contact page that is created, Wikidpad supports templates. Using templates one can predefine the initial content for the child pages of a parent page.
+
+A template is just any other Wikidpad page and it's content can be just about anything, including links, attributes, etc. It can be defined as a template, by specifying it as such on the parent page, using the \[template: pagename] attribute. An example tells more, then a thousand words; so see the example below.
+
+*Remarks*
+	* Templates are meant to be used in the Editor; they have no function in Preview.
+	* Templates only work for blank (non-existing) new pages:
+		* Existing child pages can not be "templated", by adding a template to the parent.
+		* Changes in an existing template, will not be reflected in the existing child pages; even though they were created off the template.
+	* A to-be-templated child can only have one (1) parent with a template attribute.
+	* Like the default pages also template children will only be created effectively after it is modified in some way:
+		* Template children that have not been modified (yet) are condsidered to be non-existent.
+		* They will therefore appear as "undefined-nodes" in the "views" node of the treeview.
+	* In the treeview, the views / templates node shows which templates are in use for which parent(s).
+
+[:rel:top]
+----
++++ Example
+This page has a childpage "DemoPageContactTemplate", that lookes like this:
+	_\DemoPageContactTemplate_
+	----
+	\----
+	Name:	
+	Adress:	
+	Phone:	
+	Mobile:	
+	eMail:	
+
+	Remarks:
+	\----
+	\[:rel:parents]
+	----
+
+It also has a childpage "DemoPageContactParent", that contains a list of contacts and has a template attribute attached to it.:
+	_\DemoPageContactParent_
+	----
+	\++ Personal contacts
+	\----
+	\* \[\DemoContact \AlbertWiki]
+	\* \[\DemoContact \NielsPage]
+	\* \[\DemoContact \MarieTree]
+	\----
+	\[:rel:parents]
+	*\[template: \DemoPageContactTemplate]*
+	----
+If now a new contact "\DemoContact \JasonHorman" is added to the list and it's link is followed to it's new page, that page will look like this:
+	_\DemoContact \JasonHorman_
+	----
+	*++ Demo Contact Jason Horman*
+	\----
+	Name:	
+	Adress:	
+	Phone:	
+	Mobile:	
+	eMail:	
+
+	Remarks:
+	\----
+	\[:rel:parents]
+	----
+
+The page can now be finalised, by simply typing Jason Horman's specifics into it.
+
+*Remarks*
+	* The "demo" example uses templates all over the place; check the views / templates node in the treeview to se which they are and on which parent(s) they are used.
+	* Contacts and sortlike items lend themselves particularly for a "fill in the blanks" approach. Wikidpad supports this with the [DemoPageFormTemplates|"Form pages"].
+
+[:rel:top]
+----
++++ Global templates
+Next to a page (parent) specific template, also a template for the whole wiki can be defined, using the \[global.template:&nbsp;pagename] attribute. This wiki uses the \BaseTemplate as a global template.
+	_\BaseTemplate_
+	----
+	\----
+
+	\----
+	\[:rel:parents]
+	----
+*Remarks*
+	* There can only be one (1) global template; if several global templates are defined, then the last one encountered is the one used.
+	* The global template is allways overruled by page (parent) specific templates.
+	* It is advised and good practice, to keep all the global attributes together on one or more specific pages, that are easy recognisable as such, like [WikiSettings].
+
+[:rel:top]
+----
++++ Heading generation
+Wikidpad by default generates a new title for a child based on a template; the same way it does for non-template pages. If not set differently in options (see [DemoPagePageTitles|Page formatting: Page titles]), it will take the linkname for the page and generate a title from that.
+
+This behavior can be prevented, by adding the \[template_head: manual] attribute to a template. Wikidpad will then refrain from generating a title for any page that is generated based on that template.
+This attribute has a global variant \[global.template_head: manual] with which title generation for template-children can be switched off for the entire wiki. The \[template_head: auto] can then be used, to switch it back on for individual templates.
+
+[:rel:top]
+----
++++ Remarks
+    * None
+
+[:rel:top]
+----
++++ Todo's
+done.demo.projectdemo.demo2: check out all posibilities
+\action.demo.pageformatting.pagetemplates: template action
+
+[:rel:top]
+----
++++ Results
+
+[demo.status:done]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]

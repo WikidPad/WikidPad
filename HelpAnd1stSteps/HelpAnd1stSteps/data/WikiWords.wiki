@@ -1,0 +1,13 @@
+﻿++ Wiki Words
+----
+A \WikiWord is any mixed case word typed into the editor;  TodoList or JohnDoe are example wikiwords.
+
+[alias:WikiWord]
+[alias:Wiki Word]
+[alias:Wiki word]
+[alias:Wikiwords]
+[alias:Wiki words]
+[alias:What is a wikiword]
+
+----
+previous: [:rel:back]

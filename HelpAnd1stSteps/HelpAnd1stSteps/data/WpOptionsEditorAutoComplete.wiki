@@ -1,0 +1,4 @@
+﻿	*Application settings: Editor, auto complete*    
+	----
+&bull; *Append closing bracket on auto-complete*
+When suggesting the completion for a bracketed wiki word, e.g. "\[Not Came" you can decide if a closing bracket is suggested ("\[Not Camel Case]") or not ("\[Not Camel Case").

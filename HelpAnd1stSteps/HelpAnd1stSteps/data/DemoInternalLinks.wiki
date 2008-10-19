@@ -1,0 +1,20 @@
+﻿++ Demo Internal Links
+[:rel:back]
+----
+    * [DemoLinksInsertions|Link insertions]
+
+[:rel:top]
+----
++++ Todo's
+todo.demo.projectdemo.demo1: check out all possibilities and combinations
+
+[:rel:top]
+----
++++ Results
+
+[demo.status: new]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position:1], [template: DemoSubjectTemplate]

@@ -1,0 +1,13 @@
+﻿	*Wiki settings: General, wiki control*
+	----
+&bull; *First word at startup*
+Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last words when the wiki was closed is shown on opening.
+
+&bull; *Read only wiki*
+This option controls if a wiki can be changed or only can be opened as "read only".
+
+&bull; *Wiki icon*
+Set here the name of icon to use in the system tray instead of the default icon. If the field is empty the default icon is used. The icon of the main window is not influenced by this setting (because it does not work).
+
+&bull; *Wiki-bound hotkey*
+Wiki-bound hotkey to show/hide wiki. See \OptionsDialog#*App-bound# hotkey*

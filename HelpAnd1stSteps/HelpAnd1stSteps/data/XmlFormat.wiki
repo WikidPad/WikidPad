@@ -1,0 +1,19 @@
+﻿++ Xml Format
+[:rel:back]
+----
+When exporting into XML each wiki word will include its created and modified time. This time stamp has the following format:
+	* (2003, 10, 14, 19, 51, 56, 1, 287, 1)
+The numbers correspond to these fields:
+	1. tm_year (for example, 1993) 
+	1. tm_mon range [1,12] 
+	2. tm_mday range [1,31] 
+	3. tm_hour range [0,23] 
+	4. tm_min range [0,59] 
+	5. tm_sec range [0,61]; see (1) in strftime() description 
+	6. tm_wday range [0,6], Monday is 0 
+	7. tm_yday range [1,366] 
+	8. tm_isdst Is daylight savings. 0, 1 or -1;
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

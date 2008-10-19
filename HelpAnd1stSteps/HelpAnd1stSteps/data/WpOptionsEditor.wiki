@@ -1,0 +1,7 @@
+﻿	*Application settings: Editor, general*
+	----
+&bull; *Sync. highlighting limit*
+Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 3000 to 5000 bytes
+
+&bull; *Highlight start delay*
+For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds

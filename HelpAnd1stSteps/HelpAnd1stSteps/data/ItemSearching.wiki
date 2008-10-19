@@ -1,0 +1,19 @@
+﻿++ Item Searching
+[:rel:back]
+----
+WikidPad offers several powerfull facilities to search either the current page or the whole wiki. The facilities to search a page in preview are not equal to those of the editor.
+
+    1. Search current page
+        * Preview: [FindDialog |Find dialog] [1]
+        * Editor: [IncrementalSearch |Incremental search]
+        * Editor: [FindReplace |Find & Replace] dialog.
+    2. Search whole wiki.
+        * [FastSearch |Fast search] in the toolbar
+        * [FullSearch |Full search] dialog
+
+[1] _The find dialog that is started depends on the used preview renderer: internal or external._
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 10], [template: HelpSubjectTemplate]
+[help.status:done]

@@ -1,0 +1,32 @@
+﻿++ Tree navigation
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+You can use the [TheTreeView |page tree], the [TheTreeView |views tree] and the [TheTimeView |time view] to navigate to a certain page. Only the page tree and views tree are subject of this page.
+
+Navigating and opening pages using the trees works independently of whether the current page is in preview or not. If the current page is in preview however, then any new page will also be opened in preview, unless you opt to open it in a new tab. 
+
+	----
+++++ Using the mouse
+By far the quickest and easiest way to operate the trees is by using the mouse. You go move to any page in the wiki by looking it up in the tree and clicking it's node. You can opt to open a page in a new tab, by right clicking it's node and choosing "Activate New Tab" from the context menu.
+
+	----
++++ Using the keyboard
+You can also use the up, down, left and right arrow keys to navigate within a tree and find the page you need - just in case your mouse broke down. To do this, you first have to move the cursor from the current page to the tree view window by pressing F6 (= toggle switch). The functions of the keys are:
+
+	<<|
+*Up* | Move up through the vísible nodes of the tree.
+*Down* &nbsp;&nbsp;&nbsp;| Move down through the vísible nodes of the tree.
+*Right* | Move ínto a subtree and open it.
+*Left* | Move óut of a subtree and close it.
+_Char_ | Move to the first visible node in the tree of which the name starts with the typed character
+>>
+
+Pages automitically become current in the current tab when you put the cursor on them. As it is now, there is no way you can open a page in a new tab, using the keyboard. The Ctrl-Alt-L function does not seem to work here.
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

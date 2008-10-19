@@ -1,0 +1,7 @@
+﻿	<b>Templates: see [PagePageTemplates]</b>
+	----
+&bull; *[global.template:* _page name_*]*
+Sets a default template for every new page in wiki; can be overruled by a local template attribute; default = _none_. 
+
+&bull; *[global.template_head:* _auto / manual_*]*
+Sets the default title generation for templated pages to auto of manual; default = auto.

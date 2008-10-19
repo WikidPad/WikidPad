@@ -1,0 +1,67 @@
+﻿++ Menu Options
+Contents:   [:toc:]
+[:rel:back]
+----
++++ Options: Menu settings
+This page lists all the possible settings in the main menu [1].
+
+[:rel:top]
+[1] _The page has been assembled using page inserts; it's contents can only be seen in preview._
+----
+++++ Wiki words
+[:page:MenuEditorClipboardCatcher]
+
+[:rel:top]
+----
+++++ Editor
+[:page:MenuEditorSetDateFormat]
+
+[:rel:top]
+----
+[:page:MenuEditorSettingsWrapMode]
+
+[:page:MenuEditorSettingsAutoIndent]
+
+[:page:MenuEditorSettingsAutoBullets]
+
+[:page:MenuEditorSettingsTabsToSpaces]
+
+[:rel:top]
+----
+++++ Folding
+[:page:MenuFolding]
+
+[:rel:top]
+----
+++++ View
+[:page:MenuViewWorkspace]
+
+[:page:MenuViewTree]
+
+[:page:MenuViewStructure]
+
+[:page:MenuViewTime]
+
+[:page:MenuViewEditor]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1]
+[help.status:done]
+
+*Inserts*
+[MenuEditorSetDateFormat]
+[MenuEditorSettingsWrapMode]
+[MenuEditorSettingsAutoIndent]
+[MenuEditorSettingsAutoBullets]
+[MenuEditorSettingsTabsToSpaces]
+[MenuEditorClipboardCatcher]
+[MenuFolding]
+[MenuViewWorkspace]
+[MenuViewEditor]
+[MenuViewTree]
+[MenuViewStructure]
+[MenuViewTime]
+

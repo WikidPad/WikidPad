@@ -1,0 +1,31 @@
+﻿++ Demo Text Formatting
+Contents:[:toc:]
+[:rel:back]
+----
++++ Subjects
+    1. [DemoTextEscape|Escape]
+    2. [DemoTextBasics|Basics]
+    3. [DemoTextImages|Images]
+    4. [DemoTextLists|Lists]
+    5. [DemoTextFootnotes|Footnotes]
+    6. [DemoTextTables|Tables]
+    7. [DemoTextHtmlElements|Html elements]
+    8. [DemoTextInsertions|Insertions]
+
+
+[:rel:top]
+----
++++ Todo's
+done.demo.projectdemo.demo2: check out all possibilities and combinations
+
+[:rel:top]
+----
++++ Results
+
+[demo.status.waiting: subjects]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position:3], [template: DemoSubjectTemplate]
+

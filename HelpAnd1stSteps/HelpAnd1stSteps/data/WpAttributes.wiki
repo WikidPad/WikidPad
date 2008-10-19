@@ -1,0 +1,100 @@
+﻿++ Wp Attributes
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Wiki pages support "attributes". Attributes are used for two purposes:
+	* to add an extra index for a page in the [TheTreeView |views tree].
+	* to specify certain special wiki formatting commands.
+
+[:rel:top]
+----
+++++ Syntax
+The general format for an attribute is:
+	* \[attribute key: _attribute value_], like: \[color: Dark Slate Blue]
+
+Multiple attributes for one page with the same key, but with different values can be combined into one multivalue attribute, separating the different values with semicolons; like:
+	* \[alias: \WikidPadAttributes; \WikiAttributes; \WikiDocumentAttributes]
+
+Attribute values can be enclosed in [QuotationCharacters |quotation characters] to allow them to contain reserved characters, e.g.
+	* \[shop: "audio&video"]
+
+Attribute keys can be composed keys with a hierarchical structure; i.e they can exist of multiple words, separated by a period&nbsp;"."; like:
+	* \[html.bgcolor: #FFFFCC]
+
+Certain system attributes have global representations, that set default values for the entire wiki that they are in. Their key is then prefixed with "global."; like:
+	* \[global.html.bgcolor: #FFFFCC]
+	----
+++++ User defined attributes
+Users can define their own attributes - key: value pairs - in order to create their own additional indexes for their pages in the views tree. For description and examples see: [SignalUserTags |Page signalling: user tags].
+	----
+++++ Global attribute properties
+Attributes support global properties, that influence the representation of pages in the page tree. To set the properties, a variant on the attribute specification is used, like:
+	* \[global.contact.personal.icon: people]
+	* \[global.contact.personal.color: Coral]
+	* \[global.contact.personal.bold: true]
+Would set the node in the main tree of every page that has the attribute:
+	* \[contact: personal]
+assigned, to use the icon "people", font style bold and font color "coral".
+For more comprehensive description and examples see: Page signalling: [SignalUserTags |user tags] and [SignalTodoTags |todo tags].
+	----
+++++ Autocompletion
+The editor supports autocompletion for attributes. Type part of the attribute, press Ctrl-Space and a list with existing attribute specifications will come up. Autocompletion for attributes works exactly like [Using autocompletion |autocompletion for links]; see there for details and examples. In fact, depending on how much of the attribute text is typed, a list of both attributes ánd links will come up.
+
+[:rel:top]
+----
++++ Global attributes
+This section lists the system attributes, that have global representations. They set wiki wide defaults for those attributes.
+
+++++ Editor
+[:page:GlobalAttributesEditor]
+
+[:rel:top]
+----
+++++ Page linking
+[:page:GlobalAttributesWikiWords]
+
+[:page:GlobalAttributesBracketedLinks]
+
+[:rel:top]
+----
+++++ Page formatting
+[:page:GlobalAttributesTemplates]
+
+[:page:GlobalAttributesPageView]
+
+[:page:GlobalAttributesPageMisc]
+
+[:rel:top]
+----
+++++ Page Signalling
+[:page:GlobalAttributesPageNodes]
+
+[:rel:top]
+----
+++++ Spell checking
+[:page:GlobalAttributesSpellChecking]
+
+[:rel:top]
+----
+++++ Plugins
+[:page:GlobalAttributesStructureGraphs]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 4]
+[help.status:done]
+
+
+*inserts*
+[GlobalAttributesEditor]
+[GlobalAttributesWikiWords]
+[GlobalAttributesBracketedLinks]
+[GlobalAttributesTemplates]
+[GlobalAttributesPageView]
+[GlobalAttributesPageMisc]
+[GlobalAttributesPageNodes]
+[GlobalAttributesSpellChecking]
+[GlobalAttributesStructureGraphs]

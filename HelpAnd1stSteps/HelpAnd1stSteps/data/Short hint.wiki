@@ -1,0 +1,24 @@
+﻿++ Short hint
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+The short_hint attribute displays a tooltip for the link of the page, that it is defined for. It's format is:
+	* \[short_hint: _short hint text_].
+[PageLinkShortHint|This page] has a short hint with the value: "This is a short hint for the \PageLinkShortHint page" defined for it. When the mouse is held over it's link for a moment, it wil show up as a tooltip. This will work both in the editor and in preview. Whith exported html it might depend on the browser used.
+
+*Remarks*
+	* Short_hint only works on links in pages; not on links in the treeview or other view windows.
+
+[:rel:top]
+----
++++ Settings
+++++ Options
+[:page:WpOptionsEditorShortHint]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 23]
+[help.status:done]

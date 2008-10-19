@@ -1,0 +1,43 @@
+﻿++ Links Websites
+Contents:	[:toc:]
+[:rel:back]
+----
+
++++ General
+You can add links to websites to your page and open them in your browser. You do this with a default web URL.
+
+
+    * http://groups.google.com/group/wikidpad/web/home
+    * http://tech.groups.yahoo.com/group/wikidPad/
+    * http://wikidpad.python-hosting.com/
+    * http://en.wikipedia.org/wiki/WikidPad
+
+    ----
+
+[:rel:top]
+----
++++ Link titles
+++++ Text
+A link text can in preview and export be replaced by a link title, that then serves as a clickable synonym for the link.
+
+    * [http://groups.google.com/group/wikidpad/web/home | Wikidpad: Home page]
+    * [http://tech.groups.yahoo.com/group/wikidPad/ | Wikidpad: Yahoo user group]
+    * [http://wikidpad.python-hosting.com/ | Wikidpad: Trac home page]
+    * [http://en.wikipedia.org/wiki/WikidPad | Wikidpad: On Wikipedia]
+
+    ----
+++++ Images
+Instead of a text, also an image can be used as a "title" or synonym for a link.
+
+    * Wikidpad: Home page [http://groups.google.com/group/wikidpad/web/home |  rel://files/google35.gif>am]
+    * Wikidpad: Yahoo user group [http://tech.groups.yahoo.com/group/wikidPad/ | rel://files/yahoo25.png>am] 
+    * Wikidpad: Trac home page [http://wikidpad.python-hosting.com/ |  rel://files/trac25.png>am]
+    * Wikidpad: On Wikipedia [http://en.wikipedia.org/wiki/WikidPad | rel://files/wikipedia_logo.png>am]
+
+The images can be formatted with the default image attributes; see [TextImages|Textformatting: images].
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

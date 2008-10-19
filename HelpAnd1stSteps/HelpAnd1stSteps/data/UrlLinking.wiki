@@ -1,0 +1,19 @@
+﻿++ Url Linking
+[:rel:back]
+----
+Links to external items are specified, using Url links. See [LinksUrl|Url links] for general information and additional possibilities of external linking
+
+    1. [LinksUrl|Url links]
+    2. [LinksWebsites|Websites]
+    3. [LinksFiles|Files]
+    4. [LinksWikis|Wiki's]
+    5. [TextImages|Textformatting: images]
+    6. [FilesWikiFileStore|File store]
+
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 5]
+[help.status:done]

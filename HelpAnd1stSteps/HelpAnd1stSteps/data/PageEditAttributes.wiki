@@ -1,0 +1,67 @@
+﻿++ Page Edit Attributes
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+In Wikidpad a number of attributes is available, with which the formatting of a page in the editor can be influenced.
+
+[:rel:top]
+----
++++ Font face
+The appearance of a page in the editor can be changed, by setting a different font face for it. 
+
+	----
+++++ Example
+The font of this page is "Times" in the editor, because of the font attribute on the next line.
+	* [font: Times]
+<br />
+	----
+++++ Global
+This attribute has a global representation \[global.font: font name] with which the default editor font for the whole wiki can be set. The font for individual pages can then still be set using the local font attribute. The global attribute:
+	* \[global.font: Times]
+would set the editor font for the whole wiki to "Times".
+
+[:rel:top]
+----
++++ Word wrap
+The editor supports auto-wrapping of typed text; it however only does this based on the width of the editor window and there is no way to influence this further. There are no facilities for setting page margins, auto-wrap margins or the like. Auto-wrap also only applies to the text in the editor window; it has no influence on the presentation of the lines of texts in the html view modes, when[PageViewAttributes| paragraph mode] has been set to true for the page.
+
+Wikidpad offers "Word wrap" as a means to adjust the lenght of lines on a page áfter they have been typed. It wrappes the lines in a block of text between two empty lines, in which the start and the end of the page also count as an empty line. Word wrap is a three step process:
+	1. Set the maximum lenght the lines should have by adding the \[wrap:value] attribute to the page
+	2. Set the cursor in the block of text lines, that needs to be wrapped.
+	3. Press Crtl+W and the editor will rewrap the block to the maximum line width specified.
+It is advised to be véry carefull when using word wrap. The reasons for this are:
+	1. It will wrap áll of the lines in the block; there is no way to limit it to a specific (selected) number of lines.
+	2. It is very indiscriminative as to whát it wraps; it will wrap éverything: text, headers, lists, horizontal lines, escape blocks, table declarations, the lot.
+	3. It is just as indiscriminative in what it produces; it can effectively ruine the layout and specification of a page. Luckily it can be undone with the "Undo" function ("Ctrl+Z").
+
+The reason for this behaviour lies in the fact, that wordwrap is not a parser driven function of WikidPad, but a default function of the Scintilla editor component, that drives the WikidPad editor window. This Scintilla editor is mainly designed for editing program source code. Currently however, there is no viable alternative and when used with care it might in certain situations still be usefull.
+
+*Remarks*
+	* Auto-wrapping can be switched of with the option: menu / Editor / Settings / "Wrap Mode".
+	* Word wrap has no use, when paragraph mode for the page is set to true.
+	* When the cursor is in the last block on the page, word wrap also wraps the first block on the page.
+
+	[:rel:top]
+	----
+++++ Global
+This attribute has a global representation \[global.wrap: value] with which the wrap value for the whole wiki can be set. The wrap value for individual pages can then still be set using the local font attribute. The global attribute:
+	* \[global.wrap: value]
+would set the wrap value for the whole wiki to 70.
+
+[:rel:top]
+----
++++ Settings
+++++ Menu
+[:page:MenuEditorSettingsWrapMode]
+
+[:rel:top]
+----
+++++ Global attributes
+[:page:GlobalAttributesEditor]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

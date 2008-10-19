@@ -1,0 +1,45 @@
+﻿++ Intro 3: Formatting
+[:rel:back]
+----
++++ General
+When you're not using a wiki to quickly jot down and link notes, but to make something that can be presented to others - ór to yourself, you undoubtedly would like to add formatting to your pages. You might want to:
+	* devide a text in different sections and identify those using headings
+	* use horizontal lines to separate certain parts of the text
+	* use tables, numbered lists or bulleted ones, like this one
+	* use font styles like *bold*  and _italics_
+	* etc.
+All of this can be done in WikidPad.
+
+	----
++++ Text formatting
+WikidPad supports all sorts of text formatting; a complete description of all the possibilities can be found in [TextFormatting |text formatting]. For whom the default textformatting facilities of WikidPad are unsatisfactory, the possibilty exists to use [TextHtmlElements |inline html]. WikidPad supports this, but it really only makes a difference when using an external renderer. There is véry little extra you can do with html in the internal renderer.
+
+	----
++++ Page formatting
+WikidPad supports a number of features in the area of [PageFormatting |page formatting], like:
+	* automatic [PagePageTitles |generation of titles], based on the page's page link
+	* setting [PageViewAttributes |properties] like foreground, background and link colors
+	* using existing pages as [PagePageTemplates |templates] for new ones
+A complete description of all the possibilities can be found in [PageFormatting |page formatting].
+
+	----
++++ Url links
+So far we have seen, that you can add page links to a wiki page. But you can also add links to external items like [LinksWebsites |web sites], [LinksFiles |files] and pages in [LinksWikis |other wiki's]; this is done using the standard html [LinksUrl |Url links]. For files WikidPad supports the use of relative paths.
+
+<table><tr><td>rel://files/intro/RvRselfportret1630.png</td><td>A special use of url links is that of adding images to wiki pages that are visible in preview, like this self portret of Rembrandt van Rijn made in 1630.</td></tr></table>
+	----
++++ Link formatting
+When the literal text of a page (or url) link is not really presentable, for instance because you used prefixes for al sorts of obvious reasons, you can change it's appearance in preview (ánd published html), by giving it a title (see [Using brackets |bracketed links]). A page link like [Intro Rembrandt van Rijn] can be changed into the more presentable [Intro Rembrandt van Rijn |Rembrandt van Rijn], by writing the link specification like this: \[Intro Rembrandt van Rijn |Rembrandt van Rijn], using a vertical bar to seperate link and title.
+
+<table><tr><td>[Intro Nachtwacht |rel://files/intro/RvRNachtwachtCut.png>al]</td><td>Not only text can be used as a title for page (or url) links, but also images. Like the cutout of the "Nachtwacht" to the left that acts as a link to the wiki page about the "Nachtwacht", using a url as the title instead of text.</td></tr></table>
+
+	----
++++ Escaping formatting
+WikidPad supports a number of ways to [SyntaxEscape |escape formatting]. This allows special formatting characters to be used as standard text. The backslash "\\" is the default escape character. To use an asterix "\*" in the text, without it being interpreted as the "bold" formatting tag, prepend it with a backslash "\\\*".
+
+<p align=center>[Intro2ViewingAndEditing |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro4LinkFunctions |Next page &raquo;]</p>
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: -1]
+[intro.status:done]

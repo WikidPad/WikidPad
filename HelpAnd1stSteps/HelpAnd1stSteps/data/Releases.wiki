@@ -1,0 +1,19 @@
+﻿++ Releases
+Contents:[:toc:]
+[:rel:back]
+----
++++ Current release
+	* [ChangeLog19|Release 1.9]
+
++++ Previous releases
+	* [ChangeLog18|Release 1.8]
+	* [ChangeLog17|Release 1.7]
+	* [ChangeLog16|Release 1.6]
+	* [ChangeLog2005|Changes 2005]
+	* [ChangeLog2004|Changes 2004]
+	* [ChangeLog2003|Changes 2003]
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position:3], [template: ReleaseTemplate]

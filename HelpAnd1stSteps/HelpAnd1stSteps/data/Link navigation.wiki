@@ -1,0 +1,46 @@
+﻿++ Link navigation
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+The basic form of navigating through the pages of a wiki, is to follow the page links. While navigating you have the choice to open the next page in the current tabbed page or in a new tabbed page.
+To close a tabbed page, right click the tab and select "Close tab" from the context menu. To move between tabbed pages, click the desired tab with the mouse or press Ctrl-Tab [1].
+
+[:rel:top]
+----
++++ Preview
+++++ Current tab
+Following the links to other pages is easy and works like in any browser: just click the link with the mouse. Or: 
+right click the link and choose "Activate" from the context menu [1].
+	----
+++++ New tab
+To follow a link and have it's page open in a new tab you can:
+	1. Right click the link and choose "Activate New Tab" from the context menu. The page will be opened in the new tab and that will become the current tab (default) [1].
+	2. Right click the link and choose "Activate New Tab Backgrd." from the context menu. The page will be opened in the new tab, but that will not become the current tab [1].
+
+[:rel:top]
+----
++++ The editor
+++++ Current tab
+In the editor there are several ways to follow a link:
+	1. Double click the link with the mouse.
+	2. Click the link with the mouse while pressing Ctrl.
+	3. Right click the link and choose "Activate" from the context menu.
+	4. With the cursor within the link specification, select the main menu option: "Wiki Words" / "Activate Link/Word".
+	5. With the cursor within the link specification, press Ctrl-L.
+
+	----
+++++ New tab
+To follow a link and have it's page open in a new tab you can:
+	1. Right click the link and choose "Activate New Tab" from the context menu. The page will be opened in the new tab and that will become the current tab (default).
+	2. Right click the link and choose "Activate New Tab Backgrd." from the context menu. The page will be opened in the new tab, but that will not become the current tab.
+	3. With the cursor within the link specification, select the main menu option: "Wiki Words" / "Activate Link/Word in new tab".
+	4. With the cursor within the link specification, press Ctrl-Alt-L.
+
+[:rel:top]
+----
+[1] <b><i>This function is only available in the internal preview renderer; nót in the external preview renderers!</i></b>
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

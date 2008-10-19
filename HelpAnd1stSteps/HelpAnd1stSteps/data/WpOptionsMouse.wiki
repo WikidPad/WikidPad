@@ -1,0 +1,13 @@
+﻿	*Application settings: Mouse*
+	----
+&bull; *Middle button without CTRL*
+Set the reaction of a middle button click on a wiki word in editor, internal preview, tree or wiki-wide search results if CTRL is not pressed while clicking. You can choose between opening the word in a new tab in foreground, in background or in the same (active) tab.
+
+&bull; *Middle button with CTRL*
+Same as before, but set reaction if CTRL is pressed while clicking the middle button.
+
+&bull; *Left double click in preview*
+When double clicking into preview (not on a link), this can either do nothing, switch the tab to editor or open a new tab with same page, but in editor mode.
+
+&bull; *Middle click on tab*
+This can either do nothing or close the tab

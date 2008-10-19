@@ -1,0 +1,4 @@
+﻿	*Editor: settings, tab key*
+	----
+&bull; *Tabs to spaces*
+Controls whether tabs are inserted as tabs or as spaces.

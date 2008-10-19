@@ -1,0 +1,5 @@
+﻿++ Page Link Short Hint
+----
+[short_hint:This is a short hint for the PageLinkShortHint page]
+----
+[:rel:back], [:rel:parents; aslist]

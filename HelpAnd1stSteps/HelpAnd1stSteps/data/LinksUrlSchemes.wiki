@@ -1,0 +1,27 @@
+﻿++ Links Url Schemes
+[:rel:back]
+----
+A scheme consists of the following elements:[1]
+    * scheme://host.domain:port/path/filename
+Wherein:
+    * Scheme is defining the type of Internet service. The most common type is http.
+    * Domain is defining the Internet domain name like w3schools.com.
+    * Host is defining the domain host. If omitted, the default host for http is www.
+    * Port is defining the port number at the host. The port number is normally omitted. The default port number for http is 80.
+    * Path is defining a path (a sub directory) at the server. If the path is omitted, the resource (the document) must be located at the root directory of the Web site.
+    * Filename is defining the name of a document. The default filename might be default.asp, or index.html or something else depending on the settings of the Web server.
+
+Some examples of the most common schemes are:
+    <<|
+file |a file on your local PC
+ftp |a file on an FTP server
+http |a file on a World Wide Web Server
+gopher |a file on a Gopher server
+news |a Usenet newsgroup
+telnet |a Telnet connection
+WAIS |a file on a WAIS server
+>>
+----
+[1] _Source: http://www.w3schools.com/html/html_url.asp_
+----
+previous: [:rel:back]

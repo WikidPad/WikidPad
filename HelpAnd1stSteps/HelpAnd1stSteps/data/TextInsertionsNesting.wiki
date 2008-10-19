@@ -1,0 +1,24 @@
+﻿++ Text Insertions Nesting
+Contents:   [:toc:]
+[:rel:back]
+----
++++ Test area
+Text insertions can be nested, like in this example:
+
+Following indented is the inserted page.
+	----
+	[:page:TextInsertionNesting1Ip]
+	----
+
+[:rel:top]
+----
++++ Remarks
+	* Wikidpad doesn't handle indentation of inserted pages very well and specifically not that of nested insertions
+
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+inserts:&nbsp;&nbsp; TextInsertionNesting1Ip, TextInsertionNesting2Ip, TextInsertionNesting3Ip
+[help.status:done]

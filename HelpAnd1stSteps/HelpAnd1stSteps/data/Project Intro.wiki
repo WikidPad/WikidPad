@@ -1,0 +1,38 @@
+﻿++ Project Intro
+Contents:[:toc:]
+[:rel:back]
+----
++++ Description
+The task of this project is to draw up the introductory text, that also carries enough information for the first time user, to get started.
+
+[:rel:top]
+----
++++ Members
+	* Owner:   JanSte
+	* Members: JanSte
+
+[:rel:top]
+----
++++ Actions
+	* &&i
+
+[:rel:top]
+----
++++ Remarks
+	* &&i
+
+[:rel:top]
+----
++++ Todo's
+	* todo.intro.projectintro:write intro pages
+
+[:rel:top]
+----
++++ Result
+[demo.status: new]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position:1], [pagetype: form], [template: DemoActionTemplate]

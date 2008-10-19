@@ -1,0 +1,99 @@
+﻿++ Link insertions
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Wikidpad supports a number of functions, that dynamically add page links to a page in preview and html export. These link functions are generally referred to in Wikidpad as "link insertions". The available functions are:
+	* rel: list page links related to a page
+		* back
+		* top
+		* parents
+		* children
+		* parentless [1]
+		* undefined [1]
+	* savedsearch: lists page links in the result of a saved search
+	* toc: creates table of contents for the page.
+
+[:rel:top]
+[1] _These don't really produce links related to a page, but show all of them_
+----
++++ Format
+The format of the function is in general that of a Wikidpad attribute; it's syntax is:
+	* \[:_function group_: _function_; options]
+Wherein the options are optional and must be separarted with a semicolon ";". The available options are:
+	* aslist
+	* collumns _number_
+	* existingonly
+The options "aslist" and "collumn" are only applicable to those functions, that produce a list of multiple page links. They define how the list is to be generated:
+	* aslist: as a list of comma+space separated link names
+	* columns: as _number_ collumns accross the page
+If these options are ommitted, the default is: 1 collumn. Existingonly is only applicable to "rel:children"
+
+[:rel:top]
+----
++++ rel
+This function group originally creates links, that are somehow related to the page it is on; this is not all together true anymore.
+	----
+++++ back
+The function \[:rel: back] creates a link "Back", that when clicked, activates the Wikidpad "back" function (Alt-left) and moves one page back in history. I.e. it moves back to the page you just came from. Applicable options are: none.
+
+*Examples*
+See the "Back" links at the top and bottom of this page.
+	----
+++++ top
+The function \[:rel: top] creates a link "Top", that when clicked, moves the page display to the top of the page. Applicable options are: none.
+
+*Examples*
+See the various "Top" links on this page.
+	----
+++++ parents
+The function \[:rel: parents] creates a list of one or more page links of pages that refer to the current page. Applicable options are: aslist and collumns.
+
+*Remark*
+It the page has a link on it, that refers to an anchor within itself, then the name of the page itself also appears in the parents list.
+
+*Example*
+\[:rel: parents] results in: [:rel: parents]
+	----
+++++ children
+The function \[:rel: children] creates a list of the pages that the current page refers to. Applicable options are: aslist, collumns and existingonly. When the option "existingonly" is used, the links to undefined pages are not shown.
+
+*Examples*
+Links used in the examples: ([WikidPad] WikiWords, [Case link], UndefinedPage, UndefinedPageToo)
+
+\[:rel: children; aslist] results in:
+[:rel: children]
+
+\[:rel: children; existingonly; columns 2] results in:
+[:rel: children; existingonly; columns 2]
+	----
+++++ parentless
+The function \[:rel: parentless] creates a list of all the pages, that are parentless. Applicable options are: aslist and collumns.
+	----
+++++ undefined
+The function \[:rel: undefined] creates a list of all the pages, that are undefined. Applicable options are: aslist and collumns.
+
+[:rel:top]
+----
++++ savedsearch
+The function \[:savedsearch: _searchname_] creates a list of all the page links, that were saved as a result of a search. Function in this case is the name of the saved search. Applicable options are: aslist and collumns.
+
+*Examples*
+\[:savedsearch: Case link; columns 4] (all pages containing "Case link") produces:
+[:savedsearch: Case link; columns 4]
+
+[:rel:top]
+----
+anchor:tocFunction
++++ toc
+The function \[:toc:] creates a table of contents for the headings of the current page, like the one on top of this page. In HTML preview/export the toc entries can be clicked on to move the display to the concerning heading. This function only has a function group, no function. Applicable options are: none.
+
+*Examples*
+See the toc on top of this page.
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 11]
+[help.status:done]

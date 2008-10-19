@@ -1,0 +1,16 @@
+﻿++ Wikid Pad Advanced
+[:rel:back]
+----
+	* CommandLineSupport
+	* WikidPadOnUSB
+	* ApplicationConfigurationFiles
+	* WikiLockFile
+	* WikiSyntax
+	* ChangeFileSuffix
+	* [Plugins]
+	* [Scripts]
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 16], [template: HelpSubjectTemplate]

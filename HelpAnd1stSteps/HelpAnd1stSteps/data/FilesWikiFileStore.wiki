@@ -1,0 +1,78 @@
+﻿++ Files Wiki File Store
+[:toc:]
+[:rel:back]
+----
++++ General
+[:page:FilesWikiFileStoreIp]
+
+[:rel:top]
+----
+anchor:CopyControl
++++ Copy control
+When copying a file to the file store, Wikidpad checks the store for one or more files with the same identity. These do not specifically have to be files with the same name! Files with different names, can still be (copies of) exactly the same image or document. For files to be seen as identical, they must have:
+
+    1. The same size
+    2. The same suffix (or extention = the part of the filename from the last dot to the end of the name)
+
+During identity control, all the files that fullfill these conditions, are put on the shortlist of possibly identical files. The size of the shortlist can be influenced, using the following two options: [1]
+
+    1. Modified date must match [2]
+        - Only files with the exact same modification timestamp (date ánd time) are accepted for the shortlist. This option speeds up the identity check, but may lead to unnecessary copies of the same file in the store.
+    2. File name must match
+        - Only files with the exact same name are accepted for the shortlist. This option is not extremely useful, but can have it's use.
+
+Furthermore, the comparison process can be influenced with the option: [1]
+    3. Modified date is enough
+
+After the shortlist is completed, it is compared against the file to be copied in the following sequence:
+
+    1. If the list contains a file with the exact same name, this file is condsidered to be the same file.
+    2. If modified date is enough = true
+        1. If the list contains one (1) file with the exact same modification timestamp, this file is considered to be the same file.
+        2. If the list contains more of those files, then the (first) file with the same content is considered to be the same file. [3]
+        3. If there is no such file or no file has the same content, then the process continues with bullet 4.
+    3. Modified date is enough = false
+        1. If there are files in the list, that have the same modification date, then the (first) file with the same content is considered to be the same file.
+        2. If there is no such file or no file has the same content, then the process continues with bullet 4.
+    4. The (first) file with the same content,  is considered to be the same file.
+    5. If there is no such file, then there is no file in the store, that is the same.
+
+*Important!*
+    * In (a) certain stage(s) of the decision proces, file are compaired byte by byte with the file-to-be-copied. This may be a lengthy process, depending the options set, the number of files in the shortlist and/or in the store and on their size.
+    * During copy control Wikidpad does not respond to any key presses or mouse clicks.
+
+[:rel:top]
+[1] _These options are not mutually exclusive!_
+[2] _Modification date actually is a timestamp: modification date ánd time._
+[3] _This in fact means that a random file with the same timestamp is accepted as the same file._
+----
++++ Manual control
+Other directories than "files" and "data" can be created in a wiki's directory and files in them can be referenced using relative links, but only the "files" directory is managed by the file store mechanism.
+
+The file store has no special status, as far as the operating system is concerned. Files and folders can be copied, moved and deleted to and from the folder manually, as usual. This should however be avoided at moments, when Wikidpad is performing copy control activities on the file store.
+
+The file store "copy" can't copy or create subdirectories into the file store; you can do that manually. Copy control however will not search these subdirectories for identical files.
+
+Wikidpad never deletes a file in the store; not even when there is no reference to it anymore in any of the pages of the wiki. As far as this type of "housekeeping" is necessary for the file store, it has to be done manually.
+
+[:rel:top]
+----
++++ HTML export
+When exporting pages to html, all the files in the file store, that are referenced in those pages and use a rel scheme for the link (i.e. relative link of relative path) are copied into a "files" subfolder of the export target folder. Doing this, Wikidpad will respect any folderstructure, that might have been created in the "files" folder and that contain files, that are referenced by the exported pages. So a referenced file:
+    * \rel://files/images/w3schools.png
+will be copied to:
+    * .../htmltarget/files/images/w3schools.png
+
+Files that are in the file store, but are referenced using absolute links, will not be copied to the target folder's file store. Files that are referenced with relative links, but are in a wiki subfolder different from the file store, are also nót copied to the export target. And of course files that are in folders outside the wiki folder, are not copied either. As far as any of these files is referenced using a relative liks, it's the user's responsibility, to copy these files to their correct target folders.
+
+[:rel:top]
+----
++++ Settings
+++++ Options
+[:page:WikiOptionsFileStore]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

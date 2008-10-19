@@ -1,0 +1,19 @@
+﻿	*Application settings: Plugins, GraphViz*
+	----
+&bull; *Path to GraphViz*
+The path to the \GraphViz directory of executables.
+
+&bull; *Name of dot executable*
+The name of the dot executable; default = dot.exe.
+
+&bull; *Name of neato executable*
+The name of the neato executable; default = neato.exe.
+
+&bull; *Name of twopi executable*
+The name of the twopi executable; default = twopi.exe.
+
+&bull; *Name of circo executable*
+The name of the circo executable; default = circo.exe.
+
+&bull; *Name of fdp executable*
+The name of the fdp executable; default = fdp.exe.

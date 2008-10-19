@@ -1,0 +1,10 @@
+﻿	*Wiki settings: General, page titles*
+	----
+&bull; *Title prefix*
+Control the heading level of the initial main title of new pages. See PagePageTitles
+
+&bull; *Wikiword to title*
+How should the main title of new pages be generated from the wikiword. See PagePageTitles
+
+&bull; *Use link title if present*
+Specifies if the link title will be used as title of the page. See PagePageTitles

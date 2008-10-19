@@ -1,0 +1,15 @@
+﻿++ Mic But
+----
+Name:	Michael Butscher
+Adress:	Fleischerstra&szlig;e 16
+Phone:  000-0000000
+Mobile: 666-6666666
+eMail:  micbut@wikidmail.com
+
+Remarks:
+Main developer of Wikidpad
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [pagetype: form]

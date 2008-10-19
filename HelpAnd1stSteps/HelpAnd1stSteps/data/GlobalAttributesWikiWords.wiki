@@ -1,0 +1,4 @@
+﻿	<b>Wikiwords: see [Using WikiWords]</b>
+	----
+&bull; *[global.camelCaseWordsEnabled:* _true / false_*]*
+Sets the default camelcase mode to true or false; default = true.

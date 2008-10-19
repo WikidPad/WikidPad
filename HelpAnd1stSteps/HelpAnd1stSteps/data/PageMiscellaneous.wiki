@@ -1,0 +1,27 @@
+﻿++ Page Miscellaneous
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+The attributes on this page are actually attributes that are not related to pageformatting, but they need a place somewhere, so why not here for the time being, untill there is a better place for them.
+
+[:rel:top]
+----
+++++ View_pane
+Controls whether a page should be opened in preview or in edit mode, when it is first navigated to. The format is: \[view_pane:value]; the possible values are:
+    * off: Don't change mode; use the current one
+    * editor: Show the page in edit mode
+    * preview: Show the page in preview mode
+The attribute has a global representation: \[global.view_pane:value].
+
+[:rel:top]
+----
++++ Settings
+++++ Global attributes
+[:page:GlobalAttributesPageMisc]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

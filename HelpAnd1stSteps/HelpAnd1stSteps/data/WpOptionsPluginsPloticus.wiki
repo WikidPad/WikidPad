@@ -1,0 +1,4 @@
+﻿	*Application settings: Plugins, Ploticus*
+	----
+&bull; *Path to Ploticus*
+The path to the \Ploticus executable.

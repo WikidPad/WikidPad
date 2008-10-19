@@ -1,0 +1,10 @@
+﻿++ Intro Dutch Golden Age
+[:rel:back]
+----
+
+The Golden Age was a period in Dutch history, roughly spanning the 17th century, in which Dutch trade, science, and art were among the most acclaimed in the world. For more detailed information see Wikipedia:  [http://en.wikipedia.org/wiki/Dutch_Golden_Age |Dutch Golden Age]
+
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]

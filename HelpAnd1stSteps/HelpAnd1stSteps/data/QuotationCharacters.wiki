@@ -1,0 +1,26 @@
+﻿++ Quotation Characters
+[:rel:back]
+----
+Attributes and insertions consist of a key/value pair, whereby the value sometimes can have additional parameters; this is specifically the case for insertions. The value/parameter part might - specifically for plugins - have to contain characters, that are not normally allowed within the syntax. To support this, WikidPad allows for quotation of a value or parameter or both.
+
+A quotation symbol is an arbitrary number of one of the quotation characters ", ', / or \ (double quotation mark, single quotation mark, slash or backslash). The starting and ending symbols must be the same. Examples of quotation symbols are:
+
+	* "
+	* '''
+	* //
+	* /////
+	* \\
+
+The attribute \[manufacturer: Levi & Strauss] can therefore be written as:
+
+<<
+[manufacturer: "Levi & Strauss"]
+[manufacturer: '''Levi & Strauss''']
+[manufacturer: //Levi & Strauss//]
+[manufacturer: /////Levi & Strauss/////]
+[manufacturer: \\Levi & Strauss\\]
+>>
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]

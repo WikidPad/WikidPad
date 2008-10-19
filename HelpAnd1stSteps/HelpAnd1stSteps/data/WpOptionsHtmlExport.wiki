@@ -1,0 +1,17 @@
+﻿	*Application settings: Html export*
+	----
+&bull; *Start browser after export*
+Starts the current web browser after exporting to XML.
+
+&bull; *Shows pics as links in export*
+If this option is checked, links to image URLs (those ending with .png, .gif or .jpg) are shown like other links in the export. If it is unchecked, the images (if available) are shown.
+
+&bull; *Table of contents*
+Choose if you want a table of contents in tree form, list form or not at all.
+For a single HTML page, the TOC is at the beginning of the page, for a set of HTML pages, it is a separate "index.html" file. Using "As tree" is recommended when exporting the whole or nearly the whole wiki, "As list" is better for small subsets of a wiki as the tree option gives unexpected results here.
+
+&bull; *Title of toc*
+Set the title of the table of contents according to your language. The default is "Table of Contents". For German it could be e.g. "Inhaltsverzeichnis".
+
+&bull; *Single page separator lines*
+Set the number of separator lines to separate wiki pages in a single HTML page on export.

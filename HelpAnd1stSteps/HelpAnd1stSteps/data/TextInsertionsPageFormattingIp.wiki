@@ -1,0 +1,15 @@
+﻿[html.bgcolor:#FFFFCC]
+[html.textcolor:#3300CC]\DarkSlateBlue
+[html.linkcolor:#8B008B]\DarkMagenta
+
+this is a line of text 
+with a CamelCaseWord
+that should continue on
+the same line
+[paragraph_mode: true]
+
+[font:Times New Roman]
+[wrap: 20]
+[camelCaseWordsEnabled: false]
+
+[:rel:back]

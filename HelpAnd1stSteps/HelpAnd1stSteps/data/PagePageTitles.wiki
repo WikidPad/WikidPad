@@ -1,0 +1,47 @@
+﻿++ Page Page Titles
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+For new pages a title is automatically created by Wikidpad. If and how that is done, can be controled with a number of options. 
+
+[:rel:top]
+----
++++ Settings
+++++ Options
+	*Wiki settings*
+	----
+++++ Wikiword to title
+This option controls íf and how a title is generated. The option has three settings:
+
+	<<|
+*Setting* | *Meaning* | *link name* | *title*
+No title | Don't generate a title |\PageLink| None
+As is | Use the link name for the title as it is. |\PageLink| \PageLink
+Add spaces | Insert spaces into the link name in front of each uppercase letter |\PageLink| Page Link
+>>
+
+	[:rel:top]
+	----
+++++ Use link title if present
+This setting is an extention to the "Wikiword to title" setting. Íf a page title is to be generated and íf the originating link has a link title, then the link title is to be used for the page title instead of the link name.
+
+*Example*
+If the link that led to a page-to-be-created was: \[\PageLink|Page title], then the page title would not be based on "\PageLink" but on "\Page title".
+
+	[:rel:top]
+	----
+++++ Title prefix
+The page title is defined as a heading with a certain level. The level can be controled with the "Title prefix" option. The number of plus signs that is entered in the option field, is the number of plus signs that will be used for the heading level of the page title. When Wikidpad is first installed, the default level is "++".
+
+[:rel:top]
+----
++++ Settings
+++++ Options
+[:page:WikiOptionsPageTitles]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

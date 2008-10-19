@@ -1,0 +1,102 @@
+﻿+++ Anchor Example
+----
+    * [AnchorExample|Item 1]!item1
+    * [AnchorExample|Item 2]!item2
+    * [AnchorExample|Item 3]!item3
+    * [AnchorExample|Item 4]!item4
+    * [AnchorExample|Item 5]!item5
+
+----
+[Using anchors]
+
+anchor:item1
+++++Item 1
+Quite
+a
+number
+of
+words
+that
+span
+quite
+a
+number
+of
+lines
+
+[:rel:top], [Using anchors]
+	----
+
+anchor:item2
+++++Item 2
+Quite
+a
+number
+of
+words
+that
+span
+quite
+a
+number
+of
+lines
+
+[:rel:top], [Using anchors]
+	----
+
+anchor:item3
+++++Item 3
+Quite
+a
+number
+of
+words
+that
+span
+quite
+a
+number
+of
+lines
+
+[:rel:top], [Using anchors]
+	----
+
+anchor:item4
+++++Item 4
+Quite
+a
+number
+of
+words
+that
+span
+quite
+a
+number
+of
+lines
+
+[:rel:top], [Using anchors]
+	----
+
+anchor:item5
+++++Item 5
+Quite
+a
+number
+of
+words
+that
+span
+quite
+a
+number
+of
+lines
+
+[:rel:top], [Using anchors]
+----
+previous: [:rel: back]
+[help.status:done]

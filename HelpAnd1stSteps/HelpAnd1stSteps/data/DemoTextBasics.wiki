@@ -1,0 +1,77 @@
+﻿++ Demo Text Basics
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+This page investigates the basic text formatting facilities of Wikidpad.
+
+[:rel:top]
+----
++++ Subjects
+++++ Character formatting
+Wikidpad's support for character formatting is limited to the font styles bold and italic [1][2].
+
+To make text bold, enclose it in asterisks, like \*bold\* giving *bold*.
+To make it italic, enclose it in underscores, like \_italic\_ giving _italic_.
+
+These two font styles are mutually exclusive in Wikidpad; text can not be defined to be both bold ánd italic [3]. When tried, it either results in: *_bold & italic_* or in: _*bold & italic*_. If bold+italic text or other additional character formatting is realy needed, then the use of html elements could be considered; see [DemoTextHtmlElements|Textformatting: Html elements].
+
+[:rel:top]
+[1] _Font style tags act as a special kind of escape character; nothing inbetween is recognised as a link, attribute or other wikidpad element anymore._
+[2] _Wikidpad has no support for underlined text; underlined text has been deprecated by the W3 Committee, so it is not considered a valid part of html anymore._
+[3] _Version 2.0 or later possibly wíll have support for this._
+----
+++++ Headings
+The plus sign can be used to define headings for (sub)sections on the page, like this: "\+Heading 1" [5]. The level of the heading and it formatting can be specified with the number of plus signs in front of it. For examples on how to use them, see the headings on this and other pages of the demo wiki [6].
+
+Wikidpad implements headings as - encloses them in - named html anchors. In combination with the[DemoLinksInsertions|  \[:toc:\] attribute] this allows to insert a table of contents anywhere on a page and from there to jump straight to a particular section. See the Toc on top of this page and try it [7].
+
+[:rel:top]
+[5] _Like the font style tags, the heading tag acts as a special kind of escape character; nothing after the plus sign is recognised as a link, attribute or other wikidpad element anymore._
+[6] _The Wikidpad editor - as from version 1.9 - supports folding of sections based on their headings_
+[7] _Wikidpad - as from version 1.9 - supports toc formatting up to heading level 13._
+----
+++++ Indentation
+Wikidpad supports line indentation; to indent a line, start it with one or more tab characters [9]. The next line will automatically also be indented; this behaviour can be switched on or of with the option: "Menu / Editor / Settings / Auto-indent".
+
+The indentation of two or more (already indented!) consecutive lines can be increased by selecting them and pressing Tab. To reduce indentation, press Shift+Tab instead.
+
+[:rel:top]
+[9] _Wikidpad implements indented lines as a html "list" element, enclosing them in \<ul\> tags. This should be taken into account, when using indentation in html block elements in Wikidpad._
+----
+++++ Horizontal lines
+Four (4) consecutive hyphens (-) will create a horizontal line, like can be seen on this page [12]. Oddly enough this does not only happen when the hyphens are the only characters in the line, but also when they are in the middle of a text. That text will then effectively be broken into two part, like this "aa \---- bb" becomming:
+
+    aa ---- bb
+    
+In order to prevent this from happening, the escape character can be used: "aaa \\\---- bb" [13]. A line can be indented, like is the case above with "  aa \\\---- bb". Wikidpad then encloses it  in \<ul\> tags.
+
+[:rel:top]
+[12] _Effectively móre the 4 hyphens produce the same result; a horizontal line is created and any excess hyphens are ignored._
+[13] _Be aware that the backslash only escapes óne hyphen a time; if there are five or more consecutive hyphens, then óne preceding backslash will stil result in a horizontal line!_
+----
++++ Remarks
+    * Wikidpad's support for character formatting - font, size, color, etc. - is very meagre; some enhancement in this area should be considered.
+    * There is a possibility to change the font face, but that can only be done for Wikidpad globally using the option: menu / Wiki / Options / "Html preview/export" / "Font name for html preview".
+    * Wikidpad supports some form of wordwrap, but that effectively has to be seen as page formatting, not text- or lineformatting; see [DemoPageEditAttributes|Page formatting: Edit attributes].
+    * Any amounts of successive asterisks results in an unexpected behaviour; like this:  ******** aaaaa ******** . <= If the last asterisk is not followed by a space, the group is not seen as an end-bold tag and also removes the bullet from the following list item.
+    * Any amount of underscores results in an unexpected behaviour; like this:  _______formatting is______ as against this:   _______ formatting is______. The difference is the space in front of "formatting".
+
+[:rel:top]
+----
++++ Todo's
+done.demo.projectdemo.demo2: check out all posibilities
+
+action.demo.development: check out the behaviour of consecutive asterisks.
+action.demo.development: check out the behaviour of consecutive asterisks underscores.
+action.demo.development: check out the difference in behaviour of consecutive asterisks and consecutive underscores.
+
+[:rel:top]
+----
++++ Results
+
+[demo.status.waiting: actions]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]

@@ -1,0 +1,15 @@
+﻿[:rel:back]
+----
+Name:	&&i
+Adress:	&&i
+Phone:  &&i
+Mobile: &&i
+eMail:  &&i
+
+Remarks:
+&&i
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [pagetype: form]

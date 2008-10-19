@@ -1,0 +1,4 @@
+﻿	*View: time view*
+	----
+&bull; *Show time view*
+Show or hide the time view window.

@@ -1,0 +1,4 @@
+﻿	*Folding*
+	----
+&bull; *Show folding*
+Switches the support for folding in the editor on or off.

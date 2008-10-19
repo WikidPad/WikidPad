@@ -1,0 +1,16 @@
+﻿Method \CarCount()
+
+Var
+    count   longInt
+    cars    tCursor
+endVar
+
+count = longInt(0)
+cars.open("cars.db")
+scan cars
+    :   count = count +longInt(1)
+endScan
+msgInfo("Carcount", "There are " +string(count) +" cars in the table")
+cars.close()
+
+return

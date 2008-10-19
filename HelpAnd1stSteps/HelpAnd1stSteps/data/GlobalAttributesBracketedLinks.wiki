@@ -1,0 +1,4 @@
+﻿	<b>Bracketed links: see [Using brackets]</b>
+	----
+&bull; *[global.auto_link:* _off / relax_*]*
+Sets the default recognition mode of non-camelcase wiki words in normal text; default = _Off_.

@@ -1,0 +1,88 @@
+﻿++ Command Line Support
+Contents:   [:toc:]
+[:rel:back]
+----
++++ Old form
+You can have up to two command line parameters, without leading '-'
+which have the following meaning:
+
+*First parameter* can be a path to a .wiki file (either a text file with
+wiki page content (this page is opened then) or the wiki configuration
+file). Instead of a path it can also be an URL with wiki: protocol
+
+*Second parameter* can be the name of a wiki word to open, if not
+specified in the first parameter.
+
+[:rel:top]
+----
++++ New form
+You can specify switches and/or parameters on the command line where
+the names of the switches either consist of a '-' and a character
+(short form, e.g. "-h") or begin with two dashes and a name (long
+form, e.g. "--help").
+
+Some switches also take a parameter which must follow the switch on
+the command line.
+
+The following list of switches shows the short form (not present for
+all options), the long form and (if necessary) the meaning of the
+parameter in angle brackets:
+
+++++ General
+*-h, --help*
+Shows a message box with a short overview of available switches.
+
+*-w, --wiki  <wiki path>*
+Set the wiki to open on startup (same as first parameter of old form).
+
+*-p, --page <page name>*
+Set the page to open on startup (same as second parameter of old form). You can repeat this parameter multiple times to open multiple tabs.
+
+*--rebuild*
+Rebuild the opened wiki.
+
+*-x, --exit*
+Exit immediately after command line actions were completed.
+
+++++ Exporting
+The following three must all be specified if you want to export
+something, the fourth (--export-compfn) is optional:
+
+*--export-what <what>*
+Choose if you want to export *page*, *subtree* or *wiki*.
+
+*--export-type <type>*
+Tag of the export type. Currently this can be:
+
+    * html_single: Single HTML page
+    * html_multi: Set of HTML pages
+    * xml: XML output
+    * raw_files: Set of \*.wiki files in UTF-8 format with BOM
+
+*--export-dest <destination path>*
+Path of destination directory for export.
+
+
+*--export-compfn*
+Use compatible filenames on export.
+
+++++ Special
+*--deleteconfig*
+If this is the only switch on the command line, the program deletes
+(*without further request!*) the configuration files which are the
+main "WikidPad.config" file as well as everything in
+".WikidPadGlobals" directory (normally only the global text blocks
+file).
+
+After that the program terminates immediately (otherwise the files
+would be recreated).
+
+This switch is mainly used for the uninstalling of a Windows binary.
+The uninstaller *will* ask before running WikidPad with this option.
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1]
+[help.status:busy]

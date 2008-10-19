@@ -1,0 +1,19 @@
+﻿++ FastSearch
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Fast search operates wiki wide and is driven by the search field in the WikidPad toolbar. To use it:
+	1. click with the mouse in the field
+	2. type the text to search for
+	3. press enter
+The result is a list of pages where it found a match. To go to one of the pages shown, either:
+	* navigate to it with the cursor keys and press Enter
+	* double click it with the mouse
+Fast search supports [RegEx |regex].
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

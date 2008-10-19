@@ -1,0 +1,71 @@
+﻿++ The Editor
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+The text editor is in fact the place where all the work is \done: text is typed, links are specified, attributes are added to a page. etc. It supports most of the default editing functions like:
+	* select: cut, copy and paste [1]
+	* select: drag and drop [2]
+	* multiple undo, redo
+	* [LineNumbers |line numbering]
+	* [Folding |folding]
+	* [SpellChecking |spell checking] [3]
+Furthermore it suports a number of specialised functions, like:
+	* [TextFormatting |(html) text formatting]
+	* dragging and dropping of [Using the treeview |page links] and [LinksUrl |url links]
+	* converting selected text into [Using replace text by wikiword |wiki pages]
+	* selection and insertion of icon and color [SignalPageNodes |page attributes]
+	* [ImagePasting |pasting of images] from the clipboard.
+Also a number of functions are implemented to make life easier, like:
+	* insertion of standard texts with [TextBlocks |Text blocks]
+	* moving texts around using [ScratchPad|Scratch pad]
+	* copying and pasting from external sources using [ClipboardCatcher |Clipboard catcher]
+
+The editor has many settings that control it's behaviour; the more general settings are listed below; the additional settings are listed on the pages of the subjects that they relate to.
+
+[:rel:top]
+----
++++ Auto save
+WikidPad tries to save the document in the editor window for you often. This "auto save" occurs:
+    1. after about 5-15 seconds of idle time.
+    2. on navigation to a new wiki page.
+    3. on shutdown.
+A page can be saved manually by pressing Ctrl-S.
+
+[:rel:top]
+----
+[1] _When copying from external sources like web pages, wikidpad will only paste the text, nót the formatting tags._
+[2] _The default drag and drop performs a "cut and paste" of the selected text; a "copy and paste" can be performed by holding the Ctrl key when dropping._
+[3] _Spell checking is optional and needs a plugin to be installed._
+----
++++ Settings
+++++ Menu:
+[:page:MenuEditorSetDateFormat]
+
+[:rel:top]
+----
+[:page:MenuEditorSettingsTabsToSpaces]
+
+[:rel:top]
+----
+[:page:MenuViewEditor]
+
+[:rel:top]
+----
+++++ Options
+[:page:WpOptionsEditor]
+
+[:rel:top]
+----
+[:page:WpOptionsAutoSave]
+
+[:rel:top]
+----
+[:page:WpOptionsEditorColors]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 4], [template: HelpSubjectTemplate]
+[help.status:done]

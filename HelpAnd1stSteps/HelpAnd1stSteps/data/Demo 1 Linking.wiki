@@ -1,0 +1,58 @@
+﻿++ Demo 1 Linking
+Contents:[:toc:]
+[:rel:back]
+----
++++ Description
+Collect, structure, test and prepare all information on linking.
+
+[:rel:top]
+----
++++ Tasks
+	* [DemoInternalLinks|Page links]
+	* [DemoExternalLinks|External links]
+
+[:rel:top]
+----
++++ Members
+	* Owner:   JanSte
+	* Members: JanSte; HelKo; WikPad
+
+[:rel:top]
+----
++++ Remarks
+	* External links: with the inclusion of [DemoTextImages|image links].
+
+[:rel:top]
+----
++++ Todo's
+	* todo.demo.projectdemo.demo1.links: anchors
+	* done.demo.projectdemo.demo1.links: url's
+	* done.demo.projectdemo.demo1.links: relative url's
+	* done.demo.projectdemo.demo1.links: files
+	* todo.demo.projectdemo.demo1.links: alias
+	* done.demo.projectdemo.demo1.links.images: in item
+	* done.demo.projectdemo.demo1.links.images: as link
+	* done.demo.projectdemo.demo1.links.images: size
+	* done.demo.projectdemo.demo1.links.images: alignment
+	* done.demo.projectdemo.demo1.links.images: html tags
+	* todo.demo.projectdemo.demo1.links.insertions: toc
+	* todo.demo.projectdemo.demo1.links.insertions: savedsearch
+	* todo.demo.projectdemo.demo1.links.insertions.rel: parents
+	* todo.demo.projectdemo.demo1.links.insertions.rel: children
+	* todo.demo.projectdemo.demo1.links.insertions.rel: children; existingonly
+	* todo.demo.projectdemo.demo1.links.insertions.rel: parentless
+	* todo.demo.projectdemo.demo1.links.insertions.rel: undefined
+	* todo.demo.projectdemo.demo1.links.insertions.rel: columns
+	* todo.demo.projectdemo.demo1.links: searchlinks
+	* todo.demo.projectdemo.demo1.links: short_hint
+
+[:rel:top]
+----
++++ Result
+[demo.status:busy]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [pagetype: form]

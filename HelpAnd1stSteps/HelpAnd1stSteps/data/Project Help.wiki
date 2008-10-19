@@ -1,0 +1,39 @@
+﻿++ Project Help
+Contents:[:toc:]
+[:rel:back]
+----
++++ Description
+The task of this project is to (re)write the helpwiki for Wikidpad.
+
+[:rel:top]
+----
++++ Members
+	* Owner:   JanSte
+	* Members: HelKo; WikPad
+
+[:rel:top]
+----
++++ Actions
+	* &&i
+
+[:rel:top]
+----
++++ Remarks
+	* &&i
+
+[:rel:top]
+----
++++ Todo's
+	* todo.help.projecthelp: write help pages
+
+[:rel:top]
+----
++++ Result
+[demo.status: new]
+
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position:2], [pagetype: form], [template: DemoActionTemplate]

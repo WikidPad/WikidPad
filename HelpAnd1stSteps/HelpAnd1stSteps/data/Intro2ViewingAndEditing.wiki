@@ -1,0 +1,22 @@
+﻿++ Intro 2: Edit, view and navigate
+[:rel:back]
+----
+The WikidPad [TheEditor |editor] is a plain text editor; it does not support much in the form of text- and or page formatting. Still you can add comprehensive formatting to the pages, using various forms of formatting tags. These tags however do nót influance the appearance of the text or page in the editor but in [ThePreview |preview].
+WikidPad can show a page in one of two modes: either in edit mode or in preview mode. In edit mode you can add and change text, but you can't see any form of formatting; in preview mode you can see the page fully formatted, but you can't do any form of maintenance on the text. You can switch this page from preview to edit mode and back, pressing Ctrl-Shift-Space and see the difference in presentation of the page for yourself.
+
+Preview mode is actually called "Html preview" and is meant to judge the pages on the appearance they will have in the browser; after they have been published to html. But you can of course also use it to view a wiki in a different way then in the editor. You don't háve to publish the wiki; you can use WikidPad Preview as the browser for it.
+When Wikidpad - or in fact a tabbed page from the page window - is in preview mode, what happens is that the page's text and attributes get converted into a html page, that is then fed to the internal browser that is responsible for showing the page in preview mode. So Preview in fact is a mini browser, that processes real html to render the pages. WikidPad's own internal preview is rather limited in what it can do, but under Windows there is the possibility to use an external html renderer like Internet Explorer or Mozilla/Gecko as the preview renderer.
+
+Care must be taken when using external renderers, since they have their differences of opinion on how rendered html pages should look like in terms of default margins, padding, font sizes, bordersizes, etc. And their fews on it differ particularly from those of the internal renderer. A page might look quite different in IE preview then in internal preview. So if you are making a Wiki for an audience, then take the preview into account, that they will be using.
+
+[Link navigation |Basic navigation] is done as in any browser: in preview by clicking a link and in the editor by double clicking it or pressing Ctrl-L when the cursor is in or at the link. Additionally navigation can be done by:
+	* using the [Tree navigation |page tree]
+	* using the [Page history |page history]
+	* using [Bookmarks |bookmarks]
+
+<p align=center>[Intro1StartingAWiki |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro3Formatting |Next page &raquo;]</p>
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: -1]
+[intro.status:done]

@@ -1,0 +1,126 @@
+﻿++ Text Html Internal
+Contents:   [:toc:]
+[:rel:back]
+----
++++ Entities and symbols
+In Wikidpad the html entities and symbols can be used, like:
+
+	* \&euro; = the euro sign = &euro;
+	* \&copy; = copyright = &copy;
+	* \&radic; = square root = &radic;
+	* \&nbsp; = non breakable space;
+	* \&bull; = bullet
+
+*Remarks*
+	* For a complete list of entities see: <a href="http://www.w3schools.com/tags/ref_entities.asp">W3 Schools: Entity reference</a><br />
+	* For a complete list of symbols see: <a href="http://www.w3schools.com/tags/ref_symbols.asp">W3 Schools: Symbol reference</a>
+
+[:rel:top]<br />
+----
++++ Font styles
+Html allows the use of a number of font styles. Here, it does not add much to what Wikidpad offers and part of that is deprecated by the W3 Committee and should not be used.
+<ul>
+<li><em>Emphasized text.</em>  <strong>Strong text.</strong>  <em><strong>Strong, emphasized text.</strong></em></li>
+<li><i>Italic text.</i>  <b>Bold text.</b>  <u>Underlined text.</u>  <i><b><u>Bold, italic, underlined text.</u></b></i> [1]</li>
+<li><small>Small text.</small>  Default text  <big>Big text.</big> [3]</li>
+<li><font size="2" color="blue">Blue text; font size: 2.</font>
+<font size="3" color="red">Red text; font size: 3.</font>
+<font face="times new roman" size="4" color="green">Green text; font face: 'Times New Roman'; font size: 4.</font> [2]</li>
+</ul>
+[:rel:top]<br />
+[1] _The undeline tag is still accepted by most browsers, but it has been deprecated by the W3 Committee and it is advised not to use it._<br />
+[2] _The font tag is also deprecated and advised not to use!_<br />
+[3] _The "big" tag does not work in the internal renderer, but it dóes in the external ones._
+----
++++ Headings
+The standard "\<h1\>" until "h..\>" tags can be used, to define section headings; like:
+<ul>
+<li><h3>Heading \h3</h3></li>
+<li><h6>Heading \h6</h6></li>
+</ul>
+These headings will however nót appear in the Wikidpad Toc ("\[:toc:"\]).
+
+[:rel:top]<br />
+----
++++ Lists
+<b>Unordered list:</b>
+<ul>
+<li>item 1</li>
+<ul>
+<li>item 1.1</li>
+<li>item 1.2</li>
+</ul>
+<li>item 2</li>
+</ul>
+	----
+<b>Ordered list:</b>
+<ol>
+<li>item 1</li>
+<li>item 2</li>
+</ol>
+[:rel:top]
+----
++++ Tables
+<p>This is a table based on html syntax; the table has no borders, so is ideal for textformatting</p>
+<p><table>
+<tr><td>\+</td><td>headers</td></tr>
+<tr><td>\* </td><td>bold text and lists</td></tr>
+<tr><td>\n. </td><td>lists (n = any number)</td></tr>
+<tr><td>\_ </td><td>italic text</td></tr>
+<tr><td>\[  \] </td><td>links and attributes</td></tr>
+<tr><td><\< \>\> </td><td>block areas (table, escape and preformatted)</td></tr>
+<tr><td>\---- </td><td>horizontal line</td></tr>
+</table><p/>
+<p>This is where you realy need paragraph_mode to be set to true.</p>
+[:rel:top]
+----
++++ Links
+*Web links*
+<ul>
+<li><a href="http://www.google.com/">Link: Google Search</a></li>
+<li><a href="http://www.w3schools.com/">Link: W3 Schools</a></li>
+</ul>
+*Page anchors*
+<ul>
+<li><a name="example">Example page anchor</a></li>
+<li><a href="#bottom">Jump to anchor on bottom of page</a></li>
+</ul>
+*File links*
+<ul>
+<li>A href file link with an absolute path works:
+<a href="file:///D|/Jan/Mijn%20documenten/Mijn%20pims/WikidPad/Help/files/notepad.png">notepad.png</a></li>
+<li>A href link with a Wikidpad \rel:// path to an image file álso works:
+<a href="rel://files/notepad.png">notepad.png</a></li>
+</ul>
+*Image links*<br />
+Img elements for the larger part do nót work, but for 1 or 2 exeptions. These exeptions however are unreliable, since they work in one preview, but not in the other and also browsers have their own idea's about them. The use of img links is therefore advised against [5].
+
+[:rel:top]<br />
+[5] _The bad behaviour of image links is possibly due to a program error. It might be solved in an upcomming version of WikidPad._
+----
++++ Miscelaneous
+<ul>Indented text
+<ul>Further indented text</ul>
+Indented text
+</ul>
+<ul>Horizontal rule [6]<hr size=3>
+</ul>
+<p>Paragraph [7]</p>
+<p align=right>Paragraph right alligned</p>
+<p align=center>Paragraph centered</p>
+<p align=left>Paragraph left alligned</p>
+[:rel:top]<br />
+[6] _The size and all other presentation attributesof the hr tag are deprecated and advised not to use!_<br/>
+[7] _The align attribute of the paragraph tag is deprecated and advised not to use!_
+----
+previous: [:rel:back]<br/>
+parents:&nbsp; [:rel:parents; aslist]<br/>
+attributes: [tree_position: 1], [paragraph_mode: true]<br/>
+[help.status:done]
+
+*Page anchors* Do not remove!!<br />
+<ul>
+<li><a name="bottom">Bottom anchor for link demo.</a></li>
+<li><a href="#example">Back to: Example page anchor</a></li>
+</ul><br />
+<br />

@@ -1,0 +1,12 @@
+﻿++ Demo Contact Albert Wiki
+----
+Name:	Albert E. Wiki
+Adress:	Wikistreet 36
+Phone:	010-1234567
+Mobile:	06-12345678
+eMail:	albert.wiki@email.com
+
+Remarks:
+Inventor of the wikitivity theory.
+----
+previous: [:rel:back]

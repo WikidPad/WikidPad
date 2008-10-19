@@ -1,0 +1,29 @@
+﻿++ Relative Paths Examples
+    ----
+    *Home* = \file:///H|/My%20wiki's/Wikidpad/Example[rel://files/My%20wiki's.png>ar]
+    * \rel://notes.txt
+        = \file:///H|/My%20wiki's/Wikidpad/Example/notes.txt
+    * \rel://files/images/w3schools.png
+        = \file:///H|/My%20wiki's/Wikidpad/Example/files/images/w3schools.png
+
+    * \rel://../license.txt
+        = \file:///H|/My%20wiki's/Wikidpad/license.txt
+    * \rel://../Images/notepad.png
+        = \file:///H|/My%20wiki's/Wikidpad/Images/notepad.png
+    * \rel://../Testwiki/files/codesnippet.txt
+        = \file:///H|/My%20wiki's/Wikidpad/Testwiki/files/codesnippet.txt
+    * \rel://../../tiddlyWiki/tiddlyWiki.html
+        = \file:///H|/My%20wiki's/tiddlyWiki/tiddlyWiki.html
+    * \rel://../../../someFile.ext
+        = \file:///H|/someFile.txt
+    * \rel://../../../../someFile.ext
+        = \file:///H|/someFile.txt
+
+
+    * \rel:///bootlog.txt
+        = \file:///*C*|/bootlog.txt
+    * \rel:///Windows/notepad.exe
+        = \file:///*C*|/Windows/notepad.exe
+
+    ----
+[:rel:back]

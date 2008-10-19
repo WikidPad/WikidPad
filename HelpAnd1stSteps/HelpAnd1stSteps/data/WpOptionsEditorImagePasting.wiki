@@ -1,0 +1,15 @@
+﻿	*Application settings: Editor, image pasting*
+	----
+&bull; *Filename prefix*
+A prefix to use for the filename. If this filename plus suffix exists already in "files" dir, an underscore and a sequence of 20 random letters or numbers is appended to create a unique filename. E.g. you want to store a PNG-file with prefix "foo" then WikidPad checks if "foo.png" is already in the "files" directory (if prefix is empty, this is not tried). If "foo.png" exists it tries something like "foo_2NIUXQ0OGVRDT1O3JNUN.png". If this exists already it tries again (up to 20 times) before giving up.
+
+&bull; *File type*
+    * None: Don't store images at all
+    * PNG: Store in PNG format (losless compression)
+    * JPEG: Store in JPEG format (lossy compression)
+
+&bull; *Quality*
+Number to define quality of JPEG compression (0:worst, 75:default, 100:best)
+
+&bull; *Ask settings on each paste*
+If checked, each time you paste an image, a dialog box asks for the above settings to set them individually.

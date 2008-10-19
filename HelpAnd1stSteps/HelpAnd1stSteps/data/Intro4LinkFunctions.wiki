@@ -1,0 +1,27 @@
+﻿++ Intro 4: Link Functions
+Contents:	[:toc:]
+[:rel:back]
+----
++++ Link functions
+++++ General
+WikidPad supports a number of in-page functions, that in preview are converted into page links. These functions are in WikidPad generally referred to as [Link insertions |link insertions]. Examples of these functions are the \[:rel:back] and \[:rel:top] functions, that in preview result in the "Back" and "Top" links on this page. Another example is the "parents" function, that is responsible for the list of parents at the bottom of each of the intro pages.
+
+	----
+++++ Toc
+A special case of the link functions is the \[:toc:] function. In preview it is replaced with a small table of contents based on the headings of a page. An example can be found at the top of this page. The entries in the "toc" are "anchor links"; clicking them will move the page to the heading in question.
+
+[:rel:top]
+----
++++ Page anchors
+In addition to page links and url links, WikidPad also supports anchors and anchor links; these can be used to create links to positions anywhere within the text of a page. Links to anchors can be on the same page or on other pages. For more information see: [Using anchors |Page linking: anchor links].
+
+[:rel:top]
+----
++++ Footnotes
+WikidPad allows the use of footnotes. These are implemented as a special kind of link, based on page anchors. For details on how to use them see:  [TextFootnotes |Text formatting: footnotes].
+
+[:rel:top]<p align=center>[Intro3Formatting |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro5Indexing |Next page &raquo;]</p>----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: -1]
+[intro.status:done]

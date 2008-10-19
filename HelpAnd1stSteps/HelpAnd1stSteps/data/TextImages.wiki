@@ -1,0 +1,120 @@
+﻿++ Text Images
+Contents:[:toc:]
+[:rel:back]
+----
++++ General
+You can add links to images to your pages and have them shown in preview. You do this with a URL of the type file-url. These files can be of type: ".jpg", ".gif", ".png" and ".bmp". To insert image files as línks, see [LinksFiles|Files].
+
+Example:
+An image as an image rel://files/library64.png>at Original size (64x64)
+
+[:rel:top]
+----
++++ Sizing
+Images can be resized but depending on the browser, the quality of the results can be questionable. It is better to resize the images beforehand in a good graphics program.
+
+++++ Absolute size (in pixels)
+Half size (32x32) rel://files/library64.png>s32x32
+
+Streched size (64x32) rel://files/library64.png>s64x32
+
+Enlarged size (80x80) rel://files/library64.png>s80x80
+
+    ----
+++++ Relative to surrounding page area
+Tenth size (10%x10%) rel://files/library64.png>s10%x10%4
+
+Streched size (20%x10%) rel://files/library64.png>s20%x10%
+
+    ----
+++++ Relative to image
+Half size (50%) rel://files/library64.png>r50%
+
+Tenth size (10%x10%) rel://files/library64.png>r10%x10%
+
+Streched size (20%x10%) rel://files/library64.png>r20%x10%
+
+[:rel:top]
+----
++++ Alignment
+*Important:* Internal preview does nót respect allingment parameters; it ignores them! The results of allignment can only be seen in an external renderer. Internal preview alligns "bottom" by default; this makes a page look different when shown in the internal renderer from when shown in an external renderer.
+
+++++ Default
+The alignment defaults to rel://files/library48.png inline, vertical Bottom (image has white space at the bottom)
+
+    ----
+++++ Vertical
+This is aligned rel://files/library48.png>at vertical Top
+
+This is aligned rel://files/library48.png>am vertical Middle
+
+This is aligned rel://files/library48.png>ab vertical Bottom
+
+    ----
+++++ Horizontal
+rel://files/library48.png>ar This is aligned horizontal Right
+If there is text to the left of the link, the image drops a line in html
+Moving any following text below the image, takes empty lines or \<br /> tags
+
+rel://files/library48.png>al This is aligned horizontal Left
+If there is text to the left of the link, the image drops a line in html<br /><br />
+[:rel:top]
+----
++++ Combined alignment and size
+++++ Vertical
+This is aligned rel://files/library48.png>at;r75% vertical Top; size 75%
+
+This is aligned rel://files/library48.png>am;r125% vertical Middle; size 125%
+
+This is aligned rel://files/library48.png>ab;r75% vertical Bottom; size 75%
+
+    ----
+++++ Horizontal
+rel://files/library48.png>ar;r150% This is aligned horizontal Right; size 150%
+If there is text to the left of the link, the image drops a line in html
+Moving any following text below the image, takes empty lines or \<br /> tags
+
+rel://files/library48.png>al;r125% This is aligned horizontal Left; size 125%
+If there is text to the left of the link, the image drops a line in html<br /><br />
+
+[:rel:top]
+----
++++ Titles
+++++ Text
+Like with file and URL links, you can add a title to the image "link". Nothing is however done with this title. [1]
+
+    ----
+++++ Images    
+It is possible to add an image as a title to the image; meaning that wikidpad does not complain about it. Nothing is however done with that image; it is not shown in preview, neither is it exported to html.
+
+Images cán however with good reasons be used as "titles" for the other link types, like: [LinksWebsites|Websites], [LinksFiles|Files] and [LinksWikis|Wiki's]. See also: [LinksUrl|Url links], 
+
+[:rel:top]
+[1] _In an upcoming version of WikidPad the title text will be used as the image's "alt" text (\<img src="url" alt="title" /\>)_
+----
++++ Files
+++++ Relative paths
+[:page:FilesRelativePathsIp]
+    ----
+++++ File store
+[:page:FilesWikiFileStoreIp]
+
+[:rel:top]
+----
++++ Remarks
+    * Inserting images is restricted to the formats: ".jpg", ".gif", ".png" and ".bmp".
+    * To insert an image, that does not have one of the default extentions, add the "i" attribute to the link. Example:rel://files/smile.smiley>i.
+    * To use more then 1 attribute for an image, seperate them by a semicolon (" >i;at;r75% ").
+    * Sizes are specified as Width x Hight.
+    * There is no equivalent for align: horizontal Center for the simple reason, that it does not exist in html either.
+    * Horizontal and vertical allignment can not be combined; html does not support this either. For horizontal alignment the "float" atribute is used; this alligns "Top" by default.
+    * The alignment settings are *not* respected by the *internal preview* renderer!
+    * The internal preview renderer alligns *Bottom* by default.
+    * The difference in alignment makes a page look different when shown in the internal renderer, then when shown in an external renderer.
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+inserts:&nbsp;&nbsp; [FilesRelativePathsIp]; [FilesWikiFileStoreIp]
+[help.status:done]

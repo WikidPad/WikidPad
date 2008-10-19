@@ -1,0 +1,151 @@
+﻿++ Wp Options
+Contents:   [:toc:]
+[:rel:back]
+----
++++ Options: Application settings
+This page lists all the possible application settings; they can be found in the main menu as: Wiki / Options. [1].
+
+[:rel:top]
+[1] _The page has been assembled using page inserts; it's contents can only be seen in preview._
+----
+++++ General
+[:page:WpOptionsGeneral]
+
+[:page:WpOptionsGeneralWikiControl]
+
+[:rel:top]
+----
+++++ User Interface
+[:page:WpOptionsUserInterface]
+
+[:page:WpOptionsUserInterfaceWikiControl]
+
+[:page:WpOptionsUserInterfaceLogWindow]
+
+[:page:WpOptionsUserInterfaceStructWindow]
+
+[:rel:top]
+----
+++++ Security
+[:page:WpOptionsSecurity]
+
+[:rel:top]
+----
+++++ Main tree
+[:page:WpOptionsTree]
+
+[:rel:top]
+----
+++++ Html preview
+[:page:WpOptionsHtmlPreview]
+
+[:rel:top]
+----
+++++ Html export
+[:page:WpOptionsHtmlExport]
+
+[:rel:top]
+----
+++++ Html header
+[:page:WpOptionsHtmlHeader]
+
+[:rel:top]
+----
+++++ Auto save
+[:page:WpOptionsAutoSave]
+
+[:rel:top]
+----
+++++ Editor
+[:page:WpOptionsEditor]
+
+[:page:WpOptionsEditorShortHint]
+
+[:page:WpOptionsEditorBullets]
+
+[:page:WpOptionsEditorAutoComplete]
+
+[:page:WpOptionsEditorImagePasting]
+
+[:rel:top]
+----
+++++ Editor colors
+[:page:WpOptionsEditorColors]
+
+[:rel:top]
+----
+++++ Editor clipboard catcher
+[:page:WpOptionsEditorClipboardCatcher]
+
+[:rel:top]
+----
+++++ Mouse
+[:page:WpOptionsMouse]
+
+[:rel:top]
+----
+++++ Time view
+[:page:WpOptionsTimeView]
+
+[:rel:top]
+----
+++++ Searching
+[:page:WpOptionsSearchingFull]
+
+[:page:WpOptionsSearchingIncremental]
+
+[:rel:top]
+----
+++++ Advanced
+[:page:WpOptionsAdvanced]
+
+[:rel:top]
+----
+++++ Plugins
+[:page:WpOptionsPluginsGnuplot]
+
+[:page:WpOptionsPluginsGraphViz]
+
+[:page:WpOptionsPluginsMimeTex]
+
+[:page:WpOptionsPluginsPloticus]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 2]
+[help.status:done]
+
+*Inserts*
+[WpOptionsGeneral]
+[WpOptionsGeneralWikiControl]
+[WpOptionsUserInterface]
+[WpOptionsUserInterfaceWikiControl]
+[WpOptionsUserInterfaceLogWindow]
+[WpOptionsUserInterfaceStructWindow]
+[WpOptionsSecurity]
+[WpOptionsTree]
+[WpOptionsHtmlPreview]
+[WpOptionsHtmlExport]
+[WpOptionsHtmlHeader]
+[WpOptionsAutoSave]
+[WpOptionsEditor]
+[WpOptionsEditorShortHint]
+[WpOptionsEditorBullets]
+[WpOptionsEditorAutoComplete]
+[WpOptionsEditorImagePasting]
+[WpOptionsEditorColors]
+[WpOptionsEditorClipboardCatcher]
+[WpOptionsMouse]
+[WpOptionsTimeView]
+[WpOptionsSearchingFull]
+[WpOptionsSearchingIncremental]
+[WpOptionsAdvanced]
+[WpOptionsPluginsGnuplot]
+[WpOptionsPluginsGraphViz]
+[WpOptionsPluginsMimeTex]
+[WpOptionsPluginsPloticus]
+
+
+

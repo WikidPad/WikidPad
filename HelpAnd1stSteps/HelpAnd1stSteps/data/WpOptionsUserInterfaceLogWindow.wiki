@@ -1,0 +1,7 @@
+﻿	*Application settings: User interface, log window*
+	----
+&bull; *Auto-show log window*
+Automatically show log window if new error messages arrive.
+
+&bull; *Auto-hide log window*
+Automatically hide log window if no more error messages are present.

@@ -1,0 +1,26 @@
+﻿++ Text Insertions
+Contents:	[:toc:]
+[:rel:back]
+----
++++ General
+In wikidpad the posibility exists, to insert the contents of one or more pages into a third page. To do this, you use the \[:page: pagename] directive on the inserting page on the position within the text where you want the page to be inserted. This facility is researched and tested in a number of subject specific pages.
+
+    * [TextInsertionsNesting|Subjectpage insertions and nesting]
+    * [TextInsertionsHeaders|Subjectpage insertions and headers]
+    * [TextInsertionsPageFormatting|Subjectpage insertions and page formatting]
+    * [TextInsertionsTextFormatting|Subjectpage insertions and text formatting]
+    * [TextInsertionsHtmlFormatting|Subjectpage insertions and html elements]
+
+[:rel:top]
+----
++++ Remarks
+    * When a page is inserted, 100% of what's on that page is inserted, including page title, page formatting attributes, etc.
+    * Page formatting and other attributes on the inserted page for the larger part have nó influence on the inserting page.
+    * Headers in an inserted page do not become part of the inserting page's table of contents (\[:toc:])
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [template: HelpSubjectTemplate]
+[help.status:done]

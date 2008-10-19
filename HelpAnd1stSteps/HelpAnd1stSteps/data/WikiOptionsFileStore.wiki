@@ -1,0 +1,10 @@
+﻿	*Wiki settings: File storage*
+	----
+&bull; *Modif. date must match*
+Only files with the exact same modification date are accepted for the shortlist. See above.
+
+&bull; *File name must match*
+Only files with the exact same name are accepted for the shortlist. See above.
+
+&bull; *Modif. date is enough*
+If modification timestamp corresponds, file is not checked on contents anymore.

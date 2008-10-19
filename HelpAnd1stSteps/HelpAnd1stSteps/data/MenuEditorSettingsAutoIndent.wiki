@@ -1,0 +1,4 @@
+﻿	*Editor: settings, indent*
+	----
+&bull; *Auto-indent*
+Switches auto-indentation on or off

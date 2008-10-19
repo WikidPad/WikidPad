@@ -1,0 +1,67 @@
+﻿++ Using Wiki Words
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Wikiwords are (at least by default) all words that start with an uppercase letter and where at least one uppercase letter follows a lowercase letter in the word (this is called "camelcase", like in  WikiWord). Or where a lowercase letter follows multiple uppercase letters (like in ABcd).
+
+As you type wikiwords into the editor they are automatically turned into a link and become underlined. Words that already have content, like WikiWord turn blue, words that do not, like UndefinedPage, stay black but are underlined [1][2]. For eacht new Wikiword, a new (empty) note is automatically created. To go there and add your text, type Ctrl+L when the cursor is at the start, in the middle or at the end of the wikiword or double click on the word with the mouse.
+
+[:rel:top]
+----
++++ Syntax
+++++ Naming rules
+The only characters allowed in a wikiword are A-Z and a-z. All other characters exclude a word from being interpreted as a wikiword [3].
+	----
+++++ Case sensitivity
+Wikiwords are case sensitive; WikiWord is a different wikiword from WikiworD and therefore links to a different item.[6]
+
+[:rel:top]
+----
++++ Preventing link generation
+++++ Incidentally
+To prevent a camelcased word occasionally from being used as a link, you can precede it with the escape character backslash ("\\"), like in: \WikiWord and \ABcd [4].
+	----
+++++ For a whole page
+To prevent all camelcased words on a page from being used as a link, add the attribute:
+	* \[camelCaseWordsEnabled: false]
+to the page.
+	----
+++++ Permanently
+To prevent a camelcased word permanently from being used as a link, add it to the camelcase blacklist in the Func. pages [5]. Open the "Views" node in the tree on the left, open therein the "Func. pages" node and click on "Wiki cc. blacklist" or on "Global cc. blacklist". Then enter the word on a line of its own in the list. An example is WikidPad, that is in the Wiki blacklist.
+
+    * Wiki cc. blacklist
+        Words in this list only apply to the current WikidPad Document.
+    * Global cc. blacklist
+        Words in this list apply to all your WikidPad documents.
+
+[:rel:top]
+----
+[1] _A list of all empty items can found in the "Views" node as "undefined-nodes"._
+[2] _Outside the editor, links to empty items are shown as regular text._
+[3] _Some special characters can be used in a link by_ [Using brackets].
+[4] _The backslash is the general_ [SyntaxEscape|escape character]!EscapeCharacter _in WikidPad._
+[5] _Words that are in the blacklist can still be used as a link by_ [Using brackets].
+[6] _In Windows this only works with wiki's using the \SQLlight database_.
+[:rel:top]
+----
++++ Settings
+++++ Global attributes
+[:page:GlobalAttributesWikiWords]
+
+[:rel:top]
+----
+++++ Func.pages
+	----
+&bull; *Wiki cc. blacklist*
+See above.
+
+&bull; *Global cc. blacklist*
+See above.
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1]
+[help.status:done]

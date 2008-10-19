@@ -1,0 +1,64 @@
+﻿++ The Preview
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Wikidpad translates texts and other Wikidpad elements on a page into html and uses that to show the page in preview. The previewer in fact is a small web browser. It shows the page as it will approximately look in the (real) browser after publishing (exporting) it to html.
+
+[:rel:top]
+----
++++ Excluding page attibutes
+Normally not only the page text is shown in preview, but also all the attributes that are on it. Some attributes can be usefull in preview, some however - like "tree_position" - really aren't. The option: "Props. to yes/no include in preview" (See: "Settings" below) allows to control which attributes should or shouldn't be shown in preview.
+
+In the option input field enter a regular expression of the properties that are to be shown in preview. The RE is tested against a "normalized" property where the brackets are removed and key and value are separated by ": ". So even if the property is in the page written as "\[camelCaseWordsEnabled=false]", the RE is tested against "camelCaseWordsEnabled: false".
+
+If you e.g. want to show the "alias" properties only, enter "alias: .* ". Other properties will then be hidden in the preview. The empty text field matches everything.
+
+If you want to show all properties *except* those matching the RE, tick the checkbox to the left of the "not".
+
+If you press the "Ok" button of the options dialog, but the dialog doesn't vanish, instead this text field is red, then the RE contains an error and must be corrected first.
+
+[:rel:top]
+----
++++ Preview renderer
+Under Windows you can choose the renderer for the HTML preview:
+
+    * Internal: Internal standard renderer. Not very capable, but it
+      doesn't need external components
+    * IE: Uses Internet Explorer.
+    * Mozilla: Uses Mozilla/Gecko rendering component if installed.
+      You can download it here:
+      http://www.iol.ie/~locka/mozilla/control.htm. *There seems to be
+      a severe bug that crashes WikidPad when pressing any key while
+      the Mozilla preview is shown!*
+
+Changes of this setting only have an effect for newly opened WikidPad windows. After changing this setting, Wikidpad will have to be restarted.
+
+Mozilla and IE renderer use a CSS-file located in the configuration directory (see "Help" menu -> "About" and scroll to the end to find out where it is), subfolder ".WikidPadGlobals", file "wikipreview.css".
+
+    *Important remarks*
+    * Using IE or Mozilla as renderers means that any weaknesses of
+      these browsers (esp. regarding security) become part of
+      WikidPad. If e.g. a wiki page contains dangerous scripts in
+      JavaScript they might be executed when showing the page.
+    * If you chose Mozilla and the component is not installed,
+      WikidPad will crash when opening a new window (or when
+      restarting WikidPad). If this happens, try to start WikidPad
+      again. It should then use the internal renderer instead.
+
+[:rel:top]
+----
++++ Settings
+++++ Options
+[:page:WpOptionsHtmlPreview]
+
+[:rel:top]
+----
+[:page:WpOptionsHtmlHeader]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 5]
+[help.status:done]

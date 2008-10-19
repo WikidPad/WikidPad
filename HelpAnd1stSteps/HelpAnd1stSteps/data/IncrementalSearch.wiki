@@ -1,0 +1,64 @@
+﻿++ IncrementalSearch
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+The editor supports an incremental search facility for the current page. To start it:
+	* press Ctrl-F in the editor
+	* press F3 in the editor
+The editor is then in incremental search mode and anything that is typed becomes a search
+string. As you type you are brought to the first match in the current text. Incremental Search supports [RegEx |regex]. For example: To find the word "incremental" ór the word "search" in a page, type:
+	* incremental|search
+Incremental search is case insensitive. The search starts at the cursor position (1.8beta5 and prior always started at page beginning).
+
+[:rel:top]
+----
++++ Search status
+What at any point in time the search string is, can be seen in the search status on the left hand side of the WikidPad status bar. The color of the status field depicts the result of the search:
+	* Green: search pattern is found
+	* Yellow: search pattern is nót found
+	* No change: invalid regex
+The search string can be edited inside the status field using the cursor keys and Backspace and Delete. When done select search next or search previous to find a match.
+
+[:rel:top]
+----
++++ Search start
+How the editor starts incremental search depends on the key pressed and whether there ís or isn't any text selected.
+	* F3: starts the search with the last search value entered.
+	* Ctrl-F with text selected: starts the search with the selected text in the seach field; maximum 30 characters or up to the first "newline".
+	* Ctrl-F with no text selected: starts the search with an empty seach field.
+
+[:rel:top]
+----
++++ Search control
+To find the next match (search next) either:
+	* press Ctrl-F
+	* press F3
+	* press cursor Down
+	* press page Down
+
+To find the previous match (search previous) either:
+	* press Shift-F3
+	* press cursor Up
+	* press page Up
+
+[:rel:top]
+----
++++ Search end
+To end incremental search manually either:
+	* Click anywhere outside of the search field
+	* Press Esc; this terminates the search and returns to where the search began
+	* Press Enter; this terminates the search and keeps the last found text selected (if any)
+Incremental search will end automitically after a certain period of inactivity (of the keyboard). This period can be adapted in "Options".
+
+[:rel:top]
+----
++++ Settings
+++++ Options
+[:page:WpOptionsSearchingIncremental]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

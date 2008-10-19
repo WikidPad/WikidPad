@@ -1,0 +1,25 @@
+﻿	*Application settings: Editor, colors*
+	----
+&bull; *Plain text color*
+Specify the color of plain text (like this one) in the editor by pressing the little "..." button to start the color dialog or by entering a numeric HTML color (e.g. "#000000" for black) in the text field. Leaving the field empty chooses the default color.
+
+&bull; *Link color*
+Set the color of links (URLs and existing wiki words, e.g. http://nowhere) in the editor. See "Plain text color" above for details.
+
+&bull; *Attribute/script color*
+Set the color of attributes and scripts (e.g. <%"this one"%>) in the editor. See "Plain text color" above for details.
+
+&bull; *Background color*
+(Works only partially). Specify the background color of the editor. See "Plain text color" above for details.
+
+&bull; *Selection fg. color*
+Specify the foreground color of selected text. See "Plain text color" above for details.
+
+&bull; *Selection bg. color*
+Specify the background color of selected text. See "Plain text color" above for details.
+
+&bull; *Margin color*
+Specify the color of the editor margin on the left (normally gray) which can also contain line numbers.
+
+&bull; *Text cursor color*
+Set the color of the text cursor (the small blinking vertical bar).

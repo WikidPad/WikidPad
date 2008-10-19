@@ -1,0 +1,26 @@
+﻿++ FindDialog
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+This page only relates to preview, not to the editor. The find dialog is not persé a wikidpad facility but one of the preview renderer used; íf it has one. This find facility is therefore renderer dependent.
+	* Internal previewer: no find function
+	* IE previewer: IE find dialog
+	* Mozilla/Gecko: Unknown [1]
+
+To start the find dialog:
+	* press Ctrl-F in preview
+
+[:rel:top]
+[1] _Could not be checked because of a severe bug in the python/mozilla area._
+----
++++ IE find dialog
+This is a small and simple find facility, but it dóes do it's job. It might come in handy when trying to find something on a large page in preview.
+
+	rel://files/FindDialogIE.png
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

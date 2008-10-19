@@ -1,0 +1,12 @@
+﻿----
+<<|
+Name:	| &&i
+Adress:	| &&i
+Phone:	| &&i
+Mobile:	| &&i
+eMail:	| &&i
+Remarks:	| &&i
+>>
+----
+previous: [:rel:back]
+attributes: [pagetype: form]

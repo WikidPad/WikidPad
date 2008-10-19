@@ -1,0 +1,69 @@
+﻿++ Reg Ex
+[:rel:back]
+----
+The content of this page is an extract from the Wikipedia article: [http://en.wikipedia.org/wiki/Regular_expression |"Regular Expression"]. See that article for a more elaborate description of regular expressions
+
+----
+In computing, regular expressions provide a concise and flexible means for identifying strings of text of interest, such as particular characters, words, or patterns of characters. Regular expressions (abbreviated as regex or regexp, with plural forms regexes, regexps, or regexen) are written in a formal language that can be interpreted by a regular expression processor, a program that either serves as a parser generator or examines text and identifies parts that match the provided specification.
+
+The following examples illustrate a few specifications that could be expressed in a regular expression:
+    * the sequence of characters "car" in any context, such as "car", "cartoon", or "bicarbonate"
+    * the word "car" when it appears as an isolated word
+    * the word "car" when preceded by the word "blue" or "red"
+    * a dollar sign immediately followed by one or more digits, and then optionally a period and exactly two more digits
+
+Regular expressions can be much more complex than these examples.
+
+As an example of the syntax, the regular expression \bex can be used to search for all instances of the string "ex" that occur after word boundaries (signified by the \b). Thus in the string "Texts for experts," \bex matches the "ex" in "experts" but not in "Texts" (because the "ex" occurs inside a word and not immediately after a word boundary).
+Basic concepts
+
++++ Basic concepts
+A regular expression, often called a pattern, is an expression that describes a set of strings. They are usually used to give a concise description of a set, without having to list all elements. For example, the set containing the three strings "Handel", "Händel", and "Haendel" can be described by the pattern H(ä|ae?)ndel (or alternatively, it is said that the pattern matches each of the three strings). In most formalisms, if there is any regex that matches a particular set then there is an infinite number of such expressions. Most formalisms provide the following operations to construct regular expressions.
+<<
+Alternation
+    A vertical bar separates alternatives. For example, gray|grey can match "gray" or "grey".
+Grouping
+    Parentheses are used to define the scope and precedence of the operators (among other uses). For example, gray|grey and gr(a|e)y are equivalent patterns which both describe the set of "gray" and "grey".
+Quantification
+    A quantifier after a token (such as a character) or group specifies how often that preceding element is allowed to occur. The most common quantifiers are ?, *, and +.
+
+    ? 	The question mark indicates there is zero or one of the preceding element. For example, colou?r matches both "color" and "colour".
+    * 	The asterisk indicates there are zero or more of the preceding element. For example, ab*c matches "ac", "abc", "abbc", "abbbc", and so on.
+    + 	The plus sign indicates that there is one or more of the preceding element. For example, ab+c matches "abc", "abbc", "abbbc", and so on, but not "ac".
+
+These constructions can be combined to form arbitrarily complex expressions, much like one can construct arithmetical expressions from numbers and the operations +, −, ×, and ÷. For example, H(ae?|ä)ndel and H(a|ae|ä)ndel are both valid patterns which match the same strings as the earlier example, H(ä|ae?)ndel.
+
+The precise syntax for regular expressions varies among tools and with context.
+>>
+
++++ Simple Regular Expressions
+Simple Regular Expressions is a syntax that may be used by historical versions of application programs, and may be supported within some applications for the purpose of providing backward compatibility, These forms of regular expression syntax are considered to be deprecated[3] and should not be used.
+
++++ POSIX Basic regular expressions
+Traditional Unix regular expression syntax followed common conventions but often differed from tool to tool. The IEEE POSIX Basic Regular Expressions (BRE) standard (released alongside an alternative flavor called Extended Regular Expressions or ERE) was designed mostly for backward compatibility with the traditional (Simple Regular Expression) syntax but provided a common standard which has since been adopted as the default syntax of many Unix regular expression tools, though there is often some variation or additional features. Many such tools also provide support for ERE syntax with command line arguments.
+<<
+In the BRE syntax, most characters are treated as literals — they match only themselves (i.e., a matches "a"). The exceptions, listed below, are called metacharacters or metasequences.
+. 	Matches any single character (many applications exclude newlines, and exactly which characters are considered newlines is flavor, character encoding, and platform specific, but it is safe to assume that the line feed character is included). Within POSIX bracket expressions, the dot character matches a literal dot. For example, a.c matches "abc", etc., but [a.c] matches only "a", ".", or "c".
+[ ] 	A bracket expression. Matches a single character that is contained within the brackets. For example, [abc] matches "a", "b", or "c". [a-z] specifies a range which matches any lowercase letter from "a" to "z". These forms can be mixed: [abcx-z] matches "a", "b", "c", "x", "y", and "z", as does [a-cx-z].
+
+The - character is treated as a literal character if it is the last or the first character within the brackets, or if it is escaped with a backslash: [abc-], [-abc], or [a\-bc].
+[^ ] 	Matches a single character that is not contained within the brackets. For example, [^abc] matches any character other than "a", "b", or "c". [^a-z] matches any single character that is not a lowercase letter from "a" to "z". As above, literal characters and ranges can be mixed.
+^ 	Matches the starting position within the string. In line-based tools, it matches the starting position of any line.
+$ 	Matches the ending position of the string or the position just before a string-ending newline. In line-based tools, it matches the ending position of any line.
+\( \) 	Defines a marked subexpression. The string matched within the parentheses can be recalled later (see the next entry, \n). A marked subexpression is also called a block or capturing group.
+\n 	Matches what the nth marked subexpression matched, where n is a digit from 1 to 9. This construct is theoretically irregular and was not adopted in the POSIX ERE syntax. Some tools allow referencing more than nine capturing groups.
+* 	Matches the preceding element zero or more times. For example, ab*c matches "ac", "abc", "abbbc", etc. [xyz]* matches "", "x", "y", "z", "zx", "zyx", "xyzzy", and so on. \(ab\)* matches "", "ab", "abab", "ababab", and so on.
+\{m,n\} 	Matches the preceding element at least m and not more than n times. For example, a\{3,5\} matches only "aaa", "aaaa", and "aaaaa". This is not found in a few, older instances of regular expressions.
+
+Examples:
+
+    * .at matches any three-character string ending with "at", including "hat", "cat", and "bat".
+    * [hc]at matches "hat" and "cat".
+    * [^b]at matches all strings matched by .at except "bat".
+    * ^[hc]at matches "hat" and "cat", but only at the beginning of the string or line.
+    * [hc]at$ matches "hat" and "cat", but only at the end of the string or line.
+>>
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:busy]

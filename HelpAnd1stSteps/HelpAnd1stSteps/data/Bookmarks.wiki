@@ -1,0 +1,47 @@
+﻿++ Bookmarks
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+WikidPad supports adding bookmarks to pages; this allows you to quickly find a certain page back. Bookmarking is in principal meant to support editing of pages, but it also works in preview.
+
+++++ Adding a bookmark
+In order to bookmark a page, you add a bookmark attribute to it. This attribute has the format:
+	* \[bookmarked=true]
+You can add the bookmark by either:
+	* typing it yourself
+	* pressing Ctrl-Alt-B
+	* selecting "Wiki Words"/ "Add Bookmark" from the main menu
+The automatic functions will append the atribute to the end of the test
+
+	----
+++++ Navigating using the bookmarks dialog
+To view the list of bookmarked pages:
+	* press Ctrl-Shift-B.
+	* select "Wiki Words"/ "List Bookmarks" from the main menu
+This will bring up the bookmarks dialog showing a list of the bookmarked pages, like in the screenshot below.
+
+	rel://files/BookmarksExample1.png
+
+The dialog can be used to jump to one of the listed pages by either:
+	* navigating to it's link in the list using the cursor keys and pressing Enter
+	* selecting it with the mouse and clicking OK
+	* double clicking it with the mouse
+
+	----
+++++ Navigating using the "views tree".
+Since the bookmark attribute ís a page attribute and all page attributes in principle form an alternative index into the wiki pages, also bookmarks form such an index. As soon as any page in a wiki becomes bookmarked, a new index "bookmarked" will appear in the views tree, listing all the bookmarked pages.
+
+	rel://files/BookmarksExample2.png
+
+You can go to any bookmarked page by simply clicking it's node in the bookmarked index.
+
+	----
+++++ Removing bookmarks
+There is no automatic function to remove a bookmark from a page. To "unbookmark" a page, you will have to remove the bookmark attribute manually.
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

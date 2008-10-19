@@ -1,0 +1,16 @@
+﻿++ Demo Pages
+[:rel:back]
+----
+    1. [DemoInternalLinks|Internal links]
+    2. [DemoExternalLinks|External links]
+    3. [DemoTextFormatting|Text formatting]
+    4. [DemoPageFormatting|Page formatting]
+    5. [DemoPageSignalling|Page signalling]
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents]
+settings:&nbsp; [DemoPagesTemplates], [DemoPagesSettings]
+attributes: [tree_position:2]
+
+

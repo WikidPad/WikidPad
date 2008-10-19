@@ -1,0 +1,21 @@
+﻿++ Introduction
+[:rel:back]
+----
+WikidPad is a [http://en.wikipedia.org/wiki/Wiki |wiki]. There are many wiki's and the most well known is of course [http://www.mediawiki.org/wiki/MediaWiki |"MediaWiki"], that drives [http://en.wikipedia.org/wiki/Wikipedia |Wikipedia]. Wiki's by nature are a web application and they are great to lay down all sorts of structured and unstructered texts, that are somehow related to eachother. Wiki's can be seen as a "database" for unstructured texts with unstructured relationships. The kind that real live is full of and that you can't use database systems for.
+
+It would be great if you could use a wiki as a kind of databased notepad, to lay down all sorts of idea's, results, note's, etc. and link those together the wiki way. Or data on hobbies, sports, collections or interrests, data on researches you are carrying out privately, professionally or for your study or data on all sorts of projects you could be engaged in. And then also being able to carry them around and have them available for editing and consulting on different pc's.
+The big drawback of wiki's however, is that you need a web server to drive them, which doesn't make them very portable. And of course you need to know the wiki "language" and it has all sorts of facilities - like the discussion pages - that you don't need for a "wiki notepad".
+
+WikidPad however is a wiki, that is based on disk files on your local or network drives; so you don't need a webserver, you only need WikidPad. And WikidPad goes beyond the average wiki in that it supports a treeview that shows the wiki pages and their mutual relationships. This makes navigating easier and quicker and also keeps you aware of whére you are within the wiki page structure. It also allows to create additional indexes into the pages, using page tags or page attributes. WikidPad makes making notes, linking them and finding them back very fast and very easy. It allows you to create and maintain multiple independant wiki's, that are each stored in their own folder on disk. These folders can be taken along to and/or distributed to other computers that have WikidPad installed to either consult or update the wiki's. WikidPad can even be installed on a USB storage device, like a stick or a disk and executed from there, so you can literally carry both WikidPad and your wiki's around with you.
+
+WikidPad allows to publish all or a subset of the wiki pages to HTML pages, that show the wiki pages and their contents and links roughly the same as they appear in WikidPad itself. "Roughly", because different browsers have different idea's on subjects like default borders, margins, etc. This way you can either still upload the wiki to a web server ór use them to distribute the wiki to others that don't have WikidPad installed, so they can view in in their browser.
+
+<p align=center>[Intro1StartingAWiki |Next page &raquo;]</p>
+----
+[1] _The page links in this intro are all prefixed with the word "Intro" in order to keep them out of the way of the regular help pages._
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+settings:&nbsp; IntroTemplates, IntroSettings, IntroIndex
+attributes: [tree_position:2], [view_pane: preview]
+

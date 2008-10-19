@@ -1,0 +1,4 @@
+﻿	*Editor: settings, bullets*
+	----
+&bull; *Auto-bullets*
+Switches the automatic creation of new list items in the editor on or of.

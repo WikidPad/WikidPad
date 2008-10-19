@@ -1,0 +1,4 @@
+﻿	*Wiki settings: General, footnotes*
+	----
+&bull; *Footnotes as wiki words*
+There are applications possible where there is a need for numeric page links. Under normal circumstances this can't be done, since numeric links are reserved for footnotes. The option "Footnotes as wiki words" allows to use numbers as page links. Setting that to true, dóes however mean, that footnotes can't be used anymore.

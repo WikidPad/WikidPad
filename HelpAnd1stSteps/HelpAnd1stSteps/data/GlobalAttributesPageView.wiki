@@ -1,0 +1,22 @@
+﻿	<b>Html format: see [PageViewAttributes]</b>
+	----
+&bull; *[global.html.bgcolor:* _hex color number_*]*<br/>
+Sets the default background color for pages in preview and export; default = _none_.
+
+&bull; *[global.html.textcolor:* _hex color number_*]*<br/>
+Sets the default foreground (text) color for pages in preview and export; default = _none_.
+
+&bull; *[global.html.linkcolor:* _hex color number_*]*<br/>
+Sets the default link color for pages in preview and export; default = _none_.
+
+&bull; *[global.html.alinkcolor:* _hex color number_*]*<br/>
+Sets the default active link color for pages in preview and export; default = _none_.
+
+&bull; *[global.html.vlinkcolor:* _hex color number_*]*<br/>
+Sets the default visited link color for pages in preview and export; default = _none_.
+
+&bull; *[global.html.bgimage:* _image url_*]*<br/>
+Sets the default background image for pages in preview and export; default = _none_.
+
+&bull; *[global.paragraph_mode:* _true / false_*]*<br/>
+Sets the default paragraph mode to on or off; default = off.

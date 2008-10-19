@@ -1,0 +1,41 @@
+﻿++ Search links
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+This is an advanced function; primarily used by development and only functional in the editor.
+It will not be described in detail here
+
+[:rel:top]
+----
++++ Description
+++++ General
+Only works in Edit mode
+Does create a link in View mode, but acts as a standard link to a page.
+
+Searches for the first occurrence of the text in an item and goes there
+Searches for text as it appears in the Edit window
+Searchtext can include textformatting and other characters
+Is case insensitive
+Reserved chars and spaces have to be preceded with a "#"
+
+	----
+++++ Format
+\WikiWord#search-text
+\[link]#search-text
+
+	----
+++++ Examples
+<<
+OptionsDialog#*Sort# order*
+[Options HTML preview_export]#*Preview# renderer*
+See OptionsDialog#TimeView# Pos
+Also see the changelog
+>>
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 12]
+[help.status:done]

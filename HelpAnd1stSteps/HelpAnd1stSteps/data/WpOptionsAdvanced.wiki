@@ -1,0 +1,8 @@
+﻿	*Application settings: Advanced*
+	*Warning* These settings should only be changed when it is absolutely necessary!
+	----
+&bull; *Ignore wiki lock file*
+(Default: off) When checked, a wiki is opened without warning even if a lock file is already present.
+
+&bull; *Create wiki lock file*
+(Default: on) When not checked, no lock file is created when opening a wiki (and it isn't deleted when closing it). This setting does not affect the behavior of the wikis already opened.

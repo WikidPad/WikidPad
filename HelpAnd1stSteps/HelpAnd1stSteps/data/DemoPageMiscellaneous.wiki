@@ -1,0 +1,68 @@
+﻿++ Demo Page Miscellaneous
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+The attributes on this page are actually attributes that are not related to pageformatting, but they need a place somewhere, so why not here for the time being, untill there is a better place for them.
+
+[:rel:top]
+----
+++++ Export
+Pages that contain the attribute: \[export: false] are not exported to html. The only possible value of the attribute is "false"; "true" does not need to be available, since the attribute has no global representation. This attribute only has meaning to html export; the other export functions will simply ignore it.
+
+The export is of good use for things like settings pages. It can't be used to prevent the export of template pages, since that would prevent all pages that were based on it from exporting. Those would also have the attribute on them.
+
+[:rel:top]
+----
+++++ Language
+The language attribute defines the language of a page. It is an attribute that has a function in spell checking, but since spell checking is not a subject of this demo; it is not further described here.
+
+The language attribute has a global representation.
+
+[:rel:top]
+----
+++++ Short_hint
+The short_hint attribute displays a tooltip for the link of the page, that it is defined for. It's format is: \[short_hint: short hint text]. [DemoPageMiscShortHint|This page] has a short hint with the value: "This is a short hint for the \DemoPageMiscShortHint page" defined for it. When the mouse is held over it's link for a moment, it wil show up as a tooltip. This will work both in the editor and in preview. Whith exported html it might depend on the browser used.
+
+*Remarks*
+	* Short_hint only works on links in pages; not on links in the treeview or other view windows.
+
+[:rel:top]
+----
+++++ View_pane
+Controls whether a page should be opened in preview or in edit mode, when it is first navigated to. The format is: \[view_pane:value]; the possible values are:
+    * off: Don't change mode; use the current one
+    * editor: Show the page in edit mode
+    * preview: Show the page in preview mode
+The attribute has a global representation: \[global.view_pane:value].
+
+[:rel:top]
+----
+++++ Bookmarks
+This attribute actually is a navigation supporting attribute and should be moved to the page on that subject, if and when it is added to the demo and/or help texts.
+
+	* A bookmark can be added to a wiki page by selecting the option: menu / Wiki Words / "Add Bookmark" or by pressing: Ctrl+Alt+B.
+	* To view the bookmarks set and/or navigate to them, select the option: menu / Wiki Words / "List Bookmarks" or press Ctrl+Shift+B.
+	* Since bookmarks are a page attribute like any other, they also show up in the "views" node of the treeview.
+	* This page is bookmarked with this attribute: [bookmarked=true]
+
+[:rel:top]
+----
++++ Remarks
+    * none (yet)
+
+[:rel:top]
+----
++++ Todo's
+done.demo.projectdemo.demo2: check out all posibilities
+\action.demo.pageformatting.miscellaneous: none
+
+[:rel:top]
+----
++++ Results
+
+[demo.status:done]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]

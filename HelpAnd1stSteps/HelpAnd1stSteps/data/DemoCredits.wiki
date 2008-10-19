@@ -1,0 +1,16 @@
+﻿++ Demo Credits
+[:rel:back]
+----
+For illustration purposes this demo uses icon images from the following sets:
+
+    * [http://www.everaldo.com/crystal/ | rel://files/wordpad.png>am] Crystal Clear by Everaldo Coelho.
+
+Information on html and all sorts of web related issues can be found on the exellent website of:
+
+    * [http://www.w3schools.com/ | rel://files/w3schools.gif>am] W3 Schools.
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position:3]
+

@@ -1,0 +1,14 @@
+﻿++ Page Navigation
+[:rel:back]
+----
+    * [Link navigation]
+    * [Tree navigation]
+    * [Page history]
+    * [Page relationships]
+    * [Bookmarks]
+    * [Other Navigation]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 7], [template: HelpSubjectTemplate]
+[help.status:done]

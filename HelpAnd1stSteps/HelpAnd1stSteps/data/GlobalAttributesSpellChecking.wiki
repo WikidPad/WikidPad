@@ -1,0 +1,4 @@
+﻿	<b>Spell checking: see [SpellChecking]</b>
+	----
+&bull; *[global.language:* _language code_*]*
+Sets the default language code for spell checking; default = _none_

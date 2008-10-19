@@ -1,0 +1,56 @@
+﻿++ Demo 2 Formatting
+Contents:[:toc:]
+[:rel:back]
+----
++++ Description
+Collect, structure, test and prepare all information on text and page formatting.
+
+[:rel:top]
+----
++++ Tasks
+	* [DemoTextFormatting|Text formatting]
+	* [DemoPageFormatting|Page formatting]
+
+[:rel:top]
+----
++++ Members
+	* Owner:   JanSte
+	* Members: JanSte; HelKo
+
+[:rel:top]
+----
++++ Remarks
+	* Text formatting: with the exclusion of \[\DemoTextImages|image links] those are part of [Demo 1 Linking].
+
+[:rel:top]
+----
++++ Todo's
+	* done.demo.projectdemo.demo2.textformatting: escape blocks
+	* done.demo.projectdemo.demo2.textformatting: preformatted text
+	* done.demo.projectdemo.demo2.textformatting: tables
+	* done.demo.projectdemo.demo2.textformatting: footnotes
+	* done.demo.projectdemo.demo2.textformatting.insertions: page
+	* todo.demo.projectdemo.demo2.textformatting.insertions: eval
+	* done.demo.projectdemo.demo2.pageformatting.itemattributes: font
+	* done.demo.projectdemo.demo2.pageformatting.itemattributes: paragraph_mode
+	* todo.demo.projectdemo.demo2.pageformatting.itemattributes: camelcasewordsenabled
+	* done.demo.projectdemo.demo2.pageformatting.htmlattributes: linkcolor
+	* done.demo.projectdemo.demo2.pageformatting.htmlattributes: alinkcolor
+	* done.demo.projectdemo.demo2.pageformatting.htmlattributes: vlinkcolor
+	* done.demo.projectdemo.demo2.pageformatting.htmlattributes: textcolor
+	* done.demo.projectdemo.demo2.pageformatting.htmlattributes: bgcolor
+	* done.demo.projectdemo.demo2.pageformatting.htmlattributes: bgimage
+	* done.demo.projectdemo.demo2.itemformatting: tree attributes
+	* done.demo.projectdemo.demo2.itemformatting: html tags
+	* done.demo.projectdemo.demo2.view: view_pane
+
+[:rel:top]
+----
++++ Result
+[demo.status:busy]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [pagetype: form]

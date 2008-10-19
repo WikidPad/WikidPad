@@ -1,0 +1,38 @@
+﻿++ Development
+Contents:[:toc:]
+[:rel:back]
+----
++++ Description
+The developers of Wikidpad; their task is to support the projects ans solve issues, that come up.
+
+[:rel:top]
+----
++++ Members
+	* Owner:   MicBut
+	* Members: MicBut; JasHor, GerReit
+
+[:rel:top]
+----
++++ Actions
+	* &&i
+
+[:rel:top]
+----
++++ Remarks
+	* &&i
+
+[:rel:top]
+----
++++ Todo's
+	* todo.demo.
+
+[:rel:top]
+----
++++ Result
+[demo.status: new]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position:4], [pagetype: form], [template: DemoActionTemplate]

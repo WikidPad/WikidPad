@@ -1,0 +1,73 @@
+﻿++ Text Html Elements
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Wikidpad translates texts and other Wikidpad elements on a page into html and uses that to show the page in preview. The previewer in fact is a small web browser. So with Wikidpad we are effectively dealing with html and it's developers have made it possible, to format texts on a page using html element directly. As an example: with Wikidpad elements text can not be defined to be both bold ánd italic and there's nothing that can be done about the character size. With html elements it can: like this
+
+<em><strong>This is strong, emphasized text.</strong></em>
+
+The example uses the preferred "strong" and "em" tags, but could have also used the "b" and "i" tags respectively, to arrive at the same result.
+
+[:rel:top]
+----
++++ Choice of preview renderer
+The internal previewer is rather limited in the html it can render[1], so using html elements is limited to what the internal previewer kan handle and that is not much. It is however possible to expand the possibilities, by switching over to an external preview renderer, that will then run in the Wikidpad preview window. Wikidpad then has all the power of the modern browsers at it's availability; including the use of style sheets[2].
+
+Wikidpad allows to do so with the option: menu / Wiki / Options / "Html preview/export" / "Preview renderer". This option allows to choose from:
+
+	1. Internal renderer
+	2. Microsoft Windows: Internet Explorer (IE renderer)
+	3. Mozilla Gecko rendering component (Mozilla renderer)
+
+After setting this option to a different renderer, Wikidpad will have to be restarted, in order to make the change effective. From the change in how the text is shown in preview it becomes clear, how different browsers have different opinions onhow html should be interpreted and rendered.
+
+The external renderers can only be used, when they are realy installed on the computer(s) used with Wikidpad. If that is not the case, then they will first have to be (downloaded and) installed. People who run the Windows operating system have the IE renderer available by default; it is the core part of the Internet Explorer Browser.
+
+*Warning!!!*
+At the moment there is a severe bug in either the Mozilla renderer ór the Python library used to interact with it. It will effectively crash Wikidpad, making Mozilla temporarily onusable.
+Also for this reason none of the examples have been tried with the Mozilla renderer.
+
+[:rel:top]
+[1] _The internal preview will not render xhtml, nor can it work with cascading stylesheets._
+[2] _This section will not examine stylesheets (CSS) further, since at the moment there is ongoing development on the use of style sheets in Wikikpad. A later version will examin Wikidpad and CSS in a separate section._
+----
++++ Dealing with Wikidpad peculiarities
+There are two behaviours of Wikidpad, that seriously have to be taken into account, when html elements:[5]
+
+	1. Wikidpad appends every line of text with a line break ("\<br /\>" tag).
+	2. Wikidpad uses the html "list" to implement indentation ("\<ul\>" tag).
+
+Both are of major influence on html elements, that span multiple lines.They will make a mess of any table or other html block element that is tried to be used. A table with superfluous "\<br /\>" and "\<ul\>" tags realy doesn't come out looking quite good.
+
+Wikidpad cán be stopped from appending new line tags, by adding the paragraph_mode attribute to the page and setting that to true; see [PageViewAttributes|Page formatting: view attributes]. Unfortunately however this is a pageformatting element and not a textformatting element, which means that it causes Wikidpad to refrain from appending new line tags for áll of the page, not just part of it. It is now the users own responsibility, to add "\<br /\>" tags in the text, wherever he/she needs a new line within a paragraph. For a lengthy piece of text this can be quite a task. As an alternative the html element (all of the text and all of the tags) could be written as one long line of tex; this is however only practical when the element is quite small.
+
+There is unfortynately no option available, to stop Wikidpad from adding "\<ul\>" tags to the text, in order to support indentation. Here there is only one (1) solution; don't indent the html! This is against al good html behaviour and decreases the readability of the html, but it will have to be lived with for the time being.
+
+[:rel:top]
+[5] _In an upcomming version Wikidpad will provide an html block in whitch it will refrain from these and sortlike behaviours._
+----
++++ Examples of html usage
+This section is not meant as a course on (x)html, nor is it meant to explain all the possible things that can be done with (x)html. It's goals is to show examples of what some of the possibilities are and how to go about using them. The person that reads and uses this, is expected to have some basic knowledge on (x)html.
+
+The examples are devided in two sections:
+
+    1. [TextHtmlInternal|Things that can be handled by the internal preview renderer]
+    2. [TextHtmlExternal|Things that can be done extra with external preview renderers]
+
+For comprehensive information on html elements, tags, attributes, etc and an online course on how to use it; see:
+
+	* [http://www.w3schools.com/html/default.asp | W3 School: html]
+
+Internal and IE have totally different views on things like:
+	* the default font size
+	* the interpretation of new lines and empty lines
+	* the use of white space and margins
+Because of these and other reasons it is almost impossible to get page en text layout correct for both renderers. For this reason in the examples sometimes a paragraph element is used to control new lines, instead of the \<br /> tag. This results (sometimes) in a slíghtly more consistent layout. The demo has been created using IE as the renderer, so the formatting has been targeted towards that renderer, resulting in a lesser layout in Internal.
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [template: HelpSubjectTemplate]
+[help.status:done]

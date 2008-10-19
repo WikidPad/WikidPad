@@ -1,0 +1,27 @@
+﻿	*Application settings: tree*
+	----
+&bull; *Tree auto-follow*
+The tree tries to always select the wiki word currently shown in the editor or HTML-view.
+
+&bull; *Tree update after save*
+After each (automatic or manual) save, the tree icons and shown children are updated. This may need some time and may create some flicker going from top to bottom through the tree.
+
+&bull; *Hide Undefined WikiWords in Tree*
+If a page contains wiki word links to non-existing pages, these are not shown as children in the tree.
+
+&bull; *No cycles in tree*
+If two or more pages reference each other (e.g. \NodeA -> \NodeB -> \NodeA) these cycles are not shown. Precisely: if a child of a word is already an ancestor (parent, grandparent, ...) of this word, it is not shown.
+
+&bull; *Tree auto-hide*
+After selecting an item in tree, the tree is hidden automatically. It can be brought back, by pressing Ctrl-T
+
+&bull; *Background color*
+Specify background color of tree.
+
+&bull; *Position main tree*
+Controls where to place the main tree (to the left, right, top or bottom)
+
+&bull; *Position view tree*
+You can also have a second tree which has the "Views" node as root. You can place it relative to the main tree (above, below, left or right) or choose "hidden" if you don't want it. 
+
+	*KNOWN BUG*: After changing the position of main or view tree, the trees do not react on clicks properly any longer. Restart WikidPad. See WorkSpaceGeneral!RestartWikidPad for details.

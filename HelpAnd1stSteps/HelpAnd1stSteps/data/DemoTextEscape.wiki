@@ -1,0 +1,104 @@
+﻿++ Demo Text Escape
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+There are a number of characters, that have a special meaning in Wikidpad. Single characters, like the asterisk ("\*") that is used as the "bold text" tag, pairs of characters, like the pair of square brackets that is used for link specifications, and more.
+
+Some of these characters always have meaning, some only in a certain context, like the colon (":") and the period ("."), that have no meaning on their own and can be used freely in the text, but cán have a special meaning inside attribute specifications.
+
+Since Wikidpad is about writing text, it must also be possible, to use these characters as they are and therefore "escape" from their special meaning. Wikidpad has three different explicit "escape" facilities".
+
++++ Special characters
+<<|
+*explicite*
+\+ |headers
+\* |bold text and lists
+\n. |lists (n = any number)
+\_ |italic text
+\[  \] |links and attributes
+<\< \>\> |block areas (table, escape and preformatted)
+\---- |horizontal line
+|
+*implicite*| *have a meaning in html*
+\< / \> |HTML tags
+|
+*only in context*|*of*
+\! |links (anchor)
+\| |links and tables
+\> |links
+\; |links and attributes
+\: |links, attributes, todo's
+\. |attributes
+|
+*todo and other implicite attributes*
+\todo: 
+\done: 
+\action: 
+\track: 
+\issue: 
+\question: 
+\project: 
+>>
+
+[:rel:top]
+----
++++ Escape character
+To escape single characters, prepend them with a backslash. These characters are then interpreted as normal text, the backslash is suppressed in HTML preview and export. If you want to really write a backslash, write two of them: \\.
+This way e.g. \[brackets] or \*asterisks\* can be written, that are not interpreted as formatting commands by Wikidpad.
+
+The backslash only escapes óne character at a time and never a whole Wikidpad element like a link specification. If two or more consecutive characters have to be escaped, then as many backslashes must be used. And in the case of a link like this: \[\rel://files/demo/ballon.mp3 | \rel://files/demo/music.png>am], it is not enough to "deactivate" the link with a backslash in front of the opening bracket ("["), since Wikidpad wil then see it as a text with two unrelated links: \rel://files/demo/ballon.mp3 | \rel://files/demo/music.png>am. Both links have to be escaped separately.
+
+[:rel:top]
+----
++++ Escape block
+To escape a whole section (one or more lines) of text from Wikidpad parsing and formatting, wrap that section in an "escape block", with the begin- and end tags "\<\<" and "\>\>" respectively. Example:
+
+    <<
+    *This should be bold* ThisShouldBeALink
+    >>
+
+The begin- ("\<\<") and end tag ("\>\>") should both be on a line of their own and before and after the tags only whitespace is allowed.
+
+Wikidpad will pass everything that is within the block unchanged on to html preview (ánd export). It will however still insert list tags ("\<ul\>") and line breaks ("\<br /\>"), in order to support line indentation and new lines in the preview result; see also [DemoTextBasics|Textformatting: basics].
+
+[:rel:top]
+----
++++ Preformatted block
+The preformatted block is in effect an escape block, with a special feature; the text in the block is in preview and exported html shown in a monospaced font. Also the textformatting is kept preserved, without Wikidpad inserting html list and line break elements.
+The technical difference is, that a preformatted block is passed on to preview as an html "\<pre\>" element.
+
+Example:
+<<pre
+                      ^
+                     / \
+                    /   \
+                   /_____\
+                  (       )
+                  |       |
+                  |       |
+                  |       |
+                  |       |
+                  L_______j
+>>
+
+[:rel:top]
+----
++++ Remarks
+    * Template remark
+
+[:rel:top]
+----
++++ Todo's
+done.demo.projectdemo.demo2: check out all posibilities
+\action.demo.textformatting.escapecharacter: template action
+
+[:rel:top]
+----
++++ Results
+
+[demo.status:done]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]

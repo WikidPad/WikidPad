@@ -1,0 +1,24 @@
+﻿++ Help
+----
+When you start WikidPad for the first time, this is the wiki that is opened. In it you will find initial information about what you can do with WikidPad and how to do it.
+
+WikidPad is a wiki-like notebook for storing your thoughts, ideas, todo lists, contacts or anything else you can think of that's important. What makes WikidPad different from other notepad or outliner applications is the ease with which you can cross-link your information.
+
+Every page is shown in the tree to the left of the screen, in relation to other pages that it is linked to. Referring pages are shown as parents and referred pages are shown as children. The tree is an alternative and quick means, to find and navigate around your pages. Wikidpad also offers powerfull search facilities, bases on regular expressions, to quickly find or select specific pages.
+
+What's new in version 1.9, is that WikidPad now supports tabbed editing and preview, which means that you can work in different pages at the same time in different "tabbed pages". Right click on a node in the tree and choose "Activate New Tab", to open a page in a new tab. Click the tab and choose "Close Tab" to close it.
+
+Wikidpad distinguishes two modes: edit mode and preview mode. In edit mode you compose pages with text about the various idea's, concepts and other items you wish to collect, define your links to other pages both internal and external, etc. In preview mode you can see how the texts will be shown in your browser after they have been exported to HTML. Preview mode is in fact a mini-browser, that you can use to navigate through your pages, using your mouse to click the various links, you have defined. To switch between both modes, use the "Switch Editor/Preview" button on the toolbar or use Ctrl+Tab.
+
+Follow one of the links below to see and read the various topics in this wiki. To do so in preview mode, simply click on it; to do so in edit mode, double click on it or type Ctrl+L when the cursor is in the word defining the link.
+
+    * [ThisWiki|This wiki] _Important_
+    * [IntroWiki|Wikidpad introduction]
+    * [HelpWiki|Wikidpad help]
+    * [DemoWiki|WikidPad demo]
+    * [ProgramWiki|WikidPad program]
+
+----
+previous: [:rel:back]
+settings:&nbsp; WikiTemplates, WikiSettings
+attributes: [view_pane: preview], [icon: wp_home]

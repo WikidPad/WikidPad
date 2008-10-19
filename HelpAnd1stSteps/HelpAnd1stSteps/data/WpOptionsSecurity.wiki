@@ -1,0 +1,10 @@
+﻿	*Application settings: Security*
+	----
+&bull; *Process auto-generated areas*
+Experimental feature, use not recommended!
+
+&bull; *Process insertion scripts*
+Control if insertions with key "eval" should be evaluated as Python expressions or not, see also [InlinePythonEval].
+
+&bull; *Script security*
+Set the security level for script execution, see InlinePythonEval#+++# Security# concerns .

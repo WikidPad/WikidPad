@@ -1,0 +1,45 @@
+﻿++ Demo 3 Signalling
+Contents:[:toc:]
+[:rel:back]
+----
++++ Description
+Collect, structure, test and prepare all information on page signalling.
+
+[:rel:top]
+----
++++ Tasks
+	* [DemoPageSignalling|Page signalling]
+
+[:rel:top]
+----
++++ Members
+	* Owner:   JanSte
+	* Members: JanSte
+
+[:rel:top]
+----
++++ Remarks
+	* &&i
+
+[:rel:top]
+----
++++ Todo's
+	* done.demo.projectdemo.demo3.signalling: item tags
+	* todo.demo.projectdemo.demo3.signalling: todo items
+	* done.demo.projectdemo.demo3.signalling.treeattributes: icon
+	* done.demo.projectdemo.demo3.signalling.treeattributes: color
+	* done.demo.projectdemo.demo3.signalling.treeattributes: bold
+	* done.demo.projectdemo.demo3.signalling.treeattributes: priority
+	* done.demo.projectdemo.demo3.treeformatting: child_sort_order
+	* done.demo.projectdemo.demo3.treeformatting: tree_position
+
+[:rel:top]
+----
++++ Result
+[demo.status:busy]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [pagetype: form]

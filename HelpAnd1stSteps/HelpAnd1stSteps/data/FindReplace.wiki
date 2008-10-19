@@ -1,0 +1,18 @@
+﻿++ Find Replace
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+The WikidPad editor provides a find & replace facility; it is a reasonably standard facility, like also word processors and other editors provide. A particular detail is that it supports [RegEx |regular expressions] in the search field.
+
+rel://files/FindReplace1.png
+
+To start the find & replace dialog:
+	* press Ctrl-R
+	* select Editor / "Find and replace" from the main menu
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

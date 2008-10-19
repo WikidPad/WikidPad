@@ -1,0 +1,47 @@
+﻿++ Project Demo
+Contents:[:toc:]
+[:rel:back]
+----
++++ Description
+Collect, structure, test and prepare all information that in any way has to do with linking and formatting of wiki pages.
+
+[:rel:top]
+----
++++ Members
+	* Owner:   JanSte
+	* Members: JanSte; HelKo; WikPad
+
+
+[:rel:top]
+----
++++ Actions
+	* [Demo 1 Linking]
+	* [Demo 2 Formatting]
+	* [Demo 3 Signalling]
+
+
+[:rel:top]
+----
++++ Remarks
+	* &&i
+
+
+[:rel:top]
+----
++++ Todo's
+	* todo.demo.projectdemo:Linking
+	* todo.demo.projectdemo:Formatting
+	* todo.demo.projectdemo:Signalling
+
+
+[:rel:top]
+----
++++ Result
+[demo.status:busy]
+
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position:3], [pagetype: form], [template: DemoActionTemplate]

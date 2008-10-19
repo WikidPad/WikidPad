@@ -1,0 +1,44 @@
+﻿++ Folding
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Folding is a well known technique in programming editors, but it is also useful for large structured pages in WikidPad.
+
+Folding means to hide or show a logical group of text lines when clicking on a particular sign in the editor (usually a plus or minus sign). In WikidPad this logical grouping is done by the headings.
+
+	rel://files/WorkSpaceExample4.png
+    
+First, to show the folding symbol use "Show folding" in the "Folding" menu. You will see an additional margin on the left of the editor window and a minus sign to the left of each heading (meaning "unfolded").
+
+If you now click on one of the signs, all normal text below it until the next heading with same or higher level (+ is higher than ++ is higher than +++ and so on) is hidden and the minus becomes a plus (meaning folded). A second click reverts the situation. Instead of clicking you can also select "toggle current folding" in the "Folding" menu.
+
+The functions "Unfold All" and "Fold All" in the "Folding" menu (un-)fold all parts in the current text editor.
+
+[:rel:top]
+----
++++ Functions
+	_NB: The folding bar to the left of the text supports a context menu with the same functions as the folding menu._
+++++ Menu
+	*Folding*
+	----
+&bull; *Toggle current folding*
+Switches the folding of the current section - where the cursor is in - on or off.
+
+&bull; *Unfold all*
+Unfolds all the sections of the page.
+
+&bull; *Fold all*
+Folds all the sections of the page.
+
+[:rel:top]
+----
++++ Settings
+++++ Menu
+[:page:MenuFolding]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

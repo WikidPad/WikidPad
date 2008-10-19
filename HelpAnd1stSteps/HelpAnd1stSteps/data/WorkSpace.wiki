@@ -1,0 +1,19 @@
+﻿++ Work Space
+[:rel:back]
+----
+The workspace is the Wikidpad application window. It offers a number of different views and/or windows, to support working with a wiki and it's pages.
+
+	1. [WorkSpaceGeneral|General]
+	2. [WikiControl|Wiki control]
+	3. [TheTreeView |Main tree]
+	4. [TheEditor |Page editor]
+	5. [ThePreview|Page preview]
+	6. [TheLogWindow|Log window]
+	7. [TheTimeView|Time view]
+	8. [TheStructureView|Structure view]
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1], [template: HelpSubjectTemplate]
+[help.status:done]

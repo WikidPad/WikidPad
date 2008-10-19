@@ -1,0 +1,13 @@
+﻿++ Support
+[:rel:back]
+----
+
+For questions about Wikidpad email:
+	* Michael Butscher:	mbutscher@gmx.de
+	* Jason Horman:		wikidpad@jhorman.org
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position:2]
+

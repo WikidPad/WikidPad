@@ -1,0 +1,80 @@
+﻿++ Demo Page Form Templates
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Sometimes, especially when dealing with templates, there might be a need for pages, where all that needs to be done, is to fill in a number of specific fields. The need for forms with a fill-in-the-blanks facility. Wikidpad supports this with form pages. A form page is any wikidpad page and can have any content on it, together with a number of \&&i tags. These \&&i tags depict the places where some value has te be typed; i.e. they depict the "input fields".
+
+A form page is specified, by adding a \[pagetype: form] attribute to it. This effectively changes the behaviour of the tab key from it's standard function to a "skip to the next \&&i tag" function. This happens only on the active page and only in the editor; nót in preview. Due to their use, form pages must be seen as an extention to [DemoPagePageTemplates| template pages].
+
+*Remarks*
+	* In form pages, the normal function of the tab key is not evailable! This can be something of a inconvenience when editing either the form template itself or the non-field content of a generated form page. The only way out of this is to - temporarily - disable the form attribute, by preceding it with a backslash.
+
+[:rel:top]
+----
++++ Example
+This example uses the template example as a basis and extends that; contact pages are a particularly usefull example for form pages. The contact template can easily be changed into a contact form, like this:
+	_\DemoPageContactForm_
+	----
+	\----
+	Name:	\&&i
+	Adress:	\&&i
+	Phone:	\&&i
+	Mobile:	\&&i
+	eMail:	\&&i
+
+	Remarks:
+	\&&i
+	\----
+	\[:rel:parents]
+	*\[pagetype: form]*
+	----
+If this form would have been the template for DemoPageContactParent, then adding the new contact "\DemoContact \JasonHorman" to the list, the resulting page will look like this:
+	_\DemoContact \JasonHorman_
+	----
+	*++ Demo Contact Jason Horman*
+	\----
+	Name:	\&&i
+	Adress:	\&&i
+	Phone:	\&&i
+	Mobile:	\&&i
+	eMail:	\&&i
+
+	Remarks:
+	\&&i
+	\----
+	\[:rel:parents]
+	\[pagetype: form]
+	----
+
+The \&&i tag behind "Name" would be selected and can be replaced by just typing the name. Pressing the Tab key would move the cursor to the "Adress" \&&i tag and select that. Simply tab your way through the tags and fill in Jason Hormans specifics.
+
+*Remarks*
+	* Another example is the \SystemInfoTemplate in the help pages, to be used when sending in a bug report.
+
+[:rel:top]
+----
++++ Tables
+The form templates: [DemoPageContactTable] and [DemoPageContactHtmlTable] were used together with the [DemoPageContactParent], to check whether the \&&i tags would also work within tables; both the wikidpad kind and the html kind. This to see if a form with a better layout in preview could be obtained. It works, but one has te be carefull not to upset the table tags; especially with the html table.
+
+[:rel:top]
+----
++++ Remarks
+    * None (yet)
+
+[:rel:top]
+----
++++ Todo's
+done.demo.projectdemo.demo2: check out all posibilities
+\action.demo.pageformatting.formtemplates: template action
+
+[:rel:top]
+----
++++ Results
+
+[demo.status:done]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+templates: DemoPageContactForm; DemoPageContactTable; DemoPageContactHtmlTable

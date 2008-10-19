@@ -1,0 +1,7 @@
+﻿	*View: workspace*
+	----
+&bull; *Show toolbar: Ctrl-Shift-T*
+Switches the display of the toolbar on or of.
+
+&bull; *Stay on top*
+Set Wikidpad to be always on top of the other windows, or undo that setting.

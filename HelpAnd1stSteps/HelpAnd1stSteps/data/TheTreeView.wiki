@@ -1,0 +1,65 @@
+﻿++ The Tree View
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+The treeview or "main tree" is the window on the lefthand side of the application window, with the tree like structure that is so familiar from file mgt. programs like Explorer. Contrary to those applications however, Wikidpad's tree is not a hierarchical one, but a relational one that shows the relationships between the various pages in the wiki.
+	rel://files/TreeExample1.png
+The tree consists of two major parts; the page section or "page tree" and the views section or "views tree"; the latter is accessible through the last node "views" of the main tree. The views tree is also accessible through a second window, that is normally hidden. Select the option: menu / Wiki / Options / Tree / "Position view tree" and change it from hidden to the position that suits best (top, bottom, left or right from the main tree).
+
+The page tree is where every user defined page is reflected in relation to the pages it is linked to. The views tree forms an alternative - actually several - index into the pages and gives access to the functional pages.
+
+[:rel:top]
+----
++++ The Page tree
+The page tree shows all the user defined pages in relation to their "relatives". These relatives are either:
+	* pages that refer - link - tó the page; in Wikidpad normally refered to as "parents"
+	* pages that are refered to bý the page; in Wikidpad normally refered to as "children"
+The terms "parent" and "child" are not really applicable in the context of Wikidpad, since they apply to hierarchical structures and the pages in Wikidpad do by definition not form a hierarchical "network" but a "meshed" network. In Wikidpad a page "a" might refer to a page "b", that in turn might - directly or indirectly - refer back to page "a", making them both each others (grand)parents ánd each others (grand)children. But for the lack of better terms, we will for the time being stick to "parent" and "child".
+	rel://files/PageTreeExample1.png
+The page tree is implemented through a user interface object called a "tree control". A fundamental property of a tree control, is that it is by design meant to display hierarchical structures, so it isn't really suitable for Wikidpads needs. But a control that dóes fit it's needs isn't really available, so we will have to do with the tree control. A principle shortcoming of the control is, that where it can show all the "children" of a page, it can only show one (1) of it's "parents" at a time. So whatever parent is at one point displayed for a "child" does in Wikidpad not so much depend on hierarchy and structure, but on the way the user navigated towards that child. The "path" he took. An example is "Contact 1" in the screenshot above, that has two parents: "\ContactIndex" and "Project 1" and therefore appears in the tree twice; once for each of it's parents.
+
+The "page tree" control displays "nodes"; each node represents one page and is identified by that page's link name; the key that links one page to one or more others. The page tree can be used to navigate through the pages of a wiki and through it's context menu it gives access to maintenance functions for the pages, like "rename", "delete" and "bookmark".
+
+	rel://files/TreeExample2.png
+
+[:rel:top]
+----
++++ The Views tree
+The views tree combines a whole range of alternative indexes into the wiki pages; indexes based on:
+
+	1. Page attributes
+	2. Wiki attributes
+	3. User tags
+	4. Todo tags
+	5. System tags
+
+Furthermore it gives access to functional data through the functional pages; both on wiki level and on Wikidpad level. Below is a screenshot of a views tree in it's virgin form; that of a newly created wiki.
+	rel://files/ViewsTreeExample1.png
+Each of the nodes in the tree forms a separate index into the pages and gives access to thóse pages, that satisfy a certain condition. The "icon" node for example in the screenshot above lists all the pages that the user has assigned a particular icon  to, using a so called "icon attribute". In this particular - virginal - case, it's only the "\WikiSettings" page that has been assigned an icon and that is the "wp_settings" icon.
+
+For every attribute that is assigned to a page by the user, an entry is created in the views tree; no matter if it concerns a user tag, a todo tag, a system attribute or anything else. Some indexes are maintained by Wikidpad, like the "undefined-" and "parentless pages" nodes that are invaluable in maintaining the wiki.They form an index into pages that would otherwise be inaccessable.
+
+The functional pages constitute the "odd man out" here. They do not form indexes, but a way for the user to specify certain Wikidpad global or wiki specific settings. The "Wiki cc. blacklist" for instance is a list of camelcased words, that should nót be converted by Wikidpad into a page link, when it encounters it in the text of one of the wiki's pages.
+
+[:rel:top]
+----
++++ Settings
+++++ Menu
+[:page:MenuViewTree]
+
+[:rel:top]
+----
+++++ Options
+[:page:WikiOptionsTree]
+
+[:rel:top]
+----
+[:page:WpOptionsTree]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 3]
+[help.status:done]

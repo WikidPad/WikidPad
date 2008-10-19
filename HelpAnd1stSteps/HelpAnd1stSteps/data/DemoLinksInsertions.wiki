@@ -1,0 +1,33 @@
+﻿++ Demo Links Insertions
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+
+
+[:rel:top]
+----
++++ Section 1
+
+
+[:rel:top]
+----
++++ Remarks
+    * Template remark
+
+[:rel:top]
+----
++++ Todo's
+todo.demo.template: check out all posibilities
+
+action.demo.template: template action
+
+[:rel:top]
+----
++++ Results
+
+[demo.status:new]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]

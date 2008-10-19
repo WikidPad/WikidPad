@@ -1,0 +1,12 @@
+﻿++ Demo Templates
+[:rel:back]
+----
+
+None used at this moment
+Original templates moved to DemoProjectTemplates and DemoPagesTemplates
+
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1002]; [icon:wp_template]

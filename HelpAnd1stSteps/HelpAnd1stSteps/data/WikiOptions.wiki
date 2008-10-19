@@ -1,0 +1,60 @@
+﻿++ Wiki Options
+Contents:   [:toc:]
+[:rel:back]
+----
++++ Options: Current Wiki settings
+This page lists all the possible (current) wiki settings; they can be found in the main menu as: Wiki / Options / Current wiki [1].
+
+[:rel:top]
+[1] _The page has been assembled using page inserts; it's contents can only be seen in preview._
+----
+++++ Wiki control
+[:page:WikiOptionsWikiControl]
+
+[:rel:top]
+----
+++++ Tree
+[:page:WikiOptionsTree]
+
+[:rel:top]
+----
+++++ Footnotes
+[:page:WikiOptionsFootnotes]
+
+[:rel:top]
+----
+++++ Export
+[:page:WikiOptionsExport]
+
+[:rel:top]
+----
+++++ Log window
+[:page:WikiOptionsLogWindow]
+
+[:rel:top]
+----
+++++ Page titles
+[:page:WikiOptionsPageTitles]
+
+[:rel:top]
+----
+++++ File store
+[:page:WikiOptionsFileStore]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 3]
+[help.status:done]
+
+*Inserts*
+[WikiOptionsTree]
+[WikiOptionsWikiControl]
+[WikiOptionsFootnotes]
+[WikiOptionsExport]
+[WikiOptionsLogWindow]
+[WikiOptionsPageTitles]
+[WikiOptionsFileStore]
+
+

@@ -1,0 +1,14 @@
+﻿	*Wiki settings: General, tree*
+	----
+&bull; *Force ScratchPad visibility in tree*
+Shows the special page ScratchPad always as child of the tree root, even if it is not really a child.
+
+&bull; *Remember expanded tree nodes*
+Control if expanded tree nodes should be remembered by WikidPad. This means if you collapse a tree node which contains expanded child nodes yet and expand the node later, the child nodes are expanded again. The following modes are supported:
+    * Not at all: Doesn't remember expanded nodes (like before version 1.9beta15)
+    * While wiki open: Forgets the node states when wiki is closed
+    * Always: Stores the node states in wiki configuration file and restores them on reopening
+
+It may happen that the mechanism stores expanded nodes which don't exist any longer, e.g. if the link from parent page to a child page is deleted and the child page was represented by an expanded node this is not always recognized by WikidPad, so some "garbage" may be stored.
+
+By setting the option to "Not at all" then closing the options dialog, then setting the option back to what you had before, all node state information is cleared. The info of the main tree (not the "Views" tree) is also cleared when setting a new root.

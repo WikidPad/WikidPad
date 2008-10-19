@@ -1,0 +1,27 @@
+﻿++ Demo Page Formatting
+Contents:[:toc:]
+[:rel:back]
+----
++++ Subjects
+    * [DemoPageViewAttributes|View attributes]
+    * [DemoPageEditAttributes|Edit attributes]
+    * [DemoPagePageTitles|Page titles]
+    * [DemoPagePageTemplates|Page templates]
+    * [DemoPageFormTemplates|Form templates]
+    * [DemoPageMiscellaneous|Miscellaneous]
+
+[:rel:top]
+----
++++ Todo's
+done.demo.projectdemo.demo2: check out all possibilities and combinations
+
+[:rel:top]
+----
++++ Results
+
+[demo.status.waiting: subjects]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 4], [template: DemoSubjectTemplate]

@@ -1,0 +1,12 @@
+﻿++ Demo Settings
+[:rel:back]
+----
+*Specific settings*
+
+None used at the moment
+
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1001], [icon:wp_settings]

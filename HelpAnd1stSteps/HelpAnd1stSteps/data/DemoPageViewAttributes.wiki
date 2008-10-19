@@ -1,0 +1,113 @@
+﻿++ Demo Page View Attributes
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+A number of attributes is available, that control the format of a page in the view modes: html preview and html export. These are the html- and other attributes. Changes in these attributes don't take effect (are not visible), until the page is saved; either by the auto-save process or manually.
+
+[:rel:top]
+----
++++ Html attributes
+Html attributes are used to set the foreground- (font), background- and link colors of a page in Preview and exported Html and have the format: \[html.element: value]. The existing elements are:
+
+<<|
+*Element* |  *Function* |  | *Preview* |  | *Browser*
+&nbsp;|&nbsp;| *Internal* | *IE* | *Mozilla* |&nbsp;
+html.textcolor | Color of all non-link text | Yes | Yes | ??  | Yes
+html.bgcolor | Color of the page background |  Yes | Yes | ??  | Yes
+html.linkcolor | Color of a (non-visited) link |  Yes | Yes | ??  | Yes
+html.alinkcolor | Color of a link while "under" the mouse (hovering or pressed) | No | Yes* | ?? | Some
+html.vlinkcolor | Color of a visited link | No | Yes* | ?? | Yes
+html.bgimage | Link to a background image | No | Yes* | ?? | No?
+>>
+
+*Remarks*
+	* Colors have to be specified with their full 6 digit #hex html color number, like: #000000 for Black and #483D8B for \DarkSlateBlue.
+	* Cross-browser color names like: \DarkSlateBlue are not accepted.
+	* The 3 digit alternatives for certain colors, like #FFD as a synonym for #FFFFDD, are also not accepted.
+	* For a complete list of html color numbers see: [http://www.w3schools.com/Html/html_colors.asp |W3 Schools: Colors] and [http://www.w3schools.com/Html/html_colorsfull.asp |W3 Schools: Color values]
+	* Alinkcolor works in IE, but only for external web links, not for internal wikidpad page links and only for mouse pressed, not for mouse hovering.
+	* Vlinkcolor works in IE, but only for external web links, and wikidpad anchors on the same page.
+	* Bgimage works in IE, but it's use is rather limited, since:
+		* The path (url) to the image may not contain any %20 or sortlike "characters". This also applies to relative paths (\rel://) since for preview these are converted by Wikidpad into absolute paths.
+		* There are no (sub)attributes available to specify placement, positioning, repeating, etc. The image is repeated (tiled) over the entire page.
+	* The attributes are called html attributes, since they only work in the html representations of a page and to distinct them from the options with which the colors for text, links, font, etc. in the editor window can be set. See options: menu / Wiki / Options / "Editor colors".
+
+	----
+++++ Example
+See the results of the attributes below on the appearance of this page in preview.
+	* [html.bgcolor: #FFFFCC] \yellowish
+	* [html.textcolor: #3300CC] \blueish
+	* [html.linkcolor: #8B008B] \DarkMagenta
+	* [html.alinkcolor: #FF4500] \OrangeRed
+	* [html.vlinkcolor: #008000] \Green
+	* \[html.bgimage:\rel:///notepad.png] (deactivated)
+Check their influence on the display of these links; follow them and return to see their color.
+	* [DemoPageFormatting]
+	* [DemoPageViewAttributes|Top]!Top
+	* http://www.google.com/
+
+	----
+++++ Global
+All html attributes have global representations, with which the colors for áll of the pages in the wiki can be set:
+
+	* \[global.html.bgcolor: color number]
+	* \[global.html.textcolor: color number]
+	* \[global.html.linkcolor: color number]
+	* \[global.html.alinkcolor color number]
+	* \[global.html.vlinkcolor: color number]
+	* \[global.html.bgimage: url]
+
+Page specific html attributes overrule the global ones.
+
+[:rel:top]
+----
++++ Paragraph mode
+A page by default is in line mode. In this mode, every "new line" in the editor text is replaced by a htlm "new line" tag in preview and with this turning every line in a "paragraph" of it's own. This might in certain cases not be what the user wants or needs. Also this behaviour is different from html, that principally is based on a form of "paragraph mode".
+
+Wikidpad supports it's own form of paragraph mode; in this mode "new lines" are ignored and only empty lines start a new paragraph. Paragraph mode can be switched on using the attribute: \[paragraph_mode:&nbsp;true] on the page. "New lines" can be forced in paragraph mode, by inserting the html "new line" tag: "\<br /\>" where needed.
+
+	----
+++++ Example
+The attribute on the next line switches this page to paragraph mode; see it's effect on the example text below.
+	* [paragraph_mode: true]
+
+*Example text*<br />
+In the editor this paragraph
+is shown, devided over five (5) lines.
+In preview and html export however,
+this paragraph is shown as
+one contiguous (wrapping) line.
+
+In line mode, the text above
+would have been shown in view mode
+as the original five separate lines.<br />
+And this line would have been a paragraph on it's own, not the second line of the second paragraph.
+
+	----
+++++ Global
+Paragraph mode can be switched on for all the pages in the wiki using the global attribute:
+	* \[global.paragraph_mode: true]
+In that case it can be switched off for individual pages using:
+	* \[paragraph_mode: false]
+
+[:rel:top]
+----
++++ Remarks
+    * html.bgimage does not work when image url contains %20 or sortlike "characters". This is a known limitation.
+
+[:rel:top]
+----
++++ Todo's
+done.demo.projectdemo.demo2: check out all posibilities<br />
+\action.demo.pageformatting.viewAttributes: template action
+
+[:rel:top]
+----
++++ Results
+
+[demo.status:done]
+[:rel:top]
+----
+previous: [:rel:back]<br />
+parents:&nbsp; [:rel:parents; aslist]

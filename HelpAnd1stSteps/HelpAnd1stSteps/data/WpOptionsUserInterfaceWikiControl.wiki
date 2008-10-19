@@ -1,0 +1,4 @@
+﻿	*Application settings: User interface, wiki control*
+	----
+&bull; *Recent wikis list length*
+Set the number of wikis to show in menu "Wiki"->"Recent"

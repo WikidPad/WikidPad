@@ -1,0 +1,12 @@
+﻿++ Personal contacts
+[:rel:back]
+----
+	* [DemoContact AlbertWiki]
+	* [DemoContact NielsPage]
+	* [DemoContact MarieTree]
+	* [DemoContact JasonHorman]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [template: DemoPageContactTemplate]
+\[template: \DemoPageContactForm], \[template: \DemoPageContactTable], \[template: \DemoPageContactHtmlTable]

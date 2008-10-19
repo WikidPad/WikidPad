@@ -1,0 +1,5 @@
+﻿Var
+    text    string
+    count   longInt
+    list    dynArray[]string
+endVar

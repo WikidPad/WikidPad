@@ -1,0 +1,4 @@
+﻿	*Wiki settings: General, log window*
+	----
+&bull; *Auto-show log window*
+Automatically show log window if new error messages arrive. Overrides the application level setting.

@@ -1,0 +1,4 @@
+﻿	*Application settings: Editor, short hint*    
+	----
+&bull; *Short hint delay*
+Set the number of milliseconds that have to pass before showing the short hint tooltip in the editor. A value of zero "0" deactivates the tooltip.

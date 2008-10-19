@@ -1,0 +1,12 @@
+﻿++ Program Wiki
+[:rel:back]
+----
+	* [Credits]
+	* [Support]
+	* [Releases|Release notes]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+settings:&nbsp; ProgramTemplates, ProgramSettings
+attributes: [tree_position:5]
+

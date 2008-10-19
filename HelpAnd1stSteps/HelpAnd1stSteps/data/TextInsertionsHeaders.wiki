@@ -1,0 +1,27 @@
+﻿++ Text Insertions Headers
+Contents:   [:toc:]
+[:rel:back]
+----
++++ Test area
+++++ Header 1
+
+++++ Header 2
+Between the horizontal lines underneath is an inserted page
+    ----
+    [:page:DemoTextInsertionsHeaderIp]
+    ----
+
+++++ Header 3
+
+++++ Header 4
+
++++ Remarks
+    * The \[:toc:] in the inserting page is not updated for headers in the inserted text; nór in preview nór in html export
+    * The \[:rel:] link insertions áre updated for the inserting page
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+inserts:&nbsp;&nbsp; TextInsertionsHeaderIp
+[help.status:done]

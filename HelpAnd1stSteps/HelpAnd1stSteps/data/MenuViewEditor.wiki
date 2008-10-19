@@ -1,0 +1,7 @@
+﻿	*View: editor*
+	----
+&bull; *Show indentation guides*
+Switches the display of indentation guides in the editor on or of.
+
+&bull; *Show line numbers*
+Switches the display of line numbers in the editor on or of.

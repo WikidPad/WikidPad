@@ -1,0 +1,37 @@
+﻿++ Intro 1: Starting a wiki
+[:rel:back]
+----
+After installing the program and starting it up for the first time, Wikidpad will open these helppages, that are implemented as a WikidPad wiki. Creating your first personal wiki is now as easy as choosing Wiki / New on the menu bar and answering the questions on:
+	* in which folder to store the wiki files.
+	* what [WikiDatabase |database back end] to use; for your first wiki choose "Compact Sqlite"
+WikidPad will create a new blank wiki with óne page in it; the rootpage and an additional \WikiSettings page [1] with some initial settings for the wiki; these can be changed later as you like.
+
+The root page carries the name of the wiki and forms the start of the rest of your wiki [2]. It will be opened in the editor and you can either start typing text with references to other pages/subjects, like this:
+	* For my study I am doing a paper on the famous master painters from the [Intro Dutch Golden Age] like: [Intro Rembrandt van Rijn].
+Or you can start with a list of links to subjects that you want to describe or collect data for or to use as index into your subjects, like this:
+	* [Intro Rembrandt van Rijn]
+	* [Intro Frans Hals]
+	* [Intro Johannes Vermeer]
+	* [Intro Jacob van Ruisdael]
+	* [Intro Jan Steen]
+	* ....
+	* ....
+and then go on adding text, notes, remarks, descriptions, etc. to their respective pages. Or whatever else you want to do.
+
+Creating a new page in a wiki is equal to specifying a link for it. WikidPad automatically creates a new page for every link that is specified. To go to that page press Ctrl-L with the cursor at the link or double click on the link with the mouse. Wikidpad will open the page for you in the editor and you can start doing what you like in it.
+
+Specifying a link is as easy as typing a [Using WikiWords |WikiWord] or enclosing a word or phrase in [Using brackets |\[square brackets\]]. A \WikiWord is a "\CamelCase" word; a word that starts with an uppercase letter and where at least one uppercase letter follows a lowercase letter. Page links for pages that have text in them, are shown in blue; pages that are still virginal, have their link shown in black. 
+
+Each page that is created is represented by a node in the [TheTreeView |"page tree"] to the left of the editor window. In that tree each page is shown in relation to it's parents - the pages that refer to it - and to it's children - the pages it refers to itself. The page tree is but one of the tools of WikidPad's [WorkSpaceGeneral |workspace] that support the user in working with a wiki.
+
+Links to existing pages can be typed, dragged and dropped from the page tree or entered using [Using autocompletion |auto completion].
+
+<p align=center>[IntroWiki |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro2ViewingAndEditing |Next page &raquo;]</p>
+----
+[1] _Sometimes in these intro pages a word or frase is preceded by a backslash "\\"; this is done to prevent Wikidpad from interpreting it as a formatting or linking instruction. Switch the page to the editor, to see this._
+[2] _Later on any existing page of a wiki can be set as the "root page"._
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: -1]
+[intro.status:done]

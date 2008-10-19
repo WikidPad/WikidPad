@@ -1,0 +1,15 @@
+﻿++ Hel Ko
+----
+Name:	Helge Kosuch
+Adress:	Helgen Allee 77
+Phone:  000-0000000
+Mobile: 666-6666666
+eMail:  helko@wikidmail.com
+
+Remarks:
+Wikidpad enthousiast
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [pagetype: form]

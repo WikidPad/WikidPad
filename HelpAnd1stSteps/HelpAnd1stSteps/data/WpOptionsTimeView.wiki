@@ -1,0 +1,26 @@
+﻿	*Application settings: Time view*
+	----
+&bull; *Time view pos.*
+Where (relative to main window) should the window be positioned? "Hidden" deactivates it.
+*KNOWN BUG*: After changing the position of the window, restarting WikidPad is necessary. See WorkSpaceGeneral!RestartWikidPad for details.
+
+&bull; *Date format*
+Set the time format the timeline should use to show the dates. The format is also used when interpreting a date entered by the user in the time view.
+The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
+
+&bull; *Time view auto-hide*
+After selecting an item in time view, time view is hidden automatically.
+
+&bull; *Show word list on hovering*
+Should the list of related wiki words be shown when hovering over a date with mouse.
+
+&bull; *Show word list on select*
+Should the list of related wiki words be shown when selecting (clicking on) a date.
+
+&bull; *Show empty days*
+Should "empty" dates without relatzed wiki words be shown in the timeline.
+This option can also be set in the context menu of the timeline.
+
+&bull; *Show dates ascending*
+Control if the dates in timeline should be sorted ascending or descending.
+This option can also be set in the context menu of the timeline.

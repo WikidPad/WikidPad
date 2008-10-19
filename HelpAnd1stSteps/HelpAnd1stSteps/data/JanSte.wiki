@@ -1,0 +1,15 @@
+﻿++ Jan Ste
+----
+Name:	Jan Stegehuis
+Adress:	Steeg 25, Huizen, Nederland
+Phone:  000-000000
+Mobile: 666-666666
+eMail:  janste@wikidmail.com
+
+Remarks:
+Project leader
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [pagetype: form]

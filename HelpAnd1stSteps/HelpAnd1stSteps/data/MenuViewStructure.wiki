@@ -1,0 +1,4 @@
+﻿	*View: structure view*
+	----
+&bull; *Show time view*
+Show or hide the document structure view window.

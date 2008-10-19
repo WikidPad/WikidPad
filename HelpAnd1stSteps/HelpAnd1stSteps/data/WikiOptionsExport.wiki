@@ -1,0 +1,4 @@
+﻿	*Wiki settings: General, export*
+	----
+&bull; *Default export dir.*
+Set the default export directory into which exports should go.

@@ -1,0 +1,4 @@
+﻿This is a text, that refers to footnote[10]
+
+    ----
+    [10] _This is the footnote of the inserted text itself_

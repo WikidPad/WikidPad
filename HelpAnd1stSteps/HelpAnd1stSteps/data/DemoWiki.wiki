@@ -1,0 +1,22 @@
+﻿++ Demo Wiki
+[:rel:back]
+----
+This is a demo wiki; a wiki within the help wiki. It's purpose is to show an example of a working wiki with all the techniques available within Wikidpad. To show what can be done and how to do it, so the user can copy examples and use/adjust them for his own purposes.
+
+The demo.wiki contains part of an internal Wikidpad project to collect data for the restructuring and rewriting of the wikidpadhelp.wiki. It consists of two major parts: a project part with project data and a pages part, where all the help information is collected, tested, structured, etc. To some extend these pages therefore partly form a copy of part of the help.wiki.
+
+    * DemoProject
+    * DemoPages
+    * DemoCredits
+
+The demo.wiki is completely enclosed within itself and has no links to other parts of the help wiki, nor do its links, pages, attributes, etc. realy interfere with the rest of the help.wiki. In order to obtain that result, each and every item has been prefixed with the word "Demo".
+
+*Important!*
+The demo.wiki is not meant to contain the complete help project, nor to show it in it's completed form. It shows a moment in time. The DemoPages are therefore not necesarily up-to-date or even correct. The only reliable help documentation is formed by the HelpWiki.
+
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+settings:&nbsp; DemoTemplates, DemoSettings
+attributes: [tree_position:4]

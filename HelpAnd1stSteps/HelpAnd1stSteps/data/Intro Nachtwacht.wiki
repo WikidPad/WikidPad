@@ -1,0 +1,17 @@
+﻿++ Intro Nachtwacht
+[:rel:back]
+----
+rel://files/intro/RvRNachtwacht.png
+*De compagnie van Frans Banning Cocq*
+
+Place:
+[http://www.rijksmuseum.nl |Rijksmuseum], [http://en.wikipedia.org/wiki/Amsterdam |Amsterdam]
+Grote Sael van de Cleveniersdoelen
+(Doelenzaal in the Kloveniersburgwal)
+
+The Night Watch, the most famous painting in the Rijksmuseum, actually has another title: the 'Company of Frans Banning Cocq and Willem van Ruytenburch'. The picture is a militia painting: a group portrait of a division of the civic guard.  Read more in [http://www.holland.com/rembrandt400/press/gb/index.html?page=http://www.holland.com/rembrandt400/press/gb/rembrandt/nachtwacht.html |Rembrandt 400 &raquo;]
+
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]

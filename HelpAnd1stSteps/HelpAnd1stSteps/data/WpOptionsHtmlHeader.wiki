@@ -1,0 +1,20 @@
+﻿	*Application settings: HTML header*
+	
+	These options have the same meaning and values as the global and local [PageViewAttributes |html attributes]; see there for details.
+	The options set the application defaults and are overridden by the global and local attributes.
+	These settings will be inserted in the html pages as attributes of "\<body>"-tag.
+	----
+&bull; *Link color*
+
+&bull; *Active link color*
+
+&bull; *Visited link color*
+
+&bull; *Text color*
+
+&bull; *Background color*
+
+&bull; *Background image*
+
+&bull; *Doctype*
+Sets the DOCTYPE to use in the header of an HTML file. You should only modify it if you understand what it is doing.

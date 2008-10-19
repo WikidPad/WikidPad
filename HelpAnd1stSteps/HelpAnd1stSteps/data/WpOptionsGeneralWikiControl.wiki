@@ -1,0 +1,10 @@
+﻿	*Application settings: General, wiki control*
+	----
+&bull; *New window on wiki URL*
+When double clicking on a wiki: URL, a new instance of the application is started, otherwise, the current instance loads the new wiki.
+
+&bull; *Store relative pathes to wikis*
+Pathes to the recently opened wikis are stored as relative pathes if this is checked. Useful e.g. if you have WikidPad and your wikis on an USB-stick.
+
+&bull; *Default open/new dir.*
+Directory to start when using "Wiki"->"New" or "Wiki"->"Open" in the menu. If empty, WikidPad chooses a default.

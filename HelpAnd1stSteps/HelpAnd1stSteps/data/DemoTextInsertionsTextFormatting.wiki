@@ -1,0 +1,126 @@
+﻿++ Demo Text Insertions Text Formatting
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+    The text of the plain text page to be inserted
+    ----
+    [:page:DemoTextInsertionPlainTextIp]
+    ----
+    
+    The text of the unordered list page to be inserted
+    ----
+    [:page:DemoTextInsertionListUnorderedIp]
+    ----
+    
+    The text of the ordered list page to be inserted
+    ----
+    [:page:DemoTextInsertionListOrderedIp]
+    ----
+
+[:rel:top]
+----
++++ Font styles
+++++ Font style: Bold
+    *This is
+    [:page:DemoTextInsertionPlainTextIp]
+    bold text*
+
+    ----
+++++ Font style: Italic
+    _This is
+    [:page:DemoTextInsertionPlainTextIp]
+    italic text_
+
+[:rel:top]
+----
++++ List
+++++ Unordered lists
+    * This
+    * [:page:DemoTextInsertionPlainTextIp]
+    * is
+    * [:page:DemoTextInsertionListUnorderedIp]
+    * an
+    * [:page:DemoTextInsertionListOrderedIp]
+    * unordered list
+
+    ----
+++++ Ordered lists
+    1. This
+    2. [:page:DemoTextInsertionPlainTextIp]
+    3.  is
+    [:page:DemoTextInsertionListOrderedIp]
+    4. an
+    5. [:page:DemoTextInsertionListUnorderedIp]
+    5. ordered list
+
+[:rel:top]
+----
++++ Footnotes
+    Inserted text with a footnote
+    [:page:DemoTextInsertionFootnoteIp]
+
+[:rel:top]
+----
++++ Escape blocks
+    <<
+    [:page:DemoTextInsertionPlainTextIp]
+    >>
+
+[:rel:top]
+----
++++ Preformatted blocks
+    <<pre
+    [:page:DemoTextInsertionPlainTextIp]
+    >>
+
+[:rel:top]
+----
++++ Tables
+++++ Insertion with table
+    Inserted text with a table
+    [:page:DemoTextInsertionTableIp]
+    
+    ----
+++++ Table with insertion
+    Table with inserted text
+    <<|
+    This| is a| table
+    with two| rows and| [:page:DemoTextInsertionPlainTextIp]
+    >>
+    ----
+[:rel:top]
+----
++++ Remarks
+    * Within font style tags an insertion is not recognised as such, so you cannot turn a to be inserted text to bold, italic or otherwise from within the inserting page.
+    * Lists allow the insertion of a page; whatever is inserted however, counts as an addition to the line the insertion is on. The whole page counts at them most as 1 bullet.
+    * If the page contains a bulleted list, that list becomes part of the bulleted list of the inserting page, but only if the lists are of the same type. If not, the inserting list is broken.
+    * If the inserted page contains a reference to a footnote, that reference will in preview refer to a footnote of the inserting page, with the same number. If the inserted page has it's own footnote, then that footnote will become a reference to the inserting page's footnote.
+    * If the inserting page does not have a footnote with the same number, then neither the inserted page's footnote reference, not it's footnote will be recognised as such anymore.
+    * An escape block correctly does not process an insertion.
+    * A preformatted block correctly does not process an insertion.[1]
+    * A table can contain insertions.
+
+[:rel:top]
+[1] _According to the specifications, a preformatted block is an escape block, that shows it's content in a monospaces font style._
+----
++++ Todo's
+done.demo.projectdemo.demo2: Check out all posibilities
+action.demo.development: Check whether the allowance of page insertions within bulleted lists is correct.
+action.demo.development: Check out the functioning of footnotes in inserted pages and inserting pages.
+
+[:rel:top]
+----
++++ Results
+issue.demo.new: Lists allow insertions of pages.
+This does not seem logical and feels like it should be disabled. Page insertions in lists should be neglected, as they are within font styles.
+issue.demo.new: If an inserted page has a footnote and/or a footnote reference, then those become part of the inserting page's footnote structure.
+If the inserting page does not have a footnote with the same number, then the footnote of the inserted page is not recognised as such anymore. This is not correct!
+
+[demo.status.waiting: issues]
+[:rel:top]
+[10] _This footnote is to test the insertion with the footnote_
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+inserts:&nbsp;&nbsp; DemoTextInsertionPlainTextIp; DemoTextInsertionListUnorderedIp; DemoTextInsertionListOrderedIp; DemoTextInsertionFootnoteIp; DemoTextInsertionTableIp

@@ -1,0 +1,7 @@
+﻿	<b>Editor: see [PageEditAttributes]</b>
+	----
+&bull; *[global.font:* _font name_*]*
+Sets the default editor font face for a wiki; default = _none_ ???.
+
+&bull; *[global.wrap:* _wrap value_*]*
+Sets the default wrap value for a wiki; default = _none_ but mostly a default of 70 is set in the WikiSettings page at creation of a wiki.

@@ -1,0 +1,9 @@
+﻿++ ABcd
+----
+
+An example of a wikiword, where a lowercase letter follows after multiple uppercase letters.
+
+
+----
+previous: [:rel:back]
+

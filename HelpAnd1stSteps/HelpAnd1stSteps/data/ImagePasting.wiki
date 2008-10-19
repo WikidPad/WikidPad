@@ -1,0 +1,23 @@
+﻿++ Image Pasting
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Wikidpad does not store images in it's database; it retrieves them from disk in preview on a page by page basis, based on their url file link. This however does not mean that images - copied from a website for instance - can't be pasted into a page. Wikidpad dóes support this, but instead of storing it in it's own database, it will store in the [FilesWikiFileStore |file store] and create a relative link on the page, pointing to the file store. A number of options is available, to control this function.
+
+[:rel:top]
+----
++++ File store (insert)
+[:page:FilesWikiFileStoreIp]
+
+[:rel:top]
+----
++++ Settings
+++++ Options
+[:page:WpOptionsEditorImagePasting]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

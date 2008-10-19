@@ -1,0 +1,77 @@
+﻿++ Text Html External
+Contents:   [:toc:]
+[:rel:back]<br /><br />
+*Attention:* These examples realy do not work in internal preview!
+----
++++ Font styles
+The external rederers allow for the full range of possibilities of the style attribute.
+	* Text with <del>deleted</del> and <ins>inserted</ins> parts.
+	* <sub>sub</sub>script and <sup>super</sup>script text.
+	* Text with <span style="background-color: #ff0">yellow highlight</span>.
+	* Text with <span style='color:blue; '>the blues</span>.
+	* Text with <span style="color:blue">the blues <span style="background-color: #ff0">and yellow highlight</span></span>
+	* Text with <span style="color: Navy; background-color: #ffd; font-family: times; font-variant: small-caps; border-style: dashed; border-width: 1">more style stuff.</span>
+
+For a list and explanation of all style attributes, see: <a href="http://www.w3schools.com/css/css_outline.asp"><span style="color: White; background-color: Green; border-style: outset; border-width: 2; padding: 1; text-decoration: none"> W3 Schools: CSS outline </span></a>
+
+For a complete list of html color names and numbers see: <a href="http://www.w3schools.com/tags/ref_colornames.asp"><span style="color: White; background-color: Green; border-style: outset; border-width: 2; padding: 1; text-decoration: none"> W3 Schools: Color reference </span></a>
+
+[:rel:top]
+----
++++ Paragraphs
+<p>This is default paragraph formatting</p>
+<p style="color: Navy; background-color: #ffd; font-variant: small-caps; width: 40%; border-style: inset; border-width: 1; margin-left: 25">This is text<br />in a styled paragraph</p>
+<p>This is default paragraph formatting again</p>
+[:rel:top]
+----
++++ Div element
+<div style="float: right; background-color: #ffd; width: 40%; border: 1px #8CACBB solid">
+<h5 style="color: Navy; text-align:center; margin: 1">Note title h5</h5>
+<hr style="height: 1px; background-color: #8CACBB; color: #8CACBB" />
+<p style="margin: 1; text-align:center">This is a note of somekind,<br/> that needs to stand out on the page.</p>
+</div>A note in a<br />floating:right div element.<br />
+
+[:rel:top]
+----
++++ Pre element
+Code in a \<pre element
+<pre style="background-color: #F7F9FA; border: 1px #8CACBB dashed; padding: 4px; width: 80%; margin: 2; margin-left: 15">
+Var
+    text    string              ; see TextVariable
+    count   longInt
+    list    dynArray[]string
+endVar
+</pre>
+[:rel:top]
+----
++++ Textarea element
+Text in a textArea
+<textarea style="background-color: #F7F9FA; margin: 0,8" rows="2" cols="20">This is a long list of words that doesn't need to be completely visible all the time so it may be scrollable </textarea>*Remark:* You can't use HTML or links in a textArea!
+
+[:rel:top]
+----
++++ Textarea and pre element
+Code in a textArea within a \<pre section
+<pre style="margin: 0,8"><textarea style="background-color: #F7F9FA; border: 1px #8CACBB dashed; padding: 4px" rows="6" cols=80%>
+Method \CarCount()
+
+Var
+    count   longInt
+    cars    tCursor
+endVar
+
+count = longInt(0)
+cars.open("cars.db")
+scan cars
+    :   count = count +longInt(1)
+endScan
+msgInfo("Carcount", "There are " +string(count) +" cars in the table")
+cars.close()
+
+return</textarea></pre>
+[:rel:top]
+----
+previous: [:rel:back]<br />
+parents:&nbsp; [:rel:parents; aslist]<br />
+attributes: [paragraph_mode:true]<br />
+[help.status:done]

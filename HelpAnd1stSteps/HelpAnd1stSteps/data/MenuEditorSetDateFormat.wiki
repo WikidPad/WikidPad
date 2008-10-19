@@ -1,0 +1,4 @@
+﻿	*Editor*
+	----
+&bull; *Set date format*
+Set the format for the "insert date" menu option. Shows a dialog window with a directive list and a preview section with whitch the date format can be set.

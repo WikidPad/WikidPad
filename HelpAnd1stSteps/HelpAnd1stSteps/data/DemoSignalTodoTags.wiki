@@ -1,0 +1,80 @@
+﻿++ Demo Signal Todo Tags
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+Todo tags are a type of [DemoSignalUserTags|user tags] and have roughly the same goal and possibilities. The main difference is, that they don't need square brackets and consist of a limited number of predevined key words. Furthermore they are aimed at adding a descriptive text to the tag. Todo tags do not support global attributes.
+
+As with user tags, todo tags show up as nodes in the views section. A page can have multiple todo tags and a todo tag can be on multiple pages.
+
+[:rel:top]
+----
++++ Format
+The general format is: "keyword: free text". The keywords are restricted to the following list:
+
+<<|
+\todo | something that has to be done.
+\done | something that has been done.
+\action | something that needs action.
+\track | something that needs to be tracked.
+\issue | an issue that needs to be solved.
+\question&nbsp;&nbsp;&nbsp; | a question that needs to be answered&nbsp.;&nbsp;&nbsp;
+\project | something that is part of a project.
+>>
+<br />
+Todo tags can be anywhere on a page and anywhere within a line; they can be on a line of there own or in the middle of a line of text. The tags are case sensitive and have to be written as in the list; Todo: will not result in a tag. The todo text - the text following the tag - ends either with a newline or with a vertical bar "|". The escape character can be used to escape either the tag or the bar.
+
+*Examples*
+	* todo: Demo: write a page on todo tags.
+	* done: Demo: written a page on user tags
+	* Wikidpad is Vista compatible todo: Demo: check if vista compatible is true | and also runs on Linux and Mac.
+	* question: Demo: how is todo exported? | possibly already answered in wikidpadhelp.wiki
+	* The song is on \track: 5 of the Beatles collection cd.
+
+	rel://files/SignalTodoTagsExample1.png
+[:rel:top]
+----
++++ Structured tags
+Like user tags, todo tags support nested subcategories in the form of structured todo keywords. Example:
+	* todo.demo.demo.system.bugs.urgent: Bug in wikidpad "rename link".
+	* todo.demo.demo.system.software.update: Update wikidpad to new beta release.
+
+The double ".demo.demo" had to be added, to keep the example away from the demo's actual todo tags in this wiki, that dó have a real meaning.
+	rel://files/SignalTodoTagsExample2.png
+[:rel:top]
+----
++++ Todo node signalling
+The appearance of a single todo item in the views section can be controled by using the formatting attributes: icon, color and bold in the tag's text. Example:
+	* todo.demo.demo.format.icon: [icon:exclamation]Show the exclamation icon.
+	* todo.demo.demo.format.color: [color: coral]Show the text in bold orange.[bold:true]
+For the format of the attributes see: [DemoSignalPageNodes|Signalling page nodes].
+	rel://files/SignalTodoTagsExample3.png
+[:rel:top]
+----
++++ Page signalling
+Todo tags did at one point have global attributes, that allowed to have nodes of pages, that have certain tags or belong to certain tag groups, to stand out and/or be signalled in some way. This facility has been deactivated quite some time ago and will not be reactivated.
+
+[:rel:top]
+----
++++ Remarks
+    * Formatted todo nodes in views show the formatting attributes in the text; is this meant to be?
+    * Global page signalling of todo items does not work!
+
+[:rel:top]
+----
++++ Todo's
+done.demo.projectdemo.demo3: check out all posibilities
+done.demo.projectdemo.demo3: check with development about global page signalling
+question.demo.development: is it correct that formatting attributes are shown in views / todo nodes?
+
+[:rel:top]
+----
++++ Results
+issue.demo.solved:  Global page signalling of todo items does not work!
+This is correct; it has been deactivated long time ago, but not removed from the help.wiki
+
+[demo.status.waiting: question]
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]

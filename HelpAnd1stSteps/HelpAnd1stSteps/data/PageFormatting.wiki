@@ -1,0 +1,17 @@
+﻿++ Page Formatting
+[:rel:back]
+----
++++ Subjects
+    * [PageViewAttributes|View attributes]
+    * [PageEditAttributes|Edit attributes]
+    * [PagePageTitles|Page titles]
+    * [PagePageTemplates|Page templates]
+    * [PageFormTemplates|Form templates]
+    * [PageMiscellaneous|Miscellaneous]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 6], [template: HelpSubjectTemplate]
+[help.status:done]
