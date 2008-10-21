@@ -101,24 +101,9 @@ In that case it can be switched off for individual pages using:
 [:rel:top]
 ----
 ++++ Options
-	*Application settings: HTML header settings* [1]
-	
-	These options have the same meaning and values as the global and local html attributes above. The options set the application default and are overridden by the global and local attributes.
-	----
-&bull; *Link color*
+[:page:WpOptionsHtmlHeader]
 
-&bull; *Active link color*
-
-&bull; *Visited link color*
-
-&bull; *Text color*
-
-&bull; *Background color*
-
-&bull; *Background image*
-
-[:rel:top]
-[1] _These settings will be inserted in the html pages as attributes of "\<body>"-tag._
+[:rel:top]<br />
 ----
 previous: [:rel:back]<br />
 parents:&nbsp; [:rel:parents; aslist]<br />

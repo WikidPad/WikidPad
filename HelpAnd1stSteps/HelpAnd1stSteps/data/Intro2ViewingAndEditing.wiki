@@ -18,5 +18,5 @@ Care must be taken when using external renderers, since they have their differen
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: -1]
+attributes: [tree_position: 1]
 [intro.status:done]

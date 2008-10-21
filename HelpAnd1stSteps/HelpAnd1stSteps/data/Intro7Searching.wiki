@@ -1,0 +1,20 @@
+﻿++ Intro 7: Searching
+[:rel:back]
+----
++++ General 
+Next to all the possibilities to link, index and navigate the wiki pages, WikidPad supports extensive search facilities. These range from local page searching, like:
+	* [IncrementalSearch |incremental search] and
+	* [FindReplace |find & replace]
+to wiki wide searching, like:
+	* [FastSearch |fast search] and
+	* [FullSearch |full search].
+All these functions support [RegEx |regular expressions] to specify search patterns.
+
+Full search is the most extensive one; it additionally offers the facility to save the specifications of a search in the wiki "search store" for later reuse and optionally it can be used to do a wiki wide "find & replace".
+It also offers the facility to limit the search to a subset of a wiki's pages; a subset that can be specified using the [PageListDialog |page list dialog]. This dialog supports regular expressions, but also allows to create a pagelist (i.e. page subset) manually. The dialog is also available in a number of output dialogs, like [ItemPrinting |printing], [ItemPublishing |html publishing] and [Wiki export |export], to specify the pages to be processed.
+
+<p align=center>[Intro6Signalling |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro8Output |Next page &raquo;]</p>----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1]
+[intro.status:done]

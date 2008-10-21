@@ -55,6 +55,10 @@ The functional pages constitute the "odd man out" here. They do not form indexes
 
 [:rel:top]
 ----
+[:page:WpOptionsGeneralSort]
+
+[:rel:top]
+----
 [:page:WpOptionsTree]
 
 [:rel:top]

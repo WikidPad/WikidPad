@@ -3,89 +3,108 @@ Contents:   [:toc:]
 [:rel:back]
 ----
 +++ General
-Full search provides an extended search facility for wiki wide searches. To start the full search dialog either:
+Full search provides an extended search facility for wiki wide searches supporting [RegEx |regular expressions]. To start the full search dialog either:
 	* press Ctrl-Alt-F
 	* select Wiki / "Search Wiki" from the main menu
-The search dialog is non-modal, this means that you can move between pages and edit them while the dialog is open. The right side of the dialog shows the search results, the left side contains the options to control the search. Full search supports a "find & replace" mode.
+The search dialog is non-modal, this means that you can move between pages and edit them while the dialog is open. The right side of the dialog shows the search results, the left side contains the options to control the search. Full search supports a "find & replace" mode and allows to save a search specification for later reuse. A search can be limited to a specific subset of wiki pages, using the [PageListDialog |page list dialog].
 
-*Attention* Full search operates on the data in the database. If there is a page in the editor that is not yet saved, then those changes can't be seen by the search dialog.
+*Attention:* Full search operates on the data in the database. If there is a page in the editor that is not yet saved, then those changes can't be seen by the search dialog.
 
 [:rel:top]
 ----
 +++ The search dialog
-This section lists the options that are available to control the search.
+The dialog window consists of 5 area's:
+	* search area, left top
+	* result area, right top
+	* replace area, left middle
+	* store area, left bottom
+	* general area, right bottom
+This section lists the options that are available for each of those area's.
 	----
-++++ Searching
-&bull; *Text field "Wiki Search"*
-The pattern to be searched for. You can use [RegEx |regular expressions] here. The radio buttons beneath control how the pattern should be interpreted.
+++++ Search area
+In this area you specify your search criteria and start the search. During a session with a wiki, WikidPad will store the criteria and settings of all the searches that have been performed, so they can be recalled and repeated as many times as you want, during that same session.
+
+&bull; *Wiki Search*
+A text field to enter the [RegEx |regex pattern] to be searched for. The radio buttons beneath the field control the interpretation of the pattern as either "single" regex or "anded" regex.
+The field actually is a combobox; you can use it's button to recall an earlier performed search and repeat that or adjust it to create a new search.
 
 &bull; *Simple regex*
-Choose this if the pattern contains only a single RegEx.
+Indicates that the pattern contains only a single regex.
 
 &bull; *Anded" regex*
-Choose this if the pattern contains multiple RegEx's connected with "and". For example: to search for pages with both "search" ánd "wiki" in them type: "search and wiki".
-_Remarks:_ Some operations are not available in "Anded" regex mode.
+Indicates that the pattern contains multiple regex's connected with "and". For example: to search for pages with both "search" ánd "wiki" in them type: "search and wiki" and check this radio button.
+
+_Remark:_ Some operations, like Replace, are not available in "Anded" regex mode.
 
 &bull; *Case sensitive*
-Controls whether the search should be case sensitive or not.
+Full search is case insensitive by default. To make a search case sensitive, check this option.
 
 &bull; *Whole word*
-Controls whether the search should be "whole word" only or also "partial word"
+Full search is "partial word" (character mode) by default. To make a search "whole word", check this option.
 
-&bull; *Button "Find"*
-Starts the search process. If finished, a list of matching pages is listed on the right, optional with the number of occurring matches in parentheses and/or a few characters of context if set in the options.
+&bull; *Find*
+A button to start the search process. When finished, a list of matching pages is shown in the result area, optionally with the number of occurring matches in parentheses and/or a few characters of context if so set in the options.
 
-&bull; *Button "Set Page list"*
-Opens the [PageListDialog], the Wiki Search Dialog vanishes until you close the other dialog. You can use the dialog to limit the pages that should be searched by the "Find" operation. If you save the search, the settings in the [PageListDialog] are also stored as part óf it.
+&bull; *Set Page list*
+This option allows to limit the search to a specific subset of a wiki's pages. Clicking this button opens the [PageListDialog |page list dialog] with whitch you can specify that subset. The full search dialog disappears until the page list dialog is closed. If you save the search, the page list dialog settings are saved whíth it.
 	----
-++++ Replacing
-&bull; *Text field "Replace By"*
-Enter here with which a found pattern on a page (or all pages) should be replaced. This field and the following three buttons are only available for "Simple regex" mode.
+++++ Result area
+The result area is the area where the result of a search is shown; it only has two controls: the list and the "copy" button. If no pages are found, the list remains empty. The results are listed per wiki page, not per found pattern. That is, if there are 3 "hits" on  the same page, the list only shows the page once, optionally with the number of hits found. The appearance of the items in the list depends on the settings of the "full search" options; see bottom page.
 
-&bull; *Button "Find Next"*
-Find the next matching part of text in current page or next page in the search results and select it.
+[:page:FullSearchResultList]
 
-&bull; *Button "Replace"*
-Replace current selection with content of "Replace by" and go to next matching part.
-
-&bull; *Button "Replace All"*
-After asking for confirmation, replaces all occurrences matching to the search pattern by the replacement in all pages in the search results. At the end of the operation you will be informed about the number of done replacements.
+&bull; *Copy to clipboard: "Page names"*
+This copies the page names in the result list to the clipboard. The entries are copied as text, one page name per line, each in brackets. This way you can use them to insert a list of page links into any wiki page or copy the page list into the manual page list of the page list dialog.
 	----
-++++ Storing/Loading Searches
-&bull; *List of "Saved Searches"*
-Contains the titles of all searches stored in this wiki. The saved searches can also be seen in the tree after expanding "Views" and therein "saved searches" (only presented if searches exist).
-_Remarks:_ Expanding one of the searches starts the search operation.
+++++ Replace area
+WikidPad supports a wiki wide search and replace facility; the base for it is the full search complemented with the options in this area. Replace is not available when the regex type is set to "anded".
 
-&bull; *Button "Save Search"*
-Saves the current content of the "Wiki Search" field and the settings that apply to it (not the replacement) in the wiki. First you are asked for the title of the search. If the title already exists, you must confirm to overwrite the previous search with this title.
+&bull; *Replace by*
+An input field to enter the text with which the found pattern should be replaced.
 
-&bull; *Button "Delete Search(es)"*
-Delete the searches selected in the list after confirmation
+&bull; *Find next*
+A button to find the next match in the current or next page and select it.
 
-&bull; *Button "Load Search"*
-Loads selected search into the searching area.
+&bull; *Replace*
+A button to replace the current selected match with the text in "Replace by" and go to next matching part.
 
-&bull; *Button "Load and Run Search"*
-Same as hitting "Load Search" and "Find" button subsequently. Double clicking in the list has the same effect.
+&bull; *Replace all*
+A button to replace áll occurences in all pages with the text in "Replace by". The function will ask for confirmation first and display the number of replacements when it's done.
+
+Occurences can of course be selected manually and replaced using the Replace button.
 	----
-++++ Other
-&bull; *Copy to clipboard: Button "Page names"*
-This copies the content of the result to the clipboard.
+++++ Store area
+Wikidpad supports a "search store"; here you can store search specifications - i.e. search criteria ánd search settings - so you can repeat a search without having to re-invent it every time you need it. If a search is based on a page list, then the list specification is also stored as part of the search specifications. Search stores are wiki specific, for all sorts of obvious reasons there is no "global" search store.
 
-&bull; *Button "Options"*
-Starts a dialog to set options for the search; for their meaning see "Settings" below.
+_Remark:_ The "Replace by" text is not considered part of the search specification and is not saved with it.
 
-&bull; *Button "Close"*
-Close the dialog, same as hitting ESC key.
+&bull; *Save Search*
+A button with which the current search can be saved to the wiki search store. You will be asked to specify a name for the search. If a search with that name already exists, you will be asked for confirmation to overwrite it with the new search specifications. After being saved, the search name will appear in the list of stored searches.
 
-[:rel:top]
-----
-+++ The result list
-Each item in the result list consist of the page name, one or two optional numbers in parentheses behind the name (one number: Number of occurrences, two numbers: currently shown occurrence, then "/", then number of occurrences or a question mark if unknown)
+_Remark:_ This "save" is in fact the equivalent of the common "save as" command. It will not re-save an existing stored search, but always ask for the name and for permission to overwrite.
 
-In the result list, double clicking on an item (not on its blue bar!) brings you to the page and (if existing) to the matching occurrence shown for the list item. If the page was already loaded, a double click brings you to the next occurrence on this page.
+&bull; *Saved Searches*
+The list with the names of all the search specifications, that currently have been saved to the search store.
 
-If a particular occurrence is shown in the list, you can select this item and press F3 or click on the little blue bar on the left to show the next occurrence on this page.
+&bull; *Delete Search(es)*
+A button to delete the currently selected search(es) in the search store. The function will ask for confirmation before actually performing the delete.
+
+&bull; *Load Search*
+A button to load the currently selected search into the searching area and change it or otherwise execute it again.
+
+&bull; *Load and Run Search*
+A button to load ánd run the currently selected search. Double clicking a name in the list has the same effect.
+
+&bull; *The views tree*
+The searches in the search store are not only shown in this section of the search dialog, but are also listed in the "searches" node of the [TheTreeView |views tree]. The node is only shown if the wiki's search store is not empty.
+When you expand the node of a listed search, WikidPad will perform the search on the spot and the node will list all the pages that currently fullfill the search's specifications. It therefore might take some time for the node to expand and show the resulting page list.
+	----
+++++ General area
+&bull; *Options*
+Starts a dialog to set options for the search; for their meaning see "Settings / Options" below. This dialog is nót a temporary override of the global application settings, but will actually chánge those settings.
+
+&bull; *Close*
+Closes the dialog. Pressing the Esc key does the same.
 
 [:rel:top]
 ----
@@ -97,4 +116,5 @@ If a particular occurrence is shown in the list, you can select this item and pr
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
+inserts:&nbsp;&nbsp; FullSearchResultList
 [help.status:done]

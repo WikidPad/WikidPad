@@ -4,66 +4,132 @@ Contents:   [:toc:]
 ----
 +++ General
 The page list dialog is available for the WikidPad functions:
-    * full search
-    * export
-    * print
-It's goal is to limit the scope of those functions to a subset of a wiki's pages.
+    * [FullSearch |Full search]
+    * [ItemPublishing |Html publishing (export)]
+    * [Wiki export |Data exchange (export)]
+    * [ItemPrinting |Print]
+It's goal is to limit the scope of those functions to a subset of a wiki's pages. The pagelist is described in two main parts; first the dialog will be described, followed by a description of how to use it.
+
+The pagelist is a static entity; it doesn't get updated for changes in the wiki (database) automatically; it's a job that has to be done manually. This specifically is something to keep in mind, when the pagelist is part of a saved (full) search.
 
 [:rel:top]
 ----
 +++ The dialog
-Similar to the full search dialog it has some option fields in the left half and mainly a large list on the right, called the "preview". First the criterion should be specified that the pages in the subset have to fulfill.
+The dialog window has two areas; in the left area you define and minipulate your pagelist definition; the right area will show the resulting pagelist. The pagelist is not updated automatically, you have to click the "preview" button to get that done. Actually the window has two page lists; one in the definition area, the "manual list" and the one in the result area, the "result list".
+	----
+++++ The definition area
+The definition area has three parts to it: the selection part, the manual list part and the order part. The last one is not available for full search; only for print and export.
+
++++++ Selection
+The selection part allows you to define what type of selection you want to use for the page list. The possible choices are:
+	* All pages (i.e. no selection).
+	* Pages with names matching a regular expression.
+	* The pages from a manually assembled list in the manual list section.
+These choices are mutually exclusive.
 
 &bull; *All Pages*
-All pages will be in the page list
+Specifies that all the pages are to be be in the page list. This might not seem tó obvious for a pagelist, but it might come in handy when you're dealing with a saved search that you want to reset from a subset of pages to all pages.
 
-&bull; *Page names matching regular expression*
-All pages their names match a regular expression pattern are in the list
+&bull; *Page names matching regular expression:*
+This option combines with the regex input field beneath it. It specifies that all the pages whose names match the [RegEx |regular expression] in the input field are to be in the list.
+
+_Remark:_ This regex search is _case sensitive_ and in _character mode_; this can't be changed. It only searches page names, nót page content.
 
 &bull; *Pages in list*
-All pages mentioned in the list on the left of the dialog are in the resulting page list. You can also define if children of these pages should be in the result. If the level is 0, no children are taken, for 1 direct children are taken, 2 means to take also grandchildren and so on. If the field is -1 or empty, the level is seen as indefinite.
+Specifies that all the pages in the manual list below it are to be in the page list. Optionally you can specify if one ore more levels of their children should also be in the resulting page list. Possible inputs are:
+	* Zero "0": No children are added to the result list.
+	* Positive number: _number_ levels of children are added to the result list.
+	* Empty or "-1": _áll_ levels of children are added to the result list (level = indefinite).
+	----
++++++ Manual list
+The manual list allows you to manually assemble a page list. You can type page names - i.e. the names of their links - and/or copy them from the clipboard. The section has a number of functions to facilitate working with the list, like those to order the list for a better view.
+
+_Remark:_ The order of the manual list does nót influence the order of the result list. For that you need to set the order in the order section.
+
+&bull; *Up* and *Down*
+Allow to move the currently selected item in the list up or down in the list order.
+
+&bull; *Sort*
+Sorts the list alphabetically (the sorting algorithm depends on option settings, see below).
+
+&bull; *Add*
+This option combines with the inputfield to the left of it. The inputfield allows to type a page name or paste one from the clipboard. To then add the name to the manual list press Enter or click Add.
+
+_Warning:_ WikidPad does not seem to check whether the name you enter actually exists, so be carefull with what you type. When in doubt, copy and paste it from a wiki page.
+
+&bull; *Clear list*
+Removes all the entries from the manual list.
+
+&bull; *Del*
+Deletes the currently selected entry from the manual list.
+
+&bull; *Copy*
+Allows to copy the manual list tó the cliboard.
+
+_Remark:_ The entries are copied as text, one page name per line, each in brackets. This way you can use them to insert a list of page links into any wiki page.
+
+*paste entries from clipboard*
+This subsection of the manual list allows to copy one or more page names straight fróm the clipboard into the list. It does not have to be a list of page names only, it can also be part of a page text, that contains page links. This function will extract the page names from the text and then add them to the list in order of appearance. There are three options to control the behaviour of this "paste".
+
+&bull; *Add*
+Add the entries from the clipboard, that are not yet in the list, to the end of it.
+
+&bull; *Overwrite*
+Replace the current enteries in the list with those from the clipboard.
+
+&bull; *Intersect*
+Replace the current enteries in the list with those that are both in the current list ánd in the clipboard "list".
+	----
++++++ Order
+This subsection contains one option; it controls the order of the pages in the result list. This will then also influence the order of the pages in the print or export. For full search this option is not available.
+
+&bull; *Order pages:*
+Possible choices:
+    1. "Unordered" uses the internal order of the database.
+    2. "Alphabetically".
+    3. "Natural" tries to order in the way the user would expect the pages to be ordered (well, more or less). If you have created a manual list, "natural" keeps them as they are ordered in the list. 
+    4. "As Tree" tries to sort the pages as their nodes would appear in the page tree.
+The options are listed in order of processing speed: "Unordered" is the fastest ordering; "As tree" the slowest.
+	----
+++++ The result area
+This area controls the display of the page list resulting from the specification in the definition area. The area contains only a few controls:
+
+&bull; *Result list*
+This list shows the page list, as it results from the selection in the specification area. It doesn't do that automatically, only when the "preview" button is clicked.
+
+&bull; *Preview*
+Clicking this button refreshes the result list with the page names that currently match the criteria in the definition area.
+
+&bull; *Copy*
+Copies the result list to the clipboard, the same way as the "copy" button in the definition area does.
 
 [:rel:top]
 ----
-+++ The left list
-There are a lot of possibilities to give you precise control of the content and order of this list.
++++ Creating a pagelist
+++++ Using regex
+The easiest way to create a page list, is to select the regex option and define a [RegEx |regular expression] that matches the pages you want to have in your list. To check the result of the regex, click the preview button, to show the resulting page names in the result list. If the regex is not correct, simply adjust it and click preview again. When you're satisfied, click OK and continue with the print, export or search, that the pagelist is part of.
 
-To the right of the actual list box there are the buttons "Up" and "Down" with which you can move the currently selected item in the list. With "Sort" the whole list is sorted alphabetically (the sorting algorithm depends on the option settings, see WorkSpaceGeneral#*Sort# order* ).
+++++ Using the manual list
+Using regex it is not always possible, to get at the list you want; either because it's impossible ór it takes too much time to figure it out. You are then left with the alternative of creating a page list manually. Type or paste page names in the "add" input field and add them to the list. When you're satisfied. click OK and continue.
 
-Below the list box is a text field in which you can add new list items. To add them, hit enter in the field or click on the "Add" button to the right of the field (there is another "Add" button below).
+You can give yourself a headstart, using a trick. First select regex and specify an expression that results into something close to what you need. When you're satisfied, click the "preview" button to refresh the result list, if you hadn't done so already, and then click the result list's "copy" button, to copy it to the clipboard.
+You can now use the clipboard to fill the manual list, using the "add", "overwrite" or "intersect" button, depending on the current state of the list and on what you want to achieve. Then use the "del" button to remove unwanted pages from the list and the "add" button to add page names that might still be missing.
 
-Below the text field there are the following buttons:
+If you can't create óne regex to obtain the desired page list, but if you cóuld, using two or more different ones, you can use the same trick. Specify regex, define the first expression and copy the resulting list into the manual list, using "add" or "overwrite". "Pages in list" will now automatically become the active selection. You can simply set it back to regex; this wil nót clear the manual list and you can go on typing the second expression. Preview it's result, copy that and add it to the manual list using "add" or "intersect", depending on what you need done. You can do this as many times as you want.
 
-    * "Clear List" to remove all entries from the list
-    * "Del" to delete the currently selected entry
-    * "Copy" to copy all list entries to clipboard. They are copied as text, one wiki word per line, each in brackets. So you can insert them as link list into any wiki page.
+When you also want one or more levels of the (manual) page's children in the result list, specify the number of levels you need in "pages in list" and click "preview" to check the result. This level criterion is not discriminative, so this might result in pages (re)appearing in the result list that you don't really want there. You can again use the same trick, to get rid of them. Copy the result list to the clipboard, paste it into the manual list, using the "overwrite" button and use the "del" button to remove any unwanted children.
 
-You have also possibilities to *paste entries from clipboard*. Simply copy text which contains some wiki words to the clipboard. When pasting, at first the wiki words are extracted from the text in the order of appearance (be aware that the recognition of camel-case words and [TextFootnotes] depends on the settings of the currently open page and the wiki). With the extracted words the following can be done:
+++++ Using full search as an initial step
+The regex facility in the dialog is fine, but it has the disadvantage, that it only searches page names. When you need to create a page list based on page cóntent instead of page námes, the regex facility is of no use. There is however a way around this, since [FullSearch |"full search"] dóes support regex content searches and it also features a function, that copies the resulting page names to the clipboard.
 
-    * "Add": Add words to the current entries 
-    * "Overwrite": Remove previous list entries and replace them by the new ones
-    * "Intersect": Remove entries from current list which are not in the extracted words
-
-You can also *control the order* of the pages in the final list:
-    * "Alphabetically"
-    * "Natural" tries to order in the way the user would expect
-      the pages to be ordered (well, more or less). If you have
-      created your own list of wikiwords, the "natural" order keeps
-      them as they are sorted by you. "Natural" is the second
-      slowest order mode. 
-    * "As Tree" tries to sort as words would appear in the main
-      tree of WikidPad. This is the slowest order mode.
-    * "Unordered" uses the internal order of the database and is
-      the fastest possible way.
-
-If you are using the page list dialog inside wiki-wide searching, the order option is not available.
+So, to get this done, first do a full search until you are satisfied with it's result and then copy that to the clipboard, using the "Copy to clipboard: \[Page Names]" button. Then, after you have chosen: Print or Export and selected "custom", to show the page list dialog, you can paste the result of the full search into the manual list and further refine it using all the techniques available for it.
+You can do the same thing for full search itself, but you don't have to leave the full search dialog for it. You can do the search, copy the result, click "Set page list" to call up the page list dialog, define your manual list and click OK to return to the full search dialog. There you change the regex to the one you want based on the pagelist and click "Find" to start te search.
 
 [:rel:top]
 ----
-+++ The right result list
-When you hit the button "Preview", this list shows which pages *currently* match the criteria chosen on the left side. When defining a page list e.g. for a saved search, the pages matching the criteria may change over time when the wiki database changes.
-
-The "Copy" button above the preview copies the content of the preview to the clipboard in the same way as it is done for the left page list.
++++ Settings
+++++ Options
+[:page:WpOptionsGeneralSort]
 
 [:rel:top]
 ----

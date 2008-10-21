@@ -33,5 +33,5 @@ Links to existing pages can be typed, dragged and dropped from the page tree or 
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: -1]
+attributes: [tree_position: 1]
 [intro.status:done]

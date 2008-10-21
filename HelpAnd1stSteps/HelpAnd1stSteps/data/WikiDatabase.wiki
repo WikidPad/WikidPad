@@ -2,44 +2,81 @@
 Contents:	[:toc:]
 [:rel:back]
 ----
++++ Database types
+WikidPad supports three different types of database backends:
+	* Original Gadfly
+	* Compact Sqlite
+	* Original Sqlite
+This situation has historically grown. Gadfly was the database backend for the original WikidPad as designed by Jason Horman. Compact Sqlite was the backend for WikidPadCompact, as designed by Michael Butscher. When both implementations of WikidPad were integrated into the current WikidPad implementation, Original Sqlite was added to the supported backends. The older types are still actively supported for backward compatibility purposes.
+	----
+++++ Original Gadfly
+This is the backend of the original WikidPad. It stores each wiki page in a plain text file with a .wiki extention in the wiki's "data" directory. The .grl and .gdf files are the database files used to index wiki pages and other subjects efficiently.
+Gadfly is the slowest type, but it has as an advantage, that it is portable across different platforms because it doesn't need any external binaries.
+	----
+++++ Compact Sqlite
+This is the backend of WikidPadCompact. It stores the data in óne single database file named "wiki.sli" in the wiki's "data" directory. This database file is created by the Sqlite database engine and contains the content of all the wiki's pages as well as cache information for fast handling of the wiki.
 
-WikidPad supports different database backends to store the wiki pages (see [WhereIsTheDataStored] for the differences).
+Advantages of this type are its speed and efficient use of disk space. Disadvantages are that single pages can't be edited with a text editor or searched by a desktop search engine and that there is a higher risc of data loss. If something crashes and you loose this one database file, you loose your entire wiki. With the other types you might loose one or more page files, but the majority of youw wiki pages would still be intact and you could rebuild the database files, using the wiki / rebuild function in the main menu.
 
-See [MigrationBetweenDbTypes] if you want to change the type of an existing wiki.
+There is óne additional advantage Compact has over the other two; it allows page names (the links) to be case sensitive on Windows platforms. The other two rely on the file system used and Window's file system is not case sensitive. It will remember the case, but it will still consider ThisLink.wiki to be the same file as ThislinK.wiki or THISLINK.wiki. Therefore on Windows platforms you can only use case sensitive page names, when you use Compact as the backend.
+	----
+++++ Original Sqlite
+This is the latest backend for WikidPad. Like Gadfly, this also stores each wiki page in a plain text file with a .wiki extention in the wiki's "data" directory. The database to index the wiki is stored in the file "wikiovw.sli".
+This type is nearly as fast as Compact Sqlite, but it doesn't have it's disadvantages. It dóes however need an external binary.
 
+[:rel:top]
+----
++++ The database question
 In some places you are asked which backend to use:
 
-[:rel:top]
-----
-+++ The Windows binary installer
+&bull; *The Windows binary installer*
 When using the Windows binary installer you are asked if you want to install the Gadfly and/or Sqlite database support. You should choose at least one option, otherwise you wont be able to open any wiki database!
 
-
-[:rel:top]
-----
-+++ Creating a new wiki
+&bull; *Creating a new wiki*
 After choosing name and position of the new wiki you are asked to choose the database type.
 
-
-[:rel:top]
-----
-+++ Opening an older wiki
+&bull; *Opening an older wiki*
 If you open the first time a wiki created by an older version of WikidPad(Compact) you are asked to choose the database type it has.
 
 If it was created by original WikidPad the right choice is "Original Gadfly", for WikidPadCompact it is "Compact Sqlite". Your choice will be stored in the wiki configuration file so the application will choose the right type automatically next time.
 
-
-[:rel:top]
-----
-+++ Overriding type on open
+&bull; *Overriding type on open*
 If you open a wiki with "Open as Type", you are always asked for the database type to use. This is helpful when migrating from one database backend to another.
-
 
 [:rel:top]
 ----
 +++ Determining the database type of the currently open wiki
-
 Open the "Wiki Info" dialog in "Wiki" menu and look at the "Wiki database backend" entry.
+
+[:rel:top]
+----
++++ Migration Between Db Types
+The following procedure describes how to migrate a wiki from one database type to another. It is highly recommended to make a backup of the wiki first.
+
+    1. Open dialog from menu "Wiki" -> "Export" -> "Other Export..."
+    2. Set in dialog:
+    
+        What to export: Whole wiki
+        Export to: Multipage text
+        Compatible filenames: (Doesn't matter)
+        Format version: 1
+        Write wiki func. page: Check
+        Write saved searches: Check
+        Destination file: (Choose a non existing filename in an existing directory)
+    
+    3. Hit OK
+    4. Create a new wiki with same name and the desired new database type
+    5. Delete "WikiSettings" page in the new wiki
+    6. Open dialog from menu "Wiki" -> "Import..."
+    7. Set in dialog:
+    
+        Import format: Multipage text
+        Source file: (Same path you gave as destination file above)
+    
+    8. Hit OK
+    9. Use menu "Wiki" -> "Rebuild Wiki"
+
+Now you can close the new wiki, delete or move away the old one and move the new one in its place.
 
 [:rel:top]
 ----

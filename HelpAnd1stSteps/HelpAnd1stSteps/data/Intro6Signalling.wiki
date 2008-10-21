@@ -32,8 +32,8 @@ Each different color showed which status each of the pages had and thus: where t
 +++ Fun level
 The way your page nodes look doesn't háve to mean something. You can simply use colors and all sorts of different icons because you are a bright and colorfull person and like the look of a bright and colorfull screen.
 
-[:rel:top]<p align=center>[Intro5Indexing |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro7Output |Next page &raquo;]</p>----
+<p align=center>[Intro5Indexing |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro7Searching |Next page &raquo;]</p>----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: -1]
+attributes: [tree_position: 1]
 [intro.status:done]

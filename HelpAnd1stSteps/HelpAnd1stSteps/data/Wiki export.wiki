@@ -22,9 +22,9 @@ DataExchange is at this moment combined with "Item Publishing" into one integral
 Specifies what you want to export; the possible choices are:
 	* All pages in the wiki.
 	* All pages in the current subtree (the current page and it's children).
-	* The current page only.
-	* A subset of all the wiki pages.
-For a subset of the pages choose "Custom"; this will bring up the [PageListDialog] where the subset can be defined.
+	* Current page only.
+	* Custom subset of wiki pages.
+Choosing "Custom" will bring up the [PageListDialog |page list dialog], where the subset can be defined.
 
 &bull; *Export to*
 Controls to whát the pages should be exported; the possible choices are:

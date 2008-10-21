@@ -41,5 +41,5 @@ WikidPad supports a number of ways to [SyntaxEscape |escape formatting]. This al
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: -1]
+attributes: [tree_position: 1]
 [intro.status:done]

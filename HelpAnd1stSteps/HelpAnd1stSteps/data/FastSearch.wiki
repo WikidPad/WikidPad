@@ -5,15 +5,21 @@ Contents:   [:toc:]
 +++ General
 Fast search operates wiki wide and is driven by the search field in the WikidPad toolbar. To use it:
 	1. click with the mouse in the field
-	2. type the text to search for
+	2. type the [RegEx |regular expression] to search for
 	3. press enter
-The result is a list of pages where it found a match. To go to one of the pages shown, either:
-	* navigate to it with the cursor keys and press Enter
-	* double click it with the mouse
-Fast search supports [RegEx |regex].
+The result is a dropped down list of pages where a match is found. The specification and layout of this list are exactly the same as that for the result list of the [FullSearch |Full search].
+
+[:page:FullSearchResultList]
+
+[:rel:top]
+----
++++ Settings
+++++ Options
+[:page:WpOptionsSearchingFull]
 
 [:rel:top]
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
+inserts:&nbsp;&nbsp; FullSearchResultList
 [help.status:done]

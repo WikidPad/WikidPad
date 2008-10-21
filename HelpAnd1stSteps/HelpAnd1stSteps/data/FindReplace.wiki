@@ -3,13 +3,15 @@ Contents:   [:toc:]
 [:rel:back]
 ----
 +++ General
-The WikidPad editor provides a find & replace facility; it is a reasonably standard facility, like also word processors and other editors provide. A particular detail is that it supports [RegEx |regular expressions] in the search field.
+The WikidPad editor provides a find & replace facility for individual pages; it is a reasonably standard facility, like also word processors and other editors provide. 
 
 rel://files/FindReplace1.png
 
 To start the find & replace dialog:
 	* press Ctrl-R
 	* select Editor / "Find and replace" from the main menu
+
+A particular detail is that it supports [RegEx |regular expressions] in the search field, but it doesn't do so by default. You have to check the "Regular expression" checkbox, to make it interprate the search criterion as a regex. In this mode you can use regex "escape sequences" in both the search and the replace pattern.
 
 [:rel:top]
 ----

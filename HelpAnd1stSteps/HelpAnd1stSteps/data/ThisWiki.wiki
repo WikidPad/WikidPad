@@ -2,9 +2,21 @@
 Contents: [:toc:]
 [:rel:back]
 ----
-+++ Help version 0.3
-This is version 0.3 of the help.wiki; a restructured, rewritten and extended version of the old wikidpadhelp.wiki. Part of this wiki is still under construction, but it dóes already contain the complete content of wikidpadhelp úp and including version 1.9 beta 18.5.
-The wiki has been designed with IE as the [ThePreview |preview renderer]; it might not look ideal in the internal preview renderer here and there.
++++ Help version 0.4
+This is version 0.4 of the help.wiki; a restructured, rewritten and extended version of the old wikidpadhelp.wiki. Part of this wiki is still under construction, but it dóes already contain the complete content of wikidpadhelp úp and including version 1.9 beta 18.5.
+
+*Changes compared to 0.3*
+	* ThisWiki
+	* [Intro7Searching]
+	* [Intro8Output]
+	* [Intro9Advanced]
+	* WikiDatabase
+	* RegEx
+	* PageListDialog
+	* FastSearch
+	* FullSearch
+	* FindReplace
+	* WpOptions
 
 [:rel:top]
 ----
@@ -17,6 +29,13 @@ and the "link insertion" parameter:
 that are only available in version 1.9 beta 18.5 and higher.
 The wiki cán however be used with earlier versions, without any problems.
 
+The wiki has been designed with the external [ThePreview |preview renderer] IE; it might not look ideal in the internal preview renderer here and there.
+
+[:rel:top]
+----
++++ Examples and escapes
+This wiki contains numerous examples of how to do things. Often however you can't get things to look correct both in [Intro2ViewingAndEditing |Preview] ánd in [Intro2ViewingAndEditing |Edit] mode. A choice therefore had te be made and Preview has been chosen as the prime presentation mode for this wiki. The editable text of examples therefore can contain [SyntaxEscape |escape tags] to get them to look correct in preview. So when in doubt about an example, switch to preview mode since that shows it's only correct presentation.
+
 [:rel:top]
 ----
 +++ Tree icons
@@ -28,7 +47,7 @@ This wiki uses a small number of icons, that are not yet available in WikidPad's
 	* rel://icons/bullet%20red.gif : bullet red
 	* rel://icons/flag%20red.gif : flag red
 
-They can be found in the "icons" folder of this wiki and can be made available by copying them into the "icons" subfolder of your WikidPad program folder. In the various screenshots in this wiki you will see examples of other icons, that aren't in the current WikidPad icon set. They will however become available in the upcoming version (2.0) of WikidPad. In the mean time they might at some point become available as an extra download on the wikidpad website. So keep checking if you like the screenshots. Be aware however that a lot of the old icons won't be in there anymore.
+They can be found in the "icons" folder of this wiki and can be made available by copying them into the "icons" subfolder of your WikidPad program folder. In the various screenshots in this wiki you will see examples of other icons, that aren't in the current WikidPad icon set. They will however become available in the upcoming version (2.0) of WikidPad. In the mean time they are available as the additional WP_FreeIcons download on the [http://groups.google.com/group/wikidpad/web/home |WikidPad website]. Be aware however that a lot of the original icons aren't in this set anymore.
 
 [:rel:top]
 ----

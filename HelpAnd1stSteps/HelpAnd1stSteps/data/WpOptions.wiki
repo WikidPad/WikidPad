@@ -11,6 +11,10 @@ This page lists all the possible application settings; they can be found in the 
 ++++ General
 [:page:WpOptionsGeneral]
 
+[:page:WpOptionsGeneralSort]
+
+[:page:WpOptionsGeneralRename]
+
 [:page:WpOptionsGeneralWikiControl]
 
 [:rel:top]
@@ -82,6 +86,8 @@ This page lists all the possible application settings; they can be found in the 
 ++++ Mouse
 [:page:WpOptionsMouse]
 
+[:page:WpOptionsMouseDropFiles]
+
 [:rel:top]
 ----
 ++++ Time view
@@ -119,6 +125,8 @@ attributes: [tree_position: 2]
 
 *Inserts*
 [WpOptionsGeneral]
+[WpOptionsGeneralSort]
+[WpOptionsGeneralRename]
 [WpOptionsGeneralWikiControl]
 [WpOptionsUserInterface]
 [WpOptionsUserInterfaceWikiControl]
@@ -138,6 +146,7 @@ attributes: [tree_position: 2]
 [WpOptionsEditorColors]
 [WpOptionsEditorClipboardCatcher]
 [WpOptionsMouse]
+[WpOptionsMouseDropFiles]
 [WpOptionsTimeView]
 [WpOptionsSearchingFull]
 [WpOptionsSearchingIncremental]

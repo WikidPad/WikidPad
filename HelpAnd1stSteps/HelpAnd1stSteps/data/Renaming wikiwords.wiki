@@ -16,14 +16,9 @@ When the option "change all references to the page in the wiki" has been chosen,
 
 [:rel:top]
 ----
-+++ Options
-	*Application settings*
-	----
-&bull; *Rename links when renaming wiki word*
-This option controls whether Wikidpad will or will not rename all references to a renamed page. The possible setting are:
-	* yes: rename by default
-	* no: never rename
-	* ask: ask if it should be done (this is the default setting)
++++ Settings
+++++ Options
+[:page:WpOptionsGeneralRename]
 
 [:rel:top]
 ----

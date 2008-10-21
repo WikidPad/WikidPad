@@ -1,0 +1,18 @@
+﻿&bull; *Result list"*
+Below is a screenshot of part of a result list, with the results for two pages:
+	rel://files/FullSearchExample1.png
+
+Each item in the list consists of:
+	* a blue clickable bar, functioning as the "next occurence" button
+	* the page name
+	* in parentheses: the current occurence on the page and the number of occurences on the page separated by a slash&nbsp;"/".
+		* if the option "count occurences" is set to false, the number of occurences is represented by a questionmark&nbsp;"?".
+	* on the next line(s): a portion of the found text with the pattern
+		* the size of the portion depends on the setting of the "Context characters..." option.
+
+When there are more then one occurences in a page, you can skip through them by:
+	* clicking the blue bar.
+	* selecting the page item in the list and pressing F3.
+The item in the list is updated to show what the current occurence is.
+
+Double clicking on an item - outside the blue bar! - brings you to the page and the matching occurrence shown for it in the list item. If the page was already loaded, a double click brings you to the next occurrence on the page.

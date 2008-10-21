@@ -20,8 +20,8 @@ In addition to page links and url links, WikidPad also supports anchors and anch
 +++ Footnotes
 WikidPad allows the use of footnotes. These are implemented as a special kind of link, based on page anchors. For details on how to use them see:  [TextFootnotes |Text formatting: footnotes].
 
-[:rel:top]<p align=center>[Intro3Formatting |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro5Indexing |Next page &raquo;]</p>----
+<p align=center>[Intro3Formatting |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro5Indexing |Next page &raquo;]</p>----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: -1]
+attributes: [tree_position: 1]
 [intro.status:done]

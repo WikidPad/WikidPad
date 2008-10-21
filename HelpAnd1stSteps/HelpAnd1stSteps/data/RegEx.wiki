@@ -1,69 +1,113 @@
 ﻿++ Reg Ex
+Contents:	[:toc:]
 [:rel:back]
 ----
-The content of this page is an extract from the Wikipedia article: [http://en.wikipedia.org/wiki/Regular_expression |"Regular Expression"]. See that article for a more elaborate description of regular expressions
++++ General
+rel://files/python-powered-w-70x28.gif WikidPad supports the use of *RegEx* or *RE* (=Regular Expressions) as a way to specify search criteria for wiki wide or page specific searches. Different dialects of RE exist; the one that WikidPad uses, is that of the built-in Python regular expressions. For a description of it's syntax see: [http://docs.python.org/lib/re-syntax.html |Python: RE syntax]. For a gentler introduction see: [http://docs.python.org/dev/howto/regex.html |Python: RE HowTo]. It gives good examples on how to use RE, but you will have to read past a few programming instructions.
+A more elaborate description of RE can be found on Wikipedia:  [http://en.wikipedia.org/wiki/Regular_expression |"Regular Expression"].
 
+*Remarks*
+	* In some of the descriptions below, extra backslashes have had to be added, to prevent certain characters/phrases from being interpreted as Wikidpad elements. The text is only completely correct, as it is seen in preview.
+
+[:rel:top]
 ----
-In computing, regular expressions provide a concise and flexible means for identifying strings of text of interest, such as particular characters, words, or patterns of characters. Regular expressions (abbreviated as regex or regexp, with plural forms regexes, regexps, or regexen) are written in a formal language that can be interpreted by a regular expression processor, a program that either serves as a parser generator or examines text and identifies parts that match the provided specification.
++++ Simple search
+The basic principle is simple; to find the word "circumflex", just type it and hit the "search" button. Regex however defaults to a character search (partial word), not a whole word search. Searching for "wiki" would result in all the words with the characters "wiki" in them, so also wikiwords, wikipedia, linkswikis, etc. Some of Wikidpad's search dialogs however have a checkbox "Whole word" with which the search can be switched from character mode to word mode. 
+Regex also defaults to case insensitive search. Check the "case sensitive" checkbox if it has to be otherwise.
 
-The following examples illustrate a few specifications that could be expressed in a regular expression:
-    * the sequence of characters "car" in any context, such as "car", "cartoon", or "bicarbonate"
-    * the word "car" when it appears as an isolated word
-    * the word "car" when preceded by the word "blue" or "red"
-    * a dollar sign immediately followed by one or more digits, and then optionally a period and exactly two more digits
-
-Regular expressions can be much more complex than these examples.
-
-As an example of the syntax, the regular expression \bex can be used to search for all instances of the string "ex" that occur after word boundaries (signified by the \b). Thus in the string "Texts for experts," \bex matches the "ex" in "experts" but not in "Texts" (because the "ex" occurs inside a word and not immediately after a word boundary).
-Basic concepts
-
-+++ Basic concepts
-A regular expression, often called a pattern, is an expression that describes a set of strings. They are usually used to give a concise description of a set, without having to list all elements. For example, the set containing the three strings "Handel", "Händel", and "Haendel" can be described by the pattern H(ä|ae?)ndel (or alternatively, it is said that the pattern matches each of the three strings). In most formalisms, if there is any regex that matches a particular set then there is an infinite number of such expressions. Most formalisms provide the following operations to construct regular expressions.
-<<
-Alternation
-    A vertical bar separates alternatives. For example, gray|grey can match "gray" or "grey".
-Grouping
-    Parentheses are used to define the scope and precedence of the operators (among other uses). For example, gray|grey and gr(a|e)y are equivalent patterns which both describe the set of "gray" and "grey".
-Quantification
-    A quantifier after a token (such as a character) or group specifies how often that preceding element is allowed to occur. The most common quantifiers are ?, *, and +.
-
-    ? 	The question mark indicates there is zero or one of the preceding element. For example, colou?r matches both "color" and "colour".
-    * 	The asterisk indicates there are zero or more of the preceding element. For example, ab*c matches "ac", "abc", "abbc", "abbbc", and so on.
-    + 	The plus sign indicates that there is one or more of the preceding element. For example, ab+c matches "abc", "abbc", "abbbc", and so on, but not "ac".
-
-These constructions can be combined to form arbitrarily complex expressions, much like one can construct arithmetical expressions from numbers and the operations +, −, ×, and ÷. For example, H(ae?|ä)ndel and H(a|ae|ä)ndel are both valid patterns which match the same strings as the earlier example, H(ä|ae?)ndel.
-
-The precise syntax for regular expressions varies among tools and with context.
+[:rel:top]
+----
++++ Metacharacters
+Some characters are "metacharacters" and have a special meaning in RE. For instance specifying "regex\*" as the text to search for, would not result in what you might think it would. The metacharacters are:
+<<pre
+. ^ $ * + ? { [ ] \ | ( )
 >>
+To use them in a search criterion, prefix them with a backslash "\\". So in order to find "regex\*", it should be specified as: "regex\\\*". Metacharacters can be combined in every thinkable way, in order to specify a "meta search".
 
-+++ Simple Regular Expressions
-Simple Regular Expressions is a syntax that may be used by historical versions of application programs, and may be supported within some applications for the purpose of providing backward compatibility, These forms of regular expression syntax are considered to be deprecated[3] and should not be used.
-
-+++ POSIX Basic regular expressions
-Traditional Unix regular expression syntax followed common conventions but often differed from tool to tool. The IEEE POSIX Basic Regular Expressions (BRE) standard (released alongside an alternative flavor called Extended Regular Expressions or ERE) was designed mostly for backward compatibility with the traditional (Simple Regular Expression) syntax but provided a common standard which has since been adopted as the default syntax of many Unix regular expression tools, though there is often some variation or additional features. Many such tools also provide support for ERE syntax with command line arguments.
-<<
-In the BRE syntax, most characters are treated as literals — they match only themselves (i.e., a matches "a"). The exceptions, listed below, are called metacharacters or metasequences.
-. 	Matches any single character (many applications exclude newlines, and exactly which characters are considered newlines is flavor, character encoding, and platform specific, but it is safe to assume that the line feed character is included). Within POSIX bracket expressions, the dot character matches a literal dot. For example, a.c matches "abc", etc., but [a.c] matches only "a", ".", or "c".
-[ ] 	A bracket expression. Matches a single character that is contained within the brackets. For example, [abc] matches "a", "b", or "c". [a-z] specifies a range which matches any lowercase letter from "a" to "z". These forms can be mixed: [abcx-z] matches "a", "b", "c", "x", "y", and "z", as does [a-cx-z].
-
-The - character is treated as a literal character if it is the last or the first character within the brackets, or if it is escaped with a backslash: [abc-], [-abc], or [a\-bc].
-[^ ] 	Matches a single character that is not contained within the brackets. For example, [^abc] matches any character other than "a", "b", or "c". [^a-z] matches any single character that is not a lowercase letter from "a" to "z". As above, literal characters and ranges can be mixed.
-^ 	Matches the starting position within the string. In line-based tools, it matches the starting position of any line.
-$ 	Matches the ending position of the string or the position just before a string-ending newline. In line-based tools, it matches the ending position of any line.
-\( \) 	Defines a marked subexpression. The string matched within the parentheses can be recalled later (see the next entry, \n). A marked subexpression is also called a block or capturing group.
-\n 	Matches what the nth marked subexpression matched, where n is a digit from 1 to 9. This construct is theoretically irregular and was not adopted in the POSIX ERE syntax. Some tools allow referencing more than nine capturing groups.
-* 	Matches the preceding element zero or more times. For example, ab*c matches "ac", "abc", "abbbc", etc. [xyz]* matches "", "x", "y", "z", "zx", "zyx", "xyzzy", and so on. \(ab\)* matches "", "ab", "abab", "ababab", and so on.
-\{m,n\} 	Matches the preceding element at least m and not more than n times. For example, a\{3,5\} matches only "aaa", "aaaa", and "aaaaa". This is not found in a few, older instances of regular expressions.
-
+[:rel:top]
+----
+++++ Examples
+The vertical bar "|" is the "or" operator; to find:
+	* "characters/" ór "/phrases", specify: "characters/|/phrases"
+	----
+The "\\b" combination is the "at word boundary" specifier. To find all words that:
+	* start with "meta", specify: "\\bmeta".
+	* end with "flex", specify: "flex\\b".
+	* are "RE" and nothing else, specify "\\bRE\\b".
+The "\\B" is it's opposite: "nót at word boundary".
+	----
+The circumflex accent "^" specifies: "at start of line". To find all lines that:
+	* start with "start with", specify: "^start with".
+	----
+The dollar sign "$" specifies: "at end of line". To find all lines that:
+	* end with "lines that:" or "words that:", specify: "lines that:$|words that:$".
+	----
+The asterisk "\*", plus sign "+" and question mark "?" are repeat specifiers for the preceding character, where:
+	* \* matches zero or more occurrences: "ca\*t" will match "ct", "cat", "caat", "caaat", etc.
+	* + matches one or more occurrences: "ca+t" will match "cat", "caat", "caaat", etc., but not "ct".
+	* ? matches zero or one  occurrence: "built-?in" will match "builtin" and "built-in" (but not "built in").
 Examples:
+	* "^\\+\* \*Find" will find any line starting with "find", whether it is a heading or not.
+	* "^\\++ Find" will find any heading starting with "find", independant of the heading level.
+	* "page ?link" will find "pagelink" and "page link".
+	----
+The period "." is the "match any character" specifier. To find:
+	* "built in" ánd "built-in", specify: "built.in".
+	* "builtin","built in" ánd "built-in", specify: "built.?in".
+	----
+A pair of curly brackets also forms a repeat qualifier; it's fomat is: "{m,n}" where m and n are decimal integers. This qualifier means there must be at least m repetitions, and at most n. To find:
+	* headings only of level 4 and 5, specify: "\\+{4,5}"
+	----
+A pair of parenthesis "()" forms a "group" specifier, with which a gróup of characters can be qualified with a metacharacter instead of only one character at a time.
+	* text(html)?elements will find "\TextElements" and "\TextHtmlElements".
+Groups can be nested; i.e. you can use groups within groups.
+	----
+A pair of square brackets "\[]" forms a "character class"; a "choice of characters". Specifying "\[1234]" would mean that any one of the digits 1,2,3 or 4 would cause a match. To find: 
+	* "Ctrl-T" ánd "Ctrl+T", specify "Ctrl[-+]T".
+Ranges of characters can also be specified using a hyphen "-"; so "\[1234]" can also be written as "\[1-4]".
 
-    * .at matches any three-character string ending with "at", including "hat", "cat", and "bat".
-    * [hc]at matches "hat" and "cat".
-    * [^b]at matches all strings matched by .at except "bat".
-    * ^[hc]at matches "hat" and "cat", but only at the beginning of the string or line.
-    * [hc]at$ matches "hat" and "cat", but only at the end of the string or line.
+Metacharacters lose their special nature inside classes; a asterisk inside a class e.g. "\[\*\_] represents an asterisk and not a repeat specifier. To find:
+	* any bold or italics formatted "Remarks", specify: "\[\*\_]Remarks"
+
+The circumflex accent "^" has a special meaning as the first character of a class, it then _complements_ the classes character set; turning it into an "anything bút" specification. To find:
+	* any nót formatted "Remarks", specify:  "\[^\*\_]Remarks".
+
+[:rel:top]
+----
++++ Escape sequences
+Python regex supports the use of escape sequences, to specify special characters in the search pattern, that can't be typed with the keyboard; these sequences are:
+<<pre
+\a	ASCII Bell (BEL)	
+\b	ASCII Backspace (BS)	
+\f	ASCII Formfeed (FF)	
+\n	ASCII Linefeed (LF)	
+\r	ASCII Carriage Return (CR)	
+\t	ASCII Horizontal Tab (TAB)	
+\v	ASCII Vertical Tab (VT)
+\xhh	Character with hex value hh
+\\	Backslash (\)
 >>
+Sequences like bel, bs and vt won't be of too much use in Wikidpad, but the others might in certain cases.
+	----
+++++ Examples
+&bull; To find a string with a tab like in the next line:
+	\* Find this
+you could use the pattern: "\\t* Find". This will however only work if the whitespace in front of the asterisk really ís a tab and that is only the case, when the setting "tabs to spaces" in the Editor menu was set to "false", when the page text was created.
+
+&bull; To find a string split over two lines, like "line 1 this" in:
+
+this is line 1
+this is line 2
+
+you could use the pattern: "line 1\\nthis" [1].
+	----
+++++ Find & replace
+The sequences have special use in [FindReplace |Find & Replace] when it is used in regex mode. They can then be used as (part of) the replace value. For example: "this is line 2" in the previous example could be changed into "that is line 2", using the replace value: "line 1\\nthat" [1].
+A special use of the sequences can be found in the [ItemPrinting |print dialog], where they can be used as part of the "page separator" string.
+
+[:rel:top]
+[1] _WikidPad does not use the CR/LF pair as a new line indicator, but the single LF character._
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-[help.status:busy]
+[help.status:done]

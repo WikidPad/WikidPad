@@ -1,0 +1,8 @@
+﻿	*Application settings: General, sort order*
+	----
+&bull; *Sort order*
+Sets the alphabetical sort algorithm for the nodes in the [TheTreeView |Main tree] and for the PageListDialog.
+The possible choices are:
+	* Default: sorts according to default sort order determined by the operating system.
+		* Upper case first: sorts \ABCabc instead of \AaBbCc.
+	* C: The original WikidPad sort order: uppercase first, non-English characters in illogical order at the end

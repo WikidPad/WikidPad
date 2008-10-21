@@ -14,7 +14,7 @@ Incremental search is case insensitive. The search starts at the cursor position
 [:rel:top]
 ----
 +++ Search status
-What at any point in time the search string is, can be seen in the search status on the left hand side of the WikidPad status bar. The color of the status field depicts the result of the search:
+What at any point in time the current search string is, can be seen in the search status on the left hand side of the WikidPad status bar. The color of the status field depicts the result of the search:
 	* Green: search pattern is found
 	* Yellow: search pattern is nót found
 	* No change: invalid regex

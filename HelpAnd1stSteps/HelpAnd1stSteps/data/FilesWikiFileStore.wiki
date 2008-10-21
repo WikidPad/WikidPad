@@ -29,7 +29,7 @@ After the shortlist is completed, it is compared against the file to be copied i
     1. If the list contains a file with the exact same name, this file is condsidered to be the same file.
     2. If modified date is enough = true
         1. If the list contains one (1) file with the exact same modification timestamp, this file is considered to be the same file.
-        2. If the list contains more of those files, then the (first) file with the same content is considered to be the same file. [3]
+        2. If the list contains more of those files, then the (first) file with the same content is considered to be the same file&nbsp;[3].
         3. If there is no such file or no file has the same content, then the process continues with bullet 4.
     3. Modified date is enough = false
         1. If there are files in the list, that have the same modification date, then the (first) file with the same content is considered to be the same file.

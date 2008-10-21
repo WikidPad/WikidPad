@@ -402,6 +402,7 @@ HelpAnd1stSteps/HelpAnd1stSteps/data/FindingParentlessItems.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/FindingUndefinedItems.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Folding.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/FullSearch.wiki -text
+HelpAnd1stSteps/HelpAnd1stSteps/data/FullSearchResultList.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/GerReit.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/GlobalAttributesBracketedLinks.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/GlobalAttributesEditor.wiki -text
@@ -436,7 +437,9 @@ HelpAnd1stSteps/HelpAnd1stSteps/data/Intro3Formatting.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Intro4LinkFunctions.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Intro5Indexing.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Intro6Signalling.wiki -text
-HelpAnd1stSteps/HelpAnd1stSteps/data/Intro7Output.wiki -text
+HelpAnd1stSteps/HelpAnd1stSteps/data/Intro7Searching.wiki -text
+HelpAnd1stSteps/HelpAnd1stSteps/data/Intro8Output.wiki -text
+HelpAnd1stSteps/HelpAnd1stSteps/data/Intro9Advanced.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/IntroIndex.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/IntroSettings.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/IntroTemplates.wiki -text
@@ -470,7 +473,6 @@ HelpAnd1stSteps/HelpAnd1stSteps/data/MenuViewTime.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/MenuViewTree.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/MenuViewWorkspace.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/MicBut.wiki -text
-HelpAnd1stSteps/HelpAnd1stSteps/data/MigrationBetweenDbTypes.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/MultipageTextFormat.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Other[!!-~]Navigation.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Page[!!-~]history.wiki -text
@@ -570,7 +572,6 @@ HelpAnd1stSteps/HelpAnd1stSteps/data/Using[!!-~]the[!!-~]treeview.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WIKIRELATIONS.grl -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WIKIWORDPROPS.grl -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WIKIWORDS.grl -text
-HelpAnd1stSteps/HelpAnd1stSteps/data/WhereIsTheDataStored.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WikPad.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Wiki[!!-~]export.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Wiki[!!-~]import.wiki -text
@@ -608,11 +609,14 @@ HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsEditorColors.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsEditorImagePasting.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsEditorShortHint.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsGeneral.wiki -text
+HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsGeneralRename.wiki -text
+HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsGeneralSort.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsGeneralWikiControl.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsHtmlExport.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsHtmlHeader.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsHtmlPreview.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsMouse.wiki -text
+HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsMouseDropFiles.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsPluginsGnuplot.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsPluginsGraphViz.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsPluginsMimeTex.wiki -text
@@ -640,6 +644,7 @@ HelpAnd1stSteps/HelpAnd1stSteps/files/BookmarksExample2.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/ChronoViewExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/FindDialogIE.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/FindReplace1.png -text
+HelpAnd1stSteps/HelpAnd1stSteps/files/FullSearchExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/HistoryExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/My[!!-~]wiki's.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/NewWikiExample1.png -text
@@ -696,6 +701,7 @@ HelpAnd1stSteps/HelpAnd1stSteps/files/license.txt -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/music.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/note_anchor.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/notepad.png -text
+HelpAnd1stSteps/HelpAnd1stSteps/files/python-powered-w-70x28.gif -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/smile.smiley -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/tb_back.gif -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/tb_forward.gif -text

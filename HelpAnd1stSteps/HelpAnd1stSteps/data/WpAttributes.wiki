@@ -3,11 +3,12 @@ Contents:   [:toc:]
 [:rel:back]
 ----
 +++ General
-Wiki pages support "attributes". Attributes are used for two purposes:
+Wiki pages support "attributes" [1]. Attributes are used for two purposes:
 	* to add an extra index for a page in the [TheTreeView |views tree].
 	* to specify certain special wiki formatting commands.
 
 [:rel:top]
+[1] _The page has partly been assembled using page inserts; it's complete contents can only be seen in preview._
 ----
 ++++ Syntax
 The general format for an attribute is:

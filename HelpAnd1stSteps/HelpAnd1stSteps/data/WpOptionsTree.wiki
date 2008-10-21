@@ -1,4 +1,4 @@
-﻿	*Application settings: tree*
+﻿	*Application settings: Main tree*
 	----
 &bull; *Tree auto-follow*
 The tree tries to always select the wiki word currently shown in the editor or HTML-view.

@@ -45,18 +45,7 @@ anchor:RelPaths
 ----
 +++ Settings
 ++++ Options
-	*Application settings*
-	----
-&bull; *Dropping files*
-&bull; *Dropping files with SHIFT*
-&bull; *Dropping files with CTRL*
-Control what should happen if you drag and drop files from explorer into the editor with no key pressed, with SHIFT pressed or with CTRL pressed.
-
-Possible choices are:
-    * Nothing
-    * Absolute URL: Insert absolute URL(s) to the file(s)
-    * Relative URL: URL(s) starting with "rel:"
-    * Relative into storage: Copy file(s) into file storage and create relative URL(s) to it
+[:page:WpOptionsMouseDropFiles]
 
 [:rel:top]
 ----

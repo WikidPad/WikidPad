@@ -1,0 +1,39 @@
+﻿++ Intro 8: Output
+Contents:	[:toc:]
+[:rel:back]
+----
++++ General
+WikidPad is not only a personal desktop wiki, but it also allows to share or exchange information with others through a number of output facilities, like:
+	* [ItemPublishing |publishing to html]
+	* [ItemPrinting |printing]
+	* [Wiki export |exporting]
+	* [Wiki import |importing]
+
+++++ Publishing to html
+A wiki can be published - or "exported" - to html, that can be opened by any standard browser.The function creates a completely "stand alone" local "website" in a folder of your choice, that you then can distribute to others. Or you can upload it to a real website, like it has been done with the export of this wiki, that is online available at the WikidPad sourceforge website. If you want to have a look at it, click [http://wikidpad.sourceforge.net/help/ | here]. 
+
+You can publish áll or a subset of the pages in a wiki and you have the choice to:
+	* Create a set of html pages, that look exactly the same in the browser as the pages do in preview.
+		*  Browser dependant differences of opinion about defaults left aside.
+	* Create óne large html page, with all the wiki pages.
+	* Create an additional index page with a table of contents.
+
+++++ Printing
+Pages in a wiki can be printed, using the print function. Momentarily this function only supports printing pages in plain text, like they appear in the editor and not as formatted text, like they appear in preview. If you however really need a formatted print of a number of pages, you can always export them to html and print them from the browser. The print function features a "preview" window in which you can approximately see, how the pages will be printed.
+
+++++ Exporting
+Wiki pages can be exported to:
+	* XML
+	* .wiki files
+	* multipage text format 
+Wiki files are the .wiki files as they are created and used by the "original" [WikiDatabase |database backends]. Multipage text format is a local WikidPad format, that is also understood by the Import function. It can be used to exchange pages between different wikis. Ór, since it is a human readable format, to make large scale changes to it using an editor and reload it into a new wiki.
+
+++++ Importing
+This function supports the import of wiki pages into an existing wiki. Momentarily it only supports the import of:
+	* multipage text format  
+
+<p align=center>[Intro7Searching |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro9Advanced |Next page &raquo;]</p>----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 1]
+[intro.status:done]

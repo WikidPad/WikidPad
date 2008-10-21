@@ -9,9 +9,9 @@ An index into the intro pages for quicker access and maintenance purposes.
 	* [Intro4LinkFunctions]
 	* [Intro5Indexing]
 	* [Intro6Signalling]
-	* [Intro7Output]
-	* 
-	* 
+	* [Intro7Searching]
+	* [Intro8Output]
+	* [Intro9Advanced]
 
 ----
 previous: [:rel:back]

@@ -7,7 +7,7 @@ In the "plugins" menu you will see the four entries "Show relation graph", "Show
 
 If you want to go back to editor or preview, use the "View" menu and select "Switch Ed./Prev.", "Show editor" or "Show preview".
 
-If you want to export these graphs use the [Insertions] \[:graph.relation:] or \[:graph.child:].
+If you want to export these graphs use the [WpInsertions] \[:graph.relation:] or \[:graph.child:].
 
 
 +++ Relation graph
