@@ -35,7 +35,15 @@ class NodeStyle(object):
         self.color = u"null"
         
         self.hasChildren = False
+    
+    def emptyFields(self):
+        self.label = u""
         
+        self.bold = u""
+        self.icon = u""
+        self.color = u"null"
+
+
 
 _SETTABLE_PROPS = (u"bold", u"icon", u"color")
 
@@ -212,8 +220,8 @@ class WikiWordNode(AbstractNode):
         if (self.wikiWord == "ScratchPad"):
             style.icon = "note"
             return style # ?
-            
-            
+
+
         # fetch the global properties
         globalProps = self.treeCtrl.pWiki.getWikiData().getGlobalProperties() # TODO More elegant
         # get the wikiPage properties
@@ -228,13 +236,16 @@ class WikiWordNode(AbstractNode):
             style.label += u" (%s)" % priority
             # set default importance based on priority
             if not props.has_key(u'importance'):
-                priorNum = int(priority)    # TODO Error check
-                if (priorNum > 3):
-                    props[u'importance'] = u'high'
-                elif (priorNum < 3):
-                    props[u'importance'] = u'low'
+                try:
+                    priorNum = int(priority)    # TODO Error check
+                    if (priorNum < 3):
+                        props[u'importance'] = [u'high']
+                    elif (priorNum > 3):
+                        props[u'importance'] = [u'low']
+                except ValueError:
+                    pass
 
-
+        propsItems = props.items()
         # apply the global props based on the props of this node
         for p in _SETTABLE_PROPS:
             # Check per page props first
@@ -242,20 +253,43 @@ class WikiWordNode(AbstractNode):
                 setattr(style, p, props[p][-1])
                 continue
                 
-            for (key, values) in props.items():
-                for val in values:
-                    gPropVal = globalProps.get(u"global.%s.%s.%s" % (key, val, p))
-                    if gPropVal: break
+            # Check props on page against global presentation props.
+            # The dots in the key matter. The more dots the more specific
+            # is the global prop and wins over less specific props
+            gPropVal = None
+            dots = -1
+            for (key, values) in propsItems:
+                newGPropVal = None
+                newDots = key.count(u".") + 1 # key dots plus one for value
+                if newDots > dots:
+                    for val in values:
+                        newGPropVal = globalProps.get(u"global.%s.%s.%s" % (key, val, p))
+                        if newGPropVal:
+                            gPropVal = newGPropVal
+                            dots = newDots
+                            break
 
-                while not gPropVal:
-                    gPropVal = globalProps.get(u"global.%s.%s" % (key, p))
-                    dotpos = key.rfind(u".")
-                    if dotpos == -1:
-                        break
-                    key = key[:dotpos]
+                    newDots -= 1
+                    while newDots > dots:
+                        newGPropVal = globalProps.get(u"global.%s.%s" % (key, p))
+                        if newGPropVal:
+                            break
+    
+                        dotpos = key.rfind(u".")
+                        if dotpos == -1:
+                            break
+                        key = key[:dotpos]
+                        newDots -= 1
+    
+                    if newGPropVal:
+                        gPropVal = newGPropVal
+                        dots = newDots
 
-                if gPropVal:
-                    setattr(style, p, gPropVal)
+            # If a value is found, we stop searching for this presentation
+            # property here
+            if gPropVal:
+                setattr(style, p, gPropVal)
+                continue
 
         return style
 
@@ -492,9 +526,9 @@ class TodoNode(AbstractNode):
 
     def getNodePresentation(self):
         style = NodeStyle()
+        style.emptyFields()
+
         style.hasChildren = True
-        style.label = self.categories[-1]
-        style.icon = "pin"
         
 #         if self.isRightSide:
 #         # Last item in self.categories is the right side, so tokenize it
@@ -508,6 +542,11 @@ class TodoNode(AbstractNode):
                 # Use the found property to set the style of this node
                 setattr(style, tok.grpdict["propertyName"],
                         tok.grpdict["propertyValue"])
+
+        if style.label == u"":
+            style.label = self.categories[-1]
+        if style.icon == u"":
+            style.icon = "pin"
 
         return style
 
@@ -915,14 +954,14 @@ class MainFuncPagesNode(AbstractNode):
     Represents the "Func pages" node
     """
     __slots__ = ()
-    
+
     def getNodePresentation(self):
         style = NodeStyle()
         style.label = u"Func. pages"
         style.icon = u"cog"
         style.hasChildren = True
         return style
-        
+
     def listChildren(self):
         return [
                 FuncPageNode(self.treeCtrl, self, "global/[TextBlocks]"),

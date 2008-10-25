@@ -1,7 +1,21 @@
 ﻿++ Change Log
 
 
-Sep. 26, 2008 (1.8rc16)
+Oct. 25, 2008 (.18rc17)
+
+    * Bug fixed: Layout problem in "Search Wiki" dialog
+    * Bug fixed: On inserting a textblock, selection was not replaced
+      and "undo" didn't behave well
+    * Bug fixed: "priority" attribute did not influence "importance"
+    * Bug fixed: Prioritizing more specific global settings for
+      tree node state (icon/bold/color) over less specific ones did
+      not work
+    * Bug (hopefully) fixed: Mac: Startup error due to unsupported
+      bitmap to icon conversion
+
+
+
+Sep. 26, 2008 (1.8rc16, repository revision in "stable-1.8" branch: 146)
 
     * Bug fixed: Renaming may modify page heading in wrong way
       ("++ X" renamed to 'Y X' results in "++ Y Y X")

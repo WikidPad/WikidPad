@@ -697,8 +697,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """
         Helper for buildTextBlocksMenu() to build up menu
         """
+        emptyLine = False    
         for line in tbContent.split(u"\n"):
             if line.strip() == u"":
+                emptyLine = True
                 continue
 
             # Parse line                
@@ -728,13 +730,23 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             # Adjust the stack
             if deep > stack[-1][0]:
                 stack.append([deep, None, wx.Menu()])
-            else:
+            elif stack[-1][0] > deep:
                 while stack[-1][0] > deep:
                     title, menu = stack.pop()[1:3]
                     if title is None:
                         title = u"<No title>"
                     
                     stack[-1][2].AppendMenu(wx.NewId(), title, menu)
+            else:
+                if emptyLine:
+                    title, menu = stack.pop()[1:3]
+                    if title is None:
+                        title = u"<No title>"
+
+                    stack[-1][2].AppendMenu(wx.NewId(), title, menu)
+                    stack.append([deep, None, wx.Menu()])
+            
+            emptyLine = False
             
             # Create new entry if necessary
             title, menu = stack[-1][1:3]
@@ -756,7 +768,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             menu.AppendItem(menuItem)
 
             self.textBlocksActivation[menuID] = (entryFlags, entryContent)
-
+            
         # Add the remaining ids so nothing gets lost
         for i in reusableIds:
             self.textBlocksActivation[i] = (None, None)
@@ -833,7 +845,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if u"a" in entryFlags:
                 self.appendText(entryContent)
             else:
-                self.addText(entryContent)
+                self.addText(entryContent, replaceSel=True)
             
         except KeyError:
             pass
@@ -3838,18 +3850,32 @@ These are your default global settings.
         self.getActiveEditor().AppendText(u"\n\n[%s=%s]" % (name, value))
 #         self.saveCurrentDocPage()   # TODO Remove or activate this line?
 
-    def addText(self, text):
+    def addText(self, text, replaceSel=False):
         """
         Add text to current active editor view
         """
-        self.getActiveEditor().AddText(text)
+        ed = self.getActiveEditor()
+        ed.BeginUndoAction()
+        try:
+            if replaceSel:
+                ed.ReplaceSelection(text)
+            else:
+                ed.AddText(text)
+        finally:
+            ed.EndUndoAction()
 
 
     def appendText(self, text):
         """
         Append text to current active editor view
         """
-        self.getActiveEditor().AppendText(text)
+        ed = self.getActiveEditor()
+        ed.BeginUndoAction()
+        try:
+            self.getActiveEditor().AppendText(text)
+        finally:
+            ed.EndUndoAction()
+
 
     def insertDate(self):
         # strftime can't handle unicode correctly, so conversion is needed

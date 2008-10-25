@@ -240,9 +240,16 @@ def cloneImageList(imgList):
     sz = imgList.GetSize(0)
     lng = imgList.GetImageCount()
     result = wx.ImageList(sz[0], sz[1], True, lng)
+    
+    try:
+        for i in xrange(lng):
+            result.AddIcon(imgList.GetIcon(i))
+    except wx.PyAssertionError:
+        # Alternative way
+        result = wx.ImageList(sz[0], sz[1], True, lng)
+        for i in xrange(lng):
+            result.Add(imgList.GetBitmap(i))
 
-    for i in xrange(lng):
-        result.AddIcon(imgList.GetIcon(i))
 
     return result
 

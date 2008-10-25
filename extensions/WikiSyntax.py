@@ -31,7 +31,7 @@ ItalicRE        = re.compile(ur"\b_(?P<italicContent>" + PlainCharacterPAT +
         ur"+?)_\b",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 HtmlTagRE = re.compile(
-        ur"</?[A-Za-z][A-Za-z0-9]*(?:/| [^\n>]*)?>",
+        ur"</?[A-Za-z][A-Za-z0-9:]*(?:/| [^\n>]*)?>",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 Heading4RE      = re.compile(u"^\\+\\+\\+\\+(?!\\+) ?(?P<h4Content>" +
         PlainCharacterPAT + ur"+?)\n",

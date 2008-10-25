@@ -969,7 +969,7 @@ class WikiPageListConstructionDialog(wx.Dialog, MiscEventSourceMixin):   # TODO
                 self.ctrls.rbPagesAll.SetValue(True)
             elif item.CLASS_PERSID == "RegexPage":
                 self.ctrls.rbPagesMatchRe.SetValue(True)
-                self.ctrls.tfMatchRe.SetValue(item.getPattern)
+                self.ctrls.tfMatchRe.SetValue(item.getPattern())
             elif item.CLASS_PERSID == "ListItemWithSubtreePages":
                 self.ctrls.rbPagesInList.SetValue(True)
                 self.pageListData = item.rootWords[:]
