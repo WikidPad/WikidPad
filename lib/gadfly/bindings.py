@@ -61,7 +61,7 @@ def dropview(l, c):
 
 # create view statement stuff
 def createview(l, c):
-    [create, view, name, namelist, as, selection] = l
+    [create, view, name, namelist, dummyAs, selection] = l
     return semantics.CreateView(name, namelist, selection)
 
 optnamelist0 = returnNone
@@ -288,11 +288,11 @@ def trlna(l,c):
     return others
 
 def trl1as(l,c):
-    [name, as, alias] = l
+    [name, dummyAs, alias] = l
     return [(name, alias)]
 
 def trlnas(l,c):
-    [name, as, alias, comma, others] = l
+    [name, dummyAs, alias, comma, others] = l
     others.insert(0, (name, alias))
     return others
 
@@ -546,7 +546,7 @@ def selectit(list, context):
     return (exp, None) # no binding!
 
 def selectname(list, context):
-    [exp, as, alias] = list
+    [exp, dummyAs, alias] = list
     return (exp, alias)
 
 colalias = elt0
