@@ -8,7 +8,12 @@ import wx, wx.html
 
 if wx.Platform == '__WXMSW__':
     import wx.activex
-    import wx.lib.iewin as iewin
+    try:
+        # Recent versions of wxPython have this module
+        import wx.lib.iewin_old as iewin
+    except:
+        # Nope, let's use the standard iewin
+        import wx.lib.iewin as iewin
     from WindowsHacks import getLongPath
 else:
     iewin = None
@@ -33,11 +38,11 @@ class LinkCreatorForPreviewIe:
     """
     Faked link dictionary for HTML exporter
     """
-    def __init__(self, wikiData):
-        self.wikiData = wikiData
+    def __init__(self, wikiDocument):
+        self.wikiDocument = wikiDocument
 
     def get(self, word, default = None):
-        if self.wikiData.isDefinedWikiWord(word):
+        if self.wikiDocument.isDefinedWikiWord(word):
             return urlQuote(u"internaljump:wikipage/%s" % word, u"/#:;@")
         else:
             return default
@@ -46,11 +51,11 @@ class LinkCreatorForPreviewMoz:
     """
     Faked link dictionary for HTML exporter
     """
-    def __init__(self, wikiData):
-        self.wikiData = wikiData
+    def __init__(self, wikiDocument):
+        self.wikiDocument = wikiDocument
 
     def get(self, word, default = None):
-        if self.wikiData.isDefinedWikiWord(word):
+        if self.wikiDocument.isDefinedWikiWord(word):
             return urlQuote(u"file://internaljump/wikipage/%s" % word, u"/#:;@")
         else:
             return default
@@ -79,9 +84,8 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 ("loaded current wiki page", self.onLoadedCurrentWikiPage),
                 ("reloaded current doc page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
-                ("closing current wiki", self.onClosingCurrentWiki),
+                ("closing current wiki", self.onClosingCurrentWiki)
 #                 ("options changed", self.onOptionsChanged),
-                ("changed live text", self.onChangedLiveText)
         ), self.presenter.getMiscEvent())
 
         self.__sinkApp = wxKeyFunctionSink((
@@ -90,6 +94,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
         self.__sinkDocPage = wxKeyFunctionSink((
                 ("updated wiki page", self.onUpdatedWikiPage),
+                ("changed live text", self.onChangedLiveText)
         ), self.presenter.getCurrentDocPageProxyEvent())
 
         self.visible = False
@@ -117,9 +122,9 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
         self.exporterInstance.tempFileSet = TempFileSet()
         self._updateTempFilePrefPath()
-        self.exporterInstance.styleSheet = "file:" + urlFromPathname(
-                os.path.join(wx.GetApp().globalConfigSubDir,
-                'wikipreview.css'))
+#         self.exporterInstance.styleSheet = "file:" + urlFromPathname(
+#                 os.path.join(wx.GetApp().globalConfigSubDir,
+#                 'wikipreview.css'))
 
         self.exporterInstance.setWikiDataManager(self.presenter.getWikiDocument())
 
@@ -190,12 +195,12 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         if self.outOfSync:
 #             self.currentLoadedWikiWord = None
 
-            wikiDoc = self.presenter.getWikiDocument()
-            if wikiDoc is None:
+            wikiDocument = self.presenter.getWikiDocument()
+            if wikiDocument is None:
                 self.currentLoadedWikiWord = None
                 return
 
-            self.exporterInstance.wikiData = wikiDoc.getWikiData()
+            self.exporterInstance.wikiData = wikiDocument.getWikiData()
 
             wikiPage = self.presenter.getDocPage()
             if wikiPage is None:
@@ -268,11 +273,11 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
 
     def _updateTempFilePrefPath(self):
-        wikiDoc = self.presenter.getWikiDocument()
+        wikiDocument = self.presenter.getWikiDocument()
 
-        if wikiDoc is not None:
+        if wikiDocument is not None:
             self.exporterInstance.tempFileSet.setPreferredPath(
-                    wikiDoc.getWikiTempDir())
+                    wikiDocument.getWikiTempDir())
         else:
             self.exporterInstance.tempFileSet.setPreferredPath(None)
 

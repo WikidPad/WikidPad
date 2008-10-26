@@ -1,7 +1,43 @@
 ﻿++ Change Log
 
 
-Sep. 27, 2008 (1.9beta18)
+Oct. 26, 2008 (1.9beta19)
+
+	* Option to set whole wiki read-only.
+	  See OptionsDialog#*Read-only# wiki*
+	* Wiki-bound option to auto-show log window in addition
+	  to global option
+	* "Collapse whole tree" in context menu of tree items
+	* Slightly different ordering of tree children with "tree_position"
+	  or "priority" attribute
+	* Support for cascading four CSS files from different places
+	  on export (application base, admin base, user-bound and wiki-bound).
+	* For external preview there can be three more to set it differently.
+	  See [Cascading style sheets]
+	* More logical syntax for textblocks (submenu title is not needed to be
+	  indented anymore like the rest of submenu).
+	  See [TextBlocks]#Submenu# title=
+	* Renaming the page which is root node of tree now also changes
+	  the root node to the new page name.
+	* More compatible with newer wxPython versions on Windows
+	  (thanks to Serge)
+	
+	* Bug fixed: Prioritizing more specific global settings for tree
+	  node state (icon/bold/color) over less specific ones did not work
+	* Bug fixed: Diverse problems with IE preview
+	* Bug fixed: Using templates when "templates_head" is set to "auto"
+	  (or not set at all) prevented "Use link title if present"
+	  from working
+	* Bug fixed: Doc structure didn't update anymore
+	* Bug fixed: On inserting a textblock, selection was not replaced
+	  and "undo" didn't behave well
+	* Bug fixed: "priority" attribute did not influence "importance"
+	* Bug fixed: Indentation containing real tab characters was not copied
+	  unmodified to next line on auto-indent
+
+
+
+Sep. 27, 2008 (1.9beta18, repository revision in "mbutscher" branch: 147)
 
     * Insertion [:rel:back] introduced to go back in history.
       See [Insertions]

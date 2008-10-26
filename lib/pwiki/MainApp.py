@@ -108,7 +108,7 @@ class App(wx.App, MiscEventSourceMixin):
 
     def OnInit(self):
         ## _prof.start()
-        global PREVIEW_CSS
+#         global PREVIEW_CSS
 
         self.SetAppName("WikidPad")
         self.removeAppLockOnExit = False
@@ -143,11 +143,11 @@ class App(wx.App, MiscEventSourceMixin):
                 self.globalConfigSubDir = defaultGlobalConfigSubDir
                 os.mkdir(self.globalConfigSubDir)
 
-        pCssLoc = os.path.join(self.globalConfigSubDir, "wikipreview.css")
-        if not os.path.exists(pathEnc(pCssLoc)):
-            tbFile = open(pathEnc(pCssLoc), "w")
-            tbFile.write(PREVIEW_CSS)
-            tbFile.close()
+#         pCssLoc = os.path.join(self.globalConfigSubDir, "wikipreview.css")
+#         if not os.path.exists(pathEnc(pCssLoc)):
+#             tbFile = open(pathEnc(pCssLoc), "w")
+#             tbFile.write(PREVIEW_CSS)
+#             tbFile.close()
 
         # Create default config dicts
         self.defaultGlobalConfigDict = Configuration.GLOBALDEFAULTS.copy()
@@ -572,97 +572,97 @@ class App(wx.App, MiscEventSourceMixin):
 
 
 
-PREVIEW_CSS = """
-BODY {
-	font-family: Verdana; font-size: 90%;
-}
-
-.wiki-name-ref {
-	color: #888888; font-size: 75%;
-}
-
-.parent-nodes {
-	color: #888888; font-size: 75%;
-}
-
-.property {
-	color: #888888; font-size: 75%;
-}
-
-.script {
-	color: #888888; font-size: 75%;
-}
-
-.todo {
-	font-weight: bold;
-}
-
-.url-link {
-}
-
-.wiki-link {
-}
-
-.page-toc {
-}
-
-.page-toc-level1 {
-}
-
-.page-toc-level2 {
-    margin-left: 4mm;
-}
-
-.page-toc-level3 {
-    margin-left: 8mm;
-}
-
-.page-toc-level4 {
-    margin-left: 12mm;
-}
-
-.page-toc-level5 {
-    margin-left: 16mm;
-}
-
-.page-toc-level6 {
-    margin-left: 20mm;
-}
-
-.page-toc-level7 {
-    margin-left: 24mm;
-}
-
-.page-toc-level8 {
-    margin-left: 28mm;
-}
-
-.page-toc-level9 {
-    margin-left: 32mm;
-}
-
-.page-toc-level10 {
-    margin-left: 36mm;
-}
-
-.page-toc-level11 {
-    margin-left: 40mm;
-}
-
-.page-toc-level12 {
-    margin-left: 44mm;
-}
-
-.page-toc-level13 {
-    margin-left: 48mm;
-}
-
-.page-toc-level14 {
-    margin-left: 52mm;
-}
-
-.page-toc-level15 {
-    margin-left: 56mm;
-}
-
-"""
+# PREVIEW_CSS = """
+# BODY {
+# 	font-family: Verdana; font-size: 90%;
+# }
+# 
+# .wiki-name-ref {
+# 	color: #888888; font-size: 75%;
+# }
+# 
+# .parent-nodes {
+# 	color: #888888; font-size: 75%;
+# }
+# 
+# .property {
+# 	color: #888888; font-size: 75%;
+# }
+# 
+# .script {
+# 	color: #888888; font-size: 75%;
+# }
+# 
+# .todo {
+# 	font-weight: bold;
+# }
+# 
+# .url-link {
+# }
+# 
+# .wiki-link {
+# }
+# 
+# .page-toc {
+# }
+# 
+# .page-toc-level1 {
+# }
+# 
+# .page-toc-level2 {
+#     margin-left: 4mm;
+# }
+# 
+# .page-toc-level3 {
+#     margin-left: 8mm;
+# }
+# 
+# .page-toc-level4 {
+#     margin-left: 12mm;
+# }
+# 
+# .page-toc-level5 {
+#     margin-left: 16mm;
+# }
+# 
+# .page-toc-level6 {
+#     margin-left: 20mm;
+# }
+# 
+# .page-toc-level7 {
+#     margin-left: 24mm;
+# }
+# 
+# .page-toc-level8 {
+#     margin-left: 28mm;
+# }
+# 
+# .page-toc-level9 {
+#     margin-left: 32mm;
+# }
+# 
+# .page-toc-level10 {
+#     margin-left: 36mm;
+# }
+# 
+# .page-toc-level11 {
+#     margin-left: 40mm;
+# }
+# 
+# .page-toc-level12 {
+#     margin-left: 44mm;
+# }
+# 
+# .page-toc-level13 {
+#     margin-left: 48mm;
+# }
+# 
+# .page-toc-level14 {
+#     margin-left: 52mm;
+# }
+# 
+# .page-toc-level15 {
+#     margin-left: 56mm;
+# }
+# 
+# """

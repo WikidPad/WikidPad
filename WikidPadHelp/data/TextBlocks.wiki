@@ -58,15 +58,14 @@ Same as before but title is omitted here and therefore deduced from content.
 
 Submenu title=
 
-Title without content, only meaningful as first entry of a submenu to define the submenu title.
-
+Title without content, only meaningful as title of a submenu whose items follow indented.
 
 
 A complete example with one submenu (add these lines to one of the pages or one of the "[TextBlocks].wiki" files to see the effect of it):
 
 
 ;a=Something interesting at the end
-    Submenu title=
+Submenu title=
     item title=Something to insert
     escaping=Escaping new lines as \\n...\n\n\nworks
     all together;a=Show flag to append and item title \nand escape to new line

@@ -240,7 +240,10 @@ class HtmlXmlExporter(AbstractExporter):
         self.wikiData = None
         self.wordList = None
         self.exportDest = None
-        self.styleSheet = "wikistyle.css"
+#         self.styleSheet = "wikistyle.css"
+        
+        # List of tuples (<source CSS path>, <dest CSS file name / url>)
+        self.styleSheetList = []
         self.basePageAst = None
 #         self.tokenizer = Tokenizer(
 #                 WikiFormatting.CombinedHtmlExportRE, -1)
@@ -277,6 +280,7 @@ class HtmlXmlExporter(AbstractExporter):
             self.wikiData = None
         else:
             self.wikiData = self.wikiDataManager.getWikiData()
+            self.buildStyleSheetList()
 
     def setWikiDocument(self, wikiDataManager):
         self.setWikiDataManager(wikiDataManager)
@@ -398,7 +402,7 @@ class HtmlXmlExporter(AbstractExporter):
         exportType -- string tag to identify how to export
         exportDest -- Path to destination directory or file to export to
         compatFilenames -- Should the filenames be encoded to be lowest
-                           level compatible
+                           level compatible (ascii only)?
         addOpt -- additional options returned by getAddOpt()
         """
         
@@ -517,7 +521,8 @@ class HtmlXmlExporter(AbstractExporter):
 
         outputFile = join(self.exportDest,
                 self.convertFilename(u"%s.html" % self.mainControl.wikiName))
-        self.styleSheet = "wikistyle.css"
+        self.buildStyleSheetList()
+#         self.styleSheet = "wikistyle.css"
 
         if exists(pathEnc(outputFile)):
             os.unlink(pathEnc(outputFile))
@@ -589,14 +594,16 @@ class HtmlXmlExporter(AbstractExporter):
         fp.write(self.getFileFooter())
         fp.reset()
         realfp.close() 
-        self.copyCssFile(self.exportDest)
+        self.copyCssFiles(self.exportDest)
         return outputFile
 
 
     def _exportHtmlMultipleFiles(self):
         links = LinkCreatorForHtmlMultiPageExport(
                 self.wikiDataManager.getWikiData(), self)
-        self.styleSheet = "wikistyle.css"
+#         self.styleSheet = "wikistyle.css"
+        self.buildStyleSheetList()
+
 
         if self.addOpt[1] in (1,2):
             # Write a table of contents in html page "index.html"
@@ -646,7 +653,7 @@ class HtmlXmlExporter(AbstractExporter):
                 continue
 
             self.exportWordToHtmlPage(self.exportDest, word, links, False)
-        self.copyCssFile(self.exportDest)
+        self.copyCssFiles(self.exportDest)
         rootFile = join(self.exportDest, 
                 self.convertFilename(u"%s.html" % self.wordList[0]))    #self.mainControl.wikiName))[0]
         return rootFile
@@ -768,9 +775,16 @@ class HtmlXmlExporter(AbstractExporter):
         return u"".join(result)
 
 
-    def _getGenericHtmlHeader(self, title):
-        charSet = u"; charset=UTF-8"
-        styleSheet = self.styleSheet
+    def _getGenericHtmlHeader(self, title, charSet=u'; charset=UTF-8'):
+        styleSheets = []
+        for dummy, url in self.styleSheetList:
+            styleSheets.append(
+                    u'        <link type="text/css" rel="stylesheet" href="%(url)s">' %
+                    locals())
+        
+        styleSheets = u"\n".join(styleSheets)
+
+#         styleSheet = self.styleSheet
         config = self.mainControl.getConfig()
         docType = config.get("main", "html_header_doctype",
                 'DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"')
@@ -780,7 +794,7 @@ class HtmlXmlExporter(AbstractExporter):
     <head>
         <meta http-equiv="content-type" content="text/html%(charSet)s">
         <title>%(title)s</title>
-        <link type="text/css" rel="stylesheet" href="%(styleSheet)s">
+%(styleSheets)s
     </head>
 """ % locals()
 
@@ -875,15 +889,20 @@ class HtmlXmlExporter(AbstractExporter):
         Ansi version of getFileHeader
         wikiPage -- WikiPage object
         """
-        return u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-    <head>
-        <meta http-equiv="content-type" content="text/html">
-        <title>%s</title>
-        <link type="text/css" rel="stylesheet" href="wikistyle.css">
-    </head>
-    %s
-""" % (wikiPage.getWikiWord(), self._getBodyTag(wikiPage))
+        return self._getGenericHtmlHeader(wikiPage.getWikiWord(), charset=u"") + \
+                u"    %s\n" % self._getBodyTag(wikiPage)
+
+
+#         return u"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+# <html>
+#     <head>
+#         <meta http-equiv="content-type" content="text/html">
+#         <title>%s</title>
+#         <link type="text/css" rel="stylesheet" href="wikistyle.css">
+#     </head>
+#     %s
+# """ % (wikiPage.getWikiWord(), self._getBodyTag(wikiPage))
+
 
 
     def getFileFooter(self):
@@ -919,11 +938,98 @@ class HtmlXmlExporter(AbstractExporter):
         return self.basePageAst
 
 
-    def copyCssFile(self, dir):
-        if not exists(pathEnc(join(dir, self.styleSheet))):
-            cssFile = pathEnc(join(self.mainControl.wikiAppDir, 'export', self.styleSheet))
-            if exists(pathEnc(cssFile)):
-                OsAbstract.copyFile(pathEnc(cssFile), pathEnc(join(dir, self.styleSheet)))
+    def buildStyleSheetList(self):
+        """
+        Sets the self.styleSheetList. This is a list of tuples
+        (<source CSS path>, <dest CSS file name/url>). The source file name may be
+        None if the file (normally for preview mode) shouldn't be copied.
+        Must be called after export type is set!
+        """
+        asPreview = self.exportType in ("html_previewIE", "html_previewMOZ", "html_previewWX")
+        if asPreview:
+            # Step one: Create pathes
+            pathlist = [
+                    # System base file
+                    join(self.mainControl.wikiAppDir, "appbase.css"),
+                    # Administrator modified application base file
+                    join(self.mainControl.wikiAppDir, "export",
+                        "wikistyle.css"),
+
+                    # User modified file
+                    join(wx.GetApp().globalConfigSubDir, "wikistyle.css")
+                ]
+
+            # Wiki specific file
+            if self.wikiDataManager is not None:
+                pathlist.append(join(self.wikiDataManager.getDataDir(),
+                        "wikistyle.css"))
+
+            # Overruling wikipreview.css files
+            pathlist += [
+                    # System base file (does not exist normally)
+                    join(self.mainControl.wikiAppDir, "prevappbase.css"),
+                    # Administrator modified application base file
+                    join(self.mainControl.wikiAppDir, "export",
+                            "wikipreview.css"),
+                    # User modified file
+                    join(wx.GetApp().globalConfigSubDir, "wikipreview.css")
+                ]
+
+            # Wiki specific file
+            if self.wikiDataManager is not None:
+                pathlist.append(join(self.wikiDataManager.getDataDir(),
+                        "wikipreview.css"))
+
+            # Step two: Check files for existence and create styleSheetList
+            # We don't need the source pathes, only a list of URLs to the
+            # original files
+            self.styleSheetList = []
+            for p in pathlist:
+                if not exists(pathEnc(p)):
+                    continue
+                
+                self.styleSheetList.append((None, "file:" + urlFromPathname(p)))
+            
+        else:
+            result = [
+                    # System base file
+                    (join(self.mainControl.wikiAppDir, "appbase.css"), "appbase.css"),
+                    # Administrator modified application base file
+                    (join(self.mainControl.wikiAppDir, "export", "wikistyle.css"),
+                        "admbase.css"),
+                    # User modified file
+                    (join(wx.GetApp().globalConfigSubDir, "wikistyle.css"),
+                        "userbase.css")
+                ]
+
+            # Wiki specific file
+            if self.wikiDataManager is not None:
+                result.append((join(self.wikiDataManager.getDataDir(),
+                        "wikistyle.css"), "wikistyle.css"))
+
+            # Filter non-existent
+            self.styleSheetList = [ item for item in result
+                    if exists(pathEnc(item[0])) ]
+
+
+
+
+    def copyCssFiles(self, dir):
+        for src, dst in self.styleSheetList:
+            if src is None:
+                continue
+            try:
+#                 if not exists(pathEnc(join(dir, dst))):
+                OsAbstract.copyFile(pathEnc(src), pathEnc(join(dir, dst)))
+            except:
+                traceback.print_exc()
+                
+        
+        
+#         if not exists(pathEnc(join(dir, self.styleSheet))):
+#             cssFile = pathEnc(join(self.mainControl.wikiAppDir, 'export', self.styleSheet))
+#             if exists(pathEnc(cssFile)):
+#                 OsAbstract.copyFile(pathEnc(cssFile), pathEnc(join(dir, self.styleSheet)))
 
     def shouldExport(self, wikiWord, wikiPage=None):
         if not wikiPage:
@@ -1082,6 +1188,13 @@ class HtmlXmlExporter(AbstractExporter):
             return None, None
 
 
+    def getCurrentWikiWord(self):
+        """
+        Returns the wiki word which is currently processed by the exporter.
+        """
+        return self.wikiWord
+
+
     def isHtmlSizeValue(sizeStr):
         """
         Test unistring sizestr if it is a valid HTML size info and returns
@@ -1235,7 +1348,7 @@ class HtmlXmlExporter(AbstractExporter):
         wikiDocument = self.mainControl.getWikiDocument()
 
         if key == u"page":
-            if ("wikipage/" + value) in self.insertionVisitStack:
+            if (u"wikipage/" + value) in self.insertionVisitStack:
                 # Prevent infinite recursion
                 return
 
@@ -1547,7 +1660,8 @@ class HtmlXmlExporter(AbstractExporter):
         selfLink = False
 
         if link:
-            wikiData = self.mainControl.getWikiDocument().getWikiData()
+            wikiDocument = self.mainControl.getWikiDocument()
+            wikiData = wikiDocument.getWikiData()
             # Test if link to same page itself (maybe with an anchor fragment)
             if not self.exportType in (u"html_single", u"xml"):
                 linkTo = wikiData.getAliasesWikiWord(word)
@@ -1574,7 +1688,7 @@ class HtmlXmlExporter(AbstractExporter):
                         escapeHtml(tokenText))
             else:
                 title = None
-                if wikiData.isDefinedWikiWord(word):
+                if wikiDocument.isDefinedWikiWord(word):
                     wikiWord = wikiData.getAliasesWikiWord(word)
 
                     propList = wikiData.getPropertiesForWord(wikiWord)
@@ -2408,15 +2522,15 @@ class MultiPageTextExporter(AbstractExporter):
         searchOp.cycleToStart = False
         searchOp.wildCard = 'regex'
         searchOp.wikiWide = True
-        
+
         wpo = ListWikiPagesOperation()
         wpo.setSearchOpTree(ListItemWithSubtreeWikiPagesNode(wpo, self.wordList,
                 level=0))
-        
+
         searchOp.listWikiPagesOp = wpo
-        
+
         foundPages = self.mainControl.getWikiDocument().searchWiki(searchOp)
-        
+
         return len(foundPages) == 0
 
 

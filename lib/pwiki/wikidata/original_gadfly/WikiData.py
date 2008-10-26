@@ -187,7 +187,8 @@ class WikiData:
             else:
                 self.execSql("update wikiwords set modified = ? where word = ?",
                         (moddate, word))
-                self.commitNeeded = True
+            
+            self.commitNeeded = True
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -291,6 +292,7 @@ class WikiData:
             else:
                 self.connWrap.execSql("update wikiwords set modified = ?, "
                         "created = ? where word = ?", (moddate, creadate, word))
+                self.commitNeeded = True
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -367,6 +369,7 @@ class WikiData:
                     (word, toWord, toWord))
 
         # commit anything pending so we can rollback on error
+        self.commitNeeded = True
         self.commit()
         try:
             try:
@@ -375,6 +378,7 @@ class WikiData:
                 self.connWrap.execSql("update wikiwordprops set word = ? where word = ?", (toWord, word))
                 self.connWrap.execSql("update todos set word = ? where word = ?", (toWord, word))
                 self.renameContent(word, toWord)
+                self.commitNeeded = True
                 self.commit()
             except:
                 self.connWrap.rollback()
@@ -659,6 +663,7 @@ class WikiData:
             try:
                 self.connWrap.execSqlInsert("wikirelations", ("word", "relation",
                         "created"), (word, rel[0], time()))
+                self.commitNeeded = True
 
 #                 self.execSql("insert into wikirelations(word, relation, created) "
 #                         "values (?, ?, ?)", (word, rel[0], time()))
@@ -744,11 +749,13 @@ class WikiData:
 
 
     def findBestPathFromWordToWord( self, word, toWord ):
-        """ Do a breadth first search, which will find the shortest """
-        """ path between the nodes we are interested in """
-        """ This will only find a path if the words are """
-        """ linked by parent relationship                  """
-        """ you won't be able to find your cousins    """
+        """
+        Do a breadth first search, which will find the shortest
+        path between the nodes we are interested in
+        This will only find a path if the words are
+        linked by parent relationship
+        you won't be able to find your cousins
+        """
 
         # Make sure the words are in there somewhere.
         if not ( self.isDefinedWikiWord(word) \
@@ -831,6 +838,7 @@ class WikiData:
                 self.connWrap.execSqlInsert("wikiwords", ("word", "created", 
                         "modified", "presentationdatablock", "wordnormcase"),
                         (word, ti, st.st_mtime, "", ""))
+                self.commitNeeded = True
 
 #                 self.execSql("insert into wikiwords(word, created, modified, "
 #                         "presentationdatablock, wordnormcase) "
@@ -1271,6 +1279,7 @@ class WikiData:
             try:
                 self.connWrap.execSqlInsert("wikiwordprops", ("word", "key",
                         "value"), (word, key, value))
+                self.commitNeeded = True
 
 #                 self.execSql("insert into wikiwordprops(word, key, value) "+
 #                         "values (?, ?, ?)", (word, key, value))
@@ -1366,6 +1375,7 @@ class WikiData:
     def addTodo(self, word, todo):
         try:
             self.connWrap.execSqlInsert("todos", ("word", "todo"), (word, todo))
+            self.commitNeeded = True
 
 #             self.execSql("insert into todos(word, todo) values (?, ?)", (word, todo))
         except (IOError, OSError, ValueError), e:
@@ -1426,6 +1436,8 @@ class WikiData:
             else:
                 self.connWrap.execSqlInsert("search_views", ("title", "datablock"),
                         (title, datablock))
+            
+            self.commitNeeded = True
 
 #                 self.connWrap.execSql(
 #                         "insert into search_views(title, datablock) "+\
@@ -1459,6 +1471,7 @@ class WikiData:
         try:
             self.connWrap.execSql(
                     "delete from search_views where title = ?", (title,))
+            self.commitNeeded = True
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -1486,6 +1499,7 @@ class WikiData:
         Needed before rebuilding the whole wiki
         """
         DbStructure.recreateCacheTables(self.connWrap)
+        self.commitNeeded = True
         self.commit()
 
         self.cachedContentNames = None
@@ -1501,6 +1515,7 @@ class WikiData:
             self.connWrap.execSql(
                     "update wikiwords set presentationdatablock = ? where "
                     "word = ?", (datablock, word))
+            self.commitNeeded = True
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)

@@ -1153,7 +1153,6 @@ class WikiData:
             raise DbReadAccessError(e)
 
 
-
     # ---------- Property cache handling ----------
 
     def getPropertyNames(self):

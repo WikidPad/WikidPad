@@ -4000,6 +4000,10 @@
       <label>Prepend wiki word</label>
       <help>Prepend a new or existing wiki word</help>
     </object>
+    <object class="wxMenuItem" name="CMD_COLLAPSE_TREE">
+      <label>Collapse whole tree</label>
+      <help>Collapse whole tree</help>
+    </object>
     <object class="wxMenuItem" name="CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD">
       <label>Copy URL to clipboard</label>
       <help>Copy full &quot;wiki:&quot; URL of the word to clipboard</help>

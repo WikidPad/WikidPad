@@ -325,7 +325,7 @@ Controls how many seconds of inactivity before the incremental search is closed 
 
 ++++ Advanced
 
-Change these settings only if you know what you are doing.
+Change these settings only if you know what you are doing!
 
 *Ignore wiki lock file*
 *Create wiki lock file*
@@ -360,6 +360,13 @@ By setting the option to "Not at all" then closing the options dialog, then sett
 
 *Force ScratchPad visibility in tree*
 Shows the special page ScratchPad always as child of the tree root, even if it is not really a child.
+
+*Read-only wiki*
+Check this if you want to prevent the wiki from acidental modifications.
+
+*Auto-show log window*
+Automatically show log window if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
+If the check-box is gray, the application-bound setting (see above) is used, otherwise this wiki-bound setting overrides it.
 
 *Title prefix*
 Control the heading level of the initial main title of new pages and fill between one and four '+' in this field. Default is "++".

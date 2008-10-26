@@ -2,24 +2,25 @@
 data_dir = data
 
 [main]
-wiki_icon = 
-footnotes_as_wikiwords = False
-wiki_database_type = original_gadfly
 wikipagetitle_creationmode = 1
-tree_expandednodes_descriptorpathes_main = 
-further_wiki_words = 
-last_wiki_word = WikidPadHelp
-filestorage_identity_moddatemustmatch = False
-wiki_name = WikidPadHelp
-tree_last_root_wiki_word = WikidPadHelp
-tree_expandednodes_rememberduration = 1
-wikipagetitleprefix = ++
+footnotes_as_wikiwords = False
+last_wiki_word = ChangeLog
 hotkey_showhide_bywiki = 
-tree_force_scratchpad_visibility = True
-wikipagetitle_fromlinktitle = True
-export_default_dir = 
-filestorage_identity_moddateisenough = False
+log_window_autoshow = Gray
 tree_expandednodes_descriptorpathes_views = 
 filestorage_identity_filenamemustmatch = False
+wiki_icon = 
+wiki_name = WikidPadHelp
+tree_expandednodes_descriptorpathes_main = 
+wikipagetitleprefix = ++
+wikipagetitle_fromlinktitle = True
 first_wiki_word = WikidPadHelp
+tree_expandednodes_rememberduration = 1
+tree_last_root_wiki_word = WikidPadHelp
+tree_force_scratchpad_visibility = True
+further_wiki_words = 
+filestorage_identity_moddatemustmatch = False
+filestorage_identity_moddateisenough = False
+wiki_database_type = original_gadfly
+export_default_dir = 
 

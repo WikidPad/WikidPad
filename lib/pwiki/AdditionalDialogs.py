@@ -28,6 +28,10 @@ from SearchAndReplace import ListWikiPagesOperation
 
 
 class SelectWikiWordDialog(wx.Dialog):
+    """
+    Called for "Append/Prepend wiki word" in tree node conext menu
+    """
+
     def __init__(self, pWiki, ID, title="Select Wiki Word",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D):
@@ -59,7 +63,7 @@ class SelectWikiWordDialog(wx.Dialog):
         wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
 
     def OnOk(self, evt):
-        if not self.pWiki.getWikiData().isDefinedWikiWord(self.wikiWord):
+        if not self.pWiki.getWikiDocument().isDefinedWikiWord(self.wikiWord):
             words = self.pWiki.getWikiData().getWikiWordsWith(self.wikiWord,
                     True)
             if len(words) > 0:
@@ -168,7 +172,7 @@ class OpenWikiWordDialog(wx.Dialog):
             # continue, so return True
             return True
 
-        if not self.pWiki.getWikiData().isDefinedWikiWord(self.wikiWord):
+        if not self.pWiki.getWikiDocument().isDefinedWikiWord(self.wikiWord):
             words = self.pWiki.getWikiData().getWikiWordsWith(self.wikiWord,
                     True)
             if len(words) > 0:
@@ -247,7 +251,7 @@ class OpenWikiWordDialog(wx.Dialog):
             self.ctrls.text.SetFocus()
             return
         
-        if self.pWiki.getWikiData().isDefinedWikiWord(nakedWord):
+        if not self.pWiki.getWikiDocument().isCreatableWikiWord(nakedWord):
             self.pWiki.displayErrorMessage(_(u"'%s' exists already") % nakedWord)
             self.ctrls.text.SetFocus()
             return
@@ -906,7 +910,7 @@ class ImportDialog(wx.Dialog):
         self.parent = parent
         self.mainControl = mainControl
         
-        self.listPagesOperation = ListWikiPagesOperation()
+#         self.listPagesOperation = ListWikiPagesOperation()
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.parent, "ImportDialog")
 
@@ -1086,6 +1090,10 @@ class ImportDialog(wx.Dialog):
 
 
 class ChooseWikiWordDialog(wx.Dialog):
+    """
+    Used to allow selection from list of parents, parentless words, children
+    or bookmarked words.
+    """
     def __init__(self, pWiki, ID, words, motionType, title="Choose Wiki Word",
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
         d = wx.PreDialog()
@@ -1147,7 +1155,7 @@ class ChooseWikiWordDialog(wx.Dialog):
                 # Un-alias word
                 delword = self.pWiki.getWikiData().getAliasesWikiWord(delword)
                 
-                if self.pWiki.getWikiData().isDefinedWikiWord(delword):
+                if self.pWiki.getWikiDocument().isDefinedWikiWord(delword):
                     page = self.pWiki.getWikiDocument().getWikiPage(delword)
                     page.deletePage()
                     

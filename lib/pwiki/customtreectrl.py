@@ -3751,7 +3751,8 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         self.TagNextChildren(first, last, select)
 
 
-    def DoSelectItem(self, item, unselect_others=True, extended_select=False):
+    def DoSelectItem(self, item, unselect_others=True, extended_select=False,
+            expand_if_necessary=True):
         """Actually selects/unselects an item, sending a EVT_TREE_SEL_CHANGED event."""
 
         if not item:
@@ -3786,7 +3787,10 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         parent = self.GetItemParent(item)
         while parent:
             if not self.IsExpanded(parent):
-                self.Expand(parent)
+                if expand_if_necessary:
+                    self.Expand(parent)
+                else:
+                    return # TODO Better reaction?
 
             parent = self.GetItemParent(parent)
         
@@ -3832,7 +3836,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             self.GetEventHandler().ProcessEvent(event)
 
 
-    def SelectItem(self, item, select=True):
+    def SelectItem(self, item, select=True, expand_if_necessary=True):
         """Selects/deselects an item."""
 
         if not item:
@@ -3840,7 +3844,8 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         
         if select:
         
-            self.DoSelectItem(item, not self.HasFlag(TR_MULTIPLE))
+            self.DoSelectItem(item, not self.HasFlag(TR_MULTIPLE),
+                    expand_if_necessary=expand_if_necessary)
         
         else: # deselect
         

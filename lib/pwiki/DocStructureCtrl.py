@@ -39,7 +39,7 @@ class DocStructureCtrl(EnhancedListControl):
                 ("changed live text", self.onUpdateNeeded)
 #                 ("options changed", self.onUpdateNeeded)
         ))
-        
+
         self.__sinkApp = wxKeyFunctionSink((
                 ("options changed", self.onUpdateNeeded),
         ), wx.GetApp().getMiscEvent(), self)
@@ -125,7 +125,6 @@ class DocStructureCtrl(EnhancedListControl):
 
 
     def onUpdateNeeded(self, miscevt):
-#         print "onUpdateNeeded"
         self.updateList()
 
 

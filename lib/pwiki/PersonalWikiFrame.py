@@ -972,7 +972,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if u"a" in entry.flags:
             self.appendText(entry.value)
         else:
-            self.addText(entry.value)
+            self.addText(entry.value, replaceSel=True)
 
 
     
@@ -2886,7 +2886,7 @@ These are your default global settings.
             # Remove/Replace undefined wiki words
             wwo = []
             for word in wikiWordsToOpen:
-                if self.getWikiData().isDefinedWikiWord(word):
+                if self.getWikiDocument().isDefinedWikiWord(word):
                     wwo.append(word)
                     continue
 
@@ -2910,7 +2910,7 @@ These are your default global settings.
             if len(wikiWordsToOpen) > 0 and wikiWordsToOpen[0] != self.wikiName:
                 firstWikiWord = wikiWordsToOpen[0]
                 # if the word is not a wiki word see if a word that starts with the word can be found
-                if not self.getWikiData().isDefinedWikiWord(firstWikiWord):
+                if not self.getWikiDocument().isDefinedWikiWord(firstWikiWord):
                     wordsStartingWith = self.getWikiData().getWikiWordsStartingWith(
                             firstWikiWord, True)
                     if wordsStartingWith:
@@ -2921,7 +2921,7 @@ These are your default global settings.
 
             # If present, open further words in tabs on the right
             for word in wikiWordsToOpen[1:]:
-                if not self.getWikiData().isDefinedWikiWord(word):
+                if not self.getWikiDocument().isDefinedWikiWord(word):
                     wordsStartingWith = self.getWikiData().getWikiWordsStartingWith(
                             word, True)
                     if wordsStartingWith:
@@ -3207,7 +3207,7 @@ These are your default global settings.
         if wd.getAutoReconnectTriedFlag():
             # Automatic reconnect was tried already, so don't try again
             return False
-            
+
         self.statusBar.PushStatusText(_(u"Trying to reconnect ..."), 0)
 
         try:
@@ -3221,7 +3221,7 @@ These are your default global settings.
                 traceback.print_exc()
         finally:
             self.statusBar.PopStatusText(0)
-            
+
         return False
 
 
@@ -3230,7 +3230,7 @@ These are your default global settings.
         if dpp is None:
             self.createNewDocPagePresenterTab()
             dpp = self.getCurrentDocPagePresenter()
-            
+
         dpp.openFuncPage(funcTag, **evtprops)
 
 
@@ -3346,7 +3346,7 @@ These are your default global settings.
     def deleteWikiWord(self, wikiWord):
         if wikiWord and self.requireWriteAccess():
             try:
-                if self.getWikiData().isDefinedWikiWord(wikiWord):
+                if self.getWikiDocument().isDefinedWikiWord(wikiWord):
                     page = self.getWikiDocument().getWikiPage(wikiWord)
                     page.deletePage()
             except (IOError, OSError, DbAccessError), e:
@@ -4000,7 +4000,7 @@ These are your default global settings.
             return False
 
         try:
-            if self.getWikiData().isDefinedWikiWord(toWikiWord):
+            if not self.getWikiDocument().isCreatableWikiWord(toWikiWord):
                 self.displayErrorMessage(
                         _(u"Cannot rename to '%s', word already exists") %
                         toWikiWord)
@@ -4115,7 +4115,7 @@ These are your default global settings.
                     continue
 #                     return False
 
-                if self.getWikiData().isDefinedWikiWord(wikiWord):
+                if not self.getWikiDocument().isCreatableWikiWord(wikiWord):
                     result = wx.MessageBox(uniToGui(_(
                             u'Wiki word %s exists already\n'
                             u'Would you like to append to the word?') %
@@ -4125,6 +4125,7 @@ These are your default global settings.
                     if result == wx.NO:
                         continue
                     
+                    wikiWord = self.getWikiDocument().getAliasesWikiWord(wikiWord)
                     newWord = False
 
                 break
@@ -4574,7 +4575,7 @@ These are your default global settings.
         else:
             try:
                 # self.saveCurrentDocPage()
-                if self.getWikiData().isDefinedWikiWord(wikiWord):
+                if self.getWikiDocument().isDefinedWikiWord(wikiWord):
                     page = self.getWikiDocument().getWikiPage(wikiWord)
                     page.appendLiveText(u"\n\n%s%s: %s%s" %
                             (bs, name, value, be))
@@ -4583,18 +4584,32 @@ These are your default global settings.
                 raise
 
 
-    def addText(self, text):
+    def addText(self, text, replaceSel=False):
         """
         Add text to current active editor view
         """
-        self.getActiveEditor().AddText(text)
+        ed = self.getActiveEditor()
+        ed.BeginUndoAction()
+        try:
+            if replaceSel:
+                ed.ReplaceSelection(text)
+            else:
+                ed.AddText(text)
+        finally:
+            ed.EndUndoAction()
 
 
     def appendText(self, text):
         """
         Append text to current active editor view
         """
-        self.getActiveEditor().AppendText(text)
+        ed = self.getActiveEditor()
+        ed.BeginUndoAction()
+        try:
+            self.getActiveEditor().AppendText(text)
+        finally:
+            ed.EndUndoAction()
+
 
     def insertDate(self):
         if self.isReadOnlyPage():

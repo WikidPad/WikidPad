@@ -41,29 +41,29 @@ class AbstractSearchNode:
 
     def testWikiPage(self, word, text):
         """
-        Test, if wiki page fulfills the search criteria and return
-        truth value. This is useful for wiki-wide searching for pages.
+        Test, if wiki page fulfills the search criteria and returns a tuple
+        (<truth value>. This is useful for wiki-wide searching for pages.
         
         word -- Naked wiki word of the page
         text -- Textual content of the page
         """
-        return self.testText(text)
-        # assert 0  # Abstract
+#         return self.testText(text)
+        assert 0  # Abstract
         
 
-    def testText(self, text):
-        """
-        DEPRECATED
-        Test, if text of a page fulfills the search criteria and return
-        truth value. This is useful for wiki-wide searching for pages.
-        
-        Remarks:
-        - If the node contains non text-related criteria,
-          they are ignored (interpreted as 'unknown' in boolean logic).
-          If the truth value can't be determined, the Unknown object is
-          returned
-        """
-        assert 0  # Abstract
+#     def testText(self, text):
+#         """
+#         DEPRECATED
+#         Test, if text of a page fulfills the search criteria and return
+#         truth value. This is useful for wiki-wide searching for pages.
+#         
+#         Remarks:
+#         - If the node contains non text-related criteria,
+#           they are ignored (interpreted as 'unknown' in boolean logic).
+#           If the truth value can't be determined, the Unknown object is
+#           returned
+#         """
+#         assert 0  # Abstract
 
 
     def serializeBin(self, stream):
@@ -138,21 +138,21 @@ class AndSearchNode(AbstractSearchNode):
         return Unknown
 
         
-    def testText(self, text):
-        leftret = self.left.testText(text)
-        
-        if leftret == False:
-            return False
-            
-        rightret = self.right.testText(text)
-        
-        if rightret == False:
-            return False
-
-        if leftret == True and rightret == True:
-            return True
-            
-        return Unknown
+#     def testText(self, text):
+#         leftret = self.left.testText(text)
+#         
+#         if leftret == False:
+#             return False
+#             
+#         rightret = self.right.testText(text)
+#         
+#         if rightret == False:
+#             return False
+# 
+#         if leftret == True and rightret == True:
+#             return True
+#             
+#         return Unknown
 
 
     def orderNatural(self, wordSet, coll):
@@ -458,23 +458,23 @@ class AbstractContentSearchNode(AbstractSearchNode):
         """
         return (None, None)
 
-    def testText(self, text):
-        return Unknown
+#     def testText(self, text):
+#         return Unknown
         
-    def matchesPart(self, toReplace):
+    def matchesPart(self, text, range):
         """
-        Test if string toReplace matches operation. Mainly called before
+        Test if string text[range[0]: range[1]] matches operation. Mainly called before
         a replacement is done.
         """
         assert 0  # abstract
 
-    def replace(self, text, searchData, pattern):
+    def replace(self, text, foundData, pattern):
         """
         Return the content with which the area determined by searchData
         should be replaced.
         
         text -- Full text which was prior fed to searchText()
-        searchData -- tuple returned by searchText(), containing
+        foundData -- tuple returned by searchText(), containing
                 start and end position of found data and maybe
                 additional objects. searchData must come from the
                 searchText() method of the same node for which
@@ -514,22 +514,28 @@ class RegexTextNode(AbstractContentSearchNode):
         return (match.start(0), match.end(0), match)
 
 
-    def testText(self, text):
+    def testWikiPage(self, word, text):
         return bool(self.rePattern.search(text))
 
 
-    def matchesPart(self, toReplace):
+#     def testText(self, text):
+#         return bool(self.rePattern.search(text))
+
+
+    def matchesPart(self, text, range):
         """
-        Test if string toReplace matches operation. Mainly called before
+        Test if string text[range[0]: range[1]] matches operation. Mainly called before
         a replacement is done.
         """
-        match = self.rePattern.match(toReplace)
+#         match = self.rePattern.match(toReplace)
+        match = self.rePattern.match(text, range[0], range[1])
+
         if match:
-            return (0, len(toReplace), match)
+            return (match.start(0), match.end(0), match)
         else:
             return None
 
-    def replace(self, toReplace, foundData, pattern):
+    def replace(self, text, foundData, pattern):
         return foundData[2].expand(pattern)
 
 
@@ -562,20 +568,25 @@ class SimpleStrNode(AbstractContentSearchNode):
         return (pos, pos + len(self.subStr))
 
 
-    def testText(self, text):
+    def testWikiPage(self, word, text):
         return text.find(self.subStr) != -1
 
-    def matchesPart(self, toReplace):
+
+#     def testText(self, text):
+#         return text.find(self.subStr) != -1
+
+    def matchesPart(self, text, range):
         """
-        Test if string toReplace matches operation. Mainly called before
+        Test if string text[range[0]: range[1]] matches operation. Mainly called before
         a replacement is done.
         """
-        if self.subStr == toReplace:
-            return (0, len(toReplace))
+#         if self.subStr == toReplace:
+        if self.subStr == text[range[0]: range[1]]:
+            return (range[0], range[0] + len(self.subStr))
         else:
             return None
 
-    def replace(self, toReplace, foundData, pattern):
+    def replace(self, text, foundData, pattern):
         return pattern
 
 
@@ -595,9 +606,15 @@ class ListWikiPagesOperation:
 
     def setSearchOpTree(self, searchOpTree):
         self.searchOpTree = searchOpTree
-        
+
     def getSearchOpTree(self):
         return self.searchOpTree
+        
+#     def setWikiDocument(self, wikiDoc):
+#         self.wikiDocument = wikiDoc
+#     
+#     def getWikiDocument(self):
+#         return self.wikiDocument
 
     def serializeBin(self, stream):
         """
@@ -824,10 +841,18 @@ class SearchReplaceOperation:
         
         return self.title
         
-        
     def setTitle(self, title):
         self.title = title
+
         
+#     def setWikiDocument(self, wikiDoc):
+#         self.wikiDocument = wikiDoc
+#         if self.listWikiPagesOp is not None:
+#             self.listWikiPagesOp.setWikiDocument(wikiDoc)
+# 
+#     def getWikiDocument(self):
+#         return self.wikiDocument
+
     
     def serializeBin(self, stream):
         """
@@ -850,7 +875,7 @@ class SearchReplaceOperation:
         self.booleanOp = stream.serBool(self.booleanOp)
 
         self.wildCard = stream.serString(self.wildCard)
-                
+        
         if version > 0:
             self.listWikiPagesOp.serializeBin(stream)
         else:
@@ -897,7 +922,7 @@ class SearchReplaceOperation:
     def rebuildSearchOpTree(self):
         """
         Rebuild the search operation tree. Automatically called by
-        searchText() and testText() if necessary.
+        searchText() if necessary.
         The function may raise an exception (especially regex exception)
         if the search string ontains syntax errors.
         """
@@ -969,12 +994,10 @@ class SearchReplaceOperation:
                 self.cycleToStart)
 
 
-    def matchesPart(self, toReplace):
+    def matchesPart(self, text, range):
         """
-        Test if string toReplace matches operation and
-        returns a faked 'found' tuple or None if not matching
+        Test if string text[range[0]: range[1]] matches operation.
         """
-        
         if self.booleanOp:
             return None  # TODO Exception?
 
@@ -982,8 +1005,8 @@ class SearchReplaceOperation:
         if self.searchOpTree is None:
             self.rebuildSearchOpTree()
 
-        return self.searchOpTree.matchesPart(toReplace)
-        
+        return self.searchOpTree.matchesPart(text, range)
+
 
     def replace(self, text, foundData):
         """

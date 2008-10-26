@@ -16,6 +16,7 @@ WikidPadHelp/data/AutoSave.wiki -text
 WikidPadHelp/data/BoughtTemplate.wiki -text
 WikidPadHelp/data/BulletedLists.wiki -text
 WikidPadHelp/data/CamelCase.wiki -text
+WikidPadHelp/data/Cascading[!!-~]style[!!-~]sheets.wiki -text
 WikidPadHelp/data/ChangeFileSuffix.wiki -text
 WikidPadHelp/data/ChangeLog.wiki -text
 WikidPadHelp/data/ChangeLog2003.wiki -text
@@ -331,6 +332,7 @@ WikidPadHelp/data/wikidb.gfd -text
 WikidPadHelp/files/testimg.gif -text
 /WikidPadStarter.py -text
 /WikidPad_de_DE.po -text
+/appbase.css -text
 /bld.bat -text
 /buildGadflyZips.py -text
 docs/api.txt -text

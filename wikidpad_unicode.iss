@@ -1,6 +1,6 @@
 [Files]
 Source: dist\WikidPad.exe; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
-Source: dist\export\wikistyle.css; DestDir: {app}\export\; Components: Program_files; Flags: confirmoverwrite
+Source: dist\appbase.css; DestDir: {app}; Components: Program_files
 Source: dist\extensions\*; DestDir: {app}\extensions\; Components: Program_files; Flags: recursesubdirs ignoreversion
 Source: dist\icons\*.gif; DestDir: {app}\icons\; Components: Program_files; Flags: onlyifdoesntexist
 Source: dist\icons\pwiki.ico; DestDir: {app}\icons\; Components: Program_files; Flags: onlyifdoesntexist
@@ -41,17 +41,17 @@ Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 1.9beta18_5
+AppVerName=WikidPad 1.9beta19
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=1.9.18.5
-VersionInfoTextVersion=WikidPad 1.9beta18_5
+VersionInfoVersion=1.9.19.0
+VersionInfoTextVersion=WikidPad 1.9beta19
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-1.9beta18_5
+OutputBaseFilename=WikidPad-1.9beta19
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2008 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true

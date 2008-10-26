@@ -143,6 +143,9 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
         if self.getDocPage() is not None:
             self.getDocPage().informEditorTextChanged(changer)
 
+        self.fireMiscEventProps({"changed editor text": True,
+                "changed live text": True, "changer": changer})
+
 
     def miscEventHappened(self, miscevt):
         """

@@ -66,6 +66,11 @@ def bytelenSct_mbcs(us):
     return len(mbcsEnc(us)[0])
 
 
+
+_RE_LINE_INDENT = re.compile(ur"^[ \t]*")
+
+
+
 class IncrementalSearchDialog(wx.Frame):
     
     COLOR_YELLOW = wx.Colour(255, 255, 0);
@@ -689,12 +694,17 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         return (cs, ce)
 
 
-    def gotoCharPos(self, pos):
+    def gotoCharPos(self, pos, scroll=True):
         # Go to the end and back again, so the anchor is
         # near the top
-        self.SetSelection(-1, -1)
-        self.GotoPos(self.GetLength())
-        self.GotoPos(self.bytelenSct(self.GetText()[:pos]))
+        sctPos = self.bytelenSct(self.GetText()[:pos])
+        if scroll:
+            self.SetSelection(-1, -1)
+            self.GotoPos(self.GetLength())
+            self.GotoPos(sctPos)
+        else:
+            self.SetSelectionStart(sctPos)
+            self.SetSelectionEnd(sctPos)
 
         # self.SetSelectionByCharPos(pos, pos)
 
@@ -1249,6 +1259,12 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 break
 
             charStartPos = end
+            
+            
+    def handleDropText(self, x, y, text):
+        self.DoDropText(x, y, text)
+        self.gotoCharPos(self.GetSelectionCharPos()[1], scroll=False)
+        self.SetFocus()
 
 
     def clearStylingCache(self):
@@ -1305,7 +1321,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
 
     def processTokens(self, tokens, threadholder):
-        wikiData = self.presenter.getWikiDocument().getWikiData()
+        wikiDoc = self.presenter.getWikiDocument()
+        wikiData = wikiDoc.getWikiData()
         stylebytes = SnippetCollector()
         
         for tok in tokens:
@@ -1316,10 +1333,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             bytestylelen = self.bytelenSct(tok.text)
             targetlen = bytestylelen + len(stylebytes)
             if styleno == WikiFormatting.FormatTypes.WikiWord:
-                if wikiData.isDefinedWikiWord(tok.node.nakedWord):
-                    styleno = WikiFormatting.FormatTypes.AvailWikiWord
-                else:
+                if wikiDoc.isCreatableWikiWord(tok.node.nakedWord):
                     styleno = WikiFormatting.FormatTypes.WikiWord
+                else:
+                    styleno = WikiFormatting.FormatTypes.AvailWikiWord
 
             elif styleno == WikiFormatting.FormatTypes.Insertion:
                 styleno = WikiFormatting.FormatTypes.Script
@@ -2127,14 +2144,17 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         If sarOp uses a regular expression, this function may throw
         a re.error exception.
         """
-        if sarOp.matchesPart(self.GetSelectedText()) is not None:
+        range = self.GetSelectionCharPos()
+        
+#         if sarOp.matchesPart(self.GetSelectedText()) is not None:
+        if sarOp.matchesPart(self.GetText(), range) is not None:
             # currently selected text matches search operation
             # -> continue searching at the end of selection
-            return self.GetSelectionCharPos()[1]
+            return range[1]
         else:
             # currently selected text does not match search
             # -> continue searching at the beginning of selection
-            return self.GetSelectionCharPos()[0]
+            return range[0]
 
 
     def executeSearch(self, sarOp, searchCharStartPos=-1, next=False):
@@ -2177,13 +2197,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         Returns char position after replacement or -1 if replacement wasn't
         possible
         """
-        seltext = self.GetSelectedText()
-        found = sarOp.matchesPart(seltext)
+#         seltext = self.GetSelectedText()
+        text = self.GetText()
+#         found = sarOp.matchesPart(seltext)
+        range = self.GetSelectionCharPos()
         
+#         if sarOp.matchesPart(self.GetSelectedText()) is not None:
+        found = sarOp.matchesPart(text, range)
+
         if found is None:
             return -1
 
-        replacement = sarOp.replace(seltext, found)                    
+        replacement = sarOp.replace(text, found)                    
         bytestart = self.GetSelectionStart()
         self.ReplaceSelection(replacement)
         selByteEnd = bytestart + self.bytelenSct(replacement)
@@ -2228,23 +2253,26 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             curLineNum = curLineNum + 1
             curLine = self.GetLine(curLineNum)
         endLine = curLineNum
-
+        
         if (startLine <= endLine):
             # get the start and end of the lines
             startPos = self.PositionFromLine(startLine)
             endPos = self.GetLineEndPosition(endLine)
 
             # get the indentation for rewrapping
-            indent = self.GetLineIndentation(startLine)
+#             indent = self.GetLineIndentation(startLine)
+            indent = _RE_LINE_INDENT.match(self.GetLine(startLine)).group(0)
             subIndent = indent
 
             # if the start of the para is a bullet the subIndent has to change
             if WikiFormatting.BulletRE.match(self.GetLine(startLine)):
-                subIndent = indent + 2
+#                 subIndent = indent + 2
+                subIndent = indent + u"  "
             else:
                 match = WikiFormatting.NumericBulletRE.match(self.GetLine(startLine))
                 if match:
-                    subIndent = indent + len(match.group(2)) + 2
+#                     subIndent = indent + len(match.group(2)) + 2
+                    subIndent = indent + u" " * (len(match.group(2)) + 2)
 
             # get the text that will be wrapped
             text = self.GetTextRange(startPos, endPos)
@@ -2265,8 +2293,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 wrapPosition = 5
 
             filledText = fill(text, width=wrapPosition,
-                    initial_indent=u" " * indent, 
-                    subsequent_indent=u" " * subIndent)
+                    initial_indent=indent, 
+                    subsequent_indent=subIndent)
+#             filledText = fill(text, width=wrapPosition,
+#                     initial_indent=u" " * indent, 
+#                     subsequent_indent=u" " * subIndent)
             # replace the text based on targetting
             self.SetTargetStart(startPos)
             self.SetTargetEnd(endPos)
@@ -2437,6 +2468,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 self.getLoadedDocPage().setDirty(True)
                 self.presenter.informEditorTextChanged(self)
 
+
     def OnCharAdded(self, evt):
         "When the user presses enter reindent to the previous level"
 
@@ -2448,14 +2480,16 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             currentLine = self.GetCurrentLine()
             if currentLine > 0:
                 previousLine = self.GetLine(currentLine-1)
+                indent = _RE_LINE_INDENT.match(previousLine).group(0)
 
                 # check if the prev level was a bullet level
                 if self.autoBullets:
                     match = WikiFormatting.BulletRE.match(previousLine)
                     if match:
-                        self.AddText(
-                                (" " * self.GetLineIndentation(currentLine-1)) +
-                                match.group("actualBullet"))
+                        self.AddText(indent + match.group("actualBullet"))
+#                         self.AddText(
+#                                 (" " * self.GetLineIndentation(currentLine-1)) +
+#                                 match.group("actualBullet"))
                         return
 
                     match = WikiFormatting.NumericBulletRE.search(previousLine)
@@ -2464,14 +2498,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                         prevNum = int(prevNumStr)
                         nextNum = prevNum+1
                         adjustment = len(str(nextNum)) - len(prevNumStr)
-
-                        self.AddText(u"%s%s%d. " % (u" " *
-                                (self.GetLineIndentation(currentLine-1) - adjustment),
-                                match.group(2), int(prevNum)+1))
+                        if adjustment == 0:
+                            self.AddText(u"%s%s%d. " % (indent,
+                                    match.group(2), int(prevNum)+1))
+                        else:
+                            self.AddText(u"%s%s%d. " % (u" " *
+                                    (self.GetLineIndentation(currentLine-1) - adjustment),
+                                    match.group(2), int(prevNum)+1))
                         return
 
                 if self.autoIndent:
-                    self.AddText(u" " * self.GetLineIndentation(currentLine-1))
+                    self.AddText(indent)
+#                     self.AddText(u" " * self.GetLineIndentation(currentLine-1))
 
 
     def OnKeyDown(self, evt):
@@ -2699,8 +2737,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         for tok in tokens:
             if tok.ttype == WikiFormatting.FormatTypes.WikiWord:
                 wikiWord = tok.node.nakedWord
-                if wikiData.isDefinedWikiWord(wikiWord):
-                    wikiWord = wikiData.getAliasesWikiWord(wikiWord)
+                if not wikiDocument.isCreatableWikiWord(wikiWord):
+                    wikiWord = wikiDocument.getAliasesWikiWord(wikiWord)
                     propList = wikiData.getPropertiesForWord(wikiWord)
                     for key, value in propList:
                         if key == u"short_hint":
@@ -2777,7 +2815,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     # Absolute file: URL
                     urls.append("file:%s" % url)
     
-        editor.DoDropText(x, y, " ".join(urls))
+        editor.handleDropText(x, y, " ".join(urls))
 
 
     # TODO
@@ -2863,7 +2901,7 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
 
     def OnDropText(self, x, y, text):
         text = lineendToInternal(text)
-        self.editor.DoDropText(x, y, text)
+        self.editor.handleDropText(x, y, text)
 
 
     def OnDropFiles(self, x, y, filenames):

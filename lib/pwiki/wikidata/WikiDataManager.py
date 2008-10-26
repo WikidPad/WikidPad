@@ -9,7 +9,7 @@ from wx import GetApp
 from pwiki.MiscEvent import MiscEventSourceMixin
 
 from pwiki.WikiExceptions import *
-from pwiki.StringOps import mbcsDec, re_sub_escape, pathEnc
+from pwiki.StringOps import mbcsDec, re_sub_escape, pathEnc, pathDec
 from pwiki.DocPages import WikiPage, FunctionalPage, AliasWikiPage
 
 import pwiki.PageAst as PageAst
@@ -280,7 +280,8 @@ class WikiDataManager(MiscEventSourceMixin):
         if not os.path.isabs(dataDir):
             dataDir = os.path.join(os.path.dirname(wikiConfigFilename), dataDir)
 
-        dataDir = mbcsDec(os.path.abspath(dataDir), "replace")[0]
+#         dataDir = mbcsDec(os.path.abspath(dataDir), "replace")[0]
+        dataDir = pathDec(os.path.abspath(dataDir))
 
 #         self.wikiConfigFilename = wikiConfigFilename
 
@@ -576,8 +577,31 @@ class WikiDataManager(MiscEventSourceMixin):
 
     def isDefinedWikiWord(self, wikiWord):
         return self.wikiData.isDefinedWikiWord(wikiWord)
-
         
+        
+    def isCreatableWikiWord(self, wikiWord):
+        """
+        Returns True if wikiWord can be created in the database. Does not
+        check against regular expression, but checks if word already
+        exists or (if document is in caseless mode) if word with different
+        case but same content already exists.
+        If this returns False, self.getAliasesWikiWord(wikiWord) must be able to
+        return an existing word whose existence prevents creation of wikiWord
+
+        TODO: Check against existing aliases
+        """
+        # TODO: Caseless mode
+        return not self.wikiData.isDefinedWikiWord(wikiWord)
+
+
+    def getNormcasedWikiWord(self, word):
+        """
+        Get normcased version of word. It isn't checked if word exists.
+        Currently this function just calls word.lower().
+        """
+        return word.lower()
+
+
     def getWikiPage(self, wikiWord):
         """
         Fetch a WikiPage for the wikiWord, throws WikiWordNotFoundException
@@ -659,8 +683,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
     def createWikiPage(self, wikiWord, suggNewPageTitle=None):
         """
-        create a new wikiPage for the wikiWord. Cache is not updated until
-        page is saved.
+        Create a new wikiPage for the wikiWord.
         suggNewPageTitle -- if not None contains the title of the page to create
                 (without syntax specific prefix).
         """
@@ -1019,6 +1042,7 @@ class WikiDataManager(MiscEventSourceMixin):
         
 
     def getAliasesWikiWord(self, word):
+        # TODO: Resolve properly in caseless mode
         return self.getWikiData().getAliasesWikiWord(word)
 
     def filterAliasesWikiWord(self, word):

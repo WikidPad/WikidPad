@@ -50,7 +50,7 @@ ItalicRE        = re.compile(ur"\b_(?P<italicContent>" + PlainCharacterPAT +
         ur"+?)_\b",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 HtmlTagRE = re.compile(
-        ur"</?[A-Za-z][A-Za-z0-9]*(?:/| [^\n>]*)?>",
+        ur"</?[A-Za-z][A-Za-z0-9:]*(?:/| [^\n>]*)?>",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 HtmlEntityRE = re.compile(
         ur"&(?:[A-Za-z0-9]{2,10}|#[0-9]{1,10}|#x[0-9a-fA-F]{1,8});",

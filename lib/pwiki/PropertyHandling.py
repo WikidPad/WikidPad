@@ -406,9 +406,9 @@ class PropertyCheckGlobalGraphInclude(AbstractPropertyCheck):
             props on a page
         """
         wikiWord = self.wikiPage.getWikiWord()
-        wikiDoc = self.wikiPage.getWikiDocument()
+        wikiDocument = self.wikiPage.getWikiDocument()
         
-        props = wikiDoc.getPropertyTriples(None,
+        props = wikiDocument.getPropertyTriples(None,
                 "global.graph.relations.exclude", None)
         
         if len(props) > 0:

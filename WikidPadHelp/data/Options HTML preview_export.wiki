@@ -39,7 +39,7 @@ Under Windows you can choose the renderer for the HTML preview:
 
 Changes of this setting only have an effect for newly opened WikidPad windows.
 
-Mozilla and IE renderer use a CSS-file located in the configuration directory (see "Help" menu -> "About" and scroll to the end to find out where it is), subfolder ".WikidPadGlobals", file "wikipreview.css".
+Mozilla and IE renderer can use CSS-files for preview, see [Cascading style sheets].
 
     *Important remarks*
     * Using IE or Mozilla as renderers means that any weaknesses of

@@ -31,11 +31,11 @@ class LinkCreatorForPreview:
     """
     Faked link dictionary for HTML exporter
     """
-    def __init__(self, wikiData):
-        self.wikiData = wikiData
+    def __init__(self, wikiDocument):
+        self.wikiDocument = wikiDocument
         
     def get(self, word, default = None):
-        if self.wikiData.isDefinedWikiWord(word):
+        if self.wikiDocument.isDefinedWikiWord(word):
             return u"internaljump:wikipage/%s" % word
         else:
             return default
@@ -69,9 +69,8 @@ class WikiHtmlView(wx.html.HtmlWindow):
                 ("loaded current wiki page", self.onLoadedCurrentWikiPage),
                 ("reloaded current doc page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
-                ("closing current wiki", self.onClosingCurrentWiki),
+                ("closing current wiki", self.onClosingCurrentWiki)
 #                 ("changed options", self.onOptionsChanged),
-                ("changed live text", self.onChangedLiveText)
         ), self.presenter.getMiscEvent())
         
         self.__sinkApp = wxKeyFunctionSink((
@@ -80,6 +79,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
         
         self.__sinkDocPage = wxKeyFunctionSink((
                 ("updated wiki page", self.onUpdatedWikiPage),
+                ("changed live text", self.onChangedLiveText)
         ), self.presenter.getCurrentDocPageProxyEvent())
 
         self.visible = False
@@ -203,8 +203,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
             html = self.exporterInstance.exportContentToHtmlString(word, content,
                     wikiPage.getFormatDetails(),
-                    LinkCreatorForPreview(
-                        self.presenter.getWikiDocument().getWikiData()))
+                    LinkCreatorForPreview(self.presenter.getWikiDocument()))
 
             wx.GetApp().getInsertionPluginManager().taskEnd()
 
@@ -243,11 +242,11 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
 
     def _updateTempFilePrefPath(self):
-        wikiDoc = self.presenter.getWikiDocument()
+        wikiDocument = self.presenter.getWikiDocument()
 
-        if wikiDoc is not None:
+        if wikiDocument is not None:
             self.exporterInstance.tempFileSet.setPreferredPath(
-                    wikiDoc.getWikiTempDir())
+                    wikiDocument.getWikiTempDir())
         else:
             self.exporterInstance.tempFileSet.setPreferredPath(None)
 
@@ -512,7 +511,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
                         return
                     wikiData = wikiDocument.getWikiData()
 
-                    if wikiData.isDefinedWikiWord(wikiWord):
+                    if wikiDocument.isDefinedWikiWord(wikiWord):
                         wikiWord = wikiData.getAliasesWikiWord(wikiWord)
 
                         propList = wikiData.getPropertiesForWord(wikiWord)

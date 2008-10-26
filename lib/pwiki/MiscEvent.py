@@ -205,6 +205,12 @@ class MiscEvent(object):
     def setSource(self, source):
         self.source = source
         
+    def getProps(self):
+        return self.properties
+        
+    def getListenerList(self):
+        return self.listenerList
+        
     def getMiscEvent(self):
         return self
 

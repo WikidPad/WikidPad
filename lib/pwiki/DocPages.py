@@ -20,6 +20,51 @@ import PageAst
 from wx import GetApp
 
 
+
+
+
+
+def _fillAtEmptyNear(arr, pos, item):
+    """
+    Set arr[pos] = item if arr[pos] was None, else go down in array
+    and set at first position with arr[i] == None. If reaching end of array,
+    start again at beginning.
+    Helper for DataCarryingPage.getChildRelationshipsTreeOrder()
+    """
+    if pos >= len(arr):
+        pos = -1
+    elif pos < -len(arr):
+        pos = 0
+
+    if pos > -1:
+        for i in xrange(pos, len(arr)):
+            if arr[i] is None:
+                arr[i] = item
+                return i
+        
+        for i in xrange(0, pos):
+            if arr[i] is None:
+                arr[i] = item
+                return i
+    else:
+        pos += len(arr)
+
+        for i in xrange(pos, -1, -1):
+            if arr[i] is None:
+                arr[i] = item
+                return i
+        
+        for i in xrange(len(arr) - 1, pos, -1):
+            if arr[i] is None:
+                arr[i] = item
+                return i
+        
+    
+    raise InternalError("fillAtEmptyNear couldn't find empty place")
+
+
+
+
 class DocPage(MiscEventSourceMixin):
     """
     Abstract common base class for WikiPage and FunctionalPage
@@ -436,6 +481,7 @@ class WikiPage(DataCarryingPage):
         Does not support caching
         """
         wikiData = self.getWikiData()
+        wikiDocument = self.getWikiDocument()
         
         if withFields is None:
             withFields = ()
@@ -454,11 +500,12 @@ class WikiPage(DataCarryingPage):
             # First unalias wiki pages and remove non-existing ones
             clearedIncSet = sets.Set()
             for w in includeSet:
-                w = wikiData.getAliasesWikiWord(w)  # TODO: Use wikiDoc.filterAliasesWikiWord()
+#                 w = wikiDocument.getAliasesWikiWord(w)
+                w = wikiDocument.filterAliasesWikiWord(w)
                 if w is None:
                     continue
                 
-                if not wikiData.isDefinedWikiWord(w):
+                if not wikiDocument.isDefinedWikiWord(w):
                     continue
 
                 clearedIncSet.add(w)
@@ -565,9 +612,9 @@ class WikiPage(DataCarryingPage):
 
 
     def isDefined(self):
-        return self.getWikiData().isDefinedWikiWord(self.getWikiWord())
-        
-        
+        return self.getWikiDocument().isDefinedWikiWord(self.getWikiWord())
+
+
     def deletePage(self):
         """
         Deletes the page from database
@@ -738,7 +785,7 @@ class WikiPage(DataCarryingPage):
         if self.isReadOnlyEffect():
             return
 
-        if not self.getWikiData().isDefinedWikiWord(self.wikiWord):
+        if not self.getWikiDocument().isDefinedWikiWord(self.wikiWord):
             # Pages isn't yet in database  -> fire event
             # The event may be needed to invalidate a cache
             self.fireMiscEventKeys(("saving new wiki page",))
@@ -1059,18 +1106,104 @@ class WikiPage(DataCarryingPage):
 
                 relations.sort(cmpLowerAsc)
 
-        relationData = []
-        position = 1
+
+
+        priorized = []
+        positioned = []
+        other = []
+
+        # Put relations into their appropriate arrays
         for relation in relations:
             relationPage = wikiDocument.getWikiPageNoError(relation)
-            relationData.append((relation, relationPage, position))
-            position += 1
+            props = relationPage.getProperties()
+            try:
+                if (props.has_key(u'tree_position')):
+                    positioned.append((int(props[u'tree_position'][-1]) - 1, relation))
+                elif (props.has_key(u'priority')):
+                    priorized.append((int(props[u'priority'][-1]), relation))
+                else:
+                    other.append(relation)
+            except:
+                other.append(relation)
+                
+        # Sort special arrays
+        priorized.sort(key=lambda t: t[0])
+        positioned.sort(key=lambda t: t[0])
 
-        # Sort again, using tree position and priority properties
-#         relationData.sort(_relationSort)
-        relationData.sort(key=_relationKey)
 
-        return [rd[0] for rd in relationData]
+        result = []
+        ipr = 0
+        ipo = 0
+        iot = 0
+
+        for i in xrange(len(relations)):
+            if ipo < len(positioned) and positioned[ipo][0] <= i:
+                result.append(positioned[ipo][1])
+                ipo += 1
+                continue
+            
+            if ipr < len(priorized):
+                result.append(priorized[ipr][1])
+                ipr += 1
+                continue
+            
+            if iot < len(other):
+                result.append(other[iot])
+                iot += 1
+                continue
+            
+            # When reaching this, only positioned can have elements yet
+            if ipo < len(positioned):
+                result.append(positioned[ipo][1])
+                ipo += 1
+                continue
+            
+            raise InternalError("Empty relation sorting arrays")
+        
+
+        return result
+
+
+
+#         result = [None] * len(relations)
+#         priorized = []
+#         other = []
+# 
+# 
+#         # Relations with "tree_position" attribute
+#         # get their final position here, the rest goes to arrays
+#         #  priorized  or  other
+#         for relation in relations:
+#             relationPage = wikiDocument.getWikiPageNoError(relation)
+#             props = relationPage.getProperties()
+#             try:
+#                 if (props.has_key(u'tree_position')):
+#                     _fillAtEmptyNear(result, int(props[u'tree_position'][-1]) - 1, relation)
+#                 elif (props.has_key(u'priority')):
+#                     priorized.append((int(props[u'priority'][-1]), relation))
+# #                     _fillAtEmptyNear(result, int(props[u'priority'][-1]) - 1, relation)
+#                 else:
+#                     other.append(relation)
+#             except:
+#                 other.append(relation)
+#                 
+#         # Sort priorized
+#         priorized.sort()
+# 
+#         # Now mix  priorized  and  other  into  result  array        
+#         ir = 0
+#         for dummy, relation in priorized:
+#             ir = result.index(None, ir)
+#             result[ir] = relation
+#             ir += 1
+# 
+#         for relation in other:
+#             ir = result.index(None, ir)
+#             result[ir] = relation
+#             ir += 1
+# 
+#         return result
+
 
 
         # TODO Remove aliases?
@@ -1180,9 +1313,8 @@ class FunctionalPage(DataCarryingPage):
 
 
     def _loadDbSpecificPage(self, subtag):
-        wikiData = self.wikiDocument.getWikiData()
-        if wikiData.isDefinedWikiWord(subtag):
-            return wikiData.getContent(subtag)
+        if self.wikiDocument.isDefinedWikiWord(subtag):
+            return self.wikiDocument.getWikiData().getContent(subtag)
         else:
             return u""
 
@@ -1261,7 +1393,8 @@ class FunctionalPage(DataCarryingPage):
             return
 
         wikiData = self.wikiDocument.getWikiData()
-        if wikiData.isDefinedWikiWord(subtag) and text == u"":
+
+        if self.wikiDocument.isDefinedWikiWord(subtag) and text == u"":
             # Delete content
             wikiData.deleteContent(subtag)
         else:
@@ -1347,51 +1480,52 @@ class FunctionalPage(DataCarryingPage):
 # Two search helpers for WikiPage.getChildRelationshipsTreeOrder
 
 def _relationKey(a):
-    propsA = a[1].getProperties()
-    aSort = None
+    return a[2]
+#     propsA = a[1].getProperties()
+#     aSort = None
+# 
+#     try:
+#         if (propsA.has_key(u'tree_position')):
+#             aSort = int(propsA[u'tree_position'][-1])
+#         elif (propsA.has_key(u'priority')):
+#             aSort = int(propsA[u'priority'][-1])
+#         else:
+#             aSort = a[2]
+#     except:
+#         aSort = a[2]
+# 
+#     return aSort    
 
-    try:
-        if (propsA.has_key(u'tree_position')):
-            aSort = int(propsA[u'tree_position'][-1])
-        elif (propsA.has_key(u'priority')):
-            aSort = int(propsA[u'priority'][-1])
-        else:
-            aSort = a[2]
-    except:
-        aSort = a[2]
-
-    return aSort    
 
 
-
-def _relationSort(a, b):
-    propsA = a[1].getProperties()
-    propsB = b[1].getProperties()
-
-    aSort = None
-    bSort = None
-
-    try:
-        if (propsA.has_key(u'tree_position')):
-            aSort = int(propsA[u'tree_position'][-1])
-        elif (propsA.has_key(u'priority')):
-            aSort = int(propsA[u'priority'][-1])
-        else:
-            aSort = a[2]
-    except:
-        aSort = a[2]
-
-    try:            
-        if (propsB.has_key(u'tree_position')):
-            bSort = int(propsB[u'tree_position'][-1])
-        elif (propsB.has_key(u'priority')):
-            bSort = int(propsB[u'priority'][-1])
-        else:
-            bSort = b[2]
-    except:
-        bSort = b[2]
-
-    return cmp(aSort, bSort)
+# def _relationSort(a, b):
+#     propsA = a[1].getProperties()
+#     propsB = b[1].getProperties()
+# 
+#     aSort = None
+#     bSort = None
+# 
+#     try:
+#         if (propsA.has_key(u'tree_position')):
+#             aSort = int(propsA[u'tree_position'][-1])
+#         elif (propsA.has_key(u'priority')):
+#             aSort = int(propsA[u'priority'][-1])
+#         else:
+#             aSort = a[2]
+#     except:
+#         aSort = a[2]
+# 
+#     try:            
+#         if (propsB.has_key(u'tree_position')):
+#             bSort = int(propsB[u'tree_position'][-1])
+#         elif (propsB.has_key(u'priority')):
+#             bSort = int(propsB[u'priority'][-1])
+#         else:
+#             bSort = b[2]
+#     except:
+#         bSort = b[2]
+# 
+#     return cmp(aSort, bSort)
 
 
 def _floatToCompInt(f):

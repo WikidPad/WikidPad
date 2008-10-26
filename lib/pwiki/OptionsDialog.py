@@ -472,10 +472,10 @@ class OptionsDialog(wx.Dialog):
         self.ctrls.chHtmlPreviewRenderer.Enable(
                 WikiHtmlView.WikiHtmlViewIE is not None)
         
-        wikiDoc = self.pWiki.getWikiDocument()
-        if wikiDoc is not None:        
+        wikiDocument = self.pWiki.getWikiDocument()
+        if wikiDocument is not None:        
             self.ctrls.cbWikiReadOnly.SetValue(
-                    wikiDoc.getWriteAccessDeniedByConfig())
+                    wikiDocument.getWriteAccessDeniedByConfig())
         
         self.OnEditorImagePasteFileTypeChoice(None)
 
@@ -615,10 +615,10 @@ class OptionsDialog(wx.Dialog):
 
         
         # Options with special treatment (before standard handling)
-        wikiDoc = self.pWiki.getWikiDocument()
+        wikiDocument = self.pWiki.getWikiDocument()
 
-        if wikiDoc is not None and not self.ctrls.cbWikiReadOnly.GetValue():
-            wikiDoc.setWriteAccessDeniedByConfig(False)
+        if wikiDocument is not None and not self.ctrls.cbWikiReadOnly.GetValue():
+            wikiDocument.setWriteAccessDeniedByConfig(False)
 
         # Then transfer options from dialog to config object
         for oct in self.combinedOptionToControl:
@@ -671,8 +671,8 @@ class OptionsDialog(wx.Dialog):
         else:
             self.pWiki.getConfig().set("main", "new_window_on_follow_wiki_url", "0")
 
-        if wikiDoc is not None and self.ctrls.cbWikiReadOnly.GetValue():
-            wikiDoc.setWriteAccessDeniedByConfig(True)
+        if wikiDocument is not None and self.ctrls.cbWikiReadOnly.GetValue():
+            wikiDocument.setWriteAccessDeniedByConfig(True)
 
         # Ok for each panel
         for panel in self.panelList:

@@ -654,7 +654,6 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
                     ("writecompatver", str(VERSION_WRITECOMPAT)),  # Lowest format version which is write compatible
                     ("readcompatver", str(VERSION_READCOMPAT)),  # Lowest format version which is read compatible
                     ("branchtag", "WikidPadCompact")  # Tag of the WikidPad branch
-#                     ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
                     )  )
 
             rebuildIndices(connwrap)

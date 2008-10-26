@@ -37,12 +37,12 @@ class Container(Item):
         self.title = None
 
     def append(self, item):
-        if self.title is None:
-            self.title = item.title
-
         if item.isEntry():
             if item.value != u"":
                 self.items.append(item)
+            else:
+                if self.title is None:
+                    self.title = item.title
         else:
             self.items.append(item)
 
@@ -176,28 +176,43 @@ def buildTreeFromText(content, entryFactory):
     """
     stack = [(0, Container())]
     
+    emptyLine = False
+    lastTitle = None
     for line in content.split(u"\n"):
         if line.strip() == u"":
+            emptyLine = True
+            lastTitle = None
             continue
 
         # Parse line                
         text, deep = splitIndent(line)
-        
+
         entry = entryFactory(text)
         if entry is None:
+            emptyLine = False
             continue
-        
+
         # Adjust the stack
         if deep > stack[-1][0]:
-            stack.append((deep, Container()))
-        else:
+            container = Container()
+            container.title = lastTitle
+            lastTitle = None
+            stack.append((deep, container))
+        elif stack[-1][0] > deep:
             while stack[-1][0] > deep:
                 container = stack.pop()[1]
                 if container.title is None:
                     container.title = _(u"<No title>")
 
                 stack[-1][1].append(container)
-
+#         else:
+#             if emptyLine:    
+#                 container = stack.pop()[1]
+#                 if container.title is None:
+#                     container.title = _(u"<No title>")
+#     
+#                 stack[-1][1].append(container)
+#                 stack.append((deep, Container()))
 
 
 #         # Create new entry if necessary
@@ -208,8 +223,15 @@ def buildTreeFromText(content, entryFactory):
 #             
 #         if entryValue == u"":
 #             continue
-        
+
         stack[-1][1].append(entry)
+
+        if entry.value == u"" and entry.title != u"":
+            lastTitle = entry.title
+        else:
+            lastTitle = None
+
+        emptyLine = False
 
     # Finally empty stack
     while len(stack) > 1:

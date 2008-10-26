@@ -1,6 +1,6 @@
 import threading
 
-from WikiExceptions import NotCurrentThreadException
+from WikiExceptions import NotCurrentThreadException, InternalError
 
 class _DumbThreadHolder(object):
     """
@@ -155,15 +155,6 @@ class StackedCopyDict:
         May throw exception if only base dictionary is available.
         """
         return self.dictStack.pop()
-
-
-
-
-
-
-
-
-
 
 
 

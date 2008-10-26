@@ -131,14 +131,14 @@ class DatedWikiWordFilterModified(DatedWikiWordFilterBase):
         return _(u"Modified")
         
     def getWikiWordsForDay(self, day):
-        wikiDoc = self.getWikiDocument()
-        if wikiDoc is None:
+        wikiDocument = self.getWikiDocument()
+        if wikiDocument is None:
             return []
         
         startTime = day.GetTicks()
         endTime = float(startTime + 86400 * self.getDayResolution())
 
-        return wikiDoc.getWikiWordsModifiedWithin(startTime,
+        return wikiDocument.getWikiWordsModifiedWithin(startTime,
                 endTime)
 
     def getMinMaxDay(self):
