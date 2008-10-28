@@ -19,11 +19,12 @@ The terms "parent" and "child" are not really applicable in the context of Wikid
 	rel://files/PageTreeExample1.png
 The page tree is implemented through a user interface object called a "tree control". A fundamental property of a tree control, is that it is by design meant to display hierarchical structures, so it isn't really suitable for Wikidpads needs. But a control that dóes fit it's needs isn't really available, so we will have to do with the tree control. A principle shortcoming of the control is, that where it can show all the "children" of a page, it can only show one (1) of it's "parents" at a time. So whatever parent is at one point displayed for a "child" does in Wikidpad not so much depend on hierarchy and structure, but on the way the user navigated towards that child. The "path" he took. An example is "Contact 1" in the screenshot above, that has two parents: "\ContactIndex" and "Project 1" and therefore appears in the tree twice; once for each of it's parents.
 
-The "page tree" control displays "nodes"; each node represents one page and is identified by that page's link name; the key that links one page to one or more others. The page tree can be used to navigate through the pages of a wiki and through it's context menu it gives access to maintenance functions for the pages, like "rename", "delete" and "bookmark".
+The "page tree" control displays "nodes"; each node represents one page and is identified by that page's link name; the key that links one page to one or more others. The page tree can be used to navigate through the pages of a wiki and through it's context menu it gives access to maintenance functions for the pages, like "rename", "delete" and "bookmark" [1].
 
 	rel://files/TreeExample2.png
 
 [:rel:top]
+[1] _In version 1.9 beta 19 a new option "Collapse whole tree" was added to the context menu._
 ----
 +++ The Views tree
 The views tree combines a whole range of alternative indexes into the wiki pages; indexes based on:

@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <title>HtmlCss</title>
+        <link type="text/css" rel="stylesheet" href="appbase.css">
+        <link type="text/css" rel="stylesheet" href="admbase.css">
+    </head>
+    <body>
+<span class="parent-nodes">parent nodes: <span class="parent-node"><a href="HtmlFormatting.html">HtmlFormatting</a></span> | <span class="parent-node"><a href="ThisWiki.html">ThisWiki</a></span></span><br /><br />
+<a name=".h0"></a><h2>Html Css</h2>
+Contents:   <div class="page-toc">
+<div class="page-toc-level2"><a href="#.h0">Html Css</a></div>
+<div class="page-toc-level3"><a href="#.h139">General</a></div>
+<div class="page-toc-level3"><a href="#.h1891">Examples</a></div>
+<div class="page-toc-level4"><a href="#.h1904">Appearance</a></div>
+<div class="page-toc-level4"><a href="#.h3312">Classes</a></div>
+<div class="page-toc-level3"><a href="#.h5226">CSS Files</a></div>
+<div class="page-toc-level4"><a href="#.h5240">General</a></div>
+<div class="page-toc-level4"><a href="#.h6527">History</a></div>
+<div class="page-toc-level4"><a href="#.h7542">General css files</a></div>
+<div class="page-toc-level4"><a href="#.h9153">Preview css files</a></div>
+<div class="page-toc-level3"><a href="#.h9861">Limitations</a></div>
+</div>
+ <a href="javascript:history.go(-1)">Back</a><br /><br /> <b>Attention:</b> The examples on this page realy do not work in internal preview! <hr size="1" />
+ <a name=".h139"></a><h3>General</h3>
+Earlier WikidPad supported cascading style sheets (CSS) to a limited extent. In version 1.9 beta 9 however WikidPad's support for CSS was expanded. You can now influence the look and feel of your wiki pages in both html export and external preview using all the CSS style facilities on both the global level ánd for individual wikis. And you can use classes to make live a lot easier when you are using inline (x)html. <br />
+<br />
+This page is not a course on (x)html and css; it expects those who want to use CSS to have some basic knowledge on the subject. It's main subject is WikidPad's CSS file structure. It does however give two short examples on what you can do with CSS for those who are curious for what it is all about. For more information on (x)html and CSS see: <br />
+<br />
+<ul><li /><a href="http://www.w3schools.com/css/default.asp" style="color: White; background-color: Green; border-style: outset; border-width: 2; padding: 1; text-decoration: none"> W3 Schools: CSS tutorial and reference </a> <br />
+<br />
+<li /><a href="http://www.w3schools.com/xhtml/default.asp" style="color: White; background-color: Green; border-style: outset; border-width: 2; padding: 1; text-decoration: none"> W3 Schools: XHTML tutorial and reference </a> <br />
+<br />
+</ul>
+The internal preview renderer neither supports XHTML nór CSS, but even then you can still use both for your html exported pages, since WikidPad will export them in the correct format wíth the CSS references. You just can't see in internal what your pages will look like in exported html and you will have to switch back and forth between wikidpad and browser, to get your layout like you want it to be. Or at least as close as possible. Don't forget to refresh your browser cache inbetween two tries (press F5?). <br />
+<br />
+<a href="#">Top</a> <hr size="1" />
+ <a name=".h1891"></a><h3>Examples</h3>
+<a name=".h1904"></a><h4>Appearance</h4>
+You can change the appearance of just about any "element" on your wiki pages, by (re)defining it's style in the wikistyle.css file. You could for instance make the font style of your level 3 and 4 headings italic by adding this to the css file: <ul><pre style="background-color: #F7F9FA; border: 1px #8CACBB dashed; width: 80%; padding: 4px; margin: 2">
+h3{
+	font-style: italic;
+}
+
+h4{
+	font-style: italic;
+}
+</pre><br />
+<br />
+</ul>
+Or you could change the appearance of wikidpad's default table, using this: <ul><pre style="background-color: #F7F9FA; border: 1px #8CACBB dashed; width: 80%; padding: 4px; margin: 2">
+table {
+	font-size: 85%;
+	border: 1px #8CACBB solid;
+	padding: 4px;
+	margin: 0,8;
+}
+
+td {
+	border: solid;
+	border-width: 0px 0px 1px 1px;
+	padding: 4px;
+	margin: 0,8;
+}
+</pre><br />
+<br />
+</ul>
+Or you could set basic properties for your pages with this: <ul><pre style="background-color: #F7F9FA; border: 1px #8CACBB dashed; width: 80%; padding: 4px; margin: 2">
+body {
+	font-family: Arial;
+	font-size: 85%;
+	color: Navy;
+	background: FloralWhite;
+	margin: 1em;
+	pading: 0;
+}
+</pre><br />
+<br />
+</ul>
+If you want to see what this would result in, then rename the "wikistyle.csx" file in this wiki's data directory to "wikistyle.css" and either: <ul><li />switch wikidpad to an external previewer like IE <span class="wiki-link"><a href="ThePreview.html">see: Preview</a></span> or <li />close and reopen the wiki, then export some pages to html and have a look at them in the browser. <br />
+<br />
+<hr size="1" />
+ </ul>
+<a name=".h3312"></a><h4>Classes</h4>
+The two buttoned links in the "General" section above used this: <ul><div style="background-color: #F7F9FA; border: 1px #8CACBB dashed; width: 80%; padding: 4px; margin: 2">&lt;a href="http://www.w3schools.com/tags/ref_colornames.asp" style="color: White; background-color: Green; border-style: outset; border-width: 2; padding: 1; text-decoration: none"&gt; W3 Schools: Color reference &lt;/a&gt;</div> <br />
+<br />
+</ul>
+To create a link looking like this: <a href="http://www.w3schools.com/tags/ref_colornames.asp" style="color: White; background-color: Green; border-style: outset; border-width: 2; padding: 1; text-decoration: none"> W3 Schools: Color reference </a> <br />
+<br />
+Since there were twó of those "button like links" on the page; the whole construct had to be written out twice; once for each "button". A lot of typing, error prone and a lot of work if you ever want to change the style of those "link buttons" in your wiki. You could make life a whole lot easier by using an xhtml "class" for it. Add a class definition like this: <ul><pre style="background-color: #F7F9FA; border: 1px #8CACBB dashed; width: 80%; padding: 4px; margin: 2">
+.w3schools{
+	color: White;
+	background-color: Green;
+	border-style: outset;
+	border-width: 2;
+	padding: 1;
+	text-decoration: none;
+}
+</pre><br />
+<br />
+</ul>
+to your WikiStyle.css file and reuse it for any button you would like to create; like this: <ul><div style="background-color: #F7F9FA; border: 1px #8CACBB dashed; width: 80%; padding: 4px; margin: 2">&lt;a href="http://www.w3schools.com/tags/ref_colornames.asp" <b>class="w3schools"</b>&gt; W3 Schools: Color reference &lt;/a&gt;</div> </ul>
+If you ever want to change the style of the buttons, you simply change the style definition for "w3schools" in wikistyle.css and all the buttons will look differently <a href="#.f1">[1]</a>. <br />
+<br />
+<a href="#">Top</a><br/> <a name=".f1"></a>[1] <i>This wiki doesn't use classes in it's examples (yet), since it's supposed to be able to function without a wikistyle.css file.</i> <hr size="1" />
+ <a name=".h5226"></a><h3>CSS Files</h3>
+<a name=".h5240"></a><h4>General</h4>
+WikidPad supports four (4) levels of style sheets for whitch the files are all in different locations. This is in part historically born and for reasons of backward compatibility. When a wiki ('s pages) are exported to html, also all the css files in use are copied to the export directory and references to them are added to the exported pages. <br />
+<br />
+The css file references are also part of the page specification for preview, so also preview will show the pages including all the css style rendering. This is however restricted to external renderers; the internal renderer ignores the css references. For preview WikidPad supports an additional set of three(3) css files, that will allow you to "style" pages differently in preview then in export. Also this has an historical reason and one for backward compatibility. <br />
+<br />
+Except for the wikidpad base css file "appbase.css", none of the css files is created automatically by wikidpad. If you want to use any of the files, you will have to create them yourself and name them correctly. Only if a css file with the correct name exists in the correct place, will it be processed and a reference to it will be added to the wiki pages for export and/or preview. Wikidpad checks the available css files, when a wiki is opened. <br />
+<br />
+<ul><hr size="1" />
+ </ul>
+<a name=".h6527"></a><h4>History</h4>
+Versions of WikidPad befóre 1.9 beta 9 also supported css, but only on a global level and for basic styling of elements like the TOC as the result of the <span class="wiki-link"><a href="Link%20insertions.html">[:toc:] insertion</a></span>. There was one wikistyle.css file in the install subdirectory "export" and one wikipreview.css file in the subdirectory ".WikidPadGlobals" of the user-specific <span class="wiki-link"><a href="ApplicationConfigurationFiles.html">configuration directory</a></span>. Both in fact at installation time had the same content, but were changeable by the user, as long as he kept in mind, that they could be overwritten by the installation of a new wikidpad version or else he would have to add version changes manually. <br />
+<br />
+For the sake of backward compatibility these files had to be retained and it was decided to make the best use posible of them. It is for this reason that for instance the "admbase.css" has its source in the "export" directory and not in the install directory and that next to the general css files, the three extra for preview exist. <br />
+<br />
+<ul><hr size="1" />
+ </ul>
+<a name=".h7542"></a><h4>General css files</h4>
+The general css support is done with css files for a maximum of four (4) levels, that set css styling for both (external) preview and export. When (part of) a wiki is exported, these files - íf present - are also copied to the directory that the pages are exported to. With the exeption of the application base file, all the files are called: wikistyle.css, for easy recognition. When copied to the export directory, their name is changed, since there can't be multiple files with the same name in the same directory. <br />
+<br />
+The files that wikidpad searches for when preparing a page for preview or export: <br />
+<br />
+<ul><table border="2">
+<tr><td><i>Level</i> </td><td> <i>Name</i> </td><td> <i>Location</i> </td><td> <i>Name in Export</i></td></tr>
+<tr><td>1 </td><td> appbase.css &nbsp;&nbsp;</td><td> WikidPad installation dir. </td><td> appbase.css</td></tr>
+<tr><td>2 </td><td> wikistyle.css </td><td> WikidPad / export subdir.  &nbsp;&nbsp;</td><td> admbase.css</td></tr>
+<tr><td>4 </td><td> wikistyle.css </td><td> <span class="wiki-link"><a href="ApplicationConfigurationFiles.html">.WikidPadGlobals</a></span> </td><td> userbase.css</td></tr>
+<tr><td>6 </td><td> wikistyle.css </td><td> Wiki / data subdir.</td><td> wikistyle.css</td></tr>
+</table>
+ </ul>
+<ul><li />Appbase.css is the primary application css file; it should not be changed, since it's content can be overwritten with each installation of a new wikidpad version. <li />Admbase.css is the css file, where organisation wide css styles can be specified in accordance to the house style. <li />Userbase.css is the css file, where a user can add his own specific styles. <li />Wikistyle.css is a wiki specific css file for wiki specific style specifications. <br />
+<br />
+</ul>
+Level depicts the following order of the css references for the files in the html page header. Style elements in 4 overrule/add to those in 3 that in turn overrules/adds to those in 2, etc. <ul><hr size="1" />
+ </ul>
+<a name=".h9153"></a><h4>Preview css files</h4>
+For (external) preview only, three (3) additional files are searched for; these files are: <br />
+<br />
+<ul><table border="2">
+<tr><td><i>Level</i> </td><td> <i>Name</i> </td><td> <i>Location</i> </td><td> <i>usage</i></td></tr>
+<tr><td>3 </td><td> wikipreview.css &nbsp;&nbsp;</td><td> WikidPad / export subdir. </td><td> admbase level</td></tr>
+<tr><td>5 </td><td> wikipreview.css </td><td> <span class="wiki-link"><a href="ApplicationConfigurationFiles.html">.WikidPadGlobals</a></span> </td><td> userbase level</td></tr>
+<tr><td>7 </td><td> wikipreview.css </td><td> Wiki / data subdir </td><td> wiki level</td></tr>
+</table>
+ </ul>
+For preview only settings in these files overrule those of the general files on the same level. Since they are preview only, they are not copied to the export dir. at html export time. You can for instance use them to test changes in style specifications, without having to disturb any operational css files. <br />
+<br />
+<a href="#">Top</a> <hr size="1" />
+ <a name=".h9861"></a><h3>Limitations</h3>
+There are some known limitations to using css files with wikidpad: <br />
+<br />
+&bull; <b>Paragraphs</b><br/> The html generated by wikidpad does not use the &lt;p&gt; element; also not when <span class="wiki-link"><a href="PageViewAttributes.html">paragraph_mode</a></span> is set to true. You therefore can't use p{ .....} style elements in the css file(s) for anything else then paragraphs you defined yourself, using inline (x)html. <br />
+<br />
+&bull; <b>html.attributes</b><br/> When you use <span class="wiki-link"><a href="PageViewAttributes.html">html.attributes</a></span> in a wiki, their settings are overruled by settings for the same elements in the style sheets. <br />
+<br />
+&bull; <b>wiki distribution</b><br/> If you want to distribute a wiki itself to somebody else and you use admbase and userbase level css files then don't forget to also distribute the css files concerned. <br />
+<br />
+<a href="#">Top</a> <hr size="1" />
+ previous: <a href="javascript:history.go(-1)">Back</a><br /> parents:&nbsp; <span class="wiki-link"><a href="HtmlFormatting.html">HtmlFormatting</a></span>, <span class="wiki-link"><a href="ThisWiki.html">ThisWiki</a></span><br /> attributes: <span class="property">[paragraph_mode: true]</span><br /> <span class="property">[help.status: done]</span>    </body>
+</html>

@@ -2,10 +2,32 @@
 Contents: [:toc:]
 [:rel:back]
 ----
-+++ Help version 0.4
-This is version 0.4 of the help.wiki; a restructured, rewritten and extended version of the old wikidpadhelp.wiki. Part of this wiki is still under construction, but it dóes already contain the complete content of wikidpadhelp úp and including version 1.9 beta 18.5.
++++ Help version 0.5
+This is version 0.5 of the help.wiki; a restructured, rewritten and extended version of the old wikidpadhelp.wiki. Part of this wiki is still under construction, but it dóes already contain the complete content of wikidpadhelp úp and including version 1.9 beta 19.
 
-*Changes compared to 0.3*
+*Changes 0.5 compared to 0.4*
+	* RegEx
+	* FullSearch
+	* SpellChecking
+	* TextBlocks
+	* [HtmlFormatting]
+	* [HtmlGeneral] (was \TextHtmlElements)
+	* [HtmlInternal] (was \TextHtmlInternal)
+	* [HtmlExternal] (was \TextHtmlExternal)
+	* [HtmlCss] (new)
+	* [WikidPadFiles]
+	* [ProgramFiles]
+	* [ConfigurationFiles]
+	* [UserFiles]
+	* [WikiFiles]
+	* [KeyBindings]
+	* [UsefullLinks]
+	* [SignalPageNodes]
+	* [SignalUserTags]
+	* [SignalTodoTags]
+	* [Intro3Formatting]
+
+*Changes 0.4 compared to 0.3*
 	* ThisWiki
 	* [Intro7Searching]
 	* [Intro8Output]

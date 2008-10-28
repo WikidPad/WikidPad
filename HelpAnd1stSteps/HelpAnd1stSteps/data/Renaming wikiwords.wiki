@@ -16,6 +16,11 @@ When the option "change all references to the page in the wiki" has been chosen,
 
 [:rel:top]
 ----
++++ Caution: Renaming the root page
+When the original root page of a wiki - the one with the same name as the wiki - is renamed, then the entire wiki is renamed, inclusing it's directories and files. This is correct behaviour, but be aware that this happens and be carefull using it.
+
+[:rel:top]
+----
 +++ Settings
 ++++ Options
 [:page:WpOptionsGeneralRename]

@@ -10,5 +10,5 @@
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 7], [template: HelpSubjectTemplate]
+attributes: [tree_position: 8], [template: HelpSubjectTemplate]
 [help.status:done]

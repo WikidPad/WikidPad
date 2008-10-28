@@ -65,8 +65,8 @@ Since the priority attribute acts like a tag, it is possible to add global setti
 	* \[global.priority.(level).color: color name]
 	* \[global.priority.(level).bold: true/false]
 As an example: the global attributes:
-	* [global.priority.2.color: coral]
-	* [global.priority.2.bold: true]
+	* \[global.priority.2.color: coral]
+	* \[global.priority.2.bold: true]
 would set the node name of any page in the wiki, that has priority 2 defined for it to bold and orange (coral). This will be the case for both the page nodes in the treeview ánd the page nodes within the "views / priority" node. For this page however, the global node formatting is overruled by the node apperance attributes earlier on this page.
 
 The level number is optional and can be left out, the attribute then applies to any page, that has a priority, dispite it's level.

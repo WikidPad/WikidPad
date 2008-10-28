@@ -25,7 +25,7 @@ File links | rel://files/license.txt
 Wiki links | [wiki:///C|/Documents%20and%20Settings/foowiki/foowiki.wiki | rel://files/wordpad.png>am]    Foowiki with an image title
 Footnotes | This is text with a footnote [1].
 Page insertions | See [TextInsertionsTextFormatting|Textformatting: insertions]
-[TextHtmlElements|Html elements] | <small>HTML small tekst, </small><br />HTML standard tekst, <br /><big>HTML big tekst</big>
+[HtmlFormatting|Html elements] | <small>HTML small tekst, </small><br />HTML standard tekst, <br /><big>HTML big tekst</big>
 >>
 
 

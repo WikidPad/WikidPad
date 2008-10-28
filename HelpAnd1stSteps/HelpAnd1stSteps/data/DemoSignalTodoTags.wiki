@@ -31,7 +31,7 @@ Todo tags can be anywhere on a page and anywhere within a line; they can be on a
 	* question: Demo: how is todo exported? | possibly already answered in wikidpadhelp.wiki
 	* The song is on \track: 5 of the Beatles collection cd.
 
-	rel://files/SignalTodoTagsExample1.png
+	rel://files/demo/SignalTodoTagsExample1.png
 [:rel:top]
 ----
 +++ Structured tags
@@ -40,7 +40,7 @@ Like user tags, todo tags support nested subcategories in the form of structured
 	* todo.demo.demo.system.software.update: Update wikidpad to new beta release.
 
 The double ".demo.demo" had to be added, to keep the example away from the demo's actual todo tags in this wiki, that dó have a real meaning.
-	rel://files/SignalTodoTagsExample2.png
+	rel://files/demo/SignalTodoTagsExample2.png
 [:rel:top]
 ----
 +++ Todo node signalling
@@ -48,7 +48,7 @@ The appearance of a single todo item in the views section can be controled by us
 	* todo.demo.demo.format.icon: [icon:exclamation]Show the exclamation icon.
 	* todo.demo.demo.format.color: [color: coral]Show the text in bold orange.[bold:true]
 For the format of the attributes see: [DemoSignalPageNodes|Signalling page nodes].
-	rel://files/SignalTodoTagsExample3.png
+	rel://files/demo/SignalTodoTagsExample3.png
 [:rel:top]
 ----
 +++ Page signalling

@@ -1,0 +1,29 @@
+﻿help=
+	page header=\nContents:\t[:toc:]\n[:rel:back]\n----\n+++ General\n.... text ....\n\n[:rel:top]\n----\n+++ Details\n
+	settings=\n\n[:rel:top]\n----\n+++ Settings\n++++ Options\n[:page:InsertPage]\n\n[:rel:top]\n----\n[:page:InsertPage]
+	page footer;a=\n[:rel:top]\n----\nprevious: [:rel:back]\nparents:&nbsp; [:rel:parents; aslist]\nattributes: [tree_position: 1]\n[help.status:new]
+
+intro=
+	page header=\nContents:\t[:toc:]\n[:rel:back]\n----\n+++ General\n.... text ....\n\n[:rel:top]\n----\n+++ Details\n
+	page footer;a=<p align=center>[PageLink |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[PageLink |Next page &raquo;]</p>----\nprevious: [:rel:back]\nparents:&nbsp; [:rel:parents; aslist]\nattributes: [tree_position: 1]\n[intro.status:new]
+
+footnote=
+	reference=<small><sup>[1]</sup></small>
+	text=\n<small><i>[1] .... Footnote text ....</i></small>
+
+new wiki=
+	root =\n----\n\n----\nprevious: [:rel:back]\nsettings:&nbsp; WikiTemplates, WikiSettings\nattributes: [view_pane: preview], [icon: wp_home]
+	settings =\n[:rel:back]\n----\n\n*Specific settings*\n[global.template: BaseTemplate]\n[global.font:Arial]\n\n*Default settings*\n[global.wrap: 70]\n\n----\nprevious: [:rel:back]\nparents:&nbsp; [:rel:parents; aslist]\nattributes: [tree_position: 1001], [icon:wp_settings]
+	templates =\n----\n\n\t* BaseTemplate\n\n----\nprevious: [:rel:back]\nparents:&nbsp; [:rel:parents; aslist]\nattributes: [tree_position: 1002], [icon:wp_template]
+	base template =[:rel:back]\n----\n\n----\nprevious: [:rel:back]\nparents:&nbsp; [:rel:parents; aslist]
+
+html=
+	table 2 coll.=\n<table>\n<tr><td>cell1.1</td><td>cell1.2</td></tr>\n<tr><td>cell2.1</td><td>cell2.2</td></tr>\n<tr><td>cell3.1</td><td>cell3.2</td></tr>\n</table>\n[paragraph_mode: true]\n
+	bulletted list=<ul>\n<li>item 1</li>\n<ul>\n<li>item 1.1</li>\n<li>item 1.2</li>\n</ul>\n<li>item 2</li>\n</ul>\n[paragraph_mode: true]\n
+	paragraph=<p align=right/left/center>Paragraph text right/left/center alligned</p>
+
+xhtml=
+	styled text=<span style="color: Navy; background-color: #ffd; font-family: times; font-variant: small-caps; border-style: dashed; border-width: 1">more style stuff.</span>
+	buttonlink=<a href=" url "><span style="color: White; background-color: Green; border-style: outset; border-width: 2; padding: 1; text-decoration: none"> Link title </span></a>
+	pre element=<pre> code=<pre style="background-color: #F7F9FA; border: 1px #8CACBB dashed; padding: 4px; margin: 0,8">\n\n</pre>\n
+    

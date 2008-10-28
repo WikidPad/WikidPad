@@ -75,7 +75,7 @@ The function \[:rel: undefined] creates a list of all the pages, that are undefi
 
 [:rel:top]
 ----
-+++ savedsearch
++++ saved search
 The function \[:savedsearch: _searchname_] creates a list of all the page links, that were saved as a result of a search. Function in this case is the name of the saved search. Applicable options are: aslist and collumns.
 
 *Examples*
@@ -85,7 +85,7 @@ The function \[:savedsearch: _searchname_] creates a list of all the page links,
 [:rel:top]
 ----
 anchor:tocFunction
-+++ toc
++++ table of contents
 The function \[:toc:] creates a table of contents for the headings of the current page, like the one on top of this page. In HTML preview/export the toc entries can be clicked on to move the display to the concerning heading. This function only has a function group, no function. Applicable options are: none.
 
 *Examples*

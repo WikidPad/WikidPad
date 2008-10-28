@@ -36,17 +36,16 @@ Todo tags can be anywhere on a page and anywhere within a line; they can be on a
 ----
 +++ Structured tags
 Like user tags, todo tags support nested subcategories in the form of structured todo keywords. Example:
-	* todo.demo.demo.system.bugs.urgent: Bug in wikidpad "rename link".
-	* todo.demo.demo.system.software.update: Update wikidpad to new beta release.
+	* todo.help.system.bugs.urgent: Bug in wikidpad "rename link".
+	* todo.help.system.software.update: Update wikidpad to new beta release.
 
-The double ".demo.demo" had to be added, to keep the example away from the demo's actual todo tags in this wiki, that dó have a real meaning.
 	rel://files/SignalTodoTagsExample2.png
 [:rel:top]
 ----
 +++ Todo node signalling
 The appearance of a single todo item in the views section can be controled by using the formatting attributes: icon, color and bold in the tag's text. Example:
-	* todo.demo.demo.format.icon: [icon:exclamation]Show the exclamation icon.
-	* todo.demo.demo.format.color: [color: coral]Show the text in bold orange.[bold:true]
+	* todo.help.format.icon: Show the exclamation icon. [icon:exclamation]
+	* todo.help.format.color: Show the text in bold orange. [bold:true][color: coral]
 For the format of the attributes see: [SignalPageNodes|Signalling page nodes].
 	rel://files/SignalTodoTagsExample3.png
 As can be seen in the example, the format attributes do not get removed from the text; this behaviour is delibarate. In practice it is therefore best, to put the attributes at the end of the todo text.

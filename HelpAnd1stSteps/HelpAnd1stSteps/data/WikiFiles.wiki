@@ -1,0 +1,40 @@
+﻿++ Wiki Files
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+The files of a wiki are stored in subdirectory of a directory of your choice. Each wiki has it's own directory with a number of subdirectories. By default the directory has the name of the wiki and mostly it's the same name as that of the (original) root page.
+
++++ Wiki directory
+A wiki directory contains a wiki configuration file with the name of the wiki and a ".wiki" extention and subdirectories like:
+	* "data" for the wiki database and other wiki data
+	* "file" to support the [FilesWikiFileStore |wiki file store] (optional)
+
+rel://files/NewWikiExample1.png rel://files/NewWikiExample2.png
+
+Furthermore it can contain additional subdirectories of your own choice, like one or more to store the results of [ItemPublishing |html] or other [Wiki export |exports].
+
+[:rel:top]
+----
++++ Data subdirectory
+The data directory is the location for:
+
+&bull; *database files*
+Which files these are, is dependent on the [WikiDatabase |database type] of the wiki.
+
+&bull; *func. pages*
+The wiki specific files for functions like:
+	* [TextBlocks |Text blocks]
+	* [SpellChecking |Spell checking]
+	* [Using WikiWords |Wikiword blacklists]
+
+&bull; *Cascading style sheets*
+For [HtmlCss |CSS] this directory is the location for:
+	* wiki level wikistyle.css cascading style sheet
+	* wiki level wikipreview.css cascading style sheet
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

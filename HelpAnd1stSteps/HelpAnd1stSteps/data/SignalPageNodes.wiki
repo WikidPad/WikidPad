@@ -18,6 +18,7 @@ The page node attributes have no global representation.
 The \[icon: icon name] attribute allows to change the icon for the page node from the default "page" icon to a specific one. This attribute:
 	* [icon: folder]
 changes the icon for this page into a folder.
+	rel://files/SignalPageNodeExample1.png
 
 Wikidpad has a large number of icons available for the page nodes in the tree. A complete list of them can be found in the help pages. An easy way to add an icon attribute to a page is to select it from the list, using the option:
 	* menu / Editor / "Add icon attribute".
@@ -31,6 +32,7 @@ The icons can be found in the "icons" folder of the Wikidpad program folder. Add
 The \[color: color name] attribute allows to set the color of the page's node name from the default "black" to a specific one. This attribute:
 	* [color: gold]
 changes the color of the node name for this page into gold.
+	rel://files/SignalPageNodeExample2.png
 
 Wikidpad has a large number of default color names available to choose from. An easy way to add a color attribute to a page is to select it from the list, using the option:
 	* menu / Editor / "Add color attribute".
@@ -47,6 +49,7 @@ Wikidpad has a large number of default color names available to choose from. An 
 The \[bold: value] attribute controls the font style "bold" for the node name. The possible values are "true" and "false"; false is the default. This attribute:
 	* [bold: true]
 sets the font style for the node title of this page to bold.
+	rel://files/SignalPageNodeExample3.png
 
 The \[bold: false] variant can be used, to prevent other functions from setting the font style for the node title to bold.
 
@@ -57,9 +60,11 @@ The \[bold: false] variant can be used, to prevent other functions from setting 
 The \[priority: value] attribute allows to add (append) the node name with a priority indication; the possible values are 1 trough to 5. This attribute:
 	* [priority: 2]
 will append a priority setting "(2)" to the node name of this page, making it look like <small><b><span style="color:#CC7F32">"\SignalPageNodes (2)"</span></b></small>
+	rel://files/SignalPageNodeExample4.png
 	----
 ++++ "Views / priority" node.
 The priority setting acts like a page tag <small><sup>[4]</sup></small>; pages that have a priority setting will also appear in the "prority" node of the "views" section in the treeview, subdivided according to priority level. This way pages with - a certain - priority setting can be identified and navigated to quickly.
+	rel://files/SignalPageNodeExample5.png
 	----
 ++++ Global
 Since the priority attribute acts like a tag, it is possible to add global settings to it, that will signal any page that has a priority attached to it, by giving it's node a certain appearance in the treeview  <small><sup>[4]</sup></small>. These settings are similar to the node appearance atributes described above and have a sortlike result. They are:
@@ -70,6 +75,7 @@ As an example: the global attributes:
 	* \[global.priority.2.color: coral]
 	* \[global.priority.2.bold: true]
 would set the node name of any page in the wiki, that has priority 2 defined for it to bold and orange (coral). This will be the case for both the page nodes in the treeview ánd the page nodes within the "views / priority" node. For this page however, the global node formatting is overruled by the node apperance attributes earlier on this page.
+	rel://files/SignalPageNodeExample6.png
 
 The level number is optional and can be left out, the attribute then applies to any page, that has a priority, dispite it's level.
 
@@ -79,23 +85,21 @@ The level number is optional and can be left out, the attribute then applies to 
 +++ Node position
 In the treeview any node is always a child of some other node, with the exeption of the root node. In the treeview child nodes are always sorted according to some key; by default alphabetically on node name and ascending.
 
-The \[tree_position: value] attribute allows to assign an absolute position to a page node, independant of the sort order. Value can be any whole number; both positive and negative. The first child node has position "0" [8]. This attribute:
-	* [tree_position:1]
+The \[tree_position: value] attribute allows to assign an absolute position to a page node, independant of the sort order. Value can be any whole number; both positive and negative. The first child node has position "1". This attribute:
+	* [tree_position:2]
 should make this page's node the second node in the list of children.
 
 Node positions are absolute with respect to the parent node; not with repect to the treeview itself. If a page has multiple parents, then tree_position will influence the child list of each and any of those parents. Setting tree-position can be of good use for children of higher level pages with menu's or indexes on them; not so much for lower level pages that can have many parents and therefore can appear in many different child lists.
 
-Node positions do not have to be consequtive; any number can be used, as long as it results in what is expected. This wiki uses position numbers of 1000 and higher, to make sure that schratchpad, settings, templates and other service pages are always at the end of the child list. Negative positions can be used, to make sure that certain children álways are the first children in the list [9].
+Node positions do not have to be consequtive; any number can be used, as long as it results in what is expected. This wiki uses position numbers of 1000 and higher, to make sure that schratchpad, settings, templates and other service pages are always at the end of the child list. The negative position "-1" can be used, to make sure that certain children álways are the first children in the list.
 
 [:rel:top]
-[8] _This will probably be changed to one (1) in the upcomming beta version of WikidPad._
-[9] _Zero and negative will probably have a different behaviour in beta version of WikidPad above 1.9.18.5._
 ----
 +++ Child node sort order
 The sort order for the children of a specific page can be controled by means of the \[child_sort_order: sort type] attribute. Possible values for "sort type" are:
 
 <<|
-ascending 				| Sort by node name; alphabetically, ascending
+ascending				| Sort by node name; alphabetically, ascending
 descending 			| Sort by node name; alphabetically, descending
 mod_oldest			| Sort by modification date; oldest first
 mod_newest&nbsp;&nbsp; 	| Sort by modification date; newest first

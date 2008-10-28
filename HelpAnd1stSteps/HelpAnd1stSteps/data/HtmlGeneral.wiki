@@ -1,4 +1,4 @@
-﻿++ Text Html Elements
+﻿++ Html General
 Contents:   [:toc:]
 [:rel:back]
 ----
@@ -12,7 +12,7 @@ The example uses the preferred "strong" and "em" tags, but could have also used 
 [:rel:top]
 ----
 +++ Choice of preview renderer
-The internal previewer is rather limited in the html it can render[1], so using html elements is limited to what the internal previewer kan handle and that is not much. It is however possible to expand the possibilities, by switching over to an external preview renderer, that will then run in the Wikidpad preview window. Wikidpad then has all the power of the modern browsers at it's availability; including the use of style sheets[2].
+The internal previewer is rather limited in the html it can render[1], so using html elements is limited to what the internal previewer kan handle and that is not much. It is however possible to expand the possibilities, by switching over to an external preview renderer, that will then run in the Wikidpad preview window. Wikidpad then has all the power of the modern browsers at it's availability; including the use of style sheets.
 
 Wikidpad allows to do so with the option: menu / Wiki / Options / "Html preview/export" / "Preview renderer". This option allows to choose from:
 
@@ -25,12 +25,11 @@ After setting this option to a different renderer, Wikidpad will have to be rest
 The external renderers can only be used, when they are realy installed on the computer(s) used with Wikidpad. If that is not the case, then they will first have to be (downloaded and) installed. People who run the Windows operating system have the IE renderer available by default; it is the core part of the Internet Explorer Browser.
 
 *Warning!!!*
-At the moment there is a severe bug in either the Mozilla renderer ór the Python library used to interact with it. It will effectively crash Wikidpad, making Mozilla temporarily onusable.
+At the moment there is a severe bug in either the Mozilla renderer ór the Python library used to interact with it. It will effectively crash Wikidpad, making Mozilla temporarily unusable.
 Also for this reason none of the examples have been tried with the Mozilla renderer.
 
 [:rel:top]
 [1] _The internal preview will not render xhtml, nor can it work with cascading stylesheets._
-[2] _This section will not examine stylesheets (CSS) further, since at the moment there is ongoing development on the use of style sheets in Wikikpad. A later version will examin Wikidpad and CSS in a separate section._
 ----
 +++ Dealing with Wikidpad peculiarities
 There are two behaviours of Wikidpad, that seriously have to be taken into account, when html elements:[5]
@@ -52,8 +51,8 @@ This section is not meant as a course on (x)html, nor is it meant to explain all
 
 The examples are devided in two sections:
 
-    1. [TextHtmlInternal|Things that can be handled by the internal preview renderer]
-    2. [TextHtmlExternal|Things that can be done extra with external preview renderers]
+    1. [HtmlInternal|Things that can be handled by the internal preview renderer]
+    2. [HtmlExternal|Things that can be done extra with external preview renderers]
 
 For comprehensive information on html elements, tags, attributes, etc and an online course on how to use it; see:
 
@@ -63,11 +62,12 @@ Internal and IE have totally different views on things like:
 	* the default font size
 	* the interpretation of new lines and empty lines
 	* the use of white space and margins
-Because of these and other reasons it is almost impossible to get page en text layout correct for both renderers. For this reason in the examples sometimes a paragraph element is used to control new lines, instead of the \<br /> tag. This results (sometimes) in a slíghtly more consistent layout. The demo has been created using IE as the renderer, so the formatting has been targeted towards that renderer, resulting in a lesser layout in Internal.
+Because of these and other reasons it is almost impossible to get page and text layout correct for both renderers. For this reason in the examples sometimes a paragraph element is used to control new lines, instead of the \<br /> tag. This results (sometimes) in a slíghtly more consistent layout. This wiki has been created using IE as the renderer, so the formatting has been targeted towards that renderer, resulting in a lesser layout in Internal.
 
 [:rel:top]
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [template: HelpSubjectTemplate]
+attributes: [tree_position: 1]
 [help.status:done]
+

@@ -12,7 +12,7 @@ All of this can be done in WikidPad.
 
 	----
 +++ Text formatting
-WikidPad supports all sorts of text formatting; a complete description of all the possibilities can be found in [TextFormatting |text formatting]. For whom the default textformatting facilities of WikidPad are unsatisfactory, the possibilty exists to use [TextHtmlElements |inline html]. WikidPad supports this, but it really only makes a difference when using an external renderer. There is véry little extra you can do with html in the internal renderer.
+WikidPad supports all sorts of text formatting, that includes all of the above in "General"; a complete description of all the possibilities can be found in [TextFormatting |text formatting]. 
 
 	----
 +++ Page formatting
@@ -21,6 +21,10 @@ WikidPad supports a number of features in the area of [PageFormatting |page form
 	* setting [PageViewAttributes |properties] like foreground, background and link colors
 	* using existing pages as [PagePageTemplates |templates] for new ones
 A complete description of all the possibilities can be found in [PageFormatting |page formatting].
+
+	----
++++ Html formatting
+For whom the default text- and pageformatting facilities of WikidPad are unsatisfactory, the possibilty exists to use [HtmlExternal |inline html] and [HtmlCss |cascading style sheets]. WikidPad supports this, but it really only makes a difference when exporting to html and when using an external preview renderer. There is little extra you can do with html in the [HtmlInternal |internal renderer]. Entities and symbols however like: &euro;, &copy; and &radic; are supported by default.
 
 	----
 +++ Url links

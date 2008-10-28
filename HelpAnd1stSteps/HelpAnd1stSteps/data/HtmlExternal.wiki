@@ -1,4 +1,4 @@
-﻿++ Text Html External
+﻿++ Html External
 Contents:   [:toc:]
 [:rel:back]<br /><br />
 *Attention:* These examples realy do not work in internal preview!
@@ -12,9 +12,9 @@ The external rederers allow for the full range of possibilities of the style att
 	* Text with <span style="color:blue">the blues <span style="background-color: #ff0">and yellow highlight</span></span>
 	* Text with <span style="color: Navy; background-color: #ffd; font-family: times; font-variant: small-caps; border-style: dashed; border-width: 1">more style stuff.</span>
 
-For a list and explanation of all style attributes, see: <a href="http://www.w3schools.com/css/css_outline.asp"><span style="color: White; background-color: Green; border-style: outset; border-width: 2; padding: 1; text-decoration: none"> W3 Schools: CSS outline </span></a>
+For a list and explanation of all style attributes, see: <a href="http://www.w3schools.com/css/css_outline.asp" style="color: White; background-color: Green; border-style: outset; border-width: 2; padding: 1; text-decoration: none"> W3 Schools: CSS outline </a>
 
-For a complete list of html color names and numbers see: <a href="http://www.w3schools.com/tags/ref_colornames.asp"><span style="color: White; background-color: Green; border-style: outset; border-width: 2; padding: 1; text-decoration: none"> W3 Schools: Color reference </span></a>
+For a complete list of html color names and numbers see: <a href="http://www.w3schools.com/tags/ref_colornames.asp" style="color: White; background-color: Green; border-style: outset; border-width: 2; padding: 1; text-decoration: none"> W3 Schools: Color reference </a>
 
 [:rel:top]
 ----
@@ -75,3 +75,4 @@ previous: [:rel:back]<br />
 parents:&nbsp; [:rel:parents; aslist]<br />
 attributes: [paragraph_mode:true]<br />
 [help.status:done]
+

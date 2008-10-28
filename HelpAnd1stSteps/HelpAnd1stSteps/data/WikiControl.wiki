@@ -5,32 +5,32 @@ Contents:   [:toc:]
 +++ General
 The functions below can - unless mentioned otherwise - be found in the Wiki menu.
 
-*Opening read only*
+&bull; *Opening read only*
 The Wikidpad "Open wiki" dialog has an option that can be set, if a wiki is supposed to be opened "read only".
 
-*Opening older wiki's*
-If a wiki to be opened was created with an older version of WikidPad or WikidPadCompact, Wikidpad can't determine the database type and will ask the user to specify it manually. If the wiki was created with the original WikidPad the right choice is "Original Gadfly", for WikidPadCompact it is "Compact Sqlite". The type will be stored in the wiki configuration file and Wikidpad will not have to ask for it again next time.
+&bull; *Opening older wiki's*
+If a wiki to be opened was created with an older version of WikidPad or WikidPadCompact, Wikidpad can't determine the [WikiDatabase |database type] and will ask the user to specify it manually. If the wiki was created with the original WikidPad the right choice is "Original Gadfly", for WikidPadCompact it is "Compact Sqlite". The type will be stored in the wiki configuration file and Wikidpad will not have to ask for it again next time.
 
 [:rel:top]
 ----
 +++ Wiki management
-*New*
+&bull; *New*
 Creates a new wiki and opens it in the current workspace (Wikidpad window).
 
-The name for the new wiki has to be a valid [Using WikiWords |WikiWord]. Wikidpad will offer to create it in the default wiki folder (see Settings: Default open/new dir.) but any folder can be chosen. Wikidpad will then ask to specify the [WikiDatabase |database type] to be used for the new Wiki. In the destination folder, Wikidpad will create a new folder with the name of the wiki and in it the newname.wiki file and a "Data" folder, that contains the wiki database. The .wiki file is actually the configuration file for the wiki and could be edited by hand.
+The name for the new wiki has to be a valid [Using WikiWords |WikiWord]. Wikidpad will offer to create it in the default wiki folder (see Settings: Default open/new dir.) but any folder can be chosen. Wikidpad will then ask to specify the [WikiDatabase |database type] to be used for the new Wiki. In the destination folder, Wikidpad will create a [WikiFiles |new folder] with the name of the wiki and in it the newname.wiki file and a "Data" folder, that contains the wiki database. The .wiki file is actually the configuration file for the wiki and could be edited by hand.
 
 rel://files/NewWikiExample1.png rel://files/NewWikiExample2.png
 
-*Open*
+&bull; *Open*
 Opens an existing wiki in the current workspace.
 
-*Open in new window*
+&bull; *Open in new window*
 Opens an existing wiki in a new workspace (window).
 
-*Recent*
+&bull; *Recent*
 Opens an existing wiki from the list "recently opened wiki's" in the current workspace.
 
-*Clone* (_View menu!_)
+&bull; *Clone* (_View menu!_)
 Opens the currently opened wiki in separate workspace, but nót in a separate proces. The function will do this despite the setting of "Single process per user" for the workspace.
 
 [:rel:top]
@@ -38,7 +38,7 @@ Opens the currently opened wiki in separate workspace, but nót in a separate pr
 +++ Favorites
 The "Favorites" menu gives access to wiki's that are often needed and allows them to be opened by selecting a menu entry and optionally by an icon in the toolbar and/or by a shortcut.
 
-*Add*
+&bull; *Add*
 To add a wiki to the favorites, choose "Add wiki" in the "Favorites" menu. This shows a dialog, that allows to specify:
 
     * the title for the wiki (it's name)
@@ -52,7 +52,7 @@ To add a wiki to the favorites, choose "Add wiki" in the "Favorites" menu. This 
 _Remarks:_
 	* If multiple entries refer to the same toolbar position, only one of the icons is shown (chosen arbitrarily).
 
-*Managing favorites*
+&bull; *Managing favorites*
 Currently advanced management can only be done by editing their textual specifications in the so-called functional page of the favorite wikis. To open it, either go in tree to "Views"->"Func. pages"->"Favorite wikis" or use in "Favorites" menu the entry "Manage favorites".
 
 A line in the page follows the syntax:
@@ -64,7 +64,7 @@ The meaning of the individual parameters is:
 	* Iconname is name of the icon
 	* Path can be a path or a wiki URL of the wiki to open
 
-*Examples* [1]
+&bull; *Examples* [1]
 Only the necessary things:
 	* CoolWiki=C:\\Data\\Wikis\\CoolWiki\\CoolWiki.wiki
 With shortcut:
@@ -78,23 +78,23 @@ Full blown with shortcut and icon "flash" at position 2 in toolbar:
 [1] _Double backslashes used for visibility in preview!_
 ----
 +++ Wiki maintenance
-*Rebuild*
+&bull; *Rebuild*
 This will completely rebuild the internal database for the wiki. This is sometimes necessary if program previously terminated abnormally or if datafiles were deleted or added from outside of WikidPad.
 The function can also be used to add large numbers of additional pages to the wiki.  Copy ".wiki" wikiword files into the "data" directory, then choose "Rebuild Wiki" to rebuild the database to include these files.
 
 _Remark:_ This does not work for the "Compact Sqlite" [WikiDatabase |database type].
 
-*Reconnect*
+&bull; *Reconnect*
 If during a WikidPad session the access to the wiki database files is lost (e.g. network connection drops), this might result in an error. The connection to the database then has to be reestablished, before it can be updated and work can progress.
 In principal, WikidPad will automatically try to reconnect will ask if it should do so, each time an attempt is made to open or save a page. WikidPad can however also manually be told to try to reconnect, by using the "reconnect" function.
 
 _Remark:_ Autosave is automatically disabled until the connection is successfully reestablished.
 
-*Vacuum*
+&bull; *Vacuum*
 This function is only available if currently loaded wiki is of type "Original Sqlite" or "Compact Sqlite".
 If information is deleted from an Sqlite database, the occupied hard disk space is not freed but later reused for new information to add. "Vacuum" makes this space available for the system again. After deleting large parts of a wiki, you can use "Vacuum" to free space, especially recommended for a "Compact Sqlite" wiki (where the page content is also stored in the database).
 
-*Wiki info*
+&bull; *Wiki info*
 This function displays information about the [WikiDatabase |database type] of the current wiki and the number of pages it contains.
 
 [:rel:top]
@@ -102,7 +102,7 @@ This function displays information about the [WikiDatabase |database type] of th
 +++ Deprecated
 The use of functions in this section is deprecated for new and current Wiki's. The functions are outdated and only there for backwards compatibility and the support of quite old wiki's.
 
-*Open as type*
+&bull; *Open as type*
 This function opens a wiki and álways asks for the database type to use. This is helpful when migrating from one database backend to another.
 
 [:rel:top]

@@ -10,18 +10,18 @@ WikidPad supports three different types of database backends:
 This situation has historically grown. Gadfly was the database backend for the original WikidPad as designed by Jason Horman. Compact Sqlite was the backend for WikidPadCompact, as designed by Michael Butscher. When both implementations of WikidPad were integrated into the current WikidPad implementation, Original Sqlite was added to the supported backends. The older types are still actively supported for backward compatibility purposes.
 	----
 ++++ Original Gadfly
-This is the backend of the original WikidPad. It stores each wiki page in a plain text file with a .wiki extention in the wiki's "data" directory. The .grl and .gdf files are the database files used to index wiki pages and other subjects efficiently.
+This is the backend of the original WikidPad. It stores each wiki page in a plain text file with a .wiki extention in [WikiFiles |wiki / data]. The .grl and .gdf files are the database files used to index wiki pages and other subjects efficiently.
 Gadfly is the slowest type, but it has as an advantage, that it is portable across different platforms because it doesn't need any external binaries.
 	----
 ++++ Compact Sqlite
-This is the backend of WikidPadCompact. It stores the data in óne single database file named "wiki.sli" in the wiki's "data" directory. This database file is created by the Sqlite database engine and contains the content of all the wiki's pages as well as cache information for fast handling of the wiki.
+This is the backend of WikidPadCompact. It stores the data in óne single database file named "wiki.sli" in [WikiFiles |wiki / data]. This database file is created by the Sqlite database engine and contains the content of all the wiki's pages as well as cache information for fast handling of the wiki.
 
 Advantages of this type are its speed and efficient use of disk space. Disadvantages are that single pages can't be edited with a text editor or searched by a desktop search engine and that there is a higher risc of data loss. If something crashes and you loose this one database file, you loose your entire wiki. With the other types you might loose one or more page files, but the majority of youw wiki pages would still be intact and you could rebuild the database files, using the wiki / rebuild function in the main menu.
 
 There is óne additional advantage Compact has over the other two; it allows page names (the links) to be case sensitive on Windows platforms. The other two rely on the file system used and Window's file system is not case sensitive. It will remember the case, but it will still consider ThisLink.wiki to be the same file as ThislinK.wiki or THISLINK.wiki. Therefore on Windows platforms you can only use case sensitive page names, when you use Compact as the backend.
 	----
 ++++ Original Sqlite
-This is the latest backend for WikidPad. Like Gadfly, this also stores each wiki page in a plain text file with a .wiki extention in the wiki's "data" directory. The database to index the wiki is stored in the file "wikiovw.sli".
+This is the latest backend for WikidPad. Like Gadfly, this also stores each wiki page in a plain text file with a .wiki extention in [WikiFiles |wiki / data]. The database to index the wiki is stored in the file "wikiovw.sli".
 This type is nearly as fast as Compact Sqlite, but it doesn't have it's disadvantages. It dóes however need an external binary.
 
 [:rel:top]

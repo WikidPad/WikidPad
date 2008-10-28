@@ -3,7 +3,7 @@ data_dir = data
 
 [main]
 footnotes_as_wikiwords = False
-last_wiki_word = Help
+last_wiki_word = HtmlCss
 hotkey_showhide_bywiki = 
 log_window_autoshow = True
 filestorage_identity_filenamemustmatch = False

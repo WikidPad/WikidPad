@@ -30,11 +30,10 @@ This page describes how to move WikidPad on an USB stick or similar media if you
 
 Now WikidPad doesn't need anymore to modify any files on the host computer and you can carry wikis as well as the configuration files on an USB stick to every computer you want.
 
-For details how this works, see [ApplicationConfigurationFiles].
+For details how this works, see [ConfigurationFiles].
 
 [:rel:top]
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 1]
 [help.status:done]

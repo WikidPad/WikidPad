@@ -1,0 +1,27 @@
+﻿++ User Files
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+WikidPad supports a number of global user files for functions like:
+	* [TextBlocks |Text blocks]
+	* [SpellChecking |Spell checking]
+	* [Using WikiWords |Wikiword blacklists]
+	* [WikiControl |Favorite wikis]
+	* [HtmlCss |Cascading style sheets]
+These files can be found in the ".WikidPadGlobals" subdirectory of the [ConfigurationFiles |Configuration directory].
+
+rel://files/UserConfigExample3.png rel://files/UserConfigExample4.png
+
+[:rel:top]
+----
++++ Cascading style sheets
+For CSS this directory is the location for:
+	* userbase level wikistyle.css cascading style sheet
+	* userbase level wikipreview.css cascading style sheet
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

@@ -1,16 +1,12 @@
 ﻿++ Wikid Pad Advanced
 [:rel:back]
 ----
-	* CommandLineSupport
-	* WikidPadOnUSB
-	* ApplicationConfigurationFiles
-	* WikiLockFile
-	* WikiSyntax
-	* ChangeFileSuffix
+	* [CommandLineSupport |Command line support]
+	* [WikiSyntax |Wiki syntax]
 	* [Plugins]
 	* [Scripts]
 
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 16], [template: HelpSubjectTemplate]
+attributes: [tree_position: 17], [template: HelpSubjectTemplate]

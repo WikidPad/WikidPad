@@ -1,4 +1,4 @@
 ﻿	*Wiki settings: General, log window*
 	----
 &bull; *Auto-show log window*
-Automatically show log window if new error messages arrive. Overrides the application level setting.
+Automatically show log window if new error messages arrive. If the check-box is gray, the application level setting "Auto-show log window" is used, otherwise this wiki level setting overrules it.

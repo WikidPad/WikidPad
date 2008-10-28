@@ -19,5 +19,4 @@ The lock file is placed in the same directory where the configuration file for t
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 1]
 [help.status:busy]

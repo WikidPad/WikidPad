@@ -1,0 +1,38 @@
+﻿++ Usefull Links
+[:rel:back]
+----
+rel://files/wikidpad48_36.png
+
+    * Wikidpad: Home page [http://groups.google.com/group/wikidpad/web/home |  rel://files/google35.gif>am]
+    * Wikidpad: Yahoo user group [http://tech.groups.yahoo.com/group/wikidPad/ | rel://files/yahoo25.png>am] 
+    * Wikidpad: Trac home page [http://wikidpad.python-hosting.com/ |  rel://files/trac25.png>am]
+    * Wikidpad: On Wikipedia [http://en.wikipedia.org/wiki/WikidPad | rel://files/wikipedia_logo.png>am]
+
+[:rel:top]
+----
+rel://files/w3schools.gif
+
+	* [http://www.w3schools.com/html/default.asp | W3schools: Html tutorial and references]
+	* [http://www.w3schools.com/xhtml/default.asp | W3schools: Xhtml tutorial and references]
+	* [http://www.w3schools.com/css/default.asp | W3schools: CSS tutorial and references]
+	* [http://www.w3schools.com/Html/html_colors.asp | W3schools: Colors]
+	* [http://www.w3schools.com/tags/ref_colornames.asp | W3schools: Color names]
+	* [http://www.w3schools.com/Html/html_colorsfull.asp | W3schools: Color values]
+	* [http://www.w3schools.com/tags/ref_entities.asp | W3schools: Entities]
+	* [http://www.w3schools.com/tags/ref_symbols.asp | W3schools: Symbols]
+
+[:rel:top]
+----
+rel://files/python-powered-w-70x28.gif
+
+	* [http://python.org/ |Python: Home page]
+	* [http://docs.python.org/ |Python: Documentation and tutorials]
+	* [http://docs.python.org/lib/re-syntax.html |Python: Regular expression syntax]
+	* [http://docs.python.org/dev/howto/regex.html |Python: Regular expression HowTo]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 6]
+[help.status:done]

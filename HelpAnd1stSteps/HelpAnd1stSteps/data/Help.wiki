@@ -1,6 +1,6 @@
 ﻿++ Help
 ----
-When you start WikidPad for the first time, this is the wiki that is opened. In it you will find initial information about what you can do with WikidPad and how to do it.
+When you open this wiki, this is the page it should open with in Peview mode. In this wiki you will find initial information about what you can do with WikidPad and how to do it, next to extensive help information.
 
 WikidPad is a wiki-like notebook for storing your thoughts, ideas, todo lists, contacts or anything else you can think of that's important. What makes WikidPad different from other notepad or outliner applications is the ease with which you can cross-link your information.
 

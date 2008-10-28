@@ -17,43 +17,43 @@ Any tag appears as a separate node in the "views" section of the treeview and un
 +++ Format
 A tag has the following format: \[name: value]; it in fact is an attribute, with a user defined name and value. The name acts as the tag key and can be anything, as long as it's alphanumeric and does not contain any special characters that serve as Wikidpad tags and/or delimiters. The value can also be anything and can even contain special characters, if it is enclosed in quotation characters. Examples:
 
-	* \[demoContact: private]
-	* \[demoContact: office]
-	* \[demoShop: "audio\*video"]
+	* \[helpContact: private]
+	* \[helpContact: office]
+	* \[helpShop: "audio\*video"]
 
-These attributes add a node "demoContact" with the sub nodes "private" and "office" to the views section and a node "demoShop" with a sub node "audio\*video. All three sub nodes have this page as a child node. Normally they probably wouldn't, but this is for demonstrations sake.
+These attributes add a node "helpContact" with the sub nodes "private" and "office" to the views section and a node "helpShop" with a sub node "audio\*video. All three sub nodes have this page as a child node. Normally they probably wouldn't, but this is for demonstrations sake.
 	rel://files/SignalUserTagsExample1.png
 	----
-The colon is mandatory; without it the attribute is interpreted as a link. So there can't be a tag with only a name or value, like \[demo]; there cán however be a tag with an empty value, like this:
-	* \[demo:]
-This adds an node "demo" to the views section and a sub node with no name but wíth this page as a child.
+The colon is mandatory; without it the attribute is interpreted as a link. So there can't be a tag with only a name or value, like \[help]; there cán however be a tag with an empty value, like this:
+	* \[help:]
+This adds an node "help" to the views section and a sub node with no name but wíth this page as a child.
 	rel://files/SignalUserTagsExample2.png
 	----
-Multiple values can  be defined for the same tag name, by separating them with a semicolon. This example adds three more tag values to the demoShop tag for this page:
-	* \[demoShop: computers; printers; software]
+Multiple values can  be defined for the same tag name, by separating them with a semicolon. This example adds three more tag values to the helpShop tag for this page:
+	* \[helpShop: computers; printers; software]
 
 	rel://files/SignalUserTagsExample3.png
 [:rel:top]
 ----
 +++ Structured tag names
 Tags can be nested; they can have a hierarchy of their own, using structured names. This is usefull, since it helps preventing the views section from becomming an entirely too long list of tag attributes. Using this technique, the earlier examples could have been written as
-	* \[demo.contact: private; office]
-	* \[demo.shop: "audio\*video"]
-This would have created 1 node "demo" in "views", with the sub nodes "contact" and "shop", each with their own sub nodes.
+	* \[help.contact: private; office]
+	* \[help.shop: "audio\*video"]
+This would have created 1 node "help" in "views", with the sub nodes "contact" and "shop", each with their own sub nodes.
 	rel://files/SignalUserTagsExample4.png
 	----
-It does not only help in keeping the number of nodes in views smaller, but also helps keeping the tag names shorter. If the private contacts would have to be extended with "family", "friends", etc, this would produce tagnames like: (demo)contactPrivate and contactOffice. Using nesting they would become: "demo.contact.private: family" and  "demo.contact.private: friends". Giving nice short node names, that easier fit in the not too wide views window. Adding the attributes below to this pages, would give a result as in the screenprint.
-	* [demo.contact.private: family]
-	* [demo.contact.private: friends]
-	* [demo.contact.office: project]
-	* [demo.contact.office: department]
+It does not only help in keeping the number of nodes in views smaller, but also helps keeping the tag names shorter. If the private contacts would have to be extended with "family", "friends", etc, this would produce tagnames like: (help)contactPrivate and contactOffice. Using nesting they would become: "help.contact.private: family" and  "help.contact.private: friends". Giving nice short node names, that easier fit in the not too wide views window. Adding the attributes below to this pages, would give a result as in the screenprint.
+	* [help.contact.private: family]
+	* [help.contact.private: friends]
+	* [help.contact.office: project]
+	* [help.contact.office: department]
 
-And last but certainly not least: it allows to group pages into one or more categories and does not need the invention of all sorts of structured camelcasewords - like \DemoContactPrivateFamilyInlaws - to make that possible.
+And last but certainly not least: it allows to group pages into one or more categories and does not need the invention of all sorts of structured camelcasewords - like \HelpContactPrivateFamilyInlaws - to make that possible.
 	rel://files/SignalUserTagsExample5.png
 	----
 When working wist nested or "structured" tags, be aware that:
-	* \[demo.contact: private] and
-	* \[demo.contact.private: family]
+	* \[help.contact: private] and
+	* \[help.contact.private: family]
 do nót represent the same node "private" in "views". The first "private" is a tag value and the second is a "node" in the structured tag name.
 	rel://files/SignalUserTagsExample6.png
 [:rel:top]
@@ -64,14 +64,17 @@ Tags have global attributes, that allow to have nodes of pages, that have certai
 	* \[tag name.color: color name]
 	* \[tag name.bold: true/false]
 As an example: the global attributes:
-	* [global.demo.contact.icon:people]
-	* [global.demo.contact.color: orange]
-	* [global.demo.contact.bold: true]
-would set the node name of any page in the wiki, that has a tag from the group: "demo.contact.private" to bold and orange and it's icon to "people". The additional global attributes:
-	* [global.demo.contact.private.icon:man]
-	* [global.demo.contact.private.color:navy]
-	* [global.demo.contact.private.bold:false]
-would overrule the settings for contacts, for any page that has a "demo.contact.private" tag.
+	* [global.help.contact.icon: people]
+	* [global.help.contact.color: coral]
+	* [global.help.contact.bold: true]
+would set the node name of any page in the wiki, that has a tag from the group: "help.contact" to bold and orange and it's icon to "people".
+	rel://files/SignalUserTagsExample7.png
+The additional global attributes:
+	* \[global.help.contact.private.icon:man]
+	* \[global.help.contact.private.color:navy]
+	* \[global.help.contact.private.bold:false]
+would overrule the settings for contacts, for any page that has a "help.contact.private" tag.
+	rel://files/SignalUserTagsExample8.png
 	----
 The availability of this signalling facility is important, but that is only a relative importance and it has to be used wisely, since:
 	* In a tree full of colored and iconed nodes nothing realy stands out anymore.

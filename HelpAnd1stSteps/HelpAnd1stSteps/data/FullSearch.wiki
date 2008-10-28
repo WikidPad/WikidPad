@@ -47,6 +47,15 @@ A button to start the search process. When finished, a list of matching pages is
 
 &bull; *Set Page list*
 This option allows to limit the search to a specific subset of a wiki's pages. Clicking this button opens the [PageListDialog |page list dialog] with whitch you can specify that subset. The full search dialog disappears until the page list dialog is closed. If you save the search, the page list dialog settings are saved whíth it.
+
+*Example:* 
+Open the page list dialog and enter the regex:
+	* "(?!\ChangeLog)"
+	to include all pages exept those starting with "\ChangeLog" or
+	* (?!.\*?Intro)
+	to include all pages exept those where "Intro" is somewhere in the name.
+close the dialog and define and run your full (content) search. Depending on what you specified, the result list will not contain any matches in the \ChangeLog pages or in the Intro pages.
+
 	----
 ++++ Result area
 The result area is the area where the result of a search is shown; it only has two controls: the list and the "copy" button. If no pages are found, the list remains empty. The results are listed per wiki page, not per found pattern. That is, if there are 3 "hits" on  the same page, the list only shows the page once, optionally with the number of hits found. The appearance of the items in the list depends on the settings of the "full search" options; see bottom page.
@@ -74,7 +83,7 @@ A button to replace áll occurences in all pages with the text in "Replace by". 
 Occurences can of course be selected manually and replaced using the Replace button.
 	----
 ++++ Store area
-Wikidpad supports a "search store"; here you can store search specifications - i.e. search criteria ánd search settings - so you can repeat a search without having to re-invent it every time you need it. If a search is based on a page list, then the list specification is also stored as part of the search specifications. Search stores are wiki specific, for all sorts of obvious reasons there is no "global" search store.
+Wikidpad supports a "search store"; here you can store search specifications - i.e. search criteria ánd search settings - so you can repeat a search without having to re-invent it every time you need it. If a search is based on a page list, then the list specification is also stored and/or retrieved as part of the search specifications. Search stores are wiki specific, for all sorts of obvious reasons there is no "global" search store.
 
 _Remark:_ The "Replace by" text is not considered part of the search specification and is not saved with it.
 

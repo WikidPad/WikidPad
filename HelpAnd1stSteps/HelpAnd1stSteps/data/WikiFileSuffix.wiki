@@ -1,4 +1,4 @@
-﻿++ Change File Suffix
+﻿++ Wiki File Suffix
 Contents:   [:toc:]
 [:rel:back]
 ----
@@ -57,5 +57,5 @@ Once again:
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 1], [camelCaseWordsEnabled: false]
+attributes: [camelCaseWordsEnabled: false]
 [help.status:busy]

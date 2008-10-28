@@ -54,7 +54,7 @@ Due to some misconduct of the Wikidpad parsing and conversion mechanism, it also
 
 So be sure to indent any bulleted lists, to prevent this problem from occurring!
 
-If you dó need something on the first position of a line and a bullet would also do the trick for you, you could use the [TextHtmlInternal |html entity] "\&bull;" resulting in:
+If you dó need something on the first position of a line and a bullet would also do the trick for you, you could use the [HtmlInternal |html entity] "\&bull;" resulting in:
 
 &bull; Part (\&bull; Part)
 &bull; of list (\&bull; of list)
@@ -97,7 +97,7 @@ You can not have two consecutive numbered lists, separated only by an empty line
 
 	1. list 2 item 1
 	2. list 2 item 2
-You can break this behaviour by putting the [TextHtmlInternal |html entity] "\&nbsp;" at the start of the empty line, separating both lists. The line is now no longer considered empty and the entity generates a (non breakable) space, so it won't be visible in the endresult.
+You can break this behaviour by putting the [HtmlInternal |html entity] "\&nbsp;" at the start of the empty line, separating both lists. The line is now no longer considered empty and the entity generates a (non breakable) space, so it won't be visible in the endresult.
     ----
 ++++ Auto list 
 The editor supports auto-bulleting for ordered lists, the same way it does for unordered lists and it is controled by the same options. As an extra the editor will also auto-number any next item, that is added to the list; so "    \1. item text", followed by an Enter, will result in:

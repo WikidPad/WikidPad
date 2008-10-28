@@ -5,13 +5,13 @@ AppVerName=WikidPad help and first steps
 DefaultDirName={reg:HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{{22A83C29-58A8-4CAB-8EDC-918D74F8429E%7d_is1,InstallLocation|{pf}\WikidPad}\HelpAnd1stSteps
 DefaultGroupName=WikidPad
 AppID={{8C751029-AC6E-43AC-B2CE-F13EB8D84DAD}
-VersionInfoVersion=0.4
-VersionInfoTextVersion=WikidPad help and first steps 0.4
+VersionInfoVersion=0.5
+VersionInfoTextVersion=WikidPad help and first steps 0.5
 LicenseFile=
 AllowNoIcons=true
 ShowLanguageDialog=no
 Compression=lzma/ultra
-OutputBaseFilename=WP-HelpAnd1stSteps-0.4
+OutputBaseFilename=WP-HelpAnd1stSteps-0.5
 InternalCompressLevel=ultra
 AppCopyright=© 2008 Jan Stegehuis
 UsePreviousAppDir=true
@@ -23,6 +23,6 @@ DirExistsWarning=no
 Name: {group}\{cm:UninstallProgram, WikidPadHelpAnd1stSteps}; Filename: {uninstallexe}
 Name: {group}\HelpAnd1stSteps; Filename: {reg:HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{{22A83C29-58A8-4CAB-8EDC-918D74F8429E%7d_is1,InstallLocation|{pf}\WikidPad}\WikidPad.exe; Parameters: {app}\Help.wiki
 [Files]
-Source: HelpAnd1stSteps\*; DestDir: {app}\; Flags: recursesubdirs ignoreversion
+Source: HelpAnd1stSteps\*; DestDir: {app}\; Flags: recursesubdirs ignoreversion; Excludes: .svn
 [Dirs]
 Name: {app}

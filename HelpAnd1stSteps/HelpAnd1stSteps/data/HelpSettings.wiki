@@ -6,7 +6,7 @@
 [global.help.status.new.color:steel blue]
 [global.help.status.busy.color:navy]
 [global.help.status.check.color:forest green]
-[global.help.status.done.color:black]
+\[global.help.status.\done.color:black]
 [global.help.status.waiting.color:orange]
 [global.help.status.waiting.issues.icon:flag red]
 

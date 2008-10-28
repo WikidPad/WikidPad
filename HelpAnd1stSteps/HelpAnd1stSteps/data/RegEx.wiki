@@ -20,7 +20,7 @@ Regex also defaults to case insensitive search. Check the "case sensitive" check
 +++ Metacharacters
 Some characters are "metacharacters" and have a special meaning in RE. For instance specifying "regex\*" as the text to search for, would not result in what you might think it would. The metacharacters are:
 <<pre
-. ^ $ * + ? { [ ] \ | ( )
+. ^ $ * + ? { } [ ] \ | ( )
 >>
 To use them in a search criterion, prefix them with a backslash "\\". So in order to find "regex\*", it should be specified as: "regex\\\*". Metacharacters can be combined in every thinkable way, in order to specify a "meta search".
 
@@ -55,14 +55,15 @@ The period "." is the "match any character" specifier. To find:
 	* "built in" ánd "built-in", specify: "built.in".
 	* "builtin","built in" ánd "built-in", specify: "built.?in".
 	----
-A pair of curly brackets also forms a repeat qualifier; it's fomat is: "{m,n}" where m and n are decimal integers. This qualifier means there must be at least m repetitions, and at most n. To find:
+A pair of curly brackets "{ }" also forms a repeat qualifier; it's fomat is: "{m,n}" where m and n are decimal integers. This qualifier means there must be at least m repetitions, and at most n. To find:
 	* headings only of level 4 and 5, specify: "\\+{4,5}"
+The pair can also be used with one integer specified, like: "{3}"; it then specifies the "m" parameter.
 	----
 A pair of parenthesis "()" forms a "group" specifier, with which a gróup of characters can be qualified with a metacharacter instead of only one character at a time.
 	* text(html)?elements will find "\TextElements" and "\TextHtmlElements".
 Groups can be nested; i.e. you can use groups within groups.
 	----
-A pair of square brackets "\[]" forms a "character class"; a "choice of characters". Specifying "\[1234]" would mean that any one of the digits 1,2,3 or 4 would cause a match. To find: 
+A pair of square brackets "\[ ]" forms a "character class"; a "choice of characters". Specifying "\[1234]" would mean that any one of the digits 1,2,3 or 4 would cause a match. To find: 
 	* "Ctrl-T" ánd "Ctrl+T", specify "Ctrl[-+]T".
 Ranges of characters can also be specified using a hyphen "-"; so "\[1234]" can also be written as "\[1-4]".
 
@@ -71,6 +72,70 @@ Metacharacters lose their special nature inside classes; a asterisk inside a cla
 
 The circumflex accent "^" has a special meaning as the first character of a class, it then _complements_ the classes character set; turning it into an "anything bút" specification. To find:
 	* any nót formatted "Remarks", specify:  "\[^\*\_]Remarks".
+	----
+++++ Greedy qualifiers
+\*?, +?, ??, {m,n}?
+The "\*", "+", "?" and "{m,n}" qualifiers are all greedy; they match as much text as possible. This means that matching "(\+\+)\*" against "++++" would result in three (3) matches: "*++*++", "+*++*+" and "++*++*"! When this behaviour is not desired, it can be prevented, by adding a question mark "?" áfter the qualifier. This will make it perform the match in a non-greedy or minimal fashion; as few characters as possible will be matched. So using "(\+\+)\*?" in the match against "++++" would result only in the match: "*++*++".
+
+[:rel:top]
+----
++++ Extended notation
+(?...)
+Is an extension notation and not a group specifier. The first character after the "?" determines what the meaning and further syntax of the construct is. Following are some currently supported extensions. 
+
+(?=...)
+Matches if ... matches next. This is called a lookahead assertion. For example:
+	* "Page (?=link)" will match "Page " only if it's followed by "link". 
+
+(?!...)
+Matches if ... doesn't match next. This is a negative lookahead assertion. For example:
+	* "Page (?!link)" will match "Page " only if it's not followed by "link". 
+
+(?<=...)
+Matches if the current position in the string is preceded by a match for ... that ends at the current position. For example:
+	* "Link(?<=Url )" will match "Link" only if it's preceded by "Url ".
+	* "(?<=-)\w+" looks for a word following a hyphen.
+
+(?<!...)
+Matches if the current position in the string is not preceded by a match for ... For example:
+	* "link(?<!Page )" will match "link" only if it's nót preceded by "Page ".
+
+[:rel:top]
+----
++++ Special sequences
+Regex supports a number of special sequences that start with a backslash "\\" like "\\b" and "\\B" mentioned above. The list below gives the default description; there might be differences in behaviour between ascii and unicode and between lokales. For detailed specifications see: [http://docs.python.org/lib/re-syntax.html |Python: RE syntax]
+
+<<
+\A
+Matches only at the start of the string.
+
+\b
+Matches the empty string, but only at the beginning or end of a word. A word is defined as a sequence of alphanumeric or underscore characters, so the end of a word is indicated by whitespace or a non-alphanumeric, non-underscore character.
+
+\B
+Matches the empty string, but only when it is nót at the beginning or end of a word.
+
+\d
+Matches any decimal digit; this is equivalent to the set [0-9].
+
+\D
+Matches any non-digit character; this is equivalent to the set [^0-9]
+
+\s
+Matches any whitespace character; this is equivalent to the set [ \t\n\r\f\v].
+
+\S
+Matches any non-whitespace character; this is equivalent to the set [^ \t\n\r\f\v]
+
+\w
+Matches any alphanumeric character and the underscore; this is equivalent to the set [a-zA-Z0-9_].
+
+\W
+Matches any non-alphanumeric character; this is equivalent to the set [^a-zA-Z0-9_].
+
+\Z
+Matches only at the end of the string. 
+>>
 
 [:rel:top]
 ----

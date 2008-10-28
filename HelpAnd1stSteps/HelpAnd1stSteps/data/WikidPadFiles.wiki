@@ -1,0 +1,18 @@
+﻿++ Wikid Pad Files
+[:rel:back]
+----
++++ General
+	* [ProgramFiles |Program files]
+	* [ConfigurationFiles |Configuration files]
+	* [UserFiles |User files]
+	* [WikiFiles |Wiki files]
+	* [WikiFileSuffix |Wiki file suffix]
+	* [WikiLockFile |Wiki lock file]
+	* [WikidPadOnUSB |WikidPad on USB]
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 15], [template: HelpSubjectTemplate]
+[help.status:done]

@@ -14,7 +14,7 @@ Wikidpad's support for character formatting is limited to the font styles bold a
 To make text bold, enclose it in asterisks, like \*bold\* giving *bold*.
 To make it italic, enclose it in underscores, like \_italic\_ giving _italic_.
 
-These two font styles are mutually exclusive in Wikidpad; text can not be defined to be both bold ánd italic [3]. When tried, it either results in: *_bold & italic_* or in: _*bold & italic*_. If bold+italic text or other additional character formatting is realy needed, then the use of html elements could be considered; see [TextHtmlElements|Textformatting: Html elements].
+These two font styles are mutually exclusive in Wikidpad; text can not be defined to be both bold ánd italic [3]. When tried, it either results in: *_bold & italic_* or in: _*bold & italic*_. If bold+italic text or other additional character formatting is realy needed, then the use of html elements could be considered; see [HtmlFormatting|Textformatting: Html elements].
 
 [:rel:top]
 [1] _Font style tags act as a special kind of escape character; nothing inbetween is recognised as a link, attribute or other wikidpad element anymore._

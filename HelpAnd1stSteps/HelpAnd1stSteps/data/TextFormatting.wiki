@@ -8,9 +8,10 @@
     3. [TextLists|Lists]
     4. [TextFootnotes|Footnotes]
     5. [TextTables|Tables]
-    6. [TextHtmlElements|Html elements]
-    7. [TextInsertions|Insertions]
+    6. [TextInsertions|Insertions]
 
+*Remarks:*
+	* Text can also be formatted using [HtmlFormatting |Html formatting].
 
 [:rel:top]
 ----

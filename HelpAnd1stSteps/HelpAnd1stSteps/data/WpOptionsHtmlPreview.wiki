@@ -10,4 +10,4 @@ If this option is checked, links to image URLs (those ending with .png, .gif or 
 A regular expression for the properties to be shown in HTML preview or not. See [ThePreview].
 
 &bull; *Preview renderer*
-Under Windows you can choose the renderer for the HTML preview. See [ThePreview] and [TextHtmlElements].
+Under Windows you can choose the renderer for the HTML preview. See [ThePreview] and [HtmlFormatting].

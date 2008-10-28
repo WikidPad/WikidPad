@@ -1,18 +1,15 @@
 ﻿++ Hooks
 [:rel:back]
 ----
-Under the wikidPad install directory:
+In the [ProgramFiles |WikidPad / extensions] directory, the file "wikidpadhooks.py" is located. If you have working knowledge of Python you can extend wikidPad by hooking into the events sent to the methods defined in this file. You could for example integrate wikidPad with cvs, by plugging into the events: onopen, onsave, ondelete and onrename.
 
-file:///C|/WikidPad/program%20Files/WikidPad by default
+To do so, copy the existing file: 
+	* [ProgramFiles |wikidpad / extensions / wikidpadhooks.py] to 
+	* [ProgramFiles |wikidpad / user_extensions / wikidpadhooks.py];
+create the directory if it doesn't exist.
+Then edit [ProgramFiles |user_extensions / wikidpadhooks.py] with a standard text editor to hook into the events. This file will not be touched when upgrading wikidPad.
 
-There is a directory called "extensions".  In this folder there is a
-file called "wikidpadhooks.py". If you know Python you can extend
-wikidPad by hooking into the events sent to the methods defined
-in this file. For example, you could integrate wikidPad with cvs
-by plugging into the onopen, onsave, ondelete, onrename events.
 
-file:///C|/WikidPad/program%20Files/WikidPad/extensions/WikidPadHooks.py
-file:///C|/WikidPad/program%20Files/WikidPad/user_extensions/WikidPadHooks.py
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]

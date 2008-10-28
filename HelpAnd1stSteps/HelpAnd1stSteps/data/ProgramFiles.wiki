@@ -1,0 +1,47 @@
+﻿++ Program Files
+Contents:   [:toc:]
+[:rel:back]
+----
++++ General
+The application files are stored in the WikidPad installation directory of your choice; on windows this would normally be "c:/Program Files/WikidPad/, but you could also install WikidPad on a [WikidPadOnUSB |USB device] or in any other location of your choice.
+
+rel://files/ProgramDirExample1.png
+
+	----
+++++ Wikidpad
+WikidPad contains the program executables and supporting files. It is also the location of:
+	* appbase.css cascading style sheet
+and optionally that of
+	* [ConfigurationFiles |WikidPad.config] application configuration file
+
+	----
+++++ Export
+Export is the location for additional files, that support the export function. It is also the location of:
+	* appbase level wikistyle.css cascading style sheet
+	* appbase level wikipreview.css cascading style sheet
+
+	----
+++++ Extensions
+Extentions is the location for [Plugins |plugins], that come installed with WikidPad.
+
+	----
+++++ Icons
+Icons is the location where the icons are stored; both the system icons for menu, toolbar and treeview and the user icons for the treeview.
+
+	----
+++++ Share / Enchant
+The subdirectory share / enchant is the location for the language file for SpellChecking
+
+	----
+++++ User_extentions
+User_extentions is the location to install additional [Plugins |plugins] and other user functions.
+
+	----
+++++ WikidPadHelp
+\WikidPadHelp is the location for the \WikidPadHelp.wiki
+
+[:rel:top]
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]

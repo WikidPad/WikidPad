@@ -1,4 +1,4 @@
-﻿++ Text Html Internal
+﻿++ Html Internal
 Contents:   [:toc:]
 [:rel:back]
 ----
@@ -106,7 +106,7 @@ Indented text
 <ul>Horizontal rule [6]<hr size=3>
 </ul>
 <p>Paragraph [7]</p>
-<p align=right>Paragraph right alligned</p>
+<p align=right>Paragraph text right/left/center alligned</p>
 <p align=center>Paragraph centered</p>
 <p align=left>Paragraph left alligned</p>
 [:rel:top]<br />
@@ -115,7 +115,7 @@ Indented text
 ----
 previous: [:rel:back]<br/>
 parents:&nbsp; [:rel:parents; aslist]<br/>
-attributes: [tree_position: 1], [paragraph_mode: true]<br/>
+attributes: [tree_position: 2], [paragraph_mode: true]<br/>
 [help.status:done]
 
 *Page anchors* Do not remove!!<br />
@@ -124,3 +124,4 @@ attributes: [tree_position: 1], [paragraph_mode: true]<br/>
 <li><a href="#example">Back to: Example page anchor</a></li>
 </ul><br />
 <br />
+

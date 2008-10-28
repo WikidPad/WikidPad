@@ -8,3 +8,4 @@ UserProfile
 WikidPad
 WikidPadCompact
 WikidPadGlobals
+WikiStyle

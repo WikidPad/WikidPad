@@ -3,16 +3,12 @@
 [:rel:back]
 ----
 +++ General
-The syntax of this wiki is customizable. Use:
+The WikidPad syntax is based on a set of regular expressions. It can be customized by creating a custom "wikisyntax.py" file. To do so, copy the existing file: 
+	* [ProgramFiles |wikidpad / extensions / wikisyntax.py] to 
+	* [ProgramFiles |wikidpad / user_extensions / wikisyntax.py];
+create the directory if it doesn't exist.
+Then edit [ProgramFiles |user_extensions / wikisyntax.py] with a standard text editor to override the default syntax specification. This file will not be touched when upgrading wikidPad.
 
-file:///C|/Program%20Files/WikidPad/extensions/WikiSyntax.py
-file:///C|/Program%20Files/WikidPad/user_extensions/WikiSyntax.py
-
-as the template.  Copy this file into a directory in the wikidPad
-install directory called "user_extensions". This file will not be
-touched when upgrading wikidPad.
-
-The syntax is based on a set of regular expressions.
 
 ----
 previous: [:rel:back]

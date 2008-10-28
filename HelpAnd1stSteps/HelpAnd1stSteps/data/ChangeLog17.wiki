@@ -143,7 +143,7 @@ Changes:
 
     * Changed method to find configuration directory, more suitable
       for WikidPad on USB-stick and more reliable. See WikidPadOnUSB
-      and ApplicationConfigurationFiles.
+      and ConfigurationFiles.
 
 
 Bugs fixed:
@@ -253,7 +253,7 @@ Changes:
     * Display of modification and creation date of page in status
       line (customizable date format, see [OptionsDialog])
     * Support for changing of file suffix of page files in the
-      config file (not part of options GUI) (see [ChangeFileSuffix])
+      config file (not part of options GUI) (see [WikiFileSuffix])
     * Uses now also environment variable "USERPROFILE" to find
       configuration directory
 

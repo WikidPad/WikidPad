@@ -9,6 +9,9 @@
     * [PageFormTemplates|Form templates]
     * [PageMiscellaneous|Miscellaneous]
 
+*Remarks:*
+	* Text can also be formatted using [HtmlFormatting |Html formatting].
+
 [:rel:top]
 ----
 previous: [:rel:back]
