@@ -20,7 +20,7 @@ Wikidpad supports a number of functions, that dynamically add page links to a pa
 +++ Format
 The format of the function is in general that of a Wikidpad attribute; it's syntax is:
 	* \[:_function group_: _function_; options]
-Wherein the options are optional and must be separarted with a semicolon ";". The available options are:
+Wherein the options are optional and must be separated with a semicolon ";". The available options are:
 	* aslist
 	* collumns _number_
 	* existingonly
@@ -76,7 +76,9 @@ The function \[:rel: undefined] creates a list of all the pages, that are undefi
 [:rel:top]
 ----
 +++ saved search
-The function \[:savedsearch: _searchname_] creates a list of all the page links, that were saved as a result of a search. Function in this case is the name of the saved search. Applicable options are: aslist and collumns.
+The function \[:savedsearch: _searchname_] creates a list of all the page links, that are the result of a saved search. Function in this case is the name of the saved search. Applicable options are: aslist and collumns.
+
+A "saved search" is in fact a "saved search specification". When WikidPad encounters a saved search insertion on a page, it wil retrieve the search's specification, execute it and replace the insertion with the resulting pagelist. This insertion therefore performs a "dynamic search" and results in an up-to-date searchresult.
 
 *Examples*
 \[:savedsearch: Case link; columns 4] (all pages containing "Case link") produces:

@@ -1,0 +1,13 @@
+﻿++ Wikid Pad Specials
+[:rel:back]
+----
+This section describes some special features offered by WikidPad. These can be "work in progress", preliminary examples, ready to use plugins, tryouts or other features.
+
+    * StructureGraphs
+    * ExternalGraphicalApplications
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+attributes: [tree_position: 15], [template: HelpSubjectTemplate]
+[help.status:done]

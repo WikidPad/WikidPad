@@ -5,7 +5,7 @@ Contents:   [:toc:]
 +++ 1.6 beta 4
 Feb. 24, 2006 (1.6beta4, repository revision in "mbutscher" branch: 60)
 
-<<
+<<pre
 Changes:
     * Commandline support for exporting (parts of) a wiki and
       deletion of personal configuration (see [CommandLineSupport])
@@ -42,7 +42,7 @@ Fixed bugs:
 +++ 1.6 beta 3
 Feb. 09, 2006 (1.6beta3, repository revision in "mbutscher" branch: 57)
 
-<<
+<<pre
 Changes:
     * 'global.import_scripts' property introduced (see
       [InlinePythonEval]) 
@@ -82,7 +82,7 @@ Changes:
 +++ 1.6 beta 2
 Jan. 25, 2006 (1.6beta2, repository revision in "mbutscher" branch: 55)
 
-<<
+<<pre
 *Warning*: This version has a new database format. It is converted
 automatically when opening a wiki the first time. Making a backup
 beforehand is therefore recommended!
@@ -106,7 +106,7 @@ Changes:
 +++ 1.6 beta 1
 Jan. 13, 2006 (1.6beta1, repository revision in "mbutscher" branch: 53)
 
-<<
+<<pre
 Changes:
     * WikidPad and WikidPadCompact merged into one application
       (therefore the new version number) (see [DatabaseTypes])

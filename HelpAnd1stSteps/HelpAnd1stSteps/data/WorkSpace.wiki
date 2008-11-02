@@ -11,6 +11,7 @@ The workspace is the Wikidpad application window. It offers a number of differen
 	6. [TheLogWindow|Log window]
 	7. [TheTimeView|Time view]
 	8. [TheStructureView|Structure view]
+	9. [CommandLineSupport |Command line support]
 
 ----
 previous: [:rel:back]

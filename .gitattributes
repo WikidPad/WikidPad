@@ -408,11 +408,11 @@ HelpAnd1stSteps/HelpAnd1stSteps/data/GlobalAttributesEditor.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/GlobalAttributesPageMisc.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/GlobalAttributesPageNodes.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/GlobalAttributesPageView.wiki -text
+HelpAnd1stSteps/HelpAnd1stSteps/data/GlobalAttributesScripting.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/GlobalAttributesSpellChecking.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/GlobalAttributesStructureGraphs.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/GlobalAttributesTemplates.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/GlobalAttributesWikiWords.wiki -text
-HelpAnd1stSteps/HelpAnd1stSteps/data/GlobalScriptLibrary.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/HelKo.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Help.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/HelpDummies.wiki -text
@@ -430,7 +430,6 @@ HelpAnd1stSteps/HelpAnd1stSteps/data/HtmlGeneral.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/HtmlInternal.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/ImagePasting.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/IncrementalSearch.wiki -text
-HelpAnd1stSteps/HelpAnd1stSteps/data/InlinePythonEval.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/International[!!-~]characters.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Intro[!!-~]Dutch[!!-~]Golden[!!-~]Age.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Intro[!!-~]Nachtwacht.wiki -text
@@ -463,6 +462,7 @@ HelpAnd1stSteps/HelpAnd1stSteps/data/LinksUrl.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/LinksUrlSchemes.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/LinksWebsites.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/LinksWikis.wiki -text
+HelpAnd1stSteps/HelpAnd1stSteps/data/LocalScriptLibrary.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/MenuEditorClipboardCatcher.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/MenuEditorSetDateFormat.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/MenuEditorSettingsAutoBullets.wiki -text
@@ -512,7 +512,6 @@ HelpAnd1stSteps/HelpAnd1stSteps/data/Renaming[!!-~]wikiwords.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/SEARCH_VIEWS.grl -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/SETTINGS.grl -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/ScratchPad.wiki -text
-HelpAnd1stSteps/HelpAnd1stSteps/data/Script[!!-~]options.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Scripts.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Search[!!-~]links.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/Short[!!-~]hint.wiki -text
@@ -602,6 +601,7 @@ HelpAnd1stSteps/HelpAnd1stSteps/data/WikidPadAdvanced.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WikidPadFiles.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WikidPadOnUSB.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WikidPadReferences.wiki -text
+HelpAnd1stSteps/HelpAnd1stSteps/data/WikidPadSpecials.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WorkSpace.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WorkSpaceGeneral.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpAttributes.wiki -text
@@ -616,6 +616,7 @@ HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsEditorClipboardCatcher.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsEditorColors.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsEditorImagePasting.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsEditorShortHint.wiki -text
+HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsFileLauncher.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsGeneral.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsGeneralRename.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsGeneralSort.wiki -text
@@ -655,13 +656,18 @@ HelpAnd1stSteps/HelpAnd1stSteps/files/ColorsExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/FindDialogIE.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/FindReplace1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/FullSearchExample1.png -text
+HelpAnd1stSteps/HelpAnd1stSteps/files/GnuPlotExample1.png -text
+HelpAnd1stSteps/HelpAnd1stSteps/files/GraphVizExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/HistoryExample1.png -text
+HelpAnd1stSteps/HelpAnd1stSteps/files/MimeTexExample1.gif -text
+HelpAnd1stSteps/HelpAnd1stSteps/files/MimeTexExample2.gif -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/My[!!-~]wiki's.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/NewWikiExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/NewWikiExample2.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/OpenPageExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/PageTreeExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/ParentsExample1.png -text
+HelpAnd1stSteps/HelpAnd1stSteps/files/PloticusExample1.gif -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/ProgramDirExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/RvRsmall.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/SignalPageNodeExample1.png -text
@@ -681,6 +687,10 @@ HelpAnd1stSteps/HelpAnd1stSteps/files/SignalUserTagsExample5.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/SignalUserTagsExample6.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/SignalUserTagsExample7.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/SignalUserTagsExample8.png -text
+HelpAnd1stSteps/HelpAnd1stSteps/files/StructureGraphExample1.png -text
+HelpAnd1stSteps/HelpAnd1stSteps/files/StructureGraphExample2.png -text
+HelpAnd1stSteps/HelpAnd1stSteps/files/StructureGraphExample3.png -text
+HelpAnd1stSteps/HelpAnd1stSteps/files/StructureGraphExample4.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/StructureViewExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/TextBlocksExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/TextBlocksExample2.png -text

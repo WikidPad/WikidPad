@@ -83,7 +83,7 @@ This is a name;a=This will be inserted
 >>
 	----
 ++++ Submenu's
-To group a number of single items in a submenu, indent them and preferably prefix them with a - also indented - submenu name. The format for a submenu name is "name=". Make sure there is no whitespace after the equal sign, otherwise it will be interpreted as a block text item! If a submenu name is not specified, a submenu will still be created and it will be given the identifier of the first indented single item.
+To group a number of single items in a submenu, indent them and preferably prefix them with a submenu name. The format for a submenu name is "name=". Make sure there is no whitespace after the equal sign, otherwise it will be interpreted as a block text item! If a submenu name is not specified, a submenu will still be created and it will be given the identifier of the first indented single item.
 To add a submenu with two items to the example above, specify it like this:
 <<pre
 =This will be inserted

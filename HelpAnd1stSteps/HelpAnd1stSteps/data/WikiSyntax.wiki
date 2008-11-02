@@ -13,5 +13,4 @@ Then edit [ProgramFiles |user_extensions / wikisyntax.py] with a standard text e
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 1]
-[help.status:busy]
+[help.status:done]

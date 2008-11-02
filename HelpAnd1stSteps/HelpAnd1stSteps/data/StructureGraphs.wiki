@@ -1,38 +1,109 @@
 ﻿++ Structure Graphs
+Content:	[:toc:]
 [:rel:back]
 ----
-You can create some graphs of the relations of the wikiwords to each other in the wiki. This needs the GraphViz application suite to be properly installed.
++++ General
+As a pilot activity, WikidPad offers the possibility, to create graphs of relationships between wiki pages and/or their attributes. It is "work in progress" and meant as an example of what cóuld be done in this area and therefore is not a fully worked out implementation. They are waiting for somebody with a good idea for their use.
 
-In the "plugins" menu you will see the four entries "Show relation graph", "Show rel. graph source", "Show child graph", "Show child graph source". If you choose one of them the current tab shows one of the graphs or its source (the dot script to create it).
+Currently - 1.9 beta 19 - there are two (2) graphs available:
+	1. child graph
+	2. relation graph
+They are available as both a menu option ánd a graph insertion and need the GraphViz application suite to be properly installed. Both at the moment create graphs for the entyre wiki; there is no possibility yet, to limit it to a specific set or subtree of pages.
+	----
+++++ The menu options
+In the "plugins" menu you can find four (4) options related to graphs:
+	* Show child graph
+	* Show child graph source
+	* Show relation graph
+	* Show rel. graph source
+These options all show their output in the current tab, that temporarily becomes a "graph window". To close it and return to editor or preview, select the regular option, you would normally use to activate it, like:
+	* menu View: "Switch Ed./Prev." or Ctrl-Shift-Space
+	* menu View: "Show editor" or Ctrl-Shift-A
+	* menu View: "Show preview" or Ctrl-Shift-S
+The "show ... graph" options show the actual graph in the window; the "show ... source" options show the "graphviz.dot script" that was generated to create the graph specification for GraphViz. You could copy that and use it as the basis for your own [ExternalGraphicalApplications |graphics insertion].
+	----
+++++ The insertions
+Instead of using the menu options, you can also make them part of a wiki page, by using a "graph" insertion. This will show the graph, as if it were an image you inserted in the page. The graph will of course only be visible in preview and in the html export of the page. The formats for both insertions are:
+	* \[:graph.child:]
+	* \[:graph.relation:]
+The insertions do not have a "show .... source" variant; they only show the actual graph.
+	----
+++++ Remarks
+&bull; *Undefined pages*
+The graphs do not take undefined pages into account; those are ignored and will not be part of the graph.
 
-If you want to go back to editor or preview, use the "View" menu and select "Switch Ed./Prev.", "Show editor" or "Show preview".
+&bull; *Color attributes*
+If a page to be included in a graph has a valid \[color: _color name_] attribute, then it's node color in the graph will be colored accordingly.
 
-If you want to export these graphs use the [WpInsertions] \[:graph.relation:] or \[:graph.child:].
+&bull; *Graph size*
+The resulting graphs are quite large, partly due to the (default) font size used for the nodes, but even with a smaller font size the graphs easily run "of the screen". The child graph for thís help.wiki is horrendously large and actually quite unuseable. Also due to their nature these graphs have a limited use; if the number of relationships becomes too large, their lines become difficult to follow. It is adviseable to only use these graphs for a limited number of nodes.
 
+As an example see the image below; it shows a child graph for an 81 page simple wiki and is resized to 6% of it's actual size as shown in the page window.
+rel://files/StructureGraphExample4.png
 
-+++ Relation graph
+&bull; *Processing time*
+The graphs take some time to create and specifically to display, mainly due to their size. On an x86 2GHz, 1Mb computer running Win XP SP3 it takes close to 5 minutes, for a child graph for thís help.wiki to be created and shown. So be prepared to go for a coffee brake, if you plan to try it.
 
-This graph uses relations defined by attributes in a wikiword. The key of the attribute names the kind of relation, the value names the wiki word (which must exist) to which it is related.
-
-An example could be on a page "Bird" the attributes
-<<
-[isA: Animal]
-[eats: Fish]
->>
-
-
-There are two attributes to define which attribute keys should be taken into account for relation. You can either use "global.graph.relation.exclude" to define which keys should not be taken into account (the "alias" key is e.g. a good candidate) or "global.graph.relation.include" to list the keys that only should be taken into account.
-
-These attributes apply for the whole wiki, regardless on which page they are placed. If you use both keys in the same wiki, the "...include" is ignored.
-
-The values in these attributes should be delimited by a semicolon. Each value (which is in fact an attribute key) also applies to all subkeys (e.g. "foo" also applies to "foo.bar", but not to "foobar").
-
-
-+++ Child graph
-
-This graph shows the parent->child relationship of the words in the wiki.
+&bull; *Result is an image*
+What is shown in WikidPad is an image. The graph is created as a .png image in the "Temp" directory. It is this image that is then shown in the WikidPad page window.
 
 [:rel:top]
+----
++++ Child graph
+This graph shows the parent->child relationship of the words in the wiki. Below is an image of a graph for a small wiki.
+
+	rel://files/StructureGraphExample1.png
+
+*Remarks:*
+	* The above image is downsized to 60% of it's real size.
+
+[:rel:top]
+----
++++ Relation graph
+++++ General
+This graph shows relationships between wiki pages. It does this based on attributes on the pages, but these must be a specific type of attributes: their value must be the name of an existing page, like for instance is the case for the "template" attribute.
+
+Suppose for example you have a page describing the "Sea Gull", you could then put the attributes:
+	<<
+[isA: Bird]
+[eats: Fish]
+>>
+on the page and íf "Bird" and "Fish" were other existing wiki pages, then this would result in the structure graph beneath:
+
+	rel://files/StructureGraphExample3.png
+
+You could add the same attributes to wiki pages about other animals, resulting for instance in a structure graph like this: 
+
+rel://files/StructureGraphExample2.png
+
+*Remark:*
+	* The above images are downsized to 75% of their real size.
+	----
+++++ Global Attributes
+Two global attribute are available that you can use to limit the attributes that are to be included in the graph. These are an "include" and an "exclude" attribute. As is the case for all global attributes, also these attributes apply to the whole wiki, regardless of the page they are placed on.
+
+&bull; *The include attribute*
+The include attribute has the format: \[global.graph.relation.include: _att.key1_; _att.key2_; ....]. When used any relation graph wil only show relationships for the specified attributes. All other attributes are excluded.
+_Example:_ \[global.graph.relation.include: isA; eats] only includes pages with "isA" and "eats" attributes.
+
+&bull; *The exclude attribute*
+The exclude attribute has the format: \[global.graph.relation.exclude: _att.key1_; _att.key2_; ....]. When used any relation graph wil exclude the specified attributes and not show relationships for them.
+_Example:_ \[global.graph.relation.exclude: alias; template] excludes "alias" en "template" attributes from the graph.
+
+*Remarks:*
+&bull; If a specified attribute key concerns a structured key, then a specified partial key name includes all of it's subkeys. So \[global.graph.relation.include: contact] would include both all \[contact.private: _value_] ánd  all \[contact.office: _value_] attributes and \[global.graph.relation.exclude: html] would exclude "html.textcolor" "html.bgcolor", "html.linkcolor", etc.
+
+&bull; If bóth a global.include ánd a global.exclude attribute are specified, then only the global.exclude attribute is taken into account and the global.include attribute is ignored entirely. This will be changed to a more logical behaviour in an upcomming version of WikidPad.
+	----
+++++ Remarks
+&bull; *Current page*
+The function defaults to including the current page in the graph, even if that page does not have a valid  reason to be in that graph [4].
+
+&bull; *Color attributes*
+The function defaults to including all pages in the graph that have a valid \[color: _color name_] attribute, even if those pages do not have a valid reason to be in that graph [4].
+
+[:rel:top]
+[4] _This behaviour will be corrected in an upcomming version of WikidPad._
 ----
 +++ Settings
 ++++ Global attributes
@@ -42,4 +113,4 @@ This graph shows the parent->child relationship of the words in the wiki.
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-[alias: WikiStructureGraphs]
+[help.status:done]

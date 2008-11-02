@@ -5,7 +5,7 @@ Contents:   [:toc:]
 +++ 1.7 beta 8
 Aug. 05, 2006 (1.7beta8, repository revision in "mbutscher" branch: 85)
 
-<<
+<<pre
 Changes:
     * Official support for multiple windows with same wiki in
       them, but only in the same process (therefore necessarily
@@ -29,7 +29,7 @@ Changes:
 +++ 1.7 beta 7
 Jul. 10, 2006 (1.7beta7, repository revision in "mbutscher" branch: 83)
 
-<<
+<<pre
 Changes:
     * "FastSearch" text field in toolbar. See SearchingTheWiki
 
@@ -75,7 +75,7 @@ Changes:
 +++ 1.7 beta 6
 Jun. 02, 2006 (1.7beta6, repository revision in "mbutscher" branch: 80)
 
-<<
+<<pre
 Changes:
     * Support for an additional "Views" tree which can be put at any
       side of main tree, also option to put main tree at any side of
@@ -112,7 +112,7 @@ Changes:
 +++ 1.7 beta 5
 May 08, 2006 (1.7beta5, repository revision in "mbutscher" branch: 77)
 
-<<
+<<pre
 Changes:
 
     * Clipboard catcher (Windows only): Every piece of text added to
@@ -166,7 +166,7 @@ Bugs fixed:
 +++ 1.7 beta 4
 Apr. 21, 2006 (1.7beta4, repository revision in "mbutscher" branch: 74)
 
-<<
+<<pre
 Changes:
 
     * One or more of the characters .,;:!? can directly follow
@@ -196,7 +196,7 @@ Changes:
 +++ 1.7 beta 3
 Apr. 16, 2006 (1.7beta3, repository revision in "mbutscher" branch: 73)
 
-<<
+<<pre
 Changes:
 
     * Better alias support. E.g. pages linking to an alias of
@@ -232,7 +232,7 @@ Changes:
 +++ 1.7 beta 2
 Mar. 24, 2006 (1.7beta2, repository revision in "mbutscher" branch: 70)
 
-<<
+<<pre
 Changes:
     * Importer/Exporter for new multipage text format (mpt).
       See ([WikiExport], [WikiImport], [Multipage text format])    
@@ -266,7 +266,7 @@ Changes:
 +++ 1.7 beta 1
 Mar. 09, 2006 (1.7beta1, repository revision in "mbutscher" branch: 63)
 
-<<
+<<pre
 *Warning*: This version has a new database format for
 "Compact Sqlite" databases. It is converted automatically
 when opening a wiki the first time. Making a backup beforehand

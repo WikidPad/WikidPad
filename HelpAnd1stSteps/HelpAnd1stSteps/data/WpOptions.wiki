@@ -30,6 +30,11 @@ This page lists all the possible application settings; they can be found in the 
 
 [:rel:top]
 ----
+++++ File Launcher
+[:page:WpOptionsFileLauncher]
+
+[:rel:top]
+----
 ++++ Security
 [:page:WpOptionsSecurity]
 
@@ -132,6 +137,7 @@ attributes: [tree_position: 2]
 [WpOptionsUserInterfaceWikiControl]
 [WpOptionsUserInterfaceLogWindow]
 [WpOptionsUserInterfaceStructWindow]
+[WpOptionsFileLauncher]
 [WpOptionsSecurity]
 [WpOptionsTree]
 [WpOptionsHtmlPreview]

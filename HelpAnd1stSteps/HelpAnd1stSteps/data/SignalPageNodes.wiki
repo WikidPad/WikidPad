@@ -25,7 +25,7 @@ Wikidpad has a large number of icons available for the page nodes in the tree. A
 
 	----
 +++++ User icons
-The icons can be found in the "icons" folder of the Wikidpad program folder. Additional icons for use in the treeview can be added to this folder. They have to be 16x16 GIF images; other formats and sizes are not supported. Added icons are not visible until Wikidpad has been restarted. After restart they will appear in the menu / Editor / "Add icon attribute" list.
+The icons can be found in [ProgramFiles |WikidPad / icons]. Additional icons for use in the treeview can be added to this folder. They have to be 16x16 GIF images; other formats and sizes are not supported. Added icons are not visible until Wikidpad has been restarted. After restart they will appear in the menu / Editor / "Add icon attribute" list.
 
 	----
 ++++ Color
@@ -40,6 +40,7 @@ Wikidpad has a large number of default color names available to choose from. An 
 *Remarks*
 	* A complete list of the supported color names is available in the help pages.
 	* The available color names are a subset of the html cross browser color names; the remaining html color names are not supported <small><sup>[1]</sup></small>.
+	* WikidPad uses the Python specifications for the cross browser names. For some .... reason those deviate from the official W3 html specification and sometimes quite a lot. Html "gold" for instance is specified as #FFD700 whereas WikidPad/Python uses #CC7F32.
 	* The 6 digit and 3 digit html hex color numbers are not supported for color attributes.
 	* In html, multiword color names are written as camelcase words, like: "\ForestGreen"; in Wikidpad attributes they have to be written as seperate words, like "forest green", in order to not confuse them with page links.
 	* Wikidpad color names are not case sensitive.

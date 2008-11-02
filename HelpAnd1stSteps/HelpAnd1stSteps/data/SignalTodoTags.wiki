@@ -44,8 +44,8 @@ Like user tags, todo tags support nested subcategories in the form of structured
 ----
 +++ Todo node signalling
 The appearance of a single todo item in the views section can be controled by using the formatting attributes: icon, color and bold in the tag's text. Example:
-	* todo.help.format.icon: Show the exclamation icon. [icon:exclamation]
-	* todo.help.format.color: Show the text in bold orange. [bold:true][color: coral]
+	* todo.help.format.icon: Show the exclamation icon. \[icon:exclamation][icon:exclamation]
+	* todo.help.format.color: Show the text in bold orange. \[bold:true]\[color: coral][bold:true][color: coral]
 For the format of the attributes see: [SignalPageNodes|Signalling page nodes].
 	rel://files/SignalTodoTagsExample3.png
 As can be seen in the example, the format attributes do not get removed from the text; this behaviour is delibarate. In practice it is therefore best, to put the attributes at the end of the todo text.

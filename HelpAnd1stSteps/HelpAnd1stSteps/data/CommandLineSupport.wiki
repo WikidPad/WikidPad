@@ -2,87 +2,109 @@
 Contents:   [:toc:]
 [:rel:back]
 ----
-+++ Old form
-You can have up to two command line parameters, without leading '-'
-which have the following meaning:
-
-*First parameter* can be a path to a .wiki file (either a text file with
-wiki page content (this page is opened then) or the wiki configuration
-file). Instead of a path it can also be an URL with wiki: protocol
-
-*Second parameter* can be the name of a wiki word to open, if not
-specified in the first parameter.
++++ General
+Wikidpad (still) supports two types of commandline suport:
+	* the older simple format.
+	* a newer extended format with more possibilities.
 
 [:rel:top]
 ----
-+++ New form
-You can specify switches and/or parameters on the command line where
-the names of the switches either consist of a '-' and a character
-(short form, e.g. "-h") or begin with two dashes and a name (long
-form, e.g. "--help").
-
-Some switches also take a parameter which must follow the switch on
-the command line.
-
-The following list of switches shows the short form (not present for
-all options), the long form and (if necessary) the meaning of the
-parameter in angle brackets:
-
++++ Simple format
 ++++ General
-*-h, --help*
+In the old simple format up to two command line parameters are allowed; these should not have a leading hyphen "-". The parameters have the following meaning:
+
+&bull; *First parameter*
+Specifies a wiki to be opened; the parameter can either be:
+	* the path to the .wiki configuration file in the [WikiFiles |wiki's directory],
+	* a path to a .wiki page file in the [WikiFiles |wiki's data directory],
+	* a Url for the wiki, using the [LinksWikis |wiki: scheme] (= protocol)
+	
+&bull; *Second parameter*
+Specifies the name of a wiki page to be opened at startup, if it is not already specified in the first parameter.
+	----
+++++ Examples
+&bull; Opening a wiki, with the default page, using the path to the .wiki config file
+&nbsp; "...\\WikidPad.exe" "D:\\WikidPad\\Help\\help.wiki" [1].
+
+&bull; Opening a wiki, with a specified page using both parameters
+&nbsp; "...\\WikidPad.exe" "D:\\WikidPad\\Help\\help.wiki" "Page history"
+
+&bull; Opening a wiki, with a specified page using only the first parameter
+&nbsp; "...\\WikidPad.exe" "D:\\WikidPad\\Help\\help.wiki\\Page history.wiki"
+
+&bull; Opening a wiki, with an anchor "here" on a specified page using a wiki url
+&nbsp; "\wiki:///D|/WikidPad/Help/help.wiki?page=Page%20history&anchor=here"
+
+[:rel:top]
+[1] _The path to the wikidpad executable is not written out in full, but should for instance for windows be something like: "C:\\Program Files\\WikidPad\\WikidPad.exe"_
+----
++++ Extended format
+++++ General
+The new extended format allows the specification of more then two parameters, using "switches" that identify the "parameter type" used. It supports two switch formats:
+	1. the short format, consisting of a hyphen "-" and a character, like "-h".
+	2. the long format, consisting of two hyphens "--" and a name, like "--help".
+*Remarks*
+	* The long format is available for all parameters, the short format only for a few of them.
+	* The parameter "switch" must be separated from the parameter "value" by a space.
+	* Some parameters allow additional options, that must then follow the parameter on the command line.
+	----
+++++ General parameters
+&bull; *-h, --help*
 Shows a message box with a short overview of available switches.
+_example:_ "...\\WikidPad.exe" -h
 
-*-w, --wiki  <wiki path>*
-Set the wiki to open on startup (same as first parameter of old form).
+&bull; *-w, --wiki  <wiki path>*
+Set the wiki to open on startup; the possible values are the same as for the "first parameter" of the simple format.
+_example:_ "...\\WikidPad.exe" -w "D:\\WikidPad\\Help\\help.wiki"
 
-*-p, --page <page name>*
-Set the page to open on startup (same as second parameter of old form). You can repeat this parameter multiple times to open multiple tabs.
+&bull; *-p, --page <page name>*
+Set the page to open on startup. This parameter is the same as the second parameter of the simple form; it can however be repeated multiple times, to open multiple pages in multiple tabs.
+_example:_ "...\\WikidPad.exe" --wiki "D:\\WikidPad\\Help\\help.wiki" --page "\ThisWiki" "\IntroWiki" "\HelpWiki".
 
-*--rebuild*
-Rebuild the opened wiki.
+&bull; *--rebuild*
+Rebuild the wiki to be opened. See also: [WikiControl]
+_example:_ "...\\WikidPad.exe" --wiki "D:\\WikidPad\\Help\\help.wiki" --rebuild
 
-*-x, --exit*
+&bull; *-x, --exit*
 Exit immediately after command line actions were completed.
+_example:_ See export example.
+	----
+++++ Export parameters
+These parameters allow to export all or part of a wiki's pages. The parameters form a set; the first three listed must all be specified, the fourth (--export-compfn) is optional. See also: [ItemPublishing] and [Wiki export].
 
-++++ Exporting
-The following three must all be specified if you want to export
-something, the fourth (--export-compfn) is optional:
+&bull; *--export-what <what>*
+Specifies the items to be exported; the choice can be either:
+	* "page": a single - specified - page
+	* "subtree": the whole subtree of a - specified - page
+	* "wiki": all the pages of the wiki
 
-*--export-what <what>*
-Choose if you want to export *page*, *subtree* or *wiki*.
+&bull; *--export-type <type>*
+Specifies the type of export to be performed; the current options are:
+    * "html_single": export as a single html page
+    * "html_multi": export as a set of of html pages
+    * "xml": export as xml
+    * "raw_files": export as a set of \*.wiki files in UTF-8 format with BOM
 
-*--export-type <type>*
-Tag of the export type. Currently this can be:
+&bull; *--export-dest <destination path>*
+Specifies the path of the destination directory for the export.
 
-    * html_single: Single HTML page
-    * html_multi: Set of HTML pages
-    * xml: XML output
-    * raw_files: Set of \*.wiki files in UTF-8 format with BOM
-
-*--export-dest <destination path>*
-Path of destination directory for export.
-
-
-*--export-compfn*
+&bull; *--export-compfn*
 Use compatible filenames on export.
 
-++++ Special
-*--deleteconfig*
-If this is the only switch on the command line, the program deletes
-(*without further request!*) the configuration files which are the
-main "WikidPad.config" file as well as everything in
-".WikidPadGlobals" directory (normally only the global text blocks
-file).
+&bull; *example:*
+&nbsp;Start WikidPad, export the subtree of the page "\IntroWiki" of the wiki "Help" as a set of html pages to the directory "D:\\WikidPad\\Help\\export\\intro" and close WikidPad again.
+	* &nbsp;"...\\WikidPad.exe" --wiki "D:\\WikidPad\\Help\\help.wiki" --page "\IntroWiki" --export-what "subtree" --export-type "html_multi" --export-dest "D:\\WikidPad\\Help\\export\\intro" --exit.
 
-After that the program terminates immediately (otherwise the files
-would be recreated).
+	----
+++++ Special parameters
+&bull; *--deleteconfig*
+If this parameter is used, it must be the only one on the command line. It's function is to delete *without further request!* the [ConfigurationFiles |WikidPad.config] file ánd the files in the [UserFiles |.WikidPadGlobals] directory. The program is terminated immediately after this, otherwise the files would be recreated.
 
-This switch is mainly used for the uninstalling of a Windows binary.
-The uninstaller *will* ask before running WikidPad with this option.
+This switch is mainly used for the uninstallation of a Windows binary. The uninstaller prógram *will* ask before running WikidPad with this option.
 
 [:rel:top]
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 1]
-[help.status:busy]
+attributes: [tree_position: 9]
+[help.status:done]

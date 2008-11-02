@@ -4,14 +4,14 @@
 +++ General
 WikidPad supports numerous [WikidPadReferences |settings] with which you can control it's behaviour and adjust it to your wishes. 
 
-Additionally you can automate some of your activities by using [Scripts] and adjust or expand WikidPad's functionality by creating plugins. Both however require Python programming knowledge and that is neither subject of this intro nor is it really elaborated upon in this help.wiki. To be able to work with either of these you will need experience with Python. Comprehensive documentation, manuals and guides can be found on the [http://www.python.org/ |Python website].
+Additionally you can automate some of your activities by using [Scripts] and adjust or expand WikidPad's functionality by creating [Plugins |plugins]. Both however require Python programming knowledge and that is neither subject of this intro nor is it really elaborated upon in this help.wiki. To be able to work with either of these you will need experience with Python. Comprehensive documentation, manuals and guides can be found on the [http://www.python.org/ |Python website].
 
 +++ Graphical Applications
 WikidPad is installed with the builtin support for a number of [ExternalGraphicalApplications |graphical applications], that allow you to insert specific graphics in your wiki pages. These applications are:
-    * \MimeTeX to generate mathematical formulas
-    * \GraphViz to generate directed and nondirected graphs
-    * Ploticus to generate plots and charts
-    * Gnuplot to generate mathematical plots
+    * \MimeTeX to generate mathematical formulas.
+    * \GraphViz to generate directed and nondirected graphs.
+    * Ploticus to generate plots and charts.
+    * Gnuplot to generate mathematical plots.
 The applications will have to be downloaded and installed on your computer, before they can be used in WikidPad. The use of any of those programs requires prior knowlegde of them.
 
 +++ WikidPad on USB

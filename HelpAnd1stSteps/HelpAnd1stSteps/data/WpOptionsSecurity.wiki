@@ -4,7 +4,11 @@
 Experimental feature, use not recommended!
 
 &bull; *Process insertion scripts*
-Control if insertions with key "eval" should be evaluated as Python expressions or not, see also [InlinePythonEval].
+Control if insertions with key "eval" are allowed be evaluated as Python expressions or not, see also [Scripts].
 
 &bull; *Script security*
-Set the security level for script execution, see InlinePythonEval#+++# Security# concerns .
+Set the security level for script execution, see also [Scripts]. The possible options are:
+    * No scripts: Script execution is completely disabled. This is the default.
+    * No import_scripts: Scripts on the currently open page can be executed and expressions evaluated. Importing scripts from other pages with the import_scripts property doesn't work (see below how to do this).
+    * No global.import_scripts: Property "import_scripts" works, but "global.import_scripts" does not
+    * Allow everything

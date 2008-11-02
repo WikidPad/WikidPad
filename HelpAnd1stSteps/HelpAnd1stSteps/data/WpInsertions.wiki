@@ -25,7 +25,7 @@ There are different types of insertions, that are all described on their own pag
 	* [Link insertions |Link insertions]
 	* [StructureGraphs |Structure graph insertions]
 	* [ExternalGraphicalApplications |Plugin insertions]
-	* [InlinePythonEval |Eval insertions]
+	* [Scripts |Eval insertions]
 
 [:rel:top]
 ----

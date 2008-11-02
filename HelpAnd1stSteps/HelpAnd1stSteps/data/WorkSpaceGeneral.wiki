@@ -15,7 +15,7 @@ The main tree forms an active index into the pages; it can be split in two, show
 [:rel:top]
 ----
 +++ Additional windows
-Wikidpad supports three additional view windows, that each supports working with a wiki in it's own different way. These windows are:
+Wikidpad supports three additional view windows, that each support working with a wiki in their own different way. These windows are:
 
 	* [TheLogWindow |The log window]
 	* [TheTimeView |The time view window]

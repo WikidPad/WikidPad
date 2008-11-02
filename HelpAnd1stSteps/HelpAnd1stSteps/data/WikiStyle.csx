@@ -7,14 +7,6 @@ BODY {
 	pading: 0;
 }
 
-p:first-letter {
-	font-style: normal;
-	font-size: 110%;
-	font-weight: bold;
-	color: Navy;
-}
-
-
 h3{
 	font-style: italic;
 }
@@ -23,7 +15,6 @@ h3{
 h4{
 	font-style: italic;
 }
-
 
 table {
 	font-size: 85%;

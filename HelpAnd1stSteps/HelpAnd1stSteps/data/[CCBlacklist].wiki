@@ -1,4 +1,6 @@
 ﻿CoolWiki
+EvalLibrary
+ExampleInsertion
 ISpell
 JavaScript
 MySpell

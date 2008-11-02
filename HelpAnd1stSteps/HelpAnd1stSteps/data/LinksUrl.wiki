@@ -45,6 +45,8 @@ anchor:RelPaths
 ----
 +++ Settings
 ++++ Options
+[:page:WpOptionsFileLauncher]
+
 [:page:WpOptionsMouseDropFiles]
 
 [:rel:top]

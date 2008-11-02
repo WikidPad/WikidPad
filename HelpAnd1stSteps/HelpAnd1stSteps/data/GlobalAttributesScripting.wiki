@@ -1,0 +1,4 @@
+﻿	<b>Scripting: see [Scripts]</b>
+	----
+&bull; *[global.import_scripts:* _page name_*]*
+Sets a default page to be used as the script library for the whole wiki; can be overruled by the local "import_scripts" attribute. The scripts in the specified page will automatically be available on every page of the wiki.

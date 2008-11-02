@@ -6,7 +6,6 @@
 
 [global.demo.status.new.color:steel blue]
 [global.demo.status.busy.color:navy]
-[global.demo.status.done.color:black]
 [global.demo.status.waiting.color:orange]
 [global.demo.status.waiting.issues.icon:flag red]
 

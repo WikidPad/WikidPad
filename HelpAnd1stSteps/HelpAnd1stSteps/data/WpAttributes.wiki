@@ -78,6 +78,11 @@ This section lists the system attributes, that have global representations. They
 
 [:rel:top]
 ----
+++++ Scripting
+[:page:GlobalAttributesScripting]
+
+[:rel:top]
+----
 ++++ Plugins
 [:page:GlobalAttributesStructureGraphs]
 
@@ -98,4 +103,5 @@ attributes: [tree_position: 4]
 [GlobalAttributesPageMisc]
 [GlobalAttributesPageNodes]
 [GlobalAttributesSpellChecking]
+[GlobalAttributesScripting]
 [GlobalAttributesStructureGraphs]

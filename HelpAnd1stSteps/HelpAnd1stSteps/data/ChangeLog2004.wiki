@@ -3,7 +3,7 @@ Contents:   [:toc:]
 [:rel:back]
 ----
 +++  2004 Dec 13
-<<
+<<pre
     1. Added support for export:false] attribute.  Setting this attribute
        to false will cause it to not be included in exports.
     2. Fixed issue with international characters in [Not Camel Case] links
@@ -14,14 +14,14 @@ Contents:   [:toc:]
 [:rel:top]
 ----
 +++  2004 Nov 14
-<<
+<<pre
     1. Added ability to RebuildTheWiki from disk.
 >>
 
 [:rel:top]
 ----
 +++  2004 Oct 11
-<<
+<<pre
     1. Added support for sub-tree export.
     2. Exports now (attempt) to indent indented text using \<blockquote>.
     3. Python runtime updated.
@@ -33,7 +33,7 @@ Contents:   [:toc:]
 [:rel:top]
 ----
 +++  2004 Jul 24
-<<
+<<pre
     1. Added child_sort_order attribute support.  A parent node can set
        child_sort_order to "ascending", "descending", or "unsorted" to control
        the order of the child nodes in the tree.
@@ -62,7 +62,7 @@ Contents:   [:toc:]
 [:rel:top]
 ----
 +++  2004 Jul 06
-<<
+<<pre
     1. If wikidPad is closed when minimized don't remember the minimized sizes.
     2. Highlighted text is only evaluated when Ctrl-E is pressed now, not Ctrl-1-6.
        This lets me implement this example InlinePythonEval#encodeSelection.
@@ -71,7 +71,7 @@ Contents:   [:toc:]
 [:rel:top]
 ----
 +++  2004 May 31
-<<
+<<pre
     1. Fixed a bug with todo lists under Views. Actual todo list items weren't
        displayed, only the todo list categories were.
     2. Added support passing the wiki word to open on the command line.
@@ -86,7 +86,7 @@ Contents:   [:toc:]
 [:rel:top]
 ----
 +++  2004 May 23
-<<
+<<pre
     1. Aliases now work with words [That Arent Wiki Words].
     2. Aliases are now properly formatted in the tree control.
     3. More bug fixes.
@@ -95,7 +95,7 @@ Contents:   [:toc:]
 [:rel:top]
 ----
 +++  2004 Apr 11
-<<
+<<pre
     1. Fixed some bugs with the links [That Arent Wiki Words].
     2. Fixed the default title for WIKIDPADWords have multiple capital letters in
        the beginning.
@@ -109,7 +109,7 @@ Contents:   [:toc:]
 [:rel:top]
 ----
 +++  2004 Mar 09
-<<
+<<pre
     1. Added support for WIKIDPADWords that have multiple capital letters in
        the beginning followed by lower case letters.
     2. Added support for links [That Arent Wiki Words]
@@ -124,7 +124,7 @@ Contents:   [:toc:]
 [:rel:top]
 ----
 +++  2004 Mar 06
-<<
+<<pre
     1. urls that end in .gif, .jpg, or .png will be exported as \<IMG> tags
        when exporting to HTML.
     2. Tree node text is not limited to 20 characters anymore. The text used to
@@ -142,9 +142,9 @@ Contents:   [:toc:]
     8. Clicking on a todo in the "Views" node will now highlight the todo
        item in the document.
     9. Added support for script imports. This allows you to define a set
-       of scripts in a GlobalScriptLibrary and then import them.
+       of scripts in a LocalScriptLibrary and then import them.
        
-        [import_scripts: GlobalScriptLibrary]
+        [import_scripts: LocalScriptLibrary]
        
        Type "Ctrl-4" to execute script 4 from the library.
 >>
@@ -152,7 +152,7 @@ Contents:   [:toc:]
 [:rel:top]
 ----
 +++  2004 Feb 22
-<<
+<<pre
     1. Ignore blocks \<< \>> now suppress wiki word links, properties and
        todos properly.  Script blocks with wiki words, and urls with wiki
        words in them are also now suppressed.
@@ -163,7 +163,7 @@ Contents:   [:toc:]
 [:rel:top]
 ----
 +++  2004 Feb 07
-<<
+<<pre
     1. Ctrl-Enter will now activate links.
     2. Added option to hide tree control.
     3. KeyBindings are now customizable. See ChangingKeyBindings.
@@ -183,7 +183,7 @@ Contents:   [:toc:]
 [:rel:top]
 ----
 +++  2004 Jan 12
-<<
+<<pre
     1. Fixed export bug where urls in bulleted lists would include LI in
        their HREF.
     2. Added list of possible TreeNodeColors to help doc.

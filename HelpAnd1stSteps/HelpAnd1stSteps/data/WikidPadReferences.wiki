@@ -8,10 +8,10 @@ WikidPad has a lot of different types of setting available with witch both the w
 	3. [WikiOptions |Wiki settings]
 	4. [WpAttributes |Attributes]
 	5. [WpInsertions |Insertions]
-	6. [UsefullLinks |Web links]
+	6. [UsefullLinks |Usefull links]
 
 [1] _The pages are constructed using "page insertions", that are shared with the actual subject pages._
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 16], [template: HelpSubjectTemplate]
+attributes: [tree_position: 17], [template: HelpSubjectTemplate]

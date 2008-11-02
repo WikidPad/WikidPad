@@ -1,0 +1,9 @@
+﻿	*Application settings: File Launcher*
+	This option page is only visible on non-Windows systems.
+	----
+&bull; *Path to file launcher*
+The path to the script or program that takes the path or URL of a file and runs the application associated with this file. For Linux this would be the "xdg-open" script; it might in some cases have to be installed first.
+
+On Windows and Linux, data files with a particular suffix can be associated with a particular application, so that the data file (e.g. "index.html") can be "executed" by starting the application with the file as parameter. On Windows this is a functionality of the OS itself while on Linux it is a functionality of the graphical environment like KDE or Gnome. To use this function there, a helper (normally the "xdg-open" script) must be called which detects the appropriate application and starts it.
+
+When (double)clicking a URL in WikidPad on Linux, the script is called with a file path (for "file:"/"rel:" URLs) or the URL itself as parameter.

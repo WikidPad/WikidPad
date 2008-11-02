@@ -5,7 +5,7 @@ Contents:   [:toc:]
 +++ 1.8 beta 6
 Dec. 27, 2006 (1.8beta6, repository revision in "mbutscher" branch: 100)
 
-<<
+<<pre
     * "toc" insertion for a page-wide table of contents (with
       appropriate settings in the CSS-file(s)). See [Insertions].
     * "noerror" appendix for insertions for external graphical apps
@@ -29,7 +29,7 @@ Dec. 27, 2006 (1.8beta6, repository revision in "mbutscher" branch: 100)
 +++ 1.8 beta 5
 Nov. 24, 2006 (1.8beta5, repository revision in "mbutscher" branch: 99)
 
-<<
+<<pre
     * Changed insertion syntax where value or appendices can
       be quoted to include arbitrary characters. See [Insertions].
     * Plugins for accessing MimeTeX, Ploticus and GraphViz
@@ -60,7 +60,7 @@ Nov. 24, 2006 (1.8beta5, repository revision in "mbutscher" branch: 99)
 +++ 1.8 beta 4
 Oct. 30, 2006 (1.8beta4, repository revision in "mbutscher" branch: 96)
 
-<<
+<<pre
     * Menu items and toolbar icons for zoom in/out also work for
       preview now.
     * Better page search. Search starts at cursor position or
@@ -76,7 +76,7 @@ Oct. 30, 2006 (1.8beta4, repository revision in "mbutscher" branch: 96)
 +++ 1.8 beta 3
 Oct. 26, 2006 (1.8beta3, repository revision in "mbutscher" branch: 95)
 
-<<
+<<pre
     * List undefined pages (dead wiki links), also appropriate
       insertion added. See WikiMaintenance!finding_undefined_links,
       [Insertions]
@@ -106,7 +106,7 @@ Oct. 26, 2006 (1.8beta3, repository revision in "mbutscher" branch: 95)
 +++ 1.8 beta 2
 Sep. 30, 2006 (1.8beta2, repository revision in "mbutscher" branch: 92)
 
-<<
+<<pre
     * Support for insertion of pages, relations (parents, children,
       ...) and saved searches. See [Insertions].
     * Support for placing and jumping to anchors in wiki pages.
@@ -129,7 +129,7 @@ Sep. 30, 2006 (1.8beta2, repository revision in "mbutscher" branch: 92)
 +++ 1.8 beta 1
 Aug. 30, 2006 (1.8beta1, repository revision in "mbutscher" branch: 89)
 
-<<
+<<pre
 Changes:
     * New database format! After updating a wiki it won't be
       readable anymore for older versions of WikidPad.

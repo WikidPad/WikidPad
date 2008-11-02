@@ -1,12 +1,158 @@
 ﻿++ Scripts
-Contents:   [:toc:]
+Contents:	[:toc:]
 [:rel:back]
 ----
-    * InlinePythonEval
-    * GlobalScriptLibrary
-    * [Script options]
++++ General
+WikidPad allows to evaluate and execute arbitrary Python scripts. There are three ways to do this:
+	* In-editor expression evaluation
+	* Expression evaluation insertion
+	* Editor scripts
+*Remarks:*
+&bull; Python and Python scripts are no real subject of this Wiki for the simple reason that the author has no Python experience. This page on scripting will therefore be limited to whatever wikidpadhelp.wiki had to say on the subject and what the author has retained from his earlier programming days.
+&bull; The examples on this page only work with an appropriately relaxed security setting.
+
+[:rel:top]
+----
++++ In-editor evaluation
+Python expressions can be evaluated directly in the editor by typing it, selecting it and pressing Ctrl-E. If you for instance type "1+2+3", select it an press Ctrl-E, then the result will be, that "1+2+3" is expanded to "1+2+3 = 6".
+This facility is intended for one-off use; for instance when you need to calculate something and you haven't got a calcuator on hand.
+
+*Remarks:*
+&bull; If the option "Script security" is set to "No scripts" (default), then also in-editor evaluation is disabled. See "Editor scripts".
+&bull; Certain functions from the "EvalLibrary.py" library can also be used. See "Evaluation insertions".
+&bull; Python functions can nót be used.
+
+*Warning!*
+&bull; If Ctrl-E is pressed withóut any text selected, then instead áll the editor scripts are executed. See "Editor scripts"
+
+[:rel:top]
+----
++++ Evaluation insertion
+++++ General
+The eval insertion evaluates a Python expression and in preview and html export replaces the insertion with the result of the evaluation. See also [WpInsertions].
+
+To be honest, this insertion has a véry limited usefullness; there are however three functions available in the "EvalLibrary.py" library, that you can use to put a date and/or time on a page. In preview that would however álways be the current date and/or time. In exported html pages their result would reflect the date and/or time of export.
+
+*Examples*
+	* *\[:eval:"5+6"]* = [:eval:"5+6"]
+	* *\[:eval:lib.date()]* = [:eval:"lib.date()"]
+	* *\[:eval:lib.time()]* = [:eval:"lib.time()"]
+	* *\[:eval:lib.now()]* = [:eval:"lib.now()"]
+
+*Remarks:*
+&bull; Python functions can nót be used.
+	----
+++++ Security concerns
+Because the execution of scripts is a potential security risk, álso within insertions, it can be disabled.
+
+&bull; *Process insertion scripts*
+Enables or disables the evaluation of eval insertions.
+
+[:rel:top]
+----
++++ Editor scripts
+++++ General
+Scripts are blocks of code specified somewhere on a wiki page that can be executed using Ctrl-E or Ctrl-1 through to Ctrl-6. Scripts can only be executed in the editor and are meant to simplify your life in maintaining your wiki pages. Scripts are defined within a \<% ... \%> block, like in the example below:
+	<<pre
+<%
+editor.GotoPos(editor.GetLength())
+editor.AddText('\nhello ')
+%>
+>>
+This script would move the cursor to the end of the page and insert the word "hello" on a new line. If you would remove the \<\<pre ... \>\> block from the example, you could execute the script by pressing Ctrl-E. Be carefull however, since Ctrl-E will execute áll the scripts on this page. Script blocks are ignored in preview and html export.
+
+Another example would be this script:
+	<<pre
+<% 3: lib.encodeSelection(editor) %>
+>>
+If you would type the text "c:\\this path\\will be encoded.txt", select it and press Ctrl-3, then the text would be converted to: "\file:///C|/this%20path/will%20be%20encoded.txt"\
+
+*Remarks:*
+&bull; For a list of editor control functions that you have available in scripts, see: [http://www.yellowbrain.com/stc/index.html |Yellowbrain guide to wxPython]; this however is a programmer reference and not an (end)user reference.
+&bull; "lib.encodeSelection(editor)" is a function in EvalLibrary.py.
+	----
+++++ Security concerns
+Because the execution of scripts is a potential security risk, script execution is disabled by default. To enable it, open the "Options" dialog, chapter "Security", item "Script security" and choose the level of security needed:
+
+&bull; *No scripts* (default)
+Script execution is completely disabled; álso for "In-editor evaluation".
+
+&bull; *No import_scripts*
+Scripts on the currently open page can be executed and expressions evaluated, but importing scripts from other pages is disabled.
+
+&bull; *No global.import_scripts*
+Local "import_scripts" is enabled, but "global.import_scripts" is disabled.
+
+&bull; *Allow everything*
+All forms of script execution are enabled.
+
+	----
+++++ Script location
+&bull; *Same page*
+The default location where the editor searches for a script is on the wiki page, that is the current page when Ctrl-E is pressed.
+
+&bull; *Other page*
+On a page basis you can tell the editor that it also has to take scripts into account, that are located in a different wiki page, you do this by adding the \[import_scripts: _page name_] attribute to the page. The following attribute for example:
+	* [import_scripts: LocalScriptLibrary]
+would tell the editor to also look for scripts in the wiki page \LocalScriptLibrary. If you would press Ctrl-4 you would see that the script with id "4" on that page would insert the text "--- from local library ---" at the cursor position in this page.
+
+&bull; *Global script page*
+You can also define a wiki page as the global script library for the entyre wiki. You do this by specifying that page with the \[global.import_scripts: _page name_] attribute.
+	----
+++++ Script execution
+&bull; *All scripts*
+If Ctrl-E is pressed - and nó text is selected - then áll of these scripts are executed, in this order:
+	1. The current page
+	2. The \[import_scripts: _page name_] page, íf specified
+	3. The \[global.import_scripts: _page name_] page, íf specified
+Per page the scripts are executed in the order they appear on the page. This behaviour is only limited by the setting of the security option: "Script security".
+
+&bull; *One specific script*
+Up to six (6) scripts can be assigned to a Ctrl-_number key_; you do this by adding a script-id to the script block. The format for this is: \<% n: ....\%>, where _n_ is a number from 1 up to 6; for example:
+	* script 1: \<% 1: editor.\AddText(lib.now()) %>
+	* script 2: \<% 2: lib.addDate(editor) %>
+To execute one of these scripts, press Ctrl plus it's number; so to execute script 1, press Ctrl-1 and to execute script 2, press Ctrl-2.
+
+Pressing Ctrl plus a number will execute only the script with that number; the editor will search for the script in this order:
+	1. The current page
+	2. The \[import_scripts: _page name_] page, íf specified
+	3. The \[global.import_scripts: _page name_] page, íf specified
+The first script with the number that is found, is executed and the editor will not search the other pages for a second (or third) script with the number. This allows to have different scripts with the same number; the one "closest" overrules the one "furthest away".
+
+&bull; *Editor menu*
+Instead of pressing Ctrl-E or Ctrl-n you can also select the appropriate option from Editor / Evaluation in the main menu.
+
+[:rel:top]
+----
++++ Custom functions
+Next to the functions in "EvalLibrary.py", you can define your own functions. To do so, copy the existing file: 
+	* [ProgramFiles |wikidpad / extensions / EvalLibrary.py] to 
+	* [ProgramFiles |wikidpad / user_extensions / EvalLibrary.py];
+create the directory if it doesn't exist. Then edit [ProgramFiles |user_extensions / EvalLibrary.py] to add your own functions. The new file will not be touched when upgrading wikidPad.
+
+*Remarks:*
+&bull; Depending on the type of the new functions, they can be used with: in-editor, insertion and script.
+&bull; Don't forget to save the file and [WorkSpaceGeneral |restart wikidpad]!RestartWikidPad to make use of the new functions.
+
+[:rel:top]
+----
++++ Settings
+++++ Local attributes
+&bull; *[import_scripts:* _page name_*]*
+Sets the page to be used as the script library for the current page.
+
+[:rel:top]
+----
+++++ Global attributes
+[:page:GlobalAttributesScripting]
+
+[:rel:top]
+----
+++++ Options
+[:page:WpOptionsSecurity]
+
+[:rel:top]
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 1]
 [help.status:done]

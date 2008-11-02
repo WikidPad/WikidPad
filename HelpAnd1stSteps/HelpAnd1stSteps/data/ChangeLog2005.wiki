@@ -5,7 +5,7 @@ Contents:   [:toc:]
 +++ 2005 Dec 29
 Dec. 29, 2005 (1.20beta4 / WikidPadCompact 1.5.5beta3, repository revision in "mbutscher" branch: 50)
 
-<<
+<<pre
 Changes:
     * Extended table support: wiki words, bold and italic
       text can now be used in table cells and the ...
@@ -27,7 +27,7 @@ Changes:
 +++ 2005 Dec 20
 Dec. 20, 2005 (1.20beta3, repository revision in "mbutscher" branch: 48)
 
-<<
+<<pre
 *Warning*: This version has a new database format. It is converted
 automatically when opening a wiki the first time. Making a backup
 beforehand is therefore recommended! The conversion may need a few
@@ -54,7 +54,7 @@ moments, please be patient.
 +++ 2005 Dec 10
 Dec. 10, 2005 (1.20beta2, repository revision in "mbutscher" branch: 44)
 
-<<
+<<pre
 *Warning*: This version has a new database format. It is converted
 automatically when opening a wiki the first time. Making a backup
 beforehand is therefore recommended!
@@ -104,7 +104,7 @@ beforehand is therefore recommended!
 +++ 2005 Okt 13
 Oct. 13, 2005 (1.20beta1)
 
-<<
+<<pre
     1. *Unicode support*. This means:
         1. Characters from any language in the text (if font and 
            operating system support them).
@@ -183,7 +183,7 @@ Oct. 13, 2005 (1.20beta1)
 +++ 2005 Jan 08
 Jan. 08, 2005
 
-<<
+<<pre
     1. Fixed shell hook for opening .wiki files. Found fix here:
         http://weblogs.asp.net/oldnewthing/archive/2004/10/20/245072.aspx
     2. Added a 4th heading size (++++).

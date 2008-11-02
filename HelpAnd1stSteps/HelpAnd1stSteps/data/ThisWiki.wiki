@@ -2,8 +2,21 @@
 Contents: [:toc:]
 [:rel:back]
 ----
-+++ Help version 0.5
-This is version 0.5 of the help.wiki; a restructured, rewritten and extended version of the old wikidpadhelp.wiki. Part of this wiki is still under construction, but it dóes already contain the complete content of wikidpadhelp úp and including version 1.9 beta 19.
++++ Help version 0.6
+This is version 0.6 of the help.wiki; a restructured, rewritten and extended version of the wikidpadhelp.wiki. A small part of this wiki is still under construction, but it already contains the complete content of wikidpadhelp úp to and including version 1.9 beta 19.
+
+*Changes 0.6 compared to 0.5*
+	* [Link insertions] (saved search)
+	* [WikidPadSpecials] (new)
+	* [StructureGraphs]
+	* [ExternalGraphicalApplications]
+	* [CommandLineSupport] (worked out and moved to WorkSpace)
+	* [Scripts] (was inlinePythonEval)
+	* [LocalScriptLibrary] (was \GlobalScriptLibrary)
+	* \[\ScriptOptions] (moved to \LinksUrl )
+	* [LinksUrl] (file launcher)
+	* [Plugins]
+	* [Releases] (changeLogs)
 
 *Changes 0.5 compared to 0.4*
 	* RegEx

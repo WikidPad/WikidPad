@@ -2,12 +2,28 @@
 Contents:   [:toc:]
 [:rel:back]
 ----
++++ General
+Python plugins are no real subject of this Wiki for the simple reason that the author has no Python experience. The pages below on plugins therefore have been copied relatively unchanged from the wikidpadhelp.wiki.
+
     * [Hooks]
     * [APIs]
-    * ExternalGraphicalApplications
-    * StructureGraphs
+
+For more information on plugin- and other development see "Developer Starting Points" on WikidPad's [http://wikidpad.python-hosting.com/ |trac homepage].
+
+
+----
++++ Examples
+&bull; *editor plugin*
+In [ProgramFiles |wikidpad / user_extensions] is an example for a working editor plugin. The file is called "anchorify.pyx"; rename it to "anchorify.py" and after [WorkSpaceGeneral |restarting wikidpad]!RestartWikidPad you will have a new option "Anchorify selection Ctrl-Shift-Z" in the Plugin menu and you can start using it. The function will surround any selected text with <a href=""></a> HTML tags, when Ctrl-Shift-Z is pressed. For details see the file.
+
+&bull; *insertion plugin*
+In [ProgramFiles |wikidpad / extensions] is an example for a working insertion plugin. The file is called ExampleInsertion.py. You can use it as a model to create your own insertion in [ProgramFiles |wikidpad / user_extensions].
+
+&bull; *trac wiki*
+More examples and working plugins can be found on WikidPad's  [http://wikidpad.python-hosting.com/wiki/ListOfUserScripts |trac wiki].
+
+
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 1]
-[help.status:busy]
+[help.status:done]

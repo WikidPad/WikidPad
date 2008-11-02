@@ -1,0 +1,18 @@
+﻿++ Local Script Library
+[:rel:back]
+----
+++++ General
+This is a page with a script. The script is imported as a local "script library" by the [Scripts] page trough the use of the:
+	* \[import_scripts: \LocalScriptLibrary] attribute
+When Ctrl-4 is pressed on the Scripts page, then the text: "--- from local library ---" will be inserted in the Scripts page at cursor position.
+	----
+++++ The script
+<<pre
+<% 4: editor.AddText("--- from local library ---") %>
+>>
+<% 4: editor.AddText("--- from local library ---") %>
+
+----
+previous: [:rel:back]
+parents:&nbsp; [:rel:parents; aslist]
+[help.status:done]
