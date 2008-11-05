@@ -7,7 +7,7 @@ If the same wiki is opened by different WikidPad processes at the same time, thi
 
 If another process now tries to open the same wiki, you get a warning that you should not open the wiki again, but you can ignore this warning, especially, if WikidPad terminated abnormally before and left the lock file behind.
 
-The lock file is placed in the same directory where the configuration file for the wiki is. It has the name of this config. file plus a ".lock" suffix and is empty. If the wiki is detected to be read-only, no lock file is created.
+The lock file is placed in the [WikiFiles |wiki directory]. It has the name of the wiki's .config file plus a ".lock" suffix and is empty. If the wiki is detected to be read-only, no lock file is created.
 
 [:rel:top]
 ----

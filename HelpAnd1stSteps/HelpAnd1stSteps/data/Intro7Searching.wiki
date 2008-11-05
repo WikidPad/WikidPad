@@ -16,5 +16,5 @@ It also offers the facility to limit the search to a subset of a wiki's pages; a
 <p align=center>[Intro6Signalling |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro8Output |Next page &raquo;]</p>----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 1]
+attributes: [tree_position: -1]
 [intro.status:done]

@@ -3,7 +3,7 @@ Contents:	[:toc:]
 [:rel:back]
 ----
 +++ General
-The whole printing is controlled by the "Print" dialog in the "Wiki" main menu [1].
+Printing is controlled by the "Print" dialog in the "Wiki" main menu [1]. Momentarily you can only print the wiki pages as plain text.
 
 [:rel:top]
 [1] _Definition: "print page" = physical sheet of paper or preview of it; all other pages are wiki pages._

@@ -29,9 +29,9 @@ The image specification has the general form of a URL, with the possibility to a
 
 [:rel:top]
 Footnotes:
-[1] _See http://www.w3schools.com/html/html_url.asp for more information on url's_
+[1] _See_ http://www.w3schools.com/html/html_url.asp _for more information on url's_
 [2] _Scheme is sometimes also referred to as "protocol"_
-[3] _This means that you can also not use relative paths within html elements, like in the src="..." attribute for an image element. In order for them to show up in preview correctly, you háve to use absolute paths or a wikidpad rel rel link._
+[3] _This means that you can also not use relative paths within html elements, like in the src="..." attribute for an image element. In order for them to show up in preview correctly, you háve to use absolute paths or a wikidpad rel link._
 ----
 +++ Files
 anchor:RelPaths

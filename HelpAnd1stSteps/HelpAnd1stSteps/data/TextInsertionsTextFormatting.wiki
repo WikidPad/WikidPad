@@ -3,39 +3,33 @@ Contents:   [:toc:]
 [:rel:back]
 ----
 +++ General
-    The text of the plain text page to be inserted
-    ----
-    [:page:TextInsertionPlainTextIp]
-    ----
-    
-    The text of the unordered list page to be inserted
-    ----
-    [:page:TextInsertionListUnorderedIp]
-    ----
-    
-    The text of the ordered list page to be inserted
-    ----
-    [:page:TextInsertionListOrderedIp]
-    ----
+&bull; The plain insertion of a page with font style tags
+	[:page:TextInsertionPlainTextIp]
+
+&bull; The plain insertion of a page with a bulleted list
+	[:page:TextInsertionListUnorderedIp]
+
+&bull; The plain insertion of a page with a numbered list
+	[:page:TextInsertionListOrderedIp]
+
+&bull; The plain insertion of a page with a table
+	[:page:TextInsertionTableIp]
 
 [:rel:top]
 ----
-+++ Font styles
-++++ Font style: Bold
-    *This is
-    [:page:TextInsertionPlainTextIp]
-    bold text*
-
-    ----
-++++ Font style: Italic
-    _This is
-    [:page:TextInsertionPlainTextIp]
-    italic text_
-
-[:rel:top]
-----
-+++ List
-++++ Unordered lists
++++ Unordered lists
+The list declaration:
+	<<
+    * This
+    * [:page:TextInsertionPlainTextIp]
+    * is
+    * [:page:TextInsertionListUnorderedIp]
+    * an
+    * [:page:TextInsertionListOrderedIp]
+    * unordered list
+>>
+	----
+The result:
     * This
     * [:page:TextInsertionPlainTextIp]
     * is
@@ -44,8 +38,21 @@ Contents:   [:toc:]
     * [:page:TextInsertionListOrderedIp]
     * unordered list
 
-    ----
-++++ Ordered lists
+[:rel:top]
+----
++++ Ordered lists
+The list declaration:
+	<<
+    1. This
+    2. [:page:TextInsertionPlainTextIp]
+    3.  is
+    [:page:TextInsertionListOrderedIp]
+    4. an
+    5. [:page:TextInsertionListUnorderedIp]
+    5. ordered list
+>>
+	----
+The result:
     1. This
     2. [:page:TextInsertionPlainTextIp]
     3.  is
@@ -62,33 +69,13 @@ Contents:   [:toc:]
 
 [:rel:top]
 ----
-+++ Escape blocks
-    <<
-    [:page:TextInsertionPlainTextIp]
-    >>
-
-[:rel:top]
-----
-+++ Preformatted blocks
-    <<pre
-    [:page:TextInsertionPlainTextIp]
-    >>
-
-[:rel:top]
-----
 +++ Tables
-++++ Insertion with table
-    Inserted text with a table
-    [:page:TextInsertionTableIp]
-    
-    ----
-++++ Table with insertion
-    Table with inserted text
+Table with inserted text:
     <<|
     This| is a| table
     with two| rows and| [:page:TextInsertionPlainTextIp]
     >>
-    ----
+
 [:rel:top]
 ----
 +++ Remarks
@@ -97,8 +84,6 @@ Contents:   [:toc:]
     * If the page contains a bulleted list, that list becomes part of the bulleted list of the inserting page [2], but only if the lists are of the same type. If not, the inserting list is broken.
     * If the inserted page contains a reference to a footnote, that reference will in preview refer to a footnote of the inserting page, with the same number. If the inserted page has it's own footnote, then that footnote will become a reference to the inserting page's footnote. [3]
     * If the inserting page does not have a footnote with the same number, then neither the inserted page's footnote reference, not it's footnote will be recognised as such anymore. [3]
-    * An escape block correctly does not process an insertion.
-    * A preformatted block correctly does not process an insertion.[1]
     * A table can contain insertions.
 
 [:rel:top]

@@ -11,14 +11,14 @@ In order to bookmark a page, you add a bookmark attribute to it. This attribute 
 You can add the bookmark by either:
 	* typing it yourself
 	* pressing Ctrl-Alt-B
-	* selecting "Wiki Words"/ "Add Bookmark" from the main menu
-The automatic functions will append the atribute to the end of the test
+	* selecting "Wiki Words / Add Bookmark" from the main menu
+The automatic functions will append the atribute to the end of the wiki page.
 
 	----
 ++++ Navigating using the bookmarks dialog
 To view the list of bookmarked pages:
 	* press Ctrl-Shift-B.
-	* select "Wiki Words"/ "List Bookmarks" from the main menu
+	* select "Wiki Words / List Bookmarks" from the main menu
 This will bring up the bookmarks dialog showing a list of the bookmarked pages, like in the screenshot below.
 
 	rel://files/BookmarksExample1.png

@@ -1,9 +1,9 @@
 ﻿++++ inserted header 1
 parents:
-[:rel:parents]
+[:rel:parents; aslist]
 ----
 ++++ inserted header 2
 children:
-[:rel:children]
+[:rel:children; aslist]
 
 [:rel:top]

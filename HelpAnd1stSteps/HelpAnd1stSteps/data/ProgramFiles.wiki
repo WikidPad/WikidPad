@@ -27,10 +27,11 @@ Extentions is the location for [Plugins |plugins], that come installed with Wiki
 	----
 ++++ Icons
 Icons is the location where the icons are stored; both the system icons for menu, toolbar and treeview and the user icons for the treeview.
+The icons are 16x16 .GIF images; other sizes and formats are not supported.
 
 	----
 ++++ Share / Enchant
-The subdirectory share / enchant is the location for the language file for SpellChecking
+The subdirectory share / enchant is the location for the language files for SpellChecking
 
 	----
 ++++ User_extentions

@@ -3,7 +3,7 @@ Contents:   [:toc:]
 [:rel:back]
 ----
 +++ General
-Text can be moved out of an existing page to a new - non existing - page easily. Select the text, choose menu / Editor / "Replace text by wikiword" or press Ctrl-Shift-R. Wikidpad will now ask for the name of the new page, create that and paste the selected text into it. The selected text on the originating page will be replaced by a link to the new page.
+Text can be moved out of an existing page to a new - not yet existing - page easily. Select the text, choose "menu / Editor / Replace text by wikiword" or press Ctrl-Shift-R. Wikidpad will now ask for the name of the new page, create that and paste the selected text into it. The selected text on the originating page will be replaced by a link to the new page.
 
 [:rel:top]
 ----

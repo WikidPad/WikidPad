@@ -3,7 +3,7 @@ Contents:   [:toc:]
 [:rel:back]
 ----
 +++ General
-Currently import only supports importing [MultipageTextFormat]. To call up the import dialog, select the option Wiki / Import.. from the "Wiki" menu.
+Currently import only supports importing [MultipageTextFormat]. To call up the import dialog, select the option "Wiki / Import.." from the main menu.
 
 +++ The dialog window
 &bull; *Import format*

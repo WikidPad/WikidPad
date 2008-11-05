@@ -9,7 +9,7 @@ Navigating and opening pages using the trees works independently of whether the 
 
 	----
 ++++ Using the mouse
-By far the quickest and easiest way to operate the trees is by using the mouse. You go move to any page in the wiki by looking it up in the tree and clicking it's node. You can opt to open a page in a new tab, by right clicking it's node and choosing "Activate New Tab" from the context menu.
+By far the quickest and easiest way to operate the trees is by using the mouse. You can go to any page in the wiki by looking it up in the tree and clicking it's node. You can opt to open a page in a new tab, by right clicking it's node and choosing "Activate New Tab" from the context menu.
 
 	----
 +++ Using the keyboard

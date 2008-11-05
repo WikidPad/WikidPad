@@ -14,10 +14,10 @@ For more information on plugin- and other development see "Developer Starting Po
 ----
 +++ Examples
 &bull; *editor plugin*
-In [ProgramFiles |wikidpad / user_extensions] is an example for a working editor plugin. The file is called "anchorify.pyx"; rename it to "anchorify.py" and after [WorkSpaceGeneral |restarting wikidpad]!RestartWikidPad you will have a new option "Anchorify selection Ctrl-Shift-Z" in the Plugin menu and you can start using it. The function will surround any selected text with <a href=""></a> HTML tags, when Ctrl-Shift-Z is pressed. For details see the file.
+In the directory [ProgramFiles |user_extensions] you can find an example for a working editor plugin. The file is called "anchorify.pyx"; rename it to "anchorify.py" and after [WorkSpaceGeneral |restarting wikidpad]!RestartWikidPad you will have a new option "Anchorify selection Ctrl-Shift-Z" in the Plugin menu and you can start using it. The function will surround any selected text with \<a href=""\> ... \</a\> HTML tags, when Ctrl-Shift-Z is pressed. For details see the file.
 
 &bull; *insertion plugin*
-In [ProgramFiles |wikidpad / extensions] is an example for a working insertion plugin. The file is called ExampleInsertion.py. You can use it as a model to create your own insertion in [ProgramFiles |wikidpad / user_extensions].
+In the directory [ProgramFiles |extensions] you can find an example for a working insertion plugin. The file is called ExampleInsertion.py. You can use it as a model to create your own insertion in [ProgramFiles |user_extensions].
 
 &bull; *trac wiki*
 More examples and working plugins can be found on WikidPad's  [http://wikidpad.python-hosting.com/wiki/ListOfUserScripts |trac wiki].

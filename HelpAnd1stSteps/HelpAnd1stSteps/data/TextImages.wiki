@@ -6,7 +6,8 @@ Contents:[:toc:]
 You can add links to images to your pages and have them shown in preview. You do this with a URL of the type file-url. These files can be of type: ".jpg", ".gif", ".png" and ".bmp". To insert image files as línks, see [LinksFiles|Files].
 
 Example:
-An image as an image rel://files/library64.png>at Original size (64x64)
+&bull; An image as an image \rel://files/library64.png>at Original size (64x64) results in:
+	An image as an image rel://files/library64.png>at Original size (64x64)
 
 [:rel:top]
 ----
@@ -37,7 +38,7 @@ Streched size (20%x10%) rel://files/library64.png>r20%x10%
 [:rel:top]
 ----
 +++ Alignment
-*Important:* Internal preview does nót respect allingment parameters; it ignores them! The results of allignment can only be seen in an external renderer. Internal preview alligns "bottom" by default; this makes a page look different when shown in the internal renderer from when shown in an external renderer.
+*Important:* Internal preview does nót respect allingment parameters; it ignores them! The results of allignment can only be seen in an external renderer and in exported html. Internal preview alligns "bottom" by default; this makes a page look different when shown in the internal renderer from when shown in an external renderer.
 
 ++++ Default
 The alignment defaults to rel://files/library48.png inline, vertical Bottom (image has white space at the bottom)
@@ -102,15 +103,16 @@ Images cán however with good reasons be used as "titles" for the other link typ
 [:rel:top]
 ----
 +++ Remarks
-    * Inserting images is restricted to the formats: ".jpg", ".gif", ".png" and ".bmp".
-    * To insert an image, that does not have one of the default extentions, add the "i" attribute to the link. Example:rel://files/smile.smiley>i.
-    * To use more then 1 attribute for an image, seperate them by a semicolon (" >i;at;r75% ").
-    * Sizes are specified as Width x Hight.
-    * There is no equivalent for align: horizontal Center for the simple reason, that it does not exist in html either.
-    * Horizontal and vertical allignment can not be combined; html does not support this either. For horizontal alignment the "float" atribute is used; this alligns "Top" by default.
-    * The alignment settings are *not* respected by the *internal preview* renderer!
-    * The internal preview renderer alligns *Bottom* by default.
-    * The difference in alignment makes a page look different when shown in the internal renderer, then when shown in an external renderer.
+	* Inserting images is restricted to the formats: ".jpg", ".gif", ".png" and ".bmp".
+	* To insert an image, that does not have one of the default extentions, add the "i" attribute to the link.
+	Example: "\rel://files/smile.smiley>i" rel://files/smile.smiley>i.
+	* To use more then 1 attribute for an image, seperate them by a semicolon (" >i;at;r75% ").
+	* Sizes are specified as Width x Hight.
+	* There is no equivalent for align: horizontal Center for the simple reason, that it is not supported by html.
+	* Horizontal and vertical allignment can not be combined; html does not support this either. For horizontal alignment the "float" atribute is used; this alligns "Top" by default.
+	* The alignment settings are *not* respected by the *internal preview* renderer!
+	* The internal preview renderer alligns *Bottom* by default.
+	* The difference in alignment makes a page look quite different when shown in the internal renderer, then when shown in an external renderer or exported html.
 
 [:rel:top]
 ----

@@ -10,8 +10,6 @@ The page list dialog is available for the WikidPad functions:
     * [ItemPrinting |Print]
 It's goal is to limit the scope of those functions to a subset of a wiki's pages. The pagelist is described in two main parts; first the dialog will be described, followed by a description of how to use it.
 
-The pagelist is a static entity; it doesn't get updated for changes in the wiki (database) automatically; it's a job that has to be done manually. This specifically is something to keep in mind, when the pagelist is part of a saved (full) search.
-
 [:rel:top]
 ----
 +++ The dialog
@@ -28,7 +26,7 @@ The selection part allows you to define what type of selection you want to use f
 These choices are mutually exclusive.
 
 &bull; *All Pages*
-Specifies that all the pages are to be be in the page list. This might not seem tó obvious for a pagelist, but it might come in handy when you're dealing with a saved search that you want to reset from a subset of pages to all pages.
+Specifies that all the pages are to be in the page list. This might not seem too obvious for a pagelist, but it might come in handy when you're dealing with a saved search that you want to reset from a subset of pages to all pages.
 
 &bull; *Page names matching regular expression:*
 This option combines with the regex input field beneath it. It specifies that all the pages whose names match the [RegEx |regular expression] in the input field are to be in the list.
@@ -43,6 +41,8 @@ Specifies that all the pages in the manual list below it are to be in the page l
 	----
 +++++ Manual list
 The manual list allows you to manually assemble a page list. You can type page names - i.e. the names of their links - and/or copy them from the clipboard. The section has a number of functions to facilitate working with the list, like those to order the list for a better view.
+
+This type of pagelist is a static entity; it doesn't get updated for changes in the wiki (database) automatically; it's a job that has to be done manually. This specifically is something to keep in mind, when the pagelist is part of a saved (full) search.
 
 _Remark:_ The order of the manual list does nót influence the order of the result list. For that you need to set the order in the order section.
 
@@ -75,10 +75,10 @@ This subsection of the manual list allows to copy one or more page names straigh
 Add the entries from the clipboard, that are not yet in the list, to the end of it.
 
 &bull; *Overwrite*
-Replace the current enteries in the list with those from the clipboard.
+Replace the current entries in the list with those from the clipboard.
 
 &bull; *Intersect*
-Replace the current enteries in the list with those that are both in the current list ánd in the clipboard "list".
+Replace the current entries in the list with those that are both in the current list ánd in the clipboard "list".
 	----
 +++++ Order
 This subsection contains one option; it controls the order of the pages in the result list. This will then also influence the order of the pages in the print or export. For full search this option is not available.

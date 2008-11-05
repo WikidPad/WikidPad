@@ -22,7 +22,7 @@ Some characters are "metacharacters" and have a special meaning in RE. For insta
 <<pre
 . ^ $ * + ? { } [ ] \ | ( )
 >>
-To use them in a search criterion, prefix them with a backslash "\\". So in order to find "regex\*", it should be specified as: "regex\\\*". Metacharacters can be combined in every thinkable way, in order to specify a "meta search".
+To use them as a regular character in a search criterion, prefix them with a backslash "\\". So in order to find "regex\*", it should be specified as: "regex\\\*". Metacharacters can be combined in every thinkable way, in order to specify a "meta search".
 
 [:rel:top]
 ----
@@ -40,12 +40,12 @@ The circumflex accent "^" specifies: "at start of line". To find all lines that:
 	* start with "start with", specify: "^start with".
 	----
 The dollar sign "$" specifies: "at end of line". To find all lines that:
-	* end with "lines that:" or "words that:", specify: "lines that:$|words that:$".
+	* end with "lines that:" or with "words that:", specify: "lines that:$|words that:$".
 	----
 The asterisk "\*", plus sign "+" and question mark "?" are repeat specifiers for the preceding character, where:
 	* \* matches zero or more occurrences: "ca\*t" will match "ct", "cat", "caat", "caaat", etc.
 	* + matches one or more occurrences: "ca+t" will match "cat", "caat", "caaat", etc., but not "ct".
-	* ? matches zero or one  occurrence: "built-?in" will match "builtin" and "built-in" (but not "built in").
+	* ? matches zero or one  occurrence: "built-?in" will match "builtin" and "built-in", but not "built--in" (or "built in").
 Examples:
 	* "^\\+\* \*Find" will find any line starting with "find", whether it is a heading or not.
 	* "^\\++ Find" will find any heading starting with "find", independant of the heading level.
@@ -59,7 +59,7 @@ A pair of curly brackets "{ }" also forms a repeat qualifier; it's fomat is: "{m
 	* headings only of level 4 and 5, specify: "\\+{4,5}"
 The pair can also be used with one integer specified, like: "{3}"; it then specifies the "m" parameter.
 	----
-A pair of parenthesis "()" forms a "group" specifier, with which a gróup of characters can be qualified with a metacharacter instead of only one character at a time.
+A pair of parenthesis "( )" forms a "group" specifier, with which a gróup of characters can be qualified with a metacharacter instead of only one character at a time.
 	* text(html)?elements will find "\TextElements" and "\TextHtmlElements".
 Groups can be nested; i.e. you can use groups within groups.
 	----

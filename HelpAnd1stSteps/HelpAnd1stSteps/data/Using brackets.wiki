@@ -7,12 +7,12 @@ Instead of using camelcased wikiwords you can create links, by enclosing one or 
 
 When you type the closing bracket, the phrase is automatically turned into a link and becomes underlined. Links that already have content, like [Wiki word] turn blue, links that do not, like [Undefined page], stay black but are underlined. If this does not happen, then the link contains an illegal character.
 
-For eacht new link, a new (empty) note is automatically created. To go there and add your text, type Ctrl+L when the cursor is at the start, in the middle or at the end of the link or double click on the link with the mouse.
+For eacht new link, a new (empty) page is automatically created. To go there and add your text, type Ctrl+L when the cursor is at the start, in the middle or at the end of the link or double click on the link with the mouse.
 
 [:rel:top]
 ----
 +++ Link titles
-Links can have titles attached to them. In preview mode, exported HTML, etc. it is then the title that is displayed and functions as the link and not the actual link itself. The title text must be separated from the link by a vertical bar "|", like in \[Case link|A link to the case item] that results in [Case link|A link to the case item], but still links to [Case link].
+Links can have titles attached to them. In preview mode, exported HTML, etc. it is then the title that is displayed and functions as the link and not the page link itself. The title text must be separated from the page link by a vertical bar "|", like in \[Case link|A link to the case item] that results in [Case link|A link to the case item], but still links to [Case link].
 This way you can also create "links" with otherwise illegal characters, like e.g. filenames:  [UserProfile|C:\\Application\\User.ini].
 
 [:rel:top]

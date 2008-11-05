@@ -16,7 +16,7 @@ right click the link and choose "Activate" from the context menu [1].
 ++++ New tab
 To follow a link and have it's page open in a new tab you can:
 	1. Right click the link and choose "Activate New Tab" from the context menu. The page will be opened in the new tab and that will become the current tab (default) [1].
-	2. Right click the link and choose "Activate New Tab Backgrd." from the context menu. The page will be opened in the new tab, but that will not become the current tab [1].
+	2. Right click the link and choose "Activate New Tab Backgrd." from the context menu. The page will be opened in the new tab, but that will not become the current tab [1]. This way you can set aside pages for later reading or checking.
 
 [:rel:top]
 ----

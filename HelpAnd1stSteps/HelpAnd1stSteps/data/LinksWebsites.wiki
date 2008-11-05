@@ -12,8 +12,6 @@ You can add links to websites to your page and open them in your browser. You do
     * http://wikidpad.python-hosting.com/
     * http://en.wikipedia.org/wiki/WikidPad
 
-    ----
-
 [:rel:top]
 ----
 +++ Link titles

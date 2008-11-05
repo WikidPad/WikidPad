@@ -35,5 +35,5 @@ The way your page nodes look doesn't háve to mean something. You can simply use
 <p align=center>[Intro5Indexing |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro7Searching |Next page &raquo;]</p>----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 1]
+attributes: [tree_position: -1]
 [intro.status:done]

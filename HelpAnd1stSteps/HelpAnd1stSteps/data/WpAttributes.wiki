@@ -40,9 +40,10 @@ assigned, to use the icon "people", font style bold and font color "coral".
 For more comprehensive description and examples see: Page signalling: [SignalUserTags |user tags] and [SignalTodoTags |todo tags].
 	----
 ++++ Autocompletion
-The editor supports autocompletion for attributes. Type part of the attribute, press Ctrl-Space and a list with existing attribute specifications will come up. Autocompletion for attributes works exactly like [Using autocompletion |autocompletion for links]; see there for details and examples. In fact, depending on how much of the attribute text is typed, a list of both attributes ánd links will come up.
+The editor supports autocompletion for attributes. Type part of the attribute, press Ctrl-Space and a list with existing attribute specifications will come up. Autocompletion for attributes works exactly like [Using autocompletion |autocompletion for links]; see there for details and examples. In fact, depending on how much of the attribute text is typed, a list of both attributes ánd links will come up [1].
 
 [:rel:top]
+[1] _Currently there is a bug in WikidPad, that prevents autocompletion for attributes with a period "." in the typed part of the key. This will be solved in an upcomming version op._
 ----
 +++ Global attributes
 This section lists the system attributes, that have global representations. They set wiki wide defaults for those attributes.

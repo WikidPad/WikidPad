@@ -38,7 +38,7 @@ The standard "\<h1\>" until "h..\>" tags can be used, to define section headings
 <li><h3>Heading \h3</h3></li>
 <li><h6>Heading \h6</h6></li>
 </ul>
-These headings will however nót appear in the Wikidpad Toc ("\[:toc:"\]).
+These headings will however nót appear in the Wikidpad [Link insertions |Toc].
 
 [:rel:top]<br />
 ----
@@ -72,6 +72,7 @@ These headings will however nót appear in the Wikidpad Toc ("\[:toc:"\]).
 <tr><td>\---- </td><td>horizontal line</td></tr>
 </table><p/>
 <p>This is where you realy need paragraph_mode to be set to true.</p>
+
 [:rel:top]
 ----
 +++ Links
@@ -80,11 +81,13 @@ These headings will however nót appear in the Wikidpad Toc ("\[:toc:"\]).
 <li><a href="http://www.google.com/">Link: Google Search</a></li>
 <li><a href="http://www.w3schools.com/">Link: W3 Schools</a></li>
 </ul>
+
 *Page anchors*
 <ul>
 <li><a name="example">Example page anchor</a></li>
 <li><a href="#bottom">Jump to anchor on bottom of page</a></li>
 </ul>
+
 *File links*
 <ul>
 <li>A href file link with an absolute path works:
@@ -92,6 +95,7 @@ These headings will however nót appear in the Wikidpad Toc ("\[:toc:"\]).
 <li>A href link with a Wikidpad \rel:// path to an image file álso works:
 <a href="rel://files/notepad.png">notepad.png</a></li>
 </ul>
+
 *Image links*<br />
 Img elements for the larger part do nót work, but for 1 or 2 exeptions. These exeptions however are unreliable, since they work in one preview, but not in the other and also browsers have their own idea's about them. The use of img links is therefore advised against [5].
 
@@ -99,23 +103,25 @@ Img elements for the larger part do nót work, but for 1 or 2 exeptions. These e
 [5] _The bad behaviour of image links is possibly due to a program error. It might be solved in an upcomming version of WikidPad._
 ----
 +++ Miscelaneous
-<ul>Indented text
-<ul>Further indented text</ul>
+<blockquote>Indented text (_using \<blockquote\>_)
+<blockquote>Further indented text</blockquote>
 Indented text
-</ul>
-<ul>Horizontal rule [6]<hr size=3>
-</ul>
+</blockquote>
+<blockquote>Horizontal rule [6]<hr size=3>
+</blockquote>
+
 <p>Paragraph [7]</p>
-<p align=right>Paragraph text right/left/center alligned</p>
+<p align=right>Paragraph right alligned</p>
 <p align=center>Paragraph centered</p>
 <p align=left>Paragraph left alligned</p>
+
 [:rel:top]<br />
-[6] _The size and all other presentation attributesof the hr tag are deprecated and advised not to use!_<br/>
-[7] _The align attribute of the paragraph tag is deprecated and advised not to use!_
+[6] _The size and all other presentation attributesof the \<hr> tag are deprecated and advised not to use!_<br />
+[7] _The align attribute of the paragraph tag is deprecated and advised not to use!_<br />
 ----
-previous: [:rel:back]<br/>
-parents:&nbsp; [:rel:parents; aslist]<br/>
-attributes: [tree_position: 2], [paragraph_mode: true]<br/>
+previous: [:rel:back]<br />
+parents:&nbsp; [:rel:parents; aslist]<br />
+attributes: [tree_position: 2], [paragraph_mode: true]<br />
 [help.status:done]
 
 *Page anchors* Do not remove!!<br />

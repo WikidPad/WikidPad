@@ -38,5 +38,5 @@ You could however also combine museum and location into one structured index - o
 <p align=center>[Intro4LinkFunctions |&laquo; Previous page]&nbsp;&nbsp;&nbsp;&nbsp;[Intro6Signalling |Next page &raquo;]</p>----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 1]
+attributes: [tree_position: -1]
 [intro.status:done]

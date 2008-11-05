@@ -3,19 +3,19 @@ data_dir = data
 
 [main]
 footnotes_as_wikiwords = False
-last_wiki_word = StructureGraphs
+tree_expandednodes_rememberduration = 1
+last_wiki_word = Help
 hotkey_showhide_bywiki = 
 log_window_autoshow = True
 filestorage_identity_filenamemustmatch = False
 tree_expandednodes_descriptorpathes_views = 
 wiki_icon = 
 wiki_name = Help
-tree_expandednodes_rememberduration = 1
+tree_expandednodes_descriptorpathes_main = 
 wikipagetitleprefix = ++
 wikipagetitle_fromlinktitle = False
 first_wiki_word = Help
 wikipagetitle_creationmode = 1
-tree_expandednodes_descriptorpathes_main = 
 tree_last_root_wiki_word = Help
 tree_force_scratchpad_visibility = True
 further_wiki_words = 

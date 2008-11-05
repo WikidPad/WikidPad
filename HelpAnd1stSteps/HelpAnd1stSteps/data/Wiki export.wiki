@@ -9,7 +9,7 @@ WikidPad can export wiki pages to
     * a multi page text file
 
 To export a wiki to .wiki files you can select  the predefined option:
-	* Wiki / Export / "Export Wiki to .wiki files" in the main menu
+	* "Wiki / Export / Export Wiki to .wiki files" in the main menu
 This function uses default WikidPad settings. To override these settings or choose a different type of export, select "Other export ..." from the menu. This will bring up the export dialog window.
 
 [:rel:top]

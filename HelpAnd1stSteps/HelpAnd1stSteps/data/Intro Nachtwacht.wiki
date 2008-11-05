@@ -15,3 +15,4 @@ The Night Watch, the most famous painting in the Rijksmuseum, actually has anoth
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
+[short_hint: The Nachtwacht by Rembrandt van Rijn]

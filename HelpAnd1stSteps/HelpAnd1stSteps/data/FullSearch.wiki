@@ -5,8 +5,8 @@ Contents:   [:toc:]
 +++ General
 Full search provides an extended search facility for wiki wide searches supporting [RegEx |regular expressions]. To start the full search dialog either:
 	* press Ctrl-Alt-F
-	* select Wiki / "Search Wiki" from the main menu
-The search dialog is non-modal, this means that you can move between pages and edit them while the dialog is open. The right side of the dialog shows the search results, the left side contains the options to control the search. Full search supports a "find & replace" mode and allows to save a search specification for later reuse. A search can be limited to a specific subset of wiki pages, using the [PageListDialog |page list dialog].
+	* select "Wiki / Search Wiki" from the main menu
+The search dialog is non-modal, this means that you can move between pages and edit them while the dialog is open. The right side of the dialog shows the search results, the left side contains the options to control the search. Full search supports a "find & replace" mode and allows to save a search specification for later reuse in the search store. A search can be limited to a specific subset of wiki pages, using the [PageListDialog |page list dialog].
 
 *Attention:* Full search operates on the data in the database. If there is a page in the editor that is not yet saved, then those changes can't be seen by the search dialog.
 
@@ -43,7 +43,7 @@ Full search is case insensitive by default. To make a search case sensitive, che
 Full search is "partial word" (character mode) by default. To make a search "whole word", check this option.
 
 &bull; *Find*
-A button to start the search process. When finished, a list of matching pages is shown in the result area, optionally with the number of occurring matches in parentheses and/or a few characters of context if so set in the options.
+A button to start the search process. When finished, a list of matching pages is shown in the result area, optionally with the number of occurring matches in parentheses and/or a few characters of context if so set in the options. If the result area remains empty, the search didn't find any matching pages.
 
 &bull; *Set Page list*
 This option allows to limit the search to a specific subset of a wiki's pages. Clicking this button opens the [PageListDialog |page list dialog] with whitch you can specify that subset. The full search dialog disappears until the page list dialog is closed. If you save the search, the page list dialog settings are saved whíth it.
@@ -82,6 +82,7 @@ A button to replace áll occurences in all pages with the text in "Replace by". 
 
 Occurences can of course be selected manually and replaced using the Replace button.
 	----
+anchor:SavedSearch
 ++++ Store area
 Wikidpad supports a "search store"; here you can store search specifications - i.e. search criteria ánd search settings - so you can repeat a search without having to re-invent it every time you need it. If a search is based on a page list, then the list specification is also stored and/or retrieved as part of the search specifications. Search stores are wiki specific, for all sorts of obvious reasons there is no "global" search store.
 

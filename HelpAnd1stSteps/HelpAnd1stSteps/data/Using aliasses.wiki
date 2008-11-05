@@ -3,7 +3,7 @@ Contents:   [:toc:]
 [:rel:back]
 ----
 +++ General
-Different page links - wikiwords and/or bracketed links - can be appointed to refer to the same physical page. This can be done by adding the page attribute "alias" to an existing page. An alias attribute has the form: \[alias: \<link>], where \<link> is the page link, that the page should be known as also. As many aliasses can be added to a page, as is needed.
+Different page links - wikiwords and/or bracketed links - can be appointed to refer to the same physical wiki page. This can be done by adding the page attribute "alias" to an existing page. An alias attribute has the form: \[alias: _link name_], where _link name_ is the page link, that the page should be known as also. As many aliasses can be added to a page, as is needed.
 
 An example is the item WikiWords, that is also known under the aliasses: WikiWord, [Wiki word], [Wiki words] and [What is a wikiword]. The alias attributes of that item look like this:
 <<pre

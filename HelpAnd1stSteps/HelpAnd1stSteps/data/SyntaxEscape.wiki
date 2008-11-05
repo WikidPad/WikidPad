@@ -61,7 +61,7 @@ To escape a whole section (one or more lines) of text from Wikidpad parsing and 
 
 The begin- ("\<\<") and end tag ("\>\>") should both be on a line of their own and before and after the tags only whitespace is allowed.
 
-Wikidpad will pass everything that is within the block unchanged on to html preview (ánd export). It will however still insert list tags ("\<ul\>") and line breaks ("\<br /\>"), in order to support line indentation and new lines in the preview result; see also [TextBasics|Textformatting: basics].
+Wikidpad will pass everything that is within the block on to html preview (ánd export) unchanged. It will however still insert list tags ("\<ul\>") and line breaks ("\<br /\>"), in order to support line indentation and new lines in the preview result; see also [TextBasics|Textformatting: basics].
 
 [:rel:top]
 ----

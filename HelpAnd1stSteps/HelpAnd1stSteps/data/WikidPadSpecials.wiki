@@ -9,5 +9,5 @@ This section describes some special features offered by WikidPad. These can be "
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 15], [template: HelpSubjectTemplate]
+attributes: [tree_position: 14], [template: HelpSubjectTemplate]
 [help.status:done]

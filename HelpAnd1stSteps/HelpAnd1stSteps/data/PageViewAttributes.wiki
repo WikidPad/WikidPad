@@ -43,6 +43,7 @@ See the results of the attributes below on the appearance of this page in previe
 	* [html.alinkcolor: #FF4500] \OrangeRed
 	* [html.vlinkcolor: #008000] \Green
 	* \[html.bgimage:\rel:///notepad.png] (deactivated)
+
 Check their influence on the display of these links; follow them and return to see their color.
 	* [PageFormatting]
 	* [PageViewAttributes|Top]!Top
@@ -66,8 +67,7 @@ Page specific html attributes overrule the global ones.
 +++ Paragraph mode
 A page by default is in line mode. In this mode, every "new line" in the editor text is replaced by a htlm "new line" tag in preview and with this turning every line in a "paragraph" of it's own. This might in certain cases not be what the user wants or needs. Also this behaviour is different from html, that principally is based on a form of "paragraph mode".
 
-Wikidpad supports it's own form of paragraph mode; in this mode "new lines" are ignored and only empty lines start a new paragraph. Paragraph mode can be switched on using the attribute: \[paragraph_mode:&nbsp;true] on the page. "New lines" can be forced in paragraph mode, by inserting the html "new line" tag: "\<br /\>" where needed.
-
+Wikidpad supports it's own form of paragraph mode; in this mode "new lines" are ignored and only empty lines start a new paragraph. Paragraph mode can be switched on using the attribute: \[paragraph_mode:&nbsp;true] on the page. "New lines" can be forced in paragraph mode, by inserting the html "new line" tag: "\<br /\>" where needed. Don't forget the space between "\<br" and "/\>"; "\<br/\>" without a space is not understood by internal preview.
 	----
 ++++ Example
 The attribute on the next line switches this page to paragraph mode; see it's effect on the example text below.
@@ -84,7 +84,6 @@ In line mode, the text above
 would have been shown in view mode
 as the original five separate lines.<br />
 And this line would have been a paragraph on it's own, not the second line of the second paragraph.
-
 	----
 ++++ Global
 Paragraph mode can be switched on for all the pages in the wiki using the global attribute:

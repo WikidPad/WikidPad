@@ -9,7 +9,7 @@ rel://files/FindReplace1.png
 
 To start the find & replace dialog:
 	* press Ctrl-R
-	* select Editor / "Find and replace" from the main menu
+	* select "Editor / Find and replace" from the main menu
 
 A particular detail is that it supports [RegEx |regular expressions] in the search field, but it doesn't do so by default. You have to check the "Regular expression" checkbox, to make it interprate the search criterion as a regex. In this mode you can use regex "escape sequences" in both the search and the replace pattern.
 

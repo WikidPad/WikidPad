@@ -3,7 +3,7 @@ Contents:   [:toc:]
 [:rel:back]
 ----
 +++ General
-This page investigates the basic text formatting facilities of Wikidpad.
+WikidPad supports a number of facilities for textformatting. This page explores the basic functions, other pages within TextFormatting explore specific subjects. Formatted text is for the larger part only visible as such in Preview and Html.
 
 [:rel:top]
 ----
@@ -14,7 +14,7 @@ Wikidpad's support for character formatting is limited to the font styles bold a
 To make text bold, enclose it in asterisks, like \*bold\* giving *bold*.
 To make it italic, enclose it in underscores, like \_italic\_ giving _italic_.
 
-These two font styles are mutually exclusive in Wikidpad; text can not be defined to be both bold ánd italic [3]. When tried, it either results in: *_bold & italic_* or in: _*bold & italic*_. If bold+italic text or other additional character formatting is realy needed, then the use of html elements could be considered; see [HtmlFormatting|Textformatting: Html elements].
+These two font styles are mutually exclusive in Wikidpad; text can not be defined to be both bold ánd italic [3]. When tried, it either results in: *_bold & italic_* or in: _*bold & italic*_. If bold+italic text or other additional character formatting is realy needed, then the use of html elements could be considered; see [HtmlFormatting|html formatting].
 
 [:rel:top]
 [1] _Font style tags act as a special kind of escape character; nothing inbetween is recognised as a link, attribute or other wikidpad element anymore._
@@ -22,13 +22,13 @@ These two font styles are mutually exclusive in Wikidpad; text can not be define
 [3] _Version 2.0 or later possibly wíll have support for this._
 ----
 ++++ Headings
-The plus sign can be used to define headings for (sub)sections on the page, like this: "\+Heading 1" [5]. The level of the heading and it formatting can be specified with the number of plus signs in front of it. For examples on how to use them, see the headings on this and other pages of the demo wiki [6].
+The plus sign can be used to define headings for (sub)sections on the page, like this: "\+Heading 1" [5]. The level of the heading and it formatting can be specified with the number of plus signs in front of it. For examples on how to use them, see the headings on this and other pages of the wiki [6].
 
 Wikidpad implements headings as - encloses them in - named html anchors. In combination with the[Link insertions|  \[:toc:\] function]!tocFunction this allows to insert a table of contents anywhere on a page and from there to jump straight to a particular section. See the Toc on top of this page and try it [7].
 
 [:rel:top]
 [5] _Like the font style tags, the heading tag acts as a special kind of escape character; nothing after the plus sign is recognised as a link, attribute or other wikidpad element anymore._
-[6] _The Wikidpad editor - as from version 1.9 - supports folding of sections based on their headings_
+[6] _The Wikidpad editor - as from version 1.9 - supports_ [Folding |folding] _of sections based on their headings_
 [7] _Wikidpad - as from version 1.9 - supports toc formatting up to heading level 13._
 ----
 ++++ Indentation
@@ -37,14 +37,14 @@ Wikidpad supports line indentation; to indent a line, start it with one or more 
 The indentation of two or more (already indented!) consecutive lines can be increased by selecting them and pressing Tab. To reduce indentation, press Shift+Tab instead.
 
 [:rel:top]
-[9] _Wikidpad implements indented lines as a html "list" element, enclosing them in \<ul\> tags. This should be taken into account, when using indentation in html block elements in Wikidpad._
+[9] _Wikidpad implements indented lines as an html "list" element, enclosing them in \<ul\> tags. This should be taken into account, when using indentation in inline html block elements like tables in Wikidpad._
 ----
 ++++ Horizontal lines
 Four (4) consecutive hyphens (-) will create a horizontal line, like can be seen on this page [12]. Oddly enough this does not only happen when the hyphens are the only characters in the line, but also when they are in the middle of a text. That text will then effectively be broken into two part, like this "aa \---- bb" becomming:
 
     aa ---- bb
     
-In order to prevent this from happening, the escape character can be used: "aaa \\\---- bb" [13]. A line can be indented, like is the case above with "  aa \\\---- bb". Wikidpad then encloses it  in \<ul\> tags.
+In order to prevent this from happening, the escape character can be used: "aaa \\\---- bb" [13]. A line can be indented, like is the case above with "  aa \---- bb". Wikidpad then encloses it  in \<ul\> tags.
 
 [:rel:top]
 [12] _Effectively móre then 4 hyphens produce the same result; a horizontal line is created and any excess hyphens are ignored._

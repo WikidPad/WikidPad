@@ -8,54 +8,91 @@ Wikidpad is installed with a number of predefined key bindings or "shortcut keys
 [:rel:top]
 ----
 +++ Default setting
-++++ Wiki
+++++ Workspace
++++++ General
 	<<|
-Ctrl-N | open new Wiki
-Ctrl-Alt-O | open existing Wiki
+Ctrl-Shift-T | show / hide toolbar
+Ctrl-T | show / hide main tree
+F6 | switch cursor between main tree and page window
 >>
-[:rel:top]
-----
-++++ Edit / Preview / Treeview
-+++++ View
+
++++++ Page window
 	<<|
 Ctrl-+ | zoom in
 Ctrl-- | zoom out
-Ctrl-Shift-A | show edit mode of current tab
-Ctrl-Shift-S | show preview mode of current tab
-Ctrl-T | hide/show the tree control
-F6 | switch between tree and editor
 Ctrl-Tab | switch between tabbed pages
+Ctrl-Shift-A | switch current tab to edit mode
+Ctrl-Shift-S | switch current tab to preview mode
+Ctrl-Shift-Space | switch current tab between edit and preview mode
+Ctrl-F4 | close current tab
 >>
 
-	----
-+++++ Text formatting
++++++ Editor
 	<<|
-Ctrl-B | bold
-Ctrl-I | italic
-Ctrl-Alt-H | heading
+Ctrl-Z | Undo
+Ctrl-Y | Redo
+Ctrl-X | Cut
+Ctrl-C | Copy
+Ctrl-Alt-C | Copy to scratchPad
+Ctrl-V | Paste
+>>
+
+	<<|
+Ctrl-B | make bold
+Ctrl-I | make italic
+Ctrl-Alt-H | make heading
 Ctrl-Alt-D | insert current date/time
 Ctrl-W | rewrap text at position
 >>
 
-	----
-+++++ Page control
-	<<|
-Ctrl-Alt-R | rename the current wiki word / page
-Ctrl-S | save current page
-Ctrl-D | delete the current word, and content for that word
-Ctrl-Shift-UP | view parentless nodes
->>
 [:rel:top]
 ----
-++++ Page navigation
-+++++ Pages
+++++ Wiki
++++++ Wiki Control
 	<<|
-Ctrl-L | open linked page
-Ctrl-ALT-L | open linked page in a new tab
-Ctrl-O | open page
+Ctrl-N | open new Wiki
+Ctrl-Alt-O | open existing Wiki
+Ctrl-P | print current Wiki
 >>
 
-	----
++++++ Wiki page
+	<<|
+Ctrl-Alt-R | rename current page
+Ctrl-S | save current page
+Ctrl-D | delete current page
+Ctrl-Shift-Q | set current page as Root page
+Ctrl-Shift-UP | show parentless pages
+|
+Ctrl-Shift-R | Create new page from selected text
+Ctrl-J | Create page link from selected text
+Ctrl-Space | Auto complete link (or attribute)
+>>
+
+[:rel:top]
+----
+++++ Navigation
++++++ Page
+	<<|
+Home | goto start of line
+End | goto end of line
+Ctrl-left | goto previous word in text
+Ctrl-right | goto next word in text
+Ctrl-Home | goto top of page
+Ctrl-End | goto bottom of page
+Page up | scroll screen up
+Page down | scroll screen down
+>>
+
++++++ Page links
+	<<|
+Ctrl-L | open linked page
+Ctrl-Enter | open linked page
+Ctrl-ALT-L | open linked page in a new tab
+Ctrl-O | open page
+Ctrl-Q | goto Root page (Home)
+Ctrl-Shift-H | goto Root page (on MAC)
+>>
+
 +++++ History
 	<<|
 Ctrl-H | show history
@@ -65,52 +102,65 @@ Alt-Left | go back in history
 Alt-Right | go forward in history
 >>
 
-	----
 +++++ Relatives
 	<<|
-Ctrl-Up | view parents of current word
-Ctrl-Down | view children of current word
+Ctrl-Up | show parents of current word
+Ctrl-Down | show children of current word
 >>
 
-	----
 +++++ Bookmarks
 	<<|
 Ctrl-Alt-B | add a bookmark
 Ctrl-Shift-B | show bookmarks
 >>
+
 [:rel:top]
 ----
 ++++ Search
++++++ Wiki
+	<<|
+Ctrl-Alt-F | start full search
+>>
+
++++++ Wiki page
 	<<|
 Ctrl-F | start incremental search, perform next search
 F3 | start incremental search, perform next search
-Ctrl-Alt-F | search for words within the wiki
-Ctrl-R | find & replace
+Shift-F3 | incremental search, perform next search, backward
+Ctrl-R | start find & replace
 >>
+
 [:rel:top]
 ----
-++++ Miscelaneous
+++++ Scripts
 	<<|
-Ctrl-E | eval scripts
+Ctrl-E | execute all eval scripts
+Ctrl-1 > 6 | execute numbered eval script
 >>
+
 [:rel:top]
 ----
 +++ Change key bindings
+++++ General
 The default key bindings can be overridden by creating a custom "keybindings.py" file. To do so, copy the existing file: 
 	* [ProgramFiles |wikidpad / extensions / keybindings.py] to 
-	* [ProgramFiles |wikidpad / user_extensions / keybindings.py];
-create the directory if it doesn't exist.
-Then edit [ProgramFiles |user_extensions / keybindings.py] with a standard text editor to override the default key bindings. This file will not be touched when upgrading wikidPad. Don't however touch the top line of the file, that looks like:
-	* "import wx, wx.stc"
+	* [ProgramFiles |wikidpad / user_extensions / keybindings.py].
+Create the directory if it doesn't exist. Then edit user_extensions / keybindings.py with a standard text editor to override the default key bindings. This file will not be touched when upgrading wikidPad.
 
-The general entry in the file is of the format:
+In principle you should remove all the entries from the new keybindings.py, that should keep the default setting and only maintain the entries for those keybindings that you want changed. On startup WikidPad will read both files in the order:
+	1. extensions / keybindings.py
+	2. user_extensions / keybindings.py
+and override any settings in extensions/keybindings.py with those found in user_extensions/keybindings.py. The import statement at the top of the extensions file does not have to be retained in the user_extensions file. The same is true for a number of editor scripts at the bottom of the file.
+	----
+++++ Keybinding format
+The general entry for a keybinding is of the format:
 	* \ShowTreeControl="Ctrl-T"
 If you would rather use Alt+T for that function, then change the entry to
 	* \ShowTreeControl="Alt-T"
-Don't forget to save the file and [WorkSpaceGeneral |restart wikidpad]!RestartWikidPad to make use of your new keybindings.
+Don't forget to save the file and [WorkSpaceGeneral |restart wikidpad]!RestartWikidPad to make use of the new keybindings.
 
 ----
 previous: [:rel:back]<br />
 parents:&nbsp; [:rel:parents; aslist]<br />
-attributes: [tree_position: 13], [paragraph_mode: true]<br />
+attributes: [tree_position: 6], [paragraph_mode: true]<br />
 [help.status:done]

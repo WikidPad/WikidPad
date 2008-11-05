@@ -37,6 +37,7 @@ When the literal text of a page (or url) link is not really presentable, for ins
 
 <table><tr><td>[Intro Nachtwacht |rel://files/intro/RvRNachtwachtCut.png>al]</td><td>Not only text can be used as a title for page (or url) links, but also images. Like the cutout of the "Nachtwacht" to the left that acts as a link to the wiki page about the "Nachtwacht", using a url as the title instead of text.</td></tr></table>
 
+[Short hint |Short hints] can be added to pages, that will appear when the mouse hovers over it's link, like with the cutout of the Nachtwacht above.
 	----
 +++ Escaping formatting
 WikidPad supports a number of ways to [SyntaxEscape |escape formatting]. This allows special formatting characters to be used as standard text. The backslash "\\" is the default escape character. To use an asterix "\*" in the text, without it being interpreted as the "bold" formatting tag, prepend it with a backslash "\\\*".
@@ -45,5 +46,5 @@ WikidPad supports a number of ways to [SyntaxEscape |escape formatting]. This al
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
-attributes: [tree_position: 1]
+attributes: [tree_position: -1]
 [intro.status:done]

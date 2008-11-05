@@ -4,7 +4,7 @@ Contents:   [:toc:]
 ----
 +++ General
 As you add and remove links from the various pages in your wiki database you may end up with unlinked, or parentless pages. To view parentless pages either:
-	* select Wiki Word/View Parentless Nodes
+	* select "Wiki Word / View Parentless Nodes" from the main menu.
 	* press Ctrl-Shift-Up
 	* go to the node "parentless-nodes" in the views tree
 

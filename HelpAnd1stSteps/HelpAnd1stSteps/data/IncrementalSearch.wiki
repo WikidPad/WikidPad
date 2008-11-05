@@ -6,8 +6,7 @@ Contents:   [:toc:]
 The editor supports an incremental search facility for the current page. To start it:
 	* press Ctrl-F in the editor
 	* press F3 in the editor
-The editor is then in incremental search mode and anything that is typed becomes a search
-string. As you type you are brought to the first match in the current text. Incremental Search supports [RegEx |regex]. For example: To find the word "incremental" ór the word "search" in a page, type:
+The editor is then in incremental search mode and anything that is typed becomes a search string. As you type you are brought to the first match in the current text. Incremental Search supports [RegEx |regex]. For example: To find the word "incremental" ór the word "search" in a page, type:
 	* incremental|search
 Incremental search is case insensitive. The search starts at the cursor position (1.8beta5 and prior always started at page beginning).
 
@@ -18,7 +17,7 @@ What at any point in time the current search string is, can be seen in the searc
 	* Green: search pattern is found
 	* Yellow: search pattern is nót found
 	* No change: invalid regex
-The search string can be edited inside the status field using the cursor keys and Backspace and Delete. When done select search next or search previous to find a match.
+The search string can be edited inside the status field using the cursor keys and Backspace and Delete. When done, select search next or search previous to find a match.
 
 [:rel:top]
 ----
@@ -46,9 +45,9 @@ To find the previous match (search previous) either:
 ----
 +++ Search end
 To end incremental search manually either:
-	* Click anywhere outside of the search field
-	* Press Esc; this terminates the search and returns to where the search began
-	* Press Enter; this terminates the search and keeps the last found text selected (if any)
+	* Click anywhere outside of the search field.
+	* Press Esc; this terminates the search and returns to where the search began.
+	* Press Enter; this terminates the search and keeps the last found text selected (if any).
 Incremental search will end automitically after a certain period of inactivity (of the keyboard). This period can be adapted in "Options".
 
 [:rel:top]

@@ -12,7 +12,7 @@ As with user tags, todo tags show up as nodes in the views section. A page can h
 +++ Format
 The general format is: "keyword: _free text_". The keywords are restricted to the following list:
 
-<<|
+	<<|
 \todo | something that has to be done.
 \done | something that has been done.
 \action | something that needs action.
@@ -25,12 +25,22 @@ The general format is: "keyword: _free text_". The keywords are restricted to th
 Todo tags can be anywhere on a page and anywhere within a line; they can be on a line of there own or in the middle of a line of text. The tags are case sensitive and have to be written as in the list; Todo: will not result in a tag. The todo text - the text following the tag - ends either with a newline or with a vertical bar "|". The escape character can be used to escape either the tag or the bar.
 
 *Examples*
+Todo tags like this:
+<<pre
+	* todo: Help: write a page on todo tags.
+	* done: Help: written a page on user tags
+	* Wikidpad is Vista compatible todo: Help: check if vista compatible is true | and also runs on Linux and Mac.
+	* question: Help: how is todo exported? | possibly already answered in wikidpadhelp.wiki
+	* The song is on \track: 5 of the Beatles collection cd.
+>>
+result in:
 	* todo: Help: write a page on todo tags.
 	* done: Help: written a page on user tags
 	* Wikidpad is Vista compatible todo: Help: check if vista compatible is true | and also runs on Linux and Mac.
 	* question: Help: how is todo exported? | possibly already answered in wikidpadhelp.wiki
 	* The song is on \track: 5 of the Beatles collection cd.
 
+and in the views tree in:
 	rel://files/SignalTodoTagsExample1.png
 [:rel:top]
 ----
@@ -48,7 +58,7 @@ The appearance of a single todo item in the views section can be controled by us
 	* todo.help.format.color: Show the text in bold orange. \[bold:true]\[color: coral][bold:true][color: coral]
 For the format of the attributes see: [SignalPageNodes|Signalling page nodes].
 	rel://files/SignalTodoTagsExample3.png
-As can be seen in the example, the format attributes do not get removed from the text; this behaviour is delibarate. In practice it is therefore best, to put the attributes at the end of the todo text.
+As can be seen in the example, the format attributes do not get removed from the text; this behaviour is deliberate. In practice it is therefore best, to put the attributes at the end of the todo text.
 
 [:rel:top]
 ----

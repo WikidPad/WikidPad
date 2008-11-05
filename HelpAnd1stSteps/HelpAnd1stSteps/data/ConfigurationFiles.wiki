@@ -24,7 +24,7 @@ On startup WikidPad searches for "WikidPad.config" in the following locations an
 		* this is mainly intended for windows operating systems.
 
 +++ Where is it
-You can find out where the configuration directory is, by starting WikidPad and selecting Help / About in the main menu. This will bring up the "About" dialog. In it, the configuration directory in use is specified at the bottom of the text, together with the [WikiDatabase |database type] of the current wiki.
+You can find out where the configuration directory is, by starting WikidPad and selecting "Help / About" in the main menu. This will bring up the "About" dialog. In it, the configuration directory in use is specified at the bottom of the text, together with the [WikiDatabase |database type] of the current wiki.
 
 [:rel:top]
 ----

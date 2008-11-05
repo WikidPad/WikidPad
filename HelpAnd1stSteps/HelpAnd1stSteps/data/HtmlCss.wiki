@@ -23,7 +23,6 @@ You can change the appearance of just about any "element" on your wiki pages, by
 h3{
 	font-style: italic;
 }
-
 h4{
 	font-style: italic;
 }
@@ -36,7 +35,6 @@ table {
 	padding: 4px;
 	margin: 0,8;
 }
-
 td {
 	border: solid;
 	border-width: 0px 0px 1px 1px;
@@ -88,9 +86,9 @@ If you ever want to change the style of the buttons, you simply change the style
 WikidPad supports four (4) levels of style sheets for whitch the files are all in different locations. This is in part historically born and for reasons of backward compatibility. When a wiki ('s pages) are exported to html, also all the css files in use are copied to the export directory and references to them are added to the exported pages.
 
 The css file references are also part of the page specification for preview, so also preview will show the pages including all the css style rendering. This is however restricted to external renderers; the internal renderer ignores the css references.
-For preview WikidPad supports an additional set of three(3) css files, that will allow you to "style" pages differently in preview then in export. Also this has an historical reason and one for backward compatibility.
+For preview WikidPad supports an additional set of three (3) css files, that will allow you to "style" pages differently in preview then in export. Also this has an historical reason and one for backward compatibility.
 
-Except for the wikidpad base css file "appbase.css", none of the css files is created automatically by wikidpad. If you want to use any of the files, you will have to create them yourself and name them correctly. Only if a css file with the correct name exists in the correct place, will it be processed and a reference to it will be added to the wiki pages for export and/or preview. Wikidpad checks the available css files, when a wiki is opened.
+Except for the wikidpad base css file "appbase.css", none of the css files is created automatically by wikidpad. If you want to use any of the files, you will have to create them yourself in the correct location and name them correctly. Only if a css file with the correct name exists in the correct place, will it be processed and will a reference to it be added to the wiki pages for export and/or preview. Wikidpad checks the available css files, when a wiki is opened and when a new tabbed page is opened.
 
 	----
 ++++ History
@@ -103,7 +101,6 @@ For the sake of backward compatibility these files had to be retained and it was
 The general css support is done with css files for a maximum of four (4) levels, that set css styling for both (external) preview and export. When (part of) a wiki is exported, these files - íf present - are also copied to the directory that the pages are exported to. With the exeption of the application base file, all the files are called: wikistyle.css, for easy recognition. When copied to the export directory, their name is changed, since there can't be multiple files with the same name in the same directory.
 
 The files that wikidpad searches for when preparing a page for preview or export:
-
 	<<|
 _Level_ | _Name_ | _Location_ | _Name in Export_
 1 | appbase.css &nbsp;&nbsp;| [ProgramFiles |program dir.] | appbase.css

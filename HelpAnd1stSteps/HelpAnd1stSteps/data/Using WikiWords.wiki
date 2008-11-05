@@ -5,7 +5,7 @@ Contents:   [:toc:]
 +++ General
 Wikiwords are (at least by default) all words that start with an uppercase letter and where at least one uppercase letter follows a lowercase letter in the word (this is called "camelcase", like in  WikiWord). Or where a lowercase letter follows multiple uppercase letters (like in ABcd).
 
-As you type wikiwords into the editor they are automatically turned into a link and become underlined. Words that already have content, like WikiWord turn blue, words that do not, like UndefinedPage, stay black but are underlined [1][2]. For eacht new Wikiword, a new (empty) note is automatically created. To go there and add your text, type Ctrl+L when the cursor is at the start, in the middle or at the end of the wikiword or double click on the word with the mouse.
+As you type wikiwords into the editor they are automatically turned into a link and become underlined. Words that already have content, like WikiWord turn blue, words that do not, like UndefinedPage, stay black but are underlined [1][2]. For eacht new Wikiword, a new (empty) page is automatically created. To go there and add your text, type Ctrl+L when the cursor is at the start, in the middle or at the end of the wikiword or double click on the word with the mouse.
 
 [:rel:top]
 ----
@@ -28,7 +28,7 @@ To prevent all camelcased words on a page from being used as a link, add the att
 to the page.
 	----
 ++++ Permanently
-To prevent a camelcased word permanently from being used as a link, add it to the camelcase blacklist in the Func. pages [5]. Open the "Views" node in the tree on the left, open therein the "Func. pages" node and click on "Wiki cc. blacklist" or on "Global cc. blacklist". Then enter the word on a line of its own in the list. An example is WikidPad, that is in the Wiki blacklist.
+To prevent a camelcased word permanently from being used as a link, add it to the camelcase blacklist in the Func. pages [5]. Open the "Views" node in the main tree, find and open the "Func. pages" node and click on "Wiki cc. blacklist" or on "Global cc. blacklist". Then enter the word on a line of its own in the list. An example is WikidPad, that is in the Wiki blacklist.
 
     * Wiki cc. blacklist
         Words in this list only apply to the current WikidPad Document.

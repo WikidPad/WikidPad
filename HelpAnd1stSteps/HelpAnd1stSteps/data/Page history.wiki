@@ -3,7 +3,7 @@ Contents:   [:toc:]
 [:rel:back]
 ----
 +++ General
-Per tabbed page, WikidPad maintains a history of the wiki pages that have been visited. This function can be used to quickly navigate back and forth to a earlier visited pages.
+Per tabbed page, WikidPad maintains a history of the wiki pages that have been visited. This function can be used to quickly navigate back and forth to earlier visited pages.
 
 [:rel:top]
 ----
@@ -11,7 +11,7 @@ Per tabbed page, WikidPad maintains a history of the wiki pages that have been v
 ++++ General
 You can call up a dialog window that shows the page history by:
 	* pressing Ctrl-H.
-	* selecting History / "List History" from the main menu.
+	* selecting "History / List History" from the main menu.
 The image below shows a screenshot of the history window with the link names of the pages that have been visited.
 	rel://files/HistoryExample1.png
 The history dialog can be used to jump to one of the listed pages by either:
@@ -23,12 +23,12 @@ The history dialog can be used to jump to one of the listed pages by either:
 ++++ Alternatives
 An alternative way to call up the history dialog is:
 	* pressing Ctrl-Alt-Up
-	* selecting History / "Up History" from the main menu
+	* selecting "History / Up History" from the main menu
 This will show the history dialog with the previous page already selected. All it needs to navigate there, is to press Enter.
 
 It's counterpart is formed by:
 	* pressing Ctrl-Alt-Down
-	* selecting History / "Down History" from the main menu
+	* selecting "History / Down History" from the main menu
 This will show the history dialog with the next page already selected.
 
 [:rel:top]
@@ -41,14 +41,14 @@ A quick way to navigate óne page backwards or forwards in history is by using t
 To move óne page back in history:
 	* press Alt-Left (arrow)
 	* click the rel://files/tb_back.gif button on the toolbar
-	* select History / Back from the main menu
+	* select "History / Back" from the main menu
 
 	----
 ++++ Forward
 To move óne page forward in "history":
 	* press Alt-Right (arrow)
 	* click the rel://files/tb_forward.gif button on the toolbar
-	* select History / Forward from the main menu
+	* select "History / Forward" from the main menu
 
 [:rel:top]
 ----

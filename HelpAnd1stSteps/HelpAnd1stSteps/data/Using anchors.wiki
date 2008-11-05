@@ -3,7 +3,7 @@ Contents:   [:toc:]
 [:rel:back]
 ----
 +++ General
-Links can not only be created to refer to a specific page, but they can also expanded, to refer to a specific position within the text of that page. Like this [AnchorExample|item5]!item5 link, that will jump to item 5 of an example text and [AnchorExample|item2]!item2, that will jump to item&nbsp;2.
+Links can not only be created to refer to a specific page, but they can also be expanded, to refer to a specific position within the text of that page. Like this [AnchorExample|item5]!item5 link, that will jump to item 5 of an example text and [AnchorExample|item2]!item2, that will jump to item&nbsp;2.
 
 The place in the item-text to jump to, is defined with an "anchor" attribute; this attribute has the format: "anchor:anchor-name". It has to be on it's own on an otherwise empty line, in front of the text to jump to.
 
@@ -12,6 +12,7 @@ To have a link refer to an anchor, use the link for the page it is on, followed 
 [:rel:top]
 ----
 anchor:samePage
+&raquo; _anchor:samePage_
 +++ Anchors on the same page
 Links to anchors do not default to the current page. So "!samePage" will not create a link to the anchor at the beginning of this section. References to anchors only work in connection with a link; even if that is a link tot the current page itself. So in order to create a link to the anchor of this section, the format should be: \[Using anchors]!samePage.
 

@@ -17,7 +17,7 @@ The footnote "number" can be any number; it does not have to start - per page - 
 [:rel:top]
 ----
 ++++ Natural look
-Footnote references are normally printed as superscript numbers and the footnote texts are printed in italics and a smaller font size. In Wikidpad nothing is superscript and everything appears in the same font (and) size as the rest of the text. The footnote text could be made italics, using the wikidpad italics tags, but that has a practical problem: Wikidpad does not allow for links or any other formatting inside italics text. And precisely links are things one would want to use in footnotes.
+Footnote references are normally printed as superscript numbers and the footnote texts are printed in italics and a smaller font size. With Wikidpad footnotes nothing is superscript and everything appears in the same font (and) size as the rest of the text. The footnote text could be made italics, using the wikidpad italics tags, but that has a practical problem: Wikidpad does not allow for links or any other formatting inside italics text. And precisely links are things one would want to use in footnotes.
 
 When using external preview, things cán be done to make footnotes look more "natural" by using html tags. And even when using internal preview, it would still look better in html export. Internal preview will not mind, since it will simply ignore the tags as unknown. To see how it works, check out the example below in the editor. See also [HtmlFormatting|Textformatting: Html element] on the usage of html tags.
 	----

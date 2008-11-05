@@ -11,6 +11,8 @@ Type the first 1 or more characters of the word and then press Ctrl+Space. A lis
 Screenshot:
 rel://files/Autocomplete%20WikiWord.png
 
+[:rel:top]
+----
 +++ Links
 The same thing can be done for bracketed links. Type the opening bracket and the first chacters of the link and press Ctrl+Space. The resulting list however, shows both wikiwords ánd links. If user tags are used, also thóse will appear in the list, since they have the format of a link.
 

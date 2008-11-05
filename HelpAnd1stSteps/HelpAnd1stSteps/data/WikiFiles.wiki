@@ -3,7 +3,7 @@ Contents:   [:toc:]
 [:rel:back]
 ----
 +++ General
-The files of a wiki are stored in subdirectory of a directory of your choice. Each wiki has it's own directory with a number of subdirectories. By default the directory has the name of the wiki and mostly it's the same name as that of the (original) root page.
+The files of a wiki are stored in a subdirectory of a directory of your choice. Each wiki has it's own directory with a number of subdirectories. By default the directory has the name of the wiki and mostly it's the same name as that of the (original) root page.
 
 +++ Wiki directory
 A wiki directory contains a wiki configuration file with the name of the wiki and a ".wiki" extention and subdirectories like:

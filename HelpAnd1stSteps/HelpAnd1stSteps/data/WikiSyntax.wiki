@@ -3,14 +3,36 @@
 [:rel:back]
 ----
 +++ General
-The WikidPad syntax is based on a set of regular expressions. It can be customized by creating a custom "wikisyntax.py" file. To do so, copy the existing file: 
-	* [ProgramFiles |wikidpad / extensions / wikisyntax.py] to 
-	* [ProgramFiles |wikidpad / user_extensions / wikisyntax.py];
-create the directory if it doesn't exist.
-Then edit [ProgramFiles |user_extensions / wikisyntax.py] with a standard text editor to override the default syntax specification. This file will not be touched when upgrading wikidPad.
+The WikidPad syntax is based on a set of [RegEx |regular expressions]. The syntax can be completely or partly customized by creating a custom "wikisyntax.py" file. To do so, copy the existing file: 
+	* [ProgramFiles |wikidpad / extensions / WikiSyntax.py] to 
+	* [ProgramFiles |wikidpad / user_extensions / WikiSyntax.py].
+Create the directory if it doesn't exist. Then edit the new wikisyntax.py with a standard text editor to override the default syntax specification. This file will not be touched when upgrading wikidPad.
 
+In principle you should remove all the syntax entries from the new file, that should keep their default functionality and only maintain the entries that you want changed and possible new ones you create. On startup WikidPad will read both files in the order:
+	1. extensions / wikisyntax.py
+	2. user_extensions / wikisyntax.py
+and override any entries in extensions/wikisyntax.py with those found in user_extensions/wikisyntax.py.
+
+[:rel:top]
+----
++++ Special rule!
+For the creation of a custom "wikisyntax.py" a special rule exists: syntax definitions that use a definition that is overwritten in user_extensions/wikisyntax.py must be overwritten as well or at least be copied to that file as they are. The reason for this is, that otherwise the "using" definition will use the old definition in extensions/wikisyntax.py instead of the new one in user_extensions/wikisyntax.py.
+
+*Example:*
+If "UrlRE" is overwritten, then "TitledUrlRE" must be included in user_extensions/wikisyntax.py as well (changed or unchanged) because in its definition:
+
+<<pre
+TitledUrlRE =  re.compile(BracketStartPAT +
+    ur"(?P<titledurlUrl>" + UrlRE.pattern + ur")"
+    ur"(?:(?P<titledurlDelim>[ \t]*" + TitleWikiWordDelimiterPAT + ur")"
+    ur"(?P<titledurlTitle>"+PlainCharacterPAT+ur"+?))?" + BracketEndPAT,
+    re.DOTALL | re.UNICODE | re.MULTILINE)
+>>
+
+"TitledUrlRE" uses "UrlRE" (as "UrlRE.pattern"). Otherwise "TitledUrlRE" would use the default definition of "UrlRE" in extensions/wikisyntax.py instead of the new one in user_extensions/wikisyntax.py.
 
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]
+attributes: [camelCaseWordsEnabled: false]
 [help.status:done]

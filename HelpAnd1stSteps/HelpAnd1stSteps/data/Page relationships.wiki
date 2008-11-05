@@ -3,13 +3,13 @@ Contents:   [:toc:]
 [:rel:back]
 ----
 +++ General
-WikidPad at all times knows what the "relatives" of a page are; it's parents and/or it's children. This function can be used to quickly navigate to a specific parent or child.
+WikidPad at all times knows what the "relatives" of the current page are; it's parents and/or it's children. This function can be used to quickly navigate to a specific parent or child.
 
 	----
 ++++ Parents
 To view the parents of the current page:
 	* press Ctrl-Up
-	* select "Wiki Words" / "List Parents" from the main menu
+	* select "Wiki Words / List Parents" from the main menu
 This will bring up the relatives dialog showing a list of the parent(s), like in the screenshot below.
 
 	rel://files/ParentsExample1.png
@@ -23,7 +23,7 @@ The dialog can be used to jump to one of the listed pages by either:
 ++++ Children
 To view the children of the current page:
 	* press Ctrl-Down
-	* select "Wiki Words" / "List Children" from the main menu
+	* select "Wiki Words / List Children" from the main menu
 This will bring up the relatives dialog showing the list of children. Navigating to one of the children is done the same way as for navigating to a parent.
 
 [:rel:top]

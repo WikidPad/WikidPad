@@ -2,11 +2,11 @@
 [:rel:back]
 ----
 rel://files/wikidpad48_36.png
-
-    * Wikidpad: Home page [http://groups.google.com/group/wikidpad/web/home |  rel://files/google35.gif>am]
-    * Wikidpad: Yahoo user group [http://tech.groups.yahoo.com/group/wikidPad/ | rel://files/yahoo25.png>am] 
-    * Wikidpad: Trac home page [http://wikidpad.python-hosting.com/ |  rel://files/trac25.png>am]
-    * Wikidpad: On Wikipedia [http://en.wikipedia.org/wiki/WikidPad | rel://files/wikipedia_logo.png>am]
+    * [http://wikidpad.sourceforge.net/ |Wikidpad: SourceForge home page]
+    * [http://groups.google.com/group/wikidpad/web/home |Wikidpad: Google home page] (old)
+    * [http://tech.groups.yahoo.com/group/wikidPad/ |Wikidpad: Yahoo user group ] 
+    * [http://wikidpad.python-hosting.com/ |Wikidpad: Trac home page ]
+    * [http://en.wikipedia.org/wiki/WikidPad |Wikidpad: On Wikipedia ]
 
 [:rel:top]
 ----

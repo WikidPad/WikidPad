@@ -29,7 +29,7 @@ This facility is intended for one-off use; for instance when you need to calcula
 ----
 +++ Evaluation insertion
 ++++ General
-The eval insertion evaluates a Python expression and in preview and html export replaces the insertion with the result of the evaluation. See also [WpInsertions].
+The eval insertion evaluates a Python expression and in preview and html export replaces the insertion with the result of the evaluation. See also [WpInsertions]. If the expression contains special characters, then enclose it in [QuotationCharacters |quotation characters].
 
 To be honest, this insertion has a véry limited usefullness; there are however three functions available in the "EvalLibrary.py" library, that you can use to put a date and/or time on a page. In preview that would however álways be the current date and/or time. In exported html pages their result would reflect the date and/or time of export.
 
@@ -92,12 +92,12 @@ All forms of script execution are enabled.
 The default location where the editor searches for a script is on the wiki page, that is the current page when Ctrl-E is pressed.
 
 &bull; *Other page*
-On a page basis you can tell the editor that it also has to take scripts into account, that are located in a different wiki page, you do this by adding the \[import_scripts: _page name_] attribute to the page. The following attribute for example:
+On a per page basis you can tell the editor that it also has to take scripts into account, that are located in a different wiki page, you do this by adding the \[import_scripts: _page name_] attribute to the page. The following attribute for example:
 	* [import_scripts: LocalScriptLibrary]
-would tell the editor to also look for scripts in the wiki page \LocalScriptLibrary. If you would press Ctrl-4 you would see that the script with id "4" on that page would insert the text "--- from local library ---" at the cursor position in this page.
+would tell the editor to also look for scripts in the wiki page "LocalScriptLibrary". If you would press Ctrl-4 you would see that the script with id "4" on that page would insert the text "--- from local library ---" at the cursor position in this page.
 
 &bull; *Global script page*
-You can also define a wiki page as the global script library for the entyre wiki. You do this by specifying that page with the \[global.import_scripts: _page name_] attribute.
+You can also define a wiki page as the global script library for the entíre wiki. You do this by specifying that page with the \[global.import_scripts: _page name_] attribute.
 	----
 ++++ Script execution
 &bull; *All scripts*
@@ -108,7 +108,7 @@ If Ctrl-E is pressed - and nó text is selected - then áll of these scripts are
 Per page the scripts are executed in the order they appear on the page. This behaviour is only limited by the setting of the security option: "Script security".
 
 &bull; *One specific script*
-Up to six (6) scripts can be assigned to a Ctrl-_number key_; you do this by adding a script-id to the script block. The format for this is: \<% n: ....\%>, where _n_ is a number from 1 up to 6; for example:
+Up to six (6) scripts can be assigned to a Ctrl-_number key_; you do this by adding a script-id to the script block. The format for this is: \<%&nbsp;n:&nbsp;....\%>, where _n_ is a number from 1 up to 6; for example:
 	* script 1: \<% 1: editor.\AddText(lib.now()) %>
 	* script 2: \<% 2: lib.addDate(editor) %>
 To execute one of these scripts, press Ctrl plus it's number; so to execute script 1, press Ctrl-1 and to execute script 2, press Ctrl-2.
@@ -117,18 +117,23 @@ Pressing Ctrl plus a number will execute only the script with that number; the e
 	1. The current page
 	2. The \[import_scripts: _page name_] page, íf specified
 	3. The \[global.import_scripts: _page name_] page, íf specified
-The first script with the number that is found, is executed and the editor will not search the other pages for a second (or third) script with the number. This allows to have different scripts with the same number; the one "closest" overrules the one "furthest away".
+The first script with the number that is found, is executed and the editor will not search the other pages for a second (or third) script with the same number. This allows to have different scripts with the same number; the one "closest" overrules the one "furthest away".
 
 &bull; *Editor menu*
-Instead of pressing Ctrl-E or Ctrl-n you can also select the appropriate option from Editor / Evaluation in the main menu.
+Instead of pressing Ctrl-E or Ctrl-n you can also select the appropriate option from "Editor / Evaluation" in the main menu.
 
 [:rel:top]
 ----
 +++ Custom functions
-Next to the functions in "EvalLibrary.py", you can define your own functions. To do so, copy the existing file: 
-	* [ProgramFiles |wikidpad / extensions / EvalLibrary.py] to 
-	* [ProgramFiles |wikidpad / user_extensions / EvalLibrary.py];
-create the directory if it doesn't exist. Then edit [ProgramFiles |user_extensions / EvalLibrary.py] to add your own functions. The new file will not be touched when upgrading wikidPad.
+Next to the existing functions in "evalLibrary.py", you can define your own functions or change the specification of existing ones. To do so, copy the existing file: 
+	* [ProgramFiles |wikidpad / extensions / evalLibrary.py] to 
+	* [ProgramFiles |wikidpad / user_extensions / evalLibrary.py].
+Create the directory if it doesn't exist. Then edit the new evalLibrary.py to add your own functions. The new file will not be touched when upgrading wikidPad.
+
+In principle you should remove all the functions from the new file, that should keep their default functionality and only maintain the functions that you want changed and new ones you create. On startup WikidPad will read both files in the order:
+	1. extensions / evalLibrary.py
+	2. user_extensions / evalLibrary.py
+and override any functions in extensions/evalLibrary.py with those found in user_extensions/evalLibrary.py and add your additional custom functions.
 
 *Remarks:*
 &bull; Depending on the type of the new functions, they can be used with: in-editor, insertion and script.

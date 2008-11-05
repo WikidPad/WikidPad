@@ -8,11 +8,9 @@ The big drawback of wiki's however, is that you need a web server to drive them,
 
 WikidPad however is a wiki, that is based on disk files on your local or network drives; so you don't need a webserver, you only need WikidPad. And WikidPad goes beyond the average wiki in that it supports a treeview that shows the wiki pages and their mutual relationships. This makes navigating easier and quicker and also keeps you aware of whére you are within the wiki page structure. It also allows to create additional indexes into the pages, using page tags or page attributes. WikidPad makes making notes, linking them and finding them back very fast and very easy. It allows you to create and maintain multiple independant wiki's, that are each stored in their own folder on disk. These folders can be taken along to and/or distributed to other computers that have WikidPad installed to either consult or update the wiki's. WikidPad can even be installed on a USB storage device, like a stick or a disk and executed from there, so you can literally carry both WikidPad and your wiki's around with you.
 
-WikidPad allows to publish all or a subset of the wiki pages to HTML pages, that show the wiki pages and their contents and links roughly the same as they appear in WikidPad itself. "Roughly", because different browsers have different idea's on subjects like default borders, margins, etc. This way you can either still upload the wiki to a web server ór use them to distribute the wiki to others that don't have WikidPad installed, so they can view in in their browser.
+WikidPad allows to publish all or a subset of the wiki pages to HTML pages, that show the wiki pages and their contents and links roughly the same as they appear in WikidPad itself. "Roughly", because different browsers have different idea's on subjects like default borders, margins, etc. This way you can either still upload the wiki to a web server ór use them to distribute the wiki to others that don't have WikidPad installed, so they can view it in their browser.
 
 <p align=center>[Intro1StartingAWiki |Next page &raquo;]</p>
-----
-[1] _The page links in this intro are all prefixed with the word "Intro" in order to keep them out of the way of the regular help pages._
 ----
 previous: [:rel:back]
 parents:&nbsp; [:rel:parents; aslist]

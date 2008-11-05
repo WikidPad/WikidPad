@@ -13,12 +13,11 @@
 	10. [ItemSearching |Searching]
 	11. [ItemPrinting |Printing]
 	12. [ItemPublishing |Publishing to html]
-	13. [KeyBindings |Key bindings]
-	14. [DataExchange |Data exchange]
-	15. [WikidPadSpecials |Specials]
-	16. [WikidPadFiles |Wikidpad files]
-	17. [WikidPadReferences |References]
-	18. [WikidPadAdvanced |Advanced]
+	13. [DataExchange |Data exchange]
+	14. [WikidPadSpecials |Specials]
+	15. [WikidPadFiles |Wikidpad files]
+	16. [WikidPadReferences |References]
+	17. [WikidPadAdvanced |Advanced]
 
 ----
 previous: [:rel:back]

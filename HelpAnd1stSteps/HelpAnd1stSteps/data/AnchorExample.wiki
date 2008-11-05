@@ -24,7 +24,7 @@ number
 of
 lines
 
-[:rel:top], [Using anchors]
+[:rel:top], [:rel:back]
 	----
 
 anchor:item2
@@ -42,7 +42,7 @@ number
 of
 lines
 
-[:rel:top], [Using anchors]
+[:rel:top], [:rel:back]
 	----
 
 anchor:item3
@@ -60,7 +60,7 @@ number
 of
 lines
 
-[:rel:top], [Using anchors]
+[:rel:top], [:rel:back]
 	----
 
 anchor:item4
@@ -78,7 +78,7 @@ number
 of
 lines
 
-[:rel:top], [Using anchors]
+[:rel:top], [:rel:back]
 	----
 
 anchor:item5
@@ -96,7 +96,8 @@ number
 of
 lines
 
-[:rel:top], [Using anchors]
+[:rel:top], [:rel:back]
 ----
 previous: [:rel: back]
+parents:&nbsp; [:rel:parents; aslist]
 [help.status:done]

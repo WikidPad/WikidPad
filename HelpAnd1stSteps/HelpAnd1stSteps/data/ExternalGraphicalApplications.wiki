@@ -28,7 +28,7 @@ The mentioned applications are not part of the WikidPad release itself, you must
 	4. For MimeTeX, Ploticus and Gnuplot enter the full path to the executable including the executables name. For GraphViz only enter the path to the directory containing the executables in the first text field of the page. You can change the names of the executables in their respective fields if they deviate from the default names.
 	----
 ++++ Usage as insertion
-The programs are called using "[WpInsertions |insertions]". During preview or html export the insertion is replaced by the resulting graph of the graphical application. The format for the insertions is:
+The programs are "called" using [WpInsertions |insertions]. During preview or html export the insertion is replaced by the resulting graph of the graphical application. The format for the insertions is:
     
     * MimeTeX: \[:eqn: " _script_ "]
     * GraphViz: \[:dot: " _script_ "], \[:neato: " _script_ "], \[:twopi: " _script_ "], \[:circo: " _script_ "], \[:fdp: " _script_ "]
@@ -41,7 +41,7 @@ The "scripts" must follow the syntax for the respective program, please see the 
 &bull; *Export to html*
 When exporting to html, the rendered image files are put in a subdirectory called "volatile" in the target directory for the html files. If such a "volatile" directory already exists, *all of its contents (including subfolders) are deleted*, this to avoid cluttering it up with old versions of the files!
 
-&bull; *Erros and warnings*
+&bull; *Errors and warnings*
 If the GraphViz or Ploticus applications return errors or warnings, then the insertion is not replaced with the resulting image, but with the error/warning text. To suppress warnings/errors use the appendix "noerror" after the main value of the insertion.
 
 [:rel:top]
@@ -65,7 +65,7 @@ Whereas this \[:eqn:"$\frac{-b\pm\sqrt{b^2-4ac}}{2a}$"] resulting in:
 GraphViz is a set of applications to generate directed and nondirected graphs. A helpful tutorial for creating directed graphs with GraphViz's dot utility is: [http://kabru.eecs.umich.edu/bin/view/TWiki/HowtoDirectedGraphs |Howto directed graphs]. You can download all or only some of them as you like.
 	----
 ++++ Example
-(Dot, with "noerror" appendix)*
+This "dot" insertion (with "noerror" appendix)
 	<<pre
 [:dot:"
 digraph {
@@ -76,6 +76,7 @@ d -> a
 }
 "; noerror]
 >>
+
 Results in:
 	rel://files/GraphVizExample1.png
 
@@ -86,6 +87,7 @@ Results in:
 Ploticus is an application to generate plots and charts like those that you may have seen in your favorite spreadsheet program.
 	----
 ++++ Example
+This "ploticus" insertion
 	<<pre
 [:ploticus:"
 #proc areadef
@@ -113,6 +115,7 @@ MicroMason
   crossover: 0
 "]
 >>
+
 Results in:
 	rel://files/PloticusExample1.gif
 
@@ -126,13 +129,14 @@ Gnuplot is an application to generate mathematical plots.
 Unfortunately Gnuplot always issues a warning about a missing console (?) so you have to use the appendix "noerror" in each case. Windows users can use the windows binary and set the gnuplot option to the "wgnuplot.exe" executable; this also does not issue this warning. In both cases however you will be unable to retrieve error messages from Gnuplot if the script isn't correct.
 
 At the beginning of each Gnuplot script the following lines are automatically inserted to set output to a PNG-file that is then shown in the wiki page:
-<<pre
+	<<pre
     set terminal png
     set output 'filename.png'
 >>
 where filename.png is replaced by the generated temporary file name.
 	----
 ++++ Example
+This "gnuplot" insertion
 	<<pre
 [:gnuplot:"
 set key right nobox
@@ -140,13 +144,14 @@ set samples 100
 plot [-pi/2:pi] cos(x),-(sin(x) > sin(x+1) ? sin(x) : sin(x+1))
 "]
 >>
+
 Results in:
 	rel://files/GnuPlotExample1.png
 
 [:rel:top]
 ----
 +++ For programmers
-If you want to create your own plugin to handle insertions, look in the "extensions" directory in the WikidPad installation directory. The plugins "MimeTexCGIBridge.py", "GraphvizClBridge.py" and "PloticusClBridge.py" control the external applications. The plugin "ExampleInsertion.py" handles the insertion key "testexample" and is another example how to handle insertions by a plugin.
+If you want to create your own [Plugins |plugin] to handle insertions, look in the "[ProgramFiles |extensions]" directory. The plugins "MimeTexCGIBridge.py", "GraphvizClBridge.py", "GnuplotClBridge.py" and "PloticusClBridge.py" control the external applications. The plugin "ExampleInsertion.py" handles the insertion key "testexample" and is another example how to handle insertions by a plugin.
 
 [:testexample:"this";is;//a simple//;test]
 

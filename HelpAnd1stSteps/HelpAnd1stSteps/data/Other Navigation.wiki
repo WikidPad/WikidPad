@@ -10,7 +10,7 @@ This page lists navigation functions that don't fit in one of the other categori
 This function jumps to the wiki's root page and makes that the current page of the current tab. You can execute the function by either:
 	* pressing Ctrl-Q
 	* clicking the rel://files/tb_home.gif button on the toolbar
-	* selecting History / "Wiki Home" from the main menu
+	* selecting "History / Wiki Home" from the main menu
 
 	----
 ++++ Open page
@@ -28,7 +28,7 @@ If the page you are looking for doesn't (yet) exist in the wiki, the dialog allo
 
 You can also choose to:
 	* open the page in a new tab and making that the current tab
-	* open the page in a new tab without making it the current tab
+	* open the page in a new tab without making that the current tab
 
 [:rel:top]
 ----
