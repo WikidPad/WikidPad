@@ -1,7 +1,18 @@
 ﻿++ Change Log
 
 
-Oct. 25, 2008 (.18rc17)
+Nov. 26, 2008 (1.8rc18)
+
+    * Bug fixed: Styling text with bold or italics markup failed if
+      markup was changed to something non-Ascii.
+    * Bug fixed: Spell checking did not handle language attribute
+      correctly when switching from one page to another with
+      different language.
+    * Internal: Menu plugins can now place their items into submenus
+
+
+
+Oct. 25, 2008 (1.8rc17, repository revision in "stable-1.8" branch: 156)
 
     * Bug fixed: Layout problem in "Search Wiki" dialog
     * Bug fixed: On inserting a textblock, selection was not replaced

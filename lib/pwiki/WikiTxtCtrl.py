@@ -527,6 +527,20 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         ce = cs + len(self.GetTextRange(start, end))
         return (cs, ce)
 
+
+    def gotoCharPos(self, pos, scroll=True):
+        # Go to the end and back again, so the anchor is
+        # near the top
+        sctPos = self.bytelenSct(self.GetText()[:pos])
+        if scroll:
+            self.SetSelection(-1, -1)
+            self.GotoPos(self.GetLength())
+            self.GotoPos(sctPos)
+        else:
+            self.SetSelectionStart(sctPos)
+            self.SetSelectionEnd(sctPos)
+
+
     def applyBasicSciSettings(self):
         """
         Apply the basic Scintilla settings which are resetted to wrong
@@ -1062,36 +1076,43 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         # TODO strftime
 
-    def styleSelection(self, styleChars):
+
+    def styleSelection(self, startChars, endChars=None):
         """
-        Currently len(styleChars) must be 1.
         """
+        if endChars is None:
+            endChars = startChars
+
         (startBytePos, endBytePos) = self.GetSelection()
         if startBytePos == endBytePos:
             (startBytePos, endBytePos) = self.getNearestWordPositions()
-            
+
         emptySelection = startBytePos == endBytePos  # is selection empty
+
+        startCharPos = len(self.GetTextRange(0, startBytePos))
+        endCharPos = startCharPos + len(self.GetTextRange(startBytePos, endBytePos))
 
         self.BeginUndoAction()
         try:
-            self.GotoPos(startBytePos)
-            self.AddText(styleChars)
-    
-            for i in xrange(len(styleChars)):
-                endBytePos = self.PositionAfter(endBytePos)
-    
-            self.GotoPos(endBytePos)
-            self.AddText(styleChars)
-    
-            bytePos = endBytePos
+#             print "--styleSelection4", repr((startBytePos, endBytePos))
             
-            if not emptySelection:
-                # Cursor will in the end stand after styled word
-                # if selection is empty, it will stand between the style characters
-                for i in xrange(len(styleChars)):
-                    bytePos = self.PositionAfter(bytePos)
+            endCharPos += len(startChars)
+            
+            if emptySelection:
+                # If selection is empty, cursor will in the end
+                # stand between the style characters
+                cursorCharPos = endCharPos
+            else:
+                # If not, it will stand after styled word
+                cursorCharPos = endCharPos + len(endChars)
+
+            self.gotoCharPos(startCharPos, scroll=False)
+            self.AddText(startChars)
     
-            self.GotoPos(bytePos)
+            self.gotoCharPos(endCharPos, scroll=False)
+            self.AddText(endChars)
+
+            self.gotoCharPos(cursorCharPos, scroll=False)
         finally:
             self.EndUndoAction()
             

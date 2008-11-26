@@ -1344,7 +1344,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         menuID=wx.NewId()
         helpMenu.Append(menuID, '&Visit wikidPad Homepage', 'Visit Homepage')
         wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(
-                u'http://www.jhorman.org/wikidPad/'))
+                u"http://wikidpad.sourceforge.net"))
 
         helpMenu.AppendSeparator()
 
@@ -1365,15 +1365,31 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.menuFunctions.describeMenuItems(self), [])
         if len(menuItems) > 0:
             pluginMenu = wx.Menu()
-                
+            subStructure = {}
+
             def addPluginMenuItem(function, label, statustext, icondesc=None,
                     menuID=None):
-                self.addMenuItem(pluginMenu, label, statustext,
+                labelComponents = label.split(u"|")
+                
+                sub = subStructure
+                menu = pluginMenu
+
+                for comp in labelComponents[:-1]:
+                    newMenu, newSub = sub.get(comp, (None, None))
+                    if newMenu is None:
+                        newMenu = wx.Menu()
+                        menu.AppendMenu(-1, comp, newMenu)
+                        newSub = {}
+                        sub[comp] = newMenu, newSub
+                    
+                    menu = newMenu
+                    sub = newSub
+
+                self.addMenuItem(menu, labelComponents[-1], statustext,
                         lambda evt: function(self, evt), icondesc, menuID)
-            
+
             for item in menuItems:
                 addPluginMenuItem(*item)
-
 
         self.mainmenu.Append(wikiMenu, 'W&iki')
         self.mainmenu.Append(wikiWordMenu, '&Wiki Words')
