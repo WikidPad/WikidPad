@@ -15,7 +15,25 @@ import Localization
 import WikiHtmlView
 
 
-class PredefinedOptionsPanel(wx.Panel):
+
+class DefaultOptionsPanel(wx.Panel):
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+
+    def setVisible(self, vis):
+        return True
+
+    def checkOk(self):
+        return True
+
+    def handleOk(self):
+        pass
+
+
+class ResourceOptionsPanel(DefaultOptionsPanel):
+    """
+    GUI of panel is defined by a ressource.
+    """
     def __init__(self, parent, resName):
         p = wx.PrePanel()
         self.PostCreate(p)
@@ -34,18 +52,272 @@ class PredefinedOptionsPanel(wx.Panel):
         pass
 
 
-class EmptyOptionsPanel(wx.Panel):
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
+class PluginOptionsPanel(DefaultOptionsPanel):
+    def __init__(self, parent, optionsDlg, app):
+        DefaultOptionsPanel.__init__(self, parent)
 
-    def setVisible(self, vis):
-        return True
+        self.idToOptionEntryMap = {}
+        self.oldSettings = {}
+        self.optionToControl = []
+        self.mainControl = optionsDlg.getMainControl()
+
+    
+    def addOptionEntry(self, opt, ctl, typ, *params):
+        self.optionToControl.append((opt, ctl, typ) + params)
+    
+    
+    def transferOptionsToDialog(self, config):
+        # List of tuples (<configuration file entry>, <gui control name>, <type>)
+        # Supported types:
+        #     b: boolean checkbox
+        #     i0+: nonnegative integer
+        #     t: text
+        #     tre: regular expression
+        #     ttdf: time/date format
+        #     f0+: nonegative float
+        #     seli: integer position of a selection in dropdown list
+        #     selt: Chosen text in dropdown list
+        #     color0: HTML color code or empty
+        #     spin: Numeric SpinCtrl
+        #
+        #     guilang: special choice for GUI language
+    
+        # ttdf and color0 entries have a 4th item with the name
+        #     of the "..." button to call a dialog to set.
+        # selt entries have a list with the internal config names (unicode) of the
+        #     possible choices as 4th item.
+
+        # Transfer options to dialog
+        for oct in self.optionToControl:
+            self.transferSingleOptionToDialog(config, oct)
+
+
+    def transferSingleOptionToDialog(self, config, oct):
+        o, ctl, t = oct[:3]
+        self.idToOptionEntryMap[ctl.GetId()] = oct
+        self.oldSettings[o] = config.get("main", o)
+
+        if t == "b":   # boolean field = checkbox
+            ctl.SetValue(
+                    config.getboolean("main", o))
+        elif t == "b3":   # boolean field = checkbox
+            value = config.get("main", o)
+            if value == "Gray":
+                ctl.Set3StateValue(wx.CHK_UNDETERMINED)
+            else:
+                if strToBool(value):
+                    ctl.Set3StateValue(wx.CHK_CHECKED)
+                else:
+                    ctl.Set3StateValue(wx.CHK_UNCHECKED)
+
+#                 ctl.SetValue(
+#                         config.getboolean("main", o))
+        elif t in ("t", "tre", "ttdf", "i0+", "f0+", "color0"):  # text field or regular expression field
+            ctl.SetValue(
+                    uniToGui(config.get("main", o)) )
+        elif t == "seli":   # Selection -> transfer index
+            ctl.SetSelection(config.getint("main", o))
+        elif t == "selt":   # Selection -> transfer content string
+            try:
+                idx = oct[3].index(config.get("main", o))
+                ctl.SetSelection(idx)
+            except (IndexError, ValueError):
+                ctl.SetStringSelection(uniToGui(config.get("main", o)) )
+        elif t == "spin":   # Numeric SpinCtrl -> transfer number
+            ctl.SetValue(config.getint("main", o))
+        elif t == "guilang":   # GUI language choice
+            # First fill choice with options
+            ctl.Append(_(u"Default"))
+            for ls, lt in Localization.getLangList():
+                ctl.Append(lt)
+            
+            # Then select previous setting                
+            optValue = config.get("main", o)
+            ctl.SetSelection(Localization.findLangListIndex(optValue) + 1)
+
+
+        # Register events for "..." buttons
+        if t in ("color0", "ttdf"):
+            params = oct[3:]
+            if len(params) > 0:
+                # params[0] is the "..." button after the text field
+                dottedButtonId = params[0].GetId()
+                self.idToOptionEntryMap[dottedButtonId] = oct
+
+                wx.EVT_BUTTON(self, dottedButtonId,
+                        self.OnDottedButtonPressed)
+
 
     def checkOk(self):
-        return True
+        """
+        Called when "OK" is pressed in dialog. The plugin should check here if
+        all input values are valid. If not, it should return False, then the
+        Options dialog automatically shows this panel.
+        
+        There should be a visual indication about what is wrong (e.g. red
+        background in text field). Be sure to reset the visual indication
+        if field is valid again.
+        """
+        fieldsValid = True
 
-    def handleOk(self):
-        pass
+        # First check validity of field contents
+        for oct in self.optionToControl:
+            if not self.checkSingleOptionOk(oct):
+                fieldsValid = False
+        
+        return fieldsValid
+
+
+    def checkSingleOptionOk(self, oct):
+        o, ctl, t = oct[:3]
+        fieldsValid = True
+
+        if t == "tre":
+            # Regular expression field, test if re is valid
+            try:
+                rexp = guiToUni(ctl.GetValue())
+                re.compile(rexp, re.DOTALL | re.UNICODE | re.MULTILINE)
+                ctl.SetBackgroundColour(wx.WHITE)
+            except:   # TODO Specific exception
+                fieldsValid = False
+                ctl.SetBackgroundColour(wx.RED)
+        elif t == "i0+":
+            # Nonnegative integer field
+            try:
+                val = int(guiToUni(ctl.GetValue()))
+                if val < 0:
+                    raise ValueError
+                ctl.SetBackgroundColour(wx.WHITE)
+            except ValueError:
+                fieldsValid = False
+                ctl.SetBackgroundColour(wx.RED)
+        elif t == "f0+":
+            # Nonnegative float field
+            try:
+                val = float(guiToUni(ctl.GetValue()))
+                if val < 0:
+                    raise ValueError
+                ctl.SetBackgroundColour(wx.WHITE)
+            except ValueError:
+                fieldsValid = False
+                ctl.SetBackgroundColour(wx.RED)
+        elif t == "color0":
+            # HTML Color field or empty field
+            val = guiToUni(ctl.GetValue())
+            rgb = htmlColorToRgbTuple(val)
+            
+            if val != "" and rgb is None:
+                ctl.SetBackgroundColour(wx.RED)
+                fieldsValid = False
+            else:
+                ctl.SetBackgroundColour(wx.WHITE)
+        elif t == "spin":
+            # SpinCtrl
+            try:
+                val = ctl.GetValue()
+                if val < ctl.GetMin() or \
+                        val > ctl.GetMax():
+                    raise ValueError
+                ctl.SetBackgroundColour(wx.WHITE)
+            except ValueError:
+                fieldsValid = False
+                ctl.SetBackgroundColour(wx.RED)
+
+        return fieldsValid
+
+
+
+    def transferDialogToOptions(self, config):
+        for oct in self.optionToControl:
+            self.transferDialogToSingleOption(config, oct)
+
+    def transferDialogToSingleOption(self, config, oct):
+        """
+        Transfer option from dialog to config object
+        """
+        o, ctl, t = oct[:3]
+
+        # TODO Handle unicode text controls
+        if t == "b":
+            config.set("main", o, repr(ctl.GetValue()))
+        elif t == "b3":
+            value = ctl.Get3StateValue()
+            if value == wx.CHK_UNDETERMINED:
+                config.set("main", o, "Gray")
+            elif value == wx.CHK_CHECKED:
+                config.set("main", o, "True")
+            elif value == wx.CHK_UNCHECKED:
+                config.set("main", o, "False")
+
+        elif t in ("t", "tre", "ttdf", "i0+", "f0+", "color0"):
+            config.set(
+                    "main", o, guiToUni(ctl.GetValue()) )
+        elif t == "seli":   # Selection -> transfer index
+            config.set(
+                    "main", o, unicode(ctl.GetSelection()) )
+        elif t == "selt":   # Selection -> transfer content string
+            try:
+                config.set("main", o,
+                        oct[3][ctl.GetSelection()])
+            except IndexError:
+                config.set("main", o, 
+                        guiToUni(ctl.GetStringSelection()))
+        elif t == "spin":   # Numeric SpinCtrl -> transfer number
+            config.set(
+                    "main", o, unicode(ctl.GetValue()) )
+        elif t == "guilang":    # GUI language choice
+            idx = ctl.GetSelection()
+            if idx < 1:
+                config.set("main", o, u"")
+            else:
+                config.set("main", o,
+                        Localization.getLangList()[idx - 1][0])
+
+    def OnDottedButtonPressed(self, evt):
+        """
+        Called when a "..." button is pressed (for some of them) to show
+        an alternative way to specify the input, e.g. showing a color selector
+        for color entries instead of using the bare text field
+        """
+        oct = self.idToOptionEntryMap[evt.GetId()]
+        o, ctl, t = oct[:3]
+        params = oct[3:]
+        
+        if t == "color0":
+            self.selectColor(ctl)
+        elif t == "ttdf":   # Date/time format
+            self.selectDateTimeFormat(ctl)
+
+
+    def selectColor(self, tfield):
+        rgb = htmlColorToRgbTuple(tfield.GetValue())
+        if rgb is None:
+            rgb = (0, 0, 0)
+
+        color = wx.Colour(*rgb)
+        colordata = wx.ColourData()
+        colordata.SetColour(color)
+
+        dlg = wx.ColourDialog(self, colordata)
+        try:
+            if dlg.ShowModal() == wx.ID_OK:
+                color = dlg.GetColourData().GetColour()
+                if color.Ok():
+                    tfield.SetValue(
+                            rgbToHtmlColor(color.Red(), color.Green(),
+                            color.Blue()))
+        finally:
+            dlg.Destroy()
+
+    def selectDateTimeFormat(self, tfield):
+        dlg = DateformatDialog(self, -1, self.mainControl, 
+                deffmt=tfield.GetValue())
+        try:
+            if dlg.ShowModal() == wx.ID_OK:
+                tfield.SetValue(dlg.GetValue())
+        finally:
+            dlg.Destroy()
+
 
 
 # class KeyDefField(wx.TextCtrl):
@@ -167,7 +439,8 @@ class OptionsDialog(wx.Dialog):
             ("editor_autoUnbullets", "cbAutoUnbullets", "b"),
             ("editor_autoComplete_closingBracket",
                 "cbAutoCompleteClosingBracket", "b"),
-
+            ("editor_sync_byPreviewSelection", "cbEditorSyncByPreviewSelection",
+                "b"),
 
             ("editor_imagePaste_filenamePrefix", "tfEditorImagePasteFilenamePrefix", "t"),
             ("editor_imagePaste_fileType", "chEditorImagePasteFileType", "seli"),
@@ -205,7 +478,8 @@ class OptionsDialog(wx.Dialog):
             ("userEvent_mouse/middleclick/pagetab", "chMouseMdlClickPageTab", "selt",
                     [
                     u"action/none",
-                    u"action/presenter/this/close"
+                    u"action/presenter/this/close",
+                    u"action/presenter/this/clone"
                     ]),
 
             ("userEvent_mouse/leftdrop/editor/files", "chMouseLeftDropEditor", "selt",
@@ -377,11 +651,11 @@ class OptionsDialog(wx.Dialog):
             pt = _(pt)
             if isinstance(pn, basestring):
                 if pn != "":
-                    panel = PredefinedOptionsPanel(self.ctrls.panelPages, pn)
+                    panel = ResourceOptionsPanel(self.ctrls.panelPages, pn)
                 else:
                     if self.emptyPanel is None:
                         # Necessary to avoid a crash        
-                        self.emptyPanel = EmptyOptionsPanel(self.ctrls.panelPages)
+                        self.emptyPanel = DefaultOptionsPanel(self.ctrls.panelPages)
                     panel = self.emptyPanel
             else:
                 # Factory function or class
@@ -536,6 +810,9 @@ class OptionsDialog(wx.Dialog):
         panel.Enable(True)
         panel.Show(True)
 
+
+    def getMainControl(self):
+        return self.pWiki
 
     def OnLbPages(self, evt):
         self._refreshForPage()

@@ -584,9 +584,9 @@ class WikiDataManager(MiscEventSourceMixin):
         Returns True if wikiWord can be created in the database. Does not
         check against regular expression, but checks if word already
         exists or (if document is in caseless mode) if word with different
-        case but same content already exists.
+        case but otherwise the same already exists.
         If this returns False, self.getAliasesWikiWord(wikiWord) must be able to
-        return an existing word whose existence prevents creation of wikiWord
+        return the existing word whose existence prevents creation of wikiWord
 
         TODO: Check against existing aliases
         """
@@ -600,6 +600,14 @@ class WikiDataManager(MiscEventSourceMixin):
         Currently this function just calls word.lower().
         """
         return word.lower()
+
+    def getAllDefinedWikiPageNames(self):
+        """
+        get the names of all wiki pages in the db, no aliases, no functional
+        pages.
+        Function must work for read-only wiki.
+        """
+        return self.wikiData.getAllDefinedWikiPageNames()
 
 
     def getWikiPage(self, wikiWord):

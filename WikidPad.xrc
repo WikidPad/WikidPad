@@ -1111,6 +1111,14 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
+        <object class="wxCheckBox" name="cbEditorSyncByPreviewSelection">
+          <label>Synchronize editor by preview selection</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -1593,6 +1601,7 @@
               <content>
                 <item>Nothing</item>
                 <item>Close tab</item>
+                <item>Clone tab</item>
               </content>
               <selection>0</selection>
             </object>
@@ -2422,8 +2431,7 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
-        <object class="wxBoxSizer">
-          <orient>wxHORIZONTAL</orient>
+        <object class="wxFlexGridSizer">
           <object class="sizeritem">
             <object class="wxButton" name="btnOk">
               <label> OK </label>
@@ -2449,6 +2457,24 @@
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
           </object>
+          <cols>3</cols>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Open in ...</label>
+              <style>wxALIGN_RIGHT</style>
+            </object>
+            <flag>wxALIGN_CENTRE_VERTICAL|wxALIGN_CENTRE_HORIZONTAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnNewTab">
+              <label>&amp;New Tab</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="spacer"/>
         </object>
       </object>
     </object>

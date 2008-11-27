@@ -23,6 +23,7 @@ from sre_compile import _code
 
 import sys, sre
 sub = sre.sub
+escape = sre.escape
 
 import _sre
 

@@ -643,26 +643,33 @@ class LayeredControlPresenter:
         Make the chosen subcontrol visible, all other invisible
         """
         try:
-            if self.visible and self.lastVisibleCtrlName != scName:
-                # First show subControl scName, then hide the others
-                # to avoid flicker
-                self.subControls[scName].setLayerVisible(True, scName)
-                for n, c in self.subControls.iteritems():
-                    if n != scName:
-                        c.setLayerVisible(False, n)
-
-            self.lastVisibleCtrlName = scName
-            self.setTitle(self.shortTitle)
-
+            subControl = self.subControls[scName]
         except KeyError:
             traceback.print_exc()
+            return
+
+        
+        if self.visible and self.lastVisibleCtrlName != scName:
+            # First show subControl scName, then hide the others
+            # to avoid flicker
+            self.subControls[scName].setLayerVisible(True, scName)
+            for n, c in self.subControls.iteritems():
+#                 if n != scName:
+                if c is not subControl:
+                    c.setLayerVisible(False, n)
+
+        self.lastVisibleCtrlName = scName
+        self.setTitle(self.shortTitle)
+
 
     def getCurrentSubControlName(self):
         return self.lastVisibleCtrlName
         
     def getCurrentSubControl(self):
         return self.subControls.get(self.lastVisibleCtrlName)
-
+        
+    def hasSubControl(self, scName):
+        return self.subControls.has_key(scName)
 
     def setLayerVisible(self, vis, scName=""):
         if self.visible == vis:
@@ -723,26 +730,31 @@ class LayeredControlPanel(wx.Panel, LayeredControlPresenter):
         Make the chosen subcontrol visible, all other invisible
         """
         try:
-            # First show subControl scName, then hide the others
-            # to avoid flicker
-            if self.visible and self.lastVisibleCtrlName != scName:
-                self.subControls[scName].setLayerVisible(True, scName)
-            
-            self.subControls[scName].Show(True)
-
-            for n, c in self.subControls.iteritems():
-                if n != scName:
-                    if self.visible:
-                        c.setLayerVisible(False, n)
-                    c.Show(False)
-
-            if gainFocus:
-                self.subControls[scName].SetFocus()
-
-            self.lastVisibleCtrlName = scName
-            self.setTitle(self.shortTitle)   #?
+            subControl = self.subControls[scName]
         except KeyError:
             traceback.print_exc()
+            return
+
+        # First show subControl scName, then hide the others
+        # to avoid flicker
+        if self.visible and self.lastVisibleCtrlName != scName:
+            self.subControls[scName].setLayerVisible(True, scName)
+        
+        self.subControls[scName].Show(True)
+
+        for n, c in self.subControls.iteritems():
+#             if n != scName:
+            if c is not subControl:
+                if self.visible:
+                    c.setLayerVisible(False, n)
+                c.Show(False)
+
+        if gainFocus:
+            self.subControls[scName].SetFocus()
+
+        self.lastVisibleCtrlName = scName
+        self.setTitle(self.shortTitle)   #?
+
 
     def SetFocus(self):
         try:

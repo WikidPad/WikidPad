@@ -239,16 +239,43 @@ def getBitmapFromClipboard():
         cb.Close()
 
 
+# if Configuration.isLinux():   # TODO Mac?
+#     
+#     def copyTextToClipboard(text): 
+#         dataob = textToDataObject(text)
+#     
+#         cb = wx.TheClipboard
+#         
+#         cb.Open()
+#         try:
+#             cb.SetData(dataob)
+#         finally:
+#             cb.Close()
+#     
+#         dataob = textToDataObject(text)
+#         cb.UsePrimarySelection(True)
+#         cb.Open()
+#         try:
+#             cb.SetData(dataob)
+#         finally:
+#             cb.Close()
+#             cb.UsePrimarySelection(False)
+# 
+# else:
+
 
 def copyTextToClipboard(text): 
     dataob = textToDataObject(text)
 
     cb = wx.TheClipboard
+    
     cb.Open()
     try:
         cb.SetData(dataob)
     finally:
         cb.Close()
+
+
 
 
 def getAccelPairFromKeyDown(evt):

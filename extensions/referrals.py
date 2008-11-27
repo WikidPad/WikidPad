@@ -40,6 +40,13 @@ def describeMenuItems(wiki):
         wiki - Calling PersonalWikiFrame
         evt - wxCommandEvent
 
+    If the  menu item string  contains one or more vertical bars '|' these
+        are taken as delimiters to describe a "path" of submenus where
+        the item should be placed. E.g. the item string
+        "Admin|Maintenance|Reset Settings" will create in plugins menu
+        a submenu "Admin" containing a submenu "Maintenance" containing
+        the item "Reset Settings".
+
     An  icon descriptor  can be one of the following:
         - a wxBitmap object
         - the filename of a bitmap (if file not found, no icon is used)

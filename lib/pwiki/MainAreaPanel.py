@@ -234,7 +234,20 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         
         scName = presenter.getCurrentSubControlName()
         if scName != "textedit":
-            presenter.switchSubControl("textedit", gainFocus=True)
+            if self.mainControl.getConfig().getboolean("main",
+                    "editor_sync_byPreviewSelection", False) and \
+                    presenter.getCurrentSubControlName() == "preview":
+                selText = presenter.getCurrentSubControl().getSelectedText()
+
+                presenter.switchSubControl("textedit", gainFocus=True)
+
+                if selText:
+                    editCtrl = presenter.getSubControl("textedit")
+                    editCtrl.incSearchCharStartPos = 0
+                    editCtrl.searchStr = re.escape(selText)
+                    editCtrl.executeIncrementalSearch()
+            else:
+                presenter.switchSubControl("textedit", gainFocus=True)
         else:
             presenter.switchSubControl("preview", gainFocus=True)
 

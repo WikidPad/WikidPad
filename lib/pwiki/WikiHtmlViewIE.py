@@ -214,6 +214,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
             # Remove previously used temporary files
             self.exporterInstance.tempFileSet.clear()
+            self.exporterInstance.buildStyleSheetList()
 
             content = self.presenter.getLiveText()
 
@@ -270,6 +271,9 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         if self.visible:
 #             self.outOfSync = True
             self.refresh()
+
+    def getSelectedText(self):
+        return self.GetStringSelection(False)
 
 
     def _updateTempFilePrefPath(self):

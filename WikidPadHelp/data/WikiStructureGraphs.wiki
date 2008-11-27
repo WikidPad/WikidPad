@@ -32,3 +32,22 @@ The values in these attributes should be delimited by a semicolon. Each value (w
 This graph shows the parent->child relationship of the words in the wiki.
 
 
++++ Options
+
+In the options settings there is an option page named "GraphVizStructure" which provides some possibilities to control the presentation of the above graphs. Each of the entries can be set empty to use the default settings.
+
+
+*Node font name*
+*Node font size*
+Name of the font to use and the font size for the node label
+
+*Node border color*
+Color of the small line surrounding each node
+
+*Node background color*
+Color of the node background. If the page described by this node has a "color" attribute this color attribute overrides the option setting.
+
+*Edge color*
+Color of the edges connecting nodes.
+
+

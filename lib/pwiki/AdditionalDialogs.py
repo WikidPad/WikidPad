@@ -1121,21 +1121,9 @@ class ChooseWikiWordDialog(wx.Dialog):
         self.SetFocus()
 
         wx.EVT_BUTTON(self, GUI_ID.btnDelete, self.OnDelete)
+        wx.EVT_BUTTON(self, GUI_ID.btnNewTab, self.OnNewTab)
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
         wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
-
-
-    def OnOk(self, evt):
-        sels = self.ctrls.lb.GetSelections()
-        if len(sels) != 1:
-            return # We can only go to exactly one wiki word
-            
-        wikiWord = self.words[sels[0]]
-        try:
-            self.pWiki.openWikiPage(wikiWord, forceTreeSyncFromRoot=True,
-                    motionType=self.motionType)
-        finally:
-            self.EndModal(GUI_ID.btnDelete)
 
 
     def OnDelete(self, evt):
@@ -1173,6 +1161,49 @@ class ChooseWikiWordDialog(wx.Dialog):
             self.pWiki.pageHistory.goAfterDeletion()
 
             self.EndModal(wx.ID_OK)
+
+
+    def OnOk(self, evt):
+        self.activateSelected(False)
+#         sels = self.ctrls.lb.GetSelections()
+#         if len(sels) != 1:
+#             return # We can only go to exactly one wiki word
+#             
+#         wikiWord = self.words[sels[0]]
+#         try:
+#             self.pWiki.openWikiPage(wikiWord, forceTreeSyncFromRoot=True,
+#                     motionType=self.motionType)
+#         finally:
+#             self.EndModal(GUI_ID.btnDelete)
+
+
+    def OnNewTab(self, evt):
+        self.activateSelected(True)
+
+        
+    def activateSelected(self, allNewTabs):
+        """
+        allNewTabs -- True: All selected words go to newly created tabs,
+                False: The first selected word changes current tab
+        """
+        selIdxs = self.ctrls.lb.GetSelections()
+        if len(selIdxs) == 0:
+            return
+
+        try:
+            if not allNewTabs:
+                self.pWiki.openWikiPage(self.words[selIdxs[0]],
+                        forceTreeSyncFromRoot=True, motionType=self.motionType)
+
+                selWords = [self.words[idx] for idx in selIdxs[1:]]
+            else:
+                selWords = [self.words[idx] for idx in selIdxs]
+
+            for word in selWords:
+                self.pWiki.activatePageByUnifiedName(u"wikipage/" + word, 2)
+        finally:
+            self.EndModal(wx.ID_OK)
+
 
 
 def _children(win, indent=0):

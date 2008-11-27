@@ -181,6 +181,10 @@ When this option is active and enter is pressed on a line which contains only a 
 *Append closing bracket on auto-complete*
 When suggesting the completion for a bracketed wiki word, e.g. "[Not Came" you can decide if a closing bracket is suggested ("[Not Camel Case]") or not ("[Not Camel Case").
 
+*Synchronize editor by preview selection*
+This provides some workaround to synchronize scroll position in HTML preview with the position in editor.
+If this option is checked, you can select some text in the preview and when switching back to the editor, the first occurrence of the selected text is searched and selected in editor, too.
+
 
 +++++ Image pasting
 When pasting bitmap data into WikidPad it can be saved as an image file into the "files" directory of the wiki and a link to it can be generated. These options control how to do that:

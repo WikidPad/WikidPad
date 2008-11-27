@@ -15,48 +15,100 @@ from pwiki.wxHelper import copyTextToClipboard, GUI_ID
 from pwiki.TempFileSet import createTempFile, TempFileSet
 from pwiki.StringOps import mbcsEnc, mbcsDec, utf8Enc, lineendToOs, uniToGui, \
         joinRegexes, rgbToHtmlColor, escapeHtmlNoBreaks
+from pwiki.AdditionalDialogs import FontFaceDialog
+from pwiki.OptionsDialog import PluginOptionsPanel
 
-# descriptor for plugin type
+
+# descriptor for plugin type(s)
 
 # This plugin is a hybrid and can show the graph either if menu command
 # is issued or if insertion is placed
-WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("MenuFunctions", 1))
+WIKIDPAD_PLUGIN = (("InsertionByKey", 1), ("MenuFunctions", 1), ("Options", 1))
 
 
 
-def _buildNodeDefs(wikiDocument, currWord):
+def _buildNodeDefs(wikiDocument, currWord, wordSet=None):
     currWord = wikiDocument.filterAliasesWikiWord(currWord)
     firstDef = u""
     graph = []
 
+    coloredSet = set()
+
     # define nodes
     for colored_node in wikiDocument.getPropertyTriples(None, 'color', None):
+        if not (colored_node[0] == currWord) and not (wordSet is None) and \
+                not (colored_node[0] in wordSet):
+            continue
+
         c = wx.NamedColour(colored_node[2].strip())
         
-        color_code = u'"' + rgbToHtmlColor(c.Red(), c.Green(), c.Blue()) + u'"'
+        color_code = rgbToHtmlColor(c.Red(), c.Green(), c.Blue())
         fontColor = u""
         if c.Green() < 128:
             fontColor = u" [fontcolor=white]"
+        
+        coloredSet.add(colored_node[0])
 
         if colored_node[0] == currWord:
-            firstDef = u'"%s" [fillcolor=%s]%s' % \
+            firstDef = u'"%s" [fillcolor="%s"]%s' % \
                     (colored_node[0], color_code, fontColor)
         else:
-            graph.append(u'"%s" [fillcolor=%s]%s' %
+            graph.append(u'"%s" [fillcolor="%s"]%s' %
                     (colored_node[0], color_code, fontColor))
     
-    if currWord is None:
-        return graph
-    else:    
-        if firstDef == u"":
-            firstDef = u'"%s"' % currWord
-        
-        return [firstDef] + graph
-        
+    if currWord is not None and firstDef == u"":
+        firstDef = u'"%s"' % currWord
+#         firstDef = u'"%s" [fillcolor="%s"]' % (currWord, DEFAULT_NODE_BG_COLOR)
+        coloredSet.add(currWord)
+
+#     if wordSet is not None:
+#         for word in wordSet - coloredSet:
+#             graph.append(u'"%s" [fillcolor="%s"]' % (word, DEFAULT_NODE_BG_COLOR))
+#     else:
+#         for word in wikiDocument.getAllDefinedWikiPageNames():
+#             if word in coloredSet:
+#                 continue
+#             graph.append(u'"%s" [fillcolor="%s"]' % (word, DEFAULT_NODE_BG_COLOR))
+
+
+    return [firstDef] + graph
 
 
 
-def buildRelationGraphSource(wikiDocument, currWord):
+def _buildGraphStyle(config):
+    nodeStyle = [u'style=filled']
+
+    val = config.get("main", "plugin_graphVizStructure_nodeFacename", u"")
+    if val != u"":
+        nodeStyle.append(u'fontname="%s"' % val)
+    
+    val = config.getint("main", "plugin_graphVizStructure_nodeFontsize", 0)
+    if val != 0:
+        nodeStyle.append(u'fontsize=%s' % val)
+
+    val = config.get("main", "plugin_graphVizStructure_nodeBorderColor", u"")
+    if val != u"":
+        nodeStyle.append(u'color="%s"' % val)
+
+    val = config.get("main", "plugin_graphVizStructure_nodeBgColor", u"")
+    if val != u"":
+        nodeStyle.append(u'fillcolor="%s"' % val)
+    
+    nodeStyle = "node [" + u", ".join(nodeStyle) + u"]"
+ 
+    edgeStyle = [u'style=solid']
+    
+    val = config.get("main", "plugin_graphVizStructure_edgeColor", u"")
+    if val != u"":
+        edgeStyle.append(u'color="%s"' % val)
+
+    edgeStyle = "edge [" + u", ".join(edgeStyle) + u"]"
+    
+    return nodeStyle + u"; " + edgeStyle
+
+
+
+def buildRelationGraphSource(wikiDocument, currWord, config):
     wikiData = wikiDocument.getWikiData()
 
     global_excludeRe = None
@@ -79,19 +131,12 @@ def buildRelationGraphSource(wikiDocument, currWord):
                     ur"^" + joinRegexes(global_include_properties)+ ur"(?:\.|$)",
                     re.DOTALL | re.UNICODE | re.MULTILINE)
 
-    graph = [u'', u'digraph {','node [style=filled]']
-    
-    graph += _buildNodeDefs(wikiDocument, currWord)
-
+    graph = []
+#     graph = [u'', u'digraph {','node [style=filled]']
+#     
+#     graph += _buildNodeDefs(wikiDocument, currWord)
 
     # construct edges
-    
-#     # filter out according to exclude/include settings    
-#     word_properties = wikiDocument.getPropertyTriples(currWord, None, None)
-#     
-#     word_properties += [p
-#             for p in wikiDocument.getPropertyTriples(None, None, None)
-#             if p[0] != currWord]
 
     word_properties = (p for p in wikiDocument.getPropertyTriples(None, None, None))
 
@@ -101,7 +146,9 @@ def buildRelationGraphSource(wikiDocument, currWord):
         word_relations = (p for p in word_properties if not global_excludeRe.match(p[1]))
     else:
         word_relations = word_properties
-        
+
+    wordSet = set()
+
     # Unalias wikiwords/remove non-wikiwords in property values
     for p in word_relations:
         word = wikiDocument.filterAliasesWikiWord(p[2])
@@ -109,32 +156,36 @@ def buildRelationGraphSource(wikiDocument, currWord):
             continue
 
         graph.append(u'"%s" -> "%s" [label="%s"];' % (p[0], word, p[1]))
+        wordSet.add(p[0])
+        wordSet.add(word)
 
     graph.append('}')
 
-    return '\n'.join(graph)
+    if not currWord in wordSet:
+        currWord = None
+
+    return '\n'.join([u'\ndigraph {', _buildGraphStyle(config)] +
+            _buildNodeDefs(wikiDocument, currWord, wordSet) + graph)
 
 
 
-def buildChildGraphSource(wikiDocument, currWord):
+def buildChildGraphSource(wikiDocument, currWord, config):
     wikiData = wikiDocument.getWikiData()
 
-    graph = [u'', u'digraph {','node [style=filled]']
+    graph = [u'', u'digraph {', _buildGraphStyle(config)]
 
     graph += _buildNodeDefs(wikiDocument, currWord)
-
 
     conns = set()
 
     allWords = wikiData.getAllDefinedWikiPageNames()
-    
+
     for word in allWords:
         for child in wikiData.getChildRelationships(word, existingonly=True,
                 selfreference=False):
             child = wikiDocument.getAliasesWikiWord(child)
-            
-            conns.add((word, child))
 
+            conns.add((word, child))
 
     for word, child in conns:
         graph.append(u'"%s" -> "%s";' % (word, child))
@@ -237,10 +288,10 @@ class GraphVizBaseHandler:
         
         if insToken.key == u"graph.relation":
             source = buildRelationGraphSource(exporter.getWikiDocument(),
-                    insToken.value)
+                    insToken.value, exporter.getMainControl().getConfig())
         else:    # insToken.key == u"graph.child"
             source = buildChildGraphSource(exporter.getWikiDocument(),
-                    insToken.value)
+                    insToken.value, exporter.getMainControl().getConfig())
 
         if not source:
             # Nothing in, nothing out
@@ -459,9 +510,13 @@ class GraphView(wx.html.HtmlWindow):
             self.tempFileSet.clear()
 
             if self.mode.startswith("relation graph/"):
-                source = buildRelationGraphSource(self.presenter.getWikiDocument(), word)
+                source = buildRelationGraphSource(
+                        self.presenter.getWikiDocument(), word,
+                        self.presenter.getMainControl().getConfig())
             else:  # self.mode.startswith("child graph/"):
-                source = buildChildGraphSource(self.presenter.getWikiDocument(), word)
+                source = buildChildGraphSource(
+                        self.presenter.getWikiDocument(), word,
+                        self.presenter.getMainControl().getConfig())
 
             if self.mode.endswith("/dot"):
                 response, url = self.graphDotHandler.createImage(self.tempFileSet,
@@ -498,9 +553,9 @@ class GraphView(wx.html.HtmlWindow):
 
 
 def showGraphViz(wiki, evt):
-    wikiWord = wiki.getCurrentWikiWord()
-    if wikiWord is None:
-        return
+#     wikiWord = wiki.getCurrentWikiWord()
+#     if wikiWord is None:
+#         return
     
     presenter = wiki.getCurrentDocPagePresenter()
     rc = presenter.getSubControl("graph view")
@@ -515,9 +570,9 @@ def showGraphViz(wiki, evt):
 
 
 def showGraphSource(wiki, evt):
-    wikiWord = wiki.getCurrentWikiWord()
-    if wikiWord is None:
-        return
+#     wikiWord = wiki.getCurrentWikiWord()
+#     if wikiWord is None:
+#         return
     
     presenter = wiki.getCurrentDocPagePresenter()
     rc = presenter.getSubControl("graph view")
@@ -564,3 +619,131 @@ def showChildGraphSource(wiki, evt):
     presenter.switchSubControl("graph view")
 
 
+
+def registerOptions(ver, app):
+    """
+    API function for "Options" plugins
+    Register configuration options and their GUI presentation
+    ver -- API version (can only be 1 currently)
+    app -- wxApp object
+    """
+    # Register options
+    dgcd = app.getDefaultGlobalConfigDict()
+    dgcd[("main", "plugin_graphVizStructure_nodeFacename")] = u""
+    dgcd[("main", "plugin_graphVizStructure_nodeFontsize")] = u"0"
+    dgcd[("main", "plugin_graphVizStructure_nodeBorderColor")] = u""
+    dgcd[("main", "plugin_graphVizStructure_nodeBgColor")] = u""
+    dgcd[("main", "plugin_graphVizStructure_edgeColor")] = u""
+
+    # Register panel in options dialog
+    app.addOptionsDlgPanel(GraphVizStructOptionsPanel, _(u"  GraphVizStructure"))
+
+
+
+class GraphVizStructOptionsPanel(PluginOptionsPanel):
+    def __init__(self, parent, optionsDlg, app):
+        """
+        Called when "Options" dialog is opened to show the panel.
+        Transfer here all options from the configuration file into the
+        text fields, check boxes, ...
+        """
+        PluginOptionsPanel.__init__(self, parent, optionsDlg, app)
+        
+        mainsizer = wx.FlexGridSizer(5, 3, 0, 0)
+        mainsizer.AddGrowableCol(1, 1)
+        
+        self.tfFacename = wx.TextCtrl(self, -1)
+        facenameButton = wx.Button(self, -1, _(u"..."))
+        facenameButton.SetMinSize((20, -1))
+
+        mainsizer.Add(wx.StaticText(self, -1, _(u"Node font name:")), 0,
+                wx.ALL | wx.EXPAND, 5)
+        mainsizer.Add(self.tfFacename, 1, wx.ALL | wx.EXPAND, 5)
+        mainsizer.Add(facenameButton, 0, wx.ALL | wx.EXPAND | wx.ALIGN_BOTTOM, 5)
+
+        self.addOptionEntry("plugin_graphVizStructure_nodeFacename",
+                self.tfFacename, "t")
+        
+        wx.EVT_BUTTON(self, facenameButton.GetId(), self.OnSelectFaceNode)
+
+
+        ctl = wx.TextCtrl(self, -1)
+        mainsizer.Add(wx.StaticText(self, -1, _(u"Node font size:")), 0,
+                wx.ALL | wx.EXPAND, 5)
+        mainsizer.Add(ctl, 1, wx.ALL | wx.EXPAND, 5)
+        mainsizer.Add((0, 0), 1)
+
+        self.addOptionEntry("plugin_graphVizStructure_nodeFontsize", ctl, "i0+")
+
+
+        ctl = wx.TextCtrl(self, -1)
+        colorButton = wx.Button(self, -1, _(u"..."))
+        colorButton.SetMinSize((20, -1))
+
+        mainsizer.Add(wx.StaticText(self, -1, _(u"Node border color:")), 0,
+                wx.ALL | wx.EXPAND, 5)
+        mainsizer.Add(ctl, 1, wx.ALL | wx.EXPAND, 5)
+        mainsizer.Add(colorButton, 0, wx.ALL | wx.EXPAND | wx.ALIGN_BOTTOM, 5)
+
+        self.addOptionEntry("plugin_graphVizStructure_nodeBorderColor", ctl,
+                "color0", colorButton)
+
+
+        ctl = wx.TextCtrl(self, -1)
+        colorButton = wx.Button(self, -1, _(u"..."))
+        colorButton.SetMinSize((20, -1))
+
+        mainsizer.Add(wx.StaticText(self, -1, _(u"Node background color:")), 0,
+                wx.ALL | wx.EXPAND, 5)
+        mainsizer.Add(ctl, 1, wx.ALL | wx.EXPAND, 5)
+        mainsizer.Add(colorButton, 0, wx.ALL | wx.EXPAND | wx.ALIGN_BOTTOM, 5)
+
+        self.addOptionEntry("plugin_graphVizStructure_nodeBgColor", ctl,
+                "color0", colorButton)
+
+
+        ctl = wx.TextCtrl(self, -1)
+        colorButton = wx.Button(self, -1, _(u"..."))
+        colorButton.SetMinSize((20, -1))
+
+        mainsizer.Add(wx.StaticText(self, -1, _(u"Edge color:")), 0,
+                wx.ALL | wx.EXPAND, 5)
+        mainsizer.Add(ctl, 1, wx.ALL | wx.EXPAND, 5)
+        mainsizer.Add(colorButton, 0, wx.ALL | wx.EXPAND | wx.ALIGN_BOTTOM, 5)
+
+        self.addOptionEntry("plugin_graphVizStructure_edgeColor", ctl,
+                "color0", colorButton)
+
+        self.SetSizer(mainsizer)
+        self.Fit()
+        
+        self.mainControl = optionsDlg.getMainControl()
+        self.transferOptionsToDialog(self.mainControl.getConfig())
+
+
+    def setVisible(self, vis):
+        """
+        Called when panel is shown or hidden. The actual wxWindow.Show()
+        function is called automatically.
+        
+        If a panel is visible and becomes invisible because another panel is
+        selected, the plugin can veto by returning False.
+        When becoming visible, the return value is ignored.
+        """
+        return True
+
+    def handleOk(self):
+        """
+        This is called if checkOk() returned True for all panels. Transfer here
+        all values from text fields, checkboxes, ... into the configuration
+        file.
+        """
+        self.transferDialogToOptions(self.mainControl.getConfig())
+
+
+    def OnSelectFaceNode(self, evt):
+        dlg = FontFaceDialog(self, -1, self.mainControl,
+                self.tfFacename.GetValue())
+        if dlg.ShowModal() == wx.ID_OK:
+            self.tfFacename.SetValue(dlg.GetValue())
+        dlg.Destroy()

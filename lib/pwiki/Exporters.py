@@ -270,10 +270,6 @@ class HtmlXmlExporter(AbstractExporter):
         self.outFlagEatPostBreak = False
         self.outFlagPostBreakEaten = False
 
-
-    def getMainControl(self):
-        return self.mainControl        
-
     def setWikiDataManager(self, wikiDataManager):
         self.wikiDataManager = wikiDataManager
         if self.wikiDataManager is None:
@@ -1313,7 +1309,8 @@ class HtmlXmlExporter(AbstractExporter):
                 self.outAppend(u"</td>")
             self.outAppend(u"</tr>\n")
 
-        self.outAppend(u'</table>\n', eatPostBreak=True)
+        self.outAppend(u'</table>\n', eatPostBreak=not self.asIntHtmlPreview)
+
 
 
     # TODO Process paragraph-wise formatting
@@ -1929,9 +1926,11 @@ class HtmlXmlExporter(AbstractExporter):
             elif styleno == WikiFormatting.FormatTypes.PreBlock:
                 self.resetConsecEmptyLineCount()
                 lineIndentBuffer = -1
-                self.outAppend(u"<pre>%s</pre>" %
+                self.outAppend(u"<pre>%s</pre>\n" %
                         escapeHtmlNoBreaks(tok.grpdict["preContent"]), True,
                         not self.asIntHtmlPreview)
+                if self.asIntHtmlPreview:
+                    self.outAppend(u"<br />\n")
             elif styleno == WikiFormatting.FormatTypes.Anchor:
                 if self.wordAnchor:
                     anchor = self.wordAnchor + u"#" + tok.grpdict["anchorValue"]
@@ -2007,7 +2006,7 @@ class HtmlXmlExporter(AbstractExporter):
                 link = tok.node.url
                 if link.startswith(u"rel://"):
                     absUrl = self.mainControl.makeRelUrlAbsolute(link)
- 
+
                     # Relative URL
                     if self.asHtmlPreview:
                         # If preview, make absolute
@@ -2127,8 +2126,7 @@ class HtmlXmlExporter(AbstractExporter):
                             # At least under Windows, wxWidgets has another
                             # opinion how a local file URL should look like
                             # than Python
-#                             p = urllib.url2pathname(link)  # TODO Relative URLs
-                            p = pathnameFromUrl(link)  # TODO Relative URLs
+                            p = pathnameFromUrl(link)
                             link = wx.FileSystem.FileNameToURL(p)
                         self.outAppend(u'<img src="%s" alt="" border="0"%s%s />' % 
                                 (link, sizeInTag, alignInTag))
@@ -2154,16 +2152,22 @@ class HtmlXmlExporter(AbstractExporter):
 
                 self.resetConsecEmptyLineCount()
                 lineIndentBuffer = -1
-
-                while ind < self.statestack[-1][1] and \
+                
+                while ind <= self.statestack[-1][1] and \
                         (self.statestack[-1][0] != "ol" or \
-                        numbers < self.numericdeepness):
-                    self.popState()
-
-                while ind == self.statestack[-1][1] and \
-                        self.statestack[-1][0] != "ol" and \
+                        numbers < self.numericdeepness) and \
                         self.hasStates():
                     self.popState()
+
+#                 while ind < self.statestack[-1][1] and \
+#                         (self.statestack[-1][0] != "ol" or \
+#                         numbers < self.numericdeepness):
+#                     self.popState()
+# 
+#                 while ind == self.statestack[-1][1] and \
+#                         self.statestack[-1][0] != "ol" and \
+#                         self.hasStates():
+#                     self.popState()
 
                 if ind > self.statestack[-1][1] or \
                         self.statestack[-1][0] != "ol":
@@ -2177,7 +2181,7 @@ class HtmlXmlExporter(AbstractExporter):
                     self.outIndentation("ol")
                     self.statestack.append(("ol", ind))
                     self.numericdeepness += 1
-                    
+
                 self.outAppend(u"<li />", True) # not self.asIntHtmlPreview)
 
             elif styleno == WikiFormatting.FormatTypes.Bullet:

@@ -181,7 +181,7 @@ FootnoteRE     = re.compile(BracketStartPAT + ur"(?P<footnoteId>[0-9]+?)" +
 
 # Pattern string for non camelcase wiki word
 WikiWordNccPAT = ur"[\w\-\_ \t]+?"
-WikiWordNccRevPAT = ur"[\w\-\_ \t]+?"
+WikiWordNccRevPAT = ur"[\w\-\_ \t.]+?"
 
 
 

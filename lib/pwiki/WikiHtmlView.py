@@ -1,7 +1,7 @@
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
-import traceback
+import traceback, os, os.path, re
 
 import wx, wx.html
 
@@ -11,7 +11,7 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 
 from MiscEvent import KeyFunctionSink
 
-from StringOps import uniToGui
+from StringOps import uniToGui, pathnameFromUrl
 from Configuration import isWindows, MIDDLE_MOUSE_CONFIG_TO_TABMODE, isOSX
 
 from TempFileSet import TempFileSet
@@ -57,6 +57,63 @@ def createWikiHtmlView(presenter, parent, ID):
         return hvIe
     else:
         return WikiHtmlView(presenter, parent, ID)
+
+
+
+# class TestFilter(wx.html.HtmlFilter):
+#     def CanRead(self, fsfile):
+#         print "--TestFilter", repr(fsfile.GetLocation())
+#         return False
+#     
+#     def ReadFile(self, fsfile):
+#         return u""
+# 
+# wx.html.HtmlWindow.AddFilter(TestFilter())
+
+
+
+
+
+
+# class MyLocalFSHandler(wx.FileSystemHandler):
+#     def CanOpen(self, location):
+#         print "--CanOpen1", repr(location), repr(self.GetProtocol(location))
+#         return self.GetProtocol(location) == u"file"
+#         
+#     def OpenFile(self, fs, location):
+#         print "--OpenFile", repr(location)
+#         
+#         right = self.GetRightLocation(location);
+#         fn = wx.FileSystem.URLToFileName(right);
+#         fullpath = os.path.abspath(fn)
+#     
+#         if not os.path.exists(fullpath):
+#             return None
+# #     
+# #         // we need to check whether we can really read from this file, otherwise
+# #         // wxFSFile is not going to work
+# #         wxFFileInputStream *is = new wxFFileInputStream(fullpath);
+# #         if ( !is->Ok() )
+# #         {
+# #             delete is;
+# #             return (wxFSFile*) NULL;
+# #         }
+# 
+#         f = open(fullpath, "rb")
+# 
+#         return wx.FSFile(f,
+#                             right,
+#                             self.GetMimeTypeFromExt(location),
+#                             self.GetAnchor(location), wx.DateTime())
+# #                             ,wxDateTime(wxFileModificationTime(fullpath))
+# #                             );
+# 
+# 
+# 
+# wx.FileSystem.CleanUpHandlers()
+# wx.FileSystem.AddHandler(MyLocalFSHandler())
+
+
 
 
 
@@ -138,6 +195,26 @@ class WikiHtmlView(wx.html.HtmlWindow):
         self.visible = vis
 
 
+
+    if isWindows():
+        _RE_RIGHT_FILE_URL = re.compile(u"file:/[a-zA-Z]:")
+        
+        def OnOpeningURL(self, typ, url):
+            if url.startswith("file:"):
+                if self._RE_RIGHT_FILE_URL.match(url):
+                    return wx.html.HTML_OPEN
+                # At least under Windows, wxWidgets has another
+                # opinion how a local file URL should look like
+                # than Python.
+                # The same processing is done already by the exporter
+                # for WikidPad URL but not for URLs in HTML tags. 
+                p = pathnameFromUrl(url)
+                url = wx.FileSystem.FileNameToURL(p)
+                return url
+    
+            return wx.html.HTML_OPEN
+
+
     def close(self):
         self.Unbind(wx.EVT_SET_FOCUS)
         self.setLayerVisible(False)
@@ -197,6 +274,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
             # Remove previously used temporary files
             self.exporterInstance.tempFileSet.clear()
+            self.exporterInstance.buildStyleSheetList()
 
             self.currentLoadedWikiWord = word
             content = self.presenter.getLiveText()
@@ -204,7 +282,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
             html = self.exporterInstance.exportContentToHtmlString(word, content,
                     wikiPage.getFormatDetails(),
                     LinkCreatorForPreview(self.presenter.getWikiDocument()))
-
+            
             wx.GetApp().getInsertionPluginManager().taskEnd()
 
     
@@ -239,6 +317,10 @@ class WikiHtmlView(wx.html.HtmlWindow):
         self.anchor = anchor
         if self.visible:
             self.refresh()
+            
+    
+    def getSelectedText(self):
+        return self.SelectionToText()
 
 
     def _updateTempFilePrefPath(self):

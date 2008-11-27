@@ -22,6 +22,7 @@ import TextTree
 from MiscEvent import MiscEventSourceMixin, ProxyMiscEvent  # , DebugSimple
 
 from WikiExceptions import *
+from Consts import HOMEPAGE
 
 import Configuration
 from WindowLayout import WindowSashLayouter, setWindowPos, setWindowSize
@@ -846,16 +847,35 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # get info for any plugin menu items and create them as necessary
         menuItems = reduce(lambda a, b: a+list(b),
                 self.menuFunctions.describeMenuItems(self), [])
+        
+        subStructure = {}
+
         if len(menuItems) > 0:
             def addPluginMenuItem(function, label, statustext, icondesc=None,
                     menuID=None, updateFunction=None, kind=None):
                 
+                labelComponents = label.split(u"|")
+                
+                sub = subStructure
+                menu = pluginMenu
+
+                for comp in labelComponents[:-1]:
+                    newMenu, newSub = sub.get(comp, (None, None))
+                    if newMenu is None:
+                        newMenu = wx.Menu()
+                        menu.AppendMenu(-1, comp, newMenu)
+                        newSub = {}
+                        sub[comp] = newMenu, newSub
+                    
+                    menu = newMenu
+                    sub = newSub
+
                 if updateFunction is not None:
                     updateFct = lambda evt: updateFunction(self, evt)
                 else:
                     updateFct = None
 
-                self.addMenuItem(pluginMenu, label, statustext,
+                self.addMenuItem(menu, labelComponents[-1], statustext,
                         lambda evt: function(self, evt), icondesc, menuID,
                         updateFct, kind)
 
@@ -1714,8 +1734,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         menuID=wx.NewId()
         helpMenu.Append(menuID, _(u'&Visit wikidPad Homepage'), _(u'Visit Homepage'))
-        wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(self, 
-                u'http://www.jhorman.org/wikidPad/'))
+        wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(self, HOMEPAGE))
 
         helpMenu.AppendSeparator()
 
@@ -2276,7 +2295,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             editor = WikiTxtCtrl(winProps["presenter"], parent, -1)
             editor.evalScope = { 'editor' : editor,
                     'pwiki' : self, 'lib': self.evalLib}
-    
+
             # enable and zoom the editor
             editor.Enable(0)
             editor.SetZoom(self.configuration.getint("main", "zoom"))

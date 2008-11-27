@@ -618,6 +618,9 @@ GLOBALDEFAULTS = {
     ("main", "editor_autoComplete_closingBracket"): "False",  # Append closing bracket to suggested wiki words
             # for autocompletion ("[Two" -> "[Two words]" instead of -> "[Two words")
     
+    ("main", "editor_sync_byPreviewSelection"): "False", # If True, the selection in preview will be searched in editor
+            # for synchronization of both.
+
     ("main", "editor_imagePaste_filenamePrefix"): "",  # Prefix to put before the filename.
     ("main", "editor_imagePaste_fileType"): "1",  # When pasting images into WikidPad, which file type
             # should be used. 0: Deactivate image-paste; 1: PNG format; 2: JPEG

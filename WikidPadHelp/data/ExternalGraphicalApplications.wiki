@@ -107,9 +107,11 @@ NetStuff
 MicroMason
 
 #proc getdata
-  rotate: yes
   data: 6430 -780 13470
- 
+
+#proc processdata
+  action: rotate
+
 #proc bars
   lenfield: 1
   color: dullyellow

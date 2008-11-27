@@ -78,7 +78,8 @@ class IncrementalSearchDialog(wx.Frame):
     
     def __init__(self, parent, id, txtCtrl, rect, font, presenter, searchInit=None):
         wx.Frame.__init__(self, parent, id, u"WikidPad i-search",
-                rect.GetPosition(), rect.GetSize(), wx.NO_BORDER)
+                rect.GetPosition(), rect.GetSize(),
+                wx.NO_BORDER | wx.FRAME_FLOAT_ON_PARENT)
 
         self.txtCtrl = txtCtrl
         self.presenter = presenter
@@ -108,7 +109,7 @@ class IncrementalSearchDialog(wx.Frame):
         wx.EVT_MOUSE_EVENTS(self.tfInput, self.OnMouseAnyInput)
 
         if searchInit:
-            self.tfInput.SetValue(searchInit)
+            self.tfInput.SetValue(re.escape(searchInit))
             self.tfInput.SetSelection(-1, -1)
 
         if self.closeDelay:
@@ -116,6 +117,7 @@ class IncrementalSearchDialog(wx.Frame):
             self.closeTimer.Start(self.closeDelay, True)
 
     def OnKillFocus(self, evt):
+        self.txtCtrl.endIncrementalSearch()
         self.Close()
 
     def OnText(self, evt):
@@ -149,6 +151,7 @@ class IncrementalSearchDialog(wx.Frame):
         foundPos = -2
         if key in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
             # Return pressed
+            self.txtCtrl.endIncrementalSearch()
             self.Close()
         elif key == wx.WXK_ESCAPE:
             # Esc -> Abort inc. search, go back to start
@@ -175,14 +178,17 @@ class IncrementalSearchDialog(wx.Frame):
             foundPos = self.txtCtrl.executeIncrementalSearchBackward()
         elif matchesAccelPair("ActivateLink", accP):
             # ActivateLink is normally Ctrl-L
+            self.txtCtrl.endIncrementalSearch()
             self.Close()
             self.txtCtrl.activateLink()
         elif matchesAccelPair("ActivateLinkNewTab", accP):
             # ActivateLinkNewTab is normally Ctrl-Alt-L
+            self.txtCtrl.endIncrementalSearch()
             self.Close()
             self.txtCtrl.activateLink(tabMode=2)        
         elif matchesAccelPair("ActivateLink2", accP):
             # ActivateLink2 is normally Ctrl-Return
+            self.txtCtrl.endIncrementalSearch()
             self.Close()
             self.txtCtrl.activateLink()
         # handle the other keys
@@ -200,6 +206,7 @@ class IncrementalSearchDialog(wx.Frame):
 
 
     def OnTimerIncSearchClose(self, evt):
+        self.txtCtrl.endIncrementalSearch()
         self.Close()
 
 
@@ -394,11 +401,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         
         EVT_STYLE_DONE_COMMAND(self, self.OnStyleDone)
 
-        # search related vars
-#         self.inIncrementalSearch = False
-#         self.anchorBytePosition = -1
-#         self.anchorCharPosition = -1
         self.incSearchCharStartPos = 0
+        self.incSearchPreviousHiddenLines = None
+        self.incSearchPreviousHiddenStartLine = -1
 
         self.onOptionsChanged(None)
 
@@ -1583,36 +1588,42 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         wikiPage.appendLiveText("\n%s\n---------------------------\n\n%s\n" %
                 (strftimeUB("%x %I:%M %p"), text))
 
-    def styleSelection(self, styleChars):
+    def styleSelection(self, startChars, endChars=None):
         """
-        Currently len(styleChars) must be 1.
         """
+        if endChars is None:
+            endChars = startChars
+
         (startBytePos, endBytePos) = self.GetSelection()
         if startBytePos == endBytePos:
             (startBytePos, endBytePos) = self.getNearestWordPositions()
-            
+
         emptySelection = startBytePos == endBytePos  # is selection empty
+
+        startCharPos = len(self.GetTextRange(0, startBytePos))
+        endCharPos = startCharPos + len(self.GetTextRange(startBytePos, endBytePos))
 
         self.BeginUndoAction()
         try:
-            self.GotoPos(startBytePos)
-            self.AddText(styleChars)
-    
-            for i in xrange(len(styleChars)):
-                endBytePos = self.PositionAfter(endBytePos)
-    
-            self.GotoPos(endBytePos)
-            self.AddText(styleChars)
-    
-            bytePos = endBytePos
+#             print "--styleSelection4", repr((startBytePos, endBytePos))
             
-            if not emptySelection:
-                # Cursor will in the end stand after styled word
-                # if selection is empty, it will stand between the style characters
-                for i in xrange(len(styleChars)):
-                    bytePos = self.PositionAfter(bytePos)
+            endCharPos += len(startChars)
+            
+            if emptySelection:
+                # If selection is empty, cursor will in the end
+                # stand between the style characters
+                cursorCharPos = endCharPos
+            else:
+                # If not, it will stand after styled word
+                cursorCharPos = endCharPos + len(endChars)
+
+            self.gotoCharPos(startCharPos, scroll=False)
+            self.AddText(startChars)
     
-            self.GotoPos(bytePos)
+            self.gotoCharPos(endCharPos, scroll=False)
+            self.AddText(endChars)
+
+            self.gotoCharPos(cursorCharPos, scroll=False)
         finally:
             self.EndUndoAction()
             
@@ -1863,7 +1874,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             if securityLevel > 2: # global.import_scripts property also allowed
                 globScriptName = self.presenter.getWikiDocument().getWikiData().\
                         getGlobalProperties().get("global.import_scripts")
-    
+
                 if globScriptName is not None:
                     try:
                         importPage = self.presenter.getWikiDocument().\
@@ -2032,10 +2043,81 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         return self.agaFormatList(relations)
 
 
+    def ensureSelectionExpanded(self):
+        """
+        Ensure that the selection is visible and not in a folded area
+        """
+        self.repairFoldingVisibility()
+
+        byteStart = self.GetSelectionStart()
+        byteEnd = self.GetSelectionEnd()
+
+        startLine = self.LineFromPosition(byteStart)
+        endLine = self.LineFromPosition(byteEnd)
+        
+        # Just to be sure, shouldn't happen normally
+        if endLine < startLine:
+            startLine, endLine = endLine, startLine
+        
+        for checkLine in xrange(endLine, startLine - 1, -1):
+            if not self.GetLineVisible(checkLine):
+                line = checkLine
+
+                while True:
+                    line = self.GetFoldParent(line)
+                    if line == -1:
+                        break
+                    if not self.GetFoldExpanded(line):
+                        self.ToggleFold(line)
+
+        self.SetSelection(byteStart, byteEnd)
+
+
+    def setSelectionForIncSearchByCharPos(self, start, end):
+        # Hide lines which were previously shown
+        if self.incSearchPreviousHiddenLines is not None:
+            line = self.incSearchPreviousHiddenStartLine
+            for state in self.incSearchPreviousHiddenLines:
+                if state:
+                    self.ShowLines(line, line)
+                else:
+                    self.HideLines(line, line)
+                
+                line += 1
+            
+        self.incSearchPreviousHiddenLines = None
+        self.incSearchPreviousHiddenStartLine = -1
+        
+        if start == -1:
+            self.SetSelection(-1, -1)
+            return
+        text = self.GetText()
+
+        byteStart = self.bytelenSct(text[:start])
+        byteEnd = byteStart + self.bytelenSct(text[start:end])
+        startLine = self.LineFromPosition(byteStart)
+        endLine = self.LineFromPosition(byteEnd)
+        
+        # Store current show/hide state of lines to show
+        shownList = []
+        for i in xrange(startLine, endLine + 1):
+            shownList.append(self.GetLineVisible(i))
+            
+        self.incSearchPreviousHiddenLines = shownList
+        self.incSearchPreviousHiddenStartLine = startLine
+
+        # Show lines
+        self.ShowLines(startLine, endLine)
+        self.SetSelection(byteStart, byteEnd)
+
+
+
     def startIncrementalSearch(self, initSearch=None):
         sb = self.presenter.getStatusBar()
 
         self.incSearchCharStartPos = self.GetSelectionCharPos()[1]
+        self.incSearchPreviousHiddenLines = None
+        self.incSearchPreviousHiddenStartLine = -1
 
         rect = sb.GetFieldRect(0)
         rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
@@ -2044,8 +2126,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 sb.GetFont(), self.presenter, initSearch)
         dlg.Show()
 
-
-
+    
     def executeIncrementalSearch(self, next=False):
         """
         Run incremental search, called only by IncrementalSearchDialog
@@ -2070,15 +2151,16 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 match = regex.search(text, 0, charStartPos)
 
             if match:
-                matchbytestart = self.bytelenSct(text[:match.start()])
-                matchbyteend = matchbytestart + \
-                        self.bytelenSct(text[match.start():match.end()])
+#                 matchbytestart = self.bytelenSct(text[:match.start()])
+#                 matchbyteend = matchbytestart + \
+#                         self.bytelenSct(text[match.start():match.end()])
 
-                self.SetSelectionByCharPos(match.start(), match.end())
+                self.setSelectionForIncSearchByCharPos(
+                        match.start(), match.end())
 
                 return match.end()
 
-        self.SetSelection(-1, -1)
+        self.setSelectionForIncSearchByCharPos(-1, -1)
         self.GotoPos(self.bytelenSct(text[:self.incSearchCharStartPos]))
 
         return -1
@@ -2117,11 +2199,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                             break
                         match = matchNext
 
-                self.SetSelectionByCharPos(match.start(), match.end())
+                self.setSelectionForIncSearchByCharPos(match.start(), match.end())
 
                 return match.start()
 
-        self.SetSelection(-1, -1)
+        self.setSelectionForIncSearchByCharPos(-1, -1)
         self.GotoPos(self.bytelenSct(text[:self.incSearchCharStartPos]))
 
         return -1
@@ -2129,10 +2211,23 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
     def resetIncrementalSearch(self):
         """
-        Called by IncrementalSearchDialog before aborting a inc. search
+        Called by IncrementalSearchDialog before aborting an inc. search
         """
-        self.SetSelection(-1, -1)
+        self.setSelectionForIncSearchByCharPos(-1, -1)
         self.GotoPos(self.bytelenSct(self.GetText()[:self.incSearchCharStartPos]))
+
+
+    def endIncrementalSearch(self):
+        """
+        Called if incremental search ended successful.
+        """
+        byteStart = self.GetSelectionStart()
+        byteEnd = self.GetSelectionEnd()
+
+        self.setSelectionForIncSearchByCharPos(-1, -1)
+        
+        self.SetSelection(byteStart, byteEnd)
+        self.ensureSelectionExpanded()
 
 
     def getContinuePosForSearch(self, sarOp):

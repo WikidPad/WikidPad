@@ -296,7 +296,8 @@ class PlainTextPrint:
         printout2 = PlainTextPrintout(text, self.printer)
         preview = wx.PrintPreview(printout, printout2, pddata)
 
-        frame = wx.PreviewFrame(preview, self.pWiki, _(u"Print Preview"))
+        frame = wx.PreviewFrame(preview, self.pWiki, _(u"Print Preview"),
+                style=wx.DEFAULT_FRAME_STYLE | wx.FRAME_FLOAT_ON_PARENT)
 
         frame.Initialize()
         frame.SetPosition(self.pWiki.GetPosition())

@@ -658,7 +658,7 @@ def _asciiFlexibleUrlUnquote(part):
         try:
             return mbcsDec(linkBytes, "strict")[0]
         except UnicodeDecodeError:
-            # Failed, too -> leave link part unmodified
+            # Failed, too -> leave link part unmodified. TODO Doesn't make sense, will fail as well.
             return unicode(part)
 
 
@@ -866,7 +866,7 @@ def ntPathnameFromUrl(url, testFileType=True):
     elif testFileType:
         raise RuntimeError, 'Cannot convert non-local URL to pathname'
 
-    if (not ':' in url) and (not '|' in url):
+    if (not ':' in url) and (not '|' in url) and (not '%3A' in url) and (not '%3a' in url):
         # No drive specifier, just convert slashes
         if url[:4] == '////':
             # path is something like ////host/path/on/remote/host
@@ -877,13 +877,27 @@ def ntPathnameFromUrl(url, testFileType=True):
         # make sure not to convert quoted slashes :-)
         return flexibleUrlUnquote('\\'.join(components))
 
-    comp = url.split('|')
-    if len(comp) == 1:
-        comp = url.split(':')
+    comp = None
+    for driveDelim in ('|', ':', '%3A', '%3a'):
+        comp = url.split(driveDelim)
+        if len(comp) != 2 or len(comp[0]) == 0 or comp[0][-1] not in string.ascii_letters:
+            comp = None
+            continue
+        break
 
-    if len(comp) != 2 or len(comp[0]) == 0 or comp[0][-1] not in string.ascii_letters:
+    if comp is None:
         error = 'Bad URL: ' + url
         raise IOError, error
+        
+        
+#     comp = url.split('|')
+#     if len(comp) == 1:
+#         comp = url.split(':')
+# 
+#     if len(comp) != 2 or len(comp[0]) == 0 or comp[0][-1] not in string.ascii_letters:
+#         error = 'Bad URL: ' + url
+#         raise IOError, error
+
     drive = comp[0][-1].upper()
     components = comp[1].split('/')
     path = drive + ':'

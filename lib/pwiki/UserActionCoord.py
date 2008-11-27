@@ -81,6 +81,31 @@ def _presenterClose(unifName, paramDict):
     mc.getMainAreaPanel().closeDocPagePresenterTab(presenter)
 
 
+def _presenterClone(unifName, paramDict):
+    presenter = paramDict.get("presenter")
+    if presenter is None:
+        if paramDict.get("main control") is None:
+            return
+        else:
+            presenter = paramDict["main control"].getCurrentDocPagePresenter()
+            if presenter is None:
+                return
+
+    docPage = presenter.getDocPage()
+    if docPage is None:
+        return
+    
+    newPres = paramDict["main control"].activatePageByUnifiedName(docPage.getUnifiedPageName(),
+                tabMode=2)
+
+    scName = presenter.getCurrentSubControlName()
+
+    if newPres.hasSubControl(scName):
+        newPres.switchSubControl(scName)
+
+
+
+
 
 _ACTION_PRESENTER_TO_TEXT_EDIT = SimpleAction("",
         u"action/presenter/this/subcontrol/textedit", _presenterToTextEdit)
@@ -91,14 +116,13 @@ _ACTION_PRESENTER_TO_NEW_TEXT_EDIT = SimpleAction("",
 _ACTION_PRESENTER_CLOSE = SimpleAction("",
         u"action/presenter/this/close", _presenterClose)
 
-
-
-
+_ACTION_PRESENTER_CLONE = SimpleAction("",
+        u"action/presenter/this/clone", _presenterClone)
 
 
 
 _ACTIONS = (_ACTION_PRESENTER_TO_TEXT_EDIT, _ACTION_PRESENTER_TO_NEW_TEXT_EDIT,
-        _ACTION_PRESENTER_CLOSE)
+        _ACTION_PRESENTER_CLOSE, _ACTION_PRESENTER_CLONE)
 
 
 

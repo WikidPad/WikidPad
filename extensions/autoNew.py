@@ -32,10 +32,20 @@ def describeMenuItems(wiki):
     them can be replaced by None:
         - icon descriptor (see below, if no icon found, it won't show one)
         - menu item id.
+        - update function
+        - kind of menu item (wx.ITEM_NORMAL, wx.ITEM_CHECK)
+
 
     The  callback function  must take 2 parameters:
         wiki - Calling PersonalWikiFrame
         evt - wx.CommandEvent
+
+    If the  menu item string  contains one or more vertical bars '|' these
+        are taken as delimiters to describe a "path" of submenus where
+        the item should be placed. E.g. the item string
+        "Admin|Maintenance|Reset Settings" will create in plugins menu
+        a submenu "Admin" containing a submenu "Maintenance" containing
+        the item "Reset Settings".
 
     An  icon descriptor  can be one of the following:
         - a wx.Bitmap object
@@ -45,7 +55,7 @@ def describeMenuItems(wiki):
     
     kb = wiki.getKeyBindings()
     
-    return ((autoNewNumbered, _(u"Create new page") + u"\t" +
+    return ((autoNewNumbered, _(u"Maintain|Create new page") + u"\t" +
             kb.Plugin_AutoNew_Numbered, _(u"Create new page")),)
 
 

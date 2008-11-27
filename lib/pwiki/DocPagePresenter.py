@@ -97,12 +97,6 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
         self.docPage = dp
         self.currentDocPageProxyEvent.setWatchedSource(dp)
 
-#         if self.docPage is not None:
-#             self.currentDocPageProxyEvent.setWatchedEvent(
-#                 self.docPage.getMiscEvent())
-#         else:
-#             self.currentDocPageProxyEvent.setWatchedEvent(None)
-
 
     def getCurrentDocPageProxyEvent(self):
         """
@@ -226,9 +220,6 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
         evtprops["addToHistory"] = addToHistory
         evtprops["forceTreeSyncFromRoot"] = forceTreeSyncFromRoot
 
-#         self.statusBar.SetStatusText(uniToGui(u"Opening wiki word '%s'" %
-#                 wikiWord), 0)
-
         # make sure this is a valid wiki word
         if not self.getMainControl().getFormatting().isNakedWikiWord(wikiWord):
             self.getMainControl().displayErrorMessage(
@@ -242,9 +233,6 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
                 p2.update({"reloaded current doc page": True,
                         "reloaded current wiki page": True})
                 self.fireMiscEventProps(p2)
-    #             # self.tree.buildTreeForWord(self.currentWikiWord)  # TODO Needed?
-    #             self.statusBar.SetStatusText(uniToGui(u"Wiki word '%s' already open" %
-    #                     wikiWord), 0)
                 return
 
             # trigger hook
@@ -283,9 +271,6 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
 
             self.fireMiscEventProps(p2)
     
-#             self.getMainControl().getConfig().set("main", "last_wiki_word",
-#                     wikiWord)
-
             self.getMainControl().getMainAreaPanel().updateConfig()
 
             # Should the page by default be presented in editor or preview mode?
