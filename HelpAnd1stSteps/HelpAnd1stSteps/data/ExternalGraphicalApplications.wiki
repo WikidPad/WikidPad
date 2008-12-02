@@ -28,7 +28,7 @@ The mentioned applications are not part of the WikidPad release itself, you must
 	4. For MimeTeX, Ploticus and Gnuplot enter the full path to the executable including the executables name. For GraphViz only enter the path to the directory containing the executables in the first text field of the page. You can change the names of the executables in their respective fields if they deviate from the default names.
 	----
 ++++ Usage as insertion
-The programs are "called" using [WpInsertions |insertions]. During preview or html export the insertion is replaced by the resulting graph of the graphical application. The format for the insertions is:
+The programs are "called" by using [WpInsertions |insertions]. During preview or html export the insertion is replaced by the resulting graph of the graphical application. The format for the insertions is:
     
     * MimeTeX: \[:eqn: " _script_ "]
     * GraphViz: \[:dot: " _script_ "], \[:neato: " _script_ "], \[:twopi: " _script_ "], \[:circo: " _script_ "], \[:fdp: " _script_ "]

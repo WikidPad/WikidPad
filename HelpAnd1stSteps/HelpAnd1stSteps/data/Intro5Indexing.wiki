@@ -19,7 +19,7 @@ Adding tags like \[contact:private] and \[contact:business] to pages with contac
 [:rel:top]
 ----
 +++ Examples
-Suppose within the scope of a research on [Intro Rembrandt van Rijn |Rembrandt van Rijn] you created a number of pages with details on works that he crafted; one work per page, like the one that was done on the [Intro Nachtwacht |"Nachtwacht"]. Now for a good reason you decide that you need to be able to group - i.e. index - the works on type: painting, etching and drawing, so you ad the tags:
+Suppose within the scope of a research on [Intro Rembrandt van Rijn |Rembrandt van Rijn] you created a number of pages with details on works that he crafted; one work per page, like the one that was started on the [Intro Nachtwacht |"Nachtwacht"]. Now for a good reason you decide that you need to be able to group - i.e. index - the works on type: painting, etching and drawing, so you ad the tags:
 	* \[type: painting]
 	* \[type: drawing]
 	* \[type: etching]

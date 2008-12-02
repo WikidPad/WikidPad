@@ -5,3 +5,7 @@ Limit of page size in bytes when to switch from synchronous highlighting (calcul
 
 &bull; *Highlight start delay*
 For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds
+
+&bull; *Synchronize editor by preview selection*
+This option provides a workaround to synchronize the scroll position in HTML preview with that in the editor.
+If this option is checked, you can select some text in the preview and when switching back to the editor, the selected text will be searched by the editor and it's first occurrence highlited as selected.

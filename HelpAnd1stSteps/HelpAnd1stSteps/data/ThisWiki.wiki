@@ -2,15 +2,15 @@
 Contents: [:toc:]
 [:rel:back]
 ----
-+++ Help version 1.0
-This is version 1.0 of the help.wiki; a restructured, rewritten and extended version of the wikidpadhelp.wiki. It is up to date for WikidPad version 1.9 beta 19.
++++ Help version 1.1
+This is version 1.1 of the help.wiki; a restructured, rewritten and extended version of the wikidpadhelp.wiki. It is up to date for WikidPad version 1.9 beta 20.
 
-*Changes 1.0 compared to 0.6*
-	* typo's, layout, etc.
-	* [TextLists]
-	* [KeyBindings] (changed and moved to [WikidPadReferences])
-	* [Scripts]
-	* [WikiSyntax]
+*Changes 1.1 compared to 1.0*
+	* [TheEditor] (option: "Synchronize editor by preview selection")
+	* [Bookmarks] (option: "Open in ... New Tab")
+	* [Page relationships] (option: "Open in ... New Tab")
+	* [StructureGraphs] (presentation options)
+	* [ChangeLog19] (release notes beta 20)
 
 [:rel:top]
 ----

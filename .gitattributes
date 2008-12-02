@@ -633,6 +633,7 @@ HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsPluginsPloticus.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsSearchingFull.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsSearchingIncremental.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsSecurity.wiki -text
+HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsStructureGraphs.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsTimeView.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsTree.wiki -text
 HelpAnd1stSteps/HelpAnd1stSteps/data/WpOptionsUserInterface.wiki -text
@@ -691,6 +692,7 @@ HelpAnd1stSteps/HelpAnd1stSteps/files/StructureGraphExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/StructureGraphExample2.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/StructureGraphExample3.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/StructureGraphExample4.png -text
+HelpAnd1stSteps/HelpAnd1stSteps/files/StructureGraphExample5.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/StructureViewExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/TextBlocksExample1.png -text
 HelpAnd1stSteps/HelpAnd1stSteps/files/TextBlocksExample2.png -text

@@ -3,7 +3,7 @@ Contents:	[:toc:]
 [:rel:back]
 ----
 +++ General
-The editor supports "text blocks"; a facility with which you can insert often used texts into a page with the click on a menu option. The menu option in question is Editor / "Text blocks" in the main menu. This menu item in principal is an empty one - but for an example text - but you can fill it with your own options, each representing an often used custom text.
+The editor supports "text blocks"; a facility with which you can insert often used texts into a page with the click on a menu option. The menu option in question is "Editor / Text blocks" in the main menu. This menu item in principal is an empty one - but for an example text - but you can fill it with your own options, each representing an often used custom text.
 	----
 ++++ The func pages
 The specifications for these text blocks are located in the "func. pages" of the [TheTreeView |views tree]. As usual in WikidPad there are two pages:

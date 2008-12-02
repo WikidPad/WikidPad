@@ -107,6 +107,11 @@ This page lists all the possible application settings; they can be found in the 
 
 [:rel:top]
 ----
+++++ Structure graphs
+[:page:WpOptionsStructureGraphs]
+
+[:rel:top]
+----
 ++++ Advanced
 [:page:WpOptionsAdvanced]
 
@@ -156,6 +161,7 @@ attributes: [tree_position: 2]
 [WpOptionsTimeView]
 [WpOptionsSearchingFull]
 [WpOptionsSearchingIncremental]
+[WpOptionsStructureGraphs]
 [WpOptionsAdvanced]
 [WpOptionsPluginsGnuplot]
 [WpOptionsPluginsGraphViz]

@@ -92,7 +92,7 @@ Except for the wikidpad base css file "appbase.css", none of the css files is cr
 
 	----
 ++++ History
-Versions of WikidPad befóre 1.9 beta 9 also supported css, but only on a global level and for basic styling of elements like the TOC as the result of the [Link insertions |\[:toc:\] insertion]. There was one wikistyle.css file in the install subdirectory "export" and one wikipreview.css file in the subdirectory ".WikidPadGlobals" of the user-specific [ConfigurationFiles |configuration directory]. Both in fact at installation time had the same content, but were changeable by the user, as long as he kept in mind, that they could be overwritten by the installation of a new wikidpad version or else he would have to add version changes manually.
+Versions of WikidPad befóre 1.9 beta 9 also supported css, but only on a global level and for basic styling of elements like the TOC as the result of the [Link insertions |\[:toc:\] insertion]. There was one wikistyle.css file in the [ProgramFiles|install subdirectory] "export" and one wikipreview.css file in the subdirectory ".WikidPadGlobals" of the user-specific [ConfigurationFiles |configuration directory]. Both in fact at installation time had the same content, but were changeable by the user, as long as he kept in mind, that they could be overwritten by the installation of a new wikidpad version or else he would have to add version changes manually.
 
 For the sake of backward compatibility these files had to be retained and it was decided to make the best use posible of them. It is for this reason that for instance the "admbase.css" has its source in the "export" directory and not in the install directory and that next to the general css files, the three extra for preview exist.
 

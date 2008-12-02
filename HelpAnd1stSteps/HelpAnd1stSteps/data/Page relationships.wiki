@@ -16,7 +16,7 @@ This will bring up the relatives dialog showing a list of the parent(s), like in
 
 The dialog can be used to jump to one of the listed pages by either:
 	* navigating to it's link in the list using the cursor keys and pressing Enter
-	* selecting it with the mouse and clicking OK
+	* selecting it with the mouse and clicking OK or "Open in ... New Tab"
 	* double clicking it with the mouse
 
 	----

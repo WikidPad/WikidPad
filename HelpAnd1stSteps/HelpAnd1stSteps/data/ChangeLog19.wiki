@@ -2,6 +2,32 @@
 Contents:   [:toc:]
 [:rel:back]
 ----
++++ 1.9 beta 20
+Nov. 27, 2008 (1.9beta20)
+
+<<pre
+    * Option to automatically search text selected in preview when
+      switching to editor for better synchronization (thanks to
+      François Savard).
+      See OptionsDialog#*Synchronize# editor# by# preview# selection*
+    * Dialog to go to parents/children has now "open in new tab" button.
+    * Several presentation options for GraphViz structure plugin.
+      See WikiStructureGraphs#+++# Options
+    * Show folded lines with match during incremental search and
+      unfold at the end of inc. search if necessary
+    
+    * Internal: Menu plugins can now place their items into submenus
+    
+    * Bug fixed: Styling text with bold or italics markup failed if
+      markup was changed to something non-Ascii.
+    * Bug fixed: Spell checking did not handle language attribute
+      correctly when switching from one page to another with different
+      language.
+    * Bug fixed: If WikidPad is set to stay on top, print preview
+      did not work
+>>
+
+----
 +++ 1.9 beta 19
 Oct. 26, 2008 (1.9beta19)
 

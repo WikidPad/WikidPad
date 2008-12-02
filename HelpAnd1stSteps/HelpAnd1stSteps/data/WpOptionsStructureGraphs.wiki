@@ -1,0 +1,18 @@
+﻿	<b>Application settings: see [StructureGraphs]</b>
+	_Remarks:_
+	&bull; Options that are left empty use the "\GraphViz" default settings.
+	&bull; Colors are specified using standard 6 digit HTML color values.
+	----
+&bull; *Node font name*
+&bull; *Node font size*
+The name and size of the font to use for the node label
+
+&bull; *Node border color*
+The color of the small border line surrounding each node
+
+&bull; *Node background color*
+The color of the node background.
+_Remark:_ If the wiki page described by a node has a "\[color: _color name_]" attribute then that color attribute overrules this option setting.
+
+&bull; *Edge color*
+The color of the edges connecting the nodes.

@@ -5,7 +5,7 @@ Content:	[:toc:]
 +++ General
 As a pilot activity, WikidPad offers the possibility, to create graphs of relationships between wiki pages and/or their attributes. It is "work in progress" and meant as an example of what cóuld be done in this area and therefore is not a fully worked out implementation. They are waiting for somebody with a good idea for their use.
 
-Currently - 1.9 beta 19 - there are two (2) graphs available:
+Currently - 1.9 beta 20 - there are two (2) graphs available:
 	1. child graph
 	2. relation graph
 They are available as both a menu option ánd a graph insertion and need the GraphViz application suite to be properly installed. Both at the moment create graphs for the entyre wiki; there is no possibility yet, to limit it to a specific set or subtree of pages.
@@ -50,7 +50,7 @@ What is shown in WikidPad is an image. The graph is created as a .png image in t
 [:rel:top]
 ----
 +++ Child graph
-This graph shows the parent->child relationship of the words in the wiki. Below is an image of a graph for a small wiki.
+This graph shows the parent->child relationships for all the pages in a wiki. Below is an image of a graph for a small wiki.
 
 	rel://files/StructureGraphExample1.png
 
@@ -74,7 +74,7 @@ on the page and íf "Bird" and "Fish" were other existing wiki pages, then this 
 
 You could add the same attributes to wiki pages about other animals, resulting for instance in a structure graph like this: 
 
-rel://files/StructureGraphExample2.png
+	rel://files/StructureGraphExample2.png
 
 *Remark:*
 	* The above images are downsized to 75% of their real size.
@@ -105,9 +105,45 @@ The function defaults to including all pages in the graph that have a valid \[co
 [:rel:top]
 [4] _This behaviour will be corrected in an upcomming version of WikidPad._
 ----
++++ Graph presentation
+++++ General
+The presentation of the graphs can be influenced using the "Wiki / Options / \GraphVizStructure" options. These options allow to set the following presentation properties for the graphs:
+
+	* node: font name and size
+	* node: background and border color
+	* edge: color
+
+Reducing the font size also reduces the overall size of the resulting graph.
+	----
+++++ Example
+Below is an example of the same child graph, with the following presentation settings:
+	* node: font = Arial 8
+	* node: background = #E1E1E1
+	* node: border = #808080 (grey)
+	* edge: color = #696969 (dimgrey)
+
+	rel://files/StructureGraphExample5.png
+
+*Remark:*
+	* Because of the font size 8 (and different layout), the screenshot did not have to be reduced in size and is shown at 100% of it's real size.
+	----
+++++ Colors
+\GraphViz accepts the standard HTML hex values and cross browser names for the specification of colors. The ""Wiki / Options / \GraphVizStructure" options however only accept the 6 digit color values, nót the color names. For complete lists of color values and names see:
+
+	* [http://www.w3schools.com/Html/html_colors.asp | W3schools: Colors]
+
+The options page supports you in specifying the colors by means of a color selector dialog. This however is a standard dialog, that is not much use, if it are specific HTML colors that you are after.
+
+[:rel:top]
+----
 +++ Settings
 ++++ Global attributes
 [:page:GlobalAttributesStructureGraphs]
+
+[:rel:top]
+----
+++++ Options
+[:page:WpOptionsStructureGraphs]
 
 [:rel:top]
 ----
