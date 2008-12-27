@@ -375,7 +375,8 @@ class PlainTextPrint:
         printout2 = PlainTextPrintout(text, self.printer)
         preview = wx.PrintPreview(printout, printout2, pddata)
 
-        frame = wx.PreviewFrame(preview, self.pWiki, "Print Preview")
+        frame = wx.PreviewFrame(preview, self.pWiki, "Print Preview",
+                style=wx.DEFAULT_FRAME_STYLE | wx.FRAME_FLOAT_ON_PARENT)
 
         frame.Initialize()
         frame.SetPosition(self.pWiki.GetPosition())
@@ -512,7 +513,7 @@ class PlainTextPrintout(wx.Printout):
         fontDesc = self.printer.plainTextFontDesc
         
         if not fontDesc:
-            font = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, FALSE, "Courier New")
+            font = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Courier New")
         else:
             font = wx.FontFromNativeInfoString(fontDesc)
 #             font = wxFont()

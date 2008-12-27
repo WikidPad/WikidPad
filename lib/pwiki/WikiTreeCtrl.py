@@ -1399,6 +1399,7 @@ class WikiTreeCtrl(wx.TreeCtrl):
                         break
         
         # if a path is not found try to get a path to the root node
+
         if not crumbs:
             currentNode = self.GetRootItem()
             if currentNode.IsOk() and \
@@ -1406,7 +1407,6 @@ class WikiTreeCtrl(wx.TreeCtrl):
                 currentWikiWord = self.GetPyData(currentNode).getWikiWord()
                 crumbs = wikiData.findBestPathFromWordToWord(wikiWord,
                         currentWikiWord)
-
 
         if crumbs:
             numCrumbs = len(crumbs)

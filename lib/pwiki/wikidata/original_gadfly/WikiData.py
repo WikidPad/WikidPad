@@ -548,25 +548,56 @@ class WikiData:
         return result
 
 
-    def _assembleWordGraph(self, word, graph):
-        """
-        recursively builds a graph of each of words parent relations
+#     def _assembleWordGraph(self, word, graph):
+#         """
+#         recursively builds a graph of each of words parent relations
+# 
+#         Not part of public API!
+#         """
+#         if not graph.has_key(word):
+#             parents = self.getParentRelationships(word)
+#             graph[word] = parents;
+#             for parent in parents:
+#                 self._assembleWordGraph(parent, graph)
+#         return graph
+# 
+#     def findBestPathFromWordToWord(self, word, toWord):
+#         "finds the shortest path from word to toWord"
+#         bestPath = findShortestPath(self._assembleWordGraph(word, {}), word,
+#                 toWord, [])
+#         if bestPath: bestPath.reverse()
+#         return bestPath
 
-        Not part of public API!
-        """
-        if not graph.has_key(word):
-            parents = self.getParentRelationships(word)
-            graph[word] = parents;
-            for parent in parents:
-                self._assembleWordGraph(parent, graph)
-        return graph
 
-    def findBestPathFromWordToWord(self, word, toWord):
-        "finds the shortest path from word to toWord"
-        bestPath = findShortestPath(self._assembleWordGraph(word, {}), word,
-                toWord, [])
-        if bestPath: bestPath.reverse()
-        return bestPath
+    def findBestPathFromWordToWord( self, word, toWord ):
+        """
+        Do a breadth first search, which will find the shortest
+        path between the nodes we are interested in
+        This will only find a path if the words are
+        linked by parent relationship
+        you won't be able to find your cousins
+        """
+        queue = [word]
+        previous = { word: word }
+        while queue:
+            node = queue.pop(0)
+            if node == toWord: # If we've found our target word.
+                # Work out how we got here.
+                path = [node]
+                while previous[node] != node:
+                    node = previous[node]
+                    path.append( node )
+                return path
+
+            # Continue on up the tree.
+            for parent in self.getParentRelationships(node):
+                # unless we've been to this parent before.
+                if parent not in previous and parent not in queue:
+                    previous[parent] = node
+                    queue.append( parent )
+
+        # We didn't find a path to our target word
+        return None
 
 
     # ---------- Listing/Searching wiki words (see also "alias handling", "searching pages")----------
@@ -1137,22 +1168,22 @@ class WikiData:
 ####################################################
 
 
-def findShortestPath(graph, start, end, path):   # path=[]
-    "finds the shortest path in the graph from start to end"
-    path = path + [start]
-    if start == end:
-        return path
-    if not graph.has_key(start):
-        return None
-    shortest = None
-    for node in graph[start]:
-        if node not in path:
-            newpath = findShortestPath(graph, node, end, path)
-            if newpath:
-                if not shortest or len(newpath) < len(shortest):
-                    shortest = newpath
-
-    return shortest
+# def findShortestPath(graph, start, end, path):   # path=[]
+#     "finds the shortest path in the graph from start to end"
+#     path = path + [start]
+#     if start == end:
+#         return path
+#     if not graph.has_key(start):
+#         return None
+#     shortest = None
+#     for node in graph[start]:
+#         if node not in path:
+#             newpath = findShortestPath(graph, node, end, path)
+#             if newpath:
+#                 if not shortest or len(newpath) < len(shortest):
+#                     shortest = newpath
+# 
+#     return shortest
 
 
 

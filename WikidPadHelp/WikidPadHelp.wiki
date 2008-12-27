@@ -3,7 +3,7 @@ data_dir = data
 
 [main]
 footnotes_as_wikiwords = False
-tree_expandednodes_descriptorpathes_main = wikipage/WikidPadHelp,wikipage/SearchingTheWiki;wikipage/WikidPadHelp
+tree_expandednodes_descriptorpathes_main = wikipage/WikidPadHelp,wikipage/SearchingTheWiki;wikipage/WikidPadHelp,wikipage/ChangeLog;wikipage/WikidPadHelp
 last_wiki_word = WikidPadHelp
 filestorage_identity_moddatemustmatch = False
 wiki_name = WikidPadHelp

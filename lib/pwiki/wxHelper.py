@@ -10,6 +10,7 @@ from wx.xrc import XRCCTRL, XRCID
 
 
 from MiscEvent import KeyFunctionSink
+import Configuration
 
 
 class wxIdPool:
@@ -107,88 +108,110 @@ def setWindowSize(win, size):
     win.SetSize((sizeX, sizeY))
 
 
-def getTextFromClipboard():
-    """
-    Retrieve text or unicode text from clipboard
-    """
-#     from wxPython.wx import wxTheClipboard, wxDataObjectComposite, wxDataFormat, \
-#             wxCustomDataObject, wxDF_TEXT, wxDF_UNICODETEXT
-    from StringOps import lineendToInternal, mbcsDec
-    import array
+if Configuration.isWin9x():
+    def getTextFromClipboard():
+        """
+        Retrieve text or unicode text from clipboard
+        """
+        from StringOps import lineendToInternal, mbcsDec
+        import array
+    
+        cb = wx.TheClipboard
+        cb.Open()
+        try:
+            dataob = wx.DataObjectComposite()
+            cdataob = wx.CustomDataObject(wx.DataFormat(wx.DF_TEXT))
+            udataob = wx.CustomDataObject(wx.DataFormat(wx.DF_UNICODETEXT))
+            cdataob.SetData("")
+            udataob.SetData("")
+            dataob.Add(udataob)
+            dataob.Add(cdataob)
+    
+            if cb.GetData(dataob):
+                if udataob.GetDataSize() > 0 and (udataob.GetDataSize() % 2) == 0:
+                    # We have unicode data
+                    # This might not work for all platforms:   # TODO Better impl.
+                    rawuni = udataob.GetData()
+                    arruni = array.array("u")
+                    arruni.fromstring(rawuni)
+                    realuni = lineendToInternal(arruni.tounicode())
+                    return realuni
+                elif cdataob.GetDataSize() > 0:
+                    realuni = lineendToInternal(
+                            mbcsDec(cdataob.GetData(), "replace")[0])
+                    return realuni
+                else:
+                    return u""
+            return None
+        finally:
+            cb.Close()
 
-    cb = wx.TheClipboard
-    cb.Open()
-    try:
-        dataob = wx.DataObjectComposite()
+
+    def textToDataObject(text=None):
+        """
+        Create data object for an unicode string
+        """
+        from StringOps import lineendToOs, mbcsEnc, utf8Enc
+        import array
+        
         cdataob = wx.CustomDataObject(wx.DataFormat(wx.DF_TEXT))
         udataob = wx.CustomDataObject(wx.DataFormat(wx.DF_UNICODETEXT))
-        cdataob.SetData("")
-        udataob.SetData("")
-        dataob.Add(udataob)
-        dataob.Add(cdataob)
-
-        if cb.GetData(dataob):
-            if udataob.GetDataSize() > 0 and (udataob.GetDataSize() % 2) == 0:
-                # We have unicode data
-                # This might not work for all platforms:   # TODO Better impl.
-                rawuni = udataob.GetData()
-                arruni = array.array("u")
-                arruni.fromstring(rawuni)
-                realuni = lineendToInternal(arruni.tounicode())
-                return realuni
-            elif cdataob.GetDataSize() > 0:
-                realuni = lineendToInternal(
-                        mbcsDec(cdataob.GetData(), "replace")[0])
-                return realuni
-            else:
-                return ""
-        return None
-    finally:
-        cb.Close()
-
-
-def textToDataObject(text):
-#     from wxPython.wx import wxDataObjectComposite, wxDataFormat, \
-#             wxCustomDataObject, wxDF_TEXT, wxDF_UNICODETEXT
-    from StringOps import lineendToOs, mbcsEnc, utf8Enc
-    import array
     
-    cdataob = wx.CustomDataObject(wx.DataFormat(wx.DF_TEXT))
-    udataob = wx.CustomDataObject(wx.DataFormat(wx.DF_UNICODETEXT))
+        if text is not None:
+            realuni = lineendToOs(text)
+            arruni = array.array("u")
+            arruni.fromunicode(realuni+u"\x00")
+            rawuni = arruni.tostring()
+            udataob.SetData(rawuni)
+            cdataob.SetData(mbcsEnc(realuni)[0]+"\x00")
+        else:
+            cdataob.SetData("")
+            udataob.SetData("")
+    
+        dataob = wx.DataObjectComposite()
+        dataob.Add(udataob, True)
+        dataob.Add(cdataob)
+    
+        return dataob
 
-    realuni = lineendToOs(text)
-    arruni = array.array("u")
-    arruni.fromunicode(realuni+u"\x00")
-    rawuni = arruni.tostring()
-    udataob.SetData(rawuni)
-    cdataob.SetData(mbcsEnc(realuni)[0]+"\x00")
+else:    # Non-Windows 9x versions
 
-    dataob = wx.DataObjectComposite()
-    dataob.Add(udataob, True)
-    dataob.Add(cdataob)
+    def getTextFromClipboard():
+        """
+        Retrieve text or unicode text from clipboard
+        """
+        from StringOps import lineendToInternal, mbcsDec
+    
+        cb = wx.TheClipboard
+        cb.Open()
+        try:
+            dataob = textToDataObject()
 
-    return dataob
+            if cb.GetData(dataob):
+                if dataob.GetTextLength() > 0:
+                    return lineendToInternal(dataob.GetText())
+                else:
+                    return u""
+            return None
+        finally:
+            cb.Close()
+
+
+    def textToDataObject(text=None):
+        """
+        Create data object for an unicode string
+        """
+        from StringOps import lineendToOs, mbcsEnc, utf8Enc
+        
+        if text is None:
+            text = u""
+        
+        text = lineendToOs(text)
+
+        return wx.TextDataObject(text)
 
 
 def copyTextToClipboard(text): 
-#     from wxPython.wx import wxTheClipboard
-#     from StringOps import lineendToOs, mbcsEnc
-#     import array
-# 
-#     cdataob = wxCustomDataObject(wxDataFormat(wxDF_TEXT))
-#     udataob = wxCustomDataObject(wxDataFormat(wxDF_UNICODETEXT))
-#     realuni = lineendToOs(text)
-#     arruni = array.array("u")
-#     arruni.fromunicode(realuni+u"\x00")
-#     rawuni = arruni.tostring()
-#     # print "Copy", repr(realuni), repr(rawuni), repr(mbcsenc(realuni)[0])
-#     udataob.SetData(rawuni)
-#     cdataob.SetData(mbcsEnc(realuni)[0]+"\x00")
-# 
-#     dataob = wxDataObjectComposite()
-#     dataob.Add(udataob)
-#     dataob.Add(cdataob)
-
     dataob = textToDataObject(text)
 
     cb = wx.TheClipboard

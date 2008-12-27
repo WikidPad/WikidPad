@@ -458,7 +458,7 @@
         <object class="wxFlexGridSizer">
           <object class="sizeritem">
             <object class="wxStaticText">
-              <label>Props. to</label>
+              <label>Attrs. to</label>
               <style></style>
             </object>
             <option>0</option>
@@ -491,7 +491,7 @@
           <growablecols>3</growablecols>
           <object class="sizeritem">
             <object class="wxStaticText">
-              <label>Props. to</label>
+              <label>Attrs. to</label>
               <style></style>
             </object>
             <option>0</option>
