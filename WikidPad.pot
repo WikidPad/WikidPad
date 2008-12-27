@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2008-11-27 18:57\n"
+"POT-Creation-Date: 2008-12-27 13:56\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -217,6 +217,10 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "Attribute/script color:"
+msgstr ""
+
+#: WikidPad.xrc:0
+msgid "Attrs. to"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -749,10 +753,6 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "Process insertion scripts"
-msgstr ""
-
-#: WikidPad.xrc:0
-msgid "Props. to"
 msgstr ""
 
 #: WikidPad.xrc:0

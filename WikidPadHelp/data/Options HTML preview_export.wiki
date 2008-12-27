@@ -6,7 +6,7 @@ Starts the current web browser after exporting one or more HTML pages or an XML 
 *Font name for HTML preview*
 Enter the desired font name for the HTML preview. Clicking on the "..." button shows a list of available fonts.
 
-*Props to (not) include in preview*
+*Attrs. to (not) include in preview*
 Enter here a regular expression of the properties you want to allow to be shown in the HTML preview. The RE is tested against a "normalized" property where the brackets are removed and key and value are separated by ": ". So even if the property is in the page written as "\[camelCaseWordsEnabled=false]", the RE is tested against "camelCaseWordsEnabled: false".
 
 If you e.g. want to show the "alias" properties only, enter "alias: .* ". Other properties will then be hidden in the preview. The empty text field matches everything.
@@ -15,7 +15,7 @@ If you want to show all properties *except* those matching the RE, tick the chec
 
 If you press the "Ok" button of the options dialog, but the dialog doesn't vanish, instead this text field is red, then the RE contains an error and must be corrected first.
 
-*Props to (not) include in export*
+*Attrs. to (not) include in export*
 Same as above, but for the HTML export.
 
 *Shows pics as links in preview*

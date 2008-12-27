@@ -507,13 +507,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         Deprecated, use getWikiDocument() instead
         """
         return self.wikiDataManager
-        
+
     def getWikiDocument(self):
         return self.wikiDataManager
 
     def isWikiLoaded(self):
         return self.getWikiDocument() is not None
-        
+
     def getWikiConfigPath(self):
         if self.wikiDataManager is None:
             return None
@@ -522,7 +522,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def getConfig(self):
         return self.configuration
-        
+
     def getFormatting(self):
         if self.wikiDataManager is None:
             return None

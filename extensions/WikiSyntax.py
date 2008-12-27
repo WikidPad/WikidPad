@@ -2,7 +2,7 @@ import locale
 import string
 
 import pwiki.srePersistent as re
-from pwiki.StringOps import mbcsDec, UPPERCASE, LOWERCASE
+from pwiki.StringOps import UPPERCASE, LOWERCASE
 
 locale.setlocale(locale.LC_ALL, '')
 

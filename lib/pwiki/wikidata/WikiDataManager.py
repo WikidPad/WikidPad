@@ -624,7 +624,7 @@ class WikiDataManager(MiscEventSourceMixin):
     def getWikiPageNoError(self, wikiWord):
         """
         fetch a WikiPage for the wikiWord. If it doesn't exist, return
-        one without throwing an error and without updating the cache.
+        one without throwing an error.
 
         Asking for the same wikiWord twice returns the same object if
         it wasn't garbage collected yet.

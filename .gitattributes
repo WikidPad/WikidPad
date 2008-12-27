@@ -338,7 +338,6 @@ WikidPadHelp/files/testimg.gif -text
 docs/api.txt -text
 docs/dev-setup.txt -text
 docs/dev.txt -text
-export/wikistyle.css -text
 extensions/EvalLibrary.py -text
 extensions/ExampleInsertion.py -text
 extensions/GnuplotClBridge.py -text

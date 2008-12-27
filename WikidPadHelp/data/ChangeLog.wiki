@@ -1,7 +1,14 @@
 ﻿++ Change Log
 
 
-Nov. 27, 2008 (1.9beta20)
+Dec. 27, 2008 (1.9beta21)
+
+    * Bug fixed: Tree auto-follow with Gadfly backend did not work
+      if going to a non-existing page (even if it was shown in tree)
+
+
+
+Nov. 27, 2008 (1.9beta20, repository revision in "mbutscher" branch: 163)
 
     * Option to automatically search text selected in preview when
       switching to editor for better synchronization (thanks to

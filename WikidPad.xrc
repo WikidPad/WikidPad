@@ -21,7 +21,7 @@
             <object class="wxButton" name="btnOk">
               <label>OK</label>
               <default>1</default>
-              <style></style>
+              <style/>
             </object>
             <flag>wxALL|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
@@ -45,7 +45,7 @@
       </object>
       <object class="sizeritem">
         <object class="wxStaticText" name="fieldPreview">
-          <label></label>
+          <label/>
           <size>25</size>
           <style>wxST_NO_AUTORESIZE|wxSUNKEN_BORDER</style>
         </object>
@@ -94,7 +94,7 @@
             <object class="wxButton" name="btnOk">
               <label>OK</label>
               <default>1</default>
-              <style></style>
+              <style/>
             </object>
             <flag>wxALL|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
@@ -198,7 +198,7 @@
                 <item>C</item>
               </content>
               <selection>0</selection>
-              <style></style>
+              <style/>
             </object>
             <option>0</option>
             <flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -324,7 +324,7 @@
             <object class="wxChoice" name="chGuiLanguage">
               <content/>
               <selection>0</selection>
-              <style></style>
+              <style/>
             </object>
             <option>0</option>
             <flag>wxALL|wxEXPAND</flag>
@@ -639,8 +639,7 @@
         <object class="wxFlexGridSizer">
           <object class="sizeritem">
             <object class="wxStaticText">
-              <label>Props. to</label>
-              <style></style>
+              <label>Attrs. to</label>
             </object>
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -672,8 +671,7 @@
           <growablecols>3</growablecols>
           <object class="sizeritem">
             <object class="wxStaticText">
-              <label>Props. to</label>
-              <style></style>
+              <label>Attrs. to</label>
             </object>
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -1832,7 +1830,7 @@
           </object>
           <object class="sizeritem">
             <object class="wxTextCtrl" name="tfWwSearchContextBefore">
-              <style></style>
+              <style/>
             </object>
             <option>1</option>
             <flag>wxALL|wxEXPAND</flag>
@@ -2228,7 +2226,7 @@
             <object class="wxButton" name="btnOk">
               <label>OK</label>
               <default>1</default>
-              <style></style>
+              <style/>
             </object>
             <flag>wxALL|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
@@ -2610,7 +2608,7 @@
                   <orient>wxVERTICAL</orient>
                   <object class="sizeritem">
                     <object class="wxRadioBox" name="rboxSearchType">
-                      <label></label>
+                      <label/>
                       <content>
                         <item>S&amp;imple regex</item>
                         <item>&quot;&amp;Anded&quot; regex</item>
@@ -2927,7 +2925,7 @@
           </object>
           <object class="sizeritem">
             <object class="wxRadioBox" name="rboxSearchType">
-              <label></label>
+              <label/>
               <content>
                 <item>S&amp;imple regex</item>
                 <item>&quot;An&amp;ded&quot; regex</item>
@@ -3209,7 +3207,7 @@
           </object>
           <object class="sizeritem">
             <object class="wxTextCtrl" name="tfContextBefore">
-              <style></style>
+              <style/>
             </object>
             <option>1</option>
             <flag>wxALL|wxEXPAND</flag>
@@ -3388,7 +3386,7 @@
             <object class="wxButton" name="btnFindNext">
               <label> Find &amp;Next </label>
               <default>1</default>
-              <style></style>
+              <style/>
             </object>
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -3496,7 +3494,7 @@
           </object>
           <object class="sizeritem">
             <object class="wxStaticBoxSizer">
-              <label></label>
+              <label/>
               <orient>wxVERTICAL</orient>
               <object class="spacer">
                 <size>0,5</size>
@@ -3851,7 +3849,7 @@
       </object>
       <object class="sizeritem">
         <object class="wxStaticBoxSizer">
-          <label></label>
+          <label/>
           <orient>wxVERTICAL</orient>
           <object class="sizeritem">
             <object class="wxCheckBox" name="cbShowInToolbar">
@@ -4137,7 +4135,7 @@
         <flag>wxEXPAND</flag>
       </object>
     </object>
-    <style></style>
+    <style/>
   </object>
   <object class="wxPanel" name="ExportSubMultipageText">
     <object class="wxBoxSizer">
@@ -4264,7 +4262,7 @@
           <orient>wxHORIZONTAL</orient>
           <object class="sizeritem">
             <object class="wxStaticText">
-              <label></label>
+              <label/>
               <style>wxALIGN_RIGHT</style>
             </object>
             <option>1</option>
@@ -4338,7 +4336,7 @@
             <object class="wxButton" name="btnOk">
               <label>OK</label>
               <default>1</default>
-              <style></style>
+              <style/>
             </object>
             <flag>wxALL|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
@@ -4390,7 +4388,7 @@
           <orient>wxHORIZONTAL</orient>
           <object class="sizeritem">
             <object class="wxStaticText">
-              <label></label>
+              <label/>
               <style>wxALIGN_RIGHT</style>
               <hidden>1</hidden>
             </object>
@@ -4466,7 +4464,7 @@
             <object class="wxButton" name="btnOk">
               <label>OK</label>
               <default>1</default>
-              <style></style>
+              <style/>
             </object>
             <flag>wxALL|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
@@ -4674,7 +4672,7 @@
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
-            <minsize></minsize>
+            <minsize/>
           </object>
           <object class="sizeritem">
             <object class="wxListCtrl" name="lbReplaceSuggestions">

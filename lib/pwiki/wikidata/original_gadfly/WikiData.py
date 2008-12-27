@@ -757,11 +757,6 @@ class WikiData:
         you won't be able to find your cousins
         """
 
-        # Make sure the words are in there somewhere.
-        if not ( self.isDefinedWikiWord(word) \
-                and self.isDefinedWikiWord(toWord) ):
-            return None
-
         queue = [word]
         previous = { word: word }
         while queue:
