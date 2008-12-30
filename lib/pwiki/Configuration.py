@@ -480,6 +480,8 @@ GLOBALDEFAULTS = {
     ("main", "auto_bullets"): "True",  # Show bullet/number after newline if current line has bullet
     ("main", "auto_indent"): "True",
     ("main", "show_lineNumbers"): "False", 
+    ("main", "editor_useImeWorkaround"): "False",  # Special workaround by handling input by WikidPad instead of Scintilla.
+            # Seems to help against some problems with Vietnamese input programs
     ("main", "clipboardCatcher_suffix"): ur"\n",  # Suffix to append after each caught clipboard snippet
     ("main", "clipboardCatcher_filterDouble"): "True",  # If same text shall be inserted twice (or more often)
             # do not react

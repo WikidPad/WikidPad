@@ -971,6 +971,14 @@
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
       </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbEditorUseImeWorkaround">
+          <label>Use IME workaround for editor input</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
     </object>
   </object>
   <object class="wxPanel" name="OptionsPageSearching">

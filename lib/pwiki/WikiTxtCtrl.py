@@ -305,6 +305,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         wx.EVT_MOTION(self, self.OnMouseMove)
         # EVT_STC_DOUBLECLICK(self, ID, self.OnDoubleClick)
         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
+
+        if config.getboolean("main",
+                "editor_useImeWorkaround", False):
+            wx.EVT_CHAR(self, self.OnChar_ImeWorkaround)
+        else:
+            wx.EVT_CHAR(self, self.OnChar)
+
         wx.EVT_CHAR(self, self.OnChar)
         wx.EVT_SET_FOCUS(self, self.OnSetFocus)
         
@@ -2060,10 +2067,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if isWin9x() and (WindowsHacks is not None):
             unichar = WindowsHacks.ansiInputToUnicodeChar(key)
 
-#             if self.inIncrementalSearch:
-#                 self.searchStr += unichar
-#                 self.executeIncrementalSearch();
-#             else:
             self.ReplaceSelection(unichar)
 
         else:
@@ -2072,13 +2075,36 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 unichar = unichr(evt.GetUnicodeKey())
             else:
                 unichar = mbcsDec(chr(key))[0]
-                
-#             # handle key presses while in incremental search here
-#             if self.inIncrementalSearch:
-#                 self.searchStr += unichar
-#                 self.executeIncrementalSearch();
-#             else:
+
             evt.Skip()
+
+
+    def OnChar_ImeWorkaround(self, evt):
+        """
+        Workaround for problem of Scintilla with some input method editors,
+        e.g. UniKey vietnamese IME.
+        """
+        key = evt.GetKeyCode()
+
+        # Return if this doesn't seem to be a real character input
+        if evt.ControlDown() or key < 32:
+            evt.Skip()
+            return
+            
+        if key >= wx.WXK_START and (not isUnicode() or evt.GetUnicodeKey() != key):
+            evt.Skip()
+            return
+
+        if isWin9x() and (WindowsHacks is not None):
+            unichar = WindowsHacks.ansiInputToUnicodeChar(key)
+        else:
+            if isUnicode():
+                unichar = unichr(evt.GetUnicodeKey())
+            else:
+                unichar = mbcsDec(chr(key))[0]
+
+            self.ReplaceSelection(unichar)
+
 
 
     def OnSetFocus(self, evt):

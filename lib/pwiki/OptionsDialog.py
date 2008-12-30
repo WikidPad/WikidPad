@@ -117,6 +117,7 @@ class OptionsDialog(wx.Dialog):
             ("sync_highlight_byte_limit", "tfSyncHighlightingByteLimit", "i0+"),
             ("async_highlight_delay", "tfAsyncHighlightingDelay", "f0+"),
             ("editor_autoUnbullets", "cbAutoUnbullets", "b"),
+            ("editor_useImeWorkaround", "cbEditorUseImeWorkaround", "b"),
 
             ("search_wiki_context_before", "tfWwSearchContextBefore", "i0+"),
             ("search_wiki_context_after", "tfWwSearchContextAfter", "i0+"),
