@@ -386,19 +386,24 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         wx.stc.EVT_STC_MARGINCLICK(self, ID, self.OnMarginClick)
         wx.stc.EVT_STC_DWELLSTART(self, ID, self.OnDwellStart)
         wx.stc.EVT_STC_DWELLEND(self, ID, self.OnDwellEnd)
-        
+
         wx.EVT_LEFT_DOWN(self, self.OnClick)
         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
         wx.EVT_LEFT_DCLICK(self, self.OnDoubleClick)
 #         EVT_MOTION(self, self.OnMouseMove)
         # EVT_STC_DOUBLECLICK(self, ID, self.OnDoubleClick)
         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
-        wx.EVT_CHAR(self, self.OnChar)
+        
+        if config.getboolean("main", "editor_useImeWorkaround", False):
+            wx.EVT_CHAR(self, self.OnChar_ImeWorkaround)
+        else:
+            wx.EVT_CHAR(self, self.OnChar)
+
         wx.EVT_SET_FOCUS(self, self.OnSetFocus)
 
         wx.EVT_IDLE(self, self.OnIdle)
         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
-        
+
         EVT_STYLE_DONE_COMMAND(self, self.OnStyleDone)
 
         self.incSearchCharStartPos = 0
@@ -2557,6 +2562,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
 
     def OnModified(self, evt):
+#         evt.Skip()
         if not self.ignoreOnChange:
             if evt.GetModificationType() & \
                     (wx.stc.STC_MOD_INSERTTEXT | wx.stc.STC_MOD_DELETETEXT):
@@ -2568,7 +2574,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         "When the user presses enter reindent to the previous level"
 
 #         currPos = self.GetScrollPos(wxVERTICAL)
-        
+
         key = evt.GetKey()
 
         if key == 10:
@@ -2701,6 +2707,34 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 unichar = mbcsDec(chr(key))[0]
 
             evt.Skip()
+
+
+    def OnChar_ImeWorkaround(self, evt):
+        """
+        Workaround for problem of Scintilla with some input method editors,
+        e.g. UniKey vietnamese IME.
+        """
+        key = evt.GetKeyCode()
+
+        # Return if this doesn't seem to be a real character input
+        if evt.ControlDown() or key < 32:
+            evt.Skip()
+            return
+            
+        if key >= wx.WXK_START and (not isUnicode() or evt.GetUnicodeKey() != key):
+            evt.Skip()
+            return
+
+        if isWin9x() and (WindowsHacks is not None):
+            unichar = WindowsHacks.ansiInputToUnicodeChar(key)
+        else:
+            if isUnicode():
+                unichar = unichr(evt.GetUnicodeKey())
+            else:
+                unichar = mbcsDec(chr(key))[0]
+
+            self.ReplaceSelection(unichar)
+
 
 
     def OnSetFocus(self, evt):

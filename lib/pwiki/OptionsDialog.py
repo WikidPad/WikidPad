@@ -527,7 +527,7 @@ class OptionsDialog(wx.Dialog):
 
             ("wikiLockFile_ignore", "cbWikiLockFileIgnore", "b"),
             ("wikiLockFile_create", "cbWikiLockFileCreate", "b"),
-
+            ("editor_useImeWorkaround", "cbEditorUseImeWorkaround", "b"),
 
             # wiki-specific options
 

@@ -528,6 +528,8 @@ GLOBALDEFAULTS = {
     ("main", "editor_tabsToSpaces"): "True",  # Write spaces when hitting TAB key
     ("main", "show_lineNumbers"): "False",
     ("main", "editor_useFolding"): "False",
+    ("main", "editor_useImeWorkaround"): "False",  # Special workaround by handling input by WikidPad instead of Scintilla.
+            # Seems to help against some problems with Vietnamese input programs
     ("main", "wikiWord_rename_wikiLinks"): "2", # When renaming wiki word, should it try to rename links to the word, too?
             # 0:No, 1:Yes, 2:Ask for each renaming
     ("main", "mainTree_position"): "0",  # Mode where to place the main tree,
