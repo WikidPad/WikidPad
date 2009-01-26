@@ -1,4 +1,4 @@
-import os, urllib
+import os, urllib, os.path
 from subprocess import list2cmdline
 
 import wx
@@ -31,7 +31,7 @@ class EqnHandler:
     """
     def __init__(self, app):
         self.app = app
-        self.mimetexExe = None
+        self.extAppExe = None
         
     def taskStart(self, exporter, exportType):
         """
@@ -46,8 +46,12 @@ class EqnHandler:
         call to taskStart() and before the call to taskEnd()
         """
         # Find MimeTeX executable by configuration setting
-        self.mimetexExe = self.app.getGlobalConfig().get("main",
+        self.extAppExe = self.app.getGlobalConfig().get("main",
                 "plugin_mimeTex_exePath", "")
+        
+        if self.extAppExe:
+            self.extAppExe = os.path.join(self.app.getWikiAppDir(),
+                    self.extAppExe)
 
         
     def taskEnd(self):
@@ -84,7 +88,7 @@ class EqnHandler:
             # Nothing in, nothing out
             return u""
         
-        if self.mimetexExe == "":
+        if self.extAppExe == "":
             # No path to MimeTeX executable -> show message
             return "<pre>[Please set path to MimeTeX executable]</pre>"
 
@@ -92,7 +96,7 @@ class EqnHandler:
         # variable
         os.environ["QUERY_STRING"] = bstr
 
-        cmdline = list2cmdline((self.mimetexExe,))
+        cmdline = list2cmdline((self.extAppExe,))
 
         # Run MimeTeX process
         childIn, childOut = os.popen2(cmdline, "b")

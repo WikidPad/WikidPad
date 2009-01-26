@@ -51,6 +51,11 @@ class PltHandler:
         self.extAppExe = self.app.getGlobalConfig().get("main",
                 "plugin_ploticus_exePath", "")
         
+        if self.extAppExe:
+            self.extAppExe = os.path.join(self.app.getWikiAppDir(),
+                    self.extAppExe)
+        
+
     def taskEnd(self):
         """
         Called after export task ended and after the last call to

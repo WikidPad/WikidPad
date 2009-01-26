@@ -1,7 +1,15 @@
 ﻿++ Change Log
 
 
-Dec. 27, 2008 (1.8rc19)
+Jan. 26, 2009 (1.8final)
+
+    * Bug fixed: Linux: Function keys produced characters
+    * Bug fixed: Sqlite: Bad conversion of object ids for
+      user functions
+
+
+
+Dec. 27, 2008 (1.8rc19, repository revision in "stable-1.8" branch: 170)
 
     * Bug fixed: Tree auto-follow with Gadfly backend did not work
       if going to a non-existing page (even if it was shown in tree)

@@ -380,6 +380,9 @@ class App(wx.App):
     def getGlobalConfig(self):
         return self.globalConfig
 
+    def getWikiAppDir(self):
+        return self.wikiAppDir
+
     def getLowResources(self):
         """
         Return state of the low resources global setting
