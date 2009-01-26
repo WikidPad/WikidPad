@@ -188,12 +188,14 @@ if SHFileOperationW is not None:
         dstDir = os.path.dirname(dstPath)
             
         if not os.path.exists(pathEnc(dstDir)):
-            os.makedirs(dstDir)
+            os.makedirs(pathEnc(dstDir))
         
         fileOp = SHFILEOPSTRUCTW()
-        
+
         srcPathWc = ctypes.c_wchar_p(srcPath + u"\0")
         dstPathWc = ctypes.c_wchar_p(dstPath + u"\0")
+#         srcPathWc = ctypes.c_wchar_p(srcPath + u"\0\0")
+#         dstPathWc = ctypes.c_wchar_p(dstPath + u"\0\0")
     
         fileOp.hwnd = 0
         fileOp.wFunc = FO_COPY

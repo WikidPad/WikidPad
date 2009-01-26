@@ -470,17 +470,13 @@ class HtmlXmlExporter(AbstractExporter):
                 for rsf in self.referencedStorageFiles:
                     OsAbstract.copyFile(join(wikiPath, rsf),
                             join(self.exportDest, rsf))
+#                     OsAbstract.copyFile(abspath(join(wikiPath, rsf)),
+#                             abspath(join(self.exportDest, rsf)))
 
 
         if self.mainControl.getConfig().getboolean(
                 "main", "start_browser_after_export") and browserFile:
             OsAbstract.startFile(self.mainControl, browserFile)
-#             if Configuration.isWindows():
-#                  os.startfile(startfile)
-#                 # os.startfile(mbcsEnc(link2, "replace")[0])
-#             else:
-#                 # Better solution?
-#                 wx.LaunchDefaultBrowser(startfile)    # TODO
 
         self.tempFileSet.reset()
         self.tempFileSet = None

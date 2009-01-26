@@ -2,6 +2,7 @@
 data_dir = data
 
 [main]
+wikipagetitle_creationmode = 1
 footnotes_as_wikiwords = False
 last_wiki_word = WikidPadHelp
 hotkey_showhide_bywiki = 
@@ -10,12 +11,11 @@ tree_expandednodes_descriptorpathes_views =
 filestorage_identity_filenamemustmatch = False
 wiki_icon = 
 wiki_name = WikidPadHelp
-wikipagetitle_creationmode = 1
+tree_expandednodes_descriptorpathes_main = 
 wikipagetitleprefix = ++
 wikipagetitle_fromlinktitle = True
 first_wiki_word = WikidPadHelp
 tree_expandednodes_rememberduration = 1
-tree_expandednodes_descriptorpathes_main = 
 tree_last_root_wiki_word = WikidPadHelp
 tree_force_scratchpad_visibility = True
 further_wiki_words = 

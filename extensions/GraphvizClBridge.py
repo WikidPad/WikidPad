@@ -63,7 +63,8 @@ class GraphVizBaseHandler:
             return
             
         exeName = self.app.getGlobalConfig().get("main", self.EXECONFIGKEY, "")
-        self.extAppExe = os.path.join(dirPath, exeName)
+        self.extAppExe = os.path.join(self.app.getWikiAppDir(), dirPath, exeName)
+
 
         
     def taskEnd(self):

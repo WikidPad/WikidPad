@@ -15,6 +15,9 @@ from WikiWordListPopup import WikiWordListPopup
 
 
 class TimePresentationBase:
+    """
+    Basic functionality for a timeline or calendar panel.
+    """
     def __init__(self, mainControl, wikiWordFilter):
         
         self.mainControl = mainControl
@@ -106,7 +109,9 @@ class TimePresentationBase:
         if self.wikiWordListPopup is not None:
             self.wikiWordListPopup.Unbind(wx.EVT_WINDOW_DESTROY)
             self.wikiWordListPopup.Unbind(wx.EVT_LEAVE_WINDOW)
-            self.wikiWordListPopup.Destroy()
+            self.wikiWordListPopup.Close()
+#             self.wikiWordListPopup.Show(False)
+#             self.wikiWordListPopup.Destroy()
 
         self.wikiWordListPopup = popup
 
@@ -148,7 +153,7 @@ class TimePresentationBase:
             self.wikiWordListPopup.Show()
             if focus is not None:
                 focus.SetFocus()
-            
+
 
 
     def OnMouseMotion(self, evt):

@@ -51,7 +51,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         self.DeleteAllItems()
         self.clientHeight = self.GetClientSizeTuple()[1]
         
-        self.visibleItemCount = (self.clientHeight - 4) // self.itemHeight
+        self.visibleItemCount = (self.clientHeight - 6) // self.itemHeight
         
         self.contextMenuWikiWords = IdRecycler()  # {menuid: wiki word to go to}
         self.listContent = [] # Tuples (wx.DateTime day, <number of wikiwords for day>)
@@ -105,6 +105,11 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
         size = self.GetSize()
 
         self.clientHeight = size.GetHeight()
+        
+        if self.clientHeight - 6 < self.itemHeight:
+            # Doesn't make sense to calculate further
+            # This may especially happen for the initial call on Linux
+            return
 
         self.visibleItemCount = (self.clientHeight - 6) // self.itemHeight
 

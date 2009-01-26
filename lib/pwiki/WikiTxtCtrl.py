@@ -2720,7 +2720,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if evt.ControlDown() or key < 32:
             evt.Skip()
             return
-            
+
         if key >= wx.WXK_START and (not isUnicode() or evt.GetUnicodeKey() != key):
             evt.Skip()
             return

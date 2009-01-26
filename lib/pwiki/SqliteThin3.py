@@ -617,7 +617,7 @@ class SqliteDb3:
         _sqliteTransObjects[id(func)] = func
         # TODO returns int
         self.errhandler(_dll.sqlite3_create_function(self._dbpointer, 
-                funcname, c_int(nArg), c_int(textRep), c_int(id(func)),
+                funcname, c_int(nArg), c_int(textRep), c_uint(id(func)),
                 _FUNC_CALLBACK, None, None))
 
 
@@ -763,7 +763,7 @@ del %s
 # void (*xFunc)(sqlite3_context*,int,sqlite3_value**)
 FUNC_CALLBACK_TYPE = CFUNCTYPE(None, c_void_p, c_int, POINTER(c_void_p))
 
-_dll.sqlite3_user_data.restype = c_int
+_dll.sqlite3_user_data.restype = c_uint
 
 def _pyFuncCallback(contextptr, nValues, valueptrptr):
     

@@ -51,6 +51,10 @@ class GptHandler:
         self.extAppExe = self.app.getGlobalConfig().get("main",
                 "plugin_gnuplot_exePath", "")
         
+        if self.extAppExe:
+            self.extAppExe = os.path.join(self.app.getWikiAppDir(),
+                    self.extAppExe)
+
     def taskEnd(self):
         """
         Called after export task ended and after the last call to
@@ -76,7 +80,7 @@ class GptHandler:
         Meaning and type of return value is solely defined by the type
         of the calling exporter.
         
-        For HtmlXmlExporter a unistring is returned with the HTML code
+        For HtmlExporter a unistring is returned with the HTML code
         to insert instead of the insertion.        
         """
         if not insToken.value:

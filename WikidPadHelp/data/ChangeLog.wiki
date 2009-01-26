@@ -1,7 +1,17 @@
 ﻿++ Change Log
 
 
-Dec. 27, 2008 (1.9beta21)
+Jan. 26, 2009 (1.9rc01)
+
+    * Bug fixed: Linux: Function keys produced characters
+    * Bug fixed: Linux: Timeline contained initially only
+      one item
+    * Bug fixed: Sqlite: Bad conversion of object ids for
+      user functions
+
+
+
+Dec. 27, 2008 (1.9beta21, repository revision in "mbutscher" branch: 170)
 
     * Bug fixed: Tree auto-follow with Gadfly backend did not work
       if going to a non-existing page (even if it was shown in tree)

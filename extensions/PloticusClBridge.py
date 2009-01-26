@@ -56,6 +56,10 @@ class PltHandler:
         self.extAppExe = self.app.getGlobalConfig().get("main",
                 "plugin_ploticus_exePath", "")
         
+        if self.extAppExe:
+            self.extAppExe = os.path.join(self.app.getWikiAppDir(),
+                    self.extAppExe)
+        
         if self.app.getGlobalConfig().getint("main",
                 "plugin_ploticus_outputFormat", OUTPUT_FORMAT_GIF) == OUTPUT_FORMAT_GIF:
             self.outputSuffix = ".gif"

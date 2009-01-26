@@ -2062,6 +2062,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if accP != (None, None):
                 accs.append((accP[0], accP[1], menuId))
 
+        if Configuration.isLinux():   # Actually if wxGTK
+            accs += [(wx.ACCEL_NORMAL, fkey, GUI_ID.SPECIAL_EAT_KEY)
+                    for fkey in range(wx.WXK_F1, wx.WXK_F24 + 1)] + \
+                    [(wx.ACCEL_SHIFT, fkey, GUI_ID.SPECIAL_EAT_KEY)
+                    for fkey in range(wx.WXK_F1, wx.WXK_F24 + 1)]
+    
+            wx.EVT_MENU(self, GUI_ID.SPECIAL_EAT_KEY, lambda evt: None)
+
         self.SetAcceleratorTable(wx.AcceleratorTable(accs))
 
         # Check if window should stay on top
