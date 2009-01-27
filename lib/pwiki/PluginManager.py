@@ -149,20 +149,23 @@ class PluginManager(object):
                 continue
             files = os.listdir(directory)
             for name in files:
-                module = None
-                fullname = os.path.join(directory, name)
-                ( moduleName, ext ) = os.path.splitext(name)
-                if name in exclusions:
-                    continue
-                if os.path.isfile(fullname) and ext == '.py':
-                    with open(fullname) as f:
-                        packageName = "cruelimportExtensionsPackage%i" % dirNum
-
-                        module = imp.load_module(packageName + "." + moduleName, f,
-                                pathEnc(fullname), (".py", "r", imp.PY_SOURCE))
-                if module and hasattr(module, "WIKIDPAD_PLUGIN"):
-                    if self.registerPlugin(module):
-                        exclusions.append(name)
+                try:
+                    module = None
+                    fullname = os.path.join(directory, name)
+                    ( moduleName, ext ) = os.path.splitext(name)
+                    if name in exclusions:
+                        continue
+                    if os.path.isfile(fullname) and ext == '.py':
+                        with open(fullname) as f:
+                            packageName = "cruelimportExtensionsPackage%i" % dirNum
+    
+                            module = imp.load_module(packageName + "." + moduleName, f,
+                                    pathEnc(fullname), (".py", "r", imp.PY_SOURCE))
+                    if module and hasattr(module, "WIKIDPAD_PLUGIN"):
+                        if self.registerPlugin(module):
+                            exclusions.append(name)
+                except:
+                    traceback.print_exc()
             del sys.path[-1]
           
     def importDirectory(self, name, add_to_sys_modules = False): 

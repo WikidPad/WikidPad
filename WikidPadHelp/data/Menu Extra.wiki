@@ -1,8 +1,20 @@
 ﻿++ Menu Extra
 
-Export
-import
-Scripts
-    Eval
-    Run Function #
-Options
+++ Export
+Shows a dialog to set precisely what to export, whereto and in which format. See [WikiExport].
+
+++ Import
+Shows a dialog to import wiki pages into wiki. See [WikiImport].
+
+++ Scripts
+Allows execution of Python scripts. See [InlinePythonEval].
+
++++ Eval
+If text is selected it is evaluated and result is inserted after it (useful as calculator).
+If no text selected, all scripts on the page, including 
+
++++ Run Function #
+Run one of six numbered scripts on the page (or imported from another one).
+
+++ Options
+Starts the options dialog. See [OptionsDialog].

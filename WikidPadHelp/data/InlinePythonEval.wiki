@@ -91,4 +91,3 @@ Highlight the line below and press CTRL-3
 c:\this path\will be encoded.txt
 
 <% 3: lib.encodeSelection(editor) %>
-

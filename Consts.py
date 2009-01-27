@@ -23,10 +23,11 @@ from pwiki.Enum import Enumeration
 # (2, 0, 200, 0) is 2.0final
 
 VERSION_TUPLE = ("wikidPad", 2, 0, 1, 0)
-VERSION_STRING = "wikidPad 2.0alpha1"
+VERSION_STRING = "wikidPad 2.0alpha01"
 HOMEPAGE = u"http://wikidpad.sourceforge.net"
 
 
+# Remove this when going into 2.0beta phase!!!
 DEADBLOCKTIMEOUT = 40
 
 

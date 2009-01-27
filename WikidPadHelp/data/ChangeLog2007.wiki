@@ -1,0 +1,400 @@
+﻿++ Change Log2007
+
+Dec. 27, 2007 (1.9beta14, repository revision in "mbutscher" branch: 138)
+
+    * New letter for time formats (e.g. Statusbar time format option):
+      %u shows ISO-8601 weekday number (1=monday, 7=sunday)
+    * Windows: Option to set a prefix string before each snippet from
+      clipboard catcher (prefix and suffix now support time formats).
+      See OptionsDialog#*Prepend# before# clipboard# snippet*
+    * Non-Windows: Support for a file-launcher program which takes the
+      path to a file and opens the right application. Normally the
+      "xdg-open" script does this.
+      See OptionsDialog#*Path# to# file# launcher*
+    * Support for multi-value attributes and quoted values.
+      See WikiDocumentAttributes
+    * New attribute "paragraph_mode" to control if single newlines
+      in text should be ignored and only an empty line starts a
+      new paragraph. See WikiDocumentAttributes#*paragraph_mode:
+    * Original Gadfly DB type: Faster algorithm to find opened word
+      in tree (thanks to Geoff)
+
+    * Bug fixed: Bad handling of empty input in "Open Wiki Word" dialog.
+
+
+
+Nov. 26, 2007 (1.9beta13, repository revision in "mbutscher" branch: 136)
+
+    * Support for internationalization of screen messages and dialogs
+      (GUI). Not supported are: attributes (e.g. "\[alias: WikiWord]"),
+      shortcuts ("Ctrl-A"), external plugins, some internal messages
+      (e.g. regular expression errors)
+
+    * Bug fixed for Windows: An always visible taskbar could partly
+      hide popup and tooltip windows
+
+    * Internal bug fixed: Deleting plugin modules from a plugin API
+      didn't work
+
+
+
+Oct. 27, 2007 (1.9beta12, repository revision in "mbutscher" branch: 134)
+
+    * Support for customizing favorite wikis. See FavoriteWikis
+    * Command line option to rebuild wiki (patch by mstute).
+      See CommandLineSupport#*--rebuild*
+    * Lock file for wiki to avoid to inadvertently open same wiki
+      twice. See WikiLockFile
+    * No more page history for whole window, instead history for
+      each tab
+    * Option to use single process is now on by default
+    * Better handling of changes in global text blocks and
+      recent file list if multiple WikidPad windows are open
+      in same process.
+    * When hiding a focused tool window, focus is transferred
+      to main area panel.
+
+    * Bug fixed: An added icon/color property always used
+      default brackets [], even if changed in WikiSyntax.py
+    * Bug fixed: Linux/GTK: Opening context menu of quick
+      search result list crashed WikidPad.
+
+
+
+Sep. 30, 2007 (1.9beta11, repository revision in "mbutscher" branch: 131)
+
+    * Optional shortcut to focus fast search field
+    * Options for timeline to suppress "empty" days and to sort
+      dates descending. See OptionsDialog#++++# Time# view
+    * Options for timeline to switch off wiki page list
+      on hovering over date, instead showing it after clicking
+      on it is possible. See OptionsDialog#++++# Time# view
+    * Option to set number of separator lines between wiki pages
+      in single HTML page output.
+      See [Options HTML preview_export]#*Single# page# separator# lines*
+    * Larger default delays for autosave
+    * Possibility to set image size in percent.
+      See UrlLinking#++# URL# Appendix
+    * Shortcuts "ActivateLink", "ActivateLinkNewTab" and
+      "ActivateLink2" now also work in incremental search mode
+    
+    * Bug fixed: Updating wikis from WikidPad 1.1 failed
+    * Bug fixed: Source code did not work correctly with
+      wxPython 2.8 (OS not recognized properly)
+    * Bug fixed: Exception possible when running WikidPad from
+      commandline while doc structure window is open
+    * Bug fixed: Starting URLs with characters not in system
+      codepage failed
+    * Bug fixed: Wrong shortcuts shown in tooltips of toolbar
+      buttons
+
+
+
+Sep. 05, 2007 (1.9beta10, repository revision in "mbutscher" branch: 127)
+
+    * Bug fixed: OS not recognized if using source version on
+      Windows with wxPython 2.8
+    * Bug fixed: Linux/GTK: Mouse no longer responsive after
+      clicking (and a bit dragging) on tabs
+    * Bug fixed: Modification date was changed when saving
+      an open page even if page wasn't modified (forced saving
+      was used too often)
+    * Bug fixed: Template pages did not work
+
+
+
+Aug. 28, 2007 (1.9beta9, repository revision in "mbutscher" branch: 126)
+
+    * Very basic support for a time view/timeline. Much work to do
+      yet. See TimeViewWindow
+    * Option to set default directory where to start when
+      opening/creating a wiki.
+    * Attribute "template_head" to automatically change heading of
+      pages created from a template.
+      See [Templates]#+++# Automatic# heading# replacement
+
+    * Bug fixed: Plugin "Create new page" did not work with
+      "Original Sqlite" databases
+    * Bug fixed: Linux/GTK: Dialog not focused properly
+    * Bug fixed: When cloning window only first wiki word tab was
+      shown in the new window
+
+
+
+Jul 27, 2007 (1.9beta8, repository revision in "mbutscher" branch: 123)
+
+    * New document structure window. See PageStructureWindow
+    * Search dialogs (except incremental search) now show an error
+      box with meaningful message when searching for a bad regular
+      expression.
+    
+    * Bug fixed: Font face choice dialog from options dialog did
+      not work
+    * Bug fixed: Linux/GTK: Changes of frame layout crashed WikidPad
+    * Bug fixed: Linux/GTK: Tree has wrong mouse pointer
+    
+    * Internal: DocPage.getLiveText is cached now
+    * Internal: DocPagePresenter now has stdDialog(), displayMessage()
+      and displayErrorMessage() functions to make plugins more
+      compatible to prev. versions.
+    * Internal: Generation of live PageAst centralized in DocPages and
+      made (nearly) thread-safe.
+
+
+
+Jul 04, 2007 (1.9beta7, repository revision in "mbutscher" branch: 121)
+
+    * Limited (no error messages) support for gnuplot.
+      See ExternalGraphicalApplications
+    * Option to have no title on newly generated pages.
+      See OptionsDialog#*Wikiword# to# title*
+    * Possibility to save images on the clipboard as files
+      in the "files" directory of a wiki.
+      See OptionsDialog#+++++# Image# pasting
+    * Option to set title of HTML table of contents.
+      See [Options HTML preview_export]#*Title# of# toc*
+    * New attribute "short_hint" to provide tooltip text
+      when hovering with the mouse over a wikiword having this
+      attribute. Also option to set tooltip appearance delay for
+      editor. See WikiDocumentAttributes#*short_hint*
+    
+    * Small enhancements in spell checker dialog.
+    * Using the shortcut to display wiki-wide search or replace
+      dialog while the dialog is open switches focus to it.
+    * Ctrl-F4 closes current tab (not customizable)
+    
+    * Bug fixed: Setting Scintilla codepage fails on non-Unicode
+      wxPython (does not affect Windows binary)
+
+
+
+May 27, 2007 (1.9beta6, repository revision in "mbutscher" branch: 119)
+
+    * New entry in "KeyBindings.py" for "ToggleCurrentFolding"
+      which allows to toggle the folding in the current line.
+    * Headings extended up to level 15.
+    * New version of export/import format "multipage text" which
+      can now store creation and modification date of a page as
+      well as saved searches and wiki-bound functional pages
+      (to allow a simple and complete transfer of a whole wiki
+      from one database type to another).
+    * When opening a wiki page in a new tab in background the open
+      dialog or the search results popup window stay open.
+    * Better behavior of recent files menu.
+    * Tree shows tooltips if current entry is too long to fit
+      in the window.
+    * Function to repair folding visibility to avoid folded (hidden)
+      lines which can't be unfolded anymore when header line
+      vanishes.
+    * Slightly more reasonable sorting of auto-complete suggestions.
+    * New format for main window title.
+    * "wiki:" URLs can contain now "page=" and "anchor=" parameters
+      to jump to particular pages and anchors in the pages.
+      See UrlLinking#++# Wiki:# URLs
+    * Possibility to use tabulator instead of | to delimit cells.
+      See TextFormatting#+++# Tables
+    
+    * Option to control if links to wikiwords should be renamed
+      when wikiword is renamed, can be either be "no", "yes" or
+      "ask for each renaming operation" (which is default and was
+      also the previous behavior).
+      See OptionsDialog#*Rename# links# when# renaming# wiki# word*
+    * Option to automatically hide the tree(s) after selecting
+      an entry in it. See OptionsDialog#*Tree# auto-hide*
+    * Wiki-specific option to set the systray icon (does not work
+      for main window icon). See OptionsDialog#*Wiki# icon*
+    
+    * Internal: customtreectrl.py updated to be based now on
+      rev. 1.14 in wxWidgets repository.
+    * Internal: Changes to allow usage of something else than
+      single brackets to tag wikiwords, attributes and insertions.
+    * Bug fixed: When renaming wikiword with non-ascii or
+      non-alphanumeric characters and modifying links, non-ascii
+      characters were preceded with backslashes
+    * Bug fixed: Sometimes the parent list of a page is not updated
+      after changes.
+    * Internal bug fixed: When calling PersonalWikiFrame.openWiki
+      with a relative path by a script or plugin, errors may occur.
+
+
+
+Apr. 28, 2007 (1.9beta5, repository revision in "mbutscher" branch: 116)
+
+    * Bug fixed: Preview didn't work with titled wikiwords
+    * Bug fixed: When renaming wikiword with non-ascii characters
+      and modifying links, non-ascii characters were preceded with
+      backslashes
+
+
+
+Apr. 27, 2007 (1.9beta4, repository revision in "mbutscher" branch: 114)
+
+    * Clicking on footnotes moves to the last footnote on page
+      (footnote anchor). See [Footnotes]
+    * Support for "auto_link" attribute: find (groups of) words
+      that match a wiki word and make them links. Precise behavior
+      may change in the future.
+      See [WikiDocumentAttributes]#*auto_link*
+    * Attribute "view_pane" to control if a page should show editor
+      or preview by default when opening it.
+      See [WikiDocumentAttributes]#*view_pane*
+    * Support for "win" modifier (=Windows key) for hotkeys.
+      See OptionsDialog#*App-bound# hotkey*
+    * Added wiki-bound options to control titles of newly created
+      pages.
+    * Option to write tabulators in editor
+      (Menu: "Editor"->"Settings"->"Tabs to spaces")
+    * List of all open wiki words is stored between sessions
+      (does not work if "First word at startup" is set in options).
+    * Right clicking on fold margin in editor shows fold menu.
+    
+    * Rebuild is now slower, but more reliable.
+    * Better update of a page if some important attributes were
+      changed.
+    * Directory "user_extensions" can now additionally be placed
+      inside ".WikidPadGlobals" directory in configuration dir.
+      (TODO: documentation).
+    * Some changes to produce more standard-conforming HTML.
+    
+    * Internal: Added function \PersonalWikiFrame.reloadMenuPlugins
+      to reload plugins while WikidPad is active (for developers).
+    * Internal: New subpackage rtlibRepl (runtime library
+      replacement) to replace things from Python runtime which
+      might need change, currently used for re module.
+    * Internal: Some speedup and convenience changes in
+      customtreectrl.py
+    
+    * Bug fixed: editor context menu showed "Cut" and "Delete"
+      greyed out if pasting is not possible.
+    * Bug fixed: Links were sometimes not recognized when having
+      the same page in two tabs.
+    * Bug fixed: Some clipboard and drag&drop problems on Linux
+      (other problems exist yet).
+    * Bug fixed: Removed inefficiency when exporting large sets
+      of wiki pages with many links (very large trees).
+    * Bug fixed: "page" insertion did not work.
+    * Bug fixed: Visited pages where always marked modified if
+      folding was active.
+    * Bug fixed: Script blocks were executed even if made invalid
+      with preceding backslash.
+
+
+
+Mar. 28, 2007 (1.9beta3, repository revision in "mbutscher" branch: 111)
+
+    * Autocompletion support for todo items and anchor fragments.
+      See AutoCompletion.
+    * HTML exporter now creates links which only contain anchor
+      ("#somewhere") if linking to the same page.
+    * Pagewide and wikiwide searches support now a history (not
+      saved between sessions)
+    * For "Replace All" operations the number of replacements is
+      given at the end of operation.
+
+    * Support for folding, includes storing of fold settings
+      between sessions. See [Folding].
+    * HTML entities like e.g. &nbsp; are handled now.
+      See TextFormatting!html.
+    * System-wide hotkey to show/hide WikidPad (probably Windows
+      only). Hotkeys are possible to be bound to the app and/or
+      a particular wiki. See OptionsDialog#*App-bound# hotkey*
+    * Option to offer closing bracket for bracketed wiki words
+      on autocompletion.
+      See OptionsDialog#*Append# closing# bracket# on# auto-complete*
+    * Option to play a sound each time clipboard catcher caught
+      text. See OptionsDialog#++++# Clipboard# catcher
+    * New menu items in system tray menu to control clipboard
+      catcher (for Windows).
+    * New pages found during rebuild (for Original ... db types)
+      get the modification date of the .wiki file.
+
+    * Bug fixed (at least for Windows 2K/XP): Wiki words with
+      foreign characters were not recognized or recognized with
+      wrong characters after rebuild of wikis with "Original ..."
+      types.
+    * Bug fixed: After rebuild of a database, wikiwords were no
+      longer recognized as existing (restart was needed).
+    * Bug (probably) fixed: Attribute \[child_sort_order: natural]
+      didn't always work properly.
+    * Bugs fixed: Some Linux quirks, but enough remaining yet.
+
+    * Internal: Changed wxPython namespace use from the
+      old-fashioned (wxFrame) to the "wx" namespace (wx.Frame).
+      There may be bugs yet.
+
+
+
+Feb. 26, 2007 (1.9beta2, repository revision in "mbutscher" branch: 106)
+
+    * Configurable shortcuts for showing of editor/preview,
+      switching between them
+    * Menu item, shortcut and toolbar icon to switch between
+      editor and preview (icon made by Zoltan)
+    * Support for middle mouse button and context menu to open
+      a word in a new tab. Works for editor, internal preview,
+      tree and wiki-wide search. Middle mouse button configurable
+      to open tab in fore- or background
+      (see OptionsDialog#*Middle# button# without# CTRL* )
+    * Buttons in "Open Wiki Word" dialog to open word in new
+      tab (fore-/background)
+    * Activation of [:page: ...] insertion like normal links
+    
+    * Option to set default destination directory for export
+      operations (see OptionsDialog#*Default# export# dir.* )
+    * Slightly better support for URLs in UTF-8 percent encoding,
+      also creates such URLs now. Some URLs from older versions
+      of WikidPad may not work any longer.
+    * Mouse cursor no longer changes to a hand if Ctrl is pressed
+      in editor and cursor is over a link (but works as before).
+    
+    * Filter to remove double clipboard pastes when using the
+      clipboard catcher with certain applications (e.g. Adobe Reader)
+    * Bug fixed: Creation of new wiki failed if no wiki was
+      currently loaded
+    * Bug fixed: Bad handling of wikiword links with non-ascii
+      characters in IE/Mozilla preview
+    * Bug fixed: Bad drag and drop support for tree items
+    * Bug fixed: Connection lines in tree not visible when using
+      anything else than Win 2K/XP
+    * Bug fixed: Saving of files didn't work sometimes; when
+      closing WikidPad a message "This operation requires an
+      open database" appeared under some circumstances.
+    * Bug fixed: PyDeadObjectError sometimes when closing WikidPad
+    * Bug "reduced": Instant wiki-wide search result window pops up
+      always on primary monitor in dual monitor systems.
+    * Bug fixed: getWikiWordsStartingWith(..., includeAliases=False)
+      failed for Original Sqlite (only needed for plugins)
+
+
+
+Jan. 28, 2007 (1.9beta1, repository revision in "mbutscher" branch: 103)
+
+    * Userinterface change, no more tabs for edit and preview,
+      but an arbitrary number of tabs for wiki pages, switching
+      between edit and preview by icons in toolbar or shortcuts
+    * Shortcut and menu item to open a selected wikiword in a
+      new tab
+    * New tree control which behaves and looks very similar (but
+      not identically) to the native one.
+    * Option to set text cursor color.
+      See OptionsDialog#*Text# cursor# color*
+    * Option to set selection foreground color.
+      See OptionsDialog#*Selection# fg.# color*
+
+    * More clear error message if no write access when closing wiki
+    * Patch to find sqlite3 library on Linux
+    * Bug fixed: Functional pages inside "modified-within" node
+    * Bug fixed: Non-existing pages found by search if page was
+      in cache yet
+    * Bug fixed: Possible crash when searching non-existing pages
+      in cache
+    * Bug fixed: Change of text color didn't affect some styles
+      (bold, headings, todo)
+    * Bug fixed: Link to page with spaces in name didn't work
+      with IE as preview
+    * Bug fixed: Masses of superfluous tree nodes when updating
+      tree on Linux
+    * Bug fixed: Integer division (e.g. 5/3) gave integer result
+      (e.g. 1) on expression evaluation
+    * Bug (hopefully) fixed: Temporarily generated images not shown
+      in IE 7 preview

@@ -19,22 +19,22 @@ Source: dist\wxmsw28uh_xrc_vc.dll; DestDir: {app}; Components: Program_files
 Source: dist\wxbase28uh_net_vc.dll; DestDir: {app}; Components: Program_files
 Source: dist\wxbase28uh_vc.dll; DestDir: {app}; Components: Program_files
 Source: dist\wxbase28uh_xml_vc.dll; DestDir: {app}; Components: Program_files
-Source: dist\_ctypes.pyd; DestDir: {app}; Components: Program_files
-Source: dist\_hashlib.pyd; DestDir: {app}; Components: Program_files
-Source: dist\pyexpat.pyd; DestDir: {app}; Components: Program_files
-Source: dist\_socket.pyd; DestDir: {app}; Components: Program_files
-Source: dist\select.pyd; DestDir: {app}; Components: Program_files
-Source: dist\wx._controls_.pyd; DestDir: {app}; Components: Program_files
-Source: dist\wx._core_.pyd; DestDir: {app}; Components: Program_files
-Source: dist\wx._gdi_.pyd; DestDir: {app}; Components: Program_files
-Source: dist\wx._html.pyd; DestDir: {app}; Components: Program_files
-Source: dist\wx._misc_.pyd; DestDir: {app}; Components: Program_files
-Source: dist\wx._stc.pyd; DestDir: {app}; Components: Program_files
-Source: dist\wx._windows_.pyd; DestDir: {app}; Components: Program_files
-Source: dist\wx._xrc.pyd; DestDir: {app}; Components: Program_files
+Source: dist\_ctypes.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\_hashlib.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\pyexpat.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\_socket.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\select.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\wx._controls_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\wx._core_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\wx._gdi_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\wx._html.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\wx._misc_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\wx._stc.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\wx._windows_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\wx._xrc.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\WikidPad.xrc; DestDir: {app}; Components: Program_files
 Source: dist\WikidPad_*.po; DestDir: {app}; Components: Program_files; Flags: ignoreversion sortfilesbyextension
-Source: dist\langlist.txt; DestDir: {app}; Components: Program_files; Flags: ignoreversion
+Source: dist\langlist.txt; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\gadfly.zip; DestDir: {app}; Components: Program_files
 Source: dist\library.zip; DestDir: {app}; Components: Program_files
 [Dirs]
@@ -49,18 +49,18 @@ Name: Program_files; Description: Main program files; Flags: fixed; Types: custo
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 2.0alpha1
+AppVerName=WikidPad 2.0alpha01
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
 VersionInfoVersion=2.0.1.0
-VersionInfoTextVersion=WikidPad 2.0alpha1
+VersionInfoTextVersion=WikidPad 2.0alpha01
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
-Compression=lzma/fast
-OutputBaseFilename=WikidPad-2.0alpha1
-InternalCompressLevel=none
+Compression=lzma/ultra
+OutputBaseFilename=WikidPad-2.0alpha01
+InternalCompressLevel=ultra
 AppCopyright=© 2005-2009 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
 [Icons]
@@ -92,9 +92,16 @@ Name: assocWiki; Description: Associate WikidPad with .wiki files
 Name: assocWikiUrl; Description: "Handle URLs with ""wiki:"" by WikidPad"
 [InstallDelete]
 Name: {app}\regexpr.cache; Type: files
+Name: {app}\zlib.pyd; Type: files
+; Name: {app}\extensions\WikiSyntax.py; Type: files
+
 [UninstallDelete]
 Name: {app}\regexpr.cache; Type: files
 Name: {app}\WikidPad_*.xrc; Type: files; Components: ; Tasks: 
+Name: {app}\extensions\*.pyc; Type: filesandordirs
+Name: {app}\extensions\*.pyo; Type: filesandordirs
+Name: {app}\extensions\wikidPadParser\*.pyc; Type: filesandordirs
+Name: {app}\extensions\wikidPadParser\*.pyo; Type: filesandordirs
 [Run]
 Filename: {app}\WikidPad.exe; WorkingDir: {app}; Description: Start WikidPad; Flags: postinstall skipifsilent nowait
 [Code]

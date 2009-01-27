@@ -296,9 +296,6 @@ class SingleThreadExecutor(object):
 
 
 
-
-
-
 def callInMainThread(fct, *args, **kwargs):
     if wx.Thread_IsMain() or not wx.GetApp().IsMainLoopRunning():
         return fct(*args, **kwargs)

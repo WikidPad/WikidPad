@@ -67,6 +67,7 @@ Then just start typing text with WikiWords to create your wiki.
 
 *Other/Questions*
 
+    * [Menus]
     * WikiMaintenance
     * WikidPadSupport
     * ChangeLog

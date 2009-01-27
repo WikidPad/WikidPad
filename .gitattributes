@@ -23,6 +23,7 @@ WikidPadHelp/data/ChangeLog2003.wiki -text
 WikidPadHelp/data/ChangeLog2004.wiki -text
 WikidPadHelp/data/ChangeLog2005.wiki -text
 WikidPadHelp/data/ChangeLog2006.wiki -text
+WikidPadHelp/data/ChangeLog2007.wiki -text
 WikidPadHelp/data/ChangingKeyBindings.wiki -text
 WikidPadHelp/data/ClipboardCatcher.wiki -text
 WikidPadHelp/data/Color[!!-~]AQUAMARINE.wiki -text
@@ -286,6 +287,7 @@ WikidPadHelp/data/Menu[!!-~]Tabs.wiki -text
 WikidPadHelp/data/Menu[!!-~]View.wiki -text
 WikidPadHelp/data/Menu[!!-~]Wiki[!!-~]Page.wiki -text
 WikidPadHelp/data/Menu[!!-~]Wiki.wiki -text
+WikidPadHelp/data/Menus.wiki -text
 WikidPadHelp/data/MigrationBetweenDbTypes.wiki -text
 WikidPadHelp/data/Multipage[!!-~]text[!!-~]format.wiki -text
 WikidPadHelp/data/Not[!!-~]Camel[!!-~]Case.wiki -text
@@ -361,6 +363,7 @@ extensions/PloticusClBridge.py -text
 extensions/Presentation.py -text
 extensions/WikidPadHooks.py -text
 extensions/WikidPadParserStub.py -text
+extensions/__init__.py -text
 extensions/autoNew.py -text
 extensions/referrals.py -text
 extensions/wikidPadParser/WikidPadParser.py -text

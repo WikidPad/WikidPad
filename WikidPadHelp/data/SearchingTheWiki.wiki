@@ -46,6 +46,9 @@ search and wiki
 
 Some operations are not available in "Anded" regex mode.
 
+*As is*
+All characters are taken as they are.
+
 *Case sensitive, Whole word*
 Choose here if case matters for the search pattern and/or if only whole words should be searched for
 
