@@ -1,3 +1,5 @@
+from __future__ import with_statement
+
 import threading, traceback, collections
 from thread import allocate_lock as _allocate_lock
 from time import time as _time, sleep as _sleep

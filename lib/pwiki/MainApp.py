@@ -14,6 +14,7 @@ import wx, wx.xrc
 # srePersistent.loadCodeCache()
 
 from wxHelper import IconCache
+from Consts import CONFIG_FILENAME, CONFIG_GLOBALS_DIRNAME
 from MiscEvent import KeyFunctionSink, MiscEventSourceMixin
 
 from WikiExceptions import *
@@ -53,9 +54,9 @@ def findDirs():
     globalConfigDir = None
 
     # This allows to keep the program with config on an USB stick
-    if os.path.exists(pathEnc(os.path.join(wikiAppDir, "WikidPad.config"))):
+    if os.path.exists(pathEnc(os.path.join(wikiAppDir, CONFIG_FILENAME))):
         globalConfigDir = wikiAppDir
-    elif os.path.exists(pathEnc(os.path.join(wikiAppDir, ".WikidPad.config"))):
+    elif os.path.exists(pathEnc(os.path.join(wikiAppDir, "." + CONFIG_FILENAME))):
         globalConfigDir = wikiAppDir
     else:
         globalConfigDir = os.environ.get("HOME")
@@ -145,16 +146,16 @@ class App(wx.App, MiscEventSourceMixin):
         # Find/create global config subdirectory "WikidPadGlobals"
         if Configuration.isWindows():
             defaultGlobalConfigSubDir = os.path.join(self.globalConfigDir,
-                    "WikidPadGlobals")
+                    CONFIG_GLOBALS_DIRNAME)
         else:
             defaultGlobalConfigSubDir = os.path.join(self.globalConfigDir,
-                    ".WikidPadGlobals")
+                    "." + CONFIG_GLOBALS_DIRNAME)
 
         self.globalConfigSubDir = os.path.join(self.globalConfigDir,
-                "WikidPadGlobals")
+                CONFIG_GLOBALS_DIRNAME)
         if not os.path.exists(pathEnc(self.globalConfigSubDir)):
             self.globalConfigSubDir = os.path.join(self.globalConfigDir,
-                    ".WikidPadGlobals")
+                    "." + CONFIG_GLOBALS_DIRNAME)
             if not os.path.exists(pathEnc(self.globalConfigSubDir)):
                 self.globalConfigSubDir = defaultGlobalConfigSubDir
                 os.mkdir(self.globalConfigSubDir)
@@ -181,12 +182,12 @@ class App(wx.App, MiscEventSourceMixin):
         # Find/create global config file "WikidPad.config"
         if Configuration.isWindows():
             defaultGlobalConfigLoc = os.path.join(self.globalConfigDir,
-                    "WikidPad.config")
+                    CONFIG_FILENAME)
         else:
             defaultGlobalConfigLoc = os.path.join(self.globalConfigDir,
-                    ".WikidPad.config")
+                    "." + CONFIG_FILENAME)
 
-        globalConfigLoc = os.path.join(self.globalConfigDir, "WikidPad.config")
+        globalConfigLoc = os.path.join(self.globalConfigDir, CONFIG_FILENAME)
         if os.path.exists(pathEnc(globalConfigLoc)):
             try:
                 self.globalConfig.loadConfig(globalConfigLoc)
@@ -194,7 +195,7 @@ class App(wx.App, MiscEventSourceMixin):
                 self.createDefaultGlobalConfig(globalConfigLoc)
         else:
             globalConfigLoc = os.path.join(self.globalConfigDir,
-                    ".WikidPad.config")
+                    "." + CONFIG_FILENAME)
             if os.path.exists(pathEnc(globalConfigLoc)):
                 try:
                     self.globalConfig.loadConfig(globalConfigLoc)

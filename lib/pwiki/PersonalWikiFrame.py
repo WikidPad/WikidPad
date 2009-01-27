@@ -4605,7 +4605,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         if not skipConfirm:
             result = wx.MessageBox(_(u"Are you sure you want to start a full "
-                    u"rebuild of wiki in background?<d"),
+                    u"rebuild of wiki in background?"),
                     _(u'Initiate update'),
                     wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
 

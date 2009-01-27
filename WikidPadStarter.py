@@ -7,6 +7,8 @@ if not hasattr(sys, 'frozen'):
     sys.path.append("lib")
 #     sys.path.append(r"C:\Daten\Projekte\Wikidpad\Next20\lib")
 
+from Consts import CONFIG_FILENAME, CONFIG_GLOBALS_DIRNAME
+
 
 # Switch off warnings about my special import management
 warnings.simplefilter('ignore', RuntimeWarning)
@@ -259,13 +261,15 @@ if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
         
     try:
         try:
-            globalConfigSubDir = os.path.join(globalConfigDir, "WikidPadGlobals")
+            globalConfigSubDir = os.path.join(globalConfigDir,
+                    CONFIG_GLOBALS_DIRNAME)
             shutil.rmtree(globalConfigSubDir, True)
         except:
             pass
 
         try:
-            globalConfigSubDir = os.path.join(globalConfigDir, ".WikidPadGlobals")
+            globalConfigSubDir = os.path.join(globalConfigDir,
+                    "." + CONFIG_GLOBALS_DIRNAME)
             shutil.rmtree(globalConfigSubDir, True)
         except:
             pass
@@ -282,12 +286,12 @@ if len(sys.argv) == 2 and sys.argv[1] == "--deleteconfig":
 #             pass
 
         try:
-            os.remove(os.path.join(globalConfigDir, "WikidPad.config"))
+            os.remove(os.path.join(globalConfigDir, CONFIG_FILENAME))
         except:
             pass
 
         try:
-            os.remove(os.path.join(globalConfigDir, ".WikidPad.config"))
+            os.remove(os.path.join(globalConfigDir, "." + CONFIG_FILENAME))
         except:
             pass
             
