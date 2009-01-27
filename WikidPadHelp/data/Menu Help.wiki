@@ -1,0 +1,6 @@
+﻿++ Menu Help
+
+Open help wiki
+Visit Homepage
+Show License
+About

@@ -1,0 +1,40 @@
+﻿++ Multipage text format
+
+This format is intended to save and transfer a set of pages as a single, human readable and editable text file.
+
+The file must be encoded either as UTF-8 with appropriate byte-order-mark or use the default system encoding of the operating system. The exporter always generates UTF-8 files.
+
+
+If the *first line* starts with
+
+#!
+
+it is ignored. This will later allow to handle these text files as a kind of Unix shell scripts which can be imported just by "executing" them. Currently the exporter doesn't generate such a line and there is no commandline option to run the importer.
+
+
+The *first header line* (which might be the actual second line, see above) consists of "Multipage text format " followed by a number. This identifies the file as mpt file. The number gives the format version. Currently this whole line has to be:
+
+Multipage text format 0
+
+or 
+
+Multipage text format 1
+
+The *second header line* starts with "Separator: " followed by arbitrary characters. The characters define the separator line which will then be used to separate the wiki pages (and other items) from each other. Therefore the wiki pages included in the multipage text file must not contain such a line as normal text.
+
+The *exporter tries to construct this separator* by creating 25 random alphanumeric ASCII characters enclosed by five dashes left and right, e.g. "-----s6ngFAIHeY6QewI4Bq26i6E3m-----". The exporter tries 15 of such random strings.
+If all these exist already, it gives up with an error message ("No usable separator found").
+
+
++++ Format version 0
+
+After the header the actual pages begin. Each page consists of a line with its name (=the wiki word) followed by lines of content as they are shown in WikidPad. It ends either by the end of file or by a separator line (see above).
+
+
++++ Format version 1
+
+After the header the actual pages begin. The first line defines which item is defined here. If the name starts with "funcpage/" it is a functional page, the content follows. If it starts with "savedsearch/" it is a saved search, the content is binary and encoded as base64.
+
+If the name starts with "wikipage/" it is a wiki page, the name of the page follows on the same line. The next line contains three dates separated by each other by two spaces "  ". Each date is formatted YYYY-MM-DD/hh:mm:ss. The first date is the modification date of the page, second is the creation date, third will become the last visit date (currently not supported).
+
+

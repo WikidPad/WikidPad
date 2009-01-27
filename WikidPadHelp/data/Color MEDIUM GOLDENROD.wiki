@@ -1,0 +1,2 @@
+﻿++ Color MEDIUM GOLDENROD
+[color: MEDIUM GOLDENROD]

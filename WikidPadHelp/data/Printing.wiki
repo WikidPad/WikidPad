@@ -1,0 +1,56 @@
+﻿++ Printing
+
+The whole printing is controlled by the "Print" dialog in the "Wiki" menu.
+
++++ Definitions
+
+*wiki page*: Content assigned to a particular wiki word
+*print page*: Physical sheet of paper or preview of it
+
+
++++ A few important remarks
+
+    * The number of print pages shown in the preview dialog does not
+      always match the number when really printing (technical problem)
+    * Preparing print or preview needs some time so please be patient
+    * Depending on printer and printer driver the real margins may be
+      a bit larger as set in the page setup dialog.
+
+
+The dialog has the following fields and buttons:
+
+++++ What to print
+Same as [WikiExport#What to export]
+
+
+++++ Print as
+Choose as what it should be printed (currently only "Plain text", which means the wiki pages are printed without any formatting)
+
+
+++++ Page separator
+Enter here with what the wiki pages (not the print pages) should be separated. You can use the same escapes as in the replace field of the "Find and Replace" dialog in regular expression mode.
+
+Of special interest might be:
+
+\n  New line
+\f  New print page
+\\  A single backslash
+
+The default are four newlines between the wiki pages.
+
+
+++++ Preview
+Open a preview window for the printing.
+
+
+++++ Page Setup
+Open a page setup dialog where you can set margins for the print page, print page size, orientation and the printer to use. Only the margin settings are stored between application sessions.
+
+
+++++ Choose plain text font
+Choose the font to use for plain text printing.
+
+
+++++ Print
+Opens the usual print dialog to choose printer and which print pages to print. After pressing "OK" the printing starts.
+

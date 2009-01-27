@@ -1,0 +1,160 @@
+﻿++ Change Log 2004
+
+Dec. 13, 2004
+
+    1. Added support for export:false] attribute.  Setting this attribute
+       to false will cause it to not be included in exports.
+    2. Fixed issue with international characters in [Not Camel Case] links
+       (thanks to Gilles Lenfant).
+    3. [Not Camel Case] links also now autocomplete properly.
+
+Nov. 14, 2004
+
+    1. Added ability to RebuildTheWiki from disk.
+
+Oct. 11, 2004
+
+    1. Added support for sub-tree export.
+    2. Exports now (attempt) to indent indented text using \<blockquote>.
+    3. Python runtime updated.
+    4. I attempted to update to the latest wxWindows and things didn't go
+       well. Ended up reverting back.
+    5. Additional minor fixes.
+
+July 24, 2004
+
+    1. Added child_sort_order attribute support.  A parent node can set
+       child_sort_order to "ascending", "descending", or "unsorted" to control
+       the order of the child nodes in the tree.
+       
+       [child_sort_order: unsorted]
+       
+    2. User can now place their extensions in "user_extensions" under the
+       wikidPad install directory.  This directory will not be touched when
+       upgrading wikidPad.  Copy the files in the "extensions" directory to
+       get started.
+
+    3. Added URL protocol handler for wikidPad so that wiki urls will open
+       wikidpad. For example:
+       
+       wiki://C|/Program%20Files/WikidPad/WikidPadHelp/data/ChangeLog.wiki
+       
+       Will open up this page in a new instance of wikidPad.  This will work
+       outside of wikidPad as well, from Internet Explorer for example.  The
+       easiest way to create a link to another wiki from within a wiki page
+       is to just drag and drop the .wiki file onto the text editor.
+       
+    4. Fixed some issues with the html export.  Specifically bulleted list
+       problems.  Also, ignore blocks << >> weren't exported properly.
+
+July 6, 2004
+
+    1. If wikidPad is closed when minimized don't remember the minimized sizes.
+    2. Highlighted text is only evaluated when Ctrl-E is pressed now, not Ctrl-1-6.
+       This lets me implement this example InlinePythonEval#encodeSelection.
+
+May. 31, 2004
+
+    1. Fixed a bug with todo lists under Views. Actual todo list items weren't
+       displayed, only the todo list categories were.
+    2. Added support passing the wiki word to open on the command line.
+        wikidpad.exe wikiroot.wiki wikiword        
+       You can also pass in the name of a wiki word file and wikidpad will
+       open the wiki for that word and then open the word.
+        wikidpad.exe path_to_wiki_word_file.wiki
+       This also means that you can now double click on a wiki word file
+       and wikidpad will open the wiki for the word, and then open the word.
+
+May. 23, 2004
+
+    1. Aliases now work with words [That Arent Wiki Words].
+    2. Aliases are now properly formatted in the tree control.
+    3. More bug fixes.
+
+Apr. 11, 2004
+
+    1. Fixed some bugs with the links [That Arent Wiki Words].
+    2. Fixed the default title for WIKIDPADWords have multiple capital letters in
+       the beginning.
+    3. Added ability to DisableCamelCaseWords.
+    4. Added a menu item to disable or enable indentation guides.
+    5. Added support for executing a search as part of a link. 
+        Example: This link WikiDocumentAttributes#priority
+       will take you to WikiDocumentAttributes and search for the word priority.
+
+Mar. 09, 2004
+
+    1. Added support for WIKIDPADWords that have multiple capital letters in
+       the beginning followed by lower case letters.
+    2. Added support for links [That Arent Wiki Words]
+    3. Moved the code triggered by Ctrl-B, Ctrl-I and Ctrl-Alt-H into
+       keybindings.py.  Now if you change the regex for bold or italic you
+       can also customize the code triggered by the keyboard command and the
+       menu option.
+    4. In some situations wikidPad might appear off screen at startup.
+       Added a check for this and code to reposition wikidPad back on screen.
+    
+Mar. 06, 2004
+
+    1. urls that end in .gif, .jpg, or .png will be exported as \<IMG> tags
+       when exporting to HTML.
+    2. Tree node text is not limited to 20 characters anymore. The text used to
+       be chopped at 20, and ... would be appended to the end.
+    3. Words with nested underscores ARE_NOT_TREATED_AS_ITALICS.
+    4. ~TurnsOffWordLinking.  ~ will cause a word to not be treated as a
+       wiki word link.
+    5. The HTML and XML export now wrap <<>> blocks in \<pre> tags.
+    6. You can now have more than 1 link on a line.
+        http://www.google.com/ http://www.yahoo.com/
+    7. Added "tree_position" attribute.  Look at the bottom of this page.
+       You can now change the order of the tree nodes by assigning a
+       "tree_position" or a "priority" to a node.  This page has a
+       tree_position of 0, so it is at the top of the tree to the left.
+    8. Clicking on a todo in the "Views" node will now highlight the todo
+       item in the document.
+    9. Added support for script imports. This allows you to define a set
+       of scripts in a GlobalScriptLibrary and then import them.
+       
+        [import_scripts: GlobalScriptLibrary]
+       
+       Type "Ctrl-4" to execute script 4 from the library.
+
+Feb. 22, 2004
+
+    1. Ignore blocks << >> now suppress wiki word links, properties and
+       todos properly.  Script blocks with wiki words, and urls with wiki
+       words in them are also now suppressed.
+    2. Pulled the WikiSyntax regular expressions out into an extension
+       file.
+
+Feb. 07, 2004
+
+    1. Ctrl-Enter will now activate links.
+    2. Added option to hide tree control.
+    3. KeyBindings are now customizable. See ChangingKeyBindings.
+    4. Added support for "ftp://" urls and "https://" urls.
+    5. Added ability to turn off the auto-save mode. See the "Wiki" menu.
+    6. TodoItem markers (todo, action) are now case-sensitive to avoid marking
+       TodoWikiWords as todos.
+    7. Added ability to suppress TextFormatting. Example:
+            << *This should be bold* ThisShouldBeALink >>
+    8. Added "Insert Date" command to "Editor" menu.
+    9. Added support for custom InlinePythonEval functions assigned to
+       Ctrl-1-4. For example, type Ctrl-1 to execute the function below.
+       
+       <% 1: editor.AddText("hi") %>
+       
+Jan. 12, 2004
+
+    1. Fixed export bug where urls in bulleted lists would include LI in
+       their HREF.
+    2. Added list of possible TreeNodeColors to help doc.
+    3. The mouse now changes to a hand over wiki word links.
+    4. Added context menu to tree control for rename/delete.
+    5. Added Undo/Redo buttons to Editor menu.
+    6. Added XML Export. Should be very simple to write stylesheets for
+       the exported XML to format it into anything you want. See WikiExport.
+    7. Added support for setting a custom wrap position, see TextFormatting.
+    8. Added new WikiBookmarks feature.
+    9. Added new WikiWords alias feature.
+

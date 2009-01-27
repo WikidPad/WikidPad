@@ -1,0 +1,114 @@
+﻿++ Spell Checking
+
+If you have installed the spell check add-on (for Windows binary distribution) or the pyEnchant library (for source distribution) you can run a spell check for a page or the whole wiki.
+
+You should be able to retrieve the add-on from the same place where you loaded WikidPad from. The add-on should be installed after WikidPad is installed and in the same directory as WikidPad. When deinstalling WikidPad, the add-on must be deinstalled separately.
+
+The enchant library allows to use multiple of the available spell checker programs (like ISpell) and the dictionaries created for them.
+
+The standard pyEnchant library (and the add-on package) provides ISpell and MySpell as spell checkers.
+
+
+++ Available dictionaries
+
+The add-on already contains MySpell dictionaries for the languages:
+
+<<pre
+en_US   English (US)
+en_GB   English (UK)
+de_DE   German (Germany)
+fr_FR   French (France)
+>>
+
+MySpell is also used by OpenOffice, so the dictionaries available at
+
+http://wiki.services.openoffice.org/wiki/Dictionaries
+
+should work as well.
+
+A dictionary consists of a .dic and an .aff file with the same name (like e.g. "en_US"). To install a new one, go to the installation directory of WikidPad, then in dir. "share" down in dir. "enchant". There you will see directories "ispell" and "myspell". Just copy the .dic and .aff files into the directory for the appropriate spell checker (ispell or myspell). After that WikidPad should be ready to use the dictionary.
+
+
+
+++ Defining the language
+
+You must define the language of a page or the whole wiki by specifying the "language" or "global.language" attribute. The language is just the name of the dictionary.
+
+To use US-English on this page, write
+
+[language: en_US]
+
+for the whole wiki write:
+
+[global.language: en_US]
+
+the page must be saved then to bring the attribute into effect.
+
+
+
+++ What is a word?
+
+Spell checking requires at first to find the words in the content. The regular expression used to find words is located in the "WikidPadParser.py" file (in the directory "extensions\\wikidPadParser" or "user_extensions", see [WikiSyntax]) and looks about like:
+
+<<pre
+TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlRE.pattern + u"|" +
+        WikiWordRE.pattern + ur")|\b[\w']+",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
+>>
+
+
+If you have some experience with regular expressions, you can change it. 
+
+The expression contains a named group "negative". If something matches one of the entries in this group (joined with '|'), this is *not* interpreted as word (by default numbers, URLs and camel-case wiki words). This allows to ignore unwanted patterns.
+
+
+
+++ The spell check dialog
+
+To open the spell check dialog, select "Spell check" in "Edit" menu. If the menu entry isn't there, the installation of the add-on package went wrong.
+
+After opening the dialog, it starts at the beginning of the page and searches for spelling errors. If it found one, the error is shown in red with some context before and after it in the "To check" area.
+
+You have now the possibility to correct the error in the "Replace with" field or choose a suggestion for the right spelling in the list below the field and then click on "Replace" or hit return to go to the next error.
+
+The available buttons have the following meanings:
+
+*Ignore*
+Ignore this error and find the next one.
+
+*Ignore All*
+Ignore this error and if a word with exactly the same spelling (including case) is found later again, ignore this too.
+
+*Replace*
+Replace the error with the text entered in "Replace with".
+
+*Replace All*
+Replace the error and if a word with exactly the same spelling (including case) is found later again, correct it in the same way.
+
+*Add Globally*
+Add the found word to the permanent application-wide list of words to ignore.
+
+*Add Locally*
+Add the found word to the permanent wiki-wide list of words to ignore.
+
+*Done*
+Close dialog.
+
+
+*Checkbox 'Go to next page'*
+If the spell checker reaches the end of the current page and this check box is checked, it goes on to the "next" page. "Next" means here the following wiki word in alphabetical order (case sensitive), so the spell checking might jump around in the tree on the left.
+
+
++++ Remarks
+    * The lists maintained by "Ignore All" and "Replace all" with the already found words are cleared when closing the dialog.
+    
+    * The dialog is non-modal, this means you can edit the wiki page while the dialog is open. When pressing "Ignore", the spell checker always starts searching where you left the cursor, so you can go to another page and place the cursor where you want that searching should go on.
+    
+    * The dialog can't be used to check functional pages like e.g. the text blocks pages (see [TextBlocks]).
+
+
++++ The permanent word lists
+With the buttons "Add Globally" and "Add Locally" you can add a word to a permanent ignore list. You can edit this lists as functional pages named "Global spell list" and "Wiki spell list" under the "Views" node in tree, in the "Func. pages" section.
+
+Each line contains a word to ignore during spell checking. You can add, modify or delete words or the whole list arbitrarily and cut & paste words between the lists.
+

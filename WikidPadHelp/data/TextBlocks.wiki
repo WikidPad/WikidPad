@@ -1,0 +1,72 @@
+﻿++ Text Blocks
+
+In the "Edit" menu you have a submenu "Paste Textblock" which you can modify to contain arbitrary blocks of text you use often and which you can insert or append everywhere by choosing the appropriate menu item.
+
+To modify the menu you have to edit one of two special wiki pages, so-called "functional pages" which are located below the "Func. pages" node which is a child of the "Views" node in the tree on the left.
+
+Functional pages behave similar to normal wiki pages but can't be renamed or deleted. They control some behavior of a wiki or the whole application.
+
+The "Global text blocks" page applies application-wide to all wikis, while "Wiki text blocks" can be set individually for each wiki.
+
+The menu is updated after saving (manually or automatically) one of the pages.
+
+
++++ Where are the files?
+
+If you want to edit them with a text editor, you can find the global text blocks file below your configuration directory which is either your home directory or the directory where you installed WikidPad. Your configuration directory can also be found by opening the "About" dialog (menu "Help") and scrolling down to bottom.
+
+The file is named "[TextBlocks].wiki" and is located in a directory ".WikidPadGlobals" which is in your configuration directory (the dot prefix is a Linux/Unix convention). If it does not exist when starting WikidPad, a default version is created automatically.
+
+The wiki-specific file is (for "Original" database types only) in the "data" directory of your wiki and has the name "wiki%2FTextBlocks.data". For the "Compact" database type there exists no separate file.
+
+After you have modified and saved one of the files, you can see the changes when selecting "Reread text blocks" at the bottom of the "Text blocks" menu. This reads the files again and rebuilds the menu.
+
+
+
++++ File format
+
+(If you read this in HTML preview, you should switch back to edit mode to see it correctly.)
+
+Each line represents an own entry of the menu. The indentation controls if it is in the "Text blocks" menu itself or in a submenu.
+Each entry consists of a combination of title, flags and/or content. The title is shown in the menu, the content is inserted or appended when choosing the menu item, the flags control further details. 
+
+
+Examples:
+
+=This will be inserted
+
+The equal sign is always necessary! After the equal sign begins the content which can contain escape sequences with backslash, so you can write \n to insert a newline. The title is deduced from the beginning of the content. When selecting the menu item, content is inserted at cursor position.
+
+
+
+insert=This will be inserted
+
+Same as before but the title in the menu is now "insert".
+
+
+
+append;a=This will be appended
+
+Similar as before but the entry has the "a" flag (currently the only existing one) which means the content is appended to the end of the current wiki page.
+
+
+
+;a=This will be appended
+
+Same as before but title is omitted here and therefore deduced from content.
+
+
+Submenu title=
+
+Title without content, only meaningful as title of a submenu whose items follow indented.
+
+
+A complete example with one submenu (add these lines to one of the pages or one of the "[TextBlocks].wiki" files to see the effect of it):
+
+
+;a=Something interesting at the end
+Submenu title=
+    item title=Something to insert
+    escaping=Escaping new lines as \\n...\n\n\nworks
+    all together;a=Show flag to append and item title \nand escape to new line
+

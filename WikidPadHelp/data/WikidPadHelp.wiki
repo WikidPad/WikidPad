@@ -1,0 +1,80 @@
+﻿++ Wikid Pad Help
+
+*Description*
+
+wikidPad is a wiki-like notebook for storing your thoughts, ideas,
+todo lists, contacts or anything else you can think of that's
+important.  What makes wikidPad different from other notepad or
+outliner applications is the ease with which you can cross-link your
+information.  Links in a wiki are created by typing in WikiWords.  A
+wiki word is any mixed case word typed into the editor.  TodoList or
+JohnDoe are example WikiWords.  The term wiki means "quick" in
+Hawaiian, and wikis are all about quickly linking your information
+together.
+
+To activate or follow a Wiki Word link, *double click on it*, or type
+CTRL-L when the cursor is in the word.
+
+When your finished reading through the help document select "Wiki/New"
+from the menu at the top of the application to create your own wiki.
+Then just start typing text with WikiWords to create your wiki.
+
+*Features*
+
+    * On the fly wiki WordLinking
+    * Wiki words can be CamelCase or [Not Camel Case].
+    * UrlLinking
+    * [Anchors] and [Footnotes]
+    * TreeIcons
+    * TreeNodeColors
+    * WikiWordNavigation (KeyBindings)
+    * WikiWordHistory viewer/navigation
+    * AutoSave
+
+    * Wiki TextFormatting
+    * BulletedLists
+    * WikiDocumentAttributes (cross-index your information)
+    * TodoItems (track todos, questions, issues)
+    * [Insertions]
+    * WikiBookmarks
+
+    * RenamingWikiWords
+    * WikiFonts
+    * Wiki word AutoCompletion
+    * DynamicViews
+    * SearchingTheWiki
+    * SpellChecking
+    * IncrementalSearch
+    * PageListDialog
+    * WikiExport / WikiImport
+    * [Printing]
+    * InlinePythonEval
+    * KeyBindings
+    * ClipboardCatcher
+    * InternatiönalChàracters
+    * ExternalGraphicalApplications
+    * PageStructureWindow
+    * TimeViewWindow
+    * FavoriteWikis
+    * OptionsDialog
+    * CommandLineSupport
+    * WikidPadOnUSB / ApplicationConfigurationFiles
+    * [Templates]
+    * [Folding]
+    * Different DatabaseTypes (WhereIsTheDataStored ?, MigrationBetweenDbTypes)
+    * Defining TextBlocks
+    * WikiStructureGraphs
+
+*Other/Questions*
+
+    * WikiMaintenance
+    * WikidPadSupport
+    * ChangeLog
+    * GlobalScriptLibrary
+    * WikiLockFile
+    * ApiDocs / WikidPadHooks
+    * ThirdPartyLibraries
+
+Email mbutscher@gmx.de or wikidpad@jhorman.org if you have additional questions.
+
+[alias: HelpDocument]

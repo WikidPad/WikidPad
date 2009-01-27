@@ -1,0 +1,54 @@
+﻿++ Menu Edit
+
+++ Undo
+Undo last editing.
+
+++ Redo
+Redo last editing.
+
+++ Search and Replace
+Do search or replace operation on a single page.
+
+++ Cut
+++ Copy
+++ Paste
+Usual clipboard operations in text editor. For the HTML preview only "Copy" can be used.
+
+++ Copy to ScratchPad
+Copy selected text to the special ScratchPad page which is automatically inserted into each WikidPad wiki.
+
+++ Paste Textblock
+Select an item from the submenu to add a textblock to the current page. See [TextBlocks].
+
+++ Clipboard Catcher
+(Windows only)
+Allows to catch arbitrary text from clipboard regardless which application has sent it. See [ClipboardCatcher].
+
+++ Spell check
+(Only available if pyEnchant or the WikidPad spell check addon is installed properly)
+Run spell checker for one or multiple pages. See [SpellChecking].
+
+++ Insert
++++ File URL
+Starts a file dialog where you can select one file for which a "file:..." URL is inserted in editor
+
++++ Current Date
+Inserts current date in editor
+
+++ Settings
++++ Date Format
+Set format of the date you can insert.
+
++++ Auto-Wrap
+Automatically wrap long linesd to fit on screen
+
++++ Auto-Indent
+When hitting return, the indentation of current line is copied for next line.
+
++++ Auto-Bullets
+If current line starts with a bullet * or numbering (old form: 1., 2., 3. or new form: #) next line contains bullet in the same place.
+
++++ Tabs to spaces
+If on, hitting tab inserts spaces, otherwise real tabulator characters are inserted.
+
+

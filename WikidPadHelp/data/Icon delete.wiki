@@ -1,0 +1,2 @@
+﻿++ Icon delete
+[icon: delete]

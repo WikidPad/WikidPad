@@ -1,0 +1,40 @@
+﻿++ Templates
+
+If a non-existing page has only one parent which has a "template" attribute, the initial content of the new page will be taken from the page pointed to by the attribute.
+
+The new page will (as always) only be created effectively after it is modified in some way.
+
+
+Example:
+
+Let's assume you want to record things you have bought,
+each article on it's own page.
+
+
+So at first create a template page: BoughtTemplate.
+
+Then define this as a root page which uses the template:
+[template: BoughtTemplate].
+
+Be sure to save the wiki now as template pages will always taken as they are stored in the database, not as they are written in an editor.
+
+
+Now you can create subpages:
+
+    * ArticleFoobaromatic (this is already created)
+    * ArticleStopAndGoer (go to this to see the template)
+    * NotBoughtAlsoTemplate (or to this page)
+
+
+
+You can enhance this example using [FormPages].
+
+
++++ Automatic heading replacement
+
+As you might have noticed in the above examples, the heading at the top of the newly created pages was set automatically according to the name of the page like you are used to it for new, non-templated pages.
+
+If you instead want to keep the heading of the template or don't want a heading at all, you can write \[template_head: manual] on the template page (in the example this is BoughtTemplate).
+
+If you want to disable the automatic heading replacement for all templates of a wiki, you can place \[global.template_head: manual] on an arbitrary page of the wiki. To activate then the heading replacement for a particular template, use \[template_head: auto] on the template page.
+

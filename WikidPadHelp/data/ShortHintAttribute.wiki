@@ -1,0 +1,6 @@
+﻿++ Short Hint Attribute
+
+This is here just for demonstration.
+
+
+[short_hint: Here should be written something interesting]

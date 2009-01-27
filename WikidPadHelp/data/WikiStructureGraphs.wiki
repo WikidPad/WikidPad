@@ -1,0 +1,53 @@
+﻿++ Wiki Structure Graphs
+
+You can create some graphs of the relations of the wikiwords to each other in the wiki. This needs the GraphViz application suite to be properly installed.
+
+In the "plugins" menu you will see the four entries "Show relation graph", "Show rel. graph source", "Show child graph", "Show child graph source". If you choose one of them the current tab shows one of the graphs or its source (the dot script to create it).
+
+If you want to go back to editor or preview, use the "View" menu and select "Switch Ed./Prev.", "Show editor" or "Show preview".
+
+If you want to export these graphs use the [Insertions] \[:graph.relation:] or \[:graph.child:].
+
+
++++ Relation graph
+
+This graph uses relations defined by attributes in a wikiword. The key of the attribute names the kind of relation, the value names the wiki word (which must exist) to which it is related.
+
+An example could be on a page "Bird" the attributes
+<<
+[isA: Animal]
+[eats: Fish]
+>>
+
+
+There are two attributes to define which attribute keys should be taken into account for relation. You can either use "global.graph.relation.exclude" to define which keys should not be taken into account (the "alias" key is e.g. a good candidate) or "global.graph.relation.include" to list the keys that only should be taken into account.
+
+These attributes apply for the whole wiki, regardless on which page they are placed. If you use both keys in the same wiki, the "...include" is ignored.
+
+The values in these attributes should be delimited by a semicolon. Each value (which is in fact an attribute key) also applies to all subkeys (e.g. "foo" also applies to "foo.bar", but not to "foobar").
+
+
++++ Child graph
+
+This graph shows the parent->child relationship of the words in the wiki.
+
+
++++ Options
+
+In the options settings there is an option page named "GraphVizStructure" which provides some possibilities to control the presentation of the above graphs. Each of the entries can be set empty to use the default settings.
+
+
+*Node font name*
+*Node font size*
+Name of the font to use and the font size for the node label
+
+*Node border color*
+Color of the small line surrounding each node
+
+*Node background color*
+Color of the node background. If the page described by this node has a "color" attribute this color attribute overrides the option setting.
+
+*Edge color*
+Color of the edges connecting nodes.
+
+

@@ -1,0 +1,13 @@
+﻿++ Wiki Import
+
+The wiki import dialog can be reached by the "Wiki Import..." menu item in the "Wiki" menu.
+
+It is organized similar to the WikiExport dialog.
+
+
+*Import format*
+Here you choose the type of import you want. Currently only Multipage text is supported (see [Multipage text format]).
+
+*Source file/directory*
+Here you can set where the file(s) to import come from. If file or directory is needed depends on the type given in "Import format". For multipage text it is a single file.
+

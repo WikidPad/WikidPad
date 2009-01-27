@@ -1,0 +1,2 @@
+﻿++ Icon right-left
+[icon: right-left]

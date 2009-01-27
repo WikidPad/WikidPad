@@ -1,0 +1,78 @@
+﻿++ Wiki Maintenance
+
+++ Rebuilding wiki
+
+In menu "Wiki"->"Maintenance"->"Rebuild Wiki".
+
+First you should know that a wiki in WikidPad contains some essential data (mainly the text of the wiki pages) and some cache data which is extracted from the essential data (list of children of a page, todos, attributes,...). Due to an error or some special operations (like adding or deleting page files from outside of WikidPad) it may happen that the cache information is deleted, invalid or not up-to-date anymore.
+
+Rebuilding deletes and recreates all cache information
+
+This feature can also be used to add large numbers of pages to the wiki.  Copy ".wiki" wikiword files into the data directory, then "Rebuild Wiki" to rebuild the database to include these files. This does not work for "Compact Sqlite" database type (see MigrationBetweenDbTypes for details).
+
+[alias: RebuildTheWiki]
+
+
+++ Update cache
+
+This rebuilds only pages for which cache is marked as dirty in the database. If you save a modified page it is initially marked dirty and WikidPad starts updating the cache in the background. If you want to be sure that the cache is up-to-date but do not see a need to rebuild the whole wiki, use this function.
+
+
+++ Initiate update
+
+Marks cache of all wiki pages in the database as dirty and starts updating it in the background (after performing some operations which should be done in the foreground in any case). Use this if you need a rebuild but don't want to wait until the rebuild is done.
+
+
+++ Show job count
+
+Gives a rough estimation of the number of jobs waiting in the background. The number may be inexact.
+
+
+++ Open as Type
+
+Allows to override the database type stored in wiki configuration file. Only needed in very rare cases.
+
+
+++ Reconnect
+
+In menu "Wiki"->"Maintenance"->"Reconnect".
+
+If during a WikidPad session the access to the wiki database files is lost (e.g. network connection drops), you might get an error. To make WikidPad work again after access is reestablished, use "Reconnect".
+
+Initially, WikidPad tries automatically to reconnect and asks if it should try to reconnect each time you try to open another page or try to save a page.
+
+Autosave is automatically disabled after an error until a successful reconnect.
+
+
+++ Optimise Database
+
+In menu "Wiki"->"Maintenance"->"Optimise Database". This function is only available if currently loaded wiki is of type "Original Sqlite" or "Compact Sqlite".
+
+If information is deleted from an Sqlite database, the occupied hard disk space is not freed but later reused for new information to add. "Optimise Database" makes this space available for the system again. After deleting large parts of a wiki, you can use "Optimise Database" to free space, especially recommended for a "Compact Sqlite" wiki (where the page content is also stored in the database).
+
+
+
+
+++ Other things about maintenance
+
++++ Finding and connecting parentless nodes
+
+As you add and remove links from the various pages in your wiki database you may end up with unlinked, or parentless, nodes.  To view them use the "parentless-nodes" node in the "Views" subtree.
+
+Alternatively you can use menu "Navigate" -> "List Parentless Pages" or press Ctrl-Shift-Up
+
+You can then decide if you need to relink these nodes, or if you want to delete them.
+
+anchor: finding_undefined_links
++++ Finding undefined wiki word links
+
+There may be also wiki word links to pages which do not exist, e. g. NonExisting. These are underlined and black in the editor. To list all such links, use the "undefined-nodes" node in the "Views" subtree. If you click on one of these links you go to an empty page for this word and can fill it with content.
+
+Sometimes words are unintentionally marked as wiki words. In this case you can either:
+
+    * Prefix the word with a backslash
+    * Add the attribute \[camelCaseWordsEnabled: false] on a page
+    * Enter the word into one of the blacklists, see WordLinking!exclude_from_linking.
+
+
+[icon: cog]

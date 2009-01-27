@@ -1,0 +1,2 @@
+﻿++ Icon zoomout
+[icon: zoomout]

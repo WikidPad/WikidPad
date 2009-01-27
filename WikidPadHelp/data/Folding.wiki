@@ -1,0 +1,46 @@
+﻿++ Folding
+
+Folding is a well known technique in programming editors, but it is also useful for large structured pages in WikidPad.
+
+Folding means to hide or show a logical group of text lines when clicking on a particular sign in the editor (usually a plus or minus sign). In WikidPad this logical grouping is done by the headings.
+
+First, to show the folding symbol use "Show folding" in the "Tabs" menu. You will see an additional margin on the left of the editor window and a minus sign to the left of each heading (meaning "unfolded").
+
+If you now click on one of the signs, all normal text below it until the next heading with same or higher level (+ is higher than ++ is higher than +++ and so on) is hidden and the minus becomes a plus (meaning folded). A second click reverts the situation. Instead of clicking you can also select "toggle current folding" in the "Tabs" menu.
+
+The functions "Unfold All" and "Fold All" in the "Tabs" menu (un-)fold all parts in the current text editor.
+
+
+A few test headings (just play around with them):
+
+
++ Main title
+Bla bla
+
+++ Sub one
+Bla bla
+Bla bla
+Bla bla
+
+++ Sub two
+Bla bla
+Bla bla
+Bla bla
+
++++ Sub sub one
+Bla bla
+Bla bla
+
++++ Sub sub two
+Bla bla
+Bla bla
+Bla bla
+Bla bla
+Bla bla
+Bla bla
+
++++ Sub sub three
+Bla bla
+Bla bla
+Bla bla
+Bla bla

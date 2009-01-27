@@ -1,0 +1,14 @@
+﻿++ Change Log 2003
+
+Dec. 3, 2003
+
+    1. Fixed some bugs with export.
+    2. Exported HTML now includes links to parent nodes.
+
+Nov. 14, 2003
+
+    1. Added ScratchPad feature. Ctrl-Alt-C copies to the scratch pad.
+    2. Added ability for end users to customize wikidPad by hooking into
+       some of the core events. See WikidPadHooks.
+    3. WikiWords may now contain InternatiönalChàracters.
+    4. Bug fixes. Issues with renaming wikiwords have been resolved.

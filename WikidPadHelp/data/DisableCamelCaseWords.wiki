@@ -1,0 +1,14 @@
+++ Disable Camel Case Words
+
+CamelCase WikiWords are not enable on this page b/c of the following
+option.
+
+[camelCaseWordsEnabled: false]
+
+To disable CamelCase WikiWords globally add the:
+
+<<
+[global.camelCaseWordsEnabled: false]
+>>
+
+property to a page in your wiki.

@@ -1,0 +1,25 @@
+﻿++ Anchors
+
+Anchors allow to jump to a particular position in a wiki page in edit and preview mode as well as in exported HTML pages.
+
+Defining an anchor is done with:
+
+anchor: here
+
+The anchor tag must be alone on a line, no text before or after it. After "anchor:" you give the anchor a name which must consist only of letters A to Z (upper or lowercase), digits and underscore. It must not contain spaces, other special characters or non-English characters.
+
+To go to a particular anchor in a wiki word, append a ! and the anchor name to the wiki word (non-camelcase wiki words must be put in brackets), e.g.:
+
+[Anchors]!here
+
+Clicking on the link moves the cursor after the anchor tag.
+
+
++++ Remarks
+
+    * Anchors are case-sensitive, therefore "here" and "Here" are
+      different anchors.
+    * The anchor tags are invisible in HTML preview and export.
+
+See also [Footnotes].
+

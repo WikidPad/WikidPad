@@ -1,0 +1,11 @@
+﻿++ Auto Save
+
+WikidPad tries to save the document in the editor window for you often.
+
+    1. Saves at around 5-15 seconds of idle time.
+    2. Saves on navigation to a new wiki word.
+    3. Saves on shutdown.
+
+You can manually save a document by typing "CTRL-S"
+
+[icon: disk]

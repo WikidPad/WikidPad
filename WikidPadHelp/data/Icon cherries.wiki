@@ -1,0 +1,2 @@
+++ Icon cherries
+[icon: cherries]

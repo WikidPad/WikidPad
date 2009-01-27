@@ -1,0 +1,28 @@
+﻿++ Word Linking
+
+As you type wiki words into the editor they become underlined.  Words
+that already have content, like AutoCompletion turn blue, words that
+do not, like JavaTemplates, stay black but are underlined.
+
+To activate or follow a wiki word link, *double click on it*, or
+type CTRL-L when the cursor is in the word.
+
+
++++ What are wiki words?
+
+Wiki words are (at least by default) all words which start with an
+uppercase letter and where at least one uppercase letter follows a
+lowercase letter in the word (this is called "camelcase", like e.g.
+WikiWord) or where a lowercase letter follows after multiple uppercase
+letters (ABCd).
+
+anchor: exclude_from_linking
++++ Exclude wiki words from linking
+
+To exclude a wiki word from being interpreted as link, you can precede
+it with a backslash \ (e.g. \WikiWord) or enter it in the global or
+wiki-wide camelcase blacklist (open the "Views" node in the tree on
+the left, open therein the "Func. pages" node and click on 
+"Global cc. blacklist" or "Wiki cc. blacklist". Then enter the word on
+a line of its own in the list (e.g. URLs is in the "Wiki cc.
+blacklist").

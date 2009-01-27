@@ -1,0 +1,32 @@
+﻿++ Clipboard Catcher (Windows only)
+
+The clipboard catcher is similar to the ScratchPad. While the ScratchPad catches text chunks which are especially copied to it inside WikidPad, the clipboard catcher collects every piece of text copied (or cutted) to clipboard from every application and appends it to a wiki page of your choice.
+
++++ Clipboard catcher at page
+
+In this mode, the clipboard catcher appends copied text to the page for which it was activated, even if you go to another page while it is active.
+
+Go to the wiki page where the clipboard snippets should be appended to. Activate "Clipboard Catcher at Page" in menu "Edit". If you open the menu again, you can see that "Clipboard Catcher at:" is checked now and the page name is appended to the menu item.
+
+
++++ Clipboard catcher at cursor
+
+In this mode, the snippets are inserted at current cursor position as if they were typed in manually. Cursor position and page won't be remembered. If you change the cursor position, snippets will be inserted at the new one.
+
+Activate "Clipboard Catcher at Cursor" in menu "Wiki Words".
+
+
++++ Disabling clipboard catcher
+
+The clipboard catcher is disabled when:
+
+    * the menu item "Clipboard Catcher off" is selected
+    * another wiki is opened
+    * WikidPad is closed
+
+
++++ Configuration
+
+In the options dialog, page "Clipboard Catcher", there are entries "Prepend before clipboard snippet" and "Append after clipboard snippet" where you can set which character(s) should be appended after each caught snippet.
+
+In this field you can use the same escapes as in the replace field of the "Find and Replace" dialog in regular expression mode as well as time formats as these shown in "Date Format" dialog in "Edit"->"Settings" menu (see also [Printing#++++ Page separator]).

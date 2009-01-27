@@ -1,0 +1,44 @@
+﻿+ Todo Items
+
+In WikidPad "todo", "done", "action", "track", "issue", "question" and
+"project" are special keywords that enable you to track important
+items under the "View" menu in the tree.
+
+todo: I have to do this.
+done: I have done this.
+action: I have action items
+track: I am tracking this
+issue: I am tracking this
+question: This is a question
+project: This is my project
+
+Now open the views node in the tree on the left to see how these todo
+items have been added.  For example, open "Views/question" and you will
+see a node named "This is a question."
+
+Unwanted todo items like e.g.:
+
+    Interesting CD track: loud music
+
+can be escaped:
+
+    Interesting CD \track: loud music
+
+
+A todo item ends either with a newline or with a vertical bar |. If you want to insert a bar into the item, you can escape it with a backslash.
+
+Example: todo: This item ends here| This isn't part of the item.
+todo: This ends \| not.
+
+Look in the "Views" subtree to see the todo entries.
+
+
+These items supports nested sub-categories also, for example:
+
+todo.system.bugs.urgent: There is a bug in the system
+
+Will create a "system" node in the tree under "Views/todo", which has a "bugs" subnode which has a "urgent" subnode...
+
+[icon: pin]
+[alias: TodoItem]
+

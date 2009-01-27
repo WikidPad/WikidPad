@@ -1,0 +1,88 @@
+﻿++ Wiki Export
+
+You can export your wiki as a single html page, a set of html
+pages, one wiki word page at a time, or as XML.
+
+You can select a few predefined operations from the "Wiki" menu:
+
+Export / Export Wiki As Single Html Page
+Export / Export Wiki As Set of Html Pages
+Export / Export Current Wiki Word As Html Page
+Export / Export Wiki As XML
+
+
+Or you can use Export / Other Export to show a dialog to choose other settings:
+
+*What to export*
+Choose if you want to export current page only, the current page and all sub-pages (children, grandchildren...), the whole wiki or use "Custom..." to open the [PageListDialog].
+
+*Compatible filenames*
+Uses ASCII-only filenames for exported files so that they can be transferred to other filesystems without compatibility issues. On Windows XP and Server 2003 the AppLocale utility (see http://www.microsoft.com/globaldev/tools/apploc.mspx ) might also help on export problems.
+
+*Export to*
+You can export a single HTML page, one HTML page for each wiki page, a [Multipage text format] file or a set of .wiki files (mainly interesting for Compact version to migrate to original).
+
+*Destination file/directory*
+Here you can set where the exported file(s) should be stored. If file or directory is needed depends on the type given in "Export to". For XML and multipage text it is a single file, for other types it is a directory (because multiple files must be written).
+
+
+When exporting as HTML all files in the file storage which are referenced by a relative URL (URL beginning with "rel://") in the exported pages are copied to a "files" directory in the destination directory. This does also apply to files in subdirectories of the "files" directory.
+
+
++++ Additional options for HTML exports
+For the HTML exports you can choose if you want to:
+    * export URLs to images as \<img> tags or as normal links
+    * create a table of contents either as a tree or as a list.
+      For a single HTML page, the TOC is at the beginning of the
+      page, for a set of HTML pages, it is a separate
+      "index.html" file.
+      Using "As tree" is recommended when exporting the whole or
+      nearly the whole wiki, "As list" is better for small subsets
+      of a wiki as the tree option gives weird results here.
+    
+The defaults for these options can be set in the options dialog.
+
+
++++ Additional options for .wiki file exports
+For the .wiki export you can choose if the files should have system encoding or UTF-8 with or without BOM (byte-order mark). The import function of Compact can't recognize UTF-8 without BOM correctly.
+
+
++++ Additional options for multipage text format
+
+*Version*
+Choose which version the file should have. If you use version 1 it can be read only by WikidPad 1.9beta6 and later. Version 0 can also be read by earlier versions but looses information.
+
+*Write wiki func. pages*
+Store also wiki-bound functional pages in the file. Only available for format version 1 and later.
+
+*Write saved searches*
+Store also saved searches in the file. Only available for format version 1 and later.
+
+
+
+------------------------------------------------------------
+
+*When exporting into XML* each wiki word will include its created and modified time.
+The time format will look something like this:
+
+(2003, 10, 14, 19, 51, 56, 1, 287, 1)
+
+These numbers correspond to these fields:
+
+0 tm_year (for example, 1993) 
+
+1 tm_mon range [1,12] 
+
+2 tm_mday range [1,31] 
+
+3 tm_hour range [0,23] 
+
+4 tm_min range [0,59] 
+
+5 tm_sec range [0,61]; see (1) in strftime() description 
+
+6 tm_wday range [0,6], Monday is 0 
+
+7 tm_yday range [1,366] 
+
+8 tm_isdst Is daylight savings. 0, 1 or -1;

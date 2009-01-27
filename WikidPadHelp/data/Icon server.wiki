@@ -1,0 +1,2 @@
+﻿++ Icon server
+[icon: server]

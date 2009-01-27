@@ -1,0 +1,139 @@
+﻿++ External Graphical Applications
+
+WikidPad allows access to some graphical applications which take some sort of script to generate images. You can include the script in a wiki and let the applications generate the appropriate image to show it in HTML preview and export.
+
+The supported applications are:
+
+    * MimeTeX to generate mathematical formulas
+    * GraphViz which is a set of applications to generate directed and nondirected graphs
+    * Ploticus to generate plots and charts (as you might have seen in your favorite spreadsheet program)
+    * Gnuplot to generate mathematical plots
+
+
++++ Download and installation
+
+The mentioned applications are not part of the WikidPad release itself, you must download it separately. The URLs are:
+
+<<|
+    Appl.| Download| Documentation
+    MimeTeX| http://www.forkosh.com/mimetex.html | http://www.forkosh.com/mimetex.html
+    GraphViz| http://graphviz.org/Download.php | http://graphviz.org/Documentation.php
+    Ploticus| http://ploticus.sourceforge.net/doc/download.html | http://prdownloads.sourceforge.net/ploticus/pl233site.tar.gz?download
+    Gnuplot| http://www.gnuplot.info/download.html | http://www.gnuplot.info/documentation.html
+>>
+
+
+A helpful tutorial for creating directed graphs with GraphViz' dot utility is http://kabru.eecs.umich.edu/bin/view/TWiki/HowtoDirectedGraphs.
+
+You can download all or only some of them as you like.
+
+Put the binaries in an arbitrary folder on your computer. If you do not plan to use them outside of WikidPad you can create a folder in the WikidPad installation directory and put them therein.
+
+Now start WikidPad and open the "Options" dialog. Below the "Plugin options" entry in the list on the left you see four entries, each for one of the programs. Clicking on them leads to the appropriate options page.
+
+For MimeTeX, Ploticus and Gnuplot just enter the full path to the executable, for GraphViz only set the path to the directory containing the executables in the first text field. You can change the names of the executables itself in the fields below the first.
+
+
++++ Special details about Gnuplot
+
+Unfortunately Gnuplot gives always a warning about a missing console (?) so you either have to use the appendix "noerror" all the time or (on Windows) you set the "wgnuplot.exe" executable in the options which does not issue this warning. In both cases you will be unable to retrieve error messages from Gnuplot if the script isn't right.
+
+At the beginning of each Gnuplot script the following lines are automatically inserted to set output to a PNG-file which is shown then:
+
+<<pre
+    set terminal png
+    set output 'filename.png'
+>>
+
+where filename.png is replaced by the chosen temporary file name.
+
+
++++ Usage
+
+The programs are called using [Insertions]. The keys for the insertions are:
+    
+    * eqn: MimeTeX
+    * dot, neato, twopi, circo, fdp: GraphViz
+    * ploticus: Ploticus
+    * gnuplot: Gnuplot
+
+
+The values must follow the syntax of the respective program, please see the documentation of the applications for details.
+
+The values should be quoted (enclosed by quotation symbols) if they contain special characters or newlines. A quotation symbol is an arbitrary number of one of the quotation characters ", ', / or \ (double quotation mark, single quotation mark, slash or backslash). The starting and ending symbols must be the same. Examples for quotation symbols are:
+
+"
+'''
+//
+/////
+\\
+
+When exporting HTML, the rendered image files are put in a subdirectory "volatile" in the same directory where the HTML files are. If "volatile" is already present in the destination directory, *all of its contents (including subfolders) are deleted* to avoid filling it up with old versions of the files!
+
+If the GraphViz or Ploticus applications return errors or warnings, you see these instead of the rendered images. To suppress warnings/errors use the appendix "noerror" after the main value of the insertion.
+
+
++++ Examples
+
+If you have downloaded and installed all applications you can see here how the graphics look like:
+
+
+*MimeTeX*: You should know that [:eqn:"a^2 + b^2 = c^2"] is important!
+
+
+*GraphViz (Dot, with "noerror" appendix)*
+[:dot:"
+digraph {
+a -> b
+b -> c
+b -> d
+d -> a
+}
+"; noerror]
+
+
+*Ploticus*
+[:ploticus:"
+#proc areadef
+  title: Annual Revenues, in thousands
+  rectangle: 1 1 5 2
+  xrange: 0 4
+  yrange: -5000 15000
+  yaxis.stubs: incremental 5000
+  yaxis.grid: color=pink
+  xaxis.stubs: text
+ABC Corp
+NetStuff
+MicroMason
+
+#proc getdata
+  data: 6430 -780 13470
+
+#proc processdata
+  action: rotate
+
+#proc bars
+  lenfield: 1
+  color: dullyellow
+  labelword: $ @@N
+  crossover: 0
+"]
+
+
+*Gnuplot*
+[:gnuplot:"
+set key right nobox
+set samples 100
+plot [-pi/2:pi] cos(x),-(sin(x) > sin(x+1) ? sin(x) : sin(x+1))
+"]
+
++++ For programmers
+
+If you want to create your own plugin to handle insertions, look in the "extensions" directory in the WikidPad installation directory. The plugins "MimeTexCGIBridge.py", "GraphvizClBridge.py" and "PloticusClBridge.py" control the external applications. The plugin "ExampleInsertion.py" handles the insertion key "testexample" and is another example how to handle insertions by a plugin.
+
+[:testexample:"this";is;//a simple//;test]
+
+
+
+[alias: Ploticus; MimeTeX; GraphViz; Gnuplot]
+[camelCaseWordsEnabled: false]

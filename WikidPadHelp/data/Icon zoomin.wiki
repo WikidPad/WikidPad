@@ -1,0 +1,2 @@
+﻿++ Icon zoomin
+[icon: zoomin]

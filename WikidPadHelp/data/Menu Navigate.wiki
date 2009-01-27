@@ -1,0 +1,17 @@
+﻿++ Menu Navigate
+
+Back
+Forward
+Home
+Go to Page
+Go to Parent
+List Children
+List Parentless Pages
+
+Show History
+Up History
+Down History
+
+Add Bookmark
+Go to Bookmark
+

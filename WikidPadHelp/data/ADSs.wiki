@@ -1,0 +1,3 @@
+﻿++ ADSs
+
+*Alternate data streams* of a file or directory contain (in the NTFS file system) additional data about the file/directory, e.g. meta information (author, abstract, ...) or thumbnail images. Mac users may know the "resource fork".

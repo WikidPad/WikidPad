@@ -1,0 +1,400 @@
+﻿++ Options Dialog
+
+The options dialog controls the behavior of the application and the currently open wiki. To open it, choose "Options" in the wiki menu.
+
++++ Application-wide
+
+The following options apply to the whole application and therefore to each wiki opened in it.
+
+
+++++ General options
+
+*New window on wiki URL*
+When double clicking on a wiki: URL, a new instance of the application is started, otherwise, the current instance loads the new wiki.
+
+*Low resource usage*
+Try to reduce usage of Windows resources. Only interesting for Windows 9x/ME.
+
+*Single process per user*
+If you open a new WikidPad instance while another is already running, the new window is handled by the same process as the first one. This option has only an effect after restarting WikidPad. It is off by default.
+
+Advantages:
+
+    * You can safely open the same wiki in multiple windows (on the
+      same computer and by the same user only!)
+    * Less resources (esp. memory) are needed to run multiple windows
+
+Disadvantages:
+
+    * If one window is busy due to a search or database rebuild, all windows do not react.
+    * If one window crashes (in fact the process driving it) all windows crash.
+    * An IP-socket connection is needed for communication between
+      processes. The connection is invisible for other computers on
+      a network or the internet, but a personal firewall software
+      may alarm you nevertheless. Also, if multiple user use
+      WikidPad on the same computer at the same time, all must use
+      their own home directory as configuration directory (this is
+      the default).
+
+*Store relative pathes to wikis*
+Pathes to the recently opened wikis are stored as relative pathes if this is checked. Useful e.g. if you have WikidPad and your wikis on an USB-stick.
+
+*Default open/new dir.*
+Directory to start when using "Wiki"->"New" or "Wiki"->"Open" in the menu. If empty, WikidPad chooses a default.
+
+*Sort order*
+Choose the desired alphabetical sort algorithm for wiki words, todos, attributes in tree or PageListDialog.
+The "C" order is the way previous WikidPad versions worked (uppercase letters first, non-English characters in illogical order at the end).
+The new "Default" order sorts according to default order determined by the operating system. Normally, uppercase letters are sorted inorder (AaBbCc). If you want uppercase letters (more exactly: all characters but lowercase ones) before the rest (ABCabc), check
+*Uppercase first*.
+This setting has no effect for "C" order. Alphabetical sorting of children of a wiki word in tree is always inorder.
+
+*Rename links when renaming wiki word*
+When renaming a wiki word, WikidPad can try to rename all links to this word as well, but this is not fully reliable. Here you can check if this renaming should be done or not or if WikidPad should ask for each renaming.
+
+*App-bound hotkey*
+Here you can define a hotkey to show or hide WikidPad (they may only work on Windows). Hotkeys work system-wide, not only if WikidPad is active.
+
+In the text field you can enter a hotkey in the same way as the menu shortcuts are. Unlike menu shortcuts, you can also use "win" as modifier (like "alt" or "ctrl"), but the hotkey must have at least one of "ctrl" or "alt" modifiers to work.
+
+The checkbox before the text field allows to temporarily deactivate the hotkey without deleting the field content.
+
+There is also an option to set a second hotkey which is bound to the current wiki instead of the app. See OptionsDialog#*Wiki-bound# hotkey* below in "Current wiki" options.
+
+
+++++ User interface
+
+*Minimize to Tray*
+Minimized to system tray instead of the normal taskbar.
+
+*Minimize on close button*
+Pressing the close button on the main frame (the little "X") does not close but minimize WikidPad. In conjunction with "Minimize to Tray" it minmizes to the try area.
+
+If you really want to close, use menu "Wiki"->"Exit" then or the context menu when right-clicking on the tray icon (if "Minimize to Tray" is active).
+
+*Statusbar time format*
+Set the time format the statusbar should use to show modification and creation date of the current wiki page. The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
+
+*UI language*
+Choose the preferred language of the user interface.
+
+This setting only takes effect after restarting WikidPad.
+
+*Recent wikis list length*
+Set the number of wikis to show in menu "Wiki"->"Recent"
+
+*Auto-show log window*
+Automatically show log window if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
+
+*Auto-hide log window*
+Automatically hide log window if no more error messages are present.
+
+
+*Structure window pos.*
+Where (relative to main window) should the PageStructureWindow be positioned? "Hidden" deactivates it.
+*KNOWN BUG*: After changing the position of the window, restarting WikidPad is necessary. See RestartWikidPad for details.
+
+*Structure window depth*
+Up to (and including) which heading level should headings be displayed? "1" Means only top-level heading (one plus sign), "15" means all headings.
+
+*Auto-hide structure window*
+After double-clicking an entry in PageStructureWindow the window is collapsed (hidden) automatically if this is checked.
+
+
+
+++++ Security options
+
+*Process auto-generated areas*
+Experimental feature, use not recommended!
+
+*Process insertion scripts*
+Control if insertions with key "eval" should be evaluated as Python expressions or not, see also [Insertions].
+
+*Script security*
+Set the security level for script execution, see InlinePythonEval#+++# Security# concerns .
+
+
+++++ Tree options
+
+These apply to the tree on the left of the main window.
+
+*Tree auto-follow*
+The tree tries to always select the wiki word currently shown in the editor or HTML-view.
+
+*Tree update after save*
+After each (automatic or manual) save, the tree icons and shown children are updated. This may need some time and may create some flicker going from top to bottom through the tree.
+
+*Hide Undefined WikiWords in Tree*
+If a page contains wiki word links to non-existing pages, these are not shown as children in the tree.
+
+*No cycles in tree*
+If two or more pages reference each other (e.g. NodeA -> NodeB -> NodeA) these cycles are not shown. Precisely: if a child of a word is already an ancestor (parent, grandparent, ...) of this word, it is not shown.
+
+*Tree auto-hide*
+After selecting an item in tree, the tree is hidden automatically.
+
+*Background color*
+Specify background color of tree.
+
+*Position main tree*
+Controls where to place the main tree (to the left, right, top or bottom)
+
+*Position view tree*
+You can also have a second tree which has the "Views" node as root. You can place it relative to the main tree (above, below, left or right) or choose "hidden" if you don't want it. 
+
+*KNOWN BUG*: After changing the position of main or view tree, the trees do not react on clicks properly any longer. Restart WikidPad. See RestartWikidPad for details.
+
+
+++++ HTML preview/export
+
+See [Options HTML preview_export].
+
+
+++++ Autosave
+
+*Autosave active*
+Save current page content to disk (if modified) after a few seconds of inactivity.
+
+There are two delays which *both* must be exceeded before a save operation is triggered (if Autosave is active).
+
+*Delay after key pressed*
+How long to wait after the last keypress in the editor (default: 3 seconds). Recommended value: 1 to 5 seconds.
+
+*Delay after page dirty*
+How long to wait after the page was initially modified (dirty) after last save (default: 15 seconds). Recommended value: 15 to 180 seconds.
+
+
+++++ Editor
+
+*Sync. highlighting limit*
+Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 3000 to 5000 bytes
+
+*Highlight start delay*
+For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds
+
+*Short hint delay*
+Set how many milliseconds before showing the short hint tooltip in editor. 0 deactivates the tooltip. See WikiDocumentAttributes#*short_hint* for details.
+
+*Auto-unbullets*
+When this option is active and enter is pressed on a line which contains only a bullet or a numbering without text, the bullet is removed. See BulletedLists for details.
+
+*Append closing bracket on auto-complete*
+When suggesting the completion for a bracketed wiki word, e.g. "[Not Came" you can decide if a closing bracket is suggested ("[Not Camel Case]") or not ("[Not Camel Case").
+
+*Synchronize editor by preview selection*
+This provides some workaround to synchronize scroll position in HTML preview with the position in editor.
+If this option is checked, you can select some text in the preview and when switching back to the editor, the first occurrence of the selected text is searched and selected in editor, too.
+
+
++++++ Image pasting
+When pasting bitmap data into WikidPad it can be saved as an image file into the "files" directory of the wiki and a link to it can be generated. These options control how to do that:
+
+*Filename prefix*
+A prefix to use for the filename. If this filename plus suffix exists already in "files" dir, an underscore and a sequence of 20 random letters or numbers is appended to create a unique filename. E.g. you want to store a PNG-file with prefix "foo" then WikidPad checks if "foo.png" is already in the "files" directory (if prefix is empty, this is not tried). If "foo.png" exists it tries something like "foo_2NIUXQ0OGVRDT1O3JNUN.png". If this exists already it tries again (up to 20 times) before giving up.
+
+*File type*
+
+    * None: Don't store images at all
+    * PNG: Store in PNG format (losless compression)
+    * JPEG: Store in JPEG format (lossy compression)
+
+*Quality*
+Number to define quality of JPEG compression (0:worst, 75:default, 100:best)
+
+*Ask settings on each paste*
+If checked, each time you paste an image, a dialog box asks for the above settings to set them individually.
+
+
+++++ Editor colors
+
+*Plain text color*
+Specify the color of plain text (like this one) in the editor by pressing the little "..." button to start the color dialog or by entering a numeric HTML color (e.g. "#000000" for black) in the text field. Leaving the field empty chooses the default color.
+
+*Link color*
+Set the color of links (URLs and existing wiki words, e.g. http://nowhere) in the editor. See "Plain text color" above for details.
+
+*Attribute/script color*
+Set the color of attributes and scripts (e.g. <%"this one"%>) in the editor. See "Plain text color" above for details.
+
+*Background color*
+(Works only partially). Specify the background color of the editor. See "Plain text color" above for details.
+
+*Selection fg. color*
+Specify the foreground color of selected text. See "Plain text color" above for details.
+
+*Selection bg. color*
+Specify the background color of selected text. See "Plain text color" above for details.
+
+*Margin color*
+Specify the color of the editor margin on the left (normally gray) which can also contain line numbers.
+
+*Text cursor color*
+Set the color of the text cursor (the small blinking vertical bar).
+
+
+++++ Clipboard catcher
+
+This page is only visible on Windows.
+
+*Prepend before clipboard snippet*
+Control what the ClipboardCatcher should prepend before each caught snippet. This option supports time formats (as these shown in "Set Date Format" dialog in "Editor" menu)
+
+*Append after clipboard snippet*
+Control what the ClipboardCatcher should append after each caught snippet. This option supports time formats (as these shown in "Set Date Format" dialog in "Editor" menu)
+
+*Avoid doubled snippets*
+If the same text is pasted multiple times consecutively to the clipboard, it is pasted only the first time. Some applications execute a single paste command as multiple pastes to the clipboard which would lead to multiple inserts without this option.
+
+*User notification*
+Choose if you want to hear a sound when a clipboard snippet is inserted.
+
+*Sound file*
+Choose the sound file to play (if you have chosen to be notified by sound above). If the field is empty, a default sound is played.
+
+
+++++ File Launcher
+
+This page is only visible on non-Windows systems.
+
+*Path to file launcher*
+Enter here the path to a script or program which takes the path or URL of a file and runs the application associated with this file. For Linux, find the "xdg-open" script (or install it first) which should do that.
+
+
+++++ Mouse
+
+*Middle button without CTRL*
+Set the reaction of a middle button click on a wiki word in editor, internal preview, tree or wiki-wide search results if CTRL is not pressed while clicking. You can choose between opening the word in a new tab in foreground, in background or in the same (active) tab.
+
+*Middle button with CTRL*
+Same as before, but set reaction if CTRL is pressed while clicking the middle button.
+
+*Left double click in preview*
+When double clicking into preview (not on a link), this can either do nothing, switch the tab to editor or open a new tab with same page, but in editor mode.
+
+*Middle click on tab*
+This can either do nothing or close the tab
+
+*Dropping files*
+*Dropping files with SHIFT*
+*Dropping files with CTRL*
+
+Control what should happen if you drag and drop files from explorer into the editor with no key pressed, with SHIFT pressed or with CTRL pressed.
+
+Possible choices are:
+    * Nothing
+    * Absolute URL: Insert absolute URL(s) to the file(s)
+    * Relative URL: URL(s) starting with "rel:"
+    * Relative into storage: Copy file(s) into file storage and create relative URL(s) to it
+
+
+++++ Time view
+
+*Time view pos.*
+Where (relative to main window) should the TimeViewWindow be positioned? "Hidden" deactivates it.
+*KNOWN BUG*: After changing the position of the window, restarting WikidPad is necessary. See RestartWikidPad for details.
+
+*Date format*
+Set the time format the timeline should use to show the dates. The format is also used when interpreting a date entered by the user in the time view.
+The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
+
+*Time view auto-hide*
+After selecting an item in time view, time view is hidden automatically.
+
+*Show word list on hovering*
+Should the list of related wiki words be shown when hovering over a date with mouse.
+
+*Show word list on select*
+Should the list of related wiki words be shown when selecting (clicking on) a date.
+
+*Show empty days*
+Should "empty" dates without relatzed wiki words be shown in the timeline.
+This option can also be set in the context menu of the timeline.
+
+*Show dates ascending*
+Control if the dates in timeline should be sorted ascending or descending.
+This option can also be set in the context menu of the timeline.
+
+
+++++ Searching
+
+*Context characters* *before* and *after*
+Chooses the number of characters to show before and after a found match as context in wiki-wide search. For an "anded" regex, the beginning of the page is shown with so many characters as the sum of the "before" and "after" values. Using context may slow down the searching a bit.
+
+*Count Occurrences*
+Counts how many matches a page contains and shows this number in parentheses after each page name in wiki-wide search results. This option slows down searching.
+
+*Delay before auto-close*
+Controls how many seconds of inactivity before the incremental search is closed automatically. 0 means "wait forever".
+
+
+++++ Advanced
+
+Change these settings only if you know what you are doing!
+
+*Ignore wiki lock file*
+*Create wiki lock file*
+See [WikiLockFile]
+
+
+
++++ Current wiki
+These options apply to the active wiki only
+
+
+++++ General options
+
+*Footnotes as wiki words*
+Interpret [Footnotes] (e.g. "[42]") as wiki words.
+
+*First word at startup*
+Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last words when the wiki was closed is shown on opening.
+
+*Default export dir.*
+Set the default export directory into which exports should go.
+
+*Remember expanded tree nodes*
+Control if expanded tree nodes should be remembered by WikidPad. This means if you collapse a tree node which contains expanded child nodes yet and expand the node later, the child nodes are expanded again. The following modes are supported:
+    * Not at all: Doesn't remember expanded nodes (like before version 1.9beta15)
+    * While wiki open: Forgets the node states when wiki is closed
+    * Always: Stores the node states in wiki configuration file and restores them on reopening
+
+It may happen that the mechanism stores expanded nodes which don't exist any longer, e.g. if the link from parent page to a child page is deleted and the child page was represented by an expanded node this is not always recognized by WikidPad, so some "garbage" may be stored.
+
+By setting the option to "Not at all" then closing the options dialog, then setting the option back to what you had before, all node state information is cleared. The info of the main tree (not the "Views" tree) is also cleared when setting a new root.
+
+*Force ScratchPad visibility in tree*
+Shows the special page ScratchPad always as child of the tree root, even if it is not really a child.
+
+*Read-only wiki*
+Check this if you want to prevent the wiki from acidental modifications.
+
+*Auto-show log window*
+Automatically show log window if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
+If the check-box is gray, the application-bound setting (see above) is used, otherwise this wiki-bound setting overrides it.
+
+*Title prefix*
+Control the heading level of the initial main title of new pages and fill between one and four '+' in this field. Default is "++".
+
+*Wikiword to title*
+How should the main title of new pages be generated from the wikiword:
+    * As is: Use wikiword as title
+    * Add spaces: Add spaces to wikiword in front of each uppercase letter ("NewWikiWord" -> "New Wiki Word")
+    * No title: Don't show a title at all
+
+*Use link title if present*
+If you came to a not yet created page through a titled link (e.g. [WikiWord| This is the title]) and this option is checked, the link title will be used as title of the page.
+
+*Wiki icon*
+Set here the name of icon to use in the system tray instead of the default icon. If the field is empty the default icon is used. The icon of the main window is not influenced by this setting (because it does not work).
+
+*Wiki-bound hotkey*
+Wiki-bound hotkey to show/hide wiki. See OptionsDialog#*App-bound# hotkey*
+
+
+++++ File storage
+
+*Modif. date must match*
+*Filename must match*
+*Modif. date is enough*
+See [FileStorage].
+

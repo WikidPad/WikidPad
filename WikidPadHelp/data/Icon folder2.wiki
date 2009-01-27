@@ -1,0 +1,2 @@
+﻿++ Icon folder2
+[icon: folder2]

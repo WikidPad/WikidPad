@@ -1,0 +1,22 @@
+﻿++ Menu Format
+
+++ Bold
+Marks selection in editor with appropriate markup for bold text.
+
+++ Italic
+Marks selection in editor with appropriate markup for italics.
+
+++ Heading
+Marks line containing text cursor with markup for a heading.
+
+This can be used multiple times to change heading level.
+
+++ Rewrap Text
+Rewraps text (adds/removes newlines) to make each line contain no more characters as defined in "wrap" attribute. See [TextFormatting].
+
+++ Convert
++++ Selection to Link
+Selection to Wiki Word
+Add Attribute
+Icon Attribute
+Color Attribute

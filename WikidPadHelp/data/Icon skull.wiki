@@ -1,0 +1,2 @@
+﻿++ Icon skull
+[icon: skull]

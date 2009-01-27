@@ -1,0 +1,22 @@
+﻿++ Footnotes
+
+Footnotes are numbers enclosed in brackets, e.g. [42].
+
+As this might also be a valid wiki word you have an option to let interpret footnotes just as wiki words. See OptionsDialog#*Footnotes# as# wiki# words*
+
+The following only applies if this option is *not* set for the current wiki:
+
+
+If the same footnote (footnote with same number) appears multiple times on a page, the last appearance is interpreted as "anchor", all former are interpreted as links to this anchor.
+
+In editor mode this means that double clicking or otherwise activating a footnote brings the cursor to the last occurrence of it on the page.
+
+In preview, all but the last footnote are shown as links which lead to the last one.
+
+You can try it with the [42] here or above. They all lead to the following anchor footnote:
+
+
+[42] Here you can write something intelligent.
+
+
+As always you can escape the footnote with a backslash: \[42].

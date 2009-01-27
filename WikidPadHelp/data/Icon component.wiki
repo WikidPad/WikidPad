@@ -1,0 +1,2 @@
+++ Icon component
+[icon: component]

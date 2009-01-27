@@ -1,0 +1,221 @@
+--- wikidPad functions ---
+
+newWiki(wikiName, wikiDir)
+    create a new wiki
+
+openWiki(wikiConfigFile, wikiWordToOpen)
+    open a wiki, and optionally a page in that wiki.
+
+saveCurrentWikiState()
+    Write any changes to the wiki to disk.
+
+openWikiPage(wikiWord)
+    Open a specific wiki word.
+
+findCurrentWordInTree()
+    Select the currently open page in the tree control.
+
+viewParents(word)
+    Pop up the dialog that shows the parents of the node passed in.
+
+viewChildren()
+    Pop up the dialog that shows the children of the node passed in.
+
+addToHistory(word)
+    Add the word passed in to the history.
+
+goInHistory(positionDelta)
+    Go back or forward in history by the amount passed in.
+
+goBackInHistory()
+    Go back in history one position.
+
+goForwardInHistory()
+    Go forward in history one position.
+
+viewHistory()
+    Show the history dialog.
+
+viewBookmarks()
+    Show the bookmarks dialog.
+
+saveCurrentWikiPage()
+    Save the current wiki page to disk.
+
+showWikiWordOpenDialog()
+showWikiWordRenameDialog()
+showWikiWordRenameConfirmDialog()
+showSearchDialog()
+showSavedSearchesDialog()
+showWikiWordDeleteDialog()
+showFindReplaceDialog()
+
+displayMessage(title, msg)
+    Popup a dialog with the message passed in.
+
+displayErrorMessage(errorStr, exception)
+    Popup an exception dialog.
+
+--- wikidPad variables ---
+
+globalConfigDir
+    The directory of the wikidPad.config file.
+
+globalConfigLoc
+    The wikidpad.config file.
+
+globalConfig
+    The parsed wikidpad.config file.
+
+wikiAppDir
+    The installation directory of wikidPad.
+
+wikiPadHelp
+    The location of the help wiki.
+
+config
+    The parsed configuration of the opened wiki.
+
+wikiName
+    The name of the currently opened wiki.
+
+dataDir
+    The data directory of the currently opened wiki.
+
+wikiData
+    The database object for the currently open wiki. More on this below.
+
+tree
+    The tree control on the left. The is a wxTreeCtrl. More on this below.
+
+currentWikiWord
+    The currently open wiki word.
+
+currentWikiPage
+    The data for the currently open wiki word. More on this below.
+
+editor
+    The text editor for wikidPad. This is a wxStyledTextCtrl. More on this below.
+
+
+--- wikiData - The wiki database interface ---
+
+getPage(wikiWord, itemsToLoad)
+    Get the data for a wiki word. Pass in an array of strings for the items to load.
+    Valid items are: info, parents, children, props, todos.
+    For performance you specify which items should be loaded from the db. If you only
+    need info and children call:
+
+    getPage(word, ["info", "children"])
+
+    More on the return value of this function below.
+
+getChildRelationships(wikiWord)
+    Returns array of the words that are children of the word passed in.
+
+getParentRelationships(wikiWord)
+    Returns array of the words that are parents of the word passed in.
+
+getAllDefinedWords()
+    Get all of the wiki words in the wiki.
+
+getAllAliases()
+    Get all of the aliases in the wiki.
+
+getAllRelations()
+    Get all of the relationships in the wiki. Returns array of tuples, (word, relatedTo).
+
+getWikiWordsStartingWith(string)
+getWikiWordsWith(string)
+getWikiWordsModifiedWithin(days)
+getParentLessWords()
+
+renameWord(word, toWord)
+    Rename a wiki word.
+
+deleteWord(word)
+    Delete a wiki word.
+
+getWordsWithPropertyValue(key, value)
+    Get all of the wiki words with a certain property value. For example
+    getWordsWithPropertyValue("icon", "pin") would get all of the wiki
+    words with "icon" set to "pin".
+
+findBestPathFromWordToWord(word, toWord)
+    Returns the shortest path in the wiki from "word" to "toWord". Returned
+    as an array of wiki words.
+
+search(forPattern)
+    Search the entire wiki using a regex.
+
+getTodos()
+    Get all of the todos in the wiki. Returned as an array of tuples.
+
+*wikiPage object*
+
+wikiWord
+    The word.
+
+wikiFile
+    The file that contains the data for this page.
+
+parentRelations
+    Array of the parents words for this node.
+
+childRelations
+    Array of the child words for this node.
+
+todos
+    Array of todos
+
+props
+    Hashtable of properties for the node.
+
+getContent()
+    Get the string content for the node.
+
+save()
+    Save the changes to this page to disk.
+
+
+--- tree control ---
+
+collapse()
+    collapse the tree.
+
+buildTreeForWord(wikiword)
+    Open the tree control to the wiki word passed in.
+
+*text control*
+
+setWrap(onOrOffBoolean)
+    Set the wrap mode to on/off.
+
+SetText()
+    Set the text of the control.
+
+snip()
+    Copy the currently selected text to the ScratchPad.
+
+startIncrementalSearch(searchStr)
+    Set the search mode to incremental.
+
+endIncrementalSearch()
+    Stop incremental search.
+
+executeSearch(searchStr, searchStartPos=-1)
+    Execute a search of the text in the control.
+
+getWikiWordText(position)
+    If position is in a wiki word return that word.
+
+getWikiWordBeginEnd(position)
+    If position is in a wiki word return the start/end positions of the word.
+
+isPositionInWikiWord(position)
+    Is the position in a wiki word?
+
+isPositionInLink(position)
+    Is the position in a URL link?
+
+See the wxWindows/wxPython documentation for info about the wxTreeCtrl and wxStyledTextCtrl.

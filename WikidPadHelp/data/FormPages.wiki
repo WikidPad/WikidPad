@@ -1,0 +1,25 @@
+﻿++ Form Pages
+
+Especially in conjunction with [Templates], you might have pages where only a few special fields should be filled in, like a form.
+
+For this you can place the attribute \[pagetype: form] on a page.
+
+If such a page is opened (or created automatically from a template with this attribute) the editor automatically selects the first &&i tag.
+
+These tags mark the positions, where data should be entered. You can now just type in text which overwrites the tag. The Tab key moves to the next &&i tag.
+
+
+Example:
+
+Create a template with the attribute on it: [SystemInfoTemplate]
+
+Register it as template for this page: [template: SystemInfoTemplate]
+
+
+Set a link to a non-existing page and go to it to fill in data:
+
+MySystemInfo
+
+
+This example is of practical use because the questions on the page should be answered (among others) when sending a bug report.
+

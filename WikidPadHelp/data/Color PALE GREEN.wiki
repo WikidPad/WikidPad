@@ -1,0 +1,2 @@
+﻿++ Color PALE GREEN
+[color: PALE GREEN]

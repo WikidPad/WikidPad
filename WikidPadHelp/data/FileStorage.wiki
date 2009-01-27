@@ -1,0 +1,40 @@
+﻿++ File Storage
+
+Each wiki can have a file storage (in fact a directory "files" in the wiki directory) where files from other places can copied into. This is helpful if you want to have the wiki and related files in the same place.
+
+You can copy a file into the file storage by holding the control key when dropping one or more files from Windows Explorer onto the editor. These files are then copied into the file storage and relative links to them are created in the editor. If a file was already in the storage (see "Identity check" below) a link to the existing file is shown instead and no copying is performed.
+
+If copying is necessary and a file with exactly the same name is not yet present in the repository, the full name of the source file is kept unmodified. Otherwise a random sequence of 10 letters/digits is generated and appended at the end of the file name (but before file suffix). If this name is also already in use, the program tries again with a different random sequence (up to 10 tries before giving up).
+
+
++++ Identity check
+
+To find out if an identical file is already in the file storage, WikidPad performs an identity check. The behavior of the check can be modified by some options in the options dialog, page "Current Wiki".
+
+For a file to be seen as identical to another one, at least the size and the file suffix (part of the filename from last dot to the end of the name) must match. All files in the storage which fulfill these criteria are taken as candidates for an identical file. Some options restrict the candidate list further:
+
+    * If *"Filename must match"* is checked, only a file with the completely same name is taken as candidate (this option is not extremely useful).
+
+    * If *"Modif. date must match"* is checked, only a file with the completely same modification date is taken as candidate (this option speeds up the identity check, but may lead to unnecessary copies of the same file).
+
+
+All candidates are then checked for identity, the first candidate is always the file with the completely same name as the source file (if it is in the list at all), after that files with the same modification date follow, then the rest. Candidates are checked in this order.
+
+If the option *"Modif. date is enough"* is in effect, and one candidate has the same modification date as the source file, the files are seen as identical without checking the content. This option is dangerous and is not recommended, but may be helpful if you are handling many large files.
+
+If "Modif. date is enough" is disabled or no file with identical date could be found, the candidates are compared byte by byte. This may take a while.
+
+
++++ Remarks
+
+    * You can create other directories than the "files" and "data" directory in your wiki directory and put files in it and use relative URLs to address them, but only the "files" directory is managed by the file storage mechanism.
+    * The file storage never deletes a file in the storage even it is not referenced by an URL anymore.
+    * You can copy files by hand in the repository, they will be handled as any other files. You can also modify or delete files in the normal way, but you should avoid to run file operation in the "files" directory and at the very same moment let WikidPad perform any operations in the storage.
+    * You can't copy directories by the mechanism, files only, but you can copy them by hand in the "files" directory. These subdirectories are not searched by the identity check.
+    * During identity check and copying WikidPad does not respond to any key presses or mouse clicks.
+
+
++++ On HTML export
+
+When exporting as HTML all files in the file storage which are referenced by a relative URL (URL beginning with "rel://") in the exported pages are copied to a "files" directory in the destination directory. This does also apply to files in subdirectories of the "files" directory.
+
