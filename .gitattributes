@@ -363,7 +363,6 @@ extensions/PloticusClBridge.py -text
 extensions/Presentation.py -text
 extensions/WikidPadHooks.py -text
 extensions/WikidPadParserStub.py -text
-extensions/__init__.py -text
 extensions/autoNew.py -text
 extensions/referrals.py -text
 extensions/wikidPadParser/WikidPadParser.py -text

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-01-27 12:17\n"
+"POT-Creation-Date: 2009-01-28 22:47\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1296,16 +1296,16 @@ msgstr ""
 msgid "Sort dates ascending"
 msgstr ""
 
-#: WikidPadStarter.py:342
+#: WikidPadStarter.py:158
 msgid "Error starting WikidPad"
 msgstr ""
 
-#: WikidPadStarter.py:343 lib\pwiki\SearchAndReplaceDialogs.py:626
+#: WikidPadStarter.py:159 lib\pwiki\SearchAndReplaceDialogs.py:626
 #: lib\pwiki\SearchAndReplaceDialogs.py:1239
 msgid "Error!"
 msgstr ""
 
-#: WikidPadStarter.py:350
+#: WikidPadStarter.py:166
 msgid "Error"
 msgstr ""
 
@@ -1824,15 +1824,15 @@ msgstr ""
 msgid "Message"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:139
+#: lib\pwiki\MainApp.py:140
 msgid "Error initializing environment, couldn't locate global config directory"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:246
+#: lib\pwiki\MainApp.py:247
 msgid "Invalid AppLock.lock file\n"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:516
+#: lib\pwiki\MainApp.py:517
 msgid "An error occurred during this session\n"
 "See file %s"
 msgstr ""
@@ -3107,7 +3107,7 @@ msgid "Choose a file to create URL for"
 msgstr ""
 
 #: lib\pwiki\PersonalWikiFrame.py:4607
-msgid "Are you sure you want to start a full rebuild of wiki in background?<d"
+msgid "Are you sure you want to start a full rebuild of wiki in background?"
 msgstr ""
 
 #: lib\pwiki\PersonalWikiFrame.py:4609

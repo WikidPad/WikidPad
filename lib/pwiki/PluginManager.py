@@ -1,6 +1,6 @@
 from __future__ import with_statement
 
-import os, sys, traceback, os.path
+import os, sys, traceback, os.path, imp
 
 # sys.path.append(ur"C:\Daten\Projekte\Wikidpad\Next20\extensions")
 
@@ -157,7 +157,12 @@ class PluginManager(object):
                         continue
                     if os.path.isfile(fullname) and ext == '.py':
                         with open(fullname) as f:
-                            packageName = "cruelimportExtensionsPackage%i" % dirNum
+                            packageName = "cruelimportExtensionsPackage%i_%i" % \
+                                    (id(self), dirNum)
+                            
+                            module = imp.new_module(packageName)
+                            module.__path__ = [directory]
+                            sys.modules[packageName] = module
     
                             module = imp.load_module(packageName + "." + moduleName, f,
                                     pathEnc(fullname), (".py", "r", imp.PY_SOURCE))

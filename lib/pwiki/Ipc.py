@@ -50,7 +50,11 @@ class CommandServer(SocketServer.TCPServer):
         return self.appCookie
 
     def close(self):
-        self.shutdown()
+        try:
+            # Method exists since Python 2.6
+            self.shutdown()
+        except AttributeError:
+            pass
         self.server_close()
 
 
