@@ -1400,7 +1400,7 @@ class _TheHelper(object):
         """
         Create a link from word which should be put on wikiPage.
         """
-        if isCcWikiWord(word):
+        if _TheHelper.isCcWikiWord(word):
             wikiFormatDetails = wikiPage.getFormatDetails()
             if wikiFormatDetails.withCamelCase:
                 ccBlacklist = wikiDocument.getCcWordBlacklist()
@@ -1427,6 +1427,11 @@ class _TheHelper(object):
         TODO: Check for necessary escaping
         """
         return u"%s%s: %s%s\n" % (BracketStart, key, value, BracketEnd)
+
+
+    @staticmethod
+    def isCcWikiWord(word):
+        return bool(wikiWordCcRE.match(word))
 
 
     @staticmethod
@@ -1490,7 +1495,7 @@ class _TheHelper(object):
             tofind = line[-mat1.end():]
             ccBlacklist = wikiDocument.getCcWordBlacklist()
             for word in wikiData.getWikiLinksStartingWith(tofind, True, True):
-                if not isCcWikiWord(word) or word in ccBlacklist:
+                if not _TheHelper.isCcWikiWord(word) or word in ccBlacklist:
                     continue
                 
                 backStepMap[word] = len(tofind)

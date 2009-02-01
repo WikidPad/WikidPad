@@ -1712,6 +1712,600 @@ class WikiPageListConstructionDialog(wx.Dialog, MiscEventSourceMixin):   # TODO
 
 
 
+class SearchWikiDialog2(wx.Dialog, MiscEventSourceMixin):
+    def __init__(self, parent, ID, srListBox=None, allowOrdering=True,
+            allowOkCancel=True, value=None,
+            title="Search Wiki", pos=wx.DefaultPosition, size=wx.DefaultSize,
+            style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
+        d = wx.PreDialog()
+        self.PostCreate(d)
+
+        self.mainControl = parent
+
+        res = wx.xrc.XmlResource.Get()
+        res.LoadOnDialog(self, parent, "SearchWikiDialog2")
+        if srListBox is None:
+            srListBox = SearchResultListBox(self, self.mainControl,
+                    GUI_ID.htmllbPages)
+        else:
+            srListBox.Reparent(self)
+
+        res.AttachUnknownControl("htmllbPages", srListBox, self)
+        self.ctrls = XrcControls(self)
+
+        if allowOkCancel:
+            self.ctrls.btnOk.SetId(wx.ID_OK)
+            self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
+        else:
+            self.ctrls.btnOk.SetId(wx.ID_CANCEL)
+            self.ctrls.btnCancel.Show(False)
+
+        self.ctrls.tfPageListToAdd.SetValue(uniToGui(
+                self.mainControl.getCurrentWikiWord()))
+
+        self.ctrls.cbSearch.SetWindowStyle(self.ctrls.cbSearch.GetWindowStyle()
+                | wx.TE_PROCESS_ENTER)
+
+        self.listNeedsRefresh = True  # Reflects listbox content current
+                                      # search criteria?
+
+        self.savedSearches = None
+        self.foundPages = []
+
+        self.listPagesOperation = ListWikiPagesOperation()
+        self._refreshSavedSearchesList()
+        self._refreshSearchHistoryCombo()
+        
+        # Fixes focus bug under Linux
+        self.SetFocus()
+
+        wx.EVT_BUTTON(self, GUI_ID.btnFindPages, self.OnSearchWiki)
+        wx.EVT_BUTTON(self, GUI_ID.btnSetPageList, self.OnSetPageList)
+        wx.EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)        
+        wx.EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
+        wx.EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
+        wx.EVT_BUTTON(self, GUI_ID.btnSaveSearch, self.OnSaveSearch)
+        wx.EVT_BUTTON(self, GUI_ID.btnDeleteSearches, self.OnDeleteSearches)
+        wx.EVT_BUTTON(self, GUI_ID.btnLoadSearch, self.OnLoadSearch)
+        wx.EVT_BUTTON(self, GUI_ID.btnLoadAndRunSearch, self.OnLoadAndRunSearch)
+        wx.EVT_BUTTON(self, GUI_ID.btnOptions, self.OnOptions)
+        wx.EVT_BUTTON(self, GUI_ID.btnCopyPageNamesToClipboard,
+                self.OnCopyPageNamesToClipboard)
+        wx.EVT_BUTTON(self, GUI_ID.btnAsResultlist, self.OnCmdAsResultlist)
+        wx.EVT_BUTTON(self, GUI_ID.btnAsTab, self.OnCmdAsTab)
+
+        wx.EVT_CHAR(self.ctrls.cbSearch, self.OnCharToFind)
+        wx.EVT_CHAR(self.ctrls.rboxSearchType, self.OnCharToFind)
+        wx.EVT_CHAR(self.ctrls.cbCaseSensitive, self.OnCharToFind)
+        wx.EVT_CHAR(self.ctrls.cbWholeWord, self.OnCharToFind)
+
+        wx.EVT_COMBOBOX(self, GUI_ID.cbSearch, self.OnSearchComboSelected) 
+        wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lbSavedSearches, self.OnLoadAndRunSearch)
+        wx.EVT_RADIOBOX(self, GUI_ID.rboxSearchType, self.OnRadioBox)
+        wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnClose)        
+        wx.EVT_CLOSE(self, self.OnClose)
+        
+        wx.EVT_TEXT(self, GUI_ID.cbSearch, self.OnListRefreshNeeded)
+        wx.EVT_CHECKBOX(self, GUI_ID.cbCaseSensitive, self.OnListRefreshNeeded)
+        wx.EVT_CHECKBOX(self, GUI_ID.cbWholeWord, self.OnListRefreshNeeded)
+
+
+    def displayErrorMessage(self, errorStr, e=u""):
+        """
+        Pops up an error dialog box
+        """
+        wx.MessageBox(uniToGui(u"%s. %s." % (errorStr, e)), _(u"Error!"),
+            wx.OK, self)
+
+
+    def buildSearchReplaceOperation(self):
+        searchType = self.ctrls.rboxSearchType.GetSelection()
+        
+        sarOp = SearchReplaceOperation()
+        sarOp.searchStr = guiToUni(self.ctrls.cbSearch.GetValue())
+        sarOp.booleanOp = searchType == Consts.SEARCHTYPE_BOOLEANREGEX
+        sarOp.caseSensitive = self.ctrls.cbCaseSensitive.GetValue()
+        sarOp.wholeWord = self.ctrls.cbWholeWord.GetValue()
+        sarOp.cycleToStart = False
+        sarOp.wildCard = 'regex' if searchType != Consts.SEARCHTYPE_ASIS else 'no'
+        sarOp.wikiWide = True
+        sarOp.listWikiPagesOp = self.listPagesOperation
+
+        if not sarOp.booleanOp:
+            sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
+            
+        return sarOp
+
+
+    def showSearchReplaceOperation(self, sarOp):
+        self.ctrls.cbSearch.SetValue(uniToGui(sarOp.searchStr))
+        if sarOp.booleanOp:
+            self.ctrls.rboxSearchType.SetSelection(Consts.SEARCHTYPE_BOOLEANREGEX)
+        else:
+            if sarOp.wildCard == 'regex':
+                self.ctrls.rboxSearchType.SetSelection(Consts.SEARCHTYPE_REGEX)
+            else:
+                self.ctrls.rboxSearchType.SetSelection(Consts.SEARCHTYPE_ASIS)
+
+        self.ctrls.cbCaseSensitive.SetValue(sarOp.caseSensitive)
+        self.ctrls.cbWholeWord.SetValue(sarOp.wholeWord)
+
+        if not sarOp.booleanOp and sarOp.replaceOp:
+            self.ctrls.txtReplace.SetValue(uniToGui(sarOp.replaceStr))
+
+        self.listPagesOperation = sarOp.listWikiPagesOp
+
+        self.OnRadioBox(None)  # Refresh settings
+
+
+    def _refreshPageList(self):
+        self.ctrls.htmllbPages.showSearching()
+        self.SetCursor(wx.HOURGLASS_CURSOR)
+        self.Freeze()
+        try:
+            sarOp = self.buildSearchReplaceOperation()
+
+            if len(sarOp.searchStr) > 0:
+                self.foundPages = self.mainControl.getWikiDocument().searchWiki(sarOp)
+                self.mainControl.getCollator().sort(self.foundPages)
+                self.ctrls.htmllbPages.showFound(sarOp, self.foundPages,
+                        self.mainControl.getWikiDocument())
+            else:
+                self.foundPages = []
+                self.ctrls.htmllbPages.showFound(None, None, None)
+
+            self.listNeedsRefresh = False
+
+        finally:
+            self.Thaw()
+            self.SetCursor(wx.NullCursor)
+            self.ctrls.htmllbPages.ensureNotShowSearching()
+
+
+    def OnSearchWiki(self, evt):
+        try:
+            self._refreshPageList()
+            self.addCurrentToHistory()
+            if not self.ctrls.htmllbPages.IsEmpty():
+                self.ctrls.htmllbPages.SetFocus()
+                self.ctrls.htmllbPages.SetSelection(0)
+        except re.error, e:
+            self.displayErrorMessage(_(u'Error in regular expression'),
+                    _(unicode(e)))
+
+            
+    def OnSetPageList(self, evt):
+        """
+        Show the Page List dialog
+        """
+        dlg = WikiPageListConstructionDialog(self, self.GetParent(), -1,
+                value=self.listPagesOperation, allowOrdering=False)
+
+#         result = dlg.ShowModal()
+#         dlg.Destroy()
+#         if result == wxID_OK:
+#             self.listPagesOperation = dlg.getValue()
+#             pass
+
+        dlg.getMiscEvent().addListener(KeyFunctionSink((
+                ("nonmodal closed", self.onNonmodalClosedPageList),
+        )), False)
+
+        self.Show(False)
+        dlg.Show(True)
+
+    def onNonmodalClosedPageList(self, miscevt):
+        plop = miscevt.get("listWikiPagesOp")
+        if plop is not None:
+            self.listPagesOperation = plop
+
+        self.Show(True)
+
+
+    def OnListRefreshNeeded(self, evt):
+        self.listNeedsRefresh = True
+
+    def OnFindNext(self, evt):
+        self._findNext()
+
+    def _findNext(self):
+        if self.listNeedsRefresh:
+            try:
+                # Refresh list and start from beginning
+                self._refreshPageList()
+            except re.error, e:
+                self.displayErrorMessage(_(u'Error in regular expression'),
+                        _(unicode(e)))
+                return
+
+        self.addCurrentToHistory()
+        if self.ctrls.htmllbPages.GetCount() == 0:
+            return
+        
+        try:
+            while True:            
+                    
+                #########self.ctrls.lb.SetSelection(self.listPosNext)
+                
+                wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
+                
+                if not wikiWord:
+                    self.ctrls.htmllbPages.SetSelection(0)
+                    wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
+    
+                if self.mainControl.getCurrentWikiWord() != wikiWord:
+                    self.mainControl.openWikiPage(wikiWord)
+                    nextOnPage = False
+                else:
+                    nextOnPage = True
+    
+                searchOp = self.buildSearchReplaceOperation()
+                searchOp.replaceOp = False
+                if nextOnPage:
+                    pagePosNext = self.mainControl.getActiveEditor().executeSearch(searchOp,
+                            -2)[1]
+                else:
+                    pagePosNext = self.mainControl.getActiveEditor().executeSearch(searchOp,
+                            0)[1]
+                    
+                if pagePosNext != -1:
+                    return  # Found
+                    
+                if self.ctrls.htmllbPages.GetSelection() == \
+                        self.ctrls.htmllbPages.GetCount() - 1:
+                    # Nothing more found on the last page in list, so back to
+                    # begin of list and stop
+                    self.ctrls.htmllbPages.SetSelection(0)
+                    return
+                    
+                # Otherwise: Go to next page in list            
+                self.ctrls.htmllbPages.SetSelection(
+                        self.ctrls.htmllbPages.GetSelection() + 1)
+        except re.error, e:
+            self.displayErrorMessage(_(u'Error in regular expression'),
+                    _(unicode(e)))
+
+
+
+    def OnReplace(self, evt):
+        sarOp = self.buildSearchReplaceOperation()
+        sarOp.replaceOp = True
+        try:
+            self.mainControl.getActiveEditor().executeReplace(sarOp)
+        except re.error, e:
+            self.displayErrorMessage(_(u'Error in regular expression'),
+                    _(unicode(e)))
+            return
+
+        self._findNext()
+
+
+    def OnReplaceAll(self, evt):
+        answer = wx.MessageBox(_(u"Replace all occurrences?"), _(u"Replace All"),
+                wx.YES_NO | wx.NO_DEFAULT, self)
+        
+        if answer == wx.NO:
+            return
+
+        try:
+            self._refreshPageList()
+            
+            if self.ctrls.htmllbPages.GetCount() == 0:
+                return
+                
+            # self.pWiki.saveCurrentDocPage()
+            
+            sarOp = self.buildSearchReplaceOperation()
+            sarOp.replaceOp = True
+            
+            # wikiData = self.pWiki.getWikiData()
+            wikiDocument = self.mainControl.getWikiDocument()
+            self.addCurrentToHistory()
+            
+            replaceCount = 0
+    
+            for i in xrange(self.ctrls.htmllbPages.GetCount()):
+                self.ctrls.htmllbPages.SetSelection(i)
+                wikiWord = guiToUni(self.ctrls.htmllbPages.GetSelectedWord())
+                wikiPage = wikiDocument.getWikiPageNoError(wikiWord)
+                text = wikiPage.getLiveTextNoTemplate()
+                if text is None:
+                    continue
+    
+                charStartPos = 0
+    
+                while True:
+                    try:
+                        found = sarOp.searchText(text, charStartPos)
+                        start, end = found[:2]
+                    except:
+                        # Regex error -> Stop searching
+                        return
+                        
+                    if start is None: break
+                    
+                    repl = sarOp.replace(text, found)
+                    text = text[:start] + repl + text[end:]  # TODO Faster?
+                    charStartPos = start + len(repl)
+                    replaceCount += 1
+                    if start == end:
+                        # Otherwise replacing would go infinitely
+                        break
+
+                wikiPage.replaceLiveText(text)
+                    
+            self._refreshPageList()
+            
+            wx.MessageBox(_(u"%i replacements done") % replaceCount,
+                    _(u"Replace All"),
+                wx.OK, self)        
+
+        except re.error, e:
+            self.displayErrorMessage(_(u'Error in regular expression'),
+                    _(unicode(e)))
+
+
+    def addCurrentToHistory(self):
+        sarOp = self.buildSearchReplaceOperation()
+        try:
+            sarOp.rebuildSearchOpTree()
+        except re.error:
+            # Ignore silently
+            return
+        data = sarOp.getPackedSettings()
+        tpl = (sarOp.searchStr, sarOp.getPackedSettings())
+        hist = wx.GetApp().getWikiSearchHistory()
+        try:
+            pos = hist.index(tpl)
+            del hist[pos]
+            hist.insert(0, tpl)
+        except ValueError:
+            # tpl not in hist
+            hist.insert(0, tpl)
+            if len(hist) > 10:
+                hist = hist[:10]
+            
+        wx.GetApp().setWikiSearchHistory(hist)
+        text = self.ctrls.cbSearch.GetValue()
+        self._refreshSearchHistoryCombo()
+#         self.ctrls.cbSearch.Clear()
+#         self.ctrls.cbSearch.AppendItems([tpl[0] for tpl in hist])
+        self.ctrls.cbSearch.SetValue(text)
+
+
+
+    # TODO Store search mode
+    def OnSaveSearch(self, evt):
+        sarOp = self.buildSearchReplaceOperation()
+        try:
+            sarOp.rebuildSearchOpTree()
+        except re.error, e:
+            self.mainControl.displayErrorMessage(_(u'Error in regular expression'),
+                    _(unicode(e)))
+            return
+
+        if len(sarOp.searchStr) > 0:
+            title = sarOp.getTitle()
+            while True:
+                title = guiToUni(wx.GetTextFromUser(_(u"Title:"),
+                        _(u"Choose search title"), title, self))
+                if title == u"":
+                    return  # Cancel
+                    
+#                 if title in self.pWiki.getWikiData().getSavedSearchTitles():
+                if (u"savedsearch/" + title) in self.mainControl.getWikiData()\
+                        .getDataBlockUnifNamesStartingWith(
+                        u"savedsearch/" + title):
+
+                    answer = wx.MessageBox(
+                            _(u"Do you want to overwrite existing search '%s'?") %
+                            title, _(u"Overwrite search"),
+                            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
+                    if answer == wx.NO:
+                        continue
+
+#                 self.pWiki.getWikiData().saveSearch(title,
+#                         sarOp.getPackedSettings())
+                self.mainControl.getWikiData().storeDataBlock(
+                        u"savedsearch/" + title, sarOp.getPackedSettings(),
+                        storeHint=Consts.DATABLOCK_STOREHINT_INTERN)
+
+                self._refreshSavedSearchesList()
+                break
+        else:
+            self.mainControl.displayErrorMessage(
+                    _(u"Invalid search string, can't save as view"))
+
+
+    def OnRadioBox(self, evt):
+        self.listNeedsRefresh = True
+        booleanSearch = self.ctrls.rboxSearchType.GetSelection() == 1
+        
+        self.ctrls.txtReplace.Enable(not booleanSearch)
+        self.ctrls.btnFindNext.Enable(not booleanSearch)
+        self.ctrls.btnReplace.Enable(not booleanSearch)
+        self.ctrls.btnReplaceAll.Enable(not booleanSearch)
+
+
+    def OnOptions(self, evt):
+        dlg = SearchWikiOptionsDialog(self, self.GetParent(), -1)
+        dlg.CenterOnParent(wx.BOTH)
+
+        dlg.ShowModal()
+        dlg.Destroy()
+
+
+    def getResultListPositionTuple(self):
+        return getRelativePositionTupleToAncestor(self.ctrls.htmllbPages, self)
+
+
+    def OnCmdAsResultlist(self, evt):
+        self.Hide()
+        
+        ownPos = self.GetPositionTuple()
+        oldRelBoxPos = self.getResultListPositionTuple()
+        
+        frame = FastSearchPopup(self.GetParent(), self.mainControl, -1,
+                srListBox=self.ctrls.htmllbPages)
+        frame.setSearchOp(self.buildSearchReplaceOperation())
+        
+        newRelBoxPos = frame.getResultListPositionTuple()
+
+        # A bit math to ensure that result list in both windows is placed
+        # at same position (looks more cool)
+        otherPos = (ownPos[0] + oldRelBoxPos[0] - newRelBoxPos[0],
+                ownPos[1] + oldRelBoxPos[1] - newRelBoxPos[1])
+        
+        setWindowPos(frame, pos=otherPos, fullVisible=True)
+        self.mainControl.wwSearchDlgs.append(frame)
+        frame.Show()
+        self.Close()
+
+
+    def OnCmdAsTab(self, evt):
+        self.Hide()
+
+        maPanel = self.mainControl.getMainAreaPanel()
+        presenter = LayeredControlPanel(maPanel)
+        subCtl = SearchResultPresenterControl(presenter, self.mainControl,
+                self.GetParent(), -1, srListBox=self.ctrls.htmllbPages)
+        presenter.setSubControl("search result list", subCtl)
+        presenter.switchSubControl("search result list")
+        maPanel.appendPresenterTab(presenter)
+        subCtl.setSearchOp(self.buildSearchReplaceOperation())
+
+        maPanel.showPresenter(presenter)
+        self.Close()
+
+
+    def OnClose(self, evt):
+        try:
+            self.mainControl.wwSearchDlgs.remove(self)
+        except ValueError:
+            if self is self.mainControl.mainWwSearchDlg:
+                self.mainControl.mainWwSearchDlg = None
+
+        self.Destroy()
+
+
+    def _refreshSavedSearchesList(self):
+        unifNames = self.mainControl.getWikiData()\
+                .getDataBlockUnifNamesStartingWith(u"savedsearch/")
+
+#         self.savedSearches = self.pWiki.getWikiData().getSavedSearchTitles()
+        self.savedSearches = [name[12:] for name in unifNames]
+        self.mainControl.getCollator().sort(self.savedSearches)
+
+        self.ctrls.lbSavedSearches.Clear()
+        for search in self.savedSearches:
+            self.ctrls.lbSavedSearches.Append(uniToGui(search))
+
+
+    def _refreshSearchHistoryCombo(self):
+        hist = wx.GetApp().getWikiSearchHistory()
+        self.ctrls.cbSearch.Clear()
+        self.ctrls.cbSearch.AppendItems([tpl[0] for tpl in hist])
+
+
+    def OnDeleteSearches(self, evt):
+        sels = self.ctrls.lbSavedSearches.GetSelections()
+        
+        if len(sels) == 0:
+            return
+            
+        answer = wx.MessageBox(
+                _(u"Do you want to delete %i search(es)?") % len(sels),
+                _(u"Delete search"),
+                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
+        if answer == wx.NO:
+            return
+
+        for s in sels:
+#             self.pWiki.getWikiData().deleteSavedSearch(self.savedSearches[s])
+            self.mainControl.getWikiData().deleteDataBlock(
+                    u"savedsearch/" + self.savedSearches[s])
+        self._refreshSavedSearchesList()
+
+
+    def OnLoadSearch(self, evt):
+        self._loadSearch()
+        
+    def OnLoadAndRunSearch(self, evt):
+        if self._loadSearch():
+            try:
+                self._refreshPageList()
+            except re.error, e:
+                self.displayErrorMessage(_(u'Error in regular expression'),
+                        _(unicode(e)))
+
+
+    def _loadSearch(self):
+        sels = self.ctrls.lbSavedSearches.GetSelections()
+        
+        if len(sels) != 1:
+            return False
+        
+        datablock = self.mainControl.getWikiData().retrieveDataBlock(
+                u"savedsearch/" + self.savedSearches[sels[0]])
+
+        sarOp = SearchReplaceOperation()
+        sarOp.setPackedSettings(datablock)
+        
+        self.showSearchReplaceOperation(sarOp)
+        
+        return True
+
+
+    def OnSearchComboSelected(self, evt):
+        hist = wx.GetApp().getWikiSearchHistory()
+        sarOp = SearchReplaceOperation()
+        sarOp.setPackedSettings(hist[evt.GetSelection()][1])
+        
+        self.showSearchReplaceOperation(sarOp)
+        self.ctrls.txtReplace.SetValue(guiToUni(sarOp.replaceStr))
+
+
+    def OnCopyPageNamesToClipboard(self, evt):
+        langHelper = wx.GetApp().createWikiLanguageHelper(
+                self.mainControl.getWikiDefaultWikiLanguage())
+
+        wordsText = u"".join([
+                langHelper.createStableLinksFromWikiWords((w,)) + "\n"
+                for w in self.foundPages])
+
+        copyTextToClipboard(wordsText)
+
+
+    def OnCharToFind(self, evt):
+        if (evt.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER)):
+            self.OnSearchWiki(evt)
+        elif evt.GetKeyCode() == wx.WXK_TAB:
+            if evt.ShiftDown():
+                self.ctrls.cbSearch.Navigate(wx.NavigationKeyEvent.IsBackward | 
+                        wx.NavigationKeyEvent.FromTab)
+            else:
+                self.ctrls.cbSearch.Navigate(wx.NavigationKeyEvent.IsForward | 
+                        wx.NavigationKeyEvent.FromTab)
+        else:
+            evt.Skip()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class SearchResultPresenterControl(wx.Panel):
     """
     Panel which can be added to presenter in main area panel as tab showing

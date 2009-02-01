@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-01-28 22:47\n"
+"POT-Creation-Date: 2009-02-01 22:01\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,10 +40,6 @@ msgid " Replace &All "
 msgstr ""
 
 #: WikidPad.xrc:0
-msgid "\"&Anded\" regex"
-msgstr ""
-
-#: WikidPad.xrc:0
 msgid "\"And&ed\" regex"
 msgstr ""
 
@@ -61,10 +57,6 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "&Ignore"
-msgstr ""
-
-#: WikidPad.xrc:0
-msgid "&Load"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -572,10 +564,6 @@ msgid "JPEG"
 msgstr ""
 
 #: WikidPad.xrc:0
-msgid "L. and R&un"
-msgstr ""
-
-#: WikidPad.xrc:0
 msgid "Left"
 msgstr ""
 
@@ -713,10 +701,6 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "PNG"
-msgstr ""
-
-#: WikidPad.xrc:0
-msgid "Page &names"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -860,10 +844,6 @@ msgid "Right"
 msgstr ""
 
 #: WikidPad.xrc:0
-msgid "S&imple regex"
-msgstr ""
-
-#: WikidPad.xrc:0
 msgid "Same Tab"
 msgstr ""
 
@@ -896,6 +876,10 @@ msgid "Search from"
 msgstr ""
 
 #: WikidPad.xrc:0
+msgid "Search text"
+msgstr ""
+
+#: WikidPad.xrc:0
 msgid "Select facename"
 msgstr ""
 
@@ -913,6 +897,10 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "Set page &list"
+msgstr ""
+
+#: WikidPad.xrc:0
+msgid "Set page list"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -1263,19 +1251,20 @@ msgid "Delete"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:919
+#: lib\pwiki\SearchAndReplaceDialogs.py:2090
 msgid "Title:"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:1743
+#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:2337
 msgid "As Resultlist"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:1748
-#: lib\pwiki\SearchAndReplaceDialogs.py:1851
+#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:2342
+#: lib\pwiki\SearchAndReplaceDialogs.py:2445
 msgid "As Full Search"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:2077
+#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:2671
 #: lib\pwiki\WikiHtmlView.py:625
 msgid "Activate New Tab"
 msgstr ""
@@ -1302,6 +1291,7 @@ msgstr ""
 
 #: WikidPadStarter.py:159 lib\pwiki\SearchAndReplaceDialogs.py:626
 #: lib\pwiki\SearchAndReplaceDialogs.py:1239
+#: lib\pwiki\SearchAndReplaceDialogs.py:1797
 msgid "Error!"
 msgstr ""
 
@@ -1445,11 +1435,11 @@ msgstr ""
 msgid "Referers"
 msgstr ""
 
-#: extensions\referrals.py:112
+#: extensions\referrals.py:111
 msgid "*%s page(s) referring to* %s\n"
 msgstr ""
 
-#: extensions\referrals.py:121
+#: extensions\referrals.py:120
 msgid "*%s page(s) referred to by* %s\n"
 msgstr ""
 
@@ -3192,6 +3182,34 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
+#: lib\pwiki\Pre_SearchAndReplace.py:406
+#: lib\pwiki\SearchAndReplaceDialogs.py:1468
+msgid "Bad regular expression '%s':\n"
+"%s"
+msgstr ""
+
+#: lib\pwiki\Pre_SearchAndReplace.py:407
+#: lib\pwiki\SearchAndReplaceDialogs.py:702
+#: lib\pwiki\SearchAndReplaceDialogs.py:746
+#: lib\pwiki\SearchAndReplaceDialogs.py:794
+#: lib\pwiki\SearchAndReplaceDialogs.py:805
+#: lib\pwiki\SearchAndReplaceDialogs.py:873
+#: lib\pwiki\SearchAndReplaceDialogs.py:912
+#: lib\pwiki\SearchAndReplaceDialogs.py:1067
+#: lib\pwiki\SearchAndReplaceDialogs.py:1286
+#: lib\pwiki\SearchAndReplaceDialogs.py:1300
+#: lib\pwiki\SearchAndReplaceDialogs.py:1469
+#: lib\pwiki\SearchAndReplaceDialogs.py:1873
+#: lib\pwiki\SearchAndReplaceDialogs.py:1917
+#: lib\pwiki\SearchAndReplaceDialogs.py:1965
+#: lib\pwiki\SearchAndReplaceDialogs.py:1976
+#: lib\pwiki\SearchAndReplaceDialogs.py:2044
+#: lib\pwiki\SearchAndReplaceDialogs.py:2083
+#: lib\pwiki\SearchAndReplaceDialogs.py:2238
+#: lib\pwiki\SearchAndReplaceDialogs.py:2627
+msgid "Error in regular expression"
+msgstr ""
+
 #: lib\pwiki\Printing.py:299
 msgid "Print Preview"
 msgstr ""
@@ -3520,56 +3538,52 @@ msgstr ""
 msgid "Not found"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:702
-#: lib\pwiki\SearchAndReplaceDialogs.py:746
-#: lib\pwiki\SearchAndReplaceDialogs.py:794
-#: lib\pwiki\SearchAndReplaceDialogs.py:805
-#: lib\pwiki\SearchAndReplaceDialogs.py:873
-#: lib\pwiki\SearchAndReplaceDialogs.py:912
-#: lib\pwiki\SearchAndReplaceDialogs.py:1067
-#: lib\pwiki\SearchAndReplaceDialogs.py:1286
-#: lib\pwiki\SearchAndReplaceDialogs.py:1300
-#: lib\pwiki\SearchAndReplaceDialogs.py:1469
-#: lib\pwiki\SearchAndReplaceDialogs.py:2033
-msgid "Error in regular expression"
-msgstr ""
-
-#: lib\pwiki\SearchAndReplaceDialogs.py:813
-msgid "Replace all occurrences?"
-msgstr ""
-
 #: lib\pwiki\SearchAndReplaceDialogs.py:813
 #: lib\pwiki\SearchAndReplaceDialogs.py:869
 #: lib\pwiki\SearchAndReplaceDialogs.py:1330
+#: lib\pwiki\SearchAndReplaceDialogs.py:1984
+#: lib\pwiki\SearchAndReplaceDialogs.py:2040
 msgid "Replace All"
+msgstr ""
+
+#: lib\pwiki\SearchAndReplaceDialogs.py:813
+#: lib\pwiki\SearchAndReplaceDialogs.py:1984
+msgid "Replace all occurrences?"
 msgstr ""
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:868
 #: lib\pwiki\SearchAndReplaceDialogs.py:1329
+#: lib\pwiki\SearchAndReplaceDialogs.py:2039
 msgid "%i replacements done"
 msgstr ""
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:920
+#: lib\pwiki\SearchAndReplaceDialogs.py:2091
 msgid "Choose search title"
 msgstr ""
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:930
+#: lib\pwiki\SearchAndReplaceDialogs.py:2101
 msgid "Do you want to overwrite existing search '%s'?"
 msgstr ""
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:931
+#: lib\pwiki\SearchAndReplaceDialogs.py:2102
 msgid "Overwrite search"
 msgstr ""
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:946
+#: lib\pwiki\SearchAndReplaceDialogs.py:2117
 msgid "Invalid search string, can't save as view"
 msgstr ""
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1046
+#: lib\pwiki\SearchAndReplaceDialogs.py:2217
 msgid "Do you want to delete %i search(es)?"
 msgstr ""
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1047
+#: lib\pwiki\SearchAndReplaceDialogs.py:2218
 msgid "Delete search"
 msgstr ""
 
@@ -3586,32 +3600,27 @@ msgstr ""
 msgid "No matches found"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1468
-msgid "Bad regular expression '%s':\n"
-"%s"
-msgstr ""
-
-#: lib\pwiki\SearchAndReplaceDialogs.py:1780
+#: lib\pwiki\SearchAndReplaceDialogs.py:2374
 msgid "<Search: %s>"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1828
+#: lib\pwiki\SearchAndReplaceDialogs.py:2422
 msgid "Fast Search"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1855
+#: lib\pwiki\SearchAndReplaceDialogs.py:2449
 msgid "As Tab"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1895
+#: lib\pwiki\SearchAndReplaceDialogs.py:2489
 msgid "Search: %s"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2076 lib\pwiki\WikiHtmlView.py:624
+#: lib\pwiki\SearchAndReplaceDialogs.py:2670 lib\pwiki\WikiHtmlView.py:624
 msgid "Activate"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2078 lib\pwiki\WikiHtmlView.py:626
+#: lib\pwiki\SearchAndReplaceDialogs.py:2672 lib\pwiki\WikiHtmlView.py:626
 msgid "Activate New Tab Backgrd."
 msgstr ""
 

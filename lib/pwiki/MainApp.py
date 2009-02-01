@@ -229,7 +229,7 @@ class App(wx.App, MiscEventSourceMixin):
             # a new "AppLock.lock" file which either didn't exist or was invalid
 
             singleInstance = True
-    
+
             # TODO maybe more secure method to ensure atomic exist. check and
             #   writing of file
             if os.path.exists(pathEnc(os.path.join(
@@ -246,10 +246,10 @@ class App(wx.App, MiscEventSourceMixin):
                 if len(lines) != 3:
                     sys.stderr.write(_(u"Invalid AppLock.lock file\n"))
                     return True # TODO Error handling!!!
-                    
+
                 appCookie = lines[0]
                 remotePort = int(lines[1])
-                
+
                 if port != remotePort:
                     # Everything ok so far
                     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

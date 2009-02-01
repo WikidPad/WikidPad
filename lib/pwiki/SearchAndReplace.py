@@ -96,6 +96,16 @@ class AbstractSearchNode:
         Return all words used as roots of subtrees (if any) for better tree sorting
         """
         return []
+        
+    def hasParticularTextPosition(self):
+        """
+        Returns True if a found entry has a particular text position (means
+        to support the additonal AbstractContentSearchNode methods
+        searchText(), matchesPart(), replace() ).
+
+        Call it for the root of a tree, it will automatically ask its children.
+        """
+        return False
 
 
 
@@ -484,6 +494,16 @@ class AbstractContentSearchNode(AbstractSearchNode):
         """
         assert 0  # abstract
 
+    def hasParticularTextPosition(self):
+        """
+        Returns True if a found entry has a particular text position (means
+        to support the additonal AbstractContentSearchNode methods
+        searchText(), matchesPart(), replace() ).
+
+        Call it for the root of a tree, it will automatically ask its children.
+        """
+        return True
+
 
 
 class RegexTextNode(AbstractContentSearchNode):
@@ -652,9 +672,9 @@ class ListWikiPagesOperation:
 
         if self.searchOpTree is None:
             return   # TODO: Error ?
-            
+
         return self.searchOpTree.beginWikiSearch(wikiDocument)
-        
+
 
     def endWikiSearch(self):
         """
@@ -664,9 +684,9 @@ class ListWikiPagesOperation:
 
         if self.searchOpTree is None:
             return   # TODO: Error ?
-            
+
         return self.searchOpTree.endWikiSearch()
-        
+
 
     def testWikiPage(self, word, text):
         """
@@ -908,7 +928,7 @@ class SearchReplaceOperation:
         self.clearCache()
 
 
-    def reNeeded(self):
+    def _reNeeded(self):
         """
         Return True if current settings require to use regular expressions
         instead of a simple string search. This can be True even if self.regEx
@@ -953,7 +973,7 @@ class SearchReplaceOperation:
         Build single search criterion e.g. as part of a boolean search
         and return the node.
         """
-        if not self.reNeeded():
+        if not self._reNeeded():
             # TODO: Test if really faster than REs
             return SimpleStrNode(self, searchStr)
         else:

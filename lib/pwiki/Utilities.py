@@ -37,7 +37,7 @@ class FunctionThreadStop(BasicThreadStop):
 
     def __init__(self, fct):
         self.fct = fct
-        
+
     def isRunning(self):
         return self.fct()
         
