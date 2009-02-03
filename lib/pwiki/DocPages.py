@@ -158,7 +158,8 @@ class DocPage(object, MiscEventSourceMixin):
                 return
 
             # Modify database
-            self.writeToDatabase(fireEvent=fireEvent)
+            text = self.getContent() + text
+            self.writeToDatabase(text, fireEvent=fireEvent)
 
 #             self.save(text, fireEvent=fireEvent)
 # 
@@ -232,8 +233,8 @@ class DocPage(object, MiscEventSourceMixin):
                 txtEditor.replaceText(text)
                 return
 
-            self.writeToDatabase(fireEvent=fireEvent)
-            
+            self.writeToDatabase(text, fireEvent=fireEvent)
+
 
     def informEditorTextChanged(self, changer):
         """
@@ -287,8 +288,8 @@ class DocPage(object, MiscEventSourceMixin):
         for functional pages.
         """
         raise NotImplementedError #abstract
-        
-    
+
+
     def isReadOnlyEffect(self):
         """
         Return true if page is effectively read-only, this means
@@ -297,14 +298,16 @@ class DocPage(object, MiscEventSourceMixin):
         return self.wikiDocument.isReadOnlyEffect()
 
 
-    def writeToDatabase(self, fireEvent=True):
+    def writeToDatabase(self, text=None, fireEvent=True):
         """
         Write current text to database and initiate update of meta-data.
         """
         with self.textOperationLock:
             s, u = self.getDirty()
             if s:
-                self.save(fireEvent=fireEvent)
+                if text is None:
+                    text = self.getLiveText()
+                self._save(text, fireEvent=fireEvent)
                 self.initiateUpdate(fireEvent=fireEvent)
             elif u:
                 self.initiateUpdate(fireEvent=fireEvent)
@@ -314,7 +317,7 @@ class DocPage(object, MiscEventSourceMixin):
                     self.initiateUpdate(fireEvent=fireEvent)
 
 
-    def save(self, fireEvent=True):
+    def _save(self, text, fireEvent=True):
         """
         Saves the content of current doc page.
         """
@@ -385,11 +388,11 @@ class AliasWikiPage(DocPage):
     def setDirty(self, dirt):
         return self.realWikiPage.setDirty(dirt)
 
-    def save(self, fireEvent=True):
+    def _save(self, text, fireEvent=True):
         """
         Saves the content of current doc page.
         """
-        return self.realWikiPage.save(fireEvent)
+        return self.realWikiPage._save(text, fireEvent)
 
     def initiateUpdate(self):
         return self.realWikiPage.initiateUpdate()
@@ -940,7 +943,7 @@ class WikiPage(DataCarryingPage):
                     # TODO Error checking
                     templateWord = parentPage.getPropertyOrGlobal("template")
                     templatePage = self.wikiDocument.getWikiPage(templateWord)
-                    
+
                     # getLiveText() would be more logical, but this may
                     # mean that content is up to date, while attributes
                     # are not updated.
@@ -1010,7 +1013,7 @@ class WikiPage(DataCarryingPage):
                 frozenset(("todoEntry",)))
 
 
-    def save(self, fireEvent=True):
+    def _save(self, text, fireEvent=True):
         """
         Saves the content of current wiki page.
         """
@@ -1023,7 +1026,7 @@ class WikiPage(DataCarryingPage):
                 # The event may be needed to invalidate a cache
                 self.fireMiscEventKeys(("saving new wiki page",))
 
-            self.getWikiData().setContent(self.wikiWord, self.getLiveText())
+            self.getWikiData().setContent(self.wikiWord, text)
             self.refreshSyncUpdateMatchTerms()
             self.saveDirtySince = None
 #             self.dbContentPlaceHold = object()
@@ -1913,7 +1916,7 @@ class FunctionalPage(DataCarryingPage):
 #                 wikiData.setContent(subtag, text)
 
 
-    def save(self, fireEvent=True):
+    def _save(self, text, fireEvent=True):
         """
         Saves the content of current wiki page.
         """
@@ -1921,7 +1924,7 @@ class FunctionalPage(DataCarryingPage):
             return
         
         with self.textOperationLock:
-            text = self.getLiveText()
+            # text = self.getLiveText()
     
             if self.funcTag in (u"global/TextBlocks", u"global/PWL",
                     u"global/CCBlacklist", u"global/FavoriteWikis"):

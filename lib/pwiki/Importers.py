@@ -260,14 +260,14 @@ class MultiPageTextImporter:
         timeStrings = timeStampLine.split(u"  ")
         if len(timeStrings) < 3:
             return  # TODO Report error
-        
+
         timeStrings = timeStrings[:3]
 
         try:
             timeStrings = [str(ts) for ts in timeStrings]
         except UnicodeEncodeError:
             return  # TODO Report error
-            
+
         try:
             timeStamps = [timegm(time.strptime(ts, "%Y-%m-%d/%H:%M:%S"))
                     for ts in timeStrings]
@@ -276,7 +276,7 @@ class MultiPageTextImporter:
 #             print "importItemWikiPage8", repr(timeStamps)
 #             timeStamps = [time.mktime(ts)
 #                     for ts in timeStamps]
-            
+
         except (ValueError, OverflowError):
             traceback.print_exc()
             return  # TODO Report error

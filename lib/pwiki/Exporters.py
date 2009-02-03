@@ -1256,9 +1256,10 @@ class HtmlExporter(AbstractExporter):
                     htmlContent = \
                             u'<a href="javascript:history.go(-1)">Back</a>'
 
+        elif key == u"self":
+            htmlContent = escapeHtml(self.getCurrentWikiWord())
 
         elif key == u"savedsearch":
-#             datablock = self.wikiDocument.getWikiData().getSearchDatablock(value)
             datablock = self.wikiDocument.getWikiData().retrieveDataBlock(
                     u"savedsearch/" + value)
             if datablock is not None:

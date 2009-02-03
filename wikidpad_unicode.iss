@@ -1,7 +1,7 @@
 [Files]
 Source: dist\WikidPad.exe; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\appbase.css; DestDir: {app}; Components: Program_files
-Source: dist\extensions\*; DestDir: {app}\extensions\; Components: Program_files; Flags: recursesubdirs ignoreversion
+Source: dist\extensions\*.py; DestDir: {app}\extensions\; Components: Program_files; Flags: recursesubdirs ignoreversion
 Source: dist\icons\*.gif; DestDir: {app}\icons\; Components: Program_files; Flags: onlyifdoesntexist
 Source: dist\icons\pwiki.ico; DestDir: {app}\icons\; Components: Program_files; Flags: onlyifdoesntexist
 Source: dist\WikidPadHelp\*; DestDir: {app}\WikidPadHelp\; Components: Program_files; Flags: recursesubdirs ignoreversion
@@ -49,12 +49,12 @@ Name: Program_files; Description: Main program files; Flags: fixed; Types: custo
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 2.0alpha01_03
+AppVerName=WikidPad 2.0alpha01_04
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=2.0.1.3
-VersionInfoTextVersion=WikidPad 2.0alpha01_03
+VersionInfoVersion=2.0.1.4
+VersionInfoTextVersion=WikidPad 2.0alpha01_04
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes

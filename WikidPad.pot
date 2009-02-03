@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-02-01 22:01\n"
+"POT-Creation-Date: 2009-02-03 16:20\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1451,6 +1451,19 @@ msgstr ""
 msgid "This is syntactically not a wiki word"
 msgstr ""
 
+#: extensions\wikidPadParser\WikidPadParser.py:1789
+msgid "++ Wiki Settings\n"
+"\n"
+"These are your default global settings.\n"
+"\n"
+"[global.importance.low.color: grey]\n"
+"[global.importance.high.bold: true]\n"
+"[global.contact.icon: contact]\n"
+"[global.wrap: 70]\n"
+"\n"
+"[icon: cog]\n"
+msgstr ""
+
 #: lib\pwiki\AdditionalDialogs.py:254 lib\pwiki\AdditionalDialogs.py:351
 msgid "'%s' is an invalid WikiWord"
 msgstr ""
@@ -1730,35 +1743,35 @@ msgstr ""
 msgid "History"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:1770
+#: lib\pwiki\DocPages.py:1773
 msgid "Func. tag %s does not exist"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2036
+#: lib\pwiki\DocPages.py:2039
 msgid "Global text blocks"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2037
+#: lib\pwiki\DocPages.py:2040
 msgid "Wiki text blocks"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2038
+#: lib\pwiki\DocPages.py:2041
 msgid "Global spell list"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2039
+#: lib\pwiki\DocPages.py:2042
 msgid "Wiki spell list"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2040
+#: lib\pwiki\DocPages.py:2043
 msgid "Global cc. blacklist"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2041
+#: lib\pwiki\DocPages.py:2044
 msgid "Wiki cc. blacklist"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2042
+#: lib\pwiki\DocPages.py:2045
 msgid "Favorite wikis"
 msgstr ""
 
@@ -1770,27 +1783,27 @@ msgstr ""
 msgid "Set of HTML pages"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:1309
+#: lib\pwiki\Exporters.py:1310
 msgid "<pre>[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:1792
+#: lib\pwiki\Exporters.py:1793
 msgid "[Unknown parser node with name \"%s\" found]"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:1995 lib\pwiki\Importers.py:34
+#: lib\pwiki\Exporters.py:1996 lib\pwiki\Importers.py:34
 msgid "Multipage text"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2008 lib\pwiki\Importers.py:47
+#: lib\pwiki\Exporters.py:2009 lib\pwiki\Importers.py:47
 msgid "Multipage files (*.mpt)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2009 lib\pwiki\Importers.py:48
+#: lib\pwiki\Exporters.py:2010 lib\pwiki\Importers.py:48
 msgid "Text file (*.txt)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2136
+#: lib\pwiki\Exporters.py:2137
 msgid "No usable separator found"
 msgstr ""
 
@@ -3885,8 +3898,8 @@ msgstr ""
 msgid "You cannot delete the root wiki node"
 msgstr ""
 
-#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1015
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1083
+#: lib\pwiki\wikidata\original_gadfly\WikiData.py:1017
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1085
 msgid "Wiki page not found for word: %s"
 msgstr ""
 

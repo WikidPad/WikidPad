@@ -812,7 +812,7 @@ class SearchWikiDialog(wx.Dialog):   # TODO
     def OnReplaceAll(self, evt):
         answer = wx.MessageBox(_(u"Replace all occurrences?"), _(u"Replace All"),
                 wx.YES_NO | wx.NO_DEFAULT, self)
-        
+
         if answer == wx.NO:
             return
 
@@ -840,7 +840,7 @@ class SearchWikiDialog(wx.Dialog):   # TODO
                 text = wikiPage.getLiveTextNoTemplate()
                 if text is None:
                     continue
-    
+
                 charStartPos = 0
     
                 while True:

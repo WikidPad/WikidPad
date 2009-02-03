@@ -684,13 +684,15 @@ class WikiData:
 #                 "select word from wikirelations where relation = ?", (wikiWord,))
 
         # Parents of the real word
-        wikiWord = self.getUnAliasedWikiWord(wikiWord)
+        realWord = self.getUnAliasedWikiWord(wikiWord)
+        if realWord is None:
+            realWord = wikiWord
         try:
             return self.connWrap.execSqlQuerySingleColumn(
                     "select word from wikirelations where relation = ? or "
                     "relation in (select matchterm from wikiwordmatchterms "
                     "where word = ? and "
-                    "(wikiwordmatchterms.type & 2) != 0)", (wikiWord, wikiWord))
+                    "(wikiwordmatchterms.type & 2) != 0)", (realWord, realWord))
             # Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK == 2
 
 
@@ -1894,7 +1896,7 @@ class WikiData:
                 self.connWrap.execSql("insert into datablocksexternal("
                         "unifiedname, filepath, filenamelowercase, "
                         "filesignature) values (?, ?, ?, ?)",
-                        (unifName, filePath, fileName.lower(),
+                        (unifName, fileName, fileName.lower(),
                         sqlite.Binary(fileSig)))
 
             except (IOError, OSError, sqlite.Error), e:

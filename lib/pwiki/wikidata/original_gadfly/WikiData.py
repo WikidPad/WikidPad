@@ -644,16 +644,18 @@ class WikiData:
 
     def getParentRelationships(self, wikiWord):
         "get the parent relations to this word"
-        
+
         # Parents of the real word
-        wikiWord = self.getUnAliasedWikiWord(wikiWord)
+        realWord = self.getUnAliasedWikiWord(wikiWord)
+        if realWord is None:
+            realWord = wikiWord
         try:
             parents = set(self.connWrap.execSqlQuerySingleColumn(
-                    "select word from wikirelations where relation = ?", (wikiWord,)))
+                    "select word from wikirelations where relation = ?", (realWord,)))
             
             otherTerms = self.connWrap.execSqlQuery(
                     "select matchterm, type from wikiwordmatchterms "
-                    "where word = ?", (wikiWord,))
+                    "where word = ?", (realWord,))
 
             for matchterm, typ in otherTerms:
                 if not typ & Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK:
@@ -1699,7 +1701,6 @@ class WikiData:
             if filePath is None:
                 return None  # TODO exception?
             
-
             datablock = loadEntireFile(join(self.dataDir, filePath))
             return datablock
 
@@ -1814,7 +1815,7 @@ class WikiData:
                 self.connWrap.execSqlInsert("datablocksexternal",
                         ("unifiedname", "filepath", "filenamelowercase",
                         "filesignature"),
-                        (unifName, filePath, fileName.lower(), fileSig))
+                        (unifName, fileName, fileName.lower(), fileSig))
                 self.commitNeeded = True
 
             except (IOError, OSError, ValueError), e:

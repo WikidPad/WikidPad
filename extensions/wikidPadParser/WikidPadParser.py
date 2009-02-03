@@ -1697,7 +1697,6 @@ class _TheHelper(object):
                 return
 
 
-
     @staticmethod
     def handleRewrapText(editor, settings):
         curPos = editor.GetCurrentPos()
@@ -1781,6 +1780,23 @@ class _TheHelper(object):
             editor.ReplaceTarget(filledText)
             editor.GotoPos(curPos)
 
+
+    @staticmethod
+    def getNewDefaultWikiSettingsPage(mainControl):
+        """
+        Return default text of the "WikiSettings" page for a new wiki.
+        """
+        return _(u"""++ Wiki Settings
+
+These are your default global settings.
+
+[global.importance.low.color: grey]
+[global.importance.high.bold: true]
+[global.contact.icon: contact]
+[global.wrap: 70]
+
+[icon: cog]
+""")  # TODO Localize differently?
 
 
 
