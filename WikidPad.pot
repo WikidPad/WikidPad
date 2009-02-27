@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-01-26 15:39\n"
+"POT-Creation-Date: 2009-02-27 17:07\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1186,27 +1186,27 @@ msgid "&Delete"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1373
-#: lib\pwiki\WikiTxtCtrl.py:3143
+#: lib\pwiki\WikiTxtCtrl.py:3144
 msgid "Cut"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1382
-#: lib\pwiki\WikiTxtCtrl.py:3144
+#: lib\pwiki\WikiTxtCtrl.py:3145
 msgid "Copy"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1397
-#: lib\pwiki\WikiTxtCtrl.py:3145
+#: lib\pwiki\WikiTxtCtrl.py:3146
 msgid "Paste"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1405
-#: lib\pwiki\WikiTxtCtrl.py:3141
+#: lib\pwiki\WikiTxtCtrl.py:3142
 msgid "Undo"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1408
-#: lib\pwiki\WikiTxtCtrl.py:3142
+#: lib\pwiki\WikiTxtCtrl.py:3143
 msgid "Redo"
 msgstr ""
 
@@ -1215,7 +1215,7 @@ msgid "Switch Ed./Prev"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1857
-#: lib\pwiki\WikiTxtCtrl.py:3146
+#: lib\pwiki\WikiTxtCtrl.py:3147
 msgid "Delete"
 msgstr ""
 
@@ -1224,15 +1224,15 @@ msgid "Title:"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:1742
-#: lib\pwiki\WikiHtmlView.py:621 lib\pwiki\WikiTxtCtrl.py:3150
+#: lib\pwiki\WikiHtmlView.py:622 lib\pwiki\WikiTxtCtrl.py:3151
 msgid "Activate New Tab"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\WikiTxtCtrl.py:3147
+#: WikidPad.xrc:0 lib\pwiki\WikiTxtCtrl.py:3148
 msgid "Select All"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\WikiTxtCtrl.py:3155
+#: WikidPad.xrc:0 lib\pwiki\WikiTxtCtrl.py:3156
 msgid "Close Tab"
 msgstr ""
 
@@ -3427,13 +3427,13 @@ msgid "Bad regular expression '%s':\n"
 "%s"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1741 lib\pwiki\WikiHtmlView.py:620
-#: lib\pwiki\WikiTxtCtrl.py:3149
+#: lib\pwiki\SearchAndReplaceDialogs.py:1741 lib\pwiki\WikiHtmlView.py:621
+#: lib\pwiki\WikiTxtCtrl.py:3150
 msgid "Activate"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1743 lib\pwiki\WikiHtmlView.py:622
-#: lib\pwiki\WikiTxtCtrl.py:3151
+#: lib\pwiki\SearchAndReplaceDialogs.py:1743 lib\pwiki\WikiHtmlView.py:623
+#: lib\pwiki\WikiTxtCtrl.py:3152
 msgid "Activate New Tab Backgrd."
 msgstr ""
 
@@ -3511,31 +3511,31 @@ msgid "\n"
 "Exception: %s"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2824
+#: lib\pwiki\WikiTxtCtrl.py:2825
 msgid "Line: %d Col: %d Pos: %d"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2929
+#: lib\pwiki\WikiTxtCtrl.py:2930
 msgid "Couldn't copy file"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3153
+#: lib\pwiki\WikiTxtCtrl.py:3154
 msgid "Copy anchor URL to clipboard"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3157
+#: lib\pwiki\WikiTxtCtrl.py:3158
 msgid "Show folding"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3158
+#: lib\pwiki\WikiTxtCtrl.py:3159
 msgid "&Toggle current folding"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3159
+#: lib\pwiki\WikiTxtCtrl.py:3160
 msgid "&Unfold All"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3160
+#: lib\pwiki\WikiTxtCtrl.py:3161
 msgid "&Fold All"
 msgstr ""
 

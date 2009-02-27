@@ -262,7 +262,7 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
 
             self.getSubControl("textedit").loadWikiPage(page, evtprops)
             self.getMainControl().refreshPageStatus()  # page)
-    
+
             p2 = evtprops.copy()
             p2.update({"loaded current doc page": True,
                     "loaded current wiki page": True,
@@ -270,7 +270,7 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
                     "oldDocPage": oldPage})
 
             self.fireMiscEventProps(p2)
-    
+
             self.getMainControl().getMainAreaPanel().updateConfig()
 
             # Should the page by default be presented in editor or preview mode?

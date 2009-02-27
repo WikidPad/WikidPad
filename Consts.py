@@ -19,6 +19,6 @@
 # (1, 9, 4, 2) is something after 1.9beta4
 # (2, 0, 200, 0) is 2.0final
 
-VERSION_TUPLE = ("wikidPad", 1, 9, 101, 1)
-VERSION_STRING = "wikidPad 1.9rc01"
+VERSION_TUPLE = ("wikidPad", 1, 9, 102, 1)
+VERSION_STRING = "wikidPad 1.9rc02"
 HOMEPAGE = u"http://wikidpad.sourceforge.net"

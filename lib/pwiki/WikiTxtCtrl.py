@@ -109,7 +109,7 @@ class IncrementalSearchDialog(wx.Frame):
         wx.EVT_MOUSE_EVENTS(self.tfInput, self.OnMouseAnyInput)
 
         if searchInit:
-            self.tfInput.SetValue(re.escape(searchInit))
+            self.tfInput.SetValue(searchInit)
             self.tfInput.SetSelection(-1, -1)
 
         if self.closeDelay:
@@ -2094,7 +2094,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.incSearchPreviousHiddenStartLine = -1
         
         if start == -1:
-            self.SetSelection(-1, -1)
+#             self.SetSelection(-1, -1)
+            self.SetSelection(self.GetSelectionStart(), self.GetSelectionStart())
             return
         text = self.GetText()
 
@@ -2631,7 +2632,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             # First get selected text and prepare it as default value
             text = self.GetSelectedText()
             text = text.split("\n", 1)[0]
-            text = text[:30]
+            text = re.escape(text[:30])
             self.startIncrementalSearch(text)
 
         elif matchesAccelPair("AutoComplete", accP):
