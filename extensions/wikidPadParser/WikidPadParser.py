@@ -140,11 +140,13 @@ def pseudoActionFindMarkup(s, l, st, t):
 
 # Forward definition of normal content and content in table cells, headings, ...
 content = Forward()
+oneLineContent = Forward()
 
-tableContentInCell = Forward().setResultsName("tableCell")
-headingContent = Forward().setResultsName("headingContent")
-todoContent = Forward().setResultsName("value")
-titleContent = Forward().setResultsName("title")
+tableContentInCell = Forward().setResultsNameNoCopy("tableCell")
+headingContent = Forward().setResultsNameNoCopy("headingContent")
+todoContent = Forward().setResultsNameNoCopy("value")
+titleContent = Forward().setResultsNameNoCopy("title")
+
 
 whitespace = buildRegex(ur"[ \t]*")
 whitespace = whitespace.setParseAction(actionHideOnEmpty)
@@ -165,7 +167,7 @@ def actionModeAppendix(s, l, st, t):
 
 
 modeAppendixEntry = buildRegex(ur"(?!;)\S", "key") + buildRegex(ur"(?:(?!;)\S)*", "data")
-modeAppendixEntry = modeAppendixEntry.setResultsName("entry")
+modeAppendixEntry = modeAppendixEntry.setResultsNameNoCopy("entry")
 modeAppendix = modeAppendixEntry + ZeroOrMore(buildRegex(ur";") + modeAppendixEntry)
 modeAppendix = modeAppendix.addParseAction(actionModeAppendix)
 
@@ -185,7 +187,7 @@ italicsStart = italicsStart.setParseStartAction(createCheckNotIn(("italics",)))
 italicsEnd = buildRegex(ur"_\b")
 
 italics = italicsStart + content + italicsEnd
-italics = italics.setResultsName("italics").setName("italics")
+italics = italics.setResultsNameNoCopy("italics").setName("italics")
 
 boldStart = buildRegex(ur"\*(?=\S)")
 boldStart = boldStart.setParseStartAction(createCheckNotIn(("bold",)))
@@ -193,12 +195,12 @@ boldStart = boldStart.setParseStartAction(createCheckNotIn(("bold",)))
 boldEnd = buildRegex(ur"\*")
 
 bold = boldStart + content + boldEnd
-bold = bold.setResultsName("bold").setName("bold")
+bold = bold.setResultsNameNoCopy("bold").setName("bold")
 
 
 script = buildRegex(ur"<%") + buildRegex(ur".*?(?=%>)", "code") + \
         buildRegex(ur"%>")
-script = script.setResultsName("script")
+script = script.setResultsNameNoCopy("script")
 
 horizontalLine = buildRegex(ur"----+[ \t]*$", "horizontalLine")\
         .setParseStartAction(preActCheckNothingLeft)
@@ -217,13 +219,16 @@ htmlEntity = buildRegex(
 # -------------------- Heading --------------------
 
 def actionHeading(s, l, st, t):
-    t.level = len(t[0].getText()) - 1
+    t.level = len(t[0].getText())
     t.contentNode = t.findFlatByName("headingContent")
+    if t.contentNode is None:
+        raise ParseException(s, l, "a heading needs content")
 
 headingEnd = buildRegex(ur"\n")
 
-heading = buildRegex(ur"^\+{1,15}(?!\+) ?") + headingContent + headingEnd
-heading = heading.setResultsName("heading").setParseAction(actionHeading)
+heading = buildRegex(ur"^\+{1,15}(?!\+)") + Optional(buildRegex(ur" ")) + \
+        headingContent + headingEnd
+heading = heading.setResultsNameNoCopy("heading").setParseAction(actionHeading)
 
 
 
@@ -237,16 +242,16 @@ def actionTodoEntry(s, l, st, t):
         
 
 
-todoKey = buildRegex(ur"(?:todo|done|wait|action|track|issue|"
+todoKey = buildRegex(ur"\b(?:todo|done|wait|action|track|issue|"
         ur"question|project)(?:\.[^:\s]+)?", "key")
-todoKey = todoKey.setParseStartAction(preActCheckNothingLeft)
+# todoKey = todoKey.setParseStartAction(preActCheckNothingLeft)
 
 todoEnd = buildRegex(ur"\n|\||(?!.)")
 
 todoEntry = todoKey + buildRegex(ur":", "todoDelimiter") + todoContent + \
         Optional(buildRegex(ur"\|"))
 
-todoEntry = todoEntry.setResultsName("todoEntry")\
+todoEntry = todoEntry.setResultsNameNoCopy("todoEntry")\
         .setParseAction(actionTodoEntry)
 
 # Only for LanguageHelper.parseTodoEntry()
@@ -376,19 +381,19 @@ newLine = buildRegex(ur"\n") + Optional(fakeIndentation)
 
 
 newLinesParagraph = newLine + OneOrMore(newLine)
-newLinesParagraph = newLinesParagraph.setResultsName("newParagraph")\
+newLinesParagraph = newLinesParagraph.setResultsNameNoCopy("newParagraph")\
         .setParseStartAction(preActNewLinesParagraph)\
         .setParseAction(actionResetIndent)
 
 
 newLineLineBreak = newLine
-newLineLineBreak = newLineLineBreak.setResultsName("lineBreak")\
+newLineLineBreak = newLineLineBreak.setResultsNameNoCopy("lineBreak")\
         .setParseStartAction(preActNewLineLineBreak)\
         .setParseAction(actionResetIndent)
 
 
 newLineWhitespace = newLine
-newLineWhitespace = newLineWhitespace.setResultsName("whitespace")\
+newLineWhitespace = newLineWhitespace.setResultsNameNoCopy("whitespace")\
         .setParseStartAction(preActNewLineWhitespace)
 
 
@@ -414,7 +419,7 @@ equivalIndentation = equivalIndentation.setParseAction(actionIndent).\
 
 
 indentedText = moreIndentation + content + FollowedBy(lessIndentOrEnd)
-indentedText = indentedText.setResultsName("indentedText")
+indentedText = indentedText.setResultsNameNoCopy("indentedText")
 
 
 listStartIndentation  = buildRegex(ur"^[ \t]*")
@@ -432,7 +437,7 @@ bulletEntry = equalIndentation.copy()\
 unorderedList = listStartIndentation + bullet + \
         (content + FollowedBy(lessIndentOrEnd))\
         .addParseStartAction(preActUlPrepareStack)
-unorderedList = unorderedList.setResultsName("unorderedList")
+unorderedList = unorderedList.setResultsNameNoCopy("unorderedList")
 
 
 number = buildRegex(ur"(?:\d+\.)*(\d+)\.[ \t]|#[ \t]", "number")
@@ -445,7 +450,7 @@ numberEntry = equalIndentation.copy()\
 orderedList = listStartIndentation + number + \
         (content + FollowedBy(lessIndentOrEnd))\
         .addParseStartAction(preActOlPrepareStack)
-orderedList = orderedList.setResultsName("orderedList")
+orderedList = orderedList.setResultsNameNoCopy("orderedList")
 
 
 
@@ -472,7 +477,7 @@ newCell = Choice([newCellBar, newCellTab], chooseCellEnd)
 
 
 tableRow = tableContentInCell + ZeroOrMore(newCell + tableContentInCell)
-tableRow = tableRow.setResultsName("tableRow").setParseAction(actionHideOnEmpty)
+tableRow = tableRow.setResultsNameNoCopy("tableRow").setParseAction(actionHideOnEmpty)
 
 
 def actionTableModeAppendix(s, l, st, t):
@@ -488,11 +493,11 @@ tableModeAppendix = modeAppendix.setResultsName("tableModeAppendix").addParseAct
 
 table = buildRegex(ur"<<\|").setParseStartAction(preActCheckNothingLeft) + \
         Optional(tableModeAppendix) + buildRegex(ur"[ \t]*\n") + tableRow + ZeroOrMore(newRow + tableRow) + tableEnd
-table = table.setResultsName("table")
+table = table.setResultsNameNoCopy("table")
 
 
 
-# -------------------- Suppress highlighting --------------------
+# -------------------- Suppress highlighting und no export --------------------
 
 suppressHighlightingMultipleLines = buildRegex(ur"<<[ \t]*\n")\
         .setParseStartAction(preActCheckNothingLeft) + \
@@ -502,7 +507,36 @@ suppressHighlightingMultipleLines = buildRegex(ur"<<[ \t]*\n")\
 suppressHighlightingSingleLine = buildRegex(ur"<<") + \
         buildRegex(ur"[^\n]*?(?=>>)", "plainText") + buildRegex(ur">>")
 
-suppressHighlighting = suppressHighlightingMultipleLines | suppressHighlightingSingleLine
+# suppressHighlighting = suppressHighlightingMultipleLines | suppressHighlightingSingleLine
+
+
+
+
+# -------------------- No export area--------------------
+
+def actionNoExport(s, l, st, t):
+    # Change name to reduce work when interpreting
+    t.name = "noExport"
+
+
+
+noExportMultipleLinesEnd = buildRegex(ur"^[ \t]*>>[ \t]*(?:\n|$)")
+noExportSingleLineEnd = buildRegex(ur">>")
+
+
+noExportMultipleLines = buildRegex(ur"<<hide[ \t]*\n")\
+        .setParseStartAction(preActCheckNothingLeft,
+        createCheckNotIn(("noExportMl", "noExportSl"))) + \
+        content + noExportMultipleLinesEnd
+noExportMultipleLines = noExportMultipleLines.setResultsNameNoCopy("noExportMl")\
+        .setParseAction(actionNoExport)
+
+noExportSingleLine = buildRegex(ur"<<hide[ \t]") + oneLineContent + \
+        noExportSingleLineEnd
+noExportSingleLine = noExportSingleLine.setResultsNameNoCopy("noExportSl")\
+        .setParseStartAction(
+        createCheckNotIn(("noExportMl", "noExportSl")))\
+        .setParseAction(actionNoExport)
 
 
 
@@ -512,7 +546,7 @@ preBlock = buildRegex(ur"<<pre[ \t]*\n")\
         .setParseStartAction(preActCheckNothingLeft) + \
         buildRegex(ur".*?(?=^[ \t]*>>[ \t]*(?:\n|$))", "preText") + \
         buildRegex(ur"^[ \t]*>>[ \t]*(?:\n|$)")
-preBlock = preBlock.setResultsName("preBlock")
+preBlock = preBlock.setResultsNameNoCopy("preBlock")
 
 
 # -------------------- Auto generated area --------------------
@@ -543,7 +577,7 @@ preHtmlStart = buildRegex(ur"<pre(?: [^\n>]*)?>", "htmlTag")\
 preHtmlEnd = buildRegex(ur"</pre(?: [^\n>]*)?>", "htmlTag")
 
 preHtmlTag = preHtmlStart + content + preHtmlEnd
-preHtmlTag = preHtmlTag.setResultsName("preHtmlTag")\
+preHtmlTag = preHtmlTag.setResultsNameNoCopy("preHtmlTag")\
         .setParseAction(actionPreHtmlTag)
 
 
@@ -691,6 +725,7 @@ def actionUrlLink(s, l, st, t):
 
     t.url = t.findFlatByName("url").getString()
     t.titleNode = t.findFlatByName("title")
+#     print "--actionUrlLink3", repr(t.url)
 
 
 def actionAnchorDef(s, l, st, t):
@@ -721,13 +756,13 @@ wikiWordNcc = bracketStart + \
         Optional(title) + bracketEnd + \
         Optional(MatchFirst([searchFragmentExtern, wikiWordAnchorLink]))
 
-wikiWordNcc = wikiWordNcc.setResultsName("wikiWord").setName("wikiWordNcc")\
+wikiWordNcc = wikiWordNcc.setResultsNameNoCopy("wikiWord").setName("wikiWordNcc")\
         .setParseAction(actionWikiWordNcc)
 
 
 anchorDef = buildRegex(ur"^[ \t]*anchor:[ \t]*") + buildRegex(ur"[A-Za-z0-9\_]+",
         "anchor") + buildRegex(ur"\n")
-anchorDef = anchorDef.setResultsName("anchorDef").setParseAction(actionAnchorDef)
+anchorDef = anchorDef.setResultsNameNoCopy("anchorDef").setParseAction(actionAnchorDef)
 
 
 AnchorRE = re.compile(ur"^[ \t]*anchor:[ \t]*(?P<anchorValue>[A-Za-z0-9\_]+)\n",
@@ -748,7 +783,7 @@ urlTitled = bracketStart + urlWithAppend + whitespace + \
 # urlTitled = buildRegex(BracketStartPAT) + urlBare.setResultsName("") + whitespace + \
 #         buildRegex(WikiWordTitleStartPAT) + whitespace + \
 #         content.setResultsName("title") + bracketEnd
-urlTitled = urlTitled.setResultsName("urlLink").setParseAction(actionUrlLink)
+urlTitled = urlTitled.setResultsNameNoCopy("urlLink").setParseAction(actionUrlLink)
 
 
 
@@ -758,7 +793,7 @@ urlRef = urlTitled | urlBare
 # TODO anchor/fragment
 wikiWordCc = buildRegex(ur"\b(?<!~)" + WikiWordCcPAT + ur"\b", "word") + \
         Optional(MatchFirst([searchFragmentExtern, wikiWordAnchorLink])) # Group( )
-wikiWordCc = wikiWordCc.setResultsName("wikiWord").setName("wikiWordCc")\
+wikiWordCc = wikiWordCc.setResultsNameNoCopy("wikiWord").setName("wikiWordCc")\
         .setParseStartAction(preActCheckWikiWordCcAllowed)\
         .setParseAction(actionWikiWordCc)
 
@@ -769,7 +804,7 @@ wikiWord = wikiWordNcc | wikiWordCc
 # Needed for _TheHelper.extractWikiWordFromLink()
 
 extractableWikiWord = (wikiWordNccCore | wikiWordNcc) + stringEnd
-extractableWikiWord = extractableWikiWord.setResultsName("extractableWikiWord")\
+extractableWikiWord = extractableWikiWord.setResultsNameNoCopy("extractableWikiWord")\
         .setParseAction(actionExtractableWikiWord).optimize(("regexcombine",))\
         .parseWithTabs()
 
@@ -802,7 +837,7 @@ def actionFootnote(s, l, st, t):
 
 
 footnote = bracketStart + buildRegex(footnotePAT, "footnoteId") + bracketEnd
-footnote = footnote.setResultsName("footnote")\
+footnote = footnote.setResultsNameNoCopy("footnote")\
         .setParseStartAction(preActCheckFootnotesAllowed)\
         .setParseAction(actionFootnote)
 
@@ -864,13 +899,13 @@ propInsKey = buildRegex(ur"[\w\-\_\.]+", "key")
 property = bracketStart + whitespace + propInsKey + \
         buildRegex(ur"[ \t]*[=:]") + propInsValue + \
         ZeroOrMore(buildRegex(ur";") + propInsValue) + bracketEnd
-property = property.setResultsName("property").setParseAction(actionProperty)
+property = property.setResultsNameNoCopy("property").setParseAction(actionProperty)
 
 
 insertion = bracketStart + buildRegex(ur":") + whitespace + propInsKey + \
         buildRegex(ur"[ \t]*[=:]") + propInsValue + \
         ZeroOrMore(buildRegex(ur";") + propInsValue) + bracketEnd
-insertion = insertion.setResultsName("insertion").setParseAction(actionInsertion)
+insertion = insertion.setResultsNameNoCopy("insertion").setParseAction(actionInsertion)
 
 
 
@@ -970,7 +1005,9 @@ TOKEN_TO_END = {
         "table": tableEnd,
         "preHtmlTag": preHtmlEnd,
         "heading": headingEnd,
-        "todoEntry": todoEnd
+        "todoEntry": todoEnd,
+        "noExportMl": noExportMultipleLinesEnd,
+        "noExportSl": noExportSingleLineEnd
     }
 
 
@@ -993,8 +1030,9 @@ endTokenInTable = endToken | newCell | newRow
 # -------------------- Content definitions --------------------
 
 
-findMarkupInCell = FindFirst([bold, italics, suppressHighlightingSingleLine,
-        urlRef, insertion, escapedChar, footnote, wikiWord,    # wikiWordNcc, wikiWordCc,
+findMarkupInCell = FindFirst([bold, italics, noExportSingleLine,
+        suppressHighlightingSingleLine,
+        urlRef, insertion, escapedChar, footnote, wikiWord,
         htmlTag, htmlEntity], endTokenInTable)
 findMarkupInCell = findMarkupInCell.setPseudoParseAction(pseudoActionFindMarkup)
 
@@ -1007,7 +1045,8 @@ tableContentInCell << temp
 endTokenInTitle = endToken | buildRegex(ur"\n")
 
 
-findMarkupInTitle = FindFirst([bold, italics, suppressHighlightingSingleLine,
+findMarkupInTitle = FindFirst([bold, italics, noExportSingleLine,
+        suppressHighlightingSingleLine,
         urlRef, insertion, escapedChar, footnote, htmlTag, htmlEntity],
         endTokenInTitle)
 findMarkupInTitle = findMarkupInTitle.setPseudoParseAction(pseudoActionFindMarkup)
@@ -1018,8 +1057,9 @@ titleContent << temp
 
 
 
-findMarkupInHeading = FindFirst([bold, italics, suppressHighlightingSingleLine,
-        urlRef, insertion, escapedChar, footnote, wikiWord, htmlTag,   # wikiWordNcc, wikiWordCc,
+findMarkupInHeading = FindFirst([bold, italics, noExportSingleLine,
+        suppressHighlightingSingleLine,
+        urlRef, insertion, escapedChar, footnote, wikiWord, htmlTag,
         htmlEntity], endToken)
 findMarkupInHeading = findMarkupInHeading.setPseudoParseAction(
         pseudoActionFindMarkup)
@@ -1030,7 +1070,8 @@ headingContent << temp
 
 
 
-findMarkupInTodo = FindFirst([bold, italics, suppressHighlightingSingleLine,
+findMarkupInTodo = FindFirst([bold, italics, noExportSingleLine,
+        suppressHighlightingSingleLine,
         urlRef, property, insertion, escapedChar, footnote, wikiWord,   # wikiWordNcc, wikiWordCc,
         htmlTag, htmlEntity], endToken)
 findMarkupInTodo = findMarkupInTodo.setPseudoParseAction(
@@ -1039,15 +1080,17 @@ findMarkupInTodo = findMarkupInTodo.setPseudoParseAction(
 temp = OneOrMore(NotAny(endToken) + findMarkupInTodo)
 temp = temp.leaveWhitespace().parseWithTabs()
 todoContent << temp
+oneLineContent << temp
 
 
-
-findMarkup = FindFirst([bold, italics, suppressHighlightingSingleLine, urlRef,
+findMarkup = FindFirst([bold, italics, noExportSingleLine,
+        suppressHighlightingSingleLine, urlRef,
         property, insertion, escapedChar, footnote, wikiWord,
         newLinesParagraph, newLineLineBreak, newLineWhitespace, heading,
         todoEntry, anchorDef, preHtmlTag, htmlTag,
         htmlEntity, bulletEntry, unorderedList, numberEntry, orderedList,
-        indentedText, table, preBlock, suppressHighlightingMultipleLines,
+        indentedText, table, preBlock, noExportMultipleLines,
+        suppressHighlightingMultipleLines,
         script, horizontalLine, equivalIndentation], endToken)
 findMarkup = findMarkup.setPseudoParseAction(pseudoActionFindMarkup)
 

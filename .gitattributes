@@ -1,6 +1,7 @@
 * text=auto !eol
 /Consts.py -text
 /ExceptionLogger.py -text
+/Microsoft.VC90.CRT.manifest -text
 /WikidPad.pot -text
 /WikidPad.py -text
 /WikidPad.xrc -text
@@ -293,7 +294,6 @@ WikidPadHelp/data/Multipage[!!-~]text[!!-~]format.wiki -text
 WikidPadHelp/data/Not[!!-~]Camel[!!-~]Case.wiki -text
 WikidPadHelp/data/Options[!!-~]HTML[!!-~]preview_export.wiki -text
 WikidPadHelp/data/OptionsDialog.wiki -text
-WikidPadHelp/data/PageListDialog.wiki -text
 WikidPadHelp/data/PageStructureWindow.wiki -text
 WikidPadHelp/data/Printing.wiki -text
 WikidPadHelp/data/REGISTRATION.grl -text
@@ -664,7 +664,6 @@ lib/pwiki/rtlibRepl/sre_compile.py -text
 lib/pwiki/rtlibRepl/sre_constants.py -text
 lib/pwiki/rtlibRepl/sre_parse.py -text
 lib/pwiki/sqlite3api.py -text
-lib/pwiki/srePersistent.py -text
 lib/pwiki/timeView/CalendarPanel.py -text
 lib/pwiki/timeView/DatedWikiWordFilters.py -text
 lib/pwiki/timeView/TimePresentationBase.py -text
@@ -700,3 +699,4 @@ lib/readme.txt -text
 /updateI18N.py -text
 /wikidpad_spelladdon.iss -text
 /wikidpad_unicode.iss -text
+winBinAdditions/info.txt -text

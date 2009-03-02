@@ -418,7 +418,7 @@ class App(wx.App, MiscEventSourceMixin):
             return self.wikiLanguageDescDict.values()
 
 
-    def createWikiParser(self, intLanguageName, debugMode=False):
+    def createWikiParser(self, intLanguageName, debugMode=False):   # ):True
         """
         Must be thread-safe!
         """

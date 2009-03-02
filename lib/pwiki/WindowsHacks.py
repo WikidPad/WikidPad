@@ -3,9 +3,10 @@ This is a Windows (32 bit) specific file for handling some operations not provid
 by the OS-independent wxPython library.
 """
 
-import ctypes, os, os.path, traceback
+import ctypes, os, os.path, struct, traceback
 from ctypes import c_int, c_uint, c_long, c_ulong, c_ushort, c_char, c_char_p, \
-        c_wchar_p, c_byte, byref, create_string_buffer, create_unicode_buffer   # , WindowsError
+        c_wchar_p, c_byte, byref, create_string_buffer, create_unicode_buffer, \
+        c_void_p, string_at, sizeof   # , WindowsError
 
 import wx
 
@@ -19,6 +20,8 @@ import DocPages
 _user32dll = ctypes.windll.User32
 _kernel32dll = ctypes.windll.Kernel32
 _shell32dll = ctypes.windll.Shell32
+_gdi32dll = ctypes.windll.Gdi32
+
 
 GWL_WNDPROC = -4
 WM_CHANGECBCHAIN = 781
@@ -41,6 +44,9 @@ MB_PRECOMPOSED = 1
 
 SW_SHOW = 5
 
+CF_METAFILEPICT = 3
+
+
 
 SetClipboardViewer = _user32dll.SetClipboardViewer
 # HWND SetClipboardViewer(
@@ -55,6 +61,71 @@ ChangeClipboardChain = _user32dll.ChangeClipboardChain
 #     HWND hWndRemove,	// handle to window to remove  
 #     HWND hWndNewNext 	// handle to next window 
 #    );
+
+
+
+OpenClipboard = _user32dll.OpenClipboard
+# BOOL OpenClipboard(
+#     HWND hWndNewOwner
+#    );
+
+
+
+CloseClipboard = _user32dll.CloseClipboard
+# BOOL CloseClipboard(
+#     VOID 
+#    );
+
+
+IsClipboardFormatAvailable = _user32dll.IsClipboardFormatAvailable
+# BOOL IsClipboardFormatAvailable(
+#     UINT format
+#    );
+
+
+GetClipboardData = _user32dll.GetClipboardData
+GetClipboardData.restype = c_uint
+# HANDLE GetClipboardData(
+#     UINT uFormat
+#    );
+
+
+GlobalLock = _kernel32dll.GlobalLock
+GlobalLock.restype = c_void_p
+# LPVOID GlobalLock(
+#   HGLOBAL hMem
+# );
+
+
+
+GlobalUnlock = _kernel32dll.GlobalUnlock
+GlobalUnlock.restype = c_uint
+# BOOL GlobalUnlock(
+#   HGLOBAL hMem
+# );
+
+
+
+GlobalSize = _kernel32dll.GlobalSize
+GlobalSize.restype = c_uint
+# SIZE_T GlobalSize(
+#   HGLOBAL hMem
+# );
+
+
+
+CopyMetaFile = _gdi32dll.CopyMetaFileW
+CopyMetaFile.restype = c_uint
+# HMETAFILE CopyMetaFile(
+#   HMETAFILE hmfSrc,  // handle to Windows-format metafile
+#   LPCTSTR lpszFile   // file name
+# );
+
+
+DeleteMetaFile = _gdi32dll.DeleteMetaFile
+# BOOL DeleteMetaFile(
+#   HMETAFILE hmf   // handle to Windows-format metafile
+# );
 
 
 SendMessage = _user32dll.SendMessageA
@@ -209,6 +280,63 @@ if SHFileOperationW is not None:
 
         
         return res
+
+
+
+def _getMemoryContentFromHandle(hdl):
+    """
+    Needed to retrieve clipboard data
+    """
+    pt = GlobalLock(hdl)
+    if pt == 0:
+        return None
+    try:
+        size = GlobalSize(hdl)
+        
+        return string_at(pt, size)
+    finally:
+        GlobalUnlock(hdl)
+
+
+def saveWmfFromClipboardToFileStorage(fs, prefix):
+    """
+    Retrieve raw Windows meta data file from clipboard. Return None,
+    if not present.
+    
+    fs -- FileStorage to save to
+    
+    Returns path to new file or None.
+    """
+    OpenClipboard(0)
+    try:
+        if IsClipboardFormatAvailable(CF_METAFILEPICT) == 0:
+            return None
+        
+        hdl = GetClipboardData(CF_METAFILEPICT)
+        if hdl == 0:
+            return None
+        
+        data = _getMemoryContentFromHandle(hdl)
+        if data is None:
+            return None
+        
+        hdl = struct.unpack("lllI", data)[3]
+        
+        destPath = fs.findDestPathNoSource(u".wmf", prefix)
+        
+        if destPath is None:
+            # Couldn't find unused filename
+            return None
+
+        chdl = CopyMetaFile(hdl, destPath)
+        if chdl == 0:
+            return None
+
+        DeleteMetaFile(chdl)
+
+        return destPath
+    finally:
+        CloseClipboard()
 
 
 

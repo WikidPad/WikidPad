@@ -3,6 +3,9 @@
 ++ Export
 Shows a dialog to set precisely what to export, whereto and in which format. See [WikiExport].
 
+++ Continuous Export
+Shows a dialog to set precisely what to export, whereto and in which format for the continuous export. See [WikiExport#+ Continuous export].
+
 ++ Import
 Shows a dialog to import wiki pages into wiki. See [WikiImport].
 
@@ -14,7 +17,7 @@ If text is selected it is evaluated and result is inserted after it (useful as c
 If no text selected, all scripts on the page, including 
 
 +++ Run Function #
-Run one of six numbered scripts on the page (or imported from another one).
+Run one of six numbered scripts on the page (or imported from another page).
 
 ++ Options
 Starts the options dialog. See [OptionsDialog].

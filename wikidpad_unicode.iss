@@ -37,6 +37,10 @@ Source: dist\WikidPad_*.po; DestDir: {app}; Components: Program_files; Flags: ig
 Source: dist\langlist.txt; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\gadfly.zip; DestDir: {app}; Components: Program_files
 Source: dist\library.zip; DestDir: {app}; Components: Program_files
+Source: Microsoft.VC90.CRT.manifest; DestDir: {app}
+Source: winBinAdditions\msvcp90.dll; DestDir: {app}
+Source: winBinAdditions\msvcr90.dll; DestDir: {app}
+Source: winBinAdditions\msvcm90.dll; DestDir: {app}
 [Dirs]
 Name: {app}\extensions; Components: Program_files
 Name: {app}\icons; Components: Program_files
@@ -49,17 +53,17 @@ Name: Program_files; Description: Main program files; Flags: fixed; Types: custo
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 2.0alpha01_04
+AppVerName=WikidPad 2.0beta01
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=2.0.1.4
-VersionInfoTextVersion=WikidPad 2.0alpha01_04
+VersionInfoVersion=2.0.101.4
+VersionInfoTextVersion=WikidPad 2.0beta01
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-2.0alpha01
+OutputBaseFilename=WikidPad-2.0beta01
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2009 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
@@ -104,6 +108,8 @@ Name: {app}\extensions\wikidPadParser\*.pyc; Type: filesandordirs
 Name: {app}\extensions\wikidPadParser\*.pyo; Type: filesandordirs
 [Run]
 Filename: {app}\WikidPad.exe; WorkingDir: {app}; Description: Start WikidPad; Flags: postinstall skipifsilent nowait
+[LangOptions]
+LanguageID=$0000
 [Code]
 var
   UserModeQuestion: TInputOptionWizardPage;

@@ -619,9 +619,10 @@ GLOBALDEFAULTS = {
     ("main", "editor_autoUnbullets"): "True",  # When pressing return on line with lonely bullet, remove bullet?
     ("main", "editor_autoComplete_closingBracket"): "False",  # Append closing bracket to suggested wiki words
             # for autocompletion ("[Two" -> "[Two words]" instead of -> "[Two words")
-    
     ("main", "editor_sync_byPreviewSelection"): "False", # If True, the selection in preview will be searched in editor
             # for synchronization of both.
+    ("main", "editor_tabWidth"): "4",  # How many spaces should a tab be wide?
+
 
     ("main", "editor_imagePaste_filenamePrefix"): "",  # Prefix to put before the filename.
     ("main", "editor_imagePaste_fileType"): "1",  # When pasting images into WikidPad, which file type

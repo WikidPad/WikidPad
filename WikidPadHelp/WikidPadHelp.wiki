@@ -2,6 +2,7 @@
 data_dir = data
 
 [main]
+wikipagetitle_creationmode = 1
 footnotes_as_wikiwords = False
 last_wiki_word = WikidPadHelp
 hotkey_showhide_bywiki = 
@@ -11,16 +12,15 @@ filestorage_identity_filenamemustmatch = False
 wiki_icon = 
 headingsasaliases_depth = 0
 wiki_name = WikidPadHelp
-wikipagetitle_creationmode = 1
+tree_expandednodes_descriptorpathes_main = 
 wikipagetitleprefix = ++
 wikipagetitle_fromlinktitle = True
 first_wiki_word = WikidPadHelp
 tree_expandednodes_rememberduration = 1
-tree_expandednodes_descriptorpathes_main = 
-wiki_wikilanguage = wikidpad_default_2_0
+tree_last_root_wiki_word = WikidPadHelp
 tree_force_scratchpad_visibility = True
 further_wiki_words = 
-tree_last_root_wiki_word = WikidPadHelp
+wiki_wikilanguage = wikidpad_default_2_0
 filestorage_identity_moddatemustmatch = False
 filestorage_identity_moddateisenough = False
 wiki_database_type = original_gadfly

@@ -1,6 +1,54 @@
 ﻿++ Change Log
 
 
+Mar. 02, 2009 (2.0beta01)
+
+    * Option to set tab width. See [OptionsDialog#*Tab width*]
+    * Combined wiki-wide search and page list construction into
+      one dialog to allow more comfortable search and more options
+      to define page sets for export or print.
+      See [SearchingTheWiki#+ To search all pages: Full search|full search]
+    * Basic support for continuous export.
+      See [WikiExport#+ Continuous export]
+    * Windows: Windows meta-files (vector graphic format) are saved
+      as files if inserted into WikidPad from clipboard
+    * Windows binary: Necessary VC++ runtime libraries now included
+      in installer
+    * New syntax \<<hide  >> to hide a block from preview and export.
+      See [TextFormatting#+ Hidden markup]
+    * New insertion "self" to include current page name into page
+    * Menu items to insert color or icon name into editor
+      (in addition to the insert of attributes)
+    * No more unnecessary jumping around of page when ending or
+      aborting incremental search (thanks to Christian Ziemski)
+
+    * Bug fixed: Creating a wiki-bound func. page in an "original"
+      database linked to absolute path of page file instead of
+      relative path (this means that you can't move such a wiki to
+      a new location).
+    * Bug fixed: "Replace All" in wiki-wide search did not work,
+      replacing links to a renamed wiki page did not work.
+    * Bug fixed: Non-existing pages had no parents (which also
+      affected template creation)
+
+    * Bug fixed: List of parentless nodes was wrong
+    * Bug fixed: Insertion \[:toc:] did not work.
+    * Bug fixed: Jumping between footnote and footnote anchor did
+      not work in editor.
+    * Bug fixed: HTML publishing as set of HTML pages and as
+      single page was mixed up.
+    * Bug fixed: Adding icon or color attribute failed.
+    * Bug fixed: Attribute \[view_pane: editor] did not work.
+    * Bug fixed: If repeating an incremental search with escaped
+      RE characters (e.g. '.', '?') the escaping backslashes
+      accumulated.
+    * Bug fixed: Preview failed on heading line (e.g. "+++")
+      without content
+    * Bug fixed: Heading level could be off by one.
+    * Bug fixed: todo did not work inside a line.
+
+
+
 Jan. 27, 2009 (2.0alpha01)
 
     * New menu structure, see [Menus]

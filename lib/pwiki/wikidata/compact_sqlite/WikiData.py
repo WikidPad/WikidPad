@@ -611,11 +611,21 @@ class WikiData:
         no entries in the wikiwords table.)))
         """
         try:
+#             return self.connWrap.execSqlQuerySingleColumn(
+#                     "select word from wikiwordcontent except "
+#                     "select word as mtword from wikiwordmatchterms "
+#                     "where matchterm in (select relation from wikirelations "
+#                     "where wikirelations.word != mtword)")
+
             return self.connWrap.execSqlQuerySingleColumn(
                     "select word from wikiwordcontent except "
-                    "select word as mtword from wikiwordmatchterms "
-                    "where matchterm in (select relation from wikirelations "
-                    "where wikirelations.word != mtword)")
+                    "select wikiwordmatchterms.word "
+                    "from wikiwordmatchterms inner join wikirelations "
+                    "on matchterm == relation where "
+                    "wikirelations.word != wikiwordmatchterms.word and "
+                    "(type & 2) != 0")
+
+
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)

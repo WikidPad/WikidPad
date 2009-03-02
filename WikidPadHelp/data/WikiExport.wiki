@@ -14,7 +14,7 @@ Export / Export Wiki As XML
 Or you can use Export / Other Export to show a dialog to choose other settings:
 
 *What to export*
-Choose if you want to export current page only, the current page and all sub-pages (children, grandchildren...), the whole wiki or use "Custom..." to open the [PageListDialog].
+Choose if you want to export current page only, the current page and all sub-pages (children, grandchildren...), the whole wiki or use "Custom..." to open the [SearchingTheWiki#To search all pages: Full search|full search].
 
 *Compatible filenames*
 Uses ASCII-only filenames for exported files so that they can be transferred to other filesystems without compatibility issues. On Windows XP and Server 2003 the AppLocale utility (see http://www.microsoft.com/globaldev/tools/apploc.mspx ) might also help on export problems.
@@ -60,29 +60,25 @@ Store also saved searches in the file. Only available for format version 1 and l
 
 
 
-------------------------------------------------------------
++++ Continuous export
 
-*When exporting into XML* each wiki word will include its created and modified time.
-The time format will look something like this:
+In menu "Extra" you can also choose "Continuous Export" which allows to start an export operation which is repeated automatically each time a page previously designated for export is modified.
 
-(2003, 10, 14, 19, 51, 56, 1, 287, 1)
+The dialog for continuous export is the same as for normal export, but some export types are missing as currently only the HTML export types support continuous export.
 
-These numbers correspond to these fields:
+After you made your choices what and where to export and pressed "OK", WikidPad first makes an initial normal export. After that every change to a page is reflected in the export *after the page was saved to database* (manually or by auto-save).
 
-0 tm_year (for example, 1993) 
+If you choose the menu item "Continuous Export" again (which has now a checkmark), the continuous export function is switched off again. It is also automatically deactivated if WikidPad is closed or another wiki is opened in the same window.
 
-1 tm_mon range [1,12] 
+A few drawbacks to mention:
 
-2 tm_mday range [1,31] 
+    1. Changes on a page that affect other pages (e.g. adding/removing attribute "\[global.camelCaseWordsEnabled: false]") will not change the already exported pages until they are re-exported.
+    2. The set of pages to export will be static under some circumstances. Especially if you start auto-export for all children of one or more pages, it will only export pages which were children when auto-export started regardless if new children are added later.
+    3. If you export as a single HTML file, the whole HTML file must be recreated on each change so it is only recommended if you export a few small pages.
+    4. If temporary (volatile) files must be created (e.g. generated from MimeTeX or GraphViz) there may be created new ones again and again on each change of a page filling up the "volatile" directory. Therefore it is recommended to make a final non-continuous export to clean up the garbage.
 
-3 tm_hour range [0,23] 
 
-4 tm_min range [0,59] 
 
-5 tm_sec range [0,61]; see (1) in strftime() description 
 
-6 tm_wday range [0,6], Monday is 0 
 
-7 tm_yday range [1,366] 
 
-8 tm_isdst Is daylight savings. 0, 1 or -1;

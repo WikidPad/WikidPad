@@ -11,7 +11,7 @@ import urllib_red as urllib
 
 import wx
 
-from wxHelper import XrcControls, GUI_ID
+from wxHelper import XrcControls, GUI_ID, wxKeyFunctionSink
 
 
 from WikiExceptions import WikiWordNotFoundException, ExportException
@@ -46,13 +46,15 @@ class AbstractExporter(object):
     def getWikiDocument(self):
         return self.wikiDocument
 
-    def getExportTypes(self, guiparent):
+    def getExportTypes(self, guiparent, continuousExport=False):
         """
         Return sequence of tuples with the description of export types provided
         by this object. A tuple has the form (<exp. type>,
             <human readable description>, <panel for add. options or None>)
         If panels for additional options must be created, they should use
         guiparent as parent
+        continuousExport -- If True, only types with support for continuous export
+        are listed.
         """
         raise NotImplementedError
 
@@ -100,9 +102,9 @@ class AbstractExporter(object):
 
 
     def export(self, wikiDocument, wordList, exportType, exportDest,
-            compatFilenames, addOpt):
+            compatFilenames, addOpt, progressHandler):
         """
-        Run export operation.
+        Run non-continuous export operation.
         
         wikiDocument -- WikiDocument object
         wordList -- Sequence of wiki words to export
@@ -111,8 +113,36 @@ class AbstractExporter(object):
         compatFilenames -- Should the filenames be encoded to be lowest
                            level compatible
         addOpt -- additional options returned by getAddOpt()
+        progressHandler -- wxHelper.ProgressHandler object
         """
         raise NotImplementedError
+
+    
+    def startContinuousExport(self, wikiDocument, listPagesOperation,
+            exportType, exportDest, compatFilenames, addOpt, progressHandler):
+        """
+        Start continues export operation. This function may be unimplemented
+        if derived class does not provide any continous-export type.
+        
+        wikiDocument -- WikiDocument object
+        listPagesOperation -- Instance of SearchAndReplace.SearchReplaceOperation
+        exportType -- string tag to identify how to export
+        exportDest -- Path to destination directory or file to export to
+        compatFilenames -- Should the filenames be encoded to be lowest
+                           level compatible
+        addOpt -- additional options returned by getAddOpt()
+        progressHandler -- wxHelper.ProgressHandler object
+        """
+        raise NotImplementedError
+
+
+    def stopContinuousExport(self):
+        """
+        Stop continues-export operation. This function may be unimplemented
+        if derived class does not provide any continous-export type.
+        """
+        raise NotImplementedError
+
 
 
 
@@ -255,9 +285,13 @@ class HtmlExporter(AbstractExporter):
         self.basePageAst = None
                 
         self.exportType = None
+        self.progressHandler = None
         self.referencedStorageFiles = None
         
         self.linkConverter = None
+        self.compatFilenames = None
+        self.listPagesOperation = None
+
         self.wordAnchor = None  # For multiple wiki pages in one HTML page, this contains the anchor
                 # of the current word.
         self.tempFileSet = None
@@ -268,13 +302,15 @@ class HtmlExporter(AbstractExporter):
         # Flag to control how to push output into self.result
         self.outFlagEatPostBreak = False
         self.outFlagPostBreakEaten = False
+        
+        self.__sinkWikiDocument = None
 
     def setWikiDocument(self, wikiDocument):
         self.wikiDocument = wikiDocument
         if self.wikiDocument is not None:
             self.buildStyleSheetList()
 
-    def getExportTypes(self, guiparent):
+    def getExportTypes(self, guiparent, continuousExport=False):
         """
         Return sequence of tuples with the description of export types provided
         by this object. A tuple has the form (<exp. type>,
@@ -364,7 +400,7 @@ class HtmlExporter(AbstractExporter):
 
 
     def export(self, wikiDocument, wordList, exportType, exportDest,
-            compatFilenames, addOpt):
+            compatFilenames, addOpt, progressHandler, tempFileSetReset=True):
         """
         Run export operation. This is only called for real exports,
         previews use other functions.
@@ -395,6 +431,8 @@ class HtmlExporter(AbstractExporter):
         self.exportType = exportType
         self.exportDest = exportDest
         self.addOpt = addOpt
+        self.progressHandler = progressHandler
+        self.compatFilenames = compatFilenames
 
         if compatFilenames:
             self.convertFilename = removeBracketsToCompFilename
@@ -425,7 +463,7 @@ class HtmlExporter(AbstractExporter):
         if exportType == u"html_multi":
             browserFile = self._exportHtmlMultiFile()
         elif exportType == u"html_single":
-            browserFile = self._exportHtmlSingleFiles()
+            browserFile = self._exportHtmlSingleFiles(self.wordList)
 
         # Other supported types: html_previewWX, html_previewIE, html_previewMOZ
 
@@ -446,12 +484,125 @@ class HtmlExporter(AbstractExporter):
                 "main", "start_browser_after_export") and browserFile:
             OsAbstract.startFile(self.mainControl, browserFile)
 
+        if tempFileSetReset:
+            self.tempFileSet.reset()
+            self.tempFileSet = None
+
+
+    def startContinuousExport(self, wikiDocument, listPagesOperation,
+            exportType, exportDest, compatFilenames, addOpt, progressHandler):
+        
+        self.listPagesOperation = listPagesOperation
+
+        wordList = wikiDocument.searchWiki(self.listPagesOperation)
+        
+        self.listPagesOperation.beginWikiSearch(wikiDocument)
+
+        # Initially static export
+        self.export(wikiDocument, wordList, exportType, exportDest,
+            compatFilenames, addOpt, progressHandler, tempFileSetReset=False)
+            
+        self.progressHandler = None
+
+        self.__sinkWikiDocument = wxKeyFunctionSink((
+                ("deleted wiki page", self.onDeletedWikiPage),
+                ("renamed wiki page", self.onRenamedWikiPage),
+                ("updated wiki page", self.onUpdatedWikiPage)
+#                 ("saving new wiki page", self.onSavingNewWikiPage)
+        ), self.wikiDocument.getMiscEvent())
+
+
+    def stopContinuousExport(self):
+        self.listPagesOperation.endWikiSearch()
+        self.listPagesOperation = None
+        self.__sinkWikiDocument.disconnect()
+
         self.tempFileSet.reset()
         self.tempFileSet = None
 
+
+    def onDeletedWikiPage(self, miscEvt):
+        wikiWord = miscEvt.get("wikiPage").getWikiWord()
+
+        if wikiWord not in self.wordList:
+            return
+            
+        self.wordList.remove(wikiWord)
+        
+        if self.exportType == u"html_multi":
+            self._exportHtmlMultiFile()
+
+        elif self.exportType == u"html_single":
+            self._exportHtmlSingleFiles([])
+
+
+    def onRenamedWikiPage(self, miscEvt):
+        oldWord = miscEvt.get("wikiPage").getWikiWord()
+        newWord = miscEvt.get("newWord")
+        newPage = self.wikiDocument.getWikiPage(newWord)
+        
+        oldInList = oldWord in self.wordList
+        newInList = self.listPagesOperation.testWikiPageByDocPage(newPage)
+
+        if not oldInList and not newInList:
+            return
+
+        if oldInList:
+            self.wordList.remove(oldWord)
+        
+        if newInList:
+            self.wordList.append(newWord)
+
+
+        if self.exportType == u"html_multi":
+            self._exportHtmlMultiFile()
+
+        elif self.exportType == u"html_single":
+            if newInList:
+                updList = [newWord]
+            else:
+                updList = []
+
+            self._exportHtmlSingleFiles(updList)
+
+
+    def onUpdatedWikiPage(self, miscEvt):
+        wikiPage = miscEvt.get("wikiPage")
+        wikiWord = wikiPage.getWikiWord()
+
+        oldInList = wikiWord in self.wordList
+        newInList = self.listPagesOperation.testWikiPageByDocPage(wikiPage)
+
+        if not oldInList:
+            if not newInList:
+                # Current set not affected
+                return
+            else:
+                self.wordList.append(wikiWord)
+                updList = [wikiWord]
+        else:
+            if not newInList:
+                self.wordList.remove(wikiWord)
+                updList = []
+            else:
+                updList = [wikiWord]
+        
+        if not wikiWord in self.wordList:
+            return
+
+        try:
+            if self.exportType == u"html_multi":
+                self._exportHtmlMultiFile()
+    
+            elif self.exportType == u"html_single":
+                self._exportHtmlSingleFiles(updList)
+        except WikiWordNotFoundException:
+            pass
+
+
+
     def getTempFileSet(self):
         return self.tempFileSet
-
 
 
     _INTERNALJUMP_PREFIXMAP = {
@@ -473,15 +624,18 @@ class HtmlExporter(AbstractExporter):
 
 
     def _exportHtmlMultiFile(self):
+        """
+        Multiple wiki pages in one file.
+        """        
         config = self.mainControl.getConfig()
         sepLineCount = config.getint("main",
                 "html_export_singlePage_sepLineCount", 10)
         
         if sepLineCount < 0:
             sepLineCount = 10
-        if len(self.wordList) == 1:
-            self.exportType = u"html_single"
-            return self._exportHtmlSingleFiles()
+#         if len(self.wordList) == 1:
+#             self.exportType = u"html_single"
+#             return self._exportHtmlSingleFiles(self.wordList)
 
         self.setLinkConverter(LinkConverterForHtmlMultiPageExport(
                 self.wikiDocument, self))
@@ -518,9 +672,17 @@ class HtmlExporter(AbstractExporter):
                     (tocTitle, # = "Table of Contents"
                     self.getContentListBody(linkAsFragments=True),
                     u'<br />\n' * sepLineCount))
-                    
+
+
+        if self.progressHandler is not None:
+            self.progressHandler.open(len(self.wordList))
+            step = 0
+
         # Then create the big page word by word
         for word in self.wordList:
+            if self.progressHandler is not None:
+                step += 1
+                self.progressHandler.update(step, _(u"Exporting %s") % word)
 
             wikiPage = self.wikiDocument.getWikiPage(word)
             if not self.shouldExport(word, wikiPage):
@@ -551,13 +713,13 @@ class HtmlExporter(AbstractExporter):
         return outputFile
 
 
-    def _exportHtmlSingleFiles(self):
+    def _exportHtmlSingleFiles(self, wordListToUpdate):
         self.setLinkConverter(LinkConverterForHtmlSingleFilesExport(
                 self.wikiDocument, self))
         self.buildStyleSheetList()
 
 
-        if self.addOpt[1] in (1,2):
+        if self.addOpt[1] in (1, 2):
             # TODO Configurable name
             outputFile = join(self.exportDest, self.convertFilename(u"index.html"))
             try:
@@ -596,18 +758,28 @@ class HtmlExporter(AbstractExporter):
             except Exception, e:
                 traceback.print_exc()
 
-        for word in self.wordList:
+
+        if self.progressHandler is not None:
+            self.progressHandler.open(len(self.wordList))
+            step = 0
+
+        for word in wordListToUpdate:
+            if self.progressHandler is not None:
+                step += 1
+                self.progressHandler.update(step, _(u"Exporting %s") % word)
+
             wikiPage = self.wikiDocument.getWikiPage(word)
             if not self.shouldExport(word, wikiPage):
                 continue
 
             self.exportWordToHtmlPage(self.exportDest, word, False)
+
         self.copyCssFiles(self.exportDest)
         rootFile = join(self.exportDest, 
                 self.convertFilename(u"%s.html" % self.wordList[0]))
         return rootFile
 
-        
+
     def exportWordToHtmlPage(self, dir, word, startFile=True,
             onlyInclude=None):
         outputFile = join(dir, self.convertFilename(u"%s.html" % word))
@@ -1270,16 +1442,16 @@ class HtmlExporter(AbstractExporter):
         elif key == u"toc" and value == u"":
             pageAst = self.getBasePageAst()
 
-            htmlContent = [u'<div class="page-toc">\n']
+            self.outAppend(u'<div class="page-toc">\n')
             
             for node in pageAst.iterFlatByName("heading"):
                 headLevel = node.level            
                 if self.asIntHtmlPreview:
                     # Simple indent for internal preview
-                    htmlContent.append(u"&nbsp;&nbsp;" * (headLevel - 1))
+                    self.outAppend(u"&nbsp;&nbsp;" * (headLevel - 1))
                 else:
                     # use css otherwise
-                    htmlContent.append(u'<div class="page-toc-level%i">' %
+                    self.outAppend(u'<div class="page-toc-level%i">' %
                             headLevel)
 
                 if self.wordAnchor:
@@ -1287,21 +1459,21 @@ class HtmlExporter(AbstractExporter):
                 else:
                     anchor = u".h%i" % node.pos
 
-                htmlContent.append(u'<a href="#%s">')
+                self.outAppend(u'<a href="#%s">' % anchor)
 
                 with self.optsStack:
                     self.optsStack["suppressLinks"] = True
-                    self.processAst(fullContent, node.content)
-                    
-                htmlContent.append(u'</a>')
+                    self.processAst(fullContent, node.contentNode)
+
+                self.outAppend(u'</a>')
 
                 if self.asIntHtmlPreview:
-                    htmlContent.append(u'<br />\n')
+                    self.outAppend(u'<br />\n')
                 else:
-                    htmlContent.append(u'</div>\n')
+                    self.outAppend(u'</div>\n')
 
-            htmlContent.append(u"</div>\n")
-            htmlContent = u"".join(htmlContent)
+            self.outAppend(u"</div>\n")
+#             htmlContent = u"".join(htmlContent)
 
         elif key == u"eval":
             if not self.mainControl.getConfig().getboolean("main",
@@ -1616,9 +1788,15 @@ class HtmlExporter(AbstractExporter):
             elif tname == "insertion":
                 self._processInsertion(content, node)
             elif tname == "script":
-                pass  # Hide scripts 
+                pass  # Hide scripts
+            elif tname == "noExport":
+                pass  # Hide no export areas
             elif tname == "anchorDef":
-                self.outAppend('<a name="%s"></a>' % node.anchorLink)
+                if self.wordAnchor:
+                    self.outAppend('<a name="%s"></a>' %
+                            (self.wordAnchor + u"#" + node.anchorLink))
+                else:
+                    self.outAppend('<a name="%s"></a>' % node.anchorLink)                
             elif tname == "wikiWord":
                 self._processWikiWord(node, content)
             elif tname == "table":
@@ -1721,7 +1899,7 @@ class HtmlExporter(AbstractExporter):
                                 sizeInTag = ' width="%s" height="%s"' % \
                                         (widthStr, heightStr)
                         except:
-                            # something does not match syntax requirements
+                            # something does not meet syntax requirements
                             pass
                     
                     elif relSizeInfo is not None:
@@ -1805,7 +1983,7 @@ class TextExporter(AbstractExporter):
         self.exportDest = None
         self.convertFilename = removeBracketsFilename # lambda s: s   
 
-    def getExportTypes(self, guiparent):
+    def getExportTypes(self, guiparent, continuousExport=False):
         """
         Return sequence of tuples with the description of export types provided
         by this object. A tuple has the form (<exp. type>,
@@ -1813,6 +1991,9 @@ class TextExporter(AbstractExporter):
         If panels for additional options must be created, they should use
         guiparent as parent
         """
+        if continuousExport:
+            # Continuous export not supported
+            return ()
         if guiparent:
             res = wx.xrc.XmlResource.Get()
             textPanel = res.LoadPanel(guiparent, "ExportSubText") # .ctrls.additOptions
@@ -1880,7 +2061,7 @@ class TextExporter(AbstractExporter):
             
 
     def export(self, wikiDocument, wordList, exportType, exportDest,
-            compatFilenames, addopt):
+            compatFilenames, addopt, progressHandler):
         """
         Run export operation.
         
@@ -1979,7 +2160,7 @@ class MultiPageTextExporter(AbstractExporter):
         self.addOpt = None
 
 
-    def getExportTypes(self, guiparent):
+    def getExportTypes(self, guiparent, continuousExport=False):
         """
         Return sequence of tuples with the description of export types provided
         by this object. A tuple has the form (<exp. type>,
@@ -1987,6 +2168,9 @@ class MultiPageTextExporter(AbstractExporter):
         If panels for additional options must be created, they should use
         guiparent as parent
         """
+        if continuousExport:
+            # Continuous export not supported    TODO
+            return ()
         if guiparent:
             optPanel = MultiPageTextAddOptPanel(guiparent)
         else:
@@ -2106,7 +2290,7 @@ class MultiPageTextExporter(AbstractExporter):
         
 
     def export(self, wikiDocument, wordList, exportType, exportDest,
-            compatFilenames, addOpt):
+            compatFilenames, addOpt, progressHandler):
         """
         Run export operation.
         

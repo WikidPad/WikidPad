@@ -255,6 +255,10 @@ class AllWikiPagesNode(AbstractSearchNode):
     def testWikiPage(self, word, text):
         return True
 
+    def searchText(self, text, searchCharStartPos=0, cycleToStart=False):
+        return (0, 0)
+
+
     def serializeBin(self, stream):
         """
         Read or write content of this object to or from a serialize stream
@@ -702,6 +706,9 @@ class ListWikiPagesOperation:
         return self.searchOpTree.testWikiPage(word, text)
 
 
+    def testWikiPageByDocPage(self, docPage):
+        return self.testWikiPage(docPage.getWikiWord(), docPage.getLiveText())
+
     def getRootWords(self):
         """
         Return all words used as roots of subtrees (if any) for better tree sorting
@@ -828,7 +835,7 @@ class SearchReplaceOperation:
 
         self.title = None       # Title of the search for saving it. Use getter
                                 # and setter to retrieve/modify value
-        self.ordering = "no"  # How to order the pages
+#         self.ordering = "no"    # How to order the pages
 
         self.searchOpTree = None # Cache information
         self.wikiDocument = None
@@ -949,8 +956,10 @@ class SearchReplaceOperation:
         # TODO Test empty string
 
         if not self.booleanOp:
-            self.searchOpTree = self._buildSearchCriterion(self.searchStr)
-
+            if self.searchStr == u"":
+                self.searchOpTree = AllWikiPagesNode(self)
+            else:
+                self.searchOpTree = self._buildSearchCriterion(self.searchStr)
         else:
             # TODO More features
             andPatterns = self.searchStr.split(u' and ')
@@ -1089,6 +1098,10 @@ class SearchReplaceOperation:
                 self.searchOpTree.testWikiPage(word, text)
 
 
+    def testWikiPageByDocPage(self, docPage):
+        return self.testWikiPage(docPage.getWikiWord(), docPage.getLiveText())
+
+
     def applyOrdering(self, wordSet, coll):
         """
         Returns the wordSet set ordered as defined in self.ordering. It must
@@ -1097,16 +1110,18 @@ class SearchReplaceOperation:
 
         wordSet must be a mutable set and may be modified during operation.
         """
-        if self.ordering == "no":
-            return list(wordSet)
-        elif self.ordering == "ascending":
-            result = list(wordSet)
-            coll.sort(result)
-            return result
-        elif self.ordering == "natural":
-            return self.orderNatural(wordSet, coll)
-            
-        return list(wordSet)  # TODO Error
+        return self.listWikiPagesOp.applyOrdering(wordSet, coll)
+
+#         if self.ordering == "no":
+#             return list(wordSet)
+#         elif self.ordering == "ascending":
+#             result = list(wordSet)
+#             coll.sort(result)
+#             return result
+#         elif self.ordering == "natural":
+#             return self.orderNatural(wordSet, coll)
+#             
+#         return list(wordSet)  # TODO Error
 
 
     def orderNatural(self, wordSet, coll):
@@ -1118,10 +1133,6 @@ class SearchReplaceOperation:
         wordSet -- mutable set of words to order "natural"
         coll -- Collator for sorting
         """
-#         wordSet = {}
-#         for w in words:
-#             wordSet[w] = None
-#             
         if self.searchOpTree is None:
             self.rebuildSearchOpTree()
             

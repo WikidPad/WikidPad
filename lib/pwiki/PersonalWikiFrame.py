@@ -15,7 +15,7 @@ import wx, wx.html
 from wxHelper import GUI_ID, getAccelPairFromKeyDown, \
         getAccelPairFromString, LayerSizer, appendToMenuByMenuDesc, \
         setHotKeyByString, DummyWindow, IdRecycler, clearMenu, \
-        copyTextToClipboard
+        copyTextToClipboard, ProgressHandler
 
 import TextTree
 
@@ -82,47 +82,6 @@ except:
         traceback.print_exc()
     WindowsHacks = None
 
-
-
-class wxGuiProgressHandler:
-    """
-    Implementation of a GuiProgressListener to
-    show a wxProgressDialog
-    """
-    def __init__(self, title, msg, addsteps, parent, flags=wx.PD_APP_MODAL):
-        self.title = title
-        self.msg = msg
-        self.addsteps = addsteps
-        self.parent = parent
-        self.flags = flags
-
-    def open(self, sum):
-        """
-        Start progress handler, set the number of steps, the operation will
-        take in sum. Will be called once before update()
-        is called several times
-        """
-        self.progDlg = wx.ProgressDialog(self.title, self.msg + u" " * 20,
-                sum + self.addsteps, self.parent, self.flags)
-                
-    def update(self, step, msg):
-        """
-        Called after a step is finished to trigger update
-        of GUI.
-        step -- Number of done steps
-        msg -- Human readable descripion what is currently done
-        returns: True to continue, False to stop operation
-        """
-        self.progDlg.Update(step, uniToGui(msg))
-        return True
-
-    def close(self):
-        """
-        Called after finishing operation or after abort to 
-        do clean-up if necessary
-        """
-        self.progDlg.Destroy()
-        self.progDlg = None
 
 
 class KeyBindingsCache:
@@ -240,6 +199,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.mainWwSearchDlg = None
         self.wwSearchDlgs = []   # Stores wiki wide search dialogs and detached fast search frames
         self.spellChkDlg = None  # Stores spell check dialog, if present
+        self.continuousExporter = None   # Exporter-derived object if continuous export is in effect
+        
         self.mainAreaPanel = None
 #         self._mainAreaPanelCreated = False
         self.mainmenu = None
@@ -256,9 +217,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.pluginsMenu = None
         self.fastSearchField = None   # Text field in toolbar
         
-        self.cmdIdToIconName = None # Maps command id (=menu id) to icon name
+        self.cmdIdToIconNameForAttribute = None # Maps command id (=menu id) to icon name
                                     # needed for "Editor"->"Add icon attribute"
-        self.cmdIdToColorName = None # Same for color names
+        self.cmdIdToColorNameForAttribute = None # Same for color names
+        
+        self.cmdIdToInsertString = None
 
         self.eventRoundtrip = 0
 
@@ -1130,18 +1093,25 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.activatePageByUnifiedName(u"global/FavoriteWikis", tabMode=2)
 
 
+    def OnInsertStringFromDict(self, evt):
+        if self.isReadOnlyPage():
+            return
+
+        self.getActiveEditor().AddText(self.cmdIdToInsertString[evt.GetId()])
+
+
     def OnInsertIconAttribute(self, evt):
         if self.isReadOnlyPage():
             return
 
-        self.insertAttribute("icon", self.cmdIdToIconName[evt.GetId()])
+        self.insertAttribute("icon", self.cmdIdToIconNameForAttribute[evt.GetId()])
 
 
     def OnInsertColorAttribute(self, evt):
         if self.isReadOnlyPage():
             return
 
-        self.insertAttribute("color", self.cmdIdToColorName[evt.GetId()])
+        self.insertAttribute("color", self.cmdIdToColorNameForAttribute[evt.GetId()])
 
 
     def buildMainMenu(self):
@@ -1665,13 +1635,39 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         formatMenu.AppendSeparator()
 
+
+        iconsMenu, cmdIdToIconName = PropertyHandling.buildIconsSubmenu(
+                wx.GetApp().getIconCache())
+        for cmi in cmdIdToIconName.keys():
+            wx.EVT_MENU(self, cmi, self.OnInsertStringFromDict)
+
+        formatMenu.AppendMenu(GUI_ID.MENU_ADD_ICON_NAME,
+                _(u'&Icon Name'), iconsMenu)
+        wx.EVT_UPDATE_UI(self, GUI_ID.MENU_ADD_ICON_NAME,
+                self.OnUpdateDisReadOnlyPage)
+
+        self.cmdIdToInsertString = cmdIdToIconName
+        
+        
+        colorsMenu, cmdIdToColorName = PropertyHandling.buildColorsSubmenu()
+        for cmi in cmdIdToColorName.keys():
+            wx.EVT_MENU(self, cmi, self.OnInsertStringFromDict)
+
+        formatMenu.AppendMenu(GUI_ID.MENU_ADD_STRING_NAME,
+                _(u'&Color Name'), colorsMenu)
+        wx.EVT_UPDATE_UI(self, GUI_ID.MENU_ADD_STRING_NAME,
+                self.OnUpdateDisReadOnlyPage)
+
+        self.cmdIdToInsertString.update(cmdIdToColorName)
+
+
         addAttributeMenu = wx.Menu()
         formatMenu.AppendMenu(wx.NewId(), _(u'&Add Attribute'), addAttributeMenu)
 
-        # Build full submenu for icons
-        iconsMenu, self.cmdIdToIconName = PropertyHandling.buildIconsSubmenu(
+        # Build full submenu for icon attributes
+        iconsMenu, self.cmdIdToIconNameForAttribute = PropertyHandling.buildIconsSubmenu(
                 wx.GetApp().getIconCache())
-        for cmi in self.cmdIdToIconName.keys():
+        for cmi in self.cmdIdToIconNameForAttribute.keys():
             wx.EVT_MENU(self, cmi, self.OnInsertIconAttribute)
 
         addAttributeMenu.AppendMenu(GUI_ID.MENU_ADD_ICON_ATTRIBUTE,
@@ -1679,9 +1675,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         wx.EVT_UPDATE_UI(self, GUI_ID.MENU_ADD_ICON_ATTRIBUTE,
                 self.OnUpdateDisReadOnlyPage)
 
-        # Build submenu for colors
-        colorsMenu, self.cmdIdToColorName = PropertyHandling.buildColorsSubmenu()
-        for cmi in self.cmdIdToColorName.keys():
+        # Build submenu for color attributes
+        colorsMenu, self.cmdIdToColorNameForAttribute = PropertyHandling.buildColorsSubmenu()
+        for cmi in self.cmdIdToColorNameForAttribute.keys():
             wx.EVT_MENU(self, cmi, self.OnInsertColorAttribute)
 
         addAttributeMenu.AppendMenu(GUI_ID.MENU_ADD_COLOR_ATTRIBUTE,
@@ -1690,8 +1686,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.OnUpdateDisReadOnlyPage)
 
         # TODO: Bold attribute
-
-
 
 
         navigateMenu = wx.Menu()
@@ -1766,7 +1760,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _(u'Open general export dialog'), self.OnCmdExportDialog,
                 updatefct=self.OnUpdateDisNoWiki)
 
-        self.addMenuItem(extraMenu, _(u'Import...'),
+        self.addMenuItem(extraMenu, _(u'&Continuous Export...'),
+                _(u'Open export dialog for continuous export of changes'),
+                self.OnCmdContinuousExportDialog,
+                updatefct=(self.OnUpdateDisNoWiki,
+                self.OnUpdateContinuousExportDialog), kind=wx.ITEM_CHECK)
+
+
+        self.addMenuItem(extraMenu, _(u'&Import...'),
                 _(u'Import dialog'), self.OnCmdImportDialog,
                 updatefct=self.OnUpdateDisReadOnlyWiki)
 
@@ -3140,7 +3141,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         traceback.print_exc()
                         self.fireMiscEventKeys(("dropping current wiki",))
 
+                if self.continuousExporter is not None:
+                    self.continuousExporter.stopContinuousExport()
+                    self.continuousExporter = None
+
                 try:
+
                     self.lastAccessedWiki(self.getWikiConfigPath())
                     if self.getWikiData():
                         wd.release()
@@ -3703,6 +3709,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """
         wikiConfigFilename = self._getStorableWikiPath(wikiConfigFilename)
         
+        if wikiConfigFilename == self.wikiPadHelp:
+            return
+        
         # create a new config file for the new wiki
         self.configuration.set("main", "last_wiki", wikiConfigFilename)
         if wikiConfigFilename not in self.wikiHistory:
@@ -4151,7 +4160,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             else: # lrm == 2: ask for each rename operation
                 result = wx.MessageBox(
                         _(u"Do you want to modify all links to the wiki word "
-                        u"'%s' renamed to '%s'?") % (wikiWord, toWikiWord),
+                        u"'%s' renamed to '%s' (this operation is unrealiable)?") %
+                        (wikiWord, toWikiWord),
                         _(u'Rename Wiki Word'),
                         wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION, self)
 
@@ -4175,7 +4185,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.mainWwSearchDlg.SetFocus()
             return
 
-        self.mainWwSearchDlg = SearchWikiDialog(self, -1)
+        self.mainWwSearchDlg = SearchWikiDialog(self, self, -1,
+                allowOkCancel=False, allowOrdering=False)
         self.mainWwSearchDlg.CenterOnParent(wx.BOTH)
         self.mainWwSearchDlg.Show()
 
@@ -4440,24 +4451,48 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.saveAllDocPages()
         self.getWikiData().commit()
 
-        dlg = ExportDialog(self, -1)
+        dlg = ExportDialog(self, -1, continuousExport=False)
         dlg.CenterOnParent(wx.BOTH)
 
         result = dlg.ShowModal()
         dlg.Destroy()
 
 
+    def OnCmdContinuousExportDialog(self, evt):
+        if self.continuousExporter is not None:
+            self.continuousExporter.stopContinuousExport()
+            self.continuousExporter = None
+            return
+
+        self.saveAllDocPages()
+        self.getWikiData().commit()
+
+        dlg = ExportDialog(self, -1, continuousExport=True)
+        try:
+            dlg.CenterOnParent(wx.BOTH)
+    
+            dlg.ShowModal()
+            exporter = dlg.GetValue()
+            self.continuousExporter = exporter
+        finally:
+            dlg.Destroy()
+
+
+    def OnUpdateContinuousExportDialog(self, evt):
+        evt.Check(self.continuousExporter is not None)
+
+
     EXPORT_PARAMS = {
             GUI_ID.MENU_EXPORT_WHOLE_AS_PAGE:
-                    (Exporters.HtmlExporter, u"html_single", None),
+                    (Exporters.HtmlExporter, u"html_multi", None),
             GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES:
-                    (Exporters.HtmlExporter, u"html_multi", None),
+                    (Exporters.HtmlExporter, u"html_single", None),
             GUI_ID.MENU_EXPORT_WORD_AS_PAGE:
-                    (Exporters.HtmlExporter, u"html_single", None),
-            GUI_ID.MENU_EXPORT_SUB_AS_PAGE:
-                    (Exporters.HtmlExporter, u"html_single", None),
-            GUI_ID.MENU_EXPORT_SUB_AS_PAGES:
                     (Exporters.HtmlExporter, u"html_multi", None),
+            GUI_ID.MENU_EXPORT_SUB_AS_PAGE:
+                    (Exporters.HtmlExporter, u"html_multi", None),
+            GUI_ID.MENU_EXPORT_SUB_AS_PAGES:
+                    (Exporters.HtmlExporter, u"html_single", None),
             GUI_ID.MENU_EXPORT_WHOLE_AS_RAW:
                     (Exporters.TextExporter, u"raw_files", (1,))
             }
@@ -4519,14 +4554,21 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.saveAllDocPages()
                 self.getWikiData().commit()
 
-               
                 ob = expclass(self)
                 if addopt is None:
                     # Additional options not given -> take default provided by exporter
                     addopt = ob.getAddOpt(None)
-                ob.export(self.getWikiDataManager(), wordList, exptype, dest,
-                        False, addopt)
-    
+
+                pgh = ProgressHandler(_(u"Exporting"), u"", 0, self)
+                pgh.open(0)
+                pgh.update(0, _(u"Preparing"))
+
+                try:
+                    ob.export(self.getWikiDataManager(), wordList, exptype, dest,
+                            False, addopt, pgh)
+                finally:
+                    pgh.close()
+
                 self.configuration.set("main", "last_active_dir", dest)
 
         except (IOError, OSError, DbAccessError), e:
@@ -4612,7 +4654,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if skipConfirm or result == wx.YES :
             try:
                 self.saveAllDocPages()
-                progresshandler = wxGuiProgressHandler(
+                progresshandler = ProgressHandler(
                         _(u"     Initiating update     "),
                         _(u"     Initiating update     "), 0, self)
                 self.getWikiDataManager().initiateFullUpdate(progresshandler)
@@ -4645,7 +4687,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if skipConfirm or result == wx.YES :
             try:
                 self.saveAllDocPages()
-                progresshandler = wxGuiProgressHandler(
+                progresshandler = ProgressHandler(
                         _(u"     Rebuilding wiki     "),
                         _(u"     Rebuilding wiki     "), 0, self)
                 self.getWikiDataManager().rebuildWiki(progresshandler,
@@ -4739,7 +4781,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         self.getMainAreaPanel().switchDocPagePresenterTabEditorPreview(presenter)
 
 
-    def insertAttribute(self, name, value, wikiWord=None):
+    def insertAttribute(self, key, value, wikiWord=None):
         langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.getWikiDefaultWikiLanguage())
 
@@ -4887,50 +4929,50 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     # ----------------------------------------------------------------------------------------
 
 
-    def miscEventHappened(self, miscevt):
+    def miscEventHappened(self, miscEvt):
         """
         Handle misc events
         """
         try:
-            if miscevt.getSource() is self.getWikiDocument():
+            if miscEvt.getSource() is self.getWikiDocument():
                 # Event from wiki document aka wiki data manager
-                if miscevt.has_key("deleted wiki page"):
-                    wikiPage = miscevt.get("wikiPage")
+                if miscEvt.has_key("deleted wiki page"):
+                    wikiPage = miscEvt.get("wikiPage")
                     # trigger hooks
                     self.hooks.deletedWikiWord(self,
                             wikiPage.getWikiWord())
     
-#                     self.fireMiscEventProps(miscevt.getProps())
+#                     self.fireMiscEventProps(miscEvt.getProps())
     
-                elif miscevt.has_key("renamed wiki page"):
-                    oldWord = miscevt.get("wikiPage").getWikiWord()
-                    newWord = miscevt.get("newWord")
+                elif miscEvt.has_key("renamed wiki page"):
+                    oldWord = miscEvt.get("wikiPage").getWikiWord()
+                    newWord = miscEvt.get("newWord")
 
                     # trigger hooks
                     self.hooks.renamedWikiWord(self, oldWord, newWord)
 
-#                 elif miscevt.has_key("updated wiki page"):
+#                 elif miscEvt.has_key("updated wiki page"):
 #                     # This was send from a WikiDocument(=WikiDataManager) object,
 #                     # send it again to listening components
-#                     self.fireMiscEventProps(miscevt.getProps())
-            elif miscevt.getSource() is self.getMainAreaPanel():
-                self.fireMiscEventProps(miscevt.getProps())
-#                 if miscevt.has_key("changed current docpage presenter"):
+#                     self.fireMiscEventProps(miscEvt.getProps())
+            elif miscEvt.getSource() is self.getMainAreaPanel():
+                self.fireMiscEventProps(miscEvt.getProps())
+#                 if miscEvt.has_key("changed current docpage presenter"):
 #                     self.hooks.switchedToWikiWord(self, oldWord, newWord)
 
             # Depending on wiki-related or global func. page, the following
             # events come from document or application object
 
-            if (miscevt.getSource() is self.getWikiDocument()) or \
-                   (miscevt.getSource() is wx.GetApp()):
-                if miscevt.has_key("reread text blocks needed"):
+            if (miscEvt.getSource() is self.getWikiDocument()) or \
+                   (miscEvt.getSource() is wx.GetApp()):
+                if miscEvt.has_key("reread text blocks needed"):
                     self.rereadTextBlocks()
-                elif miscevt.has_key("reread personal word list needed"):
+                elif miscEvt.has_key("reread personal word list needed"):
                     if self.spellChkDlg is not None:
                         self.spellChkDlg.rereadPersonalWordLists()
-                elif miscevt.has_key("reread favorite wikis needed"):
+                elif miscEvt.has_key("reread favorite wikis needed"):
                     self.rereadFavoriteWikis()
-                elif miscevt.has_key("reread recent wikis needed"):
+                elif miscEvt.has_key("reread recent wikis needed"):
                     self.rereadRecentWikis()
 
 

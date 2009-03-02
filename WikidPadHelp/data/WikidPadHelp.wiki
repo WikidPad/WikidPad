@@ -45,7 +45,6 @@ Then just start typing text with WikiWords to create your wiki.
     * SearchingTheWiki
     * SpellChecking
     * IncrementalSearch
-    * PageListDialog
     * WikiExport / WikiImport
     * [Printing]
     * InlinePythonEval

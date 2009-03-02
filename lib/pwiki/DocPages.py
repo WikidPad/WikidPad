@@ -161,54 +161,18 @@ class DocPage(object, MiscEventSourceMixin):
             text = self.getContent() + text
             self.writeToDatabase(text, fireEvent=fireEvent)
 
-#             self.save(text, fireEvent=fireEvent)
-# 
-#         self.update(text, fireEvent=fireEvent)
-
-
-
-#     def _mainThreadUpdateTextCache(self):
-# #         with self.textOperationLock: # Unnecessary as the function is only called
-#         # by a different thread within the lock and is waited for termination
-# 
-#         txtEditor = self.getTxtEditor()
-#         if txtEditor is not None:
-#             # page is in text editor(s), so use cache or call GetText on one of it
-#             if self.textCache is None:
-#                 self.textCache = txtEditor.GetText()
-#         else:
-#             self.textCache = self.getContent()
-
 
     def getLiveText(self):
         """
         Return current text of page, either from a text editor or
         from the database
         """
-#         for i in xrange(50):     # Actually "while True:", but this may run without end
         with self.textOperationLock:
             if self.getEditorText() is not None:
                 return self.getEditorText()
             
             return self.getContent()
 
-
-
-#                 else:
-#                     if wx.Thread_IsMain():
-#                         self._mainThreadUpdateTextCache()
-#                         return self.textCache
-
-#                 callInMainThread(self._mainThreadUpdateTextCache)
-
-#             with self.textOperationLock:
-#                 if self.textCache is None:
-#                     continue
-# 
-#                 return self.textCache
-
-        # Something went terribly wrong
-#         raise DeadBlockPreventionTimeOutError()
 
 
     def getLiveTextNoTemplate(self):
@@ -1095,8 +1059,11 @@ class WikiPage(DataCarryingPage):
                             lambda: origThreadstop.isRunning() and 
                             liveTextPlaceHold is self.liveTextPlaceHold)
 
-            pageAst = self.parseTextInContext(text, formatDetails=formatDetails,
-                    threadstop=threadstop)
+            if len(text) == 0:
+                pageAst = buildSyntaxNode([], 0)
+            else:
+                pageAst = self.parseTextInContext(text, formatDetails=formatDetails,
+                        threadstop=threadstop)
 
             with self.textOperationLock:
                 threadstop.testRunning()

@@ -41,7 +41,7 @@ class WikiPageFormatDetails(object):
 def getFootnoteAnchorDict(pageAst):
     """
     Returns a new or cached dictionary of footnote anchors
-    {footnodeId: anchorNode} from a page ast.
+    {footnoteId: anchorNode} from a page ast.
     """
     if pageAst is None:
         return

@@ -486,6 +486,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
                 # New tab
                 presenter = self.presenter.getMainControl().\
                         createNewDocPagePresenterTab()
+                presenter.switchSubControl("preview", False)
             else:
                 # Same tab
                 presenter = self.presenter
@@ -494,12 +495,12 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
             if not tabMode & 1:
                 # Show in foreground
-                presenter.switchSubControl("preview", True)
-
+#                 presenter.switchSubControl("preview", True)
                 presenter.getMainControl().getMainAreaPanel().\
                         showPresenter(presenter)
-            else:
-                presenter.switchSubControl("preview", False)
+                presenter.SetFocus()
+#             else:
+#                 presenter.switchSubControl("preview", False)
 
         elif href == u"internaljump:action/history/back":
             # Go back in history

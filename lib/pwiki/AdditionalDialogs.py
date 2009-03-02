@@ -16,16 +16,28 @@ except:
 
 
 from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, \
-        escapeForIni, unescapeForIni, escapeHtml, strftimeUB, pathEnc
+        escapeForIni, unescapeForIni, escapeHtml, strftimeUB, pathEnc, \
+        writeEntireFile
 from wikidata import DbBackendUtils
 
 from WikiExceptions import *
 import Exporters, Importers
+import Configuration
 
 from Consts import VERSION_STRING
 
-from SearchAndReplaceDialogs import WikiPageListConstructionDialog
-from SearchAndReplace import ListWikiPagesOperation
+from SearchAndReplaceDialogs import SearchWikiDialog   # WikiPageListConstructionDialog
+from SearchAndReplace import SearchReplaceOperation  # ListWikiPagesOperation
+
+
+try:
+    import WindowsHacks
+except:
+    if Configuration.isWindows():
+        traceback.print_exc()
+    WindowsHacks = None
+
+
 
 
 class SelectWikiWordDialog(wx.Dialog):
@@ -923,19 +935,24 @@ class FontFaceDialog(wx.Dialog):
 
 
 class ExportDialog(wx.Dialog):
-    def __init__(self, pWiki, ID, title="Export",
+    def __init__(self, pWiki, ID, continuousExport=False, title="Export",
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
         d = wx.PreDialog()
         self.PostCreate(d)
         
         self.pWiki = pWiki
+        self.value = None
         
-        self.listPagesOperation = ListWikiPagesOperation()
+        self.listPagesOperation = SearchReplaceOperation()  # ListWikiPagesOperation()
+        self.continuousExport = continuousExport
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "ExportDialog")
         
         self.ctrls = XrcControls(self)
         
+        if continuousExport:
+            self.SetTitle(_(u"Continuous Export"))
+
         self.emptyPanel = None
         
         exporterList = [] # List of tuples (<exporter object>, <export tag>,
@@ -944,7 +961,7 @@ class ExportDialog(wx.Dialog):
         addOptSizer = LayerSizer()
         
         for ob in Exporters.describeExporters(self.pWiki):   # TODO search plugins
-            for tp in ob.getExportTypes(self.ctrls.additOptions):
+            for tp in ob.getExportTypes(self.ctrls.additOptions, continuousExport):
                 panel = tp[2]
                 if panel is None:
                     if self.emptyPanel is None:
@@ -1037,7 +1054,9 @@ class ExportDialog(wx.Dialog):
     def OnChSelectedSet(self, evt):
         selset = self.ctrls.chSelectedSet.GetSelection()
         if selset == 3:  # Custom
-            dlg = WikiPageListConstructionDialog(self, self.pWiki, -1, 
+#             dlg = WikiPageListConstructionDialog(self, self.pWiki, -1, 
+#                     value=self.listPagesOperation)
+            dlg = SearchWikiDialog(self, self.pWiki, -1,
                     value=self.listPagesOperation)
             if dlg.ShowModal() == wx.ID_OK:
                 self.listPagesOperation = dlg.getValue()
@@ -1049,7 +1068,7 @@ class ExportDialog(wx.Dialog):
         # Run exporter
         ob, etype, desc, panel = \
                 self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
-                
+
         # If this returns None, export goes to a directory
         expDestWildcards = ob.getExportDestinationWildcards(etype)
         if expDestWildcards is None:
@@ -1103,23 +1122,40 @@ class ExportDialog(wx.Dialog):
             # custom list
             lpOp = self.listPagesOperation
 
-        wordList = self.pWiki.getWikiDocument().searchWiki(lpOp, True)
-
-#         self.pWiki.getConfig().set("main", "html_export_pics_as_links",
-#                 self.ctrls.cbHtmlExportPicsAsLinks.GetValue())
-
 
         if panel is self.emptyPanel:
             panel = None
-            
-        try:
-            ob.export(self.pWiki.getWikiDataManager(), wordList, etype, 
-                    guiToUni(self.ctrls.tfDestination.GetValue()), 
-                    self.ctrls.compatFilenames.GetValue(), ob.getAddOpt(panel))
-        except ExportException, e:
-            self.pWiki.displayErrorMessage(_(u"Error while exporting"), unicode(e))
 
-        self.EndModal(wx.ID_OK)
+        pgh = ProgressHandler(_(u"Exporting"), u"", 0, self)
+        pgh.open(0)
+        pgh.update(0, _(u"Preparing"))
+
+        try:
+            if self.continuousExport:
+                ob.startContinuousExport(self.pWiki.getWikiDocument(),
+                        lpOp, etype, guiToUni(self.ctrls.tfDestination.GetValue()),
+                        self.ctrls.compatFilenames.GetValue(), ob.getAddOpt(panel),
+                        pgh)
+    
+                self.value = ob
+            else:
+                wordList = self.pWiki.getWikiDocument().searchWiki(lpOp, True)
+        
+        #         self.pWiki.getConfig().set("main", "html_export_pics_as_links",
+        #                 self.ctrls.cbHtmlExportPicsAsLinks.GetValue())
+        
+                try:
+                    ob.export(self.pWiki.getWikiDocument(), wordList, etype, 
+                            guiToUni(self.ctrls.tfDestination.GetValue()), 
+                            self.ctrls.compatFilenames.GetValue(), ob.getAddOpt(panel),
+                            pgh)
+                except ExportException, e:
+                    self.pWiki.displayErrorMessage(_(u"Error while exporting"),
+                    unicode(e))
+
+        finally:
+            pgh.close()
+            self.EndModal(wx.ID_OK)
 
         
     def OnSelectDest(self, evt):
@@ -1159,6 +1195,14 @@ class ExportDialog(wx.Dialog):
                 self.ctrls.tfDestination.SetValue(selfile)
 
 
+    def GetValue(self):
+        return self.value
+
+
+ExportDialog.runModal = staticmethod(runDialogModalFactory(ExportDialog))
+
+
+
 class ImportDialog(wx.Dialog):
     def __init__(self, parent, ID, mainControl, title="Import",
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
@@ -1168,7 +1212,6 @@ class ImportDialog(wx.Dialog):
         self.parent = parent
         self.mainControl = mainControl
         
-#         self.listPagesOperation = ListWikiPagesOperation()
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.parent, "ImportDialog")
 
@@ -1370,7 +1413,6 @@ class NewWikiSettings(wx.Dialog):
         self.mainControl = mainControl
         self.value = None, None
 
-#         self.listPagesOperation = ListWikiPagesOperation()
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, parent, "NewWikiSettingsDialog")
 
@@ -1722,6 +1764,36 @@ class ImagePasteSaver:
             img.SaveFile(destPath, wx.BITMAP_TYPE_JPEG)
 
         return destPath
+
+
+    def saveWmfFromClipboardToFileStorage(self, fs):
+        if WindowsHacks is None:
+            return None
+        
+        return WindowsHacks.saveWmfFromClipboardToFileStorage(fs, self.prefix)
+
+
+    def saveMetaFile(self, fs, metaFile):
+        """
+        fs -- FileStorage to save into
+        rawData -- raw bytestring to save
+
+        Returns absolute path of saved image or None if not saved
+        """
+        destPath = fs.findDestPathNoSource(u".wmf", self.prefix)
+        
+        if destPath is None:
+            # Couldn't find unused filename
+            return None
+
+        metaDC = wx.MetaFileDC(destPath)
+        metaFile.Play(metaDC)
+        metaDC.Close()
+
+#         writeEntireFile(destPath, rawData)
+        
+        return destPath
+
 
 
 

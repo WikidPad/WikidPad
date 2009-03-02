@@ -8,9 +8,10 @@ from wxHelper import *
 try:
     from EnchantDriver import Dict
     import EnchantDriver
-except ImportError:
-#     traceback.print_exc()
+except (AttributeError, ImportError):
     Dict = None
+#     traceback.print_exc()
+
 
 from DocPages import AliasWikiPage, WikiPage
 

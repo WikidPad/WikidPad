@@ -1,6 +1,6 @@
 import os, os.path, traceback, sys, re
 
-from wx.xrc import XRCCTRL, XRCID
+from wx.xrc import XRCCTRL, XRCID, XmlResource
 import wx
 
 from MiscEvent import KeyFunctionSink
@@ -116,107 +116,39 @@ class IdRecycler:
 
 
 
-if Configuration.isWin9x():
-    def getTextFromClipboard():
-        """
-        Retrieve text or unicode text from clipboard
-        """
-        from StringOps import lineendToInternal, mbcsDec
-        import array
+def getTextFromClipboard():
+    """
+    Retrieve text or unicode text from clipboard
+    """
+    from StringOps import lineendToInternal, mbcsDec
+
+    cb = wx.TheClipboard
+    cb.Open()
+    try:
+        dataob = textToDataObject()
+
+        if cb.GetData(dataob):
+            if dataob.GetTextLength() > 0:
+                return lineendToInternal(dataob.GetText())
+            else:
+                return u""
+        return None
+    finally:
+        cb.Close()
+
+
+def textToDataObject(text=None):
+    """
+    Create data object for an unicode string
+    """
+    from StringOps import lineendToOs, mbcsEnc, utf8Enc
     
-        cb = wx.TheClipboard
-        cb.Open()
-        try:
-            dataob = wx.DataObjectComposite()
-            cdataob = wx.CustomDataObject(wx.DataFormat(wx.DF_TEXT))
-            udataob = wx.CustomDataObject(wx.DataFormat(wx.DF_UNICODETEXT))
-            cdataob.SetData("")
-            udataob.SetData("")
-            dataob.Add(udataob)
-            dataob.Add(cdataob)
+    if text is None:
+        text = u""
     
-            if cb.GetData(dataob):
-                if udataob.GetDataSize() > 0 and (udataob.GetDataSize() % 2) == 0:
-                    # We have unicode data
-                    # This might not work for all platforms:   # TODO Better impl.
-                    rawuni = udataob.GetData()
-                    arruni = array.array("u")
-                    arruni.fromstring(rawuni)
-                    realuni = lineendToInternal(arruni.tounicode())
-                    return realuni
-                elif cdataob.GetDataSize() > 0:
-                    realuni = lineendToInternal(
-                            mbcsDec(cdataob.GetData(), "replace")[0])
-                    return realuni
-                else:
-                    return u""
-            return None
-        finally:
-            cb.Close()
+    text = lineendToOs(text)
 
-
-    def textToDataObject(text=None):
-        """
-        Create data object for an unicode string
-        """
-        from StringOps import lineendToOs, mbcsEnc, utf8Enc
-        import array
-        
-        cdataob = wx.CustomDataObject(wx.DataFormat(wx.DF_TEXT))
-        udataob = wx.CustomDataObject(wx.DataFormat(wx.DF_UNICODETEXT))
-    
-        if text is not None:
-            realuni = lineendToOs(text)
-            arruni = array.array("u")
-            arruni.fromunicode(realuni+u"\x00")
-            rawuni = arruni.tostring()
-            udataob.SetData(rawuni)
-            cdataob.SetData(mbcsEnc(realuni)[0]+"\x00")
-        else:
-            cdataob.SetData("")
-            udataob.SetData("")
-    
-        dataob = wx.DataObjectComposite()
-        dataob.Add(udataob, True)
-        dataob.Add(cdataob)
-    
-        return dataob
-
-else:    # Non-Windows 9x versions
-
-    def getTextFromClipboard():
-        """
-        Retrieve text or unicode text from clipboard
-        """
-        from StringOps import lineendToInternal, mbcsDec
-    
-        cb = wx.TheClipboard
-        cb.Open()
-        try:
-            dataob = textToDataObject()
-
-            if cb.GetData(dataob):
-                if dataob.GetTextLength() > 0:
-                    return lineendToInternal(dataob.GetText())
-                else:
-                    return u""
-            return None
-        finally:
-            cb.Close()
-
-
-    def textToDataObject(text=None):
-        """
-        Create data object for an unicode string
-        """
-        from StringOps import lineendToOs, mbcsEnc, utf8Enc
-        
-        if text is None:
-            text = u""
-        
-        text = lineendToOs(text)
-
-        return wx.TextDataObject(text)
+    return wx.TextDataObject(text)
 
 
 def getBitmapFromClipboard():
@@ -237,6 +169,52 @@ def getBitmapFromClipboard():
         return None
     finally:
         cb.Close()
+
+
+if Configuration.isWindows():
+#     def getMetafileFromClipboard():
+#         """
+#         Retrieve metafile from clipboard if available
+#         """
+#         cb = wx.TheClipboard
+#         cb.Open()
+#         try:
+#             dataob = wx.CustomDataObject(wx.DataFormat(wx.DF_METAFILE))
+#             dataob.SetData("")
+#     
+#             if cb.GetData(dataob):
+#                 result = dataob.GetData()
+# #                 if result is not wx.NullBitmap:
+#                 return result
+# #                 else:
+# #                     return None
+#             return None
+#         finally:
+#             cb.Close()
+
+
+    def getMetafileFromClipboard():
+        """
+        Retrieve metafile from clipboard if available
+        """
+        cb = wx.TheClipboard
+        cb.Open()
+        try:
+            dataob = wx.MetafileDataObject()
+    
+            if cb.GetData(dataob):
+                result = dataob.GetMetafile()
+#                 if result is not wx.NullBitmap:
+                return result
+#                 else:
+#                     return None
+            return None
+        finally:
+            cb.Close()
+else:
+    def getMetafileFromClipboard():
+        return None
+
 
 
 # if Configuration.isLinux():   # TODO Mac?
@@ -721,8 +699,7 @@ class ProxyPanel(wx.Panel):
         sizer.Add(subWindow, 1, wx.EXPAND, 0)
 
         self.SetSizer(sizer)
-#         self.SetAutoLayout(True)
-#         sizer.Fit(self)
+
 
     def getSubWindow(self):
         return self.subWindow
@@ -731,6 +708,60 @@ class ProxyPanel(wx.Panel):
     def OnSize(self, evt):
         evt.Skip()
         size = evt.GetSize()
+
+
+class ProgressHandler(object):
+    """
+    Implementation of a GuiProgressListener to
+    show a progress dialog
+    """
+    def __init__(self, title, msg, addsteps, parent, flags=wx.PD_APP_MODAL):
+        self.title = title
+        self.msg = msg
+        self.addsteps = addsteps
+        self.parent = parent
+        self.flags = flags
+        self.progDlg = None
+
+    def open(self, sum):
+        """
+        Start progress handler, set the number of steps, the operation will
+        take in sum. Will be called once before update()
+        is called several times
+        """
+        if self.progDlg is None:
+            res = XmlResource.Get()
+            self.progDlg = res.LoadDialog(self.parent, "ProgressDialog")
+            self.progDlg.ctrls = XrcControls(self.progDlg)
+            self.progDlg.SetTitle(self.title)
+
+        self.progDlg.ctrls.text.SetLabel(self.msg)
+        self.progDlg.ctrls.gauge.SetRange(sum + self.addsteps)
+        self.progDlg.ctrls.gauge.SetValue(0)
+        self.progDlg.Show()
+
+    def update(self, step, msg):
+        """
+        Called after a step is finished to trigger update
+        of GUI.
+        step -- Number of done steps
+        msg -- Human readable descripion what is currently done
+        returns: True to continue, False to stop operation
+        """
+        self.msg = msg
+
+        self.progDlg.ctrls.text.SetLabel(msg)
+        self.progDlg.ctrls.gauge.SetValue(step)
+
+        return True
+
+    def close(self):
+        """
+        Called after finishing operation or after abort to 
+        do clean-up if necessary
+        """
+        self.progDlg.Destroy()
+        self.progDlg = None
 
 
 

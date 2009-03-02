@@ -166,7 +166,7 @@ class CmdLineAction:
 
         exporter.export(pWiki.getWikiDataManager(), wordList,
                 self.exportType, self.exportDest, 
-                self.exportCompFn, exporter.getAddOpt(None))
+                self.exportCompFn, exporter.getAddOpt(None), None)
 
 
     USAGE = \

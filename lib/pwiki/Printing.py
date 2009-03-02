@@ -10,8 +10,8 @@ from wxHelper import *
 
 from StringOps import escapeHtml, unescapeWithRe
 
-from SearchAndReplaceDialogs import WikiPageListConstructionDialog
-from SearchAndReplace import ListWikiPagesOperation
+from SearchAndReplaceDialogs import SearchWikiDialog   # WikiPageListConstructionDialog
+from SearchAndReplace import SearchReplaceOperation  # ListWikiPagesOperation
 
 
 _CUT_RE = re.compile(ur"\n|\f| +|[^ \n\f]+",
@@ -82,7 +82,9 @@ class PrintMainDialog(wx.Dialog):
     def OnChSelectedSet(self, evt):
         selset = self.ctrls.chSelectedSet.GetSelection()
         if selset == 3:  # Custom
-            dlg = WikiPageListConstructionDialog(self, self.pWiki, -1, 
+#             dlg = WikiPageListConstructionDialog(self, self.pWiki, -1, 
+#                     value=self.printer.listPagesOperation)
+            dlg = SearchWikiDialog(self, self.pWiki, -1,
                     value=self.printer.listPagesOperation)
             if dlg.ShowModal() == wx.ID_OK:
                 self.printer.listPagesOperation = dlg.getValue()
@@ -125,7 +127,7 @@ class Printer:
         self.psddata = None
 
         self.selectionSet = 0
-        self.listPagesOperation = ListWikiPagesOperation()
+        self.listPagesOperation = SearchReplaceOperation()
 
         self.plainTextFontDesc = self.pWiki.configuration.get(
                 "main", "print_plaintext_font")

@@ -35,10 +35,8 @@ class StdErrReplacement:
 
 def onException(typ, value, trace):
     global EL
-    print "--onException1"
     try:
 #         import ExceptionLogger as EL
-        print "--onException4"
 ##        traceback.print_exception(typ, value, trace, file=sys.stdout)
         f = open(os.path.join(EL._exceptionDestDir, "WikidPad_Error.log"), "a")
         try:

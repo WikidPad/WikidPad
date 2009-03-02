@@ -437,6 +437,8 @@ class OptionsDialog(wx.Dialog):
                 "cbAutoCompleteClosingBracket", "b"),
             ("editor_sync_byPreviewSelection", "cbEditorSyncByPreviewSelection",
                 "b"),
+            ("editor_tabWidth", "scEditorTabWidth", "spin"),
+
 
             ("editor_imagePaste_filenamePrefix", "tfEditorImagePasteFilenamePrefix", "t"),
             ("editor_imagePaste_fileType", "chEditorImagePasteFileType", "seli"),

@@ -21,7 +21,7 @@ from Consts import FormatTypes
 
 from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
         wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc, \
-        getBitmapFromClipboard
+        getBitmapFromClipboard, getMetafileFromClipboard
 from MiscEvent import KeyFunctionSinkAR
 from ParseUtilities import getFootnoteAnchorDict
 
@@ -39,7 +39,6 @@ from StringOps import *
 #        wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
 from Configuration import isUnicode, isWin9x, isLinux, isWindows
-
 
 try:
     import WindowsHacks
@@ -113,7 +112,7 @@ class IncrementalSearchDialog(wx.Frame):
         wx.EVT_MOUSE_EVENTS(self.tfInput, self.OnMouseAnyInput)
 
         if searchInit:
-            self.tfInput.SetValue(re.escape(searchInit))
+            self.tfInput.SetValue(searchInit)
             self.tfInput.SetSelection(-1, -1)
 
         if self.closeDelay:
@@ -435,8 +434,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
         if config.getboolean("main", "editor_useImeWorkaround", False):
             wx.EVT_CHAR(self, self.OnChar_ImeWorkaround)
-        else:
-            wx.EVT_CHAR(self, self.OnChar)
 
         wx.EVT_SET_FOCUS(self, self.OnSetFocus)
 
@@ -521,31 +518,32 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if text:
             self.ReplaceSelection(text)
             return
-        else:
-            bmp = getBitmapFromClipboard()
-            if bmp is not None:
-                img = bmp.ConvertToImage()
-                del bmp
-                fs = self.presenter.getWikiDocument().getFileStorage()
-                imgsav = ImagePasteSaver()
-                imgsav.readOptionsFromConfig(self.presenter.getConfig())
-                
-                if self.presenter.getConfig().getboolean("main",
-                        "editor_imagePaste_askOnEachPaste", True):
-                    # Options say to present dialog on an image paste operation
-                    dlg = ImagePasteDialog(self.presenter.getMainControl(), -1,
-                            imgsav)
-                    try:
-                        dlg.ShowModal()
-                        imgsav = dlg.getImagePasteSaver()
-                    finally:
-                        dlg.Destroy()
 
-                destPath = imgsav.saveFile(fs, img)
-                if destPath is None:
-                    # Couldn't find unused filename or saving denied
-                    return
-                    
+        fs = self.presenter.getWikiDocument().getFileStorage()
+        imgsav = ImagePasteSaver()
+        imgsav.readOptionsFromConfig(self.presenter.getConfig())
+
+        bmp = getBitmapFromClipboard()
+        if bmp is not None:
+            img = bmp.ConvertToImage()
+            del bmp
+            
+            if self.presenter.getConfig().getboolean("main",
+                    "editor_imagePaste_askOnEachPaste", True):
+                # Options say to present dialog on an image paste operation
+                dlg = ImagePasteDialog(self.presenter.getMainControl(), -1,
+                        imgsav)
+                try:
+                    dlg.ShowModal()
+                    imgsav = dlg.getImagePasteSaver()
+                finally:
+                    dlg.Destroy()
+
+            destPath = imgsav.saveFile(fs, img)
+            if destPath is None:
+                # Couldn't find unused filename or saving denied
+                return
+                
 #                 destPath = fs.findDestPathNoSource(u".png", u"")
 #                 
 #                 print "Paste6", repr(destPath)
@@ -555,20 +553,43 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 # 
 #                 img.SaveFile(destPath, wx.BITMAP_TYPE_PNG)
 
-                locPath = self.presenter.getMainControl().getWikiConfigPath()
+            locPath = self.presenter.getMainControl().getWikiConfigPath()
 
-                if locPath is not None:
-                    locPath = dirname(locPath)
-                    relPath = relativeFilePath(locPath, destPath)
-                    url = None
-                    if relPath is None:
-                        # Absolute path needed
-                        url = "file:%s" % urlFromPathname(destPath)
-                    else:
-                        url = "rel://%s" % urlFromPathname(relPath)
+            if locPath is not None:
+                locPath = dirname(locPath)
+                relPath = relativeFilePath(locPath, destPath)
+                url = None
+                if relPath is None:
+                    # Absolute path needed
+                    url = "file:%s" % urlFromPathname(destPath)
+                else:
+                    url = "rel://%s" % urlFromPathname(relPath)
 
-                    if url:
-                        self.ReplaceSelection(url)
+                if url:
+                    self.ReplaceSelection(url)
+
+            return
+        
+        if not WindowsHacks:
+            return
+
+        destPath = imgsav.saveWmfFromClipboardToFileStorage(fs)
+
+        if destPath is not None:
+            locPath = self.presenter.getMainControl().getWikiConfigPath()
+
+            if locPath is not None:
+                locPath = dirname(locPath)
+                relPath = relativeFilePath(locPath, destPath)
+                url = None
+                if relPath is None:
+                    # Absolute path needed
+                    url = "file:%s>i" % urlFromPathname(destPath)
+                else:
+                    url = "rel://%s>i" % urlFromPathname(relPath)
+
+                if url:
+                    self.ReplaceSelection(url)
 
 
     def onCmdCopy(self, miscevt):
@@ -769,12 +790,17 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         """
         if isUnicode():
             self.SetCodePage(wx.stc.STC_CP_UTF8)
-        self.SetIndent(4)
         self.SetTabIndents(True)
         self.SetBackSpaceUnIndents(True)
-        self.SetTabWidth(4)
         self.SetUseTabs(not self.tabsToSpaces)
         self.SetEOLMode(wx.stc.STC_EOL_LF)
+
+        tabWidth = self.presenter.getConfig().getint("main",
+                "editor_tabWidth", 4)
+
+        self.SetIndent(tabWidth)
+        self.SetTabWidth(tabWidth)
+
         self.AutoCompSetFillUps(u":=")  # TODO Add '.'?
 #         self.SetYCaretPolicy(wxSTC_CARET_SLOP, 2)  
 #         self.SetYCaretPolicy(wxSTC_CARET_JUMPS | wxSTC_CARET_EVEN, 4)  
@@ -1084,7 +1110,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         return wx.Colour(*coltuple)
 
 
-
     def onOptionsChanged(self, miscevt):
         faces = self.presenter.getDefaultFontFaces().copy()
 
@@ -1128,6 +1153,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         shorthintDelay = self.presenter.getConfig().getint("main",
                 "editor_shortHint_delay", 500)
         self.SetMouseDwellTime(shorthintDelay)
+
+        tabWidth = self.presenter.getConfig().getint("main",
+                "editor_tabWidth", 4)
+
+        self.SetIndent(tabWidth)
+        self.SetTabWidth(tabWidth)
+
 
 
     def onWikiPageUpdated(self, miscevt):
@@ -1463,7 +1495,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     stylebytes.bindStyle(node.pos, node.strLength, styleNo)
                 
                 elif node.name in ("table", "tableRow", "tableCell",
-                        "orderedList", "unorderedList", "indentedText"):
+                        "orderedList", "unorderedList", "indentedText",
+                        "noExport"):
                     process(node, stack[:])
 
         process(pageAst, [])
@@ -1798,7 +1831,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
             elif node.name == "footnote":
                 pageAst = self.getPageAst()
-                footnoteId = node.footnodeId
+                footnoteId = node.footnoteId
 
                 anchorNode = getFootnoteAnchorDict(pageAst).get(footnoteId)
                 if anchorNode is not None:
@@ -1807,7 +1840,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                         self.gotoCharPos(anchorNode.pos)
                     else:
                         # Activated footnote was last -> go to first
-                        for fnNode in pageAst.iterDeepByName("footnode"):
+                        for fnNode in pageAst.iterDeepByName("footnote"):
                             if fnNode.footnoteId == footnoteId:
                                 self.gotoCharPos(fnNode.pos)
                                 break
@@ -2121,7 +2154,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.incSearchPreviousHiddenStartLine = -1
         
         if start == -1:
-            self.SetSelection(-1, -1)
+#             self.SetSelection(-1, -1)
+            self.SetSelection(self.GetSelectionStart(), self.GetSelectionStart())
             return
         text = self.GetText()
 
@@ -2164,7 +2198,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         Run incremental search, called only by IncrementalSearchDialog
         """
         text = self.GetText()
-        if len(self.searchStr) > 0:   # and not searchStr.endswith("\\"):
+        if len(self.searchStr) > 0:
             if next:
                 charStartPos = self.GetSelectionCharPos()[1]
             else:
@@ -2203,7 +2237,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         Run incremental search, called only by IncrementalSearchDialog
         """
         text = self.GetText()
-        if len(self.searchStr) > 0:   # and not searchStr.endswith("\\"):
+        if len(self.searchStr) > 0:
             charStartPos = self.GetSelectionCharPos()[0]
 
             regex = None
@@ -2453,7 +2487,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             # First get selected text and prepare it as default value
             text = self.GetSelectedText()
             text = text.split("\n", 1)[0]
-            text = text[:30]
+            text = re.escape(text[:30])
             self.startIncrementalSearch(text)
 
         elif matchesAccelPair("AutoComplete", accP):
@@ -2502,33 +2536,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             evt.Skip()
 
 
-    def OnChar(self, evt):
-        key = evt.GetKeyCode()
-
-        # Return if this doesn't seem to be a real character input
-        if evt.ControlDown() or key < 32:
-            evt.Skip()
-            return
-            
-        if key >= wx.WXK_START and (not isUnicode() or evt.GetUnicodeKey() != key):
-            evt.Skip()
-            return
-
-
-        if isWin9x() and (WindowsHacks is not None):
-            unichar = WindowsHacks.ansiInputToUnicodeChar(key)
-
-            self.ReplaceSelection(unichar)
-
-        else:
-            if isUnicode():
-                unichar = unichr(evt.GetUnicodeKey())
-            else:
-                unichar = mbcsDec(chr(key))[0]
-
-            evt.Skip()
-
-
     def OnChar_ImeWorkaround(self, evt):
         """
         Workaround for problem of Scintilla with some input method editors,
@@ -2545,15 +2552,12 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             evt.Skip()
             return
 
-        if isWin9x() and (WindowsHacks is not None):
-            unichar = WindowsHacks.ansiInputToUnicodeChar(key)
+        if isUnicode():
+            unichar = unichr(evt.GetUnicodeKey())
         else:
-            if isUnicode():
-                unichar = unichr(evt.GetUnicodeKey())
-            else:
-                unichar = mbcsDec(chr(key))[0]
+            unichar = mbcsDec(chr(key))[0]
 
-            self.ReplaceSelection(unichar)
+        self.ReplaceSelection(unichar)
 
 
 

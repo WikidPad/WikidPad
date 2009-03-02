@@ -1260,14 +1260,14 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #                 self._sendSelectionEvents(None, selId)
         finally:
             self.Thaw()
-        
-        
+
+
 #         if selId is not None and selId.IsOk():
 #             self.SelectItem(selId)
 #         
 #         print "--collapseAll30", repr((selId, self.GetSelection()))
 
-            
+
 
 
     def expandRoot(self):
@@ -1329,7 +1329,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                             self._bindActivation()
                             return
 #                         else:
-#                             # TODO !!!!!! Better method if child doesn't even exist!
+#                             # TODO Better method if child doesn't even exist!
 #                             # Move to child but child not found ->
 #                             # subtree below currentNode might need
 #                             # a refresh

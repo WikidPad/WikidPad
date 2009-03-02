@@ -20,7 +20,7 @@ from pwiki.MiscEvent import MiscEventSourceMixin
 from pwiki import ParseUtilities
 from pwiki.StringOps import mbcsDec, re_sub_escape, pathEnc, pathDec, \
         unescapeWithRe, strToBool
-from pwiki.DocPages import WikiPage, FunctionalPage, AliasWikiPage
+from pwiki.DocPages import DocPage, WikiPage, FunctionalPage, AliasWikiPage
 
 
 from pwiki.SearchAndReplace import SearchReplaceOperation
@@ -899,7 +899,9 @@ class WikiDataManager(MiscEventSourceMixin):
             value = self._getWikiPageNoErrorNoCache(wikiWord)
             
             self.wikiPageDict[wikiWord] = value
-            value.getMiscEvent().addListener(self)
+
+            if not value.getMiscEvent().hasListener(self):
+                value.getMiscEvent().addListener(self)
 
         return value
 
@@ -1334,7 +1336,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 if wikiPage is None:
                     continue
                 if isinstance(wikiPage, AliasWikiPage):
-                    # Avoid to rename same page twice (alias and real) or more often
+                    # Avoid to process same page twice (alias and real) or more often
                     continue
                     
                 text = wikiPage.getLiveTextNoTemplate()
@@ -1529,8 +1531,8 @@ class WikiDataManager(MiscEventSourceMixin):
         elif miscevt.getSource() is GetApp():
             if miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()
-        else:
-            # These messages come from (classes derived from) DocPages,
+        elif isinstance(miscevt.getSource(), DocPage):
+            # These messages come from (classes derived from) DocPage,
             # they are mainly relayed
 
             if miscevt.has_key_in(("deleted wiki page", "renamed wiki page")):
@@ -1538,7 +1540,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 props = miscevt.getProps().copy()
                 props["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(props)
-            elif miscevt.has_key("updated wiki page"):            
+            elif miscevt.has_key("updated wiki page"):
                 props = miscevt.getProps().copy()
                 props["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(props)

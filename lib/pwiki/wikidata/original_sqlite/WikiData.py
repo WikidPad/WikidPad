@@ -729,16 +729,24 @@ class WikiData:
 #                     "on wikirelations.relation = wikiwordprops.value and "
 #                     "wikiwordprops.key = 'alias' where unaliased != wikirelations.word")
 
+#             return self.connWrap.execSqlQuerySingleColumn(
+#                     "select word from wikiwords except "
+#                     "select word as mtword from wikiwordmatchterms "
+#                     "where matchterm in (select relation from wikirelations "
+#                     "where wikirelations.word != mtword)")
+
             return self.connWrap.execSqlQuerySingleColumn(
                     "select word from wikiwords except "
-#                     "(select relation from wikirelations) and not in "
-                    "select word as mtword from wikiwordmatchterms "
-                    "where matchterm in (select relation from wikirelations "
-                    "where wikirelations.word != mtword)")
+                    "select wikiwordmatchterms.word "
+                    "from wikiwordmatchterms inner join wikirelations "
+                    "on matchterm == relation where "
+                    "wikirelations.word != wikiwordmatchterms.word and "
+                    "(type & 2) != 0")
 
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
+
 
 
     def getUndefinedWords(self):

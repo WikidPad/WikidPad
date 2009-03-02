@@ -793,7 +793,7 @@ class ParserElement(object):
         self.buildingRegex = False # To avoid endless recursion
         self.mayIndexError = True # used to optimize exception handling for subclasses that don't advance parse index
         self.errmsg = ""
-        self.modalResults = True # used to mark results names as modal (report only last) or cumulative (list all)
+#         self.modalResults = True # used to mark results names as modal (report only last) or cumulative (list all)
         self.debugActions = ( None, None, None ) #custom debug actions
         self.re = None
         self.callPreparse = True # used to avoid redundant calls to preParse
@@ -831,8 +831,21 @@ class ParserElement(object):
         """
         newself = self.copy()
         newself.resultsName = name
-        newself.modalResults = not listAllMatches
+#         newself.modalResults = not listAllMatches
         return newself
+
+
+    def setResultsNameNoCopy( self, name, listAllMatches=False ):
+        """Define name for referencing matching tokens as a nested attribute
+           of the returned parse results.
+           NOTE: this returns a *copy* of the original ParserElement object;
+           this is so that the client can define a basic element, such as an
+           integer, and reference it in multiple places with different names.
+        """
+        self.resultsName = name
+#         newself.modalResults = not listAllMatches
+        return self
+
         
     def getResultsName( self ):
         return self.resultsName
@@ -3882,6 +3895,7 @@ class SkipTo(ParseElementEnhance):
         raise exc
 
 
+
 class Forward(ParseElementEnhance, NecessaryRegexProvider):
     """Forward declaration of an expression to be defined later -
        used for recursive grammars, such as algebraic infix notation.
@@ -3945,18 +3959,33 @@ class Forward(ParseElementEnhance, NecessaryRegexProvider):
             self.buildingRegex = False
 
 
+    def _getHeadForward(self):
+        """
+        We may have a chain of Forward s pointing to other Forward s so find
+        the head of this chain.
+        """
+        ret = self
+        while ret.expr is not None and isinstance(ret.expr, Forward):
+            ret = ret.expr
+        
+        return ret
+
+
     def __lshift__( self, other ):
         if isinstance( other, basestring ):
             other = Literal(other)
-        self.expr = other
-        self.mayReturnEmpty = other.mayReturnEmpty
-        self.strRepr = None
-        self.mayIndexError = self.expr.mayIndexError
-        self.mayReturnEmpty = self.expr.mayReturnEmpty
-        self.setWhitespaceChars( self.expr.whiteChars )
-        self.skipWhitespace = self.expr.skipWhitespace
+        
+        head = self._getHeadForward()
+        head.expr = other
+        head.mayReturnEmpty = other.mayReturnEmpty
+        head.strRepr = None
+        head.mayIndexError = self.expr.mayIndexError
+        head.mayReturnEmpty = self.expr.mayReturnEmpty
+        head.setWhitespaceChars( self.expr.whiteChars )
+        head.skipWhitespace = self.expr.skipWhitespace
 #         self.saveAsList = self.expr.saveAsList
-        self.ignoreExprs.extend(self.expr.ignoreExprs)
+        head.ignoreExprs.extend(self.expr.ignoreExprs)
+
         return None
 
     def leaveWhitespace( self ):

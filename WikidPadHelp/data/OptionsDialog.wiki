@@ -19,7 +19,7 @@ Pathes to the recently opened wikis are stored as relative pathes if this is che
 Directory to start when using "Wiki"->"New" or "Wiki"->"Open" in the menu. If empty, WikidPad chooses a default.
 
 *Sort order*
-Choose the desired alphabetical sort algorithm for wiki words, todos, attributes in tree or PageListDialog.
+Choose the desired alphabetical sort algorithm for wiki words, todos, attributes in tree or when [SearchingTheWiki#To search all pages: Full search].
 The "C" order is the way previous WikidPad versions worked (uppercase letters first, non-English characters in illogical order at the end).
 The new "Default" order sorts according to default order determined by the operating system. Normally, uppercase letters are sorted inorder (AaBbCc). If you want uppercase letters (more exactly: all characters but lowercase ones) before the rest (ABCabc), check
 *Uppercase first*.
@@ -129,6 +129,9 @@ When suggesting the completion for a bracketed wiki word, e.g. "[Not Came" you c
 *Synchronize editor by preview selection*
 This provides some workaround to synchronize scroll position in HTML preview with the position in editor.
 If this option is checked, you can select some text in the preview and when switching back to the editor, the first occurrence of the selected text is searched and selected in editor, too.
+
+*Tab width*
+How many spaces should a tab be wide. This affects real tabs as well as the number of spaces used to replace a tab if "Edit"->"Settings"->"Tabs to spaces" is checked.
 
 
 +++++ Image pasting

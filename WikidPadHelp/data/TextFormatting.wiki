@@ -24,9 +24,9 @@ For creating bulleted or numbered lists, see BulletedLists.
 
 +++ Escaping Formatting
 
-++++ Escaping blocks
+++++ Escaping markup
 To create a section of text with no formatting, wrap that section 
-in a "<< >>" block. Example:
+in a "\<< >>" block. Example:
 
 escape formatting
 
@@ -36,13 +36,15 @@ escape formatting
 
 with formatting
 
+You can also use this on a single line <<like here>>. Inside the markup no newline is allowed.
+
 *This should be bold* ThisShouldBeALink
 
 Before and after the begin and end tags only whitespaces are allowed on the same line, so a << in the text does not prevent ALink from being highlighted.
 
 ++++ Preformatted blocks
 
-You can use <<\pre and >> to enclose blocks which have no special formatting (wiki words, italics) as the default escaping blocks but are shown in HTML as monospaced blocks and have exactly the same formatting as written in the source text.
+You can use \<<\pre and >> to enclose blocks which have no special formatting (wiki words, italics) as the default escaping blocks but are shown in HTML as monospaced blocks and have exactly the same formatting as written in the source text.
 
 This is helpful especially for programming source code.
 
@@ -58,6 +60,17 @@ Example:
                   |       |
                   |       |
                   L_______j
+>>
+
+
+++++ Hidden markup
+
+Hidden markups are not published to HTML or shown in preview but are otherwise fully processed by WikidPad so you can enclose comments in it as well as attributes or todos which show up in tree.
+
+A hidden markup is written as \<<\hide >> either on a single line (no newline in it) or as a block like the escaping markup.
+
+<<hide
+You only see this in editor
 >>
 
 
