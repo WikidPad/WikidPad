@@ -1252,8 +1252,9 @@ class WikiPageListConstructionDialog(wx.Dialog, MiscEventSourceMixin):   # TODO
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         
-        self.ctrls.tfPageListToAdd.SetValue(uniToGui(
-                self.pWiki.getCurrentWikiWord()))
+        currWord = self.pWiki.getCurrentWikiWord()
+        if currWord is not None:
+            self.ctrls.tfPageListToAdd.SetValue(uniToGui(currWord))
 
         if self.value is not None:
             item = self.value.searchOpTree

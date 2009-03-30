@@ -1246,8 +1246,10 @@ What makes wikidPad different from other notepad applications is the ease with w
     
     <hr />
     
-    <p />Your configuration directory is: %s
-    <p />Sqlite version: %s
+    <p>Your configuration directory is: <b>%s</b><br />
+    Sqlite version: <b>%s</b><br />
+    wxPython version: <b>%s</b>
+    </p>
 </body>
 </html>
 ''')
@@ -1262,7 +1264,8 @@ What makes wikidPad different from other notepad applications is the ease with w
             sqliteVer = sqlite.getLibVersion()
 
         text = _(self.TEXT_TEMPLATE) % (VERSION_STRING,
-                escapeHtml(pWiki.globalConfigDir), escapeHtml(sqliteVer))
+                escapeHtml(pWiki.globalConfigDir), escapeHtml(sqliteVer),
+                escapeHtml(wx.__version__))
 
         html = wx.html.HtmlWindow(self, -1)
         html.SetPage(text)

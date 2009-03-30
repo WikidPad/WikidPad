@@ -540,7 +540,10 @@ def strftimeUB(frmStr, timet=None):
     if timet is None:
         return formatWxDate(frmStr, wx.DateTime_Now())
 
-    return formatWxDate(frmStr, wx.DateTimeFromTimeT(timet))
+    try:
+        return formatWxDate(frmStr, wx.DateTimeFromTimeT(timet))
+    except TypeError:
+        return _(u"Inval. timestamp")  #  TODO Better errorhandling?
 
 
 

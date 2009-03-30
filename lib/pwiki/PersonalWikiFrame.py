@@ -4043,7 +4043,8 @@ These are your default global settings.
             else: # lrm == 2: ask for each rename operation
                 result = wx.MessageBox(
                         _(u"Do you want to modify all links to the wiki word "
-                        u"'%s' renamed to '%s'?") % (wikiWord, toWikiWord),
+                        u"'%s' renamed to '%s' (this operation is unreliable)?") %
+                        (wikiWord, toWikiWord),
                         _(u'Rename Wiki Word'),
                         wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION, self)
 

@@ -1,2 +1,1 @@
 ﻿C	English
-de_DE	Deutsch

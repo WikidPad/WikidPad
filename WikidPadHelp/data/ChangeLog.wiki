@@ -1,7 +1,25 @@
 ﻿++ Change Log
 
+Mar. 30, 2009 (1.9rc03)
 
-Jan. 26, 2009 (1.9rc01)
+    * Bug fixed: Page list construction dialog couldn't be opened
+      if a functional page was in current editor
+
+
+
+Feb. 27, 2009 (1.9rc02, repository revision in "mbutscher" branch: 187)
+
+    * No more unnecessary jumping around of page when ending
+      or aborting incremental search (thanks to Christian Ziemski).
+
+    * Bug fixed: If repeating an incremental search with escaped
+      RE characters (e.g. '.', '?') the escaping backslashes
+      accumulated.
+    * Bug fixed: Attribute \[view_pane: editor] did not work.
+
+
+
+Jan. 26, 2009 (1.9rc01, repository revision in "mbutscher" branch: 179)
 
     * Bug fixed: Linux: Function keys produced characters
     * Bug fixed: Linux: Timeline contained initially only
