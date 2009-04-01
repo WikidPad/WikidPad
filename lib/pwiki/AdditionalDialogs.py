@@ -4,6 +4,8 @@ import re
 
 from os.path import exists, isdir, isfile
 
+from xml.dom import minidom
+
 import wx, wx.html, wx.xrc
 
 
@@ -22,12 +24,13 @@ from wikidata import DbBackendUtils
 
 from WikiExceptions import *
 import Exporters, Importers
+import Serialization
 import Configuration
 
-from Consts import VERSION_STRING
+from Consts import VERSION_STRING, DATABLOCK_STOREHINT_INTERN
 
 from SearchAndReplaceDialogs import SearchWikiDialog   # WikiPageListConstructionDialog
-from SearchAndReplace import SearchReplaceOperation  # ListWikiPagesOperation
+from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation
 
 
 try:
@@ -88,6 +91,7 @@ class SelectWikiWordDialog(wx.Dialog):
                     .getWikiWordMatchTermsWith(u"")
             return
         
+        # Filter out anything else than real words and explicit aliases
         self.listContent = self.pWiki.getWikiData().getWikiWordMatchTermsWith(
                 searchTxt)
 
@@ -101,7 +105,7 @@ class SelectWikiWordDialog(wx.Dialog):
             self.wikiWord = guiToUni(self.ctrls.text.GetValue())
     
             if not self.pWiki.getWikiDocument().isDefinedWikiLink(self.wikiWord):
-                self._fillListContent()
+                self._fillListContent(self.wikiWord)
                 if len(self.listContent) > 0:
                     self.wikiWord = self.listContent[0][2]
                 else:
@@ -145,8 +149,16 @@ class SelectWikiWordDialog(wx.Dialog):
     def OnListBox(self, evt):
         sel = self.ctrls.lb.GetSelection()
         if sel != wx.NOT_FOUND:
+            if self.listContent[sel][0] != self.listContent[sel][2]:
+                self.ctrls.stLinkTo.SetLabel(uniToGui(_(u"Links to:") + u" " +
+                        self.listContent[sel][2]))
+            else:
+                self.ctrls.stLinkTo.SetLabel(u"")
             self.ignoreTextChange += 1
             self.ctrls.text.SetValue(self.listContent[sel][0])
+        else:
+            self.ctrls.stLinkTo.SetLabel(u"")
+
 
 
     def OnCharText(self, evt):
@@ -935,32 +947,38 @@ class FontFaceDialog(wx.Dialog):
 
 
 class ExportDialog(wx.Dialog):
-    def __init__(self, pWiki, ID, continuousExport=False, title="Export",
+    def __init__(self, mainControl, ID, continuousExport=False, title="Export",
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
         d = wx.PreDialog()
         self.PostCreate(d)
         
-        self.pWiki = pWiki
+        self.mainControl = mainControl
         self.value = None
         
         self.listPagesOperation = SearchReplaceOperation()  # ListWikiPagesOperation()
         self.continuousExport = continuousExport
+        self.savedExports = None
+        
+        # In addition to exporter list, this set will contain type tags of all
+        # supported exports (used for saved exports list).
+        self.supportedExportTypes = set()
         res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, self.pWiki, "ExportDialog")
-        
+        res.LoadOnDialog(self, self.mainControl, "ExportDialog")
+
         self.ctrls = XrcControls(self)
-        
+
         if continuousExport:
             self.SetTitle(_(u"Continuous Export"))
 
         self.emptyPanel = None
-        
+
         exporterList = [] # List of tuples (<exporter object>, <export tag>,
                           # <readable description>, <additional options panel>)
-        
+
         addOptSizer = LayerSizer()
-        
-        for ob in Exporters.describeExporters(self.pWiki):   # TODO search plugins
+
+        # TODO Move to ExportOperation.py
+        for ob in Exporters.describeExporters(self.mainControl):   # TODO search plugins
             for tp in ob.getExportTypes(self.ctrls.additOptions, continuousExport):
                 panel = tp[2]
                 if panel is None:
@@ -976,6 +994,7 @@ class ExportDialog(wx.Dialog):
                 # Add Tuple (Exporter object, export type tag,
                 #     export type description, additional options panel)
                 exporterList.append((ob, tp[0], tp[1], panel))
+                self.supportedExportTypes.add(tp[0])
                 addOptSizer.Add(panel)
 
 
@@ -996,9 +1015,10 @@ class ExportDialog(wx.Dialog):
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         
-        defdir = self.pWiki.getConfig().get("main", "export_default_dir", u"")
+        defdir = self.mainControl.getConfig().get("main", "export_default_dir",
+                u"")
         if defdir == u"":
-            defdir = self.pWiki.getLastActiveDir()
+            defdir = self.mainControl.getLastActiveDir()
 
         self.ctrls.tfDestination.SetValue(defdir)
 
@@ -1013,22 +1033,29 @@ class ExportDialog(wx.Dialog):
 
         self.ctrls.chExportTo.SetSelection(0)  
         self._refreshForEtype()
-        
+        self._refreshSavedExportsList()
+
         # Fixes focus bug under Linux
         self.SetFocus()
-        
+
         wx.EVT_CHOICE(self, GUI_ID.chExportTo, self.OnExportTo)
         wx.EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
 
+        wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lbSavedExports, self.OnLoadAndRunExport)
+
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
         wx.EVT_BUTTON(self, GUI_ID.btnSelectDestination, self.OnSelectDest)
+        wx.EVT_BUTTON(self, GUI_ID.btnSaveExport, self.OnSaveExport)
+        wx.EVT_BUTTON(self, GUI_ID.btnLoadExport, self.OnLoadExport)
+        wx.EVT_BUTTON(self, GUI_ID.btnLoadAndRunExport, self.OnLoadAndRunExport)
+        wx.EVT_BUTTON(self, GUI_ID.btnDeleteExports, self.OnDeleteExports)
 
 
     def _refreshForEtype(self):
         for e in self.exporterList:
             e[3].Show(False)
             e[3].Enable(False)
-            
+
         ob, etype, desc, panel = \
                 self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
 
@@ -1054,17 +1081,17 @@ class ExportDialog(wx.Dialog):
     def OnChSelectedSet(self, evt):
         selset = self.ctrls.chSelectedSet.GetSelection()
         if selset == 3:  # Custom
-#             dlg = WikiPageListConstructionDialog(self, self.pWiki, -1, 
-#                     value=self.listPagesOperation)
-            dlg = SearchWikiDialog(self, self.pWiki, -1,
+            dlg = SearchWikiDialog(self, self.mainControl, -1,
                     value=self.listPagesOperation)
             if dlg.ShowModal() == wx.ID_OK:
                 self.listPagesOperation = dlg.getValue()
             dlg.Destroy()
 
     def OnOk(self, evt):
-        import SearchAndReplace as Sar
+        self._runExporter()
 
+        
+    def _runExporter(self):
         # Run exporter
         ob, etype, desc, panel = \
                 self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
@@ -1074,54 +1101,24 @@ class ExportDialog(wx.Dialog):
         if expDestWildcards is None:
             # Export to a directory
             if not exists(pathEnc(self.ctrls.tfDestination.GetValue())):
-                self.pWiki.displayErrorMessage(
+                self.mainControl.displayErrorMessage(
                         _(u"Destination directory does not exist"))
                 return
             
             if not isdir(pathEnc(self.ctrls.tfDestination.GetValue())):
-                self.pWiki.displayErrorMessage(
+                self.mainControl.displayErrorMessage(
                         _(u"Destination must be a directory"))
                 return
         else:
             if exists(pathEnc(self.ctrls.tfDestination.GetValue())) and \
                     not isfile(pathEnc(self.ctrls.tfDestination.GetValue())):
-                self.pWiki.displayErrorMessage(
+                self.mainControl.displayErrorMessage(
                         _(u"Destination must be a file"))
                 return
 
-
-        # Create wordList (what to export)
-        selset = self.ctrls.chSelectedSet.GetSelection()
-        root = self.pWiki.getCurrentWikiWord()
-        
-        if root is None and selset in (0, 1):
-            self.pWiki.displayErrorMessage(
-                    _(u"No real wiki word selected as root"))
+        sarOp = self._getEffectiveListWikiPagesOperation()
+        if sarOp is None:
             return
-            
-        lpOp = Sar.ListWikiPagesOperation()
-
-        if selset == 0:
-            # single page
-            item = Sar.ListItemWithSubtreeWikiPagesNode(lpOp, [root], 0)
-            lpOp.setSearchOpTree(item)
-            lpOp.ordering = "asroottree"  # Slow, but more intuitive
-        elif selset == 1:
-            # subtree
-            item = Sar.ListItemWithSubtreeWikiPagesNode(lpOp, [root], -1)
-            lpOp.setSearchOpTree(item)
-            lpOp.ordering = "asroottree"  # Slow, but more intuitive
-#             wordList = self.pWiki.getWikiData().getAllSubWords([root])
-        elif selset == 2:
-            # whole wiki
-            item = Sar.AllWikiPagesNode(lpOp)
-            lpOp.setSearchOpTree(item)
-            lpOp.ordering = "asroottree"  # Slow, but more intuitive
-#             wordList = self.pWiki.getWikiData().getAllDefinedWikiPageNames()
-        else:
-            # custom list
-            lpOp = self.listPagesOperation
-
 
         if panel is self.emptyPanel:
             panel = None
@@ -1132,25 +1129,23 @@ class ExportDialog(wx.Dialog):
 
         try:
             if self.continuousExport:
-                ob.startContinuousExport(self.pWiki.getWikiDocument(),
-                        lpOp, etype, guiToUni(self.ctrls.tfDestination.GetValue()),
+                ob.startContinuousExport(self.mainControl.getWikiDocument(),
+                        sarOp, etype, guiToUni(self.ctrls.tfDestination.GetValue()),
                         self.ctrls.compatFilenames.GetValue(), ob.getAddOpt(panel),
                         pgh)
     
                 self.value = ob
             else:
-                wordList = self.pWiki.getWikiDocument().searchWiki(lpOp, True)
-        
-        #         self.pWiki.getConfig().set("main", "html_export_pics_as_links",
-        #                 self.ctrls.cbHtmlExportPicsAsLinks.GetValue())
+                wordList = self.mainControl.getWikiDocument().searchWiki(sarOp,
+                        True)
         
                 try:
-                    ob.export(self.pWiki.getWikiDocument(), wordList, etype, 
+                    ob.export(self.mainControl.getWikiDocument(), wordList, etype, 
                             guiToUni(self.ctrls.tfDestination.GetValue()), 
                             self.ctrls.compatFilenames.GetValue(), ob.getAddOpt(panel),
                             pgh)
                 except ExportException, e:
-                    self.pWiki.displayErrorMessage(_(u"Error while exporting"),
+                    self.mainControl.displayErrorMessage(_(u"Error while exporting"),
                     unicode(e))
 
         finally:
@@ -1199,7 +1194,284 @@ class ExportDialog(wx.Dialog):
         return self.value
 
 
+    def _getEffectiveListWikiPagesOperation(self):
+        """
+        Return the list operation appropriate for the current GUI settings.
+        Shows message in case of an error and returns None
+        """
+        import SearchAndReplace as Sar
+
+        # Create wordList (what to export)
+        selset = self.ctrls.chSelectedSet.GetSelection()
+        root = self.mainControl.getCurrentWikiWord()
+
+        if root is None and selset in (0, 1):
+            self.mainControl.displayErrorMessage(
+                    _(u"No real wiki word selected as root"))
+            return None
+
+        if selset == 3:
+            return self.listPagesOperation
+
+        lpOp = Sar.ListWikiPagesOperation()
+
+        if selset == 0:
+            # single page
+            item = Sar.ListItemWithSubtreeWikiPagesNode(lpOp, [root], 0)
+            lpOp.setSearchOpTree(item)
+            lpOp.ordering = "asroottree"  # Slow, but more intuitive
+        elif selset == 1:
+            # subtree
+            item = Sar.ListItemWithSubtreeWikiPagesNode(lpOp, [root], -1)
+            lpOp.setSearchOpTree(item)
+            lpOp.ordering = "asroottree"
+        elif selset == 2:
+            # whole wiki
+            item = Sar.AllWikiPagesNode(lpOp)
+            lpOp.setSearchOpTree(item)
+            lpOp.ordering = "asroottree"
+        else:
+            raise InternalError("Unknown selection for export set")
+
+        result = Sar.SearchReplaceOperation()
+        result.listWikiPagesOp = lpOp
+
+        return result
+
+
+    def _refreshSavedExportsList(self):
+        wikiData = self.mainControl.getWikiData()
+        unifNames = wikiData.getDataBlockUnifNamesStartingWith(u"savedexport/")
+
+        result = []
+        for un in unifNames:
+            name = un[12:]
+            content = wikiData.retrieveDataBlock(un)
+            xmlDoc = minidom.parseString(content)
+            xmlNode = xmlDoc.firstChild
+            etype = Serialization.serFromXmlUnicode(xmlNode, u"exportTypeName")
+            if etype not in self.supportedExportTypes:
+                # Export type of saved export not supported
+                continue
+
+            result.append((name, xmlNode))
+
+        self.mainControl.getCollator().sortByFirst(result)
+
+        self.savedExports = result
+
+        self.ctrls.lbSavedExports.Clear()
+        for exportName, xmlNode in self.savedExports:
+            self.ctrls.lbSavedExports.Append(uniToGui(exportName))
+
+
+
+    def OnSaveExport(self, evt):
+        defValue = u""
+        
+        sels = self.ctrls.lbSavedExports.GetSelections()
+        
+        if len(sels) == 1:
+            defValue = self.savedExports[sels[0]][0]
+
+        while True:
+            title = guiToUni(wx.GetTextFromUser(_(u"Title:"),
+                    _(u"Choose export title"), defValue, self))
+            if title == u"":
+                return  # Cancel
+                
+            if (u"savedexport/" + title) in self.mainControl.getWikiData()\
+                    .getDataBlockUnifNamesStartingWith(
+                    u"savedexport/" + title):
+
+                answer = wx.MessageBox(
+                        _(u"Do you want to overwrite existing export '%s'?") %
+                        title, _(u"Overwrite export"),
+                        wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
+                if answer == wx.NO:
+                    continue
+
+            xmlDoc = minidom.getDOMImplementation().createDocument(None, None, None)
+            xmlHead = xmlDoc.createElement(u"savedExport")
+
+            xmlNode = self._buildSavedExport(xmlHead, xmlDoc)
+            if xmlNode is None:
+                return
+            
+            xmlDoc.appendChild(xmlNode)
+            content = xmlDoc.toxml("utf-8")
+            xmlDoc.unlink()
+            self.mainControl.getWikiData().storeDataBlock(
+                    u"savedexport/" + title, content,
+                    storeHint=DATABLOCK_STOREHINT_INTERN)
+            
+            self._refreshSavedExportsList()
+            return
+
+
+    def OnLoadExport(self, evt):
+        self._loadExport()
+        
+        
+    def OnLoadAndRunExport(self, evt):
+        if self._loadExport():
+            self._runExporter()
+
+#     def OnLoadAndRunSearch(self, evt):
+#         if self._loadSearch():
+#             try:
+#                 self._refreshSavedExportsList()
+#             except re.error, e:
+#                 self.displayErrorMessage(_(u'Error in regular expression'),
+#                         _(unicode(e)))
+
+
+    def OnDeleteExports(self, evt):
+        sels = self.ctrls.lbSavedExports.GetSelections()
+        
+        if len(sels) == 0:
+            return
+
+        answer = wx.MessageBox(
+                _(u"Do you want to delete %i export(s)?") % len(sels),
+                _(u"Delete export"),
+                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self)
+        if answer == wx.NO:
+            return
+
+        for s in sels:
+            self.mainControl.getWikiData().deleteDataBlock(
+                    u"savedexport/" + self.savedExports[s][0])
+        self._refreshSavedExportsList()
+
+
+    def _loadExport(self):
+        sels = self.ctrls.lbSavedExports.GetSelections()
+        
+        if len(sels) != 1:
+            return False
+
+        xmlNode = self.savedExports[sels[0]][1]
+        return self._showExportProfile(xmlNode)
+
+
+    def _buildSavedExport(self, xmlHead, xmlDoc):
+        """
+        Builds the saved export as XML code from GUI settings.
+        Returns the xmlHead (aka XML "savedExport") node or None in
+        case of an error.
+        """
+
+        ob, etype, desc, panel = \
+                self.exporterList[self.ctrls.chExportTo.GetSelection()][:4]
+        
+        addOptVer = ob.getAddOptVersion()
+        
+        if addOptVer == -1:
+            # An addOpt version of -1 means that the addOpt value does not
+            # have a defined format and therefore can't be stored
+            self.mainControl.displayErrorMessage(
+                    _(u"Selected export type does not support saving"))
+            return None   # TODO Error message!!
+
+        Serialization.serToXmlUnicode(xmlHead, xmlDoc, u"exportTypeName", etype)
+
+        Serialization.serToXmlUnicode(xmlHead, xmlDoc, u"destinationPath",
+                guiToUni(self.ctrls.tfDestination.GetValue()))
+
+        pageSetXml = xmlDoc.createElement(u"pageSet")
+        xmlHead.appendChild(pageSetXml)
+
+        sarOp = self._getEffectiveListWikiPagesOperation()
+        if sarOp is None:
+            return None
+
+#         if isinstance(lpOp, SearchReplaceOperation):
+#             pageSetXml.setAttribute(u"type", u"searchReplaceOperation")
+#         elif isinstance(lpOp, ListWikiPagesOperation):
+#             pageSetXml.setAttribute(u"type", u"listWikiPagesOperation")
+
+        sarOp.serializeToXml(pageSetXml, xmlDoc)
+
+        addOptXml = xmlDoc.createElement(u"additionalOptions")
+        xmlHead.appendChild(addOptXml)
+
+        addOptXml.setAttribute(u"version", unicode(addOptVer))
+        addOptXml.setAttribute(u"type", u"simpleTuple")
+
+        Serialization.convertTupleToXml(addOptXml, xmlDoc, ob.getAddOpt(panel))
+
+        return xmlHead
+
+
+
+    def _showExportProfile(self, xmlNode):
+        try:
+            etypeProfile = Serialization.serFromXmlUnicode(xmlNode,
+                    u"exportTypeName")
+            
+            for sel, (ob, etype, desc, panel) in enumerate(self.exporterList):
+                if etype == etypeProfile:
+                    break
+            else:
+                self.mainControl.displayErrorMessage(
+                        _(u"Export type '%s' of saved export is not supported") %
+                        etypeProfile)
+                return False
+
+            addOptXml = Serialization.findXmlElementFlat(xmlNode,
+                    u"additionalOptions")
+    
+            addOptVersion = int(addOptXml.getAttribute(u"version"))
+    
+            if addOptVersion != ob.getAddOptVersion():
+                self.mainControl.displayErrorMessage(
+                        _(u"Saved export uses different version for additional "
+                        "options than current export\nExport type: '%s'\n"
+                        "Saved export version: %i\nCurrent export version: %i") %
+                        (etypeProfile, addOptVersion, ob.getAddOptVersion()))
+                return False 
+    
+            if addOptXml.getAttribute(u"type") != u"simpleTuple":
+                self.mainControl.displayErrorMessage(
+                        _(u"Type of additional option storage ('%s') is unknown") %
+                        addOptXml.getAttribute(u"type"))
+                return False
+    
+            pageSetXml = Serialization.findXmlElementFlat(xmlNode, u"pageSet")
+            
+            sarOp = SearchReplaceOperation()
+    
+    #         if pageSetXml.getAttribute(u"type") == u"searchReplaceOperation":
+    #             lpOp = SearchReplaceOperation()
+    #         elif pageSetXml.getAttribute(u"type") == u"listWikiPagesOperation":
+    #             lpOp = ListWikiPagesOperation()
+    #         else:
+    #             return # TODO Error message!
+            
+            sarOp.serializeFromXml(pageSetXml)
+    
+            addOpt = Serialization.convertTupleFromXml(addOptXml)
+    
+            self.listPagesOperation = sarOp
+            self.ctrls.chSelectedSet.SetSelection(3)
+            self.ctrls.chExportTo.SetSelection(sel)
+            ob.setAddOpt(addOpt, panel)
+    
+            self.ctrls.tfDestination.SetValue(uniToGui(
+                    Serialization.serFromXmlUnicode(xmlNode, u"destinationPath")))
+                    
+            self._refreshForEtype()
+            
+            return True
+        except SerializationException, e:
+            self.mainControl.displayErrorMessage(_(u"Error during retrieving "
+                    "saved export: ") + e.message)
+
+
 ExportDialog.runModal = staticmethod(runDialogModalFactory(ExportDialog))
+
+
 
 
 
@@ -1521,8 +1793,11 @@ What makes wikidPad different from other notepad applications is the ease with w
     
     <hr />
     
-    <p />Your configuration directory is: %s
-    <p />Sqlite version: %s
+    <p>Your configuration directory is: <b>%s</b><br />
+    Sqlite version: <b>%s</b><br />
+    wxPython version: <b>%s</b>
+    </p>
+    
 </body>
 </html>
 ''')
@@ -1537,7 +1812,8 @@ What makes wikidPad different from other notepad applications is the ease with w
             sqliteVer = sqlite.getLibVersion()
 
         text = _(self.TEXT_TEMPLATE) % (VERSION_STRING,
-                escapeHtml(pWiki.globalConfigDir), escapeHtml(sqliteVer))
+                escapeHtml(pWiki.globalConfigDir), escapeHtml(sqliteVer),
+                escapeHtml(wx.__version__))
 
         html = wx.html.HtmlWindow(self, -1)
         html.SetPage(text)

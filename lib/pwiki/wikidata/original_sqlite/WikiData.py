@@ -1842,9 +1842,9 @@ class WikiData:
                 if datablock is not None:
                     # It is in internal data blocks
                     self.connWrap.execSql("update datablocks set data = ? where "
-                            "unifiedname = ?", (sqlite.Binary(data), unifName))
+                            "unifiedname = ?", (sqlite.Binary(newdata), unifName))
                     return
-                    
+
                 # It may be in external data blocks
                 self.deleteDataBlock(unifName)
                 

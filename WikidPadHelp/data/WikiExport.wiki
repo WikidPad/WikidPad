@@ -29,6 +29,23 @@ Here you can set where the exported file(s) should be stored. If file or directo
 When exporting as HTML all files in the file storage which are referenced by a relative URL (URL beginning with "rel://") in the exported pages are copied to a "files" directory in the destination directory. This does also apply to files in subdirectories of the "files" directory.
 
 
+*Saved exports*
+You can store your current export settings and retrieve them later to do the same export job repeatedly.
+
+*Save Export*
+Asks for a name for the current settings and saves it.
+
+*Delete Export(s)*
+Deletes one or more selected export(s) after confirmation.
+
+*Load Export*
+Loads export which is currently selected in list. Your previous settings made in the dialog are overwritten.
+
+*Load and Run Export*
+Same as first hitting "Load Export" then "OK" to start the export. Double-clicking on a saved export in the list does the same.
+
+
+
 +++ Additional options for HTML exports
 For the HTML exports you can choose if you want to:
     * export URLs to images as \<img> tags or as normal links
@@ -60,11 +77,12 @@ Store also saved searches in the file. Only available for format version 1 and l
 
 
 
+
 +++ Continuous export
 
 In menu "Extra" you can also choose "Continuous Export" which allows to start an export operation which is repeated automatically each time a page previously designated for export is modified.
 
-The dialog for continuous export is the same as for normal export, but some export types are missing as currently only the HTML export types support continuous export.
+The dialog for continuous export is the same as for normal export, but some export types are missing as currently only the HTML export types support continuous export. Also some of the saved exports are hidden if they refer to exports not supported by continuous export.
 
 After you made your choices what and where to export and pressed "OK", WikidPad first makes an initial normal export. After that every change to a page is reflected in the export *after the page was saved to database* (manually or by auto-save).
 

@@ -31,10 +31,19 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
+
+------------------------------------------------------------
+Some DLLs of the Windows binary installer are copyrighted by Microsoft:
+
+msvcm90.dll
+msvcp90.dll
+msvcr90.dll
+gdiplus.dll
+
+
 ------------------------------------------------------------
 
 Components used by this software:
-
 
 * Python
 Copyright (c) 2001-2005 Python Software Foundation.

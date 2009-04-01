@@ -1751,7 +1751,7 @@ class WikiData:
                 if datablock is not None:
                     # It is in internal data blocks
                     self.connWrap.execSql("update datablocks set data = ? where "
-                            "unifiedname = ?", (data, unifName))
+                            "unifiedname = ?", (newdata, unifName))
                     return
                     
                 # It may be in external data blocks

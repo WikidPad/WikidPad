@@ -41,6 +41,7 @@ Source: Microsoft.VC90.CRT.manifest; DestDir: {app}
 Source: winBinAdditions\msvcp90.dll; DestDir: {app}
 Source: winBinAdditions\msvcr90.dll; DestDir: {app}
 Source: winBinAdditions\msvcm90.dll; DestDir: {app}
+Source: winBinAdditions\gdiplus.dll; DestDir: {app}
 [Dirs]
 Name: {app}\extensions; Components: Program_files
 Name: {app}\icons; Components: Program_files
@@ -53,17 +54,17 @@ Name: Program_files; Description: Main program files; Flags: fixed; Types: custo
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 2.0beta01
+AppVerName=WikidPad 2.0beta02
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=2.0.101.4
-VersionInfoTextVersion=WikidPad 2.0beta01
+VersionInfoVersion=2.0.102.0
+VersionInfoTextVersion=WikidPad 2.0beta02
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-2.0beta01
+OutputBaseFilename=WikidPad-2.0beta02
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2009 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true

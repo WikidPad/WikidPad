@@ -31,7 +31,6 @@ import DocPages
 
 
 
-
 class AbstractExporter(object):
     def __init__(self, mainControl):
         self.wikiDocument = None
@@ -86,17 +85,18 @@ class AbstractExporter(object):
     def getAddOpt(self, addoptpanel):
         """
         Reads additional options from panel addoptpanel.
+        If addoptpanel is None, return default values
         If getAddOptVersion() > -1, the return value must be a sequence
         of simple string, unicode and/or numeric objects. Otherwise, any object
         can be returned (normally the addoptpanel itself).
-        Here, it returns a tuple with following items:
-            * bool (as integer) if pictures should be exported as links
-            * integer to control creation of table of contents
-                (0: No; 1: as tree; 2: as list)
-            * unistring: TOC title
-            * unistring: name of export subdir for volatile files
-                (= automatically generated files, e.g. formula images
-                from MimeTeX).
+        """
+        raise NotImplementedError
+    
+
+    def setAddOpt(self, addOpt, addoptpanel):
+        """
+        Shows content of addOpt in the addoptpanel (must not be None).
+        This function is only called if getAddOptVersion() != -1.
         """
         raise NotImplementedError
 
@@ -144,6 +144,14 @@ class AbstractExporter(object):
         raise NotImplementedError
 
 
+#     def supportsXmlOptions(self):
+#         """
+#         Returns True if additional options can be returned and processed
+#         as XML.
+#         """
+#         return True
+#     
+#     def getXmlRepresentation
 
 
 def removeBracketsToCompFilename(fn):
@@ -398,6 +406,25 @@ class HtmlExporter(AbstractExporter):
 
             return (picsAsLinks, tableOfContents, tocTitle, u"volatile")
 
+
+    def setAddOpt(self, addOpt, addoptpanel):
+        """
+        Shows content of addOpt in the addoptpanel (must not be None).
+        This function is only called if getAddOptVersion() != -1.
+        """
+        picsAsLinks, tableOfContents, tocTitle, volatileDir = \
+                addOpt
+
+        # volatileDir is currently ignored
+
+        ctrls = XrcControls(addoptpanel)
+
+        ctrls.cbPicsAsLinks.SetValue(picsAsLinks != 0)
+        ctrls.chTableOfContents.SetSelection(tableOfContents)
+        ctrls.tfHtmlTocTitle.SetValue(tocTitle)
+
+        
+        
 
     def export(self, wikiDocument, wordList, exportType, exportDest,
             compatFilenames, addOpt, progressHandler, tempFileSetReset=True):
@@ -2001,7 +2028,7 @@ class TextExporter(AbstractExporter):
             textPanel = None
 
         return (
-            ("raw_files", 'Set of *.wiki files', textPanel),
+            (u"raw_files", 'Set of *.wiki files', textPanel),
             )
 
 
@@ -2058,7 +2085,15 @@ class TextExporter(AbstractExporter):
     
             return (ctrls.chTextEncoding.GetSelection(),)
 
-            
+
+    def setAddOpt(self, addOpt, addoptpanel):
+        """
+        Shows content of addOpt in the addoptpanel (must not be None).
+        This function is only called if getAddOptVersion() != -1.
+        """
+        ctrls = XrcControls(addoptpanel)
+        ctrls.chTextEncoding.SetSelection(addOpt[0])
+
 
     def export(self, wikiDocument, wordList, exportType, exportDest,
             compatFilenames, addopt, progressHandler):
@@ -2230,6 +2265,22 @@ class MultiPageTextExporter(AbstractExporter):
             writeSavedSearches = boolToInt(ctrls.cbWriteSavedSearches.GetValue())
 
         return (fileVersion, writeWikiFuncPages, writeSavedSearches)
+
+
+    def setAddOpt(self, addOpt, addoptpanel):
+        """
+        Shows content of addOpt in the addoptpanel (must not be None).
+        This function is only called if getAddOptVersion() != -1.
+        """
+        fileVersion, writeWikiFuncPages, writeSavedSearches = \
+                addOpt
+
+        ctrls = addoptpanel.ctrls   # XrcControls(addoptpanel)?
+
+        ctrls.chFileVersion.SetSelection(fileVersion)
+        ctrls.cbWriteWikiFuncPages.SetValue(writeWikiFuncPages != 0)
+        ctrls.cbWriteSavedSearches.SetValue(writeSavedSearches != 0)
+
 
 
     # TODO Check also wiki func pages !!!
@@ -2408,3 +2459,4 @@ def describeExporters(mainControl):
     return (HtmlExporter(mainControl), TextExporter(mainControl),
             MultiPageTextExporter(mainControl))
     
+

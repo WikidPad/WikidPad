@@ -10,10 +10,6 @@ if not hasattr(sys, 'frozen'):
 from Consts import CONFIG_FILENAME, CONFIG_GLOBALS_DIRNAME
 
 
-# # Switch off warnings about my special import management
-# warnings.simplefilter('ignore', RuntimeWarning)
-
-
 from Consts import VERSION_STRING, VERSION_TUPLE
 
 # Dummies for localization

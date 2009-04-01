@@ -512,6 +512,7 @@ GLOBALDEFAULTS = {
     ("main", "docStructure_depth"): "15",  # Maximum number of heading which is shown in document structure window
             # (between 1 and 15)
     ("main", "docStructure_autohide"): "False", # Automatically hide doc structure after something was activated in it.
+    ("main", "docStructure_autofollow"): "True", # Selection in document structure follows text cursor position
 
     ("main", "toolbar_show"): "True",  # Show the toolbar?
     ("main", "zoom"): '0',  # Zoom factor for editor

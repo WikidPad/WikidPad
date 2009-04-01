@@ -13,7 +13,7 @@ from wx import GetApp
 import Consts
 from pwiki.WikiExceptions import *
 
-from pwiki.Utilities import TimeoutRLock, SingleThreadExecutor
+from pwiki.Utilities import TimeoutRLock, SingleThreadExecutor, DUMBTHREADSTOP
 
 from pwiki.MiscEvent import MiscEventSourceMixin
 
@@ -503,17 +503,17 @@ class WikiDataManager(MiscEventSourceMixin):
 #                 self.updateExecutor.executeAsync(1, self._runDatabaseUpdate,
 #                         word)
 
-    def _runDatabaseUpdate(self, word, step):
+    def _runDatabaseUpdate(self, word, step, threadstop=DUMBTHREADSTOP):
         time.sleep(0.1)
         try:
             page = self.getWikiPage(word)
 
             if step == Consts.WIKIWORDMETADATA_STATE_DIRTY and \
-                    page.runDatabaseUpdate(step=step):
-                self.updateExecutor.executeAsync(1, self._runDatabaseUpdate,
+                    page.runDatabaseUpdate(step=step, threadstop=threadstop):
+                self.updateExecutor.executeAsyncWithThreadStop(1, self._runDatabaseUpdate,
                         word, Consts.WIKIWORDMETADATA_STATE_PROPSPROCESSED)
             else:
-                page.runDatabaseUpdate(step=step)
+                page.runDatabaseUpdate(step=step, threadstop=threadstop)
 
         except WikiWordNotFoundException:
             return
@@ -742,7 +742,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
 
     def pushUpdatePage(self, page):
-        self.updateExecutor.executeAsync(0, page.runDatabaseUpdate)
+        self.updateExecutor.executeAsyncWithThreadStop(0, page.runDatabaseUpdate)
 #         with self.pageUpdateDequeCondition:
 #             self.pageUpdateDeque.appendleft(page)
 #             self.pageUpdateDequeCondition.notify()
@@ -783,11 +783,11 @@ class WikiDataManager(MiscEventSourceMixin):
 
             with self.updateExecutor.getDequeCondition():
                 for word in words0:
-                    self.updateExecutor.executeAsync(1, self._runDatabaseUpdate,
+                    self.updateExecutor.executeAsyncWithThreadStop(1, self._runDatabaseUpdate,
                             word, Consts.WIKIWORDMETADATA_STATE_DIRTY)
     
                 for word in words1:
-                    self.updateExecutor.executeAsync(1, self._runDatabaseUpdate,
+                    self.updateExecutor.executeAsyncWithThreadStop(1, self._runDatabaseUpdate,
                             word, Consts.WIKIWORDMETADATA_STATE_PROPSPROCESSED)
 
     def isReadOnlyEffect(self):
@@ -819,7 +819,9 @@ class WikiDataManager(MiscEventSourceMixin):
     def isDefinedWikiLink(self, wikiWord):
         return self.wikiData.isDefinedWikiLink(wikiWord)
 
-        
+    # For plugin compatibility
+    isDefinedWikiWord = isDefinedWikiLink
+
     def isCreatableWikiWord(self, wikiWord):
         """
         Returns True if wikiWord can be created in the database. Does not
@@ -1531,6 +1533,10 @@ class WikiDataManager(MiscEventSourceMixin):
         elif miscevt.getSource() is GetApp():
             if miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()
+            elif miscevt.has_key("pause background threads"):
+                self.updateExecutor.pause()
+            elif miscevt.has_key("resume background threads"):
+                self.updateExecutor.start()
         elif isinstance(miscevt.getSource(), DocPage):
             # These messages come from (classes derived from) DocPage,
             # they are mainly relayed

@@ -1458,7 +1458,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #         nodeStyle = nodeObj.getNodePresentation()
 
         self.setNodePresentation(parentnodeid, nodeStyle)
-        
+
         if not nodeStyle.hasChildren and self.expandedNodePathes is not None:
             self.expandedNodePathes.discardStartsWith(
                     tuple(nodeObj.getNodePath()))
@@ -1685,7 +1685,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     page.getWikiLanguageName())
 
             page.appendLiveText(u"\n" +
-                    langHelper.createStableLinksFromWikiWords(toWikiWord))
+                    langHelper.createStableLinksFromWikiWords((toWikiWord,)))
 
 
     def OnPrependWikiWord(self, evt):
@@ -1698,9 +1698,10 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             
             langHelper = wx.GetApp().createWikiLanguageHelper(
                     page.getWikiLanguageName())
-
+                    
+            text = page.getLiveText()
             page.replaceLiveText(
-                    langHelper.createStableLinksFromWikiWords(toWikiWord) +
+                    langHelper.createStableLinksFromWikiWords((toWikiWord,)) +
                     u"\n" + text)
 
 

@@ -1,7 +1,7 @@
 # import hotshot
 # _prof = hotshot.Profile("hotshot.prf")
 
-import os, traceback, codecs
+import os, traceback, codecs, bisect
 import threading
 from time import sleep
 
@@ -27,9 +27,11 @@ class DocStructureCtrl(EnhancedListControl):
 
         self.updatingThreadHolder = Utilities.ThreadHolder()
         self.tocList = [] # List of tuples (char. start in text, headLevel, heading text)
+        self.tocListStarts = []   # List of the char. start items of self.tocList
         self.mainControl.getMiscEvent().addListener(self)
         self.sizeVisible = True   # False if this window has a size
                 # that it can't be read (one dim. less than 5 pixels)
+        self.ignoreOnChange = False
 
         self.docPagePresenterSink = wxKeyFunctionSink((
                 ("loaded current doc page", self.onUpdateNeeded),
@@ -41,10 +43,15 @@ class DocStructureCtrl(EnhancedListControl):
                 ("options changed", self.onUpdateNeeded),
         ), wx.GetApp().getMiscEvent(), self)
 
+        self.__sinkMainFrame = wxKeyFunctionSink((
+                ("constructed main window", self.onConstructedMainWindow),
+        ), self.mainControl.getMiscEvent(), self)
 
         currPres = self.mainControl.getCurrentDocPagePresenter()
         if currPres is not None:
             self.docPagePresenterSink.setEventSource(currPres.getMiscEvent())
+        
+        self.lastSelection = (-1, -1)
 
         self.updateList()
 
@@ -104,7 +111,55 @@ class DocStructureCtrl(EnhancedListControl):
         if oldVisible != self.isVisibleEffect():
             self.handleVisibilityChange()
 
+
+    def onConstructedMainWindow(self, evt):
+        """
+        Now we can register idle handler.
+        """
+        wx.EVT_IDLE(self, self.OnIdle)
+
+
+    def OnIdle(self, evt):
+        self.checkSelectionChanged()
         
+        
+    def checkSelectionChanged(self, callAlways=False):
+        if not self.isVisibleEffect():
+            return
+
+        presenter = self.mainControl.getCurrentDocPagePresenter()
+        if presenter is None:
+            return
+
+        subCtrl = presenter.getSubControl("textedit")
+        if subCtrl is None:
+            return
+        
+        sel = subCtrl.GetSelectionCharPos()
+        
+        if sel != self.lastSelection or callAlways:
+            self.lastSelection = sel
+            self.onSelectionChanged(sel)
+
+
+    def onSelectionChanged(self, sel):
+        """
+        This is not directly supported by Scintilla, but called by OnIdle().
+        """
+        if not self.mainControl.getConfig().getboolean("main",
+                "docStructure_autofollow"):
+            return
+
+        idx = bisect.bisect_right(self.tocListStarts, sel[0]) - 1
+
+        self.ignoreOnChange = True
+        try:
+            self.SelectSingle(idx, scrollVisible=True)
+        finally:    
+            self.ignoreOnChange = False
+
+
+
     def miscEventHappened(self, miscevt):
         """
         Handle misc events
@@ -125,9 +180,16 @@ class DocStructureCtrl(EnhancedListControl):
 
 
     def updateList(self):
+        if self.mainControl.getConfig().getboolean("main",
+                "docStructure_autofollow"):
+            self.tocListStarts = []
+            self.SelectSingle(-1)
+
         presenter = self.mainControl.getCurrentDocPagePresenter()
+
         if presenter is None:
             self.tocList = []
+            self.tocListStarts = []
             self.applyTocList()
             return
 
@@ -155,6 +217,7 @@ class DocStructureCtrl(EnhancedListControl):
         try:
             if docPage is None:
                 self.tocList = []
+                self.tocListStarts = []
                 Utilities.callInMainThread(self.applyTocList)
                 return
 
@@ -180,6 +243,7 @@ class DocStructureCtrl(EnhancedListControl):
             threadstop.testRunning()
 
             self.tocList = result
+            self.tocListStarts = [r[0] for r in result]
 
 #             if threadstop is DUMBTHREADSTOP:
 #                 self.applyTocList()
@@ -200,6 +264,7 @@ class DocStructureCtrl(EnhancedListControl):
             for start, headLevel, text in self.tocList:
                 self.InsertStringItem(self.GetItemCount(), text)
             self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+            self.checkSelectionChanged(callAlways=True)
         finally:
             self.Thaw()
 
@@ -219,8 +284,8 @@ class DocStructureCtrl(EnhancedListControl):
     def displayInSubcontrol(self, start):   # , focusToSubctrl
         """
         Display title in subcontrol of current presenter which
-        starts at byte position start in page text.
-        
+        starts at char position  start  in page text.
+
         focusToSubctrl -- True iff subcontrol should become focused after
                 displaying is done
         """
@@ -246,7 +311,10 @@ class DocStructureCtrl(EnhancedListControl):
             
 
     def OnItemSelected(self, evt):
-        start = self.tocList[evt.GetIndex()][0]
+        if self.ignoreOnChange:
+            return
+        
+        start = self.tocListStarts[evt.GetIndex()]
         self.displayInSubcontrol(start)
 
 

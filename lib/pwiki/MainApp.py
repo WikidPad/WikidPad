@@ -459,9 +459,16 @@ class App(wx.App, MiscEventSourceMixin):
         """
         pass
         
-    def getDbExecutor(self):
-        return self.dbExecutor
+#     def getDbExecutor(self):
+#         return self.dbExecutor
+        
+    def pauseBackgroundThreads(self):
+        self.fireMiscEventKeys(("pause background threads",))
+#        self.dbExecutor.pause()
 
+    def resumeBackgroundThreads(self):
+#        self.dbExecutor.start()
+        self.fireMiscEventKeys(("resume background threads",))
 
     def onGlobalConfigurationChanged(self, miscevt):
         self._rereadGlobalConfig()

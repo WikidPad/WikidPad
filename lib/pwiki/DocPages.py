@@ -9,8 +9,8 @@ from MiscEvent import MiscEventSourceMixin
 import Consts
 from WikiExceptions import *
 
-from StringOps import strToBool, fileContentToUnicode, BOM_UTF8, utf8Enc, \
-        utf8Dec, pathEnc, loadEntireTxtFile, writeEntireFile
+from StringOps import strToBool, fileContentToUnicode, lineendToInternal, \
+        loadEntireTxtFile, writeEntireFile
 
 from Utilities import DUMBTHREADSTOP, FunctionThreadStop, TimeoutRLock, \
         callInMainThread, callInMainThreadAsync
@@ -29,16 +29,6 @@ class DocPage(object, MiscEventSourceMixin):
     Abstract common base class for WikiPage and FunctionalPage
     """
     
-#     STATE_DEAD = 0xFFFF  # Page is dead (can only happen just before wiki document
-#             # is closed)
-#     STATE_INVALID = 1   # After page got new name or was deleted.
-# 
-#     # The following two can be ORed together
-#     STATE_TEXTCACHE_MATCHES_DB = 2  # text cache is equal to database
-#     STATE_TEXTCACHE_MATCHES_EDITOR = 4  # text cache is equal to editor(s)'
-#             # content (always true for current implementation). This is also
-#             # true if no editor is assigned at all.
-
     def __init__(self, wikiDocument):
         MiscEventSourceMixin.__init__(self)
         
@@ -1336,49 +1326,52 @@ class WikiPage(DataCarryingPage):
 
 
 
-    def runDatabaseUpdate(self, step=-1):
+    def runDatabaseUpdate(self, step=-1, threadstop=DUMBTHREADSTOP):
         with self.textOperationLock:
             if not self.isDefined():
-                return
+                return False
             if self.isReadOnlyEffect():
-                return
+                return False
 
             liveTextPlaceHold = self.liveTextPlaceHold
             formatDetails = self.getFormatDetails()
 
         try:
-            pageAst = self.getLivePageAst(dieOnChange=True)
-        except NotCurrentThreadException:
-            return
+            pageAst = self.getLivePageAst(dieOnChange=True,
+                    threadstop=threadstop)
 
-        # Check within lock if data is current yet
-        with self.textOperationLock:
-            if not liveTextPlaceHold is self.liveTextPlaceHold:
-                return
-
-
-        if step == -1:
-            self._refreshMetaData(pageAst, formatDetails)
-
+            # Check within lock if data is current yet
             with self.textOperationLock:
                 if not liveTextPlaceHold is self.liveTextPlaceHold:
-                    return
-                if not formatDetails.isEquivTo(self.getFormatDetails()):
-                    self.initiateUpdate()
-                    return
-        else:
-            metaState = self.getWikiData().getMetaDataState(self.wikiWord)
+                    return False
+    
+    
+            if step == -1:
+                self._refreshMetaData(pageAst, formatDetails, threadstop=threadstop)
+    
+                with self.textOperationLock:
+                    if not liveTextPlaceHold is self.liveTextPlaceHold:
+                        return False
+                    if not formatDetails.isEquivTo(self.getFormatDetails()):
+                        self.initiateUpdate()
+                        return False
+            else:
+                metaState = self.getWikiData().getMetaDataState(self.wikiWord)
+    
+                if metaState == Consts.WIKIWORDMETADATA_STATE_UPTODATE or \
+                        metaState != step:
+                    return False
+    
+                if step == Consts.WIKIWORDMETADATA_STATE_PROPSPROCESSED:
+                    return self.refreshMainDbCacheFromPageAst(pageAst,
+                            threadstop=threadstop)
+    
+                else: # step == Consts.WIKIWORDMETADATA_STATE_DIRTY
+                    return self.refreshPropertiesFromPageAst(pageAst,
+                            threadstop=threadstop)
 
-            if metaState == Consts.WIKIWORDMETADATA_STATE_UPTODATE or \
-                    metaState != step:
-                return False
-
-            if step == Consts.WIKIWORDMETADATA_STATE_PROPSPROCESSED:
-                return self.refreshMainDbCacheFromPageAst(pageAst)
-
-            else: # step == Consts.WIKIWORDMETADATA_STATE_DIRTY
-                return self.refreshPropertiesFromPageAst(pageAst)
-
+        except NotCurrentThreadException:
+            return False
 
 
 
@@ -1777,7 +1770,7 @@ class FunctionalPage(DataCarryingPage):
                 "[%s].wiki" % subtag)
         try:
             tbContent = loadEntireTxtFile(tbLoc)
-            return fileContentToUnicode(tbContent)
+            return fileContentToUnicode(lineendToInternal(tbContent))
         except:
             return u""
 

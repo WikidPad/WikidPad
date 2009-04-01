@@ -1,6 +1,23 @@
 ﻿++ Change Log
 
 
+Apr. 01, 2009 (2.0beta02)
+
+    * Option to let selection in doc. structure automatically follow
+      text cursor position in editor.
+      See [OptionsDialog#*Structure window selection auto-follow*]
+    * Saved exports similar to saved searches.
+      See [WikiExport#*Saved exports*]
+    * Faster stop when closing WikidPad
+    * Wiki page files in UTF-16 encoding (with appropriate BOM) can now
+      be read by WikidPad
+
+    * Bug fixed: Wiki-wide search couldn't be opened if a functional page
+      was in current editor
+    * Bug fixed: Dialog to append/prepend wikiword failed
+
+
+
 Mar. 02, 2009 (2.0beta01)
 
     * Option to set tab width. See [OptionsDialog#*Tab width*]

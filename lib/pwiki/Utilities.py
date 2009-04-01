@@ -18,17 +18,33 @@ class Dummy(object):
 
 class BasicThreadStop(object):
     """
-    Used for synchronous operations where no thread stop condition is necessary
+    An object of this or a derived class are handed over to long running
+    operations which might run in a separate thread and maybe must be stopped
+    for some reason (e.g. a parsing operation should be stopped if the
+    parsed text was changed and the operation on the old text therefore becomes
+    useless).
+    During the operation the function isRunning() or testRunning() should be
+    called from time to time to check if op. should be stopped.
+
+    This class is used for synchronous operations where no thread stop
+    condition is necessary.
     """
     __slots__ = ()
-    
+
     def isRunning(self):
+        """
+        Returns True if operation should continue.
+        """
         return True
-        
+
     def testRunning(self):
+        """
+        Throws a NotCurrentThreadException if op. should stop, does nothing
+        otherwise.
+        """
         pass
 
-        
+
 DUMBTHREADSTOP = BasicThreadStop()
 
 
@@ -110,7 +126,7 @@ class ExecutionResult(object):
 
 
 
-class SingleThreadExecutor(object):
+class SingleThreadExecutor(BasicThreadStop):
     def __init__(self, dequeCount=1, daemon=False):
         self.dequeCondition = threading.Condition()
         self.daemon = daemon
@@ -118,13 +134,22 @@ class SingleThreadExecutor(object):
 
         self.deques = None
         self.thread = None
+        self.paused = False
+        self.currentThreadStop = None
 
+    def isRunning(self):
+        return self.deques is not None
+        
+    def testRunning(self):
+        if self.deques is None:
+            raise NotCurrentThreadException()
 
     def start(self):
-        if self.thread is not None and self.thread.isAlive():
-            return
-
         with self.dequeCondition:
+            self.paused = False
+            if self.thread is not None and self.thread.isAlive():
+                return
+
             if self.deques is None:
                 self.deques = tuple(collections.deque()
                         for i in range(self.dequeCount))
@@ -198,7 +223,7 @@ class SingleThreadExecutor(object):
                     # Executor terminated
                     return
 
-                fct, args, kwargs, event, retObj = job
+                fct, args, kwargs, event, retObj, tstop = job
             try:
                 if fct is SingleThreadExecutor.ENDOBJECT:
                     # We should stop here, but the problem is that other
@@ -206,15 +231,23 @@ class SingleThreadExecutor(object):
                     # and must be processed before thread can end
                     with self.dequeCondition:
                         if self.getJobCount() == 0:
-                            return
+                           return
 
                         self.deques[-1].appendleft(
                                 (SingleThreadExecutor.ENDOBJECT, None, None,
                                 None, None))
                         continue
-
+                elif self.paused:
+                    # Operation should pause, this means to kill the thread, but
+                    # to keep the deques as they are.
+                    # To resume, start() is called
+                    with self.dequeCondition:
+                        return
 
 #                 tracer.runctx('retObj.result = fct(*args, **kwargs)', globals(), locals())
+                if tstop:
+                    kwargs["threadstop"] = self
+
                 retObj.setResult(fct(*args, **kwargs))
 
             except Exception, e:
@@ -232,12 +265,12 @@ class SingleThreadExecutor(object):
         if self.deques is None:
             raise InternalError("Called SingleThreadExecutor.execute() after "
                     "queue was killed")
-        
+
         event = threading.Event()
         retObj = ExecutionResult()
 
         with self.dequeCondition:
-            self.deques[idx].appendleft((fct, args, kwargs, event, retObj))
+            self.deques[idx].appendleft((fct, args, kwargs, event, retObj, None))
             self.dequeCondition.notify()
 
         event.wait(120)
@@ -257,7 +290,20 @@ class SingleThreadExecutor(object):
             return retObj  # Error?
 
         with self.dequeCondition:
-            self.deques[idx].appendleft((fct, args, kwargs, None, retObj))
+            self.deques[idx].appendleft((fct, args, kwargs, None, retObj, False))
+            self.dequeCondition.notify()
+
+        return retObj
+
+
+    def executeAsyncWithThreadStop(self, idx, fct, *args, **kwargs):
+        retObj = ExecutionResult()
+
+        if self.deques is None:
+            return retObj  # Error?
+
+        with self.dequeCondition:
+            self.deques[idx].appendleft((fct, args, kwargs, None, retObj, True))
             self.dequeCondition.notify()
 
         return retObj
@@ -286,15 +332,24 @@ class SingleThreadExecutor(object):
                 self.deques = None
             else:
                 self.deques[-1].appendleft(
-                        (SingleThreadExecutor.ENDOBJECT, None, None, None, None))
+                        (SingleThreadExecutor.ENDOBJECT, None, None, None, None,
+                        False))
             self.dequeCondition.notify()
 
         self.thread.join(120)
-        
+
         if self.thread.isAlive():
             raise DeadBlockPreventionTimeOutError()
-        
+
         self.thread = None
+
+
+    def pause(self):
+        with self.dequeCondition:
+            if self.thread is None or not self.thread.isAlive():
+                return
+                
+            self.paused = True
 
 
 
@@ -479,10 +534,6 @@ class _TimeoutRLock(threading._Verbose):
 
     def _is_owned(self):
         return self.__owner is threading.currentThread()
-
-
-
-
 
 
 

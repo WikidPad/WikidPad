@@ -411,6 +411,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 ("options changed", self.onOptionsChanged),
         ), wx.GetApp().getMiscEvent(), self)
 
+        self.__sinkMainFrame = wxKeyFunctionSink((
+                ("constructed main window", self.onConstructedMainWindow),
+        ), self.presenter.getMainControl().getMiscEvent(), self)
+
 #         self.presenter.getMiscEvent().addListener(self.presenterListener)
 
 
@@ -437,7 +441,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         wx.EVT_SET_FOCUS(self, self.OnSetFocus)
 
-        wx.EVT_IDLE(self, self.OnIdle)
         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
         
         EVT_STYLE_DONE_COMMAND(self, self.OnStyleDone)
@@ -501,6 +504,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.unloadCurrentDocPage({})   # ?
         self.presenterListener.disconnect()
 #         self.presenter.getMiscEvent().removeListener(self.presenterListener)
+
+
+    def onConstructedMainWindow(self, evt):
+        """
+        Now we can register idle handler.
+        """
+        wx.EVT_IDLE(self, self.OnIdle)
 
 
     def Cut(self):

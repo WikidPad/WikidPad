@@ -247,7 +247,11 @@ def fileContentToUnicode(content):
     and return converted unicode
     """
     if content.startswith(BOM_UTF8):
-        return utf8Dec(content[len(BOM_UTF8):], "replace")[0]
+        return content[len(BOM_UTF8):].decode("utf-8", "replace")
+    elif content.startswith(BOM_UTF16_BE):
+        return content[len(BOM_UTF16_BE):].decode("utf-16-be", "replace")
+    elif content.startswith(BOM_UTF16_LE):
+        return content[len(BOM_UTF16_LE):].decode("utf-16-le", "replace")
     else:
         return mbcsDec(content, "replace")[0]
 

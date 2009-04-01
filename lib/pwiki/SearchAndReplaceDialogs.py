@@ -781,8 +781,9 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             self.ctrls.btnOk.SetId(wx.ID_CANCEL)
             self.ctrls.btnCancel.Show(False)
 
-        self.ctrls.tfPageListToAdd.SetValue(uniToGui(
-                self.mainControl.getCurrentWikiWord()))
+        currWord = self.mainControl.getCurrentWikiWord()
+        if currWord is not None:
+            self.ctrls.tfPageListToAdd.SetValue(uniToGui(currWord))
 
         self.ctrls.cbSearch.SetWindowStyle(self.ctrls.cbSearch.GetWindowStyle()
                 | wx.TE_PROCESS_ENTER)
@@ -1387,7 +1388,6 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         unifNames = self.mainControl.getWikiData()\
                 .getDataBlockUnifNamesStartingWith(u"savedsearch/")
 
-#         self.savedSearches = self.pWiki.getWikiData().getSavedSearchTitles()
         self.savedSearches = [name[12:] for name in unifNames]
         self.mainControl.getCollator().sort(self.savedSearches)
 
@@ -1756,7 +1756,8 @@ class SearchResultPresenterControl(wx.Panel):
                 label=_(u"As Full Search"))    # TODO Allow hotkey for button
         buttonSizer.Add(self.btnAsWwSearch, 0, wx.EXPAND)
 
-        buttonSizer.AddStretchSpacer()
+#         buttonSizer.AddStretchSpacer()
+        buttonSizer.Add((0, 0), 1)
 
         res = wx.xrc.XmlResource.Get()
         self.tabContextMenu = res.LoadMenu("MenuSearchResultTabPopup")
@@ -1864,8 +1865,8 @@ class FastSearchPopup(wx.Frame):
         self.btnAsTab = wx.Button(self, GUI_ID.CMD_SEARCH_AS_TAB,
                 label=_(u"As Tab"))    # TODO Allow hotkey for button
         buttonSizer.Add(self.btnAsTab, 0, wx.EXPAND)
-        buttonSizer.AddStretchSpacer()
-
+#         buttonSizer.AddStretchSpacer()
+        buttonSizer.Add((0, 0), 1)
 
         sizer.Add(buttonSizer, 0, wx.EXPAND)
 

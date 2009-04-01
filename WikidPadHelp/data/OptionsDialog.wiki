@@ -75,6 +75,9 @@ Up to (and including) which heading level should headings be displayed? "1" Mean
 *Auto-hide structure window*
 After double-clicking an entry in PageStructureWindow the window is collapsed (hidden) automatically if this is checked.
 
+*Structure window selection auto-follow*
+If checked and document structure window is visible, changing cursor position in editor can also change selection in structure window to always show the heading which is nearest above the current cursor position.
+
 
 ++++ Security options
 

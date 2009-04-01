@@ -1,12 +1,17 @@
 In my (Michael) working set this directory contains the files
 
-msvcm90.dll
-msvcp90.dll
-msvcr90.dll
+  msvcm90.dll
+  msvcp90.dll
+  msvcr90.dll
 
 from vcredist.exe, downloadable from
 
 http://www.microsoft.com/downloads/details.aspx?familyid=9B2DA534-3E03-4391-8A4D-074B9F2BC1BF&displaylang=en
+
+
+It also contains
+
+  gdiplus.dll
 
 
 The files are needed to build the Windows binary of WikidPad.

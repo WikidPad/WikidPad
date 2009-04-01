@@ -791,17 +791,15 @@ class EnhancedListControl(wx.ListCtrl):
         _SETSSI_ITEMMASK = wx.LIST_STATE_SELECTED
 
 
-    def SelectSingle(self, idx):
+    def SelectSingle(self, idx, scrollVisible=False):
         # Unselect all selected
         for prev in self.GetAllSelected():
             self.SetItemState(prev, 0, self._SETSSI_ITEMMASK)
 
         if idx > -1:
             self.SetItemState(idx, self._SETSSI_ITEMMASK, self._SETSSI_ITEMMASK)
-
-
-
-
+            if scrollVisible:
+                self.EnsureVisible(idx)
 
 # class ColoredStatusBar(wx.StatusBar):
 #     def __init__(self, *args, **kwargs):

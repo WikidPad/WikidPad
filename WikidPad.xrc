@@ -420,6 +420,14 @@
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
       </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbDocStructureAutoFollow">
+          <label>Structure window selection auto-follow</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
     </object>
   </object>
   <object class="wxPanel" name="OptionsPageSecurity">
@@ -2491,6 +2499,13 @@
         <minsize>200,200</minsize>
       </object>
       <object class="sizeritem">
+        <object class="wxStaticText" name="stLinkTo">
+          <label></label>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
         <object class="wxStaticLine"/>
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -4335,7 +4350,7 @@
       </object>
       <object class="sizeritem">
         <object class="wxPanel" name="additOptions"/>
-        <option>3</option>
+        <option>1</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
       <object class="sizeritem">
@@ -4348,7 +4363,7 @@
         <object class="wxStaticText" name="stDestination">
           <label>Destination directory:</label>
         </object>
-        <option>1</option>
+        <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
         <border>5</border>
       </object>
@@ -4373,6 +4388,73 @@
         </object>
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticLine"/>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>Saved Exports:</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxListBox" name="lbSavedExports">
+          <content/>
+          <style>wxLB_EXTENDED</style>
+        </object>
+        <option>1</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+        <minsize>-1,80</minsize>
+      </object>
+      <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <cols>2</cols>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnSaveExport">
+              <label>&amp;Save Export</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnDeleteExports">
+              <label>&amp;Delete Export(s)</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnLoadExport">
+              <label>&amp;Load Export</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnLoadAndRunExport">
+              <label>Load and R&amp;un Export</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+        </object>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticLine"/>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>2</border>
       </object>
       <object class="sizeritem">
         <object class="wxBoxSizer">

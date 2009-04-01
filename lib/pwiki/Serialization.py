@@ -1,7 +1,8 @@
 from struct import pack, unpack
 import cStringIO as StringIO
 
-from StringOps import utf8Dec, utf8Enc
+from StringOps import utf8Dec, utf8Enc, strToBool, base64BlockEncode, \
+        base64BlockDecode
 
 
 
@@ -172,12 +173,149 @@ class SerializeStream:
             an[i] = self.serUint32(an[i])
             
         return an
-        
-
 
     def close(self):
         """
         Close stream and underlying file object
         """
         self.fileObj.close()
+
+
+
+def findXmlElementFlat(xmlNode, tag, excOnFail=True):
+    """
+    Search children of xmlNode until finding an element with tag  tag  and
+    return it. Raises SerializationException if not found (excOnFail==True) or
+    returns (excOnFail==False).
+    """
+    for subNode in xmlNode.childNodes:
+        if subNode.nodeType != subNode.ELEMENT_NODE:
+            continue
+        
+        if subNode.tagName == tag:
+            return subNode
+    
+    if excOnFail:
+        raise SerializationException(
+                "XML conversion: Element '%s' not found inside '%s'" %
+                (tag, xmlNode.tagName))
+    else:
+        return None
+
+
+def iterXmlElementFlat(xmlNode, tag):
+    """
+    Return iterator through all children of xmlNode with tag  tag.
+    """
+    for subNode in xmlNode.childNodes:
+        if subNode.nodeType != subNode.ELEMENT_NODE:
+            continue
+        
+        if subNode.tagName == tag:
+            yield subNode
+
+
+def serToXmlUnicode(xmlNode, xmlDoc, tag, data):
+    subNode = xmlDoc.createElement(tag)
+    subNode.appendChild(xmlDoc.createTextNode(data))
+    xmlNode.appendChild(subNode)
+
+
+def serFromXmlUnicode(xmlNode, tag):
+    subNode = findXmlElementFlat(xmlNode, tag)
+    child = subNode.firstChild
+    if child is None:
+        return u""
+    return child.data
+
+
+def serToXmlBool(xmlNode, xmlDoc, tag, data):
+    serToXmlUnicode(xmlNode, xmlDoc, tag, unicode(repr(data)))
+
+
+def serFromXmlBool(xmlNode, tag):
+    return strToBool(serFromXmlUnicode(xmlNode, tag))
+
+
+def serToXmlInt(xmlNode, xmlDoc, tag, data):
+    serToXmlUnicode(xmlNode, xmlDoc, tag, unicode(repr(data)))
+
+def serFromXmlInt(xmlNode, tag):
+    return int(serFromXmlUnicode(xmlNode, tag))
+
+
+
+_TYPE_TO_TYPENAME = (
+        (bool, u"bool"),
+        (int, u"int"),
+        (long, u"long"),
+        (float, u"float"),
+        (unicode, u"unicode"),
+        (str, u"str")
+    )
+
+
+
+_TYPENAME_TO_FACTORY = {
+        u"int": int,
+        u"long": long,
+        u"float": float,
+        u"unicode": unicode,
+        u"str": base64BlockDecode,
+        u"bool": strToBool
+    }
+
+
+def convertTupleToXml(xmlNode, xmlDoc, addOpt):
+#     mainEl = xmlDoc.createElement(u"addoptions")
+#     mainEl.setAttribute(u"type", u"simpletuple")
+    for opt in addOpt:
+        dtype = None
+        for t, tn in _TYPE_TO_TYPENAME:
+            if isinstance(opt, t):
+                dtype = tn
+                break
+
+        if dtype is None:
+            raise SerializationException(
+                    "XML conversion: Unknown item type in tuple: " + repr(opt))
+
+        if dtype == u"str":
+            # Maybe binary data, so do base64 encoding
+            opt = base64BlockEncode(opt)
+
+        subEl = xmlDoc.createElement(u"item")
+        subEl.setAttribute(u"type", dtype)
+
+        subEl.appendChild(xmlDoc.createTextNode(unicode(opt)))
+
+        xmlNode.appendChild(subEl)
+
+
+
+def convertTupleFromXml(xmlNode):
+#     # TODO More error checking
+#     if mainEl.tagName != u"addoptions":
+#         raise SerializationException(
+#                 "Unknown XML element " + repr(mainEl.tagName) +
+#                 ", expected 'addoptions'")
+# 
+#     if mainEl.getAttribute("type") != u"simpletuple":
+#         raise SerializationException(
+#                 "XML element 'addoptions' can only have type attribute 'simpletuple', found " +
+#                 repr(mainEl.getAttribute("type")) +" instead")
+
+    result = []
+    for subEl in iterXmlElementFlat(xmlNode, u"item"):
+        dtype = subEl.getAttribute(u"type")
+        fact = _TYPENAME_TO_FACTORY.get(dtype)
+        if fact is None:
+            raise SerializationException(
+                    "XML conversion: XML element 'item' can't have type attribute '" +
+                    repr(dtype))
+
+        data = subEl.firstChild.data
+        result.append(fact(data))
+
+    return tuple(result)
 

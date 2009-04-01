@@ -64,9 +64,8 @@ from SearchAndReplaceDialogs import *
 
 
 import Exporters
-from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, strToBool, \
-        BOM_UTF8, fileContentToUnicode, splitIndent, \
-        unescapeWithRe, escapeForIni, unescapeForIni, \
+from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, \
+        unescapeForIni, \
         wikiUrlToPathWordAndAnchor, urlFromPathname, flexibleUrlUnquote, \
         strftimeUB, pathEnc, loadEntireFile, writeEntireFile, \
         pathWordAndAnchorToWikiUrl, relativeFilePath, pathnameFromUrl
@@ -143,6 +142,8 @@ class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
 
     def __init__(self, parent, id, title, wikiAppDir, globalConfigDir,
             globalConfigSubDir, cmdLineAction):
+        # Do not use member variables starting with "externalPlugin_"! They
+        # are reserved for external plugins.
         wx.Frame.__init__(self, parent, -1, title, size = (700, 550),
                          style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
         MiscEventSourceMixin.__init__(self)
@@ -180,12 +181,11 @@ tree_position: 0;a=[tree_position: 0]\\n
 wrap: 80;a=[wrap: 80]\\n
 camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 """, True)
-#         self.globalConfigLoc = join(globalConfigDir, "WikidPad.config")
         self.configuration = wx.GetApp().createCombinedConfiguration()
         
         # Listen to application events
         wx.GetApp().getMiscEvent().addListener(self)
-
+        
         self.wikiPadHelp = join(self.wikiAppDir, 'WikidPadHelp',
                 'WikidPadHelp.wiki')
         self.windowLayouter = None  # will be set by initializeGui()
@@ -202,7 +202,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.continuousExporter = None   # Exporter-derived object if continuous export is in effect
         
         self.mainAreaPanel = None
-#         self._mainAreaPanelCreated = False
         self.mainmenu = None
 
         self.recentWikisMenu = None
@@ -225,7 +224,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.eventRoundtrip = 0
 
-#         self.currentDocPagePresenterProxyEvent = ProxyMiscEvent(self)
         self.currentWikiDocumentProxyEvent = ProxyMiscEvent(self)
         self.currentWikiDocumentProxyEvent.addListener(self)
 
@@ -234,6 +232,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 join(self.wikiAppDir, u'user_extensions'),
                 join(self.wikiAppDir, u'extensions') )
         self.pluginManager = PluginManager(dirs)
+
+#         wx.GetApp().pauseBackgroundThreads()
 
         self.hooks = self.pluginManager.registerPluginAPI(("hooks",1),
             ["startup", "newWiki", "createdWiki", "openWiki", "openedWiki", 
@@ -254,9 +254,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # trigger hook
         self.hooks.startup(self)
-
-#         # Connect page history
-#         self.pageHistory = PageHistory(self)
 
         # Initialize printing
         self.printer = Printer(self)
@@ -347,6 +344,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
  #                tracer.runctx('self.openWiki(wikiToOpen, wikiWordsToOpen, anchorToOpen=anchorToOpen)', globals(), locals())
                 self.openWiki(wikiToOpen, wikiWordsToOpen,
                         anchorToOpen=anchorToOpen)
+#                 wx.GetApp().pauseBackgroundThreads()
             else:
                 self.statusBar.SetStatusText(
                         uniToGui(_(u"Last wiki doesn't exist: %s") % wikiToOpen), 0)
@@ -364,11 +362,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         EVT_REMOTE_COMMAND(self, self.OnRemoteCommand)
 
-#         wx.FileSystem.AddHandler(wx.ZipFSHandler())
+        # Inform that idle handlers and window-specific threads can now be started
+        self.fireMiscEventKeys(("constructed main window",))
+
+#         finally:
+#             wx.GetApp().resumeBackgroundThreads()
 
 
     def loadExtensions(self):
-        self.wikidPadHooks = self.getExtension('WikidPadHooks', u'WikidPadHooks.py')
+#         self.wikidPadHooks = self.getExtension('WikidPadHooks', u'WikidPadHooks.py')
         self.keyBindings = KeyBindingsCache(
                 self.getExtension('KeyBindings', u'KeyBindings.py'))
         self.evalLib = self.getExtension('EvalLibrary', u'EvalLibrary.py')
@@ -4160,7 +4162,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             else: # lrm == 2: ask for each rename operation
                 result = wx.MessageBox(
                         _(u"Do you want to modify all links to the wiki word "
-                        u"'%s' renamed to '%s' (this operation is unrealiable)?") %
+                        u"'%s' renamed to '%s' (this operation is unreliable)?") %
                         (wikiWord, toWikiWord),
                         _(u'Rename Wiki Word'),
                         wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION, self)
