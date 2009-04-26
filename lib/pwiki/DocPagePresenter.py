@@ -318,7 +318,7 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
         Show message dialogs, used for scripts.
         Calls same function from PersonalWikiFrame.
         """
-        self.mainControl.stdDialog(dlgtype, title, message, additional)
+        return self.mainControl.stdDialog(dlgtype, title, message, additional)
 
 
     def displayMessage(self, title, str):

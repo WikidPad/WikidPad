@@ -294,6 +294,8 @@ class PlainTextPrint:
         pddata = wx.PrintDialogData(self.printer.printData)
         printout = PlainTextPrintout(text, self.printer)
         printout2 = PlainTextPrintout(text, self.printer)
+#         printout = HtmlPrintout()
+#         printout2 = HtmlPrintout()
         preview = wx.PrintPreview(printout, printout2, pddata)
 
         frame = wx.PreviewFrame(preview, self.pWiki, _(u"Print Preview"),
@@ -535,3 +537,11 @@ class PlainTextPrintout(wx.Printout):
         
         return True
 
+
+# import wx.html
+# 
+# class HtmlPrintout(wx.html.HtmlPrintout):
+#     def __init__(self):
+#         wx.html.HtmlPrintout.__init__(self)
+#         
+#         self.SetHtmlText(u"ab<br />cd<br />ef<br />\n" * 2000)

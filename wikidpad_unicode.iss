@@ -29,8 +29,8 @@ Source: dist\zlib.pyd; DestDir: {app}; Components: Program_files
 Source: dist\WikidPad.xrc; DestDir: {app}; Components: Program_files
 Source: dist\WikidPad_*.po; DestDir: {app}; Components: Program_files; Flags: ignoreversion sortfilesbyextension
 Source: dist\langlist.txt; DestDir: {app}; Components: Program_files; Flags: ignoreversion
-Source: dist\gadfly.zip; DestDir: {app}; Components: Gadfly
-Source: dist\library.zip; DestDir: {app}; Components: Program_files
+Source: dist\gadfly.zip; DestDir: {app}; Components: Gadfly; Flags: nocompression
+Source: dist\library.zip; DestDir: {app}; Components: Program_files; Flags: nocompression
 [Dirs]
 Name: {app}\extensions; Components: Program_files
 Name: {app}\icons; Components: Program_files
@@ -41,20 +41,21 @@ Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 1.9rc03
+AppVerName=WikidPad 1.9rc04
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=1.9.103.0
-VersionInfoTextVersion=WikidPad 1.9rc03
+VersionInfoVersion=1.9.104.0
+VersionInfoTextVersion=WikidPad 1.9rc04
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-1.9rc03
+OutputBaseFilename=WikidPad-1.9rc04
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2009 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
+
 [Components]
 Name: Program_files; Description: Main program files; Flags: fixed; Types: custom compact full
 Name: Gadfly; Description: Gadfly database; Types: custom compact full
@@ -170,3 +171,6 @@ begin
     end;
   end;
 end;
+[LangOptions]
+LanguageName=Marathi
+LanguageID=$044E

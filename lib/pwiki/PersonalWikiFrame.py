@@ -391,6 +391,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.hotKeyDummyWindow = None
         self._refreshHotKeys()
 
+        self.windowLayouter.layout()
+        
+        # GUI construction finished, but window is hidden yet
+
         # if a wiki to open is set, open it
         if wikiToOpen:
             if exists(pathEnc(wikiToOpen)):
@@ -5005,9 +5009,12 @@ These are your default global settings.
         if self.configuration.getboolean("main", "minimize_on_closeButton"):
             self.Iconize(True)
         else:
-            self._prepareExitWiki()
-            self.Destroy()
-            evt.Skip()
+            try:
+                self._prepareExitWiki()
+                self.Destroy()
+                evt.Skip()
+            except LossyWikiCloseDeniedException:
+                pass
 
 
     def exitWiki(self):

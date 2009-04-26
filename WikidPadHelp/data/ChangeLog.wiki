@@ -1,6 +1,14 @@
 ﻿++ Change Log
 
-Mar. 30, 2009 (1.9rc03)
+Apr. 26, 2009 (1.9rc04)
+
+    * Bug fixed: stdDialog of doc page presenter did not return
+      a value (needed for some plugins)
+    * Bug fixed: Tree scrolled to wrong initial position on startup
+
+
+
+Mar. 30, 2009 (1.9rc03, repository revision in "mbutscher" branch: 189)
 
     * Bug fixed: Page list construction dialog couldn't be opened
       if a functional page was in current editor
