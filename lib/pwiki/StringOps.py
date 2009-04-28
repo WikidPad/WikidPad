@@ -6,7 +6,6 @@ creating diff information for plain byte sequences
 """
 
 
-
 import os, threading, traceback
 
 from struct import pack, unpack
@@ -1329,7 +1328,6 @@ def binToStr(b):
 #         result.append(e)
 #     
 #     return result
-
 
 
 def wikiUrlToPathWordAndAnchor(url):

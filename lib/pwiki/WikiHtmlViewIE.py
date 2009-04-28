@@ -35,7 +35,7 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 from MiscEvent import KeyFunctionSink
 
 from StringOps import uniToGui, utf8Enc, utf8Dec, urlFromPathname, urlQuote, \
-        pathnameFromUrl
+        pathnameFromUrl, flexibleUrlUnquote
 
 import DocPages
 from TempFileSet import TempFileSet
@@ -448,6 +448,39 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             self.presenter.getMainControl().launchUrl(href)
             Cancel[0] = True
 
+
+    def StatusTextChange(self, status):
+        if self.visible:
+            if self.drivingMoz:
+                internaljumpPrefix = u"file://internaljump/wikipage/"
+            else:
+                internaljumpPrefix = u"internaljump:wikipage/"
+
+            if status.startswith(internaljumpPrefix):
+                # First check for an anchor. In URLs, anchors are always
+                # separated by '#' regardless which character is used
+                # in the wiki syntax (normally '!')
+                try:
+                    wikiWord, anchor = status[len(internaljumpPrefix):].split(
+                            u"#", 1)
+                    anchor = flexibleUrlUnquote(anchor)
+                except ValueError:
+                    wikiWord = status[len(internaljumpPrefix):]
+                    anchor = None
+
+                wikiWord = flexibleUrlUnquote(wikiWord)
+
+                wikiDocument = self.presenter.getWikiDocument()
+                if wikiDocument is None:
+                    return
+                wikiWord = wikiDocument.getUnAliasedWikiWord(wikiWord)
+
+                if wikiWord is not None:
+                    status = _(u"Link to page: %s") % wikiWord
+
+
+            self.presenter.getMainControl().statusBar.SetStatusText(
+                    uniToGui(status), 0)
 
 
 #     def OnKeyUp(self, evt):

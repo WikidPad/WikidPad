@@ -10,7 +10,7 @@ try:
     import EnchantDriver
 except (AttributeError, ImportError):
     Dict = None
-#     traceback.print_exc()
+    # traceback.print_exc()
 
 
 from DocPages import AliasWikiPage, WikiPage
@@ -109,8 +109,8 @@ class SpellCheckerDialog(wx.Dialog):
             self.spellChkAddedGlobal = None
             self.spellChkAddedLocal = None
             self.localPwlPage = None
-            
-            
+
+
     def _showInfo(self, msg):
         """
         Set dialog controls to show an info/error message
@@ -321,7 +321,9 @@ class SpellCheckerDialog(wx.Dialog):
     def OnAddWordGlobal(self, evt):
         """
         Add word globally (application-wide)
-        """  
+        """
+        if self.spellChkAddedGlobal is None:
+            return  # TODO When does this happen?
         self.spellChkAddedGlobal.add(self.currentCheckedWord)
         words = list(self.spellChkAddedGlobal)
         self.mainControl.getCollator().sort(words)
@@ -334,6 +336,9 @@ class SpellCheckerDialog(wx.Dialog):
         """
         Add word locally (wiki-wide)
         """
+        if self.spellChkAddedLocal is None:
+            return  # TODO When does this happen?
+
         self.spellChkAddedLocal.add(self.currentCheckedWord)
         words = list(self.spellChkAddedLocal)
         self.mainControl.getCollator().sort(words)

@@ -57,12 +57,15 @@ The following keys and values are built into WikidPad (further are possible by p
       the current page. In HTML preview/export you can click on the
       the lines to go to the actual headings. The value of this
       insertion must be empty.
+    * *iconimage* shows the icon whose name is given as value.
+      You can use menu "Format"->"Icon Name" to find the name of
+      an existing icon.
     * *eval* Evaluate the given Python expression and handle its
       result as if it replaces the insertion. You must switch on
       the appropriate option "Process insertion scripts" on the
       "Security" options page to make it work.
     * *self* Shows the name of the current page.
-      
+
 
 For insertion tags which produce lists of wiki links (all but the "page" and "eval" insertion), you can also have the appendix "columns 123" where 123 stands for the number of columns the list should have. By default, there is only one column.
 

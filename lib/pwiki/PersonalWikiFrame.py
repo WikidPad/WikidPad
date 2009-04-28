@@ -156,6 +156,7 @@ class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
             return
 
         self.sleepMode = False  # Is program in low resource sleep mode?
+        self.mainWindowConstructed = False
 
 #         if not globalConfigDir or not exists(globalConfigDir):
 #             self.displayErrorMessage(
@@ -182,7 +183,7 @@ wrap: 80;a=[wrap: 80]\\n
 camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 """, True)
         self.configuration = wx.GetApp().createCombinedConfiguration()
-        
+
         # Listen to application events
         wx.GetApp().getMiscEvent().addListener(self)
         
@@ -227,6 +228,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.currentWikiDocumentProxyEvent = ProxyMiscEvent(self)
         self.currentWikiDocumentProxyEvent.addListener(self)
 
+        self.configuration.setGlobalConfig(wx.GetApp().getGlobalConfig())
+
+        # State here: Global configuration available
+
         # setup plugin manager and hooks API
         dirs = ( join(self.globalConfigSubDir, u'user_extensions'),
                 join(self.wikiAppDir, u'user_extensions'),
@@ -250,7 +255,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.propertyChecker = PropertyHandling.PropertyChecker(self)
 
-        self.configuration.setGlobalConfig(wx.GetApp().getGlobalConfig())
+#         self.configuration.setGlobalConfig(wx.GetApp().getGlobalConfig())
+
+        # State here: Plugins loaded
 
         # trigger hook
         self.hooks.startup(self)
@@ -303,12 +310,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.layoutTimeViewPosition = self.configuration.getint("main",
                 "timeView_position", 0)
 
-        # this will keep track of the last font used in the editor
-        self.lastEditorFont = None
-
-        # should WikiWords be enabled or not for the current wiki
-        self.wikiWordsEnabled = True
-
         # if a wiki to open wasn't passed in use the last_wiki from the global config
         wikiToOpen = cmdLineAction.wikiToOpen
         wikiWordsToOpen = cmdLineAction.wikiWordsToOpen
@@ -321,8 +322,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.initializeGui()
 
         # Minimize on tray?
-        ## self.showOnTray = self.globalConfig.getboolean("main", "showontray")
-
         self.tbIcon = None
         self.setShowOnTray()
 
@@ -333,10 +332,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.Maximize(True)
         if windowmode & 2:
             self.Iconize(True)
-            
+
         # Set app-bound hot key
         self.hotKeyDummyWindow = None
         self._refreshHotKeys()
+
+        self.windowLayouter.layout()
+        
+        # State here: GUI construction finished, but frame is hidden yet
 
         # if a wiki to open is set, open it
         if wikiToOpen:
@@ -363,6 +366,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         EVT_REMOTE_COMMAND(self, self.OnRemoteCommand)
 
         # Inform that idle handlers and window-specific threads can now be started
+        self.mainWindowConstructed = True
         self.fireMiscEventKeys(("constructed main window",))
 
 #         finally:
@@ -419,6 +423,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def getMainAreaPanel(self):
         return self.mainAreaPanel
+        
+    def isMainWindowConstructed(self):
+        return self.mainWindowConstructed
 
     def getCurrentDocPagePresenter(self):
         """
@@ -891,9 +898,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         history = self.configuration.get("main", "wiki_history")
         if not history:
             return
-        
+
         self.wikiHistory = history.split(u";")
-        
+
         maxLen = self.configuration.getint(
                 "main", "recentWikisList_length", 5)
         if len(self.wikiHistory) > maxLen:
@@ -1166,6 +1173,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _(u'Paste'), self._OnRoundtripEvent,
                 "tb_paste", menuID=GUI_ID.CMD_CLIPBOARD_PASTE,
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
+
+        self.addMenuItem(editMenu, _(u'Select &All') + u'\t' + self.keyBindings.SelectAll,
+                _(u'Select All'), self._OnRoundtripEvent,
+                 menuID=GUI_ID.CMD_SELECT_ALL)
 
         editMenu.AppendSeparator()
 
@@ -5214,10 +5225,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if self.configuration.getboolean("main", "minimize_on_closeButton"):
             self.Iconize(True)
         else:
+            try:
 #             tracer.runctx('self._prepareExitWiki()', globals(), locals())
-            self._prepareExitWiki()
-            self.Destroy()
-            evt.Skip()
+                self._prepareExitWiki()
+                self.Destroy()
+                evt.Skip()
+            except LossyWikiCloseDeniedException:
+                pass
 
 
     def exitWiki(self):

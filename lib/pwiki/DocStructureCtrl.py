@@ -43,9 +43,13 @@ class DocStructureCtrl(EnhancedListControl):
                 ("options changed", self.onUpdateNeeded),
         ), wx.GetApp().getMiscEvent(), self)
 
-        self.__sinkMainFrame = wxKeyFunctionSink((
-                ("constructed main window", self.onConstructedMainWindow),
-        ), self.mainControl.getMiscEvent(), self)
+        if not self.mainControl.isMainWindowConstructed():
+            # Install event handler to wait for construction
+            self.__sinkMainFrame = wxKeyFunctionSink((
+                    ("constructed main window", self.onConstructedMainWindow),
+            ), self.mainControl.getMiscEvent(), self)
+        else:
+            self.onConstructedMainWindow(None)
 
         currPres = self.mainControl.getCurrentDocPagePresenter()
         if currPres is not None:

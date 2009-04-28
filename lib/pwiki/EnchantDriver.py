@@ -175,6 +175,28 @@ class EnchantStr(str):
 
 
 
+
+if os.name == "nt":
+    ctypes_find_library = find_library
+
+    def find_library(name):
+#         if name in ('c', 'm'):
+#             return find_msvcrt()
+        # See MSDN for the REAL search order.
+        for directory in [os.path.dirname(os.path.abspath(sys.argv[0]))] + os.environ['PATH'].split(os.pathsep):
+            fname = os.path.join(directory, name)
+            if os.path.exists(fname):
+                return fname
+            if fname.lower().endswith(".dll"):
+                continue
+            fname = fname + ".dll"
+            if os.path.exists(fname):
+                return fname
+        return None
+
+
+
+
 #  -------------------- From _enchant module --------------------
 
 

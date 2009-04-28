@@ -135,7 +135,10 @@ class IncrementalSearchDialog(wx.Frame):
             self.tfInput.SetBackgroundColour(IncrementalSearchDialog.COLOR_GREEN)
 
     def OnMouseAnyInput(self, evt):
-        if evt.Button(wx.MOUSE_BTN_ANY) and self.closeDelay:
+#         if evt.Button(wx.MOUSE_BTN_ANY) and self.closeDelay:
+
+        # Workaround for name clash in wx.MouseEvent.Button:
+        if wx._core_.MouseEvent_Button(evt, wx.MOUSE_BTN_ANY) and self.closeDelay:
             # If a mouse button was pressed/released, restart timer
             self.closeTimer.Start(self.closeDelay, True)
 
@@ -411,9 +414,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 ("options changed", self.onOptionsChanged),
         ), wx.GetApp().getMiscEvent(), self)
 
-        self.__sinkMainFrame = wxKeyFunctionSink((
-                ("constructed main window", self.onConstructedMainWindow),
-        ), self.presenter.getMainControl().getMiscEvent(), self)
+        if not self.presenter.getMainControl().isMainWindowConstructed():
+            # Install event handler to wait for construction
+            self.__sinkMainFrame = wxKeyFunctionSink((
+                    ("constructed main window", self.onConstructedMainWindow),
+            ), self.presenter.getMainControl().getMiscEvent(), self)
+        else:
+            self.onConstructedMainWindow(None)
 
 #         self.presenter.getMiscEvent().addListener(self.presenterListener)
 
@@ -468,6 +475,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CUT, lambda evt: self.Cut())
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, lambda evt: self.Copy())
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_PASTE, lambda evt: self.Paste())
+        wx.EVT_MENU(self, GUI_ID.CMD_SELECT_ALL, lambda evt: self.SelectAll())
+
         wx.EVT_MENU(self, GUI_ID.CMD_TEXT_DELETE, lambda evt: self.ReplaceSelection(""))
         wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN,
                 lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN))
@@ -1947,38 +1956,44 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             #   related pages)
             
             pageAst = self.getPageAst()
-            scriptNodes = list(pageAst.iterDeepByName(SCRIPTFORMAT))
+            scriptNodeGroups = [list(pageAst.iterDeepByName(SCRIPTFORMAT))]
             
             # process script imports
             if securityLevel > 1: # Local import_scripts properties allowed
                 if self.getLoadedDocPage().getProperties().has_key(
-                        "import_scripts"):
+                        u"import_scripts"):
                     scriptNames = self.getLoadedDocPage().getProperties()[
-                            "import_scripts"]
+                            u"import_scripts"]
                     for sn in scriptNames:
                         try:
                             importPage = self.presenter.getWikiDocument().\
                                     getWikiPage(sn)
                             pageAst = importPage.getLivePageAst()
-                            scriptNodes += list(
-                                    pageAst.iterDeepByName(SCRIPTFORMAT))
+                            scriptNodeGroups.append(list(
+                                    pageAst.iterDeepByName(SCRIPTFORMAT)))
                         except:
                             pass
 
             if securityLevel > 2: # global.import_scripts property also allowed
                 globScriptName = self.presenter.getWikiDocument().getWikiData().\
-                        getGlobalProperties().get("global.import_scripts")
+                        getGlobalProperties().get(u"global.import_scripts")
 
                 if globScriptName is not None:
                     try:
                         importPage = self.presenter.getWikiDocument().\
                                 getWikiPage(globScriptName)
                         pageAst = importPage.getLivePageAst()
-                        scriptNodes += list(
-                                    pageAst.iterDeepByName(SCRIPTFORMAT))
+                        scriptNodeGroups.append(list(
+                                    pageAst.iterDeepByName(SCRIPTFORMAT)))
                     except:
                         pass
+             
+            if self.presenter.getConfig().getboolean("main",
+                    "script_search_reverse", False):
+                scriptNodeGroups.reverse()
 
+            scriptNodes = reduce(lambda a, b: a + b, scriptNodeGroups)
+            
             for node in scriptNodes:
                 script = node.findFlatByName("code").getString()
                 script = re.sub(u"^[\r\n\s]+", u"", script)

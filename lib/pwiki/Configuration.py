@@ -585,6 +585,10 @@ GLOBALDEFAULTS = {
     ("main", "script_security_level"): "0",  # Allow the use of scripts and
             # import_scripts property? 0: No scripts at all; 1: No import_scripts;
             # 2: allow local import_scripts; 3: allow also global.import_scripts
+    ("main", "script_search_reverse"): "False", # Normally when searching for a script first the local page
+            # is searched, then local import_scripts, then global.import_scripts. If this is set to
+            # True the search order is reversed
+
 
     # HTML options
     ("main", "new_window_on_follow_wiki_url"): "1", # Open new window when following a "wiki:" URL 0:No, 1:Yes, new process
@@ -747,7 +751,6 @@ WIKIDEFAULTS = {
     ("main", "tree_force_scratchpad_visibility"): "True",  # Always show scratchpad below wiki root even
             # if it is not a child of it
 
-
     ("main", "further_wiki_words"): u"", # Semicolon separated list of further wiki words to show in addit. tabs
             # after last wiki word
     ("main", "first_wiki_word"): "", # Start with a special wiki word (If empty, use last word)
@@ -761,7 +764,12 @@ WIKIDEFAULTS = {
     
     ("main", "wiki_readOnly"): "False",   # Should wiki be read only?
 
-    ("main", "log_window_autoshow"): "Gray", # Automatically show log window if messages added?
+    ("main", "log_window_autoshow"): "Gray", # Automatically show log window if messages added? "Gray" means to look at
+            # global configuration for same setting
+
+    ("main", "wikiPageFiles_asciiOnly"): "False", # Use only ASCII characters in filenames of wiki page files.
+    ("main", "wikiPageFiles_gracefulOutsideAddAndRemove"): "True",   # Handle missing wiki page files gracefully and try
+            # to find existing files even if they are not in database.
 
     ("main", "headingsAsAliases_depth"): "0",  # Maximum heading depth for which aliases should be generated for
             # each heading up to and including this depth.
@@ -788,6 +796,9 @@ WIKIDEFAULTS = {
     }
 
 
+
+# If the fallthrough value is set in the wiki-bound config. then
+# the global config. value is used instead
 WIKIFALLTHROUGH ={
     ("main", "log_window_autoshow"): "Gray"
 

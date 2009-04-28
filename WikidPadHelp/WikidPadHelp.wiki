@@ -16,6 +16,7 @@ tree_expandednodes_descriptorpathes_main =
 wikipagetitleprefix = ++
 wikipagetitle_fromlinktitle = True
 first_wiki_word = WikidPadHelp
+wikipagefiles_gracefuloutsideaddandremove = True
 tree_expandednodes_rememberduration = 1
 tree_last_root_wiki_word = WikidPadHelp
 tree_force_scratchpad_visibility = True
@@ -24,5 +25,6 @@ wiki_wikilanguage = wikidpad_default_2_0
 filestorage_identity_moddatemustmatch = False
 filestorage_identity_moddateisenough = False
 wiki_database_type = original_gadfly
+wikipagefiles_asciionly = True
 export_default_dir = 
 

@@ -387,13 +387,13 @@ newLinesParagraph = newLinesParagraph.setResultsNameNoCopy("newParagraph")\
 
 
 newLineLineBreak = newLine
-newLineLineBreak = newLineLineBreak.setResultsNameNoCopy("lineBreak")\
+newLineLineBreak = newLineLineBreak.setResultsName("lineBreak")\
         .setParseStartAction(preActNewLineLineBreak)\
         .setParseAction(actionResetIndent)
 
 
 newLineWhitespace = newLine
-newLineWhitespace = newLineWhitespace.setResultsNameNoCopy("whitespace")\
+newLineWhitespace = newLineWhitespace.setResultsName("whitespace")\
         .setParseStartAction(preActNewLineWhitespace)
 
 
@@ -1282,7 +1282,10 @@ class _TheParser(object):
         raise exception if execution thread is no longer current parsing
         thread.
         """
-        
+
+        if len(content) == 0:
+            return buildSyntaxNode([], 0, "text")
+
         if formatDetails.noFormat:
             return buildSyntaxNode([buildSyntaxNode(content, 0, "plainText")],
                     0, "text")

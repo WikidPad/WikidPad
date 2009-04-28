@@ -532,7 +532,7 @@ class IconCache:
                 if id == -1:
                     id = self.iconLookupCache[iconname][0]
 
-                self.iconLookupCache[iconname] = (id, bitmap)
+                self.iconLookupCache[iconname] = (id, iconFile, bitmap)
             except Exception, e:
                 traceback.print_exc()
                 sys.stderr.write("couldn't load icon %s\n" % iconFile)
@@ -545,7 +545,7 @@ class IconCache:
         PersonalWiki.resourceSleep.
         """
         for k in self.iconLookupCache.keys():
-            self.iconLookupCache[k] = (self.iconLookupCache[k][0], None)
+            self.iconLookupCache[k] = self.iconLookupCache[k][0:2] + (None,)
 
 
     def lookupIcon(self, iconname):
@@ -555,7 +555,7 @@ class IconCache:
         If icon is unknown, None is returned.
         """
         try:
-            bitmap = self.iconLookupCache[iconname][1]
+            bitmap = self.iconLookupCache[iconname][2]
             if bitmap is not None:
                 return bitmap
                 
@@ -563,8 +563,9 @@ class IconCache:
             iconFile = os.path.join(self.iconDir, iconname+".gif")
             bitmap = wx.Bitmap(iconFile, wx.BITMAP_TYPE_GIF)
             
-            self.iconLookupCache[iconname] = (self.iconLookupCache[iconname][0],
-                    bitmap)
+            self.iconLookupCache[iconname] = self.iconLookupCache[k][0:2] + \
+                    (bitmap,)
+
             return bitmap
 
         except KeyError:
@@ -581,6 +582,16 @@ class IconCache:
         except KeyError:
             return -1
 
+
+    def lookupIconPath(self, iconname):
+        """
+        Returns the path to icon file of the requested icon.
+        If icon is unknown, -1 is returned.
+        """
+        try:
+            return self.iconLookupCache[iconname][1]
+        except KeyError:
+            return None
 
     def resolveIconDescriptor(self, desc, default=None):
         """

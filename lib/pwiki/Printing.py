@@ -4,7 +4,7 @@ import re
 ## _prof = hotshot.Profile("hotshot.prf")
 
 
-import wx, wx.xrc
+import wx, wx.xrc, wx.html
 
 from wxHelper import *
 
@@ -49,7 +49,7 @@ class PrintMainDialog(wx.Dialog):
         
         # Fixes focus bug under Linux
         self.SetFocus()
-        
+
         wx.EVT_CHOICE(self, GUI_ID.chSelectedSet, self.OnChSelectedSet)
 
         wx.EVT_BUTTON(self, GUI_ID.btnPreview, self.OnPreview)
@@ -63,8 +63,9 @@ class PrintMainDialog(wx.Dialog):
         sel = self.ctrls.chSelectedSet.GetSelection()
         if sel == -1:
             sel = self.printer.selectionSet
-            
-        self.printer.setStdOptions(sel, self.plainTextFontDesc,
+
+        self.printer.setStdOptions(sel, self.ctrls.chExportTo.GetSelection(),
+                self.plainTextFontDesc,
                 self.ctrls.tfWikiPageSeparator.GetValue())
 
 
@@ -127,6 +128,7 @@ class Printer:
         self.psddata = None
 
         self.selectionSet = 0
+        self.printType = 0  # 0: Plain text; 1: HTML
         self.listPagesOperation = SearchReplaceOperation()
 
         self.plainTextFontDesc = self.pWiki.configuration.get(
@@ -149,10 +151,12 @@ class Printer:
                 
             self.psddata.SetMarginTopLeft(wx.Point(margins[0], margins[1]))
             self.psddata.SetMarginBottomRight(wx.Point(margins[2], margins[3]))
-        
 
-    def setStdOptions(self, selectionSet, plainTextFontDesc, wpSeparator):
+
+    def setStdOptions(self, selectionSet, printType, plainTextFontDesc,
+            wpSeparator):
         self.selectionSet = selectionSet
+        self.printType = printType
         self.plainTextFontDesc = plainTextFontDesc
         self.pWiki.configuration.set("main", "print_plaintext_font",
                 plainTextFontDesc)
@@ -230,19 +234,32 @@ class Printer:
 
 
     def doPreview(self):
-        printObj = PlainTextPrint()
-        printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
-                self.buildWordList(), "plain_text", None, None)
+        if self.printType == 1:
+            printObj = HtmlPrint()
+            printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
+                    self.buildWordList(), "html_simple", None, None)
+        else: # self.printType == 0:
+            printObj = PlainTextPrint()
+            printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
+                    self.buildWordList(), "plain_text", None, None)
 
         return printObj.doPreview()
                     
                     
     def doPrint(self):
-        printObj = PlainTextPrint()
-        printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
-                self.buildWordList(), "plain_text", None, None)
+        if self.printType == 1:
+            printObj = HtmlPrint()
+            printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
+                    self.buildWordList(), "html_simple", None, None)
+        else:
+            printObj = PlainTextPrint()
+            printObj.setContext(self.pWiki, self, self.pWiki.getWikiDocument(),
+                    self.buildWordList(), "plain_text", None, None)
 
         return printObj.doPrint()
+
+
+
 
 
 class PlainTextPrint:
@@ -296,6 +313,7 @@ class PlainTextPrint:
         pddata = wx.PrintDialogData(self.printer.printData)
         printout = PlainTextPrintout(text, self.printer)
         printout2 = PlainTextPrintout(text, self.printer)
+
         preview = wx.PrintPreview(printout, printout2, pddata)
 
         frame = wx.PreviewFrame(preview, self.pWiki, _(u"Print Preview"),
@@ -305,6 +323,9 @@ class PlainTextPrint:
         frame.SetPosition(self.pWiki.GetPosition())
         frame.SetSize(self.pWiki.GetSize())
         frame.Show(True)
+
+
+
 
 
 class PlainTextPrintout(wx.Printout):
@@ -536,4 +557,98 @@ class PlainTextPrintout(wx.Printout):
         dc.SetFont(wx.NullFont)
         
         return True
+
+
+
+
+
+class HtmlPrint:
+    def __init__(self):
+        self.printOptions = None
+        self.pWiki = None
+
+    def getPrintTypes(self):
+        return (
+            ("html_simple", u'HTML', None),
+            )
+
+    def _buildText(self):
+        def getTextFromWord(word):
+            return self.wikiDocument.getWikiPage(word).getLiveText()
+
+        contents = map(getTextFromWord, self.wordList)
+        # Ensure that each wiki word content ends with newline
+        for i, c in enumerate(contents):
+            if len(c) > 0 and c[-1] != "\n":
+                contents[i] += "\n"
+                
+        try:
+            separator = unescapeWithRe(self.pWiki.getConfig().get(
+                    "main", "print_plaintext_wpseparator"))
+        except:
+            separator = u"\n\n\n\n"   # TODO Error message
+        
+        return separator.join(contents)  # TODO Make configurable
+            
+            
+    def setContext(self, pWiki, printer, wikiDocument, wordList, printType, options,
+            addopt):
+        self.pWiki = pWiki
+        self.wikiDocument = wikiDocument
+        self.wordList = wordList
+        self.printer = printer
+
+    def doPrint(self):
+        text = self._buildText()
+
+        printout = HtmlPrintout(text, self.printer)   # !!!!!
+        printer = wx.Printer(wx.PrintDialogData(self.printer.printData))
+        return printer.Print(self.pWiki, printout, True)
+
+
+    def doPreview(self):
+        text = self._buildText()
+        
+        pddata = wx.PrintDialogData(self.printer.printData)
+        printout = HtmlPrintout()
+        printout2 = HtmlPrintout()
+
+        preview = wx.PrintPreview(printout, printout2, pddata)
+
+        frame = wx.PreviewFrame(preview, self.pWiki, _(u"Print Preview"),
+                style=wx.DEFAULT_FRAME_STYLE | wx.FRAME_FLOAT_ON_PARENT)
+
+        frame.Initialize()
+        frame.SetPosition(self.pWiki.GetPosition())
+        frame.SetSize(self.pWiki.GetSize())
+        frame.Show(True)
+
+
+class HtmlPrintout(wx.html.HtmlPrintout):
+    def __init__(self):
+        wx.html.HtmlPrintout.__init__(self)
+        
+        self.exporterInstance = Exporters.HtmlExporter(
+                self.presenter.getMainControl())
+        
+        self.exporterInstance.exportType = u"html_previewWX"
+        self.exporterInstance.styleSheet = u""
+        self.exporterInstance.tempFileSet = TempFileSet()
+        
+        
+
+#     def _updateTempFilePrefPath(self):
+#         wikiDocument = self.presenter.getWikiDocument()
+# 
+#         if wikiDocument is not None:
+#             self.exporterInstance.tempFileSet.setPreferredPath(
+#                     wikiDocument.getWikiTempDir())
+#         else:
+#             self.exporterInstance.tempFileSet.setPreferredPath(None)
+
+        
+#         self.SetHtmlText(u"ab<br />\n" * 5000)
+
+
+
 

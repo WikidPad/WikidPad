@@ -20,7 +20,7 @@ class StdErrReplacement:
                     # Only write for first occurrence in session
                     f.write(EL._exceptionSessionTimeStamp)
                     EL._timestampPrinted = True
-                sys.stdout.write(data)
+                EL._previousStdOut.write(data)
                 f.write(data)
             finally:
                 f.close()
@@ -35,9 +35,10 @@ class StdErrReplacement:
 
 def onException(typ, value, trace):
     global EL
+    
     try:
 #         import ExceptionLogger as EL
-##        traceback.print_exception(typ, value, trace, file=sys.stdout)
+##        traceback.print_exception(typ, value, trace, file=EL._previousStdOut)
         f = open(os.path.join(EL._exceptionDestDir, "WikidPad_Error.log"), "a")
         try:
             if not EL._timestampPrinted:
@@ -47,14 +48,14 @@ def onException(typ, value, trace):
             
             EL._exceptionOccurred = True
             EL.traceback.print_exception(typ, value, trace, file=f)
-            EL.traceback.print_exception(typ, value, trace, file=sys.stdout)
+            EL.traceback.print_exception(typ, value, trace, file=EL._previousStdOut)
         finally:
             f.close()
     except:
-        print "Exception occurred during global exception handling:"
-        EL.traceback.print_exc(file=sys.stdout)
-        print "Original exception:"
-        EL.traceback.print_exception(typ, value, trace, file=sys.stdout)
+        EL._previousStdOut.write("Exception occurred during global exception handling:\n")
+        EL.traceback.print_exc(file=EL._previousStdOut)
+        EL._previousStdOut.write("Original exception:\n")
+        EL.traceback.print_exception(typ, value, trace, file=EL._previousStdOut)
         EL._previousExcepthook(typ, value, trace)
 
 
@@ -72,9 +73,12 @@ def startLogger(versionstring):
     EL._timestampPrinted = False
     
     
-    EL._previousExcepthook = sys.excepthook
-    sys.excepthook = onException
-    
     EL._previousStdErr = sys.stderr
     sys.stderr = StdErrReplacement()
 
+    EL._previousStdOut = sys.stdout
+    sys.stdout = StdErrReplacement()
+
+    EL._previousExcepthook = sys.excepthook
+    sys.excepthook = onException
+    

@@ -1399,13 +1399,16 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
     def onOptionsChanged(self, miscevt):
         config = self.pWiki.getConfig()
-        
+
         coltuple = htmlColorToRgbTuple(config.get("main", "tree_bg_color"))   
-        
+
         if coltuple is None:
             coltuple = (255, 255, 255)
 
         self.SetBackgroundColour(wx.Colour(*coltuple))
+        
+#         self.SetDefaultScrollVisiblePos("middle")
+
         self.Refresh()
         
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
@@ -1803,7 +1806,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 #                         sys.stderr.write(str(e))
 
                 if doexpand:
-                    self.EnsureVisible(currentNode)                            
+                    self.EnsureVisible(currentNode)
                 if selectNode:
                     self._unbindActivation()
                     self.SelectItem(currentNode)

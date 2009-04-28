@@ -4,6 +4,8 @@ import wx, wx.html, wx.xrc
 
 from MiscEvent import MiscEventSourceMixin, KeyFunctionSink
 import Consts
+from WikiExceptions import *
+
 from wxHelper import *
 
 from StringOps import uniToGui, guiToUni, escapeHtml
@@ -535,15 +537,11 @@ class SearchResultListBox(wx.HtmlListBox):
                 presenter.getSubControl("textedit").SetSelectionByCharPos(
                         info.occPos[0], info.occPos[1])
             
-            # Don't change focus when activating new tab in background
-#             # Works in fast search popup only if called twice
-#             self.pWiki.getActiveEditor().SetFocus()
-#             self.pWiki.getActiveEditor().SetFocus()
 
 
 
 
-class SearchPageDialog(wx.Dialog):   # TODO
+class SearchPageDialog(wx.Dialog):
     def __init__(self, pWiki, ID, title="",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
@@ -637,9 +635,15 @@ class SearchPageDialog(wx.Dialog):   # TODO
         wx.GetApp().setPageSearchHistory(hist)
 #         self.ctrls.cbSearch.Clear()
 #         self.ctrls.cbSearch.AppendItems([tpl[0] for tpl in hist])
-        self._refreshSearchHistoryCombo()
-        text = self.ctrls.cbSearch.GetValue()
-        self.ctrls.cbSearch.SetValue(text)
+
+        self.ctrls.cbSearch.Freeze()
+        try:
+            text = self.ctrls.cbSearch.GetValue()
+            self._refreshSearchHistoryCombo()
+            self.ctrls.cbSearch.SetValue(text)
+        finally:
+            self.ctrls.cbSearch.Thaw()
+
 
     def _refreshSearchHistoryCombo(self):
         hist = wx.GetApp().getPageSearchHistory()
@@ -690,6 +694,9 @@ class SearchPageDialog(wx.Dialog):   # TODO
 
 
     def OnFindNext(self, evt):
+        if guiToUni(self.ctrls.cbSearch.GetValue()) == u"":
+            return
+
         sarOp = self._buildSearchOperation()
         sarOp.replaceOp = False
         self.addCurrentToHistory()
@@ -810,6 +817,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
         # Fixes focus bug under Linux
         self.SetFocus()
+        self.ctrls.cbSearch.SetFocus()
 
         # Events from text search tab
         wx.EVT_BUTTON(self, GUI_ID.btnFindPages, self.OnSearchWiki)
@@ -1096,6 +1104,11 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         except re.error, e:
             self.displayErrorMessage(_(u'Error in regular expression'),
                     _(unicode(e)))
+        except DbReadAccessError, e:
+            self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
+                    _(unicode(e)))
+            return
+
 
     def OnListRefreshNeeded(self, evt):
         self.listNeedsRefresh = True
@@ -1111,6 +1124,10 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 self._refreshPageList()
             except re.error, e:
                 self.displayErrorMessage(_(u'Error in regular expression'),
+                        _(unicode(e)))
+                return
+            except DbReadAccessError, e:
+                self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
                         _(unicode(e)))
                 return
 
@@ -1238,6 +1255,9 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
         except re.error, e:
             self.displayErrorMessage(_(u'Error in regular expression'),
+                    _(unicode(e)))
+        except DbReadAccessError, e:
+            self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
                     _(unicode(e)))
 
 
@@ -1431,6 +1451,9 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 self._refreshPageList()
             except re.error, e:
                 self.displayErrorMessage(_(u'Error in regular expression'),
+                        _(unicode(e)))
+            except DbReadAccessError, e:
+                self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
                         _(unicode(e)))
 
 
@@ -2044,6 +2067,9 @@ class FastSearchPopup(wx.Frame):
             self._refreshPageList()
         except re.error, e:
             self.displayErrorMessage(_(u'Error in regular expression'),
+                    _(unicode(e)))
+        except DbReadAccessError, e:
+            self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
                     _(unicode(e)))
 
 

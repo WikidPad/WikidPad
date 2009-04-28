@@ -11,7 +11,7 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 
 from MiscEvent import KeyFunctionSink
 
-from StringOps import uniToGui, pathnameFromUrl
+from StringOps import uniToGui, pathnameFromUrl, flexibleUrlUnquote
 from Configuration import isWindows, MIDDLE_MOUSE_CONFIG_TO_TABMODE, isOSX
 
 import DocPages
@@ -169,6 +169,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
         wx.EVT_KEY_UP(self, self.OnKeyUp)
 
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
+        wx.EVT_MENU(self, GUI_ID.CMD_SELECT_ALL, lambda evt: self.SelectAll())
         wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN, lambda evt: self.addZoom(1))
         wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT, lambda evt: self.addZoom(-1))
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)        
@@ -579,6 +580,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
         else:
             cell = irep.FindCellByPos(pos.x, pos.y)
         callTip = u""
+        status = u""
 
         if cell is not None:
             linkInfo = cell.GetLink()
@@ -592,10 +594,13 @@ class WikiHtmlView(wx.html.HtmlWindow):
                     # in the wiki syntax (normally '!')
                     try:
                         wikiWord, anchor = href[22:].split(u"#", 1)
+                        anchor = flexibleUrlUnquote(anchor)
                     except ValueError:
                         wikiWord = href[22:]
                         anchor = None
 
+                    wikiWord = flexibleUrlUnquote(wikiWord)
+                    
                     wikiDocument = self.presenter.getWikiDocument()
                     if wikiDocument is None:
                         return
@@ -607,6 +612,13 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
                         if len(propList) > 0:
                             callTip = propList[-1][2]
+                        
+                        status = _(u"Link to page: %s") % wikiWord
+                else:
+                    status = href
+
+        self.presenter.getMainControl().statusBar.SetStatusText(
+                        uniToGui(status), 0)
 
         self.SetToolTipString(callTip)
 

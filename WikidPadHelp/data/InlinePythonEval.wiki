@@ -21,6 +21,19 @@ of security you want:
     * Allow everything
 
 
+When pressing Ctrl-1 to Ctrl-6 WikidPad searches for a script normally in the following order:
+
+    * Current page
+    * Pages imported by current page with attribute "import_scripts"
+    * Page imported somewhere with attribute "global.import_scripts"
+
+The latter two are only searched if security settings allow it.
+The order can be reversed by checking option "Reverse script search order (global imports first)" on options page "Security".
+
+
+
+
+
 The following examples work therefore only with an appropriately relaxed security setting.
 
 

@@ -303,6 +303,7 @@ class HtmlExporter(AbstractExporter):
         self.wordAnchor = None  # For multiple wiki pages in one HTML page, this contains the anchor
                 # of the current word.
         self.tempFileSet = None
+        self.copiedTempFileCache = None  # Dictionary {<original path>: <target URL>}
         self.convertFilename = removeBracketsFilename   # lambda s: mbcsEnc(s, "replace")[0]
         
         self.result = None
@@ -424,7 +425,40 @@ class HtmlExporter(AbstractExporter):
         ctrls.tfHtmlTocTitle.SetValue(tocTitle)
 
         
+
+    def setJobData(self, wikiDocument, wordList, exportType, exportDest,
+            compatFilenames, addOpt, progressHandler):
+        """
+        Set all information necessary to run export operation.
+        """
+
+        self.setWikiDocument(wikiDocument)
+
+        self.wordList = []
+        for w in wordList:
+            if self.wikiDocument.isDefinedWikiLink(w):
+                self.wordList.append(w)
+
+        if len(self.wordList) == 0:
+            return False
+
+#         self.wordList = wordList
+        self.exportType = exportType
+        self.exportDest = exportDest
+        self.addOpt = addOpt
+        self.progressHandler = progressHandler
+        self.compatFilenames = compatFilenames
+
+        if compatFilenames:
+            self.convertFilename = removeBracketsToCompFilename
+        else:
+            self.convertFilename = removeBracketsFilename    # lambda s: mbcsEnc(s, "replace")[0]
+            
+        self.referencedStorageFiles = None
         
+        return True
+
+
 
     def export(self, wikiDocument, wordList, exportType, exportDest,
             compatFilenames, addOpt, progressHandler, tempFileSetReset=True):
@@ -444,29 +478,9 @@ class HtmlExporter(AbstractExporter):
 #         print "export1", repr((pWiki, wikiDocument, wordList, exportType, exportDest,
 #             compatFilenames, addopt))
 
-        self.setWikiDocument(wikiDocument)
-
-        self.wordList = []
-        for w in wordList:
-            if self.wikiDocument.isDefinedWikiLink(w):
-                self.wordList.append(w)
-
-        if len(self.wordList) == 0:
+        if not self.setJobData(wikiDocument, wordList, exportType, exportDest,
+                compatFilenames, addOpt, progressHandler):
             return
-
-#         self.wordList = wordList
-        self.exportType = exportType
-        self.exportDest = exportDest
-        self.addOpt = addOpt
-        self.progressHandler = progressHandler
-        self.compatFilenames = compatFilenames
-
-        if compatFilenames:
-            self.convertFilename = removeBracketsToCompFilename
-        else:
-            self.convertFilename = removeBracketsFilename    # lambda s: mbcsEnc(s, "replace")[0]
-            
-        self.referencedStorageFiles = None
 
         if exportType in (u"html_single", u"html_multi"):
             volatileDir = self.addOpt[3]
@@ -493,6 +507,7 @@ class HtmlExporter(AbstractExporter):
             browserFile = self._exportHtmlSingleFiles(self.wordList)
 
         # Other supported types: html_previewWX, html_previewIE, html_previewMOZ
+        # are not handled in this function
 
         wx.GetApp().getInsertionPluginManager().taskEnd()
 
@@ -514,6 +529,7 @@ class HtmlExporter(AbstractExporter):
         if tempFileSetReset:
             self.tempFileSet.reset()
             self.tempFileSet = None
+            self.copiedTempFileCache = None
 
 
     def startContinuousExport(self, wikiDocument, listPagesOperation,
@@ -546,6 +562,7 @@ class HtmlExporter(AbstractExporter):
 
         self.tempFileSet.reset()
         self.tempFileSet = None
+        self.copiedTempFileCache = None
 
 
     def onDeletedWikiPage(self, miscEvt):
@@ -1203,6 +1220,8 @@ class HtmlExporter(AbstractExporter):
         self.result = []
         self.optsStack = StackedCopyDict()
         self.insertionVisitStack = []
+        self.copiedTempFileCache = {}
+
         self.outFlagEatPostBreak = False
         self.outFlagPostBreakEaten = False
 
@@ -1362,8 +1381,8 @@ class HtmlExporter(AbstractExporter):
 # TODO: (hasStates() was removed) if self.hasStates() or self.asIntHtmlPreview:
             if self.asIntHtmlPreview:
                 # It is already indented, so additional indents will not
-                # produce blank lines which must be eaten
-                self.outAppend(tag)
+                # produce blank lines which must be eaten  (?)
+                self.outAppend(tag, eatPreBreak=True)
             else:
                 self.outEatBreaks(tag)
 
@@ -1522,6 +1541,24 @@ class HtmlExporter(AbstractExporter):
                     traceback.print_exc(file=s)
                     htmlContent = u"\n<pre>\n" + \
                             escapeHtmlNoBreaks(s.getvalue()) + u"\n</pre>\n"
+        elif key == u"iconimage":
+            imgName = astNode.value
+            icPath = wx.GetApp().getIconCache().lookupIconPath(imgName)
+            if icPath is None:
+                htmlContent = _(u"<pre>[Icon '%s' not found]</pre>" % imgName)
+            else:
+                url = self.copiedTempFileCache.get(icPath)
+                if url is None:
+                    tfs = self.getTempFileSet()
+                    # TODO Take suffix from icPath
+                    dstFullPath = tfs.createTempFile("", ".gif", relativeTo="")
+                    pythonUrl = (self.exportType != "html_previewWX")
+                    url = tfs.getRelativeUrl(None, dstFullPath, pythonUrl=pythonUrl)
+
+                    OsAbstract.copyFile(icPath, dstFullPath)
+                    self.copiedTempFileCache[icPath] = url
+                
+                htmlContent = u'<img src="%s" />' % url
         else:
             # Call external plugins
             exportType = self.exportType
@@ -1755,6 +1792,7 @@ class HtmlExporter(AbstractExporter):
                 self.outEndIndentation("ul")
 
             elif tname == "bullet":
+#                 print "--bullet1", repr(self.result[-1])
                 self.outAppend(u"\n<li />", eatPreBreak=True)
             elif tname == "number":
                 self.outAppend(u"\n<li />", eatPreBreak=True)

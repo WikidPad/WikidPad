@@ -1,6 +1,42 @@
 ﻿++ Change Log
 
 
+Apr. 28, 2009 (2.0beta03)
+
+    * Option to reverse search order for scripts (global imports
+      first). See [InlinePythonEval#+++ Security concerns]
+    * Wiki-bound option to create wiki page files with ASCII-only
+      names (does not apply to Compact Sqlite DB backend).
+    * This should also fix a problem with Windows binary installer
+      and WikidPad help wiki on non-western Windows versions.
+      See [OptionsDialog#*Page file names ASCII only*]
+    * Wiki-bound option to handle missing or externally inserted
+      page files gracefully (does not apply to Compact Sqlite DB
+      backend).
+      See [OptionsDialog#*Graceful handling of missing page files*]
+    * New insertion "iconimage" to insert an icon into an HTML page.
+      See [Insertions#*iconimage*]
+    * Preview shows link target in the status bar when hovering
+      with mouse over it like browsers do
+    * Menu item "Select All" in "Edit" menu (for completeness)
+
+    * Bug fixed: Some errors weren't recorded in error log
+    * Bug fixed: Tree scrolled to wrong initial position on startup
+    * Bug fixed: Windows: Spell check addon did not work due to
+      wrong DLL find mechanism
+    * Bug fixed: LossyWikiCloseDeniedException wasn't caught and
+      polluted error log
+    * Bug fixed: Search and replace dialog for page cleared
+      "Search" text field when "Find next" was pressed
+    * Bug fixed: Wiki-wide search dialog did not focus search
+      text field when initially shown
+    * Bug fixed: Pollution of error log if moving mouse over
+      incremental search field
+    * Bug fixed: stdDialog() of doc page presenter did not return
+      a value (needed for some plugins)
+
+
+
 Apr. 01, 2009 (2.0beta02)
 
     * Option to let selection in doc. structure automatically follow

@@ -159,6 +159,8 @@ Version 1.0
 import wx
 import zlib
 import cStringIO
+import traceback
+
 
 # ----------------------------------------------------------------------------
 # Constants
@@ -1907,6 +1909,8 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         # Vista Selection Styles
         self._vistaselection = False        
 
+        self._defaultScrollVisiblePos = "auto" # Other possibility: "middle"
+
         # Connection lines style
 #         if wx.Platform != "__WXMAC__":
         if wx.GetOsVersion()[0] == wxWINDOWS_NT:
@@ -2735,7 +2739,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         
         return self._hilightUnfocusedBrush.GetColour()
 
-    
+
     def SetFirstGradientColour(self, colour=None):
         """Sets the first gradient colour."""
         
@@ -3888,7 +3892,15 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         return array
 
 
-    def EnsureVisible(self, item):
+    def SetDefaultScrollVisiblePos(self, dpos):
+        self._defaultScrollVisiblePos = dpos
+
+
+    def GetDefaultScrollVisiblePos(self):
+        return self._defaultScrollVisiblePos
+
+
+    def EnsureVisible(self, item, toMiddle=None):
         """Ensure that an item is visible in CustomTreeCtrl."""
 
         if not item:
@@ -3905,13 +3917,19 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             while parent:
                 self.Expand(parent)
                 parent = parent.GetParent()
-            
-        self.ScrollTo(item)
+        
+        if toMiddle is None:
+            toMiddle = self._defaultScrollVisiblePos == "middle"
+        
+        if toMiddle:
+            self.ScrollToMiddle(item)
+        else:
+            self.ScrollTo(item)
 
 
     def ScrollTo(self, item):
         """Scrolls the specified item into view."""
-
+        
         if not item:
             return
 
@@ -3953,6 +3971,41 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             x_pos = self.GetScrollPos(wx.HORIZONTAL)
             # Item should appear at bottom
             self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, x/_PIXELS_PER_UNIT, y/_PIXELS_PER_UNIT, x_pos, (item_y+self.GetLineHeight(item)-client_h)/_PIXELS_PER_UNIT )
+
+
+    def ScrollToMiddle(self, item):
+        """Scrolls the specified item into the vertical middle of the view."""
+
+        if not item:
+            return
+
+        # We have to call this here because the label in
+        # question might just have been added and no screen
+        # update taken place.
+        if self._dirty:
+            if wx.Platform in ["__WXMSW__", "__WXMAC__"]:
+                self.Update()
+        else:
+            wx.YieldIfNeeded()
+
+        # now scroll to the item
+        item_y = item.GetY()
+        start_x, start_y = self.GetViewStart()
+        start_y *= _PIXELS_PER_UNIT
+
+        client_w, client_h = self.GetClientSize()
+        
+        target_y = item_y - (client_h - self.GetLineHeight(item))// 2
+        target_y = max(0, target_y)
+
+        x, y = 0, 0
+
+        x, y = self._anchor.GetSize(x, y, self)
+        y += _PIXELS_PER_UNIT + 2 # one more scrollbar unit + 2 pixels
+        x += _PIXELS_PER_UNIT + 2 # one more scrollbar unit + 2 pixels
+        x_pos = self.GetScrollPos(wx.HORIZONTAL)
+
+        self.SetScrollbars(_PIXELS_PER_UNIT, _PIXELS_PER_UNIT, x/_PIXELS_PER_UNIT, y/_PIXELS_PER_UNIT, x_pos, target_y//_PIXELS_PER_UNIT)
 
 
     def OnCompareItems(self, item1, item2):

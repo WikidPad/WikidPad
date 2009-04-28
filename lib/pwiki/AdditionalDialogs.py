@@ -1409,7 +1409,7 @@ class ExportDialog(wx.Dialog):
         try:
             etypeProfile = Serialization.serFromXmlUnicode(xmlNode,
                     u"exportTypeName")
-            
+
             for sel, (ob, etype, desc, panel) in enumerate(self.exporterList):
                 if etype == etypeProfile:
                     break
@@ -1421,9 +1421,9 @@ class ExportDialog(wx.Dialog):
 
             addOptXml = Serialization.findXmlElementFlat(xmlNode,
                     u"additionalOptions")
-    
+
             addOptVersion = int(addOptXml.getAttribute(u"version"))
-    
+
             if addOptVersion != ob.getAddOptVersion():
                 self.mainControl.displayErrorMessage(
                         _(u"Saved export uses different version for additional "
@@ -1431,7 +1431,7 @@ class ExportDialog(wx.Dialog):
                         "Saved export version: %i\nCurrent export version: %i") %
                         (etypeProfile, addOptVersion, ob.getAddOptVersion()))
                 return False 
-    
+
             if addOptXml.getAttribute(u"type") != u"simpleTuple":
                 self.mainControl.displayErrorMessage(
                         _(u"Type of additional option storage ('%s') is unknown") %

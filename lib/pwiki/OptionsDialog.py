@@ -386,6 +386,7 @@ class OptionsDialog(wx.Dialog):
             ("insertions_allow_eval", "cbInsertionsAllowEval", "b"),
 #             ("tempFiles_inWikiDir", "cbTempFilesInWikiDir", "b"),
             ("script_security_level", "chScriptSecurityLevel", "seli"),
+            ("script_search_reverse", "cbScriptSearchReverse", "b"),
 
 
             ("mainTree_position", "chMainTreePosition", "seli"),
@@ -555,6 +556,11 @@ class OptionsDialog(wx.Dialog):
                     "cbTreeForceScratchpadVisibility", "b"),
 
             ("option/wiki/log_window_autoshow", "cbLogWindowAutoShowWiki", "b3"),
+
+            # The following two need special handling on dialog construction
+            ("wikiPageFiles_asciiOnly", "cbWikiPageFilesAsciiOnly", "b"),
+            ("wikiPageFiles_gracefulOutsideAddAndRemove",
+                    "cbWikiPageFilesGracefulOutsideAddAndRemove", "b"),
 
             ("wiki_icon", "tfWikiIcon", "t"),
             ("hotKey_showHide_byWiki", "tfHotKeyShowHideByWiki", "t"),
@@ -771,9 +777,17 @@ class OptionsDialog(wx.Dialog):
         if wikiDocument is not None:        
             self.ctrls.cbWikiReadOnly.SetValue(
                     wikiDocument.getWriteAccessDeniedByConfig())
-        
+
+            fppCap = wikiDocument.getWikiData().checkCapability("filePerPage")
+            
+            self.ctrls.cbWikiPageFilesAsciiOnly.Enable(fppCap is not None)
+            self.ctrls.cbWikiPageFilesGracefulOutsideAddAndRemove.Enable(
+                    fppCap is not None)
+
         self.OnEditorImagePasteFileTypeChoice(None)
 
+
+        # Now show the right panel
         self.activePageIndex = -1
         for panel in self.panelList:
             panel.Show(False)

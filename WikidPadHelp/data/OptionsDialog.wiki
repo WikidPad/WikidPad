@@ -85,7 +85,10 @@ If checked and document structure window is visible, changing cursor position in
 Control if insertions with key "eval" should be evaluated as Python expressions or not, see also [Insertions].
 
 *Script security*
-Set the security level for script execution, see [InlinePythonEval#+++ Security concerns] .
+Set the security level for script execution, see [InlinePythonEval#+++ Security concerns].
+
+*Reverse script search order (global imports first)*
+If checked, the order for searching of executable scripts is reversed, global imports are searched first (if allowed by the security setting above). See [InlinePythonEval#+++ Security concerns].
 
 
 ++++ Tree options
@@ -365,7 +368,7 @@ These options apply to the active wiki only
 Interpret [Footnotes] (e.g. "[42]") as wiki words.
 
 *First word at startup*
-Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last words when the wiki was closed is shown on opening.
+Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last words when the wiki was closed are shown on opening.
 
 *Default export dir.*
 Set the default export directory into which exports should go.
@@ -389,6 +392,18 @@ Check this if you want to prevent the wiki from acidental modifications.
 *Auto-show log window*
 Automatically show log window if new error messages arrive (see [WikiDocumentAttributes#+++ Error checking]).
 If the check-box is gray, the application-bound setting (see above) is used, otherwise this wiki-bound setting overrides it.
+
+*Page file names ASCII only*
+If set, all filenames of newly created pages only contain ASCII-characters (no umlauts, accented characters etc.). Already created files are not renmed even if the file content is modified afterwards.
+
+This option does not apply to Compact Sqlite DB backend because it does not have separate page files.
+
+*Graceful handling of missing page files*
+If a page file is deleted or inserted into the "data" directory externally tries to update the core database if it encounters this change.
+
+If not set, missing files which are listed in the core database issue an error and newly added files are ignored.
+
+This option does not apply to Compact Sqlite DB backend because it does not have separate page files.
 
 *Wiki icon*
 Set here the name of icon to use in the system tray instead of the default icon. If the field is empty the default icon is used. The icon of the main window is not influenced by this setting (because it does not work).

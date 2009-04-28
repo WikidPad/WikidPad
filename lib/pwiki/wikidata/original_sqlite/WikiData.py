@@ -178,12 +178,29 @@ class WikiData:
         Function must work for read-only wiki.
         """
         try:
-#             if (not exists(self.getWikiWordFileName(word))):
-#                 raise WikiFileNotFoundException(
-#                         _(u"Wiki page not found for word: %s") % word)
-    
-            content = loadEntireTxtFile(self.getWikiWordFileName(word))
-    
+            try:
+                filePath = self.getWikiWordFileName(word)
+            except WikiFileNotFoundException:
+                if self.wikiDocument.getWikiConfig().getboolean("main",
+                        "wikiPageFiles_gracefulOutsideAddAndRemove", True) and \
+                        self._guessWikiWordFileName(word) is not None:
+                    # Page not in database but appropriate page file
+                    # present in data directory -> refresh database and try again
+
+                    self.refreshDefinedContentNames(deleteFully=True)
+                    filePath = self.getWikiWordFileName(word)
+                else:
+                    raise
+
+            if self.wikiDocument.getWikiConfig().getboolean("main",
+                    "wikiPageFiles_gracefulOutsideAddAndRemove", True) and \
+                    not os.path.exists(filePath):
+                # File is missing and this should be handled gracefully
+                self.refreshDefinedContentNames(deleteFully=True)
+                return u""
+
+            content = loadEntireTxtFile(filePath)
+
             return fileContentToUnicode(content)
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
@@ -282,7 +299,15 @@ class WikiData:
 
     def deleteContent(self, word):
         try:
-            fileName = self.getWikiWordFileName(word)
+            try:
+                fileName = self.getWikiWordFileName(word)
+            except WikiFileNotFoundException:
+                if self.wikiDocument.getWikiConfig().getboolean("main",
+                        "wikiPageFiles_gracefulOutsideAddAndRemove", True):
+                    fileName = None
+                else:
+                    raise
+
             self.connWrap.execSql("delete from wikiwords where word = ?",
                     (word,))
             self.cachedContentNames = None
@@ -504,13 +529,32 @@ class WikiData:
         containing the content, False otherwise.
         """
         try:
-            filePath = self.getWikiWordFileName(word)
+            try:
+                filePath = self.getWikiWordFileName(word)
+            except WikiFileNotFoundException:
+                if self.wikiDocument.getWikiConfig().getboolean("main",
+                        "wikiPageFiles_gracefulOutsideAddAndRemove", True) and \
+                        self._guessWikiWordFileName(word) is not None:
+
+                    self.refreshDefinedContentNames(deleteFully=True)
+                    # Try again
+                    filePath = self.getWikiWordFileName(word)
+                else:
+                    raise
+
+            if self.wikiDocument.getWikiConfig().getboolean("main",
+                    "wikiPageFiles_gracefulOutsideAddAndRemove", True) and \
+                    not os.path.exists(filePath):
+                # File is missing and this should be handled gracefully
+                self.refreshDefinedContentNames(deleteFully=True)
+                return True
+
             fileSig = getFileSignatureBlock(filePath)
 
             dbFileSig = self.connWrap.execSqlQuerySingleItem(
                     "select filesignature from wikiwords where word = ?",
                     (word,))
-            
+
             return dbFileSig == fileSig
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
@@ -959,7 +1003,7 @@ class WikiData:
     getAllDefinedWikiPageNames = getAllDefinedContentNames
 
     
-    def refreshDefinedContentNames(self):
+    def refreshDefinedContentNames(self, deleteFully=False):
         """
         Refreshes the internal list of defined pages which
         may be different from the list of pages for which
@@ -983,8 +1027,16 @@ class WikiData:
             for path in self.connWrap.execSqlQuerySingleColumn(
                     "select filepath from wikiwords"):
                 if not os.path.exists(longPathEnc(os.path.join(self.dataDir, path))):
-                    self.connWrap.execSql("delete from wikiwords "
-                            "where filepath = ?", (path,))
+                    if not deleteFully:
+                        self.connWrap.execSql("delete from wikiwords "
+                                "where filepath = ?", (path,))
+                        self.commitNeeded = True
+                    else:
+                        words = self.connWrap.execSqlQuerySingleColumn(
+                                "select word from wikiwords "
+                                "where filepath = ?", (path,))
+                        for word in words:
+                            self.deleteWord(word)
 
             # Add new words:
             ti = time()
@@ -993,22 +1045,6 @@ class WikiData:
                 st = os.stat(longPathEnc(fullPath))
                 
                 wikiWord = self._findNewWordForFile(path)
-                
-#                 wikiWord = guessBaseNameByFilename(path, self.pagefileSuffix)
-                
-#                 if self.execSqlQuerySingleItem(
-#                         "select word from wikiwords where word = ?", (wikiWord,)):
-#                     for i in range(20):    # "while True" is too dangerous
-#                         rand = createRandomString(10)
-#                         
-#                         if self.execSqlQuerySingleItem(
-#                                 "select word from wikiwords where word = ?",
-#                                 (wikiWord + u"~" + rand,)):
-#                             continue
-#                         
-#                         wikiWord = wikiWord + u"~" + rand
-#                         break
-#                     else:
 
                 if wikiWord is not None:
                     fileSig = getFileSignatureBlock(fullPath)
@@ -1046,10 +1082,9 @@ class WikiData:
 
     def _getAllWikiFileNamesFromDisk(self):   # Used for rebuilding wiki
         try:
-            files = glob.glob(longPathEnc(join(self.dataDir,
-                    u'*' + self.pagefileSuffix)))
+            files = glob.glob(join(self.dataDir, u'*' + self.pagefileSuffix))
 
-            return [longPathDec(basename(fn)) for fn in files]
+            return [basename(fn) for fn in files]
             
 #             result = []
 #             for file in files:
@@ -1104,58 +1139,16 @@ class WikiData:
         return longPathEnc(join(self.dataDir, path))
 
 
-#     def isDefinedWikiWord(self, word):
-#         """
-#         check if a word is a valid wikiword (page name or alias)
-#         Function must work for read-only wiki.
-#         """
-#         return self._getCachedContentNames().has_key(word)
-
-#     def getWikiWordsStartingWith(self, thisStr, includeAliases=False,
-#             caseNormed=False):
-#         """
-#         get the list of words starting with thisStr. used for autocompletion.
-#         Function must work for read-only wiki.
-#         """
-#         # Escape some characters:   # TODO more elegant
-#         thisStr = thisStr.replace("[", "[[").replace("]", "[]]").replace("[[", "[[]")
-#         try:
-#             if caseNormed:
-#                 thisStr = thisStr.lower()   # TODO More general normcase function
-#                 if includeAliases:
-#                     return self.connWrap.execSqlQuerySingleColumn(
-#                             "select word from wikiwords where wordnormcase glob (? || '*') union "
-#                             "select value from wikiwordprops where key = 'alias' and "
-#                             "utf8Normcase(value) glob (? || '*')", (thisStr, thisStr))
-#                 else:
-#                     return self.connWrap.execSqlQuerySingleColumn("select word "
-#                             "from wikiwords where wordnormcase glob (? || '*')",
-#                             (thisStr,))
-#             else:
-#                 if includeAliases:
-#                     return self.connWrap.execSqlQuerySingleColumn(
-#                             "select word from wikiwords where word glob (? || '*') union "
-#                             "select value from wikiwordprops where key = 'alias' and "
-#                             "value glob (? || '*')", (thisStr, thisStr))
-#                 else:
-#                     return self.connWrap.execSqlQuerySingleColumn("select word "
-#                             "from wikiwords where word glob (? || '*')",
-#                             (thisStr,))
-# 
-# 
-#         except (IOError, OSError, sqlite.Error), e:
-#             traceback.print_exc()
-#             raise DbReadAccessError(e)
-#         
-#         return pathEnc(join(self.dataDir, path))
-
-
     def createWikiWordFileName(self, wikiWord):
         """
         Create a filename for wikiWord which is not yet in the database or
         a file with that name in the data directory
         """
-        icf = iterCompatibleFilename(wikiWord, self.pagefileSuffix)
+        asciiOnly = self.wikiDocument.getWikiConfig().getboolean("main",
+                "wikiPageFiles_asciiOnly", False)
+
+        icf = iterCompatibleFilename(wikiWord, self.pagefileSuffix,
+                asciiOnly=asciiOnly)
         for i in range(30):   # "while True" would be too dangerous
             fileName = icf.next()
             existing = self.connWrap.execSqlQuerySingleColumn(
@@ -1169,6 +1162,57 @@ class WikiData:
             return fileName
 
         return None
+
+
+    def _guessWikiWordFileName(self, wikiWord):
+        """
+        Try to find an existing file in self.dataDir which COULD BE the page
+        file for wikiWord.
+        Called when external adding of files should be handled gracefully.
+        Returns either the filename relative to self.dataDir or None.
+        """
+        try:
+            asciiOnly = self.wikiDocument.getWikiConfig().getboolean("main",
+                    "wikiPageFiles_asciiOnly", False)
+            
+            # Try first with current ascii-only setting
+            icf = iterCompatibleFilename(wikiWord, self.pagefileSuffix,
+                    asciiOnly=asciiOnly)
+    
+            for i in range(2):
+                fileName = icf.next()
+
+                existing = self.connWrap.execSqlQuerySingleColumn(
+                        "select filenamelowercase from wikiwords "
+                        "where filenamelowercase = ?", (fileName.lower(),))
+                if len(existing) > 0:
+                    continue
+                if not os.path.exists(longPathEnc(join(self.dataDir, fileName))):
+                    continue
+
+                return fileName
+
+            # Then the same with opposite ascii-only setting
+            icf = iterCompatibleFilename(wikiWord, self.pagefileSuffix,
+                    asciiOnly=not asciiOnly)
+    
+            for i in range(2):
+                fileName = icf.next()
+
+                existing = self.connWrap.execSqlQuerySingleColumn(
+                        "select filenamelowercase from wikiwords "
+                        "where filenamelowercase = ?", (fileName.lower(),))
+                if len(existing) > 0:
+                    continue
+                if not os.path.exists(longPathEnc(join(self.dataDir, fileName))):
+                    continue
+
+                return fileName
+            
+            return None
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
 
 
     def isDefinedWikiPage(self, word):
@@ -1235,66 +1279,6 @@ class WikiData:
             except (IOError, OSError, sqlite.Error), e:
                 traceback.print_exc()
                 raise DbReadAccessError(e)
-
-
-#     def getWikiLinksStartingWith(self, thisStr, includeAliases=False, 
-#             caseNormed=False):
-#         "get the list of words starting with thisStr. used for autocompletion."
-#         words = self.getAllDefinedContentNames()
-#         if includeAliases:
-#             words.extend(self.getAllAliases())
-#         
-#         if caseNormed:
-#             thisStr = thisStr.lower()   # TODO More general normcase function
-#             startingWith = [word for word in words
-#                     if word.lower().startswith(thisStr)]
-#             return startingWith
-#         else:
-#             startingWith = [word for word in words if word.startswith(thisStr)]
-#             return startingWith
-
-
-#     def getWikiWordsWith(self, thisStr, includeAliases=False):
-#         """
-#         get the list of words with thisStr in them,
-#         if possible first these which start with thisStr.
-#         Function must work for read-only wiki.
-#         """
-#         thisStr = thisStr.lower()   # TODO More general normcase function
-# 
-#         try:
-#             result1 = self.connWrap.execSqlQuerySingleColumn(
-#                     "select word from wikiwords where wordnormcase like (? || '%')",
-#                     (thisStr,))
-# 
-#             if includeAliases:
-#                 result1 += self.connWrap.execSqlQuerySingleColumn(
-#                         "select value from wikiwordprops where key = 'alias' and "
-#                         "utf8Normcase(value) like (? || '%')", (thisStr,))
-#     
-#             result2 = self.connWrap.execSqlQuerySingleColumn(
-#                     "select word from wikiwords "
-#                     "where wordnormcase like ('%' || ? || '%') and "
-#                     "wordnormcase not like (? || '%') and word not glob '[[]*'",
-#                     (thisStr, thisStr))
-#     
-#             if includeAliases:
-#                 result2 += self.connWrap.execSqlQuerySingleColumn(
-#                         "select value from wikiwordprops where key = 'alias' and "
-#                         "utf8Normcase(value) like ('%' || ? || '%') and "
-#                         "utf8Normcase(value) not like (? || '%')",
-#                         (thisStr, thisStr))
-#                         
-#             coll = self.wikiDocument.getCollator()
-#             
-#             coll.sort(result1)
-#             coll.sort(result2)
-# 
-#             return result1 + result2
-#         except (IOError, OSError, sqlite.Error), e:
-#             traceback.print_exc()
-#             raise DbReadAccessError(e)
-
 
 
     def getWikiWordsModifiedWithin(self, startTime, endTime):
@@ -1875,8 +1859,12 @@ class WikiData:
                             "set filesignature = ?", (sqlite.Binary(fileSig),))
                     return
 
+                asciiOnly = self.wikiDocument.getWikiConfig().getboolean("main",
+                        "wikiPageFiles_asciiOnly", False)
+
                 # Find unused filename
-                icf = iterCompatibleFilename(unifName, u".data")
+                icf = iterCompatibleFilename(unifName, u".data",
+                        asciiOnly=asciiOnly)
 
                 for i in range(30):   # "while True" would be too dangerous
                     fileName = icf.next()
@@ -1973,6 +1961,7 @@ class WikiData:
     _CAPABILITIES = {
         "rebuild": 1,
         "compactify": 1,     # = sqlite vacuum
+        "filePerPage": 1   # Uses a single file per page
 #         "versioning": 1,     # TODO (old versioning)
 #         "plain text import":1   # Is already plain text      
         }

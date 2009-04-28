@@ -72,12 +72,26 @@
         <object class="wxBoxSizer">
           <orient>wxHORIZONTAL</orient>
           <object class="sizeritem">
-            <object class="wxListBox" name="lbPages">
-              <content/>
+            <object class="wxBoxSizer">
+              <orient>wxVERTICAL</orient>
+              <object class="sizeritem">
+                <object class="wxStaticText">
+                  <label>Options page:</label>
+                </object>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <border>5</border>
+              </object>
+              <object class="sizeritem">
+                <object class="wxListBox" name="lbPages">
+                  <content/>
+                </object>
+                <option>1</option>
+                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                <border>5</border>
+              </object>
             </object>
             <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-            <border>5</border>
+            <flag>wxEXPAND</flag>
           </object>
           <object class="sizeritem">
             <object class="wxPanel" name="panelPages"/>
@@ -468,6 +482,14 @@
         </object>
         <option>0</option>
         <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbScriptSearchReverse">
+          <label>Reverse script search order (global imports first)</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
       </object>
     </object>
   </object>
@@ -2200,6 +2222,22 @@
         <object class="wxCheckBox" name="cbLogWindowAutoShowWiki">
           <label>Auto-show log window</label>
           <style>wxCHK_3STATE|wxCHK_ALLOW_3RD_STATE_FOR_USER</style>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbWikiPageFilesAsciiOnly">
+          <label>Page file names ASCII only</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbWikiPageFilesGracefulOutsideAddAndRemove">
+          <label>Graceful handling of missing page files</label>
         </object>
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>

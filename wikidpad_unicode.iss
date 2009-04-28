@@ -35,8 +35,8 @@ Source: dist\wx._xrc.pyd; DestDir: {app}; Components: Program_files; Flags: repl
 Source: dist\WikidPad.xrc; DestDir: {app}; Components: Program_files
 Source: dist\WikidPad_*.po; DestDir: {app}; Components: Program_files; Flags: ignoreversion sortfilesbyextension
 Source: dist\langlist.txt; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
-Source: dist\gadfly.zip; DestDir: {app}; Components: Program_files
-Source: dist\library.zip; DestDir: {app}; Components: Program_files
+Source: dist\gadfly.zip; DestDir: {app}; Components: Program_files; Flags: nocompression
+Source: dist\library.zip; DestDir: {app}; Components: Program_files; Flags: nocompression
 Source: Microsoft.VC90.CRT.manifest; DestDir: {app}
 Source: winBinAdditions\msvcp90.dll; DestDir: {app}
 Source: winBinAdditions\msvcr90.dll; DestDir: {app}
@@ -54,17 +54,17 @@ Name: Program_files; Description: Main program files; Flags: fixed; Types: custo
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 2.0beta02
+AppVerName=WikidPad 2.0beta03
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=2.0.102.0
-VersionInfoTextVersion=WikidPad 2.0beta02
+VersionInfoVersion=2.0.103.0
+VersionInfoTextVersion=WikidPad 2.0beta03
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-2.0beta02
+OutputBaseFilename=WikidPad-2.0beta03
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2009 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
