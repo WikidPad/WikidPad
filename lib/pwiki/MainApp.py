@@ -563,9 +563,9 @@ class App(wx.App, MiscEventSourceMixin):
         """
         pl = self.getOptionsDlgPanelList()
         try:
-            pl.index(("", u"Plugin options"))
+            pl.index(("", _(u"Plugin options")))
         except ValueError:
-            pl.append(("", u"Plugin options"))
+            pl.append(("", _(u"Plugin options")))
 
         pl.append((factory, title))
 

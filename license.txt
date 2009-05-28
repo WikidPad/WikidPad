@@ -2,7 +2,7 @@ The main program has the following license (some used components may have
 another license, see below):
 
 
-Copyright (c) 2005-2007 Michael Butscher, Jason Horman, Gerhard Reitmayr
+Copyright (c) 2005-2009 Michael Butscher, Jason Horman, Gerhard Reitmayr
 All rights reserved.
 
 
@@ -30,6 +30,13 @@ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
+
+------------------------------------------------------------
+Translations:
+
+Swedish     Stefan Berg <steffe62 ## gmail.com>
+
+
 
 ------------------------------------------------------------
 

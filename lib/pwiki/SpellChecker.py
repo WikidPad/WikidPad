@@ -20,7 +20,7 @@ import WikiFormatting
 
 
 class SpellCheckerDialog(wx.Dialog):
-    def __init__(self, parent, ID, mainControl, title="Check spelling",
+    def __init__(self, parent, ID, mainControl, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D):
         d = wx.PreDialog()
@@ -29,7 +29,9 @@ class SpellCheckerDialog(wx.Dialog):
         self.mainControl = mainControl
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, parent, "SpellCheckDialog")
-        self.SetTitle(title)
+
+        if title is not None:
+            self.SetTitle(title)
         
         # Create styled explanation
         tfToCheck = wx.TextCtrl(self, GUI_ID.tfToCheck,

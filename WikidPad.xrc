@@ -1912,27 +1912,27 @@
             <object class="wxStaticText">
               <label>Change these only if you know what you are doing!</label>
               <fg>#A80000</fg>
-        </object>
+            </object>
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
-      </object>
+          </object>
           <object class="sizeritem">
             <object class="wxCheckBox" name="cbWikiLockFileIgnore">
               <label>Ignore wiki lock file</label>
-        </object>
+            </object>
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
-      </object>
+          </object>
           <object class="sizeritem">
             <object class="wxCheckBox" name="cbWikiLockFileCreate">
               <label>Create wiki lock file</label>
-        </object>
+            </object>
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
-      </object>
+          </object>
           <label></label>
         </object>
         <option>0</option>
@@ -2235,7 +2235,7 @@
       </object>
       <object class="sizeritem">
         <object class="wxStaticText" name="stFacePreview">
-          <label>Sample</label>
+          <label></label>
           <font>
             <size>12</size>
             <style>default</style>
@@ -2507,7 +2507,7 @@
     <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
   </object>
   <object class="wxDialog" name="ImagePasteDialog">
-    <title>Choose Wiki Word</title>
+    <title>Paste Image</title>
     <centered>1</centered>
     <object class="wxBoxSizer">
       <orient>wxVERTICAL</orient>
@@ -2602,330 +2602,6 @@
       </object>
     </object>
     <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
-  </object>
-  <object class="wxDialog" name="SearchWikiDialog_alt_small">
-    <title>Search Wiki</title>
-    <centered>1</centered>
-    <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
-    <object class="wxBoxSizer">
-      <orient>wxHORIZONTAL</orient>
-      <object class="sizeritem">
-        <object class="wxBoxSizer">
-          <orient>wxVERTICAL</orient>
-          <object class="sizeritem">
-            <object class="wxStaticText" name="">
-              <label>Wiki Search</label>
-            </object>
-            <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxTextCtrl" name="txtSearch">
-              <style>wxTE_PROCESS_ENTER</style>
-            </object>
-            <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxBoxSizer">
-              <orient>wxHORIZONTAL</orient>
-              <object class="sizeritem">
-                <object class="wxBoxSizer">
-                  <orient>wxVERTICAL</orient>
-                  <object class="sizeritem">
-                    <object class="wxRadioBox" name="rboxSearchType">
-                      <label></label>
-                      <content>
-                        <item>S&amp;imple regex</item>
-                        <item>&quot;&amp;Anded&quot; regex</item>
-                      </content>
-                      <style>wxRA_SPECIFY_COLS|wxWANTS_CHARS</style>
-                    </object>
-                    <option>0</option>
-                    <flag>wxALL|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                  </object>
-                  <object class="sizeritem">
-                    <object class="wxCheckBox" name="cbCaseSensitive">
-                      <label>&amp;Case sensitive</label>
-                      <style>wxWANTS_CHARS</style>
-                    </object>
-                    <option>0</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                  </object>
-                  <object class="sizeritem">
-                    <object class="wxCheckBox" name="cbWholeWord">
-                      <label>&amp;Whole word</label>
-                      <style>wxWANTS_CHARS</style>
-                    </object>
-                    <option>0</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                  </object>
-                </object>
-                <option>0</option>
-              </object>
-              <object class="spacer">
-                <size>20,0</size>
-                <option>1</option>
-                <flag>wxEXPAND</flag>
-              </object>
-              <object class="sizeritem">
-                <object class="wxBoxSizer">
-                  <orient>wxVERTICAL</orient>
-                  <object class="sizeritem">
-                    <object class="wxButton" name="btnFindPages">
-                      <label> &amp;Find </label>
-                    </object>
-                    <option>0</option>
-                    <flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                    <minsize>70,20</minsize>
-                  </object>
-                  <object class="sizeritem">
-                    <object class="wxButton" name="btnSetPageList">
-                      <label>Set page &amp;list</label>
-                    </object>
-                    <option>0</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                    <minsize>70,20</minsize>
-                  </object>
-                </object>
-                <option>0</option>
-              </object>
-            </object>
-            <option>0</option>
-            <flag>wxEXPAND</flag>
-          </object>
-          <object class="sizeritem">
-            <object class="wxStaticLine"/>
-            <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxBoxSizer">
-              <orient>wxHORIZONTAL</orient>
-              <object class="sizeritem">
-                <object class="wxBoxSizer">
-                  <orient>wxVERTICAL</orient>
-                  <object class="sizeritem">
-                    <object class="wxStaticText" name="">
-                      <label>Replace By</label>
-                    </object>
-                    <option>0</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                  </object>
-                  <object class="sizeritem">
-                    <object class="wxTextCtrl" name="txtReplace">
-                      <style>wxTE_PROCESS_ENTER</style>
-                    </object>
-                    <option>0</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                  </object>
-                </object>
-                <option>1</option>
-                <flag>wxEXPAND</flag>
-              </object>
-              <object class="sizeritem">
-                <object class="wxBoxSizer">
-                  <orient>wxVERTICAL</orient>
-                  <object class="sizeritem">
-                    <object class="wxButton" name="btnFindNext">
-                      <label> Find &amp;Next </label>
-                    </object>
-                    <option>0</option>
-                    <flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                    <minsize>70,20</minsize>
-                  </object>
-                  <object class="sizeritem">
-                    <object class="wxButton" name="btnReplace">
-                      <label> &amp;Replace </label>
-                    </object>
-                    <option>0</option>
-                    <flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                    <minsize>70,20</minsize>
-                  </object>
-                  <object class="sizeritem">
-                    <object class="wxButton" name="btnReplaceAll">
-                      <label> Replace &amp;All </label>
-                    </object>
-                    <option>0</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                    <minsize>70,20</minsize>
-                  </object>
-                </object>
-              </object>
-            </object>
-            <option>0</option>
-            <flag>wxEXPAND</flag>
-          </object>
-          <object class="sizeritem">
-            <object class="wxStaticLine"/>
-            <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxBoxSizer">
-              <orient>wxHORIZONTAL</orient>
-              <object class="sizeritem">
-                <object class="wxBoxSizer">
-                  <orient>wxVERTICAL</orient>
-                  <object class="sizeritem">
-                    <object class="wxStaticText" name="">
-                      <label>Saved Searches:</label>
-                    </object>
-                    <option>0</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                  </object>
-                  <object class="sizeritem">
-                    <object class="wxListBox" name="lbSavedSearches">
-                      <content/>
-                      <style>wxLB_EXTENDED</style>
-                    </object>
-                    <option>1</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                  </object>
-                </object>
-                <option>1</option>
-                <flag>wxEXPAND</flag>
-              </object>
-              <object class="sizeritem">
-                <object class="wxBoxSizer">
-                  <orient>wxVERTICAL</orient>
-                  <object class="sizeritem">
-                    <object class="wxButton" name="btnSaveSearch">
-                      <label>&amp;Save Search</label>
-                    </object>
-                    <option>0</option>
-                    <flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                    <minsize>70,20</minsize>
-                  </object>
-                  <object class="sizeritem">
-                    <object class="wxButton" name="btnDeleteSearches">
-                      <label>&amp;Delete</label>
-                    </object>
-                    <option>0</option>
-                    <flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                    <minsize>70,20</minsize>
-                  </object>
-                  <object class="sizeritem">
-                    <object class="wxButton" name="btnLoadSearch">
-                      <label>&amp;Load</label>
-                    </object>
-                    <option>0</option>
-                    <flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                    <minsize>70,20</minsize>
-                  </object>
-                  <object class="sizeritem">
-                    <object class="wxButton" name="btnLoadAndRunSearch">
-                      <label>L. and R&amp;un</label>
-                    </object>
-                    <option>0</option>
-                    <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                    <border>5</border>
-                    <minsize>70,20</minsize>
-                  </object>
-                </object>
-                <option>0</option>
-              </object>
-            </object>
-            <option>1</option>
-            <flag>wxEXPAND</flag>
-          </object>
-        </object>
-        <option>4</option>
-        <flag>wxALL|wxEXPAND</flag>
-      </object>
-      <object class="sizeritem">
-        <object class="wxStaticLine">
-          <style>wxLI_VERTICAL</style>
-        </object>
-        <option>0</option>
-        <flag>wxALL|wxEXPAND</flag>
-        <border>10</border>
-      </object>
-      <object class="sizeritem">
-        <object class="wxBoxSizer">
-          <orient>wxVERTICAL</orient>
-          <object class="sizeritem">
-            <object class="unknown" name="htmllbPages"/>
-            <option>1</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-            <border>5</border>
-            <minsize>200,200</minsize>
-          </object>
-          <object class="sizeritem">
-            <object class="wxBoxSizer">
-              <orient>wxHORIZONTAL</orient>
-              <object class="sizeritem">
-                <object class="wxStaticText" name="">
-                  <label>Copy to clipboard:</label>
-                </object>
-                <option>0</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                <border>5</border>
-              </object>
-              <object class="sizeritem">
-                <object class="wxButton" name="btnCopyPageNamesToClipboard">
-                  <label>Page &amp;names</label>
-                </object>
-                <option>0</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                <border>5</border>
-                <minsize>70,20</minsize>
-              </object>
-            </object>
-            <option>0</option>
-          </object>
-          <object class="sizeritem">
-            <object class="wxStaticLine"/>
-            <option>0</option>
-            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-            <border>5</border>
-          </object>
-          <object class="sizeritem">
-            <object class="wxBoxSizer">
-              <orient>wxHORIZONTAL</orient>
-              <object class="sizeritem">
-                <object class="wxButton" name="btnOptions">
-                  <label>&amp;Options</label>
-                </object>
-                <option>0</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                <border>5</border>
-              </object>
-              <object class="sizeritem">
-                <object class="wxButton" name="btnClose">
-                  <label>Close</label>
-                </object>
-                <option>0</option>
-                <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                <border>5</border>
-              </object>
-            </object>
-            <option>0</option>
-          </object>
-        </object>
-        <option>4</option>
-        <flag>wxALL|wxEXPAND</flag>
-      </object>
-    </object>
   </object>
   <object class="wxDialog" name="SearchWikiDialog">
     <title>Search Wiki</title>
@@ -4664,7 +4340,7 @@
     </object>
   </object>
   <object class="wxDialog" name="SpellCheckDialog">
-    <title>Open Wiki Word</title>
+    <title>Spell Check</title>
     <centered>1</centered>
     <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
     <object class="wxBoxSizer">

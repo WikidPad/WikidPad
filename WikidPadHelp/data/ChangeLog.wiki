@@ -1,6 +1,14 @@
 ﻿++ Change Log
 
-Apr. 26, 2009 (1.9rc04)
+
+May 28, 2009 (1.9rc05)
+
+    * Swedish translation (thanks to Stefan Berg)
+    * Some bugs in translation handling fixed.
+
+
+
+Apr. 26, 2009 (1.9rc04, repository revision in "mbutscher" branch: 191)
 
     * Bug fixed: stdDialog of doc page presenter did not return
       a value (needed for some plugins)

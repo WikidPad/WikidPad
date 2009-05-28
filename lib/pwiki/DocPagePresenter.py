@@ -246,7 +246,7 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
             # fetch the page info from the database
             try:
                 page = self.getMainControl().getWikiDataManager().getWikiPage(wikiWord)
-                self.getStatusBar().SetStatusText(uniToGui(u"Opened wiki word '%s'" %
+                self.getStatusBar().SetStatusText(uniToGui(_(u"Opened wiki word '%s'") %
                         wikiWord), 0)
 
             except (WikiWordNotFoundException, WikiFileNotFoundException), e:

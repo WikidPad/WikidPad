@@ -332,6 +332,7 @@ WikidPadHelp/data/wikidb.gfd -text
 WikidPadHelp/files/testimg.gif -text
 /WikidPadStarter.py -text
 /WikidPad_de_DE.po -text
+/WikidPad_sv.po -text
 /appbase.css -text
 /bld.bat -text
 /buildGadflyZips.py -text

@@ -55,7 +55,7 @@ def describeMenuItems(wiki):
     
     kb = wiki.getKeyBindings()
     
-    return ((autoNewNumbered, _(u"Maintain|Create new page") + u"\t" +
+    return ((autoNewNumbered, _(u"Create new page") + u"\t" +
             kb.Plugin_AutoNew_Numbered, _(u"Create new page")),)
 
 
