@@ -950,7 +950,7 @@ class MainParentlessNode(AbstractNode):
 
     def getNodePresentation(self):
         style = NodeStyle()
-        style.label = u"parentless-nodes"
+        style.label = _(u"parentless-nodes")
         style.icon = u"link"
         style.hasChildren = True
         return style

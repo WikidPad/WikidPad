@@ -596,23 +596,24 @@ class OptionsDialog(wx.Dialog):
 
     DEFAULT_PANEL_LIST = (
             ("OptionsPageApplication", N_(u"Application")),    
-            ("OptionsPageUserInterface", N_(u"  User interface")),
-            ("OptionsPageSecurity", N_(u"  Security")),
-            ("OptionsPageTree", N_(u"  Tree")),
-            ("OptionsPageHtml", N_(u"  HTML preview/export")),
-            ("OptionsPageHtmlHeader", N_(u"    HTML header")),
-            ("OptionsPageEditor", N_(u"  Editor")),
-            ("OptionsPageEditorColors", N_(u"    Editor Colors")),
-            ("OptionsPageClipboardCatcher", N_(u"    Clipboard Catcher")),
-            ("OptionsPageFileLauncher", N_(u"  File Launcher")),
-            ("OptionsPageMouse", N_(u"  Mouse")),
-            ("OptionsPageTimeView", N_(u"  Time view")),
-            ("OptionsPageSearching", N_(u"  Searching")),  
-            ("OptionsPageAdvanced", N_(u"  Advanced")),  
-            ("OptionsPageAutosave", N_(u"    Autosave")),
+            ("OptionsPageUserInterface", 2 * u" " + N_(u"User interface")),
+            ("OptionsPageSecurity", 2 * u" " + N_(u"Security")),
+            ("OptionsPageTree", 2 * u" " + N_(u"Tree")),
+            ("OptionsPageHtml", 2 * u" " + N_(u"HTML preview/export")),
+            ("OptionsPageHtmlHeader", 4 * u" " + N_(u"HTML header")),
+            ("OptionsPageEditor", 2 * u" " + N_(u"Editor")),
+            ("OptionsPageEditorColors", 4 * u" " + N_(u"Editor Colors")),
+            ("OptionsPageClipboardCatcher", 4 * u" " + N_(u"Clipboard Catcher")),
+            ("OptionsPageFileLauncher", 2 * u" " + N_(u"File Launcher")),
+            ("OptionsPageMouse", 2 * u" " + N_(u"Mouse")),
+            ("OptionsPageTimeView", 2 * u" " + N_(u"Time view")),
+            ("OptionsPageSearching", 2 * u" " + N_(u"Searching")),  
+            ("OptionsPageAdvanced", 2 * u" " + N_(u"Advanced")),  
+            ("OptionsPageAutosave", 4 * u" " + N_(u"Autosave")),
             ("OptionsPageCurrentWiki", N_(u"Current Wiki")),
-            ("OptionsPageCwHeadings", N_(u"  Headings")),
-            ("OptionsPageCwAdvanced", N_(u"  Advanced"))
+            ("OptionsPageCwHeadings", 2 * u" " + N_(u"Headings")),
+            ("OptionsPageCwAdvanced", 2 * u" " + N_(u"Advanced")),
+            ("??insert mark/current wiki", u"")
     )
 
     def __init__(self, pWiki, ID, title="Options",
@@ -637,8 +638,12 @@ class OptionsDialog(wx.Dialog):
 
             newPL = []
             for e in self.combinedPanelList:
-                if e[0] == "OptionsPageFileLauncher":
-                    continue
+                if isinstance(e[0], basestring):
+                    if e[0] == "OptionsPageFileLauncher":
+                        continue
+                    if e[0].startswith("??"):
+                        # Entry is only a mark for insertion operations so skip it
+                        continue
 
                 newPL.append(e)
 
@@ -648,8 +653,12 @@ class OptionsDialog(wx.Dialog):
 
             newPL = []
             for i, e in enumerate(self.combinedPanelList):
-                if e[0] == "OptionsPageClipboardCatcher":
-                    continue
+                if isinstance(e[0], basestring):
+                    if e[0] == "OptionsPageClipboardCatcher":
+                        continue
+                    if e[0].startswith("??"):
+                        # Entry is only a mark for insertion operations so skip it
+                        continue
 
                 newPL.append(e)
 

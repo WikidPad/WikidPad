@@ -1672,28 +1672,40 @@ class WikiPage(DataCarryingPage):
 
 
         # TODO Remove aliases?
-    def _flatTreeHelper(self, page, deepness, excludeSet, result, unalias):
+    def _flatTreeHelper(self, page, deepness, excludeSet, includeSet, result,
+            unalias):
         """
         Recursive part of getFlatTree
         """
 #         print "_flatTreeHelper1", repr((page.getWikiWord(), deepness, len(excludeSet)))
-        excludeSet.add(page.getNonAliasPage().getWikiWord())
+
+        word = page.getWikiWord()
+        nonAliasWord = page.getNonAliasPage().getWikiWord()
+        excludeSet.add(nonAliasWord)
+
         children = page.getChildRelationshipsTreeOrder(existingonly=True)
 
-        for c in children:
-            subpage = self.wikiDocument.getWikiPage(c)
+        for word in children:
+            subpage = self.wikiDocument.getWikiPage(word)
             nonAliasWord = subpage.getNonAliasPage().getWikiWord()
             if nonAliasWord in excludeSet:
                 continue
             if unalias:
                 result.append((nonAliasWord, deepness + 1))
             else:
-                result.append((c, deepness + 1))
-            self._flatTreeHelper(subpage, deepness + 1, excludeSet, result,
-                    unalias)
+                result.append((word, deepness + 1))
+            
+            if includeSet is not None:
+                includeSet.discard(word)
+                includeSet.discard(nonAliasWord)
+                if len(includeSet) == 0:
+                    return
+            
+            self._flatTreeHelper(subpage, deepness + 1, excludeSet, includeSet,
+                    result, unalias)
 
 
-    def getFlatTree(self, unalias=False):
+    def getFlatTree(self, unalias=False, includeSet=None):
         """
         Returns a sequence of tuples (word, deepness) where the current
         word is the first one with deepness 0.
@@ -1702,14 +1714,23 @@ class WikiPage(DataCarryingPage):
         unalias -- replace all aliases by their real word
         TODO EXPLAIN FUNCTION !!!
         """
+        word = self.getWikiWord()
+        nonAliasWord = self.getNonAliasPage().getWikiWord()
+
         if unalias:
-            result = [(self.getNonAliasPage().getWikiWord(), 0)]
+            result = [(nonAliasWord, 0)]
         else:
-            result = [(self.getWikiWord(), 0)]
+            result = [(word, 0)]
+
+        if includeSet is not None:
+            includeSet.discard(word)
+            includeSet.discard(nonAliasWord)
+            if len(includeSet) == 0:
+                return result
 
         excludeSet = set()   # set((self.getWikiWord(),))
 
-        self._flatTreeHelper(self, 0, excludeSet, result, unalias)
+        self._flatTreeHelper(self, 0, excludeSet, includeSet, result, unalias)
 
 #         print "getFlatTree", repr(result)
 

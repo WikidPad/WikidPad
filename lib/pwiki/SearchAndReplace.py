@@ -892,7 +892,9 @@ class ListWikiPagesOperation:
 
             for rootWord in rootWords:
                 rootPage = self.wikiDocument.getWikiPage(rootWord)
-                flatTree = rootPage.getFlatTree(unalias=True)
+                flatTree = rootPage.getFlatTree(unalias=True,
+                        includeSet=wordSet.copy())
+
                 if rootWord in rootWordSet:
                     result.append(rootWord)
                     rootWordSet.remove(rootWord)

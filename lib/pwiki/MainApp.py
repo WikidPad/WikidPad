@@ -649,7 +649,7 @@ class App(wx.App, MiscEventSourceMixin):
     def getOptionsDlgPanelList(self):        
         return self.optionsDlgPanelList
 
-    def addOptionsDlgPanel(self, factory, title):
+    def addGlobalOptionsDlgPanel(self, factory, title):
         """
         factory -- Factory function (or class taking parameters
             (parent, optionsDlg, app) where
@@ -661,13 +661,30 @@ class App(wx.App, MiscEventSourceMixin):
         """
         pl = self.getOptionsDlgPanelList()
         try:
-            pl.index(("", u"Plugin options"))
+            insPos = pl.index(("??insert mark/plugins global", u""))
         except ValueError:
-            pl.append(("", u"Plugin options"))
+            pl.append(("", _(u"Plugin options")))
+            insPos = len(pl)
+            pl.append(("??insert mark/plugins global", u""))
 
-        pl.append((factory, title))
+        pl.insert(insPos, (factory, title))
 
+    addOptionsDlgPanel = addGlobalOptionsDlgPanel
 
+    def addWikiOptionsDlgPanel(self, factory, title):
+        """
+        factory -- Factory function (or class taking parameters
+            (parent, optionsDlg, app) where
+                parent: GUI parent of panel
+                optionsDlg: OptionsDialog object
+                app: MainApp object
+        title -- unistring with title to show in the left list in options
+            dialog
+        """
+        pl = self.getOptionsDlgPanelList()
+        insPos = pl.index(("??insert mark/current wiki", u""))
+
+        pl.insert(insPos, (factory, title))
 
 
 

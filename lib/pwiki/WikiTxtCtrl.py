@@ -1993,7 +1993,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 scriptNodeGroups.reverse()
 
             scriptNodes = reduce(lambda a, b: a + b, scriptNodeGroups)
-            
+
             for node in scriptNodes:
                 script = node.findFlatByName("code").getString()
                 script = re.sub(u"^[\r\n\s]+", u"", script)

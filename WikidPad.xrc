@@ -2469,7 +2469,7 @@
       </object>
       <object class="sizeritem">
         <object class="wxStaticText" name="stFacePreview">
-          <label>Sample</label>
+          <label></label>
           <font>
             <size>12</size>
             <style>default</style>
@@ -2769,7 +2769,7 @@
     <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
   </object>
   <object class="wxDialog" name="ImagePasteDialog">
-    <title>Choose Wiki Word</title>
+    <title>Paste Image</title>
     <centered>1</centered>
     <object class="wxBoxSizer">
       <orient>wxVERTICAL</orient>
@@ -4698,6 +4698,7 @@
             <object class="wxChoice" name="chExportTo">
               <content>
                 <item>Plain text</item>
+                <item>HTML</item>
               </content>
               <selection>0</selection>
             </object>
@@ -4801,7 +4802,7 @@
     </object>
   </object>
   <object class="wxDialog" name="SpellCheckDialog">
-    <title>Open Wiki Word</title>
+    <title>Spell Check</title>
     <centered>1</centered>
     <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
     <object class="wxBoxSizer">

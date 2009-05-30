@@ -257,40 +257,6 @@ class WikiDataSynchronizedProxy:
         return result
 
 
-
-
-
-
-# Version for SingleThreadAccess:
-
-# class WikiDataSynchronizedFunction:
-#     def __init__(self, function):
-#         self.callFunction = function
-#         self.dbExecutor = GetApp().getDbExecutor()
-# 
-#     def __call__(self, *args, **kwargs):
-#         return self.dbExecutor(self.callFunction, *args, **kwargs)
-# 
-# 
-# 
-# class WikiDataSynchronizedProxy:
-#     """
-#     Proxy class for synchronized access to a WikiData instance
-#     """
-#     def __init__(self, wikiData):
-#         self.wikiData = wikiData
-# 
-#     def __getattr__(self, attr):
-#         result = WikiDataSynchronizedFunction(
-#                 getattr(self.wikiData, attr))
-# 
-#         self.__dict__[attr] = result
-# 
-#         return result
-
-
-
-
 class WikiDataManager(MiscEventSourceMixin):
     """
     Wraps a WikiData object and provides services independent

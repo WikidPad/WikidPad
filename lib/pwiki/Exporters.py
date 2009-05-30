@@ -502,7 +502,7 @@ class HtmlExporter(AbstractExporter):
 
 
         if exportType == u"html_multi":
-            browserFile = self._exportHtmlMultiFile()
+            browserFile = self.exportHtmlMultiFile()
         elif exportType == u"html_single":
             browserFile = self._exportHtmlSingleFiles(self.wordList)
 
@@ -574,7 +574,7 @@ class HtmlExporter(AbstractExporter):
         self.wordList.remove(wikiWord)
         
         if self.exportType == u"html_multi":
-            self._exportHtmlMultiFile()
+            self.exportHtmlMultiFile()
 
         elif self.exportType == u"html_single":
             self._exportHtmlSingleFiles([])
@@ -599,7 +599,7 @@ class HtmlExporter(AbstractExporter):
 
 
         if self.exportType == u"html_multi":
-            self._exportHtmlMultiFile()
+            self.exportHtmlMultiFile()
 
         elif self.exportType == u"html_single":
             if newInList:
@@ -636,7 +636,7 @@ class HtmlExporter(AbstractExporter):
 
         try:
             if self.exportType == u"html_multi":
-                self._exportHtmlMultiFile()
+                self.exportHtmlMultiFile()
     
             elif self.exportType == u"html_single":
                 self._exportHtmlSingleFiles(updList)
@@ -667,14 +667,14 @@ class HtmlExporter(AbstractExporter):
         self.linkConverter = linkConverter
 
 
-    def _exportHtmlMultiFile(self):
+    def exportHtmlMultiFile(self, realfp=None, tocMode=None):
         """
         Multiple wiki pages in one file.
         """        
         config = self.mainControl.getConfig()
         sepLineCount = config.getint("main",
                 "html_export_singlePage_sepLineCount", 10)
-        
+
         if sepLineCount < 0:
             sepLineCount = 10
 #         if len(self.wordList) == 1:
@@ -684,34 +684,43 @@ class HtmlExporter(AbstractExporter):
         self.setLinkConverter(LinkConverterForHtmlMultiPageExport(
                 self.wikiDocument, self))
 
-        outputFile = join(self.exportDest,
-                self.convertFilename(u"%s.html" % self.mainControl.wikiName))
         self.buildStyleSheetList()
 
-        if exists(pathEnc(outputFile)):
-            os.unlink(pathEnc(outputFile))
+        if realfp is None:
+            outputFile = join(self.exportDest,
+                    self.convertFilename(u"%s.html" % self.mainControl.wikiName))
 
-        realfp = open(pathEnc(outputFile), "w")
-        fp = utf8Writer(realfp, "replace")
-        fp.write(self.getFileHeaderMultiPage(self.mainControl.wikiName))
+            if exists(pathEnc(outputFile)):
+                os.unlink(pathEnc(outputFile))
+
+            realfp = open(pathEnc(outputFile), "w")
+        else:
+            outputFile = None
+
+        filePointer = utf8Writer(realfp, "replace")
+
+        filePointer.write(self.getFileHeaderMultiPage(self.mainControl.wikiName))
 
         tocTitle = self.addOpt[2]
+        
+        if tocMode is None:
+            tocMode = self.addOpt[1]
 
-        if self.addOpt[1] == 1:
+        if tocMode == 1:
             # Write a content tree at beginning
             rootPage = self.mainControl.getWikiDocument().getWikiPage(
                         self.mainControl.getWikiDocument().getWikiName())
             flatTree = rootPage.getFlatTree()
 
-            fp.write((u'<h2>%s</h2>\n'
+            filePointer.write((u'<h2>%s</h2>\n'
                     '%s%s<hr size="1"/>') %
                     (tocTitle, # = "Table of Contents"
                     self.getContentTreeBody(flatTree, linkAsFragments=True),
                     u'<br />\n' * sepLineCount))
 
-        elif self.addOpt[1] == 2:
+        elif tocMode == 2:
             # Write a content list at beginning
-            fp.write((u'<h2>%s</h2>\n'
+            filePointer.write((u'<h2>%s</h2>\n'
                     '%s%s<hr size="1"/>') %
                     (tocTitle, # = "Table of Contents"
                     self.getContentListBody(linkAsFragments=True),
@@ -738,7 +747,8 @@ class HtmlExporter(AbstractExporter):
                     
                 self.wordAnchor = _escapeAnchor(word)
                 formattedContent = self.formatContent(wikiPage)
-                fp.write((u'<span class="wiki-name-ref">'
+
+                filePointer.write((u'<span class="wiki-name-ref">'
                         u'[<a name="%s">%s</a>]</span><br /><br />'
                         u'<span class="parent-nodes">parent nodes: %s</span>'
                         u'<br />%s%s<hr size="1"/>') %
@@ -750,9 +760,13 @@ class HtmlExporter(AbstractExporter):
 
         self.wordAnchor = None
 
-        fp.write(self.getFileFooter())
-        fp.reset()
-        realfp.close() 
+        filePointer.write(self.getFileFooter())
+        
+        filePointer.reset()
+
+        if outputFile is not None:
+            realfp.close()
+
         self.copyCssFiles(self.exportDest)
         return outputFile
 

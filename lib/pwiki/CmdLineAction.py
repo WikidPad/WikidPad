@@ -170,7 +170,7 @@ class CmdLineAction:
 
 
     USAGE = \
-_(u"""Options:
+N_(u"""Options:
 
     -h, --help: Show this message box
     -w, --wiki  <wiki path>: set the wiki to open on startup
@@ -187,7 +187,7 @@ _(u"""Options:
         """
         Show dialog with addRemark and command line usage information.
         """
-        wx.MessageBox(addRemark + self.USAGE, _(u"Usage information"),
+        wx.MessageBox(addRemark + _(self.USAGE), _(u"Usage information"),
                 style=wx.OK, parent=pWiki)
 
 

@@ -1,5 +1,12 @@
 ﻿++ Change Log
 
+May 30, 2009 (2.0beta04)
+
+    * Support for printing rendered HTML. See [Printing]
+
+    * Some bugs in translation handling fixed
+
+
 
 Apr. 28, 2009 (2.0beta03)
 
@@ -7,7 +14,7 @@ Apr. 28, 2009 (2.0beta03)
       first). See [InlinePythonEval#+++ Security concerns]
     * Wiki-bound option to create wiki page files with ASCII-only
       names (does not apply to Compact Sqlite DB backend).
-    * This should also fix a problem with Windows binary installer
+      This should also fix a problem with Windows binary installer
       and WikidPad help wiki on non-western Windows versions.
       See [OptionsDialog#*Page file names ASCII only*]
     * Wiki-bound option to handle missing or externally inserted

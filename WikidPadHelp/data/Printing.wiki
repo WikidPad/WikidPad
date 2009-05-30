@@ -24,10 +24,12 @@ Same as [WikiExport#What to export]
 
 
 ++++ Print as
-Choose as what it should be printed (currently only "Plain text", which means the wiki pages are printed without any formatting)
+Choose as what it should be printed, either as "Plain text", which means the wiki pages are printed without any formatting or as "HTML" which uses the internal HTML renderer to build the print pages.
 
 
 ++++ Page separator
+This applies only to "Plain text" prints.
+
 Enter here with what the wiki pages (not the print pages) should be separated. You can use the same escapes as in the replace field of the "Find and Replace" dialog in regular expression mode.
 
 Of special interest might be:

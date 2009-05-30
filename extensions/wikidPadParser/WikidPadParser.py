@@ -622,6 +622,10 @@ UrlPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
         ur'(?:(?![.,;:!?)]+["\s])[^"\s<>])*'
 
 
+# UrlInBracketsPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
+#         ur'(?:(?![.,;:!?)]+["\s])[^"\s<>' + BracketEndPAT + '])*'
+
+
 bracketStart = buildRegex(BracketStartPAT)
 bracketEnd = buildRegex(BracketEndPAT)
 
@@ -775,14 +779,17 @@ urlModeAppendix = modeAppendix.setResultsName("urlModeAppendix")
 urlWithAppend = buildRegex(UrlPAT, "url") + Optional(buildRegex(ur">") + \
         urlModeAppendix)
 
+# urlWithAppendInBrackets = buildRegex(UrlInBracketsPAT, "url") + Optional(buildRegex(ur">") + \
+#         urlModeAppendix)
+
+
 urlBare = urlWithAppend.setResultsName("urlLink")
 urlBare = urlBare.setParseAction(actionUrlLink)
 
+# urlTitled = bracketStart + urlWithAppendInBrackets + whitespace + \
+#         Optional(title) + bracketEnd
 urlTitled = bracketStart + urlWithAppend + whitespace + \
         Optional(title) + bracketEnd
-# urlTitled = buildRegex(BracketStartPAT) + urlBare.setResultsName("") + whitespace + \
-#         buildRegex(WikiWordTitleStartPAT) + whitespace + \
-#         content.setResultsName("title") + bracketEnd
 urlTitled = urlTitled.setResultsNameNoCopy("urlLink").setParseAction(actionUrlLink)
 
 
@@ -1307,10 +1314,39 @@ class _TheParser(object):
 
         return t
 
-
-
-
 THE_PARSER = _TheParser()
+
+
+
+
+
+class WikiLanguageDetails(object):
+    """
+    Stores state of wiki language specific options and allows to check if
+    two option sets are equivalent.
+    """
+    __slots__ = ("__weakref__", "footnotesAsWws", "wikiDocument")
+
+    def __init__(self, wikiDocument, config):
+        self.wikiDocument = wikiDocument
+        if self.wikiDocument is None:
+            # Set wiki-independent default values
+            self.footnotesAsWws = False
+        else:
+            self.footnotesAsWws = config.getboolean("main",
+                    "footnotes_as_wikiwords", False)
+
+    @staticmethod
+    def getWikiLanguageName():
+        return "wikidpad_default_2_0"
+
+
+    def isEquivTo(self, details):
+        """
+        Compares with other details object if both are "equivalent"
+        """
+        return self.getWikiLanguageName() == details.getWikiLanguageName() and \
+                self.footnotesAsWws == details.footnotesAsWws
 
 
 
@@ -1844,6 +1880,13 @@ These are your default global settings.
 [icon: cog]
 """)  # TODO Localize differently?
 
+
+    @staticmethod
+    def getWikiLanguageDetails(wikiDocument, config):
+        """
+        Returns a new WikiLanguageDetails object based on current configuration
+        """
+        return WikiLanguageDetails(wikiDocument, config)
 
 
 THE_LANGUAGE_HELPER = _TheHelper()

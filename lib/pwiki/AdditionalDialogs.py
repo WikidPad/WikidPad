@@ -47,7 +47,7 @@ class SelectWikiWordDialog(wx.Dialog):
     """
     Called for "Append/Prepend wiki word" in tree node context menu
     """
-    def __init__(self, pWiki, parent, ID, title=u"Select Wiki Word",
+    def __init__(self, pWiki, parent, ID, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D):
 
@@ -62,7 +62,8 @@ class SelectWikiWordDialog(wx.Dialog):
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, parent, "SelectWikiWordDialog")
 
-        self.SetTitle(title)
+        if title is not None:
+            self.SetTitle(title)
 
         self.ctrls = XrcControls(self)
 
@@ -186,7 +187,7 @@ SelectWikiWordDialog.runModal = staticmethod(runDialogModalFactory(SelectWikiWor
      
 
 class OpenWikiWordDialog(wx.Dialog):
-    def __init__(self, pWiki, parent, ID, title=u"Open Wiki Word",
+    def __init__(self, pWiki, parent, ID, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D):
 
@@ -201,7 +202,8 @@ class OpenWikiWordDialog(wx.Dialog):
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, parent, "OpenWikiWordDialog")
 
-        self.SetTitle(title)
+        if title is not None:
+            self.SetTitle(title)
 
         self.ctrls = XrcControls(self)
 
@@ -442,7 +444,7 @@ class ChooseWikiWordDialog(wx.Dialog):
     Used to allow selection from list of parents, parentless words, children
     or bookmarked words.
     """
-    def __init__(self, pWiki, ID, words, motionType, title="Choose Wiki Word",
+    def __init__(self, pWiki, ID, words, motionType, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
         d = wx.PreDialog()
         self.PostCreate(d)
@@ -453,7 +455,9 @@ class ChooseWikiWordDialog(wx.Dialog):
         
         self.ctrls = XrcControls(self)
         
-        self.SetTitle(title)
+        if title is not None:
+            self.SetTitle(title)
+
         self.ctrls.staTitle.SetLabel(title)
         
         self.motionType = motionType
@@ -793,7 +797,7 @@ class DateformatDialog(wx.Dialog):
 </html>
 """)
 
-    def __init__(self, parent, ID, mainControl, title="Choose Date Format",
+    def __init__(self, parent, ID, mainControl, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D, deffmt=u""):
         """
@@ -806,7 +810,9 @@ class DateformatDialog(wx.Dialog):
         self.value = u""     
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, parent, "DateformatDialog")
-        self.SetTitle(title)
+
+        if title is not None:
+            self.SetTitle(title)
         
         # Create HTML explanation
         html = wx.html.HtmlWindow(self, -1)
@@ -947,7 +953,7 @@ class FontFaceDialog(wx.Dialog):
 
 
 class ExportDialog(wx.Dialog):
-    def __init__(self, mainControl, ID, continuousExport=False, title="Export",
+    def __init__(self, mainControl, ID, continuousExport=False, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
         d = wx.PreDialog()
         self.PostCreate(d)
@@ -2074,7 +2080,7 @@ class ImagePasteSaver:
 
 
 class ImagePasteDialog(wx.Dialog):
-    def __init__(self, pWiki, ID, imgpastesaver, title="Image paste options",
+    def __init__(self, pWiki, ID, imgpastesaver, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
         d = wx.PreDialog()
         self.PostCreate(d)
@@ -2085,7 +2091,8 @@ class ImagePasteDialog(wx.Dialog):
 
         self.ctrls = XrcControls(self)
 
-        self.SetTitle(title)
+        if title is not None:
+            self.SetTitle(title)
 
         self.ctrls.tfEditorImagePasteFilenamePrefix.SetValue(imgpastesaver.prefix)
         self.ctrls.chEditorImagePasteFileType.SetSelection(imgpastesaver.formatNo)
