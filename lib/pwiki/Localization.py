@@ -532,6 +532,9 @@ def loadI18nDict(appDir, locStr=None):
             i18nLocale = "C"
             return
         
+        if findLangListIndex(locEntry) == -1:
+            continue
+        
         path = os.path.join(appDir, "WikidPad_" + locEntry + ".po")
         if not os.path.exists(pathEnc(path)):
             continue

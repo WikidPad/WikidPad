@@ -41,12 +41,12 @@ Name: {app}\export; Components: Program_files
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 1.9rc05
+AppVerName=WikidPad 1.9rc05_2
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=1.9.105.0
-VersionInfoTextVersion=WikidPad 1.9rc05
+VersionInfoVersion=1.9.105.2
+VersionInfoTextVersion=WikidPad 1.9rc05_2
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes

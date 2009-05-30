@@ -3,9 +3,9 @@
 # This file is distributed under the same license as wikidPad.
 msgid ""
 msgstr ""
-"Project-Id-Version: WikidPad 1.9rc04\n"
-"POT-Creation-Date: 2009-04-26 22:04\n"
-"PO-Revision-Date: 2009-05-26 19:37+0100\n"
+"Project-Id-Version: WikidPad 1.9rc05\n"
+"POT-Creation-Date: 2009-05-28 21:00\n"
+"PO-Revision-Date: 2009-05-29 21:29+0100\n"
 "Last-Translator: Stefan Berg <steffe62@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -40,12 +40,8 @@ msgid " Replace &All "
 msgstr " Ersätt &alla "
 
 #: WikidPad.xrc:0
-msgid "\"&Anded\" regex"
-msgstr "\"&AND\"-regex"
-
-#: WikidPad.xrc:0
 msgid "\"An&ded\" regex"
-msgstr "\"AN&D\"-regex"
+msgstr "Regex med \"an&d\""
 
 #: WikidPad.xrc:0
 msgid "&Case sensitive"
@@ -62,10 +58,6 @@ msgstr "Ra&dera sökning(ar)"
 #: WikidPad.xrc:0
 msgid "&Ignore"
 msgstr "Avbryt"
-
-#: WikidPad.xrc:0
-msgid "&Load"
-msgstr "&Ladda"
 
 #: WikidPad.xrc:0
 msgid "&Load Search"
@@ -329,7 +321,7 @@ msgstr "Fäll in hela trädet"
 
 #: WikidPad.xrc:0
 msgid "Compatible filenames"
-msgstr "Överensstämmande filnamn"
+msgstr "Kompatibla filnamn"
 
 #: WikidPad.xrc:0
 msgid "Context characters"
@@ -524,10 +516,6 @@ msgid "JPEG"
 msgstr "JPEG"
 
 #: WikidPad.xrc:0
-msgid "L. and R&un"
-msgstr "Ladda och kör"
-
-#: WikidPad.xrc:0
 msgid "Left"
 msgstr "Vänster"
 
@@ -541,7 +529,7 @@ msgstr "Länkfärg:"
 
 #: WikidPad.xrc:0
 msgid "Load and R&un Search"
-msgstr "Ladda och genomför sökning"
+msgstr "Ladda och genomfö&r sökning"
 
 #: WikidPad.xrc:0
 msgid "Low resource usage"
@@ -672,16 +660,12 @@ msgid "PNG"
 msgstr "PNG"
 
 #: WikidPad.xrc:0
-msgid "Page &names"
-msgstr "Sid&namn"
-
-#: WikidPad.xrc:0
 msgid "Page List"
 msgstr "Sidlista"
 
 #: WikidPad.xrc:0
 msgid "Page Setup"
-msgstr "Sidinställningar"
+msgstr "Utskriftsformat"
 
 #: WikidPad.xrc:0
 msgid "Page names matching regular expression:"
@@ -694,6 +678,10 @@ msgstr "Sidbrytningstecken:"
 #: WikidPad.xrc:0
 msgid "Pages in list and "
 msgstr "Sidor i listan och "
+
+#: WikidPad.xrc:0
+msgid "Paste Image"
+msgstr "Klistra in bild"
 
 #: WikidPad.xrc:0
 msgid "Paste from clipboard:"
@@ -824,10 +812,6 @@ msgid "Same Tab"
 msgstr "Samma flik"
 
 #: WikidPad.xrc:0
-msgid "Sample"
-msgstr "Exempel"
-
-#: WikidPad.xrc:0
 msgid "Saved Searches:"
 msgstr "Sparade sökningar:"
 
@@ -922,6 +906,10 @@ msgstr "Ljud"
 #: WikidPad.xrc:0
 msgid "Sound file:"
 msgstr "Ljudfil:"
+
+#: WikidPad.xrc:0
+msgid "Spell Check"
+msgstr "Stavningskontroll"
 
 #: WikidPad.xrc:0
 msgid "Start browser after export"
@@ -1148,23 +1136,23 @@ msgid "..."
 msgstr "..."
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:320
+#: lib\pwiki\AdditionalDialogs.py:322
 msgid " OK "
 msgstr " OK "
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:324
-#: lib\pwiki\AdditionalDialogs.py:414
+#: lib\pwiki\AdditionalDialogs.py:326
+#: lib\pwiki\AdditionalDialogs.py:416
 msgid " Cancel "
 msgstr "Avbryt"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:768
+#: lib\pwiki\AdditionalDialogs.py:772
 msgid "Destination directory:"
 msgstr "Målkatalog:"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:1003
+#: lib\pwiki\AdditionalDialogs.py:1007
 msgid "Source directory:"
 msgstr "Källkatalog:"
 
@@ -1190,11 +1178,6 @@ msgstr "Exportera"
 #: lib\pwiki\PersonalWikiFrame.py:1826
 msgid "Open Wiki Word"
 msgstr "Öppna wikiord"
-
-#: WikidPad.xrc:0
-#: lib\pwiki\PersonalWikiFrame.py:1179
-msgid "&Delete"
-msgstr "Ra&dera"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1377
@@ -1429,40 +1412,40 @@ msgstr "*%s sidor hänvisar till* %s\n"
 msgid "*%s page(s) referred to by* %s\n"
 msgstr "*%s sidor hänvisade till av * %s\n"
 
-#: lib\pwiki\AdditionalDialogs.py:187
-#: lib\pwiki\AdditionalDialogs.py:250
+#: lib\pwiki\AdditionalDialogs.py:189
+#: lib\pwiki\AdditionalDialogs.py:252
 msgid "'%s' is an invalid WikiWord"
 msgstr "'%s' är ett ogiltigt wikiord"
 
-#: lib\pwiki\AdditionalDialogs.py:194
+#: lib\pwiki\AdditionalDialogs.py:196
 msgid "'%s' is not an existing wikiword. Create?"
 msgstr "'%s' finns inte som wikiord. Skapa?"
 
-#: lib\pwiki\AdditionalDialogs.py:195
+#: lib\pwiki\AdditionalDialogs.py:197
 msgid "Create"
 msgstr "Skapa"
 
-#: lib\pwiki\AdditionalDialogs.py:255
+#: lib\pwiki\AdditionalDialogs.py:257
 msgid "'%s' exists already"
 msgstr "'%s' finns redan"
 
-#: lib\pwiki\AdditionalDialogs.py:294
+#: lib\pwiki\AdditionalDialogs.py:296
 msgid "Select Icon"
 msgstr "Välj ikon"
 
-#: lib\pwiki\AdditionalDialogs.py:303
+#: lib\pwiki\AdditionalDialogs.py:305
 msgid "Icon"
 msgstr "Ikon"
 
-#: lib\pwiki\AdditionalDialogs.py:387
+#: lib\pwiki\AdditionalDialogs.py:389
 msgid "Saved Versions"
 msgstr "Sparade versioner"
 
-#: lib\pwiki\AdditionalDialogs.py:410
+#: lib\pwiki\AdditionalDialogs.py:412
 msgid " Retrieve "
 msgstr " Hämta "
 
-#: lib\pwiki\AdditionalDialogs.py:448
+#: lib\pwiki\AdditionalDialogs.py:450
 msgid ""
 "<html>\n"
 "<body bgcolor=\"#FFFFFF\">\n"
@@ -1534,7 +1517,7 @@ msgstr ""
 "<body bgcolor=\"#FFFFFF\">\n"
 "\n"
 "<table border=\"1\" align=\"center\" style=\"border-collapse: collapse\">\n"
-"    <tr><td align=\"center\" valign=\"baseline\"><b>Tecken</b></td>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><b>Direktiv</b></td>\n"
 "        <td align=\"left\"><b>Betydelse</b></td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%a</code></td>\n"
 "        <td align=\"left\">Lokal förkortning på veckodagens namn.</td></tr>\n"
@@ -1596,89 +1579,89 @@ msgstr ""
 "</body>\n"
 "</html>\n"
 
-#: lib\pwiki\AdditionalDialogs.py:556
+#: lib\pwiki\AdditionalDialogs.py:560
 msgid "<invalid>"
 msgstr "<ogiltig>"
 
-#: lib\pwiki\AdditionalDialogs.py:771
+#: lib\pwiki\AdditionalDialogs.py:775
 msgid "Destination file:"
 msgstr "Målfil:"
 
-#: lib\pwiki\AdditionalDialogs.py:801
+#: lib\pwiki\AdditionalDialogs.py:805
 msgid "Destination directory does not exist"
 msgstr "Målkatalog finns inte"
 
-#: lib\pwiki\AdditionalDialogs.py:806
+#: lib\pwiki\AdditionalDialogs.py:810
 msgid "Destination must be a directory"
 msgstr "Målet måste vara en katalog"
 
-#: lib\pwiki\AdditionalDialogs.py:812
+#: lib\pwiki\AdditionalDialogs.py:816
 msgid "Destination must be a file"
 msgstr "Målet måste vara en fil"
 
-#: lib\pwiki\AdditionalDialogs.py:822
+#: lib\pwiki\AdditionalDialogs.py:826
 #: lib\pwiki\PersonalWikiFrame.py:4398
 #: lib\pwiki\PersonalWikiFrame.py:4412
 #: lib\pwiki\Printing.py:170
 msgid "No real wiki word selected as root"
 msgstr "Inget riktigt wikiord har valts som rot"
 
-#: lib\pwiki\AdditionalDialogs.py:862
+#: lib\pwiki\AdditionalDialogs.py:866
 msgid "Error while exporting"
 msgstr "Fel vid export"
 
-#: lib\pwiki\AdditionalDialogs.py:875
+#: lib\pwiki\AdditionalDialogs.py:879
 #: lib\pwiki\PersonalWikiFrame.py:4367
 msgid "Select Export Directory"
 msgstr "Välj exportkatalog"
 
-#: lib\pwiki\AdditionalDialogs.py:889
-#: lib\pwiki\AdditionalDialogs.py:1076
+#: lib\pwiki\AdditionalDialogs.py:893
+#: lib\pwiki\AdditionalDialogs.py:1080
 msgid "All files (*.*)"
 msgstr "Alla filer (*.*)"
 
-#: lib\pwiki\AdditionalDialogs.py:894
+#: lib\pwiki\AdditionalDialogs.py:898
 #: lib\pwiki\PersonalWikiFrame.py:4371
 msgid "Select Export File"
 msgstr "Välj exportfil"
 
-#: lib\pwiki\AdditionalDialogs.py:1006
+#: lib\pwiki\AdditionalDialogs.py:1010
 msgid "Source file:"
 msgstr "Källfil:"
 
-#: lib\pwiki\AdditionalDialogs.py:1022
+#: lib\pwiki\AdditionalDialogs.py:1026
 msgid "Source does not exist"
 msgstr "Källa finns inte"
 
-#: lib\pwiki\AdditionalDialogs.py:1032
+#: lib\pwiki\AdditionalDialogs.py:1036
 msgid "Source must be a directory"
 msgstr "Källa måste vara en katalog"
 
-#: lib\pwiki\AdditionalDialogs.py:1037
+#: lib\pwiki\AdditionalDialogs.py:1041
 msgid "Source must be a file"
 msgstr "Källa måste vara en fil"
 
-#: lib\pwiki\AdditionalDialogs.py:1048
+#: lib\pwiki\AdditionalDialogs.py:1052
 msgid "Error while importing"
 msgstr "Fel vid import"
 
-#: lib\pwiki\AdditionalDialogs.py:1062
+#: lib\pwiki\AdditionalDialogs.py:1066
 msgid "Select Import Directory"
 msgstr "Välj importkatalog"
 
-#: lib\pwiki\AdditionalDialogs.py:1077
+#: lib\pwiki\AdditionalDialogs.py:1081
 msgid "*"
 msgstr "*"
 
-#: lib\pwiki\AdditionalDialogs.py:1081
+#: lib\pwiki\AdditionalDialogs.py:1085
 msgid "Select Import File"
 msgstr "Välj importfil"
 
-#: lib\pwiki\AdditionalDialogs.py:1133
+#: lib\pwiki\AdditionalDialogs.py:1139
 msgid "Do you want to delete %i wiki page(s)?"
 msgstr "Vill du radera %i wikisidor?"
 
-#: lib\pwiki\AdditionalDialogs.py:1218
+#: lib\pwiki\AdditionalDialogs.py:1224
 msgid ""
 "\n"
 "<html>\n"
@@ -1756,26 +1739,26 @@ msgstr ""
 "</body>\n"
 "</html>\n"
 
-#: lib\pwiki\AdditionalDialogs.py:1258
+#: lib\pwiki\AdditionalDialogs.py:1264
 #: lib\pwiki\PersonalWikiFrame.py:1755
 msgid "About WikidPad"
 msgstr "Om WikidPad"
 
-#: lib\pwiki\AdditionalDialogs.py:1262
-#: lib\pwiki\AdditionalDialogs.py:1319
-#: lib\pwiki\AdditionalDialogs.py:1327
+#: lib\pwiki\AdditionalDialogs.py:1268
+#: lib\pwiki\AdditionalDialogs.py:1325
+#: lib\pwiki\AdditionalDialogs.py:1333
 msgid "N/A"
 msgstr "N/A"
 
-#: lib\pwiki\AdditionalDialogs.py:1272
+#: lib\pwiki\AdditionalDialogs.py:1278
 msgid "Okay"
 msgstr "OK"
 
-#: lib\pwiki\AdditionalDialogs.py:1317
+#: lib\pwiki\AdditionalDialogs.py:1323
 msgid "Wiki database backend:"
 msgstr "Wikins databasstöd:"
 
-#: lib\pwiki\AdditionalDialogs.py:1325
+#: lib\pwiki\AdditionalDialogs.py:1331
 msgid "Number of wiki pages:"
 msgstr "Antal wikisidor:"
 
@@ -1800,7 +1783,7 @@ msgstr ""
 "    -p, --page  <sidnamn>: Ange vilken sida som ska öppnas vid start\n"
 "    -x, --exit: Avsluta direkt efter att kommandon har körts\n"
 "    --export-what <page, subtree, wiki>: Välj om du vill exportera sida, underträd eller wiki\n"
-"    --export-type <type>: tag of the export type\n"
+"    --export-type <type>: tagg på exporttypen\n"
 "    --export-dest <sökväg>: Sökväg till målkatalogen för export\n"
 "    --export-compfn: Använd kompatibla filnamn vid export\n"
 "    --rebuild: Återskapa wikidatabasen\n"
@@ -1827,7 +1810,11 @@ msgstr "Otydligt alternativ %s:%s"
 
 #: lib\pwiki\DocPagePresenter.py:226
 msgid "'%s' is an invalid wiki word."
-msgstr "'%s' är ett ogiltigt wikiord"
+msgstr "'%s' är ett ogiltigt wikiord."
+
+#: lib\pwiki\DocPagePresenter.py:249
+msgid "Opened wiki word '%s'"
+msgstr "Öppnade wikiordet '%s'"
 
 #: lib\pwiki\DocPagePresenter.py:259
 msgid "Wiki page not found, a new page will be created"
@@ -1946,10 +1933,15 @@ msgstr ""
 "Ett fel uppstod under denna session\n"
 "Se filen %s"
 
+#: lib\pwiki\MainApp.py:566
+#: lib\pwiki\MainApp.py:568
+msgid "Plugin options"
+msgstr "Insticksprogram"
+
 #: lib\pwiki\MainAreaPanel.py:353
 #: lib\pwiki\WikiTxtCtrl.py:1821
 msgid "This can only be done for the page of a wiki word"
-msgstr "Detta kan bar utföras på en sida i ett wikiord"
+msgstr "Detta kan bara utföras på en sida i ett wikiord"
 
 #: lib\pwiki\MainAreaPanel.py:354
 #: lib\pwiki\WikiTxtCtrl.py:1822
@@ -2116,12 +2108,12 @@ msgstr "Exportera aktuellt wikiord som HTML-sida"
 #: lib\pwiki\PersonalWikiFrame.py:735
 #: lib\pwiki\PersonalWikiFrame.py:736
 msgid "Export Sub-Tree as Single HTML Page"
-msgstr "Exportera subträd som en HTML-sida"
+msgstr "Exportera underträd som en HTML-sida"
 
 #: lib\pwiki\PersonalWikiFrame.py:740
 #: lib\pwiki\PersonalWikiFrame.py:741
 msgid "Export Sub-Tree as Set of HTML Pages"
-msgstr "Exportera subträd som flera HTML-sidor"
+msgstr "Exportera underträd som flera HTML-sidor"
 
 #: lib\pwiki\PersonalWikiFrame.py:750
 msgid "Export Wiki to .wiki files"
@@ -2264,6 +2256,10 @@ msgstr "Byt namn"
 #: lib\pwiki\PersonalWikiFrame.py:1174
 msgid "Rename Current Wiki Word"
 msgstr "Byt namn på aktuellt wikiord"
+
+#: lib\pwiki\PersonalWikiFrame.py:1179
+msgid "&Delete"
+msgstr "Ra&dera"
 
 #: lib\pwiki\PersonalWikiFrame.py:1180
 #: lib\pwiki\PersonalWikiFrame.py:1861
@@ -3257,7 +3253,7 @@ msgstr "Importera sidfiler"
 
 #: lib\pwiki\PersonalWikiFrame.py:4690
 msgid "Unknown dialog type"
-msgstr "okänd dialogtyp"
+msgstr "Okänd dialogtyp"
 
 #: lib\pwiki\PersonalWikiFrame.py:4703
 msgid "Internal Error"
@@ -3697,18 +3693,18 @@ msgstr "Aktivera"
 #: lib\pwiki\WikiHtmlView.py:623
 #: lib\pwiki\WikiTxtCtrl.py:3152
 msgid "Activate New Tab Backgrd."
-msgstr "Aktivera ny fliks bakgrund"
+msgstr "Aktivera ny flik i bakgrund"
 
-#: lib\pwiki\SpellChecker.py:152
+#: lib\pwiki\SpellChecker.py:154
 msgid "No wiki open or current page is a functional page"
 msgstr "Ingen wiki är öppen eller så är aktuell sida en funktionssida"
 
-#: lib\pwiki\SpellChecker.py:164
+#: lib\pwiki\SpellChecker.py:166
 msgid "No dictionary found for this page"
 msgstr "Ingen ordlista hittades för denna sida"
 
-#: lib\pwiki\SpellChecker.py:186
-#: lib\pwiki\SpellChecker.py:206
+#: lib\pwiki\SpellChecker.py:188
+#: lib\pwiki\SpellChecker.py:208
 msgid "No (more) misspelled words found"
 msgstr "Inga (fler) felstavade ord hittades"
 
@@ -3744,6 +3740,10 @@ msgstr "1 dag"
 #: lib\pwiki\WikiTreeCtrl.py:949
 msgid "%i days"
 msgstr "%i dagar"
+
+#: lib\pwiki\WikiTreeCtrl.py:987
+msgid "parentless-nodes"
+msgstr "föräldralösa noder"
 
 #: lib\pwiki\WikiTreeCtrl.py:1018
 msgid "undefined-nodes"
@@ -3932,4 +3932,15 @@ msgstr "Du kan inte radera wikins rotnod"
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:143
 msgid "Wiki page not found for word: %s"
 msgstr "Wikisida hittades inte för ordet: %s"
+
+#~ msgid "\"&Anded\" regex"
+#~ msgstr "\"&AND\"-regex"
+#~ msgid "&Load"
+#~ msgstr "&Ladda"
+#~ msgid "L. and R&un"
+#~ msgstr "Ladda och kör"
+#~ msgid "Page &names"
+#~ msgstr "Sid&namn"
+#~ msgid "Sample"
+#~ msgstr "Exempel"
 
