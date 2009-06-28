@@ -229,7 +229,11 @@ class App(wx.App, MiscEventSourceMixin):
                 
                 lines = appLockContent.split("\n")
                 if len(lines) != 3:
-                    sys.stderr.write(_(u"Invalid AppLock.lock file\n"))
+                    sys.stderr.write(_(u"Invalid AppLock.lock file.\n"
+                            u"Ensure that WikidPad is not running,\n"
+                            u"then delete file \"%s\" if present yet.\n") %
+                                (os.path.join(self.globalConfigSubDir,
+                                "AppLock.lock")))
                     return True # TODO Error handling!!!
                     
                 appCookie = lines[0]

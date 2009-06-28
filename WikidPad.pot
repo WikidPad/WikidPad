@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-05-30 10:22\n"
+"POT-Creation-Date: 2009-06-28 11:33\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1718,23 +1718,23 @@ msgstr ""
 msgid "XML files (*.xml)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:1486
+#: lib\pwiki\Exporters.py:1487
 msgid "<pre>[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2454 lib\pwiki\Importers.py:33
+#: lib\pwiki\Exporters.py:2455 lib\pwiki\Importers.py:33
 msgid "Multipage text"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2467 lib\pwiki\Importers.py:46
+#: lib\pwiki\Exporters.py:2468 lib\pwiki\Importers.py:46
 msgid "Multipage files (*.mpt)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2468 lib\pwiki\Importers.py:47
+#: lib\pwiki\Exporters.py:2469 lib\pwiki\Importers.py:47
 msgid "Text file (*.txt)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2596
+#: lib\pwiki\Exporters.py:2597
 msgid "No usable separator found"
 msgstr ""
 
@@ -1763,15 +1763,17 @@ msgid "Error initializing environment, couldn't locate global config directory"
 msgstr ""
 
 #: lib\pwiki\MainApp.py:232
-msgid "Invalid AppLock.lock file\n"
+msgid "Invalid AppLock.lock file.\n"
+"Ensure that WikidPad is not running,\n"
+"then delete file \"%s\" if present yet.\n"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:420
+#: lib\pwiki\MainApp.py:424
 msgid "An error occurred during this session\n"
 "See file %s"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:566 lib\pwiki\MainApp.py:568
+#: lib\pwiki\MainApp.py:570 lib\pwiki\MainApp.py:572
 msgid "Plugin options"
 msgstr ""
 
@@ -2035,7 +2037,7 @@ msgstr ""
 msgid "E&xit"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:835 lib\pwiki\PersonalWikiFrame.py:5204
+#: lib\pwiki\PersonalWikiFrame.py:835 lib\pwiki\PersonalWikiFrame.py:5214
 msgid "Exit"
 msgstr ""
 
@@ -2060,8 +2062,8 @@ msgid "Manage favorites"
 msgstr ""
 
 #: lib\pwiki\PersonalWikiFrame.py:1067 lib\pwiki\PersonalWikiFrame.py:1728
-#: lib\pwiki\PersonalWikiFrame.py:2214 lib\pwiki\PersonalWikiFrame.py:4567
-#: lib\pwiki\PersonalWikiFrame.py:4832
+#: lib\pwiki\PersonalWikiFrame.py:2214 lib\pwiki\PersonalWikiFrame.py:4571
+#: lib\pwiki\PersonalWikiFrame.py:4837
 msgid "Error while starting new WikidPad instance"
 msgstr ""
 
@@ -2106,7 +2108,7 @@ msgstr ""
 msgid "Text copied to clipboard is also appended to this page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1204 lib\pwiki\PersonalWikiFrame.py:5137
+#: lib\pwiki\PersonalWikiFrame.py:1204 lib\pwiki\PersonalWikiFrame.py:5147
 msgid "Clipboard Catcher at Cursor"
 msgstr ""
 
@@ -2114,7 +2116,7 @@ msgstr ""
 msgid "Text copied to clipboard is also added to cursor position"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1215 lib\pwiki\PersonalWikiFrame.py:5141
+#: lib\pwiki\PersonalWikiFrame.py:1215 lib\pwiki\PersonalWikiFrame.py:5151
 msgid "Clipboard Catcher off"
 msgstr ""
 
@@ -2965,68 +2967,72 @@ msgstr ""
 msgid "XML files (*.xml)|*.xml|All files (*.*)|*"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4455
+#: lib\pwiki\PersonalWikiFrame.py:4432
+msgid "Error on export"
+msgstr ""
+
+#: lib\pwiki\PersonalWikiFrame.py:4459
 msgid "Choose a file to create URL for"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4506
+#: lib\pwiki\PersonalWikiFrame.py:4510
 msgid "Are you sure you want to rebuild this wiki? You may want to backup your data first!"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4508
+#: lib\pwiki\PersonalWikiFrame.py:4512
 msgid "Rebuild wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4514 lib\pwiki\PersonalWikiFrame.py:4515
+#: lib\pwiki\PersonalWikiFrame.py:4518 lib\pwiki\PersonalWikiFrame.py:4519
 msgid "Rebuilding wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4529
+#: lib\pwiki\PersonalWikiFrame.py:4533
 msgid "Error rebuilding wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4577
+#: lib\pwiki\PersonalWikiFrame.py:4581
 msgid "This could overwrite pages in the database. Continue?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4578
+#: lib\pwiki\PersonalWikiFrame.py:4582
 msgid "Import pagefiles"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4690
+#: lib\pwiki\PersonalWikiFrame.py:4694
 msgid "Unknown dialog type"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4703
+#: lib\pwiki\PersonalWikiFrame.py:4707
 msgid "Internal Error"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4814 lib\pwiki\PersonalWikiFrame.py:4822
-#: lib\pwiki\PersonalWikiFrame.py:4840
+#: lib\pwiki\PersonalWikiFrame.py:4819 lib\pwiki\PersonalWikiFrame.py:4827
+#: lib\pwiki\PersonalWikiFrame.py:4845
 msgid "Choose a Wiki to open"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4850
+#: lib\pwiki\PersonalWikiFrame.py:4855
 msgid "Name for new wiki (must be in the form of a WikiWord):"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4851
+#: lib\pwiki\PersonalWikiFrame.py:4856
 msgid "Create New Wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4862
+#: lib\pwiki\PersonalWikiFrame.py:4867
 msgid "Directory to store new wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4872
+#: lib\pwiki\PersonalWikiFrame.py:4877
 msgid "'%s' is an invalid wiki word. There must be no spaces and mixed caps"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5202
+#: lib\pwiki\PersonalWikiFrame.py:5212
 msgid "Restore"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5203
+#: lib\pwiki\PersonalWikiFrame.py:5213
 msgid "Save"
 msgstr ""
 
@@ -3541,7 +3547,11 @@ msgstr ""
 msgid "&Fold All"
 msgstr ""
 
-#: lib\pwiki\WindowsHacks.py:620
+#: lib\pwiki\WindowsHacks.py:234
+msgid "Copying from %s to %s failed. SHFileOperation result no. %s"
+msgstr ""
+
+#: lib\pwiki\WindowsHacks.py:655
 msgid "Only a real wiki page can be a clipboard catcher"
 msgstr ""
 

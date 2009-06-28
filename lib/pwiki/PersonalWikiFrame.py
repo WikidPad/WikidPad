@@ -4424,8 +4424,12 @@ These are your default global settings.
                 if addopt is None:
                     # Additional options not given -> take default provided by exporter
                     addopt = ob.getAddOpt(None)
-                ob.export(self.getWikiDataManager(), wordList, exptype, dest,
-                        False, addopt)
+
+                try:
+                    ob.export(self.getWikiDataManager(), wordList, exptype, dest,
+                            False, addopt)
+                except ExportException, e:
+                    self.displayErrorMessage(_(u"Error on export"), e)
     
                 self.configuration.set("main", "last_active_dir", dest)
 
@@ -4713,7 +4717,8 @@ These are your default global settings.
 
     def displayErrorMessage(self, errorStr, e=u""):
         "pops up a error dialog box"
-        dlg_m = wx.MessageDialog(self, uniToGui(u"%s. %s." % (errorStr, e)),
+        exMessage = mbcsDec(str(e))[0]
+        dlg_m = wx.MessageDialog(self, uniToGui(u"%s. %s." % (errorStr, exMessage)),
                 'Error!', wx.OK)
         dlg_m.ShowModal()
         dlg_m.Destroy()
@@ -5104,7 +5109,7 @@ class TaskBarIcon(wx.TaskBarIcon):
         wx.EVT_MENU(self, GUI_ID.TBMENU_SAVE,
                 lambda evt: (self.pWiki.saveAllDocPages(),
                 self.pWiki.getWikiData().commit()))
-        wx.EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pWiki.exitWiki())
+        wx.EVT_MENU(self, GUI_ID.TBMENU_EXIT, self.OnCmdExit)
 
         if self.pWiki.clipboardInterceptor is not None:
             wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
@@ -5118,6 +5123,11 @@ class TaskBarIcon(wx.TaskBarIcon):
                     self.pWiki.OnUpdateClipboardCatcher)
 
         wx.EVT_TASKBAR_LEFT_UP(self, self.OnLeftUp)
+
+
+    def OnCmdExit(self, evt):
+        # Trying to prevent a crash with this
+        wx.CallAfter(self.pWiki.exitWiki)
 
 
     def OnLeftUp(self, evt):

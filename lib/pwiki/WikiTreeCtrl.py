@@ -2015,8 +2015,13 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
     def OnTreeBeginDrag(self, event):
+        item = event.GetItem()   
+        if item is None or not item.IsOk():
+            event.Veto()
+            return
+
         formatting = self.pWiki.getFormatting()
-        itemobj = self.GetPyData(event.GetItem())
+        itemobj = self.GetPyData(item)
         if isinstance(itemobj, WikiWordNode):
             textDataOb = textToDataObject(formatting.BracketStart +
                     itemobj.getWikiWord() + formatting.BracketEnd)

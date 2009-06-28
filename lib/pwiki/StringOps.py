@@ -793,7 +793,7 @@ def ntUrlFromPathname(p):
 
     drive = urlQuote(comp[0].upper())
     components = comp[1].split('\\')
-    path = '///' + drive + '|'
+    path = '///' + drive + ':'
     for comp in components:
         if comp:
             path = path + '/' + urlQuote(comp)

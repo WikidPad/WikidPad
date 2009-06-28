@@ -566,7 +566,7 @@ class DateformatDialog(wx.Dialog):
             preview = strftimeUB(text)
             self.value = text
         except:
-            traceback.print_exc()
+#             traceback.print_exc()
             pass
 
         self.ctrls.fieldPreview.SetLabel(preview)

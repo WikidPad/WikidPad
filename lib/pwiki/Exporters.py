@@ -468,10 +468,11 @@ class HtmlXmlExporter(AbstractExporter):
             if abspath(wikiPath) != abspath(self.exportDest):
                 # Now we have to copy the referenced files to new location
                 for rsf in self.referencedStorageFiles:
-                    OsAbstract.copyFile(join(wikiPath, rsf),
-                            join(self.exportDest, rsf))
-#                     OsAbstract.copyFile(abspath(join(wikiPath, rsf)),
-#                             abspath(join(self.exportDest, rsf)))
+                    try:
+                        OsAbstract.copyFile(join(wikiPath, rsf),
+                                join(self.exportDest, rsf))
+                    except IOError, e:
+                        raise ExportException(str(e))
 
 
         if self.mainControl.getConfig().getboolean(

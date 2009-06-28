@@ -1,6 +1,22 @@
 ﻿++ Change Log
 
 
+Jun. 28, 2009 (1.9rc06)
+
+    * Bug fixed: Error log could be cluttered up with messages
+      because of bad time/date format
+    * More detailed instruction in error log in case of
+      bad AppLock.lock file
+
+    * Windows: Show error message if copying of files fails
+      during export
+    * Windows: New try to make crashes more seldom when exiting from
+      system tray
+    * Windows: Generated file URLs now use ':' after drive letter
+      instead of '|'
+
+
+
 May 28, 2009 (1.9rc05)
 
     * Swedish translation (thanks to Stefan Berg)

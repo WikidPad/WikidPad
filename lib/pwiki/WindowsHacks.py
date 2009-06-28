@@ -41,6 +41,8 @@ MB_PRECOMPOSED = 1
 
 SW_SHOW = 5
 
+FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000
+FORMAT_MESSAGE_ARGUMENT_ARRAY = 0x00002000
 
 SetClipboardViewer = _user32dll.SetClipboardViewer
 # HWND SetClipboardViewer(
@@ -79,6 +81,22 @@ SetWindowLong = _user32dll.SetWindowLongA
 #  Returns previous value of the entry
 
 
+FormatMessage = _kernel32dll.FormatMessageA
+# DWORD FormatMessage(
+#   DWORD dwFlags,
+#   LPCVOID lpSource,
+#   DWORD dwMessageId,
+#   DWORD dwLanguageId,
+#   LPTSTR lpBuffer,
+#   DWORD nSize,
+#   va_list* Arguments
+# );
+
+
+GetLastError = _kernel32dll.GetLastError
+# DWORD GetLastError(void);
+
+
 CallWindowProc = _user32dll.CallWindowProcA
 # LRESULT CallWindowProc(
 # 
@@ -112,6 +130,8 @@ WindowProcType = ctypes.WINFUNCTYPE(ctypes.c_uint, ctypes.c_int, ctypes.c_uint,
 #     WPARAM wParam,	// first message parameter
 #     LPARAM lParam 	// second message parameter
 #    );
+
+
 
 
 try:
@@ -202,15 +222,17 @@ if SHFileOperationW is not None:
         fileOp.pFrom = srcPathWc
         fileOp.pTo = dstPathWc
         fileOp.fFlags = FOF_MULTIDESTFILES | FOF_NOCONFIRMATION | \
-                FOF_NOCONFIRMMKDIR | FOF_SILENT  # | FOF_NOERRORUI
+                FOF_NOCONFIRMMKDIR # | FOF_SILENT  # | FOF_NOERRORUI
         fileOp.fAnyOperationsAborted = 0
         fileOp.hNameMappings = 0
         fileOp.lpszProgressTitle = 0
-        
+
         res = SHFileOperationW(ctypes.byref(fileOp))
 
-        
-        return res
+        if res != 0:
+            raise IOError(mbcsEnc(
+                    _(u"Copying from %s to %s failed. SHFileOperation result no. %s") %
+                    (srcPath, dstPath, res))[0])
 
 
 
@@ -261,6 +283,19 @@ else:
 
         return result.value[4:]
 
+
+
+def getErrorMessageFromCode(errCode):
+    result = create_string_buffer(1024)
+
+    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
+            0, errCode, 0, result, 1024, 0)
+    
+    return mbcsDec(result.value)[0]
+
+
+def getLastErrorMessage():
+    return getErrorMessageFromCode(GetLastError())
 
 
 
