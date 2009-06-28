@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-06-28 11:33\n"
+"POT-Creation-Date: 2009-06-28 21:52\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3536,15 +3536,31 @@ msgid "Show folding"
 msgstr ""
 
 #: lib\pwiki\WikiTxtCtrl.py:3159
-msgid "&Toggle current folding"
+msgid "Show folding marks and allow folding"
 msgstr ""
 
 #: lib\pwiki\WikiTxtCtrl.py:3160
-msgid "&Unfold All"
+msgid "&Toggle current folding"
 msgstr ""
 
 #: lib\pwiki\WikiTxtCtrl.py:3161
+msgid "Toggle folding of the current line"
+msgstr ""
+
+#: lib\pwiki\WikiTxtCtrl.py:3162
+msgid "&Unfold All"
+msgstr ""
+
+#: lib\pwiki\WikiTxtCtrl.py:3163
+msgid "Unfold everything in current editor"
+msgstr ""
+
+#: lib\pwiki\WikiTxtCtrl.py:3164
 msgid "&Fold All"
+msgstr ""
+
+#: lib\pwiki\WikiTxtCtrl.py:3165
+msgid "Fold everything in current editor"
 msgstr ""
 
 #: lib\pwiki\WindowsHacks.py:234
