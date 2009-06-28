@@ -23,18 +23,17 @@ class WikiPageFormatDetails(object):
     """
     Store some details of the formatting of a specific page
     """
-    __slots__ = ("__weakref__", "withCamelCase", "footnotesAsWws",
-            "wikiDocument", "autoLinkMode", "noFormat", "paragraphMode",
-            "wikiLanguageDetails")
+    __slots__ = ("__weakref__", "withCamelCase",
+            "wikiDocument", "basePage", "autoLinkMode", "noFormat",
+            "paragraphMode", "wikiLanguageDetails")
     
-    def __init__(self, withCamelCase=True, footnotesAsWws=False,
-            wikiDocument=None, autoLinkMode=u"off", noFormat=False,
+    def __init__(self, withCamelCase=True,
+            wikiDocument=None, basePage=None, autoLinkMode=u"off", noFormat=False,
             paragraphMode=False, wikiLanguageDetails=DUMMY_WIKI_LANGUAGE_DETAILS):
         self.wikiDocument = wikiDocument   # WikiDocument object (needed for autoLink)
+        self.basePage = basePage    # Base for calculating relative links
 
         self.withCamelCase = withCamelCase   # Interpret CamelCase as wiki word?
-        self.footnotesAsWws = footnotesAsWws # Interpret footnotes
-                # (e.g. "[42]") as wikiwords?
         self.autoLinkMode = autoLinkMode   # Mode to automatically create links from plain text
         self.noFormat = noFormat   # No formatting at all, overrides other settings
         
@@ -63,7 +62,6 @@ class WikiPageFormatDetails(object):
             return self.noFormat == details.noFormat
 
         return self.withCamelCase == details.withCamelCase and \
-                self.footnotesAsWws == details.footnotesAsWws and \
                 self.autoLinkMode == details.autoLinkMode and \
                 self.paragraphMode == details.paragraphMode and \
                 self.wikiLanguageDetails.isEquivTo(details.wikiLanguageDetails)

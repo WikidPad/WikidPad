@@ -4,8 +4,8 @@ import wx, wx.xrc
 
 from wxHelper import *
 
-from StringOps import uniToGui, guiToUni, htmlColorToRgbTuple,\
-        rgbToHtmlColor, strToBool
+from StringOps import uniToGui, guiToUni, colorDescToRgbTuple,\
+        rgbToHtmlColor, strToBool, splitIndent
 
 from AdditionalDialogs import DateformatDialog, FontFaceDialog
 
@@ -53,7 +53,7 @@ class ResourceOptionsPanel(DefaultOptionsPanel):
 
 
 class PluginOptionsPanel(DefaultOptionsPanel):
-    def __init__(self, parent, optionsDlg, app):
+    def __init__(self, parent, optionsDlg):
         DefaultOptionsPanel.__init__(self, parent)
 
         self.idToOptionEntryMap = {}
@@ -66,7 +66,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
         self.optionToControl.append((opt, ctl, typ) + params)
     
     
-    def transferOptionsToDialog(self, config):
+    def transferOptionsToDialog(self, config=None):
         # List of tuples (<configuration file entry>, <gui control name>, <type>)
         # Supported types:
         #     b: boolean checkbox
@@ -88,6 +88,10 @@ class PluginOptionsPanel(DefaultOptionsPanel):
         #     possible choices as 4th item.
 
         # Transfer options to dialog
+        
+        if config is None:
+            config = self.mainControl.getConfig()
+
         for oct in self.optionToControl:
             self.transferSingleOptionToDialog(config, oct)
 
@@ -204,7 +208,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
         elif t == "color0":
             # HTML Color field or empty field
             val = guiToUni(ctl.GetValue())
-            rgb = htmlColorToRgbTuple(val)
+            rgb = colorDescToRgbTuple(val)
             
             if val != "" and rgb is None:
                 ctl.SetBackgroundColour(wx.RED)
@@ -227,9 +231,13 @@ class PluginOptionsPanel(DefaultOptionsPanel):
 
 
 
-    def transferDialogToOptions(self, config):
+    def transferDialogToOptions(self, config=None):
+        if config is None:
+            config = self.mainControl.getConfig()
+
         for oct in self.optionToControl:
             self.transferDialogToSingleOption(config, oct)
+
 
     def transferDialogToSingleOption(self, config, oct):
         """
@@ -290,7 +298,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
 
 
     def selectColor(self, tfield):
-        rgb = htmlColorToRgbTuple(tfield.GetValue())
+        rgb = colorDescToRgbTuple(tfield.GetValue())
         if rgb is None:
             rgb = (0, 0, 0)
 
@@ -398,6 +406,8 @@ class OptionsDialog(wx.Dialog):
             ("tree_autohide", "cbTreeAutoHide", "b"),
             ("tree_bg_color", "tfTreeBgColor", "color0",
                     "btnSelectTreeBgColor"),
+            ("tree_font_nativeDesc", "tfTreeFontNativeDesc", "tfont0",
+                    "btnSelectTreeFont"),
 
 
             ("start_browser_after_export", "cbStartBrowserAfterExport", "b"),
@@ -543,7 +553,7 @@ class OptionsDialog(wx.Dialog):
 
 # "wiki_wikiLanguage"
 
-            ("footnotes_as_wikiwords", "cbFootnotesAsWws", "b"),
+#             ("footnotes_as_wikiwords", "cbFootnotesAsWws", "b"),
             ("first_wiki_word", "tfFirstWikiWord", "t"),
 
 
@@ -612,6 +622,8 @@ class OptionsDialog(wx.Dialog):
             ("OptionsPageAutosave", 4 * u" " + N_(u"Autosave")),
             ("OptionsPageCurrentWiki", N_(u"Current Wiki")),
             ("OptionsPageCwHeadings", 2 * u" " + N_(u"Headings")),
+            ("OptionsPageCwWikiLanguage", 2 * u" " + N_(u"Wiki language")),
+            ("??insert mark/current wiki/wiki lang", u""),
             ("OptionsPageCwAdvanced", 2 * u" " + N_(u"Advanced")),
             ("??insert mark/current wiki", u"")
     )
@@ -642,7 +654,7 @@ class OptionsDialog(wx.Dialog):
                     if e[0] == "OptionsPageFileLauncher":
                         continue
                     if e[0].startswith("??"):
-                        # Entry is only a mark for insertion operations so skip it
+                        # Entry is only a mark for insert operations so skip it
                         continue
 
                 newPL.append(e)
@@ -657,7 +669,7 @@ class OptionsDialog(wx.Dialog):
                     if e[0] == "OptionsPageClipboardCatcher":
                         continue
                     if e[0].startswith("??"):
-                        # Entry is only a mark for insertion operations so skip it
+                        # Entry is only a mark for insert operations so skip it
                         continue
 
                 newPL.append(e)
@@ -675,7 +687,8 @@ class OptionsDialog(wx.Dialog):
         mainsizer = LayerSizer()  # wx.BoxSizer(wx.VERTICAL)
         
         for pn, pt in self.combinedPanelList:
-            pt = _(pt)
+            indPt, textPt = splitIndent(pt)
+            pt = indPt + _(textPt)
             if isinstance(pn, basestring):
                 if pn != "":
                     panel = ResourceOptionsPanel(self.ctrls.panelPages, pn)
@@ -686,7 +699,7 @@ class OptionsDialog(wx.Dialog):
                     panel = self.emptyPanel
             else:
                 # Factory function or class
-                panel = pn(self.ctrls.panelPages, self, wx.GetApp())
+                panel = pn(self.ctrls.panelPages, self, self.pWiki)
 
             self.panelList.append(panel)
             self.ctrls.lbPages.Append(pt)
@@ -723,7 +736,7 @@ class OptionsDialog(wx.Dialog):
 
 #                 self.ctrls[c].SetValue(
 #                         self.pWiki.getConfig().getboolean("main", o))
-            elif t in ("t", "tre", "ttdf", "i0+", "f0+", "color0"):  # text field or regular expression field
+            elif t in ("t", "tre", "ttdf", "tfont0", "i0+", "f0+", "color0"):  # text field or regular expression field
                 self.ctrls[c].SetValue(
                         uniToGui(self.pWiki.getConfig().get("main", o)) )
             elif t == "seli":   # Selection -> transfer index
@@ -764,7 +777,7 @@ class OptionsDialog(wx.Dialog):
                     self.ctrls[c].SetSelection(sel)
 
             # Register events for "..." buttons
-            if t in ("color0", "ttdf"):
+            if t in ("color0", "ttdf", "tfont0"):
                 params = oct[3:]
                 if len(params) > 0:
                     # params[0] is name of the "..." button after the text field
@@ -902,7 +915,7 @@ class OptionsDialog(wx.Dialog):
             elif t == "color0":
                 # HTML Color field or empty field
                 val = guiToUni(self.ctrls[c].GetValue())
-                rgb = htmlColorToRgbTuple(val)
+                rgb = colorDescToRgbTuple(val)
                 
                 if val != "" and rgb is None:
                     self.ctrls[c].SetBackgroundColour(wx.RED)
@@ -957,7 +970,7 @@ class OptionsDialog(wx.Dialog):
                 elif value == wx.CHK_UNCHECKED:
                     self.pWiki.getConfig().set("main", o, "False")
 
-            elif t in ("t", "tre", "ttdf", "i0+", "f0+", "color0"):
+            elif t in ("t", "tre", "ttdf", "tfont0", "i0+", "f0+", "color0"):
                 self.pWiki.getConfig().set(
                         "main", o, guiToUni(self.ctrls[c].GetValue()) )
             elif t == "seli":   # Selection -> transfer index
@@ -1041,10 +1054,12 @@ class OptionsDialog(wx.Dialog):
             self.selectColor(self.ctrls[c])
         elif t == "ttdf":   # Date/time format
             self.selectDateTimeFormat(self.ctrls[c])
+        elif t == "tfont0":   # Font or empty
+            self.selectFont(self.ctrls[c])
 
 
     def selectColor(self, tfield):
-        rgb = htmlColorToRgbTuple(tfield.GetValue())
+        rgb = colorDescToRgbTuple(tfield.GetValue())
         if rgb is None:
             rgb = 0, 0, 0
 
@@ -1089,5 +1104,25 @@ class OptionsDialog(wx.Dialog):
                 tfield.SetValue(dlg.GetValue())
         finally:
             dlg.Destroy()
+
+
+    def selectFont(self, tfield):
+        fontDesc = tfield.GetValue()
+
+        # if fontDesc != u"":
+        font = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
+            
+        # wx.Font()    # 1, wx.FONTFAMILY_DEFAULT, 
+        
+        font.SetNativeFontInfoUserDesc(fontDesc)
+        
+        newFont = wx.GetFontFromUser(self, font)  # , const wxString& caption = wxEmptyString)
+        if newFont is not None and newFont.IsOk():
+            tfield.SetValue(newFont.GetNativeFontInfoUserDesc())
+
+#             GetNativeFontInfoUserDesc
+#             SetNativeFontInfoUserDesc
+
+
 
 

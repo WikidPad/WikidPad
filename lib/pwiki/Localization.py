@@ -440,6 +440,10 @@ def getI18nEntry(key):
     """
     global i18nDict
     
+    # Without this, the translation meta-data would be shown for the empty key
+    if key == u"":
+        return u""
+
     result = i18nDict.get(key)
     if result is None or result == u"":
         return key.split(u"??", 1)[0]

@@ -144,23 +144,10 @@ class WikiData:
             try:
                 filePath = self.getWikiWordFileName(word)
             except WikiFileNotFoundException:
-                if self.wikiDocument.getWikiConfig().getboolean("main",
-                        "wikiPageFiles_gracefulOutsideAddAndRemove", True) and \
-                        self._guessWikiWordFileName(word) is not None:
-                    # Page not in database but appropriate page file
-                    # present in data directory -> refresh database and try again
-
-                    self.refreshDefinedContentNames(deleteFully=True)
-                    filePath = self.getWikiWordFileName(word)
-                else:
-                    raise
-
-            if self.wikiDocument.getWikiConfig().getboolean("main",
-                    "wikiPageFiles_gracefulOutsideAddAndRemove", True) and \
-                    not os.path.exists(filePath):
-                # File is missing and this should be handled gracefully
-                self.refreshDefinedContentNames(deleteFully=True)
-                return u""
+                raise
+#                 if self.wikiDocument.getWikiConfig().getboolean("main",
+#                         "wikiPageFiles_gracefulOutsideAddAndRemove", True):
+#                     return u""
 
             content = loadEntireTxtFile(filePath)
 
@@ -202,7 +189,18 @@ class WikiData:
             else:
                 self.connWrap.execSql("update wikiwords set modified = ? "
                         "where word = ?", (moddate, word))
-                        
+
+                if self.wikiDocument.getWikiConfig().getboolean("main",
+                        "wikiPageFiles_gracefulOutsideAddAndRemove", True):
+                    try:
+                        self.getWikiWordFileName(word, mustExist=True)
+                    except WikiFileNotFoundException:
+                        fileName = self.createWikiWordFileName(word)
+
+                        self.connWrap.execSql("update wikiwords set filepath = ?, "
+                                "filenamelowercase = ? where word = ?",
+                                (fileName, fileName.lower(), word))
+
             self.cachedContentNames = None
             self.commitNeeded = True
         except (IOError, OSError, ValueError), e:
@@ -222,7 +220,7 @@ class WikiData:
         try:
             self._updatePageEntry(word, moddate, creadate)
 
-            filePath = self.getWikiWordFileName(word)
+            filePath = self.getWikiWordFileName(word, mustExist=False)
             writeEntireFile(filePath, content, True)
 
             fileSig = getFileSignatureBlock(filePath)
@@ -242,6 +240,9 @@ class WikiData:
         """
         try:
             oldFilePath = self.getWikiWordFileNameRaw(oldWord)
+            # To throw exception in case of error
+            self.getWikiWordFileName(oldWord)
+
             head, oldFileName = os.path.split(oldFilePath)
 #             head = pathDec(head)
 #             oldFileName = pathDec(oldFileName)
@@ -415,10 +416,13 @@ class WikiData:
             raise DbWriteAccessError(e)
 
 
-    def deleteWord(self, word):
+    def deleteWord(self, word, delContent=True):
         """
         delete everything about the wikiword passed in. an exception is raised
         if you try and delete the wiki root node.
+        
+        delContent -- Should actual content be deleted as well? (Parameter is
+                not part of official API)
         """
         if word != self.wikiDocument.getWikiName():
             try:
@@ -431,7 +435,8 @@ class WikiData:
                     self.deleteChildRelationships(word)
                     self.deleteProperties(word)
                     self.deleteTodos(word)
-                    self.deleteContent(word)
+                    if delContent:
+                        self.deleteContent(word)
                     self.deleteWikiWordMatchTerms(word, syncUpdate=False)
                     self.deleteWikiWordMatchTerms(word, syncUpdate=True)
                     self.commit()
@@ -514,21 +519,18 @@ class WikiData:
                 filePath = self.getWikiWordFileName(word)
             except WikiFileNotFoundException:
                 if self.wikiDocument.getWikiConfig().getboolean("main",
-                        "wikiPageFiles_gracefulOutsideAddAndRemove", True) and \
-                        self._guessWikiWordFileName(word) is not None:
-
-                    self.refreshDefinedContentNames(deleteFully=True)
-                    # Try again
-                    filePath = self.getWikiWordFileName(word)
+                        "wikiPageFiles_gracefulOutsideAddAndRemove", True):
+                    # File is missing and this should be handled gracefully
+                    return True
                 else:
                     raise
 
-            if self.wikiDocument.getWikiConfig().getboolean("main",
-                    "wikiPageFiles_gracefulOutsideAddAndRemove", True) and \
-                    not os.path.exists(filePath):
-                # File is missing and this should be handled gracefully
-                self.refreshDefinedContentNames(deleteFully=True)
-                return True
+#             if self.wikiDocument.getWikiConfig().getboolean("main",
+#                     "wikiPageFiles_gracefulOutsideAddAndRemove", True) and \
+#                     not os.path.exists(filePath):
+#                 # File is missing and this should be handled gracefully
+#                 self.refreshDefinedContentNames(deleteFully=True)
+#                 return True
 
             fileSig = getFileSignatureBlock(filePath)
 
@@ -952,17 +954,19 @@ class WikiData:
             # Delete words for which no file is present anymore
             for path in self.connWrap.execSqlQuerySingleColumn(
                     "select filepath from wikiwords"):
-                if not os.path.exists(longPathEnc(os.path.join(self.dataDir, path))):
-                    if not deleteFully:
-                        self.connWrap.execSql("delete from wikiwords "
-                                "where filepath = ?", (path,))
-                        self.commitNeeded = True
-                    else:
+
+                testPath = longPathEnc(os.path.join(self.dataDir, path))
+                if not os.path.exists(testPath) or not os.path.isfile(testPath):
+                    if deleteFully:
                         words = self.connWrap.execSqlQuerySingleColumn(
                                 "select word from wikiwords "
                                 "where filepath = ?", (path,))
                         for word in words:
-                            self.deleteWord(word)
+                            self.deleteWord(word, delContent=False)
+
+                    self.connWrap.execSql("delete from wikiwords "
+                            "where filepath = ?", (path,))
+                    self.commitNeeded = True
 
             # Add new words:
             ti = time()
@@ -976,8 +980,9 @@ class WikiData:
                     fileSig = getFileSignatureBlock(fullPath)
                     self.connWrap.execSqlInsert("wikiwords", ("word", "created", 
                             "modified", "filepath", "filenamelowercase",
-                            "filesignature"),
-                            (wikiWord, ti, st.st_mtime, path, path.lower(), fileSig))
+                            "filesignature", "metadataprocessed"),
+                            (wikiWord, ti, st.st_mtime, path, path.lower(),
+                            fileSig, 0))
                     self.commitNeeded = True
 
         except (IOError, OSError, ValueError), e:
@@ -1043,18 +1048,44 @@ class WikiData:
 
         if path is None:
             raise WikiFileNotFoundException(
-                    _(u"Wiki page not found for word: %s") % wikiWord)
-        
+                    _(u"Wiki page not found (no path information) for word: %s") %
+                    wikiWord)
+
         return path
 
 
-    def getWikiWordFileName(self, wikiWord):
+    def getWikiWordFileName(self, wikiWord, mustExist=True):
         """
         Not part of public API!
+        Function must work for read-only wiki.
         """
-        path = self.getWikiWordFileNameRaw(wikiWord)
+        try:
+            path = longPathEnc(join(self.dataDir,
+                    self.getWikiWordFileNameRaw(wikiWord)))
+    
+            if mustExist and \
+                    (not os.path.exists(path) or not os.path.isfile(path)):
+                 raise WikiFileNotFoundException(
+                        _(u"Wiki page not found (bad path information) for word: %s") %
+                        wikiWord)
+        except WikiFileNotFoundException:
+            if self.wikiDocument.getWikiConfig().getboolean("main",
+                    "wikiPageFiles_gracefulOutsideAddAndRemove", True):
+                # Refresh content names and try again
+                self.refreshDefinedContentNames(deleteFully=True)
+            
+                path = longPathEnc(join(self.dataDir,
+                        self.getWikiWordFileNameRaw(wikiWord)))
         
-        return longPathEnc(join(self.dataDir, path))
+                if mustExist and \
+                        (not os.path.exists(path) or not os.path.isfile(path)):
+                     raise WikiFileNotFoundException(
+                            _(u"Wiki page not found (bad path information) for word: %s") %
+                            wikiWord)
+            else:
+                raise
+
+        return path
 
 
     def createWikiWordFileName(self, wikiWord):

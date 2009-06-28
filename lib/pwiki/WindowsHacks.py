@@ -46,6 +46,8 @@ SW_SHOW = 5
 
 CF_METAFILEPICT = 3
 
+FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000
+FORMAT_MESSAGE_ARGUMENT_ARRAY = 0x00002000
 
 
 SetClipboardViewer = _user32dll.SetClipboardViewer
@@ -148,6 +150,22 @@ SetWindowLong = _user32dll.SetWindowLongA
 #     LONG dwNewLong 	// new value
 #    );
 #  Returns previous value of the entry
+
+
+FormatMessage = _kernel32dll.FormatMessageW
+# DWORD FormatMessage(
+#   DWORD dwFlags,
+#   LPCVOID lpSource,
+#   DWORD dwMessageId,
+#   DWORD dwLanguageId,
+#   LPTSTR lpBuffer,
+#   DWORD nSize,
+#   va_list* Arguments
+# );
+
+
+GetLastError = _kernel32dll.GetLastError
+# DWORD GetLastError(void);
 
 
 CallWindowProc = _user32dll.CallWindowProcA
@@ -271,16 +289,17 @@ if SHFileOperationW is not None:
         fileOp.pFrom = srcPathWc
         fileOp.pTo = dstPathWc
         fileOp.fFlags = FOF_MULTIDESTFILES | FOF_NOCONFIRMATION | \
-                FOF_NOCONFIRMMKDIR | FOF_SILENT  # | FOF_NOERRORUI
+                FOF_NOCONFIRMMKDIR # | FOF_SILENT  | FOF_NOERRORUI
         fileOp.fAnyOperationsAborted = 0
         fileOp.hNameMappings = 0
         fileOp.lpszProgressTitle = 0
-        
+
         res = SHFileOperationW(ctypes.byref(fileOp))
 
-        
-        return res
-
+        if res != 0:
+            raise IOError(
+                    _(u"Copying from %s to %s failed. SHFileOperation result no. %s") %
+                    (srcPath, dstPath, res))
 
 
 def _getMemoryContentFromHandle(hdl):
@@ -340,52 +359,53 @@ def saveWmfFromClipboardToFileStorage(fs, prefix):
 
 
 
+
+GetLongPathName = _kernel32dll.GetLongPathNameW
 # DWORD GetLongPathName(
 #   LPCTSTR lpszShortPath,
 #   LPTSTR lpszLongPath,
 #   DWORD cchBuffer
 # );
 
-if Configuration.isWin9x():
-    GetLongPathName = _kernel32dll.GetLongPathNameA
+
+
+def getLongPath(path):
+    if isinstance(path, str):
+        path = mbcsDec(path)[0]
     
-    def getLongPath(path):
-        path = mbcsEnc(path)[0]
-        if len(path) > MAX_PATH:
-            # Path too long for ANSI
-            return path
-        result = create_string_buffer(MAX_PATH)
-        rv = GetLongPathName(path, result, MAX_PATH)
-        if rv == 0 or rv > MAX_PATH:
-            return path
-        else:
-            return result.value
-else:
-    GetLongPathName = _kernel32dll.GetLongPathNameW
-    
-    def getLongPath(path):
-        if isinstance(path, str):
-            path = mbcsDec(path)[0]
+    if not isinstance(path, unicode):
+        return path
+
+    if len(path) > 32760:
+        # Path too long for UNICODE
+        return path
+
+    result = create_unicode_buffer(1024)
+    rv = GetLongPathName(u"\\\\?\\" + path, result, 1024)
+    if rv == 0:
+        return path
+    if rv > 1024:
+        result = create_unicode_buffer(rv)
+        rv = GetLongPathName(u"\\\\?\\" + path, result, rv)
         
-        if not isinstance(path, unicode):
-            return path
-
-        if len(path) > 32760:
-            # Path too long for UNICODE
-            return path
-
-        result = create_unicode_buffer(1024)
-        rv = GetLongPathName(u"\\\\?\\" + path, result, 1024)
         if rv == 0:
             return path
-        if rv > 1024:
-            result = create_unicode_buffer(rv)
-            rv = GetLongPathName(u"\\\\?\\" + path, result, rv)
-            
-            if rv == 0:
-                return path
 
-        return result.value[4:]
+    return result.value[4:]
+
+
+def getErrorMessageFromCode(errCode):
+    result = create_unicode_buffer(1024)
+
+    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY,
+            0, errCode, 0, result, 1024, 0)
+    
+    return result.value
+
+
+def getLastErrorMessage():
+    return getErrorMessageFromCode(GetLastError())
+
 
 
 def ansiInputToUnicodeChar(ansiCode):
@@ -846,7 +866,7 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
 
     def handleClipboardChange(self):
         text = getTextFromClipboard()
-        if len(text) == 0:
+        if text is None or len(text) == 0:
             return
         try:
             prefix = strftimeUB(self.mainControl.getConfig().get(

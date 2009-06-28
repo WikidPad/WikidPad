@@ -69,6 +69,9 @@ def _presenterToNewTextEdit(unifName, paramDict):
 
     presenter = paramDict["main control"].activatePageByUnifiedName(
             docPage.getUnifiedPageName(), tabMode=2)
+    
+    if presenter is None:
+        return
 
     presenter.switchSubControl("textedit")
 
@@ -108,6 +111,9 @@ def _presenterClone(unifName, paramDict):
     
     newPres = paramDict["main control"].activatePageByUnifiedName(docPage.getUnifiedPageName(),
                 tabMode=2)
+
+    if newPres is None:
+        return
 
     scName = presenter.getCurrentSubControlName()
 

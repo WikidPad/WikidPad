@@ -28,7 +28,7 @@ class DocPage(object, MiscEventSourceMixin):
     """
     Abstract common base class for WikiPage and FunctionalPage
     """
-    
+
     def __init__(self, wikiDocument):
         MiscEventSourceMixin.__init__(self)
         
@@ -47,6 +47,7 @@ class DocPage(object, MiscEventSourceMixin):
         self.editorText = None  # Contains editor text, 
                 # if no text editor is registered, this cache is invalid
 #         self.pageState = STATE_TEXTCACHE_MATCHES_EDITOR
+
 
     def invalidate(self):
         """
@@ -78,7 +79,7 @@ class DocPage(object, MiscEventSourceMixin):
             self.editorText = text
             self.livePageAst = None
 
-            
+
     def getEditorText(self):
         return self.editorText
 
@@ -127,6 +128,27 @@ class DocPage(object, MiscEventSourceMixin):
                 return None
 
 
+    def getLiveText(self):
+        """
+        Return current text of page, either from a text editor or
+        from the database
+        """
+        with self.textOperationLock:
+            if self.getEditorText() is not None:
+                return self.getEditorText()
+            
+            return self.getContent()
+
+
+
+    def getLiveTextNoTemplate(self):
+        """
+        Return None if page isn't existing instead of creating an automatic
+        live text (e.g. by template).
+        """
+        raise NotImplementedError   # abstract
+
+
     def appendLiveText(self, text, fireEvent=True):
         """
         Append some text to page which is either loaded in one or more
@@ -150,27 +172,6 @@ class DocPage(object, MiscEventSourceMixin):
             # Modify database
             text = self.getContent() + text
             self.writeToDatabase(text, fireEvent=fireEvent)
-
-
-    def getLiveText(self):
-        """
-        Return current text of page, either from a text editor or
-        from the database
-        """
-        with self.textOperationLock:
-            if self.getEditorText() is not None:
-                return self.getEditorText()
-            
-            return self.getContent()
-
-
-
-    def getLiveTextNoTemplate(self):
-        """
-        Return None if page isn't existing instead of creating an automatic
-        live text (e.g. by template).
-        """
-        raise NotImplementedError   # abstract
 
 
     def replaceLiveText(self, text, fireEvent=True):
@@ -442,21 +443,10 @@ class DataCarryingPage(DocPage):
         return True
 
 
-
-class WikiPage(DataCarryingPage):
+class AbstractWikiPage(DataCarryingPage):
     """
-    holds the data for a real wikipage (no alias).
-
-    Fetched via the WikiDataManager.getWikiPage method.
+    Abstract base for WikiPage and Versioning.WikiPageSnapshot
     """
-
-#     # More states for wiki pages
-# 
-#     STATE_PROPERTIES_MATCH_TEXTCACHE = 32  # Properties (=attributes) were
-#             # processed and 
-#     STATE_TEXTCACHE_MATCHES_EDITOR = 4
-
-
 
     def __init__(self, wikiDocument, wikiWord):
         DataCarryingPage.__init__(self, wikiDocument)
@@ -516,7 +506,7 @@ class WikiPage(DataCarryingPage):
                     if not self.checkFileSignatureAndMarkDirty():
                         self.initiateUpdate()
 
-            super(WikiPage, self).addTxtEditor(txted)
+            super(AbstractWikiPage, self).addTxtEditor(txted)
 
 
         # TODO Set text in editor here if first editor is created?
@@ -672,30 +662,13 @@ class WikiPage(DataCarryingPage):
         values.append(val)
 
 
-    def _cloneDeepProperties(self):
-        with self.textOperationLock:
-            result = {}
-            for key, value in self.getProperties().iteritems():
-                result[key] = value[:]
-                
-            return result
-
-
     def getTodos(self):
         with self.textOperationLock:
             if self.todos is None:
                 self.todos = self.getWikiData().getTodosForWord(self.wikiWord)
                         
             return self.todos
-        
-    def getNonAliasPage(self):
-        """
-        If this page belongs to an alias of a wiki word, return a page for
-        the real one, otherwise return self.
-        This class always returns self
-        """
-        return self
-        
+
 
     def getAnchors(self):
         """
@@ -704,129 +677,6 @@ class WikiPage(DataCarryingPage):
         pageAst = self.getLivePageAst()
         return [node.anchorLink
                 for node in pageAst.iterDeepByName("anchorDef")]
-
-
-    def isDefined(self):
-        return self.getWikiDocument().isDefinedWikiPage(self.getWikiWord())
-
-
-    def deletePage(self):
-        """
-        Deletes the page from database
-        """
-        with self.textOperationLock:
-            if self.isReadOnlyEffect():
-                return
-    
-            if self.isDefined():
-                self.getWikiData().deleteWord(self.getWikiWord())
-
-            wx.CallAfter(self.fireMiscEventKeys,
-                    ("deleted page", "deleted wiki page"))
-
-
-
-    def informRenamedWikiPage(self, newWord):
-        """
-        Informs object that the page was renamed to newWord.
-        This page object itself does not change its name but becomes invalid!
-
-        This function should be called by WikiDocument(=WikiDataManager) only,
-        use WikiDocument.renameWikiWord() to rename a page.
-        """
-
-        p = {}
-        p["renamed page"] = True
-        p["renamed wiki page"] = True
-        p["newWord"] = newWord
-
-        callInMainThreadAsync(self.fireMiscEventProps, p)
-
-
-#     def checkFileSignature(self):
-#         """
-#         Check if file signature is valid and send an event if not
-#         """
-#         with self.textOperationLock:
-#             if not self.isDefined():
-#                 return True  # ?
-# 
-#             valid = self.getWikiData().validateFileSignatureForWord(
-#                     self.wikiWord, setMetaDataDirty=False)
-#                     
-#             if valid:
-#                 return True
-# 
-#             self.markMetaDataDirty()
-#         
-#         callInMainThreadAsync(self.fireMiscEventKeys,
-#                 ("checked file signature invalid",))
-# 
-#         return False
-
-
-#     def checkFileSignatureSilent(self):
-#         """
-#         Check if file signature is valid and send an event if not
-#         """
-#         with self.textOperationLock:
-#             return self.getWikiData().validateFileSignatureForWord(
-#                     self.wikiWord, setMetaDataDirty=True)
-
-
-    def checkFileSignatureAndMarkDirty(self, fireEvent=True):
-        """
-        First checks if file signature is valid, if not, the
-        "metadataprocessed" field of the word is set to 0 to mark
-        meta-data as not up-to-date. At last the signature is
-        refreshed.
-        
-        This all is done inside the lock of the WikiData so it is
-        somewhat atomically.
-        """
-        with self.textOperationLock:
-            if self.wikiDocument.isReadOnlyEffect():
-                return True  # TODO Error message?
-    
-            if not self.isDefined():
-                return True  # TODO Error message?
-    
-            wikiData = self.getWikiData()
-            word = self.wikiWord
-
-            proxyAccessLock = getattr(wikiData, "proxyAccessLock", None)
-            if proxyAccessLock is not None:
-                proxyAccessLock.acquire()
-            try:
-                valid = wikiData.validateFileSignatureForWord(word)
-                
-                if valid:
-                    return True
-    
-                wikiData.setMetaDataState(word,
-                        Consts.WIKIWORDMETADATA_STATE_DIRTY)
-                wikiData.refreshFileSignatureForWord(word)
-            finally:
-                if proxyAccessLock is not None:
-                    proxyAccessLock.release()
-
-            editor = self.getTxtEditor()
-        
-        if editor is not None:
-            # TODO Check for deadlocks
-            callInMainThread(editor.handleInvalidFileSignature, self)
-
-        if fireEvent:
-            wx.CallAfter(self.fireMiscEventKeys,
-                    ("checked file signature invalid",))
-
-        return False
-
-
-
-    def markMetaDataDirty(self):
-        self.getWikiData().setMetaDataState(self.wikiWord,
-                Consts.WIKIWORDMETADATA_STATE_DIRTY)
 
 
     def getLiveTextNoTemplate(self):
@@ -842,6 +692,320 @@ class WikiPage(DataCarryingPage):
                     return self.getContent()
                 else:
                     return None
+
+
+    def getFormatDetails(self):
+        """
+        According to currently stored settings, return a
+        ParseUtilities.WikiPageFormatDetails object to describe
+        formatting
+        """
+        with self.textOperationLock:
+            withCamelCase = strToBool(self.getPropertyOrGlobal(
+                    u"camelCaseWordsEnabled"), True)
+    
+#             footnotesAsWws = self.wikiDocument.getWikiConfig().getboolean(
+#                     "main", "footnotes_as_wikiwords", False)
+    
+            autoLinkMode = self.getPropertyOrGlobal(u"auto_link", u"off").lower()
+
+            paragraphMode = strToBool(self.getPropertyOrGlobal(
+                    u"paragraph_mode"), False)
+                    
+            langHelper = GetApp().createWikiLanguageHelper(
+                    self.wikiDocument.getWikiDefaultWikiLanguage())
+
+            wikiLanguageDetails = langHelper.createWikiLanguageDetails(
+                    self.wikiDocument, self)
+
+            return ParseUtilities.WikiPageFormatDetails(
+                    withCamelCase=withCamelCase,
+                    wikiDocument=self.wikiDocument,
+                    basePage=self,
+                    autoLinkMode=autoLinkMode,
+                    paragraphMode=paragraphMode,
+                    wikiLanguageDetails=wikiLanguageDetails)
+
+
+    @staticmethod
+    def extractPropertyNodesFromPageAst(pageAst):
+        """
+        Return an iterator of property nodes in pageAst. This does not return
+        properties inside of todo entries.
+        """
+        return pageAst.iterUnselectedDeepByName("property",
+                frozenset(("todoEntry",)))
+
+    def _save(self, text, fireEvent=True):
+        """
+        Saves the content of current doc page.
+        """
+        pass
+
+
+    def initiateUpdate(self, fireEvent=True):
+        """
+        Initiate update of page meta-data. This function may call update
+        directly if can be done fast
+        """
+        pass
+
+
+    def getLivePageAstIfAvailable(self):
+        """
+        Return the current, up-to-data page AST if available, None otherwise
+        """
+        with self.textOperationLock:
+            # Current state
+            text = self.getLiveText()
+            formatDetails = self.getFormatDetails()
+
+            # AST state
+            pageAst = self.livePageAst
+            baseFormatDetails = self.livePageBaseFormatDetails
+
+            if pageAst is not None and \
+                    baseFormatDetails is not None and \
+                    formatDetails.isEquivTo(baseFormatDetails) and \
+                    self.liveTextPlaceHold is self.livePageBasePlaceHold:
+                return pageAst
+
+            return None
+
+
+
+    def getLivePageAst(self, fireEvent=True, dieOnChange=False,
+            threadstop=DUMBTHREADSTOP, allowMetaDataUpdate=False):
+        """
+        Return PageAst of live text. In rare cases the live text may have
+        changed while method is running and the result is inaccurate.
+        """
+#         if self.livePageAstBuildLock.acquire(False):
+#             self.livePageAstBuildLock.release()
+#         else:
+#             if wx.Thread_IsMain(): traceback.print_stack()
+
+        with self.livePageAstBuildLock:   # TODO: Timeout?
+            threadstop.testRunning()
+
+            with self.textOperationLock:
+                text = self.getLiveText()
+                liveTextPlaceHold = self.liveTextPlaceHold
+                formatDetails = self.getFormatDetails()
+
+                pageAst = self.getLivePageAstIfAvailable()
+
+            if pageAst is not None:
+                return pageAst
+
+            if dieOnChange:
+                if threadstop is DUMBTHREADSTOP:
+                    threadstop = FunctionThreadStop(
+                            lambda: liveTextPlaceHold is self.liveTextPlaceHold)
+                else:
+                    origThreadstop = threadstop
+                    threadstop = FunctionThreadStop(
+                            lambda: origThreadstop.isRunning() and 
+                            liveTextPlaceHold is self.liveTextPlaceHold)
+
+            if len(text) == 0:
+                pageAst = buildSyntaxNode([], 0)
+            else:
+                pageAst = self.parseTextInContext(text, formatDetails=formatDetails,
+                        threadstop=threadstop)
+
+            with self.textOperationLock:
+                threadstop.testRunning()
+
+                self.livePageAst = pageAst
+                self.livePageBasePlaceHold = liveTextPlaceHold
+                self.livePageBaseFormatDetails = formatDetails
+
+
+        if self.isReadOnlyEffect():
+            threadstop.testRunning()
+            return pageAst
+
+#         if False and allowMetaDataUpdate:   # TODO: Option
+#             self._refreshMetaData(pageAst, formatDetails, fireEvent=fireEvent,
+#                     threadstop=threadstop)
+
+        with self.textOperationLock:
+            threadstop.testRunning()
+            return pageAst
+
+
+    def parseTextInContext(self, text, formatDetails=None,
+            threadstop=DUMBTHREADSTOP):
+        """
+        Return PageAst of text in the context of this page (wiki language and
+        format details).
+        
+        text: unistring with text
+        """
+        parser = wx.GetApp().createWikiParser(self.getWikiLanguageName()) # TODO debug mode  , True
+
+        if formatDetails is None:
+            formatDetails = self.getFormatDetails()
+
+        try:
+            pageAst = parser.parse(self.getWikiLanguageName(), text,
+                    formatDetails, threadstop=threadstop)
+        finally:
+            wx.GetApp().freeWikiParser(parser)
+
+        threadstop.testRunning()
+
+        return pageAst
+
+
+    _DEFAULT_PRESENTATION = (0, 0, 0, 0, 0, None)
+
+    def getPresentation(self):
+        """
+        Get the presentation tuple (<cursor pos>, <editor scroll pos x>,
+            <e.s.p. y>, <preview s.p. x>, <p.s.p. y>, <folding list>)
+        The folding list may be None or a list of UInt32 numbers
+        containing fold level, header flag and expand flag for each line
+        in editor.
+        """
+        wikiData = self.wikiDocument.getWikiData()
+
+        if wikiData is None:
+            return AbstractWikiPage._DEFAULT_PRESENTATION
+
+        datablock = wikiData.getPresentationBlock(
+                self.getWikiWord())
+
+        if datablock is None or datablock == "":
+            return AbstractWikiPage._DEFAULT_PRESENTATION
+
+        try:
+            if len(datablock) == struct.calcsize("iiiii"):
+                # Version 0
+                return struct.unpack("iiiii", datablock) + (None,)
+            else:
+                ss = SerializeStream(stringBuf=datablock)
+                rcVer = ss.serUint8(1)
+                if rcVer > 1:
+                    return AbstractWikiPage._DEFAULT_PRESENTATION
+
+                # Compatible to version 1                
+                ver = ss.serUint8(1)
+                pt = [ss.serInt32(0), ss.serInt32(0), ss.serInt32(0),
+                        ss.serInt32(0), ss.serInt32(0), None]
+
+                # Fold list
+                fl = ss.serArrUint32([])
+                if len(fl) == 0:
+                    fl = None
+
+                pt[5] = fl
+
+                return tuple(pt)
+        except struct.error:
+            return AbstractWikiPage._DEFAULT_PRESENTATION
+
+
+
+
+class WikiPage(AbstractWikiPage):
+    """
+    holds the data for a real wikipage (no alias).
+
+    Fetched via the WikiDataManager.getWikiPage method.
+    """
+    def __init__(self, wikiDocument, wikiWord):
+        AbstractWikiPage.__init__(self, wikiDocument, wikiWord)
+
+        self.versionOverview = None
+
+
+    def getVersionOverview(self):
+        from pwiki.Versioning import VersionOverview
+
+        with self.textOperationLock:
+            if self.versionOverview is None:
+                self.versionOverview = VersionOverview(self.getWikiDocument(),
+                        self.getUnifiedPageName())
+                self.versionOverview.readOverview()
+    
+            return self.versionOverview
+
+
+    def getExistingVersionOverview(self):
+        from pwiki.Versioning import VersionOverview
+
+        with self.textOperationLock:
+            if self.versionOverview is None:
+                versionOverview = VersionOverview(self.getWikiDocument(),
+                        self.getUnifiedPageName())
+    
+                if versionOverview.isNotInDatabase():
+                    return None
+                else:
+                    versionOverview.readOverview()
+                    self.versionOverview = versionOverview
+            
+            return self.versionOverview
+
+
+    def getNonAliasPage(self):
+        """
+        If this page belongs to an alias of a wiki word, return a page for
+        the real one, otherwise return self.
+        This class always returns self
+        """
+        return self
+
+
+    def setPresentation(self, data, startPos):
+        """
+        Set (a part of) the presentation tuple. This is silently ignored
+        if the "write access failed" or "read access failed" flags are
+        set in the wiki document.
+        data -- tuple with new presentation data
+        startPos -- start position in the presentation tuple which should be
+                overwritten with data.
+        """
+        if self.isReadOnlyEffect():
+            return
+
+        if self.wikiDocument.getReadAccessFailed() or \
+                self.wikiDocument.getWriteAccessFailed():
+            return
+
+        try:
+            pt = self.getPresentation()
+            pt = pt[:startPos] + data + pt[startPos+len(data):]
+    
+            wikiData = self.wikiDocument.getWikiData()
+            if wikiData is None:
+                return
+                
+            if pt[5] is None:
+                # Write it in old version 0
+                wikiData.setPresentationBlock(self.getWikiWord(),
+                        struct.pack("iiiii", *pt[:5]))
+            else:
+                # Write it in new version 1
+                ss = SerializeStream(stringBuf=True, readMode=False)
+                ss.serUint8(1)  # Read compatibility version
+                ss.serUint8(1)  # Real version
+                # First five numbers
+                for n in pt[:5]:
+                    ss.serInt32(n)
+                # Folding tuple
+                ft = pt[5]
+                if ft is None:
+                    ft = ()
+                ss.serArrUint32(pt[5])
+
+                wikiData.setPresentationBlock(self.getWikiWord(),
+                        ss.getBytes())
+
+        except AttributeError:
+            traceback.print_exc()
 
 
     def _changeHeadingForTemplate(self, content):
@@ -930,176 +1094,122 @@ class WikiPage(DataCarryingPage):
         return content
 
 
-    def getFormatDetails(self):
+    def isDefined(self):
+        return self.getWikiDocument().isDefinedWikiPage(self.getWikiWord())
+
+
+    def deletePage(self):
         """
-        According to currently stored settings, return a
-        ParseUtilities.WikiPageFormatDetails object to describe
-        formatting
+        Deletes the page from database
         """
         with self.textOperationLock:
-            withCamelCase = strToBool(self.getPropertyOrGlobal(
-                    u"camelCaseWordsEnabled"), True)
+            if self.isReadOnlyEffect():
+                return
     
-            footnotesAsWws = self.wikiDocument.getWikiConfig().getboolean(
-                    "main", "footnotes_as_wikiwords", False)
-    
-            autoLinkMode = self.getPropertyOrGlobal(u"auto_link", u"off").lower()
+            if self.isDefined():
+                self.getWikiData().deleteWord(self.getWikiWord())
 
-            paragraphMode = strToBool(self.getPropertyOrGlobal(
-                    u"paragraph_mode"), False)
-    
-            return ParseUtilities.WikiPageFormatDetails(
-                    withCamelCase=withCamelCase,
-                    footnotesAsWws=footnotesAsWws,
-                    wikiDocument=self.wikiDocument,
-                    autoLinkMode=autoLinkMode,
-                    paragraphMode=paragraphMode
-                    )
+            vo = self.getExistingVersionOverview()
+            if vo is not None:
+                vo.delete()
+                self.versionOverview = None
+
+            wx.CallAfter(self.fireMiscEventKeys,
+                    ("deleted page", "deleted wiki page"))
 
 
-    @staticmethod
-    def extractPropertyNodesFromPageAst(pageAst):
+    def renameVersionData(self, newWord):
         """
-        Return an iterator of property nodes in pageAst. This does not return
-        properties inside of todo entries.
+        This is called by WikiDocument(=WikiDataManager) during
+        WikiDocument.renameWikiWord() and shouldn't be called elsewhere.
         """
-        return pageAst.iterUnselectedDeepByName("property",
-                frozenset(("todoEntry",)))
+        with self.textOperationLock:
+            vo = self.getExistingVersionOverview()
+            if vo is None:
+                return
+            
+            vo.renameTo(u"wikipage/" + newWord)
+            self.versionOverview = None
 
 
-    def _save(self, text, fireEvent=True):
+    def informRenamedWikiPage(self, newWord):
         """
-        Saves the content of current wiki page.
+        Informs object that the page was renamed to newWord.
+        This page object itself does not change its name but becomes invalid!
+
+        This function should be called by WikiDocument(=WikiDataManager) only,
+        use WikiDocument.renameWikiWord() to rename a page.
         """
-        if self.isReadOnlyEffect():
-            return
+
+        p = {}
+        p["renamed page"] = True
+        p["renamed wiki page"] = True
+        p["newWord"] = newWord
+
+        callInMainThreadAsync(self.fireMiscEventProps, p)
+
+
+    def _cloneDeepProperties(self):
+        with self.textOperationLock:
+            result = {}
+            for key, value in self.getProperties().iteritems():
+                result[key] = value[:]
+                
+            return result
+
+
+    def checkFileSignatureAndMarkDirty(self, fireEvent=True):
+        """
+        First checks if file signature is valid, if not, the
+        "metadataprocessed" field of the word is set to 0 to mark
+        meta-data as not up-to-date. At last the signature is
+        refreshed.
         
-        with self.textOperationLock:
-            if not self.getWikiDocument().isDefinedWikiPage(self.wikiWord):
-                # Pages isn't yet in database  -> fire event
-                # The event may be needed to invalidate a cache
-                self.fireMiscEventKeys(("saving new wiki page",))
-
-            self.getWikiData().setContent(self.wikiWord, text)
-            self.refreshSyncUpdateMatchTerms()
-            self.saveDirtySince = None
-#             self.dbContentPlaceHold = object()
-            if self.getEditorText() is None:
-                self.liveTextPlaceHold = object()
-
-
-            # Clear timestamp cache
-            self.modified = None
-
-
-    def getLivePageAstIfAvailable(self):
-        """
-        Return the current, up-to-data page AST if available, None otherwise
+        This all is done inside the lock of the WikiData so it is
+        somewhat atomically.
         """
         with self.textOperationLock:
-            # Current state
-            text = self.getLiveText()
-            formatDetails = self.getFormatDetails()
+            if self.wikiDocument.isReadOnlyEffect():
+                return True  # TODO Error message?
+    
+            if not self.isDefined():
+                return True  # TODO Error message?
+    
+            wikiData = self.getWikiData()
+            word = self.wikiWord
 
-            # AST state
-            pageAst = self.livePageAst
-            baseFormatDetails = self.livePageBaseFormatDetails
+            proxyAccessLock = getattr(wikiData, "proxyAccessLock", None)
+            if proxyAccessLock is not None:
+                proxyAccessLock.acquire()
+            try:
+                valid = wikiData.validateFileSignatureForWord(word)
+                
+                if valid:
+                    return True
+    
+                wikiData.setMetaDataState(word,
+                        Consts.WIKIWORDMETADATA_STATE_DIRTY)
+                wikiData.refreshFileSignatureForWord(word)
+            finally:
+                if proxyAccessLock is not None:
+                    proxyAccessLock.release()
 
-            if pageAst is not None and \
-                    baseFormatDetails is not None and \
-                    formatDetails.isEquivTo(baseFormatDetails) and \
-                    self.liveTextPlaceHold is self.livePageBasePlaceHold:
-                return pageAst
-
-            return None
-
-
-
-    def getLivePageAst(self, fireEvent=True, dieOnChange=False,
-            threadstop=DUMBTHREADSTOP, allowMetaDataUpdate=False):
-        """
-        Return PageAst of live text. In rare cases the live text may have
-        changed while method is running and the result is inaccurate.
-        """
-#         if self.livePageAstBuildLock.acquire(False):
-#             self.livePageAstBuildLock.release()
-#         else:
-#             if wx.Thread_IsMain(): traceback.print_stack()
-
-        with self.livePageAstBuildLock:   # TODO: Timeout?
-            threadstop.testRunning()
-
-            with self.textOperationLock:
-                text = self.getLiveText()
-                liveTextPlaceHold = self.liveTextPlaceHold
-                formatDetails = self.getFormatDetails()
-
-                pageAst = self.getLivePageAstIfAvailable()
-
-            if pageAst is not None:
-                return pageAst
-
-            if dieOnChange:
-                if threadstop is DUMBTHREADSTOP:
-                    threadstop = FunctionThreadStop(
-                            lambda: liveTextPlaceHold is self.liveTextPlaceHold)
-                else:
-                    origThreadstop = threadstop
-                    threadstop = FunctionThreadStop(
-                            lambda: origThreadstop.isRunning() and 
-                            liveTextPlaceHold is self.liveTextPlaceHold)
-
-            if len(text) == 0:
-                pageAst = buildSyntaxNode([], 0)
-            else:
-                pageAst = self.parseTextInContext(text, formatDetails=formatDetails,
-                        threadstop=threadstop)
-
-            with self.textOperationLock:
-                threadstop.testRunning()
-
-                self.livePageAst = pageAst
-                self.livePageBasePlaceHold = liveTextPlaceHold
-                self.livePageBaseFormatDetails = formatDetails
-
-
-        if self.isReadOnlyEffect():
-            threadstop.testRunning()
-            return pageAst
-
-#         if False and allowMetaDataUpdate:   # TODO: Option
-#             self._refreshMetaData(pageAst, formatDetails, fireEvent=fireEvent,
-#                     threadstop=threadstop)
-
-        with self.textOperationLock:
-            threadstop.testRunning()
-            return pageAst
-
-
-
-    def parseTextInContext(self, text, formatDetails=None,
-            threadstop=DUMBTHREADSTOP):
-        """
-        Return PageAst of text in the context of this page (wiki language and
-        format details).
+            editor = self.getTxtEditor()
         
-        text: unistring with text
-        """
-        parser = wx.GetApp().createWikiParser(self.getWikiLanguageName()) # TODO debug mode  , True
+        if editor is not None:
+            # TODO Check for deadlocks
+            callInMainThread(editor.handleInvalidFileSignature, self)
 
-        if formatDetails is None:
-            formatDetails = self.getFormatDetails()
+        if fireEvent:
+            wx.CallAfter(self.fireMiscEventKeys,
+                    ("checked file signature invalid",))
 
-        try:
-            pageAst = parser.parse(self.getWikiLanguageName(), text,
-                    formatDetails, threadstop=threadstop)
-        finally:
-            wx.GetApp().freeWikiParser(parser)
+        return False
 
-        threadstop.testRunning()
 
-        return pageAst
-
+    def markMetaDataDirty(self):
+        self.getWikiData().setMetaDataState(self.wikiWord,
+                Consts.WIKIWORDMETADATA_STATE_DIRTY)
 
 
     def _refreshMetaData(self, pageAst, formatDetails, fireEvent=True,
@@ -1384,164 +1494,31 @@ class WikiPage(DataCarryingPage):
             self.wikiDocument.pushUpdatePage(self)
 
 
-#     def update(self, text=None, fireEvent=True):
-#         """
-#         Update additional cached informations (properties, todos, relations)
-#         """
-#         if self.isReadOnlyEffect():
-#             return
-# 
-#         details1 = self.getFormatDetails()
-#         pageAst = self.parseTextInContext(text, details1)
-#         
-#         self._refreshMetaData(pageAst, details1)
-#         
-#         self.refreshPropertiesFromPageAst(pageAst)
-# 
-#         details2 = self.getFormatDetails()
-#         if not details1.isEquivTo(details2):
-#             # Formatting details have changed -> create new AST for second
-#             # step of refresh.  (Maybe repeat step one?)
-#             pageAst = self.parseTextInContext(text, details2)
-# 
-#         self.refreshMainDbCacheFromPageAst(pageAst, fireEvent)
-
-
-#     def addChildRelationship(self, toWord, pos):
-#         if self.isReadOnlyEffect():
-#             return
-# 
-#         if toWord not in self.childRelationSet:
-#             self.childRelations.append((toWord, pos))
-#             self.childRelationSet.add(toWord)
-#         
-#     def setProperty(self, key, value):
-#         if self.isReadOnlyEffect():
-#             return
-# 
-#         self._addProperty(key, value)
-#         
-#     def addTodo(self, todo):
-#         if self.isReadOnlyEffect():
-#             return
-# 
-#         if todo not in self.todos:
-#             self.todos.append(todo)
-# 
-#     def deleteChildRelationships(self):
-#         if self.isReadOnlyEffect():
-#             return
-# 
-#         self.childRelations = []
-#         self.childRelationSet = set()
-# 
-#     def deleteProperties(self):
-#         if self.isReadOnlyEffect():
-#             return
-# 
-#         self.props = {}
-# 
-#     def deleteTodos(self):
-#         if self.isReadOnlyEffect():
-#             return
-# 
-#         self.todos = []
-
-    _DEFAULT_PRESENTATION = (0, 0, 0, 0, 0, None)
-
-    def getPresentation(self):
+    def _save(self, text, fireEvent=True):
         """
-        Get the presentation tuple (<cursor pos>, <editor scroll pos x>,
-            <e.s.p. y>, <preview s.p. x>, <p.s.p. y>, <folding list>)
-        The folding list may be None or a list of UInt32 numbers
-        containing fold level, header flag and expand flag for each line
-        in editor.
-        """
-        wikiData = self.wikiDocument.getWikiData()
-
-        if wikiData is None:
-            return WikiPage._DEFAULT_PRESENTATION
-
-        datablock = wikiData.getPresentationBlock(
-                self.getWikiWord())
-
-        if datablock is None or datablock == "":
-            return WikiPage._DEFAULT_PRESENTATION
-
-        try:
-            if len(datablock) == struct.calcsize("iiiii"):
-                # Version 0
-                return struct.unpack("iiiii", datablock) + (None,)
-            else:
-                ss = SerializeStream(stringBuf=datablock)
-                rcVer = ss.serUint8(1)
-                if rcVer > 1:
-                    return WikiPage._DEFAULT_PRESENTATION
-
-                # Compatible to version 1                
-                ver = ss.serUint8(1)
-                pt = [ss.serInt32(0), ss.serInt32(0), ss.serInt32(0),
-                        ss.serInt32(0), ss.serInt32(0), None]
-
-                # Fold list
-                fl = ss.serArrUint32([])
-                if len(fl) == 0:
-                    fl = None
-
-                pt[5] = fl
-
-                return tuple(pt)
-        except struct.error:
-            return WikiPage._DEFAULT_PRESENTATION
-
-
-    def setPresentation(self, data, startPos):
-        """
-        Set (a part of) the presentation tuple. This is silently ignored
-        if the "write access failed" or "read access failed" flags are
-        set in the wiki document.
-        data -- tuple with new presentation data
-        startPos -- start position in the presentation tuple which should be
-                overwritten with data.
+        Saves the content of current wiki page.
         """
         if self.isReadOnlyEffect():
             return
+        
+        with self.textOperationLock:
+            if not self.getWikiDocument().isDefinedWikiPage(self.wikiWord):
+                # Pages isn't yet in database  -> fire event
+                # The event may be needed to invalidate a cache
+                self.fireMiscEventKeys(("saving new wiki page",))
 
-        if self.wikiDocument.getReadAccessFailed() or \
-                self.wikiDocument.getWriteAccessFailed():
-            return
+            self.getWikiData().setContent(self.wikiWord, text)
+            self.refreshSyncUpdateMatchTerms()
+            self.saveDirtySince = None
+#             self.dbContentPlaceHold = object()
+            if self.getEditorText() is None:
+                self.liveTextPlaceHold = object()
 
-        try:
-            pt = self.getPresentation()
-            pt = pt[:startPos] + data + pt[startPos+len(data):]
-    
-            wikiData = self.wikiDocument.getWikiData()
-            if wikiData is None:
-                return
-                
-            if pt[5] is None:
-                # Write it in old version 0
-                wikiData.setPresentationBlock(self.getWikiWord(),
-                        struct.pack("iiiii", *pt[:5]))
-            else:
-                # Write it in new version 1
-                ss = SerializeStream(stringBuf=True, readMode=False)
-                ss.serUint8(1)  # Read compatibility version
-                ss.serUint8(1)  # Real version
-                # First five numbers
-                for n in pt[:5]:
-                    ss.serInt32(n)
-                # Folding tuple
-                ft = pt[5]
-                if ft is None:
-                    ft = ()
-                ss.serArrUint32(pt[5])
 
-                wikiData.setPresentationBlock(self.getWikiWord(),
-                        ss.getBytes())
+            # Clear timestamp cache
+            self.modified = None
 
-        except AttributeError:
-            traceback.print_exc()
+
 
 
     # ----- Advanced functions -----
@@ -1735,6 +1712,7 @@ class WikiPage(DataCarryingPage):
 #         print "getFlatTree", repr(result)
 
         return result
+
 
 
 

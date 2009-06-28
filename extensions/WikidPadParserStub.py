@@ -1,8 +1,17 @@
 from __future__ import absolute_import
 import traceback
 
+import wx
 
-WIKIDPAD_PLUGIN = (("WikiParser", 1),)
+from pwiki.OptionsDialog import PluginOptionsPanel
+
+# This is a stub for the actual plugin located in
+# "wikidPadParser/WikidPadParser.py". The stub ensures that the real plugin is
+# only loaded if the language is actually used.
+
+
+
+WIKIDPAD_PLUGIN = (("WikiParser", 1), ("Options", 1))
 
 
 def describeWikiLanguage(ver, app):
@@ -78,5 +87,95 @@ def languageHelperFactory(intLanguageName, debugMode):
         _realLanguageHelperFactory = lhf
 
     return _realLanguageHelperFactory(intLanguageName, debugMode)
+
+
+def registerOptions(ver, app):
+    """
+    API function for "Options" plugins
+    Register configuration options and their GUI presentation
+    ver -- API version (can only be 1 currently)
+    app -- wxApp object
+    """
+    # Register options
+    
+    # Interpret footnotes (e.g. [42]) as wiki words?
+    app.getDefaultWikiConfigDict()[("main", "footnotes_as_wikiwords")] = u"False"
+
+    # Register panel in options dialog
+    app.addWikiWikiLangOptionsDlgPanel(WikiLangOptionsPanel,
+            u"WikidPad default 2.0")
+
+
+class WikiLangOptionsPanel(PluginOptionsPanel):
+    def __init__(self, parent, optionsDlg, mainControl):
+        """
+        Called when "Options" dialog is opened to show the panel.
+        Transfer here all options from the configuration file into the
+        text fields, check boxes, ...
+        """
+        PluginOptionsPanel.__init__(self, parent, optionsDlg)
+        self.mainControl = mainControl
+
+#         pt = self.mainControl.getConfig().getboolean("main",
+#                 "footnotes_as_wikiwords", False)
+        self.cbFootnotesAsWws = wx.CheckBox(self, -1,
+                _(u"Footnotes as wiki words"))
+#         self.cbFootnotesAsWws.SetValue(pt)
+
+#         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_exeDot",
+#                 u"dot.exe")
+#         self.tfDot = wx.TextCtrl(self, -1, pt)
+
+        mainsizer = wx.FlexGridSizer(1, 1, 0, 0)
+        mainsizer.AddGrowableCol(1, 1)
+
+        mainsizer.Add(self.cbFootnotesAsWws, 1, wx.ALL | wx.EXPAND, 5)
+        
+        self.addOptionEntry("footnotes_as_wikiwords",
+                self.cbFootnotesAsWws, "b")
+
+
+#         mainsizer.Add(wx.StaticText(self, -1, _(u"Name of dot executable:")), 0,
+#                 wx.ALL | wx.EXPAND, 5)
+#         mainsizer.Add(self.tfDot, 1, wx.ALL | wx.EXPAND, 5)
+
+        self.SetSizer(mainsizer)
+        self.Fit()
+        self.transferOptionsToDialog()
+
+
+    def setVisible(self, vis):
+        """
+        Called when panel is shown or hidden. The actual wxWindow.Show()
+        function is called automatically.
+        
+        If a panel is visible and becomes invisible because another panel is
+        selected, the plugin can veto by returning False.
+        When becoming visible, the return value is ignored.
+        """
+        return True
+
+    def checkOk(self):
+        """
+        Called when "OK" is pressed in dialog. The plugin should check here if
+        all input values are valid. If not, it should return False, then the
+        Options dialog automatically shows this panel.
+        
+        There should be a visual indication about what is wrong (e.g. red
+        background in text field). Be sure to reset the visual indication
+        if field is valid again.
+        """
+        return True
+
+    def handleOk(self):
+        """
+        This is called if checkOk() returned True for all panels. Transfer here
+        all values from text fields, checkboxes, ... into the configuration
+        file.
+        """
+        self.transferDialogToOptions()
+
+#         pt = repr(self.cbFootnotesAsWws.GetValue())
+#         self.mainControl.getConfig().set("main", "footnotes_as_wikiwords", pt)
 
 

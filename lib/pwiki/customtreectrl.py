@@ -2634,6 +2634,9 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
     def SetFont(self, font):
         """Sets the CustomTreeCtrl font."""
 
+        if font is None or not font.IsOk():
+            font = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
+
         wx.ScrolledWindow.SetFont(self, font)
 
         self._normalFont = font 
@@ -5671,9 +5674,8 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
                 
             
             else: # !RightDown() && !LeftUp() ==> LeftDown() || LeftDClick()
-
                 if not item or not item.IsEnabled():
-                    if self._textCtrl != None and item != self._textCtrl.item():
+                    if self._textCtrl is not None and item != self._textCtrl.item():
                         self._textCtrl.StopEditing()
                     return
 

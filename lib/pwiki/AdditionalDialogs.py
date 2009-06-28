@@ -296,12 +296,14 @@ class OpenWikiWordDialog(wx.Dialog):
             else:
                 self.value = ((entered, 0, entered, -1),)
 
-        self.pWiki.activatePageByUnifiedName(u"wikipage/" + self.value[0][2],
-                tabMode=tabMode)   # TODO: Go to charPos
-        
+        if self.pWiki.activatePageByUnifiedName(u"wikipage/" + self.value[0][2],
+                tabMode=tabMode) is None:   # TODO: Go to charPos
+            return True   # False instead ?
+
         for term in self.value[1:]:
-            self.pWiki.activatePageByUnifiedName(u"wikipage/" + term[2],
-                    tabMode=3)   # TODO: Go to charPos
+            if self.pWiki.activatePageByUnifiedName(u"wikipage/" + term[2],
+                    tabMode=3) is None:   # TODO: Go to charPos
+                break
 
         return True
 
@@ -461,11 +463,14 @@ class ChooseWikiWordDialog(wx.Dialog):
         self.ctrls.staTitle.SetLabel(title)
         
         self.motionType = motionType
-        self.words = words
-        wordsgui = map(uniToGui, words)
-        
-        self.ctrls.lb.Set(wordsgui)
+        self.unsortedWords = words
 
+        self.ctrls.cbSortAlphabetically.SetValue(
+                self.pWiki.getConfig().get("main",
+                "chooseWikiWordDialog_sortOrder") == u"AlphaAsc")
+
+        self._sortAndFillWords()
+        
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         
@@ -476,6 +481,8 @@ class ChooseWikiWordDialog(wx.Dialog):
         wx.EVT_BUTTON(self, GUI_ID.btnNewTab, self.OnNewTab)
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
         wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
+        wx.EVT_CHECKBOX(self, GUI_ID.cbSortAlphabetically,
+                self.OnCbSortAlphabetically)
 
 
     def OnDelete(self, evt):
@@ -546,9 +553,31 @@ class ChooseWikiWordDialog(wx.Dialog):
                 selWords = [self.words[idx] for idx in selIdxs]
 
             for word in selWords:
-                self.pWiki.activatePageByUnifiedName(u"wikipage/" + word, 2)
+                if self.pWiki.activatePageByUnifiedName(u"wikipage/" + word,
+                        2) is None:
+                    break
         finally:
             self.EndModal(wx.ID_OK)
+
+ 
+    def OnCbSortAlphabetically(self, evt):
+        self.pWiki.getConfig().set("main",
+                "chooseWikiWordDialog_sortOrder", (u"AlphaAsc" if
+                self.ctrls.cbSortAlphabetically.GetValue() else u"None"))
+        self._sortAndFillWords()
+
+ 
+    def _sortAndFillWords(self):
+        """
+        Sort words according to settings in dialog.
+        """
+        self.words = self.unsortedWords[:]
+        if self.ctrls.cbSortAlphabetically.GetValue():
+            self.pWiki.getCollator().sort(self.words)
+            
+        wordsgui = map(uniToGui, self.words)
+        
+        self.ctrls.lb.Set(wordsgui)
 
  
  
@@ -844,13 +873,10 @@ class DateformatDialog(wx.Dialog):
         preview = _(u"<invalid>")
         text = guiToUni(self.ctrls.fieldFormat.GetValue())
         try:
-#             # strftime can't handle unicode correctly, so conversion is needed
-#             mstr = mbcsEnc(text, "replace")[0]
-#             preview = mbcsDec(strftime(mstr), "replace")[0]
             preview = strftimeUB(text)
             self.value = text
         except:
-            traceback.print_exc()
+#             traceback.print_exc()
             pass
 
         self.ctrls.fieldPreview.SetLabel(preview)

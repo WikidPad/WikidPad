@@ -21,7 +21,7 @@ from pwiki import ParseUtilities
 from pwiki.StringOps import mbcsDec, re_sub_escape, pathEnc, pathDec, \
         unescapeWithRe, strToBool
 from pwiki.DocPages import DocPage, WikiPage, FunctionalPage, AliasWikiPage
-
+# from pwiki.Versioning import VersionOverview
 
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
@@ -495,7 +495,7 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         if self.lockFileName is not None:
             try:
-                os.unlink(self.lockFileName)
+                os.unlink(pathEnc(self.lockFileName))
             except:
                 traceback.print_exc()
 
@@ -942,6 +942,78 @@ class WikiDataManager(MiscEventSourceMixin):
     
             return value
 
+#     def getVersionOverview(self, unifName):
+#         """
+#         Get the version overview for an object with name unifName.
+#         """
+#         value = self.versionOverviewDict.get(unifName)
+#         if value is None:
+#             value = VersionOverview(self, unifName)
+#             value.readOverview()
+#             self.versionOverviewDict[unifName] = value
+#         
+#         return value
+#     
+#     def getExistingVersionOverview(self, unifName):
+#         """
+#         Get the version overview for an object with name unifName. If a
+#         version overview wasn't created already (in database or cache),
+#         None is returned.
+#         """
+#         value = self.versionOverviewDict.get(unifName)
+#         if value is None:
+#             value = VersionOverview(self, unifName)
+#             if value.isNotInDatabase():
+#                 return None
+# 
+#             value.readOverview()
+#             self.versionOverviewDict[unifName] = value
+#         
+#         return value
+
+
+    # Datablock function delegates
+    def getDataBlockUnifNamesStartingWith(self, startingWith):
+        """
+        Return all unified names starting with startingWith (case sensitive)
+        """
+        return self.wikiData.getDataBlockUnifNamesStartingWith(startingWith)
+
+    def retrieveDataBlock(self, unifName):
+        """
+        Retrieve data block as binary string.
+        """
+        return self.wikiData.retrieveDataBlock(unifName)
+
+    def retrieveDataBlockAsText(self, unifName):
+        """
+        Retrieve data block as unicode string (assuming it was encoded properly)
+        and with normalized line-ending (Un*x-style).
+        """
+        return self.wikiData.retrieveDataBlockAsText(unifName)
+
+    def storeDataBlock(self, unifName, newdata, storeHint=None):
+        """
+        Store newdata under unified name. If previously data was stored under the
+        same name, it is deleted.
+        
+        unifName -- unistring. Unified name to store data under
+        newdata -- Data to store, either bytestring or unistring. The latter one
+            will be converted using utf-8 before storing and the file gets
+            the appropriate line-ending of the OS for external data blocks .
+        storeHint -- Hint if data should be stored intern in table or extern
+            in a file (using DATABLOCK_STOREHINT_* constants from Consts.py).
+        """
+        return self.wikiData.storeDataBlock(unifName, newdata, storeHint)
+
+    def deleteDataBlock(self, unifName):
+        """
+        Delete data block with the associated unified name. If the unified name
+        is not in database, nothing happens.
+        """
+        return self.wikiData.deleteDataBlock(unifName)
+
+
 
     # TODO Remove if not needed
     def checkFileSignatureForWikiWordAndMarkDirty(self, word):
@@ -1196,6 +1268,7 @@ class WikiDataManager(MiscEventSourceMixin):
             del _openDocuments[wikiConfigPath]
             _openDocuments[renamedConfigPath] = self
 
+        oldWikiPage.renameVersionData(toWikiWord)
         oldWikiPage.informRenamedWikiPage(toWikiWord)
         del self.wikiPageDict[wikiWord]
 
@@ -1326,7 +1399,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
         finally:
             sarOp.endWikiSearch()
-            
+
         return result
 
 
@@ -1339,8 +1412,8 @@ class WikiDataManager(MiscEventSourceMixin):
         withCamelCase = strToBool(self.getGlobalPropertyValue(
                 u"camelCaseWordsEnabled", True))
 
-        footnotesAsWws = self.getWikiConfig().getboolean(
-                "main", "footnotes_as_wikiwords", False)
+#         footnotesAsWws = self.getWikiConfig().getboolean(
+#                 "main", "footnotes_as_wikiwords", False)
 
         autoLinkMode = strToBool(self.getGlobalPropertyValue(
                 u"auto_link", u"off").lower())
@@ -1348,12 +1421,19 @@ class WikiDataManager(MiscEventSourceMixin):
         paragraphMode = strToBool(self.getGlobalPropertyValue(
                 u"paragraph_mode", False))
 
+        langHelper = GetApp().createWikiLanguageHelper(
+                self.getWikiDefaultWikiLanguage())
+
+        wikiLanguageDetails = langHelper.createWikiLanguageDetails(
+                self, None)
+
         return ParseUtilities.WikiPageFormatDetails(
                 withCamelCase=withCamelCase,
-                footnotesAsWws=footnotesAsWws,
                 wikiDocument=self,
+                basePage=None,
                 autoLinkMode=autoLinkMode,
-                paragraphMode=paragraphMode
+                paragraphMode=paragraphMode,
+                wikiLanguageDetails=wikiLanguageDetails
                 )
 
 
@@ -1366,13 +1446,12 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         return ParseUtilities.WikiPageFormatDetails(
                 withCamelCase=True,
-                footnotesAsWws=False,
+#                 footnotesAsWws=False,
                 wikiDocument=None,
+                basePage=None,
                 autoLinkMode=False,
                 paragraphMode=False
                 )
-        
-        
 
 
     def getWikiWordsModifiedWithin(self, startTime, endTime):

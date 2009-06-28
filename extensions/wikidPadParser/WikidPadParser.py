@@ -6,9 +6,12 @@ import locale, pprint, time, sys, string, traceback
 
 from textwrap import fill
 
+import wx
+
 from pwiki.rtlibRepl import re
 from pwiki.StringOps import UPPERCASE, LOWERCASE, revStr
 from pwiki.WikiDocument import WikiDocument
+from pwiki.OptionsDialog import PluginOptionsPanel
 
 sys.stderr = sys.stdout
 
@@ -497,7 +500,7 @@ table = table.setResultsNameNoCopy("table")
 
 
 
-# -------------------- Suppress highlighting und no export --------------------
+# -------------------- Suppress highlighting and no export --------------------
 
 suppressHighlightingMultipleLines = buildRegex(ur"<<[ \t]*\n")\
         .setParseStartAction(preActCheckNothingLeft) + \
@@ -619,7 +622,7 @@ WikiWordCcPAT = (ur"(?:[" +
 
 
 UrlPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
-        ur'(?:(?![.,;:!?)]+["\s])[^"\s<>])*'
+        ur'(?:(?![.,;:!?)\]]+["\s])[^"\s<>])*'
 
 
 # UrlInBracketsPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
@@ -835,7 +838,7 @@ footnotePAT = ur"[0-9]+"
 def preActCheckFootnotesAllowed(s, l, st, pe):
     wikiFormatDetails = st.dictStack["wikiFormatDetails"]
     
-    if wikiFormatDetails.footnotesAsWws:
+    if wikiFormatDetails.wikiLanguageDetails.footnotesAsWws:
         raise ParseException(s, l, "CamelCase words not allowed here")
 
 
@@ -1127,6 +1130,7 @@ def _buildBaseDict(wikiDocument=None, formatDetails=None):
     if formatDetails is None:
         if wikiDocument is None:
             formatDetails = WikiDocument.getUserDefaultWikiPageFormatDetails()
+            formatDetails.setWikiLanguageDetails(WikiLanguageDetails(None, None))
         else:
             formatDetails = wikiDocument.getWikiDefaultWikiPageFormatDetails()
 
@@ -1304,7 +1308,7 @@ class _TheParser(object):
             t = text.parseString(content, parseAll=True, baseDict=baseDict,
                     threadstop=threadstop)
             t = buildSyntaxNode(t, 0, "text")
-                    
+
             t = _TheParser._postProcessing(intLanguageName, content, formatDetails,
                     t, threadstop)
 
@@ -1327,14 +1331,14 @@ class WikiLanguageDetails(object):
     """
     __slots__ = ("__weakref__", "footnotesAsWws", "wikiDocument")
 
-    def __init__(self, wikiDocument, config):
+    def __init__(self, wikiDocument, docPage):
         self.wikiDocument = wikiDocument
         if self.wikiDocument is None:
             # Set wiki-independent default values
             self.footnotesAsWws = False
         else:
-            self.footnotesAsWws = config.getboolean("main",
-                    "footnotes_as_wikiwords", False)
+            self.footnotesAsWws = self.wikiDocument.getWikiConfig().getboolean(
+                    "main", "footnotes_as_wikiwords", False)
 
     @staticmethod
     def getWikiLanguageName():
@@ -1368,7 +1372,7 @@ class _TheHelper(object):
         """
         Test if word is syntactically a valid wiki word and no settings
         are against it. The camelCase black list is not checked.
-        The function returns None, IFF THE WORD IS VALID, an error string
+        The function returns None IFF THE WORD IS VALID, an error string
         otherwise
         """
         if settings is not None and settings.has_key("footnotesAsWws"):
@@ -1882,11 +1886,11 @@ These are your default global settings.
 
 
     @staticmethod
-    def getWikiLanguageDetails(wikiDocument, config):
+    def createWikiLanguageDetails(wikiDocument, docPage):
         """
         Returns a new WikiLanguageDetails object based on current configuration
         """
-        return WikiLanguageDetails(wikiDocument, config)
+        return WikiLanguageDetails(wikiDocument, docPage)
 
 
 THE_LANGUAGE_HELPER = _TheHelper()
@@ -1955,6 +1959,7 @@ def languageHelperFactory(intLanguageName, debugMode):
         identify wiki language to process by helper
     """
     return THE_LANGUAGE_HELPER
+
 
 
 

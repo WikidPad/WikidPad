@@ -5,7 +5,7 @@ from WikiExceptions import *
 
 from Serialization import SerializeStream, findXmlElementFlat, \
         iterXmlElementFlat, serToXmlUnicode, serFromXmlUnicode, \
-        serToXmlBool, serFromXmlBool, serToXmlInt, serFromXmlInt
+        serToXmlBoolean, serFromXmlBoolean, serToXmlInt, serFromXmlInt
 
 
 
@@ -1054,11 +1054,11 @@ class SearchReplaceOperation:
         serToXmlUnicode(xmlNode, xmlDoc, u"searchPattern", self.searchStr)
         serToXmlUnicode(xmlNode, xmlDoc, u"replacePattern", self.replaceStr)
 
-        serToXmlBool(xmlNode, xmlDoc, u"replaceOperation", self.replaceOp)
-        serToXmlBool(xmlNode, xmlDoc, u"wholeWord", self.wholeWord)
-        serToXmlBool(xmlNode, xmlDoc, u"caseSensitive", self.caseSensitive)
-        serToXmlBool(xmlNode, xmlDoc, u"cycleToStart", self.cycleToStart)
-        serToXmlBool(xmlNode, xmlDoc, u"booleanOperation", self.booleanOp)
+        serToXmlBoolean(xmlNode, xmlDoc, u"replaceOperation", self.replaceOp)
+        serToXmlBoolean(xmlNode, xmlDoc, u"wholeWord", self.wholeWord)
+        serToXmlBoolean(xmlNode, xmlDoc, u"caseSensitive", self.caseSensitive)
+        serToXmlBoolean(xmlNode, xmlDoc, u"cycleToStart", self.cycleToStart)
+        serToXmlBoolean(xmlNode, xmlDoc, u"booleanOperation", self.booleanOp)
 
         serToXmlUnicode(xmlNode, xmlDoc, u"wildCardMode", unicode(self.wildCard))
 
@@ -1075,11 +1075,11 @@ class SearchReplaceOperation:
         self.searchStr = serFromXmlUnicode(xmlNode, u"searchPattern")
         self.replaceStr = serFromXmlUnicode(xmlNode, u"replacePattern")
 
-        self.replaceOp = serFromXmlBool(xmlNode, u"replaceOperation")
-        self.wholeWord = serFromXmlBool(xmlNode, u"wholeWord")
-        self.caseSensitive = serFromXmlBool(xmlNode, u"caseSensitive")
-        self.cycleToStart = serFromXmlBool(xmlNode, u"cycleToStart")
-        self.booleanOp = serFromXmlBool(xmlNode, u"booleanOperation")
+        self.replaceOp = serFromXmlBoolean(xmlNode, u"replaceOperation")
+        self.wholeWord = serFromXmlBoolean(xmlNode, u"wholeWord")
+        self.caseSensitive = serFromXmlBoolean(xmlNode, u"caseSensitive")
+        self.cycleToStart = serFromXmlBoolean(xmlNode, u"cycleToStart")
+        self.booleanOp = serFromXmlBoolean(xmlNode, u"booleanOperation")
 
         self.wildCard = serFromXmlUnicode(xmlNode, u"wildCardMode")
 

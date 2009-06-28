@@ -195,18 +195,18 @@ def registerOptions(ver, app):
     app.getDefaultGlobalConfigDict()[("main", "plugin_graphViz_exeFdp")] = u"fdp.exe"
 
     # Register panel in options dialog
-    app.addOptionsDlgPanel(GraphVizOptionsPanel, u"  GraphViz")
+    app.addGlobalPluginOptionsDlgPanel(GraphVizOptionsPanel, u"GraphViz")
 
 
 class GraphVizOptionsPanel(wx.Panel):
-    def __init__(self, parent, optionsDlg, app):
+    def __init__(self, parent, optionsDlg, mainControl):
         """
         Called when "Options" dialog is opened to show the panel.
         Transfer here all options from the configuration file into the
         text fields, check boxes, ...
         """
         wx.Panel.__init__(self, parent)
-        self.app = app
+        self.app = wx.GetApp()
         
         pt = self.app.getGlobalConfig().get("main", "plugin_graphViz_dirExe",
                 u"")

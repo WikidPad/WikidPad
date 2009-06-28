@@ -215,33 +215,54 @@ def iterXmlElementFlat(xmlNode, tag):
             yield subNode
 
 
-def serToXmlUnicode(xmlNode, xmlDoc, tag, data):
+def serToXmlUnicode(xmlNode, xmlDoc, tag, data, replace=False):
+    if replace:
+        subNode = findXmlElementFlat(xmlNode, tag, False)
+        if subNode is not None:
+            xmlNode.removeChild(subNode)
+
     subNode = xmlDoc.createElement(tag)
+
     subNode.appendChild(xmlDoc.createTextNode(data))
     xmlNode.appendChild(subNode)
 
 
-def serFromXmlUnicode(xmlNode, tag):
+def serFromXmlUnicode(xmlNode, tag, default=u""):
     subNode = findXmlElementFlat(xmlNode, tag)
+    if subNode is None:
+        return default
+
     child = subNode.firstChild
     if child is None:
-        return u""
+        return default
     return child.data
 
 
-def serToXmlBool(xmlNode, xmlDoc, tag, data):
-    serToXmlUnicode(xmlNode, xmlDoc, tag, unicode(repr(data)))
+def serToXmlBoolean(xmlNode, xmlDoc, tag, data, replace=False):
+    serToXmlUnicode(xmlNode, xmlDoc, tag, unicode(repr(bool(data))),
+            replace=replace)
 
 
-def serFromXmlBool(xmlNode, tag):
-    return strToBool(serFromXmlUnicode(xmlNode, tag))
+def serFromXmlBoolean(xmlNode, tag, default=None):
+    result = serFromXmlUnicode(xmlNode, tag, None)
+    if result is None:
+        return default
+
+    return strToBool(result)
 
 
-def serToXmlInt(xmlNode, xmlDoc, tag, data):
-    serToXmlUnicode(xmlNode, xmlDoc, tag, unicode(repr(data)))
+def serToXmlInt(xmlNode, xmlDoc, tag, data, replace=False):
+    serToXmlUnicode(xmlNode, xmlDoc, tag, unicode(repr(data)),
+            replace=replace)
 
-def serFromXmlInt(xmlNode, tag):
-    return int(serFromXmlUnicode(xmlNode, tag))
+def serFromXmlInt(xmlNode, tag, default=None):
+    result = serFromXmlUnicode(xmlNode, tag, None)
+    if result is None:
+        return default
+    try:
+        return int(result)
+    except ValueError:
+        return default
 
 
 

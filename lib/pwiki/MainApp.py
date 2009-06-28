@@ -20,7 +20,8 @@ from MiscEvent import KeyFunctionSink, MiscEventSourceMixin
 from WikiExceptions import *
 from Utilities import SingleThreadExecutor
 from PersonalWikiFrame import PersonalWikiFrame
-from StringOps import mbcsDec, createRandomString, pathEnc
+from StringOps import mbcsDec, createRandomString, pathEnc, writeEntireFile, \
+        loadEntireFile
 from CmdLineAction import CmdLineAction
 from Serialization import SerializeStream
 import Ipc
@@ -221,7 +222,7 @@ class App(wx.App, MiscEventSourceMixin):
 
             # We create a "password" so that no other user can send commands to this
             # WikidPad instance.
-            appCookie = createRandomString(30)
+            appCookie = createRandomString(30).encode("ascii")
 
             port = Ipc.createCommandServer(appCookie)
 
@@ -237,14 +238,19 @@ class App(wx.App, MiscEventSourceMixin):
                 singleInstance = False
                 # There seems to be(!) another instance already
                 # TODO Try to send commandline
-                f = open(pathEnc(os.path.join(
-                        self.globalConfigSubDir, "AppLock.lock")), "r")
-                appLockContent = f.read()
-                f.close()
+                appLockContent = loadEntireFile(os.path.join(
+                        self.globalConfigSubDir, "AppLock.lock"))
+#                 f = open(), "r")
+#                 f.read()
+#                 f.close()
                 
                 lines = appLockContent.split("\n")
                 if len(lines) != 3:
-                    sys.stderr.write(_(u"Invalid AppLock.lock file\n"))
+                    sys.stderr.write(_(u"Invalid AppLock.lock file.\n"
+                            u"Ensure that WikidPad is not running,\n"
+                            u"then delete file \"%s\" if present yet.\n") %
+                                (os.path.join(self.globalConfigSubDir,
+                                "AppLock.lock")))
                     return True # TODO Error handling!!!
 
                 appCookie = lines[0]
@@ -298,10 +304,13 @@ class App(wx.App, MiscEventSourceMixin):
     
                 appLockContent = appCookie + "\n" + str(port) + "\n"
     
-                f = open(pathEnc(os.path.join(
-                        self.globalConfigSubDir, "AppLock.lock")), "w")
-                f.write(appLockContent)
-                f.close()
+                writeEntireFile(os.path.join(
+                        self.globalConfigSubDir, "AppLock.lock"), appLockContent)
+    
+#                 f = open(pathEnc(os.path.join(
+#                         self.globalConfigSubDir, "AppLock.lock")), "w")
+#                 f.write(appLockContent)
+#                 f.close()
     
                 self.removeAppLockOnExit = True
         
@@ -649,13 +658,15 @@ class App(wx.App, MiscEventSourceMixin):
     def getOptionsDlgPanelList(self):        
         return self.optionsDlgPanelList
 
-    def addGlobalOptionsDlgPanel(self, factory, title):
+    def addGlobalPluginOptionsDlgPanel(self, factory, title):
         """
+        Add option page to global plugin options 
+        
         factory -- Factory function (or class taking parameters
-            (parent, optionsDlg, app) where
+            (parent, optionsDlg, mainControl) where
                 parent: GUI parent of panel
                 optionsDlg: OptionsDialog object
-                app: MainApp object
+                mainControl: PersonalWikiFrame object
         title -- unistring with title to show in the left list in options
             dialog
         """
@@ -667,12 +678,20 @@ class App(wx.App, MiscEventSourceMixin):
             insPos = len(pl)
             pl.append(("??insert mark/plugins global", u""))
 
-        pl.insert(insPos, (factory, title))
+        pl.insert(insPos, (factory, 2 * u" " + title))
 
-    addOptionsDlgPanel = addGlobalOptionsDlgPanel
 
-    def addWikiOptionsDlgPanel(self, factory, title):
+    def addOptionsDlgPanel(self, factory, title):
+        # Wrap factory function expecting old parameters with one for
+        # the new parameters.
+        def optionsPanelFactoryWrapper(parent, optionsDlg, mainControl):
+            return factory(parent, optionsDlg, wx.GetApp())
+
         """
+        Deprecated function, use addGlobalPluginOptionsDlgPanel() instead!
+
+        Add option page to global plugin options.
+        
         factory -- Factory function (or class taking parameters
             (parent, optionsDlg, app) where
                 parent: GUI parent of panel
@@ -681,11 +700,33 @@ class App(wx.App, MiscEventSourceMixin):
         title -- unistring with title to show in the left list in options
             dialog
         """
+        if title[:2] == u"  ":
+            title = title[2:]
+
+        self.addGlobalPluginOptionsDlgPanel(optionsPanelFactoryWrapper, title)
+
+
+    def addWikiWikiLangOptionsDlgPanel(self, factory, title):
+        """
+        factory -- Factory function (or class taking parameters
+            (parent, optionsDlg, mainControl) where
+                parent: GUI parent of panel
+                optionsDlg: OptionsDialog object
+                mainControl: PersonalWikiFrame object
+        title -- unistring with title to show in the left list in options
+            dialog
+        """
         pl = self.getOptionsDlgPanelList()
-        insPos = pl.index(("??insert mark/current wiki", u""))
 
-        pl.insert(insPos, (factory, title))
+        try:
+            insPos = pl.index(("??insert mark/current wiki/wiki lang", u""))
+        except ValueError:
+            insPos = pl.index(("??insert mark/current wiki", u""))
+            pl.insert(insPos, ("??insert mark/current wiki/wiki lang", u""))
+            pl.insert(insPos, ("", 2 * u" " + _(u"Wiki language")))
+            insPos += 1
 
+        pl.insert(insPos, (factory, 4 * u" " + title))
 
 
 

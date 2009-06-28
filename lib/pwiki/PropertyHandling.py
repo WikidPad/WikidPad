@@ -18,6 +18,8 @@ from WikiExceptions import *
 from Utilities import callInMainThreadAsync
 from Configuration import isUnicode
 
+import StringOps
+
 from LogWindow import LogMessage
 
 from DocPages import WikiPage
@@ -379,7 +381,8 @@ class PropertyCheckPresentation(AbstractPropertyCheck):
                         (propName, propValue), wikiWord, wikiWord, (start, end))
                 self.propChecker.appendLogMessage(msg)
         elif propName.endswith(u"color"):
-            if propValue.upper() not in _COLORS:
+#             if propValue.upper() not in _COLORS:
+            if StringOps.colorDescToRgbTuple(propValue) is None:
                 msg = LogMessage(self.mainControl, LogMessage.SEVERITY_HINT,
                         _(u"Color name doesn't exist: [%s: %s]") %
                         (propName, propValue), wikiWord, wikiWord, (start, end))
@@ -494,8 +497,8 @@ class PropertyChecker:
 
     def appendLogMessage(self, msg):
         if self.msgCollector is None:
-            raise InternalError(_(u"Calling PropertyChecker.appendLogMessage "
-                    u"while outside of checkPage"))
+            raise InternalError(u"Calling PropertyChecker.appendLogMessage "
+                    u"while outside of checkPage")
         
         self.msgCollector.append(msg)
 

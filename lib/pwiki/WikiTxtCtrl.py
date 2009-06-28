@@ -29,6 +29,7 @@ from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 from AdditionalDialogs import ImagePasteSaver, ImagePasteDialog
 # import WikiFormatting
 import DocPages
+from Versioning import VersionEntry
 from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException, \
         NotCurrentThreadException
 import UserActionCoord
@@ -482,6 +483,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN))
         wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT,
                 lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT))
+        wx.EVT_MENU(self, GUI_ID.CMD_VERSION_ADD, self.OnCmdVersionAdd)
 
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)        
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
@@ -1120,7 +1122,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         Helper for onOptionsChanged() to read a color from an option
         and create a wx.Colour object from it.
         """
-        coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
+        coltuple = colorDescToRgbTuple(self.presenter.getConfig().get(
                 "main", option))
 
         if coltuple is None:
@@ -1144,14 +1146,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.SetStyles(faces)
 
         color = self._getColorFromOption("editor_bg_color", (255, 255, 255))
-
-#         coltuple = htmlColorToRgbTuple(self.presenter.getConfig().get(
-#                 "main", "editor_bg_color"))
-# 
-#         if coltuple is None:
-#             coltuple = (255, 255, 255)
-# 
-#         color = wx.Colour(*coltuple)
 
         for i in xrange(32):
             self.StyleSetBackground(i, color)
@@ -1765,6 +1759,21 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             return None
         
         return docPage.getLivePageAst()
+
+
+    def OnCmdVersionAdd(self, evt):
+        docPage = self.getLoadedDocPage()
+        if docPage is None or \
+                not docPage.getUnifiedPageName().startswith(u"wikipage/"):
+            return
+        
+        versionOverview = docPage.getVersionOverview()
+        content = self.GetText()
+
+        # TODO Description
+        entry = VersionEntry(u"", "revdiff")
+        versionOverview.addVersion(content, entry)
+        versionOverview.writeOverview()
 
 
     def activateTokens(self, nodeList, tabMode=0):
@@ -2456,10 +2465,19 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
     def OnModified(self, evt):
         if not self.ignoreOnChange:
+            
             if evt.GetModificationType() & \
                     (wx.stc.STC_MOD_INSERTTEXT | wx.stc.STC_MOD_DELETETEXT):
-#                 self.getLoadedDocPage().setDirty(True)
+
                 self.presenter.informEditorTextChanged(self)
+
+                docPage = self.getLoadedDocPage()
+
+#                 if docPage.getTxtEditor() is self:
+#                     print "--OnModified5", repr((evt.GetModificationType(),
+#                             evt.GetPosition(), evt.GetLength(), evt.GetText()))
+
+
 
 
     def OnCharAdded(self, evt):

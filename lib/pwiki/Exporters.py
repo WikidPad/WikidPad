@@ -518,8 +518,11 @@ class HtmlExporter(AbstractExporter):
             if not OsAbstract.samefile(wikiPath, self.exportDest):
                 # Now we have to copy the referenced files to new location
                 for rsf in self.referencedStorageFiles:
-                    OsAbstract.copyFile(join(wikiPath, rsf),
-                            join(self.exportDest, rsf))
+                    try:
+                        OsAbstract.copyFile(join(wikiPath, rsf),
+                                join(self.exportDest, rsf))
+                    except IOError, e:
+                        raise ExportException(unicode(e))
 
 
         if self.mainControl.getConfig().getboolean(
@@ -937,7 +940,7 @@ class HtmlExporter(AbstractExporter):
         
         # Filter color
         def filterCol(col, prop):
-            if htmlColorToRgbTuple(col) is not None:
+            if colorDescToRgbTuple(col) is not None:
                 return u'%s="%s"' % (prop, col)
             else:
                 return u''
@@ -1234,6 +1237,7 @@ class HtmlExporter(AbstractExporter):
         self.result = []
         self.optsStack = StackedCopyDict()
         self.insertionVisitStack = []
+        self.astNodeStack = []
         self.copiedTempFileCache = {}
 
         self.outFlagEatPostBreak = False
@@ -1412,6 +1416,8 @@ class HtmlExporter(AbstractExporter):
         
         astNode -- node of type "table"
         """
+        self.astNodeStack.append(astNode)
+
         self.outAppend(u'<table border="2">\n')
         
         for row in astNode.iterFlatByName("tableRow"):
@@ -1423,9 +1429,21 @@ class HtmlExporter(AbstractExporter):
             self.outAppend(u"</tr>\n")
         self.outAppend(u'</table>\n', eatPostBreak=not self.asIntHtmlPreview)
 
+        self.astNodeStack.pop()
+
+
+    def _processInsertion(self, fullContent, astNode):
+        self.astNodeStack.append(astNode)
+        astNode.astNodeStack = self.astNodeStack
+
+        try:
+            return self._actualProcessInsertion(fullContent, astNode)
+        finally:
+            self.astNodeStack.pop()
+
 
     # TODO Context support so an insertion reacts differently in e.g. tables
-    def _processInsertion(self, fullContent, astNode):
+    def _actualProcessInsertion(self, fullContent, astNode):
         """
         Process an insertion (e.g. "[:page:WikiWord]")
         
@@ -1704,6 +1722,8 @@ class HtmlExporter(AbstractExporter):
 
 
     def _processWikiWord(self, astNodeOrWord, fullContent=None):
+        self.astNodeStack.append(astNodeOrWord)
+
         if isinstance(astNodeOrWord, SyntaxNode):
             wikiWord = astNodeOrWord.wikiWord
             anchorLink = astNodeOrWord.anchorLink
@@ -1772,12 +1792,15 @@ class HtmlExporter(AbstractExporter):
                 else:
                     self.outAppend(escapeHtml(astNodeOrWord))
 
+        self.astNodeStack.pop()
 
 
     def processAst(self, content, pageAst):
         """
         Actual token to HTML converter. May be called recursively
         """
+        self.astNodeStack.append(pageAst)
+
         for node in pageAst.iterFlatNamed():
             tname = node.name
             
@@ -2050,6 +2073,7 @@ class HtmlExporter(AbstractExporter):
                         _(u'[Unknown parser node with name "%s" found]') % tname) + \
                         u'</tt>')
 
+        self.astNodeStack.pop()
 
 
 class TextExporter(AbstractExporter):

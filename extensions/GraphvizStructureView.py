@@ -658,11 +658,11 @@ class GraphVizStructOptionsPanel(PluginOptionsPanel):
         Transfer here all options from the configuration file into the
         text fields, check boxes, ...
         """
-        PluginOptionsPanel.__init__(self, parent, optionsDlg, app)
-        
+        PluginOptionsPanel.__init__(self, parent, optionsDlg)
+
         mainsizer = wx.FlexGridSizer(5, 3, 0, 0)
         mainsizer.AddGrowableCol(1, 1)
-        
+
         self.tfFacename = wx.TextCtrl(self, -1)
         facenameButton = wx.Button(self, -1, _(u"..."))
         facenameButton.SetMinSize((20, -1))

@@ -4250,36 +4250,6 @@ def combineRegexFlags(flags, flagsMask, otherFlags, otherFlagsMask):
         return (flags & flagsMask) | (otherFlags & otherFlagsMask), newFlagsMask
 
 
-# flags mask oflags omask -> rflags rmask
-#    0    0     0     0         X     0
-#    0    0     0     1         0     1
-#    0    0     1     0         X     0 A
-#    0    0     1     1         1     1
-#    0    1     0     0         0     1
-#    0    1     0     1         0     1
-#    0    1     1     0         0     1 A
-#    0    1     1     1         E     1
-#    1    0     0     0         X     0 A
-#    1    0     0     1         0     1 A
-#    1    0     1     0         X     0 A
-#    1    0     1     1         1     1 A
-#    1    1     0     0         1     1
-#    1    1     0     1         E     1
-#    1    1     1     0         1     1 A
-#    1    1     1     1         1     1
-# 
-# flags mask  f&m  oflags omask  of&om   -> rflags rmask
-#    0    0     0     0     1       0          0     1
-#    0    0     0     1     1       1          1     1
-#    0    1     0     0     0       0          0     1
-#    0    1     0     0     1       0          0     1
-#    0    1     0     1     0       0          0     1 A
-#    1    0     0     0     1       0          0     1 A
-#    1    0     0     1     1       1          1     1 A
-#    1    1     1     0     0       0          1     1
-#    1    1     1     1     0       0          1     1 A
-#    1    1     1     1     1       1          1     1
-
 
 
 class RegexCombiner(object):

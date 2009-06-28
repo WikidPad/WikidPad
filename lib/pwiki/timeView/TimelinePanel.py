@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 # import hotshot
 # _prof = hotshot.Profile("hotshot.prf")
 
@@ -6,14 +8,14 @@ import os, traceback
 import wx
 
 # from MiscEvent import KeyFunctionSinkAR
-from pwiki.wxHelper import GUI_ID, EnhancedListControl, wxKeyFunctionSink, cloneFont, \
+from ..wxHelper import GUI_ID, EnhancedListControl, wxKeyFunctionSink, cloneFont, \
         getAccelPairFromKeyDown, appendToMenuByMenuDesc, IdRecycler
 
-from pwiki.StringOps import formatWxDate
+from ..StringOps import formatWxDate
 
-from pwiki.Configuration import isWindows
+from ..Configuration import isWindows
 
-from TimePresentationBase import TimePresentationBase
+from .TimePresentationBase import TimePresentationBase
 
 
 class TimelinePanel(EnhancedListControl, TimePresentationBase):

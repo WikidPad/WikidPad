@@ -21,7 +21,7 @@ from SearchAndReplace import SearchReplaceOperation
 
 from StringOps import mbcsEnc, guiToUni, uniToGui, strToBool, \
         pathWordAndAnchorToWikiUrl, escapeForIni, unescapeForIni, \
-        htmlColorToRgbTuple
+        colorDescToRgbTuple
 
 from AdditionalDialogs import SelectWikiWordDialog
 
@@ -1400,12 +1400,19 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
     def onOptionsChanged(self, miscevt):
         config = self.pWiki.getConfig()
 
-        coltuple = htmlColorToRgbTuple(config.get("main", "tree_bg_color"))   
+        coltuple = colorDescToRgbTuple(config.get("main", "tree_bg_color"))   
 
         if coltuple is None:
             coltuple = (255, 255, 255)
 
         self.SetBackgroundColour(wx.Colour(*coltuple))
+
+        font = wx.SystemSettings_GetFont(wx.SYS_DEFAULT_GUI_FONT)
+        # wx.Font()    # 1, wx.FONTFAMILY_DEFAULT, 
+        font.SetNativeFontInfoUserDesc(config.get(
+                "main", "tree_font_nativeDesc", u""))
+
+        self.SetFont(font)
         
 #         self.SetDefaultScrollVisiblePos("middle")
 
@@ -1914,13 +1921,17 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 self.SetItemImage(node, 0, wx.TreeItemIcon_Normal)
             except:
                 pass    
-                
-                    
+
+
     def setNodeColor(self, node, color):
         if color == "null":
             self.SetItemTextColour(node, wx.NullColour)
         else:
-            self.SetItemTextColour(node, wx.NamedColour(color))
+            coltuple = colorDescToRgbTuple(color)
+            if coltuple is not None:            
+                self.SetItemTextColour(node, wx.Colour(*coltuple))
+            else:
+                self.SetItemTextColour(node, wx.NullColour)
 
 
     def setNodePresentation(self, node, style):
@@ -2006,10 +2017,15 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
 
     def OnTreeBeginDrag(self, event):
+        item = event.GetItem()   
+        if item is None or not item.IsOk():
+            event.Veto()
+            return
+
         langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.pWiki.getWikiDocument().getWikiDefaultWikiLanguage())
 
-        itemobj = self.GetPyData(event.GetItem())
+        itemobj = self.GetPyData(item)
         if isinstance(itemobj, WikiWordNode):
             textDataOb = textToDataObject(
                     langHelper.createStableLinksFromWikiWords(
@@ -2110,8 +2126,10 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         if (tabMode & 2) and isinstance(nodeObj, WikiWordNode):
 #             self.pWiki.activateWikiWord(nodeObj.getWikiWord(), tabMode)
-            self.pWiki.activatePageByUnifiedName(
-                    u"wikipage/" + nodeObj.getWikiWord(), tabMode)
+            
+            if self.pWiki.activatePageByUnifiedName(
+                    u"wikipage/" + nodeObj.getWikiWord(), tabMode) is None:
+                return
             
             if not (tabMode & 1) and self.pWiki.getConfig().getboolean("main",
                     "tree_autohide", False):

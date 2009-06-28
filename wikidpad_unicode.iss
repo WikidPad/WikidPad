@@ -54,17 +54,17 @@ Name: Program_files; Description: Main program files; Flags: fixed; Types: custo
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 2.0beta04
+AppVerName=WikidPad 2.0beta05
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=2.0.104.0
-VersionInfoTextVersion=WikidPad 2.0beta04
+VersionInfoVersion=2.0.105.0
+VersionInfoTextVersion=WikidPad 2.0beta05
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-2.0beta04
+OutputBaseFilename=WikidPad-2.0beta05
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2009 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
@@ -98,7 +98,7 @@ Name: assocWikiUrl; Description: "Handle URLs with ""wiki:"" by WikidPad"
 [InstallDelete]
 Name: {app}\regexpr.cache; Type: files
 Name: {app}\zlib.pyd; Type: files
-; Name: {app}\extensions\WikiSyntax.py; Type: files
+Name: {app}\extensions\WikiSyntax.py; Type: files
 
 [UninstallDelete]
 Name: {app}\regexpr.cache; Type: files

@@ -1,5 +1,26 @@
 ﻿++ Change Log
 
+
+Jun. 28, 2009 (2.0beta05)
+
+    * Options "Wiki language" and "Footnotes as wiki words" moved to
+      different options pages. See [OptionsDialog#++++ Wiki language]
+    * In "Choose wikiword" dialog (for choosing parents,
+      children...), pages can be sorted alphabetically
+    * Option to change tree font.
+      See [OptionsDialog#++++ Tree options]
+    * More detailed instruction in error log in case of
+      bad AppLock.lock file
+
+    * Windows: Show error message if copying of files fails
+      during export
+    * Windows: New try to make crashes more seldom when exiting from
+      system tray
+    * Windows: Generated file URLs now use ':' after drive letter
+      instead of '|'
+
+
+
 May 30, 2009 (2.0beta04)
 
     * Support for printing rendered HTML. See [Printing]

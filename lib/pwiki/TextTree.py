@@ -11,8 +11,8 @@ import wx
 from WikiExceptions import *
 from wxHelper import XrcControls, GUI_ID
 
-from StringOps import splitIndent, unescapeWithRe, uniWithNone, re_sub_escape, \
-        splitFill
+from StringOps import splitIndentDeepness, unescapeWithRe, uniWithNone, \
+        re_sub_escape, splitFill
 
 from AdditionalDialogs import SelectIconDialog
 
@@ -185,7 +185,7 @@ def buildTreeFromText(content, entryFactory):
             continue
 
         # Parse line                
-        text, deep = splitIndent(line)
+        deep, text = splitIndentDeepness(line)
 
         entry = entryFactory(text)
         if entry is None:

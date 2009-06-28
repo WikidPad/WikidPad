@@ -439,6 +439,9 @@ class SearchResultListBox(wx.HtmlListBox):
 
         presenter = self.pWiki.activatePageByUnifiedName(
                 u"wikipage/" + info.wikiWord, tabMode)
+        
+        if presenter is None:
+            return
 
         if info.occPos[0] != -1:
             presenter.getSubControl("textedit").SetSelectionByCharPos(
@@ -501,6 +504,10 @@ class SearchResultListBox(wx.HtmlListBox):
 #             presenter = self.pWiki.activateWikiWord(info.wikiWord, 0)
             presenter = self.pWiki.activatePageByUnifiedName(
                     u"wikipage/" + info.wikiWord, 0)
+
+            if presenter is None:
+                return
+
             if info.occPos[0] != -1:
                 presenter.getSubControl("textedit").SetSelectionByCharPos(
                         info.occPos[0], info.occPos[1])
@@ -517,6 +524,10 @@ class SearchResultListBox(wx.HtmlListBox):
 #             presenter = self.pWiki.activateWikiWord(info.wikiWord, 2)
             presenter = self.pWiki.activatePageByUnifiedName(
                     u"wikipage/" + info.wikiWord, 2)
+
+            if presenter is None:
+                return
+
             if info.occPos[0] != -1:
                 presenter.getSubControl("textedit").SetSelectionByCharPos(
                         info.occPos[0], info.occPos[1])
@@ -533,6 +544,10 @@ class SearchResultListBox(wx.HtmlListBox):
 #             presenter = self.pWiki.activateWikiWord(info.wikiWord, 3)
             presenter = self.pWiki.activatePageByUnifiedName(
                     u"wikipage/" + info.wikiWord, 3)
+            
+            if presenter is None:
+                return
+
             if info.occPos[0] != -1:
                 presenter.getSubControl("textedit").SetSelectionByCharPos(
                         info.occPos[0], info.occPos[1])

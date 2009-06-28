@@ -346,6 +346,7 @@ WikidPadHelp/data/wiki%00252FCCBlacklist.data -text
 WikidPadHelp/data/wikidb.gfd -text
 WikidPadHelp/files/testimg.gif -text
 /WikidPadStarter.py -text
+/WikidPad_sv.po -text
 /appbase.css -text
 /bld.bat -text
 /buildGadflyZips.py -text
@@ -645,6 +646,8 @@ lib/pwiki/TempFileSet.py -text
 lib/pwiki/TextTree.py -text
 lib/pwiki/UserActionCoord.py -text
 lib/pwiki/Utilities.py -text
+lib/pwiki/Versioning.py -text
+lib/pwiki/VersioningGui.py -text
 lib/pwiki/WikiDocument.py -text
 lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiHtmlView.py -text

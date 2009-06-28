@@ -244,7 +244,6 @@ class MultiPageTextImporter:
         
         try:
             datablock = base64BlockDecode(b64Content)
-#             self.wikiDataManager.getWikiData().saveSearch(subtag, datablock)
             self.wikiDataManager.getWikiData().storeDataBlock(unifName, datablock,
                     storeHint=Consts.DATABLOCK_STOREHINT_INTERN)
             
@@ -271,17 +270,10 @@ class MultiPageTextImporter:
         try:
             timeStamps = [timegm(time.strptime(ts, "%Y-%m-%d/%H:%M:%S"))
                     for ts in timeStrings]
-#             timeStamps = [time.strptime(ts, "%Y-%m-%d/%H:%M:%S")
-#                     for ts in timeStrings]
-#             print "importItemWikiPage8", repr(timeStamps)
-#             timeStamps = [time.mktime(ts)
-#                     for ts in timeStamps]
 
         except (ValueError, OverflowError):
             traceback.print_exc()
             return  # TODO Report error
-            
-#         timeStrings = [strftimeUB("%Y-%m-%d/%H:%M:%S", ts) for ts in timeStamps]
 
         content = self.collectContent()
         page = self.wikiDataManager.getWikiPageNoError(subtag)

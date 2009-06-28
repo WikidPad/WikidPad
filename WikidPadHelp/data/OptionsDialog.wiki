@@ -107,6 +107,9 @@ If a page contains wiki word links to non-existing pages, these are not shown as
 *Tree auto-hide*
 After selecting an item in tree, the tree is hidden automatically.
 
+*Font*
+Select font of tree. The empty field means default font.
+
 *Background color*
 Specify background color of tree.
 
@@ -364,9 +367,6 @@ These options apply to the active wiki only
 
 ++++ General options
 
-*Footnotes as wiki words*
-Interpret [Footnotes] (e.g. "[42]") as wiki words.
-
 *First word at startup*
 Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last words when the wiki was closed are shown on opening.
 
@@ -411,9 +411,6 @@ Set here the name of icon to use in the system tray instead of the default icon.
 *Wiki-bound hotkey*
 Wiki-bound hotkey to show/hide wiki. See OptionsDialog#*App-bound# hotkey*
 
-*Wiki language*
-Choose the language (syntax) of the wiki. Each language is provided by a plugin.
-
 
 ++++ Headings
 
@@ -431,6 +428,18 @@ If you came to a not yet created page through a titled link (e.g. [WikiWord| Thi
 
 *Headings as aliases: Up to heading depth*
 All headings with a level less or equal this number are shown in the open wiki word dialog. You can select them to come to the wiki page they are on. If value is 0, no headings are processed. After changing this value, you may have to rebuild the wiki to see an effect.
+
+
+++++ Wiki language
+
+*Wiki language*
+Choose the language (syntax) of the wiki. Each language is provided by a plugin.
+
+
++++++ WikidPad default 2.0
+
+*Footnotes as wiki words*
+Interpret [Footnotes] (e.g. "[42]") as wiki words.
 
 
 ++++ Advanced

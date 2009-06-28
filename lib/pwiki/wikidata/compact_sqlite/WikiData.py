@@ -20,7 +20,7 @@ import os.path
 from time import time, localtime
 import datetime
 import string, glob, types, traceback
-import re # import pwiki.srePersistent as re
+import re
 
 from pwiki.WikiExceptions import *   # TODO make normal import
 from pwiki import SearchAndReplace

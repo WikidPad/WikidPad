@@ -538,14 +538,14 @@ class IconCache:
                 sys.stderr.write("couldn't load icon %s\n" % iconFile)
 
 
-    # TODO !  Do not remove bitmaps which are in use
-    def clearIconBitmaps(self):
-        """
-        Remove all bitmaps stored in the cache, needed by
-        PersonalWiki.resourceSleep.
-        """
-        for k in self.iconLookupCache.keys():
-            self.iconLookupCache[k] = self.iconLookupCache[k][0:2] + (None,)
+#     # TODO !  Do not remove bitmaps which are in use
+#     def clearIconBitmaps(self):
+#         """
+#         Remove all bitmaps stored in the cache, needed by
+#         PersonalWiki.resourceSleep.
+#         """
+#         for k in self.iconLookupCache.keys():
+#             self.iconLookupCache[k] = self.iconLookupCache[k][0:2] + (None,)
 
 
     def lookupIcon(self, iconname):
@@ -638,6 +638,7 @@ class IconCache:
         wx components only with SetImageList, not AssignImageList
         """
         return self.iconImageList
+
 
 
 

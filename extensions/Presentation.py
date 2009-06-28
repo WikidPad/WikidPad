@@ -2,7 +2,7 @@ from wx import Platform
 
 from Consts import FormatTypes
 
-from pwiki.StringOps import htmlColorToRgbTuple
+from pwiki.StringOps import colorDescToRgbTuple
 
 
 if Platform == '__WXMSW__':
@@ -47,11 +47,11 @@ def getStyles(styleFaces, config):
     colAttribute = config.get("main", "editor_attribute_color", "#555555")
 
     # Check validity
-    if htmlColorToRgbTuple(colPlaintext) is None:
+    if colorDescToRgbTuple(colPlaintext) is None:
         colPlaintext = "#000000"
-    if htmlColorToRgbTuple(colLink) is None:
+    if colorDescToRgbTuple(colLink) is None:
         colLink = "#0000BB"
-    if htmlColorToRgbTuple(colAttribute) is None:
+    if colorDescToRgbTuple(colAttribute) is None:
         colAttribute = "#555555"
 
     # Add colors to dictionary:

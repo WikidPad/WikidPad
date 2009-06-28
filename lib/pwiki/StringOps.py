@@ -416,10 +416,10 @@ def revStr(s):
     s.reverse()
     return u"".join(s)
 
-def splitkeep(s, delim):
+def splitKeep(s, delim):
     """
     Similar to split, but keeps the delimiter as separate element, e.g.
-    splitkeep("aaabaaabaa", "b") -> ["aaa", "b", "aaa", "b", "aa"]
+    splitKeep("aaabaaabaa", "b") -> ["aaa", "b", "aaa", "b", "aa"]
     """
     result = []
     for e in s.split(delim):
@@ -428,17 +428,24 @@ def splitkeep(s, delim):
 
     return result[:-1]
 
-
-def splitIndent(text):
+def splitIndentDeepness(text):
     """
-    Return tuple (t, d) where d is deepness of indentation and t is text
-    without the indentation
+    Return tuple (d, t) where d is deepness of indentation and t is text
+    without the indentation.
     """
     pl = len(text)
     text = text.lstrip()
-    return (text, pl-len(text))
+    return (pl-len(text), text)
     
-    
+def splitIndent(text):
+    """
+    Return tuple (ind, t) where ind is a string of the indentation characters
+    (normally spaces) and t is text without the indentation.
+    """
+    pl = len(text)
+    textOnly = text.lstrip()
+    return (text[:pl-len(textOnly)], textOnly)
+
 def measureIndent(indent):
     return len(indent)
 
@@ -547,36 +554,12 @@ def re_sub_escape(pattern):
             u"\r", u"\\r").replace(u"\t", u"\\t").replace(u"\f", u"\\f")
 
 
-def htmlColorToRgbTuple(desc):
-    """
-    Calculate RGB integer tuple from html '#hhhhhh' format string.
-    Returns None in case of an error
-    """
-    if len(desc) == 4:
-        desc = "#" + desc[1] + desc[1] + desc[2] + desc[2] + desc[3] + desc[3]
-
-    if len(desc) != 7:
-        return None
-    try:
-        r = int(desc[1:3], 16)
-        g = int(desc[3:5], 16)
-        b = int(desc[5:7], 16)
-        return (r, g, b)
-    except:
-        return None
+HTML_DIGITCOLOR = _re.compile(
+        ur"^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$",
+        _re.DOTALL | _re.UNICODE | _re.MULTILINE)
 
 
-
-#     if len(html) != 7 or html[0] != "#":
-#         return None
-#     try:
-#         r = int(html[1:3], 16)
-#         g = int(html[3:5], 16)
-#         b = int(html[5:7], 16)
-#         return (r, g, b)
-#     except:
-#         return None
-
+# def htmlColorToRgbTuple(desc):
 def colorDescToRgbTuple(desc):
     """
     Converts a color description to an RGB tuple or None if
@@ -586,21 +569,16 @@ def colorDescToRgbTuple(desc):
     HTML 3-digits color, e.g. #4E2 which converts to #44EE22  (TODO: HTML standard?)
     HTML color name
     """
-    desc = desc.strip()
-    if len(desc) == 0:
-        return None
-    
-    if desc[0] != "#":
-        desc = desc.replace(" ", "").lower()
-        desc = _COLORBASE.get(desc)
-        if desc is None:
+    global HTML_DIGITCOLOR, _COLORBASE
+
+    if not HTML_DIGITCOLOR.match(desc):
+        try:
+            desc = _COLORBASE[desc.replace(" ", "").lower()]
+        except KeyError:
             return None
 
     if len(desc) == 4:
         desc = "#" + desc[1] + desc[1] + desc[2] + desc[2] + desc[3] + desc[3]
-
-    if len(desc) != 7:
-        return None
     try:
         r = int(desc[1:3], 16)
         g = int(desc[3:5], 16)
@@ -608,6 +586,39 @@ def colorDescToRgbTuple(desc):
         return (r, g, b)
     except:
         return None
+
+
+# def colorDescToRgbTuple(desc):
+#     """
+#     Converts a color description to an RGB tuple or None if
+#     description is invalid.
+#     Color description can be:
+#     HTML 6-digits color, e.g. #C0D623
+#     HTML 3-digits color, e.g. #4E2 which converts to #44EE22  (TODO: HTML standard?)
+#     HTML color name
+#     """
+#     desc = desc.strip()
+#     if len(desc) == 0:
+#         return None
+#     
+#     if desc[0] != "#":
+#         desc = desc.replace(" ", "").lower()
+#         desc = _COLORBASE.get(desc)
+#         if desc is None:
+#             return None
+# 
+#     if len(desc) == 4:
+#         desc = "#" + desc[1] + desc[1] + desc[2] + desc[2] + desc[3] + desc[3]
+# 
+#     if len(desc) != 7:
+#         return None
+#     try:
+#         r = int(desc[1:3], 16)
+#         g = int(desc[3:5], 16)
+#         b = int(desc[5:7], 16)
+#         return (r, g, b)
+#     except:
+#         return None
 
 
 def rgbToHtmlColor(r, g, b):
@@ -838,7 +849,10 @@ def flexibleUrlUnquote(link):
 
 
 
-URL_RESERVED = frozenset((u";", u"?", u":", u"@", u"&", u"=", u"+", u",", u"/"))
+URL_RESERVED = frozenset((u";", u"?", u":", u"@", u"&", u"=", u"+", u",", u"/")
+        + (u"{", u"}", u"|", u"\\", u"^", u"~", u"[", u"]", u"`"))
+
+
 
 def urlQuote(s, safe='/'):
     """
@@ -861,6 +875,9 @@ def urlQuote(s, safe='/'):
     is reserved, but in typical usage the quote function is being
     called on a path where the existing slash characters are used as
     reserved characters.
+    
+    The characters u"{", u"}", u"|", u"\", u"^", u"~", u"[", u"]", u"`"
+    are considered unsafe and should be quoted as well.
     """
     result = []
     
@@ -884,7 +901,7 @@ def ntUrlFromPathname(p):
 
                     becomes
 
-            ///C|/foo/bar/spam.foo
+            ///C:/foo/bar/spam.foo
     """
     if not ':' in p:
         # No drive specifier, just convert slashes and quote the name
@@ -902,7 +919,7 @@ def ntUrlFromPathname(p):
 
     drive = urlQuote(comp[0].upper())
     components = comp[1].split('\\')
-    path = '///' + drive + '|'
+    path = '///' + drive + ':'
     for comp in components:
         if comp:
             path = path + '/' + urlQuote(comp)
@@ -1557,15 +1574,15 @@ def applyCompact(a, cops):
 
 def applyBinCompact(a, bops):
     """
-    Apply binary diff operations bops to a to create b
+    Apply binary diff operations bops to a to create and return b
     """
     return applyCompact(a, binCompactToCompact(bops))
 
 
 def getBinCompactForDiff(a, b):
     """
-    Return the binary compact codes to change string a to b.
-    For strings a and b (NOT unicode) it is true that
+    Return the binary compact codes to change binary string a to b.
+    For strings a and b (NOT unicode) it is always true that
         applyBinCompact(a, getBinCompactForDiff(a, b)) == b
     """
 
@@ -1606,154 +1623,155 @@ LOWERCASE = u'abcdefghijklmnopqrstuvwxyz\xaa\xb5\xba\xdf\xe0\xe1\xe2\xe3\xe4\xe5
 UPPERCASE = u'ABCDEFGHIJKLMNOPQRSTUVWXYZ\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd8\xd9\xda\xdb\xdc\xdd\xde\u0100\u0102\u0104\u0106\u0108\u010a\u010c\u010e\u0110\u0112\u0114\u0116\u0118\u011a\u011c\u011e\u0120\u0122\u0124\u0126\u0128\u012a\u012c\u012e\u0130\u0132\u0134\u0136\u0139\u013b\u013d\u013f\u0141\u0143\u0145\u0147\u014a\u014c\u014e\u0150\u0152\u0154\u0156\u0158\u015a\u015c\u015e\u0160\u0162\u0164\u0166\u0168\u016a\u016c\u016e\u0170\u0172\u0174\u0176\u0178\u0179\u017b\u017d\u0181\u0182\u0184\u0186\u0187\u0189\u018a\u018b\u018e\u018f\u0190\u0191\u0193\u0194\u0196\u0197\u0198\u019c\u019d\u019f\u01a0\u01a2\u01a4\u01a6\u01a7\u01a9\u01ac\u01ae\u01af\u01b1\u01b2\u01b3\u01b5\u01b7\u01b8\u01bc\u01c4\u01c7\u01ca\u01cd\u01cf\u01d1\u01d3\u01d5\u01d7\u01d9\u01db\u01de\u01e0\u01e2\u01e4\u01e6\u01e8\u01ea\u01ec\u01ee\u01f1\u01f4\u01f6\u01f7\u01f8\u01fa\u01fc\u01fe\u0200\u0202\u0204\u0206\u0208\u020a\u020c\u020e\u0210\u0212\u0214\u0216\u0218\u021a\u021c\u021e\u0220\u0222\u0224\u0226\u0228\u022a\u022c\u022e\u0230\u0232\u0386\u0388\u0389\u038a\u038c\u038e\u038f\u0391\u0392\u0393\u0394\u0395\u0396\u0397\u0398\u0399\u039a\u039b\u039c\u039d\u039e\u039f\u03a0\u03a1\u03a3\u03a4\u03a5\u03a6\u03a7\u03a8\u03a9\u03aa\u03ab\u03d2\u03d3\u03d4\u03d8\u03da\u03dc\u03de\u03e0\u03e2\u03e4\u03e6\u03e8\u03ea\u03ec\u03ee\u03f4\u0400\u0401\u0402\u0403\u0404\u0405\u0406\u0407\u0408\u0409\u040a\u040b\u040c\u040d\u040e\u040f\u0410\u0411\u0412\u0413\u0414\u0415\u0416\u0417\u0418\u0419\u041a\u041b\u041c\u041d\u041e\u041f\u0420\u0421\u0422\u0423\u0424\u0425\u0426\u0427\u0428\u0429\u042a\u042b\u042c\u042d\u042e\u042f\u0460\u0462\u0464\u0466\u0468\u046a\u046c\u046e\u0470\u0472\u0474\u0476\u0478\u047a\u047c\u047e\u0480\u048a\u048c\u048e\u0490\u0492\u0494\u0496\u0498\u049a\u049c\u049e\u04a0\u04a2\u04a4\u04a6\u04a8\u04aa\u04ac\u04ae\u04b0\u04b2\u04b4\u04b6\u04b8\u04ba\u04bc\u04be\u04c0\u04c1\u04c3\u04c5\u04c7\u04c9\u04cb\u04cd\u04d0\u04d2\u04d4\u04d6\u04d8\u04da\u04dc\u04de\u04e0\u04e2\u04e4\u04e6\u04e8\u04ea\u04ec\u04ee\u04f0\u04f2\u04f4\u04f8\u0500\u0502\u0504\u0506\u0508\u050a\u050c\u050e\u0531\u0532\u0533\u0534\u0535\u0536\u0537\u0538\u0539\u053a\u053b\u053c\u053d\u053e\u053f\u0540\u0541\u0542\u0543\u0544\u0545\u0546\u0547\u0548\u0549\u054a\u054b\u054c\u054d\u054e\u054f\u0550\u0551\u0552\u0553\u0554\u0555\u0556\u10a0\u10a1\u10a2\u10a3\u10a4\u10a5\u10a6\u10a7\u10a8\u10a9\u10aa\u10ab\u10ac\u10ad\u10ae\u10af\u10b0\u10b1\u10b2\u10b3\u10b4\u10b5\u10b6\u10b7\u10b8\u10b9\u10ba\u10bb\u10bc\u10bd\u10be\u10bf\u10c0\u10c1\u10c2\u10c3\u10c4\u10c5\u1e00\u1e02\u1e04\u1e06\u1e08\u1e0a\u1e0c\u1e0e\u1e10\u1e12\u1e14\u1e16\u1e18\u1e1a\u1e1c\u1e1e\u1e20\u1e22\u1e24\u1e26\u1e28\u1e2a\u1e2c\u1e2e\u1e30\u1e32\u1e34\u1e36\u1e38\u1e3a\u1e3c\u1e3e\u1e40\u1e42\u1e44\u1e46\u1e48\u1e4a\u1e4c\u1e4e\u1e50\u1e52\u1e54\u1e56\u1e58\u1e5a\u1e5c\u1e5e\u1e60\u1e62\u1e64\u1e66\u1e68\u1e6a\u1e6c\u1e6e\u1e70\u1e72\u1e74\u1e76\u1e78\u1e7a\u1e7c\u1e7e\u1e80\u1e82\u1e84\u1e86\u1e88\u1e8a\u1e8c\u1e8e\u1e90\u1e92\u1e94\u1ea0\u1ea2\u1ea4\u1ea6\u1ea8\u1eaa\u1eac\u1eae\u1eb0\u1eb2\u1eb4\u1eb6\u1eb8\u1eba\u1ebc\u1ebe\u1ec0\u1ec2\u1ec4\u1ec6\u1ec8\u1eca\u1ecc\u1ece\u1ed0\u1ed2\u1ed4\u1ed6\u1ed8\u1eda\u1edc\u1ede\u1ee0\u1ee2\u1ee4\u1ee6\u1ee8\u1eea\u1eec\u1eee\u1ef0\u1ef2\u1ef4\u1ef6\u1ef8\u1f08\u1f09\u1f0a\u1f0b\u1f0c\u1f0d\u1f0e\u1f0f\u1f18\u1f19\u1f1a\u1f1b\u1f1c\u1f1d\u1f28\u1f29\u1f2a\u1f2b\u1f2c\u1f2d\u1f2e\u1f2f\u1f38\u1f39\u1f3a\u1f3b\u1f3c\u1f3d\u1f3e\u1f3f\u1f48\u1f49\u1f4a\u1f4b\u1f4c\u1f4d\u1f59\u1f5b\u1f5d\u1f5f\u1f68\u1f69\u1f6a\u1f6b\u1f6c\u1f6d\u1f6e\u1f6f\u1fb8\u1fb9\u1fba\u1fbb\u1fc8\u1fc9\u1fca\u1fcb\u1fd8\u1fd9\u1fda\u1fdb\u1fe8\u1fe9\u1fea\u1feb\u1fec\u1ff8\u1ff9\u1ffa\u1ffb\u2102\u2107\u210b\u210c\u210d\u2110\u2111\u2112\u2115\u2119\u211a\u211b\u211c\u211d\u2124\u2126\u2128\u212a\u212b\u212c\u212d\u2130\u2131\u2133\u213e\u213f\u2145\uff21\uff22\uff23\uff24\uff25\uff26\uff27\uff28\uff29\uff2a\uff2b\uff2c\uff2d\uff2e\uff2f\uff30\uff31\uff32\uff33\uff34\uff35\uff36\uff37\uff38\uff39\uff3a'
 
 
+
 _COLORBASE = {
-    "aliceblue": "#f0f8ff",
-    "antiquewhite": "#faebd7",
-    "aqua": "#00ffff",
-    "aquamarine": "#7fffd4",
-    "azure": "#f0ffff",
-    "beige": "#f5f5dc",
-    "bisque": "#ffe4c4",
-    "black": "#000000",
-    "blanchedalmond": "#ffebcd",
-    "blue": "#0000ff",
-    "blueviolet": "#8a2be2",
-    "brown": "#a52a2a",
-    "burlywood": "#deb887",
-    "cadetblue": "#5f9ea0",
-    "chartreuse": "#7fff00",
-    "chocolate": "#d2691e",
-    "coral": "#ff7f50",
-    "cornflowerblue": "#6495ed",
-    "cornsilk": "#fff8dc",
-    "crimson": "#dc143c",
-    "cyan": "#00ffff",
-    "darkblue": "#00008b",
-    "darkcyan": "#008b8b",
-    "darkgoldenrod": "#b8860b",
-    "darkgray": "#a9a9a9",
-    "darkgrey": "#a9a9a9",
-    "darkgreen": "#006400",
-    "darkkhaki": "#bdb76b",
-    "darkmagenta": "#8b008b",
-    "darkolivegreen": "#556b2f",
-    "darkorange": "#ff8c00",
-    "darkorchid": "#9932cc",
-    "darkred": "#8b0000",
-    "darksalmon": "#e9967a",
-    "darkseagreen": "#8fbc8f",
-    "darkslateblue": "#483d8b",
-    "darkslategray": "#2f4f4f",
-    "darkslategrey": "#2f4f4f",
-    "darkturquoise": "#00ced1",
-    "darkviolet": "#9400d3",
-    "deeppink": "#ff1493",
-    "deepskyblue": "#00bfff",
-    "dimgray": "#696969",
-    "dimgrey": "#696969",
-    "dodgerblue": "#1e90ff",
-    "firebrick": "#b22222",
-    "floralwhite": "#fffaf0",
-    "forestgreen": "#228b22",
-    "fuchsia": "#ff00ff",
-    "gainsboro": "#dcdcdc",
-    "ghostwhite": "#f8f8ff",
-    "gold": "#ffd700",
-    "goldenrod": "#daa520",
-    "gray": "#808080",
-    "grey": "#808080",
-    "green": "#008000",
-    "greenyellow": "#adff2f",
-    "honeydew": "#f0fff0",
-    "hotpink": "#ff69b4",
-    "indianred ": "#cd5c5c",
-    "indigo ": "#4b0082",
-    "ivory": "#fffff0",
-    "khaki": "#f0e68c",
-    "lavender": "#e6e6fa",
-    "lavenderblush": "#fff0f5",
-    "lawngreen": "#7cfc00",
-    "lemonchiffon": "#fffacd",
-    "lightblue": "#add8e6",
-    "lightcoral": "#f08080",
-    "lightcyan": "#e0ffff",
-    "lightgoldenrodyellow": "#fafad2",
-    "lightgray": "#d3d3d3",
-    "lightgrey": "#d3d3d3",
-    "lightgreen": "#90ee90",
-    "lightpink": "#ffb6c1",
-    "lightsalmon": "#ffa07a",
-    "lightseagreen": "#20b2aa",
-    "lightskyblue": "#87cefa",
-    "lightslategray": "#778899",
-    "lightslategrey": "#778899",
-    "lightsteelblue": "#b0c4de",
-    "lightyellow": "#ffffe0",
-    "lime": "#00ff00",
-    "limegreen": "#32cd32",
-    "linen": "#faf0e6",
-    "magenta": "#ff00ff",
-    "maroon": "#800000",
-    "mediumaquamarine": "#66cdaa",
-    "mediumblue": "#0000cd",
-    "mediumorchid": "#ba55d3",
-    "mediumpurple": "#9370d8",
-    "mediumseagreen": "#3cb371",
-    "mediumslateblue": "#7b68ee",
-    "mediumspringgreen": "#00fa9a",
-    "mediumturquoise": "#48d1cc",
-    "mediumvioletred": "#c71585",
-    "midnightblue": "#191970",
-    "mintcream": "#f5fffa",
-    "mistyrose": "#ffe4e1",
-    "moccasin": "#ffe4b5",
-    "navajowhite": "#ffdead",
-    "navy": "#000080",
-    "oldlace": "#fdf5e6",
-    "olive": "#808000",
-    "olivedrab": "#6b8e23",
-    "orange": "#ffa500",
-    "orangered": "#ff4500",
-    "orchid": "#da70d6",
-    "palegoldenrod": "#eee8aa",
-    "palegreen": "#98fb98",
-    "paleturquoise": "#afeeee",
-    "palevioletred": "#d87093",
-    "papayawhip": "#ffefd5",
-    "peachpuff": "#ffdab9",
-    "peru": "#cd853f",
-    "pink": "#ffc0cb",
-    "plum": "#dda0dd",
-    "powderblue": "#b0e0e6",
-    "purple": "#800080",
-    "red": "#ff0000",
-    "rosybrown": "#bc8f8f",
-    "royalblue": "#4169e1",
-    "saddlebrown": "#8b4513",
-    "salmon": "#fa8072",
-    "sandybrown": "#f4a460",
-    "seagreen": "#2e8b57",
-    "seashell": "#fff5ee",
-    "sienna": "#a0522d",
-    "silver": "#c0c0c0",
-    "skyblue": "#87ceeb",
-    "slateblue": "#6a5acd",
-    "slategray": "#708090",
-    "slategrey": "#708090",
-    "snow": "#fffafa",
-    "springgreen": "#00ff7f",
-    "steelblue": "#4682b4",
-    "tan": "#d2b48c",
-    "teal": "#008080",
-    "thistle": "#d8bfd8",
-    "tomato": "#ff6347",
-    "turquoise": "#40e0d0",
-    "violet": "#ee82ee",
-    "wheat": "#f5deb3",
-    "white": "#ffffff",
-    "whitesmoke": "#f5f5f5",
-    "yellow": "#ffff00",
-    "yellowgreen": "#9acd32"
+    u"aliceblue": "#f0f8ff",
+    u"antiquewhite": "#faebd7",
+    u"aqua": "#00ffff",
+    u"aquamarine": "#7fffd4",
+    u"azure": "#f0ffff",
+    u"beige": "#f5f5dc",
+    u"bisque": "#ffe4c4",
+    u"black": "#000000",
+    u"blanchedalmond": "#ffebcd",
+    u"blue": "#0000ff",
+    u"blueviolet": "#8a2be2",
+    u"brown": "#a52a2a",
+    u"burlywood": "#deb887",
+    u"cadetblue": "#5f9ea0",
+    u"chartreuse": "#7fff00",
+    u"chocolate": "#d2691e",
+    u"coral": "#ff7f50",
+    u"cornflowerblue": "#6495ed",
+    u"cornsilk": "#fff8dc",
+    u"crimson": "#dc143c",
+    u"cyan": "#00ffff",
+    u"darkblue": "#00008b",
+    u"darkcyan": "#008b8b",
+    u"darkgoldenrod": "#b8860b",
+    u"darkgray": "#a9a9a9",
+    u"darkgrey": "#a9a9a9",
+    u"darkgreen": "#006400",
+    u"darkkhaki": "#bdb76b",
+    u"darkmagenta": "#8b008b",
+    u"darkolivegreen": "#556b2f",
+    u"darkorange": "#ff8c00",
+    u"darkorchid": "#9932cc",
+    u"darkred": "#8b0000",
+    u"darksalmon": "#e9967a",
+    u"darkseagreen": "#8fbc8f",
+    u"darkslateblue": "#483d8b",
+    u"darkslategray": "#2f4f4f",
+    u"darkslategrey": "#2f4f4f",
+    u"darkturquoise": "#00ced1",
+    u"darkviolet": "#9400d3",
+    u"deeppink": "#ff1493",
+    u"deepskyblue": "#00bfff",
+    u"dimgray": "#696969",
+    u"dimgrey": "#696969",
+    u"dodgerblue": "#1e90ff",
+    u"firebrick": "#b22222",
+    u"floralwhite": "#fffaf0",
+    u"forestgreen": "#228b22",
+    u"fuchsia": "#ff00ff",
+    u"gainsboro": "#dcdcdc",
+    u"ghostwhite": "#f8f8ff",
+    u"gold": "#ffd700",
+    u"goldenrod": "#daa520",
+    u"gray": "#808080",
+    u"grey": "#808080",
+    u"green": "#008000",
+    u"greenyellow": "#adff2f",
+    u"honeydew": "#f0fff0",
+    u"hotpink": "#ff69b4",
+    u"indianred ": "#cd5c5c",
+    u"indigo ": "#4b0082",
+    u"ivory": "#fffff0",
+    u"khaki": "#f0e68c",
+    u"lavender": "#e6e6fa",
+    u"lavenderblush": "#fff0f5",
+    u"lawngreen": "#7cfc00",
+    u"lemonchiffon": "#fffacd",
+    u"lightblue": "#add8e6",
+    u"lightcoral": "#f08080",
+    u"lightcyan": "#e0ffff",
+    u"lightgoldenrodyellow": "#fafad2",
+    u"lightgray": "#d3d3d3",
+    u"lightgrey": "#d3d3d3",
+    u"lightgreen": "#90ee90",
+    u"lightpink": "#ffb6c1",
+    u"lightsalmon": "#ffa07a",
+    u"lightseagreen": "#20b2aa",
+    u"lightskyblue": "#87cefa",
+    u"lightslategray": "#778899",
+    u"lightslategrey": "#778899",
+    u"lightsteelblue": "#b0c4de",
+    u"lightyellow": "#ffffe0",
+    u"lime": "#00ff00",
+    u"limegreen": "#32cd32",
+    u"linen": "#faf0e6",
+    u"magenta": "#ff00ff",
+    u"maroon": "#800000",
+    u"mediumaquamarine": "#66cdaa",
+    u"mediumblue": "#0000cd",
+    u"mediumorchid": "#ba55d3",
+    u"mediumpurple": "#9370d8",
+    u"mediumseagreen": "#3cb371",
+    u"mediumslateblue": "#7b68ee",
+    u"mediumspringgreen": "#00fa9a",
+    u"mediumturquoise": "#48d1cc",
+    u"mediumvioletred": "#c71585",
+    u"midnightblue": "#191970",
+    u"mintcream": "#f5fffa",
+    u"mistyrose": "#ffe4e1",
+    u"moccasin": "#ffe4b5",
+    u"navajowhite": "#ffdead",
+    u"navy": "#000080",
+    u"oldlace": "#fdf5e6",
+    u"olive": "#808000",
+    u"olivedrab": "#6b8e23",
+    u"orange": "#ffa500",
+    u"orangered": "#ff4500",
+    u"orchid": "#da70d6",
+    u"palegoldenrod": "#eee8aa",
+    u"palegreen": "#98fb98",
+    u"paleturquoise": "#afeeee",
+    u"palevioletred": "#d87093",
+    u"papayawhip": "#ffefd5",
+    u"peachpuff": "#ffdab9",
+    u"peru": "#cd853f",
+    u"pink": "#ffc0cb",
+    u"plum": "#dda0dd",
+    u"powderblue": "#b0e0e6",
+    u"purple": "#800080",
+    u"red": "#ff0000",
+    u"rosybrown": "#bc8f8f",
+    u"royalblue": "#4169e1",
+    u"saddlebrown": "#8b4513",
+    u"salmon": "#fa8072",
+    u"sandybrown": "#f4a460",
+    u"seagreen": "#2e8b57",
+    u"seashell": "#fff5ee",
+    u"sienna": "#a0522d",
+    u"silver": "#c0c0c0",
+    u"skyblue": "#87ceeb",
+    u"slateblue": "#6a5acd",
+    u"slategray": "#708090",
+    u"slategrey": "#708090",
+    u"snow": "#fffafa",
+    u"springgreen": "#00ff7f",
+    u"steelblue": "#4682b4",
+    u"tan": "#d2b48c",
+    u"teal": "#008080",
+    u"thistle": "#d8bfd8",
+    u"tomato": "#ff6347",
+    u"turquoise": "#40e0d0",
+    u"violet": "#ee82ee",
+    u"wheat": "#f5deb3",
+    u"white": "#ffffff",
+    u"whitesmoke": "#f5f5f5",
+    u"yellow": "#ffff00",
+    u"yellowgreen": "#9acd32"
 }
 
 

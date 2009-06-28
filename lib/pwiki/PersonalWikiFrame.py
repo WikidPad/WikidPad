@@ -155,7 +155,6 @@ class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
             self.Destroy()
             return
 
-        self.sleepMode = False  # Is program in low resource sleep mode?
         self.mainWindowConstructed = False
 
 #         if not globalConfigDir or not exists(globalConfigDir):
@@ -1598,6 +1597,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 updatefct=(self.OnUpdateDisNotWikiPage,))
 
 
+#         self.addMenuItem(wikiPageMenu, _(u'Add version') + u'\t' +
+#                 u"", _(u'Add new version'),
+#                 self._OnRoundtripEvent, menuID=GUI_ID.CMD_VERSION_ADD,
+#                 updatefct=(self.OnUpdateDisNotTextedit, self.OnUpdateDisNotWikiPage)
+#                 )
+
 
         formatMenu = wx.Menu()
         
@@ -2504,55 +2509,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
 
-    def resourceSleep(self):
-        """
-        Free unnecessary resources if program is iconized
-        """
-        if self.sleepMode:
-            return  # Already in sleep mode
-        self.sleepMode = True
-        
-        toolBar = self.GetToolBar()
-        if toolBar is not None:
-            toolBar.Destroy()
-
-        self.SetMenuBar(None)
-        self.mainmenu.Destroy()
-
-        # Set menu/menu items to None
-        self.mainmenu = None
-        self.recentWikisMenu = None
-        self.textBlocksMenu = None
-        self.favoriteWikisMenu = None
-        # self.showOnTrayMenuItem = None
-
-        # TODO Clear cache only if exactly one window uses centralized iconLookupCache
-        #      Maybe weak references?
-#         for k in self.iconLookupCache.keys():
-#             self.iconLookupCache[k] = (self.iconLookupCache[k][0], None)
-##      Even worse:  wxGetApp().getIconCache().clearIconBitmaps()
-
-        gc.collect()
-
-
-    def resourceWakeup(self):
-        """
-        Aquire resources after program is restored
-        """
-        if not self.sleepMode:
-            return  # Already in wake mode
-        self.sleepMode = False
-
-        self.buildMainMenu()
-        self.setShowToolbar(self.getConfig().getboolean("main", "toolbar_show",
-                True))
-        self.setShowOnTray()
-
-
     def testIt(self):
         self.reloadMenuPlugins()
-        
-
 
 
 #     def testIt(self):
@@ -2575,6 +2533,52 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         dc.SetPen(wx.NullPen)
 
         # self.statusBar.Refresh()
+
+
+
+#     def resourceSleep(self):
+#         """
+#         Free unnecessary resources if program is iconized
+#         """
+#         if self.sleepMode:
+#             return  # Already in sleep mode
+#         self.sleepMode = True
+#         
+#         toolBar = self.GetToolBar()
+#         if toolBar is not None:
+#             toolBar.Destroy()
+# 
+#         self.SetMenuBar(None)
+#         self.mainmenu.Destroy()
+# 
+#         # Set menu/menu items to None
+#         self.mainmenu = None
+#         self.recentWikisMenu = None
+#         self.textBlocksMenu = None
+#         self.favoriteWikisMenu = None
+#         # self.showOnTrayMenuItem = None
+# 
+#         # TODO Clear cache only if exactly one window uses centralized iconLookupCache
+#         #      Maybe weak references?
+# #         for k in self.iconLookupCache.keys():
+# #             self.iconLookupCache[k] = (self.iconLookupCache[k][0], None)
+# ##      Even worse:  wxGetApp().getIconCache().clearIconBitmaps()
+# 
+#         gc.collect()
+# 
+# 
+#     def resourceWakeup(self):
+#         """
+#         Aquire resources after program is restored
+#         """
+#         if not self.sleepMode:
+#             return  # Already in wake mode
+#         self.sleepMode = False
+# 
+#         self.buildMainMenu()
+#         self.setShowToolbar(self.getConfig().getboolean("main", "toolbar_show",
+#                 True))
+#         self.setShowOnTray()
 
 
 
@@ -3069,8 +3073,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #                             word, True)
 #                     if wordsStartingWith:
 #                         word = wordsStartingWith[0]
-                self.activatePageByUnifiedName(u"wikipage/" + word,
-                        tabMode=3)
+                if self.activatePageByUnifiedName(u"wikipage/" + word,
+                        tabMode=3) is None:
+                    break    # return instead?
 
             self.tree.SetScrollPos(wx.HORIZONTAL, 0)
             
@@ -3096,7 +3101,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     
             # return that the wiki was opened successfully
             return True
-        except (IOError, OSError, DbAccessError), e:
+        except (IOError, OSError, DbAccessError, WikiFileNotFoundException), e:
             self.lostAccess(e)
             return False
 
@@ -3383,16 +3388,20 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def openWikiPage(self, wikiWord, addToHistory=True,
             forceTreeSyncFromRoot=False, forceReopen=False, **evtprops):
-        ## _prof.start()
-        dpp = self.getCurrentDocPagePresenter()
-        if dpp is None:
-            dpp = self.createNewDocPagePresenterTab()
-
-        dpp.openWikiPage(wikiWord, addToHistory, forceTreeSyncFromRoot,
-                forceReopen, **evtprops)
-
-        self.getMainAreaPanel().showPresenter(dpp)
-        ## _prof.stop()
+        try:
+            ## _prof.start()
+            dpp = self.getCurrentDocPagePresenter()
+            if dpp is None:
+                dpp = self.createNewDocPagePresenterTab()
+    
+            dpp.openWikiPage(wikiWord, addToHistory, forceTreeSyncFromRoot,
+                    forceReopen, **evtprops)
+    
+            self.getMainAreaPanel().showPresenter(dpp)
+            ## _prof.stop()
+        except WikiFileNotFoundException, e:
+            self.lostAccess(e)
+            return None
 
 
     def saveCurrentDocPage(self, force=False):
@@ -3417,7 +3426,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if presenter is None:
                 presenter = self.createNewDocPagePresenterTab()
 
-        presenter.openDocPage(unifName, motionType="child")
+        try:
+            presenter.openDocPage(unifName, motionType="child")
+        except WikiFileNotFoundException, e:
+            self.lostAccess(e)
+            return None
 
         if not tabMode & 1:
             # Show in foreground
@@ -3860,6 +3873,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
                 self.tbIcon.Destroy()
                 self.tbIcon = None
+
 
 #         # TODO  Move to better function
 #         if bmp is not None:                
@@ -4579,6 +4593,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 try:
                     ob.export(self.getWikiDataManager(), wordList, exptype, dest,
                             False, addopt, pgh)
+                except ExportException, e:
+                    self.displayErrorMessage(_(u"Error on export"), e)
                 finally:
                     pgh.close()
 
@@ -5321,7 +5337,7 @@ class TaskBarIcon(wx.TaskBarIcon):
         wx.EVT_MENU(self, GUI_ID.TBMENU_SAVE,
                 lambda evt: (self.pWiki.saveAllDocPages(),
                 self.pWiki.getWikiData().commit()))
-        wx.EVT_MENU(self, GUI_ID.TBMENU_EXIT, lambda evt: self.pWiki.exitWiki())
+        wx.EVT_MENU(self, GUI_ID.TBMENU_EXIT, self.OnCmdExit)
 
         if self.pWiki.clipboardInterceptor is not None:
             wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
@@ -5336,6 +5352,10 @@ class TaskBarIcon(wx.TaskBarIcon):
 
         wx.EVT_TASKBAR_LEFT_UP(self, self.OnLeftUp)
 
+
+    def OnCmdExit(self, evt):
+        # Trying to prevent a crash with this, but didn't help much
+        wx.CallAfter(self.pWiki.exitWiki)
 
     def OnLeftUp(self, evt):
         if self.pWiki.IsIconized():
