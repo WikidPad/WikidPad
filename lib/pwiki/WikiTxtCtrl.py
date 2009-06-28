@@ -3063,8 +3063,10 @@ N_(u"Copy anchor URL to clipboard")
 N_(u"Close Tab")
 
 N_(u"Show folding")
+N_(u"Show folding marks and allow folding")
 N_(u"&Toggle current folding")
+N_(u"Toggle folding of the current line")
 N_(u"&Unfold All")
+N_(u"Unfold everything in current editor")
 N_(u"&Fold All")
-
-
+N_(u"Fold everything in current editor")
