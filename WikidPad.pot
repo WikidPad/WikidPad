@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-06-28 21:54\n"
+"POT-Creation-Date: 2009-07-02 16:20\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1265,32 +1265,32 @@ msgid "Default"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1143
-#: lib\pwiki\WikiTxtCtrl.py:3049
+#: lib\pwiki\WikiTxtCtrl.py:3032
 msgid "Undo"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1147
-#: lib\pwiki\WikiTxtCtrl.py:3050
+#: lib\pwiki\WikiTxtCtrl.py:3033
 msgid "Redo"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1163
-#: lib\pwiki\WikiTxtCtrl.py:3051
+#: lib\pwiki\WikiTxtCtrl.py:3034
 msgid "Cut"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1168
-#: lib\pwiki\WikiTxtCtrl.py:3052
+#: lib\pwiki\WikiTxtCtrl.py:3035
 msgid "Copy"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1172
-#: lib\pwiki\WikiTxtCtrl.py:3053
+#: lib\pwiki\WikiTxtCtrl.py:3036
 msgid "Paste"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1177
-#: lib\pwiki\WikiTxtCtrl.py:3055
+#: lib\pwiki\WikiTxtCtrl.py:3038
 msgid "Select All"
 msgstr ""
 
@@ -1304,7 +1304,7 @@ msgid "Open Wiki Word"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:2001
-#: lib\pwiki\WikiTxtCtrl.py:3054
+#: lib\pwiki\WikiTxtCtrl.py:3037
 msgid "Delete"
 msgstr ""
 
@@ -1330,7 +1330,7 @@ msgstr ""
 msgid "Activate New Tab"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\WikiTxtCtrl.py:3063
+#: WikidPad.xrc:0 lib\pwiki\WikiTxtCtrl.py:3046
 msgid "Close Tab"
 msgstr ""
 
@@ -1976,11 +1976,11 @@ msgstr ""
 msgid "Wiki language"
 msgstr ""
 
-#: lib\pwiki\MainAreaPanel.py:394 lib\pwiki\WikiTxtCtrl.py:1928
+#: lib\pwiki\MainAreaPanel.py:394 lib\pwiki\WikiTxtCtrl.py:1911
 msgid "This can only be done for the page of a wiki word"
 msgstr ""
 
-#: lib\pwiki\MainAreaPanel.py:395 lib\pwiki\WikiTxtCtrl.py:1929
+#: lib\pwiki\MainAreaPanel.py:395 lib\pwiki\WikiTxtCtrl.py:1912
 msgid "Not a wiki page"
 msgstr ""
 
@@ -2604,14 +2604,6 @@ msgstr ""
 
 #: lib\pwiki\PersonalWikiFrame.py:1595
 msgid "Copy full \"wiki:\" URL of the word to clipboard"
-msgstr ""
-
-#: lib\pwiki\PersonalWikiFrame.py:1600
-msgid "Add version"
-msgstr ""
-
-#: lib\pwiki\PersonalWikiFrame.py:1601
-msgid "Add new version"
 msgstr ""
 
 #: lib\pwiki\PersonalWikiFrame.py:1609
@@ -3870,77 +3862,77 @@ msgstr ""
 msgid "Prepend Wiki Word"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:91
+#: lib\pwiki\WikiTxtCtrl.py:90
 msgid "Incremental search (ENTER/ESC to finish)"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:1950
+#: lib\pwiki\WikiTxtCtrl.py:1933
 msgid "Set in menu \"Wiki\", item \"Options...\", options page \"Security\", \n"
 "item \"Script security\" an appropriate value to execute a script."
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:1953
+#: lib\pwiki\WikiTxtCtrl.py:1936
 msgid "Script execution disabled"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2022
+#: lib\pwiki\WikiTxtCtrl.py:2005
 msgid "\n"
 "Exception: %s"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2698
+#: lib\pwiki\WikiTxtCtrl.py:2681
 msgid "Line: %d Col: %d Pos: %d"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2844
+#: lib\pwiki\WikiTxtCtrl.py:2827
 msgid "Couldn't copy file"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3057
+#: lib\pwiki\WikiTxtCtrl.py:3040
 msgid "Follow Link"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3058
+#: lib\pwiki\WikiTxtCtrl.py:3041
 msgid "Follow Link New Tab"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3059
+#: lib\pwiki\WikiTxtCtrl.py:3042
 msgid "Follow Link New Tab Backgrd."
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3061
+#: lib\pwiki\WikiTxtCtrl.py:3044
 msgid "Copy anchor URL to clipboard"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3065
+#: lib\pwiki\WikiTxtCtrl.py:3048
 msgid "Show folding"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3066
+#: lib\pwiki\WikiTxtCtrl.py:3049
 msgid "Show folding marks and allow folding"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3067
+#: lib\pwiki\WikiTxtCtrl.py:3050
 msgid "&Toggle current folding"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3068
+#: lib\pwiki\WikiTxtCtrl.py:3051
 msgid "Toggle folding of the current line"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3069
+#: lib\pwiki\WikiTxtCtrl.py:3052
 msgid "&Unfold All"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3070
+#: lib\pwiki\WikiTxtCtrl.py:3053
 msgid "Unfold everything in current editor"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3071
+#: lib\pwiki\WikiTxtCtrl.py:3054
 msgid "&Fold All"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3072
+#: lib\pwiki\WikiTxtCtrl.py:3055
 msgid "Fold everything in current editor"
 msgstr ""
 

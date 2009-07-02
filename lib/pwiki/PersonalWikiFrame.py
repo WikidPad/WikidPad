@@ -17,49 +17,49 @@ from wxHelper import GUI_ID, getAccelPairFromKeyDown, \
         setHotKeyByString, DummyWindow, IdRecycler, clearMenu, \
         copyTextToClipboard, ProgressHandler
 
-import TextTree
+from . import TextTree
 
-from MiscEvent import MiscEventSourceMixin, ProxyMiscEvent  # , DebugSimple
+from .MiscEvent import MiscEventSourceMixin, ProxyMiscEvent  # , DebugSimple
 
-from WikiExceptions import *
+from .WikiExceptions import *
 from Consts import HOMEPAGE
 
-import Configuration
-from WindowLayout import WindowSashLayouter, setWindowPos, setWindowSize
+from . import Configuration
+from .WindowLayout import WindowSashLayouter, setWindowPos, setWindowSize
 
-from wikidata import DbBackendUtils, WikiDataManager
+from .wikidata import DbBackendUtils, WikiDataManager
 
 # To generate py2exe dependency
-import WikiDocument
+from . import WikiDocument
 
-import OsAbstract
+from . import OsAbstract
 
-import DocPages
+from . import DocPages
 
 
-from CmdLineAction import CmdLineAction
-from WikiTxtCtrl import WikiTxtCtrl, FOLD_MENU
-from WikiTreeCtrl import WikiTreeCtrl
-from WikiHtmlView import createWikiHtmlView
-from LogWindow import LogWindow
-from DocStructureCtrl import DocStructureCtrl
-from timeView.TimeViewCtrl import TimeViewCtrl
-from MainAreaPanel import MainAreaPanel
-from UserActionCoord import UserActionCoord
-from DocPagePresenter import DocPagePresenter
+from .CmdLineAction import CmdLineAction
+from .WikiTxtCtrl import WikiTxtCtrl, FOLD_MENU
+from .WikiTreeCtrl import WikiTreeCtrl
+from .WikiHtmlView import createWikiHtmlView
+from .LogWindow import LogWindow
+from .DocStructureCtrl import DocStructureCtrl
+from .timeView.TimeViewCtrl import TimeViewCtrl
+from .MainAreaPanel import MainAreaPanel
+from .UserActionCoord import UserActionCoord
+from .DocPagePresenter import DocPagePresenter
 
-from Ipc import EVT_REMOTE_COMMAND
+from .Ipc import EVT_REMOTE_COMMAND
 
-import PropertyHandling, SpellChecker
+from . import PropertyHandling, SpellChecker, Versioning
 
 # from PageHistory import PageHistory
  #from SearchAndReplace import SearchReplaceOperation
-from Printing import Printer, PrintMainDialog
+from .Printing import Printer, PrintMainDialog
 
-from AdditionalDialogs import *
-import AdditionalDialogs
-from OptionsDialog import OptionsDialog
-from SearchAndReplaceDialogs import *
+from .AdditionalDialogs import *
+from . import AdditionalDialogs
+from .OptionsDialog import OptionsDialog
+from .SearchAndReplaceDialogs import *
 
 
 
@@ -1599,7 +1599,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 #         self.addMenuItem(wikiPageMenu, _(u'Add version') + u'\t' +
 #                 u"", _(u'Add new version'),
-#                 self._OnRoundtripEvent, menuID=GUI_ID.CMD_VERSION_ADD,
+#                 self.OnCmdVersionAdd, menuID=GUI_ID.CMD_VERSION_ADD,
 #                 updatefct=(self.OnUpdateDisNotTextedit, self.OnUpdateDisNotWikiPage)
 #                 )
 
@@ -2366,6 +2366,22 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         copyTextToClipboard(pathWordAndAnchorToWikiUrl(path, wikiWord, None))
 
 
+    def OnCmdVersionAdd(self, evt):
+        docPage = self.getCurrentDocPage()
+        if docPage is None or \
+                not docPage.getUnifiedPageName().startswith(u"wikipage/"):
+            return
+        
+        versionOverview = docPage.getVersionOverview()
+        content = self.getActiveEditor().GetText()
+
+        # TODO Description
+        entry = Versioning.VersionEntry(u"", "revdiff")
+        versionOverview.addVersion(content, entry)
+        versionOverview.writeOverview()
+
+
+
     def goBrowserBack(self):
         evt = wx.CommandEvent(wx.wxEVT_COMMAND_MENU_SELECTED,
                 GUI_ID.CMD_PAGE_HISTORY_GO_BACK)
@@ -2382,7 +2398,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         Refresh the system-wide hotkey settings according to configuration
         """
         # A dummy window must be destroyed and recreated because
-        # Unregistering a hotkey doesn't work
+        # unregistering a hotkey doesn't work
         if self.hotKeyDummyWindow is not None:
             self.hotKeyDummyWindow.Destroy()
 

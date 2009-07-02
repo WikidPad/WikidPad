@@ -49,7 +49,7 @@ class WikiPageFormatDetails(object):
     def getUsesDummyWikiLanguageDetails(self):
         return self.wikiLanguageDetails is DUMMY_WIKI_LANGUAGE_DETAILS
         
-    def setWikiLanguageDetails(self, languageDetails):
+    def setWikiLanguageDetails(self, wikiLanguageDetails):
         # TODO Allow only if currently dummy language is set?
         self.wikiLanguageDetails = wikiLanguageDetails
 

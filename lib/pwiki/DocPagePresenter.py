@@ -60,7 +60,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         
     def getPageHistory():
         return self.pageHistory
-        
+
 
     def getActiveEditor(self):
         """

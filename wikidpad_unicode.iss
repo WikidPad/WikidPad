@@ -54,12 +54,12 @@ Name: Program_files; Description: Main program files; Flags: fixed; Types: custo
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 2.0beta05
+AppVerName=WikidPad 2.0beta05_1
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=2.0.105.0
-VersionInfoTextVersion=WikidPad 2.0beta05
+VersionInfoVersion=2.0.105.1
+VersionInfoTextVersion=WikidPad 2.0beta05_1
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
