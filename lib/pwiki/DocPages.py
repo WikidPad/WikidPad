@@ -23,6 +23,9 @@ from Serialization import SerializeStream
 from wx import GetApp
 
 
+# Dummy
+UNDEFINED = object()
+
 
 class DocPage(object, MiscEventSourceMixin):
     """
@@ -727,6 +730,10 @@ class AbstractWikiPage(DataCarryingPage):
                     wikiLanguageDetails=wikiLanguageDetails)
 
 
+    def isDefined(self):
+        return self.getWikiDocument().isDefinedWikiPage(self.getWikiWord())
+
+
     @staticmethod
     def extractPropertyNodesFromPageAst(pageAst):
         """
@@ -741,6 +748,18 @@ class AbstractWikiPage(DataCarryingPage):
         Saves the content of current doc page.
         """
         pass
+
+
+    def setPresentation(self, data, startPos):
+        """
+        Set (a part of) the presentation tuple. This is silently ignored
+        if the "write access failed" or "read access failed" flags are
+        set in the wiki document.
+        data -- tuple with new presentation data
+        startPos -- start position in the presentation tuple which should be
+                overwritten with data.
+        """
+        raise NotImplementedError   # abstract
 
 
     def initiateUpdate(self, fireEvent=True):
@@ -918,36 +937,50 @@ class WikiPage(AbstractWikiPage):
     def __init__(self, wikiDocument, wikiWord):
         AbstractWikiPage.__init__(self, wikiDocument, wikiWord)
 
-        self.versionOverview = None
+        self.versionOverview = UNDEFINED
 
 
     def getVersionOverview(self):
-        from pwiki.Versioning import VersionOverview
-
+        """
+        Return Versioning.VersionOverview object. If necessary create one.
+        """
         with self.textOperationLock:
-            if self.versionOverview is None:
-                self.versionOverview = VersionOverview(self.getWikiDocument(),
-                        self.getUnifiedPageName())
-                self.versionOverview.readOverview()
+            if self.versionOverview is UNDEFINED or self.versionOverview is None:
+                from .timeView.Versioning import VersionOverview
+                
+                versionOverview = VersionOverview(self.getWikiDocument(),
+                        self)
+                versionOverview.readOverview()
+                self.versionOverview = versionOverview
     
             return self.versionOverview
 
 
     def getExistingVersionOverview(self):
-        from pwiki.Versioning import VersionOverview
-
+        """
+        Return Versioning.VersionOverview object.
+        If not existing already return None.
+        """
         with self.textOperationLock:
-            if self.versionOverview is None:
+            if self.versionOverview is UNDEFINED:
+                from .timeView.Versioning import VersionOverview
+
                 versionOverview = VersionOverview(self.getWikiDocument(),
                         self.getUnifiedPageName())
     
                 if versionOverview.isNotInDatabase():
-                    return None
+                    self.versionOverview = None
                 else:
                     versionOverview.readOverview()
                     self.versionOverview = versionOverview
-            
+
             return self.versionOverview
+
+    def releaseVersionOverview(self):
+        """
+        Should only be called by VersionOverview.invalidate()
+        """
+        self.versionOverview = UNDEFINED
 
 
     def getNonAliasPage(self):
@@ -1094,8 +1127,8 @@ class WikiPage(AbstractWikiPage):
         return content
 
 
-    def isDefined(self):
-        return self.getWikiDocument().isDefinedWikiPage(self.getWikiWord())
+#     def isDefined(self):
+#         return self.getWikiDocument().isDefinedWikiPage(self.getWikiWord())
 
 
     def deletePage(self):
@@ -1112,7 +1145,7 @@ class WikiPage(AbstractWikiPage):
             vo = self.getExistingVersionOverview()
             if vo is not None:
                 vo.delete()
-                self.versionOverview = None
+                self.versionOverview = UNDEFINED
 
             wx.CallAfter(self.fireMiscEventKeys,
                     ("deleted page", "deleted wiki page"))
@@ -1129,7 +1162,7 @@ class WikiPage(AbstractWikiPage):
                 return
             
             vo.renameTo(u"wikipage/" + newWord)
-            self.versionOverview = None
+            self.versionOverview = UNDEFINED
 
 
     def informRenamedWikiPage(self, newWord):

@@ -210,7 +210,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         if not self.getMainControl().requireReadAccess():
             return
 
-        oldPage = self.getDocPage()
+#         oldPage = self.getDocPage()
 
         evtprops["addToHistory"] = addToHistory
         evtprops["forceTreeSyncFromRoot"] = forceTreeSyncFromRoot
@@ -238,6 +238,9 @@ class BasicDocPagePresenter(LayeredControlPresenter):
                 p2.update({"reloaded current doc page": True,
                         "reloaded current wiki page": True})
                 self.fireMiscEventProps(p2)
+
+                if forceTreeSyncFromRoot:
+                    self.getMainControl().findCurrentWordInTree()
                 return
 
             # trigger hook
@@ -262,29 +265,31 @@ class BasicDocPagePresenter(LayeredControlPresenter):
                         uniToGui(_(u"Wiki page not found, a new "
                         u"page will be created")), 0)
                 self.getStatusBar().SetStatusText(uniToGui(u""), 1)
+            
+            self.loadWikiPage(page, **evtprops)
 
-            self.getSubControl("textedit").loadWikiPage(page, evtprops)
-            self.getMainControl().refreshPageStatus()  # page)
-    
-            p2 = evtprops.copy()
-            p2.update({"loaded current doc page": True,
-                    "loaded current wiki page": True,
-                    "docPage": page,
-                    "oldDocPage": oldPage})
-
-            self.fireMiscEventProps(p2)
-    
-            self.getMainControl().getMainAreaPanel().updateConfig()
-
-            # Should the page by default be presented in editor or preview mode?
-            pv = page.getPropertyOrGlobal(u"view_pane")
-            if pv is not None:
-                pv = pv.lower()
-                if pv == u"preview":
-                    self.switchSubControl("preview")
-                elif pv == u"editor":
-                    self.switchSubControl("textedit")
-                # else: do nothing  (pv == u"off")
+#             self.getSubControl("textedit").loadWikiPage(page, evtprops)
+#             self.getMainControl().refreshPageStatus()  # page)
+#     
+#             p2 = evtprops.copy()
+#             p2.update({"loaded current doc page": True,
+#                     "loaded current wiki page": True,
+#                     "docPage": page,
+#                     "oldDocPage": oldPage})
+# 
+#             self.fireMiscEventProps(p2)
+#     
+#             self.getMainControl().getMainAreaPanel().updateConfig()
+# 
+#             # Should the page by default be presented in editor or preview mode?
+#             pv = page.getPropertyOrGlobal(u"view_pane")
+#             if pv is not None:
+#                 pv = pv.lower()
+#                 if pv == u"preview":
+#                     self.switchSubControl("preview")
+#                 elif pv == u"editor":
+#                     self.switchSubControl("textedit")
+#                 # else: do nothing  (pv == u"off")
 
             # sync the tree
             if forceTreeSyncFromRoot:
@@ -295,6 +300,33 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 
         # trigger hook
         self.getMainControl().hooks.openedWikiWord(self, wikiWord)
+
+
+    def loadWikiPage(self, page, **evtprops):
+        oldPage = self.getDocPage()  # TODO Test if too late to retrieve old page here
+        
+        self.getSubControl("textedit").loadWikiPage(page, evtprops)
+        self.getMainControl().refreshPageStatus()  # page)
+
+        p2 = evtprops.copy()
+        p2.update({"loaded current doc page": True,
+                "loaded current wiki page": True,
+                "docPage": page,
+                "oldDocPage": oldPage})
+
+        self.fireMiscEventProps(p2)
+
+        self.getMainControl().getMainAreaPanel().updateConfig()
+
+        # Should the page by default be presented in editor or preview mode?
+        pv = page.getPropertyOrGlobal(u"view_pane")
+        if pv is not None:
+            pv = pv.lower()
+            if pv == u"preview":
+                self.switchSubControl("preview")
+            elif pv == u"editor":
+                self.switchSubControl("textedit")
+            # else: do nothing  (pv == u"off")
 
 
     def saveCurrentDocPage(self, force = False):
@@ -349,6 +381,8 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
         res = xrc.XmlResource.Get()
         self.tabContextMenu = res.LoadMenu("MenuDocPagePresenterTabPopup")
 
+        wx.GetApp().getMiscEvent().addListener(self)
+
 
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_LIST,
                 lambda evt: self.viewHistory())
@@ -362,6 +396,10 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD,
                 lambda evt: self.pageHistory.goInHistory(1))
 
+
+    def close(self):
+        wx.GetApp().getMiscEvent().removeListener(self)
+        BasicDocPagePresenter.close(self)
 
 
 #     def historyBack(self, evt):
@@ -456,6 +494,23 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
 
     def setTitle(self, shortTitle):
         LayeredControlPresenter.setTitle(self, shortTitle)
-        self.fireMiscEventProps({"changed presenter title": True})
+
+        # Shorten title if too long
+        maxLen = self.getConfig().getint("main", "tabs_maxCharacters", 0)
+        if maxLen > 0 and len(shortTitle) > maxLen:
+            shortTitle = shortTitle[:maxLen] + u"..."
+
+        self.fireMiscEventProps({"changed presenter title": True,
+                "title": shortTitle})
 
 
+    def miscEventHappened(self, miscevt):
+        if miscevt.getSource() is wx.GetApp():
+            # The option "tabs_maxCharacters" may be changed, so set title again
+            if miscevt.has_key("options changed"):
+                self.setTitle(self.shortTitle)
+                return
+        
+        return BasicDocPagePresenter.miscEventHappened(self, miscevt)
+
+        

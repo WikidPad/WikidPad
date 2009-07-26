@@ -46,6 +46,7 @@ class ImportException(Exception): pass
 
 # See Serialization.py
 class SerializationException(Exception): pass
+class VersioningException(Exception): pass
 
 # See WikiDataManager.py. Thrown if requested handler for db backend isn't
 #     available

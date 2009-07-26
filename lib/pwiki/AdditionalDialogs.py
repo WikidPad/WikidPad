@@ -407,7 +407,7 @@ class OpenWikiWordDialog(wx.Dialog):
             for s in self.ctrls.lb.GetSelections():
                 delword = self.listContent[s][2]
                 # Un-alias word
-                delword = self.pWiki.getWikiData().getUnAliasedWikiWord(delword)
+                delword = self.pWiki.getWikiDocument().getUnAliasedWikiWord(delword)
 
                 if delword is not None:
                     page = self.pWiki.getWikiDocument().getWikiPage(delword)
@@ -500,7 +500,7 @@ class ChooseWikiWordDialog(wx.Dialog):
             for s in self.ctrls.lb.GetSelections():
                 delword = self.words[s]
                 # Un-alias word
-                delword = self.pWiki.getWikiData().getUnAliasedWikiWord(delword)
+                delword = self.pWiki.getWikiDocument().getUnAliasedWikiWord(delword)
 
                 if delword is not None:
                     page = self.pWiki.getWikiDocument().getWikiPage(delword)

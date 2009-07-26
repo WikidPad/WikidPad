@@ -34,3 +34,6 @@ Same as "Follow Link" but opens a new tab for the target.
 Copy "wiki:" URL of current wiki page to clipboard.
 
 If you right click on an "anchor:" definition in editor and choose "Copy Anchor URL to clipboard" the URL contains also a link to the particular anchor.
+
+++ Add version
+Add a new version 

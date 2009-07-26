@@ -1,3 +1,6 @@
+## import hotshot
+## _prof = hotshot.Profile("hotshot.prf")
+
 import sys, traceback, re
 
 import wx, wx.html, wx.xrc
@@ -118,7 +121,14 @@ class _SearchResultItemInfo(object):
             # No context
             self.occHtml = u""
             return self
-            
+        
+        if pos[0] is None:
+            # All occurences where deleted meanwhile dialog was open
+            self.occHtml = u""
+            self.occNumber = 0
+            self.occCount = 0
+            return self
+        
         if pos[0] == -1:
             # No position -> use beginning of text
             self.occHtml = escapeHtml(text[0:basum])
@@ -326,11 +336,11 @@ class SearchResultListBox(wx.HtmlListBox):
             return
         
         info = self.foundinfo[sel]
-        if info.occPos[0] == -1:
+        if info.occPos[0] == -1 or info.occPos[1] is None:
             return
         if info.occNumber == -1:
             return
-            
+
         before = self.pWiki.configuration.getint("main",
                 "search_wiki_context_before")
         after = self.pWiki.configuration.getint("main",
@@ -775,6 +785,8 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             allowOrdering=True, allowOkCancel=True, value=None,
             title="Search Wiki", pos=wx.DefaultPosition, size=wx.DefaultSize,
             style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
+        
+#         _prof.start()
         d = wx.PreDialog()
         self.PostCreate(d)
 
@@ -827,6 +839,14 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         if value is not None:
             self.showSearchReplaceOperation(value)
         else:
+            config = self.mainControl.getConfig()
+            self.ctrls.rboxSearchType.SetSelection(config.getint("main",
+                    "search_wiki_searchType", 0))
+            self.ctrls.cbCaseSensitive.SetValue(config.getboolean("main",
+                    "search_wiki_caseSensitive", False))
+            self.ctrls.cbWholeWord.SetValue(config.getboolean("main",
+                    "search_wiki_wholeWord", False))
+
             self.listPagesOperation = ListWikiPagesOperation()
             self._showListPagesOperation(self.listPagesOperation)
 
@@ -903,6 +923,10 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         wx.EVT_BUTTON(self, wx.ID_CANCEL, self.OnClose)        
         wx.EVT_CLOSE(self, self.OnClose)
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        
+#         _prof.stop()
+        
+
 
 
     _ORDERCHOICE_TO_NAME = {

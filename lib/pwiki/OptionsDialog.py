@@ -527,11 +527,17 @@ class OptionsDialog(wx.Dialog):
                     "cbTimeViewShowWordListOnSelect", "b"),
             ("timeline_showEmptyDays", "cbTimelineShowEmptyDays", "b"),
             ("timeline_sortDateAscending", "cbTimelineSortDateAscending", "b"),
+            ("versioning_dateFormat", "tfVersioningDateFormat", "ttdf",
+                "btnSelectVersioningDateFormat"),
 
 
+            ("search_wiki_searchType", "rboxWwSearchSearchType", "seli"),
+            ("search_wiki_caseSensitive", "cbWwSearchCaseSensitive", "b"),
+            ("search_wiki_wholeWord", "cbWwSearchWholeWord", "b"),
             ("search_wiki_context_before", "tfWwSearchContextBefore", "i0+"),
             ("search_wiki_context_after", "tfWwSearchContextAfter", "i0+"),
             ("search_wiki_count_occurrences", "cbWwSearchCountOccurrences", "b"),
+
             ("incSearch_autoOffDelay", "tfIncSearchAutoOffDelay", "i0+"),
             ("fastSearch_searchType", "rboxFastSearchSearchType", "seli"),
             ("fastSearch_caseSensitive", "cbFastSearchCaseSensitive", "b"),
@@ -561,6 +567,7 @@ class OptionsDialog(wx.Dialog):
 
             ("tree_expandedNodes_rememberDuration",
                     "chTreeExpandedNodesRememberDuration", "seli"),
+            ("tabs_maxCharacters", "tfMaxCharactersOnTab", "i0+"),
 
             ("tree_force_scratchpad_visibility",
                     "cbTreeForceScratchpadVisibility", "b"),
@@ -580,6 +587,8 @@ class OptionsDialog(wx.Dialog):
             ("wikiPageTitle_creationMode", "chWikiPageTitleCreationMode", "seli"),
             ("wikiPageTitle_fromLinkTitle", "cbWikiPageTitleFromLinkTitle", "b"),
             ("headingsAsAliases_depth", "scHeadingsAsAliasesDepth", "spin"),
+
+            ("versioning_storageLocation", "chVersioningStorageLocation", "seli"),
 
             ("fileStorage_identity_modDateMustMatch", "cbFsModDateMustMatch", "b"),
             ("fileStorage_identity_filenameMustMatch", "cbFsFilenameMustMatch", "b"),
@@ -616,12 +625,13 @@ class OptionsDialog(wx.Dialog):
             ("OptionsPageClipboardCatcher", 4 * u" " + N_(u"Clipboard Catcher")),
             ("OptionsPageFileLauncher", 2 * u" " + N_(u"File Launcher")),
             ("OptionsPageMouse", 2 * u" " + N_(u"Mouse")),
-            ("OptionsPageTimeView", 2 * u" " + N_(u"Time view")),
+            ("OptionsPageChronView", 2 * u" " + N_(u"Chron. view")),
             ("OptionsPageSearching", 2 * u" " + N_(u"Searching")),  
             ("OptionsPageAdvanced", 2 * u" " + N_(u"Advanced")),  
             ("OptionsPageAutosave", 4 * u" " + N_(u"Autosave")),
             ("OptionsPageCurrentWiki", N_(u"Current Wiki")),
             ("OptionsPageCwHeadings", 2 * u" " + N_(u"Headings")),
+            ("OptionsPageCwVersioning", 2 * u" " + N_(u"Versioning")),
             ("OptionsPageCwWikiLanguage", 2 * u" " + N_(u"Wiki language")),
             ("??insert mark/current wiki/wiki lang", u""),
             ("OptionsPageCwAdvanced", 2 * u" " + N_(u"Advanced")),
@@ -804,6 +814,8 @@ class OptionsDialog(wx.Dialog):
             
             self.ctrls.cbWikiPageFilesAsciiOnly.Enable(fppCap is not None)
             self.ctrls.cbWikiPageFilesGracefulOutsideAddAndRemove.Enable(
+                    fppCap is not None)
+            self.ctrls.chVersioningStorageLocation.Enable(
                     fppCap is not None)
 
         self.OnEditorImagePasteFileTypeChoice(None)

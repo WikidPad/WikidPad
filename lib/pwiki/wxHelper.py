@@ -54,6 +54,28 @@ class XrcControls:
         return XRCCTRL(self.__basepanel, name)
     
 
+class WindowUpdateLocker(object):
+    """
+    Python translation of wxWindowUpdateLocker.
+    Usage:
+    with WindowUpdateLocker(window):
+        do this, do that...
+    thawn again
+    """
+    def __init__(self, window):
+        self.window = window
+    
+    def __enter__(self):
+        if self.window is not None:
+            self.window.Freeze()
+        
+        return self.window
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.window is not None:
+            self.window.Thaw()
+
+
 
 class IdRecycler:
     """
@@ -443,7 +465,7 @@ class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):
     If the wxWindow ifdestroyed receives a destroy message, the sink
     automatically disconnects from evtSource.
     """
-    __slots__ = ("eventSource", "ifdestroyed")
+    __slots__ = ("eventSource", "ifdestroyed", "disabledSource")
 
 
     def __init__(self, activationTable, eventSource=None, ifdestroyed=None):
@@ -452,6 +474,7 @@ class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):
 
         self.eventSource = eventSource
         self.ifdestroyed = ifdestroyed
+        self.disabledSource = None
         
         if self.eventSource is not None:
             self.eventSource.addListener(self, self.ifdestroyed is None)
@@ -470,16 +493,41 @@ class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):
         evt.Skip()
 
 
+    def enable(self, val=True):
+        if val:
+            if self.eventSource is not None or self.disabledSource is None:
+                return
+
+            self.eventSource = self.disabledSource
+            self.disabledSource = None
+            self.eventSource.addListener(self)
+        else:
+            if self.eventSource is None or self.disabledSource is not None:
+                return
+            
+            self.disabledSource = self.eventSource
+            self.eventSource.removeListener(self)
+            self.eventSource = None
+
+    def disable(self):
+        return self.enable(False)
+
+
     def setEventSource(self, eventSource):
+        if self.eventSource is eventSource:
+            return
+
         self.disconnect()
         self.eventSource = eventSource
-        if eventSource is not None:
+        self.disabledSource = None
+        if self.eventSource is not None:
             self.eventSource.addListener(self)
 
     def disconnect(self):
         """
         Disconnect from eventSource.
         """
+        self.disabledSource = None
         if self.eventSource is None:
             return
         self.eventSource.removeListener(self)
@@ -717,6 +765,11 @@ class ProxyPanel(wx.Panel):
         return self.subWindow
 
 
+    def close(self):
+        if self.subWindow is not None:
+            self.subWindow.close()
+
+
     def OnSize(self, evt):
         evt.Skip()
         size = evt.GetSize()
@@ -794,6 +847,12 @@ class EnhancedListControl(wx.ListCtrl):
 
     def GetFirstSelected(self):
         return self.GetNextItem(-1, state=wx.LIST_STATE_SELECTED)
+
+    def GetIsSelected(self, idx):
+        if idx < 0 or idx >= self.GetItemCount():
+            return False
+
+        return bool(self.GetItemState(idx, wx.LIST_STATE_SELECTED))
 
 
     if Configuration.isWindows():

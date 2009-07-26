@@ -492,7 +492,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_ANCHOR,
                 self.OnClipboardCopyUrlToThisAnchor)
 
-
         wx.EVT_MENU(self, GUI_ID.CMD_TEXT_SELECT_ALL, lambda evt: self.SelectAll())
 
 
@@ -527,10 +526,14 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.ReplaceSelection("")
 
     def Copy(self):
-        cbIcept = self.presenter.getMainControl().getClipboardInterceptor()        
+        text = self.GetSelectedText()
+        if len(text) == 0:
+            return
+
+        cbIcept = self.presenter.getMainControl().getClipboardInterceptor()  
         if cbIcept is not None:
             cbIcept.informCopyInWikidPad()
-        copyTextToClipboard(self.GetSelectedText())
+        copyTextToClipboard(text)
 
     def Paste(self):
         text = getTextFromClipboard()
@@ -935,10 +938,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         """
         Save loaded page, if necessary, then load wikiPage into editor
         """
-        self.unloadCurrentDocPage(evtprops)        
+        self.unloadCurrentDocPage(evtprops)
         # set the editor text
         wikiDataManager = self.presenter.getWikiDocument()
-        
+
         self.presenter.setDocPage(wikiPage)
 
         docPage = self.getLoadedDocPage()
@@ -948,7 +951,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         # get the font that should be used in the editor
         font = docPage.getPropertyOrGlobal("font", self.defaultFont)
-        
+
         # set the styles in the editor to the font
         if self.lastFont != font:
             faces = self.presenter.getDefaultFontFaces().copy()

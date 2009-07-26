@@ -706,18 +706,29 @@ GLOBALDEFAULTS = {
     ("main", "timeView_dateFormat"): u"%Y %m %d",  # Time format to show and enter dates in the time view,
             # especially in the timeline    
     ("main", "timeView_autohide"): "False", # Automatically hide time view after something was selected in it.
-    ("main", "timeView_showWordListOnHovering"): "True", # If True the wordlist of a date is shown when hovering
+    ("main", "timeView_showWordListOnHovering"): u"True", # If True the wordlist of a date is shown when hovering
             # over the entry
-    ("main", "timeView_showWordListOnSelect"): "False", # If True the wordlist of a date is shown when 
+    ("main", "timeView_showWordListOnSelect"): u"False", # If True the wordlist of a date is shown when 
             # entry is selected
-    ("main", "timeline_showEmptyDays"): "True", # Show days for which no wikiword is associated?
-    ("main", "timeline_sortDateAscending"): "True", # If True the newer days are downward in the list, otherwise upward
+    ("main", "timeView_lastSelectedTab"): u"modified", # Which tab was selected last when closing WikidPad?
+            # "modified": Modified time, "version": Versioning tab
+
+    ("main", "timeline_showEmptyDays"): u"True", # Show days for which no wikiword is associated?
+    ("main", "timeline_sortDateAscending"): u"True", # If True the newer days are downward in the list, otherwise upward
+
+    ("main", "versioning_dateFormat"): u"%Y %m %d",  # Time format to show dates in the versioning view
+
 
 
     # Search options
+    ("main", "search_wiki_searchType"): "0",  # Default search type for wiki-wide search
+            # 0: Regex; 1: "Anded" regex; 2: Text as is
+    ("main", "search_wiki_caseSensitive"): "False",  # Wiki-wide search case sensitive?
+    ("main", "search_wiki_wholeWord"): "False",  # Wiki-wide search for whole words only?
     ("main", "search_wiki_context_before"): "20", # No. of context characters before
     ("main", "search_wiki_context_after"): "30",  # and after a found pattern
     ("main", "search_wiki_count_occurrences"): "True", # Show for each page the number of found matches
+
     ("main", "fastSearch_sizeX"): "200",  # Size of the fastsearch popup frame
     ("main", "fastSearch_sizeY"): "400",
     ("main", "incSearch_autoOffDelay"): "0", # Secs. of inactivity until stopping incremental
@@ -759,6 +770,8 @@ WIKIDEFAULTS = {
     ("main", "tree_last_root_wiki_word"): None, # Last root word of wiki tree
     ("main", "tree_expandedNodes_rememberDuration"): u"2", # How long should open nodes in tree be remembered?
             # 0: Not at all; 1: During session; 2: Between sessions in wiki config file
+
+    ("main", "tabs_maxCharacters"): u"0", # Maximum number of characters to show on a tab (0: inifinite)
     ("main", "tree_expandedNodes_descriptorPathes_main"): u"", # ";"-delimited sequence of node descriptor pathes of expanded nodes in tree.
             # Descriptors of a path are delimited by ','. This config. entry applies to main tree
     ("main", "tree_expandedNodes_descriptorPathes_views"): u"", # Same as above but applies to "Views" tree if present
@@ -788,6 +801,9 @@ WIKIDEFAULTS = {
 
     ("main", "headingsAsAliases_depth"): "0",  # Maximum heading depth for which aliases should be generated for
             # each heading up to and including this depth.
+
+    ("main", "versioning_storageLocation"): "0",  # Where to store versioning data? 0: Intern in database;
+            # 1: extern in files (not supported for Compact Sqlite DB)
 
     # For file storage (esp. identity check)
     ("main", "fileStorage_identity_modDateMustMatch"): "False",  # Modification date must match for file to be identical

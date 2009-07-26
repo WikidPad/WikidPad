@@ -26,6 +26,7 @@ WikidPadHelp/data/ChangeLog2005.wiki -text
 WikidPadHelp/data/ChangeLog2006.wiki -text
 WikidPadHelp/data/ChangeLog2007.wiki -text
 WikidPadHelp/data/ChangingKeyBindings.wiki -text
+WikidPadHelp/data/ChronViewWindow.wiki -text
 WikidPadHelp/data/ClipboardCatcher.wiki -text
 WikidPadHelp/data/Color[!!-~]AQUAMARINE.wiki -text
 WikidPadHelp/data/Color[!!-~]BLACK.wiki -text
@@ -313,7 +314,6 @@ WikidPadHelp/data/TextBlocks.wiki -text
 WikidPadHelp/data/TextFormatting.wiki -text
 WikidPadHelp/data/That[!!-~]Arent[!!-~]Wiki[!!-~]Words.wiki -text
 WikidPadHelp/data/ThirdPartyLibraries.wiki -text
-WikidPadHelp/data/TimeViewWindow.wiki -text
 WikidPadHelp/data/TodoItems.wiki -text
 WikidPadHelp/data/TreeIcons.wiki -text
 WikidPadHelp/data/TreeNodeColors.wiki -text
@@ -646,8 +646,6 @@ lib/pwiki/TempFileSet.py -text
 lib/pwiki/TextTree.py -text
 lib/pwiki/UserActionCoord.py -text
 lib/pwiki/Utilities.py -text
-lib/pwiki/Versioning.py -text
-lib/pwiki/VersioningGui.py -text
 lib/pwiki/WikiDocument.py -text
 lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiHtmlView.py -text
@@ -672,6 +670,8 @@ lib/pwiki/timeView/DatedWikiWordFilters.py -text
 lib/pwiki/timeView/TimePresentationBase.py -text
 lib/pwiki/timeView/TimeViewCtrl.py -text
 lib/pwiki/timeView/TimelinePanel.py -text
+lib/pwiki/timeView/Versioning.py -text
+lib/pwiki/timeView/VersioningGui.py -text
 lib/pwiki/timeView/WikiWordListPopup.py -text
 lib/pwiki/timeView/__init__.py -text
 lib/pwiki/urllib_red.py -text

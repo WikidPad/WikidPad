@@ -1,6 +1,25 @@
 ﻿++ Change Log
 
 
+Jul. 26, 2009 (2.0beta06)
+
+    * Support for storing versions of wiki pages (do not yet rely
+      on this function!). See [ChronViewWindow#+++ Versions]
+    * Options to set defaults for wiki-wide search.
+      See [OptionsDialog#*Wiki-wide search defaults*]
+    * Option to set max. length of tab titles.
+      See [OptionsDialog#*Max. characters on each tab*]
+    * Changing position of additional panels (e.g. tree,
+      doc. structure, ...) preserves size of the panels.
+
+    * Bug fixed: Problem with bracketed URL at end of a page
+    * Bug fixed: auto_link wasn't updated after creating/removing
+      aliases
+    * Bug fixed: copying to clipboard emptied clipboard if no text
+      selected
+
+
+
 Jun. 28, 2009 (2.0beta05)
 
     * Options "Wiki language" and "Footnotes as wiki words" moved to

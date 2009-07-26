@@ -395,7 +395,11 @@ class WikiHtmlView(wx.html.HtmlWindow):
             self.refresh()
 
     def OnClipboardCopy(self, evt):
-        copyTextToClipboard(self.SelectionToText())
+        text = self.SelectionToText()
+        if len(text) == 0:
+            return
+
+        copyTextToClipboard(text)
 
 
     def OnLeftDClick(self, evt):

@@ -457,6 +457,7 @@ orderedList = orderedList.setResultsNameNoCopy("orderedList")
 
 
 
+
 # -------------------- Table --------------------
 
 
@@ -621,12 +622,17 @@ WikiWordCcPAT = (ur"(?:[" +
         ur"]+)")
 
 
+# UrlPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
+#         ur'(?:(?![.,;:!?)\]]+["\s])[^"\s<>])*'
+
 UrlPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
-        ur'(?:(?![.,;:!?)\]]+["\s])[^"\s<>])*'
+        ur'(?:(?![.,;:!?)\]]+(?:["\s]|$))[^"\s<>])*'
 
 
 # UrlInBracketsPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
 #         ur'(?:(?![.,;:!?)]+["\s])[^"\s<>' + BracketEndPAT + '])*'
+# UrlInBracketsPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
+#         ur'(?:[^"\s<>' + BracketEndPAT + '])*'
 
 
 bracketStart = buildRegex(BracketStartPAT)
@@ -1120,9 +1126,10 @@ todoAsWhole = todoAsWhole.optimize(("regexcombine",)).parseWithTabs()
 
 # Whole text, optimizes subelements recursively
 text = text.optimize(("regexcombine",)).parseWithTabs()
+# text = text.parseWithTabs()
 
 
-# text.setDebugRecurs(GR_DEBUG)
+# text.setDebugRecurs(True)
 
 
 
@@ -1141,7 +1148,7 @@ def _buildBaseDict(wikiDocument=None, formatDetails=None):
 
 
 # -------------------- API for plugin WikiParser --------------------
-# During alpha state of the WikidPad version, this API isn't stable yet, 
+# During beta state of the WikidPad version, this API isn't stable yet, 
 # so changes may occur!
 
 
@@ -1768,14 +1775,14 @@ class _TheHelper(object):
                     prevNumStr = match.group(3)
                     prevNum = int(prevNumStr)
                     nextNum = prevNum+1
-                    adjustment = len(str(nextNum)) - len(prevNumStr)
-                    if adjustment == 0:
-                        editor.AddText(u"%s%s%d. " % (indent,
-                                match.group(2), int(prevNum)+1))
-                    else:
-                        editor.AddText(u"%s%s%d. " % (u" " *
-                                (editor.GetLineIndentation(currentLine - 1) - adjustment),
-                                match.group(2), int(prevNum)+1))
+#                     adjustment = len(str(nextNum)) - len(prevNumStr)
+#                     if adjustment == 0:
+                    editor.AddText(u"%s%s%d. " % (indent,
+                            match.group(2), int(prevNum)+1))
+#                     else:
+#                         editor.AddText(u"%s%s%d. " % (u" " *
+#                                 (editor.GetLineIndentation(currentLine - 1) - adjustment),
+#                                 match.group(2), int(prevNum)+1))
                     return
 
             if settings.get("autoIndent", False):

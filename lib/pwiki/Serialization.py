@@ -4,6 +4,8 @@ import cStringIO as StringIO
 from StringOps import utf8Dec, utf8Enc, strToBool, base64BlockEncode, \
         base64BlockDecode
 
+from WikiExceptions import *
+
 
 
 # ---------- Support for serializing values into binary data (and back) ----------
@@ -186,7 +188,7 @@ def findXmlElementFlat(xmlNode, tag, excOnFail=True):
     """
     Search children of xmlNode until finding an element with tag  tag  and
     return it. Raises SerializationException if not found (excOnFail==True) or
-    returns (excOnFail==False).
+    returns None (excOnFail==False).
     """
     for subNode in xmlNode.childNodes:
         if subNode.nodeType != subNode.ELEMENT_NODE:
@@ -215,6 +217,22 @@ def iterXmlElementFlat(xmlNode, tag):
             yield subNode
 
 
+def findOrAppendXmlElementFlat(xmlNode, xmlDoc, tag):
+    """
+    If inside xmlNode exists an element with tag already, return that,
+    otherwise create and append to xmlNode a new child element with this tag.
+    """
+    subNode = findXmlElementFlat(xmlNode, tag, False)
+    if subNode is not None:
+        return subNode
+
+    subNode = xmlDoc.createElement(tag)
+    xmlNode.appendChild(subNode)
+
+    return subNode
+
+
+
 def serToXmlUnicode(xmlNode, xmlDoc, tag, data, replace=False):
     if replace:
         subNode = findXmlElementFlat(xmlNode, tag, False)
@@ -228,7 +246,7 @@ def serToXmlUnicode(xmlNode, xmlDoc, tag, data, replace=False):
 
 
 def serFromXmlUnicode(xmlNode, tag, default=u""):
-    subNode = findXmlElementFlat(xmlNode, tag)
+    subNode = findXmlElementFlat(xmlNode, tag, False)
     if subNode is None:
         return default
 

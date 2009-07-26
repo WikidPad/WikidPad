@@ -186,6 +186,20 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
             self.handleVisibilityChange()
 
 
+    def handleVisibilityChange(self):
+        """
+        Only call after isVisibleEffect() really changed its value.
+        The new value is taken from isVisibleEffect(), the old is assumed
+        to be the opposite.
+        """
+        if self.isVisibleEffect():
+            self.clearCache()
+            # Trick to make switching look faster
+            wx.CallLater(1, self.updateContent)
+
+        TimePresentationBase.handleVisibilityChange(self)
+
+
     def onUpdateNeeded(self, miscevt):
         self.clearCache()
         self.updateContent()
@@ -572,8 +586,15 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
 
     def OnContextMenu(self, evt):
-        pos = self.ScreenToClient(wx.GetMousePosition())
-        item = self.HitTest(pos)[0]
+        mousePos = evt.GetPosition()
+        if mousePos == wx.DefaultPosition:
+            # E.g. context menu key was pressed on Windows keyboard
+            item = self.GetFirstSelected()
+        else:
+            item = self.HitTest(self.ScreenToClient(mousePos))[0]
+
+#         pos = self.ScreenToClient(wx.GetMousePosition())
+#         item = self.HitTest(pos)[0]
 
         self.showContextMenuForItem(item)
 
@@ -775,6 +796,8 @@ u"""
 # Entries to support i18n of context menus
 
 N_(u"Show empty days")
+N_(u"Show dates without associated wiki words")
 N_(u"Sort dates ascending")
+N_(u"List dates ascending or descending")
 
 

@@ -1773,7 +1773,6 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 crumbs = wikiData.findBestPathFromWordToWord(wikiWord,
                         currentWikiWord)
 
-
         if crumbs:
             numCrumbs = len(crumbs)
 
@@ -1817,6 +1816,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 if selectNode:
                     self._unbindActivation()
                     self.SelectItem(currentNode)
+                    self.EnsureVisible(currentNode)
                     self._bindActivation()
                 
                 return True
@@ -1829,7 +1829,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             nodeobj = self.GetPyData(child)
 #             if nodeobj.representsFamilyWikiWord() and nodeobj.getWikiWord() == findWord:
             if nodeobj.representsFamilyWikiWord() and \
-                    self.pWiki.getWikiData().getUnAliasedWikiWord(nodeobj.getWikiWord())\
+                    self.pWiki.getWikiDocument().getUnAliasedWikiWord(nodeobj.getWikiWord())\
                     == findWord:
                 return child
             

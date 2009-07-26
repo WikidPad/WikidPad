@@ -476,8 +476,9 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                 presenter = miscevt.getSource()
                 idx = self.getIndexForPresenter(presenter)
                 if idx > -1:
-                    self.SetPageText(idx,
-                            presenter.getLongTitle())
+#                     self.SetPageText(idx,
+#                             presenter.getLongTitle())
+                    self.SetPageText(idx, miscevt.get("title"))
 
                     if presenter is self.getCurrentPresenter():
                         self.mainControl.refreshPageStatus()

@@ -152,9 +152,9 @@ class SpellCheckerDialog(wx.Dialog):
                     _(u"No wiki open or current page is a functional page"))
             return False
 
+        startWikiWord = self.mainControl.getWikiDocument()\
+                .getUnAliasedWikiWordOrAsIs(startWikiWord)  # TODO Check if this can't fail
 
-        startWikiWord = self.mainControl.getWikiData().getUnAliasedWikiWord(
-                startWikiWord)
         self.currentDocPage = self.mainControl.getWikiDocument().getWikiPage(
                 startWikiWord)
 

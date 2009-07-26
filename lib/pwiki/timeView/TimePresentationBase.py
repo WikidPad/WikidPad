@@ -54,9 +54,11 @@ class TimePresentationBase:
         to be the opposite.
         """
         if not self.isVisibleEffect():
+            if self.wikiWordListPopup is not None:
+                self.setWikiWordListPopup(None)
+
             if wx.Window.FindFocus() is self:
                 self.mainControl.getMainAreaPanel().SetFocus()
-
 
     def setLayerVisible(self, vis, scName=""):
         oldVisible = self.isVisibleEffect()
@@ -148,10 +150,11 @@ class TimePresentationBase:
             self.setWikiWordListPopup(WikiWordListPopup(self, self.mainControl,
                     -1, day, wikiWords, pos=pos))
             
+            # Note: Using Freeze/Thaw here makes things worse
             self.wikiWordListPopup.Show()
             if focus is not None:
                 focus.SetFocus()
-            
+
 
 
     def OnMouseMotion(self, evt):

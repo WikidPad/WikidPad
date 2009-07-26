@@ -1348,7 +1348,7 @@ class WikiData:
             raise DbReadAccessError(e)
 
 
-    def retrieveDataBlock(self, unifName):
+    def retrieveDataBlock(self, unifName, default=""):
         """
         Retrieve data block as binary string.
         """
@@ -1363,7 +1363,7 @@ class WikiData:
             raise DbReadAccessError(e)
 
 
-    def retrieveDataBlockAsText(self, unifName):
+    def retrieveDataBlockAsText(self, unifName, default=u""):
         """
         Retrieve data block as unicode string (assuming it was encoded properly)
         and with normalized line-ending (Un*x-style).
@@ -1396,6 +1396,16 @@ class WikiData:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
+
+    def guessDataBlockStoreHint(self, unifName):
+        """
+        Return a guess of the store hint used to store the block last time.
+        Returns one of the DATABLOCK_STOREHINT_* constants from Consts.py.
+        The function is allowed to return the wrong value (therefore a guess)
+        and returns a value even for non-existing data blocks.
+        For compact_sqlite it always returns Consts.DATABLOCK_STOREHINT_INTERN.
+        """
+        return Consts.DATABLOCK_STOREHINT_INTERN
 
 
     def deleteDataBlock(self, unifName):

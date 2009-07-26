@@ -26,6 +26,7 @@ from Consts import HOMEPAGE
 
 from . import Configuration
 from .WindowLayout import WindowSashLayouter, setWindowPos, setWindowSize
+from . import WindowLayout
 
 from .wikidata import DbBackendUtils, WikiDataManager
 
@@ -44,13 +45,16 @@ from .WikiHtmlView import createWikiHtmlView
 from .LogWindow import LogWindow
 from .DocStructureCtrl import DocStructureCtrl
 from .timeView.TimeViewCtrl import TimeViewCtrl
+from .timeView import Versioning
+
 from .MainAreaPanel import MainAreaPanel
 from .UserActionCoord import UserActionCoord
 from .DocPagePresenter import DocPagePresenter
 
 from .Ipc import EVT_REMOTE_COMMAND
 
-from . import PropertyHandling, SpellChecker, Versioning
+from . import PropertyHandling, SpellChecker
+
 
 # from PageHistory import PageHistory
  #from SearchAndReplace import SearchReplaceOperation
@@ -300,14 +304,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # get the position of the splitter
         self.lastSplitterPos = self.configuration.getint("main", "splitter_pos")
                 
-        self.layoutMainTreePosition = self.configuration.getint("main",
-                "mainTree_position", 0)
-        self.layoutViewsTreePosition = self.configuration.getint("main",
-                "viewsTree_position", 0)
-        self.layoutDocStructurePosition = self.configuration.getint("main",
-                "docStructure_position", 0)
-        self.layoutTimeViewPosition = self.configuration.getint("main",
-                "timeView_position", 0)
+#         self.layoutMainTreePosition = self.configuration.getint("main",
+#                 "mainTree_position", 0)
+#         self.layoutViewsTreePosition = self.configuration.getint("main",
+#                 "viewsTree_position", 0)
+#         self.layoutDocStructurePosition = self.configuration.getint("main",
+#                 "docStructure_position", 0)
+#         self.layoutTimeViewPosition = self.configuration.getint("main",
+#                 "timeView_position", 0)
 
         # if a wiki to open wasn't passed in use the last_wiki from the global config
         wikiToOpen = cmdLineAction.wikiToOpen
@@ -1386,7 +1390,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 kind=wx.ITEM_CHECK)
 
 
-
         self.addMenuItem(viewMenu, _(u'Show &Page Structure') + u'\t' +
                 self.keyBindings.ShowDocStructure, 
                 _(u"Show structure (headings) of the page"),
@@ -1596,12 +1599,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.OnCmdClipboardCopyUrlToCurrentWikiWord,
                 updatefct=(self.OnUpdateDisNotWikiPage,))
 
+        wikiPageMenu.AppendSeparator()
 
-#         self.addMenuItem(wikiPageMenu, _(u'Add version') + u'\t' +
-#                 u"", _(u'Add new version'),
-#                 self.OnCmdVersionAdd, menuID=GUI_ID.CMD_VERSION_ADD,
-#                 updatefct=(self.OnUpdateDisNotTextedit, self.OnUpdateDisNotWikiPage)
-#                 )
+        self.addMenuItem(wikiPageMenu, _(u'&Add version') + u'\t' +
+                u"", _(u'Add new version'),
+                self.OnCmdVersionAdd, menuID=GUI_ID.CMD_VERSIONING_ADD_VERSION,
+                updatefct=(self.OnUpdateDisNotTextedit, self.OnUpdateDisNotWikiPage)
+                )
 
 
         formatMenu = wx.Menu()
@@ -2139,7 +2143,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         cfstr = self.getConfig().get("main", "windowLayout")
         self.windowLayouter.setWinPropsByConfig(cfstr)
-       
         self.windowLayouter.realize()
 #         self.windowLayouter.layout()
 
@@ -2371,7 +2374,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if docPage is None or \
                 not docPage.getUnifiedPageName().startswith(u"wikipage/"):
             return
-        
+
         versionOverview = docPage.getVersionOverview()
         content = self.getActiveEditor().GetText()
 
@@ -3805,14 +3808,37 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def setShowDocStructure(self, onOrOff):
-        self.windowLayouter.expandWindow("doc structure", onOrOff)
-        if onOrOff:
-            self.windowLayouter.focusWindow("doc structure")
+        if self.windowLayouter.containsWindow("doc structure"):
+            self.windowLayouter.expandWindow("doc structure", onOrOff)
+            if onOrOff:
+                self.windowLayouter.focusWindow("doc structure")
+        else:
+            if onOrOff:
+                self.configuration.set("main", "docStructure_position", u"1")
+                layoutCfStr = WindowLayout.calculateMainWindowLayoutCfString(
+                        self.configuration)
+                self.configuration.set("main", "windowLayout", layoutCfStr)
+                # Call of changeLayoutByCf() may crash so save
+                # data beforehand
+                self.saveCurrentWikiState()
+                self.changeLayoutByCf(layoutCfStr)
+
 
     def setShowTimeView(self, onOrOff):
-        self.windowLayouter.expandWindow("time view", onOrOff)
-        if onOrOff:
-            self.windowLayouter.focusWindow("time view")
+        if self.windowLayouter.containsWindow("time view"):
+            self.windowLayouter.expandWindow("time view", onOrOff)
+            if onOrOff:
+                self.windowLayouter.focusWindow("time view")
+        else:
+            if onOrOff:
+                self.configuration.set("main", "timeView_position", u"2")
+                layoutCfStr = WindowLayout.calculateMainWindowLayoutCfString(
+                        self.configuration)
+                self.configuration.set("main", "windowLayout", layoutCfStr)
+                # Call of changeLayoutByCf() may crash so save
+                # data beforehand
+                self.saveCurrentWikiState()
+                self.changeLayoutByCf(layoutCfStr)
 
 
     def getStayOnTop(self):
@@ -3935,48 +3961,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         BUG: Reparenting seems to disturb event handling for tree events and
             isn't available for all OS'
         """
-#         # Reparent reusable windows so they aren't destroyed when
-#         #   cleaning main window
-#         # TODO Reparent not available for all OS'
-#         cachedWindows = {}
-# #         for n, w in self.windowLayouter.winNameToObject.iteritems():
-#         for n, w in self.windowLayouter.winNameToProxy.iteritems():
-#             print "--toCache", repr(n), repr(w)
-#             cachedWindows[n] = w
-# #             w.Reparent(None)
-#             w.Reparent(self)
-# 
-#         self.windowLayouter.cleanMainWindow(cachedWindows.values())
-# 
-#         # make own creator function which provides already existing windows
-#         def cachedCreateWindow(winProps, parent):
-#             """
-#             Wrapper around _actualCreateWindow to maintain a cache
-#             of already existing windows
-#             """
-#             winName = winProps["name"]
-# 
-#             # Try in cache:
-#             window = cachedWindows.get(winName)
-# #             print "--cachedCreateWindow", repr(winName), repr(window)
-#             if window is not None:
-#                 window.Reparent(parent)    # TODO Reparent not available for all OS'
-#                 del cachedWindows[winName]
-#                 return window
-# 
-#             window = self.createWindow(winProps, parent)
-# 
-#             return window
-#         
-#         self.windowLayouter = WindowSashLayouter(self, cachedCreateWindow)
-# 
-#         # Destroy windows which weren't reused
-#         # TODO Call close method of object window if present
-#         for n, w in cachedWindows.iteritems():
-#             w.Destroy()
-# 
-#         self.windowLayouter.setWinPropsByConfig(layoutCfStr)
-
         # Handle no size events while realizing layout
         self.Unbind(wx.EVT_SIZE)
 
@@ -4074,7 +4058,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             wikiWord = self.getCurrentWikiWord()
 
         if wikiWord is not None:
-            wikiWord = self.getWikiData().getUnAliasedWikiWord(wikiWord)
+            wikiWord = self.getWikiDocument().getUnAliasedWikiWord(wikiWord)
 
         if wikiWord is None:
             self.displayErrorMessage(_(u"No real wiki word selected to rename"))
@@ -4239,7 +4223,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             wikiWord = self.getCurrentWikiWord()
 
         if wikiWord is not None:
-            wikiWord = self.getWikiData().getUnAliasedWikiWord(wikiWord)
+            wikiWord = self.getWikiDocument().getUnAliasedWikiWord(wikiWord)
 
         if wikiWord == u"ScratchPad":
             self.displayErrorMessage(_(u"The scratch pad cannot be deleted"))
@@ -4417,68 +4401,20 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     "fileStorage_identity_modDateIsEnough", False))
 
 
+            relayoutNeeded = False
             # Build new layout config string
-            newLayoutMainTreePosition = self.configuration.getint("main",
-                "mainTree_position", 0)
-            newLayoutViewsTreePosition = self.configuration.getint("main",
-                "viewsTree_position", 0)
-            newLayoutDocStructurePosition = self.configuration.getint("main",
-                "docStructure_position", 0)
-            newLayoutTimeViewPosition = self.configuration.getint("main",
-                "timeView_position", 0)    
-            if self.layoutViewsTreePosition != newLayoutViewsTreePosition or \
-                    self.layoutMainTreePosition != newLayoutMainTreePosition or \
-                    self.layoutDocStructurePosition != newLayoutDocStructurePosition or \
-                    self.layoutTimeViewPosition != newLayoutTimeViewPosition:
-
-                self.layoutViewsTreePosition = newLayoutViewsTreePosition
-                self.layoutMainTreePosition = newLayoutMainTreePosition
-                self.layoutDocStructurePosition = newLayoutDocStructurePosition
-                self.layoutTimeViewPosition = newLayoutTimeViewPosition
-
-                mainPos = {0:"left", 1:"right", 2:"above", 3:"below"}\
-                        [newLayoutMainTreePosition]
-
-                # Set layout for main tree
-                layoutCfStr = "name:main area panel;"\
-                        "layout relation:%s&layout relative to:main area panel&name:maintree&"\
-                        "layout sash position:170&layout sash effective position:170" % \
-                        mainPos
-
-                # Add layout for Views tree
-                if newLayoutViewsTreePosition > 0:
-#                     # Don't show "Views" tree
-#                     layoutCfStr = self._LAYOUT_WITHOUT_VIEWSTREE % mainPos
-#                 else:
-                    viewsPos = {1:"above", 2:"below", 3:"left", 4:"right"}\
-                            [newLayoutViewsTreePosition]
-#                     layoutCfStr += self._LAYOUT_WITH_VIEWSTREE % \
-#                             (mainPos, viewsPos)
-                    layoutCfStr += ";layout relation:%s&layout relative to:maintree&name:viewstree" % \
-                            viewsPos
-
-                if newLayoutTimeViewPosition > 0:
-                    timeViewPos = {1:"left", 2:"right", 3:"above", 4:"below"}\
-                        [newLayoutTimeViewPosition]
-                    layoutCfStr += ";layout relation:%s&layout relative to:main area panel&name:time view&"\
-                                "layout sash position:120&layout sash effective position:120" % \
-                                timeViewPos
-
-                # Layout for doc structure window
-                if newLayoutDocStructurePosition > 0:
-                    docStructPos = {1:"left", 2:"right", 3:"above", 4:"below"}\
-                        [newLayoutDocStructurePosition]
-                    layoutCfStr += ";layout relation:%s&layout relative to:main area panel&name:doc structure&"\
-                                "layout sash position:120&layout sash effective position:120" % \
-                                docStructPos
-
-                # Layout for log window
-                layoutCfStr += ";layout relation:below&layout relative to:main area panel&name:log&"\
-                            "layout sash position:1&layout sash effective position:120"
-                            
-
+            for setName in ("mainTree_position", "viewsTree_position",
+                    "docStructure_position", "timeView_position"):
+                if self.configuration.getint("main", setName, 0) != \
+                        int(oldSettings.get(setName, u"0")):
+                    relayoutNeeded = True
+                    break
+ 
+            if relayoutNeeded:
+                layoutCfStr = WindowLayout.calculateMainWindowLayoutCfString(
+                        self.configuration)
                 self.configuration.set("main", "windowLayout", layoutCfStr)
-                # Call of changeLayoutByCf() crashes on Linux/GTK so save
+                # Call of changeLayoutByCf() may crash so save
                 # data beforehand
                 self.saveCurrentWikiState()
                 self.changeLayoutByCf(layoutCfStr)
@@ -5268,21 +5204,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def exitWiki(self):
         self._prepareExitWiki()
-        self.Destroy()
+        wx.CallLater(1, self.Destroy)
+#         self.Destroy()
 
     def _prepareExitWiki(self):
-#         if not self.configuration.getboolean("main", "minimize_on_closeButton"):
-#             self.Close()
-#         else:
-#             self.prepareExit()
-#             self.Destroy()
-# 
-# 
-#     def prepareExit(self):
-        # Stop clipboard catcher if running
-#         if self.clipboardInterceptor is not None:
-#             self.clipboardInterceptor.catchOff()
-
         if self._interceptCollection is not None:
             self._interceptCollection.close()
 
@@ -5317,12 +5242,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.configuration.set("main", "frame_stayOnTop", self.getStayOnTop())
         self.configuration.set("main", "zoom", self.getActiveEditor().GetZoom())
         self.configuration.set("main", "wiki_history", ";".join(self.wikiHistory))
-        self.writeGlobalConfig()
+
+        self.windowLayouter.close()
 
         # trigger hook
         self.hooks.exit(self)
+        self.writeGlobalConfig()
 
-        self.getMainAreaPanel().close()
+#         self.getMainAreaPanel().close()
 
         # save the current wiki state
 #         self.saveCurrentWikiState()
@@ -5333,12 +5260,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if self.tbIcon.IsIconInstalled():
                 self.tbIcon.RemoveIcon()
 
+            self.tbIcon.prepareExit()
             self.tbIcon.Destroy()
             # May mysteriously prevent crash when closing WikidPad minimized
-            #   on tray
+            #   on tray:
             sleep(0.1)
             self.tbIcon = None
-        
+
         wx.GetApp().unregisterMainFrame(self)
 
 
@@ -5369,15 +5297,20 @@ class TaskBarIcon(wx.TaskBarIcon):
         wx.EVT_TASKBAR_LEFT_UP(self, self.OnLeftUp)
 
 
+    def prepareExit(self):
+        # Another desperate try to prevent crashing
+        self.Unbind(wx.EVT_TASKBAR_LEFT_UP)
+
+
     def OnCmdExit(self, evt):
         # Trying to prevent a crash with this, but didn't help much
-        wx.CallAfter(self.pWiki.exitWiki)
+        wx.CallLater(1, self.pWiki.exitWiki)
 
     def OnLeftUp(self, evt):
         if self.pWiki.IsIconized():
             self.pWiki.Iconize(False)
             self.pWiki.Show(True)
-        
+
         self.pWiki.Raise()
 
 

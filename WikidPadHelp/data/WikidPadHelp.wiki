@@ -53,7 +53,7 @@ Then just start typing text with WikiWords to create your wiki.
     * InternatiönalChàracters
     * ExternalGraphicalApplications
     * PageStructureWindow
-    * TimeViewWindow
+    * ChronViewWindow
     * FavoriteWikis
     * OptionsDialog
     * CommandLineSupport

@@ -1796,7 +1796,7 @@ class WikiData:
                 [name for name in names2 if name.startswith(startingWith)]
 
 
-    def retrieveDataBlock(self, unifName):
+    def retrieveDataBlock(self, unifName, default=""):
         """
         Retrieve data block as binary string.
         """
@@ -1814,20 +1814,29 @@ class WikiData:
             if filePath is None:
                 return None  # TODO exception?
             
-            datablock = loadEntireFile(join(self.dataDir, filePath))
-            return datablock
-
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
+        try:
+            datablock = loadEntireFile(join(self.dataDir, filePath))
+            return datablock
 
-    def retrieveDataBlockAsText(self, unifName):
+        except (IOError, OSError, ValueError), e:
+            if self.wikiDocument.getWikiConfig().getboolean("main",
+                    "wikiPageFiles_gracefulOutsideAddAndRemove", True):
+                return default
+            else:
+                traceback.print_exc()
+                raise DbReadAccessError(e)
+
+
+    def retrieveDataBlockAsText(self, unifName, default=u""):
         """
         Retrieve data block as unicode string (assuming it was encoded properly)
         and with normalized line-ending (Un*x-style).
         """
-        datablock = self.retrieveDataBlock(unifName)
+        datablock = self.retrieveDataBlock(unifName, default=default)
         if datablock is None:
             return None
 
@@ -1940,6 +1949,31 @@ class WikiData:
                 raise DbWriteAccessError(e)
 
 
+    def guessDataBlockStoreHint(self, unifName):
+        """
+        Return a guess of the store hint used to store the block last time.
+        Returns one of the DATABLOCK_STOREHINT_* constants from Consts.py.
+        The function is allowed to return the wrong value (therefore a guess)
+        and returns a value even for non-existing data blocks.
+        """
+        try:
+            datablock = self.connWrap.execSqlQuerySingleItem(
+                    "select unifiedname from datablocks where unifiedname = ?",
+                    (unifName,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+        try:
+            if datablock is not None:
+                return Consts.DATABLOCK_STOREHINT_INTERN
+            else:
+                return Consts.DATABLOCK_STOREHINT_EXTERN
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbWriteAccessError(e)
+
+
     def deleteDataBlock(self, unifName):
         """
         Delete data block with the associated unified name. If the unified name
@@ -1955,8 +1989,14 @@ class WikiData:
                     "where unifiedname = ?", (unifName,))
 
             if filePath is not None:
-                # The entry is in an external file, so delete it
-                os.unlink(longPathEnc(join(self.dataDir, filePath)))
+                try:
+                    # The entry is in an external file, so delete it
+                    os.unlink(longPathEnc(join(self.dataDir, filePath)))
+                except (IOError, OSError):
+                    if not self.wikiDocument.getWikiConfig().getboolean("main",
+                            "wikiPageFiles_gracefulOutsideAddAndRemove", True):
+                        raise
+
                 self.connWrap.execSql(
                         "delete from datablocksexternal "
                         "where unifiedname = ?", (unifName,))

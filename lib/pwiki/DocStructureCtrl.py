@@ -1,3 +1,5 @@
+from __future__ import with_statement
+
 # import hotshot
 # _prof = hotshot.Profile("hotshot.prf")
 
@@ -12,7 +14,7 @@ from Utilities import DUMBTHREADSTOP
 # from MiscEvent import KeyFunctionSinkAR
 from WikiExceptions import NotCurrentThreadException
 
-from wxHelper import EnhancedListControl, wxKeyFunctionSink
+from wxHelper import EnhancedListControl, wxKeyFunctionSink, WindowUpdateLocker
 
 
 
@@ -262,15 +264,12 @@ class DocStructureCtrl(EnhancedListControl):
         """
         Show the content of self.tocList in the ListCtrl
         """
-        self.Freeze()
-        try:
+        with WindowUpdateLocker(self):
             self.DeleteAllItems()
             for start, headLevel, text in self.tocList:
                 self.InsertStringItem(self.GetItemCount(), text)
             self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
             self.checkSelectionChanged(callAlways=True)
-        finally:
-            self.Thaw()
 
 
     def OnKillFocus(self, evt):
@@ -301,23 +300,23 @@ class DocStructureCtrl(EnhancedListControl):
         # Find out which subcontrol is currently active
         scName = presenter.getCurrentSubControlName()
         subCtrl = presenter.getSubControl(scName)
-        
+
         if scName == "textedit":
             # Text editor is active
             subCtrl.gotoCharPos(start)
         elif scName == "preview": 
             # HTML preview
             subCtrl.gotoAnchor(u".h%i" % start)
-            
+
 #         if focusToSubctrl:
 #             subCtrl.SetFocus()
 #             # wx.CallAfter(presenter.SetFocus)
-            
+
 
     def OnItemSelected(self, evt):
         if self.ignoreOnChange:
             return
-        
+
         start = self.tocListStarts[evt.GetIndex()]
         self.displayInSubcontrol(start)
 

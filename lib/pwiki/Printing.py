@@ -557,7 +557,7 @@ class PlainTextPrintout(wx.Printout):
 #                 if pagepos > 100: break
                 posyLu = printRectLu[1]
                 self.pageCharStartIndex.append(textpos)
-                
+
             i += 1
 
         dc.SetFont(wx.NullFont)
@@ -618,7 +618,11 @@ class HtmlPrint:
         
         try:
             printout = HtmlPrintout(text, self.printer)
-            printer = wx.Printer(wx.PrintDialogData(self.printer.printData))
+#             printer = wx.Printer(wx.PrintDialogData(self.printer.printData))
+            
+            pData = wx.PrintDialogData(self.printer.printData)
+            printer = wx.Printer(pData)
+
             return printer.Print(self.pWiki, printout, True)
         finally:
             self._freeHtml()

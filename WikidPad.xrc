@@ -1598,15 +1598,28 @@
       </object>
     </object>
   </object>
-  <object class="wxPanel" name="OptionsPageTimeView">
+  <object class="wxPanel" name="OptionsPageChronView">
     <object class="wxBoxSizer">
       <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>Chronological View</label>
+          <font>
+            <style>default</style>
+            <weight>bold</weight>
+            <family>normal</family>
+            <underlined>0</underlined>
+          </font>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
       <object class="sizeritem">
         <object class="wxFlexGridSizer">
           <cols>2</cols>
           <object class="sizeritem">
             <object class="wxStaticText">
-              <label>Time view pos.:</label>
+              <label>Position:</label>
             </object>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
@@ -1660,7 +1673,7 @@
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbTimeViewAutoHide">
-          <label>Time view auto-hide</label>
+          <label>Auto-hide</label>
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
@@ -1711,6 +1724,53 @@
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
       </object>
+      <object class="sizeritem">
+        <object class="wxStaticLine"/>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>Versioning</label>
+          <font>
+            <style>default</style>
+            <weight>bold</weight>
+            <family>normal</family>
+            <underlined>0</underlined>
+          </font>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Date format:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfVersioningDateFormat"/>
+            <option>1</option>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnSelectVersioningDateFormat">
+              <label>...</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxALIGN_BOTTOM</flag>
+            <border>5</border>
+            <minsize>20,-1</minsize>
+          </object>
+        </object>
+        <option>0</option>
+        <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
     </object>
   </object>
   <object class="wxPanel" name="OptionsPageSearching">
@@ -1728,6 +1788,53 @@
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>  Defaults</label>
+          <font>
+            <style>default</style>
+            <weight>bold</weight>
+            <family>normal</family>
+            <underlined>0</underlined>
+          </font>
+        </object>
+        <flag>wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxRadioBox" name="rboxWwSearchSearchType">
+          <label></label>
+          <content>
+            <item>Si&amp;mple regex</item>
+            <item>&quot;And&amp;ed&quot; regex</item>
+            <item>As &amp;is</item>
+          </content>
+          <dimension>2</dimension>
+          <style>wxRA_SPECIFY_COLS|wxNO_BORDER</style>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbWwSearchCaseSensitive">
+          <label>&amp;Case sensitive</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbWwSearchWholeWord">
+          <label>&amp;Whole word</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="spacer">
+        <size>0,5</size>
       </object>
       <object class="sizeritem">
         <object class="wxStaticText" name="">
@@ -2213,6 +2320,18 @@
             <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Max. characters on each tab:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfMaxCharactersOnTab"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
@@ -2406,6 +2525,36 @@
           </object>
         </object>
         <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+    </object>
+  </object>
+  <object class="wxPanel" name="OptionsPageCwVersioning">
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <cols>2</cols>
+          <growablecols>1</growablecols>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Where to store:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chVersioningStorageLocation">
+              <content>
+                <item>Database</item>
+                <item>Separate files</item>
+              </content>
+              <selection>0</selection>
+            </object>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
     </object>
   </object>

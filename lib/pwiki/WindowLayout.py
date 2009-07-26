@@ -435,46 +435,29 @@ class WindowSashLayouter:
         # Reparent reusable windows so they aren't destroyed when
         #   cleaning main window
         # TODO Reparent not available for all OS'
+        self.setWinPropsByConfig(layoutCfStr)
+        self.preserveSashPositions()       
+
         proxiedCachedWindows = {}
-#         for n, w in self.windowLayouter.winNameToObject.iteritems():
         for n, w in self.winNameToProxy.iteritems():
             proxiedCachedWindows[n] = w
-#             w.Reparent(None)
             w.Reparent(self.mainWindow)    # TODO Reparent not available for all OS'
 
         self.cleanMainWindow(proxiedCachedWindows.values())
 
-#         # make own creator function which provides already existing windows
-#         def cachedCreateWindow(winProps, parent):
-#             """
-#             Wrapper around _actualCreateWindow to maintain a cache
-#             of already existing windows
-#             """
-#             winName = winProps["name"]
-# 
-#             # Try in cache:
-#             window = cachedWindows.get(winName)
-# #             print "--cachedCreateWindow", repr(winName), repr(window)
-#             if window is not None:
-#                 window.Reparent(parent)    # TODO Reparent not available for all OS'
-#                 del cachedWindows[winName]
-#                 return window
-# 
-#             window = createWindowFunc(winProps, parent)
-# 
-#             return window
-        
-#         result = WindowSashLayouter(self.mainWindow, cachedCreateWindow)
-
-        self.setWinPropsByConfig(layoutCfStr)
 
         self.realize(proxiedCachedWindows)
 
         # Destroy windows which weren't reused
         # TODO Call close method of object window if present
         for n, w in proxiedCachedWindows.iteritems():
+            w.close()
             w.Destroy()
 
+
+    def close(self):
+        for w in self.winNameToObject.itervalues():
+            w.close()
 
 
     def getWindowForName(self, winName):
@@ -502,6 +485,10 @@ class WindowSashLayouter:
             return True
 
         return sashWin.isCollapsed()
+
+
+    def containsWindow(self, winName):
+        return self.winNameToSashWindow.has_key(winName)
 
 
     def expandWindow(self, winName, flag=True):
@@ -578,7 +565,7 @@ class WindowSashLayouter:
                 raise WinLayoutException(u"All except first window must relate "
                         u"to another window. %s is not first window" %
                         winProps["name"])
-            
+
             self.windowPropsList.append(winProps)
         else:
             relation = winProps.get("layout relation")
@@ -595,6 +582,32 @@ class WindowSashLayouter:
                 raise WinLayoutException((u"Window %s must relate to previously "
                             u"entered window") % winProps["name"])
         
+        
+    def preserveSashPositions(self):
+        """
+        Must be called after setWinPropsByConfig() or addWindowProps() to
+        modify the added window sash sizes before realize is called.
+        It uses self.winNameToWinProps to fill in sash sizes of current
+        layout if existing.
+        """
+        for newProps in self.windowPropsList:
+            winName = newProps.get("name")
+            currProps = self.winNameToWinProps.get(winName)
+            if currProps is None:
+                continue
+
+            self.updateWindowProps(currProps)
+        
+            if currProps.has_key("layout sash position") and \
+                    newProps.has_key("layout sash position"):
+                newProps["layout sash position"] = \
+                        currProps["layout sash position"]
+
+            if currProps.has_key("layout sash effective position") and \
+                    newProps.has_key("layout sash effective position"):
+                newProps["layout sash effective position"] = \
+                        currProps["layout sash effective position"]
+
 
     def getWinPropsForConfig(self):
         """
@@ -616,7 +629,6 @@ class WindowSashLayouter:
         self.windowPropsList = []
         for ps in cfstr.split(";"):
             winProps = stringToWinprops(ps)
-#             self.addWindowProps(winProps)
             self.addWindowProps(winProps)
 
 
@@ -638,6 +650,59 @@ def stringToWinprops(s):
         result[k] = v
         
     return result
+
+
+def calculateMainWindowLayoutCfString(config):
+    newLayoutMainTreePosition = config.getint("main",
+        "mainTree_position", 0)
+    newLayoutViewsTreePosition = config.getint("main",
+        "viewsTree_position", 0)
+    newLayoutDocStructurePosition = config.getint("main",
+        "docStructure_position", 0)
+    newLayoutTimeViewPosition = config.getint("main",
+        "timeView_position", 0)    
+
+    mainPos = {0:"left", 1:"right", 2:"above", 3:"below"}\
+            [newLayoutMainTreePosition]
+
+    # Set layout for main tree
+    layoutCfStr = "name:main area panel;"\
+            "layout relation:%s&layout relative to:main area panel&name:maintree&"\
+            "layout sash position:170&layout sash effective position:170" % \
+            mainPos
+
+    # Add layout for Views tree
+    if newLayoutViewsTreePosition > 0:
+        viewsPos = {1:"above", 2:"below", 3:"left", 4:"right"}\
+                [newLayoutViewsTreePosition]
+        layoutCfStr += (";layout relation:%s&layout relative to:maintree&name:viewstree&"
+                "layout sash position:60&layout sash effective position:60") % \
+                viewsPos
+
+    if newLayoutTimeViewPosition > 0:
+        timeViewPos = {1:"left", 2:"right", 3:"above", 4:"below"}\
+            [newLayoutTimeViewPosition]
+        layoutCfStr += ";layout relation:%s&layout relative to:main area panel&name:time view&"\
+                    "layout sash position:120&layout sash effective position:120" % \
+                    timeViewPos
+
+    # Layout for doc structure window
+    if newLayoutDocStructurePosition > 0:
+        docStructPos = {1:"left", 2:"right", 3:"above", 4:"below"}\
+            [newLayoutDocStructurePosition]
+        layoutCfStr += ";layout relation:%s&layout relative to:main area panel&name:doc structure&"\
+                    "layout sash position:120&layout sash effective position:120" % \
+                    docStructPos
+
+    # Layout for log window
+    layoutCfStr += ";layout relation:below&layout relative to:main area panel&name:log&"\
+                "layout sash position:1&layout sash effective position:120"
+                
+
+    return layoutCfStr
+
+
+
 
 
 class LayeredControlPresenter(object, MiscEventSourceMixin):
@@ -695,7 +760,7 @@ class LayeredControlPresenter(object, MiscEventSourceMixin):
     def setLayerVisible(self, vis, scName=""):
         if self.visible == vis:
             return
-        
+
         if vis:
             for n, c in self.subControls.iteritems():
                 c.setLayerVisible(n == self.lastVisibleCtrlName, n)
@@ -793,6 +858,7 @@ class LayeredControlPanel(wx.Panel, LayeredControlPresenter):
 
     def setTitle(self, shortTitle):
         LayeredControlPresenter.setTitle(self, shortTitle)
-        self.fireMiscEventProps({"changed presenter title": True})
+        self.fireMiscEventProps({"changed presenter title": True,
+                "title": shortTitle})
 
 

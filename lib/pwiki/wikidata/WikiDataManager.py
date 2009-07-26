@@ -21,7 +21,7 @@ from pwiki import ParseUtilities
 from pwiki.StringOps import mbcsDec, re_sub_escape, pathEnc, pathDec, \
         unescapeWithRe, strToBool
 from pwiki.DocPages import DocPage, WikiPage, FunctionalPage, AliasWikiPage
-# from pwiki.Versioning import VersionOverview
+# from ..timeView.Versioning import VersionOverview
 
 from pwiki.SearchAndReplace import SearchReplaceOperation
 
@@ -801,7 +801,7 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         # TODO: Caseless mode
 #         return not self.wikiData.isDefinedWikiWord(wikiWord)
-        return not self.wikiData.getUnAliasedWikiWord(wikiWord)
+        return not self.getUnAliasedWikiWord(wikiWord)
 
 
     def getNormcasedWikiWord(self, word):
@@ -979,18 +979,18 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         return self.wikiData.getDataBlockUnifNamesStartingWith(startingWith)
 
-    def retrieveDataBlock(self, unifName):
+    def retrieveDataBlock(self, unifName, default=""):
         """
         Retrieve data block as binary string.
         """
-        return self.wikiData.retrieveDataBlock(unifName)
+        return self.wikiData.retrieveDataBlock(unifName, default=default)
 
-    def retrieveDataBlockAsText(self, unifName):
+    def retrieveDataBlockAsText(self, unifName, default=u""):
         """
         Retrieve data block as unicode string (assuming it was encoded properly)
         and with normalized line-ending (Un*x-style).
         """
-        return self.wikiData.retrieveDataBlockAsText(unifName)
+        return self.wikiData.retrieveDataBlockAsText(unifName, default=default)
 
     def storeDataBlock(self, unifName, newdata, storeHint=None):
         """
@@ -1327,7 +1327,6 @@ class WikiDataManager(MiscEventSourceMixin):
         "relax" mode
         """
         if self.autoLinkRelaxInfo is None:
-
             langHelper = GetApp().createWikiLanguageHelper(
                     self.getWikiDefaultWikiLanguage())
 
@@ -1415,8 +1414,8 @@ class WikiDataManager(MiscEventSourceMixin):
 #         footnotesAsWws = self.getWikiConfig().getboolean(
 #                 "main", "footnotes_as_wikiwords", False)
 
-        autoLinkMode = strToBool(self.getGlobalPropertyValue(
-                u"auto_link", u"off").lower())
+        autoLinkMode = self.getGlobalPropertyValue(
+                u"auto_link", u"off").lower()
 
         paragraphMode = strToBool(self.getGlobalPropertyValue(
                 u"paragraph_mode", False))
@@ -1449,7 +1448,7 @@ class WikiDataManager(MiscEventSourceMixin):
 #                 footnotesAsWws=False,
                 wikiDocument=None,
                 basePage=None,
-                autoLinkMode=False,
+                autoLinkMode=u"off",
                 paragraphMode=False
                 )
 
@@ -1495,7 +1494,7 @@ class WikiDataManager(MiscEventSourceMixin):
     def getUnAliasedWikiWordOrAsIs(self, word):
         """
         return the real word if word is an alias.
-        returns word it self if word isn't an alias,
+        returns word itself if word isn't an alias,
         """
         result = self.getWikiData().getUnAliasedWikiWord(word)
 
@@ -1592,6 +1591,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 props["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(props)
             elif miscevt.has_key("updated wiki page"):
+                self.autoLinkRelaxInfo = None  # TODO Does this slow down?
                 props = miscevt.getProps().copy()
                 props["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(props)
@@ -1599,7 +1599,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 self.autoLinkRelaxInfo = None
             elif miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()
-                
+
                 props = miscevt.getProps().copy()
                 props["funcPage"] = miscevt.getSource()
                 self.fireMiscEventProps(props)
