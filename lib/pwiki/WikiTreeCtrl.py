@@ -1772,6 +1772,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 if selectNode:
                     self._unbindActivation()
                     self.SelectItem(currentNode)
+                    self.EnsureVisible(currentNode)
                     self._bindActivation()
                 
                 return True

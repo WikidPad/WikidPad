@@ -1,4 +1,11 @@
-﻿++ Change Log
+++ Change Log
+
+
+Jul. 26, 2009 (1.9rc07)
+
+    * Bug fixed: Copying to clipboard emptied clipboard if
+      no text selected
+
 
 
 Jun. 28, 2009 (1.9rc06)
@@ -206,7 +213,7 @@ Aug. 26, 2008 (1.9beta17, repository revision in "mbutscher" branch: 145)
     * Bug fixed: Linux: Problems with temporaries path for
       external plugins (thanks to jonjacksonuk and franxxk)
     * Linux standard encoding is now determined by
-      locale.getpreferredencoding() (thanks to Kamil Śliwak)
+      locale.getpreferredencoding() (thanks to Kamil Sliwak)
 
 
 

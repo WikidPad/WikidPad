@@ -471,10 +471,14 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.ReplaceSelection("")
 
     def Copy(self):
+        text = self.GetSelectedText()
+        if len(text) == 0:
+            return
+
         cbIcept = self.presenter.getMainControl().getClipboardInterceptor()        
         if cbIcept is not None:
             cbIcept.informCopyInWikidPad()
-        copyTextToClipboard(self.GetSelectedText())
+        copyTextToClipboard(text)
 
     def Paste(self):
         text = getTextFromClipboard()

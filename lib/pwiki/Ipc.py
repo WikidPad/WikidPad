@@ -125,7 +125,7 @@ def createCommandServer(appCookie):
 
 def startCommandServer():
     global theServer, theServerThread
-    
+
     theServerThread = threading.Thread(target = theServer.serve_forever)
     theServerThread.setDaemon(True)
     theServerThread.start()

@@ -233,6 +233,9 @@ class BasicDocPagePresenter(LayeredControlPresenter, MiscEventSourceMixin):
                 p2.update({"reloaded current doc page": True,
                         "reloaded current wiki page": True})
                 self.fireMiscEventProps(p2)
+
+                if forceTreeSyncFromRoot:
+                    self.getMainControl().findCurrentWordInTree()
                 return
 
             # trigger hook

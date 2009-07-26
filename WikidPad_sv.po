@@ -3,9 +3,9 @@
 # This file is distributed under the same license as wikidPad.
 msgid ""
 msgstr ""
-"Project-Id-Version: WikidPad 1.9rc05\n"
-"POT-Creation-Date: 2009-05-28 21:00\n"
-"PO-Revision-Date: 2009-05-29 21:29+0100\n"
+"Project-Id-Version: WikidPad 1.9rc06\n"
+"POT-Creation-Date: 2009-06-28 11:33\n"
+"PO-Revision-Date: 2009-06-28 19:53+0100\n"
 "Last-Translator: Stefan Berg <steffe62@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -273,7 +273,7 @@ msgstr "C"
 
 #: WikidPad.xrc:0
 msgid "C&ount Occurrences"
-msgstr "Räkna Förek&omster"
+msgstr "Räkna förek&omster"
 
 #: WikidPad.xrc:0
 msgid "Cancel"
@@ -281,7 +281,7 @@ msgstr "Avbryt"
 
 #: WikidPad.xrc:0
 msgid "Change these only if you know what you are doing!"
-msgstr "Ändra dessa endast om du vet vad du gör!"
+msgstr "Ändra detta endast om du vet vad du gör!"
 
 #: WikidPad.xrc:0
 msgid "Choose Wiki Word"
@@ -845,7 +845,7 @@ msgstr "Förgrundsfärg på markering:"
 
 #: WikidPad.xrc:0
 msgid "Set As Root"
-msgstr "Sätt som root"
+msgstr "Sätt som rot"
 
 #: WikidPad.xrc:0
 msgid "Set page &list"
@@ -1410,7 +1410,7 @@ msgstr "*%s sidor hänvisar till* %s\n"
 
 #: extensions\referrals.py:116
 msgid "*%s page(s) referred to by* %s\n"
-msgstr "*%s sidor hänvisade till av * %s\n"
+msgstr "*%s sidor är hänvisade till av * %s\n"
 
 #: lib\pwiki\AdditionalDialogs.py:189
 #: lib\pwiki\AdditionalDialogs.py:252
@@ -1873,26 +1873,26 @@ msgstr "XML-fil"
 msgid "XML files (*.xml)"
 msgstr "XML-filer (*.xml)"
 
-#: lib\pwiki\Exporters.py:1486
+#: lib\pwiki\Exporters.py:1487
 msgid "<pre>[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
 msgstr "<pre>[Tillåt evaluering av infogningsskript i \"Alternativ\", sidan \"Säkerhet\", alternativet \"Kör infogningsskript\"]</pre>"
 
-#: lib\pwiki\Exporters.py:2454
+#: lib\pwiki\Exporters.py:2455
 #: lib\pwiki\Importers.py:33
 msgid "Multipage text"
 msgstr "Multipage text"
 
-#: lib\pwiki\Exporters.py:2467
+#: lib\pwiki\Exporters.py:2468
 #: lib\pwiki\Importers.py:46
 msgid "Multipage files (*.mpt)"
 msgstr "Multipagefiler (*.mpt)"
 
-#: lib\pwiki\Exporters.py:2468
+#: lib\pwiki\Exporters.py:2469
 #: lib\pwiki\Importers.py:47
 msgid "Text file (*.txt)"
 msgstr "Textfil (*.txt)"
 
-#: lib\pwiki\Exporters.py:2596
+#: lib\pwiki\Exporters.py:2597
 msgid "No usable separator found"
 msgstr "Ingen användbar avdelare hittades"
 
@@ -1922,10 +1922,16 @@ msgid "Error initializing environment, couldn't locate global config directory"
 msgstr "Fel vid initiering av miljön, kunde inte hitta den globala konfigurationskatalogen"
 
 #: lib\pwiki\MainApp.py:232
-msgid "Invalid AppLock.lock file\n"
-msgstr "Ogiltig AppLock.lock-fil\n"
+msgid ""
+"Invalid AppLock.lock file.\n"
+"Ensure that WikidPad is not running,\n"
+"then delete file \"%s\" if present yet.\n"
+msgstr ""
+"Felaktig AppLock.lock-fil.\n"
+"Kontrollera att WikidPad inte körs,\n"
+"och radera sedan filen \"%s\" om den fortfarande finns kvar.\n"
 
-#: lib\pwiki\MainApp.py:420
+#: lib\pwiki\MainApp.py:424
 msgid ""
 "An error occurred during this session\n"
 "See file %s"
@@ -1933,8 +1939,8 @@ msgstr ""
 "Ett fel uppstod under denna session\n"
 "Se filen %s"
 
-#: lib\pwiki\MainApp.py:566
-#: lib\pwiki\MainApp.py:568
+#: lib\pwiki\MainApp.py:570
+#: lib\pwiki\MainApp.py:572
 msgid "Plugin options"
 msgstr "Insticksprogram"
 
@@ -2208,7 +2214,7 @@ msgid "E&xit"
 msgstr "Avsluta"
 
 #: lib\pwiki\PersonalWikiFrame.py:835
-#: lib\pwiki\PersonalWikiFrame.py:5204
+#: lib\pwiki\PersonalWikiFrame.py:5214
 msgid "Exit"
 msgstr "Avsluta"
 
@@ -2236,8 +2242,8 @@ msgstr "Hantera favoriter"
 #: lib\pwiki\PersonalWikiFrame.py:1067
 #: lib\pwiki\PersonalWikiFrame.py:1728
 #: lib\pwiki\PersonalWikiFrame.py:2214
-#: lib\pwiki\PersonalWikiFrame.py:4567
-#: lib\pwiki\PersonalWikiFrame.py:4832
+#: lib\pwiki\PersonalWikiFrame.py:4571
+#: lib\pwiki\PersonalWikiFrame.py:4837
 msgid "Error while starting new WikidPad instance"
 msgstr "Fel när en ny instans av WikidPad skulle startas"
 
@@ -2285,7 +2291,7 @@ msgid "Text copied to clipboard is also appended to this page"
 msgstr "Text kopierad till urklipp läggs även till på denna sida"
 
 #: lib\pwiki\PersonalWikiFrame.py:1204
-#: lib\pwiki\PersonalWikiFrame.py:5137
+#: lib\pwiki\PersonalWikiFrame.py:5147
 msgid "Clipboard Catcher at Cursor"
 msgstr "Urklippsfångare vid markör"
 
@@ -2294,7 +2300,7 @@ msgid "Text copied to clipboard is also added to cursor position"
 msgstr "Text kopierad till urklipp läggs även till vid markörens position"
 
 #: lib\pwiki\PersonalWikiFrame.py:1215
-#: lib\pwiki\PersonalWikiFrame.py:5141
+#: lib\pwiki\PersonalWikiFrame.py:5151
 msgid "Clipboard Catcher off"
 msgstr "Urklippsfångare av"
 
@@ -2970,7 +2976,7 @@ msgid ""
 "instance of WikidPad. Connect anyway (dangerous!)?"
 msgstr ""
 "Wikin '%s' används troligen av en annan\n"
-"instans av WikidPad. Fortsätta ändå (farligt!)?"
+"instans av WikidPad. Fortsätta ändå (riskabelt!)?"
 
 #: lib\pwiki\PersonalWikiFrame.py:2792
 msgid "Wiki already in use"
@@ -3222,70 +3228,74 @@ msgstr "Ordet finns redan"
 msgid "XML files (*.xml)|*.xml|All files (*.*)|*"
 msgstr "XML-filer (*.xml)|*.xml|Alla filer (*.*)|*"
 
-#: lib\pwiki\PersonalWikiFrame.py:4455
+#: lib\pwiki\PersonalWikiFrame.py:4432
+msgid "Error on export"
+msgstr "Fel vid export"
+
+#: lib\pwiki\PersonalWikiFrame.py:4459
 msgid "Choose a file to create URL for"
 msgstr "Välj en fil att skapa sökväg till"
 
-#: lib\pwiki\PersonalWikiFrame.py:4506
+#: lib\pwiki\PersonalWikiFrame.py:4510
 msgid "Are you sure you want to rebuild this wiki? You may want to backup your data first!"
 msgstr "Är du säker på att du vill återskapa wikin? Du bör ta backup på dina datafiler först!"
 
-#: lib\pwiki\PersonalWikiFrame.py:4508
+#: lib\pwiki\PersonalWikiFrame.py:4512
 msgid "Rebuild wiki"
 msgstr "Återskapa wiki"
 
-#: lib\pwiki\PersonalWikiFrame.py:4514
-#: lib\pwiki\PersonalWikiFrame.py:4515
+#: lib\pwiki\PersonalWikiFrame.py:4518
+#: lib\pwiki\PersonalWikiFrame.py:4519
 msgid "Rebuilding wiki"
 msgstr "Återskapar wiki"
 
-#: lib\pwiki\PersonalWikiFrame.py:4529
+#: lib\pwiki\PersonalWikiFrame.py:4533
 msgid "Error rebuilding wiki"
 msgstr "Fel då wikin skulle återskapas"
 
-#: lib\pwiki\PersonalWikiFrame.py:4577
+#: lib\pwiki\PersonalWikiFrame.py:4581
 msgid "This could overwrite pages in the database. Continue?"
 msgstr "Detta kan skriva över sidor i databasen. Fortsätta?"
 
-#: lib\pwiki\PersonalWikiFrame.py:4578
+#: lib\pwiki\PersonalWikiFrame.py:4582
 msgid "Import pagefiles"
 msgstr "Importera sidfiler"
 
-#: lib\pwiki\PersonalWikiFrame.py:4690
+#: lib\pwiki\PersonalWikiFrame.py:4694
 msgid "Unknown dialog type"
 msgstr "Okänd dialogtyp"
 
-#: lib\pwiki\PersonalWikiFrame.py:4703
+#: lib\pwiki\PersonalWikiFrame.py:4707
 msgid "Internal Error"
 msgstr "Internt fel"
 
-#: lib\pwiki\PersonalWikiFrame.py:4814
-#: lib\pwiki\PersonalWikiFrame.py:4822
-#: lib\pwiki\PersonalWikiFrame.py:4840
+#: lib\pwiki\PersonalWikiFrame.py:4819
+#: lib\pwiki\PersonalWikiFrame.py:4827
+#: lib\pwiki\PersonalWikiFrame.py:4845
 msgid "Choose a Wiki to open"
 msgstr "Välj wiki att öppna"
 
-#: lib\pwiki\PersonalWikiFrame.py:4850
+#: lib\pwiki\PersonalWikiFrame.py:4855
 msgid "Name for new wiki (must be in the form of a WikiWord):"
 msgstr "Namn på ny wiki (måste vara i WikiOrd-format):"
 
-#: lib\pwiki\PersonalWikiFrame.py:4851
+#: lib\pwiki\PersonalWikiFrame.py:4856
 msgid "Create New Wiki"
 msgstr "Skapa ny wiki"
 
-#: lib\pwiki\PersonalWikiFrame.py:4862
+#: lib\pwiki\PersonalWikiFrame.py:4867
 msgid "Directory to store new wiki"
 msgstr "Katalog för att lagra ny wiki"
 
-#: lib\pwiki\PersonalWikiFrame.py:4872
+#: lib\pwiki\PersonalWikiFrame.py:4877
 msgid "'%s' is an invalid wiki word. There must be no spaces and mixed caps"
 msgstr "'%s' är ett ogiltigt wikiord. Det måste vara blandat med versaler och får inte innehålla mellanslag."
 
-#: lib\pwiki\PersonalWikiFrame.py:5202
+#: lib\pwiki\PersonalWikiFrame.py:5212
 msgid "Restore"
 msgstr "Återskapa"
 
-#: lib\pwiki\PersonalWikiFrame.py:5203
+#: lib\pwiki\PersonalWikiFrame.py:5213
 msgid "Save"
 msgstr "Spara"
 
@@ -3813,7 +3823,11 @@ msgstr "Avgr&uppera alla"
 msgid "&Fold All"
 msgstr "Gruppera alla"
 
-#: lib\pwiki\WindowsHacks.py:620
+#: lib\pwiki\WindowsHacks.py:234
+msgid "Copying from %s to %s failed. SHFileOperation result no. %s"
+msgstr "Kopoering från %s till %s misslyckades. SHFileOperation resultat nr. %s"
+
+#: lib\pwiki\WindowsHacks.py:655
 msgid "Only a real wiki page can be a clipboard catcher"
 msgstr "Endast en riktig wikisida kan vara urklippsfångare"
 
@@ -3933,6 +3947,8 @@ msgstr "Du kan inte radera wikins rotnod"
 msgid "Wiki page not found for word: %s"
 msgstr "Wikisida hittades inte för ordet: %s"
 
+#~ msgid "Invalid AppLock.lock file\n"
+#~ msgstr "Ogiltig AppLock.lock-fil\n"
 #~ msgid "\"&Anded\" regex"
 #~ msgstr "\"&AND\"-regex"
 #~ msgid "&Load"
