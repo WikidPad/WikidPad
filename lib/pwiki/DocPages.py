@@ -966,8 +966,8 @@ class WikiPage(AbstractWikiPage):
                 from .timeView.Versioning import VersionOverview
 
                 versionOverview = VersionOverview(self.getWikiDocument(),
-                        self.getUnifiedPageName())
-    
+                        self)
+
                 if versionOverview.isNotInDatabase():
                     self.versionOverview = None
                 else:
