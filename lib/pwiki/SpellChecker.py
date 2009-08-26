@@ -157,6 +157,12 @@ class SpellCheckerDialog(wx.Dialog):
 
         startWikiWord = self.mainControl.getWikiData().getAliasesWikiWord(
                 startWikiWord)
+                
+        if not self.mainControl.getWikiDocument().isDefinedWikiWord(
+                startWikiWord):
+            self._showInfo(_(u"Current page is not modified yet"))
+            return False
+
         self.currentDocPage = self.mainControl.getWikiDocument().getWikiPage(
                 startWikiWord)
 

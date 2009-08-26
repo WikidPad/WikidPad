@@ -577,12 +577,12 @@ class WikiDataManager(MiscEventSourceMixin):
 
     def isDefinedWikiWord(self, wikiWord):
         return self.wikiData.isDefinedWikiWord(wikiWord)
-        
+
         
     def isCreatableWikiWord(self, wikiWord):
         """
         Returns True if wikiWord can be created in the database. Does not
-        check against regular expression, but checks if word already
+        check against wiki language regular expression, but checks if word already
         exists or (if document is in caseless mode) if word with different
         case but otherwise the same already exists.
         If this returns False, self.getAliasesWikiWord(wikiWord) must be able to

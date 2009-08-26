@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WikidPad 1.9rc06\n"
-"POT-Creation-Date: 2009-06-28 11:33\n"
-"PO-Revision-Date: 2009-06-28 19:53+0100\n"
+"POT-Creation-Date: 2009-07-26 12:29\n"
+"PO-Revision-Date: 2009-08-08 20:31+0100\n"
 "Last-Translator: Stefan Berg <steffe62@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1181,31 +1181,31 @@ msgstr "Öppna wikiord"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1377
-#: lib\pwiki\WikiTxtCtrl.py:3144
+#: lib\pwiki\WikiTxtCtrl.py:3148
 msgid "Cut"
 msgstr "Klipp ut"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1386
-#: lib\pwiki\WikiTxtCtrl.py:3145
+#: lib\pwiki\WikiTxtCtrl.py:3149
 msgid "Copy"
 msgstr "Kopiera"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1401
-#: lib\pwiki\WikiTxtCtrl.py:3146
+#: lib\pwiki\WikiTxtCtrl.py:3150
 msgid "Paste"
 msgstr "Klistra in"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1409
-#: lib\pwiki\WikiTxtCtrl.py:3142
+#: lib\pwiki\WikiTxtCtrl.py:3146
 msgid "Undo"
 msgstr "Ångra"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1412
-#: lib\pwiki\WikiTxtCtrl.py:3143
+#: lib\pwiki\WikiTxtCtrl.py:3147
 msgid "Redo"
 msgstr "Gör om"
 
@@ -1216,7 +1216,7 @@ msgstr "Växla Red./Förh."
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1861
-#: lib\pwiki\WikiTxtCtrl.py:3147
+#: lib\pwiki\WikiTxtCtrl.py:3151
 msgid "Delete"
 msgstr "Radera"
 
@@ -1227,18 +1227,18 @@ msgstr "Titel:"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\SearchAndReplaceDialogs.py:1743
-#: lib\pwiki\WikiHtmlView.py:622
-#: lib\pwiki\WikiTxtCtrl.py:3151
+#: lib\pwiki\WikiHtmlView.py:626
+#: lib\pwiki\WikiTxtCtrl.py:3155
 msgid "Activate New Tab"
 msgstr "Aktivera ny flik"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\WikiTxtCtrl.py:3148
+#: lib\pwiki\WikiTxtCtrl.py:3152
 msgid "Select All"
 msgstr "Markera allt"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\WikiTxtCtrl.py:3156
+#: lib\pwiki\WikiTxtCtrl.py:3160
 msgid "Close Tab"
 msgstr "Stäng flik"
 
@@ -1530,41 +1530,41 @@ msgstr ""
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%c</code></td>\n"
 "        <td align=\"left\">Lokalt anpassad dag, datum och klockslag.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%d</code></td>\n"
-"        <td align=\"left\">Dag i månaden som decimaltal [01,31].</td></tr>\n"
+"        <td align=\"left\">Dag i månaden som tal [01,31].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%H</code></td>\n"
-"        <td align=\"left\">Timme (24-timmarsklocka) som decimaltal [00,23].</td></tr>\n"
+"        <td align=\"left\">Timme (24-timmarsklocka) som tal [00,23].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%I</code></td>\n"
-"        <td align=\"left\">Timme (12-timmarsklocka) som decimaltal [01,12].</td></tr>\n"
+"        <td align=\"left\">Timme (12-timmarsklocka) som tal [01,12].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%j</code></td>\n"
-"        <td align=\"left\">Dag på året som decimaltal [001,366].</td></tr>\n"
+"        <td align=\"left\">Dag på året som tal [001,366].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%m</code></td>\n"
-"        <td align=\"left\">Månad som decimaltal [01,12].</td></tr>\n"
+"        <td align=\"left\">Månad som tal [01,12].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%M</code></td>\n"
-"        <td align=\"left\">Minuter som decimaltal [00,59].</td></tr>\n"
+"        <td align=\"left\">Minuter som tal [00,59].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%p</code></td>\n"
 "        <td align=\"left\">Lokalt värde med antingen AM eller PM.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%S</code></td>\n"
-"        <td align=\"left\">Sekunder som decimaltal [00,61].</td></tr>\n"
+"        <td align=\"left\">Sekunder som tal [00,61].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%u</code></td>\n"
-"        <td align=\"left\">Veckodag som decimaltal [1(måndag),7].</td></tr>\n"
+"        <td align=\"left\">Veckodag som tal [1(måndag),7].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%U</code></td>\n"
 "        <td align=\"left\">Veckonummer under året (söndag som veckans första\n"
-"                dag) som decimaltal [00,53].  Alla dagar på nytt år\n"
+"                dag) som tal [00,53].  Alla dagar på nytt år\n"
 "                före den första söndagen betraktas som veckonummer 0.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%w</code></td>\n"
-"        <td align=\"left\">Veckodag som decimaltal [0(söndag),6].</td></tr>\n"
+"        <td align=\"left\">Veckodag som tal [0(söndag),6].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%W</code></td>\n"
 "        <td align=\"left\">Veckonummer under året (måndag som veckans första\n"
-"                dag) som decimaltal [00,53].  Alla dagar på nytt år\n"
+"                dag) som tal [00,53].  Alla dagar på nytt år\n"
 "                före den första måndagen betraktas som veckonummer 0.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%x</code></td>\n"
 "        <td align=\"left\">Lokalt anpassat datum.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%X</code></td>\n"
 "        <td align=\"left\">Lokalt anpassat klockslag.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%y</code></td>\n"
-"        <td align=\"left\">År utan århundrade som decimaltal [00,99].</td></tr>\n"
+"        <td align=\"left\">År utan århundrade som tal [00,99].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%Y</code></td>\n"
-"        <td align=\"left\">År med århundrade som decimaltal.</td></tr>\n"
+"        <td align=\"left\">År med århundrade som tal.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%Z</code></td>\n"
 "        <td align=\"left\">Tidszon (inga tecken visas om det inte finns någon tidszon).</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%%</code></td>\n"
@@ -1786,7 +1786,7 @@ msgstr ""
 "    --export-type <type>: tagg på exporttypen\n"
 "    --export-dest <sökväg>: Sökväg till målkatalogen för export\n"
 "    --export-compfn: Använd kompatibla filnamn vid export\n"
-"    --rebuild: Återskapa wikidatabasen\n"
+"    --rebuild: Bygg om wikidatabasen\n"
 
 #: lib\pwiki\CmdLineAction.py:190
 msgid "Usage information"
@@ -1812,16 +1812,16 @@ msgstr "Otydligt alternativ %s:%s"
 msgid "'%s' is an invalid wiki word."
 msgstr "'%s' är ett ogiltigt wikiord."
 
-#: lib\pwiki\DocPagePresenter.py:249
+#: lib\pwiki\DocPagePresenter.py:252
 msgid "Opened wiki word '%s'"
 msgstr "Öppnade wikiordet '%s'"
 
-#: lib\pwiki\DocPagePresenter.py:259
+#: lib\pwiki\DocPagePresenter.py:262
 msgid "Wiki page not found, a new page will be created"
 msgstr "Wikisidan hittades inte, en ny sida skapas"
 
-#: lib\pwiki\DocPagePresenter.py:420
-#: lib\pwiki\DocPagePresenter.py:421
+#: lib\pwiki\DocPagePresenter.py:423
+#: lib\pwiki\DocPagePresenter.py:424
 msgid "History"
 msgstr "Historik"
 
@@ -1945,12 +1945,12 @@ msgid "Plugin options"
 msgstr "Insticksprogram"
 
 #: lib\pwiki\MainAreaPanel.py:353
-#: lib\pwiki\WikiTxtCtrl.py:1821
+#: lib\pwiki\WikiTxtCtrl.py:1825
 msgid "This can only be done for the page of a wiki word"
 msgstr "Detta kan bara utföras på en sida i ett wikiord"
 
 #: lib\pwiki\MainAreaPanel.py:354
-#: lib\pwiki\WikiTxtCtrl.py:1822
+#: lib\pwiki\WikiTxtCtrl.py:1826
 msgid "Not a wiki page"
 msgstr "Inte en wikisida"
 
@@ -2155,11 +2155,11 @@ msgstr "Visa utskriftsdialog"
 
 #: lib\pwiki\PersonalWikiFrame.py:769
 msgid "&Rebuild Wiki"
-msgstr "Åte&rskapa wiki"
+msgstr "Bygg om wiki"
 
 #: lib\pwiki\PersonalWikiFrame.py:770
 msgid "Rebuild this wiki"
-msgstr "Återskapa denna wiki"
+msgstr "Bygg om denna wiki"
 
 #: lib\pwiki\PersonalWikiFrame.py:780
 msgid "Reconnect"
@@ -2757,7 +2757,7 @@ msgstr "R&edigerare"
 
 #: lib\pwiki\PersonalWikiFrame.py:1762
 msgid "&Folding"
-msgstr "Gruppering"
+msgstr "Vikning"
 
 #: lib\pwiki\PersonalWikiFrame.py:1763
 msgid "&View"
@@ -3238,20 +3238,20 @@ msgstr "Välj en fil att skapa sökväg till"
 
 #: lib\pwiki\PersonalWikiFrame.py:4510
 msgid "Are you sure you want to rebuild this wiki? You may want to backup your data first!"
-msgstr "Är du säker på att du vill återskapa wikin? Du bör ta backup på dina datafiler först!"
+msgstr "Är du säker på att du vill bygga om denna wiki? Du bör ta backup på dina datafiler först!"
 
 #: lib\pwiki\PersonalWikiFrame.py:4512
 msgid "Rebuild wiki"
-msgstr "Återskapa wiki"
+msgstr "Bygg om wiki"
 
 #: lib\pwiki\PersonalWikiFrame.py:4518
 #: lib\pwiki\PersonalWikiFrame.py:4519
 msgid "Rebuilding wiki"
-msgstr "Återskapar wiki"
+msgstr "Bygger om wiki"
 
 #: lib\pwiki\PersonalWikiFrame.py:4533
 msgid "Error rebuilding wiki"
-msgstr "Fel då wikin skulle återskapas"
+msgstr "Fel då wikin skulle byggas om"
 
 #: lib\pwiki\PersonalWikiFrame.py:4581
 msgid "This could overwrite pages in the database. Continue?"
@@ -3694,14 +3694,14 @@ msgstr ""
 "%s"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1742
-#: lib\pwiki\WikiHtmlView.py:621
-#: lib\pwiki\WikiTxtCtrl.py:3150
+#: lib\pwiki\WikiHtmlView.py:625
+#: lib\pwiki\WikiTxtCtrl.py:3154
 msgid "Activate"
 msgstr "Aktivera"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1744
-#: lib\pwiki\WikiHtmlView.py:623
-#: lib\pwiki\WikiTxtCtrl.py:3152
+#: lib\pwiki\WikiHtmlView.py:627
+#: lib\pwiki\WikiTxtCtrl.py:3156
 msgid "Activate New Tab Backgrd."
 msgstr "Aktivera ny flik i bakgrund"
 
@@ -3775,7 +3775,7 @@ msgstr "Lägg till wikiord först"
 msgid "Incremental search (ENTER/ESC to finish)"
 msgstr "Inkrementell sökning (ENTER/ESC för att avsluta)"
 
-#: lib\pwiki\WikiTxtCtrl.py:1844
+#: lib\pwiki\WikiTxtCtrl.py:1848
 msgid ""
 "Set in menu \"Wiki\", item \"Options...\", options page \"Security\", \n"
 "item \"Script security\" an appropriate value to execute a script."
@@ -3783,11 +3783,11 @@ msgstr ""
 "Ange i \"Wiki/Alternativ...\", inställningssidan \"Säkerhet\", \n"
 "vid \"Skriptsäkerhet\", ett lämpligt alternativ för att köra skriptet."
 
-#: lib\pwiki\WikiTxtCtrl.py:1847
+#: lib\pwiki\WikiTxtCtrl.py:1851
 msgid "Script execution disabled"
 msgstr "Körning av skript avaktiverad"
 
-#: lib\pwiki\WikiTxtCtrl.py:1910
+#: lib\pwiki\WikiTxtCtrl.py:1914
 msgid ""
 "\n"
 "Exception: %s"
@@ -3795,33 +3795,49 @@ msgstr ""
 "\n"
 "Undantag: %s"
 
-#: lib\pwiki\WikiTxtCtrl.py:2825
+#: lib\pwiki\WikiTxtCtrl.py:2829
 msgid "Line: %d Col: %d Pos: %d"
 msgstr "Rad: %d Kol: %d Pos: %d"
 
-#: lib\pwiki\WikiTxtCtrl.py:2930
+#: lib\pwiki\WikiTxtCtrl.py:2934
 msgid "Couldn't copy file"
 msgstr "Kunde inte kopiera fil"
 
-#: lib\pwiki\WikiTxtCtrl.py:3154
+#: lib\pwiki\WikiTxtCtrl.py:3158
 msgid "Copy anchor URL to clipboard"
 msgstr "Kopiera sökväg till urklipp"
 
-#: lib\pwiki\WikiTxtCtrl.py:3158
+#: lib\pwiki\WikiTxtCtrl.py:3162
 msgid "Show folding"
-msgstr "Visa gruppering"
+msgstr "Visa vikning"
 
-#: lib\pwiki\WikiTxtCtrl.py:3159
+#: lib\pwiki\WikiTxtCtrl.py:3163
+msgid "Show folding marks and allow folding"
+msgstr "Visa vikningsmarkeringar och tillåt vikning"
+
+#: lib\pwiki\WikiTxtCtrl.py:3164
 msgid "&Toggle current folding"
-msgstr "Växla ak&tuell gruppering"
+msgstr "Växla ak&tuell vikning"
 
-#: lib\pwiki\WikiTxtCtrl.py:3160
+#: lib\pwiki\WikiTxtCtrl.py:3165
+msgid "Toggle folding of the current line"
+msgstr "Växla vikning på den aktuella raden"
+
+#: lib\pwiki\WikiTxtCtrl.py:3166
 msgid "&Unfold All"
-msgstr "Avgr&uppera alla"
+msgstr "Vik ut allt"
 
-#: lib\pwiki\WikiTxtCtrl.py:3161
+#: lib\pwiki\WikiTxtCtrl.py:3167
+msgid "Unfold everything in current editor"
+msgstr "Vik ut allt i aktuell redigerare"
+
+#: lib\pwiki\WikiTxtCtrl.py:3168
 msgid "&Fold All"
-msgstr "Gruppera alla"
+msgstr "Vik in allt"
+
+#: lib\pwiki\WikiTxtCtrl.py:3169
+msgid "Fold everything in current editor"
+msgstr "Vik in allt i aktuell redigerare"
 
 #: lib\pwiki\WindowsHacks.py:234
 msgid "Copying from %s to %s failed. SHFileOperation result no. %s"

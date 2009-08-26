@@ -1,4 +1,6 @@
 #!/bin/python
+## import hotshot
+## _prof = hotshot.Profile("hotshot.prf")
 
 import sys, os, traceback, os.path, glob, shutil   # , gettext
 os.stat_float_times(True)
@@ -157,7 +159,9 @@ exception = None
 
 try:
     app = App(0)
+##     _prof.start()
     app.MainLoop()
+##     _prof.stop()
     srePersistent.saveCodeCache()
     
 except Exception, e:

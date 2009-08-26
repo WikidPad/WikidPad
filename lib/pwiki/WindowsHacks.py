@@ -557,7 +557,6 @@ class WinProcInterceptCollection:
         This default function reacts only on a WM_DESTROY message and
         stops interception. All messages are sent to the original WinProc
         """
-        
         if params.uMsg == WM_DESTROY and params.hWnd == self.hWnd:
             self.stop()
 

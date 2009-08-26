@@ -1,4 +1,15 @@
-++ Change Log
+﻿++ Change Log
+
+
+Aug. 26, 2009 (1.9rc08)
+
+    * Use less CPU time if not active application
+    
+    * Bug fixed: Failure if non-existing wiki words given in
+      page list construction
+    * Bug fixed: Failure if starting spell check on a not yet
+      saved page
+
 
 
 Jul. 26, 2009 (1.9rc07)
@@ -79,7 +90,7 @@ Nov. 27, 2008 (1.9beta20, repository revision in "mbutscher" branch: 163)
 
     * Option to automatically search text selected in preview when
       switching to editor for better synchronization (thanks to
-      François Savard).
+      FranÃ§ois Savard).
       See OptionsDialog#*Synchronize# editor# by# preview# selection*
     * Dialog to go to parents/children has now "open in new tab" button.
     * Several presentation options for GraphViz structure plugin.

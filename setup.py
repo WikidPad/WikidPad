@@ -46,10 +46,10 @@ setup(
           ('extensions', glob('extensions/*.*')),
           ('', ['sqlite3.dll', 'WikidPad.xrc', 'readme_Wic.txt', 'gadfly.zip',
               'langlist.txt', 'appbase.css'] + glob('WikidPad_*.po')),
-          ('WikidPadHelp', glob(os.path.join('WikidPadHelpOG-static', '*.wiki'))),
+          ('WikidPadHelp', glob(os.path.join('WikidPadHelp', '*.wiki'))),
           (os.path.join('WikidPadHelp', 'data'),
-              glob(os.path.join('WikidPadHelpOG-static', 'data', '*.*'))),
+              glob(os.path.join('WikidPadHelp', 'data', '*.*'))),
           (os.path.join('WikidPadHelp', 'files'),
-              glob(os.path.join('WikidPadHelpOG-static', 'files', '*.*'))),
+              glob(os.path.join('WikidPadHelp', 'files', '*.*'))),
           ('export', [])]
 )

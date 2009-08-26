@@ -235,7 +235,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # defaults
         self.wikiData = None
         self.wikiDataManager = None
-        self.lastCursorPositionInPage = {}
         self.wikiHistory = []
         self.findDlg = None  # Stores find&replace or wiki search dialog, if present
         self.spellChkDlg = None  # Stores spell check dialog, if present
@@ -250,8 +249,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.textBlocksActivation = IdRecycler() # See self.fillTextBlocksMenu()
 
         self.favoriteWikisMenu = None
-        self.favoriteWikisActivation = IdRecycler() 
-
+        self.favoriteWikisActivation = IdRecycler()
+        
         self.pluginsMenu = None
         self.fastSearchField = None   # Text field in toolbar
         
@@ -415,7 +414,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.Show(True)
 
-        if self.lowResources and self.IsIconized():
+        if self.IsIconized():
             self.resourceSleep()
 
         EVT_REMOTE_COMMAND(self, self.OnRemoteCommand)
@@ -2086,6 +2085,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # Register the App IDLE handler
         wx.EVT_IDLE(self, self.OnIdle)
 
+        wx.EVT_ACTIVATE(self, self.OnActivate)
+
         # Register the App close handler
         wx.EVT_CLOSE(self, self.OnCloseButton)
 
@@ -2398,27 +2399,28 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return  # Already in sleep mode
         self.sleepMode = True
         
-        toolBar = self.GetToolBar()
-        if toolBar is not None:
-            toolBar.Destroy()
-
-        self.SetMenuBar(None)
-        self.mainmenu.Destroy()
-
-        # Set menu/menu items to None
-        self.mainmenu = None
-        self.recentWikisMenu = None
-        self.textBlocksMenu = None
-        self.favoriteWikisMenu = None
-        # self.showOnTrayMenuItem = None
-
-        # TODO Clear cache only if exactly one window uses centralized iconLookupCache
-        #      Maybe weak references?
-#         for k in self.iconLookupCache.keys():
-#             self.iconLookupCache[k] = (self.iconLookupCache[k][0], None)
-##      Even worse:  wxGetApp().getIconCache().clearIconBitmaps()
-
-        gc.collect()
+        if self.lowResources:        
+            toolBar = self.GetToolBar()
+            if toolBar is not None:
+                toolBar.Destroy()
+    
+            self.SetMenuBar(None)
+            self.mainmenu.Destroy()
+    
+            # Set menu/menu items to None
+            self.mainmenu = None
+            self.recentWikisMenu = None
+            self.textBlocksMenu = None
+            self.favoriteWikisMenu = None
+            # self.showOnTrayMenuItem = None
+    
+            # TODO Clear cache only if exactly one window uses centralized iconLookupCache
+            #      Maybe weak references?
+    #         for k in self.iconLookupCache.keys():
+    #             self.iconLookupCache[k] = (self.iconLookupCache[k][0], None)
+    ##      Even worse:  wxGetApp().getIconCache().clearIconBitmaps()
+    
+            gc.collect()
 
 
     def resourceWakeup(self):
@@ -2428,11 +2430,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if not self.sleepMode:
             return  # Already in wake mode
         self.sleepMode = False
-
-        self.buildMainMenu()
-        self.setShowToolbar(self.getConfig().getboolean("main", "toolbar_show",
-                True))
-        self.setShowOnTray()
+        
+        if self.lowResources:        
+            self.buildMainMenu()
+            self.setShowToolbar(self.getConfig().getboolean("main", "toolbar_show",
+                    True))
+            self.setShowOnTray()
 
 
     def testIt(self):
@@ -2465,11 +2468,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnIconize(self, evt):
-        if self.lowResources:
-            if self.IsIconized():
-                self.resourceSleep()
-            else:
-                self.resourceWakeup()
+        if self.IsIconized():
+            self.resourceSleep()
+        else:
+            self.resourceWakeup()
 
         if self.configuration.getboolean("main", "showontray"):
             self.Show(not self.IsIconized())
@@ -2478,8 +2480,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnMaximize(self, evt):
-        if self.lowResources:
-            self.resourceWakeup()
+        self.resourceWakeup()
 
         evt.Skip()
 
@@ -4910,9 +4911,17 @@ These are your default global settings.
     def OnSize(self, evt):
         if self.windowLayouter is not None:
             self.windowLayouter.layout()
-            if self.lowResources:
-                self.resourceWakeup()
+            self.resourceWakeup()
 
+
+    def OnActivate(self, evt):
+        evt.Skip()
+        if evt.GetActive():
+            wx.UpdateUIEvent.SetUpdateInterval(0)
+#             wx.IdleEvent.SetMode(wx.IDLE_PROCESS_SPECIFIED)
+        else:
+            wx.UpdateUIEvent.SetUpdateInterval(-1)
+#             wx.IdleEvent.SetMode(wx.IDLE_PROCESS_ALL)
 
 
     def isReadOnlyWiki(self):

@@ -687,11 +687,13 @@ class ListWikiPagesOperation:
         Return all words used as roots of subtrees (if any) for better tree sorting
         It must be called after beginWikiSearch() and before corresponding
         endWikiSearch() call.
+        Only valid wiki words are returned.
         """
         if self.searchOpTree is None:
             return []
             
-        return self.searchOpTree.getRootWords()
+        return [w for w in self.searchOpTree.getRootWords() 
+                if self.wikiDocument.isDefinedWikiWord(w)]
 
 
     def applyOrdering(self, wordSet, coll):
