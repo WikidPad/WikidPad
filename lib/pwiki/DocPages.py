@@ -2,6 +2,8 @@ from __future__ import with_statement
 
 import os.path, re, struct, time, traceback, threading
 
+from .rtlibRepl import minidom
+
 import wx
 
 from MiscEvent import MiscEventSourceMixin
@@ -18,9 +20,9 @@ from Utilities import DUMBTHREADSTOP, FunctionThreadStop, TimeoutRLock, \
 from WikiPyparsing import buildSyntaxNode
 import ParseUtilities
 
-from Serialization import SerializeStream
+import Serialization
+# from Serialization import SerializeStream
 
-from wx import GetApp
 
 
 # Dummy
@@ -444,6 +446,14 @@ class DataCarryingPage(DocPage):
 
     def checkFileSignatureAndMarkDirty(self, fireEvent=True):
         return True
+    
+    
+    def markTextChanged(self):
+        """
+        Mark text as changed and cached pageAst as invalid.
+        Mainly called when an external file change is detected.
+        """
+        self.liveTextPlaceHold = object()
 
 
 class AbstractWikiPage(DataCarryingPage):
@@ -526,6 +536,10 @@ class AbstractWikiPage(DataCarryingPage):
 
 
     def getTimestamps(self):
+        """
+        Return tuple (<last mod. time>, <creation time>, <last visit time>)
+        of this page.
+        """
         if self.modified is None:
             self.modified, self.created, self.visited = \
                     self.getWikiData().getTimestamps(self.wikiWord)
@@ -715,7 +729,7 @@ class AbstractWikiPage(DataCarryingPage):
             paragraphMode = strToBool(self.getPropertyOrGlobal(
                     u"paragraph_mode"), False)
                     
-            langHelper = GetApp().createWikiLanguageHelper(
+            langHelper = wx.GetApp().createWikiLanguageHelper(
                     self.wikiDocument.getWikiDefaultWikiLanguage())
 
             wikiLanguageDetails = langHelper.createWikiLanguageDetails(
@@ -904,7 +918,7 @@ class AbstractWikiPage(DataCarryingPage):
                 # Version 0
                 return struct.unpack("iiiii", datablock) + (None,)
             else:
-                ss = SerializeStream(stringBuf=datablock)
+                ss = Serialization.SerializeStream(stringBuf=datablock)
                 rcVer = ss.serUint8(1)
                 if rcVer > 1:
                     return AbstractWikiPage._DEFAULT_PRESENTATION
@@ -1022,7 +1036,7 @@ class WikiPage(AbstractWikiPage):
                         struct.pack("iiiii", *pt[:5]))
             else:
                 # Write it in new version 1
-                ss = SerializeStream(stringBuf=True, readMode=False)
+                ss = Serialization.SerializeStream(stringBuf=True, readMode=False)
                 ss.serUint8(1)  # Read compatibility version
                 ss.serUint8(1)  # Real version
                 # First five numbers
@@ -1223,6 +1237,7 @@ class WikiPage(AbstractWikiPage):
                 wikiData.setMetaDataState(word,
                         Consts.WIKIWORDMETADATA_STATE_DIRTY)
                 wikiData.refreshFileSignatureForWord(word)
+                self.markTextChanged()
             finally:
                 if proxyAccessLock is not None:
                     proxyAccessLock.release()
@@ -1747,6 +1762,64 @@ class WikiPage(AbstractWikiPage):
         return result
 
 
+    def getDependentDataBlocks(self):
+        vo = self.getExistingVersionOverview()
+        
+        if vo is None:
+            return []
+        
+        return vo.getDependentDataBlocks()
+        
+
+    def serializeOverviewToXml(self, xmlNode, xmlDoc):
+        """
+        Create XML node to contain overview information (neither content nor
+        version overview) about this object.
+        """
+#         Serialization.serToXmlUnicode(xmlNode, xmlDoc, u"unifiedName",
+#                 self.getUnifiedPageName(), replace=True)
+
+        timeStamps = self.getTimestamps()[:3]
+
+        # Do not use StringOps.strftimeUB here as its output
+        # relates to local time, but we need UTC here.
+        timeStrings = [unicode(time.strftime(
+                "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
+                for ts in timeStamps]
+        
+        tsNode = Serialization.findOrAppendXmlElementFlat(xmlNode, xmlDoc,
+            u"timeStamps")
+
+        tsNode.setAttribute(u"modificationTime", timeStrings[0])
+        tsNode.setAttribute(u"creationTime", timeStrings[1])
+        tsNode.setAttribute(u"visitTime", timeStrings[2])
+
+
+    def serializeOverviewFromXml(self, xmlNode):
+        """
+        Set object state from data in xmlNode
+        """
+        tsNode = Serialization.findXmlElementFlat(xmlNode, 
+            u"timeStamps", excOnFail=False)
+        
+        if tsNode is not None:
+            timeStrings = [u""] * 3
+            timeStrings[0] = tsNode.getAttribute(u"modificationTime")
+            timeStrings[1] = tsNode.getAttribute(u"creationTime")
+            timeStrings[2] = tsNode.getAttribute(u"visitTime")
+
+        timeStamps = []
+        for tstr in timeStrings:
+            if tstr == u"":
+                timeStamps.append(0.0)
+            else:
+                timeStamps.append(timegm(time.strptime(tstr,
+                        "%Y-%m-%d/%H:%M:%S")))
+
+        self.setTimestamps(timeStamps)
+
+        self.versionNumber = serFromXmlInt(xmlNode, u"versionNumber")
+
 
 
 
@@ -1798,7 +1871,7 @@ class FunctionalPage(DataCarryingPage):
 
 
     def _loadGlobalPage(self, subtag):
-        tbLoc = os.path.join(GetApp().getGlobalConfigSubDir(),
+        tbLoc = os.path.join(wx.GetApp().getGlobalConfigSubDir(),
                 "[%s].wiki" % subtag)
         try:
             tbContent = loadEntireTxtFile(tbLoc)
@@ -1881,7 +1954,7 @@ class FunctionalPage(DataCarryingPage):
 
 
     def _saveGlobalPage(self, text, subtag):
-        tbLoc = os.path.join(GetApp().getGlobalConfigSubDir(),
+        tbLoc = os.path.join(wx.GetApp().getGlobalConfigSubDir(),
                 "[%s].wiki" % subtag)
 
         writeEntireFile(tbLoc, text, True)
@@ -1946,7 +2019,7 @@ class FunctionalPage(DataCarryingPage):
                 if self.funcTag.startswith(u"wiki/"):
                     evtSource = self
                 else:
-                    evtSource = GetApp()
+                    evtSource = wx.GetApp()
     
                 if self.funcTag in (u"global/TextBlocks", u"wiki/TextBlocks"):
                     # The text blocks for the text blocks submenu was updated
@@ -1988,14 +2061,11 @@ class FunctionalPage(DataCarryingPage):
     def setPresentation(self, data, startPos):
         """Dummy"""
         pass
+        
 
 
 
 # Two search helpers for WikiPage.getChildRelationshipsTreeOrder
-
-def _relationKey(a):
-    return a[2]
-
 
 def _floatToCompInt(f):
     if f > 0:

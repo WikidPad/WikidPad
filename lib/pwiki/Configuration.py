@@ -728,6 +728,7 @@ GLOBALDEFAULTS = {
     ("main", "search_wiki_context_before"): "20", # No. of context characters before
     ("main", "search_wiki_context_after"): "30",  # and after a found pattern
     ("main", "search_wiki_count_occurrences"): "True", # Show for each page the number of found matches
+    ("main", "search_wiki_max_count_occurrences"): "100", # Stop after how many occurrences on a page
 
     ("main", "fastSearch_sizeX"): "200",  # Size of the fastsearch popup frame
     ("main", "fastSearch_sizeY"): "400",
@@ -747,6 +748,7 @@ GLOBALDEFAULTS = {
     ("main", "frame_stayOnTop"): "False",  # Should frame stay on top of all other windows?
     ("main", "showontray"): "0",
     ("main", "minimize_on_closeButton"): "False", # Minimize if the close button ("X") is pressed  
+    ("main", "mainTabs_switchMruOrder"): "True", # Switch between tabs in most-recently used order
     ("main", "strftime"): u"%x %I:%M %p",  # time format when inserting time in a page
     ("main", "pagestatus_timeformat"): u"%x %I:%M %p",  # time format for the page status field in status bar
     ("main", "recent_time_formats"): u"%x %I:%M %p;%m/%d/%y;%d.%m.%y;%d.%m.%Y;%a %Y-%m-%d",
@@ -804,6 +806,9 @@ WIKIDEFAULTS = {
 
     ("main", "versioning_storageLocation"): "0",  # Where to store versioning data? 0: Intern in database;
             # 1: extern in files (not supported for Compact Sqlite DB)
+
+    ("main", "versioning_completeSteps"): u"10",  # How many versions before next version is saved complete
+            # instead of reverse differential? 0: Always revdiff, 1: Always complete, 2: Every second v. is complete ...
 
     # For file storage (esp. identity check)
     ("main", "fileStorage_identity_modDateMustMatch"): "False",  # Modification date must match for file to be identical

@@ -303,9 +303,11 @@ WikidPadHelp/data/RestartWikidPad.wiki -text
 WikidPadHelp/data/SEARCH_VIEWS.grl -text
 WikidPadHelp/data/SETTINGS.grl -text
 WikidPadHelp/data/ScratchPad.wiki -text
+WikidPadHelp/data/SearchingTheWiki%2FBooleanRegex.wiki -text
 WikidPadHelp/data/SearchingTheWiki.wiki -text
 WikidPadHelp/data/ShortHintAttribute.wiki -text
 WikidPadHelp/data/SpellChecking.wiki -text
+WikidPadHelp/data/Subpages.wiki -text
 WikidPadHelp/data/SystemInfoTemplate.wiki -text
 WikidPadHelp/data/TMPTABLE.grl -text
 WikidPadHelp/data/TODOS.grl -text
@@ -637,6 +639,7 @@ lib/pwiki/PluginManager.py -text
 lib/pwiki/Printing.py -text
 lib/pwiki/PropertyHandling.py -text
 lib/pwiki/SearchAndReplace.py -text
+lib/pwiki/SearchAndReplaceBoolLang.py -text
 lib/pwiki/SearchAndReplaceDialogs.py -text
 lib/pwiki/Serialization.py -text
 lib/pwiki/SpellChecker.py -text
@@ -660,6 +663,9 @@ lib/pwiki/customtreectrl.py -text
 lib/pwiki/macurl2path_red.py -text
 lib/pwiki/nturl2path_red.py -text
 lib/pwiki/rtlibRepl/__init__.py -text
+lib/pwiki/rtlibRepl/expatbuilder.py -text
+lib/pwiki/rtlibRepl/minicompat.py -text
+lib/pwiki/rtlibRepl/minidom.py -text
 lib/pwiki/rtlibRepl/re.py -text
 lib/pwiki/rtlibRepl/sre_compile.py -text
 lib/pwiki/rtlibRepl/sre_constants.py -text

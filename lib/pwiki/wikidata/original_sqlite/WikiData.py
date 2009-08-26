@@ -1004,7 +1004,7 @@ class WikiData:
 
     getAllDefinedWikiPageNames = getAllDefinedContentNames
 
-    
+
     def refreshDefinedContentNames(self, deleteFully=False):
         """
         Refreshes the internal list of defined pages which
@@ -1019,6 +1019,9 @@ class WikiData:
         information (e.g. relations).
 
         The self.cachedContentNames is invalidated.
+        
+        deleteFully -- if true, all cache information related to a no
+            longer existing word is also deleted
         """
         diskFiles = frozenset(self._getAllWikiFileNamesFromDisk())
         dbFiles = frozenset(self._getAllWikiFileNamesFromDb())
@@ -1946,8 +1949,8 @@ class WikiData:
         """
         Return a guess of the store hint used to store the block last time.
         Returns one of the DATABLOCK_STOREHINT_* constants from Consts.py.
-        The function is allowed to return the wrong value (therefore a guess)
-        and returns a value even for non-existing data blocks.
+        The function is allowed to return the wrong value (therefore a guess).
+        It returns None for non-existing data blocks.
         """
         try:
             datablock = self.connWrap.execSqlQuerySingleItem(
@@ -1957,14 +1960,22 @@ class WikiData:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
+        if datablock is not None:
+            return Consts.DATABLOCK_STOREHINT_INTERN
+
         try:
-            if datablock is not None:
-                return Consts.DATABLOCK_STOREHINT_INTERN
-            else:
-                return Consts.DATABLOCK_STOREHINT_EXTERN
+            datablock = self.connWrap.execSqlQuerySingleItem(
+                    "select 1 from datablocksexternal where unifiedname = ?",
+                    (unifName,))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
+
+        if datablock is not None:
+            return Consts.DATABLOCK_STOREHINT_EXTERN
+        
+        return None
+
 
 
     def deleteDataBlock(self, unifName):
@@ -2138,187 +2149,6 @@ class WikiData:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
-
-
-#     # ---------- Versioning (optional) ----------
-#     # Must be implemented if checkCapability returns a version number
-#     #     for "versioning".
-#         
-#     def storeModification(self, word):
-#         """ Store the modification for a single word (wikicontent and headversion for the word must exist)
-#         between wikicontents and headversion in the changelog.
-#         Does not modify headversion. It is recommended to not call this directly
-# 
-#         Values for the op-column in the changelog:
-#         0 set content: set content as it is in content column
-#         1 modify: content is a binary compact diff as defined in StringOps,
-#             apply it to new revision to get the old one.
-#         2 create page: content contains data of the page
-#         3 delete page: content is undefined
-#         """
-# 
-#         content, moddate = self.getContentAndInfo(word)[:2]
-# 
-#         headcontent, headmoddate = self.connWrap.execSqlQuery("select content, modified from headversion "+\
-#                 "where word=?", (word,))[0]
-# 
-#         bindiff = getBinCompactForDiff(content, headcontent)
-#         self.connWrap.execSql("insert into changelog (word, op, content, moddate) values (?, ?, ?, ?)",
-#                 (word, 1, sqlite.Binary(bindiff), headmoddate))  # Modify  # TODO: Support overwrite
-#         return self.connWrap.lastrowid
-# 
-# 
-#     def hasVersioningData(self):
-#         """
-#         Returns true iff any version information is stored in the database
-#         """
-#         return DbStructure.hasVersioningData(self.connWrap)
-# 
-# 
-#     def storeVersion(self, description):
-#         """
-#         Store the current version of a wiki in the changelog
-# 
-#         Values for the op-column in the changelog:
-#         0 set content: set content as it is in content column
-#         1 modify: content is a binary compact diff as defined in StringOps,
-#             apply it to new revision to get the old one.
-#         2 create page: content contains data of the page
-#         3 delete page: content is undefined
-# 
-#         Renaming is not supported directly.
-#         """
-#         # Test if tables were created already
-# 
-#         if not DbStructure.hasVersioningData(self.connWrap):
-#             # Create the tables
-#             self.connWrap.commit()
-#             try:
-#                 DbStructure.createVersioningTables(self.connWrap)
-#                 # self.connWrap.commit()
-#             except:
-#                 self.connWrap.rollback()
-#                 raise
-# 
-#         self.connWrap.commit()
-#         try:
-#             # First move head version to normal versions
-#             headversion = self.connWrap.execSqlQuery("select description, "+\
-#                     "created from versions where id=0") # id 0 is the special head version
-#             if len(headversion) == 1:
-#                 firstchangeid = self.connWrap.execSqlQuerySingleItem("select id from changelog order by id desc limit 1 ",
-#                         default = -1) + 1
-# 
-#                 # Find modified words
-#                 modwords = self.connWrap.execSqlQuerySingleColumn("select headversion.word from headversion inner join "+\
-#                         "wikiwordcontent on headversion.word = wikiwordcontent.word where "+\
-#                         "headversion.modified != wikiwordcontent.modified")
-# 
-#                 for w in modwords:
-#                     self.storeModification(w)
-# 
-# 
-#                 # Store changes for deleted words
-#                 self.connWrap.execSql("insert into changelog (word, op, content, moddate) "+\
-#                         "select word, 2, content, modified from headversion where "+\
-#                         "word not in (select word from wikiwordcontent)")
-# 
-#                 # Store changes for inserted words
-#                 self.connWrap.execSql("insert into changelog (word, op, content, moddate) "+\
-#                         "select word, 3, x'', modified from wikiwordcontent where "+\
-#                         "word not in (select word from headversion)")
-# 
-#                 if firstchangeid == (self.connWrap.execSqlQuerySingleItem("select id from changelog order by id desc limit 1 ",
-#                         default = -1) + 1):
-# 
-#                     firstchangeid = -1 # No changes recorded in changelog
-# 
-#                 headversion = headversion[0]
-#                 self.connWrap.execSql("insert into versions(description, firstchangeid, created) "+\
-#                         "values(?, ?, ?)", (headversion[0], firstchangeid, headversion[1]))
-# 
-#             self.connWrap.execSql("insert or replace into versions(id, description, firstchangeid, created) "+\
-#                     "values(?, ?, ?, ?)", (0, description, -1, time()))
-# 
-#             # Copy from wikiwordcontent everything to headversion
-#             self.connWrap.execSql("delete from headversion")
-#             self.connWrap.execSql("insert into headversion select * from wikiwordcontent")
-# 
-#             self.connWrap.commit()
-#         except:
-#             self.connWrap.rollback()
-#             raise
-# 
-# 
-#     def getStoredVersions(self):
-#         """
-#         Return a list of tuples for each stored version with (<id>, <description>, <creation date>).
-#         Newest versions at first
-#         """
-#         # Head version first
-#         result = self.connWrap.execSqlQuery("select id, description, created "+\
-#                     "from versions where id == 0")
-# 
-#         result += self.connWrap.execSqlQuery("select id, description, created "+\
-#                     "from versions where id != 0 order by id desc")
-#         return result
-# 
-# 
-#     # TODO: Wrong moddate?
-#     def applyChange(self, word, op, content, moddate):
-#         """
-#         Apply a single change to wikiwordcontent. word, op, content and modified have the
-#         same meaning as in the changelog table
-#         """
-#         if op == 0:
-#             self.setContentRaw(word, content, moddate)
-#         elif op == 1:
-#             self.setContentRaw(word, applyBinCompact(self.getContent(word), content), moddate)
-#         elif op == 2:
-#             self.setContentRaw(word, content, moddate)
-#         elif op == 3:
-#             self.deleteContent(word)
-# 
-# 
-#     # TODO: Wrong date?, more efficient
-#     def applyStoredVersion(self, id):
-#         """
-#         Set the content back to the version identified by id (retrieved by getStoredVersions).
-#         Only wikiwordcontent is modified, the cache information must be updated separately
-#         """
-# 
-#         self.connWrap.commit()
-#         try:
-#             # Start with head version
-#             self.connWrap.execSql("delete from wikiwordcontent") #delete all rows
-#             self.connWrap.execSql("insert into wikiwordcontent select * from headversion") # copy from headversion
-# 
-#             if id != 0:
-#                 lowestchangeid = self.connWrap.execSqlQuerySingleColumn("select firstchangeid from versions where id == ?",
-#                         (id,))
-#                 if len(lowestchangeid) == 0:
-#                     raise WikiFileNotFoundException()  # TODO: Better exception
-# 
-#                 lowestchangeid = lowestchangeid[0]
-# 
-#                 changes = self.connWrap.execSqlQuery("select word, op, content, moddate from changelog "+\
-#                         "where id >= ? order by id desc", (lowestchangeid,))
-# 
-#                 for c in changes:
-#                     self.applyChange(*c)
-# 
-# 
-#             self.connWrap.commit()
-#         except:
-#             self.connWrap.rollback()
-#             raise
-# 
-# 
-#     def deleteVersioningData(self):
-#         """
-#         Completely delete all versioning information
-#         """
-#         DbStructure.deleteVersioningTables(self.connWrap)
 
 
     # ---------- Other optional functionality ----------

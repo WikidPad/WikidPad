@@ -2,10 +2,10 @@
 Processes versions of wiki pages.
 """
 
-import time, zlib
+import time, zlib, re
 from calendar import timegm
 
-from xml.dom import minidom
+from ..rtlibRepl import minidom
 
 import wx
 
@@ -28,6 +28,9 @@ DAMAGED = object()
 
 
 class VersionEntry(object):
+    __slots__ = ("creationTimeStamp", "description", "versionNumber",
+            "contentDifferencing", "contentEncoding", "xmlNode")
+    
     def __init__(self, description=None, contentDifferencing=u"revdiff",
             contentEncoding = None):
         self.creationTimeStamp = time.time()
@@ -73,7 +76,7 @@ class VersionEntry(object):
             serToXmlUnicode(xmlNode, xmlDoc, u"description", self.description,
                     replace=True)
 
-        serToXmlInt(xmlNode, xmlDoc, "versionNumber", self.versionNumber,
+        serToXmlInt(xmlNode, xmlDoc, u"versionNumber", self.versionNumber,
                 replace=True)
         
         serToXmlUnicode(xmlNode, xmlDoc, u"contentDifferencing",
@@ -154,6 +157,20 @@ class VersionOverview(MiscEventSourceMixin):
         self.serializeFromXml(xmlNode)
 
 
+    def getDependentDataBlocks(self):
+        assert not self.isInvalid()
+
+        unifiedPageName = self.basePage.getUnifiedPageName()
+
+        result = [u"versioning/overview/" + unifiedPageName]
+
+        for entry in self.versionEntries:
+            result.append(u"versioning/packet/versionNo/%s/%s" % (entry.versionNumber,
+                unifiedPageName))
+
+        return result
+
+
     def renameTo(self, newUnifiedPageName):
         """
         Rename all data to newUnifiedPageName. This object becomes invalid after
@@ -212,13 +229,36 @@ class VersionOverview(MiscEventSourceMixin):
         self.fireMiscEventKeys(("deleted version overview",
                 "invalidated version overview"))
 
+    @staticmethod
+    def deleteBrokenDataForDocPage(docPage):
+        """
+        Delete all versioning data of unifPageName in case of broken
+        versioning data. This may fail.
+        It mainly creates a list of all data blocks which belong to versioning
+        data of the given docPage and deletes the blocks.
+        """
+        unifPageName = docPage.getUnifiedPageName()
+        wikiDocument = docPage.getWikiDocument()
+
+        matOb = re.compile(u"^versioning/packet/versionNo/[0-9]+/%s$" %
+                re.escape(unifPageName))
+        
+        dataBlocks = wikiDocument.getDataBlockUnifNamesStartingWith(
+                u"versioning/packet/versionNo/")
+        
+        dataBlocks = [db for db in dataBlocks if matOb.match(db)]
+        dataBlocks.append(u"versioning/overview/" + unifPageName)
+
+        for db in dataBlocks:
+            wikiDocument.deleteDataBlock(db)
+
 
     def writeOverview(self, unifPageName=None):
         if unifPageName is None:
             unifName = u"versioning/overview/" + self.basePage.getUnifiedPageName()
         else:
             unifName = u"versioning/overview/" + unifPageName
-        
+
         if len(self.versionEntries) == 0:
             self.wikiDocument.deleteDataBlock(unifName)
             return
@@ -296,7 +336,7 @@ class VersionOverview(MiscEventSourceMixin):
         xmlNode.setAttribute(u"readCompatVersion", u"0")
         xmlNode.setAttribute(u"writeCompatVersion", u"0")
 
-        for xmlEntry in tuple(iterXmlElementFlat(xmlNode, u"versionOverviewEntry")):
+        for xmlEntry in iterXmlElementFlat(xmlNode, u"versionOverviewEntry"):
             xmlNode.removeChild(xmlEntry)
 
         for entry in self.versionEntries:
@@ -397,6 +437,21 @@ class VersionOverview(MiscEventSourceMixin):
             content = BOM_UTF8 + content.encode("utf-8")
         assert isinstance(content, str)
 
+        completeStep = max(self.wikiDocument.getWikiConfig().getint("main",
+                "versioning_completeSteps", 10), 0)
+
+        if completeStep == 0:
+            asRevDiff = True
+        else:
+            if len(self.versionEntries) < completeStep:
+                asRevDiff = True
+            else:
+                asRevDiff = False
+                for e in reversed(self.versionEntries[-completeStep:-1]):
+                    if e.contentDifferencing == "complete":
+                        asRevDiff = True
+                        break
+
         self.maxVersionNumber += 1
         newHeadVerNo = self.maxVersionNumber
 
@@ -412,19 +467,21 @@ class VersionOverview(MiscEventSourceMixin):
         self.versionEntries.append(entry)
 
         if len(self.versionEntries) > 1:
-            prevHeadEntry = self.versionEntries[-2]
-            prevHeadContent = self.getVersionContentRaw(prevHeadEntry.versionNumber)
-            diffPacket = getBinCompactForDiff(content, prevHeadContent)
+            if asRevDiff:
+                prevHeadEntry = self.versionEntries[-2]
+                prevHeadContent = self.getVersionContentRaw(prevHeadEntry.versionNumber)
 
-            unifName = u"versioning/packet/versionNo/%s/%s" % (prevHeadEntry.versionNumber,
-                    self.basePage.getUnifiedPageName())
-            prevHeadEntry.contentDifferencing = "revdiff"
-            prevHeadEntry.contentEncoding = None
-            self.wikiDocument.storeDataBlock(unifName, diffPacket,
-                    storeHint=self.getStorageHint())
-                
-        self.fireMiscEventKeys(("added version", "changed version overview"))
+                unifName = u"versioning/packet/versionNo/%s/%s" % (prevHeadEntry.versionNumber,
+                        self.basePage.getUnifiedPageName())
+                diffPacket = getBinCompactForDiff(content, prevHeadContent)
 
+                if len(diffPacket) < len(prevHeadContent):
+                    prevHeadEntry.contentDifferencing = "revdiff"
+                    prevHeadEntry.contentEncoding = None
+                    self.wikiDocument.storeDataBlock(unifName, diffPacket,
+                            storeHint=self.getStorageHint())
+
+        self.fireMiscEventKeys(("appended version", "changed version overview"))
 
 
     def deleteVersion(self, versionNumber):

@@ -7,8 +7,7 @@ from Serialization import SerializeStream, findXmlElementFlat, \
         iterXmlElementFlat, serToXmlUnicode, serFromXmlUnicode, \
         serToXmlBoolean, serFromXmlBoolean, serToXmlInt, serFromXmlInt
 
-
-
+import SearchAndReplaceBoolLang
 from StringOps import utf8Enc, utf8Dec, boolToChar, charToBool, strToBin, \
         binToStr
         
@@ -31,9 +30,12 @@ class AbstractSearchNode:
     def setSarOp(self, sarOp):
         self.sarOp = sarOp
     
-    def beginWikiSearch(self, wikiDocument):
+    def beginWikiSearch(self, wikiDocument, commonCache):
         """
         Always called before a new wiki-wide search operation begins
+        commonCache -- a dictionary where search nodes can place information
+            to avoid multiple retrieving of the same data from database.
+            Each node is called with the same object.
         """
         pass
     
@@ -110,7 +112,8 @@ class AbstractSearchNode:
         
     def getRootWords(self):
         """
-        Return all words used as roots of subtrees (if any) for better tree sorting
+        Return all words used as roots of subtrees (if any) for better tree sorting.
+        Do not assume that all returned words are valid!
         """
         return []
         
@@ -126,76 +129,6 @@ class AbstractSearchNode:
 
 
 
-class AndSearchNode(AbstractSearchNode):
-    """
-    Connects two nodes by logical "and"
-    """
-    
-    def __init__(self, sarOp, left, right):
-        AbstractSearchNode.__init__(self, sarOp)
-        self.left = left
-        self.right = right
-        
-    def beginWikiSearch(self, wikiDocument):
-        self.left.beginWikiSearch(wikiDocument)
-        self.right.beginWikiSearch(wikiDocument)
-        
-    def endWikiSearch(self):
-        """
-        Called after a wiki-wide search operation ended
-        """
-        self.left.endWikiSearch()
-        self.right.endWikiSearch()
-
-        
-    def testWikiPage(self, word, text):
-        leftret = self.left.testWikiPage(word, text)
-        
-        if leftret == False:
-            return False
-            
-        rightret = self.right.testWikiPage(word, text)
-        
-        if rightret == False:
-            return False
-
-        if leftret == True and rightret == True:
-            return True
-            
-        return Unknown
-
-        
-#     def testText(self, text):
-#         leftret = self.left.testText(text)
-#         
-#         if leftret == False:
-#             return False
-#             
-#         rightret = self.right.testText(text)
-#         
-#         if rightret == False:
-#             return False
-# 
-#         if leftret == True and rightret == True:
-#             return True
-#             
-#         return Unknown
-
-
-    def orderNatural(self, wordSet, coll):
-        """
-        Order of left operand has priority
-        """
-        leftret = self.left.orderNatural(wordSet, coll)
-
-        if len(wordSet) == 0:
-            return leftret
-
-        rightret = self.right.orderNatural(wordSet, coll)
-
-        return leftret + rightret
-
-
 class NotSearchNode(AbstractSearchNode):
     """
     Inverts the meaning of the subnode
@@ -207,8 +140,8 @@ class NotSearchNode(AbstractSearchNode):
         AbstractSearchNode.__init__(self, sarOp)
         self.sub = sub
         
-    def beginWikiSearch(self, wikiDocument):
-        self.sub.beginWikiSearch(wikiDocument)
+    def beginWikiSearch(self, wikiDocument, commonCache):
+        self.sub.beginWikiSearch(wikiDocument, commonCache)
         
     def endWikiSearch(self):
         """
@@ -275,7 +208,7 @@ class AllWikiPagesNode(AbstractSearchNode):
 #         print "--AllWikiPagesNode4"
 #         traceback.print_stack()
     
-    def beginWikiSearch(self, wikiDocument):
+    def beginWikiSearch(self, wikiDocument, commonCache):
         """
         Always called before a new wiki-wide search operation begins.
         Fills wordList and wordSet
@@ -403,7 +336,7 @@ class ListItemWithSubtreeWikiPagesNode(AbstractSearchNode):
         self.wordList = None   # used for orderNatural()
 
 
-    def beginWikiSearch(self, wikiDocument):
+    def beginWikiSearch(self, wikiDocument, commonCache):
         """
         Always called before a new wiki-wide search operation begins.
         Fills wordList and wordSet
@@ -571,12 +504,25 @@ class AbstractContentSearchNode(AbstractSearchNode):
     """
     def __init__(self, sarOp):
         AbstractSearchNode.__init__(self, sarOp)
-    
-    def searchText(self, text, searchCharStartPos=0):
+
+    def searchDocPageAndText(self, docPage, text, searchCharStartPos=0,
+            cycleToStart=False):
+        """
+        Default implementation to apply search operation on docPage.
+        Calls searchText().
+        """
+        if docPage is None:
+            return (None, None)
+        return self.searchText(text, searchCharStartPos=searchCharStartPos,
+                cycleToStart=cycleToStart)
+
+    def searchText(self, text, searchCharStartPos=0, cycleToStart=False):
         """
         Applies the search operation on text and returns either
         tuple (<first char>, <after last char>) with position of
         found data or (None, None) if search was unsuccessful.
+        Attention: The actually returned tuple may contain more than two items.
+        May only be called if hasParticularTextPosition() returns True.
         """
         return (None, None)
 
@@ -587,6 +533,7 @@ class AbstractContentSearchNode(AbstractSearchNode):
         """
         Test if string text[range[0]: range[1]] matches operation. Mainly called before
         a replacement is done.
+        May only be called if hasParticularTextPosition() returns True.
         """
         assert 0  # abstract
 
@@ -603,6 +550,7 @@ class AbstractContentSearchNode(AbstractSearchNode):
                 replace() is called now.
         pattern -- Pattern of the replacement, e.g. an RE pattern
                 for regular expressions
+        May only be called if hasParticularTextPosition() returns True.
         """
         assert 0  # abstract
 
@@ -617,11 +565,221 @@ class AbstractContentSearchNode(AbstractSearchNode):
         return True
 
 
+class AbstractAndOrSearchNode(AbstractContentSearchNode):
+    """
+    Connects two nodes by logical "and" or "or".
+    """
+    def __init__(self, sarOp, left, right):
+        AbstractSearchNode.__init__(self, sarOp)
+        self.left = left
+        self.right = right
+        self.partTextPosChildren = None
+
+    def beginWikiSearch(self, wikiDocument, commonCache):
+        self.left.beginWikiSearch(wikiDocument, commonCache)
+        self.right.beginWikiSearch(wikiDocument, commonCache)
+        
+        ptpc = []
+        if self.left.hasParticularTextPosition():
+            ptpc.append(self.left)
+        
+        if self.right.hasParticularTextPosition():
+            ptpc.append(self.right)
+        
+        self.partTextPosChildren = ptpc
+
+
+    def endWikiSearch(self):
+        """
+        Called after a wiki-wide search operation ended
+        """
+        self.left.endWikiSearch()
+        self.right.endWikiSearch()
+
+        
+    def testWikiPage(self, word, text):
+        raise NotImplementedError  # abstract
+
+
+    def searchDocPageAndText(self, docPage, text, searchCharStartPos=0,
+            cycleToStart=False):
+        """
+        Applies the search operation on text and returns either
+        tuple (<first char>, <after last char>) with position of
+        found data or (None, None) if search was unsuccessful.
+        May only be called if hasParticularTextPosition() returns True.
+        """
+        firstPos = -1
+        firstFound = (None, None)
+        for child in self.partTextPosChildren:
+            found = child.searchDocPageAndText(docPage, text, searchCharStartPos,
+                    cycleToStart=False)
+            if found[0] is not None and (firstPos == -1 or firstPos > found[0]):
+                firstPos = found[0]
+                firstFound = found + (child,)
+
+        if firstFound[0] is not None:
+            return firstFound
+
+        if not cycleToStart or searchCharStartPos == 0:
+            # We started at beginning, so nothing more to search
+            return (None, None)
+
+        # Try again from beginning
+        for child in self.partTextPosChildren:
+            found = child.searchDocPageAndText(docPage, text, 0,
+                    cycleToStart=False)
+            if found[0] is not None and (firstPos == -1 or firstPos > found[0]):
+                firstPos = found[0]
+                firstFound = found + (child,)
+
+        return firstFound
+
+
+    def searchText(self, text, searchCharStartPos=0, cycleToStart=False):
+        """
+        Applies the search operation on text and returns either
+        tuple (<first char>, <after last char>) with position of
+        found data or (None, None) if search was unsuccessful.
+        May only be called if hasParticularTextPosition() returns True.
+        """
+        firstPos = -1
+        firstFound = (None, None)
+        for child in self.partTextPosChildren:
+            found = child.searchText(text, searchCharStartPos, cycleToStart=False)
+            if found[0] is not None and (firstPos == -1 or firstPos > found[0]):
+                firstPos = found[0]
+                firstFound = found + (child,)
+
+        if firstFound[0] is not None:
+            return firstFound
+
+        if not cycleToStart or searchCharStartPos == 0:
+            # We started at beginning, so nothing more to search
+            return (None, None)
+
+        # Try again from beginning
+        for child in self.partTextPosChildren:
+            found = child.searchText(text, 0, cycleToStart=False)
+            if found[0] is not None and (firstPos == -1 or firstPos > found[0]):
+                firstPos = found[0]
+                firstFound = found + (child,)
+
+        return firstFound
+
+
+    def matchesPart(self, text, range):
+        """
+        Test if string text[range[0]: range[1]] matches operation. Mainly called before
+        a replacement is done.
+        May only be called if hasParticularTextPosition() returns True.
+        """
+        for child in self.partTextPosChildren:
+            if child.matchesPart(text, range):
+                return True
+        
+        return False
+
+
+    def replace(self, text, foundData, pattern):
+        """
+        Return the content with which the area determined by searchData
+        should be replaced.
+        
+        text -- Full text which was prior fed to searchText()
+        foundData -- tuple returned by searchText(), containing
+                start and end position of found data and maybe
+                additional objects. foundData must come from the
+                searchText() method of the same node for which
+                replace() is called now.
+        pattern -- Pattern of the replacement, e.g. an RE pattern
+                for regular expressions
+        May only be called if hasParticularTextPosition() returns True.
+        """
+        child = foundData[-1]
+        foundData = foundData[:-1]
+
+        return self.child.replace(text, foundData, pattern)
+
+    def hasParticularTextPosition(self):
+        """
+        Returns True if a found entry has a particular text position (means
+        to support the additonal AbstractContentSearchNode methods
+        searchText(), matchesPart(), replace() ).
+
+        Call it for the root of a tree, it will automatically ask its children.
+        """
+        return len(self.partTextPosChildren) > 0  # self.partTextPosChild is not None
+
+
+    def orderNatural(self, wordSet, coll):
+        """
+        Order of left operand has priority
+        """
+        leftret = self.left.orderNatural(wordSet, coll)
+
+        if len(wordSet) == 0:
+            return leftret
+
+        rightret = self.right.orderNatural(wordSet, coll)
+
+        return leftret + rightret
+
+
+
+class AndSearchNode(AbstractAndOrSearchNode):
+    """
+    Connects two nodes by logical "and"
+    """
+    CLASS_PERSID = "And"  # Class id for persistence storage
+
+    def testWikiPage(self, word, text):
+        leftret = self.left.testWikiPage(word, text)
+        
+        if leftret == False:
+            return False
+            
+        rightret = self.right.testWikiPage(word, text)
+        
+        if rightret == False:
+            return False
+
+        if leftret == True and rightret == True:
+            return True
+            
+        return Unknown
+
+
+class OrSearchNode(AbstractAndOrSearchNode):
+    """
+    Connects two nodes by logical "or"
+    """
+    CLASS_PERSID = "Or"  # Class id for persistence storage
+
+    def testWikiPage(self, word, text):
+        leftret = self.left.testWikiPage(word, text)
+        
+        if leftret == True:
+            return True
+            
+        rightret = self.right.testWikiPage(word, text)
+        
+        if rightret == True:
+            return True
+
+        if leftret == False and rightret == False:
+            return False
+
+        return Unknown
+
+
 
 class RegexTextNode(AbstractContentSearchNode):
     """
     Check if regex matches the contained text
     """
+    CLASS_PERSID = "RegexText"  # Class id for persistence storage
+
     def __init__(self, sarOp, rePattern):
         """
         regex -- precompiled regex pattern
@@ -722,6 +880,289 @@ class SimpleStrNode(AbstractContentSearchNode):
         return pattern
 
 
+class AbstractAttributePatternNode(AbstractContentSearchNode):
+    def __init__(self, sarOp, pattern=u""):
+        AbstractContentSearchNode.__init__(self, sarOp)
+        self.compPat = re.compile(pattern,
+                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+
+        # wordSet and wordList always contain the same words
+        self.wordSet = None    # used for testWikiPage()
+
+    def searchDocPageAndText(self, docPage, text, searchCharStartPos=0,
+            cycleToStart=False):
+        """
+        """
+        if docPage is None:
+            return (None, None)
+        
+        wikiWord = docPage.getWikiWord()
+        
+        pageAst = docPage.getLivePageAst()
+        if pageAst is None:
+            return (None, None)
+        
+        # Note: extractPropertyNodesFromPageAst() returns an iterator
+
+        for node in docPage.extractPropertyNodesFromPageAst(pageAst):
+            if node.pos < searchCharStartPos:
+                continue
+            for k, v in node.props:
+                if self._checkProperty(wikiWord, k, v):
+                    return (node.pos, node.pos + node.strLength)
+
+        if cycleToStart and searchCharStartPos > 0:
+            # Try again from beginning
+            for node in docPage.extractPropertyNodesFromPageAst(pageAst):
+                if node.pos >= searchCharStartPos:
+                    break
+                for k, v in node.props:
+                    if self._checkProperty(wikiWord, k, v):
+                        return (node.pos, node.pos + node.strLength)
+
+        # Not found
+        return (None, None)
+
+
+
+    def _getAllProperties(self, wikiDocument, commonCache):
+        allProperties = commonCache.get("allProperties")
+        
+        if allProperties is None:
+            allProperties = wikiDocument.getPropertyTriples(None, None, None)
+            commonCache["allProperties"] = allProperties
+
+        return allProperties
+
+
+    def beginWikiSearch(self, wikiDocument, commonCache):
+        """
+        Always called before a new wiki-wide search operation begins.
+        Fills wordSet.
+        TODO: Maybe use alternative implementation if only a few words are
+        checked
+        """
+        wordSet = set()
+        
+        for w, k, v in self._getAllProperties(wikiDocument, commonCache):
+            if self._checkProperty(w, k, v):
+                wordSet.add(w)
+
+        self.wordSet = wordSet
+
+    def _checkProperty(self, w, k, v):
+        raise NotImplementedError   # abstract
+
+    def testWikiPage(self, word, text):
+        return word in self.wordSet
+
+
+    def serializeBin(self, stream):
+        """
+        Read or write content of this object to or from a serialize stream
+
+        stream -- StringOps.SerializeStream object
+        """
+        version = stream.serUint32(0)
+        
+        if version != 0:
+            raise SerializationException
+            
+        pattern = stream.serUniUtf8(self.compPat.pattern)
+
+        if pattern != self.compPat.pattern:
+            self.compPat = re.compile(pattern,
+                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+
+    def serializeToXml(self, xmlNode, xmlDoc):
+        """
+        Modify XML node to contain all information about this object.
+        """
+        serToXmlUnicode(xmlNode, xmlDoc, u"pattern", self.compPat.pattern)
+
+
+    def serializeFromXml(self, xmlNode):
+        """
+        Set object state from data in xmlNode)
+        """
+        pattern = serFromXmlUnicode(xmlNode, u"pattern")
+        if pattern != self.compPat.pattern:
+            self.compPat = re.compile(pattern,
+                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+
+    def getPattern(self):
+        """
+        Return the pattern string
+        """
+        return self.compPat.pattern
+
+
+    def endWikiSearch(self):
+        """
+        Called after a wiki-wide search operation ended.
+        Clears wordList
+        """
+        self.wordSet = None
+
+
+
+# class AttributeKeyNode(AbstractAttributePatternNode):
+#     """
+#     Returns True for pages with an attribute key matching specified
+#     regular expression.
+#     """
+#     CLASS_PERSID = "AttributeKey"  # Class id for persistence storage
+# 
+#     def _checkProperty(self, w, k, v):
+#         return self.compPat.search(k)
+# 
+# 
+# class AttributeValueNode(AbstractAttributePatternNode):
+#     """
+#     Returns True for pages with an attribute key matching specified
+#     regular expression.
+#     """
+#     CLASS_PERSID = "AttributeValue"  # Class id for persistence storage
+# 
+#     def _checkProperty(self, w, k, v):
+#         return self.compPat.search(v)
+
+
+class AttributeNode(AbstractAttributePatternNode):
+    def __init__(self, sarOp, pattern, valuePattern):
+        AbstractAttributePatternNode.__init__(self, sarOp, pattern)
+
+        self.compValuePat = re.compile(valuePattern,
+                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+
+    def _checkProperty(self, w, k, v):
+        return self.compPat.search(k) and self.compValuePat.search(v)
+
+
+
+class TodoNode(AbstractContentSearchNode):
+    CLASS_PERSID = "Todo"  # Class id for persistence storage
+
+    def __init__(self, sarOp, pattern=u""):
+        AbstractContentSearchNode.__init__(self, sarOp)
+        self.compPat = re.compile(pattern,
+                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+
+        # wordSet and wordList always contain the same words
+        self.wordSet = None    # used for testWikiPage()
+
+    def searchDocPageAndText(self, docPage, text, searchCharStartPos=0,
+            cycleToStart=False):
+        """
+        """
+        if docPage is None:
+            return (None, None)
+
+#         wikiWord = docPage.getWikiWord()
+
+        pageAst = docPage.getLivePageAst()
+        if pageAst is None:
+            return (None, None)
+
+        for node in pageAst.iterDeepByName("todoEntry"):
+            if node.pos < searchCharStartPos:
+                continue
+            
+            entry = node.key + node.delimiter + node.valueNode.getString()
+            if self.compPat.search(entry):
+                return (node.pos, node.pos + node.strLength)
+
+        if cycleToStart and searchCharStartPos > 0:
+            # Try again from beginning
+            for node in pageAst.iterDeepByName("todoEntry"):
+                if node.pos >= searchCharStartPos:
+                    break
+                entry = node.key + node.delimiter + node.valueNode.getString()
+                if self.compPat.search(entry):
+                    return (node.pos, node.pos + node.strLength)
+
+        # Not found
+        return (None, None)
+
+
+    def _getAllTodos(self, wikiDocument, commonCache):
+        allTodos = commonCache.get("allTodos")
+        
+        if allTodos is None:
+            allTodos = wikiDocument.getTodos()
+            commonCache["allTodos"] = allTodos
+
+        return allTodos
+
+
+    def beginWikiSearch(self, wikiDocument, commonCache):
+        """
+        Always called before a new wiki-wide search operation begins.
+        Fills wordSet.
+        TODO: Maybe use alternative implementation if only a few words are
+        checked
+        """
+        wordSet = set()
+        
+        for w, t in self._getAllTodos(wikiDocument, commonCache):
+            if self.compPat.search(t):
+                wordSet.add(w)
+
+        self.wordSet = wordSet
+
+
+    def testWikiPage(self, word, text):
+        return word in self.wordSet
+
+
+    def serializeBin(self, stream):
+        """
+        Read or write content of this object to or from a serialize stream
+
+        stream -- StringOps.SerializeStream object
+        """
+        version = stream.serUint32(0)
+        
+        if version != 0:
+            raise SerializationException
+            
+        pattern = stream.serUniUtf8(self.compPat.pattern)
+
+        if pattern != self.compPat.pattern:
+            self.compPat = re.compile(pattern,
+                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+
+    def serializeToXml(self, xmlNode, xmlDoc):
+        """
+        Modify XML node to contain all information about this object.
+        """
+        serToXmlUnicode(xmlNode, xmlDoc, u"pattern", self.compPat.pattern)
+
+
+    def serializeFromXml(self, xmlNode):
+        """
+        Set object state from data in xmlNode)
+        """
+        pattern = serFromXmlUnicode(xmlNode, u"pattern")
+        if pattern != self.compPat.pattern:
+            self.compPat = re.compile(pattern,
+                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+
+    def getPattern(self):
+        """
+        Return the pattern string
+        """
+        return self.compPat.pattern
+
+
+    def endWikiSearch(self):
+        """
+        Called after a wiki-wide search operation ended.
+        Clears wordList
+        """
+        self.wordSet = None
+
+
 # ----------------------------------------------------------------------
 
 
@@ -802,7 +1243,7 @@ class ListWikiPagesOperation:
         pass   # TODO !!!
 
 
-    def beginWikiSearch(self, wikiDocument):
+    def beginWikiSearch(self, wikiDocument, commonCache=None):
         """
         Called by WikiDataManager(=WikiDocument) to begin a wiki-wide search
         """
@@ -810,8 +1251,11 @@ class ListWikiPagesOperation:
 
         if self.searchOpTree is None:
             return   # TODO: Error ?
+            
+        if commonCache is None:
+            commonCache = {}
 
-        return self.searchOpTree.beginWikiSearch(wikiDocument)
+        return self.searchOpTree.beginWikiSearch(wikiDocument, commonCache)
 
 
     def endWikiSearch(self):
@@ -836,7 +1280,7 @@ class ListWikiPagesOperation:
         """
         if self.searchOpTree is None:
             return False
-            
+
         return self.searchOpTree.testWikiPage(word, text)
 
 
@@ -848,11 +1292,13 @@ class ListWikiPagesOperation:
         Return all words used as roots of subtrees (if any) for better tree sorting
         It must be called after beginWikiSearch() and before corresponding
         endWikiSearch() call.
+        Only valid wiki refs are returned.
         """
         if self.searchOpTree is None:
             return []
-            
-        return self.searchOpTree.getRootWords()
+
+        return [w for w in self.searchOpTree.getRootWords() 
+                if self.wikiDocument.isDefinedWikiLink(w)]
 
 
     def applyOrdering(self, wordSet, coll):
@@ -1128,8 +1574,8 @@ class SearchReplaceOperation:
         """
         Rebuild the search operation tree. Automatically called by
         searchText() if necessary.
-        The function may raise an exception (especially regex exception)
-        if the search string ontains syntax errors.
+        My throw RE exception or WikiPyparsing.ParseException if
+        the search string has syntax errors.
         """
         # TODO Test empty string
 
@@ -1137,28 +1583,30 @@ class SearchReplaceOperation:
             if self.searchStr == u"":
                 self.searchOpTree = AllWikiPagesNode(self)
             else:
-                self.searchOpTree = self._buildSearchCriterion(self.searchStr)
+                self.searchOpTree = self._buildSearchTerm(self.searchStr)
         else:
-            # TODO More features
-            andPatterns = self.searchStr.split(u' and ')
+            parseResult = SearchAndReplaceBoolLang.parse(self.searchStr)
+            self.searchOpTree = self._buildBooleanSearchTree(parseResult)
+#             # TODO More features
+#             andPatterns = self.searchStr.split(u' and ')
+# 
+#             if len(andPatterns) == 1:
+#                 self.searchOpTree = self._buildSearchTerm(self.searchStr)
+#             else:
+#                 # Build up tree (bottom-up)
+#                 node = AndSearchNode(self, self._buildSearchTerm(andPatterns[-2]),
+#                         self._buildSearchTerm(andPatterns[-1]))
+#                 for i in xrange(len(andPatterns) - 3, -1, -1):
+#                     node = AndSearchNode(self, 
+#                             self._buildSearchTerm(andPatterns[i]), node)
+#                     
+#                 self.searchOpTree = node
 
-            if len(andPatterns) == 1:
-                self.searchOpTree = self._buildSearchCriterion(self.searchStr)
-            else:
-                # Build up tree (bottom-up)
-                node = AndSearchNode(self, self._buildSearchCriterion(andPatterns[-2]),
-                        self._buildSearchCriterion(andPatterns[-1]))
-                for i in xrange(len(andPatterns) - 3, -1, -1):
-                    node = AndSearchNode(self, 
-                            self._buildSearchCriterion(andPatterns[i]), node)
-                    
-                self.searchOpTree = node
 
-
-    def _buildSearchCriterion(self, searchStr):
+    def _buildSearchTerm(self, searchStr):
         """
         Build single search criterion e.g. as part of a boolean search
-        and return the node.
+        and return the node. My throw RE exception.
         """
         if not self._reNeeded():
             # TODO: Test if really faster than REs
@@ -1169,13 +1617,68 @@ class SearchReplaceOperation:
 
             if self.wholeWord:
                 searchStr = ur"\b%s\b" % searchStr
-                
+
             if self.caseSensitive:
                 reFlags = re.MULTILINE | re.UNICODE
             else:
                 reFlags = re.IGNORECASE | re.MULTILINE | re.UNICODE
-            
+
             return RegexTextNode(self, re.compile(searchStr, reFlags))
+
+
+
+    def _buildBooleanSearchTree(self, parseExpr):
+#         print "--_buildBooleanSearchTree1", parseExpr.pprint()
+        for node in parseExpr.iterFlatNamed():
+            tname = node.name
+            if tname == "searchExpression":
+                return self._buildBooleanSearchTree(node)
+            elif tname == "regexTerm":
+                return self._buildSearchTerm(node.regexTerm)
+            elif tname == "notExpression":
+                return NotSearchNode(self, self._buildBooleanSearchTree(node.op))
+            elif tname == "andExpression":
+                return AndSearchNode(self, self._buildBooleanSearchTree(node.op1),
+                        self._buildBooleanSearchTree(node.op2))
+            elif tname == "concatExprLevel1":
+                return AndSearchNode(self, self._buildBooleanSearchTree(node.op1),
+                        self._buildBooleanSearchTree(node.op2))
+            elif tname == "orExpression":
+                return OrSearchNode(self, self._buildBooleanSearchTree(node.op1),
+                        self._buildBooleanSearchTree(node.op2))
+            elif tname == "attributeTerm":
+                return AttributeNode(self, node.key, node.value)
+#             elif tname == "attributeKeyTerm":
+#                 return AttributeKeyNode(self, node.prefixedTerm)
+#             elif tname == "attributeValueTerm":
+#                 return AttributeValueNode(self, node.prefixedTerm)
+            elif tname == "todoTerm":
+                return TodoNode(self, node.prefixedTerm)
+
+
+
+    def searchDocPageAndText(self, docPage, text, searchCharStartPos=0):
+        """
+        Applies the search operation on docPage and returns a
+        tuple with at least two elements <first char>, <after last char>
+        with position of found data or (None, None) if search
+        was not successful.
+
+        Remarks:
+        - The function may not work if self.booleanOp is True
+        - The function does not apply a replacement, even if 'self'
+          is a replacement operation
+        """
+        if not self.hasParticularTextPosition():
+            return (None, None)  # TODO Exception?
+
+        # Try to get regex pattern
+        if self.searchOpTree is None:
+            self.rebuildSearchOpTree()
+
+        return self.searchOpTree.searchDocPageAndText(docPage, text,
+                searchCharStartPos, self.cycleToStart)
+
 
 
     def searchText(self, text, searchCharStartPos=0):
@@ -1183,14 +1686,14 @@ class SearchReplaceOperation:
         Applies the search operation on text and returns a
         tuple with at least two elements <first char>, <after last char>
         with position of found data or (None, None) if search
-        was unsuccessful.
-        
+        was not successful.
+
         Remarks:
-        - The function does not work if self.booleanOp is True
+        - The function may not work if self.booleanOp is True
         - The function does not apply a replacement, even if 'self'
           is a replacement operation
         """
-        if self.booleanOp:
+        if not self.hasParticularTextPosition():
             return (None, None)  # TODO Exception?
 
         # Try to get regex pattern
@@ -1201,11 +1704,18 @@ class SearchReplaceOperation:
                 self.cycleToStart)
 
 
+    def hasParticularTextPosition(self):
+        if self.searchOpTree is None:
+            self.rebuildSearchOpTree()
+
+        return self.searchOpTree.hasParticularTextPosition()
+
+
     def matchesPart(self, text, range):
         """
         Test if string text[range[0]: range[1]] matches operation.
         """
-        if self.booleanOp:
+        if not self.hasParticularTextPosition():
             return None  # TODO Exception?
 
         # Try to get regex pattern
@@ -1220,7 +1730,7 @@ class SearchReplaceOperation:
         Return the text which should replace the selection in text
         described by foundData (which was returned by a call to searchText)
         """
-        if self.booleanOp or not self.replaceOp:
+        if not self.replaceOp or not self.hasParticularTextPosition():
             return None   # TODO Exception?
 
         # Try to get regex pattern
@@ -1230,7 +1740,7 @@ class SearchReplaceOperation:
         return self.searchOpTree.replace(text, foundData, self.replaceStr)
 
 
-    def beginWikiSearch(self, wikiDocument):
+    def beginWikiSearch(self, wikiDocument, commonCache=None):
         """
         Called by WikiDocument(=WikiDataManager) to begin a wiki-wide search
         """
@@ -1238,11 +1748,16 @@ class SearchReplaceOperation:
 
         if self.searchOpTree is None:
             self.rebuildSearchOpTree()
-            
-        self.listWikiPagesOp.beginWikiSearch(wikiDocument)
-            
-        return self.searchOpTree.beginWikiSearch(wikiDocument)
         
+        if commonCache is None:
+            commonCache = {}
+            
+        self.listWikiPagesOp.beginWikiSearch(wikiDocument,
+                commonCache=commonCache)
+            
+        return self.searchOpTree.beginWikiSearch(wikiDocument,
+                commonCache=commonCache)
+
 
     def endWikiSearch(self):
         """
@@ -1319,5 +1834,13 @@ class SearchReplaceOperation:
         remain.sort()
         
         return naturalList + remain
+
+
+
+
+
+
+
+
 
 

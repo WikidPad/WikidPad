@@ -1,0 +1,76 @@
+﻿++ Searching The Wiki/Boolean Regex
+
+The "boolean regex" mode in wiki-wide search allows to connect multiple regular expressions by some logical operators and search special things (attributes, todos) by some prefixes.
+
++++ And, or, not
+You can connect two or more regular expressions with "and" or "or" or prefix them with "not".
+
+Examples:
+
+foo and bar   Find pages containing "foo" and "bar" in text
+foo or bar   Find pages containing "foo" or "bar" in text (or both)
+foo and not bar   Find pages containing "foo" but not "bar" in text
+
+
++++ Parentheses
+Group search expressions with parentheses
+
+( foo and bar ) or test   Find pages containing "foo" and "bar" or containing "test" (regardless if "foo" or "bar" in page)
+
+Parentheses must be surrounded by spaces (except at the beginning or end of the whole search expression), otherwise they are seen as parts of the regular expression they are adjacent to.
+
+
+At the moment the and/or operators group right-to-left, this means that
+
+foo and bar or test
+
+is equal to
+
+foo and ( bar or test )
+
+
++++ Quoting
+If you want to use "and", "or" or other keywords in a regular expression you can quote the regex by one or more double quotes, single quotes or forward slashes (backward slashes not allowed here unlike quoting in attributes or insertions). To end the quote use the same count of the same character as for beginning quote
+
+foo and "bar or test": Find pages containing "foo" and "bar or test" (written exactly so).
+
+//att:'here'//   Find "att:'here'"
+
+
++++ Prefixed terms
+
+++++ attr:
+Search for attributes. An attribute consists of a key (before colon or equal sign) and a value (after colon/equal sign). After prefix "attr:" you can give a regular expression for the key then a colon, then a regular expression for the value. The attribute must match both parts to be found. You can also omit one of the parts if it doesn't matter.
+
+Examples:
+
+attr:Mary:lamb   Find pages with an attribute containing "Mary" in the key *at any position* and "lamb" in the value *at any position*.
+
+attr:^Mary   Find pages with an attribute containing "Mary" at the beginning of the key and arbitrary value (the ^ is part of the regular expression language, meaning "start of line here").
+
+attr::lamb$   Find pages with an attribute containing "lamb" at the end of the value and arbitrary key (notice the double colon to have an empty key part, the $ is part of the regular expression language, meaning "end of line here").
+
+Be aware that in the regular expression language, a dot '.' means "any character". To find a real dot only, precede it with backslash <<\.>>.
+
+
+++++ todo:
+Search for todo entries. Although todo entries can also be divided into key and value they are unfortunately currently stored as one string of text exactly as they are entered on a page. Therefore searching todos is different from searching attributes
+
+Examples:
+
+<<
+todo:todo:   Find todo entries containing "todo:" (e.g. "todo.weekend: Wash car" is not found)
+
+todo:issue.*?:   Find todo entries containing "issue" somewhere before ":" (e.g. "issue.hairy: Wash cat" is found)
+
+todo:track   Find todo entries containing "track" somewhere (part of key or value)
+>>
+
+
+You can combine prefixed terms with logical operators and normal search terms:
+
+attr:Mary and attr:lamb   Find pages having an attribute with key containing "Mary" and an attribute with value containing "lamb" (not necessarily the same attribute).
+
+<<
+todo:grass and garden   Find pages having a todo item containing "grass" and the text "garden" somewhere.
+>>

@@ -593,7 +593,18 @@ BracketStartPAT = ur"\["
 
 BracketEnd = u"]"
 BracketEndPAT = ur"\]"
-WikiWordNccPAT = ur"[^\\/\[\]\|\000-\037=:;#!]+" # ur"[\w\-\_ \t]+"
+# WikiWordNccPAT = ur"/?(?:/?[^\\/\[\]\|\000-\037=:;#!]+)+" # ur"[\w\-\_ \t]+"
+
+# Single part of subpage path
+WikiWordPathPartPAT = ur"(?!\.\.)[^\\/\[\]\|\000-\037=:;#!]+"
+WikiPageNamePAT = WikiWordPathPartPAT + "(?:/" + WikiWordPathPartPAT + ")*"
+
+# Begins with dotted path parts which mean to go upward in subpage path
+WikiWordDottedPathPAT = ur"\.\.(/\.\.)*(?:/" + WikiWordPathPartPAT + ")*"
+WikiWordNonDottedPathPAT = ur"/{0,2}" + WikiPageNamePAT
+
+WikiWordNccPAT = WikiWordDottedPathPAT + ur"|" + WikiWordNonDottedPathPAT
+
 WikiWordTitleStartPAT = ur"\|"
 WikiWordAnchorStart = u"!"
 WikiWordAnchorStartPAT = ur"!"
@@ -603,7 +614,7 @@ BracketStartRevPAT = ur"\["
 # Bracket end, escaped for reverse RE pattern (for autocompletion)
 BracketEndRevPAT = ur"\]"
 
-WikiWordNccRevPAT = ur"[^\\/\[\]\|\000-\037=:;#!]+?"  # ur"[\w\-\_ \t.]+?"
+WikiWordNccRevPAT = ur"[^\\\[\]\|\000-\037=:;#!]+?"  # ur"[\w\-\_ \t.]+?"
 
 
 
@@ -669,10 +680,48 @@ def actionSearchFragmentIntern(s, l, st, t):
     lt2.unescaped = UnescapeStandardRE.sub(ur"\1", lt2.text)
 
 
+
+def resolveWikiWordLink(link, basePage):
+    """
+    If using subpages this is used to resolve a link to the right wiki word
+    relative to basePage on which the link is placed.
+    It returns the absolute link (page name).
+    """
+    if link.startswith(u"//"):
+        # Absolute link
+        return link[2:]
+
+    if basePage is None or not basePage.getWikiWord():
+        return link  # TODO  Better reaction?
+
+    basePath = basePage.getWikiWord().split(u"/")
+    linkPath = link.split(u"/")
+
+    if len(linkPath[0]) == 0:
+        # Preceding '/' -> Go downward one level (or more)
+        return u"/".join(basePath + linkPath[1:])
+
+    for i in xrange(0, len(linkPath)):
+        if linkPath[i] != "..":
+            return u"/".join(basePath[:-i-1] + linkPath[i:])
+    
+    return u"/".join(basePath[:-len(linkPath)])
+
+#     if len(linkPath) == 1:
+#         # Same level   TODO: Maybe search also in parent levels?
+#         return u"/".join(basePath[:-1] + linkPath)
+    
+
+
+
 def actionWikiWordNcc(s, l, st, t):
     t.wikiWord = t.findFlatByName("word")
     if t.wikiWord is not None:
-        t.wikiWord = t.wikiWord.getString()
+        t.wikiWord = resolveWikiWordLink(t.wikiWord.getString(),
+                st.dictStack["wikiFormatDetails"].basePage)
+
+        if t.wikiWord == u"":
+            raise ParseException(s, l, "Subpage resolution of wikiword failed")
 
     t.titleNode = t.findFlatByName("title")
 
@@ -701,9 +750,16 @@ def preActCheckWikiWordCcAllowed(s, l, st, pe):
 def actionWikiWordCc(s, l, st, t):
     t.wikiWord = t.findFlatByName("word")
     if t.wikiWord is not None:
-        t.wikiWord = t.wikiWord.getString()
+        wikiFormatDetails = st.dictStack["wikiFormatDetails"]
+
+        t.wikiWord = resolveWikiWordLink(t.wikiWord.getString(),
+                wikiFormatDetails.basePage)
+
+        if t.wikiWord == u"":
+            raise ParseException(s, l, "Subpage resolution of wikiword failed")
+
         try:
-            wikiFormatDetails = st.dictStack["wikiFormatDetails"]
+#             wikiFormatDetails = st.dictStack["wikiFormatDetails"]
             
             if t.wikiWord in wikiFormatDetails.wikiDocument.getCcWordBlacklist():
                 raise ParseException(s, l, "CamelCase word is in blacklist")
@@ -717,7 +773,7 @@ def actionWikiWordCc(s, l, st, t):
         t.searchFragment = fragmentNode.unescaped
     else:
         t.searchFragment = None
-    
+
     t.anchorLink = t.findFlatByName("anchorLink")
     if t.anchorLink is not None:
         t.anchorLink = t.anchorLink.getString()
@@ -825,7 +881,7 @@ extractableWikiWord = extractableWikiWord.setResultsNameNoCopy("extractableWikiW
         .parseWithTabs()
 
 
-wikiWordNccRE = re.compile(ur"^" + WikiWordNccPAT + ur"$",
+wikiPageNameRE = re.compile(ur"^" + WikiPageNamePAT + ur"$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
@@ -1178,43 +1234,6 @@ class _TheParser(object):
         Do some cleanup after main parsing.
         Not part of public API.
         """
-#         # Step one: coalesce "plainText" nodes
-#         def recursCoalesce(ast):
-#             prevNode = None
-#             newAstNodes = []
-#             for node in ast.getChildren():
-#                 # This should be safe for this parser, but not for all
-#                 if node.strLength == 0:
-#                     continue
-# 
-#                 if isinstance(node, NonTerminalNode):
-#                     prevNode = None
-#                     node = recursCoalesce(node)
-# #                     if node is not None:
-#                     newAstNodes.append(node)
-#                     continue
-# 
-#                 if node.name == "plainText":
-#                     if prevNode is None:
-#                         prevNode = node
-#                         newAstNodes.append(node)
-#                         continue
-#                     else:
-#                         prevNode.text += node.text
-#                         prevNode.strLength = len(prevNode.text)
-#                         continue
-# 
-#                 prevNode = None
-#                 newAstNodes.append(node)
-# 
-#             ast.sub = newAstNodes
-# 
-#             return ast
-#         
-#         pageAst = recursCoalesce(pageAst)
-
-
-        # Step two: Search for auto-links and add them
         autoLinkRelaxRE = None
         if formatDetails.autoLinkMode == u"relax":
             relaxList = formatDetails.wikiDocument.getAutoLinkRelaxInfo()
@@ -1270,11 +1289,10 @@ class _TheParser(object):
                                 wwNode.searchFragment = None
                                 wwNode.anchorLink = None
                                 wwNode.wikiWord = foundWord
-                                wwNode.titleNode = None
-                                        
-                               
+                                wwNode.titleNode = None # buildSyntaxNode(foundWordText, start, "plainText")
+
                                 newAstNodes.append(wwNode)
-                
+
                                 inc = max(len(foundWordText), 1)
                                 start += inc
                                 text = text[inc:]
@@ -1394,19 +1412,26 @@ class _TheHelper(object):
         if not footnotesAsWws and footnoteRE.match(word):
             return _(u"This is a footnote")
 
-        if wikiWordNccRE.match(word):
+        if wikiPageNameRE.match(word):
             return None
         else:
             return _(u"This is syntactically not a wiki word")
 
 
     @staticmethod
-    def extractWikiWordFromLink(word, wikiDocument=None):
+    def extractWikiWordFromLink(word, wikiDocument=None, basePage=None):  # TODO Problems with subpages?
         """
         Strip brackets and other link details if present and return wikiWord
         if a valid wiki word can be extracted, None otherwise.
         """
-        baseDict = _buildBaseDict(wikiDocument=wikiDocument)
+        if wikiDocument is None and basePage is not None:
+            wikiDocument = basePage.getWikiDocument()
+
+        if basePage is None:
+            baseDict = _buildBaseDict(wikiDocument=wikiDocument)
+        else:
+            baseDict = _buildBaseDict(formatDetails=basePage.getFormatDetails())
+
         try:
             t = extractableWikiWord.parseString(word, parseAll=True,
                     baseDict=baseDict)
@@ -1500,7 +1525,7 @@ class _TheHelper(object):
                 if not word in ccBlacklist:
                     return word
 
-        return BracketStart + word + BracketEnd
+        return BracketStart + u"//" + word + BracketEnd
 
 
     @staticmethod
@@ -1509,8 +1534,45 @@ class _TheHelper(object):
         Create particularly stable links from a list of words which should be
         put on wikiPage.
         """
-        return u"".join([u"%s%s%s\n" % (BracketStart, w, BracketEnd)
+        return u"\n".join([u"%s//%s%s" % (BracketStart, w, BracketEnd)
                 for w in words])
+
+    @staticmethod
+    def createRelativeLinkFromWikiWord(word, baseWord, downwardOnly=True):
+        """
+        Create a link to wikiword word relative to baseWord.
+        If downwardOnly is False, the link may contain parts to go to parents
+            or siblings
+        in path (in this wiki language, ".." are used for this).
+        If downwardOnly is True, the function may return None if a relative
+        link can't be constructed.
+        """
+
+        wordPath = word.split(u"/")
+        baseWordPath = baseWord.split(u"/")
+        
+        if downwardOnly:
+            if len(baseWordPath) >= len(wordPath):
+                return None
+            if baseWordPath != wordPath[:len(baseWordPath)]:
+                return None
+            
+            return u"/" + u"/".join(wordPath[len(baseWordPath):])
+        # TODO test downwardOnly == False
+        else:
+            # Remove common path elements
+            while len(wordPath) > 0 and len(baseWordPath) > 0 and \
+                    wordPath[0] == baseWordPath[0]:
+                del wordPath[0]
+                del baseWordPath[0]
+            
+            if len(baseWordPath) == 0:
+                if len(wordPath):
+                    return None  # word == baseWord, TODO return u"." or something
+                return u"/" + u"/".join(wordPath[len(baseWordPath):])
+
+            return u"../" * (len(baseWordPath) - 1) + \
+                    u"/".join(wordPath[len(baseWordPath):])
 
 
     @staticmethod
@@ -1966,11 +2028,4 @@ def languageHelperFactory(intLanguageName, debugMode):
         identify wiki language to process by helper
     """
     return THE_LANGUAGE_HELPER
-
-
-
-
-# print t.pprint()
-
-
 

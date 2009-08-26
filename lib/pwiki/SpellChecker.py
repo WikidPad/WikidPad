@@ -100,6 +100,9 @@ class SpellCheckerDialog(wx.Dialog):
 
         lang = docPage.getPropertyOrGlobal(u"language", self.dictLanguage)
         try:
+            if lang == u"":
+                raise EnchantDriver.DictNotFoundError()
+
             if lang != self.dictLanguage:
                 self.enchantDict = Dict(str(lang))
                 self.dictLanguage = lang
@@ -142,6 +145,38 @@ class SpellCheckerDialog(wx.Dialog):
                 set(self.localPwlPage.getLiveText().split("\n"))
 
 
+    def _findAndLoadNextWikiPage(self, firstCheckedWikiWord, checkedWikiWord):
+        while True:
+            #Go to next page
+            nw = self.mainControl.getWikiData().getNextWikiWord(
+                    checkedWikiWord)
+            if nw is None:
+                nw = self.mainControl.getWikiData().getFirstWikiWord()
+            
+            if nw is None or nw == firstCheckedWikiWord:
+                # Something went wrong or we are where we started
+                self._showInfo(_(u"No (more) misspelled words found"))
+                return None
+                
+            checkedWikiWord = nw
+
+            if firstCheckedWikiWord is None:
+                # To avoid infinite loop
+                firstCheckedWikiWord = checkedWikiWord
+
+            self.currentDocPage = self.mainControl.getWikiDocument().\
+                    getWikiPage(checkedWikiWord)
+
+            self._refreshDictionary()
+
+            if self.enchantDict is None:
+                # This page has no defined language or dictionary not available
+                continue
+            else:
+                # Success
+                return checkedWikiWord
+
+
     def checkNext(self, startPos=0):
         activeEditor = self.mainControl.getActiveEditor()
         startWikiWord = self.mainControl.getCurrentWikiWord()
@@ -153,16 +188,38 @@ class SpellCheckerDialog(wx.Dialog):
             return False
 
         startWikiWord = self.mainControl.getWikiDocument()\
-                .getUnAliasedWikiWordOrAsIs(startWikiWord)  # TODO Check if this can't fail
+                .getUnAliasedWikiWordOrAsIs(startWikiWord)
 
-        self.currentDocPage = self.mainControl.getWikiDocument().getWikiPage(
-                startWikiWord)
+        firstCheckedWikiWord = startWikiWord
 
-        self._refreshDictionary()   # TODO Make faster?
+        if not self.mainControl.getWikiDocument().isDefinedWikiPage(
+                firstCheckedWikiWord):
 
-        if self.enchantDict is None:
-            self._showInfo(_(u"No dictionary found for this page"))
-            return False  # No dictionary  # TODO: Next page
+            # This can happen if startWikiWord is a newly created, not yet
+            # saved page
+            if not self.ctrls.cbGoToNextPage.GetValue():
+                self._showInfo(
+                        _(u"Current page is not modified yet"))
+                return False
+
+            firstCheckedWikiWord = self._findAndLoadNextWikiPage(None,
+                    firstCheckedWikiWord)
+                    
+            if firstCheckedWikiWord is None:
+                return False
+
+        else:
+            self.currentDocPage = self.mainControl.getWikiDocument().getWikiPage(
+                    firstCheckedWikiWord)
+            self._refreshDictionary()   # TODO Make faster?
+
+            if self.enchantDict is None:
+                if firstCheckedWikiWord == startWikiWord:
+                    self._showInfo(_(u"No dictionary found for this page"))
+                    return False  # No dictionary  # TODO: Next page?
+
+
+        checkedWikiWord = firstCheckedWikiWord
 
         langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.currentDocPage.getWikiLanguageName())
@@ -170,7 +227,6 @@ class SpellCheckerDialog(wx.Dialog):
         text = activeEditor.GetText()
 
         self.ctrls.tfToCheck.SetValue("")
-        checkedWikiWord = startWikiWord
 
         while True:
             start, end, spWord = langHelper.findNextWordForSpellcheck(text,
@@ -179,32 +235,14 @@ class SpellCheckerDialog(wx.Dialog):
             if start is None:
                 # End of page reached
                 if self.ctrls.cbGoToNextPage.GetValue():
-                    while True:
-                        #Automatically go to next page
-                        nw = self.mainControl.getWikiData().getNextWikiWord(
-                                checkedWikiWord)
-                        if nw is None:
-                            nw = self.mainControl.getWikiData().getFirstWikiWord()
-                        
-                        if nw is None or nw == startWikiWord:
-                            # Something went wrong or we are where we started
-                            self._showInfo(_(u"No (more) misspelled words found"))
-                            return False
-                            
-                        checkedWikiWord = nw
+                    checkedWikiWord = self._findAndLoadNextWikiPage(
+                            firstCheckedWikiWord, checkedWikiWord)
+                    
+                    if checkedWikiWord is None:
+                        return False
 
-                        self.currentDocPage = self.mainControl.getWikiDocument().\
-                                getWikiPage(checkedWikiWord)
-
-                        self._refreshDictionary()
-    
-                        if self.enchantDict is None:
-                            # This page has no defined language or dictionary not available
-                            continue
-                        else:
-                            break
-
-                    text = self.mainControl.getWikiDataManager().getWikiPage(nw).getLiveText()
+                    text = self.mainControl.getWikiDataManager()\
+                            .getWikiPage(checkedWikiWord).getLiveText()
                     startPos = 0
                     continue
                 else:

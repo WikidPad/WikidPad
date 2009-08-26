@@ -2,7 +2,7 @@
 
 import string, locale, codecs, os, os.path, traceback
 
-from xml.dom import minidom
+from rtlibRepl import minidom
 
 from StringOps import utf8Enc, loadEntireFile, writeEntireFile, pathEnc
 

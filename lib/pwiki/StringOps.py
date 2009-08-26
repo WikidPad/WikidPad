@@ -316,6 +316,7 @@ def loadEntireFile(filename, textMode=False):
         rf.close()
 
 
+
 def writeEntireFile(filename, content, textMode=False):
     """
     Write entire file (binary mode).
@@ -327,68 +328,76 @@ def writeEntireFile(filename, content, textMode=False):
     for utf-8. In textMode, lineEndings are properly converted to the
     appropriate for the OS.
     """
+    import TempFileSet
+
     basePath = os.path.split(filename)[0]
     suffix = os.path.splitext(filename)[1]
 
     if basePath == "":
         basePath = u"."
 
-    fd, tempPath = tempfile.mkstemp(suffix=pathEnc(suffix), dir=pathEnc(basePath),
-            text=textMode)
+#     fd, tempPath = tempfile.mkstemp(suffix=pathEnc(suffix), dir=pathEnc(basePath),
+#             text=textMode)
 
-    try:
-        try:
-            if isinstance(content, unicode):
-                assert textMode
-                content = content.encode("utf-8")
-                os.write(fd, BOM_UTF8)
-                os.write(fd, content)
-            elif isinstance(content, str):
-                os.write(fd, content)
-            else:    # content is a sequence
-                try:
-                    iCont = iter(content)
-        
-                    firstContent = iCont.next()
-                    
-                    unic = False
-                    if isinstance(firstContent, unicode):
-                        firstContent = firstContent.encode("utf-8")
-                        os.write(fd, BOM_UTF8)
-                        unic = True
+#     try:
+    tempPath = TempFileSet.createTempFile(content, suffix=suffix, path=basePath,
+            textMode=textMode)
 
-                    assert isinstance(firstContent, str)
-                    os.write(fd, firstContent)
+#         try:
+#             if isinstance(content, unicode):
+#                 assert textMode
+#                 content = content.encode("utf-8")
+#                 os.write(fd, BOM_UTF8)
+#                 os.write(fd, content)
+#             elif isinstance(content, str):
+#                 os.write(fd, content)
+#             else:    # content is a sequence
+#                 try:
+#                     iCont = iter(content)
+#         
+#                     firstContent = iCont.next()
+#                     
+#                     unic = False
+#                     if isinstance(firstContent, unicode):
+#                         firstContent = firstContent.encode("utf-8")
+#                         os.write(fd, BOM_UTF8)
+#                         unic = True
+# 
+#                     assert isinstance(firstContent, str)
+#                     os.write(fd, firstContent)
+#     
+#                     while True:
+#                         content = iCont.next()
+#     
+#                         if unic:
+#                             assert isinstance(content, unicode)
+#                             content = content.encode("utf-8")
+#     
+#                         assert isinstance(content, str)
+#                         os.write(fd, content)
+#                 except StopIteration:
+#                     pass
+# 
+#         finally:
+#             os.close(fd)
+# 
+#     except Exception, e:
+#         # Something went wrong -> try to remove temporary file
+#         try:
+#             os.unlink(tempPath)
+#         except:
+#             traceback.print_exc()
+#         
+#         raise e
+#     else:
+
+    # Successful operation so far
     
-                    while True:
-                        content = iCont.next()
-    
-                        if unic:
-                            assert isinstance(content, unicode)
-                            content = content.encode("utf-8")
-    
-                        assert isinstance(content, str)
-                        os.write(fd, content)
-                except StopIteration:
-                    pass
+    if os.path.exists(filename):
+        os.unlink(filename)
 
-        finally:
-            os.close(fd)
+    os.rename(tempPath, filename)
 
-    except Exception, e:
-        # Something went wrong -> try to remove temporary file
-        try:
-            os.unlink(tempPath)
-        except:
-            traceback.print_exc()
-        
-        raise e
-    else:
-        # Successful operation so far
-        if os.path.exists(filename):
-            os.unlink(filename)
-
-        os.rename(tempPath, filename)
 
 
 def getFileSignatureBlock(filename):

@@ -1,0 +1,24 @@
+﻿++ Subpages
+
+You can use subpages to make a page a kind of folder for other pages related to it. For instance you can create a page "ebay" (you don't have to create it) and then create subpages for each selling or buying you did in ebay, e.g. "ebay/Couch", "ebay/Circlet", "ebay/Cerebrum", ...
+
+You can create further subsubpages, e.g. "ebay/Couch/BuyerAddress" and so on.
+
+You can create relative and absolute links (similar to relative and absolute pathes to files) to other pages according to the following rules:
+
+Links starting with two slashes are absolute, so [//ebay/Circlet] goes to page "ebay/Circlet" regardless on which page the link is placed.
+
+Links starting with one slash go to sub page, so on page "ebay" the link [/Couch] goes to "ebay/Couch". The tree also shows such a child relation differently as children "/Couch" of parent "ebay". If e.g. another page "Furniture" also links to "ebay/Couch", then "ebay/Couch" is shown with full name as child of "Furniture".
+
+Links starting with no slash go to sibling, so on page "ebay/Cerebrum" the link [Circlet] goes to "ebay/Circlet". This is the only link type where camel-case links can be used, so from "ebay/Cerebrum" the link OldCar goes to "ebay/OldCar".
+
+Links starting with one or more ".." separated by slashes go to super page. If a wiki link follows, it goes to sibling. E.g. from "ebay/Couch/BuyerAddress":
+
+[..]   goes to "ebay/Couch"
+[../..]   goes to "ebay"
+[../../Amazon]   goes to "Amazon"  (rules for file pathes are different here, they would lead to "ebay/Amazon" instead).
+
+
+At the moment alias attributes must specify the full alternative wikiword. Also, because slashes are not allowed in attribute values, the value must be quoted.
+E.g. on page "ebay/Couch" you have to write <<[alias: "ebay/Chaise"]>>.
+

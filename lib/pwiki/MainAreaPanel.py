@@ -6,7 +6,8 @@ import os, sys, traceback, string, re
 import wx
 # import wx.xrc as xrc
 
-from wxHelper import GUI_ID, copyTextToClipboard
+from wxHelper import GUI_ID, copyTextToClipboard, getAccelPairFromKeyDown
+
 from MiscEvent import MiscEventSourceMixin, ProxyMiscEvent
 
 from WikiExceptions import *
@@ -37,6 +38,10 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
         self.currentPresenter = None
         self.docPagePresenters = []
+        self.mruTabIndex = []
+        self.tabSwitchByKey = 0  # 2: Key hit, notebook change not processed;
+                # 1: Key hit, nb. change processed
+                # 0: Processing done
         self.currentPresenterProxyEvent = ProxyMiscEvent(self)
 
         # Last presenter for which a context menu was shown
@@ -48,11 +53,13 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 #         self.docPagePresContextMenu = res.LoadMenu("MenuDocPagePresenterTabPopup")
 
         self.tabDragCursor = wx.StockCursor(wx.CURSOR_HAND)
-        self.tabDragging = False
+        self.tabDragging = wx.NOT_FOUND
 
 #         wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.GetId(),
 #                 self.OnNotebookPageChanged)
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChanged)
+        wx.EVT_KEY_UP(self, self.OnKeyUp)
+
         wx.EVT_LEFT_DOWN(self, self.OnLeftDown)
         wx.EVT_LEFT_UP(self, self.OnLeftUp)
         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
@@ -61,6 +68,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
         wx.EVT_SET_FOCUS(self, self.OnFocused)
+        wx.EVT_KILL_FOCUS(self, self.OnKillFocus)
 #         EVT_AFTER_FOCUS(self, self.OnAfterFocus)
 
         wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_THIS_TAB, self.OnCloseThisTab)
@@ -71,7 +79,6 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         wx.EVT_MENU(self, GUI_ID.CMD_GO_PREVIOUS_TAB, self.OnGoTab)
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_WIKIWORD,
                 self.OnCmdClipboardCopyUrlToThisWikiWord)
-
 
     def close(self):
         for p in self.docPagePresenters:
@@ -182,6 +189,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
 
     def appendPresenterTab(self, presenter):
+        self._mruTabIndexAppend(len(self.docPagePresenters))
         self.docPagePresenters.append(presenter)
         self.AddPage(presenter, "    ")
         presenter.getMiscEvent().addListener(self)
@@ -212,6 +220,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         
         # Actual deletion
         del self.docPagePresenters[idx]
+        self._mruTabIndexDelete(idx)
         self.DeletePage(idx)
         self.updateConfig()
 
@@ -231,6 +240,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             
         # Actual remove
         del self.docPagePresenters[idx]
+        self._mruTabIndexDelete(idx)
         self.RemovePage(idx)
         self.updateConfig()
 
@@ -303,27 +313,48 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 #             pass
 
 
+#     def OnKeyDown(self, evt):
+#         key = evt.GetKeyCode()
+# 
+#         self.lastKeyPressed = time()
+#         accP = getAccelPairFromKeyDown(evt)
+#         matchesAccelPair = self.mainControl.keyBindings.\
+#                 matchesAccelPair
+#         
+#         if accP == (wx.ACCEL_CTRL, wx.WXK_TAB):
+#             print "--Forward"
+#             return
+#         
+#         evt.Skip()
+
+
     def OnNotebookPageChanged(self, evt):
         # Tricky hack to set focus to the notebook page
         if self.runningPageChangedEvent:
             evt.Skip()
-            self.runningPageChangedEvent = False
+            self.runningPageChangedEvent = True
             return
 
         try:
             # Flag the event to ignore and resend it.
             # It is then processed by wx.Notebook code
             # where the focus is set to the notebook itself
-            self.runningPageChangedEvent = True
 
             presenter = self.docPagePresenters[evt.GetSelection()]
             self.prepareCurrentPresenter(presenter)
 
-            self.ProcessEvent(evt)
+            self.runningPageChangedEvent = True
+            try:
+                self.ProcessEvent(evt.Clone())
+            finally:
+                self.runningPageChangedEvent = False
 
             # Now we can set the focus back to the presenter
             # which in turn sets it to the active subcontrol
-            presenter.SetFocus()
+
+            if self.tabSwitchByKey < 2:
+                self._mruTabIndexPushToTop(evt.GetSelection())
+                presenter.SetFocus()
         except (IOError, OSError, DbAccessError), e:
             self.runningPageChangedEvent = False
             self.mainControl.lostAccess(e)
@@ -345,9 +376,21 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
 
     def OnFocused(self, evt):
-        p = self.GetCurrentPage()
-        if p is not None:
-            p.SetFocus()
+        if self.tabSwitchByKey == 0:
+            p = self.GetCurrentPage()
+            if p is not None:
+                p.SetFocus()
+
+
+    def OnKillFocus(self, evt):
+        evt.Skip()
+
+        if self.tabSwitchByKey == 0:
+            return
+
+        self.tabSwitchByKey = 0
+        self._mruTabIndexPushToTop(self.GetSelection())
+
 
 
     def OnCloseThisTab(self, evt):
@@ -358,21 +401,92 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         self.closePresenterTab(self.getCurrentPresenter())
 
 
+    # Handle self.mruTabIndex
+    def _mruTabIndexPushToTop(self, idx):
+        """
+        Push idx to top in mru list.
+        """
+        try:
+            self.mruTabIndex.remove(idx)
+        except ValueError:
+            pass
+        
+        self.mruTabIndex.insert(0, idx)
+
+    def _mruTabIndexAppend(self, idx):
+        self.mruTabIndex = [(i if i < idx else i + 1) for i in self.mruTabIndex]
+        self.mruTabIndex.append(idx)
+
+    def _mruTabIndexDelete(self, idx):
+        """
+        Delete idx. Indices > idx must be decremented by one.
+        """
+        self.mruTabIndex = [(i if i < idx else i - 1) for i in self.mruTabIndex
+                if i != idx]
+
+    def _mruTabIndexGetNext(self, idx):
+        """
+        Get next index after idx
+        """
+        try:
+            return self.mruTabIndex[self.mruTabIndex.index(idx) + 1]
+        except (ValueError, IndexError):
+            return self.mruTabIndex[0]
+
+    def _mruTabIndexGetPrevious(self, idx):
+        """
+        Get next index after idx
+        """
+        try:
+            return self.mruTabIndex[self.mruTabIndex.index(idx) - 1]
+        except ValueError:
+            return self.mruTabIndex[-1]
+
+
     def OnGoTab(self, evt):
         pageCount = self.GetPageCount()
         if pageCount < 2:
             return
+            
+        switchMru = self.mainControl.getConfig().getboolean("main",
+                "mainTabs_switchMruOrder", True)
 
         if evt.GetId() == GUI_ID.CMD_GO_NEXT_TAB:
-            newIdx = self.GetSelection() + 1
-            if newIdx >= pageCount:
-                newIdx = 0
+            if switchMru:
+                newIdx = self._mruTabIndexGetNext(self.GetSelection())
+                self.tabSwitchByKey = 2
+            else:
+                newIdx = self.GetSelection() + 1
+                if newIdx >= pageCount:
+                    newIdx = 0
         elif evt.GetId() == GUI_ID.CMD_GO_PREVIOUS_TAB:
-            newIdx = self.GetSelection() - 1
-            if newIdx < 0:
-                newIdx = pageCount - 1
-        
+            if switchMru:
+                newIdx = self._mruTabIndexGetPrevious(self.GetSelection())
+                self.tabSwitchByKey = 2
+            else:
+                newIdx = self.GetSelection() - 1
+                if newIdx < 0:
+                    newIdx = pageCount - 1
+
         self.SetSelection(newIdx)
+        if self.tabSwitchByKey > 0:
+            self.tabSwitchByKey = 1
+
+
+    def OnKeyUp(self, evt):
+        if self.tabSwitchByKey == 0:
+            evt.Skip()
+            return
+
+        if evt.GetModifiers() & \
+                (wx.MOD_ALT | wx.MOD_CONTROL | wx.MOD_ALTGR | wx.MOD_META | wx.MOD_CMD):
+            # Some modifier keys are pressed yet
+            evt.Skip()
+            return
+
+        self.tabSwitchByKey = 0
+        self._mruTabIndexPushToTop(self.GetSelection())
+        self.docPagePresenters[self.GetSelection()].SetFocus()
 
 
     def OnCmdSwitchThisEditorPreview(self, evt):
@@ -400,8 +514,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
 
     def OnLeftDown(self, evt):
-        tab = self.HitTest(evt.GetPosition())[0]
-        self.tabDragging = tab != wx.NOT_FOUND
+        self.tabDragging = self.HitTest(evt.GetPosition())[0]  # tab != wx.NOT_FOUND
 #         if self.tabDragging:
 #             self.CaptureMouseIfOk()
         
@@ -409,15 +522,16 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
 
     def OnLeftUp(self, evt):
-        if self.tabDragging:
+        if self.tabDragging != wx.NOT_FOUND:
 #             self.ReleaseMouseIfOk()
-            self.tabDragging = False
+            oldTab = self.tabDragging
+            self.tabDragging = wx.NOT_FOUND
             self.SetCursor(wx.NullCursor)
             tab = self.HitTest(evt.GetPosition())[0]
             if not self.runningPageChangedEvent and tab != wx.NOT_FOUND and \
-                    tab != self.GetSelection():
+                    tab != oldTab:
 
-                oldTab = self.GetSelection()
+                # oldTab = self.GetSelection()
                 title = self.GetPageText(oldTab)
                 
                 # window and presenter should be identical, but to be sure
@@ -429,8 +543,11 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                 try:
                     self.RemovePage(oldTab)
                     del self.docPagePresenters[oldTab]
+                    self._mruTabIndexDelete(oldTab)
         
                     self.docPagePresenters.insert(tab, presenter)
+                    self._mruTabIndexAppend(tab)
+                    self._mruTabIndexPushToTop(tab)
                     self.InsertPage(tab, window, title, select=True)
                 finally:
                     self.Thaw()
@@ -454,17 +571,17 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
     def OnMotion(self, evt):
 #        if evt.Dragging() and evt.LeftIsDown():
-        if self.tabDragging:
+        if self.tabDragging != wx.NOT_FOUND:
             # Just to be sure
             if not evt.Dragging():
 #                 self.ReleaseMouseIfOk()
-                self.tabDragging = False
+                self.tabDragging = wx.NOT_FOUND
                 self.SetCursor(wx.NullCursor)
                 evt.Skip()
                 return
 
             tab = self.HitTest(evt.GetPosition())[0]
-            if tab != wx.NOT_FOUND and tab != self.GetSelection():
+            if tab != wx.NOT_FOUND and tab != self.tabDragging:
                 self.SetCursor(self.tabDragCursor)
             else:
                 self.SetCursor(wx.NullCursor)

@@ -4,7 +4,7 @@ import re
 
 from os.path import exists, isdir, isfile
 
-from xml.dom import minidom
+from rtlibRepl import minidom
 
 import wx, wx.html, wx.xrc
 

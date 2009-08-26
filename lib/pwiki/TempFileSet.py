@@ -2,6 +2,7 @@
 Temporary file management
 """
 import sys, os, os.path, traceback, tempfile, urllib
+from codecs import BOM_UTF8    # , BOM_UTF16_BE, BOM_UTF16_LE
 
 import wx
 
@@ -174,7 +175,7 @@ class TempFileSet:
 # The following three functions do not record the created files in a
 # TempFileSet and have no internal defaults for path and relativeTo.
 
-def createTempFile(content, suffix, path=None, relativeTo=None):
+def createTempFile(content, suffix, path=None, relativeTo=None, textMode=False):
     """
     Specialized function. Creates a file in directory path, fills it with 
     content (byte string), closes it and returns its full path.
@@ -182,13 +183,58 @@ def createTempFile(content, suffix, path=None, relativeTo=None):
         for absolute path
     """
     fd, fullPath = tempfile.mkstemp(suffix=pathEnc(suffix), dir=pathEnc(path),
-            text=False)
+            text=textMode)
     try:
-        os.write(fd, content)
-    finally:
-        os.close(fd)
+        try:
+            if isinstance(content, unicode):
+                assert textMode
+                content = content.encode("utf-8")
+                os.write(fd, BOM_UTF8)
+                os.write(fd, content)
+            elif isinstance(content, str):
+                os.write(fd, content)
+            else:    # content is a sequence
+                try:
+                    iCont = iter(content)
+        
+                    firstContent = iCont.next()
+                    
+                    unic = False
+                    if isinstance(firstContent, unicode):
+                        firstContent = firstContent.encode("utf-8")
+                        os.write(fd, BOM_UTF8)
+                        unic = True
+    
+                    assert isinstance(firstContent, str)
+                    os.write(fd, firstContent)
+    
+                    while True:
+                        content = iCont.next()
+    
+                        if unic:
+                            assert isinstance(content, unicode)
+                            content = content.encode("utf-8")
+    
+                        assert isinstance(content, str)
+                        os.write(fd, content)
+                except StopIteration:
+                    pass
+        finally:
+            os.close(fd)
+    except Exception, e:
+        traceback.print_exc()
+        # Something went wrong -> try to remove temporary file
+        try:
+            os.unlink(fullPath)
+        except:
+            traceback.print_exc()
+        
+        raise e
+
 
     return getRelativePath(relativeTo, fullPath)
+
+
 
 
 def createTempFileAndUrl(content, suffix, path=None, relativeTo=None,

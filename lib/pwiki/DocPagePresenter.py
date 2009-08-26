@@ -39,10 +39,9 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         self.currentDocPageProxyEvent = ProxyMiscEvent(self)
         self.currentDocPageProxyEvent.addListener(self)
 
-        
         # Connect page history
         self.pageHistory = PageHistory(self.getMainControl(), self)
-
+        
         self.getMainControl().getMiscEvent().addListener(self)
 
 
@@ -381,8 +380,11 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
         res = xrc.XmlResource.Get()
         self.tabContextMenu = res.LoadMenu("MenuDocPagePresenterTabPopup")
 
-        wx.GetApp().getMiscEvent().addListener(self)
+        self.mainTreePositionHint = None  # The tree ctrl uses this to remember
+        # which element was selected if same page appears multiple
+        # times in tree. DocPagePresenter class itself does not modify it.
 
+        wx.GetApp().getMiscEvent().addListener(self)
 
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_LIST,
                 lambda evt: self.viewHistory())
@@ -498,7 +500,8 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
         # Shorten title if too long
         maxLen = self.getConfig().getint("main", "tabs_maxCharacters", 0)
         if maxLen > 0 and len(shortTitle) > maxLen:
-            shortTitle = shortTitle[:maxLen] + u"..."
+            shortTitle = shortTitle[:(maxLen//2)] + u"..." + \
+                    shortTitle[-((maxLen+1)//2):]
 
         self.fireMiscEventProps({"changed presenter title": True,
                 "title": shortTitle})

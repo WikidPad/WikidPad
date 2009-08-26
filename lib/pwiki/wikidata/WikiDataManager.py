@@ -780,10 +780,18 @@ class WikiDataManager(MiscEventSourceMixin):
 
 
     def isDefinedWikiPage(self, wikiWord):
+        """
+        Check if a page with this name exists (no aliases)
+        """
         return self.wikiData.isDefinedWikiPage(wikiWord)
 
+
     def isDefinedWikiLink(self, wikiWord):
+        """
+        check if a word is a valid wikiword (page name or alias)
+        """
         return self.wikiData.isDefinedWikiLink(wikiWord)
+
 
     # For plugin compatibility
     isDefinedWikiWord = isDefinedWikiLink
@@ -1041,11 +1049,39 @@ class WikiDataManager(MiscEventSourceMixin):
                 wikiData.setMetaDataState(word,
                         Consts.WIKIWORDMETADATA_STATE_DIRTY)
                 wikiData.refreshFileSignatureForWord(word)
-            
+
+                wikiPage = self.wikiPageDict.get(word)
+                if wikiPage is not None:
+                    wikiPage.markTextChanged()
+
             return valid
         finally:
             if proxyAccessLock is not None:
                 proxyAccessLock.release()
+
+    def checkFileSignatureForAllWikiWordsAndMarkDirty(self):
+        if self.isReadOnlyEffect():
+            return True  # TODO Error message?
+
+        wikiData = self.getWikiData()
+        
+        proxyAccessLock = getattr(wikiData, "proxyAccessLock", None)
+        if proxyAccessLock is not None:
+            proxyAccessLock.acquire()
+        try:
+            for word in self.getAllDefinedWikiPageNames():
+                if not wikiData.validateFileSignatureForWord(word):
+                    wikiData.setMetaDataState(word,
+                            Consts.WIKIWORDMETADATA_STATE_DIRTY)
+                    wikiData.refreshFileSignatureForWord(word)
+
+                    wikiPage = self.wikiPageDict.get(word)
+                    if wikiPage is not None:
+                        wikiPage.markTextChanged()
+        finally:
+            if proxyAccessLock is not None:
+                proxyAccessLock.release()
+
 
 
     def initiateFullUpdate(self, progresshandler):
@@ -1357,7 +1393,7 @@ class WikiDataManager(MiscEventSourceMixin):
             return None
 
 
-    def searchWiki(self, sarOp, applyOrdering=True):  # TODO Threadholder
+    def searchWiki(self, sarOp, applyOrdering=True, threadstop=DUMBTHREADSTOP):  # TODO Threadholder
         """
         Search all wiki pages using the SearchAndReplaceOperation sarOp and
         return list of all page names that match the search criteria.
@@ -1367,6 +1403,7 @@ class WikiDataManager(MiscEventSourceMixin):
         wikiData = self.getWikiData()
         sarOp.beginWikiSearch(self)
         try:
+            threadstop.testRunning()
             # First search currently cached pages
             exclusionSet = set()
             preResultSet = set()
@@ -1388,8 +1425,11 @@ class WikiDataManager(MiscEventSourceMixin):
 
                 exclusionSet.add(k)
 
+                threadstop.testRunning()
+
             # Now search database
             resultSet = self.getWikiData().search(sarOp, exclusionSet)
+            threadstop.testRunning()
             resultSet |= preResultSet
             if applyOrdering:
                 result = sarOp.applyOrdering(resultSet, self.getCollator())
@@ -1399,6 +1439,7 @@ class WikiDataManager(MiscEventSourceMixin):
         finally:
             sarOp.endWikiSearch()
 
+        threadstop.testRunning()
         return result
 
 
@@ -1502,6 +1543,13 @@ class WikiDataManager(MiscEventSourceMixin):
             return word
 
         return result
+
+
+    def getTodos(self):
+        """
+        Return all todo entries as list of tuples (wikiword, todoEntry)
+        """
+        return self.getWikiData().getTodos()
 
 
     def getPropertyTriples(self, word, key, value):

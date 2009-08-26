@@ -68,7 +68,8 @@ class LockedWikiException(Exception): pass
 
 
 class NotCurrentThreadException(Exception): pass
-class DeadBlockPreventionTimeOutError(InternalError): pass
+class UserAbortException(Exception): pass
 
+class DeadBlockPreventionTimeOutError(InternalError): pass
 
 class BadFuncPageTagException(Exception): pass

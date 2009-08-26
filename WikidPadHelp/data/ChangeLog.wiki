@@ -1,5 +1,32 @@
 ﻿++ Change Log
 
+Aug. 26, 2009 (2.0beta07)
+
+    * Support for subpages e.g. <<[WikiWord/Subword]>>.
+      See [Subpages].
+    * Added entry "AddVersion" to KeyBindings.py to allow setting of
+      shortcut for adding a version
+    * Option to control in which steps a complete version should be
+      stored. See [OptionsDialog#*Steps to complete version*]
+    * More expressive boolean language for wiki-wide search.
+      See [SearchingTheWiki/BooleanRegex].
+    * Long-running wiki-wide search can now be aborted.
+    * Option to set maximum of counted occurrences during
+      wiki-wide search.
+      See [OptionsDialog#*Count Occurrences up to max.*]
+    * Option to switch between main tabs in most-recently-used order.
+      See [OptionsDialog#*Switch Tabs in MRU order*]
+    * Main tree tries to remember tree-path to wikiword for each tab.
+      If same wikiword appears multiple times in tree, the last used
+      place is used again when switching between tabs
+    * Use less CPU time if not active application.
+
+    * Bug fixed: Failure if non-existing wiki words given in
+      page list construction
+    * Bug fixed: Failure if starting spell check on a not yet
+      saved page
+
+
 
 Jul. 26, 2009 (2.0beta06)
 

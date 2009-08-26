@@ -457,6 +457,33 @@ def runDialogModalFactory(clazz):
 
 
 
+def getWindowParentsUpTo(childWindow, stopWindow):
+    result = [childWindow]
+    currentWindow = childWindow
+
+    while True:
+        currentWindow = currentWindow.GetParent()
+        if currentWindow is None:
+            return None   # Error
+        result.append(currentWindow)
+        if currentWindow is stopWindow:
+            return result
+
+
+def getAllChildWindows(win):
+    winSet = set()
+    winSet.add(win)
+    _getAllChildWindowsRecurs(win, winSet)
+    
+    return winSet
+
+
+def _getAllChildWindowsRecurs(win, winSet):
+    for c in win.GetChildren():
+        winSet.add(c)
+        _getAllChildWindowsRecurs(c, winSet)
+
+
 
 
 class wxKeyFunctionSink(wx.EvtHandler, KeyFunctionSink):
@@ -732,7 +759,7 @@ class LayerSizer(wx.PySizer):
 class DummyWindow(wx.Window):
     """
     Used to catch hotkeys because there seems to be a bug which prevents
-    deleting of them so instead the whole window is deleted and recreated.
+    deleting them so instead the whole window is deleted and recreated.
     """
     def __init__(self, parent, id=-1):
         wx.Window.__init__(self, parent, id, size=(0,0))

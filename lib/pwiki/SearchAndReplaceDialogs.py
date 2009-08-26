@@ -1,17 +1,22 @@
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
-import sys, traceback, re
+import sys, traceback, re, threading, time
 
 import wx, wx.html, wx.xrc
 
 from MiscEvent import MiscEventSourceMixin, KeyFunctionSink
 import Consts
 from WikiExceptions import *
+from Utilities import DUMBTHREADSTOP, callInMainThread, callInMainThreadAsync, \
+        ThreadHolder, FunctionThreadStop
 
+import wxHelper
 from wxHelper import *
 
 from StringOps import uniToGui, guiToUni, escapeHtml
+
+from WikiPyparsing import ParseException
 
 from WindowLayout import setWindowPos, setWindowSize, \
         getRelativePositionTupleToAncestor, LayeredControlPanel
@@ -21,85 +26,14 @@ from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE, isLinux
 from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation
 
 
-class SearchWikiOptionsDialog(wx.Dialog):
-    def __init__(self, parent, pWiki, ID=-1, title="Search Wiki",
-                 pos=wx.DefaultPosition, size=wx.DefaultSize,
-                 style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
-        d = wx.PreDialog()
-        self.PostCreate(d)
-
-        self.pWiki = pWiki
-
-        res = wx.xrc.XmlResource.Get()
-        res.LoadOnDialog(self, parent, "SearchWikiOptionsDialog")
-
-        self.ctrls = XrcControls(self)
-        
-        config = self.pWiki.getConfig()
-        
-        before = unicode(config.getint("main", "search_wiki_context_before"))
-        after = unicode(config.getint("main", "search_wiki_context_after"))
-                
-        self.ctrls.tfWwSearchContextBefore.SetValue(uniToGui(before))
-        self.ctrls.tfWwSearchContextAfter.SetValue(uniToGui(after))
-        self.ctrls.cbWwSearchCountOccurrences.SetValue(
-                config.getboolean("main", "search_wiki_count_occurrences"))
-        
-        self.ctrls.rboxFastSearchSearchType.SetSelection(
-                config.getint("main", "fastSearch_searchType"))
-        self.ctrls.cbFastSearchCaseSensitive.SetValue(
-                config.getboolean("main", "fastSearch_caseSensitive"))
-        self.ctrls.cbFastSearchWholeWord.SetValue(
-                config.getboolean("main", "fastSearch_wholeWord"))
-
-        self.ctrls.btnOk.SetId(wx.ID_OK)
-        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
-        
-        # Fixes focus bug under Linux
-        self.SetFocus()
-
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
-
-
-    def OnOk(self, evt):
-        config = self.pWiki.getConfig()
-        # If a text field contains an invalid value, its background becomes red
-        try:
-            self.ctrls.tfWwSearchContextBefore.SetBackgroundColour(wx.RED)
-            before = int(self.ctrls.tfWwSearchContextBefore.GetValue())
-            if before < 0: raise Exception
-            self.ctrls.tfWwSearchContextBefore.SetBackgroundColour(wx.WHITE)
-
-            self.ctrls.tfWwSearchContextAfter.SetBackgroundColour(wx.RED)
-            after = int(self.ctrls.tfWwSearchContextAfter.GetValue())
-            if after < 0: raise Exception
-            self.ctrls.tfWwSearchContextAfter.SetBackgroundColour(wx.WHITE)
-
-            config.set("main", "search_wiki_context_before", before)
-            config.set("main", "search_wiki_context_after", after)
-            config.set("main", "search_wiki_count_occurrences",
-                    self.ctrls.cbWwSearchCountOccurrences.GetValue())
-
-            config.set("main", "fastSearch_searchType", 
-                    self.ctrls.rboxFastSearchSearchType.GetSelection())
-            config.set("main", "fastSearch_caseSensitive", 
-                    self.ctrls.cbFastSearchCaseSensitive.GetValue())
-            config.set("main", "fastSearch_wholeWord", 
-                    self.ctrls.cbFastSearchWholeWord.GetValue())
-
-        except:
-            self.Refresh()
-            return
-
-        self.EndModal(wx.ID_OK)
-
 
 
 class _SearchResultItemInfo(object):
     __slots__ = ("__weakref__", "wikiWord", "occCount", "occNumber", "occHtml",
-            "occPos", "html")
-    
-    def __init__(self, wikiWord, occPos = (-1, -1), occCount = -1):
+            "occPos", "html", "maxCountOccurrences")
+
+    def __init__(self, wikiWord, occPos = (-1, -1), occCount = -1,
+            maxOccCount=100):
         self.wikiWord = wikiWord
         if occPos[0] != -1:
             self.occNumber = 1
@@ -108,15 +42,18 @@ class _SearchResultItemInfo(object):
 
         self.occHtml = u""  # HTML presentation of the occurrence
         self.occPos = occPos  # Tuple (start, end) with position of occurrence in characters
-        self.occCount = occCount # -1: Undefined
+        self.occCount = occCount # -1: Undefined; -2: More than maxCountOccurrences
+        self.maxCountOccurrences = maxOccCount
         self.html = None
-        
-        
-    def buildOccurrence(self, text, before, after, pos, occNumber):
+
+
+    def buildOccurrence(self, text, before, after, pos, occNumber, maxOccCount):
         self.html = None
         basum = before + after
         self.occNumber = -1
         self.occPos = pos
+        self.maxCountOccurrences = maxOccCount
+
         if basum == 0:
             # No context
             self.occHtml = u""
@@ -155,11 +92,14 @@ class _SearchResultItemInfo(object):
             else:
                 stroc = []
                 
-            if self.occCount != -1:
+            if self.occCount > -1:
                 stroc.append(unicode(self.occCount))
             elif len(stroc) > 0:
-                stroc.append(u"?")
-                
+                if self.occCount == -1:
+                    stroc.append(u"?")
+                elif self.occCount == -2:
+                    stroc.append(u">%s" % self.maxCountOccurrences)
+
             stroc = u"".join(stroc)
             
             if stroc != u"":
@@ -206,7 +146,7 @@ class SearchResultListBox(wx.HtmlListBox):
 
     def OnGetItem(self, i):
         if self.isShowingSearching:
-            return u"<b>" + _(u"Searching...") + u"</b>"
+            return u"<b>" + _(u"Searching... (click into field to abort)") + u"</b>"
         elif self.GetCount() == 0:
             return u"<b>" + _(u"Not found") + u"</b>"
 
@@ -235,79 +175,122 @@ class SearchResultListBox(wx.HtmlListBox):
             self.showFound(None, None, None)
 
 
-    def showFound(self, sarOp, found, wikiDocument):
+    def showFound(self, sarOp, found, wikiDocument,
+            threadstop=DUMBTHREADSTOP):
         """
         Shows the results of search operation sarOp
         found -- list of matching wiki words
         wikiDocument -- WikiDocument(=WikiDataManager) object
         """
-        self.isShowingSearching = False
         if found is None or len(found) == 0:
             self.found = []
             self.foundinfo = []
-            self.SetItemCount(1)   # For the "Not found" entry
             self.searchOp = None
+            self.isShowingSearching = False
+            callInMainThreadAsync(self.SetItemCount, 1)   # For the "Not found" entry
         else:
-            # Store and prepare clone of search operation
-            self.searchOp = sarOp.clone()
-            self.searchOp.replaceOp = False
-            self.searchOp.cycleToStart = True
+            try:
+                # Store and prepare clone of search operation
+                self.searchOp = sarOp.clone()
+                self.searchOp.replaceOp = False
+                self.searchOp.cycleToStart = True
+    
+                self.found = found
+                self.foundinfo = []
+                # Load context settings
+                before = self.pWiki.configuration.getint("main",
+                        "search_wiki_context_before")
+                after = self.pWiki.configuration.getint("main",
+                        "search_wiki_context_after")
+                        
+                countOccurrences = self.pWiki.getConfig().getboolean("main",
+                        "search_wiki_count_occurrences")
+                maxCountOccurrences = self.pWiki.getConfig().getint("main",
+                        "search_wiki_max_count_occurrences", 100)
 
-            self.found = found
-            self.foundinfo = []
-            # Load context settings
-            before = self.pWiki.configuration.getint("main",
-                    "search_wiki_context_before")
-            after = self.pWiki.configuration.getint("main",
-                    "search_wiki_context_after")
-                    
-            countOccurrences = self.pWiki.configuration.getboolean("main",
-                    "search_wiki_count_occurrences")
-                    
-            if sarOp.booleanOp:
-                # No specific position to show as context, so show beginning of page
-                # Also, no occurrence counting possible
                 context = before + after
-                if context == 0:
-                    self.foundinfo = [_SearchResultItemInfo(w) for w in found]
-                else:                    
-                    for w in found:
-                        text = wikiDocument.getWikiPageNoError(w).\
-                                getLiveTextNoTemplate()
-                        if text is None:
-                            continue
-                        self.foundinfo.append(
-                                _SearchResultItemInfo(w).buildOccurrence(
-                                text, before, after, (-1, -1), -1))
-            else:
-                if before + after == 0 and not countOccurrences:
-                    # No context, no occurrence counting
-                    self.foundinfo = [_SearchResultItemInfo(w) for w in found]
+
+                if not sarOp.hasParticularTextPosition():
+                    # No specific position to show as context, so show beginning of page
+                    # Also, no occurrence counting possible
+                    if context == 0:
+                        self.foundinfo = [_SearchResultItemInfo(w) for w in found]
+                    else:
+                        for w in found:
+                            text = wikiDocument.getWikiPageNoError(w).\
+                                    getLiveTextNoTemplate()
+                            if text is None:
+                                continue
+                            self.foundinfo.append(
+                                    _SearchResultItemInfo(w).buildOccurrence(
+                                    text, before, after, (-1, -1), -1, 100))
+                    threadstop.testRunning()
                 else:
-                    for w in found:
-                        text = wikiDocument.getWikiPageNoError(w).\
-                                getLiveTextNoTemplate()
-                        if text is None:
-                            continue
-                        pos = sarOp.searchText(text)
-                        firstpos = pos
-                        
-                        info = _SearchResultItemInfo(w, occPos=pos)
-                        
-                        if countOccurrences:
-                            occ = 1
-                            while True:
-                                pos = sarOp.searchText(text, pos[1])
-                                if pos[0] is None or pos[0] == pos[1]:
-                                    break
-                                occ += 1
+                    if context == 0 and not countOccurrences:
+                        # No context, no occurrence counting
+                        self.foundinfo = [_SearchResultItemInfo(w) for w in found]
+                    else:
+                        sarOp.beginWikiSearch(self.pWiki.getWikiDocument())
+                        try:
+                            for w in found:
+                                threadstop.testRunning()
+                                docPage = wikiDocument.getWikiPageNoError(w)
+                                text = docPage.getLiveTextNoTemplate()
+                                if text is None:
+                                    continue
+    
+    #                             pos = sarOp.searchText(text)
+                                pos = sarOp.searchDocPageAndText(docPage, text)
+                                if pos[0] is None:
+                                    # This can happen e.g. for boolean searches like
+                                    # 'foo or not bar' on a page which has neither 'foo'
+                                    # nor 'bar'.
+                                    
+                                    # Similar as if no particular text position available
+                                    if context == 0:
+                                        self.foundinfo.append(
+                                                _SearchResultItemInfo(w))
+                                    else:
+                                        self.foundinfo.append(
+                                                _SearchResultItemInfo(w).buildOccurrence(
+                                                text, before, after, (-1, -1), -1,
+                                                100))
+                                    continue
+                                firstpos = pos
+                                
+                                info = _SearchResultItemInfo(w, occPos=pos,
+                                        maxOccCount=maxCountOccurrences)
 
-                            info.occCount = occ
+                                if countOccurrences:
+                                    occ = 1
+                                    while True:
+                                        pos = sarOp.searchDocPageAndText(
+                                                docPage, text, pos[1])
+                                        if pos[0] is None or pos[0] == pos[1]:
+                                            break
+                                        occ += 1
+                                        if occ > maxCountOccurrences:
+                                            occ = -2
+                                            break
+    
+                                    info.occCount = occ
+    
+                                self.foundinfo.append(info.buildOccurrence(
+                                        text, before, after, firstpos, 1,
+                                        maxCountOccurrences))
+                        finally:
+                            sarOp.endWikiSearch()
 
-                        self.foundinfo.append(info.buildOccurrence(
-                                text, before, after, firstpos, 1))
-                            
-            self.SetItemCount(len(self.foundinfo))
+                threadstop.testRunning()
+                self.isShowingSearching = False
+                callInMainThreadAsync(self.SetItemCount, len(self.foundinfo))
+
+            except NotCurrentThreadException:
+                self.found = []
+                self.foundinfo = []
+                self.isShowingSearching = False
+                callInMainThreadAsync(self.SetItemCount, 1)   # For the "Not found" entry
+                raise
 
         self.Refresh()
         
@@ -345,29 +328,41 @@ class SearchResultListBox(wx.HtmlListBox):
                 "search_wiki_context_before")
         after = self.pWiki.configuration.getint("main",
                 "search_wiki_context_after")
-        
+
+        maxCountOccurrences = self.pWiki.getConfig().getint("main",
+                "search_wiki_max_count_occurrences", 100)
+
         wikiDocument = self.pWiki.getWikiDocument()
-        text = wikiDocument.getWikiPageNoError(info.wikiWord).\
-                getLiveTextNoTemplate()
+        docPage = wikiDocument.getWikiPageNoError(info.wikiWord)
+        text = docPage.getLiveTextNoTemplate()
         if text is not None:
-            pos = self.searchOp.searchText(text, info.occPos[1])
+            self.searchOp.beginWikiSearch(self.pWiki.getWikiDocument())
+            try:
+#                 pos = self.searchOp.searchText(text, info.occPos[1])
+                pos = self.searchOp.searchDocPageAndText(docPage, text,
+                        info.occPos[1])
+            finally:
+                self.searchOp.endWikiSearch()
         else:
             pos = (-1, -1)
 
         if pos[0] == -1:
-            # Page was changed after last search and doen't contain any occurrence anymore
+            # Page was changed after last search and doesn't contain any occurrence anymore
             info.occCount = 0
-            info.buildOccurrence(text, 0, 0, pos, -1)
+            info.buildOccurrence(text, 0, 0, pos, -1, maxCountOccurrences)
         elif pos[0] < info.occPos[1]:
             # Search went back to beginning, number of last occ. is also occ.count
             info.occCount = info.occNumber
-            info.buildOccurrence(text, before, after, pos, 1)
+            info.buildOccurrence(text, before, after, pos, 1,
+                    maxCountOccurrences)
         elif info.occPos[0] == info.occPos[1]:    # pos[0] == info.occPos[1]:
             # Match is empty
             info.occCount = info.occNumber
-            info.buildOccurrence(text, before, after, pos, 1)            
+            info.buildOccurrence(text, before, after, pos, 1,
+                    maxCountOccurrences)            
         else:
-            info.buildOccurrence(text, before, after, pos, info.occNumber + 1)
+            info.buildOccurrence(text, before, after, pos, info.occNumber + 1,
+                    maxCountOccurrences)
 
         # TODO nicer refresh
         self.SetSelection(-1)
@@ -397,6 +392,9 @@ class SearchResultListBox(wx.HtmlListBox):
 
 
     def OnLeftDown(self, evt):
+        if self.isShowingSearching:
+            self.searchWikiDialog.stopSearching()
+
         if self.GetCount() == 0:
             return  # no evt.Skip()?
 
@@ -825,6 +823,9 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         self.listNeedsRefresh = True  # Reflects listbox content current
                                       # search criteria?
 
+        self.searchingStartTime = None
+        self.searchingDisableSet = None
+
         self.savedSearches = None
         self.foundPages = []
         self.pageListData = []
@@ -849,6 +850,9 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
             self.listPagesOperation = ListWikiPagesOperation()
             self._showListPagesOperation(self.listPagesOperation)
+
+            self.OnRadioBox(None)  # Refresh settings
+            self._updateTabTitle()
 
         # Fixes focus bug under Linux
         self.SetFocus()
@@ -979,6 +983,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                         (pattern, _(unicode(e))), _(u"Error in regular expression"),
                         wx.OK, self)
                 return None
+                
             item = Sar.RegexWikiPageNode(lpOp, pattern)
         elif self.ctrls.rbPagesInList.GetValue():
             try:
@@ -1069,36 +1074,62 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def _refreshPageList(self):
+        disableSet = wxHelper.getAllChildWindows(self)
+        disableSet.difference_update(wxHelper.getWindowParentsUpTo(
+                self.ctrls.htmllbPages, self))
+        disableSet = set(win for win in disableSet if win.IsEnabled())
+
+        sarOp = self.buildSearchReplaceOperation()
+
         self.ctrls.htmllbPages.showSearching()
         self.SetCursor(wx.HOURGLASS_CURSOR)
-        self.Freeze()
-        try:
-            sarOp = self.buildSearchReplaceOperation()
+#         self.Freeze()
 
+        threadstop = FunctionThreadStop(self._searchPoll)
+        self.searchingStartTime = time.time()
+        for win in disableSet:
+            win.Disable()
+        try:
             if len(sarOp.searchStr) > 0 or self.allowOkCancel:
                 # If allowOkCancel is True, the dialog is used to create a set of pages
                 # so process even for an empty search string
                 self.foundPages = self.mainControl.getWikiDocument().searchWiki(
-                        sarOp, self.allowOrdering)
+                        sarOp, self.allowOrdering, threadstop=threadstop)
                 if not self.allowOrdering:
                     # Use default alphabetical ordering
                     self.mainControl.getCollator().sort(self.foundPages)
 
                 self.ctrls.htmllbPages.showFound(sarOp, self.foundPages,
-                        self.mainControl.getWikiDocument())
+                        self.mainControl.getWikiDocument(),
+                        threadstop=threadstop)
             else:
                 self.foundPages = []
                 self.ctrls.htmllbPages.showFound(None, None, None)
 
             self.listNeedsRefresh = False
 
+        except NotCurrentThreadException:
+            raise UserAbortException()
         finally:
-            self.Thaw()
+            self.searchingStartTime = None
+            for win in disableSet:
+                win.Enable()
+    
+            self.searchingDisableSet = None
+    #         self.Thaw()
             self.SetCursor(wx.NullCursor)
             self.ctrls.htmllbPages.ensureNotShowSearching()
 
 
+    def _searchPoll(self):
+        return  wx.SafeYield(self, True) and self.searchingStartTime is not None  #
+
+    def stopSearching(self):
+        self.searchingStartTime = None
+
+
     def OnOk(self, evt):
+        self.stopSearching()
         val = self.buildSearchReplaceOperation()
         if val is None:
             return
@@ -1119,6 +1150,8 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def OnClose(self, evt):
+        self.stopSearching()
+
         self.value = None
         try:
             self.mainControl.wwSearchDlgs.remove(self)
@@ -1140,8 +1173,13 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             if not self.ctrls.htmllbPages.IsEmpty():
                 self.ctrls.htmllbPages.SetFocus()
                 self.ctrls.htmllbPages.SetSelection(0)
+        except UserAbortException:
+            return
         except re.error, e:
             self.displayErrorMessage(_(u'Error in regular expression'),
+                    _(unicode(e)))
+        except ParseException, e:
+            self.displayErrorMessage(_(u'Error in boolean expression'),
                     _(unicode(e)))
         except DbReadAccessError, e:
             self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
@@ -1161,14 +1199,21 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             try:
                 # Refresh list and start from beginning
                 self._refreshPageList()
+            except UserAbortException:
+                return
             except re.error, e:
                 self.displayErrorMessage(_(u'Error in regular expression'),
+                        _(unicode(e)))
+                return
+            except ParseException, e:
+                self.displayErrorMessage(_(u'Error in boolean expression'),
                         _(unicode(e)))
                 return
             except DbReadAccessError, e:
                 self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
                         _(unicode(e)))
                 return
+
 
         self.addCurrentToHistory()
         if self.ctrls.htmllbPages.GetCount() == 0:
@@ -1216,6 +1261,9 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         except re.error, e:
             self.displayErrorMessage(_(u'Error in regular expression'),
                     _(unicode(e)))
+        except ParseException, e:
+            self.displayErrorMessage(_(u'Error in boolean expression'),
+                    _(unicode(e)))
 
 
 
@@ -1228,6 +1276,11 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             self.displayErrorMessage(_(u'Error in regular expression'),
                     _(unicode(e)))
             return
+        except ParseException, e:  # Probably this can't happen
+            self.displayErrorMessage(_(u'Error in boolean expression'),
+                    _(unicode(e)))
+            return
+
 
         self._findNext()
 
@@ -1235,18 +1288,18 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
     def OnReplaceAll(self, evt):
         answer = wx.MessageBox(_(u"Replace all occurrences?"), _(u"Replace All"),
                 wx.YES_NO | wx.NO_DEFAULT, self)
-        
+
         if answer == wx.NO:
             return
 
         try:
             self._refreshPageList()
-            
+
             if self.ctrls.htmllbPages.GetCount() == 0:
                 return
-                
+
             # self.pWiki.saveCurrentDocPage()
-            
+
             sarOp = self.buildSearchReplaceOperation()
             sarOp.replaceOp = True
             
@@ -1266,23 +1319,28 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
     
                 charStartPos = 0
     
-                while True:
-                    try:
-                        found = sarOp.searchText(text, charStartPos)
-                        start, end = found[:2]
-                    except:
-                        # Regex error -> Stop searching
-                        return
+                sarOp.beginWikiSearch(self.pWiki.getWikiDocument())
+                try:
+                    while True:
+                        try:
+                            found = sarOp.searchDocPageAndText(wikiPage, text,
+                                    charStartPos)
+                            start, end = found[:2]
+                        except:
+                            # Regex error -> Stop searching
+                            return
+                            
+                        if start is None: break
                         
-                    if start is None: break
-                    
-                    repl = sarOp.replace(text, found)
-                    text = text[:start] + repl + text[end:]  # TODO Faster?
-                    charStartPos = start + len(repl)
-                    replaceCount += 1
-                    if start == end:
-                        # Otherwise replacing would go infinitely
-                        break
+                        repl = sarOp.replace(text, found)
+                        text = text[:start] + repl + text[end:]  # TODO Faster?
+                        charStartPos = start + len(repl)
+                        replaceCount += 1
+                        if start == end:
+                            # Otherwise replacing would go infinitely
+                            break
+                finally:
+                    sarOp.endWikiSearch()
 
                 wikiPage.replaceLiveText(text)
                     
@@ -1291,9 +1349,13 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             wx.MessageBox(_(u"%i replacements done") % replaceCount,
                     _(u"Replace All"),
                 wx.OK, self)        
-
+        except UserAbortException:
+            return
         except re.error, e:
             self.displayErrorMessage(_(u'Error in regular expression'),
+                    _(unicode(e)))
+        except ParseException, e:
+            self.displayErrorMessage(_(u'Error in boolean expression'),
                     _(unicode(e)))
         except DbReadAccessError, e:
             self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
@@ -1307,6 +1369,10 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         except re.error:
             # Ignore silently
             return
+        except ParseException, e:
+            # This too
+            return
+
         data = sarOp.getPackedSettings()
         tpl = (sarOp.searchStr, sarOp.getPackedSettings())
         hist = wx.GetApp().getWikiSearchHistory()
@@ -1336,6 +1402,10 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             sarOp.rebuildSearchOpTree()
         except re.error, e:
             self.mainControl.displayErrorMessage(_(u'Error in regular expression'),
+                    _(unicode(e)))
+            return
+        except ParseException, e:
+            self.mainControl.displayErrorMessage(_(u'Error in boolean expression'),
                     _(unicode(e)))
             return
 
@@ -1383,11 +1453,12 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def OnOptions(self, evt):
-        dlg = SearchWikiOptionsDialog(self, self.GetParent(), -1)
-        dlg.CenterOnParent(wx.BOTH)
-
-        dlg.ShowModal()
-        dlg.Destroy()
+        self.mainControl.showOptionsDialog("OptionsPageSearching")
+#         dlg = SearchWikiOptionsDialog(self, self.GetParent(), -1)
+#         dlg.CenterOnParent(wx.BOTH)
+# 
+#         dlg.ShowModal()
+#         dlg.Destroy()
 
 
     def getResultListPositionTuple(self):
@@ -1488,8 +1559,13 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         if self._loadSearch():
             try:
                 self._refreshPageList()
+            except UserAbortException:
+                return
             except re.error, e:
                 self.displayErrorMessage(_(u'Error in regular expression'),
+                        _(unicode(e)))
+            except ParseException, e:
+                self.displayErrorMessage(_(u'Error in boolean expression'),
                         _(unicode(e)))
             except DbReadAccessError, e:
                 self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
@@ -2104,8 +2180,13 @@ class FastSearchPopup(wx.Frame):
         self.setSearchOp(self.buildSearchReplaceOperation(text))
         try:
             self._refreshPageList()
+        except UserAbortException:
+            return
         except re.error, e:
             self.displayErrorMessage(_(u'Error in regular expression'),
+                    _(unicode(e)))
+        except ParseException, e:
+            self.displayErrorMessage(_(u'Error in boolean expression'),
                     _(unicode(e)))
         except DbReadAccessError, e:
             self.displayErrorMessage(_(u'Error. Maybe wiki rebuild is needed'),
@@ -2118,28 +2199,79 @@ class FastSearchPopup(wx.Frame):
         self.sarOp = sarOp
 
 
+#     def _refreshPageList(self):
+#         self.resultBox.showSearching()
+#         self.SetCursor(wx.HOURGLASS_CURSOR)
+#         self.Freeze()
+#         try:
+#             # self.mainControl.saveCurrentDocPage()
+#     
+#             if len(self.sarOp.searchStr) > 0:
+#                 self.foundPages = self.mainControl.getWikiDocument().searchWiki(self.sarOp)
+#                 self.mainControl.getCollator().sort(self.foundPages)
+#                 self.resultBox.showFound(self.sarOp, self.foundPages,
+#                         self.mainControl.getWikiDocument())
+#             else:
+#                 self.foundPages = []
+#                 self.resultBox.showFound(None, None, None)
+# 
+#             self.listNeedsRefresh = False
+# 
+#         finally:
+#             self.Thaw()
+#             self.SetCursor(wx.NullCursor)
+#             self.resultBox.ensureNotShowSearching()
+
+
     def _refreshPageList(self):
+        disableSet = wxHelper.getAllChildWindows(self)
+        disableSet.difference_update(wxHelper.getWindowParentsUpTo(
+                self.resultBox, self))
+        disableSet = set(win for win in disableSet if win.IsEnabled())
+
         self.resultBox.showSearching()
         self.SetCursor(wx.HOURGLASS_CURSOR)
-        self.Freeze()
+#         self.Freeze()
+
+        threadstop = FunctionThreadStop(self._searchPoll)
+        self.searchingStartTime = time.time()
+        for win in disableSet:
+            win.Disable()
         try:
-            # self.mainControl.saveCurrentDocPage()
-    
             if len(self.sarOp.searchStr) > 0:
-                self.foundPages = self.mainControl.getWikiDocument().searchWiki(self.sarOp)
+                self.foundPages = self.mainControl.getWikiDocument().searchWiki(
+                        self.sarOp, threadstop=threadstop)
                 self.mainControl.getCollator().sort(self.foundPages)
                 self.resultBox.showFound(self.sarOp, self.foundPages,
-                        self.mainControl.getWikiDocument())
+                        self.mainControl.getWikiDocument(),
+                        threadstop=threadstop)
             else:
                 self.foundPages = []
                 self.resultBox.showFound(None, None, None)
 
             self.listNeedsRefresh = False
 
+        except NotCurrentThreadException:
+            raise UserAbortException()
         finally:
-            self.Thaw()
+            self.searchingStartTime = None
+            for win in disableSet:
+                win.Enable()
+    
+            self.searchingDisableSet = None
+    #         self.Thaw()
             self.SetCursor(wx.NullCursor)
             self.resultBox.ensureNotShowSearching()
+
+
+    def _searchPoll(self):
+        return wx.SafeYield(self, True) and self.searchingStartTime is not None
+
+    def stopSearching(self):
+        self.searchingStartTime = None
+
+
+
 
 
 _CONTEXT_MENU_ACTIVATE = \

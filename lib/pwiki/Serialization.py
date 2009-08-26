@@ -208,8 +208,10 @@ def findXmlElementFlat(xmlNode, tag, excOnFail=True):
 def iterXmlElementFlat(xmlNode, tag):
     """
     Return iterator through all children of xmlNode with tag  tag.
+    It is safe to add/modify/remove childNodes of xmlNode during use
+    of the iterator.
     """
-    for subNode in xmlNode.childNodes:
+    for subNode in xmlNode.childNodes[:]:
         if subNode.nodeType != subNode.ELEMENT_NODE:
             continue
         

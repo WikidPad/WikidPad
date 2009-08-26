@@ -159,6 +159,7 @@ Version 1.0
 import wx
 import zlib
 import cStringIO
+import types
 import traceback
 
 
@@ -1146,6 +1147,7 @@ class GenericTreeItem:
         # since there can be very many of these, we save size by chosing
         # the smallest representation for the elements and by ordering
         # the members to avoid padding.
+        assert isinstance(text, types.StringTypes)
         self._text = text       # label to be rendered for item
         self._data = data       # user-provided data
 
@@ -1589,6 +1591,7 @@ class GenericTreeItem:
     def SetText(self, text):
         """Sets the item text."""
 
+        assert isinstance(text, types.StringTypes)
         self._text = text
 
 
@@ -3467,7 +3470,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         # remove the item from the tree
         if parent:
         
-            parent.GetChildren().remove(item)  # remove by value
+            parent.GetChildren().remove(item)  # remove by value  # Can throw ValueError, catch?
         
         else: # deleting the root
         
@@ -3504,7 +3507,6 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         Expands an item, sending a EVT_TREE_ITEM_EXPANDING and
         EVT_TREE_ITEM_EXPANDED events.
         """
-
         if not item:
             raise Exception("\nERROR: Invalid Tree Item. ")
         

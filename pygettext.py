@@ -177,7 +177,7 @@ import token
 import tokenize
 import operator
 import codecs
-from xml.dom import minidom
+from pwiki.rtlibRepl import minidom
 from codecs import BOM_UTF8
 
 

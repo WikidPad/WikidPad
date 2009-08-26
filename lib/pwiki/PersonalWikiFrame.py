@@ -3,7 +3,8 @@
 
 import os, sys, gc, traceback, string, re
 from os.path import *
-from time import localtime, time, sleep
+import time
+from time import localtime, sleep
 
 import cPickle  # to create dependency?
 
@@ -63,7 +64,8 @@ from .Printing import Printer, PrintMainDialog
 from .AdditionalDialogs import *
 from . import AdditionalDialogs
 from .OptionsDialog import OptionsDialog
-from .SearchAndReplaceDialogs import *
+from .SearchAndReplaceDialogs import SearchPageDialog, SearchWikiDialog, \
+        FastSearchPopup
 
 
 
@@ -683,7 +685,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if wikiData is not None:
             exportWikisMenu = wx.Menu()
             wikiMenu.AppendMenu(wx.NewId(), _(u'Publish as HTML'), exportWikisMenu)
-    
+
             self.addMenuItem(exportWikisMenu,
                     _(u'Wiki as Single HTML Page'),
                     _(u'Publish Wiki as Single HTML Page'), self.OnExportWiki,
@@ -739,6 +741,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         lambda evt: self.rebuildWiki(onlyDirty=False),
                         menuID=GUI_ID.MENU_REBUILD_WIKI,
                         updatefct=self.OnUpdateDisReadOnlyWiki)
+                
+#                 if wikiData.checkCapability("filePerPage") == 1:
+#                     self.addMenuItem(maintenanceMenu,
+#                             _(u'Update &externally modified files'),
+#                             _(u'Check for externally modified files and '
+#                             u'update cache in background'),
+#                             self.OnCmdUpdateExternallyModFiles,
+#                             menuID=GUI_ID.CMD_UPDATE_EXTERNALLY_MOD_FILES_WIKI,
+#                             updatefct=self.OnUpdateDisReadOnlyWiki)
 
                 self.addMenuItem(maintenanceMenu, _(u'&Update cache...'),
                         _(u'Update cache where marked as not up to date'),
@@ -1602,7 +1613,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         wikiPageMenu.AppendSeparator()
 
         self.addMenuItem(wikiPageMenu, _(u'&Add version') + u'\t' +
-                u"", _(u'Add new version'),
+                self.keyBindings.AddVersion, _(u'Add new version'),
                 self.OnCmdVersionAdd, menuID=GUI_ID.CMD_VERSIONING_ADD_VERSION,
                 updatefct=(self.OnUpdateDisNotTextedit, self.OnUpdateDisNotWikiPage)
                 )
@@ -1646,7 +1657,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _(u'Selection to &Link') + u'\t' + self.keyBindings.MakeWikiWord,
                 _(u'Remove non-allowed characters and make sel. a wiki word link'),
                 lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()),
-                "pin", menuID=GUI_ID.CMD_FORMAT_WIKIZE_SELECTED,
+                "tb_wikize", menuID=GUI_ID.CMD_FORMAT_WIKIZE_SELECTED,
                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
         
         self.addMenuItem(convertMenu, _(u'Selection to &Wiki Word') + u'\t' + 
@@ -2214,6 +2225,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # Register the App IDLE handler
         wx.EVT_IDLE(self, self.OnIdle)
 
+        wx.EVT_ACTIVATE(self, self.OnActivate)
+
         # Register the App close handler
         wx.EVT_CLOSE(self, self.OnCloseButton)
 
@@ -2370,6 +2383,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnCmdVersionAdd(self, evt):
+        ## _prof.start()
         docPage = self.getCurrentDocPage()
         if docPage is None or \
                 not docPage.getUnifiedPageName().startswith(u"wikipage/"):
@@ -2382,6 +2396,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         entry = Versioning.VersionEntry(u"", "revdiff")
         versionOverview.addVersion(content, entry)
         versionOverview.writeOverview()
+        ## _prof.stop()
 
 
 
@@ -3446,7 +3461,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 presenter = self.createNewDocPagePresenterTab()
 
         try:
-            presenter.openDocPage(unifName, motionType="child")
+            presenter.openDocPage(unifName, motionType="random")  # motionType="child"  ?
         except WikiFileNotFoundException, e:
             self.lostAccess(e)
             return None
@@ -4365,8 +4380,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if not dateformat is None:
             self.configuration.set("main", "strftime", dateformat)
 
-    def showOptionsDialog(self):
-        dlg = OptionsDialog(self, -1)
+    def showOptionsDialog(self, startPanelName=None):
+        dlg = OptionsDialog(self, -1, startPanelName=startPanelName)
         dlg.CenterOnParent(wx.BOTH)
 
         result = dlg.ShowModal()
@@ -4622,6 +4637,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
 
+
     def initiateFullUpdate(self, skipConfirm=False):
         if self.isReadOnlyWiki():
             return
@@ -4687,6 +4703,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             except Exception, e:
                 self.displayErrorMessage(_(u"Error rebuilding wiki"), e)
                 traceback.print_exc()
+
+
+    def OnCmdUpdateExternallyModFiles(self, evt):
+        if self.isReadOnlyWiki():
+            return
+
+        # TODO Progresshandler?
+        self.getWikiDataManager().checkFileSignatureForAllWikiWordsAndMarkDirty()
+        self.getWikiDataManager().pushDirtyMetaDataUpdate()
+
 
 
     def vacuumWiki(self):
@@ -4979,8 +5005,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         return startDir
 
 
-
-
     def OnWikiOpen(self, event):
         dlg = wx.FileDialog(self, _(u"Choose a Wiki to open"),
                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
@@ -5027,7 +5051,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     wx.GetApp().getUserDefaultWikiLanguage())
 
             wikiName = userLangHelper.extractWikiWordFromLink(wikiName)
-            # TODO: Further measures to exclude prohibited characters
+            # TODO: Further measures to exclude prohibited characters!!!
 
             # make sure this is a valid wiki word
             errMsg = userLangHelper.checkForInvalidWikiWord(wikiName)
@@ -5057,7 +5081,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             (saveDirtySince, updateDirtySince) = \
                     self.getCurrentDocPage().getDirtySince()
             if saveDirtySince is not None:
-                currentTime = time()
+                currentTime = time.time()
                 # only try and save if the user stops typing
                 if (currentTime - self.getActiveEditor().lastKeyPressed) > \
                         self.autoSaveDelayAfterKeyPressed:
@@ -5072,6 +5096,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def OnSize(self, evt):
         if self.windowLayouter is not None:
             self.windowLayouter.layout()
+
+
+    def OnActivate(self, evt):
+        evt.Skip()
+        if evt.GetActive():
+            wx.UpdateUIEvent.SetUpdateInterval(0)
+#             wx.IdleEvent.SetMode(wx.IDLE_PROCESS_SPECIFIED)
+        else:
+            wx.UpdateUIEvent.SetUpdateInterval(-1)
+#             wx.IdleEvent.SetMode(wx.IDLE_PROCESS_ALL)
 
 
     def isReadOnlyWiki(self):

@@ -3,7 +3,7 @@
 
 +++ To search inside a page
 
-CTRL-F or F3 turns on wiki page IncrementalSearch.
+CTRL-F or F3 turns on IncrementalSearch.
 CTRL-R brings up the "Find and Replace" dialog.
 
 
@@ -36,9 +36,6 @@ If "Order Pages" is available you have following options:
     * "Unordered" uses the internal order of the database and is
       the fastest possible way.
 
-
-*Be aware* that the search operates on the data in the database. If you have changed a page in the editor and not yet saved, this changes can't be seen by the search dialog.
-
 The dialog consists of two tabs: "Search text" allows to search for a particular piece of text in the pages, tab "Set page list" allows to search for pages matching a regular expression or having a special parent-children relationship.
 
 
@@ -56,12 +53,9 @@ Enter the pattern you want to search for. You can use regular expressions here. 
 *Simple regex*
 Choose this if the pattern contains only a single RE
 
-*"Anded" regex*
-Choose this if the pattern contains multiple REs connected with "and". For example, to search this wiki for pages with "search" and "wiki" in them type:
-
-search and wiki
-
-Some operations are not available in "Anded" regex mode.
+*Boolean regex*
+Choose this if the pattern contains multiple REs connected with boolean operators. See [/BooleanRegex] for details.
+Some operations are not available in boolean regex mode, especially replacing of text.
 
 *As is*
 All characters are taken as they are.

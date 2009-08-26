@@ -1402,10 +1402,21 @@ class WikiData:
         Return a guess of the store hint used to store the block last time.
         Returns one of the DATABLOCK_STOREHINT_* constants from Consts.py.
         The function is allowed to return the wrong value (therefore a guess)
-        and returns a value even for non-existing data blocks.
         For compact_sqlite it always returns Consts.DATABLOCK_STOREHINT_INTERN.
+        It returns None for non-existing data blocks.
         """
-        return Consts.DATABLOCK_STOREHINT_INTERN
+        try:
+            datablock = self.connWrap.execSqlQuerySingleItem(
+                    "select 1 from datablocks where unifiedname = ?",
+                    (unifName,))
+        except (IOError, OSError, sqlite.Error), e:
+            traceback.print_exc()
+            raise DbReadAccessError(e)
+
+        if datablock is not None:
+            return Consts.DATABLOCK_STOREHINT_INTERN
+
+        return None
 
 
     def deleteDataBlock(self, unifName):

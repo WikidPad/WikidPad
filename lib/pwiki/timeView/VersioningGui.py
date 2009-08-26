@@ -15,7 +15,7 @@ from ..WikiTxtCtrl import WikiTxtCtrl
 
 from ..DocPages import FunctionalPage
 
-from .Versioning import WikiPageSnapshot
+from .Versioning import WikiPageSnapshot, VersionOverview
 
 
 # class VersionExplorerPresenterControl(wx.Panel):
@@ -217,6 +217,35 @@ class VersionExplorerPanel(EnhancedListControl):
             if answer == wx.YES:
                 self.versionOverview.delete()
                 self.updateList()
+        else:
+            # User wants to delete a page which has no valid version data
+            # so check if there is invalid version data to delete
+            
+            presenter = self.mainControl.getCurrentDocPagePresenter()
+            if presenter is not None:
+                docPage = presenter.getDocPage()
+
+            try:
+                if docPage is not None and not isinstance(docPage, FunctionalPage):
+                    versionOverview = docPage.getVersionOverview()
+
+                # this should not happen under normal circumstances    
+                self.setVersionOverview(versionOverview)
+                return
+
+            except VersioningException:
+                pass
+
+            # Here: A VersioningException was thrown, so ask if to clean up
+            # the broken parts of the version data
+            
+            answer = wx.MessageBox(
+                    _(u"Do you want to delete all version data of this page?"),
+                    _(u"Delete all versions"), wx.YES_NO | wx.ICON_QUESTION, self)
+
+            if answer == wx.YES:
+                VersionOverview.deleteBrokenDataForDocPage(docPage)
+                self.updateList()
 
 
     def setLayerVisible(self, vis, scName=""):
@@ -317,13 +346,16 @@ class VersionExplorerPanel(EnhancedListControl):
 
     def onUpdateNeeded(self, miscevt):
         if self.isVisibleEffect():
+#             if miscevt.has_key("appended version"):
+#                 self.extendList()
+#             else:
             self.updateList()
 
 
 
     def updateList(self):
         presenter = self.mainControl.getCurrentDocPagePresenter()
-        
+
         if presenter is not None:
             docPage = presenter.getDocPage()
             self.buildTocList(docPage)
@@ -332,6 +364,27 @@ class VersionExplorerPanel(EnhancedListControl):
         self.setVersionOverview(None)
         self.applyTocList()
 
+
+#     def extendList(self):
+#         presenter = self.mainControl.getCurrentDocPagePresenter()
+#         
+#         if presenter is None:
+#             self.setVersionOverview(None)
+#             self.applyTocList()
+#             return
+#             
+#         docPage = presenter.getDocPage()
+#         if isinstance(docPage, FunctionalPage):
+#             self.buildTocList(docPage)
+#             return
+#             
+#         newEntries = versionOverview.getVersionEntries()[
+#                 len(self.versionEntries):]
+# 
+#         self.versionEntries = versionOverview.getVersionEntries()
+
+
+        
 
 #         text = presenter.getLiveText()
 #         docPage = presenter.getDocPage()

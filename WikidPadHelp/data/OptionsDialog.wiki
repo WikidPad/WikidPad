@@ -41,7 +41,11 @@ There is also an option to set a second hotkey which is bound to the current wik
 ++++ User interface
 
 *Minimize to Tray*
-Minimized to system tray instead of the normal taskbar.
+Minimize to system tray instead of the normal taskbar.
+
+*Switch Tabs in MRU order*
+Switch between the page tabs with Ctrl-Tab and Ctrl-Shift-Tab in an order where the most recently used tabs are selected first.
+Instead of the default shortcuts you can look how to change them at ChangingKeyBindings and modify entries "GoNextTab" and "GoPreviousTab" in "KeyBindings.py".
 
 *Minimize on close button*
 Pressing the close button on the main frame (the little "X") does not close but minimize WikidPad. In conjunction with "Minimize to Tray" it minmizes to the try area.
@@ -299,8 +303,8 @@ Set the search options to use for wiki-wide search dialog:
 *Context characters* *before* and *after*
 Chooses the number of characters to show before and after a found match as context in wiki-wide search. For an "anded" regex, the beginning of the page is shown with so many characters as the sum of the "before" and "after" values. Using context may slow down the searching a bit.
 
-*Count Occurrences*
-Counts how many matches a page contains and shows this number in parentheses after each page name in wiki-wide search results. This option slows down searching.
+*Count Occurrences up to max.*
+Counts how many matches a page contains and shows this number in parentheses after each page name in wiki-wide search results. This option slows down searching. To avoid too long search times you can restrict here the maximum number of occurrences to count on a page.
 
 
 *Fast search defaults*
@@ -446,6 +450,15 @@ All headings with a level less or equal this number are shown in the "Open Wiki 
 Set where version information should be stored, either in the main "Database" files or as "Separate files" which creates one file for each version to save and additionally one file for each wiki page which has versions, so "Database" is the recommended option.
 
 The database backend "Compact Sqlite" only supports storing in database so this option is grayed out for such wikis.
+
+*Steps to complete version*
+To reduce used disk space, most versions are stored as "reverse difference". This means only the changes from the next newer version to this version are stored. This has two drawbacks: Calculating changes needs some time for large pages and, much more important, the version is only correct if the rev. diff. data of this version is correct and the next version is correct. If the next version is also stored as rev. diff. this goes on iteratively until the next completely saved version (the newest version is always complete).
+
+This means if one of these versions is damaged and therefore incorrect, this version and all older ones up to the next complete one (if any) are incorrect as well.
+
+So you can set that versions are stored as complete from time to time. If you e.g. set this value to 10 (the default) each tenth version is stored completely. If you set it to 1, each version is complete, 0 creates only reverse difference versions.
+
+Regardless of this setting a version is always saved as complete if the reverse difference data would be larger than the complete data.
 
 
 ++++ Wiki language

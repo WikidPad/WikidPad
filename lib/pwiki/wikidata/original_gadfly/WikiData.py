@@ -1953,25 +1953,32 @@ class WikiData:
         """
         Return a guess of the store hint used to store the block last time.
         Returns one of the DATABLOCK_STOREHINT_* constants from Consts.py.
-        The function is allowed to return the wrong value (therefore a guess)
-        and returns a value even for non-existing data blocks.
+        The function is allowed to return the wrong value (therefore a guess).
+        It returns None for non-existing data blocks.
         """
         try:
             datablock = self.connWrap.execSqlQuerySingleItem(
                     "select unifiedname from datablocks where unifiedname = ?",
                     (unifName,))
-        except (IOError, OSError, sqlite.Error), e:
+        except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
+        if datablock is not None:
+            return Consts.DATABLOCK_STOREHINT_INTERN
+
         try:
-            if datablock is not None:
-                return Consts.DATABLOCK_STOREHINT_INTERN
-            else:
-                return Consts.DATABLOCK_STOREHINT_EXTERN
-        except (IOError, OSError, sqlite.Error), e:
+            datablock = self.connWrap.execSqlQuerySingleItem(
+                    "select unifiedname from datablocksexternal where unifiedname = ?",
+                    (unifName,))
+        except (IOError, OSError, ValueError), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
+
+        if datablock is not None:
+            return Consts.DATABLOCK_STOREHINT_EXTERN
+
+        return None
 
 
     def deleteDataBlock(self, unifName):

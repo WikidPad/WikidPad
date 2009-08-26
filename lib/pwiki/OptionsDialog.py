@@ -2,17 +2,17 @@ import re
 
 import wx, wx.xrc
 
-from wxHelper import *
+from .wxHelper import *
 
-from StringOps import uniToGui, guiToUni, colorDescToRgbTuple,\
+from .StringOps import uniToGui, guiToUni, colorDescToRgbTuple,\
         rgbToHtmlColor, strToBool, splitIndent
 
-from AdditionalDialogs import DateformatDialog, FontFaceDialog
+from .AdditionalDialogs import DateformatDialog, FontFaceDialog
 
-import Configuration
-import Localization
+from . import Configuration
+from . import Localization
 
-import WikiHtmlView
+from . import WikiHtmlView
 
 
 
@@ -358,10 +358,12 @@ class OptionsDialog(wx.Dialog):
     #     of the "..." button to call for a dialog to set.
     # selt entries have a list with the internal config names (unicode) of the
     #     possible choices as 4th item.
+    
+    _lastShownPanelName = None
+
 
     OPTION_TO_CONTROL = (
             # application-wide options
-            
             ("single_process", "cbSingleProcess", "b"),
             ("wikiPathes_relative", "cbWikiPathesRelative", "b"),
             ("wikiOpenNew_defaultDir", "tfWikiOpenNewDefaultDir",
@@ -377,6 +379,8 @@ class OptionsDialog(wx.Dialog):
 
             ("showontray", "cbShowOnTray", "b"),
             ("minimize_on_closeButton", "cbMinimizeOnCloseButton", "b"),
+            ("mainTabs_switchMruOrder", "cbMainTabsSwitchMruOrder", "b"),
+
             ("pagestatus_timeformat", "tfPageStatusTimeFormat", "ttdf",
                 "btnSelectPageStatusTimeFormat"),
             ("gui_language", "chGuiLanguage", "guilang"),
@@ -537,6 +541,8 @@ class OptionsDialog(wx.Dialog):
             ("search_wiki_context_before", "tfWwSearchContextBefore", "i0+"),
             ("search_wiki_context_after", "tfWwSearchContextAfter", "i0+"),
             ("search_wiki_count_occurrences", "cbWwSearchCountOccurrences", "b"),
+            ("search_wiki_max_count_occurrences",
+                    "tfWwSearchMaxCountOccurrences", "i0+"),
 
             ("incSearch_autoOffDelay", "tfIncSearchAutoOffDelay", "i0+"),
             ("fastSearch_searchType", "rboxFastSearchSearchType", "seli"),
@@ -589,6 +595,7 @@ class OptionsDialog(wx.Dialog):
             ("headingsAsAliases_depth", "scHeadingsAsAliasesDepth", "spin"),
 
             ("versioning_storageLocation", "chVersioningStorageLocation", "seli"),
+            ("versioning_completeSteps", "tfVersioningCompleteSteps", "i0+"),
 
             ("fileStorage_identity_modDateMustMatch", "cbFsModDateMustMatch", "b"),
             ("fileStorage_identity_filenameMustMatch", "cbFsFilenameMustMatch", "b"),
@@ -638,7 +645,7 @@ class OptionsDialog(wx.Dialog):
             ("??insert mark/current wiki", u"")
     )
 
-    def __init__(self, pWiki, ID, title="Options",
+    def __init__(self, pWiki, ID, startPanelName=None, title="Options",
                  pos=wx.DefaultPosition, size=wx.DefaultSize,
                  style=wx.NO_3D):
         d = wx.PreDialog()
@@ -819,17 +826,21 @@ class OptionsDialog(wx.Dialog):
                     fppCap is not None)
 
         self.OnEditorImagePasteFileTypeChoice(None)
-
+        self.OnWwSearchCountOccurrences(None)
 
         # Now show the right panel
         self.activePageIndex = -1
         for panel in self.panelList:
             panel.Show(False)
             panel.Enable(False)
-
-        self.ctrls.lbPages.SetSelection(0)
-        self._refreshForPage()
         
+        if startPanelName is None:
+            startPanelName = OptionsDialog._lastShownPanelName
+
+        if not self.selectPanelByName(startPanelName):
+            self.ctrls.lbPages.SetSelection(0)
+            self._refreshForPage()
+
         # Fixes focus bug under Linux
         self.SetFocus()
 
@@ -857,6 +868,9 @@ class OptionsDialog(wx.Dialog):
 
         wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,
                 self.OnEditorImagePasteFileTypeChoice)
+        
+        wx.EVT_CHECKBOX(self, GUI_ID.cbWwSearchCountOccurrences,
+                self.OnWwSearchCountOccurrences)
 
 
 
@@ -866,7 +880,7 @@ class OptionsDialog(wx.Dialog):
             if not panel.setVisible(False):
                 self.ctrls.lbPages.SetSelection(self.activePageIndex)
                 return
-            
+
             panel.Show(False)
             panel.Enable(False)
 
@@ -878,6 +892,19 @@ class OptionsDialog(wx.Dialog):
         # Enable appropriate addit. options panel
         panel.Enable(True)
         panel.Show(True)
+
+
+    def selectPanelByName(self, panelName):
+        if panelName is None:
+            return False
+
+        for i, e in enumerate(self.combinedPanelList):
+            if e[0] == panelName:
+                self.ctrls.lbPages.SetSelection(i)
+                self._refreshForPage()
+                return True
+
+        return False
 
 
     def getMainControl(self):
@@ -1025,6 +1052,10 @@ class OptionsDialog(wx.Dialog):
             panel.handleOk()
 
         self.pWiki.getConfig().informChanged(self.oldSettings)
+        
+        if self.activePageIndex > -1:
+            OptionsDialog._lastShownPanelName = self.combinedPanelList[
+                    self.activePageIndex][0]
 
         evt.Skip()
 
@@ -1050,6 +1081,10 @@ class OptionsDialog(wx.Dialog):
     def OnEditorImagePasteFileTypeChoice(self, evt):
         enabled = self.ctrls.chEditorImagePasteFileType.GetSelection() == 2
         self.ctrls.tfEditorImagePasteQuality.Enable(enabled)
+
+    def OnWwSearchCountOccurrences(self, evt):
+        self.ctrls.tfWwSearchMaxCountOccurrences.Enable(
+                self.ctrls.cbWwSearchCountOccurrences.GetValue())
 
 
     def OnDottedButtonPressed(self, evt):

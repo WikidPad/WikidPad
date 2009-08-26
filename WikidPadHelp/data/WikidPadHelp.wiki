@@ -55,6 +55,7 @@ Then just start typing text with WikiWords to create your wiki.
     * PageStructureWindow
     * ChronViewWindow
     * FavoriteWikis
+    * [Subpages]
     * OptionsDialog
     * CommandLineSupport
     * WikidPadOnUSB / ApplicationConfigurationFiles
