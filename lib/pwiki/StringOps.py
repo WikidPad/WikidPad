@@ -779,11 +779,11 @@ def ntUrlFromPathname(p):
     """
     if not ':' in p:
         # No drive specifier, just convert slashes and quote the name
-        if p[:2] == '\\\\':
-        # path is something like \\host\path\on\remote\host
-        # convert this to ////host/path/on/remote/host
-        # (notice doubling of slashes at the start of the path)
-            p = '\\\\' + p
+#         if p[:2] == '\\\\':
+#         # path is something like \\host\path\on\remote\host
+#         # convert this to ////host/path/on/remote/host
+#         # (notice doubling of slashes at the start of the path)
+#             p = '\\\\' + p
         components = p.split('\\')
         return urlQuote('/'.join(components))
     comp = p.split(':')

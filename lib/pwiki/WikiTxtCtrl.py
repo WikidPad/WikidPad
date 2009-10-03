@@ -20,13 +20,14 @@ from Utilities import *
 from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
         wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc, \
         getBitmapFromClipboard
-from MiscEvent import KeyFunctionSinkAR
+
+from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException, \
+        NoPageAstException
 
 from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 from AdditionalDialogs import ImagePasteSaver, ImagePasteDialog
 import WikiFormatting
 import PageAst, DocPages
-from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException
 import UserActionCoord
 
 from SearchAndReplace import SearchReplaceOperation
@@ -599,15 +600,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.SetMarginWidth(self.FOLD_MARGIN, 16)
             self.foldingActive = True
             if forceSync:
-                self.applyFolding(self.processFolding(
-                        self.getPageAst().getTokens(), DUMBTHREADHOLDER))
+                try:
+                    self.applyFolding(self.processFolding(
+                            self.getPageAst().getTokens(), DUMBTHREADHOLDER))
+                except NoPageAstException:
+                    return
             else:
                 self.OnStyleNeeded(None)
         else:
             self.SetMarginWidth(self.FOLD_MARGIN, 0)
             self.unfoldAll()
             self.foldingActive = False
-        
+
     def getFoldingActive(self):
         return self.foldingActive
 
@@ -756,11 +760,14 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #             return
 
         text = self.GetText()
-        if self.presenter.getMainControl().\
-                saveDocPage(page, text, self.getPageAst()):
-            self.SetSavePoint()
+        try:
+            if self.presenter.getMainControl().\
+                    saveDocPage(page, text, self.getPageAst()):
+                self.SetSavePoint()
+        except NoPageAstException:
+            return
 
-        
+
     def unloadCurrentDocPage(self, evtprops=None):
         ## _prof.start()
         # Unload current page
@@ -995,21 +1002,24 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         if self.pageType == u"normal":
             # Scroll page according to the anchor
-            pageAst = self.getPageAst()
+            try:
+                anchorTokens = self.getPageAst().findTypeFlat(
+                        WikiFormatting.FormatTypes.Anchor)
+                for t in anchorTokens:
+                    if t.grpdict["anchorValue"] == anchor:
+                        # Go to the end and back again, so the anchor is
+                        # near the top
+                        self.GotoPos(self.GetLength())
+                        self.SetSelectionByCharPos(
+                                t.start + t.getRealLength(),
+                                t.start + t.getRealLength())
+                        break
+                else:
+                    anchor = None # Not found
+            except NoPageAstException:
+                return
 
-            anchorTokens = pageAst.findTypeFlat(WikiFormatting.FormatTypes.Anchor)
-            for t in anchorTokens:
-                if t.grpdict["anchorValue"] == anchor:
-                    # Go to the end and back again, so the anchor is
-                    # near the top
-                    self.GotoPos(self.GetLength())
-                    self.SetSelectionByCharPos(
-                            t.start + t.getRealLength(),
-                            t.start + t.getRealLength())
-                    break
-            else:
-                anchor = None # Not found
-                
+
     def _checkForReadOnly(self):
         """
         Set/unset read-only mode of editor according to read-only state of page.
@@ -1646,8 +1656,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
     def getPageAst(self):
         docPage = self.getLoadedDocPage()
         if docPage is None:
-            return None
-        
+            raise NoPageAstException(u"Internal error: No docPage => no page AST")
+
         return docPage.getLivePageAst()
 
 #         page = self.pageAst
@@ -1752,25 +1762,28 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #                         self.presenter.getMainControl().goBrowserBack()
 
             elif tok.ttype == WikiFormatting.FormatTypes.Footnote:
-                pageAst = self.getPageAst()
-                footnoteId = tok.grpdict["footnoteId"]
-
-                anchorTok = pageAst.getFootnoteAnchorDict().get(footnoteId)
-                if anchorTok is not None:
-                    if anchorTok.start != tok.start:
-                        # Activated footnote was not last -> go to last
-                        self.gotoCharPos(anchorTok.start)
-                    else:
-                        # Activated footnote was last -> go to first
-                        fnTokens = pageAst.findType(
-                                WikiFormatting.FormatTypes.Footnote)
-
-                        for ft in fnTokens:
-                            if ft.grpdict["footnoteId"] == footnoteId:
-                                self.gotoCharPos(ft.start)
-                                break
-
-                return True
+                try:
+                    pageAst = self.getPageAst()
+                    footnoteId = tok.grpdict["footnoteId"]
+    
+                    anchorTok = pageAst.getFootnoteAnchorDict().get(footnoteId)
+                    if anchorTok is not None:
+                        if anchorTok.start != tok.start:
+                            # Activated footnote was not last -> go to last
+                            self.gotoCharPos(anchorTok.start)
+                        else:
+                            # Activated footnote was last -> go to first
+                            fnTokens = pageAst.findType(
+                                    WikiFormatting.FormatTypes.Footnote)
+    
+                            for ft in fnTokens:
+                                if ft.grpdict["footnoteId"] == footnoteId:
+                                    self.gotoCharPos(ft.start)
+                                    break
+    
+                    return True
+                except NoPageAstException:
+                    return False
             else:
                 continue
 
@@ -1784,7 +1797,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         else:
             linkPos = self.GetCurrentPos()
 
-        pageAst = self.getPageAst()
+        try:
+            pageAst = self.getPageAst()
+        except NoPageAstException:
+            return []
+
         linkCharPos = len(self.GetTextRange(0, linkPos))
 
         result = pageAst.getTokensForPos(linkCharPos)
@@ -1795,6 +1812,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             result += pageAst.getTokensForPos(linkCharPos - 1)
             
         return result
+
 
 
     def activateLink(self, mousePosition=None, tabMode=0):
@@ -1861,8 +1879,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if startPos == endPos or index > -1:
             # Execute all or selected script blocks on the page (or other
             #   related pages)
-            
-            pageAst = self.getPageAst()
+            try:            
+                pageAst = self.getPageAst()
+            except NoPageAstException:
+                return
+
             scriptTokens = pageAst.findTypeFlat(SCRIPTFORMAT)
             
             # process script imports
@@ -2858,32 +2879,37 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         bytePos = evt.GetPosition()
         charPos = len(self.GetTextRange(0, bytePos))
         
-        pageAst = self.getPageAst()
-
-        tokens = pageAst.getTokensForPos(charPos)
-
-        if charPos > 0:
-            # Maybe a token left to the cursor was meant, so check
-            # one char to the left
-            tokens += pageAst.getTokensForPos(charPos - 1)
-            
-        callTip = None
-        for tok in tokens:
-            if tok.ttype == WikiFormatting.FormatTypes.WikiWord:
-                wikiWord = tok.node.nakedWord
-                if not wikiDocument.isCreatableWikiWord(wikiWord):
-                    wikiWord = wikiDocument.getAliasesWikiWord(wikiWord)
-                    propList = wikiData.getPropertiesForWord(wikiWord)
-                    for key, value in propList:
-                        if key == u"short_hint":
-                            callTip = value
+        try:
+            pageAst = self.getPageAst()
+    
+            tokens = pageAst.getTokensForPos(charPos)
+    
+            if charPos > 0:
+                # Maybe a token left to the cursor was meant, so check
+                # one char to the left
+                tokens += pageAst.getTokensForPos(charPos - 1)
+                
+            callTip = None
+            for tok in tokens:
+                if tok.ttype == WikiFormatting.FormatTypes.WikiWord:
+                    wikiWord = tok.node.nakedWord
+                    if not wikiDocument.isCreatableWikiWord(wikiWord):
+                        wikiWord = wikiDocument.getAliasesWikiWord(wikiWord)
+                        propList = wikiData.getPropertiesForWord(wikiWord)
+                        for key, value in propList:
+                            if key == u"short_hint":
+                                callTip = value
+                                break
+    
+                        if callTip:
                             break
+    
+            if callTip:
+                self.CallTipShow(bytePos, callTip)
 
-                    if callTip:
-                        break
-
-        if callTip:
-            self.CallTipShow(bytePos, callTip)
+        except NoPageAstException:
+            return
+    
 
 
     def OnDwellEnd(self, evt):

@@ -1,5 +1,10 @@
 ﻿++ Change Log
 
+Oct. 03, 2009 (1.9rc09)
+
+    * Bug fixed: Problem with links to network shares
+
+
 
 Aug. 26, 2009 (1.9rc08)
 

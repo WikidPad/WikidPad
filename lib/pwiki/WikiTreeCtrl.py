@@ -11,7 +11,9 @@ from wxHelper import GUI_ID, wxKeyFunctionSink, textToDataObject, \
         appendToMenuByMenuDesc, copyTextToClipboard
 from MiscEvent import DebugSimple   # , KeyFunctionSink
 
-from WikiExceptions import WikiWordNotFoundException, InternalError
+from WikiExceptions import WikiWordNotFoundException, InternalError, \
+        NoPageAstException
+
 from Utilities import StringPathSet
 
 import WikiFormatting
@@ -814,20 +816,21 @@ class WikiWordPropertySearchNode(WikiWordRelabelNode):
         WikiWordRelabelNode.onActivate(self)
 
         editor = self.treeCtrl.pWiki.getActiveEditor()
-        pageAst = editor.getPageAst()
-        if pageAst is None:
+        try:
+            pageAst = editor.getPageAst()
+
+            wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
+    #         wikiData = wikiDataManager.getWikiData()
+            wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
+                
+            propTokens = wikiPage.extractPropertyTokensFromPageAst(pageAst)
+            for t in propTokens:
+                if t.node.key == self.propName and \
+                        self.propValue in t.node.values:
+                    editor.SetSelectionByCharPos(t.start, t.start + t.getRealLength())
+                    break
+        except NoPageAstException:
             return
-            
-        wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
-#         wikiData = wikiDataManager.getWikiData()
-        wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
-            
-        propTokens = wikiPage.extractPropertyTokensFromPageAst(pageAst)
-        for t in propTokens:
-            if t.node.key == self.propName and \
-                    self.propValue in t.node.values:
-                editor.SetSelectionByCharPos(t.start, t.start + t.getRealLength())
-                break
 
 
 

@@ -4,6 +4,8 @@ class WikiWordNotFoundException(WikiDataException): pass
 class WikiFileNotFoundException(WikiDataException): pass
 class WikiDBExistsException(WikiDataException): pass
 
+class NoPageAstException(Exception): pass
+
 # For non-Windows systems
 try:
     WindowsError
