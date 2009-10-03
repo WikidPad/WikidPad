@@ -54,20 +54,21 @@ Name: Program_files; Description: Main program files; Flags: fixed; Types: custo
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 2.0beta07
+AppVerName=WikidPad 2.0beta08
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=2.0.107.0
-VersionInfoTextVersion=WikidPad 2.0beta07
+VersionInfoVersion=2.0.108.0
+VersionInfoTextVersion=WikidPad 2.0beta08
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-2.0beta07
+OutputBaseFilename=WikidPad-2.0beta08
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2009 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
+PrivilegesRequired=none
 [Icons]
 Name: {code:IconDest|Dummy}\WikidPad; Filename: {app}\WikidPad.exe; IconFilename: {app}\icons\pwiki.ico; Components: Program_files; IconIndex: 0
 Name: {code:IconDest|Dummy}\{cm:UninstallProgram, WikidPad}; Filename: {uninstallexe}

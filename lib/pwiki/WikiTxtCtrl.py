@@ -23,14 +23,14 @@ from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
         wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc, \
         getBitmapFromClipboard, getMetafileFromClipboard
 from MiscEvent import KeyFunctionSinkAR
+from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException, \
+        NotCurrentThreadException, NoPageAstException
 from ParseUtilities import getFootnoteAnchorDict
 
 from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 from AdditionalDialogs import ImagePasteSaver, ImagePasteDialog
 # import WikiFormatting
 import DocPages
-from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException, \
-        NotCurrentThreadException
 import UserActionCoord
 
 from SearchAndReplace import SearchReplaceOperation
@@ -678,15 +678,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.SetMarginWidth(self.FOLD_MARGIN, 16)
             self.foldingActive = True
             if forceSync:
-                self.applyFolding(self.processFolding(
-                        self.getPageAst(), DUMBTHREADSTOP))
+                try:
+                    self.applyFolding(self.processFolding(
+                            self.getPageAst(), DUMBTHREADSTOP))
+                except NoPageAstException:
+                    return
             else:
                 self.OnStyleNeeded(None)
         else:
             self.SetMarginWidth(self.FOLD_MARGIN, 0)
             self.unfoldAll()
             self.foldingActive = False
-        
+
     def getFoldingActive(self):
         return self.foldingActive
 
@@ -847,7 +850,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if self.presenter.getMainControl().saveDocPage(page):
             self.SetSavePoint()
 
-        
+
     def unloadCurrentDocPage(self, evtprops=None):
         ## _prof.start()
         # Stop threads
@@ -1097,16 +1100,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         if self.pageType == u"normal":
             # Scroll page according to the anchor
-            pageAst = self.getPageAst()
-
-            anchorNodes = pageAst.iterDeepByName("anchorDef")
-            for node in anchorNodes:
-                if node.anchorLink == anchor:
-                    self.gotoCharPos(node.pos + node.strLength)
-                    break
+            try:
+                anchorNodes = self.getPageAst().iterDeepByName("anchorDef")
+                for node in anchorNodes:
+                    if node.anchorLink == anchor:
+                        self.gotoCharPos(node.pos + node.strLength)
+                        break
             
-            anchor = None # Not found
-                
+                    anchor = None # Not found
+            except NoPageAstException:
+                return
+
+
     def _checkForReadOnly(self):
         """
         Set/unset read-only mode of editor according to read-only state of page.
@@ -1757,8 +1762,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
     def getPageAst(self):
         docPage = self.getLoadedDocPage()
         if docPage is None:
-            return None
-        
+            raise NoPageAstException(u"Internal error: No docPage => no page AST")
+
         return docPage.getLivePageAst()
 
 
@@ -1844,22 +1849,25 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #                         self.presenter.getMainControl().goBrowserBack()
 
             elif node.name == "footnote":
-                pageAst = self.getPageAst()
-                footnoteId = node.footnoteId
-
-                anchorNode = getFootnoteAnchorDict(pageAst).get(footnoteId)
-                if anchorNode is not None:
-                    if anchorNode.pos != node.pos:
-                        # Activated footnote was not last -> go to last
-                        self.gotoCharPos(anchorNode.pos)
-                    else:
-                        # Activated footnote was last -> go to first
-                        for fnNode in pageAst.iterDeepByName("footnote"):
-                            if fnNode.footnoteId == footnoteId:
-                                self.gotoCharPos(fnNode.pos)
-                                break
-
-                return True
+                try:
+                    pageAst = self.getPageAst()
+                    footnoteId = node.footnoteId
+    
+                    anchorNode = getFootnoteAnchorDict(pageAst).get(footnoteId)
+                    if anchorNode is not None:
+                        if anchorNode.pos != node.pos:
+                            # Activated footnote was not last -> go to last
+                            self.gotoCharPos(anchorNode.pos)
+                        else:
+                            # Activated footnote was last -> go to first
+                            for fnNode in pageAst.iterDeepByName("footnote"):
+                                if fnNode.footnoteId == footnoteId:
+                                    self.gotoCharPos(fnNode.pos)
+                                    break
+    
+                    return True
+                except NoPageAstException:
+                    return False
             else:
                 continue
 
@@ -1873,7 +1881,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         else:
             linkBytePos = self.GetCurrentPos()
 
-        pageAst = self.getPageAst()
+        try:
+            pageAst = self.getPageAst()
+        except NoPageAstException:
+            return []
+
         linkCharPos = len(self.GetTextRange(0, linkBytePos))
 
         result = pageAst.findNodesForCharPos(linkCharPos)
@@ -1884,6 +1896,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             result += pageAst.findNodesForCharPos(linkCharPos - 1)
             
         return result
+
 
 
     def activateLink(self, mousePosition=None, tabMode=0):
@@ -1949,8 +1962,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if startPos == endPos or index > -1:
             # Execute all or selected script blocks on the page (or other
             #   related pages)
-            
-            pageAst = self.getPageAst()
+            try:            
+                pageAst = self.getPageAst()
+            except NoPageAstException:
+                return
+
             scriptNodeGroups = [list(pageAst.iterDeepByName(SCRIPTFORMAT))]
             
             # process script imports
@@ -2935,7 +2951,7 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
         shiftPressed = wx.GetKeyState(wx.WXK_SHIFT)
         
         if isLinux():
-            # On Linux, at least Ubuntu, fn is a UTF-8 encoded unicode(!?)
+            # On Linux, at least Ubuntu, fn may be a UTF-8 encoded unicode(!?)
             # string
             try:
                 filenames = [utf8Dec(fn.encode("latin-1"))[0]
@@ -2945,10 +2961,10 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
 
 
         mc = self.editor.presenter.getMainControl()
-        
+
         paramDict = {"editor": self.editor, "filenames": filenames,
                 "x": x, "y": y, "main control": mc}
-        
+
         if controlPressed:
             suffix = u"/modkeys/ctrl"
         elif shiftPressed:

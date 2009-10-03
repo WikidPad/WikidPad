@@ -1979,6 +1979,7 @@ class HtmlExporter(AbstractExporter):
                 elif lowerLink.endswith(".jpg") or \
                         lowerLink.endswith(".gif") or \
                         lowerLink.endswith(".png") or \
+                        lowerLink.endswith(".tif") or \
                         lowerLink.endswith(".bmp"):
                     urlAsImage = True
                 else:

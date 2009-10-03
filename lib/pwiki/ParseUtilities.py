@@ -77,8 +77,11 @@ def getFootnoteAnchorDict(pageAst):
         return
     if not hasattr(pageAst, "footnoteAnchorDict"):
         result = {}
-        fnNodes = pageAst.iterSelectedDeepByName("footnote",
-                frozenset(("indentedText", "orderedList", "unorderedList")))
+#         fnNodes = pageAst.iterSelectedDeepByName("footnote",
+#                 frozenset(("indentedText", "orderedList", "unorderedList",
+#                 "heading", "headingContent")))
+
+        fnNodes = pageAst.iterDeepByName("footnote")
 
         for node in fnNodes:
             result[node.footnoteId] = node

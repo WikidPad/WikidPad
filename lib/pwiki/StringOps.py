@@ -133,7 +133,8 @@ if isWindows():
     def longPathEnc(s):
         if s is None:
             return None
-        if s.startswith("\\\\?\\"):
+#         if s.startswith("\\\\?\\"):
+        if s.startswith("\\\\"):
             return s
 
         return u"\\\\?\\" + os.path.abspath(s)
@@ -914,11 +915,11 @@ def ntUrlFromPathname(p):
     """
     if not ':' in p:
         # No drive specifier, just convert slashes and quote the name
-        if p[:2] == '\\\\':
-        # path is something like \\host\path\on\remote\host
-        # convert this to ////host/path/on/remote/host
-        # (notice doubling of slashes at the start of the path)
-            p = '\\\\' + p
+#         if p[:2] == '\\\\':
+#         # path is something like \\host\path\on\remote\host
+#         # convert this to ////host/path/on/remote/host
+#         # (notice doubling of slashes at the start of the path)
+#             p = '\\\\' + p
         components = p.split('\\')
         return urlQuote('/'.join(components))
     comp = p.split(':')
@@ -997,6 +998,9 @@ def ntPathnameFromUrl(url, testFileType=True):
                     becomes
 
             C:\foo\bar\spam.foo
+            
+    testFileType -- ensure that URL has type "file" (and starts with "file:")
+            throw RuntimeError if not.
     """
     import string
     if url.startswith("file:"):

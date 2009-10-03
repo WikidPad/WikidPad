@@ -234,8 +234,8 @@ class MultiPageTextImporter:
         except BadFuncPageTagException:
             # This function tag is bad or unknown -> ignore
             return  # TODO Report error
-        
-    
+
+
     def importItemSavedSearch(self, unifName):
         # The subtag is the title of the search
         
@@ -246,9 +246,7 @@ class MultiPageTextImporter:
             datablock = base64BlockDecode(b64Content)
             self.wikiDataManager.getWikiData().storeDataBlock(unifName, datablock,
                     storeHint=Consts.DATABLOCK_STOREHINT_INTERN)
-            
-            
-            
+
         except TypeError:
             # base64 decoding failed
             return  # TODO Report error
@@ -278,6 +276,7 @@ class MultiPageTextImporter:
         content = self.collectContent()
         page = self.wikiDataManager.getWikiPageNoError(subtag)
 
+        # TODO How to handle versions here?
         page.replaceLiveText(content)
         if page.getTxtEditor() is not None:
             page.writeToDatabase()

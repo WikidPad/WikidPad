@@ -11,8 +11,10 @@ from wxHelper import GUI_ID, wxKeyFunctionSink, textToDataObject, \
         appendToMenuByMenuDesc, copyTextToClipboard
 from MiscEvent import DebugSimple   # , KeyFunctionSink
 
-from WikiExceptions import WikiWordNotFoundException, InternalError
+from WikiExceptions import WikiWordNotFoundException, InternalError, \
+        NoPageAstException
 from Utilities import StringPathSet, SingleThreadExecutor
+
 
 from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 import PropertyHandling
@@ -794,18 +796,19 @@ class WikiWordPropertySearchNode(WikiWordRelabelNode):
         super(WikiWordPropertySearchNode, self).onActivate()
 
         editor = self.treeCtrl.pWiki.getActiveEditor()
-        pageAst = editor.getPageAst()
-        if pageAst is None:
+        try:
+            pageAst = editor.getPageAst()
+
+            wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
+            wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
+                
+            propNodes = wikiPage.extractPropertyNodesFromPageAst(pageAst)
+            for node in propNodes:
+                if (self.propName, self.propValue) in node.props:
+                    editor.SetSelectionByCharPos(node.pos, node.pos + node.strLength)
+                    break
+        except NoPageAstException:
             return
-            
-        wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
-        wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
-            
-        propNodes = wikiPage.extractPropertyNodesFromPageAst(pageAst)
-        for node in propNodes:
-            if (self.propName, self.propValue) in node.props:
-                editor.SetSelectionByCharPos(node.pos, node.pos + node.strLength)
-                break
 
 
 

@@ -1,3 +1,5 @@
+from __future__ import with_statement
+
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
@@ -13,10 +15,10 @@ import wx, wx.html
 # import urllib_red as urllib
 # import urllib
 
-from wxHelper import GUI_ID, getAccelPairFromKeyDown, \
+from .wxHelper import GUI_ID, getAccelPairFromKeyDown, \
         getAccelPairFromString, LayerSizer, appendToMenuByMenuDesc, \
         setHotKeyByString, DummyWindow, IdRecycler, clearMenu, \
-        copyTextToClipboard, ProgressHandler
+        copyTextToClipboard, ProgressHandler, TopLevelLocker
 
 from . import TextTree
 
@@ -3617,6 +3619,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 # This is a relative link
                 link = self.makeRelUrlAbsolute(link)
 
+#             # Quick and dirty support for spaces in URL
+#             link = link.replace(u" ", u"%20")
+
             try:
                 OsAbstract.startFile(self, link)
             except Exception, e:
@@ -4501,8 +4506,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         typ = evt.GetId()
         # Export to dir
-        dest = wx.DirSelector(_(u"Select Export Directory"), defdir,
-        wx.DD_DEFAULT_STYLE|wx.DD_NEW_DIR_BUTTON, parent=self)
+        with TopLevelLocker:
+            dest = wx.DirSelector(_(u"Select Export Directory"), defdir,
+                    wx.DD_DEFAULT_STYLE|wx.DD_NEW_DIR_BUTTON, parent=self)
 
         try:
             if dest:
@@ -4589,36 +4595,26 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def showAddFileUrlDialog(self):
         if self.isReadOnlyPage():
             return
+        
+        with TopLevelLocker:
+            path = wx.FileSelector(_(u"Choose a file to create URL for"),
+                    self.getLastActiveDir(), wildcard="*.*", flags=wx.FD_OPEN,
+                    parent=self)
 
-        dlg = wx.FileDialog(self, _(u"Choose a file to create URL for"),
-                self.getLastActiveDir(), "", "*.*", wx.OPEN)
-        if dlg.ShowModal() == wx.ID_OK:
-            url = urlFromPathname(dlg.GetPath())
-            if dlg.GetPath().endswith(".wiki"):
+#         dlg = wx.FileDialog(self, _(u"Choose a file to create URL for"),
+#                 self.getLastActiveDir(), "", "*.*", wx.OPEN)
+        if path:
+            url = urlFromPathname(path)
+            if path.endswith(".wiki"):
                 url = "wiki:" + url
             else:
-#                 doCopy = False  # Necessary because key state may change between
-#                                 # the two ifs
-#                 if False:
-#                     # Relative rel: URL
-#                     locPath = self.editor.pWiki.getWikiConfigPath()
-#                     if locPath is not None:
-#                         locPath = dirname(locPath)
-#                         relPath = relativeFilePath(locPath, fn)
-#                         if relPath is None:
-#                             # Absolute path needed
-#                             urls.append("file:%s" % url)
-#                         else:
-#                             urls.append("rel://%s" % urllib.pathname2url(relPath))
-#                 else:
-    
                 # Absolute file: URL
                 url = "file:" + url
                 
             self.getActiveEditor().AddText(url)
-            self.configuration.set("main", "last_active_dir", dirname(dlg.GetPath()))
+            self.configuration.set("main", "last_active_dir", dirname(path))
             
-        dlg.Destroy()
+#         dlg.Destroy()
 
 
 
@@ -5006,20 +5002,29 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnWikiOpen(self, event):
-        dlg = wx.FileDialog(self, _(u"Choose a Wiki to open"),
-                self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
-        if dlg.ShowModal() == wx.ID_OK:
-            self.openWiki(mbcsDec(abspath(dlg.GetPath()), "replace")[0])
-        dlg.Destroy()
+        with TopLevelLocker:
+            path = wx.FileSelector(_(u"Choose a Wiki to open"),
+                    self.getDefDirForWikiOpenNew(), wildcard=u"*.wiki",
+                    flags=wx.FD_OPEN, parent=self)
+
+#         dlg = wx.FileDialog(self, _(u"Choose a Wiki to open"),
+#                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
+        if path:
+            self.openWiki(mbcsDec(abspath(path), "replace")[0])
+#         dlg.Destroy()
 
 
     def OnWikiOpenNewWindow(self, event):
-        dlg = wx.FileDialog(self, _(u"Choose a Wiki to open"),
-                self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
-        if dlg.ShowModal() == wx.ID_OK:
+        with TopLevelLocker:
+            path = wx.FileSelector(_(u"Choose a Wiki to open"),
+                    self.getDefDirForWikiOpenNew(), wildcard=u"*.wiki",
+                    flags=wx.FD_OPEN, parent=self)
+#         dlg = wx.FileDialog(self, _(u"Choose a Wiki to open"),
+#                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
+        if path:
             try:
                 clAction = CmdLineAction([])
-                clAction.wikiToOpen = mbcsDec(abspath(dlg.GetPath()), "replace")[0]
+                clAction.wikiToOpen = mbcsDec(abspath(path), "replace")[0]
                 clAction.frameToOpen = 1  # Open in new frame
                 wx.GetApp().startPersonalWikiFrame(clAction)
             except Exception, e:
@@ -5028,16 +5033,21 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         u'WikidPad instance'), e)
                 return
 
-        dlg.Destroy()
+#         dlg.Destroy()
 
 
     def OnWikiOpenAsType(self, event):
-        dlg = wx.FileDialog(self, _(u"Choose a Wiki to open"),
-                self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
-        if dlg.ShowModal() == wx.ID_OK:
-            self.openWiki(mbcsDec(abspath(dlg.GetPath()), "replace")[0],
+        with TopLevelLocker:
+            path = wx.FileSelector(_(u"Choose a Wiki to open"),
+                    self.getDefDirForWikiOpenNew(), wildcard=u"*.wiki",
+                    flags=wx.FD_OPEN, parent=self)
+
+#         dlg = wx.FileDialog(self, _(u"Choose a Wiki to open"),
+#                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
+        if path:
+            self.openWiki(mbcsDec(abspath(path), "replace")[0],
                     ignoreWdhName=True)
-        dlg.Destroy()
+#         dlg.Destroy()
 
 
     def OnWikiNew(self, event):
@@ -5057,11 +5067,17 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             errMsg = userLangHelper.checkForInvalidWikiWord(wikiName)
 
             if errMsg is None:
-                dlg = wx.DirDialog(self, _(u"Directory to store new wiki"),
-                        self.getDefDirForWikiOpenNew(),
-                        style=wx.DD_DEFAULT_STYLE|wx.DD_NEW_DIR_BUTTON)
-                if dlg.ShowModal() == wx.ID_OK:
-                    self.newWiki(wikiName, dlg.GetPath())
+                with TopLevelLocker:
+                    dirPath = wx.DirSelector(_(u"Directory to store new wiki"),
+                            self.getDefDirForWikiOpenNew(),
+                            style=wx.DD_DEFAULT_STYLE|wx.DD_NEW_DIR_BUTTON,
+                            parent=self)
+
+#                 dlg = wx.DirDialog(self, _(u"Directory to store new wiki"),
+#                         self.getDefDirForWikiOpenNew(),
+#                         style=wx.DD_DEFAULT_STYLE|wx.DD_NEW_DIR_BUTTON)
+                if dirPath:
+                    self.newWiki(wikiName, dirPath)
             else:
                 self.displayErrorMessage(_(u"'%s' is an invalid wiki word. %s")
                         % (wikiName, errMsg))

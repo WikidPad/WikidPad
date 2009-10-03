@@ -15,7 +15,7 @@ together.
 To activate or follow a Wiki Word link, *double click on it*, or type
 CTRL-L when the cursor is in the word.
 
-When your finished reading through the help document select "Wiki/New"
+When you are finished reading through the help document select "Wiki/New"
 from the menu at the top of the application to create your own wiki.
 Then just start typing text with WikiWords to create your wiki.
 

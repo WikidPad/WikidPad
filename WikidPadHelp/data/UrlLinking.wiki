@@ -38,7 +38,7 @@ You can also copy files into a subdirectory of the wiki directory from within Wi
 
 
 ++ Images
-If an URL file ends with ".jpg", ".gif", ".png" or ".bmp", the URL is automatically shown as an image in preview and HTML export (an image in the file storage with relative URL is copied to a subdirectory "files" in the export destination directory). The URL can be absolute or relative and can point into the file storage.
+If an URL file ends with ".jpg", ".gif", ".png", ".tif" or ".bmp", the URL is automatically shown as an image in preview and HTML export (an image in the file storage with relative URL is copied to a subdirectory "files" in the export destination directory). The URL can be absolute or relative and can point into the file storage.
 
 Example (switch to preview to see the picture):
 

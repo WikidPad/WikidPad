@@ -1,5 +1,15 @@
 ﻿++ Change Log
 
+Oct. 03, 2009 (2.0beta08)
+
+    * URLs ending with ".tif" are now also automatically image URLs
+
+    * Bug fixed: Footnotes were not recognized as anchors under
+      some circumstances (e.g. in headings)
+    * Bug fixed: Problem with links to network shares
+
+
+
 Aug. 26, 2009 (2.0beta07)
 
     * Support for subpages e.g. <<[WikiWord/Subword]>>.

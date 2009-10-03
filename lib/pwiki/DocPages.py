@@ -65,8 +65,8 @@ class DocPage(object, MiscEventSourceMixin):
                 self.txtEditors = None
                 self.livePageAst = None
                 self.setEditorText(None)
-                
-    
+
+
     def isInvalid(self):
         return self.txtEditors is None
 

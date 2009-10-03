@@ -633,17 +633,12 @@ WikiWordCcPAT = (ur"(?:[" +
         ur"]+)")
 
 
-# UrlPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
-#         ur'(?:(?![.,;:!?)\]]+["\s])[^"\s<>])*'
-
 UrlPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
         ur'(?:(?![.,;:!?)\]]+(?:["\s]|$))[^"\s<>])*'
 
 
 # UrlInBracketsPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
-#         ur'(?:(?![.,;:!?)]+["\s])[^"\s<>' + BracketEndPAT + '])*'
-# UrlInBracketsPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
-#         ur'(?:[^"\s<>' + BracketEndPAT + '])*'
+#         ur'(?:[^"\t\n<>' + BracketEndPAT + '])*'
 
 
 bracketStart = buildRegex(BracketStartPAT)

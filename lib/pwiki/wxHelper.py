@@ -77,6 +77,24 @@ class WindowUpdateLocker(object):
 
 
 
+class _TopLevelLockerClass(object):
+    """
+    Provides context in which all top level windows are locked
+    Usage:
+    with TopLevelLocker:
+        do this, do that...
+    
+    """
+    def __enter__(self):
+        wx.EnableTopLevelWindows(False)
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        wx.EnableTopLevelWindows(True)
+
+# The one and only instance
+TopLevelLocker = _TopLevelLockerClass()
+
+
 class IdRecycler:
     """
     You can get ids from it, associate them with a value, later clear the
@@ -148,13 +166,25 @@ def getTextFromClipboard():
     cb.Open()
     try:
         dataob = textToDataObject()
-
         if cb.GetData(dataob):
             if dataob.GetTextLength() > 0:
                 return lineendToInternal(dataob.GetText())
             else:
                 return u""
         return None
+
+# DO NOT DELETE! Useful later for retrieving HTML URL source
+#         dataob = wx.CustomDataObject(wx.CustomDataFormat("HTML Format"))
+# 
+#         print "--getTextFromClipboard5"
+#         if cb.GetData(dataob):
+#             print "--getTextFromClipboard6"
+#             if dataob.GetSize() > 0:
+#                 print "--getTextFromClipboard7", repr(dataob.GetData()[:800])
+#                 return lineendToInternal(dataob.GetData())
+#             else:
+#                 return u""
+#         return None
     finally:
         cb.Close()
 
