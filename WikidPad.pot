@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-10-25 12:58\n"
+"POT-Creation-Date: 2009-10-25 19:07\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4213,19 +4213,19 @@ msgstr ""
 
 #: lib\pwiki\wikidata\compact_sqlite\WikiData.py:481
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:459
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:518
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:520
 msgid "You cannot delete the root wiki node"
 msgstr ""
 
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:1051
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1172
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1174
 msgid "Wiki page not found (no path information) for word: %s"
 msgstr ""
 
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:1069
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:1083
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1190
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1204
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1192
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1206
 msgid "Wiki page not found (bad path information) for word: %s"
 msgstr ""
 
