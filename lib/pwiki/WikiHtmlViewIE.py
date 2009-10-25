@@ -25,8 +25,8 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 
 from MiscEvent import KeyFunctionSink
 
-from StringOps import uniToGui, utf8Enc, utf8Dec, urlFromPathname, urlQuote, \
-        writeEntireTxtFile, pathnameFromUrl
+from StringOps import uniToGui, utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
+        urlQuote, writeEntireTxtFile, pathnameFromUrl
 
 from TempFileSet import TempFileSet
 

@@ -112,6 +112,8 @@ class App(wx.App, MiscEventSourceMixin):
 
         self.SetAppName("WikidPad")
         self.removeAppLockOnExit = False
+        self.sqliteInitFlag = False   # Read and modified only by WikiData classes
+
         wx.EVT_END_SESSION(self, self.OnEndSession)
         appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
         
@@ -469,8 +471,14 @@ class App(wx.App, MiscEventSourceMixin):
     def getGlobalConfig(self):
         return self.globalConfig
 
+    def getGlobalConfigDir(self):
+        return self.globalConfigDir
+
     def getWikiAppDir(self):
         return self.wikiAppDir
+
+    def isInPortableMode(self):
+        return self.globalConfigDir == self.wikiAppDir
 
     def getLowResources(self):
         """

@@ -141,6 +141,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
         self.visible = False
         self.outOfSync = True   # HTML content is out of sync with live content
+        self.counterResizeIgnore = 0  # How often to ignore a size event
 
         self.currentLoadedWikiWord = None
 
@@ -164,6 +165,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
         wx.EVT_KEY_UP(self, self.OnKeyUp)
+        wx.EVT_SIZE(self, self.OnSize)
 
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, self.OnClipboardCopy)
         wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN, lambda evt: self.addZoom(1))
@@ -254,6 +256,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
             try:
                 prevPage = self.presenter.getWikiDocument().getWikiPage(
                         self.currentLoadedWikiWord)
+
                 prevPage.setPresentation(self.GetViewStart(), 3)
             except WikiWordNotFoundException, e:
                 pass
@@ -288,11 +291,13 @@ class WikiHtmlView(wx.html.HtmlWindow):
     
             # TODO Reset after open wiki
             zoom = self.presenter.getConfig().getint("main", "preview_zoom", 0)
+            lx, ly = self.GetViewStart()
             self.SetFonts("", "", [max(s + 2 * zoom, 1)
                     for s in self._DEFAULT_FONT_SIZES])
-                    
+
 #             print "-- refresh8", html.encode("mbcs", "ignore")
             self.SetPage(uniToGui(html))
+            self.Scroll(lx, ly)
 
 
         if self.anchor:   #  and self.HasAnchor(self.anchor):
@@ -305,7 +310,9 @@ class WikiHtmlView(wx.html.HtmlWindow):
                 self.Scroll(0, 0)
         elif self.outOfSync:
             lx, ly = wikiPage.getPresentation()[3:5]
-            self.Scroll(lx, ly)
+            # self.counterResizeIgnore = 3
+            self.Freeze()
+            wx.CallAfter(self._scrollAndThaw, lx, ly)
 
         self.anchor = None
         self.outOfSync = False
@@ -380,6 +387,22 @@ class WikiHtmlView(wx.html.HtmlWindow):
             
     def onChangedLiveText(self, miscevt):
         self.outOfSync = True
+
+
+    def _scrollAndThaw(self, lx, ly):
+        self.Scroll(lx, ly)
+        self.Thaw()
+
+    def OnSize(self, evt):
+        if self.counterResizeIgnore > 0:
+            self.counterResizeIgnore -= 1
+            return
+
+        lx, ly = self.GetViewStart()
+        self.counterResizeIgnore = 1
+        self.Freeze()
+        wx.CallAfter(self._scrollAndThaw, lx, ly)
+        evt.Skip()
 
 
     def OnSetFocus(self, evt):

@@ -1,5 +1,15 @@
 ﻿++ Change Log
 
+Oct. 25, 2009 (1.9rc10)
+
+    * Options to control location of temporary files
+    * Bug fixed: Internal HTML preview jumped to top of page on
+      each resize
+    * Bug fixed: Temporary files for IE preview weren't deleted
+      on close
+
+
+
 Oct. 03, 2009 (1.9rc09)
 
     * Bug fixed: Problem with links to network shares

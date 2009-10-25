@@ -20,6 +20,8 @@ import datetime
 import string, glob, types, sets, traceback
 import pwiki.srePersistent as re
 
+from wx import GetApp
+
 from pwiki.WikiExceptions import *   # TODO make normal import
 from pwiki import SearchAndReplace
 
@@ -69,6 +71,43 @@ class WikiData:
         
 #         self.connWrap.execSql("pragma temp_store_directory = '%s'" %
 #                 utf8Enc(tempDir)[0])
+
+        # Set temporary directory if this is first sqlite use after prog. start
+        if not GetApp().sqliteInitFlag:
+            globalConfig = GetApp().getGlobalConfig()
+            if globalConfig.getboolean("main", "tempHandling_preferMemory",
+                    False):
+                tempMode = u"memory"
+            else:
+                tempMode = globalConfig.get("main", "tempHandling_tempMode",
+                        u"system")
+
+            if tempMode == u"auto":
+                if GetApp().isInPortableMode():
+                    tempMode = u"config"
+                else:
+                    tempMode = u"system"
+            
+            if tempMode == u"memory":
+                self.connWrap.execSql("pragma temp_store = 2")
+            elif tempMode == u"given":
+                tempDir = globalConfig.get("main", "tempHandling_tempDir", u"")
+                try:
+                    self.connWrap.execSql("pragma temp_store_directory = '%s'" %
+                            utf8Enc(tempDir)[0])
+                except sqlite.Error:
+                    self.connWrap.execSql("pragma temp_store_directory = ''")
+
+                self.connWrap.execSql("pragma temp_store = 1")
+            elif tempMode == u"config":
+                self.connWrap.execSql("pragma temp_store_directory = '%s'" %
+                        utf8Enc(GetApp().getGlobalConfigSubDir())[0])
+                self.connWrap.execSql("pragma temp_store = 1")
+            else:   # tempMode == u"system"
+                self.connWrap.execSql("pragma temp_store_directory = ''")
+                self.connWrap.execSql("pragma temp_store = 1")
+
+            GetApp().sqliteInitFlag = True
 
         DbStructure.registerSqliteFunctions(self.connWrap)
 

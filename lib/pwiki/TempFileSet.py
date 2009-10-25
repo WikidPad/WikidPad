@@ -60,6 +60,9 @@ class TempFileSet:
         """
         if path is None:
             path = self.preferredPath
+            if path is None:
+                path = getDefaultTempFilePath()
+
             if path is not None and not os.path.exists(pathEnc(path)):
                 try:
                     os.makedirs(pathEnc(path))
@@ -130,6 +133,9 @@ class TempFileSet:
         """
         if path is None:
             path = self.preferredPath
+            if path is None:
+                path = getDefaultTempFilePath()
+
             if path is not None and not os.path.exists(pathEnc(path)):
                 try:
                     os.makedirs(path)
@@ -181,6 +187,9 @@ def createTempFile(content, suffix, path=None, relativeTo=None):
     relativeTo -- path relative to which the path should be or None
         for absolute path
     """
+    if path is None:
+        path = getDefaultTempFilePath()
+
     fd, fullPath = tempfile.mkstemp(suffix=pathEnc(suffix), dir=pathEnc(path),
             text=False)
     try:
@@ -256,5 +265,24 @@ def getRelativeUrl(relativeTo, fullPath, pythonUrl=False):
     return urlFromPathname(relPath)
 
 
+def getDefaultTempFilePath():
+    """
+    Return default temp directory depending on global configuration settings.
+    May return None for system default temp dir.
+    """
+    globalConfig = wx.GetApp().getGlobalConfig()
+    tempMode = globalConfig.get("main", "tempHandling_tempMode",
+            u"system")
 
-
+    if tempMode == u"auto":
+        if wx.GetApp().isInPortableMode():
+            tempMode = u"config"
+        else:
+            tempMode = u"system"
+    
+    if tempMode == u"given":
+        return globalConfig.get("main", "tempHandling_tempDir", u"")
+    elif tempMode == u"config":
+        return wx.GetApp().getGlobalConfigSubDir()
+    else:   # tempMode == u"system"
+        return None

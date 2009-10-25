@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-10-03 10:49\n"
+"POT-Creation-Date: 2009-10-25 12:26\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -324,6 +324,10 @@ msgid "Compatible filenames"
 msgstr ""
 
 #: WikidPad.xrc:0
+msgid "Config. dir."
+msgstr ""
+
+#: WikidPad.xrc:0
 msgid "Context characters"
 msgstr ""
 
@@ -449,6 +453,10 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "Format version"
+msgstr ""
+
+#: WikidPad.xrc:0
+msgid "Given:"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -712,6 +720,10 @@ msgid "Position view tree:"
 msgstr ""
 
 #: WikidPad.xrc:0
+msgid "Prefer memory where possible"
+msgstr ""
+
+#: WikidPad.xrc:0
 msgid "Prepend before clipboard snippet:"
 msgstr ""
 
@@ -952,6 +964,18 @@ msgid "Table of contents:"
 msgstr ""
 
 #: WikidPad.xrc:0
+msgid "Temporary file directory:"
+msgstr ""
+
+#: WikidPad.xrc:0
+msgid "Temporary files"
+msgstr ""
+
+#: WikidPad.xrc:0
+msgid "Temporary path:"
+msgstr ""
+
+#: WikidPad.xrc:0
 msgid "Text color:"
 msgstr ""
 
@@ -1152,7 +1176,7 @@ msgid "Source directory:"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\OptionsDialog.py:130
-#: lib\pwiki\OptionsDialog.py:717
+#: lib\pwiki\OptionsDialog.py:722
 msgid "Default"
 msgstr ""
 
@@ -1208,7 +1232,7 @@ msgid "Title:"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:1743
-#: lib\pwiki\WikiHtmlView.py:626 lib\pwiki\WikiTxtCtrl.py:3181
+#: lib\pwiki\WikiHtmlView.py:649 lib\pwiki\WikiTxtCtrl.py:3181
 msgid "Activate New Tab"
 msgstr ""
 
@@ -1758,22 +1782,22 @@ msgstr ""
 msgid "Message"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:123
+#: lib\pwiki\MainApp.py:125
 msgid "Error initializing environment, couldn't locate global config directory"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:232
+#: lib\pwiki\MainApp.py:234
 msgid "Invalid AppLock.lock file.\n"
 "Ensure that WikidPad is not running,\n"
 "then delete file \"%s\" if present yet.\n"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:424
+#: lib\pwiki\MainApp.py:426
 msgid "An error occurred during this session\n"
 "See file %s"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:570 lib\pwiki\MainApp.py:572
+#: lib\pwiki\MainApp.py:578 lib\pwiki\MainApp.py:580
 msgid "Plugin options"
 msgstr ""
 
@@ -1785,87 +1809,87 @@ msgstr ""
 msgid "Not a wiki page"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:581
+#: lib\pwiki\OptionsDialog.py:586
 msgid "Application"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:582
+#: lib\pwiki\OptionsDialog.py:587
 msgid "  User interface"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:583
+#: lib\pwiki\OptionsDialog.py:588
 msgid "  Security"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:584
+#: lib\pwiki\OptionsDialog.py:589
 msgid "  Tree"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:585
+#: lib\pwiki\OptionsDialog.py:590
 msgid "  HTML preview/export"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:586
+#: lib\pwiki\OptionsDialog.py:591
 msgid "    HTML header"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:587
+#: lib\pwiki\OptionsDialog.py:592
 msgid "  Autosave"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:588
+#: lib\pwiki\OptionsDialog.py:593
 msgid "  Editor"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:589
+#: lib\pwiki\OptionsDialog.py:594
 msgid "    Editor Colors"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:590
+#: lib\pwiki\OptionsDialog.py:595
 msgid "    Clipboard Catcher"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:591
+#: lib\pwiki\OptionsDialog.py:596
 msgid "  File Launcher"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:592
+#: lib\pwiki\OptionsDialog.py:597
 msgid "  Mouse"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:593
+#: lib\pwiki\OptionsDialog.py:598
 msgid "  Time view"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:594
+#: lib\pwiki\OptionsDialog.py:599
 msgid "  Searching"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:595
+#: lib\pwiki\OptionsDialog.py:600
 msgid "  Advanced"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:596
+#: lib\pwiki\OptionsDialog.py:601
 msgid "Current Wiki"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:597
+#: lib\pwiki\OptionsDialog.py:602
 msgid "  File Storage"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:775
+#: lib\pwiki\OptionsDialog.py:781
 msgid "Wave files (*.wav)|*.wav"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:786 lib\pwiki\OptionsDialog.py:1034
+#: lib\pwiki\OptionsDialog.py:792 lib\pwiki\OptionsDialog.py:1050
 msgid "All files (*.*)|*"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:1024
+#: lib\pwiki\OptionsDialog.py:1040
 msgid "Select Directory"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:1032
+#: lib\pwiki\OptionsDialog.py:1048
 msgid "Select File"
 msgstr ""
 
@@ -2908,9 +2932,9 @@ msgid "This will overwrite current content if not stored as version. Continue?"
 msgstr ""
 
 #: lib\pwiki\PersonalWikiFrame.py:4023 lib\pwiki\PersonalWikiFrame.py:4147
-#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:400
+#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:439
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:364
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:407
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:446
 msgid "'%s' is an invalid wiki word"
 msgstr ""
 
@@ -3427,12 +3451,12 @@ msgid "Bad regular expression '%s':\n"
 "%s"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1742 lib\pwiki\WikiHtmlView.py:625
+#: lib\pwiki\SearchAndReplaceDialogs.py:1742 lib\pwiki\WikiHtmlView.py:648
 #: lib\pwiki\WikiTxtCtrl.py:3180
 msgid "Activate"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1744 lib\pwiki\WikiHtmlView.py:627
+#: lib\pwiki\SearchAndReplaceDialogs.py:1744 lib\pwiki\WikiHtmlView.py:650
 #: lib\pwiki\WikiTxtCtrl.py:3182
 msgid "Activate New Tab Backgrd."
 msgstr ""
@@ -3675,15 +3699,15 @@ msgstr ""
 msgid "Database format is up to date"
 msgstr ""
 
-#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:404
+#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:443
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:368
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:411
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:450
 msgid "Cannot rename '%s' to '%s', '%s' already exists"
 msgstr ""
 
-#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:459
+#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:498
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:445
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:459
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:498
 msgid "You cannot delete the root wiki node"
 msgstr ""
 
