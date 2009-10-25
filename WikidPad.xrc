@@ -264,6 +264,87 @@
         <option>0</option>
         <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
+      <object class="sizeritem">
+        <object class="wxStaticLine"/>
+        <option>0</option>
+        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText">
+          <label>Temporary files</label>
+          <font>
+            <size>8</size>
+            <style>default</style>
+            <weight>bold</weight>
+            <family>normal</family>
+            <underlined>0</underlined>
+          </font>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbTempHandlingPreferMemory">
+          <label>Prefer memory where possible</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Temporary file directory:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chTempHandlingTempMode">
+              <content>
+                <item>System</item>
+                <item>Config. dir.</item>
+                <item>Given:</item>
+              </content>
+            </object>
+            <option>0</option>
+            <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <option>0</option>
+        <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <cols>3</cols>
+          <growablecols>1</growablecols>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Temporary path:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfTempHandlingTempDir"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnSelectTempHandlingTempDir">
+              <label>...</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <border>5</border>
+            <minsize>20,-1</minsize>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
     </object>
   </object>
   <object class="wxPanel" name="OptionsPageUserInterface">

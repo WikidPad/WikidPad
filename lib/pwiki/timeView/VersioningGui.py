@@ -3,7 +3,7 @@ import traceback
 import wx, wx.xrc
 
 import Consts
-from ..WikiExceptions import *
+from pwiki.WikiExceptions import *
 
 from .. import Utilities
 from ..wxHelper import GUI_ID, EnhancedListControl, wxKeyFunctionSink, \

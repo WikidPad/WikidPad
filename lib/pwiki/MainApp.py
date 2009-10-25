@@ -121,6 +121,7 @@ class App(wx.App, MiscEventSourceMixin):
 
         self.startupDummy = wx.Frame(None, -1, u"Dummy")
         self.dbExecutor = None  # SingleThreadExecutor()
+        self.sqliteInitFlag = False   # Read and modified only by WikiData classes
         
         wx.CallAfter(self.OnInitDuringMain)
 
@@ -557,8 +558,8 @@ class App(wx.App, MiscEventSourceMixin):
 
     def unregisterMainFrame(self, wikiFrame):
         self.mainFrameSet.discard(wikiFrame)
-
-
+        
+        
     def createDefaultGlobalConfig(self, globalConfigLoc):
         self.globalConfig.createEmptyConfig(globalConfigLoc)
         self.globalConfig.fillWithDefaults()
@@ -575,11 +576,17 @@ class App(wx.App, MiscEventSourceMixin):
     def getGlobalConfigSubDir(self):
         return self.globalConfigSubDir
 
+    def getGlobalConfigDir(self):
+        return self.globalConfigDir
+
     def getGlobalConfig(self):
         return self.globalConfig
         
     def getWikiAppDir(self):
         return self.wikiAppDir
+    
+    def isInPortableMode(self):
+        return self.globalConfigDir == self.wikiAppDir
 
     def getIconCache(self):
         """

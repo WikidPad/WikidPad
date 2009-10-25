@@ -9,7 +9,7 @@ from ..rtlibRepl import minidom
 
 import wx
 
-from ..WikiExceptions import *
+from pwiki.WikiExceptions import *
 import Consts
 
 from ..MiscEvent import MiscEventSourceMixin

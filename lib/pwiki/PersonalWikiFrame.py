@@ -24,7 +24,7 @@ from . import TextTree
 
 from .MiscEvent import MiscEventSourceMixin, ProxyMiscEvent  # , DebugSimple
 
-from .WikiExceptions import *
+from WikiExceptions import *
 from Consts import HOMEPAGE
 
 from . import Configuration
@@ -63,7 +63,7 @@ from . import PropertyHandling, SpellChecker
  #from SearchAndReplace import SearchReplaceOperation
 from .Printing import Printer, PrintMainDialog
 
-from .AdditionalDialogs import *
+from AdditionalDialogs import *
 from . import AdditionalDialogs
 from .OptionsDialog import OptionsDialog
 from .SearchAndReplaceDialogs import SearchPageDialog, SearchWikiDialog, \

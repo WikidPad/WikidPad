@@ -1,5 +1,16 @@
 ﻿++ Change Log
 
+Oct. 25, 2009 (2.0beta09)
+
+    * Options to control location of temporary files.
+      See [OptionsDialog#*Temporary files*]
+    * Bug fixed: Internal HTML preview jumped to top of page on
+      each resize
+    * Bug fixed: Temporary files for IE preview weren't deleted
+      on close
+
+
+
 Oct. 03, 2009 (2.0beta08)
 
     * URLs ending with ".tif" are now also automatically image URLs

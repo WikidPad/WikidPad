@@ -318,15 +318,23 @@ class WikiWordNode(AbstractNode):
             # Check props on page against global presentation props.
             # The dots in the key matter. The more dots the more specific
             # is the global prop and wins over less specific props
+
+#             newGPropVal = globalProps.get(u"global.%s" % p)
+#             if newGPropVal is not None:
+#                 gPropVal = newGPropVal
+#                 dots = 0
+#             else:
+
             gPropVal = None
             dots = -1
+
             for (key, values) in propsItems:
                 newGPropVal = None
                 newDots = key.count(u".") + 1 # key dots plus one for value
                 if newDots > dots:
                     for val in values:
                         newGPropVal = globalProps.get(u"global.%s.%s.%s" % (key, val, p))
-                        if newGPropVal:
+                        if newGPropVal is not None:
                             gPropVal = newGPropVal
                             dots = newDots
                             break
@@ -334,7 +342,7 @@ class WikiWordNode(AbstractNode):
                     newDots -= 1
                     while newDots > dots:
                         newGPropVal = globalProps.get(u"global.%s.%s" % (key, p))
-                        if newGPropVal:
+                        if newGPropVal is not None:
                             break
     
                         dotpos = key.rfind(u".")
@@ -343,13 +351,13 @@ class WikiWordNode(AbstractNode):
                         key = key[:dotpos]
                         newDots -= 1
     
-                    if newGPropVal:
+                    if newGPropVal is not None:
                         gPropVal = newGPropVal
                         dots = newDots
 
             # If a value is found, we stop searching for this presentation
             # property here
-            if gPropVal:
+            if gPropVal is not None:
                 setattr(style, p, gPropVal)
                 continue
 

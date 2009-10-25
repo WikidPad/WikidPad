@@ -34,8 +34,8 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 
 from MiscEvent import KeyFunctionSink
 
-from StringOps import uniToGui, utf8Enc, utf8Dec, urlFromPathname, urlQuote, \
-        pathnameFromUrl, flexibleUrlUnquote
+from StringOps import uniToGui, utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
+        urlQuote, pathnameFromUrl, flexibleUrlUnquote
 
 import DocPages
 from TempFileSet import TempFileSet

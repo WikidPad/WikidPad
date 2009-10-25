@@ -2,7 +2,7 @@ import re
 
 import wx, wx.xrc
 
-from .wxHelper import *
+from wxHelper import *
 
 from .StringOps import uniToGui, guiToUni, colorDescToRgbTuple,\
         rgbToHtmlColor, strToBool, splitIndent
@@ -376,6 +376,11 @@ class OptionsDialog(wx.Dialog):
                 "b"),
             ("hotKey_showHide_byApp", "tfHotKeyShowHideByApp", "t"),
 
+            ("tempHandling_preferMemory", "cbTempHandlingPreferMemory", "b"),
+            ("tempHandling_tempMode", "chTempHandlingTempMode", "selt",
+                [u"system", u"config", u"given"]),
+            ("tempHandling_tempDir", "tfTempHandlingTempDir", "tdir",
+                "btnSelectTempHandlingTempDir"),
 
             ("showontray", "cbShowOnTray", "b"),
             ("minimize_on_closeButton", "cbMinimizeOnCloseButton", "b"),
@@ -753,7 +758,8 @@ class OptionsDialog(wx.Dialog):
 
 #                 self.ctrls[c].SetValue(
 #                         self.pWiki.getConfig().getboolean("main", o))
-            elif t in ("t", "tre", "ttdf", "tfont0", "i0+", "f0+", "color0"):  # text field or regular expression field
+            elif t in ("t", "tre", "ttdf", "tfont0", "tdir", "i0+", "f0+",
+                    "color0"):  # text field or regular expression field
                 self.ctrls[c].SetValue(
                         uniToGui(self.pWiki.getConfig().get("main", o)) )
             elif t == "seli":   # Selection -> transfer index
@@ -794,7 +800,7 @@ class OptionsDialog(wx.Dialog):
                     self.ctrls[c].SetSelection(sel)
 
             # Register events for "..." buttons
-            if t in ("color0", "ttdf", "tfont0"):
+            if t in ("color0", "ttdf", "tfont0", "tdir"):
                 params = oct[3:]
                 if len(params) > 0:
                     # params[0] is name of the "..." button after the text field
@@ -825,6 +831,7 @@ class OptionsDialog(wx.Dialog):
             self.ctrls.chVersioningStorageLocation.Enable(
                     fppCap is not None)
 
+        self.OnTempHandlingTempMode(None)
         self.OnEditorImagePasteFileTypeChoice(None)
         self.OnWwSearchCountOccurrences(None)
 
@@ -865,6 +872,9 @@ class OptionsDialog(wx.Dialog):
                 lambda evt: self.selectFile(self.ctrls.tfFileLauncherPath,
                 _(u"All files (*.*)|*")))
 
+
+        wx.EVT_CHOICE(self, GUI_ID.chTempHandlingTempMode,
+                self.OnTempHandlingTempMode)
 
         wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,
                 self.OnEditorImagePasteFileTypeChoice)
@@ -1009,7 +1019,7 @@ class OptionsDialog(wx.Dialog):
                 elif value == wx.CHK_UNCHECKED:
                     self.pWiki.getConfig().set("main", o, "False")
 
-            elif t in ("t", "tre", "ttdf", "tfont0", "i0+", "f0+", "color0"):
+            elif t in ("t", "tre", "ttdf", "tfont0", "tdir", "i0+", "f0+", "color0"):
                 self.pWiki.getConfig().set(
                         "main", o, guiToUni(self.ctrls[c].GetValue()) )
             elif t == "seli":   # Selection -> transfer index
@@ -1078,6 +1088,11 @@ class OptionsDialog(wx.Dialog):
 #             self.ctrls.tfPageStatusTimeFormat.SetValue(dlg.GetValue())
 #         dlg.Destroy()
 
+    def OnTempHandlingTempMode(self, evt):
+        enabled = self.ctrls.chTempHandlingTempMode.GetSelection() == 2
+        self.ctrls.tfTempHandlingTempDir.Enable(enabled)
+        self.ctrls.btnSelectTempHandlingTempDir.Enable(enabled)
+
     def OnEditorImagePasteFileTypeChoice(self, evt):
         enabled = self.ctrls.chEditorImagePasteFileType.GetSelection() == 2
         self.ctrls.tfEditorImagePasteQuality.Enable(enabled)
@@ -1103,6 +1118,8 @@ class OptionsDialog(wx.Dialog):
             self.selectDateTimeFormat(self.ctrls[c])
         elif t == "tfont0":   # Font or empty
             self.selectFont(self.ctrls[c])
+        elif t == "tdir":
+            self.selectDirectory(self.ctrls[c])
 
 
     def selectColor(self, tfield):

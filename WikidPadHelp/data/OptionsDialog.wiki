@@ -37,6 +37,21 @@ The checkbox before the text field allows to temporarily deactivate the hotkey w
 
 There is also an option to set a second hotkey which is bound to the current wiki instead of the app. See OptionsDialog#*Wiki-bound# hotkey* below in "Current wiki" options.
 
+*Temporary files*
+A group of settings about the placement of temporary files. These settings may need a restart of WikidPad to take effect.
+
+*Prefer memory where possible*
+If checked, main memory is used instead of files where this is possible. This especially affects temporary tables created while sqlite-based wikis are open.
+
+*Temporary file directory*
+Set the kind of location of temporary files:
+    * System: Place files in operating systems default place for temporary files
+    * Config. dir.: Place in the "WikidPadGlobals" subdirectory of the current configuration directory (useful for [WikidPadOnUSB])
+    * Given: Use path entered in "Temporary path" below.
+
+*Temporary path*
+If "Temporary file directory" is set to "Given", enter here the path to temporary directory.
+
 
 ++++ User interface
 

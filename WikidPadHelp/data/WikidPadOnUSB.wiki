@@ -25,6 +25,8 @@ This page describes how to move WikidPad on an USB stick or similar media if you
        should be identical to the destination directory. If it is
        not, something went wrong.
 
+After that, WikidPad does yet place its temporary files in the system's default temporary directory, to change this, open options dialog, go to options page "Application" (top of the list), set entry "Temporary file directory" to "Config. dir." and restart WikidPad.
+
 Now WikidPad doesn't need anymore to modify any files on the host computer and you can carry wikis as well as the configuration files on an USB stick to every computer you want.
 
 

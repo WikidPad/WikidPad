@@ -740,6 +740,7 @@ GLOBALDEFAULTS = {
     ("main", "fastSearch_wholeWord"): "False",  # Fast search for whole words only
 
 
+    # Miscellaneous
     ("main", "print_margins"): "0,0,0,0", # Left, upper, right, lower page margins on printing
     ("main", "print_plaintext_font"): "", # Font description for printing in plain text mode
     ("main", "print_plaintext_wpseparator"): "\\n\\n\\n\\n", # How to separate wikiword pages (uses re escaping)
@@ -753,9 +754,18 @@ GLOBALDEFAULTS = {
     ("main", "pagestatus_timeformat"): u"%x %I:%M %p",  # time format for the page status field in status bar
     ("main", "recent_time_formats"): u"%x %I:%M %p;%m/%d/%y;%d.%m.%y;%d.%m.%Y;%a %Y-%m-%d",
             # semicolon-separated list of recently used time formats
+    ("main", "single_process"): "True", # Ensure that only a single process runs per user 
+    ("main", "tempHandling_preferMemory"): "False", # Prefer to store temporary data in memory where this is possible?
+    ("main", "tempHandling_tempMode"): u"system", # Mode for storing of temporary data.
+            # system: use system default temp dir; config: use config subdirectory; given: use directory given
+            # in option "sqlite_tempDir"; (( auto: use "config" if configuration directory is equal installation dir.,
+            # use "system" otherwise ))
+    ("main", "tempHandling_tempDir"): u"", # Path to directory for temporary files. Only valid if
+            # "tempHandling_tempMode" is set to "given".
     ("main", "single_process"): "True", # Ensure that only a single process runs per user  
     ("main", "wikiPathes_relative"): "False", # If True, pathes to last recently used wikis
             # are stored relative to application dir.
+
     
     ("main", "collation_order"): "Default", # Set collation order, Default: system default order, C: ASCII byte value
     ("main", "collation_uppercaseFirst"): "False" # Sort uppercase first (ABCabc) or normal inorder (AaBbCc)

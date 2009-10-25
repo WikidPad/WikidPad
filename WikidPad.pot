@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-10-03 13:47\n"
+"POT-Creation-Date: 2009-10-25 12:58\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -365,6 +365,10 @@ msgid "Compatible filenames"
 msgstr ""
 
 #: WikidPad.xrc:0
+msgid "Config. dir."
+msgstr ""
+
+#: WikidPad.xrc:0
 msgid "Copy URL to clipboard"
 msgstr ""
 
@@ -506,6 +510,10 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "Format version"
+msgstr ""
+
+#: WikidPad.xrc:0
+msgid "Given:"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -801,6 +809,10 @@ msgid "Position:"
 msgstr ""
 
 #: WikidPad.xrc:0
+msgid "Prefer memory where possible"
+msgstr ""
+
+#: WikidPad.xrc:0
 msgid "Prepend before clipboard snippet:"
 msgstr ""
 
@@ -1081,6 +1093,18 @@ msgid "Table of contents:"
 msgstr ""
 
 #: WikidPad.xrc:0
+msgid "Temporary file directory:"
+msgstr ""
+
+#: WikidPad.xrc:0
+msgid "Temporary files"
+msgstr ""
+
+#: WikidPad.xrc:0
+msgid "Temporary path:"
+msgstr ""
+
+#: WikidPad.xrc:0
 msgid "Test"
 msgstr ""
 
@@ -1285,11 +1309,11 @@ msgid "Source directory:"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\OptionsDialog.py:134
-#: lib\pwiki\OptionsDialog.py:774
+#: lib\pwiki\OptionsDialog.py:780
 msgid "Default"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\OptionsDialog.py:641
+#: WikidPad.xrc:0 lib\pwiki\OptionsDialog.py:646
 msgid "Versioning"
 msgstr ""
 
@@ -1355,7 +1379,7 @@ msgid "As Full Search"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:2287
-#: lib\pwiki\WikiHtmlView.py:642
+#: lib\pwiki\WikiHtmlView.py:663
 msgid "Activate New Tab"
 msgstr ""
 
@@ -1532,17 +1556,14 @@ msgstr ""
 msgid "*%s page(s) referred to by* %s\n"
 msgstr ""
 
-#: extensions\wikidPadParser\Kopie von WikidPadParser.py:1413
 #: extensions\wikidPadParser\WikidPadParser.py:1408
 msgid "This is a footnote"
 msgstr ""
 
-#: extensions\wikidPadParser\Kopie von WikidPadParser.py:1418
 #: extensions\wikidPadParser\WikidPadParser.py:1413
 msgid "This is syntactically not a wiki word"
 msgstr ""
 
-#: extensions\wikidPadParser\Kopie von WikidPadParser.py:1944
 #: extensions\wikidPadParser\WikidPadParser.py:1939
 msgid "++ Wiki Settings\n"
 "\n"
@@ -1985,26 +2006,26 @@ msgstr ""
 msgid "Message"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:141
+#: lib\pwiki\MainApp.py:142
 msgid "Error initializing environment, couldn't locate global config directory"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:249
+#: lib\pwiki\MainApp.py:250
 msgid "Invalid AppLock.lock file.\n"
 "Ensure that WikidPad is not running,\n"
 "then delete file \"%s\" if present yet.\n"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:533
+#: lib\pwiki\MainApp.py:534
 msgid "An error occurred during this session\n"
 "See file %s"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:677
+#: lib\pwiki\MainApp.py:684
 msgid "Plugin options"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:726 lib\pwiki\OptionsDialog.py:642
+#: lib\pwiki\MainApp.py:733 lib\pwiki\OptionsDialog.py:647
 msgid "Wiki language"
 msgstr ""
 
@@ -2016,87 +2037,87 @@ msgstr ""
 msgid "Not a wiki page"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:624
+#: lib\pwiki\OptionsDialog.py:629
 msgid "Application"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:625
+#: lib\pwiki\OptionsDialog.py:630
 msgid "User interface"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:626
+#: lib\pwiki\OptionsDialog.py:631
 msgid "Security"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:627
+#: lib\pwiki\OptionsDialog.py:632
 msgid "Tree"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:628
+#: lib\pwiki\OptionsDialog.py:633
 msgid "HTML preview/export"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:629
+#: lib\pwiki\OptionsDialog.py:634
 msgid "HTML header"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:630
+#: lib\pwiki\OptionsDialog.py:635
 msgid "Editor"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:631
+#: lib\pwiki\OptionsDialog.py:636
 msgid "Editor Colors"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:632
+#: lib\pwiki\OptionsDialog.py:637
 msgid "Clipboard Catcher"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:633
+#: lib\pwiki\OptionsDialog.py:638
 msgid "File Launcher"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:634
+#: lib\pwiki\OptionsDialog.py:639
 msgid "Mouse"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:635
+#: lib\pwiki\OptionsDialog.py:640
 msgid "Chron. view"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:636
+#: lib\pwiki\OptionsDialog.py:641
 msgid "Searching"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:637 lib\pwiki\OptionsDialog.py:644
+#: lib\pwiki\OptionsDialog.py:642 lib\pwiki\OptionsDialog.py:649
 msgid "Advanced"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:638
+#: lib\pwiki\OptionsDialog.py:643
 msgid "Autosave"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:639
+#: lib\pwiki\OptionsDialog.py:644
 msgid "Current Wiki"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:640
+#: lib\pwiki\OptionsDialog.py:645
 msgid "Headings"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:855
+#: lib\pwiki\OptionsDialog.py:862
 msgid "Wave files (*.wav)|*.wav"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:866 lib\pwiki\OptionsDialog.py:1140
+#: lib\pwiki\OptionsDialog.py:873 lib\pwiki\OptionsDialog.py:1157
 msgid "All files (*.*)|*"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:1130
+#: lib\pwiki\OptionsDialog.py:1147
 msgid "Select Directory"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:1138
+#: lib\pwiki\OptionsDialog.py:1155
 msgid "Select File"
 msgstr ""
 
@@ -3829,11 +3850,11 @@ msgstr ""
 msgid "Search: %s"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2286 lib\pwiki\WikiHtmlView.py:641
+#: lib\pwiki\SearchAndReplaceDialogs.py:2286 lib\pwiki\WikiHtmlView.py:662
 msgid "Activate"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2288 lib\pwiki\WikiHtmlView.py:643
+#: lib\pwiki\SearchAndReplaceDialogs.py:2288 lib\pwiki\WikiHtmlView.py:664
 msgid "Activate New Tab Backgrd."
 msgstr ""
 
@@ -3871,55 +3892,55 @@ msgstr ""
 msgid "Versioning data damaged"
 msgstr ""
 
-#: lib\pwiki\WikiHtmlView.py:620 lib\pwiki\WikiHtmlViewIE.py:479
+#: lib\pwiki\WikiHtmlView.py:641 lib\pwiki\WikiHtmlViewIE.py:479
 msgid "Link to page: %s"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:512
+#: lib\pwiki\WikiTreeCtrl.py:520
 msgid "Views"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:827
+#: lib\pwiki\WikiTreeCtrl.py:835
 msgid "searches"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:909
+#: lib\pwiki\WikiTreeCtrl.py:917
 msgid "modified-within"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:937
+#: lib\pwiki\WikiTreeCtrl.py:945
 msgid "1 day"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:939
+#: lib\pwiki\WikiTreeCtrl.py:947
 msgid "%i days"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:977
+#: lib\pwiki\WikiTreeCtrl.py:985
 msgid "parentless-nodes"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:1008
+#: lib\pwiki\WikiTreeCtrl.py:1016
 msgid "undefined-nodes"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:1038
+#: lib\pwiki\WikiTreeCtrl.py:1046
 msgid "Func. pages"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:1168
+#: lib\pwiki\WikiTreeCtrl.py:1176
 msgid "Add icon attribute"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:1175
+#: lib\pwiki\WikiTreeCtrl.py:1183
 msgid "Add color attribute"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:1779
+#: lib\pwiki\WikiTreeCtrl.py:1787
 msgid "Append Wiki Word"
 msgstr ""
 
-#: lib\pwiki\WikiTreeCtrl.py:1794
+#: lib\pwiki\WikiTreeCtrl.py:1802
 msgid "Prepend Wiki Word"
 msgstr ""
 
@@ -4186,25 +4207,25 @@ msgstr ""
 msgid "Database format is up to date"
 msgstr ""
 
-#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:181
+#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:218
 msgid "Wiki page not found: %s"
 msgstr ""
 
-#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:444
+#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:481
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:459
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:481
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:518
 msgid "You cannot delete the root wiki node"
 msgstr ""
 
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:1051
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1135
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1172
 msgid "Wiki page not found (no path information) for word: %s"
 msgstr ""
 
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:1069
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:1083
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1153
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1167
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1190
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1204
 msgid "Wiki page not found (bad path information) for word: %s"
 msgstr ""
 
