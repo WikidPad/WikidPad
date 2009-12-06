@@ -1,5 +1,18 @@
 ﻿++ Change Log
 
+
+Dec. 06, 2009 (2.0beta10)
+
+    * Bug fixed: Linux: Detection of Python version for Sqlite
+      may fail (thanks to Martin Muenstermann)
+    * Bug fixed: Opening of Sqlite databases with foreign characters
+      in path may fail 
+    * Bug fixed: Resizing of internal HTML preview sometimes
+      doesn't work, produces gray borders
+    * Bug fixed: Failed to start with original sqlite wiki.
+
+
+
 Oct. 25, 2009 (2.0beta09)
 
     * Options to control location of temporary files.

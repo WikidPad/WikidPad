@@ -1106,8 +1106,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     if node.anchorLink == anchor:
                         self.gotoCharPos(node.pos + node.strLength)
                         break
-            
-                    anchor = None # Not found
+                    anchor = None #!!!
+
             except NoPageAstException:
                 return
 

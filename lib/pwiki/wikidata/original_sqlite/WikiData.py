@@ -61,6 +61,7 @@ class WikiData:
             raise DbWriteAccessError(e)
 
         dbfile = longPathDec(dbfile)
+
         try:
             self.connWrap = DbStructure.ConnectWrapSyncCommit(
                     sqlite.connect(dbfile))

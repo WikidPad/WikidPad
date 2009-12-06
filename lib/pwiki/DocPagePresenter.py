@@ -264,7 +264,8 @@ class BasicDocPagePresenter(LayeredControlPresenter):
                         uniToGui(_(u"Wiki page not found, a new "
                         u"page will be created")), 0)
                 self.getStatusBar().SetStatusText(uniToGui(u""), 1)
-            
+
+#             print "--openWikiPage34", repr((page, evtprops.get("anchor")))
             self.loadWikiPage(page, **evtprops)
 
 #             self.getSubControl("textedit").loadWikiPage(page, evtprops)

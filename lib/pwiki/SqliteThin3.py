@@ -1,6 +1,6 @@
 # -*- coding: ISO-8859-1 -*-
 
-import codecs, new, types, traceback, sys, os, platform
+import codecs, new, types, traceback, sys, os, platform, re
 from ctypes import *
 
 import SqliteThin3 as _module
@@ -91,11 +91,8 @@ class SqliteError3(Exception):
         return "SqliteError "+str(self.err)
 
 
-
 if isLinux():
-    pyver = tuple((int(s) for s in platform.python_version_tuple()))
-    
-    if pyver >= (2, 5, 0):
+    if sys.hexversion >= 0x02050000:
         _dll = CDLL("libsqlite3.so.0")
     else:
         _dll = CDLL("libsqlite3.so")
@@ -109,10 +106,10 @@ else:
 
 utf8Encode = codecs.getencoder("UTF8")
 
-try:
-    mbcsEncode = codecs.getencoder("mbcs")
-except:
-    mbcsEncode = codecs.getencoder("iso-8859-1")
+# try:
+#     mbcsEncode = codecs.getencoder("mbcs")
+# except:
+#     mbcsEncode = codecs.getencoder("iso-8859-1")
 
 
 isoLatin1Decoder = codecs.getdecoder("iso-8859-1")
@@ -126,12 +123,18 @@ def stdToUtf8(s):
         return utf8Encode(isoLatin1Decoder(s)[0])[0]
 
 
-def mbcsEnc(s):
+# def mbcsEnc(s):
+#     if type(s) is unicode:
+#         return mbcsEncode(s)[0]
+#     else:
+#         return s
+
+
+def utf8Enc(s):
     if type(s) is unicode:
-        return mbcsEncode(s)[0]
+        return utf8Encode(s)[0]
     else:
         return s
-
 
 
 def stdErrHandler(err):
@@ -549,7 +552,7 @@ class SqliteDb3:
         obref = c_void_p()
         # This line works around a bug in sqlite. Might need change if bug
         # is fixed
-        self.errhandler(_dll.sqlite3_open(c_char_p(mbcsEnc(dbname)), byref(obref)))
+        self.errhandler(_dll.sqlite3_open(c_char_p(utf8Enc(dbname)), byref(obref)))
 
         self._dbpointer = obref
 

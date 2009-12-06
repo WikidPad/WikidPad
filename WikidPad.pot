@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2009-10-25 19:07\n"
+"POT-Creation-Date: 2009-12-06 15:28\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1379,7 +1379,7 @@ msgid "As Full Search"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:2287
-#: lib\pwiki\WikiHtmlView.py:663
+#: lib\pwiki\WikiHtmlView.py:676
 msgid "Activate New Tab"
 msgstr ""
 
@@ -1914,7 +1914,7 @@ msgstr ""
 msgid "Wiki page not found, a new page will be created"
 msgstr ""
 
-#: lib\pwiki\DocPagePresenter.py:473 lib\pwiki\DocPagePresenter.py:474
+#: lib\pwiki\DocPagePresenter.py:474 lib\pwiki\DocPagePresenter.py:475
 msgid "History"
 msgstr ""
 
@@ -3850,11 +3850,11 @@ msgstr ""
 msgid "Search: %s"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2286 lib\pwiki\WikiHtmlView.py:662
+#: lib\pwiki\SearchAndReplaceDialogs.py:2286 lib\pwiki\WikiHtmlView.py:675
 msgid "Activate"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2288 lib\pwiki\WikiHtmlView.py:664
+#: lib\pwiki\SearchAndReplaceDialogs.py:2288 lib\pwiki\WikiHtmlView.py:677
 msgid "Activate New Tab Backgrd."
 msgstr ""
 
@@ -3892,7 +3892,7 @@ msgstr ""
 msgid "Versioning data damaged"
 msgstr ""
 
-#: lib\pwiki\WikiHtmlView.py:641 lib\pwiki\WikiHtmlViewIE.py:479
+#: lib\pwiki\WikiHtmlView.py:654 lib\pwiki\WikiHtmlViewIE.py:479
 msgid "Link to page: %s"
 msgstr ""
 
@@ -4213,19 +4213,19 @@ msgstr ""
 
 #: lib\pwiki\wikidata\compact_sqlite\WikiData.py:481
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:459
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:520
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:521
 msgid "You cannot delete the root wiki node"
 msgstr ""
 
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:1051
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1174
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1175
 msgid "Wiki page not found (no path information) for word: %s"
 msgstr ""
 
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:1069
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:1083
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1192
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1206
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1193
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:1207
 msgid "Wiki page not found (bad path information) for word: %s"
 msgstr ""
 

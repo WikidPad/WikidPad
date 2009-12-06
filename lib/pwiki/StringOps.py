@@ -859,8 +859,8 @@ def flexibleUrlUnquote(link):
 
 
 
-URL_RESERVED = frozenset((u";", u"?", u":", u"@", u"&", u"=", u"+", u",", u"/")
-        + (u"{", u"}", u"|", u"\\", u"^", u"~", u"[", u"]", u"`"))
+URL_RESERVED = frozenset((u";", u"?", u":", u"@", u"&", u"=", u"+", u",", u"/",
+        u"{", u"}", u"|", u"\\", u"^", u"~", u"[", u"]", u"`", u'"'))
 
 
 

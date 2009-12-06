@@ -143,6 +143,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
         self.visible = False
         self.outOfSync = True   # HTML content is out of sync with live content
         self.counterResizeIgnore = 0  # How often to ignore a size event
+        self.deferredScrollPos = None  # Used by scrollDeferred()
 
         self.currentLoadedWikiWord = None
 
@@ -254,7 +255,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
     def refresh(self):
         ## _prof.start()
-
+        
         # Store position of currently displayed page, if any
         if self.currentLoadedWikiWord:
             try:
@@ -301,21 +302,20 @@ class WikiHtmlView(wx.html.HtmlWindow):
                     
 #             print "-- refresh8", html.encode("mbcs", "ignore")
             self.SetPage(uniToGui(html))
-            self.Scroll(lx, ly)
+            self.scrollDeferred(lx, ly)
 
-
+#         traceback.print_stack()
         if self.anchor:   #  and self.HasAnchor(self.anchor):
             if self.HasAnchor(self.anchor):
                 self.ScrollToAnchor(self.anchor)
                 # Workaround because ScrollToAnchor scrolls too far
                 lx, ly = self.GetViewStart()
-                self.Scroll(lx, ly-1)
+                self.scrollDeferred(lx, ly-1)
             else:
-                self.Scroll(0, 0)
+                self.scrollDeferred(0, 0)
         elif self.outOfSync:
             lx, ly = wikiPage.getPresentation()[3:5]
-            self.Freeze()
-            wx.CallAfter(self._scrollAndThaw, lx, ly)
+            self.scrollDeferred(lx, ly)
 
         self.anchor = None
         self.outOfSync = False
@@ -395,9 +395,23 @@ class WikiHtmlView(wx.html.HtmlWindow):
         self.outOfSync = True
 
 
-    def _scrollAndThaw(self, lx, ly):
-        self.Scroll(lx, ly)
+    def scrollDeferred(self, lx, ly):
+        if self.deferredScrollPos is not None:
+            # An unprocessed _scrollAndThaw is in the message queue yet ->
+            # just change scrollPos
+            self.deferredScrollPos = (lx, ly)
+        else:
+            # Put new _scrollAndThaw into queue
+            self.Freeze()
+            self.deferredScrollPos = (lx, ly)
+            wx.CallAfter(self._scrollAndThaw)
+        
+    def _scrollAndThaw(self):
+        self.Scroll(self.deferredScrollPos[0], self.deferredScrollPos[1])
         self.Thaw()
+        self.deferredScrollPos = None
+        self.counterResizeIgnore = 0
+
 
     def OnSize(self, evt):
         if self.counterResizeIgnore > 0:
@@ -406,9 +420,8 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
         lx, ly = self.GetViewStart()
         self.counterResizeIgnore = 1
-        self.Freeze()
-        wx.CallAfter(self._scrollAndThaw, lx, ly)   # 94)
         evt.Skip()
+        self.scrollDeferred(lx, ly)
 
 
     def OnSetFocus(self, evt):
@@ -538,9 +551,9 @@ class WikiHtmlView(wx.html.HtmlWindow):
                 self.ScrollToAnchor(anchor)
                 # Workaround because ScrollToAnchor scrolls too far
                 lx, ly = self.GetViewStart()
-                self.Scroll(lx, ly-1)
+                self.scrollDeferred(lx, ly-1)
             else:
-                self.Scroll(0, 0)
+                self.scrollDeferred(0, 0)
         else:
             self.presenter.getMainControl().launchUrl(href)
 
