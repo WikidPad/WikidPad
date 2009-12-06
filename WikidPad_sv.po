@@ -3,9 +3,9 @@
 # This file is distributed under the same license as wikidPad.
 msgid ""
 msgstr ""
-"Project-Id-Version: WikidPad 1.9rc09\n"
-"POT-Creation-Date: 2009-10-03 10:49\n"
-"PO-Revision-Date: 2009-10-04 08:25+0100\n"
+"Project-Id-Version: WikidPad 1.9rc10\n"
+"POT-Creation-Date: 2009-10-25 12:26\n"
+"PO-Revision-Date: 2009-10-25 14:44+0100\n"
 "Last-Translator: Stefan Berg <steffe62@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -324,6 +324,10 @@ msgid "Compatible filenames"
 msgstr "Kompatibla filnamn"
 
 #: WikidPad.xrc:0
+msgid "Config. dir."
+msgstr "Konfig. kat."
+
+#: WikidPad.xrc:0
 msgid "Context characters"
 msgstr "Angränsande tecken"
 
@@ -450,6 +454,10 @@ msgstr "Tvinga visning av ScratchPad i träd"
 #: WikidPad.xrc:0
 msgid "Format version"
 msgstr "Formatversion"
+
+#: WikidPad.xrc:0
+msgid "Given:"
+msgstr "Annat:"
 
 #: WikidPad.xrc:0
 msgid "Go to next page"
@@ -712,6 +720,10 @@ msgid "Position view tree:"
 msgstr "Vyträdets postion:"
 
 #: WikidPad.xrc:0
+msgid "Prefer memory where possible"
+msgstr "Använde minne om det är möjligt"
+
+#: WikidPad.xrc:0
 msgid "Prepend before clipboard snippet:"
 msgstr "Lägg till före urklipp:"
 
@@ -952,6 +964,18 @@ msgid "Table of contents:"
 msgstr "Innehållsförteckning:"
 
 #: WikidPad.xrc:0
+msgid "Temporary file directory:"
+msgstr "Temporär filkatalog:"
+
+#: WikidPad.xrc:0
+msgid "Temporary files"
+msgstr "Temporära filer"
+
+#: WikidPad.xrc:0
+msgid "Temporary path:"
+msgstr "Tillfällig sökväg:"
+
+#: WikidPad.xrc:0
 msgid "Text color:"
 msgstr "Textfärg:"
 
@@ -1158,7 +1182,7 @@ msgstr "Källkatalog:"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\OptionsDialog.py:130
-#: lib\pwiki\OptionsDialog.py:717
+#: lib\pwiki\OptionsDialog.py:722
 msgid "Default"
 msgstr "Standard"
 
@@ -1227,7 +1251,7 @@ msgstr "Titel:"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\SearchAndReplaceDialogs.py:1743
-#: lib\pwiki\WikiHtmlView.py:626
+#: lib\pwiki\WikiHtmlView.py:649
 #: lib\pwiki\WikiTxtCtrl.py:3181
 msgid "Activate New Tab"
 msgstr "Aktivera ny flik"
@@ -1917,11 +1941,11 @@ msgstr "Felaktigt wikiord: %s"
 msgid "Message"
 msgstr "Meddelande"
 
-#: lib\pwiki\MainApp.py:123
+#: lib\pwiki\MainApp.py:125
 msgid "Error initializing environment, couldn't locate global config directory"
 msgstr "Fel vid initiering av miljön, kunde inte hitta den globala konfigurationskatalogen"
 
-#: lib\pwiki\MainApp.py:232
+#: lib\pwiki\MainApp.py:234
 msgid ""
 "Invalid AppLock.lock file.\n"
 "Ensure that WikidPad is not running,\n"
@@ -1931,7 +1955,7 @@ msgstr ""
 "Kontrollera att WikidPad inte körs,\n"
 "och radera sedan filen \"%s\" om den fortfarande finns kvar.\n"
 
-#: lib\pwiki\MainApp.py:424
+#: lib\pwiki\MainApp.py:426
 msgid ""
 "An error occurred during this session\n"
 "See file %s"
@@ -1939,8 +1963,8 @@ msgstr ""
 "Ett fel uppstod under denna session\n"
 "Se filen %s"
 
-#: lib\pwiki\MainApp.py:570
-#: lib\pwiki\MainApp.py:572
+#: lib\pwiki\MainApp.py:578
+#: lib\pwiki\MainApp.py:580
 msgid "Plugin options"
 msgstr "Insticksprogram"
 
@@ -1954,88 +1978,88 @@ msgstr "Detta kan bara utföras på en sida i ett wikiord"
 msgid "Not a wiki page"
 msgstr "Inte en wikisida"
 
-#: lib\pwiki\OptionsDialog.py:581
+#: lib\pwiki\OptionsDialog.py:586
 msgid "Application"
 msgstr "Applikation"
 
-#: lib\pwiki\OptionsDialog.py:582
+#: lib\pwiki\OptionsDialog.py:587
 msgid "  User interface"
 msgstr "  Användargränssnitt"
 
-#: lib\pwiki\OptionsDialog.py:583
+#: lib\pwiki\OptionsDialog.py:588
 msgid "  Security"
 msgstr "  Säkerhet"
 
-#: lib\pwiki\OptionsDialog.py:584
+#: lib\pwiki\OptionsDialog.py:589
 msgid "  Tree"
 msgstr "  Träd"
 
-#: lib\pwiki\OptionsDialog.py:585
+#: lib\pwiki\OptionsDialog.py:590
 msgid "  HTML preview/export"
 msgstr "  HTML förhandsgranskning/export"
 
-#: lib\pwiki\OptionsDialog.py:586
+#: lib\pwiki\OptionsDialog.py:591
 msgid "    HTML header"
 msgstr "    HTML header"
 
-#: lib\pwiki\OptionsDialog.py:587
+#: lib\pwiki\OptionsDialog.py:592
 msgid "  Autosave"
 msgstr "  Spara automatiskt"
 
-#: lib\pwiki\OptionsDialog.py:588
+#: lib\pwiki\OptionsDialog.py:593
 msgid "  Editor"
 msgstr "  Redigerare"
 
-#: lib\pwiki\OptionsDialog.py:589
+#: lib\pwiki\OptionsDialog.py:594
 msgid "    Editor Colors"
 msgstr "    Redigerarfärger"
 
-#: lib\pwiki\OptionsDialog.py:590
+#: lib\pwiki\OptionsDialog.py:595
 msgid "    Clipboard Catcher"
 msgstr "    Urklippsfångare"
 
-#: lib\pwiki\OptionsDialog.py:591
+#: lib\pwiki\OptionsDialog.py:596
 msgid "  File Launcher"
 msgstr "  Filstartare"
 
-#: lib\pwiki\OptionsDialog.py:592
+#: lib\pwiki\OptionsDialog.py:597
 msgid "  Mouse"
 msgstr "  Mus"
 
-#: lib\pwiki\OptionsDialog.py:593
+#: lib\pwiki\OptionsDialog.py:598
 msgid "  Time view"
 msgstr "  Tidsvy"
 
-#: lib\pwiki\OptionsDialog.py:594
+#: lib\pwiki\OptionsDialog.py:599
 msgid "  Searching"
 msgstr "  Sökning"
 
-#: lib\pwiki\OptionsDialog.py:595
+#: lib\pwiki\OptionsDialog.py:600
 msgid "  Advanced"
 msgstr "  Avancerat"
 
-#: lib\pwiki\OptionsDialog.py:596
+#: lib\pwiki\OptionsDialog.py:601
 msgid "Current Wiki"
 msgstr "Aktuell wiki"
 
-#: lib\pwiki\OptionsDialog.py:597
+#: lib\pwiki\OptionsDialog.py:602
 msgid "  File Storage"
 msgstr "  Fillagring"
 
-#: lib\pwiki\OptionsDialog.py:775
+#: lib\pwiki\OptionsDialog.py:781
 msgid "Wave files (*.wav)|*.wav"
 msgstr "Wave-filer (*.wav)|*.wav"
 
-#: lib\pwiki\OptionsDialog.py:786
-#: lib\pwiki\OptionsDialog.py:1034
+#: lib\pwiki\OptionsDialog.py:792
+#: lib\pwiki\OptionsDialog.py:1050
 msgid "All files (*.*)|*"
 msgstr "Alla filer (*.*)|*"
 
-#: lib\pwiki\OptionsDialog.py:1024
+#: lib\pwiki\OptionsDialog.py:1040
 msgid "Select Directory"
 msgstr "Välj katalog"
 
-#: lib\pwiki\OptionsDialog.py:1032
+#: lib\pwiki\OptionsDialog.py:1048
 msgid "Select File"
 msgstr "Välj fil"
 
@@ -3166,9 +3190,9 @@ msgstr "Detta kommer att skriva över det aktuella innehållet om det inte spara
 
 #: lib\pwiki\PersonalWikiFrame.py:4023
 #: lib\pwiki\PersonalWikiFrame.py:4147
-#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:400
+#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:439
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:364
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:407
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:446
 msgid "'%s' is an invalid wiki word"
 msgstr "'%s' är ett otillåtet wikiord"
 
@@ -3694,13 +3718,13 @@ msgstr ""
 "%s"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1742
-#: lib\pwiki\WikiHtmlView.py:625
+#: lib\pwiki\WikiHtmlView.py:648
 #: lib\pwiki\WikiTxtCtrl.py:3180
 msgid "Activate"
 msgstr "Aktivera"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1744
-#: lib\pwiki\WikiHtmlView.py:627
+#: lib\pwiki\WikiHtmlView.py:650
 #: lib\pwiki\WikiTxtCtrl.py:3182
 msgid "Activate New Tab Backgrd."
 msgstr "Aktivera ny flik i bakgrund"
@@ -3951,15 +3975,15 @@ msgstr "Uppdatering behövs, aktuell formatversion='%i'"
 msgid "Database format is up to date"
 msgstr "Databasformatet är uppdaterat"
 
-#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:404
+#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:443
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:368
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:411
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:450
 msgid "Cannot rename '%s' to '%s', '%s' already exists"
 msgstr "Kan inte byta namn på '%s' till '%s', '%s' finns redan"
 
-#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:459
+#: lib\pwiki\wikidata\compact_sqlite\WikiData.py:498
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:445
-#: lib\pwiki\wikidata\original_sqlite\WikiData.py:459
+#: lib\pwiki\wikidata\original_sqlite\WikiData.py:498
 msgid "You cannot delete the root wiki node"
 msgstr "Du kan inte radera wikins rotnod"
 

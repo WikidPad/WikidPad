@@ -1,5 +1,12 @@
 ﻿++ Change Log
 
+Dec. 06, 2009 (1.9rc11)
+
+    * Bug fixed: Linux: Detection of Python version for Sqlite
+      may fail (thanks to Martin Muenstermann)
+
+
+
 Oct. 25, 2009 (1.9rc10)
 
     * Options to control location of temporary files
