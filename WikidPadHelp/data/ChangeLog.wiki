@@ -1,5 +1,14 @@
 ﻿++ Change Log
 
+Jan. 06, 2010 (1.9rc12)
+
+    * Bug fixed: Linux: Character input not working after
+      switching of keyboard layout for certain languages
+      (e.g. Russian). Can now be fixed with the
+      IME workaround
+
+
+
 Dec. 06, 2009 (1.9rc11)
 
     * Bug fixed: Linux: Detection of Python version for Sqlite

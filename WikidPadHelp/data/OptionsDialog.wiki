@@ -350,6 +350,8 @@ Change these settings only if you know what you are doing!
 *Create wiki lock file*
 See [WikiLockFile]
 
+*Use IME workaround for editor input*
+Fixes some problems when entering characters in non-Western languages, e.g. when using UniKey (Vietnamese input method editor) under Windows or typing Russian under Linux. You must restart WikidPad to make the change have an effect.
 
 
 +++ Current wiki

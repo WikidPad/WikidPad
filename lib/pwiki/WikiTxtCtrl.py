@@ -2743,7 +2743,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         key = evt.GetKeyCode()
 
         # Return if this doesn't seem to be a real character input
-        if evt.ControlDown() or key < 32:
+        if evt.ControlDown() or (0 < key < 32):
             evt.Skip()
             return
 
