@@ -210,7 +210,7 @@ Set the color of the text cursor (the small blinking vertical bar).
 
 ++++ Clipboard catcher
 
-This page is only visible on Windows.
+This page is only visible if the necessary prerequisites are met to make the clipboard catcher work, see [ClipboardCatcher#+ Prerequisites].
 
 *Prepend before clipboard snippet*
 Control what the ClipboardCatcher should prepend before each caught snippet. This option supports time formats (as these shown in "Set Date Format" dialog in "Editor" menu)
@@ -370,7 +370,7 @@ Disadvantages:
 If two or more pages reference each other (e.g. NodeA -> NodeB -> NodeA) these cycles are not shown. Precisely: if a child of a word is already an ancestor (parent, grandparent, ...) of this word, it is not shown.
 
 *Use IME workaround for editor input*
-If you run some special input method editor (IME) or other programs which insert characters directly into WikidPad, try this setting in case of problems. It was mainly made for the Vietnamese IME UniKey.
+Fixes some problems when entering characters in non-Western languages, e.g. when using UniKey (Vietnamese input method editor) under Windows or typing Russian under Linux. You must restart WikidPad to make the change have an effect.
 
 
 ++++ Autosave

@@ -18,6 +18,12 @@ except:
         traceback.print_exc()
     WindowsHacks = None
 
+try:
+    import GtkHacks
+except:
+#     traceback.print_exc()
+    GtkHacks = None
+
 
 # Define startFile
 if Configuration.isWindows():
@@ -81,6 +87,33 @@ else:
     samefile = os.path.samefile
 
 
+# Define createInterceptCollection, createClipboardInterceptor  (may return None)
+# Define supportsClipboardInterceptor
 
+# Fallback def.
+def supportsClipboardInterceptor():
+    return False
+def createInterceptCollection(interceptors=None):
+    return None
+def createClipboardInterceptor(callingWindow):
+    return None
+
+if Configuration.isWindows():
+    if WindowsHacks:
+        def supportsClipboardInterceptor():
+            return True
+        def createInterceptCollection(interceptors=None):
+            return WindowsHacks.WinProcInterceptCollection(interceptors)
+        def createClipboardInterceptor(callingWindow):
+            return WindowsHacks.ClipboardCatchIceptor(callingWindow)
+else:
+    if GtkHacks:
+        def supportsClipboardInterceptor():
+            return True
+        def createInterceptCollection(interceptors=None):
+            return GtkHacks.FakeInterceptCollection(interceptors)
+        def createClipboardInterceptor(callingWindow):
+            return GtkHacks.ClipboardCatchFakeIceptor(callingWindow)
+        
 
 

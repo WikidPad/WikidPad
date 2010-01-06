@@ -304,7 +304,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 
     def loadWikiPage(self, page, **evtprops):
         oldPage = self.getDocPage()  # TODO Test if too late to retrieve old page here
-        
+
         self.getSubControl("textedit").loadWikiPage(page, evtprops)
         self.getMainControl().refreshPageStatus()  # page)
 

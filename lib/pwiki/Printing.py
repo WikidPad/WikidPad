@@ -48,10 +48,10 @@ class PrintMainDialog(wx.Dialog):
 
         self.ctrls.btnPrint.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
-        
+
         self.pWiki.saveAllDocPages()
         self.pWiki.getWikiData().commit()
-        
+
         # Fixes focus bug under Linux
         self.SetFocus()
 
@@ -233,7 +233,7 @@ class Printer:
 
         tl = self.psddata.GetMarginTopLeft()
         br = self.psddata.GetMarginBottomRight()
-        
+
         margins = [tl.x, tl.y, br.x, br.y]
         margtext = u",".join(map(unicode, margins))
         self.pWiki.configuration.set("main", "print_margins", margtext)

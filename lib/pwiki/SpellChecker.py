@@ -104,7 +104,7 @@ class SpellCheckerDialog(wx.Dialog):
                 raise EnchantDriver.DictNotFoundError()
 
             if lang != self.dictLanguage:
-                self.enchantDict = Dict(str(lang))
+                self.enchantDict = Dict(lang)
                 self.dictLanguage = lang
                 self.rereadPersonalWordLists()
         except (UnicodeEncodeError, EnchantDriver.DictNotFoundError):

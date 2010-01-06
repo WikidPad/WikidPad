@@ -120,7 +120,7 @@ class SelectWikiWordDialog(wx.Dialog):
                         # TODO Error message?
                         self.ctrls.text.SetFocus()
                         return
-    
+
                     self.wikiWord = wikiWord
 
         self.EndModal(wx.ID_OK)

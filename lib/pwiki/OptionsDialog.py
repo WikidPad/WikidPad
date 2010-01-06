@@ -11,6 +11,7 @@ from .AdditionalDialogs import DateformatDialog, FontFaceDialog
 
 from . import Configuration
 from . import Localization
+from . import OsAbstract
 
 from . import WikiHtmlView
 
@@ -610,7 +611,7 @@ class OptionsDialog(wx.Dialog):
 
 
     # Windows specific options
-    OPTION_TO_CONTROL_WINDOWS_ONLY = (
+    OPTION_TO_CONTROL_CLIPBOARD_CATCHER = (
             ("clipboardCatcher_prefix", "tfClipboardCatcherPrefix", "t"),
             ("clipboardCatcher_suffix", "tfClipboardCatcherSuffix", "t"),
             ("clipboardCatcher_filterDouble", "cbClipboardCatcherFilterDouble",
@@ -667,36 +668,64 @@ class OptionsDialog(wx.Dialog):
         # to the entries (the appropriate tuple) there
         self.idToOptionEntryMap = {}
 
-        if Configuration.isWindows():
-            self.combinedOptionToControl += self.OPTION_TO_CONTROL_WINDOWS_ONLY
-
-            newPL = []
-            for e in self.combinedPanelList:
-                if isinstance(e[0], basestring):
-                    if e[0] == "OptionsPageFileLauncher":
-                        continue
-                    if e[0].startswith("??"):
-                        # Entry is only a mark for insert operations so skip it
-                        continue
-
-                newPL.append(e)
-
-            self.combinedPanelList = newPL
-        else:
+        # Add additional option depending on OS and environment
+        if OsAbstract.supportsClipboardInterceptor():
+            self.combinedOptionToControl += self.OPTION_TO_CONTROL_CLIPBOARD_CATCHER
+        
+        if not Configuration.isWindows():
             self.combinedOptionToControl += self.OPTION_TO_CONTROL_NON_WINDOWS_ONLY
 
-            newPL = []
-            for i, e in enumerate(self.combinedPanelList):
-                if isinstance(e[0], basestring):
-                    if e[0] == "OptionsPageClipboardCatcher":
-                        continue
-                    if e[0].startswith("??"):
-                        # Entry is only a mark for insert operations so skip it
-                        continue
+        # Rewrite panel list depending on OS and environment
+        newPL = []
+        for e in self.combinedPanelList:
+            if isinstance(e[0], basestring):
+                if e[0] == "OptionsPageFileLauncher" and Configuration.isWindows():
+                    # For Windows the OS-function is used, for other systems
+                    # we need the path to an external script
+                    continue
+                elif e[0] == "OptionsPageClipboardCatcher" and \
+                        not OsAbstract.supportsClipboardInterceptor():
+                    continue
+                elif e[0].startswith("??"):
+                    # Entry is only a mark for inserting of panels from plugins so skip it
+                    continue
 
-                newPL.append(e)
+            newPL.append(e)
 
-            self.combinedPanelList = newPL
+        self.combinedPanelList = newPL
+
+
+
+#         if Configuration.isWindows():
+#             self.combinedOptionToControl += self.OPTION_TO_CONTROL_CLIPBOARD_CATCHER
+# 
+#             newPL = []
+#             for e in self.combinedPanelList:
+#                 if isinstance(e[0], basestring):
+#                     if e[0] == "OptionsPageFileLauncher":
+#                         continue
+#                     if e[0].startswith("??"):
+#                         # Entry is only a mark for insert operations so skip it
+#                         continue
+# 
+#                 newPL.append(e)
+# 
+#             self.combinedPanelList = newPL
+#         else:
+#             self.combinedOptionToControl += self.OPTION_TO_CONTROL_NON_WINDOWS_ONLY
+# 
+#             newPL = []
+#             for i, e in enumerate(self.combinedPanelList):
+#                 if isinstance(e[0], basestring):
+#                     if e[0] == "OptionsPageClipboardCatcher":
+#                         continue
+#                     if e[0].startswith("??"):
+#                         # Entry is only a mark for insert operations so skip it
+#                         continue
+# 
+#                 newPL.append(e)
+# 
+#             self.combinedPanelList = newPL
 
         self.ctrls = XrcControls(self)
 

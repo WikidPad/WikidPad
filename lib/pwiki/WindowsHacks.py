@@ -482,8 +482,6 @@ class WinProcParams:
         self.returnValue = None
         
 
-
-
 class BaseWinInterceptor:
     def __init__(self):
         pass
@@ -548,6 +546,9 @@ class BaseWinInterceptor:
 
 
 
+
+
+
 class WinProcInterceptCollection:
     """
     Class holding a list of interceptor objects which can do different
@@ -592,7 +593,7 @@ class WinProcInterceptCollection:
         return self.hWnd
 
 
-    def start(self, hWnd):
+    def start(self, callingWindow):
         if self.isIntercepting():
             return False
             
@@ -600,8 +601,8 @@ class WinProcInterceptCollection:
             if not icept.startBeforeIntercept(self):
                 return False
         
-        self.intercept(hWnd)
-        
+        self.intercept(callingWindow)
+
         for icept in self.interceptors:
             try:
                 icept.startAfterIntercept(self)
@@ -632,11 +633,11 @@ class WinProcInterceptCollection:
 
 
 
-    def intercept(self, hWnd):
+    def intercept(self, callingWindow):
         if self.isIntercepting():
             return
 
-        self.hWnd = hWnd
+        self.hWnd = callingWindow.GetHandle()
 
         # The stub must be saved because ctypes doesn't hold an own reference
         # to it.
@@ -784,7 +785,7 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
         self._cbViewerChainOut()
 
 
-    def informCopyInWikidPad(self):
+    def informCopyInWikidPadStart(self, text=None):
         """
         Informs the interceptor, that currently something is copied in the
         editor in WikidPad itself. If mode is MODE_AT_CURSOR this
@@ -793,6 +794,9 @@ class ClipboardCatchIceptor(BaseWinInterceptor):
         if self.mode == ClipboardCatchIceptor.MODE_AT_CURSOR:
             self.ignoreNextCCMessage = True
             self.lastText = None
+    
+    def informCopyInWikidPadStop(self):
+        pass
 
 
     def startAfterIntercept(self, interceptCollection):
@@ -960,200 +964,5 @@ class BrowserMoveIceptor(BaseWinInterceptor):
             elif cmd == APPCOMMAND_BROWSER_FORWARD:
                 self.mainControl.goBrowserForward()
                 params.returnValue = 1
-
-
-
-# class BaseClipboardCatcher(BaseWinProcIntercept):
-#     def __init__(self):
-#         BaseWinProcIntercept.__init__(self)
-#         self.nextWnd = None
-#         self.ignoreNextCCMessage = False
-# 
-# 
-#     def start(self, hWnd):
-#         self.intercept(hWnd)
-#         # SetClipboardViewer sends automatically an initial clipboard changed (CC)
-#         # message which should be ignored
-#         self.ignoreNextCCMessage = True
-#         self.nextWnd = SetClipboardViewer(c_int(self.hWnd))
-# 
-# 
-#     def stop(self):
-#         if self.nextWnd is None:
-#             return
-# 
-#         ChangeClipboardChain(c_int(self.hWnd), c_int(self.nextWnd))
-#         
-#         self.nextWnd = None
-#         
-#         
-#     def unintercept(self):
-#         self.stop()
-#         BaseWinProcIntercept.unintercept(self)
-# 
-# 
-#     def winProc(self, hWnd, uMsg, wParam, lParam):
-#         if uMsg == WM_CHANGECBCHAIN:
-#             if self.nextWnd == wParam:
-#                 # repair the chain
-#                 self.nextWnd = lParam
-#     
-#             if self.nextWnd:  # Neither None nor 0
-#                 # pass the message to the next window in chain
-#                 SendMessage(c_int(self.nextWnd), c_int(uMsg), c_uint(wParam),
-#                         c_ulong(lParam))
-#         elif uMsg == WM_DRAWCLIPBOARD:
-#             if self.ignoreNextCCMessage:
-#                 self.ignoreNextCCMessage = False
-#             else:
-#                 self.handleClipboardChange()
-# 
-#             if self.nextWnd:  # Neither None nor 0
-#                 # pass the message to the next window in chain
-#                 SendMessage(c_int(self.nextWnd), c_int(uMsg), c_uint(wParam),
-#                         c_ulong(lParam))
-# 
-#         return BaseWinProcIntercept.winProc(self, hWnd, uMsg, wParam, lParam)
-# 
-# 
-#     def handleClipboardChange(self):
-#         assert 0  # abstract
-# 
-# 
-# 
-# class WikidPadWin32WPInterceptor(BaseClipboardCatcher):
-#     """
-#     Specialized WikidPad clipboard catcher
-#     """
-#     
-#     MODE_OFF = 0
-#     MODE_AT_PAGE = 1
-#     MODE_AT_CURSOR = 2
-#     
-#     def __init__(self, mainControl):
-#         BaseClipboardCatcher.__init__(self)
-#         
-#         self.mainControl = mainControl
-#         self.wikiPage = None
-#         self.mode = WikidPadWin32WPInterceptor.MODE_OFF
-#         self.lastText = None
-#         
-#     def startAtPage(self, hWnd, wikiPage):
-#         """
-#         wikiPage -- page to write clipboard content to
-#         """
-#         if not isinstance(wikiPage,
-#                 (DocPages.WikiPage, DocPages.AliasWikiPage)):
-#             self.mainControl.displayErrorMessage(
-#                     _(u"Only a real wiki page can be a clipboard catcher"))
-#             return
-#             
-#         if self.mode != WikidPadWin32WPInterceptor.MODE_OFF:
-#             self.stop()
-# 
-#         self.lastText = None
-#         BaseClipboardCatcher.start(self, hWnd)
-#         self.wikiPage = wikiPage
-#         self.mode = WikidPadWin32WPInterceptor.MODE_AT_PAGE
-# 
-#     def startAtCursor(self, hWnd):
-#         """
-#         Write clipboard content to cursor position
-#         """
-#         if self.mode != WikidPadWin32WPInterceptor.MODE_OFF:
-#             self.stop()
-# 
-#         self.lastText = None
-#         BaseClipboardCatcher.start(self, hWnd)
-#         self.mode = WikidPadWin32WPInterceptor.MODE_AT_CURSOR
-# 
-# 
-#     def stop(self):
-#         BaseClipboardCatcher.stop(self)
-#         self.lastText = None
-#         self.wikiPage = None
-#         self.mode = WikidPadWin32WPInterceptor.MODE_OFF
-# 
-#     def getMode(self):
-#         return self.mode
-# 
-# 
-#     def winProc(self, hWnd, uMsg, wParam, lParam):
-# #         if uMsg == WM_CHAR:
-# #             print "WM_CHAR", repr((hWnd, wParam, lParam))
-# #             
-# #         if uMsg == WM_KEYDOWN:
-# #             print "WM_KEYDOWN", repr((hWnd, wParam, lParam))
-# # 
-# #         if uMsg == WM_INPUTLANGCHANGE:
-# #             print "WM_INPUTLANGCHANGE", repr((hWnd, wParam))
-# 
-#         return BaseClipboardCatcher.winProc(self, hWnd, uMsg, wParam, lParam)
-#         
-#         
-#     def notifyUserOnClipboardChange(self):
-#         config = self.mainControl.getConfig()
-#         notifMode = config.getint("main", "clipboardCatcher_userNotification", 0)
-#         if notifMode == 1:
-#             soundPath = config.get("main", "clipboardCatcher_soundFile", u"")
-#             if soundPath == u"":
-#                 wx.Bell()
-#             else:
-#                 try:
-#                     sound = wx.Sound(soundPath)
-#                     if sound.IsOk():
-#                         sound.Play(wx.SOUND_ASYNC)
-#                         self.clipCatchNotifySound = sound  # save a reference
-#                                 # (This shoudln't be needed, but there seems to be a bug...)
-#                     else:
-#                         wx.Bell()
-#                 except NotImplementedError, v:
-#                     wx.Bell()
-# 
-# 
-#     def handleClipboardChange(self):
-#         text = getTextFromClipboard()
-#         if len(text) == 0:
-#             return
-#         try:
-#             prefix = strftimeUB(self.mainControl.getConfig().get(
-#                     "main", "clipboardCatcher_prefix", r""))
-#         except:
-#             traceback.print_exc()
-#             prefix = u""   # TODO Error message?
-# 
-#         try:
-#             suffix = strftimeUB(self.mainControl.getConfig().get(
-#                     "main", "clipboardCatcher_suffix", r"\n"))
-#         except:
-#             traceback.print_exc()
-#             suffix = u"\n"   # TODO Error message?
-# 
-#         if self.mode == WikidPadWin32WPInterceptor.MODE_OFF:
-#             return
-#             
-#         if self.mainControl.getConfig().getboolean("main",
-#                 "clipboardCatcher_filterDouble", True) and self.lastText == text:
-#             # Same text shall be inserted again
-#             return
-# 
-#         if self.mode == WikidPadWin32WPInterceptor.MODE_AT_PAGE:
-#             if self.wikiPage is None:
-#                 return
-#             self.wikiPage.appendLiveText(prefix + text + suffix)
-#             self.notifyUserOnClipboardChange()
-#             
-#         elif self.mode == WikidPadWin32WPInterceptor.MODE_AT_CURSOR:
-#             self.mainControl.getActiveEditor().ReplaceSelection(prefix + text + suffix)
-#             self.notifyUserOnClipboardChange()
-#             
-#         self.lastText = text
-# 
-# 
-#     def getWikiWord(self):
-#         if self.wikiPage is None:
-#             return None
-#         else:
-#             return self.wikiPage.getWikiWord()
 
 

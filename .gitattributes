@@ -622,6 +622,7 @@ lib/pwiki/DocStructureCtrl.py -text
 lib/pwiki/EnchantDriver.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
+lib/pwiki/GtkHacks.py -text
 lib/pwiki/I18nPoUpdater.py -text
 lib/pwiki/Importers.py -text
 lib/pwiki/Ipc.py -text

@@ -1,6 +1,6 @@
 # pyenchant
 #
-# Copyright (C) 2004-2005, Ryan Kelly
+# Copyright (C) 2004-2008, Ryan Kelly
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -100,6 +100,19 @@ import wx
 
 
 #  -------------------- From utils module --------------------
+
+try:
+    unicode = unicode
+except NameError:
+    str = str
+    unicode = str
+    bytes = bytes
+    basestring = (str,bytes)
+else:
+    str = str
+    unicode = unicode
+    bytes = str
+    basestring = basestring
 
 
 def get_resource_filename(resname):

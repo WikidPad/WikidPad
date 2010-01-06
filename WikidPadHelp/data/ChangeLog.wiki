@@ -1,6 +1,20 @@
 ﻿++ Change Log
 
 
+Jan. 06, 2010 (2.0beta11)
+
+    * Support for clipboard catcher on Linux (at least Gnome).
+    * See [ClipboardCatcher#+ Prerequisites]
+
+    * Bug fixed: Linux: Spell checking did not work (thanks to
+    * Christian Ziemski)
+    * Bug fixed: Linux: Character input not working after
+      switching of keyboard layout for certain languages
+      (e.g. Russian). Can now be fixed with the
+      IME workaround
+
+
+
 Dec. 06, 2009 (2.0beta10)
 
     * Bug fixed: Linux: Detection of Python version for Sqlite

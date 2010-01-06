@@ -1,6 +1,24 @@
-﻿++ Clipboard Catcher (Windows only)
+﻿++ Clipboard Catcher (certain OS' only)
 
 The clipboard catcher is similar to the ScratchPad. While the ScratchPad catches text chunks which are especially copied to it inside WikidPad, the clipboard catcher collects every piece of text copied (or cutted) to clipboard from every application and appends it to a wiki page of your choice.
+
+
++++ Prerequisites
+
+Unfortunately the clipboard catcher is not available for all operating systems and environments. For Windows it works out of the box, for Linux/Gnome some things should be paid attention to:
+
+    * It needs pyGTK to be installed properly
+    * It only works on the default clipboard, not the so-called "primary"
+    clipboard used when selecting text and pressing middle mouse button for
+    insert.
+    * If "Avoid doubled snippets" in the options for the catcher isn't
+    checked, you may see that copying or cutting text in WikidPad while the
+    catcher is on may behave unexpected (because WikidPad tries to copy/cut
+    and insert the clipboard contents at the same time). With "Avoid doubled
+    snippets" checked, it can detect this case.
+    * It was only tested on an Ubuntu 8.04 using Gnome. There may be
+    situations (e.g. with KDE/Qt-applications) where it doesn't work.
+
 
 +++ Clipboard catcher at page
 

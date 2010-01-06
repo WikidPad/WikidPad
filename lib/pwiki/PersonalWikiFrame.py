@@ -278,20 +278,20 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.wikiHistory = history.split(u";")
 
         # clipboard catcher  
-        if WindowsHacks is None:
-            self.clipboardInterceptor = None
-            self.browserMoveInterceptor = None
-            self._interceptCollection = None
-        else:
+        if WindowsHacks is not None:
             self.clipboardInterceptor = WindowsHacks.ClipboardCatchIceptor(self)
             self.browserMoveInterceptor = WindowsHacks.BrowserMoveIceptor(self)
 
             self._interceptCollection = WindowsHacks.WinProcInterceptCollection(
-                    (self.clipboardInterceptor,
-                    self.browserMoveInterceptor))
-            self._interceptCollection.start(self.GetHandle())
+                    (self.clipboardInterceptor, self.browserMoveInterceptor))
+        else:
+            self.browserMoveInterceptor = None
+            self.clipboardInterceptor = OsAbstract.createClipboardInterceptor(self)
+            self._interceptCollection = OsAbstract.createInterceptCollection(
+                    (self.clipboardInterceptor,))
 
-#             self.clipboardInterceptor.intercept(self.GetHandle())
+        if self._interceptCollection is not None:
+            self._interceptCollection.start(self) # .GetHandle())
 
         # resize the window to the last position/size
         setWindowSize(self, (self.configuration.getint("main", "size_x", 200),
@@ -3773,10 +3773,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         and updates file history.
         """
         wikiConfigFilename = self._getStorableWikiPath(wikiConfigFilename)
-        
+
         if wikiConfigFilename == self.wikiPadHelp:
             return
-        
+
         # create a new config file for the new wiki
         self.configuration.set("main", "last_wiki", wikiConfigFilename)
         if wikiConfigFilename not in self.wikiHistory:

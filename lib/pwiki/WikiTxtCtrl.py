@@ -532,8 +532,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         cbIcept = self.presenter.getMainControl().getClipboardInterceptor()  
         if cbIcept is not None:
-            cbIcept.informCopyInWikidPad()
-        copyTextToClipboard(text)
+            cbIcept.informCopyInWikidPadStart(text=text)
+            try:
+                copyTextToClipboard(text)
+            finally:
+                cbIcept.informCopyInWikidPadStop()
+        else:
+            copyTextToClipboard(text)
 
     def Paste(self):
         text = getTextFromClipboard()
@@ -1097,16 +1102,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
             wx.GetApp().freeWikiLanguageHelper(self.wikiLanguageHelper)
             self.wikiLanguageHelper = docPage.createWikiLanguageHelper()
-
+        
         if self.pageType == u"normal":
             # Scroll page according to the anchor
             try:
+                anchorNodes = self.getPageAst().iterDeepByName("anchorDef")
                 anchorNodes = self.getPageAst().iterDeepByName("anchorDef")
                 for node in anchorNodes:
                     if node.anchorLink == anchor:
                         self.gotoCharPos(node.pos + node.strLength)
                         break
-                    anchor = None #!!!
+#                 else:
+#                     anchor = None # Not found
 
             except NoPageAstException:
                 return
@@ -1326,7 +1333,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.contextMenuTokens = nodes
             addActivateItem = False
             addUrlToClipboardItem = False
-#             print "--OnContextMenu24", repr([node.name for node in self.contextMenuTokens])
             for node in nodes:
                 if node.name == "wikiWord":
                     addActivateItem = True
@@ -1480,7 +1486,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
 
         def process(pageAst, stack):
-#             print "--process1", repr((pageAst.name, pageAst.pos))
             for node in pageAst.iterFlatNamed():
                 threadstop.testRunning()
                 
@@ -1736,8 +1741,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         self.BeginUndoAction()
         try:
-#             print "--styleSelection4", repr((startBytePos, endBytePos))
-            
             endCharPos += len(startChars)
             
             if emptySelection:
@@ -2475,10 +2478,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
                 docPage = self.getLoadedDocPage()
 
-#                 if docPage.getTxtEditor() is self:
-#                     print "--OnModified5", repr((evt.GetModificationType(),
-#                             evt.GetPosition(), evt.GetLength(), evt.GetText()))
-
 
 
 
@@ -2589,7 +2588,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         key = evt.GetKeyCode()
 
         # Return if this doesn't seem to be a real character input
-        if evt.ControlDown() or key < 32:
+        if evt.ControlDown() or (0 < key < 32):
             evt.Skip()
             return
             

@@ -65,8 +65,10 @@ class TimeViewCtrl(wx.Notebook):
 
 
         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
-        wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.GetId(),
-                self.OnNotebookPageChanged)
+#         wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.GetId(),
+#                 self.OnNotebookPageChanged)
+        self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChanged,
+                id=self.GetId())
 
 
     def close(self):
@@ -77,6 +79,9 @@ class TimeViewCtrl(wx.Notebook):
         self.mainControl.getConfig().set("main",
                 "timeView_lastSelectedTab", lastTab)
         
+        # Solves problem with GTK
+        self.Unbind(wx.EVT_NOTEBOOK_PAGE_CHANGED, id=self.GetId())
+
         for p in self.notebookPages:
             p.close()
         
