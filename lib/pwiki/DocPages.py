@@ -183,7 +183,7 @@ class DocPage(object, MiscEventSourceMixin):
         with self.textOperationLock:
             if self.isReadOnlyEffect():
                 return
-            
+
             self.setDirty(True)
             txtEditor = self.getTxtEditor()
             self.livePageAst = None
@@ -1483,6 +1483,8 @@ class WikiPage(AbstractWikiPage):
         return valid
 
 
+#     def update(self):
+#         return self.runDatabaseUpdate(step=-2)
 
     def runDatabaseUpdate(self, step=-1, threadstop=DUMBTHREADSTOP):
         with self.textOperationLock:
@@ -1513,6 +1515,28 @@ class WikiPage(AbstractWikiPage):
                     if not formatDetails.isEquivTo(self.getFormatDetails()):
                         self.initiateUpdate()
                         return False
+#             elif step == -2:
+#                 for i in range(15):   # while True  is too dangerous
+#                     metaState = self.getWikiData().getMetaDataState(self.wikiWord)
+# 
+#                     if not liveTextPlaceHold is self.liveTextPlaceHold:
+#                         return False
+#                     if not formatDetails.isEquivTo(self.getFormatDetails()):
+#                         self.initiateUpdate()
+#                         return False
+# 
+#                     if metaState == Consts.WIKIWORDMETADATA_STATE_UPTODATE:
+#                         return True
+# 
+#                     elif metaState == Consts.WIKIWORDMETADATA_STATE_PROPSPROCESSED:
+#                         self.refreshMainDbCacheFromPageAst(pageAst,
+#                                 threadstop=threadstop)
+#                         continue
+# 
+#                     else: # step == Consts.WIKIWORDMETADATA_STATE_DIRTY
+#                         self.refreshPropertiesFromPageAst(pageAst,
+#                                 threadstop=threadstop)
+#                         continue
             else:
                 metaState = self.getWikiData().getMetaDataState(self.wikiWord)
     

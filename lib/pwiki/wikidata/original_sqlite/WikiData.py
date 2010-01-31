@@ -1015,20 +1015,6 @@ class WikiData:
 
     # ---------- Listing/Searching wiki words (see also "alias handling", "searching pages")----------
 
-#     def getAllDefinedWikiPageNames(self):
-#         """
-#         get the names of all wiki pages in the db, no aliases, no functional
-#         pages.
-#         Function must work for read-only wiki.
-#         """
-#         try:
-#             return self.connWrap.execSqlQuerySingleColumn(
-#                     "select word from wikiwords where not word glob '[[]*'")
-#         except (IOError, OSError, sqlite.Error), e:
-#             traceback.print_exc()
-#             raise DbReadAccessError(e)
-
-
     def getAllDefinedContentNames(self):
         """
         get the names of all the content elements in the db, no aliases

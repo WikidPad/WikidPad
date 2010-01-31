@@ -40,6 +40,49 @@ class DbWriteAccessError(DbAccessError):
 
 
 
+class RenameWikiWordException(Exception):
+    """
+    Raised on problems with renaming multiple wikiwords at once.
+    Constructed in 
+    WikiDataManager.WikiDataManager.buildRenameSeqWithSubpages()
+    """
+    # Problems:
+    # Multiple words should be renamed to same word
+    PRB_RENAME_TO_SAME = 1
+    # Word to rename to exist already
+    PRB_TO_ALREADY_EXISTS = 2
+
+    def __init__(self, affectedRenames):
+        """
+        affectedRenames -- list of tuples (fromWikiWord, toWikiWord, problem)
+            where problem is one of the PRB_* constants of the class.
+        """
+        self.affectedRenames = affectedRenames
+        
+    def getAffectedRenames(self):
+        return self.affectedRenames
+
+
+    def getFlowText(self):
+        """
+        Return affectedRenames as multiple-line human readable text
+        """
+        # TODO Move definition outside (attn to i18n)
+        PROBLEM_HR_DICT = {
+                self.PRB_RENAME_TO_SAME: _(u"Multiple words rename to same word"),
+                self.PRB_TO_ALREADY_EXISTS: _(u"Word already exists")
+            }
+
+        result = []
+        for fromWikiWord, toWikiWord, problem in self.affectedRenames:
+            result.append(u"%s -> %s: %s" % (fromWikiWord, toWikiWord,
+                    PROBLEM_HR_DICT[problem]))
+        
+        return u"\n".join(result)
+
+
+
+
 class InternalError(Exception): pass
 
 

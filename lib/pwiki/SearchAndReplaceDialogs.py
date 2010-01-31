@@ -1319,7 +1319,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
     
                 charStartPos = 0
     
-                sarOp.beginWikiSearch(self.pWiki.getWikiDocument())
+                sarOp.beginWikiSearch(self.mainControl.getWikiDocument())
                 try:
                     while True:
                         try:

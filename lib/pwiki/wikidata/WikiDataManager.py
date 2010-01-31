@@ -1236,6 +1236,68 @@ class WikiDataManager(MiscEventSourceMixin):
         self.pushDirtyMetaDataUpdate()
 
 
+    def getWikiWordSubpages(self, wikiWord):
+        return self.getWikiData().getWikiLinksStartingWith(wikiWord + u"/")
+
+
+    def buildRenameSeqWithSubpages(self, fromWikiWord, toWikiWord):
+        """
+        Returns a sequence of tuples (fromWikiWord, toWikiWord).
+        May return None if one or more toWikiWords already exist and would be
+        overwritten.
+        
+        It is (or will become) important that the renaming is processed
+        in the order given by the returned sequence.
+        """
+        langHelper = GetApp().createWikiLanguageHelper(
+                self.getWikiDefaultWikiLanguage())
+
+        errMsg = langHelper.checkForInvalidWikiWord(toWikiWord, self)
+
+        if errMsg:
+            raise WikiDataException(_(u"'%s' is an invalid wiki word. %s") %
+                    (toWikiWord, errMsg))
+
+        # Build dictionary of renames
+        renameDict = {}
+
+        if self.isDefinedWikiPage(fromWikiWord):
+            # If fromWikiWord exists (not mandatory) it must be renamed, too
+            renameDict[fromWikiWord] = toWikiWord
+
+        for subPageName in self.getWikiWordSubpages(fromWikiWord):
+            renameDict[subPageName] = toWikiWord + subPageName[len(fromWikiWord):]
+
+        # Check for renames with errors
+        errorRenames = []
+
+        toSet = set()
+        sameToSet = set()
+        
+        for key, value in renameDict.iteritems():
+            if self.isDefinedWikiPage(value):
+                errorRenames.append((key, value,
+                        RenameWikiWordException.PRB_TO_ALREADY_EXISTS))
+
+            if value in toSet:
+                sameToSet.add(value)
+                continue
+            toSet.add(value)
+        
+        if sameToSet:
+            # Two or more words should be renamed to same word
+            # List which ones
+            errorRenames += [(key, value,
+                    RenameWikiWordException.PRB_RENAME_TO_SAME)
+                    for key, value in renameDict.iteritems()
+                    if value in sameToSet]
+
+        if errorRenames:
+            raise RenameWikiWordException(errorRenames)
+
+        return renameDict.items()
+
+
     def renameWikiWord(self, wikiWord, toWikiWord, modifyText):
         """
         modifyText -- Should the text of links to the renamed page be

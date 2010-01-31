@@ -37,6 +37,15 @@ The checkbox before the text field allows to temporarily deactivate the hotkey w
 
 There is also an option to set a second hotkey which is bound to the current wiki instead of the app. See OptionsDialog#*Wiki-bound# hotkey* below in "Current wiki" options.
 
+
+*Rename dialog defaults*
+Default settings for the wiki word rename dialog
+
+*Modify all links to the wiki word*
+*Also rename subpages*
+See [RenamingWikiWords] for the meaning.
+
+
 *Temporary files*
 A group of settings about the placement of temporary files. These settings may need a restart of WikidPad to take effect.
 

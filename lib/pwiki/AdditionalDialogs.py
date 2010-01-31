@@ -579,8 +579,151 @@ class ChooseWikiWordDialog(wx.Dialog):
         
         self.ctrls.lb.Set(wordsgui)
 
- 
- 
+
+
+
+class RenameWikiWordDialog(wx.Dialog):
+    def __init__(self, mainControl, fromWikiWord, parent, ID, title=None,
+                 pos=wx.DefaultPosition, size=wx.DefaultSize,
+                 style=wx.NO_3D):
+
+        d = wx.PreDialog()
+        self.PostCreate(d)
+
+        self.mainControl = mainControl
+        self.fromWikiWord = fromWikiWord
+
+        self.value = None
+
+        res = wx.xrc.XmlResource.Get()
+        res.LoadOnDialog(self, parent, "RenameWikiWordDialog")
+
+        if title is not None:
+            self.SetTitle(title)
+
+        self.ctrls = XrcControls(self)
+
+        self.ctrls.btnOk.SetId(wx.ID_OK)
+        self.ctrls.btnOk = self.ctrls._byId(wx.ID_OK)
+        self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
+
+        self.ctrls.stFromWikiWord.SetLabel(self.fromWikiWord)
+        self.ctrls.tfToWikiWord.SetValue(self.fromWikiWord)
+        self.ctrls.btnOk.Enable(False)
+        self.ctrls.cbModifyLinks.SetValue(self.mainControl.getConfig().getboolean(
+                "main", "wikiWord_renameDefault_modifyWikiLinks", False))
+        self.ctrls.cbRenameSubPages.SetValue(self.mainControl.getConfig().getboolean(
+                "main", "wikiWord_renameDefault_renameSubPages", True))
+
+        # Fixes focus bug under Linux
+        self.SetFocus()
+
+        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+        wx.EVT_TEXT(self, GUI_ID.tfToWikiWord, self.OnTextToWikiWord)
+
+
+
+#         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
+# 
+#         wx.EVT_CHAR(self.ctrls.text, self.OnCharText)
+#         wx.EVT_CHAR(self.ctrls.lb, self.OnCharListBox)
+#         wx.EVT_LISTBOX(self, ID, self.OnListBox)
+#         wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
+#         wx.EVT_BUTTON(self, GUI_ID.btnCreate, self.OnCreate)
+#         wx.EVT_BUTTON(self, GUI_ID.btnDelete, self.OnDelete)
+#         wx.EVT_BUTTON(self, GUI_ID.btnNewTab, self.OnNewTab)
+#         wx.EVT_BUTTON(self, GUI_ID.btnNewTabBackground, self.OnNewTabBackground)
+
+
+
+    def OnOk(self, evt):
+        msg = self._checkValidToWikiWord()
+        if msg is not None:
+            return
+
+        toWikiWord = self.ctrls.tfToWikiWord.GetValue()
+
+        try:
+            self.mainControl.renameWikiWord(self.fromWikiWord, toWikiWord,
+                    self.ctrls.cbModifyLinks.GetValue(),
+                    self.ctrls.cbRenameSubPages.GetValue())
+        except RenameWikiWordException, e:
+            wx.MessageBox(_(u"Can't process renaming:\n%s") %
+                    e.getFlowText(), _(u"Can't rename"),
+                    wx.OK | wx.ICON_HAND, self)
+            return
+        except WikiDataException, e:
+            traceback.print_exc()                
+            self.displayErrorMessage(unicode(e))
+        except (IOError, OSError, DbAccessError):
+            pass
+
+        self.EndModal(wx.ID_OK)
+
+
+    def updateValidToWikiWord(self):
+        msg = self._checkValidToWikiWord()
+        if msg is None:
+            self.ctrls.btnOk.Enable(True)
+            self.ctrls.stErrorMessage.SetLabel(u"")
+        else:
+            self.ctrls.btnOk.Enable(False)
+            self.ctrls.stErrorMessage.SetLabel(msg)
+
+
+    def _checkValidToWikiWord(self):
+        toWikiWord = self.ctrls.tfToWikiWord.GetValue()
+
+        if not toWikiWord or len(toWikiWord) == 0:
+            return u"" # No error message, but disable OK
+            
+        langHelper = wx.GetApp().createWikiLanguageHelper(
+                self.mainControl.getWikiDefaultWikiLanguage())
+
+        errMsg = langHelper.checkForInvalidWikiWord(toWikiWord,
+                self.mainControl.getWikiDocument())
+
+        if errMsg:
+            return errMsg   # _(u"Invalid wiki word. %s") % errMsg
+
+        if self.fromWikiWord == toWikiWord:
+            return _(u"Can't rename to itself")
+
+#         try:
+        if not self.mainControl.getWikiDocument().isCreatableWikiWord(toWikiWord):
+            return _(u"Word already exists")
+
+        # Word is OK
+        return None
+
+#         except (IOError, OSError, DbAccessError), e:
+#             self.mainControl.lostAccess(e)
+#             raise
+
+
+    def OnTextToWikiWord(self, evt):
+        evt.Skip()
+        self.updateValidToWikiWord()
+
+
+    def GetValue(self):
+        return self.value
+
+
+
+RenameWikiWordDialog.runModal = staticmethod(runDialogModalFactory(RenameWikiWordDialog))
+
+
+
+
+
+
+
+
+
+
+
+
 
 class SelectIconDialog(wx.Dialog):
     def __init__(self, parent, ID, iconCache, title="Select Icon",

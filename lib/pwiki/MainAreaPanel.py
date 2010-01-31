@@ -1,3 +1,5 @@
+from __future__ import with_statement
+
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
@@ -6,7 +8,8 @@ import os, sys, traceback, string, re
 import wx
 # import wx.xrc as xrc
 
-from wxHelper import GUI_ID, copyTextToClipboard, getAccelPairFromKeyDown
+from wxHelper import GUI_ID, copyTextToClipboard, getAccelPairFromKeyDown, \
+        WindowUpdateLocker
 
 from MiscEvent import MiscEventSourceMixin, ProxyMiscEvent
 
@@ -215,13 +218,33 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         if idx == -1:
             return
             
+        newIdx = -1
+        if idx == self.GetSelection():
+            switchMru = self.mainControl.getConfig().getboolean("main",
+                    "mainTabs_switchMruOrder", True)
+    
+            if switchMru:
+                # We are closing current active presenter and use MRU order
+                # to switch -> select previous presenter in MRU order
+                newIdx = self._mruTabIndexGetNext(idx)
+                if newIdx == idx:
+                    # Don't switch at all
+                    newIdx = -1
+                else:
+                    self.SetSelection(newIdx)
+
+#                 elif newIdx > idx:
+#                     # Adapt for after deletion of idx
+#                     newIdx -= 1
+
         # Prepare presenter for closing
         presenter.close()
-        
+
         # Actual deletion
         del self.docPagePresenters[idx]
         self._mruTabIndexDelete(idx)
-        self.DeletePage(idx)
+
+        self.DeletePage(idx)        
         self.updateConfig()
 
 

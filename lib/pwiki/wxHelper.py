@@ -52,7 +52,11 @@ class XrcControls:
         
     def __getitem__(self, name):
         return XRCCTRL(self.__basepanel, name)
-    
+
+    def _byId(self, wid):
+        return self.__basepanel.FindWindowById(wid)
+
+
 
 class WindowUpdateLocker(object):
     """

@@ -1,13 +1,22 @@
 ﻿++ Change Log
 
+Jan. 31, 2010 (2.0beta12)
+
+    * Support for renaming of subpages when renaming superpage.
+      See [RenamingWikiWords]
+    * More logical behavior when closing tab if MRU order is active
+
+    * Bug fixed: In wiki-wide search "Replace All" didn't work
+
+
 
 Jan. 06, 2010 (2.0beta11)
 
     * Support for clipboard catcher on Linux (at least Gnome).
-    * See [ClipboardCatcher#+ Prerequisites]
+      See [ClipboardCatcher#+ Prerequisites]
 
     * Bug fixed: Linux: Spell checking did not work (thanks to
-    * Christian Ziemski)
+      Christian Ziemski)
     * Bug fixed: Linux: Character input not working after
       switching of keyboard layout for certain languages
       (e.g. Russian). Can now be fixed with the

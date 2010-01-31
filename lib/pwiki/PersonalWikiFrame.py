@@ -3551,33 +3551,44 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 raise
 
 
-    def renameWikiWord(self, wikiWord, toWikiWord, modifyText, **evtprops):
+    def renameWikiWord(self, wikiWord, toWikiWord, modifyText, processSubpages):
         """
         Renames current wiki word to toWikiWord.
         Returns True if renaming was done successful.
         
         modifyText -- Should the text of links to the renamed page be
                 modified? (This text replacement works unreliably)
+        processSubpages -- Should subpages be renamed as well?
         """
         if wikiWord is None or not self.requireWriteAccess():
             return False
 
+        wikiDoc = self.getWikiDocument()
+
         try:
+            if processSubpages:
+                renameSeq = wikiDoc.buildRenameSeqWithSubpages(wikiWord,
+                        toWikiWord)
+            else:
+                renameSeq = [(wikiWord, toWikiWord)]
+
             self.saveAllDocPages()
 
-            if wikiWord == self.getWikiDocument().getWikiName():
-                # Renaming of root word = renaming of wiki config file
-                wikiConfigFilename = self.getWikiDocument().getWikiConfigPath()
-                self.removeFromWikiHistory(wikiConfigFilename)
-#                 self.wikiHistory.remove(wikiConfigFilename)
-                self.getWikiDocument().renameWikiWord(wikiWord, toWikiWord,
-                        modifyText)
-                # Store some additional information
-                self.lastAccessedWiki(
-                        self.getWikiDocument().getWikiConfigPath())
-            else:
-                self.getWikiDocument().renameWikiWord(wikiWord, toWikiWord,
-                        modifyText)
+            # TODO Don't recycle variable names!
+            for wikiWord, toWikiWord in renameSeq:
+
+                if wikiWord == wikiDoc.getWikiName():
+                    # Renaming of root word = renaming of wiki config file
+                    wikiConfigFilename = wikiDoc.getWikiConfigPath()
+                    self.removeFromWikiHistory(wikiConfigFilename)
+    #                 self.wikiHistory.remove(wikiConfigFilename)
+                    wikiDoc.renameWikiWord(wikiWord, toWikiWord,
+                            modifyText)
+                    # Store some additional information
+                    self.lastAccessedWiki(wikiDoc.getWikiConfigPath())
+                else:
+                    wikiDoc.renameWikiWord(wikiWord, toWikiWord,
+                            modifyText)
 
             return True
         except (IOError, OSError, DbAccessError), e:
@@ -4083,21 +4094,29 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if wikiWord is None:
             self.displayErrorMessage(_(u"No real wiki word selected to rename"))
             return
-        
+
+        if wikiWord == u"ScratchPad":
+            self.displayErrorMessage(_(u"The scratch pad cannot be renamed."))
+            return
+
         if self.isReadOnlyPage():
             return
 
-        dlg = wx.TextEntryDialog(self, uniToGui(_(u"Rename '%s' to:") %
-                wikiWord), _(u"Rename Wiki Word"), wikiWord, wx.OK | wx.CANCEL)
+        RenameWikiWordDialog.runModal(self, wikiWord, self, -1)
+        return
 
-        try:
-            while dlg.ShowModal() == wx.ID_OK and \
-                    not self.showWikiWordRenameConfirmDialog(wikiWord,
-                            guiToUni(dlg.GetValue())):
-                pass
 
-        finally:
-            dlg.Destroy()
+#         dlg = wx.TextEntryDialog(self, uniToGui(_(u"Rename '%s' to:") %
+#                 wikiWord), _(u"Rename Wiki Word"), wikiWord, wx.OK | wx.CANCEL)
+# 
+#         try:
+#             while dlg.ShowModal() == wx.ID_OK and \
+#                     not self.showWikiWordRenameConfirmDialog(wikiWord,
+#                             guiToUni(dlg.GetValue())):
+#                 pass
+# 
+#         finally:
+#             dlg.Destroy()
 
     # TODO Unicode
     def showStoreVersionDialog(self):
@@ -4159,71 +4178,71 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #                 dlg.Destroy()
 
 
-    # TODO Check if new name already exists (?)
-    def showWikiWordRenameConfirmDialog(self, wikiWord, toWikiWord):
-        """
-        Checks if renaming operation is valid, presents either an error
-        message or a confirmation dialog.
-        Returns -- True iff renaming was done successfully
-        """
-#         wikiWord = self.getCurrentWikiWord()
-
-        if not toWikiWord or len(toWikiWord) == 0:
-            return False
-            
-        langHelper = wx.GetApp().createWikiLanguageHelper(
-                self.getWikiDefaultWikiLanguage())
-                
-        errMsg = langHelper.checkForInvalidWikiWord(toWikiWord,
-                self.getWikiDocument())
-
-        if errMsg:
-            self.displayErrorMessage(_(u"'%s' is an invalid wiki word. %s.") %
-                    (toWikiWord, errMsg))
-            return False
-
-        if wikiWord == toWikiWord:
-            self.displayErrorMessage(_(u"Can't rename to itself"))
-            return False
-
-        if wikiWord == "ScratchPad":
-            self.displayErrorMessage(_(u"The scratch pad cannot be renamed."))
-            return False
-
-        try:
-            if not self.getWikiDocument().isCreatableWikiWord(toWikiWord):
-                self.displayErrorMessage(
-                        _(u"Cannot rename to '%s', word already exists") %
-                        toWikiWord)
-                return False
-
-            # Link rename mode from options
-            lrm = self.getConfig().getint("main",
-                    "wikiWord_rename_wikiLinks", 2)
-            if lrm == 0:
-                result = wx.NO
-            elif lrm == 1:
-                result = wx.YES
-            else: # lrm == 2: ask for each rename operation
-                result = wx.MessageBox(
-                        _(u"Do you want to modify all links to the wiki word "
-                        u"'%s' renamed to '%s' (this operation is unreliable)?") %
-                        (wikiWord, toWikiWord),
-                        _(u'Rename Wiki Word'),
-                        wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION, self)
-
-            if result == wx.YES or result == wx.NO:
-                try:
-                    self.renameWikiWord(wikiWord, toWikiWord, result == wx.YES)
-                    return True
-                except WikiDataException, e:
-                    traceback.print_exc()                
-                    self.displayErrorMessage(unicode(e))
-    
-            return False
-        except (IOError, OSError, DbAccessError), e:
-            self.lostAccess(e)
-            raise
+#     # TODO Check if new name already exists (?)
+#     def showWikiWordRenameConfirmDialog(self, wikiWord, toWikiWord):
+#         """
+#         Checks if renaming operation is valid, presents either an error
+#         message or a confirmation dialog.
+#         Returns -- True iff renaming was done successfully
+#         """
+# #         wikiWord = self.getCurrentWikiWord()
+# 
+#         if not toWikiWord or len(toWikiWord) == 0:
+#             return False
+#             
+#         langHelper = wx.GetApp().createWikiLanguageHelper(
+#                 self.getWikiDefaultWikiLanguage())
+#                 
+#         errMsg = langHelper.checkForInvalidWikiWord(toWikiWord,
+#                 self.getWikiDocument())
+# 
+#         if errMsg:
+#             self.displayErrorMessage(_(u"'%s' is an invalid wiki word. %s.") %
+#                     (toWikiWord, errMsg))
+#             return False
+# 
+#         if wikiWord == toWikiWord:
+#             self.displayErrorMessage(_(u"Can't rename to itself"))
+#             return False
+# 
+#         if wikiWord == "ScratchPad":
+#             self.displayErrorMessage(_(u"The scratch pad cannot be renamed."))
+#             return False
+# 
+#         try:
+#             if not self.getWikiDocument().isCreatableWikiWord(toWikiWord):
+#                 self.displayErrorMessage(
+#                         _(u"Cannot rename to '%s', word already exists") %
+#                         toWikiWord)
+#                 return False
+# 
+#             # Link rename mode from options
+#             lrm = self.getConfig().getint("main",
+#                     "wikiWord_rename_wikiLinks", 2)
+#             if lrm == 0:
+#                 result = wx.NO
+#             elif lrm == 1:
+#                 result = wx.YES
+#             else: # lrm == 2: ask for each rename operation
+#                 result = wx.MessageBox(
+#                         _(u"Do you want to modify all links to the wiki word "
+#                         u"'%s' renamed to '%s' (this operation is unreliable)?") %
+#                         (wikiWord, toWikiWord),
+#                         _(u'Rename Wiki Word'),
+#                         wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION, self)
+# 
+#             if result == wx.YES or result == wx.NO:
+#                 try:
+#                     self.renameWikiWord(wikiWord, toWikiWord, result == wx.YES)
+#                     return True
+#                 except WikiDataException, e:
+#                     traceback.print_exc()                
+#                     self.displayErrorMessage(unicode(e))
+#     
+#             return False
+#         except (IOError, OSError, DbAccessError), e:
+#             self.lostAccess(e)
+#             raise
 
 
     def showSearchDialog(self):
