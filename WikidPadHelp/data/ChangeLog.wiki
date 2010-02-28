@@ -1,5 +1,11 @@
 ﻿++ Change Log
 
+Feb. 28, 2010 (1.9final)
+
+    * Version number changed (that's all)
+
+
+
 Jan. 06, 2010 (1.9rc12)
 
     * Bug fixed: Linux: Character input not working after
