@@ -1,5 +1,30 @@
 ﻿++ Change Log
 
+Feb. 28, 2010 (2.0beta13)
+
+    * It's now possible to copy whole directories into the
+      file storage of a wiki
+    * F6 cycles now also through chronological view and page structure
+      if they are visible
+
+    * Bug fixed: No meaningful error message if exporting from
+      commandline fails
+    * Bug fixed: HTML export of subpages failed
+    * Bug fixed: Using F6 to switch between tree and tabs switched
+      also to invisible tree. 
+
+    * Bug fixed: Linux: Automatic focus shift from tab to tab content
+      did not always work
+    * Bug fixed: Linux: Selecting page in tree shifted focus to
+      tab content, therefore no keyboard navigation in tree
+    * Bug fixed: Linux: Problems with tab switching by keyboard
+
+    * Bug fixed: Windows: Incomplete or foreign enchant installation
+      may crash WikidPad on startup
+    * Bug fixed: Windows 7: Error message when using font dialog
+
+
+
 Jan. 31, 2010 (2.0beta12)
 
     * Support for renaming of subpages when renaming superpage.

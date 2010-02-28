@@ -1284,7 +1284,7 @@ class _TheParser(object):
                                 wwNode.searchFragment = None
                                 wwNode.anchorLink = None
                                 wwNode.wikiWord = foundWord
-                                wwNode.titleNode = None # buildSyntaxNode(foundWordText, start, "plainText")
+                                wwNode.titleNode = buildSyntaxNode(foundWordText, start, "plainText") # None
 
                                 newAstNodes.append(wwNode)
 

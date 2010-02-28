@@ -306,7 +306,7 @@ class WikiData:
             raise DbWriteAccessError(e)
 
 
-    def renameContent(self, oldWord, newWord):
+    def _renameContent(self, oldWord, newWord):
         """
         The content which was stored under oldWord is stored
         after the call under newWord. The self.cachedContentNames
@@ -338,7 +338,7 @@ class WikiData:
             raise DbWriteAccessError(e)
 
 
-    def deleteContent(self, word):
+    def _deleteContent(self, word):
         try:
             try:
                 fileName = self.getWikiWordFileName(word)
@@ -477,7 +477,7 @@ class WikiData:
                 self.connWrap.execSql("update wikiwordprops set word = ? where word = ?", (toWord, word))
                 self.connWrap.execSql("update todos set word = ? where word = ?", (toWord, word))
                 self.connWrap.execSql("update wikiwordmatchterms set word = ? where word = ?", (toWord, word))
-                self.renameContent(word, toWord)
+                self._renameContent(word, toWord)
                 self.connWrap.commit()
             except:
                 self.connWrap.rollback()
@@ -507,7 +507,7 @@ class WikiData:
                     self.deleteProperties(word)
                     self.deleteTodos(word)
                     if delContent:
-                        self.deleteContent(word)
+                        self._deleteContent(word)
                     self.deleteWikiWordMatchTerms(word, syncUpdate=False)
                     self.deleteWikiWordMatchTerms(word, syncUpdate=True)
                     self.connWrap.commit()

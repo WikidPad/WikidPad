@@ -198,10 +198,12 @@ class LinkConverterForHtmlSingleFilesExport(BasicLinkConverter):
             return default
         if not self.htmlExporter.shouldExport(word):
             return default
+            
+#         print "--LinkConverterForHtmlSingleFilesExport4", repr((urlFromPathname(u"ce%2FExp")))
 
-        return urlFromPathname(self.htmlExporter.convertFilename(
-                u"%s.html" % relUnAlias))
-
+        return urlFromPathname(
+                self.htmlExporter.filenameConverter.getFilenameForWikiWord(
+                relUnAlias) + ".html")
 
 class LinkConverterForHtmlMultiPageExport(BasicLinkConverter):
     def getLinkForWikiWord(self, word, default = None):
@@ -215,6 +217,27 @@ class LinkConverterForHtmlMultiPageExport(BasicLinkConverter):
             return default
 
         return u"#%s" % _escapeAnchor(relUnAlias)
+
+
+class FilenameConverter(object):
+    def __init__(self, asciiOnly):
+        self.asciiOnly = asciiOnly
+        self.reset()
+
+    def reset(self):
+        self._used = {}
+        self._valueSet = set()
+
+    def getFilenameForWikiWord(self, ww):
+        try:
+            return self._used[ww]
+        except KeyError:
+            for fname in iterCompatibleFilename(ww, u"",
+                    asciiOnly=self.asciiOnly, maxLength=245):
+                if not fname in self._valueSet:
+                    self._used[ww] = fname
+                    self._valueSet.add(fname)
+                    return fname
 
 
 
@@ -304,7 +327,8 @@ class HtmlExporter(AbstractExporter):
                 # of the current word.
         self.tempFileSet = None
         self.copiedTempFileCache = None  # Dictionary {<original path>: <target URL>}
-        self.convertFilename = removeBracketsFilename   # lambda s: mbcsEnc(s, "replace")[0]
+        self.filenameConverter = FilenameConverter(False)
+#         self.convertFilename = removeBracketsFilename   # lambda s: mbcsEnc(s, "replace")[0]
         
         self.result = None
         
@@ -449,11 +473,11 @@ class HtmlExporter(AbstractExporter):
         self.progressHandler = progressHandler
         self.compatFilenames = compatFilenames
 
-        if compatFilenames:
-            self.convertFilename = removeBracketsToCompFilename
-        else:
-            self.convertFilename = removeBracketsFilename    # lambda s: mbcsEnc(s, "replace")[0]
-            
+#             self.convertFilename = removeBracketsToCompFilename
+        self.filenameConverter = FilenameConverter(bool(compatFilenames))
+#         else:
+#             self.convertFilename = removeBracketsFilename    # lambda s: mbcsEnc(s, "replace")[0]
+
         self.referencedStorageFiles = None
         
         return True
@@ -690,8 +714,9 @@ class HtmlExporter(AbstractExporter):
         self.buildStyleSheetList()
 
         if realfp is None:
-            outputFile = join(self.exportDest,
-                    self.convertFilename(u"%s.html" % self.mainControl.wikiName))
+            outputFile = join(self.exportDest, 
+                    self.filenameConverter.getFilenameForWikiWord(
+                    self.mainControl.wikiName) + ".html")
 
             if exists(pathEnc(outputFile)):
                 os.unlink(pathEnc(outputFile))
@@ -782,7 +807,7 @@ class HtmlExporter(AbstractExporter):
 
         if self.addOpt[1] in (1, 2):
             # TODO Configurable name
-            outputFile = join(self.exportDest, self.convertFilename(u"index.html"))
+            outputFile = join(self.exportDest, pathEnc(u"index.html"))
             try:
                 if exists(pathEnc(outputFile)):
                     os.unlink(pathEnc(outputFile))
@@ -836,14 +861,17 @@ class HtmlExporter(AbstractExporter):
             self.exportWordToHtmlPage(self.exportDest, word, False)
 
         self.copyCssFiles(self.exportDest)
-        rootFile = join(self.exportDest, 
-                self.convertFilename(u"%s.html" % self.wordList[0]))
+        rootFile = join(self.exportDest,
+                self.filenameConverter.getFilenameForWikiWord(self.wordList[0]) +
+                ".html")
         return rootFile
 
 
     def exportWordToHtmlPage(self, dir, word, startFile=True,
             onlyInclude=None):
-        outputFile = join(dir, self.convertFilename(u"%s.html" % word))
+        outputFile = join(dir,
+                self.filenameConverter.getFilenameForWikiWord(word) + ".html")
+
         try:
             if exists(pathEnc(outputFile)):
                 os.unlink(pathEnc(outputFile))
@@ -1015,7 +1043,7 @@ class HtmlExporter(AbstractExporter):
             if asHref:
                 parents = parents +\
                         u'<span class="parent-node"><a href="%s.html">%s</a></span>' %\
-                        (self.convertFilename(relation), relation)
+                        (self.filenameConverter.getFilenameForWikiWord(relation), relation)
             else:
                 parents = parents +\
                 u'<span class="parent-node"><a href="#%s">%s</a></span>' %\

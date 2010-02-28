@@ -65,10 +65,9 @@ class TimeViewCtrl(wx.Notebook):
 
 
         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
-#         wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.GetId(),
-#                 self.OnNotebookPageChanged)
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChanged,
                 id=self.GetId())
+#         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
 
 
     def close(self):
@@ -81,6 +80,8 @@ class TimeViewCtrl(wx.Notebook):
         
         # Solves problem with GTK
         self.Unbind(wx.EVT_NOTEBOOK_PAGE_CHANGED, id=self.GetId())
+#         self.Unbind(wx.EVT_SET_FOCUS)
+
 
         for p in self.notebookPages:
             p.close()
@@ -109,7 +110,19 @@ class TimeViewCtrl(wx.Notebook):
         # Show menu
         activeWindow.showContextMenuOnTab()
 
-        
+
+    def OnSetFocus(self, evt):
+        # Tricky hack to set focus to the notebook page
+        tabIdx = self.GetSelection()
+        self._adjustVisibilitySubControls(tabIdx)
+        nbPage = self.notebookPages[tabIdx]
+
+        # Now we can set the focus back to the presenter
+        # which in turn sets it to the active subcontrol
+        wx.CallAfter(self._postponedOnNotebookPageChanged, nbPage)
+        evt.Skip()
+
+
     def OnNotebookPageChanged(self, evt):
         # Tricky hack to set focus to the notebook page
         tabIdx = evt.GetSelection()

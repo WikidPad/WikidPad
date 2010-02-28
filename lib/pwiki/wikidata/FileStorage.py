@@ -212,7 +212,7 @@ class FileStorage:
         If path is None, a new filename couldn't be found.
         """
 
-        if not os.path.isfile(srcPath):
+        if not (os.path.isfile(srcPath) or os.path.isdir(srcPath)):
             raise FSException(_(u"Path '%s' must point to an existing file") %
                     srcPath)
 

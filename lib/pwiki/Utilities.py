@@ -587,8 +587,32 @@ class StringPathSet(set):
         """
         for sp in self.listStartsWith(startseq):
             self.discard(sp)
-    
-    
-    
-    
-    
+
+
+
+
+class IdentityList(list):
+    """
+    A list where the "in" operator and index method checks for identity
+    instead of equality.
+    """
+    def __contains__(self, item):
+        for i in self:
+            if i is item:
+                return True
+        return False
+
+    def index(self, elem):
+        for i, item in enumerate(self):
+            if elem is item:
+                return i
+
+        raise ValueError()
+
+    def find(self, elem):
+        for i, item in enumerate(self):
+            if elem is item:
+                return i
+
+        return -1
+

@@ -1,8 +1,10 @@
-import sys, os, getopt
+import sys, os, getopt, traceback
 
 import urllib_red as urllib
 
 import wx
+
+from WikiExceptions import *
 
 from StringOps import mbcsDec, wikiUrlToPathWordAndAnchor
 
@@ -62,6 +64,7 @@ class CmdLineAction:
             return
 
         wikiWordsToOpen = []
+        
         for o, a in opts:
             if o in ("-h", "--help"):
                 self.showHelp = True
@@ -164,9 +167,16 @@ class CmdLineAction:
                     u"Value for --export-type can be one of:\n%s\n\n" % exList)
             return
 
-        exporter.export(pWiki.getWikiDataManager(), wordList,
-                self.exportType, self.exportDest, 
-                self.exportCompFn, exporter.getAddOpt(None), None)
+        try:
+            exporter.export(pWiki.getWikiDataManager(), wordList,
+                    self.exportType, self.exportDest, 
+                    self.exportCompFn, exporter.getAddOpt(None), None)
+        except (IOError, WindowsError), e:
+            traceback.print_exc()
+            # unicode(e) returns different result for IOError
+            self.showCmdLineUsage(pWiki, str(e) + u"\n\n") 
+            return
+
 
 
     USAGE = \

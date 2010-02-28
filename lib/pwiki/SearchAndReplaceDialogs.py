@@ -368,7 +368,7 @@ class SearchResultListBox(wx.HtmlListBox):
         self.SetSelection(-1)
         self.SetSelection(sel)
         self.Refresh()
-        
+
 
     def OnDClick(self, evt):
         sel = self.GetSelection()
@@ -378,13 +378,13 @@ class SearchResultListBox(wx.HtmlListBox):
         info = self.foundinfo[sel]
 
         self.pWiki.openWikiPage(info.wikiWord)
-        
+
         editor = self.pWiki.getActiveEditor()
         if editor is not None:
             if info.occPos[0] != -1:
                 self.pWiki.getActiveEditor().SetSelectionByCharPos(info.occPos[0],
                         info.occPos[1])
-
+                self.pWiki.getActiveEditor().ensureSelectionExpanded()
 
             # Works in fast search popup only if called twice
             editor.SetFocus()

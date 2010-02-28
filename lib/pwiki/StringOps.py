@@ -860,7 +860,7 @@ def flexibleUrlUnquote(link):
 
 
 URL_RESERVED = frozenset((u";", u"?", u":", u"@", u"&", u"=", u"+", u",", u"/",
-        u"{", u"}", u"|", u"\\", u"^", u"~", u"[", u"]", u"`", u'"'))
+        u"{", u"}", u"|", u"\\", u"^", u"~", u"[", u"]", u"`", u'"', u"%"))
 
 
 
@@ -1213,8 +1213,6 @@ def iterCompatibleFilename(baseName, suffix, asciiOnly=False, maxLength=250,
     # Now build infinite random names
     while True:
         yield beforeRandom + createRandomString(randomLength) + suffix
-
-u'C:\\Daten\\Projekte\\Wikidpad\\Next20\\WikidPadHelpOS\\data\\Now a%21%22\xa7$%25&=%3F\xb4`\xb4%27 Wikiword can contain (nearly) every%21%21^\xb0character. And it can be longer and longer and longer. At the moment there may be problems with HTML export of very long wikiwords, but I hope to get this working in a future.wiki'
 
 
 def _unquoteCharRepl(matchObj):

@@ -36,8 +36,12 @@ GoBack="Alt-Left"
 GoForward="Alt-Right"
 if wx.Platform == "__WXMAC__":
     GoHome="Ctrl-Shift-H"
+    StartIncrementalSearch="Alt-Shift-F"
 else:
     GoHome="Ctrl-Q"
+    StartIncrementalSearch="Ctrl-F"
+
+FocusFastSearchField=""
 Bold="Ctrl-B"
 Italic="Ctrl-I"
 Heading="Ctrl-Alt-H"
@@ -74,13 +78,11 @@ BackwardSearch="Shift-F3"
 AutoComplete="Ctrl-Space"
 ActivateLink2="Ctrl-Return"
 SwitchFocus="F6"
-StartIncrementalSearch="Ctrl-F"
 CloseCurrentTab="Ctrl-F4"
 GoNextTab="Ctrl-Tab"
 GoPreviousTab="Ctrl-Shift-Tab"
-FocusFastSearchField=""
 
-Plugin_AutoNew_Numbered = "Shift-Ctrl-N"
+Plugin_AutoNew_Numbered = "Ctrl-Shift-N"
 
 Plugin_GraphVizStructure_ShowRelationGraph = ""
 Plugin_GraphVizStructure_ShowRelationGraphSource = ""

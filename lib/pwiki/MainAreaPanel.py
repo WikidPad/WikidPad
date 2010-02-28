@@ -351,6 +351,19 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 #         evt.Skip()
 
 
+    if Configuration.isLinux():
+        def SetSelection(self, i):
+            """
+            SetSelection is overwritten on Linux because Linux/GTK sets
+            the focus automatically to the content of the selected
+            notebook tab which is not desired.
+            """
+            foc = wx.Window.FindFocus()
+            wx.Notebook.SetSelection(self, i)
+            if foc is not None:
+                foc.SetFocus()
+
+
     def OnNotebookPageChanged(self, evt):
         # Tricky hack to set focus to the notebook page
         if self.runningPageChangedEvent:
@@ -374,7 +387,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
             # Now we can set the focus back to the presenter
             # which in turn sets it to the active subcontrol
-
+            
             if self.tabSwitchByKey < 2:
                 self._mruTabIndexPushToTop(evt.GetSelection())
                 presenter.SetFocus()
@@ -429,6 +442,9 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         """
         Push idx to top in mru list.
         """
+        if idx == -1:
+            return
+
         try:
             self.mruTabIndex.remove(idx)
         except ValueError:
@@ -496,20 +512,39 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             self.tabSwitchByKey = 1
 
 
-    def OnKeyUp(self, evt):
-        if self.tabSwitchByKey == 0:
-            evt.Skip()
-            return
+    if Configuration.isLinux():
+        def OnKeyUp(self, evt):
+            if self.tabSwitchByKey == 0:
+                evt.Skip()
+                return
 
-        if evt.GetModifiers() & \
-                (wx.MOD_ALT | wx.MOD_CONTROL | wx.MOD_ALTGR | wx.MOD_META | wx.MOD_CMD):
-            # Some modifier keys are pressed yet
-            evt.Skip()
-            return
+            # For Linux the test must be done this way.
+            # Meta is always reported as pressed (at least for PC), so ignore it
+            mstate = wx.GetMouseState()
+            if mstate.ControlDown() or mstate.ShiftDown() or mstate.AltDown() or \
+                    mstate.CmdDown():
+                # Some modifier keys are pressed yet
+                evt.Skip()
+                return
 
-        self.tabSwitchByKey = 0
-        self._mruTabIndexPushToTop(self.GetSelection())
-        self.docPagePresenters[self.GetSelection()].SetFocus()
+            self.tabSwitchByKey = 0
+            self._mruTabIndexPushToTop(self.GetSelection())
+            self.docPagePresenters[self.GetSelection()].SetFocus()
+    else:
+        def OnKeyUp(self, evt):
+            if self.tabSwitchByKey == 0:
+                evt.Skip()
+                return
+
+            if evt.GetModifiers() & \
+                    (wx.MOD_ALT | wx.MOD_CONTROL | wx.MOD_ALTGR | wx.MOD_META | wx.MOD_CMD):
+                # Some modifier keys are pressed yet
+                evt.Skip()
+                return
+
+            self.tabSwitchByKey = 0
+            self._mruTabIndexPushToTop(self.GetSelection())
+            self.docPagePresenters[self.GetSelection()].SetFocus()
 
 
     def OnCmdSwitchThisEditorPreview(self, evt):

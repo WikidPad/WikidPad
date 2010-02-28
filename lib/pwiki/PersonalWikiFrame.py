@@ -27,6 +27,7 @@ from .MiscEvent import MiscEventSourceMixin, ProxyMiscEvent  # , DebugSimple
 from WikiExceptions import *
 from Consts import HOMEPAGE
 
+from . import Utilities
 from . import Configuration
 from .WindowLayout import WindowSashLayouter, setWindowPos, setWindowSize
 from . import WindowLayout
@@ -356,6 +357,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         anchorToOpen=anchorToOpen)
 #                 wx.GetApp().pauseBackgroundThreads()
             else:
+                if cmdLineAction.wikiToOpen:
+                    cmdLineAction.showCmdLineUsage(self,
+                            _(u"Wiki doesn't exist: %s") % wikiToOpen + u"\n\n")
+                    self.Close()
+                    self.Destroy()
+                    return
+
                 self.statusBar.SetStatusText(
                         uniToGui(_(u"Last wiki doesn't exist: %s") % wikiToOpen), 0)
 
@@ -579,15 +587,32 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         they are here again (make a "roundtrip").
         This function also avoids an infinite loop of such events.
         """
-        # Check for infinite loop
-        if self.eventRoundtrip > 0:
+        target = None
+
+        if self.eventRoundtrip < 1:
+            # First try: Focused window
+            target = wx.Window.FindFocus()
+
+        if target is None and self.eventRoundtrip < 2:
+            # Second try: Active DocPagePresenter
+            presenter = self.getCurrentDocPagePresenter()
+            if presenter is not None:
+                subCtl = presenter.getCurrentSubControl()
+                if subCtl is not None:
+                    target = subCtl
+                else:
+                    target = presenter
+                
+                if target is wx.Window.FindFocus():
+                    # No double-check if first try is equal second try
+                    target = None
+
+        if target is None:
             return
 
         self.eventRoundtrip += 1
         try:
-            focus = wx.Window.FindFocus()
-            if focus is not None:
-                focus.ProcessEvent(evt)
+            target.ProcessEvent(evt)
         finally:
             self.eventRoundtrip -= 1
 
@@ -2159,8 +2184,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.windowLayouter.realize()
 #         self.windowLayouter.layout()
 
-        self.tree = self.windowLayouter.getWindowForName("maintree")
-        self.logWindow = self.windowLayouter.getWindowForName("log")
+        self.tree = self.windowLayouter.getWindowByName("maintree")
+        self.logWindow = self.windowLayouter.getWindowByName("log")
 
 
         
@@ -2262,16 +2287,40 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnSwitchFocus(self, evt):
+        switchList = Utilities.IdentityList([self.mainAreaPanel])
+        if not self.windowLayouter.isWindowCollapsed("maintree"):
+            switchList.append(self.tree)
+
+        if not self.windowLayouter.isWindowCollapsed("doc structure"):
+            wnd = self.windowLayouter.getWindowByName("doc structure")
+            if wnd is not None:
+                switchList.append(wnd)
+        
+        if not self.windowLayouter.isWindowCollapsed("time view"):
+            wnd = self.windowLayouter.getWindowByName("time view")
+            if wnd is not None:
+                switchList.append(wnd)
+
+
+        if len(switchList) == 1:
+            # Nothing to switch
+            switchList[0].SetFocus()
+            return
+
         foc = wx.Window.FindFocus()
-        mainAreaPanel = self.mainAreaPanel
         while foc != None:
-            if foc == mainAreaPanel:
-                self.tree.SetFocus()
+            i = switchList.find(foc)
+            if i > -1:
+                i += 1
+                if i >= len(switchList):
+                    i = 0
+                switchList[i].SetFocus()
                 return
-            
+
             foc = foc.GetParent()
-            
-        mainAreaPanel.SetFocus()
+
+        # Nothing found -> focus on main area panel
+        switchList[0].SetFocus()
 
 
     def OnFastSearchKeyDown(self, evt):
@@ -2634,7 +2683,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # delete everything in the current tree
         self.tree.DeleteAllItems()
         
-        viewsTree = self.windowLayouter.getWindowForName("viewstree")
+        viewsTree = self.windowLayouter.getWindowByName("viewstree")
         if viewsTree is not None:
             viewsTree.DeleteAllItems()
 
@@ -2867,7 +2916,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 #        if self.wikiConfigFilename != wikiConfigFilename:
         self.closeWiki()
-        
+
         # Remove path from recent file list if present (we will add it again
         # on top if everything went fine).
         
@@ -3064,7 +3113,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.tree.expandRoot()
             self.getConfig().set("main", "tree_last_root_wiki_word", lastRoot)
 
-            viewsTree = self.windowLayouter.getWindowForName("viewstree")
+            viewsTree = self.windowLayouter.getWindowByName("viewstree")
             if viewsTree is not None:
                 viewsTree.setViewsAsRoot()
                 viewsTree.readExpandedNodesFromConfig()
@@ -3086,7 +3135,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     continue
 
             wikiWordsToOpen = wwo
-
+            
             # now try and open the last wiki page as leftmost tab
             if len(wikiWordsToOpen) > 0 and wikiWordsToOpen[0] != self.wikiName:
                 firstWikiWord = wikiWordsToOpen[0]
@@ -3114,7 +3163,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     break    # return instead?
 
             self.tree.SetScrollPos(wx.HORIZONTAL, 0)
-            
+
             # enable the editor control whether or not the wiki root was found
             for dpp in self.getMainAreaPanel().getPresenters():
                 if isinstance(dpp, DocPagePresenter):
@@ -3426,13 +3475,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             forceTreeSyncFromRoot=False, forceReopen=False, **evtprops):
         try:
             ## _prof.start()
+
             dpp = self.getCurrentDocPagePresenter()
+
             if dpp is None:
                 dpp = self.createNewDocPagePresenterTab()
     
             dpp.openWikiPage(wikiWord, addToHistory, forceTreeSyncFromRoot,
                     forceReopen, **evtprops)
-    
+
             self.getMainAreaPanel().showPresenter(dpp)
             ## _prof.stop()
         except WikiFileNotFoundException, e:
@@ -4002,8 +4053,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         wx.EVT_SIZE(self, self.OnSize)
 
-        self.tree = self.windowLayouter.getWindowForName("maintree")
-        self.logWindow = self.windowLayouter.getWindowForName("log")
+        self.tree = self.windowLayouter.getWindowByName("maintree")
+        self.logWindow = self.windowLayouter.getWindowByName("log")
 
 
 #     def getClipboardCatcher(self):

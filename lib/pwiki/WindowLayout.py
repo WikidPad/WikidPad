@@ -460,7 +460,7 @@ class WindowSashLayouter:
             w.close()
 
 
-    def getWindowForName(self, winName):
+    def getWindowByName(self, winName):
         """
         Return window object for name. Call this only after realize().
         Returns None if window not in layouter
@@ -471,7 +471,7 @@ class WindowSashLayouter:
         """
         Set focus to window named winName
         """
-        w = self.getWindowForName(winName)
+        w = self.getWindowByName(winName)
         
         if w is None:
             return

@@ -13,6 +13,7 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID
 from MiscEvent import ProxyMiscEvent  # , KeyFunctionSink
 import DocPages
 
+import Configuration
 from StringOps import uniToGui
 
 from WindowLayout import LayeredControlPresenter, LayerSizer
@@ -451,11 +452,19 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
         self.setTitle(self.shortTitle)   #?
 
 
-    def SetFocus(self):
-        try:
-            self.subControls[self.lastVisibleCtrlName].SetFocus()
-        except KeyError:
-            wx.Panel.SetFocus(self)
+    if Configuration.isLinux():
+        def SetFocus(self):
+            try:
+                ctrl = self.subControls[self.lastVisibleCtrlName]
+                wx.CallAfter(ctrl.SetFocus)
+            except KeyError:
+                wx.Panel.SetFocus(self)
+    else:
+        def SetFocus(self):
+            try:
+                self.subControls[self.lastVisibleCtrlName].SetFocus()
+            except KeyError:
+                wx.Panel.SetFocus(self)
 
 
     def viewHistory(self, posDelta=0):

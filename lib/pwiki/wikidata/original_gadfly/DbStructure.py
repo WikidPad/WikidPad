@@ -300,8 +300,8 @@ TABLE_DEFINITIONS = {
         ("word", t.t),
         ("todo", t.t)
         ),
-        
-    
+
+
     "search_views": (     # Deleted since 2.0alpha1. For updating format only 
         ("title", t.t),
         ("datablock", t.t)
@@ -321,7 +321,7 @@ TABLE_DEFINITIONS = {
         ),
 
 
-    "wikiwordmatchterms": (
+    "wikiwordmatchterms": (   # Essential since 2.0alpha1
         ("matchterm", t.t),
 #         ("matchtermnormcase", t.t),  # Does not apply for Gadfly
         ("type", t.t),
@@ -330,13 +330,13 @@ TABLE_DEFINITIONS = {
         ),
 
 
-    "datablocks": (
+    "datablocks": (   # Essential since 2.0alpha1
         ("unifiedname", t.t),
         ("data", t.t)
         ),
 
 
-    "datablocksexternal": (
+    "datablocksexternal": (   # Essential since 2.0alpha1
         ("unifiedname", t.t),
         ("filepath", t.t),
         ("filenamelowercase", t.t),

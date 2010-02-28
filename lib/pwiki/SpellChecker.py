@@ -2,15 +2,19 @@ import os.path, traceback
 
 import wx, wx.xrc
 
-from wxHelper import *
+from WikiExceptions import *
 
+from wxHelper import *
 
 try:
     from EnchantDriver import Dict
     import EnchantDriver
-except (AttributeError, ImportError):
+except (AttributeError, ImportError, WindowsError):
     Dict = None
     # traceback.print_exc()
+    
+    # WindowsError may happen if an incomplete enchant installation is found
+    # in the system
 
 
 from DocPages import AliasWikiPage, WikiPage
