@@ -42,7 +42,7 @@ from pwiki.StringOps import longPathEnc, longPathDec, utf8Enc, utf8Dec, BOM_UTF8
         fileContentToUnicode, loadEntireTxtFile, loadEntireFile, \
         writeEntireFile, Conjunction, iterCompatibleFilename, \
         getFileSignatureBlock, lineendToInternal, guessBaseNameByFilename, \
-        createRandomString
+        createRandomString, pathDec
 
 
 class WikiData:
@@ -1017,8 +1017,8 @@ class WikiData:
     def _getAllWikiFileNamesFromDisk(self):   # Used for rebuilding wiki
         try:
             files = glob.glob(join(self.dataDir, u'*' + self.pagefileSuffix))
-            
-            return [basename(fn) for fn in files]
+
+            return [pathDec(basename(fn)) for fn in files]
 
         except (IOError, OSError, ValueError), e:
             traceback.print_exc()

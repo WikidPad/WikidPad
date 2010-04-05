@@ -54,17 +54,17 @@ Name: Program_files; Description: Main program files; Flags: fixed; Types: custo
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 2.0beta13
+AppVerName=WikidPad 2.0rc01
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=2.0.113.0
-VersionInfoTextVersion=WikidPad 2.0beta13
+VersionInfoVersion=2.0.201.0
+VersionInfoTextVersion=WikidPad 2.0rc01
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-2.0beta13
+OutputBaseFilename=WikidPad-2.0rc01
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2010 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true

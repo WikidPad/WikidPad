@@ -5072,6 +5072,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnWikiOpen(self, event):
+        oldfocus = wx.Window.FindFocus()
+
         with TopLevelLocker:
             path = wx.FileSelector(_(u"Choose a Wiki to open"),
                     self.getDefDirForWikiOpenNew(), wildcard=u"*.wiki",
@@ -5081,10 +5083,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
         if path:
             self.openWiki(mbcsDec(abspath(path), "replace")[0])
+        else:
+            if oldfocus is not None:
+                oldfocus.SetFocus()
 #         dlg.Destroy()
 
 
     def OnWikiOpenNewWindow(self, event):
+        oldfocus = wx.Window.FindFocus()
+
         with TopLevelLocker:
             path = wx.FileSelector(_(u"Choose a Wiki to open"),
                     self.getDefDirForWikiOpenNew(), wildcard=u"*.wiki",
@@ -5102,6 +5109,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.displayErrorMessage(_(u'Error while starting new '
                         u'WikidPad instance'), e)
                 return
+        else:
+            oldfocus.SetFocus()
 
 #         dlg.Destroy()
 

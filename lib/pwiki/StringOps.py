@@ -5,7 +5,6 @@ Various string operations, like unicode encoding/decoding,
 creating diff information for plain byte sequences
 """
 
-
 import os, threading, traceback
 
 from struct import pack, unpack
@@ -1164,6 +1163,8 @@ def iterCompatibleFilename(baseName, suffix, asciiOnly=False, maxLength=250,
     randomLength - Length of the random sequence (without leading tilde)
 
     """
+    baseName = mbcsDec(baseName)[0]
+
     if len(baseName) > 0:
         c = baseName[0]
         if ord(c) < 32 or c in _FORBIDDEN_START or \
@@ -1280,7 +1281,7 @@ def getMd5B36ByString(text):
     """
     Calculate the MD5 hash of text (if unicode after conversion to utf-8)
     and return it as unistring for numeric base 36.
-    
+
     Based on http://code.activestate.com/recipes/111286/
     """
     if isinstance(text, unicode):

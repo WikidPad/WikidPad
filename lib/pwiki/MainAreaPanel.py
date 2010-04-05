@@ -411,6 +411,18 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             self.PopupMenu(ctxMenu)
 
 
+    if Configuration.isLinux():
+        # OnFocused() is not always called so a direct overwrite is necessary
+        def SetFocus(self):
+            if self.tabSwitchByKey == 0:
+                p = self.GetCurrentPage()
+                if p is not None:
+                    p.SetFocus()
+                    return
+
+            wx.Notebook.SetFocus(self)
+
+
     def OnFocused(self, evt):
         if self.tabSwitchByKey == 0:
             p = self.GetCurrentPage()

@@ -877,8 +877,12 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
         for wikiWord in wikiWords:
             filename = wikiWord + pagefileSuffix
             fullPath = join(dataDir, filename)
-            filesig = getFileSignatureBlock(fullPath)
-            
+            try:
+                filesig = getFileSignatureBlock(fullPath)
+            except (IOError, WindowsError):
+                traceback.print_exc()
+                continue
+
             connwrap.execSql("update wikiwords set filepath = ?, "
                     "filenamelowercase = ?, filesignature = ? "
                     "where word = ?", (filename.encode("utf-8"),

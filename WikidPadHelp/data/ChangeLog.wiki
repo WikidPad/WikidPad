@@ -1,5 +1,23 @@
 ﻿++ Change Log
 
+Apr. 05, 2010 (2.0rc01)
+
+    * Bug fixed: Keyboard shortcut for ActivateLinkBackground
+      doesn't work
+    * Bug fixed: Updating wiki database fails if a pagefile
+      is missing
+    * Bug fixed: Linux: Sometimes focus doesn't switch from tab label
+      to tab automatically
+    * Bug fixed: Focus not going back when aborting the opening of
+      a wiki
+
+    * Some key bindings in Scintilla editor component removed
+      to avoid interfere with WikidPad key bindings.
+    * Some changes to better handle missing Unicode support for
+      filesystem in Python (affects mainly Mac OS)
+
+
+
 Feb. 28, 2010 (2.0beta13)
 
     * It's now possible to copy whole directories into the

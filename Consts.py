@@ -17,13 +17,14 @@ from pwiki.Enum import Enumeration
 # patch is a sub-micro version, if needed, normally 0.
 # 
 # Examples:
-# (1, 8, 107, 0) is 1.8rc7
-# (1, 9, 4, 0) is 1.9beta4
-# (1, 9, 4, 2) is something after 1.9beta4
-# (2, 0, 200, 0) is 2.0final
+# (1, 8, 207, 0) is 1.8rc07
+# (2, 0, 3, 0) is 2.0alpha03
+# (1, 9, 104, 0) is 1.9beta04
+# (1, 9, 104, 2) is something after 1.9beta04
+# (2, 0, 300, 0) is 2.0final
 
-VERSION_TUPLE = ("wikidPad", 2, 0, 113, 0)
-VERSION_STRING = "wikidPad 2.0beta13"
+VERSION_TUPLE = ("wikidPad", 2, 0, 201, 0)
+VERSION_STRING = "wikidPad 2.0rc01"
 HOMEPAGE = u"http://wikidpad.sourceforge.net"
 
 CONFIG_FILENAME = "WikidPad.config"

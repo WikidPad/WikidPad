@@ -197,6 +197,11 @@ class IncrementalSearchDialog(wx.Frame):
             self.txtCtrl.endIncrementalSearch()
             self.Close()
             self.txtCtrl.activateLink()
+        elif matchesAccelPair("ActivateLinkBackground", accP):
+            # ActivateLinkNewTab is normally Ctrl-Alt-L
+            self.txtCtrl.endIncrementalSearch()
+            self.Close()
+            self.txtCtrl.activateLink(tabMode=3)        
         # handle the other keys
         else:
             evt.Skip()
@@ -374,28 +379,32 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         # make the text control a drop target for files and text
         self.SetDropTarget(WikiTxtCtrlDropTarget(self))
         
-        # register some keyboard commands
-        self.CmdKeyAssign(ord('+'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMIN)
-        self.CmdKeyAssign(ord('-'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMOUT)
-        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, 0, wx.stc.STC_CMD_HOMEWRAP)
-        self.CmdKeyAssign(wx.stc.STC_KEY_END, 0, wx.stc.STC_CMD_LINEENDWRAP)
-        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, wx.stc.STC_SCMOD_SHIFT,
-                wx.stc.STC_CMD_HOMEWRAPEXTEND)
-        self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_SHIFT,
-                wx.stc.STC_CMD_LINEENDWRAPEXTEND)
-
-
-        # Clear all key mappings for clipboard operations
-        # PersonalWikiFrame handles them and calls the special clipboard functions
-        # instead of the normal ones
-        self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_CTRL)
-        self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_SHIFT)
-        self.CmdKeyClear(wx.stc.STC_KEY_DELETE, wx.stc.STC_SCMOD_SHIFT)
-
-        self.CmdKeyClear(ord('X'), wx.stc.STC_SCMOD_CTRL)
-        self.CmdKeyClear(ord('C'), wx.stc.STC_SCMOD_CTRL)
-        self.CmdKeyClear(ord('V'), wx.stc.STC_SCMOD_CTRL)
+        self._resetKeyBindings()
         
+#         self.CmdKeyClearAll()
+#         
+#         # register some keyboard commands
+#         self.CmdKeyAssign(ord('+'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMIN)
+#         self.CmdKeyAssign(ord('-'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMOUT)
+#         self.CmdKeyAssign(wx.stc.STC_KEY_HOME, 0, wx.stc.STC_CMD_HOMEWRAP)
+#         self.CmdKeyAssign(wx.stc.STC_KEY_END, 0, wx.stc.STC_CMD_LINEENDWRAP)
+#         self.CmdKeyAssign(wx.stc.STC_KEY_HOME, wx.stc.STC_SCMOD_SHIFT,
+#                 wx.stc.STC_CMD_HOMEWRAPEXTEND)
+#         self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_SHIFT,
+#                 wx.stc.STC_CMD_LINEENDWRAPEXTEND)
+# 
+# 
+#         # Clear all key mappings for clipboard operations
+#         # PersonalWikiFrame handles them and calls the special clipboard functions
+#         # instead of the normal ones
+#         self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_CTRL)
+#         self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_SHIFT)
+#         self.CmdKeyClear(wx.stc.STC_KEY_DELETE, wx.stc.STC_SCMOD_SHIFT)
+# 
+#         self.CmdKeyClear(ord('X'), wx.stc.STC_SCMOD_CTRL)
+#         self.CmdKeyClear(ord('C'), wx.stc.STC_SCMOD_CTRL)
+#         self.CmdKeyClear(ord('V'), wx.stc.STC_SCMOD_CTRL)
+
         self.SetModEventMask(
                 wx.stc.STC_MOD_INSERTTEXT | wx.stc.STC_MOD_DELETETEXT)
 
@@ -623,6 +632,42 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if wx.Window.FindFocus() != self:
             return
         self.Copy()
+
+
+    def _resetKeyBindings(self):
+        
+        self.CmdKeyClearAll()
+        
+        # Register general keyboard commands (minus some which may lead to problems
+        for key, mod, action in _DEFAULT_STC_KEYS:
+            self.CmdKeyAssign(key, mod, action)
+
+        
+        # register some special keyboard commands
+        self.CmdKeyAssign(ord('+'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMIN)
+        self.CmdKeyAssign(ord('-'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMOUT)
+        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, wx.stc.STC_SCMOD_NORM,
+                wx.stc.STC_CMD_HOMEWRAP)
+        self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_NORM,
+                wx.stc.STC_CMD_LINEENDWRAP)
+        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, wx.stc.STC_SCMOD_SHIFT,
+                wx.stc.STC_CMD_HOMEWRAPEXTEND)
+        self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_SHIFT,
+                wx.stc.STC_CMD_LINEENDWRAPEXTEND)
+
+
+
+#         # Clear all key mappings for clipboard operations
+#         # PersonalWikiFrame handles them and calls the special clipboard functions
+#         # instead of the normal ones
+#         self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_CTRL)
+#         self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_SHIFT)
+#         self.CmdKeyClear(wx.stc.STC_KEY_DELETE, wx.stc.STC_SCMOD_SHIFT)
+# 
+#         self.CmdKeyClear(ord('X'), wx.stc.STC_SCMOD_CTRL)
+#         self.CmdKeyClear(ord('C'), wx.stc.STC_SCMOD_CTRL)
+#         self.CmdKeyClear(ord('V'), wx.stc.STC_SCMOD_CTRL)
+
         
         
     def setLayerVisible(self, vis, scName=""):
@@ -2543,6 +2588,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             # ActivateLink2 is normally Ctrl-Return
             self.activateLink()
 
+        elif matchesAccelPair("ActivateLinkBackground", accP):
+            # ActivateLink2 is normally Ctrl-Return
+            self.activateLink(tabMode=3)
+
         elif not evt.ControlDown() and not evt.ShiftDown():  # TODO Check all modifiers
             if key == wx.WXK_TAB:
                 if self.pageType == u"form":
@@ -3071,3 +3120,80 @@ N_(u"&Unfold All")
 N_(u"Unfold everything in current editor")
 N_(u"&Fold All")
 N_(u"Fold everything in current editor")
+
+
+
+# Default mapping based on Scintilla's "KeyMap.cxx" file
+_DEFAULT_STC_KEYS = (
+        (wx.stc.STC_KEY_DOWN,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_LINEDOWN),
+        (wx.stc.STC_KEY_DOWN,		wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_LINEDOWNEXTEND),
+        (wx.stc.STC_KEY_DOWN,		wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINESCROLLDOWN),
+        (wx.stc.STC_KEY_DOWN,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_LINEDOWNRECTEXTEND),
+        (wx.stc.STC_KEY_UP,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_LINEUP),
+        (wx.stc.STC_KEY_UP,			wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_LINEUPEXTEND),
+        (wx.stc.STC_KEY_UP,			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINESCROLLUP),
+        (wx.stc.STC_KEY_UP,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_LINEUPRECTEXTEND),
+#         (ord('['),			wx.stc.STC_SCMOD_CTRL,		wx.stc.STC_CMD_PARAUP),
+#         (ord('['),			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_PARAUPEXTEND),
+#         (ord(']'),			wx.stc.STC_SCMOD_CTRL,		wx.stc.STC_CMD_PARADOWN),
+#         (ord(']'),			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_PARADOWNEXTEND),
+        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_CHARLEFT),
+        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_CHARLEFTEXTEND),
+        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDLEFT),
+        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDLEFTEXTEND),
+        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_CHARLEFTRECTEXTEND),
+        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_CHARRIGHT),
+        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_CHARRIGHTEXTEND),
+        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDRIGHT),
+        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDRIGHTEXTEND),
+        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_CHARRIGHTRECTEXTEND),
+#         (ord('/'),		wx.stc.STC_SCMOD_CTRL,		wx.stc.STC_CMD_WORDPARTLEFT),
+#         (ord('/'),		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDPARTLEFTEXTEND),
+#         (ord('\\'),		wx.stc.STC_SCMOD_CTRL,		wx.stc.STC_CMD_WORDPARTRIGHT),
+#         (ord('\\'),		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDPARTRIGHTEXTEND),
+        (wx.stc.STC_KEY_HOME,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_VCHOME),
+        (wx.stc.STC_KEY_HOME, 		wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_VCHOMEEXTEND),
+        (wx.stc.STC_KEY_HOME, 		wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DOCUMENTSTART),
+        (wx.stc.STC_KEY_HOME, 		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DOCUMENTSTARTEXTEND),
+        (wx.stc.STC_KEY_HOME, 		wx.stc.STC_SCMOD_ALT, 	wx.stc.STC_CMD_HOMEDISPLAY),
+        (wx.stc.STC_KEY_HOME,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_VCHOMERECTEXTEND),
+        (wx.stc.STC_KEY_END,	 	wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_LINEEND),
+        (wx.stc.STC_KEY_END,	 	wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_LINEENDEXTEND),
+        (wx.stc.STC_KEY_END, 		wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DOCUMENTEND),
+        (wx.stc.STC_KEY_END, 		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DOCUMENTENDEXTEND),
+        (wx.stc.STC_KEY_END, 		wx.stc.STC_SCMOD_ALT, 	wx.stc.STC_CMD_LINEENDDISPLAY),
+        (wx.stc.STC_KEY_END,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_LINEENDRECTEXTEND),
+        (wx.stc.STC_KEY_PRIOR,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_PAGEUP),
+        (wx.stc.STC_KEY_PRIOR,		wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_PAGEUPEXTEND),
+        (wx.stc.STC_KEY_PRIOR,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_PAGEUPRECTEXTEND),
+        (wx.stc.STC_KEY_NEXT, 		wx.stc.STC_SCMOD_NORM, 	wx.stc.STC_CMD_PAGEDOWN),
+        (wx.stc.STC_KEY_NEXT, 		wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_PAGEDOWNEXTEND),
+        (wx.stc.STC_KEY_NEXT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_PAGEDOWNRECTEXTEND),
+        (wx.stc.STC_KEY_DELETE, 	wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_CLEAR),
+        (wx.stc.STC_KEY_DELETE, 	wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_DELWORDRIGHT),
+        (wx.stc.STC_KEY_DELETE,	wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_DELLINERIGHT),
+        (wx.stc.STC_KEY_INSERT, 		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_EDITTOGGLEOVERTYPE),
+        (wx.stc.STC_KEY_ESCAPE,  	wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_CANCEL),
+        (wx.stc.STC_KEY_BACK,		wx.stc.STC_SCMOD_NORM, 	wx.stc.STC_CMD_DELETEBACK),
+        (wx.stc.STC_KEY_BACK,		wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_DELETEBACK),
+        (wx.stc.STC_KEY_BACK,		wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DELWORDLEFT),
+        (wx.stc.STC_KEY_BACK, 		wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_UNDO),
+        (wx.stc.STC_KEY_BACK,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_DELLINELEFT),
+        (ord('Z'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_UNDO),
+        (ord('Y'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_REDO),
+        (ord('A'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_SELECTALL),
+        (wx.stc.STC_KEY_TAB,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_TAB),
+        (wx.stc.STC_KEY_TAB,		wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_BACKTAB),
+        (wx.stc.STC_KEY_RETURN, 	wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_NEWLINE),
+        (wx.stc.STC_KEY_RETURN, 	wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_NEWLINE),
+        (wx.stc.STC_KEY_ADD, 		wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_ZOOMIN),
+        (wx.stc.STC_KEY_SUBTRACT,	wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_ZOOMOUT),
+#         (wx.stc.STC_KEY_DIVIDE,	wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_SETZOOM),
+#         (ord('L'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINECUT),
+#         (ord('L'), 			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINEDELETE),
+#         (ord('T'), 			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINECOPY),
+#         (ord('T'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINETRANSPOSE),
+#         (ord('D'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_SELECTIONDUPLICATE),
+#         (ord('U'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LOWERCASE),
+#         (ord('U'), 			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_UPPERCASE),
+    )

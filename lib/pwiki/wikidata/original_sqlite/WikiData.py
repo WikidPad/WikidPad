@@ -40,7 +40,7 @@ from pwiki.StringOps import getBinCompactForDiff, applyBinCompact, longPathEnc, 
         BOM_UTF8, uniWithNone, loadEntireTxtFile, loadEntireFile, writeEntireFile, \
         Conjunction, iterCompatibleFilename, \
         getFileSignatureBlock, lineendToInternal, guessBaseNameByFilename, \
-        createRandomString
+        createRandomString, pathDec
 
 import Consts
 
@@ -1117,8 +1117,8 @@ class WikiData:
         try:
             files = glob.glob(join(self.dataDir, u'*' + self.pagefileSuffix))
 
-            return [basename(fn) for fn in files]
-            
+            return [pathDec(basename(fn)) for fn in files]
+
 #             result = []
 #             for file in files:
 #                 word = pathDec(basename(file))

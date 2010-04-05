@@ -1513,6 +1513,8 @@ class _TheHelper(object):
         """
         Create a link from word which should be put on wikiPage.
         """
+        wikiDocument = wikiPage.getWikiDocument()
+        
         if _TheHelper.isCcWikiWord(word):
             wikiFormatDetails = wikiPage.getFormatDetails()
             if wikiFormatDetails.withCamelCase:
