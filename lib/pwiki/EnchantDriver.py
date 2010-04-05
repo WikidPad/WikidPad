@@ -790,7 +790,7 @@ class Dict(_EnchantObject):
         desc = self.__describe(check_this=False)
         self.tag = desc[0]
         self.provider = ProviderDesc(*desc[1:])
-            
+
     def _check_this(self,msg=None):
         """Extend _EnchantObject._check_this() to check Broker validity.
         

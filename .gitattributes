@@ -614,6 +614,7 @@ lib/gadfly/server.py -text
 lib/gadfly/sql.py -text
 lib/gadfly/store.py -text
 lib/pwiki/AdditionalDialogs.py -text
+lib/pwiki/AttributeHandling.py -text
 lib/pwiki/CmdLineAction.py -text
 lib/pwiki/Configuration.py -text
 lib/pwiki/DocPagePresenter.py -text
@@ -638,7 +639,6 @@ lib/pwiki/ParseUtilities.py -text
 lib/pwiki/PersonalWikiFrame.py -text
 lib/pwiki/PluginManager.py -text
 lib/pwiki/Printing.py -text
-lib/pwiki/PropertyHandling.py -text
 lib/pwiki/SearchAndReplace.py -text
 lib/pwiki/SearchAndReplaceBoolLang.py -text
 lib/pwiki/SearchAndReplaceDialogs.py -text

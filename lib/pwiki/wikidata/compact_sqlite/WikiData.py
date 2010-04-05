@@ -13,14 +13,12 @@ Used terms:
 
 
 
-from os import mkdir, unlink, listdir, rename, stat, utime
 from os.path import exists, join, basename
-import os.path
+import os, os.path
 
 from time import time, localtime
 import datetime
-import string, glob, types, traceback
-import re
+import string, glob, traceback
 
 from wx import GetApp
 
@@ -51,7 +49,6 @@ class WikiData:
         self.wikiDocument = wikiDocument
         self.dataDir = dataDir
         self.cachedContentNames = None
-#         tempDir = uniWithNone(tempDir)
 
         dbfile = join(dataDir, "wiki.sli")
 
@@ -172,8 +169,8 @@ class WikiData:
             # reset cache
             self.cachedContentNames = None
     
-            self.cachedGlobalProps = None
-            self.getGlobalProperties()
+            self.cachedGlobalAttrs = None
+            self.getGlobalAttributes()
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             try:
@@ -328,15 +325,17 @@ class WikiData:
     def getTimestamps(self, word):
         """
         Returns a tuple with modification, creation and visit date of
-        a word or (None, None, None) if word is not in the database
+        a word or (None, None, None) if word is not in the database.
+        Aliases must be resolved beforehand.
+        Function must work for read-only wiki.
         """
         try:
             dates = self.connWrap.execSqlQuery(
-                    "select modified, created from wikiwordcontent where word = ?",
+                    "select modified, created, visited from wikiwordcontent where word = ?",
                     (word,))
 
             if len(dates) > 0:
-                return (float(dates[0][0]), float(dates[0][1]), 0.0)
+                return (float(dates[0][0]), float(dates[0][1]), float(dates[0][2]))
             else:
                 return (None, None, None)  # ?
         except (IOError, OSError, sqlite.Error), e:
@@ -349,7 +348,7 @@ class WikiData:
         Set timestamps for an existing wiki page.
         Aliases must be resolved beforehand.
         """
-        moddate, creadate = timestamps[:2]
+        moddate, creadate, visitdate = timestamps[:3]
 
         try:
             data = self.connWrap.execSqlQuery("select word from wikiwordcontent "
@@ -363,7 +362,8 @@ class WikiData:
                 raise WikiFileNotFoundException
             else:
                 self.connWrap.execSql("update wikiwordcontent set modified = ?, "
-                        "created = ? where word = ?", (moddate, creadate, word))
+                        "created = ?, visited = ? where word = ?",
+                        (moddate, creadate, visitdate, word))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -382,7 +382,7 @@ class WikiData:
             Possible field names:
                 "modified": Modification date of page
                 "created": Creation date of page
-                "visited": Last visit date of page (currently always returns 0)
+                "visited": Last visit date of page
                 "firstcharpos": Dummy returning very high value
         """
         if withFields is None:
@@ -399,9 +399,7 @@ class WikiData:
                 addFields += ", created"
                 converters.append(float)
             elif field == "visited":
-                # Fake "visited" field
                 addFields += ", visited"
-#                 converters.append(lambda s: 0.0)
                 converters.append(float)
             elif field == "firstcharpos":
                 # Fake character position. TODO More elegantly
@@ -436,7 +434,7 @@ class WikiData:
 
             try:
                 self.connWrap.execSql("update wikirelations set word = ? where word = ?", (toWord, word))
-                self.connWrap.execSql("update wikiwordprops set word = ? where word = ?", (toWord, word))
+                self.connWrap.execSql("update wikiwordattrs set word = ? where word = ?", (toWord, word))
                 self.connWrap.execSql("update todos set word = ? where word = ?", (toWord, word))
                 self.connWrap.execSql("update wikiwordmatchterms set word = ? where word = ?", (toWord, word))
                 self._renameContent(word, toWord)
@@ -464,7 +462,7 @@ class WikiData:
                     # just delete the content
     
                     self.deleteChildRelationships(word)
-                    self.deleteProperties(word)
+                    self.deleteAttributes(word)
                     self.deleteTodos(word)
                     # self.connWrap.execSql("delete from wikiwordcontent where word = ?", (word,))
                     self._deleteContent(word)
@@ -595,7 +593,7 @@ class WikiData:
             # filter to only words in wikiwords or aliases
 #             sql += " and (exists (select word from wikiwordcontent "+\
 #                     "where word = relation) or exists "+\
-#                     "(select value from wikiwordprops "+\
+#                     "(select value from wikiwordattrs "+\
 #                     "where value = relation and key = 'alias'))"
             sql += (" and (exists (select 1 from wikiwordcontent "
                     "where word = relation) or exists "
@@ -1076,16 +1074,16 @@ class WikiData:
 
 
 
-    # ---------- Property cache handling ----------
+    # ---------- Attribute cache handling ----------
 
-    def getPropertyNames(self):
+    def getAttributeNames(self):
         """
-        Return all property names not beginning with "global."
+        Return all attribute names not beginning with "global."
         Function must work for read-only wiki.
         """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
-                    "select distinct(key) from wikiwordprops "
+                    "select distinct(key) from wikiwordattrs "
                     "where key not glob 'global.*'")
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
@@ -1093,53 +1091,71 @@ class WikiData:
 
 
     # TODO More efficient? (used by autocompletion)
-    def getPropertyNamesStartingWith(self, startingWith):
+    def getAttributeNamesStartingWith(self, startingWith):
         """
         Function must work for read-only wiki.
         """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
-                    "select distinct(key) from wikiwordprops "
+                    "select distinct(key) from wikiwordattrs "
                     "where key glob (? || '*')",
                     (sqlite.escapeForGlob(startingWith),))   #  order by key")
 #             names = self.connWrap.execSqlQuerySingleColumn(
-#                     "select distinct(key) from wikiwordprops")   #  order by key")
+#                     "select distinct(key) from wikiwordattrs")   #  order by key")
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
 #         return [name for name in names if name.startswith(startingWith)]
 
-    def getGlobalProperties(self):
+
+
+    def getGlobalAttributes(self):
         """
         Function must work for read-only wiki.
         """
-        if not self.cachedGlobalProps:
-            return self.updateCachedGlobalProps()
+        if not self.cachedGlobalAttrs:
+            return self.updateCachedGlobalAttrs()
 
-        return self.cachedGlobalProps
+        return self.cachedGlobalAttrs
 
-    def getDistinctPropertyValues(self, key):
+    
+
+    def getDistinctAttributeValues(self, key):
         """
         Function must work for read-only wiki.
         """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
-                    "select distinct(value) from wikiwordprops where key = ? ",
+                    "select distinct(value) from wikiwordattrs where key = ? ",
                     (key,))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
 
-    def getPropertyTriples(self, word, key, value):
+    def getAttributeTriples(self, word, key, value,
+            withFields=("word", "key", "value")):
         """
         Function must work for read-only wiki.
         word, key and value can either be unistrings or None.
         """
+        if withFields is None:
+            withFields = ()
+
+        cols = []
+        for field in withFields:
+            if field in ("word", "key", "value"):
+                cols.append(field)
+        
+        if len(cols) == 0:
+            return []
+        
+        colTxt = ", ".join(cols)
+        
         conjunction = Conjunction("where ", "and ")
 
-        query = "select distinct word, key, value from wikiwordprops "
+        query = "select distinct " + colTxt + " from wikiwordattrs "
         parameters = []
         
         if word is not None:
@@ -1160,62 +1176,68 @@ class WikiData:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
-
-    def getWordsForPropertyName(self, key):
+    
+    
+    def getWordsForAttributeName(self, key):
         """
         Function must work for read-only wiki.
         """
         try:
             return self.connWrap.execSqlQuerySingleColumn(
-                    "select distinct(word) from wikiwordprops where key = ? ",
+                    "select distinct(word) from wikiwordattrs where key = ? ",
                     (key,))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
+    
+    
 
-    def getPropertiesForWord(self, word):
+    def getAttributesForWord(self, word):
         """
         Returns list of tuples (key, value) of key and value
-        of all properties for word.
+        of all attributes for word.
         Function must work for read-only wiki.
         """
         try:
             return self.connWrap.execSqlQuery("select key, value "+
-                        "from wikiwordprops where word = ?", (word,))
+                        "from wikiwordattrs where word = ?", (word,))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
 
-    def _setProperty(self, word, key, value):
+
+    def _setAttribute(self, word, key, value):
         try:
             self.connWrap.execSql(
-                    "insert into wikiwordprops(word, key, value) "
+                    "insert into wikiwordattrs(word, key, value) "
                     "values (?, ?, ?)", (word, key, value))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
 
 
-    def updateProperties(self, word, props):
-        self.deleteProperties(word)
+    def updateAttributes(self, word, attrs):
+        self.deleteAttributes(word)
         self.getExistingWikiWordInfo(word)
-        for k in props.keys():
-            values = props[k]
+        for k in attrs.keys():
+            values = attrs[k]
             for v in values:
-                self._setProperty(word, k, v)
+                self._setAttribute(word, k, v)
 
-        self.cachedGlobalProps = None   # reset global properties cache
+        self.cachedGlobalAttrs = None   # reset global attributes cache
 
 
-    def updateCachedGlobalProps(self):
+
+
+    def updateCachedGlobalAttrs(self):
         """
         TODO: Should become part of public API!
         Function must work for read-only wiki.
         """
         try:
-            data = self.connWrap.execSqlQuery("select key, value from wikiwordprops "
+            data = self.connWrap.execSqlQuery("select key, value from wikiwordattrs "
                     "where key glob 'global.*'")
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
@@ -1225,18 +1247,34 @@ class WikiData:
         for (key, val) in data:
             globalMap[key] = val
 
-        self.cachedGlobalProps = globalMap
+        self.cachedGlobalAttrs = globalMap
 
         return globalMap
 
 
-    def deleteProperties(self, word):
+
+
+    def deleteAttributes(self, word):
         try:
-            self.connWrap.execSql("delete from wikiwordprops where word = ?",
+            self.connWrap.execSql("delete from wikiwordattrs where word = ?",
                     (word,))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
+
+    
+    # TODO remove "property"-compatibility
+
+    getPropertyNames = getAttributeNames  
+    getPropertyNamesStartingWith = getAttributeNamesStartingWith
+    getGlobalProperties = getGlobalAttributes
+    getDistinctPropertyValues = getDistinctAttributeValues
+    getPropertyTriples = getAttributeTriples
+    getWordsForPropertyName = getWordsForAttributeName
+    getPropertiesForWord = getAttributesForWord
+    updateProperties = updateAttributes
+    updateCachedGlobalProps = updateCachedGlobalAttrs
+    deleteProperties = deleteAttributes
 
 
 
@@ -1244,8 +1282,6 @@ class WikiData:
 
     def getUnAliasedWikiWord(self, alias):
         """
-        If alias is an alias for another word, return that,
-        otherwise return None.
         Function should only be called by WikiDocument as some methods
         of unaliasing must be performed in WikiDocument.
         Function must work for read-only wiki.
@@ -1258,9 +1294,12 @@ class WikiData:
     def getTodos(self):
         """
         Function must work for read-only wiki.
+        Returns list of tuples (word, todoKey, todoValue).
         """
         try:
-            return self.connWrap.execSqlQuery("select word, todo from todos")
+#             return self.connWrap.execSqlQuery("select word, todo from todos")
+            return self.connWrap.execSqlQuery("select word, key, value from todos")
+
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
@@ -1287,8 +1326,8 @@ class WikiData:
 
     def _addTodo(self, word, todo):
         try:
-            self.connWrap.execSql("insert into todos(word, todo) values (?, ?)",
-                    (word, todo))
+            self.connWrap.execSql("insert into todos(word, key, value) values (?, ?, ?)",
+                    (word, todo[0], todo[1]))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -1304,30 +1343,58 @@ class WikiData:
 
     # ---------- Wikiword matchterm cache handling ----------
 
-    def getWikiWordMatchTermsWith(self, thisStr):
+    def getWikiWordMatchTermsWith(self, thisStr, orderBy=None, descend=False):
         "get the list of match terms with thisStr in them."
         thisStr = sqlite.escapeForGlob(thisStr.lower())   # TODO More general normcase function
 
-        try:
-            result1 = self.connWrap.execSqlQuery(
-                    "select matchterm, type, word, firstcharpos "
-                    "from wikiwordmatchterms where "
-                    "matchtermnormcase glob (? || '*')", (thisStr,))
+#         orderBy = "visited"   # !!! Test
+#         descend = True   # !!! Test
 
-            result2 = self.connWrap.execSqlQuery(
-                    "select matchterm, type, word, firstcharpos "
-                    "from wikiwordmatchterms where "
-                    "not matchtermnormcase glob (? || '*') "
-                    "and matchtermnormcase glob ('*' || ? || '*')",
-                    (thisStr, thisStr))
-        except (IOError, OSError, sqlite.Error), e:
-            traceback.print_exc()
-            raise DbReadAccessError(e)
+        if orderBy == "visited":
+            try:
+                result1 = self.connWrap.execSqlQuery(
+                        "select matchterm, type, wikiwordmatchterms.word, "
+                        "firstcharpos, charlength, visited "
+                        "from wikiwordmatchterms inner join wikiwordcontent "
+                        "on wikiwordmatchterms.word = wikiwordcontent.word where "
+                        "matchtermnormcase glob (? || '*')", (thisStr,))
+    
+                result2 = self.connWrap.execSqlQuery(
+                        "select matchterm, type, wikiwordmatchterms.word, "
+                        "firstcharpos, charlength, visited "
+                        "from wikiwordmatchterms inner join wikiwordcontent "
+                        "on wikiwordmatchterms.word = wikiwordcontent.word where "
+                        "not matchtermnormcase glob (? || '*') "
+                        "and matchtermnormcase glob ('*' || ? || '*')",
+                        (thisStr, thisStr))
+            except (IOError, OSError, sqlite.Error), e:
+                traceback.print_exc()
+                raise DbReadAccessError(e)
+        else:
+            try:
+                result1 = self.connWrap.execSqlQuery(
+                        "select matchterm, type, word, firstcharpos, charlength "
+                        "from wikiwordmatchterms where "
+                        "matchtermnormcase glob (? || '*')", (thisStr,))
+    
+                result2 = self.connWrap.execSqlQuery(
+                        "select matchterm, type, word, firstcharpos, charlength "
+                        "from wikiwordmatchterms where "
+                        "not matchtermnormcase glob (? || '*') "
+                        "and matchtermnormcase glob ('*' || ? || '*')",
+                        (thisStr, thisStr))
+            except (IOError, OSError, sqlite.Error), e:
+                traceback.print_exc()
+                raise DbReadAccessError(e)
 
         coll = self.wikiDocument.getCollator()
 
         coll.sortByFirst(result1)
         coll.sortByFirst(result2)
+        
+        if orderBy == "visited":
+            result1.sort(key=lambda k: k[5], reverse=descend)
+            result2.sort(key=lambda k: k[5], reverse=descend)
 
         return result1 + result2
 
@@ -1341,13 +1408,14 @@ class WikiData:
 
 
     def _addWikiWordMatchTerm(self, wwmTerm):
-        matchterm, typ, word, firstcharpos = wwmTerm
+        matchterm, typ, word, firstcharpos, charlength = wwmTerm
         try:
             # TODO Check for name collisions
             self.connWrap.execSql("insert into wikiwordmatchterms(matchterm, "
-                    "type, word, firstcharpos, matchtermnormcase) values "
-                    "(?, ?, ?, ?, ?)",
-                    (matchterm, typ, word, firstcharpos, matchterm.lower()))
+                    "type, word, firstcharpos, charlength, matchtermnormcase) "
+                    "values (?, ?, ?, ?, ?, ?)",
+                    (matchterm, typ, word, firstcharpos, charlength,
+                    matchterm.lower()))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -1471,44 +1539,6 @@ class WikiData:
 
     # ---------- Searching pages ----------
 
-    # TODO Other searchmodes
-    def search_fallback(self, forPattern, processAnds=True, caseSensitive=False,
-            searchmode=0):
-        """
-        Backup method for non sqlite (without user-defined functions).
-        Currently unused
-        """
-        if caseSensitive:
-            reFlags = re.MULTILINE | re.UNICODE
-        else:
-            reFlags = re.IGNORECASE | re.MULTILINE | re.UNICODE
-        
-        if processAnds:
-            andPatterns = [re.compile(pattern, reFlags)
-                           for pattern in forPattern.split(u' and ')]
-#                            for pattern in forPattern.lower().split(u' and ')]
-        else:
-            andPatterns = [re.compile(forPattern, reFlags)]
-
-
-        # execSqlQueryIter is insecure, don't use
-        itr = self.connWrap.execSqlQueryIter(
-                "select word, content from wikiwordcontent")
-
-        results = []
-
-        for word, content in itr:
-            for pattern in andPatterns:
-                if not pattern.search(content):
-                    word = None
-                    break
-
-            if word:
-                results.append(word)
-
-        return results
-
-
     def search(self, sarOp, exclusionSet):
         """
         Search all wiki pages using the SearchAndReplaceOperation sarOp and
@@ -1574,7 +1604,7 @@ class WikiData:
         self.connWrap.syncCommit()
 
         self.cachedContentNames = None
-        self.cachedGlobalProps = None
+        self.cachedGlobalAttrs = None
 
 
     def setDbSettingsValue(self, key, value):
@@ -1937,7 +1967,7 @@ class WikiData:
                     self.wikiDocument.getWikiDefaultWikiLanguage())
 
             if not langHelper.checkForInvalidWikiWord(word, self.wikiDocument):
-                self.setContent(word, content, moddate=stat(fn).st_mtime)
+                self.setContent(word, content, moddate=os.stat(fn).st_mtime)
 
         self.connWrap.commit()
 

@@ -192,13 +192,22 @@ class ConnectWrap:
         except:   #  TODO: Specific exception catch?
             pass
             
-    def execSqlInsert(self, table, fields, values):
+    def execSqlInsert(self, table, fields, values, tableDefault=None):
         """
-        Gadfly-specific function. In 2.0 it will be able to create default
-        values for non-existant fields. Sqlite provides this for free.
+        Gadfly-specific function. Since 2.0 it is possible to create default
+        values for non-existent fields. Sqlite provides this for free.
+        table -- Name of table to insert into
+        fields -- sequence of field names (aka column names)
+        values -- sequence of values to insert into the fields.
+            Must have same length as fields
+        tableDefault -- name of entry in defaultValues table to use.
+            If None or not given same as table name
         """
         assert len(fields) == len(values)
-        tableDefs = self._defaultValues.get(table)
+        if tableDefault is None:
+            tableDefault = table
+
+        tableDefs = self._defaultValues.get(tableDefault)
         if tableDefs is not None:
             for k in tableDefs.keys():
                 if k not in fields:
@@ -247,9 +256,9 @@ class ConnectWrap:
        
 
 
-VERSION_DB = 4
-VERSION_WRITECOMPAT = 4
-VERSION_READCOMPAT = 4
+VERSION_DB = 5
+VERSION_WRITECOMPAT = 5
+VERSION_READCOMPAT = 5
 
 
 # Helper for the following definitions
@@ -289,16 +298,30 @@ TABLE_DEFINITIONS = {
         ),
     
     
-    "wikiwordprops": (     # Cache, but main
+    "wikiwordprops_PRE2_1alpha01": (     # Obsolete
         ("word", t.t),
         ("key", t.t),
         ("value", t.t)
         ),
-    
-    
+
+
+    "wikiwordattrs": (     # Cache, but main
+        ("word", t.t),
+        ("key", t.t),
+        ("value", t.t),
+        ),
+
+   
+    "todos_PRE2_1alpha01": (     # Obsolete
+        ("word", t.t),
+        ("todo", t.t),
+        ),
+
+
     "todos": (     # Cache, but main
         ("word", t.t),
-        ("todo", t.t)
+        ("key", t.t),
+        ("value", t.t),
         ),
 
 
@@ -326,7 +349,8 @@ TABLE_DEFINITIONS = {
 #         ("matchtermnormcase", t.t),  # Does not apply for Gadfly
         ("type", t.t),
         ("word", t.t),
-        ("firstcharpos", t.t)
+        ("firstcharpos", t.t),
+        ("charlength", t.t)  # Length of the target
         ),
 
 
@@ -374,19 +398,32 @@ DEFAULT_VALS = {
         },
     
     
-    "wikiwordprops": {
+    "wikiwordprops_PRE2_1alpha01": {
         "word": t.t,
         "key": t.t,
         "value": t.t,
         },
     
+    "wikiwordattrs": {
+        "word": t.t,
+        "key": t.t,
+        "value": t.t,
+        },
+
     
-    "todos": {
+    "todos_PRE2_1alpha01": {
         "word": t.t,
         "todo": t.t,
         },
         
     
+    "todos": {
+        "word": t.t,
+        "key": t.t,
+        "value": t.t,
+        },
+
+
     "settings": {
         "value": t.t
         },
@@ -397,7 +434,8 @@ DEFAULT_VALS = {
         # "matchtermnormcase": t.t,
         "type": t.i,
         "word": t.t,
-        "firstcharpos": t.imo
+        "firstcharpos": t.imo,
+        "charlength": t.t,
         },
 
 
@@ -424,7 +462,7 @@ del t
 MAIN_TABLES = (
     "wikiwords",
     "wikirelations",
-    "wikiwordprops",
+    "wikiwordattrs",
     "todos",
 #     "search_views",
     "settings",
@@ -440,13 +478,16 @@ def rebuildIndices(connwrap):
     """
     connwrap.commit()
 
+    connwrap.execSqlNoError("drop index wikiwordprops_word")
+    connwrap.execSqlNoError("drop index wikiwordprops_keyvalue")
+
     connwrap.execSqlNoError("drop index wikiwords_pkey")
     connwrap.execSqlNoError("drop index wikiwordmatchterms_matchterm")
     connwrap.execSqlNoError("drop index wikirelations_pkey")
     connwrap.execSqlNoError("drop index settings_pkey")
     connwrap.execSqlNoError("drop index search_views_pkey")
     connwrap.execSqlNoError("drop index wikirelations_word")
-    connwrap.execSqlNoError("drop index wikiwordprops_word")
+    connwrap.execSqlNoError("drop index wikiwordattrs_word")
     connwrap.execSqlNoError("drop index datablocks_unifiedname")
     connwrap.execSqlNoError("drop index datablocksexternal_unifiedname")
         
@@ -455,7 +496,7 @@ def rebuildIndices(connwrap):
     connwrap.execSqlNoError("create unique index wikirelations_pkey on wikirelations(word, relation)")
     connwrap.execSqlNoError("create unique index settings_pkey on settings(key)")
     connwrap.execSqlNoError("create index wikirelations_word on wikirelations(word)")
-    connwrap.execSqlNoError("create index wikiwordprops_word on wikiwordprops(word)")
+    connwrap.execSqlNoError("create index wikiwordattrs_word on wikiwordattrs(word)")
     connwrap.execSqlNoError("create index datablocks_unifiedname on datablocks(unifiedname)")
     connwrap.execSqlNoError("create index datablocksexternal_unifiedname on datablocksexternal(unifiedname)")
 
@@ -467,7 +508,7 @@ def recreateCacheTables(connwrap):
     Delete and create again all tables with cache information and
     associated indices
     """
-    CACHE_TABLES = ("wikirelations", "wikiwordprops", "todos",
+    CACHE_TABLES = ("wikirelations", "wikiwordattrs", "todos",
             "wikiwordmatchterms")
     
     for tn in CACHE_TABLES:
@@ -909,12 +950,13 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
         connwrap.execSql("drop table wikiwordprops")
         connwrap.commit()
         changeTableSchema(connwrap, "wikiwordprops", 
-                TABLE_DEFINITIONS["wikiwordprops"])
+                TABLE_DEFINITIONS["wikiwordprops_PRE2_1alpha01"])
         rebuildIndices(connwrap)
 
         for w, k, v in dataIn:
             connwrap.execSqlInsert("wikiwordprops", ("word", "key", 
-                    "value"), (oldWikiWordToLabel(w), k, v))
+                    "value"), (oldWikiWordToLabel(w), k, v),
+                    tableDefault="wikiwordprops_PRE2_1alpha01")
 #             connwrap.execSql("insert into wikiwordprops(word, key, value) "
 #                     "values (?, ?, ?)", (oldWikiWordToLabel(w), k, v))
 
@@ -924,12 +966,13 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
         connwrap.execSql("drop table todos")
         connwrap.commit()
         changeTableSchema(connwrap, "todos", 
-                TABLE_DEFINITIONS["todos"])
+                TABLE_DEFINITIONS["todos_PRE2_1alpha01"])
         rebuildIndices(connwrap)
 
         for w, t in dataIn:
             connwrap.execSqlInsert("todos", ("word", "todo"),
-                    (oldWikiWordToLabel(w), t))
+                    (oldWikiWordToLabel(w), t),
+                    tableDefault="todos_PRE2_1alpha01")
 #             connwrap.execSql("insert into todos(word, todo) "
 #                     "values (?, ?)", (oldWikiWordToLabel(w), t))
 
@@ -987,8 +1030,12 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
         for wikiWord in wikiWords:
             filename = wikiWord + pagefileSuffix
             fullPath = join(dataDir, filename)
-            filesig = getFileSignatureBlock(fullPath)
-            
+            try:
+                filesig = getFileSignatureBlock(fullPath)
+            except (IOError, WindowsError):
+                traceback.print_exc()
+                continue
+
             connwrap.execSql("update wikiwords set filepath = ?, "
                     "filenamelowercase = ?, filesignature = ? "
                     "where word = ?", (filename, filename.lower(), filesig,
@@ -1032,8 +1079,31 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
 
         formatver = 4
         
-        
+    if formatver == 4:
+        # (Re)fill "defaultvalues" and read them into connection wrapper
+        connwrap.fillDefaultValues()
+        connwrap.readDefaultValues()
 
+        # Recreate table "todos" with new schema
+        connwrap.execSql("drop table todos")
+        changeTableSchema(connwrap, "todos", TABLE_DEFINITIONS["todos"])
+
+        # Rename table "wikiwordprops" to "wikiwordattrs"
+        changeTableSchema(connwrap, "wikiwordattrs", TABLE_DEFINITIONS["wikiwordattrs"])
+        connwrap.execSql("insert into wikiwordattrs(word, key, value) "
+                "select word, key, value from wikiwordprops")
+        connwrap.execSql("drop table wikiwordprops")
+
+        for tn in ("wikirelations", "wikiwordmatchterms"):
+            changeTableSchema(connwrap, tn, TABLE_DEFINITIONS[tn])
+
+        # Mark all wikiwords to need a rebuild
+        connwrap.execSql("update wikiwords set metadataprocessed=0")
+
+        formatver = 5
+
+    # --- WikiPad 2.1alpha.1 reached (formatver=5, writecompatver=5,
+    #         readcompatver=5) ---
 
 
 
@@ -1237,5 +1307,17 @@ invalid data.
         tablename: bytestring, name of table
         field: bytestring, name of field in table
         value: arbitrary, default object for this field in table
+
+
+++ 2.0 to 2.1alpha1 (formatver=5):
+    
+    Table "todos" modified:
+        "todo" column replaced by "key" and "value" columns
+
+    Table "wikiwordprops" renamed to "wikiwordattrs"
+    
+    Table "wikiwordmatchterms":
+        charlength: Integer. Length of the selection whose position is given in
+            firstcharpos. Invalid if firstcharpos is -1.
 
 """

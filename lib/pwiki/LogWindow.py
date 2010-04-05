@@ -1,5 +1,5 @@
 """
-GUI support and error checking for handling properties (=attributes)
+GUI support and error checking for handling attributes (=properties)
 """
 
 import traceback

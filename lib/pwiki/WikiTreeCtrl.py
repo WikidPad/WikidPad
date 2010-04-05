@@ -13,11 +13,13 @@ from MiscEvent import DebugSimple   # , KeyFunctionSink
 
 from WikiExceptions import WikiWordNotFoundException, InternalError, \
         NoPageAstException
-from Utilities import StringPathSet, SingleThreadExecutor
+
+import Utilities
+from Utilities import StringPathSet
 
 
 from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
-import PropertyHandling
+import AttributeHandling
 import DocPages
 from SearchAndReplace import SearchReplaceOperation
 
@@ -54,7 +56,7 @@ class NodeStyle(object):
 
 
 
-_SETTABLE_PROPS = (u"bold", u"icon", u"color")
+_SETTABLE_ATTRS = (u"bold", u"icon", u"color")
 
 
 # New style class to allow __slots__ for efficiency
@@ -274,7 +276,7 @@ class WikiWordNode(AbstractNode):
 
         style.hasChildren = self.flagChildren
         
-        # apply custom properties to nodes
+        # apply custom attributes to nodes
         wikiPage = wikiPage.getNonAliasPage() # Ensure we don't have an alias
 
         # if this is the scratch pad set the icon and return
@@ -283,43 +285,43 @@ class WikiWordNode(AbstractNode):
             return style # ?
 
 
-        # fetch the global properties
-        globalProps = self.treeCtrl.pWiki.getWikiData().getGlobalProperties() # TODO More elegant
-        # get the wikiPage properties
-        props = wikiPage.getProperties()
+        # fetch the global attributes
+        globalAttrs = self.treeCtrl.pWiki.getWikiData().getGlobalAttributes() # TODO More elegant
+        # get the wikiPage attributes
+        attrs = wikiPage.getAttributes()
 
         # priority
-        priority = props.get("priority", (None,))[-1]
+        priority = attrs.get("priority", (None,))[-1]
 
         # priority is special. it can create an "importance" and it changes
         # the text of the node            
         if priority:
             style.label += u" (%s)" % priority
             # set default importance based on priority
-            if not props.has_key(u'importance'):
+            if not attrs.has_key(u'importance'):
                 try:
                     priorNum = int(priority)    # TODO Error check
                     if (priorNum < 3):
-                        props[u'importance'] = [u'high']
+                        attrs[u'importance'] = [u'high']
                     elif (priorNum > 3):
-                        props[u'importance'] = [u'low']
+                        attrs[u'importance'] = [u'low']
                 except ValueError:
                     pass
 
-        propsItems = props.items()
+        attrsItems = attrs.items()
 
-        # apply the global props based on the props of this node
-        for p in _SETTABLE_PROPS:
-            # Check per page props first
-            if props.has_key(p):
-                setattr(style, p, props[p][-1])
+        # apply the global attrs based on the attrs of this node
+        for p in _SETTABLE_ATTRS:
+            # Check per page attrs first
+            if attrs.has_key(p):
+                setattr(style, p, attrs[p][-1])
                 continue
 
-            # Check props on page against global presentation props.
+            # Check attrs on page against global presentation attrs.
             # The dots in the key matter. The more dots the more specific
-            # is the global prop and wins over less specific props
+            # is the global prop and wins over less specific attrs
 
-#             newGPropVal = globalProps.get(u"global.%s" % p)
+#             newGPropVal = globalAttrs.get(u"global.%s" % p)
 #             if newGPropVal is not None:
 #                 gPropVal = newGPropVal
 #                 dots = 0
@@ -328,12 +330,12 @@ class WikiWordNode(AbstractNode):
             gPropVal = None
             dots = -1
 
-            for (key, values) in propsItems:
+            for (key, values) in attrsItems:
                 newGPropVal = None
                 newDots = key.count(u".") + 1 # key dots plus one for value
                 if newDots > dots:
                     for val in values:
-                        newGPropVal = globalProps.get(u"global.%s.%s.%s" % (key, val, p))
+                        newGPropVal = globalAttrs.get(u"global.%s.%s.%s" % (key, val, p))
                         if newGPropVal is not None:
                             gPropVal = newGPropVal
                             dots = newDots
@@ -341,7 +343,7 @@ class WikiWordNode(AbstractNode):
 
                     newDots -= 1
                     while newDots > dots:
-                        newGPropVal = globalProps.get(u"global.%s.%s" % (key, p))
+                        newGPropVal = globalAttrs.get(u"global.%s.%s" % (key, p))
                         if newGPropVal is not None:
                             break
     
@@ -356,7 +358,7 @@ class WikiWordNode(AbstractNode):
                         dots = newDots
 
             # If a value is found, we stop searching for this presentation
-            # property here
+            # attribute here
             if gPropVal is not None:
                 setattr(style, p, gPropVal)
                 continue
@@ -530,7 +532,7 @@ class MainViewNode(AbstractNode):
         # add to do list nodes
         result += TodoNode(self.treeCtrl, self, ()).listChildren()
         # add property names   
-        result += PropCategoryNode(self.treeCtrl, self, ()).listChildren()
+        result += AttrCategoryNode(self.treeCtrl, self, ()).listChildren()
         # add "searches" view
         node = MainSearchesNode(self.treeCtrl, self)
         if node.isVisible():
@@ -584,9 +586,14 @@ class TodoNode(AbstractNode):
 
         nodes = langHelper.parseTodoValue(self.categories[-1], wikiDocument)
         if nodes is not None:
-            for propNode in nodes.iterDeepByName("property"):
-                for key, value in propNode.props:
-                    if key in _SETTABLE_PROPS:
+            # Complicated version for compatibility with old language plugins
+            # TODO remove "property"-compatibility
+            for attrNode in Utilities.iterMergesort((
+                    nodes.iterDeepByName("property"),
+                    nodes.iterDeepByName("attribute") ),
+                    key=lambda n: n.pos):
+                for key, value, keyComp in attrNode.attrs:
+                    if key in _SETTABLE_ATTRS:
                         setattr(style, key, value)
 
         if style.label == u"":
@@ -605,32 +612,33 @@ class TodoNode(AbstractNode):
         wikiData = self.treeCtrl.pWiki.getWikiData()
         addedTodoSubCategories = []
         addedWords = []
-        for (wikiWord, todo) in wikiData.getTodos():
+        for (wikiWord, todoKey, todoValue) in wikiData.getTodos():
             # parse the todo for name and value
             wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
-            langHelper = wx.GetApp().createWikiLanguageHelper(
-                    wikiDocument.getWikiDefaultWikiLanguage())
+#             langHelper = wx.GetApp().createWikiLanguageHelper(
+#                     wikiDocument.getWikiDefaultWikiLanguage())
+# 
+#             node = langHelper.parseTodoEntry(todo, wikiDocument)
+#             if node is not None:
+                
+            keyComponents = todoKey.split(u".")  # TODO Language dependent: Remove
+            entryCats = tuple(keyComponents + [todoValue])
 
-            node = langHelper.parseTodoEntry(todo, wikiDocument)
-            if node is not None:
-                entryCats = tuple(node.keyComponents +
-                        [node.valueNode.getString()])
+            if len(entryCats) < len(self.categories):
+                # Can't match
+                continue
+            elif (len(entryCats) == len(self.categories)) and \
+                    (entryCats == self.categories):
+                # Same category sequence -> wiki word node
+                addedWords.append((wikiWord, todoKey, todoValue))
+            elif len(entryCats) > len(self.categories) and \
+                    entryCats[:len(self.categories)] == self.categories:
+                # Subcategories -> category node
 
-                if len(entryCats) < len(self.categories):
-                    # Can't match
-                    continue
-                elif (len(entryCats) == len(self.categories)) and \
-                        (entryCats == self.categories):
-                    # Same category sequence -> wiki word node
-                    addedWords.append((wikiWord, todo))
-                elif len(entryCats) > len(self.categories) and \
-                        entryCats[:len(self.categories)] == self.categories:
-                    # Subcategories -> category node
-    
-                    nextSubCategory = entryCats[len(self.categories)]
-    
-                    if nextSubCategory not in addedTodoSubCategories:
-                        addedTodoSubCategories.append(nextSubCategory)
+                nextSubCategory = entryCats[len(self.categories)]
+
+                if nextSubCategory not in addedTodoSubCategories:
+                    addedTodoSubCategories.append(nextSubCategory)
 
         collator = self.treeCtrl.pWiki.getCollator()
         
@@ -639,12 +647,15 @@ class TodoNode(AbstractNode):
             if result != 0:
                 return result
             
-            return collator.strcoll(left[1], right[1])
+            result = collator.strcoll(left[1], right[1])
+            if result != 0:
+                return result            
+            
+            return collator.strcoll(left[2], right[2])
 
         collator.sort(addedTodoSubCategories)
 
-#         collator.sort(addedWords)
-        addedWords.sort(cmpAddWords)
+        addedWords.sort(cmpAddWords)  # TODO no compare function support in Python 3!
 
         result = []
         # First list real categories, then right sides, then words
@@ -654,13 +665,16 @@ class TodoNode(AbstractNode):
 #         result += [TodoNode(self.treeCtrl, self, self.categories + (c,),
 #                 isRightSide=True) for c in addedRightSides]
 
-        def createSearchNode(wt):
-            searchOp = SearchReplaceOperation()
-            searchOp.wildCard = "no"
-            searchOp.searchStr = wt[1]
-            return WikiWordSearchNode(self.treeCtrl, self, wt[0], searchOp=searchOp)
+#         def createSearchNode(wt):
+#             searchOp = SearchReplaceOperation()
+#             searchOp.wildCard = "no"
+#             searchOp.searchStr = wt[1]
+#             return WikiWordSearchNode(self.treeCtrl, self, wt[0], searchOp=searchOp)
+# 
+#         result += [createSearchNode(wt) for wt in addedWords]
 
-        result += [createSearchNode(wt) for wt in addedWords]
+        result += [WikiWordTodoSearchNode(self.treeCtrl, self, wt[0], wt[1],
+                wt[2]) for wt in addedWords]
 
         return result
 
@@ -672,39 +686,78 @@ class TodoNode(AbstractNode):
                 self.categories == other.categories
 
 
-class PropCategoryNode(AbstractNode):
+class WikiWordTodoSearchNode(WikiWordRelabelNode):
     """
-    Node representing a property category or subcategory
+    Derived from WikiWordRelabelNode, specialized to locate and select
+    in the active editor a particular todo item with given todoName and
+    todoValue.
+    """
+    __slots__ = ("todoName", "todoValue")    
+    
+    def __init__(self, tree, parentNode, wikiWord, todoName, todoValue):
+        super(WikiWordTodoSearchNode, self).__init__(tree, parentNode,
+                wikiWord)
+
+        self.todoName = todoName
+        self.todoValue = todoValue
+
+
+    def onActivate(self):
+        super(WikiWordTodoSearchNode, self).onActivate()
+
+        editor = self.treeCtrl.pWiki.getActiveEditor()
+        try:
+            pageAst = editor.getPageAst()
+
+            wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
+            wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
+                
+            todoNodes = wikiPage.extractTodoNodesFromPageAst(pageAst)
+            for node in todoNodes:
+                if self.todoName == node.key and \
+                        self.todoValue == node.valueNode.getString():
+                    editor.SetSelectionByCharPos(node.pos, node.pos + node.strLength)
+                    break
+        except NoPageAstException:
+            return
+
+
+
+class AttrCategoryNode(AbstractNode):
+    """
+    Node representing a attribute category or subcategory
     """
     
     __slots__ = ("categories", "propIcon")
             
-    def __init__(self, tree, parentNode, cats, propertyIcon=u"page"):
+    def __init__(self, tree, parentNode, cats, attributeIcon=u"page"):
         AbstractNode.__init__(self, tree, parentNode)
         self.categories = cats
-        self.propIcon = propertyIcon
+        self.propIcon = attributeIcon
         self.unifiedName = u"helpernode/propcategory/" + \
                 u".".join(self.categories)
 
     def getNodePresentation(self):   # TODO Retrieve prop icon here
         style = NodeStyle()
-        globalProps = self.treeCtrl.pWiki.getWikiData().getGlobalProperties()
+        globalAttrs = self.treeCtrl.pWiki.getWikiData().getGlobalAttributes()
         key = u".".join(self.categories)
-        propertyIcon = globalProps.get(u"global.%s.icon" % (key), u"page")
+        attributeIcon = globalAttrs.get(u"global.%s.icon" % (key), u"page")
 
-        style.icon = propertyIcon   # u"page"  # self.propIcon
+        style.icon = attributeIcon   # u"page"  # self.propIcon
         style.label = self.categories[-1]
         style.hasChildren = True
         return style
 
     def listChildren(self):
         wikiData = self.treeCtrl.pWiki.getWikiData()
+        wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
+
         result = []
         key = u".".join(self.categories + (u"",))
         
         # Start with subcategories
         addedSubCategories = set()
-        for name in wikiData.getPropertyNamesStartingWith(key):
+        for name in wikiData.getAttributeNamesStartingWith(key):
             # Cut off uninteresting
             name = name[len(key):]
 
@@ -713,17 +766,17 @@ class PropCategoryNode(AbstractNode):
             
         subCats = list(addedSubCategories)
         self.treeCtrl.pWiki.getCollator().sort(subCats)
-        result += map(lambda c: PropCategoryNode(self.treeCtrl, self,
+        result += map(lambda c: AttrCategoryNode(self.treeCtrl, self,
                 self.categories + (c,)), subCats)
                 
         # Now the values:
-        vals = wikiData.getDistinctPropertyValues(u".".join(self.categories))
+        vals = wikiDocument.getDistinctAttributeValuesByKey(u".".join(self.categories))
         self.treeCtrl.pWiki.getCollator().sort(vals)
-        result += map(lambda v: PropValueNode(self.treeCtrl, self,
+        result += map(lambda v: AttrValueNode(self.treeCtrl, self,
                 self.categories, v), vals)
                 
         # Replace a single "true" value node by its children
-        if len(result) == 1 and isinstance(result[0], PropValueNode) and \
+        if len(result) == 1 and isinstance(result[0], AttrValueNode) and \
                 result[0].getValue().lower() == u"true":
             result = result[0].listChildren()
 
@@ -738,18 +791,18 @@ class PropCategoryNode(AbstractNode):
                 self.categories == other.categories
 
 
-class PropValueNode(AbstractNode):
+class AttrValueNode(AbstractNode):
     """
-    Node representing a property value. Children are WikiWordSearchNode's
+    Node representing a attribute value. Children are WikiWordSearchNode's
     """
     
     __slots__ = ("categories", "value", "propIcon")
             
-    def __init__(self, tree, parentNode, cats, value, propertyIcon=u"page"):
+    def __init__(self, tree, parentNode, cats, value, attributeIcon=u"page"):
         AbstractNode.__init__(self, tree, parentNode)
         self.categories = cats
         self.value = value
-        self.propIcon = propertyIcon
+        self.propIcon = attributeIcon
         self.unifiedName = u"helpernode/propvalue/" + \
                 u".".join(self.categories) + u"/" + self.value
 
@@ -767,11 +820,11 @@ class PropValueNode(AbstractNode):
         wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
         result = []
         key = u".".join(self.categories)
-#         words = wikiData.getWordsWithPropertyValue(key, self.value)
-        words = list(set(w for w,k,v in wikiDocument.getPropertyTriples(
+#         words = wikiData.getWordsWithAttributeValue(key, self.value)
+        words = list(set(w for w,k,v in wikiDocument.getAttributeTriples(
                 None, key, self.value)))
         self.treeCtrl.pWiki.getCollator().sort(words)                
-        return [WikiWordPropertySearchNode(self.treeCtrl, self, w,
+        return [WikiWordAttributeSearchNode(self.treeCtrl, self, w,
                 key, self.value) for w in words]
 
 
@@ -784,16 +837,16 @@ class PropValueNode(AbstractNode):
                 self.value == other.value
 
 
-class WikiWordPropertySearchNode(WikiWordRelabelNode):
+class WikiWordAttributeSearchNode(WikiWordRelabelNode):
     """
     Derived from WikiWordRelabelNode, specialized to locate and select
-    in the active editor a particular property with given propName and
+    in the active editor a particular attribute with given propName and
     propValue.
     """
     __slots__ = ("propName", "propValue")    
     
     def __init__(self, tree, parentNode, wikiWord, propName, propValue):
-        super(WikiWordPropertySearchNode, self).__init__(tree, parentNode,
+        super(WikiWordAttributeSearchNode, self).__init__(tree, parentNode,
                 wikiWord)
 
         self.propName = propName
@@ -801,7 +854,7 @@ class WikiWordPropertySearchNode(WikiWordRelabelNode):
 
 
     def onActivate(self):
-        super(WikiWordPropertySearchNode, self).onActivate()
+        super(WikiWordAttributeSearchNode, self).onActivate()
 
         editor = self.treeCtrl.pWiki.getActiveEditor()
         try:
@@ -810,9 +863,9 @@ class WikiWordPropertySearchNode(WikiWordRelabelNode):
             wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
             wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
                 
-            propNodes = wikiPage.extractPropertyNodesFromPageAst(pageAst)
-            for node in propNodes:
-                if (self.propName, self.propValue) in node.props:
+            attrNodes = wikiPage.extractAttributeNodesFromPageAst(pageAst)
+            for node in attrNodes:
+                if (self.propName, self.propValue) in node.attrs:
                     editor.SetSelectionByCharPos(node.pos, node.pos + node.strLength)
                     break
         except NoPageAstException:
@@ -1126,7 +1179,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         self.SetSpacing(0)
         self.refreshGenerator = None  # Generator called in OnIdle
-        self.refreshExecutor = SingleThreadExecutor(1)
+        self.refreshExecutor = Utilities.SingleThreadExecutor(1)
 #        self.refreshCheckChildren = [] # List of nodes to check for new/deleted children
         self.sizeVisible = True
         # Descriptor pathes of all expanded nodes to remember or None
@@ -1168,7 +1221,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         # Build icon menu
         # Build full submenu for icons
         iconsMenu, self.cmdIdToIconName = \
-                PropertyHandling.buildIconsSubmenu(wx.GetApp().getIconCache())
+                AttributeHandling.buildIconsSubmenu(wx.GetApp().getIconCache())
         for cmi in self.cmdIdToIconName.keys():
             wx.EVT_MENU(self, cmi, self.OnInsertIconAttribute)
 
@@ -1176,7 +1229,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                 _(u'Add icon attribute'), iconsMenu)
 
         # Build submenu for colors
-        colorsMenu, self.cmdIdToColorName = PropertyHandling.buildColorsSubmenu()
+        colorsMenu, self.cmdIdToColorName = AttributeHandling.buildColorsSubmenu()
         for cmi in self.cmdIdToColorName.keys():
             wx.EVT_MENU(self, cmi, self.OnInsertColorAttribute)
 
@@ -1289,20 +1342,17 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             self.Thaw()
 
 
-
     def expandRoot(self):
         """
         Called after rebuilding tree
         """
         rootNode = self.GetRootItem()
         self.Expand(rootNode)
-        self.selectedNodeWhileContext = rootNode
-        self._sendSelectionEvents(None, rootNode)
+#         self.selectedNodeWhileContext = rootNode
+#         self._sendSelectionEvents(None, rootNode)
 
     def getHideUndefined(self):
         return self.pWiki.getConfig().getboolean("main", "hideundefined")
-
-
 
 
     def onChangedPresenter(self, miscevt):

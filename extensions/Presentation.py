@@ -75,7 +75,7 @@ def getStyles(styleFaces, config):
                     "fore:%(colLink)s,underline,face:%(mono)s,size:%(size)d" % styleFaces), 
             (FormatTypes.Script,
                     "fore:%(colAttribute)s,face:%(mono)s,size:%(size)d" % styleFaces),
-            (FormatTypes.Property,
+            (FormatTypes.Attribute,
                     "bold,fore:%(colAttribute)s,face:%(mono)s,size:%(size)d" % styleFaces),
             (FormatTypes.ToDo, "fore:%(colPlaintext)s,bold,face:%(mono)s,size:%(size)d" % styleFaces)]
 

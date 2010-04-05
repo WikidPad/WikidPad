@@ -253,8 +253,8 @@ class BasicDocPagePresenter(LayeredControlPresenter):
             # fetch the page info from the database
             try:
                 page = wikiDoc.getWikiPage(wikiWord)
-                self.getStatusBar().SetStatusText(uniToGui(_(u"Opened wiki word '%s'") %
-                        wikiWord), 0)
+#                 self.getStatusBar().SetStatusText(uniToGui(_(u"Opened wiki word '%s'") %
+#                         wikiWord), 0)
 
             except (WikiWordNotFoundException, WikiFileNotFoundException), e:
                 page = wikiDoc.createWikiPage(wikiWord,
@@ -264,33 +264,10 @@ class BasicDocPagePresenter(LayeredControlPresenter):
                 self.getStatusBar().SetStatusText(
                         uniToGui(_(u"Wiki page not found, a new "
                         u"page will be created")), 0)
-                self.getStatusBar().SetStatusText(uniToGui(u""), 1)
+#                 self.getStatusBar().SetStatusText(uniToGui(u""), 1)
 
-#             print "--openWikiPage34", repr((page, evtprops.get("anchor")))
             self.loadWikiPage(page, **evtprops)
-
-#             self.getSubControl("textedit").loadWikiPage(page, evtprops)
-#             self.getMainControl().refreshPageStatus()  # page)
-#     
-#             p2 = evtprops.copy()
-#             p2.update({"loaded current doc page": True,
-#                     "loaded current wiki page": True,
-#                     "docPage": page,
-#                     "oldDocPage": oldPage})
-# 
-#             self.fireMiscEventProps(p2)
-#     
-#             self.getMainControl().getMainAreaPanel().updateConfig()
-# 
-#             # Should the page by default be presented in editor or preview mode?
-#             pv = page.getPropertyOrGlobal(u"view_pane")
-#             if pv is not None:
-#                 pv = pv.lower()
-#                 if pv == u"preview":
-#                     self.switchSubControl("preview")
-#                 elif pv == u"editor":
-#                     self.switchSubControl("textedit")
-#                 # else: do nothing  (pv == u"off")
+            page.informVisited()
 
             # sync the tree
             if forceTreeSyncFromRoot:
@@ -320,7 +297,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         self.getMainControl().getMainAreaPanel().updateConfig()
 
         # Should the page by default be presented in editor or preview mode?
-        pv = page.getPropertyOrGlobal(u"view_pane")
+        pv = page.getAttributeOrGlobal(u"view_pane")
         if pv is not None:
             pv = pv.lower()
             if pv == u"preview":

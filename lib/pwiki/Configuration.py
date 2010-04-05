@@ -602,7 +602,7 @@ GLOBALDEFAULTS = {
     ("main", "insertions_allow_eval"): "False",  # Evaluate :eval: and possible other script insertions?
 #     ("main", "tempFiles_inWikiDir"): "False",  # Store temp. files in wiki dir instead of normal temp dir.?
     ("main", "script_security_level"): "0",  # Allow the use of scripts and
-            # import_scripts property? 0: No scripts at all; 1: No import_scripts;
+            # import_scripts attribute? 0: No scripts at all; 1: No import_scripts;
             # 2: allow local import_scripts; 3: allow also global.import_scripts
     ("main", "script_search_reverse"): "False", # Normally when searching for a script first the local page
             # is searched, then local import_scripts, then global.import_scripts. If this is set to
@@ -613,7 +613,7 @@ GLOBALDEFAULTS = {
     ("main", "new_window_on_follow_wiki_url"): "1", # Open new window when following a "wiki:" URL 0:No, 1:Yes, new process
     ("main", "start_browser_after_export"): "True",
     ("main", "facename_html_preview"): "", # Facename(s) for the internal HTML preview
-    ("main", "html_preview_proppattern"): "",  # RE pattern for properties in HTML preview
+    ("main", "html_preview_proppattern"): "",  # RE pattern for attributes in HTML preview
     ("main", "html_preview_proppattern_is_excluding"): "False", # Should these pattern be excluded instead of included?
     ("main", "html_export_proppattern"): "",  # Same for HTML exporting
     ("main", "html_export_proppattern_is_excluding"): "False",  # Same for HTML exporting
@@ -769,7 +769,8 @@ GLOBALDEFAULTS = {
     ("main", "single_process"): "True", # Ensure that only a single process runs per user  
     ("main", "wikiPathes_relative"): "False", # If True, pathes to last recently used wikis
             # are stored relative to application dir.
-
+    ("main", "openWikiWordDialog_sortOrder"): "0", # Sort order in "Open Wiki Word" dialog
+            # 0:Alphabetically; 1:By last visit, newest first; 2:By last visit, oldest first
     
     ("main", "collation_order"): "Default", # Set collation order, Default: system default order, C: ASCII byte value
     ("main", "collation_uppercaseFirst"): "False" # Sort uppercase first (ABCabc) or normal inorder (AaBbCc)
@@ -788,6 +789,9 @@ WIKIDEFAULTS = {
             # 0: Not at all; 1: During session; 2: Between sessions in wiki config file
 
     ("main", "tabs_maxCharacters"): u"0", # Maximum number of characters to show on a tab (0: inifinite)
+    ("main", "template_pageNamesRE"): u"^template/",  # Regular expression pattern for pages which should be seen as templates
+            # Especially they will be listed in text editor context menu on new pages
+    
     ("main", "tree_expandedNodes_descriptorPathes_main"): u"", # ";"-delimited sequence of node descriptor pathes of expanded nodes in tree.
             # Descriptors of a path are delimited by ','. This config. entry applies to main tree
     ("main", "tree_expandedNodes_descriptorPathes_views"): u"", # Same as above but applies to "Views" tree if present

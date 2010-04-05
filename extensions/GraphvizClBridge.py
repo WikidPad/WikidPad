@@ -1,4 +1,4 @@
-import os, os.path
+import os, os.path, traceback
 from subprocess import list2cmdline
 
 import wx

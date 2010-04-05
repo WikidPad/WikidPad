@@ -14,6 +14,7 @@ from WikiExceptions import *
 from StringOps import strToBool, fileContentToUnicode, lineendToInternal, \
         loadEntireTxtFile, writeEntireFile
 
+import Utilities
 from Utilities import DUMBTHREADSTOP, FunctionThreadStop, TimeoutRLock, \
         callInMainThread, callInMainThreadAsync
 
@@ -207,6 +208,13 @@ class DocPage(object, MiscEventSourceMixin):
         self.fireMiscEventProps({"changed editor text": True,
                 "changed live text": True, "changer": changer})
 
+
+    def informVisited(self):
+        """
+        Called to inform the page that it was visited and should set
+        the "visited" entry in the database to current time.
+        """
+        pass
 
     def getWikiLanguageName(self):
         """
@@ -477,7 +485,7 @@ class AbstractWikiPage(DataCarryingPage):
         self.childRelations = None
         self.childRelationSet = set()
         self.todos = None
-        self.props = None
+        self.attrs = None
         self.modified, self.created, self.visited = None, None, None
         self.suggNewPageTitle = None  # Title to use for page if it is
                 # newly created
@@ -638,44 +646,48 @@ class AbstractWikiPage(DataCarryingPage):
             return relations
 
 
-    def getProperties(self):
+    def getAttributes(self):
         with self.textOperationLock:
-            if self.props is not None:
-                return self.props
+            if self.attrs is not None:
+                return self.attrs
             
-            data = self.getWikiData().getPropertiesForWord(self.wikiWord)
+            data = self.getWikiData().getAttributesForWord(self.wikiWord)
 
 #         with self.textOperationLock:
-#             if self.props is not None:
-#                 return self.props
+#             if self.attrs is not None:
+#                 return self.attrs
 
-            self.props = {}
+            self.attrs = {}
             for (key, val) in data:
-                self._addProperty(key, val)
+                self._addAttribute(key, val)
             
-            return self.props
+            return self.attrs
 
-    def getPropertyOrGlobal(self, propkey, default=None):
+    getProperties = getAttributes  # TODO remove "property"-compatibility
+
+    def getAttributeOrGlobal(self, attrkey, default=None):
         """
-        Tries to find a property on this page and returns the first value.
+        Tries to find an attribute on this page and returns the first value.
         If it can't be found for page, it is searched for a global
-        property with this name. If this also can't be found,
+        attribute with this name. If this also can't be found,
         default (normally None) is returned.
         """
         with self.textOperationLock:
-            props = self.getProperties()
-            if props.has_key(propkey):
-                return props[propkey][-1]
+            attrs = self.getAttributes()
+            if attrs.has_key(attrkey):
+                return attrs[attrkey][-1]
             else:
-                globalProps = self.getWikiData().getGlobalProperties()     
-                return globalProps.get(u"global."+propkey, default)
+                globalAttrs = self.getWikiData().getGlobalAttributes()     
+                return globalAttrs.get(u"global."+attrkey, default)
 
-
-    def _addProperty(self, key, val):
-        values = self.props.get(key)
+    getPropertyOrGlobal = getAttributeOrGlobal # TODO remove "property"-compatibility
+    
+    
+    def _addAttribute(self, key, val):
+        values = self.attrs.get(key)
         if not values:
             values = []
-            self.props[key] = values
+            self.attrs[key] = values
         values.append(val)
 
 
@@ -718,15 +730,15 @@ class AbstractWikiPage(DataCarryingPage):
         formatting
         """
         with self.textOperationLock:
-            withCamelCase = strToBool(self.getPropertyOrGlobal(
+            withCamelCase = strToBool(self.getAttributeOrGlobal(
                     u"camelCaseWordsEnabled"), True)
     
 #             footnotesAsWws = self.wikiDocument.getWikiConfig().getboolean(
 #                     "main", "footnotes_as_wikiwords", False)
     
-            autoLinkMode = self.getPropertyOrGlobal(u"auto_link", u"off").lower()
+            autoLinkMode = self.getAttributeOrGlobal(u"auto_link", u"off").lower()
 
-            paragraphMode = strToBool(self.getPropertyOrGlobal(
+            paragraphMode = strToBool(self.getAttributeOrGlobal(
                     u"paragraph_mode"), False)
                     
             langHelper = wx.GetApp().createWikiLanguageHelper(
@@ -749,13 +761,32 @@ class AbstractWikiPage(DataCarryingPage):
 
 
     @staticmethod
-    def extractPropertyNodesFromPageAst(pageAst):
+    def extractAttributeNodesFromPageAst(pageAst):
         """
-        Return an iterator of property nodes in pageAst. This does not return
-        properties inside of todo entries.
+        Return an iterator of attribute nodes in pageAst. This does not return
+        attributes inside of todo entries.
         """
-        return pageAst.iterUnselectedDeepByName("property",
-                frozenset(("todoEntry",)))
+        # Complicated version for compatibility with old language plugins
+        # TODO remove "property"-compatibility
+        return Utilities.iterMergesort((
+                pageAst.iterUnselectedDeepByName("attribute",
+                frozenset(("todoEntry",))),
+                pageAst.iterUnselectedDeepByName("property",
+                frozenset(("todoEntry",))) ),
+                key=lambda n: n.pos)
+        
+        # Simple one for later
+#         return pageAst.iterUnselectedDeepByName("attribute",
+#                 frozenset(("todoEntry",)))
+
+
+    @staticmethod
+    def extractTodoNodesFromPageAst(pageAst):
+        """
+        Return an iterator of todo nodes in pageAst.
+        """
+        return pageAst.iterDeepByName("todoEntry")
+
 
     def _save(self, text, fireEvent=True):
         """
@@ -1055,9 +1086,29 @@ class WikiPage(AbstractWikiPage):
             traceback.print_exc()
 
 
+    def informVisited(self):
+        """
+        Called to inform the page that it was visited and should set
+        the "visited" entry in the database to current time.
+        """
+        with self.textOperationLock:
+            if self.isReadOnlyEffect():
+                return
+    
+            if not self.isDefined():
+                return
+
+            wikiData = self.wikiDocument.getWikiData()
+            word = self.getWikiWord()
+            ts = wikiData.getTimestamps(word)
+            ts = ts[:2] + (time.time(),) + ts[3:]
+            wikiData.setTimestamps(word, ts)
+
+
     def _changeHeadingForTemplate(self, content):
         """
-        Return modified or unmodified content
+        Modify the heading of a template page's content to match the page
+        created from the template.
         """
         # Prefix is normally u"++"
         pageTitlePrefix = \
@@ -1087,10 +1138,30 @@ class WikiPage(AbstractWikiPage):
         return wikiWordHead + content[removeFirst:]
 
 
+    def getContentOfTemplate(self, templatePage, parentPage):
+        # getLiveText() would be more logical, but this may
+        # mean that content is up to date, while attributes
+        # are not updated.
+        content = templatePage.getContent()
+        
+        # Check if template title should be changed
+        tplHeading = parentPage.getAttributeOrGlobal(
+                u"template_head", u"auto")
+        if tplHeading in (u"auto", u"automatic"):
+            content = self._changeHeadingForTemplate(content)
+
+        return content
+
+
+    def setMetaDataFromTemplate(self, templatePage):
+        # Load attributes from template page
+        self.attrs = templatePage._cloneDeepAttributes()
+        
+
     def getContent(self):
         """
         Returns page content. If page doesn't exist already the template
-        creation is done here. After calling this function, properties
+        creation is done here. After calling this function, attributes
         are also accessible for a non-existing page
         """
         content = None
@@ -1106,21 +1177,24 @@ class WikiPage(AbstractWikiPage):
                 try:
                     parentPage = self.wikiDocument.getWikiPage(parents[0])
                     # TODO Error checking
-                    templateWord = parentPage.getPropertyOrGlobal("template")
+                    templateWord = parentPage.getAttributeOrGlobal("template")
                     templatePage = self.wikiDocument.getWikiPage(templateWord)
-
-                    # getLiveText() would be more logical, but this may
-                    # mean that content is up to date, while attributes
-                    # are not updated.
-                    content = templatePage.getContent()
-                    # Load properties from template page
-                    self.props = templatePage._cloneDeepProperties()
                     
-                    # Check if template title should be changed
-                    tplHeading = parentPage.getPropertyOrGlobal(
-                            u"template_head", u"auto")
-                    if tplHeading in (u"auto", u"automatic"):
-                        content = self._changeHeadingForTemplate(content)
+                    content = self.getContentOfTemplate(templatePage, parentPage)
+                    self.setMetaDataFromTemplate(templatePage)
+
+#                     # getLiveText() would be more logical, but this may
+#                     # mean that content is up to date, while attributes
+#                     # are not updated.
+#                     content = templatePage.getContent()
+#                     # Load attributes from template page
+#                     self.attrs = templatePage._cloneDeepAttributes()
+#                     
+#                     # Check if template title should be changed
+#                     tplHeading = parentPage.getAttributeOrGlobal(
+#                             u"template_head", u"auto")
+#                     if tplHeading in (u"auto", u"automatic"):
+#                         content = self._changeHeadingForTemplate(content)
                 except (WikiWordNotFoundException, WikiFileNotFoundException):
                     pass
 
@@ -1143,6 +1217,15 @@ class WikiPage(AbstractWikiPage):
 
 #     def isDefined(self):
 #         return self.getWikiDocument().isDefinedWikiPage(self.getWikiWord())
+
+
+    def pseudoDeletePage(self):
+        """
+        Delete a page which doesn't really exist.
+        Just sends an appropriate event.
+        """
+        wx.CallAfter(self.fireMiscEventKeys,
+                ("pseudo-deleted page", "pseudo-deleted wiki page"))
 
 
     def deletePage(self):
@@ -1196,10 +1279,10 @@ class WikiPage(AbstractWikiPage):
         callInMainThreadAsync(self.fireMiscEventProps, p)
 
 
-    def _cloneDeepProperties(self):
+    def _cloneDeepAttributes(self):
         with self.textOperationLock:
             result = {}
-            for key, value in self.getProperties().iteritems():
+            for key, value in self.getAttributes().iteritems():
                 result[key] = value[:]
                 
             return result
@@ -1263,7 +1346,7 @@ class WikiPage(AbstractWikiPage):
     def _refreshMetaData(self, pageAst, formatDetails, fireEvent=True,
             threadstop=DUMBTHREADSTOP):
 
-        self.refreshPropertiesFromPageAst(pageAst, threadstop=threadstop)
+        self.refreshAttributesFromPageAst(pageAst, threadstop=threadstop)
 
         formatDetails2 = self.getFormatDetails()
         if not formatDetails.isEquivTo(formatDetails2):
@@ -1286,12 +1369,12 @@ class WikiPage(AbstractWikiPage):
                 Consts.WIKIWORDMATCHTERMS_TYPE_FROM_WORD | \
                 Consts.WIKIWORDMATCHTERMS_TYPE_SYNCUPDATE
 
-        matchTerms = [(self.wikiWord, WORD_TYPE, self.wikiWord, -1)]
+        matchTerms = [(self.wikiWord, WORD_TYPE, self.wikiWord, -1, 0)]
         self.getWikiData().updateWikiWordMatchTerms(self.wikiWord, matchTerms,
                 syncUpdate=True)
 
 
-    def refreshPropertiesFromPageAst(self, pageAst, threadstop=DUMBTHREADSTOP):
+    def refreshAttributesFromPageAst(self, pageAst, threadstop=DUMBTHREADSTOP):
         """
         Update properties (aka attributes) only.
         This is step one in update/rebuild process.
@@ -1302,43 +1385,36 @@ class WikiPage(AbstractWikiPage):
         langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.getWikiLanguageName())
 
-#         self.deleteProperties()
+        attrs = {}
 
-        props = {}
-
-        def addProperty(key, value):
+        def addAttribute(key, value):
             threadstop.testRunning()
-            values = props.get(key)
+            values = attrs.get(key)
             if not values:
                 values = []
-                props[key] = values
+                attrs[key] = values
             values.append(value)
 
 
-        propNodes = self.extractPropertyNodesFromPageAst(pageAst)
-        for node in propNodes:
-            for propKey, propValue in node.props:
-                addProperty(propKey, propValue)
+        attrNodes = self.extractAttributeNodesFromPageAst(pageAst)
+        for node in attrNodes:
+            for attrKey, attrValue in \
+                    (getattr(node, "attrs", []) + getattr(node, "props", [])):  # TODO remove "property"-compatibility
+                addAttribute(attrKey, attrValue)
 
         with self.textOperationLock:
             threadstop.testRunning()
 
-            self.props = None
+            self.attrs = None
 
         try:
-            self.getWikiData().updateProperties(self.wikiWord, props)
+            self.getWikiData().updateAttributes(self.wikiWord, attrs)
         except WikiWordNotFoundException:
             return False
 
         valid = False
 
         with self.textOperationLock:
-#             print "--refreshPropertiesFromPageAst43", repr((self.wikiWord, self.saveDirtySince,
-#                     self.livePageBasePlaceHold is self.liveTextPlaceHold,
-#                     self.livePageBaseFormatDetails is not None,
-# #                     self.getFormatDetails().isEquivTo(self.livePageBaseFormatDetails),
-#                     pageAst is self.livePageAst))
-
             if self.saveDirtySince is None and \
                     self.livePageBasePlaceHold is self.liveTextPlaceHold and \
                     self.livePageBaseFormatDetails is not None and \
@@ -1349,7 +1425,7 @@ class WikiPage(AbstractWikiPage):
                 # clear the dirty flag
 
                 self.getWikiData().setMetaDataState(self.wikiWord,
-                        Consts.WIKIWORDMETADATA_STATE_PROPSPROCESSED)
+                        Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
 
                 valid = True
 
@@ -1370,8 +1446,9 @@ class WikiPage(AbstractWikiPage):
         childRelations = []
         childRelationSet = set()
 
-        def addTodo(todo):
+        def addTodo(todoKey, todoValue):
             threadstop.testRunning()
+            todo = (todoKey, todoValue)
             if todo not in todos:
                 todos.append(todo)
 
@@ -1382,10 +1459,11 @@ class WikiPage(AbstractWikiPage):
                 childRelationSet.add(toWord)
 
         # Add todo entries
-        todoTokens = pageAst.iterDeepByName("todoEntry")
-        for t in todoTokens:
-            addTodo(t.key + t.delimiter + t.valueNode.getString())
-        
+        todoNodes = pageAst.iterDeepByName("todoEntry")
+        for node in todoNodes:
+            for todoKey, todoValueNode in node.todos:
+                addTodo(todoKey, todoValueNode.getString())
+
         threadstop.testRunning()
 
         # Add child relations
@@ -1400,17 +1478,17 @@ class WikiPage(AbstractWikiPage):
 
         ALIAS_TYPE = Consts.WIKIWORDMATCHTERMS_TYPE_EXPLICIT_ALIAS | \
                 Consts.WIKIWORDMATCHTERMS_TYPE_ASLINK | \
-                Consts.WIKIWORDMATCHTERMS_TYPE_FROM_PROPERTIES
+                Consts.WIKIWORDMATCHTERMS_TYPE_FROM_ATTRIBUTES
 
         langHelper = wx.GetApp().createWikiLanguageHelper(
                 self.getWikiLanguageName())
 
-        for w, k, v in self.getWikiDocument().getPropertyTriples(
+        for w, k, v in self.getWikiDocument().getAttributeTriples(
                 self.wikiWord, u"alias", None):
             threadstop.testRunning()
             if not langHelper.checkForInvalidWikiWord(v,
                     self.getWikiDocument()):
-                matchTerms.append((v, ALIAS_TYPE, self.wikiWord, -1))
+                matchTerms.append((v, ALIAS_TYPE, self.wikiWord, -1, -1))
 
         # Add headings to match terms if wanted
         depth = self.wikiDocument.getWikiConfig().getint(
@@ -1428,7 +1506,7 @@ class WikiPage(AbstractWikiPage):
                     title = title[:-1]
                 
                 matchTerms.append((title, HEADALIAS_TYPE, self.wikiWord,
-                        node.pos))
+                        node.pos + node.strLength, 0))
 
         with self.textOperationLock:
             threadstop.testRunning()
@@ -1528,13 +1606,13 @@ class WikiPage(AbstractWikiPage):
 #                     if metaState == Consts.WIKIWORDMETADATA_STATE_UPTODATE:
 #                         return True
 # 
-#                     elif metaState == Consts.WIKIWORDMETADATA_STATE_PROPSPROCESSED:
+#                     elif metaState == Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED:
 #                         self.refreshMainDbCacheFromPageAst(pageAst,
 #                                 threadstop=threadstop)
 #                         continue
 # 
 #                     else: # step == Consts.WIKIWORDMETADATA_STATE_DIRTY
-#                         self.refreshPropertiesFromPageAst(pageAst,
+#                         self.refreshAttributesFromPageAst(pageAst,
 #                                 threadstop=threadstop)
 #                         continue
             else:
@@ -1544,12 +1622,12 @@ class WikiPage(AbstractWikiPage):
                         metaState != step:
                     return False
     
-                if step == Consts.WIKIWORDMETADATA_STATE_PROPSPROCESSED:
+                if step == Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED:
                     return self.refreshMainDbCacheFromPageAst(pageAst,
                             threadstop=threadstop)
     
                 else: # step == Consts.WIKIWORDMETADATA_STATE_DIRTY
-                    return self.refreshPropertiesFromPageAst(pageAst,
+                    return self.refreshAttributesFromPageAst(pageAst,
                             threadstop=threadstop)
 
         except NotCurrentThreadException:
@@ -1609,7 +1687,7 @@ class WikiPage(AbstractWikiPage):
         wikiDocument = self.wikiDocument
         
         # get the sort order for the children
-        childSortOrder = self.getPropertyOrGlobal(u'child_sort_order',
+        childSortOrder = self.getAttributeOrGlobal(u'child_sort_order',
                 u"ascending")
             
         # Apply sort order
@@ -1671,12 +1749,12 @@ class WikiPage(AbstractWikiPage):
         # Put relations into their appropriate arrays
         for relation in relations:
             relationPage = wikiDocument.getWikiPageNoError(relation)
-            props = relationPage.getProperties()
+            attrs = relationPage.getAttributes()
             try:
-                if (props.has_key(u'tree_position')):
-                    positioned.append((int(props[u'tree_position'][-1]) - 1, relation))
-                elif (props.has_key(u'priority')):
-                    priorized.append((int(props[u'priority'][-1]), relation))
+                if (attrs.has_key(u'tree_position')):
+                    positioned.append((int(attrs[u'tree_position'][-1]) - 1, relation))
+                elif (attrs.has_key(u'priority')):
+                    priorized.append((int(attrs[u'priority'][-1]), relation))
                 else:
                     other.append(relation)
             except:
@@ -2028,7 +2106,7 @@ class FunctionalPage(DataCarryingPage):
 
     def initiateUpdate(self, fireEvent=True):
         """
-        Update additional cached informations (properties, todos, relations).
+        Update additional cached informations (attributes, todos, relations).
         Here it is done directly in initiateUpdate() because it doesn't need
         much work.
         """

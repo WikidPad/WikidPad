@@ -212,11 +212,11 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         if isinstance(presenter, BasicDocPagePresenter) and \
                 len(self.getDocPagePresenters()) < 2:
             # At least one tab must stay
-            return
+            return False
 
         idx = self.getIndexForPresenter(presenter)
         if idx == -1:
-            return
+            return False
             
         newIdx = -1
         if idx == self.GetSelection():
@@ -246,6 +246,8 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
         self.DeletePage(idx)        
         self.updateConfig()
+        
+        return True
 
 
     def detachPresenterTab(self, presenter):
@@ -409,6 +411,18 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             self.lastContextMenuPresenter = self.docPagePresenters[tab]
 #             sc = self.lastContextMenuPresenter
             self.PopupMenu(ctxMenu)
+
+
+    if Configuration.isLinux():
+        # OnFocused() is not always called so a direct overwrite is necessary
+        def SetFocus(self):
+            if self.tabSwitchByKey == 0:
+                p = self.GetCurrentPage()
+                if p is not None:
+                    p.SetFocus()
+                    return
+
+            wx.Notebook.SetFocus(self)
 
 
     def OnFocused(self, evt):

@@ -24,11 +24,11 @@ __builtins__["_"] = N_
 
 
 # create a Trace object
-import trace
-__builtins__["tracer"] = trace.Trace(
-    ignoredirs=[sys.prefix, sys.exec_prefix],
-    trace=1,
-    count=0)
+# import trace
+# __builtins__["tracer"] = trace.Trace(
+#     ignoredirs=[sys.prefix, sys.exec_prefix],
+#     trace=1,
+#     count=0)
 
 
 

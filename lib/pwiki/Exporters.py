@@ -697,7 +697,7 @@ class HtmlExporter(AbstractExporter):
     def exportHtmlMultiFile(self, realfp=None, tocMode=None):
         """
         Multiple wiki pages in one file.
-        """        
+        """
         config = self.mainControl.getConfig()
         sepLineCount = config.getint("main",
                 "html_export_singlePage_sepLineCount", 10)
@@ -958,13 +958,13 @@ class HtmlExporter(AbstractExporter):
         bgcol = config.get("main", "html_body_bgcolor")
         bgimg = config.get("main", "html_body_background")
 
-        # Get property settings
-        linkcol = wikiPage.getPropertyOrGlobal(u"html.linkcolor", linkcol)
-        alinkcol = wikiPage.getPropertyOrGlobal(u"html.alinkcolor", alinkcol)
-        vlinkcol = wikiPage.getPropertyOrGlobal(u"html.vlinkcolor", vlinkcol)
-        textcol = wikiPage.getPropertyOrGlobal(u"html.textcolor", textcol)
-        bgcol = wikiPage.getPropertyOrGlobal(u"html.bgcolor", bgcol)
-        bgimg = wikiPage.getPropertyOrGlobal(u"html.bgimage", bgimg)
+        # Get attribute settings
+        linkcol = wikiPage.getAttributeOrGlobal(u"html.linkcolor", linkcol)
+        alinkcol = wikiPage.getAttributeOrGlobal(u"html.alinkcolor", alinkcol)
+        vlinkcol = wikiPage.getAttributeOrGlobal(u"html.vlinkcolor", vlinkcol)
+        textcol = wikiPage.getAttributeOrGlobal(u"html.textcolor", textcol)
+        bgcol = wikiPage.getAttributeOrGlobal(u"html.bgcolor", bgcol)
+        bgimg = wikiPage.getAttributeOrGlobal(u"html.bgimage", bgimg)
         
         # Filter color
         def filterCol(col, prop):
@@ -1149,7 +1149,7 @@ class HtmlExporter(AbstractExporter):
             except WikiWordNotFoundException:
                 return False
 
-        return strToBool(wikiPage.getProperties().get("export", ("True",))[-1])
+        return strToBool(wikiPage.getAttributes().get("export", ("True",))[-1])
 
 
     def getContentListBody(self, linkAsFragments):
@@ -1247,12 +1247,14 @@ class HtmlExporter(AbstractExporter):
         return self.wikiWord
 
 
-
-    def formatContent(self, wikiPage):
+    def formatContent(self, wikiPage, content=None):
         word = wikiPage.getWikiWord()
-        content = wikiPage.getLiveText()
         formatDetails = wikiPage.getFormatDetails()
-        self.basePageAst = wikiPage.getLivePageAst()
+        if content is None:
+            content = wikiPage.getLiveText()
+            self.basePageAst = wikiPage.getLivePageAst()
+        else:
+            self.basePageAst = wikiPage.parseTextInContext(content)
 
         if self.linkConverter is None:
             self.linkConverter = BasicLinkConverter(self.wikiDocument, self)
@@ -1271,14 +1273,14 @@ class HtmlExporter(AbstractExporter):
         self.outFlagEatPostBreak = False
         self.outFlagPostBreakEaten = False
 
-        # Get property pattern
+        # Get attribute pattern
         if self.asHtmlPreview:
             proppattern = self.mainControl.getConfig().get(
                         "main", "html_preview_proppattern", u"")
         else:
             proppattern = self.mainControl.getConfig().get(
                         "main", "html_export_proppattern", u"")
-                        
+
         self.proppattern = re.compile(proppattern,
                 re.DOTALL | re.UNICODE | re.MULTILINE)
 
@@ -1785,7 +1787,7 @@ class HtmlExporter(AbstractExporter):
 
             title = None
             if linkTo is not None:
-                propList = self.wikiDocument.getPropertyTriples(linkTo,
+                propList = self.wikiDocument.getAttributeTriples(linkTo,
                         u"short_hint", None)
                 if len(propList) > 0:
                     title = propList[-1][2]
@@ -1903,16 +1905,18 @@ class HtmlExporter(AbstractExporter):
                         (node.key, node.delimiter))
                 self.processAst(content, node.valueNode)
                 self.outAppend(u'</span>')
-            elif tname == "property":
-                for propKey, propValue in node.props:
-                    standardProperty = u"%s: %s" % (propKey, propValue)
-                    standardPropertyMatching = \
-                            bool(self.proppattern.match(standardProperty))
+            # TODO remove "property"-compatibility
+            elif tname in ("property", "attribute"):  # for compatibility with old language plugins
+                for propKey, propValue in node.attrs:
+                    standardAttribute = u"%s: %s" % (propKey, propValue)
+                    standardAttributeMatching = \
+                            bool(self.proppattern.match(standardAttribute))
                     # Output only for different truth values
-                    # (Either it matches and matching props should not be
+                    # (Either it matches and matching attrs should not be
                     # hidden or vice versa)
-                    if standardPropertyMatching != self.proppatternExcluding:
-                        self.outAppend( u'<span class="property">[%s: %s]</span>' % 
+                    if standardAttributeMatching != self.proppatternExcluding:
+                        # TODO remove "property"-compatibility
+                        self.outAppend( u'<span class="property attribute">[%s: %s]</span>' % 
                                 (escapeHtml(propKey),
                                 escapeHtml(propValue)) )
             elif tname == "insertion":

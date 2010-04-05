@@ -1,3 +1,5 @@
+import traceback
+
 from MiscEvent import KeyFunctionSink
 
 class PageHistory:
@@ -22,6 +24,7 @@ class PageHistory:
 
         self.__sinkWikiDoc = KeyFunctionSink((
                 ("deleted wiki page", self.onDeletedWikiPage),
+                ("pseudo-deleted wiki page", self.onDeletedWikiPage),
                 ("renamed wiki page", self.onRenamedWikiPage)
         ))
 
@@ -48,6 +51,8 @@ class PageHistory:
 
 
     def onLoadedCurrentDocPage(self, miscevt):
+#         print "--onLoadedCurrentDocPage1", repr(miscevt)
+#         traceback.print_stack()
         if miscevt.get("motionType") == "history":
             # history was used to move to new word, so don't add word to
             # history, move only pos
@@ -144,9 +149,15 @@ class PageHistory:
         Called after a page was deleted
         """
         if not self.history:
-            self.docPagePresenter.openDocPage(u"wikipage/" + 
-                    self.docPagePresenter.getWikiDocument().getWikiName(),
-                    motionType="random")
+            # No history -> try to delete current tab
+            if not self.mainControl.getMainAreaPanel().closePresenterTab(
+                    self.docPagePresenter):
+
+                # If tab can't be deleted -> go to homepage of wiki
+                self.docPagePresenter.openDocPage(u"wikipage/" + 
+                        self.docPagePresenter.getWikiDocument().getWikiName(),
+                        motionType="random")
+
             return
             
         self.docPagePresenter.openDocPage(self.history[self.pos - 1],

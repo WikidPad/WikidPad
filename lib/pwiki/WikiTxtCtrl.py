@@ -14,28 +14,36 @@ from time import time, sleep
 
 import wx, wx.stc
 
-from Utilities import *
+from Utilities import *  # TODO Remove this
 from Utilities import DUMBTHREADSTOP, callInMainThread
 
 from Consts import FormatTypes
 
 from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
-        wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc, \
-        getBitmapFromClipboard, getMetafileFromClipboard
+        wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc
+import wxHelper
+
+import OsAbstract
+
+
 from MiscEvent import KeyFunctionSinkAR
 from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException, \
         NotCurrentThreadException, NoPageAstException
 from ParseUtilities import getFootnoteAnchorDict
 
 from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
-from AdditionalDialogs import ImagePasteSaver, ImagePasteDialog
+import AdditionalDialogs
+
+
+
 # import WikiFormatting
 import DocPages
 import UserActionCoord
 
 from SearchAndReplace import SearchReplaceOperation
-from StringOps import *
-# utf8Enc, utf8Dec, mbcsEnc, mbcsDec, uniToGui, guiToUni, \
+import StringOps
+from StringOps import *  # TODO Remove this
+# mbcsDec, uniToGui, guiToUni, \
 #        wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
 from Configuration import isUnicode, isWin9x, isLinux, isWindows
@@ -58,7 +66,7 @@ def bytelenSct_utf8(us):
     us -- unicode string
     returns: Number of bytes us requires in Scintilla (with UTF-8 encoding=Unicode)
     """
-    return len(utf8Enc(us)[0])
+    return len(StringOps.utf8Enc(us)[0])
 
 
 def bytelenSct_mbcs(us):
@@ -66,7 +74,7 @@ def bytelenSct_mbcs(us):
     us -- unicode string
     returns: Number of bytes us requires in Scintilla (with mbcs encoding=Ansi)
     """
-    return len(mbcsEnc(us)[0])
+    return len(StringOps.mbcsEnc(us)[0])
 
 
 
@@ -197,6 +205,11 @@ class IncrementalSearchDialog(wx.Frame):
             self.txtCtrl.endIncrementalSearch()
             self.Close()
             self.txtCtrl.activateLink()
+        elif matchesAccelPair("ActivateLinkBackground", accP):
+            # ActivateLinkNewTab is normally Ctrl-Alt-L
+            self.txtCtrl.endIncrementalSearch()
+            self.Close()
+            self.txtCtrl.activateLink(tabMode=3)        
         # handle the other keys
         else:
             evt.Skip()
@@ -288,6 +301,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.ignoreOnChange = False
         self.searchStr = u""
         self.wikiLanguageHelper = None
+        self.templateIdRecycler = wxHelper.IdRecycler()
 
         # If autocompletion word was choosen, how many bytes to delete backward
         # before inserting word
@@ -374,28 +388,32 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         # make the text control a drop target for files and text
         self.SetDropTarget(WikiTxtCtrlDropTarget(self))
         
-        # register some keyboard commands
-        self.CmdKeyAssign(ord('+'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMIN)
-        self.CmdKeyAssign(ord('-'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMOUT)
-        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, 0, wx.stc.STC_CMD_HOMEWRAP)
-        self.CmdKeyAssign(wx.stc.STC_KEY_END, 0, wx.stc.STC_CMD_LINEENDWRAP)
-        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, wx.stc.STC_SCMOD_SHIFT,
-                wx.stc.STC_CMD_HOMEWRAPEXTEND)
-        self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_SHIFT,
-                wx.stc.STC_CMD_LINEENDWRAPEXTEND)
-
-
-        # Clear all key mappings for clipboard operations
-        # PersonalWikiFrame handles them and calls the special clipboard functions
-        # instead of the normal ones
-        self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_CTRL)
-        self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_SHIFT)
-        self.CmdKeyClear(wx.stc.STC_KEY_DELETE, wx.stc.STC_SCMOD_SHIFT)
-
-        self.CmdKeyClear(ord('X'), wx.stc.STC_SCMOD_CTRL)
-        self.CmdKeyClear(ord('C'), wx.stc.STC_SCMOD_CTRL)
-        self.CmdKeyClear(ord('V'), wx.stc.STC_SCMOD_CTRL)
+        self._resetKeyBindings()
         
+#         self.CmdKeyClearAll()
+#         
+#         # register some keyboard commands
+#         self.CmdKeyAssign(ord('+'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMIN)
+#         self.CmdKeyAssign(ord('-'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMOUT)
+#         self.CmdKeyAssign(wx.stc.STC_KEY_HOME, 0, wx.stc.STC_CMD_HOMEWRAP)
+#         self.CmdKeyAssign(wx.stc.STC_KEY_END, 0, wx.stc.STC_CMD_LINEENDWRAP)
+#         self.CmdKeyAssign(wx.stc.STC_KEY_HOME, wx.stc.STC_SCMOD_SHIFT,
+#                 wx.stc.STC_CMD_HOMEWRAPEXTEND)
+#         self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_SHIFT,
+#                 wx.stc.STC_CMD_LINEENDWRAPEXTEND)
+# 
+# 
+#         # Clear all key mappings for clipboard operations
+#         # PersonalWikiFrame handles them and calls the special clipboard functions
+#         # instead of the normal ones
+#         self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_CTRL)
+#         self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_SHIFT)
+#         self.CmdKeyClear(wx.stc.STC_KEY_DELETE, wx.stc.STC_SCMOD_SHIFT)
+# 
+#         self.CmdKeyClear(ord('X'), wx.stc.STC_SCMOD_CTRL)
+#         self.CmdKeyClear(ord('C'), wx.stc.STC_SCMOD_CTRL)
+#         self.CmdKeyClear(ord('V'), wx.stc.STC_SCMOD_CTRL)
+
         self.SetModEventMask(
                 wx.stc.STC_MOD_INSERTTEXT | wx.stc.STC_MOD_DELETETEXT)
 
@@ -489,10 +507,15 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
                 self.OnActivateNewTabBackgroundThis)
 
+        wx.EVT_MENU(self, GUI_ID.CMD_OPEN_CONTAINING_FOLDER,
+                self.OnOpenContainingFolder)
+
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_ANCHOR,
                 self.OnClipboardCopyUrlToThisAnchor)
 
         wx.EVT_MENU(self, GUI_ID.CMD_TEXT_SELECT_ALL, lambda evt: self.SelectAll())
+
+        wx.EVT_MENU(self, GUI_ID.CMD_SELECT_TEMPLATE, self.OnSelectTemplate)
 
 
 
@@ -547,10 +570,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             return
 
         fs = self.presenter.getWikiDocument().getFileStorage()
-        imgsav = ImagePasteSaver()
+        imgsav = AdditionalDialogs.ImagePasteSaver()
         imgsav.readOptionsFromConfig(self.presenter.getConfig())
 
-        bmp = getBitmapFromClipboard()
+        bmp = wxHelper.getBitmapFromClipboard()
         if bmp is not None:
             img = bmp.ConvertToImage()
             del bmp
@@ -558,8 +581,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             if self.presenter.getConfig().getboolean("main",
                     "editor_imagePaste_askOnEachPaste", True):
                 # Options say to present dialog on an image paste operation
-                dlg = ImagePasteDialog(self.presenter.getMainControl(), -1,
-                        imgsav)
+                dlg = AdditionalDialogs.ImagePasteDialog(
+                        self.presenter.getMainControl(), -1, imgsav)
                 try:
                     dlg.ShowModal()
                     imgsav = dlg.getImagePasteSaver()
@@ -623,6 +646,42 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if wx.Window.FindFocus() != self:
             return
         self.Copy()
+
+
+    def _resetKeyBindings(self):
+        
+        self.CmdKeyClearAll()
+        
+        # Register general keyboard commands (minus some which may lead to problems
+        for key, mod, action in _DEFAULT_STC_KEYS:
+            self.CmdKeyAssign(key, mod, action)
+
+        
+        # register some special keyboard commands
+        self.CmdKeyAssign(ord('+'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMIN)
+        self.CmdKeyAssign(ord('-'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMOUT)
+        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, wx.stc.STC_SCMOD_NORM,
+                wx.stc.STC_CMD_HOMEWRAP)
+        self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_NORM,
+                wx.stc.STC_CMD_LINEENDWRAP)
+        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, wx.stc.STC_SCMOD_SHIFT,
+                wx.stc.STC_CMD_HOMEWRAPEXTEND)
+        self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_SHIFT,
+                wx.stc.STC_CMD_LINEENDWRAPEXTEND)
+
+
+
+#         # Clear all key mappings for clipboard operations
+#         # PersonalWikiFrame handles them and calls the special clipboard functions
+#         # instead of the normal ones
+#         self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_CTRL)
+#         self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_SHIFT)
+#         self.CmdKeyClear(wx.stc.STC_KEY_DELETE, wx.stc.STC_SCMOD_SHIFT)
+# 
+#         self.CmdKeyClear(ord('X'), wx.stc.STC_SCMOD_CTRL)
+#         self.CmdKeyClear(ord('C'), wx.stc.STC_SCMOD_CTRL)
+#         self.CmdKeyClear(ord('V'), wx.stc.STC_SCMOD_CTRL)
+
         
         
     def setLayerVisible(self, vis, scName=""):
@@ -711,7 +770,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         for type, style in styles:
             self.StyleSetSpec(type, style)
 
-    def SetText(self, text):
+    def SetText(self, text, emptyUndo=True):
         """
         Overrides the wxStyledTextCtrl method.
         text -- Unicode text content to set
@@ -725,9 +784,12 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if isUnicode():
             wx.stc.StyledTextCtrl.SetText(self, text)
         else:
-            wx.stc.StyledTextCtrl.SetText(self, mbcsEnc(text, "replace")[0])
+            wx.stc.StyledTextCtrl.SetText(self,
+                    StringOps.mbcsEnc(text, "replace")[0])
         self.ignoreOnChange = False
-        self.EmptyUndoBuffer()
+
+        if emptyUndo:
+            self.EmptyUndoBuffer()
         # self.applyBasicSciSettings()
 
 
@@ -735,7 +797,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if isUnicode():
             wx.stc.StyledTextCtrl.SetText(self, text)
         else:
-            wx.stc.StyledTextCtrl.SetText(self, mbcsEnc(text, "replace")[0])
+            wx.stc.StyledTextCtrl.SetText(self,
+                    StringOps.mbcsEnc(text, "replace")[0])
 
 
     def GetText_unicode(self):
@@ -769,11 +832,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
 
     def ReplaceSelection_unicode(self, txt):
-        return wx.stc.StyledTextCtrl.ReplaceSelection(self, mbcsEnc(txt, "replace")[0])
+        return wx.stc.StyledTextCtrl.ReplaceSelection(self,
+                StringOps.mbcsEnc(txt, "replace")[0])
 
 
     def AddText_unicode(self, txt):
-        return wx.stc.StyledTextCtrl.AddText(self, mbcsEnc(txt, "replace")[0])
+        return wx.stc.StyledTextCtrl.AddText(self,
+                StringOps.mbcsEnc(txt, "replace")[0])
 
 
     def SetSelectionByCharPos(self, start, end):
@@ -903,9 +968,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if self.getLoadedDocPage() is None:
             return  # TODO How to handle?
 
-        globalProps = wikiDataManager.getWikiData().getGlobalProperties()
+        globalAttrs = wikiDataManager.getWikiData().getGlobalAttributes()
         # get the font that should be used in the editor
-        font = globalProps.get("global.font", self.defaultFont)
+        font = globalAttrs.get("global.font", self.defaultFont)
 
         # set the styles in the editor to the font
         if self.lastFont != font:
@@ -957,16 +1022,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if docPage is None:
             return  # TODO How to handle?
 
-        # get the font that should be used in the editor
-        font = docPage.getPropertyOrGlobal("font", self.defaultFont)
-
-        # set the styles in the editor to the font
-        if self.lastFont != font:
-            faces = self.presenter.getDefaultFontFaces().copy()
-            faces["mono"] = font
-            self.SetStyles(faces)
-            self.lastEditorFont = font
-        
         self.wikiPageSink.setEventSource(docPage.getMiscEvent())
 
         otherEditor = docPage.getTxtEditor()
@@ -985,7 +1040,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             # now fill the text into the editor
             self.SetReadOnly(False)
             self.setTextAgaUpdated(content)
-            
+
         if self.wikiLanguageHelper is None or \
                 self.wikiLanguageHelper.getWikiLanguageName() != \
                 docPage.getWikiLanguageName():
@@ -1002,7 +1057,17 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         p2.update({"loading wiki page": True, "wikiPage": docPage})
         self.presenter.fireMiscEventProps(p2)  # TODO Remove this hack
 
-        self.pageType = docPage.getProperties().get(u"pagetype",
+        # get the font that should be used in the editor
+        font = docPage.getAttributeOrGlobal("font", self.defaultFont)
+
+        # set the styles in the editor to the font
+        if self.lastFont != font:
+            faces = self.presenter.getDefaultFontFaces().copy()
+            faces["mono"] = font
+            self.SetStyles(faces)
+            self.lastEditorFont = font
+
+        self.pageType = docPage.getAttributes().get(u"pagetype",
                 [u"normal"])[-1]
 
         if self.pageType == u"normal":
@@ -1024,59 +1089,76 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                         anchor = None # Not found
 
                 if not anchor:
+                    # Is there a position given in the eventprops?
+                    firstcharpos = evtprops.get("firstcharpos", -1)
+                    if firstcharpos != -1:
+                        charlength = max(0, evtprops.get("charlength", 0))
+                        self.SetSelectionByCharPos(firstcharpos,
+                                firstcharpos + charlength)
+                        anchor = True
+
+                if not anchor:
                     # see if there is a saved position for this page
                     prst = docPage.getPresentation()
                     lastPos, scrollPosX, scrollPosY = prst[0:3]
                     foldInfo = prst[5]
                     self.setFoldInfo(foldInfo)
                     self.GotoPos(lastPos)
+                
+                    # Bad hack: First scroll to position to avoid a visible jump
+                    #   if scrolling works, then update display,
+                    #   then scroll again because it may have failed the first time
                     
-                    if True:  # scrollPosX != 0 or scrollPosY != 0:
-                        # Bad hack: First scroll to position to avoid a visible jump
-                        #   if scrolling works, then update display,
-                        #   then scroll again because it may have failed the first time
-                        
-                        self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
-                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
-                                scrollPosX, wx.HORIZONTAL)
-                        self.ProcessEvent(screvt)
-                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
-                                scrollPosX, wx.HORIZONTAL)
-                        self.ProcessEvent(screvt)
-                        
-                        self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
-                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
-                                scrollPosY, wx.VERTICAL)
-                        self.ProcessEvent(screvt)
-                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
-                                scrollPosY, wx.VERTICAL)
-                        self.ProcessEvent(screvt)
-    
-                        self.Update()
-    
-                        self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
-                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
-                                scrollPosX, wx.HORIZONTAL)
-                        self.ProcessEvent(screvt)
-                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
-                                scrollPosX, wx.HORIZONTAL)
-                        self.ProcessEvent(screvt)
-                        
-                        self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
-                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
-                                scrollPosY, wx.VERTICAL)
-                        self.ProcessEvent(screvt)
-                        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
-                                scrollPosY, wx.VERTICAL)
-                        self.ProcessEvent(screvt)
+                    self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
+                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+                            scrollPosX, wx.HORIZONTAL)
+                    self.ProcessEvent(screvt)
+                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+                            scrollPosX, wx.HORIZONTAL)
+                    self.ProcessEvent(screvt)
+                    
+                    self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
+                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+                            scrollPosY, wx.VERTICAL)
+                    self.ProcessEvent(screvt)
+                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+                            scrollPosY, wx.VERTICAL)
+                    self.ProcessEvent(screvt)
 
-        elif self.pageType == u"form":
-            self.GotoPos(0)
-            self._goToNextFormField()
+                    self.Update()
+
+                    self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
+                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+                            scrollPosX, wx.HORIZONTAL)
+                    self.ProcessEvent(screvt)
+                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+                            scrollPosX, wx.HORIZONTAL)
+                    self.ProcessEvent(screvt)
+                    
+                    self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
+                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+                            scrollPosY, wx.VERTICAL)
+                    self.ProcessEvent(screvt)
+                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+                            scrollPosY, wx.VERTICAL)
+                    self.ProcessEvent(screvt)
+
+#         elif self.pageType == u"form":
+#             self.GotoPos(0)
+#             self._goToNextFormField()
         else:
-            pass   # TODO Error message?
+            self.handleSpecialPageType()
 
         self.presenter.setTitle(docPage.getTitle())
+
+
+    def handleSpecialPageType(self):
+        if self.pageType == u"form":
+            self.GotoPos(0)
+            self._goToNextFormField()
+            return True
+        
+        return False
 
 
     def onReloadedCurrentPage(self, miscevt):
@@ -1089,7 +1171,19 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         anchor = miscevt.get("anchor")
         if not anchor:
+            if self.pageType == u"normal":
+                # Is there a position given in the eventprops?
+                firstcharpos = miscevt.get("firstcharpos", -1)
+                if firstcharpos != -1:
+                    charlength = max(0, miscevt.get("charlength", 0))
+                    self.SetSelectionByCharPos(firstcharpos,
+                            firstcharpos + charlength)
+
             return
+
+
+#         if not anchor:
+#             return
 
         docPage = self.getLoadedDocPage()
 
@@ -1150,7 +1244,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if isinstance(self.getLoadedDocPage(), 
                 (DocPages.WikiPage, DocPages.AliasWikiPage)):
 
-            font = self.getLoadedDocPage().getPropertyOrGlobal("font",
+            font = self.getLoadedDocPage().getAttributeOrGlobal("font",
                     self.defaultFont)
             faces["mono"] = font
             self.lastEditorFont = font    # ???
@@ -1195,7 +1289,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             return
 
         # get the font that should be used in the editor
-        font = self.getLoadedDocPage().getPropertyOrGlobal("font",
+        font = self.getLoadedDocPage().getAttributeOrGlobal("font",
                 self.defaultFont)
 
         # set the styles in the editor to the font
@@ -1205,7 +1299,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.SetStyles(faces)
             self.lastEditorFont = font
 
-        self.pageType = self.getLoadedDocPage().getProperties().get(u"pagetype",
+        self.pageType = self.getLoadedDocPage().getAttributes().get(u"pagetype",
                 [u"normal"])[-1]
 
 
@@ -1272,7 +1366,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         # it's cached
         text = docPage.getLiveText()  # self.GetText()
         textlen = len(text)
-
+        
         t = self.stylingThreadHolder.getThread()
         if t is not None:
             self.stylingThreadHolder.setThread(None)
@@ -1307,6 +1401,85 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             t.start()
 
 
+    def _fillTemplateMenu(self, menu):
+        idRecycler = self.templateIdRecycler
+        idRecycler.clearAssoc()
+
+        config = self.presenter.getConfig()
+
+        templateRePat = config.get(u"main", u"template_pageNamesRE",
+                u"^template/")
+
+        try:
+            templateRe = re.compile(templateRePat, re.DOTALL | re.UNICODE)
+        except re.error:
+            templateRe = re.compile(u"^template/", re.DOTALL | re.UNICODE)
+
+        wikiDocument = self.presenter.getWikiDocument()
+        templateNames = [n for n in wikiDocument.getAllDefinedWikiPageNames()
+                if templateRe.search(n)]
+        
+        wikiDocument.getCollator().sort(templateNames)
+
+        for tn in templateNames:
+            menuID, reused = idRecycler.assocGetIdAndReused(tn)
+
+            if not reused:
+                # For a new id, an event must be set
+                wx.EVT_MENU(self, menuID, self.OnTemplateUsed)
+
+            menu.Append(menuID, uniToGui(tn))
+
+
+    def OnTemplateUsed(self, evt):
+        docPage = self.getLoadedDocPage()
+        if docPage is None:
+            return
+        templateName = self.templateIdRecycler.get(evt.GetId())
+
+        if templateName is None:
+            return
+
+        wikiDocument = self.presenter.getWikiDocument()
+        templatePage = wikiDocument.getWikiPage(templateName)
+
+        content = self.getLoadedDocPage().getContentOfTemplate(templatePage,
+                templatePage)
+        docPage.setMetaDataFromTemplate(templatePage)
+
+        self.SetText(content, emptyUndo=False)
+        self.pageType = docPage.getAttributes().get(u"pagetype",
+                [u"normal"])[-1]
+        self.handleSpecialPageType()
+        # TODO Handle form mode!!
+        self.presenter.informEditorTextChanged(self)
+
+
+    def OnSelectTemplate(self, evt):
+        docPage = self.getLoadedDocPage()
+        if docPage is None:
+            return
+
+        templateName = AdditionalDialogs.SelectWikiWordDialog.runModal(
+                self.presenter.getMainControl(), self, -1,
+                title=_(u"Select template"))
+        if templateName is None:
+            return
+
+        wikiDocument = self.presenter.getWikiDocument()
+        templatePage = wikiDocument.getWikiPage(templateName)
+
+        content = self.getLoadedDocPage().getContentOfTemplate(templatePage,
+                templatePage)
+        docPage.setMetaDataFromTemplate(templatePage)
+
+        self.SetText(content, emptyUndo=False)
+        self.pageType = docPage.getAttributes().get(u"pagetype",
+                [u"normal"])[-1]
+        self.handleSpecialPageType()        
+        self.presenter.informEditorTextChanged(self)
+
+
     # TODO Wrong reaction on press of context menu button on keyboard
     def OnContextMenu(self, evt):
         mousePos = self.ScreenToClient(wx.GetMousePosition())
@@ -1314,7 +1487,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         leftFold = 0
         for i in range(self.FOLD_MARGIN):
             leftFold += self.GetMarginWidth(i)
-            
+
         rightFold = leftFold + self.GetMarginWidth(self.FOLD_MARGIN)
 
         menu = wx.Menu()
@@ -1323,8 +1496,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             # Right click in fold margin
 
             appendToMenuByMenuDesc(menu, FOLD_MENU)
-
-            # print "Right click in fold margin"
         else:
             appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_BASE)
             
@@ -1332,12 +1503,16 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             
             self.contextMenuTokens = nodes
             addActivateItem = False
+            addFileUrlItem = False
             addUrlToClipboardItem = False
             for node in nodes:
                 if node.name == "wikiWord":
                     addActivateItem = True
                 elif node.name == "urlLink":
                     addActivateItem = True
+                    if node.url.startswith(u"file:") or \
+                            node.url.startswith(u"rel://"):
+                        addFileUrlItem = True
                 elif node.name == "insertion" and node.key == u"page":
                     addActivateItem = True
                 elif node.name == "anchorDef":
@@ -1345,13 +1520,31 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
             if addActivateItem:
                 appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_ACTIVATE)
-            
+
+                if addFileUrlItem:
+                    appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_FILE_URL)
+
             if addUrlToClipboardItem:
                 appendToMenuByMenuDesc(menu,
-                        _CONTEXT_MENU_INTEXT_URL_TO_CLIPBOARD)            
+                        _CONTEXT_MENU_INTEXT_URL_TO_CLIPBOARD)
+
+            docPage = self.getLoadedDocPage()
+            if isinstance(docPage, DocPages.WikiPage):
+                if not docPage.isDefined() and not docPage.getDirty()[0]:
+                    templateSubmenu = wx.Menu()
+                    self._fillTemplateMenu(templateSubmenu)
+                    appendToMenuByMenuDesc(templateSubmenu,
+                            _CONTEXT_MENU_SELECT_TEMPLATE_IN_TEMPLATE_MENU)
     
+                    menu.AppendSeparator()
+                    menu.AppendMenu(wx.NewId(), _(u'Use template'),
+                            templateSubmenu)
+                else:
+                    appendToMenuByMenuDesc(menu,
+                            _CONTEXT_MENU_SELECT_TEMPLATE)
+
             appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_BOTTOM)
-    
+
             # Enable/Disable appropriate menu items
             item = menu.FindItemById(GUI_ID.CMD_UNDO)
             if item: item.Enable(self.CanUndo())
@@ -1472,12 +1665,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         "italics": FormatTypes.Italic,
         "urlLink": FormatTypes.Url,
         "script": FormatTypes.Script,
-        "property": FormatTypes.Property,
+        "property": FormatTypes.Attribute,             # TODO remove "property"-compatibility
+        "attribute": FormatTypes.Attribute,
         "insertion": FormatTypes.Script,
         "anchorDef": FormatTypes.Bold,
         "plainText": FormatTypes.Default
         }
-       
+
 
     def processTokens(self, text, pageAst, threadstop):
         wikiDoc = self.presenter.getWikiDocument()
@@ -1923,6 +2117,32 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if self.contextMenuTokens:
             self.activateTokens(self.contextMenuTokens, 3)
 
+    def OnOpenContainingFolder(self, evt):
+        if self.contextMenuTokens:
+            for node in self.contextMenuTokens:
+                if node.name == "urlLink":
+                    link = node.url
+
+                    if link.startswith(u"rel://"):
+                        link = self.presenter.getMainControl().makeRelUrlAbsolute(link)
+                    
+                    if link.startswith(u"file:"):
+                        try:
+                            path = dirname(StringOps.pathnameFromUrl(link))
+                            if not exists(StringOps.longPathEnc(path)):
+                                self.presenter.displayErrorMessage(
+                                        _(u"Folder does not exist"))
+                                return
+
+                            OsAbstract.startFile(self.presenter.getMainControl(),
+                                    path)
+                        except IOError:
+                            pass   # Error message?
+
+                    break
+
+
+
     def OnClipboardCopyUrlToThisAnchor(self, evt):
         wikiWord = self.presenter.getWikiWord()
         if wikiWord is None:
@@ -1973,10 +2193,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             scriptNodeGroups = [list(pageAst.iterDeepByName(SCRIPTFORMAT))]
             
             # process script imports
-            if securityLevel > 1: # Local import_scripts properties allowed
-                if self.getLoadedDocPage().getProperties().has_key(
+            if securityLevel > 1: # Local import_scripts attributes allowed
+                if self.getLoadedDocPage().getAttributes().has_key(
                         u"import_scripts"):
-                    scriptNames = self.getLoadedDocPage().getProperties()[
+                    scriptNames = self.getLoadedDocPage().getAttributes()[
                             u"import_scripts"]
                     for sn in scriptNames:
                         try:
@@ -1988,9 +2208,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                         except:
                             pass
 
-            if securityLevel > 2: # global.import_scripts property also allowed
+            if securityLevel > 2: # global.import_scripts attribute also allowed
                 globScriptName = self.presenter.getWikiDocument().getWikiData().\
-                        getGlobalProperties().get(u"global.import_scripts")
+                        getGlobalAttributes().get(u"global.import_scripts")
 
                 if globScriptName is not None:
                     try:
@@ -2476,7 +2696,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
                 self.presenter.informEditorTextChanged(self)
 
-                docPage = self.getLoadedDocPage()
+#                 docPage = self.getLoadedDocPage()
 
 
 
@@ -2485,7 +2705,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         "When the user presses enter reindent to the previous level"
 
 #         currPos = self.GetScrollPos(wxVERTICAL)
-        
+
         evt.Skip()
         key = evt.GetKey()
 
@@ -2510,7 +2730,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
             self.wikiLanguageHelper.handleNewLineAfterEditor(self, text,
                     charPos, lineStartCharPos, wikiDocument, settings)
-
 
 
     def OnKeyDown(self, evt):
@@ -2542,6 +2761,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         elif matchesAccelPair("ActivateLink2", accP):
             # ActivateLink2 is normally Ctrl-Return
             self.activateLink()
+
+        elif matchesAccelPair("ActivateLinkBackground", accP):
+            # ActivateLink2 is normally Ctrl-Return
+            self.activateLink(tabMode=3)
 
         elif not evt.ControlDown() and not evt.ShiftDown():  # TODO Check all modifiers
             if key == wx.WXK_TAB:
@@ -2742,7 +2965,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     threadstop.testRunning()
                     wikiWord = wikiDocument.getUnAliasedWikiWord(node.wikiWord)
                     if wikiWord is not None:
-                        propList = wikiDocument.getPropertyTriples(
+                        propList = wikiDocument.getAttributeTriples(
                                 wikiWord, u"short_hint", None)
                         if len(propList) > 0:
                             callTip = propList[-1][2]
@@ -2786,7 +3009,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #                 wikiWord = node.wikiWord
 #                 if not wikiDocument.isCreatableWikiWord(wikiWord):
 #                     wikiWord = wikiDocument.getAliasesWikiWord(wikiWord)
-#                     propList = wikiDocument.getPropertyTriples(
+#                     propList = wikiDocument.getAttributeTriples(
 #                             wikiWord, u"short_hint", None)
 #                     if len(propList) > 0:
 #                         callTip = propList[-1][2]
@@ -2953,7 +3176,7 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
             # On Linux, at least Ubuntu, fn may be a UTF-8 encoded unicode(!?)
             # string
             try:
-                filenames = [utf8Dec(fn.encode("latin-1"))[0]
+                filenames = [StringOps.utf8Dec(fn.encode("latin-1"))[0]
                         for fn in filenames]
             except (UnicodeEncodeError, UnicodeDecodeError):
                 pass
@@ -3022,11 +3245,30 @@ Follow Link New Tab;CMD_ACTIVATE_NEW_TAB_THIS
 Follow Link New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
 """
 
+_CONTEXT_MENU_INTEXT_FILE_URL = \
+u"""
+Open Containing Folder;CMD_OPEN_CONTAINING_FOLDER
+"""
+
+
 _CONTEXT_MENU_INTEXT_URL_TO_CLIPBOARD = \
 u"""
 -
 Copy Anchor URL to Clipboard;CMD_CLIPBOARD_COPY_URL_TO_THIS_ANCHOR
 """
+
+_CONTEXT_MENU_SELECT_TEMPLATE_IN_TEMPLATE_MENU = \
+u"""
+-
+Other...;CMD_SELECT_TEMPLATE
+"""
+
+_CONTEXT_MENU_SELECT_TEMPLATE = \
+u"""
+-
+Use Template...;CMD_SELECT_TEMPLATE
+"""
+
 
 _CONTEXT_MENU_INTEXT_BOTTOM = \
 u"""
@@ -3059,7 +3301,12 @@ N_(u"Follow Link")
 N_(u"Follow Link New Tab")
 N_(u"Follow Link New Tab Backgrd.")
 
+N_(u"Open Containing Folder")
+
 N_(u"Copy anchor URL to clipboard")
+
+N_(u"Other...")
+N_(u"Use Template...")
 
 N_(u"Close Tab")
 
@@ -3071,3 +3318,80 @@ N_(u"&Unfold All")
 N_(u"Unfold everything in current editor")
 N_(u"&Fold All")
 N_(u"Fold everything in current editor")
+
+
+
+# Default mapping based on Scintilla's "KeyMap.cxx" file
+_DEFAULT_STC_KEYS = (
+        (wx.stc.STC_KEY_DOWN,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_LINEDOWN),
+        (wx.stc.STC_KEY_DOWN,		wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_LINEDOWNEXTEND),
+        (wx.stc.STC_KEY_DOWN,		wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINESCROLLDOWN),
+        (wx.stc.STC_KEY_DOWN,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_LINEDOWNRECTEXTEND),
+        (wx.stc.STC_KEY_UP,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_LINEUP),
+        (wx.stc.STC_KEY_UP,			wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_LINEUPEXTEND),
+        (wx.stc.STC_KEY_UP,			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINESCROLLUP),
+        (wx.stc.STC_KEY_UP,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_LINEUPRECTEXTEND),
+#         (ord('['),			wx.stc.STC_SCMOD_CTRL,		wx.stc.STC_CMD_PARAUP),
+#         (ord('['),			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_PARAUPEXTEND),
+#         (ord(']'),			wx.stc.STC_SCMOD_CTRL,		wx.stc.STC_CMD_PARADOWN),
+#         (ord(']'),			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_PARADOWNEXTEND),
+        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_CHARLEFT),
+        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_CHARLEFTEXTEND),
+        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDLEFT),
+        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDLEFTEXTEND),
+        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_CHARLEFTRECTEXTEND),
+        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_CHARRIGHT),
+        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_CHARRIGHTEXTEND),
+        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDRIGHT),
+        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDRIGHTEXTEND),
+        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_CHARRIGHTRECTEXTEND),
+#         (ord('/'),		wx.stc.STC_SCMOD_CTRL,		wx.stc.STC_CMD_WORDPARTLEFT),
+#         (ord('/'),		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDPARTLEFTEXTEND),
+#         (ord('\\'),		wx.stc.STC_SCMOD_CTRL,		wx.stc.STC_CMD_WORDPARTRIGHT),
+#         (ord('\\'),		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDPARTRIGHTEXTEND),
+        (wx.stc.STC_KEY_HOME,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_VCHOME),
+        (wx.stc.STC_KEY_HOME, 		wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_VCHOMEEXTEND),
+        (wx.stc.STC_KEY_HOME, 		wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DOCUMENTSTART),
+        (wx.stc.STC_KEY_HOME, 		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DOCUMENTSTARTEXTEND),
+        (wx.stc.STC_KEY_HOME, 		wx.stc.STC_SCMOD_ALT, 	wx.stc.STC_CMD_HOMEDISPLAY),
+        (wx.stc.STC_KEY_HOME,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_VCHOMERECTEXTEND),
+        (wx.stc.STC_KEY_END,	 	wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_LINEEND),
+        (wx.stc.STC_KEY_END,	 	wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_LINEENDEXTEND),
+        (wx.stc.STC_KEY_END, 		wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DOCUMENTEND),
+        (wx.stc.STC_KEY_END, 		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DOCUMENTENDEXTEND),
+        (wx.stc.STC_KEY_END, 		wx.stc.STC_SCMOD_ALT, 	wx.stc.STC_CMD_LINEENDDISPLAY),
+        (wx.stc.STC_KEY_END,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_LINEENDRECTEXTEND),
+        (wx.stc.STC_KEY_PRIOR,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_PAGEUP),
+        (wx.stc.STC_KEY_PRIOR,		wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_PAGEUPEXTEND),
+        (wx.stc.STC_KEY_PRIOR,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_PAGEUPRECTEXTEND),
+        (wx.stc.STC_KEY_NEXT, 		wx.stc.STC_SCMOD_NORM, 	wx.stc.STC_CMD_PAGEDOWN),
+        (wx.stc.STC_KEY_NEXT, 		wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_PAGEDOWNEXTEND),
+        (wx.stc.STC_KEY_NEXT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_PAGEDOWNRECTEXTEND),
+        (wx.stc.STC_KEY_DELETE, 	wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_CLEAR),
+        (wx.stc.STC_KEY_DELETE, 	wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_DELWORDRIGHT),
+        (wx.stc.STC_KEY_DELETE,	wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_DELLINERIGHT),
+        (wx.stc.STC_KEY_INSERT, 		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_EDITTOGGLEOVERTYPE),
+        (wx.stc.STC_KEY_ESCAPE,  	wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_CANCEL),
+        (wx.stc.STC_KEY_BACK,		wx.stc.STC_SCMOD_NORM, 	wx.stc.STC_CMD_DELETEBACK),
+        (wx.stc.STC_KEY_BACK,		wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_DELETEBACK),
+        (wx.stc.STC_KEY_BACK,		wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DELWORDLEFT),
+        (wx.stc.STC_KEY_BACK, 		wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_UNDO),
+        (wx.stc.STC_KEY_BACK,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_DELLINELEFT),
+        (ord('Z'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_UNDO),
+        (ord('Y'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_REDO),
+        (ord('A'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_SELECTALL),
+        (wx.stc.STC_KEY_TAB,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_TAB),
+        (wx.stc.STC_KEY_TAB,		wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_BACKTAB),
+        (wx.stc.STC_KEY_RETURN, 	wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_NEWLINE),
+        (wx.stc.STC_KEY_RETURN, 	wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_NEWLINE),
+        (wx.stc.STC_KEY_ADD, 		wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_ZOOMIN),
+        (wx.stc.STC_KEY_SUBTRACT,	wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_ZOOMOUT),
+#         (wx.stc.STC_KEY_DIVIDE,	wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_SETZOOM),
+#         (ord('L'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINECUT),
+#         (ord('L'), 			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINEDELETE),
+#         (ord('T'), 			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINECOPY),
+#         (ord('T'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINETRANSPOSE),
+#         (ord('D'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_SELECTIONDUPLICATE),
+#         (ord('U'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LOWERCASE),
+#         (ord('U'), 			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_UPPERCASE),
+    )

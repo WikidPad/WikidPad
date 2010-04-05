@@ -102,7 +102,7 @@ class SpellCheckerDialog(wx.Dialog):
         if not isinstance(docPage, (AliasWikiPage, WikiPage)):
             return  # No support for functional pages
 
-        lang = docPage.getPropertyOrGlobal(u"language", self.dictLanguage)
+        lang = docPage.getAttributeOrGlobal(u"language", self.dictLanguage)
         try:
             if lang == u"":
                 raise EnchantDriver.DictNotFoundError()

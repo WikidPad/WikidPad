@@ -206,14 +206,15 @@ class OpenWikiWordDialog(wx.Dialog):
             self.SetTitle(title)
 
         self.ctrls = XrcControls(self)
+        
+        self.ctrls.chSort.SetSelection(self.pWiki.getConfig().getint("main",
+                "openWikiWordDialog_sortOrder", 0))
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         
         # Fixes focus bug under Linux
         self.SetFocus()
-
-        wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
 
         wx.EVT_TEXT(self, ID, self.OnText)
         wx.EVT_CHAR(self.ctrls.text, self.OnCharText)
@@ -222,6 +223,7 @@ class OpenWikiWordDialog(wx.Dialog):
         wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
         wx.EVT_BUTTON(self, GUI_ID.btnCreate, self.OnCreate)
+        wx.EVT_CHOICE(self, GUI_ID.chSort, self.OnChoiceSort)
         wx.EVT_BUTTON(self, GUI_ID.btnDelete, self.OnDelete)
         wx.EVT_BUTTON(self, GUI_ID.btnNewTab, self.OnNewTab)
         wx.EVT_BUTTON(self, GUI_ID.btnNewTabBackground, self.OnNewTabBackground)
@@ -235,14 +237,27 @@ class OpenWikiWordDialog(wx.Dialog):
         if len(searchTxt) == 0:
             self.listContent = []
             return
-
+        
+        orderChoice = self.ctrls.chSort.GetSelection()
+        
+        if orderChoice == 1:
+            orderBy = "visited"
+            descend = True
+        elif orderChoice == 2:
+            orderBy = "visited"
+            descend = False
+        else:   # orderChoice == 0:
+            orderBy = "word"
+            descend = False
+        
         if searchTxt == u"%":
             self.listContent = self.pWiki.getWikiData()\
-                    .getWikiWordMatchTermsWith(u"")
+                    .getWikiWordMatchTermsWith(u"", orderBy=orderBy,
+                    descend=descend)
             return
         
         self.listContent = self.pWiki.getWikiData().getWikiWordMatchTermsWith(
-                searchTxt)
+                searchTxt, orderBy=orderBy, descend=descend)
 
 
     def activateSelectedWikiWords(self, tabMode):
@@ -292,17 +307,19 @@ class OpenWikiWordDialog(wx.Dialog):
                             self.ctrls.text.SetFocus()
                             return False
     
-                        self.value = ((wikiWord, 0, wikiWord, -1),)
+                        self.value = ((wikiWord, 0, wikiWord, -1, -1),)
             else:
-                self.value = ((entered, 0, entered, -1),)
+                self.value = ((entered, 0, entered, -1, -1),)
 
         if self.pWiki.activatePageByUnifiedName(u"wikipage/" + self.value[0][2],
-                tabMode=tabMode) is None:   # TODO: Go to charPos
+                tabMode=tabMode, firstcharpos=self.value[0][3],
+                charlength=self.value[0][4]) is None:   # TODO: Go to charPos
             return True   # False instead ?
 
         for term in self.value[1:]:
             if self.pWiki.activatePageByUnifiedName(u"wikipage/" + term[2],
-                    tabMode=3) is None:   # TODO: Go to charPos
+                    tabMode=3, firstcharpos=term[3],
+                    charlength=term[4]) is None:   # TODO: Go to charPos
                 break
 
         return True
@@ -316,17 +333,28 @@ class OpenWikiWordDialog(wx.Dialog):
             self.ignoreTextChange -= 1
             return
 
-        text = guiToUni(evt.GetString())
+        text = guiToUni(self.ctrls.text.GetValue())  # evt.GetString())
+        
+        listBox = self.ctrls.lb
 
-        self.ctrls.lb.Freeze()
+        listBox.Freeze()
         try:
-            self.ctrls.lb.Clear()
+            listBox.Clear()
             self._fillListContent(text)
 
-            for term in self.listContent:
-                self.ctrls.lb.Append(term[0])
+            listBox.AppendItems([term[0] for term in self.listContent])
+
+#             for term in self.listContent:
+#                 listBox.Append(term[0])
         finally:
-            self.ctrls.lb.Thaw()
+            listBox.Thaw()
+
+
+    def OnChoiceSort(self, evt):
+        self.pWiki.getConfig().set("main", "openWikiWordDialog_sortOrder",
+                self.ctrls.chSort.GetSelection())
+
+        self.OnText(evt)
 
 
     def OnListBox(self, evt):

@@ -1571,8 +1571,8 @@
           <object class="sizeritem">
             <object class="wxChoice" name="chMouseMiddleButtonWithoutCtrl">
               <content>
-                <item>New Tab</item>
-                <item>New Tab Background</item>
+                <item>New tab in foreground</item>
+                <item>New tab in background</item>
                 <item>Same Tab</item>
               </content>
               <selection>0</selection>
@@ -1590,8 +1590,8 @@
           <object class="sizeritem">
             <object class="wxChoice" name="chMouseMiddleButtonWithCtrl">
               <content>
-                <item>New Tab</item>
-                <item>New Tab Background</item>
+                <item>New tab in foreground</item>
+                <item>New tab in background</item>
                 <item>Same Tab</item>
               </content>
               <selection>1</selection>
@@ -2449,6 +2449,18 @@
             <flag>wxALL|wxEXPAND</flag>
             <border>5</border>
           </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Template page names reg. exp.:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfTemplatePageNamesRE"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
@@ -2932,7 +2944,7 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
-        <object class="wxFlexGridSizer">
+        <object class="wxGridBagSizer">
           <object class="sizeritem">
             <object class="wxButton" name="btnOk">
               <label> OK </label>
@@ -2941,6 +2953,7 @@
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
+            <cellpos>0,0</cellpos>
           </object>
           <object class="sizeritem">
             <object class="wxButton" name="btnCancel">
@@ -2949,6 +2962,7 @@
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
+            <cellpos>0,1</cellpos>
           </object>
           <object class="sizeritem">
             <object class="wxButton" name="btnCreate">
@@ -2957,13 +2971,36 @@
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
+            <cellpos>0,2</cellpos>
           </object>
-          <cols>3</cols>
-          <object class="spacer">
-            <size>0,0</size>
-          </object>
-          <object class="spacer">
-            <size>0,0</size>
+          <object class="sizeritem">
+            <object class="wxBoxSizer">
+              <orient>wxHORIZONTAL</orient>
+              <object class="sizeritem">
+                <object class="wxStaticText">
+                  <label>Order:</label>
+                </object>
+                <flag>wxALL|wxALIGN_CENTRE_VERTICAL|wxALIGN_CENTRE_HORIZONTAL</flag>
+                <border>5</border>
+                <cellpos>2,0</cellpos>
+              </object>
+              <object class="sizeritem">
+                <object class="wxChoice" name="chSort">
+                  <content>
+                    <item>Alphabetically</item>
+                    <item>Newest visited</item>
+                    <item>Oldest visited</item>
+                  </content>
+                  <selection>0</selection>
+                </object>
+                <option>1</option>
+                <flag>wxALL|wxEXPAND</flag>
+                <border>5</border>
+              </object>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <cellpos>1,0</cellpos>
+            <cellspan>1,2</cellspan>
           </object>
           <object class="sizeritem">
             <object class="wxButton" name="btnDelete">
@@ -2972,14 +3009,15 @@
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
+            <cellpos>1,2</cellpos>
           </object>
           <object class="sizeritem">
             <object class="wxStaticText">
               <label>Open in ...</label>
-              <style>wxALIGN_RIGHT</style>
             </object>
-            <flag>wxALIGN_CENTRE_VERTICAL|wxALIGN_CENTRE_HORIZONTAL</flag>
+            <flag>wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
+            <cellpos>2,0</cellpos>
           </object>
           <object class="sizeritem">
             <object class="wxButton" name="btnNewTab">
@@ -2988,6 +3026,7 @@
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
+            <cellpos>2,1</cellpos>
           </object>
           <object class="sizeritem">
             <object class="wxButton" name="btnNewTabBackground">
@@ -2996,8 +3035,13 @@
             <option>0</option>
             <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
             <border>5</border>
+            <cellpos>2,2</cellpos>
           </object>
+          <growablecols>0</growablecols>
+          <growablecols>1</growablecols>
+          <growablecols>2</growablecols>
         </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
     </object>
     <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>

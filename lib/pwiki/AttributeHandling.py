@@ -1,5 +1,5 @@
 """
-GUI support and error checking for handling properties (=attributes)
+GUI support and error checking for handling attributes (=properties)
 """
 
 from __future__ import with_statement
@@ -199,23 +199,23 @@ def buildColorsSubmenu():
 
 
 
-class AbstractPropertyCheck:
+class AbstractAttributeCheck:
     """
-    Base class for the PropertyCheck* classes
+    Base class for the AttributeCheck* classes
     """
-    def __init__(self, mainControl, propChecker):
+    def __init__(self, mainControl, attrChecker):
         """
-        propChecker -- PropertyChecker
+        attrChecker -- AttributeChecker
         """
         self.mainControl = mainControl
-        self.propChecker = propChecker
+        self.attrChecker = attrChecker
 
         self.wikiPage = None
         self.pageAst = None
 
     def getResponsibleRegex(self):
         """
-        Return a compiled regular expression of the property name(s) (keys)
+        Return a compiled regular expression of the attribute name(s) (keys)
         this object is responsible for
         """
         assert 0  # abstract
@@ -237,16 +237,16 @@ class AbstractPropertyCheck:
         self.pageAst = None
 
 
-    def checkEntry(self, propName, propValue, foundProps, start, end, match):
+    def checkEntry(self, attrName, attrValue, foundAttrs, start, end, match):
         """
-        Check property entry and issue messages if necessary. The function
-        can assume that the propName matches the regex returned by
+        Check attribute entry and issue messages if necessary. The function
+        can assume that the attrName matches the regex returned by
         getResponsibleRegex().
 
-        foundProps -- Set of tuples (propName, propValue) of previously found
-            props on a page
-        start -- char pos in page where property entry starts
-        end -- char pos after end of property entry
+        foundAttrs -- Set of tuples (attrName, attrValue) of previously found
+            attrs on a page
+        start -- char pos in page where attribute entry starts
+        end -- char pos after end of attribute entry
         match -- regex match returned by checking the reposibility regex
         """
         assert 0  # abstract
@@ -254,81 +254,81 @@ class AbstractPropertyCheck:
 
 
 
-class PropertyCheckAlias(AbstractPropertyCheck):
+class AttributeCheckAlias(AbstractAttributeCheck):
     """
-    Property check for "alias" property
+    Attribute check for "alias" attribute
     """
-    def __init__(self, mainControl, propChecker):
-        AbstractPropertyCheck.__init__(self, mainControl, propChecker)
+    def __init__(self, mainControl, attrChecker):
+        AbstractAttributeCheck.__init__(self, mainControl, attrChecker)
         
     def getResponsibleRegex(self):
         """
-        Return a compiled regular expression of the property name(s) (keys)
+        Return a compiled regular expression of the attribute name(s) (keys)
         this object is responsible for
         """
         return _re.compile(ur"^alias$", _re.DOTALL | _re.UNICODE | _re.MULTILINE)
 
-    def checkEntry(self, propName, propValue, foundProps, start, end, match):
+    def checkEntry(self, attrName, attrValue, foundAttrs, start, end, match):
         """
-        Check property entry and issue messages if necessary
-        foundProps -- Set of tuples (propName, propValue) of previously found
-            props on a page
+        Check attribute entry and issue messages if necessary
+        foundAttrs -- Set of tuples (attrName, attrValue) of previously found
+            attrs on a page
         """
         wikiDocument = self.wikiPage.getWikiDocument()
         langHelper = wx.GetApp().createWikiLanguageHelper(
                 wikiDocument.getWikiDefaultWikiLanguage())
 
         wikiWord = self.wikiPage.getWikiWord()
-        errMsg = langHelper.checkForInvalidWikiWord(propValue, wikiDocument)
+        errMsg = langHelper.checkForInvalidWikiWord(attrValue, wikiDocument)
      
         if errMsg :
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
                     _(u"Alias value isn't a valid wikiword: [%s: %s], %s") %
-                    (propName, propValue, errMsg), wikiWord, wikiWord,
+                    (attrName, attrValue, errMsg), wikiWord, wikiWord,
                     (start, end))
-            self.propChecker.appendLogMessage(msg)
+            self.attrChecker.appendLogMessage(msg)
             return
             
         wikiData = self.mainControl.getWikiData()
-#         print "checkEntry3", repr(propValue), repr(wikiData.isAlias(propValue)), \
-#                 repr(wikiData.isDefinedWikiWord(propValue))
+#         print "checkEntry3", repr(attrValue), repr(wikiData.isAlias(attrValue)), \
+#                 repr(wikiData.isDefinedWikiWord(attrValue))
 
-        if wikiData.isDefinedWikiPage(propValue):
+        if wikiData.isDefinedWikiPage(attrValue):
             # Word exists and isn't an alias
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
                     _(u"A real wikiword with the alias name exists already: "
                     u"[%s: %s]") %
-                    (propName, propValue), wikiWord, wikiWord, (start, end))
-            self.propChecker.appendLogMessage(msg)
+                    (attrName, attrValue), wikiWord, wikiWord, (start, end))
+            self.attrChecker.appendLogMessage(msg)
             return
             
-#         words = wikiData.getWordsWithPropertyValue(u"alias", propValue)
+#         words = wikiData.getWordsWithAttributeValue(u"alias", attrValue)
         words = [w for w,k,v in wikiDocument
-                .getPropertyTriples(None, "bookmarked", propValue)]
+                .getAttributeTriples(None, "bookmarked", attrValue)]
 
 
         if len(words) > 1 or (len(words) > 0 and words[0] != wikiWord):
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
                     _(u"'%s' is already alias for the wiki word(s): %s") %
-                    (propValue, u"; ".join(words)), wikiWord, wikiWord,
+                    (attrValue, u"; ".join(words)), wikiWord, wikiWord,
                     (start, end))
-            self.propChecker.appendLogMessage(msg)
+            self.attrChecker.appendLogMessage(msg)
             return
 
 
-class PropertyCheckPresentation(AbstractPropertyCheck):
+class AttributeCheckPresentation(AbstractAttributeCheck):
     """
-    Property check for presentation properties "icon", "color" and "bold" and
+    Attribute check for presentation attributes "icon", "color" and "bold" and
     their global counterparts.
     """
-    def __init__(self, mainControl, propChecker):
-        AbstractPropertyCheck.__init__(self, mainControl, propChecker)
+    def __init__(self, mainControl, attrChecker):
+        AbstractAttributeCheck.__init__(self, mainControl, attrChecker)
         self.foundEntryNames = None  # Set of found presentation entry names 
 
 
     def getResponsibleRegex(self):
         """
-        Return a compiled regular expression of the property name(s) (keys)
+        Return a compiled regular expression of the attribute name(s) (keys)
         this object is responsible for
         """
         return _re.compile(ur"^(?:global\..*?\.)?(icon|color|bold)$",
@@ -336,73 +336,73 @@ class PropertyCheckPresentation(AbstractPropertyCheck):
 
 
     def beginPageCheck(self, wikiPage, pageAst):
-        AbstractPropertyCheck.beginPageCheck(self, wikiPage, pageAst)
+        AbstractAttributeCheck.beginPageCheck(self, wikiPage, pageAst)
         self.foundEntryNames = set()
 
 
     def endPageCheck(self):
         self.foundEntryNames = None
-        AbstractPropertyCheck.endPageCheck(self)
+        AbstractAttributeCheck.endPageCheck(self)
 
 
-    def checkEntry(self, propName, propValue, foundProps, start, end, match):
+    def checkEntry(self, attrName, attrValue, foundAttrs, start, end, match):
         """
-        Check property entry and issue messages if necessary
-        foundProps -- Set of tuples (propName, propValue) of previously found
-            props on a page
+        Check attribute entry and issue messages if necessary
+        foundAttrs -- Set of tuples (attrName, attrValue) of previously found
+            attrs on a page
         """
         wikiWord = self.wikiPage.getWikiWord()
 
         # Check for double entries with different values on same page
-        if propName in self.foundEntryNames:
+        if attrName in self.foundEntryNames:
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
                     _(u"The attribute %s was already set differently on this page") %
-                    (propName,), wikiWord, wikiWord, (start, end))
-            self.propChecker.appendLogMessage(msg)
+                    (attrName,), wikiWord, wikiWord, (start, end))
+            self.attrChecker.appendLogMessage(msg)
         else:
-            self.foundEntryNames.add(propName)
+            self.foundEntryNames.add(attrName)
             
-        # Check for double entries on other pages for global.* props
+        # Check for double entries on other pages for global.* attrs
         wikiData = self.mainControl.getWikiData()
-        if propName.startswith(u"global"):
-            words = wikiData.getWordsForPropertyName(propName)
+        if attrName.startswith(u"global"):
+            words = wikiData.getWordsForAttributeName(attrName)
             if len(words) > 1 or (len(words) > 0 and words[0] != wikiWord):
                 msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
                         _(u"Attribute '%s' is already defined on the wiki page(s): %s") %
-                        (propName, u"; ".join(words)), wikiWord, wikiWord,
+                        (attrName, u"; ".join(words)), wikiWord, wikiWord,
                         (start, end))
-                self.propChecker.appendLogMessage(msg)
+                self.attrChecker.appendLogMessage(msg)
 
         # Check if value is a valid name for icon/color
-        if propName.endswith(u"icon"):
-            if self.mainControl.lookupIconIndex(propValue) == -1:
+        if attrName.endswith(u"icon"):
+            if self.mainControl.lookupIconIndex(attrValue) == -1:
                 msg = LogMessage(self.mainControl, LogMessage.SEVERITY_HINT,
                         _(u"Icon name doesn't exist: [%s: %s]") %
-                        (propName, propValue), wikiWord, wikiWord, (start, end))
-                self.propChecker.appendLogMessage(msg)
-        elif propName.endswith(u"color"):
-#             if propValue.upper() not in _COLORS:
-            if StringOps.colorDescToRgbTuple(propValue) is None:
+                        (attrName, attrValue), wikiWord, wikiWord, (start, end))
+                self.attrChecker.appendLogMessage(msg)
+        elif attrName.endswith(u"color"):
+#             if attrValue.upper() not in _COLORS:
+            if StringOps.colorDescToRgbTuple(attrValue) is None:
                 msg = LogMessage(self.mainControl, LogMessage.SEVERITY_HINT,
                         _(u"Color name doesn't exist: [%s: %s]") %
-                        (propName, propValue), wikiWord, wikiWord, (start, end))
-                self.propChecker.appendLogMessage(msg)
+                        (attrName, attrValue), wikiWord, wikiWord, (start, end))
+                self.attrChecker.appendLogMessage(msg)
 
 
 # TODO Move to extension
-class PropertyCheckGlobalGraphInclude(AbstractPropertyCheck):
+class AttributeCheckGlobalGraphInclude(AbstractAttributeCheck):
     """
-    Property check for presentation properties "icon", "color" and "bold" and
+    Attribute check for presentation attributes "icon", "color" and "bold" and
     their global counterparts.
     """
-    def __init__(self, mainControl, propChecker):
-        AbstractPropertyCheck.__init__(self, mainControl, propChecker)
+    def __init__(self, mainControl, attrChecker):
+        AbstractAttributeCheck.__init__(self, mainControl, attrChecker)
         self.foundEntryNames = None  # Set of found presentation entry names 
 
 
     def getResponsibleRegex(self):
         """
-        Return a compiled regular expression of the property name(s) (keys)
+        Return a compiled regular expression of the attribute name(s) (keys)
         this object is responsible for
         """
         return _re.compile(ur"^global\.graph\.relations\.include$",
@@ -410,45 +410,45 @@ class PropertyCheckGlobalGraphInclude(AbstractPropertyCheck):
 
 
 #     def beginPageCheck(self, wikiPage, pageAst):
-#         AbstractPropertyCheck.beginPageCheck(self, wikiPage, pageAst)
+#         AbstractAttributeCheck.beginPageCheck(self, wikiPage, pageAst)
 # 
 # 
 #     def endPageCheck(self):
-#         AbstractPropertyCheck.endPageCheck(self)
+#         AbstractAttributeCheck.endPageCheck(self)
 
 
-    def checkEntry(self, propName, propValue, foundProps, start, end, match):
+    def checkEntry(self, attrName, attrValue, foundAttrs, start, end, match):
         """
-        Check property entry and issue messages if necessary
-        foundProps -- Set of tuples (propName, propValue) of previously found
-            props on a page
+        Check attribute entry and issue messages if necessary
+        foundAttrs -- Set of tuples (attrName, attrValue) of previously found
+            attrs on a page
         """
         wikiWord = self.wikiPage.getWikiWord()
         wikiDocument = self.wikiPage.getWikiDocument()
         
-        props = wikiDocument.getPropertyTriples(None,
+        attrs = wikiDocument.getAttributeTriples(None,
                 "global.graph.relations.exclude", None)
         
-        if len(props) > 0:
+        if len(attrs) > 0:
             # Check for double entries with different values on same page
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
                     _(u"The attribute 'global.graph.relations.exclude' (e.g. on page '%s') "
-                        "overrides the '...include' property") %
-                    (props[0][0],), wikiWord, wikiWord, (start, end))
+                        "overrides the '...include' attribute") %
+                    (attrs[0][0],), wikiWord, wikiWord, (start, end))
             
-            self.propChecker.appendLogMessage(msg)
+            self.attrChecker.appendLogMessage(msg)
             
 
 
-class PropertyChecker:
+class AttributeChecker:
     """
-    Component which checks a page for possible errors in the written properties
+    Component which checks a page for possible errors in the written attributes
     """
     def __init__(self, mainControl):
         self.mainControl = mainControl
-        self.singleCheckList = [PropertyCheckAlias(self.mainControl, self),
-                PropertyCheckPresentation(self.mainControl, self),
-                PropertyCheckGlobalGraphInclude(self.mainControl, self)]
+        self.singleCheckList = [AttributeCheckAlias(self.mainControl, self),
+                AttributeCheckPresentation(self.mainControl, self),
+                AttributeCheckGlobalGraphInclude(self.mainControl, self)]
 
         # Fill singleCheckREs (needed by findCheckObject)
         self.singleCheckREs = []
@@ -460,7 +460,7 @@ class PropertyChecker:
 
     def _beginPageCheck(self, wikiPage, pageAst):
         """
-        Calls beginPageCheck of all PropertyCheck* objects in
+        Calls beginPageCheck of all AttributeCheck* objects in
         the singleCheckList
         """
         for c in self.singleCheckList:
@@ -472,7 +472,7 @@ class PropertyChecker:
 
     def _endPageCheck(self):
         """
-        Calls endPageCheck of all PropertyCheck* objects in
+        Calls endPageCheck of all AttributeCheck* objects in
         the singleCheckList
         """
         for c in self.singleCheckList:
@@ -482,13 +482,13 @@ class PropertyChecker:
                 traceback.print_exc()
 
 
-    def findCheckObject(self, propName):
+    def findCheckObject(self, attrName):
         """
-        Return appropriate PropertyCheck* object from singleCheckList and
+        Return appropriate AttributeCheck* object from singleCheckList and
         match object or (None, None) if not found.
         """
         for p, c in self.singleCheckREs:
-            match = p.match(propName)
+            match = p.match(attrName)
             if match:
                 return c, match
 
@@ -497,7 +497,7 @@ class PropertyChecker:
 
     def appendLogMessage(self, msg):
         if self.msgCollector is None:
-            raise InternalError(u"Calling PropertyChecker.appendLogMessage "
+            raise InternalError(u"Calling AttributeChecker.appendLogMessage "
                     u"while outside of checkPage")
         
         self.msgCollector.append(msg)
@@ -533,41 +533,41 @@ class PropertyChecker:
 
     def checkPage(self, wikiPage):
         """
-        Check properties for a given page and page ast and fill
+        Check attributes for a given page and page ast and fill
         log window with messages if necessary
         """
         if wikiPage.isInvalid():
             return
 
-        foundProps = set()
+        foundAttrs = set()
         wikiWord = wikiPage.getWikiWord()
         pageAst = wikiPage.getLivePageAstIfAvailable()
         if pageAst is None:
             return
 
-        propNodes = wikiPage.extractPropertyNodesFromPageAst(pageAst)
+        attrNodes = wikiPage.extractAttributeNodesFromPageAst(pageAst)
 
         self._beginPageCheck(wikiPage, pageAst)
         try:
             self.msgCollector = []
 
-            for node in propNodes:
-                for propTuple in node.props:
-                    propKey, propValue = propTuple
+            for node in attrNodes:
+                for attrTuple in node.attrs:
+                    attrKey, attrValue = attrTuple
 
-                    if propTuple in foundProps:
+                    if attrTuple in foundAttrs:
                         msg = LogMessage(self.mainControl, LogMessage.SEVERITY_HINT,
-                                _(u"Same attribute twice: [%s: %s]") % propTuple,
+                                _(u"Same attribute twice: [%s: %s]") % attrTuple,
                                 wikiWord, wikiWord,
                                 (node.pos, node.pos + node.strLength))
                         self.appendLogMessage(msg)
-                        continue # if first property had messages there's no need to repeat them
+                        continue # if first attribute had messages there's no need to repeat them
 
-                    foundProps.add(propTuple)
+                    foundAttrs.add(attrTuple)
 
-                    c, match = self.findCheckObject(propKey)
+                    c, match = self.findCheckObject(attrKey)
                     if c is not None:                
-                        c.checkEntry(propKey, propValue, foundProps, node.pos,
+                        c.checkEntry(attrKey, attrValue, foundAttrs, node.pos,
                                 node.pos + node.strLength, match)
 
             callInMainThreadAsync(self.mainControl.getLogWindow().updateForWikiWord,

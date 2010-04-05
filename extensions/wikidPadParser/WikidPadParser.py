@@ -1,6 +1,9 @@
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
+# Official parser plugin for wiki language "WikidPad default 2.0"
+# Last modified (format YYYY-MM-DD): 2010-03-28
+
 
 import locale, pprint, time, sys, string, traceback
 
@@ -242,7 +245,8 @@ def actionTodoEntry(s, l, st, t):
     t.keyComponents = t.key.split(u".")
     t.delimiter = t.findFlatByName("todoDelimiter").getString()
     t.valueNode = t.findFlatByName("value")
-        
+    t.todos = [(t.key, t.valueNode)]
+
 
 
 todoKey = buildRegex(ur"\b(?:todo|done|wait|action|track|issue|"
@@ -913,33 +917,34 @@ footnoteRE = re.compile(ur"^" + footnotePAT + ur"$",
         re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
-# -------------------- Properties (=attributes) and insertions --------------------
+# -------------------- Attributes (=properties) and insertions --------------------
 
 
-def actionPropInsValueQuoteStart(s, l, st, t):
-    st.dictStack.getSubTopDict()["propInsValueQuote"] = t[0].text
+def actionAttrInsValueQuoteStart(s, l, st, t):
+    st.dictStack.getSubTopDict()["attrInsValueQuote"] = t[0].text
 
-def actionPropInsValueQuoteEnd(s, l, st, t):
-#     print "--actionPropInsValueQuoteEnd", repr((l, t[0].text, st.dictStack.getSubTopDict().get("propInsValueQuote")))
-    if t[0].text != st.dictStack.getSubTopDict().get("propInsValueQuote"):
-        raise ParseException(s, l, "End quote of property/insertion does not match start")
+def actionAttrInsValueQuoteEnd(s, l, st, t):
+    if t[0].text != st.dictStack.getSubTopDict().get("attrInsValueQuote"):
+        raise ParseException(s, l, "End quote of attribute/insertion does not match start")
 
 
-def pseudoActionPropInsQuotedValue(s, l, st, t):
+def pseudoActionAttrInsQuotedValue(s, l, st, t):
     if t.strLength == 0:
         return []
     t.name = "value"
     return t
 
 
-def actionProperty(s, l, st, t):
+def actionAttribute(s, l, st, t):
     key = t.findFlatByName("key").getString()
     t.key = key
-    t.props = [(key, vNode.getString()) for vNode in t.iterFlatByName("value")]
+    t.keyComponents = t.key.split(u".")
+    t.attrs = [(key, vNode.getString()) for vNode in t.iterFlatByName("value")]
 
 
 def actionInsertion(s, l, st, t):
     t.key = t.findFlatByName("key").getString()
+    t.keyComponents = t.key.split(u".")
     values = list(vNode.getString() for vNode in t.iterFlatByName("value"))
     t.value = values[0]
     del values[0]
@@ -947,31 +952,31 @@ def actionInsertion(s, l, st, t):
 
 
 
-propInsQuote = buildRegex(ur"\"+|'+|/+|\\+")
-propInsQuoteStart = propInsQuote.copy()\
-        .setParseAction(actionPropInsValueQuoteStart)
-propInsQuoteEnd = propInsQuote.copy()\
-        .setParseAction(actionPropInsValueQuoteEnd)
+attrInsQuote = buildRegex(ur"\"+|'+|/+|\\+")
+attrInsQuoteStart = attrInsQuote.copy()\
+        .setParseAction(actionAttrInsValueQuoteStart)
+attrInsQuoteEnd = attrInsQuote.copy()\
+        .setParseAction(actionAttrInsValueQuoteEnd)
 
-propInsQuotedValue = FindFirst([], propInsQuoteEnd)\
-        .setPseudoParseAction(pseudoActionPropInsQuotedValue)
+attrInsQuotedValue = FindFirst([], attrInsQuoteEnd)\
+        .setPseudoParseAction(pseudoActionAttrInsQuotedValue)
 
-propInsNonQuotedValue = buildRegex(ur"[\w\-\_ \t:,.!?#%|]*", "value")
+attrInsNonQuotedValue = buildRegex(ur"[\w\-\_ \t:,.!?#%|/]*", "value")
 
-propInsValue = whitespace + ((propInsQuoteStart + propInsQuotedValue + \
-        propInsQuoteEnd) | propInsNonQuotedValue)
+attrInsValue = whitespace + ((attrInsQuoteStart + attrInsQuotedValue + \
+        attrInsQuoteEnd) | attrInsNonQuotedValue)
 
-propInsKey = buildRegex(ur"[\w\-\_\.]+", "key")
+attrInsKey = buildRegex(ur"[\w\-\_\.]+", "key")
 
-property = bracketStart + whitespace + propInsKey + \
-        buildRegex(ur"[ \t]*[=:]") + propInsValue + \
-        ZeroOrMore(buildRegex(ur";") + propInsValue) + bracketEnd
-property = property.setResultsNameNoCopy("property").setParseAction(actionProperty)
+attribute = bracketStart + whitespace + attrInsKey + \
+        buildRegex(ur"[ \t]*[=:]") + attrInsValue + \
+        ZeroOrMore(buildRegex(ur";") + attrInsValue) + bracketEnd
+attribute = attribute.setResultsNameNoCopy("attribute").setParseAction(actionAttribute)
 
 
-insertion = bracketStart + buildRegex(ur":") + whitespace + propInsKey + \
-        buildRegex(ur"[ \t]*[=:]") + propInsValue + \
-        ZeroOrMore(buildRegex(ur";") + propInsValue) + bracketEnd
+insertion = bracketStart + buildRegex(ur":") + whitespace + attrInsKey + \
+        buildRegex(ur"[ \t]*[=:]") + attrInsValue + \
+        ZeroOrMore(buildRegex(ur";") + attrInsValue) + bracketEnd
 insertion = insertion.setResultsNameNoCopy("insertion").setParseAction(actionInsertion)
 
 
@@ -1011,7 +1016,7 @@ RevWikiWordRE      = re.compile(ur"^" +
 RevWikiWordRE2     = re.compile(ur"^" + WikiWordNccRevPAT + BracketStartRevPAT,
         re.DOTALL | re.UNICODE | re.MULTILINE)  # Needed for auto-completion
 
-RevPropertyValue     = re.compile(
+RevAttributeValue     = re.compile(
         ur"^([\w\-\_ \t:;,.!?#/|]*?)([ \t]*[=:][ \t]*)([\w\-\_ \t\.]+?)" +
         BracketStartRevPAT,
         re.DOTALL | re.UNICODE | re.MULTILINE)  # Needed for auto-completion
@@ -1139,7 +1144,7 @@ headingContent << temp
 
 findMarkupInTodo = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine,
-        urlRef, property, insertion, escapedChar, footnote, wikiWord,   # wikiWordNcc, wikiWordCc,
+        urlRef, attribute, insertion, escapedChar, footnote, wikiWord,   # wikiWordNcc, wikiWordCc,
         htmlTag, htmlEntity], endToken)
 findMarkupInTodo = findMarkupInTodo.setPseudoParseAction(
         pseudoActionFindMarkup)
@@ -1152,7 +1157,7 @@ oneLineContent << temp
 
 findMarkup = FindFirst([bold, italics, noExportSingleLine,
         suppressHighlightingSingleLine, urlRef,
-        property, insertion, escapedChar, footnote, wikiWord,
+        attribute, insertion, escapedChar, footnote, wikiWord,
         newLinesParagraph, newLineLineBreak, newLineWhitespace, heading,
         todoEntry, anchorDef, preHtmlTag, htmlTag,
         htmlEntity, bulletEntry, unorderedList, numberEntry, orderedList,
@@ -1513,6 +1518,8 @@ class _TheHelper(object):
         """
         Create a link from word which should be put on wikiPage.
         """
+        wikiDocument = wikiPage.getWikiDocument()
+        
         if _TheHelper.isCcWikiWord(word):
             wikiFormatDetails = wikiPage.getFormatDetails()
             if wikiFormatDetails.withCamelCase:
@@ -1620,7 +1627,7 @@ class _TheHelper(object):
                 start of text line in which cursor is.
         wikiDocument -- wiki document object
         closingBracket -- boolean iff a closing bracket should be suggested
-                for bracket wikiwords and properties
+                for bracket wikiwords and attributes
 
         returns -- a list of tuples (sortKey, entry, backStepChars) where
             sortKey -- unistring to use for sorting entries alphabetically
@@ -1651,9 +1658,9 @@ class _TheHelper(object):
                 backStepMap[word] = len(tofind)
 
         mat2 = RevWikiWordRE2.match(rline)
-        mat3 = RevPropertyValue.match(rline)
+        mat3 = RevAttributeValue.match(rline)
         if mat2:
-            # may be not-CamelCase word or in a property name
+            # may be not-CamelCase word or in an attribute name
             tofind = line[-mat2.end():]
             
             # Should a closing bracket be appended to suggested words?
@@ -1667,17 +1674,17 @@ class _TheHelper(object):
                 backStepMap[BracketStart + word +
                         wordBracketEnd] = len(tofind)
 
-            for prop in wikiData.getPropertyNamesStartingWith(
+            for prop in wikiData.getAttributeNamesStartingWith(
                     tofind[len(BracketStart):]):
                 backStepMap[BracketStart + prop] = len(tofind)
         elif mat3:
-            # In a property value
+            # In an attribute value
             tofind = line[-mat3.end():]
             propkey = revStr(mat3.group(3))
             propfill = revStr(mat3.group(2))
             propvalpart = revStr(mat3.group(1))
             values = filter(lambda pv: pv.startswith(propvalpart),
-                    wikiData.getDistinctPropertyValues(propkey))
+                    wikiDocument.getDistinctAttributeValuesByKey(propkey))
 
             for v in values:
                 backStepMap[BracketStart + propkey +
@@ -1692,15 +1699,18 @@ class _TheHelper(object):
                 if not td.startswith(tofind):
                     continue
 
-                tdmat = ToDoREWithCapturing.match(td)
-                key = tdmat.group(1) + u":"
+#                 tdmat = ToDoREWithCapturing.match(td)
+#                 key = tdmat.group(1) + u":"
+                key = td + u":"
                 backStepMap[key] = len(tofind)
 
         mat = RevTodoValueRE.match(rline)
         if mat:
             # Might be todo entry
             tofind = line[-mat.end():]
-            todos = [t[1] for t in wikiData.getTodos() if t[1].startswith(tofind)]
+            combinedTodos = [t[1] + ":" + t[2] for t in wikiData.getTodos()]
+#             todos = [t[1] for t in wikiData.getTodos() if t[1].startswith(tofind)]
+            todos = [t for t in combinedTodos if t.startswith(tofind)]
             for t in todos:
                 backStepMap[t] = len(tofind)
 
@@ -1911,7 +1921,7 @@ class _TheHelper(object):
             wrapPosition = 70
             try:
                 wrapPosition = int(
-                        editor.getLoadedDocPage().getPropertyOrGlobal(
+                        editor.getLoadedDocPage().getAttributeOrGlobal(
                         "wrap", "70"))
             except:
                 pass

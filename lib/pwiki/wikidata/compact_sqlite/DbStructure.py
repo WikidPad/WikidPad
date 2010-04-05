@@ -5,9 +5,7 @@ DB formats to the current one
 """
 
 
-import string, codecs, types, threading, traceback
-
-import time
+import string, codecs, types, traceback
 
 from os import mkdir, unlink, rename
 from os.path import exists, join
@@ -21,6 +19,9 @@ from pwiki.SearchAndReplace import SearchReplaceOperation
 import pwiki.sqlite3api as sqlite
 
 
+
+
+# Connection (and Cursor)-Wrapper to simplify some operations
 
 class ConnectWrapBase:
     """
@@ -49,27 +50,20 @@ class ConnectWrapBase:
 
     def execSql(self, sql, params=None):
         "utility method, executes the sql"
-#         start = time.clock()
         if params:
             self.dbCursor.execute(sql, params)
         else:
             self.dbCursor.execute(sql)
-        
-#         print "--execSql", repr((time.clock() - start, sql, params))
 
 
     def execSqlQuery(self, sql, params=None):
         "utility method, executes the sql, returns query result"
-#         start = time.clock()
         if params:
             self.dbCursor.execute(sql, params, typeDetect=sqlite.TYPEDET_FIRST)
         else:
             self.dbCursor.execute(sql, typeDetect=sqlite.TYPEDET_FIRST)
 
-#         result = self.dbCursor.fetchall()
-#         print "--execSqlQuery", repr((time.clock() - start, sql, params))
-
-        return self.dbCursor.fetchall()   # result
+        return self.dbCursor.fetchall()
 
 
 #     def execSqlQueryIter(self, sql, params=None):
@@ -354,9 +348,9 @@ class ConnectWrapAsyncCommit(ConnectWrapBase):
 
 
 
-VERSION_DB = 8
-VERSION_WRITECOMPAT = 8
-VERSION_READCOMPAT = 8
+VERSION_DB = 9
+VERSION_WRITECOMPAT = 9
+VERSION_READCOMPAT = 9
 
 
 # Helper for the following definitions
@@ -423,24 +417,35 @@ TABLE_DEFINITIONS = {
     "wikirelations": (     # Cache
         ("word", t.t),
         ("relation", t.t),
-        ("firstcharpos", t.imo)  # Position of the link from word to relation in chars
+        ("firstcharpos", t.imo),  # Position of the link from word to relation in chars
+        ("charlength", t.imo)  # Length of the link
         ),
 
 
-    "wikiwordprops": (     # Cache
+    "wikiwordattrs": (     # Cache, previous name: "wikiwordprops"
         ("word", t.t),
         ("key", t.t),
         ("value", t.t),
-        ("firstcharpos", t.imo)  # Position of the property in page in chars
+        ("firstcharpos", t.imo),  # Position of the attribute in page in chars
+        ("charlength", t.imo)  # Length of the attribute
         ),
-    
-    
-    "todos": (     # Cache
+
+
+    "todos_PRE2_1alpha01": (     # Obsolete
         ("word", t.t),
         ("todo", t.t),
-        ("firstcharpos", t.imo)  # Position of the todo in page in chars
+        ("firstcharpos", t.imo),  # Position of the todo in page in chars
         ),
-        
+
+
+    "todos": (     # Cache
+        ("word", t.t),
+        ("key", t.t),
+        ("value", t.t),
+        ("firstcharpos", t.imo),  # Position of the todo in page in chars
+        ("charlength", t.imo)  # Length of the todo
+        ),
+
     
     "search_views": (     # Deleted since 2.0alpha1. For updating format only 
         ("title", t.pt),
@@ -458,7 +463,8 @@ TABLE_DEFINITIONS = {
         ("matchtermnormcase", t.t),
         ("type", t.i),
         ("word", t.t),
-        ("firstcharpos", t.imo)
+        ("firstcharpos", t.imo),  # Position of the target of the matchterm in page <word>
+        ("charlength", t.imo)  # Length of the target
         ),
 
 
@@ -484,7 +490,7 @@ del t
 MAIN_TABLES = (
     "wikiwordcontent",
     "wikirelations",
-    "wikiwordprops",
+    "wikiwordattrs",
     "todos",
 #     "search_views",
     "settings",
@@ -519,6 +525,9 @@ def rebuildIndices(connwrap):
     """
     Delete and recreate all necessary indices of the database
     """
+    connwrap.execSqlNoError("drop index wikiwordprops_word")
+    connwrap.execSqlNoError("drop index wikiwordprops_keyvalue")
+
     connwrap.execSqlNoError("drop index wikiwordcontent_pkey")
     connwrap.execSqlNoError("drop index wikiwords_wordnormcase")
     connwrap.execSqlNoError("drop index wikiwords_modified")
@@ -528,8 +537,8 @@ def rebuildIndices(connwrap):
     connwrap.execSqlNoError("drop index wikirelations_pkey")
     connwrap.execSqlNoError("drop index wikirelations_word")
     connwrap.execSqlNoError("drop index wikirelations_relation")    
-    connwrap.execSqlNoError("drop index wikiwordprops_word")
-    connwrap.execSqlNoError("drop index wikiwordprops_keyvalue")
+    connwrap.execSqlNoError("drop index wikiwordattrs_word")
+    connwrap.execSqlNoError("drop index wikiwordattrs_keyvalue")
     connwrap.execSqlNoError("drop index changelog_word")
     connwrap.execSqlNoError("drop index headversion_pkey")
     connwrap.execSqlNoError("drop index datablocks_unifiedname")
@@ -542,8 +551,8 @@ def rebuildIndices(connwrap):
     connwrap.execSqlNoError("create unique index wikirelations_pkey on wikirelations(word, relation)")
     connwrap.execSqlNoError("create index wikirelations_word on wikirelations(word)")
     connwrap.execSqlNoError("create index wikirelations_relation on wikirelations(relation)")
-    connwrap.execSqlNoError("create index wikiwordprops_word on wikiwordprops(word)")
-    connwrap.execSqlNoError("create index wikiwordprops_keyvalue on wikiwordprops(key, value)")
+    connwrap.execSqlNoError("create index wikiwordattrs_word on wikiwordattrs(word)")
+    connwrap.execSqlNoError("create index wikiwordattrs_keyvalue on wikiwordattrs(key, value)")
     connwrap.execSqlNoError("create index changelog_word on changelog(word)")
     connwrap.execSqlNoError("create unique index headversion_pkey on headversion(word)")
     connwrap.execSqlNoError("create unique index datablocks_unifiedname on datablocks(unifiedname)")
@@ -555,7 +564,7 @@ def recreateCacheTables(connwrap):
     Delete and create again all tables with cache information and
     associated indices
     """
-    CACHE_TABLES = ("wikirelations", "wikiwordprops", "todos",
+    CACHE_TABLES = ("wikirelations", "wikiwordattrs", "todos",
             "wikiwordmatchterms")
     
     for tn in CACHE_TABLES:
@@ -697,6 +706,7 @@ def createWikiDB(wikiName, dataDir, overwrite=False):
                     ("writecompatver", str(VERSION_WRITECOMPAT)),  # Lowest format version which is write compatible
                     ("readcompatver", str(VERSION_READCOMPAT)),  # Lowest format version which is read compatible
                     ("branchtag", "WikidPadCompact")  # Tag of the WikidPad branch
+#                     ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
                     )  )
 
             rebuildIndices(connwrap)
@@ -1161,9 +1171,9 @@ def updateDatabase(connwrap, dataDir):
         changeTableSchema(connwrap, "wikirelations",
                 TABLE_DEFINITIONS["wikirelations"])
         changeTableSchema(connwrap, "wikiwordprops", 
-                TABLE_DEFINITIONS["wikiwordprops"])
+                TABLE_DEFINITIONS["wikiwordattrs"])
         changeTableSchema(connwrap, "todos", 
-                TABLE_DEFINITIONS["todos"])
+                TABLE_DEFINITIONS["todos_PRE2_1alpha01"])
         
         formatver = 6
 
@@ -1218,15 +1228,40 @@ def updateDatabase(connwrap, dataDir):
     # --- WikiPad 2.0alpha1 reached (formatver=8, writecompatver=8,
     #         readcompatver=8) ---
 
+    if formatver == 8:
+        # Recreate table "todos"
+        connwrap.execSql("drop table todos;")
+        changeTableSchema(connwrap, "todos", TABLE_DEFINITIONS["todos"])
+        connwrap.execSql("update todos set firstcharpos=-1;")
+
+        # Rename table "wikiwordprops" to "wikiwordattrs"
+        changeTableSchema(connwrap, "wikiwordattrs", TABLE_DEFINITIONS["wikiwordattrs"])
+        connwrap.execSql("insert into wikiwordattrs(word, key, value, "
+                "firstcharpos, charlength) select word, key, value, "
+                "firstcharpos, -1 from wikiwordprops;")
+        connwrap.execSql("drop table wikiwordprops;")
+
+        for tn in ("wikirelations", "wikiwordmatchterms"):
+            changeTableSchema(connwrap, tn, TABLE_DEFINITIONS[tn])
+            connwrap.execSql("update %s set firstcharpos=-1;" % tn)
+
+        # Mark all wikiwords to need a rebuild
+        connwrap.execSql("update wikiwordcontent set metadataprocessed=0;")
+
+        formatver = 9
+
+    # --- WikiPad 2.1alpha.1 reached (formatver=9, writecompatver93,
+    #         readcompatver=9) ---
+
 
     # Write format information
+
     connwrap.executemany("insert or replace into settings(key, value) "+
             "values (?, ?)", (
         ("formatver", str(VERSION_DB)),  # Version of database format the data was written
         ("writecompatver", str(VERSION_WRITECOMPAT)),  # Lowest format version which is write compatible
         ("readcompatver", str(VERSION_READCOMPAT)),  # Lowest format version which is read compatible
         ("branchtag", "WikidPadCompact")  # Tag of the WikidPad branch
-#         ("locale", "-") # Locale for cached wordnormcase column. '-': column invalid
         )   )
 
     rebuildIndices(connwrap)
@@ -1467,6 +1502,18 @@ invalid data.
         tablename: bytestring, name of table
         field: bytestring, name of field in table
         value: arbitrary, default object for this field in table
+
+
+++ 2.0 to 2.1alpha1 (formatver=9):
+    
+    Table "todos" modified:
+        "todo" column replaced by "key" and "value" columns
+
+    Table "wikiwordprops" renamed to "wikiwordattrs"
+    
+    Tables "todos", "wikiwordattrs", "wikirelations", "wikiwordmatchterms":
+        charlength: Integer. Length of the selection whose position is given in
+            respective firstcharpos. Invalid if firstcharpos is -1.
 
 """
 

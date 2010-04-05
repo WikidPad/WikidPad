@@ -5,7 +5,6 @@ Various string operations, like unicode encoding/decoding,
 creating diff information for plain byte sequences
 """
 
-
 import os, threading, traceback
 
 from struct import pack, unpack
@@ -1029,9 +1028,9 @@ def ntPathnameFromUrl(url, testFileType=True):
 
     if comp is None:
         error = 'Bad URL: ' + url
-        raise IOError, error
-        
-        
+        raise IOError(error)
+
+
 #     comp = url.split('|')
 #     if len(comp) == 1:
 #         comp = url.split(':')
@@ -1043,7 +1042,7 @@ def ntPathnameFromUrl(url, testFileType=True):
     drive = comp[0][-1].upper()
     components = comp[1].split('/')
     path = drive + ':'
-    for  comp in components:
+    for comp in components:
         if comp:
             path = path + '\\' + flexibleUrlUnquote(comp)
     return path
@@ -1164,6 +1163,8 @@ def iterCompatibleFilename(baseName, suffix, asciiOnly=False, maxLength=250,
     randomLength - Length of the random sequence (without leading tilde)
 
     """
+    baseName = mbcsDec(baseName)[0]
+
     if len(baseName) > 0:
         c = baseName[0]
         if ord(c) < 32 or c in _FORBIDDEN_START or \

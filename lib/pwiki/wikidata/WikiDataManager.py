@@ -477,7 +477,7 @@ class WikiDataManager(MiscEventSourceMixin):
             if step == Consts.WIKIWORDMETADATA_STATE_DIRTY and \
                     page.runDatabaseUpdate(step=step, threadstop=threadstop):
                 self.updateExecutor.executeAsyncWithThreadStop(1, self._runDatabaseUpdate,
-                        word, Consts.WIKIWORDMETADATA_STATE_PROPSPROCESSED)
+                        word, Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
             else:
                 page.runDatabaseUpdate(step=step, threadstop=threadstop)
 
@@ -745,7 +745,7 @@ class WikiDataManager(MiscEventSourceMixin):
             words0 = self.getWikiData().getWikiWordsForMetaDataState(
                     Consts.WIKIWORDMETADATA_STATE_DIRTY)
             words1 = self.getWikiData().getWikiWordsForMetaDataState(
-                    Consts.WIKIWORDMETADATA_STATE_PROPSPROCESSED)
+                    Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
 
             with self.updateExecutor.getDequeCondition():
                 for word in words0:
@@ -754,7 +754,7 @@ class WikiDataManager(MiscEventSourceMixin):
     
                 for word in words1:
                     self.updateExecutor.executeAsyncWithThreadStop(1, self._runDatabaseUpdate,
-                            word, Consts.WIKIWORDMETADATA_STATE_PROPSPROCESSED)
+                            word, Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
 
     def isReadOnlyEffect(self):
         """
@@ -1143,7 +1143,7 @@ class WikiDataManager(MiscEventSourceMixin):
             wikiWords = self.getWikiData().getWikiWordsForMetaDataState(
                     Consts.WIKIWORDMETADATA_STATE_DIRTY) + \
                     self.getWikiData().getWikiWordsForMetaDataState(
-                    Consts.WIKIWORDMETADATA_STATE_PROPSPROCESSED)
+                    Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
         else:
             # get all of the wikiWords
             wikiWords = self.getWikiData().getAllDefinedWikiPageNames()
@@ -1180,7 +1180,7 @@ class WikiDataManager(MiscEventSourceMixin):
             self.getWikiData().setDbSettingsValue(
                     "syncWikiWordMatchtermsUpToDate", "1")
 
-            # Step two: update properties. There may be properties which
+            # Step two: update attributes. There may be attributes which
             #   define how the rest has to be interpreted, therefore they
             #   must be processed first.
             for wikiWord in wikiWords:
@@ -1198,7 +1198,7 @@ class WikiDataManager(MiscEventSourceMixin):
                     pageAst = wikiPage.getLivePageAst()
 
                     self.getWikiData().refreshFileSignatureForWord(wikiWord)
-                    wikiPage.refreshPropertiesFromPageAst(pageAst)
+                    wikiPage.refreshAttributesFromPageAst(pageAst)
                 except:
                     traceback.print_exc()
 
@@ -1229,11 +1229,12 @@ class WikiDataManager(MiscEventSourceMixin):
             # specific to database backend
             self.getWikiData().cleanupAfterRebuild(progresshandler)
 
+            self.pushDirtyMetaDataUpdate()
+
         finally:
             progresshandler.close()
             self.updateExecutor.start()
 
-        self.pushDirtyMetaDataUpdate()
 
 
     def getWikiWordSubpages(self, wikiWord):
@@ -1511,16 +1512,16 @@ class WikiDataManager(MiscEventSourceMixin):
         ParseUtilities.WikiPageFormatDetails object to describe
         default formatting details if a concrete wiki page is not available.
         """
-        withCamelCase = strToBool(self.getGlobalPropertyValue(
+        withCamelCase = strToBool(self.getGlobalAttributeValue(
                 u"camelCaseWordsEnabled", True))
 
 #         footnotesAsWws = self.getWikiConfig().getboolean(
 #                 "main", "footnotes_as_wikiwords", False)
 
-        autoLinkMode = self.getGlobalPropertyValue(
+        autoLinkMode = self.getGlobalAttributeValue(
                 u"auto_link", u"off").lower()
 
-        paragraphMode = strToBool(self.getGlobalPropertyValue(
+        paragraphMode = strToBool(self.getGlobalAttributeValue(
                 u"paragraph_mode", False))
 
         langHelper = GetApp().createWikiLanguageHelper(
@@ -1590,6 +1591,8 @@ class WikiDataManager(MiscEventSourceMixin):
 
 
     def getUnAliasedWikiWord(self, word):
+        """
+        """
         # TODO: Resolve properly in caseless mode
         return self.getWikiData().getUnAliasedWikiWord(word)
 
@@ -1597,7 +1600,8 @@ class WikiDataManager(MiscEventSourceMixin):
     def getUnAliasedWikiWordOrAsIs(self, word):
         """
         return the real word if word is an alias.
-        returns word itself if word isn't an alias,
+        returns word itself if word isn't an alias (may mean it's a real word
+                or doesn't exist!)
         """
         result = self.getWikiData().getUnAliasedWikiWord(word)
 
@@ -1614,24 +1618,42 @@ class WikiDataManager(MiscEventSourceMixin):
         return self.getWikiData().getTodos()
 
 
-    def getPropertyTriples(self, word, key, value):
+    def getDistinctAttributeValuesByKey(self, key):
+        """
+        Function must work for read-only wiki.
+        Return a list of all distinct used attribute values for a given key.
+        """
+        return self.getWikiData().getDistinctAttributeValues(key)
+#         s = set(v for w, k, v in
+#                 self.getWikiData().getAttributeTriples(None, key, None))
+#         return list(s)
+
+    getDistinctPropertyValuesByKey = getDistinctAttributeValuesByKey  # TODO remove "property"-compatibility
+
+
+    def getAttributeTriples(self, word, key, value):
         """
         Function must work for read-only wiki.
         word, key and value can either be unistrings to search for or None as
         wildcard.
         """
-        return self.getWikiData().getPropertyTriples(word, key, value)
+        return self.getWikiData().getAttributeTriples(word, key, value)
+
+    getPropertyTriples = getAttributeTriples  # TODO remove "property"-compatibility
 
 
-    def getGlobalPropertyValue(self, property, default=None):
+
+    def getGlobalAttributeValue(self, attribute, default=None):
         """
         Function must work for read-only wiki.
-        Finds the wiki-global setting of property, if any.
-        Property itself must not contain the "global." prefix
+        Finds the wiki-global setting of attribute, if any.
+        Attribute itself must not contain the "global." prefix
         """
-        return self.getWikiData().getGlobalProperties().get(
-                u"global." + property, default)
+        return self.getWikiData().getGlobalAttributes().get(
+                u"global." + attribute, default)
         
+    getGlobalPropertyValue = getGlobalAttributeValue  # TODO remove "property"-compatibility
+
 
     def reconnect(self):
         """
@@ -1669,8 +1691,8 @@ class WikiDataManager(MiscEventSourceMixin):
         # Reset flag so program automatically tries reconnecting on next error
         self.autoReconnectTriedFlag = False
 
-        props = {"reconnected database": True,}
-        self.fireMiscEventProps(props)
+        attrs = {"reconnected database": True,}
+        self.fireMiscEventProps(attrs)
 
 
 
@@ -1681,9 +1703,9 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         if miscevt.getSource() is self.wikiConfiguration:
             if miscevt.has_key("changed configuration"):
-                props = miscevt.getProps().copy()
-                props["changed wiki configuration"] = True
-                self.fireMiscEventProps(props)                
+                attrs = miscevt.getProps().copy()
+                attrs["changed wiki configuration"] = True
+                self.fireMiscEventProps(attrs)                
         elif miscevt.getSource() is GetApp():
             if miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()
@@ -1695,32 +1717,33 @@ class WikiDataManager(MiscEventSourceMixin):
             # These messages come from (classes derived from) DocPage,
             # they are mainly relayed
 
-            if miscevt.has_key_in(("deleted wiki page", "renamed wiki page")):
+            if miscevt.has_key_in(("deleted wiki page", "renamed wiki page",
+                    "pseudo-deleted wiki page")):
                 self.autoLinkRelaxInfo = None
-                props = miscevt.getProps().copy()
-                props["wikiPage"] = miscevt.getSource()
-                self.fireMiscEventProps(props)
+                attrs = miscevt.getProps().copy()
+                attrs["wikiPage"] = miscevt.getSource()
+                self.fireMiscEventProps(attrs)
             elif miscevt.has_key("updated wiki page"):
                 self.autoLinkRelaxInfo = None  # TODO Does this slow down?
-                props = miscevt.getProps().copy()
-                props["wikiPage"] = miscevt.getSource()
-                self.fireMiscEventProps(props)
+                attrs = miscevt.getProps().copy()
+                attrs["wikiPage"] = miscevt.getSource()
+                self.fireMiscEventProps(attrs)
             elif miscevt.has_key("saving new wiki page"):            
                 self.autoLinkRelaxInfo = None
             elif miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()
 
-                props = miscevt.getProps().copy()
-                props["funcPage"] = miscevt.getSource()
-                self.fireMiscEventProps(props)
+                attrs = miscevt.getProps().copy()
+                attrs["funcPage"] = miscevt.getSource()
+                self.fireMiscEventProps(attrs)
             elif miscevt.has_key("updated func page"):
                 # This was send from a FuncPage object, send it again
                 # The event also contains more specific information
                 # handled by PersonalWikiFrame
-                props = miscevt.getProps().copy()
-                props["funcPage"] = miscevt.getSource()
+                attrs = miscevt.getProps().copy()
+                attrs["funcPage"] = miscevt.getSource()
 
-                self.fireMiscEventProps(props)
+                self.fireMiscEventProps(attrs)
 
 
 

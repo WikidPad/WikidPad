@@ -35,7 +35,7 @@ def _buildNodeDefs(wikiDocument, currWord, wordSet=None):
     coloredSet = set()
 
     # define nodes
-    for colored_node in wikiDocument.getPropertyTriples(None, 'color', None):
+    for colored_node in wikiDocument.getAttributeTriples(None, 'color', None):
         if not (colored_node[0] == currWord) and not (wordSet is None) and \
                 not (colored_node[0] in wordSet):
             continue
@@ -114,21 +114,21 @@ def buildRelationGraphSource(wikiDocument, currWord, config):
     global_excludeRe = None
     global_includeRe = None
 
-    global_exclude_properties = [re.escape(p[2].strip()) for p in wikiDocument.getPropertyTriples(
+    global_exclude_attributes = [re.escape(p[2].strip()) for p in wikiDocument.getAttributeTriples(
                 None, u'global.graph.relation.exclude', None)]
 
-    if len(global_exclude_properties) > 0:
+    if len(global_exclude_attributes) > 0:
         global_excludeRe = re.compile(
-                ur"^" + joinRegexes(global_exclude_properties) + ur"(?:\.|$)",
+                ur"^" + joinRegexes(global_exclude_attributes) + ur"(?:\.|$)",
                 re.DOTALL | re.UNICODE | re.MULTILINE)
 
     else:
-        global_include_properties = [re.escape(p[2].strip()) for p in wikiDocument.getPropertyTriples(
+        global_include_attributes = [re.escape(p[2].strip()) for p in wikiDocument.getAttributeTriples(
                     None, u'global.graph.relation.include', None)]
         
-        if len(global_include_properties) > 0:
+        if len(global_include_attributes) > 0:
             global_includeRe = re.compile(
-                    ur"^" + joinRegexes(global_include_properties)+ ur"(?:\.|$)",
+                    ur"^" + joinRegexes(global_include_attributes)+ ur"(?:\.|$)",
                     re.DOTALL | re.UNICODE | re.MULTILINE)
 
     graph = []
@@ -138,18 +138,18 @@ def buildRelationGraphSource(wikiDocument, currWord, config):
 
     # construct edges
 
-    word_properties = (p for p in wikiDocument.getPropertyTriples(None, None, None))
+    word_attributes = (p for p in wikiDocument.getAttributeTriples(None, None, None))
 
     if global_includeRe is not None:
-        word_relations = (p for p in word_properties if global_includeRe.match(p[1]))
+        word_relations = (p for p in word_attributes if global_includeRe.match(p[1]))
     elif global_excludeRe is not None:
-        word_relations = (p for p in word_properties if not global_excludeRe.match(p[1]))
+        word_relations = (p for p in word_attributes if not global_excludeRe.match(p[1]))
     else:
-        word_relations = word_properties
+        word_relations = word_attributes
 
     wordSet = set()
 
-    # Unalias wikiwords/remove non-wikiwords in property values
+    # Unalias wikiwords/remove non-wikiwords in attribute values
     for p in word_relations:
         word = wikiDocument.getUnAliasedWikiWord(p[2])
         if word is None:

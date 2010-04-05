@@ -645,7 +645,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
                     wikiWord = wikiDocument.getUnAliasedWikiWord(wikiWord)
 
                     if wikiWord is not None:
-                        propList = wikiDocument.getPropertyTriples(wikiWord,
+                        propList = wikiDocument.getAttributeTriples(wikiWord,
                                 u"short_hint", None)
 
                         if len(propList) > 0:

@@ -57,7 +57,7 @@ from .DocPagePresenter import DocPagePresenter
 
 from .Ipc import EVT_REMOTE_COMMAND
 
-from . import PropertyHandling, SpellChecker
+from . import AttributeHandling, SpellChecker
 
 
 # from PageHistory import PageHistory
@@ -261,7 +261,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # load extensions
         self.loadExtensions()
 
-        self.propertyChecker = PropertyHandling.PropertyChecker(self)
+        self.attributeChecker = AttributeHandling.AttributeChecker(self)
 
 #         self.configuration.setGlobalConfig(wx.GetApp().getGlobalConfig())
 
@@ -1696,7 +1696,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         formatMenu.AppendSeparator()
 
 
-        iconsMenu, cmdIdToIconName = PropertyHandling.buildIconsSubmenu(
+        iconsMenu, cmdIdToIconName = AttributeHandling.buildIconsSubmenu(
                 wx.GetApp().getIconCache())
         for cmi in cmdIdToIconName.keys():
             wx.EVT_MENU(self, cmi, self.OnInsertStringFromDict)
@@ -1709,7 +1709,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.cmdIdToInsertString = cmdIdToIconName
         
         
-        colorsMenu, cmdIdToColorName = PropertyHandling.buildColorsSubmenu()
+        colorsMenu, cmdIdToColorName = AttributeHandling.buildColorsSubmenu()
         for cmi in cmdIdToColorName.keys():
             wx.EVT_MENU(self, cmi, self.OnInsertStringFromDict)
 
@@ -1725,7 +1725,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         formatMenu.AppendMenu(wx.NewId(), _(u'&Add Attribute'), addAttributeMenu)
 
         # Build full submenu for icon attributes
-        iconsMenu, self.cmdIdToIconNameForAttribute = PropertyHandling.buildIconsSubmenu(
+        iconsMenu, self.cmdIdToIconNameForAttribute = AttributeHandling.buildIconsSubmenu(
                 wx.GetApp().getIconCache())
         for cmi in self.cmdIdToIconNameForAttribute.keys():
             wx.EVT_MENU(self, cmi, self.OnInsertIconAttribute)
@@ -1736,7 +1736,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.OnUpdateDisReadOnlyPage)
 
         # Build submenu for color attributes
-        colorsMenu, self.cmdIdToColorNameForAttribute = PropertyHandling.buildColorsSubmenu()
+        colorsMenu, self.cmdIdToColorNameForAttribute = AttributeHandling.buildColorsSubmenu()
         for cmi in self.cmdIdToColorNameForAttribute.keys():
             wx.EVT_MENU(self, cmi, self.OnInsertColorAttribute)
 
@@ -3499,7 +3499,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         dpp.saveCurrentDocPage(force)
 
 
-    def activatePageByUnifiedName(self, unifName, tabMode=0):
+    def activatePageByUnifiedName(self, unifName, tabMode=0, firstcharpos=-1,
+            charlength=-1):
         """
         tabMode -- 0:Same tab; 2: new tab in foreground; 3: new tab in background
         """
@@ -3514,7 +3515,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 presenter = self.createNewDocPagePresenterTab()
 
         try:
-            presenter.openDocPage(unifName, motionType="random")  # motionType="child"  ?
+            if firstcharpos != -1:
+                presenter.openDocPage(unifName, motionType="random",
+                        firstcharpos=firstcharpos, charlength=charlength)
+            else:
+                presenter.openDocPage(unifName, motionType="random")
         except WikiFileNotFoundException, e:
             self.lostAccess(e)
             return None
@@ -3573,7 +3578,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #                         page.save(self.getActiveEditor().cleanAutoGenAreas(text))
 #                         page.update(self.getActiveEditor().updateAutoGenAreas(text))   # ?
                         page.writeToDatabase()
-                        self.propertyChecker.initiateCheckPage(page)
+                        self.attributeChecker.initiateCheckPage(page)
 
 
 
@@ -3672,7 +3677,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def launchUrl(self, link):
-#         link2 = flexibleUrlUnquote(link)
         if self.configuration.getint(
                 "main", "new_window_on_follow_wiki_url") == 1 or \
                 not link.startswith(u"wiki:"):
@@ -3680,9 +3684,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if link.startswith(u"rel://"):
                 # This is a relative link
                 link = self.makeRelUrlAbsolute(link)
-
-#             # Quick and dirty support for spaces in URL
-#             link = link.replace(u" ", u"%20")
 
             try:
                 OsAbstract.startFile(self, link)
@@ -3803,7 +3804,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
         try:
             bookmarked = [w for w,k,v in self.getWikiDocument()
-                    .getPropertyTriples(None, "bookmarked", u"true")]
+                    .getAttributeTriples(None, "bookmarked", u"true")]
         except (IOError, OSError, DbAccessError), e:
             self.lostAccess(e)
             raise
@@ -4313,7 +4314,23 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             wikiWord = self.getCurrentWikiWord()
 
         if wikiWord is not None:
-            wikiWord = self.getWikiDocument().getUnAliasedWikiWord(wikiWord)
+            actualWikiWord = self.getWikiDocument().getUnAliasedWikiWord(
+                    wikiWord)
+
+            if actualWikiWord is None:
+                # A not yet saved page is shown
+                page = self.getWikiDocument().getWikiPageNoError(wikiWord)
+                if page.getDirty()[0]:
+                    # Page was changed already
+                        self.saveAllDocPages()
+                        actualWikiWord = self.getWikiDocument().getUnAliasedWikiWord(
+                            wikiWord)
+                else:
+                    # Unchanged unsaved page -> (pseudo-)delete without further request
+                    page.pseudoDeletePage()
+                    return
+
+            wikiWord = actualWikiWord
 
         if wikiWord == u"ScratchPad":
             self.displayErrorMessage(_(u"The scratch pad cannot be deleted"))
@@ -4404,7 +4421,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             text = self.getActiveEditor().GetSelectedText()
             if newWord:
                 page = self.wikiDataManager.createWikiPage(validWikiWord)
-                # TODO Respect template property?
+                # TODO Respect template attribute?
                 title = self.wikiDataManager.getWikiPageTitle(validWikiWord)
                 if title is not None:
                     ptp = self.wikiDataManager.getPageTitlePrefix()
@@ -4417,7 +4434,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 page = self.wikiDataManager.getWikiPage(validWikiWord)
                 page.appendLiveText(u"\n\n" + text)
                 
-                
+            
+#             print "--showReplaceTextByWikiwordDialog34", repr((validWikiWord, langHelper.createLinkFromWikiWord(validWikiWord,
+#                     self.getCurrentDocPage())))
             self.getActiveEditor().ReplaceSelection(
                     langHelper.createLinkFromWikiWord(validWikiWord,
                     self.getCurrentDocPage()))
@@ -4971,8 +4990,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def displayErrorMessage(self, errorStr, e=u""):
         "pops up a error dialog box"
-        dlg_m = wx.MessageDialog(self, uniToGui(u"%s. %s." % (errorStr, e)),
-                'Error!', wx.OK)
+        if errorStr != "":
+            msg = errorStr + "."
+        else:
+            msg = ""
+        
+        if str(e) != "":
+            msg += " %s." % e 
+        
+        dlg_m = wx.MessageDialog(self, uniToGui(msg),  # u"%s. %s." % (errorStr, e)
+                _(u'Error!'), wx.OK)
         dlg_m.ShowModal()
         dlg_m.Destroy()
         try:
@@ -5072,6 +5099,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnWikiOpen(self, event):
+        oldfocus = wx.Window.FindFocus()
+
         with TopLevelLocker:
             path = wx.FileSelector(_(u"Choose a Wiki to open"),
                     self.getDefDirForWikiOpenNew(), wildcard=u"*.wiki",
@@ -5081,10 +5110,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
         if path:
             self.openWiki(mbcsDec(abspath(path), "replace")[0])
+        else:
+            if oldfocus is not None:
+                oldfocus.SetFocus()
 #         dlg.Destroy()
 
 
     def OnWikiOpenNewWindow(self, event):
+        oldfocus = wx.Window.FindFocus()
+
         with TopLevelLocker:
             path = wx.FileSelector(_(u"Choose a Wiki to open"),
                     self.getDefDirForWikiOpenNew(), wildcard=u"*.wiki",
@@ -5102,6 +5136,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.displayErrorMessage(_(u'Error while starting new '
                         u'WikidPad instance'), e)
                 return
+        else:
+            oldfocus.SetFocus()
 
 #         dlg.Destroy()
 

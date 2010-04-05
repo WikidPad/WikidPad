@@ -880,14 +880,19 @@ class SimpleStrNode(AbstractContentSearchNode):
         return pattern
 
 
-class AbstractAttributePatternNode(AbstractContentSearchNode):
-    def __init__(self, sarOp, pattern=u""):
+class AttributeNode(AbstractContentSearchNode):
+    CLASS_PERSID = "Attribute"  # Class id for persistence storage
+    def __init__(self, sarOp, pattern, valuePattern):
         AbstractContentSearchNode.__init__(self, sarOp)
         self.compPat = re.compile(pattern,
                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
 
+        self.compValuePat = re.compile(valuePattern,
+                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+
         # wordSet and wordList always contain the same words
         self.wordSet = None    # used for testWikiPage()
+
 
     def searchDocPageAndText(self, docPage, text, searchCharStartPos=0,
             cycleToStart=False):
@@ -902,22 +907,22 @@ class AbstractAttributePatternNode(AbstractContentSearchNode):
         if pageAst is None:
             return (None, None)
         
-        # Note: extractPropertyNodesFromPageAst() returns an iterator
+        # Note: extractAttributeNodesFromPageAst() returns an iterator
 
-        for node in docPage.extractPropertyNodesFromPageAst(pageAst):
+        for node in docPage.extractAttributeNodesFromPageAst(pageAst):
             if node.pos < searchCharStartPos:
                 continue
-            for k, v in node.props:
-                if self._checkProperty(wikiWord, k, v):
+            for k, v in node.attrs:
+                if self._checkAttribute(wikiWord, k, v):
                     return (node.pos, node.pos + node.strLength)
 
         if cycleToStart and searchCharStartPos > 0:
             # Try again from beginning
-            for node in docPage.extractPropertyNodesFromPageAst(pageAst):
+            for node in docPage.extractAttributeNodesFromPageAst(pageAst):
                 if node.pos >= searchCharStartPos:
                     break
-                for k, v in node.props:
-                    if self._checkProperty(wikiWord, k, v):
+                for k, v in node.attrs:
+                    if self._checkAttribute(wikiWord, k, v):
                         return (node.pos, node.pos + node.strLength)
 
         # Not found
@@ -925,14 +930,14 @@ class AbstractAttributePatternNode(AbstractContentSearchNode):
 
 
 
-    def _getAllProperties(self, wikiDocument, commonCache):
-        allProperties = commonCache.get("allProperties")
+    def _getAllAttributes(self, wikiDocument, commonCache):
+        allAttributes = commonCache.get("allAttributes")
         
-        if allProperties is None:
-            allProperties = wikiDocument.getPropertyTriples(None, None, None)
-            commonCache["allProperties"] = allProperties
+        if allAttributes is None:
+            allAttributes = wikiDocument.getAttributeTriples(None, None, None)
+            commonCache["allAttributes"] = allAttributes
 
-        return allProperties
+        return allAttributes
 
 
     def beginWikiSearch(self, wikiDocument, commonCache):
@@ -944,14 +949,14 @@ class AbstractAttributePatternNode(AbstractContentSearchNode):
         """
         wordSet = set()
         
-        for w, k, v in self._getAllProperties(wikiDocument, commonCache):
-            if self._checkProperty(w, k, v):
+        for w, k, v in self._getAllAttributes(wikiDocument, commonCache):
+            if self._checkAttribute(w, k, v):
                 wordSet.add(w)
 
         self.wordSet = wordSet
 
-    def _checkProperty(self, w, k, v):
-        raise NotImplementedError   # abstract
+    def _checkAttribute(self, w, k, v):
+        return self.compPat.search(k) and self.compValuePat.search(v)
 
     def testWikiPage(self, word, text):
         return word in self.wordSet
@@ -1006,50 +1011,19 @@ class AbstractAttributePatternNode(AbstractContentSearchNode):
 
 
 
-# class AttributeKeyNode(AbstractAttributePatternNode):
-#     """
-#     Returns True for pages with an attribute key matching specified
-#     regular expression.
-#     """
-#     CLASS_PERSID = "AttributeKey"  # Class id for persistence storage
-# 
-#     def _checkProperty(self, w, k, v):
-#         return self.compPat.search(k)
-# 
-# 
-# class AttributeValueNode(AbstractAttributePatternNode):
-#     """
-#     Returns True for pages with an attribute key matching specified
-#     regular expression.
-#     """
-#     CLASS_PERSID = "AttributeValue"  # Class id for persistence storage
-# 
-#     def _checkProperty(self, w, k, v):
-#         return self.compPat.search(v)
-
-
-class AttributeNode(AbstractAttributePatternNode):
-    def __init__(self, sarOp, pattern, valuePattern):
-        AbstractAttributePatternNode.__init__(self, sarOp, pattern)
-
-        self.compValuePat = re.compile(valuePattern,
-                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
-
-    def _checkProperty(self, w, k, v):
-        return self.compPat.search(k) and self.compValuePat.search(v)
-
-
-
 class TodoNode(AbstractContentSearchNode):
     CLASS_PERSID = "Todo"  # Class id for persistence storage
-
-    def __init__(self, sarOp, pattern=u""):
+    def __init__(self, sarOp, pattern, valuePattern):
         AbstractContentSearchNode.__init__(self, sarOp)
         self.compPat = re.compile(pattern,
                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
 
+        self.compValuePat = re.compile(valuePattern,
+                re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+
         # wordSet and wordList always contain the same words
         self.wordSet = None    # used for testWikiPage()
+
 
     def searchDocPageAndText(self, docPage, text, searchCharStartPos=0,
             cycleToStart=False):
@@ -1057,28 +1031,27 @@ class TodoNode(AbstractContentSearchNode):
         """
         if docPage is None:
             return (None, None)
-
-#         wikiWord = docPage.getWikiWord()
-
+        
+        wikiWord = docPage.getWikiWord()
+        
         pageAst = docPage.getLivePageAst()
         if pageAst is None:
             return (None, None)
+        
+        # Note: extractAttributeNodesFromPageAst() returns an iterator
 
-        for node in pageAst.iterDeepByName("todoEntry"):
+        for node in docPage.extractTodoNodesFromPageAst(pageAst):
             if node.pos < searchCharStartPos:
                 continue
-            
-            entry = node.key + node.delimiter + node.valueNode.getString()
-            if self.compPat.search(entry):
+            if self._checkTodo(wikiWord, node.key, node.valueNode.getString()):
                 return (node.pos, node.pos + node.strLength)
 
         if cycleToStart and searchCharStartPos > 0:
             # Try again from beginning
-            for node in pageAst.iterDeepByName("todoEntry"):
+            for node in docPage.extractTodoNodesFromPageAst(pageAst):
                 if node.pos >= searchCharStartPos:
                     break
-                entry = node.key + node.delimiter + node.valueNode.getString()
-                if self.compPat.search(entry):
+                if self._checkTodo(wikiWord, node.key, node.valueNode.getString()):
                     return (node.pos, node.pos + node.strLength)
 
         # Not found
@@ -1104,12 +1077,14 @@ class TodoNode(AbstractContentSearchNode):
         """
         wordSet = set()
         
-        for w, t in self._getAllTodos(wikiDocument, commonCache):
-            if self.compPat.search(t):
+        for w, k, v in self._getAllTodos(wikiDocument, commonCache):
+            if self._checkTodo(w, k, v):
                 wordSet.add(w)
 
         self.wordSet = wordSet
 
+    def _checkTodo(self, w, k, v):
+        return self.compPat.search(k) and self.compValuePat.search(v)
 
     def testWikiPage(self, word, text):
         return word in self.wordSet
@@ -1161,6 +1136,133 @@ class TodoNode(AbstractContentSearchNode):
         Clears wordList
         """
         self.wordSet = None
+
+
+
+
+
+
+# class TodoNode(AbstractContentSearchNode):
+#     CLASS_PERSID = "Todo"  # Class id for persistence storage
+# 
+#     def __init__(self, sarOp, pattern, valuePattern):
+#         AbstractContentSearchNode.__init__(self, sarOp)
+#         self.compPat = re.compile(pattern,
+#                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+# 
+#         # wordSet and wordList always contain the same words
+#         self.wordSet = None    # used for testWikiPage()
+# 
+#     def searchDocPageAndText(self, docPage, text, searchCharStartPos=0,
+#             cycleToStart=False):
+#         """
+#         """
+#         if docPage is None:
+#             return (None, None)
+# 
+# #         wikiWord = docPage.getWikiWord()
+# 
+#         pageAst = docPage.getLivePageAst()
+#         if pageAst is None:
+#             return (None, None)
+# 
+#         for node in pageAst.iterDeepByName("todoEntry"):
+#             if node.pos < searchCharStartPos:
+#                 continue
+#             
+#             entry = node.key + node.delimiter + node.valueNode.getString()
+#             if self.compPat.search(entry):
+#                 return (node.pos, node.pos + node.strLength)
+# 
+#         if cycleToStart and searchCharStartPos > 0:
+#             # Try again from beginning
+#             for node in pageAst.iterDeepByName("todoEntry"):
+#                 if node.pos >= searchCharStartPos:
+#                     break
+#                 entry = node.key + node.delimiter + node.valueNode.getString()
+#                 if self.compPat.search(entry):
+#                     return (node.pos, node.pos + node.strLength)
+# 
+#         # Not found
+#         return (None, None)
+# 
+# 
+#     def _getAllTodos(self, wikiDocument, commonCache):
+#         allTodos = commonCache.get("allTodos")
+#         
+#         if allTodos is None:
+#             allTodos = wikiDocument.getTodos()
+#             commonCache["allTodos"] = allTodos
+# 
+#         return allTodos
+# 
+# 
+#     def beginWikiSearch(self, wikiDocument, commonCache):
+#         """
+#         Always called before a new wiki-wide search operation begins.
+#         Fills wordSet.
+#         TODO: Maybe use alternative implementation if only a few words are
+#         checked
+#         """
+#         wordSet = set()
+#         
+#         for w, t in self._getAllTodos(wikiDocument, commonCache):
+#             if self.compPat.search(t):
+#                 wordSet.add(w)
+# 
+#         self.wordSet = wordSet
+# 
+# 
+#     def testWikiPage(self, word, text):
+#         return word in self.wordSet
+# 
+# 
+#     def serializeBin(self, stream):
+#         """
+#         Read or write content of this object to or from a serialize stream
+# 
+#         stream -- StringOps.SerializeStream object
+#         """
+#         version = stream.serUint32(0)
+#         
+#         if version != 0:
+#             raise SerializationException
+#             
+#         pattern = stream.serUniUtf8(self.compPat.pattern)
+# 
+#         if pattern != self.compPat.pattern:
+#             self.compPat = re.compile(pattern,
+#                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+# 
+#     def serializeToXml(self, xmlNode, xmlDoc):
+#         """
+#         Modify XML node to contain all information about this object.
+#         """
+#         serToXmlUnicode(xmlNode, xmlDoc, u"pattern", self.compPat.pattern)
+# 
+# 
+#     def serializeFromXml(self, xmlNode):
+#         """
+#         Set object state from data in xmlNode)
+#         """
+#         pattern = serFromXmlUnicode(xmlNode, u"pattern")
+#         if pattern != self.compPat.pattern:
+#             self.compPat = re.compile(pattern,
+#                 re.DOTALL | re.UNICODE | re.MULTILINE)  # TODO MULTILINE?
+# 
+#     def getPattern(self):
+#         """
+#         Return the pattern string
+#         """
+#         return self.compPat.pattern
+# 
+# 
+#     def endWikiSearch(self):
+#         """
+#         Called after a wiki-wide search operation ended.
+#         Clears wordList
+#         """
+#         self.wordSet = None
 
 
 # ----------------------------------------------------------------------
@@ -1653,7 +1755,7 @@ class SearchReplaceOperation:
 #             elif tname == "attributeValueTerm":
 #                 return AttributeValueNode(self, node.prefixedTerm)
             elif tname == "todoTerm":
-                return TodoNode(self, node.prefixedTerm)
+                return TodoNode(self, node.key, node.value)
 
 
 

@@ -11,6 +11,10 @@ BODY {
 }
 
 .property {
+    /* Legacy definition, use ".attribute" instead  */
+}
+
+.attribute {
 	color: #888888; font-size: 75%;
 }
 

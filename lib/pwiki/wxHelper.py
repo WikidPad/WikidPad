@@ -442,8 +442,10 @@ def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
             parts += [u""] * (4 - len(parts))
 
         if parts[0] == u"-":
-            # Separator
-            menu.AppendSeparator()
+            ic = menu.GetMenuItemCount()
+            if ic > 0 and not menu.FindItemByPosition(ic - 1).IsSeparator():
+                # Separator
+                menu.AppendSeparator()
         else:
             # First check for radio or checkbox items
             kind = wx.ITEM_NORMAL
@@ -841,13 +843,16 @@ class ProgressHandler(object):
     Implementation of a GuiProgressListener to
     show a progress dialog
     """
-    def __init__(self, title, msg, addsteps, parent, flags=wx.PD_APP_MODAL):
+    def __init__(self, title, msg, addsteps, parent, flags=wx.PD_APP_MODAL,
+            yieldsteps=5):
         self.title = title
         self.msg = msg
         self.addsteps = addsteps
         self.parent = parent
         self.flags = flags
         self.progDlg = None
+        self.yieldsteps = yieldsteps
+        self.currYieldStep = 1
 
     def open(self, sum):
         """
@@ -861,6 +866,8 @@ class ProgressHandler(object):
             self.progDlg.ctrls = XrcControls(self.progDlg)
             self.progDlg.SetTitle(self.title)
 
+        self.currYieldStep = 1
+
         self.progDlg.ctrls.text.SetLabel(self.msg)
         self.progDlg.ctrls.gauge.SetRange(sum + self.addsteps)
         self.progDlg.ctrls.gauge.SetValue(0)
@@ -871,13 +878,18 @@ class ProgressHandler(object):
         Called after a step is finished to trigger update
         of GUI.
         step -- Number of done steps
-        msg -- Human readable descripion what is currently done
+        msg -- Human readable description what is currently done
         returns: True to continue, False to stop operation
         """
         self.msg = msg
 
         self.progDlg.ctrls.text.SetLabel(msg)
         self.progDlg.ctrls.gauge.SetValue(step)
+        
+        self.currYieldStep -= 1
+        if self.currYieldStep <= 0:
+            self.currYieldStep = self.yieldsteps
+            wx.SafeYield(onlyIfNeeded = True)
 
         return True
 

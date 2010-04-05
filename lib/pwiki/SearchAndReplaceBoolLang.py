@@ -180,9 +180,18 @@ attributeTerm = attributeTerm.setResultsNameNoCopy("attributeTerm")\
 
 
 todoTerm = keyPrefixTodo + buildRegex(ur" ?") + \
-        (quotedTerm | nonQuotedTermSnippet) + optWhitespace
+        parameterTermOpt.setResultsNameNoCopy("key") + optWhitespace + \
+        Optional( buildRegex(ur": ?") + 
+        parameterTerm.setResultsNameNoCopy("value") + optWhitespace )
+
 todoTerm = todoTerm.setResultsNameNoCopy("todoTerm")\
-        .setParseAction(actionPrefixedTerm)
+        .setParseAction(actionAttributeTerm)
+
+
+# todoTerm = keyPrefixTodo + buildRegex(ur" ?") + \
+#         (quotedTerm | nonQuotedTermSnippet) + optWhitespace
+# todoTerm = todoTerm.setResultsNameNoCopy("todoTerm")\
+#         .setParseAction(actionPrefixedTerm)
 
 
 # attributeValueTerm = keyPrefixValue + buildRegex(ur" ?") + \
