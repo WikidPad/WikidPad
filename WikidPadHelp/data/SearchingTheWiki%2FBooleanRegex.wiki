@@ -34,7 +34,7 @@ If you want to use "and", "or" or other keywords in a regular expression you can
 
 foo and "bar or test": Find pages containing "foo" and "bar or test" (written exactly so).
 
-//att:'here'//   Find "att:'here'"
+//attr:'here'//   Find "attr:'here'"
 
 
 +++ Prefixed terms
@@ -54,23 +54,22 @@ Be aware that in the regular expression language, a dot '.' means "any character
 
 
 ++++ todo:
-Search for todo entries. Although todo entries can also be divided into key and value they are unfortunately currently stored as one string of text exactly as they are entered on a page. Therefore searching todos is different from searching attributes
+Search for todo entries. Same syntax rules apply as for the "attr:" prefix.
 
 Examples:
 
 <<
-todo:todo:   Find todo entries containing "todo:" (e.g. "todo.weekend: Wash car" is not found)
+todo:todo:   Find todo keys containing "todo" (e.g. "todo.weekend: Wash car" is found)
 
-todo:issue.*?:   Find todo entries containing "issue" somewhere before ":" (e.g. "issue.hairy: Wash cat" is found)
+todo:todo$:   Find todo keys ending with "todo" ("todo.weekend: Wash car" is not found)
 
-todo:track   Find todo entries containing "track" somewhere (part of key or value)
+todo::lawn   Find todo entries containing "lawn" in the value somewhere (part of key or value)
 >>
-
 
 You can combine prefixed terms with logical operators and normal search terms:
 
-attr:Mary and attr:lamb   Find pages having an attribute with key containing "Mary" and an attribute with value containing "lamb" (not necessarily the same attribute).
+attr:Mary and attr:lamb   Find pages having an attribute with key containing "Mary" and an attribute with value containing "lamb" (not necessarily the same attribute!).
 
 <<
-todo:grass and garden   Find pages having a todo item containing "grass" and the text "garden" somewhere.
+todo:grass and garden   Find pages having a todo item containing "grass" in the key and the text "garden" somewhere.
 >>

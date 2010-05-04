@@ -260,7 +260,7 @@ class WikiWordNode(AbstractNode):
         """
         assert isinstance(baselabel, unicode)
 
-        wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
+        wikiDataManager = self.treeCtrl.pWiki.getWikiDocument()
         wikiData = wikiDataManager.getWikiData()
         wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
 
@@ -709,7 +709,7 @@ class WikiWordTodoSearchNode(WikiWordRelabelNode):
         try:
             pageAst = editor.getPageAst()
 
-            wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
+            wikiDataManager = self.treeCtrl.pWiki.getWikiDocument()
             wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
                 
             todoNodes = wikiPage.extractTodoNodesFromPageAst(pageAst)
@@ -860,7 +860,7 @@ class WikiWordAttributeSearchNode(WikiWordRelabelNode):
         try:
             pageAst = editor.getPageAst()
 
-            wikiDataManager = self.treeCtrl.pWiki.getWikiDataManager()
+            wikiDataManager = self.treeCtrl.pWiki.getWikiDocument()
             wikiPage = wikiDataManager.getWikiPageNoError(self.wikiWord)
                 
             attrNodes = wikiPage.extractAttributeNodesFromPageAst(pageAst)
@@ -1838,7 +1838,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         if toWikiWord is not None:
             parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
-            page = self.pWiki.getWikiDataManager().getWikiPageNoError(parentWord)
+            page = self.pWiki.getWikiDocument().getWikiPageNoError(parentWord)
             
             langHelper = wx.GetApp().createWikiLanguageHelper(
                     page.getWikiLanguageName())
@@ -1853,7 +1853,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         if toWikiWord is not None:
             parentWord = self.GetPyData(self.contextMenuNode).getWikiWord()
-            page = self.pWiki.getWikiDataManager().getWikiPageNoError(parentWord)
+            page = self.pWiki.getWikiDocument().getWikiPageNoError(parentWord)
             
             langHelper = wx.GetApp().createWikiLanguageHelper(
                     page.getWikiLanguageName())

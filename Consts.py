@@ -23,8 +23,8 @@ from pwiki.Enum import Enumeration
 # (1, 9, 104, 2) is something after 1.9beta04
 # (2, 0, 300, 0) is 2.0final
 
-VERSION_TUPLE = ("wikidPad", 2, 1, 001, 0)
-VERSION_STRING = "wikidPad 2.1alpha01"
+VERSION_TUPLE = ("wikidPad", 2, 1, 002, 0)
+VERSION_STRING = "wikidPad 2.1alpha02"
 HOMEPAGE = u"http://wikidpad.sourceforge.net"
 
 CONFIG_FILENAME = "WikidPad.config"
@@ -33,7 +33,7 @@ CONFIG_GLOBALS_DIRNAME = "WikidPadGlobals"
 
 
 # TODO Remove this soon!!!
-DEADBLOCKTIMEOUT = 80
+DEADBLOCKTIMEOUT = 180
 
 
 # Scintilla known format types and numbers

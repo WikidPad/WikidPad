@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2010-03-28
+# Last modified (format YYYY-MM-DD): 2010-05-04
 
 
 import locale, pprint, time, sys, string, traceback
@@ -961,7 +961,9 @@ attrInsQuoteEnd = attrInsQuote.copy()\
 attrInsQuotedValue = FindFirst([], attrInsQuoteEnd)\
         .setPseudoParseAction(pseudoActionAttrInsQuotedValue)
 
-attrInsNonQuotedValue = buildRegex(ur"[\w\-\_ \t:,.!?#%|/]*", "value")
+# attrInsNonQuotedValue = buildRegex(ur"[\w\-\_ \t:,.!?#%|/]*", "value")
+attrInsNonQuotedValue = buildRegex(ur"(?:[ \t]*[\w\-\_:,.!?#%|/]+)*", "value")
+
 
 attrInsValue = whitespace + ((attrInsQuoteStart + attrInsQuotedValue + \
         attrInsQuoteEnd) | attrInsNonQuotedValue)
@@ -970,13 +972,13 @@ attrInsKey = buildRegex(ur"[\w\-\_\.]+", "key")
 
 attribute = bracketStart + whitespace + attrInsKey + \
         buildRegex(ur"[ \t]*[=:]") + attrInsValue + \
-        ZeroOrMore(buildRegex(ur";") + attrInsValue) + bracketEnd
+        ZeroOrMore(buildRegex(ur";") + attrInsValue) + whitespace + bracketEnd
 attribute = attribute.setResultsNameNoCopy("attribute").setParseAction(actionAttribute)
 
 
 insertion = bracketStart + buildRegex(ur":") + whitespace + attrInsKey + \
         buildRegex(ur"[ \t]*[=:]") + attrInsValue + \
-        ZeroOrMore(buildRegex(ur";") + attrInsValue) + bracketEnd
+        ZeroOrMore(buildRegex(ur";") + attrInsValue) + whitespace + bracketEnd
 insertion = insertion.setResultsNameNoCopy("insertion").setParseAction(actionInsertion)
 
 

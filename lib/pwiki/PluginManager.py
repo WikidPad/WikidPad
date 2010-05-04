@@ -51,7 +51,7 @@ from .StringOps import mbcsEnc, pathEnc
    following syntax:
    a, = api.call1()
    """
-        
+
 class PluginAPI(object):
     """encapsulates a single plugin api and stores the functions of various
        plugins implementing that api. It takes a unique descriptor and a list
@@ -159,11 +159,11 @@ class PluginManager(object):
                         with open(fullname) as f:
                             packageName = "cruelimportExtensionsPackage%i_%i" % \
                                     (id(self), dirNum)
-                            
+
                             module = imp.new_module(packageName)
                             module.__path__ = [directory]
                             sys.modules[packageName] = module
-    
+
                             module = imp.load_module(packageName + "." + moduleName, f,
                                     pathEnc(fullname), (".py", "r", imp.PY_SOURCE))
                     if module and hasattr(module, "WIKIDPAD_PLUGIN"):

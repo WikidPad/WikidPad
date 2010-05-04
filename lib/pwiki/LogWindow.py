@@ -129,9 +129,16 @@ class LogWindow(wx.Panel):
         self.messages = newmsgs
 
 
+    def clear(self):
+        self.ctrls.lcEntries.DeleteAllItems()
+        self.messages = []
+        self.checkAutoShowHide()
+
+
     def checkAutoShowHide(self):
         """
-        Hides the log window if autohide is in effect and log is empty
+        Hides the log window if autohide is in effect and log is empty and
+        shows it if not empty and autoshow is in effect.
         """
         if self.mainControl.getConfig().getboolean(
                 "main", "log_window_autohide") and len(self.messages) == 0:
@@ -153,9 +160,10 @@ class LogWindow(wx.Panel):
         self.messages[evt.GetIndex()].onActivate()
 
     def OnClearLog(self, evt):
-        self.ctrls.lcEntries.DeleteAllItems()
-        self.messages = []
-        self.checkAutoShowHide()
+        self.clear()
+#         self.ctrls.lcEntries.DeleteAllItems()
+#         self.messages = []
+#         self.checkAutoShowHide()
 
     def OnHideLogWindow(self, evt):
         self.mainControl.hideLogWindow()

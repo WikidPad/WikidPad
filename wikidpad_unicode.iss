@@ -22,6 +22,7 @@ Source: dist\wxbase28uh_xml_vc.dll; DestDir: {app}; Components: Program_files
 Source: dist\_ctypes.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\_hashlib.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\pyexpat.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\_sqlite3.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\_socket.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\select.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\wx._controls_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
@@ -54,17 +55,17 @@ Name: Program_files; Description: Main program files; Flags: fixed; Types: custo
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 2.1alpha01
+AppVerName=WikidPad 2.1alpha02
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=2.1.001.0
-VersionInfoTextVersion=WikidPad 2.1alpha01
+VersionInfoVersion=2.1.002.0
+VersionInfoTextVersion=WikidPad 2.1alpha02
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-2.1alpha01
+OutputBaseFilename=WikidPad-2.1alpha02
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2010 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true

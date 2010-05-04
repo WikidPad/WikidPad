@@ -46,7 +46,7 @@ from StringOps import *  # TODO Remove this
 # mbcsDec, uniToGui, guiToUni, \
 #        wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
-from Configuration import isUnicode, isWin9x, isLinux, isWindows
+from Configuration import isUnicode, isWin9x, isLinux, isWindows, isOSX
 
 try:
     import WindowsHacks
@@ -105,6 +105,7 @@ class IncrementalSearchDialog(wx.Frame):
 
         self.SetSizer(mainsizer)
         self.Layout()
+        self.tfInput.SelectAll()  #added for Mac compatibility
         self.tfInput.SetFocus()
 
         config = self.txtCtrl.presenter.getConfig()
@@ -126,6 +127,11 @@ class IncrementalSearchDialog(wx.Frame):
         if self.closeDelay:
             self.closeTimer = wx.Timer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE)
             self.closeTimer.Start(self.closeDelay, True)
+
+#     def Close(self):
+#         wx.Frame.Close(self)
+#         self.txtCtrl.SetFocus()
+
 
     def OnKillFocus(self, evt):
         self.txtCtrl.forgetIncrementalSearch()
@@ -223,6 +229,11 @@ class IncrementalSearchDialog(wx.Frame):
 
         # Else don't change
 
+    if isOSX():
+        # Fix focus handling after close
+        def Close(self):
+            wx.Frame.Close(self)
+            wx.CallAfter(self.txtCtrl.SetFocus)
 
     def OnTimerIncSearchClose(self, evt):
         self.txtCtrl.endIncrementalSearch()  # TODO forgetIncrementalSearch() instead?
@@ -432,13 +443,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 ("options changed", self.onOptionsChanged),
         ), wx.GetApp().getMiscEvent(), self)
 
-        if not self.presenter.getMainControl().isMainWindowConstructed():
-            # Install event handler to wait for construction
-            self.__sinkMainFrame = wxKeyFunctionSink((
-                    ("constructed main window", self.onConstructedMainWindow),
-            ), self.presenter.getMainControl().getMiscEvent(), self)
-        else:
-            self.onConstructedMainWindow(None)
+#         if not self.presenter.getMainControl().isMainWindowConstructed():
+#             # Install event handler to wait for construction
+#             self.__sinkMainFrame = wxKeyFunctionSink((
+#                     ("constructed main window", self.onConstructedMainWindow),
+#             ), self.presenter.getMainControl().getMiscEvent(), self)
+#         else:
+#             self.onConstructedMainWindow(None)
+
+        self.__sinkMainFrame = wxKeyFunctionSink((
+                ("idle visible", self.onIdleVisible),
+        ), self.presenter.getMainControl().getMiscEvent(), self)
+
 
 #         self.presenter.getMiscEvent().addListener(self.presenterListener)
 
@@ -507,8 +523,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
                 self.OnActivateNewTabBackgroundThis)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_OPEN_CONTAINING_FOLDER,
-                self.OnOpenContainingFolder)
+        wx.EVT_MENU(self, GUI_ID.CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS,
+                self.OnConvertUrlAbsoluteRelativeThis)
+
+        wx.EVT_MENU(self, GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS,
+                self.OnOpenContainingFolderThis)
 
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_ANCHOR,
                 self.OnClipboardCopyUrlToThisAnchor)
@@ -537,11 +556,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #         self.presenter.getMiscEvent().removeListener(self.presenterListener)
 
 
-    def onConstructedMainWindow(self, evt):
-        """
-        Now we can register idle handler.
-        """
-        wx.EVT_IDLE(self, self.OnIdle)
+#     def onConstructedMainWindow(self, evt):
+#         """
+#         Now we can register idle handler.
+#         """
+#         wx.EVT_IDLE(self, self.OnIdle)
 
 
     def Cut(self):
@@ -603,20 +622,27 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 # 
 #                 img.SaveFile(destPath, wx.BITMAP_TYPE_PNG)
 
-            locPath = self.presenter.getMainControl().getWikiConfigPath()
+            url = self.presenter.getMainControl().makeAbsPathRelUrl(destPath)
+            
+            if url is None:
+                url = u"file:" + urlFromPathname(destPath)
+            
+            self.ReplaceSelection(url)
 
-            if locPath is not None:
-                locPath = dirname(locPath)
-                relPath = relativeFilePath(locPath, destPath)
-                url = None
-                if relPath is None:
-                    # Absolute path needed
-                    url = "file:%s" % urlFromPathname(destPath)
-                else:
-                    url = "rel://%s" % urlFromPathname(relPath)
-
-                if url:
-                    self.ReplaceSelection(url)
+#             locPath = self.presenter.getMainControl().getWikiConfigPath()
+# 
+#             if locPath is not None:
+#                 locPath = dirname(locPath)
+#                 relPath = relativeFilePath(locPath, destPath)
+#                 url = None
+#                 if relPath is None:
+#                     # Absolute path needed
+#                     url = "file:%s" % urlFromPathname(destPath)
+#                 else:
+#                     url = "rel://%s" % urlFromPathname(relPath)
+# 
+#             if url:
+#                 self.ReplaceSelection(url)
 
             return
         
@@ -625,21 +651,29 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         destPath = imgsav.saveWmfFromClipboardToFileStorage(fs)
 
-        if destPath is not None:
-            locPath = self.presenter.getMainControl().getWikiConfigPath()
+        url = self.presenter.getMainControl().makeAbsPathRelUrl(destPath)
+        
+        if url is None:
+            url = u"file:" + urlFromPathname(destPath)
+        
+        self.ReplaceSelection(url)
 
-            if locPath is not None:
-                locPath = dirname(locPath)
-                relPath = relativeFilePath(locPath, destPath)
-                url = None
-                if relPath is None:
-                    # Absolute path needed
-                    url = "file:%s>i" % urlFromPathname(destPath)
-                else:
-                    url = "rel://%s>i" % urlFromPathname(relPath)
 
-                if url:
-                    self.ReplaceSelection(url)
+#         if destPath is not None:
+#             locPath = self.presenter.getMainControl().getWikiConfigPath()
+# 
+#             if locPath is not None:
+#                 locPath = dirname(locPath)
+#                 relPath = relativeFilePath(locPath, destPath)
+#                 url = None
+#                 if relPath is None:
+#                     # Absolute path needed
+#                     url = "file:%s>i" % urlFromPathname(destPath)
+#                 else:
+#                     url = "rel://%s>i" % urlFromPathname(relPath)
+# 
+#                 if url:
+#                     self.ReplaceSelection(url)
 
 
     def onCmdCopy(self, miscevt):
@@ -799,6 +833,24 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         else:
             wx.stc.StyledTextCtrl.SetText(self,
                     StringOps.mbcsEnc(text, "replace")[0])
+
+
+    def replaceTextAreaByCharPos(self, newText, start, end):
+        text = self.GetText()
+        bs = self.bytelenSct(text[:start])
+        be = bs + self.bytelenSct(text[start:end])
+        self.SetTargetStart(bs)
+        self.SetTargetEnd(be)
+        
+        if isUnicode():
+            self.ReplaceTarget(newText)
+        else:
+            self.ReplaceTarget(StringOps.mbcsEnc(newText, "replace")[0])
+
+#         text = self.GetText()
+#         text = text[:pos] + newText + text[(pos + len):]
+#         
+#         self.replaceText(text)
 
 
     def GetText_unicode(self):
@@ -1460,9 +1512,17 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if docPage is None:
             return
 
+        if not isinstance(docPage, DocPages.WikiPage):
+            return
+            
+        if not docPage.isDefined() and not docPage.getDirty()[0]:
+            title = _(u"Select Template")
+        else:
+            title = _(u"Select Template (deletes current content!)")
+
         templateName = AdditionalDialogs.SelectWikiWordDialog.runModal(
                 self.presenter.getMainControl(), self, -1,
-                title=_(u"Select template"))
+                title=title)
         if templateName is None:
             return
 
@@ -1537,7 +1597,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                             _CONTEXT_MENU_SELECT_TEMPLATE_IN_TEMPLATE_MENU)
     
                     menu.AppendSeparator()
-                    menu.AppendMenu(wx.NewId(), _(u'Use template'),
+                    menu.AppendMenu(wx.NewId(), _(u'Use Template'),
                             templateSubmenu)
                 else:
                     appendToMenuByMenuDesc(menu,
@@ -1619,7 +1679,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.stylebytes = stylebytes
 #         self.pageAst = pageAst
         self.foldingseq = foldingseq
-        
+
         self.AddPendingEvent(StyleDoneEvent(stylebytes, foldingseq))
 
 
@@ -2117,7 +2177,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if self.contextMenuTokens:
             self.activateTokens(self.contextMenuTokens, 3)
 
-    def OnOpenContainingFolder(self, evt):
+    def OnOpenContainingFolderThis(self, evt):
         if self.contextMenuTokens:
             for node in self.contextMenuTokens:
                 if node.name == "urlLink":
@@ -2141,6 +2201,44 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
                     break
 
+    def convertUrlAbsoluteRelative(self, tokenList):
+        for node in tokenList:
+            if node.name == "urlLink":
+                link = node.url
+
+                for actualNode in node.iterDeepByName("url"):
+                    if actualNode.getString() == link:
+                        break # Inner for
+                else:
+                    continue  # Outer for
+
+                if link.startswith(u"rel://"):
+                    link = self.presenter.getMainControl()\
+                            .makeRelUrlAbsolute(link)
+                
+                elif link.startswith(u"file:"):
+                    link = self.presenter.getMainControl()\
+                            .makeAbsPathRelUrl(StringOps.pathnameFromUrl(
+                            link))
+                    if link is None:
+                        continue # TODO Message?
+                else:
+                    continue
+
+                self.replaceTextAreaByCharPos(link, actualNode.pos,
+                        actualNode.pos + len(node.url))
+
+                break
+
+
+    def convertSelectedUrlAbsoluteRelative(self):
+        tokenList = self.getTokensForMousePos(None)
+        self.convertUrlAbsoluteRelative(tokenList)
+
+
+    def OnConvertUrlAbsoluteRelativeThis(self, evt):
+        if self.contextMenuTokens:
+            self.convertUrlAbsoluteRelative(self.contextMenuTokens)
 
 
     def OnClipboardCopyUrlToThisAnchor(self, evt):
@@ -2445,6 +2543,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.incSearchPreviousHiddenStartLine = -1
 
         rect = sb.GetFieldRect(0)
+        
+        if isOSX():
+            # needed on Mac OSX to avoid cropped text
+            rect = wx._core.Rect(rect.x, rect.y - 2, rect.width, rect.height + 4)
+
         rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
 
         dlg = IncrementalSearchDialog(self, -1, self, rect,
@@ -2906,7 +3009,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.applyFolding(evt.foldingseq)
 
 
-    def OnIdle(self, evt):
+#     def OnIdle(self, evt):
+    def onIdleVisible(self, miscevt):
 #         evt.Skip()
 
 
@@ -3052,8 +3156,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         for fn in filenames:
             url = urlFromPathname(fn)
     
-            if fn.endswith(".wiki"):
-                urls.append("wiki:%s" % url)
+            if fn.endswith(u".wiki"):
+                urls.append(u"wiki:%s" % url)
             else:
                 doCopy = False
                 if modeCopyToStorage:
@@ -3070,18 +3174,26 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
     
                 if modeRelativeUrl or doCopy:
                     # Relative rel: URL
-                    locPath = editor.presenter.getMainControl().getWikiConfigPath()
-                    if locPath is not None:
-                        locPath = dirname(locPath)
-                        relPath = relativeFilePath(locPath, fn)
-                        if relPath is None:
-                            # Absolute path needed
-                            urls.append("file:%s" % url)
-                        else:
-                            urls.append("rel://%s" % urlFromPathname(relPath))
+                    url = editor.presenter.getMainControl().makeAbsPathRelUrl(fn)
+                    
+                    if url is None:
+                        url = u"file:" + urlFromPathname(fn)
+
+                    urls.append(url)
+
+
+#                     locPath = editor.presenter.getMainControl().getWikiConfigPath()
+#                     if locPath is not None:
+#                         locPath = dirname(locPath)
+#                         relPath = relativeFilePath(locPath, fn)
+#                         if relPath is None:
+#                             # Absolute path needed
+#                             urls.append("file:%s" % url)
+#                         else:
+#                             urls.append("rel://%s" % urlFromPathname(relPath))
                 else:
                     # Absolute file: URL
-                    urls.append("file:%s" % url)
+                    urls.append(u"file:%s" % url)
     
         editor.handleDropText(x, y, " ".join(urls))
 
@@ -3247,7 +3359,9 @@ Follow Link New Tab Backgrd.;CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS
 
 _CONTEXT_MENU_INTEXT_FILE_URL = \
 u"""
-Open Containing Folder;CMD_OPEN_CONTAINING_FOLDER
+-
+Convert Absolute/Relative File URL;CMD_CONVERT_URL_ABSOLUTE_RELATIVE_THIS
+Open Containing Folder;CMD_OPEN_CONTAINING_FOLDER_THIS
 """
 
 
@@ -3301,6 +3415,7 @@ N_(u"Follow Link")
 N_(u"Follow Link New Tab")
 N_(u"Follow Link New Tab Backgrd.")
 
+N_(u"Convert Absolute/Relative File URL")
 N_(u"Open Containing Folder")
 
 N_(u"Copy anchor URL to clipboard")

@@ -1817,7 +1817,7 @@ class ImportDialog(wx.Dialog):
             panel = None
 
         try:
-            ob.doImport(self.mainControl.getWikiDataManager(), itype, 
+            ob.doImport(self.mainControl.getWikiDocument(), itype, 
                     guiToUni(self.ctrls.tfSource.GetValue()), 
                     False, ob.getAddOpt(panel))
         except ImportException, e:

@@ -2,6 +2,7 @@
 /Consts.py -text
 /ExceptionLogger.py -text
 /Microsoft.VC90.CRT.manifest -text
+/WikidPad-winport.config -text
 /WikidPad.pot -text
 /WikidPad.py -text
 /WikidPad.xrc -text
@@ -25,6 +26,7 @@ WikidPadHelp/data/ChangeLog2004.wiki -text
 WikidPadHelp/data/ChangeLog2005.wiki -text
 WikidPadHelp/data/ChangeLog2006.wiki -text
 WikidPadHelp/data/ChangeLog2007.wiki -text
+WikidPadHelp/data/ChangeLog2008.wiki -text
 WikidPadHelp/data/ChangingKeyBindings.wiki -text
 WikidPadHelp/data/ChronViewWindow.wiki -text
 WikidPadHelp/data/ClipboardCatcher.wiki -text
@@ -321,6 +323,7 @@ WikidPadHelp/data/TreeIcons.wiki -text
 WikidPadHelp/data/TreeNodeColors.wiki -text
 WikidPadHelp/data/UrlLinking.wiki -text
 WikidPadHelp/data/WIKIRELATIONS.grl -text
+WikidPadHelp/data/WIKIWORDATTRS.grl -text
 WikidPadHelp/data/WIKIWORDMATCHTERMS.grl -text
 WikidPadHelp/data/WIKIWORDPROPS.grl -text
 WikidPadHelp/data/WIKIWORDS.grl -text
@@ -352,6 +355,7 @@ WikidPadHelp/files/testimg.gif -text
 /appbase.css -text
 /bld.bat -text
 /buildGadflyZips.py -text
+/buildWinPortZip.py -text
 docs/api.txt -text
 docs/dev-setup.txt -text
 docs/dev.txt -text
@@ -617,6 +621,7 @@ lib/pwiki/AdditionalDialogs.py -text
 lib/pwiki/AttributeHandling.py -text
 lib/pwiki/CmdLineAction.py -text
 lib/pwiki/Configuration.py -text
+lib/pwiki/ConnectWrapPysqlite.py -text
 lib/pwiki/DocPagePresenter.py -text
 lib/pwiki/DocPages.py -text
 lib/pwiki/DocStructureCtrl.py -text

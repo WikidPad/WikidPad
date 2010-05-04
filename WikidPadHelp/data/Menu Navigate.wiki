@@ -12,6 +12,8 @@ Go to the wiki root word (the word with the same name as the whole wiki).
 ++ Go to Page
 Opens dialog to open a particular page. This dialog also allows to open or delete multiple pages. If you enter a non-existing page name you can also create a new page there.
 
+After entering a few characters, the list only shows page names which start with these characters and after that names which contain the characters. The names inside of these two groups can be ordered either alphabetically or by the time of last visit of this page, so most recently used pages are placed near the top of the list.
+
 ++ Go to Parent
 Shows a list of parents for the current wiki word and allows to go to one of it.
 

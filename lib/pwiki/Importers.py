@@ -1,5 +1,5 @@
 # from Enum import Enumeration
-import sys, os, string, re, traceback, time
+import sys, os, string, re, traceback, time, sqlite3
 from os.path import join, exists, splitext
 from calendar import timegm
 import urllib_red as urllib
@@ -9,8 +9,14 @@ import urllib_red as urllib
 import Consts
 from StringOps import *
 
-from WikiExceptions import WikiWordNotFoundException, ImportException, \
-        BadFuncPageTagException
+from ConnectWrapPysqlite import ConnectWrapSyncCommit
+
+
+from WikiExceptions import *
+
+import DocPages
+
+from timeView import Versioning
 
 
 
@@ -73,7 +79,7 @@ class MultiPageTextImporter:
         return ()
 
 
-    def collectContent(self):
+    def _collectContent(self):
         """
         Collect lines from current position of importFile up to separator
         or file end collect all lines and return them as list of lines.
@@ -103,14 +109,29 @@ class MultiPageTextImporter:
         return u"".join(content)
 
 
+    def _skipContent(self):
+        """
+        Skip content until reaching next separator or end of file
+        """
+        while True:
+            # Read lines of wikiword
+            line = self.importFile.readline()
+            if line == u"":
+                # The last page in mpt file without separator
+                # ends as the real wiki page
+                break
+            
+            if line == self.separator:
+                break
 
 
-    def doImport(self, wikiDataManager, importType, importSrc,
+
+    def doImport(self, wikiDocument, importType, importSrc,
             compatFilenames, addOpt):
         """
         Run import operation.
         
-        wikiDataManager -- WikiDataManager object
+        wikiDocument -- WikiDataManager object
         importType -- string tag to identify how to import
         importDest -- Path to source directory or file to import from
         compatFilenames -- Should the filenames be decoded from the lowest
@@ -122,8 +143,9 @@ class MultiPageTextImporter:
         except IOError:
             raise ImportException(_(u"Opening import file failed"))
             
-        self.wikiDataManager = wikiDataManager
-#         wikiData = self.wikiDataManager.getWikiData()
+        self.wikiDocument = wikiDocument
+        self.tempDb = None
+#         wikiData = self.wikiDocument.getWikiData()
 
         
         # TODO Do not stop on each import error, instead create error list and
@@ -135,14 +157,16 @@ class MultiPageTextImporter:
                 bom = self.rawImportFile.read(len(BOM_UTF8))
                 if bom != BOM_UTF8:
                     self.rawImportFile.seek(0)
-                    self.importFile = mbcsReader(self.rawImportFile, "replace")
+                    decodingReader = mbcsReader
+                    decode = mbcsDec
                 else:
-                    self.importFile = utf8Reader(self.rawImportFile, "replace")
-                
-                line = self.importFile.readline()
+                    decodingReader = utf8Reader
+                    decode = utf8Dec
+
+                line = decode(self.rawImportFile.readline())[0]
                 if line.startswith("#!"):
                     # Skip initial line with #! to allow execution as shell script
-                    line = self.importFile.readline()
+                    line = decode(self.rawImportFile.readline())[0]
 
                 if not line.startswith("Multipage text format "):
                     raise ImportException(
@@ -158,7 +182,7 @@ class MultiPageTextImporter:
                             self.formatVer)
 
                 # Next is the separator line
-                line = self.importFile.readline()
+                line = decode(self.rawImportFile.readline())[0]
                 if not line.startswith("Separator: "):
                     raise ImportException(
                             _(u"Bad file format, header not detected"))
@@ -166,23 +190,50 @@ class MultiPageTextImporter:
                 self.separator = line[11:]
                 
                 if self.formatVer == 0:
-                    self.doImportVer0()
+                    self._doImportVer0()
                 elif self.formatVer == 1:
-                    while True:
-                        tag = self.importFile.readline()
-                        if tag == u"":
-                            # End of file
-                            break
-                        tag = tag[:-1]
-                        if tag.startswith(u"funcpage/"):
-                            self.importItemFuncPage(tag[9:])
-                        elif tag.startswith(u"savedsearch/"):
-                            self.importItemSavedSearch(tag)
-                        elif tag.startswith(u"wikipage/"):
-                            self.importItemWikiPage(tag[9:])
-                        else:
-                            # Unknown tag -> Ignore until separator
-                            self.collectContent()
+                    startPos = self.rawImportFile.tell()
+                    # Create temporary database. It is mainly filled during
+                    # pass 1 to check for validity and other things before
+                    # actual importing in pass 2
+                    self.tempDb = ConnectWrapSyncCommit(sqlite3.connect(""))
+                    
+                    self.tempDb.execSql("create table entries("
+                            "unifName text primary key not null, "
+                            "seen integer not null default 0, "
+                            "doImport integer not null default 0, "
+                            "missingDep integer not null default 0, "
+                            "hasVersionData integer not null default 0, "
+#                             "neededBy text default '',"
+#                             "versionContentDifferencing text default '',"
+                            "collisionWithPresent text not null default '',"
+                            "renameImportTo text not null default '',"
+                            "renamePresentTo text not null default ''"
+                            ");"
+                            )
+
+                    self.tempDb.execSql("create table depgraph("
+                            "unifName text not null default '',"
+                            "neededBy text not null default '',"
+                            "constraint depgraphpk primary key (unifName, neededBy)"
+                            ");"
+                            )
+
+
+                    self.importFile = decodingReader(self.rawImportFile, "replace")
+                    self._doImportVer1Pass1()
+                    
+                    self._markMissingDependencies()
+                    self._markHasVersionData()
+                    self._markCollision()
+
+                    self.rawImportFile.seek(startPos)
+                    self.importFile = decodingReader(self.rawImportFile, "replace")
+                    self._doImportVer1Pass2()
+
+                    self.tempDb.close()
+                    self.tempDb = None
+
             except ImportException:
                 raise
             except Exception, e:
@@ -193,12 +244,58 @@ class MultiPageTextImporter:
             self.rawImportFile.close()
 
 
-    def doImportVer0(self):
+    def _markMissingDependencies(self):
+        while True:
+            self.tempDb.execSql("""
+                update entries set missingDep=1 where (not missingDep) and 
+                    unifName in (select depgraph.neededBy from depgraph inner join 
+                    entries on depgraph.unifName = entries.unifName where
+                    (not entries.seen) or entries.missingDep);
+                """)
+
+            if self.tempDb.rowcount == 0:
+                break
+
+
+    def _markHasVersionData(self):
+        self.tempDb.execSql("""
+            update entries set hasVersionData=1 where (not hasVersionData) and 
+            unifName in (select substr(unifName, 21) from entries where 
+            unifName glob 'versioning/overview/*')
+            """)  # TODO Take missing deps into account here?
+
+#             self.tempDb.execSql("insert or replace into entries(unifName, hasVersionData) "
+#                 "values (?, 1)", (depunifName,))
+
+
+    def _markCollision(self):
+        # First find collisions with wiki words
+        for wikipageUnifName in self.tempDb.execSqlQuerySingleColumn(
+                "select unifName from entries where unifName glob 'wikipage/*'"):
+            wpName = wikipageUnifName[9:]
+        
+            collisionWithPresent = self.wikiDocument.getUnAliasedWikiWord(wpName)
+            if collisionWithPresent is None:
+                continue
+            
+            self.tempDb.execSql("update entries set collisionWithPresent = ? "
+                    "where unifName = ?",
+                    (u"wikipage/" + collisionWithPresent, wikipageUnifName))
+
+        # Then find other collisions (saved searches etc.)
+        for unifName in self.tempDb.execSqlQuerySingleColumn(
+                "select unifName from entries where unifName glob 'savedsearch/*'"):
+            if self.wikiDocument.hasDataBlock(unifName):
+                self.tempDb.execSql("update entries set collisionWithPresent = ? "
+                        "where unifName = ?", (unifName, unifName))
+
+
+    def _doImportVer0(self):
         """
         Import wikiwords if format version is 0.
         """
         langHelper = wx.GetApp().createWikiLanguageHelper(
-                self.wikiDataManager.getWikiDefaultWikiLanguage())
+                self.wikiDocument.getWikiDefaultWikiLanguage())
 
         while True:
             # Read next wikiword
@@ -208,18 +305,60 @@ class MultiPageTextImporter:
 
             wikiWord = line[:-1]
             errMsg = langHelper.checkForInvalidWikiWord(wikiWord,
-                    self.wikiDataManager)
+                    self.wikiDocument)
             if errMsg:
                 raise ImportException(_(u"Bad wiki word: %s, %s") %
                         (wikiWord, errMsg))
 
-            content = self.collectContent()
-            page = self.wikiDataManager.getWikiPageNoError(wikiWord)
+            content = self._collectContent()
+            page = self.wikiDocument.getWikiPageNoError(wikiWord)
 
             page.replaceLiveText(content)
 
 
-    def importItemFuncPage(self, subtag):
+    def _doImportVer1Pass1(self):
+        while True:
+            tag = self.importFile.readline()
+            if tag == u"":
+                # End of file
+                break
+            tag = tag[:-1]
+            if tag.startswith(u"funcpage/"):
+                self._skipContent()
+            elif tag.startswith(u"savedsearch/"):
+                self._skipContent()
+            elif tag.startswith(u"wikipage/"):
+                self._skipContent()
+            elif tag.startswith(u"versioning/overview/"):
+                self.importItemVersioningOverviewVer1Pass1(tag[20:])
+            else:
+                # Unknown tag -> Ignore until separator
+                self._skipContent()
+                continue
+            
+            self.tempDb.execSql("insert or replace into entries(unifName, seen) "
+                    "values (?, 1)", (tag,))
+
+
+    def _doImportVer1Pass2(self):
+        while True:
+            tag = self.importFile.readline()
+            if tag == u"":
+                # End of file
+                break
+            tag = tag[:-1]
+            if tag.startswith(u"funcpage/"):
+                self.importItemFuncPageVer1Pass2(tag[9:])
+            elif tag.startswith(u"savedsearch/"):
+                self.importItemSavedSearchVer1Pass2(tag)
+            elif tag.startswith(u"wikipage/"):
+                self.importItemWikiPageVer1Pass2(tag[9:])
+            else:
+                # Unknown tag -> Ignore until separator
+                self._skipContent()
+
+
+    def importItemFuncPageVer1Pass2(self, subtag):
         # The subtag is functional page tag
         try:
             # subtag is unicode but func tags are bytestrings
@@ -227,24 +366,24 @@ class MultiPageTextImporter:
         except UnicodeEncodeError:
             return
 
-        content = self.collectContent()
+        content = self._collectContent()
         try:
-            page = self.wikiDataManager.getFuncPage(subtag)
+            page = self.wikiDocument.getFuncPage(subtag)
             page.replaceLiveText(content)
         except BadFuncPageTagException:
             # This function tag is bad or unknown -> ignore
             return  # TODO Report error
 
 
-    def importItemSavedSearch(self, unifName):
+    def importItemSavedSearchVer1Pass2(self, unifName):
         # The subtag is the title of the search
         
         # Content is base64 encoded
-        b64Content = self.collectContent()
+        b64Content = self._collectContent()
         
         try:
             datablock = base64BlockDecode(b64Content)
-            self.wikiDataManager.getWikiData().storeDataBlock(unifName, datablock,
+            self.wikiDocument.getWikiData().storeDataBlock(unifName, datablock,
                     storeHint=Consts.DATABLOCK_STOREHINT_INTERN)
 
         except TypeError:
@@ -252,7 +391,7 @@ class MultiPageTextImporter:
             return  # TODO Report error
 
 
-    def importItemWikiPage(self, subtag):
+    def importItemWikiPageVer1Pass2(self, subtag):
         timeStampLine = self.importFile.readline()[:-1]
         timeStrings = timeStampLine.split(u"  ")
         if len(timeStrings) < 3:
@@ -273,8 +412,8 @@ class MultiPageTextImporter:
             traceback.print_exc()
             return  # TODO Report error
 
-        content = self.collectContent()
-        page = self.wikiDataManager.getWikiPageNoError(subtag)
+        content = self._collectContent()
+        page = self.wikiDocument.getWikiPageNoError(subtag)
 
         # TODO How to handle versions here?
         page.replaceLiveText(content)
@@ -282,6 +421,57 @@ class MultiPageTextImporter:
             page.writeToDatabase()
 
         page.setTimestamps(timeStamps)
+
+
+
+    def importItemVersioningOverviewVer1Pass1(self, subtag):
+        # Always encode to UTF-8 no matter what the import file encoding is
+        content = self._collectContent().encode("utf-8")
+
+        try:
+            ovw = Versioning.VersionOverview(self.wikiDocument,
+                    unifiedBasePageName=subtag)
+            
+            ovw.readOverviewFromBytes(content)
+            
+            ovwUnifName = ovw.getUnifiedName()
+            
+            self.tempDb.execSql("insert or replace into depgraph(unifName, neededBy) "
+                "values (?, 1)", (subtag, ovwUnifName))
+                
+            for depUnifName in ovw.getDependentDataBlocks(omitSelf=True):
+                self.tempDb.execSql("insert or replace into depgraph(unifName, neededBy) "
+                    "values (?, 1)", (depUnifName, ovwUnifName))
+#                 self.tempDb.execSql("insert or replace into entries(unifName, needed) "
+#                     "values (?, 1)", (depUnifName,))
+
+        except VersioningException:
+            return
+            
+
+
+
+# def unifNameToHumanReadable(unifName):
+#     """
+#     Return human readable description for a unified name
+#     """
+#     # TODO Move to more central place
+#     if unifName.startswith(u"wikipage/"):
+#         return _(u"wiki page '%s'") % unifName[9:]
+#     elif unifName.startswith(u"funcpage/"):
+#         return _(u"functional page '%s'") % DocPages.getHrNameForFuncTag(
+#                 unifName[9:])
+#     elif unifName.startswith(u"versioning/overview/"):
+#         return _(u"version overview for %s") % unifNameToHumanReadable(
+#                 unifName[20:])
+#     elif unifName.startswith(u"versioning/packet/versionNo/"):
+#         versionNo, subUnifName = unifName[28:].split("/", 1)
+#         return _(u"version packet (single version no. %s) for %s") % \
+#                 (versionNo, unifNameToHumanReadable(subUnifName))
+#     elif unifName.startswith(u"savedsearch/"):
+#         return _(u"saved search '%s'") % unifName[12:]
+
+
 
 
 def describeImporters(mainControl):

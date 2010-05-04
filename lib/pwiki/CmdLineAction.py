@@ -168,7 +168,7 @@ class CmdLineAction:
             return
 
         try:
-            exporter.export(pWiki.getWikiDataManager(), wordList,
+            exporter.export(pWiki.getWikiDocument(), wordList,
                     self.exportType, self.exportDest, 
                     self.exportCompFn, exporter.getAddOpt(None), None)
         except (IOError, WindowsError), e:

@@ -3,6 +3,8 @@ import os, os.path, traceback, sys, re
 from wx.xrc import XRCCTRL, XRCID, XmlResource
 import wx
 
+from WikiExceptions import *
+
 from MiscEvent import KeyFunctionSink
 import Configuration
 
@@ -48,10 +50,18 @@ class XrcControls:
         self.__basepanel = basepanel
 
     def __getattr__(self, name):
-        return XRCCTRL(self.__basepanel, name)
-        
+        result = XRCCTRL(self.__basepanel, name)
+        if result is None:
+            raise InternalError(u"XML-ID '%s' not found in %s" %
+                    (name, repr(self.__basepanel)))
+        return result
+
     def __getitem__(self, name):
-        return XRCCTRL(self.__basepanel, name)
+        result = XRCCTRL(self.__basepanel, name)
+        if result is None:
+            raise InternalError(u"XML-ID '%s' not found in %s" %
+                    (name, repr(self.__basepanel)))
+        return result
 
     def _byId(self, wid):
         return self.__basepanel.FindWindowById(wid)

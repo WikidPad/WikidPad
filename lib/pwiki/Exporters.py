@@ -329,7 +329,7 @@ class HtmlExporter(AbstractExporter):
         self.copiedTempFileCache = None  # Dictionary {<original path>: <target URL>}
         self.filenameConverter = FilenameConverter(False)
 #         self.convertFilename = removeBracketsFilename   # lambda s: mbcsEnc(s, "replace")[0]
-        
+
         self.result = None
         
         # Flag to control how to push output into self.result
@@ -1493,6 +1493,34 @@ class HtmlExporter(AbstractExporter):
 
             docpage = self.wikiDocument.getWikiPageNoError(value)
             pageAst = docpage.getLivePageAst()
+            
+            # Value to add to heading level to fix level inside inserted pages
+            offsetHead = 0
+
+            # Code to adjust heading level
+            if (u"adjheading" in appendices) or (u"adjheading+" in appendices):
+                minHead = 1000 # Just assuming that there won't be 1000 levels deep heading
+                # Adjust heading level of insertion
+                # First find the lowest heading level used in the inserted page
+                for hn in pageAst.iterDeepByName("heading"):
+                    minHead = min(minHead, hn.level)
+                
+                # if minHead is 1000 yet, there is no heading to adjust. Otherwise:
+                if minHead < 1000:
+                    fatherAst = astNode.astNodeStack[-2]
+                    
+                    # lastSurroundHead becomes the heading level in which the insertion
+                    # is embedded (taken from last heading before insertion tag)
+                    lastSurroundHead = -1
+                    for hn in fatherAst.iterDeepByName("heading"):
+                        if hn.pos > astNode.pos:
+                            break
+                        lastSurroundHead = hn.level
+
+                    # Finally the offset is calculated
+                    if lastSurroundHead > -1:
+                        offsetHead = lastSurroundHead - (minHead - 1)
+
 
             self.insertionVisitStack.append("wikipage/" + value)
             try:
@@ -1503,6 +1531,11 @@ class HtmlExporter(AbstractExporter):
                 
                 with self.optsStack:
                     self.optsStack["anchorForHeading"] = False
+                    if offsetHead != 0:
+                        self.optsStack["offsetHeadingLevel"] = \
+                                self.optsStack.get("offsetHeadingLevel", 0) + \
+                                offsetHead
+
                     self.processAst(docpage.getLiveText(), pageAst)
 
             finally:
@@ -1884,9 +1917,13 @@ class HtmlExporter(AbstractExporter):
                         anchor = u".h%i" % node.pos
 
                     self.outAppend(u'<a name="%s"></a>' % anchor)
-                    
-                boundHeadLevel = min(6, node.level)
-                self.outAppend(u"<h%i>" % boundHeadLevel, eatPreBreak=True)
+
+                headLevel = node.level + self.optsStack.get(
+                        "offsetHeadingLevel", 0)
+
+                boundHeadLevel = min(6, headLevel)
+                self.outAppend(u"<h%i class=\"heading-level%i\">" %
+                        (boundHeadLevel, headLevel), eatPreBreak=True)
                 self.processAst(content, node.contentNode)
                 self.outAppend(u"</h%i>\n" % boundHeadLevel, eatPostBreak=True)
 
@@ -2439,8 +2476,8 @@ class MultiPageTextExporter(AbstractExporter):
 #                 return sep
 #             sep += u"."
             
-        # Try random strings (15 tries)
-        for i in xrange(15):
+        # Try random strings (35 tries)
+        for i in xrange(35):
             sep = u"-----%s-----" % createRandomString(25)
             if self._checkPossibleSeparator(sep):
                 return sep

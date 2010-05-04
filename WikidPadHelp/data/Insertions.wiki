@@ -38,7 +38,9 @@ The above insertion example can therefore be written as:
 The following keys and values are built into WikidPad (further are possible by plugins):
 
     * *page* shows the content of the existing wiki page which is
-      given as insertion value.
+      given as insertion value. If it contains an appendix
+      "adjheading" it adjusts the heading levels in the inserted page
+      to the level of inserting page
     * *rel* lists all wiki words related to this page in the way
       described by the value:
         * *parents*: all parents of the page
@@ -54,7 +56,7 @@ The following keys and values are built into WikidPad (further are possible by p
     * *savedsearch* lists all wiki words found by the saved search
       with the name given as value.
     * *toc* shows a little table of contents with the headings of 
-      the current page. In HTML preview/export you can click on the
+      the current page. In HTML preview/export you can click on
       the lines to go to the actual headings. The value of this
       insertion must be empty.
     * *iconimage* shows the icon whose name is given as value.

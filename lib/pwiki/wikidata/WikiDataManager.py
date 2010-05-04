@@ -551,7 +551,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
     def getFileStorage(self):
         return self.fileStorage
-        
+
     def getWikiConfig(self):
         return self.wikiConfiguration
         
@@ -799,9 +799,9 @@ class WikiDataManager(MiscEventSourceMixin):
     def isCreatableWikiWord(self, wikiWord):
         """
         Returns True if wikiWord can be created in the database. Does not
-        check against regular expression, but checks if word already
-        exists or (if document is in caseless mode) if word with different
-        case but otherwise the same already exists.
+        check against regular expression of wiki language, but checks if word
+        already exists or (if document is in caseless mode) if word with
+        different case but otherwise the same already exists.
         If this returns False, self.getUnAliasedWikiWord(wikiWord) must be able to
         return the existing word whose existence prevents creation of wikiWord
 
@@ -986,6 +986,14 @@ class WikiDataManager(MiscEventSourceMixin):
         Return all unified names starting with startingWith (case sensitive)
         """
         return self.wikiData.getDataBlockUnifNamesStartingWith(startingWith)
+
+    def hasDataBlock(self, unifName):
+        """
+        Return if datablock exists
+        """
+        # TODO Create native method in WikiData classes
+        return self.retrieveDataBlock(unifName, default=None) is not None
+
 
     def retrieveDataBlock(self, unifName, default=""):
         """
@@ -1592,6 +1600,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
     def getUnAliasedWikiWord(self, word):
         """
+        Resolve links to wiki words. Returns None if it can't be resolved
         """
         # TODO: Resolve properly in caseless mode
         return self.getWikiData().getUnAliasedWikiWord(word)

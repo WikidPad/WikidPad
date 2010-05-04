@@ -1,0 +1,189 @@
+﻿++ Change Log2008
+
+Dec. 27, 2008 (1.9beta21)
+
+    * Bug fixed: Tree auto-follow with Gadfly backend did not work
+      if going to a non-existing page (even if it was shown in tree)
+
+
+
+Nov. 27, 2008 (1.9beta20, repository revision in "mbutscher" branch: 163)
+
+    * Option to automatically search text selected in preview when
+      switching to editor for better synchronization (thanks to
+      François Savard).
+      See OptionsDialog#*Synchronize# editor# by# preview# selection*
+    * Dialog to go to parents/children has now "open in new tab" button.
+    * Several presentation options for GraphViz structure plugin.
+      See WikiStructureGraphs#+++# Options
+    * Show folded lines with match during incremental search and
+      unfold at the end of inc. search if necessary
+    
+    * Internal: Menu plugins can now place their items into submenus
+    
+    * Bug fixed: Styling text with bold or italics markup failed if
+      markup was changed to something non-Ascii.
+    * Bug fixed: Spell checking did not handle language attribute
+      correctly when switching from one page to another with different
+      language.
+    * Bug fixed: If WikidPad is set to stay on top, print preview
+      did not work
+
+
+
+Oct. 26, 2008 (1.9beta19, repository revision in "mbutscher" branch: 158)
+
+   * Option to set whole wiki read-only.
+     See OptionsDialog#*Read-only# wiki*
+   * Wiki-bound option to auto-show log window in addition
+     to global option
+   * "Collapse whole tree" in context menu of tree items
+   * Slightly different ordering of tree children with "tree_position"
+     or "priority" attribute
+   * Support for cascading four CSS files from different places
+     on export (application base, admin base, user-bound and wiki-bound).
+   * For external preview there can be three more to set it differently.
+     See [Cascading style sheets]
+   * More logical syntax for textblocks (submenu title is not needed to be
+     indented anymore like the rest of submenu).
+     See [TextBlocks]#Submenu# title=
+   * Renaming the page which is root node of tree now also changes
+     the root node to the new page name.
+   * More compatible with newer wxPython versions on Windows
+     (thanks to Serge)
+   
+   * Bug fixed: Prioritizing more specific global settings for tree
+     node state (icon/bold/color) over less specific ones did not work
+   * Bug fixed: Diverse problems with IE preview
+   * Bug fixed: Using templates when "templates_head" is set to "auto"
+     (or not set at all) prevented "Use link title if present"
+     from working
+   * Bug fixed: Doc structure didn't update anymore
+   * Bug fixed: On inserting a textblock, selection was not replaced
+     and "undo" didn't behave well
+   * Bug fixed: "priority" attribute did not influence "importance"
+   * Bug fixed: Indentation containing real tab characters was not copied
+     unmodified to next line on auto-indent
+
+
+
+Sep. 27, 2008 (1.9beta18, repository revision in "mbutscher" branch: 147)
+
+    * Insertion [:rel:back] introduced to go back in history.
+      See [Insertions]
+    
+    * Option that double-clicking into preview switches to editor
+    * Option to close tab when clicking on it with middle mouse button
+    * Option to control what happens when dropping files.
+      For all three see OptionsDialog#++++# Mouse
+    
+    * Clipboard catcher does no longer catch when copying from
+      WikidPad itself
+    * Most menu items and toolbar icons are grayed out if not usable
+      (not yet completed)
+    * Pages are now counted as parentless if they have only itself
+      as parent
+    * Closing a wiki pushes it on top of recent files list.
+    
+    * Bug fixed: Copying of GraphViz source produced by
+      "GraphvizStructureView" plugin into clipboard did not always work
+    * Bug fixed: Renaming may modify page heading in wrong way
+      ("++ X" renamed to 'Y X' results in "++ Y Y X")
+    * Bug fixed: "wikistyle.css" is not copied on export
+    * Bug fixed: Default "wikistyle.css" has no style definition
+      for heading levels 5 to 15
+    * Bug fixed: Searching for regular expressions matching nothing
+      (e.g. "|") may freeze WikidPad
+    * Bug fixed: Nesting of text blocks into submenus doesn't work
+    * Bug fixed: Empty lines between bullets/numbered items in
+      HTML preview
+    
+    * Development: Menu items and toolbar icons from plugins can now
+      provide an update function to enable/disable when appropriate.
+      See plugin "referrals.py" as example.
+    * Development: Script "buildGadflyZips.py" added to relieve
+      creation of WikidPad from source.
+
+
+
+Aug. 26, 2008 (1.9beta17, repository revision in "mbutscher" branch: 145)
+
+    * When exporting, files in the file storage
+      ("files" directory) which are referenced on exported pages
+      are copied to export destination "files" folder.
+      See FileStorage#+++# On# HTML# export
+    * When exporting, generated files (by MimeTeX, GraphViz, ...)
+      are put to subfolder "volatile" which is deleted each time
+      the exporting is repeated (otherwise the folder would be
+      filled up with old versions of the files).
+      See ExternalGraphicalApplications#When# exporting# HTML
+    * "r" appendix to image URLs to resize relative to image size.
+      See UrlLinking#++# URL# Appendix
+    * It's now possible to give an image URL as title for
+      a wikiword or URL to use image as link. See UrlLinking
+
+    * New plugin to create relation graph (with GraphViz) between
+      wikiwords (thanks to josip_ine). See WikiStructureGraphs
+
+    * Option to (not) force visibility of page "ScratchPad".
+      See OptionsDialog#*Force# ScratchPad# visibility# in# tree*
+    * Attribute values ending with semicolon (e.g. [test:foo; ])
+      are now illegal (not interpreted as attribute)
+    * Menu plugins can now also read their shortcuts
+      from "KeyBindings.py" as main program does.
+
+    * Windows 2K/XP and later: Copying files into file storage or
+      export directory now also copies ACLs and ADSs if possible
+    * Mac: Some improvements (thanks to Gareth Simpson)
+
+    * Bug fixed: Sometimes too many empty lines in internal preview
+    * Bug fixed: Startup error if no printer is installed
+    * Bug fixed: "anded" regex search searched only for first term
+      (thanks to milus)
+    * Bug fixed: Segfault of sqlite on 64-bit Linux
+      (thanks to Anton Markov)
+    * Bug fixed: Linux: Problems with temporaries path for
+      external plugins (thanks to jonjacksonuk and franxxk)
+    * Linux standard encoding is now determined by
+      locale.getpreferredencoding() (thanks to Kamil Śliwak)
+
+
+
+Jul. 27, 2008 (1.9beta16, repository revision in "mbutscher" branch: 143)
+
+    * Option to set color of editor margin.
+      See OptionsDialog#*Margin# color*
+    * Option to set color of tree background.
+      See OptionsDialog#++++# Tree# options
+    * Option to set length of recent wikis list.
+      See OptionsDialog#*Recent# wikis# list# length*
+    * Option to store relative pathes to recent wikis.
+      See OptionsDialog#*Store# relative# pathes# to# wikis*
+    
+    * Bug fixed: "Open Wiki Word" dialog was sometimes closed
+      when keeping it open makes more sense
+    * Bug reduced(?): Linux: Handling of local file URLs to start
+      applications works better
+    * Support for all uppercase and lowercase letters in the
+      Unicode set for creating camel-case wiki words independent of OS language
+
+
+
+Jan. 26, 2008 (1.9beta15, repository revision in "mbutscher" branch: 140)
+
+    * Menu function to copy URL of current wiki word to clipboard.
+      See UrlLinking#++# Wiki:# URLs
+    * Support for ordering tree children by modification date
+      (Sqlite wikis should be rebuilt to speed this up).
+      See WikiDocumentAttributes#*child_sort_order
+    * Now remembers last used tree root and expanded nodes (optional).
+      See OptionsDialog#*Remember# expanded# tree# nodes*
+    * Windows: Hardware buttons on mouse or keyboard to navigate
+      backward/forward in browser are now recognized (doesn't work
+      for external Mozilla preview)
+    * Linux: Assumed file system encoding is now UTF-8
+    
+    * Bug fixed: Linux: Some problems with non-ascii characters in pathes
+      (some other issues are there yet)
+    * Bug fixed: Multipage text export used local time instead of GMT time
+      for modif./crea. times of pages

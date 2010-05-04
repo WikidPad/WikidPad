@@ -346,7 +346,7 @@ class SyntaxNode(object):
 
     def asStringList(self, sep=''):
         raise NotImplementedError  # abstract
-        
+
     def getString(self):
         """
         Get concatenated string of all content in this node (and subnodes)
@@ -358,6 +358,9 @@ class SyntaxNode(object):
 
     def findNodesForCharPos(self, charPos):
         raise NotImplementedError  # abstract
+
+#     def cloneDeep(self):
+#         raise NotImplementedError  # abstract
 
 
     @staticmethod
@@ -536,11 +539,57 @@ class NonTerminalNode(SyntaxNode):
 
 
 
+#     def findFlatNodeIdxForCharPos(self, charPos):
+#         lo = 0
+#         hi = self.getChildrenCount()
+#         while lo < hi:
+#             mid = (lo+hi)//2
+#             if charPos < self[mid].pos: hi = mid
+#             else: lo = mid+1
+# 
+#         index = lo - 1
+# 
+#         if index == -1:
+#             # Before first token
+#             return -1
+# 
+#         node = self[index]
+# 
+#         if lo == self.getChildrenCount() and \
+#                 charPos >= (node.pos + node.strLength):
+#             # After last token
+#             return -2
+# 
+#         return index
+# 
+# 
+#     def findFlatNodesForCharSel(self, charStartPos, charAfterLastPos):
+#         startIdx = self.findFlatNodeIdxForCharPos(charStartPos)
+#         
+#         if startIdx == -2:
+#             # Start is already after last token -> no tokens available
+#             return []
+#         
+#         if startIdx == -1:
+#             startIdx = 0
+# 
+#         endIdx = self.findFlatNodeIdxForCharPos(charAfterLastPos)
+#         
+#         if endIdx == -1:
+#             # End is yet before first token -> no tokens available
+#             return []
+#         
+#         if endIdx == -2:
+#             endIdx = -1
+#         else:
+#             
+#         
+#         return self.sub[
+        
+
+
     def findNodesForCharPos(self, charPos):
         # Algorithm taken from standard lib bisect module
-#         if self.getChildrenCount() == 0:
-#             return []
-
         lo = 0
         hi = self.getChildrenCount()
         while lo < hi:
@@ -564,6 +613,14 @@ class NonTerminalNode(SyntaxNode):
         result = node.findNodesForCharPos(charPos)
         result.append(node)
         return result
+
+
+#     def cloneDeep(self):
+#         ret = NonTerminalNode(self.sub, self.pos, self.name)
+#         ret.sub = [n.cloneDeep() for n in self.sub]
+#         ret.__dict__ = self.__dict__.copy()
+# 
+#         return ret
 
 
     def _pprintRecurs(self, ind, inc, result):
@@ -603,11 +660,11 @@ class NonTerminalNode(SyntaxNode):
         del self.sub[i]
         
     
-    def copy( self ):
-        ret = SyntaxNode(self.sub, self.pos, self.name)
-        ret.sub = self.sub[:]
-
-        return ret
+#     def copy( self ):
+#         ret = SyntaxNode(self.sub, self.pos, self.name)
+#         ret.sub = self.sub[:]
+# 
+#         return ret
 
 
     def __add__(self, other):
@@ -674,8 +731,6 @@ class TerminalNode(SyntaxNode):
             yield self
 
     def findNodesForCharPos(self, charPos):
-        # Algorithm taken from standard lib bisect module
-        
         if charPos < self.pos or charPos >= (self.pos + self.strLength):
             return []
         
@@ -691,6 +746,11 @@ class TerminalNode(SyntaxNode):
                     (self.pos, self.strLength, repr(self.name)))
         result.append("%s)" % repr(self.text))
 
+#     def cloneDeep(self):
+#         ret = TerminalNode(self.text, self.pos, self.name)
+#         ret.__dict__ = self.__dict__.copy()
+# 
+#         return ret
 
 
 

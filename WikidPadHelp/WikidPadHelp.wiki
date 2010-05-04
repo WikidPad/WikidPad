@@ -18,6 +18,7 @@ wikipagetitle_fromlinktitle = True
 first_wiki_word = WikidPadHelp
 wikipagefiles_gracefuloutsideaddandremove = True
 versioning_storagelocation = 0
+template_pagenamesre = ^template/
 wikipagetitle_creationmode = 1
 tree_last_root_wiki_word = WikidPadHelp
 tree_force_scratchpad_visibility = True

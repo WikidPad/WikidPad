@@ -235,7 +235,7 @@ class ConnectWrap:
     def closeCursor(self):
         if self.dbCursor:
             self.dbCursor.close()
-            self.dbCursor == None
+            self.dbCursor = None
             
     def __del__(self):
         """
@@ -252,7 +252,7 @@ class ConnectWrap:
         if self.dbConn:
             self.closeCursor()
             self.dbConn.close()
-            self.dbConn == None
+            self.dbConn = None
        
 
 

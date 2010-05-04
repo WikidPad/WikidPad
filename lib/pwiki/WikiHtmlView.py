@@ -11,8 +11,11 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 
 from MiscEvent import KeyFunctionSink
 
+import StringOps
 from StringOps import uniToGui, pathnameFromUrl, flexibleUrlUnquote
 from Configuration import isWindows, MIDDLE_MOUSE_CONFIG_TO_TABMODE, isOSX
+
+import OsAbstract
 
 import DocPages
 from TempFileSet import TempFileSet
@@ -180,6 +183,8 @@ class WikiHtmlView(wx.html.HtmlWindow):
                 self.OnActivateNewTabThis)
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
                 self.OnActivateNewTabBackgroundThis)        
+        wx.EVT_MENU(self, GUI_ID.CMD_OPEN_CONTAINING_FOLDER_THIS,
+                self.OnOpenContainingFolderThis)
 
         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         wx.EVT_LEFT_DCLICK(self, self.OnLeftDClick)
@@ -489,6 +494,13 @@ class WikiHtmlView(wx.html.HtmlWindow):
                 appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTERNAL_JUMP)
             else:
                 appendToMenuByMenuDesc(menu, u"Activate;CMD_ACTIVATE_THIS")
+                
+                if href.startswith(u"file:") or \
+                        href.startswith(u"rel://"):
+
+                    appendToMenuByMenuDesc(menu,
+                            u"Open Containing Folder;"
+                            u"CMD_OPEN_CONTAINING_FOLDER_THIS")
 
             self.PopupMenuXY(menu, evt.GetX(), evt.GetY())
         else:
@@ -566,7 +578,30 @@ class WikiHtmlView(wx.html.HtmlWindow):
 
     def OnActivateNewTabBackgroundThis(self, evt):
         self._activateLink(self.contextHref, tabMode=3)
-        
+
+
+    def OnOpenContainingFolderThis(self, evt):
+        if not self.contextHref:
+            return
+
+        link = self.contextHref
+
+        if link.startswith(u"rel://"):
+            link = self.presenter.getMainControl().makeRelUrlAbsolute(link)
+
+        if link.startswith(u"file:"):
+            try:
+                path = os.path.dirname(StringOps.pathnameFromUrl(link))
+                if not os.path.exists(StringOps.longPathEnc(path)):
+                    self.presenter.displayErrorMessage(
+                            _(u"Folder does not exist"))
+                    return
+
+                OsAbstract.startFile(self.presenter.getMainControl(),
+                        path)
+            except IOError:
+                pass   # Error message?
+
 
     def OnKeyUp(self, evt):
         acc = getAccelPairFromKeyDown(evt)

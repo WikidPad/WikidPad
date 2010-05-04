@@ -139,7 +139,7 @@ class SpellCheckerDialog(wx.Dialog):
 
 
     def rereadPersonalWordLists(self):
-        wdm = self.mainControl.getWikiDataManager()
+        wdm = self.mainControl.getWikiDocument()
         self.globalPwlPage = wdm.getFuncPage("global/PWL")
         self.spellChkAddedGlobal = \
                 set(self.globalPwlPage.getLiveText().split("\n"))
@@ -245,7 +245,7 @@ class SpellCheckerDialog(wx.Dialog):
                     if checkedWikiWord is None:
                         return False
 
-                    text = self.mainControl.getWikiDataManager()\
+                    text = self.mainControl.getWikiDocument()\
                             .getWikiPage(checkedWikiWord).getLiveText()
                     startPos = 0
                     continue

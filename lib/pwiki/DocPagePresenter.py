@@ -183,7 +183,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
 
         evtprops["addToHistory"] = addToHistory
         try:
-            page = self.getMainControl().getWikiDataManager().getFuncPage(funcTag)
+            page = self.getMainControl().getWikiDocument().getFuncPage(funcTag)
     
             self.getSubControl("textedit").loadFuncPage(page, evtprops)
         except (IOError, OSError, DbAccessError), e:

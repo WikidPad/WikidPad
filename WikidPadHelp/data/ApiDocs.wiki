@@ -71,6 +71,8 @@ stdDialog(dlgtype, title, message, additional=None)
 
     "text": input text to dialog, additional is the default text.
         The function returns the entered text on OK or an empty string on Cancel
+    "listmcstr": Select zero or more string entries from a list, additional is the list of strings to display.
+        Returns a list of the selected strings on OK (may be empty) or None on Cancel
     "o": Shows only OK button
     "oc": Shows OK and Cancel buttons, returns either "ok" or "cancel"
     "yn": Yes and No buttons, returns either "yes" or "no"

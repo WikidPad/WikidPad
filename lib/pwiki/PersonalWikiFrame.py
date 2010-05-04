@@ -231,6 +231,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         self.cmdIdToInsertString = None
 
+        self.sleepMode = True
         self.eventRoundtrip = 0
 
         self.currentWikiDocumentProxyEvent = ProxyMiscEvent(self)
@@ -602,7 +603,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     target = subCtl
                 else:
                     target = presenter
-                
+
                 if target is wx.Window.FindFocus():
                     # No double-check if first try is equal second try
                     target = None
@@ -1693,6 +1694,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 lambda evt: self.showReplaceTextByWikiwordDialog(),
                 updatefct=self.OnUpdateDisReadOnlyPage)
 
+
+        self.addMenuItem(convertMenu, _(u'Absolute/Relative &File URL') + u'\t' + 
+                self.keyBindings.ConvertAbsoluteRelativeFileUrl,
+                _(u'Convert file URL from absolute to relative and vice versa'),
+                lambda evt: self.getActiveEditor().convertSelectedUrlAbsoluteRelative(),
+                updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit,
+                    self.OnUpdateDisNotWikiPage))
+
         formatMenu.AppendSeparator()
 
 
@@ -2166,7 +2175,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         finally:
             del dc
 
-        
+
         # Create main area panel first
         self.mainAreaPanel = MainAreaPanel(self, self, -1)
 #         self.mainAreaPanel = MainAreaPanel(self)
@@ -2182,25 +2191,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         cfstr = self.getConfig().get("main", "windowLayout")
         self.windowLayouter.setWinPropsByConfig(cfstr)
         self.windowLayouter.realize()
-#         self.windowLayouter.layout()
 
         self.tree = self.windowLayouter.getWindowByName("maintree")
         self.logWindow = self.windowLayouter.getWindowByName("log")
 
 
-        
-
-#         wx.EVT_NOTEBOOK_PAGE_CHANGED(self, self.mainAreaPanel.GetId(),
-#                 self.OnNotebookPageChanged)
-#         wx.EVT_CONTEXT_MENU(self.mainAreaPanel, self.OnNotebookContextMenu)
-# 
-#         wx.EVT_SET_FOCUS(self.mainAreaPanel, self.OnNotebookFocused)
-
-
         # ------------------------------------------------------------------------------------
         # Create menu and toolbar
         # ------------------------------------------------------------------------------------
-        
+
         self.buildMainMenu()
         if self.getConfig().getboolean("main", "toolbar_show", True):
             self.setShowToolbar(True)
@@ -2250,7 +2249,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.SetStatusBar(self.statusBar)
 
         # Register the App IDLE handler
-        wx.EVT_IDLE(self, self.OnIdle)
+#         wx.EVT_IDLE(self, self.OnIdle)
 
         wx.EVT_ACTIVATE(self, self.OnActivate)
 
@@ -2444,7 +2443,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         content = self.getActiveEditor().GetText()
 
         # TODO Description
-        entry = Versioning.VersionEntry(u"", "revdiff")
+        entry = Versioning.VersionEntry(u"", u"",
+                "revdiff")
         versionOverview.addVersion(content, entry)
         versionOverview.writeOverview()
         ## _prof.stop()
@@ -2620,7 +2620,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # self.statusBar.Refresh()
 
 
-
 #     def resourceSleep(self):
 #         """
 #         Free unnecessary resources if program is iconized
@@ -2666,10 +2665,44 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         self.setShowOnTray()
 
 
+    def resourceSleep(self):
+        """
+        Free unnecessary resources if program is iconized
+        """
+        if self.sleepMode:
+            return  # Already in sleep mode
+        self.sleepMode = True
+        self.saveAllDocPages()
+        self.Unbind(wx.EVT_IDLE)
+
+
+    def resourceWakeup(self):
+        """
+        Aquire resources after program is restored
+        """
+        if not self.sleepMode:
+            return  # Already in wake mode
+        self.sleepMode = False
+        
+        self.Bind(wx.EVT_IDLE, self.OnIdle)
+
+
+    def Show(self, val=True):
+        super(PersonalWikiFrame, self).Show(val)
+        if val:
+            self.resourceWakeup()
+        else:
+            self.resourceSleep()
+
 
     def OnIconize(self, evt):
         if self.configuration.getboolean("main", "showontray"):
             self.Show(not self.IsIconized())
+        else:
+            if self.IsIconized():
+                self.resourceSleep()
+            else:
+                self.resourceWakeup()
 
         evt.Skip()
 
@@ -3665,15 +3698,34 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def makeRelUrlAbsolute(self, relurl):
         """
-        Return the absolute path for a rel: URL
+        Return the absolute file: URL for a rel: URL
         """
 #         relpath = urllib.url2pathname(relurl[6:])
         relpath = pathnameFromUrl(relurl[6:], False)
 
-        url = "file:" + urlFromPathname(
+        url = u"file:" + urlFromPathname(
                 abspath(join(dirname(self.getWikiConfigPath()), relpath)))
 
         return url
+
+
+    def makeAbsPathRelUrl(self, absPath):
+        """
+        Return the rel: URL for an absolute file path or None if
+        a relative URL can't be created
+        """
+        locPath = self.getWikiConfigPath()
+
+        if locPath is None:
+            return None
+
+        locPath = dirname(locPath)
+        relPath = relativeFilePath(locPath, absPath)
+        url = None
+        if relPath is None:
+            return None
+
+        return u"rel://" + urlFromPathname(relPath)
 
 
     def launchUrl(self, link):
@@ -4500,7 +4552,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             
             # TODO Move this to WikiDataManager!
             # Set file storage according to configuration
-            fs = self.getWikiDataManager().getFileStorage()
+            fs = self.getWikiDocument().getFileStorage()
             
             fs.setModDateMustMatch(self.configuration.getboolean("main",
                     "fileStorage_identity_modDateMustMatch", False))
@@ -4653,7 +4705,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 pgh.update(0, _(u"Preparing"))
 
                 try:
-                    ob.export(self.getWikiDataManager(), wordList, exptype, dest,
+                    ob.export(self.getWikiDocument(), wordList, exptype, dest,
                             False, addopt, pgh)
                 except ExportException, e:
                     self.displayErrorMessage(_(u"Error on export"), e)
@@ -4739,7 +4791,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 progresshandler = ProgressHandler(
                         _(u"     Initiating update     "),
                         _(u"     Initiating update     "), 0, self)
-                self.getWikiDataManager().initiateFullUpdate(progresshandler)
+                self.getWikiDocument().initiateFullUpdate(progresshandler)
         
     #         self.tree.collapse()
     # 
@@ -4772,7 +4824,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 progresshandler = ProgressHandler(
                         _(u"     Rebuilding wiki     "),
                         _(u"     Rebuilding wiki     "), 0, self)
-                self.getWikiDataManager().rebuildWiki(progresshandler,
+                self.getWikiDocument().rebuildWiki(progresshandler,
                         onlyDirty=onlyDirty)
 
                 self.tree.collapse()
@@ -4795,8 +4847,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
         # TODO Progresshandler?
-        self.getWikiDataManager().checkFileSignatureForAllWikiWordsAndMarkDirty()
-        self.getWikiDataManager().pushDirtyMetaDataUpdate()
+        self.getWikiDocument().checkFileSignatureForAllWikiWordsAndMarkDirty()
+        self.getWikiDocument().pushDirtyMetaDataUpdate()
 
 
 
@@ -4941,6 +4993,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         Possible values for dlgtype:
         "text": input text to dialog, additional is the default text
             when showing dlg returns entered text on OK or empty string
+        "listmcstr": List with multiple choices, additional is a sequence of
+            strings to fill the UI list with, returns a Python list with the
+            selected strings or None if dialog was aborted.
         "o": As displayMessage, shows only OK button
         "oc": Shows OK and Cancel buttons, returns either "ok" or "cancel"
         "yn": Yes and No buttons, returns either "yes" or "no"
@@ -4952,6 +5007,20 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 additional = u""
             return guiToUni(wx.GetTextFromUser(uniToGui(message),
                     uniToGui(title), uniToGui(additional), self))
+        elif dlgtype == "listmcstr":
+            if additional is None:
+                raise RuntimeError(
+                        _(u'No list of strings passed to "listmcstr" dialog'))
+            multidlg = wx.MultiChoiceDialog(self, uniToGui(message),
+                    uniToGui(title), list(additional))
+            try:
+                if (multidlg.ShowModal() == wx.ID_OK):
+                    selections = multidlg.GetSelections()
+                    return [additional[x] for x in selections]
+                else:
+                    return None
+            finally:
+                multidlg.Destroy()
         else:
             style = None
             if dlgtype == "o":
@@ -4962,9 +5031,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 style = wx.YES_NO
             elif dlgtype == "ync":
                 style = wx.YES_NO | wx.CANCEL
-            
+
             if style is None:
-                raise RuntimeError, _(u"Unknown dialog type")
+                raise RuntimeError(_(u"Unknown dialog type"))
 
             result = wx.MessageBox(uniToGui(message), uniToGui(title), style, self)
             
@@ -4977,7 +5046,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             elif result == wx.NO:
                 return "no"
                 
-            raise RuntimeError, _(u"Internal Error")
+            raise InternalError(u"Unexpected result from MessageBox in stdDialog()")
+
 
     def displayMessage(self, title, str):
         """pops up a dialog box,
@@ -5192,6 +5262,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnIdle(self, evt):
+        self.fireMiscEventKeys(("idle visible",))
         if not self.configuration.getboolean("main", "auto_save"):  # self.autoSave:
             return
         if self.getWikiDocument() is None or self.getWikiDocument().getWriteAccessFailed():
