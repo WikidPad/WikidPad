@@ -2,6 +2,7 @@
 /Consts.py -text
 /ExceptionLogger.py -text
 /Microsoft.VC90.CRT.manifest -text
+/WikidPad-winport.config -text
 /WikidPad.pot -text
 /WikidPad.py -text
 /WikidPad.xrc -text
@@ -352,6 +353,7 @@ WikidPadHelp/files/testimg.gif -text
 /appbase.css -text
 /bld.bat -text
 /buildGadflyZips.py -text
+/buildWinPortZip.py -text
 docs/api.txt -text
 docs/dev-setup.txt -text
 docs/dev.txt -text

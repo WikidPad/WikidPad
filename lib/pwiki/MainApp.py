@@ -25,7 +25,7 @@ from StringOps import mbcsDec, createRandomString, pathEnc, writeEntireFile, \
 from CmdLineAction import CmdLineAction
 from Serialization import SerializeStream
 import Ipc
-import Configuration
+import Configuration, WindowLayout
 import OptionsDialog
 import Localization
 from PluginManager import PluginManager, InsertionPluginManager
@@ -130,6 +130,7 @@ class App(wx.App, MiscEventSourceMixin):
 
 
     def OnInitDuringMain(self):
+        WindowLayout.initiateAfterWxApp()
         self.removeAppLockOnExit = False
         wx.EVT_END_SESSION(self, self.OnEndSession)
         appdir = os.path.dirname(os.path.abspath(sys.argv[0]))

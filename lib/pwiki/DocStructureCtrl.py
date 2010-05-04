@@ -45,13 +45,17 @@ class DocStructureCtrl(EnhancedListControl):
                 ("options changed", self.onUpdateNeeded),
         ), wx.GetApp().getMiscEvent(), self)
 
-        if not self.mainControl.isMainWindowConstructed():
-            # Install event handler to wait for construction
-            self.__sinkMainFrame = wxKeyFunctionSink((
-                    ("constructed main window", self.onConstructedMainWindow),
-            ), self.mainControl.getMiscEvent(), self)
-        else:
-            self.onConstructedMainWindow(None)
+#         if not self.mainControl.isMainWindowConstructed():
+#             # Install event handler to wait for construction
+#             self.__sinkMainFrame = wxKeyFunctionSink((
+#                     ("constructed main window", self.onConstructedMainWindow),
+#             ), self.mainControl.getMiscEvent(), self)
+#         else:
+#             self.onConstructedMainWindow(None)
+
+        self.__sinkMainFrame = wxKeyFunctionSink((
+                ("idle visible", self.onIdleVisible),
+        ), self.mainControl.getMiscEvent(), self)
 
         currPres = self.mainControl.getCurrentDocPagePresenter()
         if currPres is not None:
@@ -118,14 +122,14 @@ class DocStructureCtrl(EnhancedListControl):
             self.handleVisibilityChange()
 
 
-    def onConstructedMainWindow(self, evt):
-        """
-        Now we can register idle handler.
-        """
-        wx.EVT_IDLE(self, self.OnIdle)
+#     def onConstructedMainWindow(self, evt):
+#         """
+#         Now we can register idle handler.
+#         """
+#         wx.EVT_IDLE(self, self.OnIdle)
 
 
-    def OnIdle(self, evt):
+    def onIdleVisible(self, evt):
         self.checkSelectionChanged()
         
         

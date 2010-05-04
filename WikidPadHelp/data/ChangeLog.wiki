@@ -1,5 +1,17 @@
 ﻿++ Change Log
 
+
+May 04, 2010 (2.0rc02)
+
+    * Mac OS: Several enhancements and bug fixes (thanks to
+      Christian Ziemski)
+    * Reduction of used CPU time while WikidPad is minimized
+    * Workaround for problems to detect screen size
+      in multi-display environments
+    * Internal: Clearer error message for missing XML-ID
+
+
+
 Apr. 05, 2010 (2.0rc01)
 
     * Bug fixed: Keyboard shortcut for ActivateLinkBackground

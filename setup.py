@@ -24,6 +24,7 @@ excludes = ["win32api", "win32con", "win32pipe"]
 
 setup(
     options = {"py2exe": {"compressed": 1,
+                          "exeoptimize": 1,
                           "optimize": 2,
                           "ascii": 1,
                           "excludes": excludes,

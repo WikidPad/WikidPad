@@ -231,6 +231,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         self.cmdIdToInsertString = None
 
+        self.sleepMode = True
         self.eventRoundtrip = 0
 
         self.currentWikiDocumentProxyEvent = ProxyMiscEvent(self)
@@ -2250,7 +2251,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.SetStatusBar(self.statusBar)
 
         # Register the App IDLE handler
-        wx.EVT_IDLE(self, self.OnIdle)
+#         wx.EVT_IDLE(self, self.OnIdle)
 
         wx.EVT_ACTIVATE(self, self.OnActivate)
 
@@ -2665,11 +2666,44 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #                 True))
 #         self.setShowOnTray()
 
+    def resourceSleep(self):
+        """
+        Free unnecessary resources if program is iconized
+        """
+        if self.sleepMode:
+            return  # Already in sleep mode
+        self.sleepMode = True
+        self.saveAllDocPages()
+        self.Unbind(wx.EVT_IDLE)
+
+
+    def resourceWakeup(self):
+        """
+        Aquire resources after program is restored
+        """
+        if not self.sleepMode:
+            return  # Already in wake mode
+        self.sleepMode = False
+        
+        self.Bind(wx.EVT_IDLE, self.OnIdle)
+
+
+    def Show(self, val=True):
+        super(PersonalWikiFrame, self).Show(val)
+        if val:
+            self.resourceWakeup()
+        else:
+            self.resourceSleep()
 
 
     def OnIconize(self, evt):
         if self.configuration.getboolean("main", "showontray"):
             self.Show(not self.IsIconized())
+        else:
+            if self.IsIconized():
+                self.resourceSleep()
+            else:
+                self.resourceWakeup()
 
         evt.Skip()
 
@@ -5165,6 +5199,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def OnIdle(self, evt):
+        self.fireMiscEventKeys(("idle visible",))
         if not self.configuration.getboolean("main", "auto_save"):  # self.autoSave:
             return
         if self.getWikiDocument() is None or self.getWikiDocument().getWriteAccessFailed():

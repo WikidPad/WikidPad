@@ -20,8 +20,16 @@ CatchClipboardAtPage=""
 CatchClipboardAtCursor=""
 CatchClipboardOff=""
 ActivateLink="Ctrl-L"
-ActivateLinkNewTab="Ctrl-Alt-L"
-ActivateLinkBackground="Ctrl-Shift-L"
+if wx.Platform == "__WXMSW__":
+    ActivateLinkNewTab="Ctrl-Alt-L"
+    ActivateLinkBackground="Ctrl-Shift-L"
+else:
+#elif wx.Platform == "__WXGTK__":
+    # On Linux (at least with KDE) the above Windows' key bindings doesn't work
+    #    "Ctrl-Alt-L"     creates character 0xFF (and is in KDE command interface)
+    #    "Ctrl-Shift-L"   simply does nothing
+    ActivateLinkNewTab="Alt-Shift-L"
+    ActivateLinkBackground="Alt-Shift-Ctrl-L"
 ViewParents="Ctrl-Up"
 ViewParentless="Ctrl-Shift-Up"
 ViewChildren="Ctrl-Down"
@@ -41,7 +49,15 @@ else:
     GoHome="Ctrl-Q"
     StartIncrementalSearch="Ctrl-F"
 
-FocusFastSearchField=""
+if wx.Platform == "__WXMAC__":
+    GoHome="Ctrl-Shift-H"
+    StartIncrementalSearch="Alt-Shift-F"
+    FocusFastSearchField=""
+    # FocusFastSearchField="Ctrl-Shift-F"   #todo: Find a working solution
+else:
+    GoHome="Ctrl-Q"
+    StartIncrementalSearch="Ctrl-F"
+    FocusFastSearchField="Ctrl-Shift-F"
 Bold="Ctrl-B"
 Italic="Ctrl-I"
 Heading="Ctrl-Alt-H"

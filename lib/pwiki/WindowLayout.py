@@ -13,6 +13,23 @@ from wxHelper import LayerSizer, ProxyPanel
 class WinLayoutException(Exception):
     pass
 
+
+_INITIAL_DISPLAY_CLIENT_SIZE = None
+
+def initiateAfterWxApp():
+    """
+    Called after wx.App was created to do some intialization
+    """
+    global _INITIAL_DISPLAY_CLIENT_SIZE
+
+    _INITIAL_DISPLAY_CLIENT_SIZE = getOverallDisplaysClientSize()
+    
+    if _INITIAL_DISPLAY_CLIENT_SIZE.width < 10 or \
+            _INITIAL_DISPLAY_CLIENT_SIZE.height < 10:
+        
+        _INITIAL_DISPLAY_CLIENT_SIZE = wx.Rect(0, 0, 800, 600)
+
+
 # def getOverallDisplaysSize():
 def getOverallDisplaysClientSize():
     """
@@ -20,6 +37,8 @@ def getOverallDisplaysClientSize():
     available displays. This assumes that all displays have same
     resolution and are positioned in a rectangular shape.
     """
+    global _INITIAL_DISPLAY_CLIENT_SIZE
+
     # TODO: Find solution for multiple displays with taskbar always visible
 
     if wx.Display.GetCount() == 1:
@@ -36,7 +55,12 @@ def getOverallDisplaysClientSize():
         width = max(width, rect.x + rect.width)
         height = max(height, rect.y + rect.height)
 
+    # May workaround a bug
+    if (width < 10 or height < 10) and (_INITIAL_DISPLAY_CLIENT_SIZE is not None):
+        return _INITIAL_DISPLAY_CLIENT_SIZE
+
     return wx.Rect(0, 0, width, height)
+
 
 
 def setWindowPos(win, pos=None, fullVisible=False):

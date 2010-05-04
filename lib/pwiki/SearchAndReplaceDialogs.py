@@ -860,7 +860,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
         # Events from text search tab
         wx.EVT_BUTTON(self, GUI_ID.btnFindPages, self.OnSearchWiki)
-        wx.EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)        
+        wx.EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)
         wx.EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
         wx.EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
         wx.EVT_BUTTON(self, GUI_ID.btnSaveSearch, self.OnSaveSearch)

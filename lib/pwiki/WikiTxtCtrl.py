@@ -97,6 +97,7 @@ class IncrementalSearchDialog(wx.Frame):
 
         self.SetSizer(mainsizer)
         self.Layout()
+        self.tfInput.SelectAll()  #added for Mac compatibility
         self.tfInput.SetFocus()
 
         config = self.txtCtrl.presenter.getConfig()
@@ -214,6 +215,13 @@ class IncrementalSearchDialog(wx.Frame):
             self.tfInput.SetBackgroundColour(IncrementalSearchDialog.COLOR_GREEN)
 
         # Else don't change
+
+
+    if isOSX():
+        # Fix focus handling after close
+        def Close(self):
+            wx.Frame.Close(self)
+            wx.CallAfter(self.txtCtrl.SetFocus)
 
 
     def OnTimerIncSearchClose(self, evt):
@@ -423,13 +431,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 ("options changed", self.onOptionsChanged),
         ), wx.GetApp().getMiscEvent(), self)
 
-        if not self.presenter.getMainControl().isMainWindowConstructed():
-            # Install event handler to wait for construction
-            self.__sinkMainFrame = wxKeyFunctionSink((
-                    ("constructed main window", self.onConstructedMainWindow),
-            ), self.presenter.getMainControl().getMiscEvent(), self)
-        else:
-            self.onConstructedMainWindow(None)
+#         if not self.presenter.getMainControl().isMainWindowConstructed():
+#             # Install event handler to wait for construction
+#             self.__sinkMainFrame = wxKeyFunctionSink((
+#                     ("constructed main window", self.onConstructedMainWindow),
+#             ), self.presenter.getMainControl().getMiscEvent(), self)
+#         else:
+#             self.onConstructedMainWindow(None)
+
+
+        self.__sinkMainFrame = wxKeyFunctionSink((
+                ("idle visible", self.onIdleVisible),
+        ), self.presenter.getMainControl().getMiscEvent(), self)
 
 #         self.presenter.getMiscEvent().addListener(self.presenterListener)
 
@@ -523,11 +536,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #         self.presenter.getMiscEvent().removeListener(self.presenterListener)
 
 
-    def onConstructedMainWindow(self, evt):
-        """
-        Now we can register idle handler.
-        """
-        wx.EVT_IDLE(self, self.OnIdle)
+#     def onConstructedMainWindow(self, evt):
+#         """
+#         Now we can register idle handler.
+#         """
+#         wx.EVT_IDLE(self, self.OnIdle)
 
 
     def Cut(self):
@@ -2270,6 +2283,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.incSearchPreviousHiddenStartLine = -1
 
         rect = sb.GetFieldRect(0)
+        
+        if isOSX():
+            # needed on Mac OSX to avoid cropped text
+            rect = wx._core.Rect(rect.x, rect.y - 2, rect.width, rect.height + 4)
+
         rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
 
         dlg = IncrementalSearchDialog(self, -1, self, rect,
@@ -2732,7 +2750,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             self.applyFolding(evt.foldingseq)
 
 
-    def OnIdle(self, evt):
+#     def OnIdle(self, evt):
+    def onIdleVisible(self, miscevt):
 #         evt.Skip()
 
 
