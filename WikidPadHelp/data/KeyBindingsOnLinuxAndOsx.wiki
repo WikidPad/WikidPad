@@ -1,0 +1,61 @@
+﻿++ Key Bindings On Linux And Osx
+
+The original KeyBindings are for Windows.
+
+Some of them doesn't work on Linux or Apple OSX because they are reserved by the Operating System or the Desktop Environment itself. Or due to other reasons.
+
+Additionally the Windows' "Ctrl" key is existing on Mac OSX as well. 
+At least it seems so. But in reality one has to use the "Command" key instead.
+
+Example:
+The original keybinding Ctrl-Space (Autocomplete) is technically equivalent to the key Command-Space on OSX which in fact is used to start Apple Spotlight. 
+So it can't be used by WikidPad.
+
+As described in page ChangingKeyBindings it is possible to implement workarounds.
+
+One approach is to do that locally in "user_extensions".
+But the better one may be to do it globally in the directory "extensions".
+
+Here a list of already known problems/differences.
+(The following is a bit technically for now...)
+
+<<pre
+-----------------------------------------
+
+if wx.Platform == "__WXMSW__":
+    ActivateLinkNewTab="Ctrl-Alt-L"
+    ActivateLinkBackground="Ctrl-Shift-L"
+else:
+#elif wx.Platform == "__WXGTK__":
+    # On Linux (at least with KDE) the above Windows' key bindings doesn't work
+    #    "Ctrl-Alt-L"     creates character 0xFF (and is in KDE command interface)
+    #    "Ctrl-Shift-L"   simply does nothing
+    ActivateLinkNewTab="Alt-Shift-L"
+    ActivateLinkBackground="Alt-Shift-Ctrl-L"
+    # to test: What about Mac OSX?   wx.Platform == "__WXMAC__"
+
+-----------------------------------------
+
+if wx.Platform == "__WXMAC__":
+    GoHome="Ctrl-Shift-H"
+    StartIncrementalSearch="Alt-Shift-F"
+    FocusFastSearchField="Alt-Shift-S"
+else:
+    GoHome="Ctrl-Q"
+    StartIncrementalSearch="Ctrl-F"
+    FocusFastSearchField="Ctrl-Shift-F"
+
+-----------------------------------------
+
+ShowSwitchEditorPreview="Ctrl-Shift-Space"
+#if wx.Platform == "__WXMAC__":
+    # no good keybinding found that works on Mac
+    # ShowSwitchEditorPreview="??????"
+
+-----------------------------------------
+
+if wx.Platform == "__WXMAC__":
+    AutoComplete="Alt-Space"
+else:
+    AutoComplete="Ctrl-Space"
+>>

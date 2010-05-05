@@ -30,6 +30,8 @@ else:
     #    "Ctrl-Shift-L"   simply does nothing
     ActivateLinkNewTab="Alt-Shift-L"
     ActivateLinkBackground="Alt-Shift-Ctrl-L"
+    # to test: What about Mac OSX?   wx.Platform == "__WXMAC__"
+
 ViewParents="Ctrl-Up"
 ViewParentless="Ctrl-Shift-Up"
 ViewChildren="Ctrl-Down"
@@ -45,8 +47,7 @@ GoForward="Alt-Right"
 if wx.Platform == "__WXMAC__":
     GoHome="Ctrl-Shift-H"
     StartIncrementalSearch="Alt-Shift-F"
-    FocusFastSearchField=""
-    # FocusFastSearchField="Ctrl-Shift-F"   #todo: Find a working solution
+    FocusFastSearchField="Alt-Shift-S"
 else:
     GoHome="Ctrl-Q"
     StartIncrementalSearch="Ctrl-F"
@@ -79,13 +80,20 @@ FoldAll=""
 ShowEditor="Ctrl-Shift-A"
 ShowPreview="Ctrl-Shift-S"
 ShowSwitchEditorPreview="Ctrl-Shift-Space"
+#if wx.Platform == "__WXMAC__":
+    # no good keybinding found that works on Mac
+    # ShowSwitchEditorPreview="??????"
+
 ZoomIn=""
 ZoomOut=""
 CloneWindow=""
 
 ContinueSearch="F3"
 BackwardSearch="Shift-F3"
-AutoComplete="Ctrl-Space"
+if wx.Platform == "__WXMAC__":
+    AutoComplete="Alt-Space"
+else:
+    AutoComplete="Ctrl-Space"
 ActivateLink2="Ctrl-Return"
 SwitchFocus="F6"
 CloseCurrentTab="Ctrl-F4"

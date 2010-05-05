@@ -2,6 +2,10 @@
 
 Many of the key bindings defined below may be changed, ChangingKeyBindings.
 
+Please note: These bindings have been developed for use on Windows.
+On other Operating Systems like Apple OSX or Linux there may be differences.
+See KeyBindingsOnLinuxAndOsx.
+
 *Formatting*
 CTRL-B          bold
 CTRL-I          italic
@@ -49,4 +53,3 @@ CTRL-ALT-O      open wiki
 CTRL-SHIFT-B    view bookmarks
 F6              switch between tree and editor
 CTRL-TAB        switch between tabs
-

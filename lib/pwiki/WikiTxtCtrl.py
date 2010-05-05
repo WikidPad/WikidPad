@@ -46,7 +46,7 @@ from StringOps import *  # TODO Remove this
 # mbcsDec, uniToGui, guiToUni, \
 #        wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
-from Configuration import isUnicode, isWin9x, isLinux, isWindows, isOSX
+from Configuration import isUnicode, isOSX, isWin9x, isLinux, isWindows
 
 try:
     import WindowsHacks
@@ -2543,7 +2543,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.incSearchPreviousHiddenStartLine = -1
 
         rect = sb.GetFieldRect(0)
-        
         if isOSX():
             # needed on Mac OSX to avoid cropped text
             rect = wx._core.Rect(rect.x, rect.y - 2, rect.width, rect.height + 4)
