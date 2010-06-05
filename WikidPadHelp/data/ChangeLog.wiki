@@ -1,6 +1,21 @@
 ﻿++ Change Log
 
 
+Jun. 05, 2010 (2.0rc03)
+
+    * Process "binInst.ini"-file (needed for Windows binary
+      wxPython downgrade)
+    * Windows: Workaround for too short labels in wxListCtrl
+    * Mac OS: Further changes to keybindings
+    * Bug fixed: Setting wiki to readonly failed
+    * Bug fixed: Linux: Problems when switching tabs too fast
+      (thanks to Christian Ziemski)
+    * Bug fixed: Wrong focus position after opening wiki in
+      same window
+    * Bug fixed: Linux: Crash when closing WikidPad
+
+
+
 May 04, 2010 (2.0rc02)
 
     * Mac OS: Several enhancements and bug fixes (thanks to

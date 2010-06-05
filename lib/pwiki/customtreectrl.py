@@ -52,6 +52,9 @@
 # 
 # Modifications by Michael Butscher May 2007:
 # - Tooltip if label is broader than window
+# 
+# Modifications by Michael Butscher May 2010:
+# - Parameter in SelectItem() to suppress event generation
 #
 #
 # End Of Comments
@@ -3761,7 +3764,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
 
     def DoSelectItem(self, item, unselect_others=True, extended_select=False,
-            expand_if_necessary=True):
+            expand_if_necessary=True, send_events=True):
         """Actually selects/unselects an item, sending a EVT_TREE_SEL_CHANGED event."""
 
         if not item:
@@ -3784,14 +3787,15 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             if len(self.GetSelections()) == 1:
                 return
 
-        event = TreeEvent(wxEVT_TREE_SEL_CHANGING, self.GetId())
-        event._item = item
-        event._itemOld = self._current
-        event.SetEventObject(self)
-        # TODO : Here we don't send any selection mode yet !
-
-        if self.GetEventHandler().ProcessEvent(event) and not event.IsAllowed():
-            return
+        if send_events:
+            event = TreeEvent(wxEVT_TREE_SEL_CHANGING, self.GetId())
+            event._item = item
+            event._itemOld = self._current
+            event.SetEventObject(self)
+            # TODO : Here we don't send any selection mode yet !
+    
+            if self.GetEventHandler().ProcessEvent(event) and not event.IsAllowed():
+                return
 
         parent = self.GetItemParent(item)
         while parent:
@@ -3835,17 +3839,19 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         # selection is set
         self.EnsureVisible(item)
 
-        event.SetEventType(wxEVT_TREE_SEL_CHANGED)
-        self.GetEventHandler().ProcessEvent(event)
-
-        # Handles hypertext items
-        if self.IsItemHyperText(item):
-            event = TreeEvent(wxEVT_TREE_ITEM_HYPERLINK, self.GetId())
-            event._item = item
+        if send_events:
+            event.SetEventType(wxEVT_TREE_SEL_CHANGED)
             self.GetEventHandler().ProcessEvent(event)
 
+            # Handles hypertext items
+            if self.IsItemHyperText(item):
+                event = TreeEvent(wxEVT_TREE_ITEM_HYPERLINK, self.GetId())
+                event._item = item
+                self.GetEventHandler().ProcessEvent(event)
 
-    def SelectItem(self, item, select=True, expand_if_necessary=True):
+
+    def SelectItem(self, item, select=True, expand_if_necessary=True,
+            send_events=True):
         """Selects/deselects an item."""
 
         if not item:
@@ -3854,8 +3860,9 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
         if select:
         
             self.DoSelectItem(item, not self.HasFlag(TR_MULTIPLE),
-                    expand_if_necessary=expand_if_necessary)
-        
+                    expand_if_necessary=expand_if_necessary,
+                    send_events=send_events)
+
         else: # deselect
         
             item.SetHilight(False)

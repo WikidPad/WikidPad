@@ -1430,7 +1430,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             return False
 
         if len(nodePath) == 1:
-            self.SelectItem(parentNodeId)
+            self.SelectItem(parentNodeId, send_events=False)
             self.EnsureVisible(parentNodeId)
             return True
 
@@ -1448,7 +1448,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             node = self.GetPyData(nodeId)
             if node.getUnifiedName() == nodeUnifiedName:
                 if len(nodePath) == 1:
-                    self.SelectItem(nodeId)
+                    self.SelectItem(nodeId, send_events=False)
                     self.EnsureVisible(nodeId)
                     return True
                 else:
@@ -1918,7 +1918,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     self.EnsureVisible(currentNode)
                 if selectNode:
                     self._unbindActivation()
-                    self.SelectItem(currentNode)
+                    self.SelectItem(currentNode, send_events=False)
                     currentDpp = self.pWiki.getCurrentDocPagePresenter()
                     self._storeMainTreePositionHint(currentDpp, currentNode)
                     self.EnsureVisible(currentNode)

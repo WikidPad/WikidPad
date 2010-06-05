@@ -105,7 +105,8 @@ class WikiWordListPopup(wx.Frame):
             for i, w in enumerate(self.listContent):
                 self.resultBox.InsertStringItem(i, w)
                 
-            self.resultBox.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+#             self.resultBox.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+            self.resultBox.autosizeColumn(0)
             if self.resultBox.GetColumnWidth(0) < self._listMinWidth:
                 self.resultBox.SetColumnWidth(0, self._listMinWidth)
 

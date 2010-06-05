@@ -872,7 +872,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         if len(menuItems) > 0:
             def addPluginMenuItem(function, label, statustext, icondesc=None,
-                    menuID=None, updateFunction=None, kind=None):
+                    menuID=None, updateFunction=None, kind=None, *dummy):
                 
                 labelComponents = label.split(u"|")
                 
@@ -2127,7 +2127,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.toolbarFunctions.describeToolbarItems(self), [])
         
         def addPluginTool(function, tooltip, statustext, icondesc, tbID=None,
-                updateFunction=None):
+                updateFunction=None, *dummy):
             if tbID is None:
                 tbID = wx.NewId()
                 
@@ -2261,7 +2261,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         # Check resizing to layout sash windows
         wx.EVT_SIZE(self, self.OnSize)
 
-        wx.EVT_ICONIZE(self, self.OnIconize)
+        self.Bind(wx.EVT_ICONIZE, self.OnIconize)
         wx.EVT_MAXIMIZE(self, self.OnMaximize)
         
         wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_CURRENT_TAB, self._OnRoundtripEvent)
@@ -3217,6 +3217,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             # trigger hook
             self.hooks.openedWiki(self, self.wikiName, wikiCombinedFilename)
+            
+            self.getMainAreaPanel().SetFocus()
     
             # return that the wiki was opened successfully
             return True
@@ -5372,6 +5374,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         self.Destroy()
 
     def _prepareExitWiki(self):
+        self.Unbind(wx.EVT_ICONIZE)
         if self._interceptCollection is not None:
             self._interceptCollection.close()
 

@@ -429,7 +429,6 @@ class VersionExplorerPanel(EnhancedListControl):
             self.applyTocList(unicode(ve))
 
 
-
     def applyTocList(self, message=None):
         """
         Show the content of self.tocList in the ListCtrl
@@ -460,44 +459,11 @@ class VersionExplorerPanel(EnhancedListControl):
                 selected = self.GetItemCount()
 
             self.InsertStringItem(self.GetItemCount(), message)
-            self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+#             self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+            self.autosizeColumn(0)
             self.SelectSingle(selected, scrollVisible=True)
-            
-#             self.checkSelectionChanged(callAlways=True)
         finally:
             self.Thaw()
-
-
-#     def OnKillFocus(self, evt):
-#         self.SelectSingle(-1)
-#         evt.Skip()
-
-
-
-#     def displayInSubcontrol(self, start):   # , focusToSubctrl
-#         """
-#         Display title in subcontrol of current presenter which
-#         starts at char position  start  in page text.
-# 
-#         focusToSubctrl -- True iff subcontrol should become focused after
-#                 displaying is done
-#         """
-# 
-#         presenter = self.mainControl.getCurrentDocPagePresenter()
-#         if presenter is None:
-#             return
-# 
-#         # Find out which subcontrol is currently active
-#         scName = presenter.getCurrentSubControlName()
-#         subCtrl = presenter.getSubControl(scName)
-#         
-#         if scName == "textedit":
-#             # Text editor is active
-#             subCtrl.gotoCharPos(start)
-#         elif scName == "preview": 
-#             # HTML preview
-#             subCtrl.gotoAnchor(u".h%i" % start)
-            
 
 
     def OnItemSelected(self, evt):

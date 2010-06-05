@@ -156,21 +156,42 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                     openWikiWords[0])
 
 
-    # TODO What about WikidPadHooks?
-    def prepareCurrentPresenter(self, currentPresenter):
-        """
-        Mainly called by OnNotebookPageChanged to inform presenters
-        about change
-        """
-        if not (self.currentPresenter is currentPresenter):
-            self.currentPresenter = currentPresenter
-            for p in self.docPagePresenters:
-                p.setLayerVisible(p is currentPresenter)
-            proxyEvent = self.getCurrentPresenterProxyEvent()
-            proxyEvent.setWatchedEvents(
-                    (self.currentPresenter.getMiscEvent(),))
-            self.mainControl.refreshPageStatus()
-            self.fireMiscEventKeys(("changed current presenter",))
+    if Configuration.isLinux():
+        # TODO What about WikidPadHooks?
+        def prepareCurrentPresenter(self, currentPresenter):
+            """
+            Mainly called by OnNotebookPageChanged to inform presenters
+            about change
+            """
+            if not (self.currentPresenter is currentPresenter):
+                self.currentPresenter = currentPresenter
+                for p in self.docPagePresenters:
+                    p.setLayerVisible(p is currentPresenter)
+                proxyEvent = self.getCurrentPresenterProxyEvent()
+                proxyEvent.setWatchedEvents(
+                        (self.currentPresenter.getMiscEvent(),))
+                self.mainControl.refreshPageStatus()
+
+                # Only difference to non-Linux variant. To workaround
+                # funny behavior with left/right arrows with many tabs
+                wx.CallAfter(self.fireMiscEventKeys,
+                        ("changed current presenter",))
+    else:
+        # TODO What about WikidPadHooks?
+        def prepareCurrentPresenter(self, currentPresenter):
+            """
+            Mainly called by OnNotebookPageChanged to inform presenters
+            about change
+            """
+            if not (self.currentPresenter is currentPresenter):
+                self.currentPresenter = currentPresenter
+                for p in self.docPagePresenters:
+                    p.setLayerVisible(p is currentPresenter)
+                proxyEvent = self.getCurrentPresenterProxyEvent()
+                proxyEvent.setWatchedEvents(
+                        (self.currentPresenter.getMiscEvent(),))
+                self.mainControl.refreshPageStatus()
+                self.fireMiscEventKeys(("changed current presenter",))
 
 
     def showPresenter(self, currentPresenter):

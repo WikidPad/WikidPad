@@ -758,8 +758,8 @@ class SelectIconDialog(wx.Dialog):
         for icn in self.iconNames:
             self.lc.InsertImageStringItem(sys.maxint, icn,
                     self.iconCache.lookupIconIndex(icn))
-        self.lc.SetColumnWidth(0, wx.LIST_AUTOSIZE)
-        
+#         self.lc.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+        autosizeColumn(self.lc, 0)
         
         box.Add(self.lc, 1, wx.ALIGN_CENTRE|wx.ALL|wx.EXPAND, 5)
 
@@ -1963,6 +1963,10 @@ What makes wikidPad different from other notepad applications is the ease with w
             <tr><td width="30%%" align="right">&nbsp;</td></tr>
             <tr><td width="30%%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Gerhard Reitmayr</font></td></tr>
             <tr><td width="30%%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">gerhard.reitmayr@gmail.com</font></td></tr>
+            <tr><td width="30%%" align="right">&nbsp;</td></tr>
+            <tr><td width="30%%" align="right">&nbsp;</td></tr>
+            <tr><td width="30%%" align="left" colspan="2" nowrap><font size="3"><b>Translations:</b></font></td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>Swedish:</b></font></td><td nowrap><font size="3">Stefan Berg</font></td></tr>
         </table>
     </center>
     

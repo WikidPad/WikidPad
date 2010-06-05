@@ -667,6 +667,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
         if newValue:
             wikiConfig.set("main", "wiki_readOnly", "True")
+            wikiConfig.save()
             wikiConfig.setWriteAccessDenied(True)
         else:
             wikiConfig.setWriteAccessDenied(False)
