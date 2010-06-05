@@ -1,3 +1,5 @@
+from __future__ import with_statement
+
 import os, os.path, traceback, sys, re
 
 from wx.xrc import XRCCTRL, XRCID, XmlResource
@@ -516,6 +518,18 @@ def getWindowParentsUpTo(childWindow, stopWindow):
             return result
 
 
+def isDeepChildOf(childWindow, parentWindow):
+    if parentWindow is None or childWindow is None:
+        return False
+
+    while True:
+        childWindow = childWindow.GetParent()
+        if childWindow is None:
+            return False
+        if childWindow is parentWindow:
+            return True
+
+
 def getAllChildWindows(win):
     winSet = set()
     winSet.add(win)
@@ -954,6 +968,27 @@ class EnhancedListControl(wx.ListCtrl):
             self.SetItemState(idx, self._SETSSI_ITEMMASK, self._SETSSI_ITEMMASK)
             if scrollVisible:
                 self.EnsureVisible(idx)
+
+
+    def autosizeColumn(self, col):
+        # Call function below
+        autosizeColumn(self, col)
+
+
+
+if Configuration.isWindows():   # Maybe necessary for other OS' as well
+    def autosizeColumn(listCtrl, col):
+        """
+        Workaround for some bug in wxPython 2.8.10
+        """
+        with WindowUpdateLocker(listCtrl):
+            listCtrl.SetColumnWidth(col, wx.LIST_AUTOSIZE)
+            listCtrl.SetColumnWidth(col, listCtrl.GetColumnWidth(col) + 10)
+else:
+    def autosizeColumn(listCtrl, col):
+        listCtrl.SetColumnWidth(col, wx.LIST_AUTOSIZE)
+
+
 
 # class ColoredStatusBar(wx.StatusBar):
 #     def __init__(self, *args, **kwargs):

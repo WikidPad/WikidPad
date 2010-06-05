@@ -499,7 +499,7 @@ GLOBALDEFAULTS = {
     ("main", "last_wiki"): "",   # Same
     ("main", "size_x"): "500",
     ("main", "size_y"): "300",
-    
+
     ("main", "pos_x"): "10",
     ("main", "pos_y"): "10",
     ("main", "splitter_pos"): '170',
@@ -587,6 +587,9 @@ GLOBALDEFAULTS = {
     ("main", "tree_bg_color"): "",  # Background color of the trees
 
     ("main", "tree_font_nativeDesc"): u"",  # Data about tree font. If empty, default font is used
+
+    ("main", "tree_updateGenerator_minDelay"): u"0.1",  # Minimum delay (in secs) between calls to
+            # the update generator
 
 #     ("main", "tree_font_pointSize"): u"",  # Data about tree font. If pointSize is empty, default fonts is used
 #     ("main", "tree_font_family"): u"",  # Data about tree font.

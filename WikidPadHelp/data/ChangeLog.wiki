@@ -1,6 +1,32 @@
 ﻿++ Change Log
 
 
+Jun. 05, 2010 (2.1alpha03)
+
+    * When creating new wiki, dialog also asks if ascii-only
+      file names should be used for wiki page files (default is on
+      for Mac OS, see [OptionsDialog#*Page file names ASCII only*])
+    * Option to slow down background tree update (to reduce
+      response time of WikidPad).
+      See [OptionsDialog#*Update step min. delay*]
+    * Support for processing right-clicks on toolbar icons from
+      plugins (see file "extensions/referrals.py" as an example)
+
+    * Process "binInst.ini"-file (needed for Windows binary
+      wxPython downgrade)
+    * Windows: Workaround for too short labels in wxListCtrl
+    * Mac OS: Further changes to keybindings
+    * Bug fixed: Setting wiki to readonly failed
+    * Bug fixed: Linux: Problems when switching tabs too fast
+      (thanks to Christian Ziemski)
+    * Bug fixed: Wrong focus position after opening wiki in
+      same window
+    * Bug fixed: Linux: Crash when closing WikidPad
+
+    * Internal: Changes to multipage text file import (you should not notice a change)
+
+
+
 May 04, 2010 (2.1alpha02)
 
     * CSS style classes for the heading levels (named "heading-level1"

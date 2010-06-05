@@ -421,7 +421,8 @@ class OptionsDialog(wx.Dialog):
                     "btnSelectTreeBgColor"),
             ("tree_font_nativeDesc", "tfTreeFontNativeDesc", "tfont0",
                     "btnSelectTreeFont"),
-
+            ("tree_updateGenerator_minDelay", "tfTreeUpdateGeneratorMinDelay",
+                    "f0+"),
 
             ("start_browser_after_export", "cbStartBrowserAfterExport", "b"),
             ("facename_html_preview", "tfFacenameHtmlPreview", "t"),

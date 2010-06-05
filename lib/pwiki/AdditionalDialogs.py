@@ -786,7 +786,8 @@ class SelectIconDialog(wx.Dialog):
         for icn in self.iconNames:
             self.lc.InsertImageStringItem(sys.maxint, icn,
                     self.iconCache.lookupIconIndex(icn))
-        self.lc.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+#         self.lc.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+        autosizeColumn(self.lc, 0)
         
         
         box.Add(self.lc, 1, wx.ALIGN_CENTRE|wx.ALL|wx.EXPAND, 5)
@@ -1932,6 +1933,8 @@ class NewWikiSettings(wx.Dialog):
         else:
             self.ctrls.lbWikiLanguage.Enable(False)
             self.ctrls.lbWikiLanguage.SetBackgroundColour(wx.LIGHT_GREY)
+        
+        self.ctrls.cbWikiPageFilesAsciiOnly.SetValue(Configuration.isOSX())
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
@@ -1954,7 +1957,7 @@ class NewWikiSettings(wx.Dialog):
         if langSel != wx.NOT_FOUND:
             wlH = self.wikiLanguages[langSel][0]
         
-        self.value = dbH, wlH
+        self.value = (dbH, wlH, self.ctrls.cbWikiPageFilesAsciiOnly.GetValue())
 
         self.EndModal(wx.ID_OK)
 
@@ -1991,8 +1994,15 @@ What makes wikidPad different from other notepad applications is the ease with w
             <tr><td width="30%%" align="right">&nbsp;</td></tr>
             <tr><td width="30%%" align="right"><font size="3"><b>Author:</b></font></td><td nowrap><font size="3">Gerhard Reitmayr</font></td></tr>
             <tr><td width="30%%" align="right"><font size="3"><b>Email:</b></font></td><td nowrap><font size="3">gerhard.reitmayr@gmail.com</font></td></tr>
+            <tr><td width="30%%" align="right">&nbsp;</td></tr>
+            <tr><td width="30%%" align="right">&nbsp;</td></tr>
+            <tr><td width="30%%" align="left" colspan="2" nowrap><font size="3"><b>Translations:</b></font></td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>Swedish:</b></font></td><td nowrap><font size="3">Stefan Berg</font></td></tr>
         </table>
     </center>
+    
+    
+
     
     <hr />
     

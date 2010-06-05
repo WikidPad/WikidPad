@@ -97,8 +97,8 @@ class LogWindow(wx.Panel):
         self.ctrls.lcEntries.EnsureVisible(l)
 
         self.messages.append(msg)
-        self.ctrls.lcEntries.SetColumnWidth(0, wx.LIST_AUTOSIZE)
-
+#         self.ctrls.lcEntries.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+        autosizeColumn(self.ctrls.lcEntries, 0)
 
     def removeWithCheckedWikiWord(self, checkedWikiWord):
         """

@@ -11,28 +11,28 @@ Source: dist\license.txt; DestDir: {app}; Components: Program_files
 Source: dist\python26.dll; DestDir: {app}; Components: Program_files
 ; Source: dist\MSVCR71.dll; DestDir: {app}; Components: Program_files
 Source: dist\sqlite3.dll; DestDir: {app}; Components: Program_files
-Source: dist\wxmsw28uh_adv_vc.dll; DestDir: {app}; Components: Program_files
-Source: dist\wxmsw28uh_core_vc.dll; DestDir: {app}; Components: Program_files
-Source: dist\wxmsw28uh_html_vc.dll; DestDir: {app}; Components: Program_files
-Source: dist\wxmsw28uh_stc_vc.dll; DestDir: {app}; Components: Program_files
-Source: dist\wxmsw28uh_xrc_vc.dll; DestDir: {app}; Components: Program_files
-Source: dist\wxbase28uh_net_vc.dll; DestDir: {app}; Components: Program_files
-Source: dist\wxbase28uh_vc.dll; DestDir: {app}; Components: Program_files
-Source: dist\wxbase28uh_xml_vc.dll; DestDir: {app}; Components: Program_files
+Source: dist\wxmsw28uh_adv_vc.dll; DestDir: {app}; Components: Program_files; Check: ShouldInstallWxRuntime
+Source: dist\wxmsw28uh_core_vc.dll; DestDir: {app}; Components: Program_files; Check: ShouldInstallWxRuntime
+Source: dist\wxmsw28uh_html_vc.dll; DestDir: {app}; Components: Program_files; Check: ShouldInstallWxRuntime
+Source: dist\wxmsw28uh_stc_vc.dll; DestDir: {app}; Components: Program_files; Check: ShouldInstallWxRuntime
+Source: dist\wxmsw28uh_xrc_vc.dll; DestDir: {app}; Components: Program_files; Check: ShouldInstallWxRuntime
+Source: dist\wxbase28uh_net_vc.dll; DestDir: {app}; Components: Program_files; Check: ShouldInstallWxRuntime
+Source: dist\wxbase28uh_vc.dll; DestDir: {app}; Components: Program_files; Check: ShouldInstallWxRuntime
+Source: dist\wxbase28uh_xml_vc.dll; DestDir: {app}; Components: Program_files; Check: ShouldInstallWxRuntime
 Source: dist\_ctypes.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\_hashlib.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\pyexpat.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\_sqlite3.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\_socket.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
 Source: dist\select.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
-Source: dist\wx._controls_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
-Source: dist\wx._core_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
-Source: dist\wx._gdi_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
-Source: dist\wx._html.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
-Source: dist\wx._misc_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
-Source: dist\wx._stc.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
-Source: dist\wx._windows_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
-Source: dist\wx._xrc.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
+Source: dist\wx._controls_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion; Check: ShouldInstallWxRuntime
+Source: dist\wx._core_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion; Check: ShouldInstallWxRuntime
+Source: dist\wx._gdi_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion; Check: ShouldInstallWxRuntime
+Source: dist\wx._html.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion; Check: ShouldInstallWxRuntime
+Source: dist\wx._misc_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion; Check: ShouldInstallWxRuntime
+Source: dist\wx._stc.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion; Check: ShouldInstallWxRuntime
+Source: dist\wx._windows_.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion; Check: ShouldInstallWxRuntime
+Source: dist\wx._xrc.pyd; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion; Check: ShouldInstallWxRuntime
 Source: dist\WikidPad.xrc; DestDir: {app}; Components: Program_files
 Source: dist\WikidPad_*.po; DestDir: {app}; Components: Program_files; Flags: ignoreversion sortfilesbyextension
 Source: dist\langlist.txt; DestDir: {app}; Components: Program_files; Flags: replacesameversion ignoreversion
@@ -55,21 +55,24 @@ Name: Program_files; Description: Main program files; Flags: fixed; Types: custo
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 2.1alpha02
+AppVerName=WikidPad 2.1alpha03
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=2.1.002.0
-VersionInfoTextVersion=WikidPad 2.1alpha02
+VersionInfoVersion=002.001.003.000
+VersionInfoTextVersion=WikidPad 2.1alpha03
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-2.1alpha02
+OutputBaseFilename=WikidPad-2.1alpha03
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2010 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
 PrivilegesRequired=none
+[INI]
+Filename: {app}\binInst.ini; Section: Main; Key: CurrVersion; String: 002.001.003.000; Flags: createkeyifdoesntexist uninsdeleteentry uninsdeletesectionifempty
+Filename: {app}\binInst.ini; Section: Main; Key: wxVersion; String: 002.008.010.001; Flags: createkeyifdoesntexist uninsdeleteentry uninsdeletesectionifempty
 [Icons]
 Name: {code:IconDest|Dummy}\WikidPad; Filename: {app}\WikidPad.exe; IconFilename: {app}\icons\pwiki.ico; Components: Program_files; IconIndex: 0
 Name: {code:IconDest|Dummy}\{cm:UninstallProgram, WikidPad}; Filename: {uninstallexe}
@@ -104,6 +107,7 @@ Name: {app}\extensions\WikiSyntax.py; Type: files
 
 [UninstallDelete]
 Name: {app}\regexpr.cache; Type: files
+Name: {app}\binInst.ini; Type: files
 Name: {app}\WikidPad_*.xrc; Type: files; Components: ; Tasks: 
 Name: {app}\extensions\*.pyc; Type: filesandordirs
 Name: {app}\extensions\*.pyo; Type: filesandordirs
@@ -170,6 +174,14 @@ begin
     Result := true
   else
     Result := not UsingWinNT;  // On Win 98/ME, it should always return true
+end;
+
+
+function ShouldInstallWxRuntime: Boolean;
+// Returns true iff wxWidgets runtime should be installed.
+begin
+  Result := not GetIniBool('PreventInstall', 'wxPy2_8_10_1', false,
+      ExpandConstant('{app}\binInst.ini'));
 end;
 
 

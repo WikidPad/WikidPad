@@ -1,6 +1,6 @@
 #!/bin/python
 
-import sys, os, traceback, os.path, glob, shutil, imp, warnings
+import sys, os, traceback, os.path, glob, shutil, imp, warnings, ConfigParser
 os.stat_float_times(True)
 
 if not hasattr(sys, 'frozen'):
@@ -38,6 +38,34 @@ ExceptionLogger.startLogger(VERSION_STRING)
 
 # ## import hotshot
 # ## _prof = hotshot.Profile("hotshot.prf")
+
+def _putPathPrepends():
+    """
+    Process file "binInst.ini" in installation directory, if present.
+    The file is created by the Windows binary installer (Inno Setup)
+    and contains adjustments to the installation, namely additional
+    ZIP-files to add to sys.path.
+    """
+    parser = ConfigParser.RawConfigParser()
+    try:
+        f = open(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
+                "binInst.ini"), "rU")
+        parser.readfp(f)
+        f.close()
+
+        try:
+            for opt, val in parser.items("sysPathPrepend"):
+                sys.path.insert(0, os.path.join(os.path.dirname(
+                        os.path.abspath(sys.argv[0])), val))
+        except ConfigParser.NoSectionError:
+            pass
+
+    except IOError:
+        pass  # Probably file not present
+
+
+_putPathPrepends()
+
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
         "gadfly.zip"))

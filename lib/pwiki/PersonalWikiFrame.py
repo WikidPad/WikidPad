@@ -80,7 +80,7 @@ from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, \
         pathWordAndAnchorToWikiUrl, relativeFilePath, pathnameFromUrl
 
 
-from PluginManager import *
+from PluginManager import PluginManager, PluginAPIAggregation
 
 # TODO More abstract/platform independent
 try:
@@ -249,15 +249,24 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 #         wx.GetApp().pauseBackgroundThreads()
 
-        self.hooks = self.pluginManager.registerPluginAPI(("hooks",1),
+        plm = self.pluginManager # Make it shorter
+
+        self.hooks = plm.registerSimplePluginAPI(("hooks",1),
             ["startup", "newWiki", "createdWiki", "openWiki", "openedWiki", 
              "openWikiWord", "newWikiWord", "openedWikiWord", "savingWikiWord",
              "savedWikiWord", "renamedWikiWord", "deletedWikiWord", "exit"] )
         # interfaces for menu and toolbar plugins
-        self.menuFunctions = self.pluginManager.registerPluginAPI(("MenuFunctions",1), 
+        self.menuFunctions = plm.registerSimplePluginAPI(("MenuFunctions",1), 
                                 ("describeMenuItems",))
-        self.toolbarFunctions = self.pluginManager.registerPluginAPI(("ToolbarFunctions",1), 
+        
+        self.toolbarFunctions = PluginAPIAggregation(
+                plm.registerWrappedPluginAPI(("ToolbarFunctions",2),
+                                describeToolbarItems="describeToolbarItemsV02"),
+                plm.registerSimplePluginAPI(("ToolbarFunctions",1), 
                                 ("describeToolbarItems",))
+                )
+
+        del plm
 
         # load extensions
         self.loadExtensions()
@@ -872,7 +881,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         if len(menuItems) > 0:
             def addPluginMenuItem(function, label, statustext, icondesc=None,
-                    menuID=None, updateFunction=None, kind=None):
+                    menuID=None, updateFunction=None, kind=None, *dummy):
                 
                 labelComponents = label.split(u"|")
                 
@@ -2133,12 +2142,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # get info for any plugin toolbar items and create them as necessary
         toolbarItems = reduce(lambda a, b: a+list(b),
                 self.toolbarFunctions.describeToolbarItems(self), [])
-        
+
         def addPluginTool(function, tooltip, statustext, icondesc, tbID=None,
-                updateFunction=None):
+                updateFunction=None, rightclickFunction=None, *dummy):
             if tbID is None:
                 tbID = wx.NewId()
-                
+
             icon = self.resolveIconDescriptor(icondesc, defIcon)
             # tb.AddLabelTool(tbID, label, icon, wxNullBitmap, 0, tooltip)
             tb.AddSimpleTool(tbID, icon, tooltip, statustext)
@@ -2146,11 +2155,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             if updateFunction is not None:
                 wx.EVT_UPDATE_UI(self, tbID, lambda evt: updateFunction(self, evt))
+            
+            if rightclickFunction is not None:
+                wx.EVT_TOOL_RCLICKED(self, tbID, lambda evt: rightclickFunction(self, evt))
 
 
         for item in toolbarItems:
             addPluginTool(*item)
-
 
         tb.Realize()
 
@@ -2259,7 +2270,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         # Check resizing to layout sash windows
         wx.EVT_SIZE(self, self.OnSize)
 
-        wx.EVT_ICONIZE(self, self.OnIconize)
+        self.Bind(wx.EVT_ICONIZE, self.OnIconize)
         wx.EVT_MAXIMIZE(self, self.OnMaximize)
         
         wx.EVT_MENU(self, GUI_ID.CMD_CLOSE_CURRENT_TAB, self._OnRoundtripEvent)
@@ -2582,7 +2593,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def reloadMenuPlugins(self):
         if self.mainmenu is not None:
-            self.menuFunctions = self.pluginManager.registerPluginAPI((
+            self.menuFunctions = self.pluginManager.registerSimplePluginAPI((
                     "MenuFunctions",1), ("describeMenuItems",))
 
             self.loadExtensions()
@@ -2792,8 +2803,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 # 
 #             wdhName = wdhandlers[index][0]
 
-            wdhName, wlangName = AdditionalDialogs.NewWikiSettings.runModal(
-                    self, -1, self)
+            wdhName, wlangName, asciiOnly = \
+                    AdditionalDialogs.NewWikiSettings.runModal(self, -1, self)
                     
             if wdhName is None:
                 return
@@ -2847,6 +2858,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     wikiConfig.set("main", "last_wiki_word", wikiName)
                     wikiConfig.set("main", "wiki_database_type", wdhName)
                     wikiConfig.set("main", "wiki_wikiLanguage", wlangName)
+                    wikiConfig.set("main", "wikiPageFiles_asciiOnly", asciiOnly)
                     wikiConfig.set("wiki_db", "data_dir", "data")
                     wikiConfig.save()
 
@@ -3217,6 +3229,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             # trigger hook
             self.hooks.openedWiki(self, self.wikiName, wikiCombinedFilename)
     
+            self.getMainAreaPanel().SetFocus()
+
             # return that the wiki was opened successfully
             return True
         except (IOError, OSError, DbAccessError, WikiFileNotFoundException), e:
@@ -3612,8 +3626,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #                         page.update(self.getActiveEditor().updateAutoGenAreas(text))   # ?
                         page.writeToDatabase()
                         self.attributeChecker.initiateCheckPage(page)
-
-
 
                         # trigger hooks
                         self.hooks.savedWikiWord(self, word)
@@ -5435,6 +5447,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         self.Destroy()
 
     def _prepareExitWiki(self):
+        self.Unbind(wx.EVT_ICONIZE)
         if self._interceptCollection is not None:
             self._interceptCollection.close()
 

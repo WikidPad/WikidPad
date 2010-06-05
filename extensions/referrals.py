@@ -21,10 +21,22 @@
 import wx
 
 
-WIKIDPAD_PLUGIN = (("MenuFunctions",1), ("ToolbarFunctions",1))
+# If multiple descriptors with same plugin type but different version numbers
+# are provided only the one with the highest version number known to the
+# particular WikidPad version is processed.
+# 
+# Therefore 2.1beta03 or later will only see ("ToolbarFunctions",2), older ones
+# only ("ToolbarFunctions",1)
+
+WIKIDPAD_PLUGIN = (("ToolbarFunctions",2), ("ToolbarFunctions",1),
+        ("MenuFunctions",1))
+
+
 
 def describeMenuItems(wiki):
     """
+    Called if plugin descriptor ("MenuFunctions",1) is present.
+
     wiki -- Calling PersonalWikiFrame
     Returns a sequence of tuples to describe the menu items, where each must
     contain (in this order):
@@ -65,6 +77,8 @@ def describeMenuItems(wiki):
 
 def describeToolbarItems(wiki):
     """
+    Called if plugin descriptor ("ToolbarFunctions",1) is present.
+    
     wiki -- Calling PersonalWikiFrame
     Returns a sequence of tuples to describe the menu items, where each must
     contain (in this order):
@@ -90,9 +104,31 @@ def describeToolbarItems(wiki):
     The  update function  must take 2 parameters:
         wiki - Calling PersonalWikiFrame
         evt - wxUpdateUIEvent
+        
     """
     return ((referrals, _(u"Referers"), _(u"Insert referring pages"),
             ("rename", "tb_rename"), None, referralsUpdate),)
+
+
+
+def describeToolbarItemsV02(wiki):
+    """
+    Called if plugin descriptor ("ToolbarFunctions",2) is present and WikidPad
+    version is 2.1beta03 or later.
+    
+    Same as describeToolbarItems, but the tuples returned can have an additional
+    parameter:
+    
+    - right-click function
+
+    The  right-click function  must take 2 parameters:
+        wiki - Calling PersonalWikiFrame
+        evt - wxCommandEvent
+    """
+
+    return ((referrals, _(u"Referers"), _(u"Insert referring pages"),
+            ("rename", "tb_rename"), None, referralsUpdate, referralsRightClick),)
+
 
 
 def referrals(wiki, evt):
@@ -123,6 +159,11 @@ def referrals(wiki, evt):
     for word in children:
         wiki.getActiveEditor().AddText(u"%s\n" % word)
     wiki.getActiveEditor().AddText(u"------------------------\n")
+
+
+def referralsRightClick(wiki, evt):
+    # Just for demo purposes
+    print "Rightclick"
 
 
 def referralsUpdate(wiki, evt):

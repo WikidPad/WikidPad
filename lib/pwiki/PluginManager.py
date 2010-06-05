@@ -16,7 +16,7 @@ from .StringOps import mbcsEnc, pathEnc
    Example code:
    
    pm = PluginManager(["dir1, "dir2"])
-   api = pm.registerPluginAPI(("myAPI",1), ["init", "call1", "call2", "exit"])
+   api = pm.registerSimplePluginAPI(("myAPI",1), ["init", "call1", "call2", "exit"])
    pm.loadPlugins(["notloadme", "andnotme"])
    api.init("hello")
    api.exit()
@@ -52,7 +52,8 @@ from .StringOps import mbcsEnc, pathEnc
    a, = api.call1()
    """
 
-class PluginAPI(object):
+
+class SimplePluginAPI(object):
     """encapsulates a single plugin api and stores the functions of various
        plugins implementing that api. It takes a unique descriptor and a list
        of function names at creation time. For each function name a member is
@@ -65,20 +66,24 @@ class PluginAPI(object):
         self.descriptor = descriptor
         self.__functionNames = functions
         self.__plugins = {}
-        for f in functions:
+        for f in self.__functionNames:
             pluginlist = []
             self.__plugins[f] = pluginlist
-            helper = self.createHelper( pluginlist )
+            helper = self.__createHelper( pluginlist )
             setattr(self,f, helper)
-    
-    def createHelper(self, list):
-        def executeHelper(*args):
-            res = []
-            for fun in list:
-                res.append(fun(*args))
-            return res
-        return executeHelper
-    
+
+    def getFunctionNames(self):
+        return self.__functionNames
+
+    def hasFunctionName(self, fctName):
+        return fctName in self.__functionNames
+
+
+    @staticmethod
+    def __createHelper(funcList):
+        return lambda *args, **kwargs: [fun(*args, **kwargs) for fun in funcList]
+
+
     def registerModule(self, module):
         registered = False
         if self.descriptor in module.WIKIDPAD_PLUGIN:
@@ -92,44 +97,180 @@ class PluginAPI(object):
                         " but does not support any interface methods!")
         return registered
 
-    def deleteModule(self, module):
+#     def deleteModule(self, module):
+#         for f in self.__functionNames:
+#             if hasattr(module, f):
+#                 self.__plugins[f].remove(getattr(module,f))
+
+
+class WrappedPluginAPI(object):
+    """
+    Constructor takes as keyword arguments after descriptor names.
+    
+    The keys of the arguments are the function names exposed as attributes by
+    the API object. The values can be either:
+        None  to call function of same name in module(s)
+        a string  to call function of this name in module(s)
+        a wrapper function  to call with module object and parameters from
+                original function call
+    """
+
+    def __init__(self, descriptor, **wrappedFunctions):
+        self.descriptor = descriptor
+        self.__functionNames = wrappedFunctions.keys()
+        self.__wrappedFunctions = wrappedFunctions
+        self.__plugins = {}
         for f in self.__functionNames:
-            if hasattr(module, f):
-                self.__plugins[f].remove(getattr(module,f))
+            pluginlist = [] # List containing either modules if wrappedFunctions[f]
+                    # is not None or functions if wrappedFunctions[f] is None
+            self.__plugins[f] = pluginlist
+            helper = self.__createHelper(wrappedFunctions[f], pluginlist)
+            setattr(self,f, helper)
+            
+    def getFunctionNames(self):
+        return self.__functionNames
+
+    def hasFunctionName(self, fctName):
+        return fctName in self.__functionNames
+
+
+    @staticmethod
+    def __createHelper(wrapFct, list):
+        if wrapFct is None or isinstance(wrapFct, (str, unicode)):
+            return lambda *args, **kwargs: [fun(*args, **kwargs) for fun in list]
+        else:
+            return lambda *args, **kwargs: [wrapFct(module, *args, **kwargs)
+                    for module in list]
+
+
+    def registerModule(self, module):
+        if self.descriptor in module.WIKIDPAD_PLUGIN:
+            for f in self.__functionNames:
+                if self.__wrappedFunctions[f] is None:
+                    if hasattr(module, f):
+                        self.__plugins[f].append(getattr(module,f))
+                        return True
+                    else:
+                        sys.stderr.write("plugin " + module.__name__ + " exposes " +
+                                self.descriptor + 
+                                " but does not support any interface methods!")
+                        return False
+                elif isinstance(self.__wrappedFunctions[f], (str, unicode)):
+                    realF = self.__wrappedFunctions[f]
+                    if hasattr(module, realF):
+                        self.__plugins[f].append(getattr(module,realF))
+                        return True
+                    else:
+                        sys.stderr.write("plugin " + module.__name__ + " exposes " +
+                                self.descriptor + 
+                                " but does not support any interface methods!")
+                        return False
+                else:
+                    self.__plugins[f].append(module)
+                    return True
+
+        return False
+
+
+
+class PluginAPIAggregation(object):
+    def __init__(self, *apis):
+        self.__apis = apis
+
+        fctNames = set()
+        for api in self.__apis:
+            fctNames.update(api.getFunctionNames())
+        
+        for f in list(fctNames):
+            funcList = [getattr(api, f) for api in apis if api.hasFunctionName(f)]
+            helper = lambda *args, **kwargs: reduce(lambda a, b: a+list(b),
+                    [fun(*args, **kwargs) for fun in funcList])
+            setattr(self,f, helper)
+
 
 
 class PluginManager(object):
     """manages all PluginAPIs and plugins."""
     def __init__(self, directories):
-        self.pluginAPIs = {}
+        self.pluginAPIs = {}  # Dictionary {<type name>:<verReg dict>}
+                # where verReg dict is list of tuples (<version No>:<PluginAPI instance>)
         self.plugins = {}  
         self.directories = directories
         
-    def registerPluginAPI(self, name, functions):
-        api = PluginAPI(name, functions)
-        self.pluginAPIs[name] = api
+    def registerSimplePluginAPI(self, descriptor, functions):
+        api = SimplePluginAPI(descriptor, functions)
+        self.pluginAPIs[descriptor] = api
         return api
-            
-    def deletePluginAPI(self, name):
-        del self.pluginAPIs[name]
+
+
+    def registerWrappedPluginAPI(self, descriptor, **wrappedFunctions):
+        api = WrappedPluginAPI(descriptor, **wrappedFunctions)
+        self.pluginAPIs[descriptor] = api
+        return api
         
-    def getPluginAPI(self, name):
-        return self.pluginAPIs[name]
+    
+    @staticmethod
+    def combineAPIs(*apis):
+        return PluginAPIAggregation(*apis)
+
+
+#         name, versionNo = descriptor[:2]
+# 
+#         if not self.pluginAPIs.has_key(name):
+#             verReg = []
+#             self.pluginAPIs[name] = verReg
+#         else:
+#             verReg = self.pluginAPIs[name]
+# 
+#         verReg.append(versionNo, api)
+#         return api
+
+
+#     def deletePluginAPI(self, name):
+#         del self.pluginAPIs[name]
+#         
+#     def getPluginAPIVerReg(self, name):
+#         return self.pluginAPIs[name]
+
+
+    def _processDescriptors(self, descriptors):
+        """
+        Find all known plugin API descriptors and return those
+        of each type with highest version number.
+        Returns a list of descriptor tuples.
+        """
+        found = {}
+        for d in descriptors:
+            name, versionNo = d[:2]
+            if not (name, versionNo) in self.pluginAPIs:
+                continue
+
+            if versionNo > found.get(name, 0):
+                found[name] = versionNo
         
+        return found.items()
+
+
     def registerPlugin(self, module):
         registered = False
-        for api in self.pluginAPIs.itervalues():
-            registered |= api.registerModule(module)
+        
+        for desc in self._processDescriptors(module.WIKIDPAD_PLUGIN):
+            registered |= self.pluginAPIs[desc].registerModule(module)
+
+#         for api in self.pluginAPIs.itervalues():
+#             registered |= api.registerModule(module)
+
         if registered:
             self.plugins[module.__name__] = module
+
         return registered
 
-    def deletePlugin(self, name):
-        if name in self.plugins:
-            module = self.plugins[name]
-            for api in self.pluginAPIs.itervalues():
-                api.deleteModule(module)
-            del self.plugins[name]
+#     def deletePlugin(self, name):
+#         if name in self.plugins:
+#             module = self.plugins[name]
+#             for api in self.pluginAPIs.itervalues():
+#                 api.deleteModule(module)
+#             del self.plugins[name]
         
     def loadPlugins(self, excludeFiles):
         """load and register plugins with apis. the directories in the list

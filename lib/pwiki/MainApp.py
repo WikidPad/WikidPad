@@ -327,13 +327,13 @@ class App(wx.App, MiscEventSourceMixin):
         self.pluginManager = PluginManager(dirs)
 
         # Register app-wide plugin APIs
-        describeInsertionApi = self.pluginManager.registerPluginAPI(
+        describeInsertionApi = self.pluginManager.registerSimplePluginAPI(
                 ("InsertionByKey", 1), ("describeInsertionKeys",))
 
-        registerOptionsApi = self.pluginManager.registerPluginAPI(
+        registerOptionsApi = self.pluginManager.registerSimplePluginAPI(
                 ("Options", 1), ("registerOptions",))
 
-        describeWikiLanguageApi = self.pluginManager.registerPluginAPI(
+        describeWikiLanguageApi = self.pluginManager.registerSimplePluginAPI(
                 ("WikiParser", 1), ("describeWikiLanguage",))
 
         # Load plugins

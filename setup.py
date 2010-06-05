@@ -20,7 +20,7 @@ wikidpad = Target(
 )
 
 
-excludes = ["win32api", "win32con", "win32pipe"]
+excludes = ["win32api", "win32con", "win32pipe", "gadfly"]
 
 setup(
     options = {"py2exe": {"compressed": 1,

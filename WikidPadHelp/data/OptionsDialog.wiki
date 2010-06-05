@@ -354,6 +354,10 @@ For async. highlighting how long to wait after key press (in seconds) before sta
 *Short hint delay*
 Set how many milliseconds before showing the short hint tooltip in editor. 0 deactivates the tooltip. See [WikiDocumentAttributes#*short_hint*] for details.
 
+*Update step min. delay*
+After each change the tree(s) are updated to reflect changes like added or removed children of a page. This updating is done step by step where each step must be executed in the GUI-thread. Non-technically this means that WikidPad may lag during the tree update. The minimal delay setting defines the number of seconds (or fractions thereof) WikidPad waits after an update step before the next step is executed.
+Recommended value: 0.0 to 0.2 seconds
+
 *Single process per user*
 If you open a new WikidPad instance while another is already running, the new window is handled by the same process as the first one. This option has only an effect after restarting WikidPad. It is off by default.
 
@@ -435,8 +439,8 @@ Automatically show log window if new error messages arrive (see [WikiDocumentAtt
 If the check-box is gray, the application-bound setting (see above) is used, otherwise this wiki-bound setting overrides it.
 
 *Page file names ASCII only*
-If set, all filenames of newly created pages only contain ASCII-characters (no umlauts, accented characters etc.). Already created files are not renmed even if the file content is modified afterwards.
-
+If set, all filenames of newly created pages only contain ASCII-characters (no umlauts, accented characters etc.). Already created files are not renamed even if the file content is modified afterwards.
+This option is especially recommended on Mac OS or for wikis which will be interchanged with Mac users.
 This option does not apply to Compact Sqlite DB backend because it does not have separate page files.
 
 *Graceful handling of missing page files*

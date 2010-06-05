@@ -1,5 +1,7 @@
-import sys, traceback
+import sys, time, traceback
 
+## import profilehooks
+## profile = profilehooks.profile(filename="profile.prf")
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
@@ -206,7 +208,7 @@ class WikiWordNode(AbstractNode):
             self.ancestors = result
 
         return self.ancestors            
-       
+
 
     def _getValidChildren(self, wikiPage, withFields=()):
         """
@@ -377,6 +379,7 @@ class WikiWordNode(AbstractNode):
         return True
 
 
+##     @profile
     def listChildren(self):
 ##         _prof.start()
         wikiDocument = self.treeCtrl.pWiki.getWikiDocument()
@@ -592,7 +595,7 @@ class TodoNode(AbstractNode):
                     nodes.iterDeepByName("property"),
                     nodes.iterDeepByName("attribute") ),
                     key=lambda n: n.pos):
-                for key, value, keyComp in attrNode.attrs:
+                for key, value in attrNode.attrs:
                     if key in _SETTABLE_ATTRS:
                         setattr(style, key, value)
 
@@ -1179,6 +1182,8 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         self.SetSpacing(0)
         self.refreshGenerator = None  # Generator called in OnIdle
+        self.refreshGeneratorLastCallTime = time.clock()  # Initial value
+        self.refreshGeneratorLastCallMinDelay = 0.1
         self.refreshExecutor = Utilities.SingleThreadExecutor(1)
 #        self.refreshCheckChildren = [] # List of nodes to check for new/deleted children
         self.sizeVisible = True
@@ -1480,7 +1485,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             return False
 
         if len(nodePath) == 1:
-            self.SelectItem(parentNodeId)
+            self.SelectItem(parentNodeId, send_events=False)
             self.EnsureVisible(parentNodeId)
             return True
 
@@ -1498,7 +1503,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
             node = self.GetPyData(nodeId)
             if node.getUnifiedName() == nodeUnifiedName:
                 if len(nodePath) == 1:
-                    self.SelectItem(nodeId)
+                    self.SelectItem(nodeId, send_events=False)
                     self.EnsureVisible(nodeId)
                     return True
                 else:
@@ -1569,6 +1574,9 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
 
         self.Refresh()
         
+        self.refreshGeneratorLastCallMinDelay = config.getfloat("main",
+                "tree_updateGenerator_minDelay", 0.1)
+
         self.refreshGenerator = self._generatorRefreshNodeAndChildren(
                 self.GetRootItem())
         self.Bind(wx.EVT_IDLE, self.OnIdle)
@@ -1968,7 +1976,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     self.EnsureVisible(currentNode)
                 if selectNode:
                     self._unbindActivation()
-                    self.SelectItem(currentNode)
+                    self.SelectItem(currentNode, send_events=False)
                     currentDpp = self.pWiki.getCurrentDocPagePresenter()
                     self._storeMainTreePositionHint(currentDpp, currentNode)
                     self.EnsureVisible(currentNode)
@@ -2317,8 +2325,18 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
     def OnIdle(self, event):
         gen = self.refreshGenerator
         if gen is not None:
+            cl = time.clock()
+            if cl < self.refreshGeneratorLastCallTime:
+                # May happen under special circumstances (e.g. after hibernation)
+                self.refreshGeneratorLastCallTime = cl
+            elif (cl - self.refreshGeneratorLastCallTime) < self.refreshGeneratorLastCallMinDelay:
+                return
+
             try:
                 gen.next()
+                # Set time after generator run, so time needed by generator
+                # itself doesn't count
+                self.refreshGeneratorLastCallTime = time.clock()
             except StopIteration:
                 if self.refreshGenerator == gen:
                     self.refreshGenerator = None

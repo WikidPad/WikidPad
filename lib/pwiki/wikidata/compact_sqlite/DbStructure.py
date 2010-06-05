@@ -92,7 +92,11 @@ class ConnectWrapBase:
         one column and returns result. If query results
         to 0 rows, default is returned (defaults to None)
         """
-        self.dbCursor.execute(sql, params)
+        if params:
+            self.dbCursor.execute(sql, params)
+        else:
+            self.dbCursor.execute(sql)
+
         row = self.fetchone()
         if row is None:
             return default

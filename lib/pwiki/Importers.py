@@ -11,10 +11,11 @@ from StringOps import *
 
 from ConnectWrapPysqlite import ConnectWrapSyncCommit
 
-
 from WikiExceptions import *
 
 import DocPages
+
+# from MptImporterGui import MultiPageTextImporterDialog
 
 from timeView import Versioning
 
@@ -196,43 +197,60 @@ class MultiPageTextImporter:
                     # Create temporary database. It is mainly filled during
                     # pass 1 to check for validity and other things before
                     # actual importing in pass 2
+                    
+                    # TODO Respect settings for general temp location!!!
                     self.tempDb = ConnectWrapSyncCommit(sqlite3.connect(""))
-                    
-                    self.tempDb.execSql("create table entries("
-                            "unifName text primary key not null, "
-                            "seen integer not null default 0, "
-                            "doImport integer not null default 0, "
-                            "missingDep integer not null default 0, "
-                            "hasVersionData integer not null default 0, "
-#                             "neededBy text default '',"
-#                             "versionContentDifferencing text default '',"
-                            "collisionWithPresent text not null default '',"
-                            "renameImportTo text not null default '',"
-                            "renamePresentTo text not null default ''"
-                            ");"
-                            )
+                    try:
+                        self.tempDb.execSql("create table entries("
+                                "unifName text primary key not null, "   # Unified name in import file
+                                "seen integer not null default 0, "   # data really exists
+                                "dontImport integer not null default 0, "   # don't import this (set between pass 1 and 2)
+                                "missingDep integer not null default 0, "  # missing dependency(ies)
+                                "hasVersionData integer not null default 0, "  # versioning data present
+    #                             "neededBy text default '',"
+    #                             "versionContentDifferencing text default '',"
+                                "collisionWithPresent text not null default '',"  # Unif. name of present entry which collides with imported one (if any)
+                                "renameImportTo text not null default ''," # Rename imported element to (if at all)
+                                "renamePresentTo text not null default ''"  # Rename present element in  database to (if at all)
+                                ");"
+                                )
+    
+                        self.tempDb.execSql("create table depgraph("
+                                "unifName text not null default '',"
+                                "neededBy text not null default '',"
+                                "constraint depgraphpk primary key (unifName, neededBy)"
+                                ");"
+                                )
+    
+    
+                        self.importFile = decodingReader(self.rawImportFile, "replace")
+                        
+                        # Collect some initial information into the temporary database
+                        self._doImportVer1Pass1()
+    
+                        # Draw some logical conclusions on the temp db
+                        self._markMissingDependencies()
+                        self._markHasVersionData()
+                        self._markCollision()
+                        
+                        
+                        # TODO Make work
+#                         if self._isUserNeeded():
+#                             if not MultiPageTextImporterDialog.runModal(
+#                                     self.mainControl, self.tempDb,
+#                                     self.mainControl):
+#                                 # Canceled by user
+#                                 return
 
-                    self.tempDb.execSql("create table depgraph("
-                            "unifName text not null default '',"
-                            "neededBy text not null default '',"
-                            "constraint depgraphpk primary key (unifName, neededBy)"
-                            ");"
-                            )
+                        # Back to start of import file and import according to settings 
+                        # in temp db
+                        self.rawImportFile.seek(startPos)
+                        self.importFile = decodingReader(self.rawImportFile, "replace")
+                        self._doImportVer1Pass2()
 
-
-                    self.importFile = decodingReader(self.rawImportFile, "replace")
-                    self._doImportVer1Pass1()
-                    
-                    self._markMissingDependencies()
-                    self._markHasVersionData()
-                    self._markCollision()
-
-                    self.rawImportFile.seek(startPos)
-                    self.importFile = decodingReader(self.rawImportFile, "replace")
-                    self._doImportVer1Pass2()
-
-                    self.tempDb.close()
-                    self.tempDb = None
+                    finally:
+                        self.tempDb.close()
+                        self.tempDb = None
 
             except ImportException:
                 raise
@@ -247,7 +265,7 @@ class MultiPageTextImporter:
     def _markMissingDependencies(self):
         while True:
             self.tempDb.execSql("""
-                update entries set missingDep=1 where (not missingDep) and 
+                update entries set missingDep=1, dontImport=1 where (not missingDep) and 
                     unifName in (select depgraph.neededBy from depgraph inner join 
                     entries on depgraph.unifName = entries.unifName where
                     (not entries.seen) or entries.missingDep);
@@ -260,8 +278,8 @@ class MultiPageTextImporter:
     def _markHasVersionData(self):
         self.tempDb.execSql("""
             update entries set hasVersionData=1 where (not hasVersionData) and 
-            unifName in (select substr(unifName, 21) from entries where 
-            unifName glob 'versioning/overview/*')
+                unifName in (select substr(unifName, 21) from entries where 
+                unifName glob 'versioning/overview/*' and not dontImport)
             """)  # TODO Take missing deps into account here?
 
 #             self.tempDb.execSql("insert or replace into entries(unifName, hasVersionData) "
@@ -271,7 +289,8 @@ class MultiPageTextImporter:
     def _markCollision(self):
         # First find collisions with wiki words
         for wikipageUnifName in self.tempDb.execSqlQuerySingleColumn(
-                "select unifName from entries where unifName glob 'wikipage/*'"):
+                "select unifName from entries where unifName glob 'wikipage/*' "
+                "and not dontImport"):
             wpName = wikipageUnifName[9:]
         
             collisionWithPresent = self.wikiDocument.getUnAliasedWikiWord(wpName)
@@ -284,10 +303,32 @@ class MultiPageTextImporter:
 
         # Then find other collisions (saved searches etc.)
         for unifName in self.tempDb.execSqlQuerySingleColumn(
-                "select unifName from entries where unifName glob 'savedsearch/*'"):
+                "select unifName from entries where unifName glob 'savedsearch/*' "
+                "and not dontImport"):
             if self.wikiDocument.hasDataBlock(unifName):
                 self.tempDb.execSql("update entries set collisionWithPresent = ? "
                         "where unifName = ?", (unifName, unifName))
+
+
+    def _isUserNeeded(self):
+        """
+        Decide if a dialog must be shown to ask user how to proceed.
+        Under some circumstances the dialog may be shown regardless of the result.
+        """
+        if self.tempDb.execSqlQuerySingleItem("select missingDep from entries "
+                "where missingDep limit 1", default=False):
+            # Missing dependency
+            return True
+        
+        if len(self.tempDb.execSqlQuerySingleItem("select collisionWithPresent "
+                "from entries where collisionWithPresent != '' limit 1",
+                default=u"")) > 0:
+            # Name collision
+            return True
+
+        # No problems found
+        return False
+
 
 
     def _doImportVer0(self):
@@ -330,7 +371,7 @@ class MultiPageTextImporter:
             elif tag.startswith(u"wikipage/"):
                 self._skipContent()
             elif tag.startswith(u"versioning/overview/"):
-                self.importItemVersioningOverviewVer1Pass1(tag[20:])
+                self._doImportItemVersioningOverviewVer1Pass1(tag[20:])
             else:
                 # Unknown tag -> Ignore until separator
                 self._skipContent()
@@ -424,7 +465,7 @@ class MultiPageTextImporter:
 
 
 
-    def importItemVersioningOverviewVer1Pass1(self, subtag):
+    def _doImportItemVersioningOverviewVer1Pass1(self, subtag):
         # Always encode to UTF-8 no matter what the import file encoding is
         content = self._collectContent().encode("utf-8")
 
@@ -440,36 +481,17 @@ class MultiPageTextImporter:
                 "values (?, 1)", (subtag, ovwUnifName))
                 
             for depUnifName in ovw.getDependentDataBlocks(omitSelf=True):
+                # Mutual dependency between version overview and each version packet
                 self.tempDb.execSql("insert or replace into depgraph(unifName, neededBy) "
                     "values (?, 1)", (depUnifName, ovwUnifName))
+                self.tempDb.execSql("insert or replace into depgraph(unifName, neededBy) "
+                    "values (?, 1)", (ovwUnifName, depUnifName))
 #                 self.tempDb.execSql("insert or replace into entries(unifName, needed) "
 #                     "values (?, 1)", (depUnifName,))
 
         except VersioningException:
             return
             
-
-
-
-# def unifNameToHumanReadable(unifName):
-#     """
-#     Return human readable description for a unified name
-#     """
-#     # TODO Move to more central place
-#     if unifName.startswith(u"wikipage/"):
-#         return _(u"wiki page '%s'") % unifName[9:]
-#     elif unifName.startswith(u"funcpage/"):
-#         return _(u"functional page '%s'") % DocPages.getHrNameForFuncTag(
-#                 unifName[9:])
-#     elif unifName.startswith(u"versioning/overview/"):
-#         return _(u"version overview for %s") % unifNameToHumanReadable(
-#                 unifName[20:])
-#     elif unifName.startswith(u"versioning/packet/versionNo/"):
-#         versionNo, subUnifName = unifName[28:].split("/", 1)
-#         return _(u"version packet (single version no. %s) for %s") % \
-#                 (versionNo, unifNameToHumanReadable(subUnifName))
-#     elif unifName.startswith(u"savedsearch/"):
-#         return _(u"saved search '%s'") % unifName[12:]
 
 
 

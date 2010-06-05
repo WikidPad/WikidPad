@@ -307,8 +307,9 @@ class SpellCheckerDialog(wx.Dialog):
         for s in sugglist:
             self.ctrls.lbReplaceSuggestions.InsertStringItem(
                     self.ctrls.lbReplaceSuggestions.GetItemCount(), s)
-        self.ctrls.lbReplaceSuggestions.SetColumnWidth(0, wx.LIST_AUTOSIZE)
-        
+#         self.ctrls.lbReplaceSuggestions.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+        autosizeColumn(self.ctrls.lbReplaceSuggestions, 0)
+
         if len(sugglist) > 0:
             self.ctrls.tfReplaceWith.SetValue(uniToGui(sugglist[0]))
         else:

@@ -667,51 +667,15 @@ class WikiDataManager(MiscEventSourceMixin):
 
         if newValue:
             wikiConfig.set("main", "wiki_readOnly", "True")
+            wikiConfig.save()
             wikiConfig.setWriteAccessDenied(True)
         else:
             wikiConfig.setWriteAccessDenied(False)
             wikiConfig.set("main", "wiki_readOnly", "False")
 
 
-#     STOPUPDATEOBJECT = object()
-# 
-#     def _runUpdateQueue(self):
-#         while True:
-#             with self.pageUpdateDequeCondition:
-#                 while len(self.pageUpdateDeque) == 0:
-#                     self.pageUpdateDequeCondition.wait()
-# 
-#                 page = self.pageUpdateDeque.pop()
-# 
-#             try:
-#                 if page is WikiDataManager.STOPUPDATEOBJECT:
-#                     # We should stop here, but the problem is that previously
-#                     # updated pages may have pushed itself back on the deque
-#                     # and must be processed before thread can end
-#                     with self.pageUpdateDequeCondition:
-#                         if len(self.pageUpdateDeque) == 0:
-#                             return
-#                         else:
-#                             self.pushUpdatePage(WikiDataManager.STOPUPDATEOBJECT)
-#                             continue
-# 
-#                 page.runDatabaseUpdate()
-# #                 with self.pageUpdateDequeCondition:
-# #                     for p in self.pageUpdateDeque:
-# #                         if p is page:
-# #                             break
-# #                     else:
-#                         
-#                 
-#             except:
-#                 traceback.print_exc()
-
-
     def pushUpdatePage(self, page):
         self.updateExecutor.executeAsyncWithThreadStop(0, page.runDatabaseUpdate)
-#         with self.pageUpdateDequeCondition:
-#             self.pageUpdateDeque.appendleft(page)
-#             self.pageUpdateDequeCondition.notify()
 
 
     def getUpdateExecutor(self):

@@ -23,8 +23,8 @@ from pwiki.Enum import Enumeration
 # (1, 9, 104, 2) is something after 1.9beta04
 # (2, 0, 300, 0) is 2.0final
 
-VERSION_TUPLE = ("wikidPad", 2, 1, 002, 0)
-VERSION_STRING = "wikidPad 2.1alpha02"
+VERSION_TUPLE = ("wikidPad", 2, 1, 003, 0)
+VERSION_STRING = "wikidPad 2.1alpha03"
 HOMEPAGE = u"http://wikidpad.sourceforge.net"
 
 CONFIG_FILENAME = "WikidPad.config"
@@ -41,7 +41,7 @@ FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
         "AvailWikiWord", "Bold", "Italic", "Heading1", "Heading2", "Heading3",
         "Heading4", "Url", "Script", "Attribute", "ToDo"
         ], 0)
-
+        
 
 # Store hints for WikiData.storeDataBlock()
 

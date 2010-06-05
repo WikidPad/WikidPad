@@ -460,7 +460,8 @@ class VersionExplorerPanel(EnhancedListControl):
                 selected = self.GetItemCount()
 
             self.InsertStringItem(self.GetItemCount(), message)
-            self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+#             self.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+            self.autosizeColumn(0)
             self.SelectSingle(selected, scrollVisible=True)
             
 #             self.checkSelectionChanged(callAlways=True)
