@@ -2197,8 +2197,6 @@ def _cmpNumbersItem1Rev(a, b):
 
 
 
-# TODO: Allow localization (then, this map must be created after localization is
-#     set or changed.
 _FUNCTAG_TO_HR_NAME_MAP = {
             u"global/TextBlocks": N_(u"Global text blocks"),
             u"wiki/TextBlocks": N_(u"Wiki text blocks"),

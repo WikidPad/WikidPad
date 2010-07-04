@@ -1,6 +1,9 @@
-import sys, traceback, time, os.path
+import sys, traceback, time, os, os.path
 
 EL = None
+
+# Maximum file size of log file before it is thrown away
+FILE_CLEAR_LIMIT = 512 * 1024
 
 
 # global exception control
@@ -57,6 +60,35 @@ def onException(typ, value, trace):
         EL._previousStdOut.write("Original exception:\n")
         EL.traceback.print_exception(typ, value, trace, file=EL._previousStdOut)
         EL._previousExcepthook(typ, value, trace)
+
+
+def setLogDestDir(path):
+    global EL
+    
+    try:
+        logPath = os.path.join(path, "WikidPad_Error.log")
+        if os.path.exists(logPath) and os.stat(logPath).st_size > FILE_CLEAR_LIMIT:
+            bakLogPath = os.path.join(path, "WikidPad_Error_bak.log")
+            try:
+                os.unlink(bakLogPath)
+            except:
+                pass
+            
+            try:
+                os.rename(logPath, bakLogPath) 
+            except:
+                pass
+    except:
+        pass
+
+    EL._exceptionDestDir = path
+
+
+def getLogDestDir():
+    global EL
+    
+    return os.path.join(EL._exceptionDestDir, "WikidPad_Error.log")
+
 
 
 def startLogger(versionstring):

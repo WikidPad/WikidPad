@@ -796,13 +796,17 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         # create the styles
         if styleFaces is None:
             styleFaces = self.presenter.getDefaultFontFaces()
-            
+
         config = self.presenter.getConfig()
         styles = self.presenter.getMainControl().getPresentationExt()\
                 .getStyles(styleFaces, config)
-        
+
         for type, style in styles:
             self.StyleSetSpec(type, style)
+
+            if type == wx.stc.STC_STYLE_CALLTIP:
+                self.CallTipUseStyle(10)
+
 
     def SetText(self, text, emptyUndo=True):
         """

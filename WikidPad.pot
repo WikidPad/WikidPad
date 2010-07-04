@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2010-06-04 21:38\n"
+"POT-Creation-Date: 2010-07-03 15:14\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,6 +33,10 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid " &Replace "
+msgstr ""
+
+#: WikidPad.xrc:0
+msgid " &Test "
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -190,6 +194,10 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "Always"
+msgstr ""
+
+#: WikidPad.xrc:0
+msgid "Always show import table"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -421,6 +429,10 @@ msgid "Default open/new dir.:"
 msgstr ""
 
 #: WikidPad.xrc:0
+msgid "Defaults"
+msgstr ""
+
+#: WikidPad.xrc:0
 msgid "Del"
 msgstr ""
 
@@ -434,6 +446,10 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "Delay before auto-close:"
+msgstr ""
+
+#: WikidPad.xrc:0
+msgid "Details"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -462,10 +478,6 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "Encoding:"
-msgstr ""
-
-#: WikidPad.xrc:0
-msgid "Errors"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -506,6 +518,10 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "Font:"
+msgstr ""
+
+#: WikidPad.xrc:0
+msgid "Forbid cancel on search"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -578,10 +594,6 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "Image pasting"
-msgstr ""
-
-#: WikidPad.xrc:0
-msgid "Import"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -762,14 +774,6 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "Order:"
-msgstr ""
-
-#: WikidPad.xrc:0
-msgid "Other data"
-msgstr ""
-
-#: WikidPad.xrc:0
-msgid "Overwrite"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -1229,6 +1233,10 @@ msgid "User notification:"
 msgstr ""
 
 #: WikidPad.xrc:0
+msgid "Version Import"
+msgstr ""
+
+#: WikidPad.xrc:0
 msgid "Visited link color:"
 msgstr ""
 
@@ -1250,10 +1258,6 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "Whole wiki"
-msgstr ""
-
-#: WikidPad.xrc:0
-msgid "Wiki Pages"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -1286,6 +1290,10 @@ msgstr ""
 
 #: WikidPad.xrc:0
 msgid "Write saved searches"
+msgstr ""
+
+#: WikidPad.xrc:0
+msgid "Write version data of pages"
 msgstr ""
 
 #: WikidPad.xrc:0
@@ -1344,7 +1352,7 @@ msgid "Destination directory:"
 msgstr ""
 
 #: WikidPad.xrc:0 lib\pwiki\AdditionalDialogs.py:1482
-#: lib\pwiki\SearchAndReplaceDialogs.py:1415
+#: lib\pwiki\SearchAndReplaceDialogs.py:1432
 msgid "Title:"
 msgstr ""
 
@@ -1352,87 +1360,106 @@ msgstr ""
 msgid "Source directory:"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\OptionsDialog.py:135
-#: lib\pwiki\OptionsDialog.py:813
+#: WikidPad.xrc:0 lib\pwiki\MptImporterGui.py:168
+#: lib\pwiki\MptImporterGui.py:170
+msgid "Yes"
+msgstr ""
+
+#: WikidPad.xrc:0 lib\pwiki\MptImporterGui.py:168
+#: lib\pwiki\MptImporterGui.py:170 lib\pwiki\OptionsDialog.py:135
+#: lib\pwiki\OptionsDialog.py:815
 msgid "Default"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\OptionsDialog.py:651
+#: WikidPad.xrc:0 lib\pwiki\MptImporterGui.py:169
+msgid "Overwrite"
+msgstr ""
+
+#: WikidPad.xrc:0 lib\pwiki\MptImporterGui.py:169
+#: lib\pwiki\MptImporterGui.py:170
+msgid "No"
+msgstr ""
+
+#: WikidPad.xrc:0 lib\pwiki\MptImporterGui.py:193
+msgid "Import"
+msgstr ""
+
+#: WikidPad.xrc:0 lib\pwiki\OptionsDialog.py:653
 msgid "Versioning"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1195
-#: lib\pwiki\WikiTxtCtrl.py:3405
+#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1196
+#: lib\pwiki\WikiTxtCtrl.py:3409
 msgid "Undo"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1199
-#: lib\pwiki\WikiTxtCtrl.py:3406
+#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1200
+#: lib\pwiki\WikiTxtCtrl.py:3410
 msgid "Redo"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1215
-#: lib\pwiki\WikiTxtCtrl.py:3407
+#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1216
+#: lib\pwiki\WikiTxtCtrl.py:3411
 msgid "Cut"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1220
-#: lib\pwiki\WikiTxtCtrl.py:3408
+#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1221
+#: lib\pwiki\WikiTxtCtrl.py:3412
 msgid "Copy"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1224
-#: lib\pwiki\WikiTxtCtrl.py:3409
+#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1225
+#: lib\pwiki\WikiTxtCtrl.py:3413
 msgid "Paste"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1229
-#: lib\pwiki\WikiTxtCtrl.py:3411
+#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1230
+#: lib\pwiki\WikiTxtCtrl.py:3415
 msgid "Select All"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1608
+#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1527
 msgid "&Delete"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:2030
-#: lib\pwiki\PersonalWikiFrame.py:2031
+#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1949
+#: lib\pwiki\PersonalWikiFrame.py:1950
 msgid "Open Wiki Word"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:2055
-#: lib\pwiki\PersonalWikiFrame.py:2056
+#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1974
+#: lib\pwiki\PersonalWikiFrame.py:1975
 msgid "Rename Wiki Word"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:2061
-#: lib\pwiki\WikiTxtCtrl.py:3410
+#: WikidPad.xrc:0 lib\pwiki\PersonalWikiFrame.py:1980
+#: lib\pwiki\WikiTxtCtrl.py:3414
 msgid "Delete"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:812
+#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:822
 msgid "Close"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:1641
+#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:1658
 msgid "Set page list"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:1889
+#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:1906
 msgid "As Resultlist"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:1894
-#: lib\pwiki\SearchAndReplaceDialogs.py:2000
+#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:1911
+#: lib\pwiki\SearchAndReplaceDialogs.py:2017
 msgid "As Full Search"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:2287
+#: WikidPad.xrc:0 lib\pwiki\SearchAndReplaceDialogs.py:2311
 #: lib\pwiki\WikiHtmlView.py:711
 msgid "Activate New Tab"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\WikiTxtCtrl.py:3425
+#: WikidPad.xrc:0 lib\pwiki\WikiTxtCtrl.py:3429
 msgid "Close Tab"
 msgstr ""
 
@@ -1444,17 +1471,17 @@ msgstr ""
 msgid "Sort dates ascending"
 msgstr ""
 
-#: WikidPadStarter.py:182
+#: WikidPadStarter.py:195
 msgid "Error starting WikidPad"
 msgstr ""
 
-#: WikidPadStarter.py:183 lib\pwiki\PersonalWikiFrame.py:5084
-#: lib\pwiki\SearchAndReplaceDialogs.py:681
-#: lib\pwiki\SearchAndReplaceDialogs.py:962
+#: WikidPadStarter.py:196 lib\pwiki\PersonalWikiFrame.py:5003
+#: lib\pwiki\SearchAndReplaceDialogs.py:691
+#: lib\pwiki\SearchAndReplaceDialogs.py:971
 msgid "Error!"
 msgstr ""
 
-#: WikidPadStarter.py:190
+#: WikidPadStarter.py:203 lib\pwiki\MptImporterGui.py:197
 msgid "Error"
 msgstr ""
 
@@ -1767,11 +1794,11 @@ msgstr ""
 msgid "Destination must be a file"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1330 lib\pwiki\PersonalWikiFrame.py:4715
+#: lib\pwiki\AdditionalDialogs.py:1330 lib\pwiki\PersonalWikiFrame.py:4634
 msgid "Exporting"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1332 lib\pwiki\PersonalWikiFrame.py:4717
+#: lib\pwiki\AdditionalDialogs.py:1332 lib\pwiki\PersonalWikiFrame.py:4636
 msgid "Preparing"
 msgstr ""
 
@@ -1779,7 +1806,7 @@ msgstr ""
 msgid "Error while exporting"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1368 lib\pwiki\PersonalWikiFrame.py:4663
+#: lib\pwiki\AdditionalDialogs.py:1368 lib\pwiki\PersonalWikiFrame.py:4582
 msgid "Select Export Directory"
 msgstr ""
 
@@ -1791,8 +1818,8 @@ msgstr ""
 msgid "Select Export File"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1414 lib\pwiki\PersonalWikiFrame.py:4686
-#: lib\pwiki\PersonalWikiFrame.py:4700 lib\pwiki\Printing.py:182
+#: lib\pwiki\AdditionalDialogs.py:1414 lib\pwiki\PersonalWikiFrame.py:4605
+#: lib\pwiki\PersonalWikiFrame.py:4619 lib\pwiki\Printing.py:182
 msgid "No real wiki word selected as root"
 msgstr ""
 
@@ -1919,7 +1946,7 @@ msgid "\n"
 "</html>\n"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2019 lib\pwiki\PersonalWikiFrame.py:1948
+#: lib\pwiki\AdditionalDialogs.py:2019 lib\pwiki\PersonalWikiFrame.py:1867
 msgid "About WikidPad"
 msgstr ""
 
@@ -2300,31 +2327,31 @@ msgstr ""
 msgid "Func. tag %s does not exist"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2203
+#: lib\pwiki\DocPages.py:2201
 msgid "Global text blocks"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2204
+#: lib\pwiki\DocPages.py:2202
 msgid "Wiki text blocks"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2205
+#: lib\pwiki\DocPages.py:2203
 msgid "Global spell list"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2206
+#: lib\pwiki\DocPages.py:2204
 msgid "Wiki spell list"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2207
+#: lib\pwiki\DocPages.py:2205
 msgid "Global cc. blacklist"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2208
+#: lib\pwiki\DocPages.py:2206
 msgid "Wiki cc. blacklist"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2209
+#: lib\pwiki\DocPages.py:2207
 msgid "Favorite wikis"
 msgstr ""
 
@@ -2348,19 +2375,19 @@ msgstr ""
 msgid "[Unknown parser node with name \"%s\" found]"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2361 lib\pwiki\Importers.py:41
+#: lib\pwiki\Exporters.py:2362 lib\pwiki\Importers.py:61
 msgid "Multipage text"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2374 lib\pwiki\Importers.py:54
+#: lib\pwiki\Exporters.py:2375 lib\pwiki\Importers.py:74
 msgid "Multipage files (*.mpt)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2375 lib\pwiki\Importers.py:55
+#: lib\pwiki\Exporters.py:2376 lib\pwiki\Importers.py:75
 msgid "Text file (*.txt)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2518
+#: lib\pwiki\Exporters.py:2542
 msgid "No usable separator found"
 msgstr ""
 
@@ -2368,19 +2395,19 @@ msgstr ""
 msgid "Only a real wiki page can be a clipboard catcher"
 msgstr ""
 
-#: lib\pwiki\Importers.py:145
+#: lib\pwiki\Importers.py:171
 msgid "Opening import file failed"
 msgstr ""
 
-#: lib\pwiki\Importers.py:174 lib\pwiki\Importers.py:189
+#: lib\pwiki\Importers.py:202 lib\pwiki\Importers.py:217
 msgid "Bad file format, header not detected"
 msgstr ""
 
-#: lib\pwiki\Importers.py:182
+#: lib\pwiki\Importers.py:210
 msgid "File format number %i is not supported"
 msgstr ""
 
-#: lib\pwiki\Importers.py:351
+#: lib\pwiki\Importers.py:465
 msgid "Bad wiki word: %s, %s"
 msgstr ""
 
@@ -2407,1386 +2434,1445 @@ msgstr ""
 msgid "Plugin options"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:734 lib\pwiki\OptionsDialog.py:652
+#: lib\pwiki\MainApp.py:734 lib\pwiki\OptionsDialog.py:654
 msgid "Wiki language"
 msgstr ""
 
-#: lib\pwiki\MainAreaPanel.py:601 lib\pwiki\WikiTxtCtrl.py:2248
+#: lib\pwiki\MainAreaPanel.py:601 lib\pwiki\WikiTxtCtrl.py:2252
 msgid "This can only be done for the page of a wiki word"
 msgstr ""
 
-#: lib\pwiki\MainAreaPanel.py:602 lib\pwiki\WikiTxtCtrl.py:2249
+#: lib\pwiki\MainAreaPanel.py:602 lib\pwiki\WikiTxtCtrl.py:2253
 msgid "Not a wiki page"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:634
-msgid "Application"
+#: lib\pwiki\MptImporterGui.py:172
+msgid "Wiki page"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:635
-msgid "User interface"
+#: lib\pwiki\MptImporterGui.py:173
+msgid "Func. page"
+msgstr ""
+
+#: lib\pwiki\MptImporterGui.py:174
+msgid "Saved search"
+msgstr ""
+
+#: lib\pwiki\MptImporterGui.py:191
+msgid "Type"
+msgstr ""
+
+#: lib\pwiki\MptImporterGui.py:192
+msgid "Name"
+msgstr ""
+
+#: lib\pwiki\MptImporterGui.py:194
+msgid "Version\n"
+"Import"
+msgstr ""
+
+#: lib\pwiki\MptImporterGui.py:195
+msgid "Rename\n"
+"imported"
+msgstr ""
+
+#: lib\pwiki\MptImporterGui.py:196
+msgid "Rename\n"
+"present"
+msgstr ""
+
+#: lib\pwiki\MptImporterGui.py:381
+msgid "You can't rename imported and present item at the same time"
+msgstr ""
+
+#: lib\pwiki\MptImporterGui.py:394
+msgid "Rename imported"
+msgstr ""
+
+#: lib\pwiki\MptImporterGui.py:403
+msgid "Rename present"
+msgstr ""
+
+#: lib\pwiki\MptImporterGui.py:414 lib\pwiki\MptImporterGui.py:438
+msgid "Name collision: Item '%s' will be imported already"
+msgstr ""
+
+#: lib\pwiki\MptImporterGui.py:420 lib\pwiki\MptImporterGui.py:449
+msgid "Name collision: Item '%s' will already be created by renaming '%s'"
+msgstr ""
+
+#: lib\pwiki\MptImporterGui.py:429 lib\pwiki\MptImporterGui.py:443
+msgid "Name collision: Item '%s' exists already in database"
 msgstr ""
 
 #: lib\pwiki\OptionsDialog.py:636
-msgid "Security"
+msgid "Application"
 msgstr ""
 
 #: lib\pwiki\OptionsDialog.py:637
-msgid "Tree"
+msgid "User interface"
 msgstr ""
 
 #: lib\pwiki\OptionsDialog.py:638
-msgid "HTML preview/export"
+msgid "Security"
 msgstr ""
 
 #: lib\pwiki\OptionsDialog.py:639
-msgid "HTML header"
+msgid "Tree"
 msgstr ""
 
 #: lib\pwiki\OptionsDialog.py:640
-msgid "Editor"
+msgid "HTML preview/export"
 msgstr ""
 
 #: lib\pwiki\OptionsDialog.py:641
-msgid "Editor Colors"
+msgid "HTML header"
 msgstr ""
 
 #: lib\pwiki\OptionsDialog.py:642
-msgid "Clipboard Catcher"
+msgid "Editor"
 msgstr ""
 
 #: lib\pwiki\OptionsDialog.py:643
-msgid "File Launcher"
+msgid "Editor Colors"
 msgstr ""
 
 #: lib\pwiki\OptionsDialog.py:644
-msgid "Mouse"
+msgid "Clipboard Catcher"
 msgstr ""
 
 #: lib\pwiki\OptionsDialog.py:645
-msgid "Chron. view"
+msgid "File Launcher"
 msgstr ""
 
 #: lib\pwiki\OptionsDialog.py:646
-msgid "Searching"
+msgid "Mouse"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:647 lib\pwiki\OptionsDialog.py:654
-msgid "Advanced"
+#: lib\pwiki\OptionsDialog.py:647
+msgid "Chron. view"
 msgstr ""
 
 #: lib\pwiki\OptionsDialog.py:648
-msgid "Autosave"
+msgid "Searching"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:649
-msgid "Current Wiki"
+#: lib\pwiki\OptionsDialog.py:649 lib\pwiki\OptionsDialog.py:656
+msgid "Advanced"
 msgstr ""
 
 #: lib\pwiki\OptionsDialog.py:650
+msgid "Autosave"
+msgstr ""
+
+#: lib\pwiki\OptionsDialog.py:651
+msgid "Current Wiki"
+msgstr ""
+
+#: lib\pwiki\OptionsDialog.py:652
 msgid "Headings"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:895
+#: lib\pwiki\OptionsDialog.py:897
 msgid "Wave files (*.wav)|*.wav"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:906 lib\pwiki\OptionsDialog.py:1190
+#: lib\pwiki\OptionsDialog.py:908 lib\pwiki\OptionsDialog.py:1192
 msgid "All files (*.*)|*"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:1180
+#: lib\pwiki\OptionsDialog.py:1182
 msgid "Select Directory"
 msgstr ""
 
-#: lib\pwiki\OptionsDialog.py:1188
+#: lib\pwiki\OptionsDialog.py:1190
 msgid "Select File"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:162
+#: lib\pwiki\PersonalWikiFrame.py:163
 msgid "Bad formatted command line."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:372
+#: lib\pwiki\PersonalWikiFrame.py:373
 msgid "Wiki doesn't exist: %s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:378
+#: lib\pwiki\PersonalWikiFrame.py:379
 msgid "Last wiki doesn't exist: %s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:681
+#: lib\pwiki\PersonalWikiFrame.py:682
 msgid "&New"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:682
+#: lib\pwiki\PersonalWikiFrame.py:683
 msgid "Create new wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:685
+#: lib\pwiki\PersonalWikiFrame.py:686
 msgid "&Open"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:687
+#: lib\pwiki\PersonalWikiFrame.py:688
 msgid "In &This Window..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:689
+#: lib\pwiki\PersonalWikiFrame.py:690
 msgid "Open wiki in this window"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:691
+#: lib\pwiki\PersonalWikiFrame.py:692
 msgid "In &New Window..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:693
+#: lib\pwiki\PersonalWikiFrame.py:694
 msgid "Open wiki in a new window"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:695
+#: lib\pwiki\PersonalWikiFrame.py:696
 msgid "&Current in New Window"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:697
+#: lib\pwiki\PersonalWikiFrame.py:698
 msgid "Create new window for same wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:702
+#: lib\pwiki\PersonalWikiFrame.py:703
 msgid "&Recent"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:709
+#: lib\pwiki\PersonalWikiFrame.py:710
 msgid "F&avorites"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:715
+#: lib\pwiki\PersonalWikiFrame.py:716
 msgid "&Search Wiki..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:716
+#: lib\pwiki\PersonalWikiFrame.py:717
 msgid "Search whole wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:724
+#: lib\pwiki\PersonalWikiFrame.py:725
 msgid "Publish as HTML"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:727
+#: lib\pwiki\PersonalWikiFrame.py:728
 msgid "Wiki as Single HTML Page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:728
+#: lib\pwiki\PersonalWikiFrame.py:729
 msgid "Publish Wiki as Single HTML Page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:732
+#: lib\pwiki\PersonalWikiFrame.py:733
 msgid "Wiki as Set of HTML Pages"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:733
+#: lib\pwiki\PersonalWikiFrame.py:734
 msgid "Publish Wiki as Set of HTML Pages"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:737
+#: lib\pwiki\PersonalWikiFrame.py:738
 msgid "Current Wiki Word as HTML Page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:738
+#: lib\pwiki\PersonalWikiFrame.py:739
 msgid "Publish Current Wiki Word as HTML Page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:742
+#: lib\pwiki\PersonalWikiFrame.py:743
 msgid "Sub-Tree as Single HTML Page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:743
+#: lib\pwiki\PersonalWikiFrame.py:744
 msgid "Publish Sub-Tree as Single HTML Page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:747
+#: lib\pwiki\PersonalWikiFrame.py:748
 msgid "Sub-Tree as Set of HTML Pages"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:748
+#: lib\pwiki\PersonalWikiFrame.py:749
 msgid "Publish Sub-Tree as Set of HTML Pages"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:756
+#: lib\pwiki\PersonalWikiFrame.py:757
 msgid "Other Export..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:757 lib\pwiki\PersonalWikiFrame.py:1838
+#: lib\pwiki\PersonalWikiFrame.py:758 lib\pwiki\PersonalWikiFrame.py:1757
 msgid "Open general export dialog"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:761
+#: lib\pwiki\PersonalWikiFrame.py:762
 msgid "Print..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:762
+#: lib\pwiki\PersonalWikiFrame.py:763
 msgid "Show the print dialog"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:767
+#: lib\pwiki\PersonalWikiFrame.py:768
 msgid "&Properties..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:768
+#: lib\pwiki\PersonalWikiFrame.py:769
 msgid "Show general information about current wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:772
+#: lib\pwiki\PersonalWikiFrame.py:773
 msgid "Maintenance"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:776
+#: lib\pwiki\PersonalWikiFrame.py:777
 msgid "&Rebuild Wiki..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:777
+#: lib\pwiki\PersonalWikiFrame.py:778
 msgid "Rebuild this wiki and its cache completely"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:791
+#: lib\pwiki\PersonalWikiFrame.py:792
 msgid "&Update cache..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:792
+#: lib\pwiki\PersonalWikiFrame.py:793
 msgid "Update cache where marked as not up to date"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:797
+#: lib\pwiki\PersonalWikiFrame.py:798
 msgid "&Initiate update..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:798
+#: lib\pwiki\PersonalWikiFrame.py:799
 msgid "Initiate full cache update which is done mainly in background"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:805
+#: lib\pwiki\PersonalWikiFrame.py:806
 msgid "Show job count..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:806
+#: lib\pwiki\PersonalWikiFrame.py:807
 msgid "Show how many update jobs are waiting in background"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:811
+#: lib\pwiki\PersonalWikiFrame.py:812
 msgid "Open as &Type..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:812
+#: lib\pwiki\PersonalWikiFrame.py:813
 msgid "Open wiki with a specified wiki database type"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:816
+#: lib\pwiki\PersonalWikiFrame.py:817
 msgid "Reconnect..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:817
+#: lib\pwiki\PersonalWikiFrame.py:818
 msgid "Reconnect to database after connection failure"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:823
+#: lib\pwiki\PersonalWikiFrame.py:824
 msgid "&Optimise Database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:824
+#: lib\pwiki\PersonalWikiFrame.py:825
 msgid "Free unused space in database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:831
+#: lib\pwiki\PersonalWikiFrame.py:832
 msgid "&Copy .wiki files to database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:832
+#: lib\pwiki\PersonalWikiFrame.py:833
 msgid "Copy .wiki files to database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:842
+#: lib\pwiki\PersonalWikiFrame.py:843
 msgid "E&xit"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:842 lib\pwiki\PersonalWikiFrame.py:5630
+#: lib\pwiki\PersonalWikiFrame.py:843 lib\pwiki\PersonalWikiFrame.py:5549
 msgid "Exit"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1007
+#: lib\pwiki\PersonalWikiFrame.py:1008
 msgid "Reread text blocks"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1008
+#: lib\pwiki\PersonalWikiFrame.py:1009
 msgid "Reread the text block file(s) and recreate menu"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1064
+#: lib\pwiki\PersonalWikiFrame.py:1065
 msgid "Add wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1065
+#: lib\pwiki\PersonalWikiFrame.py:1066
 msgid "Add a wiki to the favorites"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1070 lib\pwiki\PersonalWikiFrame.py:1071
+#: lib\pwiki\PersonalWikiFrame.py:1071 lib\pwiki\PersonalWikiFrame.py:1072
 msgid "Manage favorites"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1092 lib\pwiki\PersonalWikiFrame.py:1887
-#: lib\pwiki\PersonalWikiFrame.py:2416 lib\pwiki\PersonalWikiFrame.py:4901
-#: lib\pwiki\PersonalWikiFrame.py:5218
+#: lib\pwiki\PersonalWikiFrame.py:1093 lib\pwiki\PersonalWikiFrame.py:1806
+#: lib\pwiki\PersonalWikiFrame.py:2335 lib\pwiki\PersonalWikiFrame.py:4820
+#: lib\pwiki\PersonalWikiFrame.py:5137
 msgid "Error while starting new WikidPad instance"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1194
+#: lib\pwiki\PersonalWikiFrame.py:1195
 msgid "&Undo"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1198
+#: lib\pwiki\PersonalWikiFrame.py:1199
 msgid "&Redo"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1206
+#: lib\pwiki\PersonalWikiFrame.py:1207
 msgid "&Search and Replace..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1208
+#: lib\pwiki\PersonalWikiFrame.py:1209
 msgid "Search and replace inside current page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1214
+#: lib\pwiki\PersonalWikiFrame.py:1215
 msgid "Cu&t"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1219
+#: lib\pwiki\PersonalWikiFrame.py:1220
 msgid "&Copy"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1223
+#: lib\pwiki\PersonalWikiFrame.py:1224
 msgid "&Paste"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1228
+#: lib\pwiki\PersonalWikiFrame.py:1229
 msgid "Select &All"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1234
+#: lib\pwiki\PersonalWikiFrame.py:1235
 msgid "Copy to Sc&ratchPad"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1236
+#: lib\pwiki\PersonalWikiFrame.py:1237
 msgid "Copy selected text to ScratchPad"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1242
+#: lib\pwiki\PersonalWikiFrame.py:1243
 msgid "Paste T&extblock"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1250
+#: lib\pwiki\PersonalWikiFrame.py:1251
 msgid "C&lipboard Catcher"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1253 lib\pwiki\PersonalWikiFrame.py:4167
+#: lib\pwiki\PersonalWikiFrame.py:1254 lib\pwiki\PersonalWikiFrame.py:4086
 msgid "Set at Page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1255
+#: lib\pwiki\PersonalWikiFrame.py:1256
 msgid "Text copied to clipboard is also appended to this page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1261
+#: lib\pwiki\PersonalWikiFrame.py:1262
 msgid "Set at Cursor"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1263
+#: lib\pwiki\PersonalWikiFrame.py:1264
 msgid "Text copied to clipboard is also added to cursor position"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1269
+#: lib\pwiki\PersonalWikiFrame.py:1270
 msgid "Set Off"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1271
+#: lib\pwiki\PersonalWikiFrame.py:1272
 msgid "Switch off clipboard catcher"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1282
+#: lib\pwiki\PersonalWikiFrame.py:1283
 msgid "Spell Check..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1284
+#: lib\pwiki\PersonalWikiFrame.py:1285
 msgid "Spell check current and possibly further pages"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1324
+#: lib\pwiki\PersonalWikiFrame.py:1294
 msgid "&Insert"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1326
+#: lib\pwiki\PersonalWikiFrame.py:1296
 msgid "&File URL..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1327
+#: lib\pwiki\PersonalWikiFrame.py:1297
 msgid "Use file dialog to add URL"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1332
+#: lib\pwiki\PersonalWikiFrame.py:1302
 msgid "Current &Date"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1333
+#: lib\pwiki\PersonalWikiFrame.py:1303
 msgid "Insert current date"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1342
+#: lib\pwiki\PersonalWikiFrame.py:1312
 msgid "&Settings"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1345
+#: lib\pwiki\PersonalWikiFrame.py:1315
 msgid "&Date Format..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1346
+#: lib\pwiki\PersonalWikiFrame.py:1316
 msgid "Set date format for inserting current date"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1350
+#: lib\pwiki\PersonalWikiFrame.py:1320
 msgid "Auto-&Wrap"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1351
+#: lib\pwiki\PersonalWikiFrame.py:1321
 msgid "Set if editor should wrap long lines"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1365
+#: lib\pwiki\PersonalWikiFrame.py:1335
 msgid "Auto-&Indent"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1366
+#: lib\pwiki\PersonalWikiFrame.py:1336
 msgid "Auto indentation"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1379
+#: lib\pwiki\PersonalWikiFrame.py:1349
 msgid "Auto-&Bullets"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1380
+#: lib\pwiki\PersonalWikiFrame.py:1350
 msgid "Show bullet on next line if current has one"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1395
+#: lib\pwiki\PersonalWikiFrame.py:1365
 msgid "Tabs to spaces"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1396
+#: lib\pwiki\PersonalWikiFrame.py:1366
 msgid "Write spaces when hitting TAB key"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1414
+#: lib\pwiki\PersonalWikiFrame.py:1384
 msgid "Show T&oolbar"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1416
+#: lib\pwiki\PersonalWikiFrame.py:1386
 msgid "Show toolbar"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1423
+#: lib\pwiki\PersonalWikiFrame.py:1393
 msgid "Show &Tree View"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1425
+#: lib\pwiki\PersonalWikiFrame.py:1395
 msgid "Show Tree Control"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1432
+#: lib\pwiki\PersonalWikiFrame.py:1402
 msgid "Show &Chron. View"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1434
+#: lib\pwiki\PersonalWikiFrame.py:1404
 msgid "Show chronological view"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1441
+#: lib\pwiki\PersonalWikiFrame.py:1411
 msgid "Show &Page Structure"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1443
+#: lib\pwiki\PersonalWikiFrame.py:1413
 msgid "Show structure (headings) of the page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1455
+#: lib\pwiki\PersonalWikiFrame.py:1425
 msgid "Show &Indentation Guides"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1456
+#: lib\pwiki\PersonalWikiFrame.py:1426
 msgid "Show indentation guides in editor"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1461
+#: lib\pwiki\PersonalWikiFrame.py:1431
 msgid "Show Line &Numbers"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1462
+#: lib\pwiki\PersonalWikiFrame.py:1432
 msgid "Show line numbers in editor"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1469
+#: lib\pwiki\PersonalWikiFrame.py:1439
 msgid "Stay on Top"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1471
+#: lib\pwiki\PersonalWikiFrame.py:1441
 msgid "Stay on Top of all other windows"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1479
+#: lib\pwiki\PersonalWikiFrame.py:1449
 msgid "&Zoom In"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1480 lib\pwiki\PersonalWikiFrame.py:2093
+#: lib\pwiki\PersonalWikiFrame.py:1450 lib\pwiki\PersonalWikiFrame.py:2012
 msgid "Zoom In"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1483
+#: lib\pwiki\PersonalWikiFrame.py:1453
 msgid "Zoo&m Out"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1484 lib\pwiki\PersonalWikiFrame.py:2098
+#: lib\pwiki\PersonalWikiFrame.py:1454 lib\pwiki\PersonalWikiFrame.py:2017
 msgid "Zoom Out"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1557
+#: lib\pwiki\PersonalWikiFrame.py:1476
 msgid "Toggle Ed./Prev"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1559 lib\pwiki\PersonalWikiFrame.py:2089
+#: lib\pwiki\PersonalWikiFrame.py:1478 lib\pwiki\PersonalWikiFrame.py:2008
 msgid "Switch between editor and preview"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1563
+#: lib\pwiki\PersonalWikiFrame.py:1482
 msgid "Enter Edit Mode"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1564
+#: lib\pwiki\PersonalWikiFrame.py:1483
 msgid "Show editor in tab"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1568
+#: lib\pwiki\PersonalWikiFrame.py:1487
 msgid "Enter Preview Mode"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1570
+#: lib\pwiki\PersonalWikiFrame.py:1489
 msgid "Show preview in tab"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1594
+#: lib\pwiki\PersonalWikiFrame.py:1513
 msgid "&Save"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1595
+#: lib\pwiki\PersonalWikiFrame.py:1514
 msgid "Save all open pages"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1602
+#: lib\pwiki\PersonalWikiFrame.py:1521
 msgid "&Rename"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1603
+#: lib\pwiki\PersonalWikiFrame.py:1522
 msgid "Rename current wiki word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1609
+#: lib\pwiki\PersonalWikiFrame.py:1528
 msgid "Delete current wiki word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1616
+#: lib\pwiki\PersonalWikiFrame.py:1535
 msgid "Set as Roo&t"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1617
+#: lib\pwiki\PersonalWikiFrame.py:1536
 msgid "Set current wiki word as tree root"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1621
+#: lib\pwiki\PersonalWikiFrame.py:1540
 msgid "R&eset Root"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1622
+#: lib\pwiki\PersonalWikiFrame.py:1541
 msgid "Set home wiki word as tree root"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1626
+#: lib\pwiki\PersonalWikiFrame.py:1545
 msgid "S&ynchronise Tree"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1627
+#: lib\pwiki\PersonalWikiFrame.py:1546
 msgid "Find the current wiki word in the tree"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1632
+#: lib\pwiki\PersonalWikiFrame.py:1551
 msgid "&Follow Link"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1633
+#: lib\pwiki\PersonalWikiFrame.py:1552
 msgid "Activate link/word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1638
+#: lib\pwiki\PersonalWikiFrame.py:1557
 msgid "Follow Link in &New Tab"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1639
+#: lib\pwiki\PersonalWikiFrame.py:1558
 msgid "Activate link/word in new tab"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1644
+#: lib\pwiki\PersonalWikiFrame.py:1563
 msgid "Copy &URL to Clipboard"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1646
+#: lib\pwiki\PersonalWikiFrame.py:1565
 msgid "Copy full \"wiki:\" URL of the word to clipboard"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1652
+#: lib\pwiki\PersonalWikiFrame.py:1571
 msgid "&Add version"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1653
+#: lib\pwiki\PersonalWikiFrame.py:1572
 msgid "Add new version"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1661
+#: lib\pwiki\PersonalWikiFrame.py:1580
 msgid "&Bold"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1662 lib\pwiki\PersonalWikiFrame.py:2074
+#: lib\pwiki\PersonalWikiFrame.py:1581 lib\pwiki\PersonalWikiFrame.py:1993
 msgid "Bold"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1668
+#: lib\pwiki\PersonalWikiFrame.py:1587
 msgid "&Italic"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1669 lib\pwiki\PersonalWikiFrame.py:2080
+#: lib\pwiki\PersonalWikiFrame.py:1588 lib\pwiki\PersonalWikiFrame.py:1999
 msgid "Italic"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1675
+#: lib\pwiki\PersonalWikiFrame.py:1594
 msgid "&Heading"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1676
+#: lib\pwiki\PersonalWikiFrame.py:1595
 msgid "Add Heading"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1684
+#: lib\pwiki\PersonalWikiFrame.py:1603
 msgid "&Rewrap Text"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1686
+#: lib\pwiki\PersonalWikiFrame.py:1605
 msgid "Rewrap Text"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1691
+#: lib\pwiki\PersonalWikiFrame.py:1610
 msgid "&Convert"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1694
+#: lib\pwiki\PersonalWikiFrame.py:1613
 msgid "Selection to &Link"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1695
+#: lib\pwiki\PersonalWikiFrame.py:1614
 msgid "Remove non-allowed characters and make sel. a wiki word link"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1700
+#: lib\pwiki\PersonalWikiFrame.py:1619
 msgid "Selection to &Wiki Word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1702
+#: lib\pwiki\PersonalWikiFrame.py:1621
 msgid "Put selected text in a new or existing wiki word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1707
+#: lib\pwiki\PersonalWikiFrame.py:1626
 msgid "Absolute/Relative &File URL"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1709
+#: lib\pwiki\PersonalWikiFrame.py:1628
 msgid "Convert file URL from absolute to relative and vice versa"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1723
+#: lib\pwiki\PersonalWikiFrame.py:1642
 msgid "&Icon Name"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1735
+#: lib\pwiki\PersonalWikiFrame.py:1654
 msgid "&Color Name"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1743
+#: lib\pwiki\PersonalWikiFrame.py:1662
 msgid "&Add Attribute"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1752
+#: lib\pwiki\PersonalWikiFrame.py:1671
 msgid "&Icon Attribute"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1762
+#: lib\pwiki\PersonalWikiFrame.py:1681
 msgid "&Color Attribute"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1771
+#: lib\pwiki\PersonalWikiFrame.py:1690
 msgid "&Back"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1772
+#: lib\pwiki\PersonalWikiFrame.py:1691
 msgid "Go backward"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1775
+#: lib\pwiki\PersonalWikiFrame.py:1694
 msgid "&Forward"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1776
+#: lib\pwiki\PersonalWikiFrame.py:1695
 msgid "Go forward"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1780
+#: lib\pwiki\PersonalWikiFrame.py:1699
 msgid "&Wiki Home"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1781
+#: lib\pwiki\PersonalWikiFrame.py:1700
 msgid "Go to wiki homepage"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1788
+#: lib\pwiki\PersonalWikiFrame.py:1707
 msgid "Go to &Page..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1789
+#: lib\pwiki\PersonalWikiFrame.py:1708
 msgid "Open wiki word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1794
+#: lib\pwiki\PersonalWikiFrame.py:1713
 msgid "Go to P&arent..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1796
+#: lib\pwiki\PersonalWikiFrame.py:1715
 msgid "List parents of current wiki word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1799
+#: lib\pwiki\PersonalWikiFrame.py:1718
 msgid "List &Children..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1801
+#: lib\pwiki\PersonalWikiFrame.py:1720
 msgid "List children of current wiki word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1804
+#: lib\pwiki\PersonalWikiFrame.py:1723
 msgid "List Pa&rentless Pages"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1806
+#: lib\pwiki\PersonalWikiFrame.py:1725
 msgid "List nodes with no parent relations"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1811
+#: lib\pwiki\PersonalWikiFrame.py:1730
 msgid "Show &History..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1812
+#: lib\pwiki\PersonalWikiFrame.py:1731
 msgid "View tab history"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1815
+#: lib\pwiki\PersonalWikiFrame.py:1734
 msgid "&Up History..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1816
+#: lib\pwiki\PersonalWikiFrame.py:1735
 msgid "Up in tab history"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1819
+#: lib\pwiki\PersonalWikiFrame.py:1738
 msgid "&Down History..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1820
+#: lib\pwiki\PersonalWikiFrame.py:1739
 msgid "Down in tab history"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1825
+#: lib\pwiki\PersonalWikiFrame.py:1744
 msgid "Add B&ookmark"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1826
+#: lib\pwiki\PersonalWikiFrame.py:1745
 msgid "Add bookmark to page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1830
+#: lib\pwiki\PersonalWikiFrame.py:1749
 msgid "Go to &Bookmark..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1831
+#: lib\pwiki\PersonalWikiFrame.py:1750
 msgid "List bookmarks"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1837
+#: lib\pwiki\PersonalWikiFrame.py:1756
 msgid "&Export..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1841
+#: lib\pwiki\PersonalWikiFrame.py:1760
 msgid "&Continuous Export..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1842
+#: lib\pwiki\PersonalWikiFrame.py:1761
 msgid "Open export dialog for continuous export of changes"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1848
+#: lib\pwiki\PersonalWikiFrame.py:1767
 msgid "&Import..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1849
+#: lib\pwiki\PersonalWikiFrame.py:1768
 msgid "Import dialog"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1855
+#: lib\pwiki\PersonalWikiFrame.py:1774
 msgid "Scripts"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1856
+#: lib\pwiki\PersonalWikiFrame.py:1775
 msgid "Run scripts, evaluate expressions"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1858
+#: lib\pwiki\PersonalWikiFrame.py:1777
 msgid "&Eval"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1859
+#: lib\pwiki\PersonalWikiFrame.py:1778
 msgid "Evaluate script blocks"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1864
+#: lib\pwiki\PersonalWikiFrame.py:1783
 msgid "Run Function &%i"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1865
+#: lib\pwiki\PersonalWikiFrame.py:1784
 msgid "Run script function %i"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1870
+#: lib\pwiki\PersonalWikiFrame.py:1789
 msgid "O&ptions..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1871
+#: lib\pwiki\PersonalWikiFrame.py:1790
 msgid "Set options"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1891
+#: lib\pwiki\PersonalWikiFrame.py:1810
 msgid "&Open help wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1892
+#: lib\pwiki\PersonalWikiFrame.py:1811
 msgid "Open WikidPadHelp, the help wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1901
+#: lib\pwiki\PersonalWikiFrame.py:1820
 msgid "&Visit Homepage"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1902
+#: lib\pwiki\PersonalWikiFrame.py:1821
 msgid "Visit wikidPad homepage"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1912
+#: lib\pwiki\PersonalWikiFrame.py:1831
 msgid "Show &License"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1913
+#: lib\pwiki\PersonalWikiFrame.py:1832
 msgid "Show license of WikidPad and used components"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1948
+#: lib\pwiki\PersonalWikiFrame.py:1867
 msgid "&About"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1952
+#: lib\pwiki\PersonalWikiFrame.py:1871
 msgid "&Wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1953
+#: lib\pwiki\PersonalWikiFrame.py:1872
 msgid "&Edit"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1954
+#: lib\pwiki\PersonalWikiFrame.py:1873
 msgid "&View"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1955
+#: lib\pwiki\PersonalWikiFrame.py:1874
 msgid "&Tabs"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1956
+#: lib\pwiki\PersonalWikiFrame.py:1875
 msgid "Wiki &Page"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1957
+#: lib\pwiki\PersonalWikiFrame.py:1876
 msgid "&Format"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1958
+#: lib\pwiki\PersonalWikiFrame.py:1877
 msgid "&Navigate"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1959
+#: lib\pwiki\PersonalWikiFrame.py:1878
 msgid "E&xtra"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1975
+#: lib\pwiki\PersonalWikiFrame.py:1894
 msgid "Pl&ugins"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1981
+#: lib\pwiki\PersonalWikiFrame.py:1900
 msgid "&Help"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:1983
+#: lib\pwiki\PersonalWikiFrame.py:1902
 msgid "He&lp"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2009 lib\pwiki\PersonalWikiFrame.py:2010
+#: lib\pwiki\PersonalWikiFrame.py:1928 lib\pwiki\PersonalWikiFrame.py:1929
 msgid "Back"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2015 lib\pwiki\PersonalWikiFrame.py:2016
+#: lib\pwiki\PersonalWikiFrame.py:1934 lib\pwiki\PersonalWikiFrame.py:1935
 msgid "Forward"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2021 lib\pwiki\PersonalWikiFrame.py:2022
+#: lib\pwiki\PersonalWikiFrame.py:1940 lib\pwiki\PersonalWikiFrame.py:1941
 msgid "Wiki Home"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2036 lib\pwiki\PersonalWikiFrame.py:2037
+#: lib\pwiki\PersonalWikiFrame.py:1955 lib\pwiki\PersonalWikiFrame.py:1956
 msgid "Search"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2042 lib\pwiki\PersonalWikiFrame.py:2043
+#: lib\pwiki\PersonalWikiFrame.py:1961 lib\pwiki\PersonalWikiFrame.py:1962
 msgid "Find current word in tree"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2046 lib\pwiki\PersonalWikiFrame.py:2064
-#: lib\pwiki\PersonalWikiFrame.py:2084
+#: lib\pwiki\PersonalWikiFrame.py:1965 lib\pwiki\PersonalWikiFrame.py:1983
+#: lib\pwiki\PersonalWikiFrame.py:2003
 msgid "Separator"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2050 lib\pwiki\PersonalWikiFrame.py:2051
+#: lib\pwiki\PersonalWikiFrame.py:1969 lib\pwiki\PersonalWikiFrame.py:1970
 msgid "Save Wiki Word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2061 lib\pwiki\PersonalWikiFrame.py:4412
+#: lib\pwiki\PersonalWikiFrame.py:1980 lib\pwiki\PersonalWikiFrame.py:4331
 msgid "Delete Wiki Word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2068
+#: lib\pwiki\PersonalWikiFrame.py:1987
 msgid "Heading"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2088
+#: lib\pwiki\PersonalWikiFrame.py:2007
 msgid "Switch Editor/Preview"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2109
+#: lib\pwiki\PersonalWikiFrame.py:2028
 msgid "Wikize Selected Word "
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2110
+#: lib\pwiki\PersonalWikiFrame.py:2029
 msgid "Wikize Selected Word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2184
+#: lib\pwiki\PersonalWikiFrame.py:2103
 msgid "Line: 9999 Col: 9999 Pos: 9999999988888"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2353
+#: lib\pwiki\PersonalWikiFrame.py:2272
 msgid "Regular expression error"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2362
+#: lib\pwiki\PersonalWikiFrame.py:2281
 msgid "Are you sure you want to reconnect? You may lose some data by this process."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2364
+#: lib\pwiki\PersonalWikiFrame.py:2283
 msgid "Reconnect database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2378 lib\pwiki\PersonalWikiFrame.py:3386
+#: lib\pwiki\PersonalWikiFrame.py:2297 lib\pwiki\PersonalWikiFrame.py:3305
 msgid "Error while trying to reconnect:\n"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2380
+#: lib\pwiki\PersonalWikiFrame.py:2299
 msgid "There was an error while reconnecting the database\n"
 "\n"
 "Would you like to try it again?\n"
 "%s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2383
+#: lib\pwiki\PersonalWikiFrame.py:2302
 msgid "Error reconnecting!"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2399 lib\pwiki\PersonalWikiFrame.py:3433
+#: lib\pwiki\PersonalWikiFrame.py:2318 lib\pwiki\PersonalWikiFrame.py:3352
 msgid "Error while trying to write:\n"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2401
+#: lib\pwiki\PersonalWikiFrame.py:2320
 msgid "There was an error while writing to the database\n"
 "\n"
 "Would you like to try it again?\n"
 "%s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2404
+#: lib\pwiki\PersonalWikiFrame.py:2323
 msgid "Error writing!"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2521
+#: lib\pwiki\PersonalWikiFrame.py:2440
 msgid "There was an error loading the icons for the tree control."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2773
+#: lib\pwiki\PersonalWikiFrame.py:2692
 msgid "No data handler available to create database."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2785
+#: lib\pwiki\PersonalWikiFrame.py:2704
 msgid "A wiki already exists in '%s', overwrite? (This deletes everything in and below this directory!)"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2787
+#: lib\pwiki\PersonalWikiFrame.py:2706
 msgid "Warning"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2828
+#: lib\pwiki\PersonalWikiFrame.py:2747
 msgid "A wiki database already exists in this location, overwrite?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2830
+#: lib\pwiki\PersonalWikiFrame.py:2749
 msgid "Wiki DB Exists"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2842
+#: lib\pwiki\PersonalWikiFrame.py:2761
 msgid "There was an error creating the wiki database."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2912 lib\pwiki\PersonalWikiFrame.py:2913
+#: lib\pwiki\PersonalWikiFrame.py:2831 lib\pwiki\PersonalWikiFrame.py:2832
 msgid "Choose database type"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2946
+#: lib\pwiki\PersonalWikiFrame.py:2865
 msgid "Invalid path or missing file '%s'"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2997 lib\pwiki\PersonalWikiFrame.py:3077
+#: lib\pwiki\PersonalWikiFrame.py:2916 lib\pwiki\PersonalWikiFrame.py:2996
 msgid "Error connecting to database in '%s'"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3002
+#: lib\pwiki\PersonalWikiFrame.py:2921
 msgid "The wiki needs an update to work with this version of WikidPad. Older versions of WikidPad may be unable to read the wiki after an update."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3005
+#: lib\pwiki\PersonalWikiFrame.py:2924
 msgid "Update database?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3040
+#: lib\pwiki\PersonalWikiFrame.py:2959
 msgid "Wiki '%s' is probably in use by different\n"
 "instance of WikidPad. Connect anyway (dangerous!)?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3042
+#: lib\pwiki\PersonalWikiFrame.py:2961
 msgid "Wiki already in use"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3051
+#: lib\pwiki\PersonalWikiFrame.py:2970
 msgid "Configuration file '%s' is corrupted or missing.\n"
 "You may have to change some settings in configuration page \"Current Wiki\" and below which were lost."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3084
+#: lib\pwiki\PersonalWikiFrame.py:3003
 msgid "Can't write to database '%s'"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3270
+#: lib\pwiki\PersonalWikiFrame.py:3189
 msgid "There is no (write-)access to underlying wiki\n"
 "Close anyway and loose possible changes?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3272
+#: lib\pwiki\PersonalWikiFrame.py:3191
 msgid "Close anyway"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3356
+#: lib\pwiki\PersonalWikiFrame.py:3275
 msgid "This operation requires an open database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3357
+#: lib\pwiki\PersonalWikiFrame.py:3276
 msgid "No open database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3369
+#: lib\pwiki\PersonalWikiFrame.py:3288
 msgid "No connection to database. Try to reconnect?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3370
+#: lib\pwiki\PersonalWikiFrame.py:3289
 msgid "Reconnect database?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3377
+#: lib\pwiki\PersonalWikiFrame.py:3296
 msgid "Trying to reconnect database..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3389
+#: lib\pwiki\PersonalWikiFrame.py:3308
 msgid "Error while reconnecting database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3414
+#: lib\pwiki\PersonalWikiFrame.py:3333
 msgid "This operation needs write access to database\n"
 "Try to write?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3415
+#: lib\pwiki\PersonalWikiFrame.py:3334
 msgid "Try writing?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3422
+#: lib\pwiki\PersonalWikiFrame.py:3341
 msgid "Trying to write to database..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3436
+#: lib\pwiki\PersonalWikiFrame.py:3355
 msgid "Error while writing to database"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3460
+#: lib\pwiki\PersonalWikiFrame.py:3379
 msgid "Database connection error: %s.\n"
 "Try to re-establish, then run \"Wiki\"->\"Reconnect\""
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3462 lib\pwiki\PersonalWikiFrame.py:3479
+#: lib\pwiki\PersonalWikiFrame.py:3381 lib\pwiki\PersonalWikiFrame.py:3398
 msgid "Connection lost"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3477
+#: lib\pwiki\PersonalWikiFrame.py:3396
 msgid "No write access to database: %s.\n"
 " Try to re-establish, then run \"Wiki\"->\"Reconnect\""
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3496
+#: lib\pwiki\PersonalWikiFrame.py:3415
 msgid "Trying to reconnect ..."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3505
+#: lib\pwiki\PersonalWikiFrame.py:3424
 msgid "Error while trying to reconnect:"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3756
+#: lib\pwiki\PersonalWikiFrame.py:3675
 msgid "Couldn't start file"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3771
+#: lib\pwiki\PersonalWikiFrame.py:3690
 msgid "Couldn't open wiki: %s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3801
+#: lib\pwiki\PersonalWikiFrame.py:3720
 msgid "Mod.: %s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3802
+#: lib\pwiki\PersonalWikiFrame.py:3721
 msgid "; Crea.: %s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3838
+#: lib\pwiki\PersonalWikiFrame.py:3757
 msgid "Parent nodes of '%s'"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3850
+#: lib\pwiki\PersonalWikiFrame.py:3769
 msgid "Parentless nodes"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3862
+#: lib\pwiki\PersonalWikiFrame.py:3781
 msgid "Child nodes of '%s'"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:3875
+#: lib\pwiki\PersonalWikiFrame.py:3794
 msgid "Bookmarks"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4022
+#: lib\pwiki\PersonalWikiFrame.py:3941
 msgid "Wiki: %s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4162
+#: lib\pwiki\PersonalWikiFrame.py:4081
 msgid "Set at Page: %s\t%s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4178
+#: lib\pwiki\PersonalWikiFrame.py:4097
 msgid "Error saving global configuration"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4189
+#: lib\pwiki\PersonalWikiFrame.py:4108
 msgid "Error saving current configuration"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4211
+#: lib\pwiki\PersonalWikiFrame.py:4130
 msgid "No real wiki word selected to rename"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4215
+#: lib\pwiki\PersonalWikiFrame.py:4134
 msgid "The scratch pad cannot be renamed."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4239
+#: lib\pwiki\PersonalWikiFrame.py:4158
 msgid "Description:"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4240
+#: lib\pwiki\PersonalWikiFrame.py:4159
 msgid "Store new version"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4254
+#: lib\pwiki\PersonalWikiFrame.py:4173
 msgid "Do you want to delete all stored versions?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4255
+#: lib\pwiki\PersonalWikiFrame.py:4174
 msgid "Delete All Versions"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4400
+#: lib\pwiki\PersonalWikiFrame.py:4319
 msgid "The scratch pad cannot be deleted"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4404
+#: lib\pwiki\PersonalWikiFrame.py:4323
 msgid "No real wiki word to delete"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4411
+#: lib\pwiki\PersonalWikiFrame.py:4330
 msgid "Are you sure you want to delete wiki word '%s'?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4440
+#: lib\pwiki\PersonalWikiFrame.py:4359
 msgid "No real wiki word to modify"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4454
+#: lib\pwiki\PersonalWikiFrame.py:4373
 msgid "Replace text by WikiWord:"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4455
+#: lib\pwiki\PersonalWikiFrame.py:4374
 msgid "Replace by Wiki Word"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4464
+#: lib\pwiki\PersonalWikiFrame.py:4383
 msgid "'%s' is an invalid wiki word."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4471
+#: lib\pwiki\PersonalWikiFrame.py:4390
 msgid "Wiki word %s exists already\n"
 "Would you like to append to the word?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4474
+#: lib\pwiki\PersonalWikiFrame.py:4393
 msgid "Word exists"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4723
+#: lib\pwiki\PersonalWikiFrame.py:4642
 msgid "Error on export"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4753
+#: lib\pwiki\PersonalWikiFrame.py:4672
 msgid "Choose a file to create URL for"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4795
+#: lib\pwiki\PersonalWikiFrame.py:4714
 msgid "Are you sure you want to start a full rebuild of wiki in background?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4797
+#: lib\pwiki\PersonalWikiFrame.py:4716
 msgid "Initiate update"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4804 lib\pwiki\PersonalWikiFrame.py:4805
+#: lib\pwiki\PersonalWikiFrame.py:4723 lib\pwiki\PersonalWikiFrame.py:4724
 msgid "     Initiating update     "
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4819
+#: lib\pwiki\PersonalWikiFrame.py:4738
 msgid "Error initiating update"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4828
+#: lib\pwiki\PersonalWikiFrame.py:4747
 msgid "Are you sure you want to rebuild this wiki? You may want to backup your data first!"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4830
+#: lib\pwiki\PersonalWikiFrame.py:4749
 msgid "Rebuild wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4837 lib\pwiki\PersonalWikiFrame.py:4838
+#: lib\pwiki\PersonalWikiFrame.py:4756 lib\pwiki\PersonalWikiFrame.py:4757
 msgid "     Rebuilding wiki     "
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4853
+#: lib\pwiki\PersonalWikiFrame.py:4772
 msgid "Error rebuilding wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4911
+#: lib\pwiki\PersonalWikiFrame.py:4830
 msgid "This could overwrite pages in the database. Continue?"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:4912
+#: lib\pwiki\PersonalWikiFrame.py:4831
 msgid "Import pagefiles"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5025
+#: lib\pwiki\PersonalWikiFrame.py:4944
 msgid "No list of strings passed to \"listmcstr\" dialog"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5048
+#: lib\pwiki\PersonalWikiFrame.py:4967
 msgid "Unknown dialog type"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5187 lib\pwiki\PersonalWikiFrame.py:5205
-#: lib\pwiki\PersonalWikiFrame.py:5229
+#: lib\pwiki\PersonalWikiFrame.py:5106 lib\pwiki\PersonalWikiFrame.py:5124
+#: lib\pwiki\PersonalWikiFrame.py:5148
 msgid "Choose a Wiki to open"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5243
+#: lib\pwiki\PersonalWikiFrame.py:5162
 msgid "Name for new wiki (must be in the form of a WikiWord):"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5244
+#: lib\pwiki\PersonalWikiFrame.py:5163
 msgid "Create New Wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5259
+#: lib\pwiki\PersonalWikiFrame.py:5178
 msgid "Directory to store new wiki"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5270
-#: lib\pwiki\wikidata\WikiDataManager.py:1231
-#: lib\pwiki\wikidata\WikiDataManager.py:1287
+#: lib\pwiki\PersonalWikiFrame.py:5189
+#: lib\pwiki\wikidata\WikiDataManager.py:1265
+#: lib\pwiki\wikidata\WikiDataManager.py:1321
 msgid "'%s' is an invalid wiki word. %s"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5563
+#: lib\pwiki\PersonalWikiFrame.py:5482
 msgid "Clipboard Catcher at Cursor"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5567
+#: lib\pwiki\PersonalWikiFrame.py:5486
 msgid "Clipboard Catcher off"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5628
+#: lib\pwiki\PersonalWikiFrame.py:5547
 msgid "Restore"
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:5629
+#: lib\pwiki\PersonalWikiFrame.py:5548
 msgid "Save"
 msgstr ""
 
@@ -3806,121 +3892,121 @@ msgstr ""
 msgid "Not found"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:702
+#: lib\pwiki\SearchAndReplaceDialogs.py:712
 msgid "End of document reached. Continue at beginning?"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:704
+#: lib\pwiki\SearchAndReplaceDialogs.py:714
 msgid "Continue at beginning?"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:715
-#: lib\pwiki\SearchAndReplaceDialogs.py:716
+#: lib\pwiki\SearchAndReplaceDialogs.py:725
+#: lib\pwiki\SearchAndReplaceDialogs.py:726
 msgid "No matches found"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:730
-#: lib\pwiki\SearchAndReplaceDialogs.py:743
-#: lib\pwiki\SearchAndReplaceDialogs.py:983
-#: lib\pwiki\SearchAndReplaceDialogs.py:1179
-#: lib\pwiki\SearchAndReplaceDialogs.py:1205
-#: lib\pwiki\SearchAndReplaceDialogs.py:1262
-#: lib\pwiki\SearchAndReplaceDialogs.py:1276
-#: lib\pwiki\SearchAndReplaceDialogs.py:1355
-#: lib\pwiki\SearchAndReplaceDialogs.py:1404
-#: lib\pwiki\SearchAndReplaceDialogs.py:1565
-#: lib\pwiki\SearchAndReplaceDialogs.py:2186
+#: lib\pwiki\SearchAndReplaceDialogs.py:740
+#: lib\pwiki\SearchAndReplaceDialogs.py:753
+#: lib\pwiki\SearchAndReplaceDialogs.py:992
+#: lib\pwiki\SearchAndReplaceDialogs.py:1196
+#: lib\pwiki\SearchAndReplaceDialogs.py:1222
+#: lib\pwiki\SearchAndReplaceDialogs.py:1279
+#: lib\pwiki\SearchAndReplaceDialogs.py:1293
+#: lib\pwiki\SearchAndReplaceDialogs.py:1372
+#: lib\pwiki\SearchAndReplaceDialogs.py:1421
+#: lib\pwiki\SearchAndReplaceDialogs.py:1582
+#: lib\pwiki\SearchAndReplaceDialogs.py:2203
 msgid "Error in regular expression"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:771
-#: lib\pwiki\SearchAndReplaceDialogs.py:1349
+#: lib\pwiki\SearchAndReplaceDialogs.py:781
+#: lib\pwiki\SearchAndReplaceDialogs.py:1366
 msgid "%i replacements done"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:772
-#: lib\pwiki\SearchAndReplaceDialogs.py:1289
-#: lib\pwiki\SearchAndReplaceDialogs.py:1350
+#: lib\pwiki\SearchAndReplaceDialogs.py:782
+#: lib\pwiki\SearchAndReplaceDialogs.py:1306
+#: lib\pwiki\SearchAndReplaceDialogs.py:1367
 msgid "Replace All"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:982
+#: lib\pwiki\SearchAndReplaceDialogs.py:991
 msgid "Bad regular expression '%s':\n"
 "%s"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1182
-#: lib\pwiki\SearchAndReplaceDialogs.py:1209
-#: lib\pwiki\SearchAndReplaceDialogs.py:1265
-#: lib\pwiki\SearchAndReplaceDialogs.py:1280
-#: lib\pwiki\SearchAndReplaceDialogs.py:1358
-#: lib\pwiki\SearchAndReplaceDialogs.py:1408
-#: lib\pwiki\SearchAndReplaceDialogs.py:1568
-#: lib\pwiki\SearchAndReplaceDialogs.py:2189
+#: lib\pwiki\SearchAndReplaceDialogs.py:1199
+#: lib\pwiki\SearchAndReplaceDialogs.py:1226
+#: lib\pwiki\SearchAndReplaceDialogs.py:1282
+#: lib\pwiki\SearchAndReplaceDialogs.py:1297
+#: lib\pwiki\SearchAndReplaceDialogs.py:1375
+#: lib\pwiki\SearchAndReplaceDialogs.py:1425
+#: lib\pwiki\SearchAndReplaceDialogs.py:1585
+#: lib\pwiki\SearchAndReplaceDialogs.py:2206
 msgid "Error in boolean expression"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1185
-#: lib\pwiki\SearchAndReplaceDialogs.py:1213
-#: lib\pwiki\SearchAndReplaceDialogs.py:1361
-#: lib\pwiki\SearchAndReplaceDialogs.py:1571
-#: lib\pwiki\SearchAndReplaceDialogs.py:2192
+#: lib\pwiki\SearchAndReplaceDialogs.py:1202
+#: lib\pwiki\SearchAndReplaceDialogs.py:1230
+#: lib\pwiki\SearchAndReplaceDialogs.py:1378
+#: lib\pwiki\SearchAndReplaceDialogs.py:1588
+#: lib\pwiki\SearchAndReplaceDialogs.py:2209
 msgid "Error. Maybe wiki rebuild is needed"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1289
+#: lib\pwiki\SearchAndReplaceDialogs.py:1306
 msgid "Replace all occurrences?"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1416
+#: lib\pwiki\SearchAndReplaceDialogs.py:1433
 msgid "Choose search title"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1426
+#: lib\pwiki\SearchAndReplaceDialogs.py:1443
 msgid "Do you want to overwrite existing search '%s'?"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1427
+#: lib\pwiki\SearchAndReplaceDialogs.py:1444
 msgid "Overwrite search"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1442
+#: lib\pwiki\SearchAndReplaceDialogs.py:1459
 msgid "Invalid search string, can't save as view"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1542
+#: lib\pwiki\SearchAndReplaceDialogs.py:1559
 msgid "Do you want to delete %i search(es)?"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1543
+#: lib\pwiki\SearchAndReplaceDialogs.py:1560
 msgid "Delete search"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1643
+#: lib\pwiki\SearchAndReplaceDialogs.py:1660
 msgid "*Set page list*"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1927
+#: lib\pwiki\SearchAndReplaceDialogs.py:1944
 msgid "<Search: %s>"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:1977
+#: lib\pwiki\SearchAndReplaceDialogs.py:1994
 msgid "Fast Search"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2004
+#: lib\pwiki\SearchAndReplaceDialogs.py:2021
 msgid "As Tab"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2044
+#: lib\pwiki\SearchAndReplaceDialogs.py:2061
 msgid "Search: %s"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2286 lib\pwiki\WikiHtmlView.py:710
+#: lib\pwiki\SearchAndReplaceDialogs.py:2310 lib\pwiki\WikiHtmlView.py:710
 msgid "Activate"
 msgstr ""
 
-#: lib\pwiki\SearchAndReplaceDialogs.py:2288 lib\pwiki\WikiHtmlView.py:712
+#: lib\pwiki\SearchAndReplaceDialogs.py:2312 lib\pwiki\WikiHtmlView.py:712
 msgid "Activate New Tab Backgrd."
 msgstr ""
 
@@ -3954,7 +4040,7 @@ msgstr ""
 
 #: lib\pwiki\Trashcan.py:183 lib\pwiki\Trashcan.py:440
 #: lib\pwiki\Trashcan.py:452 lib\pwiki\timeView\Versioning.py:175
-#: lib\pwiki\timeView\Versioning.py:437 lib\pwiki\timeView\Versioning.py:449
+#: lib\pwiki\timeView\Versioning.py:442 lib\pwiki\timeView\Versioning.py:454
 msgid "Versioning data damaged"
 msgstr ""
 
@@ -3962,7 +4048,7 @@ msgstr ""
 msgid "Multiple words rename to same word"
 msgstr ""
 
-#: lib\pwiki\WikiHtmlView.py:597 lib\pwiki\WikiTxtCtrl.py:2194
+#: lib\pwiki\WikiHtmlView.py:597 lib\pwiki\WikiTxtCtrl.py:2198
 msgid "Folder does not exist"
 msgstr ""
 
@@ -4022,101 +4108,101 @@ msgstr ""
 msgid "Incremental search (ENTER/ESC to finish)"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:1519
+#: lib\pwiki\WikiTxtCtrl.py:1523
 msgid "Select Template"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:1521
+#: lib\pwiki\WikiTxtCtrl.py:1525
 msgid "Select Template (deletes current content!)"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:1600
+#: lib\pwiki\WikiTxtCtrl.py:1604
 msgid "Use Template"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2270
+#: lib\pwiki\WikiTxtCtrl.py:2274
 msgid "Set in menu \"Wiki\", item \"Options...\", options page \"Security\", \n"
 "item \"Script security\" an appropriate value to execute a script."
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2273
+#: lib\pwiki\WikiTxtCtrl.py:2277
 msgid "Script execution disabled"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:2345
+#: lib\pwiki\WikiTxtCtrl.py:2349
 msgid "\n"
 "Exception: %s"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3025
+#: lib\pwiki\WikiTxtCtrl.py:3029
 msgid "Line: %d Col: %d Pos: %d"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3171
+#: lib\pwiki\WikiTxtCtrl.py:3175
 msgid "Couldn't copy file"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3413
+#: lib\pwiki\WikiTxtCtrl.py:3417
 msgid "Follow Link"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3414
+#: lib\pwiki\WikiTxtCtrl.py:3418
 msgid "Follow Link New Tab"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3415
+#: lib\pwiki\WikiTxtCtrl.py:3419
 msgid "Follow Link New Tab Backgrd."
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3417
+#: lib\pwiki\WikiTxtCtrl.py:3421
 msgid "Convert Absolute/Relative File URL"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3418
+#: lib\pwiki\WikiTxtCtrl.py:3422
 msgid "Open Containing Folder"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3420
+#: lib\pwiki\WikiTxtCtrl.py:3424
 msgid "Copy anchor URL to clipboard"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3422
+#: lib\pwiki\WikiTxtCtrl.py:3426
 msgid "Other..."
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3423
+#: lib\pwiki\WikiTxtCtrl.py:3427
 msgid "Use Template..."
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3427
+#: lib\pwiki\WikiTxtCtrl.py:3431
 msgid "Show folding"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3428
+#: lib\pwiki\WikiTxtCtrl.py:3432
 msgid "Show folding marks and allow folding"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3429
+#: lib\pwiki\WikiTxtCtrl.py:3433
 msgid "&Toggle current folding"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3430
+#: lib\pwiki\WikiTxtCtrl.py:3434
 msgid "Toggle folding of the current line"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3431
+#: lib\pwiki\WikiTxtCtrl.py:3435
 msgid "&Unfold All"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3432
+#: lib\pwiki\WikiTxtCtrl.py:3436
 msgid "Unfold everything in current editor"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3433
+#: lib\pwiki\WikiTxtCtrl.py:3437
 msgid "&Fold All"
 msgstr ""
 
-#: lib\pwiki\WikiTxtCtrl.py:3434
+#: lib\pwiki\WikiTxtCtrl.py:3438
 msgid "Fold everything in current editor"
 msgstr ""
 
@@ -4205,7 +4291,7 @@ msgid "Database exists already and is currently in use"
 msgstr ""
 
 #: lib\pwiki\wikidata\WikiDataManager.py:62
-#: lib\pwiki\wikidata\WikiDataManager.py:1652
+#: lib\pwiki\wikidata\WikiDataManager.py:1686
 msgid "Data handler %s not available"
 msgstr ""
 
@@ -4245,28 +4331,28 @@ msgstr ""
 msgid "Word '%s' not in wiki"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1075
-#: lib\pwiki\wikidata\WikiDataManager.py:1139
+#: lib\pwiki\wikidata\WikiDataManager.py:1109
+#: lib\pwiki\wikidata\WikiDataManager.py:1173
 msgid "Update basic link info"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1091
+#: lib\pwiki\wikidata\WikiDataManager.py:1125
 msgid "Starting update thread"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1159
+#: lib\pwiki\wikidata\WikiDataManager.py:1193
 msgid "Update attributes of %s"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1181
+#: lib\pwiki\wikidata\WikiDataManager.py:1215
 msgid "Update page %s"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1199
+#: lib\pwiki\wikidata\WikiDataManager.py:1233
 msgid "Final cleanup"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1292
+#: lib\pwiki\wikidata\WikiDataManager.py:1326
 msgid "Cannot rename '%s' to '%s', '%s' already exists"
 msgstr ""
 

@@ -821,7 +821,7 @@ def _asciiFlexibleUrlUnquote(part):
         try:
             return mbcsDec(linkBytes, "strict")[0]
         except UnicodeDecodeError:
-            # Failed, too -> leave link part unmodified. TODO Doesn't make sense, will fail as well.
+            # Failed, too -> leave link part unmodified. TODO: Doesn't make sense, will fail as well.
             return unicode(part)
 
 

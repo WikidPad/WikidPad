@@ -1,17 +1,16 @@
 ﻿++ Wiki Export
 
 You can export your wiki as a single html page, a set of html
-pages, one wiki word page at a time, or as XML.
+pages, one wiki word page at a time, or in [Multipage text format].
 
 You can select a few predefined operations from the "Wiki" menu:
 
-Export / Export Wiki As Single Html Page
-Export / Export Wiki As Set of Html Pages
-Export / Export Current Wiki Word As Html Page
-Export / Export Wiki As XML
+Publish as HTML / Wiki As Single Html Page
+Publish as HTML / Wiki As Set of Html Pages
+Publish as HTML / Current Wiki Word As Html Page
 
 
-Or you can use Export / Other Export to show a dialog to choose other settings:
+Or you can use Publish as HTML / Other Export to show a dialog to choose other settings:
 
 *What to export*
 Choose if you want to export current page only, the current page and all sub-pages (children, grandchildren...), the whole wiki or use "Custom..." to open the [SearchingTheWiki#To search all pages: Full search|full search].
@@ -69,13 +68,14 @@ For the .wiki export you can choose if the files should have system encoding or 
 *Version*
 Choose which version the file should have. If you use version 1 it can be read only by WikidPad 1.9beta6 and later. Version 0 can also be read by earlier versions but looses information.
 
+*Write version data of pages*
+Export also previous versions of the wiki pages you export. Only available for format version 1 and later.
+
 *Write wiki func. pages*
-Store also wiki-bound functional pages in the file. Only available for format version 1 and later.
+Export also wiki-bound functional pages in the file. Only available for format version 1 and later.
 
 *Write saved searches*
-Store also saved searches in the file. Only available for format version 1 and later.
-
-
+Export also saved searches in the file. Only available for format version 1 and later.
 
 
 +++ Continuous export
@@ -94,9 +94,4 @@ A few drawbacks to mention:
     2. The set of pages to export will be static under some circumstances. Especially if you start auto-export for all children of one or more pages, it will only export pages which were children when auto-export started regardless if new children are added later.
     3. If you export as a single HTML file, the whole HTML file must be recreated on each change so it is only recommended if you export a few small pages.
     4. If temporary (volatile) files must be created (e.g. generated from MimeTeX or GraphViz) there may be created new ones again and again on each change of a page filling up the "volatile" directory. Therefore it is recommended to make a final non-continuous export to clean up the garbage.
-
-
-
-
-
 

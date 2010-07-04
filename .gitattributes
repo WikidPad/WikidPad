@@ -627,6 +627,7 @@ lib/pwiki/DocPagePresenter.py -text
 lib/pwiki/DocPages.py -text
 lib/pwiki/DocStructureCtrl.py -text
 lib/pwiki/EnchantDriver.py -text
+lib/pwiki/EnhancedGrid.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
 lib/pwiki/GtkHacks.py -text
@@ -638,6 +639,7 @@ lib/pwiki/LogWindow.py -text
 lib/pwiki/MainApp.py -text
 lib/pwiki/MainAreaPanel.py -text
 lib/pwiki/MiscEvent.py -text
+lib/pwiki/MptImporterGui.py -text
 lib/pwiki/OptionsDialog.py -text
 lib/pwiki/OsAbstract.py -text
 lib/pwiki/PageHistory.py -text

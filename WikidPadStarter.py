@@ -1,5 +1,15 @@
 #!/bin/python
 
+
+# try:
+#     import psyco
+#     psyco.full()
+# except ImportError:
+#     pass
+#     traceback.print_exc()
+
+
+
 import sys, os, traceback, os.path, glob, shutil, imp, warnings, ConfigParser
 os.stat_float_times(True)
 
@@ -9,18 +19,21 @@ if not hasattr(sys, 'frozen'):
 
 from Consts import CONFIG_FILENAME, CONFIG_GLOBALS_DIRNAME
 
-
 from Consts import VERSION_STRING, VERSION_TUPLE
+
+import __builtin__
 
 # Dummies for localization
 def N_(s):
     return s
-__builtins__["N_"] = N_
+__builtin__.N_ = N_
 del N_
 
 
-__builtins__["_"] = N_
+__builtin__._ = N_
 
+
+del __builtin__
 
 
 # create a Trace object
@@ -194,12 +207,6 @@ class Error(wx.App):
 app = None
 exception = None
 
-# 
-# try:
-#     import psyco
-#     psyco.full()
-# except ImportError:
-#     traceback.print_exc()
 
 
 

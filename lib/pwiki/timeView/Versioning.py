@@ -173,8 +173,13 @@ class VersionOverview(MiscEventSourceMixin):
         content = self.wikiDocument.retrieveDataBlock(unifName, default=DAMAGED)
         if content is DAMAGED:
             raise VersioningException(_(u"Versioning data damaged"))
-        
+
         self.readOverviewFromBytes(content)
+
+        self.fireMiscEventKeys(("reread version overview",
+                "changed version overview"))
+
+
 #         elif content is None:
 #             self.versionEntries = []
 #             self.maxVersionNumber = 0

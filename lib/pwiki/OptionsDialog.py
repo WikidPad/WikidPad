@@ -559,6 +559,8 @@ class OptionsDialog(wx.Dialog):
             ("fastSearch_caseSensitive", "cbFastSearchCaseSensitive", "b"),
             ("fastSearch_wholeWord", "cbFastSearchWholeWord", "b"),
 
+            ("search_dontAllowCancel", "cbSearchDontAllowCancel", "b"),
+
             ("wikiLockFile_ignore", "cbWikiLockFileIgnore", "b"),
             ("wikiLockFile_create", "cbWikiLockFileCreate", "b"),
 

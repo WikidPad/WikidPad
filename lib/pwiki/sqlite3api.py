@@ -217,7 +217,7 @@ class Connection:
     def setAutoCommit(self, v=True, silent=False):
         if v and not self._autoCommit and not silent:
             self.commit()
-            
+
         self._autoCommit = v
         
         

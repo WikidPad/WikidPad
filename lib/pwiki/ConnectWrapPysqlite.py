@@ -9,6 +9,8 @@ WikidPad.
 
 import sqlite3, traceback
 
+from wx import GetApp
+
 from pwiki.WikiExceptions import *
 
 
@@ -27,7 +29,8 @@ class ConnectWrapBase:
 #         self.__dict__["fetchone"] = self.dbCursor.fetchone
 #         self.__dict__["fetchall"] = self.dbCursor.fetchall
 
-   
+        self.adjustTempHandling()
+
     def __setattr__(self, attr, value):
         setattr(self.dbCursor, attr, value)
 
@@ -139,6 +142,49 @@ class ConnectWrapBase:
         
     def getCursor(self):
         return self.dbCursor
+
+
+    def adjustTempHandling(self):
+        """
+        Set handling of temporary data according to user settings
+        """
+#         if not GetApp().sqliteInitFlag:   # TODO: Check for init flag here?
+        globalConfig = GetApp().getGlobalConfig()
+        if globalConfig.getboolean("main", "tempHandling_preferMemory",
+                False):
+            tempMode = u"memory"
+        else:
+            tempMode = globalConfig.get("main", "tempHandling_tempMode",
+                    u"system")
+    
+        if tempMode == u"auto":
+            if GetApp().isInPortableMode():
+                tempMode = u"config"
+            else:
+                tempMode = u"system"
+        
+        if tempMode == u"memory":
+            self.execSql("pragma temp_store = 2")
+        elif tempMode == u"given":
+            tempDir = globalConfig.get("main", "tempHandling_tempDir", u"")
+            try:
+                self.execSql("pragma temp_store_directory = '%s'" %
+                        utf8Enc(tempDir)[0])
+            except sqlite.Error:
+                self.execSql("pragma temp_store_directory = ''")
+    
+            self.execSql("pragma temp_store = 1")
+        elif tempMode == u"config":
+            self.execSql("pragma temp_store_directory = '%s'" %
+                    utf8Enc(GetApp().getGlobalConfigSubDir())[0])
+            self.execSql("pragma temp_store = 1")
+        else:   # tempMode == u"system"
+            self.execSql("pragma temp_store_directory = ''")
+            self.execSql("pragma temp_store = 1")
+    
+#         GetApp().sqliteInitFlag = True
+
+
 
 
 

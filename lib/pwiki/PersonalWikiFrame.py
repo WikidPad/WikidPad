@@ -1,3 +1,4 @@
+# -*- coding: iso8859-1 -*-
 from __future__ import with_statement
 
 ## import hotshot
@@ -1285,37 +1286,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     lambda evt: self.showSpellCheckerDialog(),
                     updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
 
-#             menuItem = wx.MenuItem(clipCatchMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
-#                     _(u'Set at Page') + u'\t' + self.keyBindings.CatchClipboardAtPage, 
-#                     _(u"Text copied to clipboard is also appended to this page"),
-#                     wx.ITEM_RADIO)
-#             clipCatchMenu.AppendItem(menuItem)
-#             wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
-#                     self.OnClipboardCatcherAtPage)
-#             wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_PAGE,
-#                     self.OnUpdateClipboardCatcher)
-# 
-# 
-#             menuItem = wx.MenuItem(clipCatchMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
-#                     _(u'Set at Cursor') + u'\t' + self.keyBindings.CatchClipboardAtCursor, 
-#                     _(u"Text copied to clipboard is also added to cursor position"),
-#                     wx.ITEM_RADIO)
-#             clipCatchMenu.AppendItem(menuItem)
-#             wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
-#                     self.OnClipboardCatcherAtCursor)
-#             wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_AT_CURSOR,
-#                     self.OnUpdateClipboardCatcher)
-# 
-# 
-#             menuItem = wx.MenuItem(clipCatchMenu, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
-#                     _(u'Set Off') + u'\t' + self.keyBindings.CatchClipboardOff, 
-#                     _(u"Switch off clipboard catcher"), wx.ITEM_RADIO)
-#             clipCatchMenu.AppendItem(menuItem)
-#             wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
-#                     self.OnClipboardCatcherOff)
-#             wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CLIPBOARD_CATCHER_OFF,
-#                     self.OnUpdateClipboardCatcher)
-
 
         editMenu.AppendSeparator()
 
@@ -1494,57 +1464,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         wx.EVT_UPDATE_UI(self, GUI_ID.CMD_SHOW_TOOLBAR,
 #                 self.OnUpdateToolbarMenuItem)
 
-#         menuID = wx.NewId()
-#         menuItem = wx.MenuItem(viewMenu, menuID,
-#                 _(u'Show &Doc. Structure') + u'\t' + self.keyBindings.ShowDocStructure,
-#                 _(u"Show Document Structure"), wx.ITEM_CHECK)
-#         viewMenu.AppendItem(menuItem)
-#         wx.EVT_MENU(self, menuID, lambda evt: self.setShowDocStructure(
-#                 self.windowLayouter.isWindowCollapsed("doc structure")))
-#         wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateDocStructureMenuItem)
-
-#         menuID = wx.NewId()
-#         menuItem = wx.MenuItem(viewMenu, menuID,
-#                 _(u'&Show Time View') + u'\t' + self.keyBindings.ShowTimeView,
-#                 _(u"Show Time View"), wx.ITEM_CHECK)
-#         viewMenu.AppendItem(menuItem)
-#         wx.EVT_MENU(self, menuID, lambda evt: self.setShowTimeView(
-#                 self.windowLayouter.isWindowCollapsed("time view")))
-#         wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateTimeViewMenuItem)
-
-#         menuItem = wx.MenuItem(viewMenu, GUI_ID.CMD_STAY_ON_TOP,
-#                 _(u'Stay on Top') + u'\t' + self.keyBindings.StayOnTop, 
-#                 _(u"Stay on Top"), wx.ITEM_CHECK)
-#         viewMenu.AppendItem(menuItem)
-#         wx.EVT_MENU(self, GUI_ID.CMD_STAY_ON_TOP, lambda evt: self.setStayOnTop(
-#                 not self.getStayOnTop()))
-#         wx.EVT_UPDATE_UI(self, GUI_ID.CMD_STAY_ON_TOP,
-#                 self.OnUpdateStayOnTopMenuItem)
-
-#         menuID=wx.NewId()
-#         indentGuidesMenuItem = wx.MenuItem(viewMenu, menuID,
-#                 _(u"&View Indentation Guides"), _(u"View Indentation Guides"),
-#                 wx.ITEM_CHECK)
-#         viewMenu.AppendItem(indentGuidesMenuItem)
-#         wx.EVT_MENU(self, menuID, self.OnCmdCheckIndentationGuides)
-#         wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateIndentationGuides)
-
-#         menuID=wx.NewId()
-#         showLineNumbersMenuItem = wx.MenuItem(viewMenu, menuID,
-#                 _(u"Show line numbers"), _(u"Show line numbers"),
-#                 wx.ITEM_CHECK)
-#         viewMenu.AppendItem(showLineNumbersMenuItem)
-#         wx.EVT_MENU(self, menuID, self.OnCmdCheckShowLineNumbers)
-#         wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateShowLineNumbers)
-
-#         menuID = wx.NewId()
-#         menuItem = wx.MenuItem(viewMenu, menuID,
-#                 _(u'&Show Tree Control') + u'\t' + self.keyBindings.ShowTreeControl,
-#                 _(u"Show Tree Control"), wx.ITEM_CHECK)
-#         viewMenu.AppendItem(menuItem)
-#         wx.EVT_MENU(self, menuID, lambda evt: self.setShowTreeControl(
-#                 self.windowLayouter.isWindowCollapsed("maintree")))
-#         wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateTreeCtrlMenuItem)
 
 
         tabsMenu = wx.Menu()
@@ -2605,8 +2524,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
 
-    def testIt(self):
-        self.reloadMenuPlugins()
+#     def testIt(self):
+       
 
 
 #     def testIt(self):

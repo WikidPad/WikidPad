@@ -2,6 +2,8 @@
 
 import string, locale, codecs, os, os.path, traceback
 
+import Consts
+
 from rtlibRepl import minidom
 
 from StringOps import utf8Enc, loadEntireFile, writeEntireFile, pathEnc
@@ -557,7 +559,20 @@ def loadI18nDict(appDir, locStr=None):
 #         rf.close()
 
 
-# TODO: Cache
+
+def _stripI18nXrcCache(content):
+    """
+    Check if content contains the right tag at beginning and either
+    return None if cache is invalid or return actual cache data.
+    """
+    parts = content.split("\n", 1)
+    if len(parts) != 2 or parts[0] != Consts.VERSION_STRING:
+        return None
+
+    return parts[1]
+
+
+
 def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
     """
     Returns the XML data of translated XRC file.
@@ -584,8 +599,10 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
 
         if os.path.exists(pathEnc(cachePath)) and \
                 os.stat(pathEnc(cachePath)).st_mtime > poModTime:
-            # Valid cache found
-            return loadEntireFile(cachePath, True)
+            data = _stripI18nXrcCache(loadEntireFile(cachePath, True))
+            if data is not None:
+                # Valid cache found
+                return data
     except:
         traceback.print_exc()  # Really?
 
@@ -598,7 +615,10 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
         if os.path.exists(pathEnc(cachePath)) and \
                 os.stat(pathEnc(cachePath)).st_mtime > poModTime:
             # Valid cache found
-            return loadEntireFile(cachePath, True)
+            data = _stripI18nXrcCache(loadEntireFile(cachePath, True))
+            if data is not None:
+                # Valid cache found
+                return data
     except:
         traceback.print_exc()  # Really?
 
@@ -645,13 +665,15 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
     translated = "".join(result)
 
 
+    # Add version tag to ensure valid cache
+    toCache = Consts.VERSION_STRING + "\n" + translated
 
     # Try to store content as cache in appDir
     try:
         cachePath = os.path.join(appDir,
                 baseXrcName + "_" + i18nLocale + ".xrc")
         
-        writeEntireFile(cachePath, translated, True)
+        writeEntireFile(cachePath, toCache, True)
         
         return translated
     except:
@@ -662,8 +684,8 @@ def getI18nXrcData(appDir, globalConfigSubDir, baseXrcName):
         cachePath = os.path.join(globalConfigSubDir,
                 baseXrcName + "_" + i18nLocale + ".xrc")
         
-        writeEntireFile(cachePath, translated, True)
-        
+        writeEntireFile(cachePath, toCache, True)
+
         return translated
     except:
         pass

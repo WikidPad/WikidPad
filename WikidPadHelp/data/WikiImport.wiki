@@ -11,3 +11,38 @@ Here you choose the type of import you want. Currently only Multipage text is su
 *Source file/directory*
 Here you can set where the file(s) to import come from. If file or directory is needed depends on the type given in "Import format". For multipage text it is a single file.
 
+
++++ Additional options for multipage text format
+
+*Always show import table*
+Shows the import table dialog always during import even if no problems arised which made it necessary.
+
+
+++++ The import table dialog
+If during import a problem arises (especially if an item present in wiki would be overwritten by an imported one with same name) or if the above option was checked, the import table dialog appears. It mainly consists of a table with all items of the import file where you can choose what to do with them.
+
+Above the table you can set the defaults for "Import" and "Version Import".
+
+For "Import" you can choose if you want to import the items only if it wouldn't overwrite ("Yes"), not import at all ("No") or import and overwrite items already present in the database ("Overwrite").
+
+"Version Import" allows only the choice between "Yes" and "No" if previous versions of an item that will be imported should be imported as well.
+
+The actual table has a row for each item to import and 7 columns:
+    * Type: Type of the item (functional page, saved search or wiki page). This column can't be edited and is always gray
+    * Name: Name of the item. If this field has a red background there is an error (mostly a name collision with an already present item). Such errors must be resolved first before the import can continue. This column can't be edited
+    * Import: Here you can choose individually if an item should be imported. If you choose "Default" the default setting from above the table is used, otherwise the individual setting (with the same meaning as for the default setting) is used.
+    * Version Import: Individual setting for version import. If an item has no version data, the field has a gray background and can't be changed
+    * Rename imported: In case of name collision (but also if there is no collision) you can enter a new name here for the item to import. For wiki pages it must follow the syntax rules of a wiki word, otherwise you get an error. For some items, renaming isn't possible and the field is gray
+    * Rename present: Here you can instead enter a new name for the item already present in database. Same restrictions apply.
+    * Error: Shows the text of an error with this item if any. If you click somewhere into a row you can also see the error message at the bottom below the table. This column can't be edited and is always gray
+
+If you press "OK" at the bottom of the dialog the table is checked for errors. If there are errors left the table will be updated and you can edit it further. If everything is right, the dialog is closed and the actual import is done.
+
+There is also a "Test" button. It updates the "Error" column (and the coloring of "Name") but does never close the dialog.
+
+
+++++ Remarks
+    * A name collision is only detected between real wiki pages, not aliases. If e.g. a page in the wiki has the alias "Foo" you don't get an error when importing a page named "Foo"
+    * You can't rename imported and present item at the same time. This restriction will be probably removed in the future
+    * You can't do circular rename present items, e.g. you can't rename page A to B, B to C and C to A. This restriction will be probably removed in the future
+    * If an imported wiki page overwrites a present one and the present one has versions, these versions are kept if the imported page doesn't have or import versions but are deleted if the imported page also imports versions. This behavior may change in the future.

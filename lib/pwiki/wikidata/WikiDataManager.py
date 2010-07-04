@@ -953,10 +953,16 @@ class WikiDataManager(MiscEventSourceMixin):
 
     def hasDataBlock(self, unifName):
         """
-        Return if datablock exists
+        Return if datablock exists.
+
+        This works also with wiki pages (unified name starting with "wikipage/")
+        but does not return aliases in this case
         """
+        if unifName.startswith(u"wikipage/"):
+            return self.isDefinedWikiPage(unifName[9:])
+            
         # TODO Create native method in WikiData classes
-        return self.retrieveDataBlock(unifName, default=None) is not None
+        return self.guessDataBlockStoreHint(unifName) is not None
 
 
     def retrieveDataBlock(self, unifName, default=""):
@@ -986,12 +992,40 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         return self.wikiData.storeDataBlock(unifName, newdata, storeHint)
 
+
+    def guessDataBlockStoreHint(self, unifName):
+        """
+        Return a guess of the store hint used to store the block last time.
+        Returns one of the DATABLOCK_STOREHINT_* constants from Consts.py.
+        The function is allowed to return the wrong value (therefore a guess).
+        It returns None for non-existing data blocks.
+        """
+        return self.wikiData.guessDataBlockStoreHint(unifName)
+
+
     def deleteDataBlock(self, unifName):
         """
         Delete data block with the associated unified name. If the unified name
         is not in database, nothing happens.
         """
         return self.wikiData.deleteDataBlock(unifName)
+
+
+    def renameDataBlock(self, oldUnifName, newUnifName):
+        """
+        Renames data block with oldUnifName to newUnifName. Tries to preserve
+        storage hint. If data block with newUnifName exists, it is overwritten.
+        Currently if oldUnifName doesn't exist, the function does nothing
+
+        TODO: Native support in WikiData classes.
+        """
+        sh = self.guessDataBlockStoreHint(oldUnifName)
+        if sh is None:
+            return
+
+        content = self.retrieveDataBlock(oldUnifName, default=None)
+        self.storeDataBlock(newUnifName, content, storeHint=sh)
+        self.deleteDataBlock(oldUnifName)
 
 
 
@@ -1428,7 +1462,7 @@ class WikiDataManager(MiscEventSourceMixin):
             return None
 
 
-    def searchWiki(self, sarOp, applyOrdering=True, threadstop=DUMBTHREADSTOP):  # TODO Threadholder
+    def searchWiki(self, sarOp, applyOrdering=True, threadstop=DUMBTHREADSTOP):
         """
         Search all wiki pages using the SearchAndReplaceOperation sarOp and
         return list of all page names that match the search criteria.

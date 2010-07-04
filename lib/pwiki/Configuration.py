@@ -746,6 +746,9 @@ GLOBALDEFAULTS = {
     ("main", "fastSearch_caseSensitive"): "False",  # Fast search case sensitive?
     ("main", "fastSearch_wholeWord"): "False",  # Fast search for whole words only
 
+    ("main", "search_dontAllowCancel"): "False", # Iff true a running search can't be canceled
+            # (advanced option to cure a problem on Mac OS)
+
 
     # Miscellaneous
     ("main", "print_margins"): "0,0,0,0", # Left, upper, right, lower page margins on printing

@@ -92,8 +92,8 @@ def findDirs():
     if globalConfigDir is not None:
         globalConfigDir = mbcsDec(globalConfigDir, "replace")[0]
         
-    ExceptionLogger._exceptionDestDir = globalConfigDir
-
+    ExceptionLogger.setLogDestDir(globalConfigDir)
+    
     return (wikiAppDir, globalConfigDir)
 
 
@@ -533,7 +533,7 @@ class App(wx.App, MiscEventSourceMixin):
 
         if ExceptionLogger._exceptionOccurred and hasattr(sys, 'frozen'):
             wx.MessageBox(_(u"An error occurred during this session\nSee file %s") %
-                    os.path.join(ExceptionLogger._exceptionDestDir, "WikidPad_Error.log"),
+                    os.path.join(ExceptionLogger.getLogDestDir()),
                     "Error", style = wx.OK)
 
 

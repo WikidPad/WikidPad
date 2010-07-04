@@ -359,7 +359,7 @@ After each change the tree(s) are updated to reflect changes like added or remov
 Recommended value: 0.0 to 0.2 seconds
 
 *Single process per user*
-If you open a new WikidPad instance while another is already running, the new window is handled by the same process as the first one. This option has only an effect after restarting WikidPad. It is off by default.
+If you open a new WikidPad instance while another is already running, the new window is handled by the same process as the first one. This option has only an effect after restarting WikidPad. It is on by default.
 
 Advantages:
 
@@ -384,6 +384,9 @@ If two or more pages reference each other (e.g. NodeA -> NodeB -> NodeA) these c
 
 *Use IME workaround for editor input*
 Fixes some problems when entering characters in non-Western languages, e.g. when using UniKey (Vietnamese input method editor) under Windows or typing Russian under Linux. You must restart WikidPad to make the change have an effect.
+
+*Forbid cancel on search*
+Checking this option forbids to cancel a running wiki-wide (or fast) search by clicking into the search field. For some OS (especially Mac OS) this increases search speed considerably.
 
 
 ++++ Autosave

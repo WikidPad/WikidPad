@@ -970,7 +970,7 @@ def updateDatabase(connwrap, dataDir, pagefileSuffix):
 
         formatver = 3
 
-    # --- WikiPad 2.1alpha.1 reached (formatver=3, writecompatver=3,
+    # --- WikiPad 2.1alpha1 reached (formatver=3, writecompatver=3,
     #         readcompatver=3) ---
 
 

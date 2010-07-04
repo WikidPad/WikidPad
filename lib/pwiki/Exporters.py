@@ -13,7 +13,7 @@ import wx
 
 from wxHelper import XrcControls, GUI_ID, wxKeyFunctionSink
 
-
+import Consts
 from WikiExceptions import WikiWordNotFoundException, ExportException
 from ParseUtilities import getFootnoteAnchorDict
 from StringOps import *
@@ -2327,6 +2327,7 @@ class MultiPageTextAddOptPanel(wx.Panel):
         
         self.ctrls.cbWriteWikiFuncPages.Enable(enabled)
         self.ctrls.cbWriteSavedSearches.Enable(enabled)
+        self.ctrls.cbWriteVersionData.Enable(enabled)
 
 
 
@@ -2387,7 +2388,7 @@ class MultiPageTextExporter(AbstractExporter):
         and can later handled back to the export method of the object
         without previously showing the export dialog.
         """
-        return 0
+        return 1
 
 
     def getAddOpt(self, addoptpanel):
@@ -2397,7 +2398,9 @@ class MultiPageTextExporter(AbstractExporter):
         of simple (unicode) string and/or numeric objects. Otherwise, any object
         can be returned (normally the addoptpanel itself).
         
-        The tuple elements mean: (<format version>,)
+        The tuple elements mean: (<format version to write>,
+                <export func. pages>, <export saved searches>,
+                <export version data>)
         """
         if addoptpanel is None:
             # Return default set in options
@@ -2409,8 +2412,10 @@ class MultiPageTextExporter(AbstractExporter):
             fileVersion = ctrls.chFileVersion.GetSelection()
             writeWikiFuncPages = boolToInt(ctrls.cbWriteWikiFuncPages.GetValue())
             writeSavedSearches = boolToInt(ctrls.cbWriteSavedSearches.GetValue())
+            writeVersionData = boolToInt(ctrls.cbWriteVersionData.GetValue())
 
-        return (fileVersion, writeWikiFuncPages, writeSavedSearches)
+        return (fileVersion, writeWikiFuncPages, writeSavedSearches,
+                writeVersionData)
 
 
     def setAddOpt(self, addOpt, addoptpanel):
@@ -2418,7 +2423,7 @@ class MultiPageTextExporter(AbstractExporter):
         Shows content of addOpt in the addoptpanel (must not be None).
         This function is only called if getAddOptVersion() != -1.
         """
-        fileVersion, writeWikiFuncPages, writeSavedSearches = \
+        fileVersion, writeWikiFuncPages, writeSavedSearches, writeVersionData = \
                 addOpt
 
         ctrls = addoptpanel.ctrls   # XrcControls(addoptpanel)?
@@ -2426,10 +2431,11 @@ class MultiPageTextExporter(AbstractExporter):
         ctrls.chFileVersion.SetSelection(fileVersion)
         ctrls.cbWriteWikiFuncPages.SetValue(writeWikiFuncPages != 0)
         ctrls.cbWriteSavedSearches.SetValue(writeSavedSearches != 0)
+        ctrls.cbWriteSavedSearches.SetValue(writeVersionData != 0)
 
 
 
-    # TODO Check also wiki func pages !!!
+    # TODO Check also wiki func pages and versions and and and ....!!!
     def _checkPossibleSeparator(self, sep):
         """
         Run search operation to test if separator string sep
@@ -2461,21 +2467,6 @@ class MultiPageTextExporter(AbstractExporter):
         """
         Find a separator (=something not used as line in a page to export)
         """
-#         # Try dashes
-#         sep = u"------"
-#         
-#         while len(sep) < 11:
-#             if self._checkPossibleSeparator(sep):
-#                 return sep
-#             sep += u"-"
-# 
-#         # Try dots
-#         sep = u"...."
-#         while len(sep) < 11:
-#             if self._checkPossibleSeparator(sep):
-#                 return sep
-#             sep += u"."
-            
         # Try random strings (35 tries)
         for i in xrange(35):
             sep = u"-----%s-----" % createRandomString(25)
@@ -2483,8 +2474,38 @@ class MultiPageTextExporter(AbstractExporter):
                 return sep
 
         # Give up
-        return None            
-        
+        return None
+
+
+    def _writeHintedDatablock(self, unifName, useB64):
+        sh = self.wikiDocument.guessDataBlockStoreHint(unifName)
+        if sh == Consts.DATABLOCK_STOREHINT_EXTERN:
+            shText = u"extern"
+        else:
+            shText = u"intern"
+
+        self.exportFile.write(unifName + u"\n")
+        if useB64:
+            datablock = self.wikiDocument.retrieveDataBlock(unifName)
+
+            self.exportFile.write(u"important/encoding/base64  storeHint/%s\n" %
+                    shText)
+            self.exportFile.write(base64BlockEncode(datablock))
+        else:
+            content = self.wikiDocument.retrieveDataBlockAsText(unifName)
+
+            self.exportFile.write(u"important/encoding/text  storeHint/%s\n" %
+                    shText)
+            self.exportFile.write(content)
+
+
+
+    def _writeSeparator(self):
+        if self.firstSeparatorCallDone:
+            self.exportFile.write("\n%s\n" % self.separator)
+        else:
+            self.firstSeparatorCallDone = True
+
 
     def export(self, wikiDocument, wordList, exportType, exportDest,
             compatFilenames, addOpt, progressHandler):
@@ -2505,11 +2526,14 @@ class MultiPageTextExporter(AbstractExporter):
         self.addOpt = addOpt
         self.exportFile = None
         self.rawExportFile = None
+        self.firstSeparatorCallDone = False
         
         self.formatVer = min(addOpt[0], 1)
         self.writeWikiFuncPages = addOpt[1] and (self.formatVer > 0)
         self.writeSavedSearches = addOpt[2] and (self.formatVer > 0)
+        self.writeVersionData = addOpt[3] and (self.formatVer > 0)
 
+        
         # The hairy thing first: find a separator that doesn't appear
         # as a line in one of the pages to export
         self.separator = self._findSeparator()
@@ -2538,11 +2562,10 @@ class MultiPageTextExporter(AbstractExporter):
                             if ft.startswith("wiki/")]
                     
                     for ft in wikiFuncTags:
+                        self._writeSeparator()
                         self.exportFile.write(u"funcpage/%s\n" % ft)
                         page = self.wikiDocument.getFuncPage(ft)
                         self.exportFile.write(page.getLiveText())
-
-                        self.exportFile.write("\n%s\n" % self.separator)
 
 
                 # Write saved searches
@@ -2553,6 +2576,7 @@ class MultiPageTextExporter(AbstractExporter):
                             u"savedsearch/")
 
                     for un in unifNames:
+                        self._writeSeparator()
 #                         self.exportFile.write(u"savedsearch/%s\n" % st)
 #                         datablock = wikiData.getSearchDatablock(st)
                         self.exportFile.write(un + u"\n")
@@ -2560,21 +2584,20 @@ class MultiPageTextExporter(AbstractExporter):
 
                         self.exportFile.write(base64BlockEncode(datablock))
 
-                        self.exportFile.write("\n%s\n" % self.separator)
-
                 locale.setlocale(locale.LC_ALL, '')
+
                 # Write actual wiki words
-                sepCount = len(self.wordList) - 1  # Number of separators yet to write
                 for word in self.wordList:
                     page = self.wikiDocument.getWikiPage(word)
 
+                    self._writeSeparator()
                     if self.formatVer == 0:
                         self.exportFile.write(u"%s\n" % word)
                     else:
                         self.exportFile.write(u"wikipage/%s\n" % word)
                         # modDate, creaDate, visitDate
                         timeStamps = page.getTimestamps()[:3]
-                        
+
                         # Do not use StringOps.strftimeUB here as its output
                         # relates to local time, but we need UTC here.
                         timeStrings = [unicode(time.strftime(
@@ -2585,9 +2608,19 @@ class MultiPageTextExporter(AbstractExporter):
 
                     self.exportFile.write(page.getLiveText())
 
-                    if sepCount > 0:
-                        self.exportFile.write("\n%s\n" % self.separator)
-                        sepCount -= 1
+                    # Write version data for this word
+                    if self.writeVersionData:
+                        verOvw = page.getExistingVersionOverview()
+                        if verOvw is not None:
+                            unifName = verOvw.getUnifiedName()
+
+                            self._writeSeparator()
+                            self._writeHintedDatablock(unifName, False)
+
+                            for unifName in verOvw.getDependentDataBlocks(
+                                    omitSelf=True):
+                                self._writeSeparator()
+                                self._writeHintedDatablock(unifName, True)
 
             except Exception, e:
                 traceback.print_exc()

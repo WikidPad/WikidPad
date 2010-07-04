@@ -589,6 +589,22 @@ class StringPathSet(set):
 
 
 
+class DefaultDictParam(dict):
+    """
+    Similar to collections.defaultdict, but gives key as argument to
+    defaultFactory
+    """
+    def __init__(self, defaultFactory):
+        self.defaultFactory = defaultFactory
+    
+    def __missing__(self, key):
+        val = self.defaultFactory(key)
+        self[key] = val
+        return val
+
+
+
+
 def iterMergesort(list_of_lists, key=None):
     # Based on http://code.activestate.com/recipes/511509-n-way-merge-sort/
     # from Mike Klaas

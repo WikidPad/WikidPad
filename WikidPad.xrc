@@ -2348,6 +2348,14 @@
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
       </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbSearchDontAllowCancel">
+          <label>Forbid cancel on search</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
       <object class="spacer">
         <size>5,5</size>
       </object>
@@ -4616,6 +4624,15 @@
             <flag>wxTOP|wxLEFT|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
           </object>
           <object class="sizeritem">
+            <object class="wxCheckBox" name="cbWriteVersionData">
+              <label>Write version data of pages</label>
+              <checked>1</checked>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
             <object class="wxCheckBox" name="cbWriteWikiFuncPages">
               <label>Write wiki func. pages</label>
               <checked>1</checked>
@@ -4862,6 +4879,32 @@
       </object>
     </object>
   </object>
+  <object class="wxPanel" name="ImportSubMultipageText">
+    <object class="wxBoxSizer">
+      <orient>wxHORIZONTAL</orient>
+      <object class="spacer">
+        <size>10,10</size>
+        <option>1</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxVERTICAL</orient>
+          <object class="sizeritem">
+            <object class="wxCheckBox" name="cbShowImportTableAlways">
+              <label>Always show import table</label>
+              <checked>0</checked>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_BOTTOM</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <option>0</option>
+        <flag>wxEXPAND</flag>
+      </object>
+    </object>
+  </object>
   <object class="wxDialog" name="ImportDialog">
     <title>Import</title>
     <centered>1</centered>
@@ -4997,63 +5040,85 @@
       <orient>wxVERTICAL</orient>
       <object class="sizeritem">
         <object class="wxStaticText" name="">
-          <label>Wiki Pages</label>
+          <label>Defaults</label>
         </object>
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
       </object>
       <object class="sizeritem">
-        <object class="unknown" name="gridWikiPages"/>
-        <option>2</option>
-        <flag>wxALL|wxEXPAND</flag>
-        <border>5</border>
-      </object>
-      <object class="sizeritem">
-        <object class="wxStaticText" name="">
-          <label>Other data</label>
+        <object class="wxFlexGridSizer">
+          <cols>4</cols>
+          <object class="sizeritem">
+            <object class="wxStaticText" name="">
+              <label>Import</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chDefaultImport">
+              <content>
+                <item>Yes</item>
+                <item>No</item>
+                <item>Overwrite</item>
+              </content>
+              <selection>0</selection>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText" name="">
+              <label>Version Import</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chDefaultVersionImport">
+              <content>
+                <item>Yes</item>
+                <item>No</item>
+              </content>
+              <selection>0</selection>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
         </object>
-        <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-        <border>5</border>
-      </object>
-      <object class="sizeritem">
-        <object class="unknown" name="gridDataBlocks"/>
-        <option>2</option>
-        <flag>wxALL|wxEXPAND</flag>
-        <border>5</border>
-      </object>
-      <object class="sizeritem">
-        <object class="wxTextCtrl" name="text"/>
-        <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-        <border>5</border>
-      </object>
-      <object class="sizeritem">
-        <object class="wxStaticText" name="">
-          <label>Errors</label>
-        </object>
-        <option>0</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-        <border>5</border>
-      </object>
-      <object class="sizeritem">
-        <object class="wxListBox" name="lbErrors">
-          <content/>
-        </object>
-        <option>1</option>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-        <border>5</border>
-      </object>
-      <object class="sizeritem">
-        <object class="wxStaticText" name="stLinkTo">
-          <label></label>
-        </object>
-        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-        <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxStaticLine"/>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="">
+          <label>Details</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="unknown" name="gridDetails"/>
+        <option>2</option>
+        <flag>wxALL|wxEXPAND</flag>
+        <border>5</border>
+        <minsize>300,300</minsize>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText" name="stGridErrors">
+          <label></label>
+          <style>wxST_NO_AUTORESIZE</style>
+          <fg>#FF0000</fg>
+        </object>
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
@@ -5078,6 +5143,14 @@
             <border>5</border>
           </object>
           <cols>3</cols>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnTest">
+              <label> &amp;Test </label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
           <object class="spacer">
             <size>80,0</size>
           </object>
