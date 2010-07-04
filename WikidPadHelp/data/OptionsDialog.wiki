@@ -381,6 +381,9 @@ If two or more pages reference each other (e.g. NodeA -> NodeB -> NodeA) these c
 *Use IME workaround for editor input*
 Fixes some problems when entering characters in non-Western languages, e.g. when using UniKey (Vietnamese input method editor) under Windows or typing Russian under Linux. You must restart WikidPad to make the change have an effect.
 
+*Forbid cancel on search*
+Checking this option forbids to cancel a running wiki-wide (or fast) search by clicking into the search field. For some OS (especially Mac OS) this increases search speed considerably.
+
 
 ++++ Autosave
 

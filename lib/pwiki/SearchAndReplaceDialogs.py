@@ -175,6 +175,15 @@ class SearchResultListBox(wx.HtmlListBox):
             self.showFound(None, None, None)
 
 
+    def _displayFound(self, itemCount, threadstop):
+        """
+        Called by showFound(), must be called in main thread.
+        """
+        if threadstop.isRunning():
+            self.SetItemCount(itemCount)
+            self.Refresh()
+
+
     def showFound(self, sarOp, found, wikiDocument,
             threadstop=DUMBTHREADSTOP):
         """
@@ -187,7 +196,7 @@ class SearchResultListBox(wx.HtmlListBox):
             self.foundinfo = []
             self.searchOp = None
             self.isShowingSearching = False
-            callInMainThreadAsync(self.SetItemCount, 1)   # For the "Not found" entry
+            callInMainThreadAsync(self._displayFound, 1, threadstop)   # For the "Not found" entry
         else:
             try:
                 # Store and prepare clone of search operation
@@ -283,17 +292,18 @@ class SearchResultListBox(wx.HtmlListBox):
 
                 threadstop.testRunning()
                 self.isShowingSearching = False
-                callInMainThreadAsync(self.SetItemCount, len(self.foundinfo))
+#                 callInMainThreadAsync(self.SetItemCount, len(self.foundinfo))
+                callInMainThreadAsync(self._displayFound, len(self.foundinfo),
+                        threadstop)
 
             except NotCurrentThreadException:
                 self.found = []
                 self.foundinfo = []
                 self.isShowingSearching = False
-                callInMainThreadAsync(self.SetItemCount, 1)   # For the "Not found" entry
+                # For the "Not found" entry
+                callInMainThreadAsync(self._displayFound, 1, threadstop)
                 raise
 
-        self.Refresh()
-        
 
     def GetSelectedWord(self):
         sel = self.GetSelection()
@@ -783,7 +793,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             allowOrdering=True, allowOkCancel=True, value=None,
             title="Search Wiki", pos=wx.DefaultPosition, size=wx.DefaultSize,
             style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
-        
+
 #         _prof.start()
         d = wx.PreDialog()
         self.PostCreate(d)
@@ -824,7 +834,6 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                                       # search criteria?
 
         self.searchingStartTime = None
-        self.searchingDisableSet = None
 
         self.savedSearches = None
         self.foundPages = []
@@ -860,7 +869,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
         # Events from text search tab
         wx.EVT_BUTTON(self, GUI_ID.btnFindPages, self.OnSearchWiki)
-        wx.EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)
+        wx.EVT_BUTTON(self, GUI_ID.btnFindNext, self.OnFindNext)        
         wx.EVT_BUTTON(self, GUI_ID.btnReplace, self.OnReplace)
         wx.EVT_BUTTON(self, GUI_ID.btnReplaceAll, self.OnReplaceAll)
         wx.EVT_BUTTON(self, GUI_ID.btnSaveSearch, self.OnSaveSearch)
@@ -1074,37 +1083,46 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def _refreshPageList(self):
+        sarOp = self.buildSearchReplaceOperation()
+
+        # If allowOkCancel is True, the dialog is used to create a set of pages
+        # so process even for an empty search string
+        if len(sarOp.searchStr) == 0 and not self.allowOkCancel:
+            self.foundPages = []
+            self.ctrls.htmllbPages.showFound(None, None, None)
+
+            self.listNeedsRefresh = False
+            return
+
         disableSet = wxHelper.getAllChildWindows(self)
         disableSet.difference_update(wxHelper.getWindowParentsUpTo(
                 self.ctrls.htmllbPages, self))
         disableSet = set(win for win in disableSet if win.IsEnabled())
 
-        sarOp = self.buildSearchReplaceOperation()
-
         self.ctrls.htmllbPages.showSearching()
         self.SetCursor(wx.HOURGLASS_CURSOR)
 #         self.Freeze()
 
-        threadstop = FunctionThreadStop(self._searchPoll)
         self.searchingStartTime = time.time()
+
+        if self.mainControl.configuration.getboolean("main",
+                        "search_dontAllowCancel"):
+            threadstop = DUMBTHREADSTOP
+        else:
+            threadstop = FunctionThreadStop(self._searchPoll)
+
         for win in disableSet:
             win.Disable()
         try:
-            if len(sarOp.searchStr) > 0 or self.allowOkCancel:
-                # If allowOkCancel is True, the dialog is used to create a set of pages
-                # so process even for an empty search string
-                self.foundPages = self.mainControl.getWikiDocument().searchWiki(
-                        sarOp, self.allowOrdering, threadstop=threadstop)
-                if not self.allowOrdering:
-                    # Use default alphabetical ordering
-                    self.mainControl.getCollator().sort(self.foundPages)
+            self.foundPages = self.mainControl.getWikiDocument().searchWiki(
+                    sarOp, self.allowOrdering, threadstop=threadstop)
+            if not self.allowOrdering:
+                # Use default alphabetical ordering
+                self.mainControl.getCollator().sort(self.foundPages)
 
-                self.ctrls.htmllbPages.showFound(sarOp, self.foundPages,
-                        self.mainControl.getWikiDocument(),
-                        threadstop=threadstop)
-            else:
-                self.foundPages = []
-                self.ctrls.htmllbPages.showFound(None, None, None)
+            self.ctrls.htmllbPages.showFound(sarOp, self.foundPages,
+                    self.mainControl.getWikiDocument(),
+                    threadstop=threadstop)
 
             self.listNeedsRefresh = False
 
@@ -1115,14 +1133,13 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             for win in disableSet:
                 win.Enable()
     
-            self.searchingDisableSet = None
     #         self.Thaw()
             self.SetCursor(wx.NullCursor)
             self.ctrls.htmllbPages.ensureNotShowSearching()
 
 
     def _searchPoll(self):
-        return  wx.SafeYield(self, True) and self.searchingStartTime is not None  #
+        return wx.SafeYield(self, True) and self.searchingStartTime is not None
 
     def stopSearching(self):
         self.searchingStartTime = None
@@ -2224,6 +2241,13 @@ class FastSearchPopup(wx.Frame):
 
 
     def _refreshPageList(self):
+        if len(self.sarOp.searchStr) == 0:
+            self.foundPages = []
+            self.resultBox.showFound(None, None, None)
+
+            self.listNeedsRefresh = False
+            return
+
         disableSet = wxHelper.getAllChildWindows(self)
         disableSet.difference_update(wxHelper.getWindowParentsUpTo(
                 self.resultBox, self))
@@ -2233,21 +2257,22 @@ class FastSearchPopup(wx.Frame):
         self.SetCursor(wx.HOURGLASS_CURSOR)
 #         self.Freeze()
 
-        threadstop = FunctionThreadStop(self._searchPoll)
+        if self.mainControl.configuration.getboolean("main",
+                        "search_dontAllowCancel"):
+            threadstop = DUMBTHREADSTOP
+        else:
+            threadstop = FunctionThreadStop(self._searchPoll)
+
         self.searchingStartTime = time.time()
         for win in disableSet:
             win.Disable()
         try:
-            if len(self.sarOp.searchStr) > 0:
-                self.foundPages = self.mainControl.getWikiDocument().searchWiki(
-                        self.sarOp, threadstop=threadstop)
-                self.mainControl.getCollator().sort(self.foundPages)
-                self.resultBox.showFound(self.sarOp, self.foundPages,
-                        self.mainControl.getWikiDocument(),
-                        threadstop=threadstop)
-            else:
-                self.foundPages = []
-                self.resultBox.showFound(None, None, None)
+            self.foundPages = self.mainControl.getWikiDocument().searchWiki(
+                    self.sarOp, threadstop=threadstop)
+            self.mainControl.getCollator().sort(self.foundPages)
+            self.resultBox.showFound(self.sarOp, self.foundPages,
+                    self.mainControl.getWikiDocument(),
+                    threadstop=threadstop)
 
             self.listNeedsRefresh = False
 
@@ -2258,7 +2283,6 @@ class FastSearchPopup(wx.Frame):
             for win in disableSet:
                 win.Enable()
     
-            self.searchingDisableSet = None
     #         self.Thaw()
             self.SetCursor(wx.NullCursor)
             self.resultBox.ensureNotShowSearching()

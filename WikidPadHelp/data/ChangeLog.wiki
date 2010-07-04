@@ -1,6 +1,16 @@
 ﻿++ Change Log
 
 
+Jul. 04, 2010 (2.0rc04)
+
+    * Bug fixed: Errors due to bad cache when using different
+      versions side-by-side with non-English UI language
+    * Workaround: Option to forbid cancelling of running
+      wiki-wide search.
+      See [OptionsDialog#*Forbid cancel on search*]
+
+
+
 Jun. 05, 2010 (2.0rc03)
 
     * Process "binInst.ini"-file (needed for Windows binary
