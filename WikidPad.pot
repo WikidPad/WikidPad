@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2010-07-03 13:12\n"
+"POT-Creation-Date: 2010-07-26 15:30\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2002,6 +2002,10 @@ msgstr ""
 
 #: lib\pwiki\Exporters.py:2102
 msgid "[Unknown parser node with name \"%s\" found]"
+msgstr ""
+
+#: lib\pwiki\Exporters.py:2136
+msgid "Set of *.wiki files"
 msgstr ""
 
 #: lib\pwiki\Exporters.py:2320 lib\pwiki\Importers.py:34

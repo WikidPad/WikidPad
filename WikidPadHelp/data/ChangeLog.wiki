@@ -1,6 +1,13 @@
 ﻿++ Change Log
 
 
+Jul. 27, 2010 (2.0rc05)
+
+    * Bug fixed: Missing string <<"Set of *.wiki files">>
+      for i18n
+
+
+
 Jul. 04, 2010 (2.0rc04)
 
     * Bug fixed: Errors due to bad cache when using different

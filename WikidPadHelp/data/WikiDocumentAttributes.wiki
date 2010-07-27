@@ -157,6 +157,12 @@ Possible values are:
 You can also use the attribute global.child_sort_order to control the default for the wiki (without this attribute "ascending" is used)
 
 
+*tree_position: Order number for position in subtree*
+Gives a position number where to place a particular word in the tree relative to its siblings. 1 places it at the top, 2 at the second-top and so-on (if place is occupied by another word with same position, it is placed as near as possible). A high value like e.g. 10000 places it at the bottom.
+
+Be aware that a word may have multiple parents, can therefore appear multiple times in the tree and will each time try to place itself at the given position.
+
+
 *export: Export this page*
 Control if the page containing this attribute should be exported. Only possible value is "false".
 The HTML exporter respects this attribute, others, like the multipage text exporter, do not.
