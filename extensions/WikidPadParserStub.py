@@ -10,7 +10,6 @@ from pwiki.OptionsDialog import PluginOptionsPanel
 # only loaded if the language is actually used.
 
 
-
 WIKIDPAD_PLUGIN = (("WikiParser", 1), ("Options", 1))
 
 

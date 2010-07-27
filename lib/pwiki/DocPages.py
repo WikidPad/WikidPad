@@ -6,7 +6,7 @@ from .rtlibRepl import minidom
 
 import wx
 
-from MiscEvent import MiscEventSourceMixin
+from MiscEvent import MiscEventSourceMixin, KeyFunctionSinkAR
 
 import Consts
 from WikiExceptions import *
@@ -478,6 +478,16 @@ class AbstractWikiPage(DataCarryingPage):
         self.livePageBaseFormatDetails = None   # Cached format details on which the
                 # page-ast bases
 
+        # List of words unknown to spellchecker
+        self.liveSpellCheckerUnknownWords = None
+
+        # liveTextPlaceHold object on which the liveSpellCheckerUnknownWords is based.
+        self.liveSpellCheckerUnknownWordsBasePlaceHold = None
+
+        self.__sinkWikiDocumentSpellSession = KeyFunctionSinkAR((
+                ("modified spell checker session", self.onModifiedSpellCheckerSession),
+        ))
+
 #         self.metaDataProcessLock = threading.RLock()  # lock while processing
 #                 # meta-data
 
@@ -492,6 +502,10 @@ class AbstractWikiPage(DataCarryingPage):
 
 #         if self.getWikiData().getMetaDataState(self.wikiWord) != 1:
 #             self.updateDirtySince = time.time()
+
+    def invalidate(self):
+        super(AbstractWikiPage, self).invalidate()
+        self.__sinkWikiDocumentSpellSession.setEventSource(None)
 
     def getWikiWord(self):
         return self.wikiWord
@@ -897,6 +911,102 @@ class AbstractWikiPage(DataCarryingPage):
         with self.textOperationLock:
             threadstop.testRunning()
             return pageAst
+
+
+    def onModifiedSpellCheckerSession(self, miscevt):
+        """
+        Invalidate spell checker data when e.g. new words are added to
+        dictionary
+        """
+        with self.textOperationLock:
+            self.__sinkWikiDocumentSpellSession.setEventSource(None)
+
+            self.liveSpellCheckerUnknownWords = None
+            self.liveSpellCheckerUnknownWordsBasePlaceHold = None
+
+        self.fireMiscEventKeys(("modified spell checker session",))
+
+
+    def getSpellCheckerUnknownWordsIfAvailable(self):
+        """
+        Return the current, up-to-data page AST if available, None otherwise
+        """
+        with self.textOperationLock:
+            # unknown words
+            unknownWords = self.liveSpellCheckerUnknownWords
+
+            if unknownWords is not None and \
+                    self.liveTextPlaceHold is \
+                    self.liveSpellCheckerUnknownWordsBasePlaceHold:
+                return unknownWords
+
+            return None
+
+
+
+    def getSpellCheckerUnknownWords(self, dieOnChange=False,
+            threadstop=DUMBTHREADSTOP):
+        """
+        Return list of unknown words as list of WikiPyparsing.TerminalNode of live text.
+        In rare cases the live text may have changed while method is running and
+        the result is inaccurate.
+        """
+#         with self.livePageAstBuildLock:   # TODO: Timeout?
+        threadstop.testRunning()
+        
+        spellSession = self.getWikiDocument().createOnlineSpellCheckerSessionClone()
+        if spellSession is None:
+            return
+            
+        spellSession.setCurrentDocPage(self)
+
+        with self.textOperationLock:
+            text = self.getLiveText()
+            liveTextPlaceHold = self.liveTextPlaceHold
+
+            unknownWords = self.getSpellCheckerUnknownWordsIfAvailable()
+
+        if unknownWords is not None:
+            return unknownWords
+
+        if dieOnChange:
+            if threadstop is DUMBTHREADSTOP:
+                threadstop = FunctionThreadStop(
+                        lambda: liveTextPlaceHold is self.liveTextPlaceHold)
+            else:
+                origThreadstop = threadstop
+                threadstop = FunctionThreadStop(
+                        lambda: origThreadstop.isRunning() and 
+                        liveTextPlaceHold is self.liveTextPlaceHold)
+
+        if len(text) == 0:
+            unknownWords = []
+        else:
+            unknownWords = spellSession.buildUnknownWordList(text,
+                    threadstop=threadstop)
+
+        with self.textOperationLock:
+            threadstop.testRunning()
+
+            self.liveSpellCheckerUnknownWords = unknownWords
+            self.liveSpellCheckerUnknownWordsBasePlaceHold = liveTextPlaceHold
+            
+            self.__sinkWikiDocumentSpellSession.setEventSource(
+                    self.getWikiDocument().getOnlineSpellCheckerSession())
+
+
+        if self.isReadOnlyEffect():
+            threadstop.testRunning()
+            return unknownWords
+
+#         if False and allowMetaDataUpdate:   # TODO: Option
+#             self._refreshMetaData(pageAst, formatDetails, fireEvent=fireEvent,
+#                     threadstop=threadstop)
+
+        with self.textOperationLock:
+            threadstop.testRunning()
+            return unknownWords
+
 
 
     def parseTextInContext(self, text, formatDetails=None,
@@ -1873,54 +1983,54 @@ class WikiPage(AbstractWikiPage):
         return vo.getDependentDataBlocks()
         
 
-    def serializeOverviewToXml(self, xmlNode, xmlDoc):
-        """
-        Create XML node to contain overview information (neither content nor
-        version overview) about this object.
-        """
-#         Serialization.serToXmlUnicode(xmlNode, xmlDoc, u"unifiedName",
-#                 self.getUnifiedPageName(), replace=True)
-
-        timeStamps = self.getTimestamps()[:3]
-
-        # Do not use StringOps.strftimeUB here as its output
-        # relates to local time, but we need UTC here.
-        timeStrings = [unicode(time.strftime(
-                "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
-                for ts in timeStamps]
-        
-        tsNode = Serialization.findOrAppendXmlElementFlat(xmlNode, xmlDoc,
-            u"timeStamps")
-
-        tsNode.setAttribute(u"modificationTime", timeStrings[0])
-        tsNode.setAttribute(u"creationTime", timeStrings[1])
-        tsNode.setAttribute(u"visitTime", timeStrings[2])
-
-
-    def serializeOverviewFromXml(self, xmlNode):
-        """
-        Set object state from data in xmlNode
-        """
-        tsNode = Serialization.findXmlElementFlat(xmlNode, 
-            u"timeStamps", excOnFail=False)
-        
-        if tsNode is not None:
-            timeStrings = [u""] * 3
-            timeStrings[0] = tsNode.getAttribute(u"modificationTime")
-            timeStrings[1] = tsNode.getAttribute(u"creationTime")
-            timeStrings[2] = tsNode.getAttribute(u"visitTime")
-
-        timeStamps = []
-        for tstr in timeStrings:
-            if tstr == u"":
-                timeStamps.append(0.0)
-            else:
-                timeStamps.append(timegm(time.strptime(tstr,
-                        "%Y-%m-%d/%H:%M:%S")))
-
-        self.setTimestamps(timeStamps)
-
-        self.versionNumber = serFromXmlInt(xmlNode, u"versionNumber")
+#     def serializeOverviewToXml(self, xmlNode, xmlDoc):
+#         """
+#         Create XML node to contain overview information (neither content nor
+#         version overview) about this object.
+#         """
+# #         Serialization.serToXmlUnicode(xmlNode, xmlDoc, u"unifiedName",
+# #                 self.getUnifiedPageName(), replace=True)
+# 
+#         timeStamps = self.getTimestamps()[:3]
+# 
+#         # Do not use StringOps.strftimeUB here as its output
+#         # relates to local time, but we need UTC here.
+#         timeStrings = [unicode(time.strftime(
+#                 "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
+#                 for ts in timeStamps]
+#         
+#         tsNode = Serialization.findOrAppendXmlElementFlat(xmlNode, xmlDoc,
+#             u"timeStamps")
+# 
+#         tsNode.setAttribute(u"modificationTime", timeStrings[0])
+#         tsNode.setAttribute(u"creationTime", timeStrings[1])
+#         tsNode.setAttribute(u"visitTime", timeStrings[2])
+# 
+# 
+#     def serializeOverviewFromXml(self, xmlNode):
+#         """
+#         Set object state from data in xmlNode
+#         """
+#         tsNode = Serialization.findXmlElementFlat(xmlNode, 
+#             u"timeStamps", excOnFail=False)
+#         
+#         if tsNode is not None:
+#             timeStrings = [u""] * 3
+#             timeStrings[0] = tsNode.getAttribute(u"modificationTime")
+#             timeStrings[1] = tsNode.getAttribute(u"creationTime")
+#             timeStrings[2] = tsNode.getAttribute(u"visitTime")
+# 
+#         timeStamps = []
+#         for tstr in timeStrings:
+#             if tstr == u"":
+#                 timeStamps.append(0.0)
+#             else:
+#                 timeStamps.append(timegm(time.strptime(tstr,
+#                         "%Y-%m-%d/%H:%M:%S")))
+# 
+#         self.setTimestamps(timeStamps)
+# 
+#         self.versionNumber = serFromXmlInt(xmlNode, u"versionNumber")
 
 
 

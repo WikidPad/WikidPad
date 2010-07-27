@@ -665,6 +665,7 @@ lib/pwiki/WikiHtmlViewIE.py -text
 lib/pwiki/WikiPyparsing.py -text
 lib/pwiki/WikiTreeCtrl.py -text
 lib/pwiki/WikiTxtCtrl.py -text
+lib/pwiki/WikiTxtDialogs.py -text
 lib/pwiki/WindowLayout.py -text
 lib/pwiki/WindowsHacks.py -text
 lib/pwiki/__init__.py -text

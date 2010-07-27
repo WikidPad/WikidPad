@@ -1,3 +1,5 @@
+from __future__ import with_statement
+
 # pyenchant
 #
 # Copyright (C) 2004-2008, Ryan Kelly
@@ -30,7 +32,8 @@
 # 
 # 
 # Modified to work with WikidPad and to reduce dependencies
-#    2006, 2008 by Michael Butscher
+#    2006, 2008, 2010 by Michael Butscher
+#    2010 Added simple thread-safety
 """
     enchant:  Access to the enchant spellchecking library
 
@@ -93,6 +96,7 @@ __version__ = "%d.%d.%d%s" % (__ver_major__,__ver_minor__,
 
 # from enchant import _enchant as _e
 import sys, os, os.path
+from threading import RLock
 from ctypes import *
 from ctypes.util import find_library
 
@@ -130,6 +134,8 @@ def get_resource_filename(resname):
 #     import pkg_resources
 #     return pkg_resources.resource_filename("enchant",resname)
 
+
+_EnchantCCallLock = RLock()
 
 class EnchantStr(str):
     """String subclass for interfacing with enchant C library.
@@ -285,21 +291,25 @@ dict_check1 = e.enchant_dict_check
 dict_check1.argtypes = [t_dict,c_char_p,c_size_t]
 dict_check1.restype = c_int
 def dict_check(dict,word):
-    return dict_check1(dict,word,len(word))
+#     print "--dict_check1", repr(dict)
+    with _EnchantCCallLock:
+        return dict_check1(dict,word,len(word))
 
 dict_suggest1 = e.enchant_dict_suggest
 dict_suggest1.argtypes = [t_dict,c_char_p,c_size_t,POINTER(c_size_t)]
 dict_suggest1.restype = POINTER(c_char_p)
 def dict_suggest(dict,word):
     numSuggsP = pointer(c_size_t(0))
-    suggs_c = dict_suggest1(dict,word,len(word),numSuggsP)
+    with _EnchantCCallLock:
+        suggs_c = dict_suggest1(dict,word,len(word),numSuggsP)
     suggs = []
     n = 0
     while n < numSuggsP.contents.value:
         suggs.append(suggs_c[n])
         n = n + 1
     if numSuggsP.contents.value > 0:
-        dict_free_string_list(dict,suggs_c)
+        with _EnchantCCallLock:
+            dict_free_string_list(dict,suggs_c)
     return suggs
 
 dict_add1 = e.enchant_dict_add
@@ -544,7 +554,10 @@ class Broker(_EnchantObject):
         """
         self._check_this()
         tag = EnchantStr(tag)
-        new_dict = broker_request_dict(self._this,tag.encode())
+
+        with _EnchantCCallLock:
+            new_dict = broker_request_dict(self._this,tag.encode())
+
         if new_dict is None:
             eStr = "Dictionary for language '%s' could not be found"
             self._raise_error(eStr % (tag,),DictNotFoundError)

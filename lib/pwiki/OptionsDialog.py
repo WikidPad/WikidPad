@@ -5,7 +5,7 @@ import wx, wx.xrc
 from wxHelper import *
 
 from .StringOps import uniToGui, guiToUni, colorDescToRgbTuple,\
-        rgbToHtmlColor, strToBool, splitIndent
+        rgbToHtmlColor, strToBool, splitIndent, escapeForIni, unescapeForIni
 
 from .AdditionalDialogs import DateformatDialog, FontFaceDialog
 
@@ -73,6 +73,7 @@ class PluginOptionsPanel(DefaultOptionsPanel):
         #     b: boolean checkbox
         #     i0+: nonnegative integer
         #     t: text
+        #     tes: text with escaped spaces, using StringOps.escapeForIni
         #     tre: regular expression
         #     ttdf: time/date format
         #     f0+: nonegative float
@@ -118,8 +119,9 @@ class PluginOptionsPanel(DefaultOptionsPanel):
 #                 ctl.SetValue(
 #                         config.getboolean("main", o))
         elif t in ("t", "tre", "ttdf", "i0+", "f0+", "color0"):  # text field or regular expression field
-            ctl.SetValue(
-                    uniToGui(config.get("main", o)) )
+            ctl.SetValue( uniToGui(config.get("main", o)) )
+        elif t == "tes":  # Text escaped 
+            ctl.SetValue( unescapeForIni(uniToGui(config.get("main", o))) )
         elif t == "seli":   # Selection -> transfer index
             ctl.SetSelection(config.getint("main", o))
         elif t == "selt":   # Selection -> transfer content string
@@ -259,8 +261,10 @@ class PluginOptionsPanel(DefaultOptionsPanel):
                 config.set("main", o, "False")
 
         elif t in ("t", "tre", "ttdf", "i0+", "f0+", "color0"):
-            config.set(
-                    "main", o, guiToUni(ctl.GetValue()) )
+            config.set("main", o, guiToUni(ctl.GetValue()) )
+        elif t == "tes":
+            config.set( "main", o, guiToUni(escapeForIni(ctl.GetValue(),
+                    toEscape=u" ")) )
         elif t == "seli":   # Selection -> transfer index
             config.set(
                     "main", o, unicode(ctl.GetSelection()) )
@@ -344,6 +348,7 @@ class OptionsDialog(wx.Dialog):
     #     b: boolean checkbox
     #     i0+: nonnegative integer
     #     t: text
+    #     tes: text with escaped spaces, using StringOps.escapeForIni
     #     tre: regular expression
     #     ttdf: time/date format
     #     f0+: nonegative float
@@ -363,7 +368,7 @@ class OptionsDialog(wx.Dialog):
     _lastShownPanelName = None
 
 
-    OPTION_TO_CONTROL = (
+    OPTION_TO_CONTROL_GLOBAL = (
             # application-wide options
             ("single_process", "cbSingleProcess", "b"),
             ("wikiPathes_relative", "cbWikiPathesRelative", "b"),
@@ -470,7 +475,9 @@ class OptionsDialog(wx.Dialog):
             ("editor_imagePaste_fileType", "chEditorImagePasteFileType", "seli"),
             ("editor_imagePaste_quality", "tfEditorImagePasteQuality", "i0+"),
             ("editor_imagePaste_askOnEachPaste", "cbEditorImagePasteAskOnEachPaste", "b"),
-
+            ("editor_filePaste_prefix", "tfEditorFilePastePrefix", "tes"),
+            ("editor_filePaste_middle", "tfEditorFilePasteMiddle", "tes"),
+            ("editor_filePaste_suffix", "tfEditorFilePasteSuffix", "tes"),
 
             ("editor_plaintext_color", "tfEditorPlaintextColor", "color0",
                     "btnSelectEditorPlaintextColor"),
@@ -511,7 +518,9 @@ class OptionsDialog(wx.Dialog):
                     u"action/none",
                     u"action/editor/this/paste/files/insert/url/absolute",
                     u"action/editor/this/paste/files/insert/url/relative",
-                    u"action/editor/this/paste/files/insert/url/tostorage"
+                    u"action/editor/this/paste/files/insert/url/tostorage",
+                    u"action/editor/this/paste/files/insert/url/movetostorage",
+                    u"action/editor/this/paste/files/insert/url/ask"
                     ]),
 
             ("userEvent_mouse/leftdrop/editor/files/modkeys/shift", "chMouseLeftDropEditorShift", "selt",
@@ -519,7 +528,9 @@ class OptionsDialog(wx.Dialog):
                     u"action/none",
                     u"action/editor/this/paste/files/insert/url/absolute",
                     u"action/editor/this/paste/files/insert/url/relative",
-                    u"action/editor/this/paste/files/insert/url/tostorage"
+                    u"action/editor/this/paste/files/insert/url/tostorage",
+                    u"action/editor/this/paste/files/insert/url/movetostorage",
+                    u"action/editor/this/paste/files/insert/url/ask"
                     ]),
 
             ("userEvent_mouse/leftdrop/editor/files/modkeys/ctrl", "chMouseLeftDropEditorCtrl", "selt",
@@ -527,7 +538,9 @@ class OptionsDialog(wx.Dialog):
                     u"action/none",
                     u"action/editor/this/paste/files/insert/url/absolute",
                     u"action/editor/this/paste/files/insert/url/relative",
-                    u"action/editor/this/paste/files/insert/url/tostorage"
+                    u"action/editor/this/paste/files/insert/url/tostorage",
+                    u"action/editor/this/paste/files/insert/url/movetostorage",
+                    u"action/editor/this/paste/files/insert/url/ask"
                     ]),
 
             ("timeView_position", "chTimeViewPosition", "seli"),
@@ -571,15 +584,17 @@ class OptionsDialog(wx.Dialog):
             ("auto_save", "cbAutoSave", "b"),
             ("auto_save_delay_key_pressed", "tfAutoSaveDelayKeyPressed", "i0+"),
             ("auto_save_delay_dirty", "tfAutoSaveDelayDirty", "i0+"),
-
+    )
 
             # wiki-specific options
 
 # "wiki_wikiLanguage"
 
 #             ("footnotes_as_wikiwords", "cbFootnotesAsWws", "b"),
-            ("first_wiki_word", "tfFirstWikiWord", "t"),
 
+    OPTION_TO_CONTROL_WIKI = (
+
+            ("first_wiki_word", "tfFirstWikiWord", "t"),
 
             ("export_default_dir", "tfExportDefaultDir", "t"),
 
@@ -648,13 +663,15 @@ class OptionsDialog(wx.Dialog):
             ("OptionsPageSearching", 2 * u" " + N_(u"Searching")),  
             ("OptionsPageAdvanced", 2 * u" " + N_(u"Advanced")),  
             ("OptionsPageAutosave", 4 * u" " + N_(u"Autosave")),
+            ("??switch mark/current wiki/begin", u""),
             ("OptionsPageCurrentWiki", N_(u"Current Wiki")),
             ("OptionsPageCwHeadings", 2 * u" " + N_(u"Headings")),
             ("OptionsPageCwVersioning", 2 * u" " + N_(u"Versioning")),
             ("OptionsPageCwWikiLanguage", 2 * u" " + N_(u"Wiki language")),
             ("??insert mark/current wiki/wiki lang", u""),
             ("OptionsPageCwAdvanced", 2 * u" " + N_(u"Advanced")),
-            ("??insert mark/current wiki", u"")
+            ("??insert mark/current wiki", u""),
+            ("??switch mark/current wiki/end", u"")
     )
 
     def __init__(self, pWiki, ID, startPanelName=None, title="Options",
@@ -668,8 +685,13 @@ class OptionsDialog(wx.Dialog):
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, self.pWiki, "OptionsDialog")
 
-        self.combinedOptionToControl = self.OPTION_TO_CONTROL
-        self.combinedPanelList = wx.GetApp().getOptionsDlgPanelList()
+        self.combinedOptionToControl = self.OPTION_TO_CONTROL_GLOBAL
+        
+        if self.pWiki.isWikiLoaded():
+            self.combinedOptionToControl += self.OPTION_TO_CONTROL_WIKI
+
+        # Hold own copy, it may need modification
+        self.combinedPanelList = wx.GetApp().getOptionsDlgPanelList()[:]
         # Maps ids of the GUI controls named in self.combinedOptionToControl
         # to the entries (the appropriate tuple) there
         self.idToOptionEntryMap = {}
@@ -677,12 +699,24 @@ class OptionsDialog(wx.Dialog):
         # Add additional option depending on OS and environment
         if OsAbstract.supportsClipboardInterceptor():
             self.combinedOptionToControl += self.OPTION_TO_CONTROL_CLIPBOARD_CATCHER
-        
+
         if not Configuration.isWindows():
             self.combinedOptionToControl += self.OPTION_TO_CONTROL_NON_WINDOWS_ONLY
 
+        if not self.pWiki.isWikiLoaded():
+            # Remove wiki-bound setting pages
+            try:
+                del self.combinedPanelList[self.combinedPanelList.index(
+                        ("??switch mark/current wiki/begin", u"")) : 
+                        self.combinedPanelList.index(
+                        ("??switch mark/current wiki/end", u""))]
+            except ValueError:
+                pass
+
+
         # Rewrite panel list depending on OS and environment
         newPL = []
+        
         for e in self.combinedPanelList:
             if isinstance(e[0], basestring):
                 if e[0] == "OptionsPageFileLauncher" and Configuration.isWindows():
@@ -797,6 +831,10 @@ class OptionsDialog(wx.Dialog):
                     "color0"):  # text field or regular expression field
                 self.ctrls[c].SetValue(
                         uniToGui(self.pWiki.getConfig().get("main", o)) )
+            elif t == "tes":  # Text escaped 
+                self.ctrls[c].SetValue(
+                        unescapeForIni(uniToGui(self.pWiki.getConfig().get(
+                        "main", o))) )
             elif t == "seli":   # Selection -> transfer index
                 self.ctrls[c].SetSelection(
                         self.pWiki.getConfig().getint("main", o))
@@ -1038,56 +1076,57 @@ class OptionsDialog(wx.Dialog):
         if wikiDocument is not None and not self.ctrls.cbWikiReadOnly.GetValue():
             wikiDocument.setWriteAccessDeniedByConfig(False)
 
+        config = self.pWiki.getConfig()
+
         # Then transfer options from dialog to config object
         for oct in self.combinedOptionToControl:
             o, c, t = oct[:3]
 
             # TODO Handle unicode text controls
             if t == "b":
-                self.pWiki.getConfig().set("main", o, repr(self.ctrls[c].GetValue()))
+                config.set("main", o, repr(self.ctrls[c].GetValue()))
             elif t == "b3":
                 value = self.ctrls[c].Get3StateValue()
                 if value == wx.CHK_UNDETERMINED:
-                    self.pWiki.getConfig().set("main", o, "Gray")
+                    config.set("main", o, "Gray")
                 elif value == wx.CHK_CHECKED:
-                    self.pWiki.getConfig().set("main", o, "True")
+                    config.set("main", o, "True")
                 elif value == wx.CHK_UNCHECKED:
-                    self.pWiki.getConfig().set("main", o, "False")
+                    config.set("main", o, "False")
 
             elif t in ("t", "tre", "ttdf", "tfont0", "tdir", "i0+", "f0+", "color0"):
-                self.pWiki.getConfig().set(
-                        "main", o, guiToUni(self.ctrls[c].GetValue()) )
+                config.set( "main", o, guiToUni(self.ctrls[c].GetValue()) )
+            elif t == "tes":
+                config.set( "main", o, guiToUni(
+                        escapeForIni(self.ctrls[c].GetValue(), toEscape=u" ")) )
             elif t == "seli":   # Selection -> transfer index
-                self.pWiki.getConfig().set(
-                        "main", o, unicode(self.ctrls[c].GetSelection()) )
+                config.set("main", o, unicode(self.ctrls[c].GetSelection()) )
             elif t == "selt":   # Selection -> transfer content string
                 try:
-                    self.pWiki.getConfig().set("main", o,
-                            oct[3][self.ctrls[c].GetSelection()])
+                    config.set("main", o, oct[3][self.ctrls[c].GetSelection()])
                 except IndexError:
-                    self.pWiki.getConfig().set("main", o, 
+                    config.set("main", o, 
                             guiToUni(self.ctrls[c].GetStringSelection()))
             elif t == "spin":   # Numeric SpinCtrl -> transfer number
-                self.pWiki.getConfig().set(
-                        "main", o, unicode(self.ctrls[c].GetValue()) )
+                config.set( "main", o, unicode(self.ctrls[c].GetValue()) )
             elif t == "guilang":    # GUI language choice
                 idx = self.ctrls[c].GetSelection()
                 if idx < 1:
-                    self.pWiki.getConfig().set("main", o, u"")
+                    config.set("main", o, u"")
                 else:
-                    self.pWiki.getConfig().set("main", o,
+                    config.set("main", o,
                             Localization.getLangList()[idx - 1][0])
 
             elif t == "wikilang":    # GUI language choice
                 idx = self.ctrls[c].GetSelection()
-                self.pWiki.getConfig().set("main", o,
+                config.set("main", o,
                         wx.GetApp().listWikiLanguageDescriptions()[idx][0])
 
         # Options with special treatment (after standard handling)
         if self.ctrls.cbNewWindowWikiUrl.GetValue():
-            self.pWiki.getConfig().set("main", "new_window_on_follow_wiki_url", "1")
+            config.set("main", "new_window_on_follow_wiki_url", "1")
         else:
-            self.pWiki.getConfig().set("main", "new_window_on_follow_wiki_url", "0")
+            config.set("main", "new_window_on_follow_wiki_url", "0")
 
         if wikiDocument is not None and self.ctrls.cbWikiReadOnly.GetValue():
             wikiDocument.setWriteAccessDeniedByConfig(True)
@@ -1096,7 +1135,7 @@ class OptionsDialog(wx.Dialog):
         for panel in self.panelList:
             panel.handleOk()
 
-        self.pWiki.getConfig().informChanged(self.oldSettings)
+        config.informChanged(self.oldSettings)
         
         if self.activePageIndex > -1:
             OptionsDialog._lastShownPanelName = self.combinedPanelList[

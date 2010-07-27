@@ -1,10 +1,9 @@
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
-import os, traceback, codecs, array
+import traceback, codecs
 from cStringIO import StringIO
-import urllib_red as urllib
-import string
+import string, itertools
 import re # import pwiki.srePersistent as re
 import threading
 
@@ -14,8 +13,8 @@ from time import time, sleep
 
 import wx, wx.stc
 
-from Utilities import *  # TODO Remove this
-from Utilities import DUMBTHREADSTOP, callInMainThread
+#from Utilities import *  # TODO Remove this
+from Utilities import DUMBTHREADSTOP, callInMainThread, ThreadHolder
 
 from Consts import FormatTypes
 
@@ -25,16 +24,13 @@ import wxHelper
 
 import OsAbstract
 
-
-from MiscEvent import KeyFunctionSinkAR
-from WikiExceptions import WikiWordNotFoundException, WikiFileNotFoundException, \
+from WikiExceptions import WikiFileNotFoundException, \
         NotCurrentThreadException, NoPageAstException
 from ParseUtilities import getFootnoteAnchorDict
 
 from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 import AdditionalDialogs
-
-
+import WikiTxtDialogs
 
 # import WikiFormatting
 import DocPages
@@ -42,11 +38,13 @@ import UserActionCoord
 
 from SearchAndReplace import SearchReplaceOperation
 import StringOps
-from StringOps import *  # TODO Remove this
+import SpellChecker
+
+# from StringOps import *  # TODO Remove this
 # mbcsDec, uniToGui, guiToUni, \
 #        wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
-from Configuration import isUnicode, isOSX, isWin9x, isLinux, isWindows
+from Configuration import isUnicode, isOSX, isLinux, isWindows
 
 try:
     import WindowsHacks
@@ -77,170 +75,7 @@ def bytelenSct_mbcs(us):
     return len(StringOps.mbcsEnc(us)[0])
 
 
-
-_RE_LINE_INDENT = re.compile(ur"^[ \t]*")
-
-
-
-class IncrementalSearchDialog(wx.Frame):
-    
-    COLOR_YELLOW = wx.Colour(255, 255, 0);
-    COLOR_GREEN = wx.Colour(0, 255, 0);
-    
-    def __init__(self, parent, id, txtCtrl, rect, font, presenter, searchInit=None):
-        wx.Frame.__init__(self, parent, id, u"WikidPad i-search",
-                rect.GetPosition(), rect.GetSize(),
-                wx.NO_BORDER | wx.FRAME_FLOAT_ON_PARENT)
-
-        self.txtCtrl = txtCtrl
-        self.presenter = presenter
-        self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
-                _(u"Incremental search (ENTER/ESC to finish)"),
-                style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
-
-        self.tfInput.SetFont(font)
-        self.tfInput.SetBackgroundColour(IncrementalSearchDialog.COLOR_YELLOW)
-        mainsizer = wx.BoxSizer(wx.HORIZONTAL)
-        mainsizer.Add(self.tfInput, 1, wx.ALL | wx.EXPAND, 0)
-
-        self.SetSizer(mainsizer)
-        self.Layout()
-        self.tfInput.SelectAll()  #added for Mac compatibility
-        self.tfInput.SetFocus()
-
-        config = self.txtCtrl.presenter.getConfig()
-
-        self.closeDelay = 1000 * config.getint("main", "incSearch_autoOffDelay",
-                0)  # Milliseconds to close or 0 to deactivate
-
-        wx.EVT_TEXT(self, GUI_ID.INC_SEARCH_TEXT_FIELD, self.OnText)
-        wx.EVT_KEY_DOWN(self.tfInput, self.OnKeyDownInput)
-        wx.EVT_KILL_FOCUS(self.tfInput, self.OnKillFocus)
-        wx.EVT_TIMER(self, GUI_ID.TIMER_INC_SEARCH_CLOSE,
-                self.OnTimerIncSearchClose)
-        wx.EVT_MOUSE_EVENTS(self.tfInput, self.OnMouseAnyInput)
-
-        if searchInit:
-            self.tfInput.SetValue(searchInit)
-            self.tfInput.SetSelection(-1, -1)
-
-        if self.closeDelay:
-            self.closeTimer = wx.Timer(self, GUI_ID.TIMER_INC_SEARCH_CLOSE)
-            self.closeTimer.Start(self.closeDelay, True)
-
-#     def Close(self):
-#         wx.Frame.Close(self)
-#         self.txtCtrl.SetFocus()
-
-
-    def OnKillFocus(self, evt):
-        self.txtCtrl.forgetIncrementalSearch()
-        self.Close()
-
-    def OnText(self, evt):
-        self.txtCtrl.searchStr = self.tfInput.GetValue()
-        foundPos = self.txtCtrl.executeIncrementalSearch()
-
-        if foundPos == -1:
-            # Nothing found
-            self.tfInput.SetBackgroundColour(IncrementalSearchDialog.COLOR_YELLOW)
-        else:
-            # Found
-            self.tfInput.SetBackgroundColour(IncrementalSearchDialog.COLOR_GREEN)
-
-    def OnMouseAnyInput(self, evt):
-#         if evt.Button(wx.MOUSE_BTN_ANY) and self.closeDelay:
-
-        # Workaround for name clash in wx.MouseEvent.Button:
-        if wx._core_.MouseEvent_Button(evt, wx.MOUSE_BTN_ANY) and self.closeDelay:
-            # If a mouse button was pressed/released, restart timer
-            self.closeTimer.Start(self.closeDelay, True)
-
-        evt.Skip()
-
-
-    def OnKeyDownInput(self, evt):
-        if self.closeDelay:
-            self.closeTimer.Start(self.closeDelay, True)
-
-        key = evt.GetKeyCode()
-        accP = getAccelPairFromKeyDown(evt)
-        matchesAccelPair = self.presenter.getMainControl().keyBindings.\
-                matchesAccelPair
-
-        foundPos = -2
-        if key in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
-            # Return pressed
-            self.txtCtrl.endIncrementalSearch()
-            self.Close()
-        elif key == wx.WXK_ESCAPE:
-            # Esc -> Abort inc. search, go back to start
-            self.txtCtrl.resetIncrementalSearch()
-            self.Close()
-        elif matchesAccelPair("ContinueSearch", accP):
-            foundPos = self.txtCtrl.executeIncrementalSearch(next=True)
-        # do the next search on another ctrl-f
-        elif matchesAccelPair("StartIncrementalSearch", accP):
-            foundPos = self.txtCtrl.executeIncrementalSearch(next=True)
-        elif accP in ((wx.ACCEL_NORMAL, wx.WXK_DOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_PAGEDOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_DOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEDOWN),
-                (wx.ACCEL_NORMAL, wx.WXK_NEXT)):
-            foundPos = self.txtCtrl.executeIncrementalSearch(next=True)
-        elif matchesAccelPair("BackwardSearch", accP):
-            foundPos = self.txtCtrl.executeIncrementalSearchBackward()
-        elif accP in ((wx.ACCEL_NORMAL, wx.WXK_UP),
-                (wx.ACCEL_NORMAL, wx.WXK_PAGEUP),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_UP),
-                (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_PAGEUP),
-                (wx.ACCEL_NORMAL, wx.WXK_PRIOR)):
-            foundPos = self.txtCtrl.executeIncrementalSearchBackward()
-        elif matchesAccelPair("ActivateLink", accP):
-            # ActivateLink is normally Ctrl-L
-            self.txtCtrl.endIncrementalSearch()
-            self.Close()
-            self.txtCtrl.activateLink()
-        elif matchesAccelPair("ActivateLinkNewTab", accP):
-            # ActivateLinkNewTab is normally Ctrl-Alt-L
-            self.txtCtrl.endIncrementalSearch()
-            self.Close()
-            self.txtCtrl.activateLink(tabMode=2)        
-        elif matchesAccelPair("ActivateLink2", accP):
-            # ActivateLink2 is normally Ctrl-Return
-            self.txtCtrl.endIncrementalSearch()
-            self.Close()
-            self.txtCtrl.activateLink()
-        elif matchesAccelPair("ActivateLinkBackground", accP):
-            # ActivateLinkNewTab is normally Ctrl-Alt-L
-            self.txtCtrl.endIncrementalSearch()
-            self.Close()
-            self.txtCtrl.activateLink(tabMode=3)        
-        # handle the other keys
-        else:
-            evt.Skip()
-
-        if foundPos == -1:
-            # Nothing found
-            self.tfInput.SetBackgroundColour(IncrementalSearchDialog.COLOR_YELLOW)
-        elif foundPos >= 0:
-            # Found
-            self.tfInput.SetBackgroundColour(IncrementalSearchDialog.COLOR_GREEN)
-
-        # Else don't change
-
-    if isOSX():
-        # Fix focus handling after close
-        def Close(self):
-            wx.Frame.Close(self)
-            wx.CallAfter(self.txtCtrl.SetFocus)
-
-    def OnTimerIncSearchClose(self, evt):
-        self.txtCtrl.endIncrementalSearch()  # TODO forgetIncrementalSearch() instead?
-        self.Close()
-
-
-class StyleCollector(SnippetCollector):
+class StyleCollector(StringOps.SnippetCollector):
     """
     Helps to collect the style bytes needed to set the syntax coloring.
     """
@@ -277,19 +112,19 @@ class StyleCollector(SnippetCollector):
 
 
 
-etEVT_STYLE_DONE_COMMAND = wx.NewEventType()
-EVT_STYLE_DONE_COMMAND = wx.PyEventBinder(etEVT_STYLE_DONE_COMMAND, 0)
-
-class StyleDoneEvent(wx.PyCommandEvent):
-    """
-    This wx Event is fired when style and folding calculations are finished.
-    It is needed to savely transfer data from the style thread to the main thread.
-    """
-    def __init__(self, stylebytes, foldingseq):
-        wx.PyCommandEvent.__init__(self, etEVT_STYLE_DONE_COMMAND, -1)
-        self.stylebytes = stylebytes
-#         self.pageAst = pageAst
-        self.foldingseq = foldingseq
+# etEVT_STYLE_DONE_COMMAND = wx.NewEventType()
+# EVT_STYLE_DONE_COMMAND = wx.PyEventBinder(etEVT_STYLE_DONE_COMMAND, 0)
+# 
+# class StyleDoneEvent(wx.PyCommandEvent):
+#     """
+#     This wx Event is fired when style and folding calculations are finished.
+#     It is needed to savely transfer data from the style thread to the main thread.
+#     """
+#     def __init__(self, stylebytes, foldingseq):
+#         wx.PyCommandEvent.__init__(self, etEVT_STYLE_DONE_COMMAND, -1)
+#         self.stylebytes = stylebytes
+# #         self.pageAst = pageAst
+#         self.foldingseq = foldingseq
 
 
 
@@ -297,6 +132,18 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
     NUMBER_MARGIN = 0
     FOLD_MARGIN = 2
     SELECT_MARGIN = 1
+
+    # Not the best of all possible solutions
+    SUGGESTION_CMD_IDS = [GUI_ID.CMD_REPLACE_THIS_SPELLING_WITH_SUGGESTION_0,
+            GUI_ID.CMD_REPLACE_THIS_SPELLING_WITH_SUGGESTION_1,
+            GUI_ID.CMD_REPLACE_THIS_SPELLING_WITH_SUGGESTION_2,
+            GUI_ID.CMD_REPLACE_THIS_SPELLING_WITH_SUGGESTION_3,
+            GUI_ID.CMD_REPLACE_THIS_SPELLING_WITH_SUGGESTION_4,
+            GUI_ID.CMD_REPLACE_THIS_SPELLING_WITH_SUGGESTION_5,
+            GUI_ID.CMD_REPLACE_THIS_SPELLING_WITH_SUGGESTION_6,
+            GUI_ID.CMD_REPLACE_THIS_SPELLING_WITH_SUGGESTION_7,
+            GUI_ID.CMD_REPLACE_THIS_SPELLING_WITH_SUGGESTION_8,
+            GUI_ID.CMD_REPLACE_THIS_SPELLING_WITH_SUGGESTION_9]
 
     def __init__(self, presenter, parent, ID):
         wx.stc.StyledTextCtrl.__init__(self, parent, ID, style=wx.WANTS_CHARS | wx.TE_PROCESS_ENTER)
@@ -442,6 +289,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.__sinkApp = wxKeyFunctionSink((
                 ("options changed", self.onOptionsChanged),
         ), wx.GetApp().getMiscEvent(), self)
+        
+        self.__sinkGlobalConfig = wxKeyFunctionSink((
+                ("changed configuration", self.onChangedConfiguration),
+        ), wx.GetApp().getGlobalConfig().getMiscEvent(), self)
 
 #         if not self.presenter.getMainControl().isMainWindowConstructed():
 #             # Install event handler to wait for construction
@@ -461,6 +312,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         self.wikiPageSink = wxKeyFunctionSink((
                 ("updated wiki page", self.onWikiPageUpdated),   # fired by a WikiPage
+                ("modified spell checker session", self.OnStyleNeeded)  # ???
         ))
 
 
@@ -484,11 +336,15 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
         
-        EVT_STYLE_DONE_COMMAND(self, self.OnStyleDone)
+#         EVT_STYLE_DONE_COMMAND(self, self.OnStyleDone)
 
         self.incSearchCharStartPos = 0
         self.incSearchPreviousHiddenLines = None
         self.incSearchPreviousHiddenStartLine = -1
+
+        self.onlineSpellCheckerActive = SpellChecker.isSpellCheckSupported() and \
+                self.presenter.getConfig().getboolean(
+                "main", "editor_onlineSpellChecker_active", False)
 
         self.onOptionsChanged(None)
 
@@ -501,6 +357,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #         WikiTxtCtrl.CURSOR_HAND = wx.StockCursor(wx.CURSOR_HAND)
 
         self.contextMenuTokens = None
+        self.contextMenuSpellCheckSuggestions = None
         
         # Connect context menu events to functions
         wx.EVT_MENU(self, GUI_ID.CMD_UNDO, lambda evt: self.Undo())
@@ -516,6 +373,17 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN))
         wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT,
                 lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT))
+
+
+        for sps in self.SUGGESTION_CMD_IDS:
+            wx.EVT_MENU(self, sps, self.OnReplaceThisSpellingWithSuggestion)
+
+        wx.EVT_MENU(self, GUI_ID.CMD_ADD_THIS_SPELLING_SESSION,
+                self.OnAddThisSpellingToIgnoreSession)        
+        wx.EVT_MENU(self, GUI_ID.CMD_ADD_THIS_SPELLING_GLOBAL,
+                self.OnAddThisSpellingToIgnoreGlobal)        
+        wx.EVT_MENU(self, GUI_ID.CMD_ADD_THIS_SPELLING_LOCAL,
+                self.OnAddThisSpellingToIgnoreLocal)        
 
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)        
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
@@ -583,15 +451,31 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             copyTextToClipboard(text)
 
     def Paste(self):
+        # Text pasted?
         text = getTextFromClipboard()
         if text:
             self.ReplaceSelection(text)
             return
 
+        # File(name)s pasted?
+        filenames = wxHelper.getFilesFromClipboard()
+        if filenames is not None:
+            mc = self.presenter.getMainControl()
+    
+            paramDict = {"editor": self, "filenames": filenames,
+                    "x": -1, "y": -1, "main control": mc,
+                    "processDirectly": True}
+
+            mc.getUserActionCoord().runAction(
+                    u"action/editor/this/paste/files/insert/url/ask", paramDict)
+
+            return
+
         fs = self.presenter.getWikiDocument().getFileStorage()
-        imgsav = AdditionalDialogs.ImagePasteSaver()
+        imgsav = WikiTxtDialogs.ImagePasteSaver()
         imgsav.readOptionsFromConfig(self.presenter.getConfig())
 
+        # Bitmap pasted?
         bmp = wxHelper.getBitmapFromClipboard()
         if bmp is not None:
             img = bmp.ConvertToImage()
@@ -600,7 +484,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             if self.presenter.getConfig().getboolean("main",
                     "editor_imagePaste_askOnEachPaste", True):
                 # Options say to present dialog on an image paste operation
-                dlg = AdditionalDialogs.ImagePasteDialog(
+                dlg = WikiTxtDialogs.ImagePasteDialog(
                         self.presenter.getMainControl(), -1, imgsav)
                 try:
                     dlg.ShowModal()
@@ -625,7 +509,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             url = self.presenter.getMainControl().makeAbsPathRelUrl(destPath)
             
             if url is None:
-                url = u"file:" + urlFromPathname(destPath)
+                url = u"file:" + StringOps.urlFromPathname(destPath)
             
             self.ReplaceSelection(url)
 
@@ -649,14 +533,16 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if not WindowsHacks:
             return
 
+        # Windows Meta File pasted?
         destPath = imgsav.saveWmfFromClipboardToFileStorage(fs)
-
-        url = self.presenter.getMainControl().makeAbsPathRelUrl(destPath)
-        
-        if url is None:
-            url = u"file:" + urlFromPathname(destPath)
-        
-        self.ReplaceSelection(url)
+        if destPath is not None:
+            url = self.presenter.getMainControl().makeAbsPathRelUrl(destPath)
+            
+            if url is None:
+                url = u"file:" + StringOps.urlFromPathname(destPath)
+            
+            self.ReplaceSelection(url)
+            return
 
 
 #         if destPath is not None:
@@ -793,6 +679,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
 
     def SetStyles(self, styleFaces = None):
+        self.SetStyleBits(5)
+
         # create the styles
         if styleFaces is None:
             styleFaces = self.presenter.getDefaultFontFaces()
@@ -806,6 +694,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
             if type == wx.stc.STC_STYLE_CALLTIP:
                 self.CallTipUseStyle(10)
+
+        self.IndicatorSetStyle(2, wx.stc.STC_INDIC_SQUIGGLE)
+        self.IndicatorSetForeground(2, wx.Colour(255, 0, 0))
 
 
     def SetText(self, text, emptyUndo=True):
@@ -862,7 +753,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         Overrides the wxStyledTextCtrl.GetText method in ansi mode
         to return unicode.
         """
-        return mbcsDec(wx.stc.StyledTextCtrl.GetText(self), "replace")[0]
+        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetText(self),
+                "replace")[0]
 
     
     def GetTextRange_unicode(self, startPos, endPos):
@@ -871,8 +763,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         to return unicode.
         startPos and endPos are byte(!) positions into the editor buffer
         """
-        return mbcsDec(wx.stc.StyledTextCtrl.GetTextRange(self, startPos, endPos),
-                "replace")[0]
+        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetTextRange(self,
+                startPos, endPos), "replace")[0]
 
 
     def GetSelectedText_unicode(self):
@@ -880,11 +772,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         Overrides the wxStyledTextCtrl.GetSelectedText method in ansi mode
         to return unicode.
         """
-        return mbcsDec(wx.stc.StyledTextCtrl.GetSelectedText(self), "replace")[0]
+        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetSelectedText(self),
+                "replace")[0]
 
 
     def GetLine_unicode(self, line):
-        return mbcsDec(wx.stc.StyledTextCtrl.GetLine(self, line), "replace")[0]
+        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetLine(self, line),
+                "replace")[0]
 
 
     def ReplaceSelection_unicode(self, txt):
@@ -1285,7 +1179,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         Helper for onOptionsChanged() to read a color from an option
         and create a wx.Colour object from it.
         """
-        coltuple = colorDescToRgbTuple(self.presenter.getConfig().get(
+        coltuple = StringOps.colorDescToRgbTuple(self.presenter.getConfig().get(
                 "main", option))
 
         if coltuple is None:
@@ -1335,6 +1229,25 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         self.SetIndent(tabWidth)
         self.SetTabWidth(tabWidth)
+
+
+
+    def onChangedConfiguration(self, miscevt):
+        """
+        Called when global configuration was changed. Most things are processed
+        by onOptionsChanged so only the online spell checker switch must be
+        handled here.
+        """
+        newSetting = self.presenter.getConfig().getboolean(
+                "main", "editor_onlineSpellChecker_active", False)
+
+        newSetting = SpellChecker.isSpellCheckSupported() and \
+                self.presenter.getConfig().getboolean(
+                "main", "editor_onlineSpellChecker_active", False)
+
+        if newSetting != self.onlineSpellCheckerActive:
+            self.onlineSpellCheckerActive = newSetting
+            self.OnStyleNeeded(None)
 
 
 
@@ -1411,7 +1324,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
     def OnStyleNeeded(self, evt):
         "Styles the text of the editor"
-
         docPage = self.getLoadedDocPage()
         if docPage is None:
             # This avoids further request from STC:
@@ -1484,7 +1396,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 # For a new id, an event must be set
                 wx.EVT_MENU(self, menuID, self.OnTemplateUsed)
 
-            menu.Append(menuID, uniToGui(tn))
+            menu.Append(menuID, StringOps.uniToGui(tn))
 
 
     def OnTemplateUsed(self, evt):
@@ -1561,14 +1473,14 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
             appendToMenuByMenuDesc(menu, FOLD_MENU)
         else:
-            appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_BASE)
-            
+
             nodes = self.getTokensForMousePos(mousePos)
-            
+
             self.contextMenuTokens = nodes
             addActivateItem = False
             addFileUrlItem = False
             addUrlToClipboardItem = False
+            unknownWord = None
             for node in nodes:
                 if node.name == "wikiWord":
                     addActivateItem = True
@@ -1581,6 +1493,33 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     addActivateItem = True
                 elif node.name == "anchorDef":
                     addUrlToClipboardItem = True
+                elif node.name == "unknownSpelling":
+                    unknownWord = node.getText()
+
+            if unknownWord:
+                # Right click on a word not in spelling dictionary
+                spellCheckerSession = self.presenter.getWikiDocument()\
+                        .createOnlineSpellCheckerSessionClone()
+                spellCheckerSession.setCurrentDocPage(self.getLoadedDocPage())
+                if spellCheckerSession:
+                    # Show suggestions if available (up to first 5)
+                    suggestions = spellCheckerSession.suggest(unknownWord)[:5]
+
+                    if len(suggestions) > 0:
+                        for s, mid in zip(suggestions, self.SUGGESTION_CMD_IDS):
+                            menuitem = wx.MenuItem(menu, mid, s)
+                            font = menuitem.GetFont()
+                            font.SetWeight(wx.FONTWEIGHT_BOLD)
+                            menuitem.SetFont(font)
+
+                            menu.AppendItem(menuitem)
+
+                        self.contextMenuSpellCheckSuggestions = suggestions
+                    # Show other spelling menu items
+                    appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_SPELLING)
+
+
+            appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_BASE)
 
             if addActivateItem:
                 appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_ACTIVATE)
@@ -1630,6 +1569,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         # Show menu
         self.PopupMenu(menu)
         self.contextMenuTokens = None
+        self.contextMenuSpellCheckSuggestions = None
         menu.Destroy()
 
 
@@ -1657,10 +1597,15 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
             charStartPos = end
             
-            
+
     def handleDropText(self, x, y, text):
-        self.DoDropText(x, y, text)
-        self.gotoCharPos(self.GetSelectionCharPos()[1], scroll=False)
+        if x != -1:
+            # Real drop
+            self.DoDropText(x, y, text)
+            self.gotoCharPos(self.GetSelectionCharPos()[1], scroll=False)
+        else:
+            self.ReplaceSelection(text)
+
         self.SetFocus()
 
 
@@ -1679,12 +1624,22 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
 
 
-    def storeStylingAndAst(self, stylebytes, foldingseq):
+    def storeStylingAndAst(self, stylebytes, foldingseq, styleMask=0xff):
         self.stylebytes = stylebytes
 #         self.pageAst = pageAst
         self.foldingseq = foldingseq
+        
+        def putStyle():
+            if stylebytes:
+                self.applyStyling(stylebytes, styleMask)
 
-        self.AddPendingEvent(StyleDoneEvent(stylebytes, foldingseq))
+            if foldingseq:
+                self.applyFolding(foldingseq)
+
+        wx.CallAfter(putStyle)
+
+#         self.AddPendingEvent(StyleDoneEvent(stylebytes, foldingseq))
+
 
 
     def buildStyling(self, text, delay, threadstop=DUMBTHREADSTOP):
@@ -1714,10 +1669,38 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 foldingseq = self.processFolding(pageAst, threadstop)
             else:
                 foldingseq = None
-    
+
             threadstop.testRunning()
-            
-            self.storeStylingAndAst(stylebytes, foldingseq)
+
+            if self.onlineSpellCheckerActive and \
+                    isinstance(docPage, DocPages.AbstractWikiPage):
+
+                # Show intermediate syntax highlighting results before spell check
+                # if we are in asynchronous mode
+                if not threadstop is DUMBTHREADSTOP:
+                    self.storeStylingAndAst(stylebytes, foldingseq, styleMask=0x1f)
+
+                scTokens = docPage.getSpellCheckerUnknownWords(threadstop=threadstop)
+
+                threadstop.testRunning()
+
+                if scTokens.getChildrenCount() > 0:
+                    spellStyleBytes = self.processSpellCheckTokens(text, scTokens,
+                            threadstop)
+
+                    threadstop.testRunning()
+
+                    # TODO: Faster? How?
+                    stylebytes = "".join([chr(ord(a) | ord(b))
+                            for a, b in itertools.izip(stylebytes, spellStyleBytes)])
+
+                    self.storeStylingAndAst(stylebytes, None, styleMask=0xff)
+                else:
+                    if threadstop is DUMBTHREADSTOP:
+                        # We didn't update in sync. mode previously so we must here
+                        self.storeStylingAndAst(stylebytes, None, styleMask=0xff)
+            else:
+                self.storeStylingAndAst(stylebytes, foldingseq, styleMask=0xff)
 
         except NotCurrentThreadException:
             return
@@ -1783,7 +1766,16 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         process(pageAst, [])
         return stylebytes.value()
-        
+
+
+    def processSpellCheckTokens(self, text, scTokens, threadstop):
+        stylebytes = StyleCollector(0, text, self.bytelenSct)
+        for node in scTokens:
+            threadstop.testRunning()
+            stylebytes.bindStyle(node.pos, node.strLength,
+                    wx.stc.STC_INDIC2_MASK)
+
+        return stylebytes.value()
 
 
     def processFolding(self, pageAst, threadstop):
@@ -1824,9 +1816,9 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         return foldingseq
 
 
-    def applyStyling(self, stylebytes):
+    def applyStyling(self, stylebytes, styleMask=0xff):
         if len(stylebytes) == self.GetLength():
-            self.StartStyling(0, 0xff)
+            self.StartStyling(0, styleMask)
             self.SetStyleBytes(len(stylebytes), stylebytes)
 
     def applyFolding(self, foldingseq):
@@ -1980,7 +1972,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #         wikiPage.appendLiveText("\n%s\n---------------------------\n\n%s\n" %
 #                 (mbcsDec(strftime("%x %I:%M %p"), "replace")[0], text))
         wikiPage.appendLiveText("\n%s\n---------------------------\n\n%s\n" %
-                (strftimeUB("%x %I:%M %p"), text))
+                (StringOps.strftimeUB("%x %I:%M %p"), text))
 
     def styleSelection(self, startChars, endChars=None):
         """
@@ -2151,11 +2143,26 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         result = pageAst.findNodesForCharPos(linkCharPos)
 
+
         if linkCharPos > 0:
             # Maybe a token left to the cursor was meant, so check
             # one char to the left
             result += pageAst.findNodesForCharPos(linkCharPos - 1)
-            
+
+        if self.onlineSpellCheckerActive:
+            docPage = self.getLoadedDocPage()
+            if isinstance(docPage, DocPages.AbstractWikiPage):
+                allUnknownWords = docPage.getSpellCheckerUnknownWords()
+                wantedUnknownWords = allUnknownWords.findNodesForCharPos(
+                        linkCharPos)
+                
+                if linkCharPos > 0 and len(wantedUnknownWords) == 0:
+                    # No unknown word found -> try left to cursor
+                    wantedUnknownWords = allUnknownWords.findNodesForCharPos(
+                            linkCharPos - 1)
+
+                result += wantedUnknownWords
+
         return result
 
 
@@ -2167,6 +2174,49 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         """
         tokens = self.getTokensForMousePos(mousePosition)
         return self.activateTokens(tokens, tabMode)
+
+
+
+    def OnReplaceThisSpellingWithSuggestion(self, evt):
+        if self.contextMenuTokens and self.contextMenuSpellCheckSuggestions:
+            for node in self.contextMenuTokens:
+                if node.name == "unknownSpelling":
+                    self.replaceTextAreaByCharPos(
+                            self.contextMenuSpellCheckSuggestions[
+                            self.SUGGESTION_CMD_IDS.index(evt.GetId())],
+                            node.pos, node.pos + node.strLength)
+                    break
+
+
+
+    def OnAddThisSpellingToIgnoreSession(self, evt):
+        if self.contextMenuTokens:
+            for node in self.contextMenuTokens:
+                if node.name == "unknownSpelling":
+                    self.presenter.getWikiDocument()\
+                            .getOnlineSpellCheckerSession().addIgnoreWordSession(
+                            node.getText())
+                    break
+
+
+    def OnAddThisSpellingToIgnoreGlobal(self, evt):
+        if self.contextMenuTokens:
+            for node in self.contextMenuTokens:
+                if node.name == "unknownSpelling":
+                    self.presenter.getWikiDocument()\
+                            .getOnlineSpellCheckerSession().addIgnoreWordGlobal(
+                            node.getText())
+                    break
+
+    def OnAddThisSpellingToIgnoreLocal(self, evt):
+        if self.contextMenuTokens:
+            for node in self.contextMenuTokens:
+                if node.name == "unknownSpelling":
+                    self.presenter.getWikiDocument()\
+                            .getOnlineSpellCheckerSession().addIgnoreWordLocal(
+                            node.getText())
+                    break
+
 
 
     def OnActivateThis(self, evt):
@@ -2256,8 +2306,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         path = self.presenter.getWikiDocument().getWikiConfigPath()
         for node in self.contextMenuTokens:
             if node.name == "anchorDef":
-                copyTextToClipboard(pathWordAndAnchorToWikiUrl(path, wikiWord,
-                        node.anchorLink))
+                copyTextToClipboard(StringOps.pathWordAndAnchorToWikiUrl(path,
+                        wikiWord, node.anchorLink))
                 return
 
 
@@ -2553,7 +2603,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
         rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
 
-        dlg = IncrementalSearchDialog(self, -1, self, rect,
+        dlg = WikiTxtDialogs.IncrementalSearchDialog(self, -1, self, rect,
                 sb.GetFont(), self.presenter, initSearch)
         dlg.Show()
 
@@ -2796,7 +2846,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
     def OnModified(self, evt):
         if not self.ignoreOnChange:
-            
+
             if evt.GetModificationType() & \
                     (wx.stc.STC_MOD_INSERTTEXT | wx.stc.STC_MOD_DELETETEXT):
 
@@ -2928,7 +2978,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         if isUnicode():
             unichar = unichr(evt.GetUnicodeKey())
         else:
-            unichar = mbcsDec(chr(key))[0]
+            unichar = StringOps.mbcsDec(chr(key))[0]
 
         self.ReplaceSelection(unichar)
 
@@ -3004,22 +3054,17 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #                 return
 
 
-    def OnStyleDone(self, evt):
-        if evt.stylebytes:
-            self.applyStyling(evt.stylebytes)
-        
-        if evt.foldingseq:
-            self.applyFolding(evt.foldingseq)
+
+#     def OnStyleDone(self, evt):
+#         if evt.stylebytes:
+#             self.applyStyling(evt.stylebytes)
+#         
+#         if evt.foldingseq:
+#             self.applyFolding(evt.foldingseq)
+# 
 
 
-#     def OnIdle(self, evt):
     def onIdleVisible(self, miscevt):
-#         evt.Skip()
-
-
-#         self.idleCounter -= 1
-#         if self.idleCounter < 0:
-#             self.idleCounter = 0
         if (self.IsEnabled()):
             if self.presenter.isCurrent():
                 # fix the line, pos and col numbers
@@ -3100,31 +3145,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         self.calltipThreadHolder.setThread(thread)
         thread.start()
 
-        
-#         pageAst = self.getPageAst()
-# 
-#         nodes = pageAst.findNodesForCharPos(charPos)
-# 
-#         if charPos > 0:
-#             # Maybe a token left to the cursor was meant, so check
-#             # one char to the left
-#             nodes += pageAst.findNodesForCharPos(charPos - 1)
-# 
-#         callTip = None
-#         for node in nodes:
-#             if node.name == "wikiWord":
-#                 wikiWord = node.wikiWord
-#                 if not wikiDocument.isCreatableWikiWord(wikiWord):
-#                     wikiWord = wikiDocument.getAliasesWikiWord(wikiWord)
-#                     propList = wikiDocument.getAttributeTriples(
-#                             wikiWord, u"short_hint", None)
-#                     if len(propList) > 0:
-#                         callTip = propList[-1][2]
-#                         break
-# 
-#         if callTip:
-#             self.CallTipShow(bytePos, callTip)
-
 
     def OnDwellEnd(self, evt):
         self.calltipThreadHolder.setThread(None)
@@ -3132,7 +3152,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
 
     @staticmethod
-    def userActionPasteFiles(unifName, paramDict):
+    def userActionPasteFiles(unifActionName, paramDict):
         """
         User action to handle pasting or dropping of files into editor.
         """
@@ -3144,43 +3164,102 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         x = paramDict.get("x")
         y = paramDict.get("y")
         
-        if unifName == u"action/editor/this/paste/files/insert/url/absolute":
-            modeCopyToStorage = False
+        dlgParams = WikiTxtDialogs.FilePasteParams()
+#             config = editor.presenter.getMainControl().getConfig()
+        dlgParams.readOptionsFromConfig(
+                editor.presenter.getMainControl().getConfig())
+
+        if unifActionName == u"action/editor/this/paste/files/insert/url/ask":
+            # Ask user
+            if not paramDict.get("processDirectly", False):
+                # If files are drag&dropped, at least on Windows the dragging
+                # source (e.g. Windows Explorer) is halted until the drop
+                # event returns.
+                # So do an idle call to open dialog later
+                paramDict["processDirectly"] = True
+                wx.CallAfter(WikiTxtCtrl.userActionPasteFiles, unifActionName,
+                        paramDict)
+                return
+
+            dlgParams = WikiTxtDialogs.FilePasteDialog.runModal(
+                    editor.presenter.getMainControl(), -1, dlgParams)
+            if dlgParams is None:
+                # User abort
+                return
+            
+            unifActionName = dlgParams.unifActionName
+
+        move = False
+
+        if unifActionName == u"action/editor/this/paste/files/insert/url/absolute":
+            modeToStorage = False
             modeRelativeUrl = False
-        elif unifName == u"action/editor/this/paste/files/insert/url/relative":
-            modeCopyToStorage = False
+        elif unifActionName == u"action/editor/this/paste/files/insert/url/relative":
+            modeToStorage = False
             modeRelativeUrl = True
-        elif unifName == u"action/editor/this/paste/files/insert/url/tostorage":
-            modeCopyToStorage = True
+        elif unifActionName == u"action/editor/this/paste/files/insert/url/tostorage":
+            modeToStorage = True
             modeRelativeUrl = False
+        elif unifActionName == u"action/editor/this/paste/files/insert/url/movetostorage":
+            modeToStorage = True
+            modeRelativeUrl = False
+            move = True
+
+
+#         elif unifActionName == u"action/editor/this/paste/files/insert/url/movetostorage":
+#             modeToStorage = True
+#             modeRelativeUrl = False
+#             move = True
+        else:
+            return
+
+
+        try:
+            prefix = StringOps.strftimeUB(dlgParams.rawPrefix)
+        except:
+            traceback.print_exc()
+            prefix = u""   # TODO Error message?
+
+        try:
+            middle = StringOps.strftimeUB(dlgParams.rawMiddle)
+        except:
+            traceback.print_exc()
+            middle = u" "   # TODO Error message?
+
+        try:
+            suffix = StringOps.strftimeUB(dlgParams.rawSuffix)
+        except:
+            traceback.print_exc()
+            suffix = u""   # TODO Error message?
+
 
         urls = []
 
         for fn in filenames:
-            url = urlFromPathname(fn)
+            url = StringOps.urlFromPathname(fn)
     
             if fn.endswith(u".wiki"):
                 urls.append(u"wiki:%s" % url)
             else:
-                doCopy = False
-                if modeCopyToStorage:
+                toStorage = False
+                if modeToStorage:
                     # Copy file into file storage
                     fs = editor.presenter.getWikiDocument().getFileStorage()
                     try:
-                        fn = fs.createDestPath(fn)
-                        doCopy = True
+                        fn = fs.createDestPath(fn, move=move)
+                        toStorage = True
                     except Exception, e:
                         traceback.print_exc()
                         editor.presenter.getMainControl().displayErrorMessage(
                                 _(u"Couldn't copy file"), e)
                         return
-    
-                if modeRelativeUrl or doCopy:
+
+                if modeRelativeUrl or toStorage:
                     # Relative rel: URL
                     url = editor.presenter.getMainControl().makeAbsPathRelUrl(fn)
                     
                     if url is None:
-                        url = u"file:" + urlFromPathname(fn)
+                        url = u"file:" + StringOps.urlFromPathname(fn)
 
                     urls.append(url)
 
@@ -3197,8 +3276,11 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 else:
                     # Absolute file: URL
                     urls.append(u"file:%s" % url)
-    
-        editor.handleDropText(x, y, " ".join(urls))
+
+
+        editor.handleDropText(x, y, prefix + middle.join(urls) + suffix)
+
+
 
 
     # TODO
@@ -3266,7 +3348,7 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
                 if fnames:
                     self.OnDropFiles(x, y, fnames)
                 elif text:
-                    text = lineendToInternal(text)
+                    text = StringOps.lineendToInternal(text)
                     self.OnDropText(x, y, text)
 
             return defresult
@@ -3276,7 +3358,7 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
 
 
     def OnDropText(self, x, y, text):
-        text = lineendToInternal(text)
+        text = StringOps.lineendToInternal(text)
         self.editor.handleDropText(x, y, text)
 
 
@@ -3316,30 +3398,54 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
 
 
 # User actions to register
-_ACTION_EDITOR_PASTE_FILES_ABSOLUTE = UserActionCoord.SimpleAction("",
-        u"action/editor/this/paste/files/insert/url/absolute",
-        WikiTxtCtrl.userActionPasteFiles)
+# _ACTION_EDITOR_PASTE_FILES_ABSOLUTE = UserActionCoord.SimpleAction("",
+#         u"action/editor/this/paste/files/insert/url/absolute",
+#         WikiTxtCtrl.userActionPasteFiles)
+# 
+# _ACTION_EDITOR_PASTE_FILES_RELATIVE = UserActionCoord.SimpleAction("",
+#         u"action/editor/this/paste/files/insert/url/relative",
+#         WikiTxtCtrl.userActionPasteFiles)
+# 
+# _ACTION_EDITOR_PASTE_FILES_TOSTORAGE = UserActionCoord.SimpleAction("",
+#         u"action/editor/this/paste/files/insert/url/tostorage",
+#         WikiTxtCtrl.userActionPasteFiles)
+# 
+# _ACTION_EDITOR_PASTE_FILES_ASK = UserActionCoord.SimpleAction("",
+#         u"action/editor/this/paste/files/insert/url/ask",
+#         WikiTxtCtrl.userActionPasteFiles)
+# 
+# 
+# _ACTIONS = (
+#         _ACTION_EDITOR_PASTE_FILES_ABSOLUTE, _ACTION_EDITOR_PASTE_FILES_RELATIVE,
+#         _ACTION_EDITOR_PASTE_FILES_TOSTORAGE, _ACTION_EDITOR_PASTE_FILES_ASK)
 
-_ACTION_EDITOR_PASTE_FILES_RELATIVE = UserActionCoord.SimpleAction("",
-        u"action/editor/this/paste/files/insert/url/relative",
-        WikiTxtCtrl.userActionPasteFiles)
 
-_ACTION_EDITOR_PASTE_FILES_TOSTORAGE = UserActionCoord.SimpleAction("",
-        u"action/editor/this/paste/files/insert/url/tostorage",
-        WikiTxtCtrl.userActionPasteFiles)
-
-
-_ACTIONS = (
-        _ACTION_EDITOR_PASTE_FILES_ABSOLUTE, _ACTION_EDITOR_PASTE_FILES_RELATIVE,
-        _ACTION_EDITOR_PASTE_FILES_TOSTORAGE)
+# Register paste actions
+_ACTIONS = tuple( UserActionCoord.SimpleAction("", unifName,
+        WikiTxtCtrl.userActionPasteFiles) for unifName in (
+            u"action/editor/this/paste/files/insert/url/absolute",
+            u"action/editor/this/paste/files/insert/url/relative",
+            u"action/editor/this/paste/files/insert/url/tostorage",
+            u"action/editor/this/paste/files/insert/url/movetostorage",
+            u"action/editor/this/paste/files/insert/url/ask") )
 
 
 UserActionCoord.registerActions(_ACTIONS)
 
 
 
+_CONTEXT_MENU_INTEXT_SPELLING = \
+u"""
+-
+Ignore;CMD_ADD_THIS_SPELLING_SESSION
+Add Globally;CMD_ADD_THIS_SPELLING_GLOBAL
+Add Locally;CMD_ADD_THIS_SPELLING_LOCAL
+"""
+
+
 _CONTEXT_MENU_INTEXT_BASE = \
 u"""
+-
 Undo;CMD_UNDO
 Redo;CMD_REDO
 -
@@ -3405,111 +3511,115 @@ u"""
 
 
 # Entries to support i18n of context menus
+if False:
+    N_(u"Ignore")
+    N_(u"Add Globally")
+    N_(u"Add Locally")
 
-N_(u"Undo")
-N_(u"Redo")
-N_(u"Cut")
-N_(u"Copy")
-N_(u"Paste")
-N_(u"Delete")
-N_(u"Select All")
+    N_(u"Undo")
+    N_(u"Redo")
+    N_(u"Cut")
+    N_(u"Copy")
+    N_(u"Paste")
+    N_(u"Delete")
+    N_(u"Select All")
 
-N_(u"Follow Link")
-N_(u"Follow Link New Tab")
-N_(u"Follow Link New Tab Backgrd.")
+    N_(u"Follow Link")
+    N_(u"Follow Link New Tab")
+    N_(u"Follow Link New Tab Backgrd.")
 
-N_(u"Convert Absolute/Relative File URL")
-N_(u"Open Containing Folder")
+    N_(u"Convert Absolute/Relative File URL")
+    N_(u"Open Containing Folder")
 
-N_(u"Copy anchor URL to clipboard")
+    N_(u"Copy anchor URL to clipboard")
 
-N_(u"Other...")
-N_(u"Use Template...")
+    N_(u"Other...")
+    N_(u"Use Template...")
 
-N_(u"Close Tab")
+    N_(u"Close Tab")
 
-N_(u"Show folding")
-N_(u"Show folding marks and allow folding")
-N_(u"&Toggle current folding")
-N_(u"Toggle folding of the current line")
-N_(u"&Unfold All")
-N_(u"Unfold everything in current editor")
-N_(u"&Fold All")
-N_(u"Fold everything in current editor")
+    N_(u"Show folding")
+    N_(u"Show folding marks and allow folding")
+    N_(u"&Toggle current folding")
+    N_(u"Toggle folding of the current line")
+    N_(u"&Unfold All")
+    N_(u"Unfold everything in current editor")
+    N_(u"&Fold All")
+    N_(u"Fold everything in current editor")
 
 
 
 # Default mapping based on Scintilla's "KeyMap.cxx" file
 _DEFAULT_STC_KEYS = (
-        (wx.stc.STC_KEY_DOWN,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_LINEDOWN),
-        (wx.stc.STC_KEY_DOWN,		wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_LINEDOWNEXTEND),
-        (wx.stc.STC_KEY_DOWN,		wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINESCROLLDOWN),
-        (wx.stc.STC_KEY_DOWN,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_LINEDOWNRECTEXTEND),
-        (wx.stc.STC_KEY_UP,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_LINEUP),
-        (wx.stc.STC_KEY_UP,			wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_LINEUPEXTEND),
-        (wx.stc.STC_KEY_UP,			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINESCROLLUP),
-        (wx.stc.STC_KEY_UP,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_LINEUPRECTEXTEND),
-#         (ord('['),			wx.stc.STC_SCMOD_CTRL,		wx.stc.STC_CMD_PARAUP),
-#         (ord('['),			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_PARAUPEXTEND),
-#         (ord(']'),			wx.stc.STC_SCMOD_CTRL,		wx.stc.STC_CMD_PARADOWN),
-#         (ord(']'),			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_PARADOWNEXTEND),
-        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_CHARLEFT),
-        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_CHARLEFTEXTEND),
-        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDLEFT),
-        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDLEFTEXTEND),
-        (wx.stc.STC_KEY_LEFT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_CHARLEFTRECTEXTEND),
-        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_CHARRIGHT),
-        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_CHARRIGHTEXTEND),
-        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDRIGHT),
-        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDRIGHTEXTEND),
-        (wx.stc.STC_KEY_RIGHT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_CHARRIGHTRECTEXTEND),
-#         (ord('/'),		wx.stc.STC_SCMOD_CTRL,		wx.stc.STC_CMD_WORDPARTLEFT),
-#         (ord('/'),		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDPARTLEFTEXTEND),
-#         (ord('\\'),		wx.stc.STC_SCMOD_CTRL,		wx.stc.STC_CMD_WORDPARTRIGHT),
-#         (ord('\\'),		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_WORDPARTRIGHTEXTEND),
-        (wx.stc.STC_KEY_HOME,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_VCHOME),
-        (wx.stc.STC_KEY_HOME, 		wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_VCHOMEEXTEND),
-        (wx.stc.STC_KEY_HOME, 		wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DOCUMENTSTART),
-        (wx.stc.STC_KEY_HOME, 		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DOCUMENTSTARTEXTEND),
-        (wx.stc.STC_KEY_HOME, 		wx.stc.STC_SCMOD_ALT, 	wx.stc.STC_CMD_HOMEDISPLAY),
-        (wx.stc.STC_KEY_HOME,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_VCHOMERECTEXTEND),
-        (wx.stc.STC_KEY_END,	 	wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_LINEEND),
-        (wx.stc.STC_KEY_END,	 	wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_LINEENDEXTEND),
-        (wx.stc.STC_KEY_END, 		wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DOCUMENTEND),
-        (wx.stc.STC_KEY_END, 		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DOCUMENTENDEXTEND),
-        (wx.stc.STC_KEY_END, 		wx.stc.STC_SCMOD_ALT, 	wx.stc.STC_CMD_LINEENDDISPLAY),
-        (wx.stc.STC_KEY_END,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_LINEENDRECTEXTEND),
-        (wx.stc.STC_KEY_PRIOR,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_PAGEUP),
-        (wx.stc.STC_KEY_PRIOR,		wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_PAGEUPEXTEND),
-        (wx.stc.STC_KEY_PRIOR,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_PAGEUPRECTEXTEND),
-        (wx.stc.STC_KEY_NEXT, 		wx.stc.STC_SCMOD_NORM, 	wx.stc.STC_CMD_PAGEDOWN),
-        (wx.stc.STC_KEY_NEXT, 		wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_PAGEDOWNEXTEND),
-        (wx.stc.STC_KEY_NEXT,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_PAGEDOWNRECTEXTEND),
-        (wx.stc.STC_KEY_DELETE, 	wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_CLEAR),
-        (wx.stc.STC_KEY_DELETE, 	wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_DELWORDRIGHT),
-        (wx.stc.STC_KEY_DELETE,	wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_DELLINERIGHT),
-        (wx.stc.STC_KEY_INSERT, 		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_EDITTOGGLEOVERTYPE),
-        (wx.stc.STC_KEY_ESCAPE,  	wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_CANCEL),
-        (wx.stc.STC_KEY_BACK,		wx.stc.STC_SCMOD_NORM, 	wx.stc.STC_CMD_DELETEBACK),
-        (wx.stc.STC_KEY_BACK,		wx.stc.STC_SCMOD_SHIFT, 	wx.stc.STC_CMD_DELETEBACK),
-        (wx.stc.STC_KEY_BACK,		wx.stc.STC_SCMOD_CTRL, 	wx.stc.STC_CMD_DELWORDLEFT),
-        (wx.stc.STC_KEY_BACK, 		wx.stc.STC_SCMOD_ALT,	wx.stc.STC_CMD_UNDO),
-        (wx.stc.STC_KEY_BACK,		wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_DELLINELEFT),
-        (ord('Z'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_UNDO),
-        (ord('Y'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_REDO),
-        (ord('A'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_SELECTALL),
-        (wx.stc.STC_KEY_TAB,		wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_TAB),
-        (wx.stc.STC_KEY_TAB,		wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_BACKTAB),
-        (wx.stc.STC_KEY_RETURN, 	wx.stc.STC_SCMOD_NORM,	wx.stc.STC_CMD_NEWLINE),
-        (wx.stc.STC_KEY_RETURN, 	wx.stc.STC_SCMOD_SHIFT,	wx.stc.STC_CMD_NEWLINE),
-        (wx.stc.STC_KEY_ADD, 		wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_ZOOMIN),
-        (wx.stc.STC_KEY_SUBTRACT,	wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_ZOOMOUT),
-#         (wx.stc.STC_KEY_DIVIDE,	wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_SETZOOM),
-#         (ord('L'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINECUT),
-#         (ord('L'), 			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINEDELETE),
-#         (ord('T'), 			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINECOPY),
-#         (ord('T'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LINETRANSPOSE),
-#         (ord('D'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_SELECTIONDUPLICATE),
-#         (ord('U'), 			wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_LOWERCASE),
-#         (ord('U'), 			wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,	wx.stc.STC_CMD_UPPERCASE),
+        (wx.stc.STC_KEY_DOWN,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_LINEDOWN),
+        (wx.stc.STC_KEY_DOWN,        wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_LINEDOWNEXTEND),
+        (wx.stc.STC_KEY_DOWN,        wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINESCROLLDOWN),
+        (wx.stc.STC_KEY_DOWN,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_LINEDOWNRECTEXTEND),
+        (wx.stc.STC_KEY_UP,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_LINEUP),
+        (wx.stc.STC_KEY_UP,            wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_LINEUPEXTEND),
+        (wx.stc.STC_KEY_UP,            wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINESCROLLUP),
+        (wx.stc.STC_KEY_UP,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_LINEUPRECTEXTEND),
+#         (ord('['),            wx.stc.STC_SCMOD_CTRL,        wx.stc.STC_CMD_PARAUP),
+#         (ord('['),            wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_PARAUPEXTEND),
+#         (ord(']'),            wx.stc.STC_SCMOD_CTRL,        wx.stc.STC_CMD_PARADOWN),
+#         (ord(']'),            wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_PARADOWNEXTEND),
+        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_CHARLEFT),
+        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_CHARLEFTEXTEND),
+        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDLEFT),
+        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDLEFTEXTEND),
+        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_CHARLEFTRECTEXTEND),
+        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_CHARRIGHT),
+        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_CHARRIGHTEXTEND),
+        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDRIGHT),
+        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDRIGHTEXTEND),
+        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_CHARRIGHTRECTEXTEND),
+#         (ord('/'),        wx.stc.STC_SCMOD_CTRL,        wx.stc.STC_CMD_WORDPARTLEFT),
+#         (ord('/'),        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDPARTLEFTEXTEND),
+#         (ord('\\'),        wx.stc.STC_SCMOD_CTRL,        wx.stc.STC_CMD_WORDPARTRIGHT),
+#         (ord('\\'),        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDPARTRIGHTEXTEND),
+        (wx.stc.STC_KEY_HOME,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_VCHOME),
+        (wx.stc.STC_KEY_HOME,         wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_VCHOMEEXTEND),
+        (wx.stc.STC_KEY_HOME,         wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DOCUMENTSTART),
+        (wx.stc.STC_KEY_HOME,         wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DOCUMENTSTARTEXTEND),
+        (wx.stc.STC_KEY_HOME,         wx.stc.STC_SCMOD_ALT,     wx.stc.STC_CMD_HOMEDISPLAY),
+        (wx.stc.STC_KEY_HOME,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_VCHOMERECTEXTEND),
+        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_LINEEND),
+        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_LINEENDEXTEND),
+        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DOCUMENTEND),
+        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DOCUMENTENDEXTEND),
+        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_ALT,     wx.stc.STC_CMD_LINEENDDISPLAY),
+        (wx.stc.STC_KEY_END,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_LINEENDRECTEXTEND),
+        (wx.stc.STC_KEY_PRIOR,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_PAGEUP),
+        (wx.stc.STC_KEY_PRIOR,        wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_PAGEUPEXTEND),
+        (wx.stc.STC_KEY_PRIOR,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_PAGEUPRECTEXTEND),
+        (wx.stc.STC_KEY_NEXT,         wx.stc.STC_SCMOD_NORM,     wx.stc.STC_CMD_PAGEDOWN),
+        (wx.stc.STC_KEY_NEXT,         wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_PAGEDOWNEXTEND),
+        (wx.stc.STC_KEY_NEXT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_PAGEDOWNRECTEXTEND),
+        (wx.stc.STC_KEY_DELETE,     wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_CLEAR),
+        (wx.stc.STC_KEY_DELETE,     wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_DELWORDRIGHT),
+        (wx.stc.STC_KEY_DELETE,    wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_DELLINERIGHT),
+        (wx.stc.STC_KEY_INSERT,         wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_EDITTOGGLEOVERTYPE),
+        (wx.stc.STC_KEY_ESCAPE,      wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_CANCEL),
+        (wx.stc.STC_KEY_BACK,        wx.stc.STC_SCMOD_NORM,     wx.stc.STC_CMD_DELETEBACK),
+        (wx.stc.STC_KEY_BACK,        wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_DELETEBACK),
+        (wx.stc.STC_KEY_BACK,        wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DELWORDLEFT),
+        (wx.stc.STC_KEY_BACK,         wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_UNDO),
+        (wx.stc.STC_KEY_BACK,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_DELLINELEFT),
+        (ord('Z'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_UNDO),
+        (ord('Y'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_REDO),
+        (ord('A'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_SELECTALL),
+        (wx.stc.STC_KEY_TAB,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_TAB),
+        (wx.stc.STC_KEY_TAB,        wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_BACKTAB),
+        (wx.stc.STC_KEY_RETURN,     wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_NEWLINE),
+        (wx.stc.STC_KEY_RETURN,     wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_NEWLINE),
+        (wx.stc.STC_KEY_ADD,         wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_ZOOMIN),
+        (wx.stc.STC_KEY_SUBTRACT,    wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_ZOOMOUT),
+#         (wx.stc.STC_KEY_DIVIDE,    wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_SETZOOM),
+#         (ord('L'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINECUT),
+#         (ord('L'),             wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINEDELETE),
+#         (ord('T'),             wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINECOPY),
+#         (ord('T'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINETRANSPOSE),
+#         (ord('D'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_SELECTIONDUPLICATE),
+#         (ord('U'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LOWERCASE),
+#         (ord('U'),             wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_UPPERCASE),
     )

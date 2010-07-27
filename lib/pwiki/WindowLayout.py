@@ -606,7 +606,7 @@ class WindowSashLayouter:
                 raise WinLayoutException((u"Window %s must relate to previously "
                             u"entered window") % winProps["name"])
         
-        
+
     def preserveSashPositions(self):
         """
         Must be called after setWinPropsByConfig() or addWindowProps() to
@@ -743,6 +743,8 @@ class LayeredControlPresenter(object, MiscEventSourceMixin):
 
     def setSubControl(self, scName, sc):
         self.subControls[scName] = sc
+        if sc is None:
+            del self.subControls[scName]
 
     def getSubControl(self, scName):
         return self.subControls.get(scName)
@@ -833,7 +835,8 @@ class LayeredControlPanel(wx.Panel, LayeredControlPresenter):
             oldSc.close()
 
         LayeredControlPresenter.setSubControl(self, scName, sc)
-        self.GetSizer().Add(sc)
+        if sc is not None:
+            self.GetSizer().Add(sc)
 
 
     def switchSubControl(self, scName, gainFocus=False):

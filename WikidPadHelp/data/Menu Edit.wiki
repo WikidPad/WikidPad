@@ -28,6 +28,13 @@ Allows to catch arbitrary text from clipboard regardless which application has s
 (Only available if pyEnchant or the WikidPad spell check addon is installed properly)
 Run spell checker for one or multiple pages. See [SpellChecking].
 
+++ Spell Check While Type
+(Only available if pyEnchant or the WikidPad spell check addon is installed properly)
+Switch the spell check while typing on or off. See [SpellChecking].
+
+++ Clear ignore list
+Clear the ignore list for the spell check while type. See [SpellChecking].
+
 ++ Insert
 +++ File URL
 Starts a file dialog where you can select one file for which a "file:..." URL is inserted in editor

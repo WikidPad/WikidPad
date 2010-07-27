@@ -7,8 +7,8 @@ import wx
 
 from WikiExceptions import *
 
-from MiscEvent import KeyFunctionSink
-import Configuration
+from .MiscEvent import KeyFunctionSink
+from . import Configuration
 
 
 def _unescapeWithRe(text):
@@ -237,6 +237,37 @@ def getBitmapFromClipboard():
         return None
     finally:
         cb.Close()
+
+
+def getFilesFromClipboard():
+    """
+    Retrieve bitmap from clipboard if available
+    """
+    from StringOps import utf8Dec
+    cb = wx.TheClipboard
+    cb.Open()
+    try:
+        dataob = wx.FileDataObject()
+
+        if cb.GetData(dataob):
+            filenames = dataob.GetFilenames()
+            if filenames:
+                if Configuration.isLinux():
+                    # On Linux, at least Ubuntu, fn may be a UTF-8 encoded unicode(!?)
+                    # string
+                    try:
+                        filenames = [utf8Dec(fn.encode("latin-1"))[0]
+                                for fn in filenames]
+                    except (UnicodeEncodeError, UnicodeDecodeError):
+                        pass
+
+                return filenames
+            else:
+                return None
+        return None
+    finally:
+        cb.Close()
+
 
 
 if Configuration.isWindows():
@@ -698,7 +729,7 @@ class IconCache:
             iconFile = os.path.join(self.iconDir, iconname+".gif")
             bitmap = wx.Bitmap(iconFile, wx.BITMAP_TYPE_GIF)
             
-            self.iconLookupCache[iconname] = self.iconLookupCache[k][0:2] + \
+            self.iconLookupCache[iconname] = self.iconLookupCache[iconname][0:2] + \
                     (bitmap,)
 
             return bitmap

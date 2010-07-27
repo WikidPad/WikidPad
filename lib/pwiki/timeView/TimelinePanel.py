@@ -794,10 +794,10 @@ u"""
 """
 
 # Entries to support i18n of context menus
-
-N_(u"Show empty days")
-N_(u"Show dates without associated wiki words")
-N_(u"Sort dates ascending")
-N_(u"List dates ascending or descending")
+if False:
+    N_(u"Show empty days")
+    N_(u"Show dates without associated wiki words")
+    N_(u"Sort dates ascending")
+    N_(u"List dates ascending or descending")
 
 

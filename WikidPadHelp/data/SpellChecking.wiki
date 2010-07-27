@@ -101,9 +101,7 @@ If the spell checker reaches the end of the current page and this check box is c
 
 +++ Remarks
     * The lists maintained by "Ignore All" and "Replace all" with the already found words are cleared when closing the dialog.
-    
     * The dialog is non-modal, this means you can edit the wiki page while the dialog is open. When pressing "Ignore", the spell checker always starts searching where you left the cursor, so you can go to another page and place the cursor where you want that searching should go on.
-    
     * The dialog can't be used to check functional pages like e.g. the text blocks pages (see [TextBlocks]).
 
 
@@ -112,3 +110,12 @@ With the buttons "Add Globally" and "Add Locally" you can add a word to a perman
 
 Each line contains a word to ignore during spell checking. You can add, modify or delete words or the whole list arbitrarily and cut & paste words between the lists.
 
+
+
+++ Spell check while type
+
+Instead of using the dialog you can also let WikidPad highlight all unknown words by jiggled red underlines. Just check "Spell Check While Type" from "Edit" menu to start it. The underlining is updated dynamically.
+
+For this spell check mode same rules about defining of language and word as above apply. When right-clicking on an unknown word the context menu shows some suggestions for the correct spelling (if available). Below that you see menu entries to ignore the word, add it globally or add it locally with the same meanings as in the spell check dialog.
+
+This spell check mode holds its own ignore list which is cleared when the wiki or WikidPad is closed or if "Clear ignore list" in "Edit" menu is called explicitly.

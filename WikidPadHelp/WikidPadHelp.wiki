@@ -3,7 +3,7 @@ data_dir = data
 
 [main]
 footnotes_as_wikiwords = False
-last_wiki_word = WikidPadHelp
+last_wiki_word = ChangeLog
 hotkey_showhide_bywiki = 
 log_window_autoshow = Gray
 tree_expandednodes_descriptorpathes_views = 
@@ -15,9 +15,11 @@ wiki_name = WikidPadHelp
 tree_expandednodes_descriptorpathes_main = 
 wikipagetitleprefix = ++
 wikipagetitle_fromlinktitle = True
+wiki_lastactivetabno = 0
 first_wiki_word = WikidPadHelp
 wikipagefiles_gracefuloutsideaddandremove = True
 versioning_storagelocation = 0
+wiki_lasttabssubctrls = textedit
 template_pagenamesre = ^template/
 wikipagetitle_creationmode = 1
 tree_last_root_wiki_word = WikidPadHelp

@@ -373,7 +373,6 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
                 lambda evt: self.viewHistory(1))
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_GO_BACK,
                 lambda evt: self.pageHistory.goInHistory(-1))
-#         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_GO_BACK, self.historyBack)
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD,
                 lambda evt: self.pageHistory.goInHistory(1))
 
@@ -383,20 +382,16 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
         BasicDocPagePresenter.close(self)
 
 
-#     def historyBack(self, evt):
-#         print "--histBack"
-#         tracer.runctx('self.pageHistory.goInHistory(-1)', globals(), locals())
-
     def setSubControl(self, scName, sc):
         oldSc = self.getSubControl(scName)
         if oldSc is not None:
             self.GetSizer().Detach(oldSc)
             oldSc.close()
 
-#         LayeredControlPresenter.setSubControl(self, scName, sc)
         BasicDocPagePresenter.setSubControl(self, scName, sc)
-        self.GetSizer().Add(sc)
-        self.Layout()
+        if sc is not None:
+            self.GetSizer().Add(sc)
+            self.Layout()
 
     def switchSubControl(self, scName, gainFocus=False):
         """

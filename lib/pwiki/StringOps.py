@@ -517,11 +517,12 @@ def escapeForIni(text, toEscape=u""):
     """
     Return an escaped version of string. Always escaped will be backslash and
     all characters with ASCII value < 32. Additional characters can be given in
-    the toEscape parameter (as unicode string, only characters < 128).
+    the toEscape parameter (as unicode string, only characters < 128,
+    not the backslash).
 
     Returns: unicode string
     """
-    # Escape '\' and for readability escape \r \n \f and \t separately
+    # Escape '\'
     text = text.replace(u"\\", u"\\x%02x" % ord("\\"))
 
     # Escape everything with ord < 32
@@ -1696,8 +1697,8 @@ _COLORBASE = {
     u"greenyellow": "#adff2f",
     u"honeydew": "#f0fff0",
     u"hotpink": "#ff69b4",
-    u"indianred ": "#cd5c5c",
-    u"indigo ": "#4b0082",
+    u"indianred": "#cd5c5c",
+    u"indigo": "#4b0082",
     u"ivory": "#fffff0",
     u"khaki": "#f0e68c",
     u"lavender": "#e6e6fa",

@@ -583,13 +583,14 @@ Delete all versions;CMD_VERSIONING_DELETE_ALL_VERSION_DATA;Delete all versions o
 
 
 # Entries to support i18n of context menus
-N_(u"Delete version")
-N_(u"Delete selected version")
-
-N_(u"Add version")
-N_(u"Add a new version")
-N_(u"Delete all versions")
-N_(u"Delete all versions of current page")
+if False:
+    N_(u"Delete version")
+    N_(u"Delete selected version")
+    
+    N_(u"Add version")
+    N_(u"Add a new version")
+    N_(u"Delete all versions")
+    N_(u"Delete all versions of current page")
 
 
 

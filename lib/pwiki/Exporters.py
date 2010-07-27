@@ -2174,7 +2174,7 @@ class TextExporter(AbstractExporter):
             textPanel = None
 
         return (
-            (u"raw_files", 'Set of *.wiki files', textPanel),
+            (u"raw_files", _(u'Set of *.wiki files'), textPanel),
             )
 
 

@@ -3,11 +3,14 @@ from __future__ import with_statement
 
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
+## import profilehooks
+## profile = profilehooks.profile(filename="profile.prf", immediate=False)
+
 
 import os, sys, gc, traceback, string, re
 from os.path import *
 import time
-from time import localtime, sleep
+from time import sleep
 
 import cPickle  # to create dependency?
 
@@ -17,9 +20,10 @@ import wx, wx.html
 # import urllib
 
 from .wxHelper import GUI_ID, getAccelPairFromKeyDown, \
-        getAccelPairFromString, LayerSizer, appendToMenuByMenuDesc, \
+        getAccelPairFromString, appendToMenuByMenuDesc, \
         setHotKeyByString, DummyWindow, IdRecycler, clearMenu, \
-        copyTextToClipboard, ProgressHandler, TopLevelLocker
+        copyTextToClipboard, ProgressHandler, TopLevelLocker, \
+        WindowUpdateLocker
 
 from . import TextTree
 
@@ -62,10 +66,10 @@ from . import AttributeHandling, SpellChecker
 
 
 # from PageHistory import PageHistory
- #from SearchAndReplace import SearchReplaceOperation
-from .Printing import Printer, PrintMainDialog
+#from SearchAndReplace import SearchReplaceOperation
+from .Printing import Printer
 
-from AdditionalDialogs import *
+# from AdditionalDialogs import *
 from . import AdditionalDialogs
 from .OptionsDialog import OptionsDialog
 from .SearchAndReplaceDialogs import SearchPageDialog, SearchWikiDialog, \
@@ -76,7 +80,7 @@ from .SearchAndReplaceDialogs import SearchPageDialog, SearchWikiDialog, \
 import Exporters
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, \
         unescapeForIni, \
-        wikiUrlToPathWordAndAnchor, urlFromPathname, flexibleUrlUnquote, \
+        wikiUrlToPathWordAndAnchor, urlFromPathname, \
         strftimeUB, pathEnc, loadEntireFile, writeEntireFile, \
         pathWordAndAnchorToWikiUrl, relativeFilePath, pathnameFromUrl
 
@@ -150,6 +154,7 @@ class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
     HOTKEY_ID_HIDESHOW_BYAPP = 1
     HOTKEY_ID_HIDESHOW_BYWIKI = 2
 
+##     @profile
     def __init__(self, parent, id, title, wikiAppDir, globalConfigDir,
             globalConfigSubDir, cmdLineAction):
         # Do not use member variables starting with "externalPlugin_"! They
@@ -330,6 +335,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #                 "timeView_position", 0)
 
         # if a wiki to open wasn't passed in use the last_wiki from the global config
+        self.cmdLineAction = cmdLineAction
         wikiToOpen = cmdLineAction.wikiToOpen
         wikiWordsToOpen = cmdLineAction.wikiWordsToOpen
         anchorToOpen = cmdLineAction.anchorToOpen
@@ -363,9 +369,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # if a wiki to open is set, open it
         if wikiToOpen:
             if exists(pathEnc(wikiToOpen)):
- #                tracer.runctx('self.openWiki(wikiToOpen, wikiWordsToOpen, anchorToOpen=anchorToOpen)', globals(), locals())
+#                tracer.runctx('self.openWiki(wikiToOpen, wikiWordsToOpen, anchorToOpen=anchorToOpen)', globals(), locals())
                 self.openWiki(wikiToOpen, wikiWordsToOpen,
-                        anchorToOpen=anchorToOpen)
+                        anchorToOpen=anchorToOpen,
+                        lastTabsSubCtrls=cmdLineAction.lastTabsSubCtrls,
+                        activeTabNo=cmdLineAction.activeTabNo)
 #                 wx.GetApp().pauseBackgroundThreads()
             else:
                 if cmdLineAction.wikiToOpen:
@@ -512,6 +520,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return wx.GetApp().getUserDefaultWikiLanguage()
 
         return self.wikiDataManager.getWikiDefaultWikiLanguage()
+
+    def getCmdLineAction(self):
+        return self.cmdLineAction
 
 #     def getUserDefaultWikiLanguage(self):
 #         """
@@ -946,7 +957,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """
         if self.recentWikisMenu is None:
             return
-        
+
         history = self.configuration.get("main", "wiki_history")
         if not history:
             return
@@ -963,6 +974,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def informRecentWikisChanged(self):
+        if self.getCmdLineAction().noRecent:
+            return
+
         self.configuration.set("main", "wiki_history",
                 ";".join(self.wikiHistory))
         wx.GetApp().fireMiscEventKeys(
@@ -1051,8 +1065,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         """
         self.favoriteWikisActivation.clearAssoc()
 
-        wikiDoc = self.getWikiDocument()
-
         page = WikiDataManager.getGlobalFuncPage(u"global/FavoriteWikis")
         treeData = TextTree.buildTreeFromText(page.getContent(),
                 TextTree.FavoriteWikisEntry.factory)
@@ -1085,6 +1097,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 # Open in new frame
                 try:
                     clAction = CmdLineAction([])
+                    clAction.inheritFrom(self.getCmdLineAction())
                     clAction.setWikiToOpen(entry.value)
                     clAction.frameToOpen = 1  # Open in new frame
                     wx.GetApp().startPersonalWikiFrame(clAction)
@@ -1276,7 +1289,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     kind=wx.ITEM_RADIO)
 
 
-
         if SpellChecker.isSpellCheckSupported():
             editMenu.AppendSeparator()
 
@@ -1285,6 +1297,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     _(u'Spell check current and possibly further pages'),
                     lambda evt: self.showSpellCheckerDialog(),
                     updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
+
+            self.addMenuItem(editMenu, _(u"Spell Check While Type"),
+                    _(u"Set if editor should do spell checking during typing"),
+                    self.OnCmdCheckSpellCheckWhileType, 
+                    updatefct=(self.OnUpdateDisNotTextedit, self.OnUpdateSpellCheckWhileType),
+                    kind=wx.ITEM_CHECK)
+
+            self.addMenuItem(editMenu, _(u'Clear Ignore List') + u'\t' +
+                    self.keyBindings.SpellCheck,
+                    _(u'Clear the list of words to ignore for spell check while type'),
+                    lambda evt: self.resetSpellCheckWhileTypeIgnoreList(),
+                    updatefct=self.OnUpdateDisNotTextedit)
 
 
         editMenu.AppendSeparator()
@@ -1797,6 +1821,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         def openHelp(evt):
             try:
                 clAction = CmdLineAction([])
+                clAction.inheritFrom(self.getCmdLineAction())
                 clAction.wikiToOpen = self.wikiPadHelp
                 clAction.frameToOpen = 1  # Open in new frame
 
@@ -2030,11 +2055,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.keyBindings.makeWikiWord(self.getActiveEditor()))
 
         # Build favorite wikis tool buttons
-        wikiDoc = self.getWikiDocument()
-        page = WikiDataManager.getGlobalFuncPage(u"global/FavoriteWikis")
-        treeData = TextTree.buildTreeFromText(page.getContent(),
-                TextTree.FavoriteWikisEntry.factory)
-        
         toolEntries = [(None, None)] * 9
 
         # Filter entries from activation map with a digit (1 to 9) in the flags.
@@ -2328,7 +2348,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 
     def OnRemoteCommand(self, evt):
         try:
-            clAction = CmdLineAction(evt.getCmdLine())
+            clAction = CmdLineAction(evt.getCmdLineAction())
             wx.GetApp().startPersonalWikiFrame(clAction)
         except Exception, e:
             traceback.print_exc()
@@ -2741,7 +2761,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             try:
                 WikiDataManager.createWikiDb(self, wdhName, wikiName, dataDir,
                         False)
-  #               createWikiDbFunc(wikiName, dataDir, False)
             except WikiDBExistsException:
                 # The DB exists, should it be overwritten
                 dlg=wx.MessageDialog(self, _(u'A wiki database already exists '
@@ -2749,7 +2768,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         _(u'Wiki DB Exists'), wx.YES_NO)
                 result = dlg.ShowModal()
                 if result == wx.ID_YES:
-  #                   createWikiDbFunc(wikiName, dataDir, True)
                     WikiDataManager.createWikiDb(self, wdhName, wikiName, dataDir,
                         True)
                 else:
@@ -2839,11 +2857,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def openWiki(self, wikiCombinedFilename, wikiWordsToOpen=None,
-            ignoreWdhName=False, anchorToOpen=None):
+            ignoreWdhName=False, lastTabsSubCtrls=None, anchorToOpen=None,
+            activeTabNo=-1):
         """
         opens up a wiki
+        wikiWordsToOpen -- List of wiki words to open or None for default
         ignoreWdhName -- Should the name of the wiki data handler in the
                 wiki config file (if any) be ignored?
+        lastTabsSubCtrls -- List of subcontrol names for each presenter
+                of the corresponding wiki word to open
         """
 
         # Fix special case
@@ -3023,7 +3045,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         try:
             furtherWikiWords = []
 
-            lastWikiWords = wikiWordsToOpen
             if wikiWordsToOpen is None:
                 if splittedWikiWord:
                     # Take wiki word from combinedFilename
@@ -3048,91 +3069,111 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         
                         wikiWordsToOpen = (lastWikiWord,) + \
                                 tuple(furtherWikiWords)
+                        
+                        if lastTabsSubCtrls is None:
+                            ltsc = self.getConfig().get("main",
+                                    "wiki_lastTabsSubCtrls", u"")
+                            if ltsc != u"":
+                                lastTabsSubCtrls = [unescapeForIni(w) for w in
+                                        ltsc.split(u";")]
 
+                        if activeTabNo == -1:
+                            activeTabNo = self.getConfig().getint("main",
+                                    "wiki_lastActiveTabNo", -1)
 
-            # reset the gui
-            self.buildMainMenu()
+            with WindowUpdateLocker(self):
+                # reset the gui
+                self.buildMainMenu()
+
+                # enable the top level menus
+                if self.mainmenu:
+                    self.mainmenu.EnableTop(1, 1)
+                    self.mainmenu.EnableTop(2, 1)
+                    self.mainmenu.EnableTop(3, 1)
+                    
+                self.fireMiscEventKeys(("opened wiki",))
+                
+                # open the home page    # TODO!
+    #             self.openWikiPage(self.wikiName)
     
-            # enable the top level menus
-            if self.mainmenu:
-                self.mainmenu.EnableTop(1, 1)
-                self.mainmenu.EnableTop(2, 1)
-                self.mainmenu.EnableTop(3, 1)
+                self.tree.SetScrollPos(wx.VERTICAL, 0)
                 
-            self.fireMiscEventKeys(("opened wiki",))
-            
-            # open the home page    # TODO!
-#             self.openWikiPage(self.wikiName)
+                lastRoot = self.getConfig().get("main", "tree_last_root_wiki_word",
+                        None)
+                if not (lastRoot and
+                        self.getWikiDocument().isDefinedWikiLink(lastRoot)):
+                    lastRoot = self.wikiName
+                    
+                self.tree.setRootByWord(lastRoot)
+                self.tree.readExpandedNodesFromConfig()
+                self.tree.expandRoot()
+                self.getConfig().set("main", "tree_last_root_wiki_word", lastRoot)
+    
+                viewsTree = self.windowLayouter.getWindowByName("viewstree")
+                if viewsTree is not None:
+                    viewsTree.setViewsAsRoot()
+                    viewsTree.readExpandedNodesFromConfig()
+                    viewsTree.expandRoot()
+    
+    
+                # Normalize lastTabsSubCtrls
+                if not lastTabsSubCtrls:
+                    lastTabsSubCtrls = ["textedit"]
+                if len(lastTabsSubCtrls) < len(wikiWordsToOpen):
+                    lastTabsSubCtrls += [lastTabsSubCtrls[0]] * \
+                            (len(wikiWordsToOpen) - len(lastTabsSubCtrls))
+    
+                # Remove/Replace undefined wiki words
+                wwo = []
+                for word, subCtrl in zip(wikiWordsToOpen, lastTabsSubCtrls):
+                    if self.getWikiDocument().isDefinedWikiLink(word):
+                        wwo.append((word, subCtrl))
+                        continue
+    
+                    wordsStartingWith = self.getWikiData().getWikiLinksStartingWith(
+                            word, True)
+                    if len(wordsStartingWith) > 0:
+                        word = wordsStartingWith[0]
+                        wwo.append((word, subCtrl))
+                        continue
+                    
+                    # Omitting word, so adjust activeTabNo
+                    activeTabNo -= 1
+    
+                # now try and open the last wiki page as leftmost tab
+                if len(wwo) > 0: ## and wwo[0][0] != self.wikiName:
+                    firstWikiWord = wwo[0][0]
 
-            self.tree.SetScrollPos(wx.VERTICAL, 0)
-            
-            lastRoot = self.getConfig().get("main", "tree_last_root_wiki_word",
-                    None)
-            if not (lastRoot and
-                    self.getWikiDocument().isDefinedWikiLink(lastRoot)):
-                lastRoot = self.wikiName
-                
-            self.tree.setRootByWord(lastRoot)
-            self.tree.readExpandedNodesFromConfig()
-            self.tree.expandRoot()
-            self.getConfig().set("main", "tree_last_root_wiki_word", lastRoot)
+                    self.openWikiPage(firstWikiWord, anchor=anchorToOpen)
+                    self.findCurrentWordInTree()
+                    targetPresenter = self.getMainAreaPanel().getPresenters()[0]
+                    if targetPresenter.hasSubControl(wwo[0][1]):
+                        targetPresenter.switchSubControl(wwo[0][1])
+#                 else:
+#                     self.openWikiPage(self.wikiName)
+    
+                # If present, open further words in tabs on the right
+                for word, subCtrl in wwo[1:]:
+                    targetPresenter = self.activatePageByUnifiedName(
+                            u"wikipage/" + word, tabMode=3)
+                    if targetPresenter is None:
+                        break    # return instead?
 
-            viewsTree = self.windowLayouter.getWindowByName("viewstree")
-            if viewsTree is not None:
-                viewsTree.setViewsAsRoot()
-                viewsTree.readExpandedNodesFromConfig()
-                viewsTree.expandRoot()
+                    if targetPresenter.hasSubControl(subCtrl):
+                        targetPresenter.switchSubControl(subCtrl)
 
+                if activeTabNo > 0:
+                    targetPresenter = self.getMainAreaPanel().getPresenters()[
+                            activeTabNo]
+                    self.getMainAreaPanel().showPresenter(targetPresenter)
 
-            # Remove/Replace undefined wiki words
-            wwo = []
-            for word in wikiWordsToOpen:
-                if self.getWikiDocument().isDefinedWikiLink(word):
-                    wwo.append(word)
-                    continue
+                self.tree.SetScrollPos(wx.HORIZONTAL, 0)
 
-                wordsStartingWith = self.getWikiData().getWikiLinksStartingWith(
-                        word, True)
-                if len(wordsStartingWith) > 0:
-                    word = wordsStartingWith[0]
-                    wwo.append(word)
-                    continue
-
-            wikiWordsToOpen = wwo
-            
-            # now try and open the last wiki page as leftmost tab
-            if len(wikiWordsToOpen) > 0 and wikiWordsToOpen[0] != self.wikiName:
-                firstWikiWord = wikiWordsToOpen[0]
-#                 # if the word is not a wiki word see if a word that starts with the word can be found
-#                 if not self.getWikiDocument().isDefinedWikiWord(firstWikiWord):
-#                     wordsStartingWith = self.getWikiData().getWikiWordsStartingWith(
-#                             firstWikiWord, True)
-#                     if wordsStartingWith:
-#                         firstWikiWord = wordsStartingWith[0]
-
-                self.openWikiPage(firstWikiWord, anchor=anchorToOpen)
-                self.findCurrentWordInTree()
-            else:
-                self.openWikiPage(self.wikiName)
-
-            # If present, open further words in tabs on the right
-            for word in wikiWordsToOpen[1:]:
-#                 if not self.getWikiDocument().isDefinedWikiWord(word):
-#                     wordsStartingWith = self.getWikiData().getWikiWordsStartingWith(
-#                             word, True)
-#                     if wordsStartingWith:
-#                         word = wordsStartingWith[0]
-                if self.activatePageByUnifiedName(u"wikipage/" + word,
-                        tabMode=3) is None:
-                    break    # return instead?
-
-            self.tree.SetScrollPos(wx.HORIZONTAL, 0)
-
-            # enable the editor control whether or not the wiki root was found
-            for dpp in self.getMainAreaPanel().getPresenters():
-                if isinstance(dpp, DocPagePresenter):
-                    e = dpp.getSubControl("textedit")
-                    e.Enable(True)
+                # enable the editor control whether or not the wiki root was found
+                for dpp in self.getMainAreaPanel().getPresenters():
+                    if isinstance(dpp, DocPagePresenter):
+                        e = dpp.getSubControl("textedit")
+                        e.Enable(True)
 
             # update the last accessed wiki config var
             self.lastAccessedWiki(self.getWikiConfigPath())
@@ -3529,7 +3570,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 # No editor -> nothing to do
                 return False
 
-            text = page.getLiveText()
+#             text = page.getLiveText()
 
             word = page.getWikiWord()
             if word is not None:
@@ -3623,7 +3664,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def findCurrentWordInTree(self):
         try:
             self.tree.buildTreeForWord(self.getCurrentWikiWord(), selectNode=True)
-        except Exception, e:
+        except Exception:
             traceback.print_exc()
 
 
@@ -3652,7 +3693,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         locPath = dirname(locPath)
         relPath = relativeFilePath(locPath, absPath)
-        url = None
         if relPath is None:
             return None
 
@@ -3737,7 +3777,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if not self.requireReadAccess():
             return
         try:
-            dlg = ChooseWikiWordDialog(self, -1, words, motionType, title)
+            dlg = AdditionalDialogs.ChooseWikiWordDialog(self, -1, words,
+                    motionType, title)
             dlg.CenterOnParent(wx.BOTH)
             dlg.ShowModal()
             dlg.Destroy()
@@ -4066,7 +4107,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if cc is None:
             return  # Shouldn't be called anyway
             
-        wikiDoc = self.getWikiDocument()
         enableCatcher = not self.isReadOnlyPage()
 
         if evt.GetId() == GUI_ID.CMD_CLIPBOARD_CATCHER_OFF:
@@ -4109,7 +4149,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def showWikiWordOpenDialog(self):
-        OpenWikiWordDialog.runModal(self, self, -1)
+        AdditionalDialogs.OpenWikiWordDialog.runModal(self, self, -1)
 #         dlg = OpenWikiWordDialog(self, -1)
 #         try:
 #             dlg.CenterOnParent(wx.BOTH)
@@ -4137,7 +4177,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if self.isReadOnlyPage():
             return
 
-        RenameWikiWordDialog.runModal(self, wikiWord, self, -1)
+        AdditionalDialogs.RenameWikiWordDialog.runModal(self, wikiWord, self, -1)
         return
 
 
@@ -4437,7 +4477,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 # 
 #         dlg.Destroy()
 # 
-        iconname = SelectIconDialog.runModal(self, -1,
+        iconname = AdditionalDialogs.SelectIconDialog.runModal(self, -1,
                 wx.GetApp().getIconCache())
 
         if iconname:
@@ -4446,7 +4486,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def showDateformatDialog(self):
         fmt = self.configuration.get("main", "strftime")
 
-        dlg = DateformatDialog(self, -1, self, deffmt = fmt)
+        dlg = AdditionalDialogs.DateformatDialog(self, -1, self, deffmt = fmt)
         dlg.CenterOnParent(wx.BOTH)
         dateformat = None
 
@@ -4483,14 +4523,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             
             # TODO Move this to WikiDataManager!
             # Set file storage according to configuration
-            fs = self.getWikiDocument().getFileStorage()
             
-            fs.setModDateMustMatch(self.configuration.getboolean("main",
-                    "fileStorage_identity_modDateMustMatch", False))
-            fs.setFilenameMustMatch(self.configuration.getboolean("main",
-                    "fileStorage_identity_filenameMustMatch", False))
-            fs.setModDateIsEnough(self.configuration.getboolean("main",
-                    "fileStorage_identity_modDateIsEnough", False))
+            if self.getWikiDocument() is not None:
+                fs = self.getWikiDocument().getFileStorage()
+                
+                fs.setModDateMustMatch(self.configuration.getboolean("main",
+                        "fileStorage_identity_modDateMustMatch", False))
+                fs.setFilenameMustMatch(self.configuration.getboolean("main",
+                        "fileStorage_identity_filenameMustMatch", False))
+                fs.setModDateIsEnough(self.configuration.getboolean("main",
+                        "fileStorage_identity_modDateIsEnough", False))
 
 
             relayoutNeeded = False
@@ -4522,10 +4564,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.saveAllDocPages()
         self.getWikiData().commit()
 
-        dlg = ExportDialog(self, -1, continuousExport=False)
+        dlg = AdditionalDialogs.ExportDialog(self, -1, continuousExport=False)
         dlg.CenterOnParent(wx.BOTH)
 
-        result = dlg.ShowModal()
+        dlg.ShowModal()
         dlg.Destroy()
 
 
@@ -4538,7 +4580,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.saveAllDocPages()
         self.getWikiData().commit()
 
-        dlg = ExportDialog(self, -1, continuousExport=True)
+        dlg = AdditionalDialogs.ExportDialog(self, -1, continuousExport=True)
         try:
             dlg.CenterOnParent(wx.BOTH)
     
@@ -4657,10 +4699,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.saveAllDocPages()
         self.getWikiData().commit()
 
-        dlg = ImportDialog(self, -1, self)
+        dlg = AdditionalDialogs.ImportDialog(self, -1, self)
         dlg.CenterOnParent(wx.BOTH)
 
-        result = dlg.ShowModal()
+        dlg.ShowModal()
         dlg.Destroy()
 
 
@@ -4704,6 +4746,32 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.spellChkDlg.checkNext(startPos=0)
 
 
+    def OnCmdCheckSpellCheckWhileType(self, evt):        
+        self.configuration.set("main", "editor_onlineSpellChecker_active",
+                evt.IsChecked())
+        oldSettings = {"editor_onlineSpellChecker_active":
+                not evt.IsChecked()}
+                
+        self.configuration.informChanged(oldSettings)
+
+    def OnUpdateSpellCheckWhileType(self, evt):
+        editor = self.getActiveEditor()
+        
+        evt.Check( editor is not None and self.configuration.getboolean("main",
+                "editor_onlineSpellChecker_active", False) )
+        evt.Enable(editor is not None)
+
+
+    def resetSpellCheckWhileTypeIgnoreList(self):
+        wikiDoc = self.getWikiDocument()
+        if wikiDoc is None:
+            return
+        
+        scs = wikiDoc.getOnlineSpellCheckerSession()
+        if scs is None:
+            return
+        
+        scs.resetIgnoreListSession()
 
 
     def initiateFullUpdate(self, skipConfirm=False):
@@ -4807,12 +4875,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         try:
             clAction = CmdLineAction([])
+            clAction.inheritFrom(self.getCmdLineAction())
             clAction.wikiToOpen = wd.getWikiConfigPath()
             clAction.frameToOpen = 1  # Open in new frame
-            wws = self.getMainAreaPanel().getOpenWikiWords()
-            
+            wws, subCtrls, activeNo = \
+                    self.getMainAreaPanel().getOpenWikiWordsSubCtrlsAndActiveNo()
+
             if wws is not None:
                 clAction.wikiWordsToOpen = wws
+                clAction.lastTabsSubCtrls = subCtrls
+                clAction.activeTabNo = activeNo
 
             wx.GetApp().startPersonalWikiFrame(clAction)
         except Exception, e:
@@ -5010,17 +5082,17 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def showAboutDialog(self):
-        dlg = AboutDialog(self)
+        dlg = AdditionalDialogs.AboutDialog(self)
         dlg.ShowModal()
         dlg.Destroy()
 
     def OnShowWikiPropertiesDialog(self, evt):
-        dlg = WikiPropertiesDialog(self, -1, self)
+        dlg = AdditionalDialogs.WikiPropertiesDialog(self, -1, self)
         dlg.ShowModal()
         dlg.Destroy()
 
     def OnCmdShowWikiJobDialog(self, evt):
-        dlg = WikiJobDialog(self, -1, self)
+        dlg = AdditionalDialogs.WikiJobDialog(self, -1, self)
         dlg.ShowModal()
         dlg.Destroy()
 
@@ -5068,9 +5140,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                    (miscEvt.getSource() is wx.GetApp()):
                 if miscEvt.has_key("reread text blocks needed"):
                     self.rereadTextBlocks()
-                elif miscEvt.has_key("reread personal word list needed"):
-                    if self.spellChkDlg is not None:
-                        self.spellChkDlg.rereadPersonalWordLists()
+#                 elif miscEvt.has_key("reread personal word list needed"):
+#                     if self.spellChkDlg is not None:
+#                         self.spellChkDlg.rereadPersonalWordLists()
                 elif miscEvt.has_key("reread favorite wikis needed"):
                     self.rereadFavoriteWikis()
                 elif miscEvt.has_key("reread recent wikis needed"):
@@ -5129,6 +5201,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if path:
             try:
                 clAction = CmdLineAction([])
+                clAction.inheritFrom(self.getCmdLineAction())
                 clAction.wikiToOpen = mbcsDec(abspath(path), "replace")[0]
                 clAction.frameToOpen = 1  # Open in new frame
                 wx.GetApp().startPersonalWikiFrame(clAction)
@@ -5400,7 +5473,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.configuration.set("main", "frame_stayOnTop", self.getStayOnTop())
         self.configuration.set("main", "zoom", self.getActiveEditor().GetZoom())
-        self.configuration.set("main", "wiki_history", ";".join(self.wikiHistory))
+        if not self.getCmdLineAction().noRecent:
+            self.configuration.set("main", "wiki_history",
+                    ";".join(self.wikiHistory))
 
         self.windowLayouter.close()
 
@@ -5543,10 +5618,10 @@ Exit;TBMENU_EXIT
 
 
 # Entries to support i18n of context menus
-
-N_(u"Restore")
-N_(u"Save")
-N_(u"Exit")
+if False:
+    N_(u"Restore")
+    N_(u"Save")
+    N_(u"Exit")
 
 # _TASKBAR_CONTEXT_MENU_CLIPCATCH = \
 # u"""

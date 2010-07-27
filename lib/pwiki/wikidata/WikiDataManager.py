@@ -3,27 +3,28 @@ from __future__ import with_statement
 from weakref import WeakValueDictionary
 import os, os.path, time, shutil, traceback
 from threading import RLock, Thread, Condition
-from collections import deque
+# from collections import deque
 
-from pwiki.rtlibRepl import re  # Original re doesn't work right with
-        # multiple threads
+import re
 
 from wx import GetApp
 
 import Consts
 from pwiki.WikiExceptions import *
 
-from pwiki.Utilities import TimeoutRLock, SingleThreadExecutor, DUMBTHREADSTOP
+from ..Utilities import TimeoutRLock, SingleThreadExecutor, DUMBTHREADSTOP
 
-from pwiki.MiscEvent import MiscEventSourceMixin
+from ..MiscEvent import MiscEventSourceMixin
 
-from pwiki import ParseUtilities
-from pwiki.StringOps import mbcsDec, re_sub_escape, pathEnc, pathDec, \
+from .. import ParseUtilities
+from ..StringOps import mbcsDec, re_sub_escape, pathEnc, pathDec, \
         unescapeWithRe, strToBool
-from pwiki.DocPages import DocPage, WikiPage, FunctionalPage, AliasWikiPage
+from ..DocPages import DocPage, WikiPage, FunctionalPage, AliasWikiPage
 # from ..timeView.Versioning import VersionOverview
 
-from pwiki.SearchAndReplace import SearchReplaceOperation
+from ..SearchAndReplace import SearchReplaceOperation
+
+from .. import SpellChecker
 
 import DbBackendUtils, FileStorage
 
@@ -387,7 +388,7 @@ class WikiDataManager(MiscEventSourceMixin):
         self.wikiData = WikiDataSynchronizedProxy(self.baseWikiData)
         self.wikiPageDict = WeakValueDictionary()
         self.funcPageDict = WeakValueDictionary()
-        
+
         self.updateExecutor = SingleThreadExecutor(3)
         self.pageRetrievingLock = TimeoutRLock(Consts.DEADBLOCKTIMEOUT)
 #         self.pageUpdateDequeCondition = Condition()
@@ -398,10 +399,16 @@ class WikiDataManager(MiscEventSourceMixin):
         self.dataDir = dataDir
         self.dbtype = wikidhName
 
+        # TODO: Only initialize on demand
+        self.onlineSpellCheckerSession = None
+        if SpellChecker.isSpellCheckSupported():
+            self.onlineSpellCheckerSession = \
+                    SpellChecker.SpellCheckerSession(self)
+            self.onlineSpellCheckerSession.rereadPersonalWordLists()
+
         self.refCount = 1
 
 
-    
     def checkDatabaseFormat(self):
         """
         Returns a pair (<frmcode>, <plain text>) where frmcode is an integer
@@ -610,6 +617,18 @@ class WikiDataManager(MiscEventSourceMixin):
                 os.makedirs(tempDir)
             except OSError:
                 self.setReadAccessFailed(True)
+
+
+    def getOnlineSpellCheckerSession(self):
+        return self.onlineSpellCheckerSession
+
+
+    def createOnlineSpellCheckerSessionClone(self):
+        if self.onlineSpellCheckerSession is None:
+            return None
+        
+        return self.onlineSpellCheckerSession.cloneForThread()
+
 
     def getNoAutoSaveFlag(self):
         """
@@ -1324,7 +1343,7 @@ class WikiDataManager(MiscEventSourceMixin):
         if self.isDefinedWikiLink(toWikiWord):
             raise WikiDataException(
                     _(u"Cannot rename '%s' to '%s', '%s' already exists") %
-                    (word, toWikiWord, toWikiWord))
+                    (wikiWord, toWikiWord, toWikiWord))
 
         try:        
             oldWikiPage = self.getWikiPage(wikiWord)
@@ -1712,7 +1731,7 @@ class WikiDataManager(MiscEventSourceMixin):
             if miscevt.has_key("changed configuration"):
                 attrs = miscevt.getProps().copy()
                 attrs["changed wiki configuration"] = True
-                self.fireMiscEventProps(attrs)                
+                self.fireMiscEventProps(attrs)
         elif miscevt.getSource() is GetApp():
             if miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()
@@ -1751,6 +1770,10 @@ class WikiDataManager(MiscEventSourceMixin):
                 attrs["funcPage"] = miscevt.getSource()
 
                 self.fireMiscEventProps(attrs)
-
-
+#         elif miscevt.getSource() is GetApp().getGlobalConfig():
+#             if miscevt.has_key("changed configuration"):
+#                 # TODO: On demand
+#                 if SpellChecker.isSpellCheckSupported():
+#                     self.onlineSpellCheckerSession = \
+#                             SpellChecker.SpellCheckerSession(self)
 

@@ -10,11 +10,11 @@ from ctypes import c_int, c_uint, c_long, c_ulong, c_ushort, c_char, c_char_p, \
 
 import wx
 
-from wxHelper import getTextFromClipboard
+from .wxHelper import getTextFromClipboard
 
-from StringOps import strftimeUB, pathEnc, mbcsEnc, mbcsDec   # unescapeWithRe
-import Configuration
-import DocPages
+from .StringOps import strftimeUB, pathEnc, mbcsEnc, mbcsDec   # unescapeWithRe
+from . import Configuration
+from . import DocPages
 
 
 _user32dll = ctypes.windll.User32
@@ -248,7 +248,10 @@ class SHFILEOPSTRUCTW(ctypes.Structure):
 # } SHFILEOPSTRUCTW,*LPSHFILEOPSTRUCTW;
 
 
+FO_MOVE = 1
 FO_COPY = 2
+# FO_DELETE = 3
+# FO_RENAME = 4
 
 FOF_MULTIDESTFILES = 1
 FOF_NOCONFIRMATION = 16
@@ -266,14 +269,7 @@ except AttributeError:
 
 
 if SHFileOperationW is not None:
-    def copyFile(srcPath, dstPath):
-        """
-        Copy file from srcPath to dstPath. dstPath may be overwritten if
-        existing already. dstPath must point to a file, not a directory.
-        If some directories in dstPath do not exist, they are created.
-        
-        This function only works on Win NT!
-        """
+    def _shellFileOp(opcode, srcPath, dstPath):
         dstDir = os.path.dirname(dstPath)
             
         if not os.path.exists(pathEnc(dstDir)):
@@ -285,7 +281,7 @@ if SHFileOperationW is not None:
         dstPathWc = ctypes.c_wchar_p(dstPath + u"\0")
     
         fileOp.hwnd = 0
-        fileOp.wFunc = FO_COPY
+        fileOp.wFunc = opcode
         fileOp.pFrom = srcPathWc
         fileOp.pTo = dstPathWc
         fileOp.fFlags = FOF_MULTIDESTFILES | FOF_NOCONFIRMATION | \
@@ -297,9 +293,39 @@ if SHFileOperationW is not None:
         res = SHFileOperationW(ctypes.byref(fileOp))
 
         if res != 0:
-            raise IOError(
-                    _(u"Copying from %s to %s failed. SHFileOperation result no. %s") %
-                    (srcPath, dstPath, res))
+            if opcode == FO_COPY:
+                raise IOError(
+                        _(u"Copying from %s to %s failed. SHFileOperation result no. %s") %
+                        (srcPath, dstPath, res))
+            elif opcode == FO_MOVE:
+                raise IOError(
+                        _(u"Moving from %s to %s failed. SHFileOperation result no. %s") %
+                        (srcPath, dstPath, res))
+            else:
+                raise InternalError(u"SHFileOperation failed. Opcode=%s from=%s to=%s errcode=%s" %
+                        (opcode, srcPath, dstPath, res))
+
+
+    def copyFile(srcPath, dstPath):
+        """
+        Copy file from srcPath to dstPath. dstPath may be overwritten if
+        existing already. dstPath must point to a file, not a directory.
+        If some directories in dstPath do not exist, they are created.
+        
+        This function only works on Win NT!
+        """
+        _shellFileOp(FO_COPY, srcPath, dstPath)
+    
+    def moveFile(srcPath, dstPath):
+        """
+        Move file from srcPath to dstPath. dstPath may be overwritten if
+        existing already. dstPath must point to a file, not a directory.
+        If some directories in dstPath do not exist, they are created.
+        
+        This function only works on Win NT!
+        """
+        _shellFileOp(FO_MOVE, srcPath, dstPath)
+
 
 
 def _getMemoryContentFromHandle(hdl):

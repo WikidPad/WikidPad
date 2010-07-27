@@ -5,8 +5,8 @@ OS abstraction
 import os, shutil, os.path, traceback
 import wx
 
-import Configuration
-from StringOps import mbcsEnc, urlQuote, pathnameFromUrl, URL_RESERVED, pathEnc
+from . import Configuration
+from .StringOps import mbcsEnc, urlQuote, pathnameFromUrl, URL_RESERVED, pathEnc
 
 
 # import WindowsHacks
@@ -56,6 +56,7 @@ else:
 # Define copyFile
 if Configuration.isWinNT() and WindowsHacks:
     copyFile = WindowsHacks.copyFile
+    moveFile = WindowsHacks.moveFile
 else:
     # TODO Mac version    
     def copyFile(srcPath, dstPath):
@@ -63,7 +64,7 @@ else:
         Copy file from srcPath to dstPath. dstPath may be overwritten if
         existing already. dstPath must point to a file, not a directory.
         If some directories in dstPath do not exist, they are created.
-        
+
         This currently just calls shutil.copy2() TODO!
         """
         dstDir = os.path.dirname(dstPath)
@@ -72,6 +73,19 @@ else:
             os.makedirs(dstDir)
     
         shutil.copy2(srcPath, dstPath)
+
+    def moveFile(srcPath, dstPath):
+        """
+        Move file from srcPath to dstPath. dstPath may be overwritten if
+        existing already. dstPath must point to a file, not a directory.
+        If some directories in dstPath do not exist, they are created.
+        """
+        dstDir = os.path.dirname(dstPath)        
+    
+        if not os.path.exists(pathEnc(dstDir)):
+            os.makedirs(dstDir)
+    
+        shutil.move(srcPath, dstPath)  
 
 
 # Define samefile

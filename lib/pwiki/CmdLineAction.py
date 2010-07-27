@@ -1,7 +1,5 @@
 import sys, os, getopt, traceback
 
-import urllib_red as urllib
-
 import wx
 
 from WikiExceptions import *
@@ -37,6 +35,11 @@ class CmdLineAction:
         self.rebuild = False # Rebuild the wiki
         self.frameToOpen = 1  # Open wiki in new frame? (yet unrecognized) 
                 # 1:New frame, 2:Already open frame, 0:Use config default 
+        self.activeTabNo = -1  # Number of tab to activate
+                # (interpreted by PersonalWikiFrame)
+        self.lastTabsSubCtrls = None  # Corresponding list of subcontrol names
+                # for each wikiword to open
+        self.noRecent = False  # Do not modify history of recently opened wikis
 
         if len(sargs) == 0:
             return
@@ -58,13 +61,13 @@ class CmdLineAction:
             opts, rargs = getopt.getopt(sargs, "hw:p:x",
                     ["help", "wiki=", "page=", "exit", "export-what=",
                     "export-type=", "export-dest=", "export-compfn", "anchor",
-					"rebuild"])
+					"rebuild", "no-recent", "preview", "editor"])
         except getopt.GetoptError:
             self.cmdLineError = True
             return
 
         wikiWordsToOpen = []
-        
+
         for o, a in opts:
             if o in ("-h", "--help"):
                 self.showHelp = True
@@ -86,9 +89,53 @@ class CmdLineAction:
                 self.exportCompFn = True
             elif o == "--rebuild":
                 self.rebuild = True
+            elif o == "--no-recent":                
+                self.noRecent = True
+            elif o == "--preview":
+                self._fillLastTabsSubCtrls(len(wikiWordsToOpen), "preview")
+            elif o == "--editor":
+                self._fillLastTabsSubCtrls(len(wikiWordsToOpen), "textedit")
+
 
         if len(wikiWordsToOpen) > 0:
             self.wikiWordsToOpen = tuple(wikiWordsToOpen)
+
+
+        self._fillLastTabsSubCtrls(len(wikiWordsToOpen))
+
+
+    def _fillLastTabsSubCtrls(self, wwoLen, newItem=None):
+        """
+        If self.lastTabsSubCtrls contains at least one item, fill it up
+        to length of wwoLen with last item. If newItem is not None, it is
+        appended.
+        If newItem is None (done by final call after collecting) self.lastTabsSubCtrls
+        shortened to length of wwoLen. If wwoLen is 0, the last item is preserved
+        to ensure that the setting "--preview" is processed when opening wiki
+        with previously opened words.
+        """
+        if not self.lastTabsSubCtrls:
+            if newItem is not None:
+                # Fill up already mentioned words with textedit subControl setting
+                self.lastTabsSubCtrls = ["textedit"] * wwoLen + [newItem]
+
+            return
+
+
+        if len(self.lastTabsSubCtrls) < wwoLen:
+                self.lastTabsSubCtrls += [self.lastTabsSubCtrls[-1]] * \
+                        (wwoLen - len(self.lastTabsSubCtrls))
+
+        if newItem is not None:
+            self.lastTabsSubCtrls.append(newItem)
+        else:
+            if wwoLen > 0:
+                self.lastTabsSubCtrls = self.lastTabsSubCtrls[:wwoLen]
+            else:
+                self.lastTabsSubCtrls = self.lastTabsSubCtrls[-1:]
+
+            if not self.lastTabsSubCtrls:
+                self.lastTabsSubCtrls = None
 
 
     def setWikiToOpen(self, wto):
@@ -101,6 +148,14 @@ class CmdLineAction:
 #                 self.wikiToOpen = self.wikiToOpen.replace("wiki:", "")
         else:
             self.wikiToOpen = wto
+
+
+    def inheritFrom(self, cmdline):
+        """
+        Inherits some settings from another commandline. Some special settings
+        should be persistent when opening one frame from another.
+        """
+        self.noRecent = cmdline.noRecent
 
 
     def actionBeforeShow(self, pWiki):
@@ -191,6 +246,12 @@ N_(u"""Options:
     --export-dest <destination path>: path of destination directory for export
     --export-compfn: Use compatible filenames on export
     --rebuild: rebuild the Wiki database
+    --no-recent: Do not record opened wikis in recently opened wikis list
+    --preview: If no pages are given, all opened pages from previous session
+               are opened in preview mode. Otherwise all pages given after that
+               option are opened in preview mode.
+    --editor: Same as --preview but opens in text editor mode.
+
 """)
 
     def showCmdLineUsage(self, pWiki, addRemark=u""):

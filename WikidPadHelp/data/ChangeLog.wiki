@@ -1,6 +1,27 @@
 ﻿++ Change Log
 
 
+Jul. 27, 2010 (2.1beta05)
+
+    * When dropping files you now have options to move files to
+      file storage (instead of copying) and to be asked every time
+      what to do. See [OptionsDialog#*Dropping files*]
+    * Option to define what to insert before, after and between file
+      links when dropping files.
+      See [OptionsDialog#+++++ File dropping] 
+    * Spell check while type.
+      See [SpellChecking#++ Spell check while type]
+    * Commandline options to start tabs in preview mode and to
+      prevent list of recent opened wikis from updating.
+      See [CommandLineSupport#++++ General]
+    * WikidPad now remembers active tab and view mode
+      (editor/preview) of each tab
+
+    * Bug fixed: Missing string <<"Set of *.wiki files">>
+      for i18n
+
+
+
 Jul. 04, 2010 (2.1alpha04)
 
     * Export of previous versions of a wiki page in multipage text
@@ -29,7 +50,7 @@ Jun. 05, 2010 (2.1alpha03)
       file names should be used for wiki page files (default is on
       for Mac OS, see [OptionsDialog#*Page file names ASCII only*])
     * Option to slow down background tree update (to reduce
-      response time of WikidPad).
+      response delay of WikidPad).
       See [OptionsDialog#*Update step min. delay*]
     * Support for processing right-clicks on toolbar icons from
       plugins (see file "extensions/referrals.py" as an example)

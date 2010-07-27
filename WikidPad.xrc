@@ -1245,6 +1245,70 @@
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
         <border>5</border>
       </object>
+      <object class="sizeritem">
+        <object class="wxStaticLine"/>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxStaticText">
+          <label>File dropping</label>
+          <font>
+            <size>8</size>
+            <style>default</style>
+            <weight>bold</weight>
+            <family>normal</family>
+            <underlined>0</underlined>
+          </font>
+        </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <cols>2</cols>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Prepend before links:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfEditorFilePastePrefix"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Between links:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfEditorFilePasteMiddle"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Append after links:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfEditorFilePasteSuffix"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <growablecols>1</growablecols>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
     </object>
   </object>
   <object class="wxPanel" name="OptionsPageEditorColors">
@@ -1652,7 +1716,9 @@
                 <item>Nothing</item>
                 <item>Absolute URL</item>
                 <item>Relative URL</item>
-                <item>Relative into file storage</item>
+                <item>Copy into file storage</item>
+                <item>Move into file storage</item>
+                <item>Ask</item>
               </content>
               <selection>0</selection>
             </object>
@@ -1672,7 +1738,9 @@
                 <item>Nothing</item>
                 <item>Absolute URL</item>
                 <item>Relative URL</item>
-                <item>Relative into file storage</item>
+                <item>Copy into file storage</item>
+                <item>Move into file storage</item>
+                <item>Ask</item>
               </content>
               <selection>0</selection>
             </object>
@@ -1692,7 +1760,9 @@
                 <item>Nothing</item>
                 <item>Absolute URL</item>
                 <item>Relative URL</item>
-                <item>Relative into file storage</item>
+                <item>Copy into file storage</item>
+                <item>Move into file storage</item>
+                <item>Ask</item>
               </content>
               <selection>0</selection>
             </object>
@@ -3353,6 +3423,100 @@
           </object>
           <growablecols>1</growablecols>
         </object>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnOk">
+              <label> OK </label>
+              <default>1</default>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxButton" name="btnCancel">
+              <label> Cancel </label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+        </object>
+      </object>
+    </object>
+    <style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
+  </object>
+  <object class="wxDialog" name="FilePasteDialog">
+    <title>Paste File</title>
+    <centered>1</centered>
+    <object class="wxBoxSizer">
+      <orient>wxVERTICAL</orient>
+      <object class="sizeritem">
+        <object class="wxFlexGridSizer">
+          <cols>2</cols>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>File type:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxChoice" name="chEditorFilePasteOperation">
+              <content>
+                <item>Absolute URL</item>
+                <item>Relative URL</item>
+                <item>Copy into file storage</item>
+                <item>Move into file storage</item>
+              </content>
+              <selection>0</selection>
+            </object>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Prepend before links:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfEditorFilePastePrefix"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Between links:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfEditorFilePasteMiddle"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxStaticText">
+              <label>Append after links:</label>
+            </object>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+          <object class="sizeritem">
+            <object class="wxTextCtrl" name="tfEditorFilePasteSuffix"/>
+            <flag>wxALL|wxEXPAND</flag>
+            <border>5</border>
+          </object>
+          <growablecols>1</growablecols>
+        </object>
+        <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
       </object>
       <object class="sizeritem">

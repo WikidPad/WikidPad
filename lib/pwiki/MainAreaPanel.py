@@ -3,7 +3,7 @@ from __future__ import with_statement
 ## import hotshot
 ## _prof = hotshot.Profile("hotshot.prf")
 
-import os, sys, traceback, string, re
+import os, sys, traceback, re
 
 import wx
 # import wx.xrc as xrc
@@ -102,20 +102,34 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
     def getPresenters(self):
         return self.docPagePresenters
         
-    def getOpenWikiWords(self):
+    def getOpenWikiWordsSubCtrlsAndActiveNo(self):
+        """
+        Returns tuple (wikiwords, subCtrls, activeNo) where wikiwords is a list of
+        the open wiki words, subCtrls is a corresponding list of names of the
+        active subcontrol in the according presenter ("textedit" or "preview"
+        normally) and activeNo is the index into wikiwords
+        for the corresponding active tab or -1 if active tab doesn't show
+        a wiki word or no wiki loaded
+        """
         if not self.mainControl.isWikiLoaded():
-            return None
+            return None, -1, None
 
-        result = []
+        wikiWords = []
+        subCtrls = []
+        activeNo = 0
         for pres in self.getPresenters():
             if isinstance(pres, BasicDocPagePresenter):
                 docPage = pres.getDocPage()
                 if isinstance(docPage, (DocPages.AliasWikiPage,
                         DocPages.WikiPage)):
-                    result.append(
-                            docPage.getNonAliasPage().getWikiWord())
+                    if pres is self.getCurrentPresenter():
+                        activeNo = len(wikiWords)
 
-        return result
+                    wikiWords.append(
+                            docPage.getNonAliasPage().getWikiWord())
+                    subCtrls.append(pres.getCurrentSubControlName())
+
+        return wikiWords, subCtrls, activeNo
 
 
     def getDocPagePresenters(self):
@@ -138,22 +152,27 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         """
         Update configuration info about open tabs
         """
-        
-        openWikiWords = self.getOpenWikiWords()
-        
+        config = self.mainControl.getConfig()
+
+        openWikiWords, subCtrls, activeNo = \
+                self.getOpenWikiWordsSubCtrlsAndActiveNo()
+
         if openWikiWords is None:
             return
-        
+
         if len(openWikiWords) < 2:
-            self.mainControl.getConfig().set("main", "further_wiki_words", u"")
+            config.set("main", "further_wiki_words", u"")
         else:
-            fwws = u";".join([escapeForIni(w, u" ;")
-                    for w in openWikiWords[1:]])
-            self.mainControl.getConfig().set("main", "further_wiki_words", fwws)
+            fwws = u";".join([escapeForIni(w, u" ;") for w in openWikiWords[1:]])
+            config.set("main", "further_wiki_words", fwws)
 
         if len(openWikiWords) > 0:
-            self.mainControl.getConfig().set("main", "last_wiki_word",
-                    openWikiWords[0])
+            config.set("main", "last_wiki_word", openWikiWords[0])
+
+            ltsc = u";".join([escapeForIni(w, u" ;") for w in subCtrls])
+            config.set("main", "wiki_lastTabsSubCtrls", ltsc)
+
+            config.set("main", "wiki_lastActiveTabNo", activeNo)
 
 
     if Configuration.isLinux():

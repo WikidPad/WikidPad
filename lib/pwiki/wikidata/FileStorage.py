@@ -5,9 +5,9 @@ data or programs)
 
 import os, os.path, traceback, glob
 
-import re as _re # import pwiki.srePersistent as re
+import re
 from pwiki.StringOps import createRandomString, pathEnc
-from pwiki.OsAbstract import copyFile
+from pwiki.OsAbstract import copyFile, moveFile
 
 
 class FSException(Exception):
@@ -15,8 +15,8 @@ class FSException(Exception):
 
 
 
-_FILESPLITPAT = _re.compile(ur"^(?P<name>\.*[^.]+)(?P<suffix>.*)$",
-        _re.DOTALL | _re.UNICODE | _re.MULTILINE)
+_FILESPLITPAT = re.compile(ur"^(?P<name>\.*[^.]+)(?P<suffix>.*)$",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
 
@@ -282,12 +282,13 @@ class FileStorage:
 
 
     # TODO progress indicator
-    def createDestPath(self, srcPath, guiProgressListener=None):
+    def createDestPath(self, srcPath, guiProgressListener=None, move=False):
         """
         Return destination path in fileStorage of a file denoted by srcPath.
         Destination may be already existing or was copied from source.
         
         guiProgressListener -- currently not used
+        move -- If True, move file instead of copying
         """
         destpath, ex = self.findDestPath(srcPath)
         if ex:
@@ -296,18 +297,30 @@ class FileStorage:
         if destpath is None:
             raise FSException(_(u"Copy of file '%s' couldn't be created") %
                     srcPath)
-                    
-        self.copyFile(srcPath, destpath)
-        
+
+        if move:
+            self.moveFile(srcPath, destpath)
+        else:
+            self.copyFile(srcPath, destpath)
+
         return destpath
 
-
-    def copyFile(unself, srcPath, dstPath):
+    @staticmethod
+    def copyFile(srcPath, dstPath):
         """
         Copy file from srcPath to dstPath. dstPath my be overwritten if
         existing already.
         """
         copyFile(srcPath, dstPath)
+
+
+    @staticmethod
+    def moveFile(srcPath, dstPath):
+        """
+        Copy file from srcPath to dstPath. dstPath my be overwritten if
+        existing already.
+        """
+        moveFile(srcPath, dstPath)
 
 
 #     def findIdenticalFile(self, srcPath):

@@ -605,9 +605,10 @@ class NonTerminalNode(SyntaxNode):
 
         node = self[index]
 
-        if lo == self.getChildrenCount() and \
-                charPos >= (node.pos + node.strLength):
-            # After last token
+#         if lo == self.getChildrenCount() and \
+#                 charPos >= (node.pos + node.strLength):
+        if charPos >= (node.pos + node.strLength):
+            # After last token or outside of any token
             return []
 
         result = node.findNodesForCharPos(charPos)

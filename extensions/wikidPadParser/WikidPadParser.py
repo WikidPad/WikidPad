@@ -11,7 +11,7 @@ from textwrap import fill
 
 import wx
 
-from pwiki.rtlibRepl import re
+import re    # from pwiki.rtlibRepl import re
 from pwiki.StringOps import UPPERCASE, LOWERCASE, revStr
 from pwiki.WikiDocument import WikiDocument
 from pwiki.OptionsDialog import PluginOptionsPanel

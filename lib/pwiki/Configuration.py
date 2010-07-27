@@ -649,7 +649,7 @@ GLOBALDEFAULTS = {
     ("main", "editor_sync_byPreviewSelection"): "False", # If True, the selection in preview will be searched in editor
             # for synchronization of both.
     ("main", "editor_tabWidth"): "4",  # How many spaces should a tab be wide?
-
+    ("main", "editor_onlineSpellChecker_active"): "False",  # Online-spellchecker (check as you type)?
 
     ("main", "editor_imagePaste_filenamePrefix"): "",  # Prefix to put before the filename.
     ("main", "editor_imagePaste_fileType"): "1",  # When pasting images into WikidPad, which file type
@@ -657,6 +657,9 @@ GLOBALDEFAULTS = {
     ("main", "editor_imagePaste_quality"): "75",  # Which quality should the (JPEG-)image have?
             # 0 zero means very bad, 100 means very good
     ("main", "editor_imagePaste_askOnEachPaste"): "True",  # When pasting image, ask each time for settings?
+    ("main", "editor_filePaste_prefix"): "",  # When dropping files into editor, how to prefix, join(middle) and suffix them?
+    ("main", "editor_filePaste_middle"): "\\x20",  # These three values are escaped with StringOps.escapeForIni to preserve spaces
+    ("main", "editor_filePaste_suffix"): "",  
 
 
     # Editor color options
@@ -668,7 +671,6 @@ GLOBALDEFAULTS = {
     ("main", "editor_selection_bg_color"): "",  # Background color of the selection in the editor
     ("main", "editor_margin_bg_color"): "",  # Background color of margins in the editor except fold margin
     ("main", "editor_caret_color"): "",  # Color of caret in the editor
-
 
     # Clipboard catcher (Windows only)
     ("main", "clipboardCatcher_prefix"): ur"",  # Prefix to prepend before each caught clipboard snippet
@@ -807,6 +809,11 @@ WIKIDEFAULTS = {
 
     ("main", "further_wiki_words"): u"", # Semicolon separated list of further wiki words to show in addit. tabs
             # after last wiki word
+
+    ("main", "wiki_lastTabsSubCtrls"): u"", # Semicolon separated list of the subcontrols active in each presenter, normally "textedit" or "preview"
+    ("main", "wiki_lastActiveTabNo"): u"-1", # Number of the tab which was last active. Non-wikiwords are ignored
+            # for this index
+
     ("main", "first_wiki_word"): "", # Start with a special wiki word (If empty, use last word)
     ("main", "wiki_database_type"): u"",  # Type of database "original_gadfly" for WikidPad,
                                          # "compact_sqlite" for WikidPadCompact

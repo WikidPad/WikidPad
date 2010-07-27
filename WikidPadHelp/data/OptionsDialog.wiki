@@ -12,8 +12,8 @@ The following options apply to the whole application and therefore to each wiki 
 *New window on wiki URL*
 When double clicking on a wiki: URL, a new instance of the application is started, otherwise, the current instance loads the new wiki.
 
-*Store relative pathes to wikis*
-Pathes to the recently opened wikis are stored as relative pathes if this is checked. Useful e.g. if you have WikidPad and your wikis on an USB-stick.
+*Store relative paths to wikis*
+Paths to the recently opened wikis are stored as relative paths if this is checked. Useful e.g. if you have WikidPad and your wikis on an USB-stick.
 
 *Default open/new dir.*
 Directory to start when using "Wiki"->"New" or "Wiki"->"Open" in the menu. If empty, WikidPad chooses a default.
@@ -180,7 +180,7 @@ A prefix to use for the filename. If this filename plus suffix exists already in
 
 *File type*
     * None: Don't store images at all
-    * PNG: Store in PNG format (losless compression)
+    * PNG: Store in PNG format (lossless compression)
     * JPEG: Store in JPEG format (lossy compression)
 
 *Quality*
@@ -188,6 +188,17 @@ Number to define quality of JPEG compression (0:worst, 75:default, 100:best)
 
 *Ask settings on each paste*
 If checked, each time you paste an image, a dialog box asks for the above settings to set them individually.
+
+
++++++ File dropping
+
+*Prepend before links*
+*Between links*
+*Append after links*
+
+When dropping files into editor (which are shown as file URLS then) you can set here what to prepend before all links, set between them and what to append. By default nothing is prepended/appended and a space is placed between links.
+
+<<You can put a newline in these fields as \n. For a single backslash type \\.>>
 
 
 ++++ Editor colors
@@ -269,7 +280,9 @@ Possible choices are:
     * Nothing
     * Absolute URL: Insert absolute URL(s) to the file(s)
     * Relative URL: URL(s) starting with "rel:"
-    * Relative into storage: Copy file(s) into file storage and create relative URL(s) to it
+    * Copy into file storage: Copy file(s) into file storage and create relative URL(s) to it
+    * Move into file storage: Copy file(s) into file storage and create relative URL(s) to it
+    * Ask: Show dialog to ask what to do. Allows also to set what to prepend/append/set between links (see [OptionsDialog#+++++ File dropping])
 
 
 ++++ Chron. view
