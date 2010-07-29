@@ -148,7 +148,7 @@ def _buildChainedUpdateEventFct(chain):
 #         
 #     return evtFct
 
-    
+
 
 class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
     HOTKEY_ID_HIDESHOW_BYAPP = 1

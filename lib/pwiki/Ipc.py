@@ -27,7 +27,7 @@ class RemoteCommandEvent(wx.PyCommandEvent):
     #    print '__del__'
     #    wx.PyCommandEvent.__del__(self)
 
-    def getCmdLine(self):
+    def getCmdLineAction(self):
         return self.cmdLine
 
 

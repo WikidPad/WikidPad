@@ -18,7 +18,6 @@ from Consts import CONFIG_FILENAME, CONFIG_GLOBALS_DIRNAME
 from MiscEvent import KeyFunctionSink, MiscEventSourceMixin
 
 from WikiExceptions import *
-from Utilities import SingleThreadExecutor
 from PersonalWikiFrame import PersonalWikiFrame
 from StringOps import mbcsDec, createRandomString, pathEnc, writeEntireFile, \
         loadEntireFile
@@ -115,21 +114,12 @@ class App(wx.App, MiscEventSourceMixin):
 
         self.SetAppName("WikidPad")
         
-        self._CallAfterId = wx.NewEventType()
-        self.Connect(-1, -1, self._CallAfterId,
-                    lambda event: event.callable(*event.args, **event.kw) )
-
-        self.startupDummy = wx.Frame(None, -1, u"Dummy")
-        self.dbExecutor = None  # SingleThreadExecutor()
+#         self._CallAfterId = wx.NewEventType()
+#         self.Connect(-1, -1, self._CallAfterId,
+#                     lambda event: event.callable(*event.args, **event.kw) )
+# 
         self.sqliteInitFlag = False   # Read and modified only by WikiData classes
         
-        wx.CallAfter(self.OnInitDuringMain)
-
-        return True
-
-
-
-    def OnInitDuringMain(self):
         WindowLayout.initiateAfterWxApp()
         self.removeAppLockOnExit = False
         wx.EVT_END_SESSION(self, self.OnEndSession)
@@ -392,8 +382,6 @@ class App(wx.App, MiscEventSourceMixin):
 
         self.startPersonalWikiFrame(CmdLineAction(sys.argv[1:]))
 
-        self.startupDummy.Close()
-
         return True
 
 
@@ -470,15 +458,11 @@ class App(wx.App, MiscEventSourceMixin):
         """
         pass
         
-#     def getDbExecutor(self):
-#         return self.dbExecutor
-        
+
     def pauseBackgroundThreads(self):
         self.fireMiscEventKeys(("pause background threads",))
-#        self.dbExecutor.pause()
 
     def resumeBackgroundThreads(self):
-#        self.dbExecutor.start()
         self.fireMiscEventKeys(("resume background threads",))
 
     def onGlobalConfigurationChanged(self, miscevt):
