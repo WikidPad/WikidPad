@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2010-07-26 15:30\n"
+"POT-Creation-Date: 2010-07-29 13:16\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2048,26 +2048,26 @@ msgstr ""
 msgid "Message"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:143
+#: lib\pwiki\MainApp.py:134
 msgid "Error initializing environment, couldn't locate global config directory"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:251
+#: lib\pwiki\MainApp.py:242
 msgid "Invalid AppLock.lock file.\n"
 "Ensure that WikidPad is not running,\n"
 "then delete file \"%s\" if present yet.\n"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:535
+#: lib\pwiki\MainApp.py:519
 msgid "An error occurred during this session\n"
 "See file %s"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:685
+#: lib\pwiki\MainApp.py:669
 msgid "Plugin options"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:734 lib\pwiki\OptionsDialog.py:653
+#: lib\pwiki\MainApp.py:718 lib\pwiki\OptionsDialog.py:653
 msgid "Wiki language"
 msgstr ""
 
@@ -3421,8 +3421,8 @@ msgid "Directory to store new wiki"
 msgstr ""
 
 #: lib\pwiki\PersonalWikiFrame.py:5197
-#: lib\pwiki\wikidata\WikiDataManager.py:1259
-#: lib\pwiki\wikidata\WikiDataManager.py:1315
+#: lib\pwiki\wikidata\WikiDataManager.py:1257
+#: lib\pwiki\wikidata\WikiDataManager.py:1313
 msgid "'%s' is an invalid wiki word. %s"
 msgstr ""
 
@@ -4132,7 +4132,7 @@ msgid "Database exists already and is currently in use"
 msgstr ""
 
 #: lib\pwiki\wikidata\WikiDataManager.py:62
-#: lib\pwiki\wikidata\WikiDataManager.py:1658
+#: lib\pwiki\wikidata\WikiDataManager.py:1656
 msgid "Data handler %s not available"
 msgstr ""
 
@@ -4168,32 +4168,32 @@ msgstr ""
 msgid "Required wiki language handler \"%s\" not available"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:840
+#: lib\pwiki\wikidata\WikiDataManager.py:838
 msgid "Word '%s' not in wiki"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1104
-#: lib\pwiki\wikidata\WikiDataManager.py:1168
+#: lib\pwiki\wikidata\WikiDataManager.py:1102
+#: lib\pwiki\wikidata\WikiDataManager.py:1166
 msgid "Update basic link info"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1120
+#: lib\pwiki\wikidata\WikiDataManager.py:1118
 msgid "Starting update thread"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1188
+#: lib\pwiki\wikidata\WikiDataManager.py:1186
 msgid "Update attributes of %s"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1210
+#: lib\pwiki\wikidata\WikiDataManager.py:1208
 msgid "Update page %s"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1228
+#: lib\pwiki\wikidata\WikiDataManager.py:1226
 msgid "Final cleanup"
 msgstr ""
 
-#: lib\pwiki\wikidata\WikiDataManager.py:1320
+#: lib\pwiki\wikidata\WikiDataManager.py:1318
 msgid "Cannot rename '%s' to '%s', '%s' already exists"
 msgstr ""
 

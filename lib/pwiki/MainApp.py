@@ -115,26 +115,17 @@ class App(wx.App, MiscEventSourceMixin):
 
         self.SetAppName("WikidPad")
         
-        self._CallAfterId = wx.NewEventType()
-        self.Connect(-1, -1, self._CallAfterId,
-                    lambda event: event.callable(*event.args, **event.kw) )
-
-        self.startupDummy = wx.Frame(None, -1, u"Dummy")
-        self.dbExecutor = None  # SingleThreadExecutor()
+#         self._CallAfterId = wx.NewEventType()
+#         self.Connect(-1, -1, self._CallAfterId,
+#                     lambda event: event.callable(*event.args, **event.kw) )
+# 
         self.sqliteInitFlag = False   # Read and modified only by WikiData classes
         
-        wx.CallAfter(self.OnInitDuringMain)
-
-        return True
-
-
-
-    def OnInitDuringMain(self):
         WindowLayout.initiateAfterWxApp()
         self.removeAppLockOnExit = False
         wx.EVT_END_SESSION(self, self.OnEndSession)
         appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
-        
+
         self.mainFrameSet = set()
 
         wikiAppDir, globalConfigDir = findDirs()
@@ -392,8 +383,6 @@ class App(wx.App, MiscEventSourceMixin):
 
         self.startPersonalWikiFrame(CmdLineAction(sys.argv[1:]))
 
-        self.startupDummy.Close()
-
         return True
 
 
@@ -470,15 +459,10 @@ class App(wx.App, MiscEventSourceMixin):
         """
         pass
         
-#     def getDbExecutor(self):
-#         return self.dbExecutor
-        
     def pauseBackgroundThreads(self):
         self.fireMiscEventKeys(("pause background threads",))
-#        self.dbExecutor.pause()
 
     def resumeBackgroundThreads(self):
-#        self.dbExecutor.start()
         self.fireMiscEventKeys(("resume background threads",))
 
     def onGlobalConfigurationChanged(self, miscevt):

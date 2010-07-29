@@ -375,8 +375,6 @@ class WikiDataManager(MiscEventSourceMixin):
         self.wikiLangName = wikiLangName
         self.ensureWikiTempDir()
 
-#         dbExecutor = GetApp().getDbExecutor()
-#         wikiData = dbExecutor(wikiDataFactory, self, dataDir, self.getWikiTempDir())
         wikiData = wikiDataFactory(self, dataDir, self.getWikiTempDir())
 
         self.baseWikiData = wikiData
@@ -1658,8 +1656,6 @@ class WikiDataManager(MiscEventSourceMixin):
                     _(u"Data handler %s not available") % self.dbtype)
 
         self.ensureWikiTempDir()
-#         dbExecutor = GetApp().getDbExecutor()
-#         wikiData = dbExecutor(wikiDataFactory, self, self.dataDir, self.getWikiTempDir())
         wikiData = wikiDataFactory(self, self.dataDir, self.getWikiTempDir())
 
         self.baseWikiData = wikiData

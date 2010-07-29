@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WikidPad 2.0rc04\n"
-"POT-Creation-Date: 2010-07-03 13:12\n"
-"PO-Revision-Date: 2010-07-04 15:27+0100\n"
+"POT-Creation-Date: 2010-07-26 15:30\n"
+"PO-Revision-Date: 2010-07-27 19:30+0100\n"
 "Last-Translator: Stefan Berg <steffe62@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -2192,6 +2192,10 @@ msgstr "<pre>[Tillåt evaluering av infogningsskript i \"Alternativ\", sidan \"S
 #: lib\pwiki\Exporters.py:2102
 msgid "[Unknown parser node with name \"%s\" found]"
 msgstr "[Okänd tolkningsnod med namnet \"%s\" hittades]"
+
+#: lib\pwiki\Exporters.py:2136
+msgid "Set of *.wiki files"
+msgstr "Flera *.wiki-filer"
 
 #: lib\pwiki\Exporters.py:2320
 #: lib\pwiki\Importers.py:34
