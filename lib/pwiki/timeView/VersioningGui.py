@@ -2,7 +2,6 @@ import traceback
 
 import wx, wx.xrc
 
-import Consts
 from pwiki.WikiExceptions import *
 
 from .. import Utilities
@@ -11,7 +10,7 @@ from ..wxHelper import GUI_ID, EnhancedListControl, wxKeyFunctionSink, \
  
 from ..WindowLayout import LayeredControlPanel
 
-from ..WikiTxtCtrl import WikiTxtCtrl
+from ..DiffGui import InlineDiffControl
 
 from ..DocPages import FunctionalPage
 
@@ -45,6 +44,12 @@ from .Versioning import WikiPageSnapshot, VersionOverview
 
 
 class VersionExplorerPanel(EnhancedListControl):
+    
+    _ACTIVATION_MODE_NORMAL = 0
+    _ACTIVATION_MODE_SET_FROM = 1
+    _ACTIVATION_MODE_SET_TO = 2
+    _ACTIVATION_MODE_FROM_PREV_TO_THIS = 3
+    
     def __init__(self, parent, ID, mainControl):
         EnhancedListControl.__init__(self, parent, ID,
                 style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.LC_NO_HEADER)
@@ -57,6 +62,7 @@ class VersionExplorerPanel(EnhancedListControl):
         
         self.versionEntries = []
         self.versionOverview = None
+        self.activationMode = self._ACTIVATION_MODE_NORMAL
         
         self.mainControl.getMiscEvent().addListener(self)
 
@@ -104,11 +110,20 @@ class VersionExplorerPanel(EnhancedListControl):
         wx.EVT_LIST_ITEM_ACTIVATED(self, self.GetId(), self.OnItemActivated)
         wx.EVT_SIZE(self, self.OnSize)
         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
-        
+
+        wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DIFF_INLINE,
+                self.OnCmdDiffInline)
+
+        wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DIFF_SET_FROM,
+                self.OnCmdDiffSetFrom)
+        wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DIFF_SET_TO,
+                self.OnCmdDiffSetTo)
+
         wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DELETE_VERSION,
                 self.OnCmdDeleteVersion)
         wx.EVT_MENU(self, GUI_ID.CMD_VERSIONING_DELETE_ALL_VERSION_DATA,
                 self.OnCmdDeleteAllVersionData)
+
 #         wx.EVT_UPDATE_UI(self, GUI_ID.CMD_CHECKBOX_TIMELINE_DATE_ASCENDING,
 #                 self.OnCmdCheckUpdateDateAscending)
 
@@ -151,14 +166,26 @@ class VersionExplorerPanel(EnhancedListControl):
             if not self.GetIsSelected(idx):
                 self.SelectSingle(idx)
 
-        if idx > -1 and idx < len(self.versionEntries):
-            # Usable version entry selected
-            menu = wx.Menu()
-            appendToMenuByMenuDesc(menu, _CONTEXT_MENU_VERSIONING_ITEM)
-            self.PopupMenu(menu)
-        else:
+        if idx < 0 or idx > len(self.versionEntries):
             # Use the tab context menu
             self.showContextMenuOnTab()
+            return
+
+        menu = wx.Menu()
+
+        if self.activationMode == self._ACTIVATION_MODE_NORMAL:
+            appendToMenuByMenuDesc(menu, _CONTEXT_MENU_DIFF_ON_WIKI_PAGE)
+        else:
+            appendToMenuByMenuDesc(menu, _CONTEXT_MENU_DIFF_ON_DIFF_CTRL)
+
+        if idx < len(self.versionEntries):
+            # Usable version entry selected
+            appendToMenuByMenuDesc(menu, _CONTEXT_MENU_VERSIONING_ITEM)
+        else:
+            # Entry "<Current>" selected, but at least one version present
+            appendToMenuByMenuDesc(menu, _CONTEXT_MENU_VERSIONING_CURRENT_ITEM)
+
+        self.PopupMenu(menu)
 
 
     def showContextMenuOnTab(self):
@@ -222,12 +249,15 @@ class VersionExplorerPanel(EnhancedListControl):
             # so check if there is invalid version data to delete
             
             presenter = self.mainControl.getCurrentDocPagePresenter()
-            if presenter is not None:
-                docPage = presenter.getDocPage()
+            if presenter is None:
+                return
+
+            docPage = presenter.getDocPage()
+            if docPage is None or isinstance(docPage, FunctionalPage):
+                return
 
             try:
-                if docPage is not None and not isinstance(docPage, FunctionalPage):
-                    versionOverview = docPage.getVersionOverview()
+                versionOverview = docPage.getVersionOverview()
 
                 # this should not happen under normal circumstances    
                 self.setVersionOverview(versionOverview)
@@ -246,6 +276,126 @@ class VersionExplorerPanel(EnhancedListControl):
             if answer == wx.YES:
                 VersionOverview.deleteBrokenDataForDocPage(docPage)
                 self.updateList()
+
+
+
+    def _getTextAndVersionNoStringBySelection(self, selIdx, baseDocPage):
+        if selIdx < len(self.versionEntries):
+            entry = self.versionEntries[selIdx]
+            text = self.versionOverview.getVersionContent(entry.versionNumber)
+            verNoStr = u"%d" % entry.versionNumber
+        else:
+            verNoStr = u"<" + _(u"Current") + u">"
+
+            text = baseDocPage.getLiveText()
+        
+        return text, verNoStr
+
+
+    def OnCmdDiffInline(self, evt):
+        selIdx = self.GetFirstSelected()
+        if selIdx == -1 or selIdx > len(self.versionEntries):
+            return
+
+        if self.versionOverview is None:
+            return
+        
+        if self.activationMode != self._ACTIVATION_MODE_NORMAL:
+            return
+
+        presenter = self.mainControl.getCurrentDocPagePresenter()
+        if presenter is None:
+            return
+
+        docPage = presenter.getDocPage()
+        if docPage is None:
+            return
+
+        if isinstance(docPage, WikiPageSnapshot):
+            baseDocPage = docPage.getSnapshotBaseDocPage()
+        else:
+            baseDocPage = docPage
+
+        maPanel = self.mainControl.getMainAreaPanel()
+        newPresenter = LayeredControlPanel(maPanel)
+        
+        subCtl = InlineDiffControl(newPresenter, self.mainControl,
+                newPresenter, -1)
+        newPresenter.setSubControl("inline diff", subCtl)
+        newPresenter.switchSubControl("inline diff")
+        maPanel.appendPresenterTab(newPresenter)
+        
+        # Actually not the numbers but a string for presentation
+        fromText, fromVerNo = self._getTextAndVersionNoStringBySelection(selIdx,
+                baseDocPage)
+
+#         if selIdx < len(self.versionEntries):
+#             entry = self.versionEntries[selIdx]
+#             fromText = self.versionOverview.getVersionContent(entry.versionNumber)
+#             fromVerNo = u"%d" % entry.versionNumber
+#         else:
+#             fromVerNo = u"<" + _(u"Current") + u">"
+# 
+#             if isinstance(docPage, WikiPageSnapshot):
+#                 fromText = baseDocPage.getLiveText()
+#             else:
+#                 # TODO: ? This would compare <Current> with itself
+#                 fromText = docPage.getLiveText() 
+
+
+        if isinstance(docPage, WikiPageSnapshot):
+            toVerNo = u"%d" % docPage.getSnapshotVersionNumber()
+        else:
+            toVerNo = u"<" + _(u"Current") + u">"
+
+        toText = docPage.getLiveText()
+
+        subCtl.showDiffs(baseDocPage, fromText, toText, fromVerNo, toVerNo)
+
+        maPanel.showPresenter(newPresenter)
+
+
+
+    def OnCmdDiffSetFrom(self, evt):
+        selIdx = self.GetFirstSelected()
+        if selIdx == -1 or selIdx > len(self.versionEntries):
+            return
+
+        if self.versionOverview is None:
+            return
+        
+        subCtrl = self.mainControl.getMainAreaPanel().getCurrentSubControl()
+        if not isinstance(subCtrl, InlineDiffControl):
+            return
+
+        baseDocPage = subCtrl.getBaseDocPage()
+
+        text, verNo = self._getTextAndVersionNoStringBySelection(selIdx,
+                baseDocPage)
+        
+        subCtrl.showDiffsNewFrom(baseDocPage, text, verNo)
+        
+
+    def OnCmdDiffSetTo(self, evt):
+        selIdx = self.GetFirstSelected()
+        if selIdx == -1 or selIdx > len(self.versionEntries):
+            return
+
+        if self.versionOverview is None:
+            return
+        
+        subCtrl = self.mainControl.getMainAreaPanel().getCurrentSubControl()
+        if not isinstance(subCtrl, InlineDiffControl):
+            return
+
+        baseDocPage = subCtrl.getBaseDocPage()
+
+        text, verNo = self._getTextAndVersionNoStringBySelection(selIdx,
+                baseDocPage)
+        
+        subCtrl.showDiffsNewTo(baseDocPage, text, verNo)
+            
+
 
 
     def setLayerVisible(self, vis, scName=""):
@@ -358,33 +508,22 @@ class VersionExplorerPanel(EnhancedListControl):
 
         if presenter is not None:
             docPage = presenter.getDocPage()
+            self.activationMode = self._ACTIVATION_MODE_NORMAL
             self.buildTocList(docPage)
             return
+
+        subCtrl = self.mainControl.getMainAreaPanel().getCurrentSubControl()
+
+        if isinstance(subCtrl, InlineDiffControl):
+            docPage = subCtrl.getBaseDocPage()
+            self.activationMode = self._ACTIVATION_MODE_FROM_PREV_TO_THIS
+            self.buildTocList(docPage)
+            return
+
 
         self.setVersionOverview(None)
         self.applyTocList()
 
-
-#     def extendList(self):
-#         presenter = self.mainControl.getCurrentDocPagePresenter()
-#         
-#         if presenter is None:
-#             self.setVersionOverview(None)
-#             self.applyTocList()
-#             return
-#             
-#         docPage = presenter.getDocPage()
-#         if isinstance(docPage, FunctionalPage):
-#             self.buildTocList(docPage)
-#             return
-#             
-#         newEntries = versionOverview.getVersionEntries()[
-#                 len(self.versionEntries):]
-# 
-#         self.versionEntries = versionOverview.getVersionEntries()
-
-
-        
 
 #         text = presenter.getLiveText()
 #         docPage = presenter.getDocPage()
@@ -526,6 +665,15 @@ class VersionExplorerPanel(EnhancedListControl):
 
 
     def OnItemActivated(self, evt):
+        if self.activationMode == self._ACTIVATION_MODE_NORMAL:
+            self._itemActivatedOnWikiPage(evt)
+        else:
+            self._itemActivatedOnDiffCtrl(evt)
+
+        
+        
+        
+    def _itemActivatedOnWikiPage(self, evt):
         presenter = self.mainControl.getCurrentDocPagePresenter()
         if presenter is None:
             return
@@ -541,6 +689,9 @@ class VersionExplorerPanel(EnhancedListControl):
                 presenter.openWikiPage(docPage.getWikiWord(), addToHistory=False,
                         forceReopen=True)
 
+                subCtrl = presenter.getCurrentSubControl()
+                subCtrl.SetFocus()
+
             return
 
         versionNo = self.versionEntries[evt.GetIndex()].versionNumber
@@ -553,40 +704,116 @@ class VersionExplorerPanel(EnhancedListControl):
                 
         presenter.loadWikiPage(snapshotPage)
 
-        # Find out which subcontrol is currently active
-        scName = presenter.getCurrentSubControlName()
-        subCtrl = presenter.getSubControl(scName)
-
-#         if self.mainControl.getConfig().getboolean("main",
-#                 "docStructure_autohide", False):
-#             # Auto-hide tree
-#             self.mainControl.setShowDocStructure(False)
-
+        subCtrl = presenter.getCurrentSubControl()
         subCtrl.SetFocus()
         # wx.CallAfter(presenter.SetFocus)
 
 
 
+
+    def _itemActivatedOnDiffCtrl(self, evt):
+        """
+        Called when content of active diff control should be changed
+        """
+        selIdx = evt.GetIndex()
+
+        subCtrl = self.mainControl.getMainAreaPanel().getCurrentSubControl()
+        if not isinstance(subCtrl, InlineDiffControl):
+            return
+
+        baseDocPage = subCtrl.getBaseDocPage()
+
+        if baseDocPage is None:
+            return
+
+        if self.activationMode == self._ACTIVATION_MODE_SET_FROM:
+            text, verNo = self._getTextAndVersionNoStringBySelection(selIdx,
+                    baseDocPage)
+            
+            subCtrl.showDiffsNewFrom(baseDocPage, text, verNo)
+        elif self.activationMode == self._ACTIVATION_MODE_SET_TO:
+            text, verNo = self._getTextAndVersionNoStringBySelection(selIdx,
+                    baseDocPage)
+            
+            subCtrl.showDiffsNewTo(baseDocPage, text, verNo)
+        else:  # self.activationMode == _ACTIVATION_MODE_FROM_PREV_TO_THIS
+            toText, toVerNo = self._getTextAndVersionNoStringBySelection(
+                    selIdx, baseDocPage)
+            
+            if selIdx == 0:
+                # We can't go one entry back, so compare first entry with itself
+                
+                fromText = toText
+                fromVerNo = toVerNo
+            else:
+                
+                fromText, fromVerNo = self._getTextAndVersionNoStringBySelection(
+                        selIdx - 1, baseDocPage)
+
+            subCtrl.showDiffs(baseDocPage, fromText, toText, fromVerNo, toVerNo)
+
+
+
+
+
+# Context menu on versioning tab
 _CONTEXT_MENU_VERSIONING_TAB = \
 u"""
 Add version;CMD_VERSIONING_ADD_VERSION;Add a new version
 Delete all versions;CMD_VERSIONING_DELETE_ALL_VERSION_DATA;Delete all versions of current page
 """
 
+
+# Diff part on context menu if wiki page is currently active
+_CONTEXT_MENU_DIFF_ON_WIKI_PAGE = \
+u"""
+Diff inline;CMD_VERSIONING_DIFF_INLINE;Show the difference between two versions inline
+"""
+
+# Diff part on context menu if a diff control is already active
+_CONTEXT_MENU_DIFF_ON_DIFF_CTRL = \
+u"""
+Set diff from;CMD_VERSIONING_DIFF_SET_FROM;Set the "from" version in diff
+Set diff to;CMD_VERSIONING_DIFF_SET_TO;Set the "to" version in diff
+"""
+
+
+# Context menu on versioning entry (except "<Current>")
 _CONTEXT_MENU_VERSIONING_ITEM = \
 u"""
+-
 Delete version;CMD_VERSIONING_DELETE_VERSION;Delete selected version
+Add version;CMD_VERSIONING_ADD_VERSION;Add a new version
+Delete all versions;CMD_VERSIONING_DELETE_ALL_VERSION_DATA;Delete all versions of current page
+"""
+
+# Context menu on versioning entry "<Current>"
+_CONTEXT_MENU_VERSIONING_CURRENT_ITEM = \
+u"""
+-
 Add version;CMD_VERSIONING_ADD_VERSION;Add a new version
 Delete all versions;CMD_VERSIONING_DELETE_ALL_VERSION_DATA;Delete all versions of current page
 """
 
 
 
+
+
+
+
 # Entries to support i18n of context menus
 if False:
+    N_(u"Diff inline")
+    N_(u"Show the difference between two versions inline")
+
+    N_(u"Set diff from")
+    N_(u'Set the "from" version in diff')
+    N_(u"Set diff to")
+    N_(u'Set the "to" version in diff')
+
     N_(u"Delete version")
     N_(u"Delete selected version")
-    
+
     N_(u"Add version")
     N_(u"Add a new version")
     N_(u"Delete all versions")

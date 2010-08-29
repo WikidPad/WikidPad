@@ -1,5 +1,9 @@
 from __future__ import with_statement
 
+## import profilehooks
+## profile = profilehooks.profile(filename="profile.prf", immediate=False)
+
+
 import os.path, re, struct, time, traceback, threading
 
 from .rtlibRepl import minidom
@@ -263,7 +267,7 @@ class DocPage(object, MiscEventSourceMixin):
         Return true if page is effectively read-only, this means
         "for any reason", regardless if error or intention.
         """
-        return self.wikiDocument.isReadOnlyEffect()
+        return (self.wikiDocument is None) or self.wikiDocument.isReadOnlyEffect()
 
 
     def writeToDatabase(self, text=None, fireEvent=True):
@@ -1008,13 +1012,13 @@ class AbstractWikiPage(DataCarryingPage):
             return unknownWords
 
 
-
+##     @profile
     def parseTextInContext(self, text, formatDetails=None,
             threadstop=DUMBTHREADSTOP):
         """
         Return PageAst of text in the context of this page (wiki language and
         format details).
-        
+
         text: unistring with text
         """
         parser = wx.GetApp().createWikiParser(self.getWikiLanguageName()) # TODO debug mode  , True

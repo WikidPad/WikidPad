@@ -2074,8 +2074,6 @@ class WikiData:
             raise DbWriteAccessError(e)
 
 
-
-
     # ---------- Searching pages ----------
 
     def search(self, sarOp, exclusionSet):  # TODO Threadholder for all
@@ -2110,8 +2108,8 @@ class WikiData:
     _CAPABILITIES = {
         "rebuild": 1,
         "compactify": 1,     # = sqlite vacuum
-        "filePerPage": 1   # Uses a single file per page
-#         "versioning": 1,     # TODO (old versioning)
+        "filePerPage": 1,   # Uses a single file per page
+#         "versioning": 1,     # (old versioning)
 #         "plain text import":1   # Is already plain text      
         }
 

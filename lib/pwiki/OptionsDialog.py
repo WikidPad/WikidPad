@@ -371,6 +371,7 @@ class OptionsDialog(wx.Dialog):
     OPTION_TO_CONTROL_GLOBAL = (
             # application-wide options
             ("single_process", "cbSingleProcess", "b"),
+            ("zombieCheck", "cbZombieCheck", "b"),
             ("wikiPathes_relative", "cbWikiPathesRelative", "b"),
             ("wikiOpenNew_defaultDir", "tfWikiOpenNewDefaultDir",
                 "t"),
@@ -907,6 +908,8 @@ class OptionsDialog(wx.Dialog):
         self.OnTempHandlingTempMode(None)
         self.OnEditorImagePasteFileTypeChoice(None)
         self.OnWwSearchCountOccurrences(None)
+        self.OnCbSingleProcess(None)
+
 
         # Now show the right panel
         self.activePageIndex = -1
@@ -955,6 +958,8 @@ class OptionsDialog(wx.Dialog):
         wx.EVT_CHECKBOX(self, GUI_ID.cbWwSearchCountOccurrences,
                 self.OnWwSearchCountOccurrences)
 
+        wx.EVT_CHECKBOX(self, GUI_ID.cbSingleProcess,
+                self.OnCbSingleProcess)
 
 
     def _refreshForPage(self):
@@ -1174,6 +1179,9 @@ class OptionsDialog(wx.Dialog):
     def OnWwSearchCountOccurrences(self, evt):
         self.ctrls.tfWwSearchMaxCountOccurrences.Enable(
                 self.ctrls.cbWwSearchCountOccurrences.GetValue())
+
+    def OnCbSingleProcess(self, evt):
+        self.ctrls.cbZombieCheck.Enable(self.ctrls.cbSingleProcess.GetValue())
 
 
     def OnDottedButtonPressed(self, evt):

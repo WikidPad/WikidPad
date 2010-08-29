@@ -392,9 +392,9 @@ class SearchResultListBox(wx.HtmlListBox):
         editor = self.pWiki.getActiveEditor()
         if editor is not None:
             if info.occPos[0] != -1:
-                self.pWiki.getActiveEditor().SetSelectionByCharPos(info.occPos[0],
+                self.pWiki.getActiveEditor().showSelectionByCharPos(info.occPos[0],
                         info.occPos[1])
-                self.pWiki.getActiveEditor().ensureSelectionExpanded()
+#                 self.pWiki.getActiveEditor().ensureSelectionExpanded()
 
             # Works in fast search popup only if called twice
             editor.SetFocus()
@@ -462,7 +462,7 @@ class SearchResultListBox(wx.HtmlListBox):
             return
 
         if info.occPos[0] != -1:
-            presenter.getSubControl("textedit").SetSelectionByCharPos(
+            presenter.getSubControl("textedit").showSelectionByCharPos(
                     info.occPos[0], info.occPos[1])
 
         if configCode != 1:
@@ -527,7 +527,7 @@ class SearchResultListBox(wx.HtmlListBox):
                 return
 
             if info.occPos[0] != -1:
-                presenter.getSubControl("textedit").SetSelectionByCharPos(
+                presenter.getSubControl("textedit").showSelectionByCharPos(
                         info.occPos[0], info.occPos[1])
     
             # Works in fast search popup only if called twice
@@ -547,7 +547,7 @@ class SearchResultListBox(wx.HtmlListBox):
                 return
 
             if info.occPos[0] != -1:
-                presenter.getSubControl("textedit").SetSelectionByCharPos(
+                presenter.getSubControl("textedit").showSelectionByCharPos(
                         info.occPos[0], info.occPos[1])
     
             # Works in fast search popup only if called twice
@@ -567,11 +567,8 @@ class SearchResultListBox(wx.HtmlListBox):
                 return
 
             if info.occPos[0] != -1:
-                presenter.getSubControl("textedit").SetSelectionByCharPos(
+                presenter.getSubControl("textedit").showSelectionByCharPos(
                         info.occPos[0], info.occPos[1])
-            
-
-
 
 
 class SearchPageDialog(wx.Dialog):

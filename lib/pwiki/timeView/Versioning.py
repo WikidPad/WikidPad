@@ -570,9 +570,6 @@ class VersionOverview(MiscEventSourceMixin):
 
 
 
-
-
-
 class WikiPageSnapshot(AbstractWikiPage):
     def __init__(self, wikiDocument, baseWikiPage, versionNo):
         AbstractWikiPage.__init__(self, wikiDocument, baseWikiPage.getWikiWord())

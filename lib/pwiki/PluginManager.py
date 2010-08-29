@@ -306,7 +306,7 @@ class PluginManager(object):
                             sys.modules[packageName] = module
 
                             module = imp.load_module(packageName + "." + moduleName, f,
-                                    pathEnc(fullname), (".py", "r", imp.PY_SOURCE))
+                                    mbcsEnc(fullname)[0], (".py", "r", imp.PY_SOURCE))
                     if module and hasattr(module, "WIKIDPAD_PLUGIN"):
                         if self.registerPlugin(module):
                             exclusions.append(name)

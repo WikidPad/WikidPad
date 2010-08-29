@@ -1308,7 +1308,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.keyBindings.SpellCheck,
                     _(u'Clear the list of words to ignore for spell check while type'),
                     lambda evt: self.resetSpellCheckWhileTypeIgnoreList(),
-                    updatefct=self.OnUpdateDisNotTextedit)
+                    updatefct=(self.OnUpdateDisNotTextedit,))
 
 
         editMenu.AppendSeparator()
@@ -2803,30 +2803,29 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     
                     # open the new wiki
                     self.openWiki(configFileLoc)
+                    p = self.wikiDataManager.createWikiPage(wikiName)
+                    p.appendLiveText(u"\n\n\t* WikiSettings\n", False)
+
                     p = self.wikiDataManager.createWikiPage(u"WikiSettings")
 
                     langHelper = wx.GetApp().createWikiLanguageHelper(
                             self.getWikiDefaultWikiLanguage())
 
                     text = langHelper.getNewDefaultWikiSettingsPage(self)
-#                     p.save(text, False)
-#                     p.update(text, False)
                     p.replaceLiveText(text, False)
     
                     p = self.wikiDataManager.createWikiPage(u"ScratchPad")
                     text = u"++ Scratch Pad\n\n"
-#                     p.save(text, False)
-#                     p.update(text, False)
                     p.replaceLiveText(text, False)
 
-                    self.getActiveEditor().GotoPos(self.getActiveEditor().GetLength())
-                    self.getActiveEditor().AddText(u"\n\n\t* WikiSettings\n")
-                    self.saveAllDocPages()
+#                     self.getActiveEditor().GotoPos(self.getActiveEditor().GetLength())
+#                     self.getActiveEditor().AddText(u"\n\n\t* WikiSettings\n")
+#                     self.saveAllDocPages()
                     
                     # trigger hook
                     self.hooks.createdWiki(self, wikiName, wikiDir)
     
-                    # reopen the root
+                    # open the homepage
                     self.openWikiPage(self.wikiName, False, False)
 
                 except (IOError, OSError, DbAccessError), e:
@@ -3427,7 +3426,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def lostWriteAccess(self, exc):
         """
-        Called if read access was lost during an operation
+        Called if write access was lost during an operation
         """
         if self.getWikiDocument().getWriteAccessFailed():
             # Was already handled -> ignore
@@ -5350,12 +5349,21 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             evt.Enable(False)            
 
 
-    def OnCmdCheckWrapMode(self, evt):        
-        self.getActiveEditor().setWrapMode(evt.IsChecked())
+    def OnCmdCheckWrapMode(self, evt):
+        editor = self.getActiveEditor()
+        if editor is None and \
+                self.getMainAreaPanel().getCurrentSubControlName() == "inline diff":
+            editor = self.getMainAreaPanel().getCurrentSubControl()
+
+        editor.setWrapMode(evt.IsChecked())
         self.configuration.set("main", "wrap_mode", evt.IsChecked())
 
     def OnUpdateWrapMode(self, evt):
         editor = self.getActiveEditor()
+        if editor is None and \
+                self.getMainAreaPanel().getCurrentSubControlName() == "inline diff":
+            editor = self.getMainAreaPanel().getCurrentSubControl()
+
         evt.Check(editor is not None and editor.getWrapMode())
         evt.Enable(editor is not None)
 

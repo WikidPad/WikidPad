@@ -19,13 +19,13 @@ from MiscEvent import KeyFunctionSink, MiscEventSourceMixin
 
 from WikiExceptions import *
 from PersonalWikiFrame import PersonalWikiFrame
-from StringOps import mbcsDec, createRandomString, pathEnc, writeEntireFile, \
-        loadEntireFile
+from StringOps import mbcsDec, createRandomString, pathEnc, \
+        writeEntireFile, loadEntireFile
 from CmdLineAction import CmdLineAction
 from Serialization import SerializeStream
 import Ipc
 import Configuration, WindowLayout
-import OptionsDialog
+import OsAbstract, OptionsDialog
 import Localization
 from PluginManager import PluginManager, InsertionPluginManager
 
@@ -96,13 +96,19 @@ def findDirs():
     return (wikiAppDir, globalConfigDir)
 
 
+_defRedirect = (wx.Platform == '__WXMSW__' or wx.Platform == '__WXMAC__')
+
 
 class App(wx.App, MiscEventSourceMixin): 
     def __init__(self, *args, **kwargs):
         global app
         app = self
+        
+        # Hack for Windows to allow installation in non-ascii path
+        sys.prefix = mbcsDec(sys.prefix)[0]
 
         MiscEventSourceMixin.__init__(self)
+
         wx.App.__init__(self, *args, **kwargs)
         self.SetAppName("WikidPad")
         # Do not initialize member variables here!
@@ -124,7 +130,7 @@ class App(wx.App, MiscEventSourceMixin):
         self.removeAppLockOnExit = False
         wx.EVT_END_SESSION(self, self.OnEndSession)
         appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
-        
+
         self.mainFrameSet = set()
 
         wikiAppDir, globalConfigDir = findDirs()
@@ -286,26 +292,39 @@ class App(wx.App, MiscEventSourceMixin):
                     # created server opened a port which is claimed to be used
                     # already by previously started instance.
                     singleInstance = True
-    
+
             if not singleInstance:
                 return False
+
+            if self.globalConfig.getboolean("main", "zombieCheck", True):
+                otherProcIds = OsAbstract.checkForOtherInstances()
+                if len(otherProcIds) > 0:
+                    procIdString = u", ".join([unicode(procId)
+                            for procId in otherProcIds])
+                    result = wx.MessageBox(
+                            _(u"Other WikidPad process(es) seem(s) to run already\n"
+                            "Process identifier(s): %s\nContinue?") % procIdString,
+                            _(u"Continue?"),
+                            wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, None)
+
+                    if result == wx.NO:
+                        return False
+
 
             if port != -1:
                 # Server is connected, start it
                 Ipc.startCommandServer()
     
                 appLockContent = appCookie + "\n" + str(port) + "\n"
-    
-                writeEntireFile(os.path.join(
-                        self.globalConfigSubDir, "AppLock.lock"), appLockContent)
-    
-#                 f = open(pathEnc(os.path.join(
-#                         self.globalConfigSubDir, "AppLock.lock")), "w")
-#                 f.write(appLockContent)
-#                 f.close()
+                appLockPath = os.path.join(self.globalConfigSubDir,
+                        "AppLock.lock")
+
+                writeEntireFile(appLockPath, appLockContent)
     
                 self.removeAppLockOnExit = True
-        
+                
+                Ipc.getCommandServer().setAppLockInfo(appLockPath, appLockContent)
+
         # Build icon cache
         iconDir = os.path.join(self.wikiAppDir, "icons")
         self.iconCache = IconCache(iconDir)
@@ -365,18 +384,18 @@ class App(wx.App, MiscEventSourceMixin):
                 self.globalConfigSubDir, "WikidPad")
         ## _prof.stop()
 
-#         # Load wxPython XML resources
-#         rf = open(os.path.join(appdir, "WikidPad.xrc"), "r")
-#         rd = rf.read()
-#         rf.close()
-
         res = wx.xrc.XmlResource.Get()
         res.SetFlags(0)
-#         rd = rd.decode("utf-8")
-#         sys.stderr.write(repr(type(rd)) + "\n")
         res.LoadFromString(rd)
+        
+        
+        
+        
+#         rd = loadEntireFile(r"C:\Daten\Projekte\Wikidpad\Current\wizards.xrc", True)
+#         res.LoadFromString(rd)
+        
 
-        # print "Set standardIcon"
+
         self.standardIcon = wx.Icon(os.path.join(self.wikiAppDir, 'icons',
                     'pwiki.ico'), wx.BITMAP_TYPE_ICO)
 

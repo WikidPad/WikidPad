@@ -61,7 +61,7 @@ class LogMessage:
         if self.gotoWikiWord is not None:
             self.mainControl.openWikiPage(self.gotoWikiWord)
             if self.selection is not None and self.selection != (-1, -1):
-                self.mainControl.getActiveEditor().SetSelectionByCharPos(
+                self.mainControl.getActiveEditor().showSelectionByCharPos(
                         *self.selection)
             
             self.mainControl.getActiveEditor().SetFocus()

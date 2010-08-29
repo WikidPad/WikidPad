@@ -93,12 +93,27 @@ if Configuration.isWindows():
     if WindowsHacks:
         def samefile(path1, path2):
             # Not fully reliable. Does anybody know something better?
-            return WindowsHacks.getLongPath(path1) == WindowsHacks.getLongPath(path2)
+            return WindowsHacks.getLongPath(path1).lower() == \
+                    WindowsHacks.getLongPath(path2).lower()
     else:
         def samefile(path1, path2):
             return os.path.abspath(path1) == os.path.abspath(path2)
 else:
     samefile = os.path.samefile
+
+
+
+# Define checkForOtherInstances
+# If defined properly it returns a list of process identifier of other WikidPad
+# processes. This list should be empty if option "Single process per user"
+# is selected. If it is not, there is an error.
+
+if WindowsHacks:
+    checkForOtherInstances = WindowsHacks.checkForOtherInstances
+else:
+    def checkForOtherInstances():
+        return []
+
 
 
 # Define createInterceptCollection, createClipboardInterceptor  (may return None)

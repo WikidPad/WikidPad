@@ -766,7 +766,9 @@ GLOBALDEFAULTS = {
     ("main", "pagestatus_timeformat"): u"%x %I:%M %p",  # time format for the page status field in status bar
     ("main", "recent_time_formats"): u"%x %I:%M %p;%m/%d/%y;%d.%m.%y;%d.%m.%Y;%a %Y-%m-%d",
             # semicolon-separated list of recently used time formats
-    ("main", "single_process"): "True", # Ensure that only a single process runs per user 
+    ("main", "single_process"): "True", # Ensure that only a single process runs per user
+    ("main", "zombieCheck"): "True", # Check for alread running processes? Only active if "single_process" is True
+    
     ("main", "tempHandling_preferMemory"): "False", # Prefer to store temporary data in memory where this is possible?
     ("main", "tempHandling_tempMode"): u"system", # Mode for storing of temporary data.
             # system: use system default temp dir; config: use config subdirectory; given: use directory given

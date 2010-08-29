@@ -39,6 +39,7 @@ dist\select.pyd
 dist\wx._controls_.pyd
 dist\wx._core_.pyd
 dist\wx._gdi_.pyd
+dist\wx._grid.pyd
 dist\wx._html.pyd
 dist\wx._misc_.pyd
 dist\wx._stc.pyd

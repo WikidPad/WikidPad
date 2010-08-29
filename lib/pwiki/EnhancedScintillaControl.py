@@ -1,0 +1,373 @@
+from __future__ import with_statement
+
+## import hotshot
+## _prof = hotshot.Profile("hotshot.prf")
+
+import traceback, codecs
+
+import wx, wx.stc
+
+from wxHelper import GUI_ID, getTextFromClipboard, WindowUpdateLocker
+
+import StringOps
+
+from Configuration import isUnicode
+
+
+
+def bytelenSct_utf8(us):
+    """
+    us -- unicode string
+    returns: Number of bytes us requires in Scintilla (with UTF-8 encoding=Unicode)
+    """
+    return len(StringOps.utf8Enc(us)[0])
+
+
+def bytelenSct_mbcs(us):
+    """
+    us -- unicode string
+    returns: Number of bytes us requires in Scintilla (with mbcs encoding=Ansi)
+    """
+    return len(StringOps.mbcsEnc(us)[0])
+
+
+
+class StyleCollector(StringOps.SnippetCollector):
+    """
+    Helps to collect the style bytes needed to set the syntax coloring in
+    Scintilla editor component
+    """
+    def __init__(self, defaultStyleNo, text, bytelenSct, startCharPos=0):   
+        super(StyleCollector, self).__init__()
+        self.defaultStyleNo = defaultStyleNo
+        self.text = text
+        self.bytelenSct = bytelenSct
+        self.charPos = startCharPos
+
+
+    def bindStyle(self, targetCharPos, targetLength, styleNo):
+        bytestylelen = self.bytelenSct(self.text[self.charPos:targetCharPos])
+        self.append(chr(self.defaultStyleNo) * bytestylelen)
+       
+        self.charPos = targetCharPos + targetLength
+        
+        bytestylelen = self.bytelenSct(self.text[targetCharPos:self.charPos])
+        self.append(chr(styleNo) * bytestylelen)
+
+    def value(self):
+        if self.charPos < len(self.text):
+            bytestylelen = self.bytelenSct(self.text[self.charPos:len(self.text)])
+            self.append(chr(self.defaultStyleNo) * bytestylelen)
+
+        return super(StyleCollector, self).value()
+
+
+
+
+
+class EnhancedScintillaControl(wx.stc.StyledTextCtrl):
+    def __init__(self, parent, ID):
+        wx.stc.StyledTextCtrl.__init__(self, parent, ID, style=wx.WANTS_CHARS | wx.TE_PROCESS_ENTER)
+        # Self-modify to ansi/unicode version
+        if isUnicode():
+            self.bytelenSct = bytelenSct_utf8
+        else:
+            self.bytelenSct = bytelenSct_mbcs
+            
+            self.GetText = self.GetText_unicode
+            self.GetTextRange = self.GetTextRange_unicode
+            self.GetSelectedText = self.GetSelectedText_unicode
+            self.GetLine = self.GetLine_unicode
+            self.ReplaceSelection = self.ReplaceSelection_unicode
+            self.AddText = self.AddText_unicode
+
+        self._resetKeyBindings()
+
+
+#         # Connect context menu events to functions
+#         wx.EVT_MENU(self, GUI_ID.CMD_UNDO, lambda evt: self.Undo())
+#         wx.EVT_MENU(self, GUI_ID.CMD_REDO, lambda evt: self.Redo())
+# 
+#         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_CUT, lambda evt: self.Cut())
+#         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, lambda evt: self.Copy())
+#         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_PASTE, lambda evt: self.Paste())
+#         wx.EVT_MENU(self, GUI_ID.CMD_SELECT_ALL, lambda evt: self.SelectAll())
+# 
+#         wx.EVT_MENU(self, GUI_ID.CMD_TEXT_DELETE, lambda evt: self.ReplaceSelection(""))
+#         wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN,
+#                 lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN))
+#         wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT,
+#                 lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT))
+
+
+    def Cut(self):
+        self.Copy()
+        self.ReplaceSelection("")
+
+#     def Copy(self):
+#         text = self.GetSelectedText()
+#         if len(text) == 0:
+#             return
+# 
+#         cbIcept = self.presenter.getMainControl().getClipboardInterceptor()  
+#         if cbIcept is not None:
+#             cbIcept.informCopyInWikidPadStart(text=text)
+#             try:
+#                 copyTextToClipboard(text)
+#             finally:
+#                 cbIcept.informCopyInWikidPadStop()
+#         else:
+#             copyTextToClipboard(text)
+
+    def Paste(self):
+        # Text pasted?
+        text = getTextFromClipboard()
+        if text:
+            self.ReplaceSelection(text)
+            return True
+        
+        return False
+
+
+    def _resetKeyBindings(self):
+        
+        self.CmdKeyClearAll()
+        
+        # Register general keyboard commands (minus some which may lead to problems
+        for key, mod, action in _DEFAULT_STC_KEYS:
+            self.CmdKeyAssign(key, mod, action)
+
+        
+        # register some special keyboard commands
+        self.CmdKeyAssign(ord('+'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMIN)
+        self.CmdKeyAssign(ord('-'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMOUT)
+        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, wx.stc.STC_SCMOD_NORM,
+                wx.stc.STC_CMD_HOMEWRAP)
+        self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_NORM,
+                wx.stc.STC_CMD_LINEENDWRAP)
+        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, wx.stc.STC_SCMOD_SHIFT,
+                wx.stc.STC_CMD_HOMEWRAPEXTEND)
+        self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_SHIFT,
+                wx.stc.STC_CMD_LINEENDWRAPEXTEND)
+
+
+    def GetText_unicode(self):
+        """
+        Overrides the wxStyledTextCtrl.GetText method in ansi mode
+        to return unicode.
+        """
+        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetText(self),
+                "replace")[0]
+
+    
+    def GetTextRange_unicode(self, startPos, endPos):
+        """
+        Overrides the wxStyledTextCtrl.GetTextRange method in ansi mode
+        to return unicode.
+        startPos and endPos are byte(!) positions into the editor buffer
+        """
+        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetTextRange(self,
+                startPos, endPos), "replace")[0]
+
+
+    def GetSelectedText_unicode(self):
+        """
+        Overrides the wxStyledTextCtrl.GetSelectedText method in ansi mode
+        to return unicode.
+        """
+        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetSelectedText(self),
+                "replace")[0]
+
+
+    def GetLine_unicode(self, line):
+        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetLine(self, line),
+                "replace")[0]
+
+
+    def ReplaceSelection_unicode(self, txt):
+        return wx.stc.StyledTextCtrl.ReplaceSelection(self,
+                StringOps.mbcsEnc(txt, "replace")[0])
+
+
+    def AddText_unicode(self, txt):
+        return wx.stc.StyledTextCtrl.AddText(self,
+                StringOps.mbcsEnc(txt, "replace")[0])
+
+
+    def SetSelectionByCharPos(self, start, end):
+        """
+        Same as SetSelection(), but start and end are character positions
+        not byte positions
+        """
+        text = self.GetText()
+        bs = self.bytelenSct(text[:start])
+        be = bs + self.bytelenSct(text[start:end])
+        self.SetSelection(bs, be)
+
+
+    def showSelectionByCharPos(self, start, end):
+        """
+        Same as SetSelectionByCharPos(), but scrolls to position correctly 
+        """
+        text = self.GetText()
+        bs = self.bytelenSct(text[:start])
+        be = bs + self.bytelenSct(text[start:end])
+
+        with WindowUpdateLocker(self):
+            self.SetSelection(-1, -1)
+            self.GotoPos(self.GetLength())
+            self.GotoPos(be)
+            self.GotoPos(bs)
+            self.SetSelection(bs, be)
+
+
+    def GetSelectionCharPos(self):
+        """
+        Same as GetSelection(), but returned (start, end) are character positions
+        not byte positions
+        """
+        start, end = self.GetSelection()
+        cs = len(self.GetTextRange(0, start))
+        ce = cs + len(self.GetTextRange(start, end))
+        return (cs, ce)
+
+
+    def gotoCharPos(self, pos, scroll=True):
+        # Go to the end and back again, so the anchor is
+        # near the top
+        sctPos = self.bytelenSct(self.GetText()[:pos])
+        if scroll:
+            self.SetSelection(-1, -1)
+            self.GotoPos(self.GetLength())
+            self.GotoPos(sctPos)
+        else:
+            self.SetSelectionStart(sctPos)
+            self.SetSelectionEnd(sctPos)
+
+        # self.SetSelectionByCharPos(pos, pos)
+
+
+    def scrollXY(self, scrollPosX, scrollPosY):
+        """
+        Set scroll bars according to given pixel positions
+        """
+        
+        # Bad hack: First scroll to position to avoid a visible jump
+        #   if scrolling works, then update display,
+        #   then scroll again because it may have failed the first time
+        
+        self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
+        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+                scrollPosX, wx.HORIZONTAL)
+        self.ProcessEvent(screvt)
+        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+                scrollPosX, wx.HORIZONTAL)
+        self.ProcessEvent(screvt)
+        
+        self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
+        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+                scrollPosY, wx.VERTICAL)
+        self.ProcessEvent(screvt)
+        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+                scrollPosY, wx.VERTICAL)
+        self.ProcessEvent(screvt)
+
+        self.Update()
+
+        self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
+        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+                scrollPosX, wx.HORIZONTAL)
+        self.ProcessEvent(screvt)
+        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+                scrollPosX, wx.HORIZONTAL)
+        self.ProcessEvent(screvt)
+        
+        self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
+        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+                scrollPosY, wx.VERTICAL)
+        self.ProcessEvent(screvt)
+        screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+                scrollPosY, wx.VERTICAL)
+        self.ProcessEvent(screvt)
+
+
+
+
+
+
+
+
+# Default mapping based on Scintilla's "KeyMap.cxx" file
+_DEFAULT_STC_KEYS = (
+        (wx.stc.STC_KEY_DOWN,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_LINEDOWN),
+        (wx.stc.STC_KEY_DOWN,        wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_LINEDOWNEXTEND),
+        (wx.stc.STC_KEY_DOWN,        wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINESCROLLDOWN),
+        (wx.stc.STC_KEY_DOWN,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_LINEDOWNRECTEXTEND),
+        (wx.stc.STC_KEY_UP,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_LINEUP),
+        (wx.stc.STC_KEY_UP,            wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_LINEUPEXTEND),
+        (wx.stc.STC_KEY_UP,            wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINESCROLLUP),
+        (wx.stc.STC_KEY_UP,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_LINEUPRECTEXTEND),
+#         (ord('['),            wx.stc.STC_SCMOD_CTRL,        wx.stc.STC_CMD_PARAUP),
+#         (ord('['),            wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_PARAUPEXTEND),
+#         (ord(']'),            wx.stc.STC_SCMOD_CTRL,        wx.stc.STC_CMD_PARADOWN),
+#         (ord(']'),            wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_PARADOWNEXTEND),
+        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_CHARLEFT),
+        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_CHARLEFTEXTEND),
+        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDLEFT),
+        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDLEFTEXTEND),
+        (wx.stc.STC_KEY_LEFT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_CHARLEFTRECTEXTEND),
+        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_CHARRIGHT),
+        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_CHARRIGHTEXTEND),
+        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDRIGHT),
+        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDRIGHTEXTEND),
+        (wx.stc.STC_KEY_RIGHT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_CHARRIGHTRECTEXTEND),
+#         (ord('/'),        wx.stc.STC_SCMOD_CTRL,        wx.stc.STC_CMD_WORDPARTLEFT),
+#         (ord('/'),        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDPARTLEFTEXTEND),
+#         (ord('\\'),        wx.stc.STC_SCMOD_CTRL,        wx.stc.STC_CMD_WORDPARTRIGHT),
+#         (ord('\\'),        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_WORDPARTRIGHTEXTEND),
+        (wx.stc.STC_KEY_HOME,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_VCHOME),
+        (wx.stc.STC_KEY_HOME,         wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_VCHOMEEXTEND),
+        (wx.stc.STC_KEY_HOME,         wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DOCUMENTSTART),
+        (wx.stc.STC_KEY_HOME,         wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DOCUMENTSTARTEXTEND),
+        (wx.stc.STC_KEY_HOME,         wx.stc.STC_SCMOD_ALT,     wx.stc.STC_CMD_HOMEDISPLAY),
+        (wx.stc.STC_KEY_HOME,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_VCHOMERECTEXTEND),
+        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_LINEEND),
+        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_LINEENDEXTEND),
+        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DOCUMENTEND),
+        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DOCUMENTENDEXTEND),
+        (wx.stc.STC_KEY_END,         wx.stc.STC_SCMOD_ALT,     wx.stc.STC_CMD_LINEENDDISPLAY),
+        (wx.stc.STC_KEY_END,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_LINEENDRECTEXTEND),
+        (wx.stc.STC_KEY_PRIOR,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_PAGEUP),
+        (wx.stc.STC_KEY_PRIOR,        wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_PAGEUPEXTEND),
+        (wx.stc.STC_KEY_PRIOR,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_PAGEUPRECTEXTEND),
+        (wx.stc.STC_KEY_NEXT,         wx.stc.STC_SCMOD_NORM,     wx.stc.STC_CMD_PAGEDOWN),
+        (wx.stc.STC_KEY_NEXT,         wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_PAGEDOWNEXTEND),
+        (wx.stc.STC_KEY_NEXT,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_PAGEDOWNRECTEXTEND),
+        (wx.stc.STC_KEY_DELETE,     wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_CLEAR),
+        (wx.stc.STC_KEY_DELETE,     wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_DELWORDRIGHT),
+        (wx.stc.STC_KEY_DELETE,    wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_DELLINERIGHT),
+        (wx.stc.STC_KEY_INSERT,         wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_EDITTOGGLEOVERTYPE),
+        (wx.stc.STC_KEY_ESCAPE,      wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_CANCEL),
+        (wx.stc.STC_KEY_BACK,        wx.stc.STC_SCMOD_NORM,     wx.stc.STC_CMD_DELETEBACK),
+        (wx.stc.STC_KEY_BACK,        wx.stc.STC_SCMOD_SHIFT,     wx.stc.STC_CMD_DELETEBACK),
+        (wx.stc.STC_KEY_BACK,        wx.stc.STC_SCMOD_CTRL,     wx.stc.STC_CMD_DELWORDLEFT),
+        (wx.stc.STC_KEY_BACK,         wx.stc.STC_SCMOD_ALT,    wx.stc.STC_CMD_UNDO),
+        (wx.stc.STC_KEY_BACK,        wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_DELLINELEFT),
+        (ord('Z'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_UNDO),
+        (ord('Y'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_REDO),
+        (ord('A'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_SELECTALL),
+        (wx.stc.STC_KEY_TAB,        wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_TAB),
+        (wx.stc.STC_KEY_TAB,        wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_BACKTAB),
+        (wx.stc.STC_KEY_RETURN,     wx.stc.STC_SCMOD_NORM,    wx.stc.STC_CMD_NEWLINE),
+        (wx.stc.STC_KEY_RETURN,     wx.stc.STC_SCMOD_SHIFT,    wx.stc.STC_CMD_NEWLINE),
+        (wx.stc.STC_KEY_ADD,         wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_ZOOMIN),
+        (wx.stc.STC_KEY_SUBTRACT,    wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_ZOOMOUT),
+#         (wx.stc.STC_KEY_DIVIDE,    wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_SETZOOM),
+#         (ord('L'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINECUT),
+#         (ord('L'),             wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINEDELETE),
+#         (ord('T'),             wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINECOPY),
+#         (ord('T'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LINETRANSPOSE),
+#         (ord('D'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_SELECTIONDUPLICATE),
+#         (ord('U'),             wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_LOWERCASE),
+#         (ord('U'),             wx.stc.STC_SCMOD_SHIFT | wx.stc.STC_SCMOD_CTRL,    wx.stc.STC_CMD_UPPERCASE),
+    )

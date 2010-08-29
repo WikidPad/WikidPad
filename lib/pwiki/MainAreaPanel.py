@@ -40,7 +40,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         self.mainControl.getMiscEvent().addListener(self)
 
         self.currentPresenter = None
-        self.docPagePresenters = []
+        self.presenters = []
         self.mruTabIndex = []
         self.tabSwitchByKey = 0  # 2: Key hit, notebook change not processed;
                 # 1: Key hit, nb. change processed
@@ -84,12 +84,26 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                 self.OnCmdClipboardCopyUrlToThisWikiWord)
 
     def close(self):
-        for p in self.docPagePresenters:
+        for p in self.presenters:
             p.close()
 
 
     def getCurrentPresenter(self):
         return self.currentPresenter
+        
+    def getCurrentSubControlName(self):
+        if self.currentPresenter is None:
+            return None
+        
+        return self.currentPresenter.getCurrentSubControlName()
+
+
+    def getCurrentSubControl(self):
+        if self.currentPresenter is None:
+            return None
+        
+        return self.currentPresenter.getCurrentSubControl()
+
 
     def getCurrentTabTitle(self):
         sel = self.GetSelection()
@@ -100,7 +114,12 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
 
     def getPresenters(self):
-        return self.docPagePresenters
+        """
+        Returns list of presenters in the MainAreaPanel (one per tab).
+        Most are derived from DocPagePresenter.DocPagePresenter, but all
+        are derived from WindowLayout.LayeredControlPresenter.
+        """
+        return self.presenters
         
     def getOpenWikiWordsSubCtrlsAndActiveNo(self):
         """
@@ -141,7 +160,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
 
     def getIndexForPresenter(self, presenter):
-        for i, p in enumerate(self.docPagePresenters):
+        for i, p in enumerate(self.presenters):
             if p is presenter:
                 return i
         
@@ -184,7 +203,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             """
             if not (self.currentPresenter is currentPresenter):
                 self.currentPresenter = currentPresenter
-                for p in self.docPagePresenters:
+                for p in self.presenters:
                     p.setLayerVisible(p is currentPresenter)
                 proxyEvent = self.getCurrentPresenterProxyEvent()
                 proxyEvent.setWatchedEvents(
@@ -204,7 +223,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             """
             if not (self.currentPresenter is currentPresenter):
                 self.currentPresenter = currentPresenter
-                for p in self.docPagePresenters:
+                for p in self.presenters:
                     p.setLayerVisible(p is currentPresenter)
                 proxyEvent = self.getCurrentPresenterProxyEvent()
                 proxyEvent.setWatchedEvents(
@@ -232,8 +251,8 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
 
     def appendPresenterTab(self, presenter):
-        self._mruTabIndexAppend(len(self.docPagePresenters))
-        self.docPagePresenters.append(presenter)
+        self._mruTabIndexAppend(len(self.presenters))
+        self.presenters.append(presenter)
         self.AddPage(presenter, "    ")
         presenter.getMiscEvent().addListener(self)
 
@@ -281,7 +300,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         presenter.close()
 
         # Actual deletion
-        del self.docPagePresenters[idx]
+        del self.presenters[idx]
         self._mruTabIndexDelete(idx)
 
         self.DeletePage(idx)        
@@ -304,7 +323,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             return
             
         # Actual remove
-        del self.docPagePresenters[idx]
+        del self.presenters[idx]
         self._mruTabIndexDelete(idx)
         self.RemovePage(idx)
         self.updateConfig()
@@ -321,7 +340,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             current = self.getDocPagePresenters()[0]
 
         # Loop over copy of the presenter list
-        for presenter in self.docPagePresenters[:]:
+        for presenter in self.presenters[:]:
 #             if isinstance(presenter, BasicDocPagePresenter) and \
 #                     len(self.getDocPagePresenters()) < 2:
 #                 # At least one DPP tab must stay
@@ -337,7 +356,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         Switch between editor and preview in the given doc page presenter
         (if presenter is owned by the MainAreaPanel).
         """
-        if not presenter in self.docPagePresenters:
+        if not presenter in self.presenters:
             return
             
         if not isinstance(presenter, BasicDocPagePresenter):
@@ -418,7 +437,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             # It is then processed by wx.Notebook code
             # where the focus is set to the notebook itself
 
-            presenter = self.docPagePresenters[evt.GetSelection()]
+            presenter = self.presenters[evt.GetSelection()]
             self.prepareCurrentPresenter(presenter)
 
             self.runningPageChangedEvent = True
@@ -446,9 +465,9 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             return
 
         # Show menu
-        ctxMenu = self.docPagePresenters[tab].getTabContextMenu()
+        ctxMenu = self.presenters[tab].getTabContextMenu()
         if ctxMenu is not None:
-            self.lastContextMenuPresenter = self.docPagePresenters[tab]
+            self.lastContextMenuPresenter = self.presenters[tab]
 #             sc = self.lastContextMenuPresenter
             self.PopupMenu(ctxMenu)
 
@@ -583,7 +602,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
             self.tabSwitchByKey = 0
             self._mruTabIndexPushToTop(self.GetSelection())
-            self.docPagePresenters[self.GetSelection()].SetFocus()
+            self.presenters[self.GetSelection()].SetFocus()
     else:
         def OnKeyUp(self, evt):
             if self.tabSwitchByKey == 0:
@@ -598,7 +617,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
             self.tabSwitchByKey = 0
             self._mruTabIndexPushToTop(self.GetSelection())
-            self.docPagePresenters[self.GetSelection()].SetFocus()
+            self.presenters[self.GetSelection()].SetFocus()
 
 
     def OnCmdSwitchThisEditorPreview(self, evt):
@@ -648,16 +667,16 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                 
                 # window and presenter should be identical, but to be sure
                 window = self.GetPage(oldTab)
-                presenter = self.docPagePresenters[oldTab]
+                presenter = self.presenters[oldTab]
                 
                 self.Unbind(wx.EVT_NOTEBOOK_PAGE_CHANGED)
                 self.Freeze()
                 try:
                     self.RemovePage(oldTab)
-                    del self.docPagePresenters[oldTab]
+                    del self.presenters[oldTab]
                     self._mruTabIndexDelete(oldTab)
         
-                    self.docPagePresenters.insert(tab, presenter)
+                    self.presenters.insert(tab, presenter)
                     self._mruTabIndexAppend(tab)
                     self._mruTabIndexPushToTop(tab)
                     self.InsertPage(tab, window, title, select=True)
@@ -673,7 +692,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         if tab == wx.NOT_FOUND:
             return
 
-        pres = self.docPagePresenters[tab]
+        pres = self.presenters[tab]
         mc = self.mainControl
 
         paramDict = {"presenter": pres, "main control": mc}
@@ -700,7 +719,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
 
     def miscEventHappened(self, miscevt):
-        if miscevt.getSource() in self.docPagePresenters:
+        if miscevt.getSource() in self.presenters:
             if miscevt.has_key("changed presenter title"):
                 presenter = miscevt.getSource()
                 idx = self.getIndexForPresenter(presenter)

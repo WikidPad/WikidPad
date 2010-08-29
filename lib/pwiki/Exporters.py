@@ -1695,7 +1695,7 @@ class HtmlExporter(AbstractExporter):
 
         if wordList is not None:
             # Create content as a nicely formatted list of wiki words
-            
+
             if len(wordList) == 0:
                 content = u""
             else:
@@ -1704,6 +1704,7 @@ class HtmlExporter(AbstractExporter):
                 # Check for desired number of columns (as appendix e.g.
                 # "columns 3" was set) and other settings
                 cols = 1
+                coldirDown = False
                 asList = False
 
                 for ap in appendices:
@@ -1712,11 +1713,12 @@ class HtmlExporter(AbstractExporter):
                             v = int(ap[8:])
                             if v > 0:
                                 cols = v
-                                break
                         except ValueError:
                             pass
                     elif ap == "aslist":
                         asList = True
+                    elif ap == u"coldir down":
+                        coldirDown = True
 
                 self.mainControl.getCollator().sort(wordList)
     
@@ -1725,6 +1727,18 @@ class HtmlExporter(AbstractExporter):
                     # We need a table for the wordlist
                     self.outAppend(u"<table>\n")
                     colpos = 0
+
+                    if coldirDown:
+                        # Reorder words for downwards direction
+
+                        result = []
+                        wordCount = len(wordList)
+                        rowCount = (wordCount + cols - 1) // cols
+                        for r in range(rowCount):
+                            result += [wordList[i]
+                                    for i in range(r, wordCount, rowCount)]
+                        wordList = result
+                    
                     for word in wordList:
                         if colpos == 0:
                             # Start table row

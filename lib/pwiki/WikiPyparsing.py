@@ -616,6 +616,30 @@ class NonTerminalNode(SyntaxNode):
         return result
 
 
+    def findFlatNodeIndexForCharPos(self, charPos):
+        # Algorithm taken from standard lib bisect module
+        lo = 0
+        hi = self.getChildrenCount()
+        while lo < hi:
+            mid = (lo+hi)//2
+            if charPos < self[mid].pos: hi = mid
+            else: lo = mid+1
+
+        index = lo - 1
+
+        if index == -1:
+            # Before first token
+            return -1
+
+        node = self[index]
+        if charPos >= (node.pos + node.strLength):
+            # After last token or outside of any token
+            return -1
+
+        return index
+        
+
+
 #     def cloneDeep(self):
 #         ret = NonTerminalNode(self.sub, self.pos, self.name)
 #         ret.sub = [n.cloneDeep() for n in self.sub]

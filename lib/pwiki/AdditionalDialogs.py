@@ -2057,37 +2057,52 @@ class SimpleInfoDialog(wx.Dialog):
         button = wx.Button(self, wx.ID_OK)
         button.SetDefault()
 
-        self.mainsizer = wx.BoxSizer(wx.VERTICAL)
+        mainsizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.lineSizer = wx.FlexGridSizer(0, 2)
+        self.lineSizer.AddGrowableCol(1, 1)
 
         self.fillInfoLines()
+
+        mainsizer.Add(self.lineSizer, 0, wx.ALL | wx.EXPAND, 0)
 
         inputsizer = wx.BoxSizer(wx.HORIZONTAL)
         inputsizer.Add(button, 0, wx.ALL | wx.EXPAND, 5)
         inputsizer.Add((0, 0), 1)   # Stretchable spacer
 
-        self.mainsizer.Add(inputsizer, 0, wx.ALL | wx.EXPAND, 5)
+        mainsizer.Add(inputsizer, 0, wx.ALL | wx.EXPAND, 0)
         
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
         wx.EVT_CLOSE(self, self.OnOk)
 
 
-        self.SetSizer(self.mainsizer)
+        self.SetSizer(mainsizer)
         self.Fit()
 
         # Fixes focus bug under Linux
         self.SetFocus()
 
 
-    def _addLine(self, label, value):
-        inputsizer = wx.BoxSizer(wx.HORIZONTAL)
-        inputsizer.Add(wx.StaticText(self, -1, label), 1,
-                wx.ALL | wx.EXPAND, 5)
-        ctl = wx.TextCtrl(self, -1, value, style = wx.TE_READONLY)
+
+    def _addLine(self, label, value, multiLine=False):
+
+        if value is not None:
+            self.lineSizer.Add(wx.StaticText(self, -1, label), 0,
+                    wx.ALL | wx.EXPAND, 5)
+        else:
+            # If no value given, show no label (as static text)
+            # but show label as value
+            self.lineSizer.Add((0, 0), 1)
+            value = label
+
+        if multiLine:
+            ctl = wx.TextCtrl(self, -1, value,
+                    style = wx.TE_MULTILINE | wx.TE_READONLY)
+        else:
+            ctl = wx.TextCtrl(self, -1, value, style = wx.TE_READONLY)
         ctl.SetBackgroundColour(self.txtBgColor)
-        inputsizer.Add(ctl, 1, wx.ALL | wx.EXPAND, 5)
-        
-        self.mainsizer.Add(inputsizer, 0, wx.EXPAND)
-        
+        self.lineSizer.Add(ctl, 1, wx.ALL | wx.EXPAND, 5)
+
         return ctl
 
         
@@ -2108,29 +2123,56 @@ class WikiPropertiesDialog(SimpleInfoDialog):
     def __init__(self, parent, id, mainControl):
         self.mainControl = mainControl
         SimpleInfoDialog.__init__(self, parent, id, 'Wiki Info',
-                          size=(470, 330) )
+                          size=(470, 330),
+                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
 
     def fillInfoLines(self):
         wd = self.mainControl.getWikiDocument()
+        if wd is None:
+            label = _(u"No wiki loaded")
+            self._addLine(label, None)
+            return
 
-        wikiData = wd.getWikiData()
+        label = _(u"Wiki config. path:")
+        value = wd.getWikiConfigPath()
+        self._addLine(label, value)
+
+#         wikiData = wd.getWikiData()
 
         label = _(u"Wiki database backend:")
-        if wd is None:
-            value = _(u"N/A")
-        else:
-            value = wd.getDbtype()
+#         if wd is None:
+#             value = _(u"N/A")
+#         else:
+        value = wd.getDbtype()
 
         self._addLine(label, value)
 
         label = _(u"Number of wiki pages:")
-        if wd is None:
-            value = _(u"N/A")
-        else:
-            value = unicode(len(wikiData.getAllDefinedWikiPageNames()))
+#         if wd is None:
+#             value = _(u"N/A")
+#         else:
+        value = unicode(len(wd.getAllDefinedWikiPageNames()))
 
         self._addLine(label, value)
 
+        if wd.isReadOnlyEffect():
+            label = _(u"Wiki is read-only. Reason:")
+
+            if wd.getWriteAccessFailed():
+                value = _(u"Write access to database lost. Try \"Wiki\"->\"Reconnect\"")
+            elif wd.getWriteAccessDeniedByConfig():
+                value = _(u"Wiki was set read-only in options dialog")
+            elif wd.getWriteAccessDenied():
+                try:
+                    f = open(pathEnc(wd.getWikiConfigPath()), "r+b")
+                    f.close()
+                    value = _("Can't write wiki config.:") + u" " + _("Unknown reason")
+                except IOError, e:
+                    value = _("Can't write wiki config.:") + u" " + unicode(e)
+            else:
+                value = _("Unknown reason")
+            
+            self._addLine(label, value, multiLine=True)
 
 
 class WikiJobDialog(SimpleInfoDialog):

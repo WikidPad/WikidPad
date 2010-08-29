@@ -3,7 +3,7 @@ data_dir = data
 
 [main]
 footnotes_as_wikiwords = False
-last_wiki_word = ChangeLog
+last_wiki_word = WikidPadHelp
 hotkey_showhide_bywiki = 
 log_window_autoshow = Gray
 tree_expandednodes_descriptorpathes_views = 

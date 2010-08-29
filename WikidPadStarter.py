@@ -14,7 +14,8 @@ import sys, os, traceback, os.path, glob, shutil, imp, warnings, ConfigParser
 os.stat_float_times(True)
 
 if not hasattr(sys, 'frozen'):
-    sys.path.append("lib")
+    sys.path.insert(0, "lib")
+#     sys.path.append("lib")
 #     sys.path.append(r"C:\Daten\Projekte\Wikidpad\Next20\lib")
 
 from Consts import CONFIG_FILENAME, CONFIG_GLOBALS_DIRNAME

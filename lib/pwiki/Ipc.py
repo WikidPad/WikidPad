@@ -39,6 +39,9 @@ class CommandServer(SocketServer.TCPServer):
         
         self.cookie = None
         
+        self.appLockPath = None
+        self.appLockContent = None
+
 #     def server_bind(self):
 # #         self.socket.settimeout(3.0)
 #         SocketServer.TCPServer.server_bind(self)
@@ -48,6 +51,11 @@ class CommandServer(SocketServer.TCPServer):
         
     def getAppCookie(self):
         return self.appCookie
+
+    def setAppLockInfo(self, appLockPath, appLockContent):
+        self.appLockPath = appLockPath
+        self.appLockContent = appLockContent
+    
 
     def close(self):
         try:
@@ -63,7 +71,7 @@ class RemoteCmdHandler(SocketServer.StreamRequestHandler):
     def setup(self):
         self.request.settimeout(10.0)
         SocketServer.StreamRequestHandler.setup(self)
-    
+
     def finish(self):
         SocketServer.StreamRequestHandler.finish(self)
         self.request.close()
@@ -78,7 +86,7 @@ class RemoteCmdHandler(SocketServer.StreamRequestHandler):
 
             result.append(c)
             read += 1
-            
+
         return ""
 
     def handle(self):
@@ -134,6 +142,10 @@ def startCommandServer():
     theServerThread = threading.Thread(target = theServer.serve_forever)
     theServerThread.setDaemon(True)
     theServerThread.start()
+
+
+def getCommandServer():
+    return theServer
 
 
 def stopCommandServer():

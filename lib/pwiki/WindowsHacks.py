@@ -17,6 +17,7 @@ from . import Configuration
 from . import DocPages
 
 
+
 _user32dll = ctypes.windll.User32
 _kernel32dll = ctypes.windll.Kernel32
 _shell32dll = ctypes.windll.Shell32
@@ -489,6 +490,18 @@ if ShellExecuteW:
                 SW_SHOW)
                 
         return res
+
+
+
+def checkForOtherInstances():
+    return []
+
+try:
+    from WindowsHacksZombieCheck import checkForOtherInstances
+except:
+    if Configuration.isWindows():
+        traceback.print_exc()
+
 
 
 

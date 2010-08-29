@@ -28,9 +28,13 @@ from WikiExceptions import WikiFileNotFoundException, \
         NotCurrentThreadException, NoPageAstException
 from ParseUtilities import getFootnoteAnchorDict
 
+from .EnhancedScintillaControl import EnhancedScintillaControl, StyleCollector
+
 from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 import AdditionalDialogs
 import WikiTxtDialogs
+
+
 
 # import WikiFormatting
 import DocPages
@@ -75,42 +79,6 @@ def bytelenSct_mbcs(us):
     return len(StringOps.mbcsEnc(us)[0])
 
 
-class StyleCollector(StringOps.SnippetCollector):
-    """
-    Helps to collect the style bytes needed to set the syntax coloring.
-    """
-    def __init__(self, defaultStyleNo, text, bytelenSct, startCharPos=0):   
-        super(StyleCollector, self).__init__()
-        self.defaultStyleNo = defaultStyleNo
-        self.text = text
-        self.bytelenSct = bytelenSct
-        self.charPos = startCharPos
-
-
-    def bindStyle(self, targetCharPos, targetLength, styleNo):
-        bytestylelen = self.bytelenSct(self.text[self.charPos:targetCharPos])
-        self.append(chr(self.defaultStyleNo) * bytestylelen)
-       
-        self.charPos = targetCharPos + targetLength
-        
-        bytestylelen = self.bytelenSct(self.text[targetCharPos:self.charPos])
-        self.append(chr(styleNo) * bytestylelen)
-
-#         bytestylelen = self.bytelenSct(self.text[self.charPos:targetCharPos])
-#         self.append(chr(self.nextStyleNo) * bytestylelen)
-#         
-#         self.nextStyleNo = styleNo
-#         self.charPos = targetCharPos
-
-    def value(self):
-        if self.charPos < len(self.text):
-            bytestylelen = self.bytelenSct(self.text[self.charPos:len(self.text)])
-            self.append(chr(self.defaultStyleNo) * bytestylelen)
-
-        return super(StyleCollector, self).value()
-
-
-
 
 # etEVT_STYLE_DONE_COMMAND = wx.NewEventType()
 # EVT_STYLE_DONE_COMMAND = wx.PyEventBinder(etEVT_STYLE_DONE_COMMAND, 0)
@@ -128,7 +96,7 @@ class StyleCollector(StringOps.SnippetCollector):
 
 
 
-class WikiTxtCtrl(wx.stc.StyledTextCtrl):
+class WikiTxtCtrl(EnhancedScintillaControl):
     NUMBER_MARGIN = 0
     FOLD_MARGIN = 2
     SELECT_MARGIN = 1
@@ -146,7 +114,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             GUI_ID.CMD_REPLACE_THIS_SPELLING_WITH_SUGGESTION_9]
 
     def __init__(self, presenter, parent, ID):
-        wx.stc.StyledTextCtrl.__init__(self, parent, ID, style=wx.WANTS_CHARS | wx.TE_PROCESS_ENTER)
+        EnhancedScintillaControl.__init__(self, parent, ID)
         self.presenter = presenter
         self.evalScope = None
         self.stylingThreadHolder = ThreadHolder()
@@ -186,21 +154,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         shorthintDelay = self.presenter.getConfig().getint("main",
                 "editor_shortHint_delay", 500)
         self.SetMouseDwellTime(shorthintDelay)
-
-
-        # Self-modify to ansi/unicode version
-        if isUnicode():
-            self.bytelenSct = bytelenSct_utf8
-        else:
-            self.bytelenSct = bytelenSct_mbcs
-            
-            self.GetText = self.GetText_unicode
-            self.GetTextRange = self.GetTextRange_unicode
-            self.GetSelectedText = self.GetSelectedText_unicode
-            self.GetLine = self.GetLine_unicode
-            self.ReplaceSelection = self.ReplaceSelection_unicode
-            self.AddText = self.AddText_unicode
-
 
         # Popup menu must be created by Python code to replace clipboard functions
         # for unicode build on Win 98/ME
@@ -245,8 +198,6 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         
         # make the text control a drop target for files and text
         self.SetDropTarget(WikiTxtCtrlDropTarget(self))
-        
-        self._resetKeyBindings()
         
 #         self.CmdKeyClearAll()
 #         
@@ -455,7 +406,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         text = getTextFromClipboard()
         if text:
             self.ReplaceSelection(text)
-            return
+            return True
 
         # File(name)s pasted?
         filenames = wxHelper.getFilesFromClipboard()
@@ -469,7 +420,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             mc.getUserActionCoord().runAction(
                     u"action/editor/this/paste/files/insert/url/ask", paramDict)
 
-            return
+            return True
 
         fs = self.presenter.getWikiDocument().getFileStorage()
         imgsav = WikiTxtDialogs.ImagePasteSaver()
@@ -495,7 +446,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
             destPath = imgsav.saveFile(fs, img)
             if destPath is None:
                 # Couldn't find unused filename or saving denied
-                return
+                return True
                 
 #                 destPath = fs.findDestPathNoSource(u".png", u"")
 #                 
@@ -528,10 +479,10 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #             if url:
 #                 self.ReplaceSelection(url)
 
-            return
+            return True
         
         if not WindowsHacks:
-            return
+            return False
 
         # Windows Meta File pasted?
         destPath = imgsav.saveWmfFromClipboardToFileStorage(fs)
@@ -542,7 +493,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 url = u"file:" + StringOps.urlFromPathname(destPath)
             
             self.ReplaceSelection(url)
-            return
+            return True
 
 
 #         if destPath is not None:
@@ -561,46 +512,13 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #                 if url:
 #                     self.ReplaceSelection(url)
 
+        return False
+
 
     def onCmdCopy(self, miscevt):
         if wx.Window.FindFocus() != self:
             return
         self.Copy()
-
-
-    def _resetKeyBindings(self):
-        
-        self.CmdKeyClearAll()
-        
-        # Register general keyboard commands (minus some which may lead to problems
-        for key, mod, action in _DEFAULT_STC_KEYS:
-            self.CmdKeyAssign(key, mod, action)
-
-        
-        # register some special keyboard commands
-        self.CmdKeyAssign(ord('+'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMIN)
-        self.CmdKeyAssign(ord('-'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMOUT)
-        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, wx.stc.STC_SCMOD_NORM,
-                wx.stc.STC_CMD_HOMEWRAP)
-        self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_NORM,
-                wx.stc.STC_CMD_LINEENDWRAP)
-        self.CmdKeyAssign(wx.stc.STC_KEY_HOME, wx.stc.STC_SCMOD_SHIFT,
-                wx.stc.STC_CMD_HOMEWRAPEXTEND)
-        self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_SHIFT,
-                wx.stc.STC_CMD_LINEENDWRAPEXTEND)
-
-
-
-#         # Clear all key mappings for clipboard operations
-#         # PersonalWikiFrame handles them and calls the special clipboard functions
-#         # instead of the normal ones
-#         self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_CTRL)
-#         self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_SHIFT)
-#         self.CmdKeyClear(wx.stc.STC_KEY_DELETE, wx.stc.STC_SCMOD_SHIFT)
-# 
-#         self.CmdKeyClear(ord('X'), wx.stc.STC_SCMOD_CTRL)
-#         self.CmdKeyClear(ord('C'), wx.stc.STC_SCMOD_CTRL)
-#         self.CmdKeyClear(ord('V'), wx.stc.STC_SCMOD_CTRL)
 
         
         
@@ -748,84 +666,16 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 #         self.replaceText(text)
 
 
-    def GetText_unicode(self):
+    def showSelectionByCharPos(self, start, end):
         """
-        Overrides the wxStyledTextCtrl.GetText method in ansi mode
-        to return unicode.
-        """
-        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetText(self),
-                "replace")[0]
-
-    
-    def GetTextRange_unicode(self, startPos, endPos):
-        """
-        Overrides the wxStyledTextCtrl.GetTextRange method in ansi mode
-        to return unicode.
-        startPos and endPos are byte(!) positions into the editor buffer
-        """
-        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetTextRange(self,
-                startPos, endPos), "replace")[0]
-
-
-    def GetSelectedText_unicode(self):
-        """
-        Overrides the wxStyledTextCtrl.GetSelectedText method in ansi mode
-        to return unicode.
-        """
-        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetSelectedText(self),
-                "replace")[0]
-
-
-    def GetLine_unicode(self, line):
-        return StringOps.mbcsDec(wx.stc.StyledTextCtrl.GetLine(self, line),
-                "replace")[0]
-
-
-    def ReplaceSelection_unicode(self, txt):
-        return wx.stc.StyledTextCtrl.ReplaceSelection(self,
-                StringOps.mbcsEnc(txt, "replace")[0])
-
-
-    def AddText_unicode(self, txt):
-        return wx.stc.StyledTextCtrl.AddText(self,
-                StringOps.mbcsEnc(txt, "replace")[0])
-
-
-    def SetSelectionByCharPos(self, start, end):
-        """
-        Same as SetSelection(), but start and end are character positions
-        not byte positions
+        Same as SetSelectionByCharPos(), but scrolls to position correctly 
         """
         text = self.GetText()
         bs = self.bytelenSct(text[:start])
         be = bs + self.bytelenSct(text[start:end])
-        self.SetSelection(bs, be)
 
-
-    def GetSelectionCharPos(self):
-        """
-        Same as GetSelection(), but returned (start, end) are character positions
-        not byte positions
-        """
-        start, end = self.GetSelection()
-        cs = len(self.GetTextRange(0, start))
-        ce = cs + len(self.GetTextRange(start, end))
-        return (cs, ce)
-
-
-    def gotoCharPos(self, pos, scroll=True):
-        # Go to the end and back again, so the anchor is
-        # near the top
-        sctPos = self.bytelenSct(self.GetText()[:pos])
-        if scroll:
-            self.SetSelection(-1, -1)
-            self.GotoPos(self.GetLength())
-            self.GotoPos(sctPos)
-        else:
-            self.SetSelectionStart(sctPos)
-            self.SetSelectionEnd(sctPos)
-
-        # self.SetSelectionByCharPos(pos, pos)
+        self.ensureTextRangeByBytePosExpanded(bs, be)
+        super(WikiTxtCtrl, self).showSelectionByCharPos(start, end)
 
 
     def applyBasicSciSettings(self):
@@ -1043,7 +893,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     firstcharpos = evtprops.get("firstcharpos", -1)
                     if firstcharpos != -1:
                         charlength = max(0, evtprops.get("charlength", 0))
-                        self.SetSelectionByCharPos(firstcharpos,
+                        self.showSelectionByCharPos(firstcharpos,
                                 firstcharpos + charlength)
                         anchor = True
 
@@ -1054,44 +904,46 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                     foldInfo = prst[5]
                     self.setFoldInfo(foldInfo)
                     self.GotoPos(lastPos)
+                    
+                    self.scrollXY(scrollPosX, scrollPosY)
                 
-                    # Bad hack: First scroll to position to avoid a visible jump
-                    #   if scrolling works, then update display,
-                    #   then scroll again because it may have failed the first time
-                    
-                    self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
-                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
-                            scrollPosX, wx.HORIZONTAL)
-                    self.ProcessEvent(screvt)
-                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
-                            scrollPosX, wx.HORIZONTAL)
-                    self.ProcessEvent(screvt)
-                    
-                    self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
-                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
-                            scrollPosY, wx.VERTICAL)
-                    self.ProcessEvent(screvt)
-                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
-                            scrollPosY, wx.VERTICAL)
-                    self.ProcessEvent(screvt)
-
-                    self.Update()
-
-                    self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
-                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
-                            scrollPosX, wx.HORIZONTAL)
-                    self.ProcessEvent(screvt)
-                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
-                            scrollPosX, wx.HORIZONTAL)
-                    self.ProcessEvent(screvt)
-                    
-                    self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
-                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
-                            scrollPosY, wx.VERTICAL)
-                    self.ProcessEvent(screvt)
-                    screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
-                            scrollPosY, wx.VERTICAL)
-                    self.ProcessEvent(screvt)
+#                     # Bad hack: First scroll to position to avoid a visible jump
+#                     #   if scrolling works, then update display,
+#                     #   then scroll again because it may have failed the first time
+#                     
+#                     self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
+#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+#                             scrollPosX, wx.HORIZONTAL)
+#                     self.ProcessEvent(screvt)
+#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+#                             scrollPosX, wx.HORIZONTAL)
+#                     self.ProcessEvent(screvt)
+#                     
+#                     self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
+#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+#                             scrollPosY, wx.VERTICAL)
+#                     self.ProcessEvent(screvt)
+#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+#                             scrollPosY, wx.VERTICAL)
+#                     self.ProcessEvent(screvt)
+# 
+#                     self.Update()
+# 
+#                     self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
+#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+#                             scrollPosX, wx.HORIZONTAL)
+#                     self.ProcessEvent(screvt)
+#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+#                             scrollPosX, wx.HORIZONTAL)
+#                     self.ProcessEvent(screvt)
+#                     
+#                     self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
+#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
+#                             scrollPosY, wx.VERTICAL)
+#                     self.ProcessEvent(screvt)
+#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
+#                             scrollPosY, wx.VERTICAL)
+#                     self.ProcessEvent(screvt)
 
 #         elif self.pageType == u"form":
 #             self.GotoPos(0)
@@ -1126,7 +978,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 firstcharpos = miscevt.get("firstcharpos", -1)
                 if firstcharpos != -1:
                     charlength = max(0, miscevt.get("charlength", 0))
-                    self.SetSelectionByCharPos(firstcharpos,
+                    self.showSelectionByCharPos(firstcharpos,
                             firstcharpos + charlength)
 
             return
@@ -1207,7 +1059,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         for i in xrange(32):
             self.StyleSetBackground(i, color)
         self.StyleSetBackground(wx.stc.STC_STYLE_DEFAULT, color)
-            
+
         self.SetSelForeground(True, self._getColorFromOption(
                 "editor_selection_fg_color", (0, 0, 0)))
         self.SetSelBackground(True, self._getColorFromOption(
@@ -1592,7 +1444,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
 
             fieldcode = text[start + 2]
             if fieldcode == "i":
-                self.SetSelectionByCharPos(start, end)
+                self.showSelectionByCharPos(start, end)
                 break
 
             charStartPos = end
@@ -2519,14 +2371,8 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
         return self.agaFormatList(relations)
 
 
-    def ensureSelectionExpanded(self):
-        """
-        Ensure that the selection is visible and not in a folded area
-        """
+    def ensureTextRangeByBytePosExpanded(self, byteStart, byteEnd):
         self.repairFoldingVisibility()
-
-        byteStart = self.GetSelectionStart()
-        byteEnd = self.GetSelectionEnd()
 
         startLine = self.LineFromPosition(byteStart)
         endLine = self.LineFromPosition(byteEnd)
@@ -2545,6 +2391,17 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                         break
                     if not self.GetFoldExpanded(line):
                         self.ToggleFold(line)
+
+
+
+    def ensureSelectionExpanded(self):
+        """
+        Ensure that the selection is visible and not in a folded area
+        """
+        byteStart = self.GetSelectionStart()
+        byteEnd = self.GetSelectionEnd()
+
+        self.ensureTextRangeByBytePosExpanded(byteStart, byteEnd)
 
         self.SetSelection(byteStart, byteEnd)
 
@@ -2766,7 +2623,7 @@ class WikiTxtCtrl(wx.stc.StyledTextCtrl):
                 return (-1, -1)  # (self.anchorCharPosition, self.anchorCharPosition)
                 
             if start is not None:
-                self.SetSelectionByCharPos(start, end)
+                self.showSelectionByCharPos(start, end)
 
                 return found    # self.anchorCharPosition
 

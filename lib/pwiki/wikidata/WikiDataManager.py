@@ -312,7 +312,7 @@ class WikiDataManager(MiscEventSourceMixin):
             self._releaseLockFile()
             raise BadConfigurationFileException(
                     _(u"Wiki configuration file is corrupted"))
-        
+
         # os.access does not answer reliably if file is writable
         # (at least on Windows), therefore we have to just open it
         # in writable mode

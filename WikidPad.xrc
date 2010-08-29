@@ -2395,6 +2395,23 @@
         <border>5</border>
       </object>
       <object class="sizeritem">
+        <object class="wxBoxSizer">
+          <orient>wxHORIZONTAL</orient>
+          <object class="spacer">
+            <size>20,20</size>
+          </object>
+          <object class="sizeritem">
+            <object class="wxCheckBox" name="cbZombieCheck">
+              <label>Warn about other processes (Windows only)</label>
+            </object>
+            <option>0</option>
+            <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+            <border>5</border>
+          </object>
+        </object>
+        <flag>wxALL|wxEXPAND</flag>
+      </object>
+      <object class="sizeritem">
         <object class="wxCheckBox" name="cbTreeNoCycles">
           <label>No cycles in tree</label>
         </object>
@@ -4606,6 +4623,14 @@
     <object class="wxMenuItem" name="CMD_SEARCH_AS_WWSEARCH">
       <label>As Full Search</label>
       <help>Copy full &quot;wiki:&quot; URL of the word to clipboard</help>
+    </object>
+  </object>
+  <object class="wxMenu" name="MenuDiffTabPopup">
+    <object class="wxMenuItem" name="CMD_CLOSE_THIS_TAB">
+      <label>Close tab</label>
+    </object>
+    <object class="wxMenuItem" name="CMD_DIFF_SWAP_FROM_TO">
+      <label>Swap From &lt;-&gt; To</label>
     </object>
   </object>
   <object class="wxMenu" name="MenuTreectrlWikiWords">

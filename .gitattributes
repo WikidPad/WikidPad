@@ -623,11 +623,13 @@ lib/pwiki/AttributeHandling.py -text
 lib/pwiki/CmdLineAction.py -text
 lib/pwiki/Configuration.py -text
 lib/pwiki/ConnectWrapPysqlite.py -text
+lib/pwiki/DiffGui.py -text
 lib/pwiki/DocPagePresenter.py -text
 lib/pwiki/DocPages.py -text
 lib/pwiki/DocStructureCtrl.py -text
 lib/pwiki/EnchantDriver.py -text
 lib/pwiki/EnhancedGrid.py -text
+lib/pwiki/EnhancedScintillaControl.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
 lib/pwiki/GtkHacks.py -text
@@ -668,6 +670,7 @@ lib/pwiki/WikiTxtCtrl.py -text
 lib/pwiki/WikiTxtDialogs.py -text
 lib/pwiki/WindowLayout.py -text
 lib/pwiki/WindowsHacks.py -text
+lib/pwiki/WindowsHacksZombieCheck.py -text
 lib/pwiki/__init__.py -text
 lib/pwiki/customtreectrl.py -text
 lib/pwiki/macurl2path_red.py -text

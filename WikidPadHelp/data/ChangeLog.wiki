@@ -1,6 +1,24 @@
 ﻿++ Change Log
 
 
+Aug. 29, 2010 (2.1beta06)
+
+    * Inline diff between versions.
+      See [ChronViewWindow#++++ Compare differences]
+    * Windows: Option to warn about other WikidPad processes running
+      in single process mode.
+      See [OptionsDialog#*Warn about other processes*]
+    * Option "coldir down" in appendix of "rel" insertions to sort
+      found wiki words downwards in columns instead of rightwards.
+      See [Insertions#multi-column table is sorted rightwards]
+    * Wiki properties dialog now also shows configuration path and
+      if wiki is read-only explains why
+
+    * Bug fixed: Homepage not prepared properly when creating new wiki
+    * Small problems with non-ascii paths fixed
+
+
+
 Jul. 27, 2010 (2.1beta05)
 
     * When dropping files you now have options to move files to

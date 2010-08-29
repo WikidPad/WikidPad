@@ -719,7 +719,7 @@ class WikiWordTodoSearchNode(WikiWordRelabelNode):
             for node in todoNodes:
                 if self.todoName == node.key and \
                         self.todoValue == node.valueNode.getString():
-                    editor.SetSelectionByCharPos(node.pos, node.pos + node.strLength)
+                    editor.showSelectionByCharPos(node.pos, node.pos + node.strLength)
                     break
         except NoPageAstException:
             return
@@ -730,9 +730,9 @@ class AttrCategoryNode(AbstractNode):
     """
     Node representing a attribute category or subcategory
     """
-    
+
     __slots__ = ("categories", "propIcon")
-            
+
     def __init__(self, tree, parentNode, cats, attributeIcon=u"page"):
         AbstractNode.__init__(self, tree, parentNode)
         self.categories = cats
@@ -869,7 +869,7 @@ class WikiWordAttributeSearchNode(WikiWordRelabelNode):
             attrNodes = wikiPage.extractAttributeNodesFromPageAst(pageAst)
             for node in attrNodes:
                 if (self.propName, self.propValue) in node.attrs:
-                    editor.SetSelectionByCharPos(node.pos, node.pos + node.strLength)
+                    editor.showSelectionByCharPos(node.pos, node.pos + node.strLength)
                     break
         except NoPageAstException:
             return

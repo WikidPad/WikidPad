@@ -188,7 +188,7 @@ class SpellCheckerDialog(wx.Dialog):
                 continue
 
             if self.session.getAutoReplaceWords().has_key(spWord):
-                activeEditor.SetSelectionByCharPos(start, end)
+                activeEditor.showSelectionByCharPos(start, end)
                 activeEditor.ReplaceSelection(
                         self.session.getAutoReplaceWords()[spWord])
                 startPos = activeEditor.GetSelectionCharPos()[1]
@@ -205,7 +205,7 @@ class SpellCheckerDialog(wx.Dialog):
         self.currentStart = start
         self.currentEnd = end
 
-        activeEditor.SetSelectionByCharPos(start, end)
+        activeEditor.showSelectionByCharPos(start, end)
 
         conStart = max(0, start - 30)
 
