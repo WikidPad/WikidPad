@@ -279,21 +279,19 @@ class AttributeCheckAlias(AbstractAttributeCheck):
                 wikiDocument.getWikiDefaultWikiLanguage())
 
         wikiWord = self.wikiPage.getWikiWord()
-        errMsg = langHelper.checkForInvalidWikiWord(attrValue, wikiDocument)
-     
-        if errMsg :
+        errMsg = langHelper.checkForInvalidWikiLink(attrValue, wikiDocument)
+
+        if errMsg:
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
                     _(u"Alias value isn't a valid wikiword: [%s: %s], %s") %
                     (attrName, attrValue, errMsg), wikiWord, wikiWord,
                     (start, end))
             self.attrChecker.appendLogMessage(msg)
             return
-            
-        wikiData = self.mainControl.getWikiData()
-#         print "checkEntry3", repr(attrValue), repr(wikiData.isAlias(attrValue)), \
-#                 repr(wikiData.isDefinedWikiWord(attrValue))
 
-        if wikiData.isDefinedWikiPage(attrValue):
+        targetWikiWord = langHelper.resolveWikiWordLink(attrValue, self.wikiPage)
+
+        if wikiDocument.isDefinedWikiPage(targetWikiWord):
             # Word exists and isn't an alias
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
                     _(u"A real wikiword with the alias name exists already: "
@@ -301,17 +299,66 @@ class AttributeCheckAlias(AbstractAttributeCheck):
                     (attrName, attrValue), wikiWord, wikiWord, (start, end))
             self.attrChecker.appendLogMessage(msg)
             return
-            
-#         words = wikiData.getWordsWithAttributeValue(u"alias", attrValue)
-        words = [w for w,k,v in wikiDocument
-                .getAttributeTriples(None, "bookmarked", attrValue)]
 
 
-        if len(words) > 1 or (len(words) > 0 and words[0] != wikiWord):
+        # TODO: Currently deactivated, needs resolving of all links
+
+#         words = [w for w,k,v in wikiDocument
+#                 .getAttributeTriples(None, "alias", attrValue)]
+# 
+# 
+#         if len(words) > 1 or (len(words) > 0 and words[0] != wikiWord):
+#             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
+#                     _(u"'%s' is already alias for the wiki word(s): %s") %
+#                     (attrValue, u"; ".join(words)), wikiWord, wikiWord,
+#                     (start, end))
+#             self.attrChecker.appendLogMessage(msg)
+#             return
+
+
+class AttributeCheckTemplate(AbstractAttributeCheck):
+    """
+    Attribute check for "template" attribute
+    """
+    def __init__(self, mainControl, attrChecker):
+        AbstractAttributeCheck.__init__(self, mainControl, attrChecker)
+        
+    def getResponsibleRegex(self):
+        """
+        Return a compiled regular expression of the attribute name(s) (keys)
+        this object is responsible for
+        """
+        return _re.compile(ur"^(?:global\.)?template$", _re.DOTALL | _re.UNICODE | _re.MULTILINE)
+
+    def checkEntry(self, attrName, attrValue, foundAttrs, start, end, match):
+        """
+        Check attribute entry and issue messages if necessary
+        foundAttrs -- Set of tuples (attrName, attrValue) of previously found
+            attrs on a page
+        """
+        wikiDocument = self.wikiPage.getWikiDocument()
+        langHelper = wx.GetApp().createWikiLanguageHelper(
+                wikiDocument.getWikiDefaultWikiLanguage())
+
+        wikiWord = self.wikiPage.getWikiWord()
+        errMsg = langHelper.checkForInvalidWikiLink(attrValue, wikiDocument)
+
+        if errMsg :
             msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
-                    _(u"'%s' is already alias for the wiki word(s): %s") %
-                    (attrValue, u"; ".join(words)), wikiWord, wikiWord,
+                    _(u"Template value isn't a valid wikiword: [%s: %s], %s") %
+                    (attrName, attrValue, errMsg), wikiWord, wikiWord,
                     (start, end))
+            self.attrChecker.appendLogMessage(msg)
+            return
+
+        targetWikiWord = langHelper.resolveWikiWordLink(attrValue, self.wikiPage)
+
+        if not wikiDocument.isDefinedWikiLink(targetWikiWord):
+            # Word doesn't exist
+            msg = LogMessage(self.mainControl, LogMessage.SEVERITY_WARNING,
+                    _(u"Template value isn't an existing wikiword: "
+                    u"[%s: %s]") %
+                    (attrName, attrValue), wikiWord, wikiWord, (start, end))
             self.attrChecker.appendLogMessage(msg)
             return
 
@@ -392,8 +439,7 @@ class AttributeCheckPresentation(AbstractAttributeCheck):
 # TODO Move to extension
 class AttributeCheckGlobalGraphInclude(AbstractAttributeCheck):
     """
-    Attribute check for presentation attributes "icon", "color" and "bold" and
-    their global counterparts.
+    Attribute check for graph relations.
     """
     def __init__(self, mainControl, attrChecker):
         AbstractAttributeCheck.__init__(self, mainControl, attrChecker)
@@ -447,6 +493,7 @@ class AttributeChecker:
     def __init__(self, mainControl):
         self.mainControl = mainControl
         self.singleCheckList = [AttributeCheckAlias(self.mainControl, self),
+                AttributeCheckTemplate(self.mainControl, self),
                 AttributeCheckPresentation(self.mainControl, self),
                 AttributeCheckGlobalGraphInclude(self.mainControl, self)]
 

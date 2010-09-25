@@ -1221,7 +1221,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.keyBindings.FindAndReplace,
                 _(u'Search and replace inside current page'),
                 lambda evt: self.showSearchReplaceDialog(),
-                updatefct=self.OnUpdateDisNotTextedit)
+                updatefct=(self.OnUpdateDisNotTextedit,))
 
         editMenu.AppendSeparator()
 
@@ -4406,6 +4406,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         try:
             langHelper = wx.GetApp().createWikiLanguageHelper(
                     self.getWikiDefaultWikiLanguage())
+                
+            absoluteLink = False
 
             while True:
                 wikiWord = guiToUni(wx.GetTextFromUser(
@@ -4414,16 +4416,24 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         
                 if not wikiWord:
                     return False
-                    
-                validWikiWord = langHelper.extractWikiWordFromLink(wikiWord,
+
+                validWikiLinkCore = langHelper.extractWikiWordFromLink(wikiWord,
                         self.getWikiDocument())
         
-                if validWikiWord is None:
+                if validWikiLinkCore is None:
                     self.displayErrorMessage(_(u"'%s' is an invalid wiki word.") % wikiWord)
                     continue
+                
+                absoluteLink = langHelper.isAbsoluteLinkCore(validWikiLinkCore)
+
+                validWikiWord = langHelper.resolveWikiWordLink(
+                        validWikiLinkCore, self.getCurrentDocPage())
+
+#                 print "--showReplaceTextByWikiwordDialog23", repr((validWikiLinkCore, langHelper.resolveWikiWordLink(validWikiLinkCore,
+#                             self.getCurrentDocPage())))
 
                 knownWikiWord = self.getWikiDocument().getUnAliasedWikiWord(
-                            validWikiWord)
+                        validWikiWord)
 
                 if knownWikiWord is not None:
                     result = wx.MessageBox(uniToGui(_(
@@ -4455,13 +4465,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             else:
                 page = self.wikiDataManager.getWikiPage(validWikiWord)
                 page.appendLiveText(u"\n\n" + text)
-                
-            
+
+
 #             print "--showReplaceTextByWikiwordDialog34", repr((validWikiWord, langHelper.createLinkFromWikiWord(validWikiWord,
 #                     self.getCurrentDocPage())))
             self.getActiveEditor().ReplaceSelection(
                     langHelper.createLinkFromWikiWord(validWikiWord,
-                    self.getCurrentDocPage()))
+                    self.getCurrentDocPage(), forceAbsolute=absoluteLink))
 
         except (IOError, OSError, DbAccessError), e:
             self.lostAccess(e)

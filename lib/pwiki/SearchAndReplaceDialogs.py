@@ -1617,7 +1617,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 self.mainControl.getWikiDefaultWikiLanguage())
 
         wordsText = u"".join([
-                langHelper.createStableLinksFromWikiWords((w,)) + "\n"
+                langHelper.createAbsoluteLinksFromWikiWords((w,)) + "\n"
                 for w in self.foundPages])
 
         copyTextToClipboard(wordsText)
@@ -1834,7 +1834,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 self.mainControl.getWikiDefaultWikiLanguage())
 
         wordsText = u"".join([
-                langHelper.createStableLinksFromWikiWords((w,)) + "\n"
+                langHelper.createAbsoluteLinksFromWikiWords((w,)) + "\n"
                 for w in self.pageListData])
 
         copyTextToClipboard(wordsText)
@@ -1845,7 +1845,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 self.mainControl.getWikiDefaultWikiLanguage())
 
         wordsText = u"".join([
-                langHelper.createStableLinksFromWikiWords((w,)) + "\n"
+                langHelper.createAbsoluteLinksFromWikiWords((w,)) + "\n"
                 for w in self.resultListData])
 
         copyTextToClipboard(wordsText)

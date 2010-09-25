@@ -775,13 +775,24 @@ class AttrCategoryNode(AbstractNode):
         # Now the values:
         vals = wikiDocument.getDistinctAttributeValuesByKey(u".".join(self.categories))
         self.treeCtrl.pWiki.getCollator().sort(vals)
-        result += map(lambda v: AttrValueNode(self.treeCtrl, self,
-                self.categories, v), vals)
+
+        for v in vals:
+            vn = AttrValueNode(self.treeCtrl, self, self.categories, v)
+            if v == "":   # strip?
+                # Replace empty value by its children
+                result += vn.listChildren()
+            else:
+                result.append(vn)
+
+#         result += map(lambda v: AttrValueNode(self.treeCtrl, self,
+#                 self.categories, v), vals)
                 
         # Replace a single "true" value node by its children
         if len(result) == 1 and isinstance(result[0], AttrValueNode) and \
                 result[0].getValue().lower() == u"true":
             result = result[0].listChildren()
+
+        
 
         return result
         
@@ -1852,7 +1863,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     page.getWikiLanguageName())
 
             page.appendLiveText(u"\n" +
-                    langHelper.createStableLinksFromWikiWords((toWikiWord,)))
+                    langHelper.createAbsoluteLinksFromWikiWords((toWikiWord,)))
 
 
     def OnPrependWikiWord(self, evt):
@@ -1868,7 +1879,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
                     
             text = page.getLiveText()
             page.replaceLiveText(
-                    langHelper.createStableLinksFromWikiWords((toWikiWord,)) +
+                    langHelper.createAbsoluteLinksFromWikiWords((toWikiWord,)) +
                     u"\n" + text)
 
 
@@ -2199,7 +2210,7 @@ class WikiTreeCtrl(customtreectrl.CustomTreeCtrl):          # wxTreeCtrl):
         itemobj = self.GetPyData(item)
         if isinstance(itemobj, WikiWordNode):
             textDataOb = textToDataObject(
-                    langHelper.createStableLinksFromWikiWords(
+                    langHelper.createAbsoluteLinksFromWikiWords(
                     (itemobj.getWikiWord(),)))
 
             wikiWordDataOb = wx.DataObjectSimple(wx.CustomDataFormat(

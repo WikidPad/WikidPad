@@ -1,6 +1,35 @@
 ﻿++ Change Log
 
 
+Sep. 25, 2010 (2.1beta07)
+
+    * "WikidPadParser.py" modified. If you have your own version
+      you must update it!
+
+    * Some changes to better support of subpages (pages with
+      slashes to create some kind of path). If you do not use
+      them you shouldn't notice a difference.
+    * See [Subpages#+++ Wiki links versus wiki page names]:
+        * "alias" and "template" attributes now process wiki links
+          instead of wiki page names
+        * Replace text by wikiword dialog now processes wiki links
+          instead of wiki page names
+        * Auto-completion updated
+
+    * If an attribute value in "Views" subtree is empty it is
+      replaced by its children (the wiki pages containing the
+      attribute)
+
+    * Bug fixed: Linux: Problem when opening a wiki where not
+      the left-most tab was selected last
+    * Bug fixed: Menu item "Search and Replace" remained gray
+      after going back from preview to editor
+    * Bug fixed: Harmless exception during searching
+    * Bug fixed: No update of syntax highlighting under some
+      circumstances
+
+
+
 Aug. 29, 2010 (2.1beta06)
 
     * Inline diff between versions.

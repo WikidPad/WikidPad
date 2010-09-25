@@ -205,6 +205,8 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                 self.currentPresenter = currentPresenter
                 for p in self.presenters:
                     p.setLayerVisible(p is currentPresenter)
+
+                currentPresenter.SetFocus()
                 proxyEvent = self.getCurrentPresenterProxyEvent()
                 proxyEvent.setWatchedEvents(
                         (self.currentPresenter.getMiscEvent(),))
@@ -423,6 +425,30 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             wx.Notebook.SetSelection(self, i)
             if foc is not None:
                 foc.SetFocus()
+
+
+#     if Configuration.isLinux():
+#         def OnNotebookPageChanged(self, evt):
+#             try:
+#                 # Flag the event to ignore and resend it.
+#                 # It is then processed by wx.Notebook code
+#                 # where the focus is set to the notebook itself
+#     
+#                 presenter = self.presenters[evt.GetSelection()]
+#                 self.prepareCurrentPresenter(presenter)
+#     
+#                 # Now we can set the focus back to the presenter
+#                 # which in turn sets it to the active subcontrol
+# 
+#                 if self.tabSwitchByKey < 2:
+#                     self._mruTabIndexPushToTop(evt.GetSelection())
+#                     presenter.SetFocus()
+#             except (IOError, OSError, DbAccessError), e:
+#                 self.runningPageChangedEvent = False
+#                 self.mainControl.lostAccess(e)
+#                 raise #???
+# 
+#     else:
 
 
     def OnNotebookPageChanged(self, evt):

@@ -1676,33 +1676,18 @@ class SearchReplaceOperation:
         """
         Rebuild the search operation tree. Automatically called by
         searchText() if necessary.
-        My throw RE exception or WikiPyparsing.ParseException if
+        May throw RE exception or WikiPyparsing.ParseException if
         the search string has syntax errors.
         """
-        # TODO Test empty string
+        if self.searchStr == u"":
+            self.searchOpTree = AllWikiPagesNode(self)
+            return
 
         if not self.booleanOp:
-            if self.searchStr == u"":
-                self.searchOpTree = AllWikiPagesNode(self)
-            else:
-                self.searchOpTree = self._buildSearchTerm(self.searchStr)
+            self.searchOpTree = self._buildSearchTerm(self.searchStr)
         else:
             parseResult = SearchAndReplaceBoolLang.parse(self.searchStr)
             self.searchOpTree = self._buildBooleanSearchTree(parseResult)
-#             # TODO More features
-#             andPatterns = self.searchStr.split(u' and ')
-# 
-#             if len(andPatterns) == 1:
-#                 self.searchOpTree = self._buildSearchTerm(self.searchStr)
-#             else:
-#                 # Build up tree (bottom-up)
-#                 node = AndSearchNode(self, self._buildSearchTerm(andPatterns[-2]),
-#                         self._buildSearchTerm(andPatterns[-1]))
-#                 for i in xrange(len(andPatterns) - 3, -1, -1):
-#                     node = AndSearchNode(self, 
-#                             self._buildSearchTerm(andPatterns[i]), node)
-#                     
-#                 self.searchOpTree = node
 
 
     def _buildSearchTerm(self, searchStr):

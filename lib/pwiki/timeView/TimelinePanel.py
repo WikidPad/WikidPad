@@ -66,7 +66,7 @@ class TimelinePanel(EnhancedListControl, TimePresentationBase):
 
         # Sets which day should be shown at which index
         self.fixedItemDay = None
-        self.fixedItemIndex = None
+        self.fixedItemIndex = 0
 
         self.minMaxDayCache = None
 

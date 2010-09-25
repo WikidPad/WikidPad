@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2010-05-04
+# Last modified (format YYYY-MM-DD): 2010-09-12
 
 
 import locale, pprint, time, sys, string, traceback
@@ -686,30 +686,8 @@ def resolveWikiWordLink(link, basePage):
     relative to basePage on which the link is placed.
     It returns the absolute link (page name).
     """
-    if link.startswith(u"//"):
-        # Absolute link
-        return link[2:]
-
-    if basePage is None or not basePage.getWikiWord():
-        return link  # TODO  Better reaction?
-
-    basePath = basePage.getWikiWord().split(u"/")
-    linkPath = link.split(u"/")
-
-    if len(linkPath[0]) == 0:
-        # Preceding '/' -> Go downward one level (or more)
-        return u"/".join(basePath + linkPath[1:])
-
-    for i in xrange(0, len(linkPath)):
-        if linkPath[i] != "..":
-            return u"/".join(basePath[:-i-1] + linkPath[i:])
-    
-    return u"/".join(basePath[:-len(linkPath)])
-
-#     if len(linkPath) == 1:
-#         # Same level   TODO: Maybe search also in parent levels?
-#         return u"/".join(basePath[:-1] + linkPath)
-    
+    return _TheHelper.resolvePrefixSilenceAndWikiWordLink(link, basePage)[2]
+   
 
 
 
@@ -889,6 +867,10 @@ wikiWordCcRE = re.compile(ur"^" + WikiWordCcPAT + ur"$",
 
 def isCcWikiWord(word):
     return bool(wikiWordCcRE.match(word))
+
+
+wikiLinkCoreRE = re.compile(ur"^" + WikiWordNccPAT + ur"$",
+        re.DOTALL | re.UNICODE | re.MULTILINE)
 
 
 
@@ -1380,6 +1362,189 @@ class WikiLanguageDetails(object):
                 self.footnotesAsWws == details.footnotesAsWws
 
 
+class _WikiLinkPath(object):
+    __slots__ = ("upwardCount", "components")
+    def __init__(self, link=None, pageName=None):
+        assert (link is None) or (pageName is None)
+
+        if pageName is not None:
+            # Handle wiki word as absolute link
+            self.upwardCount = -1
+            self.components = pageName.split(u"/")
+            return
+
+        if link is None:
+            self.upwardCount = -1
+            self.components = []
+            return
+
+        if link.startswith("//"):
+            self.upwardCount = -1
+            self.components = link[2:].split(u"/")
+            return
+        
+        if link.startswith("/"):
+            self.upwardCount = 0
+            self.components = link[1:].split(u"/")
+            return
+
+        comps = link.split(u"/")
+
+        for i in xrange(0, len(comps)):
+            if comps[i] != "..":
+                self.upwardCount = i + 1
+                self.components = comps[i:]
+                return
+        
+        self.upwardCount = len(comps) + 1
+        self.components = []
+        
+    def clone(self):
+        result = _WikiLinkPath()
+        result.upwardCount = self.upwardCount
+        result.components = self.components[:]
+        
+        return result
+
+    def isAbsolute(self):
+        return self.upwardCount == -1
+        
+    def join(self, otherPath):
+        if otherPath.upwardCount == -1:
+            self.upwardCount = -1
+            self.components = other.components[:]
+            return
+
+        self.components = self.components[:-other.upwardCount] + other.components
+
+
+    def getLinkCore(self):
+        comps = u"/".join(self.components)
+        if self.upwardCount == -1:
+            return u"//" + comps
+        elif self.upwardCount == 0:
+            return u"/" + comps
+        elif self.upwardCount == 1:
+            return comps
+        else:
+            return u"/".join([u".."] * (self.upwardCount - 1)) + u"/" + comps
+
+
+    def resolveWikiWord(self, basePath):
+        if self.isAbsolute():
+            # Absolute is checked separately so basePath can be None if
+            # self is absolute
+            return u"/".join(self.components)
+
+        absPath = basePath.joinTo(self)
+        return u"/".join(absPath.components)
+
+
+    def resolvePrefixSilenceAndWikiWordLink(self, basePath):
+        """
+        If using subpages this is used to resolve a link to the right wiki word
+        for autocompletion. It returns a tuple (prefix, silence, pageName).
+        Autocompletion now searches for all wiki words starting with pageName. For
+        all found items it removes the first  silence  characters, prepends the  prefix
+        instead and uses the result as suggestion for autocompletion.
+        
+        If prefix is None autocompletion is not possible.
+        """
+        if self.isAbsolute():
+            return u"//", 0, self.resolveWikiWord(None)
+
+        assert basePath.isAbsolute()
+        
+        if len(self.components) == 0:
+            # link path only consists of ".." -> autocompletion not possible
+            if self.upwardCount == 0:
+                return None, None, u"/".join(basePath.components)
+
+            return None, None, u"/".join(basePath.components[:-self.upwardCount])
+
+        if self.upwardCount == 0:
+            return u"/", len(basePath.resolveWikiWord(None)) + 1, \
+                    u"/".join(basePath.components + self.components)
+
+        def lenAddOne(s):
+            return len(s) + 1 if s != "" else 0
+
+        if self.upwardCount == 1:
+            return u"", \
+                    lenAddOne(u"/".join(basePath.components[:-1])), \
+                    u"/".join(basePath.components[:-1] + self.components)
+
+        return u"/".join([u".."] * (self.upwardCount - 1)) + u"/", \
+                lenAddOne(u"/".join(basePath.components[:-self.upwardCount])), \
+                u"/".join(basePath.components[:-self.upwardCount] +
+                self.components)
+
+
+
+    def joinTo(self, otherPath):
+        result = self.clone()
+        result.join(otherPath)
+        return result
+
+
+
+    @staticmethod
+    def isAbsoluteLinkCore(linkCore):
+        return linkCore.startswith(u"//")
+
+
+    @staticmethod
+    def getRelativePathByAbsPaths(targetAbsPath, baseAbsPath,
+            downwardOnly=True):
+        """
+        Create a link to targetAbsPath relative to baseAbsPath.
+        If downwardOnly is False, the link may contain parts to go to parents
+            or siblings
+        in path (in this wiki language, ".." are used for this).
+        If downwardOnly is True, the function may return None if a relative
+        link can't be constructed.
+        """
+        assert targetAbsPath.isAbsolute() and baseAbsPath.isAbsolute()
+
+        wordPath = targetAbsPath.components[:]
+        baseWordPath = baseAbsPath.components[:]
+        
+        result = _WikiLinkPath()
+        
+        if downwardOnly:
+            if len(baseWordPath) >= len(wordPath):
+                return None
+            if baseWordPath != wordPath[:len(baseWordPath)]:
+                return None
+            
+            result.upwardCount = 0
+            result.components = wordPath[len(baseWordPath):]
+            return result
+        # TODO test downwardOnly == False
+        else:
+            # Remove common path elements
+            while len(wordPath) > 0 and len(baseWordPath) > 0 and \
+                    wordPath[0] == baseWordPath[0]:
+                del wordPath[0]
+                del baseWordPath[0]
+            
+            if len(baseWordPath) == 0:
+                if len(wordPath) == 0:
+                    return None  # word == baseWord, TODO return u"." or something
+
+                result.upwardCount = 0
+                result.components = wordPath
+                return result
+
+            result.upwardCount = len(baseWordPath)
+            result.components = wordPath
+            return result
+        
+
+
+
+
+
 
 _RE_LINE_INDENT = re.compile(ur"^[ \t]*")
 
@@ -1420,6 +1585,33 @@ class _TheHelper(object):
             return _(u"This is syntactically not a wiki word")
 
 
+    # TODO More descriptive error messages (which character(s) is/are wrong?)
+    @staticmethod   # isValidWikiWord
+    def checkForInvalidWikiLink(word, wikiDocument=None, settings=None):
+        """
+        Test if word is syntactically a valid wiki word and no settings
+        are against it. The camelCase black list is not checked.
+        The function returns None IFF THE WORD IS VALID, an error string
+        otherwise
+        """
+        if settings is not None and settings.has_key("footnotesAsWws"):
+            footnotesAsWws = settings["footnotesAsWws"]
+        else:
+            if wikiDocument is None:
+                footnotesAsWws = False
+            else:
+                footnotesAsWws = wikiDocument.getWikiConfig().getboolean(
+                        "main", "footnotes_as_wikiwords", False)
+
+        if not footnotesAsWws and footnoteRE.match(word):
+            return _(u"This is a footnote")
+
+        if wikiLinkCoreRE.match(word):
+            return None
+        else:
+            return _(u"This is syntactically not a wiki word")
+
+
     @staticmethod
     def extractWikiWordFromLink(word, wikiDocument=None, basePage=None):  # TODO Problems with subpages?
         """
@@ -1441,6 +1633,70 @@ class _TheHelper(object):
             return t.wikiWord
         except ParseException:
             return None
+
+
+    resolveWikiWordLink = staticmethod(resolveWikiWordLink)
+    """
+    If using subpages this is used to resolve a link to the right wiki word
+    relative to basePage on which the link is placed.
+    It returns the absolute link (page name).
+    """
+
+
+    @staticmethod
+    def resolvePrefixSilenceAndWikiWordLink(link, basePage):
+        """
+        If using subpages this is used to resolve a link to the right wiki word
+        for autocompletion. It returns a tuple (prefix, silence, pageName).
+        Autocompletion now searches for all wiki words starting with pageName. For
+        all found items it removes the first  silence  characters, prepends the  prefix
+        instead and uses the result as suggestion for autocompletion.
+        
+        If prefix is None autocompletion is not possible.
+        """
+        linkPath = _WikiLinkPath(link=link)
+        if linkPath.isAbsolute():
+            return linkPath.resolvePrefixSilenceAndWikiWordLink(None)
+
+        if basePage is None:
+            return u"", 0, link  # TODO:  Better reaction?
+        
+        basePageName = basePage.getWikiWord()
+        if basePageName is None:
+            return u"", 0, link  # TODO:  Better reaction?
+        
+        return linkPath.resolvePrefixSilenceAndWikiWordLink(_WikiLinkPath(
+                pageName=basePageName))
+
+
+
+#         def lenAddOne(s):
+#             return len(s) + 1 if s != "" else 0
+#     
+#         if link.startswith(u"//"):
+#             # Absolute link
+#             return u"//", 0, link[2:]
+#     
+#     
+#         basePath = basePage.getWikiWord().split(u"/")
+#         linkPath = link.split(u"/")
+#     
+#         if len(linkPath[0]) == 0:
+#             # Preceding '/' -> Go downward one level (or more)
+#             return u"/", len(basePage.getWikiWord()) + 1, u"/".join(basePath + linkPath[1:])
+#     
+#         for i in xrange(0, len(linkPath)):
+#             if linkPath[i] != "..":
+#                 if i == 0:
+#                     return u"", lenAddOne(u"/".join(basePath[:-1])), \
+#                             u"/".join(basePath[:-1] + linkPath)
+#                 else:
+#                     return u"/".join([u".."] * i) + u"/", \
+#                             lenAddOne(u"/".join(basePath[:-i-1])), \
+#                             u"/".join(basePath[:-i-1] + linkPath[i:])
+#         
+#         # link path only consists of ".." -> autocompletion not possible
+#         return None, None, u"/".join(basePath[:-len(linkPath)])
 
 
     @staticmethod
@@ -1515,31 +1771,57 @@ class _TheHelper(object):
                 for w in words if w != u""]
 
 
+#     @staticmethod
+#     def createWikiLinkPathObject(self, *args, **kwargs):
+#         return _WikiLinkPath(*args, **kwargs)
+
+
     @staticmethod
-    def createLinkFromWikiWord(word, wikiPage):    # normalizeWikiWord
+    def isAbsoluteLinkCore(linkCore):
+        return _WikiLinkPath.isAbsoluteLinkCore(linkCore)
+
+
+    @staticmethod
+    def createLinkFromWikiWord(word, wikiPage, forceAbsolute=False):    # normalizeWikiWord
         """
         Create a link from word which should be put on wikiPage.
         """
         wikiDocument = wikiPage.getWikiDocument()
         
-        if _TheHelper.isCcWikiWord(word):
+        targetPath = _WikiLinkPath(pageName=word)
+
+        if forceAbsolute:
+            return BracketStart + targetPath.getLinkCore() + BracketEnd
+
+
+#         basePath = _WikiLinkPath(wikiWord=wikiPage.getWikiWord())
+
+        linkCore = _TheHelper.createRelativeLinkFromWikiWord(
+                word, wikiPage.getWikiWord(), downwardOnly=False)
+                
+        if _TheHelper.isCcWikiWord(word) and _TheHelper.isCcWikiWord(linkCore):
             wikiFormatDetails = wikiPage.getFormatDetails()
             if wikiFormatDetails.withCamelCase:
+                
                 ccBlacklist = wikiDocument.getCcWordBlacklist()
                 if not word in ccBlacklist:
-                    return word
+                    return linkCore
+        
+        return BracketStart + linkCore + BracketEnd
 
-        return BracketStart + u"//" + word + BracketEnd
 
 
     @staticmethod
-    def createStableLinksFromWikiWords(words, wikiPage=None):
+    def createAbsoluteLinksFromWikiWords(words, wikiPage=None):
         """
         Create particularly stable links from a list of words which should be
         put on wikiPage.
         """
         return u"\n".join([u"%s//%s%s" % (BracketStart, w, BracketEnd)
                 for w in words])
+                
+    # For compatibility. TODO: Remove
+    createStableLinksFromWikiWords = createAbsoluteLinksFromWikiWords
 
     @staticmethod
     def createRelativeLinkFromWikiWord(word, baseWord, downwardOnly=True):
@@ -1551,32 +1833,16 @@ class _TheHelper(object):
         If downwardOnly is True, the function may return None if a relative
         link can't be constructed.
         """
-
-        wordPath = word.split(u"/")
-        baseWordPath = baseWord.split(u"/")
         
-        if downwardOnly:
-            if len(baseWordPath) >= len(wordPath):
-                return None
-            if baseWordPath != wordPath[:len(baseWordPath)]:
-                return None
-            
-            return u"/" + u"/".join(wordPath[len(baseWordPath):])
-        # TODO test downwardOnly == False
-        else:
-            # Remove common path elements
-            while len(wordPath) > 0 and len(baseWordPath) > 0 and \
-                    wordPath[0] == baseWordPath[0]:
-                del wordPath[0]
-                del baseWordPath[0]
-            
-            if len(baseWordPath) == 0:
-                if len(wordPath):
-                    return None  # word == baseWord, TODO return u"." or something
-                return u"/" + u"/".join(wordPath[len(baseWordPath):])
+        relPath = _WikiLinkPath.getRelativePathByAbsPaths(_WikiLinkPath(
+                pageName=word), _WikiLinkPath(pageName=baseWord),
+                downwardOnly=downwardOnly)
+        
+        if relPath is None:
+            return None
+        
+        return relPath.getLinkCore()
 
-            return u"../" * (len(baseWordPath) - 1) + \
-                    u"/".join(wordPath[len(baseWordPath):])
 
 
     @staticmethod
@@ -1601,6 +1867,9 @@ class _TheHelper(object):
         Returns tuple (start, end, spWord) which is either (None, None, None)
         if no more word can be found or returns start and after-end of the
         spWord to spellcheck.
+        
+        TODO: Move away because this is specific to human language,
+            not wiki language.
         """
         while True:
             mat = TextWordRE.search(text, startPos)
@@ -1620,7 +1889,7 @@ class _TheHelper(object):
 
     @staticmethod
     def prepareAutoComplete(editor, text, charPos, lineStartCharPos,
-            wikiDocument, settings):
+            wikiDocument, docPage, settings):
         """
         Called when user wants autocompletion.
         text -- Whole text of page
@@ -1628,6 +1897,7 @@ class _TheHelper(object):
         lineStartCharPos -- For convenience and speed, position of the 
                 start of text line in which cursor is.
         wikiDocument -- wiki document object
+        docPage -- DocPage object on which autocompletion is done
         closingBracket -- boolean iff a closing bracket should be suggested
                 for bracket wikiwords and attributes
 
@@ -1647,38 +1917,51 @@ class _TheHelper(object):
         # TODO Sort entries appropriately (whatever this means)
 
         wikiData = wikiDocument.getWikiData()
+        baseWordSegments = docPage.getWikiWord().split(u"/")
 
         mat1 = RevWikiWordRE.match(rline)
         if mat1:
             # may be CamelCase word
             tofind = line[-mat1.end():]
-            ccBlacklist = wikiDocument.getCcWordBlacklist()
-            for word in wikiData.getWikiLinksStartingWith(tofind, True, True):
-                if not _TheHelper.isCcWikiWord(word) or word in ccBlacklist:
-                    continue
-                
-                backStepMap[word] = len(tofind)
+            backstep = len(tofind)
+            prefix, silence, tofind = _TheHelper.resolvePrefixSilenceAndWikiWordLink(
+                    tofind, docPage)
+            
+            # We don't want prefixes here
+            if prefix == u"":
+                ccBlacklist = wikiDocument.getCcWordBlacklist()
+                for word in wikiData.getWikiLinksStartingWith(tofind, True, True):
+                    if not _TheHelper.isCcWikiWord(word[silence:]) or word in ccBlacklist:
+                        continue
+
+                    backStepMap[word[silence:]] = backstep
 
         mat2 = RevWikiWordRE2.match(rline)
         mat3 = RevAttributeValue.match(rline)
         if mat2:
             # may be not-CamelCase word or in an attribute name
             tofind = line[-mat2.end():]
-            
+
             # Should a closing bracket be appended to suggested words?
             if closingBracket:
                 wordBracketEnd = BracketEnd
             else:
                 wordBracketEnd = u""
+            
+            backstep = len(tofind)
 
-            for word in wikiData.getWikiLinksStartingWith(
-                    tofind[len(BracketStart):], True, True):
-                backStepMap[BracketStart + word +
-                        wordBracketEnd] = len(tofind)
+            prefix, silence, tofind = _TheHelper.resolvePrefixSilenceAndWikiWordLink(
+                    tofind[len(BracketStart):], docPage)
+            
+            if prefix is not None:
+                for word in wikiData.getWikiLinksStartingWith(
+                        tofind, True, True):
+                    backStepMap[BracketStart + prefix + word[silence:] +
+                            wordBracketEnd] = backstep
 
             for prop in wikiData.getAttributeNamesStartingWith(
                     tofind[len(BracketStart):]):
-                backStepMap[BracketStart + prop] = len(tofind)
+                backStepMap[BracketStart + prop] = backstep
         elif mat3:
             # In an attribute value
             tofind = line[-mat3.end():]

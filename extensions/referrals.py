@@ -138,7 +138,7 @@ def referrals(wiki, evt):
     langHelper = wx.GetApp().createWikiLanguageHelper(
             wiki.getWikiDefaultWikiLanguage())
 
-    bracketWords = langHelper.createStableLinksFromWikiWords
+    bracketWords = langHelper.createAbsoluteLinksFromWikiWords
 
     wiki.getActiveEditor().AddText(u"\n------------------------\n")
 

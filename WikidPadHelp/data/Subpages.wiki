@@ -16,9 +16,14 @@ Links starting with one or more ".." separated by slashes go to super page. If a
 
 [..]   goes to "ebay/Couch"
 [../..]   goes to "ebay"
-[../../Amazon]   goes to "Amazon"  (rules for file pathes are different here, they would lead to "ebay/Amazon" instead).
+[../../Amazon]   goes to "Amazon"  (rules for file paths are different here, they would lead to "ebay/Amazon" instead).
 
 
-At the moment alias attributes must specify the full alternative wikiword. Also, because slashes are not allowed in attribute values, the value must be quoted.
-E.g. on page "ebay/Couch" you have to write <<[alias: "ebay/Chaise"]>>.
++++ Wiki links versus wiki page names
+
+Some components of WikidPad expect wiki page names yet which always contain the full path (like an absolute link without leading "//"). If you use subpages you should always be aware of the difference of page names and the wiki links. If you don't use subpages links and page names are the same.
+
+At the moment the attributes "alias" and "template" expect wiki links as well as the dialog for [Menu Format#+++ Selection to Wiki Word] while the dialog for [Menu Navigate#++ Go to Page] works with page names.
+
+E.g. on page "ebay/Couch" you have to write <<[alias: "Chaise"]>> to create alias "ebay/Chaise".
 

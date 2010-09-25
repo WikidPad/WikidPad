@@ -1290,8 +1290,16 @@ class WikiPage(AbstractWikiPage):
                 # Check if there is a template page
                 try:
                     parentPage = self.wikiDocument.getWikiPage(parents[0])
+
+                    langHelper = wx.GetApp().createWikiLanguageHelper(
+                            self.getWikiLanguageName())
+
                     # TODO Error checking
-                    templateWord = parentPage.getAttributeOrGlobal("template")
+#                     templateWord = parentPage.getAttributeOrGlobal("template")
+                    templateWord = langHelper.resolveWikiWordLink(
+                            parentPage.getAttributeOrGlobal("template"),
+                            parentPage)
+
                     templatePage = self.wikiDocument.getWikiPage(templateWord)
                     
                     content = self.getContentOfTemplate(templatePage, parentPage)
@@ -1600,9 +1608,11 @@ class WikiPage(AbstractWikiPage):
         for w, k, v in self.getWikiDocument().getAttributeTriples(
                 self.wikiWord, u"alias", None):
             threadstop.testRunning()
-            if not langHelper.checkForInvalidWikiWord(v,
+            if not langHelper.checkForInvalidWikiLink(v,
                     self.getWikiDocument()):
-                matchTerms.append((v, ALIAS_TYPE, self.wikiWord, -1, -1))
+#                 matchTerms.append((v, ALIAS_TYPE, self.wikiWord, -1, -1))
+                matchTerms.append((langHelper.resolveWikiWordLink(v, self),
+                        ALIAS_TYPE, self.wikiWord, -1, -1))
 
         # Add headings to match terms if wanted
         depth = self.wikiDocument.getWikiConfig().getint(

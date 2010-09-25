@@ -21,7 +21,7 @@ Makes the selected text in editor to a wiki link by removing forbidden character
 +++ Selection to Wiki Word
 Moves selected text to another wiki word and places a link to this word where the text was.
 
-You are asked for the name of the word. If you enter an existing wiki word you are asked if you want to append the text to this word.
+You are asked for the link to the word. If you enter an existing wiki word you are asked if you want to append the text to this word.
 
 ++ Icon Name
 Insert name of selected icon at cursor position.

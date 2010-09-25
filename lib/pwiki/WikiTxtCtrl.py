@@ -30,7 +30,7 @@ from ParseUtilities import getFootnoteAnchorDict
 
 from .EnhancedScintillaControl import EnhancedScintillaControl, StyleCollector
 
-from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
+from . import Configuration
 import AdditionalDialogs
 import WikiTxtDialogs
 
@@ -1548,9 +1548,7 @@ class WikiTxtCtrl(EnhancedScintillaControl):
 
                     self.storeStylingAndAst(stylebytes, None, styleMask=0xff)
                 else:
-                    if threadstop is DUMBTHREADSTOP:
-                        # We didn't update in sync. mode previously so we must here
-                        self.storeStylingAndAst(stylebytes, None, styleMask=0xff)
+                    self.storeStylingAndAst(stylebytes, None, styleMask=0xff)
             else:
                 self.storeStylingAndAst(stylebytes, foldingseq, styleMask=0xff)
 
@@ -2686,7 +2684,7 @@ class WikiTxtCtrl(EnhancedScintillaControl):
                 bytePos))
 
         acResultTuples = self.wikiLanguageHelper.prepareAutoComplete(self, text,
-                charPos, lineStartCharPos, wikiDocument,
+                charPos, lineStartCharPos, wikiDocument, self.getLoadedDocPage(),
                 {"closingBracket": closingBracket})
 
         if len(acResultTuples) > 0:
@@ -2840,19 +2838,32 @@ class WikiTxtCtrl(EnhancedScintillaControl):
         self.ReplaceSelection(unichar)
 
 
+    if isLinux():
+        def OnSetFocus(self, evt):
+#             self.presenter.makeCurrent()
+            evt.Skip()
 
-    def OnSetFocus(self, evt):
-        self.presenter.makeCurrent()
-        evt.Skip()
+            wikiPage = self.getLoadedDocPage()
+            if wikiPage is None:
+                return
+            if not isinstance(wikiPage,
+                    (DocPages.DataCarryingPage, DocPages.AliasWikiPage)):
+                return
 
-        wikiPage = self.getLoadedDocPage()
-        if wikiPage is None:
-            return
-        if not isinstance(wikiPage,
-                (DocPages.DataCarryingPage, DocPages.AliasWikiPage)):
-            return
+            wikiPage.checkFileSignatureAndMarkDirty()
+    else:
+        def OnSetFocus(self, evt):
+            self.presenter.makeCurrent()
+            evt.Skip()
 
-        wikiPage.checkFileSignatureAndMarkDirty()
+            wikiPage = self.getLoadedDocPage()
+            if wikiPage is None:
+                return
+            if not isinstance(wikiPage,
+                    (DocPages.DataCarryingPage, DocPages.AliasWikiPage)):
+                return
+
+            wikiPage.checkFileSignatureAndMarkDirty()
 
 
     def OnUserListSelection(self, evt):
@@ -2881,7 +2892,7 @@ class WikiTxtCtrl(EnhancedScintillaControl):
             middleConfig = self.presenter.getConfig().getint("main",
                     "mouse_middleButton_withCtrl", 3)
 
-        tabMode = MIDDLE_MOUSE_CONFIG_TO_TABMODE[middleConfig]
+        tabMode = Configuration.MIDDLE_MOUSE_CONFIG_TO_TABMODE[middleConfig]
         
         if not self.activateLink(evt.GetPosition(), tabMode=tabMode):
             evt.Skip()
