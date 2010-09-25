@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2010-07-29 13:16\n"
+"POT-Creation-Date: 2010-09-25 09:14\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2048,26 +2048,26 @@ msgstr ""
 msgid "Message"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:134
+#: lib\pwiki\MainApp.py:137
 msgid "Error initializing environment, couldn't locate global config directory"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:242
+#: lib\pwiki\MainApp.py:245
 msgid "Invalid AppLock.lock file.\n"
 "Ensure that WikidPad is not running,\n"
 "then delete file \"%s\" if present yet.\n"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:519
+#: lib\pwiki\MainApp.py:522
 msgid "An error occurred during this session\n"
 "See file %s"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:669
+#: lib\pwiki\MainApp.py:672
 msgid "Plugin options"
 msgstr ""
 
-#: lib\pwiki\MainApp.py:718 lib\pwiki\OptionsDialog.py:653
+#: lib\pwiki\MainApp.py:721 lib\pwiki\OptionsDialog.py:653
 msgid "Wiki language"
 msgstr ""
 
@@ -3900,7 +3900,7 @@ msgstr ""
 msgid "No dictionary found for this page"
 msgstr ""
 
-#: lib\pwiki\StringOps.py:707
+#: lib\pwiki\StringOps.py:712
 msgid "Inval. timestamp"
 msgstr ""
 

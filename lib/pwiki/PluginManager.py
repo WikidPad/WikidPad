@@ -6,7 +6,7 @@ import os, sys, traceback, os.path, imp
 
 import wx
 
-from .StringOps import mbcsEnc, pathEnc
+from .StringOps import mbcsEnc
 
 """The PluginManager and PluginAPI classes implement a generic plugin framework.
    Plugin apis are created by the PluginManager and can be used to call all
@@ -165,7 +165,7 @@ class PluginManager(object):
                             sys.modules[packageName] = module
     
                             module = imp.load_module(packageName + "." + moduleName, f,
-                                    pathEnc(fullname), (".py", "r", imp.PY_SOURCE))
+                                    mbcsEnc(fullname)[0], (".py", "r", imp.PY_SOURCE))
                     if module and hasattr(module, "WIKIDPAD_PLUGIN"):
                         if self.registerPlugin(module):
                             exclusions.append(name)

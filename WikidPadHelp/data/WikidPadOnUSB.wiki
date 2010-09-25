@@ -13,8 +13,8 @@ This page describes how to move WikidPad on an USB stick or similar media if you
        there.
     4. Go with the Windows Explorer to this configuration directory.
     5. Close WikidPad. After a short time you should see there a file
-        "WikidPad.config" and a directory ".WikidPadGlobals" (if they
-        are not already there).
+       "WikidPad.config" and a directory ".WikidPadGlobals" (if they
+       are not already there).
     6. Move file and directory to the directory where you installed
        WikidPad.
     7. If you installed WikidPad on hard drive, copy or move it to
@@ -25,12 +25,15 @@ This page describes how to move WikidPad on an USB stick or similar media if you
        should be identical to the destination directory. If it is
        not, something went wrong.
 
-After that, WikidPad does yet place its temporary files in the system's default temporary directory, to change this, open options dialog, go to options page "Application" (top of the list), set entry "Temporary file directory" to "Config. dir." and restart WikidPad.
+After that, WikidPad does still place its temporary files in the system's default temporary directory. To change this, open options dialog, go to options page "Application" (top of the list), set entry "Temporary file directory" to "Config. dir." and restart WikidPad.
 
-Now WikidPad doesn't need anymore to modify any files on the host computer and you can carry wikis as well as the configuration files on an USB stick to every computer you want.
+Another helpful option on options page "Application" is "Store relative pathes to wikis" to save paths to the recently opened wikis (listed in menu "Wiki"->"Recent") relative to WikidPad installation directory.
+
+Now WikidPad doesn't need anymore to modify any files on the host computer and you can carry wikis as well as the configuration files on a USB stick to every computer you want.
 
 
-For details how this works, see [ApplicationConfigurationFiles].
+
+For technical details how this all works, see [ApplicationConfigurationFiles].
 
 
 [camelCaseWordsEnabled: false]

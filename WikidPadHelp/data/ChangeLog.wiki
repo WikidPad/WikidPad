@@ -1,5 +1,18 @@
 ﻿++ Change Log
 
+Sep. 25, 2010 (2.0rc07)
+
+    * Bug fixed: Menu item "Search and Replace" remained gray
+      after going back from preview to editor
+    * Bug fixed: Harmless exception during searching
+
+
+
+Aug. 29, 2010 (2.0rc06)
+
+    * Small problems with non-ascii paths fixed
+
+
 
 Jul. 27, 2010 (2.0rc05)
 

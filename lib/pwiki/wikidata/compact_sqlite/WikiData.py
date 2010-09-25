@@ -1928,16 +1928,16 @@ class WikiData:
         """
         self.connWrap.syncCommit()
 
-        fnames = glob.glob(longPathEnc(join(self.dataDir, '*.wiki')))
+        fnames = glob.glob(join(self.dataDir, '*.wiki'))
         for fn in fnames:
-            word = longPathDec(basename(fn)).replace('.wiki', '')
+            word = basename(fn).replace('.wiki', '')
 
             content = fileContentToUnicode(loadEntireTxtFile(fn))
-            langHelper = wx.GetApp().createWikiLanguageHelper(
+            langHelper = GetApp().createWikiLanguageHelper(
                     self.wikiDocument.getWikiDefaultWikiLanguage())
 
             if not langHelper.checkForInvalidWikiWord(word, self.wikiDocument):
-                self.setContent(word, content, moddate=stat(fn).st_mtime)
+                self.setContent(word, content, moddate=os.stat(fn).st_mtime)
 
         self.connWrap.commit()
 

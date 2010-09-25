@@ -1198,7 +1198,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 self.keyBindings.FindAndReplace,
                 _(u'Search and replace inside current page'),
                 lambda evt: self.showSearchReplaceDialog(),
-                updatefct=self.OnUpdateDisNotTextedit)
+                updatefct=(self.OnUpdateDisNotTextedit,))
 
         editMenu.AppendSeparator()
 

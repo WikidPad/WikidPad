@@ -58,7 +58,7 @@ def lineendToInternal(text):
 if isOSX():
     # generate dependencies for py2app
     import encodings.mac_roman
-    mbcsEnc = codecs.getencoder("mac_roman")
+    _mbcsEnc = codecs.getencoder("mac_roman")
     _mbcsDec = codecs.getdecoder("mac_roman")
     mbcsReader = codecs.getreader("mac_roman")
     mbcsWriter = codecs.getwriter("mac_roman")
@@ -75,7 +75,7 @@ elif isLinux():
     if not LINUX_ENCODING:
         LINUX_ENCODING = "utf8"
 
-    mbcsEnc = codecs.getencoder(LINUX_ENCODING)
+    _mbcsEnc = codecs.getencoder(LINUX_ENCODING)
     _mbcsDec = codecs.getdecoder(LINUX_ENCODING)
     mbcsReader = codecs.getreader(LINUX_ENCODING)
     mbcsWriter = codecs.getwriter(LINUX_ENCODING)
@@ -87,13 +87,20 @@ else:
     # generate dependencies for py2exe
     import encodings.ascii
     import encodings.mbcs
-    mbcsEnc = codecs.getencoder("mbcs")
+    _mbcsEnc = codecs.getencoder("mbcs")
     _mbcsDec = codecs.getdecoder("mbcs")
     mbcsReader = codecs.getreader("mbcs")
     mbcsWriter = codecs.getwriter("mbcs")
 
     def lineendToOs(text):
         return convertLineEndings(text, "\r\n")
+
+
+def mbcsEnc(input, errors="strict"):
+    if isinstance(input, str):
+        return input, len(input)
+    else:
+        return _mbcsEnc(input, errors)
 
 
 def mbcsDec(input, errors="strict"):
@@ -113,8 +120,6 @@ else:
     def pathEnc(s):
         if s is None:
             return None
-        if isinstance(s, str):
-            return s
         return mbcsEnc(s, "replace")[0]
 
     def pathDec(s):

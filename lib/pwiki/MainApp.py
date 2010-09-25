@@ -103,6 +103,9 @@ class App(wx.App, MiscEventSourceMixin):
         global app
         app = self
 
+        # Hack for Windows to allow installation in non-ascii path
+        sys.prefix = mbcsDec(sys.prefix)[0]
+
         MiscEventSourceMixin.__init__(self)
         wx.App.__init__(self, *args, **kwargs)
         self.SetAppName("WikidPad")
