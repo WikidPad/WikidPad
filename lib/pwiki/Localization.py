@@ -2,6 +2,8 @@
 
 import string, locale, codecs, os, os.path, traceback
 
+import Consts
+
 from rtlibRepl import minidom
 
 from StringOps import utf8Enc, loadEntireFile, writeEntireFile, pathEnc

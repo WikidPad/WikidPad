@@ -176,20 +176,20 @@ elif len(sys.argv) >= 3 and sys.argv[1] == "--updtrans":
 
 
 class ErrorFrame(wx.Frame):
-   def __init__(self, parent, id, title):
-      wx.Frame.__init__(self, parent, -1, title, size = (300, 200),
+    def __init__(self, parent, id, title):
+        wx.Frame.__init__(self, parent, -1, title, size = (300, 200),
                        style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
-      dlg_m = wx.MessageDialog(self, "%s. %s." % (_(u"Error starting WikidPad"), e),
+        dlg_m = wx.MessageDialog(self, _(u"Error starting WikidPad"),
             _(u'Error!'), wx.OK)
-      dlg_m.ShowModal()
-      dlg_m.Destroy()
-      self.Close()
+        dlg_m.ShowModal()
+        dlg_m.Destroy()
+        self.Close()
 
 class Error(wx.App):   
-   def OnInit(self):
-      errorFrame = ErrorFrame(None, -1, _(u"Error"))
-      self.SetTopWindow(errorFrame)
-      return False
+    def OnInit(self):
+        errorFrame = ErrorFrame(None, -1, _(u"Error"))
+        self.SetTopWindow(errorFrame)
+        return False
 
 app = None
 exception = None
