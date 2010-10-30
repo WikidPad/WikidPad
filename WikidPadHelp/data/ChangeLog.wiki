@@ -1,5 +1,27 @@
 ﻿++ Change Log
 
+
+Oct. 30, 2010 (2.0rc08)
+
+    * Chinese translation of user interface (thanks to yuxiaoxu)
+    * Hungarian translation of user interface (thanks to Török Árpád)
+    * Hungarian translation of help wiki (separate download)
+
+    * Small change in logic to find a template: If a newly created
+      page has multiple parents it will be created from a template
+      if there are no contradictory "template" attributes in the
+      parents but at least one "template" attribute exists.
+
+    * Bug fixed: Problem with selection of tree item using keyboard
+    * Bug fixed: Bad link in exported html for list of parents of
+      a page
+    * Bug fixed: Error due to subtle change in API of newer Sqlite
+      versions
+
+    * Internal: Changes in GUI layout to better support internationalization
+
+
+
 Sep. 25, 2010 (2.0rc07)
 
     * Bug fixed: Menu item "Search and Replace" remained gray

@@ -1042,8 +1042,8 @@ class HtmlExporter(AbstractExporter):
 
             if asHref:
                 parents = parents +\
-                        u'<span class="parent-node"><a href="%s.html">%s</a></span>' %\
-                        (self.filenameConverter.getFilenameForWikiWord(relation), relation)
+                        u'<span class="parent-node"><a href="%s">%s</a></span>' %\
+                        (self.linkConverter.getLinkForWikiWord(relation), relation)
             else:
                 parents = parents +\
                 u'<span class="parent-node"><a href="#%s">%s</a></span>' %\

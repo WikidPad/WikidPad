@@ -1171,7 +1171,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # ------------------------------------------------------------------------------------
         if self.mainmenu is not None:
             # This is a rebuild of an existing menu (after loading a new wikiData)
-            self.mainmenu.Replace(0, self.buildWikiMenu(), 'W&iki')
+            self.mainmenu.Replace(0, self.buildWikiMenu(), _(u'W&iki'))
             return
 
 
@@ -2041,7 +2041,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         icon = self.lookupSystemIcon("tb_delete")
         tb.AddSimpleTool(GUI_ID.CMD_DELETE_PAGE, icon,
-                _(u"Delete") + " " + self.keyBindings.Delete, _(u"Delete Wiki Word"))
+                _(u"Delete Wiki Word") + " " + self.keyBindings.Delete,
+                _(u"Delete Wiki Word"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordDeleteDialog())
 
         tb.AddSimpleTool(wx.NewId(), seperator, _(u"Separator"), _(u"Separator"))

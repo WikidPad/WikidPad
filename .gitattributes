@@ -350,7 +350,10 @@ WikidPadHelp/data/wiki%00252FCCBlacklist.data -text
 WikidPadHelp/data/wikidb.gfd -text
 WikidPadHelp/files/testimg.gif -text
 /WikidPadStarter.py -text
+/WikidPad_hu_HU.po -text
 /WikidPad_sv.po -text
+/WikidPad_zh_CN.po -text
+/Wikidpad.icns -text
 /appbase.css -text
 /bld.bat -text
 /buildGadflyZips.py -text
@@ -708,6 +711,7 @@ lib/readme.txt -text
 /msgfmt.py -text
 /pygettext.py -text
 /setup.py -text
+/setup_macosx.py -text
 /sql_mar.py -text
 /updateI18N.py -text
 /wikidpad_spelladdon.iss -text
