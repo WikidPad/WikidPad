@@ -396,6 +396,8 @@ class WikiDataManager(MiscEventSourceMixin):
         self.wikiName = wikiName
         self.dataDir = dataDir
         self.dbtype = wikidhName
+        
+        self.whooshIndex = None
 
         # TODO: Only initialize on demand
         self.onlineSpellCheckerSession = None
@@ -519,6 +521,7 @@ class WikiDataManager(MiscEventSourceMixin):
         self.refCount -= 1
 
         if self.refCount <= 0:
+            self.refCount = 0
             self.updateExecutor.end(hardEnd=True)  # TODO Inform user as this may take some time
 
             # Invalidate all cached pages to prevent yet running threads from
@@ -534,6 +537,10 @@ class WikiDataManager(MiscEventSourceMixin):
                 self.wikiData.close()
                 self.wikiData = None
                 self.baseWikiData = None
+            
+            if self.whooshIndex is not None:
+                self.whooshIndex.close()
+                self.whooshIndex = None
 
             GetApp().getMiscEvent().removeListener(self)
 
@@ -1486,47 +1493,199 @@ class WikiDataManager(MiscEventSourceMixin):
         If applyOrdering is True, the ordering of the sarOp is applied before
         returning the list.
         """
-        wikiData = self.getWikiData()
-        sarOp.beginWikiSearch(self)
-        try:
-            threadstop.testRunning()
-            # First search currently cached pages
-            exclusionSet = set()
-            preResultSet = set()
-            
-            for k in self.wikiPageDict.keys():
-                wikiPage = self.wikiPageDict.get(k)
-                if wikiPage is None:
-                    continue
-                if isinstance(wikiPage, AliasWikiPage):
-                    # Avoid to process same page twice (alias and real) or more often
-                    continue
-                    
-                text = wikiPage.getLiveTextNoTemplate()
-                if text is None:
-                    continue
-
-                if sarOp.testWikiPage(k, text) == True:
-                    preResultSet.add(k)
-
-                exclusionSet.add(k)
-
+        if sarOp.revIndexSearch == "no": 
+            wikiData = self.getWikiData()
+            sarOp.beginWikiSearch(self)
+            try:
                 threadstop.testRunning()
-
-            # Now search database
-            resultSet = self.getWikiData().search(sarOp, exclusionSet)
+                # First search currently cached pages
+                exclusionSet = set()
+                preResultSet = set()
+                
+                for k in self.wikiPageDict.keys():
+                    wikiPage = self.wikiPageDict.get(k)
+                    if wikiPage is None:
+                        continue
+                    if isinstance(wikiPage, AliasWikiPage):
+                        # Avoid to process same page twice (alias and real) or more often
+                        continue
+                        
+                    text = wikiPage.getLiveTextNoTemplate()
+                    if text is None:
+                        continue
+    
+                    if sarOp.testWikiPage(k, text) == True:
+                        preResultSet.add(k)
+    
+                    exclusionSet.add(k)
+    
+                    threadstop.testRunning()
+    
+                # Now search database
+                resultSet = self.getWikiData().search(sarOp, exclusionSet)
+                threadstop.testRunning()
+                resultSet |= preResultSet
+                if applyOrdering:
+                    result = sarOp.applyOrdering(resultSet, self.getCollator())
+                else:
+                    result = list(resultSet)
+    
+            finally:
+                sarOp.endWikiSearch()
+    
             threadstop.testRunning()
-            resultSet |= preResultSet
-            if applyOrdering:
-                result = sarOp.applyOrdering(resultSet, self.getCollator())
-            else:
-                result = list(resultSet)
+            return result
+        else:
+            # Processing reverse index search
+            from whoosh.qparser import QueryParser
+            
+            threadstop.testRunning()
+            qp = QueryParser("content", schema=self._getRevSearchIndexSchema())
+            q = qp.parse(sarOp.searchStr)
+            s = self.getRevSearchIndex().searcher()
+            threadstop.testRunning()
+            resultList = s.search(q)
+            result = [rd["unifName"][9:] for rd in resultList
+                    if rd["unifName"].startswith(u"wikipage/")]
+            
+            threadstop.testRunning()
+            return result
 
+    
+    _REV_SEARCH_INDEX_SCHEMA = None
+    
+    @staticmethod
+    def _getRevSearchIndexSchema():
+        if WikiDataManager._REV_SEARCH_INDEX_SCHEMA is None:
+            from whoosh.fields import Schema, ID, NUMERIC, TEXT
+            from whoosh.analysis import StandardAnalyzer
+            
+            WikiDataManager._REV_SEARCH_INDEX_SCHEMA = Schema(
+                    unifName=ID(stored=True, unique=True),
+                    modTimestamp=NUMERIC(), content=TEXT(
+                    analyzer=StandardAnalyzer(stoplist=None)))
+
+        return WikiDataManager._REV_SEARCH_INDEX_SCHEMA
+
+
+    def isRevSearchIndexEnabled(self):
+        return False  # TODO: Make an option
+
+    def getRevSearchIndex(self, clear=False):
+        """
+        Opens (or creates if necessary) the whoosh search index and returns it.
+        It also automatically refreshes the index to the latest version if needed.
+        """
+        if not self.isRevSearchIndexEnabled():
+            return None
+        
+        import whoosh.index, whoosh.writing
+        
+        whoosh.writing.DOCLENGTH_TYPE = "l"
+        whoosh.writing.DOCLENGTH_LIMIT = 2 ** 31 - 1
+
+        if self.whooshIndex is None:
+            indexPath = os.path.join(self.getWikiPath(), "revindex")
+            if not os.path.exists(indexPath):
+                os.mkdir(indexPath)
+
+            if clear or not whoosh.index.exists_in(indexPath):
+                schema = self._getRevSearchIndexSchema()
+                whoosh.index.create_in(indexPath, schema)
+
+            self.whooshIndex = whoosh.index.open_dir(indexPath)
+
+        self.whooshIndex = self.whooshIndex.refresh()
+        return self.whooshIndex
+
+
+    def rebuildRevSearchIndex(self, progresshandler, onlyDirty=False):
+        """
+        progresshandler -- Object, fulfilling the
+            PersonalWikiFrame.GuiProgressHandler protocol
+        """
+        if not self.isRevSearchIndexEnabled():
+            return
+
+        self.updateExecutor.pause()
+        self.getWikiData().refreshDefinedContentNames()
+
+        # get all of the wikiWords
+        wikiWords = self.getWikiData().getAllDefinedWikiPageNames()
+
+        progresshandler.open(len(wikiWords))
+        
+        searchIdx = self.getRevSearchIndex(clear=True)
+        writer = searchIdx.writer()
+
+        try:
+            step = 1
+            
+            for wikiWord in wikiWords:
+# Disabled to remove from .pot                progresshandler.update(step, _(u"Update rev. index"))
+                wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
+                if isinstance(wikiPage, AliasWikiPage):
+                    # This should never be an alias page, so fetch the
+                    # real underlying page
+                    # This can only happen if there is a real page with
+                    # the same name as an alias
+                    wikiPage = WikiPage(self, wikiWord)
+
+                content = wikiPage.getLiveText()
+                
+                writer.add_document(unifName="wikipage/"+wikiWord,
+                        modTimestamp=wikiPage.getTimestamps()[0],
+                        content=content)
+                
+                step += 1
         finally:
-            sarOp.endWikiSearch()
+            writer.commit()
+            progresshandler.close()
+            self.updateExecutor.start()
 
-        threadstop.testRunning()
-        return result
+
+    def putIntoRevSearchIndex(self, wikiPage):
+        """
+        Add or update the reverse index for the given docPage
+        """
+        if not self.isRevSearchIndexEnabled():
+            return
+
+        if isinstance(wikiPage, AliasWikiPage):
+            wikiPage = WikiPage(self, wikiWord)
+        
+        content = wikiPage.getLiveText()
+        
+        try:
+            searchIdx = self.getRevSearchIndex()
+            writer = searchIdx.writer()
+            
+            unifName = wikiPage.getUnifiedPageName()
+            
+            writer.delete_by_term("unifName", unifName)
+            writer.add_document(unifName=unifName,
+                    modTimestamp=wikiPage.getTimestamps()[0],
+                    content=content)
+        except:
+            writer.cancel()
+            raise
+
+        writer.commit()
+        
+    
+    def removeFromRevSearchIndex(self, unifName):
+        if not self.isRevSearchIndexEnabled():
+            return
+        try:
+            searchIdx = self.getRevSearchIndex()
+            writer = searchIdx.writer()
+            
+            writer.delete_by_term("unifName", unifName)
+        except:
+            writer.cancel()
+            raise
+
+        writer.commit()
 
 
     def getWikiDefaultWikiPageFormatDetails(self):
@@ -1745,13 +1904,17 @@ class WikiDataManager(MiscEventSourceMixin):
                 attrs = miscevt.getProps().copy()
                 attrs["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(attrs)
+                self.removeFromRevSearchIndex(miscevt.getSource().getUnifiedName())
+                # TODO: Add new on rename
             elif miscevt.has_key("updated wiki page"):
                 self.autoLinkRelaxInfo = None  # TODO Does this slow down?
                 attrs = miscevt.getProps().copy()
                 attrs["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(attrs)
+                self.putIntoRevSearchIndex(miscevt.getSource())
             elif miscevt.has_key("saving new wiki page"):            
                 self.autoLinkRelaxInfo = None
+                self.putIntoRevSearchIndex(miscevt.getSource())
             elif miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()
 

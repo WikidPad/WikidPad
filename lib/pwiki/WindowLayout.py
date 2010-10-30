@@ -99,11 +99,14 @@ def setWindowPos(win, pos=None, fullVisible=False):
 
 
 
-def setWindowSize(win, size):
+def setWindowSize(win, size=None):
     """
     Set size of a wx.Window, but ensure that the size is valid
     """
-    sizeX, sizeY = size
+    if size is not None:
+        sizeX, sizeY = size
+    else:
+        sizeX, sizeY = win.GetSizeTuple()
 
 #     screenX, screenY = getOverallDisplaysSize()    
     clRect = getOverallDisplaysClientSize()

@@ -1,2 +1,4 @@
 C	English
 sv	Swedish
+hu_HU	Hungarian
+zh_CN	Chinese

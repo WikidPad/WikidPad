@@ -14,7 +14,7 @@ If a new page was modified already the context menu only offers an item "Use Tem
 
 +++ Using templates implicitly by attributes
 
-If a non-existing page has only one parent which has a "template" attribute, the initial content of the new page will be taken from the page pointed to by the attribute.
+If a non-existing page has one parent which has a "template" attribute and there is no contradictory "template" attribute on one of the other parents (if any), the initial content of the new page will be taken from the page pointed to by the attribute.
 
 The new page will (as always) only be created effectively after it is modified in some way.
 

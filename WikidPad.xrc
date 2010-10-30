@@ -3653,14 +3653,6 @@
                                   <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                                   <border>5</border>
                                 </object>
-                                <object class="sizeritem">
-                                  <object class="wxButton" name="btnSetPageList">
-                                    <label>Set page &amp;list</label>
-                                  </object>
-                                  <option>0</option>
-                                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                                  <border>5</border>
-                                </object>
                               </object>
                               <option>0</option>
                             </object>
@@ -3943,7 +3935,7 @@
                           <size>0,5</size>
                         </object>
                         <object class="sizeritem">
-                          <object class="wxBoxSizer">
+                          <object class="wxFlexGridSizer">
                             <object class="sizeritem">
                               <object class="wxListBox" name="lbPageList">
                                 <content/>
@@ -3951,51 +3943,44 @@
                               <option>1</option>
                               <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                               <border>5</border>
-                              <cellpos>0,0</cellpos>
-                              <cellspan>1,2</cellspan>
+                              <minsize>-1,200</minsize>
                             </object>
                             <object class="sizeritem">
                               <object class="wxBoxSizer">
-                                <orient>wxVERTICAL</orient>
                                 <object class="sizeritem">
                                   <object class="wxButton" name="btnPageListUp">
                                     <label>Up</label>
+                                    <style>wxBU_EXACTFIT</style>
                                   </object>
                                   <option>1</option>
                                   <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                                   <border>5</border>
-                                  <minsize>40,-1</minsize>
                                   <cellpos>0,0</cellpos>
                                 </object>
                                 <object class="sizeritem">
                                   <object class="wxButton" name="btnPageListDown">
                                     <label>Down</label>
+                                    <style>wxBU_EXACTFIT</style>
                                   </object>
                                   <option>1</option>
                                   <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                                   <border>5</border>
-                                  <minsize>40,-1</minsize>
                                 </object>
                                 <object class="sizeritem">
                                   <object class="wxButton" name="btnPageListSort">
                                     <label>Sort</label>
+                                    <style>wxBU_EXACTFIT</style>
                                   </object>
                                   <option>0</option>
                                   <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                                   <border>5</border>
-                                  <minsize>40,-1</minsize>
                                 </object>
+                                <orient>wxVERTICAL</orient>
                               </object>
+                              <option>1</option>
                               <flag>wxALL|wxEXPAND</flag>
+                              <minsize>40,-1</minsize>
                             </object>
-                            <orient>wxHORIZONTAL</orient>
-                          </object>
-                          <option>1</option>
-                          <flag>wxALL|wxEXPAND</flag>
-                        </object>
-                        <object class="sizeritem">
-                          <object class="wxBoxSizer">
-                            <orient>wxHORIZONTAL</orient>
                             <object class="sizeritem">
                               <object class="wxTextCtrl" name="tfPageListToAdd">
                                 <style>wxTE_PROCESS_ENTER</style>
@@ -4007,14 +3992,17 @@
                             <object class="sizeritem">
                               <object class="wxButton" name="btnPageListAdd">
                                 <label>Add</label>
+                                <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
                               <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                               <border>5</border>
-                              <minsize>40,-1</minsize>
                             </object>
+                            <cols>2</cols>
+                            <growablecols>0</growablecols>
+                            <growablerows>0</growablerows>
                           </object>
-                          <option>0</option>
+                          <option>1</option>
                           <flag>wxALL|wxEXPAND</flag>
                         </object>
                         <object class="sizeritem">
@@ -4023,6 +4011,7 @@
                             <object class="sizeritem">
                               <object class="wxButton" name="btnPageListClearList">
                                 <label>Clear List</label>
+                                <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
                               <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -4031,20 +4020,20 @@
                             <object class="sizeritem">
                               <object class="wxButton" name="btnPageListDelete">
                                 <label>Del</label>
+                                <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
                               <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                               <border>5</border>
-                              <minsize>40,-1</minsize>
                             </object>
                             <object class="sizeritem">
                               <object class="wxButton" name="btnPageListCopyToClipboard">
                                 <label>Copy</label>
+                                <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
                               <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                               <border>5</border>
-                              <minsize>40,-1</minsize>
                             </object>
                           </object>
                           <option>0</option>
@@ -4064,15 +4053,16 @@
                             <object class="sizeritem">
                               <object class="wxButton" name="btnPageListAddFromClipboard">
                                 <label>Add</label>
+                                <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
                               <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                               <border>5</border>
-                              <minsize>40,-1</minsize>
                             </object>
                             <object class="sizeritem">
                               <object class="wxButton" name="btnPageListOverwriteFromClipboard">
                                 <label>Overwrite</label>
+                                <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
                               <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -4081,6 +4071,7 @@
                             <object class="sizeritem">
                               <object class="wxButton" name="btnPageListIntersectWithClipboard">
                                 <label>Intersect</label>
+                                <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
                               <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -4135,11 +4126,11 @@
                         <object class="sizeritem">
                           <object class="wxButton" name="btnResultCopyToClipboard">
                             <label>Copy</label>
+                            <style>wxBU_EXACTFIT</style>
                           </object>
                           <option>0</option>
                           <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                           <border>5</border>
-                          <minsize>40,-1</minsize>
                         </object>
                       </object>
                       <option>0</option>

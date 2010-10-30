@@ -23,8 +23,8 @@ from pwiki.Enum import Enumeration
 # (1, 9, 104, 2) is something after 1.9beta04
 # (2, 0, 300, 0) is 2.0final
 
-VERSION_TUPLE = ("wikidPad", 2, 1, 107, 0)
-VERSION_STRING = "wikidPad 2.1beta07"
+VERSION_TUPLE = ("wikidPad", 2, 1, 108, 0)
+VERSION_STRING = "wikidPad 2.1beta08"
 HOMEPAGE = u"http://wikidpad.sourceforge.net"
 
 CONFIG_FILENAME = "WikidPad.config"
@@ -62,7 +62,9 @@ WIKIWORDMATCHTERMS_TYPE_EXPLICIT_ALIAS = 1
 # When trying to resolve links, look at this, too.
 WIKIWORDMATCHTERMS_TYPE_ASLINK = 2
 
+
 # The following four cannot be combined
+
 # Bitmask to filter out following three
 WIKIWORDMATCHTERMS_TYPE_FROM_MASK = 12
 # Matchterm was created based on the wiki word itself
@@ -83,10 +85,12 @@ WIKIWORDMATCHTERMS_TYPE_SYNCUPDATE = 16
 
 # Simple regex
 SEARCHTYPE_REGEX = 0
-# Boolean regex (currently only "anded" regex)
+# Boolean regex
 SEARCHTYPE_BOOLEANREGEX = 1
 # Text as is
 SEARCHTYPE_ASIS = 2
+# Reverse index search
+SEARCHTYPE_REVINDEX = 3
 
 
 

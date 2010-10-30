@@ -10,6 +10,8 @@ from wxHelper import runDialogModalFactory, XrcControls, GUI_ID
 
 import Utilities
 
+from . import WindowLayout
+
 from EnhancedGrid import EnhancedGrid
 import DocPages
 
@@ -542,6 +544,9 @@ class MultiPageTextImporterDialog(wx.Dialog):
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
         
         self.Fit()
+        # If the table is too long, a resizing may become necessary
+        WindowLayout.setWindowSize(self)
+        WindowLayout.setWindowPos(self)
         
         # Fixes focus bug under Linux
         self.SetFocus()

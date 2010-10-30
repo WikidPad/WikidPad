@@ -666,7 +666,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if kind is None:
             kind = wx.ITEM_NORMAL
 
-        menuitem = wx.MenuItem(menu, menuID, label, text, kind)
+        lcut = label.split(u"\t", 1)
+        if len(lcut) > 1:
+            label = lcut[0] + u" \t" + lcut[1]
+
+        menuitem = wx.MenuItem(menu, menuID, label + u" ", text, kind)
         bitmap = self.resolveIconDescriptor(icondesc)
         if bitmap:
             menuitem.SetBitmap(bitmap)
@@ -813,6 +817,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         menuID=GUI_ID.MENU_INITATE_UPDATE_WIKI_CACHE,
                         updatefct=self.OnUpdateDisReadOnlyWiki)
                 
+            # TODO: Test for wikiDocument.isRevSearchIndexEnabled()
+#             self.addMenuItem(maintenanceMenu, _(u'Re&index Wiki...'),
+#                     _(u'Rebuild the reverse index for fulltext search'),
+#                     lambda evt: self.rebuildRevSearchIndex(onlyDirty=False),
+#                     menuID=GUI_ID.MENU_REINDEX_REV_SEARCH,
+#                     updatefct=self.OnUpdateDisReadOnlyWiki)
+
 
             self.addMenuItem(maintenanceMenu, _(u'Show job count...'),
                     _(u'Show how many update jobs are waiting in background'),
@@ -1194,7 +1205,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # ------------------------------------------------------------------------------------
         if self.mainmenu is not None:
             # This is a rebuild of an existing menu (after loading a new wikiData)
-            self.mainmenu.Replace(0, self.buildWikiMenu(), 'W&iki')
+            self.mainmenu.Replace(0, self.buildWikiMenu(), _(u'W&iki'))
             return
 
 
@@ -2002,7 +2013,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         icon = self.lookupSystemIcon("tb_delete")
         tb.AddSimpleTool(GUI_ID.CMD_DELETE_PAGE, icon,
-                _(u"Delete") + " " + self.keyBindings.Delete, _(u"Delete Wiki Word"))
+                _(u"Delete Wiki Word") + " " + self.keyBindings.Delete,
+                _(u"Delete Wiki Word"))
 #         wx.EVT_TOOL(self, tbID, lambda evt: self.showWikiWordDeleteDialog())
 
         tb.AddSimpleTool(wx.NewId(), seperator, _(u"Separator"), _(u"Separator"))
@@ -4644,10 +4656,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     item = Sar.AllWikiPagesNode(lpOp)
                     lpOp.setSearchOpTree(item)
                     lpOp.ordering = "asroottree"  # Slow, but more intuitive
-                    wordList = self.getWikiDocument().searchWiki(lpOp)
+                    sarOp = Sar.SearchReplaceOperation()
+                    sarOp.listWikiPagesOp = lpOp
+#                     wordList = self.getWikiDocument().searchWiki(lpOp)
+                    wordList = self.getWikiDocument().searchWiki(sarOp)
     
-    #                 wordList = self.getWikiData().getAllDefinedWikiPageNames()
-                    
                 elif typ in (GUI_ID.MENU_EXPORT_SUB_AS_PAGE,
                         GUI_ID.MENU_EXPORT_SUB_AS_PAGES):
                     # Export a subtree of current word
@@ -4660,10 +4673,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                             [self.getCurrentWikiWord()], -1)
                     lpOp.setSearchOpTree(item)
                     lpOp.ordering = "asroottree"  # Slow, but more intuitive
-                    wordList = self.getWikiDocument().searchWiki(lpOp)
+
+                    sarOp = Sar.SearchReplaceOperation()
+                    sarOp.listWikiPagesOp = lpOp
+#                     wordList = self.getWikiDocument().searchWiki(lpOp)
+                    wordList = self.getWikiDocument().searchWiki(sarOp)
     
-    #                 wordList = self.getWikiData().getAllSubWords(
-    #                         [self.getCurrentWikiWord()])
                 else:
                     if self.getCurrentWikiWord() is None:
                         self.displayErrorMessage(
@@ -4848,6 +4863,36 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             except Exception, e:
                 self.displayErrorMessage(_(u"Error rebuilding wiki"), e)
                 traceback.print_exc()
+
+
+
+    def rebuildRevSearchIndex(self, skipConfirm=True, onlyDirty=False):
+        if self.isReadOnlyWiki():
+            return
+
+# Removed from .pot
+
+#         if not skipConfirm:
+#             result = wx.MessageBox(_(u"Are you sure you want to rebuild this wiki? "
+#                     u"You may want to backup your data first!"),
+#                     _(u'Rebuild wiki'),
+#                     wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION, self)
+# 
+#         if skipConfirm or result == wx.YES :
+#             try:
+#                 self.saveAllDocPages()
+#                 progresshandler = ProgressHandler(
+#                         _(u"     Reindexing wiki     "),
+#                         _(u"     Reindexing wiki     "), 0, self)
+#                 self.getWikiDocument().rebuildRevSearchIndex(progresshandler,
+#                         onlyDirty=onlyDirty)
+#             except (IOError, OSError, DbAccessError), e:
+#                 self.lostAccess(e)
+#                 raise
+#             except Exception, e:
+#                 self.displayErrorMessage(_(u"Error reindexing wiki"), e)
+#                 traceback.print_exc()
+
 
 
     def OnCmdUpdateExternallyModFiles(self, evt):

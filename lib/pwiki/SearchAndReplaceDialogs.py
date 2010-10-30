@@ -1018,6 +1018,9 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         sarOp = SearchReplaceOperation()
         sarOp.searchStr = guiToUni(self.ctrls.cbSearch.GetValue())
         sarOp.booleanOp = searchType == Consts.SEARCHTYPE_BOOLEANREGEX
+        
+        sarOp.revIndexSearch = 'no' if searchType != Consts.SEARCHTYPE_REVINDEX \
+                else 'default'
         sarOp.caseSensitive = self.ctrls.cbCaseSensitive.GetValue()
         sarOp.wholeWord = self.ctrls.cbWholeWord.GetValue()
         sarOp.cycleToStart = False
@@ -1028,7 +1031,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
         if not sarOp.booleanOp:
             sarOp.replaceStr = guiToUni(self.ctrls.txtReplace.GetValue())
-            
+
         return sarOp
 
 

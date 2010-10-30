@@ -493,7 +493,7 @@ def actionTableModeAppendix(s, l, st, t):
         if key == "t":
             st.dictStack.getNamedDict("table")["table.tabSeparated"] = True
             return
-    
+
     st.dictStack.getNamedDict("table")["table.tabSeparated"] = False
 
 

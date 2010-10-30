@@ -683,6 +683,15 @@ class AbstractWikiPage(DataCarryingPage):
 
     getProperties = getAttributes  # TODO remove "property"-compatibility
 
+
+    def getAttribute(self, attrkey, default=None):
+        with self.textOperationLock:
+            attrs = self.getAttributes()
+            if attrs.has_key(attrkey):
+                return attrs[attrkey][-1]
+            else:
+                return default
+
     def getAttributeOrGlobal(self, attrkey, default=None):
         """
         Tries to find an attribute on this page and returns the first value.
@@ -1284,41 +1293,75 @@ class WikiPage(AbstractWikiPage):
         except WikiFileNotFoundException, e:
             # Create initial content of new page
 
-            # Check if there is exactly one parent
+            # Check for "template" attribute
             parents = self.getParentRelationships()
-            if len(parents) == 1:
-                # Check if there is a template page
-                try:
-                    parentPage = self.wikiDocument.getWikiPage(parents[0])
+            if len(parents) > 0:
+                langHelper = wx.GetApp().createWikiLanguageHelper(
+                        self.getWikiLanguageName())
 
-                    langHelper = wx.GetApp().createWikiLanguageHelper(
-                            self.getWikiLanguageName())
+                templateSource = None
+                templateParent = None
+                conflict = False
+                for parent in parents:
+                    try:
+                        parentPage = self.wikiDocument.getWikiPage(parent)
+                        templateWord = langHelper.resolveWikiWordLink(
+                                parentPage.getAttribute("template"),
+                                parentPage)
+                        if templateWord is not None and \
+                                self.wikiDocument.isDefinedWikiLink(templateWord):
+                            if templateSource is None:
+                                templateSource = templateWord
+                                templateParentPage = parentPage
+                            elif templateSource != templateWord:
+                                # More than one possible template source
+                                # -> no template, stop here
+                                templateSource = None
+                                templateParentPage = None
+                                conflict = True
+                                break
+                    except (WikiWordNotFoundException, WikiFileNotFoundException):
+                        continue
 
-                    # TODO Error checking
-#                     templateWord = parentPage.getAttributeOrGlobal("template")
-                    templateWord = langHelper.resolveWikiWordLink(
-                            parentPage.getAttributeOrGlobal("template"),
-                            parentPage)
-
-                    templatePage = self.wikiDocument.getWikiPage(templateWord)
+                if templateSource is None and not conflict:
+                    # No individual template attributes, try to find global one
+                    globalAttrs = self.getWikiData().getGlobalAttributes()     
                     
-                    content = self.getContentOfTemplate(templatePage, parentPage)
+                    templateWord = globalAttrs.get(u"global.template")
+                    if templateWord is not None and \
+                            self.wikiDocument.isDefinedWikiLink(templateWord):
+                        templateSource = templateWord
+                        templateParentPage = self.wikiDocument.getWikiPage(
+                                parents[0])
+
+                
+                if templateSource is not None:
+                    templatePage = self.wikiDocument.getWikiPage(templateSource)
+
+                    content = self.getContentOfTemplate(templatePage,
+                            templateParentPage)
                     self.setMetaDataFromTemplate(templatePage)
 
-#                     # getLiveText() would be more logical, but this may
-#                     # mean that content is up to date, while attributes
-#                     # are not updated.
-#                     content = templatePage.getContent()
-#                     # Load attributes from template page
-#                     self.attrs = templatePage._cloneDeepAttributes()
+
+#             if len(parents) == 1:
+#                 # Check if there is a template page
+#                 try:
+#                     parentPage = self.wikiDocument.getWikiPage(parents[0])
+# 
+# 
+#                     # TODO Error checking
+# #                     templateWord = parentPage.getAttributeOrGlobal("template")
+#                     templateWord = langHelper.resolveWikiWordLink(
+#                             parentPage.getAttributeOrGlobal("template"),
+#                             parentPage)
+# 
+#                     templatePage = self.wikiDocument.getWikiPage(templateWord)
 #                     
-#                     # Check if template title should be changed
-#                     tplHeading = parentPage.getAttributeOrGlobal(
-#                             u"template_head", u"auto")
-#                     if tplHeading in (u"auto", u"automatic"):
-#                         content = self._changeHeadingForTemplate(content)
-                except (WikiWordNotFoundException, WikiFileNotFoundException):
-                    pass
+#                     content = self.getContentOfTemplate(templatePage, parentPage)
+#                     self.setMetaDataFromTemplate(templatePage)
+# 
+#                 except (WikiWordNotFoundException, WikiFileNotFoundException):
+#                     pass
 
             if content is None:
                 if self.suggNewPageTitle is None:

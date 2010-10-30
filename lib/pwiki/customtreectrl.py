@@ -4938,7 +4938,7 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
 
     def OnSetFocus(self, event):
         """Handles the wx.EVT_SET_FOCUS event."""
-
+        
         self._hasFocus = True
         self.RefreshSelected()
         event.Skip()
@@ -4964,10 +4964,12 @@ class CustomTreeCtrl(wx.PyScrolledWindow):
             return
 
         if self._current is None or self._key_current is None:
-        
-            event.Skip()
-            return
-        
+            if self._key_current is None: 
+                event.Skip()
+                return
+            else:  # MB: Not really knowing what I'm doing here
+                self._current = self._key_current  
+
         # how should the selection work for this event?
         is_multiple, extended_select, unselect_others = EventFlagsToSelType(self.GetTreeStyle(), event.ShiftDown(), event.CmdDown())
 

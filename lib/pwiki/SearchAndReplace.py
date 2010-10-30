@@ -1513,6 +1513,7 @@ class SearchReplaceOperation:
         self.caseSensitive = False  # Search case sensitive?
         self.cycleToStart = False  # Wrap around when coming to the end of page
         self.booleanOp = False  # Can search string contain boolean operators?
+        self.revIndexSearch = 'no'  # Reverse index search, either 'no' or 'default'
         self.wildCard = 'regex' # Search string is: 'regex':regular expression
                                 # (and replace str.) 'no':Without wildcards
         self.wikiWide = False   # Operation on whole wiki (or current page only)?
@@ -1593,6 +1594,11 @@ class SearchReplaceOperation:
             # Can only happen in stream read mode
             # Reset listWikiPagesOp to default
             self.listWikiPagesOp = ListWikiPagesOperation()
+        
+        # TODO: built in
+        if stream.isReadMode():
+            self.revIndexSearch = 'no'
+        
 
 
     def serializeToXml(self, xmlNode, xmlDoc):
@@ -1635,6 +1641,9 @@ class SearchReplaceOperation:
 
         self.listWikiPagesOp = ListWikiPagesOperation()
         self.listWikiPagesOp.serializeFromXml(subNode)
+
+        # TODO: built in
+        self.revIndexSearch = 'no'
 
 
     def getPackedSettings(self):
@@ -1792,6 +1801,9 @@ class SearchReplaceOperation:
 
 
     def hasParticularTextPosition(self):
+        if self.revIndexSearch != "no":
+            return False   # TODO!
+
         if self.searchOpTree is None:
             self.rebuildSearchOpTree()
 

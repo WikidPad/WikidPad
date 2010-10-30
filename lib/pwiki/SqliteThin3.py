@@ -272,9 +272,11 @@ def column_blob(stmt, col):
     Retrieve a blob object as Blob from a db row after a SELECT statement was performed
     col -- zero based column index
     """
-    len = _dll.sqlite3_column_bytes(stmt._stmtpointer, col)
+    length = _dll.sqlite3_column_bytes(stmt._stmtpointer, col)
+    if length == 0:
+        return ""
 
-    _dll.sqlite3_column_blob.restype = POINTER(c_char * len)  # TODO: Thread safety
+    _dll.sqlite3_column_blob.restype = POINTER(c_char * length)  # TODO: Thread safety
     
     return _dll.sqlite3_column_blob(stmt._stmtpointer, col).contents.raw   # Return Blob instead?
 
@@ -285,6 +287,8 @@ def column_text(stmt, col):
     col -- zero based column index
     """
     length = _dll.sqlite3_column_bytes(stmt._stmtpointer, col)
+    if length == 0:
+        return ""
 
     _dll.sqlite3_column_text.restype = POINTER(c_char * length)  # TODO: Thread safety
     
@@ -725,9 +729,11 @@ class _Value:
         """
         Retrieve a blob object as string from a value.
         """
-        len = _dll.sqlite3_value_bytes(self._valuepointer)
-    
-        _dll.sqlite3_value_blob.restype = POINTER(c_char * len)  # TODO: Thread safety
+        length = _dll.sqlite3_value_bytes(self._valuepointer)
+        if length == 0:
+            return ""
+
+        _dll.sqlite3_value_blob.restype = POINTER(c_char * length)  # TODO: Thread safety
         
         return _dll.sqlite3_value_blob(self._valuepointer).contents.raw   # Return Binary instead?
     
@@ -737,7 +743,9 @@ class _Value:
         Retrieve a text object as string from a value.
         """
         length = _dll.sqlite3_value_bytes(self._valuepointer)
-    
+        if length == 0:
+            return ""
+   
         _dll.sqlite3_value_text.restype = POINTER(c_char * length)  # TODO: Thread safety
         
         return _dll.sqlite3_value_text(self._valuepointer).contents.raw

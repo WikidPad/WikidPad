@@ -21,7 +21,7 @@ import DocPages
 
 from MptImporterGui import MultiPageTextImporterDialog
 
-from timeView import Versioning
+from .timeView import Versioning
 
 
 

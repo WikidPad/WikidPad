@@ -335,7 +335,7 @@ class SingleThreadExecutor(BasicThreadStop):
                         False))
             self.dequeCondition.notify()
 
-        self.thread.join(120)
+        self.thread.join(120)  # TODO: Replace by constant
 
         if self.thread.isAlive():
             raise DeadBlockPreventionTimeOutError()
@@ -344,10 +344,14 @@ class SingleThreadExecutor(BasicThreadStop):
 
 
     def pause(self):
+        """
+        Stops after current job but keeps the queue so that it can resume
+        later by call to start()
+        """
         with self.dequeCondition:
             if self.thread is None or not self.thread.isAlive():
                 return
-                
+
             self.paused = True
 
 
