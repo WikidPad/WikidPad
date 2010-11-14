@@ -1,4 +1,4 @@
+﻿zh_CN	Chinese
 C	English
-sv	Swedish
 hu_HU	Hungarian
-zh_CN	Chinese
+sv	Swedish

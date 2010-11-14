@@ -1,3 +1,4 @@
+# -*- coding: iso8859-1 -*-
 import sys, traceback
 # from time import strftime
 import re
@@ -1966,6 +1967,8 @@ What makes wikidPad different from other notepad applications is the ease with w
             <tr><td width="30%%" align="right">&nbsp;</td></tr>
             <tr><td width="30%%" align="right">&nbsp;</td></tr>
             <tr><td width="30%%" align="left" colspan="2" nowrap><font size="3"><b>Translations:</b></font></td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>Chinese:</b></font></td><td nowrap><font size="3">yuxiaoxu@msn.com</font></td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>Hungarian:</b></font></td><td nowrap><font size="3">Török Árpád</font></td></tr>
             <tr><td width="30%%" align="right"><font size="3"><b>Swedish:</b></font></td><td nowrap><font size="3">Stefan Berg</font></td></tr>
         </table>
     </center>
@@ -2082,7 +2085,7 @@ class WikiPropertiesDialog(SimpleInfoDialog):
     """
     def __init__(self, parent, id, mainControl):
         self.mainControl = mainControl
-        SimpleInfoDialog.__init__(self, parent, id, 'Wiki Info',
+        SimpleInfoDialog.__init__(self, parent, id, _(u'Wiki Properties'),
                           size=(470, 330) )
 
     def fillInfoLines(self):
@@ -2116,7 +2119,7 @@ class WikiJobDialog(SimpleInfoDialog):
         self.jobTxtCtrl = None
         self.mainControl = mainControl
 
-        SimpleInfoDialog.__init__(self, parent, id, 'Jobs',
+        SimpleInfoDialog.__init__(self, parent, id, _(u'Jobs'),
                           size=(470, 330) )
 
         # Start timer

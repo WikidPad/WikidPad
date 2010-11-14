@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2010-10-30 14:13\n"
+"POT-Creation-Date: 2010-11-14 21:28\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1889,12 +1889,20 @@ msgstr ""
 msgid "Okay"
 msgstr ""
 
+#: lib\pwiki\AdditionalDialogs.py:2088
+msgid "Wiki Properties"
+msgstr ""
+
 #: lib\pwiki\AdditionalDialogs.py:2096
 msgid "Wiki database backend:"
 msgstr ""
 
 #: lib\pwiki\AdditionalDialogs.py:2104
 msgid "Number of wiki pages:"
+msgstr ""
+
+#: lib\pwiki\AdditionalDialogs.py:2122
+msgid "Jobs"
 msgstr ""
 
 #: lib\pwiki\AdditionalDialogs.py:2139
