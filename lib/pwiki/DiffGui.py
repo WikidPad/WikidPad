@@ -5,7 +5,8 @@ import difflib
 
 import wx, wx.stc, wx.xrc
 
-from wxHelper import GUI_ID, copyTextToClipboard, WindowUpdateLocker
+from wxHelper import GUI_ID, copyTextToClipboard, WindowUpdateLocker, \
+        appendToMenuByMenuDesc
 
 from Consts import FormatTypes
 
@@ -74,9 +75,20 @@ class InlineDiffControl(EnhancedScintillaControl):
 
         wx.EVT_KEY_DOWN(self, self.OnKeyDown)
 
+        wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
+
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY, lambda evt: self.Copy())
+        wx.EVT_MENU(self, GUI_ID.CMD_SELECT_ALL, lambda evt: self.SelectAll())
+
         wx.EVT_MENU(self.tabContextMenu, GUI_ID.CMD_DIFF_SWAP_FROM_TO,
                 self.OnCmdSwapFromTo)
+
+        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_IN,
+                lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMIN))
+        wx.EVT_MENU(self, GUI_ID.CMD_ZOOM_OUT,
+                lambda evt: self.CmdKeyExecute(wx.stc.STC_CMD_ZOOMOUT))
+
+
 
 # TODO: Make work
 #         self.StyleSetSpec(wx.stc.STC_STYLE_DEFAULT, "face:%(mono)s,size:%(size)d" %
@@ -354,7 +366,7 @@ class InlineDiffControl(EnhancedScintillaControl):
             scrollPosY = self.GetScrollPos(wx.VERTICAL)
             
             self.SetText(text)
-                    
+
             self.GotoPos(lastPos)
             self.scrollXY(scrollPosX, scrollPosY)
 
@@ -364,7 +376,7 @@ class InlineDiffControl(EnhancedScintillaControl):
         if len(text) == 0:
             return
 
-        cbIcept = self.presenter.getMainControl().getClipboardInterceptor()  
+        cbIcept = self.mainControl.getClipboardInterceptor()  
         if cbIcept is not None:
             cbIcept.informCopyInWikidPadStart(text=text)
             try:
@@ -373,6 +385,19 @@ class InlineDiffControl(EnhancedScintillaControl):
                 cbIcept.informCopyInWikidPadStop()
         else:
             copyTextToClipboard(text)
+
+
+
+    # TODO Wrong reaction on press of context menu button on keyboard
+    def OnContextMenu(self, evt):
+        menu = wx.Menu()
+
+        appendToMenuByMenuDesc(menu, _CONTEXT_MENU_INTEXT_BASE)
+        
+        self.PopupMenu(menu)
+        menu.Destroy()
+
+
 
 
 
@@ -392,3 +417,21 @@ class InlineDiffControl(EnhancedScintillaControl):
 # 
 #         self.IndicatorSetStyle(2, wx.stc.STC_INDIC_SQUIGGLE)
 #         self.IndicatorSetForeground(2, wx.Colour(255, 0, 0))
+
+
+
+_CONTEXT_MENU_INTEXT_BASE = \
+u"""
+Copy;CMD_CLIPBOARD_COPY
+Select All;CMD_SELECT_ALL
+-
+Close Tab;CMD_CLOSE_CURRENT_TAB
+"""
+
+
+# Entries to support i18n of context menus
+if False:
+    N_(u"Copy")
+    N_(u"Select All")
+
+    N_(u"Close Tab")

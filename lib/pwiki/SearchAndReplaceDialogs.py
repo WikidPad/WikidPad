@@ -1856,14 +1856,17 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
     def OnResultListPreview(self, evt):
         lpOp = self._buildListPagesOperation()
-        
+
         if lpOp is None:
             return
+
+        sarOp = SearchReplaceOperation()
+        sarOp.listWikiPagesOp = lpOp
 
         self.SetCursor(wx.HOURGLASS_CURSOR)
         self.Freeze()
         try:
-            words = self.mainControl.getWikiDocument().searchWiki(lpOp)
+            words = self.mainControl.getWikiDocument().searchWiki(sarOp)
             
             self.ctrls.lbResultPreview.Clear()
             self.ctrls.lbResultPreview.AppendItems(words)

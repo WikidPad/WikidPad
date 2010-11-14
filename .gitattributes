@@ -353,6 +353,7 @@ WikidPadHelp/data/wikidb.gfd -text
 WikidPadHelp/files/testimg.gif -text
 /WikidPadStarter.py -text
 /WikidPad_hu_HU.po -text
+/WikidPad_ru_RU.po -text
 /WikidPad_sv.po -text
 /WikidPad_zh_CN.po -text
 /Wikidpad.icns -text

@@ -351,8 +351,6 @@ class WikiTxtCtrl(EnhancedScintillaControl):
         wx.EVT_MENU(self, GUI_ID.CMD_CLIPBOARD_COPY_URL_TO_THIS_ANCHOR,
                 self.OnClipboardCopyUrlToThisAnchor)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_TEXT_SELECT_ALL, lambda evt: self.SelectAll())
-
         wx.EVT_MENU(self, GUI_ID.CMD_SELECT_TEMPLATE, self.OnSelectTemplate)
 
 
@@ -3322,7 +3320,7 @@ Copy;CMD_CLIPBOARD_COPY
 Paste;CMD_CLIPBOARD_PASTE
 Delete;CMD_TEXT_DELETE
 -
-Select All;CMD_TEXT_SELECT_ALL
+Select All;CMD_SELECT_ALL
 """
 
 

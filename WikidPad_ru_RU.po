@@ -1,131 +1,132 @@
-# Copyright (C) wikidPads COPYRIGHT HOLDER
-# This file is distributed under the same license as wikidPad.
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: WikidPad 2.1\n"
-"POT-Creation-Date: 2010-10-30 12:12\n"
-"PO-Revision-Date: 2010-11-05 11:12+0800\n"
-"Last-Translator: 郁晓旭 <yuxiaoxu@msn.com>\n"
-"Language-Team: yuxiaoxu <yuxiaoxu@msn.com>\n"
+"Project-Id-Version: WIKIDPAD INTERNATIONALISATION. RUSSIAN. VERSION 1.0\n"
+"POT-Creation-Date: 2010-09-25 11:38\n"
+"PO-Revision-Date: 2010-11-01 12:57+0600\n"
+"Last-Translator: OD <qq@qq.qq>\n"
+"Language-Team:  <odomanov@yandex.ru>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5mod\n"
-"X-Poedit-Language: Chinese\n"
-"X-Poedit-Country: CHINA\n"
-"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Language: Russian\n"
+"X-Poedit-Country: RUSSIAN FEDERATION\n"
 
 #: WikidPad.xrc:0
 msgid "  Context characters"
-msgstr "上下文相关字符"
+msgstr "  Символов контекста"
 
 #: WikidPad.xrc:0
 msgid "  Defaults"
-msgstr "默认值"
+msgstr "  Значения по умолчанию"
 
 #: WikidPad.xrc:0
 msgid " &Delete "
-msgstr "删除(&D)"
+msgstr "&Удалить"
 
 #: WikidPad.xrc:0
 msgid " &Find "
-msgstr "查找(&F)"
+msgstr "&Найти"
 
 #: WikidPad.xrc:0
 msgid " &Replace "
-msgstr "替换(&R)"
+msgstr "&Заменить"
 
 #: WikidPad.xrc:0
 msgid " &Test "
-msgstr "测试(&T)"
+msgstr "&Проверить"
 
 #: WikidPad.xrc:0
 msgid " Find &Next "
-msgstr "查找下一个(&N)"
+msgstr "Найти &следующее"
 
 #: WikidPad.xrc:0
 msgid " Replace &All "
-msgstr "全部替换(&A)"
+msgstr "Заменить &всё"
 
 #: WikidPad.xrc:0
 msgid "&Case sensitive"
-msgstr "区分大小写(&C)"
+msgstr "Учитывать &регистр"
 
 #: WikidPad.xrc:0
 msgid "&Create"
-msgstr "创建(&C)"
+msgstr "&Создать"
 
 #: WikidPad.xrc:0
 msgid "&Delete Export(s)"
-msgstr "删除导出内容(&D)"
+msgstr "&Удалить Экспорт(ы)"
 
 #: WikidPad.xrc:0
 msgid "&Delete Search(es)"
-msgstr "清除搜索结果(&D)"
+msgstr "&Удалить Поиск(и)"
 
 #: WikidPad.xrc:0
 msgid "&Ignore"
-msgstr "忽略(&I)"
+msgstr "&Игнорировать"
 
 #: WikidPad.xrc:0
 msgid "&Load Export"
-msgstr "装载导出(&L)"
+msgstr "&Загрузить Экспорт"
 
 #: WikidPad.xrc:0
 msgid "&Load Search"
-msgstr "装载检索(&L)"
+msgstr "&Загрузить Поиск"
 
 #: WikidPad.xrc:0
 msgid "&New Tab"
-msgstr "新建标签页(&N)"
+msgstr "&Новой вкладке"
 
 #: WikidPad.xrc:0
 msgid "&Options"
-msgstr "选项(&O)"
+msgstr "&Настройки"
 
 #: WikidPad.xrc:0
 msgid "&Page names"
-msgstr "页面名(&P)"
+msgstr "&Имена страниц"
 
 #: WikidPad.xrc:0
 msgid "&Replace"
-msgstr "替换(&R)"
+msgstr "&Заменить"
 
 #: WikidPad.xrc:0
 msgid "&Replace by:"
-msgstr "替换为(&R):"
+msgstr "&Заменить на:"
 
 #: WikidPad.xrc:0
 msgid "&Save Export"
-msgstr "保存导出(&S)"
+msgstr "&Сохранить Экспорт"
 
 #: WikidPad.xrc:0
 msgid "&Save Search"
-msgstr "保存搜索(&S)"
+msgstr "&Сохранить Поиск"
 
 #: WikidPad.xrc:0
 msgid "&Search:"
-msgstr "检索(&S):"
+msgstr "&Найти:"
 
 #: WikidPad.xrc:0
 msgid "&Whole word"
-msgstr "整个单词(&W)"
+msgstr "Только слово &целиком"
 
 #: WikidPad.xrc:0
 msgid "&beginning"
-msgstr "开始(&B)"
+msgstr "&начала страницы"
 
 #: WikidPad.xrc:0
 msgid "(0: worst, 100: best)"
-msgstr "(0: 最差, 100: 最好)"
+msgstr "(0: худшее, 100: лучшее)"
 
 #: WikidPad.xrc:0
 msgid "(Use selected defaults if you are unsure)"
-msgstr "(不确信时使用已选默认值)"
+msgstr "(Если не уверены, используйте значения, установленные по умолчанию)"
 
 #: WikidPad.xrc:0
 msgid "* Needs WikidPad restart"
-msgstr "WikidPad需要重启才能生效* "
+msgstr "* Требуется перезапуск WikidPad"
 
 #: WikidPad.xrc:0
 msgid "0"
@@ -136,204 +137,204 @@ msgid ""
 "0: Never complete version; 1: Always complete v.;\n"
 "10: Every tenth v. is complete"
 msgstr ""
-"0: 未完成版本; 1: 总是完成 v.;\n"
-"10: 每十分之一v.完成"
+"0: Никогда не завершать версию; 1: Всегда завершать версию;\n"
+"10: Завершать каждую десятую версию"
 
 #: WikidPad.xrc:0
 msgid "1 (since 1.9beta6)"
-msgstr "1 (自1.9beta6)"
+msgstr "1 (1.9beta6 и выше)"
 
 #: WikidPad.xrc:0
 msgid "Above"
-msgstr "向上"
+msgstr "Сверху"
 
 #: WikidPad.xrc:0
 msgid "Absolute URL"
-msgstr "绝对URL"
+msgstr "Абсолютный URL"
 
 #: WikidPad.xrc:0
 msgid "Active link color:"
-msgstr "活动超链接颜色:"
+msgstr "Цвет активной ссылки:"
 
 #: WikidPad.xrc:0
 msgid "Add"
-msgstr "增加"
+msgstr "Добавить"
 
 #: WikidPad.xrc:0
 msgid "Add &Globally"
-msgstr "全局增加(&G)"
+msgstr "Добавить &глобально"
 
 #: WikidPad.xrc:0
 msgid "Add &Locally"
-msgstr "本地增加(&L)"
+msgstr "Добавить &локально"
 
 #: WikidPad.xrc:0
 msgid "Add Wiki to Favorites"
-msgstr "添加维基到收藏夹"
+msgstr "Добавить Вики в Избранное"
 
 #: WikidPad.xrc:0
 msgid "Add spaces"
-msgstr "添加空格"
+msgstr "Добавить пробелы"
 
 #: WikidPad.xrc:0
 msgid "After:"
-msgstr "之后:"
+msgstr "После:"
 
 #: WikidPad.xrc:0
 msgid "All Pages"
-msgstr "所有页"
+msgstr "Все страницы"
 
 #: WikidPad.xrc:0
 msgid "Allow everything"
-msgstr "全部允许"
+msgstr "Разрешить всё"
 
 #: WikidPad.xrc:0
 msgid "Alphabetically"
-msgstr "按字母顺序"
+msgstr "По алфавиту"
 
 #: WikidPad.xrc:0
 msgid "Also rename subpages"
-msgstr "同时修改子页面"
+msgstr "Дополнительно переименовать подстраницы"
 
 #: WikidPad.xrc:0
 msgid "Always"
-msgstr "总是"
+msgstr "Всегда"
 
 #: WikidPad.xrc:0
 msgid "Always show import table"
-msgstr "始终显示导入表"
+msgstr "Всегда показывать таблицу импорта"
 
 #: WikidPad.xrc:0
 msgid "App-bound hotkey:"
-msgstr "应用绑定热键:"
+msgstr "Общая горячая клавиша:"
 
 #: WikidPad.xrc:0
 msgid "Append after clipboard snippet:"
-msgstr "插入剪贴板片段:"
+msgstr "Вставить после фрагмента из буфера:"
 
 #: WikidPad.xrc:0
 msgid "Append after links:"
-msgstr "链接后插入:"
+msgstr "Вставить после ссылок:"
 
 #: WikidPad.xrc:0
 msgid "Append closing bracket on auto-complete"
-msgstr "自动完成追加闭合括号"
+msgstr "Добавлять закрывающую скобку при автозавершении"
 
 #: WikidPad.xrc:0
 msgid "Append wiki word"
-msgstr "追加维基字"
+msgstr "Добавить вики-слово в конец"
 
 #: WikidPad.xrc:0
 msgid "As &Tab"
-msgstr "作为标签页(&T)"
+msgstr "Как &вкладку"
 
 #: WikidPad.xrc:0
 msgid "As &is"
-msgstr "原样(&I)"
+msgstr "Как &есть"
 
 #: WikidPad.xrc:0
 msgid "As Res&ultlist"
-msgstr "作为结果列表(&U)"
+msgstr "Как список &результатов"
 
 #: WikidPad.xrc:0
 msgid "As Tree"
-msgstr "作为树"
+msgstr "Как дерево"
 
 #: WikidPad.xrc:0
 msgid "As is"
-msgstr "原样"
+msgstr "Как есть"
 
 #: WikidPad.xrc:0
 msgid "As list"
-msgstr "作为列表"
+msgstr "Как список"
 
 #: WikidPad.xrc:0
 msgid "As tree"
-msgstr "作为树"
+msgstr "Как дерево"
 
 #: WikidPad.xrc:0
 msgid "Ask"
-msgstr "询问"
+msgstr "Спросить"
 
 #: WikidPad.xrc:0
 msgid "Ask settings on each paste"
-msgstr "每次粘贴前询问设置"
+msgstr "Спрашивать установки при каждой вставке"
 
 #: WikidPad.xrc:0
 msgid "At position:"
-msgstr "位于:"
+msgstr "В положении:"
 
 #: WikidPad.xrc:0
 msgid "Attribute/script color:"
-msgstr "属性/脚本颜色："
+msgstr "Цвет атрибута/скрипта:"
 
 #: WikidPad.xrc:0
 msgid "Attrs. to"
-msgstr "属性用于"
+msgstr "Атрибуты, которые"
 
 #: WikidPad.xrc:0
 msgid "Auto-hide"
-msgstr "自动隐藏"
+msgstr "Скрывать автоматически "
 
 #: WikidPad.xrc:0
 msgid "Auto-hide log window"
-msgstr "自动隐藏日志窗口"
+msgstr "Автоматически скрывать окно журнала"
 
 #: WikidPad.xrc:0
 msgid "Auto-hide structure window"
-msgstr "自动隐藏结构窗口"
+msgstr "Автоматически скрывать окно структуры"
 
 #: WikidPad.xrc:0
 msgid "Auto-show log window"
-msgstr "自动显示日志窗口"
+msgstr "Автоматически показывать окно журнала"
 
 #: WikidPad.xrc:0
 msgid "Auto-unbullets"
-msgstr "撤消自动编号"
+msgstr "Автоматически удалять маркёры списка"
 
 #: WikidPad.xrc:0
 msgid "Autosave active"
-msgstr "激活自动保存"
+msgstr "Включить автосохранение "
 
 #: WikidPad.xrc:0
 msgid "Avoid doubled snippets"
-msgstr "避免重复粘贴"
+msgstr "Избегать дублирования фрагментов"
 
 #: WikidPad.xrc:0
 msgid "Background color:"
-msgstr "背景色:"
+msgstr "Цвет фона:"
 
 #: WikidPad.xrc:0
 msgid "Background image:"
-msgstr "背景图片:"
+msgstr "Изображение фона:"
 
 #: WikidPad.xrc:0
 msgid "Basic wiki settings"
-msgstr "维基基本设置"
+msgstr "Основные установки Вики"
 
 #: WikidPad.xrc:0
 msgid "Before:"
-msgstr "之前:"
+msgstr "Перед:"
 
 #: WikidPad.xrc:0
 msgid "Below"
-msgstr "下列"
+msgstr "Снизу"
 
 #: WikidPad.xrc:0
 msgid "Between links:"
-msgstr "链接间："
+msgstr "Вставить между ссылками:"
 
 #: WikidPad.xrc:0
 msgid "Bookmark"
-msgstr "书签"
+msgstr "Поместить в закладки"
 
 #: WikidPad.xrc:0
 msgid "Bool&ean regex"
-msgstr "布尔正则表达式"
+msgstr "&Булево регулярное выражение"
 
 #: WikidPad.xrc:0
 msgid "Bottom"
-msgstr "底部"
+msgstr "Снизу"
 
 #: WikidPad.xrc:0
 msgid "C"
@@ -341,231 +342,231 @@ msgstr "C"
 
 #: WikidPad.xrc:0
 msgid "Cancel"
-msgstr "取消"
+msgstr "Отмена"
 
 #: WikidPad.xrc:0
 msgid "Change these only if you know what you are doing!"
-msgstr "改变这些仅当明知需要做什么！"
+msgstr "Изменяйте, только если вы знаете, что делаете!"
 
 #: WikidPad.xrc:0
 msgid "Choose Wiki Word"
-msgstr "选择维基字"
+msgstr "Выберите вики-слово"
 
 #: WikidPad.xrc:0
 msgid "Choose date format"
-msgstr "选择日期格式"
+msgstr "Определите формат даты"
 
 #: WikidPad.xrc:0
 msgid "Choose plain text font"
-msgstr "选择普通文本字体"
+msgstr "Выбор шрифта основного текста"
 
 #: WikidPad.xrc:0
 msgid "Chronological View"
-msgstr "时序图"
+msgstr "Хронология"
 
 #: WikidPad.xrc:0
 msgid "Clear"
-msgstr "清除"
+msgstr "Очистить"
 
 #: WikidPad.xrc:0
 msgid "Clear List"
-msgstr "清除列表"
+msgstr "Очистить список"
 
 #: WikidPad.xrc:0
 msgid "Clone tab"
-msgstr "克隆标签页"
+msgstr "Дублировать вкладку"
 
 #: WikidPad.xrc:0
 msgid "Close tab"
-msgstr "关闭标签页"
+msgstr "Закрыть вкладку"
 
 #: WikidPad.xrc:0
 msgid "Collapse whole tree"
-msgstr "全部折叠"
+msgstr "Свернуть всё дерево"
 
 #: WikidPad.xrc:0
 msgid "Compatible filenames"
-msgstr "兼容文件名"
+msgstr "Совместимые имена файлов"
 
 #: WikidPad.xrc:0
 msgid "Config. dir."
-msgstr "配置文件目录"
+msgstr "Папка конфигурации"
 
 #: WikidPad.xrc:0
 msgid "Copy URL to clipboard"
-msgstr "复制URL到剪贴板"
+msgstr "Копировать URL в буфер"
 
 #: WikidPad.xrc:0
 msgid "Copy into file storage"
-msgstr "复制到文件存储区"
+msgstr "Копировать в файлохранилище"
 
 #: WikidPad.xrc:0
 msgid "Copy to clipboard:"
-msgstr "复制到剪贴板"
+msgstr "Копировать в буфер:"
 
 #: WikidPad.xrc:0
 msgid "Count Occurrences up to max.:"
-msgstr "匹配次数上限:"
+msgstr "Всего найти максимум:"
 
 #: WikidPad.xrc:0
 msgid "Create wiki lock file"
-msgstr "创建维基文件锁"
+msgstr "Создавать файл блокировки"
 
 #: WikidPad.xrc:0
 msgid "Current subtree"
-msgstr "当前子树"
+msgstr "Текущее поддерево"
 
 #: WikidPad.xrc:0
 msgid "Current wiki page"
-msgstr "当前维基页"
+msgstr "Текущую вики-страницу"
 
 #: WikidPad.xrc:0
 msgid "Custom..."
-msgstr "自定义..."
+msgstr "Выбрать..."
 
 #: WikidPad.xrc:0
 msgid "DOCTYPE:"
-msgstr "文档类型:"
+msgstr "DOCTYPE:"
 
 #: WikidPad.xrc:0
 msgid "Database"
-msgstr "数据库"
+msgstr "База данных"
 
 #: WikidPad.xrc:0
 msgid "Database type:"
-msgstr "数据库类型:"
+msgstr "Тип базы данных:"
 
 #: WikidPad.xrc:0
 msgid "Date format:"
-msgstr "日期格式:"
+msgstr "Формат даты:"
 
 #: WikidPad.xrc:0
 msgid "Default export dir.:"
-msgstr "默认导出目录:"
+msgstr "Папка по умолчанию для экспорта:"
 
 #: WikidPad.xrc:0
 msgid "Default open/new dir.:"
-msgstr "默认打开/创建目录:"
+msgstr "Папка по умолчанию для открытия/создания:"
 
 #: WikidPad.xrc:0
 msgid "Defaults"
-msgstr "默认值"
+msgstr "Значения по умолчанию"
 
 #: WikidPad.xrc:0
 msgid "Del"
-msgstr "删除"
+msgstr "Удалить"
 
 #: WikidPad.xrc:0
 msgid "Delay after key pressed:"
-msgstr "按键时滞:"
+msgstr "Задержка после нажатия клавиши:"
 
 #: WikidPad.xrc:0
 msgid "Delay after page dirty:"
-msgstr "脏页延迟:"
+msgstr "Задержка после изменения страницы:"
 
 #: WikidPad.xrc:0
 msgid "Delay before auto-close:"
-msgstr "自动关闭延迟"
+msgstr "Задержка перед автоматическим закрытием:"
 
 #: WikidPad.xrc:0
 msgid "Details"
-msgstr "细节"
+msgstr "Подробно"
 
 #: WikidPad.xrc:0
 msgid "Done"
-msgstr "完成"
+msgstr "Готово"
 
 #: WikidPad.xrc:0
 msgid "Down"
-msgstr "向下"
+msgstr "Вниз"
 
 #: WikidPad.xrc:0
 msgid "Dropping files with CTRL:"
-msgstr "按CTRL拖曳文件:"
+msgstr "Перетаскивание файлов с CTRL:"
 
 #: WikidPad.xrc:0
 msgid "Dropping files with SHIFT:"
-msgstr "按SHIFT拖曳文件:"
+msgstr "Перетаскивание файлов с SHIFT:"
 
 #: WikidPad.xrc:0
 msgid "Dropping files:"
-msgstr "拖曳文件:"
+msgstr "Перетаскивание файлов:"
 
 #: WikidPad.xrc:0
 msgid "Editor timing"
-msgstr "编辑器定时"
+msgstr "Задержки редактора"
 
 #: WikidPad.xrc:0
 msgid "Encoding:"
-msgstr "编码:"
+msgstr "Кодировка:"
 
 #: WikidPad.xrc:0
 msgid "Export"
-msgstr "导出"
+msgstr "Экспорт"
 
 #: WikidPad.xrc:0
 msgid "Export to:"
-msgstr "导出到:"
+msgstr "Экспорт в:"
 
 #: WikidPad.xrc:0
 msgid "Fast search defaults"
-msgstr "快速查找默认参数"
+msgstr "Значения по умолчанию для быстрого поиска"
 
 #: WikidPad.xrc:0
 msgid "File dropping"
-msgstr "丢失文件"
+msgstr "Перетаскивание файлов"
 
 #: WikidPad.xrc:0
 msgid "File storage identity check"
-msgstr "文件存储区身份检查"
+msgstr "Проверка идентичности файлов хранилища"
 
 #: WikidPad.xrc:0
 msgid "File type:"
-msgstr "文件类型:"
+msgstr "Тип файла:"
 
 #: WikidPad.xrc:0
 msgid "Filename must match"
-msgstr "文件名必须匹配"
+msgstr "Должно совпадать имя файла"
 
 #: WikidPad.xrc:0
 msgid "Filename prefix:"
-msgstr "文件扩展名:"
+msgstr "Префикс имени файла:"
 
 #: WikidPad.xrc:0
 msgid "First word at startup:"
-msgstr "启动显示窗口标题前缀:"
+msgstr "Первое слово при старте вики:"
 
 #: WikidPad.xrc:0
 msgid "Font name for HTML preview:"
-msgstr "HTML预览字体名称:"
+msgstr "Шрифт для просмотра HTML:"
 
 #: WikidPad.xrc:0
 msgid "Font:"
-msgstr "字体:"
+msgstr "Шрифт:"
 
 #: WikidPad.xrc:0
 msgid "Forbid cancel on search"
-msgstr "检索时禁止取消"
+msgstr "Запретить Отмену при поиске"
 
 #: WikidPad.xrc:0
 msgid "Force ScratchPad visibility in tree"
-msgstr "树中强制显示便笺内容"
+msgstr "Всегда показывать Черновик (ScratchPad) в дереве"
 
 #: WikidPad.xrc:0
 msgid "Format version"
-msgstr "格式版本"
+msgstr "Версия формата"
 
 #: WikidPad.xrc:0
 msgid "Given:"
-msgstr "给定："
+msgstr "Следующая:"
 
 #: WikidPad.xrc:0
 msgid "Go to next page"
-msgstr "转至下一页"
+msgstr "Перейти на следующую страницу"
 
 #: WikidPad.xrc:0
 msgid "Graceful handling of missing page files"
-msgstr "完美处理丢失页面文件"
+msgstr "Аккуратная обработка пропущенных файлов страниц"
 
 #: WikidPad.xrc:0
 msgid "HTML"
@@ -573,31 +574,31 @@ msgstr "HTML"
 
 #: WikidPad.xrc:0
 msgid "Heading of new pages"
-msgstr "新页面文件标题"
+msgstr "Заголовки новых страниц"
 
 #: WikidPad.xrc:0
 msgid "Heading prefix:"
-msgstr "标题前缀："
+msgstr "Префикс заголовка:"
 
 #: WikidPad.xrc:0
 msgid "Headings as aliases"
-msgstr "标题作为别名"
+msgstr "Заголовки как псевдонимы"
 
 #: WikidPad.xrc:0
 msgid "Hidden"
-msgstr "隐藏"
+msgstr "Скрыть"
 
 #: WikidPad.xrc:0
 msgid "Hide Log"
-msgstr "隐藏日志"
+msgstr "Скрыть журнал"
 
 #: WikidPad.xrc:0
 msgid "Hide undefined wiki words in Tree"
-msgstr "树中隐藏未定义维基字"
+msgstr "Не показывать в дереве не определённые вики-слова "
 
 #: WikidPad.xrc:0
 msgid "Highlight start delay:"
-msgstr "高亮启动延迟:"
+msgstr "Задержка начала выделения:"
 
 #: WikidPad.xrc:0
 msgid "IE"
@@ -605,39 +606,39 @@ msgstr "IE"
 
 #: WikidPad.xrc:0
 msgid "Icon:"
-msgstr "图标:"
+msgstr "Иконка:"
 
 #: WikidPad.xrc:0
 msgid "Ig&nore All"
-msgstr "忽略所有(&N)"
+msgstr "&Игнорировать всё"
 
 #: WikidPad.xrc:0
 msgid "Ignore wiki lock file"
-msgstr "忽略维基文件锁"
+msgstr "Игнорировать файл блокировки"
 
 #: WikidPad.xrc:0
 msgid "Image pasting"
-msgstr "粘贴图像"
+msgstr "Вставка картинок"
 
 #: WikidPad.xrc:0
 msgid "Import format:"
-msgstr "导入格式:"
+msgstr "Формат импорта:"
 
 #: WikidPad.xrc:0
 msgid "Import questions"
-msgstr "导入问题"
+msgstr "Настройка импорта"
 
 #: WikidPad.xrc:0
 msgid "Incremental search"
-msgstr "增量检索"
+msgstr "Пошаговый поиск"
 
 #: WikidPad.xrc:0
 msgid "Internal"
-msgstr "内部"
+msgstr "Внутренний"
 
 #: WikidPad.xrc:0
 msgid "Intersect"
-msgstr "交集"
+msgstr "Пересечение"
 
 #: WikidPad.xrc:0
 msgid "JPEG"
@@ -645,67 +646,67 @@ msgstr "JPEG"
 
 #: WikidPad.xrc:0
 msgid "Left"
-msgstr "向左"
+msgstr "Слева"
 
 #: WikidPad.xrc:0
 msgid "Left double click in preview:"
-msgstr "预览区左键双击:"
+msgstr "Двойной щелчок левой кнопкой в режиме просмотра:"
 
 #: WikidPad.xrc:0
 msgid "Link color:"
-msgstr "超链接颜色:"
+msgstr "Цвет ссылки:"
 
 #: WikidPad.xrc:0
 msgid "Load and R&un Export"
-msgstr "装载运行导出(&U)"
+msgstr "Загрузить &и запустить Экспорт"
 
 #: WikidPad.xrc:0
 msgid "Load and R&un Search"
-msgstr "装载运行检索(&U)"
+msgstr "Загрузить &и запустить Поиск"
 
 #: WikidPad.xrc:0
 msgid "Margin color:"
-msgstr "边界色:"
+msgstr "Цвет полей:"
 
 #: WikidPad.xrc:0
 msgid "Max. characters on each tab:"
-msgstr "每个标签最大字符数:"
+msgstr "Макс. число символов на каждой вкладке:"
 
 #: WikidPad.xrc:0
 msgid "Middle button with CTRL:"
-msgstr "按鼠标中键同时按CTRL:"
+msgstr "Средняя кнопка с CTRL:"
 
 #: WikidPad.xrc:0
 msgid "Middle button without CTRL:"
-msgstr "按鼠标中键:"
+msgstr "Средняя кнопка без CTRL:"
 
 #: WikidPad.xrc:0
 msgid "Middle click on tab:"
-msgstr "鼠标中键单击标签页:"
+msgstr "Средняя кнопка на вкладке:"
 
 #: WikidPad.xrc:0
 msgid "Minimize on close button"
-msgstr "关闭时最小化"
+msgstr "Минимизировать по кнопке закрытия"
 
 #: WikidPad.xrc:0
 msgid "Minimize to Tray"
-msgstr "最小化至托盘"
+msgstr "Минимизировать в трей"
 
 #: WikidPad.xrc:0
 msgid "Modif. date is enough"
-msgstr "修改日期是否足够"
+msgstr "Достаточно даты изменения"
 
 #: WikidPad.xrc:0
 msgid "Modif. date must match"
-msgstr "修改日期必须匹配"
+msgstr "Должна совпадать дата изменения"
 
 #: WikidPad.xrc:0
 msgid "Modify all links to the wiki word (unreliable!)"
-msgstr "修改指向该维基字的所有链接（不可靠！）"
+msgstr "Изменить все ссылки на вики-слово (опасно!)"
 
 #: WikidPad.xrc:0
 msgid "Move into file storage"
-msgstr "移动到文件存储区"
+msgstr "Переместить в файлохранилище"
 
 #: WikidPad.xrc:0
 msgid "Mozilla"
@@ -713,95 +714,95 @@ msgstr "Mozilla"
 
 #: WikidPad.xrc:0
 msgid "N. T. &Backgr."
-msgstr "新标签页在后台(&B)"
+msgstr "Новой вкладке в &фоне"
 
 #: WikidPad.xrc:0
 msgid "Natural"
-msgstr "固有"
+msgstr "Естественный"
 
 #: WikidPad.xrc:0
 msgid "New tab in background"
-msgstr "后台新建标签页"
+msgstr "Новая вкладка на заднем плане"
 
 #: WikidPad.xrc:0
 msgid "New tab in foreground"
-msgstr "前台新建标签页"
+msgstr "Новая вкладка на переднем плане"
 
 #: WikidPad.xrc:0
 msgid "New tab with edit"
-msgstr "新标签页（编辑）"
+msgstr "Новая вкладка в режиме редактирования"
 
 #: WikidPad.xrc:0
 msgid "New window on wiki URL"
-msgstr "维基链接打开新窗口"
+msgstr "Новое окно при открытии вики-URL"
 
 #: WikidPad.xrc:0
 msgid "Newest visited"
-msgstr "最新访问"
+msgstr "По возрастанию времени просмотра"
 
 #: WikidPad.xrc:0
 msgid "No cycles in tree"
-msgstr "树无循环"
+msgstr "Запретить циклы в дереве"
 
 #: WikidPad.xrc:0
 msgid "No global.import_scripts"
-msgstr "所有页执行import_scripts，不执行global.import_scripts"
+msgstr "Запретить global.import_scripts"
 
 #: WikidPad.xrc:0
 msgid "No import_scripts"
-msgstr "当前打开页执行import_scripts，其他页不执行。"
+msgstr "Запретить import_scripts"
 
 #: WikidPad.xrc:0
 msgid "No scripts"
-msgstr "无脚本"
+msgstr "Запретить скрипты"
 
 #: WikidPad.xrc:0
 msgid "No title"
-msgstr "无标题"
+msgstr "Без заголовка"
 
 #: WikidPad.xrc:0
 msgid "None"
-msgstr "没有"
+msgstr "Нет"
 
 #: WikidPad.xrc:0
 msgid "Not at all"
-msgstr "全不"
+msgstr "Никогда"
 
 #: WikidPad.xrc:0
 msgid "Nothing"
-msgstr "没有"
+msgstr "Ничего"
 
 #: WikidPad.xrc:0
 msgid "OK"
-msgstr "确定"
+msgstr "OK"
 
 #: WikidPad.xrc:0
 msgid "Oldest visited"
-msgstr "最久访问"
+msgstr "По убыванию времени просмотра"
 
 #: WikidPad.xrc:0
 msgid "Open in ..."
-msgstr "打开..."
+msgstr "Открыть в..."
 
 #: WikidPad.xrc:0
 msgid "Open in new window"
-msgstr "新窗口打开"
+msgstr "Открыть в новом окне"
 
 #: WikidPad.xrc:0
 msgid "Options"
-msgstr "选项"
+msgstr "Настройки"
 
 #: WikidPad.xrc:0
 msgid "Options page:"
-msgstr "选项卡:"
+msgstr "Страница настроек:"
 
 #: WikidPad.xrc:0
 msgid "Order pages:"
-msgstr "页排序："
+msgstr "Упорядочить страницы:"
 
 #: WikidPad.xrc:0
 msgid "Order:"
-msgstr "排序："
+msgstr "Порядок:"
 
 #: WikidPad.xrc:0
 msgid "PNG"
@@ -809,563 +810,563 @@ msgstr "PNG"
 
 #: WikidPad.xrc:0
 msgid "Page Setup"
-msgstr "页面设置"
+msgstr "Параметры страницы"
 
 #: WikidPad.xrc:0
 msgid "Page file names ASCII only"
-msgstr "页文件名仅为ASCII"
+msgstr "Имена файлов только в ASCII"
 
 #: WikidPad.xrc:0
 msgid "Page names matching regular expression:"
-msgstr "页名匹配正则表达式:"
+msgstr "Имена страниц удовлетворяют регулярному выражению:"
 
 #: WikidPad.xrc:0
 msgid "Page separator:"
-msgstr "页分隔符:"
+msgstr "Разделитель страниц:"
 
 #: WikidPad.xrc:0
 msgid "Pages in list and "
-msgstr "列表页面与"
+msgstr "Страницы списка и "
 
 #: WikidPad.xrc:0
 msgid "Paste File"
-msgstr "粘贴文件"
+msgstr "Вставить файл"
 
 #: WikidPad.xrc:0
 msgid "Paste Image"
-msgstr "粘贴图像"
+msgstr "Вставить изображение"
 
 #: WikidPad.xrc:0
 msgid "Paste from clipboard:"
-msgstr "从剪贴板粘贴:"
+msgstr "Вставить из буфера:"
 
 #: WikidPad.xrc:0
 msgid "Path or URL:"
-msgstr "路径或URL:"
+msgstr "Путь или URL:"
 
 #: WikidPad.xrc:0
 msgid "Path to file launcher:"
-msgstr "文件加载路径:"
+msgstr "Путь к программе-обработчику файла:"
 
 #: WikidPad.xrc:0
 msgid "Plain text"
-msgstr "普通文本"
+msgstr "Простой текст"
 
 #: WikidPad.xrc:0
 msgid "Plain text color:"
-msgstr "普通文本颜色:"
+msgstr "Цвет простого текста:"
 
 #: WikidPad.xrc:0
 msgid "Position main tree:"
-msgstr "主干树位置:"
+msgstr "Расположение главного дерева:"
 
 #: WikidPad.xrc:0
 msgid "Position view tree:"
-msgstr "视图树位置:"
+msgstr "Расположение дерева представлений:"
 
 #: WikidPad.xrc:0
 msgid "Position:"
-msgstr "位置:"
+msgstr "Расположение:"
 
 #: WikidPad.xrc:0
 msgid "Prefer memory where possible"
-msgstr "尽可能优先使用内存"
+msgstr "По возможности, использовать память"
 
 #: WikidPad.xrc:0
 msgid "Prepend before clipboard snippet:"
-msgstr "插入剪贴板片段:"
+msgstr "Вставить перед фрагментом из буфера:"
 
 #: WikidPad.xrc:0
 msgid "Prepend before links:"
-msgstr "链接前插入:"
+msgstr "Вставить перед ссылками:"
 
 #: WikidPad.xrc:0
 msgid "Prepend wiki word"
-msgstr "插入维基字"
+msgstr "Добавить вики-слово в начало"
 
 #: WikidPad.xrc:0
 msgid "Preview"
-msgstr "预览"
+msgstr "Просмотр"
 
 #: WikidPad.xrc:0
 msgid "Preview renderer:"
-msgstr "渲染引擎:"
+msgstr "Браузер для режима просмотра:"
 
 #: WikidPad.xrc:0
 msgid "Preview:"
-msgstr "预览:"
+msgstr "Предварительный просмотр:"
 
 #: WikidPad.xrc:0
 msgid "Print"
-msgstr "打印"
+msgstr "Печать"
 
 #: WikidPad.xrc:0
 msgid "Print as:"
-msgstr "打印为:"
+msgstr "Печатать как..."
 
 #: WikidPad.xrc:0
 msgid "Process auto-generated areas"
-msgstr "进程自动生成区域"
+msgstr "Обработать автоматически создаваемые области"
 
 #: WikidPad.xrc:0
 msgid "Process insertion scripts"
-msgstr "进程插入脚本"
+msgstr "Обрабатывать вставные скрипты"
 
 #: WikidPad.xrc:0
 msgid "Quality:"
-msgstr "质量:"
+msgstr "Качество:"
 
 #: WikidPad.xrc:0
 msgid "R&egular expression"
-msgstr "正则表达式(&E)"
+msgstr "&Регулярное выражение"
 
 #: WikidPad.xrc:0
 msgid "Read-only wiki"
-msgstr "只读维基"
+msgstr "Вики только для чтения"
 
 #: WikidPad.xrc:0
 msgid "Recent wikis list length:"
-msgstr "最近维基列表长度:"
+msgstr "Длина списка недавних вики:"
 
 #: WikidPad.xrc:0
 msgid "Relative URL"
-msgstr "相对URL"
+msgstr "Относительный URL"
 
 #: WikidPad.xrc:0
 msgid "Remember expanded tree nodes:"
-msgstr "记住已展开树结点:"
+msgstr "Запоминать раскрытые узлы дерева:"
 
 #: WikidPad.xrc:0
 msgid "Rename"
-msgstr "改名"
+msgstr "Переименовать"
 
 #: WikidPad.xrc:0
 msgid "Rename Word:"
-msgstr "改字："
+msgstr "Переименовать слово:"
 
 #: WikidPad.xrc:0
 msgid "Rename dialog defaults"
-msgstr "修改对话框默认值"
+msgstr "Установки по умолчанию диалога переименования"
 
 #: WikidPad.xrc:0
 msgid "Replace &All"
-msgstr "全部替换(&A)"
+msgstr "Заменить &всё"
 
 #: WikidPad.xrc:0
 msgid "Replace By"
-msgstr "替换"
+msgstr "Заменить на"
 
 #: WikidPad.xrc:0
 msgid "Replace with:"
-msgstr "替换为:"
+msgstr "Заменить на:"
 
 #: WikidPad.xrc:0
 msgid "Result"
-msgstr "结果"
+msgstr "Результат"
 
 #: WikidPad.xrc:0
 msgid "Reverse script search order (global imports first)"
-msgstr "反序查找(全局导入优先)"
+msgstr "Обратный порядок поиска скриптов (начая с global imports)"
 
 #: WikidPad.xrc:0
 msgid "Right"
-msgstr "向右"
+msgstr "Справа"
 
 #: WikidPad.xrc:0
 msgid "Same Tab"
-msgstr "相同标签页"
+msgstr "Та же вкладка"
 
 #: WikidPad.xrc:0
 msgid "Saved Exports:"
-msgstr "已保存导出:"
+msgstr "Сохранённые Экспорты:"
 
 #: WikidPad.xrc:0
 msgid "Saved Searches:"
-msgstr "已保存搜索:"
+msgstr "Сохранённые Поиски:"
 
 #: WikidPad.xrc:0
 msgid "Script security:"
-msgstr "脚本安全性:"
+msgstr "Безопасность скриптов:"
 
 #: WikidPad.xrc:0
 msgid "Search Page"
-msgstr "搜索页"
+msgstr "Искать на странице"
 
 #: WikidPad.xrc:0
 msgid "Search Wiki"
-msgstr "搜索维基"
+msgstr "Искать в Вики"
 
 #: WikidPad.xrc:0
 msgid "Search from"
-msgstr "搜索于"
+msgstr "Начинать с"
 
 #: WikidPad.xrc:0
 msgid "Search text"
-msgstr "搜索文本"
+msgstr "Найти текст"
 
 #: WikidPad.xrc:0
 msgid "Select facename"
-msgstr "选择字体名"
+msgstr "Выберите шрифт"
 
 #: WikidPad.xrc:0
 msgid "Selection bg. color:"
-msgstr "选区背景色:"
+msgstr "Цвет фона выделения:"
 
 #: WikidPad.xrc:0
 msgid "Selection fg. color:"
-msgstr "选区前景色:"
+msgstr "Цвет фона текста:"
 
 #: WikidPad.xrc:0
 msgid "Separate files"
-msgstr "单独文件"
+msgstr "Отдельные файлы"
 
 #: WikidPad.xrc:0
 msgid "Set As Root"
-msgstr "设为根"
+msgstr "Установить как корневую"
 
 #: WikidPad.xrc:0
 msgid "Short hint delay:"
-msgstr "短提示延迟:"
+msgstr "Задержка короткой подсказки:"
 
 #: WikidPad.xrc:0
 msgid "Shortcut:"
-msgstr "快捷方式:"
+msgstr "Быстрая клавиша:"
 
 #: WikidPad.xrc:0
 msgid "Show in toolbar"
-msgstr "在任务栏显示"
+msgstr "Показать в панели инструментов"
 
 #: WikidPad.xrc:0
 msgid "Show pics as links in export"
-msgstr "导出时显示图片为链接"
+msgstr "Показать при экспорте изображения как ссылки"
 
 #: WikidPad.xrc:0
 msgid "Show pics as links in preview"
-msgstr "预览时显示图片为链接"
+msgstr "Показать при просмотре изображения как ссылки"
 
 #: WikidPad.xrc:0
 msgid "Show pictures as links"
-msgstr "显示图片为链接"
+msgstr "Показать изображения как ссылки"
 
 #: WikidPad.xrc:0
 msgid "Show word list on hovering"
-msgstr "悬停时显示词列表"
+msgstr "Показать список слов при наведении курсора"
 
 #: WikidPad.xrc:0
 msgid "Show word list on select"
-msgstr "选择时显示词列表"
+msgstr "Показать список слов при выборе"
 
 #: WikidPad.xrc:0
 msgid "Si&mple regex"
-msgstr "简单正则表达式"
+msgstr "&Простое регулярное выражение"
 
 #: WikidPad.xrc:0
 msgid "Single page separator lines:"
-msgstr "单个页面分隔线:"
+msgstr "Разделители отдельных страниц:"
 
 #: WikidPad.xrc:0
 msgid "Single process per user*"
-msgstr "单用户单进程*"
+msgstr "Один процесс на пользователя*"
 
 #: WikidPad.xrc:0
 msgid "Sort"
-msgstr "排序"
+msgstr "Сортировать"
 
 #: WikidPad.xrc:0
 msgid "Sort alphabetically"
-msgstr "按字母排序"
+msgstr "Сортировать по алфавиту"
 
 #: WikidPad.xrc:0
 msgid "Sort order:"
-msgstr "排序方式:"
+msgstr "Порядок сортировки:"
 
 #: WikidPad.xrc:0
 msgid "Sound"
-msgstr "声音"
+msgstr "Звук"
 
 #: WikidPad.xrc:0
 msgid "Sound file:"
-msgstr "音频文件:"
+msgstr "Файл звука:"
 
 #: WikidPad.xrc:0
 msgid "Spell Check"
-msgstr "拼写检查"
+msgstr "Правописание"
 
 #: WikidPad.xrc:0
 msgid "Start browser after export"
-msgstr "导出后开始浏览"
+msgstr "Запустить браузер после экспорта"
 
 #: WikidPad.xrc:0
 msgid "Statusbar time format:"
-msgstr "状态栏时间格式:"
+msgstr "Формат времени в строке состояния:"
 
 #: WikidPad.xrc:0
 msgid "Steps to complete version:"
-msgstr "距完全版本的进度:"
+msgstr "Шагов до завершения версии:"
 
 #: WikidPad.xrc:0
 msgid "Store relative pathes to wikis"
-msgstr "存储相对路径到维基"
+msgstr "Сохранять относительные пути в вики"
 
 #: WikidPad.xrc:0
 msgid "Structure window heading depth:"
-msgstr "大纲窗口标题深度:"
+msgstr "Глубина заголовков окна структуры:"
 
 #: WikidPad.xrc:0
 msgid "Structure window position:"
-msgstr "结构窗口位置:"
+msgstr "Расположение окна структуры:"
 
 #: WikidPad.xrc:0
 msgid "Structure window selection auto-follow"
-msgstr "结构窗口选区自动跟随"
+msgstr "Автоматически отслеживать выбор в окне структуры"
 
 #: WikidPad.xrc:0
 msgid "Swap From <-> To"
-msgstr "从 <-> 到交换"
+msgstr "Поменять местами сравниваемые страницы"
 
 #: WikidPad.xrc:0
 msgid "Switch Ed./Prev"
-msgstr "切换编辑/预览"
+msgstr "Переключить Редактор/Просмотр"
 
 #: WikidPad.xrc:0
 msgid "Switch Tabs in MRU order"
-msgstr "切换标签页按最近访问顺序"
+msgstr "Переключать на последнюю использованную вкладку"
 
 #: WikidPad.xrc:0
 msgid "Switch tab to edit"
-msgstr "切换标签页到编辑"
+msgstr "Переключить вкладку в режим редактирования"
 
 #: WikidPad.xrc:0
 msgid "Sync. highlighting limit:"
-msgstr "同步高亮限制:"
+msgstr "Предел синхр. выделения:"
 
 #: WikidPad.xrc:0
 msgid "Synchronize editor by preview selection"
-msgstr "预览选区同步编辑器"
+msgstr "Синхронизировать режим редактора с режимом просмотра"
 
 #: WikidPad.xrc:0
 msgid "System"
-msgstr "系统"
+msgstr "Системная"
 
 #: WikidPad.xrc:0
 msgid "Tab width:"
-msgstr "表格符宽度:"
+msgstr "Ширина вкладки:"
 
 #: WikidPad.xrc:0
 msgid "Table of contents:"
-msgstr "表格内容:"
+msgstr "Оглавление:"
 
 #: WikidPad.xrc:0
 msgid "Template page names reg. exp.:"
-msgstr "模板页面名称正则表达式："
+msgstr "Регулярное выражение для имён страниц шаблонов:"
 
 #: WikidPad.xrc:0
 msgid "Temporary file directory:"
-msgstr "临时文件目录:"
+msgstr "Папка для временных файлов:"
 
 #: WikidPad.xrc:0
 msgid "Temporary files"
-msgstr "临时文件"
+msgstr "Временные файлы"
 
 #: WikidPad.xrc:0
 msgid "Temporary path:"
-msgstr "临时文件路径:"
+msgstr "Временный путь:"
 
 #: WikidPad.xrc:0
 msgid "Test"
-msgstr "测试"
+msgstr "Проверка"
 
 #: WikidPad.xrc:0
 msgid "Text color:"
-msgstr "文本颜色:"
+msgstr "Цвет текста:"
 
 #: WikidPad.xrc:0
 msgid "Text cursor color:"
-msgstr "文本光标色:"
+msgstr "Цвет текстового курсора:"
 
 #: WikidPad.xrc:0
 msgid "Timeline"
-msgstr "时间轴"
+msgstr "Шкала времени"
 
 #: WikidPad.xrc:0
 msgid "Title of toc:"
-msgstr "目录标题:"
+msgstr "Заголовок оглавления:"
 
 #: WikidPad.xrc:0
 msgid "To Word:"
-msgstr "到字:"
+msgstr "В слово:"
 
 #: WikidPad.xrc:0
 msgid "To check"
-msgstr "去检测"
+msgstr "Проверить"
 
 #: WikidPad.xrc:0
 msgid "Top"
-msgstr "顶端"
+msgstr "Сверху"
 
 #: WikidPad.xrc:0
 msgid "Tree auto-follow"
-msgstr "树自动跟随"
+msgstr "Автоматическое слежение за деревом"
 
 #: WikidPad.xrc:0
 msgid "Tree auto-hide"
-msgstr "自动隐藏树"
+msgstr "Автоматически скрывать дерево"
 
 #: WikidPad.xrc:0
 msgid "Tree timing"
-msgstr "定时树"
+msgstr "Задержки дерева"
 
 #: WikidPad.xrc:0
 msgid "Tree update after save"
-msgstr "保存后更新树"
+msgstr "Обновлять дерево после сохранения"
 
 #: WikidPad.xrc:0
 msgid "UI Language:"
-msgstr "界面语言:"
+msgstr "Язык интерфейса:"
 
 #: WikidPad.xrc:0
 msgid "UTF-8 with BOM"
-msgstr "签名UTF-8"
+msgstr "UTF-8 с BOM"
 
 #: WikidPad.xrc:0
 msgid "UTF-8 without BOM"
-msgstr "UTF-8"
+msgstr "UTF-8 без BOM"
 
 #: WikidPad.xrc:0
 msgid "Unordered"
-msgstr "无序"
+msgstr "Без упорядочения"
 
 #: WikidPad.xrc:0
 msgid "Up"
-msgstr "向上"
+msgstr "Вверх"
 
 #: WikidPad.xrc:0
 msgid "Up to heading depth:"
-msgstr "标题深度上限"
+msgstr "До заголовка глубины:"
 
 #: WikidPad.xrc:0
 msgid "Update step min. delay:"
-msgstr "更新延迟分钟数："
+msgstr "Мин. задержка шага обновления:"
 
 #: WikidPad.xrc:0
 msgid "Uppercase first"
-msgstr "大写优先"
+msgstr "Сначала заглавные"
 
 #: WikidPad.xrc:0
 msgid "Use IME workaround for editor input*"
-msgstr "编辑器使用输入法输入*"
+msgstr "Использовать \"заплатку\" IME для ввода в редакторе*"
 
 #: WikidPad.xrc:0
 msgid "Use link title if present"
-msgstr "如果当前使用标题链接"
+msgstr "Использовать название ссылки, если есть"
 
 #: WikidPad.xrc:0
 msgid "User notification:"
-msgstr "用户统治:"
+msgstr "Предупреждение пользователя:"
 
 #: WikidPad.xrc:0
 msgid "Version Import"
-msgstr "导入版本"
+msgstr "Импорт версий"
 
 #: WikidPad.xrc:0
 msgid "Visited link color:"
-msgstr "已访问链接颜色:"
+msgstr "Цвет посещённой ссылки:"
 
 #: WikidPad.xrc:0
 msgid "Warn about other processes (Windows only)"
-msgstr "对其他进程警告（仅Windows）"
+msgstr "Предупреждать о других процессах (только для Windows)"
 
 #: WikidPad.xrc:0
 msgid "What to export:"
-msgstr "导出范围:"
+msgstr "Что экспортировать:"
 
 #: WikidPad.xrc:0
 msgid "What to print:"
-msgstr "打印区域:"
+msgstr "Печатать:"
 
 #: WikidPad.xrc:0
 msgid "Where to store:"
-msgstr "存储位置:"
+msgstr "Где сохранять:"
 
 #: WikidPad.xrc:0
 msgid "While wiki open"
-msgstr "当维基打开时"
+msgstr "Пока открыта вики"
 
 #: WikidPad.xrc:0
 msgid "Whole wiki"
-msgstr "整个维基"
+msgstr "Всю вики"
 
 #: WikidPad.xrc:0
 msgid "Wiki Search"
-msgstr "搜索维基"
+msgstr "Найти в Вики"
 
 #: WikidPad.xrc:0
 msgid "Wiki Word"
-msgstr "维基字"
+msgstr "Вики-слово"
 
 #: WikidPad.xrc:0
 msgid "Wiki icon:"
-msgstr "维基图标:"
+msgstr "Иконка Вики:"
 
 #: WikidPad.xrc:0
 msgid "Wiki language:"
-msgstr "维基语言:"
+msgstr "Синтаксис Вики:"
 
 #: WikidPad.xrc:0
 msgid "Wiki word to heading:"
-msgstr "维基字至标题:"
+msgstr "Вики-слово как заголовок:"
 
 #: WikidPad.xrc:0
 msgid "Wiki-bound hotkey:"
-msgstr "维基绑定热键:"
+msgstr "Горячая клавиша этой Вики:"
 
 #: WikidPad.xrc:0
 msgid "Wiki-wide search"
-msgstr "维基广度搜索"
+msgstr "Поиск по всей Вики"
 
 #: WikidPad.xrc:0
 msgid "Write saved searches"
-msgstr "写入保存结果"
+msgstr "Записать сохранённые Поиски"
 
 #: WikidPad.xrc:0
 msgid "Write version data of pages"
-msgstr "写入页面版本数据"
+msgstr "Записать данные о версиях страниц"
 
 #: WikidPad.xrc:0
 msgid "Write wiki func. pages"
-msgstr "写入维基功能页"
+msgstr "Записать функц. страницы Вики"
 
 #: WikidPad.xrc:0
 msgid "bytes"
-msgstr "字节"
+msgstr "(байты)"
 
 #: WikidPad.xrc:0
 msgid "cursor"
-msgstr "光标"
+msgstr "позиции курсора"
 
 #: WikidPad.xrc:0
 msgid "include in export:"
-msgstr "导出包含:"
+msgstr "включать в экспорт"
 
 #: WikidPad.xrc:0
 msgid "include in preview:"
-msgstr "预览包含:"
+msgstr "включать в просмотр"
 
 #: WikidPad.xrc:0
 msgid "level(s) below"
-msgstr "如下级别"
+msgstr "уровней потомков"
 
 #: WikidPad.xrc:0
 msgid "milliseconds"
-msgstr "微秒"
+msgstr "(миллисекунды)"
 
 #: WikidPad.xrc:0
 msgid "not  "
-msgstr "否 "
+msgstr "не  "
 
 #: WikidPad.xrc:0
 msgid "second(s)"
-msgstr "秒"
+msgstr "(секунды)"
 
 #: WikidPad.xrc:0
 #: extensions\GraphvizStructureView.py:667
@@ -1376,36 +1377,36 @@ msgid "..."
 msgstr "..."
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:793
+#: lib\pwiki\AdditionalDialogs.py:794
 msgid " OK "
-msgstr "确定"
+msgstr " OK"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:797
+#: lib\pwiki\AdditionalDialogs.py:798
 msgid " Cancel "
-msgstr "取消"
+msgstr " Отмена"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:1265
+#: lib\pwiki\AdditionalDialogs.py:1266
 msgid "Destination directory:"
-msgstr "目的目录:"
+msgstr "Папка для сохранения:"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:1473
+#: lib\pwiki\AdditionalDialogs.py:1474
 #: lib\pwiki\SearchAndReplaceDialogs.py:1432
 msgid "Title:"
-msgstr "标题:"
+msgstr "Заголовок:"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:1771
+#: lib\pwiki\AdditionalDialogs.py:1772
 msgid "Source directory:"
-msgstr "源目录:"
+msgstr "Папка источника:"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\MptImporterGui.py:170
 #: lib\pwiki\MptImporterGui.py:172
 msgid "Yes"
-msgstr "是"
+msgstr "Да"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\MptImporterGui.py:170
@@ -1413,306 +1414,306 @@ msgstr "是"
 #: lib\pwiki\OptionsDialog.py:137
 #: lib\pwiki\OptionsDialog.py:854
 msgid "Default"
-msgstr "默认"
+msgstr "По умолчанию"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\MptImporterGui.py:171
 msgid "Overwrite"
-msgstr "覆写"
+msgstr "Заменить"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\MptImporterGui.py:171
 #: lib\pwiki\MptImporterGui.py:172
 msgid "No"
-msgstr "否"
+msgstr "Нет"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\MptImporterGui.py:195
 msgid "Import"
-msgstr "导入"
+msgstr "Импорт"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\OptionsDialog.py:670
 msgid "Versioning"
-msgstr "版本化"
+msgstr "Версии"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1220
 #: lib\pwiki\WikiTxtCtrl.py:3387
 msgid "Undo"
-msgstr "撤消"
+msgstr "Отменить"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1224
 #: lib\pwiki\WikiTxtCtrl.py:3388
 msgid "Redo"
-msgstr "重做"
+msgstr "Вернуть"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1240
 #: lib\pwiki\WikiTxtCtrl.py:3389
 msgid "Cut"
-msgstr "剪切"
+msgstr "Вырезать"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1245
 #: lib\pwiki\WikiTxtCtrl.py:3390
 msgid "Copy"
-msgstr "复制"
+msgstr "Копировать"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1249
 #: lib\pwiki\WikiTxtCtrl.py:3391
 msgid "Paste"
-msgstr "粘贴"
+msgstr "Вставить"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1254
 #: lib\pwiki\WikiTxtCtrl.py:3393
 msgid "Select All"
-msgstr "全选"
+msgstr "Выбрать всё"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1562
 msgid "&Delete"
-msgstr "删除(&D)"
+msgstr "&Удалить"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:1985
 #: lib\pwiki\PersonalWikiFrame.py:1986
 msgid "Open Wiki Word"
-msgstr "打开维基字"
+msgstr "Открыть вики-слово"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\PersonalWikiFrame.py:2010
 #: lib\pwiki\PersonalWikiFrame.py:2011
 msgid "Rename Wiki Word"
-msgstr "更改维基字"
+msgstr "Переименовать вики-слово"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\SearchAndReplaceDialogs.py:819
 msgid "Close"
-msgstr "关闭"
+msgstr "Закрыть"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\SearchAndReplaceDialogs.py:1658
 msgid "Set page list"
-msgstr "设置页面清单"
+msgstr "Задать фильтр страниц"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\SearchAndReplaceDialogs.py:1906
 msgid "As Resultlist"
-msgstr "结果列表"
+msgstr "Как список"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\SearchAndReplaceDialogs.py:1911
 #: lib\pwiki\SearchAndReplaceDialogs.py:2017
 msgid "As Full Search"
-msgstr "全文检索"
+msgstr "Как полный поиск"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\SearchAndReplaceDialogs.py:2311
 #: lib\pwiki\WikiHtmlView.py:711
 msgid "Activate New Tab"
-msgstr "激活新标签卡"
+msgstr "Открыть в новой вкладке"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\WikiTxtCtrl.py:3392
 msgid "Delete"
-msgstr "删除"
+msgstr "Удалить"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\WikiTxtCtrl.py:3407
 msgid "Close Tab"
-msgstr "关闭标签卡"
+msgstr "Закрыть вкладку"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\timeView\TimelinePanel.py:798
 msgid "Show empty days"
-msgstr "显示空日"
+msgstr "Показать пустые дни"
 
 #: WikidPad.xrc:0
 #: lib\pwiki\timeView\TimelinePanel.py:800
 msgid "Sort dates ascending"
-msgstr "按日期升序"
+msgstr "Сортировать даты по возрастанию"
 
 #: WikidPadStarter.py:196
 msgid "Error starting WikidPad"
-msgstr "WikidPad启动出错"
+msgstr "Ошибка при старте WikidPad"
 
 #: WikidPadStarter.py:197
 #: lib\pwiki\PersonalWikiFrame.py:5129
 #: lib\pwiki\SearchAndReplaceDialogs.py:688
 #: lib\pwiki\SearchAndReplaceDialogs.py:968
 msgid "Error!"
-msgstr "错误！"
+msgstr "Ошибка!"
 
 #: WikidPadStarter.py:204
 #: lib\pwiki\MptImporterGui.py:199
 msgid "Error"
-msgstr "错误"
+msgstr "Ошибка"
 
 #: extensions\GnuplotClBridge.py:91
 msgid "[Please set path to Gnuplot executable]"
-msgstr "[请设置Gnuplots可执行文件路径l]"
+msgstr "[Пожалуйста, укажите путь к программе Gnuplot]"
 
 #: extensions\GnuplotClBridge.py:129
 msgid "[Gnuplot error: %s]"
-msgstr "[Gnuplot错误: %s]"
+msgstr "[Ошибка Gnuplot: %s]"
 
 #: extensions\GnuplotClBridge.py:180
 msgid "Path to Gnuplot:"
-msgstr "Gnuplot路径:"
+msgstr "Путь к Gnuplot:"
 
 #: extensions\GraphvizClBridge.py:106
 msgid "[Please set path to GraphViz executables]"
-msgstr "[请设置GraphViz可执行文件路径]"
+msgstr "[Пожалуйста, укажите путь к программам GraphViz]"
 
 #: extensions\GraphvizClBridge.py:137
 msgid "[%s Error: %s]"
-msgstr "[%s 错误: %s]"
+msgstr "[%s Ошибка: %s]"
 
 #: extensions\GraphvizClBridge.py:238
 msgid "Directory of executables:"
-msgstr "可执行文件目录:"
+msgstr "Папка программ:"
 
 #: extensions\GraphvizClBridge.py:242
 msgid "Name of dot executable:"
-msgstr "dot可执行文件名:"
+msgstr "Имя программы dot:"
 
 #: extensions\GraphvizClBridge.py:246
 msgid "Name of neato executable:"
-msgstr "neato可执行文件名:"
+msgstr "Имя программы neato:"
 
 #: extensions\GraphvizClBridge.py:250
 msgid "Name of twopi executable:"
-msgstr "twopi可执行文件名:"
+msgstr "Имя программы twopi:"
 
 #: extensions\GraphvizClBridge.py:254
 msgid "Name of circo executable:"
-msgstr "circo可执行文件名:"
+msgstr "Имя программы circo:"
 
 #: extensions\GraphvizClBridge.py:258
 msgid "Name of fdp executable:"
-msgstr "fdp可执行文件名"
+msgstr "Имя программы fdp:"
 
 #: extensions\GraphvizStructureView.py:355
 msgid "%s Error: %s"
-msgstr "%s 错误: %s"
+msgstr "%s Ошибка: %s"
 
 #: extensions\GraphvizStructureView.py:421
 #: extensions\GraphvizStructureView.py:422
 msgid "Show relation graph"
-msgstr "显示关系图"
+msgstr "Граф отношений"
 
 #: extensions\GraphvizStructureView.py:424
 msgid "Show rel. graph source"
-msgstr "显示关系图来源"
+msgstr "Скрипт графа отношений"
 
 #: extensions\GraphvizStructureView.py:426
 msgid "Show relation graph source"
-msgstr "显示关系图来源"
+msgstr "Показать скрипт для создания графа отношений"
 
 #: extensions\GraphvizStructureView.py:428
 #: extensions\GraphvizStructureView.py:429
 msgid "Show child graph"
-msgstr "显示子图"
+msgstr "Граф потомков"
 
 #: extensions\GraphvizStructureView.py:431
 #: extensions\GraphvizStructureView.py:433
 msgid "Show child graph source"
-msgstr "显示子图来源"
+msgstr "Скрипт графа потомков"
 
 #: extensions\GraphvizStructureView.py:650
 msgid "  GraphVizStructure"
-msgstr "  GraphViz-struktur"
+msgstr "  GraphVizStructure"
 
 #: extensions\GraphvizStructureView.py:670
 msgid "Node font name:"
-msgstr "结点字体名称:"
+msgstr "Шрифт узла"
 
 #: extensions\GraphvizStructureView.py:682
 msgid "Node font size:"
-msgstr "结点字体大小:"
+msgstr "Размер шрифта узла:"
 
 #: extensions\GraphvizStructureView.py:694
 msgid "Node border color:"
-msgstr "结点边框色:"
+msgstr "Цвет рамки узла:"
 
 #: extensions\GraphvizStructureView.py:707
 msgid "Node background color:"
-msgstr "结点背景色:"
+msgstr "Цвет фона узла:"
 
 #: extensions\GraphvizStructureView.py:720
 msgid "Edge color:"
-msgstr "边缘色:"
+msgstr "Цвет границы:"
 
 #: extensions\MimeTexCGIBridge.py:92
 msgid "[Please set path to MimeTeX executable]"
-msgstr "[请设置MimeTeX可执行文件路径]"
+msgstr "[Пожалуйста, укажите путь к программам MimeTeX]"
 
 #: extensions\MimeTexCGIBridge.py:111
 msgid "[Invalid response from MimeTeX]"
-msgstr "[MimeTeX响应无效]"
+msgstr "[Неверный ответ MimeTeX]"
 
 #: extensions\MimeTexCGIBridge.py:172
 msgid "Path to MimeTeX:"
-msgstr "MimeTeX路径:"
+msgstr "Путь к MimeTeX:"
 
 #: extensions\PloticusClBridge.py:108
 msgid "[Please set path to Ploticus executable]"
-msgstr "[设置Ploticus可执行文件路径]"
+msgstr "[Пожалуйста, укажите путь к программе Ploticus]"
 
 #: extensions\PloticusClBridge.py:140
 msgid "[Ploticus error: %s]"
-msgstr "[Ploticus错误: %s]"
+msgstr "[Ошибка Ploticus: %s]"
 
 #: extensions\PloticusClBridge.py:200
 msgid "Path to Ploticus:"
-msgstr "Ploticus路径:"
+msgstr "Путь к Ploticus:"
 
 #: extensions\PloticusClBridge.py:206
 msgid "Output format:"
-msgstr "输出格式:"
+msgstr "Формат вывода:"
 
 #: extensions\WikidPadParserStub.py:121
 msgid "Footnotes as wiki words"
-msgstr "脚注作为维基字"
+msgstr "Сноски как вики-слова"
 
 #: extensions\autoNew.py:58
 #: extensions\autoNew.py:59
 msgid "Create new page"
-msgstr "创建新页面"
+msgstr "Создать новую страницу"
 
 #: extensions\referrals.py:74
 #: extensions\referrals.py:75
 #: extensions\referrals.py:109
 #: extensions\referrals.py:129
 msgid "Insert referring pages"
-msgstr "插入引用页"
+msgstr "Вставить ссылки для текущей страницы"
 
 #: extensions\referrals.py:109
 #: extensions\referrals.py:129
 msgid "Referers"
-msgstr "引用"
+msgstr "Ссылки страницы"
 
 #: extensions\referrals.py:147
 msgid "*%s page(s) referring to* %s\n"
-msgstr "*%s页面关联l* %s\n"
+msgstr "*Всего %s стр. ссылается на страницу* %s:\n"
 
 #: extensions\referrals.py:156
 msgid "*%s page(s) referred to by* %s\n"
-msgstr "*%s页面通过* %s关联\n"
+msgstr "*Всего на %s стр. ссылается страница* %s:\n"
 
 #: extensions\wikidPadParser\WikidPadParser.py:1580
 #: extensions\wikidPadParser\WikidPadParser.py:1607
 msgid "This is a footnote"
-msgstr "这是脚注。"
+msgstr "Это сноска"
 
 #: extensions\wikidPadParser\WikidPadParser.py:1585
 #: extensions\wikidPadParser\WikidPadParser.py:1612
 msgid "This is syntactically not a wiki word"
-msgstr "在语法上这不是个维基字。"
+msgstr "Синтаксическая ошибка в вики-слове"
 
 #: extensions\wikidPadParser\WikidPadParser.py:2234
 msgid ""
@@ -1727,9 +1728,9 @@ msgid ""
 "\n"
 "[icon: cog]\n"
 msgstr ""
-"++ 维基设置\n"
+"++ Wiki Settings\n"
 "\n"
-"如下是你默认的全局设置。\n"
+"Это ваши глобальные установки по умолчанию.\n"
 "\n"
 "[global.importance.low.color: grey]\n"
 "[global.importance.high.bold: true]\n"
@@ -1738,63 +1739,63 @@ msgstr ""
 "\n"
 "[icon: cog]\n"
 
-#: lib\pwiki\AdditionalDialogs.py:145
-#: lib\pwiki\AdditionalDialogs.py:356
+#: lib\pwiki\AdditionalDialogs.py:146
+#: lib\pwiki\AdditionalDialogs.py:357
 msgid "Links to:"
-msgstr "链接至:"
+msgstr "Ссылки на:"
 
-#: lib\pwiki\AdditionalDialogs.py:286
-#: lib\pwiki\AdditionalDialogs.py:398
+#: lib\pwiki\AdditionalDialogs.py:287
+#: lib\pwiki\AdditionalDialogs.py:399
 msgid "'%s' is an invalid WikiWord"
-msgstr "'%s'是无效的维基字。"
-
-#: lib\pwiki\AdditionalDialogs.py:293
-msgid "'%s' is not an existing wikiword. Create?"
-msgstr "'%s' 不存在该维基字。是否新建?"
+msgstr "'%s' - неверное вики-слово"
 
 #: lib\pwiki\AdditionalDialogs.py:294
+msgid "'%s' is not an existing wikiword. Create?"
+msgstr "Вики-слово '%s' не существует. Создать?"
+
+#: lib\pwiki\AdditionalDialogs.py:295
 msgid "Create"
-msgstr "创建"
+msgstr "Создать"
 
-#: lib\pwiki\AdditionalDialogs.py:404
+#: lib\pwiki\AdditionalDialogs.py:405
 msgid "'%s' exists already"
-msgstr "'%s' 已存在"
+msgstr "'%s' уже существует"
 
-#: lib\pwiki\AdditionalDialogs.py:418
-#: lib\pwiki\AdditionalDialogs.py:511
+#: lib\pwiki\AdditionalDialogs.py:419
+#: lib\pwiki\AdditionalDialogs.py:512
 msgid "Do you want to delete %i wiki page(s)?"
-msgstr "你确定要删除%i维基页吗?"
+msgstr "Выбрано страниц для удаления: %i. Удалить?"
 
-#: lib\pwiki\AdditionalDialogs.py:670
+#: lib\pwiki\AdditionalDialogs.py:671
 msgid ""
 "Can't process renaming:\n"
 "%s"
 msgstr ""
-"无法处理如下内容：\n"
+"Невозможно переименовать:\n"
 "%s"
 
-#: lib\pwiki\AdditionalDialogs.py:671
+#: lib\pwiki\AdditionalDialogs.py:672
 msgid "Can't rename"
-msgstr "无法改名"
+msgstr "Невозможно переименовать"
 
-#: lib\pwiki\AdditionalDialogs.py:709
+#: lib\pwiki\AdditionalDialogs.py:710
 msgid "Can't rename to itself"
-msgstr "无法改成原名"
+msgstr "Невозможно переименовать в себя"
 
-#: lib\pwiki\AdditionalDialogs.py:713
+#: lib\pwiki\AdditionalDialogs.py:714
 #: lib\pwiki\WikiExceptions.py:73
 msgid "Word already exists"
-msgstr "字已存在"
+msgstr "Слово уже существует"
 
-#: lib\pwiki\AdditionalDialogs.py:766
+#: lib\pwiki\AdditionalDialogs.py:767
 msgid "Select Icon"
-msgstr "选择图标"
+msgstr "Выберите иконку"
 
-#: lib\pwiki\AdditionalDialogs.py:775
+#: lib\pwiki\AdditionalDialogs.py:776
 msgid "Icon"
-msgstr "图标"
+msgstr "Иконка"
 
-#: lib\pwiki\AdditionalDialogs.py:926
+#: lib\pwiki\AdditionalDialogs.py:927
 msgid ""
 "<html>\n"
 "<body bgcolor=\"#FFFFFF\">\n"
@@ -1866,208 +1867,208 @@ msgstr ""
 "<body bgcolor=\"#FFFFFF\">\n"
 "\n"
 "<table border=\"1\" align=\"center\" style=\"border-collapse: collapse\">\n"
-"    <tr><td align=\"center\" valign=\"baseline\"><b>Directive</b></td>\n"
-"        <td align=\"left\"><b>含义</b></td></tr>\n"
+"    <tr><td align=\"center\" valign=\"baseline\"><b>Код</b></td>\n"
+"        <td align=\"left\"><b>Расшифровка</b></td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%a</code></td>\n"
-"        <td align=\"left\">本土化平日名</td></tr>\n"
+"        <td align=\"left\">Сокращённый день недели.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%A</code></td>\n"
-"        <td align=\"left\">本土化平日全名</td></tr>\n"
+"        <td align=\"left\">Полный день недели.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%b</code></td>\n"
-"        <td align=\"left\">本土化月份名</td></tr>\n"
+"        <td align=\"left\">Сокращённое название месяца.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%B</code></td>\n"
-"        <td align=\"left\">本土化月份全名</td></tr>\n"
+"        <td align=\"left\">Полное название месяца.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%c</code></td>\n"
-"        <td align=\"left\">本土化日期</td></tr>\n"
+"        <td align=\"left\">Локализованное представление даты и времени.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%d</code></td>\n"
-"        <td align=\"left\">天数（按月）十进制数 [01,31]</td></tr>\n"
+"        <td align=\"left\">День месяца в виде десятичного числа [01,31].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%H</code></td>\n"
-"        <td align=\"left\">小时(24小时制)十进制数[00,23]</td></tr>\n"
+"        <td align=\"left\">Час в виде десятичного числа [00,23].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%I</code></td>\n"
-"        <td align=\"left\">小时(12小时制)十进制数 [01,12]</td></tr>\n"
+"        <td align=\"left\">Час в виде десятичного числа [01,12].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%j</code></td>\n"
-"        <td align=\"left\">天数（按年）十进制数 [001,366]</td></tr>\n"
+"        <td align=\"left\">День года в виде десятичного числа [001,366].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%m</code></td>\n"
-"        <td align=\"left\">月份十进制数 [01,12]</td></tr>\n"
+"        <td align=\"left\">Месяц в виде десятичного числа [01,12].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%M</code></td>\n"
-"        <td align=\"left\">分钟十进制数 [00,59]</td></tr>\n"
+"        <td align=\"left\">Минуты в виде десятичного числа [00,59].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%p</code></td>\n"
-"        <td align=\"left\">本土化等价于AM（上午）或PM（下午）</td></tr>\n"
+"        <td align=\"left\">Локализованный эквивалент AM или PM.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%S</code></td>\n"
-"        <td align=\"left\">秒钟十进制数 [00,61].</td></tr>\n"
+"        <td align=\"left\">Секунды в виде десятичного числа [00,61].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%u</code></td>\n"
-"        <td align=\"left\">平日十进制数[1(周一),7].</td></tr>\n"
+"        <td align=\"left\">День недели в виде десятичного числа [1(Пн),7].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%U</code></td>\n"
-"        <td align=\"left\">周数(周日作为一周的首日\n"
-"                ) 十进制数 [00,53]. 新年所有天数\n"
-"                前述的第一个周日作为第0个周。</td></tr>\n"
+"        <td align=\"left\">Номер недели в году (Вс - первый день недели)\n"
+"                в виде десятичного числа [00,53].  Все дни в новом году,\n"
+"                предшествующие первому воскресенью имеют номер недели 0.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%w</code></td>\n"
-"        <td align=\"left\">平日十进制数 [0(周日),6].</td></tr>\n"
+"        <td align=\"left\">День недели в виде десятичного числа [0(Вс),6].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%W</code></td>\n"
-"        <td align=\"left\">周数(周一作为一周的首日\n"
-"                )十进制数[00,53].  新年所有天数\n"
-"                前述的第一个周一作为第0个周。</td></tr>\n"
+"        <td align=\"left\">Номер недели в году (Пн - первый день недели)\n"
+"                в виде десятичного числа [00,53].  Все дни в новом году,\n"
+"                предшествующие первому понедельнику имеют номер недели 0.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%x</code></td>\n"
-"        <td align=\"left\">本土化日期</td></tr>\n"
+"        <td align=\"left\">Локализованное представление даты.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%X</code></td>\n"
-"        <td align=\"left\">本土化时间</td></tr>\n"
+"        <td align=\"left\">Локализованное представление времени.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%y</code></td>\n"
-"        <td align=\"left\">年份（取消世纪数）十进制[00,99].</td></tr>\n"
+"        <td align=\"left\">Год без столетия в виде десятичного числа [00,99].</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%Y</code></td>\n"
-"        <td align=\"left\">年份十进制</td></tr>\n"
+"        <td align=\"left\">Год со столетием в виде десятичного числа.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%Z</code></td>\n"
-"        <td align=\"left\">时区名称(无时区显示空白).</td></tr>\n"
+"        <td align=\"left\">Временной пояс (ничего, если пояс не существует).</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>%%</code></td>\n"
-"        <td align=\"left\">序数 \"<tt class=\"character\">%</tt>\" </td></tr>\n"
+"        <td align=\"left\">Символ \"<tt class=\"character\">%</tt>\".</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>\\n"
 "</code></td>\n"
-"        <td align=\"left\">新行</td></tr>\n"
+"        <td align=\"left\">Новая строка.</td></tr>\n"
 "    <tr><td align=\"center\" valign=\"baseline\"><code>\\\\</code></td>\n"
-"        <td align=\"left\">序数\"<tt class=\"character\">\\</tt>\"</td></tr>\n"
+"        <td align=\"left\">Символ \"<tt class=\"character\">\\</tt>\".</td></tr>\n"
 "    </tbody>\n"
 "</table>\n"
 "</body>\n"
 "</html>\n"
 
-#: lib\pwiki\AdditionalDialogs.py:1036
+#: lib\pwiki\AdditionalDialogs.py:1037
 msgid "<invalid>"
-msgstr "<无效>"
+msgstr "<ошибка>"
 
-#: lib\pwiki\AdditionalDialogs.py:1166
+#: lib\pwiki\AdditionalDialogs.py:1167
 msgid "Continuous Export"
-msgstr "连续导出"
+msgstr "Непрерывный экспорт"
 
-#: lib\pwiki\AdditionalDialogs.py:1268
+#: lib\pwiki\AdditionalDialogs.py:1269
 msgid "Destination file:"
-msgstr "目的文件:"
+msgstr "Выберите файл:"
 
-#: lib\pwiki\AdditionalDialogs.py:1300
+#: lib\pwiki\AdditionalDialogs.py:1301
 msgid "Destination directory does not exist"
-msgstr "目的目录必须存在"
+msgstr "Целевая папка не существует"
 
-#: lib\pwiki\AdditionalDialogs.py:1305
+#: lib\pwiki\AdditionalDialogs.py:1306
 msgid "Destination must be a directory"
-msgstr "目的必须是目录"
+msgstr "Цель должна быть папкой"
 
-#: lib\pwiki\AdditionalDialogs.py:1311
+#: lib\pwiki\AdditionalDialogs.py:1312
 msgid "Destination must be a file"
-msgstr "目的必须是文件"
+msgstr "Цель должна быть файлом"
 
-#: lib\pwiki\AdditionalDialogs.py:1321
+#: lib\pwiki\AdditionalDialogs.py:1322
 #: lib\pwiki\PersonalWikiFrame.py:4700
 msgid "Exporting"
-msgstr "导出中"
+msgstr "Экспорт"
 
-#: lib\pwiki\AdditionalDialogs.py:1323
+#: lib\pwiki\AdditionalDialogs.py:1324
 #: lib\pwiki\PersonalWikiFrame.py:4702
 msgid "Preparing"
-msgstr "准备中"
+msgstr "Подготовка"
 
-#: lib\pwiki\AdditionalDialogs.py:1343
+#: lib\pwiki\AdditionalDialogs.py:1344
 msgid "Error while exporting"
-msgstr "导出时出错"
+msgstr "Ошибка при экспорте"
 
-#: lib\pwiki\AdditionalDialogs.py:1359
+#: lib\pwiki\AdditionalDialogs.py:1360
 #: lib\pwiki\PersonalWikiFrame.py:4645
 msgid "Select Export Directory"
-msgstr "选择导出目录"
+msgstr "Выберите папку для экспорта"
 
-#: lib\pwiki\AdditionalDialogs.py:1373
-#: lib\pwiki\AdditionalDialogs.py:1844
+#: lib\pwiki\AdditionalDialogs.py:1374
+#: lib\pwiki\AdditionalDialogs.py:1845
 msgid "All files (*.*)"
-msgstr "所有文件(*.*)"
+msgstr "Все файлы (*.*)"
 
-#: lib\pwiki\AdditionalDialogs.py:1378
+#: lib\pwiki\AdditionalDialogs.py:1379
 msgid "Select Export File"
-msgstr "选择导出文件"
+msgstr "Выберите файл для экспорта"
 
-#: lib\pwiki\AdditionalDialogs.py:1405
+#: lib\pwiki\AdditionalDialogs.py:1406
 #: lib\pwiki\PersonalWikiFrame.py:4669
 #: lib\pwiki\PersonalWikiFrame.py:4685
 #: lib\pwiki\Printing.py:182
 msgid "No real wiki word selected as root"
-msgstr "没有真正的维基字选定为根"
+msgstr "Нет реального вики-слова, выбранного как корневое"
 
-#: lib\pwiki\AdditionalDialogs.py:1474
+#: lib\pwiki\AdditionalDialogs.py:1475
 msgid "Choose export title"
-msgstr "选择导出标题"
-
-#: lib\pwiki\AdditionalDialogs.py:1483
-msgid "Do you want to overwrite existing export '%s'?"
-msgstr "你确定要覆写已经存在的'%s'导出文件吗?"
+msgstr "Выберите название Экспорта"
 
 #: lib\pwiki\AdditionalDialogs.py:1484
-msgid "Overwrite export"
-msgstr "覆盖导出"
+msgid "Do you want to overwrite existing export '%s'?"
+msgstr "Вы хотите заменить существующий Экспорт '%s'?"
 
-#: lib\pwiki\AdditionalDialogs.py:1531
-msgid "Do you want to delete %i export(s)?"
-msgstr "你确定要删除%i导出文件?"
+#: lib\pwiki\AdditionalDialogs.py:1485
+msgid "Overwrite export"
+msgstr "Заменить Экспорт"
 
 #: lib\pwiki\AdditionalDialogs.py:1532
+msgid "Do you want to delete %i export(s)?"
+msgstr "Выбрано экспортов: %i. Удалить?"
+
+#: lib\pwiki\AdditionalDialogs.py:1533
 msgid "Delete export"
-msgstr "删除导出"
+msgstr "Удалить Экспорт"
 
-#: lib\pwiki\AdditionalDialogs.py:1569
+#: lib\pwiki\AdditionalDialogs.py:1570
 msgid "Selected export type does not support saving"
-msgstr "所选导出类型不支持保存"
+msgstr "Выбранный тип экспорта не поддерживает сохранение"
 
-#: lib\pwiki\AdditionalDialogs.py:1613
+#: lib\pwiki\AdditionalDialogs.py:1614
 msgid "Export type '%s' of saved export is not supported"
-msgstr "已保存导出不支持导出类型 '%s'"
+msgstr "Тип экспорта '%s' для сохранённого Экспорта не поддерживается"
 
-#: lib\pwiki\AdditionalDialogs.py:1624
+#: lib\pwiki\AdditionalDialogs.py:1625
 msgid ""
 "Saved export uses different version for additional options than current export\n"
 "Export type: '%s'\n"
 "Saved export version: %i\n"
 "Current export version: %i"
 msgstr ""
-"已保存导出与当前导出使用不同版本的附加选项\n"
-"导出类型: '%s'\n"
-"已导出版本: %i\n"
-"当前导出版本: %i"
+"Сохранённый Экспорт использует версию дополнительных опций, отличную от текущего Экспорта\n"
+"Тип экспорта: '%s'\n"
+"Версия сохранённого экспорта: %i\n"
+"Версия текущего экспорта: %i"
 
-#: lib\pwiki\AdditionalDialogs.py:1632
+#: lib\pwiki\AdditionalDialogs.py:1633
 msgid "Type of additional option storage ('%s') is unknown"
-msgstr "附加存储选项类型 ('%s')未知"
+msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1663
+#: lib\pwiki\AdditionalDialogs.py:1664
 msgid "Error during retrieving saved export: "
-msgstr "获取保存导出时出错:"
+msgstr "Ошибка при чтении сохранённого экспорта:"
 
-#: lib\pwiki\AdditionalDialogs.py:1774
+#: lib\pwiki\AdditionalDialogs.py:1775
 msgid "Source file:"
-msgstr "源文件:"
+msgstr "Исходный файл:"
 
-#: lib\pwiki\AdditionalDialogs.py:1790
+#: lib\pwiki\AdditionalDialogs.py:1791
 msgid "Source does not exist"
-msgstr "源必须存在"
+msgstr "Источник не существует"
 
-#: lib\pwiki\AdditionalDialogs.py:1800
+#: lib\pwiki\AdditionalDialogs.py:1801
 msgid "Source must be a directory"
-msgstr "源必须是目录"
+msgstr "Источник должен быть папкой"
 
-#: lib\pwiki\AdditionalDialogs.py:1805
+#: lib\pwiki\AdditionalDialogs.py:1806
 msgid "Source must be a file"
-msgstr "源必须是文件"
+msgstr "Источник должен быть файлом"
 
-#: lib\pwiki\AdditionalDialogs.py:1816
+#: lib\pwiki\AdditionalDialogs.py:1817
 msgid "Error while importing"
-msgstr "导入时出错"
+msgstr "Ошибка при импорте"
 
-#: lib\pwiki\AdditionalDialogs.py:1830
+#: lib\pwiki\AdditionalDialogs.py:1831
 msgid "Select Import Directory"
-msgstr "选择导入目录"
+msgstr "Выберите папку импорта"
 
-#: lib\pwiki\AdditionalDialogs.py:1845
+#: lib\pwiki\AdditionalDialogs.py:1846
 msgid "*"
 msgstr "*"
 
-#: lib\pwiki\AdditionalDialogs.py:1849
+#: lib\pwiki\AdditionalDialogs.py:1850
 msgid "Select Import File"
-msgstr "选择导入文件"
+msgstr "Выберите файл импорта"
 
-#: lib\pwiki\AdditionalDialogs.py:1962
+#: lib\pwiki\AdditionalDialogs.py:1963
 msgid ""
 "\n"
 "<html>\n"
@@ -2098,7 +2099,12 @@ msgid ""
 "            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>Translations:</b></font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Chinese:</b></font></td><td nowrap><font size=\"3\">yuxiaoxu@msn.com</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Hungarian:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Swedish:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
+"\n"
+"\n"
+"\n"
 "        </table>\n"
 "    </center>\n"
 "    \n"
@@ -2125,27 +2131,32 @@ msgstr ""
 "            </tr>\n"
 "        </table>\n"
 "\n"
-"        <p align=left>\n"
-"wikidPad是维基风格化笔记，用于保存你的思想、方法、待办<BR>事项、往来以及任何其他你想记录下来的。<BR>\n"
-"wikidPad与其他笔记类应用软件相比与众不同的地方是<BR>你可以很方便地对你的信息进行交叉链接。</p>        \n"
+"        <p>\n"
+"wikidPad это википодобная записная книжка, в которой вы можете хранить ваши мысли, идеи, планы, контакты и всё остальное, что вы пожелаете записать.\n"
+"WikidPad отличает от других записных книжек проста, с которой вы можете создавать перекрёстные связи для вашей информации.        </p>        \n"
 "        <br><br>\n"
 "\n"
 "        <table border=0 cellpadding=1 cellspacing=0>\n"
-"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>作者：</b></font></td><td nowrap><font size=\"3\">Michael Butscher</font></td></tr>\n"
-"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>电子信箱：</b></font></td><td nowrap><font size=\"3\">mbutscher@gmx.de</font></td></tr>\n"
-"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>主页：</b></font></td><td nowrap><font size=\"3\">http://www.mbutscher.de/software.html</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Автор:</b></font></td><td nowrap><font size=\"3\">Michael Butscher</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">mbutscher@gmx.de</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>URL:</b></font></td><td nowrap><font size=\"3\">http://www.mbutscher.de/software.html</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
-"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>作者：</b></font></td><td nowrap><font size=\"3\">Jason Horman</font></td></tr>\n"
-"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>电子信箱：</b></font></td><td nowrap><font size=\"3\">wikidpad@jhorman.org</font></td></tr>\n"
-"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>主页：</b></font></td><td nowrap><font size=\"3\">http://www.jhorman.org/wikidPad/</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Автор:</b></font></td><td nowrap><font size=\"3\">Jason Horman</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">wikidpad@jhorman.org</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>URL:</b></font></td><td nowrap><font size=\"3\">http://www.jhorman.org/wikidPad/</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
-"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>作者：</b></font></td><td nowrap><font size=\"3\">Gerhard Reitmayr</font></td></tr>\n"
-"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>电子信箱：</b></font></td><td nowrap><font size=\"3\">gerhard.reitmayr@gmail.com</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Автор:</b></font></td><td nowrap><font size=\"3\">Gerhard Reitmayr</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">gerhard.reitmayr@gmail.com</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
-"            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>翻译:</b></font></td></tr>\n"
-"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>瑞典语:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
-"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>简体中文:</b></font></td><td nowrap><font size=\"3\">yuxiaoxu@msn.com</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>Переводы:</b></font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Венгерский:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Китайский:</b></font></td><td nowrap><font size=\"3\">yuxiaoxu@msn.com</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Русский:</b></font></td><td nowrap><font size=\"3\">Олег Доманов</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Шведский:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
+"\n"
+"\n"
+"\n"
 "        </table>\n"
 "    </center>\n"
 "    \n"
@@ -2154,382 +2165,380 @@ msgstr ""
 "    \n"
 "    <hr />\n"
 "    \n"
-"    <p>你的配置文件目录： <b>%s</b><br />\n"
-"    Sqlite版本号：<b>%s</b><br />\n"
-"    wxPython版本号：<b>%s</b>\n"
+"    <p>Ваша папка конфигурации: <b>%s</b><br />\n"
+"    Версия Sqlite: <b>%s</b><br />\n"
+"    Версия wxPython: <b>%s</b>\n"
 "    </p>\n"
 "    \n"
 "</body>\n"
 "</html>\n"
 
-#: lib\pwiki\AdditionalDialogs.py:2010
+#: lib\pwiki\AdditionalDialogs.py:2016
 #: lib\pwiki\PersonalWikiFrame.py:1903
 msgid "About WikidPad"
-msgstr "关于WikidPad"
+msgstr "О программе WikidPad"
 
-#: lib\pwiki\AdditionalDialogs.py:2014
+#: lib\pwiki\AdditionalDialogs.py:2020
 msgid "N/A"
-msgstr "N/A"
+msgstr "Нет данных"
 
-#: lib\pwiki\AdditionalDialogs.py:2024
+#: lib\pwiki\AdditionalDialogs.py:2030
 msgid "Okay"
-msgstr "好的"
+msgstr "OK"
 
-#: lib\pwiki\AdditionalDialogs.py:2132
+#: lib\pwiki\AdditionalDialogs.py:2138
 msgid "No wiki loaded"
-msgstr "没有装载维基"
-
-#: lib\pwiki\AdditionalDialogs.py:2136
-msgid "Wiki config. path:"
-msgstr "维基文件配置路径:"
+msgstr "Нет загруженных вики"
 
 #: lib\pwiki\AdditionalDialogs.py:2142
+msgid "Wiki config. path:"
+msgstr "Путь к конфигурации вики:"
+
+#: lib\pwiki\AdditionalDialogs.py:2148
 msgid "Wiki database backend:"
-msgstr "维基库后台:"
+msgstr "Тип базы данных:"
 
-#: lib\pwiki\AdditionalDialogs.py:2150
+#: lib\pwiki\AdditionalDialogs.py:2156
 msgid "Number of wiki pages:"
-msgstr "维基页总数:"
+msgstr "Число вики-страниц:"
 
-#: lib\pwiki\AdditionalDialogs.py:2159
+#: lib\pwiki\AdditionalDialogs.py:2165
 msgid "Wiki is read-only. Reason:"
-msgstr "维基只读原因："
+msgstr "Вики открыта только для чтения. Причина:"
 
-#: lib\pwiki\AdditionalDialogs.py:2162
+#: lib\pwiki\AdditionalDialogs.py:2168
 msgid "Write access to database lost. Try \"Wiki\"->\"Reconnect\""
-msgstr ""
-"数据库写权限丢失。\n"
-" 尝试重新建立，然后运行\"维基\"->\"重新连接\""
+msgstr "Доступ на запись к базе данных утерян. Попробуйте \"Вики\"->\"Подключить заново\""
 
-#: lib\pwiki\AdditionalDialogs.py:2164
+#: lib\pwiki\AdditionalDialogs.py:2170
 msgid "Wiki was set read-only in options dialog"
-msgstr "在选项对话框维基已被设置为只读"
+msgstr "В диалоге настройки вики установлено \"Только для чтения\""
 
-#: lib\pwiki\AdditionalDialogs.py:2169
-#: lib\pwiki\AdditionalDialogs.py:2171
+#: lib\pwiki\AdditionalDialogs.py:2175
+#: lib\pwiki\AdditionalDialogs.py:2177
 msgid "Can't write wiki config.:"
-msgstr "无法写入维基配置文件："
+msgstr "Сбой записи конфигурации вики:"
 
-#: lib\pwiki\AdditionalDialogs.py:2169
-#: lib\pwiki\AdditionalDialogs.py:2173
+#: lib\pwiki\AdditionalDialogs.py:2175
+#: lib\pwiki\AdditionalDialogs.py:2179
 msgid "Unknown reason"
-msgstr "未知原因"
+msgstr "Неизвестная причина"
 
-#: lib\pwiki\AdditionalDialogs.py:2203
+#: lib\pwiki\AdditionalDialogs.py:2209
 msgid "Number of Jobs:"
-msgstr "作业数:"
+msgstr "Число заданий:"
 
 #: lib\pwiki\AttributeHandling.py:32
 msgid "AQUAMARINE"
-msgstr "碧蓝色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:33
 msgid "BLACK"
-msgstr "黑色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:34
 msgid "BLUE VIOLET"
-msgstr "蓝紫色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:35
 msgid "BLUE"
-msgstr "蓝色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:36
 msgid "BROWN"
-msgstr "棕色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:37
 msgid "CADET BLUE"
-msgstr "灰蓝色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:38
 msgid "CORAL"
-msgstr "珊瑚色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:39
 msgid "CORNFLOWER BLUE"
-msgstr "矢车菊蓝色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:40
 msgid "CYAN"
-msgstr "青色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:41
 msgid "DARK GREEN"
-msgstr "墨绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:42
 msgid "DARK GREY"
-msgstr "深灰色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:43
 msgid "DARK OLIVE GREEN"
-msgstr "暗橄榄绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:44
 msgid "DARK ORCHID"
-msgstr "暗紫色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:45
 msgid "DARK SLATE BLUE"
-msgstr "暗灰蓝色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:46
 msgid "DARK SLATE GREY"
-msgstr "暗瓦灰色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:47
 msgid "DARK TURQUOISE"
-msgstr "暗青绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:48
 msgid "DIM GREY"
-msgstr "暗灰色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:49
 msgid "FIREBRICK"
-msgstr "火砖色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:50
 msgid "FOREST GREEN"
-msgstr "森林绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:51
 msgid "GOLD"
-msgstr "金色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:52
 msgid "GOLDENROD"
-msgstr "麒麟色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:53
 msgid "GREEN YELLOW"
-msgstr "黄绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:54
 msgid "GREEN"
-msgstr "绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:55
 msgid "GREY"
-msgstr "灰色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:56
 msgid "INDIAN RED"
-msgstr "印第安红"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:57
 msgid "KHAKI"
-msgstr "黄褐色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:58
 msgid "LIGHT BLUE"
-msgstr "亮蓝色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:59
 msgid "LIGHT GREY"
-msgstr "亮灰色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:60
 msgid "LIGHT STEEL BLUE"
-msgstr "亮钢兰色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:61
 msgid "LIME GREEN"
-msgstr "橙绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:62
 msgid "MAGENTA"
-msgstr "洋红色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:63
 msgid "MAROON"
-msgstr "栗色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:64
 msgid "MEDIUM AQUAMARINE"
-msgstr "间绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:65
 msgid "MEDIUM BLUE"
-msgstr "间蓝色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:66
 msgid "MEDIUM FOREST GREEN"
-msgstr "间森林绿"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:67
 msgid "MEDIUM GOLDENROD"
-msgstr "间麒麟色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:68
 msgid "MEDIUM ORCHID"
-msgstr "间淡紫色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:69
 msgid "MEDIUM SEA GREEN"
-msgstr "间海绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:70
 msgid "MEDIUM SLATE BLUE"
-msgstr "间灰蓝色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:71
 msgid "MEDIUM SPRING GREEN"
-msgstr "间春绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:72
 msgid "MEDIUM TURQUOISE"
-msgstr "间青绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:73
 msgid "MEDIUM VIOLET RED"
-msgstr "间紫红色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:74
 msgid "MIDNIGHT BLUE"
-msgstr "深蓝色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:75
 msgid "NAVY"
-msgstr "藏青色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:76
 msgid "ORANGE RED"
-msgstr "橘红色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:77
 msgid "ORANGE"
-msgstr "橘黄色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:78
 msgid "ORCHID"
-msgstr "淡紫色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:79
 msgid "PALE GREEN"
-msgstr "淡绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:80
 msgid "PINK"
-msgstr "粉红色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:81
 msgid "PLUM"
-msgstr "深紫色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:82
 msgid "PURPLE"
-msgstr "紫色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:83
 msgid "RED"
-msgstr "红色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:84
 msgid "SALMON"
-msgstr "鲜肉色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:85
 msgid "SEA GREEN"
-msgstr "海蓝色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:86
 msgid "SIENNA"
-msgstr "赭色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:87
 msgid "SKY BLUE"
-msgstr "天蓝色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:88
 msgid "SLATE BLUE"
-msgstr "暗蓝灰色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:89
 msgid "SPRING GREEN"
-msgstr "春绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:90
 msgid "STEEL BLUE"
-msgstr "钢青色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:91
 msgid "TAN"
-msgstr "黄褐色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:92
 msgid "THISTLE"
-msgstr "蓟花色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:93
 msgid "TURQUOISE"
-msgstr "青绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:94
 msgid "VIOLET RED"
-msgstr "紫红色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:95
 msgid "VIOLET"
-msgstr "紫罗兰色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:96
 msgid "WHEAT"
-msgstr "淡黄色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:97
 msgid "WHITE"
-msgstr "白色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:98
 msgid "YELLOW GREEN"
-msgstr "黄绿色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:99
 msgid "YELLOW"
-msgstr "黄色"
+msgstr ""
 
 #: lib\pwiki\AttributeHandling.py:286
 msgid "Alias value isn't a valid wikiword: [%s: %s], %s"
-msgstr "别名不是有效维基字: [%s: %s],  %s"
+msgstr "Псевдоним не является допустимым вики-словом: [%s: %s], %s"
 
 #: lib\pwiki\AttributeHandling.py:297
 msgid "A real wikiword with the alias name exists already: [%s: %s]"
-msgstr "该别名维基字已存在: [%s: %s]"
+msgstr "Реальное вики-слово с таким именем уже существует: [%s: %s]"
 
 #: lib\pwiki\AttributeHandling.py:348
 msgid "Template value isn't a valid wikiword: [%s: %s], %s"
-msgstr "摸板值不是有效的维基字: [%s: %s], %s"
+msgstr "Шаблон не является допустимым вики-словом: [%s: %s], %s"
 
 #: lib\pwiki\AttributeHandling.py:359
 msgid "Template value isn't an existing wikiword: [%s: %s]"
-msgstr "模板值不是已存在的维基字: [%s: %s]"
+msgstr "Шаблон не является существующим вики-словом: [%s: %s]"
 
 #: lib\pwiki\AttributeHandling.py:406
 msgid "The attribute %s was already set differently on this page"
-msgstr "属性 %s 已在本页不同处设置"
+msgstr "Атрибут %s на этой странице уже установлен в иное значение "
 
 #: lib\pwiki\AttributeHandling.py:418
 msgid "Attribute '%s' is already defined on the wiki page(s): %s"
-msgstr "属性'%s'已定义于维基页: %s"
+msgstr "Атрибут '%s' уже определён на вики-страницах: %s"
 
 #: lib\pwiki\AttributeHandling.py:427
 msgid "Icon name doesn't exist: [%s: %s]"
-msgstr "图标名不存在: [%s: %s]"
+msgstr "Такой иконки не существует: [%s: %s]"
 
 #: lib\pwiki\AttributeHandling.py:434
 msgid "Color name doesn't exist: [%s: %s]"
-msgstr "颜色名不存在: [%s: %s]"
+msgstr "Такого цвета не существует: [%s: %s]"
 
 #: lib\pwiki\AttributeHandling.py:481
 msgid "The attribute 'global.graph.relations.exclude' (e.g. on page '%s') overrides the '...include' attribute"
-msgstr "属性 'global.graph.relations.exclude' (例如：在页 '%s') 覆盖 '...include'属性。"
+msgstr "Атрибут 'global.graph.relations.exclude' (например, на странице '%s') переопределяет атрибут '...include'"
 
 #: lib\pwiki\AttributeHandling.py:607
 msgid "Same attribute twice: [%s: %s]"
-msgstr "同一属性值出现两次: [%s: %s]"
+msgstr "Повторяется один и тот же атрибут: [%s: %s]"
 
 #: lib\pwiki\CmdLineAction.py:238
 msgid ""
@@ -2551,26 +2560,27 @@ msgid ""
 "    --editor: Same as --preview but opens in text editor mode.\n"
 "\n"
 msgstr ""
-"选项:\n"
+"Опции:\n"
 "\n"
-"    -h, --help: 显示本对话框\n"
-"    -w, --wiki  <wiki path>: 设置启动时打开维基文件路径\n"
-"    -p, --page  <page name>: 设置启动时打开维基页名称\n"
-"    -x, --exit: 执行完命令行操作后立即退出\n"
-"    --export-what <what>: 选择你想导出的页面、子树或维基\n"
-"    --export-type <type>: 导出类型标签\n"
-"    --export-dest <destination path>: 导出目的文件夹路径\n"
-"    --export-compfn: 导出时使用兼容文件名\n"
-"    --rebuild: 重建维基库\n"
-"    --no-recent:在最近打开维基列表中不记录已打开维基\n"
-"    --preview: 如果没有给定页面，上一次运行时所有打开页将按预览模式打开。\n"
-"               否则将根据选项后的给定页面按预览模式打开。\n"
-"    --editor: 与“--preview”相似，只是打开时进入文本编辑模式。\n"
+"    -h, --help: Показать эту справку\n"
+"    -w, --wiki  <wiki path>: установить вики, которая открывается при старте\n"
+"    -p, --page  <page name>: установить страницу, которая открывается при старте\n"
+"    -x, --exit: выйти сразу после выполнения действий командной строки\n"
+"    --export-what <what>: выбор объекта экспорта: страница, поддерево или вики (page, subtree or wiki)\n"
+"    --export-type <type>: тип экспорта\n"
+"    --export-dest <destination path>: путь папки для экспорта\n"
+"    --export-compfn: Использовать совместимые имена файлов при экспорте\n"
+"    --rebuild: перестроить базу данных Вики\n"
+"    --no-recent: Не добавлять открытые вики в список недавно открытых\n"
+"    --preview: Если страницы не указаны, то все открытые страницы предыдущей сессии\n"
+"               открываются в режиме просмотра. В противном случае, все страницы, указанные после этой\n"
+"                опции, открываются в режиме просмотра.\n"
+"    --editor: То же как и --preview, но страницы открываются в режиме редактирования.\n"
 "\n"
 
 #: lib\pwiki\CmdLineAction.py:261
 msgid "Usage information"
-msgstr "使用信息"
+msgstr "Информация об использовании"
 
 #: lib\pwiki\Configuration.py:205
 #: lib\pwiki\Configuration.py:252
@@ -2578,138 +2588,138 @@ msgstr "使用信息"
 #: lib\pwiki\Configuration.py:376
 #: lib\pwiki\Configuration.py:421
 msgid "Unknown option %s:%s"
-msgstr "未知选项%s:%s"
+msgstr "Неизвестная опция %s:%s"
 
 #: lib\pwiki\Configuration.py:279
 msgid "Config file not found"
-msgstr "配置文件没有找到"
+msgstr "Файл конфигурации не найден"
 
 #: lib\pwiki\Configuration.py:413
 msgid "Ambiguos option set %s:%s"
-msgstr "歧义选项设置%s:%s"
+msgstr "Неоднозначные установки %s:%s"
 
 #: lib\pwiki\DiffGui.py:155
 msgid "<Diff from %s to %s>"
-msgstr "<从 %s 到 %s 有差异>"
+msgstr "<Отличия стр. %s от стр. %s>"
 
 #: lib\pwiki\DocPagePresenter.py:231
 msgid "'%s' is an invalid wiki word. %s."
-msgstr "'%s' 是无效维基字。 %s."
+msgstr "'%s' не является допустимым вики-словом. %s."
 
 #: lib\pwiki\DocPagePresenter.py:265
 msgid "Wiki page not found, a new page will be created"
-msgstr "维基页没有找到，新页将被创建。"
+msgstr "Вики-страница не найдена, будет создана новая страница"
 
 #: lib\pwiki\DocPagePresenter.py:455
 #: lib\pwiki\DocPagePresenter.py:456
 msgid "History"
-msgstr "历史"
+msgstr "История"
 
 #: lib\pwiki\DocPages.py:2107
 msgid "Func. tag %s does not exist"
-msgstr "功能标签%s不存在"
+msgstr "Функц. метка %s не существует"
 
 #: lib\pwiki\DocPages.py:2368
 msgid "Global text blocks"
-msgstr "全局文本区"
+msgstr "Глобальные текстовые блоки"
 
 #: lib\pwiki\DocPages.py:2369
 msgid "Wiki text blocks"
-msgstr "维基文本区"
+msgstr "Текстовые блоки этой Вики"
 
 #: lib\pwiki\DocPages.py:2370
 msgid "Global spell list"
-msgstr "全局拼写列表"
+msgstr "Глобальный список правописания"
 
 #: lib\pwiki\DocPages.py:2371
 msgid "Wiki spell list"
-msgstr "维基拼写列表"
+msgstr "Список правописания этой Вики"
 
 #: lib\pwiki\DocPages.py:2372
 msgid "Global cc. blacklist"
-msgstr "全局cc.黑名单"
+msgstr "Глобальный чёрный список"
 
 #: lib\pwiki\DocPages.py:2373
 msgid "Wiki cc. blacklist"
-msgstr "维基cc.黑名单"
+msgstr "Чёрный список этой Вики"
 
 #: lib\pwiki\DocPages.py:2374
 msgid "Favorite wikis"
-msgstr "维基收藏夹"
+msgstr "Избранные вики"
 
 #: lib\pwiki\Exporters.py:371
 msgid "One HTML page"
-msgstr "单个HTML文件"
+msgstr "Одна HTML страница"
 
 #: lib\pwiki\Exporters.py:372
 msgid "Set of HTML pages"
-msgstr "多个HTML文件"
+msgstr "Множество HTML страниц"
 
 #: lib\pwiki\Exporters.py:766
 #: lib\pwiki\Exporters.py:855
 msgid "Exporting %s"
-msgstr "正导出%s"
+msgstr "Экспортируется: %s"
 
 #: lib\pwiki\Exporters.py:1625
 msgid "<pre>[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
-msgstr "<pre>[在 \"选项\", 页面 \"安全性\", 选项 \"程序插入脚本\"中允许插入备注]</pre>"
+msgstr "<pre>[Разрешите обработку вставок в меню \"Настройки\", страница \"Безопасность\", опция \"Обрабатывать вставные скрипты\"]</pre>"
 
 #: lib\pwiki\Exporters.py:2159
 msgid "[Unknown parser node with name \"%s\" found]"
-msgstr "[发现未知解析结点名 \"%s\" ]"
+msgstr "[Найден неизвестный узел с именем \"%s\" ]"
 
 #: lib\pwiki\Exporters.py:2193
 msgid "Set of *.wiki files"
-msgstr "多个*.wiki文件"
+msgstr "Множество файлов *.wiki"
 
 #: lib\pwiki\Exporters.py:2378
 #: lib\pwiki\Importers.py:61
 msgid "Multipage text"
-msgstr "多页文本文件"
+msgstr "Многостраничный текст"
 
 #: lib\pwiki\Exporters.py:2391
 #: lib\pwiki\Importers.py:74
 msgid "Multipage files (*.mpt)"
-msgstr "多页文件 (*.mpt)"
+msgstr "Многостраничные файлы (*.mpt)"
 
 #: lib\pwiki\Exporters.py:2392
 #: lib\pwiki\Importers.py:75
 msgid "Text file (*.txt)"
-msgstr "文本文件 (*.txt)"
+msgstr "Текстовый файл (*.txt)"
 
 #: lib\pwiki\Exporters.py:2558
 msgid "No usable separator found"
-msgstr "没有发现可用分隔符"
+msgstr "Не найдено подходящего разделителя"
 
 #: lib\pwiki\GtkHacks.py:290
 #: lib\pwiki\WindowsHacks.py:804
 msgid "Only a real wiki page can be a clipboard catcher"
-msgstr "只有真实的维基页才能被剪贴板捕获"
+msgstr "Для захвата буфера может использоваться только реальная вики-страница"
 
 #: lib\pwiki\Importers.py:171
 msgid "Opening import file failed"
-msgstr "打开导入文件失败"
+msgstr "Ошибка открытия файла импорта"
 
 #: lib\pwiki\Importers.py:202
 #: lib\pwiki\Importers.py:217
 msgid "Bad file format, header not detected"
-msgstr "错误文件格式，文件头无法识别"
+msgstr "Неверный формат файла, заголовок не найден"
 
 #: lib\pwiki\Importers.py:210
 msgid "File format number %i is not supported"
-msgstr "不支持文件格式数%i"
+msgstr "Номер формата файла %i не поддерживается"
 
 #: lib\pwiki\Importers.py:465
 msgid "Bad wiki word: %s, %s"
-msgstr "维基坏字: %s, %s"
+msgstr "Неверное вики-слово: %s, %s"
 
 #: lib\pwiki\LogWindow.py:80
 msgid "Message"
-msgstr "信息"
+msgstr "Сообщение"
 
 #: lib\pwiki\MainApp.py:139
 msgid "Error initializing environment, couldn't locate global config directory"
-msgstr "初始化环境失败，无法加载全局配置目录。"
+msgstr "Ошибка инициализации, не найдена глобальная папка конфигурации"
 
 #: lib\pwiki\MainApp.py:247
 msgid ""
@@ -2717,9 +2727,9 @@ msgid ""
 "Ensure that WikidPad is not running,\n"
 "then delete file \"%s\" if present yet.\n"
 msgstr ""
-"AppLock.lock文件无效.\n"
-"确保WikidPad没有运行，\n"
-"然后如果存在删除文件\"%s\"。\n"
+"Неверный файл AppLock.lock.\n"
+"Убедитесь, что WikidPad не запущен\n"
+"и удалите файл \"%s\", если он ещё имеется.\n"
 
 #: lib\pwiki\MainApp.py:305
 msgid ""
@@ -2727,426 +2737,428 @@ msgid ""
 "Process identifier(s): %s\n"
 "Continue?"
 msgstr ""
-"其他WikidPad进程可能已在运行\n"
-"进程标识符： %s\n"
-"是否继续？"
+"Кажется, другой(ие) процесс(ы) WikidPad уже запущены\n"
+"Идентификатор(ы) процесса(ов): %s\n"
+"Продолжать?"
 
 #: lib\pwiki\MainApp.py:307
 msgid "Continue?"
-msgstr "是否继续？"
+msgstr "Продолжить?"
 
 #: lib\pwiki\MainApp.py:538
 msgid ""
 "An error occurred during this session\n"
 "See file %s"
 msgstr ""
-"当前会话发生错误\n"
-"参见文件%s"
+"В этой сессии произошла ошибка.\n"
+"См. файл %s"
 
 #: lib\pwiki\MainApp.py:688
 msgid "Plugin options"
-msgstr "插件选项"
+msgstr "Настройки плагинов"
 
 #: lib\pwiki\MainApp.py:737
 #: lib\pwiki\OptionsDialog.py:671
 msgid "Wiki language"
-msgstr "维基语言"
+msgstr "Синтаксис Вики"
 
 #: lib\pwiki\MainAreaPanel.py:665
 #: lib\pwiki\WikiTxtCtrl.py:2152
 msgid "This can only be done for the page of a wiki word"
-msgstr "仅维基字页面可完成"
+msgstr "Это можно сделать только со страницей вики-слова"
 
 #: lib\pwiki\MainAreaPanel.py:666
 #: lib\pwiki\WikiTxtCtrl.py:2153
 msgid "Not a wiki page"
-msgstr "不是维基页"
+msgstr "Не вики-страница"
 
 #: lib\pwiki\MptImporterGui.py:174
 msgid "Wiki page"
-msgstr "维基页"
+msgstr "Вики-страница"
 
 #: lib\pwiki\MptImporterGui.py:175
 msgid "Func. page"
-msgstr "功能页"
+msgstr "Функ. страница"
 
 #: lib\pwiki\MptImporterGui.py:176
 msgid "Saved search"
-msgstr "保存搜索"
+msgstr "Сохранённый Поиск"
 
 #: lib\pwiki\MptImporterGui.py:193
 msgid "Type"
-msgstr "类型"
+msgstr "Тип"
 
 #: lib\pwiki\MptImporterGui.py:194
 msgid "Name"
-msgstr "名称"
+msgstr "Название"
 
 #: lib\pwiki\MptImporterGui.py:196
 msgid ""
 "Version\n"
 "Import"
 msgstr ""
-"版本\n"
-"导入"
+"Импорт\n"
+"Версий"
 
 #: lib\pwiki\MptImporterGui.py:197
 msgid ""
 "Rename\n"
 "imported"
-msgstr "已导入改名"
+msgstr ""
+"Переимен.\n"
+"новое"
 
 #: lib\pwiki\MptImporterGui.py:198
 msgid ""
 "Rename\n"
 "present"
 msgstr ""
-"改名\n"
-"当前"
+"Переимен.\n"
+"старое"
 
 #: lib\pwiki\MptImporterGui.py:383
 msgid "You can't rename imported and present item at the same time"
-msgstr "你不能同时对已导入与当前项目进行改名"
+msgstr "Вы не можете переименовать импортируемую и имеющуюся одновременно"
 
 #: lib\pwiki\MptImporterGui.py:396
 msgid "Rename imported"
-msgstr "已导入改名"
+msgstr "Переименовать импортируемую"
 
 #: lib\pwiki\MptImporterGui.py:405
 msgid "Rename present"
-msgstr "修改当前"
+msgstr "Переименовать имеющуюся"
 
 #: lib\pwiki\MptImporterGui.py:416
 #: lib\pwiki\MptImporterGui.py:440
 msgid "Name collision: Item '%s' will be imported already"
-msgstr "名称冲突：项'%s'将要被导入。"
+msgstr "Конфликт имён: '%s' уже будет импортирована"
 
 #: lib\pwiki\MptImporterGui.py:422
 #: lib\pwiki\MptImporterGui.py:451
 msgid "Name collision: Item '%s' will already be created by renaming '%s'"
-msgstr "名称冲突：项'%s'将要被创建为'%s'"
+msgstr "Конфликт имён: '%s' уже будет создана путём переименования '%s'"
 
 #: lib\pwiki\MptImporterGui.py:431
 #: lib\pwiki\MptImporterGui.py:445
 msgid "Name collision: Item '%s' exists already in database"
-msgstr "名称冲突：项'%s'已存在于数据库"
+msgstr "Конфликт имён: '%s' уже существует в базе данных"
 
 #: lib\pwiki\OptionsDialog.py:652
 msgid "Application"
-msgstr "应用程序"
+msgstr "Общие"
 
 #: lib\pwiki\OptionsDialog.py:653
 msgid "User interface"
-msgstr "用户界面"
+msgstr "Интерфейс пользователя"
 
 #: lib\pwiki\OptionsDialog.py:654
 msgid "Security"
-msgstr "安全性"
+msgstr "Безопасность"
 
 #: lib\pwiki\OptionsDialog.py:655
 msgid "Tree"
-msgstr "树"
+msgstr "Дерево"
 
 #: lib\pwiki\OptionsDialog.py:656
 msgid "HTML preview/export"
-msgstr "HTML预览/导出"
+msgstr "Просмотр/экспорт HTML"
 
 #: lib\pwiki\OptionsDialog.py:657
 msgid "HTML header"
-msgstr "网页标题"
+msgstr "Заголовок HTML"
 
 #: lib\pwiki\OptionsDialog.py:658
 msgid "Editor"
-msgstr "编辑器"
+msgstr "Редактор"
 
 #: lib\pwiki\OptionsDialog.py:659
 msgid "Editor Colors"
-msgstr "编辑器颜色"
+msgstr "Цвета редактора"
 
 #: lib\pwiki\OptionsDialog.py:660
 msgid "Clipboard Catcher"
-msgstr "剪贴板监视器"
+msgstr "Захват буфера"
 
 #: lib\pwiki\OptionsDialog.py:661
 msgid "File Launcher"
-msgstr "文件装载器"
+msgstr "Программа запуска файлов"
 
 #: lib\pwiki\OptionsDialog.py:662
 msgid "Mouse"
-msgstr "鼠标"
+msgstr "Мышь"
 
 #: lib\pwiki\OptionsDialog.py:663
 msgid "Chron. view"
-msgstr "时序图"
+msgstr "Хронология"
 
 #: lib\pwiki\OptionsDialog.py:664
 msgid "Searching"
-msgstr "检索中"
+msgstr "Поиск"
 
 #: lib\pwiki\OptionsDialog.py:665
 #: lib\pwiki\OptionsDialog.py:673
 msgid "Advanced"
-msgstr "高级"
+msgstr "Дополнительно"
 
 #: lib\pwiki\OptionsDialog.py:666
 msgid "Autosave"
-msgstr "自动保存"
+msgstr "Автосохранение"
 
 #: lib\pwiki\OptionsDialog.py:668
 msgid "Current Wiki"
-msgstr "当前维基"
+msgstr "Текущая Вики"
 
 #: lib\pwiki\OptionsDialog.py:669
 msgid "Headings"
-msgstr "标题"
+msgstr "Заголовки"
 
 #: lib\pwiki\OptionsDialog.py:938
 msgid "Wave files (*.wav)|*.wav"
-msgstr "Wave文件(*.wav)|*.wav"
+msgstr "Звуковые файлы (*.wav)|*.wav"
 
 #: lib\pwiki\OptionsDialog.py:949
 #: lib\pwiki\OptionsDialog.py:1239
 msgid "All files (*.*)|*"
-msgstr "所有文件(*.*)|*"
+msgstr "Все файлы (*.*)|*"
 
 #: lib\pwiki\OptionsDialog.py:1229
 msgid "Select Directory"
-msgstr "选择目录"
+msgstr "Выберите папку"
 
 #: lib\pwiki\OptionsDialog.py:1237
 msgid "Select File"
-msgstr "选择文件"
+msgstr "Выберите файл"
 
 #: lib\pwiki\PersonalWikiFrame.py:168
 msgid "Bad formatted command line."
-msgstr "错误命令行格式。"
+msgstr "Неверная командная строка"
 
 #: lib\pwiki\PersonalWikiFrame.py:381
 msgid "Wiki doesn't exist: %s"
-msgstr "不存在维基: %s"
+msgstr "Вики не существует: '%s' "
 
 #: lib\pwiki\PersonalWikiFrame.py:387
 msgid "Last wiki doesn't exist: %s"
-msgstr "最近维基不存在: %s"
+msgstr "Последняя вики не существует: '%s'"
 
 #: lib\pwiki\PersonalWikiFrame.py:697
 msgid "&New"
-msgstr "新建(&N)"
+msgstr "&Новая"
 
 #: lib\pwiki\PersonalWikiFrame.py:698
 msgid "Create new wiki"
-msgstr "创建新维基"
+msgstr "Создать новую вики"
 
 #: lib\pwiki\PersonalWikiFrame.py:701
 msgid "&Open"
-msgstr "打开(&O)"
+msgstr "&Открыть"
 
 #: lib\pwiki\PersonalWikiFrame.py:703
 msgid "In &This Window..."
-msgstr "在本窗口(&T)..."
+msgstr "В &этом окне..."
 
 #: lib\pwiki\PersonalWikiFrame.py:705
 msgid "Open wiki in this window"
-msgstr "在本窗口打开维基"
+msgstr "Открыть вики в этом окне"
 
 #: lib\pwiki\PersonalWikiFrame.py:707
 msgid "In &New Window..."
-msgstr "在新窗口(&N)..."
+msgstr "В &новом окне..."
 
 #: lib\pwiki\PersonalWikiFrame.py:709
 msgid "Open wiki in a new window"
-msgstr "在新窗口打开维基"
+msgstr "Открыть вики в новом окне"
 
 #: lib\pwiki\PersonalWikiFrame.py:711
 msgid "&Current in New Window"
-msgstr "当前新窗口(&C)"
+msgstr "&Текущую в новом окне"
 
 #: lib\pwiki\PersonalWikiFrame.py:713
 msgid "Create new window for same wiki"
-msgstr "为同一维基创建新窗口"
+msgstr "Создать новое окно с этим же вики"
 
 #: lib\pwiki\PersonalWikiFrame.py:718
 msgid "&Recent"
-msgstr "最近(&R)"
+msgstr "&Недавние"
 
 #: lib\pwiki\PersonalWikiFrame.py:725
 msgid "F&avorites"
-msgstr "收藏夹(&A)"
+msgstr "&Избранное"
 
 #: lib\pwiki\PersonalWikiFrame.py:731
 msgid "&Search Wiki..."
-msgstr "搜索维基(&S)..."
+msgstr "&Найти в Вики..."
 
 #: lib\pwiki\PersonalWikiFrame.py:732
 msgid "Search whole wiki"
-msgstr "搜索整个维基"
+msgstr "Поиск по всей Вики"
 
 #: lib\pwiki\PersonalWikiFrame.py:740
 msgid "Publish as HTML"
-msgstr "发布为HTML"
+msgstr "Опубликовать как HTML"
 
 #: lib\pwiki\PersonalWikiFrame.py:743
 msgid "Wiki as Single HTML Page"
-msgstr "维基为单个HTML文件"
+msgstr "Вики как одна страница HTML"
 
 #: lib\pwiki\PersonalWikiFrame.py:744
 msgid "Publish Wiki as Single HTML Page"
-msgstr "发布维基为单个HTML文件"
+msgstr "Опубликовать вики как одну страницу HTML"
 
 #: lib\pwiki\PersonalWikiFrame.py:748
 msgid "Wiki as Set of HTML Pages"
-msgstr "维基为多个HTML文件"
+msgstr "Вики как набор страниц HTML"
 
 #: lib\pwiki\PersonalWikiFrame.py:749
 msgid "Publish Wiki as Set of HTML Pages"
-msgstr "发布维基为多个HTML文件"
+msgstr "Опубликовать вики как набор страниц HTML"
 
 #: lib\pwiki\PersonalWikiFrame.py:753
 msgid "Current Wiki Word as HTML Page"
-msgstr "当前维基字为HTML页面"
+msgstr "Текущее вики-слово как страница HTML"
 
 #: lib\pwiki\PersonalWikiFrame.py:754
 msgid "Publish Current Wiki Word as HTML Page"
-msgstr "发布当前维基字为HTML页面"
+msgstr "Опубликовать текущее вики-слово как страницу HTML"
 
 #: lib\pwiki\PersonalWikiFrame.py:758
 msgid "Sub-Tree as Single HTML Page"
-msgstr "子树为单个HTML页面"
+msgstr "Поддерево как одна страница HTML"
 
 #: lib\pwiki\PersonalWikiFrame.py:759
 msgid "Publish Sub-Tree as Single HTML Page"
-msgstr "发布子树为单个HTML页面"
+msgstr "Опубликовать поддерево как одну страницу HTML"
 
 #: lib\pwiki\PersonalWikiFrame.py:763
 msgid "Sub-Tree as Set of HTML Pages"
-msgstr "子树为多个HTML页面"
+msgstr "Поддерево как набор страниц HTML"
 
 #: lib\pwiki\PersonalWikiFrame.py:764
 msgid "Publish Sub-Tree as Set of HTML Pages"
-msgstr "发布子树为多个HTML页面"
+msgstr "Опубликовать поддерево как набор страниц HTML"
 
 #: lib\pwiki\PersonalWikiFrame.py:772
 msgid "Other Export..."
-msgstr "其他导出..."
+msgstr "Другой экспорт..."
 
 #: lib\pwiki\PersonalWikiFrame.py:773
 #: lib\pwiki\PersonalWikiFrame.py:1792
 msgid "Open general export dialog"
-msgstr "打开一般导出对话框"
+msgstr "Открыть общий диалог экспорта"
 
 #: lib\pwiki\PersonalWikiFrame.py:777
 msgid "Print..."
-msgstr "打印..."
+msgstr "Печать..."
 
 #: lib\pwiki\PersonalWikiFrame.py:778
 msgid "Show the print dialog"
-msgstr "显示打印对话框"
+msgstr "Открыть диалог печати"
 
 #: lib\pwiki\PersonalWikiFrame.py:783
 msgid "&Properties..."
-msgstr "属性(&P)..."
+msgstr "&Свойства..."
 
 #: lib\pwiki\PersonalWikiFrame.py:784
 msgid "Show general information about current wiki"
-msgstr "显示当前维基一般信息"
+msgstr "Показать общую информацию о текущей Вики"
 
 #: lib\pwiki\PersonalWikiFrame.py:788
 msgid "Maintenance"
-msgstr "维护"
+msgstr "Обслуживание"
 
 #: lib\pwiki\PersonalWikiFrame.py:792
 msgid "&Rebuild Wiki..."
-msgstr "重构维基(&R)..."
+msgstr "&Перестроить Вики..."
 
 #: lib\pwiki\PersonalWikiFrame.py:793
 msgid "Rebuild this wiki and its cache completely"
-msgstr "完全重构该维基及缓存"
+msgstr "Полностью перестроить эту Вики и её кэш"
 
 #: lib\pwiki\PersonalWikiFrame.py:807
 msgid "&Update cache..."
-msgstr "更新缓存(&U)..."
+msgstr "&Обновить кэш..."
 
 #: lib\pwiki\PersonalWikiFrame.py:808
 msgid "Update cache where marked as not up to date"
-msgstr "更新没有最新更新标记的缓存"
+msgstr "Обновить в кэше устаревшие сведения"
 
 #: lib\pwiki\PersonalWikiFrame.py:813
 msgid "&Initiate update..."
-msgstr "更新初始化(&I)..."
+msgstr "&Запустить обновление..."
 
 #: lib\pwiki\PersonalWikiFrame.py:814
 msgid "Initiate full cache update which is done mainly in background"
-msgstr "完成初始化更新全缓存主要在后台进行"
+msgstr "Запустить полное обновление кэша (в основном, происходит в фоновом режиме)"
 
 #: lib\pwiki\PersonalWikiFrame.py:828
 msgid "Show job count..."
-msgstr "显示作业数..."
+msgstr "Показать число заданий..."
 
 #: lib\pwiki\PersonalWikiFrame.py:829
 msgid "Show how many update jobs are waiting in background"
-msgstr "显示后台正在等待更新作业数"
+msgstr "Показать число заданий обновления, ожидающих в фоновом режиме"
 
 #: lib\pwiki\PersonalWikiFrame.py:834
 msgid "Open as &Type..."
-msgstr "打开为(&T)..."
+msgstr "Открыть &как..."
 
 #: lib\pwiki\PersonalWikiFrame.py:835
 msgid "Open wiki with a specified wiki database type"
-msgstr "使用指定的维基数据库类型打开维基"
+msgstr "Открыть вики с указанным типом базы данных"
 
 #: lib\pwiki\PersonalWikiFrame.py:839
 msgid "Reconnect..."
-msgstr "重新链接..."
+msgstr "Подключить заново..."
 
 #: lib\pwiki\PersonalWikiFrame.py:840
 msgid "Reconnect to database after connection failure"
-msgstr "连接失败后重新连接到数据库"
+msgstr "Заново подключить базу данных после ошибки"
 
 #: lib\pwiki\PersonalWikiFrame.py:846
 msgid "&Optimise Database"
-msgstr "数据库优化(&O)"
+msgstr "&Оптимизировать базу данных"
 
 #: lib\pwiki\PersonalWikiFrame.py:847
 msgid "Free unused space in database"
-msgstr "释放数据库空间"
+msgstr "Очистить неиспользуемое место в базе данных"
 
 #: lib\pwiki\PersonalWikiFrame.py:854
 msgid "&Copy .wiki files to database"
-msgstr "复制.wiki文件到数据库(&C)"
+msgstr "&Копировать файлы .wiki в базу данных"
 
 #: lib\pwiki\PersonalWikiFrame.py:855
 msgid "Copy .wiki files to database"
-msgstr "复制.wiki文件到数据库"
+msgstr "Копировать файлы .wiki в базу данных"
 
 #: lib\pwiki\PersonalWikiFrame.py:865
 msgid "E&xit"
-msgstr "退出(&X)"
+msgstr "&Выход"
 
 #: lib\pwiki\PersonalWikiFrame.py:865
 #: lib\pwiki\PersonalWikiFrame.py:5687
 msgid "Exit"
-msgstr "退出"
+msgstr "Выход"
 
 #: lib\pwiki\PersonalWikiFrame.py:1033
 msgid "Reread text blocks"
-msgstr "重读文本块"
+msgstr "Обновить текстовые блоки"
 
 #: lib\pwiki\PersonalWikiFrame.py:1034
 msgid "Reread the text block file(s) and recreate menu"
-msgstr "重读文本块文件并重建菜单"
+msgstr "Заново прочитать файл(ы) текстовых блоков и обновить меню"
 
 #: lib\pwiki\PersonalWikiFrame.py:1088
 msgid "Add wiki"
-msgstr "添加维基"
+msgstr "Добавить вики"
 
 #: lib\pwiki\PersonalWikiFrame.py:1089
 msgid "Add a wiki to the favorites"
-msgstr "添加维基到收藏夹"
+msgstr "Добавить Вики в Избранное"
 
 #: lib\pwiki\PersonalWikiFrame.py:1094
 #: lib\pwiki\PersonalWikiFrame.py:1095
 msgid "Manage favorites"
-msgstr "管理收藏夹"
+msgstr "Упорядочить Избранное"
 
 #: lib\pwiki\PersonalWikiFrame.py:1117
 #: lib\pwiki\PersonalWikiFrame.py:1842
@@ -3154,728 +3166,728 @@ msgstr "管理收藏夹"
 #: lib\pwiki\PersonalWikiFrame.py:4946
 #: lib\pwiki\PersonalWikiFrame.py:5264
 msgid "Error while starting new WikidPad instance"
-msgstr "当开启新WikidPad实例发生错误"
+msgstr "Ошибка при старте новой копии WikidPad"
 
 #: lib\pwiki\PersonalWikiFrame.py:1208
 msgid "W&iki"
-msgstr "维基(&W)"
+msgstr "&Вики"
 
 #: lib\pwiki\PersonalWikiFrame.py:1219
 msgid "&Undo"
-msgstr "撤消(&U)"
+msgstr "&Отменить"
 
 #: lib\pwiki\PersonalWikiFrame.py:1223
 msgid "&Redo"
-msgstr "重做(&R)"
+msgstr "&Вернуть"
 
 #: lib\pwiki\PersonalWikiFrame.py:1231
 msgid "&Search and Replace..."
-msgstr "查找与替换(&S)..."
+msgstr "&Найти и заменить..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1233
 msgid "Search and replace inside current page"
-msgstr "在当前页查找与替换"
+msgstr "Поиск и замена в пределах текущей страницы"
 
 #: lib\pwiki\PersonalWikiFrame.py:1239
 msgid "Cu&t"
-msgstr "剪切(&T)"
+msgstr "&Вырезать"
 
 #: lib\pwiki\PersonalWikiFrame.py:1244
 msgid "&Copy"
-msgstr "复制(&C)"
+msgstr "&Копировать"
 
 #: lib\pwiki\PersonalWikiFrame.py:1248
 msgid "&Paste"
-msgstr "粘贴(&P)"
+msgstr "В&ставить"
 
 #: lib\pwiki\PersonalWikiFrame.py:1253
 msgid "Select &All"
-msgstr "全选(&A)"
+msgstr "Выбрать &всё"
 
 #: lib\pwiki\PersonalWikiFrame.py:1259
 msgid "Copy to Sc&ratchPad"
-msgstr "复制到便笺(&R)"
+msgstr "Копировать в &Черновик (ScratchPad)"
 
 #: lib\pwiki\PersonalWikiFrame.py:1261
 msgid "Copy selected text to ScratchPad"
-msgstr "复制所选文本到便笺"
+msgstr "Копировать выбранный текст в Черновик (ScratchPad)"
 
 #: lib\pwiki\PersonalWikiFrame.py:1267
 msgid "Paste T&extblock"
-msgstr "粘贴文本块(&E)"
+msgstr "Вставить &текстовый блок"
 
 #: lib\pwiki\PersonalWikiFrame.py:1275
 msgid "C&lipboard Catcher"
-msgstr "剪贴板监视器(&L)"
+msgstr "Захват &буфера"
 
 #: lib\pwiki\PersonalWikiFrame.py:1278
 #: lib\pwiki\PersonalWikiFrame.py:4137
 msgid "Set at Page"
-msgstr "在页面设置"
+msgstr "Записывать в конец страницы"
 
 #: lib\pwiki\PersonalWikiFrame.py:1280
 msgid "Text copied to clipboard is also appended to this page"
-msgstr "复制到剪贴板文本同样追加到本页"
+msgstr "Текст, копируемый в буфер, будет также добавляться в конец этой страницы"
 
 #: lib\pwiki\PersonalWikiFrame.py:1286
 msgid "Set at Cursor"
-msgstr "在光标设置"
+msgstr "Записывать после позиции курсора"
 
 #: lib\pwiki\PersonalWikiFrame.py:1288
 msgid "Text copied to clipboard is also added to cursor position"
-msgstr "复制到剪贴板的文本同时在光标位置插入"
+msgstr "Текст, копируемый в буфер, будет также добавляться после позиции курсора"
 
 #: lib\pwiki\PersonalWikiFrame.py:1294
 msgid "Set Off"
-msgstr "关闭"
+msgstr "Отключить"
 
 #: lib\pwiki\PersonalWikiFrame.py:1296
 msgid "Switch off clipboard catcher"
-msgstr "关闭剪贴板监视器"
+msgstr "Отключить захват буфера"
 
 #: lib\pwiki\PersonalWikiFrame.py:1306
 msgid "Spell Check..."
-msgstr "拼写检查..."
+msgstr "Правописание..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1308
 msgid "Spell check current and possibly further pages"
-msgstr "当前或更远一级页面拼写检查"
+msgstr "Проверить правописание текущей и, возможно, следующих страниц"
 
 #: lib\pwiki\PersonalWikiFrame.py:1312
 msgid "Spell Check While Type"
-msgstr "输入时拼写检查"
+msgstr "Правописание при наборе"
 
 #: lib\pwiki\PersonalWikiFrame.py:1313
 msgid "Set if editor should do spell checking during typing"
-msgstr "输入状态编辑器进行拼写检查时设置"
+msgstr "Проверять правописание в ходе набора текста"
 
 #: lib\pwiki\PersonalWikiFrame.py:1318
 msgid "Clear Ignore List"
-msgstr "清除忽略列表"
+msgstr "Очистить список игнорирования"
 
 #: lib\pwiki\PersonalWikiFrame.py:1320
 msgid "Clear the list of words to ignore for spell check while type"
-msgstr "清除词列表用于输入时忽略拼写检查"
+msgstr "Очистить список слов, игнорируемых проверкой правописания при наборе"
 
 #: lib\pwiki\PersonalWikiFrame.py:1329
 msgid "&Insert"
-msgstr "插入(&I)"
+msgstr "&Вставить"
 
 #: lib\pwiki\PersonalWikiFrame.py:1331
 msgid "&File URL..."
-msgstr "文件URL(&F)..."
+msgstr "URL &файла..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1332
 msgid "Use file dialog to add URL"
-msgstr "使用文件对话框增加URL"
+msgstr "Открыть диалог выбора файла для добавления URL"
 
 #: lib\pwiki\PersonalWikiFrame.py:1337
 msgid "Current &Date"
-msgstr "当前日期(&D)"
+msgstr "Текущую &дату"
 
 #: lib\pwiki\PersonalWikiFrame.py:1338
 msgid "Insert current date"
-msgstr "插入当前日期"
+msgstr "Вставить текущую дату"
 
 #: lib\pwiki\PersonalWikiFrame.py:1347
 msgid "&Settings"
-msgstr "设置(&S)"
+msgstr "&Настройки"
 
 #: lib\pwiki\PersonalWikiFrame.py:1350
 msgid "&Date Format..."
-msgstr "日期格式(&D)..."
+msgstr "Формат &даты..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1351
 msgid "Set date format for inserting current date"
-msgstr "设置日期格式用于插入当前日期"
+msgstr "Установить формат даты при вставке текущей даты"
 
 #: lib\pwiki\PersonalWikiFrame.py:1355
 msgid "Auto-&Wrap"
-msgstr "自动折行(&W)"
+msgstr "Авто&перенос"
 
 #: lib\pwiki\PersonalWikiFrame.py:1356
 msgid "Set if editor should wrap long lines"
-msgstr "设置编辑器折叠长行"
+msgstr "Установите, чтобы редактор переносил длинные строки"
 
 #: lib\pwiki\PersonalWikiFrame.py:1370
 msgid "Auto-&Indent"
-msgstr "自动缩进(&I)"
+msgstr "Авто&отступ"
 
 #: lib\pwiki\PersonalWikiFrame.py:1371
 msgid "Auto indentation"
-msgstr "自动缩进"
+msgstr "Автоматический отступ"
 
 #: lib\pwiki\PersonalWikiFrame.py:1384
 msgid "Auto-&Bullets"
-msgstr "自动编号(&B)"
+msgstr "Авто&маркёры списков"
 
 #: lib\pwiki\PersonalWikiFrame.py:1385
 msgid "Show bullet on next line if current has one"
-msgstr "如果当前拥有编号，下一行将显示编号"
+msgstr "Создаётся маркёр на следующей строке, если он есть на текущей"
 
 #: lib\pwiki\PersonalWikiFrame.py:1400
 msgid "Tabs to spaces"
-msgstr "制表符添加空格"
+msgstr "Табуляторы в пробелы"
 
 #: lib\pwiki\PersonalWikiFrame.py:1401
 msgid "Write spaces when hitting TAB key"
-msgstr "按TAB键添加空格"
+msgstr "Записывать пробелы при нажатии на клавишу TAB"
 
 #: lib\pwiki\PersonalWikiFrame.py:1419
 msgid "Show T&oolbar"
-msgstr "显示工具栏(&O)"
+msgstr "Панель &инструментов"
 
 #: lib\pwiki\PersonalWikiFrame.py:1421
 msgid "Show toolbar"
-msgstr "显示工具栏"
+msgstr "Показать панель инструментов"
 
 #: lib\pwiki\PersonalWikiFrame.py:1428
 msgid "Show &Tree View"
-msgstr "显示树型视图(&T)"
+msgstr "&Дерево"
 
 #: lib\pwiki\PersonalWikiFrame.py:1430
 msgid "Show Tree Control"
-msgstr "显示树控件"
+msgstr "Показать дерево"
 
 #: lib\pwiki\PersonalWikiFrame.py:1437
 msgid "Show &Chron. View"
-msgstr "按时间顺序查看(&C)"
+msgstr "&Хронология"
 
 #: lib\pwiki\PersonalWikiFrame.py:1439
 msgid "Show chronological view"
-msgstr "按时间顺序查看"
+msgstr "Показать хронологию"
 
 #: lib\pwiki\PersonalWikiFrame.py:1446
 msgid "Show &Page Structure"
-msgstr "显示页面结构(&P)"
+msgstr "Структура &страницы"
 
 #: lib\pwiki\PersonalWikiFrame.py:1448
 msgid "Show structure (headings) of the page"
-msgstr "显示页面结构（标题）"
+msgstr "Показать структуру страницы (заголовки)"
 
 #: lib\pwiki\PersonalWikiFrame.py:1460
 msgid "Show &Indentation Guides"
-msgstr "显示缩进符(&I)"
+msgstr "Разметка &отступов"
 
 #: lib\pwiki\PersonalWikiFrame.py:1461
 msgid "Show indentation guides in editor"
-msgstr "在编辑器显示缩进符"
+msgstr "Показать разметку отступов в редакторе"
 
 #: lib\pwiki\PersonalWikiFrame.py:1466
 msgid "Show Line &Numbers"
-msgstr "显示行号(&N)"
+msgstr "&Номера строк"
 
 #: lib\pwiki\PersonalWikiFrame.py:1467
 msgid "Show line numbers in editor"
-msgstr "在编辑器显示行号"
+msgstr "Показать номера строк в редакторе"
 
 #: lib\pwiki\PersonalWikiFrame.py:1474
 msgid "Stay on Top"
-msgstr "保持最上"
+msgstr "Поверх всех окон"
 
 #: lib\pwiki\PersonalWikiFrame.py:1476
 msgid "Stay on Top of all other windows"
-msgstr "保持在其他所有窗口最上面"
+msgstr "Оставаться поверх всех других окон"
 
 #: lib\pwiki\PersonalWikiFrame.py:1484
 msgid "&Zoom In"
-msgstr "缩小(&Z)"
+msgstr "У&величить"
 
 #: lib\pwiki\PersonalWikiFrame.py:1485
 #: lib\pwiki\PersonalWikiFrame.py:2049
 msgid "Zoom In"
-msgstr "缩小"
+msgstr "Увеличить"
 
 #: lib\pwiki\PersonalWikiFrame.py:1488
 msgid "Zoo&m Out"
-msgstr "放大(&M)"
+msgstr "У&меньшить"
 
 #: lib\pwiki\PersonalWikiFrame.py:1489
 #: lib\pwiki\PersonalWikiFrame.py:2054
 msgid "Zoom Out"
-msgstr "放大"
+msgstr "Уменьшить"
 
 #: lib\pwiki\PersonalWikiFrame.py:1511
 msgid "Toggle Ed./Prev"
-msgstr "切换编辑/预览"
+msgstr "Переключить Редактор/Просмотр"
 
 #: lib\pwiki\PersonalWikiFrame.py:1513
 #: lib\pwiki\PersonalWikiFrame.py:2045
 msgid "Switch between editor and preview"
-msgstr "在编辑/预览间切换"
+msgstr "Переключает между режимами редактора и просмотра"
 
 #: lib\pwiki\PersonalWikiFrame.py:1517
 msgid "Enter Edit Mode"
-msgstr "进入编辑模式"
+msgstr "Войти в режим редактора"
 
 #: lib\pwiki\PersonalWikiFrame.py:1518
 msgid "Show editor in tab"
-msgstr "在标签页显示编辑器"
+msgstr "Показывать вкладку в режиме редактора"
 
 #: lib\pwiki\PersonalWikiFrame.py:1522
 msgid "Enter Preview Mode"
-msgstr "进入预览模式"
+msgstr "Войти в режим просмотра"
 
 #: lib\pwiki\PersonalWikiFrame.py:1524
 msgid "Show preview in tab"
-msgstr "在标签页显示预览"
+msgstr "Показывать вкладку в режиме просмотра"
 
 #: lib\pwiki\PersonalWikiFrame.py:1548
 msgid "&Save"
-msgstr "保存(&S)"
+msgstr "&Сохранить"
 
 #: lib\pwiki\PersonalWikiFrame.py:1549
 msgid "Save all open pages"
-msgstr "保存所有打开页面"
+msgstr "Сохранить все открытые страницы"
 
 #: lib\pwiki\PersonalWikiFrame.py:1556
 msgid "&Rename"
-msgstr "改名(&R)"
+msgstr "&Переименовать"
 
 #: lib\pwiki\PersonalWikiFrame.py:1557
 msgid "Rename current wiki word"
-msgstr "更改当前维基字"
+msgstr "Переименовать текущее вики-слово"
 
 #: lib\pwiki\PersonalWikiFrame.py:1563
 msgid "Delete current wiki word"
-msgstr "删除当前维基字"
+msgstr "Удалить текущее вики-слово"
 
 #: lib\pwiki\PersonalWikiFrame.py:1570
 msgid "Set as Roo&t"
-msgstr "设为根(&T)"
+msgstr "Установить как &корневое"
 
 #: lib\pwiki\PersonalWikiFrame.py:1571
 msgid "Set current wiki word as tree root"
-msgstr "将当前维基字设为树根"
+msgstr "Установить текущее вики-слово в качестве корня дерева"
 
 #: lib\pwiki\PersonalWikiFrame.py:1575
 msgid "R&eset Root"
-msgstr "重设根(&E)"
+msgstr "&Востановить корневое слово"
 
 #: lib\pwiki\PersonalWikiFrame.py:1576
 msgid "Set home wiki word as tree root"
-msgstr "设置首页维基字为树根"
+msgstr "Восстановить домашнюю страницу в качестве корня дерева"
 
 #: lib\pwiki\PersonalWikiFrame.py:1580
 msgid "S&ynchronise Tree"
-msgstr "同步树(&Y)"
+msgstr "&Синхронизировать дерево"
 
 #: lib\pwiki\PersonalWikiFrame.py:1581
 msgid "Find the current wiki word in the tree"
-msgstr "在树中查找当前维基字"
+msgstr "Найти текущее вики-слово в дереве"
 
 #: lib\pwiki\PersonalWikiFrame.py:1586
 msgid "&Follow Link"
-msgstr "链接(&F)"
+msgstr "&Открыть ссылку"
 
 #: lib\pwiki\PersonalWikiFrame.py:1587
 msgid "Activate link/word"
-msgstr "激活链接/字"
+msgstr "Открыть ссылку/слово"
 
 #: lib\pwiki\PersonalWikiFrame.py:1592
 msgid "Follow Link in &New Tab"
-msgstr "在新选项卡打开链接(&N)"
+msgstr "Открыть ссылку в &новой вкладке "
 
 #: lib\pwiki\PersonalWikiFrame.py:1593
 msgid "Activate link/word in new tab"
-msgstr "在新选项卡激活链接与字"
+msgstr "Открыть ссылку/слово в новой вкладке"
 
 #: lib\pwiki\PersonalWikiFrame.py:1598
 msgid "Copy &URL to Clipboard"
-msgstr "复制 (&U)RL 到剪贴板"
+msgstr "&Копировать URL в буфер"
 
 #: lib\pwiki\PersonalWikiFrame.py:1600
 msgid "Copy full \"wiki:\" URL of the word to clipboard"
-msgstr "复制该维基字完整 \"wiki:\" URL到剪贴板 "
+msgstr "Копировать полный \"wiki:\" URL слова в буфер"
 
 #: lib\pwiki\PersonalWikiFrame.py:1606
 msgid "&Add version"
-msgstr "增加版本(&A)"
+msgstr "&Добавить версию"
 
 #: lib\pwiki\PersonalWikiFrame.py:1607
 msgid "Add new version"
-msgstr "增加新版本"
+msgstr "Добавить новую версию"
 
 #: lib\pwiki\PersonalWikiFrame.py:1615
 msgid "&Bold"
-msgstr "加粗(&B)"
+msgstr "&Полужирный"
 
 #: lib\pwiki\PersonalWikiFrame.py:1616
 #: lib\pwiki\PersonalWikiFrame.py:2030
 msgid "Bold"
-msgstr "加粗"
+msgstr "Полужирный"
 
 #: lib\pwiki\PersonalWikiFrame.py:1622
 msgid "&Italic"
-msgstr "斜体(&I)"
+msgstr "&Курсив"
 
 #: lib\pwiki\PersonalWikiFrame.py:1623
 #: lib\pwiki\PersonalWikiFrame.py:2036
 msgid "Italic"
-msgstr "斜体"
+msgstr "Курсив"
 
 #: lib\pwiki\PersonalWikiFrame.py:1629
 msgid "&Heading"
-msgstr "标题(&H)"
+msgstr "&Заголовок"
 
 #: lib\pwiki\PersonalWikiFrame.py:1630
 msgid "Add Heading"
-msgstr "增加标题"
+msgstr "Добавить заголовок"
 
 #: lib\pwiki\PersonalWikiFrame.py:1638
 msgid "&Rewrap Text"
-msgstr "文本重新折行(&R)"
+msgstr "Обновить &переносы"
 
 #: lib\pwiki\PersonalWikiFrame.py:1640
 msgid "Rewrap Text"
-msgstr "文本重新折行"
+msgstr "Обновить переносы текста"
 
 #: lib\pwiki\PersonalWikiFrame.py:1645
 msgid "&Convert"
-msgstr "转换(&C)"
+msgstr "&Преобразовать"
 
 #: lib\pwiki\PersonalWikiFrame.py:1648
 msgid "Selection to &Link"
-msgstr "选择设为链接(&L)"
+msgstr "Выделенное в ссылку (&викифицировать)"
 
 #: lib\pwiki\PersonalWikiFrame.py:1649
 msgid "Remove non-allowed characters and make sel. a wiki word link"
-msgstr "移除非法字符并设选择为维基字链接"
+msgstr "Удалить недопустимые символы и преобразовать выделенный фрагмент в вики-ссылку"
 
 #: lib\pwiki\PersonalWikiFrame.py:1654
 msgid "Selection to &Wiki Word"
-msgstr "选择设为维基字(&W)"
+msgstr "Выделенное в вики-&слово"
 
 #: lib\pwiki\PersonalWikiFrame.py:1656
 msgid "Put selected text in a new or existing wiki word"
-msgstr "将选择文本置为新的或已存在的维基字"
+msgstr "Переместить выделенный фрагмент в новое или существующее вики-слово"
 
 #: lib\pwiki\PersonalWikiFrame.py:1661
 msgid "Absolute/Relative &File URL"
-msgstr "绝对/相对文件URL(&F)"
+msgstr "&Абсолютный/Относительный URL файла"
 
 #: lib\pwiki\PersonalWikiFrame.py:1663
 msgid "Convert file URL from absolute to relative and vice versa"
-msgstr "转换绝对文件URL到相对，反之亦然。"
+msgstr "Преобразовать URL файла из абсолютного в относительный и обратно"
 
 #: lib\pwiki\PersonalWikiFrame.py:1677
 msgid "&Icon Name"
-msgstr "图标名(&I)"
+msgstr "&Иконка"
 
 #: lib\pwiki\PersonalWikiFrame.py:1689
 msgid "&Color Name"
-msgstr "颜色名(&C)"
+msgstr "&Цвет"
 
 #: lib\pwiki\PersonalWikiFrame.py:1697
 msgid "&Add Attribute"
-msgstr "增加属性(&A)"
+msgstr "&Добавить атрибут"
 
 #: lib\pwiki\PersonalWikiFrame.py:1706
 msgid "&Icon Attribute"
-msgstr "图标属性(&I)"
+msgstr "Атрибут &иконки"
 
 #: lib\pwiki\PersonalWikiFrame.py:1716
 msgid "&Color Attribute"
-msgstr "颜色属性(&C)"
+msgstr "Атрибут &цвета"
 
 #: lib\pwiki\PersonalWikiFrame.py:1725
 msgid "&Back"
-msgstr "后退(&B)"
+msgstr "&Назад"
 
 #: lib\pwiki\PersonalWikiFrame.py:1726
 msgid "Go backward"
-msgstr "后退"
+msgstr "Перейти назад"
 
 #: lib\pwiki\PersonalWikiFrame.py:1729
 msgid "&Forward"
-msgstr "前进(&F)"
+msgstr "&Вперёд"
 
 #: lib\pwiki\PersonalWikiFrame.py:1730
 msgid "Go forward"
-msgstr "前进"
+msgstr "Перейти вперёд"
 
 #: lib\pwiki\PersonalWikiFrame.py:1734
 msgid "&Wiki Home"
-msgstr "维基主页(&W)"
+msgstr "&Домашняя страница"
 
 #: lib\pwiki\PersonalWikiFrame.py:1735
 msgid "Go to wiki homepage"
-msgstr "转至维基主页"
+msgstr "Перейти на домашнюю страницу этой Вики"
 
 #: lib\pwiki\PersonalWikiFrame.py:1742
 msgid "Go to &Page..."
-msgstr "转至页(&P)..."
+msgstr "Перейти на &страницу..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1743
 msgid "Open wiki word"
-msgstr "打开维基字"
+msgstr "Открыть вики-слово"
 
 #: lib\pwiki\PersonalWikiFrame.py:1748
 msgid "Go to P&arent..."
-msgstr "转至父结点(&A)..."
+msgstr "Перейти к &родителю..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1750
 msgid "List parents of current wiki word"
-msgstr "显示当前维基字父结点"
+msgstr "Список родителей текущего вики-слова"
 
 #: lib\pwiki\PersonalWikiFrame.py:1753
 msgid "List &Children..."
-msgstr "显示子结点(&C)..."
+msgstr "Перейти к &потомку..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1755
 msgid "List children of current wiki word"
-msgstr "显示当前维基字子结点"
+msgstr "Список потомков текущего вики-слова"
 
 #: lib\pwiki\PersonalWikiFrame.py:1758
 msgid "List Pa&rentless Pages"
-msgstr "显示叶子页面(&P)"
+msgstr "Список страниц &без родителей"
 
 #: lib\pwiki\PersonalWikiFrame.py:1760
 msgid "List nodes with no parent relations"
-msgstr "结点清单不带父子关系"
+msgstr "Показать список узлов, не имеющих родителей"
 
 #: lib\pwiki\PersonalWikiFrame.py:1765
 msgid "Show &History..."
-msgstr "显示历史(&H)..."
+msgstr "Показать &историю..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1766
 msgid "View tab history"
-msgstr "显示历史选项卡"
+msgstr "Посмотреть историю вкладки"
 
 #: lib\pwiki\PersonalWikiFrame.py:1769
 msgid "&Up History..."
-msgstr "向上历史(&U)..."
+msgstr "&Назад по истории..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1770
 msgid "Up in tab history"
-msgstr "选项卡历史向上"
+msgstr "Назад по истории вкладки"
 
 #: lib\pwiki\PersonalWikiFrame.py:1773
 msgid "&Down History..."
-msgstr "向下历史(&D)..."
+msgstr "&Вперёд по истории..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1774
 msgid "Down in tab history"
-msgstr "选项卡历史向下"
+msgstr "Вперёд по истории вкладки"
 
 #: lib\pwiki\PersonalWikiFrame.py:1779
 msgid "Add B&ookmark"
-msgstr "增加书签(&O)"
+msgstr "Добавить &закладку"
 
 #: lib\pwiki\PersonalWikiFrame.py:1780
 msgid "Add bookmark to page"
-msgstr "增加页书签"
+msgstr "Добавить закладку на эту страницу"
 
 #: lib\pwiki\PersonalWikiFrame.py:1784
 msgid "Go to &Bookmark..."
-msgstr "转至书签(&B)..."
+msgstr "Перейти &к закладке..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1785
 msgid "List bookmarks"
-msgstr "书签列表"
+msgstr "Список закладок"
 
 #: lib\pwiki\PersonalWikiFrame.py:1791
 msgid "&Export..."
-msgstr "导出(&E)..."
+msgstr "&Экспорт..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1795
 msgid "&Continuous Export..."
-msgstr "连续导出(&C)..."
+msgstr "&Непрерывный экспорт..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1796
 msgid "Open export dialog for continuous export of changes"
-msgstr "打开导出对话框用于连续导出"
+msgstr "Открыть диалог непрерывного экспорта изменений"
 
 #: lib\pwiki\PersonalWikiFrame.py:1802
 msgid "&Import..."
-msgstr "导入(&I)"
+msgstr "&Импорт..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1803
 msgid "Import dialog"
-msgstr "导入对话框"
+msgstr "Диалог импорта"
 
 #: lib\pwiki\PersonalWikiFrame.py:1809
 msgid "Scripts"
-msgstr "脚本"
+msgstr "Скрипты"
 
 #: lib\pwiki\PersonalWikiFrame.py:1810
 msgid "Run scripts, evaluate expressions"
-msgstr "运行脚本，计算表达式"
+msgstr "Запустить скрипты, вычислить значения выражений"
 
 #: lib\pwiki\PersonalWikiFrame.py:1812
 msgid "&Eval"
-msgstr "运算(&E)"
+msgstr "&Вычислить (Eval)"
 
 #: lib\pwiki\PersonalWikiFrame.py:1813
 msgid "Evaluate script blocks"
-msgstr "运行脚本块"
+msgstr "Обработать блоки скриптов"
 
 #: lib\pwiki\PersonalWikiFrame.py:1818
 msgid "Run Function &%i"
-msgstr "运行函数 &%i"
+msgstr "Запустить функцию &%i"
 
 #: lib\pwiki\PersonalWikiFrame.py:1819
 msgid "Run script function %i"
-msgstr "运行脚本函数 %i"
+msgstr "Запустить функцию скрипта %i"
 
 #: lib\pwiki\PersonalWikiFrame.py:1824
 msgid "O&ptions..."
-msgstr "选项(&P)..."
+msgstr "&Настройки..."
 
 #: lib\pwiki\PersonalWikiFrame.py:1825
 msgid "Set options"
-msgstr "设置选项"
+msgstr "Изменить настройки"
 
 #: lib\pwiki\PersonalWikiFrame.py:1846
 msgid "&Open help wiki"
-msgstr "打开帮助(&O)"
+msgstr "Открыть &справку "
 
 #: lib\pwiki\PersonalWikiFrame.py:1847
 msgid "Open WikidPadHelp, the help wiki"
-msgstr "打开WikidPadHelp，维基帮助文件"
+msgstr "Открыть WikidPadHelp, вики справки"
 
 #: lib\pwiki\PersonalWikiFrame.py:1856
 msgid "&Visit Homepage"
-msgstr "访问主页(&V)"
+msgstr "&Перейти на страницу WikidPad в интернете"
 
 #: lib\pwiki\PersonalWikiFrame.py:1857
 msgid "Visit wikidPad homepage"
-msgstr "访问WikidPad主页"
+msgstr "Перейти на домашнюю страницу WikidPad в интернете"
 
 #: lib\pwiki\PersonalWikiFrame.py:1867
 msgid "Show &License"
-msgstr "显示许可(&L)"
+msgstr "Показать &лицензию"
 
 #: lib\pwiki\PersonalWikiFrame.py:1868
 msgid "Show license of WikidPad and used components"
-msgstr "显示WikidPad 许可与用户组件"
+msgstr "Показать лицензии WikidPad и использованных компонентов"
 
 #: lib\pwiki\PersonalWikiFrame.py:1903
 msgid "&About"
-msgstr "关于(&A)"
+msgstr "&О программе WikidPad"
 
 #: lib\pwiki\PersonalWikiFrame.py:1907
 msgid "&Wiki"
-msgstr "维基(&W)"
+msgstr "&Вики"
 
 #: lib\pwiki\PersonalWikiFrame.py:1908
 msgid "&Edit"
-msgstr "编辑(&E)"
+msgstr "&Правка"
 
 #: lib\pwiki\PersonalWikiFrame.py:1909
 msgid "&View"
-msgstr "视图(&V)"
+msgstr "В&ид"
 
 #: lib\pwiki\PersonalWikiFrame.py:1910
 msgid "&Tabs"
-msgstr "标签页(&T)"
+msgstr "В&кладки"
 
 #: lib\pwiki\PersonalWikiFrame.py:1911
 msgid "Wiki &Page"
-msgstr "维基页(&P)"
+msgstr "Вики-&страница"
 
 #: lib\pwiki\PersonalWikiFrame.py:1912
 msgid "&Format"
-msgstr "格式(&F)"
+msgstr "&Формат"
 
 #: lib\pwiki\PersonalWikiFrame.py:1913
 msgid "&Navigate"
-msgstr "导航(&N)"
+msgstr "&Навигация"
 
 #: lib\pwiki\PersonalWikiFrame.py:1914
 msgid "E&xtra"
-msgstr "高级(&X)"
+msgstr "&Дополнительно"
 
 #: lib\pwiki\PersonalWikiFrame.py:1930
 msgid "Pl&ugins"
-msgstr "插件(&U)"
+msgstr "&Плагины"
 
 #: lib\pwiki\PersonalWikiFrame.py:1936
 msgid "&Help"
-msgstr "帮助(&H)"
+msgstr "&Справка"
 
 #: lib\pwiki\PersonalWikiFrame.py:1938
 msgid "He&lp"
-msgstr "帮助(&L)"
+msgstr "&Справка"
 
 #: lib\pwiki\PersonalWikiFrame.py:1964
 #: lib\pwiki\PersonalWikiFrame.py:1965
 msgid "Back"
-msgstr "后退"
+msgstr "Назад"
 
 #: lib\pwiki\PersonalWikiFrame.py:1970
 #: lib\pwiki\PersonalWikiFrame.py:1971
 msgid "Forward"
-msgstr "前进"
+msgstr "Вперёд"
 
 #: lib\pwiki\PersonalWikiFrame.py:1976
 #: lib\pwiki\PersonalWikiFrame.py:1977
 msgid "Wiki Home"
-msgstr "维基主页"
+msgstr "Домашняя страница"
 
 #: lib\pwiki\PersonalWikiFrame.py:1991
 #: lib\pwiki\PersonalWikiFrame.py:1992
 msgid "Search"
-msgstr "搜索"
+msgstr "Найти"
 
 #: lib\pwiki\PersonalWikiFrame.py:1997
 #: lib\pwiki\PersonalWikiFrame.py:1998
 msgid "Find current word in tree"
-msgstr "在树中查找当前关键字"
+msgstr "Найти текущее слово в дереве"
 
 #: lib\pwiki\PersonalWikiFrame.py:2001
 #: lib\pwiki\PersonalWikiFrame.py:2020
 #: lib\pwiki\PersonalWikiFrame.py:2040
 msgid "Separator"
-msgstr "分隔符"
+msgstr "Разделитель"
 
 #: lib\pwiki\PersonalWikiFrame.py:2005
 #: lib\pwiki\PersonalWikiFrame.py:2006
 msgid "Save Wiki Word"
-msgstr "保存维基字"
+msgstr "Сохранить вики-слово"
 
 #: lib\pwiki\PersonalWikiFrame.py:2016
 #: lib\pwiki\PersonalWikiFrame.py:2017
 #: lib\pwiki\PersonalWikiFrame.py:4382
 msgid "Delete Wiki Word"
-msgstr "删除维基字"
+msgstr "Удалить вики-слово"
 
 #: lib\pwiki\PersonalWikiFrame.py:2024
 msgid "Heading"
-msgstr "标题"
+msgstr "Заголовки"
 
 #: lib\pwiki\PersonalWikiFrame.py:2044
 msgid "Switch Editor/Preview"
-msgstr "切换编辑/预览"
+msgstr "Переключить Редактор/Просмотр"
 
 #: lib\pwiki\PersonalWikiFrame.py:2065
 msgid "Wikize Selected Word "
-msgstr "选中词维基化"
+msgstr "Викифицировать"
 
 #: lib\pwiki\PersonalWikiFrame.py:2066
 msgid "Wikize Selected Word"
-msgstr "选中词维基化"
+msgstr "Преобразовать выделенный фрагмент в вики-слово"
 
 #: lib\pwiki\PersonalWikiFrame.py:2135
 msgid "Line: 9999 Col: 9999 Pos: 9999999988888"
-msgstr "行: 9999 列: 9999 位置: 9999999988888"
+msgstr "Строка: 9999  Колонка: 9999  Позиция: 9999999988888"
 
 #: lib\pwiki\PersonalWikiFrame.py:2304
 msgid "Regular expression error"
-msgstr "错误正则表达式"
+msgstr "Ошибка в регулярном выражении"
 
 #: lib\pwiki\PersonalWikiFrame.py:2313
 msgid "Are you sure you want to reconnect? You may lose some data by this process."
-msgstr "你确定想要重新连接吗？该过程可能会丢失数据。"
+msgstr "Вы уверены, что хотите подключиться заново? Вы можете потерять некоторые данные."
 
 #: lib\pwiki\PersonalWikiFrame.py:2315
 msgid "Reconnect database"
-msgstr "重连数据库"
+msgstr "Подключить базу данных заново"
 
 #: lib\pwiki\PersonalWikiFrame.py:2329
 #: lib\pwiki\PersonalWikiFrame.py:3357
 msgid "Error while trying to reconnect:\n"
-msgstr "正尝试重新连接时发生错误:\n"
+msgstr "Ошибка при переподключении:\n"
 
 #: lib\pwiki\PersonalWikiFrame.py:2331
 msgid ""
@@ -3884,19 +3896,19 @@ msgid ""
 "Would you like to try it again?\n"
 "%s"
 msgstr ""
-"当重新连接数据库时发生错误。\n"
+"Произошла ошибка при переподключении базы данных\n"
 "\n"
-"你想重新尝试再次连接吗？\n"
+"Хотите попробовать ещё раз?\n"
 "%s"
 
 #: lib\pwiki\PersonalWikiFrame.py:2334
 msgid "Error reconnecting!"
-msgstr "重新连接时发生错误!"
+msgstr "Ошибка переподключения!"
 
 #: lib\pwiki\PersonalWikiFrame.py:2350
 #: lib\pwiki\PersonalWikiFrame.py:3404
 msgid "Error while trying to write:\n"
-msgstr "尝试写入时发生错误:\n"
+msgstr "Ошибка при записи:\n"
 
 #: lib\pwiki\PersonalWikiFrame.py:2352
 msgid ""
@@ -3905,413 +3917,413 @@ msgid ""
 "Would you like to try it again?\n"
 "%s"
 msgstr ""
-"写入数据库时发生错误\n"
+"Произошла ошибка при записи в базу данных\n"
 "\n"
-"你想要重新尝试写入吗?\n"
+"Хотите попробовать ещё раз?\n"
 "%s"
 
 #: lib\pwiki\PersonalWikiFrame.py:2355
 msgid "Error writing!"
-msgstr "写入错误!"
+msgstr "Ошибка записи!"
 
 #: lib\pwiki\PersonalWikiFrame.py:2472
 msgid "There was an error loading the icons for the tree control."
-msgstr "装载树控件所需图标时发生错误。"
+msgstr "Произошла ошибка при загрузке иконок для дерева."
 
 #: lib\pwiki\PersonalWikiFrame.py:2724
 msgid "No data handler available to create database."
-msgstr "创建数据库时无可用数据句柄。"
+msgstr "Нет доступного обработчика данных для создания базы данных"
 
 #: lib\pwiki\PersonalWikiFrame.py:2736
 msgid "A wiki already exists in '%s', overwrite? (This deletes everything in and below this directory!)"
-msgstr "维基在'%s'里已存在，覆写吗？ (这将删除该目录下所有内容！)"
+msgstr "Вики в '%s' уже существует, переписать? (Это уничтожит всё в этой папке и её подпапках!)"
 
 #: lib\pwiki\PersonalWikiFrame.py:2738
 msgid "Warning"
-msgstr "警告"
+msgstr "Предупреждение"
 
 #: lib\pwiki\PersonalWikiFrame.py:2778
 msgid "A wiki database already exists in this location, overwrite?"
-msgstr "维基数据库在该位置已存在，覆写吗？"
+msgstr "База данных в этом месте уже существует, переписать?"
 
 #: lib\pwiki\PersonalWikiFrame.py:2780
 msgid "Wiki DB Exists"
-msgstr "维基数据库已存在"
+msgstr "БД вики существует"
 
 #: lib\pwiki\PersonalWikiFrame.py:2791
 msgid "There was an error creating the wiki database."
-msgstr "创建维基数据库发生错误。"
+msgstr "Произошла ошибка при создании базы данных вики."
 
 #: lib\pwiki\PersonalWikiFrame.py:2860
 #: lib\pwiki\PersonalWikiFrame.py:2861
 msgid "Choose database type"
-msgstr "选择数据库类型"
+msgstr "Выберите тип базы данных"
 
 #: lib\pwiki\PersonalWikiFrame.py:2898
 msgid "Invalid path or missing file '%s'"
-msgstr "无效路径或缺失文件'%s'"
+msgstr "Неверный путь или отсутствует файл '%s'"
 
 #: lib\pwiki\PersonalWikiFrame.py:2949
 #: lib\pwiki\PersonalWikiFrame.py:3029
 msgid "Error connecting to database in '%s'"
-msgstr "连接数据库'%s'发生错误"
+msgstr "Ошибка подключения к базе данных в '%s'"
 
 #: lib\pwiki\PersonalWikiFrame.py:2954
 msgid "The wiki needs an update to work with this version of WikidPad. Older versions of WikidPad may be unable to read the wiki after an update."
-msgstr "当前版本WikidPad需要升级，旧版本WikidPad升级后可能无法读取维基。"
+msgstr "Чтобы работать с этой версией WikidPad, вики требует обновления. После обновления более старые версии WikidPad могут отказаться читать эту вики."
 
 #: lib\pwiki\PersonalWikiFrame.py:2957
 msgid "Update database?"
-msgstr "要升级数据库吗?"
+msgstr "Обновить базу данных?"
 
 #: lib\pwiki\PersonalWikiFrame.py:2992
 msgid ""
 "Wiki '%s' is probably in use by different\n"
 "instance of WikidPad. Connect anyway (dangerous!)?"
 msgstr ""
-"维基'%s'正被不同WikidPad实例使用。\n"
-"要强制连接吗（危险！）？"
+"Вики '%s', вероятно, используется другой\n"
+"копией WikidPad. Всё равно подключить (опасно!)?"
 
 #: lib\pwiki\PersonalWikiFrame.py:2994
 msgid "Wiki already in use"
-msgstr "维基正被使用"
+msgstr "Вики уже используется"
 
 #: lib\pwiki\PersonalWikiFrame.py:3003
 msgid ""
 "Configuration file '%s' is corrupted or missing.\n"
 "You may have to change some settings in configuration page \"Current Wiki\" and below which were lost."
 msgstr ""
-"配置文件'%s'冲突或缺失。.\n"
-"你可能需要修改配置页中的一些设置，\"当前维基\"及子结点丢失内容。"
+"Файл конфигурации '%s' повреждён или отсутствует.\n"
+"Вероятно, вам нужно изменить некоторые утерянные установки на странице настроек \"Текущая Вики\" и ниже."
 
 #: lib\pwiki\PersonalWikiFrame.py:3036
 msgid "Can't write to database '%s'"
-msgstr "无法写入数据库'%s'"
+msgstr "Невозможно записать в базу данных '%s'"
 
 #: lib\pwiki\PersonalWikiFrame.py:3241
 msgid ""
 "There is no (write-)access to underlying wiki\n"
 "Close anyway and loose possible changes?"
 msgstr ""
-"没有写入该维基的权限\n"
-"强制关闭，放弃可能的修改?"
+"Нет доступа (для записи) к вики\n"
+"Всё равно закрыть и потерять возможные изменения?"
 
 #: lib\pwiki\PersonalWikiFrame.py:3243
 msgid "Close anyway"
-msgstr "强制关闭"
+msgstr "Всё равно закрыть"
 
 #: lib\pwiki\PersonalWikiFrame.py:3327
 msgid "This operation requires an open database"
-msgstr "当前操作需要打开数据库"
+msgstr "Эта операция требует открытой базы данных"
 
 #: lib\pwiki\PersonalWikiFrame.py:3328
 msgid "No open database"
-msgstr "没有打开的数据库"
+msgstr "Нет открытой базы данных"
 
 #: lib\pwiki\PersonalWikiFrame.py:3340
 msgid "No connection to database. Try to reconnect?"
-msgstr "数据库无连接。尝试重新连接吗？"
+msgstr "Нет подключения к базе данных. Попытаться подключиться заново?"
 
 #: lib\pwiki\PersonalWikiFrame.py:3341
 msgid "Reconnect database?"
-msgstr "重新连接数据库?"
+msgstr "Подключить базу данных заново?"
 
 #: lib\pwiki\PersonalWikiFrame.py:3348
 msgid "Trying to reconnect database..."
-msgstr "正在重新连接数据库..."
+msgstr "Подключаюсь заново к базе данных..."
 
 #: lib\pwiki\PersonalWikiFrame.py:3360
 msgid "Error while reconnecting database"
-msgstr "重新连接数据库时发生错误"
+msgstr "Ошибка при переподключении к базе данных"
 
 #: lib\pwiki\PersonalWikiFrame.py:3385
 msgid ""
 "This operation needs write access to database\n"
 "Try to write?"
 msgstr ""
-"当前操作需要数据库写权限\n"
-"尝试写入吗?"
+"Эта операция требует разрешения на запись в базу данных\n"
+"Попытаться записать?"
 
 #: lib\pwiki\PersonalWikiFrame.py:3386
 msgid "Try writing?"
-msgstr "尝试写入?"
+msgstr "Попытаться записать?"
 
 #: lib\pwiki\PersonalWikiFrame.py:3393
 msgid "Trying to write to database..."
-msgstr "正在尝试写入数据库..."
+msgstr "Пытаюсь записать в базу данных..."
 
 #: lib\pwiki\PersonalWikiFrame.py:3407
 msgid "Error while writing to database"
-msgstr "尝试写入数据库时发生错误"
+msgstr "Ошибка при записи в базу данных"
 
 #: lib\pwiki\PersonalWikiFrame.py:3431
 msgid ""
 "Database connection error: %s.\n"
 "Try to re-establish, then run \"Wiki\"->\"Reconnect\""
 msgstr ""
-"数据库连节错误： %s.\n"
-"尝试重新建立，然后运行\"维基\"->\"重新连接\""
+"Ошибка подключения к базе данных: %s.\n"
+"Попытайтесь исправить и затем запустить \"Вики\"->\"Подключить заново\""
 
 #: lib\pwiki\PersonalWikiFrame.py:3433
 #: lib\pwiki\PersonalWikiFrame.py:3450
 msgid "Connection lost"
-msgstr "连接丢失"
+msgstr "Подключение потеряно"
 
 #: lib\pwiki\PersonalWikiFrame.py:3448
 msgid ""
 "No write access to database: %s.\n"
 " Try to re-establish, then run \"Wiki\"->\"Reconnect\""
 msgstr ""
-"数据库: %s，无写入权限。\n"
-" 尝试重新建立，然后运行\"维基\"->\"重新连接\""
+"Нет доступа на запись к базе данных: %s.\n"
+"Попытайтесь исправить и затем запустить \"Вики\"->\"Подключить заново\""
 
 #: lib\pwiki\PersonalWikiFrame.py:3467
 msgid "Trying to reconnect ..."
-msgstr "正尝试重新连接..."
+msgstr "Пытаюсь подключить заново..."
 
 #: lib\pwiki\PersonalWikiFrame.py:3476
 msgid "Error while trying to reconnect:"
-msgstr "重新连接时发生错误:"
+msgstr "Ошибка при переподключении:"
 
 #: lib\pwiki\PersonalWikiFrame.py:3726
 msgid "Couldn't start file"
-msgstr "无法起用文件"
+msgstr "Не могу запустить файл"
 
 #: lib\pwiki\PersonalWikiFrame.py:3741
 msgid "Couldn't open wiki: %s"
-msgstr "无法打开维基: %s"
+msgstr "Не могу открыть вики: %s"
 
 #: lib\pwiki\PersonalWikiFrame.py:3771
 msgid "Mod.: %s"
-msgstr "修改: %s"
+msgstr "Модиф.: %s"
 
 #: lib\pwiki\PersonalWikiFrame.py:3772
 msgid "; Crea.: %s"
-msgstr "; 创建: %s"
+msgstr "; Созд.: %s"
 
 #: lib\pwiki\PersonalWikiFrame.py:3809
 msgid "Parent nodes of '%s'"
-msgstr "'%s'父结点"
+msgstr "Родительские узлы для '%s'"
 
 #: lib\pwiki\PersonalWikiFrame.py:3821
 msgid "Parentless nodes"
-msgstr "叶子结点"
+msgstr "Узлы без родителей"
 
 #: lib\pwiki\PersonalWikiFrame.py:3833
 msgid "Child nodes of '%s'"
-msgstr "'%s'子结点"
+msgstr "Узлы-потомки для '%s'"
 
 #: lib\pwiki\PersonalWikiFrame.py:3846
 msgid "Bookmarks"
-msgstr "书签"
+msgstr "Закладки"
 
 #: lib\pwiki\PersonalWikiFrame.py:3993
 msgid "Wiki: %s"
-msgstr "维基: %s"
+msgstr "Вики: %s"
 
 #: lib\pwiki\PersonalWikiFrame.py:4132
 msgid "Set at Page: %s\t%s"
-msgstr "设置于页: %s\t%s"
+msgstr "Установить на странице: %s\t%s"
 
 #: lib\pwiki\PersonalWikiFrame.py:4148
 msgid "Error saving global configuration"
-msgstr "保存全局设置时发生错误"
+msgstr "Ошибка при сохранении глобальной конфигурации"
 
 #: lib\pwiki\PersonalWikiFrame.py:4159
 msgid "Error saving current configuration"
-msgstr "保存当前设置时发生错误"
+msgstr "Ошибка при сохранении текущей конфигурации"
 
 #: lib\pwiki\PersonalWikiFrame.py:4181
 msgid "No real wiki word selected to rename"
-msgstr "没有选择真实的维基字用于修改"
+msgstr "Не выбрано реального вики-слова для переименования"
 
 #: lib\pwiki\PersonalWikiFrame.py:4185
 msgid "The scratch pad cannot be renamed."
-msgstr "本便笺无法改名"
+msgstr "Черновик (ScratchPad) нельзя переименовать"
 
 #: lib\pwiki\PersonalWikiFrame.py:4209
 msgid "Description:"
-msgstr "描述:"
+msgstr "Описание:"
 
 #: lib\pwiki\PersonalWikiFrame.py:4210
 msgid "Store new version"
-msgstr "保存新版本"
+msgstr "Сохранить новую версию"
 
 #: lib\pwiki\PersonalWikiFrame.py:4224
 msgid "Do you want to delete all stored versions?"
-msgstr "你想要删除所有已保存版本吗?"
+msgstr "Вы хотите удалить все сохранённые версии?"
 
 #: lib\pwiki\PersonalWikiFrame.py:4225
 msgid "Delete All Versions"
-msgstr "删除所有版本"
+msgstr "Удалить все версии"
 
 #: lib\pwiki\PersonalWikiFrame.py:4370
 msgid "The scratch pad cannot be deleted"
-msgstr "本便笺无法删除"
+msgstr "Черновик (ScratchPad) нельзя удалить"
 
 #: lib\pwiki\PersonalWikiFrame.py:4374
 msgid "No real wiki word to delete"
-msgstr "没有真实的维基字可供删除"
+msgstr "Нет реального вики-слова для удаления"
 
 #: lib\pwiki\PersonalWikiFrame.py:4381
 msgid "Are you sure you want to delete wiki word '%s'?"
-msgstr "你确定要删除维基字'%s'吗?"
+msgstr "Вы уверены, что хотите удалить вики-слово '%s'?"
 
 #: lib\pwiki\PersonalWikiFrame.py:4410
 msgid "No real wiki word to modify"
-msgstr "没有真实的维基字可供修改"
+msgstr "Нет реального вики-слова для изменения"
 
 #: lib\pwiki\PersonalWikiFrame.py:4426
 msgid "Replace text by WikiWord:"
-msgstr "替换文本为维基字:"
+msgstr "Заменить выделенный текст вики-словом:"
 
 #: lib\pwiki\PersonalWikiFrame.py:4427
 msgid "Replace by Wiki Word"
-msgstr "替换为维基字"
+msgstr "Заменить вики-словом"
 
 #: lib\pwiki\PersonalWikiFrame.py:4436
 msgid "'%s' is an invalid wiki word."
-msgstr "'%s'是无效维基字。"
+msgstr "'%s' - неверное вики-слово"
 
 #: lib\pwiki\PersonalWikiFrame.py:4451
 msgid ""
 "Wiki word %s exists already\n"
 "Would you like to append to the word?"
 msgstr ""
-"维基字%s已存在\n"
-"你想要追加该维基字吗?"
+"Вики-слово %s уже существует\n"
+"Вы хотите добавить в конец этого слова?"
 
 #: lib\pwiki\PersonalWikiFrame.py:4454
 msgid "Word exists"
-msgstr "维基字已存在"
+msgstr "Слово существует"
 
 #: lib\pwiki\PersonalWikiFrame.py:4708
 msgid "Error on export"
-msgstr "导出出错"
+msgstr "Ошибка при экспорте"
 
 #: lib\pwiki\PersonalWikiFrame.py:4738
 msgid "Choose a file to create URL for"
-msgstr "选择文件用于创建URL用于"
+msgstr "Выберите файл, чтобы создать URL для"
 
 #: lib\pwiki\PersonalWikiFrame.py:4806
 msgid "Are you sure you want to start a full rebuild of wiki in background?"
-msgstr "确认你想要开始在后台完全重建维基吗?"
+msgstr "Вы уверены, что хотите запустить полную перестройку вики в фоновом режиме?"
 
 #: lib\pwiki\PersonalWikiFrame.py:4808
 msgid "Initiate update"
-msgstr "初始化升级"
+msgstr "Запустить обновление"
 
 #: lib\pwiki\PersonalWikiFrame.py:4815
 #: lib\pwiki\PersonalWikiFrame.py:4816
 msgid "     Initiating update     "
-msgstr "     初始化升级"
+msgstr "     Запуск обновления"
 
 #: lib\pwiki\PersonalWikiFrame.py:4830
 msgid "Error initiating update"
-msgstr "初始化升级时出错"
+msgstr "Ошибка при запуске обновления"
 
 #: lib\pwiki\PersonalWikiFrame.py:4839
 msgid "Are you sure you want to rebuild this wiki? You may want to backup your data first!"
-msgstr "确认你要重建该维基吗?首先你应该备份数据!"
+msgstr "Вы уверены, что хотите перестроить вики? Возможно, вам сначала нужно сделать резервную копию!"
 
 #: lib\pwiki\PersonalWikiFrame.py:4841
 msgid "Rebuild wiki"
-msgstr "重建维基"
+msgstr "Перестроить вики"
 
 #: lib\pwiki\PersonalWikiFrame.py:4848
 #: lib\pwiki\PersonalWikiFrame.py:4849
 msgid "     Rebuilding wiki     "
-msgstr "     重建维基"
+msgstr "     Перестройка вики"
 
 #: lib\pwiki\PersonalWikiFrame.py:4864
 msgid "Error rebuilding wiki"
-msgstr "重建维基出错"
+msgstr "Ошибка перестройки вики"
 
 #: lib\pwiki\PersonalWikiFrame.py:4956
 msgid "This could overwrite pages in the database. Continue?"
-msgstr "这些操作可能会覆写数据库中的页面。是否继续?"
+msgstr "Страницы в базе данных могут быть заменены. Продолжить?"
 
 #: lib\pwiki\PersonalWikiFrame.py:4957
 msgid "Import pagefiles"
-msgstr "导入页面文件"
+msgstr "Импортировать файлы страниц"
 
 #: lib\pwiki\PersonalWikiFrame.py:5070
 msgid "No list of strings passed to \"listmcstr\" dialog"
-msgstr "没有字符串列表传送到\"listmcstr\"对话框"
+msgstr "Нет списка строк, переданных в диалог \"listmcstr\""
 
 #: lib\pwiki\PersonalWikiFrame.py:5093
 msgid "Unknown dialog type"
-msgstr "未知对话框类型"
+msgstr "Неизвестный тип диалога"
 
 #: lib\pwiki\PersonalWikiFrame.py:5232
 #: lib\pwiki\PersonalWikiFrame.py:5250
 #: lib\pwiki\PersonalWikiFrame.py:5275
 msgid "Choose a Wiki to open"
-msgstr "选择需要打开的维基"
+msgstr "Выберите Вики для открытия"
 
 #: lib\pwiki\PersonalWikiFrame.py:5289
 msgid "Name for new wiki (must be in the form of a WikiWord):"
-msgstr "新维基名(必须是维基字的形式):"
+msgstr "Имя новой вики (должно быть вида 'ВикиСлово'):"
 
 #: lib\pwiki\PersonalWikiFrame.py:5290
 msgid "Create New Wiki"
-msgstr "创建新维基"
+msgstr "Создать новую вики"
 
 #: lib\pwiki\PersonalWikiFrame.py:5305
 msgid "Directory to store new wiki"
-msgstr "存储新维基的目录"
+msgstr "Папка для сохранения новой вики"
 
 #: lib\pwiki\PersonalWikiFrame.py:5316
 #: lib\pwiki\wikidata\WikiDataManager.py:1289
 #: lib\pwiki\wikidata\WikiDataManager.py:1345
 msgid "'%s' is an invalid wiki word. %s"
-msgstr "'%s'是无效维基字。 %s"
+msgstr "Слово '%s' - неверное вики-слово. %s"
 
 #: lib\pwiki\PersonalWikiFrame.py:5620
 msgid "Clipboard Catcher at Cursor"
-msgstr "在光标处开始剪贴板捕获"
+msgstr "Захват буфера в позиции курсора"
 
 #: lib\pwiki\PersonalWikiFrame.py:5624
 msgid "Clipboard Catcher off"
-msgstr "关闭剪贴板监视器"
+msgstr "Захват буфера отключен"
 
 #: lib\pwiki\PersonalWikiFrame.py:5685
 msgid "Restore"
-msgstr "还原"
+msgstr "Восстановить"
 
 #: lib\pwiki\PersonalWikiFrame.py:5686
 msgid "Save"
-msgstr "保存"
+msgstr "Сохранить"
 
 #: lib\pwiki\Printing.py:325
 #: lib\pwiki\Printing.py:641
 msgid "Print Preview"
-msgstr "打印预览"
+msgstr "Предварительный просмотр печати"
 
 #: lib\pwiki\Printing.py:338
 msgid "Printout"
-msgstr "打印输出"
+msgstr "Печать"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:149
 msgid "Searching... (click into field to abort)"
-msgstr "搜索中... (在域中单击取消)"
+msgstr "Поиск... (щёлкните поле для остановки)"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:151
 msgid "Not found"
-msgstr "没有发现"
+msgstr "Не найдено"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:709
 msgid "End of document reached. Continue at beginning?"
-msgstr "已到达文档尾。是否在文档开始处继续？"
+msgstr "Достигнут конец документа. Продолжить с начала?"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:711
 msgid "Continue at beginning?"
-msgstr "在开始处继续?"
+msgstr "Продолжить с начала?"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:722
 #: lib\pwiki\SearchAndReplaceDialogs.py:723
 msgid "No matches found"
-msgstr "没有发现匹配结果"
+msgstr "Совпадения не найдены"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:737
 #: lib\pwiki\SearchAndReplaceDialogs.py:750
@@ -4325,25 +4337,25 @@ msgstr "没有发现匹配结果"
 #: lib\pwiki\SearchAndReplaceDialogs.py:1582
 #: lib\pwiki\SearchAndReplaceDialogs.py:2203
 msgid "Error in regular expression"
-msgstr "正则表达式错误"
+msgstr "Ошибка в регулярном выражении"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:778
 #: lib\pwiki\SearchAndReplaceDialogs.py:1366
 msgid "%i replacements done"
-msgstr "完成 %i 次替换"
+msgstr "Сделано замен: %i "
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:779
 #: lib\pwiki\SearchAndReplaceDialogs.py:1306
 #: lib\pwiki\SearchAndReplaceDialogs.py:1367
 msgid "Replace All"
-msgstr "全部替换"
+msgstr "Заменить всё"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:988
 msgid ""
 "Bad regular expression '%s':\n"
 "%s"
 msgstr ""
-"不良正则表达式 '%s':\n"
+"Неверное регулярное выражение '%s':\n"
 "%s"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1199
@@ -4355,7 +4367,7 @@ msgstr ""
 #: lib\pwiki\SearchAndReplaceDialogs.py:1585
 #: lib\pwiki\SearchAndReplaceDialogs.py:2206
 msgid "Error in boolean expression"
-msgstr "错误布尔正则表达式"
+msgstr "Ошибка в булевом выражении"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1202
 #: lib\pwiki\SearchAndReplaceDialogs.py:1230
@@ -4363,96 +4375,96 @@ msgstr "错误布尔正则表达式"
 #: lib\pwiki\SearchAndReplaceDialogs.py:1588
 #: lib\pwiki\SearchAndReplaceDialogs.py:2209
 msgid "Error. Maybe wiki rebuild is needed"
-msgstr "错误：可能需要维基重建。"
+msgstr "Ошибка. Возможно, нужна перестройка вики"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1306
 msgid "Replace all occurrences?"
-msgstr "替换所有匹配结果？"
+msgstr "Заменить все вхождения?"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1433
 msgid "Choose search title"
-msgstr "选择搜索标题"
+msgstr "Выберите имя Поиска"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1443
 msgid "Do you want to overwrite existing search '%s'?"
-msgstr "你想要覆写已存在检索'%s'吗?"
+msgstr "Хотите заменить существующий Поиск '%s'?"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1444
 msgid "Overwrite search"
-msgstr "覆写检索"
+msgstr "Заменить Поиск"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1459
 msgid "Invalid search string, can't save as view"
-msgstr "无效搜索串，不能保存为视图"
+msgstr "Неверная строка поиска, невозможно сохранить как представление"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1559
 msgid "Do you want to delete %i search(es)?"
-msgstr "你想要删除%i个搜索结果吗?"
+msgstr "Выбрано Поисков: %i. Хотите удалить?"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1560
 msgid "Delete search"
-msgstr "删除搜索"
+msgstr "Удалить Поиск"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1660
 msgid "*Set page list*"
-msgstr "*设置页面列表*"
+msgstr "*Задан фильтр страниц*"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1944
 msgid "<Search: %s>"
-msgstr "<检索:  %s>"
+msgstr "<Найти: %s>"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:1994
 msgid "Fast Search"
-msgstr "快速检索"
+msgstr "Быстрый поиск"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:2021
 msgid "As Tab"
-msgstr "作为标签页"
+msgstr "Как вкладку"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:2061
 msgid "Search: %s"
-msgstr "搜索: %s"
+msgstr "Найти: %s"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:2310
 #: lib\pwiki\WikiHtmlView.py:710
 msgid "Activate"
-msgstr "激活"
+msgstr "Открыть новую вкладку"
 
 #: lib\pwiki\SearchAndReplaceDialogs.py:2312
 #: lib\pwiki\WikiHtmlView.py:712
 msgid "Activate New Tab Backgrd."
-msgstr "在后台激活新选项卡"
+msgstr "Открыть новую вкладку на заднем плане"
 
 #: lib\pwiki\SpellChecker.py:117
 msgid "No wiki open or current page is a functional page"
-msgstr "没有打开的维基或当前页为功能页"
+msgstr "Нет открытой вики или текущая страница является функциональной"
 
 #: lib\pwiki\SpellChecker.py:131
 msgid "Current page is not modified yet"
-msgstr "当前页还没有被修改"
+msgstr "Текущая страница ещё не изменялась"
 
 #: lib\pwiki\SpellChecker.py:138
 #: lib\pwiki\SpellChecker.py:172
 #: lib\pwiki\SpellChecker.py:180
 msgid "No (more) misspelled words found"
-msgstr "没有发现更多拼写错误单词"
+msgstr "Слов с ошибками (больше) нет "
 
 #: lib\pwiki\SpellChecker.py:148
 msgid "No dictionary found for this page"
-msgstr "本页面没有发现字典"
+msgstr "Словарь для этой страницы не найден"
 
 #: lib\pwiki\StringOps.py:715
 msgid "Inval. timestamp"
-msgstr "无效时间戳"
+msgstr "Неверная временная метка"
 
 #: lib\pwiki\TextTree.py:205
 #: lib\pwiki\TextTree.py:240
 msgid "<No title>"
-msgstr "<无标题>"
+msgstr "<Без заголовка>"
 
 #: lib\pwiki\TextTree.py:361
 msgid "Select wiki for favorites"
-msgstr "选择放入收藏夹的维基"
+msgstr "Выберите вики для Избранного"
 
 #: lib\pwiki\Trashcan.py:183
 #: lib\pwiki\Trashcan.py:440
@@ -4461,93 +4473,93 @@ msgstr "选择放入收藏夹的维基"
 #: lib\pwiki\timeView\Versioning.py:442
 #: lib\pwiki\timeView\Versioning.py:454
 msgid "Versioning data damaged"
-msgstr "版本化数据被损坏"
+msgstr "Данные о версиях повреждены"
 
 #: lib\pwiki\WikiExceptions.py:72
 msgid "Multiple words rename to same word"
-msgstr "多个单词修改为同一单词"
+msgstr "Несколько слов переименовываются в одно и то же слово"
 
 #: lib\pwiki\WikiHtmlView.py:597
 #: lib\pwiki\WikiTxtCtrl.py:2098
 msgid "Folder does not exist"
-msgstr "文件夹不存在"
+msgstr "Папка не существует"
 
 #: lib\pwiki\WikiHtmlView.py:689
 #: lib\pwiki\WikiHtmlViewIE.py:479
 msgid "Link to page: %s"
-msgstr "链接页面: %s"
+msgstr "Ссылка на страницу: %s"
 
 #: lib\pwiki\WikiTreeCtrl.py:525
 msgid "Views"
-msgstr "视图"
+msgstr "Представления"
 
 #: lib\pwiki\WikiTreeCtrl.py:902
 msgid "searches"
-msgstr "检索结果"
+msgstr "поиски"
 
 #: lib\pwiki\WikiTreeCtrl.py:984
 msgid "modified-within"
-msgstr "修改范围"
+msgstr "изменены-в-пределах"
 
 #: lib\pwiki\WikiTreeCtrl.py:1012
 msgid "1 day"
-msgstr "1天"
+msgstr "1-го дня"
 
 #: lib\pwiki\WikiTreeCtrl.py:1014
 msgid "%i days"
-msgstr "%i 天"
+msgstr "%i дней"
 
 #: lib\pwiki\WikiTreeCtrl.py:1052
 msgid "parentless-nodes"
-msgstr "叶子结点"
+msgstr "узлы-без-родителей"
 
 #: lib\pwiki\WikiTreeCtrl.py:1083
 msgid "undefined-nodes"
-msgstr "未定义结点"
+msgstr "не-определённые-узлы"
 
 #: lib\pwiki\WikiTreeCtrl.py:1113
 msgid "Func. pages"
-msgstr "功能页"
+msgstr "Функц. страницы"
 
 #: lib\pwiki\WikiTreeCtrl.py:1245
 msgid "Add icon attribute"
-msgstr "增加图标属性"
+msgstr "Добавить атрибут иконки"
 
 #: lib\pwiki\WikiTreeCtrl.py:1252
 msgid "Add color attribute"
-msgstr "增加颜色属性"
+msgstr "Добавить атрибут цвета"
 
 #: lib\pwiki\WikiTreeCtrl.py:1856
 msgid "Append Wiki Word"
-msgstr "追加维基字"
+msgstr "Добавить вики-слово в конец"
 
 #: lib\pwiki\WikiTreeCtrl.py:1871
 msgid "Prepend Wiki Word"
-msgstr "插入关键字"
+msgstr "Добавить вики-слово в начало"
 
 #: lib\pwiki\WikiTxtCtrl.py:1287
 msgid "Select Template"
-msgstr "选择模板"
+msgstr "Выберите шаблон"
 
 #: lib\pwiki\WikiTxtCtrl.py:1289
 msgid "Select Template (deletes current content!)"
-msgstr "选择模板（清除当前内容！）"
+msgstr "Выберите шаблон (удалит текущее содержание!)"
 
 #: lib\pwiki\WikiTxtCtrl.py:1395
 msgid "Use Template"
-msgstr "使用模板"
+msgstr "Использовать шаблон"
 
 #: lib\pwiki\WikiTxtCtrl.py:2174
 msgid ""
 "Set in menu \"Wiki\", item \"Options...\", options page \"Security\", \n"
 "item \"Script security\" an appropriate value to execute a script."
 msgstr ""
-"在菜单\"维基\"，菜单项\"选项...\"，选项卡\"安全性\", \n"
-"项目\"脚本安全性\"选择相应的数据用于执行脚本。"
+"Чтобы выполнить скрипт, установите соответствующее значение в меню \"Вики\", пункт \"Настройки...\", \n"
+"страница настроек \"Безопасность\", пункт \"Безопасность скриптов\"."
 
 #: lib\pwiki\WikiTxtCtrl.py:2177
 msgid "Script execution disabled"
-msgstr "脚本执行被禁用"
+msgstr "Выполнение скрипта запрещено"
 
 #: lib\pwiki\WikiTxtCtrl.py:2249
 msgid ""
@@ -4555,389 +4567,330 @@ msgid ""
 "Exception: %s"
 msgstr ""
 "\n"
-"异常: %s"
+"Исключение: %s"
 
 #: lib\pwiki\WikiTxtCtrl.py:2942
 msgid "Line: %d Col: %d Pos: %d"
-msgstr "行: %d 列: %d 位置: %d"
+msgstr "Строка: %d  Колонка: %d  Позиция: %d"
 
 #: lib\pwiki\WikiTxtCtrl.py:3122
 msgid "Couldn't copy file"
-msgstr "无法复制文件"
+msgstr "Ошибка копирования файла"
 
 #: lib\pwiki\WikiTxtCtrl.py:3383
 msgid "Ignore"
-msgstr "忽略"
+msgstr "Игнорировать"
 
 #: lib\pwiki\WikiTxtCtrl.py:3384
 msgid "Add Globally"
-msgstr "全局增加"
+msgstr "Добавить глобально"
 
 #: lib\pwiki\WikiTxtCtrl.py:3385
 msgid "Add Locally"
-msgstr "本地增加"
+msgstr "Добавить локально"
 
 #: lib\pwiki\WikiTxtCtrl.py:3395
 msgid "Follow Link"
-msgstr "打开链接"
+msgstr "Открыть ссылку"
 
 #: lib\pwiki\WikiTxtCtrl.py:3396
 msgid "Follow Link New Tab"
-msgstr "新标签页打开链接"
+msgstr "Открыть ссылку в новой вкладке"
 
 #: lib\pwiki\WikiTxtCtrl.py:3397
 msgid "Follow Link New Tab Backgrd."
-msgstr "新标签页打开链接在后台"
+msgstr "Открыть ссылку в новой вкладке на заднем фоне"
 
 #: lib\pwiki\WikiTxtCtrl.py:3399
 msgid "Convert Absolute/Relative File URL"
-msgstr "转换绝对/相对文件URL"
+msgstr "Преобразовать Абсолютный/Относительный URL файла"
 
 #: lib\pwiki\WikiTxtCtrl.py:3400
 msgid "Open Containing Folder"
-msgstr "打开所在文件夹"
+msgstr "Открыть папку"
 
 #: lib\pwiki\WikiTxtCtrl.py:3402
 msgid "Copy anchor URL to clipboard"
-msgstr "复制锚点URL到剪贴板"
+msgstr "Копировать anchor URL в буфер"
 
 #: lib\pwiki\WikiTxtCtrl.py:3404
 msgid "Other..."
-msgstr "其他..."
+msgstr "Другие..."
 
 #: lib\pwiki\WikiTxtCtrl.py:3405
 msgid "Use Template..."
-msgstr "使用模板..."
+msgstr "Использовать шаблон..."
 
 #: lib\pwiki\WikiTxtCtrl.py:3409
 msgid "Show folding"
-msgstr "显示折叠"
+msgstr "Показать свёртку фрагментов"
 
 #: lib\pwiki\WikiTxtCtrl.py:3410
 msgid "Show folding marks and allow folding"
-msgstr "显示折叠标记并允许折叠"
+msgstr "Показать значки свёртки и разрешить свёртку фрагментов текста"
 
 #: lib\pwiki\WikiTxtCtrl.py:3411
 msgid "&Toggle current folding"
-msgstr "切换当前折叠(&T)"
+msgstr "&Свернуть/Развернуть текущий фрагмент"
 
 #: lib\pwiki\WikiTxtCtrl.py:3412
 msgid "Toggle folding of the current line"
-msgstr "切换当前行的折叠状态"
+msgstr "Свернуть/Развернуть фрагмент текста, соответствующего текущей строке"
 
 #: lib\pwiki\WikiTxtCtrl.py:3413
 msgid "&Unfold All"
-msgstr "全部展开(&U)"
+msgstr "&Развернуть всё"
 
 #: lib\pwiki\WikiTxtCtrl.py:3414
 msgid "Unfold everything in current editor"
-msgstr "展开当前编辑器所有内容"
+msgstr "Развернуть все фрагменты в текущем редакторе"
 
 #: lib\pwiki\WikiTxtCtrl.py:3415
 msgid "&Fold All"
-msgstr "全部折叠(&F)"
+msgstr "&Свернуть всё"
 
 #: lib\pwiki\WikiTxtCtrl.py:3416
 msgid "Fold everything in current editor"
-msgstr "折叠当前编辑器所有内容"
+msgstr "Свернуть все фрагменты в текущем редакторе"
 
 #: lib\pwiki\WikiTxtDialogs.py:43
 msgid "Incremental search (ENTER/ESC to finish)"
-msgstr "增量查找(按ENTER/ESC完成)"
+msgstr "Пошаговый поиск (ENTER/ESC - остановка)"
 
 #: lib\pwiki\WindowsHacks.py:299
 msgid "Copying from %s to %s failed. SHFileOperation result no. %s"
-msgstr "从 %s 向 %s 复制失败。SHFileOperation返回结果. %s"
+msgstr "Ошибка копирования из %s в %s. Код результата SHFileOperation %s"
 
 #: lib\pwiki\WindowsHacks.py:303
 msgid "Moving from %s to %s failed. SHFileOperation result no. %s"
-msgstr "从 %s 向 %s 移动失败。SHFileOperation返回结果. %s"
+msgstr "Ошибка перемещения из %s в %s. Код результата SHFileOperation %s"
 
 #: lib\pwiki\timeView\DatedWikiWordFilters.py:131
 msgid "Modified"
-msgstr "修改"
+msgstr "Изменён"
 
 #: lib\pwiki\timeView\TimeViewCtrl.py:47
 msgid "Versions"
-msgstr "版本集"
+msgstr "Версии"
 
 #: lib\pwiki\timeView\TimelinePanel.py:799
 msgid "Show dates without associated wiki words"
-msgstr "显示日期（不关联维基字）"
+msgstr "Показать даты без соответствующих вики-слов"
 
 #: lib\pwiki\timeView\TimelinePanel.py:801
 msgid "List dates ascending or descending"
-msgstr "日期列表升序或降序排列"
+msgstr "Список дат в восходящем или нисходящем порядке"
 
 #: lib\pwiki\timeView\VersioningGui.py:225
 msgid "Deleting in-between versions is not supported yet"
-msgstr "删除区间版本目前尚未支持"
+msgstr "Удаление промежуточных версий пока не поддерживается"
 
 #: lib\pwiki\timeView\VersioningGui.py:228
 msgid "Do you want to delete this version?"
-msgstr "你想要删除该版本吗?"
+msgstr "Вы хотите удалить эту версию?"
 
 #: lib\pwiki\timeView\VersioningGui.py:229
 #: lib\pwiki\timeView\VersioningGui.py:814
 msgid "Delete version"
-msgstr "删除版本"
+msgstr "Удалить версию"
 
 #: lib\pwiki\timeView\VersioningGui.py:241
 #: lib\pwiki\timeView\VersioningGui.py:273
 msgid "Do you want to delete all version data of this page?"
-msgstr "你想要删除本页所有版本数据吗?"
+msgstr "Вы хотите удалить все данные о версиях этой страницы?"
 
 #: lib\pwiki\timeView\VersioningGui.py:242
 #: lib\pwiki\timeView\VersioningGui.py:274
 #: lib\pwiki\timeView\VersioningGui.py:819
 msgid "Delete all versions"
-msgstr "删除所有版本"
+msgstr "Удалить все версии"
 
 #: lib\pwiki\timeView\VersioningGui.py:288
 #: lib\pwiki\timeView\VersioningGui.py:349
 #: lib\pwiki\timeView\VersioningGui.py:577
 msgid "Current"
-msgstr "当前"
+msgstr "Текущая"
 
 #: lib\pwiki\timeView\VersioningGui.py:806
 msgid "Diff inline"
-msgstr "内部差异"
+msgstr "Отличия версий"
 
 #: lib\pwiki\timeView\VersioningGui.py:807
 msgid "Show the difference between two versions inline"
-msgstr "查看两种版本之间的内在差异"
+msgstr "Показать различие между версиями внутри текста"
 
 #: lib\pwiki\timeView\VersioningGui.py:809
 msgid "Set diff from"
-msgstr "设置差异于"
+msgstr "Сравнить эту страницу..."
 
 #: lib\pwiki\timeView\VersioningGui.py:810
 msgid "Set the \"from\" version in diff"
-msgstr "设置差异比较“源”版本"
+msgstr "Сравнить эту страницу..."
 
 #: lib\pwiki\timeView\VersioningGui.py:811
 msgid "Set diff to"
-msgstr "设置差异到"
+msgstr "...с этой страницей"
 
 #: lib\pwiki\timeView\VersioningGui.py:812
 msgid "Set the \"to\" version in diff"
-msgstr "设置差异比较“目的”版本"
+msgstr "Установить версию для сравнения"
 
 #: lib\pwiki\timeView\VersioningGui.py:815
 msgid "Delete selected version"
-msgstr "删除已选版本"
+msgstr "Удалить выбранную версию"
 
 #: lib\pwiki\timeView\VersioningGui.py:817
 msgid "Add version"
-msgstr "增加版本"
+msgstr "Добавить версию"
 
 #: lib\pwiki\timeView\VersioningGui.py:818
 msgid "Add a new version"
-msgstr "增加新版本"
+msgstr "Добавить новую версию"
 
 #: lib\pwiki\timeView\VersioningGui.py:820
 msgid "Delete all versions of current page"
-msgstr "删除当前页所有版本"
+msgstr "Удалить все версии текущей страницы"
 
 #: lib\pwiki\wikidata\FileStorage.py:194
 msgid "File compare error, file not readable or changed during compare"
-msgstr "文件比较错误，文件不可读或比较时被修改"
+msgstr "Ошибка сравнения файла, файл не читается или был изменён во время сравнения"
 
 #: lib\pwiki\wikidata\FileStorage.py:216
 msgid "Path '%s' must point to an existing file"
-msgstr "路径'%s'必须指向已存在文件"
+msgstr "Путь '%s' должен указывать на существующий файл"
 
 #: lib\pwiki\wikidata\FileStorage.py:233
 msgid "Internal error: Bad source file name"
-msgstr "内部错误：错误源文件名"
+msgstr "Внутренняя ошибка: Неверно имя файла-источника"
 
 #: lib\pwiki\wikidata\FileStorage.py:298
 msgid "Copy of file '%s' couldn't be created"
-msgstr "无法创建文件副本'%s'"
+msgstr "Копии файла '%s' не может быть создана"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:58
 msgid "Database exists already and is currently in use"
-msgstr "数据库已经存在并且正被使用"
+msgstr "База данных уже существует и сейчас используется"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:63
 #: lib\pwiki\wikidata\WikiDataManager.py:1862
 msgid "Data handler %s not available"
-msgstr "数据句柄“%s”不可用"
+msgstr "Обработчик данных %s недоступен"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:84
 msgid "Database is already in use with database handler \"%s\". Can't open with different handler."
-msgstr "数据库已被数据库句柄'%s'使用。无法使用不同句柄打开。"
+msgstr "База данных уже используется с обработчиком базы данных \"%s\". Невозможно открыть с другим обработчиком."
 
 #: lib\pwiki\wikidata\WikiDataManager.py:90
 msgid "Database is already in use with wiki language handler \"%s\". Can't open with different handler."
-msgstr "数据库已被维基语言句柄'%s'使用。无法使用不同句柄打开。"
+msgstr "База данных уже используется с обработчиком синтаксиса вики \"%s\". Невозможно открыть с другим обработчиком."
 
 #: lib\pwiki\wikidata\WikiDataManager.py:285
 msgid "Wiki is probably already in use by other instance"
-msgstr "维基很可能被其他实例使用。"
+msgstr "Вики, вероятно, уже используется другой копией"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:314
 msgid "Wiki configuration file is corrupted"
-msgstr "维基配置文件冲突"
+msgstr "Файл конфигурации вики повреждён"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:350
 msgid "No data handler information found, probably \"Original Gadfly\" is right."
-msgstr "没有发现数据句柄信息，可能\"原始的Gadfly\"是正确的。"
+msgstr "Не найдена информация об обработчике данных, вероятно, это \"Original Gadfly\"."
 
 #: lib\pwiki\wikidata\WikiDataManager.py:356
 msgid "Required data handler \"%s\" unknown to WikidPad"
-msgstr "WikidPad遇到未知请求数据句柄 \"%s\""
+msgstr "Требуемый обработчик данных \"%s\" неизвестен WikidPad"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:362
 msgid "Error on initializing data handler \"%s\""
-msgstr "初始化数据句柄\"%s\"出错"
+msgstr "Ошибка при инициализации обработчика \"%s\""
 
 #: lib\pwiki\wikidata\WikiDataManager.py:373
 msgid "Required wiki language handler \"%s\" not available"
-msgstr "请求的维基语言句柄\"%s\"不可用。"
+msgstr "Требуемый обработчик синтаксиса \"%s\" не доступен"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:827
 msgid "Word '%s' not in wiki"
-msgstr "字'%s'不存在于维基"
+msgstr "Слова '%s' нет в вики"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:1133
 #: lib\pwiki\wikidata\WikiDataManager.py:1197
 msgid "Update basic link info"
-msgstr "更新基本链接信息"
+msgstr "Обновить основную информацию о ссылках"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:1149
 msgid "Starting update thread"
-msgstr "开始更新进程"
+msgstr "Запуск процесса обновления"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:1217
 msgid "Update attributes of %s"
-msgstr "更新%s属性集"
+msgstr "Обновить атрибуты %s"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:1239
 msgid "Update page %s"
-msgstr "更新页%s"
+msgstr "Обновить страницу %s"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:1257
 msgid "Final cleanup"
-msgstr "清除完成"
+msgstr "Окончательная чистка"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:1350
 msgid "Cannot rename '%s' to '%s', '%s' already exists"
-msgstr "无法修改'%s'为'%s'，%s'已存在。"
+msgstr "Невозможно переименовать '%s' в '%s', '%s' уже существует"
 
 #: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:725
 #: lib\pwiki\wikidata\original_gadfly\DbStructure.py:723
 #: lib\pwiki\wikidata\original_sqlite\DbStructure.py:695
 msgid "database already exists at location: %s"
-msgstr "数据库已存在于位置： %s"
+msgstr "база данных уже существует в: %s"
 
 #: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:913
 #: lib\pwiki\wikidata\original_gadfly\DbStructure.py:779
 msgid "Update needed"
-msgstr "需要升级"
+msgstr "Требуется обновление"
 
 #: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:916
 #: lib\pwiki\wikidata\original_gadfly\DbStructure.py:782
 #: lib\pwiki\wikidata\original_sqlite\DbStructure.py:825
 msgid "Database has unknown format branchtag='%s'"
-msgstr "数据库含有未知格式分支标签='%s'"
+msgstr "База данных имеет неизвестный format branchtag='%s'"
 
 #: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:925
 #: lib\pwiki\wikidata\original_gadfly\DbStructure.py:791
 #: lib\pwiki\wikidata\original_sqlite\DbStructure.py:834
 msgid "Database has unknown format version='%i'"
-msgstr "数据库含有未知格式版本='%i'"
+msgstr "База данных имеет неизвестную версию формата='%i'"
 
 #: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:929
 #: lib\pwiki\wikidata\original_gadfly\DbStructure.py:795
 #: lib\pwiki\wikidata\original_sqlite\DbStructure.py:838
 msgid "Update needed, current format version='%i'"
-msgstr "需要升级，当前格式版本='%i'"
+msgstr "Требуется обновление, текущая версия формата='%i'"
 
 #: lib\pwiki\wikidata\compact_sqlite\DbStructure.py:932
 #: lib\pwiki\wikidata\original_gadfly\DbStructure.py:798
 #: lib\pwiki\wikidata\original_sqlite\DbStructure.py:841
 msgid "Database format is up to date"
-msgstr "数据库格式已更新"
+msgstr "Формат базы данных не требует обновления"
 
 #: lib\pwiki\wikidata\compact_sqlite\WikiData.py:215
 msgid "Wiki page not found: %s"
-msgstr "没有发现维基页: %s"
+msgstr "Вики-страница не найдена: %s"
 
 #: lib\pwiki\wikidata\compact_sqlite\WikiData.py:479
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:459
 #: lib\pwiki\wikidata\original_sqlite\WikiData.py:521
 msgid "You cannot delete the root wiki node"
-msgstr "你不能删除维基根结点"
+msgstr "Вы не можете удалить корневой узел вики"
 
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:1051
 #: lib\pwiki\wikidata\original_sqlite\WikiData.py:1160
 msgid "Wiki page not found (no path information) for word: %s"
-msgstr "没有找到匹配维基字“%s”的相关维基页(无路径信息)。"
+msgstr "Для слова %s не найдена вики-страница (нет информации о пути)."
 
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:1069
 #: lib\pwiki\wikidata\original_gadfly\WikiData.py:1083
 #: lib\pwiki\wikidata\original_sqlite\WikiData.py:1178
 #: lib\pwiki\wikidata\original_sqlite\WikiData.py:1192
 msgid "Wiki page not found (bad path information) for word: %s"
-msgstr "没有找到匹配维基字“%s”的相关维基页(不良路径信息)。"
+msgstr "Для слова %s не найдена вики-страница (неверна информация о пути)."
 
-#~ msgid "Set page &list"
-#~ msgstr "设置页面列表(&L)"
-
-#~ msgid "'%s' is already alias for the wiki word(s): %s"
-#~ msgstr "'%s'已存在于维基字别名列表: %s"
-
-#~ msgid "New Tab"
-#~ msgstr "新标签页"
-
-#~ msgid "Opened wiki word '%s'"
-#~ msgstr "已打开维基字 '%s'"
-
-#~ msgid "Internal Error"
-#~ msgstr "内部错误"
-
-#~ msgid "Rename links when renaming wiki word:"
-#~ msgstr "Byt namn på länkar vid namnbyte på wikiord:"
-
-#~ msgid "Cannot rename to '%s', word already exists"
-#~ msgstr "Kan inte byta namn till '%s', ordet finns redan"
-
-#~ msgid "\"And&ed\" regex"
-#~ msgstr "R&egex med \"and\""
-
-#~ msgid "C&ount Occurrences"
-#~ msgstr "Räkna förek&omster"
-
-#~ msgid "Context characters"
-#~ msgstr "Angränsande tecken"
-
-#~ msgid "Search Options"
-#~ msgstr "Sökalternativ"
-
-#~ msgid "Searching..."
-#~ msgstr "Söker..."
-
-#~ msgid "Time view auto-hide"
-#~ msgstr "Dölj tidsvy automatiskt"
-
-#~ msgid "Time view pos.:"
-#~ msgstr "Tidsvyns position:"
-
-#~ msgid "Time view"
-#~ msgstr "Tidsvy"
-
-#~ msgid "Invalid AppLock.lock file\n"
-#~ msgstr "Ogiltig AppLock.lock-fil\n"
-
-#~ msgid "Calling PropertyChecker.appendLogMessage while outside of checkPage"
-#~ msgstr "Calling PropertyChecker.appendLogMessage while outside of checkPage"
-
-#~ msgid "Sample"
-#~ msgstr "Exempel"
-
-#~ msgid "    Clipboard Catcher"
-#~ msgstr "    Urklippsfångare"
-
-#~ msgid "  Headings"
-#~ msgstr "  Rubriker"

@@ -380,7 +380,7 @@ class WikiDataManager(MiscEventSourceMixin):
 
         self.baseWikiData = wikiData
         self.autoLinkRelaxInfo = None
-        
+
         # Set of camelcase words not to see as wiki words
         self.ccWordBlacklist = None
         self.wikiData = WikiDataSynchronizedProxy(self.baseWikiData)
@@ -396,7 +396,7 @@ class WikiDataManager(MiscEventSourceMixin):
         self.wikiName = wikiName
         self.dataDir = dataDir
         self.dbtype = wikidhName
-        
+
         self.whooshIndex = None
 
         # TODO: Only initialize on demand
