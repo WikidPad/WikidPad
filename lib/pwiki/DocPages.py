@@ -1055,7 +1055,7 @@ class WikiPage(AbstractWikiPage):
                 ft = pt[5]
                 if ft is None:
                     ft = ()
-                ss.serArrUint32(pt[5])
+                ss.serArrUint32(ft)
 
                 wikiData.setPresentationBlock(self.getWikiWord(),
                         ss.getBytes())

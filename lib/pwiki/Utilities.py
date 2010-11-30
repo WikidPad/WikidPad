@@ -436,7 +436,7 @@ class _TimeoutRLock(threading._Verbose):
             if rc:
                 self.__owner = me
                 self.__count = 1
-                self.__acquiredStackTrace = traceback.extract_stack()
+#                 self.__acquiredStackTrace = traceback.extract_stack()
                 if __debug__:
                     self._note("%s.acquire(%s): initial success", self, blocking)
             else:
@@ -481,8 +481,8 @@ class _TimeoutRLock(threading._Verbose):
                 if __debug__:
                     self._note("%s.wait(%s): timed out", self, self.__timeout)
                 
-                print "----Lock acquired by"
-                print "".join(traceback.format_list(self.__acquiredStackTrace))
+#                 print "----Lock acquired by"
+#                 print "".join(traceback.format_list(self.__acquiredStackTrace))
 
                 raise DeadBlockPreventionTimeOutError()
             else:
@@ -491,7 +491,7 @@ class _TimeoutRLock(threading._Verbose):
                 
                 self.__owner = me
                 self.__count = 1
-                self.__acquiredStackTrace = traceback.extract_stack()
+#                 self.__acquiredStackTrace = traceback.extract_stack()
                 
                 return gotit
 

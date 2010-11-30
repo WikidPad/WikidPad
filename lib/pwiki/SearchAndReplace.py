@@ -1574,7 +1574,7 @@ class SearchReplaceOperation:
         """
         Rebuild the search operation tree. Automatically called by
         searchText() if necessary.
-        My throw RE exception or WikiPyparsing.ParseException if
+        May throw RE exception or WikiPyparsing.ParseException if
         the search string has syntax errors.
         """
         if self.searchStr == u"":
@@ -1591,7 +1591,7 @@ class SearchReplaceOperation:
     def _buildSearchTerm(self, searchStr):
         """
         Build single search criterion e.g. as part of a boolean search
-        and return the node. My throw RE exception.
+        and return the node. May throw RE exception.
         """
         if not self._reNeeded():
             # TODO: Test if really faster than REs

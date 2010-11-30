@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WikidPad 2.0\n"
-"POT-Creation-Date: 2010-10-30 08:45\n"
-"PO-Revision-Date: 2010-11-05 11:10+0800\n"
+"POT-Creation-Date: 2010-11-14 21:28\n"
+"PO-Revision-Date: 2010-11-16 13:03+0800\n"
 "Last-Translator: 郁晓旭 <yuxiaoxu@msn.com>\n"
 "Language-Team: yuxiaoxu <yuxiaoxu@msn.com>\n"
 "MIME-Version: 1.0\n"
@@ -1296,28 +1296,28 @@ msgid "..."
 msgstr "..."
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:773
+#: lib\pwiki\AdditionalDialogs.py:774
 msgid " OK "
 msgstr "确定"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:777
+#: lib\pwiki\AdditionalDialogs.py:778
 msgid " Cancel "
 msgstr "取消"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:1245
+#: lib\pwiki\AdditionalDialogs.py:1246
 msgid "Destination directory:"
 msgstr "目的目录:"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:1453
+#: lib\pwiki\AdditionalDialogs.py:1454
 #: lib\pwiki\SearchAndReplaceDialogs.py:1432
 msgid "Title:"
 msgstr "标题:"
 
 #: WikidPad.xrc:0
-#: lib\pwiki\AdditionalDialogs.py:1751
+#: lib\pwiki\AdditionalDialogs.py:1752
 msgid "Source directory:"
 msgstr "源目录:"
 
@@ -1628,34 +1628,34 @@ msgstr ""
 "\n"
 "[icon: cog]\n"
 
-#: lib\pwiki\AdditionalDialogs.py:154
-#: lib\pwiki\AdditionalDialogs.py:337
+#: lib\pwiki\AdditionalDialogs.py:155
+#: lib\pwiki\AdditionalDialogs.py:338
 msgid "Links to:"
 msgstr "链接至:"
 
-#: lib\pwiki\AdditionalDialogs.py:280
-#: lib\pwiki\AdditionalDialogs.py:379
+#: lib\pwiki\AdditionalDialogs.py:281
+#: lib\pwiki\AdditionalDialogs.py:380
 msgid "'%s' is an invalid WikiWord"
 msgstr "'%s'是无效的维基字。"
 
-#: lib\pwiki\AdditionalDialogs.py:287
+#: lib\pwiki\AdditionalDialogs.py:288
 msgid "'%s' is not an existing wikiword. Create?"
 msgstr "'%s' 不存在该维基字。是否新建?"
 
-#: lib\pwiki\AdditionalDialogs.py:288
+#: lib\pwiki\AdditionalDialogs.py:289
 msgid "Create"
 msgstr "创建"
 
-#: lib\pwiki\AdditionalDialogs.py:385
+#: lib\pwiki\AdditionalDialogs.py:386
 msgid "'%s' exists already"
 msgstr "'%s' 已存在"
 
-#: lib\pwiki\AdditionalDialogs.py:399
-#: lib\pwiki\AdditionalDialogs.py:492
+#: lib\pwiki\AdditionalDialogs.py:400
+#: lib\pwiki\AdditionalDialogs.py:493
 msgid "Do you want to delete %i wiki page(s)?"
 msgstr "你确定要删除%i维基页吗?"
 
-#: lib\pwiki\AdditionalDialogs.py:651
+#: lib\pwiki\AdditionalDialogs.py:652
 msgid ""
 "Can't process renaming:\n"
 "%s"
@@ -1663,28 +1663,28 @@ msgstr ""
 "无法处理如下内容：\n"
 "%s"
 
-#: lib\pwiki\AdditionalDialogs.py:652
+#: lib\pwiki\AdditionalDialogs.py:653
 msgid "Can't rename"
 msgstr "无法改名"
 
-#: lib\pwiki\AdditionalDialogs.py:690
+#: lib\pwiki\AdditionalDialogs.py:691
 msgid "Can't rename to itself"
 msgstr "无法改成原名"
 
-#: lib\pwiki\AdditionalDialogs.py:694
+#: lib\pwiki\AdditionalDialogs.py:695
 #: lib\pwiki\WikiExceptions.py:73
 msgid "Word already exists"
 msgstr "字已存在"
 
-#: lib\pwiki\AdditionalDialogs.py:747
+#: lib\pwiki\AdditionalDialogs.py:748
 msgid "Select Icon"
 msgstr "选择图标"
 
-#: lib\pwiki\AdditionalDialogs.py:756
+#: lib\pwiki\AdditionalDialogs.py:757
 msgid "Icon"
 msgstr "图标"
 
-#: lib\pwiki\AdditionalDialogs.py:906
+#: lib\pwiki\AdditionalDialogs.py:907
 msgid ""
 "<html>\n"
 "<body bgcolor=\"#FFFFFF\">\n"
@@ -1818,94 +1818,94 @@ msgstr ""
 "</body>\n"
 "</html>\n"
 
-#: lib\pwiki\AdditionalDialogs.py:1016
+#: lib\pwiki\AdditionalDialogs.py:1017
 msgid "<invalid>"
 msgstr "<无效>"
 
-#: lib\pwiki\AdditionalDialogs.py:1146
+#: lib\pwiki\AdditionalDialogs.py:1147
 msgid "Continuous Export"
 msgstr "连续导出"
 
-#: lib\pwiki\AdditionalDialogs.py:1248
+#: lib\pwiki\AdditionalDialogs.py:1249
 msgid "Destination file:"
 msgstr "目的文件:"
 
-#: lib\pwiki\AdditionalDialogs.py:1280
+#: lib\pwiki\AdditionalDialogs.py:1281
 msgid "Destination directory does not exist"
 msgstr "目的目录必须存在"
 
-#: lib\pwiki\AdditionalDialogs.py:1285
+#: lib\pwiki\AdditionalDialogs.py:1286
 msgid "Destination must be a directory"
 msgstr "目的必须是目录"
 
-#: lib\pwiki\AdditionalDialogs.py:1291
+#: lib\pwiki\AdditionalDialogs.py:1292
 msgid "Destination must be a file"
 msgstr "目的必须是文件"
 
-#: lib\pwiki\AdditionalDialogs.py:1301
+#: lib\pwiki\AdditionalDialogs.py:1302
 #: lib\pwiki\PersonalWikiFrame.py:4669
 msgid "Exporting"
 msgstr "导出中"
 
-#: lib\pwiki\AdditionalDialogs.py:1303
+#: lib\pwiki\AdditionalDialogs.py:1304
 #: lib\pwiki\PersonalWikiFrame.py:4671
 msgid "Preparing"
 msgstr "准备中"
 
-#: lib\pwiki\AdditionalDialogs.py:1323
+#: lib\pwiki\AdditionalDialogs.py:1324
 msgid "Error while exporting"
 msgstr "导出时出错"
 
-#: lib\pwiki\AdditionalDialogs.py:1339
+#: lib\pwiki\AdditionalDialogs.py:1340
 #: lib\pwiki\PersonalWikiFrame.py:4617
 msgid "Select Export Directory"
 msgstr "选择导出目录"
 
-#: lib\pwiki\AdditionalDialogs.py:1353
-#: lib\pwiki\AdditionalDialogs.py:1824
+#: lib\pwiki\AdditionalDialogs.py:1354
+#: lib\pwiki\AdditionalDialogs.py:1825
 msgid "All files (*.*)"
 msgstr "所有文件(*.*)"
 
-#: lib\pwiki\AdditionalDialogs.py:1358
+#: lib\pwiki\AdditionalDialogs.py:1359
 msgid "Select Export File"
 msgstr "选择导出文件"
 
-#: lib\pwiki\AdditionalDialogs.py:1385
+#: lib\pwiki\AdditionalDialogs.py:1386
 #: lib\pwiki\PersonalWikiFrame.py:4640
 #: lib\pwiki\PersonalWikiFrame.py:4654
 #: lib\pwiki\Printing.py:182
 msgid "No real wiki word selected as root"
 msgstr "没有真正的维基字选定为根"
 
-#: lib\pwiki\AdditionalDialogs.py:1454
+#: lib\pwiki\AdditionalDialogs.py:1455
 msgid "Choose export title"
 msgstr "选择导出标题"
 
-#: lib\pwiki\AdditionalDialogs.py:1463
+#: lib\pwiki\AdditionalDialogs.py:1464
 msgid "Do you want to overwrite existing export '%s'?"
 msgstr "你确定要覆写已经存在的'%s'导出文件吗?"
 
-#: lib\pwiki\AdditionalDialogs.py:1464
+#: lib\pwiki\AdditionalDialogs.py:1465
 msgid "Overwrite export"
 msgstr "覆盖导出"
 
-#: lib\pwiki\AdditionalDialogs.py:1511
+#: lib\pwiki\AdditionalDialogs.py:1512
 msgid "Do you want to delete %i export(s)?"
 msgstr "你确定要删除%i导出文件?"
 
-#: lib\pwiki\AdditionalDialogs.py:1512
+#: lib\pwiki\AdditionalDialogs.py:1513
 msgid "Delete export"
 msgstr "删除导出"
 
-#: lib\pwiki\AdditionalDialogs.py:1549
+#: lib\pwiki\AdditionalDialogs.py:1550
 msgid "Selected export type does not support saving"
 msgstr "所选导出类型不支持保存"
 
-#: lib\pwiki\AdditionalDialogs.py:1593
+#: lib\pwiki\AdditionalDialogs.py:1594
 msgid "Export type '%s' of saved export is not supported"
 msgstr "已保存导出不支持导出类型 '%s'"
 
-#: lib\pwiki\AdditionalDialogs.py:1604
+#: lib\pwiki\AdditionalDialogs.py:1605
 msgid ""
 "Saved export uses different version for additional options than current export\n"
 "Export type: '%s'\n"
@@ -1917,47 +1917,47 @@ msgstr ""
 "已导出版本: %i\n"
 "当前导出版本: %i"
 
-#: lib\pwiki\AdditionalDialogs.py:1612
+#: lib\pwiki\AdditionalDialogs.py:1613
 msgid "Type of additional option storage ('%s') is unknown"
 msgstr "附加存储选项类型 ('%s')未知"
 
-#: lib\pwiki\AdditionalDialogs.py:1643
+#: lib\pwiki\AdditionalDialogs.py:1644
 msgid "Error during retrieving saved export: "
 msgstr "获取保存导出时出错:"
 
-#: lib\pwiki\AdditionalDialogs.py:1754
+#: lib\pwiki\AdditionalDialogs.py:1755
 msgid "Source file:"
 msgstr "源文件:"
 
-#: lib\pwiki\AdditionalDialogs.py:1770
+#: lib\pwiki\AdditionalDialogs.py:1771
 msgid "Source does not exist"
 msgstr "源必须存在"
 
-#: lib\pwiki\AdditionalDialogs.py:1780
+#: lib\pwiki\AdditionalDialogs.py:1781
 msgid "Source must be a directory"
 msgstr "源必须是目录"
 
-#: lib\pwiki\AdditionalDialogs.py:1785
+#: lib\pwiki\AdditionalDialogs.py:1786
 msgid "Source must be a file"
 msgstr "源必须是文件"
 
-#: lib\pwiki\AdditionalDialogs.py:1796
+#: lib\pwiki\AdditionalDialogs.py:1797
 msgid "Error while importing"
 msgstr "导入时出错"
 
-#: lib\pwiki\AdditionalDialogs.py:1810
+#: lib\pwiki\AdditionalDialogs.py:1811
 msgid "Select Import Directory"
 msgstr "选择导入目录"
 
-#: lib\pwiki\AdditionalDialogs.py:1825
+#: lib\pwiki\AdditionalDialogs.py:1826
 msgid "*"
 msgstr "*"
 
-#: lib\pwiki\AdditionalDialogs.py:1829
+#: lib\pwiki\AdditionalDialogs.py:1830
 msgid "Select Import File"
 msgstr "选择导入文件"
 
-#: lib\pwiki\AdditionalDialogs.py:1940
+#: lib\pwiki\AdditionalDialogs.py:1941
 msgid ""
 "\n"
 "<html>\n"
@@ -1988,6 +1988,8 @@ msgid ""
 "            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>Translations:</b></font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Chinese:</b></font></td><td nowrap><font size=\"3\">yuxiaoxu@msn.com</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Hungarian:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Swedish:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
 "        </table>\n"
 "    </center>\n"
@@ -2014,7 +2016,7 @@ msgstr ""
 "\n"
 "        <p align=left>\n"
 "wikidPad是维基风格化笔记，用于保存你的思想、方法、待办<BR>事项、往来以及任何其他你想记录下来的。<BR>\n"
-"wikidPad与其他笔记类应用软件相比与众不同的地方是<BR>你可以很方便地对你的信息进行交叉链接。</p>        \n"
+"wikidPad与其他笔记类应用软件相比与众不同的地方是<BR>你可以很方便地对你的信息进行超链接。</p>        \n"
 "        <br><br>\n"
 "\n"
 "        <table border=0 cellpadding=1 cellspacing=0>\n"
@@ -2032,6 +2034,7 @@ msgstr ""
 "            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>翻译:</b></font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>瑞典语:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>匈牙利语:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>简体中文:</b></font></td><td nowrap><font size=\"3\">yuxiaoxu@msn.com</font></td></tr>\n"
 "        </table>\n"
 "    </center>\n"
@@ -2049,30 +2052,38 @@ msgstr ""
 "</body>\n"
 "</html>\n"
 
-#: lib\pwiki\AdditionalDialogs.py:1985
+#: lib\pwiki\AdditionalDialogs.py:1988
 #: lib\pwiki\PersonalWikiFrame.py:1931
 msgid "About WikidPad"
 msgstr "关于WikidPad"
 
-#: lib\pwiki\AdditionalDialogs.py:1989
-#: lib\pwiki\AdditionalDialogs.py:2095
-#: lib\pwiki\AdditionalDialogs.py:2103
+#: lib\pwiki\AdditionalDialogs.py:1992
+#: lib\pwiki\AdditionalDialogs.py:2098
+#: lib\pwiki\AdditionalDialogs.py:2106
 msgid "N/A"
 msgstr "N/A"
 
-#: lib\pwiki\AdditionalDialogs.py:1999
+#: lib\pwiki\AdditionalDialogs.py:2002
 msgid "Okay"
 msgstr "好的"
 
-#: lib\pwiki\AdditionalDialogs.py:2093
+#: lib\pwiki\AdditionalDialogs.py:2088
+msgid "Wiki Properties"
+msgstr "维基属性(&P)..."
+
+#: lib\pwiki\AdditionalDialogs.py:2096
 msgid "Wiki database backend:"
 msgstr "维基库后台:"
 
-#: lib\pwiki\AdditionalDialogs.py:2101
+#: lib\pwiki\AdditionalDialogs.py:2104
 msgid "Number of wiki pages:"
 msgstr "维基页总数:"
 
-#: lib\pwiki\AdditionalDialogs.py:2136
+#: lib\pwiki\AdditionalDialogs.py:2122
+msgid "Jobs"
+msgstr "作业"
+
+#: lib\pwiki\AdditionalDialogs.py:2139
 msgid "Number of Jobs:"
 msgstr "作业数:"
 
