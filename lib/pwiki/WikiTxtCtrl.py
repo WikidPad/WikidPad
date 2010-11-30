@@ -1438,12 +1438,13 @@ class WikiTxtCtrl(EnhancedScintillaControl):
         charStartPos = len(self.GetTextRange(0, self.GetSelectionEnd()))
         while True:
             start, end = searchOp.searchText(text, charStartPos)[:2]
-            if start is None: break
+            if start is None:
+                return False
 
             fieldcode = text[start + 2]
             if fieldcode == "i":
                 self.showSelectionByCharPos(start, end)
-                break
+                return True
 
             charStartPos = end
             
@@ -2683,7 +2684,7 @@ class WikiTxtCtrl(EnhancedScintillaControl):
 
         acResultTuples = self.wikiLanguageHelper.prepareAutoComplete(self, text,
                 charPos, lineStartCharPos, wikiDocument, self.getLoadedDocPage(),
-                {"closingBracket": closingBracket})
+                {"closingBracket": closingBracket, "builtinAttribs": True})
 
         if len(acResultTuples) > 0:
             self.presenter.getWikiDocument().getCollator().sortByFirst(
@@ -2778,7 +2779,9 @@ class WikiTxtCtrl(EnhancedScintillaControl):
         elif not evt.ControlDown() and not evt.ShiftDown():  # TODO Check all modifiers
             if key == wx.WXK_TAB:
                 if self.pageType == u"form":
-                    self._goToNextFormField()
+                    if not self._goToNextFormField():
+                        self.presenter.getMainControl().showStatusMessage(
+                                _(u"No more fields in this 'form' page"), -1)
                     return
                 evt.Skip()
             elif key == wx.WXK_RETURN and not self.AutoCompActive():

@@ -6,7 +6,7 @@ from WikiExceptions import *
 
 from StringOps import mbcsDec, wikiUrlToPathWordAndAnchor
 
-import Exporters
+import Serialization, PluginManager, Exporters, SearchAndReplace
 
 
 class CmdLineAction:
@@ -32,6 +32,8 @@ class CmdLineAction:
         self.exportType = None   # Export into which type of data?
         self.exportDest = None   # Destination path to dir/file
         self.exportCompFn = False   # Export with compatible filenames?
+        self.exportSaved = None  # Name of saved export instead
+        self.continuousExportSaved = None  # Name of saved export to run as continuous export
         self.rebuild = False # Rebuild the wiki
         self.frameToOpen = 1  # Open wiki in new frame? (yet unrecognized) 
                 # 1:New frame, 2:Already open frame, 0:Use config default 
@@ -60,7 +62,9 @@ class CmdLineAction:
         try:
             opts, rargs = getopt.getopt(sargs, "hw:p:x",
                     ["help", "wiki=", "page=", "exit", "export-what=",
-                    "export-type=", "export-dest=", "export-compfn", "anchor",
+                    "export-type=", "export-dest=", "export-compfn",
+                    "export-saved=", "continuous-export-saved=",
+                    "anchor",
 					"rebuild", "no-recent", "preview", "editor"])
         except getopt.GetoptError:
             self.cmdLineError = True
@@ -87,6 +91,10 @@ class CmdLineAction:
                 self.exportDest = mbcsDec(a, "replace")[0]
             elif o == "--export-compfn":
                 self.exportCompFn = True
+            elif o == "--export-saved":
+                self.exportSaved = mbcsDec(a, "replace")[0]
+            elif o == "--continuous-export-saved":
+                self.continuousExportSaved = mbcsDec(a, "replace")[0]
             elif o == "--rebuild":
                 self.rebuild = True
             elif o == "--no-recent":                
@@ -164,6 +172,7 @@ class CmdLineAction:
         """
         self.rebuildAction(pWiki)
         self.exportAction(pWiki)
+        self.continuousExportAction(pWiki)
 
         if self.showHelp:
             self.showCmdLineUsage(pWiki)
@@ -173,14 +182,118 @@ class CmdLineAction:
         if self.rebuild:
             pWiki.rebuildWiki(True)
 
-    def exportAction(self, pWiki):
-        if not (self.exportWhat or self.exportType or self.exportDest):
-            return # No export
+
+    def _runSavedExport(self, pWiki, savedExportName, continuousExport):
+        exportList = Exporters.retrieveSavedExportsList(pWiki,
+                pWiki.getWikiData(), continuousExport)
+        xmlNode = None
+        for exportName, xn in exportList:
+            if exportName == savedExportName:
+                xmlNode = xn
+                break
+
+        if xmlNode is None:
+            self.showCmdLineUsage(pWiki,
+                    _(u"Saved export '%s' is unknown.") % savedExportName + u"\n\n")
+            return
+
+
+        # TODO: Refactor, it is based on AdditionalDialogs.ExportDialog._showExportProfile
+        try:
+            etypeProfile = Serialization.serFromXmlUnicode(xmlNode,
+                    u"exportTypeName")
+
+            try:  
+                exporter, etype, desc, panel = PluginManager.getSupportedExportTypes(
+                        pWiki, continuousExport, None)[etypeProfile]
+            except KeyError:
+                self.showCmdLineUsage(pWiki,
+                        _(u"Export type '%s' of saved export is not supported") %
+                        etypeProfile + u"\n\n")
+                return
+
+            addOptXml = Serialization.findXmlElementFlat(xmlNode,
+                    u"additionalOptions")
+
+            addOptVersion = int(addOptXml.getAttribute(u"version"))
+
+            if addOptVersion != exporter.getAddOptVersion():
+                self.showCmdLineUsage(pWiki,
+                        _(u"Saved export uses different version for additional "
+                        "options than current export\nExport type: '%s'\n"
+                        "Saved export version: %i\nCurrent export version: %i") %
+                        (etypeProfile, addOptVersion, exporter.getAddOptVersion()) +
+                        u"\n\n")
+                return 
+
+            if addOptXml.getAttribute(u"type") != u"simpleTuple":
+                self.showCmdLineUsage(pWiki,
+                        _(u"Type of additional option storage ('%s') is unknown") %
+                        addOptXml.getAttribute(u"type") + u"\n\n")
+                return
+
+            pageSetXml = Serialization.findXmlElementFlat(xmlNode, u"pageSet")
+
+            sarOp = SearchAndReplace.SearchReplaceOperation()
+            sarOp.serializeFromXml(pageSetXml)
             
+            
+            addOpt = Serialization.convertTupleFromXml(addOptXml)
+
+#                 self.ctrls.chSelectedSet.SetSelection(3)
+#                 self.ctrls.chExportTo.SetSelection(sel)
+#                 exporter.setAddOpt(addOpt, panel)
+
+            exportDest = Serialization.serFromXmlUnicode(xmlNode,
+                    u"destinationPath")
+
+#                 self._refreshForEtype()
+
+        except SerializationException, e:
+            self.showCmdLineUsage(pWiki, _(u"Error during retrieving "
+                    "saved export: ") + e.message + u"\n\n")
+
+
+        if not continuousExport:
+            wordList = pWiki.getWikiDocument().searchWiki(sarOp,
+                    True)
+            try:
+                exporter.export(pWiki.getWikiDocument(), wordList,
+                        etype, exportDest, self.exportCompFn, addOpt, None)
+            except (IOError, WindowsError), e:
+                traceback.print_exc()
+                # unicode(e) returns different result for IOError
+                self.showCmdLineUsage(pWiki, str(e) + u"\n\n") 
+                return
+        else:
+            exporter.startContinuousExport(pWiki.getWikiDocument(),
+                    sarOp, etype, exportDest, self.exportCompFn, addOpt,
+                    None)
+            pWiki.continuousExporter = exporter
+
+
+
+    def exportAction(self, pWiki):
+        if not (self.exportWhat or self.exportType or self.exportDest or
+                self.exportSaved):
+            return # No export
+
+        if self.exportSaved:
+            if self.exportWhat or self.exportType or self.exportDest:
+                self.showCmdLineUsage(pWiki,
+                        _(u"If saved export is given, 'what', 'type' and 'dest' aren't allowed.") +
+                        u"\n\n")
+                return
+
+            self._runSavedExport(pWiki, self.exportSaved, False)
+            return
+
+
         if not (self.exportWhat and self.exportType and self.exportDest):
             # but at least one of the necessary options is missing
             self.showCmdLineUsage(pWiki,
-                    u"To export, all three export options must be set.\n\n")
+                    _(u"To export, all three export options ('what', 'type' and 'dest') must be set.") + 
+                    u"\n\n")
             return
 
         # Handle self.exportWhat
@@ -197,7 +310,7 @@ class CmdLineAction:
             wordList = pWiki.getWikiData().getAllDefinedWikiPageNames()
         else:
             self.showCmdLineUsage(pWiki,
-                    u"Value for --export-what can be page, subtree or wiki.\n\n")
+                    _(u"Value for --export-what can be 'page', 'subtree' or 'wiki'.") + u"\n\n")
             return
 
 #             # custom list
@@ -219,7 +332,7 @@ class CmdLineAction:
             exList = ", ".join([ei[1] for ei in exporterList])
             
             self.showCmdLineUsage(pWiki,
-                    u"Value for --export-type can be one of:\n%s\n\n" % exList)
+                    _(u"Value for --export-type can be one of:\n%s") % exList) + u"\n\n"
             return
 
         try:
@@ -234,6 +347,19 @@ class CmdLineAction:
 
 
 
+    def continuousExportAction(self, pWiki):
+        if not self.continuousExportSaved:
+            return
+        
+        if self.exitFinally:
+            self.showCmdLineUsage(pWiki,
+                    _(u"Combination of --exit and --continuous-export-saved isn't allowed") + u"\n\n")
+            return
+        
+        self._runSavedExport(pWiki, self.continuousExportSaved, True)
+            
+
+
     USAGE = \
 N_(u"""Options:
 
@@ -244,7 +370,9 @@ N_(u"""Options:
     --export-what <what>: choose if you want to export page, subtree or wiki
     --export-type <type>: tag of the export type
     --export-dest <destination path>: path of destination directory for export
+    --export-saved <name of saved export>: alternatively name of saved export to run
     --export-compfn: Use compatible filenames on export
+    --continuous-export-saved <name of saved export>: continuous export to start with
     --rebuild: rebuild the Wiki database
     --no-recent: Do not record opened wikis in recently opened wikis list
     --preview: If no pages are given, all opened pages from previous session
@@ -259,7 +387,7 @@ N_(u"""Options:
         Show dialog with addRemark and command line usage information.
         """
         wx.MessageBox(addRemark + _(self.USAGE), _(u"Usage information"),
-                style=wx.OK, parent=pWiki)
+                style=wx.OK, parent=None)
 
 
 

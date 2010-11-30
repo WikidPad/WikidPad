@@ -93,8 +93,12 @@ if Configuration.isWindows():
     if WindowsHacks:
         def samefile(path1, path2):
             # Not fully reliable. Does anybody know something better?
-            return WindowsHacks.getLongPath(path1).lower() == \
-                    WindowsHacks.getLongPath(path2).lower()
+            if WindowsHacks.getLongPath(path1).lower() == \
+                    WindowsHacks.getLongPath(path2).lower():
+                return True
+            
+            return WindowsHacks.getLongPath(os.path.abspath(path1)).lower() == \
+                    WindowsHacks.getLongPath(os.path.abspath(path2)).lower()
     else:
         def samefile(path1, path2):
             return os.path.abspath(path1) == os.path.abspath(path2)

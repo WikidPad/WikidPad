@@ -100,6 +100,73 @@ _COLORS = [
 ]
 
 
+_BUILTINS = {
+    u"alias": None,
+    u"auto_link": (u"off", u"relax"),
+    u"bold": (u"true", u"false"),
+    u"camelCaseWordsEnabled": (u"false", u"true"),
+    u"child_sort_order": ("ascending", u"descending", u"mod_oldest",
+            u"mod_newest", u"unsorted", u"natural"),
+    u"color": _COLORS,
+    u"export": (u"false",),
+    u"font": None, # Special handling
+
+    u"global.auto_link": (u"off", u"relax"),
+    u"global.camelCaseWordsEnabled": (u"false", u"true"),
+    u"global.child_sort_order": ("ascending", u"descending", u"mod_oldest",
+            u"mod_newest", u"unsorted", u"natural"),
+    u"global.font": None, # Special handling
+    u"global.html.linkcolor": None,
+    u"global.html.alinkcolor": None,
+    u"global.html.vlinkcolor": None,
+    u"global.html.textcolor": None,
+    u"global.html.bgcolor": None,
+    u"global.html.bgimage": None,
+    u"global.import_scripts": None,
+    u"global.language": None, # TODO: special handling
+    u"global.template": None,
+    u"global.template_head": (u"auto", u"manual"),
+    u"global.view_pane": (u"off", u"editor", u"preview"),
+
+    u"html.linkcolor": None,
+    u"html.alinkcolor": None,
+    u"html.vlinkcolor": None,
+    u"html.textcolor": None,
+    u"html.bgcolor": None,
+    u"html.bgimage": None,
+    u"icon": None,   # Special handling
+    u"import_scripts": None,
+    u"importance": (u"high", u"low"),
+    u"language": None, # TODO: special handling
+    u"pagetype": (u"form",),
+    u"priority": (u"1", u"2", u"3", u"4", u"5"),
+    u"paragraph_mode": (u"true", u"false"),
+    u"short_hint": None,
+    u"template": None,
+    u"template_head": (u"auto", u"manual"),
+    u"tree_position": None,
+    u"view_pane": (u"off", u"editor", u"preview"),
+}
+
+
+def getBuiltinKeys():
+    return _BUILTINS.keys()
+
+
+def getBuiltinValuesForKey(attrKey):
+    # Handle exceptions here
+    if attrKey == u"icon":
+        return wx.GetApp().getIconCache().iconLookupCache.keys()
+    elif attrKey == u"font" or attrKey == u"global.font":
+        fenum = wx.FontEnumerator()
+        fenum.EnumerateFacenames()
+        return fenum.GetFacenames()
+    else:    
+        return _BUILTINS.get(attrKey)
+
+
+
+
 def buildIconsSubmenu(iconCache):
     """
     iconCache -- object which holds and delivers icon bitmaps (currently PersonalWikiFrame)

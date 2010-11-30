@@ -1,5 +1,8 @@
 from __future__ import with_statement
 
+## import profilehooks
+## profile = profilehooks.profile(filename="profile.prf", immediate=False)
+
 # from Enum import Enumeration
 import sys, os, string, re, traceback, locale, time, urllib
 from os.path import join, exists, splitext, abspath
@@ -10,6 +13,7 @@ import shutil
 import urllib_red as urllib
 
 import wx
+from rtlibRepl import minidom
 
 from wxHelper import XrcControls, GUI_ID, wxKeyFunctionSink
 
@@ -17,17 +21,42 @@ import Consts
 from WikiExceptions import WikiWordNotFoundException, ExportException
 from ParseUtilities import getFootnoteAnchorDict
 from StringOps import *
+import Serialization
 from WikiPyparsing import StackedCopyDict, SyntaxNode
 from TempFileSet import TempFileSet
 
 from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
         ListItemWithSubtreeWikiPagesNode
 
-import Configuration
+import Configuration, PluginManager
 
 import OsAbstract
 
 import DocPages
+
+
+
+
+def retrieveSavedExportsList(mainControl, wikiData, continuousExport):
+    unifNames = wikiData.getDataBlockUnifNamesStartingWith(u"savedexport/")
+
+    result = []
+    for un in unifNames:
+        name = un[12:]
+        content = wikiData.retrieveDataBlock(un)
+        xmlDoc = minidom.parseString(content)
+        xmlNode = xmlDoc.firstChild
+        etype = Serialization.serFromXmlUnicode(xmlNode, u"exportTypeName")
+        if etype not in PluginManager.getSupportedExportTypes(mainControl,
+                continuousExport):
+            # Export type of saved export not supported
+            continue
+
+        result.append((name, xmlNode))
+
+    mainControl.getCollator().sortByFirst(result)
+    
+    return result
 
 
 
@@ -481,7 +510,6 @@ class HtmlExporter(AbstractExporter):
         self.referencedStorageFiles = None
         
         return True
-
 
 
     def export(self, wikiDocument, wordList, exportType, exportDest,

@@ -1068,28 +1068,29 @@ class AbstractWikiPage(DataCarryingPage):
             return AbstractWikiPage._DEFAULT_PRESENTATION
 
         try:
-            if len(datablock) == struct.calcsize("iiiii"):
+            # TODO: On next file format change: Change '=' to '>' 
+            if len(datablock) == struct.calcsize("=iiiii"):
                 # Version 0
-                return struct.unpack("iiiii", datablock) + (None,)
+                return struct.unpack("=iiiii", datablock) + (None,)
             else:
                 ss = Serialization.SerializeStream(stringBuf=datablock)
                 rcVer = ss.serUint8(1)
-                if rcVer > 1:
+                if rcVer == 1:
+                    # Compatible to version 1                
+                    ver = ss.serUint8(1)
+                    pt = [ss.serInt32(0), ss.serInt32(0), ss.serInt32(0),
+                            ss.serInt32(0), ss.serInt32(0), None]
+    
+                    # Fold list
+                    fl = ss.serArrUint32([])
+                    if len(fl) == 0:
+                        fl = None
+    
+                    pt[5] = fl
+    
+                    return tuple(pt)
+                else:
                     return AbstractWikiPage._DEFAULT_PRESENTATION
-
-                # Compatible to version 1                
-                ver = ss.serUint8(1)
-                pt = [ss.serInt32(0), ss.serInt32(0), ss.serInt32(0),
-                        ss.serInt32(0), ss.serInt32(0), None]
-
-                # Fold list
-                fl = ss.serArrUint32([])
-                if len(fl) == 0:
-                    fl = None
-
-                pt[5] = fl
-
-                return tuple(pt)
         except struct.error:
             return AbstractWikiPage._DEFAULT_PRESENTATION
 
@@ -1186,8 +1187,9 @@ class WikiPage(AbstractWikiPage):
                 
             if pt[5] is None:
                 # Write it in old version 0
+                # TODO: On next file format change: Change '=' to '>' 
                 wikiData.setPresentationBlock(self.getWikiWord(),
-                        struct.pack("iiiii", *pt[:5]))
+                        struct.pack("=iiiii", *pt[:5]))
             else:
                 # Write it in new version 1
                 ss = Serialization.SerializeStream(stringBuf=True, readMode=False)
@@ -1200,7 +1202,7 @@ class WikiPage(AbstractWikiPage):
                 ft = pt[5]
                 if ft is None:
                     ft = ()
-                ss.serArrUint32(pt[5])
+                ss.serArrUint32(ft)
 
                 wikiData.setPresentationBlock(self.getWikiWord(),
                         ss.getBytes())

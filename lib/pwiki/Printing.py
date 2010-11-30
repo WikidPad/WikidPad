@@ -202,8 +202,10 @@ class Printer:
         else:
             # custom list
             lpOp = self.listPagesOperation
-        
-        wordList = self.pWiki.getWikiDocument().searchWiki(lpOp, True)
+
+        sarOp = Sar.SearchReplaceOperation()
+        sarOp.listWikiPagesOp = lpOp
+        wordList = self.pWiki.getWikiDocument().searchWiki(sarOp, True)
  
         return wordList
 

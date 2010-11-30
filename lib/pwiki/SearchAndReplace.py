@@ -1,5 +1,4 @@
 import re, traceback
-from struct import pack, unpack
 
 from WikiExceptions import *
 
@@ -1702,7 +1701,7 @@ class SearchReplaceOperation:
     def _buildSearchTerm(self, searchStr):
         """
         Build single search criterion e.g. as part of a boolean search
-        and return the node. My throw RE exception.
+        and return the node. May throw RE exception.
         """
         if not self._reNeeded():
             # TODO: Test if really faster than REs

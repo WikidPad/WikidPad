@@ -22,6 +22,8 @@ from ..StringOps import mbcsDec, re_sub_escape, pathEnc, pathDec, \
 from ..DocPages import DocPage, WikiPage, FunctionalPage, AliasWikiPage
 # from ..timeView.Versioning import VersionOverview
 
+from .. import AttributeHandling
+
 from ..SearchAndReplace import SearchReplaceOperation
 
 from .. import SpellChecker
@@ -1801,12 +1803,49 @@ class WikiDataManager(MiscEventSourceMixin):
         return self.getWikiData().getTodos()
 
 
-    def getDistinctAttributeValuesByKey(self, key):
+    def getAttributeNamesStartingWith(self, beg, builtins=False):
+        """
+        Function must work for read-only wiki.
+        Returns list or set (whatever is more efficient) of all attribute names
+        starting with  beg.
+        """
+        
+        if not builtins:
+            return self.getWikiData().getAttributeNamesStartingWith(beg)
+        
+        biKeys = [k for k in AttributeHandling.getBuiltinKeys() if k.startswith(beg)]
+        
+        if len(biKeys) == 0:
+            # Nothing to add
+            return self.getWikiData().getAttributeNamesStartingWith(beg)
+        
+        attrs = set(self.getWikiData().getAttributeNamesStartingWith(beg))
+        attrs.update(biKeys)
+        
+        return attrs
+
+
+    def getDistinctAttributeValuesByKey(self, key, builtins=False):
         """
         Function must work for read-only wiki.
         Return a list of all distinct used attribute values for a given key.
         """
-        return self.getWikiData().getDistinctAttributeValues(key)
+        if not builtins:
+            return self.getWikiData().getDistinctAttributeValues(key)
+        
+        biVals = AttributeHandling.getBuiltinValuesForKey(key)
+        if biVals is None or len(biVals) == 0:
+            # Nothing to add
+            return self.getWikiData().getDistinctAttributeValues(key)
+        
+        vals = set(self.getWikiData().getDistinctAttributeValues(key))
+        vals.update(biVals)
+        
+        return list(vals)
+        
+        
+            
+        
 #         s = set(v for w, k, v in
 #                 self.getWikiData().getAttributeTriples(None, key, None))
 #         return list(s)

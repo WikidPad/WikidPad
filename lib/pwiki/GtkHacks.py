@@ -3,7 +3,7 @@ This is a Windows (32 bit) specific file for handling some operations not provid
 by the OS-independent wxPython library.
 """
 
-import ctypes, os, os.path, struct, traceback
+import ctypes, os, os.path, traceback
 from ctypes import c_int, c_uint, c_long, c_ulong, c_ushort, c_char, c_char_p, \
         c_wchar_p, c_byte, byref, create_string_buffer, create_unicode_buffer, \
         c_void_p, string_at, sizeof   # , WindowsError

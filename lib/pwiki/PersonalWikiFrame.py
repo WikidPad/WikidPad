@@ -2126,6 +2126,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # ------------------------------------------------------------------------------------
         self.statusBar = wx.StatusBar(self, -1)
         self.statusBar.SetFieldsCount(3)
+        self.statusBarTimer = wx.Timer(self, id=GUI_ID.STATUS_BAR_TIMER)
+        wx.EVT_TIMER(self, GUI_ID.STATUS_BAR_TIMER, self.OnStatusBarTimer)
 
         # Measure necessary widths of status fields
         dc = wx.ClientDC(self.statusBar)
@@ -5104,6 +5106,28 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 return "no"
                 
             raise InternalError(u"Unexpected result from MessageBox in stdDialog()")
+
+
+    def showStatusMessage(self, msg, duration=0):
+        """
+        If duration > 0 the message is removed after  duration  milliseconds.
+        If duration == 0 show forever (until new message overwrites)
+        If duration == -1 show for a default length (ten seconds currently)
+        """
+        self.statusBarTimer.Stop()
+        self.statusBar.SetStatusText(msg, 0)
+        
+        if duration == 0:
+            return
+        
+        if duration == -1:
+            duration = 10000
+
+        self.statusBarTimer.Start(duration, True)
+
+
+    def OnStatusBarTimer(self, evt):
+        self.statusBar.SetStatusText(u"", 0)
 
 
     def displayMessage(self, title, str):

@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2010-09-12
+# Last modified (format YYYY-MM-DD): 2010-11-29
 
 
 import locale, pprint, time, sys, string, traceback
@@ -1913,6 +1913,7 @@ class _TheHelper(object):
         rline = revStr(line)
         backStepMap = {}
         closingBracket = settings.get("closingBracket", False)
+        builtinAttribs = settings.get("builtinAttribs", False)
 
         # TODO Sort entries appropriately (whatever this means)
 
@@ -1950,17 +1951,17 @@ class _TheHelper(object):
             
             backstep = len(tofind)
 
-            prefix, silence, tofind = _TheHelper.resolvePrefixSilenceAndWikiWordLink(
+            prefix, silence, link = _TheHelper.resolvePrefixSilenceAndWikiWordLink(
                     tofind[len(BracketStart):], docPage)
             
             if prefix is not None:
                 for word in wikiData.getWikiLinksStartingWith(
-                        tofind, True, True):
+                        link, True, True):
                     backStepMap[BracketStart + prefix + word[silence:] +
                             wordBracketEnd] = backstep
 
-            for prop in wikiData.getAttributeNamesStartingWith(
-                    tofind[len(BracketStart):]):
+            for prop in wikiDocument.getAttributeNamesStartingWith(
+                    tofind[len(BracketStart):], builtinAttribs):
                 backStepMap[BracketStart + prop] = backstep
         elif mat3:
             # In an attribute value
@@ -1969,7 +1970,8 @@ class _TheHelper(object):
             propfill = revStr(mat3.group(2))
             propvalpart = revStr(mat3.group(1))
             values = filter(lambda pv: pv.startswith(propvalpart),
-                    wikiDocument.getDistinctAttributeValuesByKey(propkey))
+                    wikiDocument.getDistinctAttributeValuesByKey(propkey,
+                    builtinAttribs))
 
             for v in values:
                 backStepMap[BracketStart + propkey +

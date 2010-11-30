@@ -1173,7 +1173,7 @@ class ExportDialog(wx.Dialog):
 
         addOptSizer = LayerSizer()
 
-        # TODO Move to ExportOperation.py
+        # TODO Move to e.g. ExportOperation.py
         for ob in Exporters.describeExporters(self.mainControl):   # TODO search plugins
             for tp in ob.getExportTypes(self.ctrls.additOptions, continuousExport):
                 panel = tp[2]
@@ -1436,25 +1436,28 @@ class ExportDialog(wx.Dialog):
 
 
     def _refreshSavedExportsList(self):
-        wikiData = self.mainControl.getWikiData()
-        unifNames = wikiData.getDataBlockUnifNamesStartingWith(u"savedexport/")
+#         wikiData = self.mainControl.getWikiData()
+#         unifNames = wikiData.getDataBlockUnifNamesStartingWith(u"savedexport/")
+# 
+#         result = []
+#         for un in unifNames:
+#             name = un[12:]
+#             content = wikiData.retrieveDataBlock(un)
+#             xmlDoc = minidom.parseString(content)
+#             xmlNode = xmlDoc.firstChild
+#             etype = Serialization.serFromXmlUnicode(xmlNode, u"exportTypeName")
+#             if etype not in self.supportedExportTypes:
+#                 # Export type of saved export not supported
+#                 continue
+# 
+#             result.append((name, xmlNode))
+# 
+#         self.mainControl.getCollator().sortByFirst(result)
+# 
+#         self.savedExports = result
 
-        result = []
-        for un in unifNames:
-            name = un[12:]
-            content = wikiData.retrieveDataBlock(un)
-            xmlDoc = minidom.parseString(content)
-            xmlNode = xmlDoc.firstChild
-            etype = Serialization.serFromXmlUnicode(xmlNode, u"exportTypeName")
-            if etype not in self.supportedExportTypes:
-                # Export type of saved export not supported
-                continue
-
-            result.append((name, xmlNode))
-
-        self.mainControl.getCollator().sortByFirst(result)
-
-        self.savedExports = result
+        self.savedExports = Exporters.retrieveSavedExportsList(self.mainControl,
+                self.mainControl.getWikiData(), self.continuousExport)
 
         self.ctrls.lbSavedExports.Clear()
         for exportName, xmlNode in self.savedExports:

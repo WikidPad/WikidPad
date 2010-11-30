@@ -1522,6 +1522,8 @@ def compactToBinCompact(cops):
     result = []
     for op in cops:
         if op[0] == 0:
+            # Uses opposite endianness than the rest of WikidPad but it's
+            # too late to change
             result.append( pack("<Biii", 0, op[1], op[2], len(op[3])) )
             result.append(op[3])
         elif op[0] == 1:

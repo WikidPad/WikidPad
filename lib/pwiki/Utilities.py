@@ -439,7 +439,7 @@ class _TimeoutRLock(threading._Verbose):
             if rc:
                 self.__owner = me
                 self.__count = 1
-                self.__acquiredStackTrace = traceback.extract_stack()
+#                 self.__acquiredStackTrace = traceback.extract_stack()
                 if __debug__:
                     self._note("%s.acquire(%s): initial success", self, blocking)
             else:
@@ -456,19 +456,6 @@ class _TimeoutRLock(threading._Verbose):
             # than 20 times per second (or the timeout time remaining).
             endtime = _time() + self.__timeout
             delay = 0.0005 # 500 us -> initial delay of 1 ms
-            
-#             if wx.Thread_IsMain():
-#                 if not self.__block.acquire(0):
-#                     _sleep(0.2)
-#                     if not self.__block.acquire(0):
-#                         print "----Lock acquired by"
-#                         print "".join(traceback.format_list(self.__acquiredStackTrace))
-#                         print "\n----Lock requested by"
-#                         traceback.print_stack()
-#                     else:
-#                         self.__block.release()
-#                 else:
-#                     self.__block.release()
 
             while True:
                 gotit = self.__block.acquire(0)
@@ -484,8 +471,8 @@ class _TimeoutRLock(threading._Verbose):
                 if __debug__:
                     self._note("%s.wait(%s): timed out", self, self.__timeout)
                 
-                print "----Lock acquired by"
-                print "".join(traceback.format_list(self.__acquiredStackTrace))
+#                 print "----Lock acquired by"
+#                 print "".join(traceback.format_list(self.__acquiredStackTrace))
 
                 raise DeadBlockPreventionTimeOutError()
             else:
@@ -494,7 +481,7 @@ class _TimeoutRLock(threading._Verbose):
                 
                 self.__owner = me
                 self.__count = 1
-                self.__acquiredStackTrace = traceback.extract_stack()
+#                 self.__acquiredStackTrace = traceback.extract_stack()
                 
                 return gotit
 

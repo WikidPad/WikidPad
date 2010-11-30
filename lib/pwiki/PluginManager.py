@@ -8,6 +8,9 @@ import wx
 
 from .StringOps import mbcsEnc, pathEnc
 
+
+
+
 """The PluginManager and PluginAPI classes implement a generic plugin framework.
    Plugin apis are created by the PluginManager and can be used to call all
    installed plugins for that api at once. The PluginManager loads plugins from
@@ -436,4 +439,16 @@ class InsertionPluginManager:
             
         self.startedHandlers.clear()
 
+
+
+def getSupportedExportTypes(mainControl, continuousExport, guiParent=None):
+    import Exporters
+    
+    result = {}
+    
+    for ob in Exporters.describeExporters(mainControl):   # TODO search plugins
+        for tp in ob.getExportTypes(guiParent, continuousExport):
+            result[tp[0]] = (ob,) + tuple(tp)
+
+    return result
 
