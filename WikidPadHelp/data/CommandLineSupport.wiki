@@ -84,6 +84,12 @@ Path of destination directory for export.
 *--export-compfn*
 Use compatible filenames on export.
 
+*--export-saved <name of saved export>*
+Instead of the first three you can also use this to run a previously saved export profile
+
+*--continuous-export-saved <name of saved export>*
+Use this to start a continuous export when starting WikidPad
+
 
 ++++ Special
 

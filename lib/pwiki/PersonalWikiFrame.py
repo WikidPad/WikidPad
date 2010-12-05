@@ -78,9 +78,9 @@ from .SearchAndReplaceDialogs import SearchPageDialog, SearchWikiDialog, \
 
 
 import Exporters
+import StringOps
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, \
-        unescapeForIni, \
-        wikiUrlToPathWordAndAnchor, urlFromPathname, \
+        unescapeForIni, urlFromPathname, \
         strftimeUB, pathEnc, loadEntireFile, writeEntireFile, \
         pathWordAndAnchorToWikiUrl, relativeFilePath, pathnameFromUrl
 
@@ -1122,7 +1122,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 if entry.value.startswith(u"wiki:"):
                     # Handle an URL
                     filePath, wikiWordToOpen, anchorToOpen = \
-                            wikiUrlToPathWordAndAnchor(entry.value)
+                            StringOps.wikiUrlToPathWordAndAnchor(entry.value)
                     if exists(pathEnc(filePath)):
                         self.openWiki(filePath, wikiWordsToOpen=(wikiWordToOpen,),
                                 anchorToOpen=anchorToOpen)
@@ -3732,7 +3732,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         elif self.configuration.getint(
                 "main", "new_window_on_follow_wiki_url") != 1:
 
-            filePath, wikiWordToOpen, anchorToOpen = wikiUrlToPathWordAndAnchor(
+            filePath, wikiWordToOpen, anchorToOpen = StringOps.wikiUrlToPathWordAndAnchor(
                     link)
             if exists(filePath):
                 self.openWiki(filePath, wikiWordsToOpen=(wikiWordToOpen,),

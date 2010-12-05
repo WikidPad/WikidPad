@@ -28,7 +28,7 @@ If the wiki word is complete and suffixed with an exclamation mark, you can auto
 
 +++ Attributes
 
-See WikiDocumentAttributes about attributes.
+See WikiDocumentAttributes about attributes. WikidPad automatically suggests the builtin attributes even if they weren't used in a wiki before.
 
 Examples:
 

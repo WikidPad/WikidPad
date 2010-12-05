@@ -1487,7 +1487,11 @@ class HtmlExporter(AbstractExporter):
                 self.processAst(content, cell)
                 self.outAppend(u"</td>")
             self.outAppend(u"</tr>\n")
-        self.outAppend(u'</table>\n', eatPostBreak=not self.asIntHtmlPreview)
+        
+        if self.asIntHtmlPreview:
+            self.outAppend(u'</table>\n<br />\n') # , eatPostBreak=not self.asIntHtmlPreview)
+        else:
+            self.outAppend(u'</table>\n')
 
         self.astNodeStack.pop()
 

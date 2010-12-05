@@ -497,6 +497,15 @@ def matchWhole(reObj, s):
 
 
 
+def obfuscateShortcut(shortcut):
+    """
+    Necessary to prevent wxPython from interpreting e.g. CTRL+LEFT in a menu
+    item as being a shortcut. I haven't found a better way.
+    """
+    return u"".join([u"\u200B" + c for c in shortcut])
+
+
+
 ## Copied from xml.sax.saxutils and modified to reduce dependencies
 def escapeHtml(data):
     """

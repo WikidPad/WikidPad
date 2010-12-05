@@ -1,5 +1,22 @@
 ﻿++ Change Log
 
+
+Dec. 05, 2010 (2.1beta09)
+
+Creators of derived WikidPad parsers should merge changes from
+official parser
+
+    * Autocompletion now also suggests builtin attributes
+    * Command line options to run a saved export profile either once
+      or as continuous export.
+      See [CommandLineSupport#*--export-saved <name of saved export>*]
+
+    * Bug fixed: Autocompletion of attribute keys didn't work
+    * Bug fixed: Printing didn't work
+    * Bug fixed: Empty line after table was eaten in HTML export
+
+
+
 Oct. 30, 2010 (2.1beta08)
 
     * Chinese translation of user interface (thanks to yuxiaoxu)

@@ -953,6 +953,8 @@ class WikiTxtCtrl(EnhancedScintillaControl):
 
 
     def handleSpecialPageType(self):
+#         self.allowRectExtend(self.pageType != u"texttree")
+
         if self.pageType == u"form":
             self.GotoPos(0)
             self._goToNextFormField()
@@ -2742,6 +2744,45 @@ class WikiTxtCtrl(EnhancedScintillaControl):
                     charPos, lineStartCharPos, wikiDocument, settings)
 
 
+
+    def _getExpandedByteSelectionToLine(self, extendOverChildren):
+        """
+        Move the start of current selection to start of the line it's in and
+        move end of selection to end of its line.
+        """
+        selByteStart = self.GetSelectionStart();
+        selByteEnd = self.GetSelectionEnd();
+        lastLine = self.LineFromPosition(selByteEnd)
+        selByteStart = self.PositionFromLine(self.LineFromPosition(selByteStart))
+        selByteEnd = self.PositionFromLine(lastLine + 1)
+        
+        if extendOverChildren:
+            # Extend over all lines which are more indented than the last line
+            
+            lastLineDeep = StringOps.splitIndentDeepness(self.GetLine(lastLine))[0]
+            
+            testLine = lastLine + 1
+            while True:            
+                testLineContent = self.GetLine(testLine)
+                if len(testLineContent) == 0:
+                    # End of text reached
+                    break
+
+                if StringOps.splitIndentDeepness(testLineContent)[0] <= lastLineDeep:
+                    break
+                
+                testLine += 1
+
+            selByteEnd = self.PositionFromLine(testLine)
+
+        self.SetSelectionMode(0)
+        self.SetSelectionStart(selByteStart)
+        self.SetSelectionMode(0)
+        self.SetSelectionEnd(selByteEnd)
+
+        return selByteStart, selByteEnd
+
+
     def OnKeyDown(self, evt):
         key = evt.GetKeyCode()
 
@@ -2749,6 +2790,78 @@ class WikiTxtCtrl(EnhancedScintillaControl):
         accP = getAccelPairFromKeyDown(evt)
         matchesAccelPair = self.presenter.getMainControl().keyBindings.\
                 matchesAccelPair
+
+        if self.pageType == u"texttree":
+            if accP in ( (wx.ACCEL_ALT, wx.WXK_NUMPAD_UP),
+                    (wx.ACCEL_ALT, wx.WXK_UP),
+                    (wx.ACCEL_SHIFT | wx.ACCEL_ALT, wx.WXK_NUMPAD_UP),
+                    (wx.ACCEL_SHIFT | wx.ACCEL_ALT, wx.WXK_UP) ):
+                self.BeginUndoAction()
+                try:
+                    selByteStart, selByteEnd = self._getExpandedByteSelectionToLine(
+                            bool(accP[0] & wx.ACCEL_SHIFT))
+    
+                    firstLine = self.LineFromPosition(selByteStart)
+                    if firstLine > 0:
+                        content = self.GetSelectedText()
+                        if len(content) > 0:
+                            if content[-1] == u"\n":
+                                selByteEnd -= 1
+                            else:
+                                content += u"\n"
+                            # Now content ends with \n and selection end points
+                            # before this newline
+                            self.ReplaceSelection("")
+                            target = self.PositionFromLine(firstLine - 1)
+                            self.InsertText(target, content)
+                            self.SetSelectionMode(0)
+                            self.SetSelectionStart(target)
+                            self.SetSelectionMode(0)
+                            self.SetSelectionEnd(target + (selByteEnd - selByteStart))
+                finally:
+                    self.EndUndoAction()
+                return
+            elif accP in ( (wx.ACCEL_ALT, wx.WXK_NUMPAD_DOWN),
+                    (wx.ACCEL_ALT, wx.WXK_DOWN),
+                    (wx.ACCEL_SHIFT | wx.ACCEL_ALT, wx.WXK_NUMPAD_DOWN),
+                    (wx.ACCEL_SHIFT | wx.ACCEL_ALT, wx.WXK_DOWN) ):
+                self.BeginUndoAction()
+                try:
+                    selByteStart, selByteEnd = self._getExpandedByteSelectionToLine(
+                            bool(accP[0] & wx.ACCEL_SHIFT))
+    
+                    lastLine = self.LineFromPosition(selByteEnd)
+                    lineCount = self.GetLineCount() - 1
+                    if lastLine <= lineCount:
+                        content = self.GetSelectedText()
+                        if len(content) > 0:
+                            # Now content ends with \n and selection end points
+                            # before this newline
+                            target = self.PositionFromLine(lastLine + 1)
+                            target -= selByteEnd - selByteStart
+
+                            if content[-1] == u"\n":  # Necessary for downward move?
+                                selByteEnd -= 1
+                            else:
+                                content += u"\n"
+
+                            self.ReplaceSelection("")
+                            if self.GetTextRange(target - 1,
+                                    target) != u"\n":
+                                self.InsertText(target, u"\n")
+                                target += 1
+
+                            self.InsertText(target, content)
+                            self.SetSelectionMode(0)
+                            self.SetSelectionStart(target)
+                            self.SetSelectionMode(0)
+                            self.SetSelectionEnd(target + (selByteEnd - selByteStart))
+                finally:
+                    self.EndUndoAction()
+                return
+            
+            evt.Skip()
+
 
         if matchesAccelPair("ContinueSearch", accP):
             # ContinueSearch is normally F3
