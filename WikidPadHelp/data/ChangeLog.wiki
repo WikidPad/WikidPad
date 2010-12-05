@@ -1,6 +1,12 @@
 ﻿++ Change Log
 
 
+Dec. 05, 2010 (2.0rc09)
+
+    * Bug fixed: Empty line after table was eaten in HTML export
+
+
+
 Oct. 30, 2010 (2.0rc08)
 
     * Chinese translation of user interface (thanks to yuxiaoxu)
@@ -18,7 +24,8 @@ Oct. 30, 2010 (2.0rc08)
     * Bug fixed: Error due to subtle change in API of newer Sqlite
       versions
 
-    * Internal: Changes in GUI layout to better support internationalization
+    * Internal: Changes in GUI layout to better support
+      internationalization
 
 
 

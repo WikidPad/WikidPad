@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2010-11-14 21:28\n"
+"POT-Creation-Date: 2010-12-05 12:18\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2001,31 +2001,31 @@ msgstr ""
 msgid "Exporting %s"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:1588
+#: lib\pwiki\Exporters.py:1592
 msgid "<pre>[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2102
+#: lib\pwiki\Exporters.py:2106
 msgid "[Unknown parser node with name \"%s\" found]"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2136
+#: lib\pwiki\Exporters.py:2140
 msgid "Set of *.wiki files"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2320 lib\pwiki\Importers.py:34
+#: lib\pwiki\Exporters.py:2324 lib\pwiki\Importers.py:34
 msgid "Multipage text"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2333 lib\pwiki\Importers.py:47
+#: lib\pwiki\Exporters.py:2337 lib\pwiki\Importers.py:47
 msgid "Multipage files (*.mpt)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2334 lib\pwiki\Importers.py:48
+#: lib\pwiki\Exporters.py:2338 lib\pwiki\Importers.py:48
 msgid "Text file (*.txt)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2477
+#: lib\pwiki\Exporters.py:2481
 msgid "No usable separator found"
 msgstr ""
 
