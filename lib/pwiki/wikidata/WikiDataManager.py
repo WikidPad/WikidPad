@@ -30,6 +30,8 @@ from .. import SpellChecker
 
 import DbBackendUtils, FileStorage
 
+# Some functions import parts of the whoosh library
+
 
 
 _openDocuments = {}  # Dictionary {<path to data dir>: <WikiDataManager>}
@@ -276,6 +278,9 @@ class WikiDataManager(MiscEventSourceMixin):
     instance will be closed. The refcount starts with 1 when creating
     a WikiDataManager instance.
     """
+    
+    # Update executor queue for index search update
+    UEQUEUE_INDEX = 2
 
     def __init__(self, wikiConfigFilename, dbtype, wikiLangName, ignoreLock=False,
             createLock=True):
@@ -389,11 +394,8 @@ class WikiDataManager(MiscEventSourceMixin):
         self.wikiPageDict = WeakValueDictionary()
         self.funcPageDict = WeakValueDictionary()
 
-        self.updateExecutor = SingleThreadExecutor(3)
+        self.updateExecutor = SingleThreadExecutor(4)
         self.pageRetrievingLock = TimeoutRLock(Consts.DEADBLOCKTIMEOUT)
-#         self.pageUpdateDequeCondition = Condition()
-#         self.pageUpdateDeque = deque()
-#         self.pageUpdateThread = Thread(target=self._runUpdateQueue)
 
         self.wikiName = wikiName
         self.dataDir = dataDir
@@ -483,12 +485,24 @@ class WikiDataManager(MiscEventSourceMixin):
         try:
             page = self.getWikiPage(word)
 
-            if step == Consts.WIKIWORDMETADATA_STATE_DIRTY and \
-                    page.runDatabaseUpdate(step=step, threadstop=threadstop):
-                self.updateExecutor.executeAsyncWithThreadStop(1, self._runDatabaseUpdate,
-                        word, Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
-            else:
-                page.runDatabaseUpdate(step=step, threadstop=threadstop)
+            if step == Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED:
+                if page.runDatabaseUpdate(step=step, threadstop=threadstop):
+                    if self.isSearchIndexEnabled():
+                        self.updateExecutor.executeAsyncWithThreadStop(
+                                self.UEQUEUE_INDEX,
+                                self._runDatabaseUpdate, word,
+                                Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED)
+
+            elif step == Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED:
+                if self.isSearchIndexEnabled():
+                    page.runDatabaseUpdate(step=step, threadstop=threadstop)
+            else:   # should be: step == Consts.WIKIWORDMETADATA_STATE_DIRTY:
+                if page.runDatabaseUpdate(step=step, threadstop=threadstop):
+                    self.updateExecutor.executeAsyncWithThreadStop(1,
+                            self._runDatabaseUpdate, word,
+                            Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
+
+
 
         except WikiWordNotFoundException:
             return
@@ -715,6 +729,7 @@ class WikiDataManager(MiscEventSourceMixin):
         """
         if not self.isReadOnlyEffect():
             self.updateExecutor.clearDeque(1)
+            self.updateExecutor.clearDeque(self.UEQUEUE_INDEX)
             if not strToBool(self.getWikiData().getDbSettingsValue(
                     "syncWikiWordMatchtermsUpToDate", "0")):
 
@@ -745,6 +760,17 @@ class WikiDataManager(MiscEventSourceMixin):
                 for word in words1:
                     self.updateExecutor.executeAsyncWithThreadStop(1, self._runDatabaseUpdate,
                             word, Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
+            
+            if self.isSearchIndexEnabled():
+                words2 = self.getWikiData().getWikiWordsForMetaDataState(
+                        Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED)
+
+                with self.updateExecutor.getDequeCondition():
+                    for word in words2:
+                        self.updateExecutor.executeAsyncWithThreadStop(
+                                self.UEQUEUE_INDEX, self._runDatabaseUpdate,
+                                word, Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED)
+
 
     def isReadOnlyEffect(self):
         """
@@ -1172,16 +1198,23 @@ class WikiDataManager(MiscEventSourceMixin):
         self.getWikiData().refreshDefinedContentNames()
 
         if onlyDirty:
+#             wikiWords = self.getWikiData().getWikiWordsForMetaDataState(
+#                     Consts.WIKIWORDMETADATA_STATE_DIRTY) + \
+#                     self.getWikiData().getWikiWordsForMetaDataState(
+#                     Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
             wikiWords = self.getWikiData().getWikiWordsForMetaDataState(
-                    Consts.WIKIWORDMETADATA_STATE_DIRTY) + \
-                    self.getWikiData().getWikiWordsForMetaDataState(
-                    Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED)
+                    self.getFinalMetaDataState(), ">")
         else:
             # get all of the wikiWords
             wikiWords = self.getWikiData().getAllDefinedWikiPageNames()
 
-        progresshandler.open(len(wikiWords) * 3 + 1)
+
+        if self.isSearchIndexEnabled():
+            progresshandler.open(len(wikiWords) * 4 + 1)
+        else:
+            progresshandler.open(len(wikiWords) * 3 + 1)
 #         progresshandler.update(0, _(u"Waiting for update thread to end"))
+
 
         # re-save all of the pages
         try:
@@ -1236,9 +1269,9 @@ class WikiDataManager(MiscEventSourceMixin):
 
                 step += 1
 
-            # Step three: update the rest (todos, relations)
+            # Step three: update the rest of the syntax (todos, relations)
             for wikiWord in wikiWords:
-                progresshandler.update(step, _(u"Update page %s") % wikiWord)
+                progresshandler.update(step, _(u"Update syntax of %s") % wikiWord)
                 try:
                     wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
                     if isinstance(wikiPage, AliasWikiPage):
@@ -1255,6 +1288,29 @@ class WikiDataManager(MiscEventSourceMixin):
                     traceback.print_exc()
 
                 step += 1
+            
+            if self.isSearchIndexEnabled():
+                # Step four: update reverse index
+                for wikiWord in wikiWords:
+                    progresshandler.update(step, _(u"Update index of %s") % wikiWord)
+                    try:
+                        wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
+                        if isinstance(wikiPage, AliasWikiPage):
+                            # This should never be an alias page, so fetch the
+                            # real underlying page
+                            # This can only happen if there is a real page with
+                            # the same name as an alias
+                            wikiPage = WikiPage(self, wikiWord)
+
+                        wikiPage.putIntoSearchIndex()
+
+#                         writer.add_document(unifName="wikipage/"+wikiWord,
+#                                 modTimestamp=wikiPage.getTimestamps()[0],
+#                                 content=content)
+                    except:
+                        traceback.print_exc()
+ 
+                    step += 1
 
             progresshandler.update(step - 1, _(u"Final cleanup"))
             # Give possibility to do further reorganisation
@@ -1352,7 +1408,7 @@ class WikiDataManager(MiscEventSourceMixin):
                     _(u"Cannot rename '%s' to '%s', '%s' already exists") %
                     (wikiWord, toWikiWord, toWikiWord))
 
-        try:        
+        try:
             oldWikiPage = self.getWikiPage(wikiWord)
         except WikiWordNotFoundException:
             # So create page first
@@ -1400,6 +1456,7 @@ class WikiDataManager(MiscEventSourceMixin):
             _openDocuments[renamedConfigPath] = self
 
         oldWikiPage.renameVersionData(toWikiWord)
+        oldWikiPage.removeFromSearchIndex()
         oldWikiPage.informRenamedWikiPage(toWikiWord)
         del self.wikiPageDict[wikiWord]
 
@@ -1495,7 +1552,7 @@ class WikiDataManager(MiscEventSourceMixin):
         If applyOrdering is True, the ordering of the sarOp is applied before
         returning the list.
         """
-        if sarOp.revIndexSearch == "no": 
+        if sarOp.indexSearch == "no": 
             wikiData = self.getWikiData()
             sarOp.beginWikiSearch(self)
             try:
@@ -1542,9 +1599,12 @@ class WikiDataManager(MiscEventSourceMixin):
             from whoosh.qparser import QueryParser
             
             threadstop.testRunning()
-            qp = QueryParser("content", schema=self._getRevSearchIndexSchema())
+            if not self.isSearchIndexEnabled():
+                return []
+
+            qp = QueryParser("content", schema=self._getSearchIndexSchema())
             q = qp.parse(sarOp.searchStr)
-            s = self.getRevSearchIndex().searcher()
+            s = self.getSearchIndex().searcher()
             threadstop.testRunning()
             resultList = s.search(q)
             result = [rd["unifName"][9:] for rd in resultList
@@ -1557,7 +1617,7 @@ class WikiDataManager(MiscEventSourceMixin):
     _REV_SEARCH_INDEX_SCHEMA = None
     
     @staticmethod
-    def _getRevSearchIndexSchema():
+    def _getSearchIndexSchema():
         if WikiDataManager._REV_SEARCH_INDEX_SCHEMA is None:
             from whoosh.fields import Schema, ID, NUMERIC, TEXT
             from whoosh.analysis import StandardAnalyzer
@@ -1570,29 +1630,63 @@ class WikiDataManager(MiscEventSourceMixin):
         return WikiDataManager._REV_SEARCH_INDEX_SCHEMA
 
 
-    def isRevSearchIndexEnabled(self):
-        return False  # TODO: Make an option
+    def getFinalMetaDataState(self):
+        if self.isSearchIndexEnabled():
+            return Consts.WIKIWORDMETADATA_STATE_INDEXED
+        else:
+            return Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED
 
-    def getRevSearchIndex(self, clear=False):
+    def isSearchIndexEnabled(self):
+        return self.getWikiConfig().getboolean("main", "indexSearch_enabled",
+                False)
+
+    def isSearchIndexPresent(self):
+        import whoosh.index
+
+        indexPath = os.path.join(self.getWikiPath(), "indexsearch")
+        return os.path.exists(indexPath) and whoosh.index.exists_in(indexPath)
+
+    def removeSearchIndex(self):
+        if self.isSearchIndexEnabled():
+            raise InternalError("Calling removeSearchIndex() while index is enabled")
+        
+        p = self.updateExecutor.pause(wait=True)
+        self.updateExecutor.clearDeque(self.UEQUEUE_INDEX)
+        self.updateExecutor.start()
+
+        if self.whooshIndex is not None:
+            self.whooshIndex.close()
+            self.whooshIndex = None
+        
+
+        indexPath = os.path.join(self.getWikiPath(), "indexsearch")
+        if os.path.exists(indexPath):
+            # Warning!!! rmtree() is very dangerous, don't make a mistake here!
+            shutil.rmtree(indexPath, ignore_errors=True)
+
+
+    def getSearchIndex(self, clear=False):
         """
         Opens (or creates if necessary) the whoosh search index and returns it.
         It also automatically refreshes the index to the latest version if needed.
         """
-        if not self.isRevSearchIndexEnabled():
+#         print "--getSearchIndex1"
+        if not self.isSearchIndexEnabled():
             return None
+#         print "--getSearchIndex4"
         
         import whoosh.index, whoosh.writing
-        
+
         whoosh.writing.DOCLENGTH_TYPE = "l"
         whoosh.writing.DOCLENGTH_LIMIT = 2 ** 31 - 1
 
         if self.whooshIndex is None:
-            indexPath = os.path.join(self.getWikiPath(), "revindex")
+            indexPath = os.path.join(self.getWikiPath(), "indexsearch")
             if not os.path.exists(indexPath):
                 os.mkdir(indexPath)
 
             if clear or not whoosh.index.exists_in(indexPath):
-                schema = self._getRevSearchIndexSchema()
+                schema = self._getSearchIndexSchema()
                 whoosh.index.create_in(indexPath, schema)
 
             self.whooshIndex = whoosh.index.open_dir(indexPath)
@@ -1601,65 +1695,66 @@ class WikiDataManager(MiscEventSourceMixin):
         return self.whooshIndex
 
 
-    def rebuildRevSearchIndex(self, progresshandler, onlyDirty=False):
-        """
-        progresshandler -- Object, fulfilling the
-            PersonalWikiFrame.GuiProgressHandler protocol
-        """
-        if not self.isRevSearchIndexEnabled():
-            return
+#     def rebuildSearchIndex(self, progresshandler, onlyDirty=False):
+#         """
+#         progresshandler -- Object, fulfilling the
+#             PersonalWikiFrame.GuiProgressHandler protocol
+#         """
+#         if not self.isSearchIndexEnabled():
+#             return
+# 
+#         self.updateExecutor.pause()
+#         self.getWikiData().refreshDefinedContentNames()
+# 
+#         # get all of the wikiWords
+#         wikiWords = self.getWikiData().getAllDefinedWikiPageNames()
+# 
+#         progresshandler.open(len(wikiWords))
+#         
+#         searchIdx = self.getSearchIndex(clear=True)
+#         writer = searchIdx.writer()
+# 
+#         try:
+#             step = 1
+#             
+#             for wikiWord in wikiWords:
+# # Disabled to remove from .pot                progresshandler.update(step, _(u"Update rev. index"))
+#                 wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
+#                 if isinstance(wikiPage, AliasWikiPage):
+#                     # This should never be an alias page, so fetch the
+#                     # real underlying page
+#                     # This can only happen if there is a real page with
+#                     # the same name as an alias
+#                     wikiPage = WikiPage(self, wikiWord)
+# 
+#                 content = wikiPage.getLiveText()
+#                 
+#                 writer.add_document(unifName="wikipage/"+wikiWord,
+#                         modTimestamp=wikiPage.getTimestamps()[0],
+#                         content=content)
+#                 
+#                 step += 1
+#         finally:
+#             writer.commit()
+#             progresshandler.close()
+#             self.updateExecutor.start()
 
-        self.updateExecutor.pause()
-        self.getWikiData().refreshDefinedContentNames()
-
-        # get all of the wikiWords
-        wikiWords = self.getWikiData().getAllDefinedWikiPageNames()
-
-        progresshandler.open(len(wikiWords))
-        
-        searchIdx = self.getRevSearchIndex(clear=True)
-        writer = searchIdx.writer()
-
-        try:
-            step = 1
-            
-            for wikiWord in wikiWords:
-# Disabled to remove from .pot                progresshandler.update(step, _(u"Update rev. index"))
-                wikiPage = self._getWikiPageNoErrorNoCache(wikiWord)
-                if isinstance(wikiPage, AliasWikiPage):
-                    # This should never be an alias page, so fetch the
-                    # real underlying page
-                    # This can only happen if there is a real page with
-                    # the same name as an alias
-                    wikiPage = WikiPage(self, wikiWord)
-
-                content = wikiPage.getLiveText()
-                
-                writer.add_document(unifName="wikipage/"+wikiWord,
-                        modTimestamp=wikiPage.getTimestamps()[0],
-                        content=content)
-                
-                step += 1
-        finally:
-            writer.commit()
-            progresshandler.close()
-            self.updateExecutor.start()
 
 
-    def putIntoRevSearchIndex(self, wikiPage):
+    def putIntoSearchIndex(self, wikiPage):
         """
         Add or update the reverse index for the given docPage
         """
-        if not self.isRevSearchIndexEnabled():
+        if not self.isSearchIndexEnabled():
             return
 
         if isinstance(wikiPage, AliasWikiPage):
             wikiPage = WikiPage(self, wikiWord)
-        
+
         content = wikiPage.getLiveText()
-        
+
         try:
-            searchIdx = self.getRevSearchIndex()
+            searchIdx = self.getSearchIndex()
             writer = searchIdx.writer()
             
             unifName = wikiPage.getUnifiedPageName()
@@ -1675,11 +1770,11 @@ class WikiDataManager(MiscEventSourceMixin):
         writer.commit()
         
     
-    def removeFromRevSearchIndex(self, unifName):
-        if not self.isRevSearchIndexEnabled():
+    def removeFromSearchIndex(self, unifName):
+        if not self.isSearchIndexEnabled():
             return
         try:
-            searchIdx = self.getRevSearchIndex()
+            searchIdx = self.getSearchIndex()
             writer = searchIdx.writer()
             
             writer.delete_by_term("unifName", unifName)
@@ -1916,6 +2011,25 @@ class WikiDataManager(MiscEventSourceMixin):
 
 
 
+    def _handleWikiConfigurationChanged(self, miscevt):
+        if self.getWikiConfig().getboolean("main",
+                "indexSearch_enabled", False):
+            self.pushDirtyMetaDataUpdate()
+        else:
+            if strToBool(miscevt.get("old config settings")["indexSearch_enabled"]):
+                # Index search was switched off
+                # Remove it
+                self.removeSearchIndex()
+
+                # Check for wiki pages with wrong metadata state
+                # TODO: Faster?
+                finalState = self.getFinalMetaDataState()
+                for wikiWord in self.getWikiData().getWikiWordsForMetaDataState(
+                        finalState, "<"):
+                    self.getWikiData().setMetaDataState(wikiWord, finalState)
+
+
+
 
     def miscEventHappened(self, miscevt):
         """
@@ -1925,6 +2039,7 @@ class WikiDataManager(MiscEventSourceMixin):
             if miscevt.has_key("changed configuration"):
                 attrs = miscevt.getProps().copy()
                 attrs["changed wiki configuration"] = True
+                self._handleWikiConfigurationChanged(miscevt)
                 self.fireMiscEventProps(attrs)
         elif miscevt.getSource() is GetApp():
             if miscevt.has_key("reread cc blacklist needed"):
@@ -1943,17 +2058,17 @@ class WikiDataManager(MiscEventSourceMixin):
                 attrs = miscevt.getProps().copy()
                 attrs["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(attrs)
-                self.removeFromRevSearchIndex(miscevt.getSource().getUnifiedName())
+                miscevt.getSource().removeFromSearchIndex()  # TODO: Check for possible failure!!!
                 # TODO: Add new on rename
             elif miscevt.has_key("updated wiki page"):
-                self.autoLinkRelaxInfo = None  # TODO Does this slow down?
+                self.autoLinkRelaxInfo = None
                 attrs = miscevt.getProps().copy()
                 attrs["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(attrs)
-                self.putIntoRevSearchIndex(miscevt.getSource())
+                miscevt.getSource().putIntoSearchIndex()
             elif miscevt.has_key("saving new wiki page"):            
                 self.autoLinkRelaxInfo = None
-                self.putIntoRevSearchIndex(miscevt.getSource())
+                miscevt.getSource().putIntoSearchIndex()
             elif miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()
 

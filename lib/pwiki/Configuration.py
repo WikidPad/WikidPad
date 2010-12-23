@@ -797,7 +797,7 @@ WIKIDEFAULTS = {
     ("main", "tree_last_root_wiki_word"): None, # Last root word of wiki tree
     ("main", "tree_expandedNodes_rememberDuration"): u"2", # How long should open nodes in tree be remembered?
             # 0: Not at all; 1: During session; 2: Between sessions in wiki config file
-
+    ("main", "indexSearch_enabled"): u"False", # should the index search be enabled?
     ("main", "tabs_maxCharacters"): u"0", # Maximum number of characters to show on a tab (0: inifinite)
     ("main", "template_pageNamesRE"): u"^template/",  # Regular expression pattern for pages which should be seen as templates
             # Especially they will be listed in text editor context menu on new pages
@@ -806,7 +806,7 @@ WIKIDEFAULTS = {
             # Descriptors of a path are delimited by ','. This config. entry applies to main tree
     ("main", "tree_expandedNodes_descriptorPathes_views"): u"", # Same as above but applies to "Views" tree if present
 
-    ("main", "tree_force_scratchpad_visibility"): "True",  # Always show scratchpad below wiki root even
+    ("main", "tree_force_scratchpad_visibility"): u"True",  # Always show scratchpad below wiki root even
             # if it is not a child of it
 
     ("main", "further_wiki_words"): u"", # Semicolon separated list of further wiki words to show in addit. tabs

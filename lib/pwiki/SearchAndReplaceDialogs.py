@@ -840,6 +840,10 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             self.ctrls.chOrdering.SetSelection(self._ORDERNAME_TO_CHOICE["no"])
             self.ctrls.chOrdering.Enable(False)
 
+        self.ctrls.rboxSearchType.EnableItem(Consts.SEARCHTYPE_INDEX,
+                self.mainControl.getWikiDocument() is not None and \
+                self.mainControl.getWikiDocument().isSearchIndexEnabled())
+
         self._refreshSavedSearchesList()
         self._refreshSearchHistoryCombo()
 
@@ -1012,14 +1016,14 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
 
-    def buildSearchReplaceOperation(self):
+    def _buildSearchReplaceOperation(self):
         searchType = self.ctrls.rboxSearchType.GetSelection()
         
         sarOp = SearchReplaceOperation()
         sarOp.searchStr = guiToUni(self.ctrls.cbSearch.GetValue())
         sarOp.booleanOp = searchType == Consts.SEARCHTYPE_BOOLEANREGEX
         
-        sarOp.revIndexSearch = 'no' if searchType != Consts.SEARCHTYPE_REVINDEX \
+        sarOp.indexSearch = 'no' if searchType != Consts.SEARCHTYPE_INDEX \
                 else 'default'
         sarOp.caseSensitive = self.ctrls.cbCaseSensitive.GetValue()
         sarOp.wholeWord = self.ctrls.cbWholeWord.GetValue()
@@ -1063,6 +1067,12 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         self.ctrls.cbSearch.SetValue(uniToGui(sarOp.searchStr))
         if sarOp.booleanOp:
             self.ctrls.rboxSearchType.SetSelection(Consts.SEARCHTYPE_BOOLEANREGEX)
+        elif sarOp.indexSearch == 'default':
+            if self.mainControl.getWikiDocument() is not None and \
+                    self.mainControl.getWikiDocument().isSearchIndexEnabled():
+                self.ctrls.rboxSearchType.SetSelection(Consts.SEARCHTYPE_INDEX)
+            else:
+                self.ctrls.rboxSearchType.SetSelection(Consts.SEARCHTYPE_BOOLEANREGEX)
         else:
             if sarOp.wildCard == 'regex':
                 self.ctrls.rboxSearchType.SetSelection(Consts.SEARCHTYPE_REGEX)
@@ -1083,7 +1093,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def _refreshPageList(self):
-        sarOp = self.buildSearchReplaceOperation()
+        sarOp = self._buildSearchReplaceOperation()
 
         # If allowOkCancel is True, the dialog is used to create a set of pages
         # so process even for an empty search string
@@ -1132,7 +1142,13 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             self.searchingStartTime = None
             for win in disableSet:
                 win.Enable()
-    
+
+            # "index" option in search type was enabled by the above operation
+            # so disable again if necessary
+            self.ctrls.rboxSearchType.EnableItem(Consts.SEARCHTYPE_INDEX,
+                    self.mainControl.getWikiDocument() is not None and \
+                    self.mainControl.getWikiDocument().isSearchIndexEnabled())
+
     #         self.Thaw()
             self.SetCursor(wx.NullCursor)
             self.ctrls.htmllbPages.ensureNotShowSearching()
@@ -1147,11 +1163,11 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
     def OnOk(self, evt):
         self.stopSearching()
-        val = self.buildSearchReplaceOperation()
+        val = self._buildSearchReplaceOperation()
+        self.value = val 
         if val is None:
             return
 
-        self.value = val 
         try:
             self.mainControl.wwSearchDlgs.remove(self)
         except ValueError:
@@ -1253,7 +1269,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 else:
                     nextOnPage = True
     
-                searchOp = self.buildSearchReplaceOperation()
+                searchOp = self._buildSearchReplaceOperation()
                 searchOp.replaceOp = False
                 if nextOnPage:
                     pagePosNext = self.mainControl.getActiveEditor().executeSearch(searchOp,
@@ -1285,7 +1301,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def OnReplace(self, evt):
-        sarOp = self.buildSearchReplaceOperation()
+        sarOp = self._buildSearchReplaceOperation()
         sarOp.replaceOp = True
         try:
             self.mainControl.getActiveEditor().executeReplace(sarOp)
@@ -1317,7 +1333,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
             # self.pWiki.saveCurrentDocPage()
 
-            sarOp = self.buildSearchReplaceOperation()
+            sarOp = self._buildSearchReplaceOperation()
             sarOp.replaceOp = True
             
             # wikiData = self.pWiki.getWikiData()
@@ -1380,7 +1396,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 
     def addCurrentToHistory(self):
-        sarOp = self.buildSearchReplaceOperation()
+        sarOp = self._buildSearchReplaceOperation()
         try:
             sarOp.rebuildSearchOpTree()
         except re.error:
@@ -1414,7 +1430,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
     # TODO Store search mode
     def OnSaveSearch(self, evt):
-        sarOp = self.buildSearchReplaceOperation()
+        sarOp = self._buildSearchReplaceOperation()
         try:
             sarOp.rebuildSearchOpTree()
         except re.error, e:
@@ -1461,8 +1477,8 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
     def OnRadioBox(self, evt):
         self.listNeedsRefresh = True
-        booleanSearch = self.ctrls.rboxSearchType.GetSelection() == 1
-        
+        booleanSearch = self.ctrls.rboxSearchType.GetSelection() in (1, 3)
+
         self.ctrls.txtReplace.Enable(not booleanSearch)
         self.ctrls.btnFindNext.Enable(not booleanSearch)
         self.ctrls.btnReplace.Enable(not booleanSearch)
@@ -1490,7 +1506,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         
         frame = FastSearchPopup(self.GetParent(), self.mainControl, -1,
                 srListBox=self.ctrls.htmllbPages)
-        frame.setSearchOp(self.buildSearchReplaceOperation())
+        frame.setSearchOp(self._buildSearchReplaceOperation())
         
         newRelBoxPos = frame.getResultListPositionTuple()
 
@@ -1515,7 +1531,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         presenter.setSubControl("search result list", subCtl)
         presenter.switchSubControl("search result list")
         maPanel.appendPresenterTab(presenter)
-        subCtl.setSearchOp(self.buildSearchReplaceOperation())
+        subCtl.setSearchOp(self._buildSearchReplaceOperation())
 
         maPanel.showPresenter(presenter)
         self.Close()
@@ -2177,7 +2193,7 @@ class FastSearchPopup(wx.Frame):
         evt.Skip()
 
 
-    def buildSearchReplaceOperation(self, searchText):
+    def _buildSearchReplaceOperation(self, searchText):
         config = self.mainControl.getConfig()
         
         searchType = config.getint("main", "fastSearch_searchType")
@@ -2197,7 +2213,7 @@ class FastSearchPopup(wx.Frame):
 
 
     def runSearchOnWiki(self, text):
-        self.setSearchOp(self.buildSearchReplaceOperation(text))
+        self.setSearchOp(self._buildSearchReplaceOperation(text))
         try:
             self._refreshPageList()
         except UserAbortException:

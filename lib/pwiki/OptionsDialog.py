@@ -601,6 +601,7 @@ class OptionsDialog(wx.Dialog):
 
             ("tree_expandedNodes_rememberDuration",
                     "chTreeExpandedNodesRememberDuration", "seli"),
+            ("indexSearch_enabled", "cbIndexSearchEnabled", "b"),
             ("tabs_maxCharacters", "tfMaxCharactersOnTab", "i0+"),
             ("template_pageNamesRE", "tfTemplatePageNamesRE", "tre"),
             ("tree_force_scratchpad_visibility",

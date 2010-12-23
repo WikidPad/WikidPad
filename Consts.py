@@ -48,10 +48,17 @@ FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
 DATABLOCK_STOREHINT_INTERN = 0
 DATABLOCK_STOREHINT_EXTERN = 1
 
-
+# Content was modified and isn't in sync with meta data
 WIKIWORDMETADATA_STATE_DIRTY = 0
+# Attributes were processed
 WIKIWORDMETADATA_STATE_ATTRSPROCESSED = 1
-WIKIWORDMETADATA_STATE_UPTODATE = 2
+# All syntax information (links, todos, etc.) is processed
+WIKIWORDMETADATA_STATE_SYNTAXPROCESSED = 2
+# Syntax is processed and reverse index is up to date
+WIKIWORDMETADATA_STATE_INDEXED = 6  # = 2 | 4
+
+# WIKIWORDMETADATA_STATE_BIT_INDEXED = 4
+# WIKIWORDMETADATA_STATE_BITMASK_SYNTAXPROCESSED = 3
 
 
 
@@ -89,8 +96,8 @@ SEARCHTYPE_REGEX = 0
 SEARCHTYPE_BOOLEANREGEX = 1
 # Text as is
 SEARCHTYPE_ASIS = 2
-# Reverse index search
-SEARCHTYPE_REVINDEX = 3
+# Index search
+SEARCHTYPE_INDEX = 3
 
 
 

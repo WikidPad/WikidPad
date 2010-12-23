@@ -17,7 +17,7 @@ class Dummy(object):
 
 class BasicThreadStop(object):
     """
-    An object of this or a derived class are handed over to long running
+    An object of this or a derived class is handed over to long running
     operations which might run in a separate thread and maybe must be stopped
     for some reason (e.g. a parsing operation should be stopped if the
     parsed text was changed and the operation on the old text therefore becomes
@@ -178,8 +178,13 @@ class SingleThreadExecutor(BasicThreadStop):
 
 
     ENDOBJECT = object()
+    PAUSEOBJECT = object()
 
     def _getNextJob(self):
+        if self.paused:
+            return (SingleThreadExecutor.PAUSEOBJECT, None, None, None, None,
+                        False)
+
         # No lock as it is called always inside a lock
         for deque in self.deques:
             if len(deque) != 0:
@@ -202,33 +207,28 @@ class SingleThreadExecutor(BasicThreadStop):
             else:
                 return sum((len(deque) for deque in self.deques[start:end]), 0)
 
-#         for deque in self.deques:
-#             if len(deque) != 0:
-#                 return True
-#         
-#         return False
-
 
     def _runQueue(self):
         while True:
             with self.dequeCondition:
+
                 while self.deques is not None:
                     job = self._getNextJob()
                     if job is not None:
                         break
                     self.dequeCondition.wait()
-                
+
                 if self.deques is None:
                     # Executor terminated
                     return
 
                 fct, args, kwargs, event, retObj, tstop = job
-            try:
-                if fct is SingleThreadExecutor.ENDOBJECT:
-                    # We should stop here, but the problem is that other
-                    # operations may itself pushed back on the deque
-                    # and must be processed before thread can end
-                    with self.dequeCondition:
+
+                try:
+                    if fct is SingleThreadExecutor.ENDOBJECT:
+                        # We should stop here, but the problem is that other
+                        # operations may itself push new jobs back on the deque
+                        # which must be processed before thread can end
                         if self.getJobCount() == 0:
                            return
 
@@ -236,17 +236,21 @@ class SingleThreadExecutor(BasicThreadStop):
                                 (SingleThreadExecutor.ENDOBJECT, None, None,
                                 None, None))
                         continue
-                elif self.paused:
-                    # Operation should pause, this means to kill the thread, but
-                    # to keep the deques as they are.
-                    # To resume, start() is called
-                    with self.dequeCondition:
+                    elif fct is SingleThreadExecutor.PAUSEOBJECT:
+                        # Operation should pause, this means to kill the thread, but
+                        # to keep the deques as they are.
+                        # To resume, start() is called
                         return
+
+                except Exception, e:
+                    traceback.print_exc() # ?
+                    retObj.setException(e)
 
 #                 tracer.runctx('retObj.result = fct(*args, **kwargs)', globals(), locals())
                 if tstop:
                     kwargs["threadstop"] = self
 
+            try:
                 retObj.setResult(fct(*args, **kwargs))
 
             except Exception, e:
@@ -258,6 +262,13 @@ class SingleThreadExecutor(BasicThreadStop):
 
 
     def execute(self, idx, fct, *args, **kwargs):
+        """
+        Execute fct(*args, **kwargs) in the thread of the executor in queue idx
+        and wait until it is finished.
+        If the execution needs longer than 4 minutes,
+        a DeadBlockPreventionTimeOutError is raised.
+        Returns result from fct(...) or throws execption thrown by fct()
+        """
         if threading.currentThread() is self.thread:
             return fct(*args, **kwargs)
             
@@ -272,7 +283,7 @@ class SingleThreadExecutor(BasicThreadStop):
             self.deques[idx].appendleft((fct, args, kwargs, event, retObj, None))
             self.dequeCondition.notify()
 
-        event.wait(120)
+        event.wait(240)  # TODO: Replace by constant
 
         if not event.isSet():
             raise DeadBlockPreventionTimeOutError()
@@ -283,6 +294,13 @@ class SingleThreadExecutor(BasicThreadStop):
 
 
     def executeAsync(self, idx, fct, *args, **kwargs):
+        """
+        Execute fct(*args, **kwargs) in the thread of the executor in queue idx.
+        Call may return before execution is done (asychronous).
+        Returns an ExecutionResult object which can be checked if
+        fct was executed already and which result it returned or exception
+        it threw.
+        """
         retObj = ExecutionResult()
 
         if self.deques is None:
@@ -321,7 +339,7 @@ class SingleThreadExecutor(BasicThreadStop):
         
         If hardEnd is True, executor stops after the current job.
 
-        If the queue is empty, executor stops in each case.
+        If the queues are empty, executor stops in each case.
         """
         if self.thread is None or not self.thread.isAlive():
             return
@@ -343,16 +361,32 @@ class SingleThreadExecutor(BasicThreadStop):
         self.thread = None
 
 
-    def pause(self):
+    def pause(self, wait=False):
         """
         Stops after current job but keeps the queue so that it can resume
-        later by call to start()
+        later by call to start(). Returns True if executor thread wasn't
+        terminated already.
+        If  wait  is true the function returns after the current job was
+        done and the executor is in pause mode
         """
         with self.dequeCondition:
-            if self.thread is None or not self.thread.isAlive():
-                return
+            thread = self.thread
+            
+            if thread is None or not thread.isAlive():
+                return False
 
             self.paused = True
+            self.dequeCondition.notify()
+            
+        if wait:
+            thread.join(120)  # TODO: Replace by constant
+    
+            if thread.isAlive():
+                raise DeadBlockPreventionTimeOutError()
+
+            self.thread = None
+
+        return True
 
 
 

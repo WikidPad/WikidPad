@@ -1,10 +1,10 @@
 from __future__ import with_statement
 
-## import profilehooks
-## profile = profilehooks.profile(filename="profile.prf", immediate=False)
+# import profilehooks
+# profile = profilehooks.profile(filename="profile.prf", immediate=False)
 
 
-import os.path, re, struct, time, traceback, threading
+import os.path, re, struct, time, traceback, threading, collections
 
 from .rtlibRepl import minidom
 
@@ -66,7 +66,7 @@ class DocPage(object, MiscEventSourceMixin):
         """
         with self.textOperationLock:
             with self.txtEditorListLock:
-                self.wikiDocument = None
+                # self.wikiDocument = None
                 self.txtEditors = None
                 self.livePageAst = None
                 self.setEditorText(None)
@@ -284,7 +284,8 @@ class DocPage(object, MiscEventSourceMixin):
             elif u:
                 self.initiateUpdate(fireEvent=fireEvent)
             else:
-                if self.getWikiData().getMetaDataState(self.wikiWord) != 2:
+                if self.getMetaDataState(self.wikiWord) < \
+                        self.getWikiDocument().getFinalMetaDataState():
                     self.updateDirtySince = time.time()
                     self.initiateUpdate(fireEvent=fireEvent)
 
@@ -534,6 +535,9 @@ class AbstractWikiPage(DataCarryingPage):
 
     def getWikiData(self):
         return self.wikiDocument.getWikiData()
+        
+    def getMetaDataState(self):
+        return self.getWikiData().getMetaDataState(self.wikiWord)
 
     def addTxtEditor(self, txted):
         """
@@ -1410,6 +1414,8 @@ class WikiPage(AbstractWikiPage):
             if vo is not None:
                 vo.delete()
                 self.versionOverview = UNDEFINED
+        
+            self.removeFromSearchIndex()   # TODO: Check for (dead-)locks
 
             wx.CallAfter(self.fireMiscEventKeys,
                     ("deleted page", "deleted wiki page"))
@@ -1442,7 +1448,7 @@ class WikiPage(AbstractWikiPage):
         p["renamed page"] = True
         p["renamed wiki page"] = True
         p["newWord"] = newWord
-
+        
         callInMainThreadAsync(self.fireMiscEventProps, p)
 
 
@@ -1720,7 +1726,7 @@ class WikiPage(AbstractWikiPage):
                 self.updateDirtySince = None
 
                 self.getWikiData().setMetaDataState(self.wikiWord,
-                        Consts.WIKIWORDMETADATA_STATE_UPTODATE)
+                        Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED)
                 valid = True
 
         if fireEvent:
@@ -1728,6 +1734,62 @@ class WikiPage(AbstractWikiPage):
                     ("updated wiki page", "updated page"))
 
         return valid
+
+    
+    def putIntoSearchIndex(self, threadstop=DUMBTHREADSTOP):
+        """
+        Add or update the reverse index for the given docPage
+        """
+        with self.textOperationLock:
+            if not self.getWikiDocument().isSearchIndexEnabled():
+                return True  # Or false?
+            
+            liveTextPlaceHold = self.liveTextPlaceHold
+            content = self.getLiveText()
+
+        writer = None
+        try:
+            searchIdx = self.getWikiDocument().getSearchIndex()
+            writer = searchIdx.writer()
+
+            unifName = self.getUnifiedPageName()
+
+            writer.delete_by_term("unifName", unifName)
+            
+            writer.add_document(unifName=unifName,
+                    modTimestamp=self.getTimestamps()[0],
+                    content=content)
+        except:
+            if writer is not None:
+                writer.cancel()
+            raise
+
+        # Check within lock if data is current yet
+        with self.textOperationLock:
+            if not liveTextPlaceHold is self.liveTextPlaceHold:
+                writer.cancel()
+                return False
+            else:
+                writer.commit()
+                self.getWikiData().setMetaDataState(self.wikiWord,
+                        Consts.WIKIWORDMETADATA_STATE_INDEXED)
+                return True
+
+    def removeFromSearchIndex(self):
+        unifName = self.getUnifiedPageName()
+        
+        if not self.getWikiDocument().isSearchIndexEnabled():
+            return
+        try:
+            searchIdx = self.getWikiDocument().getSearchIndex()
+            writer = searchIdx.writer()
+            
+            writer.delete_by_term("unifName", unifName)
+        except:
+            writer.cancel()
+            raise
+
+        writer.commit()
 
 
 #     def update(self):
@@ -1772,7 +1834,7 @@ class WikiPage(AbstractWikiPage):
 #                         self.initiateUpdate()
 #                         return False
 # 
-#                     if metaState == Consts.WIKIWORDMETADATA_STATE_UPTODATE:
+#                     if metaState == Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED:
 #                         return True
 # 
 #                     elif metaState == Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED:
@@ -1785,16 +1847,19 @@ class WikiPage(AbstractWikiPage):
 #                                 threadstop=threadstop)
 #                         continue
             else:
-                metaState = self.getWikiData().getMetaDataState(self.wikiWord)
-    
-                if metaState == Consts.WIKIWORDMETADATA_STATE_UPTODATE or \
+                metaState = self.getMetaDataState()
+
+                if metaState >= self.getWikiDocument().getFinalMetaDataState() or \
                         metaState != step:
                     return False
     
-                if step == Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED:
+                if step == Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED:
+                    # 
+                    return self.putIntoSearchIndex(threadstop=threadstop)
+
+                elif step == Consts.WIKIWORDMETADATA_STATE_ATTRSPROCESSED:
                     return self.refreshMainDbCacheFromPageAst(pageAst,
                             threadstop=threadstop)
-    
                 else: # step == Consts.WIKIWORDMETADATA_STATE_DIRTY
                     return self.refreshAttributesFromPageAst(pageAst,
                             threadstop=threadstop)
@@ -1967,70 +2032,145 @@ class WikiPage(AbstractWikiPage):
         return result
 
 
-        # TODO Remove aliases?
-    def _flatTreeHelper(self, page, deepness, excludeSet, includeSet, result,
-            unalias):
-        """
-        Recursive part of getFlatTree
-        """
-#         print "_flatTreeHelper1", repr((page.getWikiWord(), deepness, len(excludeSet)))
+#         # TODO Remove aliases?
+#     def _flatTreeHelper(self, page, deepness, excludeSet, includeSet, result,
+#             unalias):
+#         """
+#         Recursive part of getFlatTree
+#         """
+# #         print "_flatTreeHelper1", repr((page.getWikiWord(), deepness, len(excludeSet)))
+# 
+#         word = page.getWikiWord()
+#         nonAliasWord = page.getNonAliasPage().getWikiWord()
+#         excludeSet.add(nonAliasWord)
+# 
+#         children = page.getChildRelationshipsTreeOrder(existingonly=True)
+# 
+#         for word in children:
+#             subpage = self.wikiDocument.getWikiPage(word)
+#             nonAliasWord = subpage.getNonAliasPage().getWikiWord()
+#             if nonAliasWord in excludeSet:
+#                 continue
+#             if unalias:
+#                 result.append((nonAliasWord, deepness + 1))
+#             else:
+#                 result.append((word, deepness + 1))
+#             
+#             if includeSet is not None:
+#                 includeSet.discard(word)
+#                 includeSet.discard(nonAliasWord)
+#                 if len(includeSet) == 0:
+#                     return
+#             
+#             self._flatTreeHelper(subpage, deepness + 1, excludeSet, includeSet,
+#                     result, unalias)
+# 
+# 
+#     def getFlatTree(self, unalias=False, includeSet=None):
+#         """
+#         Returns a sequence of tuples (word, deepness) where the current
+#         word is the first one with deepness 0.
+#         The words may contain aliases, but no word appears twice neither
+#         will both a word and its alias appear in the list.
+#         unalias -- replace all aliases by their real word
+#         TODO EXPLAIN FUNCTION !!!
+#         """
+#         word = self.getWikiWord()
+#         nonAliasWord = self.getNonAliasPage().getWikiWord()
+# 
+#         if unalias:
+#             result = [(nonAliasWord, 0)]
+#         else:
+#             result = [(word, 0)]
+# 
+#         if includeSet is not None:
+#             includeSet.discard(word)
+#             includeSet.discard(nonAliasWord)
+#             if len(includeSet) == 0:
+#                 return result
+# 
+#         excludeSet = set()   # set((self.getWikiWord(),))
+# 
+#         self._flatTreeHelper(self, 0, excludeSet, includeSet, result, unalias)
+# 
+# #         print "getFlatTree", repr(result)
+# 
+#         return result
 
-        word = page.getWikiWord()
-        nonAliasWord = page.getNonAliasPage().getWikiWord()
-        excludeSet.add(nonAliasWord)
 
-        children = page.getChildRelationshipsTreeOrder(existingonly=True)
-
-        for word in children:
-            subpage = self.wikiDocument.getWikiPage(word)
-            nonAliasWord = subpage.getNonAliasPage().getWikiWord()
-            if nonAliasWord in excludeSet:
-                continue
-            if unalias:
-                result.append((nonAliasWord, deepness + 1))
-            else:
-                result.append((word, deepness + 1))
-            
-            if includeSet is not None:
-                includeSet.discard(word)
-                includeSet.discard(nonAliasWord)
-                if len(includeSet) == 0:
-                    return
-            
-            self._flatTreeHelper(subpage, deepness + 1, excludeSet, includeSet,
-                    result, unalias)
-
-
-    def getFlatTree(self, unalias=False, includeSet=None):
+    def getFlatTree(self, unalias=False, includeSet=None, maxdepth=-1,
+            resetdepth=0):
         """
         Returns a sequence of tuples (word, deepness) where the current
         word is the first one with deepness 0.
         The words may contain aliases, but no word appears twice neither
         will both a word and its alias appear in the list.
-        unalias -- replace all aliases by their real word
-        TODO EXPLAIN FUNCTION !!!
+        
+        unalias -- if to replace all aliases by their real word
+        maxdepth -- don't create entries deeper than that level (-1: no limit)
+        resetdepth -- if entry outreaches maxdepth it is inserted later
+                with level  resetdepth  (-1: entry isn't inserted anymore)
         """
-        word = self.getWikiWord()
-        nonAliasWord = self.getNonAliasPage().getWikiWord()
+        getUnAliasedWikiWord = self.getWikiDocument().getUnAliasedWikiWord
 
-        if unalias:
-            result = [(nonAliasWord, 0)]
-        else:
-            result = [(word, 0)]
+        checkList = [(self.getWikiWord(), self.getNonAliasPage().getWikiWord(),
+                0)]
 
-        if includeSet is not None:
-            includeSet.discard(word)
-            includeSet.discard(nonAliasWord)
-            if len(includeSet) == 0:
-                return result
+        mixins = collections.deque()
+        resultSet = set()
+        result = []
 
-        excludeSet = set()   # set((self.getWikiWord(),))
+        while True:
+            if len(checkList) > 0:
+                word, nonAliasWord, chLevel = checkList[-1]
 
-        self._flatTreeHelper(self, 0, excludeSet, includeSet, result, unalias)
+                if len(mixins) > 0 and mixins[-1][2] >= chLevel:
+                    word, nonAliasWord, chLevel = mixins.pop()
+                else:
+                    del checkList[-1]
+            else:
+                if len(mixins) == 0:
+                    break # Everything empty -> terminate
+                else:
+                    mixList = list(mixins)
+                    mixList.reverse()
+                    checkList.extend((w, naw, 0) for w, naw, l in mixList)
+                    mixins.clear()
+                    continue
 
-#         print "getFlatTree", repr(result)
+            if nonAliasWord in resultSet:
+                continue
+
+            if maxdepth > -1 and chLevel > maxdepth:
+                # Don't go deeper
+                if resetdepth > -1:
+                    mixins.appendleft((word, nonAliasWord, resetdepth))
+                continue
+
+            if unalias:
+                result.append((nonAliasWord, chLevel))
+            else:
+                result.append((word, chLevel))
+
+            resultSet.add(nonAliasWord)
+
+            if includeSet is not None:
+                includeSet.discard(word)
+                includeSet.discard(nonAliasWord)
+                if len(includeSet) == 0:
+                    return result
+
+
+            page = self.getWikiDocument().getWikiPage(nonAliasWord)
+            children = page.getChildRelationshipsTreeOrder(existingonly=True)
+
+            children = [(c, getUnAliasedWikiWord(c), chLevel + 1)
+                    for c in children]
+            children.reverse()
+            checkList += children
 
         return result
+
 
 
     def getDependentDataBlocks(self):
@@ -2040,61 +2180,12 @@ class WikiPage(AbstractWikiPage):
             return []
         
         return vo.getDependentDataBlocks()
-        
-
-#     def serializeOverviewToXml(self, xmlNode, xmlDoc):
-#         """
-#         Create XML node to contain overview information (neither content nor
-#         version overview) about this object.
-#         """
-# #         Serialization.serToXmlUnicode(xmlNode, xmlDoc, u"unifiedName",
-# #                 self.getUnifiedPageName(), replace=True)
-# 
-#         timeStamps = self.getTimestamps()[:3]
-# 
-#         # Do not use StringOps.strftimeUB here as its output
-#         # relates to local time, but we need UTC here.
-#         timeStrings = [unicode(time.strftime(
-#                 "%Y-%m-%d/%H:%M:%S", time.gmtime(ts)))
-#                 for ts in timeStamps]
-#         
-#         tsNode = Serialization.findOrAppendXmlElementFlat(xmlNode, xmlDoc,
-#             u"timeStamps")
-# 
-#         tsNode.setAttribute(u"modificationTime", timeStrings[0])
-#         tsNode.setAttribute(u"creationTime", timeStrings[1])
-#         tsNode.setAttribute(u"visitTime", timeStrings[2])
-# 
-# 
-#     def serializeOverviewFromXml(self, xmlNode):
-#         """
-#         Set object state from data in xmlNode
-#         """
-#         tsNode = Serialization.findXmlElementFlat(xmlNode, 
-#             u"timeStamps", excOnFail=False)
-#         
-#         if tsNode is not None:
-#             timeStrings = [u""] * 3
-#             timeStrings[0] = tsNode.getAttribute(u"modificationTime")
-#             timeStrings[1] = tsNode.getAttribute(u"creationTime")
-#             timeStrings[2] = tsNode.getAttribute(u"visitTime")
-# 
-#         timeStamps = []
-#         for tstr in timeStrings:
-#             if tstr == u"":
-#                 timeStamps.append(0.0)
-#             else:
-#                 timeStamps.append(timegm(time.strptime(tstr,
-#                         "%Y-%m-%d/%H:%M:%S")))
-# 
-#         self.setTimestamps(timeStamps)
-# 
-#         self.versionNumber = serFromXmlInt(xmlNode, u"versionNumber")
 
 
 
 
-# TODO Maybe split into single classes for each tag
+
+# TODO: Maybe split into single classes for each tag
 
 class FunctionalPage(DataCarryingPage):
     """

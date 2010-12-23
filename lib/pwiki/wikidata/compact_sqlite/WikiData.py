@@ -512,14 +512,23 @@ class WikiData:
                 (state,))
 
 
-    def getWikiWordsForMetaDataState(self, state):
+    _METADATASTATE_NUMCOPARE_TO_SQL = {"==": "=", ">=": "<=", "<=": ">=",
+            "!=": "!=", ">": "<", "<": ">"}
+
+    def getWikiWordsForMetaDataState(self, state, compare="=="):
         """
         Retrieve a list of all words with a particular meta-data processing
         state.
         """
+        sqlCompare = self._METADATASTATE_NUMCOPARE_TO_SQL.get(compare)
+        if sqlCompare is None:
+            raise InternalError(u"getWikiWordsForMetaDataState: Bad compare '%s'" %
+                    compare)
+
         try:
             return self.connWrap.execSqlQuerySingleColumn("select word "
-                    "from wikiwordcontent where metadataprocessed = ?", (state,))
+                    "from wikiwordcontent where metadataprocessed " + sqlCompare +
+                    " ?", (state,))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)

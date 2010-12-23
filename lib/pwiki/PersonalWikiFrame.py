@@ -817,10 +817,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         menuID=GUI_ID.MENU_INITATE_UPDATE_WIKI_CACHE,
                         updatefct=self.OnUpdateDisReadOnlyWiki)
                 
-            # TODO: Test for wikiDocument.isRevSearchIndexEnabled()
+            # TODO: Test for wikiDocument.isSearchIndexEnabled()
 #             self.addMenuItem(maintenanceMenu, _(u'Re&index Wiki...'),
 #                     _(u'Rebuild the reverse index for fulltext search'),
-#                     lambda evt: self.rebuildRevSearchIndex(onlyDirty=False),
+#                     lambda evt: self.rebuildSearchIndex(onlyDirty=False),
 #                     menuID=GUI_ID.MENU_REINDEX_REV_SEARCH,
 #                     updatefct=self.OnUpdateDisReadOnlyWiki)
 
@@ -4868,7 +4868,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
 
-    def rebuildRevSearchIndex(self, skipConfirm=True, onlyDirty=False):
+    def rebuildSearchIndex(self, skipConfirm=True, onlyDirty=False):
         if self.isReadOnlyWiki():
             return
 
@@ -4886,7 +4886,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #                 progresshandler = ProgressHandler(
 #                         _(u"     Reindexing wiki     "),
 #                         _(u"     Reindexing wiki     "), 0, self)
-#                 self.getWikiDocument().rebuildRevSearchIndex(progresshandler,
+#                 self.getWikiDocument().rebuildSearchIndex(progresshandler,
 #                         onlyDirty=onlyDirty)
 #             except (IOError, OSError, DbAccessError), e:
 #                 self.lostAccess(e)

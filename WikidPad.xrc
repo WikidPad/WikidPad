@@ -1986,6 +1986,7 @@
             <item>Si&amp;mple regex</item>
             <item>Bool&amp;ean regex</item>
             <item>As &amp;is</item>
+            <item>I&amp;ndex</item>
           </content>
           <dimension>2</dimension>
           <style>wxRA_SPECIFY_COLS|wxNO_BORDER</style>
@@ -2139,6 +2140,7 @@
             <item>Si&amp;mple regex</item>
             <item>Bool&amp;ean regex</item>
             <item>As &amp;is</item>
+            <item>I&amp;ndex</item>
           </content>
           <dimension>2</dimension>
           <style>wxRA_SPECIFY_COLS</style>
@@ -2608,6 +2610,14 @@
           </object>
         </object>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbIndexSearchEnabled">
+          <label>Allow index search</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
       </object>
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbTreeForceScratchpadVisibility">
@@ -3603,6 +3613,7 @@
                               <item>Si&amp;mple regex</item>
                               <item>Bool&amp;ean regex</item>
                               <item>As &amp;is</item>
+                              <item>I&amp;ndex</item>
                             </content>
                             <dimension>2</dimension>
                             <style>wxRA_SPECIFY_COLS|wxWANTS_CHARS</style>

@@ -1512,7 +1512,7 @@ class SearchReplaceOperation:
         self.caseSensitive = False  # Search case sensitive?
         self.cycleToStart = False  # Wrap around when coming to the end of page
         self.booleanOp = False  # Can search string contain boolean operators?
-        self.revIndexSearch = 'no'  # Reverse index search, either 'no' or 'default'
+        self.indexSearch = 'no'  # Reverse index search, either 'no' or 'default'
         self.wildCard = 'regex' # Search string is: 'regex':regular expression
                                 # (and replace str.) 'no':Without wildcards
         self.wikiWide = False   # Operation on whole wiki (or current page only)?
@@ -1571,9 +1571,15 @@ class SearchReplaceOperation:
 
         stream -- StringOps.SerializeStream object
         """
-        version = stream.serUint32(1)
+        version = 2
+        if not stream.isReadMode():
+            # Adjust to lowest possible version
+            if self.indexSearch == 'no':
+                version = 1
         
-        if version < 0 or version > 1:
+        version = stream.serUint32(version)
+        
+        if version < 0 or version > 2:
             raise SerializationException
 
         self.searchStr = stream.serUniUtf8(self.searchStr)
@@ -1594,9 +1600,10 @@ class SearchReplaceOperation:
             # Reset listWikiPagesOp to default
             self.listWikiPagesOp = ListWikiPagesOperation()
         
-        # TODO: built in
-        if stream.isReadMode():
-            self.revIndexSearch = 'no'
+        if version > 1:
+            self.indexSearch = stream.serString(self.indexSearch)
+        elif stream.isReadMode():
+            self.indexSearch = 'no'
         
 
 
@@ -1612,6 +1619,7 @@ class SearchReplaceOperation:
         serToXmlBoolean(xmlNode, xmlDoc, u"caseSensitive", self.caseSensitive)
         serToXmlBoolean(xmlNode, xmlDoc, u"cycleToStart", self.cycleToStart)
         serToXmlBoolean(xmlNode, xmlDoc, u"booleanOperation", self.booleanOp)
+        serToXmlUnicode(xmlNode, xmlDoc, u"indexSearch", unicode(self.indexSearch))
 
         serToXmlUnicode(xmlNode, xmlDoc, u"wildCardMode", unicode(self.wildCard))
 
@@ -1641,8 +1649,8 @@ class SearchReplaceOperation:
         self.listWikiPagesOp = ListWikiPagesOperation()
         self.listWikiPagesOp.serializeFromXml(subNode)
 
-        # TODO: built in
-        self.revIndexSearch = 'no'
+        self.indexSearch = serFromXmlUnicode(xmlNode, u"indexSearch", u"no")\
+                .encode("ascii")
 
 
     def getPackedSettings(self):
@@ -1800,7 +1808,7 @@ class SearchReplaceOperation:
 
 
     def hasParticularTextPosition(self):
-        if self.revIndexSearch != "no":
+        if self.indexSearch != "no":
             return False   # TODO!
 
         if self.searchOpTree is None:
