@@ -438,7 +438,7 @@ class HtmlExporter(AbstractExporter):
         This function is only called if getAddOptVersion() != -1.
         """
         picsAsLinks, tableOfContents, tocTitle, volatileDir = \
-                addOpt
+                addOpt[:4]
 
         # volatileDir is currently ignored
 
@@ -2382,7 +2382,7 @@ class MultiPageTextExporter(AbstractExporter):
         This function is only called if getAddOptVersion() != -1.
         """
         fileVersion, writeWikiFuncPages, writeSavedSearches = \
-                addOpt
+                addOpt[:3]
 
         ctrls = addoptpanel.ctrls   # XrcControls(addoptpanel)?
 

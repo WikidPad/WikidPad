@@ -1781,41 +1781,77 @@ class WikiPage(AbstractWikiPage):
         return result
 
 
-        # TODO Remove aliases?
-    def _flatTreeHelper(self, page, deepness, excludeSet, includeSet, result,
-            unalias):
-        """
-        Recursive part of getFlatTree
-        """
-#         print "_flatTreeHelper1", repr((page.getWikiWord(), deepness, len(excludeSet)))
-
-        word = page.getWikiWord()
-        nonAliasWord = page.getNonAliasPage().getWikiWord()
-        excludeSet.add(nonAliasWord)
-
-        children = page.getChildRelationshipsTreeOrder(existingonly=True)
-
-        for word in children:
-            subpage = self.wikiDocument.getWikiPage(word)
-            nonAliasWord = subpage.getNonAliasPage().getWikiWord()
-            if nonAliasWord in excludeSet:
-                continue
-            if unalias:
-                result.append((nonAliasWord, deepness + 1))
-            else:
-                result.append((word, deepness + 1))
-            
-            if includeSet is not None:
-                includeSet.discard(word)
-                includeSet.discard(nonAliasWord)
-                if len(includeSet) == 0:
-                    return
-            
-            self._flatTreeHelper(subpage, deepness + 1, excludeSet, includeSet,
-                    result, unalias)
 
 
-    def getFlatTree(self, unalias=False, includeSet=None):
+#         # TODO Remove aliases?
+#     def _flatTreeHelper(self, page, deepness, excludeSet, includeSet, result,
+#             unalias):
+#         """
+#         Recursive part of getFlatTree
+#         """
+# #         print "_flatTreeHelper1", repr((page.getWikiWord(), deepness, len(excludeSet)))
+# 
+#         word = page.getWikiWord()
+#         nonAliasWord = page.getNonAliasPage().getWikiWord()
+#         excludeSet.add(nonAliasWord)
+# 
+#         children = page.getChildRelationshipsTreeOrder(existingonly=True)
+# 
+#         for word in children:
+#             subpage = self.wikiDocument.getWikiPage(word)
+#             nonAliasWord = subpage.getNonAliasPage().getWikiWord()
+#             if nonAliasWord in excludeSet:
+#                 continue
+#             if unalias:
+#                 result.append((nonAliasWord, deepness + 1))
+#             else:
+#                 result.append((word, deepness + 1))
+#             
+#             if includeSet is not None:
+#                 includeSet.discard(word)
+#                 includeSet.discard(nonAliasWord)
+#                 if len(includeSet) == 0:
+#                     return
+#             
+#             self._flatTreeHelper(subpage, deepness + 1, excludeSet, includeSet,
+#                     result, unalias)
+# 
+# 
+#     def getFlatTree(self, unalias=False, includeSet=None, maxdepth=100,
+#             includeRemain=True):
+#         """
+#         Returns a sequence of tuples (word, deepness) where the current
+#         word is the first one with deepness 0.
+#         The words may contain aliases, but no word appears twice neither
+#         will both a word and its alias appear in the list.
+#         unalias -- replace all aliases by their real word
+#         TODO EXPLAIN FUNCTION !!!
+#         """
+#         word = self.getWikiWord()
+#         nonAliasWord = self.getNonAliasPage().getWikiWord()
+# 
+#         if unalias:
+#             result = [(nonAliasWord, 0)]
+#         else:
+#             result = [(word, 0)]
+# 
+#         if includeSet is not None:
+#             includeSet.discard(word)
+#             includeSet.discard(nonAliasWord)
+#             if len(includeSet) == 0:
+#                 return result
+# 
+#         excludeSet = set()   # set((self.getWikiWord(),))
+# 
+#         self._flatTreeHelper(self, 0, excludeSet, includeSet, result, unalias)
+# 
+# #         print "getFlatTree", repr(result)
+# 
+#         return result
+
+
+
+    def getFlatTree(self, unalias=False, includeSet=None, level=-1):
         """
         Returns a sequence of tuples (word, deepness) where the current
         word is the first one with deepness 0.
@@ -1824,25 +1860,42 @@ class WikiPage(AbstractWikiPage):
         unalias -- replace all aliases by their real word
         TODO EXPLAIN FUNCTION !!!
         """
-        word = self.getWikiWord()
-        nonAliasWord = self.getNonAliasPage().getWikiWord()
+        getUnAliasedWikiWord = self.getWikiDocument().getUnAliasedWikiWord
 
-        if unalias:
-            result = [(nonAliasWord, 0)]
-        else:
-            result = [(word, 0)]
+        checkList = [(self.getWikiWord(), self.getNonAliasPage().getWikiWord(),
+                0)]
 
-        if includeSet is not None:
-            includeSet.discard(word)
-            includeSet.discard(nonAliasWord)
-            if len(includeSet) == 0:
-                return result
+        resultSet = set()
+        result = []
 
-        excludeSet = set()   # set((self.getWikiWord(),))
+        while len(checkList) > 0:
+            word, nonAliasWord, chLevel = checkList.pop()
+            if nonAliasWord in resultSet:
+                continue
 
-        self._flatTreeHelper(self, 0, excludeSet, includeSet, result, unalias)
+            if unalias:
+                result.append((nonAliasWord, chLevel))
+            else:
+                result.append((word, chLevel))
 
-#         print "getFlatTree", repr(result)
+            resultSet.add(nonAliasWord)
+
+            if includeSet is not None:
+                includeSet.discard(word)
+                includeSet.discard(nonAliasWord)
+                if len(includeSet) == 0:
+                    return result
+
+            if level > -1 and chLevel >= level:
+                continue  # Don't go deeper
+
+            page = self.getWikiDocument().getWikiPage(nonAliasWord)
+            children = page.getChildRelationshipsTreeOrder(existingonly=True)
+
+            children = [(c, getUnAliasedWikiWord(c), chLevel + 1)
+                    for c in children]
+            children.reverse()
+            checkList += children
 
         return result
 

@@ -3744,20 +3744,20 @@
                             <object class="sizeritem">
                               <object class="wxButton" name="btnPageListDelete">
                                 <label>Del</label>
+                                <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
                               <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                               <border>5</border>
-                              <minsize>40,-1</minsize>
                             </object>
                             <object class="sizeritem">
                               <object class="wxButton" name="btnPageListCopyToClipboard">
                                 <label>Copy</label>
+                                <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
                               <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                               <border>5</border>
-                              <minsize>40,-1</minsize>
                             </object>
                           </object>
                           <option>0</option>
@@ -3777,15 +3777,16 @@
                             <object class="sizeritem">
                               <object class="wxButton" name="btnPageListAddFromClipboard">
                                 <label>Add</label>
+                                <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
                               <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                               <border>5</border>
-                              <minsize>40,-1</minsize>
                             </object>
                             <object class="sizeritem">
                               <object class="wxButton" name="btnPageListOverwriteFromClipboard">
                                 <label>Overwrite</label>
+                                <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
                               <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -3794,6 +3795,7 @@
                             <object class="sizeritem">
                               <object class="wxButton" name="btnPageListIntersectWithClipboard">
                                 <label>Intersect</label>
+                                <style>wxBU_EXACTFIT</style>
                               </object>
                               <option>0</option>
                               <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -3848,11 +3850,11 @@
                         <object class="sizeritem">
                           <object class="wxButton" name="btnResultCopyToClipboard">
                             <label>Copy</label>
+                            <style>wxBU_EXACTFIT</style>
                           </object>
                           <option>0</option>
                           <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
                           <border>5</border>
-                          <minsize>40,-1</minsize>
                         </object>
                       </object>
                       <option>0</option>

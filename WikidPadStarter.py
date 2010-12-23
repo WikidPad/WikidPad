@@ -60,6 +60,13 @@ def _putPathPrepends():
         except ConfigParser.NoSectionError:
             pass
 
+        try:
+            for opt, val in parser.items("sysPathAppend"):
+                sys.path.append(os.path.join(os.path.dirname(
+                        os.path.abspath(sys.argv[0])), val))
+        except ConfigParser.NoSectionError:
+            pass
+
     except IOError:
         pass  # Probably file not present
 
