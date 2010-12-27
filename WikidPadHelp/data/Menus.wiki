@@ -3,6 +3,7 @@
 [Menu Wiki]
 [Menu Edit]
 [Menu View]
+[Menu Tabs]
 [Menu Wiki Page]
 [Menu Format]
 [Menu Navigate]

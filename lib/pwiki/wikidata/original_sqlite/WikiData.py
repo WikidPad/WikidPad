@@ -1078,7 +1078,6 @@ class WikiData:
 
                     self.connWrap.execSql("delete from wikiwords "
                             "where filepath = ?", (path,))
-                    self.commitNeeded = True
 
             # Add new words:
             ti = time()

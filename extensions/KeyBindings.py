@@ -44,6 +44,7 @@ UpHistory="Ctrl-Alt-Up"
 DownHistory="Ctrl-Alt-Down"
 GoBack="Alt-Left"
 GoForward="Alt-Right"
+GoUpwardFromSubpage=""
 if wx.Platform == "__WXMAC__":
     GoHome="Ctrl-Shift-H"
     StartIncrementalSearch="Alt-Shift-F"

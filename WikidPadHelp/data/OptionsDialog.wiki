@@ -453,6 +453,9 @@ If you have very long wiki page names and therefore very broad tabs you can rest
 *Template page names reg. exp.*
 Enter here a regular expression which must match for a page name to be listed as a template in the "Use Template" submenu. See [Templates#+++ Using templates explicitly].
 
+*Allow index search*
+Control if indexed search should be possible. See [SearchingTheWiki/Index].
+
 *Force ScratchPad visibility in tree*
 Shows the special page ScratchPad always as child of the tree root, even if it is not really a child.
 

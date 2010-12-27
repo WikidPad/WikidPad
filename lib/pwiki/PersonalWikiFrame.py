@@ -1737,6 +1737,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     forceTreeSyncFromRoot=True),
                 "tb_home")
 
+
+        self.addMenuItem(navigateMenu, _(u'Up&ward') + u'\t' + 
+                self.keyBindings.GoUpwardFromSubpage,
+                _(u'Go upward from a subpage'), self._OnEventToCurrentDocPPresenter,
+                "tb_up", menuID=GUI_ID.CMD_PAGE_GO_UPWARD_FROM_SUBPAGE)
+
         navigateMenu.AppendSeparator()
 
         self.addMenuItem(navigateMenu, _(u'Go to &Page...') + u'\t' +
@@ -1997,6 +2003,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         tb.AddSimpleTool(tbID, icon, _(u"Find current word in tree"),
                 _(u"Find current word in tree"))
         wx.EVT_TOOL(self, tbID, lambda evt: self.findCurrentWordInTree())
+
+        icon = self.lookupSystemIcon("tb_up")
+        tbID = GUI_ID.CMD_PAGE_GO_UPWARD_FROM_SUBPAGE
+        tb.AddSimpleTool(tbID, icon, _(u"Go upward from a subpage"),
+                _(u"Go upward from a subpage"))
+        wx.EVT_TOOL(self, tbID, self._OnEventToCurrentDocPPresenter)
 
         tb.AddSimpleTool(wx.NewId(), seperator, _(u"Separator"), _(u"Separator"))
 

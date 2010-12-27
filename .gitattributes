@@ -307,6 +307,7 @@ WikidPadHelp/data/SEARCH_VIEWS.grl -text
 WikidPadHelp/data/SETTINGS.grl -text
 WikidPadHelp/data/ScratchPad.wiki -text
 WikidPadHelp/data/SearchingTheWiki%2FBooleanRegex.wiki -text
+WikidPadHelp/data/SearchingTheWiki%2FIndex.wiki -text
 WikidPadHelp/data/SearchingTheWiki.wiki -text
 WikidPadHelp/data/ShortHintAttribute.wiki -text
 WikidPadHelp/data/SpellChecking.wiki -text
@@ -575,6 +576,7 @@ icons/tb_rename.gif -text
 icons/tb_save.gif -text
 icons/tb_seperator.gif -text
 icons/tb_switch[!!-~]ed[!!-~]prev.gif -text
+icons/tb_up.gif -text
 icons/tb_wikize.gif -text
 icons/tb_zoomin.gif -text
 icons/tb_zoomout.gif -text

@@ -1,6 +1,24 @@
 ﻿++ Change Log
 
 
+Dec. 27, 2010 (2.1rc10)
+
+Creators of derived WikidPad parsers should merge changes from
+official parser
+
+    * Basic support for indexed search. See [SearchingTheWiki/Index]
+    * Menu item and toolbar icon to move up from subpage to
+      its superpage. See [Menu Navigate#++ Upward]
+
+    * Bug fixed: Stack overflow for too deeply nested wikis on
+      tree-sorted print/export
+    * Bug fixed: Deprecated os.popen...() functions used
+
+    * Internal: Layout changes to better support
+      internationalization
+
+
+
 Dec. 05, 2010 (2.1beta09)
 
 Creators of derived WikidPad parsers should merge changes from

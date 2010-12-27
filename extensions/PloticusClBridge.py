@@ -1,5 +1,5 @@
 import os, os.path
-from subprocess import list2cmdline
+import subprocess
 
 import wx
 
@@ -121,17 +121,22 @@ class PltHandler:
         # Store token content in a temporary file
         srcfilepath = createTempFile(bstr, ".plt")
         try:
-            cmdline = list2cmdline((self.extAppExe, "-dir", baseDir,
+            cmdline = subprocess.list2cmdline((self.extAppExe, "-dir", baseDir,
                     srcfilepath, self.outputParameter, "-o", dstFullPath))
 
             # Run external application
-            childIn, childOut, childErr = os.popen3(cmdline, "b")
+#             childIn, childOut, childErr = os.popen3(cmdline, "b")
+            popenObject = subprocess.Popen(cmdline, shell=True,
+                    stderr=subprocess.PIPE)
+            childErr = popenObject.stderr
             
             if u"noerror" in [a.strip() for a in insToken.appendices]:
                 childErr.read()
                 errResponse = ""
             else:
                 errResponse = childErr.read()
+            
+            childErr.close()
         finally:
             os.unlink(srcfilepath)
             

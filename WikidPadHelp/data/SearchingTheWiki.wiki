@@ -60,6 +60,9 @@ Some operations are not available in boolean regex mode, especially replacing of
 *As is*
 All characters are taken as they are.
 
+*Index*
+Search on a prebuilt index. See [/Index].
+
 *Case sensitive, Whole word*
 Choose here if case matters for the search pattern and/or if only whole words should be searched for
 

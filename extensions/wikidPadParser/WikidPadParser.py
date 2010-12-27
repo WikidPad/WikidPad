@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2010-11-29
+# Last modified (format YYYY-MM-DD): 2010-12-25
 
 
 import locale, pprint, time, sys, string, traceback
@@ -1364,7 +1364,8 @@ class WikiLanguageDetails(object):
 
 class _WikiLinkPath(object):
     __slots__ = ("upwardCount", "components")
-    def __init__(self, link=None, pageName=None):
+    def __init__(self, link=None, pageName=None, upwardCount=-1,
+            components=None):
         assert (link is None) or (pageName is None)
 
         if pageName is not None:
@@ -1374,8 +1375,11 @@ class _WikiLinkPath(object):
             return
 
         if link is None:
-            self.upwardCount = -1
-            self.components = []
+            if components is None:
+                components = []
+
+            self.upwardCount = upwardCount
+            self.components = components
             return
 
         if link.startswith("//"):
@@ -1396,7 +1400,7 @@ class _WikiLinkPath(object):
                 self.components = comps[i:]
                 return
         
-        self.upwardCount = len(comps) + 1
+        self.upwardCount = len(comps)
         self.components = []
         
     def clone(self):
@@ -1412,10 +1416,11 @@ class _WikiLinkPath(object):
     def join(self, otherPath):
         if otherPath.upwardCount == -1:
             self.upwardCount = -1
-            self.components = other.components[:]
+            self.components = otherPath.components[:]
             return
 
-        self.components = self.components[:-other.upwardCount] + other.components
+        self.components = self.components[:-otherPath.upwardCount] + \
+                otherPath.components
 
 
     def getLinkCore(self):
@@ -1670,35 +1675,6 @@ class _TheHelper(object):
 
 
 
-#         def lenAddOne(s):
-#             return len(s) + 1 if s != "" else 0
-#     
-#         if link.startswith(u"//"):
-#             # Absolute link
-#             return u"//", 0, link[2:]
-#     
-#     
-#         basePath = basePage.getWikiWord().split(u"/")
-#         linkPath = link.split(u"/")
-#     
-#         if len(linkPath[0]) == 0:
-#             # Preceding '/' -> Go downward one level (or more)
-#             return u"/", len(basePage.getWikiWord()) + 1, u"/".join(basePath + linkPath[1:])
-#     
-#         for i in xrange(0, len(linkPath)):
-#             if linkPath[i] != "..":
-#                 if i == 0:
-#                     return u"", lenAddOne(u"/".join(basePath[:-1])), \
-#                             u"/".join(basePath[:-1] + linkPath)
-#                 else:
-#                     return u"/".join([u".."] * i) + u"/", \
-#                             lenAddOne(u"/".join(basePath[:-i-1])), \
-#                             u"/".join(basePath[:-i-1] + linkPath[i:])
-#         
-#         # link path only consists of ".." -> autocompletion not possible
-#         return None, None, u"/".join(basePath[:-len(linkPath)])
-
-
     @staticmethod
     def parseTodoValue(todoValue, wikiDocument=None):
         """
@@ -1771,9 +1747,9 @@ class _TheHelper(object):
                 for w in words if w != u""]
 
 
-#     @staticmethod
-#     def createWikiLinkPathObject(self, *args, **kwargs):
-#         return _WikiLinkPath(*args, **kwargs)
+    @staticmethod
+    def createWikiLinkPathObject(*args, **kwargs):
+        return _WikiLinkPath(*args, **kwargs)
 
 
     @staticmethod

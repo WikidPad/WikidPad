@@ -56,23 +56,23 @@ Name: Program_files; Description: Main program files; Flags: fixed; Types: custo
 [Setup]
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 2.1beta08_1
+AppVerName=WikidPad 2.1beta10
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=002.001.108.001
-VersionInfoTextVersion=WikidPad 2.1beta08_1
+VersionInfoVersion=002.001.110.000
+VersionInfoTextVersion=WikidPad 2.1beta10
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-2.1beta08_1
+OutputBaseFilename=WikidPad-2.1beta10
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2010 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
 PrivilegesRequired=none
 [INI]
-Filename: {app}\binInst.ini; Section: Main; Key: CurrVersion; String: 002.001.108.001; Flags: createkeyifdoesntexist uninsdeleteentry uninsdeletesectionifempty
+Filename: {app}\binInst.ini; Section: Main; Key: CurrVersion; String: 002.001.110.000; Flags: createkeyifdoesntexist uninsdeleteentry uninsdeletesectionifempty
 Filename: {app}\binInst.ini; Section: Main; Key: wxVersion; String: 002.008.010.001; Flags: createkeyifdoesntexist uninsdeleteentry uninsdeletesectionifempty
 [Icons]
 Name: {code:IconDest|Dummy}\WikidPad; Filename: {app}\WikidPad.exe; IconFilename: {app}\icons\pwiki.ico; Components: Program_files; IconIndex: 0

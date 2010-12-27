@@ -1,0 +1,111 @@
+﻿++ Searching The Wiki/Index
+
+The "Index" search mode in wiki-wide search works on a prebuilt index which is automatically updated when a page is changed.
+
++++ Enabling the index
+
+By default indexing is disabled. To enable it for a wiki, open the [//OptionsDialog], go to options page "Current Wiki" and check "Allow index search". After closing the dialog, WikidPad begins to index the wiki in the background. During this you can already search the index but it will be incomplete.
+
+If you want to ensure that indexing is finished, go to menu entry "Wiki"->"Maintenance"->"Show job count" and wait until the count in the shown dialog went to 0.
+
+If you later disable the index the index will be deleted and must be rebuild again completely if you want it back.
+
+Index information is stored in a directory "indexsearch" inside the wiki directory.
+
++++ General remarks
+
+At the moment the index search has some drawbacks:
+
+    * The result list always shows the beginning of the pages and not the place where the keyword(s) was/were found
+    * It doesn't work with Chinese, Japanese or other languages which don't use spaces to separate individual words
+    * It doesn't support stemming (finding "houses" when searching for "house")
+    * It doesn't support stop words (ignoring words so common that searching for them is useless, e.g. "the", "it", "an")
+
++++ Search syntax for index search
+
+The index search uses the whoosh library (https://bitbucket.org/mchaput/whoosh/wiki/Home) and at the moment its default search syntax which is slightly different from the one for [BooleanRegex] searches.
+
+The remaining chapter contains the relevant parts of http://packages.python.org/Whoosh/querylang.html which describe the language (it is recommended to read that in preview mode):
+
+++++ Individual terms and phrases
+
+Find documents containing the term render:
+<<pre
+render
+>>
+
+Find documents containing the phrase all was well:
+<<pre
+"all was well"
+>>
+
+++++ Boolean operators
+
+Find documents containing render and shading:
+<<pre
+render AND shading
+>>
+
+Note that AND is the default relation between terms, so this is the same as:
+<<pre
+render shading
+>>
+
+Find documents containing render, and also shading or modeling (or both):
+<<pre
+render AND shading OR modeling
+>>
+
+Find documents containing render but not modeling:
+<<pre
+render NOT modeling
+>>
+
+Find documents containing alpha but not either beta or gamma:
+<<pre
+alpha NOT (beta OR gamma)
+>>
+
+Group operators together with parentheses. For example to find documents that contain both render and shading, or contain modeling:
+<<pre
+(render AND shading) OR modeling
+>>
+
+++++ Inexact terms
+
+Use “globs” (wildcard expressions using ? to represent a single character and * to represent any number of characters) to match terms:
+<<pre
+te?t test* *b?g*``
+>>
+
+Note that a wildcard starting with ? or * is very slow. Note also that these wildcards only match individual terms. For example, the query:
+<<pre
+my*life
+>>
+will not match an indexed phrase like:
+<<pre
+my so called life
+>>
+because those are four separate terms.
+
+++++ Boosting query elements
+
+You can specify that certain parts of a query are more important for calculating the score of a matched document than others. For example, to specify that ninja is twice as important as other words, and bear is half as important:
+<<pre
+ninja^2 cowboy bear^0.5
+>>
+
+You can apply a boost to several terms using grouping parentheses:
+<<pre
+(open sesame)^2.5 roc
+>>
+
+Making a term from literal text
+
+If you need to include characters in a term that are normally treated specially by the parser, such as spaces, colons, or brackets, you can enclose the term in single quotes:
+<<pre
+'term with spaces'
+'function()'
+>>
+
+

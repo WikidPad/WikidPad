@@ -6,8 +6,11 @@ Move backward in the history of visited pages for this tab.
 ++ Forward
 Move forward in the history of visited pages for this tab.
 
-++ Home
+++ Wiki Home
 Go to the wiki root word (the word with the same name as the whole wiki).
+
+++ Upward
+If current tab shows a [Subpage] this opens the superpage, e.g. from [SearchingTheWiki/BooleanRegex] it moves to [SearchingTheWiki].
 
 ++ Go to Page
 Opens dialog to open a particular page. This dialog also allows to open or delete multiple pages. If you enter a non-existing page name you can also create a new page there.

@@ -27,3 +27,5 @@ At the moment the attributes "alias" and "template" expect wiki links as well as
 
 E.g. on page "ebay/Couch" you have to write <<[alias: "Chaise"]>> to create alias "ebay/Chaise".
 
+
+[alias: Subpage]

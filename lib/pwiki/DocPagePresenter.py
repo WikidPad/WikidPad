@@ -375,6 +375,8 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
                 lambda evt: self.pageHistory.goInHistory(-1))
         wx.EVT_MENU(self, GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD,
                 lambda evt: self.pageHistory.goInHistory(1))
+        wx.EVT_MENU(self, GUI_ID.CMD_PAGE_GO_UPWARD_FROM_SUBPAGE,
+                lambda evt: self.goUpwardFromSubpage())
 
 
     def close(self):
@@ -470,6 +472,28 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
             self.pageHistory.goInHistory(dlg.GetSelection() - (histpos - 1))
 
         dlg.Destroy()
+
+
+    def goUpwardFromSubpage(self):
+        wikiWord = self.getWikiWord()
+        if wikiWord is None:
+            return
+
+        langHelper = wx.GetApp().createWikiLanguageHelper(
+                self.getWikiDocument().getWikiDefaultWikiLanguage())
+
+        wikiPath = langHelper.createWikiLinkPathObject(pageName=wikiWord)
+        wikiPath.join(langHelper.createWikiLinkPathObject(upwardCount=1))
+        
+        upwardPageName = wikiPath.resolveWikiWord(None)
+        
+        if not upwardPageName or wikiWord == upwardPageName:
+            # No way upward
+            # TODO: Maybe alternative reaction?
+            return
+
+        # motion type "parent" isn't exactly right but a good guess
+        self.openWikiPage(upwardPageName, motionType="parent")
 
 
     def getTabContextMenu(self):

@@ -2018,16 +2018,21 @@ class WikiDataManager(MiscEventSourceMixin):
         else:
             if strToBool(miscevt.get("old config settings")["indexSearch_enabled"]):
                 # Index search was switched off
-                # Remove it
-                self.removeSearchIndex()
 
-                # Check for wiki pages with wrong metadata state
+                # Check for wiki pages with wrong metadata state and adjust
                 # TODO: Faster?
-                finalState = self.getFinalMetaDataState()
-                for wikiWord in self.getWikiData().getWikiWordsForMetaDataState(
-                        finalState, "<"):
-                    self.getWikiData().setMetaDataState(wikiWord, finalState)
+                wikiData = self.getWikiData()
 
+                wikiData.commit()
+                finalState = self.getFinalMetaDataState()
+                
+                for wikiWord in wikiData.getWikiWordsForMetaDataState(
+                        finalState, "<"):
+                    wikiData.setMetaDataState(wikiWord, finalState)
+                wikiData.commit()
+
+                # Remove index
+                self.removeSearchIndex()
 
 
 
