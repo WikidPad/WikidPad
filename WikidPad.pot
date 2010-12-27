@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2010-12-05 12:18\n"
+"POT-Creation-Date: 2010-12-26 22:20\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1284,10 +1284,10 @@ msgstr ""
 msgid "second(s)"
 msgstr ""
 
-#: WikidPad.xrc:0 extensions\GraphvizStructureView.py:667
-#: extensions\GraphvizStructureView.py:691
-#: extensions\GraphvizStructureView.py:704
-#: extensions\GraphvizStructureView.py:717
+#: WikidPad.xrc:0 extensions\GraphvizStructureView.py:672
+#: extensions\GraphvizStructureView.py:696
+#: extensions\GraphvizStructureView.py:709
+#: extensions\GraphvizStructureView.py:722
 msgid "..."
 msgstr ""
 
@@ -1403,16 +1403,16 @@ msgstr ""
 msgid "Sort dates ascending"
 msgstr ""
 
-#: WikidPadStarter.py:182
+#: WikidPadStarter.py:189
 msgid "Error starting WikidPad"
 msgstr ""
 
-#: WikidPadStarter.py:183 lib\pwiki\SearchAndReplaceDialogs.py:691
+#: WikidPadStarter.py:190 lib\pwiki\SearchAndReplaceDialogs.py:691
 #: lib\pwiki\SearchAndReplaceDialogs.py:971
 msgid "Error!"
 msgstr ""
 
-#: WikidPadStarter.py:190
+#: WikidPadStarter.py:197
 msgid "Error"
 msgstr ""
 
@@ -1420,11 +1420,11 @@ msgstr ""
 msgid "[Please set path to Gnuplot executable]"
 msgstr ""
 
-#: extensions\GnuplotClBridge.py:129
+#: extensions\GnuplotClBridge.py:134
 msgid "[Gnuplot error: %s]"
 msgstr ""
 
-#: extensions\GnuplotClBridge.py:180
+#: extensions\GnuplotClBridge.py:185
 msgid "Path to Gnuplot:"
 msgstr ""
 
@@ -1432,82 +1432,82 @@ msgstr ""
 msgid "[Please set path to GraphViz executables]"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:137
+#: extensions\GraphvizClBridge.py:142
 msgid "[%s Error: %s]"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:238
+#: extensions\GraphvizClBridge.py:243
 msgid "Directory of executables:"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:242
+#: extensions\GraphvizClBridge.py:247
 msgid "Name of dot executable:"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:246
+#: extensions\GraphvizClBridge.py:251
 msgid "Name of neato executable:"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:250
+#: extensions\GraphvizClBridge.py:255
 msgid "Name of twopi executable:"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:254
+#: extensions\GraphvizClBridge.py:259
 msgid "Name of circo executable:"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:258
+#: extensions\GraphvizClBridge.py:263
 msgid "Name of fdp executable:"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:355
+#: extensions\GraphvizStructureView.py:360
 msgid "%s Error: %s"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:421
-#: extensions\GraphvizStructureView.py:422
+#: extensions\GraphvizStructureView.py:426
+#: extensions\GraphvizStructureView.py:427
 msgid "Show relation graph"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:424
+#: extensions\GraphvizStructureView.py:429
 msgid "Show rel. graph source"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:426
+#: extensions\GraphvizStructureView.py:431
 msgid "Show relation graph source"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:428
-#: extensions\GraphvizStructureView.py:429
+#: extensions\GraphvizStructureView.py:433
+#: extensions\GraphvizStructureView.py:434
 msgid "Show child graph"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:431
-#: extensions\GraphvizStructureView.py:433
+#: extensions\GraphvizStructureView.py:436
+#: extensions\GraphvizStructureView.py:438
 msgid "Show child graph source"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:650
+#: extensions\GraphvizStructureView.py:655
 msgid "  GraphVizStructure"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:670
+#: extensions\GraphvizStructureView.py:675
 msgid "Node font name:"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:682
+#: extensions\GraphvizStructureView.py:687
 msgid "Node font size:"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:694
+#: extensions\GraphvizStructureView.py:699
 msgid "Node border color:"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:707
+#: extensions\GraphvizStructureView.py:712
 msgid "Node background color:"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:720
+#: extensions\GraphvizStructureView.py:725
 msgid "Edge color:"
 msgstr ""
 
@@ -1515,11 +1515,11 @@ msgstr ""
 msgid "[Please set path to MimeTeX executable]"
 msgstr ""
 
-#: extensions\MimeTexCGIBridge.py:111
+#: extensions\MimeTexCGIBridge.py:117
 msgid "[Invalid response from MimeTeX]"
 msgstr ""
 
-#: extensions\MimeTexCGIBridge.py:172
+#: extensions\MimeTexCGIBridge.py:178
 msgid "Path to MimeTeX:"
 msgstr ""
 
@@ -1527,15 +1527,15 @@ msgstr ""
 msgid "[Please set path to Ploticus executable]"
 msgstr ""
 
-#: extensions\PloticusClBridge.py:140
+#: extensions\PloticusClBridge.py:145
 msgid "[Ploticus error: %s]"
 msgstr ""
 
-#: extensions\PloticusClBridge.py:200
+#: extensions\PloticusClBridge.py:205
 msgid "Path to Ploticus:"
 msgstr ""
 
-#: extensions\PloticusClBridge.py:206
+#: extensions\PloticusClBridge.py:211
 msgid "Output format:"
 msgstr ""
 
@@ -1861,6 +1861,7 @@ msgid "\n"
 "            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>Translations:</b></font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Chinese:</b></font></td><td nowrap><font size=\"3\">yuxiaoxu@msn.com</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Hungarian:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Russian:</b></font></td><td nowrap><font size=\"3\">Oleg Domanov</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Swedish:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
 "        </table>\n"
 "    </center>\n"
@@ -1876,36 +1877,36 @@ msgid "\n"
 "</html>\n"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1988 lib\pwiki\PersonalWikiFrame.py:1931
+#: lib\pwiki\AdditionalDialogs.py:1989 lib\pwiki\PersonalWikiFrame.py:1931
 msgid "About WikidPad"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1992 lib\pwiki\AdditionalDialogs.py:2098
-#: lib\pwiki\AdditionalDialogs.py:2106
+#: lib\pwiki\AdditionalDialogs.py:1993 lib\pwiki\AdditionalDialogs.py:2099
+#: lib\pwiki\AdditionalDialogs.py:2107
 msgid "N/A"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2002
+#: lib\pwiki\AdditionalDialogs.py:2003
 msgid "Okay"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2088
+#: lib\pwiki\AdditionalDialogs.py:2089
 msgid "Wiki Properties"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2096
+#: lib\pwiki\AdditionalDialogs.py:2097
 msgid "Wiki database backend:"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2104
+#: lib\pwiki\AdditionalDialogs.py:2105
 msgid "Number of wiki pages:"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2122
+#: lib\pwiki\AdditionalDialogs.py:2123
 msgid "Jobs"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2139
+#: lib\pwiki\AdditionalDialogs.py:2140
 msgid "Number of Jobs:"
 msgstr ""
 
@@ -1957,35 +1958,35 @@ msgstr ""
 msgid "History"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:1923
+#: lib\pwiki\DocPages.py:1976
 msgid "Func. tag %s does not exist"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2186
+#: lib\pwiki\DocPages.py:2239
 msgid "Global text blocks"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2187
+#: lib\pwiki\DocPages.py:2240
 msgid "Wiki text blocks"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2188
+#: lib\pwiki\DocPages.py:2241
 msgid "Global spell list"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2189
+#: lib\pwiki\DocPages.py:2242
 msgid "Wiki spell list"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2190
+#: lib\pwiki\DocPages.py:2243
 msgid "Global cc. blacklist"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2191
+#: lib\pwiki\DocPages.py:2244
 msgid "Wiki cc. blacklist"
 msgstr ""
 
-#: lib\pwiki\DocPages.py:2192
+#: lib\pwiki\DocPages.py:2245
 msgid "Favorite wikis"
 msgstr ""
 

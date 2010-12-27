@@ -1,5 +1,5 @@
 import os, urllib, os.path
-from subprocess import list2cmdline
+import subprocess
 
 import wx
 
@@ -96,14 +96,20 @@ class EqnHandler:
         # variable
         os.environ["QUERY_STRING"] = bstr
 
-        cmdline = list2cmdline((self.extAppExe,))
+        cmdline = subprocess.list2cmdline((self.extAppExe,))
+
+#         childIn, childOut = os.popen2(cmdline, "b")
 
         # Run MimeTeX process
-        childIn, childOut = os.popen2(cmdline, "b")
+        popenObject = subprocess.Popen(cmdline, shell=True,
+                stdout=subprocess.PIPE)
+        childOut = popenObject.stdout
 
         # Read stdout of process entirely
         response = childOut.read()
-
+        
+        childOut.close()
+        
         # Cut off HTTP header (may need changes for non-Windows OS)
         try:
             response = response[(response.index("\n\n") + 2):]

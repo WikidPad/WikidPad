@@ -1969,6 +1969,7 @@ What makes wikidPad different from other notepad applications is the ease with w
             <tr><td width="30%%" align="left" colspan="2" nowrap><font size="3"><b>Translations:</b></font></td></tr>
             <tr><td width="30%%" align="right"><font size="3"><b>Chinese:</b></font></td><td nowrap><font size="3">yuxiaoxu@msn.com</font></td></tr>
             <tr><td width="30%%" align="right"><font size="3"><b>Hungarian:</b></font></td><td nowrap><font size="3">Török Árpád</font></td></tr>
+            <tr><td width="30%%" align="right"><font size="3"><b>Russian:</b></font></td><td nowrap><font size="3">Oleg Domanov</font></td></tr>
             <tr><td width="30%%" align="right"><font size="3"><b>Swedish:</b></font></td><td nowrap><font size="3">Stefan Berg</font></td></tr>
         </table>
     </center>

@@ -1,6 +1,17 @@
 ﻿++ Change Log
 
 
+Dec. 27, 2010 (2.0rc10)
+
+    * Bug fixed: Stack overflow for too deeply nested wikis on
+      tree-sorted print/export
+    * Bug fixed: Deprecated os.popen...() functions used
+
+    * Internal: Layout changes to better support
+      internationalization
+
+
+
 Dec. 05, 2010 (2.0rc09)
 
     * Bug fixed: Empty line after table was eaten in HTML export

@@ -5,7 +5,7 @@
 
 
 import os, os.path, re
-from subprocess import list2cmdline
+import subprocess
 
 import wx
 
@@ -335,17 +335,22 @@ class GraphVizBaseHandler:
         # Store token content in a temporary file
         srcfilepath = createTempFile(source, ".dot")
         try:
-            cmdline = list2cmdline((self.extAppExe, "-Tpng", "-o" + dstFullPath,
+            cmdline = subprocess.list2cmdline((self.extAppExe, "-Tpng", "-o" + dstFullPath,
                     srcfilepath))
 
             # Run external application
-            childIn, childOut, childErr = os.popen3(cmdline, "b")
+#             childIn, childOut, childErr = os.popen3(cmdline, "b")
+            popenObject = subprocess.Popen(cmdline, shell=True,
+                    stderr=subprocess.PIPE)
+            childErr = popenObject.stderr
 
             if u"noerror" in [a.strip() for a in insParams]:
                 childErr.read()
                 errResponse = None
             else:
                 errResponse = childErr.read()
+            
+            childErr.close()
         finally:
             os.unlink(srcfilepath)
 
