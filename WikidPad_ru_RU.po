@@ -1,3 +1,4 @@
+# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR ORGANIZATION
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
@@ -5,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2010-12-05 12:18\n"
-"PO-Revision-Date: 2010-12-08 16:16+0600\n"
+"PO-Revision-Date: 2010-12-28 19:48+0600\n"
 "Last-Translator: Oleg Domanov\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1286,10 +1287,10 @@ msgid "second(s)"
 msgstr "(секунды)"
 
 #: WikidPad.xrc:0
-#: extensions\GraphvizStructureView.py:667
-#: extensions\GraphvizStructureView.py:691
-#: extensions\GraphvizStructureView.py:704
-#: extensions\GraphvizStructureView.py:717
+#: extensions\GraphvizStructureView.py:672
+#: extensions\GraphvizStructureView.py:696
+#: extensions\GraphvizStructureView.py:709
+#: extensions\GraphvizStructureView.py:722
 msgid "..."
 msgstr "..."
 
@@ -1430,17 +1431,17 @@ msgstr "Показать пустые дни"
 msgid "Sort dates ascending"
 msgstr "Сортировать даты по возрастанию"
 
-#: WikidPadStarter.py:182
+#: WikidPadStarter.py:189
 msgid "Error starting WikidPad"
 msgstr "Ошибка при старте WikidPad"
 
-#: WikidPadStarter.py:183
+#: WikidPadStarter.py:190
 #: lib\pwiki\SearchAndReplaceDialogs.py:691
 #: lib\pwiki\SearchAndReplaceDialogs.py:971
 msgid "Error!"
 msgstr "Ошибка!"
 
-#: WikidPadStarter.py:190
+#: WikidPadStarter.py:197
 msgid "Error"
 msgstr "Ошибка"
 
@@ -1448,11 +1449,11 @@ msgstr "Ошибка"
 msgid "[Please set path to Gnuplot executable]"
 msgstr "[Пожалуйста, укажите путь к программе Gnuplot]"
 
-#: extensions\GnuplotClBridge.py:129
+#: extensions\GnuplotClBridge.py:134
 msgid "[Gnuplot error: %s]"
 msgstr "[Ошибка Gnuplot: %s]"
 
-#: extensions\GnuplotClBridge.py:180
+#: extensions\GnuplotClBridge.py:185
 msgid "Path to Gnuplot:"
 msgstr "Путь к Gnuplot:"
 
@@ -1460,82 +1461,82 @@ msgstr "Путь к Gnuplot:"
 msgid "[Please set path to GraphViz executables]"
 msgstr "[Пожалуйста, укажите путь к программам GraphViz]"
 
-#: extensions\GraphvizClBridge.py:137
+#: extensions\GraphvizClBridge.py:142
 msgid "[%s Error: %s]"
 msgstr "[%s Ошибка: %s]"
 
-#: extensions\GraphvizClBridge.py:238
+#: extensions\GraphvizClBridge.py:243
 msgid "Directory of executables:"
 msgstr "Папка программ:"
 
-#: extensions\GraphvizClBridge.py:242
+#: extensions\GraphvizClBridge.py:247
 msgid "Name of dot executable:"
 msgstr "Имя программы dot:"
 
-#: extensions\GraphvizClBridge.py:246
+#: extensions\GraphvizClBridge.py:251
 msgid "Name of neato executable:"
 msgstr "Имя программы neato:"
 
-#: extensions\GraphvizClBridge.py:250
+#: extensions\GraphvizClBridge.py:255
 msgid "Name of twopi executable:"
 msgstr "Имя программы twopi:"
 
-#: extensions\GraphvizClBridge.py:254
+#: extensions\GraphvizClBridge.py:259
 msgid "Name of circo executable:"
 msgstr "Имя программы circo:"
 
-#: extensions\GraphvizClBridge.py:258
+#: extensions\GraphvizClBridge.py:263
 msgid "Name of fdp executable:"
 msgstr "Имя программы fdp:"
 
-#: extensions\GraphvizStructureView.py:355
+#: extensions\GraphvizStructureView.py:360
 msgid "%s Error: %s"
 msgstr "%s Ошибка: %s"
 
-#: extensions\GraphvizStructureView.py:421
-#: extensions\GraphvizStructureView.py:422
+#: extensions\GraphvizStructureView.py:426
+#: extensions\GraphvizStructureView.py:427
 msgid "Show relation graph"
 msgstr "Граф отношений"
 
-#: extensions\GraphvizStructureView.py:424
+#: extensions\GraphvizStructureView.py:429
 msgid "Show rel. graph source"
 msgstr "Скрипт графа отношений"
 
-#: extensions\GraphvizStructureView.py:426
+#: extensions\GraphvizStructureView.py:431
 msgid "Show relation graph source"
 msgstr "Показать скрипт для создания графа отношений"
 
-#: extensions\GraphvizStructureView.py:428
-#: extensions\GraphvizStructureView.py:429
+#: extensions\GraphvizStructureView.py:433
+#: extensions\GraphvizStructureView.py:434
 msgid "Show child graph"
 msgstr "Граф потомков"
 
-#: extensions\GraphvizStructureView.py:431
-#: extensions\GraphvizStructureView.py:433
+#: extensions\GraphvizStructureView.py:436
+#: extensions\GraphvizStructureView.py:438
 msgid "Show child graph source"
 msgstr "Скрипт графа потомков"
 
-#: extensions\GraphvizStructureView.py:650
+#: extensions\GraphvizStructureView.py:655
 msgid "  GraphVizStructure"
 msgstr "  GraphVizStructure"
 
-#: extensions\GraphvizStructureView.py:670
+#: extensions\GraphvizStructureView.py:675
 msgid "Node font name:"
 msgstr "Шрифт узла"
 
-#: extensions\GraphvizStructureView.py:682
+#: extensions\GraphvizStructureView.py:687
 msgid "Node font size:"
 msgstr "Размер шрифта узла:"
 
-#: extensions\GraphvizStructureView.py:694
+#: extensions\GraphvizStructureView.py:699
 msgid "Node border color:"
 msgstr "Цвет рамки узла:"
 
-#: extensions\GraphvizStructureView.py:707
+#: extensions\GraphvizStructureView.py:712
 msgid "Node background color:"
 msgstr "Цвет фона узла:"
 
-#: extensions\GraphvizStructureView.py:720
+#: extensions\GraphvizStructureView.py:725
 msgid "Edge color:"
 msgstr "Цвет границы:"
 
@@ -1543,11 +1544,11 @@ msgstr "Цвет границы:"
 msgid "[Please set path to MimeTeX executable]"
 msgstr "[Пожалуйста, укажите путь к программам MimeTeX]"
 
-#: extensions\MimeTexCGIBridge.py:111
+#: extensions\MimeTexCGIBridge.py:117
 msgid "[Invalid response from MimeTeX]"
 msgstr "[Неверный ответ MimeTeX]"
 
-#: extensions\MimeTexCGIBridge.py:172
+#: extensions\MimeTexCGIBridge.py:178
 msgid "Path to MimeTeX:"
 msgstr "Путь к MimeTeX:"
 
@@ -1555,15 +1556,15 @@ msgstr "Путь к MimeTeX:"
 msgid "[Please set path to Ploticus executable]"
 msgstr "[Пожалуйста, укажите путь к программе Ploticus]"
 
-#: extensions\PloticusClBridge.py:140
+#: extensions\PloticusClBridge.py:145
 msgid "[Ploticus error: %s]"
 msgstr "[Ошибка Ploticus: %s]"
 
-#: extensions\PloticusClBridge.py:200
+#: extensions\PloticusClBridge.py:205
 msgid "Path to Ploticus:"
 msgstr "Путь к Ploticus:"
 
-#: extensions\PloticusClBridge.py:206
+#: extensions\PloticusClBridge.py:211
 msgid "Output format:"
 msgstr "Формат вывода:"
 
@@ -1988,6 +1989,7 @@ msgid ""
 "            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>Translations:</b></font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Chinese:</b></font></td><td nowrap><font size=\"3\">yuxiaoxu@msn.com</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Hungarian:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Russian:</b></font></td><td nowrap><font size=\"3\">Oleg Domanov</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Swedish:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
 "        </table>\n"
 "    </center>\n"
@@ -2002,7 +2004,7 @@ msgid ""
 "</body>\n"
 "</html>\n"
 msgstr ""
-"u\n"
+"\n"
 "<html>\n"
 "<body bgcolor=\"#FFFFFF\">\n"
 "    <center>\n"
@@ -2030,19 +2032,13 @@ msgstr ""
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Email:</b></font></td><td nowrap><font size=\"3\">gerhard.reitmayr@gmail.com</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
-"            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>Переводы:</b></font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>Translations:</b></font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Венгерский:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Китайский:</b></font></td><td nowrap><font size=\"3\">yuxiaoxu@msn.com</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Русский:</b></font></td><td nowrap><font size=\"3\">Олег Доманов</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Шведский:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
-"\n"
-"\n"
-"\n"
 "        </table>\n"
 "    </center>\n"
-"    \n"
-"    \n"
-"\n"
 "    \n"
 "    <hr />\n"
 "    \n"
@@ -2054,38 +2050,38 @@ msgstr ""
 "</body>\n"
 "</html>\n"
 
-#: lib\pwiki\AdditionalDialogs.py:1988
+#: lib\pwiki\AdditionalDialogs.py:1989
 #: lib\pwiki\PersonalWikiFrame.py:1931
 msgid "About WikidPad"
 msgstr "О программе WikidPad"
 
-#: lib\pwiki\AdditionalDialogs.py:1992
-#: lib\pwiki\AdditionalDialogs.py:2098
-#: lib\pwiki\AdditionalDialogs.py:2106
+#: lib\pwiki\AdditionalDialogs.py:1993
+#: lib\pwiki\AdditionalDialogs.py:2099
+#: lib\pwiki\AdditionalDialogs.py:2107
 msgid "N/A"
 msgstr "Нет данных"
 
-#: lib\pwiki\AdditionalDialogs.py:2002
+#: lib\pwiki\AdditionalDialogs.py:2003
 msgid "Okay"
 msgstr "OK"
 
-#: lib\pwiki\AdditionalDialogs.py:2088
+#: lib\pwiki\AdditionalDialogs.py:2089
 msgid "Wiki Properties"
 msgstr "Свойства вики"
 
-#: lib\pwiki\AdditionalDialogs.py:2096
+#: lib\pwiki\AdditionalDialogs.py:2097
 msgid "Wiki database backend:"
 msgstr "Тип базы данных:"
 
-#: lib\pwiki\AdditionalDialogs.py:2104
+#: lib\pwiki\AdditionalDialogs.py:2105
 msgid "Number of wiki pages:"
 msgstr "Число вики-страниц:"
 
-#: lib\pwiki\AdditionalDialogs.py:2122
+#: lib\pwiki\AdditionalDialogs.py:2123
 msgid "Jobs"
 msgstr "Задания"
 
-#: lib\pwiki\AdditionalDialogs.py:2139
+#: lib\pwiki\AdditionalDialogs.py:2140
 msgid "Number of Jobs:"
 msgstr "Число заданий:"
 
@@ -2141,7 +2137,7 @@ msgstr "'%s' не является допустимым вики-словом. %
 
 #: lib\pwiki\DocPagePresenter.py:256
 msgid "Opened wiki word '%s'"
-msgstr "Открытое вики-слово '%s'"
+msgstr "Открыто вики-слово '%s'"
 
 #: lib\pwiki\DocPagePresenter.py:265
 msgid "Wiki page not found, a new page will be created"
@@ -2152,35 +2148,35 @@ msgstr "Вики-страница не найдена, будет создана
 msgid "History"
 msgstr "История"
 
-#: lib\pwiki\DocPages.py:1923
+#: lib\pwiki\DocPages.py:1976
 msgid "Func. tag %s does not exist"
 msgstr "Функц. метка %s не существует"
 
-#: lib\pwiki\DocPages.py:2186
+#: lib\pwiki\DocPages.py:2239
 msgid "Global text blocks"
 msgstr "Глобальные текстовые блоки"
 
-#: lib\pwiki\DocPages.py:2187
+#: lib\pwiki\DocPages.py:2240
 msgid "Wiki text blocks"
 msgstr "Текстовые блоки этой вики"
 
-#: lib\pwiki\DocPages.py:2188
+#: lib\pwiki\DocPages.py:2241
 msgid "Global spell list"
 msgstr "Глобальный список правописания"
 
-#: lib\pwiki\DocPages.py:2189
+#: lib\pwiki\DocPages.py:2242
 msgid "Wiki spell list"
 msgstr "Список правописания этой вики"
 
-#: lib\pwiki\DocPages.py:2190
+#: lib\pwiki\DocPages.py:2243
 msgid "Global cc. blacklist"
 msgstr "Глобальный чёрный список"
 
-#: lib\pwiki\DocPages.py:2191
+#: lib\pwiki\DocPages.py:2244
 msgid "Wiki cc. blacklist"
 msgstr "Чёрный список этой вики"
 
-#: lib\pwiki\DocPages.py:2192
+#: lib\pwiki\DocPages.py:2245
 msgid "Favorite wikis"
 msgstr "Избранные вики"
 
@@ -4551,251 +4547,3 @@ msgstr "Для слова %s не найдена вики-страница (не
 msgid "Wiki page not found (bad path information) for word: %s"
 msgstr "Для слова %s не найдена вики-страница (неверна информация о пути)."
 
-#~ msgid " &Test "
-#~ msgstr "&Проверить"
-
-#~ msgid "Always show import table"
-#~ msgstr "Всегда показывать таблицу импорта"
-
-#~ msgid "Append after links:"
-#~ msgstr "Вставить после ссылок:"
-
-#~ msgid "Ask"
-#~ msgstr "Спросить"
-
-#~ msgid "Between links:"
-#~ msgstr "Вставить между ссылками:"
-
-#~ msgid "Copy into file storage"
-#~ msgstr "Копировать в файлохранилище"
-
-#~ msgid "Defaults"
-#~ msgstr "Значения по умолчанию"
-
-#~ msgid "Details"
-#~ msgstr "Подробно"
-
-#~ msgid "File dropping"
-#~ msgstr "Перетаскивание файлов"
-
-#~ msgid "Import questions"
-#~ msgstr "Настройка импорта"
-
-#~ msgid "New tab in foreground"
-#~ msgstr "Новая вкладка на переднем плане"
-
-#~ msgid "Newest visited"
-#~ msgstr "По возрастанию времени просмотра"
-
-#~ msgid "Oldest visited"
-#~ msgstr "По убыванию времени просмотра"
-
-#~ msgid "Order:"
-#~ msgstr "Порядок:"
-
-#~ msgid "Paste File"
-#~ msgstr "Вставить файл"
-
-#~ msgid "Prepend before links:"
-#~ msgstr "Вставить перед ссылками:"
-
-#~ msgid "Swap From <-> To"
-#~ msgstr "Поменять местами сравниваемые страницы"
-
-#~ msgid "Template page names reg. exp.:"
-#~ msgstr "Регулярное выражение для имён страниц шаблонов:"
-
-#~ msgid "Tree timing"
-#~ msgstr "Задержки дерева"
-
-#~ msgid "Update step min. delay:"
-#~ msgstr "Мин. задержка шага обновления:"
-
-#~ msgid "Version Import"
-#~ msgstr "Импорт версий"
-
-#~ msgid "Warn about other processes (Windows only)"
-#~ msgstr "Предупреждать о других процессах (только для Windows)"
-
-#~ msgid "Write version data of pages"
-#~ msgstr "Записать данные о версиях страниц"
-
-#~ msgid "Yes"
-#~ msgstr "Да"
-
-#~ msgid "No"
-#~ msgstr "Нет"
-
-#~ msgid "No wiki loaded"
-#~ msgstr "Нет загруженных вики"
-
-#~ msgid "Wiki config. path:"
-#~ msgstr "Путь к конфигурации вики:"
-
-#~ msgid "Wiki is read-only. Reason:"
-#~ msgstr "Вики открыта только для чтения. Причина:"
-
-#~ msgid "Write access to database lost. Try \"Wiki\"->\"Reconnect\""
-#~ msgstr ""
-#~ "Доступ на запись к базе данных утерян. Попробуйте \"Вики\"->\"Подключить "
-#~ "заново\""
-
-#~ msgid "Wiki was set read-only in options dialog"
-#~ msgstr "В диалоге настройки вики установлено \"Только для чтения\""
-
-#~ msgid "Can't write wiki config.:"
-#~ msgstr "Сбой записи конфигурации вики:"
-
-#~ msgid "Unknown reason"
-#~ msgstr "Неизвестная причина"
-
-#~ msgid "Template value isn't a valid wikiword: [%s: %s], %s"
-#~ msgstr "Шаблон не является допустимым вики-словом: [%s: %s], %s"
-
-#~ msgid "Template value isn't an existing wikiword: [%s: %s]"
-#~ msgstr "Шаблон не является существующим вики-словом: [%s: %s]"
-
-#~ msgid "<Diff from %s to %s>"
-#~ msgstr "<Отличия стр. %s от стр. %s>"
-
-#~ msgid ""
-#~ "Other WikidPad process(es) seem(s) to run already\n"
-#~ "Process identifier(s): %s\n"
-#~ "Continue?"
-#~ msgstr ""
-#~ "Кажется, другой(ие) процесс(ы) WikidPad уже запущены\n"
-#~ "Идентификатор(ы) процесса(ов): %s\n"
-#~ "Продолжать?"
-
-#~ msgid "Continue?"
-#~ msgstr "Продолжить?"
-
-#~ msgid "Wiki page"
-#~ msgstr "Вики-страница"
-
-#~ msgid "Func. page"
-#~ msgstr "Функ. страница"
-
-#~ msgid "Saved search"
-#~ msgstr "Сохранённый Поиск"
-
-#~ msgid "Type"
-#~ msgstr "Тип"
-
-#~ msgid "Name"
-#~ msgstr "Название"
-
-#~ msgid ""
-#~ "Version\n"
-#~ "Import"
-#~ msgstr ""
-#~ "Импорт\n"
-#~ "Версий"
-
-#~ msgid ""
-#~ "Rename\n"
-#~ "imported"
-#~ msgstr ""
-#~ "Переимен.\n"
-#~ "новое"
-
-#~ msgid ""
-#~ "Rename\n"
-#~ "present"
-#~ msgstr ""
-#~ "Переимен.\n"
-#~ "старое"
-
-#~ msgid "You can't rename imported and present item at the same time"
-#~ msgstr "Вы не можете переименовать импортируемую и имеющуюся одновременно"
-
-#~ msgid "Rename imported"
-#~ msgstr "Переименовать импортируемую"
-
-#~ msgid "Rename present"
-#~ msgstr "Переименовать имеющуюся"
-
-#~ msgid "Name collision: Item '%s' will be imported already"
-#~ msgstr "Конфликт имён: '%s' уже будет импортирована"
-
-#~ msgid "Name collision: Item '%s' will already be created by renaming '%s'"
-#~ msgstr "Конфликт имён: '%s' уже будет создана путём переименования '%s'"
-
-#~ msgid "Name collision: Item '%s' exists already in database"
-#~ msgstr "Конфликт имён: '%s' уже существует в базе данных"
-
-#~ msgid "Spell Check While Type"
-#~ msgstr "Правописание при наборе"
-
-#~ msgid "Set if editor should do spell checking during typing"
-#~ msgstr "Проверять правописание в ходе набора текста"
-
-#~ msgid "Clear Ignore List"
-#~ msgstr "Очистить список игнорирования"
-
-#~ msgid "Clear the list of words to ignore for spell check while type"
-#~ msgstr ""
-#~ "Очистить список слов, игнорируемых проверкой правописания при наборе"
-
-#~ msgid "Absolute/Relative &File URL"
-#~ msgstr "&Абсолютный/Относительный URL файла"
-
-#~ msgid "Convert file URL from absolute to relative and vice versa"
-#~ msgstr "Преобразовать URL файла из абсолютного в относительный и обратно"
-
-#~ msgid "No list of strings passed to \"listmcstr\" dialog"
-#~ msgstr "Нет списка строк, переданных в диалог \"listmcstr\""
-
-#~ msgid "Folder does not exist"
-#~ msgstr "Папка не существует"
-
-#~ msgid "Select Template"
-#~ msgstr "Выберите шаблон"
-
-#~ msgid "Select Template (deletes current content!)"
-#~ msgstr "Выберите шаблон (удалит текущее содержание!)"
-
-#~ msgid "Use Template"
-#~ msgstr "Использовать шаблон"
-
-#~ msgid "Ignore"
-#~ msgstr "Игнорировать"
-
-#~ msgid "Add Globally"
-#~ msgstr "Добавить глобально"
-
-#~ msgid "Add Locally"
-#~ msgstr "Добавить локально"
-
-#~ msgid "Convert Absolute/Relative File URL"
-#~ msgstr "Преобразовать Абсолютный/Относительный URL файла"
-
-#~ msgid "Open Containing Folder"
-#~ msgstr "Открыть папку"
-
-#~ msgid "Other..."
-#~ msgstr "Другие..."
-
-#~ msgid "Use Template..."
-#~ msgstr "Использовать шаблон..."
-
-#~ msgid "Moving from %s to %s failed. SHFileOperation result no. %s"
-#~ msgstr "Ошибка перемещения из %s в %s. Код результата SHFileOperation %s"
-
-#~ msgid "Diff inline"
-#~ msgstr "Отличия версий"
-
-#~ msgid "Show the difference between two versions inline"
-#~ msgstr "Показать различие между версиями внутри текста"
-
-#~ msgid "Set diff from"
-#~ msgstr "Сравнить эту страницу..."
-
-#~ msgid "Set the \"from\" version in diff"
-#~ msgstr "Сравнить эту страницу..."
-
-#~ msgid "Set diff to"
-#~ msgstr "...с этой страницей"
-
-#~ msgid "Set the \"to\" version in diff"
-#~ msgstr "Установить версию для сравнения"
