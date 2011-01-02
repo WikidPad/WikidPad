@@ -91,7 +91,7 @@ filesToZip += list(FILES_TO_PROCESS2)
 
 VERSTRING = Consts.VERSION_STRING.split(" ")[1]
 
-zfilefull = zipfile.ZipFile("WikidPad-" + VERSTRING + "-winport.zip", "w",
+zfilefull = zipfile.ZipFile("Output\\WikidPad-" + VERSTRING + "-winport.zip", "w",
         zipfile.ZIP_DEFLATED)
 
 print "Compressing files..."

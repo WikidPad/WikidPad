@@ -1707,7 +1707,7 @@ class HtmlExporter(AbstractExporter):
                 except Exception, e:
                     s = StringIO()
                     traceback.print_exc(file=s)
-                    htmlContent = u"<pre>" + s.getvalue() + u"</pre>"
+                    htmlContent = u"<pre>" + mbcsDec(s.getvalue(), 'replace')[0] + u"</pre>"
 
                 if htmlContent is None:
                     htmlContent = u""
@@ -1725,7 +1725,7 @@ class HtmlExporter(AbstractExporter):
                     except Exception, e:
                         s = StringIO()
                         traceback.print_exc(file=s)
-                        htmlContent = u"<pre>" + s.getvalue() + u"</pre>"
+                        htmlContent = u"<pre>" + mbcsDec(s.getvalue(), 'replace')[0] + u"</pre>"
 
         if wordList is not None:
             # Create content as a nicely formatted list of wiki words
