@@ -3,7 +3,7 @@ data_dir = data
 
 [main]
 footnotes_as_wikiwords = False
-last_wiki_word = WikidPadHelp
+last_wiki_word = Menu Edit
 hotkey_showhide_bywiki = 
 log_window_autoshow = Gray
 tree_expandednodes_descriptorpathes_views = 
@@ -12,7 +12,7 @@ tabs_maxcharacters = 0
 wiki_icon = 
 headingsasaliases_depth = 0
 wiki_name = WikidPadHelp
-wikipagetitle_creationmode = 1
+tree_expandednodes_descriptorpathes_main = 
 wikipagetitleprefix = ++
 wikipagetitle_fromlinktitle = True
 wiki_lastactivetabno = 0
@@ -21,7 +21,7 @@ wikipagefiles_gracefuloutsideaddandremove = True
 versioning_storagelocation = 0
 wiki_lasttabssubctrls = textedit
 template_pagenamesre = ^template/
-tree_expandednodes_descriptorpathes_main = 
+wikipagetitle_creationmode = 1
 tree_last_root_wiki_word = WikidPadHelp
 tree_force_scratchpad_visibility = True
 further_wiki_words = 
