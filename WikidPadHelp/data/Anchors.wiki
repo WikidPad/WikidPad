@@ -1,18 +1,36 @@
 ﻿++ Anchors
 
-Anchors allow to jump to a particular position in a wiki page in edit and preview mode as well as in exported HTML pages.
+Anchors allow to define a particular position within any hyperlinked page, such as a wiki page or any HTML page.
+Given such anchor, a jump to that specific position may be invoked from anywhere else using an appropiate link.
 
-Defining an anchor is done with:
+Anchors for wiki pages are supported in both, edit and preview mode.
+In exported HTML pages, anchors are supported using standard HTML-Syntax ("#...").
+
+
++++ Defining an Anchor
+
+Anchors are defined with the special anchor tag "anchor:", followed by the name of that anchor, as follows:
 
 anchor: here
 
-The anchor tag must be alone on a line, no text before or after it. After "anchor:" you give the anchor a name which must consist only of letters A to Z (upper or lowercase), digits and underscore. It must not contain spaces, other special characters or non-English characters.
+The anchor tag must be on a separate line by itself, no other text before or after it. After "anchor:" you give the anchor its name.
 
-To go to a particular anchor in a wiki word, append a ! and the anchor name to the wiki word (non-camelcase wiki words must be put in brackets), e.g.:
+This name of the anchor must consist only of letters A to Z (upper or lowercase), digits and underscore. It must not contain spaces, other special characters or non-English characters.
+
+And such name of an anchor should be unique within the page in order to avoid ambiguities.
+
+
++++ Hyperlinking to an Anchor
+
+In order to go to a particular anchor in a wiki word, append a ! and the anchor name to the wiki word (non-camelcase wiki words must be put in brackets), e.g.:
 
 [Anchors]!here
 
-Clicking on the link moves the cursor after the anchor tag.
+or
+
+TextFormatting!html
+
+Clicking on the link jumps to the page, and moves the cursor to the position following that anchor tag.
 
 
 +++ Remarks
