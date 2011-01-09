@@ -22,7 +22,7 @@ sql_mar.pyo
 
 WikidPad.py (in root): Essentially the "main" method for PersonalWikiFrame.py.
 PersonalWikiFrame.py: This is the meat of wikidPad, it represents the main window. Start here.
-WikiData.py: 2nd most important class. All data access is mediated through this classes.
+WikiData.py: 2nd most important class. All data access is mediated through these classes.
              There is one for each database backend (Original Gadfly, Original Sqlite,
              Compact Sqlite)
 WikiTxtCtrl.py: This is the code dealing with Scintilla (text editor component).
