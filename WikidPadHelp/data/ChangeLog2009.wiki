@@ -1,0 +1,227 @@
+﻿++ Change Log2009
+
+
+Dec. 06, 2009 (2.0beta10)
+
+    * Bug fixed: Linux: Detection of Python version for Sqlite
+      may fail (thanks to Martin Muenstermann)
+    * Bug fixed: Opening of Sqlite databases with foreign characters
+      in path may fail 
+    * Bug fixed: Resizing of internal HTML preview sometimes
+      doesn't work, produces gray borders
+    * Bug fixed: Failed to start with original sqlite wiki.
+
+
+
+Oct. 25, 2009 (2.0beta09)
+
+    * Options to control location of temporary files.
+      See [OptionsDialog#*Temporary files*]
+    * Bug fixed: Internal HTML preview jumped to top of page on
+      each resize
+    * Bug fixed: Temporary files for IE preview weren't deleted
+      on close
+
+
+
+Oct. 03, 2009 (2.0beta08)
+
+    * URLs ending with ".tif" are now also automatically image URLs
+
+    * Bug fixed: Footnotes were not recognized as anchors under
+      some circumstances (e.g. in headings)
+    * Bug fixed: Problem with links to network shares
+
+
+
+Aug. 26, 2009 (2.0beta07)
+
+    * Support for subpages e.g. <<[WikiWord/Subword]>>.
+      See [Subpages].
+    * Added entry "AddVersion" to KeyBindings.py to allow setting of
+      shortcut for adding a version
+    * Option to control in which steps a complete version should be
+      stored. See [OptionsDialog#*Steps to complete version*]
+    * More expressive boolean language for wiki-wide search.
+      See [SearchingTheWiki/BooleanRegex].
+    * Long-running wiki-wide search can now be aborted.
+    * Option to set maximum of counted occurrences during
+      wiki-wide search.
+      See [OptionsDialog#*Count Occurrences up to max.*]
+    * Option to switch between main tabs in most-recently-used order.
+      See [OptionsDialog#*Switch Tabs in MRU order*]
+    * Main tree tries to remember tree-path to wikiword for each tab.
+      If same wikiword appears multiple times in tree, the last used
+      place is used again when switching between tabs
+    * Use less CPU time if not active application.
+
+    * Bug fixed: Failure if non-existing wiki words given in
+      page list construction
+    * Bug fixed: Failure if starting spell check on a not yet
+      saved page
+
+
+
+Jul. 26, 2009 (2.0beta06)
+
+    * Support for storing versions of wiki pages (do not yet rely
+      on this function!). See [ChronViewWindow#+++ Versions]
+    * Options to set defaults for wiki-wide search.
+      See [OptionsDialog#*Wiki-wide search defaults*]
+    * Option to set max. length of tab titles.
+      See [OptionsDialog#*Max. characters on each tab*]
+    * Changing position of additional panels (e.g. tree,
+      doc. structure, ...) preserves size of the panels.
+
+    * Bug fixed: Problem with bracketed URL at end of a page
+    * Bug fixed: auto_link wasn't updated after creating/removing
+      aliases
+    * Bug fixed: copying to clipboard emptied clipboard if no text
+      selected
+
+
+
+Jun. 28, 2009 (2.0beta05)
+
+    * Options "Wiki language" and "Footnotes as wiki words" moved to
+      different options pages. See [OptionsDialog#++++ Wiki language]
+    * In "Choose wikiword" dialog (for choosing parents,
+      children...), pages can be sorted alphabetically
+    * Option to change tree font.
+      See [OptionsDialog#++++ Tree options]
+    * More detailed instruction in error log in case of
+      bad AppLock.lock file
+
+    * Windows: Show error message if copying of files fails
+      during export
+    * Windows: New try to make crashes more seldom when exiting from
+      system tray
+    * Windows: Generated file URLs now use ':' after drive letter
+      instead of '|'
+
+
+
+May 30, 2009 (2.0beta04)
+
+    * Support for printing rendered HTML. See [Printing]
+
+    * Some bugs in translation handling fixed
+
+
+
+Apr. 28, 2009 (2.0beta03)
+
+    * Option to reverse search order for scripts (global imports
+      first). See [InlinePythonEval#+++ Security concerns]
+    * Wiki-bound option to create wiki page files with ASCII-only
+      names (does not apply to Compact Sqlite DB backend).
+      This should also fix a problem with Windows binary installer
+      and WikidPad help wiki on non-western Windows versions.
+      See [OptionsDialog#*Page file names ASCII only*]
+    * Wiki-bound option to handle missing or externally inserted
+      page files gracefully (does not apply to Compact Sqlite DB
+      backend).
+      See [OptionsDialog#*Graceful handling of missing page files*]
+    * New insertion "iconimage" to insert an icon into an HTML page.
+      See [Insertions#*iconimage*]
+    * Preview shows link target in the status bar when hovering
+      with mouse over it like browsers do
+    * Menu item "Select All" in "Edit" menu (for completeness)
+
+    * Bug fixed: Some errors weren't recorded in error log
+    * Bug fixed: Tree scrolled to wrong initial position on startup
+    * Bug fixed: Windows: Spell check addon did not work due to
+      wrong DLL find mechanism
+    * Bug fixed: LossyWikiCloseDeniedException wasn't caught and
+      polluted error log
+    * Bug fixed: Search and replace dialog for page cleared
+      "Search" text field when "Find next" was pressed
+    * Bug fixed: Wiki-wide search dialog did not focus search
+      text field when initially shown
+    * Bug fixed: Pollution of error log if moving mouse over
+      incremental search field
+    * Bug fixed: stdDialog() of doc page presenter did not return
+      a value (needed for some plugins)
+
+
+
+Apr. 01, 2009 (2.0beta02)
+
+    * Option to let selection in doc. structure automatically follow
+      text cursor position in editor.
+      See [OptionsDialog#*Structure window selection auto-follow*]
+    * Saved exports similar to saved searches.
+      See [WikiExport#*Saved exports*]
+    * Faster stop when closing WikidPad
+    * Wiki page files in UTF-16 encoding (with appropriate BOM) can now
+      be read by WikidPad
+
+    * Bug fixed: Wiki-wide search couldn't be opened if a functional page
+      was in current editor
+    * Bug fixed: Dialog to append/prepend wikiword failed
+
+
+
+Mar. 02, 2009 (2.0beta01)
+
+    * Option to set tab width. See [OptionsDialog#*Tab width*]
+    * Combined wiki-wide search and page list construction into
+      one dialog to allow more comfortable search and more options
+      to define page sets for export or print.
+      See [SearchingTheWiki#+ To search all pages: Full search|full search]
+    * Basic support for continuous export.
+      See [WikiExport#+ Continuous export]
+    * Windows: Windows meta-files (vector graphic format) are saved
+      as files if inserted into WikidPad from clipboard
+    * Windows binary: Necessary VC++ runtime libraries now included
+      in installer
+    * New syntax \<<hide  >> to hide a block from preview and export.
+      See [TextFormatting#+ Hidden markup]
+    * New insertion "self" to include current page name into page
+    * Menu items to insert color or icon name into editor
+      (in addition to the insert of attributes)
+    * No more unnecessary jumping around of page when ending or
+      aborting incremental search (thanks to Christian Ziemski)
+
+    * Bug fixed: Creating a wiki-bound func. page in an "original"
+      database linked to absolute path of page file instead of
+      relative path (this means that you can't move such a wiki to
+      a new location).
+    * Bug fixed: "Replace All" in wiki-wide search did not work,
+      replacing links to a renamed wiki page did not work.
+    * Bug fixed: Non-existing pages had no parents (which also
+      affected template creation)
+
+    * Bug fixed: List of parentless nodes was wrong
+    * Bug fixed: Insertion \[:toc:] did not work.
+    * Bug fixed: Jumping between footnote and footnote anchor did
+      not work in editor.
+    * Bug fixed: HTML publishing as set of HTML pages and as
+      single page was mixed up.
+    * Bug fixed: Adding icon or color attribute failed.
+    * Bug fixed: Attribute \[view_pane: editor] did not work.
+    * Bug fixed: If repeating an incremental search with escaped
+      RE characters (e.g. '.', '?') the escaping backslashes
+      accumulated.
+    * Bug fixed: Preview failed on heading line (e.g. "+++")
+      without content
+    * Bug fixed: Heading level could be off by one.
+    * Bug fixed: todo did not work inside a line.
+
+
+
+Jan. 27, 2009 (2.0alpha01)
+
+    * New menu structure, see [Menus]
+    * New free icon set (thanks to Jan Stegehuis)
+    * Complete new syntax processing engine
+    * Some options in OptionsDialog moved to "Advanced" option pages
+    * Option to allow headings of a page as additional aliases when
+      opening page.
+      See [OptionsDialog#*Headings as aliases: Up to heading depth*]
+
+    * Bug fixed: Linux: Function keys produced characters
+    * Bug fixed: Linux: Timeline contained initially only
+      one item
+    * Bug fixed: Sqlite: Bad conversion of object ids for
+      user functions
