@@ -21,7 +21,10 @@ query terms highlighted.
 
 from __future__ import division
 from heapq import nlargest
-from cgi import escape as htmlescape
+from collections import deque
+
+# from cgi import escape as htmlescape
+from pwiki.StringOps import escapeHtml as htmlescape
 
 # Fragment object
 
@@ -186,25 +189,28 @@ class ContextFragmenter(object):
     This fragmenter only yields fragments that contain matched terms.
     """
     
-    def __init__(self, termset, maxchars=200, surround=20):
+    def __init__(self, termset, maxchars=200, charsbefore=20, charsafter=20):
         """
         :param termset: A collection (probably a set or frozenset) containing
             the terms you want to match to token.text attributes.
         :param maxchars: The maximum number of characters allowed in a
             fragment.
-        :param surround: The number of extra characters of context to add both
-            before the first matched term and after the last matched term.
+        :param charsbefore: The number of extra characters of context to add
+            before the first matched term .
+        :param charsafter: The number of extra characters of context to add
+            after the last matched term.
         """
-        
         self.maxchars = maxchars
-        self.charsbefore = self.charsafter = surround
+        self.charsbefore = charsbefore
+        self.charsafter = charsafter
+
     
     def __call__(self, text, tokens):
         maxchars = self.maxchars
         charsbefore = self.charsbefore
         charsafter = self.charsafter
         
-        current = []
+        current = deque()
         currentlen = 0
         countdown = -1
         for t in tokens:
@@ -221,12 +227,14 @@ class ContextFragmenter(object):
                 
                 if countdown < 0 or currentlen >= maxchars:
                     yield Fragment(current)
-                    current = []
+                    current.clear()
                     currentlen = 0
-            
+
             else:
-                while current and currentlen > charsbefore:
-                    t = current.pop(0)
+#                 while current and currentlen > charsbefore: len(current) can't be 0 if currentlen > 0 and
+#                         charsbefore should be >= 0
+                while currentlen > charsbefore:
+                    t = current.popleft()
                     currentlen -= t.endchar - t.startchar
 
         if countdown >= 0:
@@ -339,6 +347,46 @@ class UppercaseFormatter(object):
                                   for fragment in fragments))
 
 
+class SimpleHtmlFormatter(object):
+    """Returns a string in which the matched terms are enclosed in <b></b>.
+    """
+    
+    def __init__(self, between=u"... "):
+        """
+        :param between: the text to add between fragments.
+        """
+        self.between = between
+        self.firstPos = -1
+        
+    def _format_fragment(self, text, fragment):
+        output = []
+        index = fragment.startchar
+        
+        for t in fragment.matches:
+            if t.startchar > index:
+                output.append(htmlescape(text[index:t.startchar]))
+
+            ttxt = htmlescape(text[t.startchar:t.endchar])
+            if t.matched:
+                ttxt = "<b>%s</b>" % ttxt
+                if self.firstPos == -1:
+                    self.firstPos = t.startchar
+                else:
+                    self.firstPos = min(self.firstPos, t.startchar)
+
+            output.append(ttxt)
+            index = t.endchar
+        
+        output.append(htmlescape(text[index:fragment.endchar]))
+        return u"".join(output)
+
+    def __call__(self, text, fragments):
+        return self.between.join([self._format_fragment(text, fragment)
+                                  for fragment in fragments]), self.firstPos
+
+
+
+
 class HtmlFormatter(object):
     """Returns a string containing HTML formatting around the matched terms.
     
@@ -427,67 +475,67 @@ class HtmlFormatter(object):
         self.seen = {}
 
 
-class GenshiFormatter(object):
-    """Returns a Genshi event stream containing HTML formatting around the
-    matched terms.
-    """
-    
-    def __init__(self, qname="strong", between="..."):
-        """
-        :param qname: the QName for the tag to wrap around matched terms.
-        :param between: the text to add between fragments.
-        """
-        
-        self.qname = qname
-        self.between = between
-        
-        from genshi.core import START, END, TEXT, Attrs, Stream #@UnresolvedImport
-        self.START, self.END, self.TEXT = START, END, TEXT
-        self.Attrs, self.Stream = Attrs, Stream
-
-    def _add_text(self, text, output):
-        if output and output[-1][0] == self.TEXT:
-            output[-1] = (self.TEXT, output[-1][1] + text, output[-1][2])
-        else:
-            output.append((self.TEXT, text, (None, -1, -1)))
-
-    def _format_fragment(self, text, fragment):
-        START, TEXT, END, Attrs = self.START, self.TEXT, self.END, self.Attrs
-        qname = self.qname
-        output = []
-        
-        index = fragment.startchar
-        lastmatched = False
-        for t in fragment.matches:
-            if t.startchar > index:
-                if lastmatched:
-                    output.append((END, qname, (None, -1, -1)))
-                    lastmatched = False
-                self._add_text(text[index:t.startchar], output)
-            
-            ttxt = text[t.startchar:t.endchar]
-            if not lastmatched:
-                output.append((START, (qname, Attrs()), (None, -1, -1)))
-                lastmatched = True
-            output.append((TEXT, ttxt, (None, -1, -1)))
-                                    
-            index = t.endchar
-        
-        if lastmatched:
-            output.append((END, qname, (None, -1, -1)))
-        
-        return output
-
-    def __call__(self, text, fragments):
-        output = []
-        first = True
-        for fragment in fragments:
-            if not first:
-                self._add_text(self.between, output)
-            first = False
-            output += self._format_fragment(text, fragment)
-        
-        return self.Stream(output)
+# class GenshiFormatter(object):
+#     """Returns a Genshi event stream containing HTML formatting around the
+#     matched terms.
+#     """
+#     
+#     def __init__(self, qname="strong", between="..."):
+#         """
+#         :param qname: the QName for the tag to wrap around matched terms.
+#         :param between: the text to add between fragments.
+#         """
+#         
+#         self.qname = qname
+#         self.between = between
+#         
+#         from genshi.core import START, END, TEXT, Attrs, Stream #@UnresolvedImport
+#         self.START, self.END, self.TEXT = START, END, TEXT
+#         self.Attrs, self.Stream = Attrs, Stream
+# 
+#     def _add_text(self, text, output):
+#         if output and output[-1][0] == self.TEXT:
+#             output[-1] = (self.TEXT, output[-1][1] + text, output[-1][2])
+#         else:
+#             output.append((self.TEXT, text, (None, -1, -1)))
+# 
+#     def _format_fragment(self, text, fragment):
+#         START, TEXT, END, Attrs = self.START, self.TEXT, self.END, self.Attrs
+#         qname = self.qname
+#         output = []
+#         
+#         index = fragment.startchar
+#         lastmatched = False
+#         for t in fragment.matches:
+#             if t.startchar > index:
+#                 if lastmatched:
+#                     output.append((END, qname, (None, -1, -1)))
+#                     lastmatched = False
+#                 self._add_text(text[index:t.startchar], output)
+#             
+#             ttxt = text[t.startchar:t.endchar]
+#             if not lastmatched:
+#                 output.append((START, (qname, Attrs()), (None, -1, -1)))
+#                 lastmatched = True
+#             output.append((TEXT, ttxt, (None, -1, -1)))
+#                                     
+#             index = t.endchar
+#         
+#         if lastmatched:
+#             output.append((END, qname, (None, -1, -1)))
+#         
+#         return output
+# 
+#     def __call__(self, text, fragments):
+#         output = []
+#         first = True
+#         for fragment in fragments:
+#             if not first:
+#                 self._add_text(self.between, output)
+#             first = False
+#             output += self._format_fragment(text, fragment)
+#         
+#         return self.Stream(output)
 
 
 # Highlighting

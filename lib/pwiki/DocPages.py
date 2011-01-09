@@ -1,7 +1,6 @@
 from __future__ import with_statement
-
-# import profilehooks
-# profile = profilehooks.profile(filename="profile.prf", immediate=False)
+## import profilehooks
+## profile = profilehooks.profile(filename="profile.prf", immediate=False)
 
 
 import os.path, re, struct, time, traceback, threading, collections
@@ -26,7 +25,6 @@ from WikiPyparsing import buildSyntaxNode
 import ParseUtilities
 
 import Serialization
-# from Serialization import SerializeStream
 
 
 
@@ -1735,10 +1733,10 @@ class WikiPage(AbstractWikiPage):
 
         return valid
 
-    
+
     def putIntoSearchIndex(self, threadstop=DUMBTHREADSTOP):
         """
-        Add or update the reverse index for the given docPage
+        Add or update the index for the given docPage
         """
         with self.textOperationLock:
             if not self.getWikiDocument().isSearchIndexEnabled():

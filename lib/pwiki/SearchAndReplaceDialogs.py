@@ -1,5 +1,5 @@
-## import hotshot
-## _prof = hotshot.Profile("hotshot.prf")
+# import profilehooks
+# profile = profilehooks.profile(filename="profile.prf", immediate=False)
 
 import sys, traceback, re, threading, time
 
@@ -79,6 +79,13 @@ class _SearchResultItemInfo(object):
             
         self.occNumber = occNumber
         return self
+
+
+    def setHtmlDirectly(self, occHtml):
+        self.occNumber = -1
+        self.occCount = -1
+        self.occHtml = occHtml
+
 
 
     def getHtml(self):
@@ -219,26 +226,13 @@ class SearchResultListBox(wx.HtmlListBox):
 
                 context = before + after
 
-                if not sarOp.hasParticularTextPosition():
-                    # No specific position to show as context, so show beginning of page
-                    # Also, no occurrence counting possible
-                    if context == 0:
-                        self.foundinfo = [_SearchResultItemInfo(w) for w in found]
-                    else:
-                        for w in found:
-                            text = wikiDocument.getWikiPageNoError(w).\
-                                    getLiveTextNoTemplate()
-                            if text is None:
-                                continue
-                            self.foundinfo.append(
-                                    _SearchResultItemInfo(w).buildOccurrence(
-                                    text, before, after, (-1, -1), -1, 100))
-                    threadstop.testRunning()
-                else:
+                if sarOp.hasParticularTextPosition():
                     if context == 0 and not countOccurrences:
                         # No context, no occurrence counting
+                        # -> just a list of found pages
                         self.foundinfo = [_SearchResultItemInfo(w) for w in found]
                     else:
+                        # "As is" or regex search
                         sarOp.beginWikiSearch(self.pWiki.getWikiDocument())
                         try:
                             for w in found:
@@ -269,7 +263,7 @@ class SearchResultListBox(wx.HtmlListBox):
                                 
                                 info = _SearchResultItemInfo(w, occPos=pos,
                                         maxOccCount=maxCountOccurrences)
-
+    
                                 if countOccurrences:
                                     occ = 1
                                     while True:
@@ -289,7 +283,47 @@ class SearchResultListBox(wx.HtmlListBox):
                                         maxCountOccurrences))
                         finally:
                             sarOp.endWikiSearch()
-
+                elif sarOp.hasWhooshHighlighting():
+                    # Index search
+                    if context == 0:
+                        # No context, occurrence counting doesn't matter
+                        # -> just a list of found pages
+                        self.foundinfo = [_SearchResultItemInfo(w) for w in found]
+                    else:
+                        sarOp.beginWikiSearch(self.pWiki.getWikiDocument())
+                        try:
+                            for w in found:
+                                threadstop.testRunning()
+                                docPage = wikiDocument.getWikiPageNoError(w)
+                                text = docPage.getLiveTextNoTemplate()
+                                if text is None:
+                                    continue
+    
+                                html, firstPos = sarOp.highlightWhooshIndexFound(
+                                        text, docPage, before, after)
+                                
+                                info = _SearchResultItemInfo(w, occPos=(firstPos, firstPos))
+                                info.setHtmlDirectly(html)
+    
+                                self.foundinfo.append(info)
+                        finally:
+                            sarOp.endWikiSearch()
+                else:  # not sarOp.hasParticularTextPosition():
+                    # No specific position to show as context, so show beginning of page
+                    # Also, no occurrence counting possible
+                    if context == 0:
+                        self.foundinfo = [_SearchResultItemInfo(w) for w in found]
+                    else:
+                        for w in found:
+                            text = wikiDocument.getWikiPageNoError(w).\
+                                    getLiveTextNoTemplate()
+                            if text is None:
+                                continue
+                            self.foundinfo.append(
+                                    _SearchResultItemInfo(w).buildOccurrence(
+                                    text, before, after, (-1, -1), -1, 100))
+                    threadstop.testRunning()
+                
                 threadstop.testRunning()
                 self.isShowingSearching = False
 #                 callInMainThreadAsync(self.SetItemCount, len(self.foundinfo))
@@ -1092,6 +1126,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
         self._updateTabTitle()
 
 
+#     @profile
     def _refreshPageList(self):
         sarOp = self._buildSearchReplaceOperation()
 

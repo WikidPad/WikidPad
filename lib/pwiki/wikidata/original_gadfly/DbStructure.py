@@ -11,6 +11,7 @@ from os import mkdir, unlink, rename
 from os.path import exists, join, split, basename
 import glob
 
+import Consts
 from pwiki.WikiExceptions import *
 from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, \
         removeBracketsFilename, pathEnc, getFileSignatureBlock, \
@@ -1129,6 +1130,13 @@ def updateDatabase2(connwrap):
     """
     try:
         setSettingsValue(connwrap, "lastwritever", str(VERSION_DB))
+        
+        # Write which program version at last wrote to database
+        setSettingsValue(connwrap, "lastwriteprogver.branchtag", Consts.VERSION_TUPLE[0])
+        setSettingsValue(connwrap, "lastwriteprogver.major", str(Consts.VERSION_TUPLE[1]))
+        setSettingsValue(connwrap, "lastwriteprogver.minor", str(Consts.VERSION_TUPLE[2]))
+        setSettingsValue(connwrap, "lastwriteprogver.sub", str(Consts.VERSION_TUPLE[3]))
+        setSettingsValue(connwrap, "lastwriteprogver.patch", str(Consts.VERSION_TUPLE[4]))
     except IOError:
         pass
 

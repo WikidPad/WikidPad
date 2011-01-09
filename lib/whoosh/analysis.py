@@ -53,8 +53,9 @@ The first item must be a tokenizer and the rest must be filters (you can't put
 a filter first or a tokenizer after the first item).
 """
 
-from array import array
 import copy, re
+from array import array
+from collections import deque
 from itertools import chain
 
 from whoosh.lang.dmetaphone import double_metaphone
@@ -82,7 +83,26 @@ def unstopped(tokenstream):
 
 # Token object
 
+
+# Mine:
 class Token(object):
+    __slots__ = (
+        "positions",
+        "chars",
+        "stopped",
+        "boost",
+        "removestops",
+        "mode",
+
+        "startchar",
+        "endchar",
+        "text",
+        "original",
+
+        "__dict__"
+    )
+
+
     """
     Represents a "token" (usually a word) extracted from the source text being
     indexed.
@@ -112,7 +132,8 @@ class Token(object):
     """
     
     def __init__(self, positions=False, chars=False, removestops=True, mode='',
-                 **kwargs):
+                 stopped=False, boost=1.0, startchar=None, endchar=None,
+                 text=None, original=None, **kwargs):
         """
         :param positions: Whether tokens should have the token position in the
             'pos' attribute.
@@ -122,23 +143,165 @@ class Token(object):
             the tokens pass through a stop filter).
         :param mode: contains a string describing the purpose for which the
             analyzer is being called, i.e. 'index' or 'query'.
+
+            Do not modify the parameters after mode. They are needed for
+            copying only
         """
-        
         self.positions = positions
         self.chars = chars
-        self.stopped = False
-        self.boost = 1.0
         self.removestops = removestops
         self.mode = mode
-        self.__dict__.update(kwargs)
+
+        self.stopped = stopped
+        self.boost = boost
+        
+        self.startchar = startchar
+        self.endchar = endchar
+        self.text = text
+        self.original = original
+
+        if kwargs:
+            self.__dict__.update(kwargs)
+
     
-    def __repr__(self):
+    def __repr__(self):   # TODO!!!
         parms = ", ".join("%s=%r" % (name, value)
                           for name, value in self.__dict__.iteritems())
         return "%s(%s)" % (self.__class__.__name__, parms)
         
     def copy(self):
-        return copy.copy(self)
+        return Token(positions=self.positions, chars=self.chars,
+                removestops=self.removestops, mode=self.mode,
+                stopped=self.stopped, boost=self.boost, startchar=self.startchar,
+                endchar=self.endchar, text=self.text, original=self.original,
+                **self.__dict__)
+
+
+
+# mchaput:
+# class Token(object):
+#     """
+#     Represents a "token" (usually a word) extracted from the source text being
+#     indexed.
+#     
+#     See "Advanced analysis" in the user guide for more information.
+#     
+#     Because object instantiation in Python is slow, tokenizers should create
+#     ONE SINGLE Token object and YIELD IT OVER AND OVER, changing the attributes
+#     each time.
+#     
+#     This trick means that consumers of tokens (i.e. filters) must never try to
+#     hold onto the token object between loop iterations, or convert the token
+#     generator into a list. Instead, save the attributes between iterations,
+#     not the object::
+#     
+#         def RemoveDuplicatesFilter(self, stream):
+#             # Removes duplicate words.
+#             lasttext = None
+#             for token in stream:
+#                 # Only yield the token if its text doesn't
+#                 # match the previous token.
+#                 if lasttext != token.text:
+#                     yield token
+#                 lasttext = token.text
+# 
+#     ...or, call token.copy() to get a copy of the token object.
+#     """
+#     
+#     def __init__(self, positions=False, chars=False, removestops=True, mode='',
+#                  **kwargs):
+#         """
+#         :param positions: Whether tokens should have the token position in the
+#             'pos' attribute.
+#         :param chars: Whether tokens should have character offsets in the
+#             'startchar' and 'endchar' attributes.
+#         :param removestops: whether to remove stop words from the stream (if
+#             the tokens pass through a stop filter).
+#         :param mode: contains a string describing the purpose for which the
+#             analyzer is being called, i.e. 'index' or 'query'.
+#         """
+#         
+#         self.positions = positions
+#         self.chars = chars
+#         self.stopped = False
+#         self.boost = 1.0
+#         self.removestops = removestops
+#         self.mode = mode
+#         self.__dict__.update(kwargs)
+#     
+#     def __repr__(self):
+#         parms = ", ".join("%s=%r" % (name, value)
+#                           for name, value in self.__dict__.iteritems())
+#         return "%s(%s)" % (self.__class__.__name__, parms)
+#         
+#     def copy(self):
+#         # This is faster than using the copy module
+#         return Token(**self.__dict__.copy())
+
+
+
+# mchaput modif:
+# class Token(object):
+#     """
+#     Represents a "token" (usually a word) extracted from the source text being
+#     indexed.
+#     
+#     See "Advanced analysis" in the user guide for more information.
+#     
+#     Because object instantiation in Python is slow, tokenizers should create
+#     ONE SINGLE Token object and YIELD IT OVER AND OVER, changing the attributes
+#     each time.
+#     
+#     This trick means that consumers of tokens (i.e. filters) must never try to
+#     hold onto the token object between loop iterations, or convert the token
+#     generator into a list. Instead, save the attributes between iterations,
+#     not the object::
+#     
+#         def RemoveDuplicatesFilter(self, stream):
+#             # Removes duplicate words.
+#             lasttext = None
+#             for token in stream:
+#                 # Only yield the token if its text doesn't
+#                 # match the previous token.
+#                 if lasttext != token.text:
+#                     yield token
+#                 lasttext = token.text
+# 
+#     ...or, call token.copy() to get a copy of the token object.
+#     """
+#     
+#     def __init__(self, positions=False, chars=False, removestops=True, mode='',
+#                  **kwargs):
+#         """
+#         :param positions: Whether tokens should have the token position in the
+#             'pos' attribute.
+#         :param chars: Whether tokens should have character offsets in the
+#             'startchar' and 'endchar' attributes.
+#         :param removestops: whether to remove stop words from the stream (if
+#             the tokens pass through a stop filter).
+#         :param mode: contains a string describing the purpose for which the
+#             analyzer is being called, i.e. 'index' or 'query'.
+#         """
+#         
+#         self.positions = positions
+#         self.chars = chars
+#         self.stopped = False
+#         self.boost = 1.0
+#         self.removestops = removestops
+#         self.mode = mode
+#         self.__dict__.update(kwargs)
+#     
+#     def __repr__(self):
+#         parms = ", ".join("%s=%r" % (name, value)
+#                           for name, value in self.__dict__.iteritems())
+#         return "%s(%s)" % (self.__class__.__name__, parms)
+#         
+#     def copy(self):
+#         # This is faster than using the copy module
+#         return Token(**self.__dict__)
+
+
+
 
 
 # Composition support
@@ -183,6 +346,7 @@ class IDTokenizer(Tokenizer):
         assert isinstance(value, unicode), "%r is not unicode" % value
         t = Token(positions, chars, removestops=removestops, mode=mode)
         t.text = value
+        t.boost=1.0
         if keeporiginal:
             t.original = value
         if positions:
@@ -202,9 +366,9 @@ class RegexTokenizer(Tokenizer):
     [u"hi", u"there", u"3.141", u"big", u"time", u"under_score"]
     """
     
-    __inittypes__ = dict(expression=unicode, gaps=bool)
+    __inittypes__ = dict(expression=unicode, gaps=bool, lowercase=bool)
     
-    def __init__(self, expression=r"\w+(\.?\w+)*", gaps=False):
+    def __init__(self, expression=r"\w+(\.?\w+)*", gaps=False, lowercase=False):
         """
         :param expression: A regular expression object or string. Each match
             of the expression equals a token. Group 0 (the entire matched text)
@@ -213,12 +377,15 @@ class RegexTokenizer(Tokenizer):
         :param gaps: If True, the tokenizer *splits* on the expression, rather
             than matching on the expression.
         """
-        
+
         if isinstance(expression, basestring):
             self.expression = re.compile(expression, re.UNICODE)
         else:
             self.expression = expression
         self.gaps = gaps
+        
+        self.lowercase = lowercase
+        
     
     def __eq__(self, other):
         if self.__class__ is other.__class__:
@@ -244,10 +411,17 @@ class RegexTokenizer(Tokenizer):
         """
         
         assert isinstance(value, unicode), "%r is not unicode" % value
-        
+
+        if self.lowercase:
+            lowervalue = value.lower()
+        else:
+            lowervalue = value
+
         t = Token(positions, chars, removestops=removestops, mode=mode)
         if not tokenize:
-            t.original = t.text = value
+            t.original = value
+            t.text = lowervalue
+            t.boost = 1.0
             if positions: t.pos = start_pos
             if chars:
                 t.startchar = start_char
@@ -255,30 +429,33 @@ class RegexTokenizer(Tokenizer):
             yield t
         elif not self.gaps:
             # The default: expression matches are used as tokens
-            for pos, match in enumerate(self.expression.finditer(value)):
-                t.text = match.group(0)
+            for pos, match in enumerate(self.expression.finditer(lowervalue)):
+                ms = match.start()
+                me = match.end()
+                t.text = lowervalue[ms:me]  # match.group(0)
                 if keeporiginal:
-                    t.original = t.text
+                    t.original = value[ms:me]
                 t.stopped = False
                 if positions:
                     t.pos = start_pos + pos
                 if chars:
-                    t.startchar = start_char + match.start()
-                    t.endchar = start_char + match.end()
+                    t.startchar = start_char + ms
+                    t.endchar = start_char + me
                 yield t
         else:
             # When gaps=True, iterate through the matches and
             # yield the text between them.
             prevend = 0
             pos = start_pos
-            for match in self.expression.finditer(value):
+            for match in self.expression.finditer(lowervalue):
                 start = prevend
                 end = match.start()
-                text = value[start:end]
+                text = lowervalue[start:end]
                 if text:
                     t.text = text
+                    t.boost = 1.0
                     if keeporiginal:
-                        t.original = t.text
+                        t.original = value[start:end]
                     t.stopped = False
                     if positions:
                         t.pos = pos
@@ -295,6 +472,7 @@ class RegexTokenizer(Tokenizer):
             # yield the last bit of text as a final token.
             if prevend < len(value):
                 t.text = value[prevend:]
+                t.boost = 1.0
                 if keeporiginal:
                     t.original = t.text
                 t.stopped = False
@@ -364,6 +542,7 @@ class CharsetTokenizer(Tokenizer):
         t = Token(positions, chars, removestops=removestops, mode=mode)
         if not tokenize:
             t.original = t.text = value
+            t.boost = 1.0
             if positions: t.pos = start_pos
             if chars:
                 t.startchar = start_char
@@ -381,6 +560,7 @@ class CharsetTokenizer(Tokenizer):
                 else:
                     if currentchar > startchar:
                         t.text = text
+                        t.boost = 1.0
                         if keeporiginal:
                             t.original = t.text
                         if positions:
@@ -397,6 +577,7 @@ class CharsetTokenizer(Tokenizer):
             
             if currentchar > startchar:
                 t.text = value[startchar:currentchar]
+                t.boost = 1.0
                 if keeporiginal:
                     t.original = t.text
                 if positions:
@@ -1168,10 +1349,13 @@ class BiWordFilter(Filter):
     
         "the-sign", "sign-of", "of-four"
         
-    This can be used in fields dedicated to phrase searching. In the example
-    above,  the three "bi-word" tokens will be faster to find than the four
-    original words since there are fewer of them and they will be much less
-    frequent (especially compared to words like "the" and "of").
+    This can be used to create fields for pseudo-phrase searching, where if
+    all the terms match the document probably contains the phrase, but the
+    searching is faster than actually doing a phrase search on individual word
+    terms.
+    
+    The ``BiWordFilter`` is much faster than using the otherwise equivalent
+    ``ShingleFilter(2)``.
     """
     
     def __init__(self, sep="-"):
@@ -1212,11 +1396,63 @@ class BiWordFilter(Filter):
             if chars: prev_startchar = sc
             if positions: prev_pos = ps
         
-        # If at no bi-words were emitted, that is, the token stream only had
+        # If no bi-words were emitted, that is, the token stream only had
         # a single token, then emit that single token.
         if not atleastone:
             yield token
         
+
+class ShingleFilter(Filter):
+    """Merges a certain number of adjacent tokens into multi-word tokens, so
+    that for example::
+    
+        "better", "a", "witty", "fool", "than", "a", "foolish", "wit"
+        
+    with ``ShingleFilter(3, ' ')`` becomes::
+    
+        'better a witty', 'a witty fool', 'witty fool than', 'fool than a',
+        'than a foolish', 'a foolish wit'
+    
+    This can be used to create fields for pseudo-phrase searching, where if
+    all the terms match the document probably contains the phrase, but the
+    searching is faster than actually doing a phrase search on individual word
+    terms.
+    
+    If you're using two-word shingles, you should use the functionally
+    equivalent ``BiWordFilter`` instead because it's faster than
+    ``ShingleFilter``.
+    """
+    
+    def __init__(self, size=2, sep="-"):
+        self.size = size
+        self.sep = sep
+        
+    def __call__(self, tokens):
+        size = self.size
+        sep = self.sep
+        buf = deque()
+        atleastone = False
+        
+        def make_token():
+            tk = buf[0]
+            tk.text = sep.join([t.text for t in buf])
+            if tk.chars:
+                tk.endchar = buf[-1].endchar
+            return tk
+        
+        for token in tokens:
+            buf.append(token.copy())
+            if len(buf) == size:
+                atleastone = True
+                yield make_token()
+                buf.popleft()
+        
+        # If no shingles were emitted, that is, the token stream had fewer than
+        # 'size' tokens, then emit a single token with whatever tokens there
+        # were
+        if not atleastone:
+            yield make_token()
+
 
 class BoostTextFilter(Filter):
     "This filter is deprecated, use :class:`DelimitedAttributeFilter` instead."
@@ -1259,7 +1495,7 @@ class BoostTextFilter(Filter):
             yield t
 
 
-class DeliminatedAttributeFilter(Filter):
+class DelimitedAttributeFilter(Filter):
     """Looks for delimiter characters in the text of each token and stores the
     data after the delimiter in a named attribute on the token.
     
@@ -1322,8 +1558,26 @@ class DeliminatedAttributeFilter(Filter):
 
 
 class DoubleMetaphoneFilter(Filter):
-    def __init__(self, primary_boost=3.0):
+    """Transforms the text of the tokens using Lawrence Philips's Double
+    Metaphone algorithm. This algorithm attempts to encode words in such a way
+    that similar-sounding words reduce to the same code. This may be useful for
+    fields containing the names of people and places, and other uses where
+    tolerance of spelling differences is desireable.
+    """
+    
+    def __init__(self, primary_boost=1.0, secondary_boost=0.5, combine=False):
+        """
+        :param primary_boost: the boost to apply to the token containing the
+            primary code.
+        :param secondary_boost: the boost to apply to the token containing the
+            secondary code, if any.
+        :param combine: if True, the original unencoded tokens are kept in the
+            stream, preceding the encoded tokens.
+        """
+        
         self.primary_boost = primary_boost
+        self.secondary_boost = secondary_boost
+        self.combine = combine
         
     def __eq__(self, other):
         return (other
@@ -1332,21 +1586,67 @@ class DoubleMetaphoneFilter(Filter):
     
     def __call__(self, tokens):
         primary_boost = self.primary_boost
+        secondary_boost = self.secondary_boost
+        combine = self.combine
         
         for t in tokens:
+            if combine:
+                yield t
+            
             primary, secondary = double_metaphone(t.text)
+            b = t.boost
+            # Overwrite the token's text and boost and yield it
             if primary:
-                # Save the original boost
-                b = t.boost
-                # Overwrite the token's text and boost and yield it
                 t.text = primary
                 t.boost = b * primary_boost
                 yield t
-                # Restored the original boost
-                t.boost = b 
             if secondary:
                 t.text = secondary
+                t.boost = b * secondary_boost
                 yield t
+                
+
+class SubstitutionFilter(Filter):
+    """Performas a regular expression substitution on the token text.
+    
+    This is especially useful for removing text from tokens, for example
+    hyphens::
+    
+        ana = RegexTokenizer(r"\\S+") | SubstitutionFilter("-", "")
+        
+    Because it has the full power of the re.sub() method behind it, this filter
+    can perform some fairly complex transformations. For example, to take tokens
+    like ``'a=b', 'c=d', 'e=f'`` and change them to ``'b=a', 'd=c', 'f=e'``::
+    
+        # Analyzer that swaps the text on either side of an equal sign
+        ana = RegexTokenizer(r"\\S+") | SubstitutionFilter("([^/]*)/(./*)", r"\\2/\\1")
+    """
+    
+    def __init__(self, pattern, replacement):
+        """
+        :param pattern: a pattern string or compiled regular expression object
+            describing the text to replace.
+        :param replacement: the substitution text.
+        """
+        
+        if isinstance(pattern, basestring):
+            pattern = re.compile(pattern, re.UNICODE)
+        self.pattern = pattern
+        self.replacement = replacement
+    
+    def __eq__(self, other):
+        return (other and self.__class__ is other.__class__
+                and self.pattern == other.pattern
+                and self.replacement == other.replacement)
+    
+    def __call__(self, tokens):
+        pattern = self.pattern
+        replacement = self.replacement
+        
+        for t in tokens:
+            t.text = pattern.sub(replacement, t.text)
+            yield t
+
 
 # Analyzers
 
@@ -1482,8 +1782,9 @@ def StandardAnalyzer(expression=r"\w+(\.?\w+)*", stoplist=STOP_WORDS,
         than matching on the expression.
     """
     
-    ret = RegexTokenizer(expression=expression, gaps=gaps)
-    chain = ret | LowercaseFilter()
+#     ret = RegexTokenizer(expression=expression, gaps=gaps)
+#     chain = ret | LowercaseFilter()
+    chain = RegexTokenizer(expression=expression, gaps=gaps, lowercase=True)
     if stoplist is not None:
         chain = chain | StopFilter(stoplist=stoplist, minsize=minsize,
                                    maxsize=maxsize)

@@ -1698,6 +1698,11 @@ class SearchReplaceOperation:
         if self.searchStr == u"":
             self.searchOpTree = AllWikiPagesNode(self)
             return
+        
+        if self.indexSearch != "no":
+            # Search tree not used, but non-None value needed
+            self.searchOpTree = AllWikiPagesNode(self)
+            return
 
         if not self.booleanOp:
             self.searchOpTree = self._buildSearchTerm(self.searchStr)
@@ -1807,6 +1812,54 @@ class SearchReplaceOperation:
                 self.cycleToStart)
 
 
+    def getWhooshIndexQuery(self, wikiDocument):
+        from whoosh.qparser import QueryParser
+
+        qp = QueryParser("content", schema=wikiDocument.getWhooshIndexSchema())
+        q = qp.parse(self.searchStr)
+#         print "--getWhooshIndexQuery10", repr((qp, q))
+
+        return q
+
+
+    def hasWhooshHighlighting(self):
+        """
+        Return True iff call to highlightWhooshIndexFound() would work.
+        """
+        return self.indexSearch == "default"
+
+
+    def highlightWhooshIndexFound(self, content, docPage, before, after,
+            formatter=None):
+        """
+        Retrieve formatted output with highlighted search hits for a page.
+        formatter -- whoosh formatter or None (uses SimpleHtmlFormatter then)
+        """
+        if docPage is None:
+            return
+        
+        from whoosh import highlight
+
+        # TODO: Loop invariant, move out?
+        q = self.getWhooshIndexQuery(docPage.getWikiDocument())
+        
+        # Extract the terms the user mentioned
+        terms = [text for fieldname, text in q.all_terms()
+                if fieldname == "content"]
+        
+        analyzer = docPage.getWikiDocument().getWhooshIndexContentAnalyzer()
+        
+        # TODO: Length of before and after from config
+        fragmenter = highlight.ContextFragmenter(terms, (before + after) * 2,
+                before, after)
+
+        if formatter is None:
+            formatter = highlight.SimpleHtmlFormatter()
+        
+        return highlight.highlight(content, terms, analyzer,
+                     fragmenter, formatter, top=1)
+
+
     def hasParticularTextPosition(self):
         if self.indexSearch != "no":
             return False   # TODO!
@@ -1854,13 +1907,13 @@ class SearchReplaceOperation:
 
         if self.searchOpTree is None:
             self.rebuildSearchOpTree()
-        
+
         if commonCache is None:
             commonCache = {}
-            
+
         self.listWikiPagesOp.beginWikiSearch(wikiDocument,
                 commonCache=commonCache)
-            
+
         return self.searchOpTree.beginWikiSearch(wikiDocument,
                 commonCache=commonCache)
 

@@ -10,6 +10,7 @@ import string, codecs, types, traceback
 from os import mkdir, unlink, rename
 from os.path import exists, join
 
+import Consts
 from pwiki.WikiExceptions import *
 from pwiki.StringOps import mbcsDec, mbcsEnc, utf8Enc, utf8Dec, applyBinCompact, \
         removeBracketsFilename, pathEnc, getFileSignatureBlock, \
@@ -994,9 +995,21 @@ def updateDatabase2(connwrap):
     Performs further updates
     """
     try:
-        # Write which version at last wrote to database
+        # Write which format version at last wrote to database
         connwrap.execSql("insert or replace into settings(key, value) "
                 "values ('lastwritever', '"+str(VERSION_DB)+"')")
+
+        # Write which program version at last wrote to database
+        connwrap.execSql("insert or replace into settings(key, value) "
+                "values ('lastwriteprogver.branchtag', '"+Consts.VERSION_TUPLE[0]+"')")
+        connwrap.execSql("insert or replace into settings(key, value) "
+                "values ('lastwriteprogver.major', '"+str(Consts.VERSION_TUPLE[1])+"')")
+        connwrap.execSql("insert or replace into settings(key, value) "
+                "values ('lastwriteprogver.minor', '"+str(Consts.VERSION_TUPLE[2])+"')")
+        connwrap.execSql("insert or replace into settings(key, value) "
+                "values ('lastwriteprogver.sub', '"+str(Consts.VERSION_TUPLE[3])+"')")
+        connwrap.execSql("insert or replace into settings(key, value) "
+                "values ('lastwriteprogver.patch', '"+str(Consts.VERSION_TUPLE[4])+"')")
     except sqlite.ReadOnlyDbError:
         pass
 

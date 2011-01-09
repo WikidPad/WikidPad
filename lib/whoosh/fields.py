@@ -64,24 +64,32 @@ class FieldType(object):
       fields marked as 'unique' to find the previous version of a document
       being updated.
       
+    * multitoken_query is a string indicating what kind of query to use when
+      a "word" in a user query parses into multiple tokens. The string is
+      interpreted by the query parser. The strings understood by the default
+      query parser are "first" (use first token only), "and" (join the tokens
+      with an AND query), "or" (join the tokens with OR), and "phrase" (join
+      the tokens with a phrase query).
+     
     The constructor for the base field type simply lets you supply your own
     configured field format, vector format, and scorable and stored values.
     Subclasses may configure some or all of this for you.
-    
     """
     
     format = vector = scorable = stored = unique = None
     indexed = True
+    multitoken_query = "first"
     __inittypes__ = dict(format=Format, vector=Format,
                          scorable=bool, stored=bool, unique=bool)
     
     def __init__(self, format, vector=None, scorable=False, stored=False,
-                 unique=False):
+                 unique=False, multitoken_query="first"):
         self.format = format
         self.vector = vector
         self.scorable = scorable
         self.stored = stored
         self.unique = unique
+        self.multitoken_query = multitoken_query
     
     def __repr__(self):
         temp = "%s(format=%r, vector=%r, scorable=%s, stored=%s, unique=%s)"

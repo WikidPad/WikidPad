@@ -740,13 +740,17 @@ lib/whoosh/lang/dmetaphone.py -text
 lib/whoosh/lang/lovins.py -text
 lib/whoosh/lang/morph_en.py -text
 lib/whoosh/lang/paicehusk.py -text
+lib/whoosh/lang/phonetic.py -text
 lib/whoosh/lang/porter.py -text
 lib/whoosh/lang/porter2.py -text
 lib/whoosh/lang/wordnet.py -text
 lib/whoosh/matching.py -text
 lib/whoosh/qparser/__init__.py -text
+lib/whoosh/qparser/common.py -text
 lib/whoosh/qparser/dateparse.py -text
 lib/whoosh/qparser/default.py -text
+lib/whoosh/qparser/plugins.py -text
+lib/whoosh/qparser/syntax.py -text
 lib/whoosh/query.py -text
 lib/whoosh/ramdb/__init__.py -text
 lib/whoosh/ramdb/ramindex.py -text

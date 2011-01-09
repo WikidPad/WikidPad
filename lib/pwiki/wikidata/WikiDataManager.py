@@ -1,5 +1,6 @@
 from __future__ import with_statement
 
+
 from weakref import WeakValueDictionary
 import os, os.path, time, shutil, traceback
 from threading import RLock, Thread, Condition
@@ -1290,7 +1291,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 step += 1
             
             if self.isSearchIndexEnabled():
-                # Step four: update reverse index
+                # Step four: update index
                 for wikiWord in wikiWords:
                     progresshandler.update(step, _(u"Update index of %s") % wikiWord)
                     try:
@@ -1595,39 +1596,53 @@ class WikiDataManager(MiscEventSourceMixin):
             threadstop.testRunning()
             return result
         else:
-            # Processing reverse index search
-            from whoosh.qparser import QueryParser
-            
+            # Processing index search
             threadstop.testRunning()
             if not self.isSearchIndexEnabled():
                 return []
 
-            qp = QueryParser("content", schema=self._getSearchIndexSchema())
-            q = qp.parse(sarOp.searchStr)
+            q = sarOp.getWhooshIndexQuery(self)
             s = self.getSearchIndex().searcher()
             threadstop.testRunning()
-            resultList = s.search(q)
+            resultList = s.search(q, limit=None)
+            
+#             docnumList = [(rd.docnum, rd["unifName"]) for rd in resultList]
+#             
+#             docnumList.sort()
+#             docpp = "\n".join(["%3i %s" % rd for rd in docnumList])
+# 
+#             print "--docResults"
+#             print docpp.encode("mbcs", "replace")
+
             result = [rd["unifName"][9:] for rd in resultList
                     if rd["unifName"].startswith(u"wikipage/")]
             
             threadstop.testRunning()
             return result
 
-    
+
+    @staticmethod
+    def getWhooshIndexContentAnalyzer():
+        from whoosh.analysis import StandardAnalyzer        
+        return StandardAnalyzer(stoplist=None)
+
+
+
     _REV_SEARCH_INDEX_SCHEMA = None
     
     @staticmethod
-    def _getSearchIndexSchema():
+    def getWhooshIndexSchema():
         if WikiDataManager._REV_SEARCH_INDEX_SCHEMA is None:
             from whoosh.fields import Schema, ID, NUMERIC, TEXT
-            from whoosh.analysis import StandardAnalyzer
             
             WikiDataManager._REV_SEARCH_INDEX_SCHEMA = Schema(
                     unifName=ID(stored=True, unique=True),
                     modTimestamp=NUMERIC(), content=TEXT(
-                    analyzer=StandardAnalyzer(stoplist=None)))
+                    analyzer=WikiDataManager.getWhooshIndexContentAnalyzer()))
 
         return WikiDataManager._REV_SEARCH_INDEX_SCHEMA
+    
+    
 
 
     def getFinalMetaDataState(self):
@@ -1686,7 +1701,7 @@ class WikiDataManager(MiscEventSourceMixin):
                 os.mkdir(indexPath)
 
             if clear or not whoosh.index.exists_in(indexPath):
-                schema = self._getSearchIndexSchema()
+                schema = self.getWhooshIndexSchema()
                 whoosh.index.create_in(indexPath, schema)
 
             self.whooshIndex = whoosh.index.open_dir(indexPath)
@@ -1740,36 +1755,6 @@ class WikiDataManager(MiscEventSourceMixin):
 #             self.updateExecutor.start()
 
 
-
-    def putIntoSearchIndex(self, wikiPage):
-        """
-        Add or update the reverse index for the given docPage
-        """
-        if not self.isSearchIndexEnabled():
-            return
-
-        if isinstance(wikiPage, AliasWikiPage):
-            wikiPage = WikiPage(self, wikiWord)
-
-        content = wikiPage.getLiveText()
-
-        try:
-            searchIdx = self.getSearchIndex()
-            writer = searchIdx.writer()
-            
-            unifName = wikiPage.getUnifiedPageName()
-            
-            writer.delete_by_term("unifName", unifName)
-            writer.add_document(unifName=unifName,
-                    modTimestamp=wikiPage.getTimestamps()[0],
-                    content=content)
-        except:
-            writer.cancel()
-            raise
-
-        writer.commit()
-        
-    
     def removeFromSearchIndex(self, unifName):
         if not self.isSearchIndexEnabled():
             return

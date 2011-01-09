@@ -1,8 +1,6 @@
 # -*- coding: iso8859-1 -*-
 from __future__ import with_statement
 
-## import hotshot
-## _prof = hotshot.Profile("hotshot.prf")
 ## import profilehooks
 ## profile = profilehooks.profile(filename="profile.prf", immediate=False)
 

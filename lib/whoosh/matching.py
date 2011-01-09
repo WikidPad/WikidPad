@@ -251,7 +251,7 @@ class ListMatcher(Matcher):
     """
     
     def __init__(self, ids, weights=None, values=None, format=None,
-                 scorer=None, position=0):
+                 scorer=None, position=0, all_weights=None):
         """
         :param ids: a list of doc IDs.
         :param weights: a list of weights corresponding to the list of IDs.
@@ -266,6 +266,7 @@ class ListMatcher(Matcher):
         
         self._ids = ids
         self._weights = weights
+        self._all_weights = all_weights
         self._values = values
         self._i = position
         self._format = format
@@ -318,7 +319,9 @@ class ListMatcher(Matcher):
         self._i += 1
     
     def weight(self):
-        if self._weights:
+        if self._all_weights:
+            return self._all_weights
+        elif self._weights:
             return self._weights[self._i]
         else:
             return 1.0
@@ -1022,13 +1025,19 @@ class InverseMatcher(WrappingMatcher):
         if child.is_active() and child.id() < self._id:
             child.skip_to(self._id)
         
-        while (self._id < self.limit
-               and ((child.is_active() and self._id == child.id())
-                    or missing(self._id))):
-            self._id += 1
-            if child.is_active():
+        # While self._id is missing or is in the child matcher, increase it
+        while child.is_active() and self._id < self.limit:
+            if missing(self._id):
+                self._id += 1
+                continue
+
+            if self._id == child.id():
+                self._id += 1
                 child.next()
-    
+                continue
+            
+            break
+        
     def id(self):
         return self._id
     

@@ -341,8 +341,14 @@ class GraphVizBaseHandler:
             # Run external application
 #             childIn, childOut, childErr = os.popen3(cmdline, "b")
             popenObject = subprocess.Popen(cmdline, shell=True,
-                    stderr=subprocess.PIPE)
+                    stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                    stdin=subprocess.PIPE)
             childErr = popenObject.stderr
+
+            # See http://bytes.com/topic/python/answers/634409-subprocess-handle-invalid-error
+            # why this is necessary
+            popenObject.stdin.close()
+            popenObject.stdout.close()
 
             if u"noerror" in [a.strip() for a in insParams]:
                 childErr.read()
