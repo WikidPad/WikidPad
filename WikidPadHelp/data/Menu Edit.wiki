@@ -9,10 +9,9 @@ Redo last editing.
 ++ Search and Replace
 Do search or replace operation on a single page.
 
-++ Cut
-++ Copy
-++ Paste
-Usual clipboard operations in text editor. For the HTML preview only "Copy" can be used.
+++ Cut, Copy and Paste
+The usual clipboard operations, as in any text editor.
+Note: From the HTML preview, only "Copy" may be used, of course, as there is no editing possible.
 
 ++ Copy to ScratchPad
 Copy selected text to the special ScratchPad page which is automatically inserted into each WikidPad wiki.

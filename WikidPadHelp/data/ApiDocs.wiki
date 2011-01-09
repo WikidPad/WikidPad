@@ -1,14 +1,13 @@
 ﻿++ wikidPad Hooks
 
-Under the wikidPad install directory:
+Under the directory where wikidPad is installed, there is a sub directory called "extensions".  
 
-file:///C|/Program%20Files/WikidPad by default
+(Note: Under MS-Windows, this install directory is file:///C|/Program%20Files/WikidPad by default.)
 
-There is a directory called "extensions".  In this folder there is a
-file called "wikidpadhooks.py". If you know Python you can extend
-wikidPad by hooking into the events sent to the methods defined
-in this file. For example, you could integrate wikidPad with cvs
-by plugging into the onopen, onsave, ondelete, onrename events.
+In this install folder there is a file called "wikidpadhooks.py".
+
+If you know Python you can extend wikidPad by hooking into the events sent to the methods defined
+in this file. For example, you could integrate wikidPad with a cvs system by plugging into the onopen, onsave, ondelete, onrename events.
 
 file:///C|/Program%20Files/WikidPad/extensions/WikidPadHooks.py
 file:///C|/Program%20Files/WikidPad/user_extensions/WikidPadHooks.py
