@@ -47,7 +47,7 @@ Inserts current date in editor
 Set format of the date you can insert.
 
 +++ Auto-Wrap
-Automatically wrap long linesd to fit on screen
+Automatically wrap long lines in order to fit on screen
 
 +++ Auto-Indent
 When hitting return, the indentation of current line is copied for next line.
