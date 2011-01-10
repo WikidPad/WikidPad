@@ -1,6 +1,6 @@
 ﻿++ Application Configuration Files
 
-Application configuration files mean here.
+Application configuration files mean here:
 
 	* the application-wide configuration files "WikidPad.config"; and
 	* the directory ".WikidPadGlobals" with all contained files.

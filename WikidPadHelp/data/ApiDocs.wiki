@@ -1,6 +1,6 @@
 ﻿++ wikidPad Hooks
 
-Under the directory where wikidPad is installed, there is a sub directory called "extensions".  
+Under the directory where wikidPad is installed, there is a subdirectory called "extensions".  
 
 (Note: Under MS-Windows, this install directory is file:///C|/Program%20Files/WikidPad by default.)
 
