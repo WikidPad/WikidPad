@@ -1685,10 +1685,8 @@ class WikiDataManager(MiscEventSourceMixin):
         Opens (or creates if necessary) the whoosh search index and returns it.
         It also automatically refreshes the index to the latest version if needed.
         """
-#         print "--getSearchIndex1"
         if not self.isSearchIndexEnabled():
             return None
-#         print "--getSearchIndex4"
         
         import whoosh.index, whoosh.writing
 
@@ -2055,10 +2053,10 @@ class WikiDataManager(MiscEventSourceMixin):
                 attrs = miscevt.getProps().copy()
                 attrs["wikiPage"] = miscevt.getSource()
                 self.fireMiscEventProps(attrs)
-                miscevt.getSource().putIntoSearchIndex()
+#                 miscevt.getSource().putIntoSearchIndex()
             elif miscevt.has_key("saving new wiki page"):            
                 self.autoLinkRelaxInfo = None
-                miscevt.getSource().putIntoSearchIndex()
+#                 miscevt.getSource().putIntoSearchIndex()
             elif miscevt.has_key("reread cc blacklist needed"):
                 self._updateCcWordBlacklist()
 

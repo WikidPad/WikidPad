@@ -1517,16 +1517,26 @@ class WikiPage(AbstractWikiPage):
     def _refreshMetaData(self, pageAst, formatDetails, fireEvent=True,
             threadstop=DUMBTHREADSTOP):
 
+        # Step 1: Refresh attributes
         self.refreshAttributesFromPageAst(pageAst, threadstop=threadstop)
 
+        # Some attributes control format details so check if attribute
+        # refresh changed the details
         formatDetails2 = self.getFormatDetails()
         if not formatDetails.isEquivTo(formatDetails2):
             # Formatting details have changed -> stop and wait for
             # new round to update
             return False
 
-        return self.refreshMainDbCacheFromPageAst(pageAst, fireEvent=fireEvent,
+        # Step 2: Refresh todos, link structure ...
+        self.refreshMainDbCacheFromPageAst(pageAst, fireEvent=fireEvent,
                 threadstop=threadstop)
+
+        # Step 3: Update index search data
+        self.putIntoSearchIndex(threadstop=threadstop)
+        
+        return True
+
 
 
     def refreshSyncUpdateMatchTerms(self):
@@ -1739,6 +1749,8 @@ class WikiPage(AbstractWikiPage):
         Add or update the index for the given docPage
         """
         with self.textOperationLock:
+            threadstop.testRunning()
+
             if not self.getWikiDocument().isSearchIndexEnabled():
                 return True  # Or false?
             
@@ -1815,7 +1827,7 @@ class WikiPage(AbstractWikiPage):
     
             if step == -1:
                 self._refreshMetaData(pageAst, formatDetails, threadstop=threadstop)
-    
+
                 with self.textOperationLock:
                     if not liveTextPlaceHold is self.liveTextPlaceHold:
                         return False

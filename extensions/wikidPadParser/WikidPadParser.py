@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2010-12-25
+# Last modified (format YYYY-MM-DD): 2011-01-12
 
 
 import locale, pprint, time, sys, string, traceback
@@ -12,6 +12,7 @@ from textwrap import fill
 import wx
 
 import re    # from pwiki.rtlibRepl import re
+from pwiki.WikiExceptions import *
 from pwiki.StringOps import UPPERCASE, LOWERCASE, revStr
 from pwiki.WikiDocument import WikiDocument
 from pwiki.OptionsDialog import PluginOptionsPanel
@@ -1981,7 +1982,10 @@ class _TheHelper(object):
         if mat:
             # In an anchor of a possible bracketed wiki word
             tofind = line[-mat.end():]
-            wikiWord = revStr(mat.group("wikiWord"))
+            wikiLinkCore = revStr(mat.group("wikiWord"))
+            wikiWord = _TheHelper.resolvePrefixSilenceAndWikiWordLink(
+                    wikiLinkCore, docPage)[2]
+
             anchorBegin = revStr(mat.group("anchorBegin"))
 
             try:
@@ -1990,7 +1994,7 @@ class _TheHelper(object):
                         if a.startswith(anchorBegin)]
 
                 for a in anchors:
-                    backStepMap[BracketStart + wikiWord +
+                    backStepMap[BracketStart + wikiLinkCore +
                             BracketEnd +
                             WikiWordAnchorStart + a] = len(tofind)
             except WikiWordNotFoundException:
@@ -2001,7 +2005,10 @@ class _TheHelper(object):
         if mat:
             # In an anchor of a possible camel case word
             tofind = line[-mat.end():]
-            wikiWord = revStr(mat.group("wikiWord"))
+            wikiLinkCore = revStr(mat.group("wikiWord"))
+            wikiWord = _TheHelper.resolvePrefixSilenceAndWikiWordLink(
+                    wikiLinkCore, docPage)[2]
+
             anchorBegin = revStr(mat.group("anchorBegin"))
 
             try:
@@ -2010,7 +2017,7 @@ class _TheHelper(object):
                         if a.startswith(anchorBegin)]
                         
                 for a in anchors:
-                    backStepMap[wikiWord + WikiWordAnchorStart +
+                    backStepMap[wikiWord + wikiLinkCore +
                             a] = len(tofind)
             except WikiWordNotFoundException:
                 # wikiWord isn't a wiki word
