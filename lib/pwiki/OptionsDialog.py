@@ -580,7 +580,7 @@ class OptionsDialog(wx.Dialog):
 
 
             ("editor_useImeWorkaround", "cbEditorUseImeWorkaround", "b"),
-
+            ("menu_accels_kbdTranslate", "cbMenuAccelsKbdTranslate", "b"),
 
             ("auto_save", "cbAutoSave", "b"),
             ("auto_save_delay_key_pressed", "tfAutoSaveDelayKeyPressed", "i0+"),

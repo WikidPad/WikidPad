@@ -2,7 +2,7 @@
 OS abstraction
 """
 
-import os, shutil, os.path, traceback
+import os, shutil, os.path, re, traceback
 import wx
 
 from . import Configuration
@@ -149,4 +149,51 @@ else:
             return GtkHacks.ClipboardCatchFakeIceptor(callingWindow)
         
 
+if WindowsHacks:
+    _ACCEL_KEY_MAPPING = None
+    
+    def translateAcceleratorByKbLayout(accStr):
+        global _ACCEL_KEY_MAPPING
 
+        cm = re.match(ur"(.+?[\+\-])(.) *$", accStr)
+        if not cm:
+            return accStr
+        
+        if not _ACCEL_KEY_MAPPING:
+            # Build mapping
+            
+            result = {}
+            
+            # The order to scan for matches is important:
+            # 1. Uppercase letters
+            # 2. Digits
+            # 3. Remaining ASCII codes
+            
+            for char in range(0x41, 0x5b) + range(0x30, 0x3a) + \
+                    range(0x20, 0x30) + range(0x3a, 0x41) + range(0x5b, 0x7f):
+                ks = WindowsHacks.VkKeyScan(unichr(char))
+                vkCode = ks & 0xff
+                if vkCode == 0:
+                    continue
+                
+                targetChar = WindowsHacks.MapVirtualKey(vkCode, 2) & 0xffff
+                
+                if targetChar == 0:
+                    continue
+                
+                targetChar = unichr(targetChar).upper()
+                
+                if targetChar in result:
+                    continue
+
+                result[targetChar] = unichr(char)
+
+            _ACCEL_KEY_MAPPING = result
+
+        return cm.group(1) + _ACCEL_KEY_MAPPING.get(cm.group(2), cm.group(2))
+
+
+
+else:
+    def translateAcceleratorByKbLayout(accStr):
+        return accStr

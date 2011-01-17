@@ -341,6 +341,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         if not wikiToOpen:
             wikiToOpen = self.configuration.get("main", "last_wiki")
 
+        # Prepare accelerator translation before initializing GUI
+        if self.configuration.getboolean("main", "menu_accels_kbdTranslate", False):
+            self.translateMenuAccelerator = OsAbstract.translateAcceleratorByKbLayout
+        else:
+            self.translateMenuAccelerator = lambda x: x
+
         # initialize the GUI
         self.initializeGui()
 
@@ -666,7 +672,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         lcut = label.split(u"\t", 1)
         if len(lcut) > 1:
+            lcut[1] = self.translateMenuAccelerator(lcut[1])
             label = lcut[0] + u" \t" + lcut[1]
+
 
         menuitem = wx.MenuItem(menu, menuID, label + u" ", text, kind)
         bitmap = self.resolveIconDescriptor(icondesc)
@@ -1819,7 +1827,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         for i in range(1,7):
             self.addMenuItem(evaluationMenu,
-                    (_(u'Run Function &%i') + u'\tCtrl-%i') % (i, i),
+                    _(u'Run Function &%i') % i +
+                    self.translateMenuAccelerator(u'\tCtrl-%i' % i),
                     _(u'Run script function %i') % i,
                     lambda evt, i=i: self.getActiveEditor().evalScriptBlocks(i))
 

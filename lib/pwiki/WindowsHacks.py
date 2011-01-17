@@ -192,6 +192,19 @@ MultiByteToWideChar = _kernel32dll.MultiByteToWideChar
 #    );
 
 
+MapVirtualKey = _user32dll.MapVirtualKeyW
+MapVirtualKey.restype = c_uint
+# UINT MapVirtualKey(UINT uCode,
+#     UINT uMapType
+# );
+
+
+VkKeyScan = _user32dll.VkKeyScanW
+VkKeyScan.argtypes = [ctypes.c_wchar]
+# SHORT VkKeyScan(          TCHAR ch
+# );
+
+
 
 WindowProcType = ctypes.WINFUNCTYPE(ctypes.c_uint, ctypes.c_int, ctypes.c_uint,
         ctypes.c_uint, ctypes.c_ulong)
@@ -202,6 +215,7 @@ WindowProcType = ctypes.WINFUNCTYPE(ctypes.c_uint, ctypes.c_int, ctypes.c_uint,
 #     WPARAM wParam,	// first message parameter
 #     LPARAM lParam 	// second message parameter
 #    );
+
 
 
 try:
@@ -502,6 +516,11 @@ except:
     if Configuration.isWindows():
         traceback.print_exc()
 
+
+def virtualKeyToChar(vk):
+    result = MapVirtualKey(vk, 2)
+    deadKey = result & 0x80000000
+    return deadKey, result #& 0xffff
 
 
 
