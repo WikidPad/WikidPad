@@ -13,7 +13,7 @@ from pwiki.wxHelper import GUI_ID, wxKeyFunctionSink, cloneFont, \
 from pwiki.StringOps import formatWxDate
 
 from pwiki.WindowLayout import setWindowPos, setWindowClientSize, LayeredControlPanel
-from pwiki.Configuration import isWindows
+from pwiki.SystemInfo import isWindows
 
 from TimePresentationBase import TimePresentationBase
 

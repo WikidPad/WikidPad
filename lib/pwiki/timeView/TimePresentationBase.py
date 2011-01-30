@@ -9,7 +9,7 @@ import wx
 from pwiki.wxHelper import GUI_ID, wxKeyFunctionSink, cloneFont, \
         getAccelPairFromKeyDown, appendToMenuByMenuDesc
 
-from pwiki.Configuration import isWindows
+from pwiki.SystemInfo import isWindows
 
 from WikiWordListPopup import WikiWordListPopup
 

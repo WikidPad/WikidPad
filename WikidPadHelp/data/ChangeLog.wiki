@@ -1,7 +1,42 @@
 ﻿++ Change Log
 
+Jan. 30, 2011 (2.1beta11)
 
-Dec. 27, 2010 (2.1rc10)
+This version needs a rebuild of the index if you enabled indexed
+search. This is done automatically in the background but may
+initially lead to higher CPU load and incomplete results of index
+searches.
+
+Creators of derived WikidPad parsers should merge changes from
+official parser
+
+    * Option for translating menu accelerators for special keyboard
+      layouts where ctrl-level has other layout than base level.
+      See [OptionsDialog#*Translate menu accelerators for keyboard layout*]
+    * Option to show iframe content from external sources inside
+      the HTML IE preview.
+      See [Options HTML preview_export#*Show iframes inside IE preview*]
+    * Experimental: Windows: Option to let scroll-wheel scroll
+      windows under pointer. Doesn't work for some windows.
+      See [OptionsDialog#*Scroll under pointer*]
+    * Index search: Highlight found terms and jump to one found
+      term on double-click
+    * Removed plus signs in front of headings in page structure
+      view, used indentation instead
+
+    * Several bug fixes regarding "whoosh" (index search)
+    * Bug fixed: Windows: "Invalid handle" error on command line
+      bridge insertion plugins
+    * Bug fixed: Autocompletion for anchors treated wiki links as
+      wiki words (no relative or absolute paths supported)
+
+    * Internal, index search: Store a format number for search
+      index and rebuild index if number doesn't match the format
+      of current WikidPad version
+
+
+
+Dec. 27, 2010 (2.1beta10)
 
 Creators of derived WikidPad parsers should merge changes from
 official parser

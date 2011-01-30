@@ -375,7 +375,13 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             self.passNavigate -= 1
             return
             
+        if (not (Flags[0] and iewin.NAV_Hyperlink)) and \
+                self.presenter.getConfig().getboolean("main",
+                "html_preview_ieShowIframes", False):
+            return
+
         href = URL[0]
+        
         if self.drivingMoz:
             internaljumpPrefix = u"file://internaljump/"
         else:

@@ -2,12 +2,12 @@ import traceback
 
 import wx
 
-from MiscEvent import MiscEventSourceMixin
-from StringOps import escapeForIni, unescapeForIni
+from .MiscEvent import MiscEventSourceMixin
+from .StringOps import escapeForIni, unescapeForIni
 
-from Configuration import isLinux
+from .SystemInfo import isLinux
 
-from wxHelper import LayerSizer, ProxyPanel
+from .wxHelper import LayerSizer, ProxyPanel
 
 
 class WinLayoutException(Exception):

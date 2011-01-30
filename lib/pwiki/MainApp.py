@@ -21,6 +21,7 @@ from WikiExceptions import *
 from PersonalWikiFrame import PersonalWikiFrame
 from StringOps import mbcsDec, createRandomString, pathEnc, \
         writeEntireFile, loadEntireFile
+import SystemInfo
 from CmdLineAction import CmdLineAction
 from Serialization import SerializeStream
 import Ipc
@@ -32,8 +33,8 @@ from PluginManager import PluginManager, InsertionPluginManager
 
 
 # For wx.GetOsVersion()
-wxWINDOWS_NT = Configuration.wxWINDOWS_NT
-wxWIN95 = Configuration.wxWIN95
+wxWINDOWS_NT = SystemInfo.wxWINDOWS_NT
+wxWIN95 = SystemInfo.wxWIN95
 
 
 
@@ -119,7 +120,7 @@ class App(wx.App, MiscEventSourceMixin):
 #         global PREVIEW_CSS
 
         self.SetAppName("WikidPad")
-        
+
 #         self._CallAfterId = wx.NewEventType()
 #         self.Connect(-1, -1, self._CallAfterId,
 #                     lambda event: event.callable(*event.args, **event.kw) )
@@ -143,7 +144,7 @@ class App(wx.App, MiscEventSourceMixin):
         self.globalConfigDir = globalConfigDir
 
         # Find/create global config subdirectory "WikidPadGlobals"
-        if Configuration.isWindows():
+        if SystemInfo.isWindows():
             defaultGlobalConfigSubDir = os.path.join(self.globalConfigDir,
                     CONFIG_GLOBALS_DIRNAME)
         else:
@@ -179,7 +180,7 @@ class App(wx.App, MiscEventSourceMixin):
         self.globalConfig = self.createGlobalConfiguration()
 
         # Find/create global config file "WikidPad.config"
-        if Configuration.isWindows():
+        if SystemInfo.isWindows():
             defaultGlobalConfigLoc = os.path.join(self.globalConfigDir,
                     CONFIG_FILENAME)
         else:
@@ -477,6 +478,41 @@ class App(wx.App, MiscEventSourceMixin):
         """
         pass
         
+        
+    def FilterEvent(self, evt):
+        if isinstance(evt, wx.MouseEvent) and \
+                wx.wxEVT_MOUSEWHEEL == evt.GetEventType():
+                    
+            oldObj = evt.GetEventObject()
+
+            scPos = evt.GetEventObject().ClientToScreen(evt.GetPositionTuple())
+            wnd = wx.FindWindowAtPoint(scPos)
+            if wnd is not None and wnd is not oldObj:
+#                 newPos = wnd.ScreenToClient(scPos)
+                evt.m_x, evt.m_y = 0, 0 # newPos
+                evt.SetEventObject(wnd)
+                
+                scrollUnits = (evt.GetWheelRotation() // evt.GetWheelDelta()) * evt.GetLinesPerAction()
+                
+                if isinstance(wnd, wx.ScrolledWindow):
+                    x, y = wnd.GetViewStart()
+                    wnd.Scroll(x, y - scrollUnits)
+#                 elif isinstance(wnd, wx.ListCtrl):
+#                     print "--FilterEvent31", repr(wnd.HasScrollbar(wx.VERTICAL))
+                    
+#                 elif wnd.HasScrollbar(wx.VERTICAL):
+# #                     print "--FilterEvent31"
+#                     y = wnd.GetScrollPos(wx.VERTICAL)
+#                     wnd.SetScrollPos(wx.VERTICAL, y - scrollUnits)
+                else:
+#                     print "--FilterEvent45", repr(((evt.GetEventObject()), scrollUnits, wnd.HasScrollbar(wx.VERTICAL)))                    
+                    wnd.ProcessEvent(evt)
+
+                return 1
+                
+        result = wx.App.FilterEvent(self, evt)
+        return result
+        
 
     def pauseBackgroundThreads(self):
         self.fireMiscEventKeys(("pause background threads",))
@@ -511,6 +547,11 @@ class App(wx.App, MiscEventSourceMixin):
             except:
                 self.collator = Localization.getCollatorByString(u"C",
                         collationCaseMode)
+        
+        self.SetCallFilterEvent(self.globalConfig.getboolean("main",
+                "mouse_scrollUnderPointer"))
+        
+
 
 
     def OnEndSession(self, evt):
@@ -673,7 +714,7 @@ class App(wx.App, MiscEventSourceMixin):
         """
         Add option page to global plugin options 
         
-        factory -- Factory function (or class taking parameters
+        factory -- Factory function taking parameters
             (parent, optionsDlg, mainControl) where
                 parent: GUI parent of panel
                 optionsDlg: OptionsDialog object

@@ -7,7 +7,7 @@ import urllib_red as urllib
 
 import wx, wx.xrc
 
-from wxHelper import XrcControls
+from .wxHelper import XrcControls
 
 
 import Consts
@@ -244,6 +244,7 @@ class MultiPageTextImporter:
                                 ");"
                                 )
     
+                        # Dependencies. If unifName isn't imported (or faulty), neededBy shouldn't be either
                         self.tempDb.execSql("create table depgraph("
                                 "unifName text not null default '',"
                                 "neededBy text not null default '',"

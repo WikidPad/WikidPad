@@ -13,13 +13,13 @@ from wxHelper import GUI_ID, XrcControls, getAccelPairFromKeyDown, \
 
 from StringOps import unescapeForIni
 
-import Configuration
+import SystemInfo
 
 
 try:
     import WindowsHacks
 except:
-    if Configuration.isWindows():
+    if SystemInfo.isWindows():
         traceback.print_exc()
     WindowsHacks = None
 
@@ -174,7 +174,7 @@ class IncrementalSearchDialog(wx.Frame):
 
         # Else don't change
 
-    if Configuration.isOSX():
+    if SystemInfo.isOSX():
         # Fix focus handling after close
         def Close(self):
             wx.Frame.Close(self)

@@ -6,21 +6,24 @@ import traceback, os, os.path, re
 import wx, wx.html
 
 from WikiExceptions import *
-from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
+
+from .SystemInfo import isWindows, isOSX
+
+from .wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
         wxKeyFunctionSink, appendToMenuByMenuDesc
 
-from MiscEvent import KeyFunctionSink
+from .MiscEvent import KeyFunctionSink
 
-import StringOps
-from StringOps import uniToGui, pathnameFromUrl, flexibleUrlUnquote
-from Configuration import isWindows, MIDDLE_MOUSE_CONFIG_TO_TABMODE, isOSX
+from . import StringOps
+from .StringOps import uniToGui, pathnameFromUrl, flexibleUrlUnquote
+from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
-import OsAbstract
+from . import OsAbstract
 
-import DocPages
-from TempFileSet import TempFileSet
+from . import DocPages
+from .TempFileSet import TempFileSet
 
-import Exporters
+from . import Exporters
 
 if isWindows():
     try:

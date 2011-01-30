@@ -5,7 +5,7 @@ from __future__ import with_statement
 ## profile = profilehooks.profile(filename="profile.prf", immediate=False)
 
 
-import os, sys, gc, traceback, string, re
+import os, os.path, sys, gc, traceback, string, re
 from os.path import *
 import time
 from time import sleep
@@ -31,7 +31,7 @@ from WikiExceptions import *
 from Consts import HOMEPAGE
 
 from . import Utilities
-from . import Configuration
+from . import SystemInfo
 from .WindowLayout import WindowSashLayouter, setWindowPos, setWindowSize
 from . import WindowLayout
 
@@ -89,7 +89,7 @@ from PluginManager import PluginManager, PluginAPIAggregation
 try:
     import WindowsHacks
 except:
-    if Configuration.isWindows():
+    if SystemInfo.isWindows():
         traceback.print_exc()
     WindowsHacks = None
 
@@ -185,7 +185,7 @@ class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
 
         # Create the "[TextBlocks].wiki" file in the global config subdirectory
         # if the file doesn't exist yet.
-        tbLoc = join(self.globalConfigSubDir, "[TextBlocks].wiki")
+        tbLoc = os.path.join(self.globalConfigSubDir, "[TextBlocks].wiki")
         if not exists(pathEnc(tbLoc)):
             writeEntireFile(tbLoc, 
 """importance: high;a=[importance: high]\\n
@@ -199,7 +199,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # Listen to application events
         wx.GetApp().getMiscEvent().addListener(self)
         
-        self.wikiPadHelp = join(self.wikiAppDir, 'WikidPadHelp',
+        self.wikiPadHelp = os.path.join(self.wikiAppDir, 'WikidPadHelp',
                 'WikidPadHelp.wiki')
         self.windowLayouter = None  # will be set by initializeGui()
 
@@ -246,9 +246,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # State here: Global configuration available
 
         # setup plugin manager and hooks API
-        dirs = ( join(self.globalConfigSubDir, u'user_extensions'),
-                join(self.wikiAppDir, u'user_extensions'),
-                join(self.wikiAppDir, u'extensions') )
+        dirs = ( os.path.join(self.globalConfigSubDir, u'user_extensions'),
+                os.path.join(self.wikiAppDir, u'user_extensions'),
+                os.path.join(self.wikiAppDir, u'extensions') )
         self.pluginManager = PluginManager(dirs)
 
 #         wx.GetApp().pauseBackgroundThreads()
@@ -422,20 +422,21 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def getExtension(self, extensionName, fileName):
-        extensionFileName = join(self.globalConfigSubDir, u'user_extensions',
-                fileName)
+        extensionFileName = os.path.join(self.globalConfigSubDir,
+                u'user_extensions', fileName)
         if exists(pathEnc(extensionFileName)):
             userUserExtension = loadEntireFile(extensionFileName, True)
         else:
             userUserExtension = None
 
-        extensionFileName = join(self.wikiAppDir, 'user_extensions', fileName)
+        extensionFileName = os.path.join(self.wikiAppDir, 'user_extensions',
+                fileName)
         if exists(pathEnc(extensionFileName)):
             userExtension = loadEntireFile(extensionFileName, True)
         else:
             userExtension = None
 
-        extensionFileName = join(self.wikiAppDir, 'extensions', fileName)
+        extensionFileName = os.path.join(self.wikiAppDir, 'extensions', fileName)
         systemExtension = loadEntireFile(extensionFileName, True)
 
         return importCode(systemExtension, userExtension, userUserExtension,
@@ -865,7 +866,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         wikiMenu.AppendSeparator()  # TODO May have two separators without anything between
 
-#         self.addMenuItem(wikiMenu, '&Test', 'Test', lambda evt: self.testIt())
+        self.addMenuItem(wikiMenu, '&Test', 'Test', lambda evt: self.testIt())
 
         menuID=wx.NewId()
         wikiMenu.Append(menuID, _(u'E&xit'), _(u'Exit'))
@@ -1133,7 +1134,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         self.openWiki(filePath, wikiWordsToOpen=(wikiWordToOpen,),
                                 anchorToOpen=anchorToOpen)
                 else:
-                    self.openWiki(abspath(entry.value))
+                    self.openWiki(os.path.abspath(entry.value))
 
         except KeyError:
             pass
@@ -1827,8 +1828,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         for i in range(1,7):
             self.addMenuItem(evaluationMenu,
-                    _(u'Run Function &%i') % i +
-                    self.translateMenuAccelerator(u'\tCtrl-%i' % i),
+                    _(u'Run Function &%i\tCtrl-%i') % (i, i),
                     _(u'Run script function %i') % i,
                     lambda evt, i=i: self.getActiveEditor().evalScriptBlocks(i))
 
@@ -1880,12 +1880,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _(u'Show &License'),
                 _(u'Show license of WikidPad and used components'),
                 lambda evt: OsAbstract.startFile(self,
-                join(self.wikiAppDir, u'license.txt')))
+                os.path.join(self.wikiAppDir, u'license.txt')))
 
 #         menuID = wx.NewId()
 #         helpMenu.Append(menuID, _(u'View &License'), _(u'View License'))
 #         wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(self, 
-#                 join(self.wikiAppDir, u'license.txt')))
+#                 os.path.join(self.wikiAppDir, u'license.txt')))
 
 
 
@@ -2214,7 +2214,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if accP != (None, None):
                 accs.append((accP[0], accP[1], menuId))
 
-        if Configuration.isLinux():   # Actually if wxGTK
+        if SystemInfo.isLinux():   # Actually if wxGTK
             accs += [(wx.ACCEL_NORMAL, fkey, GUI_ID.SPECIAL_EAT_KEY)
                     for fkey in range(wx.WXK_F1, wx.WXK_F24 + 1)] + \
                     [(wx.ACCEL_SHIFT, fkey, GUI_ID.SPECIAL_EAT_KEY)
@@ -2577,8 +2577,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
 
-#     def testIt(self):
-       
+    def testIt(self):
+        from .FileManagementGui import InfoDatabase
+
+        progresshandler = ProgressHandler(
+                _(u"     Scanning     "),
+                _(u"     Scanning     "), 0, self)
+
+        infoDb = InfoDatabase(self.getWikiDocument())
+        infoDb.createDatabase()
+        infoDb.scanFileStore()
+        infoDb.scanLinks(progresshandler)
+        
 
 
 #     def testIt(self):
@@ -2746,8 +2756,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
         wikiName = string.replace(wikiName, u" ", u"")
-        wikiDir = join(wikiDir, wikiName)
-        configFileLoc = join(wikiDir, u"%s.wiki" % wikiName)
+        wikiDir = os.path.join(wikiDir, wikiName)
+        configFileLoc = os.path.join(wikiDir, u"%s.wiki" % wikiName)
 
 #         self.statusBar.SetStatusText(uniToGui(u"Creating Wiki: %s" % wikiName), 0)
 
@@ -2787,8 +2797,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             allIsWell = True
 
-            dataDir = join(wikiDir, "data")
-            dataDir = mbcsDec(abspath(dataDir), "replace")[0]
+            dataDir = os.path.join(wikiDir, "data")
+            dataDir = mbcsDec(os.path.abspath(dataDir), "replace")[0]
 
             # create the data directory for the data files
             try:
@@ -2909,7 +2919,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         # this could be a wiki overwrite from newWiki. We don't want to overwrite
         # the new config with the old one.
 
-        wikiCombinedFilename = abspath(join(self.wikiAppDir, wikiCombinedFilename))
+        wikiCombinedFilename = os.path.abspath(os.path.join(self.wikiAppDir,
+                wikiCombinedFilename))
 
         # make sure the config exists
         cfgPath, splittedWikiWord = WikiDataManager.splitConfigPathAndWord(
@@ -3703,32 +3714,18 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def makeRelUrlAbsolute(self, relurl):
         """
         Return the absolute file: URL for a rel: URL
+        TODO: Remove
         """
-#         relpath = urllib.url2pathname(relurl[6:])
-        relpath = pathnameFromUrl(relurl[6:], False)
-
-        url = u"file:" + urlFromPathname(
-                abspath(join(dirname(self.getWikiConfigPath()), relpath)))
-
-        return url
+        return self.getWikiDocument().makeRelUrlAbsolute(relurl)
 
 
     def makeAbsPathRelUrl(self, absPath):
         """
         Return the rel: URL for an absolute file path or None if
-        a relative URL can't be created
+        a relative URL can't be created.
+        TODO: Remove
         """
-        locPath = self.getWikiConfigPath()
-
-        if locPath is None:
-            return None
-
-        locPath = dirname(locPath)
-        relPath = relativeFilePath(locPath, absPath)
-        if relPath is None:
-            return None
-
-        return u"rel://" + urlFromPathname(relPath)
+        return self.getWikiDocument().makeAbsPathRelUrl(absPath)
 
 
     def launchUrl(self, link):
@@ -3738,7 +3735,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             if link.startswith(u"rel://"):
                 # This is a relative link
-                link = self.makeRelUrlAbsolute(link)
+                link = self.getWikiDocument().makeRelUrlAbsolute(link)
 
             try:
                 OsAbstract.startFile(self, link)
@@ -4026,7 +4023,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             if self.tbIcon is None:
                 self.tbIcon = TaskBarIcon(self)
 
-            if Configuration.isLinux():
+            if SystemInfo.isLinux():
                 # On Linux, the tray icon must be resized here, otherwise
                 # it might be too large.
                 if bmp is not None:
@@ -5279,7 +5276,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         dlg = wx.FileDialog(self, _(u"Choose a Wiki to open"),
 #                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
         if path:
-            self.openWiki(mbcsDec(abspath(path), "replace")[0])
+            self.openWiki(mbcsDec(os.path.abspath(path), "replace")[0])
         else:
             if oldfocus is not None:
                 oldfocus.SetFocus()
@@ -5299,7 +5296,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             try:
                 clAction = CmdLineAction([])
                 clAction.inheritFrom(self.getCmdLineAction())
-                clAction.wikiToOpen = mbcsDec(abspath(path), "replace")[0]
+                clAction.wikiToOpen = mbcsDec(os.path.abspath(path), "replace")[0]
                 clAction.frameToOpen = 1  # Open in new frame
                 wx.GetApp().startPersonalWikiFrame(clAction)
             except Exception, e:
@@ -5322,7 +5319,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         dlg = wx.FileDialog(self, _(u"Choose a Wiki to open"),
 #                 self.getDefDirForWikiOpenNew(), "", "*.wiki", wx.OPEN)
         if path:
-            self.openWiki(mbcsDec(abspath(path), "replace")[0],
+            self.openWiki(mbcsDec(os.path.abspath(path), "replace")[0],
                     ignoreWdhName=True)
 #         dlg.Destroy()
 

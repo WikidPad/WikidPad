@@ -25,7 +25,7 @@ from WikiExceptions import *
 LINEEND_SPLIT_RE = _re.compile(r"\r\n?|\n", _re.UNICODE)
 
 
-from Configuration import isUnicode, isOSX, isLinux, isWindows, isWin9x
+from SystemInfo import isUnicode, isOSX, isLinux, isWindows, isWin9x
 
 
 # To generate dependencies for py2exe/py2app
@@ -501,6 +501,7 @@ def obfuscateShortcut(shortcut):
     """
     Necessary to prevent wxPython from interpreting e.g. CTRL+LEFT in a menu
     item as being a shortcut. I haven't found a better way.
+    Unused at the moment.
     """
     return u"".join([u"\u200B" + c for c in shortcut])
 
@@ -1023,6 +1024,9 @@ def ntPathnameFromUrl(url, testFileType=True):
         url = url[5:]
     elif testFileType:
         raise RuntimeError, 'Cannot convert non-local URL to pathname'
+    
+    # Strip fragment if present
+    url = url.split("#", 1)[0]
 
     if (not ':' in url) and (not '|' in url) and (not '%3A' in url) and (not '%3a' in url):
         # No drive specifier, just convert slashes
@@ -1079,6 +1083,10 @@ def macPathnameFromUrl(url, testFileType=True):
         url = url[2:]
     elif url[:2] == '//':
         raise RuntimeError, 'Cannot convert non-local URL to pathname'
+
+    # Strip fragment if present
+    url = url.split("#", 1)[0]
+
     components = url.split('/')
     # Remove . and embedded ..
     i = 0
@@ -1118,6 +1126,9 @@ def elsePathnameFromUrl(url, testFileType=True):
     elif testFileType:
         raise RuntimeError, 'Cannot convert non-local URL to pathname'
     
+    # Strip fragment if present
+    url = url.split("#", 1)[0]
+
     return flexibleUrlUnquote(url)
 
 

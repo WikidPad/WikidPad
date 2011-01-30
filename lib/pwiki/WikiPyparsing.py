@@ -528,8 +528,7 @@ class NonTerminalNode(SyntaxNode):
 
     def iterDeep(self, start=0):
         """
-        Iterate over all elements with the given name. If an NTNode
-        is found that is contained in deepSet, its children are searched, too.
+        Iterate over all elements.
         """
         for node in self.sub[start:]:
             yield node

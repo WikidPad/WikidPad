@@ -15,7 +15,7 @@ from MiscEvent import MiscEventSourceMixin, ProxyMiscEvent
 
 from WikiExceptions import *
 
-import Configuration
+import SystemInfo
 from StringOps import escapeForIni, pathWordAndAnchorToWikiUrl
 
 from DocPagePresenter import BasicDocPagePresenter
@@ -194,7 +194,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             config.set("main", "wiki_lastActiveTabNo", activeNo)
 
 
-    if Configuration.isLinux():
+    if SystemInfo.isLinux():
         # TODO What about WikidPadHooks?
         def prepareCurrentPresenter(self, currentPresenter):
             """
@@ -258,7 +258,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
         self.AddPage(presenter, "    ")
         presenter.getMiscEvent().addListener(self)
 
-        if Configuration.isLinux():
+        if SystemInfo.isLinux():
             presenter.Show(True)
 
         if self.getCurrentPresenter() is None:
@@ -385,7 +385,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 
 
 #     # Problem with mouse capture on Linux  (MacOS?)
-#     if Configuration.isWindows():
+#     if SystemInfo.isWindows():
 #         def CaptureMouseIfOk(self):
 #             return self.CaptureMouse()
 #         
@@ -414,7 +414,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
 #         evt.Skip()
 
 
-    if Configuration.isLinux():
+    if SystemInfo.isLinux():
         def SetSelection(self, i):
             """
             SetSelection is overwritten on Linux because Linux/GTK sets
@@ -427,7 +427,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
                 foc.SetFocus()
 
 
-#     if Configuration.isLinux():
+#     if SystemInfo.isLinux():
 #         def OnNotebookPageChanged(self, evt):
 #             try:
 #                 # Flag the event to ignore and resend it.
@@ -498,7 +498,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             self.PopupMenu(ctxMenu)
 
 
-    if Configuration.isLinux():
+    if SystemInfo.isLinux():
         # OnFocused() is not always called so a direct overwrite is necessary
         def SetFocus(self):
             if self.tabSwitchByKey == 0:
@@ -611,7 +611,7 @@ class MainAreaPanel(wx.Notebook, MiscEventSourceMixin):
             self.tabSwitchByKey = 1
 
 
-    if Configuration.isLinux():
+    if SystemInfo.isLinux():
         def OnKeyUp(self, evt):
             if self.tabSwitchByKey == 0:
                 evt.Skip()

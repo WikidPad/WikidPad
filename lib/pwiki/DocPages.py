@@ -1070,7 +1070,7 @@ class AbstractWikiPage(DataCarryingPage):
             return AbstractWikiPage._DEFAULT_PRESENTATION
 
         try:
-            # TODO: On next file format change: Change '=' to '>' 
+            # TODO: On next incompatible file format change: Change '=' to '>' 
             if len(datablock) == struct.calcsize("=iiiii"):
                 # Version 0
                 return struct.unpack("=iiiii", datablock) + (None,)

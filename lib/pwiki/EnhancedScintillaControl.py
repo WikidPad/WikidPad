@@ -11,7 +11,7 @@ from wxHelper import GUI_ID, getTextFromClipboard, WindowUpdateLocker
 
 import StringOps
 
-from Configuration import isUnicode
+from SystemInfo import isUnicode
 
 
 

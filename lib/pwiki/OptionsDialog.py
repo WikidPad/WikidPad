@@ -4,12 +4,14 @@ import wx, wx.xrc
 
 from wxHelper import *
 
+from . import SystemInfo
+
 from .StringOps import uniToGui, guiToUni, colorDescToRgbTuple,\
         rgbToHtmlColor, strToBool, splitIndent, escapeForIni, unescapeForIni
 
 from .AdditionalDialogs import DateformatDialog, FontFaceDialog
 
-from . import Configuration
+
 from . import Localization
 from . import OsAbstract
 
@@ -441,6 +443,8 @@ class OptionsDialog(wx.Dialog):
             ("html_preview_pics_as_links", "cbHtmlPreviewPicsAsLinks", "b"),
             ("html_export_pics_as_links", "cbHtmlExportPicsAsLinks", "b"),
             ("html_preview_renderer", "chHtmlPreviewRenderer", "seli"),
+            ("html_preview_ieShowIframes", "cbHtmlPreviewIeShowIframes", "b"),
+
             ("export_table_of_contents", "chTableOfContents", "seli"),
             ("html_toc_title", "tfHtmlTocTitle", "t"),
             ("html_export_singlePage_sepLineCount",
@@ -581,6 +585,7 @@ class OptionsDialog(wx.Dialog):
 
             ("editor_useImeWorkaround", "cbEditorUseImeWorkaround", "b"),
             ("menu_accels_kbdTranslate", "cbMenuAccelsKbdTranslate", "b"),
+            ("mouse_scrollUnderPointer", "cbMouseScrollUnderPointer", "b"),
 
             ("auto_save", "cbAutoSave", "b"),
             ("auto_save_delay_key_pressed", "tfAutoSaveDelayKeyPressed", "i0+"),
@@ -664,6 +669,7 @@ class OptionsDialog(wx.Dialog):
             ("OptionsPageChronView", 2 * u" " + N_(u"Chron. view")),
             ("OptionsPageSearching", 2 * u" " + N_(u"Searching")),  
             ("OptionsPageAdvanced", 2 * u" " + N_(u"Advanced")),  
+            ("OptionsPageAdvTiming", 4 * u" " + N_(u"Timing")),
             ("OptionsPageAutosave", 4 * u" " + N_(u"Autosave")),
             ("??switch mark/current wiki/begin", u""),
             ("OptionsPageCurrentWiki", N_(u"Current Wiki")),
@@ -702,7 +708,7 @@ class OptionsDialog(wx.Dialog):
         if OsAbstract.supportsClipboardInterceptor():
             self.combinedOptionToControl += self.OPTION_TO_CONTROL_CLIPBOARD_CATCHER
 
-        if not Configuration.isWindows():
+        if not SystemInfo.isWindows():
             self.combinedOptionToControl += self.OPTION_TO_CONTROL_NON_WINDOWS_ONLY
 
         if not self.pWiki.isWikiLoaded():
@@ -721,7 +727,7 @@ class OptionsDialog(wx.Dialog):
         
         for e in self.combinedPanelList:
             if isinstance(e[0], basestring):
-                if e[0] == "OptionsPageFileLauncher" and Configuration.isWindows():
+                if e[0] == "OptionsPageFileLauncher" and SystemInfo.isWindows():
                     # For Windows the OS-function is used, for other systems
                     # we need the path to an external script
                     continue
@@ -738,7 +744,7 @@ class OptionsDialog(wx.Dialog):
 
 
 
-#         if Configuration.isWindows():
+#         if SystemInfo.isWindows():
 #             self.combinedOptionToControl += self.OPTION_TO_CONTROL_CLIPBOARD_CATCHER
 # 
 #             newPL = []
@@ -906,10 +912,7 @@ class OptionsDialog(wx.Dialog):
             self.ctrls.chVersioningStorageLocation.Enable(
                     fppCap is not None)
 
-        self.OnTempHandlingTempMode(None)
-        self.OnEditorImagePasteFileTypeChoice(None)
-        self.OnWwSearchCountOccurrences(None)
-        self.OnCbSingleProcess(None)
+        self.OnUpdateUiAfterChange(None)
 
 
         # Now show the right panel
@@ -951,16 +954,19 @@ class OptionsDialog(wx.Dialog):
 
 
         wx.EVT_CHOICE(self, GUI_ID.chTempHandlingTempMode,
-                self.OnTempHandlingTempMode)
+                self.OnUpdateUiAfterChange)
 
         wx.EVT_CHOICE(self, GUI_ID.chEditorImagePasteFileType,
-                self.OnEditorImagePasteFileTypeChoice)
+                self.OnUpdateUiAfterChange)
+                
+        wx.EVT_CHOICE(self, GUI_ID.chHtmlPreviewRenderer,
+                self.OnUpdateUiAfterChange)
         
         wx.EVT_CHECKBOX(self, GUI_ID.cbWwSearchCountOccurrences,
-                self.OnWwSearchCountOccurrences)
+                self.OnUpdateUiAfterChange)
 
         wx.EVT_CHECKBOX(self, GUI_ID.cbSingleProcess,
-                self.OnCbSingleProcess)
+                self.OnUpdateUiAfterChange)
 
 
     def _refreshForPage(self):
@@ -1168,21 +1174,35 @@ class OptionsDialog(wx.Dialog):
 #             self.ctrls.tfPageStatusTimeFormat.SetValue(dlg.GetValue())
 #         dlg.Destroy()
 
-    def OnTempHandlingTempMode(self, evt):
+
+    def OnUpdateUiAfterChange(self, evt):
+        """
+        Some controls must be updated (esp. dis-/enabled) after a change.
+        """
+        # If temp. handling is set to "given" directory, field to enter
+        # directory must be enabled
         enabled = self.ctrls.chTempHandlingTempMode.GetSelection() == 2
         self.ctrls.tfTempHandlingTempDir.Enable(enabled)
         self.ctrls.btnSelectTempHandlingTempDir.Enable(enabled)
 
-    def OnEditorImagePasteFileTypeChoice(self, evt):
+        # If image should be pasted as JPEG, quality can be set
         enabled = self.ctrls.chEditorImagePasteFileType.GetSelection() == 2
         self.ctrls.tfEditorImagePasteQuality.Enable(enabled)
 
-    def OnWwSearchCountOccurrences(self, evt):
+        # If HTML preview is not internal one, allow to set if iframes should
+        # be shown inside the preview
+        self.ctrls.cbHtmlPreviewIeShowIframes.Enable(
+                self.ctrls.chHtmlPreviewRenderer.GetSelection() > 0)
+
+        # If occurrences of search terms are counted, allow to set maximum
+        # number to count up to
         self.ctrls.tfWwSearchMaxCountOccurrences.Enable(
                 self.ctrls.cbWwSearchCountOccurrences.GetValue())
 
-    def OnCbSingleProcess(self, evt):
+        # If single process mode checked, allow to check for other
+        # WikidPad processes already running
         self.ctrls.cbZombieCheck.Enable(self.ctrls.cbSingleProcess.GetValue())
+
 
 
     def OnDottedButtonPressed(self, evt):

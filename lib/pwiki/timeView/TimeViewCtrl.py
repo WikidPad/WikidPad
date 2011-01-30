@@ -9,7 +9,7 @@ import wx
 from pwiki.wxHelper import appendToMenuByMenuDesc
 
 from pwiki.WindowLayout import LayeredControlPanel
-from pwiki.Configuration import isWindows
+from pwiki.SystemInfo import isWindows
 
 from . import DatedWikiWordFilters
 

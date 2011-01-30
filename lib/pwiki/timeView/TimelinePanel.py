@@ -13,7 +13,7 @@ from ..wxHelper import GUI_ID, EnhancedListControl, wxKeyFunctionSink, cloneFont
 
 from ..StringOps import formatWxDate
 
-from ..Configuration import isWindows
+from ..SystemInfo import isWindows
 
 from .TimePresentationBase import TimePresentationBase
 

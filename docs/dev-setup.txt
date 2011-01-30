@@ -16,7 +16,7 @@ http://www.wxpython.org/
 Windows only: comtypes (used version: 0.5.2, other versions may or may not work)
 http://pypi.python.org/pypi/comtypes
 
-To create all files necessary for building a WikidPad Windows binary you 
+To create all files necessary for building a WikidPad Windows binary you
 should run WikidPad, set as HTML preview viewer "IE", run WikidPad again and
 switch at least once between editor and preview of a page.
 
@@ -75,8 +75,7 @@ Error messages like "Seen unexpected token ..." can be ignored.
 At the end of the build process there will also be a list of missing modules
 ("The following modules appear to be missing").
 The following modules can be missing without harm:
-'email.Generator', 'email.Iterators', 'gobject', 'gtk' and
-(at least currently, but may change soon) everything starting with 'whoosh'.
+'email.Generator', 'email.Iterators', 'gobject' and 'gtk'.
 
 The "dist" directory contains the final product, "build" contains intermediate
 cache files and is not needed for the actual program.

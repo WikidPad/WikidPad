@@ -3,7 +3,7 @@ This is a Windows (32 bit) specific file for handling some operations not provid
 by the OS-independent wxPython library.
 """
 
-import ctypes, os, os.path, struct, traceback
+import ctypes, os, os.path, re, struct, traceback
 from ctypes import c_int, c_uint, c_long, c_ulong, c_ushort, c_char, c_char_p, \
         c_wchar_p, c_byte, byref, create_string_buffer, create_unicode_buffer, \
         c_void_p, string_at, sizeof   # , WindowsError
@@ -13,7 +13,7 @@ import wx
 from .wxHelper import getTextFromClipboard
 
 from .StringOps import strftimeUB, pathEnc, mbcsEnc, mbcsDec   # unescapeWithRe
-from . import Configuration
+from . import SystemInfo
 from . import DocPages
 
 
@@ -513,14 +513,64 @@ def checkForOtherInstances():
 try:
     from WindowsHacksZombieCheck import checkForOtherInstances
 except:
-    if Configuration.isWindows():
+    if SystemInfo.isWindows():
         traceback.print_exc()
 
 
-def virtualKeyToChar(vk):
-    result = MapVirtualKey(vk, 2)
-    deadKey = result & 0x80000000
-    return deadKey, result #& 0xffff
+
+_ACCEL_KEY_MAPPING = None
+
+def translateAcceleratorByKbLayout(accStr):
+    global _ACCEL_KEY_MAPPING
+
+    cm = re.match(ur"(.+?[\+\-])(.) *$", accStr)
+    if not cm:
+        return accStr
+
+    if not _ACCEL_KEY_MAPPING:
+        # Build mapping
+
+        result = {}
+        
+        # Dictionary for alternative detection method
+        resultBack = {}
+
+        # The order to scan for matches is important:
+        # 1. Uppercase letters
+        # 2. Digits
+        # 3. Remaining codes
+
+        for char in range(0x41, 0x5b) + range(0x30, 0x3a) + \
+                range(0x20, 0x30) + range(0x3a, 0x41) + range(0x5b, 0xffff):
+            ks = VkKeyScan(unichr(char))
+            vkCode = ks & 0xff
+
+            if vkCode == 0:
+                continue
+
+            # Alternative method
+            targetChar = unichr(vkCode).upper()
+            if not targetChar in resultBack:
+                resultBack[targetChar] = unichr(char)
+
+
+            targetChar = MapVirtualKey(vkCode, 2) & 0xffff
+
+            if targetChar == 0:
+                continue
+
+            targetChar = unichr(targetChar).upper()
+
+            if targetChar in result:
+                continue
+
+            result[targetChar] = unichr(char)
+            
+        # If result and resultBack have a key, result wins
+        resultBack.update(result)
+        _ACCEL_KEY_MAPPING = resultBack
+
+    return cm.group(1) + _ACCEL_KEY_MAPPING.get(cm.group(2), cm.group(2))
 
 
 

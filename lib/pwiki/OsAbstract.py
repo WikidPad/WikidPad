@@ -5,7 +5,7 @@ OS abstraction
 import os, shutil, os.path, re, traceback
 import wx
 
-from . import Configuration
+from . import SystemInfo
 from .StringOps import mbcsEnc, urlQuote, pathnameFromUrl, URL_RESERVED, pathEnc
 
 
@@ -14,7 +14,7 @@ from .StringOps import mbcsEnc, urlQuote, pathnameFromUrl, URL_RESERVED, pathEnc
 try:
     import WindowsHacks
 except:
-    if Configuration.isWindows():
+    if SystemInfo.isWindows():
         traceback.print_exc()
     WindowsHacks = None
 
@@ -26,8 +26,8 @@ except:
 
 
 # Define startFile
-if Configuration.isWindows():
-    if Configuration.isWinNT() and Configuration.isUnicode() and WindowsHacks:
+if SystemInfo.isWindows():
+    if SystemInfo.isWinNT() and SystemInfo.isUnicode() and WindowsHacks:
         startFile = WindowsHacks.startFile
     else:
         def startFile(mainControl, link):
@@ -54,7 +54,7 @@ else:
 
 
 # Define copyFile
-if Configuration.isWinNT() and WindowsHacks:
+if SystemInfo.isWinNT() and WindowsHacks:
     copyFile = WindowsHacks.copyFile
     moveFile = WindowsHacks.moveFile
 else:
@@ -89,7 +89,7 @@ else:
 
 
 # Define samefile
-if Configuration.isWindows():
+if SystemInfo.isWindows():
     if WindowsHacks:
         def samefile(path1, path2):
             # Not fully reliable. Does anybody know something better?
@@ -104,6 +104,14 @@ if Configuration.isWindows():
             return os.path.abspath(path1) == os.path.abspath(path2)
 else:
     samefile = os.path.samefile
+
+
+if WindowsHacks:
+    def normalizePath(path):
+        return WindowsHacks.getLongPath(os.path.abspath(path)).lower()
+else:
+    def normalizePath(path):
+        return os.path.normcase(os.path.abspath(path))
 
 
 
@@ -131,7 +139,7 @@ def createInterceptCollection(interceptors=None):
 def createClipboardInterceptor(callingWindow):
     return None
 
-if Configuration.isWindows():
+if SystemInfo.isWindows():
     if WindowsHacks:
         def supportsClipboardInterceptor():
             return True
@@ -150,50 +158,7 @@ else:
         
 
 if WindowsHacks:
-    _ACCEL_KEY_MAPPING = None
-    
-    def translateAcceleratorByKbLayout(accStr):
-        global _ACCEL_KEY_MAPPING
-
-        cm = re.match(ur"(.+?[\+\-])(.) *$", accStr)
-        if not cm:
-            return accStr
-        
-        if not _ACCEL_KEY_MAPPING:
-            # Build mapping
-            
-            result = {}
-            
-            # The order to scan for matches is important:
-            # 1. Uppercase letters
-            # 2. Digits
-            # 3. Remaining ASCII codes
-            
-            for char in range(0x41, 0x5b) + range(0x30, 0x3a) + \
-                    range(0x20, 0x30) + range(0x3a, 0x41) + range(0x5b, 0x7f):
-                ks = WindowsHacks.VkKeyScan(unichr(char))
-                vkCode = ks & 0xff
-                if vkCode == 0:
-                    continue
-                
-                targetChar = WindowsHacks.MapVirtualKey(vkCode, 2) & 0xffff
-                
-                if targetChar == 0:
-                    continue
-                
-                targetChar = unichr(targetChar).upper()
-                
-                if targetChar in result:
-                    continue
-
-                result[targetChar] = unichr(char)
-
-            _ACCEL_KEY_MAPPING = result
-
-        return cm.group(1) + _ACCEL_KEY_MAPPING.get(cm.group(2), cm.group(2))
-
-
-
+    translateAcceleratorByKbLayout = WindowsHacks.translateAcceleratorByKbLayout
 else:
     def translateAcceleratorByKbLayout(accStr):
         return accStr

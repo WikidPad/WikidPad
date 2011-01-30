@@ -13,7 +13,6 @@ import wx, gtk
 from wxHelper import getTextFromClipboard
 
 from StringOps import strftimeUB, pathEnc, mbcsEnc, mbcsDec   # unescapeWithRe
-import Configuration
 import DocPages
 
 import gobject

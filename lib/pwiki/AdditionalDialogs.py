@@ -26,7 +26,7 @@ from wikidata import DbBackendUtils
 from WikiExceptions import *
 import Exporters, Importers
 import Serialization
-import Configuration
+import SystemInfo
 
 from Consts import VERSION_STRING, DATABLOCK_STOREHINT_INTERN
 
@@ -1929,7 +1929,7 @@ class NewWikiSettings(wx.Dialog):
             self.ctrls.lbWikiLanguage.Enable(False)
             self.ctrls.lbWikiLanguage.SetBackgroundColour(wx.LIGHT_GREY)
         
-        self.ctrls.cbWikiPageFilesAsciiOnly.SetValue(Configuration.isOSX())
+        self.ctrls.cbWikiPageFilesAsciiOnly.SetValue(SystemInfo.isOSX())
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)

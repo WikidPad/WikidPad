@@ -13,42 +13,44 @@ from time import time, sleep
 
 import wx, wx.stc
 
-#from Utilities import *  # TODO Remove this
-from Utilities import DUMBTHREADSTOP, callInMainThread, ThreadHolder
-
 from Consts import FormatTypes
 
-from wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
+#from Utilities import *  # TODO Remove this
+from .Utilities import DUMBTHREADSTOP, callInMainThread, ThreadHolder
+
+from .wxHelper import GUI_ID, getTextFromClipboard, copyTextToClipboard, \
         wxKeyFunctionSink, getAccelPairFromKeyDown, appendToMenuByMenuDesc
-import wxHelper
+from . import wxHelper
 
-import OsAbstract
+from . import OsAbstract
 
-from WikiExceptions import WikiFileNotFoundException, \
+from .WikiExceptions import WikiFileNotFoundException, \
         NotCurrentThreadException, NoPageAstException
-from ParseUtilities import getFootnoteAnchorDict
+
+from .SystemInfo import isUnicode, isOSX, isLinux, isWindows
+
+from .ParseUtilities import getFootnoteAnchorDict
 
 from .EnhancedScintillaControl import EnhancedScintillaControl, StyleCollector
 
 from . import Configuration
-import AdditionalDialogs
-import WikiTxtDialogs
+from . import AdditionalDialogs
+from . import WikiTxtDialogs
 
 
 
 # import WikiFormatting
-import DocPages
-import UserActionCoord
+from . import DocPages
+from . import UserActionCoord
 
-from SearchAndReplace import SearchReplaceOperation
-import StringOps
-import SpellChecker
+from .SearchAndReplace import SearchReplaceOperation
+from . import StringOps
+from . import SpellChecker
 
 # from StringOps import *  # TODO Remove this
 # mbcsDec, uniToGui, guiToUni, \
 #        wikiWordToLabel, revStr, lineendToInternal, lineendToOs
 
-from Configuration import isUnicode, isOSX, isLinux, isWindows
 
 try:
     import WindowsHacks
@@ -1899,8 +1901,25 @@ class WikiTxtCtrl(EnhancedScintillaControl):
                     suggNewPageTitle = None
                 else:
                     suggNewPageTitle = node.titleNode.getString()
+                    
+                unaliasedTarget = self.presenter.getWikiDocument()\
+                        .getUnAliasedWikiWordOrAsIs(node.wikiWord)
 
-                presenter.openWikiPage(node.wikiWord,
+                docPage = self.getLoadedDocPage()
+                
+                # Contains start and end character position where a search fragment
+                # search should never match
+                # If the target wikiword is the current one, the search fragment
+                # search should not find the link itself
+
+                forbiddenSearchfragHit = (0, 0)
+                if docPage is not None:
+                    wikiWord = docPage.getWikiWord()
+                    if wikiWord is not None:
+                        if wikiWord == unaliasedTarget:
+                            forbiddenSearchfragHit = (node.pos, node.pos + node.strLength)
+
+                presenter.openWikiPage(unaliasedTarget,
                         motionType="child", anchor=node.anchorLink,
                         suggNewPageTitle=suggNewPageTitle)
 
@@ -1910,9 +1929,15 @@ class WikiTxtCtrl(EnhancedScintillaControl):
                     searchOp.wildCard = "no"   # TODO Why not regex?
                     searchOp.searchStr = searchfrag
     
-                    presenter.getSubControl("textedit").executeSearch(
+                    found = presenter.getSubControl("textedit").executeSearch(
                             searchOp, 0)
-                
+                    
+                    if found[0] >= forbiddenSearchfragHit[0] and \
+                            found[0] < forbiddenSearchfragHit[1]:
+                        # Searchfrag found its own link -> search after link
+                        presenter.getSubControl("textedit").executeSearch(
+                            searchOp, forbiddenSearchfragHit[1])
+
                 if not tabMode & 1:
                     # Show in foreground
                     presenter.getMainControl().getMainAreaPanel().\

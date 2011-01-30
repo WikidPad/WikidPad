@@ -28,7 +28,7 @@ from TempFileSet import TempFileSet
 from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation, \
         ListItemWithSubtreeWikiPagesNode
 
-import Configuration, PluginManager
+import SystemInfo, PluginManager
 
 import OsAbstract
 
@@ -928,7 +928,7 @@ class HtmlExporter(AbstractExporter):
 
         formattedContent = self.formatContent(wikiPage)
 
-        if Configuration.isUnicode():
+        if SystemInfo.isUnicode():
             result.append(self.getFileHeader(wikiPage))
 
         # if startFile is set then this is the only page being exported so

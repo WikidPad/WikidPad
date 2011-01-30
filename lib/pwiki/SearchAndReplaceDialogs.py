@@ -5,25 +5,27 @@ import sys, traceback, re, threading, time
 
 import wx, wx.html, wx.xrc
 
-from MiscEvent import MiscEventSourceMixin, KeyFunctionSink
 import Consts
+from .MiscEvent import MiscEventSourceMixin, KeyFunctionSink
 from WikiExceptions import *
-from Utilities import DUMBTHREADSTOP, callInMainThread, callInMainThreadAsync, \
+from .Utilities import DUMBTHREADSTOP, callInMainThread, callInMainThreadAsync, \
         ThreadHolder, FunctionThreadStop
 
-import wxHelper
+from .SystemInfo import isLinux
+
+from . import wxHelper
 from wxHelper import *
 
-from StringOps import uniToGui, guiToUni, escapeHtml
+from .StringOps import uniToGui, guiToUni, escapeHtml
 
-from WikiPyparsing import ParseException
+from .WikiPyparsing import ParseException
 
-from WindowLayout import setWindowPos, setWindowSize, \
+from .WindowLayout import setWindowPos, setWindowSize, \
         getRelativePositionTupleToAncestor, LayeredControlPanel
 
-from Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE, isLinux
+from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
-from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation
+from .SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation
 
 
 

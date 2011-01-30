@@ -343,10 +343,8 @@ Chooses the number of characters to show before and after a found match as conte
 *Count Occurrences up to max.*
 Counts how many matches a page contains and shows this number in parentheses after each page name in wiki-wide search results. This option slows down searching. To avoid too long search times you can restrict here the maximum number of occurrences to count on a page.
 
-
 *Fast search defaults*
 Set the search options to use for the small search field in toolbar. Same options as for "Wiki-wide search defaults" above.
-
 
 *Delay before auto-close*
 Controls how many seconds of inactivity before the incremental search is closed automatically. 0 means "wait forever".
@@ -354,22 +352,14 @@ Controls how many seconds of inactivity before the incremental search is closed 
 
 ++++ Advanced
 
-*Ignore wiki lock file*
-*Create wiki lock file*
-Change these settings only if you know what you are doing! See [WikiLockFile].
+*Use IME workaround for editor input*
+Fixes some problems when entering characters in non-Western languages, e.g. when using UniKey (Vietnamese input method editor) under Windows or typing Russian under Linux. You must restart WikidPad to make the change have an effect.
 
-*Sync. highlighting limit*
-Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 300 to 500 bytes
+*Translate menu accelerators for keyboard layout*
+Windows only. Translates accelerators (aka shortcuts) of the menus to work with special keyboard layouts where the ctrl-level (layout when CTRL is pressed) differs from layout in base-level. After translation the shortcuts look wrong but work correctly. The translation is based on the layout on WikidPad startup, changes while WikidPad is running are not processed. This option has only an effect after restarting WikidPad.
 
-*Highlight start delay*
-For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds
-
-*Short hint delay*
-Set how many milliseconds before showing the short hint tooltip in editor. 0 deactivates the tooltip. See [WikiDocumentAttributes#*short_hint*] for details.
-
-*Update step min. delay*
-After each change the tree(s) are updated to reflect changes like added or removed children of a page. This updating is done step by step where each step must be executed in the GUI-thread. Non-technically this means that WikidPad may lag during the tree update. The minimal delay setting defines the number of seconds (or fractions thereof) WikidPad waits after an update step before the next step is executed.
-Recommended value: 0.0 to 0.2 seconds
+*Forbid cancel on search*
+Checking this option forbids to cancel a running wiki-wide (or fast) search by clicking into the search field. For some OS (especially Mac OS) this increases search speed considerably.
 
 *Single process per user*
 If you open a new WikidPad instance while another is already running, the new window is handled by the same process as the first one. This option has only an effect after restarting WikidPad. It is on by default.
@@ -404,11 +394,28 @@ It has a few restrictions at the moment:
 *No cycles in tree*
 If two or more pages reference each other (e.g. NodeA -> NodeB -> NodeA) these cycles are not shown. Precisely: if a child of a word is already an ancestor (parent, grandparent, ...) of this word, it is not shown.
 
-*Use IME workaround for editor input*
-Fixes some problems when entering characters in non-Western languages, e.g. when using UniKey (Vietnamese input method editor) under Windows or typing Russian under Linux. You must restart WikidPad to make the change have an effect.
+*Scroll under pointer*
+Windows only, *experimental*. When using the mouse-wheel on Windows it normally scrolls the control which currently has the focus (is active). With this option the control under the mouse pointer is scrolled instead. This only works for some controls, for the others you first have to click into the control (give it the focus) and then scroll while mouse pointer is over the control.
 
-*Forbid cancel on search*
-Checking this option forbids to cancel a running wiki-wide (or fast) search by clicking into the search field. For some OS (especially Mac OS) this increases search speed considerably.
+*Ignore wiki lock file*
+*Create wiki lock file*
+Change these settings only if you know what you are doing! See [WikiLockFile].
+
+
++++++ Timing
+
+*Sync. highlighting limit*
+Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 300 to 500 bytes
+
+*Highlight start delay*
+For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds
+
+*Short hint delay*
+Set how many milliseconds before showing the short hint tooltip in editor. 0 deactivates the tooltip. See [WikiDocumentAttributes#*short_hint*] for details.
+
+*Update step min. delay*
+After each change the tree(s) are updated to reflect changes like added or removed children of a page. This updating is done step by step where each step must be executed in the GUI-thread. Non-technically this means that WikidPad may lag during the tree update. The minimal delay setting defines the number of seconds (or fractions thereof) WikidPad waits after an update step before the next step is executed.
+Recommended value: 0.0 to 0.2 seconds
 
 
 ++++ Autosave

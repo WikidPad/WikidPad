@@ -13,7 +13,7 @@ from wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID
 from MiscEvent import ProxyMiscEvent  # , KeyFunctionSink
 import DocPages
 
-import Configuration
+import SystemInfo
 from StringOps import uniToGui
 
 from WindowLayout import LayeredControlPresenter, LayerSizer
@@ -221,7 +221,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
         errMsg = None
 
         # The "if" ensures that existing pages can be opened even
-        # if syntax is (or became) incompatible
+        # if the syntax is (or became) incompatible
         if not self.getWikiDocument().isDefinedWikiPage(wikiWord):
             errMsg = langHelper.checkForInvalidWikiWord(wikiWord,
                     self.getWikiDocument())
@@ -426,7 +426,7 @@ class DocPagePresenter(wx.Panel, BasicDocPagePresenter):
         self.setTitle(self.shortTitle)   #?
 
 
-    if Configuration.isLinux():
+    if SystemInfo.isLinux():
         def SetFocus(self):
             try:
                 ctrl = self.subControls[self.lastVisibleCtrlName]

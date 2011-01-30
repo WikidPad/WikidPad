@@ -351,7 +351,6 @@ class Cursor:
                     self.nextRow = tuple(self.nextRowIntern)
                 else:
                     self.nextRow = None
-#                     self.nextRowIntern
                     self.colTypeHints = None
                     # Statement no longer needed here
                     self.conn.putStmtBack(self.stmtsql, self.stmt)
@@ -361,7 +360,6 @@ class Cursor:
 
             except Error:
                 self.nextRow = None
-#                 self.nextRowIntern
                 self.colTypeHints = None
                 # Statement no longer needed here
                 self.conn.putStmtBack(self.stmtsql, self.stmt)

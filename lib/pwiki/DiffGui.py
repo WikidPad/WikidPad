@@ -17,7 +17,7 @@ from .WikiPyparsing import TerminalNode, NonTerminalNode
 
 from .EnhancedScintillaControl import EnhancedScintillaControl, StyleCollector
 
-from .Configuration import isUnicode
+from .SystemInfo import isUnicode
 
 
 

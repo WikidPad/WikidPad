@@ -1382,13 +1382,19 @@ class _WikiLinkPath(object):
             self.upwardCount = upwardCount
             self.components = components
             return
+        
+        if link == u".":
+            # Link to self
+            self.upwardCount = 0
+            self.components = []
+            return
 
-        if link.startswith("//"):
+        if link.startswith(u"//"):
             self.upwardCount = -1
             self.components = link[2:].split(u"/")
             return
         
-        if link.startswith("/"):
+        if link.startswith(u"/"):
             self.upwardCount = 0
             self.components = link[1:].split(u"/")
             return
@@ -1411,6 +1417,10 @@ class _WikiLinkPath(object):
         
         return result
 
+    def __repr__(self):
+        return "_WikiLinkPath(upwardCount=%i, components=%s)" % \
+                (self.upwardCount, repr(self.components))
+
     def isAbsolute(self):
         return self.upwardCount == -1
         
@@ -1419,9 +1429,28 @@ class _WikiLinkPath(object):
             self.upwardCount = -1
             self.components = otherPath.components[:]
             return
+        elif otherPath.upwardCount == 0:
+            self.components = self.components + otherPath.components
+        else:
+            if otherPath.upwardCount <= len(self.components):
+                self.components = self.components[:-otherPath.upwardCount] + \
+                        otherPath.components
+            else:
+                # Going back further than self was deep (eliminating
+                # more components than self had)
 
-        self.components = self.components[:-otherPath.upwardCount] + \
-                otherPath.components
+                if self.upwardCount == -1:
+                    # Actually an error (going upward after already reaching root)
+                    # TODO: Handle as error?
+                    self.components = otherPath.components[:]
+                else:
+                    # Add up upwardCount of other path after subtracting
+                    # number of own components because otherPath walked
+                    # over them already
+                    self.upwardCount += otherPath.upwardCount - \
+                            len(self.components)
+
+                    self.components = otherPath.components[:]
 
 
     def getLinkCore(self):

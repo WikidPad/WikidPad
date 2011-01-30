@@ -19,7 +19,8 @@ from ..MiscEvent import MiscEventSourceMixin
 
 from .. import ParseUtilities
 from ..StringOps import mbcsDec, re_sub_escape, pathEnc, pathDec, \
-        unescapeWithRe, strToBool
+        unescapeWithRe, strToBool, pathnameFromUrl, urlFromPathname, \
+        relativeFilePath
 from ..DocPages import DocPage, WikiPage, FunctionalPage, AliasWikiPage
 # from ..timeView.Versioning import VersionOverview
 
@@ -340,10 +341,7 @@ class WikiDataManager(MiscEventSourceMixin):
         if not os.path.isabs(dataDir):
             dataDir = os.path.join(os.path.dirname(wikiConfigFilename), dataDir)
 
-#         dataDir = mbcsDec(os.path.abspath(dataDir), "replace")[0]
         dataDir = pathDec(os.path.abspath(dataDir))
-
-#         self.wikiConfigFilename = wikiConfigFilename
 
         if not dbtype:
             wikidhName = wikiConfig.get("main",
@@ -394,7 +392,7 @@ class WikiDataManager(MiscEventSourceMixin):
         self.wikiData = WikiDataSynchronizedProxy(self.baseWikiData)
         self.wikiPageDict = WeakValueDictionary()
         self.funcPageDict = WeakValueDictionary()
-
+        
         self.updateExecutor = SingleThreadExecutor(4)
         self.pageRetrievingLock = TimeoutRLock(Consts.DEADBLOCKTIMEOUT)
 
@@ -472,7 +470,25 @@ class WikiDataManager(MiscEventSourceMixin):
             raise writeException
             
         self.updateExecutor.start()
-        
+
+        if self.isSearchIndexEnabled() and self.getWikiConfig().getint(
+                "main", "indexSearch_formatNo", 1) != Consts.SEARCHINDEX_FORMAT_NO:
+            # Search index rebuild needed
+            # Remove old search index and lower meta data state.
+            # The following pushDirtyMetaDataUpdate() will start rebuilding
+
+            wikiData = self.getWikiData()
+
+            wikiData.commit()
+            finalState = Consts.WIKIWORDMETADATA_STATE_SYNTAXPROCESSED
+
+            for wikiWord in wikiData.getWikiWordsForMetaDataState(
+                    finalState, "<"):
+                wikiData.setMetaDataState(wikiWord, finalState)
+
+            wikiData.commit()
+            self.removeSearchIndex()
+
         self.pushDirtyMetaDataUpdate()
         
 #         if not self.isReadOnlyEffect():
@@ -715,6 +731,39 @@ class WikiDataManager(MiscEventSourceMixin):
             wikiConfig.set("main", "wiki_readOnly", "False")
 
 
+
+    def makeRelUrlAbsolute(self, relurl):
+        """
+        Return the absolute file: URL for a rel: URL
+        """
+        relpath = pathnameFromUrl(relurl[6:], False)
+
+        url = u"file:" + urlFromPathname(
+                os.path.abspath(os.path.join(os.path.dirname(
+                        self.getWikiConfigPath()), relpath)))
+
+        return url
+
+
+    def makeAbsPathRelUrl(self, absPath):
+        """
+        Return the rel: URL for an absolute file path or None if
+        a relative URL can't be created
+        """
+        locPath = self.getWikiConfigPath()
+
+        if locPath is None:
+            return None
+
+        locPath = os.path.dirname(locPath)
+        relPath = relativeFilePath(locPath, absPath)
+        if relPath is None:
+            return None
+
+        return u"rel://" + urlFromPathname(relPath)
+
+
+
     def pushUpdatePage(self, page):
         self.updateExecutor.executeAsyncWithThreadStop(0, page.runDatabaseUpdate)
 
@@ -923,7 +972,6 @@ class WikiDataManager(MiscEventSourceMixin):
             if value is None:
                 # No active page available
                 realWikiWord = self.getUnAliasedWikiWordOrAsIs(wikiWord)
-#                 print "--_getWikiPageNoErrorNoCache13", repr((wikiWord, realWikiWord))
                 if wikiWord == realWikiWord:
                     # no alias
                     value = WikiPage(self, wikiWord)
@@ -1606,14 +1654,6 @@ class WikiDataManager(MiscEventSourceMixin):
             threadstop.testRunning()
             resultList = s.search(q, limit=None)
             
-#             docnumList = [(rd.docnum, rd["unifName"]) for rd in resultList]
-#             
-#             docnumList.sort()
-#             docpp = "\n".join(["%3i %s" % rd for rd in docnumList])
-# 
-#             print "--docResults"
-#             print docpp.encode("mbcs", "replace")
-
             result = [rd["unifName"][9:] for rd in resultList
                     if rd["unifName"].startswith(u"wikipage/")]
             
@@ -1662,8 +1702,8 @@ class WikiDataManager(MiscEventSourceMixin):
         return os.path.exists(indexPath) and whoosh.index.exists_in(indexPath)
 
     def removeSearchIndex(self):
-        if self.isSearchIndexEnabled():
-            raise InternalError("Calling removeSearchIndex() while index is enabled")
+#         if self.isSearchIndexEnabled():
+#             raise InternalError("Calling removeSearchIndex() while index is enabled")
         
         p = self.updateExecutor.pause(wait=True)
         self.updateExecutor.clearDeque(self.UEQUEUE_INDEX)
@@ -1678,6 +1718,8 @@ class WikiDataManager(MiscEventSourceMixin):
         if os.path.exists(indexPath):
             # Warning!!! rmtree() is very dangerous, don't make a mistake here!
             shutil.rmtree(indexPath, ignore_errors=True)
+
+        self.getWikiConfig().set("main", "indexSearch_formatNo", u"0")
 
 
     def getSearchIndex(self, clear=False):
@@ -1703,8 +1745,12 @@ class WikiDataManager(MiscEventSourceMixin):
                 whoosh.index.create_in(indexPath, schema)
 
             self.whooshIndex = whoosh.index.open_dir(indexPath)
+            
+            self.getWikiConfig().set("main", "indexSearch_formatNo",
+                    unicode(Consts.SEARCHINDEX_FORMAT_NO))
 
         self.whooshIndex = self.whooshIndex.refresh()
+
         return self.whooshIndex
 
 

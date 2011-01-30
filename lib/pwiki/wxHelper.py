@@ -8,7 +8,7 @@ import wx
 from WikiExceptions import *
 
 from .MiscEvent import KeyFunctionSink
-from . import Configuration
+from . import SystemInfo
 
 
 def _unescapeWithRe(text):
@@ -252,7 +252,7 @@ def getFilesFromClipboard():
         if cb.GetData(dataob):
             filenames = dataob.GetFilenames()
             if filenames:
-                if Configuration.isLinux():
+                if SystemInfo.isLinux():
                     # On Linux, at least Ubuntu, fn may be a UTF-8 encoded unicode(!?)
                     # string
                     try:
@@ -270,7 +270,7 @@ def getFilesFromClipboard():
 
 
 
-if Configuration.isWindows():
+if SystemInfo.isWindows():
 #     def getMetafileFromClipboard():
 #         """
 #         Retrieve metafile from clipboard if available
@@ -316,7 +316,7 @@ else:
 
 
 
-# if Configuration.isLinux():   # TODO Mac?
+# if SystemInfo.isLinux():   # TODO Mac?
 #     
 #     def copyTextToClipboard(text): 
 #         dataob = textToDataObject(text)
@@ -983,7 +983,7 @@ class EnhancedListControl(wx.ListCtrl):
         return bool(self.GetItemState(idx, wx.LIST_STATE_SELECTED))
 
 
-    if Configuration.isWindows():
+    if SystemInfo.isWindows():
         _SETSSI_ITEMMASK = wx.LIST_STATE_SELECTED | wx.LIST_STATE_FOCUSED
     else:
         # TODO Check for MacOS
@@ -1007,7 +1007,7 @@ class EnhancedListControl(wx.ListCtrl):
 
 
 
-if Configuration.isWindows():   # Maybe necessary for other OS' as well
+if SystemInfo.isWindows():   # Maybe necessary for other OS' as well
     def autosizeColumn(listCtrl, col):
         """
         Workaround for some bug in wxPython 2.8.10

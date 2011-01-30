@@ -15,14 +15,14 @@ from wxHelper import *
 
 from WikiExceptions import *
 
-from Utilities import callInMainThreadAsync
-from Configuration import isUnicode
+from .Utilities import callInMainThreadAsync
+from .SystemInfo import isUnicode
 
-import StringOps
+from . import StringOps
 
-from LogWindow import LogMessage
+from .LogWindow import LogMessage
 
-from DocPages import WikiPage
+from .DocPages import WikiPage
 
 
 

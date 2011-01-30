@@ -52,6 +52,10 @@ Mozilla and IE renderer can use CSS-files for preview, see [Cascading style shee
       again. It should then use the internal renderer instead.
 
 
+*Show iframes inside IE preview*
+If you chose IE renderer above you can set if an iframe (this is like a browser window in the browser window) should show its contents inside the preview or if your external default browser is started for this. This option may also work with Mozilla renderer but is currently untested.
+
+
 *Table of contents*
 Choose if you want a table of contents in tree form, list form or not at all, see WikiExport#*Additional# options*
 In the export dialog, you can temporarily override this setting for one export.

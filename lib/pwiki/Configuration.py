@@ -1,5 +1,5 @@
 import ConfigParser
-import os, traceback
+import traceback
 import cStringIO as StringIO
 
 # from os.path import *
@@ -7,69 +7,13 @@ import cStringIO as StringIO
 import codecs
 import wx
 
-import MainApp
-import Utilities
-
-# Bug workaround: In wxPython 2.6 these constants weren't defined
-#    in 2.8 they are defined under a different name and with different values
-
-try:
-    wxWINDOWS_NT = wx.OS_WINDOWS_NT
-except AttributeError:
-    wxWINDOWS_NT = 18   # For wx.GetOsVersion()
-    
-try:
-    wxWIN95 = wx.OS_WINDOWS_9X
-except AttributeError:
-    wxWIN95 = 20   # For wx.GetOsVersion(), this includes also Win 98 and ME
-
-
 from MiscEvent import MiscEventSourceMixin
 from WikiExceptions import *
 
+from .SystemInfo import isUnicode
 
-# Placed here to avoid circular dependency with StringOps
-def isUnicode():
-    """
-    Return if GUI is in unicode mode
-    """
-    return wx.PlatformInfo[2] == "unicode"
-
-def isOSX():
-    """
-    Return if running on Mac OSX
-    """
-    return '__WXMAC__' in wx.PlatformInfo
-    
-def isLinux():
-    """
-    Return if running on Linux system
-    """
-    try:
-        return os.uname()[0] == "Linux"
-    except AttributeError:
-        return False
-
-
-_ISWIN9x = wx.GetOsVersion()[0] == wxWIN95
-_ISWINNT = wx.GetOsVersion()[0] == wxWINDOWS_NT
-
-def isWin9x():
-    """
-    Returns True if OS is Windows 95/98/ME
-    """
-    return _ISWIN9x
-
-def isWinNT():
-    """
-    Returns True if OS is Windows NT/2000/XP...
-    """
-    return _ISWINNT
-
-def isWindows():
-    return _ISWIN9x or _ISWINNT
-
-
+# For compatibility TODO: remove in 2.2
+from .SystemInfo import isOSX, isLinux, isWin9x, isWinNT, isWindows
 
 # from WikiExceptions import *
 
@@ -613,29 +557,30 @@ GLOBALDEFAULTS = {
 
 
     # HTML options
-    ("main", "new_window_on_follow_wiki_url"): "1", # Open new window when following a "wiki:" URL 0:No, 1:Yes, new process
-    ("main", "start_browser_after_export"): "True",
-    ("main", "facename_html_preview"): "", # Facename(s) for the internal HTML preview
-    ("main", "html_preview_proppattern"): "",  # RE pattern for attributes in HTML preview
-    ("main", "html_preview_proppattern_is_excluding"): "False", # Should these pattern be excluded instead of included?
-    ("main", "html_export_proppattern"): "",  # Same for HTML exporting
-    ("main", "html_export_proppattern_is_excluding"): "False",  # Same for HTML exporting
-    ("main", "html_preview_pics_as_links"): "False",  # Show only links to pictures in HTML preview
-    ("main", "html_export_pics_as_links"): "False",  # Same for HTML exporting
-    ("main", "html_preview_renderer"): "0",  # 0: Internal wxWidgets; 1: IE; 2: Mozilla
-    ("main", "export_table_of_contents"): "0",  # Show table of contents when exporting
+    ("main", "new_window_on_follow_wiki_url"): u"1", # Open new window when following a "wiki:" URL 0:No, 1:Yes, new process
+    ("main", "start_browser_after_export"): u"True",
+    ("main", "facename_html_preview"): u"", # Facename(s) for the internal HTML preview
+    ("main", "html_preview_proppattern"): u"",  # RE pattern for attributes in HTML preview
+    ("main", "html_preview_proppattern_is_excluding"): u"False", # Should these pattern be excluded instead of included?
+    ("main", "html_export_proppattern"): u"",  # Same for HTML exporting
+    ("main", "html_export_proppattern_is_excluding"): u"False",  # Same for HTML exporting
+    ("main", "html_preview_pics_as_links"): u"False",  # Show only links to pictures in HTML preview
+    ("main", "html_export_pics_as_links"): u"False",  # Same for HTML exporting
+    ("main", "html_preview_renderer"): u"0",  # 0: Internal wxWidgets; 1: IE; 2: Mozilla
+    ("main", "html_preview_ieShowIframes"): u"False",  # Show iframes with external sources inside IE preview?
+    ("main", "export_table_of_contents"): u"0",  # Show table of contents when exporting
             # 0:None, 1:formatted as tree, 2:as list
     ("main", "html_toc_title"): u"Table of Contents",  # title of table of contents
     ("main", "html_export_singlePage_sepLineCount"): u"10",  # How many empty lines to separate
             # two wiki pages in a single HTML page
 
-    ("main", "html_body_link"): "",  # for HTML preview/export, color for link or "" for default
-    ("main", "html_body_alink"): "",  # for HTML preview/export, color for active link or "" for default
-    ("main", "html_body_vlink"): "",  # for HTML preview/export, color for visited link or "" for default
-    ("main", "html_body_text"): "",  # for HTML preview/export, color for text or "" for default
-    ("main", "html_body_bgcolor"): "",  # for HTML preview/export, color for background or "" for default
-    ("main", "html_body_background"): "",  # for HTML preview/export, URL for background image or "" for none
-    ("main", "html_header_doctype"): 'DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"',
+    ("main", "html_body_link"): u"",  # for HTML preview/export, color for link or "" for default
+    ("main", "html_body_alink"): u"",  # for HTML preview/export, color for active link or "" for default
+    ("main", "html_body_vlink"): u"",  # for HTML preview/export, color for visited link or "" for default
+    ("main", "html_body_text"): u"",  # for HTML preview/export, color for text or "" for default
+    ("main", "html_body_bgcolor"): u"",  # for HTML preview/export, color for background or "" for default
+    ("main", "html_body_background"): u"",  # for HTML preview/export, URL for background image or "" for none
+    ("main", "html_header_doctype"): u'DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"',
 
 
     # Editor options
@@ -690,6 +635,9 @@ GLOBALDEFAULTS = {
     ("main", "mouse_middleButton_withoutCtrl"): "1", # If middle mouse button is pressed on a link in editor or preview, without
             # Ctrl pressed, should it then open link in  0: a new tab in foreground, 1: new tab background, 2: same tab
     ("main", "mouse_middleButton_withCtrl"): "0", # Same, but if Ctrl is pressed
+
+    ("main", "mouse_scrollUnderPointer"): "False", # Windows only, experimental, incomplete: Scroll window under pointer instead
+            # of focused window
 
 
     ("main", "userEvent_mouse/leftdoubleclick/preview/body"): u"action/none", # How to react when user double-clicks somewhere into body of preview?
@@ -801,6 +749,8 @@ WIKIDEFAULTS = {
     ("main", "tree_expandedNodes_rememberDuration"): u"2", # How long should open nodes in tree be remembered?
             # 0: Not at all; 1: During session; 2: Between sessions in wiki config file
     ("main", "indexSearch_enabled"): u"False", # should the index search be enabled?
+    ("main", "indexSearch_formatNo"): u"1", # internal: Number of format of search index (only valid if index enabled)
+            # if it doesn't match format number of this WikidPad version, index rebuild is needed
     ("main", "tabs_maxCharacters"): u"0", # Maximum number of characters to show on a tab (0: inifinite)
     ("main", "template_pageNamesRE"): u"^template/",  # Regular expression pattern for pages which should be seen as templates
             # Especially they will be listed in text editor context menu on new pages

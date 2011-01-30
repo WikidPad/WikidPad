@@ -10,8 +10,10 @@ from pwiki.wxHelper import GUI_ID, EnhancedListControl, wxKeyFunctionSink, clone
         drawTextRight, drawTextCenter, getAccelPairFromKeyDown, \
         appendToMenuByMenuDesc
 
+from pwiki.SystemInfo import isWindows, isOSX
+
 from pwiki.WindowLayout import setWindowPos, setWindowClientSize
-from pwiki.Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE, isWindows, isOSX
+from pwiki.Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
 
 

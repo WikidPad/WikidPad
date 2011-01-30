@@ -16,8 +16,6 @@ from WikiExceptions import NotCurrentThreadException
 
 from wxHelper import EnhancedListControl, wxKeyFunctionSink, WindowUpdateLocker
 
-import Configuration
-
 
 class DocStructureCtrl(EnhancedListControl):
     def __init__(self, parent, ID, mainControl):
@@ -248,8 +246,8 @@ class DocStructureCtrl(EnhancedListControl):
                 if node.level > depth:
                     continue
 
-                title = node.getString()
-                if title.endswith(u"\n"):
+                title = u"  " * (node.level - 1) + node.contentNode.getString()
+                while title.endswith(u"\n"):
                     title = title[:-1]
                 result.append((node.pos, node.level, title))
 

@@ -663,6 +663,7 @@ lib/pwiki/Serialization.py -text
 lib/pwiki/SpellChecker.py -text
 lib/pwiki/SqliteThin3.py -text
 lib/pwiki/StringOps.py -text
+lib/pwiki/SystemInfo.py -text
 lib/pwiki/TempFileSet.py -text
 lib/pwiki/TextTree.py -text
 lib/pwiki/UserActionCoord.py -text
