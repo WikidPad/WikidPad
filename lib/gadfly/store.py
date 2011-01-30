@@ -3,7 +3,7 @@
 :Author: Aaron Watters
 :Maintainers: http://gadfly.sf.net/
 :Copyright: Aaron Robert Watters, 1994
-:Id: $Id: store.py,v 1.5 2008/08/24 12:38:50 butscher Exp $:
+:Id: $Id: store.py,v 1.6 2009/01/27 12:38:10 Michael Butscher Exp $:
 """
 
 verbosity = 0
@@ -1386,6 +1386,9 @@ class DB_Logger:
 
 #
 # $Log: store.py,v $
+# Revision 1.6  2009/01/27 12:38:10  Michael Butscher
+# 2.0alpha01
+#
 # Revision 1.5  2008/08/24 12:38:50  butscher
 # Intermediate commit
 #

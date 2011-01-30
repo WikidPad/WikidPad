@@ -1,6 +1,13 @@
 ﻿++ Change Log
 
 
+Jan. 30, 2011 (2.0final)
+
+    * Bug fixed: Windows: "Invalid handle" error on command line
+      bridge insertion plugins
+
+
+
 Dec. 27, 2010 (2.0rc10)
 
     * Bug fixed: Stack overflow for too deeply nested wikis on

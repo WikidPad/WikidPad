@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2011-01-02 11:11\n"
+"POT-Creation-Date: 2011-01-29 14:42\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1284,10 +1284,10 @@ msgstr ""
 msgid "second(s)"
 msgstr ""
 
-#: WikidPad.xrc:0 extensions\GraphvizStructureView.py:672
-#: extensions\GraphvizStructureView.py:696
-#: extensions\GraphvizStructureView.py:709
-#: extensions\GraphvizStructureView.py:722
+#: WikidPad.xrc:0 extensions\GraphvizStructureView.py:678
+#: extensions\GraphvizStructureView.py:702
+#: extensions\GraphvizStructureView.py:715
+#: extensions\GraphvizStructureView.py:728
 msgid "..."
 msgstr ""
 
@@ -1420,11 +1420,11 @@ msgstr ""
 msgid "[Please set path to Gnuplot executable]"
 msgstr ""
 
-#: extensions\GnuplotClBridge.py:134
+#: extensions\GnuplotClBridge.py:140
 msgid "[Gnuplot error: %s]"
 msgstr ""
 
-#: extensions\GnuplotClBridge.py:185
+#: extensions\GnuplotClBridge.py:191
 msgid "Path to Gnuplot:"
 msgstr ""
 
@@ -1432,82 +1432,82 @@ msgstr ""
 msgid "[Please set path to GraphViz executables]"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:142
+#: extensions\GraphvizClBridge.py:148
 msgid "[%s Error: %s]"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:243
+#: extensions\GraphvizClBridge.py:249
 msgid "Directory of executables:"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:247
+#: extensions\GraphvizClBridge.py:253
 msgid "Name of dot executable:"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:251
+#: extensions\GraphvizClBridge.py:257
 msgid "Name of neato executable:"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:255
+#: extensions\GraphvizClBridge.py:261
 msgid "Name of twopi executable:"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:259
+#: extensions\GraphvizClBridge.py:265
 msgid "Name of circo executable:"
 msgstr ""
 
-#: extensions\GraphvizClBridge.py:263
+#: extensions\GraphvizClBridge.py:269
 msgid "Name of fdp executable:"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:360
+#: extensions\GraphvizStructureView.py:366
 msgid "%s Error: %s"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:426
-#: extensions\GraphvizStructureView.py:427
+#: extensions\GraphvizStructureView.py:432
+#: extensions\GraphvizStructureView.py:433
 msgid "Show relation graph"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:429
+#: extensions\GraphvizStructureView.py:435
 msgid "Show rel. graph source"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:431
+#: extensions\GraphvizStructureView.py:437
 msgid "Show relation graph source"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:433
-#: extensions\GraphvizStructureView.py:434
+#: extensions\GraphvizStructureView.py:439
+#: extensions\GraphvizStructureView.py:440
 msgid "Show child graph"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:436
-#: extensions\GraphvizStructureView.py:438
+#: extensions\GraphvizStructureView.py:442
+#: extensions\GraphvizStructureView.py:444
 msgid "Show child graph source"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:655
+#: extensions\GraphvizStructureView.py:661
 msgid "  GraphVizStructure"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:675
+#: extensions\GraphvizStructureView.py:681
 msgid "Node font name:"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:687
+#: extensions\GraphvizStructureView.py:693
 msgid "Node font size:"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:699
+#: extensions\GraphvizStructureView.py:705
 msgid "Node border color:"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:712
+#: extensions\GraphvizStructureView.py:718
 msgid "Node background color:"
 msgstr ""
 
-#: extensions\GraphvizStructureView.py:725
+#: extensions\GraphvizStructureView.py:731
 msgid "Edge color:"
 msgstr ""
 
@@ -1515,11 +1515,11 @@ msgstr ""
 msgid "[Please set path to MimeTeX executable]"
 msgstr ""
 
-#: extensions\MimeTexCGIBridge.py:117
+#: extensions\MimeTexCGIBridge.py:124
 msgid "[Invalid response from MimeTeX]"
 msgstr ""
 
-#: extensions\MimeTexCGIBridge.py:178
+#: extensions\MimeTexCGIBridge.py:185
 msgid "Path to MimeTeX:"
 msgstr ""
 
@@ -1527,15 +1527,15 @@ msgstr ""
 msgid "[Please set path to Ploticus executable]"
 msgstr ""
 
-#: extensions\PloticusClBridge.py:145
+#: extensions\PloticusClBridge.py:151
 msgid "[Ploticus error: %s]"
 msgstr ""
 
-#: extensions\PloticusClBridge.py:205
+#: extensions\PloticusClBridge.py:211
 msgid "Path to Ploticus:"
 msgstr ""
 
-#: extensions\PloticusClBridge.py:211
+#: extensions\PloticusClBridge.py:217
 msgid "Output format:"
 msgstr ""
 
