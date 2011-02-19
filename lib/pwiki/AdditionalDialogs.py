@@ -1913,8 +1913,12 @@ class NewWikiSettings(wx.Dialog):
                     break
             else:
                 self.ctrls.lbDatabaseType.SetSelection(0)
+
+            self.ctrls.cbWikiPageFilesAsciiOnly.SetValue(SystemInfo.isOSX())
+
         else:
             self.ctrls.lbDatabaseType.Enable(False)
+            self.ctrls.cbWikiPageFilesAsciiOnly.Enable(False)
             self.ctrls.lbDatabaseType.SetBackgroundColour(wx.LIGHT_GREY)
 
         if defWikiLang is not NewWikiSettings.DEFAULT_GREY:
@@ -1925,11 +1929,10 @@ class NewWikiSettings(wx.Dialog):
                     break
             else:
                 self.ctrls.lbWikiLanguage.SetSelection(0)
+
         else:
             self.ctrls.lbWikiLanguage.Enable(False)
             self.ctrls.lbWikiLanguage.SetBackgroundColour(wx.LIGHT_GREY)
-        
-        self.ctrls.cbWikiPageFilesAsciiOnly.SetValue(SystemInfo.isOSX())
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)

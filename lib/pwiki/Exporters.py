@@ -21,6 +21,7 @@ import Consts
 from WikiExceptions import WikiWordNotFoundException, ExportException
 from ParseUtilities import getFootnoteAnchorDict
 from StringOps import *
+from . import StringOps
 import Serialization
 from WikiPyparsing import StackedCopyDict, SyntaxNode
 from TempFileSet import TempFileSet
@@ -706,7 +707,7 @@ class HtmlExporter(AbstractExporter):
 
     _INTERNALJUMP_PREFIXMAP = {
         u"html_previewWX": u"internaljump:",
-        u"html_previewIE": u"internaljump:",
+        u"html_previewIE": u"http://internaljump/",
         u"html_previewMOZ": u"file://internaljump/"
     }
 
@@ -1556,13 +1557,13 @@ class HtmlExporter(AbstractExporter):
                         offsetHead = lastSurroundHead - (minHead - 1)
 
 
-            self.insertionVisitStack.append("wikipage/" + value)
+            self.insertionVisitStack.append(u"wikipage/" + value)
             try:
                 
                 # Inside an inserted page we don't want anchors to the
                 # headings to avoid collisions with headings of surrounding
                 # page.
-                
+
                 with self.optsStack:
                     self.optsStack["anchorForHeading"] = False
                     if offsetHead != 0:
@@ -1618,7 +1619,7 @@ class HtmlExporter(AbstractExporter):
             pageAst = self.getBasePageAst()
 
             self.outAppend(u'<div class="page-toc">\n')
-            
+
             for node in pageAst.iterFlatByName("heading"):
                 headLevel = node.level            
                 if self.asIntHtmlPreview:
@@ -1906,6 +1907,186 @@ class HtmlExporter(AbstractExporter):
         self.astNodeStack.pop()
 
 
+    def _processUrlLink(self, astNode):
+        link = astNode.url
+        pointRelative = False  # Final link should be relative
+
+        if link.startswith(u"rel://"):
+            pointRelative = True
+            absUrl = self.mainControl.makeRelUrlAbsolute(link)
+
+            # Relative URL
+            if self.asHtmlPreview:
+                # If preview, make absolute
+                link = absUrl
+            else:
+                if self.referencedStorageFiles is not None:
+                    # Get absolute path to the file
+                    absPath = StringOps.pathnameFromUrl(absUrl)
+                    # and to the file storage
+                    stPath = self.wikiDocument.getFileStorage().getStoragePath()
+                    
+                    isCont = testContainedInDir(stPath, absPath)
+
+                    if isCont:
+                        # File is in file storage -> add to
+                        # referenced storage files                            
+                        self.referencedStorageFiles.add(
+                                StringOps.relativeFilePath(
+                                self.wikiDocument.getWikiPath(),
+                                absPath))
+                        
+                        relPath = StringOps.pathnameFromUrl(link[6:], False)
+                
+                        absUrl = u"file:" + StringOps.urlFromPathname(
+                                os.path.abspath(os.path.join(self.exportDest,
+                                relPath)))
+                        link = absUrl
+
+        else:
+            absUrl = link
+
+        lowerLink = link.lower()
+        
+        if astNode.appendixNode is None:
+            appendixDict = {}
+        else:
+            appendixDict = dict(astNode.appendixNode.entries)
+
+        # Decide if this is an image link
+        if appendixDict.has_key("l"):
+            urlAsImage = False
+        elif appendixDict.has_key("i"):
+            urlAsImage = True
+        elif self.asHtmlPreview and \
+                self.mainControl.getConfig().getboolean(
+                "main", "html_preview_pics_as_links"):
+            urlAsImage = False
+        elif not self.asHtmlPreview and self.addOpt[0]:
+            urlAsImage = False
+        elif lowerLink.endswith(".jpg") or \
+                lowerLink.endswith(".gif") or \
+                lowerLink.endswith(".png") or \
+                lowerLink.endswith(".tif") or \
+                lowerLink.endswith(".bmp"):
+            urlAsImage = True
+        else:
+            urlAsImage = False
+
+        pointingType = appendixDict.get("p")
+
+        # Decide if link should be relative or absolute
+        if self.asIntHtmlPreview:
+            # For preview always absolute link
+            pointRelative = False
+        elif pointingType == u"abs":
+            pointRelative = False
+        elif pointingType == u"rel":
+            pointRelative = True
+
+        if pointRelative:
+            # Even if link is already relative it is relative to
+            # wrong location in most cases
+            if lowerLink.startswith("file:") or \
+                    lowerLink.startswith("rel:"):
+                absPath = StringOps.pathnameFromUrl(absUrl)
+                relPath = StringOps.relativeFilePath(self.exportDest,
+                        absPath)
+                if relPath is None:
+                    link = absUrl
+                else:
+                    link = StringOps.urlFromPathname(relPath)
+        else:
+            if lowerLink.startswith("rel:"):
+                link = absUrl
+
+
+        if urlAsImage:
+            # Ignore title, use image
+            sizeInTag = u""
+
+            # Size info for direct setting in HTML code
+            sizeInfo = appendixDict.get("s")
+            # Relative size info which modifies real image size
+            relSizeInfo = appendixDict.get("r")
+
+            if sizeInfo is not None:
+                try:
+                    widthStr, heightStr = sizeInfo.split(u"x")
+                    if self.isHtmlSizeValue(widthStr) and \
+                            self.isHtmlSizeValue(heightStr):
+                        sizeInTag = ' width="%s" height="%s"' % \
+                                (widthStr, heightStr)
+                except:
+                    # something does not meet syntax requirements
+                    pass
+            
+            elif relSizeInfo is not None:
+                params = relSizeInfo.split(u"x")
+                if len(params) == 1:
+                    if params[0] == u"":
+                        widthStr, heightStr = "100%", "100%"
+                    else:
+                        widthStr, heightStr = params[0], params[0]
+                else:
+                    widthStr, heightStr = params[0], params[1]
+
+                width = SizeValue(widthStr)
+                height = SizeValue(heightStr)
+
+                if width.isValid() and height.isValid() and \
+                        (width.getUnit() == height.getUnit()):
+                    imgWidth, imgHeight = self._getImageDims(absUrl)
+                    if imgWidth is not None:
+                        # TODO !!!
+                        if width.getUnit() == width.UNIT_FACTOR:
+                            imgWidth = int(imgWidth * width.getValue())
+                            imgHeight = int(imgHeight * height.getValue())
+
+                        sizeInTag = ' width="%s" height="%s"' % \
+                                (imgWidth, imgHeight)
+
+            alignInTag = u""
+            alignInfo = appendixDict.get("a")
+            if alignInfo is not None:
+                try:
+                    if alignInfo == u"t":
+                        alignInTag = u' align="top"'
+                    elif alignInfo == u"m":
+                        alignInTag = u' align="middle"'
+                    elif alignInfo == u"b":
+                        alignInTag = u' align="bottom"'
+                    elif alignInfo == u"l":
+                        alignInTag = u' align="left"'
+                    elif alignInfo == u"r":
+                        alignInTag = u' align="right"'
+                except:
+                    # something does not match syntax requirements
+                    pass
+
+            if self.asIntHtmlPreview and lowerLink.startswith("file:"):
+                # At least under Windows, wxWidgets has another
+                # opinion how a local file URL should look like
+                # than Python
+                p = pathnameFromUrl(link)
+                link = wx.FileSystem.FileNameToURL(p)
+            self.outAppend(u'<img src="%s" alt="" border="0"%s%s />' % 
+                    (link, sizeInTag, alignInTag))
+        else:
+            if not self.optsStack.get("suppressLinks", False):
+                # If we would be in a title, only image urls are allowed
+                self.outAppend(u'<span class="url-link"><a href="%s">' % link)
+                if astNode.titleNode is not None:
+                    with self.optsStack:
+                        self.optsStack["suppressLinks"] = True
+                        self.processAst(content, astNode.titleNode)
+                else:
+                    self.outAppend(escapeHtml(astNode.url))                        
+                self.outAppend(u'</a></span>')
+
+
+
+
     def processAst(self, content, pageAst):
         """
         Actual token to HTML converter. May be called recursively
@@ -1940,7 +2121,6 @@ class HtmlExporter(AbstractExporter):
                 self.outEndIndentation("ul")
 
             elif tname == "bullet":
-#                 print "--bullet1", repr(self.result[-1])
                 self.outAppend(u"\n<li />", eatPreBreak=True)
             elif tname == "number":
                 self.outAppend(u"\n<li />", eatPreBreak=True)
@@ -2046,144 +2226,7 @@ class HtmlExporter(AbstractExporter):
                             self.outAppend(u'<a href="#%s">%s</a>' % (fnAnchor,
                             escapeHtml(node.getString())))
             elif tname == "urlLink":
-                link = node.url
-                if link.startswith(u"rel://"):
-                    absUrl = self.mainControl.makeRelUrlAbsolute(link)
-
-                    # Relative URL
-                    if self.asHtmlPreview:
-                        # If preview, make absolute
-                        link = absUrl
-                    else:
-                        if self.referencedStorageFiles is not None:
-                            # Get absolute path to the file
-                            absLink = pathnameFromUrl(absUrl)
-                            # and to the file storage
-                            stPath = self.wikiDocument.getFileStorage().getStoragePath()
-                            
-                            isCont = testContainedInDir(stPath, absLink)
-                            if isCont:
-                                # File is in file storage -> add to
-                                # referenced storage files                            
-                                self.referencedStorageFiles.add(
-                                        relativeFilePath(
-                                        self.wikiDocument.getWikiPath(),
-                                        absLink))
-
-                        # If export, reformat a bit
-                        link = link[6:]
-                else:
-                    absUrl = link
-
-                lowerLink = link.lower()
-                
-                if node.appendixNode is None:
-                    appendixDict = {}
-                else:
-                    appendixDict = dict(node.appendixNode.entries)
-
-                # Decide if this is an image link
-                if appendixDict.has_key("l"):
-                    urlAsImage = False
-                elif appendixDict.has_key("i"):
-                    urlAsImage = True
-                elif self.asHtmlPreview and \
-                        self.mainControl.getConfig().getboolean(
-                        "main", "html_preview_pics_as_links"):
-                    urlAsImage = False
-                elif not self.asHtmlPreview and self.addOpt[0]:
-                    urlAsImage = False
-                elif lowerLink.endswith(".jpg") or \
-                        lowerLink.endswith(".gif") or \
-                        lowerLink.endswith(".png") or \
-                        lowerLink.endswith(".tif") or \
-                        lowerLink.endswith(".bmp"):
-                    urlAsImage = True
-                else:
-                    urlAsImage = False
-
-                if urlAsImage:
-                    # Ignore title, use image
-                    sizeInTag = u""
-
-                    # Size info for direct setting in HTML code
-                    sizeInfo = appendixDict.get("s")
-                    # Relative size info which modifies real image size
-                    relSizeInfo = appendixDict.get("r")
-
-                    if sizeInfo is not None:
-                        try:
-                            widthStr, heightStr = sizeInfo.split(u"x")
-                            if self.isHtmlSizeValue(widthStr) and \
-                                    self.isHtmlSizeValue(heightStr):
-                                sizeInTag = ' width="%s" height="%s"' % \
-                                        (widthStr, heightStr)
-                        except:
-                            # something does not meet syntax requirements
-                            pass
-                    
-                    elif relSizeInfo is not None:
-                        params = relSizeInfo.split(u"x")
-                        if len(params) == 1:
-                            if params[0] == u"":
-                                widthStr, heightStr = "100%", "100%"
-                            else:
-                                widthStr, heightStr = params[0], params[0]
-                        else:
-                            widthStr, heightStr = params[0], params[1]
-
-                        width = SizeValue(widthStr)
-                        height = SizeValue(heightStr)
-
-                        if width.isValid() and height.isValid() and \
-                                (width.getUnit() == height.getUnit()):
-                            imgWidth, imgHeight = self._getImageDims(absUrl)
-                            if imgWidth is not None:
-                                # TODO !!!
-                                if width.getUnit() == width.UNIT_FACTOR:
-                                    imgWidth = int(imgWidth * width.getValue())
-                                    imgHeight = int(imgHeight * height.getValue())
-
-                                sizeInTag = ' width="%s" height="%s"' % \
-                                        (imgWidth, imgHeight)
-
-                    alignInTag = u""
-                    alignInfo = appendixDict.get("a")
-                    if alignInfo is not None:
-                        try:
-                            if alignInfo == u"t":
-                                alignInTag = u' align="top"'
-                            elif alignInfo == u"m":
-                                alignInTag = u' align="middle"'
-                            elif alignInfo == u"b":
-                                alignInTag = u' align="bottom"'
-                            elif alignInfo == u"l":
-                                alignInTag = u' align="left"'
-                            elif alignInfo == u"r":
-                                alignInTag = u' align="right"'
-                        except:
-                            # something does not match syntax requirements
-                            pass
-
-                    if self.asIntHtmlPreview and lowerLink.startswith("file:"):
-                        # At least under Windows, wxWidgets has another
-                        # opinion how a local file URL should look like
-                        # than Python
-                        p = pathnameFromUrl(link)
-                        link = wx.FileSystem.FileNameToURL(p)
-                    self.outAppend(u'<img src="%s" alt="" border="0"%s%s />' % 
-                            (link, sizeInTag, alignInTag))
-                else:
-                    if not self.optsStack.get("suppressLinks", False):
-                        # If we would be in a title, only image urls are allowed
-                        self.outAppend(u'<span class="url-link"><a href="%s">' % link)
-                        if node.titleNode is not None:
-                            with self.optsStack:
-                                self.optsStack["suppressLinks"] = True
-                                self.processAst(content, node.titleNode)
-                        else:
-                            self.outAppend(escapeHtml(link))                        
-                        self.outAppend(u'</a></span>')
+                self._processUrlLink(node)
             elif tname == "stringEnd":
                 pass
             else:

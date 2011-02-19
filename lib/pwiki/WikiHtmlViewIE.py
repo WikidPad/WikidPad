@@ -53,7 +53,7 @@ class LinkConverterForPreviewIe:
 
     def getLinkForWikiWord(self, word, default = None):
         if self.wikiDocument.isDefinedWikiLink(word):
-            return urlQuote(u"internaljump:wikipage/%s" % word, u"/#:;@")
+            return urlQuote(u"http://internaljump/wikipage/%s" % word, u"/#:;@")
         else:
             return default
 
@@ -370,6 +370,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
     def BeforeNavigate2(self, this, pDisp, URL, Flags, TargetFrameName,
                         PostData, Headers, Cancel):
+                            
         Cancel[0] = False
         if self.passNavigate:
             self.passNavigate -= 1
@@ -381,12 +382,13 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             return
 
         href = URL[0]
-        
+
+
         if self.drivingMoz:
             internaljumpPrefix = u"file://internaljump/"
         else:
-            internaljumpPrefix = u"internaljump:"
-
+            internaljumpPrefix = u"http://internaljump/"
+            
         if href.startswith(internaljumpPrefix + u"wikipage/"):
 
             if self.drivingMoz:
@@ -407,9 +409,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             except ValueError:
                 word = href[len(internaljumpPrefix) + 9:]
                 anchor = None
-
-#             if self.drivingMoz:
-
+            
             # unescape word
             word = urllib.unquote(word) # utf8Dec(urllib.unquote(word))[0]
             if anchor:
@@ -460,7 +460,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
             if self.drivingMoz:
                 internaljumpPrefix = u"file://internaljump/wikipage/"
             else:
-                internaljumpPrefix = u"internaljump:wikipage/"
+                internaljumpPrefix = u"http://internaljump/wikipage/"
 
             if status.startswith(internaljumpPrefix):
                 # First check for an anchor. In URLs, anchors are always
@@ -473,17 +473,17 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                 except ValueError:
                     wikiWord = status[len(internaljumpPrefix):]
                     anchor = None
-
+                    
                 wikiWord = flexibleUrlUnquote(wikiWord)
 
                 wikiDocument = self.presenter.getWikiDocument()
                 if wikiDocument is None:
                     return
+                    
                 wikiWord = wikiDocument.getUnAliasedWikiWord(wikiWord)
 
                 if wikiWord is not None:
                     status = _(u"Link to page: %s") % wikiWord
-
 
             self.presenter.getMainControl().statusBar.SetStatusText(
                     uniToGui(status), 0)

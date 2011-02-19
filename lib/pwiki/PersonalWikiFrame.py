@@ -866,7 +866,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         wikiMenu.AppendSeparator()  # TODO May have two separators without anything between
 
-        self.addMenuItem(wikiMenu, '&Test', 'Test', lambda evt: self.testIt())
+#         self.addMenuItem(wikiMenu, '&Test', 'Test', lambda evt: self.testIt())
 
         menuID=wx.NewId()
         wikiMenu.Append(menuID, _(u'E&xit'), _(u'Exit'))
@@ -2577,17 +2577,17 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
 
-    def testIt(self):
-        from .FileManagementGui import InfoDatabase
-
-        progresshandler = ProgressHandler(
-                _(u"     Scanning     "),
-                _(u"     Scanning     "), 0, self)
-
-        infoDb = InfoDatabase(self.getWikiDocument())
-        infoDb.createDatabase()
-        infoDb.scanFileStore()
-        infoDb.scanLinks(progresshandler)
+#     def testIt(self):
+#         from .FileManagementGui import InfoDatabase
+# 
+#         progresshandler = ProgressHandler(
+#                 _(u"     Scanning     "),
+#                 _(u"     Scanning     "), 0, self)
+# 
+#         infoDb = InfoDatabase(self.getWikiDocument())
+#         infoDb.createDatabase()
+#         infoDb.scanFileStore()
+#         infoDb.scanLinks(progresshandler)
         
 
 
@@ -2786,7 +2786,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #             wdhName = wdhandlers[index][0]
 
             wdhName, wlangName, asciiOnly = \
-                    AdditionalDialogs.NewWikiSettings.runModal(self, -1, self)
+                    AdditionalDialogs.NewWikiSettings.runModal(self, -1, self)[:3]
                     
             if wdhName is None:
                 return
@@ -2998,9 +2998,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 # (probably old database) or required handler not available,
                 # so ask user
                 self.displayErrorMessage(unicode(e))
-                dbtype, dummy = AdditionalDialogs.NewWikiSettings.runModal(
+                dbtype = AdditionalDialogs.NewWikiSettings.runModal(
                         self, -1, self, dbtype,
-                        AdditionalDialogs.NewWikiSettings.DEFAULT_GREY)
+                        AdditionalDialogs.NewWikiSettings.DEFAULT_GREY)[0]
 #                 dbtype = self._askForDbType()
                 if dbtype is None:
                     return False
@@ -3011,9 +3011,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 # (probably old database) or required handler not available,
                 # so ask user
                 self.displayErrorMessage(unicode(e))
-                dummy, wikiLang = AdditionalDialogs.NewWikiSettings.runModal(
+                wikiLang = AdditionalDialogs.NewWikiSettings.runModal(
                         self, -1, self,
-                        AdditionalDialogs.NewWikiSettings.DEFAULT_GREY, wikiLang)
+                        AdditionalDialogs.NewWikiSettings.DEFAULT_GREY, wikiLang)[1]
 #                 dbtype = self._askForDbType()
                 if wikiLang is None:
                     return False

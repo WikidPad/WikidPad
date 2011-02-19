@@ -39,7 +39,7 @@ http://sourceforge.net/projects/wikidpad/files/AdditionalForDevelopment/py2exe-0
 
 
 Windows only, if you want to create Windows binary installers:
-Inno setup
+Inno setup (5.4.1 or later)
 http://www.jrsoftware.org/isinfo.php
 ISTool (not absolutely necessary, but strongly recommended)
 http://www.istool.org/

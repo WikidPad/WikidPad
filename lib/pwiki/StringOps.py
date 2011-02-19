@@ -772,7 +772,7 @@ def getRelativeFilePathAndTestContained(location, toFilePath):
         if len(fileParts) == 0:
             break  # TODO Error ???
 
-        if locParts[0] != fileParts[0]:
+        if os.path.normcase(locParts[0]) != os.path.normcase(fileParts[0]):
             break
 
         del locParts[0]
