@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WikidPad 2.0\n"
-"POT-Creation-Date: 2010-11-14 21:28\n"
-"PO-Revision-Date: 2010-11-16 13:03+0800\n"
+"POT-Creation-Date: 2011-01-29 14:42\n"
+"PO-Revision-Date: 2011-02-11 16:53+0800\n"
 "Last-Translator: 郁晓旭 <yuxiaoxu@msn.com>\n"
 "Language-Team: yuxiaoxu <yuxiaoxu@msn.com>\n"
 "MIME-Version: 1.0\n"
@@ -1288,10 +1288,10 @@ msgid "second(s)"
 msgstr "秒"
 
 #: WikidPad.xrc:0
-#: extensions\GraphvizStructureView.py:667
-#: extensions\GraphvizStructureView.py:691
-#: extensions\GraphvizStructureView.py:704
-#: extensions\GraphvizStructureView.py:717
+#: extensions\GraphvizStructureView.py:678
+#: extensions\GraphvizStructureView.py:702
+#: extensions\GraphvizStructureView.py:715
+#: extensions\GraphvizStructureView.py:728
 msgid "..."
 msgstr "..."
 
@@ -1432,17 +1432,17 @@ msgstr "显示空日"
 msgid "Sort dates ascending"
 msgstr "按日期升序"
 
-#: WikidPadStarter.py:182
+#: WikidPadStarter.py:189
 msgid "Error starting WikidPad"
 msgstr "WikidPad启动出错"
 
-#: WikidPadStarter.py:183
+#: WikidPadStarter.py:190
 #: lib\pwiki\SearchAndReplaceDialogs.py:691
 #: lib\pwiki\SearchAndReplaceDialogs.py:971
 msgid "Error!"
 msgstr "错误！"
 
-#: WikidPadStarter.py:190
+#: WikidPadStarter.py:197
 msgid "Error"
 msgstr "错误"
 
@@ -1450,11 +1450,11 @@ msgstr "错误"
 msgid "[Please set path to Gnuplot executable]"
 msgstr "[请设置Gnuplots可执行文件路径l]"
 
-#: extensions\GnuplotClBridge.py:129
+#: extensions\GnuplotClBridge.py:140
 msgid "[Gnuplot error: %s]"
 msgstr "[Gnuplot错误: %s]"
 
-#: extensions\GnuplotClBridge.py:180
+#: extensions\GnuplotClBridge.py:191
 msgid "Path to Gnuplot:"
 msgstr "Gnuplot路径:"
 
@@ -1462,82 +1462,82 @@ msgstr "Gnuplot路径:"
 msgid "[Please set path to GraphViz executables]"
 msgstr "[请设置GraphViz可执行文件路径]"
 
-#: extensions\GraphvizClBridge.py:137
+#: extensions\GraphvizClBridge.py:148
 msgid "[%s Error: %s]"
 msgstr "[%s 错误: %s]"
 
-#: extensions\GraphvizClBridge.py:238
+#: extensions\GraphvizClBridge.py:249
 msgid "Directory of executables:"
 msgstr "可执行文件目录:"
 
-#: extensions\GraphvizClBridge.py:242
+#: extensions\GraphvizClBridge.py:253
 msgid "Name of dot executable:"
 msgstr "dot可执行文件名:"
 
-#: extensions\GraphvizClBridge.py:246
+#: extensions\GraphvizClBridge.py:257
 msgid "Name of neato executable:"
 msgstr "neato可执行文件名:"
 
-#: extensions\GraphvizClBridge.py:250
+#: extensions\GraphvizClBridge.py:261
 msgid "Name of twopi executable:"
 msgstr "twopi可执行文件名:"
 
-#: extensions\GraphvizClBridge.py:254
+#: extensions\GraphvizClBridge.py:265
 msgid "Name of circo executable:"
 msgstr "circo可执行文件名:"
 
-#: extensions\GraphvizClBridge.py:258
+#: extensions\GraphvizClBridge.py:269
 msgid "Name of fdp executable:"
 msgstr "fdp可执行文件名"
 
-#: extensions\GraphvizStructureView.py:355
+#: extensions\GraphvizStructureView.py:366
 msgid "%s Error: %s"
 msgstr "%s 错误: %s"
 
-#: extensions\GraphvizStructureView.py:421
-#: extensions\GraphvizStructureView.py:422
+#: extensions\GraphvizStructureView.py:432
+#: extensions\GraphvizStructureView.py:433
 msgid "Show relation graph"
 msgstr "显示关系图"
 
-#: extensions\GraphvizStructureView.py:424
+#: extensions\GraphvizStructureView.py:435
 msgid "Show rel. graph source"
 msgstr "显示关系图来源"
 
-#: extensions\GraphvizStructureView.py:426
+#: extensions\GraphvizStructureView.py:437
 msgid "Show relation graph source"
 msgstr "显示关系图来源"
 
-#: extensions\GraphvizStructureView.py:428
-#: extensions\GraphvizStructureView.py:429
+#: extensions\GraphvizStructureView.py:439
+#: extensions\GraphvizStructureView.py:440
 msgid "Show child graph"
 msgstr "显示子图"
 
-#: extensions\GraphvizStructureView.py:431
-#: extensions\GraphvizStructureView.py:433
+#: extensions\GraphvizStructureView.py:442
+#: extensions\GraphvizStructureView.py:444
 msgid "Show child graph source"
 msgstr "显示子图来源"
 
-#: extensions\GraphvizStructureView.py:650
+#: extensions\GraphvizStructureView.py:661
 msgid "  GraphVizStructure"
 msgstr "  GraphViz-struktur"
 
-#: extensions\GraphvizStructureView.py:670
+#: extensions\GraphvizStructureView.py:681
 msgid "Node font name:"
 msgstr "结点字体名称:"
 
-#: extensions\GraphvizStructureView.py:682
+#: extensions\GraphvizStructureView.py:693
 msgid "Node font size:"
 msgstr "结点字体大小:"
 
-#: extensions\GraphvizStructureView.py:694
+#: extensions\GraphvizStructureView.py:705
 msgid "Node border color:"
 msgstr "结点边框色:"
 
-#: extensions\GraphvizStructureView.py:707
+#: extensions\GraphvizStructureView.py:718
 msgid "Node background color:"
 msgstr "结点背景色:"
 
-#: extensions\GraphvizStructureView.py:720
+#: extensions\GraphvizStructureView.py:731
 msgid "Edge color:"
 msgstr "边缘色:"
 
@@ -1545,11 +1545,11 @@ msgstr "边缘色:"
 msgid "[Please set path to MimeTeX executable]"
 msgstr "[请设置MimeTeX可执行文件路径]"
 
-#: extensions\MimeTexCGIBridge.py:111
+#: extensions\MimeTexCGIBridge.py:124
 msgid "[Invalid response from MimeTeX]"
 msgstr "[MimeTeX响应无效]"
 
-#: extensions\MimeTexCGIBridge.py:172
+#: extensions\MimeTexCGIBridge.py:185
 msgid "Path to MimeTeX:"
 msgstr "MimeTeX路径:"
 
@@ -1557,15 +1557,15 @@ msgstr "MimeTeX路径:"
 msgid "[Please set path to Ploticus executable]"
 msgstr "[设置Ploticus可执行文件路径]"
 
-#: extensions\PloticusClBridge.py:140
+#: extensions\PloticusClBridge.py:151
 msgid "[Ploticus error: %s]"
 msgstr "[Ploticus错误: %s]"
 
-#: extensions\PloticusClBridge.py:200
+#: extensions\PloticusClBridge.py:211
 msgid "Path to Ploticus:"
 msgstr "Ploticus路径:"
 
-#: extensions\PloticusClBridge.py:206
+#: extensions\PloticusClBridge.py:217
 msgid "Output format:"
 msgstr "输出格式:"
 
@@ -1990,6 +1990,7 @@ msgid ""
 "            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>Translations:</b></font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Chinese:</b></font></td><td nowrap><font size=\"3\">yuxiaoxu@msn.com</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Hungarian:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Russian:</b></font></td><td nowrap><font size=\"3\">Oleg Domanov</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>Swedish:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
 "        </table>\n"
 "    </center>\n"
@@ -2033,10 +2034,11 @@ msgstr ""
 "            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\">&nbsp;</td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"left\" colspan=\"2\" nowrap><font size=\"3\"><b>翻译:</b></font></td></tr>\n"
-"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>瑞典语:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
-"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>匈牙利语:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
 "            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>简体中文:</b></font></td><td nowrap><font size=\"3\">yuxiaoxu@msn.com</font></td></tr>\n"
-"        </table>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>匈牙利语:</b></font></td><td nowrap><font size=\"3\">Török Árpád</font></td></tr>\n"
+"            <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>俄语:</b></font></td><td nowrap><font size=\"3\">Oleg Domanov</font></td></tr>\n"
+"              <tr><td width=\"30%%\" align=\"right\"><font size=\"3\"><b>瑞典语:</b></font></td><td nowrap><font size=\"3\">Stefan Berg</font></td></tr>\n"
+"                              </table>\n"
 "    </center>\n"
 "    \n"
 "    \n"
@@ -2052,38 +2054,38 @@ msgstr ""
 "</body>\n"
 "</html>\n"
 
-#: lib\pwiki\AdditionalDialogs.py:1988
+#: lib\pwiki\AdditionalDialogs.py:1989
 #: lib\pwiki\PersonalWikiFrame.py:1931
 msgid "About WikidPad"
 msgstr "关于WikidPad"
 
-#: lib\pwiki\AdditionalDialogs.py:1992
-#: lib\pwiki\AdditionalDialogs.py:2098
-#: lib\pwiki\AdditionalDialogs.py:2106
+#: lib\pwiki\AdditionalDialogs.py:1993
+#: lib\pwiki\AdditionalDialogs.py:2099
+#: lib\pwiki\AdditionalDialogs.py:2107
 msgid "N/A"
 msgstr "N/A"
 
-#: lib\pwiki\AdditionalDialogs.py:2002
+#: lib\pwiki\AdditionalDialogs.py:2003
 msgid "Okay"
 msgstr "好的"
 
-#: lib\pwiki\AdditionalDialogs.py:2088
+#: lib\pwiki\AdditionalDialogs.py:2089
 msgid "Wiki Properties"
 msgstr "维基属性(&P)..."
 
-#: lib\pwiki\AdditionalDialogs.py:2096
+#: lib\pwiki\AdditionalDialogs.py:2097
 msgid "Wiki database backend:"
 msgstr "维基库后台:"
 
-#: lib\pwiki\AdditionalDialogs.py:2104
+#: lib\pwiki\AdditionalDialogs.py:2105
 msgid "Number of wiki pages:"
 msgstr "维基页总数:"
 
-#: lib\pwiki\AdditionalDialogs.py:2122
+#: lib\pwiki\AdditionalDialogs.py:2123
 msgid "Jobs"
 msgstr "作业"
 
-#: lib\pwiki\AdditionalDialogs.py:2139
+#: lib\pwiki\AdditionalDialogs.py:2140
 msgid "Number of Jobs:"
 msgstr "作业数:"
 
@@ -2150,35 +2152,35 @@ msgstr "维基页没有找到，新页将被创建。"
 msgid "History"
 msgstr "历史"
 
-#: lib\pwiki\DocPages.py:1923
+#: lib\pwiki\DocPages.py:1976
 msgid "Func. tag %s does not exist"
 msgstr "功能标签%s不存在"
 
-#: lib\pwiki\DocPages.py:2186
+#: lib\pwiki\DocPages.py:2239
 msgid "Global text blocks"
 msgstr "全局文本区"
 
-#: lib\pwiki\DocPages.py:2187
+#: lib\pwiki\DocPages.py:2240
 msgid "Wiki text blocks"
 msgstr "维基文本区"
 
-#: lib\pwiki\DocPages.py:2188
+#: lib\pwiki\DocPages.py:2241
 msgid "Global spell list"
 msgstr "全局拼写列表"
 
-#: lib\pwiki\DocPages.py:2189
+#: lib\pwiki\DocPages.py:2242
 msgid "Wiki spell list"
 msgstr "维基拼写列表"
 
-#: lib\pwiki\DocPages.py:2190
+#: lib\pwiki\DocPages.py:2243
 msgid "Global cc. blacklist"
 msgstr "全局cc.黑名单"
 
-#: lib\pwiki\DocPages.py:2191
+#: lib\pwiki\DocPages.py:2244
 msgid "Wiki cc. blacklist"
 msgstr "维基cc.黑名单"
 
-#: lib\pwiki\DocPages.py:2192
+#: lib\pwiki\DocPages.py:2245
 msgid "Favorite wikis"
 msgstr "维基收藏夹"
 
@@ -2195,34 +2197,34 @@ msgstr "多个HTML文件"
 msgid "Exporting %s"
 msgstr "正导出%s"
 
-#: lib\pwiki\Exporters.py:1588
+#: lib\pwiki\Exporters.py:1592
 msgid "<pre>[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
 msgstr "<pre>[在 \"选项\", 页面 \"安全性\", 选项 \"程序插入脚本\"中允许插入备注]</pre>"
 
-#: lib\pwiki\Exporters.py:2102
+#: lib\pwiki\Exporters.py:2106
 msgid "[Unknown parser node with name \"%s\" found]"
 msgstr "[发现未知解析结点名 \"%s\" ]"
 
-#: lib\pwiki\Exporters.py:2136
+#: lib\pwiki\Exporters.py:2140
 msgid "Set of *.wiki files"
 msgstr "多个*.wiki文件"
 
-#: lib\pwiki\Exporters.py:2320
+#: lib\pwiki\Exporters.py:2324
 #: lib\pwiki\Importers.py:34
 msgid "Multipage text"
 msgstr "多页文本文件"
 
-#: lib\pwiki\Exporters.py:2333
+#: lib\pwiki\Exporters.py:2337
 #: lib\pwiki\Importers.py:47
 msgid "Multipage files (*.mpt)"
 msgstr "多页文件 (*.mpt)"
 
-#: lib\pwiki\Exporters.py:2334
+#: lib\pwiki\Exporters.py:2338
 #: lib\pwiki\Importers.py:48
 msgid "Text file (*.txt)"
 msgstr "文本文件 (*.txt)"
 
-#: lib\pwiki\Exporters.py:2477
+#: lib\pwiki\Exporters.py:2481
 msgid "No usable separator found"
 msgstr "没有发现可用分隔符"
 

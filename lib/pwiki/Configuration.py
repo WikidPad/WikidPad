@@ -496,7 +496,7 @@ class CombinedConfiguration(_AbstractConfiguration):
 
 GLOBALDEFAULTS = {
     ("main", "wiki_history"): None,   # Should be overwritten with concrete value
-    ("main", "last_wiki"): "",   # Same
+    ("main", "last_wiki"): "WikidPadHelp/WikidPadHelp.wiki",
     ("main", "size_x"): "500",
     ("main", "size_y"): "300",
     
