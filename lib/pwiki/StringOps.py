@@ -479,6 +479,18 @@ def splitFill(text, delim, count, fill=u""):
     return result
 
 
+# def splitUnifName(unifName):
+#     """
+#     Split a unified name path and return a list of components.
+#     If a part of the path must contain a slash it is quoted as double slash.
+#     
+#     Some unified names shouldn't be processed by this function, especially
+#     "wikipage/..." unifNames
+#     """
+#     result = 
+
+
+
 def matchWhole(reObj, s):
     """
     reObj -- Compiled regular expression
@@ -772,7 +784,7 @@ def getRelativeFilePathAndTestContained(location, toFilePath):
         if len(fileParts) == 0:
             break  # TODO Error ???
 
-        if locParts[0] != fileParts[0]:
+        if os.path.normcase(locParts[0]) != os.path.normcase(fileParts[0]):
             break
 
         del locParts[0]
@@ -1315,12 +1327,14 @@ def getMd5B36ByString(text):
     if isinstance(text, unicode):
         text = text.encode("utf-8")
     
-    digest = hashlib.md5(text).digest()
+#     digest = hashlib.md5(text).digest()
+# 
+#     # make an integer out of the number
+#     x = 0L
+#     for digit in digest:
+#        x = x*256 + ord(digit)
 
-    # make an integer out of the number
-    x = 0L
-    for digit in digest:
-       x = x*256 + ord(digit)
+    x = int(hashlib.md5(text).hexdigest(), 16)
     
     # create the result in base len(_RNDBASESEQ) (=36)
     res=""

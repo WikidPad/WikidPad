@@ -31,7 +31,11 @@ from .SystemInfo import isUnicode, isOSX, isLinux, isWindows
 
 from .ParseUtilities import getFootnoteAnchorDict
 
-from .EnhancedScintillaControl import EnhancedScintillaControl, StyleCollector
+from .EnhancedScintillaControl import StyleCollector
+
+from .SearchableScintillaControl import SearchableScintillaControl
+
+
 
 from . import Configuration
 from . import AdditionalDialogs
@@ -98,7 +102,7 @@ def bytelenSct_mbcs(us):
 
 
 
-class WikiTxtCtrl(EnhancedScintillaControl):
+class WikiTxtCtrl(SearchableScintillaControl):
     NUMBER_MARGIN = 0
     FOLD_MARGIN = 2
     SELECT_MARGIN = 1
@@ -116,8 +120,8 @@ class WikiTxtCtrl(EnhancedScintillaControl):
             GUI_ID.CMD_REPLACE_THIS_SPELLING_WITH_SUGGESTION_9]
 
     def __init__(self, presenter, parent, ID):
-        EnhancedScintillaControl.__init__(self, parent, ID)
-        self.presenter = presenter
+        SearchableScintillaControl.__init__(self, presenter,
+                presenter.getMainControl(), parent, ID)
         self.evalScope = None
         self.stylingThreadHolder = ThreadHolder()
         self.calltipThreadHolder = ThreadHolder()
@@ -127,7 +131,6 @@ class WikiTxtCtrl(EnhancedScintillaControl):
 #         self.loadedDocPage = None
         self.lastFont = None
         self.ignoreOnChange = False
-        self.searchStr = u""
         self.wikiLanguageHelper = None
         self.templateIdRecycler = wxHelper.IdRecycler()
 
@@ -289,9 +292,7 @@ class WikiTxtCtrl(EnhancedScintillaControl):
 
         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
         
-#         EVT_STYLE_DONE_COMMAND(self, self.OnStyleDone)
-
-        self.incSearchCharStartPos = 0
+#         self.incSearchCharStartPos = 0
         self.incSearchPreviousHiddenLines = None
         self.incSearchPreviousHiddenStartLine = -1
 
@@ -304,10 +305,6 @@ class WikiTxtCtrl(EnhancedScintillaControl):
         # when was a key pressed last. used to check idle time.
         self.lastKeyPressed = time()
         self.eolMode = self.GetEOLMode()
-
-#         # Stock cursors. Created here because the App object must be created first
-#         WikiTxtCtrl.CURSOR_IBEAM = wx.StockCursor(wx.CURSOR_IBEAM)
-#         WikiTxtCtrl.CURSOR_HAND = wx.StockCursor(wx.CURSOR_HAND)
 
         self.contextMenuTokens = None
         self.contextMenuSpellCheckSuggestions = None
@@ -381,10 +378,6 @@ class WikiTxtCtrl(EnhancedScintillaControl):
 #         """
 #         wx.EVT_IDLE(self, self.OnIdle)
 
-
-    def Cut(self):
-        self.Copy()
-        self.ReplaceSelection("")
 
     def Copy(self):
         text = self.GetSelectedText()
@@ -1407,9 +1400,9 @@ class WikiTxtCtrl(EnhancedScintillaControl):
             if item: item.Enable(self.CanUndo())
             item = menu.FindItemById(GUI_ID.CMD_REDO)
             if item: item.Enable(self.CanRedo())
-    
+
             cancopy = self.GetSelectionStart() != self.GetSelectionEnd()
-            
+
             item = menu.FindItemById(GUI_ID.CMD_TEXT_DELETE)
             if item: item.Enable(cancopy and not self.GetReadOnly())
             item = menu.FindItemById(GUI_ID.CMD_CLIPBOARD_CUT)
@@ -2115,7 +2108,7 @@ class WikiTxtCtrl(EnhancedScintillaControl):
 
                     if link.startswith(u"rel://"):
                         link = self.presenter.getMainControl().makeRelUrlAbsolute(link)
-                    
+
                     if link.startswith(u"file:"):
                         try:
                             path = dirname(StringOps.pathnameFromUrl(link))
@@ -2431,6 +2424,13 @@ class WikiTxtCtrl(EnhancedScintillaControl):
 
 
     def setSelectionForIncSearchByCharPos(self, start, end):
+        """
+        Overwrites SearchableScintillaControl.setSelectionForIncSearchByCharPos
+        Called during incremental search to select text. Will be called with
+        start=-1 if nothing is found to select.
+        This variant handles showing/hiding of folded lines
+        """
+
         # Hide lines which were previously shown
         if self.incSearchPreviousHiddenLines is not None:
             line = self.incSearchPreviousHiddenStartLine
@@ -2471,215 +2471,231 @@ class WikiTxtCtrl(EnhancedScintillaControl):
 
 
     def startIncrementalSearch(self, initSearch=None):
-        sb = self.presenter.getStatusBar()
-
-        self.incSearchCharStartPos = self.GetSelectionCharPos()[1]
         self.incSearchPreviousHiddenLines = None
         self.incSearchPreviousHiddenStartLine = -1
 
-        rect = sb.GetFieldRect(0)
-        if isOSX():
-            # needed on Mac OSX to avoid cropped text
-            rect = wx._core.Rect(rect.x, rect.y - 2, rect.width, rect.height + 4)
-
-        rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
-
-        dlg = WikiTxtDialogs.IncrementalSearchDialog(self, -1, self, rect,
-                sb.GetFont(), self.presenter, initSearch)
-        dlg.Show()
-
-    
-    def executeIncrementalSearch(self, next=False):
-        """
-        Run incremental search, called only by IncrementalSearchDialog
-        """
-        text = self.GetText()
-        if len(self.searchStr) > 0:
-            if next:
-                charStartPos = self.GetSelectionCharPos()[1]
-            else:
-                charStartPos = self.incSearchCharStartPos
-
-            regex = None
-            try:
-                regex = re.compile(self.searchStr, re.IGNORECASE | \
-                        re.MULTILINE | re.UNICODE)
-            except:
-                # Regex error
-                return charStartPos   # ?
-
-            match = regex.search(text, charStartPos, len(text))
-            if not match and charStartPos > 0:
-                match = regex.search(text, 0, charStartPos)
-
-            if match:
-#                 matchbytestart = self.bytelenSct(text[:match.start()])
-#                 matchbyteend = matchbytestart + \
-#                         self.bytelenSct(text[match.start():match.end()])
-
-                self.setSelectionForIncSearchByCharPos(
-                        match.start(), match.end())
-
-                return match.end()
-
-        self.setSelectionForIncSearchByCharPos(-1, -1)
-        self.GotoPos(self.bytelenSct(text[:self.incSearchCharStartPos]))
-
-        return -1
-
-
-    def executeIncrementalSearchBackward(self):
-        """
-        Run incremental search, called only by IncrementalSearchDialog
-        """
-        text = self.GetText()
-        if len(self.searchStr) > 0:
-            charStartPos = self.GetSelectionCharPos()[0]
-
-            regex = None
-            try:
-                regex = re.compile(self.searchStr, re.IGNORECASE | \
-                        re.MULTILINE | re.UNICODE)
-            except:
-                # Regex error
-                return charStartPos   # ?
-
-            match = regex.search(text, 0, len(text))
-            if match:
-                if match.end() > charStartPos:
-                    # First match already reached -> find last
-                    while True:
-                        matchNext = regex.search(text, match.end(), len(text))
-                        if not matchNext:
-                            break
-                        match = matchNext
-                        
-                else:
-                    while True:
-                        matchNext = regex.search(text, match.end(), len(text))
-                        if matchNext.end() > charStartPos:
-                            break
-                        match = matchNext
-
-                self.setSelectionForIncSearchByCharPos(match.start(), match.end())
-
-                return match.start()
-
-        self.setSelectionForIncSearchByCharPos(-1, -1)
-        self.GotoPos(self.bytelenSct(text[:self.incSearchCharStartPos]))
-
-        return -1
-
-
-    def forgetIncrementalSearch(self):
-        """
-        Called by IncrementalSearchDialog if user just leaves the inc. search
-        field.
-        """
-        pass
-
-    def resetIncrementalSearch(self):
-        """
-        Called by IncrementalSearchDialog before aborting an inc. search.
-        Called when search was explicitly aborted by user (with escape key)
-        """
-        self.setSelectionForIncSearchByCharPos(-1, -1)
-        self.GotoPos(self.bytelenSct(self.GetText()[:self.incSearchCharStartPos]))
+        super(WikiTxtCtrl, self).startIncrementalSearch(initSearch)
 
 
     def endIncrementalSearch(self):
-        """
-        Called if incremental search ended successful.
-        """
-        byteStart = self.GetSelectionStart()
-        byteEnd = self.GetSelectionEnd()
+        super(WikiTxtCtrl, self).endIncrementalSearch()
 
-        self.setSelectionForIncSearchByCharPos(-1, -1)
-        
-        self.SetSelection(byteStart, byteEnd)
         self.ensureSelectionExpanded()
 
 
-    def getContinuePosForSearch(self, sarOp):
-        """
-        Return the character position where to continue the given
-        search operation sarOp. It always continues at beginning
-        or end of current selection.
-        
-        If sarOp uses a regular expression, this function may throw
-        a re.error exception.
-        """
-        range = self.GetSelectionCharPos()
-        
-#         if sarOp.matchesPart(self.GetSelectedText()) is not None:
-        if sarOp.matchesPart(self.GetText(), range) is not None:
-            # currently selected text matches search operation
-            # -> continue searching at the end of selection
-            return range[1]
-        else:
-            # currently selected text does not match search
-            # -> continue searching at the beginning of selection
-            return range[0]
 
 
-    def executeSearch(self, sarOp, searchCharStartPos=-1, next=False):
-        """
-        Returns a tuple with a least two elements (<start>, <after end>)
-        containing start and after end char positions of the found occurrence
-        or (-1, -1) if not found.
-        """
-        if sarOp.booleanOp:
-            return (-1, -1)  # Not possible
 
-        if searchCharStartPos == -2:
-            searchCharStartPos = self.getContinuePosForSearch(sarOp)
-
-        text = self.GetText()
-        if len(sarOp.searchStr) > 0:
-            charStartPos = searchCharStartPos
-            if next:
-                charStartPos = len(self.GetTextRange(0, self.GetSelectionEnd()))
-            try:
-                found = sarOp.searchText(text, charStartPos)
-                start, end = found[:2]
-            except:
-                # Regex error
-                return (-1, -1)  # (self.anchorCharPosition, self.anchorCharPosition)
-                
-            if start is not None:
-                self.showSelectionByCharPos(start, end)
-
-                return found    # self.anchorCharPosition
-
-        self.SetSelection(-1, -1)
-        self.GotoPos(self.bytelenSct(text[:searchCharStartPos]))
-
-        return (-1, -1)
-        
-        
-    def executeReplace(self, sarOp):
-        """
-        Returns char position after replacement or -1 if replacement wasn't
-        possible
-        """
-#         seltext = self.GetSelectedText()
-        text = self.GetText()
-#         found = sarOp.matchesPart(seltext)
-        range = self.GetSelectionCharPos()
-        
-#         if sarOp.matchesPart(self.GetSelectedText()) is not None:
-        found = sarOp.matchesPart(text, range)
-
-        if found is None:
-            return -1
-
-        replacement = sarOp.replace(text, found)                    
-        bytestart = self.GetSelectionStart()
-        self.ReplaceSelection(replacement)
-        selByteEnd = bytestart + self.bytelenSct(replacement)
-        selCharEnd = len(self.GetTextRange(0, selByteEnd))
-
-        return selCharEnd
+#     def startIncrementalSearch(self, initSearch=None):
+#         sb = self.presenter.getStatusBar()
+# 
+#         self.incSearchCharStartPos = self.GetSelectionCharPos()[1]
+#         self.incSearchPreviousHiddenLines = None
+#         self.incSearchPreviousHiddenStartLine = -1
+# 
+#         rect = sb.GetFieldRect(0)
+#         if isOSX():
+#             # needed on Mac OSX to avoid cropped text
+#             rect = wx._core.Rect(rect.x, rect.y - 2, rect.width, rect.height + 4)
+# 
+#         rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
+# 
+#         dlg = WikiTxtDialogs.IncrementalSearchDialog(self, -1, self, rect,
+#                 sb.GetFont(), self.presenter, initSearch)
+#         dlg.Show()
+# 
+#     
+#     def executeIncrementalSearch(self, next=False):
+#         """
+#         Run incremental search, called only by IncrementalSearchDialog
+#         """
+#         text = self.GetText()
+#         if len(self.searchStr) > 0:
+#             if next:
+#                 charStartPos = self.GetSelectionCharPos()[1]
+#             else:
+#                 charStartPos = self.incSearchCharStartPos
+# 
+#             regex = None
+#             try:
+#                 regex = re.compile(self.searchStr, re.IGNORECASE | \
+#                         re.MULTILINE | re.UNICODE)
+#             except:
+#                 # Regex error
+#                 return charStartPos   # ?
+# 
+#             match = regex.search(text, charStartPos, len(text))
+#             if not match and charStartPos > 0:
+#                 match = regex.search(text, 0, charStartPos)
+# 
+#             if match:
+# #                 matchbytestart = self.bytelenSct(text[:match.start()])
+# #                 matchbyteend = matchbytestart + \
+# #                         self.bytelenSct(text[match.start():match.end()])
+# 
+#                 self.setSelectionForIncSearchByCharPos(
+#                         match.start(), match.end())
+# 
+#                 return match.end()
+# 
+#         self.setSelectionForIncSearchByCharPos(-1, -1)
+#         self.GotoPos(self.bytelenSct(text[:self.incSearchCharStartPos]))
+# 
+#         return -1
+# 
+# 
+#     def executeIncrementalSearchBackward(self):
+#         """
+#         Run incremental search, called only by IncrementalSearchDialog
+#         """
+#         text = self.GetText()
+#         if len(self.searchStr) > 0:
+#             charStartPos = self.GetSelectionCharPos()[0]
+# 
+#             regex = None
+#             try:
+#                 regex = re.compile(self.searchStr, re.IGNORECASE | \
+#                         re.MULTILINE | re.UNICODE)
+#             except:
+#                 # Regex error
+#                 return charStartPos   # ?
+# 
+#             match = regex.search(text, 0, len(text))
+#             if match:
+#                 if match.end() > charStartPos:
+#                     # First match already reached -> find last
+#                     while True:
+#                         matchNext = regex.search(text, match.end(), len(text))
+#                         if not matchNext:
+#                             break
+#                         match = matchNext
+#                         
+#                 else:
+#                     while True:
+#                         matchNext = regex.search(text, match.end(), len(text))
+#                         if matchNext.end() > charStartPos:
+#                             break
+#                         match = matchNext
+# 
+#                 self.setSelectionForIncSearchByCharPos(match.start(), match.end())
+# 
+#                 return match.start()
+# 
+#         self.setSelectionForIncSearchByCharPos(-1, -1)
+#         self.GotoPos(self.bytelenSct(text[:self.incSearchCharStartPos]))
+# 
+#         return -1
+# 
+# 
+#     def forgetIncrementalSearch(self):
+#         """
+#         Called by IncrementalSearchDialog if user just leaves the inc. search
+#         field.
+#         """
+#         pass
+# 
+#     def resetIncrementalSearch(self):
+#         """
+#         Called by IncrementalSearchDialog before aborting an inc. search.
+#         Called when search was explicitly aborted by user (with escape key)
+#         """
+#         self.setSelectionForIncSearchByCharPos(-1, -1)
+#         self.GotoPos(self.bytelenSct(self.GetText()[:self.incSearchCharStartPos]))
+# 
+# 
+#     def endIncrementalSearch(self):
+#         """
+#         Called if incremental search ended successfully.
+#         """
+#         byteStart = self.GetSelectionStart()
+#         byteEnd = self.GetSelectionEnd()
+# 
+#         self.setSelectionForIncSearchByCharPos(-1, -1)
+#         
+#         self.SetSelection(byteStart, byteEnd)
+#         self.ensureSelectionExpanded()
+# 
+# 
+#     def getContinuePosForSearch(self, sarOp):
+#         """
+#         Return the character position where to continue the given
+#         search operation sarOp. It always continues at beginning
+#         or end of current selection.
+#         
+#         If sarOp uses a regular expression, this function may throw
+#         a re.error exception.
+#         """
+#         range = self.GetSelectionCharPos()
+#         
+# #         if sarOp.matchesPart(self.GetSelectedText()) is not None:
+#         if sarOp.matchesPart(self.GetText(), range) is not None:
+#             # currently selected text matches search operation
+#             # -> continue searching at the end of selection
+#             return range[1]
+#         else:
+#             # currently selected text does not match search
+#             # -> continue searching at the beginning of selection
+#             return range[0]
+# 
+# 
+#     def executeSearch(self, sarOp, searchCharStartPos=-1, next=False):
+#         """
+#         Returns a tuple with a least two elements (<start>, <after end>)
+#         containing start and after end char positions of the found occurrence
+#         or (-1, -1) if not found.
+#         """
+#         if sarOp.booleanOp:
+#             return (-1, -1)  # Not possible
+# 
+#         if searchCharStartPos == -2:
+#             searchCharStartPos = self.getContinuePosForSearch(sarOp)
+# 
+#         text = self.GetText()
+#         if len(sarOp.searchStr) > 0:
+#             charStartPos = searchCharStartPos
+#             if next:
+#                 charStartPos = len(self.GetTextRange(0, self.GetSelectionEnd()))
+#             try:
+#                 found = sarOp.searchText(text, charStartPos)
+#                 start, end = found[:2]
+#             except:
+#                 # Regex error
+#                 return (-1, -1)  # (self.anchorCharPosition, self.anchorCharPosition)
+#                 
+#             if start is not None:
+#                 self.showSelectionByCharPos(start, end)
+# 
+#                 return found    # self.anchorCharPosition
+# 
+#         self.SetSelection(-1, -1)
+#         self.GotoPos(self.bytelenSct(text[:searchCharStartPos]))
+# 
+#         return (-1, -1)
+#         
+#         
+#     def executeReplace(self, sarOp):
+#         """
+#         Returns char position after replacement or -1 if replacement wasn't
+#         possible
+#         """
+# #         seltext = self.GetSelectedText()
+#         text = self.GetText()
+# #         found = sarOp.matchesPart(seltext)
+#         range = self.GetSelectionCharPos()
+#         
+# #         if sarOp.matchesPart(self.GetSelectedText()) is not None:
+#         found = sarOp.matchesPart(text, range)
+# 
+#         if found is None:
+#             return -1
+# 
+#         replacement = sarOp.replace(text, found)                    
+#         bytestart = self.GetSelectionStart()
+#         self.ReplaceSelection(replacement)
+#         selByteEnd = bytestart + self.bytelenSct(replacement)
+#         selCharEnd = len(self.GetTextRange(0, selByteEnd))
+# 
+#         return selCharEnd
 
 
 
@@ -2810,7 +2826,7 @@ class WikiTxtCtrl(EnhancedScintillaControl):
 
     def OnKeyDown(self, evt):
         key = evt.GetKeyCode()
-
+        
         self.lastKeyPressed = time()
         accP = getAccelPairFromKeyDown(evt)
         matchesAccelPair = self.presenter.getMainControl().keyBindings.\
@@ -2888,20 +2904,20 @@ class WikiTxtCtrl(EnhancedScintillaControl):
             evt.Skip()
 
 
-        if matchesAccelPair("ContinueSearch", accP):
-            # ContinueSearch is normally F3
-            self.startIncrementalSearch(self.searchStr)
-            evt.Skip()
+#         if matchesAccelPair("ContinueSearch", accP):
+#             # ContinueSearch is normally F3
+#             self.startIncrementalSearch(self.searchStr)
+#             evt.Skip()
+# 
+#         elif matchesAccelPair("StartIncrementalSearch", accP):
+#             # Start incremental search
+#             # First get selected text and prepare it as default value
+#             text = self.GetSelectedText()
+#             text = text.split("\n", 1)[0]
+#             text = re.escape(text[:30])
+#             self.startIncrementalSearch(text)
 
-        elif matchesAccelPair("StartIncrementalSearch", accP):
-            # Start incremental search
-            # First get selected text and prepare it as default value
-            text = self.GetSelectedText()
-            text = text.split("\n", 1)[0]
-            text = re.escape(text[:30])
-            self.startIncrementalSearch(text)
-
-        elif matchesAccelPair("AutoComplete", accP):
+        if matchesAccelPair("AutoComplete", accP):
             # AutoComplete is normally Ctrl-Space
             # Handle autocompletion
             self.autoComplete()
@@ -2913,6 +2929,20 @@ class WikiTxtCtrl(EnhancedScintillaControl):
         elif matchesAccelPair("ActivateLinkBackground", accP):
             # ActivateLink2 is normally Ctrl-Return
             self.activateLink(tabMode=3)
+
+        elif matchesAccelPair("ActivateLink", accP):
+            # ActivateLink is normally Ctrl-L
+            # There is also a shortcut for it. This can only happen
+            # if OnKeyDown is called indirectly
+            # from IncrementalSearchDialog.OnKeyDownInput
+            self.activateLink()
+
+        elif matchesAccelPair("ActivateLinkNewTab", accP):
+            # ActivateLinkNewTab is normally Ctrl-Alt-L
+            # There is also a shortcut for it. This can only happen
+            # if OnKeyDown is called indirectly
+            # from IncrementalSearchDialog.OnKeyDownInput
+            self.activateLink(tabMode=2)
 
         elif not evt.ControlDown() and not evt.ShiftDown():  # TODO Check all modifiers
             if key == wx.WXK_TAB:
@@ -2950,7 +2980,7 @@ class WikiTxtCtrl(EnhancedScintillaControl):
                 evt.Skip()
             
         else:
-            evt.Skip()
+            super(WikiTxtCtrl, self).OnKeyDown(evt)
 
 
     def OnChar_ImeWorkaround(self, evt):

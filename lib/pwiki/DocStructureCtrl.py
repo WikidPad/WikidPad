@@ -160,7 +160,7 @@ class DocStructureCtrl(EnhancedListControl):
         if not self.mainControl.getConfig().getboolean("main",
                 "docStructure_autofollow"):
             return
-
+            
         idx = bisect.bisect_right(self.tocListStarts, sel[0]) - 1
 
         self.ignoreOnChange = True
@@ -191,10 +191,10 @@ class DocStructureCtrl(EnhancedListControl):
 
 
     def updateList(self):
-        if self.mainControl.getConfig().getboolean("main",
-                "docStructure_autofollow"):
-            self.tocListStarts = []
-            self.SelectSingle(-1)
+#         if self.mainControl.getConfig().getboolean("main",
+#                 "docStructure_autofollow"):
+#             self.tocListStarts = []
+#             self.SelectSingle(-1)
 
         presenter = self.mainControl.getCurrentDocPagePresenter()
 
@@ -256,9 +256,6 @@ class DocStructureCtrl(EnhancedListControl):
             self.tocList = result
             self.tocListStarts = [r[0] for r in result]
 
-#             if threadstop is DUMBTHREADSTOP:
-#                 self.applyTocList()
-#             else:
             Utilities.callInMainThread(self.applyTocList)
 
         except NotCurrentThreadException:

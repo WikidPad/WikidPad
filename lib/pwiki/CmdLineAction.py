@@ -6,8 +6,6 @@ from WikiExceptions import *
 
 from StringOps import mbcsDec, wikiUrlToPathWordAndAnchor
 
-import Serialization, PluginManager, Exporters, SearchAndReplace
-
 
 class CmdLineAction:
     """
@@ -184,6 +182,8 @@ class CmdLineAction:
 
 
     def _runSavedExport(self, pWiki, savedExportName, continuousExport):
+        import Serialization, PluginManager, Exporters, SearchAndReplace
+
         exportList = Exporters.retrieveSavedExportsList(pWiki,
                 pWiki.getWikiData(), continuousExport)
         xmlNode = None
@@ -274,6 +274,8 @@ class CmdLineAction:
 
 
     def exportAction(self, pWiki):
+        import Exporters
+
         if not (self.exportWhat or self.exportType or self.exportDest or
                 self.exportSaved):
             return # No export

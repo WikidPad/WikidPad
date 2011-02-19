@@ -97,6 +97,18 @@ class ConnectWrapBase:
         return row[0]
 
         
+    def execSqlUntilNoChange(self, sql, params=None):
+        """
+        Executes update or delete statement until no more rows are changed
+        by it.
+        """
+        while True:
+            self.tempDb.execSql(sql, params)
+
+            if self.rowcount == 0:
+                return
+
+
     def execSqlNoError(self, sql):
         """
         Ignore sqlite errors on execution

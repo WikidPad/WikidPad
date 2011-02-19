@@ -16,10 +16,13 @@ os.stat_float_times(True)
 if not hasattr(sys, 'frozen'):
     sys.path.insert(0, "lib")
 #     sys.path.append("lib")
-#     sys.path.append(r"C:\Daten\Projekte\Wikidpad\Next20\lib")
+#     sys.path.append(r"C:\Daten\Projekte\Wikidpad\Current\lib")
+
+# os.environ["PATH"] = os.path.dirname(os.path.abspath(sys.argv[0])) + ";" + os.environ["PATH"]
 
 from Consts import CONFIG_FILENAME, CONFIG_GLOBALS_DIRNAME
 
+# imports VERSION_TUPLE for plugins which may expect it here
 from Consts import VERSION_STRING, VERSION_TUPLE
 
 import __builtin__

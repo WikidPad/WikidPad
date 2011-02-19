@@ -30,7 +30,7 @@ class IncrementalSearchDialog(wx.Frame):
     COLOR_YELLOW = wx.Colour(255, 255, 0);
     COLOR_GREEN = wx.Colour(0, 255, 0);
     
-    def __init__(self, parent, id, txtCtrl, rect, font, presenter, searchInit=None):
+    def __init__(self, parent, id, txtCtrl, rect, font, mainControl, searchInit=None):
         # Frame title is invisible but is helpful for workarounds with
         # third-party tools
         wx.Frame.__init__(self, parent, id, u"WikidPad i-search",
@@ -38,7 +38,7 @@ class IncrementalSearchDialog(wx.Frame):
                 wx.NO_BORDER | wx.FRAME_FLOAT_ON_PARENT)
 
         self.txtCtrl = txtCtrl
-        self.presenter = presenter
+        self.mainControl = mainControl
         self.tfInput = wx.TextCtrl(self, GUI_ID.INC_SEARCH_TEXT_FIELD,
                 _(u"Incremental search (ENTER/ESC to finish)"),
                 style=wx.TE_PROCESS_ENTER | wx.TE_RICH)
@@ -53,7 +53,7 @@ class IncrementalSearchDialog(wx.Frame):
         self.tfInput.SelectAll()  #added for Mac compatibility
         self.tfInput.SetFocus()
 
-        config = self.txtCtrl.presenter.getConfig()
+        config = self.mainControl.getConfig()
 
         self.closeDelay = 1000 * config.getint("main", "incSearch_autoOffDelay",
                 0)  # Milliseconds to close or 0 to deactivate
@@ -110,15 +110,15 @@ class IncrementalSearchDialog(wx.Frame):
 
         key = evt.GetKeyCode()
         accP = getAccelPairFromKeyDown(evt)
-        matchesAccelPair = self.presenter.getMainControl().keyBindings.\
-                matchesAccelPair
+        matchesAccelPair = self.mainControl.keyBindings.matchesAccelPair
 
         foundPos = -2
-        if key in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
+        if accP in ((wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER),
+                (wx.ACCEL_NORMAL, wx.WXK_RETURN)):
             # Return pressed
             self.txtCtrl.endIncrementalSearch()
             self.Close()
-        elif key == wx.WXK_ESCAPE:
+        elif accP == (wx.ACCEL_NORMAL, wx.WXK_ESCAPE):
             # Esc -> Abort inc. search, go back to start
             self.txtCtrl.resetIncrementalSearch()
             self.Close()
@@ -145,22 +145,22 @@ class IncrementalSearchDialog(wx.Frame):
             # ActivateLink is normally Ctrl-L
             self.txtCtrl.endIncrementalSearch()
             self.Close()
-            self.txtCtrl.activateLink()
+            self.txtCtrl.OnKeyDown(evt)
         elif matchesAccelPair("ActivateLinkNewTab", accP):
             # ActivateLinkNewTab is normally Ctrl-Alt-L
             self.txtCtrl.endIncrementalSearch()
             self.Close()
-            self.txtCtrl.activateLink(tabMode=2)        
+            self.txtCtrl.OnKeyDown(evt)
         elif matchesAccelPair("ActivateLink2", accP):
             # ActivateLink2 is normally Ctrl-Return
             self.txtCtrl.endIncrementalSearch()
             self.Close()
-            self.txtCtrl.activateLink()
+            self.txtCtrl.OnKeyDown(evt)
         elif matchesAccelPair("ActivateLinkBackground", accP):
             # ActivateLinkNewTab is normally Ctrl-Alt-L
             self.txtCtrl.endIncrementalSearch()
             self.Close()
-            self.txtCtrl.activateLink(tabMode=3)        
+            self.txtCtrl.OnKeyDown(evt)
         # handle the other keys
         else:
             evt.Skip()

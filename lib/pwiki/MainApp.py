@@ -4,7 +4,8 @@
 import sys, os, traceback, os.path, socket
 
 # To generate dependency for py2exe
-import subprocess
+if False:
+    import subprocess
 
 import ExceptionLogger
 
@@ -13,22 +14,18 @@ import wx, wx.xrc
 # import srePersistent
 # srePersistent.loadCodeCache()
 
-from wxHelper import IconCache
 from Consts import CONFIG_FILENAME, CONFIG_GLOBALS_DIRNAME
+
 from MiscEvent import KeyFunctionSink, MiscEventSourceMixin
 
 from WikiExceptions import *
-from PersonalWikiFrame import PersonalWikiFrame
+import Configuration
 from StringOps import mbcsDec, createRandomString, pathEnc, \
         writeEntireFile, loadEntireFile
+
 import SystemInfo
+import WindowLayout
 from CmdLineAction import CmdLineAction
-from Serialization import SerializeStream
-import Ipc
-import Configuration, WindowLayout
-import OsAbstract, OptionsDialog
-import Localization
-from PluginManager import PluginManager, InsertionPluginManager
 
 
 
@@ -131,7 +128,7 @@ class App(wx.App, MiscEventSourceMixin):
         self.removeAppLockOnExit = False
         wx.EVT_END_SESSION(self, self.OnEndSession)
         appdir = os.path.dirname(os.path.abspath(sys.argv[0]))
-
+        
         self.mainFrameSet = set()
 
         wikiAppDir, globalConfigDir = findDirs()
@@ -172,9 +169,6 @@ class App(wx.App, MiscEventSourceMixin):
         self.wikiConfigFallthroughDict = Configuration.WIKIFALLTHROUGH.copy()
         self.pageSearchHistory = []
         self.wikiSearchHistory = []
-        
-        self.optionsDlgPanelList = list(
-                OptionsDialog.OptionsDialog.DEFAULT_PANEL_LIST)
 
         # load or create global configuration
         self.globalConfig = self.createGlobalConfiguration()
@@ -203,12 +197,43 @@ class App(wx.App, MiscEventSourceMixin):
                     self.createDefaultGlobalConfig(globalConfigLoc)
             else:
                 self.createDefaultGlobalConfig(defaultGlobalConfigLoc)
-            
+
+        splash = None
+        
+        cmdLine = CmdLineAction(sys.argv[1:])
+        if not cmdLine.exitFinally and self.globalConfig.getboolean("main",
+                "startup_splashScreen_show", True):
+            bitmap = wx.Bitmap(os.path.join(appdir, "icons/pwiki.ico"))
+            if bitmap:
+                splash = wx.SplashScreen(bitmap,
+                      wx.SPLASH_CENTRE_ON_SCREEN|wx.SPLASH_TIMEOUT, 15000, None,
+                      style=wx.BORDER_NONE|wx.FRAME_NO_TASKBAR)
+                wx.Yield()
+
+        try:
+            return self.initStep2(cmdLine)
+        finally:
+            if splash:
+                splash.Destroy()
+
+
+    def initStep2(self, cmdLine):
+        # Block of modules to import while splash screen is shown
+        from wxHelper import IconCache
+        from Serialization import SerializeStream
+        import OsAbstract
+        import Ipc
+        import OptionsDialog, Localization
+        from PluginManager import PluginManager, InsertionPluginManager
+
+
+        self.optionsDlgPanelList = list(
+                OptionsDialog.OptionsDialog.DEFAULT_PANEL_LIST)
+
         self.globalConfig.getMiscEvent().addListener(KeyFunctionSink((
                 ("changed configuration", self.onGlobalConfigurationChanged),
         )), False)
-        
-        ## _prof.start()
+
         Localization.loadLangList(self.wikiAppDir)
         
         Localization.loadI18nDict(self.wikiAppDir, self.globalConfig.get(
@@ -326,6 +351,7 @@ class App(wx.App, MiscEventSourceMixin):
                 
                 Ipc.getCommandServer().setAppLockInfo(appLockPath, appLockContent)
 
+
         # Build icon cache
         iconDir = os.path.join(self.wikiAppDir, "icons")
         self.iconCache = IconCache(iconDir)
@@ -389,18 +415,13 @@ class App(wx.App, MiscEventSourceMixin):
         res.SetFlags(0)
         res.LoadFromString(rd)
         
-        
-        
-        
 #         rd = loadEntireFile(r"C:\Daten\Projekte\Wikidpad\Current\wizards.xrc", True)
 #         res.LoadFromString(rd)
-        
-
 
         self.standardIcon = wx.Icon(os.path.join(self.wikiAppDir, 'icons',
                     'pwiki.ico'), wx.BITMAP_TYPE_ICO)
 
-        self.startPersonalWikiFrame(CmdLineAction(sys.argv[1:]))
+        self.startPersonalWikiFrame(cmdLine)
 
         return True
 
@@ -528,6 +549,8 @@ class App(wx.App, MiscEventSourceMixin):
         """
         Make settings from global config which are changeable during session
         """
+        import Localization
+        
         collationOrder = self.globalConfig.get("main", "collation_order")
         collationUppercaseFirst = self.globalConfig.getboolean("main",
                 "collation_uppercaseFirst")
@@ -547,11 +570,11 @@ class App(wx.App, MiscEventSourceMixin):
             except:
                 self.collator = Localization.getCollatorByString(u"C",
                         collationCaseMode)
-        
-        self.SetCallFilterEvent(self.globalConfig.getboolean("main",
-                "mouse_scrollUnderPointer"))
-        
-
+        try:
+            self.SetCallFilterEvent(self.globalConfig.getboolean("main",
+                    "mouse_scrollUnderPointer"))
+        except AttributeError:
+            pass  # Older wxPython versions didn't support this
 
 
     def OnEndSession(self, evt):
@@ -561,6 +584,8 @@ class App(wx.App, MiscEventSourceMixin):
 
 
     def OnExit(self):
+        import Ipc
+
         self.getInsertionPluginManager().taskEnd()
 
         if self.removeAppLockOnExit:
@@ -582,6 +607,8 @@ class App(wx.App, MiscEventSourceMixin):
 
 
     def startPersonalWikiFrame(self, clAction):
+        from PersonalWikiFrame import PersonalWikiFrame
+
         wikiFrame = PersonalWikiFrame(None, -1, "WikidPad", self.wikiAppDir,
                 self.globalConfigDir, self.globalConfigSubDir, clAction)
 
@@ -780,3 +807,25 @@ class App(wx.App, MiscEventSourceMixin):
 
         pl.insert(insPos, (factory, 4 * u" " + title))
 
+
+    def addWikiPluginOptionsDlgPanel(self, factory, title):
+        """
+        factory -- Factory function (or class taking parameters
+            (parent, optionsDlg, mainControl) where
+                parent: GUI parent of panel
+                optionsDlg: OptionsDialog object
+                mainControl: PersonalWikiFrame object
+        title -- unistring with title to show in the left list in options
+            dialog
+        """
+        pl = self.getOptionsDlgPanelList()
+
+        try:
+            insPos = pl.index(("??insert mark/current wiki/plugins", u""))
+        except ValueError:
+            insPos = pl.index(("??insert mark/current wiki", u""))
+            pl.insert(insPos, ("??insert mark/current wiki/plugins", u""))
+            pl.insert(insPos, ("", 2 * u" " + _(u"Plugins")))
+            insPos += 1
+
+        pl.insert(insPos, (factory, 4 * u" " + title))

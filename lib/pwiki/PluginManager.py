@@ -376,9 +376,9 @@ class InsertionPluginManager:
         # (<insertion key>, <import type>) tuple to description tuple dictionary
         ktToDescDict = {}
         for keyDesc in self.byKeyDescriptions:
-            key, etlist, factory = keyDesc
+            key, etlist, factory = keyDesc[:3]
             for et in etlist:
-                ktToDescDict[(key, et)] = keyDesc
+                ktToDescDict[(key, et)] = keyDesc[:3]
 
         # (<insertion key>, <import type>) tuple to description tuple dictionary
         self.ktToDescDict = ktToDescDict
@@ -388,7 +388,7 @@ class InsertionPluginManager:
         # Dictionary {id(handler): handler}
 
         self.startedHandlers = {}
-        
+
     def getHandler(self, exporter, exportType, insKey):
         """
         Return the appropriate handler for the parameter combination or None

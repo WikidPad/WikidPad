@@ -1,7 +1,7 @@
 from __future__ import with_statement
 
 import traceback
-import difflib
+import difflib, re
 
 import wx, wx.stc, wx.xrc
 
@@ -15,7 +15,8 @@ from . import StringOps
 
 from .WikiPyparsing import TerminalNode, NonTerminalNode
 
-from .EnhancedScintillaControl import EnhancedScintillaControl, StyleCollector
+from .EnhancedScintillaControl import StyleCollector
+from .SearchableScintillaControl import SearchableScintillaControl
 
 from .SystemInfo import isUnicode
 
@@ -40,19 +41,19 @@ def bytelenSct_mbcs(us):
 
 
 # TODO: Handle editing and rename/delete of baseDocPage
-class InlineDiffControl(EnhancedScintillaControl):
+class InlineDiffControl(SearchableScintillaControl):
     def __init__(self, presenter, mainControl, parent, ID):
-        EnhancedScintillaControl.__init__(self, parent, ID)
+        SearchableScintillaControl.__init__(self, presenter, mainControl,
+                parent, ID)
         
         self.fromText = None
         self.toText = None
         self.fromVerNo = None
         self.toVerNo = None
 
-#         self.opcodes = None
-        self.presenter = presenter
-        self.mainControl = mainControl
-        self.procTokens = None # NonTerminalNode with TerminalNode's
+#         self.presenter = presenter
+#         self.mainControl = mainControl
+        self.procTokens = None # NonTerminalNode with TerminalNode s
         self.stylebytes = None
         self.baseDocPage = None
 
@@ -296,7 +297,8 @@ class InlineDiffControl(EnhancedScintillaControl):
 
             return
 
-        evt.Skip()
+
+        super(InlineDiffControl, self).OnKeyDown(evt)
 
 
 

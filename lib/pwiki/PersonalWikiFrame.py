@@ -44,6 +44,7 @@ from . import OsAbstract
 
 from . import DocPages
 
+from .PWikiNonCore import PWikiNonCore
 
 from .CmdLineAction import CmdLineAction
 from .WikiTxtCtrl import WikiTxtCtrl, FOLD_MENU
@@ -183,6 +184,7 @@ class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
 
         self.globalConfigSubDir = globalConfigSubDir
 
+        # TODO: Move to MainApp
         # Create the "[TextBlocks].wiki" file in the global config subdirectory
         # if the file doesn't exist yet.
         tbLoc = os.path.join(self.globalConfigSubDir, "[TextBlocks].wiki")
@@ -245,6 +247,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # State here: Global configuration available
 
+        self.loadFixedExtensions()
+        
+        self.nonCoreMenuItems = PWikiNonCore(self, self)
+
         # setup plugin manager and hooks API
         dirs = ( os.path.join(self.globalConfigSubDir, u'user_extensions'),
                 os.path.join(self.wikiAppDir, u'user_extensions'),
@@ -272,8 +278,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         del plm
 
-        # load extensions
-        self.loadExtensions()
+        self.pluginManager.loadPlugins([ u'KeyBindings.py',
+                u'EvalLibrary.py' ] )
+
 
         self.attributeChecker = AttributeHandling.AttributeChecker(self)
 
@@ -349,7 +356,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # initialize the GUI
         self.initializeGui()
-
+        
         # Minimize on tray?
         self.tbIcon = None
         self.setShowOnTray()
@@ -369,7 +376,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.windowLayouter.layout()
         
         # State here: GUI construction finished, but frame is hidden yet
-
+        
         # if a wiki to open is set, open it
         if wikiToOpen:
             if exists(pathEnc(wikiToOpen)):
@@ -411,14 +418,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #             wx.GetApp().resumeBackgroundThreads()
 
 
-    def loadExtensions(self):
+    def loadFixedExtensions(self):
 #         self.wikidPadHooks = self.getExtension('WikidPadHooks', u'WikidPadHooks.py')
         self.keyBindings = KeyBindingsCache(
                 self.getExtension('KeyBindings', u'KeyBindings.py'))
         self.evalLib = self.getExtension('EvalLibrary', u'EvalLibrary.py')
         self.presentationExt = self.getExtension('Presentation', u'Presentation.py')
-        self.pluginManager.loadPlugins([ u'KeyBindings.py',
-                u'EvalLibrary.py' ] )
 
 
     def getExtension(self, extensionName, fileName):
@@ -692,6 +697,43 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             wx.EVT_UPDATE_UI(self, menuID, updatefct)
 
         return menuitem
+
+
+    def addMenuItemByInternalDescriptor(self, menu, desc):
+        if desc is None:
+            return
+        
+        def internalAddMenuItem(function, label, statustext, shortcut=None,
+                icondesc=None, menuID=None, updateFunction=None, kind=None,
+                *dummy):
+            """
+            Compared to fillPluginsMenu() this variant supports tuples as
+            update function but no auto-created submenus
+            (by using '|' in item name).
+            It expects an optional  shortcut  string before icon description
+            instead of appending the shortcut with '\t' to label
+
+            Furthermore it doesn't send self as additional parameter when
+            menu item is called or updated.
+            """
+            if shortcut is not None:
+                label += '\t' + shortcut
+
+            self.addMenuItem(menu, label, statustext,
+                    function, icondesc, menuID, updateFunction, kind)
+
+        internalAddMenuItem(*desc)
+
+
+    def addMenuItemByUnifNameTable(self, menu, unifNameTable):
+        for unifName in unifNameTable.split("\n"):
+            unifName = unifName.strip()
+            if unifName == "":
+                continue
+
+            self.addMenuItemByInternalDescriptor(menu,
+                    self.nonCoreMenuItems.getDescriptorFor(unifName))
+
 
 
     def buildWikiMenu(self):
@@ -1335,17 +1377,23 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         insertMenu = wx.Menu()
         editMenu.AppendMenu(wx.NewId(), _(u'&Insert'), insertMenu)
 
-        self.addMenuItem(insertMenu, _(u'&File URL...') + '\t' + 
-                self.keyBindings.AddFileUrl, _(u'Use file dialog to add URL'),
-                lambda evt: self.showAddFileUrlDialog(),
-                updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
 
+        self.addMenuItemByUnifNameTable(insertMenu,
+                """
+                menuItem/mainControl/builtin/showInsertFileUrlDialog
+                menuItem/mainControl/builtin/insertCurrentDate
+                """)
 
-        self.addMenuItem(insertMenu, _(u'Current &Date') + u'\t' + 
-                self.keyBindings.InsertDate, _(u'Insert current date'),
-                lambda evt: self.insertDate(), "date",
-                updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit,
-                    self.OnUpdateDisNotWikiPage))
+#         self.addMenuItem(insertMenu, _(u'&File URL...') + '\t' + 
+#                 self.keyBindings.AddFileUrl, _(u'Use file dialog to add URL'),
+#                 self.nonCore.OnShowAddFileUrlDialog,
+#                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit))
+
+#         self.addMenuItem(insertMenu, _(u'Current &Date') + u'\t' + 
+#                 self.keyBindings.InsertDate, _(u'Insert current date'),
+#                 lambda evt: self.insertDate(), "date",
+#                 updatefct=(self.OnUpdateDisReadOnlyPage, self.OnUpdateDisNotTextedit,
+#                     self.OnUpdateDisNotWikiPage))
 
         # TODO: Insert colorname, color value, icon name
 
@@ -1380,13 +1428,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 updatefct=self.OnUpdateAutoIndent,
                 kind=wx.ITEM_CHECK)
 
-#         menuID=wx.NewId()
-#         autoIndentMenuItem = wx.MenuItem(settingsMenu, menuID,
-#                 _(u"Auto-&Indent"), _(u"Auto indentation"), wx.ITEM_CHECK)
-#         settingsMenu.AppendItem(autoIndentMenuItem)
-#         wx.EVT_MENU(self, menuID, self.OnCmdCheckAutoIndent)
-#         wx.EVT_UPDATE_UI(self, menuID, self.OnUpdateAutoIndent)
-
 
         self.addMenuItem(settingsMenu, _(u"Auto-&Bullets"),
                 _(u"Show bullet on next line if current has one"),
@@ -1394,31 +1435,12 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 updatefct=self.OnUpdateAutoBullets,
                 kind=wx.ITEM_CHECK)
 
-#         menuID=wx.NewId()
-#         autoBulletsMenuItem = wx.MenuItem(settingsMenu, menuID,
-#                 _(u"Auto-&Bullets"),
-#                 _(u"Show bullet on next line if current has one"),
-#                 wx.ITEM_CHECK)
-#         settingsMenu.AppendItem(autoBulletsMenuItem)
-#         wx.EVT_MENU(self, menuID, self.OnCmdCheckAutoBullets)
-#         wx.EVT_UPDATE_UI(self, menuID,
-#                 self.OnUpdateAutoBullets)
 
         self.addMenuItem(settingsMenu, _(u"Tabs to spaces"),
                 _(u"Write spaces when hitting TAB key"),
                 self.OnCmdCheckTabsToSpaces, 
                 updatefct=self.OnUpdateTabsToSpaces,
                 kind=wx.ITEM_CHECK)
-
-#         menuID=wx.NewId()
-#         autoBulletsMenuItem = wx.MenuItem(settingsMenu, menuID,
-#                 _(u"Tabs to spaces"), _(u"Write spaces when hitting TAB key"),
-#                 wx.ITEM_CHECK)
-#         settingsMenu.AppendItem(autoBulletsMenuItem)
-#         wx.EVT_MENU(self, menuID, self.OnCmdCheckTabsToSpaces)
-#         wx.EVT_UPDATE_UI(self, menuID,
-#                 self.OnUpdateTabsToSpaces)
-
 
 
         viewMenu = wx.Menu()
@@ -2568,7 +2590,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.menuFunctions = self.pluginManager.registerSimplePluginAPI((
                     "MenuFunctions",1), ("describeMenuItems",))
 
-            self.loadExtensions()
+            self.loadFixedExtensions()
+            self.pluginManager.loadPlugins([ u'KeyBindings.py',
+                    u'EvalLibrary.py' ] )
 
             # This is a rebuild of an existing menu (after loading a new wikiData)
             clearMenu(self.pluginsMenu)
@@ -2585,9 +2609,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 _(u"     Scanning     "), 0, self)
 
         infoDb = InfoDatabase(self.getWikiDocument())
-        infoDb.createDatabase()
-        infoDb.scanFileStore()
-        infoDb.scanLinks(progresshandler)
+        
+        infoDb.buildDatabaseBeforeDialog(progresshandler)
         
 
 
@@ -2786,7 +2809,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #             wdhName = wdhandlers[index][0]
 
             wdhName, wlangName, asciiOnly = \
-                    AdditionalDialogs.NewWikiSettings.runModal(self, -1, self)
+                    AdditionalDialogs.NewWikiSettings.runModal(self, -1, self)[:3]
                     
             if wdhName is None:
                 return
@@ -2998,9 +3021,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 # (probably old database) or required handler not available,
                 # so ask user
                 self.displayErrorMessage(unicode(e))
-                dbtype, dummy = AdditionalDialogs.NewWikiSettings.runModal(
+                dbtype = AdditionalDialogs.NewWikiSettings.runModal(
                         self, -1, self, dbtype,
-                        AdditionalDialogs.NewWikiSettings.DEFAULT_GREY)
+                        AdditionalDialogs.NewWikiSettings.DEFAULT_GREY)[0]
 #                 dbtype = self._askForDbType()
                 if dbtype is None:
                     return False
@@ -3011,9 +3034,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 # (probably old database) or required handler not available,
                 # so ask user
                 self.displayErrorMessage(unicode(e))
-                dummy, wikiLang = AdditionalDialogs.NewWikiSettings.runModal(
+                wikiLang = AdditionalDialogs.NewWikiSettings.runModal(
                         self, -1, self,
-                        AdditionalDialogs.NewWikiSettings.DEFAULT_GREY, wikiLang)
+                        AdditionalDialogs.NewWikiSettings.DEFAULT_GREY, wikiLang)[1]
 #                 dbtype = self._askForDbType()
                 if wikiLang is None:
                     return False
@@ -4748,32 +4771,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         dlg.Destroy()
 
 
-    def showAddFileUrlDialog(self):
-        if self.isReadOnlyPage():
-            return
-        
-        with TopLevelLocker:
-            path = wx.FileSelector(_(u"Choose a file to create URL for"),
-                    self.getLastActiveDir(), wildcard="*.*", flags=wx.FD_OPEN,
-                    parent=self)
-
-#         dlg = wx.FileDialog(self, _(u"Choose a file to create URL for"),
-#                 self.getLastActiveDir(), "", "*.*", wx.OPEN)
-        if path:
-            url = urlFromPathname(path)
-            if path.endswith(".wiki"):
-                url = "wiki:" + url
-            else:
-                # Absolute file: URL
-                url = "file:" + url
-                
-            self.getActiveEditor().AddText(url)
-            self.configuration.set("main", "last_active_dir", dirname(path))
-            
-#         dlg.Destroy()
-
-
-
     def showSpellCheckerDialog(self):
         if self.spellChkDlg != None:
             return
@@ -5046,17 +5043,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         finally:
             ed.EndUndoAction()
 
-
-    def insertDate(self):
-        if self.isReadOnlyPage():
-            return
-
-#         # strftime can't handle unicode correctly, so conversion is needed
-#         mstr = mbcsEnc(self.configuration.get("main", "strftime"), "replace")[0]
-#         self.getActiveEditor().AddText(mbcsDec(strftime(mstr), "replace")[0])
-
-        mstr = self.configuration.get("main", "strftime")
-        self.getActiveEditor().AddText(strftimeUB(mstr))
 
     def getLastActiveDir(self):
         return self.configuration.get("main", "last_active_dir", os.getcwd())

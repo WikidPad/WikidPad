@@ -362,7 +362,6 @@ WikidPadHelp/files/testimg.gif -text
 /appbase.css -text
 /bld.bat -text
 /buildGadflyZips.py -text
-/buildWinPortZip.py -text
 docs/api.txt -text
 docs/dev-setup.txt -text
 docs/dev.txt -text
@@ -651,6 +650,7 @@ lib/pwiki/MiscEvent.py -text
 lib/pwiki/MptImporterGui.py -text
 lib/pwiki/OptionsDialog.py -text
 lib/pwiki/OsAbstract.py -text
+lib/pwiki/PWikiNonCore.py -text
 lib/pwiki/PageHistory.py -text
 lib/pwiki/ParseUtilities.py -text
 lib/pwiki/PersonalWikiFrame.py -text
@@ -659,6 +659,7 @@ lib/pwiki/Printing.py -text
 lib/pwiki/SearchAndReplace.py -text
 lib/pwiki/SearchAndReplaceBoolLang.py -text
 lib/pwiki/SearchAndReplaceDialogs.py -text
+lib/pwiki/SearchableScintillaControl.py -text
 lib/pwiki/Serialization.py -text
 lib/pwiki/SpellChecker.py -text
 lib/pwiki/SqliteThin3.py -text

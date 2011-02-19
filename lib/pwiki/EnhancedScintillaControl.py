@@ -102,22 +102,10 @@ class EnhancedScintillaControl(wx.stc.StyledTextCtrl):
 
     def Cut(self):
         self.Copy()
-        self.ReplaceSelection("")
+        self.ReplaceSelection(u"")
 
-#     def Copy(self):
-#         text = self.GetSelectedText()
-#         if len(text) == 0:
-#             return
-# 
-#         cbIcept = self.presenter.getMainControl().getClipboardInterceptor()  
-#         if cbIcept is not None:
-#             cbIcept.informCopyInWikidPadStart(text=text)
-#             try:
-#                 copyTextToClipboard(text)
-#             finally:
-#                 cbIcept.informCopyInWikidPadStop()
-#         else:
-#             copyTextToClipboard(text)
+    def Copy(self):
+        raise NotImplementedError
 
     def Paste(self):
         # Text pasted?

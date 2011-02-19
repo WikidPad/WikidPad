@@ -440,7 +440,7 @@ class CombinedConfiguration(_AbstractConfiguration):
 
 GLOBALDEFAULTS = {
     ("main", "wiki_history"): None,   # Should be overwritten with concrete value
-    ("main", "last_wiki"): "",   # Same
+    ("main", "last_wiki"): "WikidPadHelp/WikidPadHelp.wiki",
     ("main", "size_x"): "500",
     ("main", "size_y"): "300",
 
@@ -710,6 +710,7 @@ GLOBALDEFAULTS = {
     ("main", "showontray"): "0",
     ("main", "minimize_on_closeButton"): "False", # Minimize if the close button ("X") is pressed  
     ("main", "mainTabs_switchMruOrder"): "True", # Switch between tabs in most-recently used order
+    ("main", "startup_splashScreen_show"): "True", # Show splash screen on startup
     ("main", "strftime"): u"%x %I:%M %p",  # time format when inserting time in a page
     ("main", "pagestatus_timeformat"): u"%x %I:%M %p",  # time format for the page status field in status bar
     ("main", "recent_time_formats"): u"%x %I:%M %p;%m/%d/%y;%d.%m.%y;%d.%m.%Y;%a %Y-%m-%d",

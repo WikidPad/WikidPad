@@ -457,8 +457,7 @@ def clearMenu(menu):
 
 def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
     """
-    Appends the menu items described in unistring desc to
-    menu.
+    Appends the menu items described in unistring desc to menu.
     keyBindings -- a KeyBindingsCache object or None
      
     menu -- already created wx-menu where items should be appended
@@ -474,7 +473,7 @@ def appendToMenuByMenuDesc(menu, desc, keyBindings=None):
     Fourth part (optional) is the shortcut, either written as e.g.
     "Ctrl-A" or preceded with '*' and followed by a key to lookup
     in the KeyBindings, e.g. "*ShowFolding". If keyBindings
-    parameter is None, all shortcuts are ignored.
+    parameter is None, all shortcuts (with or without *) are ignored.
     """
     for line in desc.split(u"\n"):
         if line.strip() == u"":

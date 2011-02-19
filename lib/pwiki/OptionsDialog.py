@@ -397,6 +397,7 @@ class OptionsDialog(wx.Dialog):
             ("showontray", "cbShowOnTray", "b"),
             ("minimize_on_closeButton", "cbMinimizeOnCloseButton", "b"),
             ("mainTabs_switchMruOrder", "cbMainTabsSwitchMruOrder", "b"),
+            ("startup_splashScreen_show", "cbStartupSplashScreenShow", "b"),
 
             ("pagestatus_timeformat", "tfPageStatusTimeFormat", "ttdf",
                 "btnSelectPageStatusTimeFormat"),
