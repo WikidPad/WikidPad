@@ -1,5 +1,26 @@
 ﻿++ Change Log
 
+Feb. 27, 2011 (2.1rc01)
+
+    * Support for [.] to refer to current wiki page
+    * Introduced "prel" and "pabs" in URL appendix and automatic
+      adaption of relative links. See [UrlLinking#++ URL Appendix]
+    * Windows binary installer now supports creation of a portable
+      install (no uninstall, no registry or start menu changes)
+    * Removed annoying "blinking" on current heading in
+      doc structure window (thanks to Christian Ziemski)
+
+    * Bug fixed: Autocompletion for anchors treated wiki links as
+      wiki words (no relative or absolute paths supported)
+    * Bug fixed: Error in error handling for unknown wiki language
+      tag on opening a wiki
+    * Bug fixed: Problems with IE 6 on Win XP SP2 reduced (problems
+      with iframe remain)
+    * Bug fixed: Sometimes relative links not possible due to
+      undesired case sensitivity
+
+
+
 Jan. 30, 2011 (2.1beta11)
 
 This version needs a rebuild of the index if you enabled indexed

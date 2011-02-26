@@ -83,31 +83,23 @@ cache files and is not needed for the actual program.
 
 --- To create a WikidPad.exe distribution ---
 
-Modify the version number of wikidPad (additionally to above adjustments) in:
-wikidpad_unicode.iss   (5 times)
+Modify version number and version string of WikidPad (additionally to above
+adjustments) in wikidpad_unicode.iss. Find
+
+#define verStr "2.2beta01"
+#define verNo "002.002.101.000"
+
+and change lines appropriately.
+
 
 Run wikidPad by double clicking on "WikidPad.exe" in "dist" directory. This
 should show the help wiki. Maybe perform some basic testing that everything is
 right, then close WikidPad.
 
 Double click on "wikidpad_unicode.iss" which should start up ISTool (if you
-installed it). Change version number (5 times) if you didn't before, let ISTool
-build the installer and test it.
+installed it). Change version number if you didn't before (see above), let
+ISTool build the installer and test it.
 
-
---- To create a portable Windows distribution in a ZIP file ---
-
-You can also create a ZIP file which can be unpacked on a USB-stick to have a
-portable version.
-
-Follow instructions of "--- To build and generate executable ---" above, then run
-python buildWinPortZip.py
-
-This should create a file "WikidPad-2.1beta08-winport.zip" (version number may
-vary) containing everything necessary.
-
-
-
-
-
-
+The installer can also be used to install a portable version (no entries in
+registry or start menu; no uninstaller, just delete installation directory
+instead).

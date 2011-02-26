@@ -53,19 +53,22 @@ Name: {app}\WikidPadHelp\data
 Name: {app}\WikidPadHelp\files
 Name: {app}\export
 [Setup]
+#define verStr "2.1rc01"
+#define verNo "002.001.201.000"
+
 SolidCompression=true
 AppName=WikidPad
-AppVerName=WikidPad 2.1beta11
+AppVerName=WikidPad {#verStr}
 DefaultDirName={pf}\WikidPad
 DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
-VersionInfoVersion=002.001.111.000
-VersionInfoTextVersion=WikidPad 2.1beta11
+VersionInfoVersion={#verNo}
+VersionInfoTextVersion=WikidPad {#verStr}
 LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra
-OutputBaseFilename=WikidPad-2.1beta11
+OutputBaseFilename=WikidPad-{#verStr}
 InternalCompressLevel=ultra
 AppCopyright=© 2005-2011 Jason Horman, Michael Butscher, Gerhard Reitmayr
 UsePreviousAppDir=true
@@ -73,7 +76,7 @@ PrivilegesRequired=none
 CreateUninstallRegKey=not PortableInstall
 Uninstallable=not PortableInstall
 [INI]
-Filename: {app}\binInst.ini; Section: Main; Key: CurrVersion; String: 002.001.111.000; Flags: createkeyifdoesntexist uninsdeleteentry uninsdeletesectionifempty
+Filename: {app}\binInst.ini; Section: Main; Key: CurrVersion; String: {#verNo}; Flags: createkeyifdoesntexist uninsdeleteentry uninsdeletesectionifempty
 Filename: {app}\binInst.ini; Section: Main; Key: wxVersion; String: 002.008.010.001; Flags: createkeyifdoesntexist uninsdeleteentry uninsdeletesectionifempty; Check: ShouldInstallWxRuntime
 Filename: {app}\binInst.ini; Section: Main; Key: portableInstall; String: 0; Flags: uninsdeleteentry uninsdeletesectionifempty; Check: not PortableInstall
 Filename: {app}\binInst.ini; Section: Main; Key: portableInstall; String: 1; Flags: uninsdeleteentry uninsdeletesectionifempty; Check: PortableInstall

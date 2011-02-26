@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2011-01-29 15:38\n"
+"POT-Creation-Date: 2011-02-26 13:41\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1955,7 +1955,7 @@ msgstr ""
 msgid "Select Import File"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1966
+#: lib\pwiki\AdditionalDialogs.py:1969
 msgid "\n"
 "<html>\n"
 "<body bgcolor=\"#FFFFFF\">\n"
@@ -2006,63 +2006,63 @@ msgid "\n"
 "</html>\n"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2017 lib\pwiki\PersonalWikiFrame.py:1916
+#: lib\pwiki\AdditionalDialogs.py:2020 lib\pwiki\PersonalWikiFrame.py:1916
 msgid "About WikidPad"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2021
+#: lib\pwiki\AdditionalDialogs.py:2024
 msgid "N/A"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2031
+#: lib\pwiki\AdditionalDialogs.py:2034
 msgid "Okay"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2132
+#: lib\pwiki\AdditionalDialogs.py:2135
 msgid "Wiki Properties"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2139
+#: lib\pwiki\AdditionalDialogs.py:2142
 msgid "No wiki loaded"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2143
+#: lib\pwiki\AdditionalDialogs.py:2146
 msgid "Wiki config. path:"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2149
+#: lib\pwiki\AdditionalDialogs.py:2152
 msgid "Wiki database backend:"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2157
+#: lib\pwiki\AdditionalDialogs.py:2160
 msgid "Number of wiki pages:"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2166
+#: lib\pwiki\AdditionalDialogs.py:2169
 msgid "Wiki is read-only. Reason:"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2169
+#: lib\pwiki\AdditionalDialogs.py:2172
 msgid "Write access to database lost. Try \"Wiki\"->\"Reconnect\""
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2171
+#: lib\pwiki\AdditionalDialogs.py:2174
 msgid "Wiki was set read-only in options dialog"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2176 lib\pwiki\AdditionalDialogs.py:2178
+#: lib\pwiki\AdditionalDialogs.py:2179 lib\pwiki\AdditionalDialogs.py:2181
 msgid "Can't write wiki config.:"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2176 lib\pwiki\AdditionalDialogs.py:2180
+#: lib\pwiki\AdditionalDialogs.py:2179 lib\pwiki\AdditionalDialogs.py:2183
 msgid "Unknown reason"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2193
+#: lib\pwiki\AdditionalDialogs.py:2196
 msgid "Jobs"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2210
+#: lib\pwiki\AdditionalDialogs.py:2213
 msgid "Number of Jobs:"
 msgstr ""
 
@@ -2491,43 +2491,43 @@ msgstr ""
 msgid "Favorite wikis"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:400
+#: lib\pwiki\Exporters.py:401
 msgid "One HTML page"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:401
+#: lib\pwiki\Exporters.py:402
 msgid "Set of HTML pages"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:794 lib\pwiki\Exporters.py:883
+#: lib\pwiki\Exporters.py:795 lib\pwiki\Exporters.py:884
 msgid "Exporting %s"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:1657
+#: lib\pwiki\Exporters.py:1658
 msgid "<pre>[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2191
+#: lib\pwiki\Exporters.py:2234
 msgid "[Unknown parser node with name \"%s\" found]"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2225
+#: lib\pwiki\Exporters.py:2268
 msgid "Set of *.wiki files"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2410 lib\pwiki\Importers.py:61
+#: lib\pwiki\Exporters.py:2453 lib\pwiki\Importers.py:61
 msgid "Multipage text"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2423 lib\pwiki\Importers.py:74
+#: lib\pwiki\Exporters.py:2466 lib\pwiki\Importers.py:74
 msgid "Multipage files (*.mpt)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2424 lib\pwiki\Importers.py:75
+#: lib\pwiki\Exporters.py:2467 lib\pwiki\Importers.py:75
 msgid "Text file (*.txt)"
 msgstr ""
 
-#: lib\pwiki\Exporters.py:2590
+#: lib\pwiki\Exporters.py:2633
 msgid "No usable separator found"
 msgstr ""
 
@@ -3726,10 +3726,6 @@ msgstr ""
 msgid "There was an error loading the icons for the tree control."
 msgstr ""
 
-#: lib\pwiki\PersonalWikiFrame.py:2584 lib\pwiki\PersonalWikiFrame.py:2585
-msgid "     Scanning     "
-msgstr ""
-
 #: lib\pwiki\PersonalWikiFrame.py:2755
 msgid "No data handler available to create database."
 msgstr ""
@@ -4245,7 +4241,7 @@ msgstr ""
 msgid "Folder does not exist"
 msgstr ""
 
-#: lib\pwiki\WikiHtmlView.py:692 lib\pwiki\WikiHtmlViewIE.py:485
+#: lib\pwiki\WikiHtmlView.py:692 lib\pwiki\WikiHtmlViewIE.py:486
 msgid "Link to page: %s"
 msgstr ""
 
