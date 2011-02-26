@@ -20,7 +20,7 @@ To show a different title in the HTML preview/export as a link, use e.g.
 
 Switch to preview to see the "Go somewhere" only. You can also use an image URL (see below) as title to show a clickable image:
 
-[https://somewheresecure.com| rel://files/testimg.gif>r40%]
+[https://somewheresecure.com |rel://files/testimg.gif>r40% ]
 
 
 ++ Relative URLs
