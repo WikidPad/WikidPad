@@ -1680,16 +1680,16 @@ class WikiData:
             traceback.print_exc()
             raise DbReadAccessError(e)
 
-    def getTodosForWord(self, word):
-        """
-        Returns list of all todo items of word
-        """
-        try:
-            return self.connWrap.execSqlQuerySingleColumn("select todo from todos "
-                    "where word = ?", (word,))
-        except (IOError, OSError, ValueError), e:
-            traceback.print_exc()
-            raise DbReadAccessError(e)
+#     def getTodosForWord(self, word):
+#         """
+#         Returns list of all todo items of word
+#         """
+#         try:
+#             return self.connWrap.execSqlQuerySingleColumn("select todo from todos "
+#                     "where word = ?", (word,))
+#         except (IOError, OSError, ValueError), e:
+#             traceback.print_exc()
+#             raise DbReadAccessError(e)
 
 
     def updateTodos(self, word, todos):

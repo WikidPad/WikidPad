@@ -8,7 +8,6 @@ from __future__ import with_statement
 import os, os.path, sys, gc, traceback, string, re
 from os.path import *
 import time
-from time import sleep
 
 import cPickle  # to create dependency?
 
@@ -50,10 +49,6 @@ from .CmdLineAction import CmdLineAction
 from .WikiTxtCtrl import WikiTxtCtrl, FOLD_MENU
 from .WikiTreeCtrl import WikiTreeCtrl
 from .WikiHtmlView import createWikiHtmlView
-from .LogWindow import LogWindow
-from .DocStructureCtrl import DocStructureCtrl
-from .timeView.TimeViewCtrl import TimeViewCtrl
-from .timeView import Versioning
 
 from .MainAreaPanel import MainAreaPanel
 from .UserActionCoord import UserActionCoord
@@ -64,15 +59,7 @@ from .Ipc import EVT_REMOTE_COMMAND
 from . import AttributeHandling, SpellChecker
 
 
-# from PageHistory import PageHistory
-#from SearchAndReplace import SearchReplaceOperation
-from .Printing import Printer
-
-# from AdditionalDialogs import *
 from . import AdditionalDialogs
-from .OptionsDialog import OptionsDialog
-from .SearchAndReplaceDialogs import SearchPageDialog, SearchWikiDialog, \
-        FastSearchPopup
 
 
 
@@ -188,7 +175,7 @@ class PersonalWikiFrame(wx.Frame, MiscEventSourceMixin):
         # Create the "[TextBlocks].wiki" file in the global config subdirectory
         # if the file doesn't exist yet.
         tbLoc = os.path.join(self.globalConfigSubDir, "[TextBlocks].wiki")
-        if not exists(pathEnc(tbLoc)):
+        if not os.path.exists(pathEnc(tbLoc)):
             writeEntireFile(tbLoc, 
 """importance: high;a=[importance: high]\\n
 importance: low;a=[importance: low]\\n
@@ -214,6 +201,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.mainWwSearchDlg = None
         self.wwSearchDlgs = []   # Stores wiki wide search dialogs and detached fast search frames
         self.spellChkDlg = None  # Stores spell check dialog, if present
+        self.printer = None  # Stores Printer object (initialized on demand)
         self.continuousExporter = None   # Exporter-derived object if continuous export is in effect
         
         self.mainAreaPanel = None
@@ -290,9 +278,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         # trigger hook
         self.hooks.startup(self)
-
-        # Initialize printing
-        self.printer = Printer(self)
 
         # wiki history
         history = self.configuration.get("main", "wiki_history")
@@ -379,7 +364,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         
         # if a wiki to open is set, open it
         if wikiToOpen:
-            if exists(pathEnc(wikiToOpen)):
+            if os.path.exists(pathEnc(wikiToOpen)):
 #                tracer.runctx('self.openWiki(wikiToOpen, wikiWordsToOpen, anchorToOpen=anchorToOpen)', globals(), locals())
                 self.openWiki(wikiToOpen, wikiWordsToOpen,
                         anchorToOpen=anchorToOpen,
@@ -429,14 +414,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def getExtension(self, extensionName, fileName):
         extensionFileName = os.path.join(self.globalConfigSubDir,
                 u'user_extensions', fileName)
-        if exists(pathEnc(extensionFileName)):
+        if os.path.exists(pathEnc(extensionFileName)):
             userUserExtension = loadEntireFile(extensionFileName, True)
         else:
             userUserExtension = None
 
         extensionFileName = os.path.join(self.wikiAppDir, 'user_extensions',
                 fileName)
-        if exists(pathEnc(extensionFileName)):
+        if os.path.exists(pathEnc(extensionFileName)):
             userExtension = loadEntireFile(extensionFileName, True)
         else:
             userExtension = None
@@ -824,8 +809,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 #         if wikiData is not None:
             self.addMenuItem(wikiMenu, _(u'Print...') + u'\t' + self.keyBindings.Print,
-                    _(u'Show the print dialog'),
-                    lambda evt: self.printer.showPrintMainDialog())
+                    _(u'Show the print dialog'), self.OnShowPrintMainDialog)
 
             wikiMenu.AppendSeparator()
 
@@ -865,7 +849,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                         lambda evt: self.initiateFullUpdate(),
                         menuID=GUI_ID.MENU_INITATE_UPDATE_WIKI_CACHE,
                         updatefct=self.OnUpdateDisReadOnlyWiki)
-                
+
+                self.addMenuItemByUnifNameTable(maintenanceMenu,
+                        """
+                        menuItem/mainControl/builtin/showFileCleanupDialog
+                        """
+                        )
+
             # TODO: Test for wikiDocument.isSearchIndexEnabled()
 #             self.addMenuItem(maintenanceMenu, _(u'Re&index Wiki...'),
 #                     _(u'Rebuild the reverse index for fulltext search'),
@@ -908,7 +898,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         wikiMenu.AppendSeparator()  # TODO May have two separators without anything between
 
-        self.addMenuItem(wikiMenu, '&Test', 'Test', lambda evt: self.testIt())
+#         self.addMenuItem(wikiMenu, '&Test', 'Test', lambda evt: self.testIt())
 
         menuID=wx.NewId()
         wikiMenu.Append(menuID, _(u'E&xit'), _(u'Exit'))
@@ -1172,7 +1162,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     # Handle an URL
                     filePath, wikiWordToOpen, anchorToOpen = \
                             StringOps.wikiUrlToPathWordAndAnchor(entry.value)
-                    if exists(pathEnc(filePath)):
+                    if os.path.exists(pathEnc(filePath)):
                         self.openWiki(filePath, wikiWordsToOpen=(wikiWordToOpen,),
                                 anchorToOpen=anchorToOpen)
                 else:
@@ -2334,6 +2324,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         acc = getAccelPairFromKeyDown(evt)
         if acc == (wx.ACCEL_NORMAL, wx.WXK_RETURN) or \
                 acc == (wx.ACCEL_NORMAL, wx.WXK_NUMPAD_ENTER):
+            from .SearchAndReplaceDialogs import FastSearchPopup
+
             text = guiToUni(self.fastSearchField.GetValue())
             tfHeight = self.fastSearchField.GetSize()[1]
             pos = self.fastSearchField.ClientToScreen((0, tfHeight))
@@ -2439,6 +2431,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     def OnCmdVersionAdd(self, evt):
         ## _prof.start()
+        from .timeView import Versioning
+
         docPage = self.getCurrentDocPage()
         if docPage is None or \
                 not docPage.getUnifiedPageName().startswith(u"wikipage/"):
@@ -2528,10 +2522,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             editor.SetZoom(self.configuration.getint("main", "zoom"))
             return editor
         elif winName == "log":
+            from .LogWindow import LogWindow
             return LogWindow(parent, -1, self)
         elif winName == "doc structure":
+            from .DocStructureCtrl import DocStructureCtrl
             return DocStructureCtrl(parent, -1, self)
         elif winName == "time view":
+            from .timeView.TimeViewCtrl import TimeViewCtrl
             return TimeViewCtrl(parent, -1, self)
         elif winName == "main area panel":  # TODO remove this hack
             self.mainAreaPanel.Reparent(parent)
@@ -2601,16 +2598,16 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
 
-    def testIt(self):
-        from .FileManagementGui import InfoDatabase
-
-        progresshandler = ProgressHandler(
-                _(u"     Scanning     "),
-                _(u"     Scanning     "), 0, self)
-
-        infoDb = InfoDatabase(self.getWikiDocument())
-        
-        infoDb.buildDatabaseBeforeDialog(progresshandler)
+#     def testIt(self):
+#         from .FileManagementGui import InfoDatabase
+# 
+#         progresshandler = ProgressHandler(
+#                 _(u"     Scanning     "),
+#                 _(u"     Scanning     "), 0, self)
+# 
+#         infoDb = InfoDatabase(self.getWikiDocument())
+#         
+#         infoDb.buildDatabaseBeforeDialog(progresshandler)
         
 
 
@@ -2785,7 +2782,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         self.statusBar.SetStatusText(uniToGui(u"Creating Wiki: %s" % wikiName), 0)
 
         createIt = True;
-        if (exists(pathEnc(wikiDir))):
+        if (os.path.exists(pathEnc(wikiDir))):
             dlg=wx.MessageDialog(self,
                     uniToGui(_(u"A wiki already exists in '%s', overwrite? "
                     u"(This deletes everything in and below this directory!)") %
@@ -3773,7 +3770,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             filePath, wikiWordToOpen, anchorToOpen = StringOps.wikiUrlToPathWordAndAnchor(
                     link)
-            if exists(filePath):
+            if os.path.exists(filePath):
                 self.openWiki(filePath, wikiWordsToOpen=(wikiWordToOpen,),
                         anchorToOpen=anchorToOpen)  # ?
                 return True
@@ -4270,109 +4267,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.getWikiData().deleteVersioningData()
 
 
-#     def showSavedVersionsDialog(self):
-#         if not self.getWikiData().hasVersioningData():
-#             dlg=wx.MessageDialog(self,
-#                     _(u"This wiki does not contain any version information"),
-#                     _(u'Retrieve version'), wx.OK)
-#             dlg.ShowModal()
-#             dlg.Destroy()
-#             return
-# 
-#         dlg = SavedVersionsDialog(self, -1)
-#         dlg.CenterOnParent(wx.BOTH)
-# 
-#         version = None
-#         if dlg.ShowModal() == wx.ID_OK:
-#             version = dlg.GetValue()
-#         dlg.Destroy()
-# 
-#         if version:
-#             dlg=wx.MessageDialog(self,
-#                     _(u"This will overwrite current content if not stored as "
-#                     u"version. Continue?"),
-#                     _(u'Retrieve version'), wx.YES_NO)
-#             if dlg.ShowModal() == wx.ID_YES:
-#                 dlg.Destroy()
-#                 self.saveAllDocPages()
-#                 word = self.getCurrentWikiWord()
-#                 self.getWikiData().applyStoredVersion(version[0])
-#                 self.rebuildWiki(skipConfirm=True)
-#                 ## self.tree.collapse()
-#                 self.openWikiPage(self.getCurrentWikiWord(), forceTreeSyncFromRoot=True, forceReopen=True)
-#                 ## self.findCurrentWordInTree()
-#             else:
-#                 dlg.Destroy()
-
-
-#     # TODO Check if new name already exists (?)
-#     def showWikiWordRenameConfirmDialog(self, wikiWord, toWikiWord):
-#         """
-#         Checks if renaming operation is valid, presents either an error
-#         message or a confirmation dialog.
-#         Returns -- True iff renaming was done successfully
-#         """
-# #         wikiWord = self.getCurrentWikiWord()
-# 
-#         if not toWikiWord or len(toWikiWord) == 0:
-#             return False
-#             
-#         langHelper = wx.GetApp().createWikiLanguageHelper(
-#                 self.getWikiDefaultWikiLanguage())
-#                 
-#         errMsg = langHelper.checkForInvalidWikiWord(toWikiWord,
-#                 self.getWikiDocument())
-# 
-#         if errMsg:
-#             self.displayErrorMessage(_(u"'%s' is an invalid wiki word. %s.") %
-#                     (toWikiWord, errMsg))
-#             return False
-# 
-#         if wikiWord == toWikiWord:
-#             self.displayErrorMessage(_(u"Can't rename to itself"))
-#             return False
-# 
-#         if wikiWord == "ScratchPad":
-#             self.displayErrorMessage(_(u"The scratch pad cannot be renamed."))
-#             return False
-# 
-#         try:
-#             if not self.getWikiDocument().isCreatableWikiWord(toWikiWord):
-#                 self.displayErrorMessage(
-#                         _(u"Cannot rename to '%s', word already exists") %
-#                         toWikiWord)
-#                 return False
-# 
-#             # Link rename mode from options
-#             lrm = self.getConfig().getint("main",
-#                     "wikiWord_rename_wikiLinks", 2)
-#             if lrm == 0:
-#                 result = wx.NO
-#             elif lrm == 1:
-#                 result = wx.YES
-#             else: # lrm == 2: ask for each rename operation
-#                 result = wx.MessageBox(
-#                         _(u"Do you want to modify all links to the wiki word "
-#                         u"'%s' renamed to '%s' (this operation is unreliable)?") %
-#                         (wikiWord, toWikiWord),
-#                         _(u'Rename Wiki Word'),
-#                         wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION, self)
-# 
-#             if result == wx.YES or result == wx.NO:
-#                 try:
-#                     self.renameWikiWord(wikiWord, toWikiWord, result == wx.YES)
-#                     return True
-#                 except WikiDataException, e:
-#                     traceback.print_exc()                
-#                     self.displayErrorMessage(unicode(e))
-#     
-#             return False
-#         except (IOError, OSError, DbAccessError), e:
-#             self.lostAccess(e)
-#             raise
-
-
     def showSearchDialog(self):
+        from .SearchAndReplaceDialogs import SearchWikiDialog
+
         if self.mainWwSearchDlg != None:
             if isinstance(self.mainWwSearchDlg, SearchWikiDialog):
                 self.mainWwSearchDlg.SetFocus()
@@ -4436,6 +4333,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
 
     def showSearchReplaceDialog(self):
+        from .SearchAndReplaceDialogs import SearchPageDialog
+
         if self.findDlg != None:
             if isinstance(self.findDlg, SearchPageDialog):
                 self.findDlg.SetFocus()
@@ -4560,6 +4459,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.configuration.set("main", "strftime", dateformat)
 
     def showOptionsDialog(self, startPanelName=None):
+        from .OptionsDialog import OptionsDialog
+
         dlg = OptionsDialog(self, -1, startPanelName=startPanelName)
         dlg.CenterOnParent(wx.BOTH)
 
@@ -5166,6 +5067,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         dlg.ShowModal()
         dlg.Destroy()
 
+    def OnShowPrintMainDialog(self, evt):
+        if self.printer is None:
+            from .Printing import Printer
+            self.printer = Printer(self)
+
+        self.printer.showPrintMainDialog()
+
+
     def OnShowWikiPropertiesDialog(self, evt):
         dlg = AdditionalDialogs.WikiPropertiesDialog(self, -1, self)
         dlg.ShowModal()
@@ -5587,7 +5496,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             self.tbIcon.Destroy()
             # May mysteriously prevent crash when closing WikidPad minimized
             #   on tray:
-            sleep(0.1)
+            time.sleep(0.1)
             self.tbIcon = None
 
         wx.GetApp().unregisterMainFrame(self)

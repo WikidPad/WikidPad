@@ -24,7 +24,7 @@ Switch to preview to see the "Go somewhere" only. You can also use an image URL 
 
 
 ++ Relative URLs
-You can create URLs which are relative to the wiki directory. These start with rel:// followed by the relative position. For HTML export the rel:// is removed to create a relative HTML link (without protocol). For HTML preview they are converted to "file:" URLs.
+You can create URLs which are relative to the wiki directory. These start with rel:// followed by the relative position. For HTML export the rel:// is removed to create a relative HTML link (without protocol) which is adapted to new position. For HTML preview they are converted to "file:" URLs.
 
 You can drag a file from Windows Explorer while holding shift key to create a relative URL. This does not work with files ending with ".wiki", these are always absolute and have the "wiki:" protocol.
 
@@ -88,6 +88,8 @@ You can control details of URL presentation, especially for images, by using an 
       at all is interpreted as "100%x100%".
     a Set alignment of image, the following character defines which alignment (*t*op, vertically
       *m*iddle, *b*ottom, *r*ight or *l*eft). This setting is not respected by the internal preview.
+    p Set *rel*ative or *abs*olute linking on HTML export for "file:" and "rel:" links.
+      If relative link is not possible, absolute link is used.
 
 Examples:
 

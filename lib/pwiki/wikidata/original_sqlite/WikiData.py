@@ -1711,17 +1711,17 @@ class WikiData:
             raise DbReadAccessError(e)
 
 
-    def getTodosForWord(self, word):
-        """
-        Returns list of all todo items of word.
-        Function must work for read-only wiki.
-        """
-        try:
-            return self.connWrap.execSqlQuerySingleColumn("select todo from todos "
-                    "where word = ?", (word,))
-        except (IOError, OSError, sqlite.Error), e:
-            traceback.print_exc()
-            raise DbReadAccessError(e)
+#     def getTodosForWord(self, word):
+#         """
+#         Returns list of all todo items of word.
+#         Function must work for read-only wiki.
+#         """
+#         try:
+#             return self.connWrap.execSqlQuerySingleColumn("select todo from todos "
+#                     "where word = ?", (word,))
+#         except (IOError, OSError, sqlite.Error), e:
+#             traceback.print_exc()
+#             raise DbReadAccessError(e)
 
 
     def updateTodos(self, word, todos):

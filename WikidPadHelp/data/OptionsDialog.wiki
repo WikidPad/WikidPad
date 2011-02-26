@@ -76,6 +76,9 @@ Pressing the close button on the main frame (the little "X") does not close but 
 
 If you really want to close, use menu "Wiki"->"Exit" then or the context menu when right-clicking on the tray icon (if "Minimize to Tray" is active).
 
+*Show splash screen*
+Shows a splash screen on startup. Switching this off doesn't speed up starting of WikidPad (maybe one millisecond). Splash screen is never shown if WikidPad was started with command line option -x (exit after other command line commands were processed).
+
 *Statusbar time format*
 Set the time format the statusbar should use to show modification and creation date of the current wiki page. The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
 

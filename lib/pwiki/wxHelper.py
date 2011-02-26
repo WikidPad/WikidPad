@@ -908,6 +908,19 @@ class ProgressHandler(object):
         self.yieldsteps = yieldsteps
         self.currYieldStep = 1
 
+    def setTitle(self, title):
+        self.title = title
+        if self.progDlg is not None:
+            # Set title in open dialog
+            self.progDlg.SetTitle(self.title)
+    
+    def setMessage(self, msg):
+        self.msg = msg
+        if self.progDlg is not None:
+            # Set message in open dialog
+            self.progDlg.ctrls.text.SetLabel(msg)
+
+
     def open(self, sum):
         """
         Start progress handler, set the number of steps, the operation will

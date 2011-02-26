@@ -103,7 +103,7 @@ class ConnectWrapBase:
         by it.
         """
         while True:
-            self.tempDb.execSql(sql, params)
+            self.execSql(sql, params)
 
             if self.rowcount == 0:
                 return

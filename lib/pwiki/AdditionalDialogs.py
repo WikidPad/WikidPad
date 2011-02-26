@@ -24,14 +24,10 @@ from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, \
 from wikidata import DbBackendUtils
 
 from WikiExceptions import *
-import Exporters, Importers
 import Serialization
 import SystemInfo
 
 from Consts import VERSION_STRING, DATABLOCK_STOREHINT_INTERN
-
-from SearchAndReplaceDialogs import SearchWikiDialog   # WikiPageListConstructionDialog
-from SearchAndReplace import SearchReplaceOperation, ListWikiPagesOperation
 
 
 
@@ -1145,13 +1141,16 @@ class FontFaceDialog(wx.Dialog):
 class ExportDialog(wx.Dialog):
     def __init__(self, mainControl, ID, continuousExport=False, title=None,
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
+        from . import Exporters
+        from .SearchAndReplace import SearchReplaceOperation
+
         d = wx.PreDialog()
         self.PostCreate(d)
         
         self.mainControl = mainControl
         self.value = None
         
-        self.listPagesOperation = SearchReplaceOperation()  # ListWikiPagesOperation()
+        self.listPagesOperation = SearchReplaceOperation()
         self.continuousExport = continuousExport
         self.savedExports = None
         
@@ -1277,6 +1276,8 @@ class ExportDialog(wx.Dialog):
     def OnChSelectedSet(self, evt):
         selset = self.ctrls.chSelectedSet.GetSelection()
         if selset == 3:  # Custom
+            from .SearchAndReplaceDialogs import SearchWikiDialog
+
             dlg = SearchWikiDialog(self, self.mainControl, -1,
                     value=self.listPagesOperation)
             if dlg.ShowModal() == wx.ID_OK:
@@ -1585,11 +1586,6 @@ class ExportDialog(wx.Dialog):
         if sarOp is None:
             return None
 
-#         if isinstance(lpOp, SearchReplaceOperation):
-#             pageSetXml.setAttribute(u"type", u"searchReplaceOperation")
-#         elif isinstance(lpOp, ListWikiPagesOperation):
-#             pageSetXml.setAttribute(u"type", u"listWikiPagesOperation")
-
         sarOp.serializeToXml(pageSetXml, xmlDoc)
 
         addOptXml = xmlDoc.createElement(u"additionalOptions")
@@ -1605,6 +1601,8 @@ class ExportDialog(wx.Dialog):
 
 
     def _showExportProfile(self, xmlNode):
+        from .SearchAndReplace import SearchReplaceOperation
+
         try:
             etypeProfile = Serialization.serFromXmlUnicode(xmlNode,
                     u"exportTypeName")
@@ -1641,13 +1639,6 @@ class ExportDialog(wx.Dialog):
             
             sarOp = SearchReplaceOperation()
     
-    #         if pageSetXml.getAttribute(u"type") == u"searchReplaceOperation":
-    #             lpOp = SearchReplaceOperation()
-    #         elif pageSetXml.getAttribute(u"type") == u"listWikiPagesOperation":
-    #             lpOp = ListWikiPagesOperation()
-    #         else:
-    #             return # TODO Error message!
-            
             sarOp.serializeFromXml(pageSetXml)
     
             addOpt = Serialization.convertTupleFromXml(addOptXml)
@@ -1677,6 +1668,8 @@ ExportDialog.runModal = staticmethod(runDialogModalFactory(ExportDialog))
 class ImportDialog(wx.Dialog):
     def __init__(self, parent, ID, mainControl, title="Import",
                  pos=wx.DefaultPosition, size=wx.DefaultSize):
+        from . import Importers
+
         d = wx.PreDialog()
         self.PostCreate(d)
         

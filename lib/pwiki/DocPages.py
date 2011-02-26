@@ -720,12 +720,12 @@ class AbstractWikiPage(DataCarryingPage):
         values.append(val)
 
 
-    def getTodos(self):
-        with self.textOperationLock:
-            if self.todos is None:
-                self.todos = self.getWikiData().getTodosForWord(self.wikiWord)
-                        
-            return self.todos
+#     def getTodos(self):
+#         with self.textOperationLock:
+#             if self.todos is None:
+#                 self.todos = self.getWikiData().getTodosForWord(self.wikiWord)
+#                         
+#             return self.todos
 
 
     def getAnchors(self):

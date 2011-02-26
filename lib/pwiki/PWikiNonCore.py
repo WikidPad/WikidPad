@@ -14,7 +14,6 @@ import wx
 from . import wxHelper, StringOps
 
 
-
 class PWikiNonCore:
     def __init__(self, mainControl, dlgParent):
         self.mainControl = mainControl
@@ -64,6 +63,16 @@ class PWikiNonCore:
         self.mainControl.getActiveEditor().AddText(StringOps.strftimeUB(mstr))
 
 
+#     def OnShowFileCleanup(self, evt):
+#         from . import FileManagementGui
+# 
+#         progresshandler = wxHelper.ProgressHandler(
+#                 _(u"     Scanning     "),
+#                 _(u"     Scanning     "), 0, self.mainControl)
+#         
+#         FileManagementGui.runFileCleanup(self.mainControl, self.dlgParent,
+#                 progresshandler)
+
 
     def _buildDescriptorDict(self):
         """
@@ -101,8 +110,11 @@ class PWikiNonCore:
                 _(u'Current &Date'), _(u'Insert current date'),
                 kb.InsertDate, "date", None,
                 (mc.OnUpdateDisReadOnlyPage, mc.OnUpdateDisNotTextedit,
-                    mc.OnUpdateDisNotWikiPage))
-
+                    mc.OnUpdateDisNotWikiPage)),
+#             "showFileCleanupDialog": (self.OnShowFileCleanup,
+#                 _(u'File cleanup...'), _(u'Remove orphaned files and dead links'),
+#                 kb.FileCleanup, None, None,
+#                 None),
             }
 
         return descriptorDict

@@ -515,7 +515,6 @@ class _RequestGrid(EnhancedGrid):
 
 class MultiPageTextImporterDialog(wx.Dialog):
     """
-    Called for "Append/Prepend wiki word" in tree node context menu
     """
 
     def __init__(self, mainControl, db, parent):
@@ -529,16 +528,12 @@ class MultiPageTextImporterDialog(wx.Dialog):
         res = wx.xrc.XmlResource.Get()
         res.LoadOnDialog(self, parent, "MultiPageTextImporterDialog")
 
-#         if title is not None:
-#             self.SetTitle(title)
-
         self.ctrls = XrcControls(self)
 
         grid = _RequestGrid(self, db, mainControl.getWikiDocument(),
                 mainControl.getCollator())
 
         res.AttachUnknownControl("gridDetails", grid, self)
-#         res.AttachUnknownControl("gridDataBlocks", gridDataBlocks, self)
 
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
@@ -554,48 +549,17 @@ class MultiPageTextImporterDialog(wx.Dialog):
         wx.EVT_BUTTON(self, wx.ID_OK, self.OnOk)
         wx.EVT_BUTTON(self, GUI_ID.btnTest, self.OnTest)
 
-#         wx.EVT_TEXT(self, ID, self.OnText)
-#         wx.EVT_CHAR(self.ctrls.text, self.OnCharText)
-#         wx.EVT_CHAR(self.ctrls.lb, self.OnCharListBox)
-#         wx.EVT_LISTBOX(self, ID, self.OnListBox)
-#         wx.EVT_LISTBOX_DCLICK(self, GUI_ID.lb, self.OnOk)
-
 
     def OnOk(self, evt):
         if not self.ctrls.gridDetails.validateInput():
             self.ctrls.gridDetails.updateErrorColumn()
             return
-        
+
         self.ctrls.gridDetails.writeGridToDb()
         self.value = True
 
-#         sel = self.ctrls.lb.GetSelection()
-#         if sel != wx.NOT_FOUND:
-#             term = self.listContent[sel]
-#             self.wikiWord = term[2]
-#         else:
-#             self.wikiWord = guiToUni(self.ctrls.text.GetValue())
-#     
-#             if not self.pWiki.getWikiDocument().isDefinedWikiLink(self.wikiWord):
-#                 self._fillListContent(self.wikiWord)
-#                 if len(self.listContent) > 0:
-#                     self.wikiWord = self.listContent[0][2]
-#                 else:
-#                     langHelper = wx.GetApp().createWikiLanguageHelper(
-#                             self.pWiki.getWikiDefaultWikiLanguage())
-#                     wikiWord = langHelper.extractWikiWordFromLink(self.wikiWord,
-#                             self.pWiki.getWikiDocument())
-#     
-#                     if wikiWord is None:
-#                         # Entered text is not a valid wiki word
-#                         # TODO Error message?
-#                         self.ctrls.text.SetFocus()
-#                         return
-# 
-#                     self.wikiWord = wikiWord
-
         self.EndModal(wx.ID_OK)
-        
+
 
     def OnTest(self, evt):
         self.ctrls.gridDetails.validateInput()
