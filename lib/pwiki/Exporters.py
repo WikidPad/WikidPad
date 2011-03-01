@@ -1907,7 +1907,7 @@ class HtmlExporter(AbstractExporter):
         self.astNodeStack.pop()
 
 
-    def _processUrlLink(self, astNode):
+    def _processUrlLink(self, fullContent, astNode):
         link = astNode.url
         pointRelative = False  # Final link should be relative
 
@@ -1976,7 +1976,7 @@ class HtmlExporter(AbstractExporter):
         pointingType = appendixDict.get("p")
 
         # Decide if link should be relative or absolute
-        if self.asIntHtmlPreview:
+        if self.asHtmlPreview:
             # For preview always absolute link
             pointRelative = False
         elif pointingType == u"abs":
@@ -2079,7 +2079,7 @@ class HtmlExporter(AbstractExporter):
                 if astNode.titleNode is not None:
                     with self.optsStack:
                         self.optsStack["suppressLinks"] = True
-                        self.processAst(content, astNode.titleNode)
+                        self.processAst(fullContent, astNode.titleNode)
                 else:
                     self.outAppend(escapeHtml(astNode.url))                        
                 self.outAppend(u'</a></span>')
@@ -2226,7 +2226,7 @@ class HtmlExporter(AbstractExporter):
                             self.outAppend(u'<a href="#%s">%s</a>' % (fnAnchor,
                             escapeHtml(node.getString())))
             elif tname == "urlLink":
-                self._processUrlLink(node)
+                self._processUrlLink(content, node)
             elif tname == "stringEnd":
                 pass
             else:
