@@ -276,7 +276,7 @@ class DocStructureCtrl(EnhancedListControl):
 
 
     def OnKillFocus(self, evt):
-        self.SelectSingle(-1)
+#         self.SelectSingle(-1)
         evt.Skip()
         
         

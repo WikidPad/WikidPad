@@ -1457,6 +1457,8 @@ class ExportDialog(wx.Dialog):
 # 
 #         self.savedExports = result
 
+        from . import Exporters
+
         self.savedExports = Exporters.retrieveSavedExportsList(self.mainControl,
                 self.mainControl.getWikiData(), self.continuousExport)
 

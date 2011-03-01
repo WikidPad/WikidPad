@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2011-02-26 15:51\n"
+"POT-Creation-Date: 2011-03-01 13:28\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1439,12 +1439,12 @@ msgstr ""
 msgid "Destination directory:"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\AdditionalDialogs.py:1478
+#: WikidPad.xrc:0 lib\pwiki\AdditionalDialogs.py:1480
 #: lib\pwiki\SearchAndReplaceDialogs.py:1485
 msgid "Title:"
 msgstr ""
 
-#: WikidPad.xrc:0 lib\pwiki\AdditionalDialogs.py:1768
+#: WikidPad.xrc:0 lib\pwiki\AdditionalDialogs.py:1770
 msgid "Source directory:"
 msgstr ""
 
@@ -1912,7 +1912,7 @@ msgstr ""
 msgid "Select Export Directory"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1375 lib\pwiki\AdditionalDialogs.py:1841
+#: lib\pwiki\AdditionalDialogs.py:1375 lib\pwiki\AdditionalDialogs.py:1843
 msgid "All files (*.*)"
 msgstr ""
 
@@ -1925,82 +1925,82 @@ msgstr ""
 msgid "No real wiki word selected as root"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1479
+#: lib\pwiki\AdditionalDialogs.py:1481
 msgid "Choose export title"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1488
+#: lib\pwiki\AdditionalDialogs.py:1490
 msgid "Do you want to overwrite existing export '%s'?"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1489
+#: lib\pwiki\AdditionalDialogs.py:1491
 msgid "Overwrite export"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1536
+#: lib\pwiki\AdditionalDialogs.py:1538
 msgid "Do you want to delete %i export(s)?"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1537
+#: lib\pwiki\AdditionalDialogs.py:1539
 msgid "Delete export"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1574
+#: lib\pwiki\AdditionalDialogs.py:1576
 msgid "Selected export type does not support saving"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1615 lib\pwiki\CmdLineAction.py:211
+#: lib\pwiki\AdditionalDialogs.py:1617 lib\pwiki\CmdLineAction.py:211
 msgid "Export type '%s' of saved export is not supported"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1626 lib\pwiki\CmdLineAction.py:222
+#: lib\pwiki\AdditionalDialogs.py:1628 lib\pwiki\CmdLineAction.py:222
 msgid "Saved export uses different version for additional options than current export\n"
 "Export type: '%s'\n"
 "Saved export version: %i\n"
 "Current export version: %i"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1634 lib\pwiki\CmdLineAction.py:231
+#: lib\pwiki\AdditionalDialogs.py:1636 lib\pwiki\CmdLineAction.py:231
 msgid "Type of additional option storage ('%s') is unknown"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1658 lib\pwiki\CmdLineAction.py:253
+#: lib\pwiki\AdditionalDialogs.py:1660 lib\pwiki\CmdLineAction.py:253
 msgid "Error during retrieving saved export: "
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1771
+#: lib\pwiki\AdditionalDialogs.py:1773
 msgid "Source file:"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1787
+#: lib\pwiki\AdditionalDialogs.py:1789
 msgid "Source does not exist"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1797
+#: lib\pwiki\AdditionalDialogs.py:1799
 msgid "Source must be a directory"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1802
+#: lib\pwiki\AdditionalDialogs.py:1804
 msgid "Source must be a file"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1813
+#: lib\pwiki\AdditionalDialogs.py:1815
 msgid "Error while importing"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1827
+#: lib\pwiki\AdditionalDialogs.py:1829
 msgid "Select Import Directory"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1842
+#: lib\pwiki\AdditionalDialogs.py:1844
 msgid "*"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1846
+#: lib\pwiki\AdditionalDialogs.py:1848
 msgid "Select Import File"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:1962
+#: lib\pwiki\AdditionalDialogs.py:1964
 msgid "\n"
 "<html>\n"
 "<body bgcolor=\"#FFFFFF\">\n"
@@ -2051,63 +2051,63 @@ msgid "\n"
 "</html>\n"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2013 lib\pwiki\PersonalWikiFrame.py:1928
+#: lib\pwiki\AdditionalDialogs.py:2015 lib\pwiki\PersonalWikiFrame.py:1928
 msgid "About WikidPad"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2017
+#: lib\pwiki\AdditionalDialogs.py:2019
 msgid "N/A"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2027
+#: lib\pwiki\AdditionalDialogs.py:2029
 msgid "Okay"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2128
+#: lib\pwiki\AdditionalDialogs.py:2130
 msgid "Wiki Properties"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2135
+#: lib\pwiki\AdditionalDialogs.py:2137
 msgid "No wiki loaded"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2139
+#: lib\pwiki\AdditionalDialogs.py:2141
 msgid "Wiki config. path:"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2145
+#: lib\pwiki\AdditionalDialogs.py:2147
 msgid "Wiki database backend:"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2153
+#: lib\pwiki\AdditionalDialogs.py:2155
 msgid "Number of wiki pages:"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2162
+#: lib\pwiki\AdditionalDialogs.py:2164
 msgid "Wiki is read-only. Reason:"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2165
+#: lib\pwiki\AdditionalDialogs.py:2167
 msgid "Write access to database lost. Try \"Wiki\"->\"Reconnect\""
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2167
+#: lib\pwiki\AdditionalDialogs.py:2169
 msgid "Wiki was set read-only in options dialog"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2172 lib\pwiki\AdditionalDialogs.py:2174
+#: lib\pwiki\AdditionalDialogs.py:2174 lib\pwiki\AdditionalDialogs.py:2176
 msgid "Can't write wiki config.:"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2172 lib\pwiki\AdditionalDialogs.py:2176
+#: lib\pwiki\AdditionalDialogs.py:2174 lib\pwiki\AdditionalDialogs.py:2178
 msgid "Unknown reason"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2189
+#: lib\pwiki\AdditionalDialogs.py:2191
 msgid "Jobs"
 msgstr ""
 
-#: lib\pwiki\AdditionalDialogs.py:2206
+#: lib\pwiki\AdditionalDialogs.py:2208
 msgid "Number of Jobs:"
 msgstr ""
 
