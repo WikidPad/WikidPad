@@ -140,6 +140,9 @@ class WikiData:
     # ---------- Direct handling of page data ----------
 
     def getContent(self, word):
+        """
+        Function must work for read-only wiki.
+        """
         try:
             try:
                 filePath = self.getWikiWordFileName(word)
@@ -293,7 +296,9 @@ class WikiData:
     def getTimestamps(self, word):
         """
         Returns a tuple with modification, creation and visit date of
-        a word or (None, None, None) if word is not in the database
+        a word or (None, None, None) if word is not in the database.
+        Aliases must be resolved beforehand.
+        Function must work for read-only wiki.
         """
         try:
             dates = self.connWrap.execSqlQuery(
@@ -312,6 +317,7 @@ class WikiData:
     def setTimestamps(self, word, timestamps):
         """
         Set timestamps for an existing wiki page.
+        Aliases must be resolved beforehand.
         """
         moddate, creadate, visitdate = timestamps[:3]
 
@@ -426,8 +432,8 @@ class WikiData:
         """
         if word != self.wikiDocument.getWikiName():
             try:
+                self.connWrap.syncCommit()
                 try:
-                    self.commit()
                     # don't delete the relations to the word since other
                     # pages still have valid outward links to this page.
                     # just delete the content
@@ -457,7 +463,6 @@ class WikiData:
                 raise DbReadAccessError(e)
         else:
             raise WikiDataException(_(u"You cannot delete the root wiki node"))
-
 
 
     def setMetaDataState(self, word, state):
@@ -600,6 +605,7 @@ class WikiData:
             selfreference=True, withFields=()):
         """
         get the child relations of this word
+        Function must work for read-only wiki.
         existingonly -- List only existing wiki words
         selfreference -- List also wikiWord if it references itself
         withFields -- Seq. of names of fields which should be included in

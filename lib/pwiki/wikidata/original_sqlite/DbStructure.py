@@ -353,7 +353,6 @@ class ConnectWrapAsyncCommit(ConnectWrapBase):
 
 
 
-
 VERSION_DB = 3
 VERSION_WRITECOMPAT = 3
 VERSION_READCOMPAT = 3
@@ -550,6 +549,7 @@ def recreateCacheTables(connwrap):
         changeTableSchema(connwrap, tn, TABLE_DEFINITIONS[tn])
 
     rebuildIndices(connwrap)
+
 #     connwrap.execSql("create unique index wikirelations_pkey on wikirelations(word, relation)")
 #     connwrap.execSql("create index wikirelations_word on wikirelations(word)")
 #     connwrap.execSql("create index wikirelations_relation on wikirelations(relation)")

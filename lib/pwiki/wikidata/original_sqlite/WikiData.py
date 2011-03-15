@@ -164,9 +164,10 @@ class WikiData:
         except (IOError, OSError, sqlite.Error), e:
             # Remember but continue
             lastException = DbWriteAccessError(e)
-    
+
         # Function to convert unicode strings from input to content in database
         # used by setContent
+
         def contentUniInputToDb(unidata):
             return utf8Enc(unidata, "replace")[0]
 
@@ -402,6 +403,7 @@ class WikiData:
                 self.connWrap.execSql("update wikiwords set modified = ?, "
                         "created = ?, visited = ? where word = ?",
                         (moddate, creadate, visitdate, word))
+                self.commitNeeded = True
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -422,7 +424,6 @@ class WikiData:
                 "created": Creation date of page
                 "visited": Last visit date of page
                 "firstcharpos": Dummy returning very high value
-                
         """
         if withFields is None:
             withFields = ()
@@ -529,6 +530,7 @@ class WikiData:
         try:
             self.connWrap.execSql("update wikiwords set metadataprocessed = ? "
                     "where word = ?", (state, word))
+            self.commitNeeded = True
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -552,6 +554,7 @@ class WikiData:
         """
         self.connWrap.execSql("update wikiwords set metadataprocessed = ?",
                 (state,))
+        self.commitNeeded = True
 
 
     _METADATASTATE_NUMCOPARE_TO_SQL = {"==": "=", ">=": "<=", "<=": ">=",

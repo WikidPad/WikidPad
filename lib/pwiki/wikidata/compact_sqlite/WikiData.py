@@ -35,7 +35,6 @@ except:
 # finally:
 #     pass
 
-
 from pwiki.StringOps import getBinCompactForDiff, applyBinCompact, longPathEnc, \
         longPathDec, binCompactToCompact, fileContentToUnicode, utf8Enc, utf8Dec, \
         uniWithNone, loadEntireTxtFile, Conjunction, lineendToInternal
@@ -60,13 +59,14 @@ class WikiData:
             raise DbWriteAccessError(e)
 
         dbfile = longPathDec(dbfile)
+
         try:
             self.connWrap = DbStructure.ConnectWrapSyncCommit(
                     sqlite.connect(dbfile))
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbReadAccessError(e)
-        
+
         # Set temporary directory if this is first sqlite use after prog. start
         if not GetApp().sqliteInitFlag:
             globalConfig = GetApp().getGlobalConfig()
@@ -103,7 +103,6 @@ class WikiData:
                 self.connWrap.execSql("pragma temp_store = 1")
 
             GetApp().sqliteInitFlag = True
-
 
         DbStructure.registerSqliteFunctions(self.connWrap)
 
@@ -146,7 +145,7 @@ class WikiData:
         # Function to convert from content in database to
         # return value, used by getContent()
         self.contentDbToOutput = lambda c: utf8Dec(c, "replace")[0]
-        
+
         try:
             # Set marker for database type
             self.wikiDocument.getWikiConfig().set("main", "wiki_database_type",
@@ -166,9 +165,8 @@ class WikiData:
         try:
             self._createTempTables()
 
-            # reset cache
+            # create word caches
             self.cachedContentNames = None
-    
             self.cachedGlobalAttrs = None
             self.getGlobalAttributes()
         except (IOError, OSError, sqlite.Error), e:
@@ -179,7 +177,7 @@ class WikiData:
                 traceback.print_exc()
                 raise DbReadAccessError(e2)
             raise DbReadAccessError(e)
-            
+
         if lastException:
             raise lastException
 
@@ -197,16 +195,19 @@ class WikiData:
 
         # These schema changes are only on a temporary table so they are not
         # in DbStructure.py
-        self.connWrap.execSql("create temp table temppathfindparents "
+        self.connWrap.execSql("create temp table temppathfindparents "+
                 "(word text primary key, child text, steps integer)")
 
-        self.connWrap.execSql("create index temppathfindparents_steps "
+        self.connWrap.execSql("create index temppathfindparents_steps "+
                 "on temppathfindparents(steps)")
 
 
     # ---------- Direct handling of page data ----------
-    
+
     def getContent(self, word):
+        """
+        Function must work for read-only wiki.
+        """
         try:
             result = self.connWrap.execSqlQuerySingleItem("select content from "+\
                 "wikiwordcontent where word = ?", (word,), None)
@@ -364,6 +365,7 @@ class WikiData:
                 self.connWrap.execSql("update wikiwordcontent set modified = ?, "
                         "created = ?, visited = ? where word = ?",
                         (moddate, creadate, visitdate, word))
+                self.commitNeeded = True
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -425,6 +427,8 @@ class WikiData:
             raise DbReadAccessError(e)
 
 
+
+
     # ---------- Renaming/deleting pages with cache update or invalidation ----------
 
     def renameWord(self, word, toWord):
@@ -438,7 +442,6 @@ class WikiData:
                 self.connWrap.execSql("update todos set word = ? where word = ?", (toWord, word))
                 self.connWrap.execSql("update wikiwordmatchterms set word = ? where word = ?", (toWord, word))
                 self._renameContent(word, toWord)
-    
                 self.connWrap.commit()
             except:
                 self.connWrap.rollback()
@@ -448,10 +451,13 @@ class WikiData:
             raise DbWriteAccessError(e)
 
 
-    def deleteWord(self, word):
+    def deleteWord(self, word, delContent=True):
         """
         delete everything about the wikiword passed in. an exception is raised
         if you try and delete the wiki root node.
+        
+        delContent -- Should actual content be deleted as well? (Parameter is
+                not part of official API)
         """
         if word != self.wikiDocument.getWikiName():
             try:
@@ -464,8 +470,8 @@ class WikiData:
                     self.deleteChildRelationships(word)
                     self.deleteAttributes(word)
                     self.deleteTodos(word)
-                    # self.connWrap.execSql("delete from wikiwordcontent where word = ?", (word,))
-                    self._deleteContent(word)
+                    if delContent:
+                        self._deleteContent(word)
                     self.deleteWikiWordMatchTerms(word, syncUpdate=False)
                     self.deleteWikiWordMatchTerms(word, syncUpdate=True)
                     self.connWrap.commit()
@@ -487,6 +493,7 @@ class WikiData:
         try:
             self.connWrap.execSql("update wikiwordcontent set metadataprocessed = ? "
                     "where word = ?", (state, word))
+            self.commitNeeded = True
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -510,6 +517,7 @@ class WikiData:
         """
         self.connWrap.execSql("update wikiwordcontent set metadataprocessed = ?",
                 (state,))
+        self.commitNeeded = True
 
 
     _METADATASTATE_NUMCOPARE_TO_SQL = {"==": "=", ">=": "<=", "<=": ">=",

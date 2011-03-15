@@ -4,18 +4,18 @@ from pwiki.Enum import Enumeration
 # VERSION_TUPLE is structured (branch, major, minor, stateAndMicro, patch)
 # where branch is normally string "wikidPad", but should be changed if somebody
 # develops a derived version of WikidPad.
-# 
+#
 # major and minor are the main versions,
 # stateAndMicro is:
-#     between 0 and 99 for "alpha" 
+#     between 0 and 99 for "alpha"
 #     between 100 and 199 for "beta"
 #     between 200 and 299 for "rc" (release candidate)
 #     300 for "final"
-#     
+#
 #     the unit and tenth place form the micro version.
-# 
+#
 # patch is a sub-micro version, if needed, normally 0.
-# 
+#
 # Examples:
 # (1, 8, 207, 0) is 1.8rc07
 # (2, 0, 3, 0) is 2.0alpha03
@@ -39,9 +39,9 @@ DEADBLOCKTIMEOUT = 1800
 # Scintilla known format types and numbers
 FormatTypes = Enumeration("FormatTypes", ["Default", "WikiWord",
         "AvailWikiWord", "Bold", "Italic", "Heading1", "Heading2", "Heading3",
-        "Heading4", "Url", "Script", "Attribute", "ToDo"
+        "Heading4", "Heading5", "Url", "Script", "Attribute", "ToDo"
         ], 0)
-        
+
 
 # Store hints for WikiData.storeDataBlock()
 

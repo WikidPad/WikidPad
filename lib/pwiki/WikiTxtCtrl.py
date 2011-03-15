@@ -88,7 +88,7 @@ def bytelenSct_mbcs(us):
 
 # etEVT_STYLE_DONE_COMMAND = wx.NewEventType()
 # EVT_STYLE_DONE_COMMAND = wx.PyEventBinder(etEVT_STYLE_DONE_COMMAND, 0)
-# 
+#
 # class StyleDoneEvent(wx.PyCommandEvent):
 #     """
 #     This wx Event is fired when style and folding calculations are finished.
@@ -174,7 +174,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.SetMarginWidth(self.FOLD_MARGIN, 0)
         self.SetMarginWidth(self.SELECT_MARGIN, 16)
         self.SetMarginWidth(self.NUMBER_MARGIN, 0)
-        
+
         self.SetMarginType(self.FOLD_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
         self.SetMarginType(self.SELECT_MARGIN, wx.stc.STC_MARGIN_SYMBOL)
         self.SetMarginType(self.NUMBER_MARGIN, wx.stc.STC_MARGIN_NUMBER)
@@ -200,12 +200,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         # i plan on lexing myself
         self.SetLexer(wx.stc.STC_LEX_CONTAINER)
-        
+
         # make the text control a drop target for files and text
         self.SetDropTarget(WikiTxtCtrlDropTarget(self))
-        
+
 #         self.CmdKeyClearAll()
-#         
+#
 #         # register some keyboard commands
 #         self.CmdKeyAssign(ord('+'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMIN)
 #         self.CmdKeyAssign(ord('-'), wx.stc.STC_SCMOD_CTRL, wx.stc.STC_CMD_ZOOMOUT)
@@ -215,15 +215,15 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #                 wx.stc.STC_CMD_HOMEWRAPEXTEND)
 #         self.CmdKeyAssign(wx.stc.STC_KEY_END, wx.stc.STC_SCMOD_SHIFT,
 #                 wx.stc.STC_CMD_LINEENDWRAPEXTEND)
-# 
-# 
+#
+#
 #         # Clear all key mappings for clipboard operations
 #         # PersonalWikiFrame handles them and calls the special clipboard functions
 #         # instead of the normal ones
 #         self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_CTRL)
 #         self.CmdKeyClear(wx.stc.STC_KEY_INSERT, wx.stc.STC_SCMOD_SHIFT)
 #         self.CmdKeyClear(wx.stc.STC_KEY_DELETE, wx.stc.STC_SCMOD_SHIFT)
-# 
+#
 #         self.CmdKeyClear(ord('X'), wx.stc.STC_SCMOD_CTRL)
 #         self.CmdKeyClear(ord('C'), wx.stc.STC_SCMOD_CTRL)
 #         self.CmdKeyClear(ord('V'), wx.stc.STC_SCMOD_CTRL)
@@ -245,7 +245,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.__sinkApp = wxKeyFunctionSink((
                 ("options changed", self.onOptionsChanged),
         ), wx.GetApp().getMiscEvent(), self)
-        
+
         self.__sinkGlobalConfig = wxKeyFunctionSink((
                 ("changed configuration", self.onChangedConfiguration),
         ), wx.GetApp().getGlobalConfig().getMiscEvent(), self)
@@ -279,7 +279,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wx.stc.EVT_STC_MARGINCLICK(self, ID, self.OnMarginClick)
         wx.stc.EVT_STC_DWELLSTART(self, ID, self.OnDwellStart)
         wx.stc.EVT_STC_DWELLEND(self, ID, self.OnDwellEnd)
-        
+
         wx.EVT_LEFT_DOWN(self, self.OnClick)
         wx.EVT_MIDDLE_DOWN(self, self.OnMiddleDown)
         wx.EVT_LEFT_DCLICK(self, self.OnDoubleClick)
@@ -291,7 +291,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wx.EVT_SET_FOCUS(self, self.OnSetFocus)
 
         wx.EVT_CONTEXT_MENU(self, self.OnContextMenu)
-        
+
 #         self.incSearchCharStartPos = 0
         self.incSearchPreviousHiddenLines = None
         self.incSearchPreviousHiddenStartLine = -1
@@ -308,7 +308,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         self.contextMenuTokens = None
         self.contextMenuSpellCheckSuggestions = None
-        
+
         # Connect context menu events to functions
         wx.EVT_MENU(self, GUI_ID.CMD_UNDO, lambda evt: self.Undo())
         wx.EVT_MENU(self, GUI_ID.CMD_REDO, lambda evt: self.Redo())
@@ -329,15 +329,15 @@ class WikiTxtCtrl(SearchableScintillaControl):
             wx.EVT_MENU(self, sps, self.OnReplaceThisSpellingWithSuggestion)
 
         wx.EVT_MENU(self, GUI_ID.CMD_ADD_THIS_SPELLING_SESSION,
-                self.OnAddThisSpellingToIgnoreSession)        
+                self.OnAddThisSpellingToIgnoreSession)
         wx.EVT_MENU(self, GUI_ID.CMD_ADD_THIS_SPELLING_GLOBAL,
-                self.OnAddThisSpellingToIgnoreGlobal)        
+                self.OnAddThisSpellingToIgnoreGlobal)
         wx.EVT_MENU(self, GUI_ID.CMD_ADD_THIS_SPELLING_LOCAL,
-                self.OnAddThisSpellingToIgnoreLocal)        
+                self.OnAddThisSpellingToIgnoreLocal)
 
-        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)        
+        wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_THIS, self.OnActivateThis)
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_THIS,
-                self.OnActivateNewTabThis)        
+                self.OnActivateNewTabThis)
         wx.EVT_MENU(self, GUI_ID.CMD_ACTIVATE_NEW_TAB_BACKGROUND_THIS,
                 self.OnActivateNewTabBackgroundThis)
 
@@ -384,7 +384,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         if len(text) == 0:
             return
 
-        cbIcept = self.presenter.getMainControl().getClipboardInterceptor()  
+        cbIcept = self.presenter.getMainControl().getClipboardInterceptor()
         if cbIcept is not None:
             cbIcept.informCopyInWikidPadStart(text=text)
             try:
@@ -405,7 +405,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         filenames = wxHelper.getFilesFromClipboard()
         if filenames is not None:
             mc = self.presenter.getMainControl()
-    
+
             paramDict = {"editor": self, "filenames": filenames,
                     "x": -1, "y": -1, "main control": mc,
                     "processDirectly": True}
@@ -424,7 +424,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         if bmp is not None:
             img = bmp.ConvertToImage()
             del bmp
-            
+
             if self.presenter.getConfig().getboolean("main",
                     "editor_imagePaste_askOnEachPaste", True):
                 # Options say to present dialog on an image paste operation
@@ -440,25 +440,25 @@ class WikiTxtCtrl(SearchableScintillaControl):
             if destPath is None:
                 # Couldn't find unused filename or saving denied
                 return True
-                
+
 #                 destPath = fs.findDestPathNoSource(u".png", u"")
-#                 
+#
 #                 print "Paste6", repr(destPath)
 #                 if destPath is None:
 #                     # Couldn't find unused filename
 #                     return
-# 
+#
 #                 img.SaveFile(destPath, wx.BITMAP_TYPE_PNG)
 
             url = self.presenter.getMainControl().makeAbsPathRelUrl(destPath)
-            
+
             if url is None:
                 url = u"file:" + StringOps.urlFromPathname(destPath)
-            
+
             self.ReplaceSelection(url)
 
 #             locPath = self.presenter.getMainControl().getWikiConfigPath()
-# 
+#
 #             if locPath is not None:
 #                 locPath = dirname(locPath)
 #                 relPath = relativeFilePath(locPath, destPath)
@@ -468,12 +468,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #                     url = "file:%s" % urlFromPathname(destPath)
 #                 else:
 #                     url = "rel://%s" % urlFromPathname(relPath)
-# 
+#
 #             if url:
 #                 self.ReplaceSelection(url)
 
             return True
-        
+
         if not WindowsHacks:
             return False
 
@@ -481,17 +481,17 @@ class WikiTxtCtrl(SearchableScintillaControl):
         destPath = imgsav.saveWmfFromClipboardToFileStorage(fs)
         if destPath is not None:
             url = self.presenter.getMainControl().makeAbsPathRelUrl(destPath)
-            
+
             if url is None:
                 url = u"file:" + StringOps.urlFromPathname(destPath)
-            
+
             self.ReplaceSelection(url)
             return True
 
 
 #         if destPath is not None:
 #             locPath = self.presenter.getMainControl().getWikiConfigPath()
-# 
+#
 #             if locPath is not None:
 #                 locPath = dirname(locPath)
 #                 relPath = relativeFilePath(locPath, destPath)
@@ -501,7 +501,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #                     url = "file:%s>i" % urlFromPathname(destPath)
 #                 else:
 #                     url = "rel://%s>i" % urlFromPathname(relPath)
-# 
+#
 #                 if url:
 #                     self.ReplaceSelection(url)
 
@@ -513,8 +513,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
             return
         self.Copy()
 
-        
-        
+
+
     def setLayerVisible(self, vis, scName=""):
         """
         Informs the widget if it is really visible on the screen or not
@@ -534,20 +534,20 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
     def setAutoIndent(self, onOff):
         self.autoIndent = onOff
-        
+
     def getAutoIndent(self):
         return self.autoIndent
 
     def setAutoBullets(self, onOff):
         self.autoBullets = onOff
-        
+
     def getAutoBullets(self):
         return self.autoBullets
-        
+
     def setTabsToSpaces(self, onOff):
         self.tabsToSpaces = onOff
         self.SetUseTabs(not onOff)
-        
+
     def getTabsToSpaces(self):
         return self.tabsToSpaces
 
@@ -568,7 +568,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         """
         forceSync -- when setting folding on, the folding is completed
             before function returns iff forceSync is True
-        """ 
+        """
         if onOrOff:
             self.SetMarginWidth(self.FOLD_MARGIN, 16)
             self.foldingActive = True
@@ -647,7 +647,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         be = bs + self.bytelenSct(text[start:end])
         self.SetTargetStart(bs)
         self.SetTargetEnd(be)
-        
+
         if isUnicode():
             self.ReplaceTarget(newText)
         else:
@@ -655,13 +655,13 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
 #         text = self.GetText()
 #         text = text[:pos] + newText + text[(pos + len):]
-#         
+#
 #         self.replaceText(text)
 
 
     def showSelectionByCharPos(self, start, end):
         """
-        Same as SetSelectionByCharPos(), but scrolls to position correctly 
+        Same as SetSelectionByCharPos(), but scrolls to position correctly
         """
         text = self.GetText()
         bs = self.bytelenSct(text[:start])
@@ -690,9 +690,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.SetTabWidth(tabWidth)
 
         self.AutoCompSetFillUps(u":=")  # TODO Add '.'?
-#         self.SetYCaretPolicy(wxSTC_CARET_SLOP, 2)  
-#         self.SetYCaretPolicy(wxSTC_CARET_JUMPS | wxSTC_CARET_EVEN, 4)  
-        self.SetYCaretPolicy(wx.stc.STC_CARET_SLOP | wx.stc.STC_CARET_EVEN, 4) 
+#         self.SetYCaretPolicy(wxSTC_CARET_SLOP, 2)
+#         self.SetYCaretPolicy(wxSTC_CARET_JUMPS | wxSTC_CARET_EVEN, 4)
+        self.SetYCaretPolicy(wx.stc.STC_CARET_SLOP | wx.stc.STC_CARET_EVEN, 4)
 
 
 
@@ -738,7 +738,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.applyBasicSciSettings()
 
             self.wikiPageSink.disconnect()
-            
+
             self.presenter.setDocPage(None)
 
             self.clearStylingCache()
@@ -746,7 +746,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #             self.foldingseq = None
 #             self.pageAst = None
             self.pageType = "normal"
-        
+
         ## _prof.stop()
 
 
@@ -755,9 +755,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
         # set the editor text
         content = None
         wikiDataManager = self.presenter.getWikiDocument()
-        
+
         self.presenter.setDocPage(funcPage)
-        
+
         if self.getLoadedDocPage() is None:
             return  # TODO How to handle?
 
@@ -897,13 +897,13 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     foldInfo = prst[5]
                     self.setFoldInfo(foldInfo)
                     self.GotoPos(lastPos)
-                    
+
                     self.scrollXY(scrollPosX, scrollPosY)
-                
+
 #                     # Bad hack: First scroll to position to avoid a visible jump
 #                     #   if scrolling works, then update display,
 #                     #   then scroll again because it may have failed the first time
-#                     
+#
 #                     self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
 #                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
 #                             scrollPosX, wx.HORIZONTAL)
@@ -911,7 +911,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
 #                             scrollPosX, wx.HORIZONTAL)
 #                     self.ProcessEvent(screvt)
-#                     
+#
 #                     self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
 #                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
 #                             scrollPosY, wx.VERTICAL)
@@ -919,9 +919,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
 #                             scrollPosY, wx.VERTICAL)
 #                     self.ProcessEvent(screvt)
-# 
+#
 #                     self.Update()
-# 
+#
 #                     self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
 #                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
 #                             scrollPosX, wx.HORIZONTAL)
@@ -929,7 +929,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
 #                             scrollPosX, wx.HORIZONTAL)
 #                     self.ProcessEvent(screvt)
-#                     
+#
 #                     self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
 #                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
 #                             scrollPosY, wx.VERTICAL)
@@ -954,7 +954,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.GotoPos(0)
             self._goToNextFormField()
             return True
-        
+
         return False
 
 
@@ -993,7 +993,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             wx.GetApp().freeWikiLanguageHelper(self.wikiLanguageHelper)
             self.wikiLanguageHelper = docPage.createWikiLanguageHelper()
-        
+
         if self.pageType == u"normal":
             # Scroll page according to the anchor
             try:
@@ -1038,7 +1038,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
     def onOptionsChanged(self, miscevt):
         faces = self.presenter.getDefaultFontFaces().copy()
 
-        if isinstance(self.getLoadedDocPage(), 
+        if isinstance(self.getLoadedDocPage(),
                 (DocPages.WikiPage, DocPages.AliasWikiPage)):
 
             font = self.getLoadedDocPage().getAttributeOrGlobal("font",
@@ -1123,14 +1123,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
         """
         Called directly from a doc page to repair the editor state if an
         invalid file signature was detected.
-        
+
         docPage -- calling docpage
         """
         if docPage is not self.getLoadedDocPage() or \
                 not isinstance(docPage,
                         (DocPages.DataCarryingPage, DocPages.AliasWikiPage)):
             return
-        
+
         sd, ud = docPage.getDirty()
         if sd:
             return   # TODO What to do on conflict?
@@ -1159,7 +1159,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         """
         if self.getLoadedDocPage() is not None:
             self.wikiPageSink.disconnect()
-            
+
             self.SetDocPointer(None)
             self.applyBasicSciSettings()
 
@@ -1181,7 +1181,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         # it's cached
         text = docPage.getLiveText()  # self.GetText()
         textlen = len(text)
-        
+
         t = self.stylingThreadHolder.getThread()
         if t is not None:
             self.stylingThreadHolder.setThread(None)
@@ -1208,7 +1208,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.stopStcStyler()
 
             sth = self.stylingThreadHolder
-            
+
             delay = self.presenter.getConfig().getfloat(
                     "main", "async_highlight_delay")
             t = threading.Thread(None, self.buildStyling, args = (text, delay, sth))
@@ -1233,7 +1233,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         wikiDocument = self.presenter.getWikiDocument()
         templateNames = [n for n in wikiDocument.getAllDefinedWikiPageNames()
                 if templateRe.search(n)]
-        
+
         wikiDocument.getCollator().sort(templateNames)
 
         for tn in templateNames:
@@ -1277,7 +1277,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         if not isinstance(docPage, DocPages.WikiPage):
             return
-            
+
         if not docPage.isDefined() and not docPage.getDirty()[0]:
             title = _(u"Select Template")
         else:
@@ -1299,14 +1299,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.SetText(content, emptyUndo=False)
         self.pageType = docPage.getAttributes().get(u"pagetype",
                 [u"normal"])[-1]
-        self.handleSpecialPageType()        
+        self.handleSpecialPageType()
         self.presenter.informEditorTextChanged(self)
 
 
     # TODO Wrong reaction on press of context menu button on keyboard
     def OnContextMenu(self, evt):
         mousePos = self.ScreenToClient(wx.GetMousePosition())
-        
+
         leftFold = 0
         for i in range(self.FOLD_MARGIN):
             leftFold += self.GetMarginWidth(i)
@@ -1385,7 +1385,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     self._fillTemplateMenu(templateSubmenu)
                     appendToMenuByMenuDesc(templateSubmenu,
                             _CONTEXT_MENU_SELECT_TEMPLATE_IN_TEMPLATE_MENU)
-    
+
                     menu.AppendSeparator()
                     menu.AppendMenu(wx.NewId(), _(u'Use Template'),
                             templateSubmenu)
@@ -1444,7 +1444,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 return True
 
             charStartPos = end
-            
+
 
     def handleDropText(self, x, y, text):
         if x != -1:
@@ -1476,7 +1476,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.stylebytes = stylebytes
 #         self.pageAst = pageAst
         self.foldingseq = foldingseq
-        
+
         def putStyle():
             if stylebytes:
                 self.applyStyling(stylebytes, styleMask)
@@ -1495,11 +1495,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
             if delay != 0 and not threadstop is DUMBTHREADSTOP:
                 sleep(delay)
                 threadstop.testRunning()
-            
+
             docPage = self.getLoadedDocPage()
             if docPage is None:
                 return
-            
+
             for i in range(20):   # "while True" is too dangerous
                 formatDetails = docPage.getFormatDetails()
                 pageAst = docPage.getLivePageAst(threadstop=threadstop)
@@ -1510,9 +1510,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     break
 
             stylebytes = self.processTokens(text, pageAst, threadstop)
-            
+
             threadstop.testRunning()
-    
+
             if self.getFoldingActive():
                 foldingseq = self.processFolding(pageAst, threadstop)
             else:
@@ -1575,9 +1575,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
         def process(pageAst, stack):
             for node in pageAst.iterFlatNamed():
                 threadstop.testRunning()
-                
+
                 styleNo = WikiTxtCtrl._TOKEN_TO_STYLENO.get(node.name)
-                
+
                 if styleNo is not None:
                     stylebytes.bindStyle(node.pos, node.strLength, styleNo)
                 elif node.name == "wikiWord":
@@ -1595,16 +1595,16 @@ class WikiTxtCtrl(SearchableScintillaControl):
                             FormatTypes.ToDo)
                 elif node.name == "value" and "todoEntry" in stack:
                     process(node, stack[:])
-                           
+
                 elif node.name == "heading":
-                    if node.level < 4:
+                    if node.level < 5:
                         styleNo = FormatTypes.Heading1 + \
                                 (node.level - 1)
                     else:
-                        styleNo = FormatTypes.Heading4
+                        styleNo = FormatTypes.Heading5
 
                     stylebytes.bindStyle(node.pos, node.strLength, styleNo)
-                
+
                 elif node.name in ("table", "tableRow", "tableCell",
                         "orderedList", "unorderedList", "indentedText",
                         "noExport"):
@@ -1630,10 +1630,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
         prevLevel = 0
         levelStack = []
         foldHeader = False
-        
+
         for node in pageAst:
             threadstop.testRunning()
-            
+
             if node.name == "heading":
                 while levelStack and (levelStack[-1][0] != "heading" or
                         levelStack[-1][1] > node.level):
@@ -1653,12 +1653,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             if lfc > 0:
                 foldingseq += [len(levelStack) + 1] * lfc
-                
+
             prevLevel = len(levelStack) + 1
-                
+
         # final line
         foldingseq.append(len(levelStack) + 1)
-        
+
         return foldingseq
 
 
@@ -1681,7 +1681,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         """
         for i in xrange(self.GetLineCount()):
             self.SetFoldExpanded(i, True)
-        
+
         self.ShowLines(0, self.GetLineCount()-1)
 
 
@@ -1723,9 +1723,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
             if self.GetFoldExpanded(ln):
                 levOut |= 8192
             if self.GetLineVisible(ln):
-                levOut |= 16384            
+                levOut |= 16384
             result[ln] = levOut
-            
+
         return result
 
 
@@ -1739,14 +1739,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
             levComb = levIn & 4095
             if levIn & 4096:
                 levComb |= wx.stc.STC_FOLDLEVELHEADERFLAG
-                
+
             self.SetFoldLevel(ln, levComb)
             self.SetFoldExpanded(ln, bool(levIn & 8192))
             if levIn & 16384:
                 self.ShowLines(ln, ln)
             else:
                 self.HideLines(ln, ln)
-        
+
         self.repairFoldingVisibility()
 
 
@@ -1754,23 +1754,23 @@ class WikiTxtCtrl(SearchableScintillaControl):
     def repairFoldingVisibility(self):
         if not self.getFoldingActive():
             return
-            
+
         lc = self.GetLineCount()
-        
+
         if lc == 0:
             return
 
         self.ShowLines(0, 0)
         if lc == 1:
             return
-            
+
         combLevel = self.GetFoldLevel(0)
         prevLevel = combLevel & 4095
         prevIsHeader = combLevel & wx.stc.STC_FOLDLEVELHEADERFLAG
         prevIsExpanded = self.GetFoldExpanded(0)
         prevVisible = True  # First line must always be visible
         prevLn = 0
-        
+
 #         print "0", prevLevel, bool(prevIsHeader), bool(prevIsExpanded), bool(prevVisible)
 
         for ln in xrange(1, lc):
@@ -1787,11 +1787,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
                             not (prevIsHeader and not prevIsExpanded)) or \
                         (prevIsHeader and prevIsExpanded):
                     # if current level is not larger than previous this indicates
-                    # an error except that the previous line is a header line and 
+                    # an error except that the previous line is a header line and
                     # folded (not expanded).
                     # Other possibility of an error is if previous line is a
                     # header and IS expanded.
-                    
+
                     # Show line in these cases
                     self.SetFoldExpanded(prevLn, True) # Needed?
                     self.ShowLines(ln, ln)
@@ -1814,7 +1814,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.Copy()
 
         wikiPage = self.presenter.getWikiDocument().getWikiPageNoError("ScratchPad")
-        
+
 #         wikiPage.appendLiveText("\n%s\n---------------------------\n\n%s\n" %
 #                 (mbcsDec(strftime("%x %I:%M %p"), "replace")[0], text))
         wikiPage.appendLiveText("\n%s\n---------------------------\n\n%s\n" %
@@ -1838,7 +1838,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.BeginUndoAction()
         try:
             endCharPos += len(startChars)
-            
+
             if emptySelection:
                 # If selection is empty, cursor will in the end
                 # stand between the style characters
@@ -1849,14 +1849,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             self.gotoCharPos(startCharPos, scroll=False)
             self.AddText(startChars)
-    
+
             self.gotoCharPos(endCharPos, scroll=False)
             self.AddText(endChars)
 
             self.gotoCharPos(cursorCharPos, scroll=False)
         finally:
             self.EndUndoAction()
-            
+
 
     def getPageAst(self):
         docPage = self.getLoadedDocPage()
@@ -1886,20 +1886,20 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 else:
                     # Same tab
                     presenter = self.presenter
-                    
+
                 titleFromLink = self.presenter.getConfig().getboolean("main",
                         "wikiPageTitle_fromLinkTitle", False)
-                
+
                 if not titleFromLink or node.titleNode is None:
                     suggNewPageTitle = None
                 else:
                     suggNewPageTitle = node.titleNode.getString()
-                    
+
                 unaliasedTarget = self.presenter.getWikiDocument()\
                         .getUnAliasedWikiWordOrAsIs(node.wikiWord)
 
                 docPage = self.getLoadedDocPage()
-                
+
                 # Contains start and end character position where a search fragment
                 # search should never match
                 # If the target wikiword is the current one, the search fragment
@@ -1921,10 +1921,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     searchOp = SearchReplaceOperation()
                     searchOp.wildCard = "no"   # TODO Why not regex?
                     searchOp.searchStr = searchfrag
-    
+
                     found = presenter.getSubControl("textedit").executeSearch(
                             searchOp, 0)
-                    
+
                     if found[0] >= forbiddenSearchfragHit[0] and \
                             found[0] < forbiddenSearchfragHit[1]:
                         # Searchfrag found its own link -> search after link
@@ -1944,7 +1944,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             elif node.name == "insertion":
                 if node.key == u"page":
-                        
+
                     # open the wiki page
                     if tabMode & 2:
                         # New tab
@@ -1953,7 +1953,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     else:
                         # Same tab
                         presenter = self.presenter
-    
+
                     presenter.openWikiPage(node.value,
                             motionType="child")  # , anchor=node.value)
 
@@ -1961,7 +1961,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                         # Show in foreground
                         presenter.getMainControl().getMainAreaPanel().\
                                 showPresenter(presenter)
-    
+
                     return True
 
                     # TODO: Make this work correctly
@@ -1974,7 +1974,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 try:
                     pageAst = self.getPageAst()
                     footnoteId = node.footnoteId
-    
+
                     anchorNode = getFootnoteAnchorDict(pageAst).get(footnoteId)
                     if anchorNode is not None:
                         if anchorNode.pos != node.pos:
@@ -1986,7 +1986,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                                 if fnNode.footnoteId == footnoteId:
                                     self.gotoCharPos(fnNode.pos)
                                     break
-    
+
                     return True
                 except NoPageAstException:
                     return False
@@ -2024,7 +2024,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 allUnknownWords = docPage.getSpellCheckerUnknownWords()
                 wantedUnknownWords = allUnknownWords.findNodesForCharPos(
                         linkCharPos)
-                
+
                 if linkCharPos > 0 and len(wantedUnknownWords) == 0:
                     # No unknown word found -> try left to cursor
                     wantedUnknownWords = allUnknownWords.findNodesForCharPos(
@@ -2138,7 +2138,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 if link.startswith(u"rel://"):
                     link = self.presenter.getMainControl()\
                             .makeRelUrlAbsolute(link)
-                
+
                 elif link.startswith(u"file:"):
                     link = self.presenter.getMainControl()\
                             .makeAbsPathRelUrl(StringOps.pathnameFromUrl(
@@ -2206,13 +2206,13 @@ class WikiTxtCtrl(SearchableScintillaControl):
         if startPos == endPos or index > -1:
             # Execute all or selected script blocks on the page (or other
             #   related pages)
-            try:            
+            try:
                 pageAst = self.getPageAst()
             except NoPageAstException:
                 return
 
             scriptNodeGroups = [list(pageAst.iterDeepByName(SCRIPTFORMAT))]
-            
+
             # process script imports
             if securityLevel > 1: # Local import_scripts attributes allowed
                 if self.getLoadedDocPage().getAttributes().has_key(
@@ -2242,7 +2242,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                                     pageAst.iterDeepByName(SCRIPTFORMAT)))
                     except:
                         pass
-             
+
             if self.presenter.getConfig().getboolean("main",
                     "script_search_reverse", False):
                 scriptNodeGroups.reverse()
@@ -2296,7 +2296,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #         if not self.presenter.getConfig().getboolean("main",
 #                 "process_autogenerated_areas"):
 #             return text
-# 
+#
 #         return WikiFormatting.AutoGenAreaRE.sub(ur"\1\2\4", text)
 
 
@@ -2327,10 +2327,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #         if not self.presenter.getConfig().getboolean("main",
 #                 "process_autogenerated_areas"):
 #             return text
-# 
+#
 #         # So the text can be referenced from an AGA function
 #         self.agatext = text
-# 
+#
 #         return WikiFormatting.AutoGenAreaRE.sub(self._agaReplace, text)
 
 
@@ -2393,11 +2393,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         startLine = self.LineFromPosition(byteStart)
         endLine = self.LineFromPosition(byteEnd)
-        
+
         # Just to be sure, shouldn't happen normally
         if endLine < startLine:
             startLine, endLine = endLine, startLine
-        
+
         for checkLine in xrange(endLine, startLine - 1, -1):
             if not self.GetLineVisible(checkLine):
                 line = checkLine
@@ -2439,12 +2439,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     self.ShowLines(line, line)
                 else:
                     self.HideLines(line, line)
-                
+
                 line += 1
-            
+
         self.incSearchPreviousHiddenLines = None
         self.incSearchPreviousHiddenStartLine = -1
-        
+
         if start == -1:
 #             self.SetSelection(-1, -1)
             self.SetSelection(self.GetSelectionStart(), self.GetSelectionStart())
@@ -2455,12 +2455,12 @@ class WikiTxtCtrl(SearchableScintillaControl):
         byteEnd = byteStart + self.bytelenSct(text[start:end])
         startLine = self.LineFromPosition(byteStart)
         endLine = self.LineFromPosition(byteEnd)
-        
+
         # Store current show/hide state of lines to show
         shownList = []
         for i in xrange(startLine, endLine + 1):
             shownList.append(self.GetLineVisible(i))
-            
+
         self.incSearchPreviousHiddenLines = shownList
         self.incSearchPreviousHiddenStartLine = startLine
 
@@ -2488,23 +2488,23 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
 #     def startIncrementalSearch(self, initSearch=None):
 #         sb = self.presenter.getStatusBar()
-# 
+#
 #         self.incSearchCharStartPos = self.GetSelectionCharPos()[1]
 #         self.incSearchPreviousHiddenLines = None
 #         self.incSearchPreviousHiddenStartLine = -1
-# 
+#
 #         rect = sb.GetFieldRect(0)
 #         if isOSX():
 #             # needed on Mac OSX to avoid cropped text
 #             rect = wx._core.Rect(rect.x, rect.y - 2, rect.width, rect.height + 4)
-# 
+#
 #         rect.SetPosition(sb.ClientToScreen(rect.GetPosition()))
-# 
+#
 #         dlg = WikiTxtDialogs.IncrementalSearchDialog(self, -1, self, rect,
 #                 sb.GetFont(), self.presenter, initSearch)
 #         dlg.Show()
-# 
-#     
+#
+#
 #     def executeIncrementalSearch(self, next=False):
 #         """
 #         Run incremental search, called only by IncrementalSearchDialog
@@ -2515,7 +2515,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #                 charStartPos = self.GetSelectionCharPos()[1]
 #             else:
 #                 charStartPos = self.incSearchCharStartPos
-# 
+#
 #             regex = None
 #             try:
 #                 regex = re.compile(self.searchStr, re.IGNORECASE | \
@@ -2523,27 +2523,27 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #             except:
 #                 # Regex error
 #                 return charStartPos   # ?
-# 
+#
 #             match = regex.search(text, charStartPos, len(text))
 #             if not match and charStartPos > 0:
 #                 match = regex.search(text, 0, charStartPos)
-# 
+#
 #             if match:
 # #                 matchbytestart = self.bytelenSct(text[:match.start()])
 # #                 matchbyteend = matchbytestart + \
 # #                         self.bytelenSct(text[match.start():match.end()])
-# 
+#
 #                 self.setSelectionForIncSearchByCharPos(
 #                         match.start(), match.end())
-# 
+#
 #                 return match.end()
-# 
+#
 #         self.setSelectionForIncSearchByCharPos(-1, -1)
 #         self.GotoPos(self.bytelenSct(text[:self.incSearchCharStartPos]))
-# 
+#
 #         return -1
-# 
-# 
+#
+#
 #     def executeIncrementalSearchBackward(self):
 #         """
 #         Run incremental search, called only by IncrementalSearchDialog
@@ -2551,7 +2551,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #         text = self.GetText()
 #         if len(self.searchStr) > 0:
 #             charStartPos = self.GetSelectionCharPos()[0]
-# 
+#
 #             regex = None
 #             try:
 #                 regex = re.compile(self.searchStr, re.IGNORECASE | \
@@ -2559,7 +2559,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #             except:
 #                 # Regex error
 #                 return charStartPos   # ?
-# 
+#
 #             match = regex.search(text, 0, len(text))
 #             if match:
 #                 if match.end() > charStartPos:
@@ -2569,31 +2569,31 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #                         if not matchNext:
 #                             break
 #                         match = matchNext
-#                         
+#
 #                 else:
 #                     while True:
 #                         matchNext = regex.search(text, match.end(), len(text))
 #                         if matchNext.end() > charStartPos:
 #                             break
 #                         match = matchNext
-# 
+#
 #                 self.setSelectionForIncSearchByCharPos(match.start(), match.end())
-# 
+#
 #                 return match.start()
-# 
+#
 #         self.setSelectionForIncSearchByCharPos(-1, -1)
 #         self.GotoPos(self.bytelenSct(text[:self.incSearchCharStartPos]))
-# 
+#
 #         return -1
-# 
-# 
+#
+#
 #     def forgetIncrementalSearch(self):
 #         """
 #         Called by IncrementalSearchDialog if user just leaves the inc. search
 #         field.
 #         """
 #         pass
-# 
+#
 #     def resetIncrementalSearch(self):
 #         """
 #         Called by IncrementalSearchDialog before aborting an inc. search.
@@ -2601,32 +2601,32 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #         """
 #         self.setSelectionForIncSearchByCharPos(-1, -1)
 #         self.GotoPos(self.bytelenSct(self.GetText()[:self.incSearchCharStartPos]))
-# 
-# 
+#
+#
 #     def endIncrementalSearch(self):
 #         """
 #         Called if incremental search ended successfully.
 #         """
 #         byteStart = self.GetSelectionStart()
 #         byteEnd = self.GetSelectionEnd()
-# 
+#
 #         self.setSelectionForIncSearchByCharPos(-1, -1)
-#         
+#
 #         self.SetSelection(byteStart, byteEnd)
 #         self.ensureSelectionExpanded()
-# 
-# 
+#
+#
 #     def getContinuePosForSearch(self, sarOp):
 #         """
 #         Return the character position where to continue the given
 #         search operation sarOp. It always continues at beginning
 #         or end of current selection.
-#         
+#
 #         If sarOp uses a regular expression, this function may throw
 #         a re.error exception.
 #         """
 #         range = self.GetSelectionCharPos()
-#         
+#
 # #         if sarOp.matchesPart(self.GetSelectedText()) is not None:
 #         if sarOp.matchesPart(self.GetText(), range) is not None:
 #             # currently selected text matches search operation
@@ -2636,8 +2636,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #             # currently selected text does not match search
 #             # -> continue searching at the beginning of selection
 #             return range[0]
-# 
-# 
+#
+#
 #     def executeSearch(self, sarOp, searchCharStartPos=-1, next=False):
 #         """
 #         Returns a tuple with a least two elements (<start>, <after end>)
@@ -2646,10 +2646,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #         """
 #         if sarOp.booleanOp:
 #             return (-1, -1)  # Not possible
-# 
+#
 #         if searchCharStartPos == -2:
 #             searchCharStartPos = self.getContinuePosForSearch(sarOp)
-# 
+#
 #         text = self.GetText()
 #         if len(sarOp.searchStr) > 0:
 #             charStartPos = searchCharStartPos
@@ -2661,18 +2661,18 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #             except:
 #                 # Regex error
 #                 return (-1, -1)  # (self.anchorCharPosition, self.anchorCharPosition)
-#                 
+#
 #             if start is not None:
 #                 self.showSelectionByCharPos(start, end)
-# 
+#
 #                 return found    # self.anchorCharPosition
-# 
+#
 #         self.SetSelection(-1, -1)
 #         self.GotoPos(self.bytelenSct(text[:searchCharStartPos]))
-# 
+#
 #         return (-1, -1)
-#         
-#         
+#
+#
 #     def executeReplace(self, sarOp):
 #         """
 #         Returns char position after replacement or -1 if replacement wasn't
@@ -2682,19 +2682,19 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #         text = self.GetText()
 # #         found = sarOp.matchesPart(seltext)
 #         range = self.GetSelectionCharPos()
-#         
+#
 # #         if sarOp.matchesPart(self.GetSelectedText()) is not None:
 #         found = sarOp.matchesPart(text, range)
-# 
+#
 #         if found is None:
 #             return -1
-# 
-#         replacement = sarOp.replace(text, found)                    
+#
+#         replacement = sarOp.replace(text, found)
 #         bytestart = self.GetSelectionStart()
 #         self.ReplaceSelection(replacement)
 #         selByteEnd = bytestart + self.bytelenSct(replacement)
 #         selCharEnd = len(self.GetTextRange(0, selByteEnd))
-# 
+#
 #         return selCharEnd
 
 
@@ -2720,7 +2720,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         bytePos = self.GetCurrentPos()
         lineStartBytePos = self.PositionFromLine(self.LineFromPosition(bytePos))
-        
+
         lineStartCharPos = len(self.GetTextRange(0, lineStartBytePos))
         charPos = lineStartCharPos + len(self.GetTextRange(lineStartBytePos,
                 bytePos))
@@ -2732,7 +2732,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         if len(acResultTuples) > 0:
             self.presenter.getWikiDocument().getCollator().sortByFirst(
                     acResultTuples)
-            
+
             self.autoCompBackBytesMap = dict( (
                     (art[1], self.bytelenSct(text[charPos - art[2]:charPos]))
                     for art in acResultTuples) )
@@ -2796,14 +2796,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
         lastLine = self.LineFromPosition(selByteEnd)
         selByteStart = self.PositionFromLine(self.LineFromPosition(selByteStart))
         selByteEnd = self.PositionFromLine(lastLine + 1)
-        
+
         if extendOverChildren:
             # Extend over all lines which are more indented than the last line
-            
+
             lastLineDeep = StringOps.splitIndentDeepness(self.GetLine(lastLine))[0]
-            
+
             testLine = lastLine + 1
-            while True:            
+            while True:
                 testLineContent = self.GetLine(testLine)
                 if len(testLineContent) == 0:
                     # End of text reached
@@ -2811,7 +2811,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
                 if StringOps.splitIndentDeepness(testLineContent)[0] <= lastLineDeep:
                     break
-                
+
                 testLine += 1
 
             selByteEnd = self.PositionFromLine(testLine)
@@ -2826,7 +2826,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
     def OnKeyDown(self, evt):
         key = evt.GetKeyCode()
-        
+
         self.lastKeyPressed = time()
         accP = getAccelPairFromKeyDown(evt)
         matchesAccelPair = self.presenter.getMainControl().keyBindings.\
@@ -2841,7 +2841,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 try:
                     selByteStart, selByteEnd = self._getExpandedByteSelectionToLine(
                             bool(accP[0] & wx.ACCEL_SHIFT))
-    
+
                     firstLine = self.LineFromPosition(selByteStart)
                     if firstLine > 0:
                         content = self.GetSelectedText()
@@ -2870,7 +2870,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 try:
                     selByteStart, selByteEnd = self._getExpandedByteSelectionToLine(
                             bool(accP[0] & wx.ACCEL_SHIFT))
-    
+
                     lastLine = self.LineFromPosition(selByteEnd)
                     lineCount = self.GetLineCount() - 1
                     if lastLine <= lineCount:
@@ -2900,7 +2900,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 finally:
                     self.EndUndoAction()
                 return
-            
+
             evt.Skip()
 
 
@@ -2908,7 +2908,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #             # ContinueSearch is normally F3
 #             self.startIncrementalSearch(self.searchStr)
 #             evt.Skip()
-# 
+#
 #         elif matchesAccelPair("StartIncrementalSearch", accP):
 #             # Start incremental search
 #             # First get selected text and prepare it as default value
@@ -2957,20 +2957,20 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 wikiDocument = self.presenter.getWikiDocument()
                 bytePos = self.GetCurrentPos()
                 lineStartBytePos = self.PositionFromLine(self.LineFromPosition(bytePos))
-                
+
                 lineStartCharPos = len(self.GetTextRange(0, lineStartBytePos))
                 charPos = lineStartCharPos + len(self.GetTextRange(lineStartBytePos,
                         bytePos))
 
                 autoUnbullet = self.presenter.getConfig().getboolean("main",
                         "editor_autoUnbullets", False)
-                
+
                 settings = {
                         "autoUnbullet": autoUnbullet,
                         "autoBullets": self.autoBullets,
                         "autoIndent": self.autoIndent
                         }
-                
+
                 if self.wikiLanguageHelper.handleNewLineBeforeEditor(self, text,
                         charPos, lineStartCharPos, wikiDocument, settings):
                     evt.Skip()
@@ -2978,7 +2978,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             else:
                 evt.Skip()
-            
+
         else:
             super(WikiTxtCtrl, self).OnKeyDown(evt)
 
@@ -2994,7 +2994,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         if evt.ControlDown() or (0 < key < 32):
             evt.Skip()
             return
-            
+
         if key >= wx.WXK_START and (not isUnicode() or evt.GetUnicodeKey() != key):
             evt.Skip()
             return
@@ -3062,7 +3062,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     "mouse_middleButton_withCtrl", 3)
 
         tabMode = Configuration.MIDDLE_MOUSE_CONFIG_TO_TABMODE[middleConfig]
-        
+
         if not self.activateLink(evt.GetPosition(), tabMode=tabMode):
             evt.Skip()
 
@@ -3080,7 +3080,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #             return
 #         else:
 #             textPos = self.PositionFromPoint(evt.GetPosition())
-# 
+#
 #             if (self.isPositionInWikiWord(textPos) or
 #                         self.isPositionInLink(textPos)):
 #                 self.SetCursor(WikiTxtCtrl.CURSOR_HAND)
@@ -3095,10 +3095,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #     def OnStyleDone(self, evt):
 #         if evt.stylebytes:
 #             self.applyStyling(evt.stylebytes)
-#         
+#
 #         if evt.foldingseq:
 #             self.applyFolding(evt.foldingseq)
-# 
+#
 
 
     def onIdleVisible(self, miscevt):
@@ -3127,10 +3127,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             self.ToggleFold(line)
             self.repairFoldingVisibility()
-        
+
         evt.Skip()
-        
-        
+
+
 
     def _threadShowCalltip(self, wikiDocument, charPos, bytePos,
             threadstop=DUMBTHREADSTOP):
@@ -3178,7 +3178,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         thread = threading.Thread(target=self._threadShowCalltip,
                 args=(wikiDocument, charPos, bytePos),
                 kwargs={"threadstop": self.calltipThreadHolder})
-                
+
         self.calltipThreadHolder.setThread(thread)
         thread.start()
 
@@ -3200,7 +3200,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         filenames = paramDict.get("filenames")
         x = paramDict.get("x")
         y = paramDict.get("y")
-        
+
         dlgParams = WikiTxtDialogs.FilePasteParams()
 #             config = editor.presenter.getMainControl().getConfig()
         dlgParams.readOptionsFromConfig(
@@ -3223,7 +3223,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             if dlgParams is None:
                 # User abort
                 return
-            
+
             unifActionName = dlgParams.unifActionName
 
         move = False
@@ -3274,7 +3274,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         for fn in filenames:
             url = StringOps.urlFromPathname(fn)
-    
+
             if fn.endswith(u".wiki"):
                 urls.append(u"wiki:%s" % url)
             else:
@@ -3294,7 +3294,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 if modeRelativeUrl or toStorage:
                     # Relative rel: URL
                     url = editor.presenter.getMainControl().makeAbsPathRelUrl(fn)
-                    
+
                     if url is None:
                         url = u"file:" + StringOps.urlFromPathname(fn)
 
@@ -3330,15 +3330,15 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #         mouseBtnPressed = wxGetKeyState(WXK_LBUTTON) or \
 #                 wxGetKeyState(WXK_MBUTTON) or \
 #                 wxGetKeyState(WXK_RBUTTON)
-# 
+#
 #         ctrlPressed = wxGetKeyState(WXK_CONTROL)
-# 
+#
 #         if (not ctrlPressed) or mouseBtnPressed:
 #             self.SetCursor(WikiTxtCtrl.CURSOR_IBEAM)
 #             return False
 #         else:
 #             linkPos = self.PositionFromPoint(wxPoint(*self.ScreenToClientXY(*mousePos)))
-# 
+#
 #             if (self.isPositionInWikiWord(linkPos) or
 #                         self.isPositionInLink(linkPos)):
 #                 self.SetCursor(WikiTxtCtrl.CURSOR_HAND)
@@ -3367,7 +3367,7 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
 
         self.fobj = wx.FileDataObject()
         dataob.Add(self.fobj)
-        
+
         self.dataob = dataob
         self.SetDataObject(dataob)
 
@@ -3402,10 +3402,10 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
     def OnDropFiles(self, x, y, filenames):
         urls = []
 
-        # Necessary because key state may change during the loop                                
+        # Necessary because key state may change during the loop
         controlPressed = wx.GetKeyState(wx.WXK_CONTROL)
         shiftPressed = wx.GetKeyState(wx.WXK_SHIFT)
-        
+
         if isLinux():
             # On Linux, at least Ubuntu, fn may be a UTF-8 encoded unicode(!?)
             # string
@@ -3438,20 +3438,20 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
 # _ACTION_EDITOR_PASTE_FILES_ABSOLUTE = UserActionCoord.SimpleAction("",
 #         u"action/editor/this/paste/files/insert/url/absolute",
 #         WikiTxtCtrl.userActionPasteFiles)
-# 
+#
 # _ACTION_EDITOR_PASTE_FILES_RELATIVE = UserActionCoord.SimpleAction("",
 #         u"action/editor/this/paste/files/insert/url/relative",
 #         WikiTxtCtrl.userActionPasteFiles)
-# 
+#
 # _ACTION_EDITOR_PASTE_FILES_TOSTORAGE = UserActionCoord.SimpleAction("",
 #         u"action/editor/this/paste/files/insert/url/tostorage",
 #         WikiTxtCtrl.userActionPasteFiles)
-# 
+#
 # _ACTION_EDITOR_PASTE_FILES_ASK = UserActionCoord.SimpleAction("",
 #         u"action/editor/this/paste/files/insert/url/ask",
 #         WikiTxtCtrl.userActionPasteFiles)
-# 
-# 
+#
+#
 # _ACTIONS = (
 #         _ACTION_EDITOR_PASTE_FILES_ABSOLUTE, _ACTION_EDITOR_PASTE_FILES_RELATIVE,
 #         _ACTION_EDITOR_PASTE_FILES_TOSTORAGE, _ACTION_EDITOR_PASTE_FILES_ASK)

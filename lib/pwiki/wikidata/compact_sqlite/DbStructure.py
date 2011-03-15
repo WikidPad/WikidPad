@@ -898,6 +898,8 @@ def getSettingsInt(connwrap, key, default=None):
             (key,), default))
 
 
+
+
 def checkDatabaseFormat(connwrap):
     """
     Check the database format.
