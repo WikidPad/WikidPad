@@ -165,7 +165,7 @@ class WikiData:
         try:
             self._createTempTables()
 
-            # create word caches
+            # reset cache
             self.cachedContentNames = None
             self.cachedGlobalAttrs = None
             self.getGlobalAttributes()
@@ -195,10 +195,10 @@ class WikiData:
 
         # These schema changes are only on a temporary table so they are not
         # in DbStructure.py
-        self.connWrap.execSql("create temp table temppathfindparents "+
+        self.connWrap.execSql("create temp table temppathfindparents "
                 "(word text primary key, child text, steps integer)")
 
-        self.connWrap.execSql("create index temppathfindparents_steps "+
+        self.connWrap.execSql("create index temppathfindparents_steps "
                 "on temppathfindparents(steps)")
 
 
@@ -365,7 +365,6 @@ class WikiData:
                 self.connWrap.execSql("update wikiwordcontent set modified = ?, "
                         "created = ?, visited = ? where word = ?",
                         (moddate, creadate, visitdate, word))
-                self.commitNeeded = True
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -493,7 +492,6 @@ class WikiData:
         try:
             self.connWrap.execSql("update wikiwordcontent set metadataprocessed = ? "
                     "where word = ?", (state, word))
-            self.commitNeeded = True
         except (IOError, OSError, sqlite.Error), e:
             traceback.print_exc()
             raise DbWriteAccessError(e)
@@ -517,7 +515,6 @@ class WikiData:
         """
         self.connWrap.execSql("update wikiwordcontent set metadataprocessed = ?",
                 (state,))
-        self.commitNeeded = True
 
 
     _METADATASTATE_NUMCOPARE_TO_SQL = {"==": "=", ">=": "<=", "<=": ">=",

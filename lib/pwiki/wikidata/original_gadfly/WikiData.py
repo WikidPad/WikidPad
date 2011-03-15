@@ -432,12 +432,11 @@ class WikiData:
         """
         if word != self.wikiDocument.getWikiName():
             try:
-                self.connWrap.syncCommit()
+                self.commit()
                 try:
                     # don't delete the relations to the word since other
                     # pages still have valid outward links to this page.
                     # just delete the content
-    
                     self.deleteChildRelationships(word)
                     self.deleteAttributes(word)
                     self.deleteTodos(word)
