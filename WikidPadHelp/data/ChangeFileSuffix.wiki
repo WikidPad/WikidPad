@@ -1,8 +1,9 @@
-﻿++ Change File Suffix
+﻿[:page:PageHeader][:toc:]
++ Change File Suffix
 
 *USE THIS AT YOUR OWN RISK!!!*  *USE THIS AT YOUR OWN RISK!!!*
 
-Normally the page files in the "data" directory of a "Original Gadfly" or "Original Sqlite" wiki have the suffix ".wiki". You can change this if you really need to.
+Normally the page files in the [data directory] of a "Original Gadfly" or "Original Sqlite" wiki have the suffix ".wiki". You can change this if you really need to.
 
 Currently there is no support for automatic renaming of existing page files. If necessary, a script will be published to do that.
 
@@ -45,3 +46,6 @@ Then you should be able to open the wiki in WikidPad.
 Once again:
 
 *USE THIS AT YOUR OWN RISK!!!*  *USE THIS AT YOUR OWN RISK!!!*
+
+
+[:page:PageFooter]

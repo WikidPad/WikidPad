@@ -1,16 +1,17 @@
-﻿++ Wiki Maintenance
+﻿[:page:PageHeader][:toc:]
++ Wiki Maintenance
 
 ++ Rebuilding wiki
 
 In menu "Wiki"->"Maintenance"->"Rebuild Wiki".
 
-First you should know that a wiki in WikidPad contains some essential data (mainly the text of the wiki pages) and some cache data which is extracted from the essential data (list of children of a page, todos, attributes,...). Due to an error or some special operations (like adding or deleting page files from outside of WikidPad) it may happen that the cache information is deleted, invalid or not up-to-date anymore.
+First you should know that a wiki in WikidPad contains some essential data (mainly the text of the WikiPages) and some cache data which is extracted from the essential data (list of children of a page, todos, attributes,...). Due to an error or some special operations (like adding or deleting page files from outside of WikidPad) it may happen that the cache information is deleted, invalid or not up-to-date anymore.
 
 Rebuilding deletes and recreates all cache information
 
 This feature can also be used to add large numbers of pages to the wiki.  Copy ".wiki" wikiword files into the data directory, then "Rebuild Wiki" to rebuild the database to include these files. This does not work for "Compact Sqlite" database type (see MigrationBetweenDbTypes for details).
 
-[alias: RebuildTheWiki]
+[alias:RebuildTheWiki]
 
 
 ++ Update cache
@@ -20,7 +21,7 @@ This rebuilds only pages for which cache is marked as dirty in the database. If 
 
 ++ Initiate update
 
-Marks cache of all wiki pages in the database as dirty and starts updating it in the background (after performing some operations which should be done in the foreground in any case). Use this if you need a rebuild but don't want to wait until the rebuild is done.
+Marks cache of all WikiPages in the database as dirty and starts updating it in the background (after performing some operations which should be done in the foreground in any case). Use this if you need a rebuild but don't want to wait until the rebuild is done.
 
 
 ++ Show job count
@@ -57,9 +58,9 @@ If information is deleted from an Sqlite database, the occupied hard disk space 
 
 +++ Finding and connecting parentless nodes
 
-As you add and remove links from the various pages in your wiki database you may end up with unlinked, or parentless, nodes.  To view them use the "parentless-nodes" node in the "Views" subtree.
+As you add and remove links from various pages in your wiki database you may end up with unlinked, or parentless, nodes.  To view them use the "parentless-nodes" node in the "Views" subtree.
 
-Alternatively you can use menu "Navigate" -> "List Parentless Pages" or press Ctrl-Shift-Up
+Alternatively you can use the menu "Navigate" -> "List Parentless Pages" or press [Ctrl-Shift-Up].
 
 You can then decide if you need to relink these nodes, or if you want to delete them.
 
@@ -72,7 +73,7 @@ Sometimes words are unintentionally marked as wiki words. In this case you can e
 
     * Prefix the word with a backslash
     * Add the attribute \[camelCaseWordsEnabled: false] on a page
-    * Enter the word into one of the blacklists, see WordLinking!exclude_from_linking.
+    * Enter the word into one of the blacklists, see WikiWordLinking!exclude_from_linking.
 
 
-[icon: cog]
+[:page:PageFooter][icon:cog]

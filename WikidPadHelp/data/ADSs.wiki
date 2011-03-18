@@ -1,5 +1,9 @@
-﻿++ ADSs
+﻿[:page:PageHeader][:toc:]
++ ADSs
 
 *Alternate data streams* of a file or directory (in the NTFS file system) contain additional data about that file/directory, e.g. meta information (author, abstract, ...) or thumbnail images.
 
 Note: Mac users may know the "resource fork".
+
+
+[:page:PageFooter][short_hint:Alternate data streams]

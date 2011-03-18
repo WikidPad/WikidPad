@@ -1,0 +1,7 @@
+﻿[:page:PageHeader][:toc:]
++ Attribute Short Hint
+
+This is here just for demonstration.
+
+
+[:page:PageFooter][alias:"Short_Hint Attribute"][short_hint:Here should be written something interesting]

@@ -1,4 +1,5 @@
-﻿++ Footnotes
+﻿[:page:PageHeader][:toc:]
++ Footnotes
 
 Footnotes are numbers enclosed in brackets, e.g. [42].
 
@@ -20,3 +21,6 @@ You can try it with the [42] here or above. They all lead to the following ancho
 
 
 As always you can escape the footnote with a backslash: \[42].
+
+
+[:page:PageFooter]

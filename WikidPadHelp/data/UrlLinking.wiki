@@ -1,8 +1,8 @@
 ﻿++ Url Linking
 
-You may enter URLs to websites or local files into your document.  To
-open the link double click on it or press the Ctrl-L. If you drag a
-file from Windows explorer onto wikidPad a link will be created for
+You may enter URLs to websites or local files into your document. To
+open the link double click on it or press the [Ctrl-L]. If you drag a
+file from Windows explorer onto WikidPad a link will be created for
 you.
 
 Example:
@@ -26,7 +26,7 @@ Switch to preview to see the "Go somewhere" only. You can also use an image URL 
 ++ Relative URLs
 You can create URLs which are relative to the wiki directory. These start with rel:// followed by the relative position. For HTML export the rel:// is removed to create a relative HTML link (without protocol) which is adapted to new position. For HTML preview they are converted to "file:" URLs.
 
-You can drag a file from Windows Explorer while holding shift key to create a relative URL. This does not work with files ending with ".wiki", these are always absolute and have the "wiki:" protocol.
+You can drag a file from Windows Explorer while holding the [Shift] key down in order to create a relative URL. This does not work with files ending with ".wiki", these are always absolute and have the "wiki:" protocol.
 
 Example:
 

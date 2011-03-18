@@ -1,0 +1,9 @@
+﻿[:page:PageHeader][:toc:]
++ Wikid Pad Wiki Data Directory
+
+This refers to the directory where data of Your current Wiki is located.
+
+Note: by default, this is a sub directory of the [installation directory], and it has the same name as the Wiki.
+
+
+[:page:PageFooter][icon:folder][alias:Data Directory; Data directory; data directory][short_hint:The directory where the data files of Your current Wikid are]

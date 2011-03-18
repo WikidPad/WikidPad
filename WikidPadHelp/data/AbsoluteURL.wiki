@@ -1,0 +1,7 @@
+﻿[:page:PageHeader][:toc:]
++ Absolute URL
+
+todo: Add content
+
+
+[:page:PageFooter][alias:Absolute URL; absolute URL][short_hint:An URL with a fully specified, absolute path - not a relative path.]

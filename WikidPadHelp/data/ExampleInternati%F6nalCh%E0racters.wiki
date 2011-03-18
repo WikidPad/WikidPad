@@ -1,0 +1,20 @@
+﻿[:page: PageHeader][:toc:]
++ Example Internatiönal Chàracters
+
+Tests with international characters:
+
+    * ÄtTheBeginning
+    * AtTheEnð
+    * StuckÄtTheMiddle
+    * XxXxÖx.
+
+    * SšTtz
+
+zžtsš
+
+ŠSTŽZ
+
+ÓsÔsÖsÚsÜsÝ
+
+
+[:page:PageFooter][icon:spanner]

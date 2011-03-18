@@ -1,0 +1,118 @@
+﻿[:page:PageHeader][:toc:]
++ Wiki Pad Help Style Guide
+
+As the user base of WikidPad increases continously, we did a full refactoring of these pages.
+
+The objective of this page is to document and to explain the architecture and styles we have applied.
+
+++ Structure of any regular Page 
+
+Any regular page of this help wiki is build as follows:
+
+	* First Line: including the PageHeader and the (local) ToC
+	* Second Line: First Level Header-1 - using "+ 'WikiWord of WikiPage'"
+	* Third Line: empty line.
+	* body of the page
+	* Two blanc lines
+	* Last Line: including the PageFooter, followed by applicable WikiDocumentAttributes.
+
+++ The First Line
+
+Obviously, the single line \[:page:PageHeader]\[:toc:] on top serves two purposes:
+
++++ A general Navigation Table
+
+\[:page:PageHeader] allows for a table of important links to be offered anywhere,
+thus improving the already excellent navigation capabilities of WikidPad.
+
+And such can be removed or adjusted in one central place, if needed.
+You may even empty the content of PageHeader in order to make it's effect invisible.
+
++++ An OverView of the HeadLines
+
+Using \[:toc:] gives a comprehensive overview of all headers defined in the page,
+and should allow easy navigation especially in lengthy pages without any need to
+use the PageStructureWindow
+
++++ Beware exported results!
+
+So far, any such navigation aid can also be accomplished by means build into WikidPad.
+Alas: if You export a WiKi e.g. to [HTML pages], all these build in functionalities are
+not available any more.   
+
+++ The Last Line
+
+Intentionally, all relevant attributes are kept in the last line. 
+
+Somtimes, this line may not be easy to read -on first glance. 
+
+Alas: keeping the attributes together with the PageFooter allows for global SearchingTheWiki 
+thereby keeping complete control of what-is-used-where. 
+
+We believe, gives an important advantage for the ongoing maintenance of the pages.
+
+++ Applicable WikiDocumentAttributes
+
+Following WikiDocumentAttributes are used in the last line, and preferably in the following order:
+
++++ icon:
+
+++++ Grouping Icons
+
++++++ icon: list
+
++++++ icon: left-right
+[Icon left-right] is used for the pages regarding the [Menus]
+
++++++ icon: spanner
+[Icon spanner] is used for Example Pages such as ExampleInsertions.
+
+++++ Special Purpose Icons
+
++++++ icon: cog
+[Icon cog], which is also used by WikidPad for the [Func. pages] in the [Tree View]
+is used for the page abut WikiMaintenance.
+
++++++ icon: disk
+[Icon disk] is used for the page about AutoSave.
+
++++++ icon: folder
+[Icon folder] is used for the pages related to directories such as about 
+the [installation directory] or the [data directory].
+
++++++ icon: console
+[Icon console] is used for the page about CommandLineSupport.
+
++++++ icon: lens
+[Icon lens] is used for the pages IncrementalSearch and SearchingTheWiki.
+
++++++ icon: pin
+[Icon pin] is used for the page about TodoItems.
+
++++++ icon: rename
+[Icon rename] is used for the page about RenamingWikiWords.
+
++++++ icon: question
+[Icon question] is used for the page about WhereIsTheDataStored.
+
+
++++ alias:
+
++++ short_hint:
+
++++ camelCaseWordsEnabled: false
+
++++ child_sort_order: natural
+
++++ bookmarked: true
+
++++ tree_position:
+
+
+++ Naming Conventions for WikiPages
+
+
+++ Exceptions
+
+
+[:page:PageFooter]

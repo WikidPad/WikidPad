@@ -1,56 +1,64 @@
-﻿++ Wiki Export
+﻿[:page:PageHeader][:toc:]
++ Wiki Export
 
-You can export your wiki as a single html page, a set of html
-pages, one wiki word page at a time, or in [Multipage text format].
+The WikiDialog "Export" can be reached by the ["Export..." menu item] in the ["Extra" Menu].
+
+This dialog is organized similar to the ["Import" dialog].
+
+You can export your wiki as a single [HTML page], a as a set of [HTML pages],
+one WikiWordPage at a time, or in [Multipage text format].
 
 You can select a few predefined operations from the "Wiki" menu:
 
-Publish as HTML / Wiki As Single Html Page
-Publish as HTML / Wiki As Set of Html Pages
-Publish as HTML / Current Wiki Word As Html Page
+	* Publish as HTML / Wiki As Single [HTML Page]
+	* Publish as HTML / Wiki As Set of [HTML Pages]
+	* Publish as HTML / Current WikiWord As [HTML Page]
 
 
 Or you can use Publish as HTML / Other Export to show a dialog to choose other settings:
 
-*What to export*
+++ Export options
+
++++ What to export
 Choose if you want to export current page only, the current page and all sub-pages (children, grandchildren...), the whole wiki or use "Custom..." to open the [SearchingTheWiki#To search all pages: Full search|full search].
 
-*Compatible filenames*
++++ Compatible filenames
 Uses ASCII-only filenames for exported files so that they can be transferred to other filesystems without compatibility issues. On Windows XP and Server 2003 the AppLocale utility (see http://www.microsoft.com/globaldev/tools/apploc.mspx ) might also help on export problems.
 
-*Export to*
-You can export a single HTML page, one HTML page for each wiki page, a [Multipage text format] file or a set of .wiki files (mainly interesting for Compact version to migrate to original).
++++ Export to
+You can export a single [HTML page], one [HTML page] for each WikiPage, a [Multipage text format] file or a set of .wiki files (mainly interesting for Compact version to migrate to original).
 
-*Destination file/directory*
++++ Destination file/directory
 Here you can set where the exported file(s) should be stored. If file or directory is needed depends on the type given in "Export to". For XML and multipage text it is a single file, for other types it is a directory (because multiple files must be written).
 
 
-When exporting as HTML all files in the file storage which are referenced by a relative URL (URL beginning with "rel://") in the exported pages are copied to a "files" directory in the destination directory. This does also apply to files in subdirectories of the "files" directory.
+When exporting as HTML all files in the FileStorage which are referenced by a RelativeURL (URL beginning with "rel://") in the exported pages are copied to a "files" directory in the destination directory. This does also apply to files in subdirectories of the "files" directory.
 
 
-*Saved exports*
++++ Saved exports
 You can store your current export settings and retrieve them later to do the same export job repeatedly.
 
-*Save Export*
++++ Save Export
 Asks for a name for the current settings and saves it.
 
-*Delete Export(s)*
++++ Delete Export(s)
 Deletes one or more selected export(s) after confirmation.
 
-*Load Export*
++++ Load Export
 Loads export which is currently selected in list. Your previous settings made in the dialog are overwritten.
 
-*Load and Run Export*
++++ Load and Run Export
 Same as first hitting "Load Export" then "OK" to start the export. Double-clicking on a saved export in the list does the same.
 
 
 
-+++ Additional options for HTML exports
+++ Additional options for HTML exports
+
 For the HTML exports you can choose if you want to:
     * export URLs to images as \<img> tags or as normal links
     * create a table of contents either as a tree or as a list.
-      For a single HTML page, the TOC is at the beginning of the
-      page, for a set of HTML pages, it is a separate
+      For a single [HTML page], the TOC is at the beginning of the
+      page, for a set of [HTML pages], it is a separate
       "index.html" file.
       Using "As tree" is recommended when exporting the whole or
       nearly the whole wiki, "As list" is better for small subsets
@@ -59,28 +67,28 @@ For the HTML exports you can choose if you want to:
 The defaults for these options can be set in the options dialog.
 
 
-+++ Additional options for .wiki file exports
+++ Additional options for .wiki file exports
 For the .wiki export you can choose if the files should have system encoding or UTF-8 with or without BOM (byte-order mark). The import function of Compact can't recognize UTF-8 without BOM correctly.
 
 
-+++ Additional options for multipage text format
+++ Additional options for multipage text format
 
-*Version*
++++ Version
 Choose which version the file should have. If you use version 1 it can be read only by WikidPad 1.9beta6 and later. Version 0 can also be read by earlier versions but looses information.
 
-*Write version data of pages*
-Export also previous versions of the wiki pages you export. Only available for format version 1 and later.
++++ Write version data of pages
+Export also previous versions of the WikiPages you export. Only available for format version 1 and later.
 
-*Write wiki func. pages*
++++ Write wiki func. pages
 Export also wiki-bound functional pages in the file. Only available for format version 1 and later.
 
-*Write saved searches*
++++ Write saved searches
 Export also saved searches in the file. Only available for format version 1 and later.
 
 
-+++ Continuous export
+++ Continuous export
 
-In menu "Extra" you can also choose "Continuous Export" which allows to start an export operation which is repeated automatically each time a page previously designated for export is modified.
+In [Extra Menu] you can also choose "Continuous Export" which allows to start an export operation which is repeated automatically each time a page previously designated for export is modified.
 
 The dialog for continuous export is the same as for normal export, but some export types are missing as currently only the HTML export types support continuous export. Also some of the saved exports are hidden if they refer to exports not supported by continuous export.
 
@@ -88,10 +96,12 @@ After you made your choices what and where to export and pressed "OK", WikidPad 
 
 If you choose the menu item "Continuous Export" again (which has now a checkmark), the continuous export function is switched off again. It is also automatically deactivated if WikidPad is closed or another wiki is opened in the same window.
 
-A few drawbacks to mention:
+A few drawbacks worth to mention:
 
     1. Changes on a page that affect other pages (e.g. adding/removing attribute "\[global.camelCaseWordsEnabled: false]") will not change the already exported pages until they are re-exported.
     2. The set of pages to export will be static under some circumstances. Especially if you start auto-export for all children of one or more pages, it will only export pages which were children when auto-export started regardless if new children are added later.
     3. If you export as a single HTML file, the whole HTML file must be recreated on each change so it is only recommended if you export a few small pages.
     4. If temporary (volatile) files must be created (e.g. generated from MimeTeX or GraphViz) there may be created new ones again and again on each change of a page filling up the "volatile" directory. Therefore it is recommended to make a final non-continuous export to clean up the garbage.
 
+
+[:page:PageFooter][alias:'"Export" dialog']

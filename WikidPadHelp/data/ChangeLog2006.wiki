@@ -1,17 +1,20 @@
-﻿++ Change Log2006
+﻿[:page:PageHeader][:toc:]
++ Change Log2006
 
-Dec. 27, 2006 (1.8beta6, repository revision in "mbutscher" branch: 100)
+++ Dec. 27, 2006: 1.8beta6
 
-    * "toc" insertion for a page-wide table of contents (with
+RepositoryRevision in "mbutscher" branch: *100*
+
+    * insertion ":toc:" for a page-wide table of contents (with
       appropriate settings in the CSS-file(s)). See [Insertions].
     * "noerror" appendix for insertions for external graphical apps
       (except MimeTeX) to ignore warning/error messages.
       See ExternalGraphicalApplications.
     * For Windows: Option to use Internet Explorer or
-      (with restrictions) Mozilla to render HTML preview
+      (with restrictions) Mozilla to render [HTML preview]
       (including a new style sheet to control preview).
       See [Options HTML preview_export]#*Preview# renderer*
-    * Option to set doctype for HTML preview/export.
+    * Option to set doctype for [HTML preview]/[HTML export].
     * Option to set background color of selected text.
     * Internal: Slightly better handling of databases without
       write access.
@@ -21,7 +24,9 @@ Dec. 27, 2006 (1.8beta6, repository revision in "mbutscher" branch: 100)
 
 
 
-Nov. 24, 2006 (1.8beta5, repository revision in "mbutscher" branch: 99)
+++ Nov. 24, 2006: 1.8beta5
+
+RepositoryRevision in "mbutscher" branch: *99*
 
     * Changed insertion syntax where value or appendices can
       be quoted to include arbitrary characters. See [Insertions].
@@ -30,8 +35,8 @@ Nov. 24, 2006 (1.8beta5, repository revision in "mbutscher" branch: 99)
       See [ExternalGraphicalApplications].
     
     * Tags to mark text as suppressed (<< >>) are no longer shown
-      in HTML preview/export
-    * "Wiki Info" dialog to show some basic information about the
+      in [HTML preview]/[HTML export]
+    * [Wiki Info] dialog to show some basic information about the
       current wiki. Rather empty at the moment.
     * New behavior and look of incremental search. May change again
       if users don't like it.
@@ -49,7 +54,9 @@ Nov. 24, 2006 (1.8beta5, repository revision in "mbutscher" branch: 99)
 
 
 
-Oct. 30, 2006 (1.8beta4, repository revision in "mbutscher" branch: 96)
+++ Oct. 30, 2006: 1.8beta4
+
+RepositoryRevision in "mbutscher" branch: *96*
 
     * Menu items and toolbar icons for zoom in/out also work for
       preview now.
@@ -62,14 +69,16 @@ Oct. 30, 2006 (1.8beta4, repository revision in "mbutscher" branch: 96)
 
 
 
-Oct. 26, 2006 (1.8beta3, repository revision in "mbutscher" branch: 95)
+++ Oct. 26, 2006: 1.8beta3
+
+RepositoryRevision in "mbutscher" branch: *95*
 
     * List undefined pages (dead wiki links), also appropriate
       insertion added. See WikiMaintenance!finding_undefined_links,
       [Insertions]
     * Better alphabetical sort order for wiki words, todos,
       attributes in tree. See OptionsDialog#*Sort# order*
-    * The order how wiki pages are ordered when printing or
+    * The order how WikiPages are ordered when printing or
       exporting the whole wiki or a subtree to a single HTML page
       is (hopefully) more logical. It is the same as the new
       "As Tree" order used in PageListDialog#"As# Tree" .
@@ -89,12 +98,13 @@ Oct. 26, 2006 (1.8beta3, repository revision in "mbutscher" branch: 95)
 
 
 
-Sep. 30, 2006 (1.8beta2, repository revision in "mbutscher" branch: 92)
+++ Sep. 30, 2006: 1.8beta2
+
+RepositoryRevision in "mbutscher" branch: *92*
 
     * Support for insertion of pages, relations (parents, children,
       ...) and saved searches. See [Insertions].
-    * Support for placing and jumping to anchors in wiki pages.
-      See [Anchors].
+    * Support for placing and jumping to [Anchors] in [WikiPages].
     
     * Setting of a few more shortcut keys possible in
       KeyBindings.py (continue search, auto complete, ...)
@@ -104,12 +114,14 @@ Sep. 30, 2006 (1.8beta2, repository revision in "mbutscher" branch: 92)
     * Fixed bug: Renaming of wiki word failed if link modification
       was wanted by the user or if page was not yet saved the
       first time.
-    * Fixed bug: Opening a wiki page file instead of
+    * Fixed bug: Opening a WikiPage file instead of
       wiki configuration file failed.
 
 
 
-Aug. 30, 2006 (1.8beta1, repository revision in "mbutscher" branch: 89)
+++ Aug. 30, 2006: 1.8beta1
+
+RepositoryRevision in "mbutscher" branch: *89*
 
 Changes:
     * New database format! After updating a wiki it won't be
@@ -127,7 +139,7 @@ Changes:
     * Possibility to set size and alignment for image URLs.
       See UrlLinking#++# URL# Appendix
     * Functional pages for "camelcase blacklist". Words on this
-      list are not shown as wiki links. See WordLinking
+      list are not shown as wiki links. See WikiWordLinking
     * Option to automatically remove bullets and numbers which
       stand "lonely" on a line by pressing enter.
       See BulletedLists
@@ -140,13 +152,15 @@ Changes:
     * Bug fixed: Wiki word aliases not shown as links on
       HTML export.
     * Bug fixed: Wrong URL creation mode when releasing/pressing
-      SHIFT or CTRL during drag&drop operation.
+      [Shift] or [Ctrl] during drag&drop operation.
     * Better handling of non Western-European languages on
       Win 98/ME
 
 
 
-Aug. 05, 2006 (1.7beta8, repository revision in "mbutscher" branch: 85)
+++ Aug. 05, 2006: 1.7beta8
+
+RepositoryRevision in "mbutscher" branch: *85*
 
 Changes:
     * Official support for multiple windows with same wiki in
@@ -167,7 +181,9 @@ Changes:
 
 
 
-Jul. 10, 2006 (1.7beta7, repository revision in "mbutscher" branch: 83)
+++ Jul. 10, 2006: 1.7beta7
+
+RepositoryRevision in "mbutscher" branch: *83*
 
 Changes:
     * "Fast search" text field in toolbar. See SearchingTheWiki
@@ -185,7 +201,7 @@ Changes:
     * Menus slightly reorganized, some menu items are at other
       places and/or have another name.
     * Wiki specific option to set page title prefix
-      (normally "++") for new wiki pages. This allows to freely
+      (normally "++") for new WikiPages. This allows to freely
       choose the heading level.
       See OptionsDialog#*New# page# title# prefix*
     * Possibility to add (absolute) URL with file dialog (menu
@@ -210,7 +226,9 @@ Changes:
 
 
 
-Jun. 02, 2006 (1.7beta6, repository revision in "mbutscher" branch: 80)
+++ Jun. 02, 2006: 1.7beta6
+
+RepositoryRevision in "mbutscher" branch: *80*
 
 Changes:
     * Support for an additional "Views" tree which can be put at any
@@ -244,17 +262,19 @@ Changes:
 
 
 
-May 08, 2006 (1.7beta5, repository revision in "mbutscher" branch: 77)
+++ May 08, 2006: 1.7beta5
+
+RepositoryRevision in "mbutscher" branch: *77*
 
 Changes:
 
     * Clipboard catcher (Windows only): Every piece of text added to
-      the clipboard is also appended to a wiki page if the clipboard
+      the clipboard is also appended to a WikiPage if the clipboard
       catcher is active. There is also an option to set some suffix
       after each caught piece of text from clipboard (by default, a
       newline is added). See ClipboardCatcher.
-    * File storage introduced: Copy files into a subdirectory of the
-      wiki within WikidPad. See FileStorage.
+    * [File storage] introduced: Copy files into a subdirectory of the
+      wiki within WikidPad.
 
     * Options to choose text colors for editor. See
       OptionsDialog#*Plain# text# color* and following.
@@ -265,7 +285,7 @@ Changes:
 
     * If a wiki word node is clicked which is subnode of an attribute
       node, the particular attribute is selected as it worked already
-      for todo items.
+      for TodoItems.
 
     * New menu item to hide/show toolbar.
     * New menu item to keep window always on top.
@@ -274,14 +294,14 @@ Changes:
     * Simpler function for some standard dialogs for scripts.
       See [ApiDocs]#stdDialog
 
-    * Changed method to find configuration directory, more suitable
+    * Changed method to find [configuration directory], more suitable
       for WikidPad on USB-stick and more reliable. See WikidPadOnUSB
       and ApplicationConfigurationFiles.
 
 
 Bugs fixed:
 
-    * Todo item part shows up twice in tree with same content if part
+    * TodoItem part shows up twice in tree with same content if part
       is also right side of a todo entry. Now shows up only once.
     * Wrong cursor position after using bold or italic from
       menu/toolbar
@@ -295,7 +315,9 @@ Bugs fixed:
 
 
 
-Apr. 21, 2006 (1.7beta4, repository revision in "mbutscher" branch: 74)
+++ Apr. 21, 2006: 1.7beta4
+
+RepositoryRevision in "mbutscher" branch: *74*
 
 Changes:
 
@@ -304,9 +326,9 @@ Changes:
       a character as last one in an URL, enclose the URL in brackets.
     * Attribute names can consist of all alphanumeric
       (unicode definition) characters.
-    * Support for zoom in preview (with Ctrl-+, Ctrl-- and
-      Ctrl-Mousewheel).
-    * Better formatting of titles of newly created wiki pages
+    * Support for zoom in preview (with [Ctrl-+], [Ctrl--] and
+      [Ctrl-Mousewheel]).
+    * Better formatting of titles of newly created WikiPages
       (e.g. wikiword "URLViewer" now leads to title "++ URL Viewer"
       instead of "++ URLV iewer"
 
@@ -322,7 +344,9 @@ Changes:
 
 
 
-Apr. 16, 2006 (1.7beta3, repository revision in "mbutscher" branch: 73)
+++ Apr. 16, 2006: 1.7beta3
+
+RepositoryRevision in "mbutscher" branch: *73*
 
 Changes:
 
@@ -335,7 +359,7 @@ Changes:
       own "Log Window" for error messages, see [WikiDocumentAttributes].
     
     * Support for spell checking, see [SpellChecking].
-    * Todo items can now be terminated with newline or |
+    * TodoItems can now be terminated with newline or |
     * On multiple attributes of same name on one page (e.g.
       multiple "icon" attributes) the last one is now preferred
       instead of the first one.
@@ -355,7 +379,9 @@ Changes:
 
 
 
-Mar. 24, 2006 (1.7beta2, repository revision in "mbutscher" branch: 70)
+++ Mar. 24, 2006: 1.7beta2
+
+RepositoryRevision in "mbutscher" branch: *70*
 
 Changes:
     * Importer/Exporter for new multipage text format (mpt).
@@ -369,7 +395,7 @@ Changes:
 
     * Introduced <\<pre >>  block to create preformatted,
       monospaced text
-    * Todo items (e.g. "\todo:", "\track:") can start after
+    * TodoItems (e.g. "\todo:", "\track:") can start after
       arbitrary text now, not only at the beginning of a line.
       This is currently experimental! It might be changed back
       if user have problems with this (see [TodoItems]).
@@ -379,14 +405,16 @@ Changes:
     * Support for changing of file suffix of page files in the
       config file (not part of options GUI) (see [ChangeFileSuffix])
     * Uses now also environment variable "USERPROFILE" to find
-      configuration directory
+      the [configuration directory].
 
     * Bug fixed: page-wide "Replace All" could run in an endless
       loop (e.g. when replacing "e" by "ee").
 
 
 
-Mar. 09, 2006 (1.7beta1, repository revision in "mbutscher" branch: 63)
+++ Mar. 09, 2006: 1.7beta1
+
+RepositoryRevision in "mbutscher" branch: *63*
 
 *Warning*: This version has a new database format for
 "Compact Sqlite" databases. It is converted automatically
@@ -396,8 +424,8 @@ is therefore recommended!
 Changes:
     * Introduced new db backend "Original Sqlite".
       See [WhereIsTheDataStored] and [MigrationBetweenDbTypes].
-    * For "Set Date Format" dialog last 10 entries are remembered
-    * Option to interpret image URLs for HTML preview and export
+    * For [Set Date Format] dialog last 10 entries are remembered
+    * Option to interpret image URLs for [HTML preview] and [HTML export]
       either as images or as normal links (see [OptionsDialog])
     * Export dialog has checkbox to temporarily override this option
       setting.
@@ -424,7 +452,9 @@ Fixed bugs:
 
 
 
-Feb. 24, 2006 (1.6beta4, repository revision in "mbutscher" branch: 60)
+++ Feb. 24, 2006: 1.6beta4
+
+RepositoryRevision in "mbutscher" branch: *60*
 
 Changes:
     * Commandline support for exporting (parts of) a wiki and
@@ -438,7 +468,7 @@ Changes:
       "functional pages", located under Views in tree
     * Editor font now changes instantly after saving page
     * Now at most one script is executed when pressing
-      Ctrl-Number (search order: local page, imported scripts,
+      [Ctrl-Number] (search order: local page, imported scripts,
       global imported scripts page)
 
     * Better handling of property "camelCaseWordsEnabled" during
@@ -458,7 +488,9 @@ Fixed bugs:
 
 
 
-Feb. 09, 2006 (1.6beta3, repository revision in "mbutscher" branch: 57)
+++ Feb. 09, 2006: 1.6beta3
+
+RepositoryRevision in "mbutscher" branch: *57*
 
 Changes:
     * 'global.import_scripts' property introduced (see
@@ -483,9 +515,9 @@ Changes:
       now only needs to contain the  definitions which are
       different compared to the file in "extensions"
 
-    * In configuration directory, a directory ".WikidPadGlobals"
-      will be created if not existing
-    * In ".WikidPadGlobals" a file "[TextBlocks].wiki" will be
+    * In [configuration directory], subdirectory ".WikidPadGlobals"
+      will be created if it does not exist yet.
+    * In ".WikidPadGlobals" a file "TextBlocks.wiki" will be
       created if not existing. This file describes content of
       the "Editor"->"Text blocks" submenu and can be customized
       (see [TextBlocks]).
@@ -495,7 +527,9 @@ Changes:
 
 
 
-Jan. 25, 2006 (1.6beta2, repository revision in "mbutscher" branch: 55)
+++ Jan. 25, 2006: 1.6beta2
+
+RepositoryRevision in "mbutscher" branch: *55*
 
 *Warning*: This version has a new database format. It is converted
 automatically when opening a wiki the first time. Making a backup
@@ -516,7 +550,9 @@ Changes:
 
 
 
-Jan. 13, 2006 (1.6beta1, repository revision in "mbutscher" branch: 53)
+++ Jan. 13, 2006: 1.6beta1
+
+RepositoryRevision in "mbutscher" branch: *53*
 
 Changes:
     * WikidPad and WikidPadCompact merged into one application
@@ -536,3 +572,6 @@ Changes:
 
     * Bug fixed: non camel-case words starting with camel-case word
       (e.g. [WikiWord with something]) incorrectly recognized in tree
+
+
+[:page:PageFooter]

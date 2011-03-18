@@ -1,0 +1,9 @@
+﻿[:page:PageHeader][:toc:]
++ Wikid Pad Install Directory
+
+This refers to the directory where Your installed Your WikidPad application.
+
+Note: Under MS-Windows, this install directory is file:///C|/Program%20Files/WikidPad by default.
+
+
+[:page:PageFooter][icon:folder][alias:Install Directory; install directory; installation directory][short_hint:The directory where Your WikidPad is installed]

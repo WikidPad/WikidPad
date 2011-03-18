@@ -1,15 +1,20 @@
-﻿++ Wiki Syntax
+﻿[:page:PageHeader][:toc:]
++ Wiki Syntax
 
 *(This page is outdated and needs rewrite)*
 
+todo: Write content
 
 The syntax of this wiki is customizable. Use:
 
 file:///C|/Program%20Files/WikidPad/extensions/WikiSyntax.py
 file:///C|/Program%20Files/WikidPad/user_extensions/WikiSyntax.py
 
-as the template.  Copy this file into a directory in the wikidPad
-install directory called "user_extensions". This file will not be
-touched when upgrading wikidPad.
+as the template.  Copy this file into a directory below the WikidPad
+[installation directory] called "user_extensions". This file will not be
+touched when You [upgrade WikidPad].
 
-The syntax is based on a set of regular expressions.
+The syntax is based on a set of [regular expressions].
+
+
+[:page:PageFooter]

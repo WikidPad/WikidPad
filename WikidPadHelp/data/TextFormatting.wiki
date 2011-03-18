@@ -1,16 +1,27 @@
-﻿++ Text Formatting
+﻿[:page:PageHeader][:toc:]
++ Text Formatting
 
 As you type you can enter formatting commands in plain text.
 
+++ WikiMarkUp
+
 *bold*
 _italic_
+
+
+++ WikiHeaders
+
 + Heading1
 ++ Heading2
 +++ Heading3
 ++++ Heading4
++++++ Heading5
+
+
+++ TextWrap
 
 When you type in a really really really really really really really really really really really really
-long line you can tell wikidPad to rewrap it for you by pressing Ctrl-W. Try it on this line.
+long line you can tell WikidPad to rewrap it for you by pressing [Ctrl-W]. Try it on this line.
 
 You can even change the wrap position by adding a wrap attribute to your document.
 [wrap: 20]
@@ -19,12 +30,18 @@ Changes the wrapping on this page to 20.
 [global.wrap: 70]
 changes the global wrap position to 70.
 
-For creating bulleted or numbered lists, see BulletedLists.
+++ WikiLists
 
+See BulletedLists on how You can easily create bulleted or numbered lists.
 
-+++ Escaping Formatting
+++ WikiTables
 
-++++ Escaping markup
+For creating bulleted or numbered lists, 
+see WikiTables on how You can easily  .
+
+++ Escaping Formatting
+
++++ Escaping markup
 To create a section of text with no formatting, wrap that section 
 in a "\<< >>" block. Example:
 
@@ -42,7 +59,7 @@ You can also use this on a single line <<like here>>. Inside the markup no newli
 
 Before and after the begin and end tags only whitespaces are allowed on the same line, so a << in the text does not prevent ALink from being highlighted.
 
-++++ Preformatted blocks
++++ Preformatted blocks
 
 You can use \<<\pre and >> to enclose blocks which have no special formatting (wiki words, italics) as the default escaping blocks but are shown in HTML as monospaced blocks and have exactly the same formatting as written in the source text.
 
@@ -63,7 +80,7 @@ Example:
 >>
 
 
-++++ Hidden markup
++++ Hidden markup
 
 Hidden markups are not published to HTML or shown in preview but are otherwise fully processed by WikidPad so you can enclose comments in it as well as attributes or todos which show up in tree.
 
@@ -74,13 +91,14 @@ You only see this in editor
 >>
 
 
-++++ Escaping characters
-To escape single characters, prepend them with a backslash. These characters are then interpreted as normal text, the backslash is suppressed in HTML preview and export. If you want to really write a backslash, write two of them: \\.
++++ Escaping characters
+
+To escape single characters, prepend them with a backslash. These characters are then interpreted as normal text, the backslash is suppressed in [HTML preview] and [HTML export]. If you want to really write a backslash, write two of them: \\.
 
 With this, you can write \[brackets] or \*asterisks\* which are not seen as formatting commands by \WikidPad.
 
 
-+++ Tables
+++ Tables
 
 A table is enclosed in <<| and >> tags which must be alone on a line as for format escaping tags.
 Each line with text is a table row, cells are separated by |. A table cell can contain wiki word links, bold and italic text. Tables show up properly only in preview mode.
@@ -105,7 +123,9 @@ with two	rows and	three columns delimited by tabs (not |) and \
 
 
 anchor: html
-+++ HTML tags and entities
+++ HTML tags and entities
+
 You can also use <b>HTML tags</b> and &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entities in WikidPad. Use preview to show the effect of them.
 
 
+[:page:PageFooter]

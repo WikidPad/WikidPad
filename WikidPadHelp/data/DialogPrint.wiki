@@ -1,0 +1,7 @@
+﻿[:page:PageHeader][:toc:]
++ Dialog Print
+
+todo: Add content
+
+
+[:page:PageFooter][alias:print dialog]

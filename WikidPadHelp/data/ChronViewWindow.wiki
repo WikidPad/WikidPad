@@ -1,11 +1,12 @@
-﻿++ Chronological View Window
+﻿[:page:PageHeader][:toc:]
++ Chronological View Window
 
-The chron. view window presents pages related to a particular date, ordered by time and a list of versions of a particular wiki page. "Related" can mean different things, mainly date of last modification or of creation (currently only last modification is implemented).
+The chron. view window presents pages related to a particular date, ordered by time and a list of versions of a particular WikiPage. "Related" can mean different things, mainly date of last modification or of creation (currently only last modification is implemented).
 
 The chron. view is far away from complete, so the look and behavior described here may change in the future.
 
 
-+++ The Timeline
+++ The Timeline
 
 The currently only way to present the modification date of pages is the timeline which is a list of dates, each date with a background color representing the number of pages related to that date (white for zero and going darker for more pages). When moving over a date with related pages with the mouse, a little window with a list of the pages appears.
 
@@ -14,17 +15,18 @@ You can then move into the window and click on one of the page names with the le
 To let the timeline show another date range you can currently only click twice (not doubleclick) on an arbitrary date and enter a new one (similar to renaming files in Windows Explorer). After that the whole timeline refreshes according to your entry.
 
 
-+++ Versions
+++ Versions
 
-The versions tab lists all versions stored for the currently active wiki page. Double-clicking on one of the versions shows it in the current editor or preview window. These versions are read-only and can't be modifed (except "<Current>"). Attributes are always taken from the current page state, so if e.g. the current page has "font" attribute "Verdana" then all previous versions will be shown in this font regardless if the attribute was there already.
+The [versions tab] lists all versions stored for the currently active WikiPage. Double-clicking on one of the versions shows it in the current editor or preview window. These versions are read-only and can't be modifed (except "<Current>"). Attributes are always taken from the current page state, so if e.g. the current page has "font" attribute "Verdana" then all previous versions will be shown in this font regardless if the attribute was there already.
 
 To go back to the current state of the page, double click on "<Current>", the last element in versions list.
 
-To create a new version from current state of page, choose "Add version" from either the right-click menu of the versions panel or from main menu "Wiki Page".
+To create a [new version] from current state of a WikiPage, choose [Add version] from either the right-click menu of the [versions control] or from the [menu Wiki Page].
 
-To delete a version, either hit DEL key after selecting the version or right-click on the versions panel and choose "Delete version". At the moment you can only delete the oldest version (top of the list) or the newest version (one above "<Current>"), no versions in-between.
+To delete a version, either hit DEL key after selecting the version or right-click on the [versions control] and choose [Delete version]. At the moment you can only delete the oldest version (top of the list) or the newest version (one above "<Current>"), no versions in-between.
 
-++++ Compare differences
+
++++ Compare differences
 
 You can also create an "inline diff" to compare two versions. The inline diff shows the changes done from one version to another as
 
@@ -37,8 +39,11 @@ First double click on the version you want to have as "to" version in the "versi
 In the diff view the versions tab works differently. Double clicking on a version changes the diff to compare the last version before the double clicked one with the double clicked one. So you can compare step by step which changes were made from one version to the next. The context menu of the version tab also allows to explicitly set the version to compare from or to compare to.
 
 
+++ Options
+
+See 
+	* [OptionsDialog#+++ Chronological view|Chronological view] and 
+	* [OptionsDialog#+++ Versioning Data|Versioning]
 
 
-+++ Options
-
-See [OptionsDialog#++++ Chron. view] and [OptionsDialog#++++ Versioning]
+[:page:PageFooter]

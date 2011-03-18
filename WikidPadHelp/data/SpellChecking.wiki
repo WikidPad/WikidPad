@@ -1,4 +1,5 @@
-﻿++ Spell Checking
+﻿[:page:PageHeader][:toc:]
++ Spell Checking
 
 If you have installed the spell check add-on (for Windows binary distribution) or the pyEnchant library (for source distribution) you can run a spell check for a page or the whole wiki.
 
@@ -48,7 +49,7 @@ the page must be saved then to bring the attribute into effect.
 
 ++ What is a word?
 
-Spell checking requires at first to find the words in the content. The regular expression used to find words is located in the "WikidPadParser.py" file (in the directory "extensions\\wikidPadParser" or "user_extensions", see [WikiSyntax]) and looks about like:
+Spell checking requires at first to find the words in the content. The RegularExpression used to find words is located in the "WikidPadParser.py" file (in the directory "extensions\\WikidPadParser" or "user_extensions", see [WikiSyntax]) and looks about like:
 
 <<pre
 TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlRE.pattern + u"|" +
@@ -57,10 +58,9 @@ TextWordRE = re.compile(ur"(?P<negative>[0-9]+|"+ UrlRE.pattern + u"|" +
 >>
 
 
-If you have some experience with regular expressions, you can change it. 
+If you have some experience with [regular expressions], you can change it. 
 
-The expression contains a named group "negative". If something matches one of the entries in this group (joined with '|'), this is *not* interpreted as word (by default numbers, URLs and camel-case wiki words). This allows to ignore unwanted patterns.
-
+The regular expression contains a named group "negative". If something matches one of the entries in this group (joined with '|'), this is *not* interpreted as word (by default numbers, URLs and camel-case wiki words). This allows to ignore unwanted patterns.
 
 
 ++ The spell check dialog
@@ -73,49 +73,52 @@ You have now the possibility to correct the error in the "Replace with" field or
 
 The available buttons have the following meanings:
 
-*Ignore*
++++++ Ignore
 Ignore this error and find the next one.
 
-*Ignore All*
++++++ Ignore All
 Ignore this error and if a word with exactly the same spelling (including case) is found later again, ignore this too.
 
-*Replace*
++++++ Replace
 Replace the error with the text entered in "Replace with".
 
-*Replace All*
++++++ Replace All
 Replace the error and if a word with exactly the same spelling (including case) is found later again, correct it in the same way.
 
-*Add Globally*
++++++ Add Globally
 Add the found word to the permanent application-wide list of words to ignore.
 
-*Add Locally*
++++++ Add Locally
 Add the found word to the permanent wiki-wide list of words to ignore.
 
-*Done*
++++++ Done
 Close dialog.
 
 
-*Checkbox 'Go to next page'*
++++++ Checkbox 'Go to next page'
 If the spell checker reaches the end of the current page and this check box is checked, it goes on to the "next" page. "Next" means here the following wiki word in alphabetical order (case sensitive), so the spell checking might jump around in the tree on the left.
 
 
-+++ Remarks
+++ Remarks
     * The lists maintained by "Ignore All" and "Replace all" with the already found words are cleared when closing the dialog.
-    * The dialog is non-modal, this means you can edit the wiki page while the dialog is open. When pressing "Ignore", the spell checker always starts searching where you left the cursor, so you can go to another page and place the cursor where you want that searching should go on.
+    * The dialog is non-modal, this means you can edit the WikiPage while the dialog is open. When pressing "Ignore", the spell checker always starts searching where you left the cursor, so you can go to another page and place the cursor where you want that searching should go on.
     * The dialog can't be used to check functional pages like e.g. the text blocks pages (see [TextBlocks]).
 
 
-+++ The permanent word lists
+++ The permanent word lists
 With the buttons "Add Globally" and "Add Locally" you can add a word to a permanent ignore list. You can edit this lists as functional pages named "Global spell list" and "Wiki spell list" under the "Views" node in tree, in the "Func. pages" section.
 
 Each line contains a word to ignore during spell checking. You can add, modify or delete words or the whole list arbitrarily and cut & paste words between the lists.
 
 
 
-++ Spell check while type
+++ Spell checking while you type
 
 Instead of using the dialog you can also let WikidPad highlight all unknown words by jiggled red underlines. Just check "Spell Check While Type" from "Edit" menu to start it. The underlining is updated dynamically.
 
 For this spell check mode same rules about defining of language and word as above apply. When right-clicking on an unknown word the context menu shows some suggestions for the correct spelling (if available). Below that you see menu entries to ignore the word, add it globally or add it locally with the same meanings as in the spell check dialog.
 
 This spell check mode holds its own ignore list which is cleared when the wiki or WikidPad is closed or if "Clear ignore list" in "Edit" menu is called explicitly.
+
+
+[:page:PageFooter]

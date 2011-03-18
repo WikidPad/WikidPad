@@ -1,0 +1,12 @@
+﻿[:page:PageHeader][:toc:]
++ Keyboard Shortcut Ctrl-H
+
+Use [Ctrl-H] in order to view the [history] of the WikiPages you have visited.
+
+++ See also
+
+	* [Ctrl-Alt-Left], [Ctrl-Alt-Right], [Ctrl-Alt-Up], [Ctrl-Alt-Down].
+	* KeyBindings
+
+
+[:page:PageFooter][icon:key][alias:Ctrl-H][short_hint:View History]

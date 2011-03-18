@@ -1,3 +1,7 @@
-++ That Arent Wiki Words
+﻿[:page:PageHeader][:toc:]
++ That Arent Wiki Words
 
 This is an example of a wiki word that isn't CamelCase.
+
+
+[:page:PageFooter]

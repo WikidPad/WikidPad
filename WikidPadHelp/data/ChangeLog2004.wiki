@@ -1,6 +1,7 @@
-﻿++ Change Log 2004
+﻿[:page:PageHeader][:toc:]
++ Change Log 2004
 
-Dec. 13, 2004
+++ Dec. 13, 2004
 
     1. Added support for export:false] attribute.  Setting this attribute
        to false will cause it to not be included in exports.
@@ -8,11 +9,13 @@ Dec. 13, 2004
        (thanks to Gilles Lenfant).
     3. [Not Camel Case] links also now autocomplete properly.
 
-Nov. 14, 2004
+
+++ Nov. 14, 2004
 
     1. Added ability to RebuildTheWiki from disk.
 
-Oct. 11, 2004
+
+++ Oct. 11, 2004
 
     1. Added support for sub-tree export.
     2. Exports now (attempt) to indent indented text using \<blockquote>.
@@ -21,7 +24,8 @@ Oct. 11, 2004
        well. Ended up reverting back.
     5. Additional minor fixes.
 
-July 24, 2004
+
+++ July 24, 2004
 
     1. Added child_sort_order attribute support.  A parent node can set
        child_sort_order to "ascending", "descending", or "unsorted" to control
@@ -47,13 +51,15 @@ July 24, 2004
     4. Fixed some issues with the html export.  Specifically bulleted list
        problems.  Also, ignore blocks << >> weren't exported properly.
 
-July 6, 2004
+
+++ July 6, 2004
 
     1. If wikidPad is closed when minimized don't remember the minimized sizes.
-    2. Highlighted text is only evaluated when Ctrl-E is pressed now, not Ctrl-1-6.
+    2. Highlighted text is only evaluated when [Ctrl-E] is pressed now, not [Ctrl-1] to [Ctrl-6].
        This lets me implement this example InlinePythonEval#encodeSelection.
 
-May. 31, 2004
+
+++ May. 31, 2004
 
     1. Fixed a bug with todo lists under Views. Actual todo list items weren't
        displayed, only the todo list categories were.
@@ -65,13 +71,15 @@ May. 31, 2004
        This also means that you can now double click on a wiki word file
        and wikidpad will open the wiki for the word, and then open the word.
 
-May. 23, 2004
+
+++ May. 23, 2004
 
     1. Aliases now work with words [That Arent Wiki Words].
     2. Aliases are now properly formatted in the tree control.
     3. More bug fixes.
 
-Apr. 11, 2004
+
+++ Apr. 11, 2004
 
     1. Fixed some bugs with the links [That Arent Wiki Words].
     2. Fixed the default title for WIKIDPADWords have multiple capital letters in
@@ -82,19 +90,21 @@ Apr. 11, 2004
         Example: This link WikiDocumentAttributes#priority
        will take you to WikiDocumentAttributes and search for the word priority.
 
-Mar. 09, 2004
+
+++ Mar. 09, 2004
 
     1. Added support for WIKIDPADWords that have multiple capital letters in
        the beginning followed by lower case letters.
     2. Added support for links [That Arent Wiki Words]
-    3. Moved the code triggered by Ctrl-B, Ctrl-I and Ctrl-Alt-H into
+    3. Moved the code triggered by [Ctrl-B], [Ctrl-I] and [Ctrl-Alt-H] into
        keybindings.py.  Now if you change the regex for bold or italic you
        can also customize the code triggered by the keyboard command and the
        menu option.
     4. In some situations wikidPad might appear off screen at startup.
        Added a check for this and code to reposition wikidPad back on screen.
     
-Mar. 06, 2004
+
+++ Mar. 06, 2004
 
     1. urls that end in .gif, .jpg, or .png will be exported as \<IMG> tags
        when exporting to HTML.
@@ -117,9 +127,10 @@ Mar. 06, 2004
        
         [import_scripts: GlobalScriptLibrary]
        
-       Type "Ctrl-4" to execute script 4 from the library.
+       Press [Ctrl-4] in order to execute script 4 from the library.
 
-Feb. 22, 2004
+
+++ Feb. 22, 2004
 
     1. Ignore blocks << >> now suppress wiki word links, properties and
        todos properly.  Script blocks with wiki words, and urls with wiki
@@ -127,9 +138,10 @@ Feb. 22, 2004
     2. Pulled the WikiSyntax regular expressions out into an extension
        file.
 
-Feb. 07, 2004
 
-    1. Ctrl-Enter will now activate links.
+++ Feb. 07, 2004
+
+    1. [Ctrl-Enter] will now activate links.
     2. Added option to hide tree control.
     3. KeyBindings are now customizable. See ChangingKeyBindings.
     4. Added support for "ftp://" urls and "https://" urls.
@@ -140,11 +152,12 @@ Feb. 07, 2004
             << *This should be bold* ThisShouldBeALink >>
     8. Added "Insert Date" command to "Editor" menu.
     9. Added support for custom InlinePythonEval functions assigned to
-       Ctrl-1-4. For example, type Ctrl-1 to execute the function below.
+       [Ctrl-1] to [Ctrl-4]. For example, type [Ctrl-1] to execute the function below:
        
        <% 1: editor.AddText("hi") %>
+
        
-Jan. 12, 2004
+++ Jan. 12, 2004
 
     1. Fixed export bug where urls in bulleted lists would include LI in
        their HREF.
@@ -158,3 +171,5 @@ Jan. 12, 2004
     8. Added new WikiBookmarks feature.
     9. Added new WikiWords alias feature.
 
+
+[:page:PageFooter]

@@ -1,4 +1,5 @@
-﻿++ Migration Between Db Types
+﻿[:page:PageHeader][:toc:]
++ Migration Between Db Types
 
 The following procedure describes how to migrate a wiki from one database type to another.
 
@@ -8,13 +9,13 @@ It is recommended to make a backup before applying it.
     1. Open dialog from menu "Wiki" -> "Export" -> "Other Export..."
     2. Set in dialog:
     
-        What to export: Whole wiki
-        Export to: Multipage text
-        Compatible filenames: (Doesn't matter)
-        Format version: 1
-        Write wiki func. page: Check
-        Write saved searches: Check
-        Destination file: (Choose a non existing filename in an existing directory)
+        * What to export: Whole wiki
+        * Export to: Multipage text
+        * Compatible filenames: (Doesn't matter)
+        * Format version: 1
+        * Write wiki func. page: Check
+        * Write saved searches: Check
+        * Destination file: (Choose a non existing filename in an existing directory)
     
     3. Hit OK
     4. Create a new wiki with same name and the desired new database type
@@ -22,15 +23,14 @@ It is recommended to make a backup before applying it.
     6. Open dialog from menu "Wiki" -> "Import..."
     7. Set in dialog:
     
-        Import format: Multipage text
-        Source file: (Same path you gave as destination file above)
+        * Import format: Multipage text
+        * Source file: (Same path you gave as destination file above)
     
     8. Hit OK
-    9. Use menu "Wiki" -> "Maintenance" -> "Update cache" or wait until it is done
-       automatically in background.
+    9. Use menu "Wiki" -> "Maintenance" -> "Update cache" (or wait until it's done in the background automatically)
 
 
 Now you can close the new wiki, delete or move away the old one and move the new one at its place.
 
 
-[camelCaseWordsEnabled: false]
+[:page:PageFooter][camelCaseWordsEnabled: false]

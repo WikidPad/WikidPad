@@ -1,0 +1,3 @@
+﻿<<|
+WikdPad Help | [WikidPadFeatures|Features] | TextFormatting | [Menus] | [KeyBindings|Keys]  | [OptionsDialog|Options] | [TreeNodeIcons|Icons] | [TreeNodeColors|Colors] | [WikidPadSupport|Support] | [ChangeLog] |
+>>

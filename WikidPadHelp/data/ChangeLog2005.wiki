@@ -1,11 +1,14 @@
-﻿++ Change Log 2005
+﻿[:page:PageHeader][:toc:]
++ Change Log 2005
 
-Dec. 29, 2005 (1.20beta4 / WikidPadCompact 1.5.5beta3, repository revision in "mbutscher" branch: 50)
+++ Dec. 29, 2005: 1.20beta4 / WikidPadCompact 1.5.5beta3 
+
+RepositoryRevision in "mbutscher" branch: *50*
 
 Changes:
     * Extended table support: wiki words, bold and italic
       text can now be used in table cells and the ...
-    * same support in todo items now works correctly
+    * same support in TodoItems now works correctly
 
     * Per-wiki-option to define a fixed wiki word to show when
       wiki is opened
@@ -18,7 +21,9 @@ Changes:
     * Some bugs fixed
 
 
-Dec. 20, 2005 (1.20beta3, repository revision in "mbutscher" branch: 48)
+++ Dec. 20, 2005: 1.20beta3
+
+RepositoryRevision in "mbutscher" branch: *48*
 
 *Warning*: This version has a new database format. It is converted
 automatically when opening a wiki the first time. Making a backup
@@ -34,14 +39,16 @@ moments, please be patient.
 
     * The .wiki filenames have no more brackets
     * Option to forbid cycles in trees (see [OptionsDialog])
-    * Option to filter properties to show in HTML preview and export (see [OptionsDialog])
+    * Option to filter properties to show in [HTML preview] and export (see [OptionsDialog])
     * A few bugs fixed. Among others:
         * Wrong line endings in clipboard
         * WPCompact: Missing RE prevents wrap text from work
         * WPCompact: Creation of new wikis and importing doesn't work (wrong formatver)
 
 
-Dec. 10, 2005 (1.20beta2, repository revision in "mbutscher" branch: 44)
+++ Dec. 10, 2005: 1.20beta2
+
+RepositoryRevision in "mbutscher" branch: *44*
 
 *Warning*: This version has a new database format. It is converted
 automatically when opening a wiki the first time. Making a backup
@@ -74,7 +81,7 @@ beforehand is therefore recommended!
     3. Other
         1. *Faster startup* by caching initially created regular
            expressions in a file named "regexpr.cache" in the
-           application directory. (Deleting it is always safe and
+           [application directory]. (Deleting it is always safe and
            recommended after changing WikiSyntax)
         2. Option to handle numeric only words (=*footnotes*) as
            wiki words or regular text. This option applies to the
@@ -87,7 +94,7 @@ beforehand is therefore recommended!
         1. *WikiWord and [WikiWord]* were different words
 
 
-Oct. 13, 2005 (1.20beta1)
+++ Oct. 13, 2005: 1.20beta1
 
     1. *Unicode support*. This means:
         1. Characters from any language in the text (if font and 
@@ -114,7 +121,7 @@ Oct. 13, 2005 (1.20beta1)
            it is done in the background, so you might notice a delay 
            before the highlighting is updated.
         3. New menu item "Replace Text by WikiWord". Select some text you 
-           want to move to a new wiki page, choose the item and enter the 
+           want to move to a new WikiPage, choose the item and enter the 
            name of the new page. On the old page, the text will be 
            replaced by a link to the new one.
         4. Possibility to change the date format for "Insert Date"
@@ -162,8 +169,11 @@ Oct. 13, 2005 (1.20beta1)
         2. Slower but more reliable HTML/XML export.
 
 
-Jan. 08, 2005
+++ Jan. 08, 2005
 
     1. Fixed shell hook for opening .wiki files. Found fix here:
         http://weblogs.asp.net/oldnewthing/archive/2004/10/20/245072.aspx
     2. Added a 4th heading size (++++).
+
+
+[:page:PageFooter]

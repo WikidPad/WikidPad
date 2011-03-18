@@ -1,1 +1,7 @@
-﻿++ Camel Case
+﻿[:page:PageHeader][:toc:]
++ Camel Case
+
+See also http://en.wikipedia.org/wiki/CamelCase
+
+
+[:page:PageFooter]

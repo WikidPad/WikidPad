@@ -1,4 +1,5 @@
-﻿++ Page Structure Window
+﻿[:page:PageHeader][:toc:]
++ Page Structure Window
 
 Like the tree(s) give a concise view of your whole wiki, the document structure window gives a concise view of the current page by listing all headings (or only headings up to a certain level) and allows to jump to a particular heading (in editor and preview).
 
@@ -13,3 +14,4 @@ Double clicking it sets the focus to the editor/preview so you can directly star
 To expand/collapse the window manually, use in menu "View" entry "Show Doc. Structure".
 
 
+[:page:PageFooter]

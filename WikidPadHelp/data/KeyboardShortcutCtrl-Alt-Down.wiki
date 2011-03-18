@@ -1,0 +1,12 @@
+﻿[:page:PageHeader][:toc:]
++ Keyboard Shortcut Ctrl-Alt-Down
+
+Use [Ctrl-Alt-Down] in order to view the [history] window with the next word automatically selected.
+
+++ See also
+
+	* [Ctrl-H], [Ctrl-Alt-Right], [Ctrl-Alt-Left], [Ctrl-Alt-Up]
+	* KeyBindings
+
+
+[:page:PageFooter][icon:key][alias:Ctrl-Alt-Down][short_hint:View history: select next]

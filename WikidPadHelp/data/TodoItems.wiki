@@ -1,16 +1,17 @@
-﻿+ Todo Items
+﻿[:page:PageHeader][:toc:]
++ Todo Items
 
 In WikidPad "todo", "done", "action", "track", "issue", "question" and
 "project" are special keywords that enable you to track important
-items under the "View" menu in the tree.
+items under the [View Menu] in the tree.
 
-todo: I have to do this.
-done: I have done this.
-action: I have action items
-track: I am tracking this
-issue: I am tracking this
-question: This is a question
-project: This is my project
+	* todo: I have to do this.
+	* done: I have done this.
+	* action: I have to act in this.
+	* track: I am tracking this
+	* issue: This is to be addressed
+	* question: This is a question
+	* project: This is my project
 
 Now open the views node in the tree on the left to see how these todo
 items have been added.  For example, open "Views/question" and you will
@@ -33,12 +34,11 @@ todo: This ends \| not.
 Look in the "Views" subtree to see the todo entries.
 
 
-These items supports nested sub-categories also, for example:
+These items supports nested sub-categories as well, for example:
 
 todo.system.bugs.urgent: There is a bug in the system
 
-Will create a "system" node in the tree under "Views/todo", which has a "bugs" subnode which has a "urgent" subnode...
+This will create a "system" node in the tree under "Views/todo", which has a "bugs" subnode which has a "urgent" subnode...
 
-[icon: pin]
-[alias: TodoItem]
 
+[:page:PageFooter][icon:pin][alias:TodoItem]

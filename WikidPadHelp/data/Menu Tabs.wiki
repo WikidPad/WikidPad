@@ -1,22 +1,28 @@
-﻿++ Menu Tabs
+﻿[:page:PageHeader][:toc:]
++ Menu Tabs
 
-++ Toggle Ed./Prev.
-Switch between editor and preview mode in current tab.
+++ Toggle Ed./Prev. - [Ctrl-Shift-Space]
+Switch between editor and [HTML preview] mode in current tab.
 
-++ Enter Edit Mode
+++ Enter Edit Mode - [Ctrl-Shift-A]
 Shows editor in current tab.
 
-++ Enter Preview Mode
-Shows HTML preview.
+++ Enter Preview Mode - [Ctrl-Shift-S]
+Shows [HTML preview].
 
+----
+ 
 ++ Show Folding
 Shows/hides an additional margin to the left of the editor to control folding. See [Folding].
 
 ++ Toggle Current Folding
-Fold/Unfold current line and following.
+Fold/Unfold current line and following. See [Folding].
 
 ++ Unfold All
 Unfold all lines.
 
 ++ Fold All
 Fold all lines.
+
+
+[:page:PageFooter][icon:left-right][alias:'"Tabs" Menu'; Tabs Menu][short_hint:The "Tabs" menu]

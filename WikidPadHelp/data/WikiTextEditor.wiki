@@ -1,0 +1,12 @@
+﻿[:page:PageHeader][:toc:]
++ Wiki Text Editor
+
+	* WikiWordLinking
+	* AutoCompletion
+	* [Folding]
+	* AutoSave
+	* KeyBindings
+	* KeyBindingsOnLinuxAndOsx
+
+	
+[:page:PageFooter][icon:list][child_sort_order: natural]

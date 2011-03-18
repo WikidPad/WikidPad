@@ -1,4 +1,5 @@
-﻿++ Folding
+﻿[:page:PageHeader][:toc:]
++ Folding
 
 Folding is a well known technique in programming editors, but it is also useful for large structured pages in WikidPad.
 
@@ -44,3 +45,6 @@ Bla bla
 Bla bla
 Bla bla
 Bla bla
+
+
+[:page:PageFooter]

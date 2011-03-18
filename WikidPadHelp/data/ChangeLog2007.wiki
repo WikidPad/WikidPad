@@ -1,6 +1,9 @@
-﻿++ Change Log2007
+﻿[:page:PageHeader][:toc:]
++ Change Log2007
 
-Dec. 27, 2007 (1.9beta14, repository revision in "mbutscher" branch: 138)
+++ Dec. 27, 2007: 1.9beta14
+
+RepositoryRevision in "mbutscher" branch: *138*
 
     * New letter for time formats (e.g. Statusbar time format option):
       %u shows ISO-8601 weekday number (1=monday, 7=sunday)
@@ -23,11 +26,13 @@ Dec. 27, 2007 (1.9beta14, repository revision in "mbutscher" branch: 138)
 
 
 
-Nov. 26, 2007 (1.9beta13, repository revision in "mbutscher" branch: 136)
+++ Nov. 26, 2007: 1.9beta13
+
+RepositoryRevision in "mbutscher" branch: *136*
 
     * Support for internationalization of screen messages and dialogs
-      (GUI). Not supported are: attributes (e.g. "\[alias: WikiWord]"),
-      shortcuts ("Ctrl-A"), external plugins, some internal messages
+      (GUI). Not supported are: attributes (e.g. "\[alias:WikiWord]"),
+      shortcuts ([Ctrl-A]), external plugins, some internal messages
       (e.g. regular expression errors)
 
     * Bug fixed for Windows: An always visible taskbar could partly
@@ -38,7 +43,9 @@ Nov. 26, 2007 (1.9beta13, repository revision in "mbutscher" branch: 136)
 
 
 
-Oct. 27, 2007 (1.9beta12, repository revision in "mbutscher" branch: 134)
+++ Oct. 27, 2007: 1.9beta12
+
+RepositoryRevision in "mbutscher" branch: *134*
 
     * Support for customizing favorite wikis. See FavoriteWikis
     * Command line option to rebuild wiki (patch by mstute).
@@ -52,7 +59,7 @@ Oct. 27, 2007 (1.9beta12, repository revision in "mbutscher" branch: 134)
       recent file list if multiple WikidPad windows are open
       in same process.
     * When hiding a focused tool window, focus is transferred
-      to main area panel.
+      to main area control.
 
     * Bug fixed: An added icon/color property always used
       default brackets [], even if changed in WikiSyntax.py
@@ -61,22 +68,24 @@ Oct. 27, 2007 (1.9beta12, repository revision in "mbutscher" branch: 134)
 
 
 
-Sep. 30, 2007 (1.9beta11, repository revision in "mbutscher" branch: 131)
+++ Sep. 30, 2007: 1.9beta11
+
+RepositoryRevision in "mbutscher" branch: *131*
 
     * Optional shortcut to focus fast search field
     * Options for timeline to suppress "empty" days and to sort
       dates descending. See OptionsDialog#++++# Time# view
-    * Options for timeline to switch off wiki page list
+    * Options for timeline to switch off WikiPage list
       on hovering over date, instead showing it after clicking
       on it is possible. See OptionsDialog#++++# Time# view
-    * Option to set number of separator lines between wiki pages
+    * Option to set number of separator lines between WikiPages
       in single HTML page output.
       See [Options HTML preview_export]#*Single# page# separator# lines*
     * Larger default delays for autosave
     * Possibility to set image size in percent.
       See UrlLinking#++# URL# Appendix
     * Shortcuts "ActivateLink", "ActivateLinkNewTab" and
-      "ActivateLink2" now also work in incremental search mode
+      "ActivateLink2" now also works in incremental search mode
     
     * Bug fixed: Updating wikis from WikidPad 1.1 failed
     * Bug fixed: Source code did not work correctly with
@@ -90,7 +99,9 @@ Sep. 30, 2007 (1.9beta11, repository revision in "mbutscher" branch: 131)
 
 
 
-Sep. 05, 2007 (1.9beta10, repository revision in "mbutscher" branch: 127)
+++ Sep. 05, 2007: 1.9beta10
+
+RepositoryRevision in "mbutscher" branch: *127*
 
     * Bug fixed: OS not recognized if using source version on
       Windows with wxPython 2.8
@@ -103,11 +114,13 @@ Sep. 05, 2007 (1.9beta10, repository revision in "mbutscher" branch: 127)
 
 
 
-Aug. 28, 2007 (1.9beta9, repository revision in "mbutscher" branch: 126)
+++ Aug. 28, 2007: 1.9beta9
+
+RepositoryRevision in "mbutscher" branch: *126*
 
     * Very basic support for a time view/timeline. Much work to do
       yet. See TimeViewWindow
-    * Option to set default directory where to start when
+    * Option to set [default directory] where to start when
       opening/creating a wiki.
     * Attribute "template_head" to automatically change heading of
       pages created from a template.
@@ -121,7 +134,9 @@ Aug. 28, 2007 (1.9beta9, repository revision in "mbutscher" branch: 126)
 
 
 
-Jul 27, 2007 (1.9beta8, repository revision in "mbutscher" branch: 123)
+++ Jul 27, 2007: 1.9beta8
+
+RepositoryRevision in "mbutscher" branch: *123*
 
     * New document structure window. See PageStructureWindow
     * Search dialogs (except incremental search) now show an error
@@ -142,14 +157,16 @@ Jul 27, 2007 (1.9beta8, repository revision in "mbutscher" branch: 123)
 
 
 
-Jul 04, 2007 (1.9beta7, repository revision in "mbutscher" branch: 121)
+++ Jul 04, 2007: 1.9beta7
+
+RepositoryRevision in "mbutscher" branch: *121*
 
     * Limited (no error messages) support for gnuplot.
       See ExternalGraphicalApplications
     * Option to have no title on newly generated pages.
       See OptionsDialog#*Wikiword# to# title*
     * Possibility to save images on the clipboard as files
-      in the "files" directory of a wiki.
+      in the [files directory] of a wiki.
       See OptionsDialog#+++++# Image# pasting
     * Option to set title of HTML table of contents.
       See [Options HTML preview_export]#*Title# of# toc*
@@ -161,14 +178,16 @@ Jul 04, 2007 (1.9beta7, repository revision in "mbutscher" branch: 121)
     * Small enhancements in spell checker dialog.
     * Using the shortcut to display wiki-wide search or replace
       dialog while the dialog is open switches focus to it.
-    * Ctrl-F4 closes current tab (not customizable)
+    * [Ctrl-F4] closes current tab (not customizable)
     
     * Bug fixed: Setting Scintilla codepage fails on non-Unicode
       wxPython (does not affect Windows binary)
 
 
 
-May 27, 2007 (1.9beta6, repository revision in "mbutscher" branch: 119)
+++ May 27, 2007: 1.9beta6
+
+RepositoryRevision in "mbutscher" branch: *119*
 
     * New entry in "KeyBindings.py" for "ToggleCurrentFolding"
       which allows to toggle the folding in the current line.
@@ -178,7 +197,7 @@ May 27, 2007 (1.9beta6, repository revision in "mbutscher" branch: 119)
       well as saved searches and wiki-bound functional pages
       (to allow a simple and complete transfer of a whole wiki
       from one database type to another).
-    * When opening a wiki page in a new tab in background the open
+    * When opening a WikiPage in a new tab in background the open
       dialog or the search results popup window stay open.
     * Better behavior of recent files menu.
     * Tree shows tooltips if current entry is too long to fit
@@ -218,7 +237,9 @@ May 27, 2007 (1.9beta6, repository revision in "mbutscher" branch: 119)
 
 
 
-Apr. 28, 2007 (1.9beta5, repository revision in "mbutscher" branch: 116)
+++ Apr. 28, 2007: 1.9beta5
+
+RepositoryRevision in "mbutscher" branch: *116*
 
     * Bug fixed: Preview didn't work with titled wikiwords
     * Bug fixed: When renaming wikiword with non-ascii characters
@@ -227,7 +248,9 @@ Apr. 28, 2007 (1.9beta5, repository revision in "mbutscher" branch: 116)
 
 
 
-Apr. 27, 2007 (1.9beta4, repository revision in "mbutscher" branch: 114)
+++ Apr. 27, 2007: 1.9beta4
+
+RepositoryRevision in "mbutscher" branch: *114*
 
     * Clicking on footnotes moves to the last footnote on page
       (footnote anchor). See [Footnotes]
@@ -251,10 +274,10 @@ Apr. 27, 2007 (1.9beta4, repository revision in "mbutscher" branch: 114)
     * Rebuild is now slower, but more reliable.
     * Better update of a page if some important attributes were
       changed.
-    * Directory "user_extensions" can now additionally be placed
-      inside ".WikidPadGlobals" directory in configuration dir.
+    * [user_extensions directory] can now additionally be placed
+      inside [WikidPadGlobals directory] in [configuration directory].
       (TODO: documentation).
-    * Some changes to produce more standard-conforming HTML.
+    * Some changes to produce more standard-conformant HTML.
     
     * Internal: Added function \PersonalWikiFrame.reloadMenuPlugins
       to reload plugins while WikidPad is active (for developers).
@@ -271,7 +294,7 @@ Apr. 27, 2007 (1.9beta4, repository revision in "mbutscher" branch: 114)
     * Bug fixed: Some clipboard and drag&drop problems on Linux
       (other problems exist yet).
     * Bug fixed: Removed inefficiency when exporting large sets
-      of wiki pages with many links (very large trees).
+      of WikiPages with many links (very large trees).
     * Bug fixed: "page" insertion did not work.
     * Bug fixed: Visited pages where always marked modified if
       folding was active.
@@ -280,9 +303,11 @@ Apr. 27, 2007 (1.9beta4, repository revision in "mbutscher" branch: 114)
 
 
 
-Mar. 28, 2007 (1.9beta3, repository revision in "mbutscher" branch: 111)
+++ Mar. 28, 2007: 1.9beta3
 
-    * Autocompletion support for todo items and anchor fragments.
+RepositoryRevision in "mbutscher" branch: *111*
+
+    * Autocompletion support for TodoItems and anchor fragments.
       See AutoCompletion.
     * HTML exporter now creates links which only contain anchor
       ("#somewhere") if linking to the same page.
@@ -324,7 +349,9 @@ Mar. 28, 2007 (1.9beta3, repository revision in "mbutscher" branch: 111)
 
 
 
-Feb. 26, 2007 (1.9beta2, repository revision in "mbutscher" branch: 106)
+++ Feb. 26, 2007: 1.9beta2
+
+RepositoryRevision in "mbutscher" branch: *106*
 
     * Configurable shortcuts for showing of editor/preview,
       switching between them
@@ -337,14 +364,14 @@ Feb. 26, 2007 (1.9beta2, repository revision in "mbutscher" branch: 106)
       (see OptionsDialog#*Middle# button# without# CTRL* )
     * Buttons in "Open Wiki Word" dialog to open word in new
       tab (fore-/background)
-    * Activation of [:page: ...] insertion like normal links
+    * Activation of [:page:...] insertion like normal links
     
     * Option to set default destination directory for export
       operations (see OptionsDialog#*Default# export# dir.* )
     * Slightly better support for URLs in UTF-8 percent encoding,
       also creates such URLs now. Some URLs from older versions
       of WikidPad may not work any longer.
-    * Mouse cursor no longer changes to a hand if Ctrl is pressed
+    * Mouse cursor no longer changes to a hand if [Ctrl] is pressed
       in editor and cursor is over a link (but works as before).
     
     * Filter to remove double clipboard pastes when using the
@@ -367,10 +394,12 @@ Feb. 26, 2007 (1.9beta2, repository revision in "mbutscher" branch: 106)
 
 
 
-Jan. 28, 2007 (1.9beta1, repository revision in "mbutscher" branch: 103)
+++ Jan. 28, 2007: 1.9beta1
+
+RepositoryRevision in "mbutscher" branch: *103*
 
     * Userinterface change, no more tabs for edit and preview,
-      but an arbitrary number of tabs for wiki pages, switching
+      but an arbitrary number of tabs for WikiPages, switching
       between edit and preview by icons in toolbar or shortcuts
     * Shortcut and menu item to open a selected wikiword in a
       new tab
@@ -398,3 +427,6 @@ Jan. 28, 2007 (1.9beta1, repository revision in "mbutscher" branch: 103)
       (e.g. 1) on expression evaluation
     * Bug (hopefully) fixed: Temporarily generated images not shown
       in IE 7 preview
+
+
+[:page:PageFooter]

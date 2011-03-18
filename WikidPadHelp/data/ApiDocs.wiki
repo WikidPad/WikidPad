@@ -1,6 +1,7 @@
-﻿++ wikidPad Hooks
+﻿[:page:PageHeader][:toc:]
++ WikidPad Hooks
 
-Under the directory where wikidPad is installed, there is a subdirectory called "extensions".  
+Under the directory where wikidPad is installed, there is a subdirectory called "extensions".
 
 (Note: Under MS-Windows, this install directory is file:///C|/Program%20Files/WikidPad by default.)
 
@@ -23,76 +24,75 @@ If you are reading the source code of WikidPad, this instance is often
 stored in member variable "pWiki", for some newer objects it has the
 name "mainControl".
 
-*Selected functions of PersonalWikiFrame instance*
++++ Selected functions of PersonalWikiFrame instance
 
-newWiki(wikiName, wikiDir)
++++++ newWiki(wikiName, wikiDir)
     Create a new wiki
 
-openWiki(wikiConfigFilename, wikiWordToOpen=None, ignoreWdhName=False)
++++++ openWiki(wikiConfigFilename, wikiWordToOpen=None, ignoreWdhName=False)
     Open a wiki, and optionally a page in that wiki. if ignoreWdhName
     is True, the program asks for the database type (same as
     "Open as Type" in menu)
 
-saveCurrentWikiState()
++++++ saveCurrentWikiState()
     Write any changes to the wiki to disk.
-    
-openWikiPage(wikiWord)
+
++++++ openWikiPage(wikiWord)
     Open a specific wiki word.
 
-findCurrentWordInTree()
++++++ findCurrentWordInTree()
     Select the currently open page in the tree control.
-    
-viewParents(word)
+
++++++ viewParents(word)
     Pop up the dialog that shows the parents of the node passed in.
 
-viewChildren()
++++++ viewChildren()
     Pop up the dialog that shows the children of the node passed in.
 
-viewParentLess()
++++++ viewParentLess()
     Pop up the dialog that shows the parentless nodes.
 
-viewBookmarks()
++++++ viewBookmarks()
     Pop up the dialog that shows the bookmarked nodes.
 
-viewHistory()
++++++ viewHistory()
     Pop up the dialog that shows the history of visited pages.
 
-saveCurrentWikiPage()
++++++ saveCurrentWikiPage()
     Save the current wiki page to disk.
 
-stdDialog(dlgtype, title, message, additional=None)
++++++ stdDialog(dlgtype, title, message, additional=None)
     Show one of the standard dialogs. dlgtype is a string giving the type
     of the desired dialog. title and message are strings to show in the
     dialog, the meaning of additional and the return value depends on
     the dialog type.
-    
+
     Possible types:
 
-    "text": input text to dialog, additional is the default text.
-        The function returns the entered text on OK or an empty string on Cancel
-    "listmcstr": Select zero or more string entries from a list, additional is the list of strings to display.
-        Returns a list of the selected strings on OK (may be empty) or None on Cancel
-    "o": Shows only OK button
-    "oc": Shows OK and Cancel buttons, returns either "ok" or "cancel"
-    "yn": Yes and No buttons, returns either "yes" or "no"
-    "ync": like "yn" but with additional cancel button, can also return
-        "cancel"
+	* "text": input text to dialog, additional is the default text.
+	  The function returns the entered text on OK or an empty string on Cancel
+	* "listmcstr": Select zero or more string entries from a list, additional is the list of strings to display.
+	  Returns a list of the selected strings on OK (may be empty) or None on Cancel
+	* "o": Shows only OK button
+	* "oc": Shows OK and Cancel buttons, returns either "ok" or "cancel"
+	* "yn": Yes and No buttons, returns either "yes" or "no"
+	* "ync": like "yn" but with additional cancel button, can also return "cancel"
 
 
-displayErrorMessage(errorStr, exception)
++++++ displayErrorMessage(errorStr, exception)
     Popup an exception dialog.
 
 
-getWikiData()
++++++ getWikiData()
     Get currently active WikiData object.
-    
-getActiveEditor()
+
++++++ getActiveEditor()
     Returns currently active editor control (currently there only can be one).
 
-getCurrentWikiWord()
++++++ getCurrentWikiWord()
     The currently open wiki word.
-    
-getCurrentDocPage()
+
++++++ getCurrentDocPage()
     Get the current DocPage object. (TODO)
 
 
@@ -103,198 +103,200 @@ getCurrentDocPage()
 
 
 
-
+++ Outdated Documentation
 
 *The following documentation is outdated!*
 
 The first argument to each hook function is wikidPad itself.  Here are
 the available methods on the wikidPad object.
 
-*wikidPad functions*
++++ wikidPad functions
 
 
-addToHistory(word)
++++++ addToHistory(word)
     Add the word passed in to the history.
-    
-goInHistory(positionDelta)
+
++++++ goInHistory(positionDelta)
     Go back or forward in history by the amount passed in.
-    
-goBackInHistory()
+
++++++ goBackInHistory()
     Go back in history one position.
-    
-goForwardInHistory()
+
++++++ goForwardInHistory()
     Go forward in history one position.
-    
-       
-showWikiWordOpenDialog()
-showWikiWordRenameDialog()
-showWikiWordRenameConfirmDialog()
-showSearchDialog()
-showSavedSearchesDialog()
-showWikiWordDeleteDialog()
-showFindReplaceDialog()
 
-displayMessage(title, msg)
+
++++++ showWikiWordOpenDialog()
++++++ showWikiWordRenameDialog()
++++++ showWikiWordRenameConfirmDialog()
++++++ showSearchDialog()
++++++ showSavedSearchesDialog()
++++++ showWikiWordDeleteDialog()
++++++ showFindReplaceDialog()
+
++++++ displayMessage(title, msg)
     Popup a dialog with the message passed in.
-    
-    
-*wikidPad.variables*
 
-globalConfigDir
+
++++ wikidPad.variables
+
++++++ globalConfigDir
     The directory of the wikidPad.config file.
 
-globalConfigLoc
++++++ globalConfigLoc
     The wikidpad.config file.
 
-globalConfig
++++++ globalConfig
     The parsed wikidpad.config file.
 
-wikiAppDir
++++++ wikiAppDir
     The installation directory of wikidPad.
-    
-wikiPadHelp
+
++++++ wikiPadHelp
     The location of the help wiki.
-    
-config
+
++++++ config
     The parsed configuration of the opened wiki.
-    
-wikiName
+
++++++ wikiName
     The name of the currently opened wiki.
-    
-dataDir
+
++++++ dataDir
     The data directory of the currently opened wiki.
-    
-wikiData
+
++++++ wikiData
     The database object for the currently open wiki. More on this below.
-    
-tree
+
++++++ tree
     The tree control on the left. The is a wxTreeCtrl. More on this below.
 
-    
-editor
++++++ editor
     The text editor for wikidPad. This is a wxStyledTextCtrl. More on this below.
-    
-    
-*wikiData - The wiki database interface* 
 
-getPage(wikiWord, itemsToLoad) 
+
++++ wikiData - The wiki database interface
+
++++++ getPage(wikiWord, itemsToLoad)
     Get the data for a wiki word. Pass in an array of strings for the items to load.
     Valid items are: info, parents, children, props, todos.
     For performance you specify which items should be loaded from the db. If you only
     need info and children call:
-    
-    getPage(word, ["info", "children"])
-    
-    More on the return value of this function below.
-    
-getChildRelationships(wikiWord)
-    Returns array of the words that are children of the word passed in.
-    
-getParentRelationships(wikiWord)
-    Returns array of the words that are parents of the word passed in.
-    
-getAllWords()
-    Get all of the wiki words in the wiki.
-    
-getAllAliases()
-    Get all of the aliases in the wiki.
-    
-getAllRelations()
-    Get all of the relationships in the wiki. Returns array of tuples, (word, relatedTo).
-    
-getWikiWordsStartingWith(string)
-getWikiWordsWith(string)
-getWikiWordsModifiedWithin(days)
-getParentLessWords()
 
-renameWord(word, toWord)
+    getPage(word, ["info", "children"])
+
+    More on the return value of this function below.
+
++++++ getChildRelationships(wikiWord)
+    Returns array of the words that are children of the word passed in.
+
++++++ getParentRelationships(wikiWord)
+    Returns array of the words that are parents of the word passed in.
+
++++++ getAllWords()
+    Get all of the wiki words in the wiki.
+
++++++ getAllAliases()
+    Get all of the aliases in the wiki.
+
++++++ getAllRelations()
+    Get all of the relationships in the wiki. Returns array of tuples, (word, relatedTo).
+
++++++ getWikiWordsStartingWith(string)
++++++ getWikiWordsWith(string)
++++++ getWikiWordsModifiedWithin(days)
++++++ getParentLessWords()
+
++++++ renameWord(word, toWord)
     Rename a wiki word.
-    
-deleteWord(word)
+
++++++ deleteWord(word)
     Delete a wiki word.
-    
-getWordsWithPropertyValue(key, value)
+
++++++ getWordsWithPropertyValue(key, value)
     Get all of the wiki words with a certain property value. For example
     getWordsWithPropertyValue("icon", "pin") would get all of the wiki
     words with "icon" set to "pin".
 
-findBestPathFromWordToWord(word, toWord)
++++++ findBestPathFromWordToWord(word, toWord)
     Returns the shortest path in the wiki from "word" to "toWord". Returned
     as an array of wiki words.
-    
-search(forPattern)
+
++++++ search(forPattern)
     Search the entire wiki using a regex.
 
-getTodos()
++++++ getTodos()
     Get all of the todos in the wiki. Returned as an array of tuples.
 
-*wikiPage object*
 
-wikiWord
++++ wikiPage object
+
++++++ wikiWord
     The word.
 
-wikiFile
++++++ wikiFile
     The file that contains the data for this page.
 
-parentRelations
++++++ parentRelations
     Array of the parents words for this node.
 
-childRelations
++++++ childRelations
     Array of the child words for this node.
 
-todos
++++++ todos
     Array of todos
 
-props
++++++ props
     Hashtable of properties for the node.
-    
-getContent()
+
++++++ getContent()
     Get the string content for the node.
 
-save()
++++++ save()
     Save the changes to this page to disk.
-    
-    
-*tree control*
 
-collapse()
+
++++ tree control
+
++++++ collapse()
     collapse the tree.
-    
-buildTreeForWord(wikiword)
-    Open the tree control to the wiki word passed in.
-    
-*text control*
 
-setWrap(onOrOffBoolean)
++++++ buildTreeForWord(wikiword)
+    Open the tree control to the wiki word passed in.
+
+
++++ text control
+
++++++ setWrap(onOrOffBoolean)
     Set the wrap mode to on/off.
 
-SetText()
++++++ SetText()
     Set the text of the control.
-    
-snip()
+
++++++ snip()
     Copy the currently selected text to the ScratchPad.
 
-startIncrementalSearch(searchStr)
++++++ startIncrementalSearch(searchStr)
     Set the search mode to incremental.
-    
-endIncrementalSearch()
+
++++++ endIncrementalSearch()
     Stop incremental search.
 
-executeSearch(searchStr, searchStartPos=-1)
++++++ executeSearch(searchStr, searchStartPos=-1)
     Execute a search of the text in the control.
-    
-getWikiWordText(position)
+
++++++ getWikiWordText(position)
     If position is in a wiki word return that word.
-    
-getWikiWordBeginEnd(position)
+
++++++ getWikiWordBeginEnd(position)
     If position is in a wiki word return the start/end positions of the word.
-    
-isPositionInWikiWord(position)
+
++++++ isPositionInWikiWord(position)
     Is the position in a wiki word?
-    
-isPositionInLink(position)
+
++++++ isPositionInLink(position)
     Is the position in a URL link?
 
 See the wxWindows/wxPython documentation for info about the wxTreeCtrl and wxStyledTextCtrl.
 
-[alias: WikidPadHooks]
+
+[:page:PageFooter][alias: WikidPadHooks]

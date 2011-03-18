@@ -1,8 +1,13 @@
-++ Wiki Bookmarks
+﻿[:page:PageHeader][:toc:]
++ Wiki Bookmarks
 
-You can add a bookmark to a wiki page by selecting Wiki "Add Bookmark"
-from the "Wiki Words" menu.  You also press Ctrl-Alt-B. To view your
-bookmarks select "View Bookmarks" from the "Wiki" menu, or press 
-Ctrl-Shift-B. Bookmarks are just a form of WikiDocumentAttribute.
+You can add a bookmark to a WikiPage by selecting Wiki "Add Bookmark"
+from the [Navigate Menu].  You can also press [Ctrl-Alt-B]. 
 
-[bookmarked=true]
+To view your bookmarks select "View Bookmarks" from the "Wiki" menu,
+or press [Ctrl-Shift-B]. 
+
+Bookmarks are just a form of WikiDocumentAttribute.
+
+
+[:page:PageFooter][bookmarked=true][alias:WikiBookMark; WikiBookMarks; WikiBookmark; Wiki Bookmark]

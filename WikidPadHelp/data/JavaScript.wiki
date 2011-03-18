@@ -1,0 +1,7 @@
+﻿[:page:PageHeader][:toc:]
++ Java Script
+
+See http://en.wikipedia.org/wiki/JavaScript
+
+
+[:page:PageFooter]

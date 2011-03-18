@@ -1,4 +1,5 @@
-++ Scratch Pad
+﻿+ Scratch Pad
 
-The scratch pad is a holding place for random text.  You can easily
-copy text to the ScratchPad by typing CTRL-ALT-C.
+The scratch pad is a place to hold any random text.
+
+You can easily copy text to the ScratchPad by typing [Ctrl-Alt-C].

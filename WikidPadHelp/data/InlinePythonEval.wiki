@@ -21,7 +21,7 @@ of security you want:
     * Allow everything
 
 
-When pressing Ctrl-1 to Ctrl-6 WikidPad searches for a script normally in the following order:
+When pressing [Ctrl-1] to [Ctrl-6] WikidPad searches for a script normally in the following order:
 
     * Current page
     * Pages imported by current page with attribute "import_scripts"
@@ -39,9 +39,9 @@ The following examples work therefore only with an appropriately relaxed securit
 
 +++ Evaluating expressions
 You can evaluate Python expressions directly in the editor by
-highlighting the expression and pressing CTRL-E. Example:
+highlighting the expression and pressing [Ctrl-E]. Example:
 
-Highlight the calculation below, and type CTRL-E.
+Highlight the calculation below, and type [Ctrl-E].
 
 1+2+3
  
@@ -55,15 +55,15 @@ editor.GotoPos(editor.GetLength())
 editor.AddText('\nhello ')
 %>
 
-To execute the code above, type Ctrl-E. Ctrl-E actually will execute all
+To execute the code above, type [Ctrl-E]. This will actually execute all
 of the scripts on a page, including script imports.
 
-You can assign up to 6 functions on a page to a Ctrl-# key. For example:
+You can assign up to 6 functions on a page to a [Ctrl-#] key. For example:
 
 function 1: <% 1: editor.AddText(lib.now()) %>
 function 2: <% 2: lib.addDate(editor) %>
 
-Type Ctrl-1 to execute function 1. Enter Ctrl-2 to execute function 2.
+Type [Ctrl-1] to execute function 1. Enter [Ctrl-2] to execute function 2.
 This will execute at most one script. If a script with this number is
 found on the page, it is executed, if not, the local script imports
 with import_scripts are searched. If no appropriate script is found
@@ -85,7 +85,7 @@ You can import scripts from another page using the following attribute.
 
 [import_scripts: GlobalScriptLibrary]
 
-Type "Ctrl-4" to see the output from script 4 on the page
+Type [Ctrl-4] to see the output from script 4 on the page
 GlobalScriptLibrary.
 
 You can also use \[global.import_scripts: ...] property to define a single page which will be seen as if it was imported by every page of the wiki.
@@ -99,7 +99,7 @@ available to the "editor" control.
 
 +++ Another Example
 
-Highlight the line below and press CTRL-3
+Highlight the line below and press [Ctrl-3]
 
 c:\this path\will be encoded.txt
 

@@ -3,8 +3,8 @@
 
 +++ To search inside a page
 
-CTRL-F or F3 turns on IncrementalSearch.
-CTRL-R brings up the "Find and Replace" dialog.
+[Ctrl-F] or [F3] turns on IncrementalSearch.
+[Ctrl-R] brings up the "Find and Replace" dialog.
 
 
 +++ To search all pages: Fast search
@@ -18,7 +18,7 @@ At the bottom there are buttons "As Full Search" or "As Tab" to convert the smal
 
 +++ To search all pages: Full search
 
-CTRL-ALT-F brings up the search dialog for the entire wiki.
+[Ctrl-Alt-F] brings up the search dialog for the entire wiki.
 
 The dialog is non-modal, this means you can edit your wiki while the dialog is open.
 

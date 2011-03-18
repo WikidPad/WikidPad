@@ -1,13 +1,15 @@
-﻿++ Change Log2008
+﻿[:page:PageHeader][:toc:]
++ Change Log2008
 
-Dec. 27, 2008 (1.9beta21)
+++ Dec. 27, 2008: 1.9beta21
 
     * Bug fixed: Tree auto-follow with Gadfly backend did not work
       if going to a non-existing page (even if it was shown in tree)
 
 
+++ Nov. 27, 2008: 1.9beta20
 
-Nov. 27, 2008 (1.9beta20, repository revision in "mbutscher" branch: 163)
+RepositoryRevision in "mbutscher" branch: *163*
 
     * Option to automatically search text selected in preview when
       switching to editor for better synchronization (thanks to
@@ -30,8 +32,9 @@ Nov. 27, 2008 (1.9beta20, repository revision in "mbutscher" branch: 163)
       did not work
 
 
+++ Oct. 26, 2008: 1.9beta19
 
-Oct. 26, 2008 (1.9beta19, repository revision in "mbutscher" branch: 158)
+RepositoryRevision in "mbutscher" branch: *158*
 
    * Option to set whole wiki read-only.
      See OptionsDialog#*Read-only# wiki*
@@ -66,8 +69,9 @@ Oct. 26, 2008 (1.9beta19, repository revision in "mbutscher" branch: 158)
      unmodified to next line on auto-indent
 
 
+++ Sep. 27, 2008: 1.9beta18
 
-Sep. 27, 2008 (1.9beta18, repository revision in "mbutscher" branch: 147)
+RepositoryRevision in "mbutscher" branch: *147*
 
     * Insertion [:rel:back] introduced to go back in history.
       See [Insertions]
@@ -96,7 +100,7 @@ Sep. 27, 2008 (1.9beta18, repository revision in "mbutscher" branch: 147)
       (e.g. "|") may freeze WikidPad
     * Bug fixed: Nesting of text blocks into submenus doesn't work
     * Bug fixed: Empty lines between bullets/numbered items in
-      HTML preview
+      [HTML preview]
     
     * Development: Menu items and toolbar icons from plugins can now
       provide an update function to enable/disable when appropriate.
@@ -106,15 +110,17 @@ Sep. 27, 2008 (1.9beta18, repository revision in "mbutscher" branch: 147)
 
 
 
-Aug. 26, 2008 (1.9beta17, repository revision in "mbutscher" branch: 145)
+++ Aug. 26, 2008: 1.9beta17
 
-    * When exporting, files in the file storage
-      ("files" directory) which are referenced on exported pages
-      are copied to export destination "files" folder.
+RepositoryRevision in "mbutscher" branch: *145*
+
+    * Upon export, files in the [file storage]
+      [files directory] which are referenced on exported pages
+      are copied to export destination's "files" directory.
       See FileStorage#+++# On# HTML# export
     * When exporting, generated files (by MimeTeX, GraphViz, ...)
-      are put to subfolder "volatile" which is deleted each time
-      the exporting is repeated (otherwise the folder would be
+      are put to [subdirectory volatile] which is deleted each time
+      the exporting is repeated (otherwise the directory would be
       filled up with old versions of the files).
       See ExternalGraphicalApplications#When# exporting# HTML
     * "r" appendix to image URLs to resize relative to image size.
@@ -132,7 +138,7 @@ Aug. 26, 2008 (1.9beta17, repository revision in "mbutscher" branch: 145)
     * Menu plugins can now also read their shortcuts
       from "KeyBindings.py" as main program does.
 
-    * Windows 2K/XP and later: Copying files into file storage or
+    * Windows 2K/XP and later: Copying files into [file storage] or
       export directory now also copies ACLs and ADSs if possible
     * Mac: Some improvements (thanks to Gareth Simpson)
 
@@ -145,11 +151,13 @@ Aug. 26, 2008 (1.9beta17, repository revision in "mbutscher" branch: 145)
     * Bug fixed: Linux: Problems with temporaries path for
       external plugins (thanks to jonjacksonuk and franxxk)
     * Linux standard encoding is now determined by
-      locale.getpreferredencoding() (thanks to Kamil Śliwak)
+      locale.getpreferredencoding() (thanks to Kamil ?liwak)
 
 
 
-Jul. 27, 2008 (1.9beta16, repository revision in "mbutscher" branch: 143)
+++ Jul. 27, 2008: 1.9beta16
+
+RepositoryRevision in "mbutscher" branch: *143*
 
     * Option to set color of editor margin.
       See OptionsDialog#*Margin# color*
@@ -160,16 +168,15 @@ Jul. 27, 2008 (1.9beta16, repository revision in "mbutscher" branch: 143)
     * Option to store relative pathes to recent wikis.
       See OptionsDialog#*Store# relative# pathes# to# wikis*
     
-    * Bug fixed: "Open Wiki Word" dialog was sometimes closed
-      when keeping it open makes more sense
-    * Bug reduced(?): Linux: Handling of local file URLs to start
-      applications works better
-    * Support for all uppercase and lowercase letters in the
-      Unicode set for creating camel-case wiki words independent of OS language
+    * Bug fixed: "Open Wiki Word" dialog was sometimes closed when keeping it open makes more sense
+    * Bug reduced(?): Linux: Handling of local file URLs to start applications works better
+    * Support for all uppercase and lowercase letters in the Unicode set for creating camel-case wiki words independent of OS language
 
 
 
-Jan. 26, 2008 (1.9beta15, repository revision in "mbutscher" branch: 140)
+++ Jan. 26, 2008: 1.9beta15
+
+RepositoryRevision in "mbutscher" branch: *140*
 
     * Menu function to copy URL of current wiki word to clipboard.
       See UrlLinking#++# Wiki:# URLs
@@ -187,3 +194,6 @@ Jan. 26, 2008 (1.9beta15, repository revision in "mbutscher" branch: 140)
       (some other issues are there yet)
     * Bug fixed: Multipage text export used local time instead of GMT time
       for modif./crea. times of pages
+
+
+[:page:PageFooter]

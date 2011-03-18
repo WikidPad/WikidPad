@@ -68,7 +68,7 @@ If "Temporary file directory" is set to "Given", enter here the path to temporar
 Minimize to system tray instead of the normal taskbar.
 
 *Switch Tabs in MRU order*
-Switch between the page tabs with Ctrl-Tab and Ctrl-Shift-Tab in an order where the most recently used tabs are selected first.
+Switch between the page tabs with [Ctrl-Tab] and [Ctrl-Shift-Tab] in an order where the most recently used tabs are selected first.
 Instead of the default shortcuts you can look how to change them at ChangingKeyBindings and modify entries "GoNextTab" and "GoPreviousTab" in "KeyBindings.py".
 
 *Minimize on close button*
@@ -261,11 +261,11 @@ Enter here the path to a script or program which takes the path or URL of a file
 
 ++++ Mouse
 
-*Middle button without CTRL*
+*Middle button without [Ctrl]*
 Set the reaction of a middle button click on a wiki word in editor, internal preview, tree or wiki-wide search results if CTRL is not pressed while clicking. You can choose between opening the word in a new tab in foreground, in background or in the same (active) tab.
 
-*Middle button with CTRL*
-Same as before, but set reaction if CTRL is pressed while clicking the middle button.
+*Middle button with [Ctrl]*
+Same as before, but set reaction if [Ctrl] is pressed while clicking the middle button.
 
 *Left double click in preview*
 When double clicking into preview (not on a link), this can either do nothing, switch the tab to editor or open a new tab with same page, but in editor mode.
@@ -274,10 +274,10 @@ When double clicking into preview (not on a link), this can either do nothing, s
 This can either do nothing, close the tab or clone it (open same page in a new tab).
 
 *Dropping files*
-*Dropping files with SHIFT*
-*Dropping files with CTRL*
+*Dropping files with [Shift]*
+*Dropping files with [Ctrl]*
 
-Control what should happen if you drag and drop files from explorer into the editor with no key pressed, with SHIFT pressed or with CTRL pressed.
+Control what should happen if you drag and drop files from explorer into the editor with no key pressed, with [Shift] pressed or with [Ctrl] pressed.
 
 Possible choices are:
     * Nothing
@@ -359,7 +359,7 @@ Controls how many seconds of inactivity before the incremental search is closed 
 Fixes some problems when entering characters in non-Western languages, e.g. when using UniKey (Vietnamese input method editor) under Windows or typing Russian under Linux. You must restart WikidPad to make the change have an effect.
 
 *Translate menu accelerators for keyboard layout*
-Windows only. Translates accelerators (aka shortcuts) of the menus to work with special keyboard layouts where the ctrl-level (layout when CTRL is pressed) differs from layout in base-level. After translation the shortcuts look wrong but work correctly. The translation is based on the layout on WikidPad startup, changes while WikidPad is running are not processed. This option has only an effect after restarting WikidPad.
+Windows only. Translates accelerators (aka shortcuts) of the menus to work with special keyboard layouts where the ctrl-level (layout when [Ctrl] is pressed) differs from layout in base-level. After translation the shortcuts look wrong but work correctly. The translation is based on the layout on WikidPad startup, changes while WikidPad is running are not processed. This option has only an effect after restarting WikidPad.
 
 *Forbid cancel on search*
 Checking this option forbids to cancel a running wiki-wide (or fast) search by clicking into the search field. For some OS (especially Mac OS) this increases search speed considerably.

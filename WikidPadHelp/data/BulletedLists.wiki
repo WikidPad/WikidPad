@@ -1,4 +1,5 @@
-﻿++ Bulleted Lists
+﻿[:page:PageHeader][:toc:]
++ Bulleted Lists
 
 To start a bulleted list the line must be indented with a tabulator.
 After the tabulator type an asterisk followed by a space.
@@ -29,14 +30,14 @@ If a line has a "lonely" bullet or number on it and you press enter, the bullet 
 You can switch off this behavior as well in "Options" dialog, page "Editor", option "Auto-unbullets".
 
 
-+++ Indenting afterwards
+++ Indenting afterwards
 
 If you have written a list already and want to indent it (more) afterwards, select the list (at least two lines must be selected) and press TAB.
 
-If you want to reduce indentation, press SHIFT-TAB instead.
+If you want to reduce indentation, press [Shift-Tab] instead.
 
 
-+++ Caution
+++ Caution
 
 Be sure to indent your list, otherwise the following text is interpreted as part of the list and therefore indented in the HTML view.
 
@@ -48,3 +49,6 @@ Example (switch to preview to see the problem):
 
 
 After the list.
+
+
+[:page:PageFooter]

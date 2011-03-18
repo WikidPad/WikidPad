@@ -1,9 +1,10 @@
-﻿++ Templates
+﻿[:page:PageHeader][:toc:]
++ Templates
 
 Templates can be used to give an already prepared content as starting point to new pages.
 
 
-+++ Using templates explicitly
+++ Using templates explicitly
 
 On a newly created page, open the context menu (right click) on the text editor and choose in the "Use Template" submenu one of the offered pages as template whose content is copied to the newly created page. If the desired template page is not listed, choose "Other..." and select the page from a dialog.
 
@@ -12,7 +13,7 @@ The list of pages suggested as templates in the context menu is defined by an op
 If a new page was modified already the context menu only offers an item "Use Template..." to get to the selection dialog. You should be aware that choosing a template there overwrites the current content of your page!
 
 
-+++ Using templates implicitly by attributes
+++ Using templates implicitly by attributes
 
 If a non-existing page has one parent which has a "template" attribute and there is no contradictory "template" attribute on one of the other parents (if any), the initial content of the new page will be taken from the page pointed to by the attribute.
 
@@ -44,7 +45,7 @@ Now you can create subpages:
 You can enhance this example using [FormPages].
 
 
-++++ Automatic heading replacement
++++ Automatic heading replacement
 
 As you might have noticed in the above examples, the heading at the top of the newly created pages was set automatically according to the name of the page like you are used to it for new, non-templated pages.
 
@@ -52,3 +53,5 @@ If you instead want to keep the heading of the template or don't want a heading 
 
 If you want to disable the automatic heading replacement for all templates of a wiki, you can place \[global.template_head: manual] on an arbitrary page of the wiki. To activate then the heading replacement for a particular template, use \[template_head: auto] on the template page.
 
+
+[:page:PageFooter]

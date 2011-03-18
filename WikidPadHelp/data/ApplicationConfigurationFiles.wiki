@@ -1,9 +1,10 @@
-﻿++ Application Configuration Files
+﻿[:page:PageHeader][:toc:]
++ Application Configuration Files
 
 Application configuration files mean here:
 
-	* the application-wide configuration files "WikidPad.config"; and
-	* the directory ".WikidPadGlobals" with all contained files.
+	* the application-wide configuration file "WikidPad.config"; and
+	* the directory ".WikidPadGlobals" with all files contained therein.
 
 This page describes where WikidPad searches for these files on startup:
 
@@ -24,6 +25,4 @@ If WikidPad is running, you can find out where the files are stored by opening t
 On Windows, you can open a console (=Dos-Box) and type the command "set" which shows all environment variables.
 
 
-
-
-[camelCaseWordsEnabled: false]
+[:page:PageFooter][camelCaseWordsEnabled: false]

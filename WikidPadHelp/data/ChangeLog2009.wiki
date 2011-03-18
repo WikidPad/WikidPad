@@ -1,7 +1,7 @@
-﻿++ Change Log2009
+﻿[:page:PageHeader][:toc:]
++ Change Log2009
 
-
-Dec. 06, 2009 (2.0beta10)
+++ Dec. 06, 2009: 2.0beta10
 
     * Bug fixed: Linux: Detection of Python version for Sqlite
       may fail (thanks to Martin Muenstermann)
@@ -12,8 +12,7 @@ Dec. 06, 2009 (2.0beta10)
     * Bug fixed: Failed to start with original sqlite wiki.
 
 
-
-Oct. 25, 2009 (2.0beta09)
+++ Oct. 25, 2009: 2.0beta09
 
     * Options to control location of temporary files.
       See [OptionsDialog#*Temporary files*]
@@ -23,8 +22,7 @@ Oct. 25, 2009 (2.0beta09)
       on close
 
 
-
-Oct. 03, 2009 (2.0beta08)
+++ Oct. 03, 2009: 2.0beta08
 
     * URLs ending with ".tif" are now also automatically image URLs
 
@@ -33,8 +31,7 @@ Oct. 03, 2009 (2.0beta08)
     * Bug fixed: Problem with links to network shares
 
 
-
-Aug. 26, 2009 (2.0beta07)
+++ Aug. 26, 2009: 2.0beta07
 
     * Support for subpages e.g. <<[WikiWord/Subword]>>.
       See [Subpages].
@@ -61,8 +58,7 @@ Aug. 26, 2009 (2.0beta07)
       saved page
 
 
-
-Jul. 26, 2009 (2.0beta06)
+++ Jul. 26, 2009: 2.0beta06
 
     * Support for storing versions of wiki pages (do not yet rely
       on this function!). See [ChronViewWindow#+++ Versions]
@@ -80,8 +76,7 @@ Jul. 26, 2009 (2.0beta06)
       selected
 
 
-
-Jun. 28, 2009 (2.0beta05)
+++ Jun. 28, 2009: 2.0beta05
 
     * Options "Wiki language" and "Footnotes as wiki words" moved to
       different options pages. See [OptionsDialog#++++ Wiki language]
@@ -100,16 +95,14 @@ Jun. 28, 2009 (2.0beta05)
       instead of '|'
 
 
-
-May 30, 2009 (2.0beta04)
+++ May 30, 2009: 2.0beta04
 
     * Support for printing rendered HTML. See [Printing]
 
     * Some bugs in translation handling fixed
 
 
-
-Apr. 28, 2009 (2.0beta03)
+++ Apr. 28, 2009: 2.0beta03
 
     * Option to reverse search order for scripts (global imports
       first). See [InlinePythonEval#+++ Security concerns]
@@ -117,13 +110,13 @@ Apr. 28, 2009 (2.0beta03)
       names (does not apply to Compact Sqlite DB backend).
       This should also fix a problem with Windows binary installer
       and WikidPad help wiki on non-western Windows versions.
-      See [OptionsDialog#*Page file names ASCII only*]
+      See [OptionsDialog#+++++ Page file names ASCII only]
     * Wiki-bound option to handle missing or externally inserted
       page files gracefully (does not apply to Compact Sqlite DB
       backend).
-      See [OptionsDialog#*Graceful handling of missing page files*]
+      See [OptionsDialog#+++ Graceful handling of missing page files]
     * New insertion "iconimage" to insert an icon into an HTML page.
-      See [Insertions#*iconimage*]
+      See [Insertions#+++++ iconimage]
     * Preview shows link target in the status bar when hovering
       with mouse over it like browsers do
     * Menu item "Select All" in "Edit" menu (for completeness)
@@ -144,14 +137,13 @@ Apr. 28, 2009 (2.0beta03)
       a value (needed for some plugins)
 
 
-
-Apr. 01, 2009 (2.0beta02)
+++ Apr. 01, 2009: 2.0beta02
 
     * Option to let selection in doc. structure automatically follow
       text cursor position in editor.
-      See [OptionsDialog#*Structure window selection auto-follow*]
+      See [OptionsDialog#+++ Structure window selection auto-follow]
     * Saved exports similar to saved searches.
-      See [WikiExport#*Saved exports*]
+      See [WikiExport#+++ Saved exports]
     * Faster stop when closing WikidPad
     * Wiki page files in UTF-16 encoding (with appropriate BOM) can now
       be read by WikidPad
@@ -161,8 +153,7 @@ Apr. 01, 2009 (2.0beta02)
     * Bug fixed: Dialog to append/prepend wikiword failed
 
 
-
-Mar. 02, 2009 (2.0beta01)
+++ Mar. 02, 2009: 2.0beta01
 
     * Option to set tab width. See [OptionsDialog#*Tab width*]
     * Combined wiki-wide search and page list construction into
@@ -193,7 +184,7 @@ Mar. 02, 2009 (2.0beta01)
       affected template creation)
 
     * Bug fixed: List of parentless nodes was wrong
-    * Bug fixed: Insertion \[:toc:] did not work.
+    * Bug fixed: Insertion of \[:toc:] did not work.
     * Bug fixed: Jumping between footnote and footnote anchor did
       not work in editor.
     * Bug fixed: HTML publishing as set of HTML pages and as
@@ -201,16 +192,14 @@ Mar. 02, 2009 (2.0beta01)
     * Bug fixed: Adding icon or color attribute failed.
     * Bug fixed: Attribute \[view_pane: editor] did not work.
     * Bug fixed: If repeating an incremental search with escaped
-      RE characters (e.g. '.', '?') the escaping backslashes
-      accumulated.
+      RE characters (e.g. '.', '?') the escaping backslashes accumulated.
     * Bug fixed: Preview failed on heading line (e.g. "+++")
       without content
     * Bug fixed: Heading level could be off by one.
     * Bug fixed: todo did not work inside a line.
 
 
-
-Jan. 27, 2009 (2.0alpha01)
+++ Jan. 27, 2009: 2.0alpha01
 
     * New menu structure, see [Menus]
     * New free icon set (thanks to Jan Stegehuis)
@@ -218,10 +207,11 @@ Jan. 27, 2009 (2.0alpha01)
     * Some options in OptionsDialog moved to "Advanced" option pages
     * Option to allow headings of a page as additional aliases when
       opening page.
-      See [OptionsDialog#*Headings as aliases: Up to heading depth*]
+      See [OptionsDialog#+++ Headings as aliases: Up to heading depth]
 
     * Bug fixed: Linux: Function keys produced characters
-    * Bug fixed: Linux: Timeline contained initially only
-      one item
-    * Bug fixed: Sqlite: Bad conversion of object ids for
-      user functions
+    * Bug fixed: Linux: Timeline contained initially only one item
+    * Bug fixed: Sqlite: Bad conversion of object ids for user functions
+
+
+[:page:PageFooter]

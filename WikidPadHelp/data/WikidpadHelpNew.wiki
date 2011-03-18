@@ -1,0 +1,29 @@
+﻿[:page:PageHeader][:toc:]
++ Wikid Pad Help
+
+[icon:top-bottom]
+
+++ Description
+[:page:WikidPad; adjheading]
+
+++ [wiki]
+What does *[wiki]* mean?: [:page:wiki; adjheading]
+
+++ How to surf the wiki
+To activate or follow a WikiWordLink, just *double click on it*, or type
+[Ctrl-L] when the cursor is in the word.
+
+While you are reading through the help document select "Wiki/New"
+from the [Menus] at the top of the application to create your own wiki.
+Then just start typing text with WikiWords and enjoy creating your wiki.
+
+++ WikidPadFeatures
+Here is an overview of *WikidPadFeatures*: [:page:WikidPadFeatures; adjheading]
+
+++ Other WikidPadTopics
+Other *WikidPadTopics* of interest are: [:page:WikidPadTopics; adjheading]
+ 
+++ Support for WikidPad 
+WikidPad is well supported - see WikidPadSupport: [:page:WikidPadSupport; adjheading]
+
+++ Style Guide for this WikiPadHe

@@ -1,8 +1,9 @@
-﻿++ Searching The Wiki/Index
+﻿[:page:PageHeader][:toc:]
++ Searching The Wiki/Index
 
 The "Index" search mode in wiki-wide search works on a prebuilt index which is automatically updated when a page is changed.
 
-+++ Enabling the index
+++ Enabling the index
 
 By default indexing is disabled. To enable it for a wiki, open the [//OptionsDialog], go to options page "Current Wiki" and check "Allow index search". After closing the dialog, WikidPad begins to index the wiki in the background. During this you can already search the index but it will be incomplete.
 
@@ -12,7 +13,7 @@ If you later disable the index the index will be deleted and must be rebuild aga
 
 Index information is stored in a directory "indexsearch" inside the wiki directory.
 
-+++ General remarks
+++ General remarks
 
 At the moment the index search has some drawbacks:
 
@@ -21,13 +22,13 @@ At the moment the index search has some drawbacks:
     * It doesn't support stemming (finding "houses" when searching for "house")
     * It doesn't support stop words (ignoring words so common that searching for them is useless, e.g. "the", "it", "an")
 
-+++ Search syntax for index search
+++ Search syntax for index search
 
 The index search uses the whoosh library (https://bitbucket.org/mchaput/whoosh/wiki/Home) and at the moment its default search syntax which is slightly different from the one for [BooleanRegex] searches.
 
 The remaining chapter contains the relevant parts of http://packages.python.org/Whoosh/querylang.html which describe the language (it is recommended to read that in preview mode):
 
-++++ Individual terms and phrases
++++ Individual terms and phrases
 
 Find documents containing the term render:
 <<pre
@@ -39,7 +40,7 @@ Find documents containing the phrase all was well:
 "all was well"
 >>
 
-++++ Boolean operators
++++ Boolean operators
 
 Find documents containing render and shading:
 <<pre
@@ -71,7 +72,7 @@ Group operators together with parentheses. For example to find documents that co
 (render AND shading) OR modeling
 >>
 
-++++ Inexact terms
++++ Inexact terms
 
 Use “globs” (wildcard expressions using ? to represent a single character and * to represent any number of characters) to match terms:
 <<pre
@@ -88,7 +89,7 @@ my so called life
 >>
 because those are four separate terms.
 
-++++ Boosting query elements
++++ Boosting query elements
 
 You can specify that certain parts of a query are more important for calculating the score of a matched document than others. For example, to specify that ninja is twice as important as other words, and bear is half as important:
 <<pre
@@ -109,3 +110,4 @@ If you need to include characters in a term that are normally treated specially 
 >>
 
 
+[:page:PageFooter]

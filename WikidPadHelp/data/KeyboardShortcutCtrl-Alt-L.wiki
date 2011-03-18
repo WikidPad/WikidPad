@@ -1,0 +1,13 @@
+﻿[:page:PageHeader][:toc:]
++ Keyboard Shortcut Ctrl-Alt-L
+
+Use [Ctrl-Alt-L] in order to activate a WikiWord link in a new tab.
+
+++ See also
+
+	* [Ctrl-L]
+	* ["Wiki Page" Menu]
+	* KeyBindings
+
+
+[:page:PageFooter][icon:key][alias:Ctrl-Alt-L][short_hint:Activate link in new tab]

@@ -1,10 +1,13 @@
-﻿++ Cascading style sheets
+﻿[:page:PageHeader][:toc:]
++ Cascading style sheets
 
 Cascading style sheets (in short: CSS) are a way to control the rendering of an HTML file in great detail. When exporting HTML from WikidPad, certain CSS files are copied to the export directory and referenced by the generated HTML page(s). They are also respected for the external IE preview, the internal preview ignores them.
 
+++ Search order
+
 WikidPad searches in the following places for CSS files to copy and reference:
 
-   * File "appbase.css" in WikidPad installation directory, copied as
+   * File "appbase.css" in the WikidPad [installation directory], copied as
      "appbase.css". You should not modify it as it is overwritten at
      each update of WikidPad
    * File "wikistyle.css" in install subdirectory "export", copied as "admbase.css"
@@ -18,7 +21,9 @@ WikidPad searches in the following places for CSS files to copy and reference:
 Settings in a file overwrite same settings in files above it.
 
 
-For preview, there are three additional files taken into account (if you want the preview to look differently).
+++ In PreView
+
+In preview, three additional files are taken into account:
 
 These files overwrite settings in the files above.
 
@@ -27,6 +32,10 @@ These files overwrite settings in the files above.
      "WikidPadGlobals" of user-specific configuration directory
    * File "wikipreview.css" in subdirectory "data" of wiki directory
 
+Use these, if you want the preview to look differently.
 
 
-To find your user-specific configuration directory see "Help" menu -> "About" and scroll to the end to find out where it is.
+To find your user-specific configuration directory see [Menu Help]!About and scroll to the end to find out where it is.
+
+
+[:page:PageFooter]
