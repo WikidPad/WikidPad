@@ -1,2 +1,2 @@
-﻿++ Icon mobile
-[icon: mobile]
+﻿+ Icon mobile
+[icon:mobile]

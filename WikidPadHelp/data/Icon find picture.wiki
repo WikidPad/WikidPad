@@ -1,2 +1,2 @@
-﻿++ Icon find picture
-[icon: find picture]
+﻿+ Icon find picture
+[icon:find picture]

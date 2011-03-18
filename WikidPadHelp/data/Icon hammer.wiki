@@ -1,2 +1,2 @@
-﻿++ Icon hammer
-[icon: hammer]
+﻿+ Icon hammer
+[icon:hammer]

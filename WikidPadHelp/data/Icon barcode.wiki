@@ -1,2 +1,2 @@
-++ Icon barcode
-[icon: barcode]
+﻿+ Icon barcode
+[icon:barcode]

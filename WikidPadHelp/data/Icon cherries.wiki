@@ -1,2 +1,2 @@
-++ Icon cherries
-[icon: cherries]
+﻿+ Icon cherries
+[icon:cherries]

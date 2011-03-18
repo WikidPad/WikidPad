@@ -1,2 +1,2 @@
-﻿++ Icon folder
-[icon: folder]
+﻿+ Icon folder
+[icon:folder]

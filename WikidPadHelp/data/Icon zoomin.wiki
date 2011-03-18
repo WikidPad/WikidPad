@@ -1,2 +1,2 @@
-﻿++ Icon zoomin
-[icon: zoomin]
+﻿+ Icon zoomin
+[icon:zoomin]

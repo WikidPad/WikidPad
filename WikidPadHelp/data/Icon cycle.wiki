@@ -1,2 +1,2 @@
-﻿++ Icon cycle
-[icon: cycle]
+﻿+ Icon cycle
+[icon:cycle]

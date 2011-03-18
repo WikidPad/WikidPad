@@ -1,2 +1,2 @@
-++ Icon component
-[icon: component]
+﻿+ Icon component
+[icon:component]

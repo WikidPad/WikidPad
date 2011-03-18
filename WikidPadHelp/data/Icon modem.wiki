@@ -1,2 +1,2 @@
-﻿++ Icon modem
-[icon: modem]
+﻿+ Icon modem
+[icon:modem]

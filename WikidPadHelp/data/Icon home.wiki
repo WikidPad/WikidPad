@@ -1,2 +1,2 @@
-﻿++ Icon home
+﻿+ Icon home
 [icon:home]

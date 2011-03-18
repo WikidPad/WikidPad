@@ -1,2 +1,2 @@
-﻿++ Icon folderwiki
-[icon: folderwiki]
+﻿+ Icon folderwiki
+[icon:folderwiki]

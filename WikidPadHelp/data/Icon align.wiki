@@ -1,3 +1,2 @@
-++ Icon align
-
-[icon: align]
+﻿+ Icon align
+[icon:align]

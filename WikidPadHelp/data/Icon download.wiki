@@ -1,2 +1,2 @@
-﻿++ Icon download
-[icon: download]
+﻿+ Icon download
+[icon:download]
