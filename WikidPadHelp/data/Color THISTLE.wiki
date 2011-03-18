@@ -1,2 +1,2 @@
-﻿++ Color THISTLE
-[color: THISTLE]
+﻿+ Color THISTLE
+[color: THISTLE][icon:color palette]

@@ -1,2 +1,2 @@
-﻿++ Color PURPLE
-[color: PURPLE]
+﻿+ Color PURPLE
+[color: PURPLE][icon:color palette]

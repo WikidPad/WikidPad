@@ -1,2 +1,2 @@
-﻿++ Color ORCHID
-[color: ORCHID]
+﻿+ Color ORCHID
+[color: ORCHID][icon:color palette]

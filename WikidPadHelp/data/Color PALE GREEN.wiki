@@ -1,2 +1,2 @@
-﻿++ Color PALE GREEN
-[color: PALE GREEN]
+﻿+ Color PALE GREEN
+[color: PALE GREEN][icon:color palette]

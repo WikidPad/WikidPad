@@ -1,2 +1,2 @@
-﻿++ Color FOREST GREEN
-[color: FOREST GREEN]
+﻿+ Color FOREST GREEN
+[color: FOREST GREEN][icon:color palette]

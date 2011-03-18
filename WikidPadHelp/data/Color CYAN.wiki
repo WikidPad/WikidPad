@@ -1,2 +1,2 @@
-﻿++ Color CYAN
-[color: CYAN]
+﻿+ Color CYAN
+[color: CYAN][icon:color palette]

@@ -1,2 +1,2 @@
-++ Color AQUAMARINE
-[color: AQUAMARINE]
+﻿+ Color AQUAMARINE
+[color: AQUAMARINE][icon:color palette]

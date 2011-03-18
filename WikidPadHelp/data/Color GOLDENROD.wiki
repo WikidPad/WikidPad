@@ -1,2 +1,2 @@
-﻿++ Color GOLDENROD
-[color: GOLDENROD]
+﻿+ Color GOLDENROD
+[color: GOLDENROD][icon:color palette]
