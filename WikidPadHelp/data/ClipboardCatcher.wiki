@@ -1,25 +1,28 @@
 ﻿[:page:PageHeader][:toc:]
 + Clipboard Catcher (certain OS' only)
 
-The clipboard catcher is similar to the ScratchPad. While the
-ScratchPad catches text chunks which are especially copied to it from
-inside WikidPad, the clipboard catcher collects every piece of text
-copied (or cutted) to the clipboard from every other application and
-appends it to a WikiPage of your choice.
+The clipboard catcher is similar to the ScratchPad. The difference is:
+
+	* The ScratchPad catches text chunks which are specifically copied to it from inside WikidPad.
+	* The ClipboardCatcher collects every piece of text copied (or cutted) to the ClipBoard from every other application and appends it to a WikiPage of your choice.
 
 
 ++ Prerequisites
 
-Unfortunately the clipboard catcher is not available for all operating systems and environments. For Windows it works out of the box, for Linux/Gnome some things should be paid attention to:
+The ClipboardCatcher is not available for all operating systems and environments, unfortunately. 
 
-    * It needs pyGTK to be installed properly.
-    * It only works on the default clipboard, not the so-called
+For MsWindows it works out of the box.
+
+For Linux/Gnome systems, attention should be paid to the following:
+
+    * [pyGTK] needs to be installed properly.
+    * It only works on the default ClipBoard, not the so-called
     "primary" clipboard used when selecting text and pressing middle
     mouse button for insert.
     * If "Avoid doubled snippets" in the options for the catcher isn't
     checked, you may see that copying or cutting text in WikidPad while the
     catcher is on may behave unexpected (because WikidPad tries to copy/cut
-    and insert the clipboard contents at the same time). With "Avoid doubled
+    and insert the ClipBoard contents at the same time). With "Avoid doubled
     snippets" checked, it can detect this case.
     * It was only tested on Ubuntu 8.04 using Gnome. There may be
     situations (e.g. with KDE/Qt-applications) where it doesn't work.

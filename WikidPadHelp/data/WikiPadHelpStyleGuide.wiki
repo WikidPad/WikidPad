@@ -77,7 +77,7 @@ is used for the page abut WikiMaintenance.
 [Icon disk] is used for the page about AutoSave.
 
 +++++ icon: folder
-[Icon folder] is used for the pages related to directories such as about 
+[Icon folder] is used for the pages related to directories such as 
 the [installation directory] or the [data directory].
 
 +++++ icon: console

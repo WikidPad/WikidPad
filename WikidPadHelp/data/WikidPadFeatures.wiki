@@ -5,8 +5,7 @@
     * WikiWords can be CamelCase or [Not Camel Case].
     * UrlLinking
     * [Anchors] and [Footnotes]
-    * TreeNodeIcons
-    * TreeNodeColors
+    * TreeNodeIcons and TreeNodeColors
     * WikiWordNavigation (KeyBindings)
     * WikiWordHistory viewer/navigation
     * AutoSave
@@ -20,7 +19,7 @@
 
     * RenamingWikiWords
     * WikiFonts
-    * Wiki word AutoCompletion
+    * AutoCompletion
     * DynamicViews
     * SearchingTheWiki
     * SpellChecking
@@ -38,11 +37,11 @@
     * [Subpages]
     * OptionsDialog
     * CommandLineSupport
-    * WikidPadOnUSB / ApplicationConfigurationFiles
+    * [Wikid Pad on a USB stick] / ApplicationConfigurationFiles
     * [Templates]
     * [Folding]
     * Different DatabaseTypes (WhereIsTheDataStored ?, MigrationBetweenDbTypes)
-    * Defining TextBlocks
+    * Define reusable TextBlocks
     * WikiStructureGraphs
 
 +++ Other topics of interest

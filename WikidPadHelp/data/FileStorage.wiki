@@ -3,7 +3,7 @@
 
 Each wiki can have a file storage (in fact a directory "files" in the wiki directory) where files from other places can copied into. This is helpful if you want to have the wiki and related files in the same place.
 
-You can copy a file into the file storage by holding the control key when dropping one or more files from Windows Explorer onto the editor. These files are then copied into the file storage and relative links to them are created in the editor. If a file was already in the storage (see "Identity check" below) a link to the existing file is shown instead and no copying is performed.
+You can copy a file into the file storage by holding the control key when dropping one or more files from MsWindowsExplorer onto the editor. These files are then copied into the file storage and relative links to them are created in the editor. If a file was already in the storage (see "Identity check" below) a link to the existing file is shown instead and no copying is performed.
 
 If copying is necessary and a file with exactly the same name is not yet present in the repository, the full name of the source file is kept unmodified. Otherwise a random sequence of 10 letters/digits is generated and appended at the end of the file name (but before file suffix). If this name is also already in use, the program tries again with a different random sequence (up to 10 tries before giving up).
 

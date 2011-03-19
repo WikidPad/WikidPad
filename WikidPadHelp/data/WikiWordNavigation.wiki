@@ -2,7 +2,7 @@
 
 *Open Parent/Children Words*
 
-You can use the tree to navigate your wikiwords.  Or you can use the
+You can use the tree to navigate your WikiWords.  Or you can use the
 "view parents" and "view children" feature.
 
 To view the parents of the current page, the pages that link to this
@@ -19,7 +19,7 @@ of different ways.
     1. Double click the link.
     2. Hold down control and click the link.
     3. Type [Ctrl-L] to Activate the link.
-    4. For wikiwords you can also use [Ctrl-Shift-L]
+    4. For WikiWords you can also use [Ctrl-Shift-L]
 
 *To Open Any Word*
 

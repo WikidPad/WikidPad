@@ -17,4 +17,4 @@ zžtsš
 ÓsÔsÖsÚsÜsÝ
 
 
-[:page:PageFooter][icon:spanner]
+[:page:PageFooter][icon:spanner][camelCaseWordsEnabled: false]

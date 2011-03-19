@@ -106,7 +106,7 @@ file).
 After that the program terminates immediately (otherwise the files
 would be recreated).
 
-This switch is mainly used for the uninstalling of a Windows binary.
+This switch is mainly used for the uninstalling of a MsWindowsBinary.
 The uninstaller *will* ask before running WikidPad with this option.
 
 

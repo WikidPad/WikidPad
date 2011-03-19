@@ -347,6 +347,7 @@ WikidPadHelp/data/ScratchPad.wiki -text
 WikidPadHelp/data/SearchingTheWiki%2FBooleanRegex.wiki -text
 WikidPadHelp/data/SearchingTheWiki%2FIndex.wiki -text
 WikidPadHelp/data/SearchingTheWiki.wiki -text
+WikidPadHelp/data/ShortHintAttribute.wiki -text
 WikidPadHelp/data/SpellChecking.wiki -text
 WikidPadHelp/data/Subpages.wiki -text
 WikidPadHelp/data/SystemInfoTemplate.wiki -text
@@ -389,12 +390,13 @@ WikidPadHelp/data/WikidPad.wiki -text
 WikidPadHelp/data/WikidPadFeatures.wiki -text
 WikidPadHelp/data/WikidPadGlossary.wiki -text
 WikidPadHelp/data/WikidPadHelp.wiki -text
-WikidPadHelp/data/WikidPadInstallDirectory.wiki -text
+WikidPadHelp/data/WikidPadInstallationDirectory.wiki -text
 WikidPadHelp/data/WikidPadOnUSB.wiki -text
 WikidPadHelp/data/WikidPadSupport.wiki -text
 WikidPadHelp/data/WikidPadTopics.wiki -text
 WikidPadHelp/data/WikidPadWikiDataDirectory.wiki -text
 WikidPadHelp/data/WikidpadHelpNew.wiki -text
+WikidPadHelp/data/WordLinking.wiki -text
 WikidPadHelp/data/index/DOCUMENTS.grl -text
 WikidPadHelp/data/index/TEXT_INDEX.grl -text
 WikidPadHelp/data/index/WORDS.grl -text

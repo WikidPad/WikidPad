@@ -1,17 +1,18 @@
-﻿++ Change Log
+﻿[:page:PageHeader][:toc:]
++ Change Log
 
-Feb. 27, 2011 (2.2beta01)
+++ Feb. 27, 2011: 2.2beta01
 
     * Support for [.] to refer to current wiki page
     * Introduced "prel" and "pabs" in URL appendix and automatic
       adaption of relative links. See [UrlLinking#++ URL Appendix]
-    * Windows binary installer now supports creation of a portable
+    * MsWindowsBinaryInstaller now supports creation of a portable
       install (no uninstall, no registry or start menu changes)
     * Incremental search now also supported in inline diff view
     * Removed annoying "blinking" on current heading in
       doc structure window (thanks to Christian Ziemski)
     * Introduced splash window.
-      See [OptionsDialog#*Show splash screen*]
+      See [OptionsDialog#+++ Show splash screen]
 
     * Bug fixed: Autocompletion for anchors treated wiki links as
       wiki words (no relative or absolute paths supported)
@@ -25,8 +26,7 @@ Feb. 27, 2011 (2.2beta01)
       wxPython versions
 
 
-
-Jan. 30, 2011 (2.1beta11)
+++ Jan. 30, 2011: 2.1beta11
 
 This version needs a rebuild of the index if you enabled indexed
 search. This is done automatically in the background but may
@@ -38,20 +38,20 @@ official parser
 
     * Option for translating menu accelerators for special keyboard
       layouts where ctrl-level has other layout than base level.
-      See [OptionsDialog#*Translate menu accelerators for keyboard layout*]
+      See [OptionsDialog#+++ Translate menu accelerators for keyboard layout]
     * Option to show iframe content from external sources inside
       the HTML IE preview.
       See [Options HTML preview_export#*Show iframes inside IE preview*]
-    * Experimental: Windows: Option to let scroll-wheel scroll
-      windows under pointer. Doesn't work for some windows.
-      See [OptionsDialog#*Scroll under pointer*]
+    * Experimental: MsWindows: Option to let scroll-wheel scroll
+      the window under the pointer. Doesn't work for some windows.
+      See [OptionsDialog#+++ Scroll under pointer]
     * Index search: Highlight found terms and jump to one found
       term on double-click
     * Removed plus signs in front of headings in page structure
       view, used indentation instead
 
     * Several bug fixes regarding "whoosh" (index search)
-    * Bug fixed: Windows: "Invalid handle" error on command line
+    * Bug fixed: MsWindows: "Invalid handle" error on command line
       bridge insertion plugins
     * Bug fixed: Autocompletion for anchors treated wiki links as
       wiki words (no relative or absolute paths supported)
@@ -61,8 +61,7 @@ official parser
       of current WikidPad version
 
 
-
-Dec. 27, 2010 (2.1beta10)
+++ Dec. 27, 2010: 2.1beta10
 
 Creators of derived WikidPad parsers should merge changes from
 official parser
@@ -79,8 +78,7 @@ official parser
       internationalization
 
 
-
-Dec. 05, 2010 (2.1beta09)
+++ Dec. 05, 2010: 2.1beta09
 
 Creators of derived WikidPad parsers should merge changes from
 official parser
@@ -95,8 +93,7 @@ official parser
     * Bug fixed: Empty line after table was eaten in HTML export
 
 
-
-Oct. 30, 2010 (2.1beta08)
+++ Oct. 30, 2010: 2.1beta08
 
     * Chinese translation of user interface (thanks to yuxiaoxu)
     * Hungarian translation of user interface (thanks to Török Árpád)
@@ -116,8 +113,7 @@ Oct. 30, 2010 (2.1beta08)
     * Internal: Changes in GUI layout to better support internationalization
 
 
-
-Sep. 25, 2010 (2.1beta07)
+++ Sep. 25, 2010: 2.1beta07
 
     * "WikidPadParser.py" modified. If you have your own version
       you must update it!
@@ -128,7 +124,7 @@ Sep. 25, 2010 (2.1beta07)
     * See [Subpages#+++ Wiki links versus wiki page names]:
         * "alias" and "template" attributes now process wiki links
           instead of wiki page names
-        * Replace text by wikiword dialog now processes wiki links
+        * Replace text by WikiWord dialog now processes wiki links
           instead of wiki page names
         * Auto-completion updated
 
@@ -145,14 +141,13 @@ Sep. 25, 2010 (2.1beta07)
       circumstances
 
 
-
-Aug. 29, 2010 (2.1beta06)
+++ Aug. 29, 2010: 2.1beta06
 
     * Inline diff between versions.
       See [ChronViewWindow#++++ Compare differences]
-    * Windows: Option to warn about other WikidPad processes running
+    * MsWindows: Option to warn about other WikidPad processes running
       in single process mode.
-      See [OptionsDialog#*Warn about other processes*]
+      See [OptionsDialog#+++ Warn about other processes]
     * Option "coldir down" in appendix of "rel" insertions to sort
       found wiki words downwards in columns instead of rightwards.
       See [Insertions#multi-column table is sorted rightwards]
@@ -163,15 +158,14 @@ Aug. 29, 2010 (2.1beta06)
     * Small problems with non-ascii paths fixed
 
 
-
-Jul. 27, 2010 (2.1beta05)
+++ Jul. 27, 2010: 2.1beta05
 
     * When dropping files you now have options to move files to
       file storage (instead of copying) and to be asked every time
-      what to do. See [OptionsDialog#*Dropping files*]
+      what to do. See [OptionsDialog#+++ Dropping files]
     * Option to define what to insert before, after and between file
       links when dropping files.
-      See [OptionsDialog#+++++ File dropping] 
+      See [OptionsDialog#+++ File dropping] 
     * Spell check while type.
       See [SpellChecking#++ Spell check while type]
     * Commandline options to start tabs in preview mode and to
@@ -184,8 +178,7 @@ Jul. 27, 2010 (2.1beta05)
       for i18n
 
 
-
-Jul. 04, 2010 (2.1alpha04)
+++ Jul. 04, 2010: 2.1alpha04
 
     * Export of previous versions of a wiki page in multipage text
       file format is supported now.
@@ -203,25 +196,24 @@ Jul. 04, 2010 (2.1alpha04)
       versions side-by-side with non-English UI language
     * Workaround: Option to forbid cancelling of running
       wiki-wide search.
-      See [OptionsDialog#*Forbid cancel on search*]
+      See [OptionsDialog#+++ Forbid cancel on search]
 
 
-
-Jun. 05, 2010 (2.1alpha03)
+++ Jun. 05, 2010: 2.1alpha03
 
     * When creating new wiki, dialog also asks if ascii-only
       file names should be used for wiki page files (default is on
-      for Mac OS, see [OptionsDialog#*Page file names ASCII only*])
+      for MacOS, see [OptionsDialog#+++ Page file names ASCII only])
     * Option to slow down background tree update (to reduce
       response delay of WikidPad).
-      See [OptionsDialog#*Update step min. delay*]
+      See [OptionsDialog#+++ Update step min. delay]
     * Support for processing right-clicks on toolbar icons from
       plugins (see file "extensions/referrals.py" as an example)
 
-    * Process "binInst.ini"-file (needed for Windows binary
+    * Process "binInst.ini"-file (needed for MsWindowsBinary
       wxPython downgrade)
-    * Windows: Workaround for too short labels in wxListCtrl
-    * Mac OS: Further changes to keybindings
+    * MsWindows: Workaround for too short labels in wxListCtrl
+    * MacOS: Further changes to keybindings
     * Bug fixed: Setting wiki to readonly failed
     * Bug fixed: Linux: Problems when switching tabs too fast
       (thanks to Christian Ziemski)
@@ -233,10 +225,9 @@ Jun. 05, 2010 (2.1alpha03)
       notice a change)
 
 
+++ May 04, 2010: 2.1alpha02
 
-May 04, 2010 (2.1alpha02)
-
-    * CSS style classes for the heading levels (named "heading-level1"
+    * [CSS] style classes for the heading levels (named "heading-level1"
       to "heading-level15")
     * Appendix "adjheading" for insertion "page" to adjust headings of
       a page included into another. See [Insertions#    * *page*]
@@ -249,18 +240,17 @@ May 04, 2010 (2.1alpha02)
       to show a list where user can select zero or more list entries.
       See [ApiDocs#stdDialog(]
 
-    * Mac OS: Several enhancements and bug fixes (thanks to
+    * MacOS: Several enhancements and bug fixes (thanks to
       Christian Ziemski)
     * Reduction of used CPU time while WikidPad is minimized
     * Workaround for problems to detect screen size
       in multi-display environments
     * Internal: Clearer error message for missing XML-ID
-    * Internal: Windows binary: Plugins are now compiled at
+    * Internal: MsWindowsBinary: Plugins are now compiled at
       run-time with "-O" option (keeps doc-strings)
 
 
-
-Apr. 05, 2010 (2.1alpha01)
+++ Apr. 05, 2010: 2.1alpha01
 
     * New database format! It is recommended to make a backup before
       updating and run "Maintenance"->"Update cache" after that
@@ -274,7 +264,7 @@ Apr. 05, 2010 (2.1alpha01)
     * In wiki-wide search in boolean search mode, the "\todo:" prefix
       now behaves exactly as the "attr:" prefix.
       See [SearchingTheWiki/BooleanRegex#++++ todo:]
-    * Tabs close now if a wikiword is deleted and no other word is
+    * Tabs close now if a WikiWord is deleted and no other word is
       in the history of this tab
     * Context menu of "file:" and "rel:" URLs now offers to open
       containing folder of a file
@@ -291,7 +281,7 @@ Apr. 05, 2010 (2.1alpha01)
     * Some key bindings in Scintilla editor component removed to avoid
       interference with WikidPad key bindings
     * Some changes to better handle missing Unicode support for
-      filesystem in Python (affects mainly Mac OS)
+      filesystem in Python (affects mainly MacOS)
 
     * Bug fixed: Keyboard shortcut for ActivateLinkBackground
       doesn't work
@@ -302,8 +292,7 @@ Apr. 05, 2010 (2.1alpha01)
       a wiki
 
 
-
-Feb. 28, 2010 (2.0beta13)
+++ Feb. 28, 2010: 2.0beta13
 
     * It's now possible to copy whole directories into the
       file storage of a wiki
@@ -322,13 +311,12 @@ Feb. 28, 2010 (2.0beta13)
       tab content, therefore no keyboard navigation in tree
     * Bug fixed: Linux: Problems with tab switching by keyboard
 
-    * Bug fixed: Windows: Incomplete or foreign enchant installation
+    * Bug fixed: MsWindows: Incomplete or foreign enchant installation
       may crash WikidPad on startup
-    * Bug fixed: Windows 7: Error message when using font dialog
+    * Bug fixed: MsWindows7: Error message when using font dialog
 
 
-
-Jan. 31, 2010 (2.0beta12)
+++ Jan. 31, 2010: 2.0beta12
 
     * Support for renaming of subpages when renaming superpage.
       See [RenamingWikiWords]
@@ -337,8 +325,7 @@ Jan. 31, 2010 (2.0beta12)
     * Bug fixed: In wiki-wide search "Replace All" didn't work
 
 
-
-Jan. 06, 2010 (2.0beta11)
+++ Jan. 06, 2010: 2.0beta11
 
     * Support for clipboard catcher on Linux (at least Gnome).
       See [ClipboardCatcher#+ Prerequisites]
@@ -351,20 +338,15 @@ Jan. 06, 2010 (2.0beta11)
       IME workaround
 
 
-[ChangeLog2009]
+++ Previous Years
 
-[ChangeLog2008]
-
-[ChangeLog2007]
-
-[ChangeLog2006]
-
-[ChangeLog2005]
-
-[ChangeLog2004]
-
-[ChangeLog2003]
++++ [ChangeLog2009]
++++ [ChangeLog2008]
++++ [ChangeLog2007]
++++ [ChangeLog2006]
++++ [ChangeLog2005]
++++ [ChangeLog2004]
++++ [ChangeLog2003]
 
 
-[bookmarked: true]
-[tree_position: 0]
+[:page:PageHeader][bookmarked: true][tree_position: 0]

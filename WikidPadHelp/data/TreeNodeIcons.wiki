@@ -5,8 +5,8 @@ Following icons may be used with the [icon attribute].
 Example:
 \[icon:icon]
 
-You can add additional icons to WikidPad by putting 16x16
-gif's into the "icons" directory below the WikidPadInstallDirectory.
+You can add additional icons to WikidPad: Just put 16x16 gif's 
+into the "icons" directory below the [WikidPad installation directory].
 
 See the IconTestPage for actual usage.
 

@@ -29,12 +29,12 @@
 
     1. Added child_sort_order attribute support.  A parent node can set
        child_sort_order to "ascending", "descending", or "unsorted" to control
-       the order of the child nodes in the tree.
+       the order of the [child nodes] in the [tree view dialog].
        
        [child_sort_order: unsorted]
        
     2. User can now place their extensions in "user_extensions" under the
-       wikidPad install directory.  This directory will not be touched when
+       [WikidPad installation directory].  This directory will not be touched when
        upgrading wikidPad.  Copy the files in the "extensions" directory to
        get started.
 
@@ -63,11 +63,11 @@
 
     1. Fixed a bug with todo lists under Views. Actual todo list items weren't
        displayed, only the todo list categories were.
-    2. Added support passing the wiki word to open on the command line.
-        wikidpad.exe wikiroot.wiki wikiword        
-       You can also pass in the name of a wiki word file and wikidpad will
+    2. Added support passing the WikiWord to open on the command line.
+       <code>wikidpad.exe wikiroot.wiki WikiWord</code>
+       You can also pass in the name of a WikiWord file and WikidPad will
        open the wiki for that word and then open the word.
-        wikidpad.exe path_to_wiki_word_file.wiki
+       <code>wikidpad.exe path_to_wiki_word_file.wiki</code>
        This also means that you can now double click on a wiki word file
        and wikidpad will open the wiki for the word, and then open the word.
 
@@ -117,11 +117,11 @@
     6. You can now have more than 1 link on a line.
         http://www.google.com/ http://www.yahoo.com/
     7. Added "tree_position" attribute.  Look at the bottom of this page.
-       You can now change the order of the tree nodes by assigning a
+       You can now change the order of the [tree nodes] by assigning a
        "tree_position" or a "priority" to a node.  This page has a
        tree_position of 0, so it is at the top of the tree to the left.
-    8. Clicking on a todo in the "Views" node will now highlight the todo
-       item in the document.
+    8. Clicking on a todo in the ["Views" node] will now highlight the 
+       TodoItem in the document.
     9. Added support for script imports. This allows you to define a set
        of scripts in a GlobalScriptLibrary and then import them.
        

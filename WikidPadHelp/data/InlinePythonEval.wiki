@@ -71,7 +71,7 @@ there either, the page mentioned in global.import_scripts is searched.
 As already said, this happens only with the right security settings.
 
 You can define your own functions for evaluation by copying
-evalLibrary.py into a directory in the wikidPad install directory
+evalLibrary.py into a directory below the [WikidPad installation directory]
 called "user_extensions". This file will not be touched when upgrading
 wikidPad.
 

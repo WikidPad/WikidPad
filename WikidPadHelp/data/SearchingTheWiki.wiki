@@ -28,7 +28,7 @@ If "Order Pages" is available you have following options:
     * "Alphabetically"
     * "Natural" tries to order in the way the user would expect
       the pages to be ordered (well, more or less). If you have
-      created your own list of wikiwords, the "natural" order keeps
+      created your own list of WikiWords, the "natural" order keeps
       them as they are sorted by you. "Natural" is the second
       slowest order mode. 
     * "As Tree" tries to sort as words would appear in the main

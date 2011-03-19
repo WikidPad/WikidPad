@@ -7,7 +7,7 @@ Cascading style sheets (in short: CSS) are a way to control the rendering of an 
 
 WikidPad searches in the following places for CSS files to copy and reference:
 
-   * File "appbase.css" in the WikidPad [installation directory], copied as
+   * File "appbase.css" in the [WikidPad installation directory], copied as
      "appbase.css". You should not modify it as it is overwritten at
      each update of WikidPad
    * File "wikistyle.css" in install subdirectory "export", copied as "admbase.css"

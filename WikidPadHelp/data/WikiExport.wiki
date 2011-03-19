@@ -23,7 +23,7 @@ Or you can use Publish as HTML / Other Export to show a dialog to choose other s
 Choose if you want to export current page only, the current page and all sub-pages (children, grandchildren...), the whole wiki or use "Custom..." to open the [SearchingTheWiki#To search all pages: Full search|full search].
 
 +++ Compatible filenames
-Uses ASCII-only filenames for exported files so that they can be transferred to other filesystems without compatibility issues. On Windows XP and Server 2003 the AppLocale utility (see http://www.microsoft.com/globaldev/tools/apploc.mspx ) might also help on export problems.
+Uses ASCII-only filenames for exported files so that they can be transferred to other filesystems without compatibility issues. On MsWindowsXP and MsWindowsServer2003 the AppLocale utility (see http://www.microsoft.com/globaldev/tools/apploc.mspx ) might also help on export problems.
 
 +++ Export to
 You can export a single [HTML page], one [HTML page] for each WikiPage, a [Multipage text format] file or a set of .wiki files (mainly interesting for Compact version to migrate to original).

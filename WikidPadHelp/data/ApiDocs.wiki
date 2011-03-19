@@ -1,13 +1,10 @@
 ﻿[:page:PageHeader][:toc:]
 + WikidPad Hooks
 
-Under the directory where wikidPad is installed, there is a subdirectory called "extensions".
+Under the [WikidPad installation directory], there is a subdirectory called "extensions".
+In this directory there is a file called "wikidpadhooks.py".
 
-(Note: Under MS-Windows, this install directory is file:///C|/Program%20Files/WikidPad by default.)
-
-In this install folder there is a file called "wikidpadhooks.py".
-
-If you know Python you can extend wikidPad by hooking into the events sent to the methods defined
+If you know Python you can extend WikidPad by hooking into the events sent to the methods defined
 in this file. For example, you could integrate wikidPad with a cvs system by plugging into the onopen, onsave, ondelete, onrename events.
 
 file:///C|/Program%20Files/WikidPad/extensions/WikidPadHooks.py
@@ -38,10 +35,10 @@ name "mainControl".
     Write any changes to the wiki to disk.
 
 +++++ openWikiPage(wikiWord)
-    Open a specific wiki word.
+    Open a specific WikiWord.
 
 +++++ findCurrentWordInTree()
-    Select the currently open page in the tree control.
+    Select the currently open page in the [tree control].
 
 +++++ viewParents(word)
     Pop up the dialog that shows the parents of the node passed in.
@@ -50,13 +47,13 @@ name "mainControl".
     Pop up the dialog that shows the children of the node passed in.
 
 +++++ viewParentLess()
-    Pop up the dialog that shows the parentless nodes.
+    Pop up the dialog that shows the [parentless nodes].
 
 +++++ viewBookmarks()
-    Pop up the dialog that shows the bookmarked nodes.
+    Pop up the dialog that shows the [bookmarked nodes].
 
 +++++ viewHistory()
-    Pop up the dialog that shows the history of visited pages.
+    Pop up the dialog that shows the [history of visited pages].
 
 +++++ saveCurrentWikiPage()
     Save the current wiki page to disk.
@@ -150,7 +147,7 @@ the available methods on the wikidPad object.
     The parsed wikidpad.config file.
 
 +++++ wikiAppDir
-    The installation directory of wikidPad.
+    The [installation directory] of wikidPad.
 
 +++++ wikiPadHelp
     The location of the help wiki.

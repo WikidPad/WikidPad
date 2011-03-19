@@ -10,8 +10,8 @@ RepositoryRevision in "mbutscher" branch: *100*
     * "noerror" appendix for insertions for external graphical apps
       (except MimeTeX) to ignore warning/error messages.
       See ExternalGraphicalApplications.
-    * For Windows: Option to use Internet Explorer or
-      (with restrictions) Mozilla to render [HTML preview]
+    * For MsWindows: Option to use the MsInternetExplorer or
+      (with restrictions) the Mozilla to render [HTML preview]
       (including a new style sheet to control preview).
       See [Options HTML preview_export]#*Preview# renderer*
     * Option to set doctype for [HTML preview]/[HTML export].
@@ -43,7 +43,7 @@ RepositoryRevision in "mbutscher" branch: *99*
     * Renaming links to a page when renaming the page now only
       renames whole words.
 
-    * Windows binary installer: .wiki file of WikidPadHelp are now
+    * MsWindowsBinaryInstaller: .wiki file of WikidPadHelp are now
       always overwritten on updating.
 
     * Internal: Plugin type "InsertionByKey" created which registers
@@ -77,7 +77,7 @@ RepositoryRevision in "mbutscher" branch: *95*
       insertion added. See WikiMaintenance!finding_undefined_links,
       [Insertions]
     * Better alphabetical sort order for wiki words, todos,
-      attributes in tree. See OptionsDialog#*Sort# order*
+      attributes in tree. See [OptionsDialog# +++Sort order]
     * The order how WikiPages are ordered when printing or
       exporting the whole wiki or a subtree to a single HTML page
       is (hopefully) more logical. It is the same as the new
@@ -128,7 +128,7 @@ Changes:
       readable anymore for older versions of WikidPad.
     * Updating of wiki databases to new versions is now done only
       after asking user.
-    * New position for configuration files on Windows inside
+    * New position for configuration files on MsWindows inside
       "Application Data\WikidPad" directory. You might have to move
       "WikidPad.config" file and ".WikidPadGlobals" directory from
       "Application Data" to the new location if updating from
@@ -219,7 +219,7 @@ Changes:
     * Internal: Extension files are now loaded with universal
       newline support, so newline conversion for Linux shouldn't
       be necessary anymore.
-    * Windows binary installer now supports installation for
+    * MsWindowsBinaryInstaller now supports installation for
       current user only (on NT-based systems) or for all users
       (if installing as administrator, you are asked how to
       install).
@@ -268,7 +268,7 @@ RepositoryRevision in "mbutscher" branch: *77*
 
 Changes:
 
-    * Clipboard catcher (Windows only): Every piece of text added to
+    * Clipboard catcher (MsWindows only): Every piece of text added to
       the clipboard is also appended to a WikiPage if the clipboard
       catcher is active. There is also an option to set some suffix
       after each caught piece of text from clipboard (by default, a
@@ -295,7 +295,7 @@ Changes:
       See [ApiDocs]#stdDialog
 
     * Changed method to find [configuration directory], more suitable
-      for WikidPad on USB-stick and more reliable. See WikidPadOnUSB
+      for [Wikid Pad on a USB stick] and more reliable. See WikidPadOnUSB
       and ApplicationConfigurationFiles.
 
 
@@ -329,7 +329,7 @@ Changes:
     * Support for zoom in preview (with [Ctrl-+], [Ctrl--] and
       [Ctrl-Mousewheel]).
     * Better formatting of titles of newly created WikiPages
-      (e.g. wikiword "URLViewer" now leads to title "++ URL Viewer"
+      (e.g. WikiWord "URLViewer" now leads to title "++ URL Viewer"
       instead of "++ URLV iewer"
 
     * Bug fixed: Tree always visible on WikidPad start, even if
@@ -459,7 +459,7 @@ RepositoryRevision in "mbutscher" branch: *60*
 Changes:
     * Commandline support for exporting (parts of) a wiki and
       deletion of personal configuration (see [CommandLineSupport])
-    * Windows binary installer: Support for deleting config.
+    * MsWindowsBinaryInstaller: Support for deleting config.
       files on uninstall
     * Support HTML tags in WikidPad
 
@@ -468,7 +468,7 @@ Changes:
       "functional pages", located under Views in tree
     * Editor font now changes instantly after saving page
     * Now at most one script is executed when pressing
-      [Ctrl-Number] (search order: local page, imported scripts,
+      [Ctrl-#] (search order: local page, imported scripts,
       global imported scripts page)
 
     * Better handling of property "camelCaseWordsEnabled" during
@@ -509,7 +509,7 @@ Changes:
       properties, except there is e.g. a
       'global.work.somewhere.else.color' property. This works for
       'color', 'icon' and 'bold' properties which control the
-      presentation of the tree nodes (see [WikiDocumentAttributes]).
+      presentation of the [tree nodes] (see [WikiDocumentAttributes]).
 
     * Differential user_extensions: A file in "user_extensions"
       now only needs to contain the  definitions which are

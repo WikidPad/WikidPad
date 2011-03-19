@@ -1,31 +1,32 @@
-﻿++ Wikid Pad Help
+﻿[:page:PageHeader][:toc:]
++ Wikid Pad Help
 
-*Description*
+++ Description
 
-wikidPad is a wiki-like notebook for storing your thoughts, ideas,
-todo lists, contacts or anything else you can think of that's
-important.  What makes wikidPad different from other notepad or
+WikidPad is a wiki-like notebook for storing your thoughts, ideas,
+TodoItems, contacts or anything else you can think of that's
+important.  What makes WikidPad different from other notepad or
 outliner applications is the ease with which you can cross-link your
 information.  Links in a wiki are created by typing in WikiWords.  A
-wiki word is any mixed case word typed into the editor.  TodoList or
+WikiWord is any mixed case word typed into the editor.  TodoList or
 JohnDoe are example WikiWords.  The term wiki means "quick" in
 Hawaiian, and wikis are all about quickly linking your information
 together.
 
-To activate or follow a Wiki Word link, *double click on it*, or type
-CTRL-L when the cursor is in the word.
+To activate or follow a WikiWord link, *double click on it*, or type
+[Ctrl-L] when the cursor is in the word.
 
 When you are finished reading through the help document select "Wiki/New"
 from the menu at the top of the application to create your own wiki.
 Then just start typing text with WikiWords to create your wiki.
 
-*Features*
+++ Features
 
     * On the fly wiki WordLinking
     * Wiki words can be CamelCase or [Not Camel Case].
     * UrlLinking
     * [Anchors] and [Footnotes]
-    * TreeIcons
+    * TreeNodeIcons
     * TreeNodeColors
     * WikiWordNavigation (KeyBindings)
     * WikiWordHistory viewer/navigation
@@ -75,7 +76,7 @@ Then just start typing text with WikiWords to create your wiki.
     * WikiLockFile
     * ApiDocs / WikidPadHooks
     * ThirdPartyLibraries
+    * WikidPadSupport
 
-Email mbutscher@gmx.de or wikidpad@jhorman.org if you have additional questions.
 
-[alias: HelpDocument]
+[:page:PageFooter][alias: HelpDocument]

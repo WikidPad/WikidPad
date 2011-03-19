@@ -1,9 +1,9 @@
 ﻿[:page:PageHeader][:toc:]
 + Spell Checking
 
-If you have installed the spell check add-on (for Windows binary distribution) or the pyEnchant library (for source distribution) you can run a spell check for a page or the whole wiki.
+If you have installed the spell check add-on (for MsWindowsBinaryDistribution) or the pyEnchant library (for source distribution) you can run a spell check for a page or the whole wiki.
 
-You should be able to retrieve the add-on from the same place where you loaded WikidPad from. The add-on should be installed after WikidPad is installed and in the same directory as WikidPad. When deinstalling WikidPad, the add-on must be deinstalled separately.
+You should be able to retrieve the add-on from the same place where you loaded WikidPad from. The add-on should be installed after WikidPad is installed, and into the same directory, the [WikidPad installation directory]. When deinstalling WikidPad, the add-on must be deinstalled separately.
 
 The enchant library allows to use multiple of the available spell checker programs (like ISpell) and the dictionaries created for them.
 
@@ -27,7 +27,7 @@ http://wiki.services.openoffice.org/wiki/Dictionaries
 
 should work as well.
 
-A dictionary consists of a .dic and an .aff file with the same name (like e.g. "en_US"). To install a new one, go to the installation directory of WikidPad, then in dir. "share" down in dir. "enchant". There you will see directories "ispell" and "myspell". Just copy the .dic and .aff files into the directory for the appropriate spell checker (ispell or myspell). After that WikidPad should be ready to use the dictionary.
+A dictionary consists of a .dic and an .aff file with the same name (like e.g. "en_US"). To install a new one, go to the [WikidPad installation directory], then in dir. "share" down in dir. "enchant". There you will see directories "ispell" and "myspell". Just copy the .dic and .aff files into the directory for the appropriate spell checker (ispell or myspell). After that WikidPad should be ready to use the dictionary.
 
 
 

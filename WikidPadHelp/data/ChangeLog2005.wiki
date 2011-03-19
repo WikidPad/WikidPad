@@ -58,7 +58,7 @@ beforehand is therefore recommended!
         1. When choosing a wiki word to go to (by using the
            "view parents", "view parentless nodes", etc. menu 
            functions) you can in the dialog choose one or more wiki
-           pages to *delete*, so e.g. all parentless nodes can be
+           pages to *delete*, so e.g. all [parentless nodes] can be
            deleted at once.
         2. *HTML-Preview*. At the top of the editor window there are
            two tabs "Edit" and "Preview". If you click the "Preview"
@@ -161,7 +161,7 @@ beforehand is therefore recommended!
            installed). If not checked, the same window is reused to open 
            the selected wiki.
         5. "Low resource usage". Uses less GDI and user resources on 
-           Windows 95/98/ME, especially if minimized. Changing this 
+           MsWindows 95/98/ME, especially if minimized. Changing this 
            setting takes effect only after restarting WikidPad.
 
     6. *Internals*:

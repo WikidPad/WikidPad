@@ -7,7 +7,7 @@ RepositoryRevision in "mbutscher" branch: *138*
 
     * New letter for time formats (e.g. Statusbar time format option):
       %u shows ISO-8601 weekday number (1=monday, 7=sunday)
-    * Windows: Option to set a prefix string before each snippet from
+    * MsWindows: Option to set a prefix string before each snippet from
       clipboard catcher (prefix and suffix now support time formats).
       See OptionsDialog#*Prepend# before# clipboard# snippet*
     * Non-Windows: Support for a file-launcher program which takes the
@@ -35,7 +35,7 @@ RepositoryRevision in "mbutscher" branch: *136*
       shortcuts ([Ctrl-A]), external plugins, some internal messages
       (e.g. regular expression errors)
 
-    * Bug fixed for Windows: An always visible taskbar could partly
+    * Bug fixed for MsWindows: An always visible taskbar could partly
       hide popup and tooltip windows
 
     * Internal bug fixed: Deleting plugin modules from a plugin API
@@ -104,7 +104,7 @@ RepositoryRevision in "mbutscher" branch: *131*
 RepositoryRevision in "mbutscher" branch: *127*
 
     * Bug fixed: OS not recognized if using source version on
-      Windows with wxPython 2.8
+      MsWindows with wxPython 2.8
     * Bug fixed: Linux/GTK: Mouse no longer responsive after
       clicking (and a bit dragging) on tabs
     * Bug fixed: Modification date was changed when saving
@@ -171,7 +171,7 @@ RepositoryRevision in "mbutscher" branch: *121*
     * Option to set title of HTML table of contents.
       See [Options HTML preview_export]#*Title# of# toc*
     * New attribute "short_hint" to provide tooltip text
-      when hovering with the mouse over a wikiword having this
+      when hovering with the mouse over a WikiWord having this
       attribute. Also option to set tooltip appearance delay for
       editor. See WikiDocumentAttributes#*short_hint*
     
@@ -181,7 +181,7 @@ RepositoryRevision in "mbutscher" branch: *121*
     * [Ctrl-F4] closes current tab (not customizable)
     
     * Bug fixed: Setting Scintilla codepage fails on non-Unicode
-      wxPython (does not affect Windows binary)
+      wxPython (does not affect the MsWindowsBinary)
 
 
 
@@ -213,8 +213,8 @@ RepositoryRevision in "mbutscher" branch: *119*
     * Possibility to use tabulator instead of | to delimit cells.
       See TextFormatting#+++# Tables
     
-    * Option to control if links to wikiwords should be renamed
-      when wikiword is renamed, can be either be "no", "yes" or
+    * Option to control if links to WikiWords should be renamed
+      when a WikiWord is renamed, can be either be "no", "yes" or
       "ask for each renaming operation" (which is default and was
       also the previous behavior).
       See OptionsDialog#*Rename# links# when# renaming# wiki# word*
@@ -226,8 +226,8 @@ RepositoryRevision in "mbutscher" branch: *119*
     * Internal: customtreectrl.py updated to be based now on
       rev. 1.14 in wxWidgets repository.
     * Internal: Changes to allow usage of something else than
-      single brackets to tag wikiwords, attributes and insertions.
-    * Bug fixed: When renaming wikiword with non-ascii or
+      single brackets to tag WikiWords, attributes and [Insertions].
+    * Bug fixed: When renaming a WikiWord with non-ascii or
       non-alphanumeric characters and modifying links, non-ascii
       characters were preceded with backslashes
     * Bug fixed: Sometimes the parent list of a page is not updated
@@ -241,8 +241,8 @@ RepositoryRevision in "mbutscher" branch: *119*
 
 RepositoryRevision in "mbutscher" branch: *116*
 
-    * Bug fixed: Preview didn't work with titled wikiwords
-    * Bug fixed: When renaming wikiword with non-ascii characters
+    * Bug fixed: Preview didn't work with titled WikiWords
+    * Bug fixed: When renaming WikiWord with non-ascii characters
       and modifying links, non-ascii characters were preceded with
       backslashes
 
@@ -320,7 +320,7 @@ RepositoryRevision in "mbutscher" branch: *111*
       between sessions. See [Folding].
     * HTML entities like e.g. &nbsp; are handled now.
       See TextFormatting!html.
-    * System-wide hotkey to show/hide WikidPad (probably Windows
+    * System-wide hotkey to show/hide WikidPad (probably MsWindows
       only). Hotkeys are possible to be bound to the app and/or
       a particular wiki. See OptionsDialog#*App-bound# hotkey*
     * Option to offer closing bracket for bracketed wiki words
@@ -329,15 +329,15 @@ RepositoryRevision in "mbutscher" branch: *111*
     * Option to play a sound each time clipboard catcher caught
       text. See OptionsDialog#++++# Clipboard# catcher
     * New menu items in system tray menu to control clipboard
-      catcher (for Windows).
+      catcher (for MsWindows).
     * New pages found during rebuild (for Original ... db types)
       get the modification date of the .wiki file.
 
-    * Bug fixed (at least for Windows 2K/XP): Wiki words with
+    * Bug fixed (at least for MsWindows 2K/XP): WikiWords with
       foreign characters were not recognized or recognized with
       wrong characters after rebuild of wikis with "Original ..."
       types.
-    * Bug fixed: After rebuild of a database, wikiwords were no
+    * Bug fixed: After rebuild of a database, WikiWords were no
       longer recognized as existing (restart was needed).
     * Bug (probably) fixed: Attribute \[child_sort_order: natural]
       didn't always work properly.
@@ -378,7 +378,7 @@ RepositoryRevision in "mbutscher" branch: *106*
       clipboard catcher with certain applications (e.g. Adobe Reader)
     * Bug fixed: Creation of new wiki failed if no wiki was
       currently loaded
-    * Bug fixed: Bad handling of wikiword links with non-ascii
+    * Bug fixed: Bad handling of WikiWordLinks with non-ascii
       characters in IE/Mozilla preview
     * Bug fixed: Bad drag and drop support for tree items
     * Bug fixed: Connection lines in tree not visible when using
@@ -401,7 +401,7 @@ RepositoryRevision in "mbutscher" branch: *103*
     * Userinterface change, no more tabs for edit and preview,
       but an arbitrary number of tabs for WikiPages, switching
       between edit and preview by icons in toolbar or shortcuts
-    * Shortcut and menu item to open a selected wikiword in a
+    * Shortcut and menu item to open a selected WikiWord in a
       new tab
     * New tree control which behaves and looks very similar (but
       not identically) to the native one.
@@ -421,7 +421,7 @@ RepositoryRevision in "mbutscher" branch: *103*
       (bold, headings, todo)
     * Bug fixed: Link to page with spaces in name didn't work
       with IE as preview
-    * Bug fixed: Masses of superfluous tree nodes when updating
+    * Bug fixed: Masses of superfluous [tree nodes] when updating
       tree on Linux
     * Bug fixed: Integer division (e.g. 5/3) gave integer result
       (e.g. 1) on expression evaluation

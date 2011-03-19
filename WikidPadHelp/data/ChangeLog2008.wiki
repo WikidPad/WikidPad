@@ -17,7 +17,7 @@ RepositoryRevision in "mbutscher" branch: *163*
       See OptionsDialog#*Synchronize# editor# by# preview# selection*
     * Dialog to go to parents/children has now "open in new tab" button.
     * Several presentation options for GraphViz structure plugin.
-      See WikiStructureGraphs#+++# Options
+      See [WikiStructureGraphs#++ Options]
     * Show folded lines with match during incremental search and
       unfold at the end of inc. search if necessary
     
@@ -52,7 +52,7 @@ RepositoryRevision in "mbutscher" branch: *158*
      See [TextBlocks]#Submenu# title=
    * Renaming the page which is root node of tree now also changes
      the root node to the new page name.
-   * More compatible with newer wxPython versions on Windows
+   * More compatible with newer wxPython versions on MsWindows
      (thanks to Serge)
    
    * Bug fixed: Prioritizing more specific global settings for tree
@@ -126,10 +126,10 @@ RepositoryRevision in "mbutscher" branch: *145*
     * "r" appendix to image URLs to resize relative to image size.
       See UrlLinking#++# URL# Appendix
     * It's now possible to give an image URL as title for
-      a wikiword or URL to use image as link. See UrlLinking
+      a WikiWord or URL to use image as link. See UrlLinking
 
     * New plugin to create relation graph (with GraphViz) between
-      wikiwords (thanks to josip_ine). See WikiStructureGraphs
+      WikiWords (thanks to josip_ine). See WikiStructureGraphs
 
     * Option to (not) force visibility of page "ScratchPad".
       See OptionsDialog#*Force# ScratchPad# visibility# in# tree*
@@ -138,7 +138,7 @@ RepositoryRevision in "mbutscher" branch: *145*
     * Menu plugins can now also read their shortcuts
       from "KeyBindings.py" as main program does.
 
-    * Windows 2K/XP and later: Copying files into [file storage] or
+    * MsWindows 2K/XP and later: Copying files into [file storage] or
       export directory now also copies ACLs and ADSs if possible
     * Mac: Some improvements (thanks to Gareth Simpson)
 
@@ -183,9 +183,9 @@ RepositoryRevision in "mbutscher" branch: *140*
     * Support for ordering tree children by modification date
       (Sqlite wikis should be rebuilt to speed this up).
       See WikiDocumentAttributes#*child_sort_order
-    * Now remembers last used tree root and expanded nodes (optional).
+    * Now remembers last used [root node] and [expanded nodes] (optional).
       See OptionsDialog#*Remember# expanded# tree# nodes*
-    * Windows: Hardware buttons on mouse or keyboard to navigate
+    * MsWindows: Hardware buttons on mouse or keyboard to navigate
       backward/forward in browser are now recognized (doesn't work
       for external Mozilla preview)
     * Linux: Assumed file system encoding is now UTF-8

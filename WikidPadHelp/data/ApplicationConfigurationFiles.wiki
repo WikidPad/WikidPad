@@ -6,23 +6,23 @@ Application configuration files mean here:
 	* the application-wide configuration file "WikidPad.config"; and
 	* the directory ".WikidPadGlobals" with all files contained therein.
 
-This page describes where WikidPad searches for these files on startup:
+This page describes where WikidPad searches for these files during startup:
 
-If the installation directory (where the "WikidPad.exe" file is on Windows binary installations) contains already a file "WikidPad.config", the installation directory becomes the configuration directory.
+If the [installation directory] contains already a file "WikidPad.config", the [installation directory] becomes the configuration directory.
 
-This is helpful for WikidPad on an USB stick, so you can move it between multiple computers without any need to store a file on the host computer.
+This is helpful for [Wikid Pad on a USB stick], so you can move it between multiple computers without any need to store a file on the host computer.
 
 
 If WikidPad could not find a "WikidPad.config" file, it uses so-called environment variables to locate the config. directory
 
     1. If there is a "HOME" variable, its value (normally a directory) is used.
-    2. If not, it asks the operating system for the appropriate user configuration directory (this is done through the wxPython library) and puts its data in a subdirectory "WikidPad" similar to other applications (this is mainly intended for Windows).
+    2. If not, it asks the operating system for the appropriate user configuration directory (this is done through the wxPython library) and puts its data in a subdirectory "WikidPad" similar to other applications (this is mainly intended for MsWindows).
 
 
 If WikidPad is running, you can find out where the files are stored by opening the "About" dialog (menu "Help") and scrolling the shown text down to the end. The configuration directory is mentioned there.
 
 
-On Windows, you can open a console (=Dos-Box) and type the command "set" which shows all environment variables.
+On MsWindows, you can open a console (=Dos-Box) and type the command "set" which shows all environment variables.
 
 
 [:page:PageFooter][camelCaseWordsEnabled: false]

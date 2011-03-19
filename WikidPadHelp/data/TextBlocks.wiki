@@ -14,7 +14,7 @@ The menu is updated after saving (manually or automatically) one of the pages.
 
 ++ Where are these files?
 
-If you want to edit them with a text editor, you can find the global text blocks file below your configuration directory which is either your home directory or the directory where you installed WikidPad. Your configuration directory can also be found by opening the "About" dialog (menu "Help") and scrolling down to bottom.
+If you want to edit them with a text editor, you can find the global text blocks file below your [configuration directory] which is either your home directory or the [WikidPad installation directory]. Your [configuration directory] can also be found by opening the "About" dialog (menu "Help") and scrolling down to bottom.
 
 The file is named "[TextBlocks].wiki" and is located in a directory ".WikidPadGlobals" which is in your configuration directory (the dot prefix is a Linux/Unix convention). If it does not exist when starting WikidPad, a default version is created automatically.
 

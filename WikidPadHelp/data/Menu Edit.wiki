@@ -30,7 +30,7 @@ Copy selected text to the special ScratchPad page which is automatically inserte
 Select an item from the submenu to add a textblock to the current page. See [TextBlocks].
 
 ++ Clipboard Catcher
-(Windows and Linux/GTK only, Linux/GTK needs pyGTK)
+(MsWindows and Linux/GTK only, Linux/GTK needs [pyGTK])
 Allows to catch arbitrary text from clipboard regardless which application has sent it. See [ClipboardCatcher].
 
 ----

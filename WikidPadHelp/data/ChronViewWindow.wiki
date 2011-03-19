@@ -12,7 +12,7 @@ The currently only way to present the modification date of pages is the timeline
 
 You can then move into the window and click on one of the page names with the left or middle mouse button to open the page.
 
-To let the timeline show another date range you can currently only click twice (not doubleclick) on an arbitrary date and enter a new one (similar to renaming files in Windows Explorer). After that the whole timeline refreshes according to your entry.
+To let the timeline show another date range you can currently only click twice (not doubleclick) on an arbitrary date and enter a new one (similar to renaming files in MsWindowsExplorer). After that the whole timeline refreshes according to your entry.
 
 
 ++ Versions

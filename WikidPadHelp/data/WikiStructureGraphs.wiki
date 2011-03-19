@@ -12,7 +12,7 @@ If you want to export these graphs use the [Insertions] \[:graph.relation:] or \
 
 ++ Relation graph
 
-This graph uses relations defined by attributes in a wikiword. The key of the attribute names the kind of relation, the value names the wiki word (which must exist) to which it is related.
+This graph uses relations defined by attributes in a WikiPage. The key of the attribute names the kind of relation, the value names the WikiWord (which must exist) to which it is related.
 
 An example could be on a page "Bird" the attributes
 <<
@@ -34,7 +34,7 @@ This graph shows the parent->child relationship of the words in the wiki.
 
 ++ Options
 
-In the options settings there is an option page named "GraphVizStructure" which provides some possibilities to control the presentation of the above graphs. Each of the entries can be set empty to use the default settings.
+In the OptionsDialog there is an OptionPage named "GraphVizStructure" which provides some possibilities to control the presentation of the above graphs. Each of the entries can be set empty to use the default settings.
 
 +++++ Node font name
 Name of the font to use for the node label

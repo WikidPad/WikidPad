@@ -26,11 +26,11 @@ Same for HTML export.
 In the export dialog, you can temporarily override this setting for one export.
 
 *Preview renderer*
-Under Windows you can choose the renderer for the HTML preview:
+Under MsWindows you can choose the renderer for the [HTML preview]:
 
     * Internal: Internal standard renderer. Not very capable, but it
       doesn't need external components
-    * IE: Uses Internet Explorer.
+    * IE: Uses MsWindowsInternetExplorer.
     * Mozilla: Uses Mozilla/Gecko rendering component if installed.
       You can download it here:
       http://www.iol.ie/~locka/mozilla/control.htm. *There seems to be

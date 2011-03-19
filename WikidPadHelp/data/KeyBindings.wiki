@@ -3,8 +3,8 @@
 
 Many of the key bindings defined below may be changed, see ChangingKeyBindings.
 
-Please note: These bindings have been developed for use on Windows.
-On other Operating Systems like Apple OSX or Linux there may be differences.
+Please note: These bindings have been developed for use on MsWindows.
+On other Operating Systems like [Apple OSX] or Linux there may be differences.
 See KeyBindingsOnLinuxAndOsx.
 
 
@@ -39,7 +39,7 @@ See KeyBindingsOnLinuxAndOsx.
 	* [Ctrl-D]          delete the current WikiWord, including all content for that word
 	* [Ctrl-Up]         view parents of current WikiWord
 	* [Ctrl-Down]       view children of current WikiWord
-	* [Ctrl-Shift-Up]   view parentless nodes
+	* [Ctrl-Shift-Up]   view [parentless nodes]
 
 ++ View
 	* [Ctrl-Shift-A]    show edit mode of current tab

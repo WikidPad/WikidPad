@@ -9,4 +9,5 @@ WikidPad tries very often to save the document in Your WikiEditorWindow:
 
 You can manually save a document by typing [Ctrl-S].
 
+
 [:page:PageFooter][icon:disk]

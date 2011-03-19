@@ -163,7 +163,7 @@ To this page can also be linked as WikiDocumentAttribute.
 See InlinePythonEval.
 
 
-+++++ child_sort_order: order how to sort child nodes in the tree
++++++ child_sort_order: order how to sort [child nodes] in the tree
 Possible values are:
     * ascending: Sort alphabetically ascending
     * descending: Sort alphabetically descending
@@ -234,7 +234,7 @@ Allow recognition of non-camelcase wiki words in normal text (without brackets).
       non alpha-numeric characters in text to white spaces in the
       wiki word.
 
-When active, e.g. text "multipage text, format" is recognized as wikiword [Multipage text format].
+When active, e.g. text "multipage text, format" is recognized as WikiWord [Multipage text format].
 
 You can also use "global.auto_link" to set the option for the whole wiki.
 

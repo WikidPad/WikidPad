@@ -9,7 +9,7 @@ First you should know that a wiki in WikidPad contains some essential data (main
 
 Rebuilding deletes and recreates all cache information
 
-This feature can also be used to add large numbers of pages to the wiki.  Copy ".wiki" wikiword files into the data directory, then "Rebuild Wiki" to rebuild the database to include these files. This does not work for "Compact Sqlite" database type (see MigrationBetweenDbTypes for details).
+This feature can also be used to add large numbers of pages to the wiki.  Copy ".wiki" WikiWordFiles into the data directory, then "Rebuild Wiki" to rebuild the database to include these files. This does not work for "Compact Sqlite" database type (see MigrationBetweenDbTypes for details).
 
 [alias:RebuildTheWiki]
 
@@ -56,9 +56,9 @@ If information is deleted from an Sqlite database, the occupied hard disk space 
 
 ++ Other things about maintenance
 
-+++ Finding and connecting parentless nodes
++++ Finding and connecting [parentless nodes]
 
-As you add and remove links from various pages in your wiki database you may end up with unlinked, or parentless, nodes.  To view them use the "parentless-nodes" node in the "Views" subtree.
+As you add and remove links from various pages in your wiki database you may end up with unlinked, or [parentless nodes].  To view them use the [parentless-nodes] node in the "Views" subtree.
 
 Alternatively you can use the menu "Navigate" -> "List Parentless Pages" or press [Ctrl-Shift-Up].
 
@@ -72,7 +72,7 @@ There may be also wiki word links to pages which do not exist, e. g. NonExisting
 Sometimes words are unintentionally marked as wiki words. In this case you can either:
 
     * Prefix the word with a backslash
-    * Add the attribute \[camelCaseWordsEnabled: false] on a page
+    * Add the attribute \[camelCaseWordsEnabled: false] on a WikiPage
     * Enter the word into one of the blacklists, see WikiWordLinking!exclude_from_linking.
 
 

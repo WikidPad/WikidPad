@@ -25,7 +25,7 @@ Shows a list of parents for the current wiki word and allows to go to one of it.
 Same as "Go to Parent" for children of current page.
 
 ++ List Parentless Pages - [Ctrl-Shift-Up]
-List of all parentless nodes (independent of current wiki word).
+List of all [parentless nodes] (independent of current wiki word).
 
 ++ Show History - [Ctrl-H]
 Shows history of all pages visited in the current tab.
