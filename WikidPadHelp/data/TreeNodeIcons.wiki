@@ -125,6 +125,7 @@ See the IconTestPage for actual usage.
 	* open
 	* orgchart
 	* page
+	* page-empty
 	* paint
 	* paintbrush
 	* paste

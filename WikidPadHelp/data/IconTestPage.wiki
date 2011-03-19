@@ -116,6 +116,7 @@
 	* [Icon open]
 	* [Icon orgchart]
 	* [Icon page]
+	* [Icon page-empty]
 	* [Icon paint]
 	* [Icon paintbrush]
 	* [Icon paste]
