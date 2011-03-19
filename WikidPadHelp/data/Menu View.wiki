@@ -14,7 +14,7 @@ Show tree view which visualizes the parent-children connection between pages.
 Show a chronological timeline when which pages changed last. See [TimeViewWindow].
 
 ++ Show Page Structure
-Show the headings of a page in a hierarchical manner. See [PageStructureWindow].
+Show the headings of a page in a hierarchical manner. See [page structure window].
 
 ----
 

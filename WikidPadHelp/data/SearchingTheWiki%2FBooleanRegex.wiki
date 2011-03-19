@@ -72,7 +72,7 @@ You can combine prefixed terms with logical operators and normal search terms:
 attr:Mary and attr:lamb   Find pages having an attribute with key containing "Mary" and an attribute with value containing "lamb" (not necessarily the same attribute!).
 
 <<
-todo:grass and garden   Find pages having a todo item containing "grass" in the key and the text "garden" somewhere.
+todo:grass and garden   Find pages having a TodoItem containing "grass" in the key and the text "garden" somewhere.
 >>
 
 

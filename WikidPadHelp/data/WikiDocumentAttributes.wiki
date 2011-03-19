@@ -11,7 +11,7 @@ You can attach attributes to a page like this:
 \[attribute: value]
 
 By such setting of an attribute, this document can be seen under the
-[*Views* node] in the ["Tree" pane] on the left, under importance/high.
+["Views" node] in the ["Tree" pane] on the left, under importance/high.
 
 Attributes you might want to add to your WikiWords, for example, might be:
 
@@ -21,8 +21,8 @@ Attributes you might want to add to your WikiWords, for example, might be:
 [contact.personal.kids: school] to mark something as personal contact
 about school of the kids.
 
-Open the "Views" node in the tree on the left to see how these attributes
-become available for reference.
+Open the ["Views" node] in the ["Tree" pane] on the left to see how these 
+attributes become available for reference.
 
 ++ Multiple Attribute Values
 
@@ -46,7 +46,7 @@ You can also quote the values, if they contain disallowed characters, e.g.
 The precise quoting syntax is the same as for [Insertions]#++ Syntax
 
 
-++ Autocompletion
+++ AutoCompletion
 
 Attributes also support AutoCompletion. Try it:
 
@@ -59,7 +59,7 @@ Place cursor after the m and press [Ctrl-Space]
 +++ Formatting a Page
 
 There are 3 special attributes which you can attach to a page in order to control
-the appearance of the page's node in the ["Tree" control].
+the appearance of the page's node in the ["Tree" pane].
 
 These attributes override any [global settings] (see below): 
 
@@ -269,11 +269,11 @@ See WikiStructureGraphs.
 
 ++ Error checking
 
-The content of a page is checked on saving for logical errors in some of the special attributes. There is a log window below the editor (normally hidden) which shows error messages if something is wrong.
+The content of a page is checked on saving for logical errors in some of the special attributes. There is a [log window] below the editor (normally hidden) which shows error messages if something is wrong.
 
-Currently it checks the attributes alias, color, icon and bold. The presentation attributes inside todo items are not checked.
+Currently it checks the attributes alias, color, icon and bold. The presentation attributes inside TodoItems are not checked.
 
-The log window normally automatically pops up if new messages arrive and automatically hides when there are no more messages (both can be switched off in configuration dialog.
+The [log window] normally automatically pops up if new messages arrive and automatically hides when there are no more messages (both can be switched off in configuration dialog.
 
 To test the error checking, remove the backslash on the following line and save the page:
 

@@ -1,14 +1,16 @@
-﻿++ Menus
+﻿[:page:PageHeader][:toc:]
++ Menus
 
-[Menu Wiki]
-[Menu Edit]
-[Menu View]
-[Menu Tabs]
-[Menu Wiki Page]
-[Menu Format]
-[Menu Navigate]
-[Menu Extra]
-[Menu Help]
+	* [Menu Wiki]
+	* [Menu Edit]
+	* [Menu View]
+	* [Menu Tabs]
+	* [Menu Wiki Page]
+	* [Menu Format]
+	* [Menu Navigate]
+	* [Menu Extra]
+	* [Menu Plugins]
+	* [Menu Help]
 
 
-[child_sort_order: natural]
+[:page:PageFooter][icon:list][child_sort_order: natural]

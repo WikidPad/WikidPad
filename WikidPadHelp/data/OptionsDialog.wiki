@@ -91,24 +91,24 @@ This setting only takes effect after restarting WikidPad.
 +++++ Recent wikis list length
 Set the number of wikis to show in menu "Wiki"->"Recent"
 
-+++++ Auto-show log window
-Automatically show log window if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
++++++ Auto-show [log window]
+Automatically show the [log window] if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
 
-+++++ Auto-hide log window
-Automatically hide log window if no more error messages are present.
++++++ Auto-hide [log window]
+Automatically hide the [log window] if no more error messages are present.
 
 +++++ Structure window pos.
-Where (relative to main window) should the PageStructureWindow be positioned? "Hidden" deactivates it.
+Where (relative to main window) should the [page structure window] be positioned? "Hidden" deactivates it.
 *KnownBug*: After changing the position of the window, restarting WikidPad is necessary. See RestartWikidPad for details.
 
 +++++ Structure window heading depth
 Up to (and including) which heading level should headings be displayed? "1" Means only top-level heading (one plus sign), "15" means all headings.
 
 +++++ Auto-hide structure window
-After double-clicking an entry in PageStructureWindow the window is collapsed (hidden) automatically if this is checked.
+After double-clicking an entry in [page structure window] the window is collapsed (hidden) automatically if this is checked.
 
 +++++ Structure window selection auto-follow
-If checked and document structure window is visible, changing cursor position in editor can also change selection in structure window to always show the heading which is nearest above the current cursor position.
+If checked and [page structure window] is visible, changing cursor position in editor can also change selection in structure window to always show the heading which is nearest above the current cursor position.
 
 
 ++++ Security options
@@ -475,8 +475,8 @@ Shows the special page ScratchPad always as child of the tree root, even if it i
 +++++ Read-only wiki
 Check this if you want to prevent the wiki from acidental modifications.
 
-+++++ Auto-show log window
-Automatically show log window if new error messages arrive (see [WikiDocumentAttributes#+++ Error checking]).
++++++ Auto-show [log window]
+Automatically show the [log window] if new error messages arrive (see [WikiDocumentAttributes#+++ Error checking]).
 If the check-box is gray, the application-bound setting (see above) is used, otherwise this wiki-bound setting overrides it.
 
 +++++ Page file names ASCII only

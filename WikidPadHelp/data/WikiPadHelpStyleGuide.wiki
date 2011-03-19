@@ -32,7 +32,7 @@ You may even empty the content of PageHeader in order to make it's effect invisi
 
 Using \[:toc:] gives a comprehensive overview of all headers defined in the page,
 and should allow easy navigation especially in lengthy pages without any need to
-use the PageStructureWindow
+use the [page structure window].
 
 +++ Beware exported results!
 

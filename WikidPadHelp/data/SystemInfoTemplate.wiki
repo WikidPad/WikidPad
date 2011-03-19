@@ -1,4 +1,4 @@
-﻿++ System Info Template
+﻿+ System Info Template
 
 
 Which operating system do you use?

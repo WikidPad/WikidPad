@@ -1,6 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + Todo Items
 
+++ Special Keywords
 In WikidPad "todo", "done", "action", "track", "issue", "question" and
 "project" are special keywords that enable you to track important
 items under the [View Menu] in the tree.
@@ -17,7 +18,10 @@ Now open the views node in the tree on the left to see how these todo
 items have been added.  For example, open "Views/question" and you will
 see a node named "This is a question."
 
-Unwanted todo items like e.g.:
+
+++ Escape Unwanted TodoItems
+
+Unwanted TodoItems like e.g.:
 
     Interesting CD track: loud music
 
@@ -26,13 +30,17 @@ can be escaped:
     Interesting CD \track: loud music
 
 
+++ Terminate TodoItems
+
 A todo item ends either with a newline or with a vertical bar |. If you want to insert a bar into the item, you can escape it with a backslash.
 
-Example: todo: This item ends here| This isn't part of the item.
-todo: This ends \| not.
+Example: todo: This item ends here| This text is not part of the item any more.
+todo: This does \|not end here.
 
 Look in the "Views" subtree to see the todo entries.
 
+
+++ Sub-Categories for TodoItems
 
 These items supports nested sub-categories as well, for example:
 

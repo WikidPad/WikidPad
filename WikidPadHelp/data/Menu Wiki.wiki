@@ -1,6 +1,7 @@
-﻿++ Menu Wiki
+﻿[:page:PageHeader][:toc:]
++ Menu Wiki
 
-++ New
+++ New - [Ctrl-N]
 Create new wiki
 
 ++ Open
@@ -10,22 +11,30 @@ In the appearing file dialog choose the one ".wiki" file with the name of your w
 
 There may be a file with the same name in the "data" directory below, but this contains the text of your wiki root page.
 
+----
+
 ++ Recent
 Recently opened wikis. Choosing one opens it in the same window.
 
 ++ Favorites
 Favorite wikis to open, see [FavoriteWikis].
 
-++ Search wiki
+----
+
+++ Search wiki - [Ctrl-Alt-F]
 Start the dialog to search the whole wiki. See [SearchingTheWiki#+++ To search all pages].
+
+----
 
 ++ Publish as HTML
 You can there export your wiki or the current subtree (current page and all children, grandchildren...) or a single page in HTML format. You also have the choice to export as one HTML page containing all published wiki pages (such a page may become very large and is then hard to open in a web browser) or as set of HTML pages, one for each wiki page plus an index-page for the table of contents if you set so.
 
 You can also use "Other Export" to show a dialog to set more precisely what to export, whereto and in which format. See [WikiExport].
 
-++ Print
+++ Print - [Ctrl-P]
 Start print dialog for a plain text print of some or all wiki pages. See [Printing].
+
+----
 
 ++ Properties
 Shows internal name of database backend (may be needed for support requests) and the number of wiki pages in the wiki.
@@ -33,6 +42,10 @@ Shows internal name of database backend (may be needed for support requests) and
 ++ Maintenance
 These items are only needed in rare cases. They allow to update the whole wiki in the foreground or as background task and to cope with some errors which may happen. See [WikiMaintenance].
 
+----
+
 ++ Exit
 Nothing surprising.
 
+
+[:page:PageFooter][icon:left-right][alias:'"Wiki" Menu'; Wiki Menu][short_hint:The "Wiki" menu]

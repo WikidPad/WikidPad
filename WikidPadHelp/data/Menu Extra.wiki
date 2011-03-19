@@ -1,4 +1,5 @@
-﻿++ Menu Extra
+﻿[:page:PageHeader][:toc:]
++ Menu Extra
 
 ++ Export
 Shows a dialog to set precisely what to export, whereto and in which format. See [WikiExport].
@@ -9,15 +10,20 @@ Shows a dialog to set precisely what to export, whereto and in which format for 
 ++ Import
 Shows a dialog to import wiki pages into wiki. See [WikiImport].
 
+----
 ++ Scripts
 Allows execution of Python scripts. See [InlinePythonEval].
 
-+++ Eval
++++ Eval - [Ctrl-E]
 If text is selected it is evaluated and result is inserted after it (useful as calculator).
-If no text selected, all scripts on the page, including 
+If no text is selected, all scripts on the page are evaluated (including imported ones).
 
 +++ Run Function #
 Run one of six numbered scripts on the page (or imported from another page).
 
+----
 ++ Options
 Starts the options dialog. See [OptionsDialog].
+
+
+[:page:PageFooter][icon:left-right][alias:'"Extra" Menu'; Extra Menu][short_hint:The "Extra" menu]

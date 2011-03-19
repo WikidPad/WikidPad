@@ -1,27 +1,32 @@
-﻿++ Menu Format
+﻿[:page:PageHeader][:toc:]
++ Menu Format
 
-++ Bold
+++ Bold - [Ctrl-B]
 Marks selection in editor with appropriate markup for bold text.
 
-++ Italic
+++ Italic - [Ctrl-I]
 Marks selection in editor with appropriate markup for italics.
 
-++ Heading
+++ Heading - [Ctrl-Alt-H]
 Marks line containing text cursor with markup for a heading.
 
 This can be used multiple times to change heading level.
 
-++ Rewrap Text
+----
+
+++ Rewrap Text - [Ctrl-W]
 Rewraps text (adds/removes newlines) to make each line contain no more characters as defined in "wrap" attribute. See [TextFormatting].
 
 ++ Convert
-+++ Selection to Link
++++ Selection to Link - [Ctrl-J]
 Makes the selected text in editor to a wiki link by removing forbidden characters.
 
-+++ Selection to Wiki Word
++++ Selection to Wiki Word - [Ctrl-Shift-R]
 Moves selected text to another wiki word and places a link to this word where the text was.
 
 You are asked for the link to the word. If you enter an existing wiki word you are asked if you want to append the text to this word.
+
+----
 
 ++ Icon Name
 Insert name of selected icon at cursor position.
@@ -31,3 +36,6 @@ Insert name of selected color at cursor position.
 
 ++ Add Attribute
 Allows to append to a page the appropriate attribute to give the related node in tree the selected icon or color.
+
+
+[:page:PageFooter][icon:left-right][alias:'"Format" Menu'; Format Menu][short_hint:The "Format" menu]

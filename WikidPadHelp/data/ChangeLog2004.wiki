@@ -31,7 +31,7 @@
        child_sort_order to "ascending", "descending", or "unsorted" to control
        the order of the [child nodes] in the [tree view dialog].
        
-       [child_sort_order: unsorted]
+       \[child_sort_order: unsorted]
        
     2. User can now place their extensions in "user_extensions" under the
        [WikidPad installation directory].  This directory will not be touched when
@@ -44,7 +44,7 @@
        wiki://C|/Program%20Files/WikidPad/WikidPadHelp/data/ChangeLog.wiki
        
        Will open up this page in a new instance of wikidPad.  This will work
-       outside of wikidPad as well, from Internet Explorer for example.  The
+       outside of wikidPad as well, from MsInternetExplorer for example.  The
        easiest way to create a link to another wiki from within a wiki page
        is to just drag and drop the .wiki file onto the text editor.
        

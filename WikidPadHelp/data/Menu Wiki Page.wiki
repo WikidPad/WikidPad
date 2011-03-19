@@ -1,17 +1,20 @@
-﻿++ Menu Wiki Page
+﻿[:page:PageHeader][:toc:]
++ Menu Wiki Page
 
-++ Save
+++ Save - [Ctrl-S]
 Save current wiki page to database (in fact all modified wiki pages are saved).
 
-++ Rename
+++ Rename - [Ctrl-Alt-R]
 Rename current page. After chosing the new you are also asked if you want WikidPad to replace all references to the old name to references to the new one (if you have not set a default action in options).
 
 Be aware that this process is only a simple text search and replace which may produce wrong results under some circumstances.
 
-++ Delete
+++ Delete - [Ctrl-D]
 Delete current page.
 
-++ Set as Root
+----
+
+++ Set as Root - [Ctrl-Shift-Q]
 Set current page as root of the tree.
 
 The child relationships between wiki pages actually form a graph (each page can have zero or more parents) but graphs are hard to display so it is mapped to a tree instead.
@@ -24,10 +27,12 @@ Reset tree root tothe default (the wiki root which is the page with the same nam
 ++ Synchronize tree
 Show and select wiki page of current tab in tree. By default this happens automatically but you can change that in the options.
 
-++ Follow Link
+----
+
+++ Follow Link - [Ctrl-L]
 Follow the URL or wiki word link the text cursor is currently on in editor.
 
-++ Follow Link in New Tab
+++ Follow Link in New Tab - [Ctrl-Alt-L]
 Same as "Follow Link" but opens a new tab for the target.
 
 ++ Copy URL to Clipboard
@@ -35,5 +40,10 @@ Copy "wiki:" URL of current wiki page to clipboard.
 
 If you right click on an "anchor:" definition in editor and choose "Copy Anchor URL to clipboard" the URL contains also a link to the particular anchor.
 
+----
+
 ++ Add version
-Add a new version 
+Add a new version
+
+
+[:page:PageFooter][icon:left-right][alias:'"Wiki Page" Menu'; Wiki Page Menu][short_hint:The "Wiki Page" menu]

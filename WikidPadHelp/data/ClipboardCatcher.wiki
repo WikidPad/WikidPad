@@ -56,7 +56,7 @@ The clipboard catcher is disabled when:
 
 In the options dialog, page "Clipboard Catcher", there are entries "Prepend before clipboard snippet" and "Append after clipboard snippet" where you can set which character(s) should be appended after each caught snippet.
 
-In this field you can use the same escapes as in the replace field of the "Find and Replace" dialog in regular expression mode as well as time formats as these shown in "Date Format" dialog in "Edit"->"Settings" menu (see also [Printing#++++ Page separator]).
+In this field you can use the same escapes as in the replace field of the "Find and Replace" dialog in [regular expression] mode as well as time formats as these shown in "Date Format" dialog in "Edit"->"Settings" menu (see also [Printing#+++ Page separator]).
 
 
 [:page:PageFooter]

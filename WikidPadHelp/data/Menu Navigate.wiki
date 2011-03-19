@@ -13,6 +13,7 @@ Go to the wiki root word (the word with the same name as the whole wiki).
 ++ Upward
 If current tab shows a [Subpage] this opens the superpage, e.g. from [SearchingTheWiki/BooleanRegex] it moves to [SearchingTheWiki].
 
+----
 ++ Go to Page - [Ctrl-O]
 Opens dialog to open a particular page. This dialog also allows to open or delete multiple pages. If you enter a non-existing page name you can also create a new page there.
 
@@ -27,6 +28,7 @@ Same as "Go to Parent" for children of current page.
 ++ List Parentless Pages - [Ctrl-Shift-Up]
 List of all [parentless nodes] (independent of current wiki word).
 
+----
 ++ Show History - [Ctrl-H]
 Shows history of all pages visited in the current tab.
 
@@ -36,6 +38,7 @@ Same as "Show History" but automatically selects the previously visited page.
 ++ Down History - [Ctrl-Alt-Down]
 Same as "Show History" but automatically selects the next page to visit.
 
+----
 ++ Add Bookmark - [Ctrl-Alt-B]
 Append a special bookmark attribute to the current WikiPage.
 

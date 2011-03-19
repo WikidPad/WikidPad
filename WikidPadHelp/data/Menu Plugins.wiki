@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + Menu Plugins
 
-todo: Add Menu Options
+todo: Add content
 
 See also [WikiStructureGraphs].
 

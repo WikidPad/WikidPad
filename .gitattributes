@@ -33,7 +33,6 @@ WikidPadHelp/data/ChangeLog2007.wiki -text
 WikidPadHelp/data/ChangeLog2008.wiki -text
 WikidPadHelp/data/ChangeLog2009.wiki -text
 WikidPadHelp/data/ChangingKeyBindings.wiki -text
-WikidPadHelp/data/ChronViewWindow.wiki -text
 WikidPadHelp/data/ClipboardCatcher.wiki -text
 WikidPadHelp/data/Color[!!-~]AQUAMARINE.wiki -text
 WikidPadHelp/data/Color[!!-~]BLACK.wiki -text
@@ -335,7 +334,6 @@ WikidPadHelp/data/Options[!!-~]HTML[!!-~]preview_export.wiki -text
 WikidPadHelp/data/OptionsDialog.wiki -text
 WikidPadHelp/data/PageFooter.wiki -text
 WikidPadHelp/data/PageHeader.wiki -text
-WikidPadHelp/data/PageStructureWindow.wiki -text
 WikidPadHelp/data/Printing.wiki -text
 WikidPadHelp/data/REGISTRATION.grl -text
 WikidPadHelp/data/RelativeURL.wiki -text
@@ -347,7 +345,6 @@ WikidPadHelp/data/ScratchPad.wiki -text
 WikidPadHelp/data/SearchingTheWiki%2FBooleanRegex.wiki -text
 WikidPadHelp/data/SearchingTheWiki%2FIndex.wiki -text
 WikidPadHelp/data/SearchingTheWiki.wiki -text
-WikidPadHelp/data/ShortHintAttribute.wiki -text
 WikidPadHelp/data/SpellChecking.wiki -text
 WikidPadHelp/data/Subpages.wiki -text
 WikidPadHelp/data/SystemInfoTemplate.wiki -text
@@ -390,13 +387,15 @@ WikidPadHelp/data/WikidPad.wiki -text
 WikidPadHelp/data/WikidPadFeatures.wiki -text
 WikidPadHelp/data/WikidPadGlossary.wiki -text
 WikidPadHelp/data/WikidPadHelp.wiki -text
+WikidPadHelp/data/WikidPadHelpTodo.wiki -text
 WikidPadHelp/data/WikidPadInstallationDirectory.wiki -text
 WikidPadHelp/data/WikidPadOnUSB.wiki -text
 WikidPadHelp/data/WikidPadSupport.wiki -text
 WikidPadHelp/data/WikidPadTopics.wiki -text
 WikidPadHelp/data/WikidPadWikiDataDirectory.wiki -text
 WikidPadHelp/data/WikidpadHelpNew.wiki -text
-WikidPadHelp/data/WordLinking.wiki -text
+WikidPadHelp/data/WindowChronView.wiki -text
+WikidPadHelp/data/WindowPageStructure.wiki -text
 WikidPadHelp/data/index/DOCUMENTS.grl -text
 WikidPadHelp/data/index/TEXT_INDEX.grl -text
 WikidPadHelp/data/index/WORDS.grl -text

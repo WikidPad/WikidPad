@@ -13,7 +13,7 @@ Example:
 ++++ Heading4
 +++++ Heading5
 
-See also: [Folding], PageStructureWindow, InsertTableofContent.
+See also: [Folding], [page structure window], InsertTableofContent.
 
 
 [:page:PageFooter][alias:WikiHeaders]

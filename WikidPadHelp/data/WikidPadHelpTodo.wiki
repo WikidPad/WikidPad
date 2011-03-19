@@ -1,0 +1,8 @@
+﻿++ Wikid Pad Help Todo
+
+Get following pages to new PageHeader style:
+
+Insertions.wiki
+Menu Format.wiki
+Menu Wiki Page.wiki
+Options HTML preview_export.wiki

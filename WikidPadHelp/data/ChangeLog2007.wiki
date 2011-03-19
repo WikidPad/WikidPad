@@ -33,7 +33,7 @@ RepositoryRevision in "mbutscher" branch: *136*
     * Support for internationalization of screen messages and dialogs
       (GUI). Not supported are: attributes (e.g. "\[alias:WikiWord]"),
       shortcuts ([Ctrl-A]), external plugins, some internal messages
-      (e.g. regular expression errors)
+      (e.g. errors of [regular expressions])
 
     * Bug fixed for MsWindows: An always visible taskbar could partly
       hide popup and tooltip windows
@@ -91,7 +91,7 @@ RepositoryRevision in "mbutscher" branch: *131*
     * Bug fixed: Source code did not work correctly with
       wxPython 2.8 (OS not recognized properly)
     * Bug fixed: Exception possible when running WikidPad from
-      commandline while doc structure window is open
+      commandline while the [page structure window] is open
     * Bug fixed: Starting URLs with characters not in system
       codepage failed
     * Bug fixed: Wrong shortcuts shown in tooltips of toolbar
@@ -138,7 +138,7 @@ RepositoryRevision in "mbutscher" branch: *126*
 
 RepositoryRevision in "mbutscher" branch: *123*
 
-    * New document structure window. See PageStructureWindow
+    * New [page structure window].
     * Search dialogs (except incremental search) now show an error
       box with meaningful message when searching for a bad regular
       expression.
@@ -420,13 +420,13 @@ RepositoryRevision in "mbutscher" branch: *103*
     * Bug fixed: Change of text color didn't affect some styles
       (bold, headings, todo)
     * Bug fixed: Link to page with spaces in name didn't work
-      with IE as preview
+      with MsInternetExplorer as preview
     * Bug fixed: Masses of superfluous [tree nodes] when updating
       tree on Linux
     * Bug fixed: Integer division (e.g. 5/3) gave integer result
       (e.g. 1) on expression evaluation
     * Bug (hopefully) fixed: Temporarily generated images not shown
-      in IE 7 preview
+      in MsInternetExplorer 7 preview
 
 
 [:page:PageFooter]

@@ -14,4 +14,4 @@ Double clicking it sets the focus to the editor/preview so you can directly star
 To expand/collapse the window manually, use in menu "View" entry "Show Doc. Structure".
 
 
-[:page:PageFooter]
+[:page:PageFooter][alias:page structure window]

@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + Keyboard Shortcut Ctrl-E
 
-Use [Ctrl-E] in order evaluate function script(s).
+Use [Ctrl-E] in order to evaluate function script(s).
 
 ++ See also
 

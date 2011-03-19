@@ -18,8 +18,8 @@
       See [OptionsDialog#+++ Temporary files]
     * Bug fixed: Internal [HTML preview] jumped to top of page on
       each resize
-    * Bug fixed: Temporary files for IE preview weren't deleted
-      on close
+    * Bug fixed: Temporary files for MsInternetExplorer preview 
+      weren't deleted on close
 
 
 ++ Oct. 03, 2009: 2.0beta08
@@ -61,7 +61,7 @@
 ++ Jul. 26, 2009: 2.0beta06
 
     * Support for storing versions of wiki pages (do not yet rely
-      on this function!). See [ChronViewWindow#+++ Versions]
+      on this function!). See [WindowChronView#++ Versions]
     * Options to set defaults for wiki-wide search.
       See [OptionsDialog#+++ Wiki-wide search defaults]
     * Option to set max. length of tab titles.

@@ -242,10 +242,10 @@ Changes:
       changed on page rename accordingly.
       See RenamingWikiWords#*Title# auto-rename*
     * Fixed bug: Upper case non-ascii letters were not found when
-      opening a wiki word (e.g. "ÃƒÆ’Ã¢â‚¬Â°" didn't find ÃƒÆ’Ã¢â‚¬Â°ve).
+      opening a wiki word (e.g. "\ÃƒÆ’Ã¢â‚¬Â°" didn't find "\ÃƒÆ’Ã¢â‚¬Â°ve").
     * HTML-tag \<pre> is now handled much better.
     * Changed controls in spell check dialog to circumvent problems
-      with some languages on Win 98/ME
+      with some languages on MsWindows 98/ME
     
     * Fixed bug: No preview if newly created page wasn't saved first.
     * Fixed bug: No preview if page contains plain text only.
@@ -295,15 +295,15 @@ Changes:
       See [ApiDocs]#stdDialog
 
     * Changed method to find [configuration directory], more suitable
-      for [Wikid Pad on a USB stick] and more reliable. See WikidPadOnUSB
-      and ApplicationConfigurationFiles.
+      for [Wikid Pad on a USB stick] and more reliable.
+      See also ApplicationConfigurationFiles.
 
 
 Bugs fixed:
 
     * TodoItem part shows up twice in tree with same content if part
       is also right side of a todo entry. Now shows up only once.
-    * Wrong cursor position after using bold or italic from
+    * Wrong cursor position after using *bold* or _italic_ from
       menu/toolbar
     * "Show referring Wikis" in the "Plugins" menu didn't work
     * Exception when refreshing tree while "saved searches" node is
@@ -558,7 +558,7 @@ Changes:
     * WikidPad and WikidPadCompact merged into one application
       (therefore the new version number) (see [DatabaseTypes])
     * In wiki-wide search cycling through found matching occurrences
-      on a page with F3 or clicking on the little blue bar
+      on a page with [F3] or clicking on the little blue bar
     * Basic printing support (see [Printing])
     * Support for titled wiki words and URLs (e.g
       [http://www.somewhere.com/aaa/bbb |Somewhere]

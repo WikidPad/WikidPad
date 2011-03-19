@@ -1,9 +1,11 @@
-﻿++ Url Linking
+﻿[:page:PageHeader][:toc:]
++ Url Linking
 
 You may enter URLs to websites or local files into your document. To
-open the link double click on it or press the [Ctrl-L]. If you drag a
-file from MsWindowsExplorer onto WikidPad a link will be created for
-you.
+open the link double click on it or press the [Ctrl-L]. 
+
+++ Absolute URLs
+If you drag a file from MsWindowsExplorer onto WikidPad a link will be created for you.
 
 Example:
 
@@ -12,15 +14,7 @@ https://somewheresecure.com
 file:///C|/Documents%20and%20Settings/joeshmoe/readme.txt
 ftp://ftp.whereever.com/
 
-To create an absolute URL to a file you can also use "Add file URL" in "Editor" menu and choose the desired file in file dialog.
-
-To show a different title in the HTML preview/export as a link, use e.g.
-
-[ftp://ftp.whereever.com/ |Go somewhere]
-
-Switch to preview to see the "Go somewhere" only. You can also use an image URL (see below) as title to show a clickable image:
-
-[https://somewheresecure.com |rel://files/testimg.gif>r40% ]
+To create such [absolute URL] to a file you can also use "Add file URL" in "Editor" menu and choose the desired file in file dialog.
 
 
 ++ Relative URLs
@@ -39,8 +33,14 @@ If you right-click on a "file:" or "rel:" URL and choose "Convert Absolute/Relat
 Converting a relative URL to an absolute one is always possible, but there may be absolute URLs (especially on MsWindows if pointing to a different drive than the one the wiki is on) that can't be converted to relative URLs. In this case nothing happens.
 
 
-++ File storage
-You can also copy files into a subdirectory of the wiki directory from within WikidPad. See [FileStorage] for details.
+++ Show a Different Title
+To show a different title in the [HTML preview/export] as a link, use e.g.
+
+[ftp://ftp.whereever.com/ |Go somewhere]
+
+Switch to preview to see the "Go somewhere" only. You can also use an image URL (see below) as title to show a clickable image:
+
+[https://somewheresecure.com |rel://files/testimg.gif>r40% ]
 
 
 ++ Images
@@ -75,6 +75,10 @@ To create these URLs you can also use in menu "Wiki Words" the function "Copy UR
 The above menu entry is also available in context menus for wiki word tree items, tabs and for "anchor: ..." lines in the editor. In the last case the URL contains also the anchor you clicked on.
 
 
+++ File storage
+You can also copy files into a subdirectory of the wiki directory from within WikidPad. See [FileStorage] for details.
+
+
 ++ URL Appendix
 You can control details of URL presentation, especially for images, by using an URL appendix. This consists of a '>' character directly after the URL (no space) and some code characters which can be delimited by semicolons. The following codes are defined:
 
@@ -101,3 +105,6 @@ rel://files/testimg.gif>l
 
 Relative size:
 rel://files/testimg.gif>r110%x60%
+
+
+[:page:PageFooter]

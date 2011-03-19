@@ -1,48 +1,35 @@
-﻿++ Insertions
+﻿[:page:PageHeader][:toc:]
++ Insertions
 
-Insertions allow to insert some dynamic text into preview and HTML export of a page. This text can either be the content of another page or a list of wikipage links to pages which are parents or children of a page or to pages which form the result of a saved search.
+Insertions allow to insert some dynamic text into preview and HTML export of a page.
 
-To insert, for example, the content of the IncrementalSearch page, write:
+This text can either be the content of another page or a list of links to WikiPages which are parents or children of a page or to pages which form the result of a saved search.
 
-[:page: IncrementalSearch]
-
-----
-
-If you switch now to the preview, you will see the content of the IncrementalSearch page above, instead of the insertion tag.
+See ExampleInsertions.
 
 
-+++ Syntax
+++ Syntax
 The tag begins always with '[:' then comes the _insertion key_, then a colon and the _insertion value_,
 after that there may be appendices, separated by semicolons, to describe the way of presentation in more detail. The tag is closed by a closing bracket.
 
 In the example above, "page" is the insertion key, "IncrementalSearch" is the value.
 
-The value and appendices can be quoted (enclosed by quotation symbols) if they shall contain special characters or newlines. A quotation symbol is an arbitrary number of one of the quotation characters ", ', / or \ (double quotation mark, single quotation mark, slash or backslash). The starting and ending symbols must be the same. Examples for quotation symbols are:
++++ Using Quotation Symbols 
+The value and appendices can be quoted (enclosed by quotation symbols) if they shall contain special characters or newlines. A quotation symbol is an arbitrary number of one of the quotation characters ", ', / or \ (double quotation mark, single quotation mark, slash or backslash). 
+The starting and ending symbols must be the same. 
 
-"
-'''
-//
-/////
-\\
+See ExampleQuotationSymbols.
 
-The above insertion example can therefore be written as:
 
-<<
-[:page: "IncrementalSearch"]
-[:page: '''IncrementalSearch''']
-[:page: //IncrementalSearch//]
-[:page: /////IncrementalSearch/////]
-[:page: \\IncrementalSearch\\]
->>
-
++++ Builtin _keys_ and _values_ 
 The following keys and values are built into WikidPad (further are possible by plugins):
 
     * *page* shows the content of the existing wiki page which is
       given as insertion value. If it contains an appendix
       "adjheading" it adjusts the heading levels in the inserted page
-      to the level of inserting page
+      to the level of inserting page. See InsertPage.
     * *rel* lists all wiki words related to this page in the way
-      described by the value:
+      described by the value: See InsertRel.
         * *parents*: all parents of the page
         * *children*: all children (= all wiki links) of the page.
           With appendix "existingonly" only the really existing
@@ -54,21 +41,22 @@ The following keys and values are built into WikidPad (further are possible by p
         * *back*: go back in history of WikidPad tab (or browser
           on export)
     * *savedsearch* lists all wiki words found by the saved search
-      with the name given as value.
+      with the name given as value. See InsertSavedSearch.
     * *toc* shows a little table of contents with the headings of 
       the current page. In HTML preview/export you can click on
       the lines to go to the actual headings. The value of this
-      insertion must be empty.
+      insertion must be empty. See InsertToC.
     * *iconimage* shows the icon whose name is given as value.
       You can use menu "Format"->"Icon Name" to find the name of
-      an existing icon.
+      an existing icon. See InsertIconImage.
     * *eval* Evaluate the given Python expression and handle its
       result as if it replaces the insertion. You must switch on
       the appropriate option "Process insertion scripts" on the
-      "Security" options page to make it work.
-    * *self* Shows the name of the current page.
+      "Security" options page to make it work. See InsertEval.
+    * *self* Shows the name of the current page. See InsertSelf.
 
 
+++ Sorting Multi-Column Output
 For insertion tags which produce lists of wiki links (all but the "page" and "eval" insertion), you can also have the appendix "columns 123" where 123 stands for the number of columns the list should have. By default, there is only one column.
 
 By default such a multi-column table is sorted rightwards:
@@ -88,29 +76,4 @@ C F I
 >>
 
 
-+++ Examples
-
-At first a few wiki links to demonstrate the functions: (KeyBindings, DeadLink, DeadLinkToo, ScratchPad, TextBlocks)
-
-It is recommended to switch to preview to see the effect of the tags:
-
-*\[:rel: parents]*
-[:rel: parents]
-
-*\[:rel: children]*
-[:rel: children]
-
-*\[:rel: children;existingonly;columns 2]*
-[:rel: children;existingonly;columns 2]
-
-*\[:rel: children;existingonly;columns 2;coldir down]*
-[:rel: children;existingonly;columns 2;coldir down]
-
-*\[:savedsearch: nanny; columns 4]*  (all pages containing "any")
-[:savedsearch: nanny; columns 4]
-
-*\[:toc:]*
-[:toc:]
-
-*\[:eval:"5+6"]*
-[:eval:"5+6"]
+[:page:PageHeader]

@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 ++ Wiki Page
 
-todo: Write content
+todo: Add content
 
 
 [:page:PageFooter][alias:WikiPages]

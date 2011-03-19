@@ -9,8 +9,8 @@
     * MsWindowsBinaryInstaller now supports creation of a portable
       install (no uninstall, no registry or start menu changes)
     * Incremental search now also supported in inline diff view
-    * Removed annoying "blinking" on current heading in
-      doc structure window (thanks to Christian Ziemski)
+    * Removed annoying "blinking" on current heading in the
+      [page structure window] (thanks to Christian Ziemski)
     * Introduced splash window.
       See [OptionsDialog#+++ Show splash screen]
 
@@ -18,8 +18,8 @@
       wiki words (no relative or absolute paths supported)
     * Bug fixed: Error in error handling for unknown wiki language
       tag on opening a wiki
-    * Bug fixed: Problems with IE 6 on Win XP SP2 reduced (problems
-      with iframe remain)
+    * Bug fixed: Problems with MsInternetExplorer 6 on Win XP SP2 
+      reduced (problems with iframe remain)
     * Bug fixed: Sometimes relative links not possible due to
       undesired case sensitivity
     * Bug fixed: "SetCallFilterEvent" not supported by older
@@ -40,7 +40,7 @@ official parser
       layouts where ctrl-level has other layout than base level.
       See [OptionsDialog#+++ Translate menu accelerators for keyboard layout]
     * Option to show iframe content from external sources inside
-      the HTML IE preview.
+      the MsInternetExplorer preview.
       See [Options HTML preview_export#*Show iframes inside IE preview*]
     * Experimental: MsWindows: Option to let scroll-wheel scroll
       the window under the pointer. Doesn't work for some windows.
@@ -144,7 +144,7 @@ official parser
 ++ Aug. 29, 2010: 2.1beta06
 
     * Inline diff between versions.
-      See [ChronViewWindow#++++ Compare differences]
+      See [WindowChronView#+++ Compare differences]
     * MsWindows: Option to warn about other WikidPad processes running
       in single process mode.
       See [OptionsDialog#+++ Warn about other processes]

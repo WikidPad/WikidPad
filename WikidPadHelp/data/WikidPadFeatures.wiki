@@ -31,8 +31,7 @@
     * ClipboardCatcher
     * InternatiönalChàracters
     * ExternalGraphicalApplications
-    * PageStructureWindow
-    * ChronViewWindow
+    * [page structure window], [chronological view window]
     * FavoriteWikis
     * [Subpages]
     * OptionsDialog

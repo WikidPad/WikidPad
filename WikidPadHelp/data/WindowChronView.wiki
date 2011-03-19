@@ -1,16 +1,14 @@
 ﻿[:page:PageHeader][:toc:]
 + Chronological View Window
 
-The chron. view window presents pages related to a particular date, ordered by time and a list of versions of a particular WikiPage. "Related" can mean different things, mainly date of last modification or of creation (currently only last modification is implemented).
-
-The chron. view is far away from complete, so the look and behavior described here may change in the future.
+The chronological view window presents pages related to a particular date, ordered by time and a list of versions of a particular WikiPage. "Related" can mean different things, mainly date of last modification or of creation (currently only last modification is implemented).
 
 
 ++ The Timeline
 
-The currently only way to present the modification date of pages is the timeline which is a list of dates, each date with a background color representing the number of pages related to that date (white for zero and going darker for more pages). When moving over a date with related pages with the mouse, a little window with a list of the pages appears.
+Currently, the only way to present modification dates of pages is the timeline which is a list of dates, each date with a background color representing the number of pages related to that date (white for zero and going darker for more pages). When moving over a date with related pages with the mouse, a little window with a list of the pages appears.
 
-You can then move into the window and click on one of the page names with the left or middle mouse button to open the page.
+You can go into that window and click on one of the page names with the left or middle mouse button to open the page.
 
 To let the timeline show another date range you can currently only click twice (not doubleclick) on an arbitrary date and enter a new one (similar to renaming files in MsWindowsExplorer). After that the whole timeline refreshes according to your entry.
 
@@ -23,7 +21,7 @@ To go back to the current state of the page, double click on "<Current>", the la
 
 To create a [new version] from current state of a WikiPage, choose [Add version] from either the right-click menu of the [versions control] or from the [menu Wiki Page].
 
-To delete a version, either hit DEL key after selecting the version or right-click on the [versions control] and choose [Delete version]. At the moment you can only delete the oldest version (top of the list) or the newest version (one above "<Current>"), no versions in-between.
+To delete a version, either hit the [Del key] after selecting the version or right-click on the [versions control] and choose "[Delete version]". At the moment you can only delete the oldest version (top of the list) or the newest version (one above "<Current>"), no versions in-between.
 
 
 +++ Compare differences
@@ -46,4 +44,4 @@ See
 	* [OptionsDialog#+++ Versioning Data|Versioning]
 
 
-[:page:PageFooter]
+[:page:PageFooter][alias: chronological view window]

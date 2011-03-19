@@ -3,7 +3,7 @@
 
 *(This page is outdated and needs rewrite)*
 
-todo: Write content
+todo: Add content
 
 The syntax of this wiki is customizable. Use:
 

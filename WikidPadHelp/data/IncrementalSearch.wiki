@@ -1,11 +1,12 @@
-﻿++ Incremental Search
+﻿[:page:PageHeader][:toc:]
++ Incremental Search
 
 In order to start an incremental search in the left field of the status bar,
 just type [Ctrl-F] or [F3] while You are in a document.
 
-Now, beeing in incremental search mode anything you type becomes a search
+Now, being in incremental search mode anything you type becomes a search
 string, and as you type you are forwarded to any matches found in the current
-text. 
+text.
 
 Type [Ctrl-F] or [F3] again, or type [Cursor-Down] or [Page-Down]
 in order to "Search Next". In order to "Search Backwards" just type
@@ -13,7 +14,7 @@ in order to "Search Next". In order to "Search Backwards" just type
 
 To exit incremental search mode type [Enter].
 
-Incremental search supports regex. For example: To match the
+Incremental search supports [regular expressions]. For example: To match the
 word "incremental" or the word "search" in this document, type:
 
 [Ctrl-F]
@@ -42,4 +43,4 @@ number of seconds of inactivity before incremental search is closed
 automatically. 0 means "wait forever".
 
 
-[icon: lens]
+[:page:PageFooter][icon: lens]

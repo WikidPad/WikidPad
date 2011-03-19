@@ -13,16 +13,16 @@ JohnDoe are example WikiWords.  The term wiki means "quick" in
 Hawaiian, and wikis are all about quickly linking your information
 together.
 
-To activate or follow a WikiWord link, *double click on it*, or type
+To activate or follow a WikiWord link, just *double click on it*, or type
 [Ctrl-L] when the cursor is in the word.
 
-When you are finished reading through the help document select "Wiki/New"
+While you are reading through this help document select "Wiki/New"
 from the menu at the top of the application to create your own wiki.
-Then just start typing text with WikiWords to create your wiki.
+Then just start typing text with WikiWords to build your own wiki.
 
 ++ Features
 
-    * On the fly wiki WordLinking
+    * On the fly WikiWordLinking
     * Wiki words can be CamelCase or [Not Camel Case].
     * UrlLinking
     * [Anchors] and [Footnotes]
@@ -35,7 +35,7 @@ Then just start typing text with WikiWords to create your wiki.
     * Wiki TextFormatting
     * BulletedLists
     * WikiDocumentAttributes (cross-index your information)
-    * TodoItems (track todos, questions, issues)
+    * TodoItems (track todos, questions, issues ...)
     * [Insertions]
     * WikiBookmarks
 
@@ -53,8 +53,7 @@ Then just start typing text with WikiWords to create your wiki.
     * ClipboardCatcher
     * InternatiönalChàracters
     * ExternalGraphicalApplications
-    * PageStructureWindow
-    * ChronViewWindow
+    * [page structure window], [chronological view window]
     * FavoriteWikis
     * [Subpages]
     * OptionsDialog
@@ -76,7 +75,7 @@ Then just start typing text with WikiWords to create your wiki.
     * WikiLockFile
     * ApiDocs / WikidPadHooks
     * ThirdPartyLibraries
-    * WikidPadSupport
+    * WikidPadHelpTodo
 
 
-[:page:PageFooter][alias: HelpDocument]
+[:page:PageFooter][alias: HelpDocument][child_sort_order: natural]

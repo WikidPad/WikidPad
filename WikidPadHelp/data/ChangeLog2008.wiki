@@ -38,7 +38,7 @@ RepositoryRevision in "mbutscher" branch: *158*
 
    * Option to set whole wiki read-only.
      See OptionsDialog#*Read-only# wiki*
-   * Wiki-bound option to auto-show log window in addition
+   * Wiki-bound option to auto-show the [log window] in addition
      to global option
    * "Collapse whole tree" in context menu of tree items
    * Slightly different ordering of tree children with "tree_position"
@@ -57,7 +57,7 @@ RepositoryRevision in "mbutscher" branch: *158*
    
    * Bug fixed: Prioritizing more specific global settings for tree
      node state (icon/bold/color) over less specific ones did not work
-   * Bug fixed: Diverse problems with IE preview
+   * Bug fixed: Diverse problems with MsInternetExplorer preview
    * Bug fixed: Using templates when "templates_head" is set to "auto"
      (or not set at all) prevented "Use link title if present"
      from working
@@ -96,7 +96,7 @@ RepositoryRevision in "mbutscher" branch: *147*
     * Bug fixed: "wikistyle.css" is not copied on export
     * Bug fixed: Default "wikistyle.css" has no style definition
       for heading levels 5 to 15
-    * Bug fixed: Searching for regular expressions matching nothing
+    * Bug fixed: Searching for [regular expressions] matching nothing
       (e.g. "|") may freeze WikidPad
     * Bug fixed: Nesting of text blocks into submenus doesn't work
     * Bug fixed: Empty lines between bullets/numbered items in

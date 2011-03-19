@@ -1,7 +1,8 @@
-﻿++ Inline Python Eval
+﻿[:page:PageHeader][:toc:]
++ Inline Python Eval
 
 
-+++ Security concerns
+++ Security concerns
 WikidPad allows to evaluate and execute arbitrary Python scripts.
 Because this is a potential security risk, script execution is
 disabled by default.
@@ -37,7 +38,7 @@ The order can be reversed by checking option "Reverse script search order (globa
 The following examples work therefore only with an appropriately relaxed security setting.
 
 
-+++ Evaluating expressions
+++ Evaluating expressions
 You can evaluate Python expressions directly in the editor by
 highlighting the expression and pressing [Ctrl-E]. Example:
 
@@ -46,7 +47,7 @@ Highlight the calculation below, and type [Ctrl-E].
 1+2+3
  
  
-+++ Executing scripts on the same page
+++ Executing scripts on the same page
 You can also execute blocks of code within a document.  Blocks of code
 are defined within <% %> blocks. For example:
 
@@ -79,28 +80,30 @@ file:///C|/Program%20Files/WikidPad/extensions/EvalLibrary.py
 file:///C|/Program%20Files/WikidPad/user_extensions/EvalLibrary.py
 
 
-+++ Script Imports
+++ Script Imports
 
 You can import scripts from another page using the following attribute.
 
 [import_scripts: GlobalScriptLibrary]
 
-Type [Ctrl-4] to see the output from script 4 on the page
-GlobalScriptLibrary.
+Type [Ctrl-4] to see the output from script 4 on the page GlobalScriptLibrary.
 
-You can also use \[global.import_scripts: ...] property to define a single page which will be seen as if it was imported by every page of the wiki.
+You can also use the property \[global.import_scripts: ...] in order to define a single page which will be seen as if it was imported by every page of the wiki.
 
 
-+++ Editor Control Functions
+++ Editor Control Functions
 
 See http://www.yellowbrain.com/stc/index.html for a list of the functions
 available to the "editor" control.
 
 
-+++ Another Example
+++ Another Example
 
 Highlight the line below and press [Ctrl-3]
 
 c:\this path\will be encoded.txt
 
 <% 3: lib.encodeSelection(editor) %>
+
+
+[:page:PageFooter]
