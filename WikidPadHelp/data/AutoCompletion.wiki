@@ -8,12 +8,12 @@ This works for the following components (for all of the following examples, move
 
 ++ Wiki words
 
-An incomplete wiki word (with left bracket or without) can be completed. Examples:
+An incomplete WikiWord (with left bracket or without) can easily be completed. Examples:
 
     TextForm
     [Not Cam
     
-For bracketed wiki words the closing bracket is normally not part of the suggestions, but there is an option to change that. See OptionsDialog#*Append# closing# bracket# on# auto-complete*
+For bracketed WikiWords the closing bracket is usually not part of the suggestions, but there is an option to change that. See [OptionsDialog#++++ Append closing bracket on auto-complete]
 
 
 

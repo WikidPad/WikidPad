@@ -8,11 +8,12 @@ This text can either be the content of another page or a list of links to WikiPa
 See ExampleInsertions.
 
 
-++ Syntax
+++ Insertion Syntax
 The tag begins always with '[:' then comes the _insertion key_, then a colon and the _insertion value_,
 after that there may be appendices, separated by semicolons, to describe the way of presentation in more detail. The tag is closed by a closing bracket.
 
 In the example above, "page" is the insertion key, "IncrementalSearch" is the value.
+
 
 +++ Using Quotation Symbols 
 The value and appendices can be quoted (enclosed by quotation symbols) if they shall contain special characters or newlines. A quotation symbol is an arbitrary number of one of the quotation characters ", ', / or \ (double quotation mark, single quotation mark, slash or backslash). 
@@ -28,7 +29,7 @@ The following keys and values are built into WikidPad (further are possible by p
       given as insertion value. If it contains an appendix
       "adjheading" it adjusts the heading levels in the inserted page
       to the level of inserting page. See InsertPage.
-    * *rel* lists all wiki words related to this page in the way
+    * *rel* lists all WikiWords related to this page in the way
       described by the value: See InsertRel.
         * *parents*: all parents of the page
         * *children*: all children (= all wiki links) of the page.
@@ -36,15 +37,15 @@ The following keys and values are built into WikidPad (further are possible by p
           pages are listed
         * *parentless*: all parentless pages. The list is
           independent from the page containing the insertion tag.
-        * *undefined*: all undefined wiki word links. The list is
+        * *undefined*: all undefined WikiWordLinks. The list is
           independent from the page containing the insertion tag.
-        * *back*: go back in history of WikidPad tab (or browser
-          on export)
-    * *savedsearch* lists all wiki words found by the saved search
+        * *back*: go back in history of WikidPad WikiTextEditorTab
+          (or browser on export)
+    * *savedsearch* lists all WikiWords found by the saved search
       with the name given as value. See InsertSavedSearch.
     * *toc* shows a little table of contents with the headings of 
-      the current page. In HTML preview/export you can click on
-      the lines to go to the actual headings. The value of this
+      the current page. In [HTML preview]/[HTML export] you can click
+      on the lines to go to the actual headings. The value of this
       insertion must be empty. See InsertToC.
     * *iconimage* shows the icon whose name is given as value.
       You can use menu "Format"->"Icon Name" to find the name of
@@ -76,4 +77,4 @@ C F I
 >>
 
 
-[:page:PageHeader]
+[:page:PageFooter]

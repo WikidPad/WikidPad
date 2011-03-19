@@ -19,7 +19,7 @@ The [versions tab] lists all versions stored for the currently active WikiPage. 
 
 To go back to the current state of the page, double click on "<Current>", the last element in versions list.
 
-To create a [new version] from current state of a WikiPage, choose [Add version] from either the right-click menu of the [versions control] or from the [menu Wiki Page].
+To create a [new version] from the current state of a WikiPage, choose [Add version] from either the right-click menu of the [versions control] or from the [menu Wiki Page].
 
 To delete a version, either hit the [Del key] after selecting the version or right-click on the [versions control] and choose "[Delete version]". At the moment you can only delete the oldest version (top of the list) or the newest version (one above "<Current>"), no versions in-between.
 

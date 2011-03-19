@@ -32,9 +32,9 @@ Further details of the behavior of incremental search:
     * [Enter] terminates search and keeps last found text selected (if any)
     * [Esc] terminates search and goes back where search began
     * Clicking outside of the search field terminates search
-    * If search pattern is found search field is green
-    * If search pattern is not found search field is yellow
-    * If search pattern is an invalid regex, color doesn't change
+    * If search pattern is *found* search field is *green*
+    * If search pattern is *not found* search field is *yellow*
+    * If search pattern is an *invalid regex*, color doesn't change
 
 
 In the options dialog, page "Searching" there is also an option

@@ -14,7 +14,7 @@ To activate or follow a WikiWordLink, just *double click on it*, or type
 [Ctrl-L] when the cursor is in the word.
 
 While you are reading through the help document select "Wiki/New"
-from the [Menus] at the top of the application to create your own wiki.
+from the [Menus] at the top of the application window to create your own wiki.
 Then just start typing text with WikiWords and enjoy creating your wiki.
 
 ++ WikidPadFeatures

@@ -1,7 +1,5 @@
-﻿+ Wiki Word History
-
-[alias: history; History]
-[short_hint: Wiki Pad maintains a history of the WikiWords you have visited.]
+﻿[:page:PageHeader][:toc:]
++ Wiki Word History
 
 WikidPad maintains a history of the WikiWords you have visited.
 
@@ -13,3 +11,6 @@ To go forward in the history press [Ctrl-Alt-Right] arrow.
 To view the history window with the previous word automatically selected press [Ctrl-Alt-Up] arrow.
 
 To view the history window with the next word automatically selected press [Ctrl-Alt-Down] arrow.
+
+
+[:page:PageFooter][alias: history; History][short_hint: Wiki Pad maintains a history of the WikiWords you have visited.]

@@ -6,17 +6,17 @@
 RepositoryRevision in "mbutscher" branch: *50*
 
 Changes:
-    * Extended table support: wiki words, bold and italic
+    * Extended table support: WikiWords, bold and italic
       text can now be used in table cells and the ...
     * same support in TodoItems now works correctly
 
-    * Per-wiki-option to define a fixed wiki word to show when
-      wiki is opened
+    * Per-wiki-option to define a fixed WikiWord to show when
+      the wiki gets opened
     * Regular expression support for page search (menu
       "Editor"->"Find and Replace")
     * For wiki-wide search, the number of occurring matches on
       a page can be displayed.
-    * Function key F6 to switch between tree and editor
+    * Function key F6 to switch between TreeControl and WikiTextEditor
 
     * Some bugs fixed
 
@@ -55,24 +55,24 @@ automatically when opening a wiki the first time. Making a backup
 beforehand is therefore recommended!
 
     1. *User interface*
-        1. When choosing a wiki word to go to (by using the
+        1. When choosing a WikiWord to go to (by using the
            "view parents", "view parentless nodes", etc. menu 
            functions) you can in the dialog choose one or more wiki
            pages to *delete*, so e.g. all [parentless nodes] can be
            deleted at once.
-        2. *HTML-Preview*. At the top of the editor window there are
+        2. *[HTML-Preview]*. Above the WikiTextEditor window there are
            two tabs "Edit" and "Preview". If you click the "Preview"
-           tab you see the rendered HTML-View of the current editor
+           tab you see the rendered HTML preview of the current editor
            content. In the options you can choose the font face to
-           use in the preview.
+           use in the [Preview mode].
         3. *Completely new wiki-wide search dialog*. It replaces the
            "view saved-searches" function and its dialog. You can now
            edit the wiki while the dialog is open yet
            (=non-modal dialog). For details see [SearchingTheWiki].
     
     2. *New options to handle tree*
-        1. *"Tree auto-follow"*: The tree tries to always select the
-           wiki word currently shown in the editor or HTML-view.
+        1. *"Tree auto-follow"*: The tree tries to select the currently
+           shown WikiWord always, both in [Edit mode] and in [Preview mode].
         2. *"Tree update after save"*: After each (automatic or manual)
            save the tree icons and shown children are updated. This
            may need some time and may create some flicker going from
@@ -84,8 +84,8 @@ beforehand is therefore recommended!
            [application directory]. (Deleting it is always safe and
            recommended after changing WikiSyntax)
         2. Option to handle numeric only words (=*footnotes*) as
-           wiki words or regular text. This option applies to the
-           current wiki only
+           WikiWords or as regular text only. 
+           This option applies to the current wiki only.
         3. In export dialog: option to use *compatible filenames* which
            contain ASCII-only characters, so sets of HTML files are
            more compatible to other filesystems.
@@ -100,12 +100,12 @@ beforehand is therefore recommended!
         1. Characters from any language in the text (if font and 
            operating system support them).
         2. Arbitrary alphanumeric characters (as defined by Unicode 
-           consortium) for non-camelCase wiki words (if operating and 
+           consortium) for non-camelCase WikiWords (if operating and 
            file system supports it), except numeric only words, like
            e.g. [42].
         3. Support for all characters in incremental search.
 
-    2. Changes in *wiki syntax*:
+    2. Changes in the *WikiSyntax*:
         1. Before and after the tags to escape formatting (<< and >>) 
            only whitespaces are allowed on the same line. See 
            TextFormatting.
@@ -115,7 +115,7 @@ beforehand is therefore recommended!
            A # is escaped as ##.
         3. Arbitrary alphanumeric characters (see 1.2.)
 
-    3. The *editor*:
+    3. The *WikiTextEditor*:
         1. Drag and drop of text.
         2. Faster syntax highlighting. For pages bigger than 10 KBytes, 
            it is done in the background, so you might notice a delay 
@@ -126,25 +126,25 @@ beforehand is therefore recommended!
            replaced by a link to the new one.
         4. Possibility to change the date format for "Insert Date"
         5. New menu item "Wikize selected word" to convert selected words 
-           to a valid wiki word.
+           to a valid WikiWord.
         6. Menu and toolbar plugin to add a list of the children and 
-           parents of a wiki word to a page.
-        7. Menu plugin to create new wiki words with auto-generated 
+           parents of a WikiWord of a page.
+        7. Menu plugin to create new WikiWords with auto-generated 
            names. (Name looks like  [New124536] with a unique number).
         8. Right handling of numbered lists with multiple levels of 
-           numbering (like this one). See also BulletedLists. Written by 
-           Gerhard Reitmayr.
+           numbering (like this one). See also BulletedLists.
+           Written by Gerhard Reitmayr.
 
-    4. The *user interface*:
+    4. The *UserInterface*:
         1. Submenu to choose colors similar to icons.
         2. In the dialogs "Open word" and "Search wiki" you can use
            cursor up/down to move between text field and the list below
            the field.
-        3. "Set as root" menu item to choose an arbitrary wiki word as 
+        3. "Set as root" menu item to choose an arbitrary WikiWord as 
            root of the tree on the left.
         4. Add menu and toolbar items as Python plugins (no documentation
-           yet, but example in extensions/referrals.py). Written by 
-           Gerhard Reitmayr.
+           yet, but example in extensions/referrals.py). 
+           Written by Gerhard Reitmayr.
         5. Arbitrary nested todo and property entries in the View tree. 
            See WikiDocumentAttributes and TodoItems.
 
@@ -157,7 +157,7 @@ beforehand is therefore recommended!
            show the result.
         4. "New window on wiki URL". If checked, activating a "wiki:" URL 
            opens a new WikidPad window (only if   'Handle URLs with 
-           "wiki:" by WikidPad'   was checked when WikidPad was 
+           "wiki:" by WikidPad'  was checked when WikidPad was 
            installed). If not checked, the same window is reused to open 
            the selected wiki.
         5. "Low resource usage". Uses less GDI and user resources on 

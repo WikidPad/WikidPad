@@ -2,7 +2,7 @@
 + Options for HTML preview/export
 
 +++++ Start browser after export
-Starts the current web browser after exporting one or more HTML pages or an XML document.
+Starts the current web browser after exporting one or more HtmlPages or an XML document.
 
 +++++ Font name for HTML preview
 Enter the desired font name for the HTML preview. Clicking on the "..." button shows a list of available fonts.
@@ -65,14 +65,14 @@ In the export dialog, you can temporarily override this setting for one export.
 Set the title of the table of contents according to your language. The default is "Table of Contents". For German it could be e.g. "Inhaltsverzeichnis".
 
 +++++ Single page separator lines
-Set the number of separator lines to separate wiki pages in a single HTML page on export.
+Set the number of separator lines to separate wiki pages in a single HtmlPage on export.
 
 
 
 +++ HTML header settings
 
 ++++ Attributes of "<body>"-tag
-The following settings for HTML export/preview can all be overridden by attributes for a particular wiki and for a particular page. These settings (either in options dialog or as attributes) only have an effect when exporting a set of HTML pages, not when exporting a single page containing multiple wiki words. For HTML preview only some of the settings have an effect at all.
+The following settings for HTML export/preview can all be overridden by attributes for a particular wiki and for a particular page. These settings (either in options dialog or as attributes) only have an effect when exporting a set of HtmlPages, not when exporting a single page containing multiple WikiWords. For HTML preview only some of the settings have an effect at all.
 
 
 +++++ Link color

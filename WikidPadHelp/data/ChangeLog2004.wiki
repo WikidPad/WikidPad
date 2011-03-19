@@ -35,18 +35,18 @@
        
     2. User can now place their extensions in "user_extensions" under the
        [WikidPad installation directory].  This directory will not be touched when
-       upgrading wikidPad.  Copy the files in the "extensions" directory to
+       upgrading WikidPad.  Copy the files in the "extensions" directory to
        get started.
 
-    3. Added URL protocol handler for wikidPad so that wiki urls will open
+    3. Added URL protocol handler for WikidPad so that wiki urls will open
        wikidpad. For example:
        
        wiki://C|/Program%20Files/WikidPad/WikidPadHelp/data/ChangeLog.wiki
        
-       Will open up this page in a new instance of wikidPad.  This will work
-       outside of wikidPad as well, from MsInternetExplorer for example.  The
+       Will open up this page in a new instance of WikidPad.  This will work
+       outside of WikidPad as well, from MsInternetExplorer for example.  The
        easiest way to create a link to another wiki from within a wiki page
-       is to just drag and drop the .wiki file onto the text editor.
+       is to just drag and drop the .wiki file onto the WikiTextEditor.
        
     4. Fixed some issues with the html export.  Specifically bulleted list
        problems.  Also, ignore blocks << >> weren't exported properly.
@@ -54,7 +54,7 @@
 
 ++ July 6, 2004
 
-    1. If wikidPad is closed when minimized don't remember the minimized sizes.
+    1. If WikidPad is closed when minimized don't remember the minimized sizes.
     2. Highlighted text is only evaluated when [Ctrl-E] is pressed now, not [Ctrl-1] to [Ctrl-6].
        This lets me implement this example InlinePythonEval#encodeSelection.
 
@@ -68,7 +68,7 @@
        You can also pass in the name of a WikiWord file and WikidPad will
        open the wiki for that word and then open the word.
        <code>wikidpad.exe path_to_wiki_word_file.wiki</code>
-       This also means that you can now double click on a wiki word file
+       This also means that you can now double click on a WikiWord file
        and wikidpad will open the wiki for the word, and then open the word.
 
 
@@ -82,8 +82,8 @@
 ++ Apr. 11, 2004
 
     1. Fixed some bugs with the links [That Arent Wiki Words].
-    2. Fixed the default title for WIKIDPADWords have multiple capital letters in
-       the beginning.
+    2. Fixed the default title for WIKIDPADWords that start with multiple capital 
+       letters, followed by one or more lowercase characters.
     3. Added ability to DisableCamelCaseWords.
     4. Added a menu item to disable or enable indentation guides.
     5. Added support for executing a search as part of a link. 
@@ -100,8 +100,8 @@
        keybindings.py.  Now if you change the regex for bold or italic you
        can also customize the code triggered by the keyboard command and the
        menu option.
-    4. In some situations wikidPad might appear off screen at startup.
-       Added a check for this and code to reposition wikidPad back on screen.
+    4. In some situations WikidPad might appear off screen at startup.
+       Added a check for this and code to reposition WikidPad back onto the screen.
     
 
 ++ Mar. 06, 2004
@@ -112,8 +112,8 @@
        be chopped at 20, and ... would be appended to the end.
     3. Words with nested underscores ARE_NOT_TREATED_AS_ITALICS.
     4. ~TurnsOffWordLinking.  ~ will cause a word to not be treated as a
-       wiki word link.
-    5. The HTML and XML export now wrap <<>> blocks in \<pre> tags.
+       WikiWordLink.
+    5. The HTML export now wraps <<>> blocks in \<pre> tags.
     6. You can now have more than 1 link on a line.
         http://www.google.com/ http://www.yahoo.com/
     7. Added "tree_position" attribute.  Look at the bottom of this page.
@@ -132,9 +132,9 @@
 
 ++ Feb. 22, 2004
 
-    1. Ignore blocks << >> now suppress wiki word links, properties and
-       todos properly.  Script blocks with wiki words, and urls with wiki
-       words in them are also now suppressed.
+    1. Ignore blocks << >> now suppress WikiWordLinks, properties and
+       todos properly.  Script blocks with WikiWords, and URLs with 
+       WikiWords in them are also now suppressed.
     2. Pulled the WikiSyntax regular expressions out into an extension
        file.
 
@@ -162,7 +162,7 @@
     1. Fixed export bug where urls in bulleted lists would include LI in
        their HREF.
     2. Added list of possible TreeNodeColors to help doc.
-    3. The mouse now changes to a hand over wiki word links.
+    3. The mouse now changes to a hand over WikiWordLinks.
     4. Added context menu to tree control for rename/delete.
     5. Added Undo/Redo buttons to Editor menu.
     6. Added XML Export. Should be very simple to write stylesheets for

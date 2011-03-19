@@ -5,14 +5,14 @@ The WikiDialog "Export" can be reached by the ["Export..." menu item] in the ["E
 
 This dialog is organized similar to the ["Import" dialog].
 
-You can export your wiki as a single [HTML page], a as a set of [HTML pages],
+You can export your wiki as a single HtmlPage, a as a set of HtmlPages,
 one WikiWordPage at a time, or in [Multipage text format].
 
 You can select a few predefined operations from the "Wiki" menu:
 
-	* Publish as HTML / Wiki As Single [HTML Page]
-	* Publish as HTML / Wiki As Set of [HTML Pages]
-	* Publish as HTML / Current WikiWord As [HTML Page]
+	* Publish as HTML / Wiki as Single HtmlPage
+	* Publish as HTML / Wiki as Set of HtmlPages
+	* Publish as HTML / Current WikiWord as HtmlPage
 
 
 Or you can use Publish as HTML / Other Export to show a dialog to choose other settings:
@@ -26,7 +26,7 @@ Choose if you want to export current page only, the current page and all sub-pag
 Uses ASCII-only filenames for exported files so that they can be transferred to other filesystems without compatibility issues. On MsWindowsXP and MsWindowsServer2003 the AppLocale utility (see http://www.microsoft.com/globaldev/tools/apploc.mspx ) might also help on export problems.
 
 +++ Export to
-You can export a single [HTML page], one [HTML page] for each WikiPage, a [Multipage text format] file or a set of .wiki files (mainly interesting for Compact version to migrate to original).
+You can export a single HtmlPage, one HtmlPage for each WikiPage, a [Multipage text format] file or a set of .wiki files (mainly interesting for Compact version to migrate to original).
 
 +++ Destination file/directory
 Here you can set where the exported file(s) should be stored. If file or directory is needed depends on the type given in "Export to". For XML and multipage text it is a single file, for other types it is a directory (because multiple files must be written).
@@ -57,8 +57,8 @@ Same as first hitting "Load Export" then "OK" to start the export. Double-clicki
 For the HTML exports you can choose if you want to:
     * export URLs to images as \<img> tags or as normal links
     * create a table of contents either as a tree or as a list.
-      For a single [HTML page], the TOC is at the beginning of the
-      page, for a set of [HTML pages], it is a separate
+      For a single HtmlPage, the TOC is at the beginning of the
+      page, for a set of HtmlPages, it is a separate
       "index.html" file.
       Using "As tree" is recommended when exporting the whole or
       nearly the whole wiki, "As list" is better for small subsets
@@ -100,7 +100,7 @@ A few drawbacks worth to mention:
 
     1. Changes on a page that affect other pages (e.g. adding/removing attribute "\[global.camelCaseWordsEnabled: false]") will not change the already exported pages until they are re-exported.
     2. The set of pages to export will be static under some circumstances. Especially if you start auto-export for all children of one or more pages, it will only export pages which were children when auto-export started regardless if new children are added later.
-    3. If you export as a single HTML file, the whole HTML file must be recreated on each change so it is only recommended if you export a few small pages.
+    3. If you export as a single HtmlFile, the whole HtmlFile must be recreated on each change so it is only recommended if you export a few small pages.
     4. If temporary (volatile) files must be created (e.g. generated from MimeTeX or GraphViz) there may be created new ones again and again on each change of a page filling up the "volatile" directory. Therefore it is recommended to make a final non-continuous export to clean up the garbage.
 
 

@@ -50,13 +50,13 @@ The precise quoting syntax is the same as for [Insertions]#++ Syntax
 
 Attributes also support AutoCompletion. Try it:
 
-Place cursor after the m and press [Ctrl-Space]
+Place the cursor behind the m and press [Ctrl-Space]
 [im
 
 
-++ Attribute Based Tree Formatting
+++ Formatting a Page
 
-+++ Formatting a Page
++++ Attribute Based Tree Formatting
 
 There are 3 special attributes which you can attach to a page in order to control
 the appearance of the page's node in the ["Tree" pane].
@@ -64,16 +64,18 @@ the appearance of the page's node in the ["Tree" pane].
 These attributes override any [global settings] (see below): 
 
 +++++ icon: name
+
+Example:
+[icon:lens]
+\[icon:lens] changes the icon for this page to a lens.
+
 	See TreeNodeIcons
 
 +++++ color: (white, blue, etc.)
 	See TreeNodeColors
 	
 +++++ bold: (true or false)
-
-Example:
-[icon:lens] changes the icon for this page to a lens.
-
+Set the font weight of the title of the WikiPage as shown in the TreeControl to bold, or to normal.
 
 +++ Formatting a TodoItem
 
@@ -81,6 +83,7 @@ Such attributes can also be written in a TodoItem. If used there, they control t
 
 Example:
 todo: Show another color [color: orange]
+
 
 ++ Using Global Attribute Properties
 
@@ -93,8 +96,7 @@ Examples:
 This means any document in the wiki with an "importance" attribute
 that has a value of high will be bold.
 [importance: high]
-So setting the above attribute is what made this document bold
-in the tree.
+So setting \[importance: high] above is what makes the title of this document look bold in the TreeControl.
 
 
 If the global definition contains the first part(s) of an attribute the appearance is also changed.
@@ -126,18 +128,22 @@ importance setting of the node if "importance" is not already set.
 
 
 +++++ font: font face name
-Change the editor font of a page or the whole wiki.
+For the current page or the for whole wiki, set a particular font face to be used by the WikiTextEditor, 
 See WikiFonts for example and details.
 
 
 +++++ camelCaseWordsEnabled: "true" or "false"
 Control, if on one page or all pages (prefixed with "global") CamelCaseWords should be interpreted as wiki links.
 
-Bracketed words (e.g. [CamelCaseWords] are always seen as links).
+Bracketed words (e.g. [CamelCaseWord] are always seen as links).
 
 
 +++++ paragraph_mode: "true" or "false"
-Choose if for one or all pages a newline in editor is shown as new line in [HTML preview]/[HTML export] (paragraph_mode: false) or is ignored and only an empty line starts a new paragraph (paragraph_mode: true).
+Choose if for one or all pages.
+
+A newline in the WikiTextEditor is shown:
+	* as new line in [HTML preview]/[HTML export] (paragraph_mode: false) or
+	* is ignored and only an empty line starts a new paragraph (paragraph_mode: true).
 
 This paragraph is shown in
 preview differently if you
@@ -196,7 +202,7 @@ See [Templates]
 
 
 +++++ pagetype: type of the page
-Controls some behavior of the editor.
+Controls some behavior of the WikiTextEditor.
 
 Currently only type "form" is supported (see [FormPages] for details).
 
@@ -227,12 +233,14 @@ Link (URL) to a background image. Doesn't work for internal preview.
 
 
 +++ auto_link
-Allow recognition of non-camelcase wiki words in normal text (without brackets). Supported values:
+Allow to recognize WikiWords, which are not CamelCase in normal text (without brackets).
+
+Supported values are:
 
     * off: Switch off recognition
     * relax: Recognition is case-insensitive and maps arbitrary
       non alpha-numeric characters in text to white spaces in the
-      wiki word.
+      WikiWord.
 
 When active, e.g. text "multipage text, format" is recognized as WikiWord [Multipage text format].
 
@@ -253,9 +261,10 @@ You can also use "global.view_pane".
 If you place the mouse pointer over the wiki link to a page which contains this attribute,
 the value of the attribute is shown as a tooltip. 
 
-E.g. place the mouse pointer over this link and let it rest one moment:
+E.g. place the mouse pointer over one of these links and let it rest one moment:
 
 	[Short_Hint Attribute]
+	[Ctrl-B]
 	ACLs, ADSs
 
 +++ Structure Graphs

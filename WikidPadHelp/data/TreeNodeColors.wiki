@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + Tree Node Colors
 
-This is the list of colors supported in the tree control via the
+This is the list of colors supported in the TreeControl via the
 \[color: LIGHT STEEL BLUE] attribute.
 
 See also the ColorTestPage.

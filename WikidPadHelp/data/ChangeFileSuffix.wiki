@@ -3,14 +3,14 @@
 
 *USE THIS AT YOUR OWN RISK!!!*  *USE THIS AT YOUR OWN RISK!!!*
 
-Normally the page files in the [data directory] of a "Original Gadfly" or "Original Sqlite" wiki have the suffix ".wiki". You can change this if you really need to.
+Usually the page files in the [wiki data directory] of a "Original Gadfly" or "Original Sqlite" wiki have the suffix ".wiki". You can change this if you really need to.
 
 Currently there is no support for automatic renaming of existing page files. If necessary, a script will be published to do that.
 
 
 Ensure that you have *not* opened with WikidPad the wiki you want to modify now.
 
-To change the suffix open the file with suffix .wiki in the wiki directory (*above* the "data" directory) with a text editor. This is the configuration file of the wiki (its suffix can't be changed). In this file you will find a line:
+In order to change the suffix, just open the file with suffix .wiki in the [wiki directory] (*above* the [wiki data directory]) with a text editor. This is the configuration file of the wiki (its suffix can't be changed). In this file you will find a line:
 
 [main]
 
@@ -39,7 +39,7 @@ db_pagefile_suffix=.wiki
     * To go back to the default ".wiki" files, you can also delete the line completely
 
 
-Now you can save and close the configuration file. After that you should somehow rename the existing page files.
+Now you can save and close the [wiki configuration file]. After that you should somehow rename the page files in the [wiki data directory].
 Then you should be able to open the wiki in WikidPad.
 
 

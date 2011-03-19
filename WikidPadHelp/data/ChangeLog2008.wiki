@@ -11,13 +11,13 @@
 
 RepositoryRevision in "mbutscher" branch: *163*
 
-    * Option to automatically search text selected in preview when
-      switching to editor for better synchronization (thanks to
-      François Savard).
-      See OptionsDialog#*Synchronize# editor# by# preview# selection*
+    * Option to automatically search text selected in [Preview mode] 
+      when switching to editor mode for better synchronization
+      (thanks to François Savard).
+      See OptionsDialog#Synchronize# editor# by# preview# selection
     * Dialog to go to parents/children has now "open in new tab" button.
-    * Several presentation options for GraphViz structure plugin.
-      See [WikiStructureGraphs#++ Options]
+    * Several presentation options for GraphVizStructurePlugin.
+      See WikiStructureGraphs#++ Options
     * Show folded lines with match during incremental search and
       unfold at the end of inc. search if necessary
     
@@ -65,8 +65,8 @@ RepositoryRevision in "mbutscher" branch: *158*
    * Bug fixed: On inserting a textblock, selection was not replaced
      and "undo" didn't behave well
    * Bug fixed: "priority" attribute did not influence "importance"
-   * Bug fixed: Indentation containing real tab characters was not copied
-     unmodified to next line on auto-indent
+   * Bug fixed: Indentation containing real tabulator characters was 
+     not copied unmodified to next line on auto-indent
 
 
 ++ Sep. 27, 2008: 1.9beta18
@@ -76,8 +76,8 @@ RepositoryRevision in "mbutscher" branch: *147*
     * Insertion [:rel:back] introduced to go back in history.
       See [Insertions]
     
-    * Option that double-clicking into preview switches to editor
-    * Option to close tab when clicking on it with middle mouse button
+    * Option for double-clicking into [Preview mode] to switch to [Edit mode]
+    * Option to close a WikiTextEditorTab when clicking on it with middle mouse button
     * Option to control what happens when dropping files.
       For all three see OptionsDialog#++++# Mouse
     
@@ -159,7 +159,7 @@ RepositoryRevision in "mbutscher" branch: *145*
 
 RepositoryRevision in "mbutscher" branch: *143*
 
-    * Option to set color of editor margin.
+    * Option to set color of left margin of WikiTextEditor.
       See OptionsDialog#*Margin# color*
     * Option to set color of tree background.
       See OptionsDialog#++++# Tree# options
@@ -170,7 +170,7 @@ RepositoryRevision in "mbutscher" branch: *143*
     
     * Bug fixed: "Open Wiki Word" dialog was sometimes closed when keeping it open makes more sense
     * Bug reduced(?): Linux: Handling of local file URLs to start applications works better
-    * Support for all uppercase and lowercase letters in the Unicode set for creating camel-case wiki words independent of OS language
+    * Support for all uppercase and lowercase letters in the Unicode set for creating CamelCase WikiWords independent of OS language
 
 
 
@@ -178,7 +178,7 @@ RepositoryRevision in "mbutscher" branch: *143*
 
 RepositoryRevision in "mbutscher" branch: *140*
 
-    * Menu function to copy URL of current wiki word to clipboard.
+    * Menu function to copy the URL of the current WikiWord to the clipboard.
       See UrlLinking#++# Wiki:# URLs
     * Support for ordering tree children by modification date
       (Sqlite wikis should be rebuilt to speed this up).

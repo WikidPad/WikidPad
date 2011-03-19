@@ -2,15 +2,15 @@
 + Menu Format
 
 ++ Bold - [Ctrl-B]
-Marks selection in editor with appropriate markup for bold text.
+Mark the text currently selected in the WikiTextEditor with appropriate markup for *bold* text.
 
 ++ Italic - [Ctrl-I]
-Marks selection in editor with appropriate markup for italics.
+Mark the text currently selected in the WikiTextEditor with appropriate markup for _italics_.
 
 ++ Heading - [Ctrl-Alt-H]
-Marks line containing text cursor with markup for a heading.
+Mark the current line (containing the text cursor) with markup for a heading.
 
-This can be used multiple times to change heading level.
+Use this multiple times in order to increase the level of the heading.
 
 ----
 
@@ -19,23 +19,23 @@ Rewraps text (adds/removes newlines) to make each line contain no more character
 
 ++ Convert
 +++ Selection to Link - [Ctrl-J]
-Makes the selected text in editor to a wiki link by removing forbidden characters.
+Convert text selected in the WikiTextEditor to a wiki link, also removing forbidden characters.
 
-+++ Selection to Wiki Word - [Ctrl-Shift-R]
-Moves selected text to another wiki word and places a link to this word where the text was.
++++ Selection to WikiWord - [Ctrl-Shift-R]
+Move selected text to another WikiWord and place a link to this WikiWord where the text was.
 
-You are asked for the link to the word. If you enter an existing wiki word you are asked if you want to append the text to this word.
+You are asked for the link to the word. If you enter an existing WikiWord you are asked if you want to append the text to this WikiPage.
 
 ----
 
 ++ Icon Name
-Insert name of selected icon at cursor position.
+Insert the name of the selected icon at the cursor position.
 
 ++ Color Name
-Insert name of selected color at cursor position.
+Insert the name of the selected color at the cursor position.
 
 ++ Add Attribute
-Allows to append to a page the appropriate attribute to give the related node in tree the selected icon or color.
+Allows to append to a WikiPage the appropriate attribute in order to give the related node in tree the selected icon or color.
 
 
 [:page:PageFooter][icon:left-right][alias:'"Format" Menu'; Format Menu][short_hint:The "Format" menu]

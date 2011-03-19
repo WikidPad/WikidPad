@@ -26,7 +26,7 @@ You can download them separately. The URLs are:
 >>
 
 
-A helpful tutorial for creating directed graphs with GraphViz's dot utility is http://kabru.eecs.umich.edu/bin/view/TWiki/HowtoDirectedGraphs.
+A helpful tutorial for creating directed graphs with the GraphViz dot utility is http://kabru.eecs.umich.edu/bin/view/TWiki/HowtoDirectedGraphs.
 
 You can download all or only some of them as you like.
 

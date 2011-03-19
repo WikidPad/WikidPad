@@ -52,7 +52,7 @@
       place is used again when switching between tabs
     * Use less CPU time if not active application.
 
-    * Bug fixed: Failure if non-existing wiki words given in
+    * Bug fixed: Failure if non-existing WikiWords given in
       page list construction
     * Bug fixed: Failure if starting spell check on a not yet
       saved page
@@ -64,7 +64,7 @@
       on this function!). See [WindowChronView#++ Versions]
     * Options to set defaults for wiki-wide search.
       See [OptionsDialog#+++ Wiki-wide search defaults]
-    * Option to set max. length of tab titles.
+    * Option to set max. length of WikiTextEditorTab titles.
       See [OptionsDialog#+++ Max. characters on each tab]
     * Changing position of additional panels (e.g. tree,
       doc. structure, ...) preserves size of the panels.
@@ -112,7 +112,7 @@
       page files gracefully (does not apply to Compact Sqlite DB
       backend).
       See [OptionsDialog#+++ Graceful handling of missing page files]
-    * New insertion "iconimage" to insert an icon into an HTML page.
+    * New insertion "iconimage" to insert an icon into an HtmlPage.
       See [Insertions#+++ iconimage]
     * Preview shows link target in the status bar when hovering
       with mouse over it like browsers do
@@ -136,8 +136,8 @@
 
 ++ Apr. 01, 2009: 2.0beta02
 
-    * Option to let selection in doc. structure automatically follow
-      text cursor position in editor.
+    * Option to let the selection in [page structure window] automatically
+      follow the position of the text cursor in the related WikiTextEditorTab.
       See [OptionsDialog#+++ Structure window selection auto-follow]
     * Saved exports similar to saved searches.
       See [WikiExport#+++ Saved exports]
@@ -146,13 +146,13 @@
       be read by WikidPad
 
     * Bug fixed: Wiki-wide search couldn't be opened if a functional page
-      was in current editor
+      was in the current WikiTextEditorTab
     * Bug fixed: Dialog to append/prepend a WikiWord failed
 
 
 ++ Mar. 02, 2009: 2.0beta01
 
-    * Option to set tab width. See [OptionsDialog#*Tab width*]
+    * Option to set WikiTextEditorTab width. See [OptionsDialog#*Tab width*]
     * Combined wiki-wide search and page list construction into
       one dialog to allow more comfortable search and more options
       to define page sets for export or print.
@@ -166,8 +166,8 @@
     * New syntax \<<hide  >> to hide a block from preview and export.
       See [TextFormatting#+ Hidden markup]
     * New insertion "self" to include current page name into page
-    * Menu items to insert color or icon name into editor
-      (in addition to the insert of attributes)
+    * Menu items to insert color or icon name into WikiTextEditor
+      (in addition to manual typing to insert attributes)
     * No more unnecessary jumping around of page when ending or
       aborting incremental search (thanks to Christian Ziemski)
 
@@ -184,7 +184,7 @@
     * Bug fixed: Insertion of \[:toc:] did not work.
     * Bug fixed: Jumping between footnote and footnote anchor did
       not work in editor.
-    * Bug fixed: HTML publishing as set of HTML pages and as
+    * Bug fixed: HTML publishing as set of HtmlPages and as
       single page was mixed up.
     * Bug fixed: Adding icon or color attribute failed.
     * Bug fixed: Attribute \[view_pane: editor] did not work.

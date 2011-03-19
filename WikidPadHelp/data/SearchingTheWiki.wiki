@@ -175,9 +175,9 @@ Below the text field there are the following buttons:
 
     * "Clear List" to remove all entries from the list
     * "Del" to delete the currently selected entry
-    * "Copy" to copy all list entries to clipboard. They are copied as text, one wiki word per line, each in brackets. So you can insert them as link list into any wiki page.
+    * "Copy" to copy all list entries to clipboard. They are copied as text, one WikiWord per line, each in brackets. So you can insert them as link list into any wiki page.
 
-You have also possibilities to *paste entries from clipboard*. Simply copy text which contains some wiki words to the clipboard. When pasting, at first the wiki words are extracted from the text in the order of appearance (be aware that the recognition of camel-case words and [Footnotes] depends on the settings of the currently open page and the wiki). With the extracted words the following can be done:
+You have also possibilities to *paste entries from clipboard*. Simply copy text which contains some WikiWords to the clipboard. When pasting, at first the WikiWords are extracted from the text in the order of appearance (be aware that the recognition of camel-case words and [Footnotes] depends on the settings of the currently open WikiPage and the wiki). With the extracted words the following can be done:
 
     * "Add": Add words to the current entries 
     * "Overwrite": Remove previous list entries and replace them by the new ones

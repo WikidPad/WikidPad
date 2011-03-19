@@ -11,7 +11,7 @@ RepositoryRevision in "mbutscher" branch: *138*
       clipboard catcher (prefix and suffix now support time formats).
       See OptionsDialog#*Prepend# before# clipboard# snippet*
     * Non-Windows: Support for a file-launcher program which takes the
-      path to a file and opens the right application. Normally the
+      path to a file and opens the right application. Usually the
       "xdg-open" script does this.
       See OptionsDialog#*Path# to# file# launcher*
     * Support for multi-value attributes and quoted values.
@@ -79,7 +79,7 @@ RepositoryRevision in "mbutscher" branch: *131*
       on hovering over date, instead showing it after clicking
       on it is possible. See OptionsDialog#++++# Time# view
     * Option to set number of separator lines between WikiPages
-      in single HTML page output.
+      in single HtmlPage output.
       See [Options HTML preview_export]#*Single# page# separator# lines*
     * Larger default delays for autosave
     * Possibility to set image size in percent.
@@ -129,7 +129,7 @@ RepositoryRevision in "mbutscher" branch: *126*
     * Bug fixed: Plugin "Create new page" did not work with
       "Original Sqlite" databases
     * Bug fixed: Linux/GTK: Dialog not focused properly
-    * Bug fixed: When cloning window only first wiki word tab was
+    * Bug fixed: When cloning window only first WikiWord tab was
       shown in the new window
 
 
@@ -149,10 +149,10 @@ RepositoryRevision in "mbutscher" branch: *123*
     * Bug fixed: Linux/GTK: Tree has wrong mouse pointer
     
     * Internal: DocPage.getLiveText is cached now
-    * Internal: DocPagePresenter now has stdDialog(), displayMessage()
+    * Internal: DocPagePresenter.py now has stdDialog(), displayMessage()
       and displayErrorMessage() functions to make plugins more
       compatible to prev. versions.
-    * Internal: Generation of live PageAst centralized in DocPages and
+    * Internal: Generation of live PageAst centralized in DocPages.py and
       made (nearly) thread-safe.
 
 
@@ -173,12 +173,12 @@ RepositoryRevision in "mbutscher" branch: *121*
     * New attribute "short_hint" to provide tooltip text
       when hovering with the mouse over a WikiWord having this
       attribute. Also option to set tooltip appearance delay for
-      editor. See WikiDocumentAttributes#*short_hint*
+      WikiTextEditor. See WikiDocumentAttributes#*short_hint*
     
     * Small enhancements in spell checker dialog.
     * Using the shortcut to display wiki-wide search or replace
       dialog while the dialog is open switches focus to it.
-    * [Ctrl-F4] closes current tab (not customizable)
+    * [Ctrl-F4] closes current WikiTextEditorTab (not customizable)
     
     * Bug fixed: Setting Scintilla codepage fails on non-Unicode
       wxPython (does not affect the MsWindowsBinary)
@@ -197,7 +197,7 @@ RepositoryRevision in "mbutscher" branch: *119*
       well as saved searches and wiki-bound functional pages
       (to allow a simple and complete transfer of a whole wiki
       from one database type to another).
-    * When opening a WikiPage in a new tab in background the open
+    * When opening a WikiPage in a new WikiTextEditorTab in background the open
       dialog or the search results popup window stay open.
     * Better behavior of recent files menu.
     * Tree shows tooltips if current entry is too long to fit
@@ -255,21 +255,21 @@ RepositoryRevision in "mbutscher" branch: *114*
     * Clicking on footnotes moves to the last footnote on page
       (footnote anchor). See [Footnotes]
     * Support for "auto_link" attribute: find (groups of) words
-      that match a wiki word and make them links. Precise behavior
+      that match a WikiWord and make them links. Precise behavior
       may change in the future.
       See [WikiDocumentAttributes]#*auto_link*
-    * Attribute "view_pane" to control if a page should show editor
-      or preview by default when opening it.
+    * Attribute "view_pane" to control if a page, when it gets opened,
+      should by default be shown in [Edit mode] or in [Preview mode].
       See [WikiDocumentAttributes]#*view_pane*
     * Support for "win" modifier (=Windows key) for hotkeys.
       See OptionsDialog#*App-bound# hotkey*
     * Added wiki-bound options to control titles of newly created
       pages.
-    * Option to write tabulators in editor
+    * Option to handle tabulators ([Tab key]) in WikiTextEditor
       (Menu: "Editor"->"Settings"->"Tabs to spaces")
-    * List of all open wiki words is stored between sessions
+    * List of all open WikiWords is stored between sessions
       (does not work if "First word at startup" is set in options).
-    * Right clicking on fold margin in editor shows fold menu.
+    * Right clicking on fold margin in WikiTextEditor shows fold menu.
     
     * Rebuild is now slower, but more reliable.
     * Better update of a page if some important attributes were
@@ -290,7 +290,7 @@ RepositoryRevision in "mbutscher" branch: *114*
     * Bug fixed: editor context menu showed "Cut" and "Delete"
       greyed out if pasting is not possible.
     * Bug fixed: Links were sometimes not recognized when having
-      the same page in two tabs.
+      the same page in two WikiTextEditorTabs.
     * Bug fixed: Some clipboard and drag&drop problems on Linux
       (other problems exist yet).
     * Bug fixed: Removed inefficiency when exporting large sets
@@ -323,8 +323,8 @@ RepositoryRevision in "mbutscher" branch: *111*
     * System-wide hotkey to show/hide WikidPad (probably MsWindows
       only). Hotkeys are possible to be bound to the app and/or
       a particular wiki. See OptionsDialog#*App-bound# hotkey*
-    * Option to offer closing bracket for bracketed wiki words
-      on autocompletion.
+    * Option to offer closing bracket for bracketed WikiWords
+      on AutoCompletion.
       See OptionsDialog#*Append# closing# bracket# on# auto-complete*
     * Option to play a sound each time clipboard catcher caught
       text. See OptionsDialog#++++# Clipboard# catcher
@@ -353,26 +353,27 @@ RepositoryRevision in "mbutscher" branch: *111*
 
 RepositoryRevision in "mbutscher" branch: *106*
 
-    * Configurable shortcuts for showing of editor/preview,
-      switching between them
+    * Configurable shortcuts to enter [Edit mode] or [Preview mode],
+      and to switch between them.
     * Menu item, shortcut and toolbar icon to switch between
-      editor and preview (icon made by Zoltan)
+      [Edit mode] and [Preview mode] (icon made by Zoltan)
     * Support for middle mouse button and context menu to open
-      a word in a new tab. Works for editor, internal preview,
-      tree and wiki-wide search. Middle mouse button configurable
-      to open tab in fore- or background
-      (see OptionsDialog#*Middle# button# without# CTRL* )
+      a word in a new WikiTextEditorTab. Works for [Edit mode], internal [Preview mode], 
+      tree control and wiki-wide search. Middle mouse button configurable
+      to open WikiTextEditorTab in foreground or background
+      See OptionsDialog#Middle# button# without# CTRL
     * Buttons in "Open Wiki Word" dialog to open word in new
-      tab (fore-/background)
-    * Activation of [:page:...] insertion like normal links
+      WikiTextEditorTab (fore-/background)
+    * Activation of a [:page:...] insertion like a normal link
     
     * Option to set default destination directory for export
       operations (see OptionsDialog#*Default# export# dir.* )
     * Slightly better support for URLs in UTF-8 percent encoding,
       also creates such URLs now. Some URLs from older versions
       of WikidPad may not work any longer.
-    * Mouse cursor no longer changes to a hand if [Ctrl] is pressed
-      in editor and cursor is over a link (but works as before).
+    * Mouse cursor does not change to a hand any more, if [Ctrl]
+      is pressed in the WikiTextEditor while the cursor is over a link 
+      (but works as before).
     
     * Filter to remove double clipboard pastes when using the
       clipboard catcher with certain applications (e.g. Adobe Reader)
@@ -399,10 +400,11 @@ RepositoryRevision in "mbutscher" branch: *106*
 RepositoryRevision in "mbutscher" branch: *103*
 
     * Userinterface change, no more tabs for edit and preview,
-      but an arbitrary number of tabs for WikiPages, switching
-      between edit and preview by icons in toolbar or shortcuts
+      but an arbitrary number of WikiTextEditorTabs for WikiPages, 
+      switching between [Edit mode] and [Preview mode] using 
+      icons in toolbar, or KeyboardShortcuts
     * Shortcut and menu item to open a selected WikiWord in a
-      new tab
+      new WikiTextEditorTab
     * New tree control which behaves and looks very similar (but
       not identically) to the native one.
     * Option to set text cursor color.

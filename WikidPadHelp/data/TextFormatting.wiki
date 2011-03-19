@@ -87,7 +87,7 @@ Hidden markups are not published to HTML or shown in preview but are otherwise f
 A hidden markup is written as \<<\hide >> either on a single line (no newline in it) or as a block like the escaping markup.
 
 <<hide
-You only see this in editor
+You can see this in [Edit mode] only, not in [Preview mode].
 >>
 
 
@@ -100,20 +100,23 @@ With this, you can write \[brackets] or \*asterisks\* which are not seen as form
 
 ++ Tables
 
++++ Columns delimited by "|" [Pipe key]
+
 A table is enclosed in <<| and >> tags which must be alone on a line as for format escaping tags.
-Each line with text is a table row, cells are separated by |. A table cell can contain wiki word links, bold and italic text. Tables show up properly only in preview mode.
+Each line with text is a table row, cells are separated by |. A table cell can contain WikiWords, bold and italic text. Tables show up properly only in [Preview mode].
 
-Example:
-
+++++ Example
 <<|
 ScratchPad| This is| *a table*
 with two| rows and| three columns delimited by \| and \
                                                     with two lines in a cell
 >>
 
++++ Columns delimited by [Tab key]
 
 To use tabulators instead of vertical bar | as cell delimiters, use <<|t to start the table:
 
+++++ Example
 <<|t
 ScratchPad	This is	*a table*
 with two	rows and	three columns delimited by tabs (not |) and \

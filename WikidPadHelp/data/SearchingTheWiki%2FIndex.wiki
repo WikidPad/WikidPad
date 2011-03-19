@@ -26,7 +26,7 @@ At the moment the index search has some drawbacks:
 
 The index search uses the whoosh library (https://bitbucket.org/mchaput/whoosh/wiki/Home) and at the moment its default search syntax which is slightly different from the one for [BooleanRegex] searches.
 
-The remaining chapter contains the relevant parts of http://packages.python.org/Whoosh/querylang.html which describe the language (it is recommended to read that in preview mode):
+The remaining chapter contains the relevant parts of http://packages.python.org/Whoosh/querylang.html which describe the language (it is recommended to read that in [Preview mode]):
 
 +++ Individual terms and phrases
 

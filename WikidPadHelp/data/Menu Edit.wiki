@@ -50,10 +50,10 @@ Clear the ignore list for the spell check while type. See [SpellChecking].
  
 ++ Insert
 +++ File URL
-Starts a file dialog where you can select a file for which a "file:..." URL is inserted in editor
+Starts a file dialog. If You select a file here, a corresponding "file:..." URL gets inserted at the current text position.
 
 +++ Current Date - [Ctrl-Alt-D]
-Inserts the current date into the editor
+Insert the current date into the WikiTextEditor
 
 ++ Settings
 +++ Date Format
@@ -69,7 +69,7 @@ When hitting return, the indentation of current line is copied for next line.
 If current line starts with a bullet * or numbering (old form: 1., 2., 3. or new form: #) next line contains bullet in the same place.
 
 +++ Tabs to spaces
-If on, hitting tab inserts spaces, otherwise real tabulator characters are inserted.
+If on, hitting the [Tab key] inserts spaces, otherwise real tabulator characters are inserted.
 
 
 [:page:PageFooter][icon:left-right][alias:'"Edit" Menu'; Edit Menu][short_hint:The "Edit" menu]

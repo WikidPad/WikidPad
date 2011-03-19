@@ -11,7 +11,7 @@ Move forward in the history of visited pages for this tab.
 Go to the wiki root word (the word with the same name as the whole wiki).
 
 ++ Upward
-If current tab shows a [Subpage] this opens the superpage, e.g. from [SearchingTheWiki/BooleanRegex] it moves to [SearchingTheWiki].
+If current WikiTextEditorTab shows a SubPage this opens the SuperPage, e.g. from [SearchingTheWiki/BooleanRegex] it moves to [SearchingTheWiki].
 
 ----
 ++ Go to Page - [Ctrl-O]
@@ -20,13 +20,13 @@ Opens dialog to open a particular page. This dialog also allows to open or delet
 After entering a few characters, the list only shows page names which start with these characters and after that names which contain the characters. The names inside of these two groups can be ordered either alphabetically or by the time of last visit of this page, so most recently used pages are placed near the top of the list.
 
 ++ Go to Parent - [Ctrl-Up]
-Shows a list of parents for the current wiki word and allows to go to one of it.
+Shows a list of parents for the current WikiWord and allows to go to one of it.
 
 ++ List Children - [Ctrl-Down]
 Same as "Go to Parent" for children of current page.
 
 ++ List Parentless Pages - [Ctrl-Shift-Up]
-List of all [parentless nodes] (independent of current wiki word).
+List of all [parentless nodes] (independent of current WikiPage).
 
 ----
 ++ Show History - [Ctrl-H]

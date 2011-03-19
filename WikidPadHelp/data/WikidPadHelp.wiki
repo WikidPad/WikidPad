@@ -8,7 +8,7 @@ TodoItems, contacts or anything else you can think of that's
 important.  What makes WikidPad different from other notepad or
 outliner applications is the ease with which you can cross-link your
 information.  Links in a wiki are created by typing in WikiWords.  A
-WikiWord is any mixed case word typed into the editor.  TodoList or
+WikiWord is any mixed case word typed into the editor.  TodoItem or
 JohnDoe are example WikiWords.  The term wiki means "quick" in
 Hawaiian, and wikis are all about quickly linking your information
 together.
@@ -17,13 +17,13 @@ To activate or follow a WikiWord link, just *double click on it*, or type
 [Ctrl-L] when the cursor is in the word.
 
 While you are reading through this help document select "Wiki/New"
-from the menu at the top of the application to create your own wiki.
+from the menu at the top of the application window to create your own wiki.
 Then just start typing text with WikiWords to build your own wiki.
 
 ++ Features
 
     * On the fly WikiWordLinking
-    * Wiki words can be CamelCase or [Not Camel Case].
+    * WikiWords can be CamelCase or [Not Camel Case].
     * UrlLinking
     * [Anchors] and [Footnotes]
     * TreeNodeIcons
@@ -41,7 +41,7 @@ Then just start typing text with WikiWords to build your own wiki.
 
     * RenamingWikiWords
     * WikiFonts
-    * Wiki word AutoCompletion
+    * WikiWord AutoCompletion
     * DynamicViews
     * SearchingTheWiki
     * SpellChecking

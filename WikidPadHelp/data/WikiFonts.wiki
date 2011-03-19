@@ -3,21 +3,24 @@
 
 ++ Setting a font attribute for an individual page
 
-You can change the font of a single WikiPage by adding a font
-attribute to that page. Example:
+You can change the font of a single WikiPage by adding a font attribute to that page. 
+
++++ Example
 
 [font: Verdana]
 
-This font attribute is what changes the font of this page to Verdana.
+This font attribute \[font: Verdana] is what changes the font of this page to Verdana.
+
 
 ++ Setting a global font attribute
 
-You can change the default font for the entire wiki by creating a
-global attribute. Example:
+You can change the default font for the entire wiki by creating a global attribute.
+
++++ Example
 
 [global.font: Courier New]
 
-would set the default font for the wiki to "Courier New".  
+\[global.font: Courier New] would set the default font for the wiki to "Courier New".  
 
 
 See WikiDocumentAttributes for more information about attributes.

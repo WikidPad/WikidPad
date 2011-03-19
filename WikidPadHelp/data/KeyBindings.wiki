@@ -42,13 +42,13 @@ See KeyBindingsOnLinuxAndOsx.
 	* [Ctrl-Shift-Up]   view [parentless nodes]
 
 ++ View
-	* [Ctrl-Shift-A]    show edit mode of current tab
-	* [Ctrl-Shift-S]    show preview mode of current tab
-	* [Ctrl-Shift-Space]toggle edit/preview mode of current tab
+	* [Ctrl-Shift-A]    show [Edit mode] of current WikiTextEditorTab
+	* [Ctrl-Shift-S]    show [Preview mode] of current WikiTextEditorTab
+	* [Ctrl-Shift-Space]toggle between [Edit mode] and [Preview mode] of current tab
 
-	* [Ctrl-T]          hide/show the tree control
-	* [F6]              switch between tree and editor
-	* [Ctrl-Tab]        switch between tabs
+	* [Ctrl-T]          hide/show the [Tree control]
+	* [F6]              switch between [Tree control] and WikiTextEditor
+	* [Ctrl-Tab]        switch between WikiTextEditorTabs
 
 ++ Zoom
 	* [Ctrl-+]          zoom in

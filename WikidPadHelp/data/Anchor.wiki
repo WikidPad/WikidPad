@@ -2,12 +2,12 @@
 + Anchor
 
 An Anchor allows You to define a particular position within any hyper
-linked page, such as a WikiPage or any HTML page. Given such an
+linked page, such as a WikiPage or any HtmlPage. Given such an
 anchor, a jump to that specific position may be invoked from anywhere
 else using an appropriate link.
 
-Anchors for WikiPages are supported in both, edit and preview mode.
-In exported HTML pages, anchors are supported using standard HTML-Syntax ("#...").
+Anchors for WikiPages are supported in both, in [Edit mode] and in [Preview mode).
+In exported HtmlPages, anchors are supported using standard HtmlSyntax ("#...").
 
 
 ++ Defining an Anchor and its name

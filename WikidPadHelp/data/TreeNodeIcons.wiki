@@ -1,10 +1,12 @@
 ﻿[:page:PageHeader][:toc:]
 + Tree Node Icons
 
-Following icons may be used with the [icon attribute].
-Example:
+Following icons may be used with the [icon attribute] in order to be shown in the TreeControl.
+
+++ Example
 \[icon:icon]
 
+++ Adding Icons
 You can add additional icons to WikidPad: Just put 16x16 gif's 
 into the "icons" directory below the [WikidPad installation directory].
 

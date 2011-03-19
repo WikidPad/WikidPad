@@ -14,13 +14,13 @@ When using the MsWindowsBinaryInstaller you are asked if you want to install the
 
 
 ++ Creating a new wiki
-After choosing name and position of the new wiki you are asked to choose the database type.
+After choosing the name and the position of the new wiki you are asked to choose the database type.
 
 
 ++ Opening an older wiki
 If you open a wiki created by an older version of WikidPad(Compact) for the first time, you are asked to choose the database type it has.
 
-If the wiki was created by original WikidPad the right choice is "Original Gadfly", for WikidPadCompact it is "Compact Sqlite". Your choice will be stored in the wiki configuration file so the application will choose the right type automatically next time.
+If the wiki was created by the original WikidPad the right choice is "Original Gadfly", for WikidPadCompact it is "Compact Sqlite". Your choice will be stored in the wiki configuration file so the application will choose the right type automatically next time.
 
 
 ++ Overriding type on open

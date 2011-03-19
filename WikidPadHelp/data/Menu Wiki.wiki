@@ -27,7 +27,7 @@ Start the dialog to search the whole wiki. See [SearchingTheWiki#+++ To search a
 ----
 
 ++ Publish as HTML
-You can there export your wiki or the current subtree (current page and all children, grandchildren...) or a single page in HTML format. You also have the choice to export as one HTML page containing all published wiki pages (such a page may become very large and is then hard to open in a web browser) or as set of HTML pages, one for each wiki page plus an index-page for the table of contents if you set so.
+You can there export your wiki or the current subtree (current page and all children, grandchildren...) or a single page in HTML format. You also have the choice to export as one HtmlPage containing all published wiki pages (such a page may become very large and is then hard to open in a web browser) or as set of HtmlPages, one for each wiki page plus an index-page for the table of contents if you set so.
 
 You can also use "Other Export" to show a dialog to set more precisely what to export, whereto and in which format. See [WikiExport].
 

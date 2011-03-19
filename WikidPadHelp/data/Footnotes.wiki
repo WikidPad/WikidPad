@@ -3,9 +3,9 @@
 
 Footnotes are numbers enclosed in brackets, e.g. [42].
 
-As this might also be a valid wiki word you have an option to let interpret footnotes just as wiki words. See OptionsDialog#*Footnotes# as# wiki# words*
+As this might be a valid WikiWord also, you have an option to have footnotes interpreted just as WikiWords. See OptionsDialog#*Footnotes# as# wiki# words*
 
-The following only applies if this option is *not* set for the current wiki:
+The following applies only if this option is *not* set for the current wiki:
 
 
 If the same footnote (footnote with same number) appears multiple times on a page, the last appearance is interpreted as "anchor", all former are interpreted as links to this anchor.

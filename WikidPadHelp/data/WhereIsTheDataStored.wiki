@@ -1,39 +1,35 @@
 ﻿[:page:PageHeader][:toc:]
 + Where Is The Data Stored
 
-This depends on the database type, which is in use:
+Different DatabaseTypes supported. Thus, this depends on which is in use:
 
 ++ Original Gadfly
-The data for your wiki is stored in plain text under the data
-directory of the directory your Wiki config is stored in. There is
-one file per wiki word. The .grl and .gdf files are the database
-files used to index your wiki words efficiently.
+The data of your wiki is stored in plain text under the [wiki data directory], usually below the [configuration directory].
 
-This type is slow but portable across different platforms because it
-doesn't need any external binaries.
+There is one file per WikiPage.
+
+The .grl and .gdf files are the database files used to index your WikiWords efficiently.
+
+This type is slow but portable across different platforms because it doesn't need any external binaries.
 
 
 ++ Compact Sqlite (aka WikidPadCompact)
-The data is stored in a single file named "wiki.sli" under the data
-directory of the directory your Wiki config is stored in. This
-database file is created by the Sqlite database engine and contains
-the content of all WikiPages as well as the cache information for
-fast handling of your wiki.
+The data is stored in a single file named "wiki.sli" under the [wiki data directory], usually below the [configuration directory].
 
-Advantages of this type are its speed and efficient usage of hard disk
-space. On the other hand single pages can't be edited with a text
-editor or searched by a desktop search engine (like Google Desktop).
+This database file is created by the Sqlite database engine and contains the content of all WikiPages as well as the cache information for fast handling of your wiki.
+
+Advantages of this type are its speed and efficient usage of hard disk space. 
+On the other hand single pages can't be edited with any text editor or searched by a desktop search engine (like Google Desktop).
 
 
 ++ Original Sqlite
-The data for your wiki is stored in plain text under the data
-directory of the directory your Wiki config is stored in. There is one
-file per wiki word. The database to index the wiki is stored in the
-file "wikiovw.sli".
+The data of your wiki is stored in plain text under the [wiki data directory], usually below the [configuration directory].
 
-This type provides one file per page (as "Original Gadfly") which can
-be edited or searched by external programs and is nearly as fast as
-"Compact Sqlite".
+There is one file per WikiPage.
+
+The database to index the wiki is stored in the file "wikiovw.sli".
+
+This type provides one file per page (as "Original Gadfly") which can be edited or searched by external programs and is nearly as fast as "Compact Sqlite".
 
 
 [:page:PageFooter][icon:question]

@@ -25,20 +25,20 @@ In a real tree, each node has exactly one parent except the root node which has 
 Reset tree root tothe default (the wiki root which is the page with the same name as the whole wiki)
 
 ++ Synchronize tree
-Show and select wiki page of current tab in tree. By default this happens automatically but you can change that in the options.
+Show and select WikiPage for current WikiTextEditorTab in [Tree control]. By default this happens automatically but you can change that in the options.
 
 ----
 
 ++ Follow Link - [Ctrl-L]
-Follow the URL or wiki word link the text cursor is currently on in editor.
+Follow the URL or WikiWordLink which is currently under the text cursor of the WikiTextEditor.
 
 ++ Follow Link in New Tab - [Ctrl-Alt-L]
-Same as "Follow Link" but opens a new tab for the target.
+Same as "Follow Link" but opens a new (foreground) WikiTextEditorTab for the target.
 
 ++ Copy URL to Clipboard
 Copy "wiki:" URL of current wiki page to clipboard.
 
-If you right click on an "anchor:" definition in editor and choose "Copy Anchor URL to clipboard" the URL contains also a link to the particular anchor.
+If you right click on an "anchor:" definition in [Edit mode] and choose "Copy Anchor URL to clipboard" the URL contains also a link to the particular anchor.
 
 ----
 

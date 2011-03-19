@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + That Arent Wiki Words
 
-This is an example of a wiki word that isn't CamelCase.
+This is an example of a WikiWord that is neither CamelCase nor a WIKIDPADWord.
 
 
 [:page:PageFooter]

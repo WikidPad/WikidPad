@@ -65,15 +65,15 @@ Alternatively you can use the menu "Navigate" -> "List Parentless Pages" or pres
 You can then decide if you need to relink these nodes, or if you want to delete them.
 
 anchor: finding_undefined_links
-+++ Finding undefined wiki word links
++++ Finding undefined WikiWordLinks
 
-There may be also wiki word links to pages which do not exist, e. g. NonExisting. These are underlined and black in the editor. To list all such links, use the "undefined-nodes" node in the "Views" subtree. If you click on one of these links you go to an empty page for this word and can fill it with content.
+There may be WikiWordLinks to pages which do not exist, e. g. NonExisting. Such undefined WikiWords are shown underlined and black in [Edit mode]. To list all such links, use the "undefined-nodes" node in the "Views" subtree. If you click on one of these links you go to an empty page for this word and can fill it with content.
 
-Sometimes words are unintentionally marked as wiki words. In this case you can either:
+Sometimes words are marked as WikiWords unintentionally. In this case you can do one of the following:
 
     * Prefix the word with a backslash
-    * Add the attribute \[camelCaseWordsEnabled: false] on a WikiPage
-    * Enter the word into one of the blacklists, see WikiWordLinking!exclude_from_linking.
+    * Add the attribute \[camelCaseWordsEnabled: false] on the WikiPage
+    * Enter the word into one of the blacklists. See WikiWordLinking!exclude_from_linking.
 
 
 [:page:PageFooter][icon:cog]

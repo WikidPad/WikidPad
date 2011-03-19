@@ -1,8 +1,50 @@
-﻿++ Wikid Pad Help Todo
+﻿[:page:PageHeader][:toc:]
++ Wikid Pad Help Todo
 
-Get following pages to new PageHeader style:
+F:\!!_Projects\Python\WikidPad\branches\mbutscher\work\WikidPadHelp\data\WikiPadHelpStyleGuide.wiki
 
-Insertions.wiki
-Menu Format.wiki
-Menu Wiki Page.wiki
-Options HTML preview_export.wiki
+
+++ Problems
+	* WikidPadHelpTodo
+	* some \[short_hint's] do not render, e.g. when having "xyz" or [xyz] inside
+	* some \[alias: xyz] do not work, e.g. for the [Menus]
+
+++ WikidPadHelpStyleGuide to be completed
+
+++ missing Pages / Aliases
+	* WikiTextEditor
+		* [View mode]
+		* [Edit mode]
+		* [Preview mode]
+
+	* misc KeyboardShortcut's are missing
+	* WikiTextEditorTab
+	* WikidPadDirectories
+		* [wiki data directory] => rename WikidPadWikiDataDirectory.wiki
+		* [application directory]
+		* [configuration directory]
+		* [files directory]
+		* [default temporary directory]
+
+++ WikidPadHelp BuzzWords
+	* Tree view, ["Tree" pane]
+	* ["Views" node]
+	* WikidPadDirectories
+		* [wiki directory]
+	* WikidPadFiles
+		* [temporary files]
+	* currently opened wiki	
+	* WikidPad [database backend]
+	* Linux and other OS's
+
+
+++ other WikidPad Issues
+
+WikidPadParser.py: UrlPAT:
+	* protocols should be case-insensitive: MailTo:
+	* Skype: is a protocol :-)
+
+	* TreeView should become MultiTabbed - for Symmetry and Functionality
+	* StructureView should become MultiTabbed (with just one Tab)
+	* StructureView should not disappear without notice
+	* VersionsView should not disappear without notice

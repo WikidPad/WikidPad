@@ -2,21 +2,21 @@
 + Menu Tabs
 
 ++ Toggle Ed./Prev. - [Ctrl-Shift-Space]
-Switch between editor and [HTML preview] mode in current tab.
+Switch between [Edit mode] and [Preview mode] in current WikiTextEditorTab.
 
-++ Enter Edit Mode - [Ctrl-Shift-A]
-Shows editor in current tab.
+++ Enter [Edit mode] - [Ctrl-Shift-A]
+Show current WikiTextEditorTab in [Edit mode].
 
-++ Enter Preview Mode - [Ctrl-Shift-S]
-Shows [HTML preview].
+++ Enter [Preview mode] - [Ctrl-Shift-S]
+Show current WikiTextEditorTab in [Preview mode].
 
 ----
  
 ++ Show Folding
-Shows/hides an additional margin to the left of the editor to control folding. See [Folding].
+Show/hide an additional margin to control folding on the left side of the WikiTextEditor. See [Folding].
 
 ++ Toggle Current Folding
-Fold/Unfold current line and following. See [Folding].
+Fold/Unfold at the current line. See [Folding].
 
 ++ Unfold All
 Unfold all lines.

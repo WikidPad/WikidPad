@@ -8,5 +8,5 @@
 	* KeyBindings
 	* KeyBindingsOnLinuxAndOsx
 
-	
-[:page:PageFooter][icon:list][child_sort_order: natural]
+
+[:page:PageFooter][icon:list][short_hint:Where You type the text of Your WikiPage][child_sort_order: natural]

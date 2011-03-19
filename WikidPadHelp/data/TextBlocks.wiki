@@ -14,9 +14,9 @@ The menu is updated after saving (manually or automatically) one of the pages.
 
 ++ Where are these files?
 
-If you want to edit them with a text editor, you can find the global text blocks file below your [configuration directory] which is either your home directory or the [WikidPad installation directory]. Your [configuration directory] can also be found by opening the "About" dialog (menu "Help") and scrolling down to bottom.
+If you want to edit them with any external text editor, you can find the global text blocks file below your [configuration directory] which is either your home directory or the [WikidPad installation directory]. Your [configuration directory] can also be found by opening the "About" dialog (menu "Help") and scrolling down to bottom.
 
-The file is named "[TextBlocks].wiki" and is located in a directory ".WikidPadGlobals" which is in your configuration directory (the dot prefix is a Linux/Unix convention). If it does not exist when starting WikidPad, a default version is created automatically.
+The file is named "[TextBlocks].wiki" and is located in a directory ".WikidPadGlobals" which is in your [configuration directory] (the dot prefix is a Linux/Unix convention). If it does not exist when starting WikidPad, a default version is created automatically.
 
 The wiki-specific file is (for "Original" database types only) in the "data" directory of your wiki and has the name "wiki%2FTextBlocks.data". For the "Compact" database type there exists no separate file.
 
@@ -26,7 +26,7 @@ After you have modified and saved one of the files, you can see the changes when
 
 ++ File format
 
-(If you read this in [HTML preview], you should switch back to [edit mode] to see it correctly.)
+(If you read this in [HTML preview], you should switch back to [Edit mode] to see it correctly.)
 
 Each line represents an own entry of the menu. The indentation controls if it is in the "Text blocks" menu itself or in a submenu.
 Each entry consists of a combination of title, flags and/or content. The title is shown in the menu, the content is inserted or appended when choosing the menu item, the flags control further details. 

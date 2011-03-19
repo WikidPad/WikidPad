@@ -1,5 +1,5 @@
 ﻿[:page:PageHeader][:toc:]
-++ Wiki Word Linking
++ Wiki Word Link
 
 When you type a WikiWord into the WikiTextEditor, it becomes underlined.
 
@@ -9,8 +9,9 @@ When you type a WikiWord into the WikiTextEditor, it becomes underlined.
 To activate or follow a WikiWordLink, just *double click on it*!
 Or type [Ctrl-L] while the cursor is in the word.
 
+
 anchor: exclude_from_linking
-+++ Exclude wiki words from linking
++++ Exclude a WikiWord from linking
 
 Sometimes, You do not want a WikiWord to be interpreted as a link.
 
@@ -24,4 +25,4 @@ Open the global or the WikiWide CamelCaseBlackList and enter the
 word on a line of its own in the list (e.g. URLs is in the ["Wiki cc. blacklist"]).
 
 
-[:page:PageFooter]
+[:page:PageFooter][alias:WikiWordLinking]

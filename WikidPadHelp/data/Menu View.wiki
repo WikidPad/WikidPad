@@ -11,7 +11,7 @@ Show toolbar with often used functions
 Show tree view which visualizes the parent-children connection between pages.
 
 ++ Show Chron. View
-Show a chronological timeline when which pages changed last. See [TimeViewWindow].
+Show a chronological timeline when which pages changed last. See [time view window].
 
 ++ Show Page Structure
 Show the headings of a page in a hierarchical manner. See [page structure window].
@@ -19,10 +19,10 @@ Show the headings of a page in a hierarchical manner. See [page structure window
 ----
 
 ++ Show Indentation Guides
-Shows vertical lines in editor to better see which text has which indentation level.
+Shows vertical lines in the WikiTextEditor in order to see the indentation level of text more easily.
 
 ++ Show Line Numbers
-Shows line numbers to the left of the editor. This means logical lines terminated with a newline. A logical line can span over mutliple physical lines on the screen.
+Shows line numbers at the left side of the WikiTextEditor. This means logical lines terminated with a newline. A logical line can span over mutliple physical lines on the screen.
 
 ----
  
@@ -32,10 +32,10 @@ Window stays on top over other windows.
 ----
 
 ++ Zoom In - [Ctrl-+]
-Enlarge fonts in editor or preview.
+Enlarge fonts in [Edit mode] or [Preview mode].
 
 ++ Zoom Out - [Ctrl--]
-Reduce font size in editor or preview.
+Reduce font size in [Edit mode] or [Preview mode].
 
 
 [:page:PageFooter][icon:left-right][alias:'"View" Menu'; View Menu][short_hint:The "View" menu]

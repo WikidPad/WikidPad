@@ -6,7 +6,7 @@ Templates can be used to give an already prepared content as starting point to n
 
 ++ Using templates explicitly
 
-On a newly created page, open the context menu (right click) on the text editor and choose in the "Use Template" submenu one of the offered pages as template whose content is copied to the newly created page. If the desired template page is not listed, choose "Other..." and select the page from a dialog.
+On a newly created page, open the context menu (right click) on the WikiTextEditor and choose in the "Use Template" submenu one of the offered pages as template whose content is copied to the newly created page. If the desired template page is not listed, choose "Other..." and select the page from a dialog.
 
 The list of pages suggested as templates in the context menu is defined by an option, see [OptionsDialog#*Template page names reg. exp.*].
 
@@ -31,7 +31,7 @@ So at first create a template page: BoughtTemplate.
 Then define this as a root page which uses the template:
 [template: BoughtTemplate].
 
-Be sure to save the wiki now because template pages will always taken as they are stored in the database, not as they are written in an editor.
+Be sure to save the WikiPage now ([Ctrl-S]), because template pages will always be used as they are stored in the database, not as they are written in an editor.
 
 
 Now you can create subpages:

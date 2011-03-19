@@ -12,7 +12,7 @@ WikiPage content (this page is opened then) or the wiki configuration
 file). Instead of a path it can also be an URL with wiki: protocol
 
 +++++ Second parameter* 
-*Second parameter* can be the name of a wiki word to open, if not
+*Second parameter* can be the name of a WikiWord to open, if not
 specified in the first parameter.
 
 
@@ -49,7 +49,7 @@ Rebuild the opened wiki.
 Do not record opened wikis in recently opened wikis list found in menu "Wiki" as submenu "Recent"
 
 +++++ --preview
-If no pages are given, all opened pages from previous session are opened in preview mode. Otherwise all pages mentioned on command line after that option are opened in preview mode.
+If no pages are given, all opened pages from previous session are opened in [Preview mode]. Otherwise all pages mentioned on command line after that option are opened in [Preview mode].
 
 +++++ --editor
 Same as --preview but opens in text editor mode. You can use both switches in conjunction, e.g.
@@ -73,8 +73,8 @@ Choose if you want to export *page*, *subtree* or *wiki*.
 +++++ --export-type <type>
 Tag of the export type. Currently this can be:
 
-    * html_single: A single WikiPage per HTML file
-    * html_multi: Multiple WikiPages in one HTML file
+    * html_single: A single WikiPage per HtmlFile
+    * html_multi: Multiple WikiPages in one HtmlFile
     * raw_files: Set of \*.wiki files in UTF-8 format with BOM
 
 Attention: In 1.9 the meaning of "html_single" and "html_multi"

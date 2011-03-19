@@ -5,7 +5,7 @@ Under the [WikidPad installation directory], there is a subdirectory called "ext
 In this directory there is a file called "wikidpadhooks.py".
 
 If you know Python you can extend WikidPad by hooking into the events sent to the methods defined
-in this file. For example, you could integrate wikidPad with a cvs system by plugging into the onopen, onsave, ondelete, onrename events.
+in this file. For example, you could integrate WikidPad with a cvs system by plugging into the onopen, onsave, ondelete, onrename events.
 
 file:///C|/Program%20Files/WikidPad/extensions/WikidPadHooks.py
 file:///C|/Program%20Files/WikidPad/user_extensions/WikidPadHooks.py
@@ -84,10 +84,10 @@ name "mainControl".
     Get currently active WikiData object.
 
 +++++ getActiveEditor()
-    Returns currently active editor control (currently there only can be one).
+    Returns the currently active WikiTextEditor (currently there can only be one).
 
 +++++ getCurrentWikiWord()
-    The currently open wiki word.
+    The currently open WikiWord.
 
 +++++ getCurrentDocPage()
     Get the current DocPage object. (TODO)
@@ -104,10 +104,10 @@ name "mainControl".
 
 *The following documentation is outdated!*
 
-The first argument to each hook function is wikidPad itself.  Here are
-the available methods on the wikidPad object.
+The first argument to each hook function is WikidPad itself.  Here are
+the available methods on the WikidPad object.
 
-+++ wikidPad functions
++++ WikidPad functions
 
 
 +++++ addToHistory(word)
@@ -135,10 +135,10 @@ the available methods on the wikidPad object.
     Popup a dialog with the message passed in.
 
 
-+++ wikidPad.variables
++++ WikidPad.variables
 
 +++++ globalConfigDir
-    The directory of the wikidPad.config file.
+    The directory of the WikidPad.config file.
 
 +++++ globalConfigLoc
     The wikidpad.config file.
@@ -147,7 +147,7 @@ the available methods on the wikidPad object.
     The parsed wikidpad.config file.
 
 +++++ wikiAppDir
-    The [installation directory] of wikidPad.
+    The [installation directory] of WikidPad.
 
 +++++ wikiPadHelp
     The location of the help wiki.
@@ -159,22 +159,22 @@ the available methods on the wikidPad object.
     The name of the currently opened wiki.
 
 +++++ dataDir
-    The data directory of the currently opened wiki.
+    The [wiki data directory] of the currently opened wiki.
 
 +++++ wikiData
     The database object for the currently open wiki. More on this below.
 
 +++++ tree
-    The tree control on the left. The is a wxTreeCtrl. More on this below.
+    The TreeControl on the left. The is a wxTreeCtrl. More on this below.
 
 +++++ editor
-    The text editor for wikidPad. This is a wxStyledTextCtrl. More on this below.
+    The WikiTextEditor. This is a wxStyledTextCtrl. More on this below.
 
 
 +++ wikiData - The wiki database interface
 
 +++++ getPage(wikiWord, itemsToLoad)
-    Get the data for a wiki word. Pass in an array of strings for the items to load.
+    Get the data for a WikiWord. Pass in an array of strings for the items to load.
     Valid items are: info, parents, children, props, todos.
     For performance you specify which items should be loaded from the db. If you only
     need info and children call:
@@ -190,7 +190,7 @@ the available methods on the wikidPad object.
     Returns array of the words that are parents of the word passed in.
 
 +++++ getAllWords()
-    Get all of the wiki words in the wiki.
+    Get all of the WikiWords in the wiki.
 
 +++++ getAllAliases()
     Get all of the aliases in the wiki.
@@ -204,22 +204,22 @@ the available methods on the wikidPad object.
 +++++ getParentLessWords()
 
 +++++ renameWord(word, toWord)
-    Rename a wiki word.
+    Rename a WikiPage.
 
 +++++ deleteWord(word)
-    Delete a wiki word.
+    Delete a WikiPage.
 
 +++++ getWordsWithPropertyValue(key, value)
-    Get all of the wiki words with a certain property value. For example
+    Get all of the WikiWords with a certain property value. For example
     getWordsWithPropertyValue("icon", "pin") would get all of the wiki
     words with "icon" set to "pin".
 
 +++++ findBestPathFromWordToWord(word, toWord)
     Returns the shortest path in the wiki from "word" to "toWord". Returned
-    as an array of wiki words.
+    as an array of WikiWords.
 
 +++++ search(forPattern)
-    Search the entire wiki using a regex.
+    Search the entire wiki using a regular expression.
 
 +++++ getTodos()
     Get all of the todos in the wiki. Returned as an array of tuples.
@@ -231,7 +231,7 @@ the available methods on the wikidPad object.
     The word.
 
 +++++ wikiFile
-    The file that contains the data for this page.
+    The file that contains the data for this WikiPage.
 
 +++++ parentRelations
     Array of the parents words for this node.
@@ -258,7 +258,7 @@ the available methods on the wikidPad object.
     collapse the tree.
 
 +++++ buildTreeForWord(wikiword)
-    Open the tree control to the wiki word passed in.
+    Open the tree control to the WikiWord passed in.
 
 
 +++ text control
@@ -282,16 +282,16 @@ the available methods on the wikidPad object.
     Execute a search of the text in the control.
 
 +++++ getWikiWordText(position)
-    If position is in a wiki word return that word.
+    If position is in a WikiWord return that word.
 
 +++++ getWikiWordBeginEnd(position)
-    If position is in a wiki word return the start/end positions of the word.
+    If position is in a WikiWord return the start/end positions of that word.
 
 +++++ isPositionInWikiWord(position)
-    Is the position in a wiki word?
+    Is the position in a WikiWord?
 
 +++++ isPositionInLink(position)
-    Is the position in a URL link?
+    Is the position in a [URL link]?
 
 See the wxWindows/wxPython documentation for info about the wxTreeCtrl and wxStyledTextCtrl.
 

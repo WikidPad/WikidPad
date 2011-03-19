@@ -42,13 +42,13 @@ Inserts the current date into the editor
 + Menu Tabs
 
 ++ Toggle Ed./Prev. - [Ctrl-Shift-Space]
-Switch between editor and [HTML preview] mode in current tab.
+Switch between [Edit mode] and [Preview mode] in current WikiTextEditorTab.
 
-++ Enter Edit Mode - [Ctrl-Shift-A]
-Shows editor in current tab.
+++ Enter [Edit mode] - [Ctrl-Shift-A]
+Show current WikiTextEditorTab in [Edit mode].
 
-++ Enter Preview Mode - [Ctrl-Shift-S]
-Shows [HTML preview].
+++ Enter [Preview mode] - [Ctrl-Shift-S]
+Show current WikiTextEditorTab in [Preview mode].
 
 
 + Menu Wiki Page
@@ -75,7 +75,7 @@ In a real tree, each node has exactly one parent except the root node which has 
 Follow the URL or WikiWord link, on which the text cursor in the editor currently is.
 
 ++ Follow Link in New Tab - [Ctrl-Alt-L]
-Same as "Follow Link" but opens a new tab for the target.
+Same as "Follow Link" but opens a new WikiTextEditorTab for the target.
 
 ++ Bold - [Ctrl-B]
 Marks selection in editor with appropriate markup for bold text.
@@ -93,12 +93,12 @@ Rewraps text (adds/removes newlines) to make each line contain no more character
 
 ++ Convert
 +++ Selection to Link - [Ctrl-J]
-Makes the selected text in editor to a wiki link by removing forbidden characters.
+Convert text selected in the WikiTextEditor to a WikiLink, also removing forbidden characters.
 
 +++ Selection to Wiki Word - [Ctrl-Shift-R]
-Moves selected text to another wiki word and places a link to this word where the text was.
+Moves selected text to another WikiWord and places a link to this word where the text was.
 
-You are asked for the link to the word. If you enter an existing wiki word you are asked if you want to append the text to this word.
+You are asked for the link to the word. If you enter an existing WikiWord you are asked if you want to append the text to this word.
 
 + Menu Navigate
 
@@ -117,28 +117,28 @@ Opens dialog to open a particular page. This dialog also allows to open or delet
 After entering a few characters, the list only shows page names which start with these characters and after that names which contain the characters. The names inside of these two groups can be ordered either alphabetically or by the time of last visit of this page, so most recently used pages are placed near the top of the list.
 
 ++ Go to Parent - [Ctrl-Up]
-Shows a list of parents for the current wiki word and allows to go to one of it.
+Shows a list of parents for the current WikiPage and allows to go to one of it.
 
 ++ List Children - [Ctrl-Down]
 Same as "Go to Parent" for children of current page.
 
 ++ List Parentless Pages - [Ctrl-Shift-Up]
-List of all [parentless nodes] (independent of current wiki word).
+List of all [parentless nodes] (independent of current WikiPage).
 
 ++ Show History - [Ctrl-H]
-Shows history of all pages visited in the current tab.
+Shows history of all WikiPages visited in the current WikiTextEditorTab .
 
 ++ Up History - [Ctrl-Alt-Up]
-Same as "Show History" but automatically selects the previously visited page.
+Same as "Show History" but automatically selects the previously visited WikiPage.
 
 ++ Down History - [Ctrl-Alt-Down]
-Same as "Show History" but automatically selects the next page to visit.
+Same as "Show History" but automatically selects the next WikiPage to visit.
 
 ++ Add Bookmark - [Ctrl-Alt-B]
 Append a special bookmark attribute to the current WikiPage.
 
 ++ Go to Bookmark - [Ctrl-Shift-Up]
-Lists all pages with bookmark attribute.
+Lists all WikiPages with bookmark attribute.
 
 
 + Menu Extra

@@ -2,10 +2,11 @@
 + Wikid Pad
 
 WikidPad is a [wiki]-like notebook for storing your thoughts, ideas,
-todo lists, contacts or anything else you can think of that's
-important.  What makes WikidPad different from other notepad or
-outliner applications is the ease with which you can cross-link your
-information.  Links in a wiki are created by typing CamelCase WikiWords.
+todo lists, contacts, articles or anything else you can think of that's
+important to You.  WikidPad is different from other notepad or outliner 
+applications - e.g. see how easy you can cross-link your information.
+
+To create links in a wiki just type CamelCase WikiWords.
 
 
 [:page:PageFooter]

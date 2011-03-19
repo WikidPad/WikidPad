@@ -37,7 +37,7 @@ use the [page structure window].
 +++ Beware exported results!
 
 So far, any such navigation aid can also be accomplished by means build into WikidPad.
-Alas: if You export a WiKi e.g. to [HTML pages], all these build in functionalities are
+Alas: if You export a WiKi e.g. to HtmlPages, all these build in functionalities are
 not available any more.   
 
 ++ The Last Line
@@ -78,7 +78,7 @@ is used for the page abut WikiMaintenance.
 
 +++++ icon: folder
 [Icon folder] is used for the pages related to directories such as 
-the [installation directory] or the [data directory].
+the [installation directory] or the [wiki data directory].
 
 +++++ icon: console
 [Icon console] is used for the page about CommandLineSupport.

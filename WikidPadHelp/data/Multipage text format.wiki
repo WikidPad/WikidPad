@@ -40,7 +40,7 @@ If all these exist already, it gives up with an error message ("No usable separa
 
 +++ Format version 0
 
-After the header the actual pages begin. Each page consists of a line with its name (=the wiki word) followed by lines of content as they are shown in WikidPad. It ends either by the end of file or by a separator line (see above).
+After the header the actual pages begin. Each page consists of a line with its name (=the WikiWord) followed by lines of content as they are shown in WikidPad. It ends either by the end of file or by a separator line (see above).
 
 
 +++ Format version 1

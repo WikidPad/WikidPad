@@ -14,8 +14,8 @@
     * Introduced splash window.
       See [OptionsDialog#+++ Show splash screen]
 
-    * Bug fixed: Autocompletion for anchors treated wiki links as
-      wiki words (no relative or absolute paths supported)
+    * Bug fixed: AutoCompletion for [Anchors] treated wiki links as
+      WikiWords (no relative or absolute paths supported)
     * Bug fixed: Error in error handling for unknown wiki language
       tag on opening a wiki
     * Bug fixed: Problems with MsInternetExplorer 6 on Win XP SP2 
@@ -41,7 +41,7 @@ official parser
       See [OptionsDialog#+++ Translate menu accelerators for keyboard layout]
     * Option to show iframe content from external sources inside
       the MsInternetExplorer preview.
-      See [Options HTML preview_export#*Show iframes inside IE preview*]
+      See [Options HTML preview_export#Show iframes inside IE preview]
     * Experimental: MsWindows: Option to let scroll-wheel scroll
       the window under the pointer. Doesn't work for some windows.
       See [OptionsDialog#+++ Scroll under pointer]
@@ -53,8 +53,8 @@ official parser
     * Several bug fixes regarding "whoosh" (index search)
     * Bug fixed: MsWindows: "Invalid handle" error on command line
       bridge insertion plugins
-    * Bug fixed: Autocompletion for anchors treated wiki links as
-      wiki words (no relative or absolute paths supported)
+    * Bug fixed: Autocompletion for [Anchors] treated WikiLinks as
+      WikiWords (no relative or absolute paths supported)
 
     * Internal, index search: Store a format number for search
       index and rebuild index if number doesn't match the format
@@ -86,7 +86,7 @@ official parser
     * Autocompletion now also suggests builtin attributes
     * Command line options to run a saved export profile either once
       or as continuous export.
-      See [CommandLineSupport#*--export-saved <name of saved export>*]
+      See [CommandLineSupport#--export-saved <name of saved export>]
 
     * Bug fixed: Autocompletion of attribute keys didn't work
     * Bug fixed: Printing didn't work
@@ -132,10 +132,10 @@ official parser
       replaced by its children (the wiki pages containing the
       attribute)
 
-    * Bug fixed: Linux: Problem when opening a wiki where not
-      the left-most tab was selected last
+    * Bug fixed: Linux: Problem when opening a wiki when the
+      left-most WikiTextEditorTab was not selected last
     * Bug fixed: Menu item "Search and Replace" remained gray
-      after going back from preview to editor
+      after going back from [Preview mode] to [Edit mode]
     * Bug fixed: Harmless exception during searching
     * Bug fixed: No update of syntax highlighting under some
       circumstances
@@ -149,10 +149,11 @@ official parser
       in single process mode.
       See [OptionsDialog#+++ Warn about other processes]
     * Option "coldir down" in appendix of "rel" insertions to sort
-      found wiki words downwards in columns instead of rightwards.
+      found WikiWords downwards in columns instead of rightwards.
       See [Insertions#multi-column table is sorted rightwards]
-    * Wiki properties dialog now also shows configuration path and
-      if wiki is read-only explains why
+    * The Wiki properties dialog now also shows the path of the 
+      [configuration directory]. 
+      And if the wiki is read-only, it explains why
 
     * Bug fixed: Homepage not prepared properly when creating new wiki
     * Small problems with non-ascii paths fixed
@@ -162,17 +163,17 @@ official parser
 
     * When dropping files you now have options to move files to
       file storage (instead of copying) and to be asked every time
-      what to do. See [OptionsDialog#+++ Dropping files]
+      what to do. See [OptionsDialog#Dropping files]
     * Option to define what to insert before, after and between file
       links when dropping files.
-      See [OptionsDialog#+++ File dropping] 
+      See [OptionsDialog#+++ File dropping]
     * Spell check while type.
       See [SpellChecking#++ Spell check while type]
-    * Commandline options to start tabs in preview mode and to
+    * Commandline options to start WikiTextEditorTabs in [Preview mode] and to
       prevent list of recent opened wikis from updating.
-      See [CommandLineSupport#++++ General]
-    * WikidPad now remembers active tab and view mode
-      (editor/preview) of each tab
+      See [CommandLineSupport#+++ General]
+    * WikidPad now remembers the active WikiTextEditorTab, and the [View mode]
+      ([Edit mode]/[Preview mode]) of each WikiTextEditorTab across sessions
 
     * Bug fixed: Missing string <<"Set of *.wiki files">>
       for i18n
@@ -215,7 +216,7 @@ official parser
     * MsWindows: Workaround for too short labels in wxListCtrl
     * MacOS: Further changes to keybindings
     * Bug fixed: Setting wiki to readonly failed
-    * Bug fixed: Linux: Problems when switching tabs too fast
+    * Bug fixed: Linux: Problems when switching WikiTextEditorTabs too fast
       (thanks to Christian Ziemski)
     * Bug fixed: Wrong focus position after opening wiki in
       same window
@@ -230,7 +231,7 @@ official parser
     * [CSS] style classes for the heading levels (named "heading-level1"
       to "heading-level15")
     * Appendix "adjheading" for insertion "page" to adjust headings of
-      a page included into another. See [Insertions#    * *page*]
+      a page included into another. See [Insertions#*page*]
     * Menu item to convert between absolute and relative URL.
       See [UrlLinking#++ Converting between relative and absolute URL]
     * Context menu item for file: and rel: URLs to open
@@ -264,30 +265,30 @@ official parser
     * In wiki-wide search in boolean search mode, the "\todo:" prefix
       now behaves exactly as the "attr:" prefix.
       See [SearchingTheWiki/BooleanRegex#++++ todo:]
-    * Tabs close now if a WikiWord is deleted and no other word is
-      in the history of this tab
+    * WikiTextEditorTabs close now if a WikiWord is deleted and 
+      no other word is in the history of this WikiTextEditorTab
     * Context menu of "file:" and "rel:" URLs now offers to open
       containing folder of a file
-    * When using headings as wiki word links and opening a heading,
-      cursors now jumps to this heading in editor
+    * When using headings as WikiWordLinks and opening a heading,
+      cursors now jumps to this heading in the WikiTextEditor
 
     * Internal: Renaming "properties" of a wiki page to "attributes"
       in function and token names to get a more consistent naming.
       Currently there is compatibility code to keep plugins working.
     * Internal: Todos are now processed (and especially parsed) in
-      a similar way as attributes. If you have your own parser, update
-      it according to "extensions\wikidPadParser\WikidPadParser.py".
+      a way similar to attributes. If you have your own parser, update
+      it according to "extensions\WikidPadParser\WikidPadParser.py".
 
     * Some key bindings in Scintilla editor component removed to avoid
-      interference with WikidPad key bindings
+      interference with WikidPad KeyBindings
     * Some changes to better handle missing Unicode support for
       filesystem in Python (affects mainly MacOS)
 
     * Bug fixed: Keyboard shortcut for ActivateLinkBackground
       doesn't work
     * Bug fixed: Updating wiki database fails if a pagefile is missing
-    * Bug fixed: Linux: Sometimes focus doesn't switch from tab label
-      to tab automatically
+    * Bug fixed: Linux: Sometimes focus doesn't switch from the label 
+      of a WikiTextEditorTab to the content automatically
     * Bug fixed: Focus not going back when aborting the opening of
       a wiki
 
@@ -302,14 +303,14 @@ official parser
     * Bug fixed: No meaningful error message if exporting from
       commandline fails
     * Bug fixed: HTML export of subpages failed
-    * Bug fixed: Using F6 to switch between tree and tabs switched
+    * Bug fixed: Using F6 to switch between tree and WikiTextEditorTabs switched
       also to invisible tree. 
 
-    * Bug fixed: Linux: Automatic focus shift from tab to tab content
-      did not always work
+    * Bug fixed: Linux: Automatic focus shift from WikiTextEditorTab
+      label to content of WikiTextEditorTab did not always work
     * Bug fixed: Linux: Selecting page in tree shifted focus to
-      tab content, therefore no keyboard navigation in tree
-    * Bug fixed: Linux: Problems with tab switching by keyboard
+      WikiTextEditorTab content, therefore no keyboard navigation in tree
+    * Bug fixed: Linux: Problems with WikiTextEditorTab switching by keyboard
 
     * Bug fixed: MsWindows: Incomplete or foreign enchant installation
       may crash WikidPad on startup
@@ -320,7 +321,7 @@ official parser
 
     * Support for renaming of subpages when renaming superpage.
       See [RenamingWikiWords]
-    * More logical behavior when closing tab if MRU order is active
+    * More logical behavior when closing WikiTextEditorTab if MRU order is active
 
     * Bug fixed: In wiki-wide search "Replace All" didn't work
 

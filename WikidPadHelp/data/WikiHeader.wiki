@@ -5,7 +5,7 @@ Headers are very useful in order to structure Your text.
 
 Just type one to five "+" plus characters at the beginning of a new line, followed by a blank space and then by the text of Your header line.
 
-Example:
+++ Example
 
 + Heading1
 ++ Heading2
