@@ -62,7 +62,6 @@ from . import AttributeHandling, SpellChecker
 from . import AdditionalDialogs
 
 
-
 import Exporters
 import StringOps
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, \
@@ -197,9 +196,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.wikiDataManager = None
         self.lastCursorPositionInPage = {}
         self.wikiHistory = []
-        self.findDlg = None  # Stores find&replace dialog, if present
-        self.mainWwSearchDlg = None
-        self.wwSearchDlgs = []   # Stores wiki wide search dialogs and detached fast search frames
+        self.nonModalFindDlg = None  # Stores find&replace dialog, if present
+        self.nonModalMainWwSearchDlg = None
+        self.nonModalWwSearchDlgs = []   # Stores wiki wide search dialogs and detached fast search frames
+        self.nonModalFileCleanupDlg = None  # Stores file dialog FileCleanup.FileCleanupDialog
         self.spellChkDlg = None  # Stores spell check dialog, if present
         self.printer = None  # Stores Printer object (initialized on demand)
         self.continuousExporter = None   # Exporter-derived object if continuous export is in effect
@@ -379,8 +379,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.Destroy()
                     return
 
-                self.statusBar.SetStatusText(
-                        uniToGui(_(u"Last wiki doesn't exist: %s") % wikiToOpen), 0)
+#                 self.statusBar.SetStatusText(
+#                         uniToGui(_(u"Last wiki doesn't exist: %s") % wikiToOpen), 0)
+                self.displayErrorMessage(
+                        _(u"Wiki doesn't exist: %s") % wikiToOpen)
 
         cmdLineAction.actionBeforeShow(self)
 
@@ -1165,6 +1167,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     if os.path.exists(pathEnc(filePath)):
                         self.openWiki(filePath, wikiWordsToOpen=(wikiWordToOpen,),
                                 anchorToOpen=anchorToOpen)
+                    else:
+                        self.displayErrorMessage(
+                                _(u"Wiki doesn't exist: %s") % wikiToOpen)
                 else:
                     self.openWiki(os.path.abspath(entry.value))
 
@@ -1236,6 +1241,19 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
         self.insertAttribute("color", self.cmdIdToColorNameForAttribute[evt.GetId()])
+
+
+    def resetCommanding(self):
+        """
+        Reset the "commanding" (meaning menus, toolbar(s), shortcuts)
+        """
+        self.buildMainMenu()
+
+        # Update toolbar by recreating
+        if self.getShowToolbar():
+            with WindowUpdateLocker(self):
+                self.setShowToolbar(False)
+                self.setShowToolbar(True)
 
 
     def buildMainMenu(self):
@@ -1898,24 +1916,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         helpMenu.Append(menuID, _(u'View &License'), _(u'View License'))
 #         wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(self, 
 #                 os.path.join(self.wikiAppDir, u'license.txt')))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         # Build menubar from all the menus
@@ -2929,7 +2929,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         lastTabsSubCtrls -- List of subcontrol names for each presenter
                 of the corresponding wiki word to open
         """
-
         # Fix special case
         if wikiWordsToOpen == (None,):
             wikiWordsToOpen = None
@@ -2947,7 +2946,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 wikiCombinedFilename)
 
         if cfgPath is None:
-            self.displayErrorMessage(_(u"Invalid path or missing file '%s'")
+            self.displayErrorMessage(_(u"Inaccessible or missing file: %s")
                         % wikiCombinedFilename)
 
             # Try to remove combined filename from recent files if existing
@@ -3052,9 +3051,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             except (BadConfigurationFileException,
                     MissingConfigurationFileException), e:
-                self.displayErrorMessage(_(u"Configuration file '%s' is corrupted or "
-                        u"missing.\nYou may have to change some settings in configuration "
-                        u'page "Current Wiki" and below which were lost.') % cfgPath)
+                answer = wx.MessageBox(_(u"Configuration file '%s' is corrupted "
+                        u"or missing.\nYou may have to change some settings "
+                        u'in configuration page "Current Wiki" and below which '
+                        u"were lost.") % cfgPath, _(u'Continue?'),
+                        wx.OK | wx.CANCEL | wx.ICON_QUESTION, self)
+                if answer == wx.CANCEL:
+                    return False
+
                 wdhName = self._askForDbType()
                 if wdhName is None:
                     return False
@@ -3146,7 +3150,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             with WindowUpdateLocker(self):
                 # reset the gui
-                self.buildMainMenu()
+                self.resetCommanding()
 
                 # enable the top level menus
                 if self.mainmenu:
@@ -3731,21 +3735,29 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             traceback.print_exc()
 
 
-    def makeRelUrlAbsolute(self, relurl):
+    def makeRelUrlAbsolute(self, relurl, addSafe=''):
         """
         Return the absolute file: URL for a rel: URL
         TODO: Remove
         """
-        return self.getWikiDocument().makeRelUrlAbsolute(relurl)
+        import warnings
+        warnings.warn("PersonalWikiFrame.makeRelUrlAbsolute() deprecated, use "
+                "WikiDocument.makeRelUrlAbsolute()", DeprecationWarning)
+
+        return self.getWikiDocument().makeRelUrlAbsolute(relurl, addSafe=addSafe)
 
 
-    def makeAbsPathRelUrl(self, absPath):
+    def makeAbsPathRelUrl(self, absPath, addSafe=''):
         """
         Return the rel: URL for an absolute file path or None if
         a relative URL can't be created.
         TODO: Remove
         """
-        return self.getWikiDocument().makeAbsPathRelUrl(absPath)
+        import warnings
+        warnings.warn("PersonalWikiFrame.makeAbsPathRelUrl() deprecated, use "
+                "WikiDocument.makeAbsPathRelUrl()", DeprecationWarning)
+
+        return self.getWikiDocument().makeAbsPathRelUrl(absPath, addSafe=addSafe)
 
 
     def launchUrl(self, link):
@@ -4270,15 +4282,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def showSearchDialog(self):
         from .SearchAndReplaceDialogs import SearchWikiDialog
 
-        if self.mainWwSearchDlg != None:
-            if isinstance(self.mainWwSearchDlg, SearchWikiDialog):
-                self.mainWwSearchDlg.SetFocus()
+        if self.nonModalMainWwSearchDlg != None:
+            if isinstance(self.nonModalMainWwSearchDlg, SearchWikiDialog):
+                self.nonModalMainWwSearchDlg.SetFocus()
             return
 
-        self.mainWwSearchDlg = SearchWikiDialog(self, self, -1,
+        self.nonModalMainWwSearchDlg = SearchWikiDialog(self, self, -1,
                 allowOkCancel=False, allowOrdering=False)
-        self.mainWwSearchDlg.CenterOnParent(wx.BOTH)
-        self.mainWwSearchDlg.Show()
+        self.nonModalMainWwSearchDlg.CenterOnParent(wx.BOTH)
+        self.nonModalMainWwSearchDlg.Show()
 
 
     def showWikiWordDeleteDialog(self, wikiWord=None):
@@ -4335,14 +4347,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
     def showSearchReplaceDialog(self):
         from .SearchAndReplaceDialogs import SearchPageDialog
 
-        if self.findDlg != None:
-            if isinstance(self.findDlg, SearchPageDialog):
-                self.findDlg.SetFocus()
+        if self.nonModalFindDlg != None:
+            if isinstance(self.nonModalFindDlg, SearchPageDialog):
+                self.nonModalFindDlg.SetFocus()
             return
 
-        self.findDlg = SearchPageDialog(self, -1)
-        self.findDlg.CenterOnParent(wx.BOTH)
-        self.findDlg.Show()
+        self.nonModalFindDlg = SearchPageDialog(self, -1)
+        self.nonModalFindDlg.CenterOnParent(wx.BOTH)
+        self.nonModalFindDlg.Show()
 
 
     def showReplaceTextByWikiwordDialog(self):

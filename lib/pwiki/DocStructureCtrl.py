@@ -146,11 +146,11 @@ class DocStructureCtrl(EnhancedListControl):
         if subCtrl is None:
             return
         
-        sel = subCtrl.GetSelectionCharPos()
+        sel = subCtrl.LineFromPosition(subCtrl.GetCurrentPos())
         
         if sel != self.lastSelection or callAlways:
             self.lastSelection = sel
-            self.onSelectionChanged(sel)
+            self.onSelectionChanged(subCtrl.GetSelectionCharPos())
 
 
     def onSelectionChanged(self, sel):

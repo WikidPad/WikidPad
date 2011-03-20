@@ -590,7 +590,7 @@ class WikiHtmlView(wx.html.HtmlWindow):
         link = self.contextHref
 
         if link.startswith(u"rel://"):
-            link = self.presenter.getMainControl().makeRelUrlAbsolute(link)
+            link = self.presenter.getWikiDocument().makeRelUrlAbsolute(link)
 
         if link.startswith(u"file:"):
             try:

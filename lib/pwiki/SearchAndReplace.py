@@ -7,9 +7,6 @@ from Serialization import SerializeStream, findXmlElementFlat, \
         serToXmlBoolean, serFromXmlBoolean, serToXmlInt, serFromXmlInt
 
 import SearchAndReplaceBoolLang
-from StringOps import utf8Enc, utf8Dec, boolToChar, charToBool, strToBin, \
-        binToStr
-        
 
 
 

@@ -1799,6 +1799,10 @@ class WikiData:
         if orderBy == "visited":
             result1.sort(key=lambda k: k[5], reverse=descend)
             result2.sort(key=lambda k: k[5], reverse=descend)
+        else:
+            if descend:
+                result1.reverse()
+                result2.reverse()
 
         return result1 + result2
 

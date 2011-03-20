@@ -101,6 +101,15 @@ CloseCurrentTab="Ctrl-F4"
 GoNextTab="Ctrl-Tab"
 GoPreviousTab="Ctrl-Shift-Tab"
 
+# Move selected logical line(s) one line up or down. "WithIndent" means that
+# all lines below selection which are deeper indented than the last selected one
+# are also selected and moved
+LogLineUp=""
+LogLineUpWithIndented=""
+LogLineDown=""
+LogLineDownWithIndented=""
+
+
 Plugin_AutoNew_Numbered = "Ctrl-Shift-N"
 
 Plugin_GraphVizStructure_ShowRelationGraph = ""

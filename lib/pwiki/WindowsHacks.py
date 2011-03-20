@@ -265,15 +265,16 @@ class SHFILEOPSTRUCTW(ctypes.Structure):
 
 FO_MOVE = 1
 FO_COPY = 2
-# FO_DELETE = 3
+FO_DELETE = 3
 # FO_RENAME = 4
 
 FOF_MULTIDESTFILES = 1
 FOF_NOCONFIRMATION = 16
+FOF_ALLOWUNDO = 0x0040
 FOF_NOCONFIRMMKDIR = 512
 FOF_NOERRORUI = 1024
 FOF_SILENT = 4
-
+FOF_WANTNUKEWARNING = 0x4000   # Windows 2000 and later
 
 try:
     SHFileOperationW = _shell32dll.SHFileOperationW
@@ -285,22 +286,25 @@ except AttributeError:
 
 if SHFileOperationW is not None:
     def _shellFileOp(opcode, srcPath, dstPath):
-        dstDir = os.path.dirname(dstPath)
-            
-        if not os.path.exists(pathEnc(dstDir)):
-            os.makedirs(dstDir)
-        
         fileOp = SHFILEOPSTRUCTW()
         
         srcPathWc = ctypes.c_wchar_p(srcPath + u"\0")
-        dstPathWc = ctypes.c_wchar_p(dstPath + u"\0")
     
         fileOp.hwnd = 0
         fileOp.wFunc = opcode
         fileOp.pFrom = srcPathWc
-        fileOp.pTo = dstPathWc
-        fileOp.fFlags = FOF_MULTIDESTFILES | FOF_NOCONFIRMATION | \
-                FOF_NOCONFIRMMKDIR # | FOF_SILENT  | FOF_NOERRORUI
+        if dstPath is not None:
+            dstDir = os.path.dirname(dstPath)
+                
+            if not os.path.exists(pathEnc(dstDir)):
+                os.makedirs(dstDir)
+
+            dstPathWc = ctypes.c_wchar_p(dstPath + u"\0")
+            fileOp.pTo = dstPathWc
+        else:
+            fileOp.pTo = 0
+        fileOp.fFlags = FOF_ALLOWUNDO | FOF_MULTIDESTFILES | FOF_NOCONFIRMATION | \
+                FOF_NOCONFIRMMKDIR | FOF_WANTNUKEWARNING # | FOF_SILENT  | FOF_NOERRORUI
         fileOp.fAnyOperationsAborted = 0
         fileOp.hNameMappings = 0
         fileOp.lpszProgressTitle = 0
@@ -316,6 +320,10 @@ if SHFileOperationW is not None:
                 raise IOError(
                         _(u"Moving from %s to %s failed. SHFileOperation result no. %s") %
                         (srcPath, dstPath, res))
+            elif opcode == FO_DELETE:
+                raise IOError(
+                        _(u"Deleting %s failed. SHFileOperation result no. %s") %
+                        (srcPath, res))
             else:
                 raise InternalError(u"SHFileOperation failed. Opcode=%s from=%s to=%s errcode=%s" %
                         (opcode, srcPath, dstPath, res))
@@ -341,6 +349,13 @@ if SHFileOperationW is not None:
         """
         _shellFileOp(FO_MOVE, srcPath, dstPath)
 
+    def deleteFile(path):
+        """
+        Delete file or directory  path.
+        
+        This function only works on Win NT!
+        """
+        _shellFileOp(FO_DELETE, path, None)
 
 
 def _getMemoryContentFromHandle(hdl):

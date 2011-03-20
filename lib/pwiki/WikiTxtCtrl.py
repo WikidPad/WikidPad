@@ -450,7 +450,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 #
 #                 img.SaveFile(destPath, wx.BITMAP_TYPE_PNG)
 
-            url = self.presenter.getMainControl().makeAbsPathRelUrl(destPath)
+            url = self.presenter.getWikiDocument().makeAbsPathRelUrl(destPath)
 
             if url is None:
                 url = u"file:" + StringOps.urlFromPathname(destPath)
@@ -480,7 +480,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
         # Windows Meta File pasted?
         destPath = imgsav.saveWmfFromClipboardToFileStorage(fs)
         if destPath is not None:
-            url = self.presenter.getMainControl().makeAbsPathRelUrl(destPath)
+            url = self.presenter.getWikiDocument().makeAbsPathRelUrl(destPath)
 
             if url is None:
                 url = u"file:" + StringOps.urlFromPathname(destPath)
@@ -899,48 +899,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     self.GotoPos(lastPos)
 
                     self.scrollXY(scrollPosX, scrollPosY)
-
-#                     # Bad hack: First scroll to position to avoid a visible jump
-#                     #   if scrolling works, then update display,
-#                     #   then scroll again because it may have failed the first time
-#
-#                     self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
-#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
-#                             scrollPosX, wx.HORIZONTAL)
-#                     self.ProcessEvent(screvt)
-#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
-#                             scrollPosX, wx.HORIZONTAL)
-#                     self.ProcessEvent(screvt)
-#
-#                     self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
-#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
-#                             scrollPosY, wx.VERTICAL)
-#                     self.ProcessEvent(screvt)
-#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
-#                             scrollPosY, wx.VERTICAL)
-#                     self.ProcessEvent(screvt)
-#
-#                     self.Update()
-#
-#                     self.SetScrollPos(wx.HORIZONTAL, scrollPosX, False)
-#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
-#                             scrollPosX, wx.HORIZONTAL)
-#                     self.ProcessEvent(screvt)
-#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
-#                             scrollPosX, wx.HORIZONTAL)
-#                     self.ProcessEvent(screvt)
-#
-#                     self.SetScrollPos(wx.VERTICAL, scrollPosY, True)
-#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBTRACK,
-#                             scrollPosY, wx.VERTICAL)
-#                     self.ProcessEvent(screvt)
-#                     screvt = wx.ScrollWinEvent(wx.wxEVT_SCROLLWIN_THUMBRELEASE,
-#                             scrollPosY, wx.VERTICAL)
-#                     self.ProcessEvent(screvt)
-
-#         elif self.pageType == u"form":
-#             self.GotoPos(0)
-#             self._goToNextFormField()
         else:
             self.handleSpecialPageType()
 
@@ -1047,6 +1005,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
             self.lastEditorFont = font    # ???
 
         self._checkForReadOnly()
+        
         self.SetStyles(faces)
 
         color = self._getColorFromOption("editor_bg_color", (255, 255, 255))
@@ -1597,11 +1556,11 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     process(node, stack[:])
 
                 elif node.name == "heading":
-                    if node.level < 5:
+                    if node.level < 6:   # TODO: Compatibility for Presentation.py without heading5
                         styleNo = FormatTypes.Heading1 + \
                                 (node.level - 1)
                     else:
-                        styleNo = FormatTypes.Heading5
+                        styleNo = FormatTypes.Bold
 
                     stylebytes.bindStyle(node.pos, node.strLength, styleNo)
 
@@ -2107,7 +2066,8 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     link = node.url
 
                     if link.startswith(u"rel://"):
-                        link = self.presenter.getMainControl().makeRelUrlAbsolute(link)
+                        link = self.presenter.getWikiDocument()\
+                                .makeRelUrlAbsolute(link)
 
                     if link.startswith(u"file:"):
                         try:
@@ -2129,27 +2089,26 @@ class WikiTxtCtrl(SearchableScintillaControl):
             if node.name == "urlLink":
                 link = node.url
 
-                for actualNode in node.iterDeepByName("url"):
-                    if actualNode.getString() == link:
-                        break # Inner for
+                if ' ' in node.coreNode.getString():
+                    addSafe = ' '
                 else:
-                    continue  # Outer for
+                    addSafe = ''
 
                 if link.startswith(u"rel://"):
-                    link = self.presenter.getMainControl()\
-                            .makeRelUrlAbsolute(link)
+                    link = self.presenter.getWikiDocument()\
+                            .makeRelUrlAbsolute(link, addSafe=addSafe)
 
                 elif link.startswith(u"file:"):
-                    link = self.presenter.getMainControl()\
+                    link = self.presenter.getWikiDocument()\
                             .makeAbsPathRelUrl(StringOps.pathnameFromUrl(
-                            link))
+                            link), addSafe=addSafe)
                     if link is None:
                         continue # TODO Message?
                 else:
                     continue
 
-                self.replaceTextAreaByCharPos(link, actualNode.pos,
-                        actualNode.pos + len(node.url))
+                self.replaceTextAreaByCharPos(link, node.coreNode.pos,
+                        node.coreNode.pos + node.coreNode.strLength)
 
                 break
 
@@ -2785,7 +2744,6 @@ class WikiTxtCtrl(SearchableScintillaControl):
                     charPos, lineStartCharPos, wikiDocument, settings)
 
 
-
     def _getExpandedByteSelectionToLine(self, extendOverChildren):
         """
         Move the start of current selection to start of the line it's in and
@@ -2824,6 +2782,84 @@ class WikiTxtCtrl(SearchableScintillaControl):
         return selByteStart, selByteEnd
 
 
+
+    def moveSelectedLinesOneUp(self, extendOverChildren):
+        """
+        Extend current selection to full logical lines and move selected lines
+        upward one line.
+        extendOverChildren -- iff true, extend selection over lines more indented
+            below the initial selection
+        """
+        self.BeginUndoAction()
+        try:
+            selByteStart, selByteEnd = self._getExpandedByteSelectionToLine(
+                    extendOverChildren)
+
+            firstLine = self.LineFromPosition(selByteStart)
+            if firstLine > 0:
+                content = self.GetSelectedText()
+                if len(content) > 0:
+                    if content[-1] == u"\n":
+                        selByteEnd -= 1
+                    else:
+                        content += u"\n"
+                    # Now content ends with \n and selection end points
+                    # before this newline
+                    self.ReplaceSelection("")
+                    target = self.PositionFromLine(firstLine - 1)
+                    self.InsertText(target, content)
+                    self.SetSelectionMode(0)
+                    self.SetSelectionStart(target)
+                    self.SetSelectionMode(0)
+                    self.SetSelectionEnd(target + (selByteEnd - selByteStart))
+        finally:
+            self.EndUndoAction()
+
+
+
+    def moveSelectedLinesOneDown(self, extendOverChildren):
+        """
+        Extend current selection to full logical lines and move selected lines
+        upward one line.
+        extendOverChildren -- iff true, extend selection over lines more indented
+            below the initial selection
+        """
+        self.BeginUndoAction()
+        try:
+            selByteStart, selByteEnd = self._getExpandedByteSelectionToLine(
+                    extendOverChildren)
+
+            lastLine = self.LineFromPosition(selByteEnd)
+            lineCount = self.GetLineCount() - 1
+            if lastLine <= lineCount:
+                content = self.GetSelectedText()
+                if len(content) > 0:
+                    # Now content ends with \n and selection end points
+                    # before this newline
+                    target = self.PositionFromLine(lastLine + 1)
+                    target -= selByteEnd - selByteStart
+
+                    if content[-1] == u"\n":  # Necessary for downward move?
+                        selByteEnd -= 1
+                    else:
+                        content += u"\n"
+
+                    self.ReplaceSelection("")
+                    if self.GetTextRange(target - 1,
+                            target) != u"\n":
+                        self.InsertText(target, u"\n")
+                        target += 1
+
+                    self.InsertText(target, content)
+                    self.SetSelectionMode(0)
+                    self.SetSelectionStart(target)
+                    self.SetSelectionMode(0)
+                    self.SetSelectionEnd(target + (selByteEnd - selByteStart))
+        finally:
+            self.EndUndoAction()
+
+
+
     def OnKeyDown(self, evt):
         key = evt.GetKeyCode()
 
@@ -2832,90 +2868,24 @@ class WikiTxtCtrl(SearchableScintillaControl):
         matchesAccelPair = self.presenter.getMainControl().keyBindings.\
                 matchesAccelPair
 
-        if self.pageType == u"texttree":
-            if accP in ( (wx.ACCEL_ALT, wx.WXK_NUMPAD_UP),
-                    (wx.ACCEL_ALT, wx.WXK_UP),
-                    (wx.ACCEL_SHIFT | wx.ACCEL_ALT, wx.WXK_NUMPAD_UP),
-                    (wx.ACCEL_SHIFT | wx.ACCEL_ALT, wx.WXK_UP) ):
-                self.BeginUndoAction()
-                try:
-                    selByteStart, selByteEnd = self._getExpandedByteSelectionToLine(
-                            bool(accP[0] & wx.ACCEL_SHIFT))
-
-                    firstLine = self.LineFromPosition(selByteStart)
-                    if firstLine > 0:
-                        content = self.GetSelectedText()
-                        if len(content) > 0:
-                            if content[-1] == u"\n":
-                                selByteEnd -= 1
-                            else:
-                                content += u"\n"
-                            # Now content ends with \n and selection end points
-                            # before this newline
-                            self.ReplaceSelection("")
-                            target = self.PositionFromLine(firstLine - 1)
-                            self.InsertText(target, content)
-                            self.SetSelectionMode(0)
-                            self.SetSelectionStart(target)
-                            self.SetSelectionMode(0)
-                            self.SetSelectionEnd(target + (selByteEnd - selByteStart))
-                finally:
-                    self.EndUndoAction()
-                return
-            elif accP in ( (wx.ACCEL_ALT, wx.WXK_NUMPAD_DOWN),
-                    (wx.ACCEL_ALT, wx.WXK_DOWN),
-                    (wx.ACCEL_SHIFT | wx.ACCEL_ALT, wx.WXK_NUMPAD_DOWN),
-                    (wx.ACCEL_SHIFT | wx.ACCEL_ALT, wx.WXK_DOWN) ):
-                self.BeginUndoAction()
-                try:
-                    selByteStart, selByteEnd = self._getExpandedByteSelectionToLine(
-                            bool(accP[0] & wx.ACCEL_SHIFT))
-
-                    lastLine = self.LineFromPosition(selByteEnd)
-                    lineCount = self.GetLineCount() - 1
-                    if lastLine <= lineCount:
-                        content = self.GetSelectedText()
-                        if len(content) > 0:
-                            # Now content ends with \n and selection end points
-                            # before this newline
-                            target = self.PositionFromLine(lastLine + 1)
-                            target -= selByteEnd - selByteStart
-
-                            if content[-1] == u"\n":  # Necessary for downward move?
-                                selByteEnd -= 1
-                            else:
-                                content += u"\n"
-
-                            self.ReplaceSelection("")
-                            if self.GetTextRange(target - 1,
-                                    target) != u"\n":
-                                self.InsertText(target, u"\n")
-                                target += 1
-
-                            self.InsertText(target, content)
-                            self.SetSelectionMode(0)
-                            self.SetSelectionStart(target)
-                            self.SetSelectionMode(0)
-                            self.SetSelectionEnd(target + (selByteEnd - selByteStart))
-                finally:
-                    self.EndUndoAction()
-                return
-
-            evt.Skip()
-
-
-#         if matchesAccelPair("ContinueSearch", accP):
-#             # ContinueSearch is normally F3
-#             self.startIncrementalSearch(self.searchStr)
-#             evt.Skip()
+#         if self.pageType == u"texttree":
+#             if accP in ( (wx.ACCEL_ALT, wx.WXK_NUMPAD_UP),
+#                     (wx.ACCEL_ALT, wx.WXK_UP),
+#                     (wx.ACCEL_SHIFT | wx.ACCEL_ALT, wx.WXK_NUMPAD_UP),
+#                     (wx.ACCEL_SHIFT | wx.ACCEL_ALT, wx.WXK_UP) ):
+# 
+#                 self.moveSelectedLinesOneUp(accP[0] & wx.ACCEL_SHIFT)
+#                 return
+#             elif accP in ( (wx.ACCEL_ALT, wx.WXK_NUMPAD_DOWN),
+#                     (wx.ACCEL_ALT, wx.WXK_DOWN),
+#                     (wx.ACCEL_SHIFT | wx.ACCEL_ALT, wx.WXK_NUMPAD_DOWN),
+#                     (wx.ACCEL_SHIFT | wx.ACCEL_ALT, wx.WXK_DOWN) ):
 #
-#         elif matchesAccelPair("StartIncrementalSearch", accP):
-#             # Start incremental search
-#             # First get selected text and prepare it as default value
-#             text = self.GetSelectedText()
-#             text = text.split("\n", 1)[0]
-#             text = re.escape(text[:30])
-#             self.startIncrementalSearch(text)
+#                 self.moveSelectedLinesOneDown(accP[0] & wx.ACCEL_SHIFT)
+#                 return
+# 
+#             evt.Skip()
+
 
         if matchesAccelPair("AutoComplete", accP):
             # AutoComplete is normally Ctrl-Space
@@ -2943,6 +2913,19 @@ class WikiTxtCtrl(SearchableScintillaControl):
             # if OnKeyDown is called indirectly
             # from IncrementalSearchDialog.OnKeyDownInput
             self.activateLink(tabMode=2)
+
+        elif matchesAccelPair("LogLineUp", accP):
+            # LogLineUp is by default undefined
+            self.moveSelectedLinesOneUp(False)
+        elif matchesAccelPair("LogLineUpWithIndented", accP):
+            # LogLineUp is by default undefined
+            self.moveSelectedLinesOneUp(True)
+        elif matchesAccelPair("LogLineDown", accP):
+            # LogLineUp is by default undefined
+            self.moveSelectedLinesOneDown(False)
+        elif matchesAccelPair("LogLineDownWithIndented", accP):
+            # LogLineUp is by default undefined
+            self.moveSelectedLinesOneDown(True)
 
         elif not evt.ControlDown() and not evt.ShiftDown():  # TODO Check all modifiers
             if key == wx.WXK_TAB:
@@ -3226,7 +3209,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
             unifActionName = dlgParams.unifActionName
 
-        move = False
+        moveToStorage = False
 
         if unifActionName == u"action/editor/this/paste/files/insert/url/absolute":
             modeToStorage = False
@@ -3240,16 +3223,14 @@ class WikiTxtCtrl(SearchableScintillaControl):
         elif unifActionName == u"action/editor/this/paste/files/insert/url/movetostorage":
             modeToStorage = True
             modeRelativeUrl = False
-            move = True
 
 
 #         elif unifActionName == u"action/editor/this/paste/files/insert/url/movetostorage":
 #             modeToStorage = True
 #             modeRelativeUrl = False
-#             move = True
+#             moveToStorage = True
         else:
             return
-
 
         try:
             prefix = StringOps.strftimeUB(dlgParams.rawPrefix)
@@ -3273,17 +3254,15 @@ class WikiTxtCtrl(SearchableScintillaControl):
         urls = []
 
         for fn in filenames:
-            url = StringOps.urlFromPathname(fn)
-
             if fn.endswith(u".wiki"):
-                urls.append(u"wiki:%s" % url)
+                urls.append(u"wiki:%s" % StringOps.urlFromPathname(fn))
             else:
                 toStorage = False
                 if modeToStorage:
                     # Copy file into file storage
                     fs = editor.presenter.getWikiDocument().getFileStorage()
                     try:
-                        fn = fs.createDestPath(fn, move=move)
+                        fn = fs.createDestPath(fn, move=moveToStorage)
                         toStorage = True
                     except Exception, e:
                         traceback.print_exc()
@@ -3291,29 +3270,10 @@ class WikiTxtCtrl(SearchableScintillaControl):
                                 _(u"Couldn't copy file"), e)
                         return
 
-                if modeRelativeUrl or toStorage:
-                    # Relative rel: URL
-                    url = editor.presenter.getMainControl().makeAbsPathRelUrl(fn)
-
-                    if url is None:
-                        url = u"file:" + StringOps.urlFromPathname(fn)
-
-                    urls.append(url)
-
-
-#                     locPath = editor.presenter.getMainControl().getWikiConfigPath()
-#                     if locPath is not None:
-#                         locPath = dirname(locPath)
-#                         relPath = relativeFilePath(locPath, fn)
-#                         if relPath is None:
-#                             # Absolute path needed
-#                             urls.append("file:%s" % url)
-#                         else:
-#                             urls.append("rel://%s" % urlFromPathname(relPath))
-                else:
-                    # Absolute file: URL
-                    urls.append(u"file:%s" % url)
-
+                urls.append(editor.wikiLanguageHelper.createUrlLinkFromPath(
+                        editor.presenter.getWikiDocument(), fn,
+                        relative=modeRelativeUrl or toStorage,
+                        bracketed=dlgParams.bracketedUrl))
 
         editor.handleDropText(x, y, prefix + middle.join(urls) + suffix)
 
@@ -3427,7 +3387,7 @@ class WikiTxtCtrlDropTarget(wx.PyDropTarget):
             suffix = u"/modkeys/shift"
         else:
             suffix = u""
-
+            
         mc.getUserActionCoord().reactOnUserEvent(
                 u"mouse/leftdrop/editor/files" + suffix, paramDict)
 

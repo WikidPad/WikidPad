@@ -196,6 +196,7 @@ class FilePasteParams:
                 # (before calling StringOps.strftimeUB on it)
         self.rawMiddle = u" "  # Middle text between links
         self.rawSuffix = u""  # Suffix after links
+        self.bracketedUrl = True
 
         self.unifActionName = None  # Unified name of the action to do 
 #         self.actionParamDict = None  # Parameter dict of action
@@ -212,6 +213,8 @@ class FilePasteParams:
                 "editor_filePaste_middle", u" "))
         self.rawSuffix = unescapeForIni(config.get("main",
                 "editor_filePaste_suffix", u""))
+        self.bracketedUrl = config.getboolean("main",
+                "editor_filePaste_bracketedUrl", True)
 
 
 
@@ -233,6 +236,7 @@ class FilePasteDialog(wx.Dialog):
         self.ctrls.tfEditorFilePastePrefix.SetValue(filepastesaver.rawPrefix)
         self.ctrls.tfEditorFilePasteMiddle.SetValue(filepastesaver.rawMiddle)
         self.ctrls.tfEditorFilePasteSuffix.SetValue(filepastesaver.rawSuffix)
+        self.ctrls.cbEditorFilePasteBracketedUrl.SetValue(filepastesaver.bracketedUrl)
 
         self.filepastesaver = None
 
@@ -269,6 +273,8 @@ class FilePasteDialog(wx.Dialog):
                     self.ctrls.tfEditorFilePasteMiddle.GetValue()
             filepastesaver.rawSuffix = \
                     self.ctrls.tfEditorFilePasteSuffix.GetValue()
+            filepastesaver.bracketedUrl = \
+                    self.ctrls.cbEditorFilePasteBracketedUrl.GetValue()
 
             self.filepastesaver = filepastesaver
 

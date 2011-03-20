@@ -930,7 +930,23 @@ def urlQuote(s, safe='/'):
 
 
 
-def ntUrlFromPathname(p):
+def urlQuoteSpecific(s, toQuote=''):
+    """
+    Only quote characters in toQuote
+    """
+    result = []
+    
+    for c in s:
+        if c in toQuote:
+            result.append("%%%02X" % ord(c))
+        else:
+            result.append(c)
+
+    return "".join(result)
+
+
+
+def ntUrlFromPathname(p, addSafe=''):
     r"""
     Modified version of nturl2path.pathname2url.
 
@@ -950,27 +966,27 @@ def ntUrlFromPathname(p):
 #         # (notice doubling of slashes at the start of the path)
 #             p = '\\\\' + p
         components = p.split('\\')
-        return urlQuote('/'.join(components))
+        return urlQuote('/'.join(components), safe='/' + addSafe)
     comp = p.split(':')
     if len(comp) != 2 or len(comp[0]) > 1:
         error = 'Bad path: ' + p
         raise IOError, error
 
-    drive = urlQuote(comp[0].upper())
+    drive = urlQuote(comp[0].upper(), safe='/' + addSafe)
     components = comp[1].split('\\')
     path = '///' + drive + ':'
     for comp in components:
         if comp:
-            path = path + '/' + urlQuote(comp)
+            path = path + '/' + urlQuote(comp, safe='/' + addSafe)
     return path
 
 
 
-def _macpncomp2url(component):
-    component = urlQuote(component[:31], safe='')  # We want to quote slashes
+def _macpncomp2url(component, addSafe):
+    component = urlQuote(component[:31], safe=addSafe)  # We want to quote slashes
     return component
 
-def macUrlFromPathname(pathname):
+def macUrlFromPathname(pathname, addSafe=''):
     """
     Modified version of macurl2path.pathname2url.
 
@@ -989,7 +1005,8 @@ def macUrlFromPathname(pathname):
         if components[i] == '':
             components[i] = '..'
     # Truncate names longer than 31 bytes
-    components = map(_macpncomp2url, components)
+    components = [_macpncomp2url(c, addSafe) for c in components]
+#     components = map(_macpncomp2url, components)
 
     if os.path.isabs(pathname):
         return '/' + '/'.join(components)
@@ -1002,15 +1019,14 @@ if os.name == 'nt':
 elif os.name == 'mac':
     urlFromPathname = macUrlFromPathname
 else:
-    def urlFromPathname(fn):
-        # TODO Really do this for non-Windows systems?
-    
+    def urlFromPathname(fn, addSafe=''):
         if isinstance(fn, unicode):
             fn = utf8Enc(fn, "replace")[0]
             
-        url = urllib.pathname2url(fn)
-        url.replace("%24", "$")
-    
+        # riscos not supported
+        url = urlQuote(fn, safe='/$' + addSafe)
+#         url.replace("%24", "$")
+
         return url
 
 
@@ -1171,7 +1187,7 @@ _FORBIDDEN_START = _FORBIDDEN_CHARACTERS | frozenset(u".$ -")
 # Allowed ascii characters remaining: #&()+,=[]^_`{}
 
 
-def iterCompatibleFilename(baseName, suffix, asciiOnly=False, maxLength=250,
+def iterCompatibleFilename(baseName, suffix, asciiOnly=False, maxLength=120,
         randomLength=10):
     """
     Generator to create filenames compatible to (hopefully) all major

@@ -6,7 +6,7 @@ import os, shutil, os.path, re, traceback
 import wx
 
 from . import SystemInfo
-from .StringOps import mbcsEnc, urlQuote, pathnameFromUrl, URL_RESERVED, pathEnc
+from .StringOps import mbcsEnc, urlQuote, pathnameFromUrl, pathEnc
 
 
 # import WindowsHacks
@@ -36,12 +36,6 @@ else:
     def startFile(mainControl, link):
         # We need mainControl only for this version of startFile()
         
-#         # The link was unquoted(???), so URL-quote it again
-#         if link.startswith("http:") or link.startswith("https:") or \
-#                 link.startswith("mailto:") or link.startswith("ftp:") or \
-#                 link.startswith("file:"):
-#             link = urlQuote(link, URL_RESERVED)
-
         startPath = mainControl.getConfig().get("main", "fileLauncher_path", u"")
         if startPath == u"":
             wx.LaunchDefaultBrowser(link)
@@ -57,6 +51,7 @@ else:
 if SystemInfo.isWinNT() and WindowsHacks:
     copyFile = WindowsHacks.copyFile
     moveFile = WindowsHacks.moveFile
+    deleteFile = WindowsHacks.deleteFile
 else:
     # TODO Mac version    
     def copyFile(srcPath, dstPath):
@@ -85,7 +80,17 @@ else:
         if not os.path.exists(pathEnc(dstDir)):
             os.makedirs(dstDir)
     
-        shutil.move(srcPath, dstPath)  
+        shutil.move(srcPath, dstPath)
+
+
+    def deleteFile(path):
+        """
+        Delete file or directory  path.
+        """
+        # TODO: Check for directories
+        # os.rmdir(path) ?
+        os.unlink(path) 
+
 
 
 # Define samefile

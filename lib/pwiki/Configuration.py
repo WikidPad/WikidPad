@@ -605,7 +605,8 @@ GLOBALDEFAULTS = {
     ("main", "editor_filePaste_prefix"): "",  # When dropping files into editor, how to prefix, join(middle) and suffix them?
     ("main", "editor_filePaste_middle"): "\\x20",  # These three values are escaped with StringOps.escapeForIni to preserve spaces
     ("main", "editor_filePaste_suffix"): "",  
-
+    ("main", "editor_filePaste_bracketedUrl"): "True", # Should the URL be inserted in brackets (and with 
+            # spaces in it preserved unquoted)?
 
     # Editor color options
     ("main", "editor_plaintext_color"): "", # Color of plain text (and non-exist. wikiwords) in editor
@@ -732,7 +733,7 @@ GLOBALDEFAULTS = {
     ("main", "wikiPathes_relative"): "False", # If True, pathes to last recently used wikis
             # are stored relative to application dir.
     ("main", "openWikiWordDialog_sortOrder"): "0", # Sort order in "Open Wiki Word" dialog
-            # 0:Alphabetically; 1:By last visit, newest first; 2:By last visit, oldest first
+            # 0:Alphabetically; 1:By last visit, newest first; 2:By last visit, oldest first; 3:Alphabetically reverse
     
     ("main", "collation_order"): "Default", # Set collation order, Default: system default order, C: ASCII byte value
     ("main", "collation_uppercaseFirst"): "False" # Sort uppercase first (ABCabc) or normal inorder (AaBbCc)

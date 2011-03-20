@@ -484,6 +484,7 @@ class OptionsDialog(wx.Dialog):
             ("editor_filePaste_prefix", "tfEditorFilePastePrefix", "tes"),
             ("editor_filePaste_middle", "tfEditorFilePasteMiddle", "tes"),
             ("editor_filePaste_suffix", "tfEditorFilePasteSuffix", "tes"),
+            ("editor_filePaste_bracketedUrl", "cbEditorFilePasteBracketedUrl", "b"),
 
             ("editor_plaintext_color", "tfEditorPlaintextColor", "color0",
                     "btnSelectEditorPlaintextColor"),

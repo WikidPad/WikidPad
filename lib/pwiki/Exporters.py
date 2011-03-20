@@ -1013,7 +1013,7 @@ class HtmlExporter(AbstractExporter):
                 # Relative URL
                 if self.asHtmlPreview:
                     # If preview, make absolute
-                    bgimg = self.mainControl.makeRelUrlAbsolute(bgimg)
+                    bgimg = self.wikiDocument.makeRelUrlAbsolute(bgimg)
                 else:
                     # If export, reformat a bit
                     bgimg = bgimg[6:]
@@ -1917,11 +1917,11 @@ class HtmlExporter(AbstractExporter):
 
     def _processUrlLink(self, fullContent, astNode):
         link = astNode.url
-        pointRelative = False  # Final link should be relative
+        pointRelative = False  # Should final link be relative?
 
         if link.startswith(u"rel://"):
             pointRelative = True
-            absUrl = self.mainControl.makeRelUrlAbsolute(link)
+            absUrl = self.wikiDocument.makeRelUrlAbsolute(link)
 
             # Relative URL
             if self.asHtmlPreview:
@@ -1983,6 +1983,8 @@ class HtmlExporter(AbstractExporter):
 
         pointingType = appendixDict.get("p")
 
+        relRelocate = True # Relocate(=rewrite) relative link?
+
         # Decide if link should be relative or absolute
         if self.asHtmlPreview:
             # For preview always absolute link
@@ -1991,12 +1993,19 @@ class HtmlExporter(AbstractExporter):
             pointRelative = False
         elif pointingType == u"rel":
             pointRelative = True
+        elif pointingType == u"rnr":
+            pointRelative = True
+            relRelocate = False
 
         if pointRelative:
-            # Even if link is already relative it is relative to
-            # wrong location in most cases
-            if lowerLink.startswith("file:") or \
-                    lowerLink.startswith("rel:"):
+            if not relRelocate and lowerLink.startswith("rel://"):
+                # Do not relocate relative link (might link to a resource
+                # outside of WikidPad, relative to export destination)
+                link = link[6:]
+            elif lowerLink.startswith("file:") or \
+                    lowerLink.startswith("rel://"):
+                # Even if link is already relative it is relative to
+                # wrong location in most cases
                 absPath = StringOps.pathnameFromUrl(absUrl)
                 relPath = StringOps.relativeFilePath(self.exportDest,
                         absPath)
@@ -2005,7 +2014,7 @@ class HtmlExporter(AbstractExporter):
                 else:
                     link = StringOps.urlFromPathname(relPath)
         else:
-            if lowerLink.startswith("rel:"):
+            if lowerLink.startswith("rel://"):
                 link = absUrl
 
 
@@ -2089,9 +2098,8 @@ class HtmlExporter(AbstractExporter):
                         self.optsStack["suppressLinks"] = True
                         self.processAst(fullContent, astNode.titleNode)
                 else:
-                    self.outAppend(escapeHtml(astNode.url))                        
+                    self.outAppend(escapeHtml(astNode.coreNode.getString()))                        
                 self.outAppend(u'</a></span>')
-
 
 
 

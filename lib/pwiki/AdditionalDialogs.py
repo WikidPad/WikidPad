@@ -229,21 +229,28 @@ class OpenWikiWordDialog(wx.Dialog):
         orderChoice = self.ctrls.chSort.GetSelection()
         
         if orderChoice == 1:
+            # Newest visited
             orderBy = "visited"
             descend = True
         elif orderChoice == 2:
+            # Oldest visited
             orderBy = "visited"
             descend = False
+        elif orderChoice == 3:
+            # Alphabetically reverse
+            orderBy = "word"
+            descend = True
         else:   # orderChoice == 0:
+            # Alphabetically
             orderBy = "word"
             descend = False
-        
+
         if searchTxt == u"%":
             self.listContent = self.pWiki.getWikiData()\
                     .getWikiWordMatchTermsWith(u"", orderBy=orderBy,
                     descend=descend)
             return
-        
+
         self.listContent = self.pWiki.getWikiData().getWikiWordMatchTermsWith(
                 searchTxt, orderBy=orderBy, descend=descend)
 

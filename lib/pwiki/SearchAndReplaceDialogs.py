@@ -180,7 +180,7 @@ class SearchResultListBox(wx.HtmlListBox):
         the list is cleared.
         """
         if self.isShowingSearching:
-            # This can only happend if showFound wasn't called
+            # This can only happen if showFound wasn't called
             self.showFound(None, None, None)
 
 
@@ -638,7 +638,7 @@ class SearchPageDialog(wx.Dialog):
 
 
     def OnClose(self, evt):
-        self.pWiki.findDlg = None
+        self.pWiki.nonModalFindDlg = None
         self.Destroy()
 
 
@@ -1206,10 +1206,10 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
             return
 
         try:
-            self.mainControl.wwSearchDlgs.remove(self)
+            self.mainControl.nonModalWwSearchDlgs.remove(self)
         except ValueError:
-            if self is self.mainControl.mainWwSearchDlg:
-                self.mainControl.mainWwSearchDlg = None
+            if self is self.mainControl.nonModalMainWwSearchDlg:
+                self.mainControl.nonModalMainWwSearchDlg = None
 
         if self.IsModal():
             self.EndModal(wx.ID_OK)
@@ -1224,10 +1224,10 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
         self.value = None
         try:
-            self.mainControl.wwSearchDlgs.remove(self)
+            self.mainControl.nonModalWwSearchDlgs.remove(self)
         except ValueError:
-            if self is self.mainControl.mainWwSearchDlg:
-                self.mainControl.mainWwSearchDlg = None
+            if self is self.mainControl.nonModalMainWwSearchDlg:
+                self.mainControl.nonModalMainWwSearchDlg = None
 
         if self.IsModal():
             self.EndModal(wx.ID_CANCEL)
@@ -1553,7 +1553,7 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
                 ownPos[1] + oldRelBoxPos[1] - newRelBoxPos[1])
         
         setWindowPos(frame, pos=otherPos, fullVisible=True)
-        self.mainControl.wwSearchDlgs.append(frame)
+        self.mainControl.nonModalWwSearchDlgs.append(frame)
         frame.Show()
         self.Close()
 
@@ -1576,10 +1576,10 @@ class SearchWikiDialog(wx.Dialog, MiscEventSourceMixin):
 
 #     def OnClose(self, evt):
 #         try:
-#             self.mainControl.wwSearchDlgs.remove(self)
+#             self.mainControl.nonModalWwSearchDlgs.remove(self)
 #         except ValueError:
-#             if self is self.mainControl.mainWwSearchDlg:
-#                 self.mainControl.mainWwSearchDlg = None
+#             if self is self.mainControl.nonModalMainWwSearchDlg:
+#                 self.mainControl.nonModalMainWwSearchDlg = None
 # 
 #         self.Destroy()
 
@@ -2010,7 +2010,7 @@ class SearchResultPresenterControl(wx.Panel):
         frame = FastSearchPopup(self.searchDialogParent, self.mainControl,
                 -1, srListBox=self.resultBox)
 
-        self.mainControl.wwSearchDlgs.append(frame)
+        self.mainControl.nonModalWwSearchDlgs.append(frame)
         frame.setSearchOp(self.sarOp)
         frame.fixate()
         frame.Show()
@@ -2027,7 +2027,7 @@ class SearchResultPresenterControl(wx.Panel):
                 allowOrdering=False)
         dlg.showSearchReplaceOperation(self.sarOp)
 
-        self.mainControl.wwSearchDlgs.append(dlg)
+        self.mainControl.nonModalWwSearchDlgs.append(dlg)
         dlg.Show()
 
         self.presenter.close()
@@ -2152,7 +2152,7 @@ class FastSearchPopup(wx.Frame):
                 ownPos[1] + oldRelBoxPos[1] - newRelBoxPos[1])
 
         setWindowPos(dlg, pos=otherPos, fullVisible=True)
-        self.mainControl.wwSearchDlgs.append(dlg)
+        self.mainControl.nonModalWwSearchDlgs.append(dlg)
         self.Close()
         dlg.Show()
 
@@ -2223,7 +2223,7 @@ class FastSearchPopup(wx.Frame):
             config.set("main", "fastSearch_sizeY", str(height))
         
         try:
-            self.mainControl.wwSearchDlgs.remove(self)
+            self.mainControl.nonModalWwSearchDlgs.remove(self)
         except ValueError:
             pass
 

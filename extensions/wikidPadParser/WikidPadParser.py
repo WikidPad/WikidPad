@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2011-01-12
+# Last modified (format YYYY-MM-DD): 2011-03-17
 
 
 import locale, pprint, time, sys, string, traceback
@@ -13,7 +13,9 @@ import wx
 
 import re    # from pwiki.rtlibRepl import re
 from pwiki.WikiExceptions import *
-from pwiki.StringOps import UPPERCASE, LOWERCASE, revStr
+from pwiki.StringOps import UPPERCASE, LOWERCASE, revStr, urlFromPathname, \
+        urlQuoteSpecific
+
 from pwiki.WikiDocument import WikiDocument
 from pwiki.OptionsDialog import PluginOptionsPanel
 
@@ -173,7 +175,7 @@ def actionModeAppendix(s, l, st, t):
 
 
 
-modeAppendixEntry = buildRegex(ur"(?!;)\S", "key") + buildRegex(ur"(?:(?!;)\S)*", "data")
+modeAppendixEntry = buildRegex(ur"(?![;\|\]])\S", "key") + buildRegex(ur"(?:(?![;\|\]])\S)*", "data")
 modeAppendixEntry = modeAppendixEntry.setResultsNameNoCopy("entry")
 modeAppendix = modeAppendixEntry + ZeroOrMore(buildRegex(ur";") + modeAppendixEntry)
 modeAppendix = modeAppendix.addParseAction(actionModeAppendix)
@@ -639,11 +641,11 @@ WikiWordCcPAT = (ur"(?:[" +
 
 
 UrlPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
-        ur'(?:(?![.,;:!?)\]]+(?:["\s]|$))[^"\s<>])*'
+        ur'(?:(?![.,;:!?)]+(?:["\s]|$))[^"\s|\]<>])*'
 
 
-# UrlInBracketsPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
-#         ur'(?:[^"\t\n<>' + BracketEndPAT + '])*'
+UrlInBracketsPAT = ur'(?:(?:wiki|https?|ftp|rel)://|mailto:|Outlook:\S|file://?)'\
+        ur'(?:(?![ \t]+[|\]])(?: |[^"\s|\]<>]))*'
 
 
 bracketStart = buildRegex(BracketStartPAT)
@@ -768,9 +770,17 @@ def actionExtractableWikiWord(s, l, st, t):
 
 
 def actionUrlLink(s, l, st, t):
+    if t.name == "urlLinkBare":
+        t.bracketed = False
+    else:
+        t.bracketed = True
+    
+    t.name = "urlLink"        
     t.appendixNode = t.findFlatByName("urlModeAppendix")
+    t.coreNode = t.findFlatByName("url")
 
-    t.url = t.findFlatByName("url").getString()
+    # Valid URL but may differ from original input
+    t.url = urlQuoteSpecific(t.coreNode.getString(), ' ')
     t.titleNode = t.findFlatByName("title")
 #     print "--actionUrlLink3", repr(t.url)
 
@@ -822,18 +832,18 @@ urlModeAppendix = modeAppendix.setResultsName("urlModeAppendix")
 urlWithAppend = buildRegex(UrlPAT, "url") + Optional(buildRegex(ur">") + \
         urlModeAppendix)
 
-# urlWithAppendInBrackets = buildRegex(UrlInBracketsPAT, "url") + Optional(buildRegex(ur">") + \
-#         urlModeAppendix)
+urlWithAppendInBrackets = buildRegex(UrlInBracketsPAT, "url") + Optional(buildRegex(ur">") + \
+        urlModeAppendix)
 
 
-urlBare = urlWithAppend.setResultsName("urlLink")
+urlBare = urlWithAppend.setResultsName("urlLinkBare")
 urlBare = urlBare.setParseAction(actionUrlLink)
 
-# urlTitled = bracketStart + urlWithAppendInBrackets + whitespace + \
-#         Optional(title) + bracketEnd
-urlTitled = bracketStart + urlWithAppend + whitespace + \
+urlTitled = bracketStart + urlWithAppendInBrackets + whitespace + \
         Optional(title) + bracketEnd
-urlTitled = urlTitled.setResultsNameNoCopy("urlLink").setParseAction(actionUrlLink)
+# urlTitled = bracketStart + urlWithAppend + whitespace + \
+#         Optional(title) + bracketEnd
+urlTitled = urlTitled.setResultsNameNoCopy("urlLinkBracketed").setParseAction(actionUrlLink)
 
 
 
@@ -1058,7 +1068,7 @@ TOKEN_TO_END = {
         "orderedList": lessIndentOrEnd,
         "indentedText": lessIndentOrEnd,
         "wikiWord": bracketEnd,
-        "urlLink": bracketEnd,
+        "urlLinkBracketed": bracketEnd,
         "table": tableEnd,
         "preHtmlTag": preHtmlEnd,
         "heading": headingEnd,
@@ -1788,7 +1798,7 @@ class _TheHelper(object):
 
 
     @staticmethod
-    def createLinkFromWikiWord(word, wikiPage, forceAbsolute=False):    # normalizeWikiWord
+    def createLinkFromWikiWord(word, wikiPage, forceAbsolute=False):
         """
         Create a link from word which should be put on wikiPage.
         """
@@ -1798,9 +1808,6 @@ class _TheHelper(object):
 
         if forceAbsolute:
             return BracketStart + targetPath.getLinkCore() + BracketEnd
-
-
-#         basePath = _WikiLinkPath(wikiWord=wikiPage.getWikiWord())
 
         linkCore = _TheHelper.createRelativeLinkFromWikiWord(
                 word, wikiPage.getWikiWord(), downwardOnly=False)
@@ -1816,7 +1823,6 @@ class _TheHelper(object):
         return BracketStart + linkCore + BracketEnd
 
 
-
     @staticmethod
     def createAbsoluteLinksFromWikiWords(words, wikiPage=None):
         """
@@ -1826,8 +1832,8 @@ class _TheHelper(object):
         return u"\n".join([u"%s//%s%s" % (BracketStart, w, BracketEnd)
                 for w in words])
                 
-    # For compatibility. TODO: Remove
-    createStableLinksFromWikiWords = createAbsoluteLinksFromWikiWords
+#     # For compatibility. TODO: Remove
+#     createStableLinksFromWikiWords = createAbsoluteLinksFromWikiWords
 
     @staticmethod
     def createRelativeLinkFromWikiWord(word, baseWord, downwardOnly=True):
@@ -1849,6 +1855,26 @@ class _TheHelper(object):
         
         return relPath.getLinkCore()
 
+    @staticmethod
+    def createUrlLinkFromPath(wikiDocument, path, relative=False, bracketed=False):
+        if bracketed:
+            addSafe = ' '
+        else:
+            addSafe = ''
+
+        if relative: 
+            url = wikiDocument.makeAbsPathRelUrl(path, addSafe=addSafe)
+
+            if url is None:
+                # Relative not possible -> absolute instead
+                url = u"file:" + urlFromPathname(path, addSafe=addSafe)
+        else:
+            url = u"file:" + urlFromPathname(path, addSafe=addSafe)
+        
+        if bracketed:
+            url = BracketStart + url + BracketEnd
+        
+        return url
 
 
     @staticmethod

@@ -63,15 +63,15 @@ class PWikiNonCore:
         self.mainControl.getActiveEditor().AddText(StringOps.strftimeUB(mstr))
 
 
-#     def OnShowFileCleanup(self, evt):
-#         from . import FileManagementGui
-# 
-#         progresshandler = wxHelper.ProgressHandler(
-#                 _(u"     Scanning     "),
-#                 _(u"     Scanning     "), 0, self.mainControl)
-#         
-#         FileManagementGui.runFileCleanup(self.mainControl, self.dlgParent,
-#                 progresshandler)
+    def OnShowFileCleanup(self, evt):
+        from . import FileCleanup
+
+        progresshandler = wxHelper.ProgressHandler(
+                _(u"     Scanning     "),
+                _(u"     Scanning     "), 0, self.mainControl)
+        
+        FileCleanup.runFileCleanup(self.mainControl, self.dlgParent,
+                progresshandler)
 
 
     def _buildDescriptorDict(self):
@@ -111,10 +111,10 @@ class PWikiNonCore:
                 kb.InsertDate, "date", None,
                 (mc.OnUpdateDisReadOnlyPage, mc.OnUpdateDisNotTextedit,
                     mc.OnUpdateDisNotWikiPage)),
-#             "showFileCleanupDialog": (self.OnShowFileCleanup,
-#                 _(u'File cleanup...'), _(u'Remove orphaned files and dead links'),
-#                 kb.FileCleanup, None, None,
-#                 None),
+            "showFileCleanupDialog": (self.OnShowFileCleanup,
+                _(u'File cleanup...'), _(u'Remove orphaned files and dead links'),
+                kb.FileCleanup, None, None,
+                None),
             }
 
         return descriptorDict

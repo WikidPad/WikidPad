@@ -694,7 +694,7 @@ lib/pwiki/EnhancedGrid.py -text
 lib/pwiki/EnhancedScintillaControl.py -text
 lib/pwiki/Enum.py -text
 lib/pwiki/Exporters.py -text
-lib/pwiki/FileManagementGui.py -text
+lib/pwiki/FileCleanup.py -text
 lib/pwiki/GtkHacks.py -text
 lib/pwiki/I18nPoUpdater.py -text
 lib/pwiki/Importers.py -text
