@@ -1,0 +1,11 @@
+﻿[:page:PageHeader][:toc:]
++ Example Escape Formatting
+
+<<
+*This should be bold* ThisShouldBeALink
+>> 
+
+*This should be bold* ThisShouldBeALink
+
+
+[:page:PageFooter]

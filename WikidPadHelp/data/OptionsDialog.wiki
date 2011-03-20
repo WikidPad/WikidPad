@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + Options Dialog
 
-The options dialog controls the behavior of the application and of the currently open wiki. To open it, choose "Options" in the wiki menu.
+The options dialog controls the behavior of the application and of the currently open wiki. To open it, choose "Options" in the [Wiki menu].
 
 ++ Application-wide
 
@@ -14,7 +14,9 @@ The following options apply to the whole application and therefore to each wiki 
 When double clicking on a wiki: URL, a new instance of the application is started, otherwise, the current instance loads the new wiki.
 
 +++++ Store relative paths to wikis
-Paths to the recently opened wikis (listed in menu "Wiki"->"Recent") are stored relative to the [WikidPad installation directory] from now on, if this is checked. This means: existing entries in "Recent" are *not* modified and may become invalid when changing this option. Relative paths to wikis can be very useful e.g. if you have Your [Wikid Pad on a USB stick], toghether with Your wikis.
+Paths to the recently opened wikis (listed in menu "Wiki"->"Recent") are stored relative to the [WikidPad installation directory] from now on, if this is checked. This means: existing entries in "Recent" are *not* modified and may become invalid when changing this option.
+
+Relative paths to wikis can be very useful e.g. if you have Your [Wikid Pad on a USB stick], together with Your wikis.
 
 +++++ Default open/new dir.
 Directory to start when using "Wiki"->"New" or "Wiki"->"Open" in the menu. If empty, WikidPad chooses a default.

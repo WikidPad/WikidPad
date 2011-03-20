@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + Wiki Word History
 
-WikidPad maintains a history of the WikiWords you have visited.
+WikidPad maintains a history of the WikiPages you have visited.
 
 You can view this history by pressing [Ctrl-H].
 

@@ -4,7 +4,7 @@ data_dir = data
 [main]
 footnotes_as_wikiwords = False
 indexsearch_enabled = False
-last_wiki_word = WhereIsTheDataStored
+last_wiki_word = ExampleListNumbered
 hotkey_showhide_bywiki = 
 log_window_autoshow = Gray
 tree_expandednodes_descriptorpathes_views = 
@@ -20,7 +20,7 @@ wiki_lastactivetabno = 0
 first_wiki_word = WikidPadHelp
 wikipagefiles_gracefuloutsideaddandremove = True
 versioning_storagelocation = 0
-wiki_lasttabssubctrls = textedit
+wiki_lasttabssubctrls = preview
 template_pagenamesre = ^template/
 tree_expandednodes_descriptorpathes_main = 
 tree_last_root_wiki_word = WikidPadHelp

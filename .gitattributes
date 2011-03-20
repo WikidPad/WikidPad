@@ -111,10 +111,15 @@ WikidPadHelp/data/DatabaseTypes.wiki -text
 WikidPadHelp/data/DialogPrint.wiki -text
 WikidPadHelp/data/DisableCamelCaseWords.wiki -text
 WikidPadHelp/data/DynamicViews.wiki -text
+WikidPadHelp/data/ExampleEscapeFormatting.wiki -text
 WikidPadHelp/data/ExampleInsertPage.wiki -text
 WikidPadHelp/data/ExampleInsertions.wiki -text
 WikidPadHelp/data/ExampleInternati%F6nalCh%E0racters.wiki -text
+WikidPadHelp/data/ExampleListBulletPoint.wiki -text
+WikidPadHelp/data/ExampleListNumbered.wiki -text
 WikidPadHelp/data/ExampleQuotationSymbols.wiki -text
+WikidPadHelp/data/ExampleTablePipe.wiki -text
+WikidPadHelp/data/ExampleTableTabulator.wiki -text
 WikidPadHelp/data/ExternalGraphicalApplications.wiki -text
 WikidPadHelp/data/FavoriteWikis.wiki -text
 WikidPadHelp/data/FileStorage.wiki -text
@@ -405,8 +410,6 @@ WikidPadHelp/data/index/wiki_idx.gfd -text
 WikidPadHelp/data/upgrade[!!-~]WikidPad.wiki -text
 WikidPadHelp/data/wiki%00252FCCBlacklist.data -text
 WikidPadHelp/data/wikidb.gfd -text
-WikidPadHelp/data/wikidb.gfl -text
-WikidPadHelp/data/wikidb.glb -text
 WikidPadHelp/files/testimg.gif -text
 /WikidPadStarter.py -text
 /WikidPad_hu_HU.po -text

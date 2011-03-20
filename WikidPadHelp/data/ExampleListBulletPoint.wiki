@@ -1,0 +1,7 @@
+﻿[:page:PageHeader][:toc:]
++ Example List Bullet Point
+
+    * Put your cursor at the end of this line and press enter.
+
+
+[:page:PageFooter]

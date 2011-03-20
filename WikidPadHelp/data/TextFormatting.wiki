@@ -23,12 +23,12 @@ _italic_
 When you type in a really really really really really really really really really really really really
 long line you can tell WikidPad to rewrap it for you by pressing [Ctrl-W]. Try it on this line.
 
-You can even change the wrap position by adding a wrap attribute to your document.
+You can even change the wrap position by adding a wrap attribute such as \[wrap: 20] to your document.
 [wrap: 20]
-Changes the wrapping on this page to 20.
+This changes the wrapping on the current WikiPage to 20 characters.
 
 [global.wrap: 70]
-changes the global wrap position to 70.
+This changes the wrap position globally to 70.
 
 ++ WikiLists
 
@@ -39,25 +39,16 @@ See BulletedLists on how You can easily create bulleted or numbered lists.
 For creating bulleted or numbered lists, 
 see WikiTables on how You can easily  .
 
-++ Escaping Formatting
+++ Escape Formatting
 
-+++ Escaping markup
-To create a section of text with no formatting, wrap that section 
-in a "\<< >>" block. Example:
++++ Escape MarkUp
+To create a section of text without any formatting, wrap that section in a "\<< >>" block.
 
-escape formatting
+You can also use this on a single line <<like here>>. Inside such escaped MarkUp no newline is allowed.
 
-<<
-*This should be bold* ThisShouldBeALink
->> 
+See ExampleEscapeFormatting
 
-with formatting
-
-You can also use this on a single line <<like here>>. Inside the markup no newline is allowed.
-
-*This should be bold* ThisShouldBeALink
-
-Before and after the begin and end tags only whitespaces are allowed on the same line, so a << in the text does not prevent ALink from being highlighted.
+Before and after the begin and end tags only whitespaces are allowed on the same line, so a << without closing />> in the text does not prevent ALink from being highlighted.
 
 +++ Preformatted blocks
 
@@ -103,26 +94,18 @@ With this, you can write \[brackets] or \*asterisks\* which are not seen as form
 +++ Columns delimited by "|" [Pipe key]
 
 A table is enclosed in <<| and >> tags which must be alone on a line as for format escaping tags.
-Each line with text is a table row, cells are separated by |. A table cell can contain WikiWords, bold and italic text. Tables show up properly only in [Preview mode].
+Each line with text is a table row, cells are separated by the [Pipe key] "|".
+Each table cell may contain WikiWords, *bold* text, and _italic_ text.
 
-++++ Example
-<<|
-ScratchPad| This is| *a table*
-with two| rows and| three columns delimited by \| and \
-                                                    with two lines in a cell
->>
+Tables show up properly in [Preview mode].
+
+See ExampleTablePipe
 
 +++ Columns delimited by [Tab key]
 
 To use tabulators instead of vertical bar | as cell delimiters, use <<|t to start the table:
 
-++++ Example
-<<|t
-ScratchPad	This is	*a table*
-with two	rows and	three columns delimited by tabs (not |) and \
-                                                    with two lines in a cell
->>
-
+See ExampleTableTabulator
 
 
 anchor: html
