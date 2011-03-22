@@ -1,5 +1,5 @@
 ﻿[:page:PageHeader][:toc:]
-+ Menu Extra
++ MenuExtra
 
 ++ Export
 Shows a dialog to set precisely what to export, whereto and in which format. See [WikiExport].
@@ -26,4 +26,4 @@ Run one of six numbered scripts on the page (or imported from another page).
 Starts the options dialog. See [OptionsDialog].
 
 
-[:page:PageFooter][icon:left-right][alias:'"Extra" Menu'; Extra Menu][short_hint:The "Extra" menu]
+[:page:PageFooter][icon:left-right][alias:'"Extra" menu'][short_hint:'The "Extra" menu - [Alt-X]']

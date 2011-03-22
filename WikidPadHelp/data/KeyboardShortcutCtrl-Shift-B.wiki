@@ -2,13 +2,14 @@
 + Keyboard Shortcut Ctrl-Shift-B
 
 Use [Ctrl-Shift-B] to view your bookmarks,
-or select "Goto Bookmark" from the [Navigate Menu].
+or select ["Navigate" menu]->"Goto Bookmark".
 
 WikiBookmarks are just a form of WikiDocumentAttribute.
 
 ++ See also
 
 	* [Ctrl-Alt-B]
+	* ["Navigate" menu]
 	* KeyBindings
 
 

@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + Favorite Wikis
 
-The "Favorites" menu can be customized to contain links to wikis you need often and allows to open them by selecting a menu entry and optionally by an icon in the toolbar and/or by a shortcut.
+The "Favorites" menu can be customized to contain links to wikis you need often and allows to open them by selecting a menu entry and optionally by an icon in the toolbar and/or by a KeyboardShortcut.
 
 
 ++ Add wiki

@@ -1,8 +1,8 @@
 ﻿[:page:PageHeader][:toc:]
 + Dynamic Views
 
-The "Views" item in the tree to the left performs searches based on
-WikiDocumentAttributes and shows WikiNodes that match those searches. 
+The "Views" item in the ["Tree" window] to the left performs searches 
+based on WikiDocumentAttributes and shows WikiNodes that match those searches. 
 
 
 [:page:PageFooter][icon:find]

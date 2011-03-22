@@ -1,5 +1,5 @@
 ﻿[:page:PageHeader][:toc:]
-+ Menu Navigate
++ MenuNavigate
 
 ++ Back - [Alt-Left]
 Move backward in the history of visited pages for this tab.
@@ -46,4 +46,4 @@ Append a special bookmark attribute to the current WikiPage.
 Lists all pages with bookmark attribute.
 
 
-[:page:PageFooter][icon:left-right][alias:'"Navigate" Menu'; Navigate Menu][short_hint:The "Navigate" menu]
+[:page:PageFooter][icon:left-right][alias:'"Navigate" menu'][short_hint:'The "Navigate" menu - [Alt-N]']

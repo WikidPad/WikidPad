@@ -1,5 +1,5 @@
 ﻿[:page:PageHeader][:toc:]
-+ Menu Edit
++ MenuEdit
 
 ++ Undo - [Ctrl-Z]
 Undo last editing. 
@@ -72,4 +72,4 @@ If current line starts with a bullet * or numbering (old form: 1., 2., 3. or new
 If on, hitting the [Tab key] inserts spaces, otherwise real tabulator characters are inserted.
 
 
-[:page:PageFooter][icon:left-right][alias:'"Edit" Menu'; Edit Menu][short_hint:The "Edit" menu]
+[:page:PageFooter][icon:left-right][alias:'"Edit" menu'][short_hint:'The "Edit" menu - [Alt-E]']

@@ -7,7 +7,7 @@ The "Index" search mode in wiki-wide search works on a prebuilt index which is a
 
 By default indexing is disabled. To enable it for a wiki, open the [//OptionsDialog], go to options page "Current Wiki" and check "Allow index search". After closing the dialog, WikidPad begins to index the wiki in the background. During this you can already search the index but it will be incomplete.
 
-If you want to ensure that indexing is finished, go to menu entry "Wiki"->"Maintenance"->"Show job count" and wait until the count in the shown dialog went to 0.
+If you want to ensure that indexing is finished, go to ["Wiki" menu]->"Maintenance"->"Show job count" and wait until the count in the shown dialog went to 0.
 
 If you later disable the index the index will be deleted and must be rebuild again completely if you want it back.
 

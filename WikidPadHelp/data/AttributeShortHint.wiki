@@ -1,7 +1,10 @@
 ﻿[:page:PageHeader][:toc:]
 + Attribute Short Hint
 
-This is here just for demonstration.
+If you place the mouse pointer over the wiki link to a page which contains this attribute,
+the value of the attribute is shown as a tooltip. 
+
+See	ExampleAttributeShortHint
 
 
-[:page:PageFooter][alias:"Short_Hint Attribute"][short_hint:Here should be written something interesting]
+[:page:PageFooter][alias:'"short_hint" attribute'][short_hint:Shows a tooltip on any link to such WikiWord in WikiTextEditor] 

@@ -12,4 +12,4 @@ Use [Ctrl-1] in order to execute function script number 1.
 	* KeyBindings
 
 
-[:page:PageFooter][icon:key][alias:Ctrl-1][short_hint: Run Function 1]
+[:page:PageFooter][icon:key][alias:Ctrl-1][short_hint:Run Function 1]

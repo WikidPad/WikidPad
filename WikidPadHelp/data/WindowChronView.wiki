@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + Chronological View Window
 
-The chronological view window presents pages related to a particular date, ordered by time and a list of versions of a particular WikiPage. "Related" can mean different things, mainly date of last modification or of creation (currently only last modification is implemented).
+The *"chronological view"* window presents pages related to a particular date, ordered by time and a list of versions of a particular WikiPage. "Related" can mean different things, mainly date of last modification or of creation (currently only last modification is implemented).
 
 
 ++ The Timeline
@@ -44,4 +44,4 @@ See
 	* [OptionsDialog#+++ Versioning Data|Versioning]
 
 
-[:page:PageFooter][alias: chronological view window]
+[:page:PageFooter][alias:'"chronological view" window']

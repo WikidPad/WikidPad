@@ -4,7 +4,7 @@
 ++ Special Keywords
 In WikidPad "todo", "done", "action", "track", "issue", "question" and
 "project" are special keywords that enable you to track important
-items under the [View Menu] in the tree.
+items under the "View" item in the ["Tree" window].
 
 	* todo: I have to do this.
 	* done: I have done this.

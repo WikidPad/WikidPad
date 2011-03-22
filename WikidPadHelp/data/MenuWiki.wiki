@@ -1,5 +1,5 @@
 ﻿[:page:PageHeader][:toc:]
-+ Menu Wiki
++ MenuWiki
 
 ++ New - [Ctrl-N]
 Create new wiki
@@ -32,7 +32,7 @@ You can there export your wiki or the current subtree (current page and all chil
 You can also use "Other Export" to show a dialog to set more precisely what to export, whereto and in which format. See [WikiExport].
 
 ++ Print - [Ctrl-P]
-Start print dialog for a plain text print of some or all wiki pages. See [Printing].
+Start ["Print" dialog] for a plain text print of some or all wiki pages. See [Printing].
 
 ----
 
@@ -48,4 +48,4 @@ These items are only needed in rare cases. They allow to update the whole wiki i
 Nothing surprising.
 
 
-[:page:PageFooter][icon:left-right][alias:'"Wiki" Menu'; Wiki Menu][short_hint:The "Wiki" menu]
+[:page:PageFooter][icon:left-right][alias:'"Wiki" menu'][short_hint:'The "Wiki" menu - [Alt-I]']

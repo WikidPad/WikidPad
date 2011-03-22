@@ -23,7 +23,7 @@ Settings in a file overwrite same settings in files above it.
 
 ++ In PreView
 
-In preview, three additional files are taken into account:
+In [Preview mode], three additional files are taken into account:
 
 These files overwrite settings in the files above.
 
@@ -32,10 +32,10 @@ These files overwrite settings in the files above.
      "WikidPadGlobals" of user-specific [configuration directory]
    * File "wikipreview.css" in subdirectory "data" of wiki directory
 
-Use these, if you want the preview to look differently.
+Use these, if you want the [Preview mode] to look differently.
 
 
-To find your user-specific [configuration directory] see [Menu Help]!About and scroll to the end to find out where it is.
+To find your user-specific [configuration directory] see [MenuHelp]!About and scroll to the end to find out where it is.
 
 
 [:page:PageFooter]

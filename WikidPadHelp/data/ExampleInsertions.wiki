@@ -3,7 +3,7 @@
 
 At first a few wiki links to demonstrate the functions: (KeyBindings, DeadLink, DeadLinkToo, ScratchPad, TextBlocks)
 
-It is recommended to switch to preview to see the effect of the tags.
+It is recommended to switch to [Preview mode] to see the effect of the tags.
 
 See also ExampleInsertPage.
 

@@ -5,9 +5,9 @@
 
     1. Added support for export:false] attribute.  Setting this attribute
        to false will cause it to not be included in exports.
-    2. Fixed issue with international characters in [Not Camel Case] links
+    2. Fixed issue with international characters in [not Camel Case] links
        (thanks to Gilles Lenfant).
-    3. [Not Camel Case] links also now autocomplete properly.
+    3. [not Camel Case] links also now autocomplete properly.
 
 
 ++ Nov. 14, 2004
@@ -75,7 +75,7 @@
 ++ May. 23, 2004
 
     1. Aliases now work with words [That Arent Wiki Words].
-    2. Aliases are now properly formatted in the tree control.
+    2. Aliases are now properly formatted in the ["Tree" window].
     3. More bug fixes.
 
 
@@ -145,7 +145,7 @@
     2. Added option to hide tree control.
     3. KeyBindings are now customizable. See ChangingKeyBindings.
     4. Added support for "ftp://" urls and "https://" urls.
-    5. Added ability to turn off the auto-save mode. See the "Wiki" menu.
+    5. Added ability to turn off the auto-save mode. See the ["Wiki" menu].
     6. TodoItem markers (todo, action) are now case-sensitive to avoid marking
        TodoWikiWords as todos.
     7. Added ability to suppress TextFormatting. Example:

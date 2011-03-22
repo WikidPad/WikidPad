@@ -17,7 +17,7 @@ uppercase letter and where at least one uppercase letter follows a
 lowercase letter in the word (this is called "CamelCase", like e.g.
 \WikiWord).
 
-A \WikiWord can be CamelCase, [Not Camel Case],or a WIKIDPADWords.
+A \WikiWord can be CamelCase, [not Camel Case],or a WIKIDPADWord.
 
 
-[:page:PageFooter][alias:WikiWords][short_hint:A WikiWord is simply any CamelCase or "[Not Camel Case]" word]
+[:page:PageFooter][alias:WikiWords][short_hint:'A WikiWord is simply any CamelCase or "[not Camel Case]" word']

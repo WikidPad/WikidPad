@@ -10,4 +10,4 @@ Use [Ctrl-B] in order to format some selected text as *bold*.
 	* KeyBindings
 
 
-[:page:PageFooter][icon:key][alias:Ctrl-B][short_hint:Format selected text as *bold*]
+[:page:PageFooter][icon:key][alias:Ctrl-B][short_hint:Format selected text as bold]

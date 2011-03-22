@@ -165,7 +165,7 @@ the available methods on the WikidPad object.
     The database object for the currently open wiki. More on this below.
 
 +++++ tree
-    The TreeControl on the left. The is a wxTreeCtrl. More on this below.
+    The ["Tree" window] on the left. The is a wxTreeCtrl. More on this below.
 
 +++++ editor
     The WikiTextEditor. This is a wxStyledTextCtrl. More on this below.

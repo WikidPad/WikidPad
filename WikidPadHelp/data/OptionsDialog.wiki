@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + Options Dialog
 
-The options dialog controls the behavior of the application and of the currently open wiki. To open it, choose "Options" in the [Wiki menu].
+The options dialog controls the behavior of the application and of the currently open wiki. To open it, choose "Options" in the ["Wiki" menu].
 
 ++ Application-wide
 
@@ -14,12 +14,12 @@ The following options apply to the whole application and therefore to each wiki 
 When double clicking on a wiki: URL, a new instance of the application is started, otherwise, the current instance loads the new wiki.
 
 +++++ Store relative paths to wikis
-Paths to the recently opened wikis (listed in menu "Wiki"->"Recent") are stored relative to the [WikidPad installation directory] from now on, if this is checked. This means: existing entries in "Recent" are *not* modified and may become invalid when changing this option.
+Paths to the recently opened wikis (listed in ["Wiki" menu]->"Recent") are stored relative to the [WikidPad installation directory] from now on, if this is checked. This means: existing entries in "Recent" are *not* modified and may become invalid when changing this option.
 
 Relative paths to wikis can be very useful e.g. if you have Your [Wikid Pad on a USB stick], together with Your wikis.
 
 +++++ Default open/new dir.
-Directory to start when using "Wiki"->"New" or "Wiki"->"Open" in the menu. If empty, WikidPad chooses a default.
+Directory to start when using ["Wiki" menu]->"New" or ["Wiki" menu]->"Open" in the menu. If empty, WikidPad chooses a default.
 
 +++++ Sort order
 Choose the desired alphabetical sort algorithm for WikiWords, todos, attributes in tree or when [SearchingTheWiki#To search all pages: Full search].
@@ -34,7 +34,7 @@ When renaming a wiki word, WikidPad can try to rename all links to this word as 
 +++++ App-bound hotkey
 Here you can define a hotkey to show or hide WikidPad (they may only work on MsWindows). Hotkeys work system-wide, not only if WikidPad is active.
 
-In the text field you can enter a hotkey in the same way as the menu shortcuts are. Unlike menu shortcuts, you can also use "win" as modifier (like "alt" or "ctrl"), but the hotkey must have at least one of "ctrl" or "alt" modifiers to work.
+In the text field you can enter a hotkey in the same way as the menu shortcuts are. Unlike menu shortcuts, you can also use ["Win" key] as a modifier (like [Alt] or [Ctrl]), but the hotkey must have at least one of [Alt] or [Ctrl] modifiers to work.
 
 The checkbox before the text field allows to temporarily deactivate the hotkey without deleting the field content.
 
@@ -77,7 +77,7 @@ Instead of the default shortcuts you can look how to change them at ChangingKeyB
 +++++ Minimize on close button
 Pressing the close button on the main frame (the little "X") does not close but minimize WikidPad. In conjunction with "Minimize to Tray" it minmizes to the try area.
 
-If you really want to close, use menu "Wiki"->"Exit" then or the context menu when right-clicking on the tray icon (if "Minimize to Tray" is active).
+If you really want to close, use ["Wiki" menu]->"Exit" then or the context menu when right-clicking on the tray icon (if "Minimize to Tray" is active).
 
 +++++ Show splash screen
 Shows a splash screen on startup. Switching this off doesn't speed up starting of WikidPad (maybe one millisecond). Splash screen is never shown if WikidPad was started with command line option -x (exit after other command line commands were processed).
@@ -91,26 +91,29 @@ Choose the preferred language of the user interface.
 This setting only takes effect after restarting WikidPad.
 
 +++++ Recent wikis list length
-Set the number of wikis to show in menu "Wiki"->"Recent"
+Set the number of wikis to show in ["Wiki" menu]->"Recent"
 
 +++++ Auto-show [log window]
-Automatically show the [log window] if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
+Automatically show the ["log" window] if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
 
 +++++ Auto-hide [log window]
-Automatically hide the [log window] if no more error messages are present.
+If checked the ["log" window] hides automatically, if no more error messages are present.
 
 +++++ Structure window pos.
-Where (relative to main window) should the [page structure window] be positioned? "Hidden" deactivates it.
+Where to position the ["Page Structure" window] (relative to main window)? "Hidden" deactivates it.
 *KnownBug*: After changing the position of the window, restarting WikidPad is necessary. See RestartWikidPad for details.
 
 +++++ Structure window heading depth
-Up to (and including) which heading level should headings be displayed? "1" Means only top-level heading (one plus sign), "15" means all headings.
+Up to (and including) which heading level should headings be displayed? 
+	* "1" Means only top-level heading (one plus sign)
+	* ...
+	* "15" means all headings.
 
 +++++ Auto-hide structure window
-After double-clicking an entry in [page structure window] the window is collapsed (hidden) automatically if this is checked.
+If checked the ["Page Structure" window] hides automatically after You double-click one of it's entries.
 
 +++++ Structure window selection auto-follow
-If checked and [page structure window] is visible, changing cursor position in the WikiTextEditor can also change selection in structure window to always show the heading which is nearest above the current cursor position.
+If checked and ["Page Structure" window] is visible, changing cursor position in the WikiTextEditor can also change selection in structure window to always show the heading which is nearest above the current cursor position.
 
 
 ++++ Security options
@@ -139,7 +142,7 @@ After each (automatic or manual) save, the tree icons and shown children are upd
 If a page contains wiki word links to non-existing pages, these are not shown as children in the tree.
 
 +++++ Tree auto-hide
-After selecting an item in tree, the tree is hidden automatically.
+If checked the ["Tree" window] hides automatically after You double-click one of it's entries.
 
 +++++ Font
 Select font of tree. The empty field means default font.
@@ -167,7 +170,7 @@ See [Options HTML preview_export].
 When this option is active and enter is pressed on a line which contains only a bullet or a numbering without text, the bullet is removed. See BulletedLists for details.
 
 +++++ Append closing bracket on auto-complete
-When suggesting the completion for a bracketed wiki word, e.g. "[Not Came" you can decide if a closing bracket is suggested ("[Not Camel Case]") or not ("[Not Camel Case").
+When suggesting the completion for a bracketed wiki word, e.g. "[Not Came" you can decide if a closing bracket is suggested ("[not Camel Case]") or not ("[not Camel Case").
 
 +++++ Synchronize editor by preview selection
 This provides some workaround to synchronize the scroll position in [Preview mode] with the position in [Edit mode].
@@ -294,18 +297,18 @@ This can either do nothing, close the WikiTextEditorTab or clone it (open same p
 Define what should happen if you drag and drop files from explorer into the WikiTextEditor with no key pressed, with [Shift] pressed or with [Ctrl] pressed.
 
 Possible choices are:
-    * Nothing
-    * Absolute URL: Insert absolute URL(s) to the file(s)
-    * Relative URL: URL(s) starting with "rel:"
-    * Copy into file storage: Copy file(s) into file storage and create relative URL(s) to it
-    * Move into file storage: Copy file(s) into file storage and create relative URL(s) to it
+    * nothing
+    * absolute URL: Insert [absolute URL](s) to the file(s), starting with "file:"
+    * relative URL: Insert [relative URL](s) to the file(s), starting with "rel:".
+    * Copy into file storage: Copy file(s) into [file storage] and create [relative URL](s) to it
+    * Move into file storage: Move file(s) into [file storage] and create [relative URL](s) to it
     * Ask: Show dialog to ask what to do. Allows also to set what to prepend/append/set between links (see [OptionsDialog#+++++ File dropping])
 
 
 ++++ Chron. view
 
 +++++ Position
-Where (relative to main window) should the ChronViewWindow be positioned? "Hidden" deactivates it.
+Where (relative to main window) should the ["Chronological View" window] be positioned? "Hidden" deactivates it.
 *KnownBug*: After changing the position of the window, restarting WikidPad may be necessary. See RestartWikidPad for details.
 
 +++++ Chronological view: Date format
@@ -373,7 +376,7 @@ Controls how many seconds of inactivity before the incremental search is closed 
 Fixes some problems when entering characters in non-Western languages, e.g. when using UniKey (Vietnamese input method) under MsWindows or typing Russian under Linux. You must restart WikidPad to make the change have an effect.
 
 +++++ Translate menu accelerators for keyboard layout
-MsWindows only. Translates accelerators (aka shortcuts) of the menus to work with special keyboard layouts where the ctrl-level (layout when [Ctrl] is pressed) differs from layout in base-level. After translation the shortcuts look wrong but work correctly. The translation is based on the layout on WikidPad startup, changes while WikidPad is running are not processed. This option has only an effect after restarting WikidPad.
+MsWindows only. Translates accelerators (aka shortcuts) of the [Menus] to work with special keyboard layouts where the ctrl-level (layout when [Ctrl] is pressed) differs from layout in base-level. After translation the shortcuts look wrong but work correctly. The translation is based on the layout on WikidPad startup, changes while WikidPad is running are not processed. This option has only an effect after restarting WikidPad.
 
 +++++ Forbid cancel on search
 Checking this option forbids to cancel a running wiki-wide (or fast) search by clicking into the search field. For some OS (especially MacOS) this increases search speed considerably.
@@ -430,7 +433,7 @@ Limit of page size in bytes when to switch from synchronous highlighting (calcul
 For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds
 
 +++++ Short hint delay
-Set how many milliseconds before showing the short hint tooltip in the WikiTextEditor. 0 deactivates the tooltip. See [WikiDocumentAttributes#*short_hint*] for details.
+Set how many milliseconds before showing the ["short_hint" attribute] tooltip in the WikiTextEditor. 0 deactivates the tooltip. See [WikiDocumentAttributes#*short_hint*] for details.
 
 +++++ Update step min. delay
 After each change the tree(s) are updated to reflect changes like added or removed children of a page. This updating is done step by step where each step must be executed in the GUI-thread. Non-technically this means that WikidPad may lag during the tree update. The minimal delay setting defines the number of seconds (or fractions thereof) WikidPad waits after an update step before the next step is executed.
@@ -570,4 +573,4 @@ See [FileStorage].
 See [FileStorage].
 
 
-[:page:PageFooter]
+[:page:PageFooter][alias:'"Options" dialog']

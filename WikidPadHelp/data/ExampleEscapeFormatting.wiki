@@ -2,10 +2,17 @@
 + Example Escape Formatting
 
 <<
-*This should be bold* ThisShouldBeALink
+This should *not* be bold
+ThisShouldNotBeALink
 >> 
 
-*This should be bold* ThisShouldBeALink
+*This should be bold* 
+ThisShouldBeALink
+
+And << This should *not* be bold >>.
+
+But << This should be *bold*.
+
 
 
 [:page:PageFooter]

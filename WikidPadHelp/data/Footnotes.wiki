@@ -12,7 +12,7 @@ If the same footnote (footnote with same number) appears multiple times on a pag
 
 In editor mode this means that double clicking or otherwise activating a footnote brings the cursor to the last occurrence of it on the page.
 
-In preview, all but the last footnote are shown as links which lead to the last one.
+In [Preview mode], all but the last footnote are shown as links which lead to the last one.
 
 You can try it with the [42] here or above. They all lead to the following anchor footnote:
 

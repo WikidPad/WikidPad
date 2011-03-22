@@ -190,4 +190,4 @@ When you hit the button "Preview", this list shows which pages *currently* match
 The "Copy" button above the preview copies the content of the preview to the clipboard in the same way as it is done for the left page list.
 
 
-[:page:PageFooter][icon: lens]
+[:page:PageFooter][icon:lens]

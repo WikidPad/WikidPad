@@ -1,9 +1,0 @@
-﻿[:page:PageHeader][:toc:]
-+ Menu Plugins
-
-todo: Add content
-
-See also [WikiStructureGraphs].
-
-
-[:page:PageFooter][icon:left-right][alias:'"Plugins" Menu'; Plugins Menu][short_hint:The "Plugins" menu']

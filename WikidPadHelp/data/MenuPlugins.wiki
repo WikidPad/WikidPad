@@ -1,0 +1,9 @@
+﻿[:page:PageHeader][:toc:]
++ MenuPlugins
+
+todo: Add content
+
+See also [WikiStructureGraphs].
+
+
+[:page:PageFooter][icon:left-right][alias:'"Plugins" menu'][short_hint:'The "Plugins" menu - [Alt-U]']

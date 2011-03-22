@@ -71,4 +71,4 @@
 	* [Color YELLOW]
 
 
-[:page:PageFooter][icon:list][child_sort_order: natural]
+[:page:PageFooter][icon:colour selection][child_sort_order: natural]

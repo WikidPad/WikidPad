@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + Printing
 
-The whole printing is controlled by the "Print" dialog in the "Wiki" menu.
+Printing is controlled by the ["Print" dialog] in the ["Wiki" menu].
 
 ++ Definitions
 
@@ -11,11 +11,11 @@ The whole printing is controlled by the "Print" dialog in the "Wiki" menu.
 
 ++ A few important remarks
 
-    * The number of print pages shown in the [preview dialog] does not
+    * The number of print pages shown in the ["Preview" dialog] does not
       always match the number when really printing (technical problem)
     * Preparing print or preview needs some time so please be patient
     * Depending on printer and printer driver the real margins may be
-      a bit larger as set in the page setup dialog.
+      a bit larger as set in the ["Page Setup" dialog].
 
 
 The dialog has the following fields and buttons:
@@ -39,15 +39,15 @@ Of special interest might be:
 \f  New print page
 \\  A single backslash
 
-The default are four newlines between the WikiPages.
+The default is to have four newlines between the WikiPages.
 
 
 +++ Preview
-Open a [print preview window].
+Open a ["Print Preview" dialog].
 
 
 +++ Page Setup
-Open a [page setup dialog] where you can set margins for the print page, print page size, orientation and the printer to use. Only the margin settings are stored between application sessions.
+Open a ["Page Setup" dialog] where you can set margins for the print page, print page size, orientation and the printer to use. Only the margin settings are stored between application sessions.
 
 
 +++ Choose plain text font
@@ -55,7 +55,7 @@ Choose the font to use for plain text printing.
 
 
 ++++ Print
-Opens the usual [print dialog] to choose printer and which pages to print. After pressing "OK" the printing starts.
+Opens the systems standard "Print" dialog to choose printer and which pages to print. After pressing "OK" the printing starts.
 
 
-[:page:PageFooter]
+[:page:PageFooter][alias:'"Print" dialog']

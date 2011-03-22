@@ -1,5 +1,5 @@
 ﻿[:page:PageHeader][:toc:]
-+ Menu View
++ MenuView
 
 ++ Show Toolbar - [Ctrl-Shift-T]
 Show toolbar with often used functions
@@ -38,4 +38,4 @@ Enlarge fonts in [Edit mode] or [Preview mode].
 Reduce font size in [Edit mode] or [Preview mode].
 
 
-[:page:PageFooter][icon:left-right][alias:'"View" Menu'; View Menu][short_hint:The "View" menu]
+[:page:PageFooter][icon:left-right][alias:'"View" menu'][short_hint:'The "View" menu - [Alt-V]']

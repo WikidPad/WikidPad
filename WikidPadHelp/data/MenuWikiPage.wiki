@@ -1,5 +1,5 @@
 ﻿[:page:PageHeader][:toc:]
-+ Menu Wiki Page
++ MenuWiki Page
 
 ++ Save - [Ctrl-S]
 Save current wiki page to database (in fact all modified wiki pages are saved).
@@ -46,4 +46,4 @@ If you right click on an "anchor:" definition in [Edit mode] and choose "Copy An
 Add a new version
 
 
-[:page:PageFooter][icon:left-right][alias:'"Wiki Page" Menu'; Wiki Page Menu][short_hint:The "Wiki Page" menu]
+[:page:PageFooter][icon:left-right][alias:'"Wiki Page" menu'][short_hint:'The "Wiki Page" menu - [Alt-P]']

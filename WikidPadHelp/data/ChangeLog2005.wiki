@@ -16,7 +16,7 @@ Changes:
       "Editor"->"Find and Replace")
     * For wiki-wide search, the number of occurring matches on
       a page can be displayed.
-    * Function key F6 to switch between TreeControl and WikiTextEditor
+    * Function key [F6] to switch between ["Tree" window] and WikiTextEditor
 
     * Some bugs fixed
 
@@ -62,7 +62,7 @@ beforehand is therefore recommended!
            deleted at once.
         2. *[HTML-Preview]*. Above the WikiTextEditor window there are
            two tabs "Edit" and "Preview". If you click the "Preview"
-           tab you see the rendered HTML preview of the current editor
+           tab you see the rendered [HTML preview] of the current editor
            content. In the options you can choose the font face to
            use in the [Preview mode].
         3. *Completely new wiki-wide search dialog*. It replaces the
@@ -86,7 +86,7 @@ beforehand is therefore recommended!
         2. Option to handle numeric only words (=*footnotes*) as
            WikiWords or as regular text only. 
            This option applies to the current wiki only.
-        3. In export dialog: option to use *compatible filenames* which
+        3. In ["Export" dialog]: option to use *compatible filenames* which
            contain ASCII-only characters, so sets of HTML files are
            more compatible to other filesystems.
     
@@ -106,9 +106,9 @@ beforehand is therefore recommended!
         3. Support for all characters in incremental search.
 
     2. Changes in the *WikiSyntax*:
-        1. Before and after the tags to escape formatting (<< and >>) 
-           only whitespaces are allowed on the same line. See 
-           TextFormatting.
+        1. Before and after the tags to escape formatting (<< "<<" >> and ">>") 
+           only WhiteSpaces are allowed on the same line. 
+           See TextFormatting.
         2. Escaping spaces when executing a search as part of a link. 
            Example: This link
            WikiDocumentAttributes#creating# a# new# wiki .
@@ -117,8 +117,8 @@ beforehand is therefore recommended!
 
     3. The *WikiTextEditor*:
         1. Drag and drop of text.
-        2. Faster syntax highlighting. For pages bigger than 10 KBytes, 
-           it is done in the background, so you might notice a delay 
+        2. Faster syntax highlighting. For pages larger than 10 KBytes, 
+           this is done in the background, so you might notice a delay 
            before the highlighting is updated.
         3. New menu item "Replace Text by WikiWord". Select some text you 
            want to move to a new WikiPage, choose the item and enter the 
@@ -148,7 +148,7 @@ beforehand is therefore recommended!
         5. Arbitrary nested todo and property entries in the View tree. 
            See WikiDocumentAttributes and TodoItems.
 
-    5. *Options* dialog in the "Wiki" menu:
+    5. *Options* dialog in the ["Wiki" menu]:
         1. "Minimize to Tray".
         2. "Hide undefined wiki words in tree". Undefined children words 
            of a word are not shown in the tree if this is checked.

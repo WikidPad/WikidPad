@@ -1,54 +1,51 @@
 ﻿[:page:PageHeader][:toc:]
 + Text Formatting
 
-As you type you can enter formatting commands in plain text.
-
-++ WikiMarkUp
-
-*bold*
-_italic_
+While you type you can enter formatting commands in plain text.
 
 
-++ WikiHeaders
+++ InlineMarkUp
 
-+ Heading1
-++ Heading2
-+++ Heading3
-++++ Heading4
-+++++ Heading5
+See ExampleInlineMarkUp on how You can create *bold* or _italic_ text.
 
+++ Headers
+
+See WikiHeaders on how You can create header lines of different levels.
+
+++ Lists
+
+See BulletedLists on how You can easily create bulleted or numbered lists.
+
+++ Tables
+
+See WikiTables on how You can create tables easily.
 
 ++ TextWrap
 
 When you type in a really really really really really really really really really really really really
 long line you can tell WikidPad to rewrap it for you by pressing [Ctrl-W]. Try it on this line.
 
-You can even change the wrap position by adding a wrap attribute such as \[wrap: 20] to your document.
+You can even change the wrap position by adding a ["wrap" attribute] such as \[wrap: 20] to your document.
 [wrap: 20]
 This changes the wrapping on the current WikiPage to 20 characters.
 
 [global.wrap: 70]
 This changes the wrap position globally to 70.
 
-++ WikiLists
-
-See BulletedLists on how You can easily create bulleted or numbered lists.
-
-++ WikiTables
-
-For creating bulleted or numbered lists, 
-see WikiTables on how You can easily  .
-
 ++ Escape Formatting
 
 +++ Escape MarkUp
-To create a section of text without any formatting, wrap that section in a "\<< >>" block.
+To create a section of text without any formatting,
+wrap that section in a "\<\< ... \>\>" block.
 
-You can also use this on a single line <<like here>>. Inside such escaped MarkUp no newline is allowed.
+You can also use this on a single line <<LikeHere>>.
+Inside such <<EscapedInlineMarkUp>> no newline is allowed.
 
 See ExampleEscapeFormatting
 
-Before and after the begin and end tags only whitespaces are allowed on the same line, so a << without closing />> in the text does not prevent ALink from being highlighted.
+Before and after the begin and end tags only WhiteSpaces are allowed on the same line.
+
+Thus, a  << "<<" >>  without closing ">>" in the text does not prevent << ExampleEscapeFormatting from being highlighted.
 
 +++ Preformatted blocks
 
@@ -56,19 +53,7 @@ You can use \<<\pre and >> to enclose blocks which have no special formatting (w
 
 This is helpful especially for programming source code.
 
-Example:
-<<pre
-                      ^
-                     / \
-                    /   \
-                   /_____\
-                  (       )
-                  |       |
-                  |       |
-                  |       |
-                  |       |
-                  L_______j
->>
+See ExamplePreformattedBlock
 
 
 +++ Hidden markup
@@ -87,25 +72,6 @@ You can see this in [Edit mode] only, not in [Preview mode].
 To escape single characters, prepend them with a backslash. These characters are then interpreted as normal text, the backslash is suppressed in [HTML preview] and [HTML export]. If you want to really write a backslash, write two of them: \\.
 
 With this, you can write \[brackets] or \*asterisks\* which are not seen as formatting commands by \WikidPad.
-
-
-++ Tables
-
-+++ Columns delimited by "|" [Pipe key]
-
-A table is enclosed in <<| and >> tags which must be alone on a line as for format escaping tags.
-Each line with text is a table row, cells are separated by the [Pipe key] "|".
-Each table cell may contain WikiWords, *bold* text, and _italic_ text.
-
-Tables show up properly in [Preview mode].
-
-See ExampleTablePipe
-
-+++ Columns delimited by [Tab key]
-
-To use tabulators instead of vertical bar | as cell delimiters, use <<|t to start the table:
-
-See ExampleTableTabulator
 
 
 anchor: html

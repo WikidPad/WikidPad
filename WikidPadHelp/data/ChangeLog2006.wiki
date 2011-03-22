@@ -12,7 +12,7 @@ RepositoryRevision in "mbutscher" branch: *100*
       See ExternalGraphicalApplications.
     * For MsWindows: Option to use the MsInternetExplorer or
       (with restrictions) the Mozilla to render [HTML preview]
-      (including a new style sheet to control preview).
+      (including a new style sheet to control [Preview mode]).
       See [Options HTML preview_export]#*Preview# renderer*
     * Option to set doctype for [HTML preview]/[HTML export].
     * Option to set background color of selected text.
@@ -59,13 +59,13 @@ RepositoryRevision in "mbutscher" branch: *99*
 RepositoryRevision in "mbutscher" branch: *96*
 
     * Menu items and toolbar icons for zoom in/out also work for
-      preview now.
+      [Preview mode] now.
     * Better page search. Search starts at cursor position or
       optional at beginning. Before wrapping search from page end
       to beginning, user is asked.
     * Bug fixed: Showing (more precisely searching) of words in
       subcategories of todos in tree did not work.
-    * Bug fixed: Zooming preview didn't show up dynamically.
+    * Bug fixed: Zooming [Preview mode] didn't show up dynamically.
 
 
 
@@ -106,7 +106,7 @@ RepositoryRevision in "mbutscher" branch: *92*
       ...) and saved searches. See [Insertions].
     * Support for placing and jumping to [Anchors] in [WikiPages].
     
-    * Setting of a few more shortcut keys possible in
+    * Setting of a few more KeyboardShortcuts now possible in
       KeyBindings.py (continue search, auto complete, ...)
     
     * Fixed bug: Some problems with non-ascii pathes.
@@ -145,7 +145,7 @@ Changes:
       See BulletedLists
     
     * Menu functions "Show Tree Control", "Show Toolbar" and
-      "Stay on Top" moved to "View" menu
+      "Stay on Top" moved to ["View" menu]
     * Preview now shows indented paragraphs correctly (or,
       at least, better)
     
@@ -198,7 +198,7 @@ Changes:
 
     * Optical changes in extension "referrals.py" (thanks to
       schnullibullihulli).
-    * Menus slightly reorganized, some menu items are at other
+    * [Menus] slightly reorganized, some menu items are at other
       places and/or have another name.
     * Wiki specific option to set page title prefix
       (normally "++") for new WikiPages. This allows to freely
@@ -278,8 +278,8 @@ Changes:
 
     * Options to choose then text color for the WikiTextEditor.
       See OptionsDialog#Plain# text# color
-    * Control background and text color of HTML export (and partially
-      for preview) by attributes (for wiki or page) or by options for
+    * Control background and text color of [HTML export] (and partially
+      for [Preview mode]) by attributes (for wiki or page) or by options for
       the whole application.
       See [Options HTML preview_export]#+++# HTML# page# settings
 
@@ -305,7 +305,7 @@ Bugs fixed:
       is also right side of a todo entry. Now shows up only once.
     * Wrong cursor position after using *bold* or _italic_ from
       menu/toolbar
-    * "Show referring Wikis" in the "Plugins" menu didn't work
+    * ["Plugins" menu]->"Show referring Wikis" didn't work
     * Exception when refreshing tree while "saved searches" node is
       expanded
     * Exception when trying to paste something non-textual from
@@ -326,7 +326,7 @@ Changes:
       a character as last one in an URL, enclose the URL in brackets.
     * Attribute names can consist of all alphanumeric
       (unicode definition) characters.
-    * Support for zoom in preview (with [Ctrl-+], [Ctrl--] and
+    * Support for zoom in [Preview mode] (with [Ctrl-+], [Ctrl--] and
       [Ctrl-Mousewheel]).
     * Better formatting of titles of newly created WikiPages
       (e.g. WikiWord "URLViewer" now leads to title "++ URL Viewer"
@@ -427,7 +427,7 @@ Changes:
     * For [Set Date Format] dialog last 10 entries are remembered
     * Option to interpret image URLs for [HTML preview] and [HTML export]
       either as images or as normal links (see [OptionsDialog])
-    * Export dialog has checkbox to temporarily override this option
+    * ["Export" dialog] has checkbox to temporarily override this option
       setting.
 
     * Attribute \[pagetype: form] introduced to support special
@@ -563,7 +563,7 @@ Changes:
     * Basic printing support (see [Printing])
     * Support for titled WikiWords and URLs (e.g
       [http://www.somewhere.com/aaa/bbb |Somewhere]
-      [ScratchPad |This text is shown in preview and HTML export] )
+      [ScratchPad |This text is shown in HTML preview and HTML export] )
       The title of the link is not stored in the XML export!
 
     * Options to control timing behavior of syntax highlighter (see

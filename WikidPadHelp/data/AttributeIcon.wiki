@@ -4,4 +4,4 @@
 See TreeNodeIcons for full list and samples.
 
 
-[:page:PageFooter][alias:Icon Attribute; icon attribute]
+[:page:PageFooter][alias:'"icon" attribute']

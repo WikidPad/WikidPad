@@ -46,17 +46,17 @@ Set the page to open on startup (same as second parameter of old form). You can 
 Rebuild the opened wiki.
 
 +++++ --no-recent
-Do not record opened wikis in recently opened wikis list found in menu "Wiki" as submenu "Recent"
+Do not record opened wikis in recently opened wikis list found in ["Wiki" menu]->"Recent"
 
 +++++ --preview
 If no pages are given, all opened pages from previous session are opened in [Preview mode]. Otherwise all pages mentioned on command line after that option are opened in [Preview mode].
 
 +++++ --editor
-Same as --preview but opens in text editor mode. You can use both switches in conjunction, e.g.
+Same as --preview but opens in text [Edit mode]. You can use both switches in conjunction, e.g.
 
 -p Page1 --preview -p Page2 -p Page3 --editor -p Page4
 
-opens Page1 in editor mode (editor is the default mode), Page2 and Page3 are opened as preview, Page4 in editor mode again
+opens Page1 in [Edit mode] (this is the default mode), Page2 and Page3 are opened in [Preview mode], and Page4 in [Edit mode] again
 
 +++++ -x, --exit
 Exit immediately after command line actions were completed.

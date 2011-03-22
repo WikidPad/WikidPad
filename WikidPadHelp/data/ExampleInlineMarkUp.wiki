@@ -1,0 +1,47 @@
+﻿[:page:PageHeader][:toc:]
++ Example Inline Mark Up
+
+*bold*
+_italic_
+
+Note: *bold _italic_ works*.
+Note: _italic *bold* works_.
+
+*bold
+may
+span
+several
+lines*, as You can see.
+
+_italic
+may
+span
+several
+lines_, as You can see.
+
+
+*bold
+may
+span
+several
+_italic
+lines_*, as You can see.
+
+
+_italic
+may
+span
+several
+*bold
+lines*_, as You can see.
+
+
+Note: *bold* and _italic_ may be nested within each other, as seen above.
+But *bold* and _italic_ may *not* _overlap_ each other!
+
+Thus:
+*This _won't work*_
+_Neither does *this_*
+
+
+[:page:PageFooter]

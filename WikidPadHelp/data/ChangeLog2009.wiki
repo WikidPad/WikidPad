@@ -7,7 +7,7 @@
       may fail (thanks to Martin Muenstermann)
     * Bug fixed: Opening of Sqlite databases with foreign characters
       in path may fail 
-    * Bug fixed: Resizing of internal HTML preview sometimes
+    * Bug fixed: Resizing of internal [HTML preview] sometimes
       doesn't work, produces gray borders
     * Bug fixed: Failed to start with original sqlite wiki.
 
@@ -36,7 +36,7 @@
     * Support for subpages e.g. <<[WikiWord/Subword]>>.
       See [Subpages].
     * Added entry "AddVersion" to KeyBindings.py to allow setting of
-      shortcut for adding a version
+      KeyboardShortcuts for ["Wiki Page" menu]->"Add version"
     * Option to control in which steps a complete version should be
       stored. See [OptionsDialog#+++ Steps to complete version]
     * More expressive boolean language for wiki-wide search.
@@ -116,7 +116,7 @@
       See [Insertions#+++ iconimage]
     * Preview shows link target in the status bar when hovering
       with mouse over it like browsers do
-    * Menu item "Select All" in "Edit" menu (for completeness)
+    * Menu item "Select All" in ["Edit" menu] (for completeness)
 
     * Bug fixed: Some errors weren't recorded in error log
     * Bug fixed: Tree scrolled to wrong initial position on startup
@@ -163,7 +163,7 @@
       as files if inserted into WikidPad from clipboard
     * MsWindowsBinary: Necessary VC++ runtime libraries now included
       in MsWindowsInstaller
-    * New syntax \<<hide  >> to hide a block from preview and export.
+    * New syntax \<<hide  >> to hide a block from [HTML preview]/[HTML export].
       See [TextFormatting#+ Hidden markup]
     * New insertion "self" to include current page name into page
     * Menu items to insert color or icon name into WikiTextEditor

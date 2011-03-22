@@ -8,7 +8,7 @@ This dialog is organized similar to the ["Import" dialog].
 You can export your wiki as a single HtmlPage, a as a set of HtmlPages,
 one WikiWordPage at a time, or in [Multipage text format].
 
-You can select a few predefined operations from the "Wiki" menu:
+You can select a few predefined operations from the ["Wiki" menu]:
 
 	* Publish as HTML / Wiki as Single HtmlPage
 	* Publish as HTML / Wiki as Set of HtmlPages
@@ -88,7 +88,7 @@ Export also saved searches in the file. Only available for format version 1 and 
 
 ++ Continuous export
 
-In [Extra Menu] you can also choose "Continuous Export" which allows to start an export operation which is repeated automatically each time a page previously designated for export is modified.
+In the ["Extra" menu] you can also choose "Continuous Export" which allows to start an export operation which is repeated automatically each time a page previously designated for export is modified.
 
 The dialog for continuous export is the same as for normal export, but some export types are missing as currently only the HTML export types support continuous export. Also some of the saved exports are hidden if they refer to exports not supported by continuous export.
 

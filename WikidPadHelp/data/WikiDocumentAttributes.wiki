@@ -75,7 +75,7 @@ Example:
 	See TreeNodeColors
 	
 +++++ bold: (true or false)
-Set the font weight of the title of the WikiPage as shown in the TreeControl to bold, or to normal.
+Set the font weight of the title of the WikiPage as shown in the ["Tree" window] to bold, or to normal.
 
 +++ Formatting a TodoItem
 
@@ -96,7 +96,7 @@ Examples:
 This means any document in the wiki with an "importance" attribute
 that has a value of high will be bold.
 [importance: high]
-So setting \[importance: high] above is what makes the title of this document look bold in the TreeControl.
+So setting \[importance: high] above is what makes the title of this document look bold in the ["Tree" window].
 
 
 If the global definition contains the first part(s) of an attribute the appearance is also changed.
@@ -258,14 +258,9 @@ You can also use "global.view_pane".
 
 
 +++++ short_hint
-If you place the mouse pointer over the wiki link to a page which contains this attribute,
-the value of the attribute is shown as a tooltip. 
 
-E.g. place the mouse pointer over one of these links and let it rest one moment:
+See ["short_hint" attribute]
 
-	[Short_Hint Attribute]
-	[Ctrl-B]
-	ACLs, ADSs
 
 +++ Structure Graphs
 

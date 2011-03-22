@@ -3,67 +3,69 @@
 
 ++ Description
 
-WikidPad is a wiki-like notebook for storing your thoughts, ideas,
+WikidPad is a [wiki]-like notebook for storing your thoughts, ideas,
 TodoItems, contacts or anything else you can think of that's
 important.  What makes WikidPad different from other notepad or
 outliner applications is the ease with which you can cross-link your
-information.  Links in a wiki are created by typing in WikiWords.  A
-WikiWord is any mixed case word typed into the editor.  TodoItem or
-JohnDoe are example WikiWords.  The term wiki means "quick" in
-Hawaiian, and wikis are all about quickly linking your information
-together.
-
+information.  WikiLinks in a wiki are created by typing in WikiWords.
+A WikiWord is any mixed case word typed into the editor.  TodoItem or
+JohnDoe are examples of WikiWords.
+[Wikis] are all about quickly linking your information together.
 To activate or follow a WikiWord link, just *double click on it*, or type
 [Ctrl-L] when the cursor is in the word.
 
 While you are reading through this help document select "Wiki/New"
 from the menu at the top of the application window to create your own wiki.
-Then just start typing text with WikiWords to build your own wiki.
+Then just start typing text with WikiWords to build your own Wiki.
 
 ++ Features
 
     * On the fly WikiWordLinking
-    * WikiWords can be CamelCase or [Not Camel Case].
-    * UrlLinking
-    * [Anchors] and [Footnotes]
-    * TreeNodeIcons
-    * TreeNodeColors
-    * WikiWordNavigation (KeyBindings)
-    * WikiWordHistory viewer/navigation
-    * AutoSave
+    * WikiWords can be CamelCase, [not Camel Case] or WIKIDPADWords.
+    * UrlLinking with [absolute URL]s and [relative URL]s
+    * [Anchors], [Footnotes] and [Bookmarks]
 
-    * Wiki TextFormatting
-    * BulletedLists
-    * WikiDocumentAttributes (cross-index your information)
-    * TodoItems (track todos, questions, issues ...)
-    * [Insertions]
-    * WikiBookmarks
+	* Wiki TextFormatting
+		* WikiHeaders, BulletedLists, WikiTables
+		* WikiDocumentAttributes (cross-index your information)
+		* TodoItems (track todos, questions, issues ...)
+		* [Insertions]
+		* WikiFonts
 
-    * RenamingWikiWords
-    * WikiFonts
-    * WikiWord AutoCompletion
-    * DynamicViews
-    * SearchingTheWiki
-    * SpellChecking
-    * IncrementalSearch
-    * WikiExport / WikiImport
-    * [Printing]
-    * InlinePythonEval
-    * KeyBindings
-    * ClipboardCatcher
-    * InternatiönalChàracters
-    * ExternalGraphicalApplications
-    * [page structure window], [chronological view window]
-    * FavoriteWikis
-    * [Subpages]
-    * OptionsDialog
-    * CommandLineSupport
-    * WikidPadOnUSB / ApplicationConfigurationFiles
-    * [Templates]
-    * [Folding]
-    * Different DatabaseTypes (WhereIsTheDataStored ?, MigrationBetweenDbTypes)
-    * Defining TextBlocks
+	* Easy Editing in the WikiTextEditor
+		* WikiWord AutoCompletion
+		* SpellChecking
+		* AutoSave
+		* ClipboardCatcher
+		* [Folding]
+
+	* Efficient Navigation
+		* WikiWordNavigation
+		* WikiWordHistory viewer/navigation
+		* SearchingTheWiki, incl. IncrementalSearch
+		* ["Tree" window] with TreeNodeIcons and TreeNodeColors
+		* DynamicViews
+		* ["Page Structure" window], ["Chronological View" window]
+
+	* Dialogs
+		* RenamingWikiWords: ["Rename Wiki Word" dialog]
+		* [Printing]:	["Print" dialog]
+		* WikiExport:	["Export" dialog] / WikiImport	["Import" dialog]
+		* OptionsDialog:	["Options" dialog]
+
+	* InlinePythonEval
+	* KeyBindings
+	* InternatiönalChàracters
+	* ExternalGraphicalApplications
+	* FavoriteWikis
+	* [Subpages]
+	* CommandLineSupport
+	* WikidPadOnUSB / ApplicationConfigurationFiles
+	* [Templates]
+	* Different DatabaseTypes (WhereIsTheDataStored ?, MigrationBetweenDbTypes)
+	* Defining TextBlocks
     * WikiStructureGraphs
+
 
 *Other/Questions*
 

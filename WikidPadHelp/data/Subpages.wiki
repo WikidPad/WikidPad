@@ -24,7 +24,7 @@ Links starting with one or more ".." separated by slashes go to super page. If a
 
 Some components of WikidPad expect WikiPage names yet which always contain the full path (like an absolute link without leading "//"). If you use subpages you should always be aware of the difference of page names and the wiki links. If you don't use subpages links and page names are the same.
 
-At the moment the attributes "alias" and "template" expect wiki links as well as the dialog for [Menu Format#+++ Selection to WikiWord] while the dialog for [Menu Navigate#++ Go to Page] works with page names.
+At the moment the attributes "alias" and "template" expect wiki links as well as the dialog for [MenuFormat#+++ Selection to WikiWord] while the dialog for [MenuNavigate#++ Go to Page] works with page names.
 
 E.g. on page "ebay/Couch" you have to write <<[alias:"Chaise"]>> to create alias "ebay/Chaise".
 

@@ -2,7 +2,7 @@
 + WIKIDPAD Words
 
 WikidPad also recognizes a word as a WikiWord, if at least one lowercase letter
-follows after multiple uppercase letters.
+follows several (that is: more than one) uppercase letters.
 
 
 ++ Examples

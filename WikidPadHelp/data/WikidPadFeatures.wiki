@@ -2,7 +2,7 @@
 + Wikid Pad Features
 
     * On the fly WikiWordLinking
-    * WikiWords can be CamelCase or [Not Camel Case].
+    * WikiWords can be CamelCase or [not Camel Case].
     * UrlLinking
     * [Anchors] and [Footnotes]
     * TreeNodeIcons and TreeNodeColors
@@ -31,7 +31,7 @@
     * ClipboardCatcher
     * InternatiönalChàracters
     * ExternalGraphicalApplications
-    * [page structure window], [chronological view window]
+    * ["Page Structure" window], ["Chronological View" window]
     * FavoriteWikis
     * [Subpages]
     * OptionsDialog

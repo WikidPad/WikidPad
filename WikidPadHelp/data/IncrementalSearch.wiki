@@ -43,4 +43,4 @@ number of seconds of inactivity before incremental search is closed
 automatically. 0 means "wait forever".
 
 
-[:page:PageFooter][icon: lens]
+[:page:PageFooter][icon:lens]

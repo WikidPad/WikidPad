@@ -33,14 +33,14 @@ For Linux/Gnome systems, attention should be paid to the following:
 
 In this mode, the clipboard catcher appends copied text to the page for which it was activated, even if you go to another page while it is active.
 
-Go to the WikiPage where the clipboard snippets should be appended to. Activate "Clipboard Catcher at Page" in the [Edit Menu]. If you open the menu again, you can see that "Clipboard Catcher at:" is checked now and the name of the WikiPage name is appended to the menu item.
+Go to the WikiPage where the clipboard snippets should be appended to. Activate "Clipboard Catcher at Page" in the ["Edit" menu]. If you open the menu again, you can see that "Clipboard Catcher at:" is checked now and the name of the WikiPage name is appended to the menu item.
 
 
 +++ Clipboard catcher at cursor
 
 In this mode, the snippets are inserted at current cursor position as if they were typed in manually. Cursor position and page won't be remembered. If you change the cursor position, snippets will be inserted at the new one.
 
-Activate "Clipboard Catcher"->"Set at Cursor" in the [Edit Menu].
+Activate "Clipboard Catcher"->"Set at Cursor" in the ["Edit" menu].
 
 
 +++ Disable the clipboard catcher
@@ -56,7 +56,7 @@ The clipboard catcher is disabled when:
 
 In the options dialog, page "Clipboard Catcher", there are entries "Prepend before clipboard snippet" and "Append after clipboard snippet" where you can set which character(s) should be appended after each caught snippet.
 
-In this field you can use the same escapes as in the replace field of the "Find and Replace" dialog in [regular expression] mode as well as time formats as these shown in "Date Format" dialog in "Edit"->"Settings" menu (see also [Printing#+++ Page separator]).
+In this field you can use the same escapes as in the replace field of the "Find and Replace" dialog in [regular expression] mode as well as time formats as these shown in "Date Format" dialog in ["Edit" menu]->["Settings" submenu] (see also [Printing#+++ Page separator]).
 
 
 [:page:PageFooter]

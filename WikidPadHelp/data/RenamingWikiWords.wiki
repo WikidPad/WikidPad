@@ -30,4 +30,4 @@ The default settings for these options can be set in the [OptionsDialog#+++++ Re
 If the title of page which was generated at page creation (the text at the top beginning with "+ ") wasn't modified since creation, then the title will be modified accordingly when the page is renamed.
 
 
-[:page:PageFooter][icon:rename]
+[:page:PageFooter][icon:rename][alias:'"Rename Wiki Word" dialog'] 

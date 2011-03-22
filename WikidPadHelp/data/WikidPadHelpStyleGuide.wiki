@@ -1,9 +1,16 @@
 ﻿[:page:PageHeader][:toc:]
 + Wiki Pad Help Style Guide
 
-As the user base of WikidPad increases continously, we did a full refactoring of these pages.
+As the user base of WikidPad increases continuously, we did a full refactoring of these pages.
 
 The objective of this page is to document and to explain the architecture and styles we have applied.
+
+++ Language and Short Keys
+
+This Help Wiki uses the terminology of the original English language version.
+And uses as KeyboardShortcut the standard MsWindows version (see KeyBindings).
+
+ 
 
 ++ Structure of any regular Page 
 

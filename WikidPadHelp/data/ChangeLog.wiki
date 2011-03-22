@@ -68,7 +68,7 @@ official parser
 
     * Basic support for indexed search. See [SearchingTheWiki/Index]
     * Menu item and toolbar icon to move up from subpage to
-      its superpage. See [Menu Navigate#++ Upward]
+      its superpage. See [MenuNavigate#++ Upward]
 
     * Bug fixed: Stack overflow for too deeply nested wikis on
       tree-sorted print/export
@@ -258,7 +258,7 @@ official parser
 
     * Storing of timestamp of last visit to a page. The
       "Open Wiki Word" dialog allows now to sort by newest or oldest
-      visit time. See [Menu Navigate#++ Go to Page]
+      visit time. See [MenuNavigate#++ Go to Page]
     * Context menu entry to apply a particular page as template on
       a newly created page (and option to define which pages to offer
       as templates). See [ChangeLog#+++ Using templates explicitly]
@@ -284,7 +284,7 @@ official parser
     * Some changes to better handle missing Unicode support for
       filesystem in Python (affects mainly MacOS)
 
-    * Bug fixed: Keyboard shortcut for ActivateLinkBackground
+    * Bug fixed: KeyboardShortcut for ActivateLinkBackground
       doesn't work
     * Bug fixed: Updating wiki database fails if a pagefile is missing
     * Bug fixed: Linux: Sometimes focus doesn't switch from the label 
@@ -297,14 +297,14 @@ official parser
 
     * It's now possible to copy whole directories into the
       file storage of a wiki
-    * F6 cycles now also through chronological view and page structure
-      if they are visible
+    * [F6] cycles now also through the ["Page Structure" window]
+      and the ["Chronological View" window] if they are visible.
 
     * Bug fixed: No meaningful error message if exporting from
       commandline fails
     * Bug fixed: HTML export of subpages failed
-    * Bug fixed: Using F6 to switch between tree and WikiTextEditorTabs switched
-      also to invisible tree. 
+    * Bug fixed: Using [F6] to cycle through windows did also switch to 
+      ["Tree" window] even if this was invisible. 
 
     * Bug fixed: Linux: Automatic focus shift from WikiTextEditorTab
       label to content of WikiTextEditorTab did not always work

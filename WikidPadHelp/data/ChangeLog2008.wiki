@@ -135,11 +135,11 @@ RepositoryRevision in "mbutscher" branch: *145*
       See OptionsDialog#*Force# ScratchPad# visibility# in# tree*
     * Attribute values ending with semicolon (e.g. [test:foo; ])
       are now illegal (not interpreted as attribute)
-    * Menu plugins can now also read their shortcuts
+    * Menu plugins can now also read their KeyboardShortcuts
       from "KeyBindings.py" as main program does.
 
     * MsWindows 2K/XP and later: Copying files into [file storage] or
-      export directory now also copies ACLs and ADSs if possible
+      [export directory] now also copies ACLs and ADSs if possible
     * Mac: Some improvements (thanks to Gareth Simpson)
 
     * Bug fixed: Sometimes too many empty lines in internal preview

@@ -1,5 +1,5 @@
 ﻿[:page:PageHeader][:toc:]
-+ Menu Format
++ MenuFormat
 
 ++ Bold - [Ctrl-B]
 Mark the text currently selected in the WikiTextEditor with appropriate markup for *bold* text.
@@ -38,4 +38,4 @@ Insert the name of the selected color at the cursor position.
 Allows to append to a WikiPage the appropriate attribute in order to give the related node in tree the selected icon or color.
 
 
-[:page:PageFooter][icon:left-right][alias:'"Format" Menu'; Format Menu][short_hint:The "Format" menu]
+[:page:PageFooter][icon:left-right][alias:'"Format" menu'][short_hint:'The "Format" menu - [Alt-F]']

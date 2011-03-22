@@ -30,7 +30,7 @@ rel://../above/andBelow.txt
 ++ Converting between relative and absolute URL
 If you right-click on a "file:" or "rel:" URL and choose "Convert Absolute/Relative File URL" you can change an URL from one type to the other. Alternatively you can place the text cursor in such an URL and select from regular menu "Format"->"Convert"->"Absolute/Relative File URL".
 
-Converting a relative URL to an absolute one is always possible, but there may be absolute URLs (especially on MsWindows if pointing to a different drive than the one the wiki is on) that can't be converted to relative URLs. In this case nothing happens.
+Converting a [relative URL] to an [absolute URL] is always possible, but there may be absolute URLs (especially on MsWindows if pointing to a different drive than the one the wiki is on) that can't be converted to relative URLs. In this case nothing happens.
 
 
 ++ Show a Different Title
@@ -44,9 +44,9 @@ Switch to preview to see the "Go somewhere" only. You can also use an image URL 
 
 
 ++ Images
-If an URL file ends with ".jpg", ".gif", ".png", ".tif" or ".bmp", the URL is automatically shown as an image in preview and HTML export (an image in the file storage with relative URL is copied to a subdirectory "files" in the export destination directory). The URL can be absolute or relative and can point into the file storage.
+If an URL file ends with ".jpg", ".gif", ".png", ".tif" or ".bmp", the URL is automatically shown as an image in [preview mode] and in [HTML export] (an image in the file storage with relative URL is copied to a subdirectory "files" in the export destination directory). The URL can be an [absolute URL] or a [relative URL] and can point into the [file storage].
 
-Example (switch to preview to see the picture):
+Example (switch to [preview mode] to see the picture):
 
 rel://files/testimg.gif
 
@@ -76,7 +76,7 @@ The above menu entry is also available in context menus for WikiWord tree items,
 
 
 ++ File storage
-You can also copy files into a subdirectory of the wiki directory from within WikidPad. See [FileStorage] for details.
+You can also copy files into a subdirectory of the [wiki directory] from within WikidPad. See [FileStorage] for details.
 
 
 ++ URL Appendix
@@ -90,9 +90,9 @@ You can control details of URL presentation, especially for images, by using an 
     r Set size in percent relative to image size (e.g. "50%x30%"). Only one given
       percent value is used for width and height ("40%" is same as "40%x40%"). No value
       at all is interpreted as "100%x100%".
-    a Set alignment of image, the following character defines which alignment (*t*op, vertically
+    a Set alignment of image, the following character defines which alignment (*t*op, *v*ertically
       *m*iddle, *b*ottom, *r*ight or *l*eft). This setting is not respected by the internal preview.
-    p Set *rel*ative or *abs*olute linking on HTML export for "file:" and "rel:" links.
+    p Set *rel*ative or *abs*olute linking on [HTML export] for "file:" and "rel:" links.
       If relative link is not possible, absolute link is used.
 
 Examples:

@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + Keyboard Shortcut
 
-++ Menu Wiki
+++ MenuWiki
 
 +++ New - [Ctrl-N]
 Create new wiki
@@ -14,8 +14,7 @@ Create new wiki
 Start the [search dialog] in order to search the whole wiki. See [SearchingTheWiki#++ To search all pages].
 
 ++ Print - [Ctrl-P]
-Start the [print dialog] for a plain text print of some or all WikiPages. See [Printing].
-DialogPrint
+Start the ["Print" dialog] for a plain text print of some or all WikiPages. See [Printing].
 
 ++ Undo - [Ctrl-Z]
 Undo last editing. 
@@ -39,7 +38,7 @@ Copy selected text to the special ScratchPad page which is automatically inserte
 +++ Current Date - [Ctrl-Alt-D]
 Inserts the current date into the editor
 
-+ Menu Tabs
++ MenuTabs
 
 ++ Toggle Ed./Prev. - [Ctrl-Shift-Space]
 Switch between [Edit mode] and [Preview mode] in current WikiTextEditorTab.
@@ -51,7 +50,7 @@ Show current WikiTextEditorTab in [Edit mode].
 Show current WikiTextEditorTab in [Preview mode].
 
 
-+ Menu Wiki Page
++ MenuWiki Page
 
 ++ Save - [Ctrl-S]
 Save current the WikiPage to the database (in fact all modified wiki pages are saved).
@@ -100,7 +99,7 @@ Moves selected text to another WikiWord and places a link to this word where the
 
 You are asked for the link to the word. If you enter an existing WikiWord you are asked if you want to append the text to this word.
 
-+ Menu Navigate
++ MenuNavigate
 
 ++ Back - [Alt-Left]
 Move backward in the history of visited pages for this tab.
@@ -141,7 +140,7 @@ Append a special bookmark attribute to the current WikiPage.
 Lists all WikiPages with bookmark attribute.
 
 
-+ Menu Extra
++ MenuExtra
 
 +++ Eval - [Ctrl-E]
 If text is selected it is evaluated and result is inserted after it (useful as calculator).
@@ -153,4 +152,4 @@ Run one of six numbered scripts on the page (or imported from another page).
 See [InlinePythonEval].
 
 
-[:page:PageFooter][icon:list][short_hint:Special function keys, often keeping Ctrl and/or Alt pressed while striking the actual Key]
+[:page:PageFooter][icon:list][alias:KeyboardShortcuts][short_hint:Special function keys, often keeping Ctrl and/or Alt pressed while striking the actual Key]

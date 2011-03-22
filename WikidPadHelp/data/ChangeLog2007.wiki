@@ -8,7 +8,7 @@ RepositoryRevision in "mbutscher" branch: *138*
     * New letter for time formats (e.g. Statusbar time format option):
       %u shows ISO-8601 weekday number (1=monday, 7=sunday)
     * MsWindows: Option to set a prefix string before each snippet from
-      clipboard catcher (prefix and suffix now support time formats).
+      ClipboardCatcher (prefix and suffix now support time formats).
       See OptionsDialog#*Prepend# before# clipboard# snippet*
     * Non-Windows: Support for a file-launcher program which takes the
       path to a file and opens the right application. Usually the
@@ -32,8 +32,8 @@ RepositoryRevision in "mbutscher" branch: *136*
 
     * Support for internationalization of screen messages and dialogs
       (GUI). Not supported are: attributes (e.g. "\[alias:WikiWord]"),
-      shortcuts ([Ctrl-A]), external plugins, some internal messages
-      (e.g. errors of [regular expressions])
+      KeyboardShortcuts ([Ctrl-A]), external plugins, some internal 
+      messages (e.g. errors of [regular expressions])
 
     * Bug fixed for MsWindows: An always visible taskbar could partly
       hide popup and tooltip windows
@@ -170,10 +170,10 @@ RepositoryRevision in "mbutscher" branch: *121*
       See OptionsDialog#+++++# Image# pasting
     * Option to set title of HTML table of contents.
       See [Options HTML preview_export]#*Title# of# toc*
-    * New attribute "short_hint" to provide tooltip text
+    * New ["short_hint" attribute] to provide tooltip text
       when hovering with the mouse over a WikiWord having this
       attribute. Also option to set tooltip appearance delay for
-      WikiTextEditor. See WikiDocumentAttributes#*short_hint*
+      WikiTextEditor. See [WikiDocumentAttributes#+++ short_hint]
     
     * Small enhancements in spell checker dialog.
     * Using the shortcut to display wiki-wide search or replace
@@ -399,13 +399,13 @@ RepositoryRevision in "mbutscher" branch: *106*
 
 RepositoryRevision in "mbutscher" branch: *103*
 
-    * Userinterface change, no more tabs for edit and preview,
+    * Userinterface change, no more tabs for [Edit mode] and [Preview mode],
       but an arbitrary number of WikiTextEditorTabs for WikiPages, 
       switching between [Edit mode] and [Preview mode] using 
       icons in toolbar, or KeyboardShortcuts
     * Shortcut and menu item to open a selected WikiWord in a
       new WikiTextEditorTab
-    * New tree control which behaves and looks very similar (but
+    * New ["Tree" window] which behaves and looks very similar (but
       not identically) to the native one.
     * Option to set text cursor color.
       See OptionsDialog#*Text# cursor# color*

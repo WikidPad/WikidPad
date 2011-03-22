@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + Tree Node Colors
 
-This is the list of colors supported in the TreeControl via the
+This is the list of colors supported in the ["Tree" window] via the
 \[color: LIGHT STEEL BLUE] attribute.
 
 See also the ColorTestPage.
@@ -75,4 +75,4 @@ See also the ColorTestPage.
 	* YELLOW GREEN
 
 
-[:page:PageFooter][icon:list][child_sort_order: natural]
+[:page:PageFooter][icon:colour selection][child_sort_order: natural]

@@ -13,4 +13,4 @@ To view the history window with the previous word automatically selected press [
 To view the history window with the next word automatically selected press [Ctrl-Alt-Down] arrow.
 
 
-[:page:PageFooter][alias: history; History][short_hint: Wiki Pad maintains a history of the WikiWords you have visited.]
+[:page:PageFooter][alias: history; History][short_hint:WikidPad maintains a history of the WikiWords you have visited.]

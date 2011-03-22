@@ -1,5 +1,5 @@
 ﻿[:page:PageHeader][:toc:]
-+ Menu Tabs
++ MenuTabs
 
 ++ Toggle Ed./Prev. - [Ctrl-Shift-Space]
 Switch between [Edit mode] and [Preview mode] in current WikiTextEditorTab.
@@ -25,4 +25,4 @@ Unfold all lines.
 Fold all lines.
 
 
-[:page:PageFooter][icon:left-right][alias:'"Tabs" Menu'; Tabs Menu][short_hint:The "Tabs" menu]
+[:page:PageFooter][icon:left-right][alias:'"Tabs" menu'][short_hint:'The "Tabs" menu - [Alt-T]']

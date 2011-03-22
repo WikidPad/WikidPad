@@ -1,0 +1,20 @@
+﻿[:page:PageHeader][:toc:]
++ Wiki Tables
+
+++ Columns delimited by "|" [Pipe key]
+
+A table is enclosed in <<| and >> tags which must be alone on a line as for format escaping tags.
+Each line with text is a table row, cells are separated by the [Pipe key] "|".
+Each table cell may contain WikiWords, *bold* text, and _italic_ text.
+
+Tables show up properly in [Preview mode].
+
+See ExampleTablePipe
+
+++ Columns delimited by [Tab key]
+
+To use tabulators instead of vertical bar | as cell delimiters, use <<|t to start the table:
+
+See ExampleTableTabulator
+
+[:page:PageFooter]

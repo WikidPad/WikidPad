@@ -3,7 +3,7 @@
 
 ++ Rebuilding wiki
 
-In menu "Wiki"->"Maintenance"->"Rebuild Wiki".
+In ["Wiki" menu]->"Maintenance"->"Rebuild Wiki".
 
 First you should know that a wiki in WikidPad contains some essential data (mainly the text of the WikiPages) and some cache data which is extracted from the essential data (list of children of a page, todos, attributes,...). Due to an error or some special operations (like adding or deleting page files from outside of WikidPad) it may happen that the cache information is deleted, invalid or not up-to-date anymore.
 
@@ -36,7 +36,7 @@ Allows to override the database type stored in wiki configuration file. Only nee
 
 ++ Reconnect
 
-In menu "Wiki"->"Maintenance"->"Reconnect".
+In ["Wiki" menu]->"Maintenance"->"Reconnect".
 
 If during a WikidPad session the access to the wiki database files is lost (e.g. network connection drops), you might get an error. To make WikidPad work again after access is reestablished, use "Reconnect".
 
@@ -47,7 +47,7 @@ Autosave is automatically disabled after an error until a successful reconnect.
 
 ++ Optimise Database
 
-In menu "Wiki"->"Maintenance"->"Optimise Database". This function is only available if currently loaded wiki is of type "Original Sqlite" or "Compact Sqlite".
+In ["Wiki" menu]->"Maintenance"->"Optimise Database". This function is only available if currently loaded wiki is of type "Original Sqlite" or "Compact Sqlite".
 
 If information is deleted from an Sqlite database, the occupied hard disk space is not freed but later reused for new information to add. "Optimise Database" makes this space available for the system again. After deleting large parts of a wiki, you can use "Optimise Database" to free space, especially recommended for a "Compact Sqlite" wiki (where the page content is also stored in the database).
 

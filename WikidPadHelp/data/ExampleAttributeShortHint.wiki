@@ -1,0 +1,20 @@
+﻿[:page:PageHeader][:toc:]
++ Example Attribute Short Hint
+
+++ Usage
+
+This is how to use the ["short_hint" attribute]
+\[short_hint:Here should be written something interesting]
+
+[short_hint:Here should be written something interesting]
+
+++ Effect
+
+Place the mouse pointer over one of these links and let it rest for a moment:
+
+	* [ExampleAttributeShortHint]
+	* [Ctrl-B]
+	* ACLs, ADSs
+
+
+[:page:PageFooter]

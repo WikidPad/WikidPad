@@ -2,13 +2,14 @@
 + Keyboard Shortcut Ctrl-Alt-B
 
 Use [Ctrl-Alt-B] to add a WikiBookmark to a wiki page,
-or select "Add Bookmark" from the [Navigate Menu].
+or select ["Navigate" menu]->"Add Bookmark".
 
 WikiBookmarks are just a form of WikiDocumentAttribute.
 
 ++ See also
 
 	* [Ctrl-Shift-B]
+	* ["Navigate" menu]
 	* KeyBindings
 
 

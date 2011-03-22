@@ -51,7 +51,7 @@ Otherwise the text following is interpreted as part of the list and therefore ge
 todo.help: still valid?
 
 
-Example (switch to preview to see the problem):
+Example (switch to [Preview mode] to see the problem):
 
 
 * Part

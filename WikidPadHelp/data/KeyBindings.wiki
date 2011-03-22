@@ -46,8 +46,8 @@ See KeyBindingsOnLinuxAndOsx.
 	* [Ctrl-Shift-S]    show [Preview mode] of current WikiTextEditorTab
 	* [Ctrl-Shift-Space]toggle between [Edit mode] and [Preview mode] of current tab
 
-	* [Ctrl-T]          hide/show the [Tree control]
-	* [F6]              switch between [Tree control] and WikiTextEditor
+	* [Ctrl-T]          hide/show the ["Tree" window]
+	* [F6]              cycle through windows
 	* [Ctrl-Tab]        switch between WikiTextEditorTabs
 
 ++ Zoom

@@ -1,7 +1,7 @@
 ﻿[:page:PageHeader][:toc:]
 + Insertions
 
-Insertions allow to insert some dynamic text into preview and HTML export of a page.
+Insertions allow to insert some dynamic text into [HTML preview]/[HTML export] of a page.
 
 This text can either be the content of another page or a list of links to WikiPages which are parents or children of a page or to pages which form the result of a saved search.
 
@@ -48,7 +48,7 @@ The following keys and values are built into WikidPad (further are possible by p
       on the lines to go to the actual headings. The value of this
       insertion must be empty. See InsertToC.
     * *iconimage* shows the icon whose name is given as value.
-      You can use menu "Format"->"Icon Name" to find the name of
+      You can use ["Format" menu]->"Icon Name" to find the name of
       an existing icon. See InsertIconImage.
     * *eval* Evaluate the given Python expression and handle its
       result as if it replaces the insertion. You must switch on
