@@ -1,2 +1,2 @@
-﻿++ Icon note2
-[icon: note2]
+﻿+ Icon note2
+[icon:note2]

@@ -1,2 +1,2 @@
-﻿++ Color ORANGE
-[color: ORANGE]
+﻿+ Color ORANGE
+[color: ORANGE][icon:color palette]

@@ -1,7 +1,8 @@
-﻿++ Inline Python Eval
+﻿[:page:PageHeader][:toc:]
++ Inline Python Eval
 
 
-+++ Security concerns
+++ Security concerns
 WikidPad allows to evaluate and execute arbitrary Python scripts.
 Because this is a potential security risk, script execution is
 disabled by default.
@@ -21,7 +22,7 @@ of security you want:
     * Allow everything
 
 
-When pressing Ctrl-1 to Ctrl-6 WikidPad searches for a script normally in the following order:
+When You press [Ctrl-1] to [Ctrl-6], then WikidPad usually searches for a script in the following order:
 
     * Current page
     * Pages imported by current page with attribute "import_scripts"
@@ -34,44 +35,47 @@ The order can be reversed by checking option "Reverse script search order (globa
 
 
 
-The following examples work therefore only with an appropriately relaxed security setting.
+Thus, the following examples work only when security setting are appropriately relaxed.
 
 
-+++ Evaluating expressions
-You can evaluate Python expressions directly in the editor by
-highlighting the expression and pressing CTRL-E. Example:
+++ Evaluating expressions
+You can evaluate Python expressions directly in the WikiTextEditor.
+Just highlight the expression and press [Ctrl-E]. Example:
 
-Highlight the calculation below, and type CTRL-E.
++++ Example
+Highlight the calculation below, and press [Ctrl-E].
 
 1+2+3
  
  
-+++ Executing scripts on the same page
+++ Executing scripts on the same page
 You can also execute blocks of code within a document.  Blocks of code
-are defined within <% %> blocks. For example:
+are defined within <% %> blocks.
+
++++ Example
 
 <%
 editor.GotoPos(editor.GetLength())
 editor.AddText('\nhello ')
 %>
 
-To execute the code above, type Ctrl-E. Ctrl-E actually will execute all
+To execute the code above, type [Ctrl-E]. This will actually execute all
 of the scripts on a page, including script imports.
 
-You can assign up to 6 functions on a page to a Ctrl-# key. For example:
+You can assign up to 6 functions on a page to a [Ctrl-#] key. For example:
 
 function 1: <% 1: editor.AddText(lib.now()) %>
 function 2: <% 2: lib.addDate(editor) %>
 
-Type Ctrl-1 to execute function 1. Enter Ctrl-2 to execute function 2.
+Type [Ctrl-1] to execute function 1. Enter [Ctrl-2] to execute function 2.
 This will execute at most one script. If a script with this number is
 found on the page, it is executed, if not, the local script imports
 with import_scripts are searched. If no appropriate script is found
 there either, the page mentioned in global.import_scripts is searched.
 As already said, this happens only with the right security settings.
 
-You can define your own functions for evaluation by copying
-evalLibrary.py into a directory in the wikidPad install directory
+You can define your own functions for evaluation. Just copy file
+"evalLibrary.py" into a directory below the [WikidPad installation directory]
 called "user_extensions". This file will not be touched when upgrading
 wikidPad.
 
@@ -79,28 +83,30 @@ file:///C:/Program%20Files/WikidPad/extensions/EvalLibrary.py
 file:///C:/Program%20Files/WikidPad/user_extensions/EvalLibrary.py
 
 
-+++ Script Imports
+++ Script Imports
 
-You can import scripts from another page using the following attribute.
+You can import scripts from another page using the following attribute:
 
 [import_scripts: GlobalScriptLibrary]
 
-Type "Ctrl-4" to see the output from script 4 on the page
-GlobalScriptLibrary.
+Type [Ctrl-4] to see the output from script 4 on the page GlobalScriptLibrary.
 
-You can also use \[global.import_scripts: ...] property to define a single page which will be seen as if it was imported by every page of the wiki.
+You can also use the property \[global.import_scripts: ...] in order to define a single page which will be seen as if it was imported by every page of the wiki.
 
 
-+++ Editor Control Functions
+++ WikiTextEditor Functions
 
 See http://www.yellowbrain.com/stc/index.html for a list of the functions
 available to the "editor" control.
 
 
-+++ Another Example
+++ Another Example
 
-Highlight the line below and press CTRL-3
+Highlight the line below and press [Ctrl-3]
 
 c:\this path\will be encoded.txt
 
 <% 3: lib.encodeSelection(editor) %>
+
+
+[:page:PageFooter]

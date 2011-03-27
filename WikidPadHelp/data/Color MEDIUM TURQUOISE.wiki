@@ -1,2 +1,2 @@
-﻿++ Color MEDIUM TURQUOISE
-[color: MEDIUM TURQUOISE]
+﻿+ Color MEDIUM TURQUOISE
+[color: MEDIUM TURQUOISE][icon:color palette]

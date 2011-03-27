@@ -1,124 +1,130 @@
-﻿++ Options Dialog
+﻿[:page:PageHeader][:toc:]
++ Options Dialog
 
-The options dialog controls the behavior of the application and the currently open wiki. To open it, choose "Options" in the wiki menu.
+The options dialog controls the behavior of the application and of the currently open wiki. To open it, choose "Options" in the ["Wiki" menu].
 
-+++ Application-wide
+++ Application-wide
 
 The following options apply to the whole application and therefore to each wiki opened in it.
 
 
 ++++ General options
 
-*New window on wiki URL*
++++++ New window on wiki URL
 When double clicking on a wiki: URL, a new instance of the application is started, otherwise, the current instance loads the new wiki.
 
-*Store relative paths to wikis*
-Paths to the recently opened wikis (listed in menu "Wiki"->"Recent") are stored relative to WikidPad installation directory in the future if this is checked. "In the future" means that existing entries in "Recent" are not modified and may become invalid when changing this option. Useful e.g. if you have WikidPad and your wikis on a USB-stick.
++++++ Store relative paths to wikis
+Paths to the recently opened wikis (listed in ["Wiki" menu]->"Recent") are stored relative to the [WikidPad installation directory] from now on, if this is checked. This means: existing entries in "Recent" are *not* modified and may become invalid when changing this option.
 
-*Default open/new dir.*
-Directory to start when using "Wiki"->"New" or "Wiki"->"Open" in the menu. If empty, WikidPad chooses a default.
+Relative paths to wikis can be very useful e.g. if you have Your [Wikid Pad on a USB stick], together with Your wikis.
 
-*Sort order*
-Choose the desired alphabetical sort algorithm for wiki words, todos, attributes in tree or when [SearchingTheWiki#To search all pages: Full search].
++++++ Default open/new dir.
+Directory to start when using ["Wiki" menu]->"New" or ["Wiki" menu]->"Open" in the menu. If empty, WikidPad chooses a default.
+
++++++ Sort order
+Choose the desired alphabetical sort algorithm for WikiWords, todos, attributes in tree or when [SearchingTheWiki#To search all pages: Full search].
 The "C" order is the way previous WikidPad versions worked (uppercase letters first, non-English characters in illogical order at the end).
-The new "Default" order sorts according to default order determined by the operating system. Normally, uppercase letters are sorted inorder (AaBbCc). If you want uppercase letters (more exactly: all characters but lowercase ones) before the rest (ABCabc), check
+The new "Default" order sorts according to default order determined by the operating system. Usumally, uppercase letters are sorted inorder (AaBbCc). If you want uppercase letters (more exactly: all characters but lowercase ones) before the rest (ABCabc), check
 *Uppercase first*.
-This setting has no effect for "C" order. Alphabetical sorting of children of a wiki word in tree is always inorder.
+This setting has no effect for "C" order. Alphabetical sorting of children of a WikiWord in tree is always inorder.
 
-*Rename links when renaming wiki word*
++++++ Rename links when renaming wiki word
 When renaming a wiki word, WikidPad can try to rename all links to this word as well, but this is not fully reliable. Here you can check if this renaming should be done or not or if WikidPad should ask for each renaming.
 
-*App-bound hotkey*
-Here you can define a hotkey to show or hide WikidPad (they may only work on Windows). Hotkeys work system-wide, not only if WikidPad is active.
++++++ App-bound hotkey
+Here you can define a hotkey to show or hide WikidPad (they may only work on MsWindows). Hotkeys work system-wide, not only if WikidPad is active.
 
-In the text field you can enter a hotkey in the same way as the menu shortcuts are. Unlike menu shortcuts, you can also use "win" as modifier (like "alt" or "ctrl"), but the hotkey must have at least one of "ctrl" or "alt" modifiers to work.
+In the text field you can enter a hotkey in the same way as the menu shortcuts are. Unlike menu shortcuts, you can also use ["Win" key] as a modifier (like [Alt] or [Ctrl]), but the hotkey must have at least one of [Alt] or [Ctrl] modifiers to work.
 
 The checkbox before the text field allows to temporarily deactivate the hotkey without deleting the field content.
 
 There is also an option to set a second hotkey which is bound to the current wiki instead of the app. See OptionsDialog#*Wiki-bound# hotkey* below in "Current wiki" options.
 
 
-*Rename dialog defaults*
++++++ Rename dialog defaults
 Default settings for the wiki word rename dialog
 
-*Modify all links to the wiki word*
++++++ Modify all links to the wiki word
 *Also rename subpages*
 See [RenamingWikiWords] for the meaning.
 
 
-*Temporary files*
++++++ Temporary files
 A group of settings about the placement of temporary files. These settings may need a restart of WikidPad to take effect.
 
-*Prefer memory where possible*
++++++ Prefer memory where possible
 If checked, main memory is used instead of files where this is possible. This especially affects temporary tables created while sqlite-based wikis are open.
 
-*Temporary file directory*
++++++ Temporary file directory
 Set the kind of location of temporary files:
     * System: Place files in operating systems default place for temporary files
-    * Config. dir.: Place in the "WikidPadGlobals" subdirectory of the current configuration directory (useful for [WikidPadOnUSB])
+    * Config. dir.: Place in the "WikidPadGlobals" subdirectory of the current configuration directory (useful for [Wikid Pad on a USB stick])
     * Given: Use path entered in "Temporary path" below.
 
-*Temporary path*
+Temporary path+++++ 
 If "Temporary file directory" is set to "Given", enter here the path to temporary directory.
 
 
 ++++ User interface
 
-*Minimize to Tray*
++++++ Minimize to Tray
 Minimize to system tray instead of the normal taskbar.
 
-*Switch Tabs in MRU order*
-Switch between the page tabs with Ctrl-Tab and Ctrl-Shift-Tab in an order where the most recently used tabs are selected first.
++++++ Switch Tabs in MRU order
+Switch between the page tabs with [Ctrl-Tab] and [Ctrl-Shift-Tab] in an order where the most recently used tabs are selected first.
 Instead of the default shortcuts you can look how to change them at ChangingKeyBindings and modify entries "GoNextTab" and "GoPreviousTab" in "KeyBindings.py".
 
-*Minimize on close button*
++++++ Minimize on close button
 Pressing the close button on the main frame (the little "X") does not close but minimize WikidPad. In conjunction with "Minimize to Tray" it minmizes to the try area.
 
-If you really want to close, use menu "Wiki"->"Exit" then or the context menu when right-clicking on the tray icon (if "Minimize to Tray" is active).
+If you really want to close, use ["Wiki" menu]->"Exit" then or the context menu when right-clicking on the tray icon (if "Minimize to Tray" is active).
 
-*Show splash screen*
++++++ Show splash screen
 Shows a splash screen on startup. Switching this off doesn't speed up starting of WikidPad (maybe one millisecond). Splash screen is never shown if WikidPad was started with command line option -x (exit after other command line commands were processed).
 
-*Statusbar time format*
-Set the time format the statusbar should use to show modification and creation date of the current wiki page. The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
++++++ Statusbar time format
+Set the time format the statusbar should use to show modification and creation date of the current wiki page. The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the WikiTextEditor.
 
-*UI language*
++++++ UI language
 Choose the preferred language of the user interface.
 
 This setting only takes effect after restarting WikidPad.
 
-*Recent wikis list length*
-Set the number of wikis to show in menu "Wiki"->"Recent"
++++++ Recent wikis list length
+Set the number of wikis to show in ["Wiki" menu]->"Recent"
 
-*Auto-show log window*
-Automatically show log window if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
++++++ Auto-show [log window]
+Automatically show the ["log" window] if new error messages arrive (see [WikiDocumentAttributes]#+++# Error# checking ).
 
-*Auto-hide log window*
-Automatically hide log window if no more error messages are present.
++++++ Auto-hide [log window]
+If checked the ["log" window] hides automatically, if no more error messages are present.
 
-*Structure window pos.*
-Where (relative to main window) should the PageStructureWindow be positioned? "Hidden" deactivates it.
-*KNOWN BUG*: After changing the position of the window, restarting WikidPad is necessary. See RestartWikidPad for details.
++++++ Structure window pos.
+Where to position the ["Page Structure" window] (relative to main window)? "Hidden" deactivates it.
+*KnownBug*: After changing the position of the window, restarting WikidPad is necessary. See RestartWikidPad for details.
 
-*Structure window heading depth*
-Up to (and including) which heading level should headings be displayed? "1" Means only top-level heading (one plus sign), "15" means all headings.
++++++ Structure window heading depth
+Up to (and including) which heading level should headings be displayed? 
+	* "1" Means only top-level heading (one plus sign)
+	* ...
+	* "15" means all headings.
 
-*Auto-hide structure window*
-After double-clicking an entry in PageStructureWindow the window is collapsed (hidden) automatically if this is checked.
++++++ Auto-hide structure window
+If checked the ["Page Structure" window] hides automatically after You double-click one of it's entries.
 
-*Structure window selection auto-follow*
-If checked and document structure window is visible, changing cursor position in editor can also change selection in structure window to always show the heading which is nearest above the current cursor position.
++++++ Structure window selection auto-follow
+If checked and ["Page Structure" window] is visible, changing cursor position in the WikiTextEditor can also change selection in structure window to always show the heading which is nearest above the current cursor position.
 
 
 ++++ Security options
 
-*Process insertion scripts*
++++++ Process insertion scripts
 Control if insertions with key "eval" should be evaluated as Python expressions or not, see also [Insertions].
 
-*Script security*
++++++ Script security
 Set the security level for script execution, see [InlinePythonEval#+++ Security concerns].
 
-*Reverse script search order (global imports first)*
++++++ Reverse script search order (global imports first)
 If checked, the order for searching of executable scripts is reversed, global imports are searched first (if allowed by the security setting above). See [InlinePythonEval#+++ Security concerns].
 
 
@@ -126,80 +132,80 @@ If checked, the order for searching of executable scripts is reversed, global im
 
 These apply to the tree on the left of the main window.
 
-*Tree auto-follow*
-The tree tries to always select the wiki word currently shown in the editor or HTML-view.
++++++ Tree auto-follow
+The tree tries to always select the wiki word currently shown in [Edit mode] or [Preview mode].
 
-*Tree update after save*
++++++ Tree update after save
 After each (automatic or manual) save, the tree icons and shown children are updated. This may need some time and may create some flicker going from top to bottom through the tree.
 
-*Hide Undefined wiki words in Tree*
++++++ Hide Undefined wiki words in Tree
 If a page contains wiki word links to non-existing pages, these are not shown as children in the tree.
 
-*Tree auto-hide*
-After selecting an item in tree, the tree is hidden automatically.
++++++ Tree auto-hide
+If checked the ["Tree" window] hides automatically after You double-click one of it's entries.
 
-*Font*
++++++ Font
 Select font of tree. The empty field means default font.
 
-*Background color*
++++++ Background color
 Specify background color of tree.
 
-*Position main tree*
++++++ Position main tree
 Controls where to place the main tree (to the left, right, top or bottom)
 
-*Position view tree*
++++++ Position view tree
 You can also have a second tree which has the "Views" node as root. You can place it relative to the main tree (above, below, left or right) or choose "hidden" if you don't want it. 
 
-*KNOWN BUG*: After changing the position of main or view tree, the trees do not react on clicks properly any longer. Restart WikidPad. See RestartWikidPad for details.
+*KnownBug*: After changing the position of main or view tree, the trees do not react on clicks properly any longer. Restart WikidPad. See RestartWikidPad for details.
 
 
-++++ HTML preview/export
+++++ [HTML preview]/[HTML export]
 
 See [Options HTML preview_export].
 
 
 ++++ Editor
 
-*Auto-unbullets*
++++++ Auto-unbullets
 When this option is active and enter is pressed on a line which contains only a bullet or a numbering without text, the bullet is removed. See BulletedLists for details.
 
-*Append closing bracket on auto-complete*
-When suggesting the completion for a bracketed wiki word, e.g. "[Not Came" you can decide if a closing bracket is suggested ("[Not Camel Case]") or not ("[Not Camel Case").
++++++ Append closing bracket on auto-complete
+When suggesting the completion for a bracketed wiki word, e.g. "[Not Came" you can decide if a closing bracket is suggested ("[not Camel Case]") or not ("[not Camel Case").
 
-*Synchronize editor by preview selection*
-This provides some workaround to synchronize scroll position in HTML preview with the position in editor.
-If this option is checked, you can select some text in the preview and when switching back to the editor, the first occurrence of the selected text is searched and selected in editor, too.
++++++ Synchronize editor by preview selection
+This provides some workaround to synchronize the scroll position in [Preview mode] with the position in [Edit mode].
+If this option is checked, you can select some text in [Preview mode]. when switching back to [Edit mode], the first occurrence of the selected text is searched and selected in the WikiTextEditor, as well.
 
-*Tab width*
-How many spaces should a tab be wide. This affects real tabs as well as the number of spaces used to replace a tab if "Edit"->"Settings"->"Tabs to spaces" is checked.
++++++ Tab width
+How many spaces should a tabulator character be wide. This affects real tabulators as well as the number of spaces used to replace a tabulator character if "Edit"->"Settings"->"Tabs to spaces" is checked.
 
 
 +++++ Image pasting
 
 When pasting bitmap data into WikidPad it can be saved as an image file into the "files" directory of the wiki and a link to it can be generated. These options control how to do that:
 
-*Filename prefix*
++++++ Filename prefix
 A prefix to use for the filename. If this filename plus suffix exists already in "files" dir, an underscore and a sequence of 20 random letters or numbers is appended to create a unique filename. E.g. you want to store a PNG-file with prefix "foo" then WikidPad checks if "foo.png" is already in the "files" directory (if prefix is empty, this is not tried). If "foo.png" exists it tries something like "foo_2NIUXQ0OGVRDT1O3JNUN.png". If this exists already it tries again (up to 20 times) before giving up.
 
-*File type*
++++++ File type
     * None: Don't store images at all
     * PNG: Store in PNG format (lossless compression)
     * JPEG: Store in JPEG format (lossy compression)
 
-*Quality*
++++++ Quality
 Number to define quality of JPEG compression (0:worst, 75:default, 100:best)
 
-*Ask settings on each paste*
++++++ Ask settings on each paste
 If checked, each time you paste an image, a dialog box asks for the above settings to set them individually.
 
 
-+++++ File dropping
+++++ File dropping
 
-*Prepend before links*
-*Between links*
-*Append after links*
++++++ Prepend before links
++++++ Between links
++++++ Append after links
 
-When dropping files into editor (which are shown as file URLS then) you can set here what to prepend before all links, set between them and what to append. By default nothing is prepended/appended and a space is placed between links.
+When dropping files into WikiTextEditor (which are shown as file URLS then) you can set here what to prepend before all links, set between them and what to append. By default nothing is prepended/appended and a space is placed between links.
 
 <<You can put a newline in these fields as \n. For a single backslash type \\.>>
 
@@ -207,167 +213,178 @@ When dropping files into editor (which are shown as file URLS then) you can set 
 Set if you want to have file links in brackets. If so, spaces are kept as they are instead of escaping them as %20 to increase readability.
 
 
-++++ Editor colors
+++++ Editor Colors
 
-*Plain text color*
-Specify the color of plain text (like this one) in the editor by pressing the little "..." button to start the color dialog or by entering a numeric HTML color (e.g. "#000000" for black) in the text field. Leaving the field empty chooses the default color.
++++++ Plain text color
+Specify the color of plain text (like this one) in the WikiTextEditor by pressing the little "..." button to start the color dialog or by entering a numeric HTML color (e.g. "#000000" for black) in the text field. Leaving the field empty chooses the default color.
 
-*Link color*
-Set the color of links (URLs and existing wiki words, e.g. http://nowhere) in the editor. See "Plain text color" above for details.
++++++ Link color
+Set the color of links (URLs and existing wiki words, e.g. http://nowhere) in the WikiTextEditor. See "Plain text color" above for details.
 
-*Attribute/script color*
-Set the color of attributes and scripts (e.g. <%"this one"%>) in the editor. See "Plain text color" above for details.
++++++ Attribute/script color
+Set the color of attributes and scripts (e.g. <%"this one"%>) in the WikiTextEditor. See "Plain text color" above for details.
 
-*Background color*
-(Works only partially). Specify the background color of the editor. See "Plain text color" above for details.
++++++ Background color
+(Works only partially). Specify the background color of the WikiTextEditor. See "Plain text color" above for details.
 
-*Selection fg. color*
++++++ Selection fg. color
 Specify the foreground color of selected text. See "Plain text color" above for details.
 
-*Selection bg. color*
++++++ Selection bg. color
 Specify the background color of selected text. See "Plain text color" above for details.
 
-*Margin color*
-Specify the color of the editor margin on the left (normally gray) which can also contain line numbers.
++++++ Margin color
+Specify the color of the left margin of the WikiTextEditor, which may also show line numbers. (Usually gray)
 
-*Text cursor color*
++++++ Text cursor color
 Set the color of the text cursor (the small blinking vertical bar).
 
 
-++++ Clipboard catcher
+++++ ClipboardCatcher
 
 This page is only visible if the necessary prerequisites are met to make the clipboard catcher work, see [ClipboardCatcher#+ Prerequisites].
 
-*Prepend before clipboard snippet*
++++++ Prepend before clipboard snippet
 Control what the ClipboardCatcher should prepend before each caught snippet. This option supports time formats (as these shown in "Set Date Format" dialog in "Editor" menu)
 
-*Append after clipboard snippet*
++++++ Append after clipboard snippet
 Control what the ClipboardCatcher should append after each caught snippet. This option supports time formats (as these shown in "Set Date Format" dialog in "Editor" menu)
 
-*Avoid doubled snippets*
++++++ Avoid doubled snippets
 If the same text is pasted multiple times consecutively to the clipboard, it is pasted only the first time. Some applications execute a single paste command as multiple pastes to the clipboard which would lead to multiple inserts without this option set.
 
-*User notification*
++++++ User notification
 Choose if you want to hear a sound when a clipboard snippet is inserted.
 
-*Sound file*
++++++ Sound file
 Choose the sound file to play (if you have chosen to be notified by sound above). If the field is empty, a default sound is played.
 
 
 ++++ File Launcher
 
-This page is only visible on non-Windows systems.
+This page is only visible on non-MsWindows systems.
 
-*Path to file launcher*
++++++ Path to file launcher
 Enter here the path to a script or program which takes the path or URL of a file and runs the application associated with this file. For Linux, find the "xdg-open" script (or install it first) which should do that.
 
 
 ++++ Mouse
 
-*Middle button without CTRL*
-Set the reaction of a middle button click on a wiki word in editor, internal preview, tree or wiki-wide search results if CTRL is not pressed while clicking. You can choose between opening the word in a new tab in foreground, in background or in the same (active) tab.
++++++ Middle button without [Ctrl]
+Set the reaction of a middle button click on a WikiWord if [Ctrl] is not pressed while clicking.
+This applies to [Edit mode], [Preview mode], [Tree control], or [Wiki-wide search] results.
 
-*Middle button with CTRL*
-Same as before, but set reaction if CTRL is pressed while clicking the middle button.
+You may choose between:
 
-*Left double click in preview*
-When double clicking into preview (not on a link), this can either do nothing, switch the tab to editor or open a new tab with same page, but in editor mode.
+	* open the WikiWord in a new WikiTextEditorTab in foreground
+	* open the WikiWord in a new WikiTextEditorTab in background
+	* open in the same (currently active) WikiTextEditorTab.
 
-*Middle click on tab*
-This can either do nothing, close the tab or clone it (open same page in a new tab).
++++++ Middle button with [Ctrl]
+Same as before, but set reaction if [Ctrl] is pressed while clicking the middle button.
 
-*Dropping files*
-*Dropping files with SHIFT*
-*Dropping files with CTRL*
++++++ Left double click in preview
+When double clicking somewhere into [Preview mode] (but not on a link), this can either do:
 
-Control what should happen if you drag and drop files from explorer into the editor with no key pressed, with SHIFT pressed or with CTRL pressed.
+	* nothing
+	* switch the WikiTextEditorTab to [Edit mode]
+	* open a new WikiTextEditorTab with same page, opened in [Edit mode].
+
++++++ Middle click on WikiTextEditorTab
+This can either do nothing, close the WikiTextEditorTab or clone it (open same page in a new WikiTextEditorTab).
+
+	* *Dropping files*
+	* *Dropping files with [Shift]*
+	* *Dropping files with [Ctrl]*
+
+Define what should happen if you drag and drop files from explorer into the WikiTextEditor with no key pressed, with [Shift] pressed or with [Ctrl] pressed.
 
 Possible choices are:
-    * Nothing
-    * Absolute URL: Insert absolute URL(s) to the file(s)
-    * Relative URL: URL(s) starting with "rel:"
-    * Copy into file storage: Copy file(s) into file storage and create relative URL(s) to it
-    * Move into file storage: Copy file(s) into file storage and create relative URL(s) to it
+    * nothing
+    * absolute URL: Insert [absolute URL](s) to the file(s), starting with "file:"
+    * relative URL: Insert [relative URL](s) to the file(s), starting with "rel:".
+    * Copy into file storage: Copy file(s) into [file storage] and create [relative URL](s) to it
+    * Move into file storage: Move file(s) into [file storage] and create [relative URL](s) to it
     * Ask: Show dialog to ask what to do. Allows also to set what to prepend/append/set between links (see [OptionsDialog#+++++ File dropping])
 
 
 ++++ Chron. view
 
-*Position*
-Where (relative to main window) should the ChronViewWindow be positioned? "Hidden" deactivates it.
-*KNOWN BUG*: After changing the position of the window, restarting WikidPad may be necessary. See RestartWikidPad for details.
++++++ Position
+Where (relative to main window) should the ["Chronological View" window] be positioned? "Hidden" deactivates it.
+*KnownBug*: After changing the position of the window, restarting WikidPad may be necessary. See RestartWikidPad for details.
 
-*Chronological view: Date format*
++++++ Chronological view: Date format
 Set the time format the timeline should use to show the dates. The format is also used when interpreting a date entered by the user in the time view.
-The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
+The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the WikiTextEditor.
 
-*Auto-hide*
++++++ Auto-hide
 After selecting an item in timeline, timeline is hidden automatically.
 
-*Show word list on hovering*
++++++ Show word list on hovering
 Should the list of related wiki words be shown when hovering over a date with mouse.
 
-*Show word list on select*
++++++ Show word list on select
 Should the list of related wiki words be shown when selecting (clicking on) a date.
 
-*Show empty days*
++++++ Show empty days
 Should "empty" dates without relatzed wiki words be shown in the timeline?
 This option can also be set in the context menu of the timeline.
 
-*Show dates ascending*
++++++ Show dates ascending
 Control if the dates in timeline should be sorted ascending or descending.
 This option can also be set in the context menu of the timeline.
 
-*Versioning: Date format*
-Set the time format the version list should use to show the dates. The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the editor.
++++++ Versioning: Date format
+Set the format to be used in the version list in order to show the dates. The format can also be set by clicking on the small "..." button which starts the same dialog as used for setting the date format for the WikiTextEditor.
 
 
 ++++ Searching
 
-*Wiki-wide search defaults*
++++++ Wiki-wide search defaults
 Set the search options to use for wiki-wide search dialog:
 
-    *Simple regex*
+    * *Simple regex*
     Choose this if the pattern contains only a single regular expression (RE).
     
-    *"Anded" regex*
+    * *"Anded" regex*
     Choose this if the pattern contains multiple REs connected with "and". For example, to search this wiki for pages with "search" and "wiki" in them type:
 
     search and wiki
 
     Some operations are not available in "Anded" regex mode.
 
-    *As is*
+    * *As is*
     All characters are taken as they are.
     
-    *Case sensitive, Whole word*
+    * *Case sensitive, Whole word*
     Choose here if case matters for the search pattern and/or if only whole words should be searched for
 
-*Context characters* *before* and *after*
++++++ Context characters *before* and *after*
 Chooses the number of characters to show before and after a found match as context in wiki-wide search. For an "anded" regex, the beginning of the page is shown with so many characters as the sum of the "before" and "after" values. Using context may slow down the searching a bit.
 
-*Count Occurrences up to max.*
++++++ Count Occurrences up to max.
 Counts how many matches a page contains and shows this number in parentheses after each page name in wiki-wide search results. This option slows down searching. To avoid too long search times you can restrict here the maximum number of occurrences to count on a page.
 
-*Fast search defaults*
++++++ Fast search defaults
 Set the search options to use for the small search field in toolbar. Same options as for "Wiki-wide search defaults" above.
 
-*Delay before auto-close*
++++++ Delay before auto-close
 Controls how many seconds of inactivity before the incremental search is closed automatically. 0 means "wait forever".
 
 
 ++++ Advanced
 
-*Use IME workaround for editor input*
-Fixes some problems when entering characters in non-Western languages, e.g. when using UniKey (Vietnamese input method editor) under Windows or typing Russian under Linux. You must restart WikidPad to make the change have an effect.
++++++ Use IME workaround for editor input
+Fixes some problems when entering characters in non-Western languages, e.g. when using UniKey (Vietnamese input method) under MsWindows or typing Russian under Linux. You must restart WikidPad to make the change have an effect.
 
-*Translate menu accelerators for keyboard layout*
-Windows only. Translates accelerators (aka shortcuts) of the menus to work with special keyboard layouts where the ctrl-level (layout when CTRL is pressed) differs from layout in base-level. After translation the shortcuts look wrong but work correctly. The translation is based on the layout on WikidPad startup, changes while WikidPad is running are not processed. This option has only an effect after restarting WikidPad.
++++++ Translate menu accelerators for keyboard layout
+MsWindows only. Translates accelerators (aka shortcuts) of the [Menus] to work with special keyboard layouts where the ctrl-level (layout when [Ctrl] is pressed) differs from layout in base-level. After translation the shortcuts look wrong but work correctly. The translation is based on the layout on WikidPad startup, changes while WikidPad is running are not processed. This option has only an effect after restarting WikidPad.
 
-*Forbid cancel on search*
-Checking this option forbids to cancel a running wiki-wide (or fast) search by clicking into the search field. For some OS (especially Mac OS) this increases search speed considerably.
++++++ Forbid cancel on search
+Checking this option forbids to cancel a running wiki-wide (or fast) search by clicking into the search field. For some OS (especially MacOS) this increases search speed considerably.
 
-*Single process per user*
++++++ Single process per user
 If you open a new WikidPad instance while another is already running, the new window is handled by the same process as the first one. This option has only an effect after restarting WikidPad. It is on by default.
 
 Advantages:
@@ -385,56 +402,58 @@ Disadvantages:
       a network or the internet, but a personal firewall software
       may alarm you nevertheless. Also, if multiple user use
       WikidPad on the same computer at the same time, all must use
-      their own home directory as configuration directory (this is
-      the default).
+      their own home directory as [configuration directory]
+      (this is the default).
 
-*Warn about other processes*
++++++ Warn about other processes
 This option is only available if "Single process per user" is checked. On startup of WikidPad it checks if there are other WikidPad processes and warns about them if so.
 
-It has a few restrictions at the moment:
+This has a few restrictions at the moment:
 
-    * Works only on Windows
-    * Only compares the executable (path and name) of new and existing processes. So when you do not use the Windows binary to start but Python directly it warns about other processes started with the same "python(w).exe"
+    * Works only on MsWindows
+    * Only compares the executable (path and name) of new and existing processes. So when you do not use the MsWindowsBinary to start but Python directly it warns about other processes started with the same "python(w).exe"
     * Does not warn about processes started by other users (this is intentional)
 
-*No cycles in tree*
++++++ No cycles in tree
 If two or more pages reference each other (e.g. NodeA -> NodeB -> NodeA) these cycles are not shown. Precisely: if a child of a word is already an ancestor (parent, grandparent, ...) of this word, it is not shown.
 
-*Scroll under pointer*
-Windows only, *experimental*. When using the mouse-wheel on Windows it normally scrolls the control which currently has the focus (is active). With this option the control under the mouse pointer is scrolled instead. This only works for some controls, for the others you first have to click into the control (give it the focus) and then scroll while mouse pointer is over the control.
++++++ Scroll under pointer
+MsWindows only, *experimental*. When using the mouse-wheel on MsWindows it normally scrolls the control which currently has the focus (is active). With this option the control under the mouse pointer is scrolled instead. This only works for some controls, for the others you first have to click into the control (give it the focus) and then scroll while mouse pointer is over the control.
 
-*Ignore wiki lock file*
-*Create wiki lock file*
++++++ Ignore wiki lock file
+Change these settings only if you know what you are doing! See [WikiLockFile].
+
++++++ Create wiki lock file
 Change these settings only if you know what you are doing! See [WikiLockFile].
 
 
 +++++ Timing
 
-*Sync. highlighting limit*
++++++ Sync. highlighting limit
 Limit of page size in bytes when to switch from synchronous highlighting (calculated after each keypress) to asynchronous highlighting (calculated in the background and shown when ready). Recommended value: 300 to 500 bytes
 
-*Highlight start delay*
++++++ Highlight start delay
 For async. highlighting how long to wait after key press (in seconds) before starting the highlighting work in background. Recommended value: 0.2 to 0.5 seconds
 
-*Short hint delay*
-Set how many milliseconds before showing the short hint tooltip in editor. 0 deactivates the tooltip. See [WikiDocumentAttributes#*short_hint*] for details.
++++++ Short hint delay
+Set how many milliseconds before showing the ["short_hint" attribute] tooltip in the WikiTextEditor. 0 deactivates the tooltip. See [WikiDocumentAttributes#*short_hint*] for details.
 
-*Update step min. delay*
++++++ Update step min. delay
 After each change the tree(s) are updated to reflect changes like added or removed children of a page. This updating is done step by step where each step must be executed in the GUI-thread. Non-technically this means that WikidPad may lag during the tree update. The minimal delay setting defines the number of seconds (or fractions thereof) WikidPad waits after an update step before the next step is executed.
 Recommended value: 0.0 to 0.2 seconds
 
 
 ++++ Autosave
 
-*Autosave active*
++++++ Autosave active
 Save current page content to disk (if modified) after a few seconds of inactivity.
 
 There are two delays which *both* must be exceeded before a save operation is triggered (if Autosave is active).
 
-*Delay after key pressed*
-How long to wait after the last keypress in the editor (default: 3 seconds). Recommended value: 1 to 5 seconds.
++++++ Delay after key pressed
+How long to wait after the last keypress in the WikiTextEditor (default: 3 seconds). Recommended value: 1 to 5 seconds.
 
-*Delay after page dirty*
++++++ Delay after page dirty
 How long to wait after the page was initially modified (dirty) after last save (default: 15 seconds). Recommended value: 15 to 180 seconds.
 
 
@@ -444,86 +463,86 @@ These options apply to the active wiki only
 
 ++++ General options
 
-*First word at startup*
++++++ First word at startup
 Wiki word which should be shown as first one each time the wiki is opened. If the field is empty, the last words when the wiki was closed are shown on opening.
 
-*Default export dir.*
++++++ Default export dir.
 Set the default export directory into which exports should go.
 
-*Remember expanded tree nodes*
-Control if expanded tree nodes should be remembered by WikidPad. This means if you collapse a tree node which contains expanded child nodes yet and expand the node later, the child nodes are expanded again. The following modes are supported:
-    * Not at all: Doesn't remember expanded nodes (like before version 1.9beta15)
-    * While wiki open: Forgets the node states when wiki is closed
-    * Always: Stores the node states in wiki configuration file and restores them on reopening
++++++ Remember expanded tree nodes
+Control if [expanded tree nodes] should be remembered by WikidPad. This means if you collapse a tree node which contains expanded child nodes yet and expand the node later, the child nodes are expanded again. The following modes are supported:
+    * Not at all: Do not remember [expanded tree nodes] (as before version 1.9beta15)
+    * While wiki open: Forget the node states when wiki is closed
+    * Always: Store the node states in the wiki configuration file and restores them on reopening
 
 It may happen that the mechanism stores expanded nodes which don't exist any longer, e.g. if the link from parent page to a child page is deleted and the child page was represented by an expanded node this is not always recognized by WikidPad, so some "garbage" may be stored.
 
 By setting the option to "Not at all" then closing the options dialog, then setting the option back to what you had before, all node state information is cleared. The info of the main tree (not the "Views" tree) is also cleared when setting a new root.
 
-*Max. characters on each tab*
-If you have very long wiki page names and therefore very broad tabs you can restrict the number of characters to show on a tab. Use 0 for no restriction.
++++++ Max. characters on each tab
+If you have very long wiki page names and therefore very broad labels for the WikiTextEditorTabs you can restrict the number of characters to be shown in the label of the WikiTextEditorTab. Use 0 for no restriction.
 
-*Template page names reg. exp.*
++++++ Template page names reg. exp.
 Enter here a regular expression which must match for a page name to be listed as a template in the "Use Template" submenu. See [Templates#+++ Using templates explicitly].
 
-*Allow index search*
++++++ Allow index search
 Control if indexed search should be possible. See [SearchingTheWiki/Index].
 
-*Force ScratchPad visibility in tree*
++++++ Force ScratchPad visibility in tree
 Shows the special page ScratchPad always as child of the tree root, even if it is not really a child.
 
-*Read-only wiki*
++++++ Read-only wiki
 Check this if you want to prevent the wiki from acidental modifications.
 
-*Auto-show log window*
-Automatically show log window if new error messages arrive (see [WikiDocumentAttributes#+++ Error checking]).
++++++ Auto-show [log window]
+Automatically show the [log window] if new error messages arrive (see [WikiDocumentAttributes#+++ Error checking]).
 If the check-box is gray, the application-bound setting (see above) is used, otherwise this wiki-bound setting overrides it.
 
-*Page file names ASCII only*
++++++ Page file names ASCII only
 If set, all filenames of newly created pages only contain ASCII-characters (no umlauts, accented characters etc.). Already created files are not renamed even if the file content is modified afterwards.
-This option is especially recommended on Mac OS or for wikis which will be interchanged with Mac users.
+This option is especially recommended on MacOS or for wikis which will be interchanged with Mac users.
 This option does not apply to Compact Sqlite DB backend because it does not have separate page files.
 
-*Graceful handling of missing page files*
++++++ Graceful handling of missing page files
 If a page file is deleted or inserted into the "data" directory externally tries to update the core database if it encounters this change.
 
 If not set, missing files which are listed in the core database issue an error and newly added files are ignored.
 
 This option does not apply to Compact Sqlite DB backend because it does not have separate page files.
 
-*Wiki icon*
++++++ Wiki icon
 Set here the name of icon to use in the system tray instead of the default icon. If the field is empty the default icon is used. The icon of the main window is not influenced by this setting (because it does not work).
 
-*Wiki-bound hotkey*
-Wiki-bound hotkey to show/hide wiki. See OptionsDialog#*App-bound# hotkey*
++++++ Wiki-bound hotkey
+Wiki-bound hotkey to show/hide wiki. See [OptionsDialog#+++ App-bound hotkey]
 
 
 ++++ Headings
 
-*Heading prefix*
++++++ Heading prefix
 Control the heading level of the initial main title of new pages and fill between one and fifteen '+' in this field (if using default wiki language). Default is "++".
 
-*Wikiword to heading*
-How should the main heading of new pages be generated from the wikiword:
-    * As is: Use wikiword as heading
-    * Add spaces: Add spaces to wikiword in front of each uppercase letter ("NewWikiWord" -> "New Wiki Word")
++++++ WikiWord to heading
+How should the main heading of new pages be generated from the WikiWord:
+    * As is: Use the WikiWord as heading
+    * Add spaces: Add spaces to the WikiWord in front of each uppercase letter ("NewWikiWord" -> "New Wiki Word")
     * No title: Don't show a heading at all
 
-*Use link title if present*
++++++ Use link title if present
 If you came to a not yet created page through a titled link (e.g. [WikiWord| This is the title]) and this option is checked, the link title will be used as title of the page.
 
-*Headings as aliases: Up to heading depth*
++++++ Headings as aliases: Up to heading depth
 All headings with a level less or equal this number are shown in the "Open Wiki Word" dialog. You can select them to come to the wiki page they are on. If value is 0, no headings are processed. After changing this value, you may have to rebuild the wiki to see an effect.
 
 
 ++++ Versioning
 
-*Where to store*
++++++ Where to store
 Set where version information should be stored, either in the main "Database" files or as "Separate files" which creates one file for each version to save and additionally one file for each wiki page which has versions, so "Database" is the recommended option.
 
 The database backend "Compact Sqlite" only supports storing in database so this option is grayed out for such wikis.
 
-*Steps to complete version*
++++++ Steps to complete version
 To reduce used disk space, most versions are stored as "reverse difference". This means only the changes from the next newer version to this version are stored. This has two drawbacks: Calculating changes needs some time for large pages and, much more important, the version is only correct if the rev. diff. data of this version is correct and the next version is correct. If the next version is also stored as rev. diff. this goes on iteratively until the next completely saved version (the newest version is always complete).
 
 This means if one of these versions is damaged and therefore incorrect, this version and all older ones up to the next complete one (if any) are incorrect as well.
@@ -535,19 +554,26 @@ Regardless of this setting a version is always saved as complete if the reverse 
 
 ++++ Wiki language
 
-*Wiki language*
++++++ Wiki language
 Choose the language (syntax) of the wiki. Each language is provided by a plugin.
 
 
-+++++ WikidPad default 2.0
+++++++ WikidPad default 2.0
 
-*Footnotes as wiki words*
++++++ Footnotes as wiki words
 Interpret [Footnotes] (e.g. "[42]") as wiki words.
 
 
 ++++ Advanced
 
-*Modif. date must match*
-*Filename must match*
-*Modif. date is enough*
++++++ Modif. date must match
 See [FileStorage].
+
++++++ Filename must match
+See [FileStorage].
+
++++++ Modif. date is enough
+See [FileStorage].
+
+
+[:page:PageFooter][alias:'"Options" dialog']

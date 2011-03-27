@@ -1,0 +1,16 @@
+﻿[:page:PageHeader][:toc:]
++ Keyboard Shortcut Ctrl-Shift-B
+
+Use [Ctrl-Shift-B] to view your bookmarks,
+or select ["Navigate" menu]->"Goto Bookmark".
+
+WikiBookmarks are just a form of WikiDocumentAttribute.
+
+++ See also
+
+	* [Ctrl-Alt-B]
+	* ["Navigate" menu]
+	* KeyBindings
+
+
+[:page:PageFooter][icon:key][alias:Ctrl-Shift-B][short_hint:Goto Bookmark]

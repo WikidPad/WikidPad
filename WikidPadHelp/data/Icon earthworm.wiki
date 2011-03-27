@@ -1,2 +1,2 @@
-﻿++ Icon earthworm
-[icon: earthworm]
+﻿+ Icon earthworm
+[icon:earthworm]

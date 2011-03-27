@@ -1,0 +1,11 @@
+﻿[:page:PageHeader][:toc:]
++ Example Table Tabulator
+
+<<|t
+ScratchPad	This is	*a table*
+with two	rows and	three columns delimited by tabs (not |) and \
+                                                    with two lines in a cell
+>>
+
+
+[:page:PageFooter]

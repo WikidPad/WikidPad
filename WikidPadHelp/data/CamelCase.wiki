@@ -1,1 +1,14 @@
-﻿++ Camel Case
+﻿[:page:PageHeader][:toc:]
++ Camel Case
+
+A word is typed in Camel Case, if:
+
+	* it starts with some UPPERCASE letter(s),
+	* followed by some lowercase letter(s),
+	* followed by at least one more UPPERCASE letter(s)
+	* eventually followed by more lowercase letter(s) - or none
+
+See also http://en.wikipedia.org/wiki/CamelCase
+
+
+[:page:PageFooter][short_hint:UPPERlowerUPPERcase]

@@ -1,2 +1,2 @@
-++ Icon console
-[icon: console]
+﻿+ Icon console
+[icon:console]

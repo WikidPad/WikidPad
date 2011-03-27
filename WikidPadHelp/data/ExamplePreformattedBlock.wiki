@@ -1,0 +1,20 @@
+﻿[:page:PageHeader][:toc:]
++ Example Preformatted Block
+
+Use "\<\<pre" and "\>\>" lines in order to keep lines formatted as they are:
+
+<<pre
+                      ^
+                     / \
+                    /   \
+                   /_____\
+                  (       )
+                  |       |
+                  |       |
+                  |       |
+                  |       |
+                  L_______j
+>>
+
+
+[:page:PageFooter]

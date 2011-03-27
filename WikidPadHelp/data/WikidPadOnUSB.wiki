@@ -1,6 +1,7 @@
-﻿++ Wikid Pad On USB
+﻿[:page:PageHeader][:toc:]
++ Wikid Pad On USB
 
-This page describes how to move WikidPad on an USB stick or similar media if you use the Windows binary installer.
+This page describes how to move WikidPad onto an USB stick or similar media if you use the MsWindowsBinaryInstaller.
 
     1. Install WikidPad either directly on the stick or on the hard
        drive. During installation you are asked if you want to
@@ -8,26 +9,25 @@ This page describes how to move WikidPad on an USB stick or similar media if you
        'wiki:' by WikidPad". Uncheck both options, they wouldn't work
        with the USB installation anyway.
     2. Start WikidPad.
-    3. Open the "About" dialog (in menu "Help") and scroll the shown
-       text down to the end. The configuration directory is mentioned
+    3. Open the "About" dialog (in ["Help" menu]) and scroll the shown
+       text down to the end. The [configuration directory] is mentioned
        there.
-    4. Go with the Windows Explorer to this configuration directory.
+    4. Open this [configuration directory] in MsWindowsExplorer.
     5. Close WikidPad. After a short time you should see there a file
-       "WikidPad.config" and a directory ".WikidPadGlobals" (if they
+       "WikidPad.config" and a [WikidPadGlobals directory] (if they
        are not already there).
-    6. Move file and directory to the directory where you installed
-       WikidPad.
+    6. Move file and directory to the [WikidPad installation directory].
     7. If you installed WikidPad on hard drive, copy or move it to
        the USB stick.
     8. Start it from there by double clicking on the "WikidPad.exe"
        file in the destination directory on the stick.
-    9. Repeat step 3., but this time the configuration directory
-       should be identical to the destination directory. If it is
+    9. Repeat step 3., but this time the [configuration directory]
+       should be identical to the [destination directory]. If it is
        not, something went wrong.
 
-After that, WikidPad does still place its temporary files in the system's default temporary directory. To change this, open options dialog, go to options page "Application" (top of the list), set entry "Temporary file directory" to "Config. dir." and restart WikidPad.
+After that, WikidPad still places its [temporary files] in the system's [default temporary directory]. To change this, open options dialog, go to options page "Application" (top of the list), set entry "Temporary file directory" to "Config. dir." and restart WikidPad.
 
-Another helpful option on options page "Application" is "Store relative pathes to wikis" to save paths to the recently opened wikis (listed in menu "Wiki"->"Recent") relative to WikidPad installation directory.
+Another helpful option on the options page "Application" is "Store relative pathes to wikis" to save paths to the recently opened wikis (listed in ["Wiki" menu]->"Recent") relative to the [WikidPad installation directory].
 
 Now WikidPad doesn't need anymore to modify any files on the host computer and you can carry wikis as well as the configuration files on a USB stick to every computer you want.
 
@@ -36,4 +36,4 @@ Now WikidPad doesn't need anymore to modify any files on the host computer and y
 For technical details how this all works, see [ApplicationConfigurationFiles].
 
 
-[camelCaseWordsEnabled: false]
+[:page:PageFooter][alias:Wikid Pad on a USB stick][camelCaseWordsEnabled: false]

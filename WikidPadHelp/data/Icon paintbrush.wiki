@@ -1,2 +1,2 @@
-﻿++ Icon paintbrush
-[icon: paintbrush]
+﻿+ Icon paintbrush
+[icon:paintbrush]

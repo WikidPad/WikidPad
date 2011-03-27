@@ -1,2 +1,2 @@
-﻿++ Icon pc
-[icon: pc]
+﻿+ Icon pc
+[icon:pc]

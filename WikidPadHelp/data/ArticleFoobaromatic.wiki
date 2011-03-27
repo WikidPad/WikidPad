@@ -1,4 +1,4 @@
-﻿++ Article Foobaromatic
+﻿+ Article Foobaromatic
 
 Manufacturer: Yoyodyne
 Price: 135,70

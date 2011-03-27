@@ -1,0 +1,14 @@
+﻿[:page:PageHeader][:toc:]
++ Keyboard Shortcut Ctrl-L
+
+Use [Ctrl-L] in order to activate / follow a link.
+
+++ See also
+
+	* [Ctrl-Alt-L]
+	* WikiWordNavigation
+	* ["Wiki Page" menu]
+	* KeyBindings
+
+
+[:page:PageFooter][icon:key][alias:Ctrl-L][short_hint:Activate link]

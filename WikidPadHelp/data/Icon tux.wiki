@@ -1,2 +1,2 @@
-﻿++ Icon tux
-[icon: tux]
+﻿+ Icon tux
+[icon:tux]

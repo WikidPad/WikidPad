@@ -1,2 +1,2 @@
-++ Icon cd_drive
-[icon: cd_drive]
+﻿+ Icon cd_drive
+[icon:cd_drive]

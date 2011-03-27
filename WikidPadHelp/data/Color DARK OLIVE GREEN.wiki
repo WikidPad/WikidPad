@@ -1,2 +1,2 @@
-﻿++ Color DARK OLIVE GREEN
-[color: DARK OLIVE GREEN]
+﻿+ Color DARK OLIVE GREEN
+[color: DARK OLIVE GREEN][icon:color palette]

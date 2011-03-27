@@ -1,0 +1,23 @@
+﻿[:page:PageHeader][:toc:]
++ Wiki Word
+
+++ Simple WikiWord
+A simple \WikiWord is any CamelCase word typed into the WikiTextEditor.
+
++++ Examples
+
+	* TodoList
+	* JohnDoe
+
+
+++ What are WikiWords?
+
+\WikiWords are (at least by default) all words which start with an
+uppercase letter and where at least one uppercase letter follows a
+lowercase letter in the word (this is called "CamelCase", like e.g.
+\WikiWord).
+
+A \WikiWord can be CamelCase, [not Camel Case],or a WIKIDPADWord.
+
+
+[:page:PageFooter][alias:WikiWords][short_hint:'A WikiWord is simply any CamelCase or "[not Camel Case]" word']

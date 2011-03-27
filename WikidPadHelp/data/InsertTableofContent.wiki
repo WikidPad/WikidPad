@@ -1,0 +1,7 @@
+﻿[:page:PageHeader][:toc:]
++ Insert Tableof Content
+
+See [Insertions].
+
+
+[:page:PageFooter][alias:ToC; Insert a Table of Content; Insert TableofContent]

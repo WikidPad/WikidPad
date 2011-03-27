@@ -1,2 +1,2 @@
-++ Icon clip
-[icon:clip ]
+﻿+ Icon clip
+[icon:clip]

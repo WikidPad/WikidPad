@@ -1,2 +1,2 @@
-﻿++ Icon glasses
-[icon: glasses]
+﻿+ Icon glasses
+[icon:glasses]

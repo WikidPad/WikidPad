@@ -1,27 +1,34 @@
-﻿++ Wiki Word Navigation
+﻿[:page:PageHeader][:toc:]
++ Wiki Word Navigation
 
-*Open Parent/Children Words*
+++ Open Parent/Children Words
 
-You can use the tree to navigate your wikiwords.  Or you can use the
+You can use the tree to navigate your WikiWords.  Or you can use the
 "view parents" and "view children" feature.
 
++++ View Parents
 To view the parents of the current page, the pages that link to this
-page, either enter "CTRL-UP" or select "Wiki Words/View Parents"
+page, either enter [Ctrl-Up] or select "Wiki Words/View Parents"
 from the menu bar.
 
++++ View Children
 To view the children of the current page, the pages that this page
-links to, either enter "CTRL-DOWN" or select "Wiki Words/View
+links to, either enter [Ctrl-Down] or select "Wiki Words/View
 Children" from the menu bar.
 
+++ Follow a Link
 When editing a piece of text you can follow a link in a couple
 of different ways.
 
     1. Double click the link.
     2. Hold down control and click the link.
-    3. Type Ctrl-L to Activate the link.
-    4. For wikiwords you can also use Ctrl-Shift-L
+    3. Type [Ctrl-L] to activate the link.
+    4. For WikiWords you can also use [Ctrl-Shift-L]
 
-*To Open Any Word*
+++ Open *Any* Word
 
-To open a link anywhere in the active wiki type in CTRL-O. This opens
+To open a link anywhere in the active wiki type in [Ctrl-O]. This opens
 a dialog that will search for words. 
+
+
+[:page:PageFooter]

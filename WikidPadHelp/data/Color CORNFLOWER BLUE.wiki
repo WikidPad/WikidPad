@@ -1,2 +1,2 @@
-﻿++ Color CORNFLOWER BLUE
-[color: CORNFLOWER BLUE]
+﻿+ Color CORNFLOWER BLUE
+[color: CORNFLOWER BLUE][icon:color palette]

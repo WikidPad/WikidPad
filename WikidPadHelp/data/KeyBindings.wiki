@@ -1,55 +1,73 @@
-﻿++ Key Bindings
+﻿[:page:PageHeader][:toc:]
++ Key Bindings
 
-Many of the key bindings defined below may be changed, ChangingKeyBindings.
+Many of the key bindings defined below may be changed, see ChangingKeyBindings.
 
-Please note: These bindings have been developed for use on Windows.
-On other Operating Systems like Apple OSX or Linux there may be differences.
+Please note: These bindings have been developed for use on MsWindows.
+On other Operating Systems like [Apple OSX] or Linux there may be differences.
 See KeyBindingsOnLinuxAndOsx.
 
-*Formatting*
-CTRL-B          bold
-CTRL-I          italic
-CTRL-ALT-H      heading
 
-*Commands*
-CTRL-L          activate link
-CTRL-ALT-L      activate wikiword in a new tab
-CTRL-W          rewrap text at position
-CTRL-E          eval scripts
-CTRL-F          start incremental search, perform next search
-F3              start incremental search, perform next search
-CTRL-ALT-F      search for words within the wiki
+++ TextFormatting
+	* [Ctrl-B]          bold
+	* [Ctrl-I]          italic
 
-*History*
-CTRL-H          view history
-CTRL-ALT-UP     view history, select -1
-CTRL-ALT-DOWN   view history, select +1
-ALT-LEFT        go back in history
-ALT-RIGHT       go forward in history
+++ WikiHeaders
+	* [Ctrl-Alt-H]      heading
 
-*Wiki Words*
-CTRL-O          open wiki word
-CTRL-S          save current word
-CTRL-R          replace
-CTRL-ALT-R      rename the current wiki word
-CTRL-D          delete the current word, and content for that word
-CTRL-UP         view parents of current word
-CTRL-DOWN       view children of current word
-CTRL-SHIFT-UP   view parentless nodes
-CTRL-ALT-B      add a bookmark
+++ Navigate
+	* [Ctrl-L]          activate link
+	* [Ctrl-Alt-L]      activate WikiWord in a new tab
 
-*View*
-CTRL-+          zoom in
-CTRL--          zoom out
-CTRL-SHIFT-A    show edit mode of current tab
-CTRL-SHIFT-S    show preview mode of current tab
+++ SearchingTheWiki
+	* [Ctrl-F]          start IncrementalSearch, perform next search
+	* [F3]              start IncrementalSearch, perform next search
+	* [Ctrl-Alt-F]      search for words within the wiki
+
+++ [History]
+	* [Ctrl-H]          view [history]
+	* [Ctrl-Alt-Up]     view [history], select -1
+	* [Ctrl-Alt-Down]   view [history], select +1
+	* [Ctrl-Alt-Left]   go back in [history]
+	* [Ctrl-Alt-Right]  go forward in [history]
+
+++ WikiWords
+	* [Ctrl-O]          search for and open WikiWord
+	* [Ctrl-S]          save current WikiWord
+	* [Ctrl-R]          search and replace within current WikiWord 
+	* [Ctrl-Alt-R]      rename the current WikiWord
+	* [Ctrl-D]          delete the current WikiWord, including all content for that word
+	* [Ctrl-Up]         view parents of current WikiWord
+	* [Ctrl-Down]       view children of current WikiWord
+	* [Ctrl-Shift-Up]   view [parentless nodes]
+
+++ View
+	* [Ctrl-Shift-A]    show [Edit mode] of current WikiTextEditorTab
+	* [Ctrl-Shift-S]    show [Preview mode] of current WikiTextEditorTab
+	* [Ctrl-Shift-Space]toggle between [Edit mode] and [Preview mode] of current tab
+
+	* [Ctrl-T]          hide/show the ["Tree" window]
+	* [F6]              cycle through windows
+	* [Ctrl-Tab]        switch between WikiTextEditorTabs
+
+++ Zoom
+	* [Ctrl-+]          zoom in
+	* [Ctrl--]          zoom out
+
+++ WikiBookmarks
+	* [Ctrl-Alt-B]      add a bookmark
+	* [Ctrl-Shift-B]    goto bookmark
+ 
+++ Commands
+	* [Ctrl-W]          rewrap text at position
+	* [Ctrl-E]          eval scripts
+
+++ Wiki
+	* [Ctrl-N]          new Wiki
+	* [Ctrl-Alt-O]      open wiki
+
+++ Insert
+	* [Ctrl-Alt-D]      Insert current date/time
 
 
-*Misc*
-CTRL-T          hide/show the tree control
-CTRL-ALT-D      Insert current date/time
-CTRL-N          new Wiki
-CTRL-ALT-O      open wiki
-CTRL-SHIFT-B    view bookmarks
-F6              switch between tree and editor
-CTRL-TAB        switch between tabs
+[:page:PageFooter][icon:list][child_sort_order: natural]

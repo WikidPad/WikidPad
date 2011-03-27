@@ -1,40 +1,49 @@
-﻿++ Clipboard Catcher (certain OS' only)
+﻿[:page:PageHeader][:toc:]
++ Clipboard Catcher (certain OS' only)
 
-The clipboard catcher is similar to the ScratchPad. While the ScratchPad catches text chunks which are especially copied to it inside WikidPad, the clipboard catcher collects every piece of text copied (or cutted) to clipboard from every application and appends it to a wiki page of your choice.
+The clipboard catcher is similar to the ScratchPad. The difference is:
+
+	* The ScratchPad catches text chunks which are specifically copied to it from inside WikidPad.
+	* The ClipboardCatcher collects every piece of text copied (or cutted) to the ClipBoard from every other application and appends it to a WikiPage of your choice.
 
 
-+++ Prerequisites
+++ Prerequisites
 
-Unfortunately the clipboard catcher is not available for all operating systems and environments. For Windows it works out of the box, for Linux/Gnome some things should be paid attention to:
+The ClipboardCatcher is not available for all operating systems and environments, unfortunately. 
 
-    * It needs pyGTK to be installed properly
-    * It only works on the default clipboard, not the so-called "primary"
-    clipboard used when selecting text and pressing middle mouse button for
-    insert.
+For MsWindows it works out of the box.
+
+For Linux/Gnome systems, attention should be paid to the following:
+
+    * [pyGTK] needs to be installed properly.
+    * It only works on the default ClipBoard, not the so-called
+    "primary" clipboard used when selecting text and pressing middle
+    mouse button for insert.
     * If "Avoid doubled snippets" in the options for the catcher isn't
     checked, you may see that copying or cutting text in WikidPad while the
     catcher is on may behave unexpected (because WikidPad tries to copy/cut
-    and insert the clipboard contents at the same time). With "Avoid doubled
+    and insert the ClipBoard contents at the same time). With "Avoid doubled
     snippets" checked, it can detect this case.
-    * It was only tested on an Ubuntu 8.04 using Gnome. There may be
+    * It was only tested on Ubuntu 8.04 using Gnome. There may be
     situations (e.g. with KDE/Qt-applications) where it doesn't work.
 
+++ Modes of operation
 
 +++ Clipboard catcher at page
 
 In this mode, the clipboard catcher appends copied text to the page for which it was activated, even if you go to another page while it is active.
 
-Go to the wiki page where the clipboard snippets should be appended to. Activate "Clipboard Catcher at Page" in menu "Edit". If you open the menu again, you can see that "Clipboard Catcher at:" is checked now and the page name is appended to the menu item.
+Go to the WikiPage where the clipboard snippets should be appended to. Activate "Clipboard Catcher at Page" in the ["Edit" menu]. If you open the menu again, you can see that "Clipboard Catcher at:" is checked now and the name of the WikiPage name is appended to the menu item.
 
 
 +++ Clipboard catcher at cursor
 
 In this mode, the snippets are inserted at current cursor position as if they were typed in manually. Cursor position and page won't be remembered. If you change the cursor position, snippets will be inserted at the new one.
 
-Activate "Clipboard Catcher at Cursor" in menu "Wiki Words".
+Activate "Clipboard Catcher"->"Set at Cursor" in the ["Edit" menu].
 
 
-+++ Disabling clipboard catcher
++++ Disable the clipboard catcher
 
 The clipboard catcher is disabled when:
 
@@ -43,8 +52,11 @@ The clipboard catcher is disabled when:
     * WikidPad is closed
 
 
-+++ Configuration
+++ Configuration
 
 In the options dialog, page "Clipboard Catcher", there are entries "Prepend before clipboard snippet" and "Append after clipboard snippet" where you can set which character(s) should be appended after each caught snippet.
 
-In this field you can use the same escapes as in the replace field of the "Find and Replace" dialog in regular expression mode as well as time formats as these shown in "Date Format" dialog in "Edit"->"Settings" menu (see also [Printing#++++ Page separator]).
+In this field you can use the same escapes as in the replace field of the "Find and Replace" dialog in [regular expression] mode as well as time formats as these shown in "Date Format" dialog in ["Edit" menu]->["Settings" submenu] (see also [Printing#+++ Page separator]).
+
+
+[:page:PageFooter]

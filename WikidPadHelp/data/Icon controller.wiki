@@ -1,2 +1,2 @@
-++ Icon controller
-[icon:controller ]
+﻿+ Icon controller
+[icon:controller]

@@ -1,0 +1,59 @@
+﻿[:page:PageHeader][:toc:]
++ Anchor
+
+An Anchor allows You to define a particular position within any hyper
+linked page, such as a WikiPage or any HtmlPage. Given such an
+anchor, a jump to that specific position may be invoked from anywhere
+else using an appropriate link.
+
+Anchors for WikiPages are supported in both, in [Edit mode] and in [Preview mode).
+In exported HtmlPages, anchors are supported using standard HtmlSyntax ("#...").
+
+
+++ Defining an Anchor and its name
+
+Anchors are defined with the special anchor tag "anchor:", followed by the name of that anchor, as follows:
+
+anchor: here
+
+The anchor tag must be on a separate line by itself, no other text before or after it.
+
+After "anchor:" you give the anchor its name.
+
+Such name of an anchor must consist solely of:
+	* letters A to Z (upper or lowercase), 
+	* digits and 
+	* underscore.
+
+The name of an anchor must *not* contain spaces, nor any other special or non-English character(s).
+
+Naturally, such name of an anchor should be unique within the page in order to avoid ambiguities.
+
+
+++ Hyperlinking to an Anchor
+
+In order to link to a particular anchor in a WikiPage, append an
+exclamation mark ("!") and the name of the anchor name to the
+WikiWord. (Note: Non-CamelCase WikiWords must be put in brackets, as
+always.)
+
+Example:
+
+[Anchor]!here
+
+or
+
+TextFormatting!html
+
+Doubleclick on such link in order to jump to the page, and having the cursor moved to the position following that anchor tag.
+
+
+++ Remarks
+
+    * Anchors are case-sensitive. Thus, "here" and "Here" are different anchors.
+    * The anchor tags are invisible in [HTML preview] and [HTML export].
+
+See also [Footnotes].
+
+
+[:page:PageFooter][alias:Anchors; PageAnchor; PageAnchors; WikiPageAnchor; WikiPageAnchors]

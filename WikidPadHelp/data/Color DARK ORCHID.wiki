@@ -1,2 +1,2 @@
-﻿++ Color DARK ORCHID
-[color: DARK ORCHID]
+﻿+ Color DARK ORCHID
+[color: DARK ORCHID][icon:color palette]

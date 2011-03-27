@@ -1,23 +1,23 @@
-﻿++ Key Bindings On Linux And Osx
+﻿[:page:PageHeader][:toc:]
++ Key Bindings On Linux And Osx
 
-The original KeyBindings are for Windows.
+The original KeyBindings are for MsWindows.
 
-Some of them doesn't work on Linux or Apple OSX because they are reserved by the Operating System or the Desktop Environment itself. Or due to other reasons.
+Some of them doesn't work on Linux or [MacOSX] because they are reserved by the Operating System or the Desktop Environment itself. Or due to other reasons.
 
-Additionally the Windows' "Ctrl" key is existing on Mac OSX as well. 
+Additionally the MsWindows' [Ctrl] key is existing on MacOSX as well. 
 At least it seems so. But in reality one has to use the "Command" key instead.
 
 Example:
-The original keybinding Ctrl-Space (Autocomplete) is technically equivalent to the key Command-Space on OSX which in fact is used to start Apple Spotlight. 
-So it can't be used by WikidPad.
+The original keybinding [Ctrl-Space] for AutoComplete is technically equivalent to the key Command-Space on OSX which in fact is used to start Apple Spotlight. Thus, it can't be used by WikidPad.
 
 As described in page ChangingKeyBindings it is possible to implement workarounds.
 
-One approach is to do that locally in "user_extensions".
-But the better one may be to do it globally in the directory "extensions".
+This could be done locally in "user_extensions".
+But preferrably You do it globally in the directory "extensions".
 
-Here a list of already known problems/differences.
-(The following is a bit technically for now...)
+Here is a list of already known problems/differences.
+(This is going to be a bit technically for now...)
 
 <<pre
 -----------------------------------------
@@ -32,7 +32,7 @@ else:
     #    "Ctrl-Shift-L"   simply does nothing
     ActivateLinkNewTab="Alt-Shift-L"
     ActivateLinkBackground="Alt-Shift-Ctrl-L"
-    # to test: What about Mac OSX?   wx.Platform == "__WXMAC__"
+    # to test: What about MacOSX?   wx.Platform == "__WXMAC__"
 
 -----------------------------------------
 
@@ -59,3 +59,6 @@ if wx.Platform == "__WXMAC__":
 else:
     AutoComplete="Ctrl-Space"
 >>
+
+
+[:page:PageFooter]

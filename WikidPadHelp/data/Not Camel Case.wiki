@@ -1,1 +1,5 @@
-﻿++ Not Camel Case
+﻿[:page:PageHeader][:toc:]
++ not Camel Case
+
+
+[:page:PageFooter]

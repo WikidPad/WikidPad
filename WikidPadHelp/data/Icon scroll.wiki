@@ -1,2 +1,2 @@
-﻿++ Icon scroll
-[icon: scroll]
+﻿+ Icon scroll
+[icon:scroll]

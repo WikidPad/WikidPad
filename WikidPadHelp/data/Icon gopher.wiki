@@ -1,2 +1,2 @@
-﻿++ Icon gopher
-[icon: gopher]
+﻿+ Icon gopher
+[icon:gopher]

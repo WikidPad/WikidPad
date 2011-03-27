@@ -1,2 +1,2 @@
-﻿++ Color DIM GREY
-[color: DIM GREY]
+﻿+ Color DIM GREY
+[color: DIM GREY][icon:color palette]

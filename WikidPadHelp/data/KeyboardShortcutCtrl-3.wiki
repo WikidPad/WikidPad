@@ -1,0 +1,15 @@
+﻿[:page:PageHeader][:toc:]
++ Keyboard Shortcut Ctrl-3
+
+Use [Ctrl-3] in order to execute function script number 1.
+
+++ See also
+
+	* [Ctrl-1], [Ctrl-2], [Ctrl-4], [Ctrl-5], [Ctrl-6]
+	* [Ctrl-E]
+	* ["Extra" menu]
+	* InlinePythonEval
+	* KeyBindings
+
+
+[:page:PageFooter][icon:key][alias:Ctrl-3][short_hint:Run Function 3]

@@ -1,0 +1,54 @@
+﻿[:page:PageHeader][:toc:]
++ Wikid Pad Help Todo
+
+F:\!!_Projects\Python\WikidPad\branches\mbutscher\work\WikidPadHelp\data\WikiPadHelpStyleGuide.wiki
+
+
+++ todo Michael
+	* [F6] is not in [Menus] - might go in ["View" menu], or in ["Navigate" menu]
+	* ["Navigate" menu] needs to be discussed / reviewed
+
+++ Problems 
+
+++ to be completed
+	* WikidPadHelpTodo
+	* WikidPadHelpStyleGuide
+	* WikidPadHelpNew
+	* 
+++ missing Pages / Aliases
+	* WikiTextEditor
+		* [View mode]
+		* [Edit mode]
+		* [Preview mode]
+
+	* misc KeyboardShortcut's are missing
+	* WikiTextEditorTab
+	* WikidPadDirectories
+		* [wiki data directory] => rename WikidPadWikiDataDirectory.wiki
+		* [application directory]
+		* [configuration directory]
+		* [files directory]
+		* [default temporary directory]
+
+++ WikidPadHelp BuzzWords
+	* Tree view, ["Tree" pane]
+	* ["Views" node]
+	* WikidPadDirectories
+		* [wiki directory]
+	* WikidPadFiles
+		* [temporary files]
+	* currently opened wiki	
+	* WikidPad [database backend]
+	* Linux and other OS's
+
+
+++ other WikidPad Issues
+
+WikidPadParser.py: UrlPAT:
+	* protocols should be case-insensitive: MailTo:
+	* Skype: is a protocol :-)
+
+	* TreeView should become MultiTabbed - for Symmetry and Functionality
+	* StructureView should become MultiTabbed (with just one Tab)
+	* StructureView should not disappear without notice
+	* VersionsView should not disappear without notice

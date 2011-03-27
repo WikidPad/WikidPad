@@ -1,0 +1,13 @@
+﻿[:page:PageHeader][:toc:]
++ Keyboard Shortcut Ctrl-B
+
+Use [Ctrl-B] in order to format some selected text as *bold*.
+
+++ See also
+
+	* [Ctrl-I]
+	* TextFormatting
+	* KeyBindings
+
+
+[:page:PageFooter][icon:key][alias:Ctrl-B][short_hint:Format selected text as bold]

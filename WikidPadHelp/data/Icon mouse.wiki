@@ -1,2 +1,2 @@
-﻿++ Icon mouse
-[icon: mouse]
+﻿+ Icon mouse
+[icon:mouse]

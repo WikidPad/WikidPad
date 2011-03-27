@@ -1,2 +1,2 @@
-﻿++ Icon tracker ball
-[icon: tracker ball]
+﻿+ Icon tracker ball
+[icon:tracker ball]

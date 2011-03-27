@@ -1,2 +1,2 @@
-﻿++ Color CORAL
-[color: CORAL]
+﻿+ Color CORAL
+[color: CORAL][icon:color palette]

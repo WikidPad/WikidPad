@@ -1,22 +1,23 @@
-﻿++ Auto Completion
+﻿[:page:PageHeader][:toc:]
++ Auto Completion
 
-When pressing the keyboard shortcut for autocompletion (normally CTRL-SPACE), the program looks at the characters to the left of the text cursor on the same line and shows a list of suggestions how to complete the text.
+When pressing the keyboard shortcut for autocompletion (usually [Ctrl-Space]), the program looks at the characters to the left of the text cursor on the same line and shows a list of suggestions how to complete the text.
 
 This works for the following components (for all of the following examples, move the cursor to the end of the line and press the shortcut):
 
 
-+++ Wiki words
+++ Wiki words
 
-An incomplete wiki word (with left bracket or without) can be completed. Examples:
+An incomplete WikiWord (with left bracket or without) can easily be completed. Examples:
 
     TextForm
     [Not Cam
     
-For bracketed wiki words the closing bracket is normally not part of the suggestions, but there is an option to change that. See OptionsDialog#*Append# closing# bracket# on# auto-complete*
+For bracketed WikiWords the closing bracket is usually not part of the suggestions, but there is an option to change that. See [OptionsDialog#++++ Append closing bracket on auto-complete]
 
 
 
-+++ Anchors of wiki words
+++ Anchors of wiki words
 
 If you don't know what an anchor is, you might read [Anchors] first.
 
@@ -26,7 +27,7 @@ If the wiki word is complete and suffixed with an exclamation mark, you can auto
 
 
 
-+++ Attributes
+++ Attributes
 
 See WikiDocumentAttributes about attributes. WikidPad automatically suggests the builtin attributes even if they weren't used in a wiki before.
 
@@ -37,7 +38,7 @@ Examples:
 
 
 
-+++ Todo items
+++ Todo items
 
 See TodoItems.
 
@@ -47,4 +48,4 @@ Autocompletion only works within the first 40 characters in the todo key (the pa
     todo:
 
 
-[bookmarked=true]
+[:page:PageFooter][bookmarked=true]

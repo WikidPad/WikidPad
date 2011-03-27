@@ -1,2 +1,2 @@
-﻿++ Icon dino
-[icon: dino]
+﻿+ Icon dino
+[icon:dino]

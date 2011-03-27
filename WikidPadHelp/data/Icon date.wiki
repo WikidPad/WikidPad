@@ -1,2 +1,2 @@
-﻿++ Icon date
-[icon: date]
+﻿+ Icon date
+[icon:date]

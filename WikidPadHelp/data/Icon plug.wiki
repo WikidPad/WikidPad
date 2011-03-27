@@ -1,2 +1,2 @@
-﻿++ Icon plug
-[icon: plug]
+﻿+ Icon plug
+[icon:plug]

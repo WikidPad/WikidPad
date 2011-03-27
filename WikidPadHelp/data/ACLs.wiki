@@ -1,3 +1,7 @@
-﻿++ ACLs
+﻿[:page:PageHeader][:toc:]
++ ACLs
 
 *Access control lists* define in the NTFS file system who can/can't do what with a file or directory (e.g. read, write, delete).
+
+
+[:page:PageFooter][short_hint:Access control lists]

@@ -1,34 +1,34 @@
-﻿++ Database Types
+﻿[:page:PageHeader][:toc:]
++ Database Types
 
-WikidPad supports different database backends to store the wiki pages (see [WhereIsTheDataStored] for the differences).
+WikidPad supports different database backends to store the WikiPages (see [WhereIsTheDataStored] for the differences).
 
 See [MigrationBetweenDbTypes] if you want to change the type of an existing wiki.
 
 
-In some places you are asked which backend to use:
+In some places you are asked which [database backend] to use:
 
 
-+++ The Windows binary installer
-When using the Windows binary installer you are asked if you want to install the Gadfly and/or Sqlite database support. You should choose at least one option, otherwise you wont be able to open any wiki database!
+++ The MsWindowsBinaryInstaller
+When using the MsWindowsBinaryInstaller you are asked if you want to install the Gadfly and/or Sqlite database support. You should choose at least one option, otherwise you wont be able to open any wiki database!
 
 
-+++ Creating a new wiki
-After choosing name and position of the new wiki you are asked to choose the database type.
+++ Creating a new wiki
+After choosing the name and the position of the new wiki you are asked to choose the database type.
 
 
-+++ Opening an older wiki
-If you open the first time a wiki created by an older version of WikidPad(Compact) you are asked to choose the database type it has.
+++ Opening an older wiki
+If you open a wiki created by an older version of WikidPad(Compact) for the first time, you are asked to choose the database type it has.
 
-If it was created by original WikidPad the right choice is "Original Gadfly", for WikidPadCompact it is "Compact Sqlite". Your choice will be stored in the wiki configuration file so the application will choose the right type automatically next time.
-
-
-+++ Overriding type on open
-If you open a wiki with "Wiki"->"Maintenance"->"Open as Type", you are always asked for the database type to use. This is helpful when migrating from one database backend to another.
+If the wiki was created by the original WikidPad the right choice is "Original Gadfly", for WikidPadCompact it is "Compact Sqlite". Your choice will be stored in the wiki configuration file so the application will choose the right type automatically next time.
 
 
-+++ Determining the database type of the currently open wiki
+++ Overriding type on open
+If you open a wiki with ["Wiki" menu]->"Maintenance"->"Open as Type", you are always asked for the database type to use. This is helpful when migrating from one database backend to another.
 
-Open the "Wiki Info" dialog in "Wiki" menu and look at the "Wiki database backend" entry.
+
+++ Determining the database type of the currently open wiki
+Open the "Wiki Info" dialog in ["Wiki" menu] and look at the "Wiki database backend" entry.
 
 
-[camelCaseWordsEnabled=false]
+[:page:PageFooter][camelCaseWordsEnabled=false]

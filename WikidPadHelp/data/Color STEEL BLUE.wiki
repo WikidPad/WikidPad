@@ -1,2 +1,2 @@
-﻿++ Color STEEL BLUE
-[color: STEEL BLUE]
+﻿+ Color STEEL BLUE
+[color: STEEL BLUE][icon:color palette]

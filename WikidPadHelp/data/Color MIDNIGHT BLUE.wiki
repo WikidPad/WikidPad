@@ -1,2 +1,2 @@
-﻿++ Color MIDNIGHT BLUE
-[color: MIDNIGHT BLUE]
+﻿+ Color MIDNIGHT BLUE
+[color: MIDNIGHT BLUE][icon:color palette]

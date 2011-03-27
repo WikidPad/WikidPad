@@ -1,0 +1,32 @@
+﻿[:page:PageHeader][:toc:]
++ Example Insertions
+
+At first a few wiki links to demonstrate the functions: (KeyBindings, DeadLink, DeadLinkToo, ScratchPad, TextBlocks)
+
+It is recommended to switch to [Preview mode] to see the effect of the tags.
+
+See also ExampleInsertPage.
+
++++++ \[:rel: parents]
+[:rel: parents]
+
++++++ \[:rel: children]
+[:rel: children]
+
++++++ \[:rel: children;existingonly;columns 2]
+[:rel: children;existingonly;columns 2]
+
++++++ \[:rel: children;existingonly;columns 2;coldir down]
+[:rel: children;existingonly;columns 2;coldir down]
+
++++++ \[:savedsearch: nanny; columns 4] (all pages containing "any")
+[:savedsearch: nanny; columns 4]
+
++++++ \[:toc:]
+[:toc:]
+
++++++ \[:eval:"5+6"]
+[:eval:"5+6"]
+
+
+[:page:PageFooter][icon:spanner]

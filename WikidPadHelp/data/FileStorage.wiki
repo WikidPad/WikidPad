@@ -1,13 +1,14 @@
-﻿++ File Storage
+﻿[:page:PageHeader][:toc:]
++ File Storage
 
 Each wiki can have a file storage (in fact a directory "files" in the wiki directory) where files from other places can copied into. This is helpful if you want to have the wiki and related files in the same place.
 
-You can copy a file into the file storage by holding the control key when dropping one or more files from Windows Explorer onto the editor. These files are then copied into the file storage and relative links to them are created in the editor. If a file was already in the storage (see "Identity check" below) a link to the existing file is shown instead and no copying is performed.
+You can copy a file into the file storage by holding the control key when dropping one or more files from MsWindowsExplorer onto the editor. These files are then copied into the file storage and relative links to them are created in the editor. If a file was already in the storage (see "Identity check" below) a link to the existing file is shown instead and no copying is performed.
 
 If copying is necessary and a file with exactly the same name is not yet present in the repository, the full name of the source file is kept unmodified. Otherwise a random sequence of 10 letters/digits is generated and appended at the end of the file name (but before file suffix). If this name is also already in use, the program tries again with a different random sequence (up to 10 tries before giving up).
 
 
-+++ Identity check
+++ Identity check
 
 To find out if an identical file is already in the file storage, WikidPad performs an identity check. The behavior of the check can be modified by some options in the options dialog, page "Current Wiki".
 
@@ -25,7 +26,7 @@ If the option *"Modif. date is enough"* is in effect, and one candidate has the 
 If "Modif. date is enough" is disabled or no file with identical date could be found, the candidates are compared byte by byte. This may take a while.
 
 
-+++ Remarks
+++ Remarks
 
     * You can create other directories than the "files" and "data" directory in your wiki directory and put files in it and use relative URLs to address them, but only the "files" directory is managed by the file storage mechanism.
     * The file storage never deletes a file in the storage even it is not referenced by an URL anymore.
@@ -34,7 +35,9 @@ If "Modif. date is enough" is disabled or no file with identical date could be f
     * During identity check and copying WikidPad does not respond to any key presses or mouse clicks.
 
 
-+++ On HTML export
+++ On HTML export
 
 When exporting as HTML all files in the file storage which are referenced by a relative URL (URL beginning with "rel://") in the exported pages are copied to a "files" directory in the destination directory. This does also apply to files in subdirectories of the "files" directory.
 
+
+[:page:PageFooter][alias:File Storage; File storage; file storage]

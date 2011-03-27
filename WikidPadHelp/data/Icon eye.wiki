@@ -1,2 +1,2 @@
-﻿++ Icon eye
-[icon: eye]
+﻿+ Icon eye
+[icon:eye]

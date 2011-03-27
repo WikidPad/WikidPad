@@ -1,19 +1,22 @@
-﻿++ Command Line Support
+﻿[:page:PageHeader][:toc:]
++ Command Line Support
 
-+++ Old form
+++ Old form
 
 You can have up to two command line parameters, without leading '-'
 which have the following meaning:
 
++++++ First Parameter
 *First parameter* can be a path to a .wiki file (either a text file with
-wiki page content (this page is opened then) or the wiki configuration
+WikiPage content (this page is opened then) or the wiki configuration
 file). Instead of a path it can also be an URL with wiki: protocol
 
-*Second parameter* can be the name of a wiki word to open, if not
++++++ Second parameter* 
+*Second parameter* can be the name of a WikiWord to open, if not
 specified in the first parameter.
 
 
-+++ New form
+++ New form
 
 You can specify switches and/or parameters on the command line where
 the names of the switches either consist of a '-' and a character
@@ -28,72 +31,72 @@ all options), the long form and (if necessary) the meaning of the
 parameter in angle brackets:
 
 
-++++ General
++++ General
 
-*-h, --help*
++++++ -h, --help
 Shows a message box with a short overview of available switches.
 
-*-w, --wiki  <wiki path>*
++++++ -w, --wiki  <wiki path>
 Set the wiki to open on startup (same as first parameter of old form).
 
-*-p, --page <page name>*
++++++ -p, --page <page name>
 Set the page to open on startup (same as second parameter of old form). You can repeat this parameter multiple times to open multiple tabs.
 
-*--rebuild*
++++++ --rebuild
 Rebuild the opened wiki.
 
-*--no-recent*
-Do not record opened wikis in recently opened wikis list found in menu "Wiki" as submenu "Recent"
++++++ --no-recent
+Do not record opened wikis in recently opened wikis list found in ["Wiki" menu]->"Recent"
 
-*--preview*
-If no pages are given, all opened pages from previous session are opened in preview mode. Otherwise all pages mentioned on command line after that option are opened in preview mode.
++++++ --preview
+If no pages are given, all opened pages from previous session are opened in [Preview mode]. Otherwise all pages mentioned on command line after that option are opened in [Preview mode].
 
-*--editor*
-Same as --preview but opens in text editor mode. You can use both switches in conjunction, e.g.
++++++ --editor
+Same as --preview but opens in text [Edit mode]. You can use both switches in conjunction, e.g.
 
 -p Page1 --preview -p Page2 -p Page3 --editor -p Page4
 
-opens Page1 in editor mode (editor is the default mode), Page2 and Page3 are opened as preview, Page4 in editor mode again
+opens Page1 in [Edit mode] (this is the default mode), Page2 and Page3 are opened in [Preview mode], and Page4 in [Edit mode] again
 
-*-x, --exit*
++++++ -x, --exit
 Exit immediately after command line actions were completed.
 
 
-++++ Exporting
++++ Exporting
 
 The following three must all be specified if you want to export
 something, the fourth (--export-compfn) is optional:
 
-*--export-what <what>*
++++++ --export-what <what>
 Choose if you want to export *page*, *subtree* or *wiki*.
 
-*--export-type <type>*
++++++ --export-type <type>
 Tag of the export type. Currently this can be:
 
-    * html_single: A single wiki page per HTML file
-    * html_multi: Multiple wiki pages in one HTML file
+    * html_single: A single WikiPage per HtmlFile
+    * html_multi: Multiple WikiPages in one HtmlFile
     * raw_files: Set of \*.wiki files in UTF-8 format with BOM
 
 Attention: In 1.9 the meaning of "html_single" and "html_multi"
 were reversed!
 
-*--export-dest <destination path>*
++++++ --export-dest <destination path>
 Path of destination directory for export.
 
 
-*--export-compfn*
++++++ --export-compfn
 Use compatible filenames on export.
 
-*--export-saved <name of saved export>*
++++++ --export-saved <name of saved export>
 Instead of the first three you can also use this to run a previously saved export profile
 
-*--continuous-export-saved <name of saved export>*
++++++ --continuous-export-saved <name of saved export>
 Use this to start a continuous export when starting WikidPad
 
 
-++++ Special
++++ Special
 
-*--deleteconfig*
++++++ --deleteconfig
 If this is the only switch on the command line, the program deletes
 (*without further request!*) the configuration files which are the
 main "WikidPad.config" file as well as everything in
@@ -103,6 +106,8 @@ file).
 After that the program terminates immediately (otherwise the files
 would be recreated).
 
-This switch is mainly used for the uninstalling of a Windows binary.
+This switch is mainly used for the uninstalling of a MsWindowsBinary.
 The uninstaller *will* ask before running WikidPad with this option.
 
+
+[:page:PageFooter][icon:console]

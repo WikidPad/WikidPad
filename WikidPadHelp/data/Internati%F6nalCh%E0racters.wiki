@@ -1,17 +1,9 @@
-﻿++ Internatiönal Chàracters
+﻿[:page:PageHeader][:toc:]
++ Internatiönal Chàracters
 
 WikiWords may contain InternatiönalChàracters.
 
-Tests
-    * ÄtTheBeginning
-    * AtTheEnð
-    * StuckÄtTheMiddle
-    * XxXxÖx.
+For examples, see ExampleInternatiönalChàracters.
 
-    * SšTtz
 
-zžtsš
-
-ŠSTŽZ
-
-ÓsÔsÖsÚsÜsÝ
+[:page:PageFooter]

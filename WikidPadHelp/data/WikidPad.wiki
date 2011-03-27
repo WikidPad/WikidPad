@@ -1,0 +1,12 @@
+﻿[:page:PageHeader][:toc:]
++ Wikid Pad
+
+WikidPad is a [wiki]-like notebook for storing your thoughts, ideas,
+todo lists, contacts, articles or anything else you can think of that's
+important to You.  WikidPad is different from other notepad or outliner 
+applications - e.g. see how easy you can cross-link your information.
+
+Just type a CamelCase WikiWord in order to create a WikiLink in a wiki.
+
+
+[:page:PageFooter]

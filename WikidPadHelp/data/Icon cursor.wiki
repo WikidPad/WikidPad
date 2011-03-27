@@ -1,2 +1,2 @@
-++ Icon cursor
-[icon: cursor]
+﻿+ Icon cursor
+[icon:cursor]

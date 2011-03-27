@@ -1,0 +1,19 @@
+﻿[:page:PageHeader][:toc:]
++ Wiki Header
+
+Headers are very useful in order to structure Your text.
+
+Just type one to five "+" plus characters at the beginning of a new line, followed by a blank space and then by the text of Your header line.
+
+++ Example
+
++ Heading1
+++ Heading2
++++ Heading3
+++++ Heading4
++++++ Heading5
+
+See also: [Folding], [page structure window], InsertTableofContent.
+
+
+[:page:PageFooter][alias:WikiHeaders]

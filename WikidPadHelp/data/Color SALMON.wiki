@@ -1,2 +1,2 @@
-﻿++ Color SALMON
-[color: SALMON]
+﻿+ Color SALMON
+[color: SALMON][icon:color palette]
