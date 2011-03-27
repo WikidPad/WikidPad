@@ -1,2 +1,2 @@
-﻿+ Icon crazy hair
-[icon:crazy hair]
+++ Icon crazy hair
+[icon: crazy hair]

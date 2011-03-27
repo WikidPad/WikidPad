@@ -1,0 +1,15 @@
+﻿++ Page Structure Window
+
+Like the tree(s) give a concise view of your whole wiki, the document structure window gives a concise view of the current page by listing all headings (or only headings up to a certain level) and allows to jump to a particular heading (in editor and preview).
+
+First you must activate the doc. structure window in the options, page "Application", entry "Structure window pos.". Select where to position it relative to the main window (top, bottom, left or right).
+
+Then you must restart WikidPad, this is unfortunately necessary after all changes to the window layout (similarly when changing the position of one of the trees).
+
+Now you see the headings in the new window. When selecting one, the editor or preview jumps to it.
+
+Double clicking it sets the focus to the editor/preview so you can directly start typing or scrolling in the main window. If in the options the entry "Auto-hide structure window" is checked, double clicking also collapses the document structure window (hides it temporarily)
+
+To expand/collapse the window manually, use in menu "View" entry "Show Doc. Structure".
+
+

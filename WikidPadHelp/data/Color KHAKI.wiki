@@ -1,2 +1,2 @@
-﻿+ Color KHAKI
-[color: KHAKI][icon:color palette]
+﻿++ Color KHAKI
+[color: KHAKI]

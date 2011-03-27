@@ -1,2 +1,2 @@
-﻿+ Icon eraser
-[icon:eraser]
+﻿++ Icon eraser
+[icon: eraser]

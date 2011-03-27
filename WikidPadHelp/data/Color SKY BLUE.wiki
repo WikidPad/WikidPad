@@ -1,2 +1,2 @@
-﻿+ Color SKY BLUE
-[color: SKY BLUE][icon:color palette]
+﻿++ Color SKY BLUE
+[color: SKY BLUE]

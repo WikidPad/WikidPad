@@ -1,7 +1,0 @@
-﻿[:page:PageHeader][:toc:]
-++ Wiki Page
-
-todo: Add content
-
-
-[:page:PageFooter][alias:WikiPages]

@@ -1,7 +1,0 @@
-﻿[:page: PageHeader][:toc:]
-+ upgrade Wikid Pad
-
-todo: Add content
-
-
-[:page: PageHeader]

@@ -1,2 +1,2 @@
-﻿+ Icon open
-[icon:open]
+﻿++ Icon open
+[icon: open]

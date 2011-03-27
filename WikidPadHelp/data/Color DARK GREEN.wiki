@@ -1,2 +1,2 @@
-﻿+ Color DARK GREEN
-[color: DARK GREEN][icon:color palette]
+﻿++ Color DARK GREEN
+[color: DARK GREEN]

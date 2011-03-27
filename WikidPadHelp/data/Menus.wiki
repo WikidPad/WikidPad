@@ -1,18 +1,14 @@
-﻿[:page:PageHeader][:toc:]
-+ Menus
+﻿++ Menus
 
-WikidPad has the following drop-down menus:
-
-	* ["Wiki" menu]
-	* ["Edit" menu]
-	* ["View" menu]
-	* ["Tabs" menu]
-	* ["Wiki Page" menu]
-	* ["Format" menu]
-	* ["Navigate" menu]
-	* ["Extra" menu]
-	* ["Plugins" menu]
-	* ["Help" menu]
+[Menu Wiki]
+[Menu Edit]
+[Menu View]
+[Menu Tabs]
+[Menu Wiki Page]
+[Menu Format]
+[Menu Navigate]
+[Menu Extra]
+[Menu Help]
 
 
-[:page:PageFooter][icon:list][child_sort_order: natural]
+[child_sort_order: natural]

@@ -1,2 +1,2 @@
-﻿+ Color SPRING GREEN
-[color: SPRING GREEN][icon:color palette]
+﻿++ Color SPRING GREEN
+[color: SPRING GREEN]

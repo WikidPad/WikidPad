@@ -1,2 +1,2 @@
-﻿+ Color NAVY
-[color: NAVY][icon:color palette]
+﻿++ Color NAVY
+[color: NAVY]

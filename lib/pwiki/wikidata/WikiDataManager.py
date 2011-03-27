@@ -412,13 +412,6 @@ class WikiDataManager(MiscEventSourceMixin):
 
         self.whooshIndex = None
 
-        # TODO: Only initialize on demand
-        self.onlineSpellCheckerSession = None
-        if SpellChecker.isSpellCheckSupported():
-            self.onlineSpellCheckerSession = \
-                    SpellChecker.SpellCheckerSession(self)
-            self.onlineSpellCheckerSession.rereadPersonalWordLists()
-
         self.refCount = 1
 
 
@@ -442,6 +435,13 @@ class WikiDataManager(MiscEventSourceMixin):
         except DbWriteAccessError, e:
             traceback.print_exc()
             writeException = e
+
+        # TODO: Only initialize on demand
+        self.onlineSpellCheckerSession = None
+        if SpellChecker.isSpellCheckSupported():
+            self.onlineSpellCheckerSession = \
+                    SpellChecker.SpellCheckerSession(self)
+            self.onlineSpellCheckerSession.rereadPersonalWordLists()
 
         # Path to file storage
         fileStorDir = os.path.join(os.path.dirname(self.getWikiConfigPath()),
@@ -2055,7 +2055,8 @@ class WikiDataManager(MiscEventSourceMixin):
                 "indexSearch_enabled", False):
             self.pushDirtyMetaDataUpdate()
         else:
-            if strToBool(miscevt.get("old config settings")["indexSearch_enabled"]):
+            if strToBool(miscevt.get("old config settings")
+                    .get("indexSearch_enabled", "False")):
                 # Index search was switched off
 
                 # Check for wiki pages with wrong metadata state and adjust

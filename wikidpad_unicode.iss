@@ -50,8 +50,8 @@ Name: {app}\WikidPadHelp\data
 Name: {app}\WikidPadHelp\files
 Name: {app}\export
 [Setup]
-#define verStr "2.2beta01_1"
-#define verNo "002.002.101.001"
+#define verStr "2.2beta02"
+#define verNo "002.002.102.000"
 
 SolidCompression=true
 AppName=WikidPad
@@ -61,7 +61,7 @@ DefaultGroupName=WikidPad
 AppID={{22A83C29-58A8-4CAB-8EDC-918D74F8429E}
 VersionInfoVersion={#verNo}
 VersionInfoTextVersion=WikidPad {#verStr}
-LicenseFile=C:\DATEN\Projekte\Wikidpad\Current\license.txt
+LicenseFile=license.txt
 AllowNoIcons=true
 ShowLanguageDialog=yes
 Compression=lzma/ultra

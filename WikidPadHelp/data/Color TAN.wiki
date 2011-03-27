@@ -1,2 +1,2 @@
-﻿+ Color TAN
-[color: TAN][icon:color palette]
+﻿++ Color TAN
+[color: TAN]

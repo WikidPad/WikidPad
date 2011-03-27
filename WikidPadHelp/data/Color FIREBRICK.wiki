@@ -1,2 +1,2 @@
-﻿+ Color FIREBRICK
-[color: FIREBRICK][icon:color palette]
+﻿++ Color FIREBRICK
+[color: FIREBRICK]

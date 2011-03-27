@@ -1,2 +1,2 @@
-﻿+ Color PLUM
-[color: PLUM][icon:color palette]
+﻿++ Color PLUM
+[color: PLUM]

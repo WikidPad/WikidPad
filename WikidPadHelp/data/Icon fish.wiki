@@ -1,2 +1,2 @@
-﻿+ Icon fish
-[icon:fish]
+﻿++ Icon fish
+[icon: fish]

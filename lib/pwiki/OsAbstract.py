@@ -89,8 +89,10 @@ else:
         """
         # TODO: Check for directories
         # os.rmdir(path) ?
-        os.unlink(path) 
-
+        if os.path.isfile(path) or os.path.islink(path):
+            os.unlink(path)
+        elif os.path.isdir(path):
+            os.rmdir(path)
 
 
 # Define samefile

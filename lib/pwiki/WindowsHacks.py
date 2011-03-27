@@ -355,7 +355,10 @@ if SHFileOperationW is not None:
         
         This function only works on Win NT!
         """
-        _shellFileOp(FO_DELETE, path, None)
+        if os.path.isfile(path) or os.path.islink(path):
+            _shellFileOp(FO_DELETE, path, None)
+        elif os.path.isdir(path):
+            os.rmdir(path)
 
 
 def _getMemoryContentFromHandle(hdl):

@@ -1,32 +1,62 @@
-﻿[:page:PageHeader][:toc:]
-+ Change Log
+﻿++ Change Log
 
-++ Feb. 27, 2011: 2.2beta01
+Mar. 27, 2011 (2.2beta02)
+
+    * File cleanup dialog to find orphaned files in file storage and
+      missing files (aka dead links). See [FileCleanupDialog]
+
+    * Less jumping around of selection in doc structure window when
+      adding text (thanks to Christian Ziemski)
+    * Support for spaces in bracketed URLs
+    * Option to control type of URL (bracketed or not) on drag&drop.
+      See [OptionsDialog#*Links in brackets*]
+    * Support for URL appendix "prnr" to create a relative link
+      which is not relocated (modified) when exported as HTML to
+      a different destination. See [UrlLinking#++ URL Appendix]
+    * Option to sort list in "Open Wiki Word" dialog in reverse
+      alphabetical order
+    * Keybinding settings introduced to move one or more selected
+      logical lines one line up or down. See [ChangingKeyBindings]
+
+    * Bug fixed: URL links with title give exception
+    * Bug fixed: Export dialog didn't work
+    * Bug fixed: Favorite wiki icons may open wrong wiki
+    * Bug fixed: Misleading error message and bad error handling
+      for corrupted wiki config file
+
+    * Internal: Deprecated makeRelUrlAbsolute() and
+      makeAbsPathRelUrl() in PersonalWikiFrame, call functions in
+      WikiDocument instead
+
+
+
+Feb. 27, 2011 (2.2beta01)
 
     * Support for [.] to refer to current wiki page
     * Introduced "prel" and "pabs" in URL appendix and automatic
       adaption of relative links. See [UrlLinking#++ URL Appendix]
-    * MsWindowsBinaryInstaller now supports creation of a portable
+    * Windows binary installer now supports creation of a portable
       install (no uninstall, no registry or start menu changes)
     * Incremental search now also supported in inline diff view
-    * Removed annoying "blinking" on current heading in the
-      [page structure window] (thanks to Christian Ziemski)
+    * Removed annoying "blinking" on current heading in
+      doc structure window (thanks to Christian Ziemski)
     * Introduced splash window.
-      See [OptionsDialog#+++ Show splash screen]
+      See [OptionsDialog#*Show splash screen*]
 
-    * Bug fixed: AutoCompletion for [Anchors] treated wiki links as
-      WikiWords (no relative or absolute paths supported)
+    * Bug fixed: Autocompletion for anchors treated wiki links as
+      wiki words (no relative or absolute paths supported)
     * Bug fixed: Error in error handling for unknown wiki language
       tag on opening a wiki
-    * Bug fixed: Problems with MsInternetExplorer 6 on Win XP SP2 
-      reduced (problems with iframe remain)
+    * Bug fixed: Problems with IE 6 on Win XP SP2 reduced (problems
+      with iframe remain)
     * Bug fixed: Sometimes relative links not possible due to
       undesired case sensitivity
     * Bug fixed: "SetCallFilterEvent" not supported by older
       wxPython versions
 
 
-++ Jan. 30, 2011: 2.1beta11
+
+Jan. 30, 2011 (2.1beta11)
 
 This version needs a rebuild of the index if you enabled indexed
 search. This is done automatically in the background but may
@@ -38,37 +68,38 @@ official parser
 
     * Option for translating menu accelerators for special keyboard
       layouts where ctrl-level has other layout than base level.
-      See [OptionsDialog#+++ Translate menu accelerators for keyboard layout]
+      See [OptionsDialog#*Translate menu accelerators for keyboard layout*]
     * Option to show iframe content from external sources inside
-      the MsInternetExplorer preview.
-      See [Options HTML preview_export#Show iframes inside IE preview]
-    * Experimental: MsWindows: Option to let scroll-wheel scroll
-      the window under the pointer. Doesn't work for some windows.
-      See [OptionsDialog#+++ Scroll under pointer]
+      the HTML IE preview.
+      See [Options HTML preview_export#*Show iframes inside IE preview*]
+    * Experimental: Windows: Option to let scroll-wheel scroll
+      windows under pointer. Doesn't work for some windows.
+      See [OptionsDialog#*Scroll under pointer*]
     * Index search: Highlight found terms and jump to one found
       term on double-click
     * Removed plus signs in front of headings in page structure
       view, used indentation instead
 
     * Several bug fixes regarding "whoosh" (index search)
-    * Bug fixed: MsWindows: "Invalid handle" error on command line
+    * Bug fixed: Windows: "Invalid handle" error on command line
       bridge insertion plugins
-    * Bug fixed: Autocompletion for [Anchors] treated WikiLinks as
-      WikiWords (no relative or absolute paths supported)
+    * Bug fixed: Autocompletion for anchors treated wiki links as
+      wiki words (no relative or absolute paths supported)
 
     * Internal, index search: Store a format number for search
       index and rebuild index if number doesn't match the format
       of current WikidPad version
 
 
-++ Dec. 27, 2010: 2.1beta10
+
+Dec. 27, 2010 (2.1beta10)
 
 Creators of derived WikidPad parsers should merge changes from
 official parser
 
     * Basic support for indexed search. See [SearchingTheWiki/Index]
     * Menu item and toolbar icon to move up from subpage to
-      its superpage. See [MenuNavigate#++ Upward]
+      its superpage. See [Menu Navigate#++ Upward]
 
     * Bug fixed: Stack overflow for too deeply nested wikis on
       tree-sorted print/export
@@ -78,7 +109,8 @@ official parser
       internationalization
 
 
-++ Dec. 05, 2010: 2.1beta09
+
+Dec. 05, 2010 (2.1beta09)
 
 Creators of derived WikidPad parsers should merge changes from
 official parser
@@ -86,14 +118,15 @@ official parser
     * Autocompletion now also suggests builtin attributes
     * Command line options to run a saved export profile either once
       or as continuous export.
-      See [CommandLineSupport#--export-saved <name of saved export>]
+      See [CommandLineSupport#*--export-saved <name of saved export>*]
 
     * Bug fixed: Autocompletion of attribute keys didn't work
     * Bug fixed: Printing didn't work
     * Bug fixed: Empty line after table was eaten in HTML export
 
 
-++ Oct. 30, 2010: 2.1beta08
+
+Oct. 30, 2010 (2.1beta08)
 
     * Chinese translation of user interface (thanks to yuxiaoxu)
     * Hungarian translation of user interface (thanks to Török Árpád)
@@ -113,7 +146,8 @@ official parser
     * Internal: Changes in GUI layout to better support internationalization
 
 
-++ Sep. 25, 2010: 2.1beta07
+
+Sep. 25, 2010 (2.1beta07)
 
     * "WikidPadParser.py" modified. If you have your own version
       you must update it!
@@ -124,7 +158,7 @@ official parser
     * See [Subpages#+++ Wiki links versus wiki page names]:
         * "alias" and "template" attributes now process wiki links
           instead of wiki page names
-        * Replace text by WikiWord dialog now processes wiki links
+        * Replace text by wikiword dialog now processes wiki links
           instead of wiki page names
         * Auto-completion updated
 
@@ -132,54 +166,56 @@ official parser
       replaced by its children (the wiki pages containing the
       attribute)
 
-    * Bug fixed: Linux: Problem when opening a wiki when the
-      left-most WikiTextEditorTab was not selected last
+    * Bug fixed: Linux: Problem when opening a wiki where not
+      the left-most tab was selected last
     * Bug fixed: Menu item "Search and Replace" remained gray
-      after going back from [Preview mode] to [Edit mode]
+      after going back from preview to editor
     * Bug fixed: Harmless exception during searching
     * Bug fixed: No update of syntax highlighting under some
       circumstances
 
 
-++ Aug. 29, 2010: 2.1beta06
+
+Aug. 29, 2010 (2.1beta06)
 
     * Inline diff between versions.
-      See [WindowChronView#+++ Compare differences]
-    * MsWindows: Option to warn about other WikidPad processes running
+      See [ChronViewWindow#++++ Compare differences]
+    * Windows: Option to warn about other WikidPad processes running
       in single process mode.
-      See [OptionsDialog#+++ Warn about other processes]
+      See [OptionsDialog#*Warn about other processes*]
     * Option "coldir down" in appendix of "rel" insertions to sort
-      found WikiWords downwards in columns instead of rightwards.
+      found wiki words downwards in columns instead of rightwards.
       See [Insertions#multi-column table is sorted rightwards]
-    * The Wiki properties dialog now also shows the path of the 
-      [configuration directory]. 
-      And if the wiki is read-only, it explains why
+    * Wiki properties dialog now also shows configuration path and
+      if wiki is read-only explains why
 
     * Bug fixed: Homepage not prepared properly when creating new wiki
     * Small problems with non-ascii paths fixed
 
 
-++ Jul. 27, 2010: 2.1beta05
+
+Jul. 27, 2010 (2.1beta05)
 
     * When dropping files you now have options to move files to
       file storage (instead of copying) and to be asked every time
-      what to do. See [OptionsDialog#Dropping files]
+      what to do. See [OptionsDialog#*Dropping files*]
     * Option to define what to insert before, after and between file
       links when dropping files.
-      See [OptionsDialog#+++ File dropping]
+      See [OptionsDialog#+++++ File dropping] 
     * Spell check while type.
       See [SpellChecking#++ Spell check while type]
-    * Commandline options to start WikiTextEditorTabs in [Preview mode] and to
+    * Commandline options to start tabs in preview mode and to
       prevent list of recent opened wikis from updating.
-      See [CommandLineSupport#+++ General]
-    * WikidPad now remembers the active WikiTextEditorTab, and the [View mode]
-      ([Edit mode]/[Preview mode]) of each WikiTextEditorTab across sessions
+      See [CommandLineSupport#++++ General]
+    * WikidPad now remembers active tab and view mode
+      (editor/preview) of each tab
 
     * Bug fixed: Missing string <<"Set of *.wiki files">>
       for i18n
 
 
-++ Jul. 04, 2010: 2.1alpha04
+
+Jul. 04, 2010 (2.1alpha04)
 
     * Export of previous versions of a wiki page in multipage text
       file format is supported now.
@@ -197,26 +233,27 @@ official parser
       versions side-by-side with non-English UI language
     * Workaround: Option to forbid cancelling of running
       wiki-wide search.
-      See [OptionsDialog#+++ Forbid cancel on search]
+      See [OptionsDialog#*Forbid cancel on search*]
 
 
-++ Jun. 05, 2010: 2.1alpha03
+
+Jun. 05, 2010 (2.1alpha03)
 
     * When creating new wiki, dialog also asks if ascii-only
       file names should be used for wiki page files (default is on
-      for MacOS, see [OptionsDialog#+++ Page file names ASCII only])
+      for Mac OS, see [OptionsDialog#*Page file names ASCII only*])
     * Option to slow down background tree update (to reduce
       response delay of WikidPad).
-      See [OptionsDialog#+++ Update step min. delay]
+      See [OptionsDialog#*Update step min. delay*]
     * Support for processing right-clicks on toolbar icons from
       plugins (see file "extensions/referrals.py" as an example)
 
-    * Process "binInst.ini"-file (needed for MsWindowsBinary
+    * Process "binInst.ini"-file (needed for Windows binary
       wxPython downgrade)
-    * MsWindows: Workaround for too short labels in wxListCtrl
-    * MacOS: Further changes to keybindings
+    * Windows: Workaround for too short labels in wxListCtrl
+    * Mac OS: Further changes to keybindings
     * Bug fixed: Setting wiki to readonly failed
-    * Bug fixed: Linux: Problems when switching WikiTextEditorTabs too fast
+    * Bug fixed: Linux: Problems when switching tabs too fast
       (thanks to Christian Ziemski)
     * Bug fixed: Wrong focus position after opening wiki in
       same window
@@ -226,12 +263,13 @@ official parser
       notice a change)
 
 
-++ May 04, 2010: 2.1alpha02
 
-    * [CSS] style classes for the heading levels (named "heading-level1"
+May 04, 2010 (2.1alpha02)
+
+    * CSS style classes for the heading levels (named "heading-level1"
       to "heading-level15")
     * Appendix "adjheading" for insertion "page" to adjust headings of
-      a page included into another. See [Insertions#*page*]
+      a page included into another. See [Insertions#    * *page*]
     * Menu item to convert between absolute and relative URL.
       See [UrlLinking#++ Converting between relative and absolute URL]
     * Context menu item for file: and rel: URLs to open
@@ -241,92 +279,96 @@ official parser
       to show a list where user can select zero or more list entries.
       See [ApiDocs#stdDialog(]
 
-    * MacOS: Several enhancements and bug fixes (thanks to
+    * Mac OS: Several enhancements and bug fixes (thanks to
       Christian Ziemski)
     * Reduction of used CPU time while WikidPad is minimized
     * Workaround for problems to detect screen size
       in multi-display environments
     * Internal: Clearer error message for missing XML-ID
-    * Internal: MsWindowsBinary: Plugins are now compiled at
+    * Internal: Windows binary: Plugins are now compiled at
       run-time with "-O" option (keeps doc-strings)
 
 
-++ Apr. 05, 2010: 2.1alpha01
+
+Apr. 05, 2010 (2.1alpha01)
 
     * New database format! It is recommended to make a backup before
       updating and run "Maintenance"->"Update cache" after that
 
     * Storing of timestamp of last visit to a page. The
       "Open Wiki Word" dialog allows now to sort by newest or oldest
-      visit time. See [MenuNavigate#++ Go to Page]
+      visit time. See [Menu Navigate#++ Go to Page]
     * Context menu entry to apply a particular page as template on
       a newly created page (and option to define which pages to offer
       as templates). See [ChangeLog#+++ Using templates explicitly]
     * In wiki-wide search in boolean search mode, the "\todo:" prefix
       now behaves exactly as the "attr:" prefix.
       See [SearchingTheWiki/BooleanRegex#++++ todo:]
-    * WikiTextEditorTabs close now if a WikiWord is deleted and 
-      no other word is in the history of this WikiTextEditorTab
+    * Tabs close now if a wikiword is deleted and no other word is
+      in the history of this tab
     * Context menu of "file:" and "rel:" URLs now offers to open
       containing folder of a file
-    * When using headings as WikiWordLinks and opening a heading,
-      cursors now jumps to this heading in the WikiTextEditor
+    * When using headings as wiki word links and opening a heading,
+      cursors now jumps to this heading in editor
 
     * Internal: Renaming "properties" of a wiki page to "attributes"
       in function and token names to get a more consistent naming.
       Currently there is compatibility code to keep plugins working.
     * Internal: Todos are now processed (and especially parsed) in
-      a way similar to attributes. If you have your own parser, update
-      it according to "extensions\WikidPadParser\WikidPadParser.py".
+      a similar way as attributes. If you have your own parser, update
+      it according to "extensions\wikidPadParser\WikidPadParser.py".
 
     * Some key bindings in Scintilla editor component removed to avoid
-      interference with WikidPad KeyBindings
+      interference with WikidPad key bindings
     * Some changes to better handle missing Unicode support for
-      filesystem in Python (affects mainly MacOS)
+      filesystem in Python (affects mainly Mac OS)
 
-    * Bug fixed: KeyboardShortcut for ActivateLinkBackground
+    * Bug fixed: Keyboard shortcut for ActivateLinkBackground
       doesn't work
     * Bug fixed: Updating wiki database fails if a pagefile is missing
-    * Bug fixed: Linux: Sometimes focus doesn't switch from the label 
-      of a WikiTextEditorTab to the content automatically
+    * Bug fixed: Linux: Sometimes focus doesn't switch from tab label
+      to tab automatically
     * Bug fixed: Focus not going back when aborting the opening of
       a wiki
 
 
-++ Feb. 28, 2010: 2.0beta13
+
+Feb. 28, 2010 (2.0beta13)
 
     * It's now possible to copy whole directories into the
       file storage of a wiki
-    * [F6] cycles now also through the ["Page Structure" window]
-      and the ["Chronological View" window] if they are visible.
+    * F6 cycles now also through chronological view and page structure
+      if they are visible
 
     * Bug fixed: No meaningful error message if exporting from
       commandline fails
     * Bug fixed: HTML export of subpages failed
-    * Bug fixed: Using [F6] to cycle through windows did also switch to 
-      ["Tree" window] even if this was invisible. 
+    * Bug fixed: Using F6 to switch between tree and tabs switched
+      also to invisible tree. 
 
-    * Bug fixed: Linux: Automatic focus shift from WikiTextEditorTab
-      label to content of WikiTextEditorTab did not always work
+    * Bug fixed: Linux: Automatic focus shift from tab to tab content
+      did not always work
     * Bug fixed: Linux: Selecting page in tree shifted focus to
-      WikiTextEditorTab content, therefore no keyboard navigation in tree
-    * Bug fixed: Linux: Problems with WikiTextEditorTab switching by keyboard
+      tab content, therefore no keyboard navigation in tree
+    * Bug fixed: Linux: Problems with tab switching by keyboard
 
-    * Bug fixed: MsWindows: Incomplete or foreign enchant installation
+    * Bug fixed: Windows: Incomplete or foreign enchant installation
       may crash WikidPad on startup
-    * Bug fixed: MsWindows7: Error message when using font dialog
+    * Bug fixed: Windows 7: Error message when using font dialog
 
 
-++ Jan. 31, 2010: 2.0beta12
+
+Jan. 31, 2010 (2.0beta12)
 
     * Support for renaming of subpages when renaming superpage.
       See [RenamingWikiWords]
-    * More logical behavior when closing WikiTextEditorTab if MRU order is active
+    * More logical behavior when closing tab if MRU order is active
 
     * Bug fixed: In wiki-wide search "Replace All" didn't work
 
 
-++ Jan. 06, 2010: 2.0beta11
+
+Jan. 06, 2010 (2.0beta11)
 
     * Support for clipboard catcher on Linux (at least Gnome).
       See [ClipboardCatcher#+ Prerequisites]
@@ -339,15 +381,20 @@ official parser
       IME workaround
 
 
-++ Previous Years
+[ChangeLog2009]
 
-+++ [ChangeLog2009]
-+++ [ChangeLog2008]
-+++ [ChangeLog2007]
-+++ [ChangeLog2006]
-+++ [ChangeLog2005]
-+++ [ChangeLog2004]
-+++ [ChangeLog2003]
+[ChangeLog2008]
+
+[ChangeLog2007]
+
+[ChangeLog2006]
+
+[ChangeLog2005]
+
+[ChangeLog2004]
+
+[ChangeLog2003]
 
 
-[:page:PageHeader][bookmarked: true][tree_position: 0]
+[bookmarked: true]
+[tree_position: 0]

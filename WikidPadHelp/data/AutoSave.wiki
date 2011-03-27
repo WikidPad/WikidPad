@@ -1,13 +1,11 @@
-﻿[:page:PageHeader][:toc:]
-+ Auto Save
+﻿++ Auto Save
 
-WikidPad tries very often to save the document in Your WikiEditorWindow:
+WikidPad tries to save the document in the editor window for you often.
 
-    1. at around 5-15 seconds of idle time
-    2. when You navigate to a new WikiWord
-    3. upon shutdown
+    1. Saves at around 5-15 seconds of idle time.
+    2. Saves on navigation to a new wiki word.
+    3. Saves on shutdown.
 
-You can manually save a document by typing [Ctrl-S].
+You can manually save a document by typing "CTRL-S"
 
-
-[:page:PageFooter][icon:disk]
+[icon: disk]

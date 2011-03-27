@@ -674,9 +674,9 @@ class _MissingGrid(EnhancedGrid):
     ACTION_DELETE = 2
 
     COL_FULLPATH = 0
-    COL_ACTION = 1
+#     COL_ACTION = 1
 
-    COL_COUNT = 2
+    COL_COUNT = 1
 
 
     def __init__(self, parent, db, wikiDocument, collator, id=-1):
@@ -708,7 +708,7 @@ class _MissingGrid(EnhancedGrid):
         self.CreateGrid(0, self.COL_COUNT)
 
         self.SetColLabelValue(self.COL_FULLPATH, _(u"Path"))
-        self.SetColLabelValue(self.COL_ACTION, _(u"Action"))
+#         self.SetColLabelValue(self.COL_ACTION, _(u"Action"))
 #         self.SetColLabelValue(self.COL_ERROR, _(u"Error"))
 
         colWidthSum = sum(self.GetColSize(i) for i in range(self.COL_COUNT))
@@ -721,12 +721,12 @@ class _MissingGrid(EnhancedGrid):
 
         self.SetColAttr(self.COL_FULLPATH, readOnlyAttr)
 
-        actionChEditor = wx.grid.GridCellChoiceEditor(self.ACTIONCHOICELIST,
-                False)
-        actionAttr = wx.grid.GridCellAttr()
-        actionAttr.SetEditor(actionChEditor)
-
-        self.SetColAttr(self.COL_ACTION, actionAttr)
+#         actionChEditor = wx.grid.GridCellChoiceEditor(self.ACTIONCHOICELIST,
+#                 False)
+#         actionAttr = wx.grid.GridCellAttr()
+#         actionAttr.SetEditor(actionChEditor)
+# 
+#         self.SetColAttr(self.COL_ACTION, actionAttr)
 
         self.updateGridBySql()
 
@@ -788,22 +788,24 @@ class _MissingGrid(EnhancedGrid):
             self.gridToId.append(id)
 
             self.SetCellValue(rowNo, self.COL_FULLPATH, fullPath)
-            self.SetCellValue(rowNo, self.COL_ACTION,
-                    self.ACTIONCHOICELIST[action])
+#             self.SetCellValue(rowNo, self.COL_ACTION,
+#                     self.ACTIONCHOICELIST[action])
 
         self.SetGridCursor(row, col)
 
 
     def storeGridToSql(self):
-        sqlDb = self.db.getSqlDb()
+        pass
 
-        for rowNo, id in enumerate(self.gridToId):
-#             print "--storeGridToSql5", repr((rowNo, id, self.GetCellValue(rowNo,
-#                     self.COL_ACTION), self.ACTIONCHOICELIST.index(self.GetCellValue(rowNo,
-#                     self.COL_ACTION))))
-            sqlDb.execSql("update refedItems set action=? where id==?",
-                    (self.ACTIONCHOICELIST.index(self.GetCellValue(rowNo,
-                    self.COL_ACTION)), id))
+#         sqlDb = self.db.getSqlDb()
+# 
+#         for rowNo, id in enumerate(self.gridToId):
+# #             print "--storeGridToSql5", repr((rowNo, id, self.GetCellValue(rowNo,
+# #                     self.COL_ACTION), self.ACTIONCHOICELIST.index(self.GetCellValue(rowNo,
+# #                     self.COL_ACTION))))
+#             sqlDb.execSql("update refedItems set action=? where id==?",
+#                     (self.ACTIONCHOICELIST.index(self.GetCellValue(rowNo,
+#                     self.COL_ACTION)), id))
 
 
 
@@ -1303,6 +1305,8 @@ class FileCleanupDialog(wx.Dialog):
         # Fixes layout problem
         orphanedGrid.GetGrandParent().Layout()
         missingGrid.GetGrandParent().Layout()
+        
+        self.ctrls.nbCleanup.SetSelection(0)
 
         # Fixes focus bug under Linux
         self.SetFocus()

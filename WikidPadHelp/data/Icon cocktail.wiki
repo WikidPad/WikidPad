@@ -1,2 +1,2 @@
-﻿+ Icon cocktail
-[icon:cocktail]
+++ Icon cocktail
+[icon: cocktail]

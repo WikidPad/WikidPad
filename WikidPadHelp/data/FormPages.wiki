@@ -1,5 +1,4 @@
-﻿[:page:PageHeader][:toc:]
-+ Form Pages
+﻿++ Form Pages
 
 Especially in conjunction with [Templates], you might have pages where only a few special fields should be filled in, like a form.
 
@@ -24,5 +23,3 @@ MySystemInfo
 
 This example is of practical use because the questions on the page should be answered (among others) when sending a bug report.
 
-
-[:page:PageFooter]

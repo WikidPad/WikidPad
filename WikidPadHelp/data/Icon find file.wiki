@@ -1,2 +1,2 @@
-﻿+ Icon find file
-[icon:find file]
+﻿++ Icon find file
+[icon: find file]

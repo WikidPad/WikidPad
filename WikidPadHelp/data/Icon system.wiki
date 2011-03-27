@@ -1,2 +1,2 @@
-﻿+ Icon system
-[icon:system]
+﻿++ Icon system
+[icon: system]

@@ -1,0 +1,176 @@
+﻿++ Tree Icons
+
+These are the list of icons that may be used with the:
+[icon: icon]
+attribute.
+
+You can add additional icons to wikidPad by putting 16x16
+gif's into the "icons" folder in the install directory.
+
+IconTestPage
+
+airbrush
+align
+area selection
+barcode
+beer
+bottom-top
+boy
+brush
+cancel
+card
+carrot
+cd_audio
+cd_drive
+cd
+chart
+cherries
+clip
+cobra
+cocktail
+cog
+colour selection
+colour selector
+component
+console
+contact
+controller
+controls
+copy
+crab
+crazy hair
+cross
+cursor move
+cursor
+cut
+cycle
+data file
+date
+delete
+desert
+dice
+dino
+disk
+dna
+doc
+download
+drive c
+drive d
+drive e
+drive f
+drive g
+drive h
+drive networked
+drive
+earthworm
+eraser
+explorer
+eye
+fan
+file folder
+find file
+find picture
+find
+fish
+flag
+flash
+flood fill
+folder open
+folder
+folder2
+folderwiki
+gameboy
+gb advance
+glasses
+gopher
+graduate
+graph
+graph2
+grid
+grim
+hammer
+heli
+helmet
+home
+horizontal flip
+hub stack
+icon
+icons.txt
+joypad
+joystick
+left arrow
+left-right
+lens
+lifesaver
+link
+list
+listen
+lizard
+mail
+mobile
+modem
+monitor
+monster
+mountains
+mouse click
+mouse move
+mouse
+movie
+music
+mydoc
+note
+note2
+notepad
+ok
+open
+orgchart
+page
+paint
+paintbrush
+paste
+pc
+pencil
+person
+pin
+plug
+push
+pwiki.ico
+radio
+rename
+right arrow
+right-left
+salt
+scales
+scanner
+scroll
+select
+server
+skull
+skull_crossbones
+smudge
+sound file
+spanner
+speaker
+spiky hair
+sub
+system
+tank
+text
+thingy
+top-bottom
+tracker ball
+tux
+tv
+twirl
+undo
+user
+userlist
+users
+vertical flip
+vodka
+water drop
+web server
+winamp
+zip disk
+zoomin
+zoomout

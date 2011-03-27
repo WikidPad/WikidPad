@@ -5734,70 +5734,6 @@
                   <border>5</border>
                 </object>
                 <object class="sizeritem">
-                  <object class="wxFlexGridSizer">
-                    <cols>4</cols>
-                    <object class="sizeritem">
-                      <object class="wxStaticText" name="">
-                        <label>Default action:</label>
-                      </object>
-                      <option>0</option>
-                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                      <border>5</border>
-                    </object>
-                    <object class="sizeritem">
-                      <object class="wxChoice" name="chMissingDefaultAction">
-                        <content>
-                          <item>Keep</item>
-                          <item>Delete</item>
-                        </content>
-                        <selection>0</selection>
-                      </object>
-                      <option>0</option>
-                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                      <border>5</border>
-                    </object>
-                    <object class="sizeritem">
-                      <object class="wxStaticText" name="">
-                        <label>Collector page:</label>
-                      </object>
-                      <option>0</option>
-                      <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                      <border>5</border>
-                    </object>
-                    <object class="sizeritem">
-                      <object class="wxTextCtrl" name="tf63"/>
-                      <flag>wxALL|wxEXPAND</flag>
-                      <border>5</border>
-                    </object>
-                    <object class="spacer">
-                      <size>0,0</size>
-                    </object>
-                    <object class="spacer">
-                      <size>0,0</size>
-                    </object>
-                    <object class="spacer">
-                      <size>0,0</size>
-                    </object>
-                    <object class="spacer">
-                      <size>0,0</size>
-                    </object>
-                  </object>
-                </object>
-                <object class="sizeritem">
-                  <object class="wxCheckBox" name="cb121">
-                    <label>Keeping directory in filestorage keeps everything in it</label>
-                  </object>
-                  <option>0</option>
-                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                  <border>5</border>
-                </object>
-                <object class="sizeritem">
-                  <object class="wxStaticLine"/>
-                  <option>0</option>
-                  <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
-                  <border>5</border>
-                </object>
-                <object class="sizeritem">
                   <object class="wxStaticText" name="">
                     <label>Details</label>
                   </object>
@@ -5823,6 +5759,7 @@
                       <minsize>100,400</minsize>
                     </object>
                   </object>
+                  <option>1</option>
                   <flag>wxEXPAND</flag>
                 </object>
                 <object class="sizeritem">

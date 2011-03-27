@@ -1,9 +1,0 @@
-﻿[:page:PageHeader][:toc:]
-+ Camel Case Black List
-
-	* Open the "Views" node in the tree on the left, 
-	* open the "Func. pages" node
-	* click on "Global cc. blacklist" or "Wiki cc. blacklist".
-
-
-[:page:PageFooter]

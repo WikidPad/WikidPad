@@ -1,4 +1,4 @@
-﻿+ System Info Template
+﻿++ System Info Template
 
 
 Which operating system do you use?
@@ -19,7 +19,7 @@ Have you created your own version of some files in the "extensions" directory an
 Which filesystem is used to store the wiki files on (FAT, NTFS, network drive)?
     &&i
 
-Which database backend do you use: ("Original Gadfly", from original WikidPad, "Compact Sqlite", formerly known as WikidPadCompact or the new "Original Sqlite")?
+Which database backend do you use ("Original Gadfly", from original WikidPad, "Compact Sqlite", formerly known as WikidPadCompact or the new "Original Sqlite")?
     &&i
 
 

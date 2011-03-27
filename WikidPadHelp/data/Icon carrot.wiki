@@ -1,2 +1,2 @@
-﻿+ Icon carrot
-[icon:carrot]
+++ Icon carrot
+[icon: carrot]

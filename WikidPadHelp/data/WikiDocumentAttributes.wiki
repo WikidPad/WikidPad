@@ -1,19 +1,16 @@
-﻿[:page:PageHeader][:toc:]
-+ Wiki Document Attributes
+﻿++ Wiki Document Attributes
 
-WikiPages support "attributes". Attributes serve two purposes:
-
-	* You may index your data by attribute (in addition to: by WikiWord)
-	* They are used to specify certain special WikiFormattingCommands
+Wiki pages support "attributes". Attributes serve 2 purposes.  They
+allow you to index your data by attribute, in addition to by wikiword,
+and they are used to specify certain special wiki formatting commands.
 
 You can attach attributes to a page like this:
 
-\[attribute: value]
+[attribute: value]
 
-By such setting of an attribute, this document can be seen under the
-["Views" node] in the ["Tree" pane] on the left, under importance/high.
-
-Attributes you might want to add to your WikiWords, for example, might be:
+Setting an attribute like this makes this document available under the
+*Views* node in the tree on the left, under importance/high.  Example
+attributes you might want to add to your wiki words might be:
 
 [contact: work]
 [contact: private] for wiki contacts, ie JohnDoe
@@ -21,71 +18,53 @@ Attributes you might want to add to your WikiWords, for example, might be:
 [contact.personal.kids: school] to mark something as personal contact
 about school of the kids.
 
-Open the ["Views" node] in the ["Tree" pane] on the left to see how these 
-attributes become available for reference.
+Open the "Views" node in the tree on the left to see how these attributes
+become available for reference.
 
-++ Multiple Attribute Values
-
-Some attribute key may have have multiple values, e.g.
+If you have multiple attributes with same key but different value, e.g.
 <<
-[alias:Foo]
-[alias:Bar]
-[alias:FooBar]
+[alias: Foo]
+[alias: Bar]
+[alias: FooBar]
 >>
 
-Abbreviate multiple values of same attribute by writing them separated by semicolon, e.g.
+You can write them as multiple values in a single attribute, separated by semicolon, e.g.
 <<
-[alias:Foo; Bar; FooBar]
+[alias: Foo; Bar; FooBar]
 >>
-
-++ Quoting Values
 
 You can also quote the values, if they contain disallowed characters, e.g.
 [contact: "Carl [Home]"]
 
-The precise quoting syntax is the same as for [Insertions]#++ Syntax
+The precise quoting syntax is the same as for [Insertions]#+++# Syntax
 
 
-++ AutoCompletion
++++ Autocompletion
 
-Attributes also support AutoCompletion. Try it:
+Attributes also support auto completion. Try it:
 
-Place the cursor behind the m and press [Ctrl-Space]
+Place cursor after the m and press CTRL-SPACE
 [im
 
 
-++ Formatting a Page
-
 +++ Attribute Based Tree Formatting
 
-There are 3 special attributes which you can attach to a page in order to control
-the appearance of the page's node in the ["Tree" pane].
+There are 3 special attributes you can attach to a page that control
+the appearance of the page's node in the tree. These attributes override any global settings (see below): 
 
-These attributes override any [global settings] (see below): 
-
-+++++ icon: name
+icon: name (see TreeIcons)
+color: (white, blue, etc., see TreeNodeColors)
+bold: (true or false)
 
 Example:
-[icon:lens]
-\[icon:lens] changes the icon for this page to a lens.
+[icon: lens] changes the icon for this page to a lens.
 
-	See TreeNodeIcons
-
-+++++ color: (white, blue, etc.)
-	See TreeNodeColors
-	
-+++++ bold: (true or false)
-Set the font weight of the title of the WikiPage as shown in the ["Tree" window] to bold, or to normal.
-
-+++ Formatting a TodoItem
-
-Such attributes can also be written in a TodoItem. If used there, they control the presentation of the TodoEntry (below the special ["Views" node]) instead of the WikiPage.
+These attributes can also be written in a todo item. If used there, they control the presentation of the todo entry (below the special "Views" node) instead of the wiki page.
 
 Example:
 todo: Show another color [color: orange]
 
 
-++ Using Global Attribute Properties
 
 You can also use global attribute properties to change the appearance based on the existence of other properties.
 
@@ -96,7 +75,8 @@ Examples:
 This means any document in the wiki with an "importance" attribute
 that has a value of high will be bold.
 [importance: high]
-So setting \[importance: high] above is what makes the title of this document look bold in the ["Tree" window].
+So setting the above attribute is what made this document bold
+in the tree.
 
 
 If the global definition contains the first part(s) of an attribute the appearance is also changed.
@@ -117,9 +97,9 @@ When creating a new wiki some default global attributes are
 automatically attached to the root wiki document on the WikiSettings page.
 
 
-++ Special Attributes
++++ Special Attributes
 
-+++++ priority: 1-5
+*priority: 1-5*
 The priority setting will set the node text in the tree to
 "WikiDocumentAttributes (3)" for example.  It also will affect the
 importance setting of the node if "importance" is not already set.
@@ -127,23 +107,19 @@ importance setting of the node if "importance" is not already set.
 [priority: 3]
 
 
-+++++ font: font face name
-For the current page or the for whole wiki, set a particular font face to be used by the WikiTextEditor, 
+*font: font face name*
+Change the editor font of a page or the whole wiki.
 See WikiFonts for example and details.
 
 
-+++++ camelCaseWordsEnabled: "true" or "false"
+*camelCaseWordsEnabled: "true" or "false"*
 Control, if on one page or all pages (prefixed with "global") CamelCaseWords should be interpreted as wiki links.
 
-Bracketed words (e.g. [CamelCaseWord] are always seen as links).
+Bracketed words (e.g. [CamelCaseWords] are always seen as links).
 
 
-+++++ paragraph_mode: "true" or "false"
-Choose if for one or all pages.
-
-A newline in the WikiTextEditor is shown:
-	* as new line in [HTML preview]/[HTML export] (paragraph_mode: false) or
-	* is ignored and only an empty line starts a new paragraph (paragraph_mode: true).
+*paragraph_mode: "true" or "false"*
+Choose if for one or all pages a newline in editor is shown as new line in HTML preview/export (paragraph_mode: false) or is ignored and only an empty line starts a new paragraph (paragraph_mode: true).
 
 This paragraph is shown in
 preview differently if you
@@ -157,19 +133,19 @@ Now we start again here.
 \[paragraph_mode: true]
 
 
-+++++ alias: other page name
+*alias: other page name*
 Set another name under which a page can be linked to.
 
 Example:
 To this page can also be linked as WikiDocumentAttribute.
-[alias:WikiDocumentAttribute]
+[alias: WikiDocumentAttribute]
 
 
-+++++ import_scripts: page to import scripts from
+*import_scripts: page to import scripts from*
 See InlinePythonEval.
 
 
-+++++ child_sort_order: order how to sort [child nodes] in the tree
+*child_sort_order: order how to sort child nodes in the tree*
 Possible values are:
     * ascending: Sort alphabetically ascending
     * descending: Sort alphabetically descending
@@ -181,73 +157,69 @@ Possible values are:
 You can also use the attribute global.child_sort_order to control the default for the wiki (without this attribute "ascending" is used)
 
 
-+++++ tree_position: Order number for position in subtree
+*tree_position: Order number for position in subtree*
 Gives a position number where to place a particular word in the tree relative to its siblings. 1 places it at the top, 2 at the second-top and so-on (if place is occupied by another word with same position, it is placed as near as possible). A high value like e.g. 10000 places it at the bottom.
 
 Be aware that a word may have multiple parents, can therefore appear multiple times in the tree and will each time try to place itself at the given position.
 
 
-+++++ export: Export this page
+*export: Export this page*
 Control if the page containing this attribute should be exported. Only possible value is "false".
 The HTML exporter respects this attribute, others, like the multipage text exporter, do not.
 
-+++ Templates
 
-+++++ template: page which content should be used as template
+*template: page which content should be used as template*
 See [Templates]
 
-+++++ template_head: "auto" or "manual"
+
+*template_head: "auto" or "manual"*
 Choose if a new page created from a template should take the heading from the template or should automatically create a new one.
 See [Templates]
 
 
-+++++ pagetype: type of the page
-Controls some behavior of the WikiTextEditor.
+*pagetype: type of the page*
+Controls some behavior of the editor.
 
 Currently only type "form" is supported (see [FormPages] for details).
 
-+++ Spell Checking
 
-+++++ language: language code
+*language: language code*
 Controls language of a page or the wiki (with "global." prepended) for [SpellChecking].
 
-+++ html Colors and Background
 
-+++++ html.linkcolor
+*html.linkcolor*
 Specify the color of a link in preview/HTML export with a numeric HTML color (e.g. "#000000" for black).
 
-+++++ html.alinkcolor
+*html.alinkcolor*
 Color of a link while hovering over it with the mouse or while mouse is pressed (depends on browser). Doesn't work for internal preview.
 
-+++++ html.vlinkcolor
+*html.vlinkcolor*
 Color of an already visited link. Doesn't work for internal preview.
 
-+++++ html.textcolor
+*html.textcolor*
 Color of normal text.
 
-+++++ html.bgcolor
+*html.bgcolor*
 Color of background.
 
-+++++ html.bgimage
+*html.bgimage*
 Link (URL) to a background image. Doesn't work for internal preview.
 
 
-+++ auto_link
-Allow to recognize WikiWords, which are not CamelCase in normal text (without brackets).
-
-Supported values are:
+*auto_link*
+Allow recognition of non-camelcase wiki words in normal text (without brackets). Supported values:
 
     * off: Switch off recognition
     * relax: Recognition is case-insensitive and maps arbitrary
       non alpha-numeric characters in text to white spaces in the
-      WikiWord.
+      wiki word.
 
-When active, e.g. text "multipage text, format" is recognized as WikiWord [Multipage text format].
+When active, e.g. text "multipage text, format" is recognized as wikiword [Multipage text format].
 
 You can also use "global.auto_link" to set the option for the whole wiki.
 
 
-+++++ view_pane
+*view_pane*
 Controls which pane should be shown when a page is opened:
 
     * off: Don't change pane
@@ -257,33 +229,29 @@ Controls which pane should be shown when a page is opened:
 You can also use "global.view_pane".
 
 
-+++++ short_hint
+*short_hint*
+If you place the mouse pointer over the wiki link to a page which contains this attribute, the value of the attribute is shown as a tooltip. E.g. place the mouse pointer over this link and let it rest one moment:
+    ShortHintAttribute
 
-See ["short_hint" attribute]
 
-
-+++ Structure Graphs
-
-+++++ global.graph.relation.exclude
-See WikiStructureGraphs.
-
-+++++ global.graph.relation.include
+*global.graph.relation.exclude*
+*global.graph.relation.include*
 See WikiStructureGraphs.
 
 
-++ Error checking
++++ Error checking
 
-The content of a page is checked on saving for logical errors in some of the special attributes. There is a [log window] below the editor (normally hidden) which shows error messages if something is wrong.
+The content of a page is checked on saving for logical errors in some of the special attributes. There is a log window below the editor (normally hidden) which shows error messages if something is wrong.
 
-Currently it checks the attributes alias, color, icon and bold. The presentation attributes inside TodoItems are not checked.
+Currently it checks the attributes alias, color, icon and bold. The presentation attributes inside todo items are not checked.
 
-The [log window] normally automatically pops up if new messages arrive and automatically hides when there are no more messages (both can be switched off in configuration dialog.
+The log window normally automatically pops up if new messages arrive and automatically hides when there are no more messages (both can be switched off in configuration dialog.
 
 To test the error checking, remove the backslash on the following line and save the page:
 
-\[icon:doesntexist]
+\[icon: doesntexist]
 
 Double clicking a message brings the editor to the offending attribute. Position may be a bit off if page was modified after saving.
 
 
-[:page:PageFooter][tree_position: 6]
+[tree_position: 6]

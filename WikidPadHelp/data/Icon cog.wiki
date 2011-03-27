@@ -1,2 +1,2 @@
-﻿+ Icon cog
-[icon:cog]
+++ Icon cog
+[icon: cog]

@@ -1,0 +1,22 @@
+﻿++ Menu Tabs
+
+++ Toggle Ed./Prev.
+Switch between editor and preview mode in current tab.
+
+++ Enter Edit Mode
+Shows editor in current tab.
+
+++ Enter Preview Mode
+Shows HTML preview.
+
+++ Show Folding
+Shows/hides an additional margin to the left of the editor to control folding. See [Folding].
+
+++ Toggle Current Folding
+Fold/Unfold current line and following.
+
+++ Unfold All
+Unfold all lines.
+
+++ Fold All
+Fold all lines.

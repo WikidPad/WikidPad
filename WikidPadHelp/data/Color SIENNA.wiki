@@ -1,2 +1,2 @@
-﻿+ Color SIENNA
-[color: SIENNA][icon:color palette]
+﻿++ Color SIENNA
+[color: SIENNA]

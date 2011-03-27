@@ -1,2 +1,2 @@
-﻿+ Icon flag
-[icon:flag]
+﻿++ Icon flag
+[icon: flag]

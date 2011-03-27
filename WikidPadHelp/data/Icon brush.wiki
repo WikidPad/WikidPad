@@ -1,2 +1,2 @@
-﻿+ Icon brush
-[icon:brush]
+++ Icon brush
+[icon: brush]

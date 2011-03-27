@@ -1,0 +1,42 @@
+﻿++ Menu Navigate
+
+++ Back
+Move backward in the history of visited pages for this tab.
+
+++ Forward
+Move forward in the history of visited pages for this tab.
+
+++ Wiki Home
+Go to the wiki root word (the word with the same name as the whole wiki).
+
+++ Upward
+If current tab shows a [Subpage] this opens the superpage, e.g. from [SearchingTheWiki/BooleanRegex] it moves to [SearchingTheWiki].
+
+++ Go to Page
+Opens dialog to open a particular page. This dialog also allows to open or delete multiple pages. If you enter a non-existing page name you can also create a new page there.
+
+After entering a few characters, the list only shows page names which start with these characters and after that names which contain the characters. The names inside of these two groups can be ordered either alphabetically or by the time of last visit of this page, so most recently used pages are placed near the top of the list.
+
+++ Go to Parent
+Shows a list of parents for the current wiki word and allows to go to one of it.
+
+++ List Children
+Same as "Go to Parent" for children of current page.
+
+++ List Parentless Pages
+List of all parentless nodes (independent of current wiki word).
+
+++ Show History
+Shows history of all pages visited in the current tab.
+
+++ Up History
+Same as "Show History" but automatically selects the previously visited page.
+
+++ Down History
+Same as "Show History" but automatically selects the next page to visit.
+
+++ Add Bookmark
+Append a special bookmark attribute to current wiki page.
+
+++ Go to Bookmark
+Lists all pages with bookmark attribute.

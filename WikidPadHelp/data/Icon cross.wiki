@@ -1,2 +1,2 @@
-﻿+ Icon cross
-[icon:cross]
+++ Icon cross
+[icon: cross]

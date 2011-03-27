@@ -1,40 +1,36 @@
-﻿[:page:PageHeader][:toc:]
-+ Incremental Search
+﻿++ Incremental Search
 
-In order to start an incremental search in the left field of the status bar,
-just type [Ctrl-F] or [F3] while You are in a document.
+When in a document type CTRL-F or F3 to start an incremental search in
+the left field of the status bar.
+When in incremental search mode anything you type becomes a search
+string, and as you type you are brought to matches in the current
+text. Typing CTRL-F, or F3 again or typing CURSOR DOWN or PAGE DOWN
+will "Search Next" while SHIFT-F3, CURSOR UP or PAGE UP search
+backwards.
 
-Now, being in incremental search mode anything you type becomes a search
-string, and as you type you are forwarded to any matches found in the current
-text.
+To exit incremental search mode type ENTER.
 
-Type [Ctrl-F] or [F3] again, or type [Cursor-Down] or [Page-Down]
-in order to "Search Next". In order to "Search Backwards" just type
-[Shift-F3], [Cursor-Up] or [Page-Up] 
-
-To exit incremental search mode type [Enter].
-
-Incremental search supports [regular expressions]. For example: To match the
+Incremental search supports regex. For example: To match the
 word "incremental" or the word "search" in this document, type:
 
-[Ctrl-F]
+CTRL-F
 incremental|search
-Then type [Ctrl-F] again to cycle through the matches.
+Then type CTRL-F again to cycle through the matches.
 
 
-Further details of the behavior of incremental search:
+Further details of the behavior of inc. search:
 
-    * [Ctrl-F] while text is selected in editor copies it to search
+    * Ctrl-F while text is selected in editor copies it to search
       field up to the first newline or up to 30 characters
-    * [F3] starts search field with last search entered
+    * F3 starts search field with last search entered
     * Search starts at cursor position (1.8beta5 and prior started
       always at page beginning)
-    * [Enter] terminates search and keeps last found text selected (if any)
-    * [Esc] terminates search and goes back where search began
+    * ENTER terminates search and keeps last found text selected (if any)
+    * ESC terminates search and goes back where search began
     * Clicking outside of the search field terminates search
-    * If search pattern is *found* search field is *green*
-    * If search pattern is *not found* search field is *yellow*
-    * If search pattern is an *invalid regex*, color doesn't change
+    * If search pattern is found search field is green
+    * If search pattern is not found search field is yellow
+    * If search pattern is an invalid regex, color doesn't change
 
 
 In the options dialog, page "Searching" there is also an option
@@ -43,4 +39,4 @@ number of seconds of inactivity before incremental search is closed
 automatically. 0 means "wait forever".
 
 
-[:page:PageFooter][icon:lens]
+[icon: lens]

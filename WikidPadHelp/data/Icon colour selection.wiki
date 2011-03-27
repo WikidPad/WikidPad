@@ -1,2 +1,2 @@
-﻿+ Icon colour selection
+++ Icon colour selection
 [icon:colour selection ]

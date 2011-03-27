@@ -1,2 +1,2 @@
-﻿+ Color BLUE
-[color: BLUE][icon:color palette]
+﻿++ Color BLUE
+[color: BLUE]

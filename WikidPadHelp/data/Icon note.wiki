@@ -1,2 +1,2 @@
-﻿+ Icon note
-[icon:note]
+﻿++ Icon note
+[icon: note]

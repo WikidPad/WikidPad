@@ -1,2 +1,2 @@
-﻿+ Icon mydoc
-[icon:mydoc]
+﻿++ Icon mydoc
+[icon: mydoc]

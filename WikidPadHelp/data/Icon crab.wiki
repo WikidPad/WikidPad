@@ -1,2 +1,2 @@
-﻿+ Icon crab
-[icon:crab]
+++ Icon crab
+[icon: crab]

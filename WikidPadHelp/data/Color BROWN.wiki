@@ -1,2 +1,2 @@
-﻿+ Color BROWN
-[color: BROWN][icon:color palette]
+﻿++ Color BROWN
+[color: BROWN]

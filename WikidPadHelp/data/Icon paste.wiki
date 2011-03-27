@@ -1,2 +1,2 @@
-﻿+ Icon paste
-[icon:paste]
+﻿++ Icon paste
+[icon: paste]

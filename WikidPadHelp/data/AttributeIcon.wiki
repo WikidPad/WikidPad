@@ -1,7 +1,0 @@
-﻿[:page:PageHeader][:toc:]
-+ Attribute Icon
-
-See TreeNodeIcons for full list and samples.
-
-
-[:page:PageFooter][alias:'"icon" attribute']

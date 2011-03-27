@@ -1,13 +1,13 @@
-﻿[:page:PageHeader][:toc:]
-+ Searching The Wiki
-
-++ To search inside a page
-
-[Ctrl-F] or [F3] turns on IncrementalSearch.
-[Ctrl-R] brings up the "Find and Replace" dialog.
+﻿++ Searching The Wiki
 
 
-++ To search all pages: Fast search
++++ To search inside a page
+
+CTRL-F or F3 turns on IncrementalSearch.
+CTRL-R brings up the "Find and Replace" dialog.
+
+
++++ To search all pages: Fast search
 
 The toolbar contains a little search field. Just enter text you want to search for (you can use regular expression syntax), hit return and a list of matching wiki pages pops up.
 The list has a little title bar. As soon as you move the list a bit by dragging the bar it will no longer automatically close if you click outside of it.
@@ -16,9 +16,9 @@ Use the small close button ("X") to close it.
 At the bottom there are buttons "As Full Search" or "As Tab" to convert the small list to a full blown search dialog (see below) or to a tab.
 
 
-++ To search all pages: Full search
++++ To search all pages: Full search
 
-[Ctrl-Alt-F] brings up the search dialog for the entire wiki.
+CTRL-ALT-F brings up the search dialog for the entire wiki.
 
 The dialog is non-modal, this means you can edit your wiki while the dialog is open.
 
@@ -28,7 +28,7 @@ If "Order Pages" is available you have following options:
     * "Alphabetically"
     * "Natural" tries to order in the way the user would expect
       the pages to be ordered (well, more or less). If you have
-      created your own list of WikiWords, the "natural" order keeps
+      created your own list of wikiwords, the "natural" order keeps
       them as they are sorted by you. "Natural" is the second
       slowest order mode. 
     * "As Tree" tries to sort as words would appear in the main
@@ -36,86 +36,86 @@ If "Order Pages" is available you have following options:
     * "Unordered" uses the internal order of the database and is
       the fastest possible way.
 
-The dialog consists of two tabs: "Search text" allows to search for a particular piece of text in the pages, tab "Set page list" allows to search for pages matching a [regular expression] or having a special parent-children relationship.
+The dialog consists of two tabs: "Search text" allows to search for a particular piece of text in the pages, tab "Set page list" allows to search for pages matching a regular expression or having a special parent-children relationship.
 
 
-+++ Tab "Search text"
+++++ Tab "Search text"
 
 The whole right side of the tab shows the search results, the left side allows to control how to search.
 
 From top to bottom:
 
-++++ Search text
++++++ Search text
 
-+++++ Text field "Wiki Search"
-Enter the pattern you want to search for. You can use a [regular expression] here. Below you can set exactly how the pattern should be interpreted.
+*Text field "Wiki Search"*
+Enter the pattern you want to search for. You can use regular expressions here. Below you can set exactly how the pattern should be interpreted.
 
-+++++ Simple regex
+*Simple regex*
 Choose this if the pattern contains only a single RE
 
-+++++ Boolean regex
+*Boolean regex*
 Choose this if the pattern contains multiple REs connected with boolean operators. See [/BooleanRegex] for details.
 Some operations are not available in boolean regex mode, especially replacing of text.
 
-+++++ As is
+*As is*
 All characters are taken as they are.
 
-+++++ Index
+*Index*
 Search on a prebuilt index. See [/Index].
 
-+++++ Case sensitive, Whole word
+*Case sensitive, Whole word*
 Choose here if case matters for the search pattern and/or if only whole words should be searched for
 
-+++ Button "Find"
+*Button "Find"*
 Starts search process. If finished, a list of matching pages is listed on the right, optional with the number of occurring matches in parentheses and/or a few characters of context if set in the options.
 
-++++ Replacing
++++++ Replacing
 
-+++++ Text field "Replace By"
+*Text field "Replace By"*
 Enter here with which a found pattern on a page (or all pages) should be replaced. This field and the following three buttons are only available for "Simple regex" mode.
 
-+++++ Button "Find Next"
+*Button "Find Next"*
 Find the next matching part of text in current page or next page in the search results and select it.
 
-+++++ Button "Replace"
+*Button "Replace"*
 Replace current selection with content of "Replace by" and go to next matching part.
 
-+++++ Button "Replace All"
+*Button "Replace All"*
 After asking for confirmation, replaces all occurrences matching to the search pattern by the replacement in all pages in the search results. At the end of the operation you will be informed about the number of done replacements.
 
 
-++++ Storing/Loading Searches
++++++ Storing/Loading Searches
 
-+++++ List of "Saved Searches"
+*List of "Saved Searches"*
 Contains the titles of all searches stored in this wiki. The saved searches can also be seen in the tree after expanding "Views" and therein "saved searches" (only presented if searches exist).
 
 Expanding one of the searches starts the search operation.
 
-+++++ Button "Save Search"
+*Button "Save Search"*
 Saves the current content of the "Wiki Search" field and the settings below (not the replacement) in the wiki. First you are asked for the title of the search. If the title already exists, you must confirm to overwrite the previous search with this title.
 
-+++++ Button "Delete Search(es)"
+*Button "Delete Search(es)"*
 Delete the searches selected in the list after confirmation
 
-+++++ Button "Load Search"
+*Button "Load Search"*
 Loads selected search into the searching area.
 
-+++++ Button "Load and Run Search"
+*Button "Load and Run Search"*
 Same as hitting "Load Search" and "Find" button subsequently. Double clicking in the list has the same effect.
 
 
-++++ Other
++++++ Other
 
-+++++ Copy to clipboard: Button "Page names"
+*Copy to clipboard: Button "Page names"*
 This copies the content of the result to the clipboard as text containing a list of .
 
-+++++ Button "As Resultlist"
+*Button "As Resultlist"*
 Convert dialog to a small resultlist to save screen space.
 
-+++++ Button "As Tab"
+*Button "As Tab"*
 Convert it to a tab.
 
-+++++ Button "Options"
+*Button "Options"*
 Starts a dialog to set options for the searching:
 
     Context *before* and *after*
@@ -135,11 +135,11 @@ Starts a dialog to set options for the searching:
     They have the same meaning as in the large search dialog.
 
 
-+++++ Button "Close"
+*Button "Close"*
 Close the dialog, same as hitting ESC key. This button is replaced by "OK" and "Cancel" if using the dialog to define a set of pages for exporting or printing.
 
 
-++++ The result list on the right
++++++ The result list on the right
 
 Each item in the result list consist of the page name, one or two optional numbers in parentheses behind the name (one number: Number of occurrences, two numbers: currently shown occurrence, then "/", then number of occurrences or a question mark if unknown)
 
@@ -148,23 +148,23 @@ In the result list, double clicking on an item (not on its blue bar!) brings you
 If a particular occurrence is shown in the list, you can select this item and press F3 or click on the little blue bar on the left to show the next occurrence on this page.
 
 
-+++ Tab "Set page list"
+++++ Tab "Set page list"
 
 Similar to the "Search text" tab it has some option fields in the left half and mainly a large list on the right, called the "preview".
 
 At first you should choose the criterion the pages have to fulfill:
 
-++++ All Pages
++++++ All Pages
 All pages will be in the page list
 
-++++ Page names matching regular expression
-All pages their names match a [regular expression] pattern are in the list
++++++ Page names matching regular expression
+All pages their names match a regular expression pattern are in the list
 
-++++ Pages in list
++++++ Pages in list
 All pages mentioned in the list on the left of the dialog are in the resulting page list. You can also define if children of these pages should be in the result. If the level is 0, no children are taken, for 1 direct children are taken, 2 means to take also grandchildren and so on. If the field is -1 or empty, the level is seen as indefinite.
 
 
-++++ The left list
++++++ The left list
 There are a lot of possibilities to give you precise control of the content and order of this list.
 
 To the right of the actual list box there are the buttons "Up" and "Down" with which you can move the currently selected item in the list. With "Sort" the whole list is sorted alphabetically (the sorting algorithm depends on the option settings, see OptionsDialog#*Sort# order* ).
@@ -175,19 +175,20 @@ Below the text field there are the following buttons:
 
     * "Clear List" to remove all entries from the list
     * "Del" to delete the currently selected entry
-    * "Copy" to copy all list entries to clipboard. They are copied as text, one WikiWord per line, each in brackets. So you can insert them as link list into any wiki page.
+    * "Copy" to copy all list entries to clipboard. They are copied as text, one wiki word per line, each in brackets. So you can insert them as link list into any wiki page.
 
-You have also possibilities to *paste entries from clipboard*. Simply copy text which contains some WikiWords to the clipboard. When pasting, at first the WikiWords are extracted from the text in the order of appearance (be aware that the recognition of camel-case words and [Footnotes] depends on the settings of the currently open WikiPage and the wiki). With the extracted words the following can be done:
+You have also possibilities to *paste entries from clipboard*. Simply copy text which contains some wiki words to the clipboard. When pasting, at first the wiki words are extracted from the text in the order of appearance (be aware that the recognition of camel-case words and [Footnotes] depends on the settings of the currently open page and the wiki). With the extracted words the following can be done:
 
     * "Add": Add words to the current entries 
     * "Overwrite": Remove previous list entries and replace them by the new ones
     * "Intersect": Remove entries from current list which are not in the extracted words
 
 
-++ The right result list
++++ The right result list
 When you hit the button "Preview", this list shows which pages *currently* match the criteria chosen on the left side. When defining a page list e.g. for a saved search, the pages matching the criteria may change over time when the wiki database changes.
 
 The "Copy" button above the preview copies the content of the preview to the clipboard in the same way as it is done for the left page list.
 
 
-[:page:PageFooter][icon:lens]
+
+[icon: lens]

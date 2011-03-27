@@ -1,2 +1,2 @@
-﻿+ Color MEDIUM AQUAMARINE
-[color: MEDIUM AQUAMARINE][icon:color palette]
+﻿++ Color MEDIUM AQUAMARINE
+[color: MEDIUM AQUAMARINE]

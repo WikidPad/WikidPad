@@ -1,2 +1,2 @@
-﻿+ Icon salt
-[icon:salt]
+﻿++ Icon salt
+[icon: salt]

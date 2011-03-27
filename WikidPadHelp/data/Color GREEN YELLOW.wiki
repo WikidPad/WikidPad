@@ -1,2 +1,2 @@
-﻿+ Color GREEN YELLOW
-[color: GREEN YELLOW][icon:color palette]
+﻿++ Color GREEN YELLOW
+[color: GREEN YELLOW]

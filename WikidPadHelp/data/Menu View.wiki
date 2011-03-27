@@ -1,0 +1,31 @@
+﻿++ Menu View
+
+++ Show Toolbar
+Show toolbar with often used functions
+
+
+*For the following three to work you must first set the position of the desired view to something else than "Hidden" in the OptionsDialog.*
+
+++ Show Tree View
+Show tree view which visualizes the parent-children connection between pages.
+
+++ Show Chron. View
+Show a chronological timeline when which pages changed last. See [TimeViewWindow].
+
+++ Show Page Structure
+Show the headings of a page in a hierarchical manner. See [PageStructureWindow].
+
+++ Show Indentation Guides
+Shows vertical lines in editor to better see which text has which indentation level.
+
+++ Show Line Numbers
+Shows line numbers to the left of the editor. This means logical lines terminated with a newline. A logical line can span over mutliple physical lines on the screen.
+
+++ Stay on Top
+Window stays on top over other windows.
+
+++ Zoom In
+Enlarge fonts in editor or preview.
+
+++ Zoom Out
+Reduce font size in editor or preview.

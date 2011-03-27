@@ -1,2 +1,2 @@
-﻿+ Color DARK SLATE GREY
-[color: DARK SLATE GREY][icon:color palette]
+﻿++ Color DARK SLATE GREY
+[color: DARK SLATE GREY]
