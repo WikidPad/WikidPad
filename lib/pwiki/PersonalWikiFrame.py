@@ -74,7 +74,6 @@ from .SearchAndReplaceDialogs import SearchPageDialog, SearchWikiDialog, \
         FastSearchPopup
 
 
-
 import Exporters
 import StringOps
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, \
@@ -387,8 +386,10 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     self.Destroy()
                     return
 
-                self.statusBar.SetStatusText(
-                        uniToGui(_(u"Last wiki doesn't exist: %s") % wikiToOpen), 0)
+#                 self.statusBar.SetStatusText(
+#                         uniToGui(_(u"Last wiki doesn't exist: %s") % wikiToOpen), 0)
+                self.displayErrorMessage(
+                        _(u"Wiki doesn't exist: %s") % wikiToOpen)
 
         cmdLineAction.actionBeforeShow(self)
 
@@ -1133,6 +1134,9 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     if exists(pathEnc(filePath)):
                         self.openWiki(filePath, wikiWordsToOpen=(wikiWordToOpen,),
                                 anchorToOpen=anchorToOpen)
+                    else:
+                        self.displayErrorMessage(
+                                _(u"Wiki doesn't exist: %s") % wikiToOpen)
                 else:
                     self.openWiki(os.path.abspath(entry.value))
 
@@ -1204,6 +1208,19 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             return
 
         self.insertAttribute("color", self.cmdIdToColorNameForAttribute[evt.GetId()])
+
+
+    def resetCommanding(self):
+        """
+        Reset the "commanding" (meaning menus, toolbar(s), shortcuts)
+        """
+        self.buildMainMenu()
+
+        # Update toolbar by recreating
+        if self.getShowToolbar():
+            with WindowUpdateLocker(self):
+                self.setShowToolbar(False)
+                self.setShowToolbar(True)
 
 
     def buildMainMenu(self):
@@ -1886,24 +1903,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 #         helpMenu.Append(menuID, _(u'View &License'), _(u'View License'))
 #         wx.EVT_MENU(self, menuID, lambda evt: OsAbstract.startFile(self, 
 #                 os.path.join(self.wikiAppDir, u'license.txt')))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         # Build menubar from all the menus
@@ -2909,7 +2908,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         lastTabsSubCtrls -- List of subcontrol names for each presenter
                 of the corresponding wiki word to open
         """
-
         # Fix special case
         if wikiWordsToOpen == (None,):
             wikiWordsToOpen = None
@@ -2927,7 +2925,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                 wikiCombinedFilename)
 
         if cfgPath is None:
-            self.displayErrorMessage(_(u"Invalid path or missing file '%s'")
+            self.displayErrorMessage(_(u"Inaccessible or missing file: %s")
                         % wikiCombinedFilename)
 
             # Try to remove combined filename from recent files if existing
@@ -3032,9 +3030,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             except (BadConfigurationFileException,
                     MissingConfigurationFileException), e:
-                self.displayErrorMessage(_(u"Configuration file '%s' is corrupted or "
-                        u"missing.\nYou may have to change some settings in configuration "
-                        u'page "Current Wiki" and below which were lost.') % cfgPath)
+                answer = wx.MessageBox(_(u"Configuration file '%s' is corrupted "
+                        u"or missing.\nYou may have to change some settings "
+                        u'in configuration page "Current Wiki" and below which '
+                        u"were lost.") % cfgPath, _(u'Continue?'),
+                        wx.OK | wx.CANCEL | wx.ICON_QUESTION, self)
+                if answer == wx.CANCEL:
+                    return False
+
                 wdhName = self._askForDbType()
                 if wdhName is None:
                     return False
@@ -3126,7 +3129,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
             with WindowUpdateLocker(self):
                 # reset the gui
-                self.buildMainMenu()
+                self.resetCommanding()
 
                 # enable the top level menus
                 if self.mainmenu:

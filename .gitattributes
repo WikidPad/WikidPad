@@ -362,6 +362,7 @@ WikidPadHelp/files/testimg.gif -text
 /appbase.css -text
 /bld.bat -text
 /buildGadflyZips.py -text
+/buildWinPortZip.py -text
 docs/api.txt -text
 docs/dev-setup.txt -text
 docs/dev.txt -text

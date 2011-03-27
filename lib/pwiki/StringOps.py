@@ -1159,7 +1159,7 @@ _FORBIDDEN_START = _FORBIDDEN_CHARACTERS | frozenset(u".$ -")
 # Allowed ascii characters remaining: #&()+,=[]^_`{}
 
 
-def iterCompatibleFilename(baseName, suffix, asciiOnly=False, maxLength=250,
+def iterCompatibleFilename(baseName, suffix, asciiOnly=False, maxLength=120,
         randomLength=10):
     """
     Generator to create filenames compatible to (hopefully) all major

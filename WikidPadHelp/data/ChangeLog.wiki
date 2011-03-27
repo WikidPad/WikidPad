@@ -1,5 +1,19 @@
 ﻿++ Change Log
 
+
+Mar. 27, 2011 (2.1rc02)
+
+    * Support for URL appendix "prnr" to create a relative link
+      which is not relocated (modified) when exported as HTML to
+      a different destination. See [UrlLinking#++ URL Appendix]
+
+    * Bug fixed: URL links with title give exception
+    * Bug fixed: Favorite wiki icons may open wrong wiki
+    * Bug fixed: Misleading error message and bad error handling
+      for corrupted wiki config file
+
+
+
 Feb. 27, 2011 (2.1rc01)
 
     * Support for [.] to refer to current wiki page

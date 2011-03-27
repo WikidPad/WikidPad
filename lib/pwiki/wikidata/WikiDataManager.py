@@ -2,7 +2,7 @@ from __future__ import with_statement
 
 
 from weakref import WeakValueDictionary
-import os, os.path, time, shutil, traceback
+import os, os.path, time, shutil, traceback, ConfigParser
 from threading import RLock, Thread, Condition
 # from collections import deque
 
@@ -130,43 +130,49 @@ def splitConfigPathAndWord(wikiCombinedFilename):
         wikiConfigFilename = mbcsDec(wikiCombinedFilename)[0]
     else:
         wikiConfigFilename = wikiCombinedFilename
-    wikiWord = None
 
-    while True:
-        try:
-            # config.read(wikiConfigFile)
-            wikiConfig.loadConfig(wikiConfigFilename)
-            return wikiConfigFilename, wikiWord
-        except Exception, e:
-            # try to recover by checking if the parent dir contains the real wiki file
-            # if it does the current wiki file must be a wiki word file, so open the
-            # real wiki to the wiki word.
-#                 try:
-            parentDir = os.path.dirname(os.path.dirname(wikiConfigFilename))
-            if parentDir:
-                try:
-                    wikiFiles = [file for file in os.listdir(parentDir) \
-                            if file.endswith(".wiki")]
-                    if len(wikiFiles) > 0:
-                        wikiWord = os.path.basename(wikiConfigFilename)
-                        wikiWord = wikiWord[0 : len(wikiWord) - 5]
+    try:
+        wikiConfig.loadConfig(wikiConfigFilename)
+        return wikiConfigFilename, None
+    except ConfigParser.ParsingError, e:
+        # try to recover by checking if the parent dir contains the real wiki file
+        # if it does the current wiki file must be a wiki word file, so open the
+        # real wiki to the wiki word.
+        wikiWord = None
+        parentDir = os.path.dirname(os.path.dirname(wikiConfigFilename))
+        if parentDir:
+            try:
+                wikiFiles = [file for file in os.listdir(parentDir) \
+                        if file.endswith(".wiki")]
+                if len(wikiFiles) > 0:
+                    wikiWord = os.path.basename(wikiConfigFilename)
+                    wikiWord = wikiWord[0 : len(wikiWord) - 5]
 
-                        # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
-                        windows83Marker = wikiWord.find("~")
-                        if windows83Marker != -1:
-                            wikiWord = wikiWord[0:windows83Marker]
-                            matchingFiles = [file for file in wikiFiles \
-                                    if file.lower().startswith(wikiWord)]
-                            if matchingFiles:
-                                wikiWord = matchingFiles[0]
-                        wikiConfigFilename = os.path.join(parentDir, wikiFiles[0])
-                        continue
-                except (WindowsError, IOError, OSError):
-                    # something went wrong -> give up
-                    traceback.print_exc()
-                    return None, None
+                    # if this is win95 or < the file name could be a 8.3 alias, file~1 for example
+                    windows83Marker = wikiWord.find("~")
+                    if windows83Marker != -1:
+                        wikiWord = wikiWord[0:windows83Marker]
+                        matchingFiles = [file for file in wikiFiles \
+                                if file.lower().startswith(wikiWord)]
+                        if matchingFiles:
+                            wikiWord = matchingFiles[0]
 
-            return None, None
+                    wikiConfig.loadConfig(os.path.join(parentDir, wikiFiles[0]))
+                    return os.path.join(parentDir, wikiFiles[0]), wikiWord
+            except:
+                pass
+
+        # Either parent directory couldn't be constructed or something went
+        # wrong in parent directory so return initial wikiConfigFilename
+        # although the file is obviously corrupted but this is handled by
+        # code PersonalWikiFrame.openWiki
+        return wikiConfigFilename, None
+
+    except Exception, e:
+        # Something else went wrong (file not present or not accessible)
+        traceback.print_exc()
+        return None, None
+
     
     
 def getGlobalFuncPage(funcTag):
@@ -310,7 +316,11 @@ class WikiDataManager(MiscEventSourceMixin):
         self.writeAccessFailed = False
         self.writeAccessDenied = False
 
-        wikiConfig.loadConfig(wikiConfigFilename)
+        try:
+            wikiConfig.loadConfig(wikiConfigFilename)
+        except ConfigParser.ParsingError, e:
+            raise BadConfigurationFileException(
+                    _(u"Wiki configuration file is corrupted"))
 
         # config variables
         wikiName = wikiConfig.get("main", "wiki_name")
@@ -402,13 +412,6 @@ class WikiDataManager(MiscEventSourceMixin):
 
         self.whooshIndex = None
 
-        # TODO: Only initialize on demand
-        self.onlineSpellCheckerSession = None
-        if SpellChecker.isSpellCheckSupported():
-            self.onlineSpellCheckerSession = \
-                    SpellChecker.SpellCheckerSession(self)
-            self.onlineSpellCheckerSession.rereadPersonalWordLists()
-
         self.refCount = 1
 
 
@@ -432,6 +435,13 @@ class WikiDataManager(MiscEventSourceMixin):
         except DbWriteAccessError, e:
             traceback.print_exc()
             writeException = e
+
+        # TODO: Only initialize on demand
+        self.onlineSpellCheckerSession = None
+        if SpellChecker.isSpellCheckSupported():
+            self.onlineSpellCheckerSession = \
+                    SpellChecker.SpellCheckerSession(self)
+            self.onlineSpellCheckerSession.rereadPersonalWordLists()
 
         # Path to file storage
         fileStorDir = os.path.join(os.path.dirname(self.getWikiConfigPath()),

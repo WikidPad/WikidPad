@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WIKIDPAD INTERNATIONALISATION. RUSSIAN. VERSION 1.0\n"
 "POT-Creation-Date: 2010-11-14 20:59\n"
-"PO-Revision-Date: 2011-01-30 20:51+0600\n"
+"PO-Revision-Date: 2011-03-01 19:54+0600\n"
 "Last-Translator: Oleg Domanov\n"
 "Language-Team:  <odomanov@yandex.ru>\n"
 "MIME-Version: 1.0\n"
@@ -1190,7 +1190,7 @@ msgstr "Временные файлы"
 
 #: WikidPad.xrc:0
 msgid "Temporary path:"
-msgstr "Временный путь:"
+msgstr "Путь к папке:"
 
 #: WikidPad.xrc:0
 msgid "Test"
@@ -2099,7 +2099,7 @@ msgstr "*"
 msgid "Select Import File"
 msgstr "Выберите файл импорта"
 
-#: lib\pwiki\AdditionalDialogs.py:1966
+#: lib\pwiki\AdditionalDialogs.py:1969
 msgid ""
 "\n"
 "<html>\n"
@@ -2161,7 +2161,7 @@ msgstr ""
 "        </table>\n"
 "\n"
 "        <p>\n"
-"wikidPad это википодобная записная книжка, в которой вы можете хранить ваши мысли, идеи, планы, контакты и многое другое, что вы можете придумать и что можно представить в письменном виде.\n"
+"wikidPad это википодобная записная книжка, в которой вы можете хранить ваши мысли, идеи, планы, контакты и многое другое, что можно представить в письменном виде.\n"
 "WikidPad отличает от других записных книжек простота создания перекрёстных связей для вашей информации.        </p>        \n"
 "        <br><br>\n"
 "\n"
@@ -2202,66 +2202,66 @@ msgstr ""
 "</body>\n"
 "</html>\n"
 
-#: lib\pwiki\AdditionalDialogs.py:2017
+#: lib\pwiki\AdditionalDialogs.py:2020
 #: lib\pwiki\PersonalWikiFrame.py:1916
 msgid "About WikidPad"
 msgstr "О программе WikidPad"
 
-#: lib\pwiki\AdditionalDialogs.py:2021
+#: lib\pwiki\AdditionalDialogs.py:2024
 msgid "N/A"
 msgstr "Нет данных"
 
-#: lib\pwiki\AdditionalDialogs.py:2031
+#: lib\pwiki\AdditionalDialogs.py:2034
 msgid "Okay"
 msgstr "OK"
 
-#: lib\pwiki\AdditionalDialogs.py:2132
+#: lib\pwiki\AdditionalDialogs.py:2135
 msgid "Wiki Properties"
 msgstr "Свойства вики"
 
-#: lib\pwiki\AdditionalDialogs.py:2139
+#: lib\pwiki\AdditionalDialogs.py:2142
 msgid "No wiki loaded"
 msgstr "Нет загруженных вики"
 
-#: lib\pwiki\AdditionalDialogs.py:2143
+#: lib\pwiki\AdditionalDialogs.py:2146
 msgid "Wiki config. path:"
 msgstr "Путь к конфигурации вики:"
 
-#: lib\pwiki\AdditionalDialogs.py:2149
+#: lib\pwiki\AdditionalDialogs.py:2152
 msgid "Wiki database backend:"
 msgstr "Тип базы данных:"
 
-#: lib\pwiki\AdditionalDialogs.py:2157
+#: lib\pwiki\AdditionalDialogs.py:2160
 msgid "Number of wiki pages:"
 msgstr "Число вики-страниц:"
 
-#: lib\pwiki\AdditionalDialogs.py:2166
+#: lib\pwiki\AdditionalDialogs.py:2169
 msgid "Wiki is read-only. Reason:"
 msgstr "Вики открыта только для чтения. Причина:"
 
-#: lib\pwiki\AdditionalDialogs.py:2169
+#: lib\pwiki\AdditionalDialogs.py:2172
 msgid "Write access to database lost. Try \"Wiki\"->\"Reconnect\""
 msgstr "Доступ на запись к базе данных утерян. Попробуйте \"Вики\"->\"Подключить заново\""
 
-#: lib\pwiki\AdditionalDialogs.py:2171
+#: lib\pwiki\AdditionalDialogs.py:2174
 msgid "Wiki was set read-only in options dialog"
 msgstr "В диалоге настройки вики установлено \"Только для чтения\""
 
-#: lib\pwiki\AdditionalDialogs.py:2176
-#: lib\pwiki\AdditionalDialogs.py:2178
+#: lib\pwiki\AdditionalDialogs.py:2179
+#: lib\pwiki\AdditionalDialogs.py:2181
 msgid "Can't write wiki config.:"
 msgstr "Сбой записи конфигурации вики:"
 
-#: lib\pwiki\AdditionalDialogs.py:2176
-#: lib\pwiki\AdditionalDialogs.py:2180
+#: lib\pwiki\AdditionalDialogs.py:2179
+#: lib\pwiki\AdditionalDialogs.py:2183
 msgid "Unknown reason"
 msgstr "Неизвестная причина"
 
-#: lib\pwiki\AdditionalDialogs.py:2193
+#: lib\pwiki\AdditionalDialogs.py:2196
 msgid "Jobs"
 msgstr "Задания"
 
-#: lib\pwiki\AdditionalDialogs.py:2210
+#: lib\pwiki\AdditionalDialogs.py:2213
 msgid "Number of Jobs:"
 msgstr "Число заданий:"
 
@@ -2716,47 +2716,47 @@ msgstr "Чёрный список этой вики"
 msgid "Favorite wikis"
 msgstr "Избранные вики"
 
-#: lib\pwiki\Exporters.py:400
+#: lib\pwiki\Exporters.py:401
 msgid "One HTML page"
 msgstr "Одна HTML страница"
 
-#: lib\pwiki\Exporters.py:401
+#: lib\pwiki\Exporters.py:402
 msgid "Set of HTML pages"
 msgstr "Множество HTML страниц"
 
-#: lib\pwiki\Exporters.py:794
-#: lib\pwiki\Exporters.py:883
+#: lib\pwiki\Exporters.py:795
+#: lib\pwiki\Exporters.py:884
 msgid "Exporting %s"
 msgstr "Экспортируется: %s"
 
-#: lib\pwiki\Exporters.py:1657
+#: lib\pwiki\Exporters.py:1658
 msgid "<pre>[Allow evaluation of insertions in \"Options\", page \"Security\", option \"Process insertion scripts\"]</pre>"
 msgstr "<pre>[Разрешите обработку вставок в меню \"Настройки\", страница \"Безопасность\", опция \"Обрабатывать вставные скрипты\"]</pre>"
 
-#: lib\pwiki\Exporters.py:2191
+#: lib\pwiki\Exporters.py:2234
 msgid "[Unknown parser node with name \"%s\" found]"
 msgstr "[Найден неизвестный узел с именем \"%s\" ]"
 
-#: lib\pwiki\Exporters.py:2225
+#: lib\pwiki\Exporters.py:2268
 msgid "Set of *.wiki files"
 msgstr "Множество файлов *.wiki"
 
-#: lib\pwiki\Exporters.py:2410
+#: lib\pwiki\Exporters.py:2453
 #: lib\pwiki\Importers.py:61
 msgid "Multipage text"
 msgstr "Многостраничный текст"
 
-#: lib\pwiki\Exporters.py:2423
+#: lib\pwiki\Exporters.py:2466
 #: lib\pwiki\Importers.py:74
 msgid "Multipage files (*.mpt)"
 msgstr "Многостраничные файлы (*.mpt)"
 
-#: lib\pwiki\Exporters.py:2424
+#: lib\pwiki\Exporters.py:2467
 #: lib\pwiki\Importers.py:75
 msgid "Text file (*.txt)"
 msgstr "Текстовый файл (*.txt)"
 
-#: lib\pwiki\Exporters.py:2590
+#: lib\pwiki\Exporters.py:2633
 msgid "No usable separator found"
 msgstr "Не найдено подходящего разделителя"
 
@@ -4017,11 +4017,6 @@ msgstr "Ошибка записи!"
 msgid "There was an error loading the icons for the tree control."
 msgstr "Произошла ошибка при загрузке иконок для дерева."
 
-#: lib\pwiki\PersonalWikiFrame.py:2584
-#: lib\pwiki\PersonalWikiFrame.py:2585
-msgid "     Scanning     "
-msgstr "     Сканирование    "
-
 #: lib\pwiki\PersonalWikiFrame.py:2755
 msgid "No data handler available to create database."
 msgstr "Нет доступного обработчика данных для создания базы данных"
@@ -4577,7 +4572,7 @@ msgid "Folder does not exist"
 msgstr "Папка не существует"
 
 #: lib\pwiki\WikiHtmlView.py:692
-#: lib\pwiki\WikiHtmlViewIE.py:485
+#: lib\pwiki\WikiHtmlViewIE.py:486
 msgid "Link to page: %s"
 msgstr "Ссылка на страницу: %s"
 
@@ -4911,7 +4906,7 @@ msgstr "Слова '%s' нет в вики"
 #: lib\pwiki\wikidata\WikiDataManager.py:1210
 #: lib\pwiki\wikidata\WikiDataManager.py:1281
 msgid "Update basic link info"
-msgstr "Обновить основную информацию о ссылках"
+msgstr "Обновление осн.информации о связях"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:1226
 msgid "Starting update thread"
@@ -4919,19 +4914,19 @@ msgstr "Запуск процесса обновления"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:1301
 msgid "Update attributes of %s"
-msgstr "Обновить атрибуты %s"
+msgstr "Обновление атрибутов: %s"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:1323
 msgid "Update syntax of %s"
-msgstr "Обновить синтаксис %s"
+msgstr "Обновление синтаксиса: %s"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:1344
 msgid "Update index of %s"
-msgstr "Обновить индекс %s"
+msgstr "Обновление индекса: %s"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:1364
 msgid "Final cleanup"
-msgstr "Окончательная чистка"
+msgstr "Окончательно прибираемся"
 
 #: lib\pwiki\wikidata\WikiDataManager.py:1457
 msgid "Cannot rename '%s' to '%s', '%s' already exists"

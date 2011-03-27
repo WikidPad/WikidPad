@@ -90,6 +90,8 @@ You can control details of URL presentation, especially for images, by using an 
       *m*iddle, *b*ottom, *r*ight or *l*eft). This setting is not respected by the internal preview.
     p Set *rel*ative or *abs*olute linking on HTML export for "file:" and "rel:" links.
       If relative link is not possible, absolute link is used.
+      Use *rnr* (=relative, no relocation) if you want a relative link which is not modified on
+      export in any way (compatibility to behavior of previous WikidPad versions)
 
 Examples:
 
