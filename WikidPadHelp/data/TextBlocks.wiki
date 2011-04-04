@@ -1,13 +1,13 @@
 ﻿[:page:PageHeader][:toc:]
 + Text Blocks
 
-In the ["Edit" menu] you have a submenu "Paste Textblock" which you can modify to contain arbitrary blocks of text you use often and which you can insert or append everywhere by choosing the appropriate menu item.
+In the ["Edit" menu] you have a ["Paste Textblock" submenu] which you can modify to contain arbitrary blocks of text you use often and which you can insert or append everywhere by choosing the appropriate menu item.
 
 To modify the menu you have to edit one of two special WikiPages, so-called "functional pages" which are located below the "Func. pages" node which is a child of the "Views" node in the tree on the left.
 
 Functional pages behave similar to normal WikiPages but can't be renamed or deleted. They control some behavior of a wiki or the whole application.
 
-The "Global text blocks" page applies application-wide to all wikis, while "Wiki text blocks" can be set individually for each wiki.
+The ["Global text blocks" page] applies application-wide to all wikis, while "Wiki text blocks" can be set individually for each wiki.
 
 The menu is updated after saving (manually or automatically) one of the pages.
 

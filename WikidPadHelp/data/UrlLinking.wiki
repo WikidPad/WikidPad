@@ -18,7 +18,7 @@ To create such [absolute URL] to a file you can also use "Add file URL" in "Edit
 
 
 ++ Relative URLs
-You can create URLs which are relative to the wiki directory. These start with rel:// followed by the relative position. For HTML export the rel:// is removed to create a relative HTML link (without protocol) which is adapted to new position. For HTML preview they are converted to "file:" URLs.
+You can create URLs which are relative to the wiki directory. These start with rel:// followed by the relative position. For [HTML export] the rel:// is removed to create a relative HTML link (without protocol) which is adapted to new position. For HTML preview they are converted to "file:" URLs.
 
 You can drag a file from MsWindowsExplorer while holding the [Shift] key down in order to create a relative URL. This does not work with files ending with ".wiki", these are always absolute and have the "wiki:" protocol.
 

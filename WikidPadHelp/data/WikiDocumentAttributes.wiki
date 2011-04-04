@@ -187,9 +187,11 @@ Gives a position number where to place a particular word in the tree relative to
 Be aware that a word may have multiple parents, can therefore appear multiple times in the tree and will each time try to place itself at the given position.
 
 
-+++++ export: Export this page
-Control if the page containing this attribute should be exported. Only possible value is "false".
-The HTML exporter respects this attribute, others, like the multipage text exporter, do not.
++++++ export: Do not export this page
+Control if the page containing this attribute should be exported. Only
+the value "false" is permitted here. The [HTML exporter] respects this
+attribute, others exporters such as the [multipage text exporter] do
+*not* respect this attribute.
 
 +++ Templates
 

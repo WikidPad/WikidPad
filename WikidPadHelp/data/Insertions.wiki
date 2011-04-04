@@ -3,16 +3,34 @@
 
 Insertions allow to insert some dynamic text into [HTML preview]/[HTML export] of a page.
 
-This text can either be the content of another page or a list of links to WikiPages which are parents or children of a page or to pages which form the result of a saved search.
+_This_ text can be
+	* a TableOfContent of the current WikiPage
+	* the content of any other WikiPage
+	* a list of links to WikiPages which are 
+		* parents of a page or 
+		* children of a page
+	* a list of links to WikiPages which form the result of a saved search.
 
 See ExampleInsertions.
-
+See also ExampleInsertPage.
 
 ++ Insertion Syntax
-The tag begins always with '[:' then comes the _insertion key_, then a colon and the _insertion value_,
-after that there may be appendices, separated by semicolons, to describe the way of presentation in more detail. The tag is closed by a closing bracket.
 
-In the example above, "page" is the insertion key, "IncrementalSearch" is the value.
+An *InsertionTag*
+
+	* begins always with *'[:'* 
+	* followed by the *_insertion key_*, 
+	* then another *colon ':'* and, if need
+		* the *_insertion value_*,
+			* optionally followed by one or more *_appendix_*, 
+			* separated by *semicolon ';'*, 
+	* The tag is closed by a closing bracket *'\]'*.
+
+<<pre
+Insertion: '[:' _insertion key_ ':' _insertion value_ [ ';' _appendix_ | ... ] ']' 
+>>
+
+An *_appendix_* allows to describe the method of presentation in more detail.
 
 
 +++ Using Quotation Symbols 

@@ -37,12 +37,13 @@ moments, please be patient.
     else| where?| elsewhere
     >>
 
-    * The .wiki filenames have no more brackets
-    * Option to forbid cycles in trees (see [OptionsDialog])
-    * Option to filter properties to show in [HTML preview] and export (see [OptionsDialog])
+    * No more brackets for filenames such as <<code \*.wiki" >>
+    * Option to forbid cycles in trees (see [OptionsDialog]#cycles)
+    * Option to filter properties to be shown in [Preview mode]
+		and in [HTMLexport (see OptionsDialog)
     * A few bugs fixed. Among others:
         * Wrong line endings in clipboard
-        * WPCompact: Missing RE prevents wrap text from work
+        * WPCompact: Missing REs prevents wrap text from work
         * WPCompact: Creation of new wikis and importing doesn't work (wrong formatver)
 
 

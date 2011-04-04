@@ -3,79 +3,84 @@
 
 ++ Description
 
-WikidPad is a [wiki]-like notebook for storing your thoughts, ideas,
-TodoItems, contacts or anything else you can think of that's
-important.  What makes WikidPad different from other notepad or
-outliner applications is the ease with which you can cross-link your
-information.  WikiLinks in a wiki are created by typing in WikiWords.
+WikidPad: a [wiki]-like notebook. For your thoughts, ideas, concepts,
+contacts, projects, TodoItems ... : *anything* worth noting to *You*.
+
+What makes WikidPad different from other notepads or outliners ?
+	* The ease of cross-linking your information - on the fly ?
+  
+
+WikiLinks in a wiki are created by typing in WikiWords.
 A WikiWord is any mixed case word typed into the editor.  TodoItem or
 JohnDoe are examples of WikiWords.
 [Wikis] are all about quickly linking your information together.
 To activate or follow a WikiWord link, just *double click on it*, or type
 [Ctrl-L] when the cursor is in the word.
 
-While you are reading through this help document select "Wiki/New"
-from the menu at the top of the application window to create your own wiki.
-Then just start typing text with WikiWords to build your own Wiki.
-
 ++ Features
 
-    * On the fly WikiWordLinking
-    * WikiWords can be CamelCase, [not Camel Case] or WIKIDPADWords.
-    * UrlLinking with [absolute URL]s and [relative URL]s
-    * [Anchors], [Footnotes] and [Bookmarks]
+	* WikiWordLinking - On the fly
+		* WikiWords can be CamelCase, [not Camel Case] or WIKIDPADWords.
+		* UrlLinking with [absolute URL]s and [relative URL]s
 
-	* Wiki TextFormatting
+	* TextFormatting - On the fly 
 		* WikiHeaders, BulletedLists, WikiTables
-		* WikiDocumentAttributes (cross-index your information)
-		* TodoItems (track todos, questions, issues ...)
-		* [Insertions]
-		* WikiFonts
 
-	* Easy Editing in the WikiTextEditor
+	* WikiTextEditor - easy and convenient
 		* WikiWord AutoCompletion
-		* SpellChecking
-		* AutoSave
-		* ClipboardCatcher
+		* integrated SpellChecking
 		* [Folding]
 
-	* Efficient Navigation
-		* WikiWordNavigation
-		* WikiWordHistory viewer/navigation
+	* WikiWordNavigation - versatile and efficient 
 		* SearchingTheWiki, incl. IncrementalSearch
-		* ["Tree" window] with TreeNodeIcons and TreeNodeColors
-		* DynamicViews
-		* ["Page Structure" window], ["Chronological View" window]
+		* WikiWordHistory to view/navigate
+		* ["Tree" window] with TreeNodeIcons, TreeNodeColors and DynamicViews
+		* ["Page Structure" window], WikiStructureGraphs, ["Chronological View" window]
 
-	* Dialogs
+	* Cross-index Your information
+		* [Anchors], [Footnotes] and [Bookmarks]
+		* WikiDocumentAttributes - more cross-indexing and formatting 
+		* TodoItems (categorise and track todos, questions, issues ...)
+
+	* Empowering TimeSaver's and Safety Features
+		* [Insertions]
+		* FavoriteWikis
+		* [Subpages]
+		* [Templates]
+		* InternatiönalChàracters
+		* WikiFonts
+		* AutoSave
+
+	* Get things done
+		* GlobalScriptLibrary and InlinePythonEval - 
+		* Define reusable TextBlocks
+		* KeyboardShortcuts and modifiable KeyBindings
+
+	* Functional [Menus] and Dialogs
 		* RenamingWikiWords: ["Rename Wiki Word" dialog]
 		* [Printing]:	["Print" dialog]
 		* WikiExport:	["Export" dialog] / WikiImport	["Import" dialog]
 		* OptionsDialog:	["Options" dialog]
 
-	* InlinePythonEval
-	* KeyBindings
-	* InternatiönalChàracters
-	* ExternalGraphicalApplications
-	* FavoriteWikis
-	* [Subpages]
-	* CommandLineSupport
-	* WikidPadOnUSB / ApplicationConfigurationFiles
-	* [Templates]
-	* Different DatabaseTypes (WhereIsTheDataStored ?, MigrationBetweenDbTypes)
-	* Defining TextBlocks
-    * WikiStructureGraphs
+	* Versatile technology
+		* ExternalGraphicalApplications
+		* ApiDocs / WikidPadHooks
+		* CommandLineSupport
+		* WikidPadOnUSB / ApplicationConfigurationFiles
+		* Different DatabaseTypes (WhereIsTheDataStored ?, MigrationBetweenDbTypes)
+
+
+While you are reading through this help document select "Wiki/New"
+from the menu at the top of the application window to create your own wiki.
+Then just start typing text with WikiWords to build your own Wiki.
 
 
 *Other/Questions*
 
-    * [Menus]
     * WikiMaintenance
     * WikidPadSupport
     * ChangeLog
-    * GlobalScriptLibrary
     * WikiLockFile
-    * ApiDocs / WikidPadHooks
     * ThirdPartyLibraries
     * WikidPadHelpTodo
 

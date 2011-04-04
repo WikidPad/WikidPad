@@ -62,9 +62,8 @@ Hidden markups are not published to HTML or shown in preview but are otherwise f
 
 A hidden markup is written as \<<\hide >> either on a single line (no newline in it) or as a block like the escaping markup.
 
-<<hide
-You can see this in [Edit mode] only, not in [Preview mode].
->>
+See ExampleHideMarkup
+
 
 
 +++ Escaping characters

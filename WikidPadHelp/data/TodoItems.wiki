@@ -2,9 +2,8 @@
 + Todo Items
 
 ++ Special Keywords
-In WikidPad "todo", "done", "action", "track", "issue", "question" and
-"project" are special keywords that enable you to track important
-items under the "View" item in the ["Tree" window].
+
+Special keywords enable you to track important items in WikidPad.
 
 	* todo: I have to do this.
 	* done: I have done this.
@@ -13,10 +12,6 @@ items under the "View" item in the ["Tree" window].
 	* issue: This is to be addressed
 	* question: This is a question
 	* project: This is my project
-
-Now open the views node in the tree on the left to see how these todo
-items have been added.  For example, open "Views/question" and you will
-see a node named "This is a question."
 
 
 ++ Escape Unwanted TodoItems
@@ -47,6 +42,13 @@ These items supports nested sub-categories as well, for example:
 todo.system.bugs.urgent: There is a bug in the system
 
 This will create a "system" node in the tree under "Views/todo", which has a "bugs" subnode which has a "urgent" subnode...
+
+++ See TodoItems in the ["Tree" window]
+
+Now open the the ["View" item] in the ["Tree" window] on the left to see
+how these todo items have been added. For example, open
+"Views/question" and you will see a node named "This is a question."
+
 
 
 [:page:PageFooter][icon:pin][alias:TodoItem]

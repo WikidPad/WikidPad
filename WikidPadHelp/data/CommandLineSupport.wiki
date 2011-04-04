@@ -64,8 +64,8 @@ Exit immediately after command line actions were completed.
 
 +++ Exporting
 
-The following three must all be specified if you want to export
-something, the fourth (--export-compfn) is optional:
+All of the following three options must be specified if you want to
+export something - the fourth option (--export-compfn) is optional:
 
 +++++ --export-what <what>
 Choose if you want to export *page*, *subtree* or *wiki*.
