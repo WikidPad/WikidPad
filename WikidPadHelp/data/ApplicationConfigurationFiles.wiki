@@ -8,7 +8,7 @@ Application configuration files mean here:
 
 This page describes where WikidPad searches for these files during startup:
 
-If the [installation directory] contains already a file "WikidPad.config", the [installation directory] becomes the configuration directory.
+If the [WikidPad installation directory] contains already a file "WikidPad.config", the [installation directory] becomes the configuration directory.
 
 This is helpful for [Wikid Pad on a USB stick], so you can move it between multiple computers without any need to store a file on the host computer.
 
