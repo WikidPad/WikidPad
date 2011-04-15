@@ -1,18 +1,17 @@
-﻿[:page:PageHeader][:toc:]
-+ Footnotes
+﻿++ Footnotes
 
 Footnotes are numbers enclosed in brackets, e.g. [42].
 
-As this might be a valid WikiWord also, you have an option to have footnotes interpreted just as WikiWords. See OptionsDialog#*Footnotes# as# wiki# words*
+As this might also be a valid wiki word you have an option to let interpret footnotes just as wiki words. See OptionsDialog#*Footnotes# as# wiki# words*
 
-The following applies only if this option is *not* set for the current wiki:
+The following only applies if this option is *not* set for the current wiki:
 
 
 If the same footnote (footnote with same number) appears multiple times on a page, the last appearance is interpreted as "anchor", all former are interpreted as links to this anchor.
 
 In editor mode this means that double clicking or otherwise activating a footnote brings the cursor to the last occurrence of it on the page.
 
-In [Preview mode], all but the last footnote are shown as links which lead to the last one.
+In preview, all but the last footnote are shown as links which lead to the last one.
 
 You can try it with the [42] here or above. They all lead to the following anchor footnote:
 
@@ -21,6 +20,3 @@ You can try it with the [42] here or above. They all lead to the following ancho
 
 
 As always you can escape the footnote with a backslash: \[42].
-
-
-[:page:PageFooter]

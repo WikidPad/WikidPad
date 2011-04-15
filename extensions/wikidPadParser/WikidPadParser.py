@@ -2,7 +2,7 @@
 ## _prof = hotshot.Profile("hotshot.prf")
 
 # Official parser plugin for wiki language "WikidPad default 2.0"
-# Last modified (format YYYY-MM-DD): 2011-03-17
+# Last modified (format YYYY-MM-DD): 2011-03-28
 
 
 import locale, pprint, time, sys, string, traceback
@@ -705,9 +705,9 @@ def actionWikiWordNcc(s, l, st, t):
 
     t.titleNode = t.findFlatByName("title")
 
-    fragmentNode = t.findFlatByName("searchFragment")
-    if fragmentNode is not None:
-        t.searchFragment = fragmentNode.unescaped
+    t.fragmentNode = t.findFlatByName("searchFragment")
+    if t.fragmentNode is not None:
+        t.searchFragment = t.fragmentNode.unescaped
     else:
         t.searchFragment = None
     
@@ -748,9 +748,9 @@ def actionWikiWordCc(s, l, st, t):
 
     t.titleNode = None
 
-    fragmentNode = t.findFlatByName("searchFragment")
-    if fragmentNode is not None:
-        t.searchFragment = fragmentNode.unescaped
+    t.fragmentNode = t.findFlatByName("searchFragment")
+    if t.fragmentNode is not None:
+        t.searchFragment = t.fragmentNode.unescaped
     else:
         t.searchFragment = None
 

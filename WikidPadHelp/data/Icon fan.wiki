@@ -1,2 +1,2 @@
-﻿+ Icon fan
-[icon:fan]
+﻿++ Icon fan
+[icon: fan]

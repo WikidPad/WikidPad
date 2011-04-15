@@ -1,2 +1,2 @@
-﻿+ Color LIME GREEN
-[color: LIME GREEN][icon:color palette]
+﻿++ Color LIME GREEN
+[color: LIME GREEN]

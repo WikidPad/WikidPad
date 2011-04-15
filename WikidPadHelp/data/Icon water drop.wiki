@@ -1,2 +1,2 @@
-﻿+ Icon water drop
-[icon:water drop]
+﻿++ Icon water drop
+[icon: water drop]

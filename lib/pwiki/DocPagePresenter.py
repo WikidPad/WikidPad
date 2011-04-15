@@ -58,7 +58,7 @@ class BasicDocPagePresenter(LayeredControlPresenter):
     def getWikiDocument(self):
         return self.getMainControl().getWikiDocument()
         
-    def getPageHistory():
+    def getPageHistory(self):
         return self.pageHistory
 
 

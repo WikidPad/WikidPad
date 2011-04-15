@@ -1,2 +1,2 @@
-﻿+ Color MEDIUM SLATE BLUE
-[color: MEDIUM SLATE BLUE][icon:color palette]
+﻿++ Color MEDIUM SLATE BLUE
+[color: MEDIUM SLATE BLUE]

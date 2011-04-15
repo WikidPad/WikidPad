@@ -1,15 +1,3 @@
-﻿[:page:PageHeader][:toc:]
-+ Wikid Pad Support
+﻿++ Wikid Pad Support
 
-Do you have a question, comment, appraisal or suggestion about WikidPad?
-
-Do not hesitate - send Your message right away to
-
-	* mailto:mbutscher@gmx.de
-	  or 
-	* mailto:wikidpad@jhorman.org 
-
-and mention WikidPad in the subject line.
-
-
-[:page:PageFooter]
+Email mbutscher@gmx.de or wikidpad@jhorman.org if you have any questions about wikidPad.

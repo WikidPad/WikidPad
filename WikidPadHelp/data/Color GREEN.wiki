@@ -1,2 +1,2 @@
-﻿+ Color GREEN
-[color: GREEN][icon:color palette]
+﻿++ Color GREEN
+[color: GREEN]

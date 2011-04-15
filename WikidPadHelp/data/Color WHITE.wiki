@@ -1,2 +1,2 @@
-﻿+ Color WHITE
-[color: WHITE][icon:color palette]
+﻿++ Color WHITE
+[color: WHITE]

@@ -76,6 +76,17 @@ class AbstractCollator:
 #         if not ascend:
 #             lst.reverse()
 
+    def sortByItem(self, lst, i, ascend=True):
+        """
+        Similar to sort(), but lst items are sequences where only item number i
+        is taken for sorting.
+        """
+        def strcollByItem(left, right):
+            return self.strcoll(left[i], right[i])
+
+        lst.sort(strcollByItem, reverse=not ascend)
+
+
     def sortByFirst(self, lst, ascend=True):
         """
         Similar to sort(), but lst items are sequences where only the first

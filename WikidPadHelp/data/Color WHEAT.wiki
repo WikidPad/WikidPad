@@ -1,2 +1,2 @@
-﻿+ Color WHEAT
-[color: WHEAT][icon:color palette]
+﻿++ Color WHEAT
+[color: WHEAT]

@@ -1,2 +1,2 @@
-﻿+ Icon mouse click
-[icon:mouse click]
+﻿++ Icon mouse click
+[icon: mouse click]

@@ -13,7 +13,8 @@ from wxHelper import *
 from StringOps import escapeHtml, unescapeWithRe
 
 from TempFileSet import TempFileSet
-import Exporters
+from . import PluginManager
+
 
 from SearchAndReplaceDialogs import SearchWikiDialog   # WikiPageListConstructionDialog
 from SearchAndReplace import SearchReplaceOperation  # ListWikiPagesOperation
@@ -585,7 +586,8 @@ class HtmlPrint:
         def getTextFromWord(word):
             return self.wikiDocument.getWikiPage(word).getLiveText()
 
-        exporterInstance = Exporters.HtmlExporter(self.pWiki)
+        exporterInstance = PluginManager.getExporterTypeDict(
+                self.pWiki, False)[u"html_single"][0](self.pWiki)
 
         # TODO Progress handler
         # TODO Set additional options

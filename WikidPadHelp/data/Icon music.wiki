@@ -1,2 +1,2 @@
-﻿+ Icon music
-[icon:music]
+﻿++ Icon music
+[icon: music]

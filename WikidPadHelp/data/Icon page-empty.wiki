@@ -1,2 +1,0 @@
-﻿+ Icon page-empty
-[icon:page-empty]

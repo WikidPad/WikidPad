@@ -1,2 +1,2 @@
-﻿+ Icon tv
-[icon:tv]
+﻿++ Icon tv
+[icon: tv]

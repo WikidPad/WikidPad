@@ -1,2 +1,2 @@
-﻿+ Color DARK SLATE BLUE
-[color: DARK SLATE BLUE][icon:color palette]
+﻿++ Color DARK SLATE BLUE
+[color: DARK SLATE BLUE]

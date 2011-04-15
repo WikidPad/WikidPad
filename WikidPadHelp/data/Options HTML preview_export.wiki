@@ -1,14 +1,13 @@
-﻿[:page:PageHeader][:toc:]
-+ Options for [HTML preview]/[HTML export]
+﻿++ Options for HTML preview/export
 
-+++++ Start browser after export
-Starts the current web browser after exporting one or more HtmlPages or an XML document.
+*Start browser after export*
+Starts the current web browser after exporting one or more HTML pages or an XML document.
 
-+++++ Font name for HTML preview
-Enter the desired font name for the [HTML preview]. Clicking on the "..." button shows a list of available fonts.
+*Font name for HTML preview*
+Enter the desired font name for the HTML preview. Clicking on the "..." button shows a list of available fonts.
 
-+++++ Attrs. to (not) include in preview
-Enter here a [regular expression] of the properties you want to allow to be shown in the [HTML preview]. The RE is tested against a "normalized" property where the brackets are removed and key and value are separated by ": ". So even if the property is in the page written as "\[camelCaseWordsEnabled=false]", the RE is tested against "camelCaseWordsEnabled: false".
+*Attrs. to (not) include in preview*
+Enter here a regular expression of the properties you want to allow to be shown in the HTML preview. The RE is tested against a "normalized" property where the brackets are removed and key and value are separated by ": ". So even if the property is in the page written as "\[camelCaseWordsEnabled=false]", the RE is tested against "camelCaseWordsEnabled: false".
 
 If you e.g. want to show the "alias" properties only, enter "alias: .* ". Other properties will then be hidden in the preview. The empty text field matches everything.
 
@@ -16,22 +15,22 @@ If you want to show all properties *except* those matching the RE, tick the chec
 
 If you press the "Ok" button of the options dialog, but the dialog doesn't vanish, instead this text field is red, then the RE contains an error and must be corrected first.
 
-+++++ Attrs. to (not) include in export
-Same as above, but for the [HTML export].
+*Attrs. to (not) include in export*
+Same as above, but for the HTML export.
 
-+++++ Shows pics as links in preview
+*Shows pics as links in preview*
 If this option is checked, links to image URLs (those ending with .png, .gif or .jpg) are shown like other links in the preview. If it is unchecked, the images (if available) are shown.
 
-+++++ Shows pics as links in export
-Same for [HTML export].
-In the ["Export" dialog], you can temporarily override this setting for one export.
+*Shows pics as links in export*
+Same for HTML export.
+In the export dialog, you can temporarily override this setting for one export.
 
-+++++ Preview renderer
-Under MsWindows you can choose the renderer for the [HTML preview]:
+*Preview renderer*
+Under Windows you can choose the renderer for the HTML preview:
 
     * Internal: Internal standard renderer. Not very capable, but it
       doesn't need external components
-    * IE: Uses MsWindowsInternetExplorer.
+    * IE: Uses Internet Explorer.
     * Mozilla: Uses Mozilla/Gecko rendering component if installed.
       You can download it here:
       http://www.iol.ie/~locka/mozilla/control.htm. *There seems to be
@@ -40,12 +39,12 @@ Under MsWindows you can choose the renderer for the [HTML preview]:
 
 Changes of this setting only have an effect for newly opened WikidPad windows.
 
-Mozilla renderer and MsInternetExplorer renderer can use CSS-files for [HTML preview], see [Cascading style sheets].
+Mozilla and IE renderer can use CSS-files for preview, see [Cascading style sheets].
 
     *Important remarks*
-    * Using MsInternetExplorer or Mozilla as renderers implies
-      that any weaknesses of these browsers, especially regarding security,
-      become part of WikidPad. If e.g. a wiki page contains dangerous scripts in
+    * Using IE or Mozilla as renderers means that any weaknesses of
+      these browsers (esp. regarding security) become part of
+      WikidPad. If e.g. a wiki page contains dangerous scripts in
       JavaScript they might be executed when showing the page.
     * If you chose Mozilla and the component is not installed,
       WikidPad will crash when opening a new window (or when
@@ -53,53 +52,50 @@ Mozilla renderer and MsInternetExplorer renderer can use CSS-files for [HTML pre
       again. It should then use the internal renderer instead.
 
 
-+++++ Show iframes inside IE preview
-If you chose MsInternetExplorer as renderer above you can set if an iframe (this is like a browser window in the browser window) should show its contents inside the preview or if your external default browser is started for this. This option may also work with Mozilla renderer but is currently untested.
+*Show iframes inside IE preview*
+If you chose IE renderer above you can set if an iframe (this is like a browser window in the browser window) should show its contents inside the preview or if your external default browser is started for this. This option may also work with Mozilla renderer but is currently untested.
 
 
-+++++ Table of contents
+*Table of contents*
 Choose if you want a table of contents in tree form, list form or not at all, see WikiExport#*Additional# options*
-In the ["Export" dialog], you can temporarily override this setting for one export.
+In the export dialog, you can temporarily override this setting for one export.
 
-+++++ Title of toc
+*Title of toc*
 Set the title of the table of contents according to your language. The default is "Table of Contents". For German it could be e.g. "Inhaltsverzeichnis".
 
-+++++ Single page separator lines
-Set the number of separator lines to separate wiki pages in a single HtmlPage on export.
+*Single page separator lines*
+Set the number of separator lines to separate wiki pages in a single HTML page on export.
 
 
 
 +++ HTML header settings
 
 ++++ Attributes of "<body>"-tag
-The following settings for [HTML preview]/[HTML export] can all be overridden by attributes for a particular wiki and for a particular page. These settings (either in options dialog or as attributes) only have an effect when exporting a set of HtmlPages, not when exporting a single page containing multiple WikiWords. For HTML preview only some of the settings have an effect at all.
+The following settings for HTML export/preview can all be overridden by attributes for a particular wiki and for a particular page. These settings (either in options dialog or as attributes) only have an effect when exporting a set of HTML pages, not when exporting a single page containing multiple wiki words. For HTML preview only some of the settings have an effect at all.
 
 
-+++++ Link color
-Specify the color of a link in [HTML preview]/[HTML export] by pressing the little "..." button to start the color dialog or by entering a numeric HTML color (e.g. "#000000" for black) in the text field. Leaving the field empty chooses the default color.
+*Link color*
+Specify the color of a link in preview/HTML export by pressing the little "..." button to start the color dialog or by entering a numeric HTML color (e.g. "#000000" for black) in the text field. Leaving the field empty chooses the default color.
 
 The attribute to override this for a single page is "html.linkcolor". To set it for a whole wiki, use "global.html.linkcolor". Both attributes take a numeric HTML color as value.
 
 
-+++++ Active link color
+*Active link color*
 Color of a link while hovering over it with the mouse or while mouse is pressed (depends on browser). Doesn't work for preview. Attribute to override: "html.alinkcolor". 
 
-+++++ Visited link color
+*Visited link color*
 Color of an already visited link. Doesn't work for preview. Attribute to override: "html.vlinkcolor". 
 
-+++++ Text color
+*Text color*
 Color of normal text. Attribute to override: "html.textcolor".
 
-+++++ Background color
+*Background color*
 Color of background. Attribute to override: "html.bgcolor".
 
-+++++ Background image
+*Background image*
 Link (URL) to a background image. Doesn't work for preview. Attribute to override: "html.bgimage". 
 
 
 
 ++++ DOCTYPE
 Sets the DOCTYPE to use in the header of an HTML file. You should only modify it if you understand what it is doing.
-
-
-[:page:PageFooter]

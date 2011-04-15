@@ -1,2 +1,2 @@
-﻿+ Color INDIAN RED
-[color: INDIAN RED][icon:color palette]
+﻿++ Color INDIAN RED
+[color: INDIAN RED]

@@ -1,2 +1,2 @@
-﻿+ Color SLATE BLUE
-[color: SLATE BLUE][icon:color palette]
+﻿++ Color SLATE BLUE
+[color: SLATE BLUE]

@@ -16,16 +16,24 @@ else:
     iewin = None
 
 
-if wx.Platform == '__WXMSW__':
-    try:
-        # Generate dependencies for py2exe
-        import comtypes.gen._99AB80C4_5E19_4FD5_B3CA_5EF62FC3F765_0_1_0 as _dummy
-        import comtypes.gen.myole4ax as _dummy
-        import comtypes.gen._3050F1C5_98B5_11CF_BB82_00AA00BDCE0B_0_4_0 as _dummy
-        import comtypes.gen.MSHTML as _dummy
-        del _dummy
-    except:
-        pass
+# if wx.Platform == '__WXMSW__':
+#     try:
+#         # Generate dependencies for py2exe
+#         import comtypes.gen._99AB80C4_5E19_4FD5_B3CA_5EF62FC3F765_0_1_0 as _dummy
+#         import comtypes.gen.myole4ax as _dummy
+#         import comtypes.gen._3050F1C5_98B5_11CF_BB82_00AA00BDCE0B_0_4_0 as _dummy
+#         import comtypes.gen.MSHTML as _dummy
+#         del _dummy
+#     except:
+#         pass
+
+if False:
+    # Generate dependencies for py2exe
+    import comtypes.gen._99AB80C4_5E19_4FD5_B3CA_5EF62FC3F765_0_1_0 as _dummy
+    import comtypes.gen.myole4ax as _dummy
+    import comtypes.gen._3050F1C5_98B5_11CF_BB82_00AA00BDCE0B_0_4_0 as _dummy
+    import comtypes.gen.MSHTML as _dummy
+
 
 
 from WikiExceptions import *
@@ -40,7 +48,7 @@ from StringOps import uniToGui, utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
 import DocPages
 from TempFileSet import TempFileSet
 
-import Exporters
+from . import PluginManager
 
 
 
@@ -128,8 +136,9 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
 
 
         # TODO Should be changed to presenter as controller
-        self.exporterInstance = Exporters.HtmlExporter(
-                self.presenter.getMainControl())
+        self.exporterInstance = PluginManager.getExporterTypeDict(
+                self.presenter.getMainControl(), False)[u"html_single"][0]\
+                (self.presenter.getMainControl())
 
         # TODO More elegantly
         if self.drivingMoz:
@@ -151,9 +160,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
                     u"", ".html", relativeTo="").decode("latin-1")
         self.htpaths[1] = self.exporterInstance.tempFileSet.createTempFile(
                     u"", ".html", relativeTo="").decode("latin-1")
-        
-        
-                    
+
         self.normHtpaths = [os.path.normcase(getLongPath(self.htpaths[0])),
                 os.path.normcase(getLongPath(self.htpaths[1]))]
                 
@@ -313,6 +320,7 @@ class WikiHtmlViewIE(iewin.IEHtmlWindow):
         self.outOfSync = True
         if self.visible:
             self.refresh()
+
 
     def onReloadedCurrentPage(self, miscevt):
         """

@@ -1,2 +1,2 @@
-﻿+ Icon joystick
-[icon:joystick]
+﻿++ Icon joystick
+[icon: joystick]

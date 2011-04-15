@@ -1,7 +1,0 @@
-﻿[:page:PageHeader][:toc:]
-+ Relative URL
-
-Such URL begins with "rel://"
-
-
-[:page:PageFooter][alias:Relative URL; relative URL][short_hint:An URL with a path relative to the position of the current page - not an absolute path.]

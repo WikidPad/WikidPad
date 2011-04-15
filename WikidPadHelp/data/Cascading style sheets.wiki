@@ -1,18 +1,15 @@
-﻿[:page:PageHeader][:toc:]
-+ Cascading style sheets
+﻿++ Cascading style sheets
 
-Cascading style sheets (in short: CSS) are a way to control the rendering of an HtmlFile in great detail. When exporting HTML from WikidPad, certain CSS files are copied to the export directory and referenced by the generated HTML page(s). They are also respected for the external MsInternetExplorer preview, the internal preview ignores them.
-
-++ Search order
+Cascading style sheets (in short: CSS) are a way to control the rendering of an HTML file in great detail. When exporting HTML from WikidPad, certain CSS files are copied to the export directory and referenced by the generated HTML page(s). They are also respected for the external IE preview, the internal preview ignores them.
 
 WikidPad searches in the following places for CSS files to copy and reference:
 
-   * File "appbase.css" in the [WikidPad installation directory], copied as
+   * File "appbase.css" in WikidPad installation directory, copied as
      "appbase.css". You should not modify it as it is overwritten at
      each update of WikidPad
    * File "wikistyle.css" in install subdirectory "export", copied as "admbase.css"
    * File "wikistyle.css" in subdirectory ".WikidPadGlobals" or
-     "WikidPadGlobals" of user-specific [configuration directory], copied
+     "WikidPadGlobals" of user-specific configuration directory, copied
      as "userbase.css"
    * File "wikistyle.css" in subdirectory "data" of wiki directory,
      copied as "wikistyle.css"
@@ -21,21 +18,15 @@ WikidPad searches in the following places for CSS files to copy and reference:
 Settings in a file overwrite same settings in files above it.
 
 
-++ In PreView
-
-In [Preview mode], three additional files are taken into account:
+For preview, there are three additional files taken into account (if you want the preview to look differently).
 
 These files overwrite settings in the files above.
 
    * File "wikipreview.css" in install subdirectory "export"
    * File "wikipreview.css" in subdirectory ".WikidPadGlobals" or
-     "WikidPadGlobals" of user-specific [configuration directory]
+     "WikidPadGlobals" of user-specific configuration directory
    * File "wikipreview.css" in subdirectory "data" of wiki directory
 
-Use these, if you want the [Preview mode] to look differently.
 
 
-To find your user-specific [configuration directory] see [MenuHelp]!About and scroll to the end to find out where it is.
-
-
-[:page:PageFooter]
+To find your user-specific configuration directory see "Help" menu -> "About" and scroll to the end to find out where it is.

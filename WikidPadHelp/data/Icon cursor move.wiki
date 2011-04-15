@@ -1,2 +1,2 @@
-﻿+ Icon cursor move
-[icon:cursor move]
+++ Icon cursor move
+[icon: cursor move]

@@ -1,2 +1,2 @@
-﻿+ Icon link
-[icon:link]
+﻿++ Icon link
+[icon: link]

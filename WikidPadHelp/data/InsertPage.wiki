@@ -1,7 +1,0 @@
-﻿[:page:PageHeader][:toc:]
-+ Insert Page
-
-See [Insertions].
-
-
-[:page:PageFooter][alias:Insert a Page; Insert Page]

@@ -1,7 +1,0 @@
-﻿[:page:PageHeader][:toc:]
-+ Insert Rel
-
-See [Insertions].
-
-
-[:page:PageFooter][alias:Insert rel;InsertRelated; Insert related page names]

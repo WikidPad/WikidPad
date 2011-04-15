@@ -1,2 +1,2 @@
-﻿+ Icon lens
-[icon:lens]
+﻿++ Icon lens
+[icon: lens]

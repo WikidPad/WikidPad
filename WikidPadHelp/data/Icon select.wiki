@@ -1,2 +1,2 @@
-﻿+ Icon select
-[icon:select]
+﻿++ Icon select
+[icon: select]

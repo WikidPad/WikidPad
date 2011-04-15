@@ -1,2 +1,2 @@
-﻿+ Color MEDIUM ORCHID
-[color: MEDIUM ORCHID][icon:color palette]
+﻿++ Color MEDIUM ORCHID
+[color: MEDIUM ORCHID]

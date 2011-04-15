@@ -1,2 +1,2 @@
-﻿+ Icon spanner
-[icon:spanner]
+﻿++ Icon spanner
+[icon: spanner]

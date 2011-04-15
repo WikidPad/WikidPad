@@ -1,2 +1,2 @@
-﻿+ Icon chart
-[icon:chart]
+++ Icon chart
+[icon: chart]

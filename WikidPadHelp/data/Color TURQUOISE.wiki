@@ -1,2 +1,2 @@
-﻿+ Color TURQUOISE
-[color: TURQUOISE][icon:color palette]
+﻿++ Color TURQUOISE
+[color: TURQUOISE]

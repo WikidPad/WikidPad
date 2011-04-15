@@ -1,0 +1,13 @@
+﻿++ Menu Help
+
+++ Open help wiki
+Opens this help wiki in a new window.
+
+++ Visit Homepage
+Starts default browser to show WikidPad's homepage.
+
+++ Show License
+Shows license of WikidPad
+
+++ About
+Shows version of WikidPad, copyright and at the bottom some information if you need support.

@@ -18,16 +18,18 @@ except:
     sqlite = None
 
 
+from Consts import VERSION_STRING, DATABLOCK_STOREHINT_INTERN
+
 from StringOps import uniToGui, guiToUni, mbcsEnc, mbcsDec, \
         escapeForIni, unescapeForIni, escapeHtml, strftimeUB, pathEnc, \
         writeEntireFile
 from wikidata import DbBackendUtils
 
 from WikiExceptions import *
-import Serialization
-import SystemInfo
 
-from Consts import VERSION_STRING, DATABLOCK_STOREHINT_INTERN
+import Serialization, PluginManager, SystemInfo
+
+
 
 
 
@@ -280,8 +282,6 @@ class OpenWikiWordDialog(wx.Dialog):
                             .getUnAliasedWikiWord(wikiWord), -1),)
                 else:
                     self._fillListContent(entered)
-#                     terms = self.pWiki.getWikiData().getWikiWordMatchTermsWith(
-#                             entered)
                     if len(self.listContent) > 0:
                         self.value = (self.listContent[0],)
                     else:
@@ -712,16 +712,11 @@ class RenameWikiWordDialog(wx.Dialog):
         if self.fromWikiWord == toWikiWord:
             return _(u"Can't rename to itself")
 
-#         try:
         if not self.mainControl.getWikiDocument().isCreatableWikiWord(toWikiWord):
             return _(u"Word already exists")
 
         # Word is OK
         return None
-
-#         except (IOError, OSError, DbAccessError), e:
-#             self.mainControl.lostAccess(e)
-#             raise
 
 
     def OnTextToWikiWord(self, evt):
@@ -822,23 +817,6 @@ class SelectIconDialog(wx.Dialog):
         return self.value
 
 
-#     @staticmethod
-#     def runModal(parent, ID, iconCache, title="Select Icon",
-#             pos=wx.DefaultPosition, size=wx.DefaultSize,
-#             style=wx.NO_3D|wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER):
-# 
-#         dlg = SelectIconDialog(parent, ID, iconCache, title, pos, size, style)
-#         try:
-#             dlg.CenterOnParent(wx.BOTH)
-#             if dlg.ShowModal() == wx.ID_OK:
-#                 return dlg.GetValue()
-#             else:
-#                 return None
-# 
-#         finally:
-#             dlg.Destroy()
-
-
     def OnOk(self, evt):
         no = self.lc.GetNextItem(-1, state = wx.LIST_STATE_SELECTED)
         if no > -1:
@@ -849,74 +827,6 @@ class SelectIconDialog(wx.Dialog):
         self.EndModal(wx.ID_OK)
 
 
-
-# class SavedVersionsDialog(wx.Dialog):
-#     def __init__(self, pWiki, ID, title="Saved Versions",
-#                  pos=wx.DefaultPosition, size=wx.DefaultSize,
-#                  style=wx.NO_3D):
-#         wx.Dialog.__init__(self, pWiki, ID, title, pos, size, style)
-#         self.pWiki = pWiki
-#         self.value = None        
-#         
-#         # Now continue with the normal construction of the dialog
-#         # contents
-#         sizer = wx.BoxSizer(wx.VERTICAL)
-# 
-#         label = wx.StaticText(self, -1, _(u"Saved Versions"))
-#         sizer.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-# 
-#         box = wx.BoxSizer(wx.VERTICAL)
-# 
-#         self.lb = wx.ListBox(self, -1, wx.DefaultPosition, wx.Size(165, 200),
-#                 [], wx.LB_SINGLE)
-# 
-#         # fill in the listbox
-#         self.versions = self.pWiki.getWikiData().getStoredVersions()
-#             
-#         for version in self.versions:
-#             self.lb.Append(version[1])
-# 
-#         box.Add(self.lb, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
-# 
-#         sizer.AddSizer(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-# 
-#         line = wx.StaticLine(self, -1, size=(20,-1), style=wx.LI_HORIZONTAL)
-#         sizer.Add(line, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.TOP, 5)
-# 
-#         box = wx.BoxSizer(wx.HORIZONTAL)
-# 
-#         btn = wx.Button(self, wx.ID_OK, _(u" Retrieve "))
-#         btn.SetDefault()
-#         box.Add(btn, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-# 
-#         btn = wx.Button(self, wx.ID_CANCEL, _(u" Cancel "))
-#         box.Add(btn, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
-# 
-#         sizer.AddSizer(box, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-# 
-#         self.SetSizer(sizer)
-#         self.SetAutoLayout(True)
-#         sizer.Fit(self)
-#         
-#         # Fixes focus bug under Linux
-#         self.SetFocus()
-# 
-#         ## wx.EVT_BUTTON(self, wxID_OK, self.OnRetrieve)
-#         wx.EVT_LISTBOX(self, ID, self.OnListBox)
-#         wx.EVT_LISTBOX_DCLICK(self, ID, lambda evt: self.EndModal(wx.ID_OK))
-#         
-# ##    def OnRetrieve(self, evt):
-# ##        if self.value:
-# ##            self.pWiki.getWikiData().deleteSavedSearch(self.value)
-# ##            self.EndModal(wxID_CANCEL)
-#         
-#     def GetValue(self):
-#         """ Returns None or tuple (<id>, <description>, <creation date>)
-#         """
-#         return self.value
-# 
-#     def OnListBox(self, evt):
-#         self.value = self.versions[evt.GetSelection()]
 
 
 SelectIconDialog.runModal = staticmethod(runDialogModalFactory(SelectIconDialog))
@@ -1180,25 +1090,26 @@ class ExportDialog(wx.Dialog):
         addOptSizer = LayerSizer()
 
         # TODO Move to e.g. ExportOperation.py
-        for ob in Exporters.describeExporters(self.mainControl):   # TODO search plugins
-            for tp in ob.getExportTypes(self.ctrls.additOptions, continuousExport):
-                panel = tp[2]
-                if panel is None:
-                    if self.emptyPanel is None:
-                        # Necessary to avoid a crash        
-                        self.emptyPanel = wx.Panel(self.ctrls.additOptions)
-                        # self.emptyPanel.Fit()
-                    panel = self.emptyPanel
-                else:
-                    pass
-                    # panel.Fit()
+        for obtp in PluginManager.getSupportedExportTypes(mainControl,
+                self.ctrls.additOptions, continuousExport).values():
+            panel = obtp[3]
+            if panel is None:
+                if self.emptyPanel is None:
+                    # Necessary to avoid a crash        
+                    self.emptyPanel = wx.Panel(self.ctrls.additOptions)
 
-                # Add Tuple (Exporter object, export type tag,
-                #     export type description, additional options panel)
-                exporterList.append((ob, tp[0], tp[1], panel))
-                self.supportedExportTypes.add(tp[0])
-                addOptSizer.Add(panel)
+                panel = self.emptyPanel
+            else:
+                pass
+                # panel.Fit()
 
+            # Add Tuple (Exporter object, export type tag,
+            #     export type description, additional options panel)
+            exporterList.append((obtp[0], obtp[1], obtp[2], panel))
+            self.supportedExportTypes.add(obtp[1])
+            addOptSizer.Add(panel)
+
+        mainControl.getCollator().sortByItem(exporterList, 2)
 
         self.ctrls.additOptions.SetSizer(addOptSizer)
         self.ctrls.additOptions.SetMinSize(addOptSizer.GetMinSize())
@@ -1444,26 +1355,6 @@ class ExportDialog(wx.Dialog):
 
 
     def _refreshSavedExportsList(self):
-#         wikiData = self.mainControl.getWikiData()
-#         unifNames = wikiData.getDataBlockUnifNamesStartingWith(u"savedexport/")
-# 
-#         result = []
-#         for un in unifNames:
-#             name = un[12:]
-#             content = wikiData.retrieveDataBlock(un)
-#             xmlDoc = minidom.parseString(content)
-#             xmlNode = xmlDoc.firstChild
-#             etype = Serialization.serFromXmlUnicode(xmlNode, u"exportTypeName")
-#             if etype not in self.supportedExportTypes:
-#                 # Export type of saved export not supported
-#                 continue
-# 
-#             result.append((name, xmlNode))
-# 
-#         self.mainControl.getCollator().sortByFirst(result)
-# 
-#         self.savedExports = result
-
         from . import Exporters
 
         self.savedExports = Exporters.retrieveSavedExportsList(self.mainControl,
@@ -1472,7 +1363,6 @@ class ExportDialog(wx.Dialog):
         self.ctrls.lbSavedExports.Clear()
         for exportName, xmlNode in self.savedExports:
             self.ctrls.lbSavedExports.Append(uniToGui(exportName))
-
 
 
     def OnSaveExport(self, evt):
@@ -1525,14 +1415,6 @@ class ExportDialog(wx.Dialog):
     def OnLoadAndRunExport(self, evt):
         if self._loadExport():
             self._runExporter()
-
-#     def OnLoadAndRunSearch(self, evt):
-#         if self._loadSearch():
-#             try:
-#                 self._refreshSavedExportsList()
-#             except re.error, e:
-#                 self.displayErrorMessage(_(u'Error in regular expression'),
-#                         _(unicode(e)))
 
 
     def OnDeleteExports(self, evt):

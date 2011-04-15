@@ -1,2 +1,2 @@
-﻿+ Icon winamp
-[icon:winamp]
+﻿++ Icon winamp
+[icon: winamp]

@@ -1,2 +1,2 @@
-﻿+ Color DARK TURQUOISE
-[color: DARK TURQUOISE][icon:color palette]
+﻿++ Color DARK TURQUOISE
+[color: DARK TURQUOISE]

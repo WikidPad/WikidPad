@@ -285,9 +285,7 @@ class WikiWordNode(AbstractNode):
         if (self.wikiWord == "ScratchPad"):
             style.icon = "note"
             return style # ?
-        
-        if not wikiPage.isDefined():
-            style.icon = "page-empty"
+
 
         # fetch the global attributes
         globalAttrs = self.treeCtrl.pWiki.getWikiData().getGlobalAttributes() # TODO More elegant

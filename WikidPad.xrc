@@ -875,8 +875,6 @@
             <object class="wxChoice" name="chHtmlPreviewRenderer">
               <content>
                 <item>Internal</item>
-                <item>IE</item>
-                <item>Mozilla</item>
               </content>
               <selection>0</selection>
             </object>
@@ -1136,6 +1134,14 @@
       <object class="sizeritem">
         <object class="wxCheckBox" name="cbEditorSyncByPreviewSelection">
           <label>Synchronize editor by preview selection</label>
+        </object>
+        <option>0</option>
+        <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+        <border>5</border>
+      </object>
+      <object class="sizeritem">
+        <object class="wxCheckBox" name="cbEditorColorizeSearchFragments">
+          <label>Colorize search fragments of links separately</label>
         </object>
         <option>0</option>
         <flag>wxALL|wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
@@ -5704,7 +5710,7 @@
                   <option>1</option>
                   <flag>wxALL|wxEXPAND</flag>
                   <border>5</border>
-                  <minsize>500,400</minsize>
+                  <minsize>400,200</minsize>
                 </object>
                 <object class="sizeritem">
                   <object class="wxStaticText" name="stGridOrphanedErrors">
@@ -5749,14 +5755,14 @@
                       <option>2</option>
                       <flag>wxALL|wxEXPAND</flag>
                       <border>5</border>
-                      <minsize>200,400</minsize>
+                      <minsize>200,200</minsize>
                     </object>
                     <object class="sizeritem">
                       <object class="unknown" name="htmllbMissingLinkingPages"/>
                       <option>1</option>
                       <flag>wxALL|wxEXPAND</flag>
                       <border>5</border>
-                      <minsize>100,400</minsize>
+                      <minsize>100,200</minsize>
                     </object>
                   </object>
                   <option>1</option>

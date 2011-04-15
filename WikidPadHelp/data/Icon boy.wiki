@@ -1,2 +1,2 @@
-﻿+ Icon boy
-[icon:boy]
+++ Icon boy
+[icon: boy]

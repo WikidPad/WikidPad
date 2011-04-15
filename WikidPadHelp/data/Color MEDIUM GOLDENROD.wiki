@@ -1,2 +1,2 @@
-﻿+ Color MEDIUM GOLDENROD
-[color: MEDIUM GOLDENROD][icon:color palette]
+﻿++ Color MEDIUM GOLDENROD
+[color: MEDIUM GOLDENROD]

@@ -1,2 +1,2 @@
-﻿+ Color MEDIUM SEA GREEN
-[color: MEDIUM SEA GREEN][icon:color palette]
+﻿++ Color MEDIUM SEA GREEN
+[color: MEDIUM SEA GREEN]

@@ -1,2 +1,2 @@
-﻿+ Icon zip disk
-[icon:zip disk]
+﻿++ Icon zip disk
+[icon: zip disk]

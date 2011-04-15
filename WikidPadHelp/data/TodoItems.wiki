@@ -1,22 +1,22 @@
-﻿[:page:PageHeader][:toc:]
-+ Todo Items
+﻿+ Todo Items
 
-++ Special Keywords
+In WikidPad "todo", "done", "action", "track", "issue", "question" and
+"project" are special keywords that enable you to track important
+items under the "View" menu in the tree.
 
-Special keywords enable you to track important items in WikidPad.
+todo: I have to do this.
+done: I have done this.
+action: I have action items
+track: I am tracking this
+issue: I am tracking this
+question: This is a question
+project: This is my project
 
-	* todo: I have to do this.
-	* done: I have done this.
-	* action: I have to act in this.
-	* track: I am tracking this
-	* issue: This is to be addressed
-	* question: This is a question
-	* project: This is my project
+Now open the views node in the tree on the left to see how these todo
+items have been added.  For example, open "Views/question" and you will
+see a node named "This is a question."
 
-
-++ Escape Unwanted TodoItems
-
-Unwanted TodoItems like e.g.:
+Unwanted todo items like e.g.:
 
     Interesting CD track: loud music
 
@@ -25,30 +25,20 @@ can be escaped:
     Interesting CD \track: loud music
 
 
-++ Terminate TodoItems
-
 A todo item ends either with a newline or with a vertical bar |. If you want to insert a bar into the item, you can escape it with a backslash.
 
-Example: todo: This item ends here| This text is not part of the item any more.
-todo: This does \|not end here.
+Example: todo: This item ends here| This isn't part of the item.
+todo: This ends \| not.
 
 Look in the "Views" subtree to see the todo entries.
 
 
-++ Sub-Categories for TodoItems
-
-These items supports nested sub-categories as well, for example:
+These items supports nested sub-categories also, for example:
 
 todo.system.bugs.urgent: There is a bug in the system
 
-This will create a "system" node in the tree under "Views/todo", which has a "bugs" subnode which has a "urgent" subnode...
+Will create a "system" node in the tree under "Views/todo", which has a "bugs" subnode which has a "urgent" subnode...
 
-++ See TodoItems in the ["Tree" window]
+[icon: pin]
+[alias: TodoItem]
 
-Now open the the ["View" item] in the ["Tree" window] on the left to see
-how these todo items have been added. For example, open
-"Views/question" and you will see a node named "This is a question."
-
-
-
-[:page:PageFooter][icon:pin][alias:TodoItem]

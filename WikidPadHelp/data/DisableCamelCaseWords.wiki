@@ -1,19 +1,14 @@
-﻿[:page:PageHeader][:toc:]
-+ Disable Camel Case Words
+++ Disable Camel Case Words
 
-++ local
-
-CamelCase WikiWords are not enabled on this page b/c of the following option:
+CamelCase WikiWords are not enable on this page b/c of the following
+option.
 
 [camelCaseWordsEnabled: false]
 
-++ global
-
-In order to disable CamelCase WikiWords globally add the following property to a page in your wiki:
+To disable CamelCase WikiWords globally add the:
 
 <<
 [global.camelCaseWordsEnabled: false]
 >>
 
-
-[:page:PageFooter]
+property to a page in your wiki.

@@ -1,2 +1,2 @@
-﻿+ Icon cd
-[icon:cd]
+++ Icon cd
+[icon: cd]

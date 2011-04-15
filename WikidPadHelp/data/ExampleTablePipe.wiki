@@ -1,9 +1,0 @@
-﻿[:page:PageHeader][:toc:]
-+ Example Table Pipe
-
-<<|
-ScratchPad| This is| *a table*
-with two| rows and| three columns delimited by \| and \
-                                                    with two lines in a cell
->>
-
