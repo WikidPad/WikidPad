@@ -432,6 +432,7 @@ extensions/ExampleInsertion.py -text
 extensions/GnuplotClBridge.py -text
 extensions/GraphvizClBridge.py -text
 extensions/GraphvizStructureView.py -text
+extensions/HtmlExporter.py -text
 extensions/KeyBindings.py -text
 extensions/MimeTexCGIBridge.py -text
 extensions/PloticusClBridge.py -text
@@ -737,6 +738,7 @@ lib/pwiki/WikiDocument.py -text
 lib/pwiki/WikiExceptions.py -text
 lib/pwiki/WikiHtmlView.py -text
 lib/pwiki/WikiHtmlViewIE.py -text
+lib/pwiki/WikiHtmlViewWK.py -text
 lib/pwiki/WikiPyparsing.py -text
 lib/pwiki/WikiTreeCtrl.py -text
 lib/pwiki/WikiTxtCtrl.py -text

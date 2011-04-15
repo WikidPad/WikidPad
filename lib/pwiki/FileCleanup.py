@@ -950,7 +950,9 @@ class _MissingLinkingPagesListBox(wx.HtmlListBox):
                 "where refedItemId == ?", (refedItemId,))
 
         if len(dbData) == 0:
+            self.itemInfo = []
             self.SetItemCount(0)
+            self.Refresh()
             return
 
         # Group by unified name (wiki word)
@@ -1431,6 +1433,7 @@ class FileCleanupDialog(wx.Dialog):
     def onModifiedWikiPage(self, miscevt):
         self.db.updateWikiPage(miscevt.get("wikiPage"))
         self.db.deleteUninteresting()
+        self.db.getSqlDb().commit()
 
 #         if miscevt.get("wikiPage").getUnifiedPageName() in self.modifiedSinceOpen:
 #             return

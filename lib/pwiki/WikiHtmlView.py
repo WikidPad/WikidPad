@@ -15,7 +15,8 @@ from .wxHelper import getAccelPairFromKeyDown, copyTextToClipboard, GUI_ID, \
 from .MiscEvent import KeyFunctionSink
 
 from . import StringOps
-from .StringOps import uniToGui, pathnameFromUrl, flexibleUrlUnquote
+from StringOps import uniToGui, utf8Enc, utf8Dec, pathEnc, urlFromPathname, \
+        urlQuote, pathnameFromUrl, flexibleUrlUnquote
 from .Configuration import MIDDLE_MOUSE_CONFIG_TO_TABMODE
 
 from . import OsAbstract
@@ -23,8 +24,18 @@ from . import OsAbstract
 from . import DocPages
 from .TempFileSet import TempFileSet
 
-from . import Exporters
+from . import PluginManager
 
+
+# Try and load webkit renderer
+try:
+    import WikiHtmlViewWK
+except:
+#         traceback.print_exc()
+    WikiHtmlViewWK = None
+
+
+# Try and load Windows IE renderer
 if isWindows():
     try:
         import WikiHtmlViewIE
@@ -33,6 +44,7 @@ if isWindows():
         WikiHtmlViewIE = None
 else:
     WikiHtmlViewIE = None
+
 
 class LinkConverterForPreview:
     """
@@ -51,7 +63,7 @@ class LinkConverterForPreview:
 def createWikiHtmlView(presenter, parent, ID):
     pvRenderer = presenter.getConfig().getint("main", "html_preview_renderer", 0)
 
-    if WikiHtmlViewIE and pvRenderer > 0:
+    if WikiHtmlViewIE and pvRenderer in (1, 2):
         # Set preview renderer to 0 = Internal
         config = presenter.getConfig()
         config.set("main", "html_preview_renderer", "0")
@@ -62,66 +74,12 @@ def createWikiHtmlView(presenter, parent, ID):
         config.set("main", "html_preview_renderer", str(pvRenderer))
         config.saveGlobalConfig()
         return hvIe
-    else:
-        return WikiHtmlView(presenter, parent, ID)
+        
+    if WikiHtmlViewWK and pvRenderer == 3:
+        return WikiHtmlViewWK.WikiHtmlViewWK(presenter, parent, ID)
 
-
-
-# class TestFilter(wx.html.HtmlFilter):
-#     def CanRead(self, fsfile):
-#         print "--TestFilter", repr(fsfile.GetLocation())
-#         return False
-#     
-#     def ReadFile(self, fsfile):
-#         return u""
-# 
-# wx.html.HtmlWindow.AddFilter(TestFilter())
-
-
-
-
-
-
-# class MyLocalFSHandler(wx.FileSystemHandler):
-#     def CanOpen(self, location):
-#         print "--CanOpen1", repr(location), repr(self.GetProtocol(location))
-#         return self.GetProtocol(location) == u"file"
-#         
-#     def OpenFile(self, fs, location):
-#         print "--OpenFile", repr(location)
-#         
-#         right = self.GetRightLocation(location);
-#         fn = wx.FileSystem.URLToFileName(right);
-#         fullpath = os.path.abspath(fn)
-#     
-#         if not os.path.exists(fullpath):
-#             return None
-# #     
-# #         // we need to check whether we can really read from this file, otherwise
-# #         // wxFSFile is not going to work
-# #         wxFFileInputStream *is = new wxFFileInputStream(fullpath);
-# #         if ( !is->Ok() )
-# #         {
-# #             delete is;
-# #             return (wxFSFile*) NULL;
-# #         }
-# 
-#         f = open(fullpath, "rb")
-# 
-#         return wx.FSFile(f,
-#                             right,
-#                             self.GetMimeTypeFromExt(location),
-#                             self.GetAnchor(location), wx.DateTime())
-# #                             ,wxDateTime(wxFileModificationTime(fullpath))
-# #                             );
-# 
-# 
-# 
-# wx.FileSystem.CleanUpHandlers()
-# wx.FileSystem.AddHandler(MyLocalFSHandler())
-
-
-
+    # Internal preview if nothing else wanted or possible
+    return WikiHtmlView(presenter, parent, ID)
 
 
 class WikiHtmlView(wx.html.HtmlWindow):
@@ -134,7 +92,6 @@ class WikiHtmlView(wx.html.HtmlWindow):
                 ("reloaded current doc page", self.onReloadedCurrentPage),
                 ("opened wiki", self.onOpenedWiki),
                 ("closing current wiki", self.onClosingCurrentWiki)
-#                 ("changed options", self.onOptionsChanged),
         ), self.presenter.getMiscEvent())
         
         self.__sinkApp = wxKeyFunctionSink((
@@ -157,9 +114,10 @@ class WikiHtmlView(wx.html.HtmlWindow):
         self.contextHref = None  # Link href on which context menu was opened
         
         # TODO Should be changed to presenter as controller
-        self.exporterInstance = Exporters.HtmlExporter(
-                self.presenter.getMainControl())
-                
+        self.exporterInstance = PluginManager.getExporterTypeDict(
+                self.presenter.getMainControl(), False)[u"html_single"][0]\
+                (self.presenter.getMainControl())
+
         self._DEFAULT_FONT_SIZES = self.presenter.getMainControl().presentationExt.INTHTML_FONTSIZES
         
         # TODO More elegantly

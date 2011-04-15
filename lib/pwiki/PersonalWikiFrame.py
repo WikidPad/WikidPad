@@ -62,7 +62,6 @@ from . import AttributeHandling, SpellChecker
 from . import AdditionalDialogs
 
 
-import Exporters
 import StringOps
 from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, \
         unescapeForIni, urlFromPathname, \
@@ -70,7 +69,9 @@ from StringOps import uniToGui, guiToUni, mbcsDec, mbcsEnc, \
         pathWordAndAnchorToWikiUrl, relativeFilePath, pathnameFromUrl
 
 
-from PluginManager import PluginManager, PluginAPIAggregation
+from PluginManager import PluginAPIAggregation
+import PluginManager
+
 
 # TODO More abstract/platform independent
 try:
@@ -240,10 +241,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.nonCoreMenuItems = PWikiNonCore(self, self)
 
         # setup plugin manager and hooks API
-        dirs = ( os.path.join(self.globalConfigSubDir, u'user_extensions'),
+#         dirs = ( os.path.join(self.globalConfigSubDir, u'user_extensions'),
+#                 os.path.join(self.wikiAppDir, u'user_extensions'),
+#                 os.path.join(self.wikiAppDir, u'extensions') )
+        dirs = ( os.path.join(self.wikiAppDir, u'extensions'),
                 os.path.join(self.wikiAppDir, u'user_extensions'),
-                os.path.join(self.wikiAppDir, u'extensions') )
-        self.pluginManager = PluginManager(dirs)
+                os.path.join(self.globalConfigSubDir, u'user_extensions') )
+        self.pluginManager = PluginManager.PluginManager(dirs, systemDirIdx=0)
 
 #         wx.GetApp().pauseBackgroundThreads()
 
@@ -257,7 +261,7 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.menuFunctions = plm.registerSimplePluginAPI(("MenuFunctions",1), 
                                 ("describeMenuItems",))
         
-        self.toolbarFunctions = PluginAPIAggregation(
+        self.toolbarFunctions = PluginManager.PluginAPIAggregation(
                 plm.registerWrappedPluginAPI(("ToolbarFunctions",2),
                                 describeToolbarItems="describeToolbarItemsV02"),
                 plm.registerSimplePluginAPI(("ToolbarFunctions",1), 
@@ -358,10 +362,8 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.hotKeyDummyWindow = None
         self._refreshHotKeys()
 
-        self.windowLayouter.layout()
-        
         # State here: GUI construction finished, but frame is hidden yet
-        
+
         # if a wiki to open is set, open it
         if wikiToOpen:
             if os.path.exists(pathEnc(wikiToOpen)):
@@ -634,6 +636,20 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
             target.ProcessEvent(evt)
         finally:
             self.eventRoundtrip -= 1
+
+
+    def getPageHistoryDeepness(self):
+        """
+        Convenience method to call PageHistory.getDeepness() for current
+        presenter.
+        Returns tuple (back, forth) where  back  is the maximum number of steps
+        to go backward in history,  forth  the max. number to go forward
+        """
+        dpp = self.getCurrentDocPagePresenter()
+        if dpp is None:
+            return (0, 0)
+        
+        return dpp.getPageHistory().getDeepness()
 
 
     def _OnEventToCurrentDocPPresenter(self, evt):
@@ -1761,12 +1777,15 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.addMenuItem(navigateMenu, _(u'&Back') + u'\t' + self.keyBindings.GoBack,
                 _(u'Go backward'), self._OnEventToCurrentDocPPresenter,
-                "tb_back", menuID=GUI_ID.CMD_PAGE_HISTORY_GO_BACK)
+                "tb_back", updatefct=lambda evt: evt.Enable(
+                self.getPageHistoryDeepness()[0] > 0),
+                menuID=GUI_ID.CMD_PAGE_HISTORY_GO_BACK)
 
         self.addMenuItem(navigateMenu, _(u'&Forward') + u'\t' + self.keyBindings.GoForward,
                 _(u'Go forward'), self._OnEventToCurrentDocPPresenter,
-                "tb_forward", menuID=GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD)
-
+                "tb_forward", updatefct=lambda evt: evt.Enable(
+                self.getPageHistoryDeepness()[1] > 0),
+                menuID=GUI_ID.CMD_PAGE_HISTORY_GO_FORWARD)
 
         self.addMenuItem(navigateMenu, _(u'&Wiki Home') + u'\t' + self.keyBindings.GoHome,
                 _(u'Go to wiki homepage'),
@@ -2179,18 +2198,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         p = self.createNewDocPagePresenterTab()
         self.mainAreaPanel.prepareCurrentPresenter(p)
  
-        # Build layout:
-
-        self.windowLayouter = WindowSashLayouter(self, self.createWindow)
-
-        cfstr = self.getConfig().get("main", "windowLayout")
-        self.windowLayouter.setWinPropsByConfig(cfstr)
-        self.windowLayouter.realize()
-
-        self.tree = self.windowLayouter.getWindowByName("maintree")
-        self.logWindow = self.windowLayouter.getWindowByName("log")
-
-
         # ------------------------------------------------------------------------------------
         # Create menu and toolbar
         # ------------------------------------------------------------------------------------
@@ -2242,6 +2249,19 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.statusBar.SetStatusWidths([-1, -1, posWidth])
         self.SetStatusBar(self.statusBar)
+
+
+        # Build layout:
+
+        self.windowLayouter = WindowSashLayouter(self, self.createWindow)
+
+        cfstr = self.getConfig().get("main", "windowLayout")
+        self.windowLayouter.setWinPropsByConfig(cfstr)
+        self.windowLayouter.realize()
+
+        self.tree = self.windowLayouter.getWindowByName("maintree")
+        self.logWindow = self.windowLayouter.getWindowByName("log")
+
 
         # Register the App IDLE handler
 #         wx.EVT_IDLE(self, self.OnIdle)
@@ -2805,12 +2825,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 # 
 #             wdhName = wdhandlers[index][0]
 
-            wdhName, wlangName, asciiOnly = \
-                    AdditionalDialogs.NewWikiSettings.runModal(self, -1, self)[:3]
-                    
-            if wdhName is None:
+            wsett = AdditionalDialogs.NewWikiSettings.runModal(self, -1, self)
+            if wsett is None:
                 return
 
+            wdhName, wlangName, asciiOnly = wsett[:3]
+            if wdhName is None:
+                return
 
             # create the new dir for the wiki
             os.mkdir(wikiDir)
@@ -3229,7 +3250,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     if targetPresenter.hasSubControl(subCtrl):
                         targetPresenter.switchSubControl(subCtrl)
 
-                if activeTabNo > 0:
+                if activeTabNo > 0 and \
+                        len(self.getMainAreaPanel().getPresenters()) > 0:
+                    activeTabNo = min(activeTabNo,
+                            len(self.getMainAreaPanel().getPresenters()) - 1)
+
                     targetPresenter = self.getMainAreaPanel().getPresenters()[
                             activeTabNo]
                     self.getMainAreaPanel().showPresenter(targetPresenter)
@@ -4572,17 +4597,17 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
     EXPORT_PARAMS = {
             GUI_ID.MENU_EXPORT_WHOLE_AS_PAGE:
-                    (Exporters.HtmlExporter, u"html_multi", None),
+                    (u"html_multi", None),
             GUI_ID.MENU_EXPORT_WHOLE_AS_PAGES:
-                    (Exporters.HtmlExporter, u"html_single", None),
+                    (u"html_single", None),
             GUI_ID.MENU_EXPORT_WORD_AS_PAGE:
-                    (Exporters.HtmlExporter, u"html_multi", None),
+                    (u"html_multi", None),
             GUI_ID.MENU_EXPORT_SUB_AS_PAGE:
-                    (Exporters.HtmlExporter, u"html_multi", None),
+                    (u"html_multi", None),
             GUI_ID.MENU_EXPORT_SUB_AS_PAGES:
-                    (Exporters.HtmlExporter, u"html_single", None),
+                    (u"html_single", None),
             GUI_ID.MENU_EXPORT_WHOLE_AS_RAW:
-                    (Exporters.TextExporter, u"raw_files", (1,))
+                    (u"raw_files", (1,))
             }
 
 
@@ -4641,12 +4666,14 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
                     wordList = (self.getCurrentWikiWord(),)
 
-                expclass, exptype, addopt = self.EXPORT_PARAMS[typ]
+                exptype, addopt = self.EXPORT_PARAMS[typ]
                 
                 self.saveAllDocPages()
                 self.getWikiData().commit()
 
-                ob = expclass(self)
+                ob = PluginManager.getSupportedExportTypes(self, None, False)[exptype][0]
+#                 ob = expclass(self)
+
                 if addopt is None:
                     # Additional options not given -> take default provided by exporter
                     addopt = ob.getAddOpt(None)

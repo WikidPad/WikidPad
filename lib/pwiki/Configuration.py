@@ -566,7 +566,7 @@ GLOBALDEFAULTS = {
     ("main", "html_export_proppattern_is_excluding"): u"False",  # Same for HTML exporting
     ("main", "html_preview_pics_as_links"): u"False",  # Show only links to pictures in HTML preview
     ("main", "html_export_pics_as_links"): u"False",  # Same for HTML exporting
-    ("main", "html_preview_renderer"): u"0",  # 0: Internal wxWidgets; 1: IE; 2: Mozilla
+    ("main", "html_preview_renderer"): u"0",  # 0: Internal wxWidgets; 1: IE; 2: Mozilla; 3: Webkit
     ("main", "html_preview_ieShowIframes"): u"False",  # Show iframes with external sources inside IE preview?
     ("main", "export_table_of_contents"): u"0",  # Show table of contents when exporting
             # 0:None, 1:formatted as tree, 2:as list
@@ -593,6 +593,8 @@ GLOBALDEFAULTS = {
             # for autocompletion ("[Two" -> "[Two words]" instead of -> "[Two words")
     ("main", "editor_sync_byPreviewSelection"): "False", # If True, the selection in preview will be searched in editor
             # for synchronization of both.
+    ("main", "editor_colorizeSearchFragments"): "False", # Search fragments (part after # in wiki link) are colored
+            # separately in syntax coloring (by default blue if present, black if not). May slow down highlighting.
     ("main", "editor_tabWidth"): "4",  # How many spaces should a tab be wide?
     ("main", "editor_onlineSpellChecker_active"): "False",  # Online-spellchecker (check as you type)?
 

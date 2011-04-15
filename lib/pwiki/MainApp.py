@@ -346,9 +346,9 @@ class App(wx.App, MiscEventSourceMixin):
                         "AppLock.lock")
 
                 writeEntireFile(appLockPath, appLockContent)
-    
+
                 self.removeAppLockOnExit = True
-                
+
                 Ipc.getCommandServer().setAppLockInfo(appLockPath, appLockContent)
 
 
@@ -357,10 +357,13 @@ class App(wx.App, MiscEventSourceMixin):
         self.iconCache = IconCache(iconDir)
 
         # Create plugin manager for application-wide plugins
-        dirs = ( os.path.join(self.globalConfigSubDir, u'user_extensions'),
+#         dirs = ( os.path.join(self.globalConfigSubDir, u'user_extensions'),
+#                 os.path.join(self.wikiAppDir, u'user_extensions'),
+#                 os.path.join(self.wikiAppDir, u'extensions') )
+        dirs = ( os.path.join(self.wikiAppDir, u'extensions'),
                 os.path.join(self.wikiAppDir, u'user_extensions'),
-                os.path.join(self.wikiAppDir, u'extensions') )
-        self.pluginManager = PluginManager(dirs)
+                os.path.join(self.globalConfigSubDir, u'user_extensions') )
+        self.pluginManager = PluginManager(dirs, systemDirIdx=0)
 
         # Register app-wide plugin APIs
         describeInsertionApi = self.pluginManager.registerSimplePluginAPI(
@@ -372,6 +375,10 @@ class App(wx.App, MiscEventSourceMixin):
         describeWikiLanguageApi = self.pluginManager.registerSimplePluginAPI(
                 ("WikiParser", 1), ("describeWikiLanguage",))
 
+        self.describeExportersApi = self.pluginManager.registerSimplePluginAPI(
+                ("Exporters", 1), ("describeExportersV01",))
+
+
         # Load plugins
 #         dirs = ( os.path.join(self.wikiAppDir, u'user_extensions'),
 #                 os.path.join(self.wikiAppDir, u'extensions') )
@@ -382,12 +389,12 @@ class App(wx.App, MiscEventSourceMixin):
         # Register options
         registerOptionsApi.registerOptions(1, self)
 
-        # Retrieve descriptions for InsertionByKey
-        insertionDescriptions = reduce(lambda a, b: a+list(b),
-                describeInsertionApi.describeInsertionKeys(1, self), [])
-
-        self.insertionPluginManager = InsertionPluginManager(
-                insertionDescriptions)
+#         # Retrieve descriptions for InsertionByKey
+#         insertionDescriptions = reduce(lambda a, b: a+list(b),
+#                 describeInsertionApi.describeInsertionKeys(1, self), [])
+# 
+#         self.insertionPluginManager = InsertionPluginManager(
+#                 insertionDescriptions)
 
         # Retrieve descriptions for InsertionByKey
         insertionDescriptions = reduce(lambda a, b: a+list(b),
@@ -401,6 +408,7 @@ class App(wx.App, MiscEventSourceMixin):
 
         self.wikiLanguageDescDict = dict(( (item[0], item)
                 for item in wikiLanguageDescriptions ))
+
 
         self.collator = None
 
@@ -631,7 +639,10 @@ class App(wx.App, MiscEventSourceMixin):
     def unregisterMainFrame(self, wikiFrame):
         self.mainFrameSet.discard(wikiFrame)
         
-        
+    def describeExporters(self, mainControl):
+        return reduce(lambda a, b: a+list(b),
+                self.describeExportersApi.describeExporters(mainControl), [])
+
     def createDefaultGlobalConfig(self, globalConfigLoc):
         self.globalConfig.createEmptyConfig(globalConfigLoc)
         self.globalConfig.fillWithDefaults()

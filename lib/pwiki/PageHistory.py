@@ -144,6 +144,14 @@ class PageHistory:
                 motionType="history", historyDelta=delta)
 
 
+    def getDeepness(self):
+        """
+        Returns tuple (back, forth) where  back  is the maximum number of steps
+        to go backward in history,  forth  the max. number to go forward
+        """
+        return (max(0, self.pos - 1), max(0, len(self.history) - self.pos))
+
+
     def goAfterDeletion(self):
         """
         Called after a page was deleted

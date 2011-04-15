@@ -1770,7 +1770,8 @@ class SearchReplaceOperation:
         was not successful.
 
         Remarks:
-        - The function may not work if self.booleanOp is True
+        - The function works only if self.hasParticularTextPosition()
+          returns True
         - The function does not apply a replacement, even if 'self'
           is a replacement operation
         """
@@ -1794,7 +1795,8 @@ class SearchReplaceOperation:
         was not successful.
 
         Remarks:
-        - The function may not work if self.booleanOp is True
+        - The function works only if self.hasParticularTextPosition()
+          returns True
         - The function does not apply a replacement, even if 'self'
           is a replacement operation
         """

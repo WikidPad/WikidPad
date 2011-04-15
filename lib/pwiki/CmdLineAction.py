@@ -6,6 +6,8 @@ from WikiExceptions import *
 
 from StringOps import mbcsDec, wikiUrlToPathWordAndAnchor
 
+import PluginManager
+
 
 class CmdLineAction:
     """
@@ -205,7 +207,7 @@ class CmdLineAction:
 
             try:  
                 exporter, etype, desc, panel = PluginManager.getSupportedExportTypes(
-                        pWiki, continuousExport, None)[etypeProfile]
+                        pWiki, None, continuousExport)[etypeProfile]
             except KeyError:
                 self.showCmdLineUsage(pWiki,
                         _(u"Export type '%s' of saved export is not supported") %
@@ -274,8 +276,6 @@ class CmdLineAction:
 
 
     def exportAction(self, pWiki):
-        import Exporters
-
         if not (self.exportWhat or self.exportType or self.exportDest or
                 self.exportSaved):
             return # No export
@@ -320,9 +320,11 @@ class CmdLineAction:
 
         # Handle self.exportType
         exporterList = []
-        for ob in Exporters.describeExporters(pWiki):   # TODO search plugins
-            for tp in ob.getExportTypes(None):
-                exporterList.append((ob, tp[0]))
+        for obtp in PluginManager.getSupportedExportTypes(
+                mainControl, None).values():
+            exporterList.append((obtp[0], obtp[1]))
+            
+        mainControl.getCollator().sortByItem(exporterList, 1)
 
         exporter = None
         for ei in exporterList:

@@ -474,6 +474,7 @@ class OptionsDialog(wx.Dialog):
                 "cbAutoCompleteClosingBracket", "b"),
             ("editor_sync_byPreviewSelection", "cbEditorSyncByPreviewSelection",
                 "b"),
+            ("editor_colorizeSearchFragments", "cbEditorColorizeSearchFragments", "b"),
             ("editor_tabWidth", "scEditorTabWidth", "spin"),
 
 
@@ -816,6 +817,21 @@ class OptionsDialog(wx.Dialog):
         self.ctrls.btnOk.SetId(wx.ID_OK)
         self.ctrls.btnCancel.SetId(wx.ID_CANCEL)
 
+        # Special options to be prepared before transferring to dialog
+        self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData = [0]
+        if WikiHtmlView.WikiHtmlViewIE is not None:
+            self.ctrls.chHtmlPreviewRenderer.Append(_(u"IE"))
+            self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(1)
+            self.ctrls.chHtmlPreviewRenderer.Append(_(u"Mozilla"))
+            self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(2)
+        
+        if WikiHtmlView.WikiHtmlViewWK is not None:
+            self.ctrls.chHtmlPreviewRenderer.Append(_(u"Webkit"))
+            self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData.append(3)
+
+        self.ctrls.chHtmlPreviewRenderer.Enable(
+                len(self.ctrls.chHtmlPreviewRenderer.optionsDialog_clientData) > 1)
+
         # Transfer options to dialog
         for oct in self.combinedOptionToControl:
             o, c, t = oct[:3]
@@ -846,8 +862,14 @@ class OptionsDialog(wx.Dialog):
                         unescapeForIni(uniToGui(self.pWiki.getConfig().get(
                         "main", o))) )
             elif t == "seli":   # Selection -> transfer index
-                self.ctrls[c].SetSelection(
-                        self.pWiki.getConfig().getint("main", o))
+                sel = self.pWiki.getConfig().getint("main", o)
+                if hasattr(self.ctrls[c], "optionsDialog_clientData"):
+                    # There is client data to take instead of real selection
+                    try:
+                        sel = self.ctrls[c].optionsDialog_clientData.index(sel)
+                    except (IndexError, ValueError):
+                        sel = 0
+                self.ctrls[c].SetSelection(sel)
             elif t == "selt":   # Selection -> transfer content string
                 try:
                     idx = oct[3].index(self.pWiki.getConfig().get("main", o))
@@ -898,9 +920,6 @@ class OptionsDialog(wx.Dialog):
                 self.pWiki.getConfig().getint("main",
                 "new_window_on_follow_wiki_url") != 0)
 
-        self.ctrls.chHtmlPreviewRenderer.Enable(
-                WikiHtmlView.WikiHtmlViewIE is not None)
-        
         wikiDocument = self.pWiki.getWikiDocument()
         if wikiDocument is not None:        
             self.ctrls.cbWikiReadOnly.SetValue(
@@ -1114,7 +1133,11 @@ class OptionsDialog(wx.Dialog):
                 config.set( "main", o, guiToUni(
                         escapeForIni(self.ctrls[c].GetValue(), toEscape=u" ")) )
             elif t == "seli":   # Selection -> transfer index
-                config.set("main", o, unicode(self.ctrls[c].GetSelection()) )
+                sel = self.ctrls[c].GetSelection()
+                if hasattr(self.ctrls[c], "optionsDialog_clientData"):
+                    # There is client data to take instead of real selection
+                    sel = self.ctrls[c].optionsDialog_clientData[sel]
+                config.set("main", o, unicode(sel))
             elif t == "selt":   # Selection -> transfer content string
                 try:
                     config.set("main", o, oct[3][self.ctrls[c].GetSelection()])

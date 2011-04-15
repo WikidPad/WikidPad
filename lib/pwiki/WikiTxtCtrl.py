@@ -300,6 +300,9 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 self.presenter.getConfig().getboolean(
                 "main", "editor_onlineSpellChecker_active", False)
 
+        self.optionColorizeSearchFragments = self.presenter.getConfig()\
+                .getboolean("main", "editor_colorizeSearchFragments", False)
+
         self.onOptionsChanged(None)
 
         # when was a key pressed last. used to check idle time.
@@ -1037,15 +1040,13 @@ class WikiTxtCtrl(SearchableScintillaControl):
         self.SetTabWidth(tabWidth)
 
 
-
     def onChangedConfiguration(self, miscevt):
         """
         Called when global configuration was changed. Most things are processed
         by onOptionsChanged so only the online spell checker switch must be
         handled here.
         """
-        newSetting = self.presenter.getConfig().getboolean(
-                "main", "editor_onlineSpellChecker_active", False)
+        restyle = False
 
         newSetting = SpellChecker.isSpellCheckSupported() and \
                 self.presenter.getConfig().getboolean(
@@ -1053,6 +1054,16 @@ class WikiTxtCtrl(SearchableScintillaControl):
 
         if newSetting != self.onlineSpellCheckerActive:
             self.onlineSpellCheckerActive = newSetting
+            restyle = True
+
+        newSetting = self.presenter.getConfig()\
+                .getboolean("main", "editor_colorizeSearchFragments", False)
+
+        if newSetting != self.optionColorizeSearchFragments:
+            self.optionColorizeSearchFragments = newSetting
+            restyle = True
+
+        if restyle:
             self.OnStyleNeeded(None)
 
 
@@ -1525,6 +1536,56 @@ class WikiTxtCtrl(SearchableScintillaControl):
         }
 
 
+    def _findFragmentSearch(self, linkNode):
+        """
+        linkNode -- AST node of type "wikiWord"
+        returns
+            (<first char pos>, <after last char pos>) of targeted search
+                fragment if present
+            (None, None) if not present
+            (-1, -1) if search is not applicable
+        """
+        unaliasedTarget = self.presenter.getWikiDocument()\
+                .getUnAliasedWikiWordOrAsIs(linkNode.wikiWord)
+
+        docPage = self.getLoadedDocPage()
+        if docPage is None:
+            return (-1, -1)
+
+        wikiWord = docPage.getWikiWord()
+        if wikiWord is None:
+            return (-1, -1)
+
+        if wikiWord == unaliasedTarget:
+            forbiddenSearchfragHit = (linkNode.pos,
+                    linkNode.pos + linkNode.strLength)
+        else:
+            forbiddenSearchfragHit = (0, 0)
+        
+        searchfrag = linkNode.searchFragment
+        if searchfrag is None:
+            return (-1, -1)
+
+        searchOp = SearchReplaceOperation()
+        searchOp.wildCard = "no"
+        searchOp.searchStr = searchfrag
+        
+        targetPage = self.presenter.getWikiDocument().getWikiPage(
+                linkNode.wikiWord)
+
+        found = searchOp.searchDocPageAndText(targetPage,
+                targetPage.getLiveText(), 0)
+
+        if found[0] >= forbiddenSearchfragHit[0] and \
+                found[0] < forbiddenSearchfragHit[1]:
+            # Searchfrag found its own link -> search after link
+            found = searchOp.searchDocPageAndText(targetPage,
+                    targetPage.getLiveText(), forbiddenSearchfragHit[1])
+
+        return found
+
+
+
     def processTokens(self, text, pageAst, threadstop):
         wikiDoc = self.presenter.getWikiDocument()
         stylebytes = StyleCollector(FormatTypes.Default,
@@ -1544,6 +1605,27 @@ class WikiTxtCtrl(SearchableScintillaControl):
                         styleNo = FormatTypes.WikiWord
                     else:
                         styleNo = FormatTypes.AvailWikiWord
+                        if self.optionColorizeSearchFragments and \
+                                node.searchFragment:
+                            if self._findFragmentSearch(node)[0] == None:
+#                             if targetTxt.find(node.searchFragment) == -1:
+                                searchFragNode = node.fragmentNode
+
+                                stylebytes.bindStyle(node.pos,
+                                        searchFragNode.pos - node.pos,
+                                        FormatTypes.AvailWikiWord)
+
+                                stylebytes.bindStyle(searchFragNode.pos,
+                                        searchFragNode.strLength,
+                                        FormatTypes.WikiWord)
+
+                                stylebytes.bindStyle(searchFragNode.pos +
+                                        searchFragNode.strLength,
+                                        node.strLength -
+                                        (searchFragNode.pos - node.pos) -
+                                        searchFragNode.strLength,
+                                        FormatTypes.AvailWikiWord)
+                                continue
 
                     stylebytes.bindStyle(node.pos, node.strLength, styleNo)
 
@@ -1878,7 +1960,7 @@ class WikiTxtCtrl(SearchableScintillaControl):
                 searchfrag = node.searchFragment
                 if searchfrag is not None:
                     searchOp = SearchReplaceOperation()
-                    searchOp.wildCard = "no"   # TODO Why not regex?
+                    searchOp.wildCard = "no"
                     searchOp.searchStr = searchfrag
 
                     found = presenter.getSubControl("textedit").executeSearch(

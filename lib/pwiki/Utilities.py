@@ -723,3 +723,22 @@ class IdentityList(list):
 
         return -1
 
+
+def filterIdenticalItem(seq, i):
+    """
+    Return a list with the elements of seq minus those for which element[i]
+    is identical to another element[j] which is earlier in the sequence
+    """
+    foundIds = set()
+    result = []
+    
+    for el in seq:
+        if id(el[i]) in foundIds:
+            continue
+        
+        foundIds.add(id(el[i]))
+        result.append(el)
+    
+    return result
+
+

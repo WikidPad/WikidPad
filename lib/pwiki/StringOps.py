@@ -1149,7 +1149,9 @@ def elsePathnameFromUrl(url, testFileType=True):
     #
     # XXXX The .. handling should be fixed...
     #
-    if url.startswith("file:"):
+    if url.startswith("file:///"):
+        url = url[7:]   # Third '/' remains
+    elif url.startswith("file:"):
         url = url[5:]
     elif testFileType:
         raise RuntimeError, 'Cannot convert non-local URL to pathname'

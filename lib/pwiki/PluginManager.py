@@ -6,6 +6,8 @@ import os, sys, traceback, os.path, imp
 
 import wx
 
+import Utilities
+
 from .StringOps import mbcsEnc, pathEnc
 
 
@@ -96,7 +98,7 @@ class SimplePluginAPI(object):
                     registered = True
             if not registered:
                 sys.stderr.write("plugin " + module.__name__ + " exposes " +
-                        self.descriptor + 
+                        str(self.descriptor) + 
                         " but does not support any interface methods!")
         return registered
 
@@ -194,11 +196,12 @@ class PluginAPIAggregation(object):
 
 class PluginManager(object):
     """manages all PluginAPIs and plugins."""
-    def __init__(self, directories):
+    def __init__(self, directories, systemDirIdx=-1):
         self.pluginAPIs = {}  # Dictionary {<type name>:<verReg dict>}
                 # where verReg dict is list of tuples (<version No>:<PluginAPI instance>)
         self.plugins = {}  
         self.directories = directories
+        self.systemDirIdx = systemDirIdx
         
     def registerSimplePluginAPI(self, descriptor, functions):
         api = SimplePluginAPI(descriptor, functions)
@@ -287,11 +290,23 @@ class PluginManager(object):
            appearing in earlier directories are not loaded from later ones."""
         import imp
         exclusions = excludeFiles[:]
+        
         for dirNum, directory in enumerate(self.directories):
             sys.path.append(os.path.dirname(directory))
             if not os.access(mbcsEnc(directory, "replace")[0], os.F_OK):
                 continue
             files = os.listdir(directory)
+
+            if dirNum == self.systemDirIdx:
+                packageName = "wikidpadSystemPlugins"
+            else:
+                packageName = "cruelimportExtensionsPackage%i_%i" % \
+                        (id(self), dirNum)
+
+            package = imp.new_module(packageName)
+            package.__path__ = [directory]
+            sys.modules[packageName] = package
+
             for name in files:
                 try:
                     module = None
@@ -301,18 +316,14 @@ class PluginManager(object):
                         continue
                     if os.path.isfile(fullname) and ext == '.py':
                         with open(fullname) as f:
-                            packageName = "cruelimportExtensionsPackage%i_%i" % \
-                                    (id(self), dirNum)
-
-                            module = imp.new_module(packageName)
-                            module.__path__ = [directory]
-                            sys.modules[packageName] = module
-
                             module = imp.load_module(packageName + "." + moduleName, f,
                                     mbcsEnc(fullname)[0], (".py", "r", imp.PY_SOURCE))
-                    if module and hasattr(module, "WIKIDPAD_PLUGIN"):
-                        if self.registerPlugin(module):
-                            exclusions.append(name)
+
+                    if module:
+                        setattr(package, moduleName, module)
+                        if hasattr(module, "WIKIDPAD_PLUGIN"):
+                            if self.registerPlugin(module):
+                                exclusions.append(name)
                 except:
                     traceback.print_exc()
             del sys.path[-1]
@@ -441,14 +452,110 @@ class InsertionPluginManager:
 
 
 
-def getSupportedExportTypes(mainControl, continuousExport, guiParent=None):
-    import Exporters
+def getExporterClasses(mainControl):
+    import Exporters    # createExporters
     
+    # TODO: Cache?
+    return reduce(lambda a, b: a+list(b),
+            wx.GetApp().describeExportersApi.describeExportersV01(mainControl),
+            list(Exporters.describeExportersV01(mainControl)))
+
+#     classIds = set()
+#     classList = []
+#     
+#     unfilteredClasses = 
+#     
+#     for c in unfilteredClasses:
+#         if id(c) in classIds:
+#             continue
+# 
+#         classIds.add(id(c))
+#         classList.append(c)
+#     
+#     return classList
+
+
+def getExporterTypeDict(mainControl, continuousExport):
+    """
+    Returns dictionary {exporterTypeName: (class, exporterTypeName, humanReadableName)}
+    """
     result = {}
-    
-    for ob in Exporters.describeExporters(mainControl):   # TODO search plugins
-        for tp in ob.getExportTypes(guiParent, continuousExport):
-            result[tp[0]] = (ob,) + tuple(tp)
+
+    # External plugins can overwrite internal exporter types (good idea?)
+    for c in getExporterClasses(mainControl):
+        for tnt in c.getExportTypes(mainControl, continuousExport):
+            tname, tnameHr = tnt[:2]
+            result[tname] = (c, tname, tnameHr)
 
     return result
+
+
+
+
+def getSupportedExportTypes(mainControl, guiParent=None, continuousExport=False):
+    """
+    Returns dictionary {exporterTypeName: (exportObject, exporterTypeName,
+        humanReadableName, addOptPanel)}
+    addOptPanel is the additional options GUI panel and is always None if
+    guiParent is None
+    """
+    preResult = []
+
+    classIdToInstanceDict = {}
+    
+    typeDict = getExporterTypeDict(mainControl, continuousExport)
+
+    # First create an object of each exporter class and create list of 
+    # objects with the respective exportType (and human readable export type)
+    for ctt in typeDict.values():
+        ob = classIdToInstanceDict.get(id(ctt[0]))
+        if ob is None:
+            ob = ctt[0](mainControl)
+            classIdToInstanceDict[id(ctt[0])] = ob
+
+        preResult.append((ob, ctt[1], ctt[2]))
+
+    result = {}
+
+    if guiParent is None:
+        # No GUI, just convert to appropriate dictionary
+        result = {}
+        for ob, expType, expTypeHr in preResult:
+            result[expType] = (ob, expType, expTypeHr, None)
+        return result
+
+    else:
+        # With GUI
+
+        # First collect desired exporter types we want from each exporter object
+        # Each object should only be asked once for the panel list
+        # with the complete set of exporter types we want from it
+        objIdToObjExporterTypes = {}
+        for ob, expType, expTypeHr in preResult:
+            objIdToObjExporterTypes.setdefault(id(ob), [ob, set()])[1].add(expType)
+
+        # Now actually ask for panels from each object and create dictionary from
+        # export type to panel
+        # If we would ask the same object multiple times we may get multiple
+        # equal panels where only one panel is necessary
+        exportTypeToPanelDict = {}
+        for ob, expTypeSet in objIdToObjExporterTypes.values():
+            expTypePanels = ob.getAddOptPanelsForTypes(guiParent, expTypeSet)
+            for expType, panel in expTypePanels:
+                if expType in expTypeSet:
+                    exportTypeToPanelDict[expType] = panel
+                    expTypeSet.remove(expType)
+            
+            # Possibly remaining types not returned by getAddOptPanelsForTypes
+            # get a None as panel
+            for expType in expTypeSet:
+                exportTypeToPanelDict[expType] = None
+
+        # Finally create result dictionary
+        result = {}
+        for ob, expType, expTypeHr in preResult:
+            result[expType] = (ob, expType, expTypeHr,
+                    exportTypeToPanelDict[expType])
+
+        return result
 
