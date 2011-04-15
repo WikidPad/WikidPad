@@ -365,8 +365,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         self.hotKeyDummyWindow = None
         self._refreshHotKeys()
 
-        self.windowLayouter.layout()
-        
         # State here: GUI construction finished, but frame is hidden yet
 
         # if a wiki to open is set, open it
@@ -2166,18 +2164,6 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
         p = self.createNewDocPagePresenterTab()
         self.mainAreaPanel.prepareCurrentPresenter(p)
  
-        # Build layout:
-
-        self.windowLayouter = WindowSashLayouter(self, self.createWindow)
-
-        cfstr = self.getConfig().get("main", "windowLayout")
-        self.windowLayouter.setWinPropsByConfig(cfstr)
-        self.windowLayouter.realize()
-
-        self.tree = self.windowLayouter.getWindowByName("maintree")
-        self.logWindow = self.windowLayouter.getWindowByName("log")
-
-
         # ------------------------------------------------------------------------------------
         # Create menu and toolbar
         # ------------------------------------------------------------------------------------
@@ -2229,6 +2215,19 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 
         self.statusBar.SetStatusWidths([-1, -1, posWidth])
         self.SetStatusBar(self.statusBar)
+
+
+        # Build layout:
+
+        self.windowLayouter = WindowSashLayouter(self, self.createWindow)
+
+        cfstr = self.getConfig().get("main", "windowLayout")
+        self.windowLayouter.setWinPropsByConfig(cfstr)
+        self.windowLayouter.realize()
+
+        self.tree = self.windowLayouter.getWindowByName("maintree")
+        self.logWindow = self.windowLayouter.getWindowByName("log")
+
 
         # Register the App IDLE handler
 #         wx.EVT_IDLE(self, self.OnIdle)
@@ -2784,12 +2783,13 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
 # 
 #             wdhName = wdhandlers[index][0]
 
-            wdhName, wlangName, asciiOnly = \
-                    AdditionalDialogs.NewWikiSettings.runModal(self, -1, self)[:3]
-                    
-            if wdhName is None:
+            wsett = AdditionalDialogs.NewWikiSettings.runModal(self, -1, self)
+            if wsett is None:
                 return
 
+            wdhName, wlangName, asciiOnly = wsett[:3]
+            if wdhName is None:
+                return
 
             # create the new dir for the wiki
             os.mkdir(wikiDir)
@@ -3208,7 +3208,11 @@ camelCaseWordsEnabled: false;a=[camelCaseWordsEnabled: false]\\n
                     if targetPresenter.hasSubControl(subCtrl):
                         targetPresenter.switchSubControl(subCtrl)
 
-                if activeTabNo > 0:
+                if activeTabNo > 0 and \
+                        len(self.getMainAreaPanel().getPresenters()) > 0:
+                    activeTabNo = min(activeTabNo,
+                            len(self.getMainAreaPanel().getPresenters()) - 1)
+
                     targetPresenter = self.getMainAreaPanel().getPresenters()[
                             activeTabNo]
                     self.getMainAreaPanel().showPresenter(targetPresenter)

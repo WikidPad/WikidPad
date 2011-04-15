@@ -22,7 +22,7 @@ def initiateAfterWxApp():
     """
     global _INITIAL_DISPLAY_CLIENT_SIZE
 
-    _INITIAL_DISPLAY_CLIENT_SIZE = getOverallDisplaysClientSize()
+    _INITIAL_DISPLAY_CLIENT_SIZE = getOverallDisplaysClientRect()
     
     if _INITIAL_DISPLAY_CLIENT_SIZE.width < 10 or \
             _INITIAL_DISPLAY_CLIENT_SIZE.height < 10:
@@ -30,7 +30,6 @@ def initiateAfterWxApp():
         _INITIAL_DISPLAY_CLIENT_SIZE = wx.Rect(0, 0, 800, 600)
 
 
-# def getOverallDisplaysSize():
 def getOverallDisplaysClientSize():
     """
     Estimate the rectangle of the screen real estate with all
@@ -63,6 +62,51 @@ def getOverallDisplaysClientSize():
 
 
 
+def getOverallDisplaysClientRect():
+    """
+    Estimate the rectangle of the screen real estate with all
+    available displays. This assumes that all displays have same
+    resolution and are positioned in a rectangular shape.
+    """
+    global _INITIAL_DISPLAY_CLIENT_SIZE
+
+    # TODO: Find solution for multiple displays with taskbar always visible
+
+    if wx.Display.GetCount() == 1:
+        return wx.GetClientDisplayRect()
+
+    left = 0
+    top = 0
+    right = 0 # Actually first position outside of screen to the right
+    bottom = 0 # First pos. outside downwards
+
+    for i in range(wx.Display.GetCount()):
+        d = wx.Display(i)
+        
+        rect = d.GetGeometry()
+        
+        dright = rect.x + rect.width
+        dbottom = rect.y + rect.height
+        
+        left = min(left, rect.x)
+        top = min(top, rect.y)
+        right = max(right, dright)
+        bottom = max(bottom, dbottom)
+
+
+    width = right - left
+    height = bottom - top
+
+    # May workaround a bug
+    if (width < 10 or height < 10) and (_INITIAL_DISPLAY_CLIENT_SIZE is not None):
+        return _INITIAL_DISPLAY_CLIENT_SIZE
+
+    return wx.Rect(left, top, width, height)
+
+
+
+
+
 def setWindowPos(win, pos=None, fullVisible=False):
     """
     Set position of a wx.Window, but ensure that the position is valid.
@@ -76,24 +120,27 @@ def setWindowPos(win, pos=None, fullVisible=False):
         currentX, currentY = win.GetPositionTuple()
         
 #     screenX, screenY = getOverallDisplaysSize()
-    clRect = getOverallDisplaysClientSize()
+    clRect = getOverallDisplaysClientRect()
+    
+    clRectRight = clRect.x + clRect.width
+    clRectBottom = clRect.y + clRect.height
     
     # fix any crazy screen positions
     if currentX < clRect.x:
         currentX = clRect.x + 10
     if currentY < clRect.y:
         currentY = clRect.y + 10
-    if currentX > clRect.width:
-        currentX = clRect.width - 100
-    if currentY > clRect.height:
-        currentY = clRect.height - 100
+    if currentX >= clRectRight:
+        currentX = clRectRight - 100
+    if currentY >= clRectBottom:
+        currentY = clRectBottom - 100
 
     if fullVisible:
         sizeX, sizeY = win.GetSizeTuple()
-        if (currentX - clRect.x) + sizeX > clRect.width:
-            currentX = clRect.width - sizeX + clRect.x
-        if (currentY - clRect.y) + sizeY > clRect.height:
-            currentY = clRect.height - sizeY + clRect.y
+        if currentX + sizeX > clRectRight:
+            currentX = clRectRight - sizeX
+        if currentY + sizeY > clRectBottom:
+            currentY = clRectBottom - sizeY
 
     win.SetPosition((currentX, currentY))
 
@@ -109,7 +156,7 @@ def setWindowSize(win, size=None):
         sizeX, sizeY = win.GetSizeTuple()
 
 #     screenX, screenY = getOverallDisplaysSize()    
-    clRect = getOverallDisplaysClientSize()
+    clRect = getOverallDisplaysClientRect()
 
     # don't let the window be > than the size of the screen
     if sizeX > clRect.width:
@@ -128,7 +175,7 @@ def setWindowClientSize(win, size):
     sizeX, sizeY = size
 
 #     screenX, screenY = getOverallDisplaysSize()    
-    clRect = getOverallDisplaysClientSize()
+    clRect = getOverallDisplaysClientRect()
 
     # don't let the window be > than the size of the screen
     if sizeX > clRect.width:
@@ -179,6 +226,7 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
         self.minimalEffectiveSashPos = 0
         self.sashPos = 0
         self.centerWindow = None
+        self.layoutWorkSize = None
         
         self.SetMinimumSizeX(1)
         self.SetMinimumSizeY(1)
@@ -240,11 +288,30 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
 
 
     def setSashPosition(self, pos):
+        parent = self.GetParent()
+        if isinstance(parent, SmartSashLayoutWindow):
+            ws = parent.layoutWorkSize
+            if ws is None:
+                cwidth, cheight = parent.GetClientSizeTuple()
+            else:
+                cwidth, cheight = ws
+        else:
+            cwidth, cheight = parent.GetClientSizeTuple()
+
+        if self.GetOrientation() == wx.LAYOUT_VERTICAL:
+            if cwidth > 10:
+                pos = min(pos, cwidth - 5)
+        else:
+            if cheight > 10:
+                pos = min(pos, cheight - 5)
+
         if self.GetOrientation() == wx.LAYOUT_VERTICAL:
             self.SetDefaultSize((pos, 1000))
+            self.layoutWorkSize = (pos, cheight)
         else:
             self.SetDefaultSize((1000, pos))
-            
+            self.layoutWorkSize = (cwidth, pos)
+
         self.sashPos = pos
         if pos >= self.minimalEffectiveSashPos:
             self.effectiveSashPos = pos
@@ -252,6 +319,7 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
         parent = self.GetParent()
         sevent = wx.SizeEvent(parent.GetSize())
         parent.ProcessEvent(sevent)
+
 
     def getSashPosition(self):
         return self.sashPos
@@ -295,7 +363,7 @@ class SmartSashLayoutWindow(wx.SashLayoutWindow):
         evt.Skip()
         
     def OnSize(self, evt):
-#         evt.Skip()
+        self.layoutWorkSize = None
         if self.centerWindow is None:
             return
             

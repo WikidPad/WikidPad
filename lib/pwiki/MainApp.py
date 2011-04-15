@@ -547,11 +547,11 @@ class App(wx.App, MiscEventSourceMixin):
             except:
                 self.collator = Localization.getCollatorByString(u"C",
                         collationCaseMode)
-        
-        self.SetCallFilterEvent(self.globalConfig.getboolean("main",
-                "mouse_scrollUnderPointer"))
-        
-
+        try:
+            self.SetCallFilterEvent(self.globalConfig.getboolean("main",
+                    "mouse_scrollUnderPointer"))
+        except AttributeError:
+            pass  # Older wxPython versions didn't support this
 
 
     def OnEndSession(self, evt):
